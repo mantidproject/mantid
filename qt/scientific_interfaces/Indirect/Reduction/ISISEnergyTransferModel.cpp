@@ -5,33 +5,27 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferModel.h"
-#include "Common/WorkspaceUtils.h"
 #include "ISISEnergyTransferModelUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "ReductionAlgorithmUtils.h"
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace MantidQt::CustomInterfaces {
-IETModel::IETModel() {}
+IETModel::IETModel() : m_outputGroupName(), m_outputWorkspaces() {}
 
-std::vector<std::string> IETModel::validateRunData(IETRunData const &runData, std::size_t const &defaultSpectraMin,
-                                                   std::size_t const &defaultSpectraMax) {
+std::vector<std::string> IETModel::validateRunData(IETRunData const &runData) {
   std::vector<std::string> errors;
   IETDataValidator validator;
 
   auto inputFiles = runData.getInputData().getInputFiles();
   bool isRunFileValid = !inputFiles.empty();
   std::string firstFileName = inputFiles.substr(0, inputFiles.find(','));
-
-  std::string detectorError =
-      validator.validateDetectorGrouping(runData.groupingPropertiesRaw(), defaultSpectraMin, defaultSpectraMax);
-  if (!detectorError.empty()) {
-    errors.push_back(detectorError);
-  }
 
   std::string analysisError = validator.validateAnalysisData(runData.getAnalysisData());
   if (!analysisError.empty()) {
@@ -69,7 +63,7 @@ void IETModel::setInputProperties(IAlgorithmRuntimeProps &properties, IETInputDa
 
 void IETModel::setConversionProperties(IAlgorithmRuntimeProps &properties, IETConversionData const &conversionData,
                                        std::string const &instrument) {
-  std::vector<long> detectorRange;
+  std::vector<int> detectorRange;
 
   if (instrument == "IRIS" || instrument == "OSIRIS") {
     Mantid::API::AlgorithmProperties::update("Efixed", conversionData.getEfixed(), properties);
@@ -117,7 +111,7 @@ void IETModel::setOutputProperties(IAlgorithmRuntimeProps &properties, IETOutput
   Mantid::API::AlgorithmProperties::update("OutputWorkspace", outputGroupName, properties);
 }
 
-std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::string const &inputText) {
+std::string IETModel::getOutputGroupName(InstrumentData const &instData, std::string const &inputText) {
   std::string instrument = instData.getInstrument();
   std::string analyser = instData.getAnalyser();
   std::string reflection = instData.getReflection();
@@ -125,8 +119,8 @@ std::string IETModel::getOuputGroupName(InstrumentData const &instData, std::str
   return instrument + inputText + "_" + analyser + "_" + reflection + "_Reduced";
 }
 
-std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                      InstrumentData const &instData, IETRunData &runData) {
+MantidQt::API::IConfiguredAlgorithm_sptr IETModel::energyTransferAlgorithm(InstrumentData const &instData,
+                                                                           IETRunData &runData) {
   auto properties = runData.groupingProperties();
 
   setInstrumentProperties(*properties, instData);
@@ -136,17 +130,12 @@ std::string IETModel::runIETAlgorithm(MantidQt::API::BatchAlgorithmRunner *batch
   setRebinProperties(*properties, runData.getRebinData());
   setAnalysisProperties(*properties, runData.getAnalysisData());
 
-  std::string outputGroupName = getOuputGroupName(instData, runData.getInputData().getInputText());
-  setOutputProperties(*properties, runData.getOutputData(), outputGroupName);
+  m_outputGroupName = getOutputGroupName(instData, runData.getInputData().getInputText());
+  setOutputProperties(*properties, runData.getOutputData(), m_outputGroupName);
 
   auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
   reductionAlg->initialize();
-  API::IConfiguredAlgorithm_sptr configuredAlg =
-      std::make_shared<API::ConfiguredAlgorithm>(std::move(reductionAlg), std::move(properties));
-
-  batchAlgoRunner->executeAlgorithmAsync(std::move(configuredAlg));
-
-  return outputGroupName;
+  return std::make_shared<API::ConfiguredAlgorithm>(std::move(reductionAlg), std::move(properties));
 }
 
 std::vector<std::string> IETModel::validatePlotData(IETPlotData const &plotParams) {
@@ -281,11 +270,11 @@ double IETModel::loadDetailedBalance(std::string const &filename) {
 
 std::vector<std::string> IETModel::groupWorkspaces(std::string const &groupName, std::string const &instrument,
                                                    std::string const &groupOption, bool const shouldGroup) {
-  std::vector<std::string> outputWorkspaces;
+  m_outputWorkspaces.clear();
 
-  if (WorkspaceUtils::doesExistInADS(groupName)) {
-    if (auto const outputGroup = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(groupName)) {
-      outputWorkspaces = outputGroup->getNames();
+  if (doesExistInADS(groupName)) {
+    if (auto const outputGroup = getADSWorkspace<WorkspaceGroup>(groupName)) {
+      m_outputWorkspaces = outputGroup->getNames();
 
       if (instrument == "OSIRIS") {
         if (!shouldGroup) {
@@ -303,7 +292,7 @@ std::vector<std::string> IETModel::groupWorkspaces(std::string const &groupName,
     }
   }
 
-  return outputWorkspaces;
+  return m_outputWorkspaces;
 }
 
 void IETModel::ungroupWorkspace(std::string const &workspaceName) {

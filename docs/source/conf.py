@@ -64,22 +64,17 @@ templates_path = ["_templates"]
 # The suffix of source filenames.
 source_suffix = ".rst"
 
-# The master toctree document.
-master_doc = "index"
+# The root toctree document.
+root_doc = "index"
 
 # General information about the project.
 project = "MantidProject"
 copyright = "2015, Mantid"
 
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
-#
-version_str = mantid.__version__
-# The short X.Y version.
-version = ".".join(version_str.split(".")[:2])
 # The full version, including alpha/beta/rc tags.
-release = version_str
+release = mantid.__version__
+# The short X.Y version.
+version = ".".join(release.split(".")[:2])
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -187,6 +182,9 @@ html_show_copyright = False
 
 # Do not show last updated information in the HTML footer.
 html_last_updated_fmt = None
+
+# Hide the navigation sidebar, we use a table of contents instead.
+html_sidebars = {"**": []}
 
 # -- Options for Epub output ---------------------------------------------------
 # This flag determines if a toc entry is inserted again at the beginning of its nested toc listing.

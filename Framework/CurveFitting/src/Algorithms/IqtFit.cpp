@@ -72,11 +72,6 @@ template <typename Base> std::map<std::string, std::string> IqtFit<Base>::valida
   return Base::validateInputs();
 }
 
-template <typename Base> bool IqtFit<Base>::isFitParameter(const std::string &name) const {
-  return name.rfind("A0") != std::string::npos || name.rfind("Height") != std::string::npos ||
-         name.rfind("Stretching") != std::string::npos || name.rfind("Lifetime") != std::string::npos;
-}
-
 template <typename Base> bool IqtFit<Base>::throwIfElasticQConversionFails() const { return true; }
 
 // Register the algorithms into the AlgorithmFactory

@@ -36,8 +36,8 @@ Here is an example using the ``SXD`` class that finds peaks and then removes dup
   ws = Load(Filename='SXD33335.nxs', OutputWorkspace='SXD33335')
 
   # find peaks using SXD static method - determines peak threshold from
-  # the standard deviation of the intensity distribution
-  peaks_ws = SXD.find_sx_peaks(ws, nstd=6)
+  # the ratio of local variance over mean
+  peaks_ws = SXD.find_sx_peaks(ws, ThresholdVarianceOverMean=2.0)
   SXD.remove_duplicate_peaks_by_qlab(peaks_ws, q_tol=0.05)
 
   # find a UB
@@ -63,7 +63,7 @@ The updated positions are stored in an .xml file, the path to the file is return
 
   sxd = SXD()
   wsname = sxd.load_run(32863)
-  peaks_ws = sxd.find_sx_peaks(wsname,  nstd=8)
+  peaks_ws = sxd.find_sx_peaks(wsname)
   sxd.remove_peaks_on_detector_edge(peaks_ws, 2)
 
   # initial UB
@@ -144,7 +144,7 @@ The reduction proceeds as follows:
 
     for run in runs:
         ws = sxd.get_ws(run)
-        peaks = sxd.find_sx_peaks(ws, nstd=8)
+        peaks = sxd.find_sx_peaks(ws)
         sxd.remove_peaks_on_detector_edge(peaks, 2)
         sxd.set_peaks(run, peaks)
     # find UB with consistent indexing across runs
@@ -173,10 +173,12 @@ The reduction proceeds as follows:
     for run in runs:
         skew_args = {**skew_args, 'OutputFile': path.join(save_dir, f"{run}_{peak_type.value}_int.pdf")}
         sxd.integrate_data(integration_type, peak_type, run=run, **skew_args)
+        sxd.remove_non_integrated_peaks(sxd.get_peaks(run, peak_type, integration_type))
+        sxd.calc_absorption_weighted_path_lengths(peak_type, integration_type, run=run, ApplyCorrection=True)
         sxd.save_peak_table(run, peak_type, integration_type, save_dir, save_format='SHELX')
 
     # save combined table
-    sxd.save_all_peaks(peak_type, integration_type, save_dir=save_dir, save_format=fmt)
+    sxd.save_all_peaks(peak_type, integration_type, save_dir=save_dir, save_format='SHELX')
 
 .. _isis-single-crystal-diffraction-wish-ref:
 
@@ -205,7 +207,7 @@ This example shows how to load data with specific file extension and perform an 
     WishSX.mask_detector_edges(ws, nedge=16, ntubes=2)
     wsMD = WishSX.convert_ws_to_MD(ws, frame="Q (lab frame)")
     # find peaks and integrate
-    peaks = WishSX.find_sx_peaks(ws, nstd=8)
+    peaks = WishSX.find_sx_peaks(ws)
     peaks_int = WishSX().integrate_peaks_MD_optimal_radius(wsMD, peaks, peaks+"_int", ws=ws, **intPeaksMDArgs)
 
 Note that the method ``integrate_peaks_MD_optimal_radius`` requires an instance of the class ``WishSX()`` - this is
@@ -268,7 +270,7 @@ has changed).
         WishSX.mask_detector_edges(ws, nedge=16, ntubes=2)
         wsMD = WishSX.convert_ws_to_MD(ws, frame="Q (lab frame)")
         # find peaks and integrate
-        peaks = WishSX.find_sx_peaks(ws, nstd=8)
+        peaks = WishSX.find_sx_peaks(ws)
         peaks_int = WishSX().integrate_peaks_MD_optimal_radius(wsMD, peaks, peaks+"_int", ws=ws, **intPeaksMDArgs)
         peaks_int = peaks_int.name()
         # filter to get strong peaks only

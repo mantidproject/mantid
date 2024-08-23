@@ -23,7 +23,7 @@ Loading Data Test
 - Open Muon Analysis
 - On the **Home** tab set the instrument to **PSI**
 - The load current run button should be greyed out
-- Load **dolly 1529** using the **Browse** button
+- Load **deltat_tdc_dolly_1529.bin** from the unit test data using the **Browse** button
 - Set `Rebin` to `Fixed` and enter a value of `5`
 - You will get 4 lines that all curve upwards
 - If you tick the `Plot raw` option the data will change

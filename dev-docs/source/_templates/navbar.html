@@ -7,9 +7,9 @@
   <h3>{{ _('Navigation') }}</h3>
   <ul>
     {%- block rootrellink %}
-    <li class="nav-item nav-item-0"><a href="{{ pathto(master_doc) }}">{{ "Documentation" }}</a>{{ reldelim1 }}</li>
+    <li class="nav-item nav-item-0"><a href="{{ pathto(root_doc) }}">{{ "Documentation" }}</a>{{ reldelim1 }}</li>
     {%- endblock %}
-    {% if master_doc != pagename %}
+    {% if root_doc != pagename %}
     {%- for parent in parents %}
     <li class="nav-item nav-item-{{ loop.index }}"><a href="{{ parent.link|e }}" {% if loop.last %}{{ accesskey("U") }}{% endif %}>{{ parent.title }}</a>{{ reldelim1 }}</li>
     {% endfor %}
@@ -35,7 +35,7 @@
         </button>
         <a class="navbar-brand" href="http://www.mantidproject.org">
         {%- else -%}
-        <a class="navbar-brand" href="{{ pathto(master_doc) }}">
+        <a class="navbar-brand" href="{{ pathto(root_doc) }}">
         {%- endif -%}
           {%- block sidebarlogo %}
             {%- if logo %}<img src="{{ pathto('_static/' + logo, 1) }}">{%- endif %}

@@ -6,7 +6,7 @@
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
             name="INTER"
             valid-from="2020-02-14 00:00:00"
-            valid-to=  "2100-01-31 23:59:59"
+            valid-to=  "2024-02-23 09:59:59"
             last-modified="2020-10-15 00:00:00">
 
   <defaults>

@@ -27,120 +27,96 @@ void saveNexusProcessed(std::string const &workspaceName, std::string const &fil
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
-ILLEnergyTransfer::ILLEnergyTransfer(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent) {
+
+ILLEnergyTransfer::ILLEnergyTransfer(IDataReduction *idrUI, QWidget *parent) : DataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
 
-  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setInstrumentDefault()));
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
-
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-
-  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
-          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
-
-  // Validate to remove invalid markers
-  validateTab();
 }
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
 ILLEnergyTransfer::~ILLEnergyTransfer() = default;
 
-void ILLEnergyTransfer::setup() {}
-
-bool ILLEnergyTransfer::validate() {
-  UserInputValidator uiv;
-
+void ILLEnergyTransfer::handleValidation(IUserInputValidator *validator) const {
   // Validate run file
   if (!m_uiForm.rfInput->isValid())
-    uiv.addErrorMessage("Run File is invalid.");
+    validator->addErrorMessage("Run File is invalid.");
 
   // Validate map file if it is being used
   bool useMapFile = m_uiForm.rdGroupChoose->isChecked();
   if (useMapFile && !m_uiForm.rfMapFile->isValid())
-    uiv.addErrorMessage("Grouping file is invalid.");
+    validator->addErrorMessage("Grouping file is invalid.");
 
   // Validate background file
   if (!m_uiForm.rfBackgroundRun->isValid()) {
-    uiv.addErrorMessage("Background Run File is invalid.");
+    validator->addErrorMessage("Background Run File is invalid.");
   } else {
     bool isDouble = true;
-    m_backScaling = m_uiForm.leBackgroundFactor->text().toDouble(&isDouble);
-    if ((!isDouble || m_backScaling <= 0) && !m_uiForm.rfBackgroundRun->getUserInput().toString().isEmpty()) {
-      uiv.addErrorMessage("BackgroundScaleFactor is invalid. "
-                          "It has to be a positive number.");
+    auto const backScaling = m_uiForm.leBackgroundFactor->text().toDouble(&isDouble);
+    if ((!isDouble || backScaling <= 0) && !m_uiForm.rfBackgroundRun->getUserInput().toString().isEmpty()) {
+      validator->addErrorMessage("BackgroundScaleFactor is invalid. "
+                                 "It has to be a positive number.");
     }
   }
 
   // Validate calibration file
   if (!m_uiForm.rfCalibrationRun->isValid()) {
-    uiv.addErrorMessage("Calibration Run File is invalid.");
+    validator->addErrorMessage("Calibration Run File is invalid.");
   } else if (!m_uiForm.rfCalibrationRun->getUserInput().toString().isEmpty()) {
     auto range = m_uiForm.lePeakRange->text().split(',');
     if (range.size() != 2) {
-      uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
-                          "Provide comma separated two energy values in meV.");
+      validator->addErrorMessage("Calibration Peak Range is invalid. \n"
+                                 "Provide comma separated two energy values in meV.");
     } else {
       bool isDouble1 = true;
-      m_peakRange[0] = range[0].toDouble(&isDouble1);
+      auto const peakRangeMin = range[0].toDouble(&isDouble1);
       bool isDouble2 = true;
-      m_peakRange[1] = range[1].toDouble(&isDouble2);
-
-      if (!isDouble1 || !isDouble2) {
-        uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
-                            "Provide comma separated two energy values in meV.");
-      } else {
-        if (m_peakRange[0] >= m_peakRange[1]) {
-          uiv.addErrorMessage("Calibration Peak Range is invalid. \n"
-                              "Start energy is >= than the end energy.");
-        }
+      auto const peakRangeMax = range[1].toDouble(&isDouble2);
+      if (peakRangeMin >= peakRangeMax) {
+        validator->addErrorMessage("Calibration Peak Range is invalid. \n"
+                                   "Start energy is >= than the end energy.");
       }
     }
   }
 
   // Validate the calibration background file
   if (!m_uiForm.rfBackCalibrationRun->isValid()) {
-    uiv.addErrorMessage("Background run for calibration is invalid.");
+    validator->addErrorMessage("Background run for calibration is invalid.");
   } else {
     bool isDouble = true;
-    m_backCalibScaling = m_uiForm.leBackCalibScale->text().toDouble(&isDouble);
-    if ((!isDouble || m_backCalibScaling <= 0) && !m_uiForm.rfBackCalibrationRun->getUserInput().toString().isEmpty()) {
-      uiv.addErrorMessage("Scale factor for calibration background is invalid. "
-                          "It has to be a positive number.");
+    auto const backCalibScaling = m_uiForm.leBackCalibScale->text().toDouble(&isDouble);
+    if ((!isDouble || backCalibScaling <= 0) && !m_uiForm.rfBackCalibrationRun->getUserInput().toString().isEmpty()) {
+      validator->addErrorMessage("Scale factor for calibration background is invalid. "
+                                 "It has to be a positive number.");
     }
   }
 
   // Calibration file required if calibration background is given
   if (!m_uiForm.rfBackCalibrationRun->getUserInput().toString().isEmpty() &&
       m_uiForm.rfCalibrationRun->getUserInput().toString().isEmpty()) {
-    uiv.addErrorMessage("Calibration file is required if calibration background is given");
+    validator->addErrorMessage("Calibration file is required if calibration background is given");
   }
 
   // Validate the manual PSD integration range
   if (m_uiForm.rdGroupRange->isChecked()) {
     auto range = m_uiForm.lePixelRange->text().split(',');
     if (range.size() != 2) {
-      uiv.addErrorMessage("PSD Integration Range is invalid. \n"
-                          "Provide comma separated two pixel numbers, e.g. 1,128");
+      validator->addErrorMessage("PSD Integration Range is invalid. \n"
+                                 "Provide comma separated two pixel numbers, e.g. 1,128");
     } else {
       bool isDouble1 = true;
-      m_pixelRange[0] = range[0].toInt(&isDouble1);
+      auto pixelRangeMin = range[0].toInt(&isDouble1);
       bool isDouble2 = true;
-      m_pixelRange[1] = range[1].toInt(&isDouble2);
+      auto pixelRangeMax = range[1].toInt(&isDouble2);
 
       if (!isDouble1 || !isDouble2) {
-        uiv.addErrorMessage("PSD Integration Range is invalid. \n"
-                            "Provide comma separated two pixel numbers, e.g. 1,128");
+        validator->addErrorMessage("PSD Integration Range is invalid. \n"
+                                   "Provide comma separated two pixel numbers, e.g. 1,128");
       } else {
-        if (m_pixelRange[0] >= m_pixelRange[1] || m_pixelRange[0] < 1 || m_pixelRange[1] > 128) {
-          uiv.addErrorMessage("PSD Integration Range is invalid. \n"
-                              "Start or end pixel number is outside range [1-128], "
-                              "or start pixel number is >= than the end pixel number.");
+        if (pixelRangeMin >= pixelRangeMax || pixelRangeMin < 1 || pixelRangeMax > 128) {
+          validator->addErrorMessage("PSD Integration Range is invalid. \n"
+                                     "Start or end pixel number is outside range [1-128], "
+                                     "or start pixel number is >= than the end pixel number.");
         }
       }
     }
@@ -148,7 +124,7 @@ bool ILLEnergyTransfer::validate() {
 
   // Validate if the output workspace name is not empty
   if (m_uiForm.leOutWS->text().isEmpty())
-    uiv.addErrorMessage("OutputWorkspace name is invalid.");
+    validator->addErrorMessage("OutputWorkspace name is invalid.");
 
   // Validate QENS specific
 
@@ -157,26 +133,20 @@ bool ILLEnergyTransfer::validate() {
     int useVanadiumRun = m_uiForm.sbUnmirrorOption->value();
     if ((useVanadiumRun == 5 || useVanadiumRun == 7) &&
         (!m_uiForm.rfAlignmentRun->isValid() || m_uiForm.rfAlignmentRun->getUserInput().toString().isEmpty()))
-      uiv.addErrorMessage("Alignment run is invalid.");
+      validator->addErrorMessage("Alignment run is invalid.");
   }
 
   // Validate FWS specific
 
   if (m_uiForm.rdFWS->isChecked()) {
     if (m_uiForm.cbObservable->currentText().isEmpty()) {
-      uiv.addErrorMessage("Observable is invalid, check the sample logs "
-                          "for available options");
+      validator->addErrorMessage("Observable is invalid, check the sample logs "
+                                 "for available options");
     }
   }
-
-  // Show error message for errors
-  if (!uiv.isAllInputValid())
-    showMessageBox(uiv.generateErrorMessage());
-
-  return uiv.isAllInputValid();
 }
 
-void ILLEnergyTransfer::run() {
+void ILLEnergyTransfer::handleRun() {
   QString runFilename = m_uiForm.rfInput->getUserInput().toString();
   QString backgroundFilename = m_uiForm.rfBackgroundRun->getUserInput().toString();
   QString calibrationFilename = m_uiForm.rfCalibrationRun->getUserInput().toString();
@@ -197,6 +167,9 @@ void ILLEnergyTransfer::run() {
 
     // Calibraiton peak range
     if (!calibrationFilename.toStdString().empty()) {
+      auto range = m_uiForm.lePeakRange->text().split(',');
+      m_peakRange[0] = range[0].toDouble();
+      m_peakRange[1] = range[1].toDouble();
       auto peakRange =
           boost::lexical_cast<std::string>(m_peakRange[0]) + "," + boost::lexical_cast<std::string>(m_peakRange[1]);
       reductionAlg->setProperty("CalibrationPeakRange", peakRange);
@@ -232,6 +205,7 @@ void ILLEnergyTransfer::run() {
   // Handle background file
   if (!backgroundFilename.toStdString().empty()) {
     reductionAlg->setProperty("BackgroundRun", backgroundFilename.toStdString());
+    m_backScaling = m_uiForm.leBackgroundFactor->text().toDouble();
     reductionAlg->setProperty("BackgroundScalingFactor", m_backScaling);
   }
 
@@ -243,6 +217,7 @@ void ILLEnergyTransfer::run() {
   // Handle calibration background file
   if (!calibrationBackgroundFilename.toStdString().empty()) {
     reductionAlg->setProperty("CalibrationBackgroundRun", calibrationBackgroundFilename.toStdString());
+    m_backCalibScaling = m_uiForm.leBackCalibScale->text().toDouble();
     reductionAlg->setProperty("CalibrationBackgroundScalingFactor", m_backCalibScaling);
   }
 
@@ -272,6 +247,9 @@ void ILLEnergyTransfer::run() {
 
   // Handle manual PSD integration range
   if (m_uiForm.rdGroupRange->isChecked()) {
+    auto range = m_uiForm.lePixelRange->text().split(',');
+    m_pixelRange[0] = range[0].toInt();
+    m_pixelRange[1] = range[1].toInt();
     auto pixelRange =
         boost::lexical_cast<std::string>(m_pixelRange[0]) + "," + boost::lexical_cast<std::string>(m_pixelRange[1]);
     reductionAlg->setProperty("ManualPSDIntegrationRange", pixelRange);
@@ -291,6 +269,7 @@ void ILLEnergyTransfer::run() {
  * @param error True if the algorithm was stopped due to error, false otherwise
  */
 void ILLEnergyTransfer::algorithmComplete(bool error) {
+  m_runPresenter->setRunEnabled(true);
   if (error)
     return;
   else {
@@ -302,11 +281,6 @@ void ILLEnergyTransfer::algorithmComplete(bool error) {
     }
   }
 }
-
-/**
- * Handle when Run is clicked
- */
-void ILLEnergyTransfer::runClicked() { runTab(); }
 
 /**
  * Handles plotting of the reduced ws.
@@ -335,22 +309,12 @@ void ILLEnergyTransfer::save() {
 /**
  * Called when the instrument has changed, used to update default values.
  */
-void ILLEnergyTransfer::setInstrumentDefault() {
+void ILLEnergyTransfer::updateInstrumentConfiguration() {
   auto const instrument = getInstrumentDetail("instrument");
 
   // Set instrument in run file widgets
   m_uiForm.rfInput->setInstrumentOverride(instrument);
   m_uiForm.rfMapFile->setInstrumentOverride(instrument);
-}
-
-void ILLEnergyTransfer::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
-void ILLEnergyTransfer::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                                        QString const &tooltip) {
-  UNUSED_ARG(enableOutputButtons);
-  setRunEnabled(enabled);
-  m_uiForm.pbRun->setText(message);
-  m_uiForm.pbRun->setToolTip(tooltip);
 }
 
 } // namespace MantidQt::CustomInterfaces

@@ -20,11 +20,11 @@ namespace {
 
 void export_MandatoryValidator() {
   EXPORT_MANDATORYVALIDATOR(double, Float);
-  EXPORT_MANDATORYVALIDATOR(long, Int);
+  EXPORT_MANDATORYVALIDATOR(int, Int);
   EXPORT_MANDATORYVALIDATOR(std::string, String);
 
   // Array types
   EXPORT_MANDATORYVALIDATOR(std::vector<double>, FloatArray);
-  EXPORT_MANDATORYVALIDATOR(std::vector<long>, IntArray);
+  EXPORT_MANDATORYVALIDATOR(std::vector<int>, IntArray);
   EXPORT_MANDATORYVALIDATOR(std::vector<std::string>, StringArray);
 }

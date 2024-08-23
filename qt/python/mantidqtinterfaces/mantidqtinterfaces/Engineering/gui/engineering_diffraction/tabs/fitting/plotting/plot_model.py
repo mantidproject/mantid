@@ -12,10 +12,11 @@ from collections import defaultdict
 from mantid import FunctionFactory
 from mantid.api import TextAxis
 from mantid.kernel import UnitConversion, DeltaEModeType, UnitParams
-from mantid.simpleapi import logger, CreateEmptyTableWorkspace, GroupWorkspaces, CreateWorkspace
+from mantid.simpleapi import logger, CreateEmptyTableWorkspace, GroupWorkspaces, CreateWorkspace, FindPeaksConvolve
 from mantid.api import AnalysisDataService as ADS
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common.output_sample_logs import write_table_row
 from mantid.api import CompositeFunction
+from mantid.fitfunctions import FunctionWrapper
 
 
 class FittingPlotModel(object):
@@ -93,6 +94,9 @@ class FittingPlotModel(object):
 
     def _setup_peak_func_and_extract_fwhm(self, ws_name, peak_func_names, fit_func):
         fit_func_name = fit_func.name()
+        if fit_func.hasParameter("FWHM"):
+            return  # Avoid re-calculating of FWHM if the fit function already has it
+
         if fit_func_name in peak_func_names:
             peak_func = FunctionFactory.Instance().createPeakFunction(fit_func_name)
             [peak_func.setParameter(i_param, fit_func.getParameterValue(i_param)) for i_param in range(fit_func.nParams())]
@@ -176,3 +180,68 @@ class FittingPlotModel(object):
 
     def get_fit_results(self):
         return self._fit_results
+
+    def run_find_peaks_convolve(self, input_ws_name, peak_type, x_range):
+        """
+        Run FindPeaksConvolve algorithm with default values for ENGIN-X
+        :param input_ws_name: Name of the input workspace to run against
+        :param peak_type: Name of the selected peak type
+        :param x_range: min and max values of the fitting range
+        :return string: Function wrapper string for the peaks detected via the algorithm, None otherwise
+        """
+        if not ADS.doesExist(input_ws_name):
+            logger.error(f"{input_ws_name} does not exist!")
+            return None
+        fit_prop_ws = ADS.retrieve(input_ws_name)
+        groupWs = FindPeaksConvolve(
+            InputWorkspace=fit_prop_ws,
+            OutputWorkspace="FindPeaksConvolve_" + input_ws_name,
+            IOverSigmaThreshold=10,
+            EstimatedPeakExtent=200,
+            StoreInADS=True,
+        )
+        peak_x_values = dict()
+        peak_y_values = dict()
+        for tab_ws in groupWs:
+            if tab_ws.getName() == "PeakCentre":
+                peak_x_values = self._re_organize_keys_find_peaks_convolve(tab_ws)
+            elif tab_ws.getName() == "PeakYPosition":
+                peak_y_values = self._re_organize_keys_find_peaks_convolve(tab_ws)
+
+        if peak_x_values is None or peak_y_values is None:
+            logger.error("Failed extracting columns from FindPeakConvolve output")
+            return None
+
+        return self._get_func_wrapper_str_for_peak_x_y(peak_x_values, peak_y_values, peak_type, fit_prop_ws, x_range)
+
+    def _get_func_wrapper_str_for_peak_x_y(self, peak_x_values, peak_y_values, peak_type, fit_prop_ws, x_range):
+        if set(peak_x_values.keys()) == set(peak_y_values.keys()):
+            logger.notice(f"Adding {len(peak_x_values)} peaks found via FindPeaksConvolve")
+            func_wrapper = None
+            for col, x_value in peak_x_values.items():
+                if x_value < x_range[0] or x_value > x_range[1]:
+                    continue
+                y_value = peak_y_values[col]
+                peak_func = FunctionFactory.Instance().createPeakFunction(peak_type)
+                peak_func.setCentre(x_value)
+                peak_func.setHeight(y_value)
+                peak_func.setMatrixWorkspace(fit_prop_ws, 0, 0, 0)
+                f_wrapper = FunctionWrapper(peak_func)
+                if func_wrapper is None:
+                    func_wrapper = f_wrapper
+                else:
+                    func_wrapper += f_wrapper
+            if func_wrapper is not None:
+                return str(func_wrapper)
+            else:
+                logger.error("No peak functions were created from the results of FindPeaksConvolve")
+        else:
+            logger.error("Incompatible columns returned from FindPeaksConvolve!")
+        return None
+
+    def _re_organize_keys_find_peaks_convolve(self, table_ws):
+        if table_ws.rowCount() == 1:
+            table_dict = table_ws.row(0)
+            table_dict.pop("SpecIndex", None)
+            return {col_name.split("_")[-1]: value for col_name, value in table_dict.items()}
+        return None

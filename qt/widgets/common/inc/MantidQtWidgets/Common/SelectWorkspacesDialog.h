@@ -35,7 +35,8 @@ public:
 
   /// Constructor
   SelectWorkspacesDialog(QWidget *parent = nullptr, const std::string &typeFilter = "",
-                         const std::string &customButtonLabel = "");
+                         const std::string &customButtonLabel = "",
+                         QAbstractItemView::SelectionMode mode = QAbstractItemView::MultiSelection);
 
   /// Return the selected names
   QStringList getSelectedNames() const;

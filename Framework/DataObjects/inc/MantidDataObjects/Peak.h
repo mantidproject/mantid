@@ -108,6 +108,7 @@ public:
   double getAzimuthal() const override;
   double getDSpacing() const override;
   double getTOF() const override;
+  const Mantid::Kernel::V3D &getCachedDetectorPosition() const { return detPos; }
 
   double getInitialEnergy() const override;
   double getFinalEnergy() const override;

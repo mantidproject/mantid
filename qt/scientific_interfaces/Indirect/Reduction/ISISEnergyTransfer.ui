@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>660</width>
-    <height>841</height>
+    <width>670</width>
+    <height>840</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -26,23 +26,32 @@
       <string>Input</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="1">
-       <widget class="QCheckBox" name="ckSumFiles">
-        <property name="toolTip">
-         <string>Sum multiple files together.</string>
+      <item row="0" column="0">
+       <widget class="MantidQt::API::FileFinderWidget" name="dsRunFiles" native="true">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>41</verstretch>
+         </sizepolicy>
         </property>
-        <property name="text">
-         <string>Sum Files</string>
+        <property name="label" stdset="0">
+         <string>Input Runs</string>
+        </property>
+        <property name="multipleFiles" stdset="0">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
-       <widget class="QCheckBox" name="ckUseCalib">
+      <item row="1" column="1">
+       <widget class="QCheckBox" name="ckLoadLogFiles">
         <property name="toolTip">
-         <string>Use calibration file to adjust for detector efficiency.</string>
+         <string>Load log files</string>
         </property>
         <property name="text">
-         <string>Use Calib File</string>
+         <string>Load Log Files</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -71,32 +80,23 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QCheckBox" name="ckLoadLogFiles">
+      <item row="0" column="1">
+       <widget class="QCheckBox" name="ckSumFiles">
         <property name="toolTip">
-         <string>Load log files</string>
+         <string>Sum multiple files together.</string>
         </property>
         <property name="text">
-         <string>Load Log Files</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
+         <string>Sum Files</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="MantidQt::API::FileFinderWidget" name="dsRunFiles" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>41</verstretch>
-         </sizepolicy>
+      <item row="2" column="1">
+       <widget class="QCheckBox" name="ckUseCalib">
+        <property name="toolTip">
+         <string>Use calibration file to adjust for detector efficiency.</string>
         </property>
-        <property name="label" stdset="0">
-         <string>Input Runs</string>
-        </property>
-        <property name="multipleFiles" stdset="0">
-         <bool>true</bool>
+        <property name="text">
+         <string>Use Calib File</string>
         </property>
        </widget>
       </item>
@@ -393,75 +393,9 @@
            <number>0</number>
           </property>
           <widget class="QWidget" name="pgSingleRebin">
-           <layout class="QVBoxLayout" name="verticalLayout_16">
-            <property name="spacing">
-             <number>0</number>
-            </property>
-            <property name="leftMargin">
-             <number>0</number>
-            </property>
-            <property name="topMargin">
-             <number>0</number>
-            </property>
-            <property name="rightMargin">
-             <number>0</number>
-            </property>
-            <property name="bottomMargin">
-             <number>0</number>
-            </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
-             <layout class="QHBoxLayout" name="loSingleRebin">
-              <property name="spacing">
-               <number>6</number>
-              </property>
-              <property name="leftMargin">
-               <number>6</number>
-              </property>
-              <property name="topMargin">
-               <number>6</number>
-              </property>
-              <property name="rightMargin">
-               <number>6</number>
-              </property>
-              <property name="bottomMargin">
-               <number>6</number>
-              </property>
-              <item>
-               <widget class="QLabel" name="lbRebinLow">
-                <property name="text">
-                 <string>Low:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QDoubleSpinBox" name="spRebinLow">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="decimals">
-                 <number>5</number>
-                </property>
-                <property name="minimum">
-                 <double>-999.990000000000009</double>
-                </property>
-                <property name="maximum">
-                 <double>999.990000000000009</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="valRebinLow">
-                <property name="styleSheet">
-                 <string notr="true">color: rgb(255, 0, 4)</string>
-                </property>
-                <property name="text">
-                 <string>*</string>
-                </property>
-               </widget>
-              </item>
+             <layout class="QVBoxLayout" name="verticalLayout">
               <item>
                <spacer name="horizontalSpacer_7">
                 <property name="orientation">
@@ -469,96 +403,208 @@
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>40</width>
+                  <width>568</width>
                   <height>20</height>
                  </size>
                 </property>
                </spacer>
               </item>
               <item>
-               <widget class="QLabel" name="lbRebinWidth">
-                <property name="text">
-                 <string>Width:</string>
-                </property>
-               </widget>
+               <layout class="QHBoxLayout" name="horizontalLayout_4">
+                <item>
+                 <widget class="QLabel" name="lbRebinLow">
+                  <property name="minimumSize">
+                   <size>
+                    <width>32</width>
+                    <height>16</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Low:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="spRebinLow">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="decimals">
+                   <number>5</number>
+                  </property>
+                  <property name="minimum">
+                   <double>-999.990000000000009</double>
+                  </property>
+                  <property name="maximum">
+                   <double>999.990000000000009</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="valRebinLow">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>16</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text">
+                   <string>*</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="lbRebinWidth">
+                  <property name="minimumSize">
+                   <size>
+                    <width>32</width>
+                    <height>16</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Width:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="spRebinWidth">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="decimals">
+                   <number>5</number>
+                  </property>
+                  <property name="minimum">
+                   <double>-999.990000000000009</double>
+                  </property>
+                  <property name="maximum">
+                   <double>999.990000000000009</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.010000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="valRebinWidth">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>16</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text">
+                   <string>*</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="lbRebinHigh">
+                  <property name="minimumSize">
+                   <size>
+                    <width>32</width>
+                    <height>16</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>High:</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QDoubleSpinBox" name="spRebinHigh">
+                  <property name="enabled">
+                   <bool>false</bool>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>50</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="decimals">
+                   <number>5</number>
+                  </property>
+                  <property name="minimum">
+                   <double>-999.990000000000009</double>
+                  </property>
+                  <property name="maximum">
+                   <double>999.990000000000009</double>
+                  </property>
+                  <property name="singleStep">
+                   <double>0.100000000000000</double>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="valRebinHigh">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>16</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="styleSheet">
+                   <string notr="true">color: rgb(255, 0, 4)</string>
+                  </property>
+                  <property name="text">
+                   <string>*</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="spRebinWidth">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="decimals">
-                 <number>5</number>
-                </property>
-                <property name="minimum">
-                 <double>-999.990000000000009</double>
-                </property>
-                <property name="maximum">
-                 <double>999.990000000000009</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.010000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="valRebinWidth">
-                <property name="styleSheet">
-                 <string notr="true">color: rgb(255, 0, 4)</string>
-                </property>
-                <property name="text">
-                 <string>*</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_8">
+               <spacer name="horizontalSpacer_5">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>40</width>
+                  <width>628</width>
                   <height>20</height>
                  </size>
                 </property>
                </spacer>
-              </item>
-              <item>
-               <widget class="QLabel" name="lbRebinHigh">
-                <property name="text">
-                 <string>High:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QDoubleSpinBox" name="spRebinHigh">
-                <property name="enabled">
-                 <bool>false</bool>
-                </property>
-                <property name="decimals">
-                 <number>5</number>
-                </property>
-                <property name="minimum">
-                 <double>-999.990000000000009</double>
-                </property>
-                <property name="maximum">
-                 <double>999.990000000000009</double>
-                </property>
-                <property name="singleStep">
-                 <double>0.100000000000000</double>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="valRebinHigh">
-                <property name="styleSheet">
-                 <string notr="true">color: rgb(255, 0, 4)</string>
-                </property>
-                <property name="text">
-                 <string>*</string>
-                </property>
-               </widget>
               </item>
              </layout>
             </item>
@@ -666,64 +712,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="gbRun">
-     <property name="title">
-      <string>Run</string>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_7">
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>7</number>
-      </property>
-      <item>
-       <spacer name="horizontalSpacer_4">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pbRun">
-        <property name="minimumSize">
-         <size>
-          <width>150</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>180</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Run</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <spacer name="horizontalSpacer_10">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </widget>
+    <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true"/>
    </item>
    <item>
     <widget class="QGroupBox" name="gbOutput">
@@ -981,7 +970,7 @@
   <customwidget>
    <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
    <extends>QWidget</extends>
-   <header>Common/OutputPlotOptionsView.h</header>
+   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
@@ -994,6 +983,12 @@
    <class>MantidQt::MantidWidgets::DataSelector</class>
    <extends>QWidget</extends>
    <header>MantidQtWidgets/Common/DataSelector.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::RunView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Spectroscopy/RunWidget/RunView.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <tabstops>
@@ -1009,7 +1004,6 @@
   <tabstop>ckDetailedBalance</tabstop>
   <tabstop>spDetailedBalance</tabstop>
   <tabstop>ckDoNotRebin</tabstop>
-  <tabstop>cbRebinType</tabstop>
   <tabstop>spRebinLow</tabstop>
   <tabstop>spRebinWidth</tabstop>
   <tabstop>spRebinHigh</tabstop>

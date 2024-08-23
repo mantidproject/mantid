@@ -671,14 +671,14 @@ of intersection.
 */
 {
   // If an intersect (single component)
-  if (Intersect)
+  if (Intersect) {
     return (Comp.empty()) ? 1 : 0;
-  // Else needs to be union of Intersections.
-  std::vector<Acomp>::const_iterator cc;
-  for (cc = Comp.begin(); cc != Comp.end(); ++cc)
-    if (cc->Intersect == 0 || !cc->isSimple())
-      return 0;
-
+  }
+  const auto it = std::find_if(Comp.cbegin(), Comp.cend(),
+                               [](const auto &acomp) { return acomp.isInter() == 0 || !acomp.isSimple(); });
+  if (it != Comp.cend()) {
+    return 0;
+  }
   return 1;
 }
 
@@ -692,14 +692,14 @@ of unions
 */
 {
   // If an intersect (single component)
-  if (!Intersect)
+  if (!Intersect) {
     return (Comp.empty()) ? 1 : 0;
-  // Else needs to be intersection of unions
-  std::vector<Acomp>::const_iterator cc;
-  for (cc = Comp.begin(); cc != Comp.end(); ++cc)
-    if (cc->Intersect == 1 || !cc->isSimple())
-      return 0;
-
+  }
+  const auto it = std::find_if(Comp.cbegin(), Comp.cend(),
+                               [](const auto &acomp) { return acomp.isInter() == 1 || !acomp.isSimple(); });
+  if (it != Comp.cend()) {
+    return 0;
+  }
   return 1;
 }
 
@@ -905,8 +905,8 @@ It is set on exit (to the EPI)
     }
   }
 
-  std::vector<int>::iterator dx, ddx; // DNF active iterator
-  std::vector<int>::iterator px;      // PIactive iterator
+  std::vector<int>::iterator dx, ddx;  // DNF active iterator
+  std::vector<int>::const_iterator px; // PIactive iterator
 
   //
   // First remove singlets:
@@ -914,12 +914,9 @@ It is set on exit (to the EPI)
   for (dx = DNFactive.begin(); dx != DNFactive.end(); ++dx) {
     if (*dx >= 0 && DNFscore[*dx] == 1) // EPI (definately)
     {
-      for (px = PIactive.begin(); px != PIactive.end(); ++px) {
-        if (Grid[*px][*dx])
-          break;
-      }
+      px = std::find_if(PIactive.cbegin(), PIactive.cend(), [&](const int pi) { return Grid[pi][*dx]; });
 
-      if (PIactive.end() == px)
+      if (PIactive.cend() == px)
         continue;
 
       EPI.emplace_back(PIform[*px]);
@@ -1191,10 +1188,11 @@ the Base state.
       return retJoin;
   }
 
-  std::vector<Acomp>::const_iterator cc;
-  for (cc = Comp.begin(); cc != Comp.end(); ++cc)
-    if (cc->isTrue(Base) == retJoin)
-      return retJoin;
+  const auto it =
+      std::find_if(Comp.cbegin(), Comp.cend(), [&](const auto &acomp) { return acomp.isTrue(Base) == retJoin; });
+  if (it != Comp.cend()) {
+    return retJoin;
+  }
 
   // Finally not true then
   return 1 - retJoin;

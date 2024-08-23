@@ -79,6 +79,9 @@ pythonalgorithms.refresh.allowed = 0
 # Use forward slash / for all paths
 datasearch.directories = @DATADIRS@
 
+# Directory where data cache is stored, default IDaaS path
+datacachesearch.directory = /data/instrument
+
 # Root of html documentation (kept as unix-style path)
 docs.html.root = @HTML_ROOT@
 
@@ -130,6 +133,13 @@ MantidOptions.InvisibleWorkspaces=0
 # This flag controls the way the "unwrapped" instrument view is rendered.
 # Change to Off to disable OpenGL and use normal windows graphics.
 MantidOptions.InstrumentView.UseOpenGL = On
+
+# This will reduce the size of the OpenGL display lists used when drawing the
+# Instrument View. By doing this we reduce the chance that we will hit
+# a memory allocation bug in the Mesa graphics library that has been
+# fixed in version 24.1. This is only relevant if you are using both Linux and
+# a broken version of Mesa.
+MantidOptions.InstrumentView.MesaBugWorkaround = Off
 
 # Controls the default normalization mode for graph plotting
 # Allowed values are:

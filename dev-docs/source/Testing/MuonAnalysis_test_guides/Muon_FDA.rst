@@ -23,7 +23,7 @@ FFT Test
 - Change *Instrument* to **MUSR**, found in the *Home* tab
 - In the loading bar enter ``62260``
 - Go to the **Transform** tab
-    - Set the workspace to "MUSR00062260; Group; bkwd; Asym; FD"
+    - Set the workspace to "MUSR00062260; Group; bkwd; Asymmetry; FD"
     - Click the calculate FFT button and a plot will appear
     - The plot window will show a broad peak
 - In the **Fitting** tab it will contain 3 workspace ending in `Re_unit_MHz` (real), `Im_unit_MHz` (imaginary) and `mod_unit_MHz` (modulus)
@@ -36,7 +36,7 @@ FFT Test
     - The "padding" adds zeros to the end of the time domain data set, to improve the sampling of the FFT
     - Set the xrange for the plot to be from ``0`` to ``2`` by changing the x min and x max values below the plot
     - Set the "padding" to zero and press calculate
-    - The plots should be a nice peak, but it will have lots of straight lines
+    - The plot should still have a peak, but it will be less smooth
     - Set the "padding" to ``50`` and press calculate
     - The plot will now be nice and smooth
 - At the top of the plotting window change the unit from "Frequency" to "Field", the data will have different x axis

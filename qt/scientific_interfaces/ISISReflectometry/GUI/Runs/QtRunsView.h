@@ -19,7 +19,7 @@
 namespace MantidQt {
 
 namespace API {
-class AlgorithmRunner;
+class QtAlgorithmRunner;
 }
 
 namespace CustomInterfaces {
@@ -79,8 +79,8 @@ public:
   std::string getSearchCycle() const override;
   int getLiveDataUpdateInterval() const override;
 
-  std::shared_ptr<MantidQt::API::AlgorithmRunner> getAlgorithmRunner() const override;
-  std::shared_ptr<MantidQt::API::AlgorithmRunner> getMonitorAlgorithmRunner() const override;
+  std::shared_ptr<MantidQt::API::QtAlgorithmRunner> getAlgorithmRunner() const override;
+  std::shared_ptr<MantidQt::API::QtAlgorithmRunner> getMonitorAlgorithmRunner() const override;
 
   // Live data monitor
   void startMonitor() override;
@@ -92,8 +92,8 @@ private:
   /// Implement our own timer event to trigger autoreduction
   void timerEvent(QTimerEvent *event) override;
 
-  std::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
-  std::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
+  std::shared_ptr<MantidQt::API::QtAlgorithmRunner> m_algoRunner;
+  std::shared_ptr<MantidQt::API::QtAlgorithmRunner> m_monitorAlgoRunner;
 
   void setSelected(QComboBox &box, std::string const &str);
 

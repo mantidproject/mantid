@@ -1,1 +1,0 @@
-- Fixed intermittent crash in the Instrument View caused by a project recovery save happening while the Instrument View was opening.

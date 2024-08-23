@@ -251,7 +251,7 @@ void ALFAnalysisView::replot() { m_plot->replot(); }
 void ALFAnalysisView::openExternalPlot(Mantid::API::MatrixWorkspace_sptr const &workspace,
                                        std::vector<int> const &workspaceIndices) const {
   // Externally plot the plotted workspace.
-  MantidQt::Widgets::MplCpp::plot({workspace}, boost::none, workspaceIndices);
+  MantidQt::Widgets::MplCpp::plot({workspace}, std::nullopt, workspaceIndices);
 }
 
 std::pair<double, double> ALFAnalysisView::getRange() const {

@@ -16,7 +16,7 @@ except ImportError:
 
 
 def returnValid(validity, teststring, pos):
-    if QString == str:
+    if QString is str:
         return (validity, teststring, pos)
     else:
         return (validity, pos)

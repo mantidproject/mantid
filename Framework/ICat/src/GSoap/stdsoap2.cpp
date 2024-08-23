@@ -16,6 +16,8 @@ GNU_DIAG_OFF("cast-align")
 GNU_DIAG_OFF("deprecated-copy")
 GNU_DIAG_OFF("stringop-truncation")
 GNU_DIAG_OFF("restrict")
+GNU_DIAG_OFF("stringop-overread")
+GNU_DIAG_OFF("maybe-uninitialized")
 
 /*
   stdsoap2.c[pp] 2.8.15
@@ -15460,3 +15462,4 @@ GNU_DIAG_ON("format-truncation")
 GNU_DIAG_ON("implicit-fallthrough")
 GNU_DIAG_ON("cast-align")
 GNU_DIAG_OFF("deprecated-copy")
+GNU_DIAG_ON("maybe-uninitialized")

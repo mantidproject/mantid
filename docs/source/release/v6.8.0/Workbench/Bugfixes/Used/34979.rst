@@ -1,1 +1,0 @@
-- Fix bug that would open a duplicate tab if a file was already open. Now it will select the existing tab with the file.

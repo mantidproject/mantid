@@ -131,7 +131,7 @@ class BasicFittingModelTest(unittest.TestCase):
 
     def test_that_current_dataset_index_will_raise_if_the_index_is_greater_than_or_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.model.current_dataset_index = 2
 
     def test_that_current_dataset_index_will_set_the_current_dataset_index_as_expected(self):
@@ -163,7 +163,7 @@ class BasicFittingModelTest(unittest.TestCase):
 
     def test_that_setting_the_start_xs_will_raise_if_the_number_of_xs_is_not_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.model.start_xs = [0.0]
 
     def test_that_it_is_possible_to_set_the_current_start_x_as_expected(self):
@@ -195,7 +195,7 @@ class BasicFittingModelTest(unittest.TestCase):
 
     def test_that_setting_the_end_xs_will_raise_if_the_number_of_xs_is_not_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.model.end_xs = [10.0]
 
     def test_that_it_is_possible_to_set_the_current_end_x_as_expected(self):
@@ -246,7 +246,7 @@ class BasicFittingModelTest(unittest.TestCase):
 
     def test_that_setting_the_single_fit_function_will_raise_if_the_number_of_functions_is_not_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.model.single_fit_functions = [self.fit_function]
 
     def test_that_clear_single_fit_functions_will_clear_the_single_fit_functions_as_expected(self):
@@ -312,7 +312,7 @@ class BasicFittingModelTest(unittest.TestCase):
 
     def test_that_setting_the_fit_statuses_will_raise_if_the_number_of_fit_statuses_is_not_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.model.fit_statuses = ["success"]
 
     def test_it_is_possible_to_set_the_currently_selected_fit_status(self):
@@ -326,7 +326,7 @@ class BasicFittingModelTest(unittest.TestCase):
 
     def test_that_setting_the_chi_squared_will_raise_if_the_number_of_chi_squared_is_not_equal_to_the_number_of_datasets(self):
         self.model.dataset_names = self.dataset_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.model.chi_squared = [0.0]
 
     def test_it_is_possible_to_set_the_currently_selected_chi_squared(self):

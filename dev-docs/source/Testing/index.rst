@@ -22,13 +22,17 @@ creation is outlined in :ref:`issue_tracking`.
 
    Core/Core
    Direct/ALFViewTests
+   Direct/DGSReductionTests
    Direct/MSliceTestGuide
    SliceViewer/SliceViewer
    MuonAnalysis_test_guides/index
    ElementalAnalysis/ElementalAnalysisTests
+   Indirect/DiffractionTests
    Indirect/DataReductionTests
-   Inelastic/DataAnalysisTests
-   Inelastic/DataManipulationTests
+   Inelastic/CorrectionsTests
+   Inelastic/DataProcessorTests
+   Inelastic/QENSFittingTests
+   Inelastic/BayesFittingTests
    EngineeringDiffraction/EngineeringDiffractionTestGuide
    ErrorReporter-ProjectRecovery/ErrorReporterTesting
    ErrorReporter-ProjectRecovery/ProjectRecoveryTesting
@@ -36,3 +40,5 @@ creation is outlined in :ref:`issue_tracking`.
    ReflectometryGUI/ReflectometryGUITests
    SANSGUI/ISISSANSGUITests
    General/SampleTransmissionCalculatorTestGuide
+   Utility/FilterEventsInterfaceTest
+   Documentation/DocumentationTest

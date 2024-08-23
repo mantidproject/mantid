@@ -9,9 +9,8 @@
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 
-#include <QList>
-#include <QString>
-#include <QStringList>
+#include <string>
+#include <vector>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -24,15 +23,15 @@ namespace MantidWidgets {
  */
 struct EXPORT_OPT_MANTIDQT_COMMON FunctionModelDataset {
 public:
-  FunctionModelDataset(QString workspaceName, FunctionModelSpectra spectra);
+  FunctionModelDataset(std::string workspaceName, FunctionModelSpectra spectra);
 
-  inline QString datasetName() const noexcept { return m_workspaceName; }
-  QStringList domainNames() const;
+  inline std::string datasetName() const noexcept { return m_workspaceName; }
+  std::vector<std::string> domainNames() const;
 
   inline std::size_t numberOfSpectra() const noexcept { return m_spectra.size().value; }
 
 private:
-  QString m_workspaceName;
+  std::string m_workspaceName;
   FunctionModelSpectra m_spectra;
 };
 

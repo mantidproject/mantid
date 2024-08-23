@@ -154,12 +154,12 @@ void LoadGSASInstrumentFile::exec() {
     if (!bankIds.empty()) {
       // If user provided a list of banks, check that they exist in the .prm
       // file
-      for (auto bankId : bankIds) {
-        if (!bankparammap.count(bankId)) {
-          std::stringstream errorString;
-          errorString << "Bank " << bankId << " not found in .prm file";
-          throw runtime_error(errorString.str());
-        }
+      const auto it = std::find_if(bankIds.cbegin(), bankIds.cend(),
+                                   [&bankparammap](const auto &bankId) { return !bankparammap.count(bankId); });
+      if (it != bankIds.cend()) {
+        std::stringstream errorString;
+        errorString << "Bank " << (*it) << " not found in .prm file";
+        throw runtime_error(errorString.str());
       }
     } else {
       // Else, use all available banks

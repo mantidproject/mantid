@@ -1,1 +1,0 @@
-- New algorithm :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>` for monochromatic instruments which integrates events while loading and sets the X-axis based on log data.

@@ -34,16 +34,16 @@ Flipper configurations
 *InputWorkspaces* is a list containing one to four workspace names (X unit: wavelength) corresponding to the instrument configurations given as *Flippers*. Supported configurations are:
 
 :literal:`'00, 01, 10, 11'`
-   Full polarization corrections. Four input workspaces are required. They should be in the input group in the following order: both flippers off, analyzer flipper on, polarizer flipper on, both flippers on.
+   Full polarization corrections: both flippers off, analyzer flipper on, polarizer flipper on, both flippers on. Four input workspaces are required. The flipper configuration can be provided in any order and should match the order of the workspaces in the input group.
 
 :literal:`'00, 01, 11'` and :literal:`'00, 10, 11'`
-   Polarization corrections with the assumption that the corrected count rates :math:`\Sigma^{+-} = \Sigma^{-+}`. In this case the intensity of the missing flipper configuration (01 or 10) can be solved from the other intensities. Workspaces in the input group should be in the following order: both flippers off, one flipper on, both flippers on.
+   Polarization corrections with the assumption that the corrected count rates :math:`\Sigma^{+-} = \Sigma^{-+}`. In this case the intensity of the missing flipper configuration (01 or 10) can be solved from the other intensities. The flipper configuration can be provided in any order and should match the order of the workspaces in the input group.
 
 :literal:`'00, 11'`
-   Polarization corrections with the assumption that the corrected count rates :math:`\Sigma^{+-} = \Sigma^{-+} = 0`. In this case the intensities of the missing flipper configurations (01 and 10) can be solved from the other intensities. Workspaces in the input group should be in the following order: both flippers off, both flippers on.
+   Polarization corrections with the assumption that the corrected count rates :math:`\Sigma^{+-} = \Sigma^{-+} = 0`. In this case the intensities of the missing flipper configurations (01 and 10) can be solved from the other intensities. The flipper configuration can be provided in any order and should match the order of the workspaces in the input group.
 
 :literal:`'0, 1'`
-   Polarization corrections when no analyzer has been used. Workspaces in the input group should be in the following order: polarizer flipper off, polarizer flipper on.
+   Polarization corrections when no analyzer has been used: polarizer flipper off, polarizer flipper on. The flipper configuration can be provided in any order and should match the order of the workspaces in the input group.
 
 :literal:`'0'`
    Polarization corrections for a direct beam measurement in a reflectometry experiment.

@@ -27,13 +27,15 @@ void SaveAlgorithmRunner::runSaveAsciiAlgorithm(const Mantid::API::Workspace_spt
   alg->execute();
 }
 
-void SaveAlgorithmRunner::runSaveORSOAlgorithm(const Mantid::API::Workspace_sptr &workspace,
-                                               std::string const &savePath, const bool &includeQResolution) const {
+void SaveAlgorithmRunner::runSaveORSOAlgorithm(std::vector<std::string> const &workspaceNames,
+                                               std::string const &savePath, const bool &includeQResolution,
+                                               const bool &includeAdditionalColumns) const {
   auto alg = Mantid::API::AlgorithmManager::Instance().create("SaveISISReflectometryORSO");
   alg->setRethrows(true);
-  alg->setProperty("InputWorkspace", workspace);
+  alg->setProperty("WorkspaceList", workspaceNames);
   alg->setProperty("Filename", savePath);
   alg->setProperty("WriteResolution", includeQResolution);
+  alg->setProperty("IncludeAdditionalColumns", includeAdditionalColumns);
   alg->execute();
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

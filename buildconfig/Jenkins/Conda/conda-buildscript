@@ -16,6 +16,7 @@
 #   2. CMAKE_PRESET: the CMake preset that should be run to generate the cmake files for this CI job
 #
 # Possible flags:
+#   --disable-unittests: Disable the unit tests. Otherwise they're run by default.
 #   --enable-systemtests: Build and run the system tests
 #   --enable-docs: Build the docs
 #   --enable-dev-docs: Build the developer docs
@@ -68,6 +69,7 @@ EXTRA_CMAKE_FLAGS="-DENABLE_PRECOMMIT=OFF"
 while [ ! $# -eq 0 ]
 do
     case "$1" in
+        --disable-unittests) ENABLE_UNIT_TESTS=false ;;
         --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
         --enable-docs) ENABLE_DOCS=true ;;
         --enable-doctests)
@@ -76,8 +78,8 @@ do
             ;;
         --enable-dev-docs) ENABLE_DEV_DOCS=true ;;
         --enable-coverity)
-	    ENABLE_COVERITY=true
-	    ENABLE_UNIT_TESTS=false
+            ENABLE_COVERITY=true
+            ENABLE_UNIT_TESTS=false
 	    ;;
         --clean-build) CLEAN_BUILD=true ;;
         --clean-external-projects) CLEAN_EXTERNAL_PROJECTS=true ;;
@@ -115,10 +117,15 @@ create_and_activate_mantid_developer_env
 
 # Check whether this is an incremental build that only changes rst files
 if [ -d $BUILD_DIR ]; then
-    if ${SCRIPT_DIR}/../check_for_changes dev-docs-only || ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
+    if ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
       ENABLE_BUILD_CODE=false
       ENABLE_UNIT_TESTS=false
       ENABLE_SYSTEM_TESTS=false
+    elif ${SCRIPT_DIR}/../check_for_changes dev-docs-only; then
+      ENABLE_BUILD_CODE=false
+      ENABLE_UNIT_TESTS=false
+      ENABLE_SYSTEM_TESTS=false
+      ENABLE_DOC_TESTS=false
     fi
     rm -rf ${BUILD_DIR}/bin ${BUILD_DIR}/ExternalData ${BUILD_DIR}/Testing
     find $WORKSPACE \( -iname 'TEST-*.xml' -o -name 'Test.xml' \) -delete
@@ -143,7 +150,7 @@ if [[ $ENABLE_DOCS == true ]]; then
 fi
 
 # Run the script that handles the build
-$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS
+$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS
 
 # Run unit and system tests
 $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS

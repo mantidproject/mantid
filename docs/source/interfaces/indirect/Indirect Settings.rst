@@ -90,13 +90,13 @@ Glossary of Allowed Suffixes
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 | _Corrections | EnergyTransfer (:math:`meV`) | Spectrum Number                                | :ref:`Data Corrections <interface-inelastic-corrections>` in CalculatePaalmanPings or CalculateMonteCarloAbsorption |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _eq          | Q (:math:`A^-1`)             | Sample Environment variable (e.g. Temperature) | :ref:`Data Analysis <interface-inelastic-data-analysis>` in Elwin                                                   |
+| _eq          | Q (:math:`A^-1`)             | Sample Environment variable (e.g. Temperature) | :ref:`Data Processor <interface-inelastic-data-processor>` in Elwin                                                 |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _elf         | Intensity                    | Q (:math:`A^-1`)                               | :ref:`Data Analysis <interface-inelastic-data-analysis>` in Elwin                                                   |
+| _elf         | Intensity                    | Q (:math:`A^-1`)                               | :ref:`Data Processor <interface-inelastic-data-processor>` in Elwin                                                 |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _iqt         | Time (:math:`ns`)            | Spectrum Number or Q (:math:`A^-1`)            | :ref:`Data Analysis <interface-inelastic-data-analysis>` in I(Q,t)                                                  |
+| _iqt         | Time (:math:`ns`)            | Spectrum Number or Q (:math:`A^-1`)            | :ref:`Data Processor <interface-inelastic-data-processor>` in I(Q,t)                                                |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _Result      | Q (:math:`A^-1`)             | Fit Parameter Name                             | :ref:`Data Analysis <interface-inelastic-data-analysis>` in MSDFit, IqtFit, ConvFit or F(Q)Fit                      |
+| _Result      | Q (:math:`A^-1`)             | Fit Parameter Name                             | :ref:`QENS Fitting <interface-inelastic-qens-fitting>` in MSD, I(Q,t), Convolution or Function(Q)                   |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 
 When **Restrict allowed input files by name** is ticked, the input data is restricted by name
@@ -131,16 +131,11 @@ Sample Suffixes
 Resolution Suffixes
   _res
 
-Data Analysis Suffixes
-~~~~~~~~~~~~~~~~~~~~~~
-Elwin
-#####
+QENS Fitting Suffixes
+~~~~~~~~~~~~~~~~~~~~~
 
-Input Suffixes
-  _red, _sqw
-
-MSDFit
-######
+MSD
+###
 
 Sample Suffixes
   _eq
@@ -149,19 +144,10 @@ I(Q,t)
 ######
 
 Sample Suffixes
-  _red, _sqw
-
-Resolution Suffixes
-  _res, _red, _sqw
-
-I(Q,t)Fit
-#########
-
-Sample Suffixes
   _iqt
 
-ConvFit
-#######
+Convolution
+###########
 
 Sample Suffixes
   _red, _sqw
@@ -169,8 +155,8 @@ Sample Suffixes
 Resolution Suffixes
   _res, _red, _sqw
 
-F(Q)Fit
-#######
+Function(Q)
+###########
 
 Sample Suffixes
   _Result
@@ -242,6 +228,8 @@ Transmission
 ############
 No restrictions.
 
+Data Processor Suffixes
+~~~~~~~~~~~~~~~~~~~~~~~
 Symmetrise
 ##########
 
@@ -259,6 +247,21 @@ Moments
 
 Input Suffixes
   _sqw
+
+Elwin
+#####
+
+Input Suffixes
+  _red, _sqw
+
+I(Q,t)
+######
+
+Sample Suffixes
+  _red, _sqw
+
+Resolution Suffixes
+  _res, _red, _sqw
 
 Diffraction Suffixes
 ~~~~~~~~~~~~~~~~~~~~

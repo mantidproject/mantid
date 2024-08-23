@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISCalibration.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <QDebug>
 #include <QFileInfo>
@@ -41,9 +41,10 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
-    : IndirectDataReductionTab(idrUI, parent), m_lastCalPlotFilename("") {
+ISISCalibration::ISISCalibration(IDataReduction *idrUI, QWidget *parent)
+    : DataReductionTab(idrUI, parent), m_lastCalPlotFilename("") {
   m_uiForm.setupUi(parent);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin));
 
@@ -129,9 +130,6 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
   auto resPeak = m_uiForm.ppResolution->addRangeSelector("ResPeak");
   resPeak->setColour(Qt::red);
 
-  // Update instrument information when a new instrument config is selected
-  connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(setDefaultInstDetails()));
-
   // Update property map when a range selector is moved
   connectRangeSelectors();
   // Update range selector positions when a value in the double manager changes
@@ -141,8 +139,6 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
   // Toggle RES file options when user toggles Create RES File checkbox
   connect(m_uiForm.ckCreateResolution, SIGNAL(toggled(bool)), this, SLOT(resCheck(bool)));
 
-  // Shows message on run button when user is inputting a run number
-  connect(m_uiForm.leRunNo, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
   // Shows message on run button when Mantid is finding the file for a given run
   // number
   connect(m_uiForm.leRunNo, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
@@ -155,11 +151,7 @@ ISISCalibration::ISISCalibration(IndirectDataReduction *idrUI, QWidget *parent)
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   // Handle running, plotting and saving
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-
-  connect(this, SIGNAL(updateRunButton(bool, std::string const &, QString const &, QString const &)), this,
-          SLOT(updateRunButton(bool, std::string const &, QString const &, QString const &)));
 }
 
 ISISCalibration::~ISISCalibration() {
@@ -289,10 +281,27 @@ void ISISCalibration::setResolutionSpectraRange(const double &minimum, const dou
   m_dblManager->setValue(m_properties["ResSpecMax"], maximum);
 }
 
-void ISISCalibration::setup() {}
+/*
+ * Handle completion of the calibration and resolution algorithms.
+ *
+ * @param error If the algorithms failed.
+ */
+void ISISCalibration::algorithmComplete(bool error) {
+  m_runPresenter->setRunEnabled(true);
+  if (!error) {
+    std::vector<std::string> outputWorkspaces{m_outputCalibrationName.toStdString()};
+    if (m_uiForm.ckCreateResolution->isChecked() && !m_outputResolutionName.isEmpty()) {
+      outputWorkspaces.emplace_back(m_outputResolutionName.toStdString());
+      if (m_uiForm.ckSmoothResolution->isChecked())
+        outputWorkspaces.emplace_back(m_outputResolutionName.toStdString() + "_pre_smooth");
+    }
+    setOutputPlotOptionsWorkspaces(outputWorkspaces);
 
-void ISISCalibration::run() {
-  // Get properties
+    m_uiForm.pbSave->setEnabled(true);
+  }
+}
+
+void ISISCalibration::handleRun() {
   const auto filenames = m_uiForm.leRunNo->getFilenames().join(",");
   const auto outputWorkspaceNameStem = outputWorkspaceName().toLower();
 
@@ -322,58 +331,30 @@ void ISISCalibration::run() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-/*
- * Handle completion of the calibration and resolution algorithms.
- *
- * @param error If the algorithms failed.
- */
-void ISISCalibration::algorithmComplete(bool error) {
-  if (!error) {
-    std::vector<std::string> outputWorkspaces{m_outputCalibrationName.toStdString()};
-    if (m_uiForm.ckCreateResolution->isChecked() && !m_outputResolutionName.isEmpty()) {
-      outputWorkspaces.emplace_back(m_outputResolutionName.toStdString());
-      if (m_uiForm.ckSmoothResolution->isChecked())
-        outputWorkspaces.emplace_back(m_outputResolutionName.toStdString() + "_pre_smooth");
-    }
-    setOutputPlotOptionsWorkspaces(outputWorkspaces);
-
-    m_uiForm.pbSave->setEnabled(true);
-  }
-}
-
-bool ISISCalibration::validate() {
-  MantidQt::CustomInterfaces::UserInputValidator uiv;
-
-  uiv.checkFileFinderWidgetIsValid("Run", m_uiForm.leRunNo);
+void ISISCalibration::handleValidation(IUserInputValidator *validator) const {
+  validator->checkFileFinderWidgetIsValid("Run", m_uiForm.leRunNo);
 
   auto rangeOfPeak = peakRange();
   auto rangeOfBackground = backgroundRange();
-  uiv.checkValidRange("Peak Range", rangeOfPeak);
-  uiv.checkValidRange("Back Range", rangeOfBackground);
-  uiv.checkRangesDontOverlap(rangeOfPeak, rangeOfBackground);
+  validator->checkValidRange("Peak Range", rangeOfPeak);
+  validator->checkValidRange("Back Range", rangeOfBackground);
+  validator->checkRangesDontOverlap(rangeOfPeak, rangeOfBackground);
 
   if (m_uiForm.ckCreateResolution->isChecked()) {
-    uiv.checkValidRange("Background", resolutionRange());
+    validator->checkValidRange("Background", resolutionRange());
 
     double eLow = m_dblManager->value(m_properties["ResELow"]);
     double eHigh = m_dblManager->value(m_properties["ResEHigh"]);
     double eWidth = m_dblManager->value(m_properties["ResEWidth"]);
 
-    uiv.checkBins(eLow, eWidth, eHigh);
+    validator->checkBins(eLow, eWidth, eHigh);
   }
-
-  QString error = uiv.generateErrorMessage();
-
-  if (error != "")
-    g_log.warning(error.toStdString());
-
-  return (error == "");
 }
 
 /**
  * Sets default spectra, peak and background ranges.
  */
-void ISISCalibration::setDefaultInstDetails() {
+void ISISCalibration::updateInstrumentConfiguration() {
   try {
     setDefaultInstDetails(getInstrumentDetails());
   } catch (std::exception const &ex) {
@@ -466,7 +447,7 @@ void ISISCalibration::calPlotRaw() {
   setPeakRangeLimits(dataX.front(), dataX.back());
   setBackgroundRangeLimits(dataX.front(), dataX.back());
 
-  setDefaultInstDetails();
+  updateInstrumentConfiguration();
 
   m_uiForm.ppCalibration->replot();
 
@@ -672,17 +653,10 @@ void ISISCalibration::resCheck(bool state) {
 }
 
 /**
- * Called when a user starts to type / edit the runs to load.
- */
-void ISISCalibration::pbRunEditing() {
-  updateRunButton(false, "unchanged", "Editing...", "Run numbers are currently being edited.");
-}
-
-/**
  * Called when the FileFinder starts finding the files.
  */
 void ISISCalibration::pbRunFinding() {
-  updateRunButton(false, "unchanged", "Finding files...", "Searching for data files for the run numbers entered...");
+  m_runPresenter->setRunText("Finding files...");
   m_uiForm.leRunNo->setEnabled(false);
 }
 
@@ -691,11 +665,9 @@ void ISISCalibration::pbRunFinding() {
  */
 void ISISCalibration::pbRunFinished() {
   if (!m_uiForm.leRunNo->isValid())
-    updateRunButton(false, "unchanged", "Invalid Run(s)",
-                    "Cannot find data files for some of the run numbers entered.");
+    m_runPresenter->setRunText("Invalid Run(s)");
   else
-    updateRunButton();
-
+    m_runPresenter->setRunEnabled(true);
   m_uiForm.leRunNo->setEnabled(true);
 }
 /**
@@ -711,11 +683,6 @@ void ISISCalibration::saveClicked() {
   }
   m_batchAlgoRunner->executeBatchAsync();
 }
-
-/**
- * Handle when Run is clicked
- */
-void ISISCalibration::runClicked() { runTab(); }
 
 void ISISCalibration::addRuntimeSmoothing(const QString &workspaceName) {
   auto smoothAlg = AlgorithmManager::Instance().create("WienerSmooth");
@@ -778,17 +745,6 @@ IAlgorithm_sptr ISISCalibration::energyTransferReductionAlgorithm(const QString 
   return reductionAlg;
 }
 
-void ISISCalibration::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
 void ISISCalibration::setSaveEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
-
-void ISISCalibration::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                                      QString const &tooltip) {
-  setRunEnabled(enabled);
-  m_uiForm.pbRun->setText(message);
-  m_uiForm.pbRun->setToolTip(tooltip);
-  if (enableOutputButtons != "unchanged")
-    setSaveEnabled(enableOutputButtons == "enable");
-}
 
 } // namespace MantidQt::CustomInterfaces

@@ -47,7 +47,7 @@ void Plotter::reflectometryPlot(const std::vector<std::string> &workspaces) cons
     }
   }
 
-  plot(actualWorkspaces, boost::none, wksp_indices, boost::none, boost::none, ax_properties, window_title,
+  plot(actualWorkspaces, std::nullopt, wksp_indices, std::nullopt, std::nullopt, ax_properties, window_title,
        plotErrorBars, false);
 }
 

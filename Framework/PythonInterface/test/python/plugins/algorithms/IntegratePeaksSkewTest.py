@@ -74,9 +74,26 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             IntegrateIfOnEdge=False,
             OutputWorkspace="out0",
         )
-        # check peaks in bank 1 were not integrated (mask touches edge)
+        # check peaks in bank 1 were not integrated (mask touches masked pixel)
         for ipk, pk in enumerate(out):
             self.assertEqual(pk.getIntensity(), 0)
+
+    def test_integrate_on_edge_option_respects_detector_masking(self):
+        ws_masked = CloneWorkspace(InputWorkspace=self.ws)
+        det_info = ws_masked.detectorInfo()
+        det_info.setMasked(det_info.indexOf(self.peaks.getPeak(0).getDetectorID()), True)
+        out = IntegratePeaksSkew(
+            InputWorkspace=ws_masked,
+            PeaksWorkspace=self.peaks,
+            ThetaWidth=0,
+            BackscatteringTOFResolution=0.3,
+            IntegrateIfOnEdge=False,
+            NRowsEdge=0,
+            NColsEdge=0,
+            OutputWorkspace="out0_masked",
+        )
+        # check peaks in bank 1 were not integrated (mask touches edge)
+        self.assertEqual(out.getPeak(0).getIntensity(), 0)
 
     def test_integrate_use_nearest_peak_false_update_peak_position_false(self):
         out = IntegratePeaksSkew(
@@ -367,7 +384,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
             OutputWorkspace="out8",
         )
         self.assertGreater(out.getPeak(0).getIntensityOverSigma(), 0)
-        self.assertAlmostEqual(out.getPeak(0).getIntensityOverSigma(), 10.84209, delta=1e-4)
+        self.assertAlmostEqual(out.getPeak(0).getIntensityOverSigma(), 8.8002, delta=1e-4)
         out = IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,

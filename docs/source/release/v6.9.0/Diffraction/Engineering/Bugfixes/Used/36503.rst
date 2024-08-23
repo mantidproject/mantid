@@ -1,1 +1,0 @@
-- Resolved the out of sync observation between the fit algorithm parameters returned by the :ref:`Fitting tab <ui engineering fitting>` of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` and the Parameters table after completing a fitting.

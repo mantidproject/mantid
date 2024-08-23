@@ -223,6 +223,7 @@ The output PDF can be customized with the following parameters:
 - By calling with `debug=True` which will retain the intermediate self scattering correction workspace.
 - By calling with `placzek_order` the Placzek correction order can be specified, with the option of 1 or 2 (defaults to 1).
 - By calling with `sample_temp` the user can override the sample temperature provided in the logs. It defaults to using values from the logs if available.
+- By calling with `pdf_output_name`, the name of the output PDF will be set to the user-provided name. If not specified, the output will be the run number suffixed with the PDF type.
 
 Example
 =======

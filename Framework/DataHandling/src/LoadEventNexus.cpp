@@ -26,6 +26,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -59,6 +60,18 @@ using Types::Core::DateAndTime;
 namespace {
 // detnotes the end of iteration for NeXus::getNextEntry
 const std::string NULL_STR("NULL");
+
+const std::vector<std::string> binningModeNames{"Default", "Linear", "Logarithmic"};
+enum class BinningMode { DEFAULT, LINEAR, LOGARITHMIC, enum_count };
+typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
+
+const std::string LOG_CHARGE_NAME("proton_charge");
+
+namespace PropertyNames {
+const std::string COMPRESS_TOL("CompressTolerance");
+const std::string COMPRESS_MODE("CompressBinningMode");
+const std::string BAD_PULSES_CUTOFF("FilterBadPulsesLowerCutoff");
+} // namespace PropertyNames
 } // namespace
 
 /**
@@ -81,8 +94,10 @@ bool exists(const std::map<std::string, std::string> &entries, const std::string
  */
 LoadEventNexus::LoadEventNexus()
     : filter_tof_min(0), filter_tof_max(0), m_specMin(0), m_specMax(0), longest_tof(0), shortest_tof(0), bad_tofs(0),
-      discarded_events(0), compressTolerance(0), m_instrument_loaded_correctly(false), loadlogs(false),
-      event_id_is_spec(false) {}
+      discarded_events(0), compressEvents(false), m_instrument_loaded_correctly(false), loadlogs(false),
+      event_id_is_spec(false) {
+  compressTolerance = EMPTY_DBL();
+}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -142,11 +157,16 @@ void LoadEventNexus::init() {
                   "Optional: To only include events before the provided stop "
                   "time, in seconds (relative to the start of the run).");
 
+  declareProperty(
+      std::make_unique<PropertyWithValue<double>>(PropertyNames::BAD_PULSES_CUTOFF, EMPTY_DBL(), Direction::Input),
+      "Optional: To filter bad pulses set the Lower Cutoff percentage to use.");
+
   std::string grp1 = "Filter Events";
   setPropertyGroup("FilterByTofMin", grp1);
   setPropertyGroup("FilterByTofMax", grp1);
   setPropertyGroup("FilterByTimeStart", grp1);
   setPropertyGroup("FilterByTimeStop", grp1);
+  setPropertyGroup("FilterBadPulsesLowerCutoff", grp1);
 
   declareProperty(std::make_unique<ArrayProperty<string>>("BankName", Direction::Input),
                   "Optional: To only include events from one bank. Any bank "
@@ -170,11 +190,18 @@ void LoadEventNexus::init() {
                   "This can significantly reduce memory use and memory fragmentation; it "
                   "may also speed up loading.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>("CompressTolerance", -1.0, Direction::Input),
-                  "Run CompressEvents while loading (optional, leave blank or "
-                  "negative to not do). "
-                  "This specified the tolerance to use (in microseconds) when "
-                  "compressing.");
+  declareProperty(
+      std::make_unique<PropertyWithValue<double>>(PropertyNames::COMPRESS_TOL, EMPTY_DBL(), Direction::Input),
+      "CompressEvents while loading (optional, default: off). "
+      "This specified the tolerance to use (in microseconds) when compressing where positive is linear tolerance, "
+      "negative is logorithmic tolerance, and zero indicates that time-of-flight must be identical to compress.");
+  declareProperty(
+      PropertyNames::COMPRESS_MODE, binningModeNames[size_t(BinningMode::DEFAULT)],
+      std::make_shared<Mantid::Kernel::StringListValidator>(binningModeNames),
+      "Optional. "
+      "Binning behavior can be specified in the usual way through sign of binwidth and other properties ('Default'); "
+      "or can be set to one of the allowed binning modes. "
+      "This will override all other specification or default behavior.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
@@ -191,7 +218,8 @@ void LoadEventNexus::init() {
 
   std::string grp3 = "Reduce Memory Use";
   setPropertyGroup("Precount", grp3);
-  setPropertyGroup("CompressTolerance", grp3);
+  setPropertyGroup(PropertyNames::COMPRESS_TOL, grp3);
+  setPropertyGroup(PropertyNames::COMPRESS_MODE, grp3);
   setPropertyGroup("ChunkNumber", grp3);
   setPropertyGroup("TotalChunks", grp3);
 
@@ -286,6 +314,18 @@ void LoadEventNexus::init() {
                                                                                 Direction::Input),
                   "If specified, these logs will NOT be loaded from the file (each "
                   "separated by a space).");
+}
+
+std::map<std::string, std::string> LoadEventNexus::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  if (!isDefault(PropertyNames::BAD_PULSES_CUTOFF)) {
+    const double cutoff = getProperty(PropertyNames::BAD_PULSES_CUTOFF);
+    if (cutoff < 0 || cutoff > 100)
+      result[PropertyNames::BAD_PULSES_CUTOFF] = "Must be empty or between 0 and 100";
+  }
+
+  return result;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -389,7 +429,15 @@ void LoadEventNexus::execLoader() {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 
-  compressTolerance = getProperty("CompressTolerance");
+  compressEvents = !isDefault(PropertyNames::COMPRESS_TOL);
+  compressTolerance = getProperty(PropertyNames::COMPRESS_TOL);
+  if (compressEvents) {
+    BINMODE mode = getPropertyValue(PropertyNames::COMPRESS_MODE);
+    if (mode == BinningMode::LINEAR)
+      compressTolerance = std::fabs(compressTolerance);
+    else if (mode == BinningMode::LOGARITHMIC)
+      compressTolerance = -1. * std::fabs(compressTolerance);
+  }
 
   loadlogs = getProperty("LoadLogs");
 
@@ -584,7 +632,7 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
     // If successful, we can try to load the pulse times
     std::vector<Types::Core::DateAndTime> temp;
     if (localWorkspace->run().hasProperty("proton_charge")) {
-      auto *log =
+      const auto *log =
           dynamic_cast<Kernel::TimeSeriesProperty<double> *>(localWorkspace->mutableRun().getProperty("proton_charge"));
       if (log)
         temp = log->timesAsVector();
@@ -1063,6 +1111,20 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     }
   }
 
+  // setup filter bad pulses
+  filter_bad_pulses = !isDefault(PropertyNames::BAD_PULSES_CUTOFF);
+
+  if (filter_bad_pulses) {
+    double min_pcharge, max_pcharge;
+    std::tie(min_pcharge, max_pcharge, std::ignore) =
+        m_ws->run().getBadPulseRange(LOG_CHARGE_NAME, getProperty(PropertyNames::BAD_PULSES_CUTOFF));
+
+    const auto *pcharge_log =
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_ws->run().getLogData(LOG_CHARGE_NAME));
+    bad_pulses_timeroi = std::make_shared<TimeROI>(
+        pcharge_log->makeFilterByValue(min_pcharge, max_pcharge, false, TimeInterval(0, 1), 0., true));
+  }
+
   if (metaDataOnly) {
     // Now, create a default X-vector for histogramming, with just 2 bins.
     auto axis = HistogramData::BinEdges{1, static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1 - 1};
@@ -1231,9 +1293,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
       // events were filtered during read
       // filter the logs the same way FilterByTime does
       TimeROI timeroi(filter_time_start, filter_time_stop);
+      if (filter_bad_pulses)
+        timeroi.update_intersection(*bad_pulses_timeroi);
       m_ws->mutableRun().setTimeROI(timeroi);
       m_ws->mutableRun().removeDataOutsideTimeROI();
     }
+  } else if (filter_bad_pulses) {
+    m_ws->mutableRun().setTimeROI(*bad_pulses_timeroi);
+    m_ws->mutableRun().removeDataOutsideTimeROI();
   }
 }
 
@@ -1558,8 +1625,6 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
   filter_tof_max = getProperty(prefix + "ByTofMax");
   if ((filter_tof_min == EMPTY_DBL()) && (filter_tof_max == EMPTY_DBL())) {
     // Nothing specified. Include everything
-    filter_tof_min = -1e20;
-    filter_tof_max = +1e20;
     filter_tof_range = false;
   } else if ((filter_tof_min != EMPTY_DBL()) && (filter_tof_max != EMPTY_DBL())) {
     // Both specified. Keep these values
@@ -1651,10 +1716,10 @@ LoadEventNexus::LoaderType LoadEventNexus::defineLoaderType(const bool haveWeigh
   noParallelConstrictions &= !(m_ws->nPeriods() != 1);
   noParallelConstrictions &= !haveWeights;
   noParallelConstrictions &= !oldNeXusFileNames;
-  noParallelConstrictions &= !(filter_tof_min != -1e20 || filter_tof_max != 1e20);
+  noParallelConstrictions &= !(filter_tof_range);
   noParallelConstrictions &= !((filter_time_start != Types::Core::DateAndTime::minimum() ||
                                 filter_time_stop != Types::Core::DateAndTime::maximum()));
-  noParallelConstrictions &= !((!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
+  noParallelConstrictions &= !((!isDefault(PropertyNames::COMPRESS_TOL) || !isDefault("SpectrumMin") ||
                                 !isDefault("SpectrumMax") || !isDefault("SpectrumList") || !isDefault("ChunkNumber")));
   noParallelConstrictions &= !(classType != "NXevent_data");
 

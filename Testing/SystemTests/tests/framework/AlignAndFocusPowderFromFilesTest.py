@@ -54,7 +54,9 @@ class SimplestCompare(systemtesting.MantidSystemTest):
         self.wksp_mem, self.wksp_file = self.wksp_mem + "_mem", self.wksp_mem + "_file"
 
         # load then process
-        LoadEventAndCompress(Filename=self.data_file, OutputWorkspace=self.wksp_mem, MaxChunkSize=16, FilterBadPulses=0)
+        LoadEventAndCompress(
+            Filename=self.data_file, OutputWorkspace=self.wksp_mem, MaxChunkSize=16, FilterBadPulses=0, CompressTOFTolerance=0
+        )
         LoadDiffCal(Filename=self.cal_file, InputWorkspace=self.wksp_mem, WorkspaceName="PG3")
         PDDetermineCharacterizations(
             InputWorkspace=self.wksp_mem, Characterizations="characterizations", ReductionProperties="__snspowderreduction_inner"
@@ -104,6 +106,86 @@ class SimplestCompare(systemtesting.MantidSystemTest):
         return (self.wksp_mem, self.wksp_file)
 
 
+class LogarithmicCompression(systemtesting.MantidSystemTest):
+    cal_file = "PG3_FERNS_d4832_2011_08_24.cal"
+    char_file = "PG3_characterization_2012_02_23-HR-ILL.txt"
+    data_file = "PG3_9829_event.nxs"
+
+    def cleanup(self):
+        return do_cleanup(self.cacheDir)
+
+    def requiredMemoryMB(self):
+        return 3 * 1024  # GiB
+
+    def requiredFiles(self):
+        return [self.cal_file, self.char_file, self.data_file]
+
+    def runTest(self):
+        self.cacheDir = getCacheDir()
+
+        PDLoadCharacterizations(
+            Filename=self.char_file, OutputWorkspace="characterizations", SpectrumIDs="1", L2="3.18", Polar="90", Azimuthal="0"
+        )
+
+        self.wksp_mem = os.path.basename(self.data_file).split(".")[0]
+        self.wksp_mem, self.wksp_file = self.wksp_mem + "_mem", self.wksp_mem + "_file"
+
+        # load then process
+        LoadEventNexus(Filename=self.data_file, OutputWorkspace=self.wksp_mem)
+        FilterBadPulses(InputWorkspace=self.wksp_mem, OutputWorkspace=self.wksp_mem, LowerCutoff=95)
+        LoadDiffCal(Filename=self.cal_file, InputWorkspace=self.wksp_mem, WorkspaceName="PG3")
+        PDDetermineCharacterizations(
+            InputWorkspace=self.wksp_mem, Characterizations="characterizations", ReductionProperties="__snspowderreduction_inner"
+        )
+        AlignAndFocusPowder(
+            InputWorkspace=self.wksp_mem,
+            OutputWorkspace=self.wksp_mem,
+            GroupingWorkspace="PG3_group",
+            CalibrationWorkspace="PG3_cal",
+            MaskWorkspace="PG3_mask",
+            Params=-0.0002,
+            CompressTolerance=-0.01,
+            PrimaryFlightPath=60,
+            SpectrumIDs="1",
+            L2="3.18",
+            Polar="90",
+            Azimuthal="0",
+            ReductionProperties="__snspowderreduction_inner",
+        )
+        NormaliseByCurrent(InputWorkspace=self.wksp_mem, OutputWorkspace=self.wksp_mem)
+        ConvertUnits(InputWorkspace=self.wksp_mem, OutputWorkspace=self.wksp_mem, Target="dSpacing")
+        SortEvents(self.wksp_mem)
+
+        # everything inside the algorithm
+        AlignAndFocusPowderFromFiles(
+            Filename=self.data_file,
+            OutputWorkspace=self.wksp_file,
+            GroupingWorkspace="PG3_group",
+            CalibrationWorkspace="PG3_cal",
+            MaskWorkspace="PG3_mask",
+            Params=-0.0002,
+            CompressTolerance=0.01,
+            CompressBinningMode="Logarithmic",
+            FilterBadPulses=95,
+            PrimaryFlightPath=60,
+            SpectrumIDs="1",
+            L2="3.18",
+            Polar="90",
+            Azimuthal="0",
+            ReductionProperties="__snspowderreduction_inner",
+        )
+        NormaliseByCurrent(InputWorkspace=self.wksp_file, OutputWorkspace=self.wksp_file)
+        ConvertUnits(InputWorkspace=self.wksp_file, OutputWorkspace=self.wksp_file, Target="dSpacing")
+        SortEvents(self.wksp_file)
+
+    def validateMethod(self):
+        self.tolerance = 1.0e-2
+        return "ValidateWorkspaceToWorkspace"
+
+    def validate(self):
+        return (self.wksp_mem, self.wksp_file)
+
+
 class ChunkingCompare(systemtesting.MantidSystemTest):
     # this test is very similar to SNAPRedux.Simple
 
@@ -129,6 +211,32 @@ class ChunkingCompare(systemtesting.MantidSystemTest):
 
     def validate(self):
         return ("with_chunks", "no_chunks")
+
+
+class CompressedCompare(systemtesting.MantidSystemTest):
+    # this test is very similar to SNAPRedux.Simple
+
+    def requiredMemoryMB(self):
+        return 24 * 1024  # GiB
+
+    def runTest(self):
+        GRP_WKSP = "SNAP_compress_params"
+
+        # 11MB file
+        kwargs = {"Filename": "SNAP_45874", "Params": (0.5, -0.004, 7), "GroupingWorkspace": GRP_WKSP}
+
+        # create grouping for two output spectra
+        CreateGroupingWorkspace(InstrumentFilename="SNAP_Definition.xml", GroupDetectorsBy="Group", OutputWorkspace=GRP_WKSP)
+
+        AlignAndFocusPowderFromFiles(
+            OutputWorkspace="compress1", MaxChunkSize=0.0, CompressTolerance=1e-2, MinSizeCompressOnLoad=1e-14, **kwargs
+        )
+
+    def validateMethod(self):
+        return None
+
+    def validate(self):
+        return None
 
 
 class UseCache(systemtesting.MantidSystemTest):
@@ -291,7 +399,9 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
         self.wksp_mem, self.wksp_file = self.wksp_mem + "_mem", self.wksp_mem + "_file"
 
         # load then process
-        LoadEventAndCompress(Filename=self.data_file, OutputWorkspace=self.wksp_mem, MaxChunkSize=16, FilterBadPulses=0)
+        LoadEventAndCompress(
+            Filename=self.data_file, OutputWorkspace=self.wksp_mem, MaxChunkSize=16, FilterBadPulses=0, CompressTOFTolerance=0
+        )
         LoadDiffCal(Filename=self.cal_file, InputWorkspace=self.wksp_mem, WorkspaceName="PG3")
         PDDetermineCharacterizations(
             InputWorkspace=self.wksp_mem, Characterizations="characterizations", ReductionProperties="__snspowderreduction_inner"

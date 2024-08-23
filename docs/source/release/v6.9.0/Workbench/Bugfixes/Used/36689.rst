@@ -1,1 +1,0 @@
-- Fixed crash when opening the :ref:`algm-Rebin` algorithm dialog when a group workspace is selected as the input workspace.

@@ -27,7 +27,7 @@ class SCalculatorFactory(object):
         abins_data: abins.AbinsData,
         instrument: Instrument,
         quantum_order_num: int,
-        autoconvolution: bool = False
+        autoconvolution_max: int = 0
     ):
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon)
@@ -36,7 +36,7 @@ class SCalculatorFactory(object):
         :param abins_data: object of type AbinsData with data from phonon file
         :param instrument: object of type Instrument for which simulation should be performed
         :param quantum_order_num: number of quantum order events taken into account during the simulation
-        :param autoconvolution: Convolve results with fundamentals to obtain approximate spectra up to this order
+        :param autoconvolution_max: Convolve results with fundamentals to obtain approximate spectra up to this order
         """
         if sample_form in ALL_SAMPLE_FORMS:
             if sample_form == "Powder":
@@ -47,11 +47,9 @@ class SCalculatorFactory(object):
                     abins_data=abins_data,
                     instrument=instrument,
                     quantum_order_num=quantum_order_num,
-                    autoconvolution=autoconvolution,
+                    autoconvolution_max=autoconvolution_max,
                 )
-                # TODO: implement numerical powder averaging
 
-            # elif sample == "SingleCrystal":  #TODO implement single crystal scenario
             else:
                 raise ValueError("Only implementation for sample in the form of powder is available.")
         else:

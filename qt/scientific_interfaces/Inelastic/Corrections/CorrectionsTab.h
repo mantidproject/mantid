@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IndirectTab.h"
-#include "Common/OutputPlotOptionsPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -61,7 +61,7 @@ private:
   double m_numberDensity;
 };
 
-class MANTIDQT_INELASTIC_DLL CorrectionsTab : public IndirectTab {
+class MANTIDQT_INELASTIC_DLL CorrectionsTab : public InelasticTab {
   Q_OBJECT
 
 public:
@@ -97,15 +97,7 @@ protected:
   /// QtCheckBoxFactory
   QtCheckBoxFactory *m_blnEdFac;
 
-protected slots:
-  /// Slot that can be called when a user eidts an input.
-  void inputChanged();
-
 private:
-  void setup() override = 0;
-  void run() override = 0;
-  bool validate() override = 0;
-
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
 

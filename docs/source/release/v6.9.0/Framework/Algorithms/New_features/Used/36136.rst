@@ -1,1 +1,0 @@
-- A new method was added the histogram Event data without sorting the events first, which the :ref:`Rebin <algm-Rebin>` algorithm now uses when ``PreserveEvents=False``, giving a performance improvement.

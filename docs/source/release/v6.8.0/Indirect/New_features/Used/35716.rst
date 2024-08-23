@@ -1,1 +1,0 @@
-- When loading resolution data containing `NAN` values into :ref:`Data Analysis <interface-inelastic-data-analysis>` they will be replaced with zeros and a warning displayed to the user.

@@ -5,73 +5,21 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
+#include "MantidQtWidgets/Common/TableWidgetValidators.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-
-#include <boost/optional.hpp>
 #include <utility>
-
-namespace {
-using namespace Mantid::API;
-
-MatrixWorkspace_sptr getWorkspace(const std::string &name) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(name);
-}
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-bool validWorkspace(std::string const &name) { return !name.empty() && doesExistInADS(name); }
-
-boost::optional<std::size_t> maximumIndex(const MatrixWorkspace_sptr &workspace) {
-  if (workspace) {
-    const auto numberOfHistograms = workspace->getNumberHistograms();
-    if (numberOfHistograms > 0)
-      return numberOfHistograms - 1;
-  }
-  return boost::none;
-}
-
-QString getIndexString(const MatrixWorkspace_sptr &workspace) {
-  const auto maximum = maximumIndex(workspace);
-  if (maximum) {
-    if (*maximum > 0)
-      return QString("0-%1").arg(*maximum);
-    return "0";
-  }
-  return "";
-}
-
-QString getIndexString(const std::string &workspaceName) { return getIndexString(getWorkspace(workspaceName)); }
-
-std::unique_ptr<QRegExpValidator> createValidator(const QString &regex, QObject *parent) {
-  return std::make_unique<QRegExpValidator>(QRegExp(regex), parent);
-}
-
-QString OR(const QString &lhs, const QString &rhs) { return "(" + lhs + "|" + rhs + ")"; }
-
-QString NATURAL_NUMBER(std::size_t digits) { return OR("0", "[1-9][0-9]{," + QString::number(digits - 1) + "}"); }
-
-const QString EMPTY = "^$";
-const QString SPACE = "(\\s)*";
-const QString COMMA = SPACE + "," + SPACE;
-const QString MINUS = "\\-";
-
-const QString NUMBER = NATURAL_NUMBER(4);
-const QString NATURAL_RANGE = "(" + NUMBER + MINUS + NUMBER + ")";
-const QString NATURAL_OR_RANGE = OR(NATURAL_RANGE, NUMBER);
-const QString SPECTRA_LIST = "(" + NATURAL_OR_RANGE + "(" + COMMA + NATURAL_OR_RANGE + ")*)";
-} // namespace
 
 namespace MantidQt::MantidWidgets {
 
 AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
-  m_uiForm.leWorkspaceIndices->setValidator(createValidator(SPECTRA_LIST, this).release());
+  const auto validatorString = QString::fromStdString(getRegexValidatorString(RegexValidatorStrings::SpectraValidator));
+  m_uiForm.leWorkspaceIndices->setValidator(new QRegExpValidator(QRegExp(validatorString), this));
   setAllSpectraSelectionEnabled(false);
-
+  connect(m_uiForm.dsWorkspace, SIGNAL(filesAutoLoaded()), this, SLOT(handleAutoLoaded()));
   connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(workspaceChanged(const QString &)));
   connect(m_uiForm.ckAllSpectra, SIGNAL(stateChanged(int)), this, SLOT(selectAllSpectra(int)));
   connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SLOT(emitAddData()));
@@ -97,8 +45,8 @@ void AddWorkspaceDialog::updateSelectedSpectra() {
 
 void AddWorkspaceDialog::selectAllSpectra(int state) {
   auto const name = workspaceName();
-  if (validWorkspace(name) && state == Qt::Checked) {
-    m_uiForm.leWorkspaceIndices->setText(getIndexString(name));
+  if (WorkspaceUtils::doesExistInADS(name) && state == Qt::Checked) {
+    m_uiForm.leWorkspaceIndices->setText(QString::fromStdString(WorkspaceUtils::getIndexString(name)));
     m_uiForm.leWorkspaceIndices->setEnabled(false);
   } else
     m_uiForm.leWorkspaceIndices->setEnabled(true);
@@ -106,7 +54,10 @@ void AddWorkspaceDialog::selectAllSpectra(int state) {
 
 void AddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
   const auto name = workspaceName.toStdString();
-  const auto workspace = getWorkspace(name);
+  const auto workspace = WorkspaceUtils::getADSWorkspace(name);
+  m_uiForm.pbAdd->setText("Add");
+  m_uiForm.pbAdd->setEnabled(true);
+
   if (workspace)
     setWorkspace(name);
   else
@@ -115,10 +66,15 @@ void AddWorkspaceDialog::workspaceChanged(const QString &workspaceName) {
 
 void AddWorkspaceDialog::emitAddData() { emit addData(this); }
 
+void AddWorkspaceDialog::handleAutoLoaded() {
+  m_uiForm.pbAdd->setText("Loading");
+  m_uiForm.pbAdd->setEnabled(false);
+}
+
 void AddWorkspaceDialog::setWorkspace(const std::string &workspace) {
   setAllSpectraSelectionEnabled(true);
   if (m_uiForm.ckAllSpectra->isChecked()) {
-    m_uiForm.leWorkspaceIndices->setText(getIndexString(workspace));
+    m_uiForm.leWorkspaceIndices->setText(QString::fromStdString(WorkspaceUtils::getIndexString(workspace)));
     m_uiForm.leWorkspaceIndices->setEnabled(false);
   }
 }

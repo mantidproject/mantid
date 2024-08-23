@@ -127,7 +127,7 @@ public:
   /// error
   void setFileProblem(const QString &message);
   /// Get file problem, empty string means no error.
-  QString getFileProblem();
+  QString getFileProblem() const;
   /// Read settings from the given group
   void readSettings(const QString &group);
   /// Save settings in the given group

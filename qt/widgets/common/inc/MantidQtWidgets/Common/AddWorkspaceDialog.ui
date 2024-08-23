@@ -25,7 +25,7 @@
         <item row="0" column="1">
          <widget class="MantidQt::MantidWidgets::DataSelector" name="dsWorkspace" native="true">
           <property name="ShowGroups" stdset="0">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="showLoad" stdset="0">
            <bool>false</bool>

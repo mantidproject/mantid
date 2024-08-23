@@ -74,7 +74,6 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
 
         * In Log scale bins with 0 counts should appear white
         * When you zoom in to a region comprising only of bins with 0 counts it will set the color axis limits to (0.1,1) and force the scale to be linear
-        * Zoom in to a region outside the extent of the data, check the Log colorscale option is disabled.
 
     c. Change colormap
     d. Reverse colormap
@@ -86,7 +85,7 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
 
     a. Confirm it tracks with the cursor when Track Cursor is checked
     b. Uncheck the track cursor and confirm it updates when the cursor is clicked.
-    c. Transpose the axes (as in step 6) and confirm the cursor position displayed is still correct.
+    c. Transpose the axes (as in step 6) and confirm the cursor position displayed is still correct (note if Track Cursor is checked you will need to click on the colorfill plot again).
 
 8. Resize the sliceviewer window, check the widgets, buttons etc. are still visible and clear for reasonable aspect ratios.
 
@@ -139,7 +138,7 @@ MDWorkspace (with events)
 
     a. Confirm the slider moves when the spinbox value is updated.
     b. Confirm moving the slider updates the spinbox.
-    c. Check the slicepoint is updated in the cursor info table.
+    c. Check the slicepoint is updated in the cursor info table (note if Track Cursor is checked you will need to click on the colorfill plot again).
 
 Test the :ref:`Nonorthogonal view<mantid:sliceviewer_nonortho>`
 

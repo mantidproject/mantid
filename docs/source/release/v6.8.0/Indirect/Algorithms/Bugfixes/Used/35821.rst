@@ -1,3 +1,0 @@
-- The Abins GAUSSIAN parser now reads "Standard Orientation"
-  positions. This does not affect results but prevents errors when
-  "Input Orientation" data is missing from the .log file.

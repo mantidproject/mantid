@@ -63,15 +63,19 @@ SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser, QObject
   connect(fitBrowser, SIGNAL(functionChanged()), this, SLOT(functionChanged()));
 
   // When a fit is completed finishHandle is called which emits needShowPlot
-  connect(this, SIGNAL(needShowPlot(Ui::SequentialFitDialog *, MantidQt::MantidWidgets::FitPropertyBrowser *)),
-          mantidui, SLOT(showSequentialPlot(Ui::SequentialFitDialog *, MantidQt::MantidWidgets::FitPropertyBrowser *)));
+  if (mantidui != nullptr) {
+    connect(this, SIGNAL(needShowPlot(Ui::SequentialFitDialog *, MantidQt::MantidWidgets::FitPropertyBrowser *)),
+            mantidui,
+            SLOT(showSequentialPlot(Ui::SequentialFitDialog *, MantidQt::MantidWidgets::FitPropertyBrowser *)));
+  }
   connect(ui.tWorkspaces, SIGNAL(cellChanged(int, int)), this, SLOT(spectraChanged(int, int)));
   connect(ui.tWorkspaces, SIGNAL(itemSelectionChanged()), this, SLOT(selectionChanged()));
   selectionChanged();
 } // namespace MantidWidgets
 
 void SequentialFitDialog::addWorkspace() {
-  SelectWorkspacesDialog *dlg = new SelectWorkspacesDialog(this, "MatrixWorkspace");
+  SelectWorkspacesDialog *dlg =
+      new SelectWorkspacesDialog(this, "MatrixWorkspace", "", QAbstractItemView::ExtendedSelection);
   if (dlg->exec() == QDialog::Accepted) {
     addWorkspaces(dlg->getSelectedNames());
   }

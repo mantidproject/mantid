@@ -130,8 +130,8 @@ This can be performed directly with :ref:`algm-FilterByTime` or indirectly with 
 	axes[2][0].set_xlim(temp_x_limit)
 	axes[2][0].set_ylim(temp_y_limit)
 
-	plt.tight_layout()
-	plt.show()
+	fig.tight_layout()
+	fig.show()
 
 
 Interface

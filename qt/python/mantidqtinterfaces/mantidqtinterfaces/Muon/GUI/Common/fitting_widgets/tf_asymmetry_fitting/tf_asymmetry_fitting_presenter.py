@@ -35,9 +35,9 @@ class TFAsymmetryFittingPresenter(GeneralFittingPresenter):
         self._switch_to_normal_fitting()
         super().handle_instrument_changed()
 
-    def handle_ads_clear_or_remove_workspace_event(self, _: str = None) -> None:
+    def handle_ads_clear_or_remove_workspace_event(self, name: str) -> None:
         """Handle when there is a clear or remove workspace event in the ADS."""
-        super().handle_ads_clear_or_remove_workspace_event()
+        super().handle_ads_clear_or_remove_workspace_event(name)
 
         if self.model.number_of_datasets == 0:
             self._switch_to_normal_fitting()

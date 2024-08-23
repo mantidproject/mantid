@@ -1,1 +1,0 @@
-- Fixed bug where overplotting group workspaces would cause an unhandled exception.

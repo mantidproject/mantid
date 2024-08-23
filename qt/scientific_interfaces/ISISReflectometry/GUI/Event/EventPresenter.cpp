@@ -9,6 +9,7 @@
 #include "GUI/Batch/IBatchPresenter.h"
 #include "IEventPresenter.h"
 #include "IEventView.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/algorithm/string.hpp>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
@@ -88,6 +89,8 @@ void EventPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
 
 void EventPresenter::notifyAutoreductionResumed() { updateWidgetEnabledState(); }
 
+GNU_DIAG_OFF("maybe-uninitialized")
+
 void EventPresenter::setUniformSlicingByTimeFromView() {
   m_slicing = UniformSlicingByTime(m_view->uniformSliceLength());
 }
@@ -144,6 +147,8 @@ void EventPresenter::setSlicingFromView() {
     throw std::runtime_error("Unrecognized slice type.");
   }
 }
+
+GNU_DIAG_ON("maybe-uninitialized")
 
 bool EventPresenter::isProcessing() const { return m_mainPresenter->isProcessing(); }
 

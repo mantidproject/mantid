@@ -10,6 +10,7 @@
 #include "ui_DetectorGroupingOptions.h"
 
 #include <memory>
+#include <optional>
 #include <string>
 
 #include <QObject>
@@ -27,13 +28,13 @@ class DetectorGroupingOptions : public QWidget {
 public:
   DetectorGroupingOptions(QWidget *parent);
 
-  void setGroupingMethod(QString const &option);
+  void removeGroupingMethod(std::string const &option);
+  void setGroupingMethod(std::string const &option);
 
-  std::string groupingMethod() const;
-  std::string mapFile() const;
-  std::string customGrouping() const;
-  int nGroups() const;
+  void setSaveCustomVisible(bool const visible);
 
+  std::optional<std::string> validateGroupingProperties(std::size_t const &spectraMin,
+                                                        std::size_t const &spectraMax) const;
   std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> groupingProperties() const;
 
 signals:
@@ -44,7 +45,12 @@ private slots:
   void emitSaveCustomGrouping();
 
 private:
-  int optionIndex(QString const &option) const;
+  std::string groupingMethod() const;
+  std::string groupingFile() const;
+  std::string customGrouping() const;
+  int nGroups() const;
+
+  int optionIndex(std::string const &option) const;
 
   Ui::DetectorGroupingWidget m_uiForm;
 };

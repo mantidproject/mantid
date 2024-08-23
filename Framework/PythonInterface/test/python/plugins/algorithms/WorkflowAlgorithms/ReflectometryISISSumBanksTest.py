@@ -10,7 +10,7 @@ from unittest.mock import MagicMock
 
 import numpy
 
-from mantid.api import MatrixWorkspace, WorkspaceGroup
+from mantid.api import MatrixWorkspace
 from mantid.simpleapi import CreateSampleWorkspace, CreateWorkspace
 from plugins.algorithms.WorkflowAlgorithms.ReflectometryISISSumBanks import ReflectometryISISSumBanks
 from testhelpers import WorkspaceCreationHelper
@@ -124,7 +124,7 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
     def test_sum_banks(self):
         num_banks = 3
         test_ws = CreateSampleWorkspace(StoreInADS=False, NumBanks=1, BankPixelWidth=num_banks)
-        summed_ws = ReflectometryISISSumBanks().sum_banks(test_ws)
+        summed_ws = ReflectometryISISSumBanks().sum_banks(test_ws, num_banks)
 
         self.assertIsInstance(summed_ws, MatrixWorkspace)
         self.assertNotEqual(test_ws, summed_ws)
@@ -138,7 +138,7 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         num_banks_included = 2
         roi_detector_ids = "9-14"
         masked_ws = ReflectometryISISSumBanks().mask_detectors(test_ws, roi_detector_ids)
-        summed_ws = ReflectometryISISSumBanks().sum_banks(masked_ws)
+        summed_ws = ReflectometryISISSumBanks().sum_banks(masked_ws, num_banks)
 
         self.assertIsInstance(summed_ws, MatrixWorkspace)
         self.assertNotEqual(test_ws, summed_ws)
@@ -149,7 +149,7 @@ class ReflectometryISISSumBanksTest(unittest.TestCase):
         num_monitors = 2
         test_ws = CreateSampleWorkspace(StoreInADS=False, NumBanks=1, BankPixelWidth=num_banks, NumMonitors=num_monitors)
 
-        summed_ws = ReflectometryISISSumBanks().sum_banks(test_ws)
+        summed_ws = ReflectometryISISSumBanks().sum_banks(test_ws, num_banks)
         prepended_ws = ReflectometryISISSumBanks()._prepend_monitors(test_ws, summed_ws)
 
         self.assertEqual(num_banks + num_monitors, prepended_ws.getNumberHistograms())

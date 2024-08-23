@@ -1,2 +1,0 @@
-- When closing the MSlice interface in Mantid the Jupyter QtConsole is now cleaned up
-- Upgrade from matplotlib 3.6 to 3.7

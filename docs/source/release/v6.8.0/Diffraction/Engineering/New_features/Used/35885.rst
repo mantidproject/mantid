@@ -1,1 +1,0 @@
-- Added new SNAPRed menu item for Diffraction interfaces

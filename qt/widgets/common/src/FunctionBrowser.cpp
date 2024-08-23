@@ -133,10 +133,10 @@ bool FunctionBrowser::hasFunction() const { return m_presenter->hasFunction(); }
 int FunctionBrowser::getNumberOfDatasets() const { return m_presenter->getNumberOfDatasets(); }
 
 /// Get the names of datasets
-QStringList FunctionBrowser::getDatasetNames() const { return m_presenter->getDatasetNames(); }
+std::vector<std::string> FunctionBrowser::getDatasetNames() const { return m_presenter->getDatasetNames(); }
 
 /// Get the names of the dataset domains
-QStringList FunctionBrowser::getDatasetDomainNames() const { return m_presenter->getDatasetDomainNames(); }
+std::vector<std::string> FunctionBrowser::getDatasetDomainNames() const { return m_presenter->getDatasetDomainNames(); }
 
 /// Set new number of the datasets
 /// @param n :: New value for the number of datasets.
@@ -145,7 +145,9 @@ void FunctionBrowser::setNumberOfDatasets(int n) { m_presenter->setNumberOfDatas
 /// Sets the datasets being fitted. They will be displayed by the
 /// local parameter editing dialog.
 /// @param datasetNames :: Names of the datasets
-void FunctionBrowser::setDatasets(const QStringList &datasetNames) { m_presenter->setDatasets(datasetNames); }
+void FunctionBrowser::setDatasets(const std::vector<std::string> &datasetNames) {
+  m_presenter->setDatasets(datasetNames);
+}
 
 /// Sets the datasets being fitted. They will be displayed by the
 /// local parameter editing dialog.
@@ -185,7 +187,7 @@ void FunctionBrowser::removeDatasets(const QList<int> &indices) { m_presenter->r
 
 /// Add some datasets to those already set.
 /// @param names :: A list of names for the new datasets.
-void FunctionBrowser::addDatasets(const QStringList &names) { m_presenter->addDatasets(names); }
+void FunctionBrowser::addDatasets(const std::vector<std::string> &names) { m_presenter->addDatasets(names); }
 
 /// Return the multidomain function for multi-dataset fitting
 IFunction_sptr FunctionBrowser::getGlobalFunction() { return m_presenter->getFitFunction(); }

@@ -26,7 +26,7 @@ using namespace Mantid::API;
  * @param saver :: The model to use to save the files
  * @param view :: The view we are handling
  */
-SavePresenter::SavePresenter(ISaveView *view, std::unique_ptr<IAsciiSaver> saver)
+SavePresenter::SavePresenter(ISaveView *view, std::unique_ptr<IFileSaver> saver)
     : m_mainPresenter(nullptr), m_view(view), m_saver(std::move(saver)), m_shouldAutosave(false),
       m_shouldSaveIndividualRows(false) {
 
@@ -63,6 +63,17 @@ bool SavePresenter::isProcessing() const { return m_mainPresenter->isProcessing(
 
 bool SavePresenter::isAutoreducing() const { return m_mainPresenter->isAutoreducing(); }
 
+namespace {
+bool isORSOFormat(const NamedFormat &fileFormat) {
+  return fileFormat == NamedFormat::ORSOAscii || fileFormat == NamedFormat::ORSONexus;
+}
+} // unnamed namespace
+
+bool SavePresenter::hasSelectedORSOFormat() const {
+  const auto selectedFormat = SavePresenter::formatFromIndex(SavePresenter::m_view->getFileFormatIndex());
+  return isORSOFormat(selectedFormat);
+}
+
 /** Tells the view to enable/disable certain widgets based on the
  * selected file format
  */
@@ -77,10 +88,22 @@ void SavePresenter::updateWidgetStateBasedOnFileFormat() const {
     m_view->disableLogList();
 
   // Enable/disable the Q resolution checkbox for formats that can optionally include resolution
-  if (fileFormat == NamedFormat::Custom || fileFormat == NamedFormat::ORSOAscii)
+  if (fileFormat == NamedFormat::Custom || isORSOFormat(fileFormat))
     m_view->enableQResolutionCheckBox();
   else
     m_view->disableQResolutionCheckBox();
+
+  // Enable/disable the additional columns checkbox for formats that can optionally include these
+  if (isORSOFormat(fileFormat))
+    m_view->enableAdditionalColumnsCheckBox();
+  else
+    m_view->disableAdditionalColumnsCheckBox();
+
+  // Enable/disable the save to single file checkbox for formats that support this
+  if (shouldAutosave() && isORSOFormat(fileFormat))
+    m_view->enableSaveToSingleFileCheckBox();
+  else
+    m_view->disableSaveToSingleFileCheckBox();
 
   // Everything else is enabled for Custom and disabled otherwise
   if (fileFormat == NamedFormat::Custom) {
@@ -130,6 +153,9 @@ void SavePresenter::enableAutosave() {
   if (isValidSaveDirectory(m_view->getSavePath())) {
     m_shouldAutosave = true;
     m_view->enableSaveIndividualRowsCheckbox();
+    if (hasSelectedORSOFormat()) {
+      m_view->enableSaveToSingleFileCheckBox();
+    }
   } else {
     m_shouldAutosave = false;
     m_view->disallowAutosave();
@@ -140,6 +166,7 @@ void SavePresenter::enableAutosave() {
 void SavePresenter::disableAutosave() {
   m_shouldAutosave = false;
   m_view->disableSaveIndividualRowsCheckbox();
+  m_view->disableSaveToSingleFileCheckBox();
 }
 
 void SavePresenter::notifySaveIndividualRowsEnabled() { m_shouldSaveIndividualRows = true; }
@@ -200,13 +227,19 @@ void SavePresenter::filterWorkspaceNames() {
 void SavePresenter::populateParametersList() {
   m_view->clearParametersList();
 
-  std::string wsName = m_view->getCurrentWorkspaceName();
-  std::vector<std::string> logs;
-  const auto &properties = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName)->run().getProperties();
-  for (auto it = properties.begin(); it != properties.end(); it++) {
-    logs.emplace_back((*it)->name());
+  const std::string wsName = m_view->getCurrentWorkspaceName();
+  if (!AnalysisDataService::Instance().doesExist(wsName)) {
+    return;
   }
-  m_view->setParametersList(logs);
+
+  if (const auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName)) {
+    std::vector<std::string> logs;
+    const auto &properties = ws->run().getProperties();
+    for (auto it = properties.begin(); it != properties.end(); it++) {
+      logs.emplace_back((*it)->name());
+    }
+    m_view->setParametersList(logs);
+  }
 }
 
 bool SavePresenter::isValidSaveDirectory(std::string const &directory) {
@@ -229,33 +262,37 @@ NamedFormat SavePresenter::formatFromIndex(int formatIndex) const {
     return NamedFormat::ILLCosmos;
   case 4:
     return NamedFormat::ORSOAscii;
+  case 5:
+    return NamedFormat::ORSONexus;
   default:
     throw std::runtime_error("Unknown save format.");
   }
 }
 
-FileFormatOptions SavePresenter::getSaveParametersFromView() const {
+FileFormatOptions SavePresenter::getSaveParametersFromView(bool const isAutoSave) const {
   return FileFormatOptions(
       /*format=*/formatFromIndex(m_view->getFileFormatIndex()),
       /*prefix=*/m_view->getPrefix(),
       /*includeHeader=*/m_view->getHeaderCheck(),
       /*separator=*/m_view->getSeparator(),
-      /*includeQResolution=*/m_view->getQResolutionCheck());
+      /*includeQResolution=*/m_view->getQResolutionCheck(),
+      /*includeAdditionalColumns=*/m_view->getAdditionalColumnsCheck(),
+      /*shouldSaveToSingleFile=*/isAutoSave && m_view->getSaveToSingleFileCheck());
 }
 
 void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames,
-                                   std::vector<std::string> const &logParameters) {
+                                   std::vector<std::string> const &logParameters, bool const isAutoSave) {
   auto savePath = m_view->getSavePath();
   if (m_saver->isValidSaveDirectory(savePath))
-    m_saver->save(savePath, workspaceNames, logParameters, getSaveParametersFromView());
+    m_saver->save(savePath, workspaceNames, logParameters, getSaveParametersFromView(isAutoSave));
   else
     errorInvalidSaveDirectory();
 }
 
 /** Saves workspaces with the names specified. */
-void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames) {
+void SavePresenter::saveWorkspaces(std::vector<std::string> const &workspaceNames, bool const isAutoSave) {
   auto selectedLogParameters = m_view->getSelectedParameters();
-  saveWorkspaces(workspaceNames, selectedLogParameters);
+  saveWorkspaces(workspaceNames, selectedLogParameters, isAutoSave);
 }
 
 /** Saves selected workspaces */

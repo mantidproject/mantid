@@ -8,6 +8,7 @@
 
 #include "CorrectionsTab.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_CalculatePaalmanPings.h"
 
 #include "MantidGeometry/Instrument_fwd.h"
@@ -18,20 +19,21 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL CalculatePaalmanPings : public CorrectionsTab {
+class MANTIDQT_INELASTIC_DLL CalculatePaalmanPings : public CorrectionsTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
   CalculatePaalmanPings(QWidget *parent = nullptr);
+
+  void handleRun() override;
+  void handleValidation(IUserInputValidator *validator) const override;
 
 private slots:
   void absCorComplete(bool error);
   void postProcessComplete(bool error);
   void getBeamWidthFromWorkspace(const QString &wsName);
   void fillCorrectionDetails(const QString &wsName);
-  void validateChemical();
   void saveClicked();
-  void runClicked();
   void setSampleDensityOptions(QString const &method);
   void setCanDensityOptions(QString const &method);
   void setSampleDensityUnit(QString const &text);
@@ -44,13 +46,8 @@ private slots:
   void setCanDensity(double value);
 
 private:
-  void setup() override;
-  void run() override;
-  bool validate() override;
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
-
-  bool doValidation(bool silent = false);
 
   void addShapeSpecificSampleOptions(const Mantid::API::IAlgorithm_sptr &alg, const QString &shape);
   void addShapeSpecificCanOptions(const Mantid::API::IAlgorithm_sptr &alg, const QString &shape);
@@ -64,10 +61,7 @@ private:
   double getSampleDensityValue(QString const &type) const;
   double getCanDensityValue(QString const &type) const;
 
-  void setRunEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
-  void setButtonsEnabled(bool enabled);
-  void setRunIsRunning(bool running);
 
   boost::optional<double> getInstrumentParameter(const Mantid::Geometry::Instrument_const_sptr &instrument,
                                                  const std::string &parameterName);

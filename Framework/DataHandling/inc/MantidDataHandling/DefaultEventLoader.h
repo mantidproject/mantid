@@ -65,6 +65,10 @@ public:
   /// in the event list.
   std::vector<std::vector<std::vector<Mantid::DataObjects::WeightedEvent> *>> weightedEventVectors;
 
+  /// Vector where index = event_id; value = ptr to std::vector<WeightedEventNoTime> in the
+  /// event list.
+  std::vector<std::vector<std::vector<Mantid::DataObjects::WeightedEventNoTime> *>> weightedNoTimeEventVectors;
+
   /// Vector where (index = pixel ID+pixelID_to_wi_offset), value = workspace
   /// index)
   std::vector<size_t> pixelID_to_wi_vector;
@@ -88,7 +92,7 @@ template <class T> void DefaultEventLoader::makeMapToEventLists(std::vector<std:
   vectors.resize(m_ws.nPeriods());
   if (event_id_is_spec) {
     // Find max spectrum no
-    auto *ax1 = m_ws.getAxis(1);
+    const auto *ax1 = m_ws.getAxis(1);
     specnum_t maxSpecNo = -std::numeric_limits<specnum_t>::max(); // So that any number will be
                                                                   // greater than this
     for (size_t i = 0; i < ax1->length(); i++) {

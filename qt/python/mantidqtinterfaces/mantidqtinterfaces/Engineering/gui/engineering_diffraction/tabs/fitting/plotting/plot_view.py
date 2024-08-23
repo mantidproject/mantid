@@ -14,7 +14,7 @@ from mantidqt.MPLwidgets import FigureCanvas
 from .EngDiff_fitpropertybrowser import EngDiffFitPropertyBrowser
 from workbench.plotting.toolbar import ToolbarStateManager
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_toolbar import FittingPlotToolbar
-from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing
+from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver
 
 Ui_plot, _ = load_ui(__file__, "plot_widget.ui")
 
@@ -87,6 +87,7 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.hide_fit_browser()
         self.hide_fit_progress_bar()
         self.show_cancel_button(False)
+        self.set_find_peaks_convolve_button_status(False)
 
     def mouse_click(self, event):
         if event.button == event.canvas.buttond.get(Qt.RightButton):
@@ -142,6 +143,13 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
     def set_slot_for_legend_toggled(self):
         self.toolbar.sig_toggle_legend.connect(self.toggle_legend)
 
+    def set_slot_for_find_peaks_convolve(self, presenter_func):
+        self.toolbar.sig_find_peaks_convolve.connect(presenter_func)
+
+    def set_subscriber_for_function_changed(self, presenter_func):
+        func_changed_observer = GenericObserver(presenter_func)
+        self.fit_browser.function_changed_notifier.add_subscriber(func_changed_observer)
+
     def toggle_legend(self):
         self.update_legend(self.get_axes()[0])
         self.figure.canvas.draw()
@@ -158,6 +166,12 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
 
     def hide_fit_progress_bar(self):
         self.fit_progress_bar.hide()
+
+    def set_find_peaks_convolve_button_status(self, status):
+        if self.fit_browser.isVisible() is False:
+            self.toolbar.set_action_enabled("FindPeaksConvolve", False)
+        else:
+            self.toolbar.set_action_enabled("FindPeaksConvolve", status)
 
     def show_fit_progress_bar(self):
         self.fit_progress_bar.show()

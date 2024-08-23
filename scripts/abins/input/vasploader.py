@@ -6,21 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from itertools import chain
-import logging
 import os
 import re
-from typing import Any, Dict, Iterator, List, Optional, Union
+from typing import Any, Dict, Iterator, List, Optional
 from xml.etree import ElementTree
 
-import mantid.kernel
 
 import numpy as np
 
 from abins import AbinsData
-from abins.input import AbInitioLoader, TextParser
 from abins.constants import COMPLEX_TYPE, FLOAT_TYPE, HZ2INV_CM, VASP_FREQ_TO_THZ
-
-Logger = Union[logging.Logger, mantid.kernel.Logger]
+from abins.input import AbInitioLoader, TextParser
+from abins.logging import get_logger, Logger
 
 
 class VASPLoader(AbInitioLoader):
@@ -33,15 +30,11 @@ class VASPLoader(AbInitioLoader):
 
     """
 
-    def __init__(self, input_ab_initio_filename: str = None) -> None:
-        """
+    @property
+    def _ab_initio_program(self) -> str:
+        return "VASP"
 
-        :param input_ab_initio_filename: name of file with phonon data (foo.phonon)
-        """
-        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
-        self._ab_initio_program = "VASP"
-
-    def read_vibrational_or_phonon_data(self, logger: Logger = None) -> AbinsData:
+    def read_vibrational_or_phonon_data(self, logger: Optional[Logger] = None) -> AbinsData:
         input_filename = self._clerk.get_input_filename()
 
         if not os.path.isfile(input_filename):
@@ -53,11 +46,7 @@ class VASPLoader(AbInitioLoader):
             self._num_k = 1
 
         elif "OUTCAR" in input_filename:
-            if logger is None:
-                import mantid.kernel
-
-                mantid_logger: mantid.kernel.Logger = mantid.kernel.logger
-                logger = mantid_logger
+            logger = get_logger(logger=logger)
             logger.warning(
                 "Reading OUTCAR file. This feature is included for development purposes "
                 "and may be removed in future versions. Please use the vasprun.xml file where possible."

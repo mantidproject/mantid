@@ -31,7 +31,9 @@ public:
   MOCK_CONST_METHOD0(getFileFormatIndex, int());
   MOCK_CONST_METHOD0(getHeaderCheck, bool());
   MOCK_CONST_METHOD0(getQResolutionCheck, bool());
+  MOCK_CONST_METHOD0(getAdditionalColumnsCheck, bool());
   MOCK_CONST_METHOD0(getSeparator, std::string());
+  MOCK_CONST_METHOD0(getSaveToSingleFileCheck, bool());
 
   MOCK_CONST_METHOD0(clearWorkspaceList, void());
   MOCK_CONST_METHOD0(clearParametersList, void());
@@ -53,8 +55,12 @@ public:
   MOCK_METHOD0(disableHeaderCheckBox, void());
   MOCK_METHOD0(enableQResolutionCheckBox, void());
   MOCK_METHOD0(disableQResolutionCheckBox, void());
+  MOCK_METHOD0(enableAdditionalColumnsCheckBox, void());
+  MOCK_METHOD0(disableAdditionalColumnsCheckBox, void());
   MOCK_METHOD0(enableSeparatorButtonGroup, void());
   MOCK_METHOD0(disableSeparatorButtonGroup, void());
+  MOCK_METHOD0(enableSaveToSingleFileCheckBox, void());
+  MOCK_METHOD0(disableSaveToSingleFileCheckBox, void());
   MOCK_METHOD0(enableSaveIndividualRowsCheckbox, void());
   MOCK_METHOD0(disableSaveIndividualRowsCheckbox, void());
 

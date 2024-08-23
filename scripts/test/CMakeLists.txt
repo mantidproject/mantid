@@ -9,6 +9,7 @@ set(TEST_PY_FILES
     DirectReductionHelpersTest.py
     DoublePulseFitTest.py
     IndirectCommonTests.py
+    IndirectReductionCommonTest.py
     InelasticDirectDetpackmapTest.py
     ISISDirecInelasticConfigTest.py
     ReductionSettingsTest.py

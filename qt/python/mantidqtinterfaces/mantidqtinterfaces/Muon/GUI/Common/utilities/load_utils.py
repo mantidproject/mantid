@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
+from mantid import logger
 import mantid.simpleapi as mantid
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceGroup
 from mantid.simpleapi import CloneWorkspace, DeleteWorkspace, mtd, Plus, UnGroupWorkspace
@@ -172,7 +173,11 @@ def load_dead_time_from_filename(filename):
     :param filename: The full path to the .nxs file.
     :return: The name of the workspace in the ADS.
     """
-    loaded_data, run, _, _ = load_workspace_from_filename(filename)
+    try:
+        loaded_data, _, _, _ = load_workspace_from_filename(filename)
+    except RuntimeError as ex:
+        logger.warning(str(ex))
+        return ""
 
     if is_workspace_group(loaded_data["OutputWorkspace"]):
         dead_times = loaded_data["DataDeadTimeTable"][0]
@@ -213,9 +218,12 @@ def load_workspace_from_filename(filename, input_properties=DEFAULT_INPUTS, outp
         alg, psi_data = create_load_algorithm(filename.split(os.sep)[-1], input_properties)
         alg.execute()
 
-    filename = get_correct_file_path(filename, alg)
+    loaded_ws_name = alg.getProperty("OutputWorkspace").valueAsStr
+    if not AnalysisDataService.doesExist(loaded_ws_name):
+        raise RuntimeError("See the logs for why this file failed to load.")
 
-    workspace = AnalysisDataService.retrieve(alg.getProperty("OutputWorkspace").valueAsStr)
+    filename = get_correct_file_path(filename, alg)
+    workspace = AnalysisDataService.retrieve(loaded_ws_name)
     if is_workspace_group(workspace):
         # handle multi-period data
         load_result = _get_algorithm_properties(alg, output_properties)
@@ -329,7 +337,7 @@ def flatten_run_list(run_list):
 
 
 def exception_message_for_failed_files(failed_file_list):
-    message = "Could not load the following files : \n "
+    message = "Could not load the following files:\n"
     for failure in failed_file_list:
-        message += "{} ; {}".format(os.path.split(failure[0])[-1], failure[1])
+        message += f"- {os.path.split(failure[0])[-1]} : {failure[1]}".replace("\n", "")
     return message

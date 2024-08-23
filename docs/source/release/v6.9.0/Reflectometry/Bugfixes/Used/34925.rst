@@ -1,2 +1,0 @@
-- Workbench will no longer crash if invalid inputs are given in the options column of the Runs Table in the
-  :ref:`ISIS Reflectometry Interface <interface-isis-refl>`.

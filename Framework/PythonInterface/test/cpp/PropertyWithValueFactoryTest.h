@@ -46,9 +46,7 @@ public:
     checkPropertyValue<CType>(std::move(valueProp), pyvalue);                                                          \
   }
 
-  void test_builtin_type_creates_int_type_property_without_error() {
-    testCreateSingleValueProperty<long>(FROM_INT(10));
-  }
+  void test_builtin_type_creates_int_type_property_without_error() { testCreateSingleValueProperty<int>(FROM_INT(10)); }
 
   void test_builtin_type_creates_double_type_property_without_error() {
     testCreateSingleValueProperty<double>(PyFloat_FromDouble(50.123));
@@ -67,11 +65,11 @@ public:
   }
 
   void test_builtin_type_create_long_array_from_list_type_property() {
-    testCreateArrayProperty<long>(Py_BuildValue("[NN]", PyLong_FromLong(-10), PyLong_FromLong(4)));
+    testCreateArrayProperty<int>(Py_BuildValue("[NN]", PyLong_FromLong(-10), PyLong_FromLong(4)));
   }
 
   void test_builtin_type_create_int_array_from_list_type_property() {
-    testCreateArrayProperty<long>(Py_BuildValue("[ii]", -10, 4));
+    testCreateArrayProperty<int>(Py_BuildValue("[ii]", -10, 4));
   }
 
 private:

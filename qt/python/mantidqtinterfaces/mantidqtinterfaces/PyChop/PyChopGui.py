@@ -241,7 +241,7 @@ class PyChopGui(QMainWindow):
                 self.widgets["MultiRepCheck"].setEnabled(True)
                 self.tabs.setTabEnabled(self.tdtabID, True)
                 if self.instSciAct.isChecked():
-                    self.widgets["Chopper0Phase"]["Edit"].setText("1500")
+                    self.widgets["Chopper0Phase"]["Edit"].setText("12400")
                     self.widgets["Chopper0Phase"]["Label"].setText("Disk chopper phase delay time")
                     self.widgets["Chopper0Phase"]["Edit"].show()
                     self.widgets["Chopper0Phase"]["Label"].show()
@@ -762,11 +762,11 @@ class PyChopGui(QMainWindow):
             ei = self.engine.getEi()
             out = self.engine.getWidths()
             res = out["Energy"]
-            percent = res / ei * 100
+            percent = res[0] / ei * 100
             chop_width = out["chopper"]
             mod_width = out["moderator"]
-            new_str = "\nEi is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n" % (ei, res * 1000, percent)
-            new_str += "FWHM at sample from chopper and moderator are %6.2f us, %6.2f us\n" % (chop_width, mod_width)
+            new_str = "\nEi is %6.2f meV, resolution is %6.2f ueV, percentage resolution is %6.3f\n" % (ei, res[0] * 1000, percent)
+            new_str += "FWHM at sample from chopper and moderator are %6.2f us, %6.2f us\n" % (chop_width[0], mod_width[0])
         self.scredt.append(new_str)
 
     def onHelp(self):

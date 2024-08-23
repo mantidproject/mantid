@@ -1,1 +1,0 @@
-- Add temperature from sample log to the workspace title when using the :ref:`LoadWAND <algm-LoadWAND>` or :ref:`WANDPowderReduction <algm-WANDPowderReduction>` algorithm to process a group of datasets for HB2C (a.k.a. WAND^2) at HFIR.

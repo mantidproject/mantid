@@ -56,8 +56,7 @@ class IO(object):
         else:
             core_name = filename  # e.g. OUTCAR -> OUTCAR (core_name) -> OUTCAR.hdf5
 
-        save_dir_path = ConfigService.getString("defaultsave.directory")
-        self._hdf_filename = os.path.join(save_dir_path, core_name + ".hdf5")  # name of hdf file
+        self._hdf_filename = os.path.join(self.get_save_dir_path(), core_name + ".hdf5")  # name of hdf file
 
         self._attributes = {}  # attributes for group
 
@@ -67,6 +66,10 @@ class IO(object):
         self._data = {}
 
         # Fields which have a form of empty dictionaries have to be set by an inheriting class.
+
+    @staticmethod
+    def get_save_dir_path() -> str:
+        return ConfigService.getString("defaultsave.directory")
 
     def _valid_hash(self):
         """
@@ -128,6 +131,8 @@ class IO(object):
             return True
 
         if isinstance(new, (np.ndarray, float)):
+            if previous is None:
+                return False
             return np.allclose(previous, new)
         # Tuples are converted to list in caching
         elif isinstance(new, tuple):

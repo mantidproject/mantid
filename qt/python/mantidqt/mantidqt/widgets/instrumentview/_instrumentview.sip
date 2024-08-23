@@ -289,6 +289,17 @@ public:
              7: SideBySide
 %End
 
+  // set maintain aspect ratio
+  void setMaintainAspectRatio(bool on);
+%Docstring
+    void setMaintainAspectRatio(bool on)
+    ------------------------------
+    Set the maintain aspect ratio option in the current window.
+
+    Args:
+      on: boolean indicating whether to turn maintain aspect ratio on or off
+%End
+
   void setMinValue(double value, bool apply);
 %Docstring
     void setMinValue(double value, bool apply)

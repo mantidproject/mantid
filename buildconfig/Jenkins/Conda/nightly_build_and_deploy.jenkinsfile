@@ -484,7 +484,12 @@ def build_and_test(platform) {
     bat "\"${WIN_BASH}\" -ex -c \"${buildscript_path}\
       ${workspace_unix_style}/${CHECKOUT_DIR} ${cmake_preset} ${common_args}\""
   } else {
-    sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} --enable-doctests"
+    // Only run doctests on Linux
+    doctests = ""
+    if(platform.startsWith('linux')) {
+      doctests = "--enable-doctests"
+    }
+    sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} ${doctests}"
   }
 }
 

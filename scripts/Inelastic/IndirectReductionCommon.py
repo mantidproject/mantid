@@ -4,8 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import AppendSpectra, DeleteWorkspace, Load
-from mantid.api import AnalysisDataService, WorkspaceGroup, AlgorithmManager
+from mantid.simpleapi import AppendSpectra, ApplyDiffCal, ConvertUnits, CreateGroupingWorkspace, DeleteWorkspace, Load, Rebin
+from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup, AlgorithmManager
+from mantid.dataobjects import GroupingWorkspace
 from mantid import mtd, logger, config
 
 try:
@@ -16,6 +17,8 @@ except ImportError:
 
 import os
 import numpy as np
+from math import expm1, log
+from typing import List, Tuple
 
 
 # -------------------------------------------------------------------------------
@@ -79,11 +82,13 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
 
     @return List of loaded workspace names and flag indicating chopped data
     """
+
     instrument = os.path.splitext(os.path.basename(ipf_filename))[0]
     instrument = instrument.split("_")[0]
     parse_file_range = create_file_range_parser(instrument)
     file_ranges = [file_range for range_str in file_ranges for file_range in range_str.split(",")]
     file_groups = [file_group for file_range in file_ranges for file_group in parse_file_range(file_range)]
+    file_groups = flatten_groups(file_groups)
 
     workspace_names = []
     chopped_data = False
@@ -93,6 +98,23 @@ def load_file_ranges(file_ranges, ipf_filename, spec_min, spec_max, sum_files=Tr
         workspace_names.extend(created_workspaces)
 
     return workspace_names, chopped_data
+
+
+def flatten_groups(file_groups):
+    """
+    If the list of groups to reduce is a list of list with one element per list, it can miss the sum file algorithm unless the list
+    is flattened to a single group
+
+    @param file_groups list of groups to reduce separately
+
+    @return Individual list with one group or list of lists if the groups have more than one member
+    """
+    sum_individual_workspaces = sum([len(group) for group in file_groups])
+    if len(file_groups) != sum_individual_workspaces:
+        return file_groups
+
+    file_groups = [ws[0] for ws in file_groups]
+    return [file_groups]
 
 
 def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files=False, load_logs=True, load_opts=None, find_masked_detectors=False):
@@ -305,7 +327,7 @@ def sum_regular_runs(workspace_names):
     summed_monitor_ws_name = workspace_names[0] + "_mon"
 
     # Get a list of the run numbers for the original data
-    run_numbers = ",".join([str(mtd[ws_name].getRunNumber()) for ws_name in workspace_names])
+    run_numbers = add_run_numbers(workspace_names)
 
     # Generate lists of the detector and monitor workspaces
     detector_workspaces = ",".join(workspace_names)
@@ -329,7 +351,8 @@ def sum_regular_runs(workspace_names):
     Scale(InputWorkspace=summed_monitor_ws_name, OutputWorkspace=summed_monitor_ws_name, Factor=scale_factor)
 
     # Add the list of run numbers to the result workspace as a sample log
-    AddSampleLog(Workspace=summed_detector_ws_name, LogName="multi_run_numbers", LogType="String", LogText=run_numbers)
+    AddSampleLog(Workspace=workspace_names[0], LogName="multi_run_reduction", LogType="String", LogText="regular_runs")
+    AddSampleLog(Workspace=workspace_names[0], LogName="run_number", LogType="String", LogText=run_numbers)
 
     # Only have the one workspace now
     return [summed_detector_ws_name]
@@ -342,7 +365,7 @@ def sum_chopped_runs(workspace_names):
     """
     Sum runs with chopped data.
     """
-    from mantid.simpleapi import MergeRuns, Scale, DeleteWorkspace
+    from mantid.simpleapi import MergeRuns, Scale, DeleteWorkspace, AddSampleLog
 
     try:
         num_merges = len(mtd[workspace_names[0]].getNames())
@@ -350,6 +373,8 @@ def sum_chopped_runs(workspace_names):
         raise RuntimeError("Not all runs have been chopped, cannot sum.")
 
     merges = list()
+
+    run_numbers = add_run_numbers(workspace_names)
 
     # Generate a list of workspaces to be merged
     for idx in range(0, num_merges):
@@ -378,11 +403,30 @@ def sum_chopped_runs(workspace_names):
             DeleteWorkspace(merge["detector"][idx])
             DeleteWorkspace(merge["monitor"][idx])
 
+    # Add the list of run numbers to the result workspace as a sample log
+    AddSampleLog(Workspace=workspace_names[0], LogName="multi_run_reduction", LogType="String", LogText="chopped_runs")
+    AddSampleLog(Workspace=workspace_names[0], LogName="run_number", LogType="String", LogText=run_numbers)
+
     # Only have the one workspace now
     return [workspace_names[0]]
 
 
 # --------------------------------------------------------------------------------
+def add_run_numbers(workspace_names):
+    run_numbers = []
+    for ws_name in workspace_names:
+        ws = mtd[ws_name]
+        if ws.isGroup():
+            number = ws[0].getRunNumber()
+        else:
+            number = ws.getRunNumber()
+        run_numbers.append(number)
+
+    # Get a list of the run numbers for the original data
+    return ",".join([str(number) for number in run_numbers])
+
+
+# ---------------------------------------------------------------------------------
 
 
 def get_ipf_parameters_from_run(run_number, instrument, analyser, reflection, parameters):
@@ -443,9 +487,9 @@ def identify_bad_detectors(workspace_name):
     Identify detectors which should be masked
 
     @param workspace_name Name of workspace to use to get masking detectors
-    @return List of masked spectra
+    @return List of spectra numbers to mask
     """
-    from mantid.simpleapi import IdentifyNoisyDetectors, DeleteWorkspace
+    from mantid.simpleapi import IdentifyNoisyDetectors
 
     instrument = mtd[workspace_name].getInstrument()
 
@@ -459,15 +503,11 @@ def identify_bad_detectors(workspace_name):
     masked_spec = list()
 
     if masking_type == "IdentifyNoisyDetectors":
-        ws_mask = "__workspace_mask"
-        IdentifyNoisyDetectors(InputWorkspace=workspace_name, OutputWorkspace=ws_mask)
+        workspace_mask = IdentifyNoisyDetectors(InputWorkspace=workspace_name, StoreInADS=False)
 
         # Convert workspace to a list of spectra
-        num_spec = mtd[ws_mask].getNumberHistograms()
-        masked_spec = [spec for spec in range(0, num_spec) if mtd[ws_mask].readY(spec)[0] == 0.0]
-
-        # Remove the temporary masking workspace
-        DeleteWorkspace(ws_mask)
+        num_spec = workspace_mask.getNumberHistograms()
+        masked_spec = [workspace_mask.getSpectrum(i).getSpectrumNo() for i in range(0, num_spec) if workspace_mask.readY(i)[0] == 0.0]
 
     logger.debug("Masked spectra for workspace %s: %s" % (workspace_name, str(masked_spec)))
 
@@ -651,36 +691,58 @@ def group_on_string(group_detectors, grouping_string):
     return conjoin_workspaces(*groups)
 
 
-def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None, group_string=None):
+def group_spectra(
+    workspace: str | MatrixWorkspace,
+    method: str,
+    group_file: str = None,
+    group_ws: GroupingWorkspace = None,
+    group_string: str = None,
+    number_of_groups: int = None,
+    spectra_range: List[float] = None,
+) -> MatrixWorkspace:
     """
-    Groups spectra in a given workspace according to the Workflow.GroupingMethod and
-    Workflow.GroupingFile parameters and GroupingPolicy property.
+    Groups spectra in a given workspace according to the Workflow.GroupingMethod property.
 
-    @param workspace_name Name of workspace to group spectra of
-    @param masked_detectors List of spectra numbers to mask
+    @param workspace A workspace object, or the name of a workspace in the ADS
     @param method Grouping method (IPF, All, Individual, File, Workspace)
-    @param group_file File for File method
+    @param group_file *.map file for GroupDetectors, or *.cal file for DiffractionFocussing
     @param group_ws Workspace for Workspace method
     @param group_string String for custom method - comma separated list or range
+    @param number_of_groups The number of groups to split the spectra into
+    @param spectra_range The min and max spectra numbers
     """
-    grouped_ws = group_spectra_of(mtd[workspace_name], masked_detectors, method, group_file, group_ws, group_string)
+    return group_spectra_of(
+        mtd[workspace] if isinstance(workspace, str) else workspace,
+        method,
+        group_file,
+        group_ws,
+        group_string,
+        number_of_groups,
+        spectra_range,
+    )
 
-    if grouped_ws is not None:
-        mtd.addOrReplace(workspace_name, grouped_ws)
 
-
-def group_spectra_of(workspace, masked_detectors, method, group_file=None, group_ws=None, group_string=None):
+def group_spectra_of(
+    workspace: MatrixWorkspace,
+    method: str,
+    group_file: str = None,
+    group_ws: GroupingWorkspace = None,
+    group_string: str = None,
+    number_of_groups: int = None,
+    spectra_range: List[int] = None,
+) -> MatrixWorkspace:
     """
-    Groups spectra in a given workspace according to the Workflow.GroupingMethod and
-    Workflow.GroupingFile parameters and GroupingPolicy property.
+    Groups spectra in a given workspace according to the Workflow.GroupingMethod property.
 
     @param workspace Workspace to group spectra of
-    @param masked_detectors List of spectra numbers to mask
     @param method Grouping method (IPF, All, Individual, File, Workspace)
-    @param group_file File for File method
+    @param group_file *.map file for GroupDetectors, or *.cal file for DiffractionFocussing
     @param group_ws Workspace for Workspace method
     @param group_string String for custom method - comma separated list or range
+    @param number_of_groups The number of groups to split the spectra into
+    @param spectra_range The min and max spectra numbers
     """
+
     instrument = workspace.getInstrument()
     group_detectors = AlgorithmManager.create("GroupDetectors")
     group_detectors.setChild(True)
@@ -696,19 +758,19 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
             grouping_method = "Individual"
 
     else:
-        # Otherwise use the value of GroupingPolicy
+        # Otherwise use the value of GroupingMethod
         grouping_method = method
 
     logger.information("Grouping method for workspace %s is %s" % (workspace.name(), grouping_method))
 
     if grouping_method == "Individual":
         # Nothing to do here
-        return None
+        return workspace
 
     elif grouping_method == "All":
         # Get a list of all spectra minus those which are masked
         num_spec = workspace.getNumberHistograms()
-        spectra_list = [spec for spec in range(0, num_spec) if spec not in masked_detectors]
+        spectra_list = [spec for spec in range(0, num_spec)]
 
         # Apply the grouping
         group_detectors.setProperty("WorkspaceIndexList", spectra_list)
@@ -716,6 +778,13 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
     elif grouping_method == "File":
         # Get the filename for the grouping file
         if group_file is not None:
+            # If grouping file is a *.cal file
+            if group_file.endswith(".cal"):
+                group_ws = create_grouping_workspace(workspace, group_file)
+                group_detectors.setProperty("CopyGroupingFromWorkspace", group_ws)
+                group_detectors.execute()
+                return group_detectors.getProperty("OutputWorkspace").value
+
             grouping_file = group_file
             group_detectors.setProperty("ExcludeGroupNumbers", [0])
         else:
@@ -732,10 +801,6 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         if not os.path.isfile(grouping_file):
             raise RuntimeError("Cannot find grouping file: %s" % grouping_file)
 
-        # Mask detectors if required
-        if len(masked_detectors) > 0:
-            _mask_detectors(workspace, masked_detectors)
-
         # Apply the grouping
         group_detectors.setProperty("MapFile", grouping_file)
 
@@ -744,17 +809,57 @@ def group_spectra_of(workspace, masked_detectors, method, group_file=None, group
         group_detectors.setProperty("CopyGroupingFromWorkspace", group_ws)
 
     elif grouping_method == "Custom":
-        # Mask detectors if required
-        if len(masked_detectors) > 0:
-            _mask_detectors(workspace, masked_detectors)
         return group_on_string(group_detectors, group_string)
-
+    elif grouping_method == "Groups":
+        group_string = create_detector_grouping_string(number_of_groups, spectra_range[0], spectra_range[1])
+        return group_on_string(group_detectors, group_string)
     else:
         raise RuntimeError("Invalid grouping method %s for workspace %s" % (grouping_method, workspace.name()))
 
-    group_detectors.setProperty("OutputWorkspace", "__temp")
     group_detectors.execute()
     return group_detectors.getProperty("OutputWorkspace").value
+
+
+def create_range_string(minimum: int, maximum: int) -> str:
+    return f"{minimum}-{maximum}"
+
+
+def create_grouping_string(group_size: int, number_of_groups: int, spectra_min: int) -> str:
+    grouping_string = create_range_string(spectra_min, spectra_min + group_size - 1)
+    for i in range(spectra_min + group_size, spectra_min + group_size * number_of_groups, group_size):
+        grouping_string += "," + create_range_string(i, i + group_size - 1)
+    return grouping_string
+
+
+def create_detector_grouping_string(number_of_groups: int, spectra_min: int, spectra_max: int) -> str:
+    assert number_of_groups > 0, "Number of groups must be greater than zero."
+    assert spectra_min <= spectra_max, "Spectra min cannot be larger than spectra max."
+    assert number_of_groups <= spectra_max - spectra_min + 1, "Number of groups must be less or equal to the number of spectra."
+    number_of_spectra = 1 + spectra_max - spectra_min
+
+    grouping_string = create_grouping_string(int(number_of_spectra / number_of_groups), number_of_groups, spectra_min)
+    remainder = number_of_spectra % number_of_groups
+    if remainder != 0:
+        grouping_string += f",{create_range_string(spectra_min + number_of_spectra - remainder, spectra_min + number_of_spectra - 1)}"
+    return grouping_string
+
+
+def create_grouping_workspace(workspace: MatrixWorkspace, cal_file: str) -> GroupingWorkspace:
+    group_ws, _, _ = CreateGroupingWorkspace(InstrumentName=workspace.getInstrument().getName(), OldCalFilename=cal_file, StoreInADS=False)
+    return group_ws
+
+
+def _excluded_detector_ids(grouping_workspace: GroupingWorkspace) -> List[int]:
+    """
+    Finds the detector IDs which are not included in the grouping. These detector IDs will be in a group with a negative group ID.
+    @param grouping_workspace The GroupingWorkspace containing the detector grouping information.
+    @return A list of detector IDs which are excluded from the grouping.
+    """
+    excluded_ids = []
+    for group_id in grouping_workspace.getGroupIDs():
+        if group_id < 0:
+            excluded_ids.extend(grouping_workspace.getDetectorIDsOfGroup(int(group_id)))
+    return excluded_ids
 
 
 # -------------------------------------------------------------------------------
@@ -819,11 +924,15 @@ def rename_reduction(workspace_name, multiple_files):
 
     is_multi_frame = isinstance(mtd[workspace_name], WorkspaceGroup)
 
-    # Get the instrument
+    # Get the instrument, run number and title
     if is_multi_frame:
         instrument = mtd[workspace_name].getItem(0).getInstrument()
+        run_number = mtd[workspace_name].getItem(0).getRun()["run_number"].value
+        run_title = mtd[workspace_name].getItem(0).getRun()["run_title"].value.strip()
     else:
         instrument = mtd[workspace_name].getInstrument()
+        run_number = mtd[workspace_name].getRun()["run_number"].value
+        run_title = mtd[workspace_name].getRun()["run_title"].value.strip()
 
     # Get the naming convention parameter form the parameter file
     try:
@@ -832,26 +941,16 @@ def rename_reduction(workspace_name, multiple_files):
         # Default to run title if naming convention parameter not set
         convention = "RunTitle"
     logger.information("Naming convention for workspace %s is %s" % (workspace_name, convention))
-
-    # Get run number
-    if is_multi_frame:
-        run_number = mtd[workspace_name].getItem(0).getRun()["run_number"].value
-    else:
-        run_number = mtd[workspace_name].getRun()["run_number"].value
     logger.information("Run number for workspace %s is %s" % (workspace_name, run_number))
+    logger.information("Run title for workspace %s is %s" % (workspace_name, run_title))
 
     inst_name = instrument.getName()
     inst_name = inst_name.lower()
 
-    # Get run title
-    if is_multi_frame:
-        run_title = mtd[workspace_name].getItem(0).getRun()["run_title"].value.strip()
-    else:
-        run_title = mtd[workspace_name].getRun()["run_title"].value.strip()
-    logger.information("Run title for workspace %s is %s" % (workspace_name, run_title))
-
     if multiple_files:
         multi_run_marker = "_multi"
+        split_runs = [int(run) for run in run_number.split(",")]
+        run_number = str(min(split_runs)) + "-" + str(max(split_runs))
     else:
         multi_run_marker = ""
 
@@ -994,6 +1093,54 @@ def get_multi_frame_rebin(workspace_name, rebin_string):
 # -------------------------------------------------------------------------------
 
 
+def _get_x_range_when_bins_vary(workspace: MatrixWorkspace, grouping_workspace: GroupingWorkspace) -> Tuple[float]:
+    """
+    Finds the minimum and maximum X values for a workspace with varying bins. It will only search for the min
+    and max x values in spectra which are included in the grouping provided by the GroupingWorkspace.
+    @param workspace The workspace to search for the min and max X.
+    @param grouping_workspace The workspace containing detector grouping information.
+    @return A minimum and maximum X value.
+    """
+    excluded_ids = _excluded_detector_ids(grouping_workspace)
+
+    min_value, max_value = float("inf"), float("-inf")
+    spec_info = workspace.spectrumInfo()
+    for i in range(workspace.getNumberHistograms()):
+        if spec_info.isMasked(i) or not spec_info.hasDetectors(i):
+            continue
+        detector_ids = workspace.getSpectrum(i).getDetectorIDs()
+        if detector_ids[0] in excluded_ids:
+            continue
+        x = workspace.extractX()[i]
+        min_value = x.min() if x.min() < min_value else min_value
+        max_value = x.max() if x.max() > max_value else max_value
+
+    assert min_value > 0, "The minimum x value in a dSpacing workspace should be a positive number."
+    assert max_value == float("-inf") or max_value > 0, "The maximum x value in a dSpacing workspace should be a positive number."
+
+    return min_value, max_value
+
+
+def rebin_logarithmic(workspace: MatrixWorkspace, calibration_file: str) -> MatrixWorkspace:
+    """
+    Performs logarithmic rebinning on the provided workspace. The rebinning parameters are calculated
+    based on the spectra which are included in the grouping provided in the calibration file.
+    @param workspace The workspace to be logarithmically rebinned.
+    @param calibration_file The *.cal file to use to find which detectors are excluded from the grouping.
+    @return A rebinned workspace.
+    """
+    grouping_workspace = create_grouping_workspace(workspace, calibration_file)
+
+    min_value, max_value = _get_x_range_when_bins_vary(workspace, grouping_workspace)
+
+    if min_value == float("inf") or max_value == float("-inf"):
+        raise RuntimeError("No selected Detectors found in .cal file for input range.")
+
+    step = expm1((log(max_value) - log(min_value)) / workspace.blocksize())
+
+    return Rebin(InputWorkspace=workspace, Params=[min_value, step, max_value], BinningMode="Logarithmic", StoreInADS=False)
+
+
 def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_bins):
     """
     @param workspace_name Name of workspace to rebin
@@ -1034,23 +1181,48 @@ def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_
 
 # -------------------------------------------------------------------------------
 
+
+def calibrate(workspace, calibration_file: str):
+    """
+    Calibrates the workspace using the calibration file, and converts from TOF to dSpacing.
+
+    @param workspace The workspace or workspace name to be calibrated.
+    @param calibration_file The calibration file to use.
+
+    @return The calibrated workspace.
+    """
+    ApplyDiffCal(InstrumentWorkspace=workspace, CalibrationFile=calibration_file, StoreInADS=False, EnableLogging=False)
+
+    converted = ConvertUnits(
+        InputWorkspace=workspace,
+        Target="dSpacing",
+        StoreInADS=False,
+        EnableLogging=False,
+    )
+
+    ApplyDiffCal(InstrumentWorkspace=converted, ClearCalibration=True, StoreInADS=False, EnableLogging=False)
+    return converted
+
+
+# -------------------------------------------------------------------------------
+
 # ========== Child Algorithms ==========
 
 
-def _mask_detectors(workspace, masked_indices):
+def mask_detectors(workspace, masked_indices):
     """
     Masks the detectors at the specified indices in the specified
     workspace.
 
     :param workspace:       The workspace whose detectors to mask.
-    :param masked_indices:  The indices of the detectors to mask.
+    :param masked_indices:  The spectra indices to mask.
     """
-    mask_detectors = AlgorithmManager.createUnmanaged("MaskDetectors")
-    mask_detectors.setChild(True)
-    mask_detectors.initialize()
-    mask_detectors.setProperty("Workspace", workspace)
-    mask_detectors.setProperty("WorkspaceIndexList", masked_indices)
-    mask_detectors.execute()
+    mask_detectors_alg = AlgorithmManager.createUnmanaged("MaskDetectors")
+    mask_detectors_alg.setChild(True)
+    mask_detectors_alg.initialize()
+    mask_detectors_alg.setProperty("Workspace", workspace)
+    mask_detectors_alg.setProperty("SpectraList", masked_indices)
+    mask_detectors_alg.execute()
 
 
 def _save_ascii(workspace, file_name):

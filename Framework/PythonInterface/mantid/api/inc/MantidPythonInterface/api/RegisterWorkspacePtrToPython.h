@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/WeakPtr.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
@@ -41,6 +42,7 @@ struct DLLExport TypedPropertyValueHandler<std::shared_ptr<T>,
       alg->setProperty<HeldType>(name, std::dynamic_pointer_cast<T>(ExtractSharedPtr<API::Workspace>(value)()));
   }
 
+  GNU_DIAG_OFF("maybe-uninitialized")
   /**
    * Create a PropertyWithValue from the given python object value
    * @param name :: The name of the property
@@ -70,6 +72,7 @@ struct DLLExport TypedPropertyValueHandler<std::shared_ptr<T>,
     }
     return valueProp;
   }
+  GNU_DIAG_ON("maybe-uninitialized")
 };
 
 /**

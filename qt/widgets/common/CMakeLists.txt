@@ -1,11 +1,12 @@
 set(SRC_FILES
     src/AddWorkspaceDialog.cpp
+    src/AddWorkspaceMultiDialog.cpp
     src/AlgorithmDialog.cpp
     src/AlgorithmHistoryWindow.cpp
     src/AlgorithmInputHistory.cpp
     src/AlgorithmPropertiesWidget.cpp
-    src/AlgorithmRunner.cpp
     src/AlgorithmSelectorWidget.cpp
+    src/AlgorithmRunner.cpp
     src/AlternateCSPythonLexer.cpp
     src/BatchAlgorithmRunner.cpp
     src/BoolPropertyWidget.cpp
@@ -86,6 +87,7 @@ set(SRC_FILES
     src/PropertyWidget.cpp
     src/PropertyWidgetFactory.cpp
     src/PythonRunner.cpp
+    src/QtAlgorithmRunner.cpp
     src/QtJobRunner.cpp
     src/QtSignalChannel.cpp
     src/QtJSONUtils.cpp
@@ -97,6 +99,7 @@ set(SRC_FILES
     src/SelectFunctionDialog.cpp
     src/SelectWorkspacesDialog.cpp
     src/SlitCalculator.cpp
+    src/TableWidgetValidators.cpp
     src/TextPropertyWidget.cpp
     src/TSVSerialiser.cpp
     src/UserFunctionDialog.cpp
@@ -111,6 +114,8 @@ set(SRC_FILES
     src/WorkspacePresenter/WorkspaceTreeWidget.cpp
     src/WorkspacePresenter/WorkspaceTreeWidgetSimple.cpp
     src/WorkspaceSelector.cpp
+    src/WorkspaceMultiSelector.cpp
+    src/WorkspaceUtils.cpp
     src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp
     src/AlgorithmProgress/AlgorithmProgressDialogWidget.cpp
     src/AlgorithmProgress/AlgorithmProgressModel.cpp
@@ -156,10 +161,10 @@ set(SRC_FILES
 
 set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
+    inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.h
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
     inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
-    inc/MantidQtWidgets/Common/AlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
     inc/MantidQtWidgets/Common/BoolPropertyWidget.h
@@ -211,6 +216,7 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/PropertyWidget.h
     inc/MantidQtWidgets/Common/PythonRunner.h
+    inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QtJobRunner.h
     inc/MantidQtWidgets/Common/QtSignalChannel.h
     inc/MantidQtWidgets/Common/RenameParDialog.h
@@ -229,6 +235,7 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h
     inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h
     inc/MantidQtWidgets/Common/WorkspaceSelector.h
+    inc/MantidQtWidgets/Common/WorkspaceMultiSelector.h
     inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h
     inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogWidget.h
     inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h
@@ -261,8 +268,8 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/BaseEncoder.h
     inc/MantidQtWidgets/Common/BaseDecoder.h
     inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
-    inc/MantidQtWidgets/Common/AlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
+    inc/MantidQtWidgets/Common/AlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
     inc/MantidQtWidgets/Common/ConfiguredAlgorithm.h
@@ -279,6 +286,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/HelpWindow.h
     inc/MantidQtWidgets/Common/Hint.h
     inc/MantidQtWidgets/Common/IAddWorkspaceDialog.h
+    inc/MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h
     inc/MantidQtWidgets/Common/IConfiguredAlgorithm.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorModel.h
     inc/MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h
@@ -296,6 +304,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidTreeWidgetItem.h
     inc/MantidQtWidgets/Common/MockJobRunner.h
+    inc/MantidQtWidgets/Common/MockUserInputValidator.h
     inc/MantidQtWidgets/Common/MultifitSetupDialog.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
     inc/MantidQtWidgets/Common/ParseKeyValueString.h
@@ -303,11 +312,14 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/ProgressableView.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
     inc/MantidQtWidgets/Common/QSettingsHelper.h
+    inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
     inc/MantidQtWidgets/Common/SequentialFitDialog.h
+    inc/MantidQtWidgets/Common/TableWidgetValidators.h
     inc/MantidQtWidgets/Common/UserInputValidator.h
     inc/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
     inc/MantidQtWidgets/Common/WorkspaceIcons.h
+    inc/MantidQtWidgets/Common/WorkspaceUtils.h
     inc/MantidQtWidgets/Common/Batch/QtStandardItemTreeAdapter.h
     inc/MantidQtWidgets/Common/Batch/QtBasicNavigation.h
     inc/MantidQtWidgets/Common/Batch/QtTreeCursorNavigation.h
@@ -339,6 +351,7 @@ set(QT5_INC_FILES
 
 set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
+    inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.ui
     inc/MantidQtWidgets/Common/DataSelector.ui
     inc/MantidQtWidgets/Common/EditLocalParameterDialog.ui
     inc/MantidQtWidgets/Common/LogValueSelector.ui
@@ -360,7 +373,6 @@ set(QT5_UI_FILES
 set(MOC_FILES
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
-    inc/MantidQtWidgets/Common/AlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
     inc/MantidQtWidgets/Common/BoolPropertyWidget.h
@@ -426,6 +438,7 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/pqHelpWindow.h
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
+    inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/RenameParDialog.h
     inc/MantidQtWidgets/Common/SaveWorkspaces.h
     inc/MantidQtWidgets/Common/ScriptEditor.h
@@ -437,6 +450,7 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/TrackedAction.h
     inc/MantidQtWidgets/Common/UserFunctionDialog.h
     inc/MantidQtWidgets/Common/WorkspaceSelector.h
+    inc/MantidQtWidgets/Common/WorkspaceMultiSelector.h
     inc/MantidQtWidgets/Common/LineEditWithClear.h
     inc/MantidQtWidgets/Common/LogValueSelector.h
     inc/MantidQtWidgets/Common/FindFilesThreadPoolManager.h
@@ -468,8 +482,6 @@ set(INC_FILES
     ${MOC_FILES}
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
     inc/MantidQtWidgets/Common/AlgorithmInputHistory.h
-    inc/MantidQtWidgets/Common/AlgorithmRunner.h
-    inc/MantidQtWidgets/Common/MockAlgorithmRunner.h
     inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
     inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
@@ -499,12 +511,15 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/LogValueFinder.h
     inc/MantidQtWidgets/Common/MantidDesktopServices.h
     inc/MantidQtWidgets/Common/MantidAlgorithmMetatype.h
+    inc/MantidQtWidgets/Common/MockAlgorithmRunner.h
+    inc/MantidQtWidgets/Common/MockQtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/NonOrthogonal.h
     inc/MantidQtWidgets/Common/pixmaps.h
     inc/MantidQtWidgets/Common/PlotAxis.h
     inc/MantidQtWidgets/Common/PluginLibraries.h
     inc/MantidQtWidgets/Common/PropertyWidgetFactory.h
     inc/MantidQtWidgets/Common/QScienceSpinBox.h
+    inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QSettingsHelper.h
     inc/MantidQtWidgets/Common/QStringUtils.h
     inc/MantidQtWidgets/Common/QtJSONUtils.h
@@ -592,6 +607,7 @@ set(INC_FILES
 
 set(UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
+    inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.ui
     inc/MantidQtWidgets/Common/DataSelector.ui
     inc/MantidQtWidgets/Common/CatalogSearch.ui
     inc/MantidQtWidgets/Common/CatalogSelector.ui
@@ -706,8 +722,10 @@ set(TEST_FILES
     test/ProjectSaveModelTest.h
     test/ProjectSavePresenterTest.h
     test/SelectionNotificationServiceTest.h
+    test/SelectionWorkspacesDialogTest.h
     test/TrackedActionTest.h
     test/QtJSONUtilsTest.h
+    test/WorkspaceUtilsTest.h
     test/Batch/BuildSubtreeItemsTest.h
     test/Batch/ExtractSubtreesTest.h
     test/Batch/FindSubtreeRootsTest.h
@@ -720,6 +738,7 @@ set(TEST_FILES
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
 
 set(QT5_TEST_FILES
+    test/AlgorithmRunnerTest.h
     test/BatchAlgorithmRunnerTest.h
     test/FileDialogHandlerTest.h
     test/FindFilesThreadPoolManagerTest.h
@@ -732,6 +751,7 @@ set(QT5_TEST_FILES
     test/FitScriptGeneratorPresenterTest.h
     test/FitScriptGeneratorViewTest.h
     test/FitScriptOptionsBrowserTest.h
+    test/SelectWorkspacesDialogTest.h
     test/FunctionTreeViewTest.h
     test/ImageInfoModelMatrixWSTest.h
     test/ImageInfoModelMDTest.h
@@ -743,6 +763,7 @@ set(QT5_TEST_FILES
     test/QtJSONUtilsTest.h
     test/RepoModelTest.h
     test/ParseKeyValueStringTest.h
+    test/WorkspaceUtilsTest.h
     test/Python/SipTest.h
     test/Batch/BuildSubtreeItemsTest.h
     test/Batch/ExtractSubtreesTest.h

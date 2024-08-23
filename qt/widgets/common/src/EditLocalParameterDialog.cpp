@@ -8,6 +8,7 @@
 
 #include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
 #include "MantidQtWidgets/Common/LocalParameterItemDelegate.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 
 #include <QClipboard>
 #include <QMenu>
@@ -35,16 +36,16 @@ namespace MantidQt::MantidWidgets {
  * @param constraints :: [input] Parameter constraints.
  */
 EditLocalParameterDialog::EditLocalParameterDialog(QWidget *parent, const std::string &parName,
-                                                   const QStringList &datasetNames,
-                                                   const QStringList &datasetDomainNames, const QList<double> &values,
-                                                   const QList<bool> &fixes, const QStringList &ties,
-                                                   const QStringList &constraints)
+                                                   const std::vector<std::string> &datasetNames,
+                                                   const std::vector<std::string> &datasetDomainNames,
+                                                   const QList<double> &values, const QList<bool> &fixes,
+                                                   const QStringList &ties, const QStringList &constraints)
     : MantidDialog(parent), m_parName(parName), m_values(values), m_fixes(fixes), m_ties(std::move(ties)),
       m_constraints(std::move(constraints)) {
-  assert(values.size() == datasetDomainNames.size());
-  assert(fixes.size() == datasetDomainNames.size());
-  assert(ties.size() == datasetDomainNames.size());
-  assert(constraints.size() == datasetDomainNames.size());
+  assert(static_cast<std::size_t>(values.size()) == datasetDomainNames.size());
+  assert(static_cast<std::size_t>(fixes.size()) == datasetDomainNames.size());
+  assert(static_cast<std::size_t>(ties.size()) == datasetDomainNames.size());
+  assert(static_cast<std::size_t>(constraints.size()) == datasetDomainNames.size());
   m_uiForm.setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
   doSetup(parName, datasetNames, datasetDomainNames);
@@ -58,9 +59,9 @@ EditLocalParameterDialog::EditLocalParameterDialog(QWidget *parent, const std::s
  * @param datasetNames :: [input] Names of workspaces being fitted.
  * @param datasetDomainNames :: [input] Names given to the domains being fitted.
  */
-void EditLocalParameterDialog::doSetup(const std::string &parName, const QStringList &datasetNames,
-                                       const QStringList &datasetDomainNames) {
-  m_logFinder = std::make_unique<LogValueFinder>(datasetNames);
+void EditLocalParameterDialog::doSetup(const std::string &parName, const std::vector<std::string> &datasetNames,
+                                       const std::vector<std::string> &datasetDomainNames) {
+  m_logFinder = std::make_unique<LogValueFinder>(stdVectorToQStringList(datasetNames));
   // Populate list of logs
   auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
   for (const auto &logName : m_logFinder->getLogNames()) {
@@ -74,11 +75,11 @@ void EditLocalParameterDialog::doSetup(const std::string &parName, const QString
   connect(m_uiForm.tableWidget, SIGNAL(cellChanged(int, int)), this, SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + QString::fromStdString(parName));
 
-  for (int i = 0; i < datasetDomainNames.size(); i++) {
+  for (int i = 0; i < static_cast<int>(datasetDomainNames.size()); i++) {
     m_uiForm.tableWidget->insertRow(i);
     auto cell = new QTableWidgetItem(makeNumber(m_values[i]));
     m_uiForm.tableWidget->setItem(i, valueColumn, cell);
-    auto headerItem = new QTableWidgetItem(datasetDomainNames[i]);
+    auto headerItem = new QTableWidgetItem(QString::fromStdString(datasetDomainNames[i]));
     m_uiForm.tableWidget->setVerticalHeaderItem(i, headerItem);
     cell = new QTableWidgetItem("");
     auto flags = cell->flags();
@@ -102,7 +103,11 @@ void EditLocalParameterDialog::doSetup(const std::string &parName, const QString
   connect(deleg, SIGNAL(setAllValuesToLog()), this, SLOT(setAllValuesToLog()));
 
   m_uiForm.tableWidget->installEventFilter(this);
+
+  connect(this, SIGNAL(finished(int)), this, SLOT(emitDialogFinished(int)));
 }
+
+void EditLocalParameterDialog::emitDialogFinished(int result) { emit dialogFinished(result, this); }
 
 /// Slot. Called when a value changes.
 /// @param row :: Row index of the changed cell.

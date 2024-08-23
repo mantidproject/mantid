@@ -33,7 +33,7 @@ def getUMatrix(ws):
 class FindGlobalBMatrixTest(unittest.TestCase):
     def setUp(self):
         # load empty instrument so can create a peak table
-        self.ws = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="empty_SXD")
+        self.ws = LoadEmptyInstrument(Filename="SXD_Definition.xml", OutputWorkspace="empty_SXD")
         axis = self.ws.getAxis(0)
         axis.setUnit("TOF")
 

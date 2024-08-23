@@ -1,1 +1,0 @@
-- :ref:`algm-ReflectometryReductionOneAuto` no longer throws an error when attempting to run a reduction that applies both a background subtraction and a polarization correction.

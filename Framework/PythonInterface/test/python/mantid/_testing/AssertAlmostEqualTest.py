@@ -22,7 +22,7 @@ class AssertAlmostEqualTest(unittest.TestCase):
         self.ws3 = ws3
 
     def test_simple(self):
-        assert_almost_equal(self.ws1, self.ws1)
+        assert_almost_equal(self.ws1, self.ws2, atol=1, rtol=1)
 
     def test_atol(self):
         # compare (ws1 - ws2) < atol
@@ -33,11 +33,8 @@ class AssertAlmostEqualTest(unittest.TestCase):
         assert_almost_equal(self.ws1, self.ws3, rtol=0.7)
 
     def test_raises(self):
-        with self.assertRaises(AssertionError):
-            assert_almost_equal(self.ws1, self.ws2)
-
         with self.assertRaises(ValueError):
-            assert_almost_equal(self.ws1, self.ws2, atol=1, rtol=1)
+            assert_almost_equal(self.ws1, self.ws2)
 
 
 if __name__ == "__main__":

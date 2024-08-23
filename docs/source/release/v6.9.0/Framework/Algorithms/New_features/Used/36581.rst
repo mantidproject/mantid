@@ -1,1 +1,0 @@
-- Added the option to change the number of points used in the `SolidAngle` algorithm when triangulating a cylinder, which is what happens for tube detectors. The new argument is called `NumberOfCylinderSlices` and will default to `10`, which is the current number of slices used.

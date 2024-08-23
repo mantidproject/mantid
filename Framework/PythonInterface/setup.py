@@ -15,5 +15,5 @@ setup(
     name="mantid",
     version=os.environ["MANTID_VERSION_STR"],
     packages=find_packages(exclude=["*.test", "plugins*"]),
-    package_data={"": ["*.ui"]},
+    package_data={"": ["*.json", "*.ui"]},
 )

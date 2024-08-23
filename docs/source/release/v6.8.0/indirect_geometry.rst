@@ -7,7 +7,7 @@ Indirect Geometry Changes
 
 New Features
 ------------
-- When loading resolution data containing `NAN` values into :ref:`Data Analysis <interface-inelastic-data-analysis>` they will be replaced with zeros and a warning displayed to the user.
+- When loading resolution data containing `NAN` values into :ref:`Data Analysis <interface-inelastic-qens-fitting>` they will be replaced with zeros and a warning displayed to the user.
 - Added the quasielasticbayes package to the Linux standalone tarball.
 
 

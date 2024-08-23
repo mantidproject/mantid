@@ -92,31 +92,14 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
         self.assertEqual(len(wks), 1)
-        self.assertEqual(wks.getNames()[0], "iris26173_multi_diffspec_red")
+        self.assertEqual(wks.getNames()[0], "iris26173-26176_multi_diffspec_red")
 
         red_ws = wks[0]
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), "dSpacing")
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
-        self.assertTrue("multi_run_numbers" in red_ws.getRun())
-        self.assertEqual(red_ws.getRun().get("multi_run_numbers").value, "26173,26174,26175,26176")
-
-    def test_grouping_individual(self):
-        """
-        Test setting individual grouping, one spectrum per detector.
-        """
-
-        wks = ISISIndirectDiffractionReduction(
-            InputFiles=["IRS26176.RAW"], Instrument="IRIS", Mode="diffspec", SpectraRange=[105, 112], GroupingPolicy="Individual"
-        )
-
-        self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
-        self.assertEqual(len(wks), 1)
-        self.assertEqual(wks.getNames()[0], "iris26176_diffspec_red")
-
-        red_ws = wks[0]
-        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), "dSpacing")
-        self.assertEqual(red_ws.getNumberHistograms(), 8)
+        self.assertTrue("multi_run_reduction" in red_ws.getRun())
+        self.assertEqual(red_ws.getRun().get("run_number").value, "26173,26174,26175,26176")
 
     def test_reduction_with_container_completes(self):
         """
@@ -217,7 +200,7 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
             Instrument="OSIRIS",
             Mode="diffspec",
             SpectraRange=[3, 962],
-            GroupingPolicy="Workspace",
+            GroupingMethod="Workspace",
             GroupingWorkspace="__grouping",
         )
 
@@ -245,26 +228,61 @@ class ISISIndirectDiffractionReductionTest(unittest.TestCase):
         self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), "dSpacing")
         self.assertEqual(red_ws.getNumberHistograms(), 1)
 
-    def test_vesuvio_individual(self):
-        """
-        Test setting individual grouping, one spectrum per detector.
-        """
+    def test_reduction_with_different_custom_groupings_creates_a_workspace_with_the_correct_size(self):
+        custom_grouping_strings = {"3:198": 196, "3:25,27:198": 195, "3-198": 1, "3-25,26:198": 174, "3+5+7,8-40,41:198": 160}
 
-        wks = ISISIndirectDiffractionReduction(
+        for custom_string, expected_size in custom_grouping_strings.items():
+            reduced_workspace = ISISIndirectDiffractionReduction(
+                InputFiles=["29244"],
+                GroupingMethod="Custom",
+                GroupingString=custom_string,
+                InstrumentParFile="IP0005.dat",
+                Instrument="VESUVIO",
+                mode="diffspec",
+                SpectraRange=[3, 198],
+            )
+
+            self.assertEqual(reduced_workspace.getItem(0).getNumberHistograms(), expected_size)
+
+    def test_reduction_with_different_number_of_groups(self):
+        # Non-divisible numbers will have an extra group with the remaining detectors
+        results = {5: 5, 10: 11, 4: 5, 15: 15}
+        spectra_min, spectra_max = 3, 197
+
+        for number_of_groups, expected_size in results.items():
+            reduced_workspace = ISISIndirectDiffractionReduction(
+                InputFiles=["29244"],
+                GroupingMethod="Groups",
+                NGroups=number_of_groups,
+                InstrumentParFile="IP0005.dat",
+                Instrument="VESUVIO",
+                mode="diffspec",
+                SpectraRange=[spectra_min, spectra_max],
+            )
+
+            workspace = reduced_workspace.getItem(0)
+            self.assertEqual(expected_size, workspace.getNumberHistograms())
+
+            n_detectors_per_group = (spectra_max - spectra_min + 1) // number_of_groups
+            for spec_i in range(number_of_groups):
+                self.assertEqual(n_detectors_per_group, len(workspace.getSpectrum(spec_i).getDetectorIDs()))
+
+    def test_reduction_with_map_file(self):
+        reduced_workspace = ISISIndirectDiffractionReduction(
             InputFiles=["29244"],
-            GroupingPolicy="Individual",
+            GroupingMethod="File",
+            GroupingFile="vesuvio_4_by_24.map",
             InstrumentParFile="IP0005.dat",
             Instrument="VESUVIO",
             mode="diffspec",
-            SpectraRange=[3, 198],
+            SpectraRange=[3, 98],
         )
 
-        self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
-        self.assertEqual(len(wks), 1)
+        self.assertTrue(isinstance(reduced_workspace, WorkspaceGroup), "Result workspace should be a workspace group.")
+        self.assertEqual(reduced_workspace.getNames()[0], "vesuvio29244_diffspec_red")
 
-        red_ws = wks[0]
-        self.assertEqual(red_ws.getAxis(0).getUnit().unitID(), "dSpacing")
-        self.assertEqual(red_ws.getNumberHistograms(), 196)
+        red_ws = reduced_workspace.getItem(0)
+        self.assertEqual(red_ws.getNumberHistograms(), 24)
 
     # ------------------------------------------Failure cases------------------------------------------
 

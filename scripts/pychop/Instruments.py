@@ -135,6 +135,7 @@ class ChopperSystem(object):
         "flux_ref_slot",
         "flux_ref_freq",
         "frequency_names",
+        "phaseOffset",
     ]
 
     def __init__(self, inval=None):
@@ -168,6 +169,7 @@ class ChopperSystem(object):
         self.isFermi = False
         self.isPhaseIndependent = []
         self.defaultPhase = []
+        self.phaseOffset = None
         self.phaseNames = []
         for idx, chopper in enumerate(self.choppers):
             self.distance.append(chopper["distance"])
@@ -190,6 +192,8 @@ class ChopperSystem(object):
                 self.numDisk.append(2 if ("isDouble" in chopper and chopper["isDouble"]) else 1)
                 self.isPhaseIndependent.append(True if ("isPhaseIndependent" in chopper and chopper["isPhaseIndependent"]) else False)
                 self.defaultPhase.append(chopper["defaultPhase"] if "defaultPhase" in chopper else 0)
+                if "phaseOffset" in chopper:
+                    self.phaseOffset = chopper["phaseOffset"]
                 self.phaseNames.append(chopper["phaseName"] if "phaseName" in chopper else "Chopper %d phase delay time" % (idx))
         if not any(self.slot_ang_pos):
             self.slot_ang_pos = None
@@ -415,7 +419,9 @@ class ChopperSystem(object):
         """Private method to calculate resolution for given Ei from chopper opening times"""
         Ei = _check_input(self, Ei_in)
         if "_saved_state" not in self.__dict__ or (self._saved_state[0] != self._get_state(Ei)):
-            Eis, all_times, chop_times, lastChopDist, lines = MulpyRep.calcChopTimes(Ei, self._long_frequency, self._instpar, self.phase)
+            Eis, all_times, chop_times, lastChopDist, lines = MulpyRep.calcChopTimes(
+                Ei, self._long_frequency, self._instpar, self.phase, self.phaseOffset
+            )
             Eis, lines = self._removeLowIntensityReps(Eis, lines, Ei)
             self._saved_state = [self._get_state(Ei), Eis, chop_times, lastChopDist, lines, all_times]
         else:
@@ -645,7 +651,7 @@ class Moderator(object):
         if not hasattr(self, "flux_interp"):
             raise AttributeError("This instrument does not have a table of measured flux")
         wavelength = [min(max(l, self.fmn), self.fmx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, "__len__") else [Ei]))]
-        return self.flux_interp(wavelength)
+        return self.flux_interp(wavelength[0])
 
     @property
     def theta_m(self):
@@ -995,7 +1001,6 @@ class Instrument(object):
             except TypeError:
                 etrans = np.asfarray(etrans)
         res = obj.getResolution(etrans)
-
         if return_polynomial:
 
             def cubic(x, x_0, x_1, x_2, x_3):

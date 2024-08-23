@@ -130,16 +130,120 @@ public:
 
     const auto &x = workspace->x(workspaceIndex);
     const auto &y = workspace->y(workspaceIndex);
+    const auto &e = workspace->e(workspaceIndex);
     const auto &spectrumInfo = workspace->spectrumInfo();
 
     // WHEN
     auto peakFindingStrategy = std::make_unique<AllPeaksStrategy>(backgroundStrategy.get(), spectrumInfo);
-    auto peaks = peakFindingStrategy->findSXPeaks(x, y, workspaceIndex);
+    auto peaks = peakFindingStrategy->findSXPeaks(x, y, e, workspaceIndex);
 
     // THEN
     TSM_ASSERT("There should be two peaks that are found.", peaks.get().size() == 2);
     TSM_ASSERT("The first peak should have a signal value of 7.", peaks.get()[0].getIntensity() == 7.);
     TSM_ASSERT("The second peak should have a signal value of 11.", peaks.get()[1].getIntensity() == 11.);
+  }
+
+  PeakList runFindAllPeaksWithMinBinWidth(const std::unique_ptr<BackgroundStrategy> backgroundStrategy,
+                                          int minBinWidth = Mantid::EMPTY_INT()) {
+    // GIVEN
+    // auto backgroundStrategy = std::make_unique<AbsoluteBackgroundStrategy>(3.);
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2 /*nhist*/, 15 /*nbins*/);
+    const int workspaceIndex = 1;
+    auto &mutableY = workspace->mutableY(workspaceIndex);
+    doAddDoublePeakToData(mutableY);
+
+    const auto &x = workspace->x(workspaceIndex);
+    const auto &y = workspace->y(workspaceIndex);
+    const auto &e = workspace->e(workspaceIndex);
+    const auto &spectrumInfo = workspace->spectrumInfo();
+
+    // WHEN
+    auto peakFindingStrategy = std::make_unique<AllPeaksStrategy>(backgroundStrategy.get(), spectrumInfo);
+    if (minBinWidth != Mantid::EMPTY_INT())
+      peakFindingStrategy->setMinNBinsPerPeak(minBinWidth);
+    return peakFindingStrategy->findSXPeaks(x, y, e, workspaceIndex);
+  }
+
+  void testWhenFindsAllPeaksWithMinimumBinWidthSpecified() {
+    auto peaks = runFindAllPeaksWithMinBinWidth(std::make_unique<AbsoluteBackgroundStrategy>(3.0), 4);
+
+    TSM_ASSERT("There should be only one peak found.", peaks.get().size() == 1);
+    TSM_ASSERT("The only peak should have a signal value of 7.", peaks.get()[0].getIntensity() == 7.);
+  }
+
+  void testAllPeaksWithMinimumBinWidthSpecifiedFindsNoPeaks() {
+    auto peaks = runFindAllPeaksWithMinBinWidth(std::make_unique<AbsoluteBackgroundStrategy>(3.0), 5);
+
+    ETS_ASSERT_EQUALS(peaks.is_initialized(), false);
+  }
+
+  void testThatFindAllPeaksNSigmaFindPeaks() {
+    // GIVEN
+    std::vector<double> newYValues = {1.5, 2.0, 10.0, 11.0, 14.0, 9.0, 1.5, 1.5, 1.5, 6.0, 9.0, 19.0, 21.5, 1.5, 1.5};
+    std::vector<double> newErrorValues = {1.5, 2.0, 2.0, 5.0, 7.0, 1.5, 1.5, 1.5, 1.5, 3.0, 4.0, 3.0, 2.5, 2.5, 1.5};
+    auto peaks = runAllPeaksNSigma(newYValues, newErrorValues, 3.0);
+
+    // THEN
+    TSM_ASSERT("There should be two peaks that are found.", peaks.get().size() == 2);
+    TSM_ASSERT("The first peak should have a signal value of 14.", peaks.get()[0].getIntensity() == 14.);
+    TSM_ASSERT("The second peak should have a signal value of 21.5", peaks.get()[1].getIntensity() == 21.5);
+  }
+
+  void testThatFindAllPeaksNSigmaFindPeaksWithMinBinWidthRequired() {
+    // GIVEN
+    std::vector<double> newYValues = {1.5, 2.0, 10.0, 11.0, 14.0, 11.0, 9.5, 1.5,
+                                      1.5, 6.0, 9.0,  19.0, 21.5, 20.5, 19.5};
+    std::vector<double> newErrorValues = {1.5, 2.0, 2.0, 5.0, 7.0, 5.5, 6.5, 1.5, 1.5, 3.0, 4.0, 3.0, 12.5, 7.5, 8.5};
+
+    auto peaks = runAllPeaksNSigma(newYValues, newErrorValues, 3.0, 4);
+
+    // THEN
+    TSM_ASSERT("There should be two peaks that are found.", peaks.get().size() == 1);
+    TSM_ASSERT("The first peak should have a signal value of 14.", peaks.get()[0].getIntensity() == 14.);
+  }
+
+  void testThatFindAllPeaksNSigmaFindPeaksAtBoundary() {
+    // GIVEN
+    std::vector<double> newYValues = {1.5, 2.0, 10.0, 11.0, 14.0, 9.0, 1.5, 1.5, 1.5, 6.0, 9.0, 19.0, 21.5, 22.5, 23.5};
+    std::vector<double> newErrorValues = {1.5, 2.0, 5.0, 5.0, 7.0, 1.5, 1.5, 1.5, 1.5, 3.0, 4.0, 3.0, 2.5, 2.5, 1.5};
+    auto peaks = runAllPeaksNSigma(newYValues, newErrorValues, 3.0);
+
+    // THEN
+    TSM_ASSERT("There should be two peaks that are found.", peaks.get().size() == 1);
+    TSM_ASSERT("The second peak should have a signal value of 21.5", peaks.get()[0].getIntensity() == 23.5);
+  }
+
+  void testWhenAllPeaksNSigmaFindsNoPeaks() {
+    std::vector<double> newYValues = {1.5, 2.0, 10.0, 11.0, 14.0, 9.0, 1.5, 1.5, 1.5, 6.0, 9.0, 19.0, 21.5, 1.5, 1.5};
+    std::vector<double> newErrorValues = {1.5, 2.0, 5.0, 5.0, 7.0, 1.5, 1.5, 1.5, 1.5, 3.0, 2.0, 4.0, 6.5, 2.5, 1.5};
+    auto peaks = runAllPeaksNSigma(newYValues, newErrorValues, 3.0);
+
+    ETS_ASSERT_EQUALS(peaks.is_initialized(), false);
+  }
+
+  PeakList runAllPeaksNSigma(const std::vector<double> &newYValues, const std::vector<double> &newEValues,
+                             const double nsigma, int minBinWidth = Mantid::EMPTY_INT()) {
+    // GIVEN
+    auto workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2 /*nhist*/, 15 /*nbins*/);
+    const int workspaceIndex = 1;
+    auto &mutableY = workspace->mutableY(workspaceIndex);
+    auto &mutableE = workspace->mutableE(workspaceIndex);
+
+    doAddNSigmaPeakToData(mutableY, newYValues, mutableE, newEValues);
+
+    const auto &x = workspace->x(workspaceIndex);
+    const auto &y = workspace->y(workspaceIndex);
+    const auto &e = workspace->e(workspaceIndex);
+    const auto &spectrumInfo = workspace->spectrumInfo();
+
+    // WHEN
+    auto peakFindingStrategy = std::make_unique<NSigmaPeaksStrategy>(spectrumInfo, nsigma);
+    if (minBinWidth != Mantid::EMPTY_INT()) {
+      peakFindingStrategy->setMinNBinsPerPeak(minBinWidth);
+    }
+
+    auto peaks = peakFindingStrategy->findSXPeaks(x, y, e, workspaceIndex);
+    return peaks;
   }
 
   void testThatThrowsWhenBackgroundStrategyIsNotAbsoluteBackgroundStrategyWhenUsingAllPeaksStrategy() {
@@ -333,11 +437,12 @@ private:
 
     const auto &x = workspace->x(workspaceIndex);
     const auto &y = workspace->y(workspaceIndex);
+    const auto &e = workspace->e(workspaceIndex);
     const auto &spectrumInfo = workspace->spectrumInfo();
 
     // WHEN
     auto peakFindingStrategy = std::make_unique<StrongestPeaksStrategy>(backgroundStrategy, spectrumInfo);
-    auto peaks = peakFindingStrategy->findSXPeaks(x, y, workspaceIndex);
+    auto peaks = peakFindingStrategy->findSXPeaks(x, y, e, workspaceIndex);
 
     // THEN
     TSM_ASSERT("There should only be one peak that is found.", peaks.get().size() == 1);
@@ -353,6 +458,20 @@ private:
 
     for (size_t index = 0; index < y.size(); ++index) {
       y[index] = newDataValues[index];
+    }
+  }
+
+  void doAddNSigmaPeakToData(Mantid::HistogramData::HistogramY &y, const std::vector<double> &newYValues,
+                             Mantid::HistogramData::HistogramE &e, const std::vector<double> &newErrorValues) {
+
+    if (y.size() != newYValues.size() || e.size() != newErrorValues.size()) {
+      throw std::runtime_error("The data sizes don't match. This is a test setup issue. "
+                               "Make sure there is one fake data point per entry in the histogram.");
+    }
+
+    for (size_t index = 0; index < y.size(); ++index) {
+      y[index] = newYValues[index];
+      e[index] = newErrorValues[index];
     }
   }
 };

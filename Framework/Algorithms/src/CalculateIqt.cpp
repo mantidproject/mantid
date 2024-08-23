@@ -138,7 +138,14 @@ void CalculateIqt::exec() {
   bool enforceNormalization = getProperty("EnforceNormalization");
   const int nIterations = getProperty("NumberOfIterations");
   const int seed = getProperty("SeedValue");
-  resolution = normalizedFourierTransform(resolution, rebinParams, enforceNormalization);
+
+  m_sampleIntegral = integration(rebin(sampleWorkspace, rebinParams));
+  m_resolutionIntegral = integration(rebin(resolution, rebinParams));
+
+  resolution = fourierTransform(resolution, rebinParams);
+  if (enforceNormalization) {
+    resolution = divide(resolution, m_resolutionIntegral);
+  }
 
   auto outputWorkspace = monteCarloErrorCalculation(sampleWorkspace, resolution, rebinParams, seed, calculateErrors,
                                                     nIterations, enforceNormalization);
@@ -265,24 +272,20 @@ MatrixWorkspace_sptr CalculateIqt::replaceSpecialValues(const MatrixWorkspace_sp
   return specialValuesAlgorithm->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr CalculateIqt::normalizedFourierTransform(MatrixWorkspace_sptr workspace,
-                                                              const std::string &rebinParams,
-                                                              const bool enforceNormalization) {
+MatrixWorkspace_sptr CalculateIqt::fourierTransform(MatrixWorkspace_sptr workspace, const std::string &rebinParams) {
   workspace = rebin(workspace, rebinParams);
-  auto workspace_int = integration(workspace);
   workspace = convertToPointData(workspace);
   workspace = extractFFTSpectrum(workspace);
-  if (enforceNormalization) {
-    return divide(workspace, workspace_int);
-  }
-  // return the output workspace of ExtractFFTSpectrum
   return workspace;
 }
 
 MatrixWorkspace_sptr CalculateIqt::calculateIqt(MatrixWorkspace_sptr workspace,
                                                 const MatrixWorkspace_sptr &resolutionWorkspace,
                                                 const std::string &rebinParams, const bool enforceNormalization) {
-  workspace = normalizedFourierTransform(workspace, rebinParams, enforceNormalization);
+  workspace = fourierTransform(workspace, rebinParams);
+  if (enforceNormalization) {
+    workspace = divide(workspace, m_sampleIntegral);
+  }
   return divide(workspace, resolutionWorkspace);
 }
 

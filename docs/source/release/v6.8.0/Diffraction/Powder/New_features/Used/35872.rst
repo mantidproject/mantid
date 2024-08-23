@@ -1,1 +1,0 @@
-- :ref:`PowderReduceP2D <algm-PowderReduceP2D>` has been adapted to work with SNAP measuring data.

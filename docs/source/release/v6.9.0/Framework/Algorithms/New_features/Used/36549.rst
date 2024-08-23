@@ -1,1 +1,0 @@
-- Add support for fine-grained gitHub access tokens for authenticated calls. Can be set via ``network.github.api_token`` in Mantid.user.properties.

@@ -11,10 +11,10 @@ import numpy as np
 from numbers import Real
 from scipy.signal import convolve
 
-from mantid.kernel import logger as mantid_logger
 import abins
 from abins.constants import ALL_KEYWORDS_ATOMS_S_DATA, ALL_SAMPLE_FORMS, ATOM_LABEL, FLOAT_TYPE, S_LABEL
 from abins.instruments.directinstrument import DirectInstrument
+from abins.logging import get_logger, Logger
 import abins.parameters
 
 # Type annotation for atom items e.g. data['atom_1']
@@ -378,7 +378,7 @@ class SData(collections.abc.Sequence):
                 spectrum = convolve(atom_data["s"][f"order_{order_index}"], fundamental_spectrum, mode="full")[: fundamental_spectrum.size]
                 self._data[atom_key]["s"][f"order_{order_index + 1}"] = spectrum
 
-    def check_thresholds(self, return_cases: bool = False, logger=None, logging_level: str = "warning"):
+    def check_thresholds(self, return_cases: bool = False, logger: Optional[Logger] = None, logging_level: str = "warning"):
         """
         Compare the S data values to minimum thresholds and warn if the threshold appears large relative to the data
 
@@ -396,8 +396,7 @@ class SData(collections.abc.Sequence):
 
         """
 
-        if logger is None:
-            logger = mantid_logger
+        logger = get_logger(logger=logger)
         logger_call = getattr(logger, logging_level)
 
         warning_cases = []
@@ -508,8 +507,7 @@ class SData(collections.abc.Sequence):
         return len(self._data)
 
     @overload  # F811
-    def __getitem__(self, item: int) -> OneAtomSData:
-        ...
+    def __getitem__(self, item: int) -> OneAtomSData: ...
 
     @overload  # F811
     def __getitem__(self, item: slice) -> List[OneAtomSData]:  # F811
@@ -586,8 +584,7 @@ class SDataByAngle(collections.abc.Sequence):
         return len(self.angles)
 
     @overload  # F811
-    def __getitem__(self, item: int) -> SData:
-        ...
+    def __getitem__(self, item: int) -> SData: ...
 
     @overload  # F811
     def __getitem__(self: SDBA, item: slice) -> SDBA:  # F811

@@ -111,6 +111,19 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         self.assertAlmostEqual(data3.getSignalArray().max(), 16 / 25 * 420 / 621)
         self.assertAlmostEqual(data3.getErrorSquaredArray().max(), (16 / 25) ** 2 * (1 / 16 + 1 / 25) * (420 / 621) ** 2)
 
+    def testDetectorGrouping(self):
+        data = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", Grouping="None")
+        data_2x2 = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", Grouping="2x2")
+        data_4x4 = HB3AAdjustSampleNorm("HB3A_data.nxs", OutputType="Detector", NormaliseBy="None", Grouping="4x4")
+
+        ref_sum = data.getSignalArray().sum()
+        self.assertAlmostEqual(ref_sum, data_2x2.getSignalArray().sum())
+        self.assertAlmostEqual(ref_sum, data_4x4.getSignalArray().sum())
+
+        ref_shape = data.getSignalArray().shape
+        self.assertEqual(ref_shape, tuple([2 * val if i < 2 else val for i, val in enumerate(data_2x2.getSignalArray().shape)]))
+        self.assertEqual(ref_shape, tuple([4 * val if i < 2 else val for i, val in enumerate(data_4x4.getSignalArray().shape)]))
+
 
 if __name__ == "__main__":
     unittest.main()

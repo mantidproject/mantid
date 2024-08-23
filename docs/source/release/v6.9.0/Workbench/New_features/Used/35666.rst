@@ -1,1 +1,0 @@
-- Added new options in the plot settings which let users set default X and Y ranges for spectra plots effectively zooming in on open.

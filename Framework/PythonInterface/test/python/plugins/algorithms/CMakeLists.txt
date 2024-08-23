@@ -4,6 +4,7 @@ add_subdirectory(WorkflowAlgorithms)
 
 set(TEST_PY_FILES
     AbinsBasicTest.py
+    Abins2BasicTest.py
     AbinsAdvancedParametersTest.py
     AlignComponentsTest.py
     AngularAutoCorrelationsSingleAxisTest.py
@@ -51,9 +52,11 @@ set(TEST_PY_FILES
     FitGaussianTest.py
     FindGoniometerFromUBTest.py
     FindGlobalBMatrixTest.py
+    FindMultipleUMatricesTest.py
     FindSXPeaksConvolveTest.py
     FitIncidentSpectrumTest.py
     FractionalIndexingTest.py
+    GenerateGroupingSNSInelasticTest.py
     GenerateLogbookTest.py
     GetEiT0atSNSTest.py
     GroupBySampleChangerPositionTest.py
@@ -68,6 +71,7 @@ set(TEST_PY_FILES
     IndexPeaksTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
+    IntegratePeaks1DProfileTest.py
     IntegratePeaksShoeboxTOFTest.py
     IntegratePeaksSkewTest.py
     LeadPressureCalcTest.py
@@ -112,6 +116,7 @@ set(TEST_PY_FILES
     SANSWideAngleCorrectionTest.py
     SaveGEMMAUDParamFileTest.py
     SaveNexusPDTest.py
+    SaveMDHistoToVTKTest.py
     SaveGSSCWTest.py
     SaveHKLCWTest.py
     SaveINSTest.py

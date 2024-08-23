@@ -1,0 +1,1 @@
+- Add support for :ref:`Ragged Workspaces <Ragged_Workspace>` to binary operations. :ref:`Plus <algm-Plus>`, :ref:`Minus <algm-Minus>`, :ref:`Divide <algm-Divide>` and :ref:`Multiply <algm-Multiply>`.

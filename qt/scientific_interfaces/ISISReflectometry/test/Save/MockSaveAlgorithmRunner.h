@@ -18,8 +18,8 @@ public:
   MOCK_CONST_METHOD7(runSaveAsciiAlgorithm,
                      void(const Mantid::API::Workspace_sptr &, std::string const &, std::string const &,
                           std::vector<std::string> const &, const bool &, const bool &, std::string const &));
-  MOCK_CONST_METHOD3(runSaveORSOAlgorithm,
-                     void(const Mantid::API::Workspace_sptr &, std::string const &, const bool &));
+  MOCK_CONST_METHOD4(runSaveORSOAlgorithm,
+                     void(std::vector<std::string> const &, std::string const &, const bool &, const bool &));
 };
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
 GNU_DIAG_ON_SUGGEST_OVERRIDE

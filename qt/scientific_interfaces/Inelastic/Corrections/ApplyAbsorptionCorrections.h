@@ -11,17 +11,22 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 #include "ui_ApplyAbsorptionCorrections.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INELASTIC_DLL ApplyAbsorptionCorrections : public CorrectionsTab {
+class MANTIDQT_INELASTIC_DLL ApplyAbsorptionCorrections : public CorrectionsTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
   ApplyAbsorptionCorrections(QWidget *parent = nullptr);
   ~ApplyAbsorptionCorrections();
+
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
 
 private slots:
   /// Handles a new sample being loaded
@@ -38,23 +43,16 @@ private slots:
   void postProcessComplete(bool error);
   /// Handles mantid plot and save
   void saveClicked();
-  void runClicked();
   void plotCurrentPreview();
 
 private:
-  void setup() override;
-  void run() override;
-  bool validate() override;
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
 
   void addInterpolationStep(const Mantid::API::MatrixWorkspace_sptr &toInterpolate, std::string toMatch);
   void plotInPreview(const QString &curveName, Mantid::API::MatrixWorkspace_sptr &ws, const QColor &curveColor);
 
-  void setRunEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
-  void setButtonsEnabled(bool enabled);
-  void setRunIsRunning(bool running);
 
   Ui::ApplyAbsorptionCorrections m_uiForm;
 

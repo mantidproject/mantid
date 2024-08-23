@@ -1,1 +1,0 @@
-- Fixed bug where Workbench can hang if you close a plot while an algorithm is processing.

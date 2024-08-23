@@ -1,0 +1,1 @@
+- Fixed error when plotting a histogram of live data.

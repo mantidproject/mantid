@@ -43,8 +43,7 @@ private:
   API::MatrixWorkspace_sptr replaceSpecialValues(const API::MatrixWorkspace_sptr &workspace);
 
   API::MatrixWorkspace_sptr removeInvalidData(API::MatrixWorkspace_sptr workspace);
-  API::MatrixWorkspace_sptr normalizedFourierTransform(API::MatrixWorkspace_sptr workspace,
-                                                       const std::string &rebinParams, const bool enforceNormalization);
+  API::MatrixWorkspace_sptr fourierTransform(API::MatrixWorkspace_sptr workspace, const std::string &rebinParams);
   API::MatrixWorkspace_sptr calculateIqt(API::MatrixWorkspace_sptr workspace,
                                          const API::MatrixWorkspace_sptr &resolutionWorkspace,
                                          const std::string &rebinParams, const bool enforceNormalization);
@@ -54,6 +53,9 @@ private:
   API::MatrixWorkspace_sptr
   setErrorsToStandardDeviation(const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);
   API::MatrixWorkspace_sptr setErrorsToZero(const std::vector<API::MatrixWorkspace_sptr> &simulatedWorkspaces);
+
+  API::MatrixWorkspace_sptr m_sampleIntegral;
+  API::MatrixWorkspace_sptr m_resolutionIntegral;
 };
 
 } // namespace Algorithms

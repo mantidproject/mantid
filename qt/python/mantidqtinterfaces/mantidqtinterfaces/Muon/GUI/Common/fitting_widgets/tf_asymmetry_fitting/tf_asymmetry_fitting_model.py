@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import AlgorithmManager, logger
-from mantid.api import IFunction
+from mantid.api import CompositeFunction, IFunction, MultiDomainFunction
 from mantid.simpleapi import CopyLogs, ConvertFitFunctionForMuonTFAsymmetry
 
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
@@ -94,14 +94,18 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
         """Updates the TF Asymmetry and normal simultaneous fit function based on the function from a TFA fit."""
         self.fitting_context.tf_asymmetry_simultaneous_function = tf_asymmetry_simultaneous_function
 
-        if self.fitting_context.number_of_datasets > 1:
+        if isinstance(self.fitting_context.simultaneous_fit_function, MultiDomainFunction) and isinstance(
+            tf_asymmetry_simultaneous_function, MultiDomainFunction
+        ):
             self._update_parameters_of_multi_domain_simultaneous_function_from(tf_asymmetry_simultaneous_function)
         else:
             self.fitting_context.simultaneous_fit_function = self._get_normal_fit_function_from(tf_asymmetry_simultaneous_function)
 
     def _update_parameters_of_multi_domain_simultaneous_function_from(self, tf_asymmetry_simultaneous_function: IFunction) -> None:
         """Updates the parameters in the normal simultaneous function based on a TF Asymmetry simultaneous function."""
-        for domain_index in range(tf_asymmetry_simultaneous_function.nFunctions()):
+        for domain_index in range(
+            min([tf_asymmetry_simultaneous_function.nFunctions(), self.fitting_context.simultaneous_fit_function.nFunctions()])
+        ):
             tf_asymmetry_domain_function = tf_asymmetry_simultaneous_function.getFunction(domain_index)
             parameter_values, errors = self.get_fit_function_parameter_values(
                 self._get_normal_fit_function_from(tf_asymmetry_domain_function)
@@ -112,7 +116,7 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
     def get_domain_tf_asymmetry_fit_function(self, tf_simultaneous_function: IFunction, dataset_index: int) -> IFunction:
         """Returns the fit function in the TF Asymmetry simultaneous function corresponding to the specified index."""
-        if self.fitting_context.number_of_datasets < 2 or tf_simultaneous_function is None:
+        if self.fitting_context.number_of_datasets < 2 or not isinstance(tf_simultaneous_function, MultiDomainFunction):
             return tf_simultaneous_function
 
         index = dataset_index if dataset_index is not None else 0
@@ -298,10 +302,11 @@ class TFAsymmetryFittingModel(GeneralFittingModel):
 
     def _get_normal_fit_function_from(self, tf_asymmetry_function: IFunction) -> IFunction:
         """Returns the ordinary fit function embedded within the TF Asymmetry fit function."""
-        if tf_asymmetry_function is not None:
-            return tf_asymmetry_function.getFunction(0).getFunction(1).getFunction(1)
-        else:
-            return tf_asymmetry_function
+        if isinstance(tf_asymmetry_function, CompositeFunction):
+            domain_function = tf_asymmetry_function.getFunction(0)
+            if isinstance(domain_function, CompositeFunction) and isinstance(domain_function.getFunction(1), CompositeFunction):
+                return domain_function.getFunction(1).getFunction(1)
+        return None
 
     def _update_tf_asymmetry_parameter_value(self, dataset_index: int, full_parameter: str, value: float) -> None:
         """Updates a parameters value within the current TF Asymmetry single function or simultaneous function."""

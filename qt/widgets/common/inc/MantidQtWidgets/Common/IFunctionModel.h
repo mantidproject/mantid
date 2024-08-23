@@ -46,8 +46,8 @@ public:
   virtual IFunction_sptr getCurrentFunction() const = 0;
   virtual void setNumberDomains(int) = 0;
   virtual void setDatasets(const QList<FunctionModelDataset> &datasets) = 0;
-  virtual QStringList getDatasetNames() const = 0;
-  virtual QStringList getDatasetDomainNames() const = 0;
+  virtual std::vector<std::string> getDatasetNames() const = 0;
+  virtual std::vector<std::string> getDatasetDomainNames() const = 0;
   virtual int getNumberDomains() const = 0;
   virtual int currentDomainIndex() const = 0;
   virtual void setCurrentDomainIndex(int) = 0;
@@ -73,6 +73,8 @@ public:
   virtual void setLocalParameterConstraint(std::string const &parameterName, int i, std::string const &constraint) = 0;
   virtual void setGlobalParameterValue(std::string const &parameterName, double value) = 0;
   virtual std::string setBackgroundA0(double value) = 0;
+  virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
+  virtual void setQValues(const std::vector<double> &qValues) = 0;
 
 protected:
   static void copyParametersAndErrors(const IFunction &funFrom, IFunction &funTo);

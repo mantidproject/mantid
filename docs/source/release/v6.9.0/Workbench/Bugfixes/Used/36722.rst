@@ -1,1 +1,0 @@
-- Fixed a bug where fixed properties in the fitting view could not be un-fixed.

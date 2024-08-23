@@ -1,1 +1,0 @@
-- Improved behaviour of the load dialog with event workspaces so that it doesn't expand off the bottom of the screen.

@@ -1,1 +1,0 @@
-- :ref:`ExtractSpectra <algm-ExtractSpectra>` no longer sorts events when doing x-range trimming. The algorithm that extracts the events does not require it. This will likely move execution time of workflows from ExtractSpectra to elsewhere, but the overall execution may be reduced.

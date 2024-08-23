@@ -10,18 +10,19 @@ from typing import Optional, Union, List
 import re
 from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, Measurement
 from orsopy.fileio import Reduction, Software
-from orsopy.fileio.orso import Orso, OrsoDataset, save_orso
-from orsopy.fileio.base import Column, ErrorColumn
+from orsopy.fileio.orso import Orso, OrsoDataset, save_orso, save_nexus
+from orsopy.fileio.base import Column, ErrorColumn, File
 
 from mantid.kernel import version
 from enum import Enum
 
 
 class MantidORSOSaver:
-    FILE_EXT = ".ort"
+    ASCII_FILE_EXT = ".ort"
+    NEXUS_FILE_EXT = ".orb"
 
     def __init__(self, filename: str, comment: str = None) -> None:
-        self._filename = filename if filename.endswith(self.FILE_EXT) else f"{filename}{self.FILE_EXT}"
+        self._filename = filename
         self._comment = comment
         self._datasets = []
 
@@ -33,7 +34,17 @@ class MantidORSOSaver:
         self._datasets.append(dataset.dataset)
 
     def save_orso_ascii(self) -> None:
-        save_orso(datasets=self._datasets, fname=self._filename, comment=self._comment)
+        save_orso(datasets=self._datasets, fname=self._get_filename_with_extension(self.ASCII_FILE_EXT), comment=self._comment)
+
+    def save_orso_nexus(self) -> None:
+        save_nexus(datasets=self._datasets, fname=self._get_filename_with_extension(self.NEXUS_FILE_EXT), comment=self._comment)
+
+    def _get_filename_with_extension(self, extension):
+        return self._filename if self._filename.endswith(extension) else f"{self._filename}{extension}"
+
+    @staticmethod
+    def is_supported_extension(filename):
+        return filename.endswith(MantidORSOSaver.ASCII_FILE_EXT) or filename.endswith(MantidORSOSaver.NEXUS_FILE_EXT)
 
 
 class MantidORSODataset:
@@ -69,6 +80,21 @@ class MantidORSODataset:
 
     def set_doi(self, doi: str) -> None:
         self._header.data_source.experiment.doi = doi
+
+    def set_reduction_call(self, call: str) -> None:
+        self._header.reduction.call = call
+
+    def add_measurement_data_file(self, filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None) -> None:
+        self._header.data_source.measurement.data_files.append(self._create_file(filename, timestamp, comment))
+
+    def add_measurement_additional_file(self, filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None) -> None:
+        if self._header.data_source.measurement.additional_files is None:
+            self._header.data_source.measurement.additional_files = []
+        self._header.data_source.measurement.additional_files.append(self._create_file(filename, timestamp, comment))
+
+    @staticmethod
+    def _create_file(filename: str, timestamp: Optional[datetime] = None, comment: Optional[str] = None) -> File:
+        return File(filename, timestamp, comment)
 
     def _create_mandatory_header(
         self, ws, dataset_name: str, reduction_timestamp: datetime, creator_name: str, creator_affiliation: str
@@ -127,8 +153,10 @@ class MantidORSODataset:
 class MantidORSODataColumns:
     # Data column units
     class Unit(Enum):
-        Angstrom = "1/angstrom"
-        Nm = "1/nm"
+        Angstrom = "angstrom"
+        InverseAngstrom = "1/angstrom"
+        InverseNm = "1/nm"
+        Degrees = "degrees"
 
     # Data column labels
     LABEL_Q = "Qz"
@@ -154,7 +182,7 @@ class MantidORSODataColumns:
         reflectivity_data: np.ndarray,
         reflectivity_error: Optional[np.ndarray] = None,
         q_resolution: Optional[np.ndarray] = None,
-        q_unit: Unit = Unit.Angstrom,
+        q_unit: Unit = Unit.InverseAngstrom,
         r_error_value_is: Optional[ErrorValue] = ErrorValue.Sigma,
         q_error_value_is: Optional[ErrorValue] = ErrorValue.Sigma,
     ):
@@ -162,7 +190,7 @@ class MantidORSODataColumns:
         self._data = []
 
         # Add the first two mandatory columns
-        self._add_column(name=self.LABEL_Q, unit=q_unit.value, physical_quantity=self.QUANTITY_Q, data=q_data)
+        self._add_column(name=self.LABEL_Q, unit=q_unit, physical_quantity=self.QUANTITY_Q, data=q_data)
         self._add_column(name=self.LABEL_REFLECTIVITY, unit=None, physical_quantity=self.QUANTITY_REFLECTIVITY, data=reflectivity_data)
 
         # Add the third and fourth strongly recommended columns, if data is available
@@ -183,7 +211,7 @@ class MantidORSODataColumns:
     def data(self) -> np.ndarray:
         return np.array(self._data).T
 
-    def add_column(self, name: str, unit, physical_quantity: str, data: np.ndarray) -> None:
+    def add_column(self, name: str, unit: [Unit, str], physical_quantity: str, data: np.ndarray) -> None:
         # The third and fourth strongly recommended columns are required if further columns are to be added
         self._ensure_recommended_columns_are_present(data)
         self._add_column(name, unit, physical_quantity, data)
@@ -193,8 +221,9 @@ class MantidORSODataColumns:
         self._ensure_recommended_columns_are_present(data)
         self._add_error_column(error_of, error_type, value_is, data)
 
-    def _add_column(self, name: str, unit, physical_quantity: str, data: np.ndarray) -> None:
-        self._header_info.append(Column(name=name, unit=unit, physical_quantity=physical_quantity))
+    def _add_column(self, name: str, unit: [Unit, str], physical_quantity: str, data: np.ndarray) -> None:
+        unit_value = unit.value if isinstance(unit, self.Unit) else unit
+        self._header_info.append(Column(name=name, unit=unit_value, physical_quantity=physical_quantity))
         self._data.append(data)
 
     def _add_error_column(self, error_of: str, error_type: ErrorType, value_is: Optional[ErrorValue], data: np.ndarray) -> None:

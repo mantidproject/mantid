@@ -20,6 +20,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Types::Core;
 
 class CompressEventsTest : public CxxTest::TestSuite {
 public:
@@ -32,7 +33,6 @@ public:
   void test_InvalidInputs() {
     CompressEvents alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT_THROWS(alg.setPropertyValue("Tolerance", "-1.0"), const std::invalid_argument &);
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Tolerance", "0.0"));
   }
 
@@ -128,4 +128,75 @@ public:
   void test_InPlace_ZeroTolerance_WithPulseTime() {
     doTest("CompressEvents_input", "CompressEvents_input", 0.0, 50, .001);
   }
+
+  void doLogarithmicTest(const std::string &binningMode, const double tolerance, double wallClockTolerance = 0.) {
+    EventWorkspace_sptr input, output;
+    EventType eventType = WEIGHTED_NOTIME;
+    if (wallClockTolerance > 0.)
+      eventType = WEIGHTED;
+
+    /** Create event workspace with:
+     * 1 pixels (or another number)
+     * 64 histogrammed bins from 0.0 in steps of 1.0
+     * 128 events; two in each bin, at time 1.0, 2.0, etc.
+     * PulseTime = 1 second, 2 seconds, etc.
+     */
+    input = WorkspaceCreationHelper::createEventWorkspace(1, 64, 64, 0, 1, 2);
+    AnalysisDataService::Instance().addOrReplace("CompressEvents_input", input);
+
+    TS_ASSERT_EQUALS(input->getNumberEvents(), 128);
+    const double inputIntegral = input->getSpectrum(0).integrate(0., 100., true);
+
+    CompressEvents alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "CompressEvents_input");
+    alg.setPropertyValue("OutputWorkspace", "CompressEvents_output");
+    alg.setProperty("Tolerance", tolerance);
+    alg.setPropertyValue("BinningMode", binningMode);
+    if (wallClockTolerance > 0.) {
+      alg.setProperty("WallClockTolerance", wallClockTolerance);
+      alg.setProperty("StartTime",
+                      "2010-01-01T00:00:00"); // copied from createEventWorkspace
+    }
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("CompressEvents_output");
+
+    TS_ASSERT_EQUALS(output->getNumberEvents(), 7);
+    TS_ASSERT_EQUALS(output->getEventType(), eventType);
+    TS_ASSERT_DELTA(output->getSpectrum(0).integrate(0., 100., true), inputIntegral, 1.e-6);
+
+    EventList el = output->getSpectrum(0);
+    TS_ASSERT_DELTA(el.getEvent(0).weight(), 2.0, 1e-6);
+    TS_ASSERT_DELTA(el.getEvent(0).errorSquared(), 2.0, 1e-6);
+    TS_ASSERT_DELTA(el.getEvent(0).tof(), 0.5, 1e-6);
+    for (int i = 1; i < 7; i++) {
+      TS_ASSERT_DELTA(el.getEvent(i).weight(), 1.0 * pow(2, i), 1e-6);
+      TS_ASSERT_DELTA(el.getEvent(i).errorSquared(), 1.0 * pow(2, i), 1e-6);
+      TS_ASSERT_DELTA(el.getEvent(i).tof(), 0.75 * pow(2, i), 1e-6);
+    }
+
+    if (wallClockTolerance > 0.) {
+      const auto startTime = DateAndTime("2010-01-01T00:00:00");
+      TS_ASSERT_EQUALS(el.getEvent(0).pulseTime(), startTime);
+      TS_ASSERT_EQUALS(el.getEvent(1).pulseTime(), startTime + 1.0);
+      TS_ASSERT_EQUALS(el.getEvent(2).pulseTime(), startTime + 2.5);
+      TS_ASSERT_EQUALS(el.getEvent(3).pulseTime(), startTime + 5.5);
+      TS_ASSERT_EQUALS(el.getEvent(4).pulseTime(), startTime + 11.5);
+      TS_ASSERT_EQUALS(el.getEvent(5).pulseTime(), startTime + 23.5);
+      TS_ASSERT_EQUALS(el.getEvent(6).pulseTime(), startTime + 47.5);
+    } else {
+      const auto timeZero = DateAndTime{0};
+      for (int i = 0; i < 7; i++) {
+        TS_ASSERT_EQUALS(el.getEvent(i).pulseTime(), timeZero);
+      }
+    }
+  }
+
+  void test_Logarithmic_binning() { doLogarithmicTest("Logarithmic", 1.); }
+  void test_Logarithmic_binning_default() { doLogarithmicTest("Default", -1.); }
+  void test_Logarithmic_binning_WithPulseTime() { doLogarithmicTest("Logarithmic", 1., 64); }
+  void test_Logarithmic_binning_default_WithPulseTime() { doLogarithmicTest("Default", -1., 64); }
 };

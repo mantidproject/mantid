@@ -1,1 +1,0 @@
-- :ref:`PDCalibration <algm-PDCalibration>` has two new parameters, ``StartWorkspaceIndex`` and ``StopWorkspaceIndex``, which limit which spectra are calibrated

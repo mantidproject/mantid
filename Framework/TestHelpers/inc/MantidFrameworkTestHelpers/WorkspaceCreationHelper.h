@@ -38,7 +38,8 @@
 namespace Mantid {
 namespace DataObjects {
 class PeaksWorkspace;
-}
+class LeanElasticPeaksWorkspace;
+} // namespace DataObjects
 namespace Kernel {
 class Logger;
 class V3D;
@@ -365,6 +366,15 @@ std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> createPeaksWorkspace(const 
 /// matrix
 std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> createPeaksWorkspace(const int numPeaks,
                                                                           const Mantid::Kernel::DblMatrix &ubMat);
+
+/// Create a simple lean peaks workspace containing the given number of peaks
+std::shared_ptr<Mantid::DataObjects::LeanElasticPeaksWorkspace>
+createLeanPeaksWorkspace(const int numPeaks, const bool createOrientedLattice = false);
+/// Create a simple lean peaks workspace containing the given number of peaks and UB
+/// matrix
+std::shared_ptr<Mantid::DataObjects::LeanElasticPeaksWorkspace>
+createLeanPeaksWorkspace(const int numPeaks, const Mantid::Kernel::DblMatrix &ubMat);
+
 /**Build table workspace with preprocessed detectors for existing workspace with
  * instrument */
 std::shared_ptr<Mantid::DataObjects::TableWorkspace>

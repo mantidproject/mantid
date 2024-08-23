@@ -1,1 +1,0 @@
-- Fixed bug where it was not possible to remove the grid lines on a plot once they had been added.

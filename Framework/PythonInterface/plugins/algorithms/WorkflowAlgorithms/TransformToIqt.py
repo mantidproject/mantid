@@ -157,10 +157,9 @@ class TransformToIqt(PythonAlgorithm):
         end_prog = 0.3 if self._calculate_errors else 0.9
         workflow_prog = Progress(self, start=0.0, end=end_prog, nreports=8)
         workflow_prog.report("Cropping Workspace")
-        CropWorkspace(InputWorkspace=self._sample, OutputWorkspace="__TransformToIqt_sample_cropped", Xmin=self._e_min, Xmax=self._e_max)
+        cropped_workspace = CropWorkspace(InputWorkspace=self._sample, Xmin=self._e_min, Xmax=self._e_max, StoreInADS=False)
         workflow_prog.report("Calculating table properties")
-        x_data = mtd["__TransformToIqt_sample_cropped"].readX(0)
-        number_input_points = len(x_data) - 1
+        number_input_points = cropped_workspace.blocksize()
         num_bins = int(number_input_points / self._number_points_per_bin)
         self._e_width = (abs(self._e_min) + abs(self._e_max)) / num_bins
 
@@ -220,10 +219,6 @@ class TransformToIqt(PythonAlgorithm):
                 resolution_bins,
             ]
         )
-
-        workflow_prog.report("Deleting temp Workspace")
-        if mtd.doesExist("__TransformToIqt_sample_cropped"):
-            DeleteWorkspace("__TransformToIqt_sample_cropped")
 
         self.setProperty("ParameterWorkspace", param_table)
 

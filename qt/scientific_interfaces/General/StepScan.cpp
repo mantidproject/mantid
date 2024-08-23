@@ -46,7 +46,7 @@ using namespace Mantid::API;
 /// Constructor
 StepScan::StepScan(QWidget *parent)
     : UserSubWindow(parent), m_instrument(ConfigService::Instance().getInstrument().name()),
-      m_algRunner(new API::AlgorithmRunner(this)), m_addObserver(*this, &StepScan::handleAddEvent),
+      m_algRunner(new API::QtAlgorithmRunner(this)), m_addObserver(*this, &StepScan::handleAddEvent),
       m_replObserver(*this, &StepScan::handleReplEvent), m_replaceObserverAdded(false) {}
 
 StepScan::~StepScan() {

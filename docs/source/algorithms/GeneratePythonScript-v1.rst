@@ -13,12 +13,15 @@ Retrieves the algorithm history of the workspace and saves it to a
 Python script file or Python variable.
 
 A time range can be specified which will restrict the algorithms in
-the scrit to those which were executed between the given times,
-if no end time was specified then algorithms from the start time up
+the script to those which were executed between the given times.
+If no end time was specified then algorithms from the start time up
 to the current time will be included in the generated script.
 
 Start and end times are given in ISO8601 format: YYYY-MM-DD HH:mm:ss,
 for example 3:25 PM on July the 4th 2014 would be 2014-07-04 15:25:00.
+
+The generated script includes a few lines of header comments at the top.
+The ``ExcludeHeader`` parameter can be used to optionally exclude these.
 
 Usage
 -----

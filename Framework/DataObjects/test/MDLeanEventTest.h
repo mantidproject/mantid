@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidDataObjects/MDLeanEvent.h"
-#include "MantidDataObjects/MortonIndex/WideInt.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>

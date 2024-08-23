@@ -1,0 +1,1 @@
+- Improve shoebox position optimisation in :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` - would previously be centred on nearby stronger peaks if present.

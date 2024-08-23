@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataSelector.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/Workspace.h"
@@ -48,14 +49,6 @@ std::string loadAlgName(const std::string &filePath) {
   return suffix == "dave" ? "LoadDaveGrp" : "Load";
 }
 
-void loadFile(std::string const &filename, std::string const &workspaceName) {
-  auto const loadAlg = AlgorithmManager::Instance().createUnmanaged(loadAlgName(filename));
-  loadAlg->initialize();
-  loadAlg->setProperty("Filename", filename);
-  loadAlg->setProperty("OutputWorkspace", workspaceName);
-  loadAlg->execute();
-}
-
 void makeGroup(std::string const &workspaceName) {
   auto const &ads = AnalysisDataService::Instance();
   if (!ads.retrieveWS<WorkspaceGroup>(workspaceName)) {
@@ -72,7 +65,8 @@ void makeGroup(std::string const &workspaceName) {
 namespace MantidQt::MantidWidgets {
 
 DataSelector::DataSelector(QWidget *parent)
-    : API::MantidWidget(parent), m_algRunner(), m_autoLoad(true), m_showLoad(true), m_alwaysLoadAsGroup(false) {
+    : API::MantidWidget(parent), m_loadProperties(), m_algRunner(), m_autoLoad(true), m_showLoad(true),
+      m_alwaysLoadAsGroup(false) {
   m_uiForm.setupUi(this);
   connect(m_uiForm.cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
   connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SIGNAL(loadClicked()));
@@ -118,6 +112,7 @@ void DataSelector::handleFileInput() {
 
   // attempt to load the file
   if (m_autoLoad) {
+    emit filesAutoLoaded();
     autoLoadFile(filename);
   } else {
     // files were found
@@ -177,7 +172,7 @@ bool DataSelector::isValid() {
         // don't use algorithm runner because we need to know instantly.
         auto const filepath = m_uiForm.rfFileInput->getUserInput().toString().toStdString();
         if (!filepath.empty())
-          loadFile(filepath, wsName);
+          executeLoadAlgorithm(filepath, wsName);
 
         isValid = doesExistInADS(wsName);
 
@@ -185,6 +180,21 @@ bool DataSelector::isValid() {
           m_uiForm.rfFileInput->setFileProblem("The specified workspace is "
                                                "missing from the analysis data "
                                                "service");
+        }
+      } else {
+        auto &ads = AnalysisDataService::Instance();
+        if (!ads.doesExist(wsName)) {
+          return isValid;
+        }
+        auto const workspaceTypes = m_uiForm.wsWorkspaceInput->getWorkspaceTypes();
+        auto const workspace = ads.retrieveWS<Workspace>(wsName);
+        isValid = workspaceTypes.empty() || workspaceTypes.indexOf(QString::fromStdString(workspace->id())) != -1;
+        if (!isValid) {
+          m_uiForm.rfFileInput->setFileProblem("The specified workspace type (" +
+                                               QString::fromStdString(workspace->id()) +
+                                               ") is "
+                                               "not one of the allowed types: " +
+                                               workspaceTypes.join(", "));
         }
       }
     }
@@ -223,14 +233,33 @@ QString DataSelector::getProblem() const {
  */
 void DataSelector::autoLoadFile(const QString &filepath) {
   const auto baseName = getWsNameFromFiles().toStdString();
+  executeLoadAlgorithm(filepath.toStdString(), baseName);
+}
 
-  // create instance of load algorithm
-  const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(loadAlgName(filepath.toStdString()));
+/**
+ * Executes the load algorithm in a background thread using the Algorithm runner
+ *
+ * @param filename :: The filename of the file to be loaded.
+ * @param outputWorkspace :: The name to give the output workspace.
+ */
+void DataSelector::executeLoadAlgorithm(std::string const &filename, std::string const &outputWorkspace) {
+  const auto loadAlg = AlgorithmManager::Instance().createUnmanaged(loadAlgName(filename));
   loadAlg->initialize();
-  loadAlg->setProperty("Filename", filepath.toStdString());
-  loadAlg->setProperty("OutputWorkspace", baseName);
+  loadAlg->setProperty("Filename", filename);
+  loadAlg->setProperty("OutputWorkspace", outputWorkspace);
+  loadAlg->updatePropertyValues(m_loadProperties);
 
   m_algRunner.startAlgorithm(loadAlg);
+}
+
+/**
+ * Set an extra property on the load algorithm before execution
+ *
+ * @param propertyName :: The name of the Load algorithm property to be set
+ * @param value :: The value of the Load algorithm property to be set
+ */
+void DataSelector::setLoadProperty(std::string const &propertyName, bool const value) {
+  Mantid::API::AlgorithmProperties::update(propertyName, value, m_loadProperties);
 }
 
 /**
@@ -448,7 +477,7 @@ void DataSelector::dropEvent(QDropEvent *de) {
     auto const file = extractLastOf(filepath, "/");
     if (fileFound(file)) {
       auto const workspaceName = cutLastOf(file, ".");
-      loadFile(filepath, workspaceName);
+      executeLoadAlgorithm(filepath, workspaceName);
 
       setWorkspaceSelectorIndex(QString::fromStdString(workspaceName));
       m_uiForm.cbInputType->setCurrentIndex(1);

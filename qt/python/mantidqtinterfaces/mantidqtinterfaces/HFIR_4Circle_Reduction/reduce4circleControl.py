@@ -1451,7 +1451,7 @@ class CWSCDReductionControl(object):
 
         # create list of output
         param_list = list()
-        for (exp_number, scan_number) in self._myPeakInfoDict.keys():
+        for exp_number, scan_number in self._myPeakInfoDict.keys():
             peak_int_info = self._myPeakInfoDict[exp_number, scan_number]
 
             # x value
@@ -2427,7 +2427,7 @@ class CWSCDReductionControl(object):
         # wave length
         wavelength = self.get_calibrated_wave_length(exp_number)
         record_lambda = self._preprocessedInfoDict[scan_number]["WaveLength"]
-        if type(record_lambda) != type(wavelength):
+        if type(record_lambda) is not type(wavelength):
             unmatch_score += 20
         elif wavelength is not None and abs(wavelength - record_lambda) > 1.0e-5:
             unmatch_score += 40
@@ -2435,7 +2435,7 @@ class CWSCDReductionControl(object):
         # detector distance
         det_sample_distance = self.get_calibrated_det_sample_distance(exp_number)
         record_distance = self._preprocessedInfoDict[scan_number]["DetSampleDistance"]
-        if type(det_sample_distance) != type(record_distance):
+        if type(det_sample_distance) is not type(record_distance):
             unmatch_score += 200
         elif det_sample_distance is not None and abs(det_sample_distance - record_distance) > 1.0e-5:
             unmatch_score += 400

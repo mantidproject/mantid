@@ -196,6 +196,9 @@ public:
   bool autoTrim() const;
   void setAutoTrim(const bool &setting);
 
+  bool disableReplaceWSButton() const;
+  void setDisableReplaceWSButton(const bool &disable);
+
 protected:
   /// Constructor
   Property(std::string name, const std::type_info &type, const unsigned int &direction = Direction::Input);
@@ -232,6 +235,9 @@ private:
   /// Flag to determine if string inputs to the property should be automatically
   /// trimmed of whitespace
   bool m_autotrim;
+
+  /// Flag to disable the generation of the "Replace Workspace" button on the OutputWorkspace property
+  bool m_disableReplaceWSButton;
 };
 
 /// Compares this to another property for equality

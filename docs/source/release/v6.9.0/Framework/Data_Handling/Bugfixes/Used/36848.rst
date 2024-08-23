@@ -1,1 +1,0 @@
-- Fixed issue where ``timeAverageValue`` was incorrect for ``FilteredTimeSeriesProperty`` data sets with only one data point in the filter.

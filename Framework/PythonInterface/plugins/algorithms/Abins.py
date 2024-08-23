@@ -28,11 +28,20 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         self._scale = None
         self._setting = None
 
-    def category(self) -> str:
+        # Save a copy of bin_width for cleanup after it is mutated
+        self._initial_parameters_bin_width = abins.parameters.sampling["bin_width"]
+
+    @staticmethod
+    def category() -> str:
         return "Simulation"
 
-    def summary(self) -> str:
+    @staticmethod
+    def summary() -> str:
         return "Calculates inelastic neutron scattering against 1-D ω axis."
+
+    @staticmethod
+    def version() -> int:
+        return 1
 
     def seeAlso(self):
         return ["Abins2D"]
@@ -105,6 +114,11 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         # so insert placeholder "1" for now.
         prog_reporter.resetNumSteps(1, 0.1, 0.8)
 
+        if self._autoconvolution:
+            autoconvolution_max = self._max_event_order
+        else:
+            autoconvolution_max = 0
+
         s_calculator = abins.SCalculatorFactory.init(
             filename=self._vibrational_or_phonon_data_file,
             temperature=self._temperature,
@@ -112,10 +126,13 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
             abins_data=ab_initio_data,
             instrument=self._instrument,
             quantum_order_num=self._num_quantum_order_events,
-            autoconvolution=self._autoconvolution,
+            autoconvolution_max=autoconvolution_max,
         )
         s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
+
+        # Clean up parameter modified by _get_properties()
+        abins.parameters.sampling["bin_width"] = self._initial_parameters_bin_width
 
         # Hold reporter at 80% for this message
         prog_reporter.resetNumSteps(1, 0.8, 0.80000001)

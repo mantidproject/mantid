@@ -1,1 +1,0 @@
-- Fix miscalculated Debye-Waller factor in :ref:`ComputeIncoherentDos <algm-ComputeIncoherentDos>`

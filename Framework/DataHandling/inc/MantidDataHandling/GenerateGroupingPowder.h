@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -17,7 +18,7 @@ namespace DataHandling {
 
   @date 2012-07-16
 */
-class MANTID_DATAHANDLING_DLL GenerateGroupingPowder final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL GenerateGroupingPowder : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -29,13 +30,21 @@ public:
 
   static std::string parFilenameFromXmlFilename(const std::string &filename);
 
-private:
-  void saveAsXML();
+protected:
+  void init() override;
+
+  void createGroups();
   void saveAsNexus();
+
+  DataObjects::GroupingWorkspace_sptr m_groupWS;
+
+private:
+  void saveGroups();
+  void saveAsXML();
   void saveAsPAR();
 
-  void init() override;
   void exec() override;
+
   std::map<std::string, std::string> validateInputs() override;
 };
 

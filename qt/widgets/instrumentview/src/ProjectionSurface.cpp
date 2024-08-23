@@ -45,10 +45,10 @@ namespace MantidQt::MantidWidgets {
  * instrument
  */
 ProjectionSurface::ProjectionSurface(const IInstrumentActor *rootActor)
-    : m_instrActor(rootActor), m_viewImage(nullptr), m_pickImage(nullptr), m_viewRect(), m_selectRect(),
-      m_interactionMode(MoveMode), m_isLightingOn(false), m_peakLabelPrecision(2), m_showPeakRows(false),
-      m_showPeakLabels(false), m_showPeakRelativeIntensity(false), m_peakShapesStyle(0), m_viewChanged(true),
-      m_redrawPicking(true) {
+    : m_instrActor(rootActor), m_viewImage(nullptr), m_pickImage(nullptr), m_backgroundColor(Qt::black), m_viewRect(),
+      m_selectRect(), m_interactionMode(MoveMode), m_isLightingOn(false), m_peakLabelPrecision(2),
+      m_showPeakRows(false), m_showPeakLabels(false), m_showPeakRelativeIntensity(false), m_peakShapesStyle(0),
+      m_viewChanged(true), m_redrawPicking(true) {
   connect(rootActor, SIGNAL(colorMapChanged()), this, SLOT(colorMapChanged()));
   connect(rootActor, SIGNAL(refreshView()), this, SLOT(refreshView()));
   connect(&m_maskShapes, SIGNAL(shapeCreated()), this, SIGNAL(shapeCreated()));
@@ -464,6 +464,9 @@ bool ProjectionSurface::canShowContextMenu() const {
  * @param y The Y coordinate in logical pixels
  */
 size_t ProjectionSurface::getPickID(int x, int y) const {
+  if (!m_pickImage)
+    return -1;
+
   // OpenGL canvases on high-pixel density monitors have a higher number of physical
   // pixels in the QImage. The pick coordinates are in logical coordinates so we need to scale them
   auto toImageCoord = [this](int logical) {
@@ -471,7 +474,7 @@ size_t ProjectionSurface::getPickID(int x, int y) const {
   };
 
   const int imageX(toImageCoord(x)), imageY(toImageCoord(y));
-  if (!m_pickImage || !m_pickImage->valid(imageX, imageY))
+  if (!m_pickImage->valid(imageX, imageY))
     return -1;
 
   QRgb pixel = m_pickImage->pixel(imageX, imageY);

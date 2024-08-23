@@ -1,1 +1,0 @@
-- :ref:`amend_config <Amend Config>` is a new context manager available that allows you to temporarily change :ref:`Mantid User Properties <Properties File>` in a safe and efficient way.

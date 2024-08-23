@@ -10,12 +10,13 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/ProcessBankData.h"
 #include "MantidDataHandling/PulseIndexer.h"
+#include "MantidKernel/Timer.h"
 
 using namespace Mantid::DataObjects;
 
 namespace Mantid::DataHandling {
 
-ProcessBankData::ProcessBankData(DefaultEventLoader &m_loader, std::string entry_name, API::Progress *prog,
+ProcessBankData::ProcessBankData(DefaultEventLoader &m_loader, const std::string &entry_name, API::Progress *prog,
                                  std::shared_ptr<std::vector<uint32_t>> event_id,
                                  std::shared_ptr<std::vector<float>> event_time_of_flight, size_t numEvents,
                                  size_t startAt, std::shared_ptr<std::vector<uint64_t>> event_index,
@@ -102,7 +103,7 @@ void ProcessBankData::run() {
   auto *alg = m_loader.alg;
 
   // Will we need to compress?
-  const bool compress = (alg->compressTolerance >= 0);
+  const bool compress = (alg->compressEvents);
 
   // Which detector IDs were touched?
   std::vector<bool> usedDetIds(m_max_detid - m_min_detid + 1, false);
@@ -115,6 +116,11 @@ void ProcessBankData::run() {
   std::vector<size_t> pulseROI;
   if (alg->m_is_time_filtered) {
     pulseROI = thisBankPulseTimes->getPulseIndices(alg->filter_time_start, alg->filter_time_stop);
+  }
+
+  if (alg->filter_bad_pulses) {
+    pulseROI = Mantid::Kernel::ROI::calculate_intersection(
+        pulseROI, thisBankPulseTimes->getPulseIndices(alg->bad_pulses_timeroi->toTimeIntervals()));
   }
 
   const PulseIndexer pulseIndexer(event_index, startAt, numEvents, entry_name, pulseROI);
@@ -152,7 +158,7 @@ void ProcessBankData::run() {
             auto *eventVector = m_loader.eventVectors[periodIndex][detId];
             // NULL eventVector indicates a bad spectrum lookup
             if (eventVector) {
-              eventVector->emplace_back(tof, pulsetime);
+              eventVector->emplace_back(std::move(tof), pulsetime);
             } else {
               ++my_discarded_events;
             }

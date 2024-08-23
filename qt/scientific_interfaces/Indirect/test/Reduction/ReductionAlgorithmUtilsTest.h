@@ -15,7 +15,8 @@ using namespace MantidQt::CustomInterfaces;
 
 class ReductionAlgorithmUtilsTest : public CxxTest::TestSuite {
 public:
-  ReductionAlgorithmUtilsTest() = default;
+  static ReductionAlgorithmUtilsTest *createSuite() { return new ReductionAlgorithmUtilsTest(); }
+  static void destroySuite(ReductionAlgorithmUtilsTest *suite) { delete suite; }
 
   void setUp() override {
     m_filename = "C:/path/to/file.raw";

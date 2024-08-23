@@ -1,1 +1,0 @@
-- A new 1D peak finding Algorithm `FindPeaksConvolve` has been added to the Framework and is available in the `FitPropertyBrowser`. It has been added as an alternative to the `FindPeaks` algorithm with the intention of increasing the range of spectra we can sucessfully find peaks for.

@@ -18,12 +18,13 @@
 from bs4 import BeautifulSoup
 import urllib.request as urllib2
 import re
+import random
 import webbrowser
 import time
 import argparse
 
 
-def crawl_url_for_html_addons(url):
+def crawl_url_for_html_addons(url, k=0):
     parent_url = url
     parent_url = re.sub("index.html$", "", parent_url)
     html_page = urllib2.urlopen(url)
@@ -32,7 +33,10 @@ def crawl_url_for_html_addons(url):
     for link in soup.findAll("a", attrs={"href": re.compile(".html")}):
         html_ref = link.get("href")
         urls.append(parent_url + html_ref)
-    return urls
+    if k > 0:
+        return random.sample(urls, min(k, len(urls)))
+    else:
+        return urls
 
 
 def open_urls(list_of_urls, delay=1):
@@ -48,30 +52,37 @@ def open_urls(list_of_urls, delay=1):
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-d", "--open-tab-delay", type=int, help="Delay between each new page tab in seconds.", default=1)
+parser.add_argument("-k", "--k_samples", type=int, help="Sampling random subset of k urls per documentation section", default=0)
 args = parser.parse_args()
 
 all_urls = []
 
+k_samples = args.k_samples
+if k_samples is None:
+    k_samples = 0
+
 print("Crawling for Algorithm URLs...")
-algorithm_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/algorithms/index.html")
+algorithm_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/algorithms/index.html", k_samples)
 all_urls.extend(algorithm_urls)
 
 print("Crawling for Concept URLs...")
-concept_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/concepts/index.html")
+concept_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/concepts/index.html", k_samples)
 all_urls.extend(concept_urls)
 
 print("Crawling for Interface URLs...")
-interface_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/interfaces/index.html")
+interface_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/interfaces/index.html", k_samples)
 all_urls.extend(interface_urls)
 
 print("Crawling for Technique URLs...")
-technique_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/techniques/index.html")
+technique_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/techniques/index.html", k_samples)
 all_urls.extend(technique_urls)
 
 print("Crawling python api...")
-mantid_kernel_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/kernel/" "index.html")
-mantid_geometry_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/geometry/" "index.html")
-mantid_api_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/api/" "index.html")
+mantid_kernel_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/kernel/" "index.html", k_samples)
+mantid_geometry_urls = crawl_url_for_html_addons(
+    "http://docs.mantidproject.org/nightly/api/python/mantid/geometry/" "index.html", k_samples
+)
+mantid_api_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/api/" "index.html", k_samples)
 # Only one
 mantid_plots_urls = ["http://docs.mantidproject.org/nightly/api/python/mantid/plots/index.html"]
 
@@ -93,7 +104,7 @@ all_urls.extend(mantid_utils)
 
 print("All webpages crawled")
 
-print("Opening Urls...")
+print("Opening ", len(all_urls), " Urls...")
 
 delay = args.open_tab_delay
 

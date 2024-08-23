@@ -1,2 +1,0 @@
-- ``Background Workspace`` and ``Scale Factor`` can now be given on the ISIS SANS Interface.
-  See :ref:`ISIS_SANS_scaled_background-ref` for more details.

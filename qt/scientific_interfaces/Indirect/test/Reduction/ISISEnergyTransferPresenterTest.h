@@ -9,140 +9,126 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "../Common/MockObjects.h"
+#include "MantidQtWidgets/Spectroscopy/MockObjects.h"
+#include "MockObjects.h"
 #include "Reduction/ISISEnergyTransferPresenter.h"
-#include "Reduction/IndirectDataReduction.h"
 
+#include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidQtWidgets/Common/MockAlgorithmRunner.h"
 
 using namespace MantidQt::CustomInterfaces;
-using MantidQt::API::BatchAlgorithmRunner;
 using namespace testing;
 
-GNU_DIAG_OFF_SUGGEST_OVERRIDE
+namespace {
 
-class MockIETModel : public IETModel {
+IETSaveData createSaveData() { return IETSaveData(true, true, true, true, true); }
 
+} // namespace
+
+class ISISEnergyTransferPresenterTest : public CxxTest::TestSuite {
 public:
-  MOCK_METHOD3(runIETAlgorithm, std::string(MantidQt::API::BatchAlgorithmRunner *, InstrumentData, IETRunData));
-};
-
-class MockIETView : public IETView {
-public:
-  MOCK_CONST_METHOD0(getRunData, IETRunData());
-  MOCK_CONST_METHOD0(getPlotData, IETPlotData());
-  MOCK_CONST_METHOD0(getSaveData, IETSaveData());
-
-  MOCK_CONST_METHOD0(getCustomGrouping, std::string());
-
-  MOCK_CONST_METHOD0(getGroupOutputOption, std::string());
-  MOCK_CONST_METHOD0(getPlotOptionsView, IndirectPlotOptionsView *());
-  MOCK_CONST_METHOD0(getGroupOutputCheckbox, bool());
-
-  MOCK_CONST_METHOD0(getFirstFilename, std::string());
-
-  MOCK_CONST_METHOD0(isRunFilesValid, bool());
-  MOCK_CONST_METHOD1(validateCalibrationFileType, void(UserInputValidator &));
-  MOCK_CONST_METHOD1(validateRebinString, void(UserInputValidator &uiv));
-
-  MOCK_CONST_METHOD0(showRebinWidthPrompt, bool());
-  MOCK_CONST_METHOD3(showSaveCustomGroupingDialog,
-                     void(std::string const &customGroupingOutput, std::string const &defaultGroupingFilename,
-                          std::string const &saveDirectory));
-  MOCK_CONST_METHOD1(displayWarning, void(std::string const &message));
-
-  MOCK_METHOD1(setBackgroundSectionVisible, void(bool visible));
-  MOCK_METHOD1(setPlotTimeSectionVisible, void(bool visible));
-  MOCK_METHOD1(setPlottingOptionsVisible, void(bool visible));
-  MOCK_METHOD1(setScaleFactorVisible, void(bool visible));
-  MOCK_METHOD1(setAclimaxSaveVisible, void(bool visible));
-  MOCK_METHOD1(setNXSPEVisible, void(bool visible));
-  MOCK_METHOD1(setFoldMultipleFramesVisible, void(bool visible));
-  MOCK_METHOD1(setOutputInCm1Visible, void(bool visible));
-  MOCK_METHOD1(setGroupOutputCheckBoxVisible, void(bool visible));
-  MOCK_METHOD1(setGroupOutputDropdownVisible, void(bool visible));
-
-  MOCK_METHOD1(setDetailedBalance, void(double detailedBalance));
-  MOCK_METHOD1(setRunFilesEnabled, void(bool enable));
-  MOCK_METHOD1(setSingleRebin, void(bool enable));
-  MOCK_METHOD1(setMultipleRebin, void(bool enable));
-  MOCK_METHOD1(setSaveEnabled, void(bool enable));
-  MOCK_METHOD1(setPlotTimeIsPlotting, void(bool plotting));
-  MOCK_METHOD2(setFileExtensionsByName, void(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes));
-  MOCK_METHOD1(setOutputWorkspaces, void(std::vector<std::string> const &outputWorkspaces));
-
-  MOCK_METHOD1(setInstrumentDefault, void(InstrumentData const &instrumentDetails));
-  MOCK_METHOD4(updateRunButton, void(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                                     QString const &tooltip));
-};
-
-class MockIndirectDataReduction : public IndirectDataReduction {
-  Q_OBJECT
-
-public:
-  MockIndirectDataReduction() : IndirectDataReduction(nullptr) {}
-};
-
-class IETPresenterTest : public CxxTest::TestSuite {
-public:
-  static IETPresenterTest *createSuite() { return new IETPresenterTest(); }
-  static void destroySuite(IETPresenterTest *suite) { delete suite; }
+  static ISISEnergyTransferPresenterTest *createSuite() { return new ISISEnergyTransferPresenterTest(); }
+  static void destroySuite(ISISEnergyTransferPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    auto view = std::make_unique<NiceMock<MockIETView>>();
     auto model = std::make_unique<NiceMock<MockIETModel>>();
+    auto algorithmRunner = std::make_unique<NiceMock<MockAlgorithmRunner>>();
 
-    m_view = view.get();
+    m_runView = std::make_unique<NiceMock<MockRunView>>();
+    m_outputOptionsView = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
+    m_instrumentConfig = std::make_unique<NiceMock<MockInstrumentConfig>>();
+
+    m_view = std::make_unique<NiceMock<MockIETView>>();
+    ON_CALL(*m_view, getRunView()).WillByDefault(Return(m_runView.get()));
+    ON_CALL(*m_view, getPlotOptionsView()).WillByDefault(Return(m_outputOptionsView.get()));
+
     m_model = model.get();
-    m_idrUI = new MockIndirectDataReduction();
+    m_algorithmRunner = algorithmRunner.get();
+    m_idrUI = std::make_unique<NiceMock<MockDataReduction>>();
+    ON_CALL(*m_idrUI, getInstrumentConfiguration()).WillByDefault(Return(m_instrumentConfig.get()));
 
-    m_presenter = std::make_unique<IETPresenter>(std::move(view), std::move(model), m_idrUI);
+    m_presenter =
+        std::make_unique<IETPresenter>(m_idrUI.get(), m_view.get(), std::move(model), std::move(algorithmRunner));
   }
 
   void tearDown() override {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_runView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_outputOptionsView));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_instrumentConfig));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_idrUI));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_algorithmRunner));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_idrUI));
 
     m_presenter.reset();
+    m_idrUI.reset();
+    m_view.reset();
+    m_runView.reset();
+    m_outputOptionsView.reset();
+    m_instrumentConfig.reset();
   }
 
-  void test_fetch_instrument_data() {
-    QMap<QString, QString> instDetails;
-    instDetails["spectra-min"] = "1";
-    instDetails["spectra-max"] = "10";
-    instDetails["Efixed"] = "0.85";
-    instDetails["cm-1-convert-choice"] = "true";
-    instDetails["save-nexus-choice"] = "true";
-    instDetails["save-ascii-choice"] = "true";
-    instDetails["fold-frames-choice"] = "true";
+  void test_notifySaveClicked_will_not_save_the_workspace_if_its_not_in_the_ADS() {
+    std::vector<std::string> names{"NotInADS"};
 
-    IETInputData inputData("iris26184_multi_graphite002_red");
-    IETConversionData conversionData(0.5, 1, 2);
-    IETGroupingData groupingData(IETGroupingType::DEFAULT);
-    IETBackgroundData backgroundData(false);
-    IETAnalysisData analysisData;
-    IETRebinData rebinData;
-    IETOutputData outputData;
+    ON_CALL(*m_view, getSaveData()).WillByDefault(Return(createSaveData()));
+    ON_CALL(*m_model, outputWorkspaceNames()).WillByDefault(Return(names));
 
-    IETRunData runData(inputData, conversionData, groupingData, backgroundData, analysisData, rebinData, outputData);
+    // Expect no call because the workspace is not in the ADS
+    EXPECT_CALL(*m_model, saveWorkspace(_, _)).Times(0);
 
-    auto instrument = QString::fromStdString("IRIS");
-    auto analyser = QString::fromStdString("Analyser");
-    auto reflection = QString::fromStdString("Reflection");
+    m_presenter->notifySaveClicked();
+  }
 
-    ON_CALL(*m_model, runIETAlgorithm(_, _, _)).WillByDefault(Return(""));
-    ON_CALL(*m_view, getRunData()).WillByDefault(Return(runData));
+  void test_notifySaveClicked_will_save_the_workspace_if_its_not_in_the_ADS() {
+    std::vector<std::string> names{"InADS"};
+    auto const workspace = Mantid::IndirectFitDataCreationHelper::createWorkspace(4, 5);
+    AnalysisDataService::Instance().addOrReplace(names[0], workspace);
 
-    ExpectationSet expectRunData = EXPECT_CALL(*m_view, getRunData()).Times(1);
-    ExpectationSet expectRunAlgo = EXPECT_CALL(*m_model, runIETAlgorithm(_, _, _)).Times(1).After(expectRunData);
+    ON_CALL(*m_view, getSaveData()).WillByDefault(Return(createSaveData()));
+    ON_CALL(*m_model, outputWorkspaceNames()).WillByDefault(Return(names));
 
-    m_presenter->run();
+    EXPECT_CALL(*m_model, saveWorkspace(names[0], _)).Times(1);
+
+    m_presenter->notifySaveClicked();
+  }
+
+  void test_notifyRunFinished_sets_run_text_to_invalid_if_the_run_files_are_not_valid() {
+    ON_CALL(*m_view, isRunFilesValid()).WillByDefault(Return(false));
+
+    EXPECT_CALL(*m_runView, setRunText("Invalid Run(s)")).Times(1);
+    EXPECT_CALL(*m_view, setRunFilesEnabled(true)).Times(1);
+
+    m_presenter->notifyRunFinished();
+  }
+
+  void test_notifyRunFinished_sets_the_run_text_when_the_run_files_are_valid() {
+    std::string const filename = "filename.nxs";
+    double const detailedBalance = 1.1;
+
+    ON_CALL(*m_view, isRunFilesValid()).WillByDefault(Return(true));
+
+    ON_CALL(*m_view, getFirstFilename()).WillByDefault(Return(filename));
+    ON_CALL(*m_model, loadDetailedBalance(filename)).WillByDefault(Return(detailedBalance));
+
+    EXPECT_CALL(*m_view, setDetailedBalance(detailedBalance)).Times(1);
+    EXPECT_CALL(*m_runView, setRunText("Run")).Times(1);
+    EXPECT_CALL(*m_view, setRunFilesEnabled(true)).Times(1);
+
+    m_presenter->notifyRunFinished();
   }
 
 private:
   std::unique_ptr<IETPresenter> m_presenter;
 
-  MockIETView *m_view;
-  MockIETModel *m_model;
-  IndirectDataReduction *m_idrUI;
+  std::unique_ptr<NiceMock<MockIETView>> m_view;
+  NiceMock<MockIETModel> *m_model;
+  NiceMock<MockAlgorithmRunner> *m_algorithmRunner;
+  std::unique_ptr<NiceMock<MockDataReduction>> m_idrUI;
+
+  std::unique_ptr<NiceMock<MockRunView>> m_runView;
+  std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputOptionsView;
+  std::unique_ptr<NiceMock<MockInstrumentConfig>> m_instrumentConfig;
 };

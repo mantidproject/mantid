@@ -6,41 +6,32 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectDataReductionTab.h"
+#include "DataReductionTab.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 
 #include "MantidKernel/System.h"
 #include "ui_ILLEnergyTransfer.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-/** ILLEnergyTransfer
+class IDataReduction;
 
-  @author Dan Nixon
-  @date 23/07/2014
-*/
-class MANTIDQT_INDIRECT_DLL ILLEnergyTransfer : public IndirectDataReductionTab {
+class MANTIDQT_INDIRECT_DLL ILLEnergyTransfer : public DataReductionTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
-  ILLEnergyTransfer(IndirectDataReduction *idrUI, QWidget *parent = nullptr);
+  ILLEnergyTransfer(IDataReduction *idrUI, QWidget *parent = nullptr);
   ~ILLEnergyTransfer() override;
 
-  void setup() override;
-  void run() override;
-
-public slots:
-  bool validate() override;
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
 
 private slots:
   void algorithmComplete(bool error);
-  void setInstrumentDefault();
-
-  void runClicked();
-  void setRunEnabled(bool enabled);
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run", QString const &tooltip = "");
 
 private:
+  void updateInstrumentConfiguration() override;
+
   Ui::ILLEnergyTransfer m_uiForm;
   double m_backScaling = 1.;
   double m_backCalibScaling = 1.;

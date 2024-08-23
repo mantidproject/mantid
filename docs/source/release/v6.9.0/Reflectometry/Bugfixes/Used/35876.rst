@@ -1,2 +1,0 @@
-- It is now once again possible to provide a negative ``dQ/Q`` value on the Experiment Settings and Runs tab of the
-  :ref:`ISIS Reflectometry Interface <interface-isis-refl>` to indicate that linear binning should be performed.

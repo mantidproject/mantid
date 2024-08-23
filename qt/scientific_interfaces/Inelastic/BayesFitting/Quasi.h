@@ -8,22 +8,29 @@
 
 #include "BayesFittingTab.h"
 #include "DllConfig.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "ui_Quasi.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTIDQT_INELASTIC_DLL Quasi : public BayesFittingTab {
+class MANTIDQT_INELASTIC_DLL Quasi : public BayesFittingTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
   Quasi(QWidget *parent = nullptr);
 
-  // Inherited methods from BayesFittingTab
-  void setup() override;
-  bool validate() override;
-  void run() override;
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;
+
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
+
+  // Slot for when settings are changed
+  void applySettings(std::map<std::string, QVariant> const &settings) override;
+  // Setup fit options, property browser, and plot options ui elements
+  void setupFitOptions();
+  void setupPropertyBrowser();
+  void setupPlotOptions();
 
 private slots:
   /// Slot for when the min range on the range selector changes
@@ -44,25 +51,23 @@ private slots:
   void updateMiniPlot();
   /// Handles what happen after the algorithm is run
   void algorithmComplete(bool error);
+  void enableView(bool const enable = false);
 
-  void runClicked();
   void plotClicked();
   void plotCurrentPreview();
   void saveClicked();
 
 private:
-  void displayMessageAndRun(std::string const &saveDirectory);
   int displaySaveDirectoryMessage();
 
   void setFileExtensionsByName(bool filter) override;
 
-  void setRunEnabled(bool enabled);
   void setPlotResultEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
-  void setRunIsRunning(bool running);
   void setPlotResultIsPlotting(bool plotting);
 
+  std::string m_outputBaseName;
   /// Current preview spectrum
   int m_previewSpec;
   /// The ui form

@@ -32,7 +32,14 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
     // new roi is the intersection of these two
     auto roi_combined = Mantid::Kernel::ROI::calculate_intersection(m_roi, pulse_roi);
     m_roi.clear();
-    m_roi.assign(roi_combined.cbegin(), roi_combined.cend());
+    if (roi_combined.empty()) {
+      // if roi_combined is empty then no pulses should be included, just set range to 0
+      m_roi.push_back(0);
+      m_roi.push_back(0);
+      m_roi_complex = false;
+      return;
+    } else
+      m_roi.assign(roi_combined.cbegin(), roi_combined.cend());
     m_roi_complex = bool(m_roi.size() > 2);
   }
 
@@ -56,7 +63,12 @@ PulseIndexer::PulseIndexer(std::shared_ptr<std::vector<uint64_t>> event_index, c
   if ((firstPulseIndex != m_roi.front()) || (lastPulseIndex != m_roi.back())) {
     auto roi_combined = Mantid::Kernel::ROI::calculate_intersection(m_roi, {firstPulseIndex, lastPulseIndex});
     m_roi.clear();
-    m_roi.assign(roi_combined.cbegin(), roi_combined.cend());
+    if (roi_combined.empty()) {
+      // if roi_combined is empty then no pulses should be included, just set range to 0
+      m_roi.push_back(0);
+      m_roi.push_back(0);
+    } else
+      m_roi.assign(roi_combined.cbegin(), roi_combined.cend());
   }
 
   // after the updates, recalculate if the roi is more than a single region
@@ -95,7 +107,7 @@ size_t PulseIndexer::determineFirstPulseIndex() const {
   // verify that there isn't a repeat right after the found value
   if (firstPulseIndex + 1 != m_event_index->size()) {
     for (; firstPulseIndex < m_event_index->size() - 1; ++firstPulseIndex) {
-      if (m_event_index->operator[](firstPulseIndex) != m_event_index->operator[](firstPulseIndex + 1)) {
+      if ((*m_event_index)[firstPulseIndex] != (*m_event_index)[firstPulseIndex + 1]) {
         break;
       }
     }
@@ -159,9 +171,9 @@ size_t PulseIndexer::getStartEventIndex(const size_t pulseIndex) const {
   // determine the correct start index
   size_t eventIndex;
   if (pulseIndex <= m_roi.front()) {
-    eventIndex = m_event_index->operator[](m_roi.front());
+    eventIndex = (*m_event_index)[m_roi.front()];
   } else {
-    eventIndex = m_event_index->operator[](pulseIndex);
+    eventIndex = (*m_event_index)[pulseIndex];
   }
 
   // return the index with the offset subtracted
@@ -201,8 +213,7 @@ size_t PulseIndexer::getStopEventIndex(const size_t pulseIndex) const {
   const auto pulseIndexEnd = pulseIndex + 1;
 
   // check if the requests have gone past the end - order of if/else matters
-  // const size_t eventIndex = (pulseIndexEnd >= m_roi.back()) ? m_numEvents : m_event_index->operator[](pulseIndexEnd);
-  size_t eventIndex = m_event_index->operator[](pulseIndexEnd);
+  size_t eventIndex = (pulseIndexEnd >= m_event_index->size()) ? m_numEvents : (*m_event_index)[pulseIndexEnd];
   if (pulseIndexEnd == m_roi.back()) {
     eventIndex = std::min(m_numEvents, eventIndex);
     if (pulseIndexEnd == m_event_index->size())

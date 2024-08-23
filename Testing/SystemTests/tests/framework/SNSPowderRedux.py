@@ -489,3 +489,66 @@ class PG3InfoFromLogs(systemtesting.MantidSystemTest):
 
         # Check volume using height value from log - pi*(r^2)*h, r and h in meters
         assert mtd["PG3_46577"].sample().getShape().volume() == np.pi * np.square(0.00295) * 0.020
+
+
+class LogarithmicTest(systemtesting.MantidSystemTest):
+    cal_file = "PG3_FERNS_d4832_2011_08_24.cal"
+    char_file = "PG3_characterization_2012_02_23-HR-ILL.txt"
+    ref_file = "PG3_9829_sum_reference.gsa"
+    data_file = "PG3_9829_event.nxs"
+    expected_ws_name = "sns_powder_expected"
+
+    def cleanup(self):
+        return True
+
+    def requiredMemoryMB(self):
+        """Requires 2Gb"""
+        return 2000
+
+    def requiredFiles(self):
+        files = [self.cal_file, self.char_file, self.ref_file, self.data_file]
+        return files
+
+    def runTest(self):
+        savedir = getSaveDir()
+
+        results = PDLoadCharacterizations(Filename=self.char_file, OutputWorkspace="characterizations")
+
+        AlignAndFocusPowderFromFiles(
+            Filename=self.data_file,
+            FilterBadPulses=95.0,
+            OutputWorkspace=self.expected_ws_name,
+            Characterizations="characterizations",
+            CalFileName=self.cal_file,
+            Params=0.01,
+            CompressTolerance=-0.001,
+            CompressBinningMode="Logarithmic",
+            PrimaryFlightPath=results.PrimaryFlightPath,
+            SpectrumIDs=results.SpectrumIDs,
+            L2=results.L2,
+            Polar=results.Polar,
+            Azimuthal=results.Azimuthal,
+        )
+        CompressEvents(
+            InputWorkspace=self.expected_ws_name, OutputWorkspace=self.expected_ws_name, Tolerance=-0.001, BinningMode="Logarithmic"
+        )
+        ConvertUnits(InputWorkspace=self.expected_ws_name, OutputWorkspace=self.expected_ws_name, Target="dSpacing")
+
+        SNSPowderReduction(
+            Filename="PG3_9829",
+            VanadiumNumber=-1,
+            CalibrationFile=self.cal_file,
+            CharacterizationRunsFile=self.char_file,
+            Binning=0.01,
+            CompressTOFTolerance=-0.001,
+            CompressBinningMode="Logarithmic",
+            OutputDirectory=savedir,
+            NormalizeByCurrent=False,
+        )
+
+    def validateMethod(self):
+        self.tolerance = 1.0e-5
+        return "ValidateWorkspaceToWorkspace"
+
+    def validate(self):
+        return ("PG3_9829", self.expected_ws_name)

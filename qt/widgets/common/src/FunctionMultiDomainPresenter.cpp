@@ -117,17 +117,23 @@ boost::optional<std::string> FunctionMultiDomainPresenter::currentFunctionIndex(
 
 void FunctionMultiDomainPresenter::setNumberOfDatasets(int n) { m_model->setNumberDomains(n); }
 
-void FunctionMultiDomainPresenter::setDatasets(const QStringList &datasetNames) { m_model->setDatasets(datasetNames); }
+void FunctionMultiDomainPresenter::setDatasets(const std::vector<std::string> &datasetNames) {
+  m_model->setDatasets(datasetNames);
+}
 
 void FunctionMultiDomainPresenter::setDatasets(const QList<FunctionModelDataset> &datasets) {
   m_model->setDatasets(datasets);
 }
 
-void FunctionMultiDomainPresenter::addDatasets(const QStringList &datasetNames) { m_model->addDatasets(datasetNames); }
+void FunctionMultiDomainPresenter::addDatasets(const std::vector<std::string> &datasetNames) {
+  m_model->addDatasets(datasetNames);
+}
 
-QStringList FunctionMultiDomainPresenter::getDatasetNames() const { return m_model->getDatasetNames(); }
+std::vector<std::string> FunctionMultiDomainPresenter::getDatasetNames() const { return m_model->getDatasetNames(); }
 
-QStringList FunctionMultiDomainPresenter::getDatasetDomainNames() const { return m_model->getDatasetDomainNames(); }
+std::vector<std::string> FunctionMultiDomainPresenter::getDatasetDomainNames() const {
+  return m_model->getDatasetDomainNames();
+}
 
 int FunctionMultiDomainPresenter::getNumberOfDatasets() const { return m_model->getNumberDomains(); }
 
@@ -326,8 +332,7 @@ void FunctionMultiDomainPresenter::editLocalParameter(std::string const &paramet
   QList<bool> fixes;
   QStringList ties;
   QStringList constraints;
-  const int n = domainNames.size();
-  for (int i = 0; i < n; ++i) {
+  for (int i = 0; i < static_cast<int>(domainNames.size()); ++i) {
     const double value = getLocalParameterValue(parameterName, i);
     values.push_back(value);
     const bool fixed = isLocalParameterFixed(parameterName, i);

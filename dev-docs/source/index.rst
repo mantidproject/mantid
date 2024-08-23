@@ -26,6 +26,7 @@ Guides
    DoxygenSetup
    NewStarterC++
    NewStarterPython
+   PythonAlgorithmsInExternalProjects
 
 :doc:`DeveloperAccounts`
    Details of the accounts required for developers.
@@ -277,7 +278,7 @@ Component Overviews
    IndexProperty
    IndirectDataAnalysisAddingFitType
    IndirectDataAnalysisFileStructure
-   InelasticDataManipulationFileStructure
+   InelasticDataProcessorFileStructure
    InstrumentViewer
    ISISReflectometryInterface
    ISISSANSReductionBackend

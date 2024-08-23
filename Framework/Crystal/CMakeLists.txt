@@ -17,6 +17,7 @@ set(SRC_FILES
     src/DisjointElement.cpp
     src/FilterPeaks.cpp
     src/FindClusterFaces.cpp
+    src/FindGoniometerAngles.cpp
     src/FindSXPeaks.cpp
     src/FindSXPeaksHelper.cpp
     src/FindUBUsingFFT.cpp
@@ -94,6 +95,7 @@ set(INC_FILES
     inc/MantidCrystal/DisjointElement.h
     inc/MantidCrystal/FilterPeaks.h
     inc/MantidCrystal/FindClusterFaces.h
+    inc/MantidCrystal/FindGoniometerAngles.h
     inc/MantidCrystal/FindSXPeaks.h
     inc/MantidCrystal/FindSXPeaksHelper.h
     inc/MantidCrystal/FindUBUsingFFT.h
@@ -171,6 +173,7 @@ set(TEST_FILES
     DisjointElementTest.h
     FilterPeaksTest.h
     FindClusterFacesTest.h
+    FindGoniometerAnglesTest.h
     FindSXPeaksHelperTest.h
     FindSXPeaksTest.h
     FindUBUsingFFTTest.h

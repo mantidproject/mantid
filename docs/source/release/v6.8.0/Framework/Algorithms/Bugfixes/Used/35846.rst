@@ -1,1 +1,0 @@
-- The progress bar for :ref:`LoadMD <algm-LoadMD>` now includes loading experiment information.

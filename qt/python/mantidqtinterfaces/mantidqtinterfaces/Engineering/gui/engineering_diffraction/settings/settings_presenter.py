@@ -165,7 +165,7 @@ class SettingsPresenter(object):
 
     def save_new_settings(self):
         self._collect_new_settings_from_view()
-        self._save_settings_to_file()
+        self._save_settings_to_file(set_nullables_to_default=False)
 
     def _collect_new_settings_from_view(self):
         self._validate_settings()
@@ -180,7 +180,7 @@ class SettingsPresenter(object):
         self.settings["dSpacing_min"] = self.view.get_dSpacing_min()
 
     def _show_settings_in_view(self):
-        self._validate_settings()
+        self._validate_settings(set_nullables_to_default=False)
         self.view.set_save_location(self.settings["save_location"])
         self.view.set_full_calibration(self.settings["full_calibration"])
         self.view.set_checked_logs(self.settings["logs"])
@@ -198,8 +198,8 @@ class SettingsPresenter(object):
         self.view.find_path_to_gsas2()
         self.validate_gsas2_path()
 
-    def _save_settings_to_file(self):
-        self._validate_settings()
+    def _save_settings_to_file(self, set_nullables_to_default=True):
+        self._validate_settings(set_nullables_to_default)
         self.model.set_settings_dict(self.settings)
         self.savedir_notifier.notify_subscribers(self.settings["save_location"])
 
@@ -216,7 +216,7 @@ class SettingsPresenter(object):
         if name not in self.settings or self.settings[name] == "":
             self.settings[name] = DEFAULT_SETTINGS[name]
 
-    def _validate_settings(self):
+    def _validate_settings(self, set_nullables_to_default=True):
         for key in list(self.settings):
             if key not in DEFAULT_SETTINGS.keys():
                 del self.settings[key]
@@ -229,7 +229,9 @@ class SettingsPresenter(object):
         self.check_and_populate_with_default("save_location")
         self.check_and_populate_with_default("logs")
 
-        self.check_and_populate_with_default("primary_log")
+        if set_nullables_to_default:
+            self.check_and_populate_with_default("primary_log")
+
         # boolean values already checked to be "" or True or False in settings_helper
         self.check_and_populate_with_default("sort_ascending")
         self.check_and_populate_with_default("path_to_gsas2")

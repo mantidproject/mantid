@@ -1,1 +1,0 @@
-- New function :ref:`assert_almost_equal <mantid.testing.assert_almost_equal>` to make testing equality between workspaces more convenient.

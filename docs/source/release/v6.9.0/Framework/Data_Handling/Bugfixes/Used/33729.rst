@@ -1,1 +1,0 @@
-- Fixed loading of files where some periods have no data.

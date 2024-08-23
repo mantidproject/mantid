@@ -1,1 +1,0 @@
-- New shoebox integration algorithm for single-crystal Bragg peaks :ref:`IntegratePeaksShoeboxTOF <algm-IntegratePeaksShoeboxTOF>`

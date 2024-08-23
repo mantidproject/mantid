@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import json
-import os
 from mantid.api import AlgorithmFactory, PythonAlgorithm, ITableWorkspaceProperty, FileProperty, FileAction
 from mantid.simpleapi import CreateEmptyTableWorkspace
 from mantid.kernel import Direction
+from mantid.utils.muon import PEAK_DATA_JSON
 from mantid import mtd
 
 LABELS = {"Primary": "Primary energy", "Secondary": "Secondary energy"}
@@ -67,10 +67,7 @@ class PeakMatching(PythonAlgorithm):
 
     def get_default_peak_data(self):
         # import locally dynamically so we don't introduce a qt dependency into the framework
-        from mantidqtinterfaces.Muon.GUI import ElementalAnalysis
-
-        path = os.path.join(os.path.dirname(ElementalAnalysis.__file__), "peak_data.json")
-        with open(path, "r") as file_to_read:
+        with open(PEAK_DATA_JSON, "r") as file_to_read:
             peak_data = json.load(file_to_read)
         return peak_data
 

@@ -99,15 +99,13 @@ enum class RotationPlane { horizontal, vertical };
  */
 Mantid::Kernel::V3D detectorPosition(const RotationPlane plane, const double distance, const double angle) {
   const double a = degToRad(angle);
-  double x, y, z;
+  double x = 0, y = 0, z = 0;
   switch (plane) {
   case RotationPlane::horizontal:
     x = distance * std::sin(a);
-    y = 0;
     z = distance * std::cos(a);
     break;
   case RotationPlane::vertical:
-    x = 0;
     y = distance * std::sin(a);
     z = distance * std::cos(a);
     break;
@@ -122,15 +120,13 @@ Mantid::Kernel::V3D detectorPosition(const RotationPlane plane, const double dis
  */
 Mantid::Kernel::Quat detectorFaceRotation(const RotationPlane plane, const double angle) {
   const Mantid::Kernel::V3D axis = [plane]() {
-    double x, y;
+    double x = 0, y = 0;
     switch (plane) {
     case RotationPlane::horizontal:
-      x = 0;
       y = 1;
       break;
     case RotationPlane::vertical:
       x = -1;
-      y = 0;
       break;
     }
     return Mantid::Kernel::V3D(x, y, 0);
@@ -482,7 +478,6 @@ void LoadILLReflectometry::loadData(const NeXus::NXEntry &entry, const std::vect
   const int nb_monitors = static_cast<int>(monitorNames.size());
   Progress progress(this, 0, 1, m_numberOfHistograms + nb_monitors);
   if (!xVals.empty()) {
-    HistogramData::BinEdges binEdges(xVals);
     // first, load data
     LoadHelper::fillStaticWorkspace(m_localWorkspace, data, xVals, 0);
     progress.report();

@@ -1,2 +1,0 @@
-- Background Subtracted (``_bgsub``) workspaces are now correctly deleted when ``File`` is selected as the save
-  location in the ISIS SANS GUI.

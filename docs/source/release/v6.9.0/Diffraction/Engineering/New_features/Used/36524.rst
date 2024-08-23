@@ -1,1 +1,0 @@
-- Additional parameter ``UpdateInstrumentParameters`` in :ref:`AddSampleLog <algm-AddSampleLog>` which updates the instrument parameters after adding the log. This allows for instruments with detectors on motors (e.g. SNAP) to update the geomtry when adding logs.

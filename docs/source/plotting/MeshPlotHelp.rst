@@ -114,7 +114,7 @@ Note Component index 0 is usually the Container.
    sample = ws.getInstrument().getSample().getPos() - source
    arrow(axes, sample, origin=(0,0,-0.04))
    axes.view_init(vertical_axis='y', elev=30, azim=-135)
-   plt.show()
+   fig.show()
 
 
 Plot a cuboid sample shape, rotate it by the goniometer and add lattice vector arrows.
@@ -192,7 +192,7 @@ Plot a cuboid sample shape, rotate it by the goniometer and add lattice vector a
       arrow(axes, reciprocal_lattice[:,i], color = colors[i], linestyle = '--')
 
    axes.view_init(vertical_axis='y', elev=27, azim=50)
-   plt.show()
+   fig.show()
 
 
 **Other Plotting Documentation**

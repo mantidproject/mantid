@@ -20,7 +20,7 @@ poll for new runs.
 */
 class MANTIDQT_ISISREFLECTOMETRY_DLL CatalogRunNotifier : public IRunNotifier, public RunsViewTimerSubscriber {
 public:
-  static auto constexpr POLLING_INTERVAL_MILLISECONDS = 15000;
+  static auto constexpr POLLING_INTERVAL_MILLISECONDS = 30000;
 
   explicit CatalogRunNotifier(IRunsView *view);
   ~CatalogRunNotifier() override = default;

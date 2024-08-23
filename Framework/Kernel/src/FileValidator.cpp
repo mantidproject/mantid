@@ -130,13 +130,9 @@ bool FileValidator::endswith(const std::string &value) const {
   std::transform(value_copy.begin(), value_copy.end(), value_copy.begin(), tolower);
 
   // check for the ending
-  for (const auto &extension : m_extensions) {
-    if (has_ending(value, extension)) // original case
-      return true;
-    if (has_ending(value_copy, extension)) // lower case
-      return true;
-  }
-  return false;
+  return std::any_of(m_extensions.cbegin(), m_extensions.cend(), [&](const auto extension) {
+    return has_ending(value, extension) || has_ending(value_copy, extension);
+  });
 }
 
 } // namespace Mantid::Kernel

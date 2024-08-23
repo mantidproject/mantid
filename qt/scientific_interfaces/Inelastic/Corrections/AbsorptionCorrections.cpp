@@ -5,12 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "AbsorptionCorrections.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/Axis.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Unit.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
 #include <QRegExpValidator>
 #include <QSignalBlocker>
@@ -18,6 +19,9 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::DeltaEMode;
+
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 /**
  * Determines whether an input has a value of zero
@@ -66,10 +70,9 @@ MatrixWorkspace_sptr convertUnits(const MatrixWorkspace_sptr &workspace, std::st
   convertAlg->setChild(true);
   convertAlg->setProperty("InputWorkspace", workspace);
   convertAlg->setProperty("OutputWorkspace", "__converted");
-  auto eMode = workspace->getEMode();
-  convertAlg->setProperty("EMode", DeltaEMode::asString(eMode));
-  if ((eMode == DeltaEMode::Type::Direct) || (eMode == DeltaEMode::Type::Indirect)) {
-    convertAlg->setProperty("EFixed", workspace->getEFixed(workspace->getDetector(0)));
+  convertAlg->setProperty("EMode", DeltaEMode::asString(workspace->getEMode()));
+  if (auto const eFixed = getEFixed(workspace)) {
+    convertAlg->setProperty("EFixed", *eFixed);
   }
   convertAlg->setProperty("Target", target);
   convertAlg->execute();
@@ -108,6 +111,7 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   std::map<std::string, std::string> actions;
   actions["Plot Spectra"] = "Plot Wavelength";
   actions["Plot Bins"] = "Plot Angle";
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin, "", actions));
 
@@ -123,7 +127,6 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   // Handle algorithm completion
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   // Handle running, plotting and saving
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   // Handle density units
   connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(QString const &)), this,
@@ -141,10 +144,6 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   connect(m_uiForm.spSampleDensity, SIGNAL(valueChanged(double)), this, SLOT(setSampleDensity(double)));
   connect(m_uiForm.spCanDensity, SIGNAL(valueChanged(double)), this, SLOT(setCanDensity(double)));
 
-  connect(m_uiForm.leSampleChemicalFormula, SIGNAL(editingFinished()), this, SLOT(doValidation()));
-  connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this, SLOT(doValidation()));
-  connect(m_uiForm.cbUseCan, SIGNAL(stateChanged(int)), this, SLOT(doValidation()));
-
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSampleInput->isOptional(true);
 }
@@ -153,13 +152,61 @@ AbsorptionCorrections::~AbsorptionCorrections() = default;
 
 MatrixWorkspace_sptr AbsorptionCorrections::sampleWorkspace() const {
   auto const name = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-  return WorkspaceUtils::doesExistInADS(name) ? WorkspaceUtils::getADSWorkspace(name) : nullptr;
+  return doesExistInADS(name) ? getADSWorkspace(name) : nullptr;
 }
 
-void AbsorptionCorrections::setup() { doValidation(); }
+void AbsorptionCorrections::handleValidation(IUserInputValidator *validator) const {
+  validator->checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
 
-void AbsorptionCorrections::run() {
-  setRunIsRunning(true);
+  if (!sampleWorkspace())
+    validator->addErrorMessage("Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
+
+  QString const sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
+  const bool isPreset = sampleShape == "Preset";
+  const bool isUseCan = m_uiForm.cbUseCan->isChecked();
+
+  if (m_uiForm.cbSampleMaterialMethod->currentText() == "Chemical Formula") {
+    if (!(m_uiForm.leSampleChemicalFormula->text().isEmpty() && isPreset)) {
+      validator->checkFieldIsValid("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula,
+                                   m_uiForm.valSampleChemicalFormula);
+      auto const sampleChem = m_uiForm.leSampleChemicalFormula->text().toStdString();
+      try {
+        Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
+      } catch (std::runtime_error &ex) {
+        UNUSED_ARG(ex);
+        validator->addErrorMessage("Chemical Formula for Sample was not recognised.");
+        validator->setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
+      }
+    }
+  }
+
+  if (!isPreset) {
+    validateSampleGeometryInputs(validator, sampleShape);
+
+    if (isUseCan) {
+      if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
+        auto const containerChem = m_uiForm.leCanChemicalFormula->text().toStdString();
+        if (validator->checkFieldIsNotEmpty("Container Chemical Formula", m_uiForm.leCanChemicalFormula,
+                                            m_uiForm.valCanChemicalFormula)) {
+          validator->checkFieldIsValid("Container Chemical Formula", m_uiForm.leCanChemicalFormula,
+                                       m_uiForm.valCanChemicalFormula);
+        }
+
+        try {
+          Mantid::Kernel::Material::parseChemicalFormula(containerChem);
+        } catch (std::runtime_error &ex) {
+          UNUSED_ARG(ex);
+          validator->addErrorMessage("Chemical Formula for Container was not recognised.");
+          validator->setErrorLabel(m_uiForm.valCanChemicalFormula, false);
+        }
+      }
+      validateContainerGeometryInputs(validator, sampleShape);
+    }
+  }
+}
+
+void AbsorptionCorrections::handleRun() {
+  setSaveResultEnabled(false);
 
   bool const isUseCan = m_uiForm.cbUseCan->isChecked();
 
@@ -173,19 +220,19 @@ void AbsorptionCorrections::run() {
   // General details
   monteCarloAbsCor->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
   monteCarloAbsCor->setProperty("BeamWidth", m_uiForm.spBeamWidth->value());
-  long const events = static_cast<long>(m_uiForm.spNumberEvents->value());
+  auto const events = m_uiForm.spNumberEvents->value();
   monteCarloAbsCor->setProperty("EventsPerPoint", events);
   auto const interpolation = m_uiForm.cbInterpolation->currentText().toStdString();
   monteCarloAbsCor->setProperty("Interpolation", interpolation);
-  long const maxAttempts = static_cast<long>(m_uiForm.spMaxScatterPtAttempts->value());
+  auto const maxAttempts = m_uiForm.spMaxScatterPtAttempts->value();
   monteCarloAbsCor->setProperty("MaxScatterPtAttempts", maxAttempts);
 
   bool const isSparseInstrument = m_uiForm.cbSparseInstrument->isChecked();
   if (isSparseInstrument) {
     monteCarloAbsCor->setProperty("SparseInstrument", isSparseInstrument);
-    long const numberOfDetectorRows = static_cast<long>(m_uiForm.spNumberDetectorRows->value());
+    auto const numberOfDetectorRows = m_uiForm.spNumberDetectorRows->value();
     monteCarloAbsCor->setProperty("NumberOfDetectorRows", numberOfDetectorRows);
-    long const numberOfDetectorColumns = static_cast<long>(m_uiForm.spNumberDetectorColumns->value());
+    auto const numberOfDetectorColumns = m_uiForm.spNumberDetectorColumns->value();
     monteCarloAbsCor->setProperty("NumberOfDetectorColumns", numberOfDetectorColumns);
   }
 
@@ -325,24 +372,13 @@ void AbsorptionCorrections::addShapeSpecificCanOptions(const IAlgorithm_sptr &al
   }
 }
 
-bool AbsorptionCorrections::validate() {
-  UserInputValidator uiv = doValidation();
-
-  // Give error for failed validation
-  if (!uiv.isAllInputValid()) {
-    auto const error = uiv.generateErrorMessage();
-    showMessageBox(error);
-  }
-  return uiv.isAllInputValid();
-}
-
 /**
  * Validates algorithm properties specific to the sample for a given shape.
  *
  * @param uiv Address of user input validator to set error messages omn
  * @param shape Sample shape
  */
-void AbsorptionCorrections::validateSampleGeometryInputs(UserInputValidator &uiv, const QString &shape) {
+void AbsorptionCorrections::validateSampleGeometryInputs(IUserInputValidator *uiv, const QString &shape) const {
   bool hasZero = false;
   if (shape == "FlatPlate") {
     double const sampleHeight = m_uiForm.spFlatSampleHeight->value();
@@ -366,7 +402,7 @@ void AbsorptionCorrections::validateSampleGeometryInputs(UserInputValidator &uiv
     hasZero = hasZero || isValueZero(sampleOuterRadius);
 
     if (sampleInnerRadius >= sampleOuterRadius) {
-      uiv.addErrorMessage("SampleOuterRadius must be greater than SampleInnerRadius.");
+      uiv->addErrorMessage("SampleOuterRadius must be greater than SampleInnerRadius.");
     }
 
   } else if (shape == "Cylinder") {
@@ -377,7 +413,7 @@ void AbsorptionCorrections::validateSampleGeometryInputs(UserInputValidator &uiv
     hasZero = hasZero || isValueZero(sampleHeight);
   }
   if (hasZero) {
-    uiv.addErrorMessage("Sample Geometry inputs cannot be zero-valued.");
+    uiv->addErrorMessage("Sample Geometry inputs cannot be zero-valued.");
   }
 }
 
@@ -387,7 +423,7 @@ void AbsorptionCorrections::validateSampleGeometryInputs(UserInputValidator &uiv
  * @param uiv Address of user input validator to set error messages omn
  * @param shape Container shape
  */
-void AbsorptionCorrections::validateContainerGeometryInputs(UserInputValidator &uiv, const QString &shape) {
+void AbsorptionCorrections::validateContainerGeometryInputs(IUserInputValidator *uiv, const QString &shape) const {
   bool hasZero = false;
 
   if (shape == "FlatPlate") {
@@ -402,7 +438,7 @@ void AbsorptionCorrections::validateContainerGeometryInputs(UserInputValidator &
 
     double const sampleRadius = m_uiForm.spAnnSampleOuterRadius->value();
     if (canOuterRadius <= sampleRadius) {
-      uiv.addErrorMessage("CanOuterRadius must be greater than SampleRadius.");
+      uiv->addErrorMessage("CanOuterRadius must be greater than SampleRadius.");
     }
 
   } else if (shape == "Annulus") {
@@ -415,68 +451,15 @@ void AbsorptionCorrections::validateContainerGeometryInputs(UserInputValidator &
     double const sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
     double const sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
     if (canInnerRadius >= sampleInnerRadius) {
-      uiv.addErrorMessage("SampleInnerRadius must be greater than ContainerInnerRadius.");
+      uiv->addErrorMessage("SampleInnerRadius must be greater than ContainerInnerRadius.");
     }
     if (canOuterRadius <= sampleOuterRadius) {
-      uiv.addErrorMessage("ContainerOuterRadius must be greater than SampleOuterRadius.");
+      uiv->addErrorMessage("ContainerOuterRadius must be greater than SampleOuterRadius.");
     }
   }
   if (hasZero) {
-    uiv.addErrorMessage("Container Geometry inputs cannot be zero-valued.");
+    uiv->addErrorMessage("Container Geometry inputs cannot be zero-valued.");
   }
-}
-
-UserInputValidator AbsorptionCorrections::doValidation() {
-  UserInputValidator uiv;
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
-
-  if (!sampleWorkspace())
-    uiv.addErrorMessage("Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
-
-  QString const sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
-  const bool isPreset = sampleShape == "Preset";
-  const bool isUseCan = m_uiForm.cbUseCan->isChecked();
-
-  if (m_uiForm.cbSampleMaterialMethod->currentText() == "Chemical Formula") {
-    if (!(m_uiForm.leSampleChemicalFormula->text().isEmpty() && isPreset)) {
-      uiv.checkFieldIsValid("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula,
-                            m_uiForm.valSampleChemicalFormula);
-      auto const sampleChem = m_uiForm.leSampleChemicalFormula->text().toStdString();
-      try {
-        Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
-      } catch (std::runtime_error &ex) {
-        UNUSED_ARG(ex);
-        uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
-        uiv.setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
-      }
-    }
-  }
-
-  if (!isPreset) {
-    validateSampleGeometryInputs(uiv, sampleShape);
-
-    if (isUseCan) {
-      if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
-        auto const containerChem = m_uiForm.leCanChemicalFormula->text().toStdString();
-        if (uiv.checkFieldIsNotEmpty("Container Chemical Formula", m_uiForm.leCanChemicalFormula,
-                                     m_uiForm.valCanChemicalFormula)) {
-          uiv.checkFieldIsValid("Container Chemical Formula", m_uiForm.leCanChemicalFormula,
-                                m_uiForm.valCanChemicalFormula);
-        }
-
-        try {
-          Mantid::Kernel::Material::parseChemicalFormula(containerChem);
-        } catch (std::runtime_error &ex) {
-          UNUSED_ARG(ex);
-          uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
-          uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
-        }
-      }
-      validateContainerGeometryInputs(uiv, sampleShape);
-    }
-  }
-
-  return uiv;
 }
 
 void AbsorptionCorrections::loadSettings(const QSettings &settings) {
@@ -486,13 +469,12 @@ void AbsorptionCorrections::loadSettings(const QSettings &settings) {
 void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("CalculateMonteCarlo");
-  m_uiForm.dsSampleInput->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName)
-                                               : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsSampleInput->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsSampleInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
 void AbsorptionCorrections::processWavelengthWorkspace() {
-  auto correctionsWs = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(m_pythonExportWsName);
+  auto correctionsWs = getADSWorkspace<WorkspaceGroup>(m_pythonExportWsName);
   if (correctionsWs) {
     correctionsWs = convertUnits(correctionsWs, "Wavelength");
     addWorkspaceToADS(m_pythonExportWsName, correctionsWs);
@@ -503,7 +485,7 @@ void AbsorptionCorrections::processWavelengthWorkspace() {
 
 void AbsorptionCorrections::convertSpectrumAxes(const WorkspaceGroup_sptr &correctionsWs) {
   auto const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-  convertSpectrumAxes(correctionsWs, WorkspaceUtils::getADSWorkspace(sampleWsName));
+  convertSpectrumAxes(correctionsWs, getADSWorkspace(sampleWsName));
   setYAxisLabels(correctionsWs, "", "Attenuation Factor");
 }
 
@@ -518,9 +500,9 @@ void AbsorptionCorrections::convertSpectrumAxes(const WorkspaceGroup_sptr &corre
 void AbsorptionCorrections::convertSpectrumAxes(const MatrixWorkspace_sptr &correction,
                                                 const MatrixWorkspace_sptr &sample) {
   if (correction && sample && sample->getEMode() == DeltaEMode::Type::Indirect) {
-    try {
-      convertSpectrumAxis(correction, WorkspaceUtils::getEFixed(correction));
-    } catch (std::runtime_error const &) {
+    if (auto const eFixed = getEFixed(correction)) {
+      convertSpectrumAxis(correction, *eFixed);
+    } else {
       convertSpectrumAxis(correction);
     }
   }
@@ -531,7 +513,8 @@ void AbsorptionCorrections::convertSpectrumAxes(const MatrixWorkspace_sptr &corr
  * @param error True if algorithm has failed.
  */
 void AbsorptionCorrections::algorithmComplete(bool error) {
-  setRunIsRunning(false);
+  m_runPresenter->setRunEnabled(true);
+  setSaveResultEnabled(!error);
   // The m_saveAlgRunning flag is queried here so the
   // processWavelengthWorkspace isn't executed at the end of the
   // saveAlg completing, as this will throw an exception.
@@ -539,17 +522,15 @@ void AbsorptionCorrections::algorithmComplete(bool error) {
     processWavelengthWorkspace();
     setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
   } else if (!error && m_saveAlgRunning) {
-    setButtonsEnabled(true);
     m_saveAlgRunning = false;
   } else {
     m_saveAlgRunning = false;
-    setSaveResultEnabled(false);
     emit showMessageBox("Could not run absorption corrections.\nSee Results Log for details.");
   }
 }
 
 void AbsorptionCorrections::getParameterDefaults(QString const &dataName) {
-  auto const sampleWs = WorkspaceUtils::getADSWorkspace(dataName.toStdString());
+  auto const sampleWs = getADSWorkspace(dataName.toStdString());
   if (sampleWs)
     getParameterDefaults(sampleWs->getInstrument());
   else
@@ -620,11 +601,6 @@ void AbsorptionCorrections::saveClicked() {
   addSaveWorkspace(m_pythonExportWsName);
   addSaveWorkspace(factorsWs);
   m_batchAlgoRunner->executeBatchAsync();
-}
-
-void AbsorptionCorrections::runClicked() {
-  clearOutputPlotOptionsWorkspaces();
-  runTab();
 }
 
 void AbsorptionCorrections::setSampleDensityOptions(QString const &method) {
@@ -725,18 +701,6 @@ double AbsorptionCorrections::getCanDensityValue(QString const &type) const {
   return type == "Mass Density" ? m_canDensities->getMassDensity() : m_canDensities->getNumberDensity();
 }
 
-void AbsorptionCorrections::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
 void AbsorptionCorrections::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
-
-void AbsorptionCorrections::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setSaveResultEnabled(enabled);
-}
-
-void AbsorptionCorrections::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
-}
 
 } // namespace MantidQt::CustomInterfaces

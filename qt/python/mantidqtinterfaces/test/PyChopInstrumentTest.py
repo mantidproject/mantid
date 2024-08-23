@@ -14,6 +14,7 @@ import warnings
 import numpy as np
 
 from pychop.Instruments import Instrument
+from pychop import MulpyRep
 
 
 class PyChopInstrumentTests(unittest.TestCase):
@@ -412,7 +413,7 @@ class PyChopGuiTests(unittest.TestCase):
         for inst, ch, frq, ei, res0, flux0 in zip(instruments, choppers, freqs, eis, ref_res, ref_flux):
             res, flux = Instrument.calculate(inst, ch, frq, ei, 0)
             np.testing.assert_allclose(res[0], res0, rtol=1e-4, atol=0)
-            np.testing.assert_allclose(flux[0], flux0, rtol=1e-4, atol=0)
+            np.testing.assert_allclose(flux, flux0, rtol=1e-4, atol=0)
 
     def test_erange(self):
         # Tests MARI raises if Ei outside range [0, 180meV] with G chopper only ('S' chopper ok up to 1000meV)
@@ -422,6 +423,20 @@ class PyChopGuiTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             obj.setEi(500)
         obj.setEi(180)
+
+    def test_phase_offset(self):
+        # Tests calcChopTimes applies new phase offset parameter
+        instpars = [[9.3, 9.995], [1, 2], None, [950, 10.0], [64, 10.0], [250, 290.0], [1, 1], 2.5, 1.925, [50, 1], 0, 0.9, [0]]
+        phaseoffset = None
+        Eis_none, _, _, _, _ = MulpyRep.calcChopTimes(50.0, [50.0, 400.0], instpars, [17000], phaseoffset)
+        self.assertAlmostEqual(Eis_none[5], 10.71281984, places=7)
+        self.assertAlmostEqual(Eis_none[6], 7.70630740, places=7)
+        self.assertAlmostEqual(Eis_none[7], 5.80834507, places=7)
+        phaseoffset = 4500
+        Eis_offset, _, _, _, _ = MulpyRep.calcChopTimes(50.0, [50.0, 400.0], instpars, [17000], phaseoffset)
+        self.assertAlmostEqual(Eis_offset[5], 2.48991457, places=7)
+        self.assertAlmostEqual(Eis_offset[6], 2.10994937, places=7)
+        self.assertAlmostEqual(Eis_offset[7], 1.81075983, places=7)
 
 
 if __name__ == "__main__":

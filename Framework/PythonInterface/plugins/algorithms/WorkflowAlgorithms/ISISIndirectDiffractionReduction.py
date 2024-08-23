@@ -7,12 +7,20 @@
 # pylint: disable=no-init,too-many-instance-attributes
 import os
 
-from IndirectReductionCommon import load_files, load_file_ranges
+from IndirectReductionCommon import calibrate, load_files, load_file_ranges, rebin_logarithmic
 
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 from mantid import config
+
+
+def _str_or_none(string):
+    return string if string != "" else None
+
+
+def _ws_or_none(workspace_name):
+    return mtd[workspace_name] if workspace_name != "" else None
 
 
 def is_range_ascending(range_string, delimiter):
@@ -95,7 +103,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self.declareProperty(
             FileProperty("CalFile", "", action=FileAction.OptionalLoad),
-            doc="Filename of the .cal file to use in the [[AlignDetectors]] and " + "[[DiffractionFocussing]] child algorithms.",
+            doc="Filename of the .cal file to use in the [[ApplyDiffCal]] and [[ConvertUnits]] child algorithms.",
         )
 
         self.declareProperty(
@@ -126,13 +134,35 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
         self.declareProperty(
             name="GroupingPolicy",
+            defaultValue="",
+            validator=StringListValidator(["", "All", "File", "Workspace", "Custom", "Groups"]),
+            doc="This property is deprecated (since v6.10), please use the 'GroupingMethod' property instead.",
+        )
+        self.declareProperty(
+            name="GroupingMethod",
             defaultValue="All",
-            validator=StringListValidator(["All", "Individual", "Workspace", "IPF"]),
-            doc="Selects the type of detector grouping to be used.",
+            validator=StringListValidator(["All", "File", "Workspace", "Custom", "Groups"]),
+            doc="The method used to group detectors.",
         )
         self.declareProperty(
             WorkspaceProperty("GroupingWorkspace", "", direction=Direction.Input, optional=PropertyMode.Optional),
-            doc="Workspace containing spectra grouping.",
+            doc="A workspace containing a detector grouping.",
+        )
+        self.declareProperty(name="GroupingString", defaultValue="", direction=Direction.Input, doc="Detectors to group as a string")
+        self.declareProperty(
+            FileProperty("MapFile", "", action=FileAction.OptionalLoad, extensions=[".map"]),
+            doc="This property is deprecated (since v6.10), please use the 'GroupingFile' property instead.",
+        )
+        self.declareProperty(
+            FileProperty("GroupingFile", "", action=FileAction.OptionalLoad, extensions=[".map"]),
+            doc="A file containing a detector grouping.",
+        )
+        self.declareProperty(
+            name="NGroups",
+            defaultValue=1,
+            validator=IntBoundedValidator(lower=1),
+            direction=Direction.Input,
+            doc="The number of groups for grouping the detectors.",
         )
 
         self.declareProperty(
@@ -177,12 +207,32 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 logger.warning("type = " + str(type(mode)))
                 issues["CalFile"] = "Cal Files are currently only available for use in OSIRIS diffspec mode"
 
+        # Validate grouping method
+        grouping_method = self.getPropertyValue("GroupingMethod")
+        grouping_policy = self.getPropertyValue("GroupingPolicy")
+
+        if grouping_policy != "":
+            logger.warning(
+                "The 'GroupingPolicy' algorithm property has been deprecated (since v6.10). Please use the 'GroupingMethod' "
+                "algorithm property instead."
+            )
+
+        grouping_ws = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
+        if (grouping_method == "Workspace" or grouping_policy == "Workspace") and grouping_ws is None:
+            issues["GroupingWorkspace"] = "Must select a grouping workspace for current GroupingWorkspace"
+
+        map_file = _str_or_none(self.getPropertyValue("MapFile"))
+        if map_file is not None:
+            logger.warning(
+                "The 'MapFile' algorithm property has been deprecated (since v6.10). Please use the 'GroupingFile' "
+                "algorithm property instead."
+            )
+
         return issues
 
     # ------------------------------------------------------------------------------
 
     def PyExec(self):
-
         from IndirectReductionCommon import (
             get_multi_frame_rebin,
             identify_bad_detectors,
@@ -194,6 +244,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             group_spectra,
             fold_chopped,
             rename_reduction,
+            mask_detectors,
         )
 
         self._setup()
@@ -214,11 +265,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
             load_opts=load_opts,
         )
 
-        # applies the changes in the provided calibration file
-        self._apply_calibration()
-        # Load container if run is given
-        self._load_and_scale_container(self._container_scale_factor, load_opts)
-
         # Load vanadium runs if given
         if self._vanadium_runs:
             self._vanadium_ws, _, _ = load_files(
@@ -232,6 +278,11 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
             if len(self._workspace_names) > len(self._vanadium_runs):
                 raise RuntimeError("There cannot be more sample runs than vanadium runs.")
+
+        # applies the changes in the provided calibration file
+        self._apply_calibration()
+        # Load container if run is given
+        self._load_and_scale_container(self._container_scale_factor, load_opts)
 
         for index, c_ws_name in enumerate(self._workspace_names):
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
@@ -313,11 +364,24 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 # Convert to dSpacing
                 ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target="dSpacing", EMode="Elastic")
 
+                # Mask noisy detectors
+                if len(masked_detectors) > 0:
+                    mask_detectors(ws_name, masked_detectors)
+
                 # Handle rebinning
                 rebin_reduction(ws_name, self._rebin_string, rebin_string_2, num_bins)
 
                 # Group spectra
-                group_spectra(ws_name, masked_detectors=masked_detectors, method=self._grouping_method, group_ws=self._grouping_workspace)
+                grouped = group_spectra(
+                    ws_name,
+                    method=self._grouping_method,
+                    group_file=self._grouping_file,
+                    group_ws=self._grouping_workspace,
+                    group_string=self._grouping_string,
+                    number_of_groups=self._number_of_groups,
+                    spectra_range=self._spectra_range,
+                )
+                AnalysisDataService.addOrReplace(ws_name, grouped)
 
             if is_multi_frame:
                 fold_chopped(c_ws_name)
@@ -356,9 +420,18 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
         self._mode = self.getPropertyValue("Mode")
         self._spectra_range = self.getProperty("SpectraRange").value
         self._rebin_string = self.getPropertyValue("RebinParam")
-        self._grouping_method = self.getPropertyValue("GroupingPolicy")
-        grouping_ws_name = self.getPropertyValue("GroupingWorkspace")
-        self._grouping_workspace = mtd[grouping_ws_name] if grouping_ws_name else None
+
+        grouping_policy = self.getPropertyValue("GroupingPolicy")
+        grouping_method = self.getPropertyValue("GroupingMethod")
+        # 'GroupingPolicy' is deprecated, but if it is provided instead of 'GroupingMethod' then try to use it anyway
+        self._grouping_method = grouping_policy if grouping_policy != "" and grouping_method == "All" else grouping_method
+        self._grouping_workspace = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
+        self._grouping_string = _str_or_none(self.getPropertyValue("GroupingString"))
+        map_file = _str_or_none(self.getPropertyValue("MapFile"))
+        grouping_file = _str_or_none(self.getPropertyValue("GroupingFile"))
+        # 'MapFile' is deprecated, but if it is provided instead of 'GroupingFile' then try to use it anyway
+        self._grouping_file = map_file if map_file is not None and grouping_file is None else grouping_file
+        self._number_of_groups = self.getProperty("NGroups").value
 
         if self._rebin_string == "":
             self._rebin_string = None
@@ -384,13 +457,20 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
     def _apply_calibration(self):
         """
-        Checks to ensure a calibration file has been given
-        and if so performs AlignDetectors and DiffractionFocussing.
+        Checks to ensure a calibration file has been given and if so performs a calibration and
+        a logarithmic rebinning for the spectra which are not excluded from the grouping.
         """
         if self._cal_file != "":
             for ws_name in self._workspace_names:
-                AlignDetectors(InputWorkspace=ws_name, OutputWorkspace=ws_name, CalibrationFile=self._cal_file)
-                DiffractionFocussing(InputWorkspace=ws_name, OutputWorkspace=ws_name, GroupingFileName=self._cal_file)
+                calibrated = calibrate(ws_name, self._cal_file)
+                rebinned = rebin_logarithmic(calibrated, self._cal_file)
+                AnalysisDataService.addOrReplace(ws_name, rebinned)
+
+            if self._vanadium_ws:
+                for van_ws_name in self._vanadium_ws:
+                    calibrated = calibrate(van_ws_name, self._cal_file)
+                    rebinned = rebin_logarithmic(calibrated, self._cal_file)
+                    AnalysisDataService.addOrReplace(van_ws_name, rebinned)
 
     def _load_and_scale_container(self, scale_factor, load_opts):
         """

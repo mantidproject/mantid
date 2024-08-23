@@ -25,7 +25,7 @@ Mantid::Kernel::Logger g_log("Python Type Extractor");
 namespace Mantid::PythonInterface {
 
 struct PyNativeTypeExtractor {
-  using PythonOutputT = boost::make_recursive_variant<bool, long, double, std::string, Mantid::API::Workspace_sptr,
+  using PythonOutputT = boost::make_recursive_variant<bool, int, double, std::string, Mantid::API::Workspace_sptr,
                                                       std::vector<boost::recursive_variant_>>::type;
 
   static PythonOutputT convert(const boost::python::object &obj) {
@@ -40,7 +40,7 @@ struct PyNativeTypeExtractor {
     } else if (PyFloat_Check(rawptr)) {
       out = extract<double>(obj);
     } else if (PyLong_Check(rawptr)) {
-      out = extract<long>(obj);
+      out = static_cast<int>(extract<long>(obj));
     } else if (PyUnicode_Check(rawptr)) {
       out = extract<std::string>(obj);
     } else if (auto extractor = extract<Mantid::API::Workspace_sptr>(obj); extractor.check()) {
@@ -79,13 +79,13 @@ public:
 
   virtual ~IPyTypeVisitor() = default;
   virtual void operator()(bool value) const = 0;
-  virtual void operator()(long value) const = 0;
+  virtual void operator()(int value) const = 0;
   virtual void operator()(double value) const = 0;
   virtual void operator()(std::string) const = 0;
   virtual void operator()(Mantid::API::Workspace_sptr) const = 0;
 
   virtual void operator()(std::vector<bool>) const = 0;
-  virtual void operator()(std::vector<long>) const = 0;
+  virtual void operator()(std::vector<int>) const = 0;
   virtual void operator()(std::vector<double>) const = 0;
   virtual void operator()(std::vector<std::string>) const = 0;
 
@@ -100,8 +100,8 @@ public:
       applyVectorProp<bool>(values);
     } else if (elemType == typeid(double)) {
       applyVectorProp<double>(values);
-    } else if (elemType == typeid(long)) {
-      applyVectorProp<long>(values);
+    } else if (elemType == typeid(int)) {
+      applyVectorProp<int>(values);
     } else if (elemType == typeid(std::string)) {
       applyVectorProp<std::string>(values);
     } else {

@@ -52,7 +52,7 @@ namespace {
   }
 
 int64_t vectorVolume(const std::vector<int64_t> &size) {
-  return std::accumulate(size.begin(), size.end(), int64_t{1}, std::multiplies<>());
+  return std::accumulate(size.cbegin(), size.cend(), int64_t{1}, std::multiplies<>());
 }
 
 std::pair<::NeXus::Info, bool> checkIfOpenAndGetInfo(::NeXus::File &file, const std::string &&entry) {
@@ -102,11 +102,20 @@ void doReadNexusAnyVector(std::vector<T> &out, ::NeXus::File &file, const size_t
   } else if constexpr (std::is_same_v<T, U>) {
     if (size > 0)
       callGetData(file, out, close_file);
+    else {
+      if (close_file) {
+        file.closeData();
+      }
+    }
   } else {
     if (size > 0) {
       std::vector<U> buf(size);
       callGetData(file, buf, close_file);
-      std::transform(buf.begin(), buf.end(), out.begin(), [](U a) -> T { return static_cast<T>(a); });
+      std::transform(buf.cbegin(), buf.cend(), out.begin(), [](U a) -> T { return static_cast<T>(a); });
+    } else {
+      if (close_file) {
+        file.closeData();
+      }
     }
   }
 }
@@ -144,7 +153,7 @@ void doReadNexusAnySlab(std::vector<T> &out, ::NeXus::File &file, const std::vec
     if (volume > 0) {
       std::vector<U> buf(volume);
       callGetSlab(file, buf, start, size, close_file);
-      std::transform(buf.begin(), buf.end(), out.begin(), [](U a) -> T { return static_cast<T>(a); });
+      std::transform(buf.cbegin(), buf.cend(), out.begin(), [](U a) -> T { return static_cast<T>(a); });
     }
   }
 }

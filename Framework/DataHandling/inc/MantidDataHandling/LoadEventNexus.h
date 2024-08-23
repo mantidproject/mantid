@@ -162,6 +162,9 @@ public:
   /// if wall-clock filtering was requested
   bool m_is_time_filtered{false};
 
+  bool filter_bad_pulses{false};
+  std::shared_ptr<Mantid::Kernel::TimeROI> bad_pulses_timeroi;
+
   /// Mutex protecting tof limits
   std::mutex m_tofMutex;
 
@@ -178,6 +181,7 @@ public:
 
   /// Tolerance for CompressEvents; use -1 to mean don't compress.
   double compressTolerance;
+  bool compressEvents;
 
   /// Pulse times for ALL banks, taken from proton_charge log.
   std::shared_ptr<BankPulseTimes> m_allBanksPulseTimes;
@@ -195,6 +199,8 @@ private:
 
   /// Execution code
   void execLoader() override;
+
+  std::map<std::string, std::string> validateInputs() override;
 
   LoadEventNexus::LoaderType defineLoaderType(const bool haveWeights, const bool oldNeXusFileNames,
                                               const std::string &classType) const;

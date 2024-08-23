@@ -8,7 +8,7 @@
 
 namespace MantidQt::CustomInterfaces {
 
-BayesFittingTab::BayesFittingTab(QWidget *parent) : IndirectTab(parent), m_propTree(new QtTreePropertyBrowser()) {
+BayesFittingTab::BayesFittingTab(QWidget *parent) : InelasticTab(parent), m_propTree(new QtTreePropertyBrowser()) {
   m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
@@ -22,6 +22,10 @@ BayesFittingTab::~BayesFittingTab() { m_propTree->unsetFactoryForManager(m_dblMa
  * @param filter :: true if you want to allow filtering
  */
 void BayesFittingTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
+
+void BayesFittingTab::applySettings(std::map<std::string, QVariant> const &settings) {
+  filterInputData(settings.at("RestrictInput").toBool());
+}
 
 void BayesFittingTab::setFileExtensionsByName(bool filter) { (void)filter; }
 

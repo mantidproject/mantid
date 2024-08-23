@@ -5,13 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferValidator.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <filesystem>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace {
 IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &outputName) {
@@ -65,7 +66,7 @@ std::vector<std::string> IETDataValidator::validateBackgroundData(IETBackgroundD
         errors.push_back("Background Start must be less than Background End");
       }
 
-      auto tempWs = WorkspaceUtils::getADSWorkspace(name);
+      auto tempWs = getADSWorkspace(name);
 
       const double minBack = tempWs->x(0).front();
       const double maxBack = tempWs->x(0).back();
@@ -90,67 +91,6 @@ std::string IETDataValidator::validateAnalysisData(IETAnalysisData analysisData)
     }
   }
   return "";
-}
-
-std::string IETDataValidator::validateDetectorGrouping(Mantid::API::AlgorithmRuntimeProps *groupingProperties,
-                                                       std::size_t const &defaultSpectraMin,
-                                                       std::size_t const &defaultSpectraMax) {
-  std::string groupingType = groupingProperties->getProperty("GroupingMethod");
-  if (groupingType == "File") {
-    std::string mapFile = groupingProperties->getProperty("MapFile");
-    if (mapFile.empty())
-      return "Mapping file is invalid.";
-  } else if (groupingType == "Custom") {
-    if (!groupingProperties->existsProperty("GroupingString"))
-      return "Please supply a custom grouping for detectors.";
-    else {
-      std::string customString = groupingProperties->getProperty("GroupingString");
-      return checkCustomGroupingNumbersInRange(getCustomGroupingNumbers(customString), defaultSpectraMin,
-                                               defaultSpectraMax);
-    }
-  } else if (groupingType == "Groups") {
-    auto const numberOfSpectra = defaultSpectraMax - defaultSpectraMin + 1;
-    auto nGroups = std::stoull(groupingProperties->getPropertyValue("NGroups"));
-    if (nGroups < 1) {
-      return "The number of groups must be a positive number.";
-    } else if (nGroups > numberOfSpectra) {
-      return "The number of groups must be less or equal to the number of spectra (" + std::to_string(numberOfSpectra) +
-             ").";
-    }
-  }
-  return "";
-}
-
-std::vector<std::size_t> IETDataValidator::getCustomGroupingNumbers(std::string const &customString) {
-  std::vector<std::string> customGroupingStrings;
-  std::vector<std::size_t> customGroupingNumbers;
-  // Get the numbers from customString and store them in customGroupingStrings
-  boost::split(customGroupingStrings, customString, boost::is_any_of(" ,-+:"));
-  for (const auto &string : customGroupingStrings)
-    if (!string.empty())
-      customGroupingNumbers.emplace_back(std::stoull(string));
-  return customGroupingNumbers;
-}
-
-std::string IETDataValidator::checkCustomGroupingNumbersInRange(std::vector<std::size_t> const &customGroupingNumbers,
-                                                                std::size_t const &spectraMin,
-                                                                std::size_t const &spectraMax) const {
-  if (std::any_of(customGroupingNumbers.cbegin(), customGroupingNumbers.cend(),
-                  [this, spectraMin, spectraMax](auto number) {
-                    return !this->numberInCorrectRange(number, spectraMin, spectraMax);
-                  })) {
-    return "Please supply a custom grouping within the correct range";
-  } else {
-    return "";
-  }
-}
-
-bool IETDataValidator::numberInCorrectRange(std::size_t const &spectraNumber, std::size_t const &spectraMin,
-                                            std::size_t const &spectraMax) const {
-  if (spectraMin != 0 && spectraMax != 0) {
-    return spectraNumber >= spectraMin && spectraNumber <= spectraMax;
-  }
-  return false;
 }
 
 } // namespace CustomInterfaces

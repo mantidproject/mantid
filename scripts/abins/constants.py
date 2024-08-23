@@ -262,7 +262,7 @@ T_THRESHOLD = 1e-12
 MAX_ORDER = 4  # max quantum order event
 
 ALL_SUPPORTED_AB_INITIO_PROGRAMS = ["CRYSTAL", "CASTEP", "DMOL3", "GAUSSIAN", "VASP"]
-AB_INITIO_FILE_EXTENSIONS = ["phonon", "out", "outmol", "log", "LOG", "xml", "yaml", "castep_bin", "hdf5"]
+AB_INITIO_FILE_EXTENSIONS = ["phonon", "out", "outmol", "log", "LOG", "xml", "yaml", "castep_bin", "hdf5", "json"]
 
 ONE_DIMENSIONAL_INSTRUMENTS = ["TOSCA", "Lagrange"]
 TWO_DIMENSIONAL_CHOPPER_INSTRUMENTS = ["MAPS", "MARI", "MERLIN"]

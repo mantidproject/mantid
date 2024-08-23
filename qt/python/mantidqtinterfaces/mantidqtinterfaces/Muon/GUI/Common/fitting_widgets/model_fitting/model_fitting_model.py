@@ -241,6 +241,10 @@ class ModelFittingModel(BasicFittingModel):
         x_lower, _ = self.x_limits_of_workspace(workspace_name)
         return x_lower
 
+    def number_of_result_tables() -> int:
+        """Returns the number of results tables stored by the fitting context."""
+        return self.fitting_context.number_of_result_tables()
+
     def _reset_current_result_table_index(self) -> None:
         """Resets the current result table index stored by the context."""
         if self.fitting_context.number_of_result_tables() == 0:

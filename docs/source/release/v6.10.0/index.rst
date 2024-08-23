@@ -4,19 +4,52 @@
 Mantid 6.10.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/6_10_release/IntegratePeaks1DProfile_OutputFile.png
    :class: screenshot
-   :width: 385px
+   :width: 500px
    :align: right
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.10.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+In this release, we changed the way files are loaded into Mantid:
+On ISIS Data Analysis as a Service Platform (IDAaaS), loading files will look
+into the instrument data cache path ``/data/instrument``
+first before looking for the file on the data archive.
+This change will speed up loading raw data files on IDAaaS, especially
+for users who do not have access to the data archive or users whose
+instrument data is not reliably accessed from the archive.
+Other important highlights include:
+
+- New algorithm :ref:`algm-IntegratePeaks1DProfile` to integrate single-crystal
+  Bragg peaks in a workspace with an x-unit of TOF adapted from an algorithm in
+  SXD2001 by Gutmann, M. J. (2005).
+- New algorithms for supporting the polarised SANS data reduction:
+  :ref:`algm-DepolarizedAnalyserTransmission`, :ref:`algm-FlipperEfficiency`
+  and :ref:`algm-HeliumAnalyserEfficiency`.
+- Improvements to the way Mantid handles event compression. The algorithm
+  :ref:`algm-CompressEvents` now has the ability to combine events together in
+  logarithmically increasing size groups.
+  We re-implemented :ref:`LoadEventNexus <algm-LoadEventNexus>` when specifying the
+  ``CompressTolerance`` (the execution time of
+  ``LoadEventNexus`` is generally longer, but workflows using
+  ``CompressEvents`` generally run faster).
+- New option to find peaks using the ratio of variance/mean in
+  :ref:`algm-FindSXPeaksConvolve` - this is a peak finding criterion used in
+  DIALS software (Winter, G., et al. Acta Crystallographica Section D,
+  Structural Biology 74.2 (2018): 85-97).
+- New detector grouping options on the :ref:`interface-indirect-diffraction` interface
+  (including ``All``, ``Groups``, ``Custom`` and ``File`` options).
+- New way to easily load multiple files into :ref:`Elwin Tab <elwin>` of
+  :ref:`Data Processor Interface <interface-inelastic-data-processor>`.
+- The `Inelastic Data Analysis` interface has been renamed to the
+  :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>` interface
+  and the `Inelastic Data Manipulation` interface has been renamed to the
+  :ref:`Inelastic Data Processor <interface-inelastic-data-processor>` interface.
+  The new names provides better descriptions of what the interfaces do.
+
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the

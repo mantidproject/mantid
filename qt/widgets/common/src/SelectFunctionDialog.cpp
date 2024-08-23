@@ -68,6 +68,10 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent, const std::vector<st
   m_form->searchBox->completer()->setCompletionMode(QCompleter::PopupCompletion);
   m_form->searchBox->completer()->setFilterMode(Qt::MatchContains);
 
+  // Complete suggestions in search box,
+  // number of suggestions same as number of registeredFunctions
+  addSearchBoxFunctionNames(registeredFunctions);
+
   connect(m_form->searchBox, SIGNAL(editTextChanged(const QString &)), this, SLOT(searchBoxChanged(const QString &)));
 
   // Construct the QTreeWidget based on the map information of categories and
@@ -85,6 +89,16 @@ SelectFunctionDialog::SelectFunctionDialog(QWidget *parent, const std::vector<st
   m_form->searchBox->setCurrentIndex(-1);
 
   connect(m_form->helpButton, SIGNAL(clicked()), this, SLOT(helpClicked()));
+}
+
+/**
+ * Complete the QComboBox with the available functions for fitting
+ * @param registeredFunctions :: [input] Vector of avaiblable functions
+ */
+void SelectFunctionDialog::addSearchBoxFunctionNames(const std::vector<std::string> &registeredFunctions) {
+  for (const auto &function : registeredFunctions) {
+    m_form->searchBox->addItem(QString::fromStdString(function));
+  }
 }
 
 /**
@@ -122,7 +136,6 @@ void SelectFunctionDialog::constructFunctionTree(
           for (const auto &function : entry.second) {
             QTreeWidgetItem *fit = new QTreeWidgetItem(catItem);
             fit->setText(0, QString::fromStdString(function));
-            m_form->searchBox->addItem(QString::fromStdString(function));
           }
         }
       } else {
@@ -157,7 +170,6 @@ void SelectFunctionDialog::constructFunctionTree(
               for (const auto &function : entry.second) {
                 QTreeWidgetItem *fit = new QTreeWidgetItem(catItem);
                 fit->setText(0, QString::fromStdString(function));
-                m_form->searchBox->addItem(QString::fromStdString(function));
               }
             }
           }

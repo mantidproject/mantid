@@ -10,6 +10,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidDataHandling/LoadEventAsWorkspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -62,8 +63,12 @@ public:
 
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "Energy")
-    TS_ASSERT_EQUALS(outputWS->readY(0)[0], 1)
-    TS_ASSERT_EQUALS(outputWS->readE(0)[0], 1)
+    // // TS_ASSERT_EQUALS(outputWS->readY(0)[0], 1)
+    // // TS_ASSERT_EQUALS(outputWS->readE(0)[0], 1)
+    // I don't agree with original test to have values of 1 in Y(0)[0] and E(0)[0]. CNCS_7860_event.nxs bank5
+    // has 0 total counts this should count as faulty detector and the feature is spurious and should be excluded.
+    TS_ASSERT_EQUALS(outputWS->readY(0)[0], 0)
+    TS_ASSERT_EQUALS(outputWS->readE(0)[0], 0)
     TS_ASSERT_EQUALS(outputWS->readX(0)[0], 2.85)
     TS_ASSERT_EQUALS(outputWS->readX(0)[1], 3.15)
   }
@@ -163,6 +168,193 @@ public:
     load->initialize();
     load->setChild(true);
     load->setProperty("Filename", "BSS_11841_event.nxs");
+    load->execute();
+    Mantid::API::Workspace_sptr outputWS2 = load->getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS2);
+
+    auto integrate = AlgorithmManager::Instance().createUnmanaged("Integration");
+    integrate->initialize();
+    integrate->setChild(true);
+    integrate->setProperty("InputWorkspace", outputWS2);
+    integrate->setProperty("RangeLower", 0.0);
+    integrate->execute();
+
+    Mantid::API::MatrixWorkspace_sptr outputWS3 = integrate->getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS3);
+
+    // set the expected X-axis
+    outputWS3->getAxis(0)->setUnit("Wavelength");
+    const auto xBins = {1.463, 1.617};
+    const auto histX = Mantid::Kernel::make_cow<Mantid::HistogramData::HistogramX>(xBins);
+    for (size_t i = 0; i < outputWS3->getNumberHistograms(); i++)
+      outputWS3->setSharedX(i, histX);
+
+    // compare workspaces
+    auto compare = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+    compare->initialize();
+    compare->setChild(true);
+    compare->setProperty("Workspace1", outputWS);
+    compare->setProperty("Workspace2", outputWS3);
+    compare->execute();
+    TS_ASSERT(compare->getProperty("Result"));
+  }
+
+  void test_CGE_small_empty_entries() {
+    const std::string filename = Mantid::API::FileFinder::Instance().getFullPath("CG3_960.nxs.h5");
+    // Run the algorithm
+    LoadEventAsWorkspace2D alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "out_ws"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", filename))
+
+    TS_ASSERT(alg.execute());
+    Mantid::DataObjects::Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+  };
+
+  void test_BSS_filterbytimeROI() {
+    // compare loading with LoadEventAsWorkspace2D to LoadEventNexus+Integration by filtering 0.0 to 5.0s of data
+
+    // load with LoadEventAsWorkspace2D
+    LoadEventAsWorkspace2D alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "unused"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "BSS_11841_event.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("XCenter", "1.54"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("XWidth", "0.1"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilterByTimeStart", "0.0"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilterByTimeStop", "5.0"))
+    TS_ASSERT(alg.execute());
+
+    Mantid::DataObjects::Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+
+    // load with LoadEventNexus then do Integration
+    auto load = AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
+    load->initialize();
+    load->setChild(true);
+    load->setProperty("Filename", "BSS_11841_event.nxs");
+    load->setProperty("FilterByTimeStart", "0.0");
+    load->setProperty("FilterByTimeStop", "5.0");
+    load->execute();
+    Mantid::API::Workspace_sptr outputWS2 = load->getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS2);
+
+    auto integrate = AlgorithmManager::Instance().createUnmanaged("Integration");
+    integrate->initialize();
+    integrate->setChild(true);
+    integrate->setProperty("InputWorkspace", outputWS2);
+    integrate->setProperty("RangeLower", 0.0);
+    integrate->execute();
+
+    Mantid::API::MatrixWorkspace_sptr outputWS3 = integrate->getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS3);
+
+    // set the expected X-axis
+    outputWS3->getAxis(0)->setUnit("Wavelength");
+    const auto xBins = {1.463, 1.617};
+    const auto histX = Mantid::Kernel::make_cow<Mantid::HistogramData::HistogramX>(xBins);
+    for (size_t i = 0; i < outputWS3->getNumberHistograms(); i++)
+      outputWS3->setSharedX(i, histX);
+
+    // compare workspaces
+    auto compare = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+    compare->initialize();
+    compare->setChild(true);
+    compare->setProperty("Workspace1", outputWS);
+    compare->setProperty("Workspace2", outputWS3);
+    compare->execute();
+    TS_ASSERT(compare->getProperty("Result"));
+  }
+
+  void test_BSS_filterbytimeStart() {
+    // compare loading with LoadEventAsWorkspace2D to LoadEventNexus+Integration by filtering from 5.0s of data
+    // till the end of run when FiltertByTimeStop is not given.
+
+    // load with LoadEventAsWorkspace2D
+    LoadEventAsWorkspace2D alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "unused"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "BSS_11841_event.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("XCenter", "1.54"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("XWidth", "0.1"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilterByTimeStart", "5.0"))
+    // TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilterByTimeStop", "5.0"))
+    TS_ASSERT(alg.execute());
+
+    Mantid::DataObjects::Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+
+    // load with LoadEventNexus then do Integration
+    auto load = AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
+    load->initialize();
+    load->setChild(true);
+    load->setProperty("Filename", "BSS_11841_event.nxs");
+    load->setProperty("FilterByTimeStart", "5.0");
+    // load->setProperty("FilterByTimeStop", "5.0");
+    load->execute();
+    Mantid::API::Workspace_sptr outputWS2 = load->getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS2);
+
+    auto integrate = AlgorithmManager::Instance().createUnmanaged("Integration");
+    integrate->initialize();
+    integrate->setChild(true);
+    integrate->setProperty("InputWorkspace", outputWS2);
+    integrate->setProperty("RangeLower", 0.0);
+    integrate->execute();
+
+    Mantid::API::MatrixWorkspace_sptr outputWS3 = integrate->getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS3);
+
+    // set the expected X-axis
+    outputWS3->getAxis(0)->setUnit("Wavelength");
+    const auto xBins = {1.463, 1.617};
+    const auto histX = Mantid::Kernel::make_cow<Mantid::HistogramData::HistogramX>(xBins);
+    for (size_t i = 0; i < outputWS3->getNumberHistograms(); i++)
+      outputWS3->setSharedX(i, histX);
+
+    // compare workspaces
+    auto compare = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+    compare->initialize();
+    compare->setChild(true);
+    compare->setProperty("Workspace1", outputWS);
+    compare->setProperty("Workspace2", outputWS3);
+    compare->execute();
+    TS_ASSERT(compare->getProperty("Result"));
+  }
+
+  void test_BSS_filterbytimeStop() {
+    // compare loading with LoadEventAsWorkspace2D to LoadEventNexus+Integration by filtering from start
+    // till 7.1s of run when FiltertByTimeStart is not given.
+    // load with LoadEventAsWorkspace2D
+    LoadEventAsWorkspace2D alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "unused"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "BSS_11841_event.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("XCenter", "1.54"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("XWidth", "0.1"))
+    // TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilterByTimeStart", "0.0"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FilterByTimeStop", "7.1"))
+    TS_ASSERT(alg.execute());
+
+    Mantid::DataObjects::Workspace2D_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+
+    // load with LoadEventNexus then do Integration
+    auto load = AlgorithmManager::Instance().createUnmanaged("LoadEventNexus");
+    load->initialize();
+    load->setChild(true);
+    load->setProperty("Filename", "BSS_11841_event.nxs");
+    // load->setProperty("FilterByTimeStart", "0.0");
+    load->setProperty("FilterByTimeStop", "7.1");
     load->execute();
     Mantid::API::Workspace_sptr outputWS2 = load->getProperty("OutputWorkspace");
     TS_ASSERT(outputWS2);

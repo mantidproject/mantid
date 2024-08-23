@@ -1,1 +1,0 @@
-- Improved right-click behaviour in the table view (e.g. "Show Data") when right-clicking on a row/column header.

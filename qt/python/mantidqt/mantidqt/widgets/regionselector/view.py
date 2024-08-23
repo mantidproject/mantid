@@ -15,10 +15,10 @@ from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
 class RegionSelectorView(QWidget):
     """The view for the data portion of the sliceviewer"""
 
-    def __init__(self, presenter, parent=None, dims_info=None, image_info_widget=None):
+    def __init__(self, presenter, parent=None, dims_info=None, image_info_widget=None, add_extents=False):
         super().__init__(parent)
         self.setWindowFlags(Qt.Window)
-        self._data_view = SliceViewerDataView(presenter, dims_info, None, self, None, image_info_widget)
+        self._data_view = SliceViewerDataView(presenter, dims_info, None, self, None, image_info_widget, add_extents)
         self._data_view.help_button.hide()
 
         layout = QHBoxLayout(self)

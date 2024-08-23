@@ -6,6 +6,7 @@
 
 # SPDX - License - Identifier: GPL - 3.0 +
 from abc import ABCMeta, abstractmethod
+from pathlib import Path
 from typing import Sequence
 
 from mantid.kernel import logger
@@ -29,10 +30,19 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
     read_formatted_data() if necessary and caching the results.
     """
 
-    def __init__(self, input_ab_initio_filename=None):
-        self._sample_form = None
-        self._ab_initio_program = None
+    def __init__(self, input_ab_initio_filename: str = None):
+        """An object for loading phonon data from ab initio output files"""
+
+        if not isinstance(input_ab_initio_filename, str):
+            raise TypeError("Filename must be a string")
+        elif not Path(input_ab_initio_filename).is_file():
+            raise IOError(f"Ab initio file {input_ab_initio_filename} not found.")
+
         self._clerk = abins.IO(input_filename=input_ab_initio_filename, group_name=abins.parameters.hdf_groups["ab_initio_data"])
+
+    @property
+    @abstractmethod
+    def _ab_initio_program(self) -> str: ...
 
     @abstractmethod
     def read_vibrational_or_phonon_data(self) -> abins.AbinsData:

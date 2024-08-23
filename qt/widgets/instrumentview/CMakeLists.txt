@@ -22,6 +22,8 @@ set(SRC_FILES
     src/InstrumentWidgetMaskTab.cpp
     src/InstrumentWidgetPickTab.cpp
     src/InstrumentWidgetRenderTab.cpp
+    src/InstrumentRendererClassic.cpp
+    src/InstrumentRendererMultiList.cpp
     src/InstrumentRenderer.cpp
     src/InstrumentWidgetTab.cpp
     src/InstrumentWidgetTreeTab.cpp
@@ -94,6 +96,8 @@ set(INC_FILES
     inc/MantidQtWidgets/InstrumentView/InstrumentWidget.h
     inc/MantidQtWidgets/InstrumentView/InstrumentWidgetEncoder.h
     inc/MantidQtWidgets/InstrumentView/InstrumentWidgetDecoder.h
+    inc/MantidQtWidgets/InstrumentView/InstrumentRendererClassic.h
+    inc/MantidQtWidgets/InstrumentView/InstrumentRendererMultiList.h
     inc/MantidQtWidgets/InstrumentView/InstrumentRenderer.h
     inc/MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h
     inc/MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h

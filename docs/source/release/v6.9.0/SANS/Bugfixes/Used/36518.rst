@@ -1,3 +1,0 @@
-- The Beam Centre Finder's bank selector has been simplified to remove unneeded checkboxes.
-- When the instrument is set to LARMOR, the Beam Centre Finder's position labels now indicate that the given values
-  should be in meters (m).

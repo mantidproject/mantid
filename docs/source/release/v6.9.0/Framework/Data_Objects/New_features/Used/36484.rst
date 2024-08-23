@@ -1,2 +1,0 @@
-- New C++ method ``Mantid::Kernel::Logger::isDebug()`` to allow for finding out if debug logs should even be sent to the logger for printing.
-- Additional timer in `LoadEventNexus <algm-LoadEventNexus>` to give more information when profiling code using `Algorithm Profiler <https://developer.mantidproject.org/AlgorithmProfiler.html>`_

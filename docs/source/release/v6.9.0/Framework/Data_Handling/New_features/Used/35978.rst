@@ -1,2 +1,0 @@
-- :ref:`LoadEmptyInstrument <algm-LoadEmptyInstrument>` now accepts instrument definition file names with ".nxs.h5" extensions.
-- :ref:`LoadCalFile <algm-LoadCalFile>` now accepts instrument definition file names with ".hdf5", ".nxs", and ".nxs.h5" extensions.

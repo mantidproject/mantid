@@ -31,6 +31,7 @@ It is not recommended where there is significant vibrational coupling between fr
 Alternatively, force-constants data can be provided and a fine q-point mesh will be sampled automatically.
 In this case the supported formats are CASTEP (.castep_bin generated with ``phonon_write_force_constants = True``)
 and Phonopy (*phonopy.yaml* file generated with ``INCLUDE_ALL = .TRUE.``)
+It is also permitted to use a phonopy YAML file which does not contain the force constants, if force constants are stored in a ``FORCE_CONSTANTS`` or ``force_constants.hdf5`` file in the same directory. This is less convenient but may result in significantly faster loading if the force constant matrix is large.
 
 The user may also provide an experimental file with measured dynamical structure factor S in order to directly
 compare theoretical and experimental spectra.

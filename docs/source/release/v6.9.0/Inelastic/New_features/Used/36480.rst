@@ -1,1 +1,0 @@
--  The tab :ref:`Symmetrise <inelastic-symmetrise>` of the :ref:`Inelastic Data Manipulation Interface <interface-inelastic-data-manipulation>` has been modified with better input data validation. Selection markers can be moved to negative spectra side upon change of ReflectType property and the central marker is fixed.

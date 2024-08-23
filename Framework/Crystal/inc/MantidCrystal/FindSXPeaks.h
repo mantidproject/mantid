@@ -56,6 +56,7 @@ public:
 
   static const std::string strongestPeakStrategy;
   static const std::string allPeaksStrategy;
+  static const std::string allPeaksNSigmaStrategy;
   static const std::string relativeResolutionStrategy;
   static const std::string absoluteResolutionPeaksStrategy;
 

@@ -1,1 +1,0 @@
-- When opening consecutive files in the tab :ref:`S(Q,w) <inelastic-sqw>` of the :ref:`Inelastic Data Manipulation Interface <interface-inelastic-data-manipulation>`, the limits of the contour plot for the newest data file opened are updated to fit the plot widget size.

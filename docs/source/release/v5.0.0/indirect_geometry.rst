@@ -13,7 +13,7 @@ New
 ###
 
 - Simultaneous fitting has been added as an option on the convolutional, F(Q) and Msd fitting tabs in QENS Data Analysis. This allows multiple spectra from one or more reductions
-  to be fitted with parameters tied together. For more information on these changes, see the updated documentation :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>`.
+  to be fitted with parameters tied together. For more information on these changes, see the updated documentation :ref:`Inelastic Data Analysis <interface-inelastic-qens-fitting>`.
 
 Improvements
 ############

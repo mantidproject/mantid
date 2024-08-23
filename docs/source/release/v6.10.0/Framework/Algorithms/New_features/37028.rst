@@ -1,1 +1,0 @@
-- New algorithm :ref:`LoadErrorEventsNexus <algm-LoadErrorEventsNexus>` to load events from the `bank_error_events` bank of a NeXus file

@@ -5,14 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import collections.abc
-from typing import List, NamedTuple, overload, Type, TypedDict, TypeVar
+from typing import List, NamedTuple, Optional, overload, Type, TypedDict, TypeVar
 from math import isclose
 
 import numpy as np
 from numpy.linalg import norm
-from mantid.kernel import logger as mantid_logger
 
 from abins.constants import COMPLEX_ID, COMPLEX_TYPE, FLOAT_ID, FLOAT_TYPE
+from abins.logging import get_logger, Logger
 
 
 class KpointData(NamedTuple):
@@ -56,12 +56,11 @@ class KpointsData(collections.abc.Sequence):
         weights: np.ndarray,
         k_vectors: np.ndarray,
         unit_cell: np.ndarray,
-        logger=None
+        logger: Optional[Logger] = None,
     ) -> None:
         super().__init__()
 
-        if logger is None:
-            logger = mantid_logger
+        logger = get_logger(logger=logger)
 
         dim = 3
 
@@ -140,8 +139,7 @@ class KpointsData(collections.abc.Sequence):
         return self._weights.size
 
     @overload  # F811
-    def __getitem__(self, item: int) -> KpointData:
-        ...
+    def __getitem__(self, item: int) -> KpointData: ...
 
     @overload  # F811
     def __getitem__(self, item: slice) -> List[KpointData]:  # F811

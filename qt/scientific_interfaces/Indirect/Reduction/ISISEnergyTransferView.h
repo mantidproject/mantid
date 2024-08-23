@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DataReduction.h"
 #include "DllConfig.h"
 #include "ISISEnergyTransferData.h"
-#include "IndirectDataReduction.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "ui_ISISEnergyTransfer.h"
 
@@ -16,91 +16,146 @@ namespace MantidQt {
 namespace CustomInterfaces {
 
 class DetectorGroupingOptions;
+class IIETPresenter;
+class IRunView;
 
-class MANTIDQT_INDIRECT_DLL IETViewSubscriber {
+class MANTIDQT_INDIRECT_DLL IIETView {
 public:
-  virtual void notifyNewMessage(const QString &message) = 0;
-  virtual void notifySaveClicked() = 0;
-  virtual void notifyRunClicked() = 0;
-  virtual void notifyPlotRawClicked() = 0;
-  virtual void notifySaveCustomGroupingClicked(std::string const &customGrouping) = 0;
-  virtual void notifyRunFinished() = 0;
+  virtual ~IIETView() = default;
+
+  virtual void subscribePresenter(IIETPresenter *presenter) = 0;
+
+  virtual IETRunData getRunData() const = 0;
+  virtual IETPlotData getPlotData() const = 0;
+  virtual IETSaveData getSaveData() const = 0;
+
+  virtual std::string getGroupOutputOption() const = 0;
+  virtual IRunView *getRunView() const = 0;
+  virtual IOutputPlotOptionsView *getPlotOptionsView() const = 0;
+  virtual bool getGroupOutputCheckbox() const = 0;
+
+  virtual std::string getFirstFilename() const = 0;
+
+  virtual bool isRunFilesValid() const = 0;
+  virtual void validateCalibrationFileType(IUserInputValidator *uiv) const = 0;
+  virtual void validateRebinString(IUserInputValidator *uiv) const = 0;
+  virtual std::optional<std::string> validateGroupingProperties(std::size_t const &spectraMin,
+                                                                std::size_t const &spectraMax) const = 0;
+
+  virtual bool showRebinWidthPrompt() const = 0;
+  virtual void showSaveCustomGroupingDialog(std::string const &customGroupingOutput,
+                                            std::string const &defaultGroupingFilename,
+                                            std::string const &saveDirectory) const = 0;
+  virtual void displayWarning(std::string const &message) const = 0;
+
+  virtual void setCalibVisible(bool visible) = 0;
+  virtual void setEfixedVisible(bool visible) = 0;
+  virtual void setBackgroundSectionVisible(bool visible) = 0;
+  virtual void setPlotTimeSectionVisible(bool visible) = 0;
+  virtual void setAnalysisSectionVisible(bool visible) = 0;
+  virtual void setPlottingOptionsVisible(bool visible) = 0;
+  virtual void setAclimaxSaveVisible(bool visible) = 0;
+  virtual void setSPEVisible(bool visible) = 0;
+  virtual void setFoldMultipleFramesVisible(bool visible) = 0;
+  virtual void setOutputInCm1Visible(bool visible) = 0;
+  virtual void setGroupOutputCheckBoxVisible(bool visible) = 0;
+  virtual void setGroupOutputDropdownVisible(bool visible) = 0;
+
+  virtual void setDetailedBalance(double detailedBalance) = 0;
+  virtual void setRunFilesEnabled(bool enable) = 0;
+  virtual void setSingleRebin(bool enable) = 0;
+  virtual void setMultipleRebin(bool enable) = 0;
+  virtual void setSaveEnabled(bool enable) = 0;
+  virtual void setPlotTimeIsPlotting(bool plotting) = 0;
+  virtual void setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes) = 0;
+  virtual void setEnableOutputOptions(bool const enable) = 0;
+
+  virtual void setInstrumentSpectraRange(int specMin, int specMax) = 0;
+  virtual void setInstrumentRebinning(std::vector<double> const &rebinParams, std::string const &rebinText,
+                                      bool checked, int tabIndex) = 0;
+  virtual void setInstrumentEFixed(std::string const &instrumentName, double eFixed) = 0;
+  virtual void setInstrumentGrouping(std::string const &instrumentName) = 0;
+  virtual void setInstrumentSpecDefault(std::map<std::string, bool> &specMap) = 0;
+
+  virtual void showMessageBox(std::string const &message) = 0;
 };
 
-class MANTIDQT_INDIRECT_DLL IETView : public QWidget {
+class MANTIDQT_INDIRECT_DLL IETView : public QWidget, public IIETView {
   Q_OBJECT
 
 public:
-  IETView(IETViewSubscriber *subscriber, QWidget *parent = nullptr);
-  ~IETView();
+  IETView(QWidget *parent = nullptr);
 
-  IETRunData getRunData() const;
-  IETPlotData getPlotData() const;
-  IETSaveData getSaveData() const;
+  void subscribePresenter(IIETPresenter *presenter) override;
 
-  std::string getGroupOutputOption() const;
-  OutputPlotOptionsView *getPlotOptionsView() const;
-  bool getGroupOutputCheckbox() const;
+  IETRunData getRunData() const override;
+  IETPlotData getPlotData() const override;
+  IETSaveData getSaveData() const override;
 
-  std::string getFirstFilename() const;
+  std::string getGroupOutputOption() const override;
+  IRunView *getRunView() const override;
+  IOutputPlotOptionsView *getPlotOptionsView() const override;
+  bool getGroupOutputCheckbox() const override;
 
-  bool isRunFilesValid() const;
-  void validateCalibrationFileType(UserInputValidator &uiv) const;
-  void validateRebinString(UserInputValidator &uiv) const;
+  std::string getFirstFilename() const override;
 
-  bool showRebinWidthPrompt() const;
+  bool isRunFilesValid() const override;
+  void validateCalibrationFileType(IUserInputValidator *uiv) const override;
+  void validateRebinString(IUserInputValidator *uiv) const override;
+  std::optional<std::string> validateGroupingProperties(std::size_t const &spectraMin,
+                                                        std::size_t const &spectraMax) const override;
+
+  bool showRebinWidthPrompt() const override;
   void showSaveCustomGroupingDialog(std::string const &customGroupingOutput, std::string const &defaultGroupingFilename,
-                                    std::string const &saveDirectory) const;
-  void displayWarning(std::string const &message) const;
+                                    std::string const &saveDirectory) const override;
+  void displayWarning(std::string const &message) const override;
 
-  void setCalibVisible(bool visible);
-  void setEfixedVisible(bool visible);
-  void setBackgroundSectionVisible(bool visible);
-  void setPlotTimeSectionVisible(bool visible);
-  void setAnalysisSectionVisible(bool visible);
-  void setPlottingOptionsVisible(bool visible);
-  void setAclimaxSaveVisible(bool visible);
-  void setSPEVisible(bool visible);
-  void setFoldMultipleFramesVisible(bool visible);
-  void setOutputInCm1Visible(bool visible);
-  void setGroupOutputCheckBoxVisible(bool visible);
-  void setGroupOutputDropdownVisible(bool visible);
+  void setCalibVisible(bool visible) override;
+  void setEfixedVisible(bool visible) override;
+  void setBackgroundSectionVisible(bool visible) override;
+  void setPlotTimeSectionVisible(bool visible) override;
+  void setAnalysisSectionVisible(bool visible) override;
+  void setPlottingOptionsVisible(bool visible) override;
+  void setAclimaxSaveVisible(bool visible) override;
+  void setSPEVisible(bool visible) override;
+  void setFoldMultipleFramesVisible(bool visible) override;
+  void setOutputInCm1Visible(bool visible) override;
+  void setGroupOutputCheckBoxVisible(bool visible) override;
+  void setGroupOutputDropdownVisible(bool visible) override;
 
-  void setDetailedBalance(double detailedBalance);
-  void setRunFilesEnabled(bool enable);
-  void setSingleRebin(bool enable);
-  void setMultipleRebin(bool enable);
-  void setSaveEnabled(bool enable);
-  void setPlotTimeIsPlotting(bool plotting);
-  void setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes);
-  void setOutputWorkspaces(std::vector<std::string> const &outputWorkspaces);
+  void setDetailedBalance(double detailedBalance) override;
+  void setRunFilesEnabled(bool enable) override;
+  void setSingleRebin(bool enable) override;
+  void setMultipleRebin(bool enable) override;
+  void setSaveEnabled(bool enable) override;
+  void setPlotTimeIsPlotting(bool plotting) override;
+  void setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes) override;
+  void setEnableOutputOptions(bool const enable) override;
 
-public slots:
-  void setInstrumentDefault(InstrumentData const &instrumentDetails);
-  void updateRunButton(bool enabled = true, std::string const &enableOutputButtons = "unchanged",
-                       QString const &message = "Run", QString const &tooltip = "");
+  void setInstrumentSpectraRange(int specMin, int specMax) override;
+  void setInstrumentRebinning(std::vector<double> const &rebinParams, std::string const &rebinText, bool checked,
+                              int tabIndex) override;
+  void setInstrumentEFixed(std::string const &instrumentName, double eFixed) override;
+  void setInstrumentGrouping(std::string const &instrumentName) override;
+  void setInstrumentSpecDefault(std::map<std::string, bool> &specMap) override;
+
+  void showMessageBox(std::string const &message) override;
 
 private slots:
-  void showMessageBox(const QString &message);
   void saveClicked();
-  void runClicked();
   void plotRawClicked();
   void saveCustomGroupingClicked(std::string const &customGrouping);
   void pbRunFinished();
 
   void handleDataReady();
 
-  void pbRunEditing();
   void pbRunFinding();
 
 private:
-  void setRunEnabled(bool enable);
   void setPlotTimeEnabled(bool enable);
-  void setButtonsEnabled(bool enable);
 
-  std::vector<std::string> m_outputWorkspaces;
   Ui::ISISEnergyTransfer m_uiForm;
-  IETViewSubscriber *m_subscriber;
+  IIETPresenter *m_presenter;
   DetectorGroupingOptions *m_groupingWidget;
 };
 } // namespace CustomInterfaces

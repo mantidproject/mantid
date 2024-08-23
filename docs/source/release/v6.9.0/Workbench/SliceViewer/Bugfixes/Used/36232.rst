@@ -1,1 +1,0 @@
-- Fix issue when adding peaks was not taking into account the projection matrix when calculating HKL.

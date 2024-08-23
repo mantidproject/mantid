@@ -29,6 +29,7 @@
 #include <iterator>
 #include <map>
 #include <memory>
+#include <numeric>
 #include <sstream>
 
 namespace Mantid::DataHandling {
@@ -312,10 +313,12 @@ int SaveISISNexus::saveStringVectorOpen(const char *name, const std::vector<std:
     return 0;
   }
   int buff_size = max_str_size;
-  if (buff_size <= 0)
-    for (const auto &str : str_vec) {
-      buff_size = std::max(buff_size, int(str.size()));
-    }
+  if (buff_size <= 0) {
+    const auto maxSize =
+        std::accumulate(str_vec.cbegin(), str_vec.cend(), size_t(0),
+                        [](size_t currentMax, const auto &str) { return std::max(currentMax, str.size()); });
+    buff_size = boost::numeric_cast<int>(maxSize);
+  }
   if (buff_size <= 0)
     buff_size = 1;
   auto buff = new char[buff_size];
@@ -385,29 +388,29 @@ void SaveISISNexus::toISO8601(std::string &str) {
 void SaveISISNexus::write_isis_vms_compat() {
   NXmakegroup(handle, "isis_vms_compat", "IXvms");
   NXopengroup(handle, "isis_vms_compat", "IXvms");
-  int ndet = m_isisRaw->i_det;
-  int nmon = m_isisRaw->i_mon;
+  int numDet = m_isisRaw->i_det;
+  int numMon = m_isisRaw->i_mon;
 
   saveInt("ADD", &m_isisRaw->add, 9);
-  saveInt("CODE", m_isisRaw->code, ndet);
-  saveInt("CRAT", m_isisRaw->crat, ndet);
+  saveInt("CODE", m_isisRaw->code, numDet);
+  saveInt("CRAT", m_isisRaw->crat, numDet);
 
   write_rpb();
   write_spb();
   write_vpb();
   saveInt("DAEP", &m_isisRaw->daep, 64);
-  saveInt("DELT", m_isisRaw->delt, ndet);
+  saveInt("DELT", m_isisRaw->delt, numDet);
   saveInt("FORM", &m_isisRaw->data_format);
   saveChar("HDR", &m_isisRaw->hdr, 80);
-  saveFloat("LEN2", m_isisRaw->len2, ndet);
-  saveInt("MDET", m_isisRaw->mdet, nmon);
-  saveInt("MODN", m_isisRaw->modn, ndet);
-  saveInt("MONP", m_isisRaw->monp, nmon);
-  saveInt("MPOS", m_isisRaw->mpos, ndet);
+  saveFloat("LEN2", m_isisRaw->len2, numDet);
+  saveInt("MDET", m_isisRaw->mdet, numMon);
+  saveInt("MODN", m_isisRaw->modn, numDet);
+  saveInt("MONP", m_isisRaw->monp, numMon);
+  saveInt("MPOS", m_isisRaw->mpos, numDet);
   saveChar("NAME", m_isisRaw->i_inst, 8);
-  saveInt("NDET", &ndet);
+  saveInt("NDET", &numDet);
   saveInt("NFPP", &m_isisRaw->t_nfpp);
-  saveInt("NMON", &nmon);
+  saveInt("NMON", &numMon);
   saveInt("NPER", &m_isisRaw->t_nper);
   saveInt("NSER", &m_isisRaw->e_nse);
   saveInt("NSP1", &m_isisRaw->t_nsp1);
@@ -417,13 +420,13 @@ void SaveISISNexus::write_isis_vms_compat() {
   saveInt("PMAP", &m_isisRaw->t_pmap, 256);
   saveInt("PRE1", &m_isisRaw->t_pre1);
   saveInt("RUN", &m_isisRaw->r_number);
-  saveInt("SPEC", m_isisRaw->spec, ndet);
+  saveInt("SPEC", m_isisRaw->spec, numDet);
   saveInt("TCM1", &m_isisRaw->t_tcm1);
   saveFloat("TCP1", m_isisRaw->t_tcp1, 20);
-  saveInt("TIMR", m_isisRaw->timr, ndet);
+  saveInt("TIMR", m_isisRaw->timr, numDet);
   saveChar("TITL", m_isisRaw->r_title, 80);
-  saveFloat("TTHE", m_isisRaw->tthe, ndet);
-  saveInt("UDET", m_isisRaw->udet, ndet);
+  saveFloat("TTHE", m_isisRaw->tthe, numDet);
+  saveInt("UDET", m_isisRaw->udet, numDet);
   saveInt("ULEN", &m_isisRaw->u_len);
   std::string user_info(160, ' ');
   if (m_isisRaw->u_len > 0) {
@@ -595,8 +598,8 @@ int *SaveISISNexus::getMonitorData(int period, int imon) {
 }
 
 void SaveISISNexus::write_monitors() {
-  int nmon = m_isisRaw->i_mon;
-  for (int i = 0; i < nmon; ++i) {
+  int numMon = m_isisRaw->i_mon;
+  for (int i = 0; i < numMon; ++i) {
     monitor_i(i);
   }
 }
@@ -606,10 +609,10 @@ void SaveISISNexus::write_monitors() {
  * @param i Index of a monitor
  */
 void SaveISISNexus::monitor_i(int i) {
-  int nper = m_isisRaw->t_nper; // number of periods
-  int ntc = m_isisRaw->t_ntc1;  // number of time channels
-  int dim[] = {nper, 1, ntc};
-  int size[] = {1, 1, ntc};
+  int numPer = m_isisRaw->t_nper; // number of periods
+  int numTc = m_isisRaw->t_ntc1;  // number of time channels
+  int dim[] = {numPer, 1, numTc};
+  int size[] = {1, 1, numTc};
   std::ostringstream ostr;
   int mon_num = i + 1;
   ostr << "monitor_" << mon_num;
@@ -619,7 +622,7 @@ void SaveISISNexus::monitor_i(int i) {
   //  int imon = m_isisRaw->mdet[i]; // spectrum number
   NXmakedata(handle, "data", NX_INT32, 3, dim);
   NXopendata(handle, "data");
-  for (int p = 0; p < nper; ++p) {
+  for (int p = 0; p < numPer; ++p) {
     int start[] = {p, 0, 0};
     NXputslab(handle, getMonitorData(p, i), start, size);
   }
@@ -692,12 +695,13 @@ void SaveISISNexus::sample() {
   saveString("id", " ");
   float tmp(0.0);
   saveFloat("distance", &tmp, 1);
-  std::string shape[] = {"cylinder", "flat plate", "HRPD slab", "unknown"};
+  const std::string shape[] = {"cylinder", "flat plate", "HRPD slab", "unknown"};
   int i = m_isisRaw->spb.e_geom - 1;
   if (i < 0 || i > 3)
     i = 3;
   saveString("shape", shape[i]);
-  std::string type[] = {"sample+can", "empty can", "vanadium", "absorber", "nothing", "sample, no can", "unknown"};
+  const std::string type[] = {"sample+can", "empty can",      "vanadium", "absorber",
+                              "nothing",    "sample, no can", "unknown"};
   i = m_isisRaw->spb.e_type - 1;
   if (i < 0 || i > 6)
     i = 6;

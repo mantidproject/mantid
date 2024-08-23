@@ -196,7 +196,7 @@ void ConvolutionFunctionModel::findComponentPrefixes() {
   m_deltaFunctionPrefix.reset();
   m_tempFunctionPrefix.reset();
   m_fitTypePrefix.reset();
-  m_peakPrefixes = QStringList();
+  m_peakPrefixes = std::vector<std::string>{};
   m_resolutionWorkspace.clear();
   m_resolutionWorkspaceIndex = 0;
 
@@ -205,7 +205,7 @@ void ConvolutionFunctionModel::findComponentPrefixes() {
     return;
   iterateThroughFunction(function.get(), "");
 
-  if (m_peakPrefixes->isEmpty()) {
+  if (m_peakPrefixes->empty()) {
     m_peakPrefixes.reset();
   }
   if (!m_convolutionPrefix) {
@@ -249,7 +249,7 @@ void ConvolutionFunctionModel::setPrefix(IFunction *func, std::string const &pre
     m_resolutionWorkspace = func->getAttribute("Workspace").asString();
     m_resolutionWorkspaceIndex = func->getAttribute("WorkspaceIndex").asInt();
   } else if (isLorentzianFunction(func)) {
-    m_peakPrefixes->append(QString::fromStdString(prefix));
+    m_peakPrefixes->emplace_back(prefix);
   } else if (isfitTypeFunction(func)) {
     m_fitTypePrefix = prefix;
   }

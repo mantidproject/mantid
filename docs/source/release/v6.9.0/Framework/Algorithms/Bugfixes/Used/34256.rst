@@ -1,1 +1,0 @@
-- Added warning message when ``ConvertUnits`` or ``ConvertAxisByFormula`` fails to do the conversion for certain detectors. Previously the warning was an information message.

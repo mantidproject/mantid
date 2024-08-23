@@ -97,7 +97,7 @@ Usage
 
 .. testoutput:: exampleIntegratePeaksShoeboxTOF
 
-    I/sigma = 100.49
+    I/sigma = 100.80
 
 References
 ----------

@@ -180,8 +180,8 @@ template <size_t Bits, typename Signed> struct wide_integer<Bits, Signed>::_impl
   }
 
   constexpr static void wide_integer_from_bultin(wide_integer<Bits, Signed> &self, double rhs) noexcept {
-    if ((rhs > 0 && rhs < std::numeric_limits<uint64_t>::max()) ||
-        (rhs < 0 && rhs > std::numeric_limits<int64_t>::min())) {
+    if ((rhs > 0 && rhs < static_cast<double>(std::numeric_limits<uint64_t>::max())) ||
+        (rhs < 0 && rhs > static_cast<double>(std::numeric_limits<int64_t>::min()))) {
       self = to_Integral(rhs);
       return;
     }
@@ -194,7 +194,7 @@ template <size_t Bits, typename Signed> struct wide_integer<Bits, Signed>::_impl
     size_t count = static_cast<size_t>(r / std::numeric_limits<uint64_t>::max());
     self = count;
     self *= std::numeric_limits<uint64_t>::max();
-    long double to_diff = count;
+    auto to_diff = static_cast<long double>(count);
     to_diff *= std::numeric_limits<uint64_t>::max();
 
     self += to_Integral(r - to_diff);
@@ -1306,49 +1306,6 @@ template <size_t Bits, typename Signed> std::wistream &operator>>(std::wistream 
   return in;
 }
 
-template <size_t Bits, typename Signed>
-to_chars_result to_chars(char *first, char *last, const wide_integer<Bits, Signed> &value, int base) {
-  if (base < 2 || base > 36) {
-    return {last, std::make_error_code(std::errc::invalid_argument)};
-  }
-  if (first >= last) {
-    return {last, std::make_error_code(std::errc::invalid_argument)};
-  }
-
-  if (value == 0) {
-    *first = '0';
-    *(++first) = '\0';
-    return {++first, {}};
-  }
-
-  wide_integer<Bits, Signed> v = value;
-  if (v < 0) {
-    v = -v;
-    *(first++) = '-';
-  }
-
-  char *cur = last;
-
-  while (v != 0 && --cur >= first) {
-    static const char ALPHA[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-    *cur = ALPHA[v % base];
-    v /= base;
-  }
-
-  if (v && cur + 1 == first) {
-    return {nullptr, std::make_error_code(std::errc::value_too_large)};
-  }
-
-  while (cur < last) {
-    *(first++) = *(cur++);
-  }
-  if (first < last) {
-    *first = '\0';
-  }
-
-  return {first, {}};
-}
-
 std::array<char, 256> inline genReverseAlpha() noexcept {
   static const char ALPHA[] = "0123456789abcdefghijklmnopqrstuvwxyz";
   std::array<char, 256> res;
@@ -1357,48 +1314,6 @@ std::array<char, 256> inline genReverseAlpha() noexcept {
     res[ALPHA[i]] = static_cast<char>(i);
   }
   return res;
-}
-
-template <size_t Bits, typename Signed>
-from_chars_result from_chars(const char *first, const char *last, wide_integer<Bits, Signed> &value, int base) {
-  if (base < 2 || base > 36) {
-    return {first, std::make_error_code(std::errc::invalid_argument)};
-  }
-  if (first >= last) {
-    return {first, std::make_error_code(std::errc::invalid_argument)};
-  }
-
-  bool is_negative = *first == '-';
-  if (is_negative) {
-    if (!is_same<Signed, signed>::value) {
-      return {first, std::make_error_code(std::errc::result_out_of_range)};
-    }
-    if (++first >= last) {
-      return {first, std::make_error_code(std::errc::invalid_argument)};
-    }
-  }
-
-  wide_integer<Bits, Signed> v = 0;
-  const char *cur = first;
-
-  do {
-    static const std::array<char, 256> ALPHA = genReverseAlpha();
-    char cv = ALPHA[*cur];
-    if (cv >= base || cv == -1) {
-      if (cur == first) {
-        return {cur, std::make_error_code(std::errc::result_out_of_range)};
-      } else {
-        value = v;
-        return {cur, {}};
-      }
-    }
-
-    v *= base;
-    v += cv;
-  } while (++cur < last);
-
-  value = is_negative ? -v : v;
-  return {cur, {}};
 }
 
 constexpr int128_t operator"" _cppi128(const char *n) { return int128_t::_impl::from_str(n); }

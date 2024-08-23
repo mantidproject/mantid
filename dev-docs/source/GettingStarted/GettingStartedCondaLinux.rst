@@ -60,3 +60,24 @@ Please follow the Linux related instructions on :ref:`this page <clion-ref>`.
 CMake Conda variables
 -----------------------
 The `CONDA_BUILD` parameter is used to customise our installation, which is required when we are using the conda-build tool to build and package Mantid. This option can be passed to CMake on the command line using -DCONDA_BUILD=True.
+
+Debugging with `gdb`
+---------------------
+If you wish to use ``gdb`` to debug Mantid, then you can use:
+
+``./build/bin/launch_mantidworkbench.sh --debug``
+
+This will start ``gdb`` with the appropriate command, you can then use the run command ``r`` within ``gdb`` to start Mantid. If you wish to launch Workbench more
+directly then you will need to include the ``--single-process`` flag for your python process, otherwise you will not be able to use most breakpoints
+that you set. For example:
+
+``gdb --args python build/bin/workbench --single-process``
+
+Some useful commands for using ``gdb``:
+
+* ``r`` - Run command
+* ``c`` - Continue (e.g. after stopping at a breakpoint)
+* ``b my_file.cpp:15`` - Insert a breakpoint in ``my_file.cpp`` at line 15
+* ``Ctrl+C`` - Pause execution (e.g. if you want to insert a breakpoint)
+* ``l`` - Shows source code around the point where you're paused
+* ``print myVariable`` - Show value of a local variable

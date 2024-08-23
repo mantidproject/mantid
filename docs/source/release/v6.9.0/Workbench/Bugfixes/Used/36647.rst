@@ -1,1 +1,0 @@
-- Fixed bug where Workbench could crash if an editor tab was closed while executing.

@@ -5,16 +5,19 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ResNorm.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/SettingsHelper.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
+#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include <map>
 #include <string>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("ResNorm");
@@ -23,6 +26,8 @@ Mantid::Kernel::Logger g_log("ResNorm");
 namespace MantidQt::CustomInterfaces {
 ResNorm::ResNorm(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
+
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
 
   // Create range selector
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("ResNormERange");
@@ -55,7 +60,6 @@ ResNorm::ResNorm(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(handleAlgorithmComplete(bool)));
 
   // Post Plot and Save
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
   connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
   connect(m_uiForm.pbPlotCurrent, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
@@ -68,27 +72,15 @@ ResNorm::ResNorm(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
 void ResNorm::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("ResNorm");
-  m_uiForm.dsVanadium->setFBSuffixes(filter ? InterfaceUtils::getVanadiumFBSuffixes(tabName)
-                                            : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsVanadium->setWSSuffixes(filter ? InterfaceUtils::getVanadiumWSSuffixes(tabName) : noSuffixes);
-  m_uiForm.dsResolution->setFBSuffixes(filter ? InterfaceUtils::getResolutionFBSuffixes(tabName)
-                                              : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsResolution->setWSSuffixes(filter ? InterfaceUtils::getResolutionWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsVanadium->setFBSuffixes(filter ? getVanadiumFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsVanadium->setWSSuffixes(filter ? getVanadiumWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsResolution->setFBSuffixes(filter ? getResolutionFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
-void ResNorm::setup() {}
-
-/**
- * Validate the form to check the program can be run
- *
- * @return :: Whether the form was valid
- */
-bool ResNorm::validate() {
-  UserInputValidator uiv;
-  QString errors("");
-
-  bool const vanValid = uiv.checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
-  bool const resValid = uiv.checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
+void ResNorm::handleValidation(IUserInputValidator *validator) const {
+  bool const vanValid = validator->checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
+  bool const resValid = validator->checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);
 
   if (vanValid) {
     // Check vanadium input is _red or _sqw workspace
@@ -96,21 +88,20 @@ bool ResNorm::validate() {
     int const cutIndex = vanName.lastIndexOf("_");
     QString const vanSuffix = vanName.right(vanName.size() - (cutIndex + 1));
     if (vanSuffix.compare("red") != 0 && vanSuffix.compare("sqw") != 0)
-      uiv.addErrorMessage("The Vanadium run is not _red or _sqw workspace");
+      validator->addErrorMessage("The Vanadium run is not _red or _sqw workspace");
 
     // Check Res and Vanadium are the same Run
     if (resValid) {
       // Check that Res file is still in ADS if not, load it
-      auto const resolutionWs =
-          WorkspaceUtils::getADSWorkspace(m_uiForm.dsResolution->getCurrentDataName().toStdString());
-      auto const vanadiumWs = WorkspaceUtils::getADSWorkspace(vanName.toStdString());
+      auto const resolutionWs = getADSWorkspace(m_uiForm.dsResolution->getCurrentDataName().toStdString());
+      auto const vanadiumWs = getADSWorkspace(vanName.toStdString());
 
       int const resRun = resolutionWs->getRunNumber();
       int const vanRun = vanadiumWs->getRunNumber();
 
       if (resRun != vanRun)
-        uiv.addErrorMessage("The provided Vanadium and Resolution do not have "
-                            "matching run numbers");
+        validator->addErrorMessage("The provided Vanadium and Resolution do not have "
+                                   "matching run numbers");
     }
   }
 
@@ -118,22 +109,10 @@ bool ResNorm::validate() {
   auto const eMin = getDoubleManagerProperty("EMin");
   auto const eMax = getDoubleManagerProperty("EMax");
   if (eMin >= eMax)
-    errors.append("EMin must be strictly less than EMax.\n");
-
-  // Create and show error messages
-  errors.append(uiv.generateErrorMessage());
-  if (!errors.isEmpty()) {
-    emit showMessageBox(errors);
-    return false;
-  }
-
-  return true;
+    validator->addErrorMessage("EMin must be strictly less than EMax.\n");
 }
 
-/**
- * Run the ResNorm v2 algorithm.
- */
-void ResNorm::run() {
+void ResNorm::handleRun() {
   m_uiForm.ppPlot->watchADS(false);
 
   auto const vanWsName(m_uiForm.dsVanadium->getCurrentDataName());
@@ -142,7 +121,7 @@ void ResNorm::run() {
   auto const eMin(getDoubleManagerProperty("EMin"));
   auto const eMax(getDoubleManagerProperty("EMax"));
 
-  auto const outputWsName = WorkspaceUtils::getWorkspaceBasename(resWsName.toStdString()) + "_ResNorm";
+  auto const outputWsName = getWorkspaceBasename(resWsName.toStdString()) + "_ResNorm";
 
   auto resNorm = AlgorithmManager::Instance().create("ResNorm", 2);
   resNorm->initialize();
@@ -164,7 +143,9 @@ void ResNorm::run() {
  * @param error If the algorithm failed
  */
 void ResNorm::handleAlgorithmComplete(bool error) {
-  setRunIsRunning(false);
+  m_runPresenter->setRunEnabled(true);
+  setPlotResultEnabled(!error);
+  setSaveResultEnabled(!error);
   if (!error) {
     // Update preview plot
     previewSpecChanged(m_previewSpec);
@@ -172,17 +153,14 @@ void ResNorm::handleAlgorithmComplete(bool error) {
     processLogs();
 
     m_uiForm.ppPlot->watchADS(true);
-  } else {
-    setPlotResultEnabled(false);
-    setSaveResultEnabled(false);
   }
 }
 
 void ResNorm::processLogs() {
   auto const resWsName(m_uiForm.dsResolution->getCurrentDataName());
-  auto const outputWsName = WorkspaceUtils::getWorkspaceBasename(resWsName.toStdString()) + "_ResNorm";
-  auto const resolutionWorkspace = WorkspaceUtils::getADSWorkspace(resWsName.toStdString());
-  auto const resultWorkspace = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(outputWsName);
+  auto const outputWsName = getWorkspaceBasename(resWsName.toStdString()) + "_ResNorm";
+  auto const resolutionWorkspace = getADSWorkspace(resWsName.toStdString());
+  auto const resultWorkspace = getADSWorkspace<WorkspaceGroup>(outputWsName);
 
   copyLogs(resolutionWorkspace, resultWorkspace);
   addAdditionalLogs(resultWorkspace);
@@ -276,9 +254,9 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
   }
 
   QPair<double, double> res;
-  auto const range = WorkspaceUtils::getXRangeFromWorkspace(filename.toStdString());
+  auto const range = getXRangeFromWorkspace(filename.toStdString());
 
-  auto const vanWs = WorkspaceUtils::getADSWorkspace(filename.toStdString());
+  auto const vanWs = getADSWorkspace(filename.toStdString());
   if (vanWs)
     m_uiForm.spPreviewSpectrum->setMaximum(static_cast<int>(vanWs->getNumberHistograms()) - 1);
 
@@ -286,7 +264,7 @@ void ResNorm::handleVanadiumInputReady(const QString &filename) {
 
   // Use the values from the instrument parameter file if we can
   // The maximum and minimum value of the plot
-  if (WorkspaceUtils::getResolutionRangeFromWs(filename.toStdString(), res)) {
+  if (getResolutionRangeFromWs(filename.toStdString(), res)) {
     // ResNorm resolution should be +/- 10 * the IPF resolution
     res.first = res.first * 10;
     res.second = res.second * 10;
@@ -387,12 +365,12 @@ void ResNorm::previewSpecChanged(int value) {
   std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
   std::string fitParamsName(m_pythonExportWsName + "_Fit");
   if (AnalysisDataService::Instance().doesExist(fitWsGroupName)) {
-    auto const fitWorkspaces = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(fitWsGroupName);
-    auto const fitParams = WorkspaceUtils::getADSWorkspace<ITableWorkspace>(fitParamsName);
+    auto const fitWorkspaces = getADSWorkspace<WorkspaceGroup>(fitWsGroupName);
+    auto const fitParams = getADSWorkspace<ITableWorkspace>(fitParamsName);
     if (fitWorkspaces && fitParams) {
       Column_const_sptr scaleFactors = fitParams->getColumn("Scaling");
       std::string fitWsName(fitWorkspaces->getItem(m_previewSpec)->getName());
-      auto const fitWs = WorkspaceUtils::getADSWorkspace(fitWsName);
+      auto const fitWs = getADSWorkspace(fitWsName);
 
       auto fit = WorkspaceFactory::Instance().create(fitWs, 1);
       fit->setSharedX(0, fitWs->sharedX(1));
@@ -439,25 +417,18 @@ void ResNorm::plotCurrentPreview() {
       plotWorkspaces, plotIndices, std::vector<bool>(plotWorkspaces.size(), SettingsHelper::externalPlotErrorBars()));
 }
 
-void ResNorm::runClicked() {
-  if (validateTab()) {
-    setRunIsRunning(true);
-    runTab();
-  }
-}
-
 /**
  * Handles saving when button is clicked
  */
 void ResNorm::saveClicked() {
 
   const auto resWsName(m_uiForm.dsResolution->getCurrentDataName());
-  const auto outputWsName = WorkspaceUtils::getWorkspaceBasename(resWsName.toStdString()) + "_ResNorm";
+  const auto outputWsName = getWorkspaceBasename(resWsName.toStdString()) + "_ResNorm";
   addSaveWorkspaceToQueue(outputWsName);
 
   m_pythonExportWsName = outputWsName;
   // Check workspace exists
-  IndirectTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
+  InelasticTab::checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
 
   addSaveWorkspaceToQueue(outputWsName);
   m_batchAlgoRunner->executeBatchAsync();
@@ -478,8 +449,6 @@ void ResNorm::plotClicked() {
   setPlotResultIsPlotting(false);
 }
 
-void ResNorm::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
 void ResNorm::setPlotResultEnabled(bool enabled) {
   m_uiForm.pbPlot->setEnabled(enabled);
   m_uiForm.cbPlot->setEnabled(enabled);
@@ -488,14 +457,9 @@ void ResNorm::setPlotResultEnabled(bool enabled) {
 void ResNorm::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
 void ResNorm::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
+  m_runPresenter->setRunEnabled(enabled);
   setPlotResultEnabled(enabled);
   setSaveResultEnabled(enabled);
-}
-
-void ResNorm::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
 }
 
 void ResNorm::setPlotResultIsPlotting(bool plotting) {

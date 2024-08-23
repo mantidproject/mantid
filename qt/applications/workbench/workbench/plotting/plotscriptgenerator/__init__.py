@@ -65,7 +65,9 @@ def generate_script(fig, exclude_headers=False):
         axes.legend().set_draggable(True)     (if legend present, or just draggable() for earlier matplotlib versions)
         <Legend title and label commands if non-default>
 
-        plt.show()
+        fig.show()
+        # Use plt.show() if running the script outside of Workbench
+        #plt.show()
 
     :param fig: A matplotlib.pyplot.Figure object you want to create a script from
     :param exclude_headers: Boolean. Set to True to ignore imports/headers
@@ -122,7 +124,9 @@ def generate_script(fig, exclude_headers=False):
     cmds.extend(generate_workspace_retrieval_commands(fig) + [""])
     cmds.append("{}, {} = {}".format(FIG_VARIABLE, AXES_VARIABLE, generate_subplots_command(fig)))
     cmds.extend(plot_commands)
-    cmds.append("plt.show()")
+    cmds.append("fig.show()")
+    cmds.append("# Use plt.show() if running the script outside of Workbench")
+    cmds.append("#plt.show()")
     cmds.append("# Scripting Plots in Mantid:")
     cmds.append("# https://docs.mantidproject.org/tutorials/python_in_mantid/plotting/02_scripting_plots.html")
 

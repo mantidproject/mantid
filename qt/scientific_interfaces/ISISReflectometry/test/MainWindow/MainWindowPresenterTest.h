@@ -59,19 +59,21 @@ public:
     auto &config = Mantid::Kernel::ConfigService::Instance();
     config.setString("default.facility", backup_facility);
     config.setString("default.instrument", backup_instrument);
+    // Verifying and clearing of expectations happens when mock variables are destroyed.
+    // Some of our mocks are created as member variables and will exist until all tests have run, so we need to
+    // explicitly verify and clear them after each test.
+    verifyAndClear();
   }
 
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
     auto presenter = makePresenter();
-    verifyAndClear();
   }
 
   void testMainWindowPresenterSubscribesToOptionsPresenter() {
     auto optionsPresenter = makeOptionsPresenter();
     EXPECT_CALL(*m_optionsPresenter, subscribe(_)).Times(1);
     auto presenter = makePresenter(std::move(optionsPresenter));
-    verifyAndClear();
   }
 
   void testConstructorAddsBatchPresenterForAllBatchViews() {
@@ -81,7 +83,6 @@ public:
 
     auto presenter = makePresenter();
     TS_ASSERT_EQUALS(presenter.m_batchPresenters.size(), m_batchViews.size());
-    verifyAndClear();
   }
 
   void testBatchPresenterAddedWhenNewBatchRequested() {
@@ -93,7 +94,6 @@ public:
     expectBatchAdded(batchPresenter);
 
     presenter.notifyNewBatchRequested();
-    verifyAndClear();
   }
 
   void testBatchRemovedWhenCloseBatchRequested() {
@@ -103,7 +103,6 @@ public:
     expectBatchRemovedFromView(batchIndex);
     presenter.notifyCloseBatchRequested(batchIndex);
     assertFirstBatchWasRemovedFromModel(presenter);
-    verifyAndClear();
   }
 
   void testBatchNotRemovedIfRequestCloseFailed() {
@@ -113,7 +112,6 @@ public:
     expectBatchNotRemovedFromView(batchIndex);
     presenter.notifyCloseBatchRequested(batchIndex);
     assertBatchNotRemovedFromModel(presenter);
-    verifyAndClear();
   }
 
   void testBatchNotRemovedIfAutoreducing() {
@@ -123,7 +121,6 @@ public:
     expectBatchNotRemovedFromView(batchIndex);
     presenter.notifyCloseBatchRequested(batchIndex);
     assertBatchNotRemovedFromModel(presenter);
-    verifyAndClear();
   }
 
   void testBatchNotRemovedIfProcessing() {
@@ -133,7 +130,6 @@ public:
     expectBatchNotRemovedFromView(batchIndex);
     presenter.notifyCloseBatchRequested(batchIndex);
     assertBatchNotRemovedFromModel(presenter);
-    verifyAndClear();
   }
 
   void testWarningGivenIfRemoveBatchWhileAutoreducing() {
@@ -142,7 +138,6 @@ public:
     expectBatchIsAutoreducing(batchIndex);
     expectCannotCloseBatchWarning();
     presenter.notifyCloseBatchRequested(batchIndex);
-    verifyAndClear();
   }
 
   void testWarningGivenIfRemoveBatchWhileProcessing() {
@@ -151,7 +146,6 @@ public:
     expectBatchIsProcessing(batchIndex);
     expectCannotCloseBatchWarning();
     presenter.notifyCloseBatchRequested(batchIndex);
-    verifyAndClear();
   }
 
   void testWarningGivenIfRemoveUnsavedBatchOptionChecked() {
@@ -163,7 +157,6 @@ public:
     expectBatchUnsaved(batchIndex);
     expectAskDiscardChanges();
     presenter.notifyCloseBatchRequested(batchIndex);
-    verifyAndClear();
   }
 
   void testNoWarningGivenIfRemoveUnsavedBatchOptionUnchecked() {
@@ -174,7 +167,6 @@ public:
     expectBatchSaved(batchIndex);
     expectDoNotAskDiscardChanges();
     presenter.notifyCloseBatchRequested(batchIndex);
-    verifyAndClear();
   }
 
   void testNoWarningIfRemoveSavedBatchOptionChecked() {
@@ -185,7 +177,6 @@ public:
     expectBatchSaved(batchIndex);
     expectDoNotAskDiscardChanges();
     presenter.notifyCloseBatchRequested(batchIndex);
-    verifyAndClear();
   }
 
   void testNoWarningIfRemoveSavedBatchOptionUnchecked() {
@@ -196,7 +187,6 @@ public:
     expectBatchSaved(batchIndex);
     expectDoNotAskDiscardChanges();
     presenter.notifyCloseBatchRequested(batchIndex);
-    verifyAndClear();
   }
 
   void testReductionResumedNotifiesAllBatchPresenters() {
@@ -204,7 +194,6 @@ public:
     for (auto batchPresenter : m_batchPresenters)
       EXPECT_CALL(*batchPresenter, notifyAnyBatchReductionResumed());
     presenter.notifyAnyBatchReductionResumed();
-    verifyAndClear();
   }
 
   void testReductionPausedNotifiesAllBatchPresenters() {
@@ -212,14 +201,12 @@ public:
     for (auto batchPresenter : m_batchPresenters)
       EXPECT_CALL(*batchPresenter, notifyAnyBatchReductionPaused());
     presenter.notifyAnyBatchReductionPaused();
-    verifyAndClear();
   }
 
   void testShowOptionsOpensDialog() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_optionsPresenter, showView()).Times(AtLeast(1));
     presenter.notifyShowOptionsRequested();
-    verifyAndClear();
   }
 
   void testShowSlitCalculatorSetsInstrument() {
@@ -227,14 +214,12 @@ public:
     auto const instrument = setupInstrument(presenter, "TEST_INSTRUMENT");
     expectSlitCalculatorInstrumentUpdated(instrument);
     presenter.notifyShowSlitCalculatorRequested();
-    verifyAndClear();
   }
 
   void testShowSlitCalculatorOpensDialog() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_slitCalculator, show()).Times(1);
     presenter.notifyShowSlitCalculatorRequested();
-    verifyAndClear();
   }
 
   void testAutoreductionResumedNotifiesAllBatchPresenters() {
@@ -242,7 +227,6 @@ public:
     for (auto batchPresenter : m_batchPresenters)
       EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionResumed());
     presenter.notifyAnyBatchAutoreductionResumed();
-    verifyAndClear();
   }
 
   void testAutoreductionPausedNotifiesAllBatchPresenters() {
@@ -250,7 +234,6 @@ public:
     for (auto batchPresenter : m_batchPresenters)
       EXPECT_CALL(*batchPresenter, notifyAnyBatchAutoreductionPaused());
     presenter.notifyAnyBatchAutoreductionPaused();
-    verifyAndClear();
   }
 
   void testAnyBatchIsProcessing() {
@@ -259,7 +242,6 @@ public:
     expectBatchIsProcessing(1);
     auto isProcessing = presenter.isAnyBatchProcessing();
     TS_ASSERT_EQUALS(isProcessing, true);
-    verifyAndClear();
   }
 
   void testNoBatchesAreProcessing() {
@@ -268,7 +250,6 @@ public:
     expectBatchIsNotProcessing(1);
     auto isProcessing = presenter.isAnyBatchProcessing();
     TS_ASSERT_EQUALS(isProcessing, false);
-    verifyAndClear();
   }
 
   void testAnyBatchIsAutoreducing() {
@@ -277,7 +258,6 @@ public:
     expectBatchIsAutoreducing(1);
     auto isAutoreducing = presenter.isAnyBatchAutoreducing();
     TS_ASSERT_EQUALS(isAutoreducing, true);
-    verifyAndClear();
   }
 
   void testNoBatchesAreAutoreducing() {
@@ -286,7 +266,6 @@ public:
     expectBatchIsNotAutoreducing(1);
     auto isAutoreducing = presenter.isAnyBatchAutoreducing();
     TS_ASSERT_EQUALS(isAutoreducing, false);
-    verifyAndClear();
   }
 
   void testChangeInstrumentRequestedUpdatesInstrumentInModel() {
@@ -294,7 +273,6 @@ public:
     auto const instrument = std::string("POLREF");
     presenter.notifyChangeInstrumentRequested(instrument);
     TS_ASSERT_EQUALS(presenter.instrumentName(), instrument);
-    verifyAndClear();
   }
 
   void testChangeInstrumentRequestedUpdatesInstrumentInChildPresenters() {
@@ -304,7 +282,6 @@ public:
     EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument)).Times(1);
     EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument)).Times(1);
     presenter.notifyChangeInstrumentRequested(instrument);
-    verifyAndClear();
   }
 
   void testChangeInstrumentRequestedDoesNotUpdateInstrumentIfNotChanged() {
@@ -313,7 +290,6 @@ public:
     EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument)).Times(0);
     EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument)).Times(0);
     presenter.notifyChangeInstrumentRequested(instrument);
-    verifyAndClear();
   }
 
   void testChangeInstrumentUpdatesInstrumentInSlitCalculator() {
@@ -322,7 +298,6 @@ public:
     auto const instrument = std::string("POLREF");
     expectSlitCalculatorInstrumentUpdated(instrument);
     presenter.notifyChangeInstrumentRequested(instrument);
-    verifyAndClear();
   }
 
   void testChangeInstrumentDoesNotUpdateInstrumentInSlitCalculatorIfNotChanged() {
@@ -330,7 +305,6 @@ public:
     auto const instrument = setupInstrument(presenter, "POLREF");
     expectSlitCalculatorInstrumentNotUpdated();
     presenter.notifyChangeInstrumentRequested(instrument);
-    verifyAndClear();
   }
 
   void testUpdateInstrumentDoesNotUpdateInstrumentInSlitCalculator() {
@@ -338,7 +312,6 @@ public:
     auto const instrument = setupInstrument(presenter, "POLREF");
     expectSlitCalculatorInstrumentNotUpdated();
     presenter.notifyUpdateInstrumentRequested();
-    verifyAndClear();
   }
 
   void testUpdateInstrumentDoesNotUpdateInstrumentInChildPresenters() {
@@ -347,7 +320,6 @@ public:
     EXPECT_CALL(*m_batchPresenters[0], notifyInstrumentChanged(instrument)).Times(0);
     EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument)).Times(0);
     presenter.notifyUpdateInstrumentRequested();
-    verifyAndClear();
   }
 
   void testUpdateInstrumentDoesNotChangeInstrumentName() {
@@ -355,13 +327,11 @@ public:
     auto const instrument = setupInstrument(presenter, "POLREF");
     presenter.notifyUpdateInstrumentRequested();
     TS_ASSERT_EQUALS(presenter.instrumentName(), instrument);
-    verifyAndClear();
   }
 
   void testUpdateInstrumentThrowsIfInstrumentNotSet() {
     auto presenter = makePresenter();
     TS_ASSERT_THROWS_ANYTHING(presenter.notifyUpdateInstrumentRequested());
-    verifyAndClear();
   }
 
   void testUpdateInstrumentSetsFacilityInConfig() {
@@ -371,7 +341,6 @@ public:
     config.setString("default.facility", "OLD_FACILITY");
     presenter.notifyUpdateInstrumentRequested();
     TS_ASSERT_EQUALS(config.getString("default.facility"), "ISIS");
-    verifyAndClear();
   }
 
   void testUpdateInstrumentSetsInstrumentInConfig() {
@@ -381,7 +350,6 @@ public:
     config.setString("default.instrument", "OLD_INSTRUMENT");
     presenter.notifyUpdateInstrumentRequested();
     TS_ASSERT_EQUALS(config.getString("default.instrument"), instrument);
-    verifyAndClear();
   }
 
   void testCloseEventChecksIfPrevented() {
@@ -392,7 +360,6 @@ public:
     EXPECT_CALL(*m_batchPresenters[1], isAutoreducing).Times(1);
     EXPECT_CALL(m_view, acceptCloseEvent).Times(1);
     presenter.notifyCloseEvent();
-    verifyAndClear();
   }
 
   void testCloseEventIgnoredIfAutoreducing() {
@@ -400,7 +367,6 @@ public:
     expectBatchIsAutoreducing(0);
     EXPECT_CALL(m_view, ignoreCloseEvent).Times(1);
     presenter.notifyCloseEvent();
-    verifyAndClear();
   }
 
   void testCloseEventIgnoredIfProcessing() {
@@ -408,7 +374,6 @@ public:
     expectBatchIsProcessing(0);
     EXPECT_CALL(m_view, ignoreCloseEvent).Times(1);
     presenter.notifyCloseEvent();
-    verifyAndClear();
   }
 
   void testCloseEventAcceptedIfNotWorking() {
@@ -417,7 +382,6 @@ public:
     expectBatchIsNotProcessing(0);
     EXPECT_CALL(m_view, acceptCloseEvent).Times(1);
     presenter.notifyCloseEvent();
-    verifyAndClear();
   }
 
   void testSaveBatch() {
@@ -425,7 +389,6 @@ public:
     auto const batchIndex = 1;
     expectBatchIsSavedToFile(batchIndex);
     presenter.notifySaveBatchRequested(batchIndex);
-    verifyAndClear();
   }
 
   void testSaveBatchToInvalidPath() {
@@ -433,7 +396,6 @@ public:
     auto const batchIndex = 1;
     expectBatchIsNotSavedToInvalidFile(batchIndex);
     presenter.notifySaveBatchRequested(batchIndex);
-    verifyAndClear();
   }
 
   void testSaveBatchHandlesFailedSave() {
@@ -441,7 +403,6 @@ public:
     auto const batchIndex = 1;
     expectBatchIsNotSavedWhenSaveFails(batchIndex);
     presenter.notifySaveBatchRequested(batchIndex);
-    verifyAndClear();
   }
 
   void testLoadBatch() {
@@ -449,7 +410,6 @@ public:
     auto const batchIndex = 1;
     expectBatchIsLoadedFromFile(batchIndex);
     presenter.notifyLoadBatchRequested(batchIndex);
-    verifyAndClear();
   }
 
   void testWarningGivenIfLoadBatchOverUnsavedBatch() {
@@ -459,7 +419,6 @@ public:
     expectBatchUnsaved(batchIndex);
     expectAskDiscardChanges();
     presenter.notifyLoadBatchRequested(batchIndex);
-    verifyAndClear();
   }
 
   void testNoWarningGivenIfLoadBatchOverSavedBatch() {
@@ -468,7 +427,6 @@ public:
     expectBatchSaved(batchIndex);
     expectDoNotAskDiscardChanges();
     presenter.notifyLoadBatchRequested(batchIndex);
-    verifyAndClear();
   }
 
   void testLoadBatchDiscardChanges() {
@@ -483,7 +441,6 @@ public:
     EXPECT_CALL(m_fileHandler, loadJSONFromFile(filename)).Times(1).WillOnce(Return(map));
     EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
     presenter.notifyLoadBatchRequested(batchIndex);
-    verifyAndClear();
   }
 
   void testWarningGivenCloseGUIWithUnsavedChanges() {
@@ -493,7 +450,6 @@ public:
     expectBatchUnsaved(batchIndex);
     expectAskDiscardChanges();
     presenter.isCloseEventPrevented();
-    verifyAndClear();
   }
 
   void testBatchPresentersNotifySetRoundPrecisionOnOptionsChanged() {
@@ -505,7 +461,6 @@ public:
       EXPECT_CALL(*batchPresenter, notifySetRoundPrecision(prec));
     }
     presenter.notifyOptionsChanged();
-    verifyAndClear();
   }
 
   void testBatchPresentersNotifyResetRoundPrecisionOnOptionsChanged() {
@@ -515,7 +470,6 @@ public:
       EXPECT_CALL(*batchPresenter, notifyResetRoundPrecision());
     }
     presenter.notifyOptionsChanged();
-    verifyAndClear();
   }
 
 private:

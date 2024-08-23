@@ -33,6 +33,11 @@ bool OpenGLError::check(const std::string &funName) {
   return false;
 }
 
+std::string OpenGLError::openGlVersion() {
+  const unsigned char *verString = glGetString(GL_VERSION);
+  return std::string(reinterpret_cast<const char *>(verString));
+}
+
 std::ostream &OpenGLError::log() { return g_log.error(); }
 
 std::ostream &OpenGLError::logDebug() { return g_log.debug(); }

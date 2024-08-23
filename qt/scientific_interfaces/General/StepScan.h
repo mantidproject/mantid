@@ -11,7 +11,7 @@
 //----------------------
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
+#include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_StepScan.h"
 
@@ -76,7 +76,7 @@ private:
   QString m_inputFilename;
   const std::string m_instrument; ///< The default instrument (for live data)
 
-  API::AlgorithmRunner *m_algRunner; ///< Object for running algorithms asynchronously
+  API::QtAlgorithmRunner *m_algRunner; ///< Object for running algorithms asynchronously
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAddNotification> m_addObserver;
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAfterReplaceNotification> m_replObserver;
   boost::optional<int> m_fignum;

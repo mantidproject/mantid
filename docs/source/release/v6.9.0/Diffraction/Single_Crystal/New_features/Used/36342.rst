@@ -1,1 +1,0 @@
-- New algorithm :ref:`SymmetriseMDHisto <algm-SymmetriseMDHisto>` to symmetrise :ref:`MDHistoWorkspaces <MDHistoWorkspace>` by operations in the Laue class of the point group.

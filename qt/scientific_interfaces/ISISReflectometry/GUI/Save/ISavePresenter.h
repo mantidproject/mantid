@@ -22,7 +22,7 @@ public:
   virtual ~ISavePresenter() = default;
 
   virtual void acceptMainPresenter(IBatchPresenter *mainPresenter) = 0;
-  virtual void saveWorkspaces(std::vector<std::string> const &workspaceNames) = 0;
+  virtual void saveWorkspaces(std::vector<std::string> const &workspaceNames, bool const isAutoSave) = 0;
   virtual bool shouldAutosave() const = 0;
   virtual bool shouldAutosaveGroupRows() const = 0;
 

@@ -23,11 +23,17 @@ public:
   static BatchJobManagerProcessingTest *createSuite() { return new BatchJobManagerProcessingTest(); }
   static void destroySuite(BatchJobManagerProcessingTest *suite) { delete suite; }
 
+  void tearDown() override {
+    // Verifying and clearing of expectations happens when mock variables are destroyed.
+    // Some of our mocks are created as member variables and will exist until all tests have run, so we need to
+    // explicitly verify and clear them after each test.
+    verifyAndClear();
+  }
+
   void testInitialisedWithNonRunningState() {
     auto jobManager = makeJobManager();
     TS_ASSERT_EQUALS(jobManager.isProcessing(), false);
     TS_ASSERT_EQUALS(jobManager.isAutoreducing(), false);
-    verifyAndClear();
   }
 
   void testReductionResumed() {
@@ -39,14 +45,12 @@ public:
     TS_ASSERT_EQUALS(jobManager.m_reprocessFailed, hasSelection);
     TS_ASSERT_EQUALS(jobManager.m_processAll, !hasSelection);
     TS_ASSERT_EQUALS(jobManager.m_processPartial, hasSelection);
-    verifyAndClear();
   }
 
   void testReductionPaused() {
     auto jobManager = makeJobManager();
     jobManager.notifyReductionPaused();
     TS_ASSERT_EQUALS(jobManager.isProcessing(), false);
-    verifyAndClear();
   }
 
   void testAutoreductionResumed() {
@@ -57,21 +61,18 @@ public:
     TS_ASSERT_EQUALS(jobManager.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobManager.m_processAll, true);
     TS_ASSERT_EQUALS(jobManager.m_processPartial, false);
-    verifyAndClear();
   }
 
   void testAutoreductionPaused() {
     auto jobManager = makeJobManager();
     jobManager.notifyAutoreductionPaused();
     TS_ASSERT_EQUALS(jobManager.isAutoreducing(), false);
-    verifyAndClear();
   }
 
   void testSetReprocessFailedItems() {
     auto jobManager = makeJobManager();
     jobManager.setReprocessFailedItems(true);
     TS_ASSERT_EQUALS(jobManager.m_reprocessFailed, true);
-    verifyAndClear();
   }
 
   void testReductionResumedWithNoSelection() {
@@ -82,7 +83,6 @@ public:
     TS_ASSERT_EQUALS(jobManager.m_reprocessFailed, false);
     TS_ASSERT_EQUALS(jobManager.m_processAll, true);
     TS_ASSERT_EQUALS(jobManager.m_processPartial, false);
-    verifyAndClear();
   }
 
   void testReductionResumedWithBothGroupsSelected() {
@@ -95,7 +95,6 @@ public:
     TS_ASSERT_EQUALS(jobManager.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobManager.m_processAll, false);
     TS_ASSERT_EQUALS(jobManager.m_processPartial, false);
-    verifyAndClear();
   }
 
   void testReductionResumedWithBothGroupsSelectedAndEmptyGroupNotSelected() {
@@ -108,7 +107,6 @@ public:
     TS_ASSERT_EQUALS(jobManager.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobManager.m_processAll, false);
     TS_ASSERT_EQUALS(jobManager.m_processPartial, false);
-    verifyAndClear();
   }
 
   void testReductionResumedWithGroupAndRowSelected() {
@@ -121,7 +119,6 @@ public:
     TS_ASSERT_EQUALS(jobManager.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobManager.m_processAll, false);
     TS_ASSERT_EQUALS(jobManager.m_processPartial, false);
-    verifyAndClear();
   }
 
   void testReductionResumedWithGroupAndNonInvalidRowSelected() {
@@ -134,7 +131,6 @@ public:
     TS_ASSERT_EQUALS(jobManager.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobManager.m_processAll, false);
     TS_ASSERT_EQUALS(jobManager.m_processPartial, false);
-    verifyAndClear();
   }
 
   void testReductionResumedWithAllRowsSelected() {
@@ -147,7 +143,6 @@ public:
     TS_ASSERT_EQUALS(jobManager.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobManager.m_processAll, false);
     TS_ASSERT_EQUALS(jobManager.m_processPartial, false);
-    verifyAndClear();
   }
 
   void testReductionResumedWithAllNonInvalidRowsSelected() {
@@ -160,7 +155,6 @@ public:
     TS_ASSERT_EQUALS(jobManager.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobManager.m_processAll, false);
     TS_ASSERT_EQUALS(jobManager.m_processPartial, false);
-    verifyAndClear();
   }
 
   void testReductionResumedWithSomeRowsSelected() {
@@ -173,7 +167,6 @@ public:
     TS_ASSERT_EQUALS(jobManager.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobManager.m_processAll, false);
     TS_ASSERT_EQUALS(jobManager.m_processPartial, true);
-    verifyAndClear();
   }
 
   void testReductionResumedWithGroupAndSomeRowsSelected() {
@@ -186,7 +179,6 @@ public:
     TS_ASSERT_EQUALS(jobManager.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobManager.m_processAll, false);
     TS_ASSERT_EQUALS(jobManager.m_processPartial, true);
-    verifyAndClear();
   }
 
   void testReductionResumedWithGroupAndChildRowSelected() {
@@ -199,7 +191,6 @@ public:
     TS_ASSERT_EQUALS(jobManager.m_reprocessFailed, true);
     TS_ASSERT_EQUALS(jobManager.m_processAll, false);
     TS_ASSERT_EQUALS(jobManager.m_processPartial, false);
-    verifyAndClear();
   }
 
   void testGetAlgorithmsWithMultipleMatchingRows() {
@@ -255,7 +246,6 @@ public:
     auto jobManager = makeJobManager();
     auto const algorithms = jobManager.getAlgorithms();
     TS_ASSERT_EQUALS(algorithms, std::deque<IConfiguredAlgorithm_sptr>());
-    verifyAndClear();
   }
 
   void testGetAlgorithmsWithMultiGroupModel() {
@@ -263,7 +253,6 @@ public:
     auto jobManager = makeJobManager();
     auto const algorithms = jobManager.getAlgorithms();
     TS_ASSERT_EQUALS(algorithms, std::deque<IConfiguredAlgorithm_sptr>());
-    verifyAndClear();
   }
 
   void testAlgorithmStarted() {
@@ -277,7 +266,6 @@ public:
     TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsLambda(), "");
     TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQ(), "");
     TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQBinned(), "");
-    verifyAndClear();
   }
 
   void testAlgorithmComplete() {
@@ -291,7 +279,6 @@ public:
 
     jobManager.algorithmComplete(m_jobAlgorithm);
     TS_ASSERT_EQUALS(row.state(), State::ITEM_SUCCESS);
-    verifyAndClear();
   }
 
   void testAlgorithmError() {
@@ -307,7 +294,6 @@ public:
     TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsLambda(), "");
     TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQ(), "");
     TS_ASSERT_EQUALS(row.reducedWorkspaceNames().iVsQBinned(), "");
-    verifyAndClear();
   }
 
   void testAlgorithmCompleteSetsParentsSingleRow() {
@@ -322,8 +308,6 @@ public:
 
     TS_ASSERT_EQUALS(row->state(), State::ITEM_SUCCESS);
     TS_ASSERT_EQUALS(group.state(), State::ITEM_CHILDREN_SUCCESS);
-
-    verifyAndClear();
   }
 
   void testAlgorithmCompleteSetsParentsMultipleRows() {
@@ -346,8 +330,6 @@ public:
     TS_ASSERT_EQUALS(row1->state(), State::ITEM_SUCCESS);
     TS_ASSERT_EQUALS(row2->state(), State::ITEM_SUCCESS);
     TS_ASSERT_EQUALS(group.state(), State::ITEM_CHILDREN_SUCCESS);
-
-    verifyAndClear();
   }
 
   void testAlgorithmErrorSetsParentIncomplete() {
@@ -370,7 +352,5 @@ public:
     TS_ASSERT_EQUALS(row1->state(), State::ITEM_ERROR);
     TS_ASSERT_EQUALS(row2->state(), State::ITEM_SUCCESS);
     TS_ASSERT_EQUALS(group.state(), State::ITEM_NOT_STARTED);
-
-    verifyAndClear();
   }
 };

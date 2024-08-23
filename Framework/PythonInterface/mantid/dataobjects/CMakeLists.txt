@@ -9,20 +9,27 @@ set(EXPORT_FILES
     src/Exports/EventWorkspace.cpp
     src/Exports/EventWorkspaceProperty.cpp
     src/Exports/Workspace2D.cpp
+    src/Exports/Workspace2DProperty.cpp
     src/Exports/RebinnedOutput.cpp
     src/Exports/SpecialWorkspace2D.cpp
+    src/Exports/SpecialWorkspace2DProperty.cpp
     src/Exports/GroupingWorkspace.cpp
+    src/Exports/GroupingWorkspaceProperty.cpp
     src/Exports/MaskWorkspace.cpp
     src/Exports/MaskWorkspaceProperty.cpp
     src/Exports/OffsetsWorkspace.cpp
+    src/Exports/OffsetsWorkspaceProperty.cpp
     src/Exports/MDEventWorkspace.cpp
     src/Exports/MDHistoWorkspace.cpp
     src/Exports/PeaksWorkspace.cpp
     src/Exports/LeanElasticPeaksWorkspace.cpp
     src/Exports/PeaksWorkspaceProperty.cpp
     src/Exports/TableWorkspace.cpp
+    src/Exports/TableWorkspaceProperty.cpp
     src/Exports/SplittersWorkspace.cpp
+    src/Exports/SplittersWorkspaceProperty.cpp
     src/Exports/WorkspaceSingleValue.cpp
+    src/Exports/WorkspaceSingleValueProperty.cpp
     src/Exports/NoShape.cpp
     src/Exports/PeakShapeSpherical.cpp
     src/Exports/PeakShapeEllipsoid.cpp

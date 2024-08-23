@@ -1,1 +1,0 @@
-- Fix bug in the Sample Logs Viewer that causes crash when the selected workspace is modified or deleted

@@ -1,1 +1,0 @@
-- Fix issue when displaying large array properies in the sample logs viewer

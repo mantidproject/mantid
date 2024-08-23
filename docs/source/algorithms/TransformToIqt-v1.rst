@@ -104,15 +104,22 @@ Usage
     sample = Load('irs26176_graphite002_red.nxs')
     can = Load('irs26173_graphite002_red.nxs')
 
-    # Commented out while we investigate an unreliable segmentation fault
-    # params, iqt = TransformToIqt(SampleWorkspace=sample,
-    #                              ResolutionWorkspace=can,
-    #                              EnergyMin=-0.5,
-    #                              EnergyMax=0.5,
-    #                              BinReductionFactor=10)
+    params, iqt = TransformToIqt(SampleWorkspace=sample,
+                                 ResolutionWorkspace=can,
+                                 EnergyMin=-0.5,
+                                 EnergyMax=0.5,
+                                 BinReductionFactor=10,
+                                 EnableLogging=True)
 
-    # print('Number of output bins: %d' % (params.cell('SampleOutputBins', 0)))
-    # print('Resolution bins: %d' % (params.cell('ResolutionBins', 0)))
+    print('Number of output bins: %d' % (params.cell('SampleOutputBins', 0)))
+    print('Resolution bins: %d' % (params.cell('ResolutionBins', 0)))
+
+Output:
+
+.. testoutput:: exTransformToIqtIRIS
+
+    Number of output bins: 172
+    Resolution bins: 6
 
 .. categories::
 

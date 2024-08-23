@@ -56,6 +56,9 @@ public:
   std::vector<size_t> getPulseIndices(const Mantid::Types::Core::DateAndTime &start,
                                       const Mantid::Types::Core::DateAndTime &stop) const;
 
+  // convert a list of time intervals to pulse indices
+  std::vector<size_t> getPulseIndices(const std::vector<Mantid::Kernel::TimeInterval> &splitters) const;
+
   /// Equals
   bool equals(size_t otherNumPulse, const std::string &otherStartTime);
 

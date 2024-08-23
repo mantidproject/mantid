@@ -350,10 +350,10 @@ void PoldiIndexKnownCompounds::scaleToExperimentalValues(const std::vector<Poldi
                                                          const PoldiPeakCollection_sptr &measuredPeaks) const {
   double maximumExperimentalIntensity = getMaximumIntensity(measuredPeaks);
 
-  double maximumCalculatedIntensity = 0.0;
-  for (const auto &peakCollection : peakCollections) {
-    maximumCalculatedIntensity = std::max(getMaximumIntensity(peakCollection), maximumCalculatedIntensity);
-  }
+  double maximumCalculatedIntensity = std::accumulate(
+      peakCollections.cbegin(), peakCollections.cend(), 0.0, [&](const auto currentMax, const auto &peakCollection) {
+        return std::max(getMaximumIntensity(peakCollection), currentMax);
+      });
 
   scaleIntensityEstimates(peakCollections, std::vector<double>(peakCollections.size(), maximumExperimentalIntensity /
                                                                                            maximumCalculatedIntensity));

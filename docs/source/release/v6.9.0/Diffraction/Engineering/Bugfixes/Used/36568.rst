@@ -1,2 +1,0 @@
-- Avoid cropping the range of TOF data in the GSAS-II tab of :ref:`Engineering Diffraction GUI<Engineering_Diffraction-ref>` from its original TOF range
-- Updated the dmax value used to generate ``Pawley Refinement`` from ``3 Ang`` into ``4.2 Ang`` since ENGIN-X has wavelength range of upto ``6 Ang``.

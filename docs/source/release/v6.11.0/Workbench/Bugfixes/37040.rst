@@ -1,0 +1,1 @@
+- Fixed issue with dragging text onto the plot: Previously, dragging invalid text onto the plot resulted in unexpected behavior Now, when invalid text is dragged onto the plot, a warning is displayed to the user indicating that the workspace is invalid.

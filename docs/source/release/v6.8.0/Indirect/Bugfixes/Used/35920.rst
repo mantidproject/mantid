@@ -1,1 +1,0 @@
-- The data analysis GUI will no longer crash when using plot guess if the sample data contains NAN's.

@@ -5,8 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "CalculatePaalmanPings.h"
-#include "Common/InterfaceUtils.h"
-#include "Common/WorkspaceUtils.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -17,12 +15,17 @@
 #include "MantidKernel/Unit.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
+#include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 
 #include <QLineEdit>
 #include <QSignalBlocker>
 #include <QValidator>
 
 using namespace Mantid::API;
+
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
+using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("CalculatePaalmanPings");
@@ -41,6 +44,7 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
     : CorrectionsTab(parent), m_sampleDensities(std::make_shared<Densities>()),
       m_canDensities(std::make_shared<Densities>()) {
   m_uiForm.setupUi(parent);
+  setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
   std::map<std::string, std::string> actions;
   actions["Plot Spectra"] = "Plot Wavelength";
   actions["Plot Bins"] = "Plot Angle";
@@ -56,11 +60,8 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
   QValidator *formulaValidator = new QRegExpValidator(regex, this);
   m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
   m_uiForm.leCanChemicalFormula->setValidator(formulaValidator);
-  connect(m_uiForm.leSampleChemicalFormula, SIGNAL(editingFinished()), this, SLOT(validateChemical()));
-  connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this, SLOT(validateChemical()));
   // Connect slots for run, plot and save
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 
   // Connect slots for toggling the mass/number density unit
   connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(QString const &)), this,
@@ -88,12 +89,99 @@ CalculatePaalmanPings::CalculatePaalmanPings(QWidget *parent)
   }
 }
 
-void CalculatePaalmanPings::setup() { doValidation(true); }
+void CalculatePaalmanPings::handleValidation(IUserInputValidator *validator) const {
+  validator->checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+  const auto sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+  const auto sampleWsNameStr = sampleWsName.toStdString();
+  bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsNameStr);
 
-void CalculatePaalmanPings::validateChemical() { doValidation(true); }
+  if (sampleExists && !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsNameStr)) {
+    validator->addErrorMessage("Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
+  }
 
-void CalculatePaalmanPings::run() {
-  setRunIsRunning(true);
+  // Validate chemical formula
+  if (m_uiForm.cbSampleMaterialMethod->currentText() == "Chemical Formula") {
+    if (validator->checkFieldIsNotEmpty("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula,
+                                        m_uiForm.valSampleChemicalFormula))
+      validator->checkFieldIsValid("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula,
+                                   m_uiForm.valSampleChemicalFormula);
+
+    const auto sampleChem = m_uiForm.leSampleChemicalFormula->text().toStdString();
+    try {
+      Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
+    } catch (std::runtime_error &ex) {
+      UNUSED_ARG(ex);
+      validator->addErrorMessage("Chemical Formula for Sample was not recognised.");
+      validator->setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
+    }
+  }
+
+  if (m_uiForm.ckUseCan->isChecked()) {
+    validator->checkDataSelectorIsValid("Can", m_uiForm.dsContainer);
+
+    if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
+      // Validate chemical formula
+      if (validator->checkFieldIsNotEmpty("Can Chemical Formula", m_uiForm.leCanChemicalFormula,
+                                          m_uiForm.valCanChemicalFormula))
+        validator->checkFieldIsValid("Can Chemical Formula", m_uiForm.leCanChemicalFormula,
+                                     m_uiForm.valCanChemicalFormula);
+
+      const auto containerChem = m_uiForm.leCanChemicalFormula->text().toStdString();
+      try {
+        Mantid::Kernel::Material::parseChemicalFormula(containerChem);
+      } catch (std::runtime_error &ex) {
+        UNUSED_ARG(ex);
+        validator->addErrorMessage("Chemical Formula for Container was not recognised.");
+        validator->setErrorLabel(m_uiForm.valCanChemicalFormula, false);
+      }
+    }
+
+    const auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
+    const auto containerWsNameStr = containerWsName.toStdString();
+    bool containerExists = AnalysisDataService::Instance().doesExist(containerWsNameStr);
+
+    if (containerExists && !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(containerWsNameStr)) {
+      validator->addErrorMessage("Invalid container workspace. Ensure a MatrixWorkspace is provided.");
+    }
+
+    // Ensure sample and container are the same kind of data
+    const auto sampleType = sampleWsName.right(sampleWsName.length() - sampleWsName.lastIndexOf("_"));
+    const auto containerType = containerWsName.right(containerWsName.length() - containerWsName.lastIndexOf("_"));
+
+    g_log.debug() << "Sample type is: " << sampleType.toStdString() << '\n';
+    g_log.debug() << "Can type is: " << containerType.toStdString() << '\n';
+
+    if (containerType != sampleType)
+      validator->addErrorMessage("Sample and can workspaces must contain the same type of data.");
+
+    // Shape validation
+
+    const auto shape = m_uiForm.cbSampleShape->currentIndex();
+    if (shape == 1 && m_uiForm.ckUseCan->isChecked()) {
+      auto sampleRadius = m_uiForm.spCylSampleOuterRadius->value();
+      auto containerRadius = m_uiForm.spCylCanOuterRadius->value();
+      if (containerRadius <= sampleRadius) {
+        validator->addErrorMessage("Container radius must be bigger than sample radius");
+      }
+    }
+    if (shape == 2) {
+      auto sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
+      auto sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
+      if (sampleOuterRadius <= sampleInnerRadius) {
+        validator->addErrorMessage("Sample outer radius must be bigger than sample inner radius");
+      }
+      if (m_uiForm.ckUseCan->isChecked()) {
+        auto containerRadius = m_uiForm.spAnnCanOuterRadius->value();
+        if (containerRadius <= sampleOuterRadius) {
+          validator->addErrorMessage("Container outer radius must be bigger than sample outer radius");
+        }
+      }
+    }
+  }
+}
+
+void CalculatePaalmanPings::handleRun() {
+  clearOutputPlotOptionsWorkspaces();
 
   // Get correct corrections algorithm
   auto sampleShape = m_uiForm.cbSampleShape->currentText();
@@ -115,7 +203,7 @@ void CalculatePaalmanPings::run() {
   const auto efixed = m_uiForm.doubleEfixed->value();
   absCorAlgo->setProperty("EFixed", efixed);
 
-  const long int numwave = m_uiForm.spNwave->value();
+  const auto numwave = m_uiForm.spNwave->value();
   absCorAlgo->setProperty("NumberWavelengths", numwave);
 
   const bool inter = m_uiForm.cbInterpolate->isChecked();
@@ -130,7 +218,7 @@ void CalculatePaalmanPings::run() {
     if (convertedSampleWorkspace)
       absCorProps->setPropertyValue("SampleWorkspace", convertedSampleWorkspace.get());
     else {
-      setRunIsRunning(false);
+      m_runPresenter->setRunEnabled(true);
       return;
     }
 
@@ -170,7 +258,7 @@ void CalculatePaalmanPings::run() {
       if (convertedWorkspace)
         absCorProps->setPropertyValue("CanWorkspace", convertedWorkspace.get());
       else {
-        setRunIsRunning(false);
+        m_runPresenter->setRunEnabled(true);
         return;
       }
 
@@ -216,112 +304,6 @@ void CalculatePaalmanPings::run() {
   m_pythonExportWsName = outputWsName.toStdString();
 }
 
-bool CalculatePaalmanPings::validate() { return doValidation(); }
-
-/**
- * Does validation on the user input.
- *
- * @param silent Set to true to avoid creating an error message
- * @return True if all user input is valid
- */
-bool CalculatePaalmanPings::doValidation(bool silent) {
-  UserInputValidator uiv;
-
-  uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
-  const auto sampleWsName = m_uiForm.dsSample->getCurrentDataName();
-  const auto sampleWsNameStr = sampleWsName.toStdString();
-  bool sampleExists = AnalysisDataService::Instance().doesExist(sampleWsNameStr);
-
-  if (sampleExists && !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsNameStr)) {
-    uiv.addErrorMessage("Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
-  }
-
-  // Validate chemical formula
-  if (m_uiForm.cbSampleMaterialMethod->currentText() == "Chemical Formula") {
-    if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula,
-                                 m_uiForm.valSampleChemicalFormula))
-      uiv.checkFieldIsValid("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula,
-                            m_uiForm.valSampleChemicalFormula);
-
-    const auto sampleChem = m_uiForm.leSampleChemicalFormula->text().toStdString();
-    try {
-      Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
-    } catch (std::runtime_error &ex) {
-      UNUSED_ARG(ex);
-      uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
-      uiv.setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
-    }
-  }
-
-  if (m_uiForm.ckUseCan->isChecked()) {
-    uiv.checkDataSelectorIsValid("Can", m_uiForm.dsContainer);
-
-    if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
-      // Validate chemical formula
-      if (uiv.checkFieldIsNotEmpty("Can Chemical Formula", m_uiForm.leCanChemicalFormula,
-                                   m_uiForm.valCanChemicalFormula))
-        uiv.checkFieldIsValid("Can Chemical Formula", m_uiForm.leCanChemicalFormula, m_uiForm.valCanChemicalFormula);
-
-      const auto containerChem = m_uiForm.leCanChemicalFormula->text().toStdString();
-      try {
-        Mantid::Kernel::Material::parseChemicalFormula(containerChem);
-      } catch (std::runtime_error &ex) {
-        UNUSED_ARG(ex);
-        uiv.addErrorMessage("Chemical Formula for Container was not recognised.");
-        uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
-      }
-    }
-
-    const auto containerWsName = m_uiForm.dsContainer->getCurrentDataName();
-    const auto containerWsNameStr = containerWsName.toStdString();
-    bool containerExists = AnalysisDataService::Instance().doesExist(containerWsNameStr);
-
-    if (containerExists && !AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(containerWsNameStr)) {
-      uiv.addErrorMessage("Invalid container workspace. Ensure a MatrixWorkspace is provided.");
-    }
-
-    // Ensure sample and container are the same kind of data
-    const auto sampleType = sampleWsName.right(sampleWsName.length() - sampleWsName.lastIndexOf("_"));
-    const auto containerType = containerWsName.right(containerWsName.length() - containerWsName.lastIndexOf("_"));
-
-    g_log.debug() << "Sample type is: " << sampleType.toStdString() << '\n';
-    g_log.debug() << "Can type is: " << containerType.toStdString() << '\n';
-
-    if (containerType != sampleType)
-      uiv.addErrorMessage("Sample and can workspaces must contain the same type of data.");
-
-    // Shape validation
-
-    const auto shape = m_uiForm.cbSampleShape->currentIndex();
-    if (shape == 1 && m_uiForm.ckUseCan->isChecked()) {
-      auto sampleRadius = m_uiForm.spCylSampleOuterRadius->value();
-      auto containerRadius = m_uiForm.spCylCanOuterRadius->value();
-      if (containerRadius <= sampleRadius) {
-        uiv.addErrorMessage("Container radius must be bigger than sample radius");
-      }
-    }
-    if (shape == 2) {
-      auto sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
-      auto sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
-      if (sampleOuterRadius <= sampleInnerRadius) {
-        uiv.addErrorMessage("Sample outer radius must be bigger than sample inner radius");
-      }
-      if (m_uiForm.ckUseCan->isChecked()) {
-        auto containerRadius = m_uiForm.spAnnCanOuterRadius->value();
-        if (containerRadius <= sampleOuterRadius) {
-          uiv.addErrorMessage("Container outer radius must be bigger than sample outer radius");
-        }
-      }
-    }
-  }
-
-  // Show error message if needed
-  if (!uiv.isAllInputValid() && !silent)
-    emit showMessageBox(uiv.generateErrorMessage());
-
-  return uiv.isAllInputValid();
-}
-
 /**
  * Handles completion of the correction algorithm.
  *
@@ -329,7 +311,7 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
  */
 void CalculatePaalmanPings::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
-  setRunIsRunning(false);
+  m_runPresenter->setRunEnabled(true);
 
   if (!error) {
     // Convert the spectrum axis of correction factors to Q
@@ -341,7 +323,7 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
       if (!factorWs || !sampleWs)
         continue;
 
-      if (WorkspaceUtils::getEMode(sampleWs) == "Indirect") {
+      if (getEMode(sampleWs) == "Indirect") {
         auto convertSpecAlgo = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
         convertSpecAlgo->initialize();
         convertSpecAlgo->setProperty("InputWorkspace", factorWs);
@@ -349,10 +331,10 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
         convertSpecAlgo->setProperty("Target", "ElasticQ");
         convertSpecAlgo->setProperty("EMode", "Indirect");
 
-        try {
-          convertSpecAlgo->setProperty("EFixed", WorkspaceUtils::getEFixed(factorWs));
-        } catch (std::runtime_error &) {
+        if (auto const eFixed = getEFixed(factorWs)) {
+          convertSpecAlgo->setProperty("EFixed", *eFixed);
         }
+
         m_batchAlgoRunner->addAlgorithm(convertSpecAlgo);
       }
     }
@@ -374,7 +356,7 @@ void CalculatePaalmanPings::absCorComplete(bool error) {
  */
 void CalculatePaalmanPings::postProcessComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(postProcessComplete(bool)));
-  setRunIsRunning(false);
+  m_runPresenter->setRunEnabled(true);
 
   if (!error) {
     auto const group = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_pythonExportWsName);
@@ -399,12 +381,10 @@ void CalculatePaalmanPings::loadSettings(const QSettings &settings) {
 void CalculatePaalmanPings::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("CalculatePaalmanPings");
-  m_uiForm.dsSample->setFBSuffixes(filter ? InterfaceUtils::getSampleFBSuffixes(tabName)
-                                          : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsSample->setWSSuffixes(filter ? InterfaceUtils::getSampleWSSuffixes(tabName) : noSuffixes);
-  m_uiForm.dsContainer->setFBSuffixes(filter ? InterfaceUtils::getContainerFBSuffixes(tabName)
-                                             : InterfaceUtils::getExtensions(tabName));
-  m_uiForm.dsContainer->setWSSuffixes(filter ? InterfaceUtils::getContainerWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsSample->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsSample->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
+  m_uiForm.dsContainer->setFBSuffixes(filter ? getContainerFBSuffixes(tabName) : getExtensions(tabName));
+  m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName) : noSuffixes);
 }
 
 /**
@@ -420,13 +400,11 @@ void CalculatePaalmanPings::fillCorrectionDetails(const QString &wsName) {
     return;
   }
 
-  try {
-    m_uiForm.doubleEfixed->setValue(WorkspaceUtils::getEFixed(ws));
-  } catch (std::runtime_error &) {
-    // do nothing if there is no efixed
+  if (auto const eFixed = getEFixed(ws)) {
+    m_uiForm.doubleEfixed->setValue(*eFixed);
   }
 
-  auto emode = QString::fromStdString(WorkspaceUtils::getEMode(ws));
+  auto emode = QString::fromStdString(getEMode(ws));
   int index = m_uiForm.cbEmode->findText(emode);
   if (index != -1) {
     m_uiForm.cbEmode->setCurrentIndex(index);
@@ -574,11 +552,6 @@ void CalculatePaalmanPings::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void CalculatePaalmanPings::runClicked() {
-  clearOutputPlotOptionsWorkspaces();
-  runTab();
-}
-
 void CalculatePaalmanPings::setSampleDensityOptions(QString const &method) {
   setComboBoxOptions(m_uiForm.cbSampleDensity, getDensityOptions(method));
 }
@@ -666,18 +639,6 @@ double CalculatePaalmanPings::getCanDensityValue(QString const &type) const {
   return type == "Mass Density" ? m_canDensities->getMassDensity() : m_canDensities->getNumberDensity();
 }
 
-void CalculatePaalmanPings::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
-
 void CalculatePaalmanPings::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
-
-void CalculatePaalmanPings::setButtonsEnabled(bool enabled) {
-  setRunEnabled(enabled);
-  setSaveResultEnabled(enabled);
-}
-
-void CalculatePaalmanPings::setRunIsRunning(bool running) {
-  m_uiForm.pbRun->setText(running ? "Running..." : "Run");
-  setButtonsEnabled(!running);
-}
 
 } // namespace MantidQt::CustomInterfaces

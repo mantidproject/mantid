@@ -24,11 +24,30 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>939</width>
-        <height>722</height>
+        <width>935</width>
+        <height>718</height>
        </rect>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,1,1,1,0">
+      <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,0,1,1,0,0">
+       <item>
+        <widget class="QTextEdit" name="textEdit">
+         <property name="styleSheet">
+          <string notr="true">QTextEdit {
+    background-color: #FFFFE0;
+}</string>
+         </property>
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+         <property name="html">
+          <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:7.8pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Deprecation warning:&lt;/span&gt; This feature has been deprecated as of version 6.10. If you still use this feature, please inform a Mantid developer at mantid-help@mantidproject.org. Assuming no user feedback, this feature will be removed two minor versions from now (in version 6.12). Please note that the &amp;quot;Calculate Monte Carlo Absorption&amp;quot; tab offers a far better version of this feature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
        <item>
         <widget class="QGroupBox" name="gbInput">
          <property name="title">
@@ -1228,52 +1247,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGroupBox" name="gbRun">
-         <property name="title">
-          <string>Run</string>
-         </property>
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <property name="topMargin">
-           <number>0</number>
-          </property>
-          <property name="bottomMargin">
-           <number>3</number>
-          </property>
-          <item>
-           <spacer name="horizontalSpacer_3">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>265</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbRun">
-            <property name="text">
-             <string>Run</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer_4">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>265</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-         </layout>
-        </widget>
+        <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true"/>
        </item>
        <item>
         <widget class="QGroupBox" name="gbOutput">
@@ -1331,7 +1305,13 @@
   <customwidget>
    <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
    <extends>QWidget</extends>
-   <header>Common/OutputPlotOptionsView.h</header>
+   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::RunView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Spectroscopy/RunWidget/RunView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -74,11 +74,9 @@ std::size_t DetectorGroup::nDets() const { return m_detectors.size(); }
  *  @return a V3D object of the detector group position
  */
 V3D DetectorGroup::getPos() const {
-  V3D newPos;
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    newPos += (*it).second->getPos();
-  }
+  V3D newPos = std::accumulate(m_detectors.cbegin(), m_detectors.cend(), V3D(),
+                               [](const V3D &pos, const auto &detector) { return pos + detector.second->getPos(); });
+
   // We can have very small values (< Tolerance) of each component that should
   // be zero
   if (std::abs(newPos[0]) < Mantid::Kernel::Tolerance)
@@ -96,11 +94,9 @@ std::optional<Kernel::V2D> DetectorGroup::getSideBySideViewPos() const { return 
 
 /// Gives the average distance of a group of detectors from the given component
 double DetectorGroup::getDistance(const IComponent &comp) const {
-  double result = 0.0;
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    result += (*it).second->getDistance(comp);
-  }
+  double result =
+      std::accumulate(m_detectors.cbegin(), m_detectors.cend(), 0.0,
+                      [&comp](double sum, const auto &detector) { return sum + detector.second->getDistance(comp); });
   return result / static_cast<double>(m_detectors.size());
 }
 
@@ -204,11 +200,8 @@ double DetectorGroup::solidAngle(const Geometry::SolidAngleParams &params) const
  *
  */
 bool DetectorGroup::isParametrized() const {
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
-    if ((*it).second->isParametrized())
-      return true;
-  return false;
+  return std::any_of(m_detectors.cbegin(), m_detectors.cend(),
+                     [](const auto &detector) { return detector.second->isParametrized(); });
 }
 
 /** isValid() is true if the point is inside any of the detectors, i.e. one of
@@ -218,12 +211,8 @@ bool DetectorGroup::isParametrized() const {
  *  @return if the point is in a detector it returns true else it returns false
  */
 bool DetectorGroup::isValid(const V3D &point) const {
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    if ((*it).second->isValid(point))
-      return true;
-  }
-  return false;
+  return std::any_of(m_detectors.cbegin(), m_detectors.cend(),
+                     [&point](const auto &detector) { return detector.second->isValid(point); });
 }
 
 /** Does the point given lie on the surface of one of the detectors
@@ -232,12 +221,8 @@ bool DetectorGroup::isValid(const V3D &point) const {
  *  @return true if the point is on the side of a detector else it returns false
  */
 bool DetectorGroup::isOnSide(const V3D &point) const {
-  DetCollection::const_iterator it;
-  for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    if ((*it).second->isOnSide(point))
-      return true;
-  }
-  return false;
+  return std::any_of(m_detectors.cbegin(), m_detectors.cend(),
+                     [&point](const auto &detector) { return detector.second->isOnSide(point); });
 }
 
 /** tries to find a point that lies on or within the first detector in the

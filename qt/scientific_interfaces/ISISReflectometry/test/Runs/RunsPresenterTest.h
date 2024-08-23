@@ -17,8 +17,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/Batch/MockJobTreeView.h"
-#include "MantidQtWidgets/Common/MockAlgorithmRunner.h"
 #include "MantidQtWidgets/Common/MockProgressableView.h"
+#include "MantidQtWidgets/Common/MockQtAlgorithmRunner.h"
 #include "MockRunsView.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -1234,9 +1234,9 @@ private:
     expectGetLiveDataOptions(std::make_unique<AlgorithmRuntimeProps>(), instrument, updateInterval);
   }
 
-  std::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
+  std::shared_ptr<NiceMock<MockQtAlgorithmRunner>> expectGetAlgorithmRunner() {
     // Get the algorithm runner
-    auto algRunner = std::make_shared<NiceMock<MockAlgorithmRunner>>();
+    auto algRunner = std::make_shared<NiceMock<MockQtAlgorithmRunner>>();
     ON_CALL(m_view, getMonitorAlgorithmRunner()).WillByDefault(Return(algRunner));
     return algRunner;
   }
@@ -1254,7 +1254,7 @@ private:
   }
 
   void assertAlgorithmPropertiesContainOptions(IAlgorithmRuntimeProps const &expected,
-                                               std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
+                                               std::shared_ptr<NiceMock<MockQtAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
     const auto &expectedAlgProps = expected.getProperties();
     const auto &resultAlgProps = alg->getProperties();
@@ -1268,7 +1268,7 @@ private:
   }
 
   void assertPostProcessingPropertiesContainOptions(IAlgorithmRuntimeProps const &expected,
-                                                    std::shared_ptr<NiceMock<MockAlgorithmRunner>> &algRunner) {
+                                                    std::shared_ptr<NiceMock<MockQtAlgorithmRunner>> &algRunner) {
     auto alg = algRunner->algorithm();
     TS_ASSERT_EQUALS(convertAlgPropsToString(expected), alg->getPropertyValue("PostProcessingProperties"))
   }

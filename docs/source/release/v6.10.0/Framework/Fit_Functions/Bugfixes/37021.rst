@@ -1,2 +1,0 @@
-- Fit Function DSFinterp1DFit, which deprecated, has been removed
-

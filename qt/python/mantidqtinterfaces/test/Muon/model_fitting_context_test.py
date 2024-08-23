@@ -58,14 +58,11 @@ class ModelFittingContextTest(unittest.TestCase):
         self.assertEqual(self.fitting_context.y_parameter_errors, {})
 
     def test_that_current_result_table_index_will_raise_if_the_index_provided_is_too_large(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.fitting_context.current_result_table_index = 4
 
     def test_that_current_result_table_index_will_not_raise_a_runtime_error_if_theres_no_datasets_and_none_is_provided(self):
-        try:
-            self.fitting_context.current_result_table_index = None
-        except RuntimeError:
-            self.fail("This should not have raised an exception.")
+        self.fitting_context.current_result_table_index = None
 
     def test_that_number_of_result_tables_will_return_the_expected_number_of_results_tables(self):
         self.assertEqual(self.fitting_context.number_of_result_tables(), 0)

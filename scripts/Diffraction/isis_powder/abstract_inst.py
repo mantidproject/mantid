@@ -146,6 +146,12 @@ class AbstractInst(object):
         """
         return True
 
+    def should_subtract_empty_inst_from_vanadium(self):
+        """
+        :return: Whether the empty run should be subtracted from a vandium run
+        """
+        return True
+
     def perform_abs_vanadium_norm(self):
         """
         :return: Whether the sample run should undergo an absolute normalisation to
@@ -190,6 +196,13 @@ class AbstractInst(object):
         :return: A filename that will allow Mantid to find the correct run for that instrument.
         """
         return self._generate_inst_filename(run_number=run_number, file_ext=file_ext)
+
+    def _check_sample_details(self):
+        if self._sample_details is None:
+            raise ValueError(
+                "Absorption corrections cannot be run without sample details."
+                " Please set sample details using set_sample before running absorption corrections."
+            )
 
     def _apply_absorb_corrections(self, run_details, ws_to_correct):
         """

@@ -21,23 +21,22 @@ class SXDPeakSearchAndFindUBUsingFFT(systemtesting.MantidSystemTest):
 
     def runTest(self):
         ws = Load(Filename="SXD23767.raw", LoadMonitors="Exclude")
-        self.peaks = SXD.find_sx_peaks(ws, nstd=6)
+        self.peaks = SXD.find_sx_peaks(ws, ThresholdVarianceOverMean=1.5)
         FindUBUsingFFT(PeaksWorkspace=self.peaks, MinD=1, MaxD=10, Tolerance=0.15)
         SelectCellOfType(PeaksWorkspace=self.peaks, CellType="Cubic", Centering="F", Apply=True)
         OptimizeLatticeForCellType(PeaksWorkspace=self.peaks, CellType="Cubic", Apply=True)
         self.nindexed, *_ = IndexPeaks(PeaksWorkspace=self.peaks, Tolerance=0.1, CommonUBForAll=True)
 
     def validate(self):
-        self.assertEqual(214, self.nindexed)
+        self.assertEqual(171, self.nindexed)
         latt = SXD.retrieve(self.peaks).sample().getOrientedLattice()
-        a, alpha = 5.6541, 90  # published value for NaCl is a=6.6402 but the detector positions haven't been calibrated
+        a, alpha = 5.6533, 90  # published value for NaCl is a=6.6402 but the detector positions haven't been calibrated
         self.assertAlmostEqual(a, latt.a(), delta=1e-5)
         self.assertAlmostEqual(a, latt.b(), delta=1e-5)
         self.assertAlmostEqual(a, latt.c(), delta=1e-5)
         self.assertAlmostEqual(alpha, latt.alpha(), delta=1e-10)
         self.assertAlmostEqual(alpha, latt.beta(), delta=1e-10)
         self.assertAlmostEqual(alpha, latt.gamma(), delta=1e-10)
-        return self.peaks, "SXD23767_found_peaks.nxs"
 
 
 class SXDDetectorCalibration(systemtesting.MantidSystemTest):
@@ -56,7 +55,7 @@ class SXDDetectorCalibration(systemtesting.MantidSystemTest):
         a, alpha = 5.6402, 90
         CalculateUMatrix(PeaksWorkspace=self.peaks, a=a, b=a, c=a, alpha=alpha, beta=alpha, gamma=alpha)
         # load an empty workspace as MoveCOmpoennt etc. only work on Matrix workspaces
-        self.ws = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="empty")
+        self.ws = LoadEmptyInstrument(Filename="SXD_Definition.xml", OutputWorkspace="empty")
 
         self.xml_path = SXD.calibrate_sxd_panels(self.ws, self.peaks, self._temp_dir, tol=0.25, SearchRadiusTransBank=0.025)
 
@@ -93,7 +92,7 @@ class SXDProcessSampleData(systemtesting.MantidSystemTest):
         ADS.clear()
 
     def runTest(self):
-        sxd = SXD(vanadium_runno=23769, empty_runno=23768)
+        sxd = SXD(vanadium_runno=23769, empty_runno=23768, scale_integrated=False)
         sxd.van_ws = LoadNexus(Filename="SXD23779_processed_vanadium.nxs", OutputWorkspace="SXD23779_vanadium")
         sxd.set_sample(
             Geometry={"Shape": "CSG", "Value": sxd.sphere_shape},
@@ -135,38 +134,67 @@ class SXDIntegrateData(systemtesting.MantidSystemTest):
         self.tolerance_is_rel_err = True
         return self.integrated_peaks, "SXD23767_found_peaks_integrated.nxs"
 
-    class SXDIntegrateDataShoebox(systemtesting.MantidSystemTest):
-        def cleanup(self):
-            ADS.clear()
 
-        def runTest(self):
-            sxd = SXD(vanadium_runno=23769, empty_runno=23768)
-            # load data and convert to Qlab
-            ws = LoadNexus(Filename="SXD23767_processed.nxs", OutputWorkspace="SXD23767_processed")
-            runno = 23767
-            sxd.set_ws(runno, ws)
-            # create peak table
-            peaks = CreatePeaksWorkspace(InstrumentWorkspace=ws, NumberOfPeaks=0, OutputWorkspace="peaks")
-            AddPeak(PeaksWorkspace="peaks", RunWorkspace=ws, TOF=8303.3735339704781, DetectorID=7646)
-            AddPeak(PeaksWorkspace="peaks", RunWorkspace=ws, TOF=19166.422281671705, DetectorID=20009)
-            AddPeak(PeaksWorkspace="peaks", RunWorkspace=ws, TOF=1582.4728457415549, DetectorID=25111)
-            AddPeak(PeaksWorkspace="peaks", RunWorkspace=ws, TOF=1734.9661945986509, DetectorID=28271)
-            AddPeak(PeaksWorkspace="peaks", RunWorkspace=ws, TOF=5241.7309709929505, DetectorID=1380)
-            AddPeak(PeaksWorkspace="peaks", RunWorkspace=ws, TOF=1665.2648421691604, DetectorID=8176)
-            AddPeak(PeaksWorkspace="peaks", RunWorkspace=ws, TOF=7690.5100117616385, DetectorID=22799)
-            AddPeak(PeaksWorkspace="peaks", RunWorkspace=ws, TOF=8289.2655006925579, DetectorID=7327)
-            sxd.set_peaks(runno, peaks, PEAK_TYPE.FOUND)
-            # integrate
-            sxd.integrate_data(
-                INTEGRATION_TYPE.SHOEBOX,
-                PEAK_TYPE.FOUND,
-                GetNBinsFromBackToBackParams=True,
-                WeakPeakThreshold=20.0,
-                LorentzCorrection=False,
-                WeakPeakStrategy="NearestStrongPeak",
-            )
-            self.integrated_peaks = sxd.get_peaks_name(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.SHOEBOX)
+class SXDIntegrateDataShoebox(systemtesting.MantidSystemTest):
+    def cleanup(self):
+        ADS.clear()
 
-        def validate(self):
-            intens_over_sigma = [98.97, 0.0, 10.5, 10.87, 135.83, 0.0, -0.4, 1.08]
-            self.assertTrue(np.allclose(np.round(self.integrated_peaks.column("Intens/SigInt"), 2), intens_over_sigma))
+    def runTest(self):
+        sxd = SXD(vanadium_runno=23769, empty_runno=23768)
+        runno = 23767
+        _load_data_and_add_peaks(sxd, runno)
+
+        # integrate
+        sxd.integrate_data(
+            INTEGRATION_TYPE.SHOEBOX,
+            PEAK_TYPE.FOUND,
+            GetNBinsFromBackToBackParams=True,
+            WeakPeakThreshold=20.0,
+            LorentzCorrection=False,
+            WeakPeakStrategy="NearestStrongPeak",
+        )
+        self.integrated_peaks = sxd.get_peaks(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.SHOEBOX)
+
+    def validate(self):
+        intens_over_sigma = [0.0, 9.638, 10.265, 136.535, 0.0]
+        self.assertTrue(np.allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2))
+
+
+class SXDIntegrateData1DProfile(systemtesting.MantidSystemTest):
+    def cleanup(self):
+        ADS.clear()
+
+    def runTest(self):
+        sxd = SXD(vanadium_runno=23769, empty_runno=23768)
+        runno = 23767
+        _load_data_and_add_peaks(sxd, runno)
+
+        # integrate
+        sxd.integrate_data(
+            INTEGRATION_TYPE.PROFILE,
+            PEAK_TYPE.FOUND,
+            GetNBinsFromBackToBackParams=True,
+            NFWHM=6,
+            CostFunction="RSq",
+            FixPeakParameters="A",
+            FractionalChangeDSpacing=0.025,
+            IntegrateIfOnEdge=False,
+        )
+        self.integrated_peaks = sxd.get_peaks(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.PROFILE)
+
+    def validate(self):
+        intens_over_sigma = [0.0, 18.45, 17.11, 134.29, 0.0]
+        self.assertTrue(np.allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2))
+
+
+def _load_data_and_add_peaks(sxd, runno):
+    ws = LoadNexus(Filename="SXD23767_processed.nxs", OutputWorkspace="SXD23767_processed")
+    sxd.set_ws(runno, ws)
+    # create peak table
+    peaks = CreatePeaksWorkspace(InstrumentWorkspace=ws, NumberOfPeaks=0, OutputWorkspace="peaks")
+    AddPeak(PeaksWorkspace="peaks", RunWorkspace=ws, TOF=19166.422281671705, DetectorID=20009)
+    AddPeak(PeaksWorkspace="peaks", RunWorkspace=ws, TOF=1582.4728457415549, DetectorID=25111)
+    AddPeak(PeaksWorkspace="peaks", RunWorkspace=ws, TOF=1734.9661945986509, DetectorID=28271)
+    AddPeak(PeaksWorkspace="peaks", RunWorkspace=ws, TOF=5241.7309709929505, DetectorID=1380)
+    AddPeak(PeaksWorkspace="peaks", RunWorkspace=ws, TOF=1665.2648421691604, DetectorID=8176)
+    sxd.set_peaks(runno, peaks, PEAK_TYPE.FOUND)

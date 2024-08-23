@@ -12,7 +12,12 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/ScalarUtils.h"
+#include "MantidJson/Json.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+
+#include <boost/algorithm/string/replace.hpp>
+#include <json/json.h>
 
 namespace Mantid::Crystal {
 // Register the algorithm into the AlgorithmFactory
@@ -42,6 +47,9 @@ void ShowPossibleCells::init() {
                         "Gets set with the number of possible cells.");
 
   this->declareProperty("AllowPermutations", true, "Allow permutations of conventional cells");
+
+  this->declareProperty(std::make_unique<Mantid::Kernel::ArrayProperty<std::string>>("Cells", Direction::Output),
+                        "A list of the different cells");
 }
 
 /** Execute the algorithm.
@@ -72,14 +80,39 @@ void ShowPossibleCells::exec() {
   // now tell the user the number of possible conventional cells:
   g_log.notice() << "Num Cells : " << num_cells << '\n';
 
+  std::vector<std::string> cells;
+
   for (size_t i = 0; i < num_cells; i++) {
     DblMatrix newUB = list[i].GetNewUB();
     std::string message = list[i].GetDescription() + " Lat Par:" + IndexingUtils::GetLatticeParameterString(newUB);
 
     g_log.notice(std::string(message));
+
+    Json::Value root;
+    root["Error"] = list[i].GetError();
+    root["FormNumber"] = static_cast<uint32_t>(list[i].GetFormNum());
+    root["CellType"] = list[i].GetCellType();
+    root["Centering"] = list[i].GetCentering();
+    Json::Value outUB;
+    for (double x : newUB.getVector())
+      outUB.append(x);
+    root["UB"] = outUB;
+
+    std::vector<double> lattice_parameters;
+    IndexingUtils::GetLatticeParameters(newUB, lattice_parameters);
+    root["a"] = lattice_parameters[0];
+    root["b"] = lattice_parameters[1];
+    root["c"] = lattice_parameters[2];
+    root["alpha"] = lattice_parameters[3];
+    root["beta"] = lattice_parameters[4];
+    root["gamma"] = lattice_parameters[5];
+    root["volume"] = lattice_parameters[6];
+
+    cells.push_back(Mantid::JsonHelpers::jsonToString(root));
   }
 
   this->setProperty("NumberOfCells", static_cast<int>(num_cells));
+  this->setProperty("Cells", cells);
 }
 
 } // namespace Mantid::Crystal

@@ -54,12 +54,10 @@ BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
       m_algorithmErrorObserver(*this, &BatchAlgorithmRunner::handleAlgorithmError),
       m_executeAsync(this, &BatchAlgorithmRunner::executeBatchAsyncImpl) {}
 
-BatchAlgorithmRunner::~BatchAlgorithmRunner() {
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
-  removeAllObservers();
-}
+BatchAlgorithmRunner::~BatchAlgorithmRunner() { removeAllObservers(); }
 
 void BatchAlgorithmRunner::addAllObservers() {
+  std::lock_guard<std::recursive_mutex> lock(m_notificationMutex);
   m_notificationCenter.addObserver(m_batchCompleteObserver);
   m_notificationCenter.addObserver(m_batchCancelledObserver);
   m_notificationCenter.addObserver(m_algorithmStartedObserver);
@@ -68,6 +66,7 @@ void BatchAlgorithmRunner::addAllObservers() {
 }
 
 void BatchAlgorithmRunner::removeAllObservers() {
+  std::lock_guard<std::recursive_mutex> lock(m_notificationMutex);
   m_notificationCenter.removeObserver(m_batchCompleteObserver);
   m_notificationCenter.removeObserver(m_batchCancelledObserver);
   m_notificationCenter.removeObserver(m_algorithmStartedObserver);
@@ -113,10 +112,10 @@ void BatchAlgorithmRunner::addAlgorithm(const IAlgorithm_sptr &algo, std::unique
  */
 void BatchAlgorithmRunner::setQueue(std::deque<IConfiguredAlgorithm_sptr> algorithms) {
   g_log.debug() << "Set batch queue to algorithm list:\n";
-  for (auto &algorithm : algorithms)
+  for (auto const &algorithm : algorithms)
     g_log.debug() << algorithm->algorithm()->name() << "\n";
 
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_executeMutex);
   m_algorithms = std::move(algorithms);
 }
 
@@ -124,14 +123,17 @@ void BatchAlgorithmRunner::setQueue(std::deque<IConfiguredAlgorithm_sptr> algori
  * Removes all algorithms from the queue.
  */
 void BatchAlgorithmRunner::clearQueue() {
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_executeMutex);
   m_algorithms.clear();
 }
 
 /**
  * Returns the number of algorithms in the queue.
  */
-size_t BatchAlgorithmRunner::queueLength() { return m_algorithms.size(); }
+size_t BatchAlgorithmRunner::queueLength() {
+  std::lock_guard<std::recursive_mutex> lock(m_executeMutex);
+  return m_algorithms.size();
+}
 
 /**
  * Executes the algorithms on a separate thread and waits for their completion.
@@ -170,16 +172,16 @@ void BatchAlgorithmRunner::executeAlgorithmAsync(IConfiguredAlgorithm_sptr algor
  * Cancel execution of remaining queued items
  */
 void BatchAlgorithmRunner::cancelBatch() {
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
-  // If the queue is empty, notify straight away that the batch has been
+  // If not currently executing, notify straight away that the batch has been
   // cancelled. Otherwise, set a flag so that it will be cancelled after the
   // current algorithm finishes processing
-  if (queueLength() < 1) {
+  if (m_executeMutex.try_lock()) {
+    m_executeMutex.unlock();
     addAllObservers();
-    m_notificationCenter.postNotification(new BatchCancelledNotification());
+    postNotification(new BatchCancelledNotification());
     removeAllObservers();
   } else {
-    m_cancelRequested = true;
+    setCancelRequested(true);
   }
 }
 
@@ -187,14 +189,13 @@ void BatchAlgorithmRunner::cancelBatch() {
  * Reset state ready for executing a new batch
  */
 void BatchAlgorithmRunner::resetState() {
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
   removeAllObservers();
   clearQueue();
-  m_cancelRequested = false;
+  setCancelRequested(false);
 }
 
 bool BatchAlgorithmRunner::cancelRequested() {
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_cancelMutex);
   return m_cancelRequested;
 }
 
@@ -202,10 +203,10 @@ bool BatchAlgorithmRunner::cancelRequested() {
  * Implementation of sequential algorithm scheduler.
  */
 bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void & /*unused*/) {
-  std::lock_guard<std::recursive_mutex> lock(m_mutex);
+  std::lock_guard<std::recursive_mutex> lock(m_executeMutex);
 
   bool errorFlag = false;
-  for (auto &it : m_algorithms) {
+  for (auto const &it : m_algorithms) {
     if (cancelRequested()) {
       g_log.information("Stopping batch algorithm execution: cancelled");
       break;
@@ -228,9 +229,9 @@ bool BatchAlgorithmRunner::executeBatchAsyncImpl(const Poco::Void & /*unused*/) 
 
   // Notify observers
   if (cancelRequested())
-    m_notificationCenter.postNotification(new BatchCancelledNotification());
+    postNotification(new BatchCancelledNotification());
   else
-    m_notificationCenter.postNotification(new BatchCompleteNotification(false, errorFlag));
+    postNotification(new BatchCompleteNotification(false, errorFlag));
 
   resetState();
 
@@ -257,14 +258,14 @@ bool BatchAlgorithmRunner::executeAlgo(const IConfiguredAlgorithm_sptr &algorith
     g_log.information() << "Starting next algorithm in queue: " << m_currentAlgorithm->name() << "\n";
 
     // Start algorithm running
-    m_notificationCenter.postNotification(new AlgorithmStartedNotification(algorithm));
+    postNotification(new AlgorithmStartedNotification(algorithm));
     auto result = m_currentAlgorithm->execute();
 
     if (!result) {
       auto message = std::string("Algorithm") + algorithm->algorithm()->name() + std::string(" execution failed");
-      m_notificationCenter.postNotification(new AlgorithmErrorNotification(algorithm, message));
+      postNotification(new AlgorithmErrorNotification(algorithm, message));
     } else {
-      m_notificationCenter.postNotification(new AlgorithmCompleteNotification(algorithm));
+      postNotification(new AlgorithmCompleteNotification(algorithm));
     }
 
     return result;
@@ -273,7 +274,7 @@ bool BatchAlgorithmRunner::executeAlgo(const IConfiguredAlgorithm_sptr &algorith
   catch (Mantid::Kernel::Exception::NotFoundError &notFoundEx) {
     UNUSED_ARG(notFoundEx);
     g_log.warning("Algorithm property does not exist.\nStopping queue execution.");
-    m_notificationCenter.postNotification(new AlgorithmErrorNotification(algorithm, notFoundEx.what()));
+    postNotification(new AlgorithmErrorNotification(algorithm, notFoundEx.what()));
     return false;
   }
   // If a property was assigned a value of the wrong type
@@ -281,20 +282,29 @@ bool BatchAlgorithmRunner::executeAlgo(const IConfiguredAlgorithm_sptr &algorith
     UNUSED_ARG(invalidArgEx);
     g_log.warning("Algorithm property given value of incorrect type.\nStopping "
                   "queue execution.");
-    m_notificationCenter.postNotification(new AlgorithmErrorNotification(algorithm, invalidArgEx.what()));
+    postNotification(new AlgorithmErrorNotification(algorithm, invalidArgEx.what()));
     return false;
   }
   // For anything else that could go wrong
   catch (std::exception &ex) {
     g_log.warning("Error starting batch algorithm");
-    m_notificationCenter.postNotification(new AlgorithmErrorNotification(algorithm, ex.what()));
+    postNotification(new AlgorithmErrorNotification(algorithm, ex.what()));
     return false;
   } catch (...) {
     g_log.warning("Unknown error starting next batch algorithm");
-    m_notificationCenter.postNotification(
-        new AlgorithmErrorNotification(algorithm, "Unknown error starting algorithm"));
+    postNotification(new AlgorithmErrorNotification(algorithm, "Unknown error starting algorithm"));
     return false;
   }
+}
+
+void BatchAlgorithmRunner::postNotification(Poco::Notification *notification) {
+  std::lock_guard<std::recursive_mutex> lock(m_notificationMutex);
+  m_notificationCenter.postNotification(notification);
+}
+
+void BatchAlgorithmRunner::setCancelRequested(bool const cancel) {
+  std::lock_guard<std::recursive_mutex> lock(m_cancelMutex);
+  m_cancelRequested = cancel;
 }
 
 /**

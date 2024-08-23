@@ -1,1 +1,0 @@
-- Now set ``modUB`` in :ref:`IndexPeaks <algm-IndexPeaks>` when ``SaveModulationInfo=True``

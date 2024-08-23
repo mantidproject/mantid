@@ -255,7 +255,7 @@ void AlgorithmPropertiesWidget::initLayout() {
 
       // Only show the "Replace Workspace" button if the algorithm has an input
       // workspace.
-      if (hasInputWS)
+      if (hasInputWS && !prop->disableReplaceWSButton())
         widget->addReplaceWSButton();
 
       ++row;

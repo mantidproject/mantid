@@ -311,6 +311,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         :param state: If true a request is being made to turn them on, else they should be turned off
         """
         data_view = self.view.data_view
+        data_view.image_info_widget.setShowSignal(not state)
         if state:
             data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)

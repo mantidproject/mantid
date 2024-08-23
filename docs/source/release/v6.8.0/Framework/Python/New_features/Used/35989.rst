@@ -1,1 +1,0 @@
-- :ref:`SNSPowderReduction <algm-SNSPowderReduction>`, can now perform linear interpolation for temperature of two empty container background runs using new :ref:`InterpolateBackground <algm-InterpolateBackground>` algorithm

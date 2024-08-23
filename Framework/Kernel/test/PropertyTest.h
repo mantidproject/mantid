@@ -99,6 +99,15 @@ public:
     TS_ASSERT(p3->remember());
   }
 
+  void testDisableReplaceWSButton() {
+    auto p = std::make_unique<PropertyHelper>();
+    TS_ASSERT(!p->disableReplaceWSButton());
+    p->setDisableReplaceWSButton(true);
+    TS_ASSERT(p->disableReplaceWSButton());
+    p->setDisableReplaceWSButton(false);
+    TS_ASSERT(!p->disableReplaceWSButton());
+  }
+
 private:
   std::unique_ptr<Property> p;
 };

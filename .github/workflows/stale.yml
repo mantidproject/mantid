@@ -11,16 +11,16 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v8
+      - uses: actions/stale@v9
         with:
-          days-before-issue-stale: 180
+          days-before-issue-stale: 365
           days-before-pr-stale: 90
           # number of days after it's set to stale
           days-before-close: 7
           exempt-issue-labels: 'Induction,Roadmap'
           stale-issue-message: >
             This issue has been automatically marked as stale because it has not had
-            activity in 6 months. It will be closed in 7 days if no further activity occurs.
+            activity in a year. It will be closed in 7 days if no further activity occurs.
 
             Allowing issues to close as stale helps us filter out issues which can wait
             for future development time. All issues closed by stale bot act like normal issues; they can be searched for, commented on or reopened at any point.

@@ -1,47 +1,21 @@
-# Testing
-set(TEST_FILES
-    Analysis/ConvFitModelTest.h
-    Analysis/ConvFitDataPresenterTest.h
-    Analysis/ConvFunctionModelTest.h
-    Analysis/FqFitDataPresenterTest.h
-    Analysis/FqFitModelTest.h
-    Analysis/IDAFunctionParameterEstimationTest.h
-    Analysis/IndirectDataAnalysisTabTest.h
-    Analysis/IndirectFitDataPresenterTest.h
-    Analysis/IndirectFitDataTest.h
-    Analysis/IndirectFitDataModelTest.h
-    Analysis/IndirectFitOutputTest.h
-    Analysis/IndirectFitOutputOptionsModelTest.h
-    Analysis/IndirectFitOutputOptionsPresenterTest.h
-    Analysis/IndirectFitPlotModelTest.h
-    Analysis/IndirectFitPlotPresenterTest.h
-    Analysis/IndirectFitPropertyBrowserTest.h
-    Analysis/IndirectFittingModelTest.h
-    Analysis/IqtFitModelTest.h
-    Common/IndirectDataValidationHelperTest.h
-    Common/OutputPlotOptionsModelTest.h
-    Common/OutputPlotOptionsPresenterTest.h
-    Common/SettingsModelTest.h
-    Common/SettingsPresenterTest.h
-    Common/WorkspaceUtilsTest.h
-    Common/InterfaceUtilsTest.h
-    Manipulation/InelasticDataManipulationElwinTabModelTest.h
-    Manipulation/InelasticDataManipulationIqtTabModelTest.h
-    Manipulation/InelasticDataManipulationMomentsTabModelTest.h
-    Manipulation/InelasticDataManipulationSqwTabModelTest.h
-    Manipulation/InelasticDataManipulationSymmetriseTabModelTest.h
-)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-Wno-maybe-uninitialized)
+endif()
 
-set(TEST_HELPERS Analysis/MockObjects.h Common/MockObjects.h)
+set(ALL_TEST_FILES)
+set(ALL_TEST_HELPERS)
+
+add_subdirectory(Processor)
+add_subdirectory(QENSFitting)
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/InterfacesInelasticTestInitialization.h)
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesInelasticTest
   QT_VERSION 5
-  SRC ${TEST_FILES}
+  SRC ${ALL_TEST_FILES}
   INCLUDE_DIRS ../../../../Framework/DataObjects/inc ../
-  TEST_HELPER_SRCS ${TEST_HELPERS}
+  TEST_HELPER_SRCS ${ALL_TEST_HELPERS}
   LINK_LIBS ${CORE_MANTIDLIBS}
             Mantid::DataObjects
             gmock
@@ -49,7 +23,7 @@ mtd_add_qt_tests(
             ${Boost_LIBRARIES}
             Mantid::PythonInterfaceCore
             ${PYTHON_LIBRARIES}
-  QT5_LINK_LIBS Qt5::OpenGL Qt5::Concurrent
+  QT5_LINK_LIBS Qt5::OpenGL
   MTD_QT_LINK_LIBS MantidScientificInterfacesInelastic MantidQtWidgetsCommon MantidQtWidgetsPlotting
                    MantidQtWidgetsMplCpp
   PARENT_DEPENDENCIES GUITests

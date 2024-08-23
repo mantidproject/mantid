@@ -53,7 +53,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-.. testcode:: GenerateGroupingPowder
+.. testcode:: GenerateGroupingPowder_default
 
     # create some grouping file
     import mantid
@@ -61,10 +61,9 @@ Usage
 
     #load some file
     ws=Load("CNCS_7860")
-    gws = "a_nice_name_for_grouping_workspace"
 
     #generate the files
-    GenerateGroupingPowder(ws,10,outputFilename, GroupingWorkspace=gws)
+    GenerateGroupingPowder(ws,10, GroupingFilename=outputFilename)
 
     #check that it works
     import os.path
@@ -73,12 +72,11 @@ Usage
     if(os.path.isfile(mantid.config.getString("defaultsave.directory")+"powder.par")):
         print("Found file powder.par")
     wsg=GroupDetectors(ws,outputFilename)
-    print("The grouped workspace has {} histograms".format(wsg.getNumberHistograms()))
+    print("The grouping workspace has {} histograms".format(wsg.getNumberHistograms()))
 
-.. testcleanup:: GenerateGroupingPowder
+.. testcleanup:: GenerateGroupingPowder_default
 
    DeleteWorkspace(ws)
-   DeleteWorkspace(gws)
    DeleteWorkspace(wsg)
    import os,mantid
    filename=mantid.config.getString("defaultsave.directory")+"powder.xml"
@@ -88,11 +86,43 @@ Usage
 
 Output:
 
-.. testoutput:: GenerateGroupingPowder
+.. testoutput:: GenerateGroupingPowder_default
 
     Found file powder.xml
     Found file powder.par
-    The grouped workspace has 14 histograms
+    The grouping workspace has 14 histograms
+
+----
+
+Similarly, one could instead specify the grouping workspace:
+
+.. testcode:: GenerateGroupingPowder_GroupingWorkspace
+
+    #load some file
+    ws=Load("CNCS_7860")
+    gws_name= "a_nice_name_for_grouping_workspace"
+
+    #generate the files
+    GenerateGroupingPowder(ws,10, GroupingWorkspace=gws_name)
+
+    #check that it works
+    gws = mtd[gws_name]
+    print("The grouping workspace has {} histograms".format(gws.getNumberHistograms()))
+
+.. testcleanup:: GenerateGroupingPowder_GroupingWorkspace
+
+   DeleteWorkspace(ws)
+   DeleteWorkspace(gws)
+
+
+
+Output:
+
+.. testoutput:: GenerateGroupingPowder_GroupingWorkspace
+
+    The grouping workspace has 51200 histograms
+
+
 
 If one would use LoadDetectorsGroupingFile on powder.xml one would get a workspace that looks like
 

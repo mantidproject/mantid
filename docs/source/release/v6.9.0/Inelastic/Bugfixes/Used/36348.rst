@@ -1,1 +1,0 @@
-- The available fit functions in FqFit tab of :ref:`Inelastic Data Analysis <interface-inelastic-data-analysis>` change in relation to the type of the analysis parameter selected when adding a workspace, in this case either WIDTH or EISF.

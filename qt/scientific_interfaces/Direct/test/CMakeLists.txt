@@ -1,3 +1,7 @@
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-Wno-maybe-uninitialized)
+endif()
+
 # Testing
 set(TEST_FILES ALFAlgorithmManagerTest.h ALFAnalysisModelTest.h ALFAnalysisPresenterTest.h ALFInstrumentModelTest.h
                ALFInstrumentPresenterTest.h

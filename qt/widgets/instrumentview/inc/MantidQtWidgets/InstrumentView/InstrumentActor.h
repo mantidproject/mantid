@@ -10,6 +10,7 @@
 #include "MantidQtWidgets/InstrumentView/ColorMap.h"
 #include "MantidQtWidgets/InstrumentView/DllOption.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
+#include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -274,6 +275,7 @@ private:
   /// Sum the counts in detectors if the workspace is ragged
   void sumDetectorsRagged(const std::vector<size_t> &dets, std::vector<double> &x, std::vector<double> &y,
                           size_t size) const;
+  void resetInstrumentRenderer();
 
   /// The workspace whose data are shown
   std::shared_ptr<Mantid::API::MatrixWorkspace> m_workspace;

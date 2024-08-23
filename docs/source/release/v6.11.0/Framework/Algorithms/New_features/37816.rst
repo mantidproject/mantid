@@ -1,0 +1,1 @@
+- New version 2 of :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>` that adds FilterByTime functionality.

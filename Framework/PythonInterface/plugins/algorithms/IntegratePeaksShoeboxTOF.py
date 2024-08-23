@@ -24,7 +24,7 @@ from mantid.kernel import (
 )
 from dataclasses import dataclass
 import numpy as np
-from scipy.ndimage import uniform_filter
+from scipy.ndimage import distance_transform_edt, maximum_position, label
 from scipy.signal import convolve
 from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
 from FindSXPeaksConvolve import make_kernel, get_kernel_shape
@@ -190,9 +190,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         )
         self.declareProperty(
             name="NFWHM",
-            defaultValue=4,
+            defaultValue=4.0,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=1),
+            validator=FloatBoundedValidator(lower=1.0),
             doc="If GetNBinsFromBackToBackParams=True then the number of TOF bins will be NFWHM x FWHM of the "
             "BackToBackExponential at the peak detector and TOF.",
         )
@@ -250,14 +250,14 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             name="NRowsEdge",
             defaultValue=1,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=1),
+            validator=IntBoundedValidator(lower=0),
             doc="Shoeboxes containing detectors NRowsEdge from the detector edge are defined as on the edge.",
         )
         self.declareProperty(
             name="NColsEdge",
             defaultValue=1,
             direction=Direction.Input,
-            validator=IntBoundedValidator(lower=1),
+            validator=IntBoundedValidator(lower=0),
             doc="Shoeboxes containing detectors NColsEdge from the detector edge are defined as on the edge.",
         )
         edge_check_enabled = EnabledWhenProperty("IntegrateIfOnEdge", PropertyCriterion.IsDefault)
@@ -299,9 +299,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         if self.getProperty("GetNBinsFromBackToBackParams").value:
             # check at least first peak in workspace has back to back params
             if not inst.getComponentByName(pk_ws.column("BankName")[0]).hasParameter("B"):
-                issues[
-                    "GetNBinsFromBackToBackParams"
-                ] = "Workspace doesn't have back to back exponential coefficients defined in the parameters.xml file."
+                issues["GetNBinsFromBackToBackParams"] = (
+                    "Workspace doesn't have back to back exponential coefficients defined in the parameters.xml file."
+                )
         return issues
 
     def PyExec(self):
@@ -366,7 +366,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 ipos_predicted = [peak_data.irow, peak_data.icol, ix]
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
 
-                intens, sigma, status, ispecs, ipos, nrows, ncols, nbins = integrate_peak(
+                intens, sigma, i_over_sig, status, ipos, nrows, ncols, nbins = integrate_peak(
                     ws,
                     peaks,
                     ipk,
@@ -383,7 +383,6 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     weak_peak_threshold,
                     do_optimise_shoebox,
                 )
-
                 if status == PEAK_STATUS.WEAK and do_optimise_shoebox and weak_peak_strategy == "NearestStrongPeak":
                     # look for possible strong peaks at any TOF in the window (won't know if strong until all pks integrated)
                     ipks_near, _ = find_ipks_in_window(ws, peaks, ispecs, ipk)
@@ -392,12 +391,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 else:
                     if status == PEAK_STATUS.STRONG:
                         ipks_strong.append(ipk)
-                    if output_file:
-                        # save result for plotting
-                        i_over_sig = intens / sigma if sigma > 0 else 0.0
-                        results[ipk] = ShoeboxResult(
-                            ipk, peak, x, y, [nrows, ncols, nbins], ipos, [peak_data.irow, peak_data.icol, ix], i_over_sig, status
-                        )
+                    results[ipk] = ShoeboxResult(
+                        ipk, peak, x, y, [nrows, ncols, nbins], ipos, [peak_data.irow, peak_data.icol, ix], i_over_sig, status
+                    )  # use this to get strong peak shoebox dimensions even if no plotting
                 # scale summed intensity by bin width to get integrated area
                 intens = intens * bin_width
                 sigma = sigma * bin_width
@@ -437,14 +433,13 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 # integrate at previously found ipos
                 ipos = [*np.argwhere(ispecs == weak_pk.ispec)[0], np.argmin(abs(x - weak_pk.tof))]
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
-                intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+                intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
                 # scale summed intensity by bin width to get integrated area
                 intens = intens * weak_pk.tof_bin_width
                 sigma = sigma * weak_pk.tof_bin_width
                 set_peak_intensity(peak, intens, sigma, do_lorz_cor)
                 if output_file:
                     # save result for plotting
-                    i_over_sig = intens / sigma if sigma > 0 else 0.0
                     peak_shape = [nrows, ncols, nbins]
                     ipos_predicted = [peak_data.irow, peak_data.icol, np.argmin(abs(x - pk_tof))]
                     results[ipk] = ShoeboxResult(
@@ -500,21 +495,23 @@ def integrate_peak(
     ws, peaks, ipk, kernel, nrows, ncols, nbins, x, y, esq, ispecs, ipos_predicted, det_edges, weak_peak_threshold, do_optimise_shoebox
 ):
     # perform initial integration
-    intens_over_sig = convolve_shoebox(y, esq, kernel)
+    intens_over_sig = convolve_shoebox(y, esq, kernel)  # array of I/sigma same size as data
 
     # identify best shoebox position near peak
-    ipos = find_nearest_peak_in_data_window(intens_over_sig, ispecs, x, ws, peaks, ipk, *ipos_predicted)
+    ipos = find_nearest_peak_in_data_window(intens_over_sig, ispecs, x, ws, peaks, ipk, tuple(ipos_predicted))
 
     # perform final integration if required
+    intens, sigma, i_over_sig = 0.0, 0.0, 0.0
+    status = PEAK_STATUS.NO_PEAK
     if ipos is not None:
         # integrate at that position (without smoothing I/sigma)
-        intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+        intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
         if status == PEAK_STATUS.STRONG and do_optimise_shoebox:
             ipos, (nrows, ncols, nbins) = optimise_shoebox(y, esq, (nrows, ncols, nbins), ipos)
             kernel = make_kernel(nrows, ncols, nbins)
             # re-integrate but this time check for overlap with edge
-            intens, sigma, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
-    return intens, sigma, status, ispecs, ipos, nrows, ncols, nbins
+            intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+    return intens, sigma, i_over_sig, status, ipos, nrows, ncols, nbins
 
 
 def round_up_to_odd_number(number):
@@ -578,7 +575,6 @@ def convolve_shoebox(y, esq, kernel, mode="same"):
         econv = np.sqrt(convolve(esq, kernel**2, mode=mode))
         intens_over_sig = yconv / econv
     intens_over_sig[~np.isfinite(intens_over_sig)] = 0
-    intens_over_sig = uniform_filter(intens_over_sig, size=len(y.shape))
     # zero edges where convolution is invalid
     if mode == "same":
         edge_mask = np.ones(intens_over_sig.shape, dtype=bool)
@@ -588,38 +584,30 @@ def convolve_shoebox(y, esq, kernel, mode="same"):
     return intens_over_sig
 
 
-def find_nearest_peak_in_data_window(data, ispecs, x, ws, peaks, ipk, irow, icol, ix, threshold=2):
-    ipks_near, ispecs_peaks = find_ipks_in_window(ws, peaks, ispecs, ipk, tof_min=x.min(), tof_max=x.max())
-    if len(ipks_near) > 0:
+def find_nearest_peak_in_data_window(data, ispecs, x, ws, peaks, ipk, ipos, min_threshold=2):
+    # find threshold
+    threshold = max(0.5 * (data[ipos] + min_threshold), min_threshold)
+    labels, nlabels = label(data > threshold)
+    if nlabels < 1:
+        return None  # no peak found
+    peak_label = labels[ipos]
+    if peak_label == 0:
+        dists, inearest = distance_transform_edt(labels == 0, return_distances=True, return_indices=True)
+        nearest_label = labels[tuple(inearest)]
+        # mask out labels closest to other peaks
+        ipks_near, ispecs_peaks = find_ipks_in_window(ws, peaks, ispecs, ipk, tof_min=x.min(), tof_max=x.max())
         tofs = peaks.column("TOF")
-        # get position of nearby peaks in data array in fractional coords
-        shape = np.array(data.shape)
-        pos_near = [
-            np.r_[np.argwhere(ispecs == ispecs_peaks[ii])[0], np.argmin(abs(x - tofs[ipk_near]))] / shape
-            for ii, ipk_near in enumerate(ipks_near)
-        ]
-        # sort data in descending order and select strongest data point nearest to pk (in fractional coordinates)
-        isort = list(zip(*np.unravel_index(np.argsort(-data, axis=None), data.shape)))
-        pk_pos = np.array([irow, icol, ix]) / np.array(data.shape)
-        imax_nearest = None
-        for ibin in isort:
-            if data[ibin] > threshold:
-                # calc distance to predicted peak position
-                bin_pos = np.array(ibin) / shape
-                pk_dist_sq = np.sum((pk_pos - bin_pos) ** 2)
-                for pos in pos_near:
-                    if np.sum((pos - bin_pos) ** 2) > pk_dist_sq:
-                        imax_nearest = ibin
-                        break
-                else:
-                    continue  # executed if inner loop did not break (i.e. pixel closer to nearby peak than this peak)
-                break  # execute if inner loop did break and else branch ignored (i.e. found bin closest to this peak)
-            else:
-                break
-        return imax_nearest  # could be None if no peak found
-    else:
-        # no nearby peaks - return position of maximum in data
-        return np.unravel_index(np.argmax(data), data.shape)
+        for ii, ipk_near in enumerate(ipks_near):
+            ipos_near = tuple([*np.argwhere(ispecs == ispecs_peaks[ii])[0], np.argmin(abs(x - tofs[ipk_near]))])
+            ilabel_near = nearest_label[ipos_near]
+            if ilabel_near != nearest_label[ipos] or dists[ipos] > dists[ipos_near]:
+                labels[labels == nearest_label[ipos_near]] = 0  # remove the label
+        if not labels.any():
+            # no more peak regions left
+            return None
+        inearest = distance_transform_edt(labels == 0, return_distances=False, return_indices=True)
+        peak_label = labels[tuple(inearest)][ipos]
+    return maximum_position(data, labels, peak_label)
 
 
 def find_ipks_in_window(ws, peaks, ispecs, ipk, tof_min=None, tof_max=None):
@@ -645,9 +633,9 @@ def integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edge
     )
 
     status = PEAK_STATUS.NO_PEAK
+    intens, sigma, i_over_sig = 0.0, 0.0, 0.0
     if det_edges is not None and det_edges[slices[:-1]].any():
         status = PEAK_STATUS.ON_EDGE
-        intens, sigma = 0.0, 0.0
     else:
         if y[slices].size != kernel.size:
             # peak is partially on edge, but we continue to integrate with a partial kernel
@@ -659,7 +647,7 @@ def integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edge
                 # get index in y where kernel starts
                 iy_start = ipos[idim] - kernel.shape[idim] // 2
                 if iy_start < 0:
-                    istart = -iy_start  # chop of ii elements at the begninning of the kernel along this dimension
+                    istart = -iy_start  # chop of ii elements at the beginning of the kernel along this dimension
                 elif iy_start > y.shape[idim] - kernel.shape[idim]:
                     iend = y.shape[idim] - iy_start  # include only up to number of elements remaining in y
                 kernel_slices.append(slice(istart, iend))
@@ -669,9 +657,10 @@ def integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edge
             kernel[inegative] = -np.sum(kernel[~inegative]) / np.sum(inegative)
         intens = np.sum(y[slices] * kernel)
         sigma = np.sqrt(np.sum(esq[slices] * (kernel**2)))
+        i_over_sig = intens / sigma if sigma > 0 else 0.0
         if status == PEAK_STATUS.NO_PEAK:
-            status = PEAK_STATUS.STRONG if intens / sigma > weak_peak_threshold else PEAK_STATUS.WEAK
-    return intens, sigma, status
+            status = PEAK_STATUS.STRONG if i_over_sig > weak_peak_threshold else PEAK_STATUS.WEAK
+    return intens, sigma, i_over_sig, status
 
 
 def optimise_shoebox(y, esq, peak_shape, ipos, nfail_max=2):

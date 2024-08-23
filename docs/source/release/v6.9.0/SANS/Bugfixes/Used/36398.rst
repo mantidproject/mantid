@@ -1,3 +1,0 @@
-- The option to save an output file using :ref:`algm-SaveCanSAS1D` has now been disabled if the reduction mode is set to
-  2D on the :ref:`ISIS_SANS_Runs_Tab-ref`. While the algorithm is able to handle 2D data without crashing, the output
-  file it produces is not meaningful.

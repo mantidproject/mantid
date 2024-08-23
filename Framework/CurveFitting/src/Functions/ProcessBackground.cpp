@@ -366,11 +366,10 @@ void ProcessBackground::addRegion() {
   }
 
   // Check
-  for (auto it = vx.begin() + 1; it != vx.end(); ++it) {
-    if (*it <= *it - 1) {
-      g_log.error() << "The vector X with value inserted is not ordered incrementally\n";
-      throw std::runtime_error("Build new vector error!");
-    }
+  const auto it = std::adjacent_find(vx.cbegin(), vx.cend(), std::greater_equal<double>());
+  if (it != vx.cend()) {
+    g_log.error() << "The vector X with value inserted is not ordered incrementally" << std::endl;
+    throw std::runtime_error("Build new vector error!");
   }
 
   // Construct the new Workspace
@@ -504,7 +503,7 @@ void ProcessBackground::selectFromGivenFunction() {
 
   auto bkgdorder = static_cast<int>(parmap.size() - 1); // A0 - A(n) total n+1 parameters
   bkgdfunc->setAttributeValue("n", bkgdorder);
-  for (auto &mit : parmap) {
+  for (const auto &mit : parmap) {
     string parname = mit.first;
     double parvalue = mit.second;
     bkgdfunc->setParameter(parname, parvalue);

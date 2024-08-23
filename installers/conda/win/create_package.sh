@@ -86,9 +86,6 @@ echo "Removing jq from conda env"
 "$CONDA_EXE" remove --prefix $CONDA_ENV_PATH --yes m2w64-jq
 echo "jq removed from conda env"
 
-# Pip install quasielasticbayes so it can be packaged alongside workbench on windows
-# Version 0.2.0 is built for Python 3.10
-$CONDA_ENV_PATH/python.exe -m pip install quasielasticbayes==0.2.0
 # Pip install quickBayes until there's a conda package
 $CONDA_ENV_PATH/python.exe -m pip install quickBayes==1.0.0b15
 

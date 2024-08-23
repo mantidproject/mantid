@@ -26,7 +26,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         return super(DirectEnergyConversionTest, self).__init__(methodName)
 
     def setUp(self):
-        if self.reducer is None or type(self.reducer) != type(DirectEnergyConversion):
+        if self.reducer is None or type(self.reducer) is not type(DirectEnergyConversion):
             self.reducer = DirectEnergyConversion("MAR")
 
     def tearDown(self):

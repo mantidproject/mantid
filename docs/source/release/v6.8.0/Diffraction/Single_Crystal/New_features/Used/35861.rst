@@ -1,1 +1,0 @@
-- :ref:`LoadWANDSCD <algm-LoadWANDSCD>` with grouping option has been sped up

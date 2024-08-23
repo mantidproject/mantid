@@ -23,22 +23,15 @@ For more information on what a Workspace2D contains, see
 :ref:`MatrixWorkspace <MatrixWorkspace>`.
 
 There is also a specialised form of Workspace2D, called a RebinnedOutput
-which is produced by :ref:`algm-SofQWNormalisedPolygon`. In addition
+which is produced by some algorithms, such as :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`
+and :ref:`ConvertToReflectometryQ <algm-ConvertToReflectometryQ>`. In addition
 to the signal Y and error E values for each bin, it also carries the
 fractional weight F of the signal in the bin. This is needed to keep
 track of the portions of counts from bins in the original grid which has
 been put into the new (rebinned) grid. A more detailed explanation is
-given in the description of :ref:`algm-SofQWNormalisedPolygon`.
-For correct handling of the fractional weights in rebinning, the user
-is recommended to use the :ref:`algm-Rebin2D` algorithm in preference
-to :ref:`algm-Integration` or :ref:`algm-SumSpectra` although the other
-algorithms do account for the fractional weights.
-
-.. warning:: Note, however, that all binary and unary operations on
-   workspaces will ignore the fractional weights. Thus it is important
-   to handle all background subtractions and scaling in the original
-   reduced dataset(s) **before** conversion using
-   :ref:`algm-SofQWNormalisedPolygon`.
+given in the concepts page :ref:`FractionalRebinning <FractionalRebinning>`.
+In particular, consult the :ref:`Notes <FractionalRebinning-Notes>` section for
+relevant information on binary and unary operations on workspaces.
 
 Working with Workspace2Ds in Python
 -----------------------------------

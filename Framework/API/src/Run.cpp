@@ -339,6 +339,37 @@ void Run::integrateProtonCharge(const std::string &logname) const {
 
 //-----------------------------------------------------------------------------------------------
 /**
+ * Determine the range of bad pulses to filter based on the cutoff
+ * @return min pcharge, max pcharge, mean pcharge
+ * @throw Exception::NotFoundError if the proton charge not found or invalid
+ */
+std::tuple<double, double, double> Run::getBadPulseRange(const std::string &logname, const double &cutoff) const {
+  // check the proton charge exists in the run object
+  if (!this->hasProperty(logname)) {
+    throw std::runtime_error("Failed to find \"" + logname + "\" in sample logs");
+  }
+  const auto *pcharge_log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(this->getLogData(logname));
+  if (!pcharge_log) {
+    throw std::logic_error("Failed to find \"" + logname + "\" in sample logs");
+  }
+  Kernel::TimeSeriesPropertyStatistics stats = pcharge_log->getStatistics();
+
+  // check that the maximum value is greater than zero
+  if (stats.maximum <= 0.) {
+    throw std::runtime_error("Maximum value of charge is not greater than zero (" + logname + ")");
+  }
+
+  // set the range
+  const double min_pcharge = stats.mean * cutoff * 0.01;
+  const double max_pcharge = stats.maximum * 1.1; // make sure everything high is in
+  if (min_pcharge >= max_pcharge) {
+    throw std::runtime_error("proton_charge window filters out all of the data");
+  }
+  return {min_pcharge, max_pcharge, stats.mean};
+}
+
+//-----------------------------------------------------------------------------------------------
+/**
  * Update property "duration" with the duration of the Run's TimeROI attribute.
  *
  * If the Run's TimeROI is empty, this member function does nothing.

@@ -1,0 +1,1 @@
+- Fixed an unreliable segmentation fault in the :ref:`ExtractFFTSpectrum <algm-ExtractFFTSpectrum>` algorithm.

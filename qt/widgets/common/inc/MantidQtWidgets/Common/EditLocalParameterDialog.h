@@ -12,6 +12,8 @@
 #include "ui_EditLocalParameterDialog.h"
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <QDialog>
 
@@ -28,9 +30,9 @@ class FunctionMultiDomainPresenter;
 class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog : public MantidQt::API::MantidDialog {
   Q_OBJECT
 public:
-  EditLocalParameterDialog(QWidget *parent, const std::string &parName, const QStringList &datasetNames,
-                           const QStringList &datasetDomainNames, const QList<double> &values, const QList<bool> &fixes,
-                           const QStringList &ties, const QStringList &constraints);
+  EditLocalParameterDialog(QWidget *parent, const std::string &parName, const std::vector<std::string> &datasetNames,
+                           const std::vector<std::string> &datasetDomainNames, const QList<double> &values,
+                           const QList<bool> &fixes, const QStringList &ties, const QStringList &constraints);
 
   std::string getParameterName() const { return m_parName; }
   QList<double> getValues() const;
@@ -48,8 +50,10 @@ public:
 
 signals:
   void logOptionsChecked(bool /*_t1*/);
+  void dialogFinished(int /*result*/, EditLocalParameterDialog * /*dialog*/);
 
 private slots:
+  void emitDialogFinished(int /*result*/);
   void valueChanged(int /*row*/, int /*col*/);
   void setAllValues(double /*value*/);
   void fixParameter(int /*index*/, bool /*fix*/);
@@ -64,7 +68,8 @@ private slots:
   void setAllValuesToLog();
 
 private:
-  void doSetup(const std::string &parName, const QStringList &datasetDomains, const QStringList &datasetDomainNames);
+  void doSetup(const std::string &parName, const std::vector<std::string> &datasetDomains,
+               const std::vector<std::string> &datasetDomainNames);
   bool eventFilter(QObject *obj, QEvent *ev) override;
   void showContextMenu();
   void redrawCells();

@@ -51,10 +51,12 @@ Usage
     eis = result.readX(0)
     temperatures = run.getLogData('temperature').value
 
-    plt.plot(eis, temperatures)
-    plt.xlabel("Ei (meV)")
-    plt.ylabel("temperature (K)")
-    plt.show()
+    fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+
+    ax.plot(eis, temperatures)
+    ax.set_xlabel("Ei (meV)")
+    ax.set_ylabel("temperature (K)")
+    fig.show()
 
 
 **Multiple monochromators example**

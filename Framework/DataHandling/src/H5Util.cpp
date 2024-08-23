@@ -201,7 +201,8 @@ std::string readString(H5::DataSet &dataset) {
 #if H5_VERSION_GE(1, 14, 0)
   // hdf5 >=1.14 puts the null terminator in the string
   // this strips that out
-  value.erase(std::find(value.begin(), value.end(), '\0'), value.end());
+  if (const auto pos = value.rfind('\0'); pos != std::string::npos)
+    value.erase(pos);
 #endif
 
   return value;

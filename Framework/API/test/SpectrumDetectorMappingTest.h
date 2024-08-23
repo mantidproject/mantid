@@ -116,8 +116,8 @@ public:
   }
 
   void test_array_constructor_null_inputs() {
-    specnum_t specs[2];
-    detid_t detids[2];
+    specnum_t specs[2] = {0, 1};
+    detid_t detids[2] = {0, 1};
     TS_ASSERT_THROWS(SpectrumDetectorMapping(nullptr, detids, 10), const std::invalid_argument &);
     TS_ASSERT_THROWS(SpectrumDetectorMapping(specs, nullptr, 10), const std::invalid_argument &);
   }

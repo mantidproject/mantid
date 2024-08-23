@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
@@ -65,6 +66,8 @@ private:
   void exec() override;
   void writeTableWorkspace(const API::ITableWorkspace_const_sptr &tws, const std::string &filename, bool appendToFile,
                            bool writeHeader, int prec, bool scientific, const std::string &comment);
+  void write1DHistoCut(const API::IMDHistoWorkspace_const_sptr &mdws, const std::string &filename, bool appendToFile,
+                       bool writeHeader, int prec, bool scientific, const std::string &comment);
   /// Writes a spectrum to the file using a workspace index
   void writeSpectrum(const int &wsIndex, std::ofstream &file);
   std::vector<std::string> stringListToVector(std::string &inputString);

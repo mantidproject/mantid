@@ -1,1 +1,0 @@
-- Moved :ref:`Data Analysis <interface-inelastic-data-analysis>` interface from Indirect and Direct interface menus into Inelastic interface menu.

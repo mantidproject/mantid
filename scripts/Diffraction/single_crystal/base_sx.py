@@ -4,17 +4,24 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Sequence
+from typing import Sequence, Optional
 import numpy as np
 from enum import Enum
 import mantid.simpleapi as mantid
-from mantid.api import FunctionFactory, AnalysisDataService as ADS
-from mantid.kernel import logger
+from mantid.api import FunctionFactory, AnalysisDataService as ADS, IMDEventWorkspace, IPeaksWorkspace, IPeak
+from mantid.kernel import logger, SpecialCoordinateSystem
 from FindGoniometerFromUB import getSignMaxAbsValInCol
-from mantid.geometry import CrystalStructure, SpaceGroupFactory, ReflectionGenerator, ReflectionConditionFilter
+from mantid.geometry import CrystalStructure, SpaceGroupFactory, ReflectionGenerator, ReflectionConditionFilter, PeakShape
 from os import path
-
+from json import loads as json_loads
+from matplotlib.pyplot import subplots, close
+from matplotlib.patches import Circle
+from matplotlib.colors import LogNorm
+from matplotlib.backends.backend_pdf import PdfPages
 from abc import ABC, abstractmethod
+from scipy.spatial.transform import Rotation
+from scipy.optimize import minimize
+from functools import reduce
 
 
 class PEAK_TYPE(Enum):
@@ -28,10 +35,11 @@ class INTEGRATION_TYPE(Enum):
     MD_OPTIMAL_RADIUS = "int_MD_opt"
     SKEW = "int_skew"
     SHOEBOX = "int_shoebox"
+    PROFILE = "int_profile"
 
 
 class BaseSX(ABC):
-    def __init__(self, vanadium_runno: str, file_ext: str):
+    def __init__(self, vanadium_runno: Optional[str] = None, file_ext: str = ".raw", scale_integrated: bool = False):
         self.runs = dict()
         self.van_runno = vanadium_runno
         self.van_ws = None
@@ -39,6 +47,7 @@ class BaseSX(ABC):
         self.sample_dict = None
         self.n_mcevents = 1200
         self.file_ext = file_ext  # file extension
+        self.scale_integrated = scale_integrated
 
     # --- decorator to apply to all runs is run=None ---
     def default_apply_to_all_runs(func):
@@ -260,6 +269,25 @@ class BaseSX(ABC):
                     mantid.PredictFractionalPeaks(Peaks=pred_peaks, FracPeaks=out_peaks_name, EnableLogging=False, **kwargs)
             self.set_peaks(run, out_peaks_name, peak_type)
 
+    @default_apply_to_all_runs
+    def calc_absorption_weighted_path_lengths(self, peak_type, int_type=None, run=None, **kwargs):
+        """
+        Method to calculate tbar for each peak (saved in a column of the table) and optionally apply an attenuation
+        correction to the integrated intensity of each peak. By default the correction will be applied if
+        self.scale_integrated = True - which is the case for SXD but not WISH, but can be overridden by supplying
+        keyword ApplyCorrection.
+        :param peak_type: PEAK_TYPE Enum to identify peak table to use
+        :param int_type: INTEGRATION_TYPE Enum to identify peak table to use
+        :param run: run number to identify peak table to use (if not supplied default will be to apply to all runs)
+        :param kwargs: keyword arguments passed to AddAbsorptionWeightedPathLengths algorithm
+        """
+        default_kwargs = {"ApplyCorrection": self.scale_integrated, "EventsPerPoint": 1500, "MaxScatterPtAttempts": 7500}
+        kwargs = {**default_kwargs, **kwargs}
+        ws = self.get_ws(run)
+        peaks = self.get_peaks(run, peak_type, int_type)
+        mantid.CopySample(InputWorkspace=ws, OutputWorkspace=peaks, CopyEnvironment=False)
+        mantid.AddAbsorptionWeightedPathLengths(InputWorkspace=peaks, **kwargs)
+
     @staticmethod
     def get_back_to_back_exponential_func(pk, ws, ispec):
         tof = pk.getTOF()
@@ -347,6 +375,11 @@ class BaseSX(ABC):
         peaks_int = mantid.IntegratePeaksShoeboxTOF(InputWorkspace=ws, PeaksWorkspace=peaks, OutputWorkspace=out_peaks, **kwargs)
         return peaks_int
 
+    @staticmethod
+    def integrate_peaks_profile(ws, peaks, out_peaks, **kwargs):
+        peaks_int = mantid.IntegratePeaks1DProfile(InputWorkspace=ws, PeaksWorkspace=peaks, OutputWorkspace=out_peaks, **kwargs)
+        return peaks_int
+
     @default_apply_to_all_runs
     def integrate_data(self, integration_type, peak_type, tol=0, run=None, **kwargs):
         pk_table = self.get_peaks(run, peak_type)
@@ -365,6 +398,8 @@ class BaseSX(ABC):
             self.integrate_peaks_MD_optimal_radius(ws_md, pk_table, peak_int_name, **kwargs)
         elif integration_type == INTEGRATION_TYPE.SHOEBOX:
             BaseSX.integrate_peaks_shoebox(ws, pk_table, peak_int_name, **kwargs)
+        elif integration_type == INTEGRATION_TYPE.PROFILE:
+            BaseSX.integrate_peaks_profile(ws, pk_table, peak_int_name, **kwargs)
         else:
             BaseSX.integrate_peaks_skew(ws, pk_table, peak_int_name, **kwargs)
         # store result
@@ -520,6 +555,7 @@ class BaseSX(ABC):
             if not spgr.isAllowedReflection(pk.getIntHKL()):
                 iremove.append(ipk)
         mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove, EnableLogging=False)
+        return len(iremove)
 
     @staticmethod
     def remove_peaks_near_powder_line(peaks, resolution=0.05, dmin=0.5, dmax=10, phase="Al", dlist=None, structure=None):
@@ -613,6 +649,286 @@ class BaseSX(ABC):
             Operator=">",
             EnableLogging=False,
         )
+
+    @staticmethod
+    def plot_integrated_peaks_MD(
+        wsMD: IMDEventWorkspace,
+        peaks: IPeaksWorkspace,
+        filename: str,
+        nbins_max: Optional[int] = 21,
+        extent: Optional[float] = 1.5,
+        log_norm: Optional[bool] = True,
+    ):
+        """
+        Function to plot summary of IntegratePeaksMD integration comprising 3 colorfill plots per peak saved in a pdf.
+        :param wsMD:  MD workspace to plot
+        :param peaks: integrated peaks using IntegratePeaksMD
+        :param filename: filename to store pdf output
+        :param nbins: number of bins along major radius of ellipsoid
+        :param extent: extent in units of largest outer background radius
+        :param log_norm: use log normalisation in colorscale
+        """
+        wsMD = BaseSX.retrieve(wsMD)
+        peaks = BaseSX.retrieve(peaks)
+
+        # find appropriate getter for peak centre given MD frame
+        frame = wsMD.getSpecialCoordinateSystem()
+        frame_to_peak_centre_attr = "getQLabFrame"
+        if frame == SpecialCoordinateSystem.QSample:
+            frame_to_peak_centre_attr = "getQSampleFrame"
+        elif frame == SpecialCoordinateSystem.HKL:
+            frame_to_peak_centre_attr = "getHKL"
+
+        # loop over peaks and plot
+        try:
+            with PdfPages(filename) as pdf:
+                for ipk, pk in enumerate(peaks):
+                    peak_shape = pk.getPeakShape()
+                    if peak_shape.shapeName().lower() == "none":
+                        continue
+                    ws_cut, radii, bg_inner_radii, bg_outer_radii, box_lengths, imax = BaseSX._bin_MD_around_peak(
+                        wsMD, pk, peak_shape, nbins_max, extent, frame_to_peak_centre_attr
+                    )
+
+                    fig, axes = subplots(1, 3, figsize=(12, 4), subplot_kw={"projection": "mantid"})
+                    for iax, ax in enumerate(axes):
+                        dims = list(range(3))
+                        dims.pop(iax)
+                        # plot slice
+                        im = ax.imshow(ws_cut.getSignalArray().sum(axis=iax)[:, ::-1].T)  # reshape to match sliceviewer
+                        im.set_extent([-1, 1, -1, 1])  # so that ellipsoid is a circle
+                        if log_norm and not np.allclose(im.get_array(), 0):
+                            im.set_norm(LogNorm())
+                        # plot peak position
+                        ax.plot(0, 0, "xr")
+                        # plot peak representation (circle given extents)
+                        patch = Circle((0, 0), radii[imax] / box_lengths[imax], facecolor="none", edgecolor="r", ls="--")
+                        ax.add_patch(patch)
+                        # add background shell
+                        if not np.allclose(bg_outer_radii, 0.0):
+                            patch = Circle(
+                                (0, 0), bg_outer_radii[imax] / box_lengths[imax], facecolor="none", edgecolor=3 * [0.7]
+                            )  # outer radius
+                            ax.add_patch(patch)
+                            patch = Circle(
+                                (0, 0), bg_inner_radii[imax] / box_lengths[imax], facecolor="none", edgecolor=3 * [0.7], ls="--"
+                            )  # inner radius
+                            ax.add_patch(patch)
+                        # format axes
+                        ax.set_xlim(-1, 1)
+                        ax.set_ylim(-1, 1)
+                        ax.set_aspect("equal")
+                        ax.set_xlabel(ws_cut.getDimension(dims[0]).name)
+                        ax.set_ylabel(ws_cut.getDimension(dims[1]).name)
+                    fig.suptitle(
+                        f"{ipk} ({','.join(str(np.round(pk.getHKL(), 2))[1:-1].split())})"
+                        f"  $I/\\sigma$={np.round(pk.getIntensityOverSigma(), 2)}\n"
+                        rf"$\lambda$={np.round(pk.getWavelength(), 2)} $\AA$; "
+                        rf"$2\theta={np.round(np.degrees(pk.getScattering()), 1)}^\circ$; "
+                        rf"d={np.round(pk.getDSpacing(), 2)} $\AA$"
+                    )
+                    fig.tight_layout()
+                    pdf.savefig(fig)
+                    close(fig)
+        except OSError:
+            raise RuntimeError(
+                f"OutputFile ({filename}) could not be opened - please check it is not open by "
+                f"another programme and that the user has permission to write to that directory."
+            )
+
+    @staticmethod
+    def _bin_MD_around_peak(
+        wsMD: IMDEventWorkspace, pk: IPeak, peak_shape: PeakShape, nbins_max: int, extent: float, frame_to_peak_centre_attr: str
+    ):
+        """
+        Bin MD workspace in peak region with projection axes given by the axes of the ellipsoid shape
+        :param wsMD: MD workspace (with 3 dims)
+        :param pk: Peak object that has been integrated
+        :param peak_shape: shape of integrated peak (spherical, ellipsoid or none)
+        :param nbins_max: number of bins along the major axis of the ellipsoid
+        :param extent: extent of output MD workspace along each dimension in units of the outer background radius
+        :param frame_to_peak_centre_attr: name of attribute to return peak centre in appropriate frame
+        :return ws_cut: MD workspace in peak region
+        :return radii: radii of the ellipsoid peak region
+        :return bg_inner_radii: inner background radii of the ellipsoid peak region
+        :return bg_outer_radii: outer background radii of the ellipsoid peak region
+        :return box_lengths: length of each dimension in the MD workspace
+        :return: imax: index of dimension with largest radius
+        """
+        ndims = wsMD.getNumDims()
+        radii, bg_inner_radii, bg_outer_radii, evecs, translation = BaseSX._get_ellipsoid_params_from_peak(peak_shape, ndims)
+        imax = np.argmax(radii)
+        # calc center in frame of ellipsoid axes
+        cen = getattr(pk, frame_to_peak_centre_attr)()
+        cen = np.matmul(evecs.T, np.array(cen) + translation)
+        # get extents
+        box_lengths = bg_outer_radii if not np.allclose(bg_outer_radii, 0.0) else radii
+        box_lengths = box_lengths * extent
+        extents = np.vstack((cen - box_lengths, cen + box_lengths))
+        # get nbins along each axis
+        nbins = np.array([int(nbins_max * radii[iax] / radii[imax]) for iax in range(ndims)])
+        # ensure minimum of 3 bins inside radius along each dim
+        min_nbins_in_radius = 3
+        nbins_in_radius = np.min(nbins * radii / box_lengths)  # along most coarsely binned dimension
+        if nbins_in_radius < min_nbins_in_radius:
+            nbins = nbins * min_nbins_in_radius / nbins_in_radius
+        # call BinMD
+        ws_cut = mantid.BinMD(
+            InputWorkspace=wsMD,
+            AxisAligned=False,
+            BasisVector0=r"Q$_0$,unit," + ",".join(np.array2string(evecs[:, 0], precision=6).strip("[]").split()),
+            BasisVector1=r"Q$_1$,unit," + ",".join(np.array2string(evecs[:, 1], precision=6).strip("[]").split()),
+            BasisVector2=r"Q$_2$,unit," + ",".join(np.array2string(evecs[:, 2], precision=6).strip("[]").split()),
+            OutputExtents=extents.flatten(order="F"),
+            OutputBins=nbins.astype(int),
+            EnableLogging=False,
+            StoreInADS=False,
+        )
+        return ws_cut, radii, bg_inner_radii, bg_outer_radii, box_lengths, imax
+
+    @staticmethod
+    def _get_ellipsoid_params_from_peak(peak_shape: PeakShape, ndims: int):
+        """
+        Extract ellipsoid parameters (eigenvectors, radii etc.) from PeakShape object
+        :param peak_shape: PeakShape object of a integrated peak
+        :param ndims: number of dimensions in the MD workspace
+        :return radii: array of ellipsoid radii (3 sigma) defining peak region
+        :return bg_inner_radii: array of inner radii for ellipsoid background shell
+        :return bg_outer_radii: array of outer radii for ellipsoid background shell
+        :return evecs: ndims x ndims array of eignevectors - each column corresponds to an ellipsoid axis
+        :return translation: translation of the ellipsoid center in the coordinates/frame of the MD workspace integrated
+        """
+        shape_info = json_loads(peak_shape.toJSON())
+        if peak_shape.shapeName().lower() == "spherical":
+            BaseSX._convert_spherical_representation_to_ellipsoid(shape_info)
+        # get radii
+        radii = np.array([shape_info[f"radius{iax}"] for iax in range(ndims)])
+        bg_inner_radii = np.array([shape_info[f"background_inner_radius{iax}"] for iax in range(ndims)])
+        bg_outer_radii = np.array([shape_info[f"background_outer_radius{iax}"] for iax in range(ndims)])
+        # eignevectors of ellipsoid
+        evecs = np.zeros((ndims, ndims))
+        for iax in range(ndims):
+            evec = np.array([float(elem) for elem in shape_info[f"direction{iax}"].split()])
+            evecs[:, iax] = evec / np.linalg.norm(evec)
+        # get translation in frame of wsMD
+        translation = np.array([shape_info[f"translation{iax}"] for iax in range(ndims)])
+        return radii, bg_inner_radii, bg_outer_radii, evecs, translation
+
+    @staticmethod
+    def _convert_spherical_representation_to_ellipsoid(shape_info: dict):
+        """
+        Update shape_info dict of a spherical peak shape to have same keys/fields as an ellipsoid
+        :param shape_info: dictionary of JSON shape representation
+        """
+        # copied from mantidqt.widgets.sliceviewer.peaksviewer.representation.ellipsoid - can't import here though
+        # convert shape_info dict from sphere to ellipsoid for plotting
+        for key in ["radius", "background_inner_radius", "background_outer_radius"]:
+            shape_info[f"{key}{0}"] = shape_info.pop(key) if key in shape_info else 0.0
+            for idim in [1, 2]:
+                shape_info[f"{key}{idim}"] = shape_info[f"{key}{0}"]
+        # add axes along basis vecs of frame and set 0 translation
+        shape_info.update(
+            {
+                "direction0": "1 0 0",
+                "direction1": "0 1 0",
+                "direction2": "0 0 1",
+                "translation0": 0.0,
+                "translation1": 0.0,
+                "translation2": 0.0,
+            }
+        )
+
+    @staticmethod
+    def optimize_goniometer_axis(pk_ws_list: list, iaxis: int, euler_axes: str = "yz", fix_angles: bool = True, apply: bool = False):
+        # extract axes and angles from goniometer
+        gonio = BaseSX.retrieve(pk_ws_list[0]).run().getGoniometer()
+        gonio_axes = [gonio.getAxis(iax)["rotationaxis"] * gonio.getAxis(iax)["sense"] for iax in range(gonio.getNumberAxes())]
+        gonio_angles = np.zeros((len(pk_ws_list), len(gonio_axes)))
+        for iws, peaks in enumerate(pk_ws_list):
+            gonio = BaseSX.retrieve(peaks).run().getGoniometer()
+            gonio_angles[iws, :] = [gonio.getAxis(iax)["angle"] for iax in range(gonio.getNumberAxes())]
+
+        # get all U matrices rotated by goniometer
+        umats = [BaseSX.retrieve(peaks).sample().getOrientedLattice().getU() for peaks in pk_ws_list]
+        umats_rot = [BaseSX.retrieve(peaks).getPeak(0).getGoniometerMatrix() @ umats[irun] for irun, peaks in enumerate(pk_ws_list)]
+        # use run with minimum rotation around iaxis as reference (zero is ideal)
+        iref = np.argmin(abs(gonio_angles[:, iaxis]))
+        umat_ref = umats[iref]
+        # optimise goniometer axis (and optionally the goniometer angles)
+        pguess = len(euler_axes) * [0]
+        if not fix_angles:
+            pguess.extend(gonio_angles[:, iaxis])
+
+        result = minimize(
+            BaseSX._optimize_goniometer_axis_cost_function,
+            pguess,
+            args=(umats_rot, umat_ref, gonio_axes, gonio_angles, euler_axes, iaxis),
+            method="Nelder-Mead",
+        )
+
+        if not result.success:
+            logger.error("Failed to optimise goniometer axis - please check UB matrices on the workspaces.")
+        else:
+            # update gonio axes and angles
+            gonio_axes[iaxis] = Rotation.from_euler(euler_axes, result.x[: len(euler_axes)], degrees=True).apply(gonio_axes[iaxis])
+            if not fix_angles:
+                gonio_angles[:, iaxis] = result.x[len(euler_axes) :]
+            # get average U matrix accross all runs (using new goniometer)
+            if apply:
+                for iws, peaks in enumerate(pk_ws_list):
+                    gonio_rots = [
+                        Rotation.from_rotvec(axis * gonio_angles[iws, iax], degrees=True).as_matrix() for iax, axis in enumerate(gonio_axes)
+                    ]
+                    R = reduce(lambda x, y: x @ y, gonio_rots)
+                    [pk.setGoniometerMatrix(R) for pk in BaseSX.retrieve(peaks)]
+                    # adjust U matrix for optimimised goniometer
+                    BaseSX.retrieve(peaks).sample().getOrientedLattice().setU(R.T @ umats_rot[iws])
+        return gonio_axes, gonio_angles
+
+    @staticmethod
+    def _optimize_goniometer_axis_cost_function(p, umats_rot, umat_ref, gonio_axes, gonio_angles, euler_axes, iaxis):
+        # rotate goniometer axis being optimised
+        euler_angles = p[: len(euler_axes)]
+        these_gonio_axes = gonio_axes.copy()
+        these_gonio_axes[iaxis] = Rotation.from_euler(euler_axes, euler_angles, degrees=True).apply(these_gonio_axes[iaxis])
+        these_gonio_angles = gonio_angles.copy()
+        if len(p) > len(euler_axes):
+            these_gonio_angles[:, iaxis] = p[len(euler_axes) :]  # overwrite with angles provided
+        # add up total angle difference in rotation to get from predicted to observed U for all runs
+        angle_sum = 0
+        for irun, urot in enumerate(umats_rot):
+            # caluclate predicted goniometer rotation
+            gonio_rots = [
+                Rotation.from_rotvec(axis * these_gonio_angles[irun, iax], degrees=True).as_matrix()
+                for iax, axis in enumerate(these_gonio_axes)
+            ]
+            urot_predict = reduce(lambda x, y: x @ y, gonio_rots) @ umat_ref
+            # add rotation angle between prediced and observed U
+            angle_sum = angle_sum + Rotation.from_matrix(urot_predict @ urot.T).magnitude()
+        return angle_sum
+
+    @staticmethod
+    def find_consistent_ub(peaks_ref, peaks, hkl_tol=0.15, hm_symbol=None, fix_alatt=True):
+        sample = BaseSX.retrieve(peaks_ref).sample()
+        if not sample.hasOrientedLattice():
+            logger.error("Reference workspace must have a UB.")
+            return
+        mantid.SetUB(Workspace=peaks, UB=sample.getOrientedLattice().getUB(), EnableLogging=False)
+        nindexed, *_ = mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=hkl_tol, RoundHKLs=True, CommonUBForAll=True, EnableLogging=False)
+        if hm_symbol is not None:
+            nremoved = BaseSX.remove_forbidden_peaks(peaks, hm_symbol)  # check doesn't remove unindexed peaks
+            nindexed = nindexed - nremoved
+        if nindexed < 2:
+            logger.error("Reference UB must index at least 2 valid peaks.")
+            return
+        # optimise UB
+        if fix_alatt:
+            # get lattice parameters from ws given UB
+            latt = BaseSX.retrieve(peaks_ref).sample().getOrientedLattice()
+            alatt = {param: getattr(latt, param)() for param in ("a", "b", "c", "alpha", "beta", "gamma")}
+            mantid.CalculateUMatrix(PeaksWorkspace=peaks, **alatt)
+        else:
+            mantid.FindUBUsingIndexedPeaks(PeaksWorkspace=peaks, Tolerance=hkl_tol)
 
     @staticmethod
     def retrieve(ws):

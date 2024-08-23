@@ -1,1 +1,0 @@
-- Fixes a regression introduced in Mantid version 6.8 where creating new batch tabs or deleting all batch tabs in the :ref:`ISIS Reflectometry Interface <interface-isis-refl>` causes Mantid to crash.

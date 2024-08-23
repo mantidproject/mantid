@@ -49,7 +49,9 @@ class SliceViewerCanvas(ScrollZoomMixin, MantidFigureCanvas):
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
 
-    def __init__(self, presenter: IDataViewSubscriber, dims_info, can_normalise, parent=None, conf=None, image_info_widget=None):
+    def __init__(
+        self, presenter: IDataViewSubscriber, dims_info, can_normalise, parent=None, conf=None, image_info_widget=None, add_extents=True
+    ):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -155,17 +157,23 @@ class SliceViewerDataView(QWidget):
         self.status_bar.addWidget(self.status_bar_label)
 
         # min/max extents
-        self.extents = self.create_extents_layout()
+        self.extents = self.create_extents_layout() if add_extents else None
 
         # layout
         layout = QGridLayout(self)
         layout.setSpacing(1)
+        if self.extents:
+            colorbar_rowspan = 4
+            status_bar_row = 4
+            layout.addLayout(self.extents, 3, 0, 1, 1)
+        else:
+            colorbar_rowspan = 3
+            status_bar_row = 3
         layout.addLayout(self.dimensions_layout, 0, 0, 1, 2)
         layout.addLayout(self.toolbar_layout, 1, 0, 1, 1)
-        layout.addLayout(self.colorbar_layout, 1, 1, 4, 1)
+        layout.addLayout(self.colorbar_layout, 1, 1, colorbar_rowspan, 1)
         layout.addWidget(self.canvas, 2, 0, 1, 1)
-        layout.addLayout(self.extents, 3, 0, 1, 1)
-        layout.addWidget(self.status_bar, 4, 0, 1, 1)
+        layout.addWidget(self.status_bar, status_bar_row, 0, 1, 1)
         layout.setRowStretch(2, 1)
 
     def create_dimensions(self, dims_info, custom_image_info=False):
@@ -205,8 +213,9 @@ class SliceViewerDataView(QWidget):
         self.plot_MDH = self.plot_MDH_orthogonal
         self.set_integer_axes_ticks()
 
-        self.ax.callbacks.connect("xlim_changed", self.xlim_changed)
-        self.ax.callbacks.connect("ylim_changed", self.ylim_changed)
+        if self.extents:
+            self.ax.callbacks.connect("xlim_changed", self.xlim_changed)
+            self.ax.callbacks.connect("ylim_changed", self.ylim_changed)
 
         self.canvas.draw_idle()
 
@@ -239,8 +248,9 @@ class SliceViewerDataView(QWidget):
         self.fig.add_subplot(self.ax)
         self.plot_MDH = self.plot_MDH_nonorthogonal
 
-        self.ax.callbacks.connect("xlim_changed", self.xlim_changed)
-        self.ax.callbacks.connect("ylim_changed", self.ylim_changed)
+        if self.extents:
+            self.ax.callbacks.connect("xlim_changed", self.xlim_changed)
+            self.ax.callbacks.connect("ylim_changed", self.ylim_changed)
 
         self.canvas.draw_idle()
 
@@ -605,6 +615,9 @@ class SliceViewerDataView(QWidget):
         return extents
 
     def extents_set_enabled(self, state):
+        if self.extents is None:
+            return
+
         self.x_min.setEnabled(state)
         self.x_max.setEnabled(state)
         self.y_min.setEnabled(state)

@@ -66,22 +66,20 @@ void ExcludeRangeFinder::findNextExcludedRange(double p) {
   // m_exclude that is greater than p. If this point is a start than the
   // end will be the following point. If it's an end then the start is
   // the previous point. Keep index m_exclIndex pointing to the start.
-  for (auto it = m_exclude.begin() + m_exclIndex; it != m_exclude.end(); ++it) {
-    if (*it >= p) {
-      m_exclIndex = static_cast<std::size_t>(std::distance(m_exclude.begin(), it));
-      if (m_exclIndex % 2 == 0) {
-        // A number at an even position in m_exclude starts an exclude
-        // range
-        m_startExcludedRange = *it;
-        m_endExcludeRange = *(it + 1);
-      } else {
-        // A number at an odd position in m_exclude ends an exclude range
-        m_startExcludedRange = *(it - 1);
-        m_endExcludeRange = *it;
-        --m_exclIndex;
-      }
-      break;
-    }
+  const auto it = std::find_if(m_exclude.cbegin(), m_exclude.cend(), [&p](const auto &ex) { return ex >= p; });
+  if (it == m_exclude.cend())
+    return;
+  m_exclIndex = static_cast<std::size_t>(std::distance(m_exclude.begin(), it));
+  if (m_exclIndex % 2 == 0) {
+    // A number at an even position in m_exclude starts an exclude
+    // range
+    m_startExcludedRange = *it;
+    m_endExcludeRange = *(it + 1);
+  } else {
+    // A number at an odd position in m_exclude ends an exclude range
+    m_startExcludedRange = *(it - 1);
+    m_endExcludeRange = *it;
+    --m_exclIndex;
   }
   // No need for additional checks as p < m_exclude.back()
   // and m_exclude[m_exclIndex] < p due to conditions at the calls

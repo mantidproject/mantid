@@ -1,2 +1,0 @@
-- All beam centre settings can now be left uncommented in the TOML file. The appropriate beam centre values will now be
-  selected based on the ``selected_detector`` setting from the TOML file or ``Reduction Mode`` setting on the GUI.

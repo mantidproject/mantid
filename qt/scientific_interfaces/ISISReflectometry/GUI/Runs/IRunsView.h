@@ -18,7 +18,7 @@
 namespace MantidQt {
 
 namespace API {
-class AlgorithmRunner;
+class QtAlgorithmRunner;
 }
 
 namespace CustomInterfaces {
@@ -106,8 +106,8 @@ public:
   virtual std::string getSearchCycle() const = 0;
   virtual int getLiveDataUpdateInterval() const = 0;
 
-  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner> getAlgorithmRunner() const = 0;
-  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner> getMonitorAlgorithmRunner() const = 0;
+  virtual std::shared_ptr<MantidQt::API::QtAlgorithmRunner> getAlgorithmRunner() const = 0;
+  virtual std::shared_ptr<MantidQt::API::QtAlgorithmRunner> getMonitorAlgorithmRunner() const = 0;
 
   // Start live data monitoring
   virtual void startMonitor() = 0;

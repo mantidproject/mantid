@@ -71,7 +71,7 @@ class BayesQuasi2(QuickBayesTemplate):
             axis_names.append(f"fit {j+1}")
             axis_names.append(f"diff {j+1}")
         ws = self.create_ws(
-            OutputWorkspace=f"{name}_workspace",
+            OutputWorkspace=name,
             DataX=np.array(x),
             DataY=np.array(y),
             NSpec=len(axis_names),
@@ -198,7 +198,7 @@ class BayesQuasi2(QuickBayesTemplate):
             engine = workflow.fit_engine
 
             ws_list = self.make_fit_ws(
-                engine=engine, max_features=max_num_peaks, ws_list=ws_list, x_unit="DeltaE", name=f"{name}_{prog}_{spec}_"
+                engine=engine, max_features=max_num_peaks, ws_list=ws_list, x_unit="DeltaE", name=f"{name}_{prog}_Workspace_{spec}"
             )
 
         sample_logs = [("background", BG_str), ("elastic_peak", elastic), ("energy_min", start_x), ("energy_max", end_x)]

@@ -1,1 +1,0 @@
-- Fixed a bin edge error and exception raised when performing an elastic reduction for a single scan with (:ref:`elastic <algm-ElasticEMUauReduction>`).

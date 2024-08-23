@@ -77,9 +77,13 @@ class AxesTabWidgetView(QWidget):
         self.show_minor_gridlines_check_box.setEnabled(enabled)
 
     def get_lower_limit(self):
+        if not self.lower_limit_line_edit.hasAcceptableInput():
+            self.lower_limit_line_edit.validator().fixup(self.lower_limit_line_edit.text())
         return float(self.lower_limit_line_edit.text())
 
     def get_upper_limit(self):
+        if not self.upper_limit_line_edit.hasAcceptableInput():
+            self.upper_limit_line_edit.validator().fixup(self.upper_limit_line_edit.text())
         return float(self.upper_limit_line_edit.text())
 
     def get_label(self):

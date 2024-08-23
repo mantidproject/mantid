@@ -34,7 +34,7 @@ class PairingTableView(QtWidgets.QWidget):
         self._validate_pair_name_entry = lambda text: True
         self._validate_alpha = lambda text: True
 
-        self._on_table_data_changed = lambda: 0
+        self._on_table_data_changed = lambda row, column: 0
         self._on_guess_alpha_clicked = lambda row: 0
 
         # The active groups that can be selected from the group combo box
@@ -183,7 +183,7 @@ class PairingTableView(QtWidgets.QWidget):
             self.pairing_table.setItem(row_position, i, item)
         # guess alpha button
         guess_alpha_widget = self._guess_alpha_button()
-        guess_alpha_widget.clicked.connect(lambda: self.guess_alpha_clicked_from_row(row_position))
+        guess_alpha_widget.clicked.connect(self.guess_alpha_clicked_from_row)
         self.pairing_table.setCellWidget(row_position, 5, guess_alpha_widget)
 
     def _group_selection_cell_widget(self):
@@ -200,8 +200,8 @@ class PairingTableView(QtWidgets.QWidget):
         guess_alpha.setText("Guess")
         return guess_alpha
 
-    def guess_alpha_clicked_from_row(self, row):
-        self._on_guess_alpha_clicked(row)
+    def guess_alpha_clicked_from_row(self):
+        self._on_guess_alpha_clicked(self.pairing_table.currentIndex().row())
 
     def get_table_contents(self):
         if self._updating:
@@ -252,14 +252,18 @@ class PairingTableView(QtWidgets.QWidget):
     def on_table_data_changed(self, slot):
         self._on_table_data_changed = slot
 
-    def on_item_changed(self):
+    def on_item_changed(self, item):
         """Not yet implemented."""
         if not self._updating:
             pass
 
-    def on_cell_changed(self, _row, _col):
+    def on_cell_changed(self, row, column):
         if not self._updating:
-            self._on_table_data_changed(_row, _col)
+            if not (isinstance(self.sender(), QtWidgets.QTableWidget) or self.sender().pos().isNull()):
+                pos_index = self.pairing_table.indexAt(self.sender().pos())
+                row = pos_index.row()
+                column = pos_index.column()
+            self._on_table_data_changed(row, column)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Context Menu

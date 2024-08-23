@@ -1,1 +1,0 @@
-- Allow loading of buggy .nxspe files with incorrect fields or detector sizes

@@ -198,6 +198,20 @@ class WorkspaceCalculatorModelTest(unittest.TestCase):
         value = mtd[output_ws].readY(0)[0]
         self.assertAlmostEqual(value, -26.9626, delta=1e-4)
 
+    def test_model_matrix_same(self):
+        """Tests binary operations on MatrixWorkspaces with having two of the same workspace."""
+        lhs_scaling = 3
+        rhs_scaling = 2
+        output_ws = "test_model_matrix_scaling"
+        model = WorkspaceCalculatorModel(
+            lhs_scale=lhs_scaling, lhs_ws=self.matrix_lhs, rhs_scale=rhs_scaling, rhs_ws=self.matrix_lhs, output_ws=output_ws, operation="+"
+        )
+        valid_lhs, valid_rhs, err_msg = model.performOperation()
+        self.assertTrue(mtd[output_ws])
+        self.check_validity(lhs_validation=valid_lhs, rhs_validation=valid_rhs, err_msg=err_msg, passed=True)
+        value = mtd[output_ws].readY(0)[0]
+        self.assertEqual(value, 1.5)
+
     def test_model_matrix_groups(self):
         """Tests binary operations on equal size groups containing MatrixWorkspaces."""
         for operation in self.operations:

@@ -68,14 +68,13 @@ void PropertyHandler::init() {
     pi->property()->addSubProperty(fnProp);
     // assign m_item
     QList<QtBrowserItem *> itList = pi->children();
-    foreach (QtBrowserItem *browserItem, itList) {
-      if (browserItem->property() == fnProp) {
-        m_item = browserItem;
-        break;
-      }
-    }
-    if (m_item == nullptr)
+    const auto it = std::find_if(itList.cbegin(), itList.cend(),
+                                 [&fnProp](auto browserItem) { return browserItem->property() == fnProp; });
+    if (it != itList.cend()) {
+      m_item = *it;
+    } else {
       throw std::runtime_error("Browser item not found");
+    }
 
     if (!m_cf) {
       m_browser->m_browser->setExpanded(m_item, false);
@@ -206,7 +205,7 @@ private:
  */
 void PropertyHandler::initTies() {
   for (size_t iparam = 0; iparam < m_cf->nParams(); iparam++) {
-    Mantid::API::ParameterTie *tie = m_cf->getTie(iparam);
+    const auto *tie = m_cf->getTie(iparam);
     if (tie) {
       // get function index from prefix (second element of pair below)
       const auto nameIndex_pair = m_cf->parseName(m_cf->parameterName(iparam));
@@ -257,13 +256,11 @@ void PropertyHandler::initParameters() {
     m_item->property()->addSubProperty(prop);
     m_parameters << prop;
     if (m_fun->isFixed(i)) {
-      QtProperty *tieProp = m_browser->m_stringManager->addProperty("Tie");
-      m_browser->m_stringManager->setValue(tieProp, QString::number(m_fun->getParameter(i)));
-      prop->addSubProperty(tieProp);
-      m_ties[parName] = tieProp;
+      fix(parName);
+      m_browser->m_changeSlotsEnabled = false;
     }
     // add constraint properties
-    Mantid::API::IConstraint *c = m_fun->getConstraint(i);
+    const Mantid::API::IConstraint *c = m_fun->getConstraint(i);
     if (c) {
       QStringList qc = QString::fromStdString(c->asString()).split("<");
       bool lo = false;
@@ -472,16 +469,23 @@ void PropertyHandler::renameChildren(const Mantid::API::CompositeFunction &cf) {
     QString parName = it.key();
     QString fullName = functionPrefix() + "." + parName;
     QtProperty *prop = it.value();
-    Mantid::API::ParameterTie *tie = cf.getTie(cf.parameterIndex(fullName.toStdString()));
+    const auto paramIndex = m_browser->compositeFunction()->parameterIndex(fullName.toStdString());
+    const auto status = cf.getParameterStatus(paramIndex);
+    const auto *tie = cf.getTie(paramIndex);
     if (!tie) {
-      // In this case the tie has been removed from the composite function since it contained a reference to
-      // the function which was removed
-      QtProperty *parProp = getParameterProperty(parName);
-      if (parProp != nullptr) {
-        parProp->removeSubProperty(prop);
-        // Don't increment the iterator if we delete the current tie.
-        it = m_ties.erase(it);
-        parProp->setEnabled(true);
+      if (status != Mantid::API::IFunction::ParameterStatus::Fixed &&
+          status != Mantid::API::IFunction::ParameterStatus::FixedByDefault) {
+        // In this case the tie has been removed from the composite function since it contained a reference to
+        // the function which was removed
+        QtProperty *parProp = getParameterProperty(parName);
+        if (parProp != nullptr) {
+          parProp->removeSubProperty(prop);
+          // Don't increment the iterator if we delete the current tie.
+          it = m_ties.erase(it);
+          parProp->setEnabled(true);
+        }
+      } else {
+        ++it;
       }
       continue;
     } else {
@@ -520,7 +524,7 @@ QString PropertyHandler::functionName() const {
 }
 
 QString PropertyHandler::functionPrefix() const {
-  PropertyHandler *ph = parentHandler();
+  const PropertyHandler *ph = parentHandler();
   if (ph) {
     int iFun = -1;
     Mantid::API::CompositeFunction_sptr cf = ph->cfun();
@@ -661,11 +665,10 @@ bool PropertyHandler::setParameter(QtProperty *prop) {
 
     // If the parameter is fixed, re-fix to update the subproperty.
     if (m_fun->isFixed(m_fun->parameterIndex(parName))) {
-      foreach (QtProperty *subProp, prop->subProperties()) {
-        if (subProp->propertyName() == "Fix") {
-          fix(prop->propertyName());
-          break;
-        }
+      const auto subProps = prop->subProperties();
+      if (std::any_of(subProps.cbegin(), subProps.cend(),
+                      [](const auto &subProp) { return subProp->propertyName() == "Fix"; })) {
+        fix(prop->propertyName());
       }
     }
 
@@ -886,7 +889,7 @@ void PropertyHandler::setAttribute(QString const &attName, AttributeType const &
     try {
       m_fun->setAttribute(attName.toStdString(), Mantid::API::IFunction::Attribute(attValue));
       m_browser->compositeFunction()->checkFunction();
-      foreach (QtProperty *prop, m_attributes) {
+      foreach (const QtProperty *prop, m_attributes) {
         if (prop->propertyName() == attName) {
           // re-insert the attribute and parameter properties as they may
           // depend on the value of the attribute being set
@@ -1109,20 +1112,19 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
 bool PropertyHandler::isParameter(QtProperty *prop) { return m_parameters.contains(prop); }
 
 QtProperty *PropertyHandler::getParameterProperty(const QString &parName) const {
-  foreach (QtProperty *parProp, m_parameters) {
-    if (parProp->propertyName() == parName) {
-      return parProp;
-    }
+  const auto it = std::find_if(m_parameters.cbegin(), m_parameters.cend(),
+                               [&parName](const auto &parProp) { return parProp->propertyName() == parName; });
+  if (it != m_parameters.cend()) {
+    return *it;
   }
   return nullptr;
 }
 
 QtProperty *PropertyHandler::getParameterProperty(QtProperty *prop) const {
-  foreach (QtProperty *parProp, m_parameters) {
-    QList<QtProperty *> subs = parProp->subProperties();
-    if (subs.contains(prop)) {
-      return parProp;
-    }
+  const auto it = std::find_if(m_parameters.cbegin(), m_parameters.cend(),
+                               [&prop](const auto &parProp) { return parProp->subProperties().contains(prop); });
+  if (it != m_parameters.cend()) {
+    return *it;
   }
   return nullptr;
 }
@@ -1137,47 +1139,42 @@ void PropertyHandler::addTie(const QString &tieStr) {
     auto &cfunction = *m_browser->compositeFunction();
     cfunction.tie(name, expr);
     cfunction.applyTies();
+    const auto paramIndex = cfunction.parameterIndex(name);
+    const auto paramStatus = cfunction.getParameterStatus(paramIndex);
+    const bool fixed = paramStatus == Mantid::API::IFunction::ParameterStatus::Fixed;
     const bool recursive = true;
-    QString parName = QString::fromStdString(cfunction.parameterLocalName(cfunction.parameterIndex(name), recursive));
-    foreach (QtProperty *parProp, m_parameters) {
-      if (parProp->propertyName() == parName) {
-        m_browser->m_changeSlotsEnabled = false;
-        QtProperty *tieProp = m_ties[parName];
-        if (!tieProp) {
-          tieProp = m_browser->m_stringManager->addProperty("Tie");
-          m_ties[parName] = tieProp;
-        }
-        m_browser->m_stringManager->setValue(tieProp, QString::fromStdString(expr));
-        m_browser->m_changeSlotsEnabled = true;
-        parProp->addSubProperty(tieProp);
-        updateParameters();
-        return;
-      }
-    }
-  } catch (...) {
-  }
-  QMessageBox::critical(m_browser, "Mantid - Error", "Failed to set tie: " + tieStr);
-}
-
-void PropertyHandler::fix(const QString &parName) {
-  QtProperty *parProp = getParameterProperty(parName);
-  if (!parProp)
-    return;
-  QString parValue = QString::number(m_browser->m_parameterManager->value(parProp));
-  try {
-    m_fun->tie(parName.toStdString(), parValue.toStdString());
+    QString parName = QString::fromStdString(cfunction.parameterLocalName(paramIndex, recursive));
+    QtProperty *parProp = getParameterProperty(parName);
+    if (!parProp)
+      return;
     m_browser->m_changeSlotsEnabled = false;
     QtProperty *tieProp = m_ties[parName];
     if (!tieProp) {
-      tieProp = m_browser->m_stringManager->addProperty("Fix");
+      const auto tiePropName = fixed ? "Fix" : "Tie";
+      tieProp = m_browser->m_stringManager->addProperty(tiePropName);
       m_ties[parName] = tieProp;
     }
-    m_browser->m_stringManager->setValue(tieProp, parValue);
-    m_browser->m_changeSlotsEnabled = true;
+    m_browser->m_stringManager->setValue(tieProp, QString::fromStdString(expr));
     parProp->addSubProperty(tieProp);
-    tieProp->setEnabled(false);
-  } catch (...) {
+    if (fixed) {
+      tieProp->setEnabled(false);
+    }
+    m_browser->m_changeSlotsEnabled = true;
+    if (!fixed) {
+      updateParameters();
+    }
+  } catch (const std::exception &exc) {
+    std::cerr << exc.what();
+    QMessageBox::critical(m_browser, "Mantid - Error", "Failed to set tie: " + tieStr);
   }
+}
+
+void PropertyHandler::fix(const QString &parName) {
+  const QtProperty *parProp = getParameterProperty(parName);
+  if (!parProp)
+    return;
+  QString parValue = QString::number(m_browser->m_parameterManager->value(parProp));
+  addTie(functionPrefix() + "." + parName + "=" + parValue);
 }
 
 /**
@@ -1607,7 +1604,7 @@ void PropertyHandler::fit() {
   }
 }
 
-void PropertyHandler::updateWorkspaces(QStringList oldWorkspaces) {
+void PropertyHandler::updateWorkspaces(const QStringList &oldWorkspaces) {
   if (m_workspace) {
     int index = m_browser->m_enumManager->value(m_workspace) - 1;
     QString wsName;
@@ -1615,7 +1612,7 @@ void PropertyHandler::updateWorkspaces(QStringList oldWorkspaces) {
       wsName = oldWorkspaces[index];
     }
     QStringList names("All");
-    foreach (QString name, m_browser->m_workspaceNames) { names.append(name); }
+    foreach (const QString &name, m_browser->m_workspaceNames) { names.append(name); }
     m_browser->m_enumManager->setEnumNames(m_workspace, names);
     if (m_browser->m_workspaceNames.contains(wsName)) {
       m_browser->m_enumManager->setValue(m_workspace, m_browser->m_workspaceNames.indexOf(wsName) + 1);

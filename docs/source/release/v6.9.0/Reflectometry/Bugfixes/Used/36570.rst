@@ -1,1 +1,0 @@
-- Fix an error where live data reduction via the :ref:`ISIS Reflectometry Interface <interface-isis-refl>` would not work if ROI Detector IDs had been specified in the interface.

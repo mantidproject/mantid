@@ -65,6 +65,11 @@ public:
    algorithm. */
   void set_resulting_workspace(const std::string &ws_name) { det_par_ws_name = ws_name; }
 
+  static void writePAR(const std::string &filename, const std::vector<double> &azimuthal,
+                       const std::vector<double> &polar, const std::vector<double> &azimuthal_width,
+                       const std::vector<double> &polar_width, const std::vector<double> &secondary_flightpath,
+                       const std::vector<size_t> &det_ID, const size_t nDetectors);
+
 private:
   /// Initialisation code
   void init() override;

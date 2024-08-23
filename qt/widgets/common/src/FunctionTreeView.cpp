@@ -922,10 +922,9 @@ std::string FunctionTreeView::getIndex(QtProperty *prop) const {
     auto props = prop->subProperties();
     if (props.isEmpty())
       return "";
-    for (auto it = props.begin(); it != props.end(); ++it) {
-      if (isIndex(*it)) {
-        return m_indexManager->value(*it).toStdString();
-      }
+    const auto it = std::find_if(props.cbegin(), props.cend(), [&](const auto &prop) { return isIndex(prop); });
+    if (it != props.cend()) {
+      return m_indexManager->value(*it).toStdString();
     }
     return "";
   }
@@ -967,7 +966,7 @@ QtProperty *FunctionTreeView::getFunctionProperty(std::string const &index) cons
   // Might not be the most efficient way to do it. m_functionManager might be
   // searched instead,
   // but it is not being kept up-to-date at the moment (is not cleared).
-  foreach (auto property, m_properties.keys()) {
+  for (const auto &property : m_properties.keys()) {
     if (isFunction(property) && getIndex(property) == index) {
       return property;
     }
@@ -1045,13 +1044,9 @@ std::string FunctionTreeView::getFullParameterName(const std::string &parameter,
 bool FunctionTreeView::hasTie(QtProperty *prop) const {
   if (!prop)
     return false;
-  auto children = prop->subProperties();
-  foreach (QtProperty const *child, children) {
-    if (child->propertyName() == "Tie") {
-      return true;
-    }
-  }
-  return false;
+  const auto children = prop->subProperties();
+  return std::any_of(children.cbegin(), children.cend(),
+                     [](const auto child) { return child->propertyName() == "Tie"; });
 }
 
 /**
@@ -1072,11 +1067,11 @@ QString FunctionTreeView::getTie(QtProperty *prop) const {
   if (prop->propertyName() == "Tie") {
     return m_tieManager->value(prop);
   }
-  auto children = prop->subProperties();
-  foreach (QtProperty const *child, children) {
-    if (child->propertyName() == "Tie") {
-      return m_tieManager->value(child);
-    }
+  const auto children = prop->subProperties();
+  const auto it =
+      std::find_if(children.cbegin(), children.cend(), [](const auto child) { return child->propertyName() == "Tie"; });
+  if (it != children.cend()) {
+    return m_tieManager->value(*it);
   }
   return "";
 }
@@ -1143,15 +1138,11 @@ bool FunctionTreeView::hasConstraint(QtProperty *prop) const { return hasLowerBo
 bool FunctionTreeView::hasLowerBound(QtProperty *prop) const {
   if (!isParameter(prop))
     return false;
-  auto props = prop->subProperties();
-  if (props.isEmpty())
-    return false;
-  foreach (QtProperty const *p, props) {
-    if (dynamic_cast<QtAbstractPropertyManager *>(m_constraintManager) == p->propertyManager() &&
-        p->propertyName() == "LowerBound")
-      return true;
-  }
-  return false;
+  const auto props = prop->subProperties();
+  return std::any_of(props.cbegin(), props.cend(), [&](const auto &p) {
+    return dynamic_cast<QtAbstractPropertyManager *>(m_constraintManager) == p->propertyManager() &&
+           p->propertyName() == "LowerBound";
+  });
 }
 
 /**
@@ -1161,15 +1152,11 @@ bool FunctionTreeView::hasLowerBound(QtProperty *prop) const {
 bool FunctionTreeView::hasUpperBound(QtProperty *prop) const {
   if (!isParameter(prop))
     return false;
-  auto props = prop->subProperties();
-  if (props.isEmpty())
-    return false;
-  foreach (QtProperty const *p, props) {
-    if (dynamic_cast<QtAbstractPropertyManager *>(m_constraintManager) == p->propertyManager() &&
-        p->propertyName() == "UpperBound")
-      return true;
-  }
-  return false;
+  const auto props = prop->subProperties();
+  return std::any_of(props.cbegin(), props.cend(), [&](const auto &p) {
+    return dynamic_cast<QtAbstractPropertyManager *>(m_constraintManager) == p->propertyManager() &&
+           p->propertyName() == "UpperBound";
+  });
 }
 
 /// Get a constraint string
@@ -1454,11 +1441,11 @@ void FunctionTreeView::setParameterError(std::string const &parameterName, doubl
   std::tie(index, name) = splitParameterName(parameterName);
   if (auto const *prop = getFunctionProperty(index)) {
     auto children = prop->subProperties();
-    foreach (QtProperty *child, children) {
-      if (isParameter(child) && child->propertyName().toStdString() == name) {
-        m_parameterManager->setError(child, error);
-        break;
-      }
+    const auto it = std::find_if(children.cbegin(), children.cend(), [&](auto &child) {
+      return isParameter(child) && child->propertyName().toStdString() == name;
+    });
+    if (it != children.cend()) {
+      m_parameterManager->setError(*it, error);
     }
   }
 }
@@ -1559,11 +1546,12 @@ QtProperty *FunctionTreeView::getParameterProperty(std::string const &parameterN
   std::string index, name;
   std::tie(index, name) = splitParameterName(parameterName);
   if (auto const *prop = getFunctionProperty(index)) {
-    auto children = prop->subProperties();
-    foreach (QtProperty *child, children) {
-      if (isParameter(child) && child->propertyName().toStdString() == name) {
-        return child;
-      }
+    const auto children = prop->subProperties();
+    const auto it = std::find_if(children.cbegin(), children.cend(), [&](const auto &child) {
+      return isParameter(child) && child->propertyName().toStdString() == name;
+    });
+    if (it != children.cend()) {
+      return *it;
     }
   }
   std::string message = "Unknown function parameter " + parameterName +
@@ -1574,7 +1562,7 @@ QtProperty *FunctionTreeView::getParameterProperty(std::string const &parameterN
 /// Get a property for an attribute
 QtProperty *FunctionTreeView::getAttributeProperty(std::string const &attributeName) const {
   std::string index, name;
-  QtProperty *prop;
+  const QtProperty *prop;
   std::tie(index, name) = splitParameterName(attributeName);
   if (!variableIsPrefixed(attributeName)) {
     // If variable is unprefixed then we are on the top level composite
@@ -1583,11 +1571,12 @@ QtProperty *FunctionTreeView::getAttributeProperty(std::string const &attributeN
   } else {
     prop = getFunctionProperty(index);
   }
-  auto children = prop->subProperties();
-  foreach (QtProperty *child, children) {
-    if (isAttribute(child) && child->propertyName().toStdString() == name) {
-      return child;
-    }
+  const auto children = prop->subProperties();
+  const auto it = std::find_if(children.cbegin(), children.cend(), [&](const auto &child) {
+    return isAttribute(child) && child->propertyName().toStdString() == name;
+  });
+  if (it != children.cend()) {
+    return *it;
   }
   std::string message = "Unknown function attribute " + attributeName;
   throw std::runtime_error(message);
@@ -1679,11 +1668,11 @@ void FunctionTreeView::fixParameter() {
 
 /// Get a tie property attached to a parameter property
 QtProperty *FunctionTreeView::getTieProperty(QtProperty *prop) const {
-  auto children = prop->subProperties();
-  foreach (QtProperty *child, children) {
-    if (child->propertyName() == "Tie") {
-      return child;
-    }
+  const auto children = prop->subProperties();
+  const auto it = std::find_if(children.cbegin(), children.cend(),
+                               [](const auto &child) { return child->propertyName() == "Tie"; });
+  if (it != children.cend()) {
+    return *it;
   }
   return nullptr;
 }

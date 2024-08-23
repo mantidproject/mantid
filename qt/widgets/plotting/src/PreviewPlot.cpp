@@ -43,16 +43,6 @@ constexpr auto LOG_SCALE = "Log";
 constexpr auto SQUARE_SCALE = "Square";
 constexpr auto SHOWALLERRORS = "Show all errors";
 constexpr auto HIDEALLERRORS = "Hide all errors";
-
-template <typename Observer> void modifyObserver(Observer &observer, bool const turnOn) {
-  auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
-  if (turnOn && !notificationCenter.hasObserver(observer)) {
-    notificationCenter.addObserver(observer);
-  } else if (!turnOn && notificationCenter.hasObserver(observer)) {
-    notificationCenter.removeObserver(observer);
-  }
-}
-
 } // namespace
 
 namespace MantidQt::MantidWidgets {
@@ -64,9 +54,8 @@ namespace MantidQt::MantidWidgets {
  */
 PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
     : QWidget(parent), m_canvas{new FigureCanvasQt(111, MANTID_PROJECTION, parent)}, m_panZoomTool(m_canvas),
-      m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
-      m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced), m_axis("both"), m_style("sci"), m_useOffset(true),
-      m_xAxisScale("linear"), m_yAxisScale("linear"), m_redrawOnPaint(false) {
+      m_axis("both"), m_style("sci"), m_useOffset(true), m_xAxisScale("linear"), m_yAxisScale("linear"),
+      m_redrawOnPaint(false) {
   createLayout();
   createActions();
 
@@ -77,18 +66,12 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
 }
 
 /**
- * Destructor.
- * Removes ADS observers
- */
-PreviewPlot::~PreviewPlot() { watchADS(false); }
-
-/**
  * Enable/disable the ADS observers
  * @param on If true ADS observers are enabled else they are disabled
  */
 void PreviewPlot::watchADS(bool on) {
-  modifyObserver(m_wsReplacedObserver, on);
-  modifyObserver(m_wsRemovedObserver, on);
+  this->observeReplace(on);
+  this->observeDelete(on);
 }
 
 /**
@@ -601,19 +584,22 @@ QStringList PreviewPlot::linesWithErrors() const {
 
 /**
  * Observer method called when a workspace is removed from the ADS
- * @param nf A pointer to the notification object
+ * @param wsName The name of the workspace which has been removed.
+ * @param ws The workspace which has been removed.
  */
-void PreviewPlot::onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf) {
+void PreviewPlot::deleteHandle(const std::string &wsName, const Workspace_sptr &ws) {
+  (void)wsName;
+
   if (m_lines.isEmpty()) {
     return;
   }
   // Ignore non matrix workspaces
-  if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
+  if (auto deletedWs = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
     // the artist may have already been removed. ignore the event is that is the
     // case
     bool removed = false;
     try {
-      removed = m_canvas->gca<MantidAxes>().removeWorkspaceArtists(ws);
+      removed = m_canvas->gca<MantidAxes>().removeWorkspaceArtists(deletedWs);
     } catch (Mantid::PythonInterface::PythonException &) {
     }
     if (removed) {
@@ -624,18 +610,19 @@ void PreviewPlot::onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification
 
 /**
  * Observer method called when a workspace is replaced in the ADS
- * @param nf A pointer to the notification object
+ * @param wsName The name of the workspace which has been replaced.
+ * @param ws The new workspace.
  */
-void PreviewPlot::onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf) {
+void PreviewPlot::replaceHandle(const std::string &wsName, const Workspace_sptr &ws) {
+  (void)wsName;
+
   if (m_lines.isEmpty()) {
     return;
   }
   // Ignore non matrix workspaces
-  if (std::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
-    if (auto newWS = std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
-      if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS)) {
-        this->replot();
-      }
+  if (auto newWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+    if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS)) {
+      this->replot();
     }
   }
 }

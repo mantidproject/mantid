@@ -1,1 +1,0 @@
-- `unique_name` and `unique_hidden_name` now available as part of :ref:`AnalysisDataServiceImpl <mantid.api.AnalysisDataServiceImpl>` to assist in creating unique names for workspaces that avoid collision.

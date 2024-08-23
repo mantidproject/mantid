@@ -13,7 +13,7 @@ The changes are:
 
  - A fix to stop workbench freezing when plotting data from a workspace which is changing (e.g plotting live data)
  - Removed slit lookup that was specific to OFFSPEC in :ref:`algm-ReflectometryReductionOneLiveData` as it is no longer required and was causing regular crashes when running live data on OFFSPEC.
- - Fixed a bug in :ref:`Elwin Tab <elwin>` of :ref:`Data Manipulation Interface <interface-inelastic-data-manipulation>` where changing integration range with the sliders did not change default integration range.
+ - Fixed a bug in :ref:`Elwin Tab <elwin>` of :ref:`Data Manipulation Interface <interface-inelastic-data-processor>` where changing integration range with the sliders did not change default integration range.
  - Add sample log values to the live data workspace before the instrument is loaded in :ref:`algm-ReflectometryReductionOneLiveData` to ensure log values are available when setting the detector positions.
  - Fixed a crash when using multiple Indirect or Inelastic interfaces. This crash was present on the :ref:`Bayes Fitting <interface-inelastic-bayes-fitting>` interface, but could also be replicated elsewhere.
 

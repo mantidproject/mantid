@@ -66,6 +66,8 @@ void QtSaveView::connectSaveSettingsWidgets() {
   connectSettingsChange(*m_ui.saveIndividualRowsCheckBox);
   connectSettingsChange(*m_ui.headerCheckBox);
   connectSettingsChange(*m_ui.qResolutionCheckBox);
+  connectSettingsChange(*m_ui.extraColumnsCheckBox);
+  connectSettingsChange(*m_ui.multipleDatasetsCheckBox);
   connectSettingsChange(*m_ui.commaRadioButton);
   connectSettingsChange(*m_ui.spaceRadioButton);
   connectSettingsChange(*m_ui.tabRadioButton);
@@ -130,6 +132,10 @@ void QtSaveView::enableQResolutionCheckBox() { m_ui.qResolutionCheckBox->setEnab
 
 void QtSaveView::disableQResolutionCheckBox() { m_ui.qResolutionCheckBox->setEnabled(false); }
 
+void QtSaveView::enableAdditionalColumnsCheckBox() { m_ui.extraColumnsCheckBox->setEnabled(true); }
+
+void QtSaveView::disableAdditionalColumnsCheckBox() { m_ui.extraColumnsCheckBox->setEnabled(false); }
+
 void QtSaveView::enableSeparatorButtonGroup() {
   m_ui.commaRadioButton->setEnabled(true);
   m_ui.spaceRadioButton->setEnabled(true);
@@ -141,6 +147,9 @@ void QtSaveView::disableSeparatorButtonGroup() {
   m_ui.spaceRadioButton->setEnabled(false);
   m_ui.tabRadioButton->setEnabled(false);
 }
+void QtSaveView::enableSaveToSingleFileCheckBox() { m_ui.multipleDatasetsCheckBox->setEnabled(true); }
+
+void QtSaveView::disableSaveToSingleFileCheckBox() { m_ui.multipleDatasetsCheckBox->setEnabled(false); }
 
 void QtSaveView::enableSaveIndividualRowsCheckbox() { m_ui.saveIndividualRowsCheckBox->setEnabled(true); }
 
@@ -219,6 +228,11 @@ bool QtSaveView::getHeaderCheck() const { return m_ui.headerCheckBox->isChecked(
  */
 bool QtSaveView::getQResolutionCheck() const { return m_ui.qResolutionCheckBox->isChecked(); }
 
+/** Returns the include additional columns check value
+ * @return :: The include additional columns check
+ */
+bool QtSaveView::getAdditionalColumnsCheck() const { return m_ui.extraColumnsCheckBox->isChecked(); }
+
 void QtSaveView::disallowAutosave() { m_ui.saveReductionResultsCheckBox->setCheckState(Qt::CheckState::Unchecked); }
 
 /** Returns the separator type
@@ -229,6 +243,11 @@ std::string QtSaveView::getSeparator() const {
   boost::to_lower(sep); // lowercase
   return sep;
 }
+
+/** Returns the save multiple datasets to single file check value
+ * @return :: The save multiple datasets to single file check
+ */
+bool QtSaveView::getSaveToSingleFileCheck() const { return m_ui.multipleDatasetsCheckBox->isChecked(); }
 
 /** Clear the 'List of workspaces' widget
  */

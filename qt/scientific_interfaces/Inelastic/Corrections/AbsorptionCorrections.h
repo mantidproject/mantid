@@ -12,13 +12,15 @@
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class MANTIDQT_INELASTIC_DLL AbsorptionCorrections : public CorrectionsTab {
+class MANTIDQT_INELASTIC_DLL AbsorptionCorrections : public CorrectionsTab, public IRunSubscriber {
   Q_OBJECT
 
 public:
@@ -27,10 +29,12 @@ public:
 
   Mantid::API::MatrixWorkspace_sptr sampleWorkspace() const;
 
+  void handleValidation(IUserInputValidator *validator) const override;
+  void handleRun() override;
+
 private slots:
   virtual void algorithmComplete(bool error);
   void saveClicked();
-  void runClicked();
   void getParameterDefaults(QString const &dataName);
   void setSampleDensityOptions(QString const &method);
   void setCanDensityOptions(QString const &method);
@@ -43,17 +47,13 @@ private slots:
   void setSampleDensity(double value);
   void setCanDensity(double value);
   void handlePresetShapeChanges(int index);
-  UserInputValidator doValidation();
 
 private:
-  void setup() override;
-  void run() override;
-  bool validate() override;
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
 
-  void validateSampleGeometryInputs(UserInputValidator &uiv, const QString &shape);
-  void validateContainerGeometryInputs(UserInputValidator &uiv, const QString &shape);
+  void validateSampleGeometryInputs(IUserInputValidator *uiv, const QString &shape) const;
+  void validateContainerGeometryInputs(IUserInputValidator *uiv, const QString &shape) const;
 
   void addSaveWorkspace(std::string const &wsName);
   void addShapeSpecificSampleOptions(const Mantid::API::IAlgorithm_sptr &alg, const QString &shape);
@@ -71,8 +71,6 @@ private:
                          std::string const &beamWidthParamName) const;
   void setBeamHeightValue(const Mantid::Geometry::Instrument_const_sptr &instrument,
                           std::string const &beamHeightParamName) const;
-  void setWavelengthsValue(const Mantid::Geometry::Instrument_const_sptr &instrument,
-                           std::string const &wavelengthsParamName) const;
   void setEventsValue(const Mantid::Geometry::Instrument_const_sptr &instrument,
                       std::string const &eventsParamName) const;
   void setInterpolationValue(const Mantid::Geometry::Instrument_const_sptr &instrument,
@@ -89,10 +87,7 @@ private:
   double getSampleDensityValue(QString const &type) const;
   double getCanDensityValue(QString const &type) const;
 
-  void setRunEnabled(bool enabled);
   void setSaveResultEnabled(bool enabled);
-  void setButtonsEnabled(bool enabled);
-  void setRunIsRunning(bool running);
 
   bool m_saveAlgRunning{false};
 

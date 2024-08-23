@@ -65,8 +65,9 @@ class NMoldyn4Interpolation(PythonAlgorithm):
         self.validate_bounds(sim_X, ref_X, sim_Q, ref_Q)
 
         # Interpolates the simulated data onto the OSIRIS grid
-        interp = sc.interpolate.interp2d(sim_X, sim_Q, sim_Y)
-        interp_Y = interp(ref_X_bins, ref_Q)
+
+        interp = sc.interpolate.RectBivariateSpline(sim_Q, sim_X, sim_Y)
+        interp_Y = interp(ref_Q, ref_X_bins)
 
         # Outputs interpolated data into a new workspace
         interp_Y = interp_Y.flatten()

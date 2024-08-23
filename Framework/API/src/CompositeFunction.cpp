@@ -965,7 +965,7 @@ size_t CompositeFunction::getNumberDomains() const {
   }
   size_t nd = getFunction(0)->getNumberDomains();
   for (size_t iFun = 1; iFun < n; ++iFun) {
-    if (getFunction(0)->getNumberDomains() != nd) {
+    if (getFunction(iFun)->getNumberDomains() != nd) {
       throw std::runtime_error("CompositeFunction has members with "
                                "inconsistent domain numbers.");
     }

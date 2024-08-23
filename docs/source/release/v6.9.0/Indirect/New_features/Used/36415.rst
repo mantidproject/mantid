@@ -1,1 +1,0 @@
-- Removed unnecessary options from ISIS Energy Transfer tab and show only relevant options based on the selected instrument

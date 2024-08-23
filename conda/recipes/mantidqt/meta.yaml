@@ -18,8 +18,8 @@ requirements:
     - {{ compiler("cxx") }}
     - llvm-openmp  # [osx]
     - libgomp  # [linux]
-    - ninja  # [unix]
-    - cmake
+    - ninja  # [osx or linux]
+    - cmake {{ cmake }}
     - git
     - python {{ python }}                    # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
@@ -33,11 +33,12 @@ requirements:
     - {{ cdt('libxxf86vm') }}  # [linux]
     - {{ cdt('libx11-devel') }}  # [linux]
     - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
-    - libcxx  # [osx]
+    - libcxx  {{ libcxx }}                   # [osx]
 
   host:
+    - libboost-devel {{ libboost_devel }}
+    - libboost-python-devel {{ libboost_python_devel }}
     - eigen
-    - jemalloc  # [unix]
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - mantid {{ version }}
     - python {{ python }}

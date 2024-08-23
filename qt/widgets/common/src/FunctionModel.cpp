@@ -174,23 +174,23 @@ void FunctionModel::setParameterError(std::string const &parameterName, double v
 }
 
 double FunctionModel::getParameter(std::string const &parameterName) const {
-  return getCurrentFunction()->getParameter(parameterName);
+  auto const fun = getCurrentFunction();
+  return fun && fun->hasParameter(parameterName) ? fun->getParameter(parameterName) : 0.0;
 }
 
 IFunction::Attribute FunctionModel::getAttribute(std::string const &attrName) const {
-  return getCurrentFunction()->getAttribute(attrName);
+  auto const fun = getCurrentFunction();
+  return fun && fun->hasAttribute(attrName) ? fun->getAttribute(attrName) : IFunction::Attribute();
 }
 
 double FunctionModel::getParameterError(std::string const &parameterName) const {
   auto fun = getCurrentFunction();
-  auto const index = fun->parameterIndex(parameterName);
-  return fun->getError(index);
+  return fun && fun->hasParameter(parameterName) ? fun->getError(fun->parameterIndex(parameterName)) : 0.0;
 }
 
 std::string FunctionModel::getParameterDescription(std::string const &parameterName) const {
   auto fun = getCurrentFunction();
-  auto const index = fun->parameterIndex(parameterName);
-  return fun->parameterDescription(index);
+  return fun && fun->hasParameter(parameterName) ? fun->parameterDescription(fun->parameterIndex(parameterName)) : "";
 }
 
 bool FunctionModel::isParameterFixed(std::string const &parameterName) const {
@@ -273,7 +273,7 @@ void FunctionModel::setNumberDomains(int nDomains) {
 /// Sets the datasets based on their workspace names. This assumes there is only
 /// a single spectrum in the workspaces being fitted.
 /// @param datasetNames :: Names of the workspaces to be fitted.
-void FunctionModel::setDatasets(const QStringList &datasetNames) {
+void FunctionModel::setDatasets(const std::vector<std::string> &datasetNames) {
   QList<FunctionModelDataset> datasets;
   for (const auto &datasetName : datasetNames)
     datasets.append(FunctionModelDataset(datasetName, FunctionModelSpectra("0")));
@@ -293,7 +293,7 @@ void FunctionModel::setDatasets(const QList<FunctionModelDataset> &datasets) {
 /// Adds datasets based on their workspace names. This assumes there is only
 /// a single spectrum in the added workspaces.
 /// @param datasetNames :: Names of the workspaces to be added.
-void FunctionModel::addDatasets(const QStringList &datasetNames) {
+void FunctionModel::addDatasets(const std::vector<std::string> &datasetNames) {
   for (const auto &datasetName : datasetNames)
     m_datasets.append(FunctionModelDataset(datasetName, FunctionModelSpectra("0")));
 
@@ -324,24 +324,26 @@ void FunctionModel::removeDatasets(QList<int> &indices) {
 /// Returns the workspace names of the datasets. If a dataset has N spectra,
 /// then the workspace name is multiplied by N. This is required for
 /// EditLocalParameterDialog.
-QStringList FunctionModel::getDatasetNames() const {
-  QStringList datasetNames;
+std::vector<std::string> FunctionModel::getDatasetNames() const {
+  std::vector<std::string> allDatasetNames;
   for (const auto &dataset : m_datasets)
     for (auto i = 0u; i < dataset.numberOfSpectra(); ++i) {
       UNUSED_ARG(i);
-      datasetNames << dataset.datasetName();
+      allDatasetNames.emplace_back(dataset.datasetName());
     }
-  return datasetNames;
+  return allDatasetNames;
 }
 
 /// Returns names for the domains of each dataset. If a dataset has multiple
 /// spectra, then a domain name will include the spectrum number of a domain in
 /// a workspace. This is required for EditLocalParameterDialog.
-QStringList FunctionModel::getDatasetDomainNames() const {
-  QStringList domainNames;
-  for (const auto &dataset : m_datasets)
-    domainNames << dataset.domainNames();
-  return domainNames;
+std::vector<std::string> FunctionModel::getDatasetDomainNames() const {
+  std::vector<std::string> allDomainNames;
+  for (const auto &dataset : m_datasets) {
+    auto const domainNames = dataset.domainNames();
+    allDomainNames.insert(allDomainNames.end(), domainNames.cbegin(), domainNames.cend());
+  }
+  return allDomainNames;
 }
 
 int FunctionModel::getNumberDomains() const { return static_cast<int>(m_numberDomains); }
@@ -499,7 +501,7 @@ void FunctionModel::checkDatasets() {
   if (numberOfDomains(m_datasets) != static_cast<int>(m_numberDomains)) {
     m_datasets.clear();
     for (auto i = 0u; i < m_numberDomains; ++i)
-      m_datasets.append(FunctionModelDataset(QString::number(i), FunctionModelSpectra("0")));
+      m_datasets.append(FunctionModelDataset(std::to_string(i), FunctionModelSpectra("0")));
   }
 }
 
@@ -649,5 +651,11 @@ std::string FunctionModel::setBackgroundA0(double value) {
   }
   return foundName;
 }
+
+void FunctionModel::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
+  (void)fitResolutions;
+}
+
+void FunctionModel::setQValues(const std::vector<double> &qValues) { (void)qValues; }
 
 } // namespace MantidQt::MantidWidgets

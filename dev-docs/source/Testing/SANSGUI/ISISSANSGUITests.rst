@@ -57,9 +57,8 @@ In the ``Runs`` tab:
    an output name, one row without.
 #. Try changing a random setting in the settings tab and remember what you set
    it to.
-#. Make some more edits to the table. Due to a known issue, the setting will change
-   back to its original value (once fixed, we expect the setting to keep showing
-   the value you changed it to).
+#. Make some more edits to the table. The settings will be reverted to the defaults
+   set in the User File.
 #. Click the ``Export Table`` button and save the table as a csv file. Check
    the file in an editor or Excel and ensure it looks like a sensible
    representation of the table in the format ``key,value,key,value,...``. All
@@ -72,8 +71,6 @@ In the ``Runs`` tab:
 #. Try deleting and/or reordering some of the columns in the saved file and
    re-load it. All of the values in the file should be populated in the correct
    columns.
-#. Check again that the setting you changed is still showing the value you
-   changed it to, rather than the original.
 #. Re-load the original batch file.
 
 User files
@@ -83,8 +80,8 @@ User files
 #. Re-load the user file and check the values you changed - they should have
    reverted to their original values.
 #. Change some values on the ``Beam Centre`` tab. Re-load the user file. The inputs in the ``Centre Position``
-   section should revert to their original values, apart from the ``Detector`` combobox.
-   The inputs in the ``Options`` section (such as the radius limits) should not revert.
+   section should revert to their original values. The inputs in the ``Options`` section (such as the radius limits)
+   should not revert.
 #. Ensure that you can load the old style ``MaskFile.txt`` user file from the sample data.
 
    - **Note:** In order to see this file, you may need to change the settings in the file browser window to look for
@@ -121,12 +118,16 @@ Processing
    Mode`` is ``All``.
 #. In the ``Runs`` tab, under ``Save Options``, select ``Both``, and tick
    ``CanSAS (1D)`` and ``NXcanSAS (1D/2D)``.
+#. Select ``Save Can``.
 #. Click ``Process All``.
 #. After some seconds the rows should turn green.
 #. In the workspaces list, there should be a series of new workspaces; four
    group workspaces and four 1D workspaces.
 #. Check your default save directory. For each reduction two banks (HAB/main) should
-   be saved. In total there should be 8 workspaces (4 CanSAS ``.xml`` and 4 NXcanSAS ``.h5``) saved.
+   be saved. In total, there should be 20 workspaces saved. For each row, file type, and bank, there should be a
+   reduced file (with no suffix) and a ``sample`` file. The ``first_time`` line should also produce a ``can`` workspace
+   for each file type and bank. This is because both workspaces have the same ``can`` input run numbers and so the
+   reduction only calculates it once.
 #. Double-click the 1D workspaces and you should get a single line plot.
 #. Clear the newly created files and workspaces to make the next test easier
 #. Change the contents of the first cell in the first row to ``74045`` and click
@@ -137,8 +138,7 @@ Processing
 
 *2D reduction*
 
-#. Switch to 2D and manually untick CanSAS (since we have manually
-   changed the save options at this point)
+#. Switch to the 2D ``Reduction Mode``.
 #. Tick the ``Plot Results`` box.
 #. Click ``Process All``.
 #. A plot window will open; initially empty, then with a line.
@@ -196,16 +196,36 @@ Processing
 #. Check that your save location contains files for both the background subtracted workspace and the normal reduction
    output.
 
+Save Other
+##########
+
+*Single Workspace*
+
+#. Navigate to the ``Runs`` tab, making sure there are some reduced workspaces present in the ADS. Follow one of the
+   "Processing" instruction sets above if you need to create some.
+#. Click the ``Save Other`` button.
+#. Select one of the workspaces from the list.
+#. Provide a path to a new save directory, and provide a file name.
+#. Click ``Save``.
+#. Check the file was saved to the correct location on your system.
+
+*Multiple Workspaces*
+
+#. Select multiple workspaces with Shift or Ctrl/Cmd.
+#. Provide a suffix for the files.
+#. Click ``Save``.
+#. Check that the files were saved with their workspace's names, but with the provided suffix appended.
+
 Beam centre finder
 ##################
 
 In the ``Beam centre`` tab:
 
-#. Make a note of the four values representing the front/main detector centre positions.
-#. Check that detector is set to ``main-detector`` and click run.
+#. Make a note of the four values representing the rear/front detector centre positions.
+#. Check that the ``Find Rear Centre`` radio button is selected and click run.
 #. A plot should appear - make sure to show it if it is behind another window. It should be updated with four lines, which gradually get closer together. This might take a while to run.
 #. Check the values in the first two text boxes at the top (Centre Position - Rear) have changed when it has finished running.
-#. Change the detector to ``Hab`` and re-run the test.
+#. Select the ``Find Front Centre`` radio button and re-run the test.
 #. Four more lines should appear on the same plot. This time, in the values at the top, only the values for the front should have changed.
 
 Sum runs
@@ -245,3 +265,5 @@ Display
    have clear tooltips.
 #. In the settings, hover over a random selection of buttons and text boxes to check tooltips are still there.
    Users rely on the tooltips a lot and really do notice each missing one.
+   *Note: The* ``Wavelength`` *section of the settings is missing its tooltips. We and the users are aware of this so an
+   issue should not be made when it is discovered.*

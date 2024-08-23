@@ -70,6 +70,7 @@ set(PYTHON_PLUGINS
     algorithms/FindGlobalBMatrix.py
     algorithms/FindSatellitePeaks.py
     algorithms/FindSXPeaksConvolve.py
+    algorithms/FindMultipleUMatrices.py
     algorithms/FitGaussian.py
     algorithms/FitIncidentSpectrum.py
     algorithms/GSASIIRefineFitPeaks.py
@@ -90,6 +91,7 @@ set(PYTHON_PLUGINS
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
     algorithms/InelasticEMUauReduction.py
+    algorithms/IntegratePeaks1DProfile.py
     algorithms/IntegratePeaksProfileFitting.py
     algorithms/IntegratePeaksSkew.py
     algorithms/IntegratePeaksShoeboxTOF.py
@@ -171,6 +173,7 @@ set(PYTHON_PLUGINS
     algorithms/SaveHKLCW.py
     algorithms/SaveINS.py
     algorithms/SaveISISReflectometryORSO.py
+    algorithms/SaveMDHistoToVTK.py
     algorithms/SaveNexusPD.py
     algorithms/SaveP2D.py
     algorithms/SavePlot1DAsJson.py
@@ -378,6 +381,7 @@ set(PYTHON_PLUGINS
     functions/RFresonance.py
     functions/Redfield.py
     functions/SCgapSwave.py
+    functions/SpinDiffusion.py
     functions/SpinGlass.py
     functions/StandardSC.py
     functions/StaticLorentzianKT.py
@@ -386,6 +390,7 @@ set(PYTHON_PLUGINS
     functions/StretchedKT.py
     functions/TFMuonium.py
     functions/TeixeiraWater.py
+    functions/TeixeiraWaterIqt.py
     functions/ZFMuonium.py
     functions/ZFdipole.py
     functions/ZFelectronDipole.py

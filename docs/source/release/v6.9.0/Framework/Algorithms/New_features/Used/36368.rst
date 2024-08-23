@@ -1,1 +1,0 @@
-- When the `StoreInADS` algorithm property is False, it is now optional to provide a value for `OutputWorkspace`.

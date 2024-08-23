@@ -142,8 +142,9 @@ After the peak shape is defined a spectrum can be calculated::
 The output is a tuple of two 1d numpy arrays (x, y) that can be used with `matplotlib` to plot::
 
   import matplotlib.pyplot as plt
-  plt.plot(*sp)
-  plt.show()
+  fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+  ax.plot(*sp)
+  fig.show()
 
 .. image:: /images/CrystalFieldSpectrum1.png
    :height: 300

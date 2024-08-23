@@ -1,1 +1,0 @@
-- Allow the passing of height information to the donor workspace ``mantid.utils.absorptioncorrutils`` so that the absorption calculation calculation can be performed without the experimental data.

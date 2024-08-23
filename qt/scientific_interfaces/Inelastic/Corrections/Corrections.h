@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "Common/IndirectInterface.h"
-#include "Common/IndirectTab.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
+#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 
 #include "ui_Corrections.h"
 
@@ -35,7 +35,7 @@ class CorrectionsTab;
  *
  * Is a friend to the CorrectionsTab class.
  */
-class Corrections : public IndirectInterface {
+class Corrections : public InelasticInterface {
   Q_OBJECT
 
   /// Allow CorrectionsTab to have access.

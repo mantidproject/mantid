@@ -1,2 +1,0 @@
-- Beam shape & size, sample thickness, and detector information is now correctly saved by :ref:`algm-SaveCanSAS1D`
-  and :ref:`algm-SaveNXcanSAS`.

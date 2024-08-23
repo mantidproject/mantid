@@ -1,1 +1,0 @@
-- Fixes a crash when a sample run cannot be found in the Mask tab of the :ref:`ISIS_SANS_Settings_Tab-ref`.

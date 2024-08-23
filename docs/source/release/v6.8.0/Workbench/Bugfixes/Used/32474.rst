@@ -1,1 +1,0 @@
-- Avoided a bug when attempting to drag and drop a single binned workspace onto an open plot. This action is now rejected an a warning logged.

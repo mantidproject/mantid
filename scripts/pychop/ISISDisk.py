@@ -72,10 +72,11 @@ class ISISDisk:
             self.Chop2Phase = 5  # Phase delay time in usec for chopper 2 (T0/frame overlap chopper)
         elif "MERLIN" in instname:
             self.dist = [9.3, 10.1]
-            self.nslot = [1, 2]
-            self.slot_width = [950, 10]
+            self.nslot = [10, 2]
+            self.slot_width = [68, 10]
             self.guide_width = [64, 10]
-            self.radius = [250, 290]
+            self.slot_ang_pos = [[-45.5, -32.5, -19.5, -6.5, 6.5, 19.5, 32.5, 45.5, 50, 150], [0, 180]]
+            self.radius = [300, 290]
             self.numDisk = [1, 1]
             self.samp_det = 2.5
             self.chop_samp = 1.82

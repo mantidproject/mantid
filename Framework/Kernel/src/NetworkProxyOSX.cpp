@@ -10,9 +10,9 @@
 #include "MantidKernel/NetworkProxy.h"
 #include <CFNetwork/CFProxySupport.h>
 #include <CoreFoundation/CoreFoundation.h>
+#include <Security/Authorization.h>
 #include <SystemConfiguration/SystemConfiguration.h>
 #include <sstream>
-#include <string>
 #include <vector>
 
 namespace Mantid {
