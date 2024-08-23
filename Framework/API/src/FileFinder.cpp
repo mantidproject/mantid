@@ -477,7 +477,7 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
   }
 
   // Path not found
-  if (uniqueExts.size() == 1) {
+  if (!useExtsOnly && uniqueExts.size() == 1) {
     uniqueExts.pop_back(); // No need to search for missing extension again
     getUniqueExtensions(exts, uniqueExts);
     getUniqueExtensions(extensions, uniqueExts);
