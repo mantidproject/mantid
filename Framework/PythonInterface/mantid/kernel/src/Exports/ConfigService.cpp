@@ -104,6 +104,8 @@ void export_ConfigService() {
            "definitions")
       .def("getFacilityNames", &ConfigServiceImpl::getFacilityNames, arg("self"), "Returns the default facility")
       .def("getFacilities", &ConfigServiceImpl::getFacilities, arg("self"), "Returns the default facility")
+      .def("configureLogging", &ConfigServiceImpl::configureLogging, arg("self"),
+           "Configure and start the logging framework")
       .def("remove", &ConfigServiceImpl::remove, (arg("self"), arg("rootName")), "Remove the indicated key.")
       .def("getFacility", (const FacilityInfo &(ConfigServiceImpl::*)() const) & ConfigServiceImpl::getFacility,
            arg("self"), return_value_policy<reference_existing_object>(), "Returns the default facility")
