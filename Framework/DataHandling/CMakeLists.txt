@@ -469,7 +469,6 @@ set(TEST_FILES
     EventWorkspaceCollectionTest.h
     ExtractMonitorWorkspaceTest.h
     ExtractPolarizationEfficienciesTest.h
-    FilterEventsByLogValuePreNexusTest.h
     FindDetectorsInShapeTest.h
     FindDetectorsParTest.h
     GenerateGroupingPowderTest.h
