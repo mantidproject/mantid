@@ -682,7 +682,6 @@ duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCa
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:57
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadDNSEvent.h:44
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/BitStream.h:30
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/BinaryFile.h:52
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadDspacemap.cpp:342
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadANSTOHelper.cpp:210
 variableScope:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DetermineChunking.cpp:163

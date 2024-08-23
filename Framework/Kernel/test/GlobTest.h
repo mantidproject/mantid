@@ -11,8 +11,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Glob.h"
 
-#include <Poco/File.h>
 #include <Poco/Path.h>
+#include <filesystem>
+#include <fstream>
 
 using namespace Mantid::Kernel;
 
@@ -74,22 +75,29 @@ public:
   }
 
   void test_match_relative_path() {
+    std::filesystem::path testDir("GlobTestDir");
+    TS_ASSERT(std::filesystem::create_directory(testDir));
 
-    Poco::File testDir("GlobTestDir");
-    testDir.createDirectory();
-    Poco::File file1("GlobTestDir/File.1");
-    file1.createFile();
-    Poco::File file2("GlobTestDir/File.2");
-    file2.createFile();
+    std::filesystem::path file1("GlobTestDir/File.1");
+    {
+      std::ofstream handle(file1);
+      handle.close();
+    }
+
+    std::filesystem::path file2("GlobTestDir/File.2");
+    {
+      std::ofstream handle(file2);
+      handle.close();
+    }
 
     std::string pattern = "GlobTestDir/File.*";
 
     std::set<std::string> files;
     Glob::glob(pattern, files);
     TS_ASSERT_EQUALS(files.size(), 2);
-    file1.remove();
-    file2.remove();
-    testDir.remove();
+    std::filesystem::remove(file1);
+    std::filesystem::remove(file2);
+    std::filesystem::remove(testDir);
   }
 
   void test_double_dots_in_pattern() {

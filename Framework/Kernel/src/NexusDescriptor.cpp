@@ -11,7 +11,7 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
-#include <Poco/File.h>
+#include <filesystem>
 #include <Poco/Path.h>
 
 #include <algorithm>
@@ -115,7 +115,7 @@ NexusDescriptor::NexusDescriptor(const std::string &filename, const bool init)
   if (filename.empty()) {
     throw std::invalid_argument("NexusDescriptor() - Empty filename '" + filename + "'");
   }
-  if (!Poco::File(filename).exists()) {
+  if (!std::filesystem::exists(filename)) {
     throw std::invalid_argument("NexusDescriptor() - File '" + filename + "' does not exist");
   }
 

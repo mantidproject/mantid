@@ -12,8 +12,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FileDescriptor.h"
 
-#include <Poco/File.h>
 #include <Poco/Path.h>
+#include <filesystem>
 
 using Mantid::Kernel::FileDescriptor;
 
@@ -30,16 +30,16 @@ public:
     const auto &dataPaths = cfg.getDataSearchDirs();
     for (const auto &dataPath : dataPaths) {
       Poco::Path nxsPath(dataPath, "CNCS_7860_event.nxs");
-      if (Poco::File(nxsPath).exists())
+      if (std::filesystem::exists(nxsPath.toString()))
         m_testNexusPath = nxsPath.toString();
       Poco::Path nonNxsPath(dataPath, "CSP79590.raw");
-      if (Poco::File(nonNxsPath).exists())
+      if (std::filesystem::exists(nonNxsPath.toString()))
         m_testNonNexusPath = nonNxsPath.toString();
       Poco::Path asciiPath(dataPath, "AsciiExample.txt");
-      if (Poco::File(asciiPath).exists())
+      if (std::filesystem::exists(asciiPath.toString()))
         m_testAsciiPath = asciiPath.toString();
       Poco::Path emptyFilePath(dataPath, "emptyFile.txt");
-      if (Poco::File(emptyFilePath).exists())
+      if (std::filesystem::exists(emptyFilePath.toString()))
         m_emptyFilePath = emptyFilePath.toString();
 
       if (!m_testNexusPath.empty() && !m_testNonNexusPath.empty() && !m_testAsciiPath.empty() &&

@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/Logger.h"
-#include <Poco/File.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string/case_conv.hpp>
+#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <sstream>
@@ -81,11 +81,11 @@ std::string FileValidator::checkValidity(const std::string &value) const {
   }
 
   // If the file is required to exist check it is there
-  if (m_testExist && (value.empty() || !Poco::File(value).exists())) {
+  if (m_testExist && (value.empty() || !std::filesystem::exists(value))) {
     return "File \"" + abspath + "\" not found";
   }
 
-  if (m_testExist && (Poco::File(value).exists())) {
+  if (m_testExist && (std::filesystem::exists(value))) {
     std::ifstream in;
     in.open(value.c_str());
     if (!in) {

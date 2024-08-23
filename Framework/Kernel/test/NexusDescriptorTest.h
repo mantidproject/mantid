@@ -10,9 +10,9 @@
 #include "MantidKernel/NexusDescriptor.h"
 #include <cxxtest/TestSuite.h>
 
+#include <filesystem>
 #include <memory>
 
-#include <Poco/File.h>
 #include <Poco/Path.h>
 #include <nexus/NeXusFile.hpp>
 
@@ -32,15 +32,15 @@ public:
     auto dataPaths = ConfigService::Instance().getDataSearchDirs();
     for (auto &dataPath : dataPaths) {
       Poco::Path hdf5Path(dataPath, "CNCS_7860_event.nxs");
-      if (Poco::File(hdf5Path).exists())
+      if (std::filesystem::exists(hdf5Path.toString()))
         m_testHDF5Path = hdf5Path.toString();
 
       Poco::Path hdf4Path(dataPath, "argus0026287.nxs");
-      if (Poco::File(hdf4Path).exists())
+      if (std::filesystem::exists(hdf4Path.toString()))
         m_testHDF4Path = hdf4Path.toString();
 
       Poco::Path nonhdf5Path(dataPath, "CSP79590.raw");
-      if (Poco::File(nonhdf5Path).exists())
+      if (std::filesystem::exists(nonhdf5Path.toString()))
         m_testNonHDFPath = nonhdf5Path.toString();
 
       if (!m_testHDF5Path.empty() && !m_testHDF4Path.empty() && !m_testNonHDFPath.empty())

@@ -7,8 +7,8 @@
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/Strings.h"
 
-#include <Poco/File.h>
 #include <Poco/Path.h>
+#include <filesystem>
 
 #include <stdexcept>
 
@@ -131,7 +131,7 @@ FileDescriptor::FileDescriptor(const std::string &filename) : m_filename(), m_ex
   if (filename.empty()) {
     throw std::invalid_argument("FileDescriptor() - Empty filename '" + filename + "'");
   }
-  if (!Poco::File(filename).exists()) {
+  if (!std::filesystem::exists(filename)) {
     throw std::invalid_argument("FileDescriptor() - File '" + filename + "' does not exist");
   }
   initialize(filename);
