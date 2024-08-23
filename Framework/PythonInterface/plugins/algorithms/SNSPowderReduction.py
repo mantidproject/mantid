@@ -933,7 +933,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             ReductionProperties="__snspowderreduction",
             LogAllowList=self.getPropertyValue("LogAllowList").strip(),
             LogBlockList=self.getPropertyValue("LogBlockList").strip(),
-            MinSizeCompressOnLoad=self._compressionThreshold**otherArgs,
+            MinSizeCompressOnLoad=self._compressionThreshold,
+            **otherArgs,
         )
 
         # TODO make sure that this funny function is called
