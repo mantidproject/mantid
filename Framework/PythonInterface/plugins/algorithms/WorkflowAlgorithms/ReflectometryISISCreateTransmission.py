@@ -93,6 +93,7 @@ class ReflectometryISISCreateTransmission(DataProcessorAlgorithm):
 
     def _load_run(self, run: str, output_name: str):
         """Load a run as a histogram workspace"""
+        self.log().information("Loading the run file")
         alg = self.createChildAlgorithm(self._LOAD_ALG, Filename=run, OutputWorkspace=output_name)
         alg.setRethrows(True)
         alg.execute()
@@ -104,6 +105,7 @@ class ReflectometryISISCreateTransmission(DataProcessorAlgorithm):
         if flood_ws is None:
             return workspace
 
+        self.log().information("Performing flood correction")
         args = {"FloodWorkspace": flood_ws}
         return self._run_algorithm(workspace, self._FLOOD_ALG, "InputWorkspace", args)
 
@@ -112,6 +114,7 @@ class ReflectometryISISCreateTransmission(DataProcessorAlgorithm):
         if self.getProperty(Prop.BACK_SUB_ROI).isDefault:
             return workspace
 
+        self.log().information("Performing background subtraction")
         args = {
             "InputWorkspaceIndexType": "WorkspaceIndex",
             "ProcessingInstructions": self.getPropertyValue(Prop.BACK_SUB_ROI),
@@ -121,6 +124,7 @@ class ReflectometryISISCreateTransmission(DataProcessorAlgorithm):
 
     def _create_transmission_ws(self, workspace):
         """Create the transmission workspace"""
+        self.log().information("Creating the transmission workspace")
         args = {
             Prop.TRANS_ROI: self.getPropertyValue(Prop.TRANS_ROI),
             Prop.I0_MON_IDX: self.getPropertyValue(Prop.I0_MON_IDX),
