@@ -160,6 +160,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     _sampleFormula = None
     _massDensity = None
     _containerShape = None
+    _compressionThreshold = None
 
     def category(self):
         return "Diffraction\\Reduction"
@@ -178,7 +179,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         return "The algorithm used for reduction of powder diffraction data obtained on SNS instruments (e.g. PG3)"
 
     def PyInit(self):
-        self.copyProperties("AlignAndFocusPowderFromFiles", ["Filename", "PreserveEvents", "DMin", "DMax", "DeltaRagged"])
+        self.copyProperties(
+            "AlignAndFocusPowderFromFiles", ["Filename", "PreserveEvents", "DMin", "DMax", "DeltaRagged", "MinSizeCompressOnLoad"]
+        )
 
         self.declareProperty("Sum", False, "Sum the runs. Does nothing for characterization runs.")
         self.declareProperty(
@@ -437,6 +440,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         self._info = None
         self._chunks = self.getProperty("MaxChunkSize").value
+
+        self._compressionThreshold = self.getProperty("MinSizeCompressOnLoad").value
 
         # define splitters workspace and filter wall time
         self._splittersWS = self.getProperty("SplittersWorkspace").value
@@ -928,6 +933,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             ReductionProperties="__snspowderreduction",
             LogAllowList=self.getPropertyValue("LogAllowList").strip(),
             LogBlockList=self.getPropertyValue("LogBlockList").strip(),
+            MinSizeCompressOnLoad=self._compressionThreshold,
             **otherArgs,
         )
 
