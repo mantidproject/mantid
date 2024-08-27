@@ -96,7 +96,7 @@ void CompositeCluster::addIndex(const size_t & /*index*/) {
  */
 void CompositeCluster::findMinimum() const {
   if (!m_ownedClusters.empty()) {
-    ICluster *minCluster = m_ownedClusters.front().get();
+    ICluster const *minCluster = m_ownedClusters.front().get();
     size_t minLabel = minCluster->getLabel();
     for (size_t i = 1; i < m_ownedClusters.size(); ++i) {
       size_t temp = m_ownedClusters[i]->getLabel();
@@ -114,7 +114,7 @@ void CompositeCluster::findMinimum() const {
  */
 void CompositeCluster::toUniformMinimum(std::vector<DisjointElement> &disjointSet) {
   if (!m_ownedClusters.empty()) {
-    ICluster *minCluster = m_ownedClusters.front().get();
+    ICluster const *minCluster = m_ownedClusters.front().get();
     size_t minLabel = minCluster->getLabel();
     for (size_t i = 1; i < m_ownedClusters.size(); ++i) {
       size_t temp = m_ownedClusters[i]->getLabel();
