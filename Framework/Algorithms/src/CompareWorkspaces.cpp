@@ -592,7 +592,7 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
   bool raggedWorkspace{false};
-  size_t numBins;
+  size_t numBins(0UL);
   try {
     numBins = ws1->blocksize();
   } catch (std::length_error &) {
@@ -600,7 +600,18 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
   }
   const bool histogram = ws1->isHistogramData();
   const bool checkAllData = getProperty("CheckAllData");
-  const bool RelErr = getProperty("ToleranceRelErr");
+  const bool isRelErr = getProperty("ToleranceRelErr");
+  const double tolerance = getProperty("Tolerance");
+  std::function<bool(double const, double const)> compare;
+  if (isRelErr) {
+    compare = [tolerance](double const x1, double const x2) -> bool {
+      return CompareWorkspaces::withinRelativeTolerance(x1, x2, tolerance);
+    };
+  } else {
+    compare = [tolerance](double const x1, double const x2) -> bool {
+      return CompareWorkspaces::withinAbsoluteTolerance(x1, x2, tolerance);
+    };
+  }
 
   // First check that the workspace are the same size
   if (numHists != ws2->getNumberHistograms() ||
@@ -615,8 +626,8 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
     return false;
   }
 
-  const double tolerance = getProperty("Tolerance");
   bool resultBool = true;
+  bool logDebug = g_log.is(Logger::Priority::PRIO_DEBUG);
 
   // Now check the data itself
   PARALLEL_FOR_IF(m_parallelComparison && ws1->threadSafe() && ws2->threadSafe())
@@ -642,32 +653,26 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
       } else {
 
         for (int j = 0; j < static_cast<int>(Y1.size()); ++j) {
-          bool err;
-          if (RelErr) {
-            err = (!withinRelativeTolerance(X1[j], X2[j], tolerance) ||
-                   !withinRelativeTolerance(Y1[j], Y2[j], tolerance) ||
-                   !withinRelativeTolerance(E1[j], E2[j], tolerance));
-          } else {
-            err = (!withinAbsoluteTolerance(X1[j], X2[j], tolerance) ||
-                   !withinAbsoluteTolerance(Y1[j], Y2[j], tolerance) ||
-                   !withinAbsoluteTolerance(E1[j], E2[j], tolerance));
-          }
-
+          bool err = (!compare(X1[j], X2[j]) || !compare(Y1[j], Y2[j]) || !compare(E1[j], E2[j]));
           if (err) {
-            g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
-            g_log.debug() << " Dataset #1 (X,Y,E) = (" << X1[j] << "," << Y1[j] << "," << E1[j] << ")\n";
-            g_log.debug() << " Dataset #2 (X,Y,E) = (" << X2[j] << "," << Y2[j] << "," << E2[j] << ")\n";
-            g_log.debug() << " Difference (X,Y,E) = (" << std::fabs(X1[j] - X2[j]) << "," << std::fabs(Y1[j] - Y2[j])
-                          << "," << std::fabs(E1[j] - E2[j]) << ")\n";
+            if (logDebug) {
+              g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
+              g_log.debug() << " Dataset #1 (X,Y,E) = (" << X1[j] << "," << Y1[j] << "," << E1[j] << ")\n";
+              g_log.debug() << " Dataset #2 (X,Y,E) = (" << X2[j] << "," << Y2[j] << "," << E2[j] << ")\n";
+              g_log.debug() << " Difference (X,Y,E) = (" << std::fabs(X1[j] - X2[j]) << "," << std::fabs(Y1[j] - Y2[j])
+                            << "," << std::fabs(E1[j] - E2[j]) << ")\n";
+            }
             PARALLEL_CRITICAL(resultBool)
             resultBool = false;
           }
         }
 
         // Extra one for histogram data
-        if (histogram && !withinAbsoluteTolerance(X1.back(), X2.back(), tolerance)) {
-          g_log.debug() << " Data ranges mismatch for spectra N: (" << i << ")\n";
-          g_log.debug() << " Last bin ranges (X1_end vs X2_end) = (" << X1.back() << "," << X2.back() << ")\n";
+        if (histogram && !compare(X1.back(), X2.back())) {
+          if (logDebug) {
+            g_log.debug() << " Data ranges mismatch for spectra N: (" << i << ")\n";
+            g_log.debug() << " Last bin ranges (X1_end vs X2_end) = (" << X1.back() << "," << X2.back() << ")\n";
+          }
           PARALLEL_CRITICAL(resultBool)
           resultBool = false;
         }
@@ -1100,17 +1105,13 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
       }
       bool mismatch = false;
       if (isRelErr) {
-        if (!withinRelativeTolerance(s1, s2, tolerance)) {
-          mismatch = true;
-        }
-      } else if (!withinAbsoluteTolerance(s1, s2, tolerance)) {
-        mismatch = true;
-      } else if (!withinAbsoluteTolerance(v1[0], v2[0], tolerance)) {
-        mismatch = true;
-      } else if (!withinAbsoluteTolerance(v1[1], v2[1], tolerance)) {
-        mismatch = true;
-      } else if (!withinAbsoluteTolerance(v1[2], v2[2], tolerance)) {
-        mismatch = true;
+        mismatch = !withinRelativeTolerance(s1, s2, tolerance);
+        // Q: whould we not also compare the vectors?
+      } else {
+        mismatch = !withinAbsoluteTolerance(s1, s2, tolerance) || 
+                   !withinAbsoluteTolerance(v1[0], v2[0], tolerance) ||
+                   !withinAbsoluteTolerance(v1[1], v2[1], tolerance) ||
+                   !withinAbsoluteTolerance(v1[2], v2[2], tolerance);
       }
       if (mismatch) {
         g_log.notice(name);
@@ -1279,14 +1280,9 @@ void CompareWorkspaces::doTableComparison(const API::ITableWorkspace_const_sptr 
     const auto c2 = tws2->getColumn(i);
 
     if (isRelErr) {
-      if (!c1->equalsRelErr(*c2, tolerance)) {
-        mismatch = true;
-      }
+      mismatch = !c1->equalsRelErr(*c2, tolerance);
     } else {
-
-      if (!c1->equals(*c2, tolerance)) {
-        mismatch = true;
-      }
+      mismatch = !c1->equals(*c2, tolerance);
     }
     if (mismatch) {
       g_log.debug() << "Table data mismatch at column " << i << "\n";
