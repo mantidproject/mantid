@@ -21,6 +21,7 @@ Submodules
    :maxdepth: 1
 
    kernel/index
+   dataobjects/index
    geometry/index
    api/index
    plots/index
