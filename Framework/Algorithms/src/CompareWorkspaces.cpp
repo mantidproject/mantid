@@ -78,13 +78,13 @@ int compareEventLists(Kernel::Logger &logger, const EventList &el1, const EventL
       diffpulse = true;
       ++numdiffpulse;
     }
-    if (fabs(e1.tof() - e2.tof()) > tolTof) {
+    if (std::fabs(e1.tof() - e2.tof()) > tolTof) {
       difftof = true;
       ++numdifftof;
     }
     if (diffpulse && difftof)
       ++numdiffboth;
-    if (fabs(e1.weight() - e2.weight()) > tolWeight) {
+    if (std::fabs(e1.weight() - e2.weight()) > tolWeight) {
       diffweight = true;
       ++numdiffweight;
     }
@@ -644,11 +644,14 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
         for (int j = 0; j < static_cast<int>(Y1.size()); ++j) {
           bool err;
           if (RelErr) {
-            err =
-                (relErr(X1[j], X2[j], tolerance) || relErr(Y1[j], Y2[j], tolerance) || relErr(E1[j], E2[j], tolerance));
-          } else
-            err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance ||
-                   std::fabs(E1[j] - E2[j]) > tolerance);
+            err = (!withinRelativeTolerance(X1[j], X2[j], tolerance) ||
+                   !withinRelativeTolerance(Y1[j], Y2[j], tolerance) ||
+                   !withinRelativeTolerance(E1[j], E2[j], tolerance));
+          } else {
+            err = (!withinAbsoluteTolerance(X1[j], X2[j], tolerance) ||
+                   !withinAbsoluteTolerance(Y1[j], Y2[j], tolerance) ||
+                   !withinAbsoluteTolerance(E1[j], E2[j], tolerance));
+          }
 
           if (err) {
             g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
@@ -662,7 +665,7 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
         }
 
         // Extra one for histogram data
-        if (histogram && std::fabs(X1.back() - X2.back()) > tolerance) {
+        if (histogram && !withinAbsoluteTolerance(X1.back(), X2.back(), tolerance)) {
           g_log.debug() << " Data ranges mismatch for spectra N: (" << i << ")\n";
           g_log.debug() << " Last bin ranges (X1_end vs X2_end) = (" << X1.back() << "," << X2.back() << ")\n";
           PARALLEL_CRITICAL(resultBool)
@@ -676,7 +679,7 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
 
   if (!resultBool)
     recordMismatch("Data mismatch");
-  // If all is well, return true
+  // return result
   return resultBool;
 }
 
@@ -1097,16 +1100,16 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
       }
       bool mismatch = false;
       if (isRelErr) {
-        if (relErr(s1, s2, tolerance)) {
+        if (!withinRelativeTolerance(s1, s2, tolerance)) {
           mismatch = true;
         }
-      } else if (std::fabs(s1 - s2) > tolerance) {
+      } else if (!withinAbsoluteTolerance(s1, s2, tolerance)) {
         mismatch = true;
-      } else if (std::fabs(v1[0] - v2[0]) > tolerance) {
+      } else if (!withinAbsoluteTolerance(v1[0], v2[0], tolerance)) {
         mismatch = true;
-      } else if (std::fabs(v1[1] - v2[1]) > tolerance) {
+      } else if (!withinAbsoluteTolerance(v1[1], v2[1], tolerance)) {
         mismatch = true;
-      } else if (std::fabs(v1[2] - v2[2]) > tolerance) {
+      } else if (!withinAbsoluteTolerance(v1[2], v2[2], tolerance)) {
         mismatch = true;
       }
       if (mismatch) {
@@ -1213,11 +1216,12 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(const LeanElasticPeaksWorks
         g_log.information() << "Column " << name << " is not compared\n";
       }
       bool mismatch = false;
+      // Q: why does it not perform the user-specified operation for QLab and QSample?
       if (isRelErr && name != "QLab" && name != "QSample") {
-        if (relErr(s1, s2, tolerance)) {
+        if (!withinRelativeTolerance(s1, s2, tolerance)) {
           mismatch = true;
         }
-      } else if (std::fabs(s1 - s2) > tolerance) {
+      } else if (!withinAbsoluteTolerance(s1, s2, tolerance)) {
         mismatch = true;
       }
       if (mismatch) {
@@ -1341,26 +1345,38 @@ void CompareWorkspaces::recordMismatch(const std::string &msg, std::string ws1, 
 }
 
 //------------------------------------------------------------------------------------------------
-/** Function which calculates relative error between two values and analyses if
-this error is within the limits
-* requested. When the absolute value of the difference is smaller then the value
-of the error requested,
-* absolute error is used instead of relative error.
+/** Function which calculates absolute error between two values and analyses if
+this error is within the limits requested.
 
-@param x1       -- first value to check difference
-@param x2       -- second value to check difference
-@param errorVal -- the value of the error, to check against. Should  be large
-then 0
+@param x1    -- first value to check difference
+@param x2    -- second value to check difference
+@param atol  -- the tolerance of the comparison. Must be nonnegative
 
-@returns true if error or false if the value is within the limits requested
+@returns true if absolute difference is within the tolerance; false otherwise
 */
-bool CompareWorkspaces::relErr(double x1, double x2, double errorVal) const {
-  double num = std::fabs(x1 - x2);
-  // how to treat x1<0 and x2 > 0 ?  probably this way
-  double den = 0.5 * (std::fabs(x1) + std::fabs(x2));
-  if (den < errorVal)
-    return (num > errorVal);
+bool CompareWorkspaces::withinAbsoluteTolerance(double const x1, double const x2, double const atol) {
+  // NOTE !(|x1-x2| > atol) is not the same as |x1-x2| <= atol
+  return !(std::fabs(x1 - x2) > atol);
+}
 
-  return (num / den > errorVal);
+//------------------------------------------------------------------------------------------------
+/** Function which calculates relative error between two values and analyses if
+this error is within the limits requested.
+
+@param x1    -- first value to check difference
+@param x2    -- second value to check difference
+@param rtol  -- the tolerance of the comparison. Must be nonnegative
+
+@returns true if relative difference is within the tolerance; false otherwise
+@returns true if error or false if the relative value is within the limits requested
+*/
+bool CompareWorkspaces::withinRelativeTolerance(double const x1, double const x2, double const rtol) {
+  double const num = std::fabs(x1 - x2);
+  // create a standardized size to compare against
+  double const den = 0.5 * (std::fabs(x1) + std::fabs(x2));
+  if (den < rtol)
+    return !(num > rtol);
+
+  return !(num / den > rtol);
 }
 } // namespace Mantid::Algorithms
