@@ -11,11 +11,9 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
-#include <filesystem>
-#include <Poco/Path.h>
-
 #include <algorithm>
 #include <cstring>
+#include <filesystem>
 #include <string>
 
 namespace Mantid::Kernel {
@@ -211,7 +209,7 @@ bool NexusDescriptor::classTypeExists(const std::string &classType) const {
  */
 void NexusDescriptor::initialize(const std::string &filename) {
   m_filename = filename;
-  m_extension = "." + Poco::Path(filename).getExtension();
+  m_extension = std::filesystem::path(filename).extension().string();
 
   m_file = std::make_unique<::NeXus::File>(this->filename());
 

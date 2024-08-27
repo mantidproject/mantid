@@ -13,7 +13,6 @@
 #include <filesystem>
 #include <memory>
 
-#include <Poco/Path.h>
 #include <nexus/NeXusFile.hpp>
 
 #include <cstdio>
@@ -31,17 +30,17 @@ public:
     using Mantid::Kernel::ConfigService;
     auto dataPaths = ConfigService::Instance().getDataSearchDirs();
     for (auto &dataPath : dataPaths) {
-      Poco::Path hdf5Path(dataPath, "CNCS_7860_event.nxs");
-      if (std::filesystem::exists(hdf5Path.toString()))
-        m_testHDF5Path = hdf5Path.toString();
+      const auto hdf5Path = std::filesystem::path(dataPath) / "CNCS_7860_event.nxs";
+      if (std::filesystem::exists(hdf5Path))
+        m_testHDF5Path = hdf5Path.string();
 
-      Poco::Path hdf4Path(dataPath, "argus0026287.nxs");
-      if (std::filesystem::exists(hdf4Path.toString()))
-        m_testHDF4Path = hdf4Path.toString();
+      const auto hdf4Path = std::filesystem::path(dataPath) / "argus0026287.nxs";
+      if (std::filesystem::exists(hdf4Path))
+        m_testHDF4Path = hdf4Path.string();
 
-      Poco::Path nonhdf5Path(dataPath, "CSP79590.raw");
-      if (std::filesystem::exists(nonhdf5Path.toString()))
-        m_testNonHDFPath = nonhdf5Path.toString();
+      const auto nonhdf5Path = std::filesystem::path(dataPath) / "CSP79590.raw";
+      if (std::filesystem::exists(nonhdf5Path))
+        m_testNonHDFPath = nonhdf5Path.string();
 
       if (!m_testHDF5Path.empty() && !m_testHDF4Path.empty() && !m_testNonHDFPath.empty())
         break;

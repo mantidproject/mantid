@@ -9,7 +9,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/DirectoryValidator.h"
-#include <Poco/File.h>
 #include <filesystem>
 #include <fstream>
 

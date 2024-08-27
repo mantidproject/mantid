@@ -7,9 +7,7 @@
 #include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/Strings.h"
 
-#include <Poco/Path.h>
 #include <filesystem>
-
 #include <stdexcept>
 
 namespace Mantid::Kernel {
@@ -82,7 +80,7 @@ bool FileDescriptor::isAscii(std::istream &data, const size_t nbytes) {
 bool FileDescriptor::isAscii(FILE *file, const size_t nbytes) {
   // read the data and reset the seek index back to the beginning
   auto dataArray = new char[nbytes];
-  char *pend = &dataArray[fread(dataArray, 1, nbytes, file)];
+  const char *pend = &dataArray[fread(dataArray, 1, nbytes, file)];
   int retval = fseek(file, 0, SEEK_SET);
   if (retval < 0)
     throw std::runtime_error("FileDescriptor::isAscii - Cannot change position "
@@ -177,7 +175,7 @@ bool FileDescriptor::isXML() const { return (this->isAscii() && this->extension(
  */
 void FileDescriptor::initialize(const std::string &filename) {
   m_filename = filename;
-  m_extension = Mantid::Kernel::Strings::toLower("." + Poco::Path(filename).getExtension());
+  m_extension = Mantid::Kernel::Strings::toLower(std::filesystem::path(filename).extension().string());
 
   m_file.open(m_filename.c_str(), std::ios::in | std::ios::binary);
   if (!m_file)
