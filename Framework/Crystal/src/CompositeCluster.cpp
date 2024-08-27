@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CompositeCluster.h"
 
+#include <algorithm>
 #include <numeric>
+#include <stdexcept>
 
 namespace {
 /**
@@ -61,10 +63,10 @@ void CompositeCluster::writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> w
  */
 size_t CompositeCluster::getLabel() const {
   findMinimum();
-  if (!m_label.is_initialized()) {
+  if (!m_label.has_value()) {
     throw std::runtime_error("No child IClusters. CompositeCluster::getLabel() is not supported.");
   } else {
-    return m_label.get(); // Assumes all are uniform.
+    return m_label.value(); // Assumes all are uniform.
   }
 }
 

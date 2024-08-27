@@ -133,7 +133,7 @@ private:
   void setScaleType(AxisID id, const QString &actionName);
   void toggleLegend(const bool checked);
 
-  boost::optional<char const *> overrideAxisLabel(AxisID const &axisID);
+  std::optional<char const *> overrideAxisLabel(AxisID const &axisID);
   void setAxisLabel(AxisID const &axisID, char const *const label);
 
   // Block redrawing from taking place

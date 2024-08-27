@@ -129,8 +129,8 @@ Kernel::V3D inSphere(const detail::ShapeInfo &shapeInfo, Kernel::PseudoRandomNum
  * @param maxAttempts maximum number of random numbers to use before giving up
  * @return a point
  */
-boost::optional<Kernel::V3D> inGenericShape(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
-                                            size_t maxAttempts) {
+std::optional<Kernel::V3D> inGenericShape(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
+                                          size_t maxAttempts) {
   return bounded(object, rng, object.getBoundingBox(), maxAttempts);
 }
 
@@ -142,9 +142,9 @@ boost::optional<Kernel::V3D> inGenericShape(const IObject &object, Kernel::Pseud
  * @param maxAttempts number of attempts to find a suitable point
  * @return a point or none if maxAttempts was exceeded
  */
-boost::optional<Kernel::V3D> bounded(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
-                                     const BoundingBox &box, size_t maxAttempts) {
-  boost::optional<Kernel::V3D> point{boost::none};
+std::optional<Kernel::V3D> bounded(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
+                                   const BoundingBox &box, size_t maxAttempts) {
+  std::optional<Kernel::V3D> point{std::nullopt};
   if (box.isNull()) {
     throw std::invalid_argument("Invalid bounding box. Cannot generate random point.");
   }

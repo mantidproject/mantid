@@ -80,7 +80,7 @@ struct SpectraInfo {
 };
 
 // Helper typdef.
-using SpectraInfo_optional = boost::optional<SpectraInfo>;
+using SpectraInfo_optional = std::optional<SpectraInfo>;
 
 /**
  * Extract ALL the detector, spectrum number and workspace index mapping

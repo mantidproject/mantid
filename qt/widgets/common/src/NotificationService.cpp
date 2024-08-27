@@ -58,7 +58,7 @@ void NotificationService::showMessage(const QString &title, const QString &messa
 bool NotificationService::isEnabled() {
   bool retVal = false;
   try {
-    retVal = Mantid::Kernel::ConfigService::Instance().getValue<bool>(NOTIFICATIONS_ENABLED_KEY).get_value_or(true);
+    retVal = Mantid::Kernel::ConfigService::Instance().getValue<bool>(NOTIFICATIONS_ENABLED_KEY).value_or(true);
   } catch (const Mantid::Kernel::Exception::FileError &) {
     // The Config Service could not find the properties file
     // Disable notifications

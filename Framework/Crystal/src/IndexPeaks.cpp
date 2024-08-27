@@ -16,7 +16,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 #include <algorithm>
 
@@ -231,9 +231,9 @@ using IndexedSatelliteInfo = std::tuple<V3D, V3D, V3D, double>;
  * @return (IntHKL, IntMNP, error) if a peak was indexed, otherwise none
  */
 
-boost::optional<IndexedSatelliteInfo> indexSatellite(const V3D &mainHKL, const int maxOrder,
-                                                     const std::vector<V3D> &modVectors, const double tolerance,
-                                                     const bool crossTerms) {
+std::optional<IndexedSatelliteInfo> indexSatellite(const V3D &mainHKL, const int maxOrder,
+                                                   const std::vector<V3D> &modVectors, const double tolerance,
+                                                   const bool crossTerms) {
   const auto offsets = generateOffsetVectors(modVectors, maxOrder, crossTerms);
   bool foundSatellite{false};
   V3D indexedIntHKL, indexedMNP, fractionalOffset;
@@ -252,7 +252,7 @@ boost::optional<IndexedSatelliteInfo> indexSatellite(const V3D &mainHKL, const i
   if (foundSatellite)
     return std::make_tuple(fractionalOffset, indexedIntHKL, indexedMNP, indexedIntHKL.hklError());
   else
-    return boost::none;
+    return std::nullopt;
 }
 
 /**
@@ -295,7 +295,7 @@ CombinedIndexingStats indexPeaks(const std::vector<IPeak *> &peaks, DblMatrix ub
       auto result = indexSatellite(nominalHKL, satelliteArgs.maxOrder, satelliteArgs.modVectors,
                                    satelliteArgs.tolerance, satelliteArgs.crossTerms);
       if (result) {
-        const auto &satelliteInfo = result.get();
+        const auto &satelliteInfo = result.value();
         V3D hkl;
         ;
         if (roundHKLs) {

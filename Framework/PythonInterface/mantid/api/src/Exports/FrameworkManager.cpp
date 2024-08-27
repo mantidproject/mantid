@@ -44,8 +44,7 @@ void declareCPPAlgorithms() { AlgorithmFactory::Instance().subscribe<Mantid::Pyt
  */
 void updatePythonPaths() {
   auto packagesetup = import("mantid.kernel.packagesetup");
-  packagesetup.attr("update_sys_paths")(
-      ConfigService::Instance().getValue<std::string>(PYTHONPATHS_KEY).get_value_or(""));
+  packagesetup.attr("update_sys_paths")(ConfigService::Instance().getValue<std::string>(PYTHONPATHS_KEY).value_or(""));
 }
 
 /**

@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidDataHandling/DataBlock.h"
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace Mantid {
 namespace DataHandling {
@@ -32,7 +32,7 @@ public:
   std::vector<SpectrumPair> m_intervals;
   specnum_t m_currentSpectrum;
 
-  boost::optional<size_t> m_currentIntervalIndex;
+  std::optional<size_t> m_currentIntervalIndex;
 };
 
 } // namespace DataHandling

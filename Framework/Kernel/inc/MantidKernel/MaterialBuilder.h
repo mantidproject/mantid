@@ -8,7 +8,7 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Material.h"
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 namespace Mantid {
 // Forward declare
@@ -70,15 +70,15 @@ private:
 
   std::string m_name;
   Material::ChemicalFormula m_formula;
-  boost::optional<int> m_atomicNo;
+  std::optional<int> m_atomicNo;
   int m_massNo;
-  boost::optional<double> m_numberDensity, m_packingFraction;
-  boost::optional<double> m_numberDensityEff;
-  boost::optional<double> m_zParam, m_cellVol, m_massDensity;
-  boost::optional<double> m_totalXSection, m_cohXSection, m_incXSection, m_absSection;
+  std::optional<double> m_numberDensity, m_packingFraction;
+  std::optional<double> m_numberDensityEff;
+  std::optional<double> m_zParam, m_cellVol, m_massDensity;
+  std::optional<double> m_totalXSection, m_cohXSection, m_incXSection, m_absSection;
   NumberDensityUnit m_numberDensityUnit;
-  boost::optional<std::string> m_attenuationProfileFileName;
-  boost::optional<std::string> m_xRayAttenuationProfileFileName;
+  std::optional<std::string> m_attenuationProfileFileName;
+  std::optional<std::string> m_xRayAttenuationProfileFileName;
   std::string m_attenuationFileSearchPath;
 };
 

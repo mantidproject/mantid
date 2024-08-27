@@ -209,7 +209,7 @@ public:
         peak.setHKL(hkl + modHKL * mnp);
         peak.setIntHKL(hkl);
         peak.setIntMNP(mnp);
-        peak.setQSampleFrame(peak.getQSampleFrame() + modUB * mnp * 2 * M_PI, boost::none);
+        peak.setQSampleFrame(peak.getQSampleFrame() + modUB * mnp * 2 * M_PI, std::nullopt);
       }
     }
 

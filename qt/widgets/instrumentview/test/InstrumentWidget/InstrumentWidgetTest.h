@@ -60,7 +60,7 @@ public:
 
     m_glEnabledOriginal = Mantid::Kernel::ConfigService::Instance()
                               .getValue<bool>("MantidOptions.InstrumentView.UseOpenGL")
-                              .get_value_or(true);
+                              .value_or(true);
     setGl(true);
   }
 

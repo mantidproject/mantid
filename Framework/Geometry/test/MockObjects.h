@@ -85,9 +85,8 @@ public:
   MOCK_METHOD1(setSamplePos, void(const Mantid::Kernel::V3D &XYZ));
   MOCK_CONST_METHOD0(getQLabFrame, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getQSampleFrame, Mantid::Kernel::V3D());
-  MOCK_METHOD2(setQSampleFrame,
-               void(const Mantid::Kernel::V3D &QSampleFrame, boost::optional<double> detectorDistance));
-  MOCK_METHOD2(setQLabFrame, void(const Mantid::Kernel::V3D &QLabFrame, boost::optional<double> detectorDistance));
+  MOCK_METHOD2(setQSampleFrame, void(const Mantid::Kernel::V3D &QSampleFrame, std::optional<double> detectorDistance));
+  MOCK_METHOD2(setQLabFrame, void(const Mantid::Kernel::V3D &QLabFrame, std::optional<double> detectorDistance));
   MOCK_METHOD1(setWavelength, void(double wavelength));
   MOCK_CONST_METHOD0(getWavelength, double());
   MOCK_CONST_METHOD0(getScattering, double());

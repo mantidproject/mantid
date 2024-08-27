@@ -41,7 +41,7 @@ Peak::Peak() : BasePeak(), m_row(-1), m_col(-1), m_detectorID(-1), m_initialEner
  *        Used to give a valid TOF. Default 1.0 meters.
  */
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::V3D &QLabFrame,
-           boost::optional<double> detectorDistance)
+           std::optional<double> detectorDistance)
     : BasePeak() {
   // Initialization of m_inst, sourcePos, m_samplePos
   setInstrument(m_inst);
@@ -63,7 +63,7 @@ Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::
  *        Used to give a valid TOF. Default 1.0 meters.
  */
 Peak::Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::V3D &QSampleFrame,
-           const Mantid::Kernel::Matrix<double> &goniometer, boost::optional<double> detectorDistance)
+           const Mantid::Kernel::Matrix<double> &goniometer, std::optional<double> detectorDistance)
     : BasePeak(goniometer) {
   // Initialization of m_inst, sourcePos, m_samplePos
   this->setInstrument(m_inst);
@@ -173,7 +173,7 @@ Peak::Peak(const Geometry::IPeak &ipeak)
 
 //----------------------------------------------------------------------------------------------
 Peak::Peak(const Mantid::DataObjects::LeanElasticPeak &lpeak, const Geometry::Instrument_const_sptr &inst,
-           boost::optional<double> detectorDistance)
+           std::optional<double> detectorDistance)
     : BasePeak(lpeak) {
   this->setInstrument(inst);
   this->setQLabFrame(lpeak.getQLabFrame(), std::move(detectorDistance));
@@ -499,7 +499,7 @@ Mantid::Kernel::V3D Peak::getQSampleFrame() const {
  * @param detectorDistance :: distance between the sample and the detector.
  *        Used to give a valid TOF. You do NOT need to explicitly set this.
  */
-void Peak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame, boost::optional<double> detectorDistance) {
+void Peak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame, std::optional<double> detectorDistance) {
   V3D Qlab = getGoniometerMatrix() * QSampleFrame;
   this->setQLabFrame(Qlab, detectorDistance);
 }
@@ -520,7 +520,7 @@ void Peak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame, boost::optio
  *this is provided. Then we do not
  * ray trace to find the intersecing detector.
  */
-void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab, boost::optional<double> detectorDistance) {
+void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab, std::optional<double> detectorDistance) {
   if (!this->m_inst) {
     throw std::invalid_argument("Setting QLab without an instrument would lead "
                                 "to an inconsistent state for the Peak");
@@ -571,8 +571,8 @@ void Peak::setQLabFrame(const Mantid::Kernel::V3D &qLab, boost::optional<double>
   detectorDir.normalize();
 
   // Use the given detector distance to find the detector position.
-  if (detectorDistance.is_initialized()) {
-    detPos = m_samplePos + detectorDir * detectorDistance.get();
+  if (detectorDistance.has_value()) {
+    detPos = m_samplePos + detectorDir * detectorDistance.value();
     // We do not-update the detector as by manually setting the distance the
     // client seems to know better.
   } else {

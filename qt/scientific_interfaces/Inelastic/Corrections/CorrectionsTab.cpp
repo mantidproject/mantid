@@ -85,9 +85,9 @@ bool CorrectionsTab::checkWorkspaceBinningMatches(const MatrixWorkspace_const_sp
  * @param eMode Emode to use (if not set will determine based on current X unit)
  * @return Name of output workspace
  */
-boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(const MatrixWorkspace_sptr &ws,
-                                                                 std::string const &unitID, std::string const &suffix,
-                                                                 std::string eMode, double eFixed) {
+std::optional<std::string> CorrectionsTab::addConvertUnitsStep(const MatrixWorkspace_sptr &ws,
+                                                               std::string const &unitID, std::string const &suffix,
+                                                               std::string eMode, double eFixed) {
   std::string outputName = ws->getName();
 
   if (suffix != "UNIT")
@@ -112,7 +112,7 @@ boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(const MatrixWor
       eFixed = *eFixedFromWs;
     } else {
       showMessageBox("Please enter an Efixed value.");
-      return boost::none;
+      return std::nullopt;
     }
   }
 

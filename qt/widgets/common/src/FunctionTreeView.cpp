@@ -2060,10 +2060,10 @@ void FunctionTreeView::setErrorsEnabled(bool enabled) { m_parameterManager->setE
  */
 void FunctionTreeView::clearErrors() { m_parameterManager->clearErrors(); }
 
-boost::optional<std::string> FunctionTreeView::currentFunctionIndex() const { return m_currentFunctionIndex; }
+std::optional<std::string> FunctionTreeView::currentFunctionIndex() const { return m_currentFunctionIndex; }
 
 void FunctionTreeView::updateCurrentFunctionIndex() {
-  boost::optional<std::string> newIndex;
+  std::optional<std::string> newIndex;
 
   if (auto item = m_browser->currentItem()) {
     auto prop = item->property();

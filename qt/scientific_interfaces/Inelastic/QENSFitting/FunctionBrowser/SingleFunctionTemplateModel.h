@@ -15,7 +15,7 @@
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <QMap>
-#include <boost/optional.hpp>
+#include <optional>
 #include <string>
 
 namespace MantidQt {
@@ -51,7 +51,7 @@ private:
   QMap<std::string, IFunction_sptr> m_fitTypeToFunctionStore;
   QMap<std::string, std::vector<std::string>> m_globalParameterStore;
   std::vector<std::string> m_fitTypeList;
-  boost::optional<std::string> findFitTypeForFunctionName(const std::string &name) const;
+  std::optional<std::string> findFitTypeForFunctionName(const std::string &name) const;
   // Parameter estimation
   std::unique_ptr<FunctionParameterEstimation> m_parameterEstimation;
 };

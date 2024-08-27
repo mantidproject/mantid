@@ -32,7 +32,7 @@ public:
   MOCK_CONST_METHOD0(algorithmName, std::string());
   MOCK_CONST_METHOD0(algorithmVersion, int());
   MOCK_CONST_METHOD0(shapeName, std::string());
-  MOCK_CONST_METHOD1(radius, boost::optional<double>(Mantid::Geometry::PeakShape::RadiusType));
+  MOCK_CONST_METHOD1(radius, std::optional<double>(Mantid::Geometry::PeakShape::RadiusType));
   ~MockPeakShape() override = default;
 };
 } // namespace DataObjects

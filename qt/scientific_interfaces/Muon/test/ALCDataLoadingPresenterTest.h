@@ -22,7 +22,7 @@ using namespace testing;
 namespace boost {
 template <class CharType, class CharTrait>
 std::basic_ostream<CharType, CharTrait> &operator<<(std::basic_ostream<CharType, CharTrait> &out,
-                                                    optional<std::pair<double, double>> const &maybe) {
+                                                    std::optional<std::pair<double, double>> const &maybe) {
   if (maybe)
     out << maybe->first << ", " << maybe->second;
   return out;
@@ -42,7 +42,7 @@ public:
   MOCK_CONST_METHOD0(log, std::string());
   MOCK_CONST_METHOD0(function, std::string());
   MOCK_CONST_METHOD0(calculationType, std::string());
-  MOCK_CONST_METHOD0(timeRange, boost::optional<PAIR_OF_DOUBLES>());
+  MOCK_CONST_METHOD0(timeRange, std::optional<PAIR_OF_DOUBLES>());
   MOCK_CONST_METHOD0(deadTimeType, std::string());
   MOCK_CONST_METHOD0(deadTimeFile, std::string());
   MOCK_CONST_METHOD0(detectorGroupingType, std::string());
@@ -146,7 +146,7 @@ public:
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Integral"));
     ON_CALL(*m_view, log()).WillByDefault(Return("sample_magn_field"));
     ON_CALL(*m_view, function()).WillByDefault(Return("Last"));
-    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::make_optional(std::make_pair(-6.0, 32.0))));
+    ON_CALL(*m_view, timeRange()).WillByDefault(Return(std::make_optional(std::make_pair(-6.0, 32.0))));
     // Add range for integration
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("None"));
     ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Auto"));
@@ -209,7 +209,7 @@ public:
 
   void test_load_timeLimits() {
     // Set time limit
-    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::make_optional(std::make_pair(5.0, 10.0))));
+    ON_CALL(*m_view, timeRange()).WillByDefault(Return(std::make_optional(std::make_pair(5.0, 10.0))));
 
     EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
@@ -224,7 +224,7 @@ public:
   void test_updateAvailableInfo() {
     // Test time limits
     auto timeRange = std::make_pair<double, double>(0.0, 0.0);
-    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::make_optional(timeRange)));
+    ON_CALL(*m_view, timeRange()).WillByDefault(Return(std::make_optional(timeRange)));
 
     EXPECT_CALL(*m_view, getFirstFile()).WillRepeatedly(Return("MUSR00015189.nxs"));
     // Test logs
@@ -243,7 +243,7 @@ public:
   void test_updateAvailableInfo_NotFirstRun() {
     // Test time limits
     auto timeRange = std::make_pair<double, double>(0.1, 10.0); // not the first run loaded
-    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::make_optional(timeRange)));
+    ON_CALL(*m_view, timeRange()).WillByDefault(Return(std::make_optional(timeRange)));
 
     EXPECT_CALL(*m_view, getFirstFile()).WillRepeatedly(Return("MUSR00015189.nxs"));
     // Test logs

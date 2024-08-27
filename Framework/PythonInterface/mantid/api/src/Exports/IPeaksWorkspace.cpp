@@ -12,11 +12,11 @@
 #include "MantidPythonInterface/core/Converters/PyObjectToV3D.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 #include <boost/none.hpp>
-#include <boost/optional.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/python/manage_new_object.hpp>
 #include <boost/python/return_internal_reference.hpp>
+#include <optional>
 #include <utility>
 
 using namespace boost::python;
@@ -41,7 +41,7 @@ IPeak *createPeakHKL(const IPeaksWorkspace &self, const object &data) {
 
 /// Create a peak via it's QLab value from a list or numpy array
 IPeak *createPeakQLab(const IPeaksWorkspace &self, const object &data) {
-  auto peak = self.createPeak(Mantid::PythonInterface::Converters::PyObjectToV3D(data)(), boost::none);
+  auto peak = self.createPeak(Mantid::PythonInterface::Converters::PyObjectToV3D(data)(), std::nullopt);
   // Python will manage it
   return peak.release();
 }
@@ -127,7 +127,7 @@ private:
   // type alias for the member function to wrap
   template <typename T> using MemberFunc = void (IPeak::*)(T value);
   // special type alias for V3D functions that take an addtional parameter
-  using MemberFuncV3D = void (IPeak::*)(const V3D &value, boost::optional<double>);
+  using MemberFuncV3D = void (IPeak::*)(const V3D &value, std::optional<double>);
   // type alias for the setter function
   using SetterType = std::function<void(IPeak &peak, const object)>;
 
@@ -164,7 +164,7 @@ private:
       if (!extractor.check()) {
         throw std::runtime_error("Cannot set value. Value was not of the expected type!");
       }
-      (peak.*func)(extractor(), boost::none);
+      (peak.*func)(extractor(), std::nullopt);
     };
   }
 

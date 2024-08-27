@@ -152,8 +152,8 @@ void FrameworkManagerImpl::loadPlugins() { loadPluginsUsingKey(PLUGINS_DIR_KEY, 
 void FrameworkManagerImpl::setNumOMPThreadsToConfigValue() {
   // Set the number of threads to use for this process
   auto maxCores = Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
-  if (maxCores.get_value_or(0) > 0) {
-    setNumOMPThreads(maxCores.get());
+  if (maxCores.value_or(0) > 0) {
+    setNumOMPThreads(maxCores.value());
   }
 }
 
@@ -346,7 +346,7 @@ void FrameworkManagerImpl::disableNexusOutput() { NXMSetError(nullptr, NexusErro
 void FrameworkManagerImpl::asynchronousStartupTasks() {
   auto instrumentUpdates = Kernel::ConfigService::Instance().getValue<bool>("UpdateInstrumentDefinitions.OnStartup");
 
-  if (instrumentUpdates.get_value_or(false)) {
+  if (instrumentUpdates.value_or(false)) {
     updateInstrumentDefinitions();
   } else {
     g_log.information() << "Instrument updates disabled - cannot update "
@@ -354,7 +354,7 @@ void FrameworkManagerImpl::asynchronousStartupTasks() {
   }
 
   auto newVersionCheck = Kernel::ConfigService::Instance().getValue<bool>("CheckMantidVersion.OnStartup");
-  if (newVersionCheck.get_value_or(false)) {
+  if (newVersionCheck.value_or(false)) {
     checkIfNewerVersionIsAvailable();
   } else {
     g_log.information() << "Version check disabled.\n";
@@ -367,11 +367,11 @@ void FrameworkManagerImpl::setupUsageReporting() {
   auto &configSvc = ConfigService::Instance();
   auto interval = configSvc.getValue<int>("Usage.BufferCheckInterval");
   auto &usageSvc = UsageService::Instance();
-  if (interval.get_value_or(0) > 0) {
-    usageSvc.setInterval(interval.get());
+  if (interval.value_or(0) > 0) {
+    usageSvc.setInterval(interval.value());
   }
   auto enabled = configSvc.getValue<bool>("usagereports.enabled");
-  usageSvc.setEnabled(enabled.get_value_or(false));
+  usageSvc.setEnabled(enabled.value_or(false));
   usageSvc.registerStartup();
 }
 

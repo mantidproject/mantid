@@ -17,7 +17,6 @@
 #include <QHash>
 #include <QSetIterator>
 #include <QStringList>
-#include <boost/optional.hpp>
 #include <set>
 
 namespace MantidQt {

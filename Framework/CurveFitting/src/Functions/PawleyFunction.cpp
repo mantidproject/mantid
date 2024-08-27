@@ -302,7 +302,7 @@ PawleyFunction::PawleyFunction()
     : IPawleyFunction(), m_compositeFunction(), m_pawleyParameterFunction(), m_peakProfileComposite(), m_hkls(),
       m_dUnit(), m_wsUnit(), m_peakRadius(5) {
   auto peakRadius = Kernel::ConfigService::Instance().getValue<int>("curvefitting.peakRadius");
-  m_peakRadius = peakRadius.get_value_or(5);
+  m_peakRadius = peakRadius.value_or(5);
 }
 
 void PawleyFunction::setMatrixWorkspace(std::shared_ptr<const MatrixWorkspace> workspace, size_t wi, double startX,

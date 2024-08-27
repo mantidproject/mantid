@@ -288,8 +288,8 @@ public:
 
   void testCustomPropertyAsValue() {
     // Mantid.legs is defined in the properties script as 6
-    int value = ConfigService::Instance().getValue<int>("projectRecovery.secondsBetween").get_value_or(0);
-    double dblValue = ConfigService::Instance().getValue<double>("projectRecovery.secondsBetween").get_value_or(0);
+    int value = ConfigService::Instance().getValue<int>("projectRecovery.secondsBetween").value_or(0);
+    double dblValue = ConfigService::Instance().getValue<double>("projectRecovery.secondsBetween").value_or(0);
 
     TS_ASSERT_EQUALS(value, 60);
     TS_ASSERT_EQUALS(dblValue, 60.0);

@@ -394,8 +394,8 @@ void PanelsSurface::processGrid(size_t rootIndex) {
 /// and forming a flat surface.
 /// @param rootIndex :: Index of a component that is a tube
 /// @return Optional index of the bank that contains all of the tubes forming
-///   the surface. If the surface isn't flat return boost::none.
-boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
+///   the surface. If the surface isn't flat return std::nullopt.
+std::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
   const auto &componentInfo = m_instrActor->componentInfo();
   const auto bankIndex0 = componentInfo.parent(rootIndex);
   auto tubes = std::vector<size_t>();
@@ -441,7 +441,7 @@ boost::optional<size_t> PanelsSurface::processTubes(size_t rootIndex) {
     addTubes(bankIndex, tubes);
     normal = tubes.size() > 1 ? calculateBankNormal(componentInfo, tubes) : V3D();
     if (normal.nullVector() || !isBankFlat(componentInfo, bankIndex, tubes, normal))
-      return boost::none;
+      return std::nullopt;
   }
 
   // save bank info
@@ -607,7 +607,7 @@ void PanelsSurface::findFlatPanels(size_t rootIndex, std::vector<bool> &visited)
   if (componentType == ComponentType::OutlineComposite) {
     const auto bankIndex = processTubes(rootIndex);
     if (bankIndex) {
-      setBankVisited(componentInfo, bankIndex.get(), visited);
+      setBankVisited(componentInfo, bankIndex.value(), visited);
     } else {
       setBankVisited(componentInfo, parentIndex, visited);
     }

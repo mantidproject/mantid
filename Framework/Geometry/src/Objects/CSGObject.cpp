@@ -2001,9 +2001,9 @@ int CSGObject::getPointInObject(Kernel::V3D &point) const {
  * @param maxAttempts The maximum number of attempts at generating a point
  * @return whether a point was generated in the object or not
  */
-boost::optional<Kernel::V3D> CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
-                                                              const size_t maxAttempts) const {
-  boost::optional<V3D> point{boost::none};
+std::optional<Kernel::V3D> CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
+                                                            const size_t maxAttempts) const {
+  std::optional<V3D> point{std::nullopt};
   // If the shape fills its bounding box well enough then the most efficient
   // way to get the point is just brute force. We'll try that first with
   // just a few attempts.
@@ -2012,7 +2012,7 @@ boost::optional<Kernel::V3D> CSGObject::generatePointInObject(PseudoRandomNumber
   // within the box. So there is a sweet spot which depends on the actual
   // shape, its dimension and orientation.
   const size_t bruteForceAttempts{std::min(static_cast<size_t>(5), maxAttempts)};
-  boost::optional<V3D> maybePoint{RandomPoint::inGenericShape(*this, rng, bruteForceAttempts)};
+  std::optional<V3D> maybePoint{RandomPoint::inGenericShape(*this, rng, bruteForceAttempts)};
   if (maybePoint) {
     point = maybePoint;
   } else {
@@ -2047,10 +2047,10 @@ boost::optional<Kernel::V3D> CSGObject::generatePointInObject(PseudoRandomNumber
  * @param maxAttempts The maximum number of attempts at generating a point
  * @return whether a point was generated in the object or not
  */
-boost::optional<Kernel::V3D> CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                              const BoundingBox &activeRegion,
-                                                              const size_t maxAttempts) const {
-  boost::optional<V3D> point{boost::none};
+std::optional<Kernel::V3D> CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                            const BoundingBox &activeRegion,
+                                                            const size_t maxAttempts) const {
+  std::optional<V3D> point{std::nullopt};
   // We'll first try brute force. If the shape fills its bounding box
   // well enough, this should be the fastest method.
   // Increasing the brute force attemps speeds up the shapes that fill

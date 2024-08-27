@@ -10,10 +10,10 @@
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidFrameworkTestHelpers/BoxControllerDummyIO.h"
 #include "MantidKernel/DiskBuffer.h"
-#include <boost/optional.hpp>
 #include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
@@ -105,12 +105,12 @@ public:
     sc.setSplitTopInto(1, 20);
     sc.setSplitTopInto(2, 30);
 
-    boost::optional<std::vector<size_t>> splitTopInto = sc.getSplitTopInto();
+    std::optional<std::vector<size_t>> splitTopInto = sc.getSplitTopInto();
 
-    TSM_ASSERT_EQUALS("Should have three dimensions", splitTopInto.get().size(), 3);
-    TSM_ASSERT_EQUALS("Should have a value of 10 in the first dimension", splitTopInto.get()[0], 10);
-    TSM_ASSERT_EQUALS("Should have a value of 20 in the second dimension", splitTopInto.get()[1], 20);
-    TSM_ASSERT_EQUALS("Should have a value of 30 in the third dimension", splitTopInto.get()[2], 30);
+    TSM_ASSERT_EQUALS("Should have three dimensions", splitTopInto.value().size(), 3);
+    TSM_ASSERT_EQUALS("Should have a value of 10 in the first dimension", splitTopInto.value()[0], 10);
+    TSM_ASSERT_EQUALS("Should have a value of 20 in the second dimension", splitTopInto.value()[1], 20);
+    TSM_ASSERT_EQUALS("Should have a value of 30 in the third dimension", splitTopInto.value()[2], 30);
   }
 
   void test_setSplitTopIntoThrowsForWrongDimension() {
@@ -234,7 +234,7 @@ public:
     // Check for top level splitting
     if (a.getSplitTopInto() && b.getSplitTopInto()) {
       for (size_t d = 0; d < a.getNDims(); d++) {
-        TS_ASSERT_EQUALS(a.getSplitTopInto().get()[d], b.getSplitTopInto().get()[d]);
+        TS_ASSERT_EQUALS(a.getSplitTopInto().value()[d], b.getSplitTopInto().value()[d]);
       }
     } else {
       TS_ASSERT_EQUALS(a.getSplitTopInto(), b.getSplitTopInto());
@@ -341,7 +341,7 @@ public:
     // Check the constructor defaults.
     BoxController box_controller(2);
 
-    boost::optional<std::vector<size_t>> splitTopInto = box_controller.getSplitTopInto();
+    std::optional<std::vector<size_t>> splitTopInto = box_controller.getSplitTopInto();
     TS_ASSERT(!splitTopInto)
     TS_ASSERT_EQUALS(2, box_controller.getNDims());
     TS_ASSERT_EQUALS(1, box_controller.getNumSplit());

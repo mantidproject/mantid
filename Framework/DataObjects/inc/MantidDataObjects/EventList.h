@@ -359,13 +359,13 @@ private:
   void generateCountsHistogram(const double step, const MantidVec &X, MantidVec &Y) const;
 
 public:
-  static boost::optional<size_t> findLinearBin(const MantidVec &X, const double tof, const double divisor,
-                                               const double offset, const bool findExact = true);
-  static boost::optional<size_t> findLogBin(const MantidVec &X, const double tof, const double divisor,
-                                            const double offset, const bool findExact = true);
+  static std::optional<size_t> findLinearBin(const MantidVec &X, const double tof, const double divisor,
+                                             const double offset, const bool findExact = true);
+  static std::optional<size_t> findLogBin(const MantidVec &X, const double tof, const double divisor,
+                                          const double offset, const bool findExact = true);
 
 private:
-  static boost::optional<size_t> findExactBin(const MantidVec &X, const double tof, size_t n_bin);
+  static std::optional<size_t> findExactBin(const MantidVec &X, const double tof, size_t n_bin);
 
   void generateCountsHistogramPulseTime(const MantidVec &X, MantidVec &Y) const;
 

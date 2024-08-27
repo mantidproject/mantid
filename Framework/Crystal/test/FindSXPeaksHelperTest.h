@@ -138,9 +138,9 @@ public:
     auto peaks = peakFindingStrategy->findSXPeaks(x, y, e, workspaceIndex);
 
     // THEN
-    TSM_ASSERT("There should be two peaks that are found.", peaks.get().size() == 2);
-    TSM_ASSERT("The first peak should have a signal value of 7.", peaks.get()[0].getIntensity() == 7.);
-    TSM_ASSERT("The second peak should have a signal value of 11.", peaks.get()[1].getIntensity() == 11.);
+    TSM_ASSERT("There should be two peaks that are found.", peaks.value().size() == 2);
+    TSM_ASSERT("The first peak should have a signal value of 7.", peaks.value()[0].getIntensity() == 7.);
+    TSM_ASSERT("The second peak should have a signal value of 11.", peaks.value()[1].getIntensity() == 11.);
   }
 
   PeakList runFindAllPeaksWithMinBinWidth(const std::unique_ptr<BackgroundStrategy> backgroundStrategy,
@@ -167,14 +167,14 @@ public:
   void testWhenFindsAllPeaksWithMinimumBinWidthSpecified() {
     auto peaks = runFindAllPeaksWithMinBinWidth(std::make_unique<AbsoluteBackgroundStrategy>(3.0), 4);
 
-    TSM_ASSERT("There should be only one peak found.", peaks.get().size() == 1);
-    TSM_ASSERT("The only peak should have a signal value of 7.", peaks.get()[0].getIntensity() == 7.);
+    TSM_ASSERT("There should be only one peak found.", peaks.value().size() == 1);
+    TSM_ASSERT("The only peak should have a signal value of 7.", peaks.value()[0].getIntensity() == 7.);
   }
 
   void testAllPeaksWithMinimumBinWidthSpecifiedFindsNoPeaks() {
     auto peaks = runFindAllPeaksWithMinBinWidth(std::make_unique<AbsoluteBackgroundStrategy>(3.0), 5);
 
-    ETS_ASSERT_EQUALS(peaks.is_initialized(), false);
+    ETS_ASSERT_EQUALS(peaks.has_value(), false);
   }
 
   void testThatFindAllPeaksNSigmaFindPeaks() {
@@ -184,9 +184,9 @@ public:
     auto peaks = runAllPeaksNSigma(newYValues, newErrorValues, 3.0);
 
     // THEN
-    TSM_ASSERT("There should be two peaks that are found.", peaks.get().size() == 2);
-    TSM_ASSERT("The first peak should have a signal value of 14.", peaks.get()[0].getIntensity() == 14.);
-    TSM_ASSERT("The second peak should have a signal value of 21.5", peaks.get()[1].getIntensity() == 21.5);
+    TSM_ASSERT("There should be two peaks that are found.", peaks.value().size() == 2);
+    TSM_ASSERT("The first peak should have a signal value of 14.", peaks.value()[0].getIntensity() == 14.);
+    TSM_ASSERT("The second peak should have a signal value of 21.5", peaks.value()[1].getIntensity() == 21.5);
   }
 
   void testThatFindAllPeaksNSigmaFindPeaksWithMinBinWidthRequired() {
@@ -198,8 +198,8 @@ public:
     auto peaks = runAllPeaksNSigma(newYValues, newErrorValues, 3.0, 4);
 
     // THEN
-    TSM_ASSERT("There should be two peaks that are found.", peaks.get().size() == 1);
-    TSM_ASSERT("The first peak should have a signal value of 14.", peaks.get()[0].getIntensity() == 14.);
+    TSM_ASSERT("There should be two peaks that are found.", peaks.value().size() == 1);
+    TSM_ASSERT("The first peak should have a signal value of 14.", peaks.value()[0].getIntensity() == 14.);
   }
 
   void testThatFindAllPeaksNSigmaFindPeaksAtBoundary() {
@@ -209,8 +209,8 @@ public:
     auto peaks = runAllPeaksNSigma(newYValues, newErrorValues, 3.0);
 
     // THEN
-    TSM_ASSERT("There should be two peaks that are found.", peaks.get().size() == 1);
-    TSM_ASSERT("The second peak should have a signal value of 21.5", peaks.get()[0].getIntensity() == 23.5);
+    TSM_ASSERT("There should be two peaks that are found.", peaks.value().size() == 1);
+    TSM_ASSERT("The second peak should have a signal value of 21.5", peaks.value()[0].getIntensity() == 23.5);
   }
 
   void testWhenAllPeaksNSigmaFindsNoPeaks() {
@@ -218,7 +218,7 @@ public:
     std::vector<double> newErrorValues = {1.5, 2.0, 5.0, 5.0, 7.0, 1.5, 1.5, 1.5, 1.5, 3.0, 2.0, 4.0, 6.5, 2.5, 1.5};
     auto peaks = runAllPeaksNSigma(newYValues, newErrorValues, 3.0);
 
-    ETS_ASSERT_EQUALS(peaks.is_initialized(), false);
+    ETS_ASSERT_EQUALS(peaks.has_value(), false);
   }
 
   PeakList runAllPeaksNSigma(const std::vector<double> &newYValues, const std::vector<double> &newEValues,
@@ -286,7 +286,7 @@ public:
     EXPECT_CALL(progress, doReport(_)).Times(0); // We only report if there are more than 50 peaks
 
     // WHEN
-    auto reducedPeaks = simpleStrategy->reduce(peakList.get(), progress);
+    auto reducedPeaks = simpleStrategy->reduce(peakList.value(), progress);
 
     // THEN
     const double tolerance = 1e-6;
@@ -322,7 +322,7 @@ public:
     EXPECT_CALL(progress, doReport(_)).Times(0); // We only report if there are more than 50 peaks
 
     // WHEN
-    const auto reducedPeaks = findMaxReduceStrategy->reduce(peakList.get(), progress);
+    const auto reducedPeaks = findMaxReduceStrategy->reduce(peakList.value(), progress);
 
     // THEN
     const double tolerance = 1e-6;
@@ -445,8 +445,8 @@ private:
     auto peaks = peakFindingStrategy->findSXPeaks(x, y, e, workspaceIndex);
 
     // THEN
-    TSM_ASSERT("There should only be one peak that is found.", peaks.get().size() == 1);
-    TSM_ASSERT("The peak should have a signal value of 11.", peaks.get()[0].getIntensity() == 11.);
+    TSM_ASSERT("There should only be one peak that is found.", peaks.value().size() == 1);
+    TSM_ASSERT("The peak should have a signal value of 11.", peaks.value()[0].getIntensity() == 11.);
   }
 
   void doAddDoublePeakToData(Mantid::HistogramData::HistogramY &y) {

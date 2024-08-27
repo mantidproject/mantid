@@ -10,9 +10,9 @@
 #include "MantidAPI/Progress.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include <boost/optional.hpp>
 #include <climits>
 #include <nexus/NeXusFile.hpp>
+#include <optional>
 
 namespace Mantid {
 namespace NeXus {
@@ -84,7 +84,7 @@ private:
   void setOtherProperties(IAlgorithm *alg, const std::string &propertyName, const std::string &propertyValue,
                           int perioidNum) override;
   void doExec(const Mantid::API::Workspace_sptr &inputWorkspace, std::shared_ptr<Mantid::NeXus::NexusFileIO> &nexusFile,
-              const bool keepFile = false, boost::optional<size_t> entryNumber = boost::optional<size_t>());
+              const bool keepFile = false, std::optional<size_t> entryNumber = std::optional<size_t>());
 
   /// Pointer to the local workspace
   API::MatrixWorkspace_const_sptr m_inputWorkspace;

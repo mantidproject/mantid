@@ -49,10 +49,10 @@ LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame)
  */
 LeanElasticPeak::LeanElasticPeak(const Mantid::Kernel::V3D &QSampleFrame,
                                  const Mantid::Kernel::Matrix<double> &goniometer,
-                                 boost::optional<std::shared_ptr<const Geometry::ReferenceFrame>> refFrame)
+                                 std::optional<std::shared_ptr<const Geometry::ReferenceFrame>> refFrame)
     : BasePeak() {
-  if (refFrame.is_initialized())
-    setReferenceFrame(refFrame.get());
+  if (refFrame.has_value())
+    setReferenceFrame(refFrame.value());
   setQSampleFrame(QSampleFrame, goniometer);
 }
 
@@ -187,7 +187,7 @@ Mantid::Kernel::V3D LeanElasticPeak::getQSampleFrame() const { return m_Qsample;
  *        This is in inelastic convention: momentum transfer of the LATTICE!
  *        Also, q does NOT have a 2pi factor = it is equal to 1/wavelength.
  */
-void LeanElasticPeak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame, boost::optional<double>) {
+void LeanElasticPeak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame, std::optional<double>) {
   m_Qsample = QSampleFrame;
 }
 
@@ -216,7 +216,7 @@ void LeanElasticPeak::setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
  *        Also, q does have a 2pi factor = it is equal to 2pi/wavelength (in
  *        Angstroms).
  */
-void LeanElasticPeak::setQLabFrame(const Mantid::Kernel::V3D &qLab, boost::optional<double>) {
+void LeanElasticPeak::setQLabFrame(const Mantid::Kernel::V3D &qLab, std::optional<double>) {
   this->setQSampleFrame(getInverseGoniometerMatrix() * qLab);
 }
 

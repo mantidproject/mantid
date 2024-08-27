@@ -374,8 +374,8 @@ int MeshObject::getPointInObject(Kernel::V3D &point) const {
  * @param maxAttempts The maximum number of attempts at generating a point
  * @return The generated point
  */
-boost::optional<Kernel::V3D> MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                               const size_t maxAttempts) const {
+std::optional<Kernel::V3D> MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                             const size_t maxAttempts) const {
   const auto &bbox = getBoundingBox();
   if (bbox.isNull()) {
     throw std::runtime_error("Object::generatePointInObject() - Invalid "
@@ -394,9 +394,9 @@ boost::optional<Kernel::V3D> MeshObject::generatePointInObject(Kernel::PseudoRan
  * @param maxAttempts The maximum number of attempts at generating a point
  * @return The generated point
  */
-boost::optional<Kernel::V3D> MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                               const BoundingBox &activeRegion,
-                                                               const size_t maxAttempts) const {
+std::optional<Kernel::V3D> MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                             const BoundingBox &activeRegion,
+                                                             const size_t maxAttempts) const {
 
   const auto point = RandomPoint::bounded(*this, rng, activeRegion, maxAttempts);
 

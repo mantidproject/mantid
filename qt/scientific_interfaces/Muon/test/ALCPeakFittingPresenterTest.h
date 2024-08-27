@@ -19,8 +19,6 @@
 #include "../Muon/IALCPeakFittingModel.h"
 #include "../Muon/IALCPeakFittingView.h"
 
-#include <boost/optional/optional_io.hpp>
-
 using namespace Mantid;
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -29,7 +27,7 @@ using namespace testing;
 namespace boost {
 template <class CharType, class CharTrait>
 std::basic_ostream<CharType, CharTrait> &operator<<(std::basic_ostream<CharType, CharTrait> &out,
-                                                    optional<QString> const &maybe) {
+                                                    std::optional<QString> const &maybe) {
   if (maybe)
     out << maybe->toStdString();
   return out;
@@ -49,7 +47,7 @@ public:
   void plotGuess() override { emit plotGuessClicked(); }
 
   MOCK_CONST_METHOD1(function, IFunction_const_sptr(std::string const &));
-  MOCK_CONST_METHOD0(currentFunctionIndex, boost::optional<std::string>());
+  MOCK_CONST_METHOD0(currentFunctionIndex, std::optional<std::string>());
   MOCK_CONST_METHOD0(peakPicker, IPeakFunction_const_sptr());
 
   MOCK_METHOD0(initialize, void());
@@ -193,7 +191,7 @@ public:
   }
 
   void test_onCurrentFunctionChanged_nothing() {
-    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::none));
+    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(std::nullopt));
 
     EXPECT_CALL(*m_view, setPeakPickerEnabled(false));
 
@@ -201,7 +199,7 @@ public:
   }
 
   void test_onCurrentFunctionChanged_peak() {
-    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<std::string>("f1")));
+    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(std::optional<std::string>("f1")));
     ON_CALL(*m_view, function(std::string("f1"))).WillByDefault(Return(createGaussian(1, 2, 3)));
 
     EXPECT_CALL(*m_view, setPeakPickerEnabled(true));
@@ -214,7 +212,7 @@ public:
   }
 
   void test_onCurrentFunctionChanged_nonPeak() {
-    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<std::string>("f1")));
+    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(std::optional<std::string>("f1")));
     ON_CALL(*m_view, function(std::string("f1")))
         .WillByDefault(Return(API::FunctionFactory::Instance().createFunction("LinearBackground")));
 
@@ -224,7 +222,7 @@ public:
   }
 
   void test_onPeakPickerChanged() {
-    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<std::string>("f1")));
+    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(std::optional<std::string>("f1")));
     ON_CALL(*m_view, peakPicker()).WillByDefault(Return(createGaussian(4, 5, 6)));
 
     EXPECT_CALL(*m_view, setParameter(std::string("f1"), std::string("PeakCentre"), 4));
@@ -235,7 +233,7 @@ public:
   }
 
   void test_onParameterChanged_peak() {
-    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<std::string>("f1")));
+    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(std::optional<std::string>("f1")));
     ON_CALL(*m_view, function(std::string("f1"))).WillByDefault(Return(createGaussian(4, 2, 6)));
     ON_CALL(*m_view, peakPicker()).WillByDefault(Return(createGaussian(4, 5, 6)));
 
@@ -252,7 +250,7 @@ public:
   // if it's thrown for currently selected peak function, because that's when
   // PeakPicker is displayed
   void test_onParameterChanged_notACurrentFunction() {
-    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<std::string>("f2")));
+    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(std::optional<std::string>("f2")));
 
     EXPECT_CALL(*m_view, setPeakPicker(_)).Times(0);
 
@@ -260,7 +258,7 @@ public:
   }
 
   void test_onParameterChanged_nonPeak() {
-    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(boost::optional<std::string>("f1")));
+    ON_CALL(*m_view, currentFunctionIndex()).WillByDefault(Return(std::optional<std::string>("f1")));
     ON_CALL(*m_view, function(std::string("f1")))
         .WillByDefault(Return(API::FunctionFactory::Instance().createFunction("LinearBackground")));
 

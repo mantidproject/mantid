@@ -212,9 +212,9 @@ void memoryCheck(size_t nPoints) {
  * @param startId : Start Id to use for labeling
  * @param nThreads : Optional argument of number of threads to use.
  */
-ConnectedComponentLabeling::ConnectedComponentLabeling(const size_t &startId, boost::optional<int> nThreads)
+ConnectedComponentLabeling::ConnectedComponentLabeling(const size_t &startId, std::optional<int> nThreads)
     : m_startId(startId), m_nThreads(std::move(nThreads)) {
-  if (m_nThreads.is_initialized() && m_nThreads.get() < 0) {
+  if (m_nThreads.has_value() && m_nThreads.value() < 0) {
     throw std::invalid_argument("Cannot request that CCL runs with less than one thread!");
   }
 }
@@ -242,8 +242,8 @@ ConnectedComponentLabeling::~ConnectedComponentLabeling() = default;
  * @return : Number of available threads
  */
 int ConnectedComponentLabeling::getNThreads() const {
-  if (m_nThreads.is_initialized()) {
-    return m_nThreads.get(); // Follow explicit instructions if provided.
+  if (m_nThreads.has_value()) {
+    return m_nThreads.value(); // Follow explicit instructions if provided.
   } else {
     return API::FrameworkManager::Instance().getNumOMPThreads(); // Figure it out.
   }

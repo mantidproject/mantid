@@ -8,7 +8,7 @@
 
 #include "MantidNexusGeometry/DllConfig.h"
 #include <H5Cpp.h>
-#include <boost/optional.hpp>
+#include <optional>
 #include <vector>
 
 namespace Mantid {
@@ -24,15 +24,15 @@ template <typename T, typename R> std::vector<R> convertVector(const std::vector
   return target;
 }
 
-boost::optional<H5::DataSet> findDataset(const H5::Group &parentGroup, const H5std_string &name);
+std::optional<H5::DataSet> findDataset(const H5::Group &parentGroup, const H5std_string &name);
 
-boost::optional<H5::Group> findGroup(const H5::Group &parentGroup, const H5std_string &classType);
+std::optional<H5::Group> findGroup(const H5::Group &parentGroup, const H5std_string &classType);
 
 H5::Group findGroupOrThrow(const H5::Group &parentGroup, const H5std_string &classType);
 
 std::vector<H5::Group> findGroups(const H5::Group &parentGroup, const H5std_string &classType);
 
-boost::optional<H5::Group> findGroupByName(const H5::Group &parentGroup, const H5std_string &name);
+std::optional<H5::Group> findGroupByName(const H5::Group &parentGroup, const H5std_string &name);
 bool hasNXAttribute(const H5::Group &group, const std::string &attributeValue);
 bool isNamed(const H5::H5Object &obj, const std::string &name);
 } // namespace utilities

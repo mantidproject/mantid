@@ -384,13 +384,14 @@ double ElwinView::getBackgroundEnd() { return m_dblManager->value(m_properties["
  */
 void ElwinView::setRangeSelector(RangeSelector *rs, QtProperty *lower, QtProperty *upper,
                                  const QPair<double, double> &range,
-                                 const boost::optional<QPair<double, double>> &bounds) {
+                                 const std::optional<QPair<double, double>> &bounds) {
   m_dblManager->setValue(lower, range.first);
   m_dblManager->setValue(upper, range.second);
   rs->setRange(range.first, range.second);
   if (bounds) {
     // clamp the bounds of the selector
-    rs->setBounds(bounds.get().first, bounds.get().second);
+    const auto value = bounds.value();
+    rs->setBounds(value.first, value.second);
   }
 }
 

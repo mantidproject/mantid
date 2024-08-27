@@ -15,8 +15,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/optional.hpp>
 #include <iterator>
+#include <optional>
 #include <vector>
 
 namespace Mantid {
@@ -102,7 +102,7 @@ private:
 using yIt = Mantid::HistogramData::HistogramY::const_iterator;
 using Bound = HistogramData::HistogramX::const_iterator;
 using BoundsIterator = std::pair<Bound, Bound>;
-using PeakList = boost::optional<std::vector<SXPeak>>;
+using PeakList = std::optional<std::vector<SXPeak>>;
 
 class PeakContainer {
 public:
