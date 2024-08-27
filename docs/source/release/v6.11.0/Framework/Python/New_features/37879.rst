@@ -1,1 +1,1 @@
-- Creates documentation for dataobjects python bindings
+- Creates documentation for :mod:`mantid.dataobjects` python bindings
