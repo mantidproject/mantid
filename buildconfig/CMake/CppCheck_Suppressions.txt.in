@@ -91,7 +91,6 @@ returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ConfigSe
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ConfigService.h:197
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ThreadScheduler.h:174
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ThreadScheduler.h:278
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ConfigService.cpp:1919
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TopicInfo.cpp:38
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FilteredTimeSeriesProperty.cpp:408
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManagerProperty.cpp:149
