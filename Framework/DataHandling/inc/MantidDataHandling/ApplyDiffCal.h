@@ -21,9 +21,7 @@ class MANTID_DATAHANDLING_DLL ApplyDiffCal final : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override {
-    return {"AlignDetectors", "ConvertDiffCal", "ConvertUnits", "LoadDiffCal"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"ConvertDiffCal", "ConvertUnits", "LoadDiffCal"}; }
   const std::string category() const override;
   const std::string summary() const override;
   /// Cross-check properties with each other @see IAlgorithm::validateInputs
