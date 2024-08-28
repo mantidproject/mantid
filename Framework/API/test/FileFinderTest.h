@@ -104,6 +104,8 @@ public:
 
     ConfigService::Instance().updateFacilities(m_facFile.path());
     ConfigService::Instance().setString("datacachesearch.directory", "");
+    const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() + "Mantid.properties";
+    ConfigService::Instance().updateConfig(propfile);
   }
 
   ~FileFinderTest() override { m_facFile.remove(); }
