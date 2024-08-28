@@ -11,6 +11,7 @@ import re
 from mantid.api import AlgorithmFactory, AlgorithmManager, FunctionFactory
 from mantiddoc import get_logger
 from typing import List
+from pathlib import Path
 
 ALG_DOCNAME_RE = re.compile(r"^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$")
 FIT_DOCNAME_RE = re.compile(r"^([A-Z][a-zA-Z0-9]+)$")
@@ -77,7 +78,7 @@ class BaseDirective(Directive):
         if screenshots_dir is None or screenshots_dir == "":
             return None
         else:
-            return screenshots_dir
+            return Path(screenshots_dir)
 
     def add_rst(self, text):
         """

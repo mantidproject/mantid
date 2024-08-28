@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantiddoc.directives.base import BaseDirective
-
+from pathlib import Path
 import os
 
 
@@ -36,7 +36,7 @@ class CompilationDirective(BaseDirective):
         if os.path.exists(script_dir):
             for file in os.listdir(script_dir):
                 if file.endswith(".rst"):
-                    with open(script_dir + "/" + file) as f:
+                    with open(script_dir.joinpath(file)) as f:
                         contents = f.read()
                         self.add_rst(contents)
 
@@ -44,7 +44,7 @@ class CompilationDirective(BaseDirective):
 
     def getPath(self):
         # the location of documentation
-        source_dir = self.state.document.settings.env.srcdir
+        source_dir = Path(self.state.document.settings.env.srcdir)
         # the location of the release notes for this version
         release_dir = self.source().rsplit("/", 1)[0]
         # argument provided to amalgamate directive
@@ -52,7 +52,7 @@ class CompilationDirective(BaseDirective):
         if args[0] != "/":
             args = "/" + args
         path_to_notes = release_dir + args
-        return os.path.abspath(os.path.join(source_dir, path_to_notes))
+        return source_dir.joinpath(path_to_notes)
 
 
 def setup(app):
