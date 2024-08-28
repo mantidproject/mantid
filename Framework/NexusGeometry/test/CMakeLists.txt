@@ -7,9 +7,7 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(NexusGeometryTest ${TEST_FILES})
 
-  target_link_libraries(
-    NexusGeometryTest PRIVATE Mantid::NexusGeometry Mantid::Types Mantid::Kernel Boost::filesystem gmock
-  )
+  target_link_libraries(NexusGeometryTest PRIVATE Mantid::NexusGeometry Mantid::Types Mantid::Kernel gmock)
 
   add_framework_test_helpers(NexusGeometryTest)
   add_dependencies(NexusGeometryTest Geometry)

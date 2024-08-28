@@ -13,8 +13,8 @@
 #include "MantidKernel/Logger.h"
 #include <Poco/AutoPtr.h>
 #include <Poco/Logger.h>
-#include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 // standard
 #include <fstream>
@@ -41,7 +41,7 @@ public:
     std::string script = "import sys\n"
                          "stdout_old = sys.stdout\n"                           // backup the standard file descriptor
                          "sys.stdout = open(r'TEMPFILE', 'w', buffering=1)\n"; // redirection, small buffer needed
-    auto tmpFilePath = boost::filesystem::temp_directory_path() / "testPySysWriteStdout.txt";
+    auto tmpFilePath = std::filesystem::temp_directory_path() / "testPySysWriteStdout.txt";
     replaceSubstring(script, "TEMPFILE", tmpFilePath.string());
     PyRun_SimpleString(script.c_str()); // execute the python script
 
@@ -61,7 +61,7 @@ public:
     std::getline(logFile, message);
     TS_ASSERT_EQUALS(message, loggedMessage)
     logFile.close();
-    boost::filesystem::remove(tmpFilePath);
+    std::filesystem::remove(tmpFilePath);
 
     Poco::Logger::root().setChannel(channelOld); // restore the channel
   }

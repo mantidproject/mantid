@@ -125,7 +125,7 @@ set_property(TARGET WorkflowAlgorithms PROPERTY FOLDER "MantidFramework")
 target_link_libraries(
   WorkflowAlgorithms
   PUBLIC Mantid::Nexus Mantid::API Mantid::DataObjects
-  PRIVATE Mantid::Kernel Boost::filesystem
+  PRIVATE Mantid::Kernel
 )
 
 # Add the unit tests directory

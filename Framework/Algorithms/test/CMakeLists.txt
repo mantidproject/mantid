@@ -42,7 +42,6 @@ if(CXXTEST_FOUND)
             Mantid::DataObjects
             Mantid::Kernel
             Boost::boost
-            Boost::filesystem
             ${BCRYPT}
             gmock
   )

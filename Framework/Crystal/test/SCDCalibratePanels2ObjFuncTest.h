@@ -29,7 +29,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/filesystem.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <cxxtest/TestSuite.h>
@@ -83,9 +82,6 @@ public:
   void test_rot_shift() {
     g_log.notice() << "test_rot_shift() starts.\n";
 
-    // Generate unique temp files
-    auto filenamebase = boost::filesystem::temp_directory_path();
-    filenamebase /= boost::filesystem::unique_path("testBank_%%%%%%%%");
     // Make a clone of the standard peak workspace
     PeaksWorkspace_sptr pws = m_pws->clone();
     Mantid::API::IPeaksWorkspace_sptr ipws = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(pws);
@@ -143,9 +139,6 @@ public:
   void test_detector_resize() {
     g_log.notice() << "test_Bank() starts.\n";
 
-    // Generate unique temp files
-    auto filenamebase = boost::filesystem::temp_directory_path();
-    filenamebase /= boost::filesystem::unique_path("testBank_%%%%%%%%");
     // Make a clone of the standard peak workspace
     PeaksWorkspace_sptr pws = m_pws->clone();
     Mantid::API::IPeaksWorkspace_sptr ipws = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(pws);

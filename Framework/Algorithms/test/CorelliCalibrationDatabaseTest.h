@@ -18,7 +18,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <fstream>
 
 using Mantid::Algorithms::CorelliCalibrationDatabase;
@@ -50,11 +50,11 @@ public:
   void test_file_io() {
     // create directory
     std::string test_dir{"TestCorelliCalibrationX"};
-    boost::filesystem::create_directory(test_dir);
-    TS_ASSERT(boost::filesystem::is_directory(test_dir));
+    std::filesystem::create_directory(test_dir);
+    TS_ASSERT(std::filesystem::is_directory(test_dir));
 
     // clean
-    boost::filesystem::remove_all(test_dir);
+    std::filesystem::remove_all(test_dir);
   }
 
   //-----------------------------------------------------------------------------
@@ -125,9 +125,9 @@ public:
     // component file: name, remove file if it does exist, save and check file
     // existence
     const std::string testcalibtablefilename{"/tmp/testsourcedb2.csv"};
-    boost::filesystem::remove(testcalibtablefilename);
+    std::filesystem::remove(testcalibtablefilename);
     calib_handler.saveCalibrationTable(testcalibtablefilename);
-    TS_ASSERT(boost::filesystem::exists(testcalibtablefilename));
+    TS_ASSERT(std::filesystem::exists(testcalibtablefilename));
     // load file and check
     TableWorkspace_sptr duptable = loadCSVtoTable(testcalibtablefilename, "DuplicatedSource");
     TS_ASSERT_EQUALS(duptable->rowCount(), 3);
@@ -135,10 +135,10 @@ public:
 
     // Test: save single component file
     const std::string testsamplecalfilename{"/tmp/testsampledb2.csv"};
-    boost::filesystem::remove(testsamplecalfilename);
+    std::filesystem::remove(testsamplecalfilename);
     // save
     calib_handler.saveCompomentDatabase("20201117", "sample-position", testsamplecalfilename);
-    TS_ASSERT(boost::filesystem::exists(testsamplecalfilename));
+    TS_ASSERT(std::filesystem::exists(testsamplecalfilename));
 
     // load
     TableWorkspace_sptr dupsampletable =
@@ -162,9 +162,9 @@ public:
     // create directory database
     std::string calibdir{"/tmp/TestCorelliCalibration1117"};
     // clean previous
-    boost::filesystem::remove_all(calibdir);
+    std::filesystem::remove_all(calibdir);
     // create data base
-    boost::filesystem::create_directory(calibdir);
+    std::filesystem::create_directory(calibdir);
     // create a previously generated database file
     // will create the following files:
     // moderator.csv, sample-position.csv, bank2.csv, bank42.csv
@@ -206,11 +206,11 @@ public:
     TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(4, 0), "bank42/sixteenpack");
 
     // Output 2: search the saved output calibration file
-    boost::filesystem::path pdir(calibdir);
-    boost::filesystem::path pbase("corelli_instrument_20201117.csv");
-    boost::filesystem::path ptodaycalfile = pdir / pbase;
+    std::filesystem::path pdir(calibdir);
+    std::filesystem::path pbase("corelli_instrument_20201117.csv");
+    std::filesystem::path ptodaycalfile = pdir / pbase;
     std::string todaycalfile = ptodaycalfile.string();
-    TS_ASSERT(boost::filesystem::exists(todaycalfile));
+    TS_ASSERT(std::filesystem::exists(todaycalfile));
     // load and compare
     // ... ...
 
@@ -341,13 +341,13 @@ private:
    */
   void create_existing_database_files(const std::string &calibdir, std::vector<std::string> &banks) {
 
-    boost::filesystem::path dir(calibdir);
+    std::filesystem::path dir(calibdir);
 
     for (auto bankname : banks) {
       // create full path database name
       std::string basename = bankname + ".csv";
-      boost::filesystem::path basepath(basename);
-      boost::filesystem::path fullpath = dir / basename;
+      std::filesystem::path basepath(basename);
+      std::filesystem::path fullpath = dir / basename;
       std::string filename = fullpath.string();
       // write file
       std::ofstream bankofs(filename, std::ofstream::out);
@@ -369,13 +369,13 @@ private:
   void verify_component_files(const std::string &calfiledir, const std::string &component,
                               size_t expectedrecordsnumber) {
     // Create full file path
-    boost::filesystem::path pdir(calfiledir);
-    boost::filesystem::path pbase(component + ".csv");
-    boost::filesystem::path pcompcalfile = pdir / pbase;
+    std::filesystem::path pdir(calfiledir);
+    std::filesystem::path pbase(component + ".csv");
+    std::filesystem::path pcompcalfile = pdir / pbase;
     std::string compcalfile = pcompcalfile.string();
 
     // Assert file existence
-    TS_ASSERT(boost::filesystem::exists(compcalfile));
+    TS_ASSERT(std::filesystem::exists(compcalfile));
 
     // Load table
     TableWorkspace_sptr tablews = loadCSVtoTable(compcalfile, "CorelliVerify_" + component);

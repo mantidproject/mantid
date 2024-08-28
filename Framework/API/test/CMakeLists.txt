@@ -19,7 +19,6 @@ if(CXXTEST_FOUND)
             Mantid::Nexus
             Mantid::NexusGeometry
             ${BCRYPT}
-            Boost::filesystem
             gmock
             Python::Python
   )

@@ -13,7 +13,6 @@ macro(add_framework_test_helpers target_name)
     ${target_name}
     PRIVATE Mantid::API
             Boost::boost
-            Boost::filesystem
             Mantid::DataObjects
             Mantid::Catalog
             Mantid::DataHandling

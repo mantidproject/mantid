@@ -521,11 +521,7 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithm
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/inc/MantidCurveFitting/EigenVector.h:91
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/inc/MantidCurveFitting/Algorithms/Fit1D.h:61
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1385
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1484
-constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1438
-constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1542
-constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1647
-constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1725
+constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SCDCalibratePanels2.cpp:1483
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/Fit1D.cpp:379
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/inc/MantidCurveFitting/Functions/BSpline.h:34
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/inc/MantidCurveFitting/Functions/Chebyshev.h:37
@@ -1193,7 +1189,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/HFIRLo
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/HFIRLoad.cpp:215
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/HFIRLoad.cpp:223
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/AndMD.cpp:0
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SofTwoThetaTOF.cpp:192
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/WorkflowAlgorithms/src/SofTwoThetaTOF.cpp:196
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/BooleanBinaryOperationMD.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/BinaryOperationMD.cpp:0
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/CompactMD.cpp:30

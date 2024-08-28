@@ -25,12 +25,13 @@
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/filesystem.hpp>
 #include <boost/math/constants/constants.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <stdexcept>
 
 using namespace Mantid::API;
@@ -38,10 +39,18 @@ using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using Mantid::Kernel::Strings::randomString;
 
 namespace {
 /// static logger
 Logger g_log("SCDCalibratePanels2Test");
+
+std::string tempfilename() {
+  const auto filename = "testL1_" + randomString(8);
+  auto filepath = std::filesystem::temp_directory_path() / filename;
+
+  return filepath.string();
+}
 } // namespace
 
 class SCDCalibratePanels2Test : public CxxTest::TestSuite {
@@ -130,8 +139,8 @@ public:
   void run_Null_Case() {
     g_log.notice() << "test: !Null case!\n";
     // Generate unique temp files
-    auto filenamebase = boost::filesystem::temp_directory_path();
-    filenamebase /= boost::filesystem::unique_path("nullcase_%%%%%%%%");
+    const auto filenamebase = tempfilename();
+
     // Make a clone of the standard peak workspace
     PeaksWorkspace_sptr pws = m_pws->clone();
 
@@ -142,11 +151,11 @@ public:
     bool calibrateBanks = false;
     bool calibrateT0 = false;
     bool tuneSamplePos = false;
-    runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
+    runCalibration(filenamebase, pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
 
     // Apply the calibration results
     MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
-    const std::string xmlFileName = filenamebase.string() + ".xml";
+    const std::string xmlFileName = filenamebase + ".xml";
     auto lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
@@ -165,8 +174,7 @@ public:
   void run_L1() {
     g_log.notice() << "test_L1() starts.\n";
     // Generate unique temp files
-    auto filenamebase = boost::filesystem::temp_directory_path();
-    filenamebase /= boost::filesystem::unique_path("testL1_%%%%%%%%");
+    const auto filenamebase = tempfilename();
     // Make a clone of the standard peak workspace
     PeaksWorkspace_sptr pws = m_pws->clone();
 
@@ -181,11 +189,11 @@ public:
     bool calibrateBanks = false;
     bool calibrateT0 = false;
     bool tuneSamplePos = false;
-    runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
+    runCalibration(filenamebase, pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
 
     // Apply the calibration results
     MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
-    const std::string xmlFileName = filenamebase.string() + ".xml";
+    const std::string xmlFileName = filenamebase + ".xml";
     auto lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
@@ -207,8 +215,7 @@ public:
   void run_Bank() {
     g_log.notice() << "test_Bank() starts.\n";
     // Generate unique temp files
-    auto filenamebase = boost::filesystem::temp_directory_path();
-    filenamebase /= boost::filesystem::unique_path("testBank_%%%%%%%%");
+    const auto filenamebase = tempfilename();
     // Make a clone of the standard peak workspace
     PeaksWorkspace_sptr pws = m_pws->clone();
 
@@ -235,11 +242,11 @@ public:
     bool calibrateBanks = true;
     bool calibrateT0 = false;
     bool tuneSamplePos = false;
-    runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
+    runCalibration(filenamebase, pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
 
     // Apply the calibration results
     MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
-    const std::string xmlFileName = filenamebase.string() + ".xml";
+    const std::string xmlFileName = filenamebase + ".xml";
     auto lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
@@ -285,8 +292,7 @@ public:
     g_log.notice() << "test_T0() starts.\n";
 
     // Generate unique temp files
-    auto filenamebase = boost::filesystem::temp_directory_path();
-    filenamebase /= boost::filesystem::unique_path("testT0_%%%%%%%%");
+    const auto filenamebase = tempfilename();
     // Make a clone of the standard peak workspace
     PeaksWorkspace_sptr pws = m_pws->clone();
 
@@ -298,7 +304,7 @@ public:
     bool calibrateT0 = true;
     bool tuneSamplePos = false;
 
-    double t0 = runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
+    double t0 = runCalibration(filenamebase, pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
     g_log.notice() << "calibrated T0 = " << t0 << "\n";
     // NOTE:
     //  It is recommended to have L1 and T0 calibrated at the same time.
@@ -310,9 +316,8 @@ public:
   void test_calibrateDetectorSize() {
 
     // Generate unique temp files
-    auto filenamebase = boost::filesystem::temp_directory_path();
-    filenamebase /= boost::filesystem::unique_path("testBank_%%%%%%%%");
-    std::string filenameBase = filenamebase.string();
+    std::string filenameBase = tempfilename();
+
     // Make a clone of the standard peak workspace
     PeaksWorkspace_sptr pws = m_pws->clone();
     // Resize
@@ -381,8 +386,8 @@ public:
   void SaveTime_test_samplePos() {
     g_log.notice() << "test_samplePos() starts.\n";
     // Generate unique temp files
-    auto filenamebase = boost::filesystem::temp_directory_path();
-    filenamebase /= boost::filesystem::unique_path("testSamplePos_%%%%%%%%");
+    const auto filenamebase = tempfilename();
+
     // Make a clone of the standard peak workspace
     PeaksWorkspace_sptr pws = m_pws->clone();
 
@@ -397,11 +402,11 @@ public:
     bool calibrateBanks = false;
     bool calibrateT0 = true;
     bool tuneSamplePos = true;
-    runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
+    runCalibration(filenamebase, pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
 
     // Apply the calibration results
     MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
-    const std::string xmlFileName = filenamebase.string() + ".xml";
+    const std::string xmlFileName = filenamebase + ".xml";
     IAlgorithm_sptr lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
@@ -425,8 +430,7 @@ public:
   void run_Exec() {
     g_log.notice() << "test_Exec() starts.\n";
     // Generate unique temp files
-    auto filenamebase = boost::filesystem::temp_directory_path();
-    filenamebase /= boost::filesystem::unique_path("testExec_%%%%%%%%");
+    const auto filenamebase = tempfilename();
     // Make a clone of the standard peak workspace
     PeaksWorkspace_sptr pws = m_pws->clone();
 
@@ -470,11 +474,11 @@ public:
     bool calibrateBanks = true;
     bool calibrateT0 = false;
     bool tuneSamplePos = false;
-    runCalibration(filenamebase.string(), pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
+    runCalibration(filenamebase, pws, calibrateL1, calibrateBanks, calibrateT0, tuneSamplePos);
 
     // Apply the calibration results
     MatrixWorkspace_sptr ws = generateSimulatedWorkspace();
-    const std::string xmlFileName = filenamebase.string() + ".xml";
+    const std::string xmlFileName = filenamebase + ".xml";
     auto lpf_alg = AlgorithmFactory::Instance().create("LoadParameterFile", 1);
     lpf_alg->initialize();
     lpf_alg->setLogging(LOGCHILDALG);
