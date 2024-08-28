@@ -9,6 +9,7 @@ from sphinx.locale import _  # noqa: F401
 import os
 from string import Template
 import subprocess
+from pathlib import Path
 
 STYLE = dict()
 
@@ -47,7 +48,7 @@ class DiagramDirective(BaseDirective):
         if diagrams_dir is None or diagrams_dir == "":
             return None
         else:
-            return diagrams_dir
+            return Path(diagrams_dir)
 
     def run(self):
         """
@@ -81,14 +82,14 @@ class DiagramDirective(BaseDirective):
         if diagram_name[-4:] != ".dot":
             raise RuntimeError("Diagrams need to be referred to by their filename, including '.dot' extension.")
 
-        in_path = os.path.join(env.srcdir, "diagrams", diagram_name)
-        out_path = os.path.join(diagrams_dir, diagram_name[:-4] + ".svg")
+        in_path = Path(env.srcdir, "diagrams", diagram_name)
+        out_path = Path(diagrams_dir, diagram_name[:-4] + ".svg")
 
         # Generate the diagram
         try:
             in_src = open(in_path, "r").read()
         except Exception:
-            raise RuntimeError("Cannot find dot-file: '" + diagram_name + "' in '" + os.path.join(env.srcdir, "diagrams"))
+            raise RuntimeError("Cannot find dot-file: '" + diagram_name + "' in '" + Path(env.srcdir, "diagrams"))
 
         out_src = Template(in_src).substitute(STYLE)
         out_src = out_src.encode()
@@ -97,7 +98,7 @@ class DiagramDirective(BaseDirective):
         gviz.wait()
 
         # relative path to image, in unix style
-        rel_path = os.path.relpath(out_path, env.srcdir).replace("\\", "/")
+        rel_path = out_path.relative_to(env.srcdir)
 
         self.add_rst(".. image:: /" + rel_path + "\n\n")
 

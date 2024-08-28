@@ -7,6 +7,7 @@
 import os
 import mantid
 from .base import AlgorithmBaseDirective
+from pathlib import Path
 
 
 class SourceLinkError(Exception):
@@ -89,7 +90,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                 file_paths[extension] = None
             else:
                 # prepend the base framework directory
-                fname = os.path.join(self.source_root, file_paths[extension])
+                fname = self.source_root.joinpath(file_paths[extension])
                 file_paths[extension] = fname
                 if not os.path.exists(file_paths[extension]):
                     error_string += "Cannot find {} file at {}\n".format(extension, file_paths[extension])
@@ -150,9 +151,8 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         """
         if self.__source_root is None:
             env = self.state.document.settings.env
-            direc = env.srcdir  # = C:\Mantid\Code\Mantid\docs\source
-            direc = os.path.join(direc, "..", "..")  # assume root is two levels up
-            direc = os.path.abspath(direc)
+            # assume root is two levels up
+            direc = Path(env.srcdir, "..", "..").resolve()  # = C:\Mantid\Code\Mantid\docs\source
             self.__source_root = direc  # pylint: disable=protected-access
 
         return self.__source_root
@@ -162,12 +162,11 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         Fills the file_lookup dictionary after parsing the source code
         """
         env = self.state.document.settings.env
-        builddir = env.doctreedir  # there should be a better setting option
-        builddir = os.path.join(builddir, "..", "..")
-        builddir = os.path.abspath(builddir)
+        builddir = Path(env.doctreedir, "..", "..")  # there should be a better setting option
+        builddir = builddir.resolve()
 
         for dir_name, _, file_list in os.walk(self.source_root):
-            if dir_name.startswith(builddir):
+            if builddir in Path(dir_name).resolve().parents:
                 continue  # don't check or add to the cache
             for fname in file_list:
                 (base_name, file_extensions) = os.path.splitext(fname)
@@ -180,7 +179,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                         self.file_lookup[base_name] = {}
                     if file_extensions not in self.file_lookup[base_name].keys():
                         self.file_lookup[base_name][file_extensions] = []
-                    self.file_lookup[base_name][file_extensions].append(os.path.join(dir_name, fname))
+                    self.file_lookup[base_name][file_extensions].append(Path(dir_name, fname))
 
     def output_to_page(self, file_paths, file_name, sanity_checks):
         """
@@ -243,9 +242,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         """
         Outputs the source link for a file to the rst page
         """
-        _, f_name = os.path.split(filepath)
-
-        self.add_rst("{}: `{} <{}>`_\n\n".format(self.file_types[extension], f_name, self.convert_path_to_github_url(filepath)))
+        self.add_rst("{}: `{} <{}>`_\n\n".format(self.file_types[extension], str(filepath.name), self.convert_path_to_github_url(filepath)))
 
     def convert_path_to_github_url(self, file_path):
         """
@@ -254,9 +251,9 @@ class SourceLinkDirective(AlgorithmBaseDirective):
         example path Framework/Algorithms/inc/MantidAlgorithms/MergeRuns.h
         example url  https://github.com/mantidproject/mantid/blob/master/Framework/Algorithms/inc/MantidAlgorithms/MergeRuns.h
         """
-        url = file_path
+        url = str(file_path)
         # remove the directory path
-        url = url.replace(self.source_root, "")
+        url = url.replace(str(self.source_root), "")
         # harmonize slashes
         url = url.replace("\\", "/")
         # prepend the github part
