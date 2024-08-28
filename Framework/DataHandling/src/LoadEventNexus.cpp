@@ -1271,8 +1271,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   if (eventsLoaded > 0) {
     int nBins = getProperty("NumberOfBins");
     auto binEdgesVec = std::vector<double>(nBins + 1);
-    binEdgesVec[0] = shortest_tof - 1;
-    binEdgesVec[nBins] = longest_tof + 1;
+    binEdgesVec[0] = shortest_tof;        // left edge is inclusive
+    binEdgesVec[nBins] = longest_tof + 1; // right edge is exclusive
     double binStep = (binEdgesVec[nBins] - binEdgesVec[0]) / nBins;
     for (int binIndex = 1; binIndex < nBins; binIndex++) {
       binEdgesVec[binIndex] = binEdgesVec[0] + (binStep * binIndex);
