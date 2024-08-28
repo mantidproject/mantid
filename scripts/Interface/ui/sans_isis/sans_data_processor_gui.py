@@ -387,6 +387,11 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.hide_geometry()
         self.hide_background_subtraction()
 
+        # Hide broken functionality: https://github.com/mantidproject/mantid/issues/37836
+        self.event_slice_optimisation_checkbox.setChecked(False)
+        self.event_slice_optimisation_checkbox.setHidden(True)
+        self.event_slice_optimisation_label.setHidden(True)
+
         return True
 
     def _on_wavelength_step_type_changed(self):
@@ -1142,7 +1147,7 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
 
     @event_slice_optimisation.setter
     def event_slice_optimisation(self, value):
-        self.event_slice_optimisation_checkbox.setChecked(value)
+        pass
 
     @property
     def instrument(self):
