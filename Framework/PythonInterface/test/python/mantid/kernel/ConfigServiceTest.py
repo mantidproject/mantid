@@ -133,6 +133,12 @@ class ConfigServiceTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, config.setLogLevel, 4, True)
         testhelpers.assertRaisesNothing(self, config.setLogLevel, "warning", True)
 
+    def test_log_level_get_set(self):
+        logLevels = ["fatal", "error", "warning", "information", "debug"]
+        for x in logLevels:
+            config.setLogLevel(x)
+            self.assertEqual(config.getLogLevel(), x)
+
     def test_properties_documented(self):
         # location of the rst file relative to this file this will break if either moves
         doc_filename = os.path.split(__file__)[0]

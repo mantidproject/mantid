@@ -110,6 +110,19 @@ public:
     TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setLogLevel(4));
   }
 
+  void testLogLevelSetGet() {
+    Logger log1("testLogLevelGetSet");
+
+    for (std::string x : Logger::PriorityNames) {
+      TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setLogLevel(x));
+      TS_ASSERT_EQUALS(log1.getLevelName(), x);
+      TS_ASSERT_EQUALS(ConfigService::Instance().getLogLevel(), x);
+    }
+
+    // return back to previous values
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().setLogLevel(4));
+  }
+
   void testDefaultFacility() {
     TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().getFacility());
     //

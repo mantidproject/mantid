@@ -1921,7 +1921,7 @@ void ConfigServiceImpl::setLogLevel(int logLevel, bool quiet) {
   }
 }
 
-void ConfigServiceImpl::setLogLevel(std::string logLevel, bool quiet) {
+void ConfigServiceImpl::setLogLevel(std::string const &logLevel, bool quiet) {
   Mantid::Kernel::Logger::setLevelForAll(logLevel);
   // update the internal value to keep strings in sync
   m_pConf->setString(LOG_LEVEL_KEY, g_log.getLevelName());
@@ -1930,6 +1930,8 @@ void ConfigServiceImpl::setLogLevel(std::string logLevel, bool quiet) {
     g_log.log("logging set to " + logLevel + " priority", static_cast<Logger::Priority>(g_log.getLevel()));
   }
 }
+
+std::string ConfigServiceImpl::getLogLevel() { return g_log.getLevelName(); }
 
 /// \cond TEMPLATE
 template DLLExport boost::optional<double> ConfigServiceImpl::getValue(const std::string &);
