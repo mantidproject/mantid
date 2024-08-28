@@ -1369,9 +1369,6 @@ bool CompareWorkspaces::withinRelativeTolerance(double const x1, double const x2
   double const num = std::fabs(x1 - x2);
   // create a standardized size to compare against
   double const den = 0.5 * (std::fabs(x1) + std::fabs(x2));
-  // if (den < rtol)
-  //   return !(num > rtol);
-
-  return !(num / den > rtol);
+  return !(num > (rtol * den));
 }
 } // namespace Mantid::Algorithms

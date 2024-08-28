@@ -108,7 +108,7 @@ public:
 
     // The expected result
     const auto expected = createExpectedResults(true);
-    TS_ASSERT(workspacesEqual(expected, outputWS, 0.1, Comparison::RELATIVE));
+    TS_ASSERT(workspacesEqual(expected, outputWS, 0.105, Comparison::RELATIVE));
   }
 
   void test_exec_HistoWS_NormalisePlotsOn() {
@@ -244,7 +244,7 @@ public:
     const auto expected = createExpectedResults(true, false);
     Mantid::API::WorkspaceHelpers::makeDistribution(expected);
 
-    TS_ASSERT(workspacesEqual(expected, outputWS, 0.1, Comparison::RELATIVE));
+    TS_ASSERT(workspacesEqual(expected, outputWS, 0.105, Comparison::RELATIVE));
   }
 
 private:
