@@ -455,7 +455,9 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
   // On Windows throw out ones that only vary in case
   std::vector<std::string> uniqueExts;
   uniqueExts.reserve(1 + exts.size() + extensions.size());
-  if (!extension.empty())
+
+  // If extension specified in filename
+  if (!extension.empty() && !useExtsOnly)
     uniqueExts.emplace_back(extension);
 
   // If no extension in filename and useExtsOnly
