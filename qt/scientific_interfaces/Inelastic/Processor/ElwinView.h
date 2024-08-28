@@ -39,18 +39,19 @@ public:
                            const std::vector<WorkspaceIndex>::const_iterator &to) override;
 
   void plotInput(MatrixWorkspace_sptr inputWS, int spectrum) override;
-  void newInputDataFromDialog(std::vector<std::string> const &names) override;
-  void clearPreviewFile() override;
   void setRunIsRunning(const bool running) override;
   void setSaveResultEnabled(const bool enabled) override;
   int getPreviewSpec() const override;
   std::string getPreviewWorkspaceName(int index) const override;
-  std::string getPreviewFilename(int index) const override;
+  void setPreviewWorkspaceName(int index) override;
   std::string getCurrentPreview() const override;
+  void updateSelectorRange(const MatrixWorkspace_sptr &inputWS) override;
 
   // controls for dataTable
   void clearDataTable() override;
   void addTableEntry(int row, std::string const &name, std::string const &wsIndexes) override;
+  void updatePreviewWorkspaceNames(const std::vector<std::string> &names) override;
+
   QModelIndexList getSelectedData() override;
   void selectAllRows() override;
 
@@ -83,7 +84,7 @@ private slots:
   void notifyCheckboxValueChanged(QtProperty *, bool);
   void notifyPlotPreviewClicked();
   void notifySaveClicked();
-  void notifySelectedSpectrumChanged(int);
+  void notifySelectedSpectrumChanged();
   void notifyPreviewIndexChanged(int);
   void notifyRowModeChanged();
   void notifyAddWorkspaceDialog();
@@ -95,8 +96,8 @@ private:
   void setHorizontalHeaders();
   void setDefaultSampleLog(const Mantid::API::MatrixWorkspace_const_sptr &ws);
 
-  void disconnectSignals();
-  void connectSignals();
+  void disconnectSignals() const;
+  void connectSignals() const;
 
   /// Function to set the range selector on the mini plot
   void setRangeSelector(MantidWidgets::RangeSelector *rs, QtProperty *lower, QtProperty *upper,

@@ -1,0 +1,2 @@
+- It is possible to see the Spectrum number 0 on the widget plot of the selected preview workspace on :ref:`Elwin interface <elwin>`
+- Changing the preview spectrum above the plot widget combo box plots the correct spectrum for the selected index  :ref:`Elwin interface <elwin>`

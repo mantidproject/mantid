@@ -27,7 +27,7 @@ public:
   explicit AddWorkspaceMultiDialog(QWidget *parent);
 
   std::string workspaceName() const override;
-  stringPairVec selectedNameIndexPairs() const;
+  StringPairVec selectedNameIndexPairs() const;
 
   bool isEmpty() const;
   void setWSSuffices(const QStringList &suffices) override;

@@ -48,7 +48,7 @@ std::string AddWorkspaceMultiDialog::workspaceName() const {
 
 void AddWorkspaceMultiDialog::setup() { m_uiForm.tbWorkspace->setupTable(); }
 
-stringPairVec AddWorkspaceMultiDialog::selectedNameIndexPairs() const {
+StringPairVec AddWorkspaceMultiDialog::selectedNameIndexPairs() const {
 
   return m_uiForm.tbWorkspace->retrieveSelectedNameIndexPairs();
 }

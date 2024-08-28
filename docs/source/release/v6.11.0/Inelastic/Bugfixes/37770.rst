@@ -1,0 +1,1 @@
+- Adding new data to the  :ref:`Elwin data table <elwin>` after clearing the Analysis Data Service no longer raises a *No data found* warning.

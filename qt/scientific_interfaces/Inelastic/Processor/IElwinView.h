@@ -42,19 +42,19 @@ public:
                                    const std::vector<MantidWidgets::WorkspaceIndex>::const_iterator &to) = 0;
 
   virtual void plotInput(Mantid::API::MatrixWorkspace_sptr inputWS, int spectrum) = 0;
-  virtual void newInputDataFromDialog(std::vector<std::string> const &names) = 0;
-  virtual void clearPreviewFile() = 0;
   virtual void setRunIsRunning(const bool running) = 0;
   virtual void setSaveResultEnabled(const bool enabled) = 0;
   virtual int getPreviewSpec() const = 0;
 
   virtual std::string getPreviewWorkspaceName(int index) const = 0;
-  virtual std::string getPreviewFilename(int index) const = 0;
+  virtual void setPreviewWorkspaceName(int index) = 0;
   virtual std::string getCurrentPreview() const = 0;
+  virtual void updateSelectorRange(const MatrixWorkspace_sptr &inputWS) = 0;
 
   // controls for dataTable
   virtual void clearDataTable() = 0;
   virtual void addTableEntry(int row, std::string const &name, std::string const &wsIndexes) = 0;
+  virtual void updatePreviewWorkspaceNames(const std::vector<std::string> &names) = 0;
 
   virtual QModelIndexList getSelectedData() = 0;
   virtual void selectAllRows() = 0;
