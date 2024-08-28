@@ -104,6 +104,8 @@ void export_ConfigService() {
            "definitions")
       .def("getFacilityNames", &ConfigServiceImpl::getFacilityNames, arg("self"), "Returns the default facility")
       .def("getFacilities", &ConfigServiceImpl::getFacilities, arg("self"), "Returns the default facility")
+      .def("configureLogging", &ConfigServiceImpl::configureLogging, arg("self"),
+           "Configure and start the logging framework")
       .def("remove", &ConfigServiceImpl::remove, (arg("self"), arg("rootName")), "Remove the indicated key.")
       .def("getFacility", (const FacilityInfo &(ConfigServiceImpl::*)() const) & ConfigServiceImpl::getFacility,
            arg("self"), return_value_policy<reference_existing_object>(), "Returns the default facility")
@@ -144,10 +146,12 @@ void export_ConfigService() {
       .def("saveConfig", &ConfigServiceImpl::saveConfig, (arg("self"), arg("filename")),
            "Saves the keys that have changed from their default to the given "
            "filename")
+      .def("getLogLevel", &ConfigServiceImpl::getLogLevel, arg("self"),
+           "Return the string value for the log representation")
       .def("setLogLevel", (void (ConfigServiceImpl::*)(int, bool)) & ConfigServiceImpl::setLogLevel,
            (arg("self"), arg("logLevel"), arg("quiet") = false),
            "Sets the log level priority for all the log channels, logLevel 1 = Fatal, 6 = information, 7 = Debug")
-      .def("setLogLevel", (void (ConfigServiceImpl::*)(std::string, bool)) & ConfigServiceImpl::setLogLevel,
+      .def("setLogLevel", (void (ConfigServiceImpl::*)(std::string const &, bool)) & ConfigServiceImpl::setLogLevel,
            (arg("self"), arg("logLevel"), arg("quiet") = false),
            "Sets the log level priority for all the log channels. Allowed values are fatal, critical, error, warning, "
            "notice, information, debug, and trace.")
