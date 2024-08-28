@@ -140,7 +140,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
 
     @staticmethod
     def seeAlso():
-        return ["AlignDetectors", "DiffractionFocussing", "SNSPowderReduction"]
+        return ["DiffractionFocussing", "SNSPowderReduction"]
 
     @staticmethod
     def _run_list(runs):
