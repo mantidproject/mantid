@@ -108,7 +108,7 @@ public:
 
     // The expected result
     const auto expected = createExpectedResults(true);
-    TS_ASSERT(workspacesEqual(expected, outputWS, 0.1, true));
+    TS_ASSERT(workspacesEqual(expected, outputWS, 0.1, Comparison::RELATIVE));
   }
 
   void test_exec_HistoWS_NormalisePlotsOn() {
@@ -134,7 +134,7 @@ public:
 
     // The expected result
     const auto expected = createExpectedResults(true, true);
-    TS_ASSERT(workspacesEqual(expected, outputWS, 5e-2));
+    TS_ASSERT(workspacesEqual(expected, outputWS, 5e-2, Comparison::ABSOLUTE));
   }
 
   void test_exec_PointsWS_extend() {
@@ -244,7 +244,7 @@ public:
     const auto expected = createExpectedResults(true, false);
     Mantid::API::WorkspaceHelpers::makeDistribution(expected);
 
-    TS_ASSERT(workspacesEqual(expected, outputWS, 0.1, true));
+    TS_ASSERT(workspacesEqual(expected, outputWS, 0.1, Comparison::RELATIVE));
   }
 
 private:
@@ -301,8 +301,9 @@ private:
   }
 
   /// Compare workspaces
+  enum Comparison : bool { RELATIVE = true, ABSOLUTE = false };
   bool workspacesEqual(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs, double tolerance,
-                       bool relativeError = false) {
+                       bool relativeError = Comparison::ABSOLUTE) {
     auto alg = Mantid::API::AlgorithmFactory::Instance().create("CompareWorkspaces", 1);
     alg->setChild(true);
     alg->initialize();
@@ -336,7 +337,7 @@ private:
 
     // The expected result
     const auto expected = createExpectedResults(false);
-    TS_ASSERT(workspacesEqual(expected, outputWS, 1e-4));
+    TS_ASSERT(workspacesEqual(expected, outputWS, 1e-4, Comparison::ABSOLUTE));
   }
 
   /// Cached string for option

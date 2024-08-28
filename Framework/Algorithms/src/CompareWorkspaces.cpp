@@ -265,7 +265,7 @@ void CompareWorkspaces::processGroups(const std::shared_ptr<const API::Workspace
     checker->setPropertyValue("Workspace1", namesOne[i]);
     checker->setPropertyValue("Workspace2", namesTwo[i]);
     for (size_t j = 0; j < numNonDefault; ++j) {
-      Property *p = nonDefaultProps[j];
+      Property const *p = nonDefaultProps[j];
       checker->setPropertyValue(p->name(), p->value());
     }
     checker->execute();
@@ -952,7 +952,7 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1, const API::Run 
     return false;
   } else {
     // Sort logs by name before one-by-one comparison
-    auto compareNames = [](Kernel::Property *p1, Kernel::Property *p2) { return p1->name() < p2->name(); };
+    auto compareNames = [](Kernel::Property const *p1, Kernel::Property const *p2) { return p1->name() < p2->name(); };
     std::sort(ws1logs.begin(), ws1logs.end(), compareNames);
     std::sort(ws2logs.begin(), ws2logs.end(), compareNames);
     for (size_t i = 0; i < ws1logs.size(); ++i) {
@@ -1108,10 +1108,10 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
         mismatch = !withinRelativeTolerance(s1, s2, tolerance);
         // Q: whould we not also compare the vectors?
       } else {
-        mismatch = !withinAbsoluteTolerance(s1, s2, tolerance) || 
-                   !withinAbsoluteTolerance(v1[0], v2[0], tolerance) ||
-                   !withinAbsoluteTolerance(v1[1], v2[1], tolerance) ||
-                   !withinAbsoluteTolerance(v1[2], v2[2], tolerance);
+        mismatch = !withinAbsoluteTolerance(s1, s2, tolerance) ||       //
+                   !withinAbsoluteTolerance(v1[0], v2[0], tolerance) || //
+                   !withinAbsoluteTolerance(v1[1], v2[1], tolerance) || //
+                   !withinAbsoluteTolerance(v1[2], v2[2], tolerance);   //
       }
       if (mismatch) {
         g_log.notice(name);
@@ -1274,7 +1274,7 @@ void CompareWorkspaces::doTableComparison(const API::ITableWorkspace_const_sptr 
   const bool checkAllData = getProperty("CheckAllData");
   const bool isRelErr = getProperty("ToleranceRelErr");
   const double tolerance = getProperty("Tolerance");
-  bool mismatch = false;
+  bool mismatch;
   for (size_t i = 0; i < numCols; ++i) {
     const auto c1 = tws1->getColumn(i);
     const auto c2 = tws2->getColumn(i);
@@ -1287,7 +1287,6 @@ void CompareWorkspaces::doTableComparison(const API::ITableWorkspace_const_sptr 
     if (mismatch) {
       g_log.debug() << "Table data mismatch at column " << i << "\n";
       recordMismatch("Table data mismatch");
-      mismatch = false;
       if (!checkAllData) {
         return;
       }
@@ -1370,8 +1369,8 @@ bool CompareWorkspaces::withinRelativeTolerance(double const x1, double const x2
   double const num = std::fabs(x1 - x2);
   // create a standardized size to compare against
   double const den = 0.5 * (std::fabs(x1) + std::fabs(x2));
-  if (den < rtol)
-    return !(num > rtol);
+  // if (den < rtol)
+  //   return !(num > rtol);
 
   return !(num / den > rtol);
 }
