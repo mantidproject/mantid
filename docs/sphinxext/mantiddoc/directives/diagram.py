@@ -98,7 +98,8 @@ class DiagramDirective(BaseDirective):
         gviz.wait()
 
         # relative path to image, in unix style
-        rel_path = out_path.relative_to(env.srcdir)
+        # pathlib.Path.relative_to() will not work here, the method won't traverse up then down again
+        rel_path = os.path.relpath(out_path, env.srcdir).replace("\\", "/")
 
         self.add_rst(".. image:: /" + rel_path + "\n\n")
 
