@@ -432,8 +432,6 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWork
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:191
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:261
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:268
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/ConnectedComponentLabeling.cpp:337
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/ConnectedComponentLabeling.cpp:338
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/CalculateUMatrix.cpp:65
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:78
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:437

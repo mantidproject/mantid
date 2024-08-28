@@ -213,9 +213,15 @@ void memoryCheck(size_t nPoints) {
  * @param nThreads : Optional argument of number of threads to use.
  */
 ConnectedComponentLabeling::ConnectedComponentLabeling(const size_t &startId, std::optional<int> nThreads)
-    : m_startId(startId), m_nThreads(std::move(nThreads)) {
-  if (m_nThreads.has_value() && m_nThreads.value() < 0) {
-    throw std::invalid_argument("Cannot request that CCL runs with less than one thread!");
+    : m_startId(startId) {
+  if (nThreads.has_value()) {
+    if (nThreads.value() < 0) {
+      throw std::invalid_argument("Cannot request that CCL runs with less than one thread!");
+    } else {
+      m_nThreadsToUse = nThreads.value(); // Follow explicit instructions if provided.
+    }
+  } else {
+    m_nThreadsToUse = API::FrameworkManager::Instance().getNumOMPThreads(); // Figure it out.
   }
 }
 
@@ -236,18 +242,6 @@ size_t ConnectedComponentLabeling::getStartLabelId() const { return m_startId; }
 /** Destructor
  */
 ConnectedComponentLabeling::~ConnectedComponentLabeling() = default;
-
-/**
- * Get the number of threads available
- * @return : Number of available threads
- */
-int ConnectedComponentLabeling::getNThreads() const {
-  if (m_nThreads.has_value()) {
-    return m_nThreads.value(); // Follow explicit instructions if provided.
-  } else {
-    return API::FrameworkManager::Instance().getNumOMPThreads(); // Figure it out.
-  }
-}
 
 /**
  * Perform the work of the CCL algorithm
@@ -273,20 +267,18 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(const IMDHistoWorks
 
   // For each process maintains pair of index from within process bounds to
   // index outside process bounds
-  const int nThreadsToUse = getNThreads();
+  if (m_nThreadsToUse > 1) {
+    auto iterators = ws->createIterators(m_nThreadsToUse);
+    const size_t maxClustersPossible = calculateMaxClusters(ws.get(), m_nThreadsToUse);
 
-  if (nThreadsToUse > 1) {
-    auto iterators = ws->createIterators(nThreadsToUse);
-    const size_t maxClustersPossible = calculateMaxClusters(ws.get(), nThreadsToUse);
+    std::vector<VecEdgeIndexPair> parallelEdgeVec(m_nThreadsToUse);
 
-    std::vector<VecEdgeIndexPair> parallelEdgeVec(nThreadsToUse);
-
-    std::vector<std::map<size_t, std::shared_ptr<Cluster>>> parallelClusterMapVec(nThreadsToUse);
+    std::vector<std::map<size_t, std::shared_ptr<Cluster>>> parallelClusterMapVec(m_nThreadsToUse);
 
     // ------------- Stage One. Local CCL in parallel.
     g_log.debug("Parallel solve local CCL");
     // PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i = 0; i < nThreadsToUse; ++i) {
+    for (int i = 0; i < m_nThreadsToUse; ++i) {
       API::IMDIterator *iterator = iterators[i].get();
       boost::scoped_ptr<BackgroundStrategy> strategy(baseStrategy->clone()); // local strategy
       VecEdgeIndexPair &edgeVec = parallelEdgeVec[i];                        // local edge indexes
@@ -334,8 +326,8 @@ ClusterMap ConnectedComponentLabeling::calculateDisjointTree(const IMDHistoWorks
 
     for (auto &indexPairVec : parallelEdgeVec) {
       for (auto &iit : indexPairVec) {
-        DisjointElement &a = neighbourElements[iit.get<0>()];
-        DisjointElement &b = neighbourElements[iit.get<1>()];
+        const DisjointElement &a = neighbourElements[iit.get<0>()];
+        const DisjointElement &b = neighbourElements[iit.get<1>()];
         clusterRegister.merge(a, b);
       }
     }

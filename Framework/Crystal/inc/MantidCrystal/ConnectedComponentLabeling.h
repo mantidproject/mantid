@@ -69,9 +69,6 @@ public:
   virtual ~ConnectedComponentLabeling();
 
 private:
-  /// Get the number of threads to use.
-  int getNThreads() const;
-
   /// Calculate the disjoint element tree across the image.
   ConnectedComponentMappingTypes::ClusterMap calculateDisjointTree(const Mantid::API::IMDHistoWorkspace_sptr &ws,
                                                                    BackgroundStrategy *const baseStrategy,
@@ -81,7 +78,7 @@ private:
   size_t m_startId;
 
   /// Run multithreaded
-  const std::optional<int> m_nThreads;
+  int m_nThreadsToUse;
 };
 
 } // namespace Crystal
