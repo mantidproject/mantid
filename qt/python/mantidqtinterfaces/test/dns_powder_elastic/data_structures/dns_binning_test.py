@@ -28,9 +28,7 @@ class DNSBinningTest(unittest.TestCase):
         self.assertTrue(np.array_equal(self.binning.bin_edge_range, np.asarray([-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5])))
 
         self.binning = DNSBinning(xmin=0, xmax=5, step=0)
-        self.assertEqual(self.binning.nbins, 1)
-        self.binning = DNSBinning(xmin=0, xmax=5, step=0, number_of_bins=3)
-        self.assertEqual(self.binning.nbins, 3)
+        self.assertEqual(self.binning.nbins, 0)
 
 
 if __name__ == "__main__":

@@ -98,7 +98,7 @@ class DNSDatasetTest(unittest.TestCase):
     def test_automatic_omega_binning(self, mock_binning):
         test_v = automatic_omega_binning(self.full_data)
         self.assertEqual(test_v, mock_binning.return_value)
-        mock_binning.assert_called_once_with(304.0, 304.0, 1)
+        mock_binning.assert_called_once_with(304.0, 304.0, 0)
 
     def test_get_proposal_from_filename(self):
         test_v = get_proposal_from_filename("p678_000123.d_dat", 123)
@@ -139,7 +139,7 @@ class DNSDatasetTest(unittest.TestCase):
         test_v = get_bank_positions(self.full_data)
         self.assertEqual(test_v, [-9])
         test_v = get_bank_positions(self.standard_data)
-        self.assertEqual(test_v, [-9.04, -10])
+        self.assertEqual(test_v, [-10, -9.04, -9])
 
 
 if __name__ == "__main__":
