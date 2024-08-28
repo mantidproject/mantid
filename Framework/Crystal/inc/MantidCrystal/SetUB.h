@@ -31,7 +31,7 @@ public:
 
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
-    return {"FindUBUsingFFT", "FindUBUsingIndexedPeaks", "FindUBUsingLatticeParameters", "FindUBUsingMinMaxD"};
+    return {"FindUBUsingFFT", "FindUBUsingIndexedPeaks", "FindUBUsingLatticeParameters"};
   }
   const std::string category() const override;
 
