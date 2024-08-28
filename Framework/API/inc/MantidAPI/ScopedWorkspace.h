@@ -70,9 +70,6 @@ private:
   /// Generates a tricky name which is unique within ADS
   static std::string generateUniqueName();
 
-  /// Generates a random alpha-numeric string
-  static std::string randomString(size_t len);
-
   /// Length of workspace names generated
   static const size_t NAME_LENGTH;
 };
