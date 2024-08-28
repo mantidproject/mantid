@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantiddoc.directives.base import BaseDirective  # pylint: disable=unused-import
+import os
 from pathlib import Path
 
 
@@ -92,7 +93,8 @@ class InterfaceDirective(BaseDirective):
                 width = picture.width
 
             # relative path to image
-            rel_path = screenshots_dir.relative_to(env.srcdir)
+            # pathlib.Path.relative_to() will not work here, the method won't traverse up then down again
+            rel_path = os.path.relpath(screenshots_dir, env.srcdir).replace("\\", "/")
             # stick a "/" as the first character so Sphinx computes relative location from source directory
             path = Path("/").joinpath(rel_path).joinpath(filename)
             caption = ""
