@@ -51,7 +51,7 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent) : CorrectionsTab(par
 ContainerSubtraction::~ContainerSubtraction() {
   m_uiForm.ppPreview->watchADS(false);
   if (m_transformedContainerWS) {
-    auto const containerName = m_transformedContainerWS->getName();
+    const auto &containerName = m_transformedContainerWS->getName();
 
     // It is not safe to keep the signals connected
     (void)m_uiForm.dsContainer->disconnect();
