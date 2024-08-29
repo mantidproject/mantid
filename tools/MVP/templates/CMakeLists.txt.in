@@ -16,6 +16,12 @@ add_executable(launch
     ${MOC_FILES}
 )
 
+# Link with the Release version of the standard library. This is required because
+# Conda does not provide packages with Debug symbols.
+if(WIN32)
+  set_property(TARGET launch PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+endif()
+
 target_link_libraries(launch
     Qt5::Core
     Qt5::Gui
