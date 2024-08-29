@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/StartsWithValidator.h"
+#include <algorithm>
 #ifndef Q_MOC_RUN
 #include <memory>
 #endif
