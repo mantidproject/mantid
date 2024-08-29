@@ -1080,7 +1080,7 @@ set_property(TARGET Algorithms PROPERTY FOLDER "MantidFramework")
 target_link_libraries(
   Algorithms
   PUBLIC Mantid::API Mantid::HistogramData Mantid::Kernel Mantid::Geometry Mantid::Indexing
-  PRIVATE Mantid::DataObjects Mantid::Parallel Mantid::Types Boost::filesystem
+  PRIVATE Mantid::DataObjects Mantid::Parallel Mantid::Types
 )
 
 # Add the unit tests directory

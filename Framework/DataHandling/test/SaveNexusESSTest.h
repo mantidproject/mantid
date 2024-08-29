@@ -26,7 +26,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
-#include <boost/filesystem.hpp>
 #include <memory>
 
 using namespace Mantid::DataHandling;

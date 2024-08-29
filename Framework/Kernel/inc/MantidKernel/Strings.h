@@ -426,6 +426,13 @@ template <typename Integer> std::vector<std::vector<Integer>> parseGroups(const 
   return groups;
 }
 
+/**
+ * Generates random alpha-numeric string.
+ * @param len :: Length of the string
+ * @return Random string of the given length
+ */
+MANTID_KERNEL_DLL std::string randomString(const size_t len);
+
 /// Extract a line from input stream, discarding any EOL characters encountered
 MANTID_KERNEL_DLL std::istream &extractToEOL(std::istream &is, std::string &str);
 

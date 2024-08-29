@@ -261,7 +261,7 @@ include_directories(inc)
 target_link_libraries(
   Crystal
   PUBLIC Mantid::API Mantid::Geometry Mantid::Kernel
-  PRIVATE Mantid::DataObjects Mantid::Indexing Boost::filesystem
+  PRIVATE Mantid::DataObjects Mantid::Indexing
 )
 
 # Add the unit tests directory

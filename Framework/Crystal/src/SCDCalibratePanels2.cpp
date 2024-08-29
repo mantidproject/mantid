@@ -28,9 +28,9 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include <boost/filesystem.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -1435,7 +1435,7 @@ void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
     }
   }
 
-  double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
+  const double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
 
   // scan from -4cm to 4cm along dL1 where the minimum is supposed to be at 0 for null
   // case with instrument at the engineering position
@@ -1464,8 +1464,7 @@ void SCDCalibratePanels2::profileL1(Mantid::API::IPeaksWorkspace_sptr &pws,
   }
 
   // output to file
-  auto filenamebase = boost::filesystem::temp_directory_path();
-  filenamebase /= boost::filesystem::unique_path("profileSCDCalibratePanels2_L1.csv");
+  auto filenamebase = std::filesystem::temp_directory_path() / "profileSCDCalibratePanels2_L1.csv";
   std::ofstream profL1File;
   profL1File.open(filenamebase.string());
   profL1File << msgrst.str();
@@ -1538,8 +1537,8 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
         target[i * 3 + j] = qv[j];
       }
     }
-    //
-    double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
+
+    const double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
 
     // NOTE: very expensive scan of the parameter space
     for (double dx = -1e-2; dx < 1e-2; dx += 2e-2 / 20.0) {
@@ -1585,9 +1584,8 @@ void SCDCalibratePanels2::profileBanks(Mantid::API::IPeaksWorkspace_sptr &pws,
     }
 
     // output to file
-    auto filenamebase = boost::filesystem::temp_directory_path();
-    std::string fnbase = "profileSCDCalibratePanels2_" + bankname + ".csv";
-    filenamebase /= boost::filesystem::unique_path(fnbase);
+    const std::string csvname = "profileSCDCalibratePanels2_" + bankname + ".csv";
+    auto filenamebase = std::filesystem::temp_directory_path() / csvname;
     std::ofstream profBankFile;
     profBankFile.open(filenamebase.string());
     profBankFile << msgrst.str();
@@ -1644,7 +1642,7 @@ void SCDCalibratePanels2::profileT0(Mantid::API::IPeaksWorkspace_sptr &pws,
     }
   }
 
-  double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
+  const double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
 
   // scan from -10 ~ 10 ms along dT0
   double deltaT0 = -10;
@@ -1671,8 +1669,7 @@ void SCDCalibratePanels2::profileT0(Mantid::API::IPeaksWorkspace_sptr &pws,
   }
 
   // output to file
-  auto filenamebase = boost::filesystem::temp_directory_path();
-  filenamebase /= boost::filesystem::unique_path("profileSCDCalibratePanels2_T0.csv");
+  auto filenamebase = std::filesystem::temp_directory_path() / "profileSCDCalibratePanels2_T0.csv";
   std::ofstream profL1File;
   profL1File.open(filenamebase.string());
   profL1File << msgrst.str();
@@ -1722,7 +1719,7 @@ void SCDCalibratePanels2::profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws,
     }
   }
 
-  double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
+  const double xValues[7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0}; // xValues is not used
 
   // profile begin
   for (double deltaL1 = -4e-2; deltaL1 < 4e-2; deltaL1 += 1e-4) {
@@ -1748,8 +1745,7 @@ void SCDCalibratePanels2::profileL1T0(Mantid::API::IPeaksWorkspace_sptr &pws,
   }
 
   // output to file
-  auto filenamebase = boost::filesystem::temp_directory_path();
-  filenamebase /= boost::filesystem::unique_path("profileSCDCalibratePanels2_L1T0.csv");
+  auto filenamebase = std::filesystem::temp_directory_path() / "profileSCDCalibratePanels2_L1T0.csv";
   std::ofstream profL1File;
   profL1File.open(filenamebase.string());
   profL1File << msgrst.str();

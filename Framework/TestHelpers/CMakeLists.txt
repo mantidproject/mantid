@@ -81,7 +81,6 @@ target_link_libraries(
   FrameworkTestHelpers
   PRIVATE Mantid::API
           Boost::boost
-          Boost::filesystem
           Mantid::DataObjects
           Mantid::Catalog
           Mantid::DataHandling
