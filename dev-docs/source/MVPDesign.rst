@@ -227,7 +227,7 @@ files can be used to build the widget as follows:
   mkdir buildmvp
   cd buildmvp
   cmake ..
-  cmake --buildmvp .
+  cmake --build .
 
 The example widget can then be opened with:
 
