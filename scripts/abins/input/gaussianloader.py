@@ -7,7 +7,7 @@
 import io
 from io import BufferedReader
 import re
-from typing import List
+from typing import Iterable, List
 
 import numpy as np
 
@@ -179,16 +179,27 @@ class GAUSSIANLoader(AbInitioLoader):
 
         freq = []
         atomic_disp = np.zeros(shape=(num_freq, self._num_atoms, dim), dtype=COMPLEX_TYPE)
-        end_msg = ["-------------------"]
+
         # Next block is:
         # -------------------
         # - Thermochemistry -
         # -------------------
 
         # parse block with frequencies and atomic displacements
+        with TextParser.save_excursion(file_obj):
+            try:
+                TextParser.find_first(file_obj=file_obj, msg="Frequencies --- ")
+                high_precision = True
+                end_msg = ["activities (A**4/AMU)"]
+            except EOFError:
+                high_precision = False
+                end_msg = ["-------------------"]
+
+        file_obj.readline()  # Advance past false-positive end marker
+
         while not (TextParser.block_end(file_obj=file_obj, msg=end_msg) or TextParser.file_end(file_obj=file_obj)):
-            self._read_freq_block(file_obj=file_obj, freq=freq)
-            self._read_atomic_disp_block(file_obj=file_obj, disp=atomic_disp)
+            self._read_freq_block(file_obj=file_obj, freq=freq, high_precision=high_precision)
+            self._read_atomic_disp_block(file_obj=file_obj, disp=atomic_disp, high_precision=high_precision)
 
         data["frequencies"] = np.asarray([freq]).astype(dtype=FLOAT_TYPE, casting="safe")
 
@@ -222,17 +233,32 @@ class GAUSSIANLoader(AbInitioLoader):
         data["atomic_displacements"] = np.asarray([np.transpose(a=atomic_disp, axes=(1, 0, 2))])
 
     @staticmethod
-    def _read_freq_block(*, file_obj: BufferedReader, freq: List[float]) -> None:
+    def _read_freq_block(*, file_obj: BufferedReader, freq: List[float], high_precision: bool = False) -> None:
         """
         Parses block with frequencies.
         :param file_obj: file object from which we read
         :param freq: list with frequencies which we update
+        :param high_precision: If true, look for block beginning 'Frequencies ---'
         """
-        line = TextParser.find_first(file_obj=file_obj, msg="Frequencies -- ")
+        msg = "Frequencies --- " if high_precision else "Frequencies -- "
+        line = TextParser.find_first(file_obj=file_obj, msg=msg)
+
         line = line.split()
         freq.extend([float(i) for i in line[2:]])
 
-    def _read_atomic_disp_block(self, *, file_obj: BufferedReader, disp: np.ndarray) -> None:
+    def _read_atomic_disp_block(self, *, file_obj: BufferedReader, disp: np.ndarray, high_precision: bool = False) -> None:
+        """
+        Parses block with atomic displacements.
+        :param file_obj: file object from which we read
+        :param disp: Complex-valued array [num_freq, num_atoms, dim] to be updated with displacement data
+        :param high_precision: Read block in alternate format (direction-per-row instead of direction-per-column)
+        """
+        if high_precision:
+            self._read_atomic_disp_block_high_precision(file_obj=file_obj, disp=disp)
+        else:
+            self._read_atomic_disp_block_low_precision(file_obj=file_obj, disp=disp)
+
+    def _read_atomic_disp_block_low_precision(self, *, file_obj: BufferedReader, disp: np.ndarray) -> None:
         """
         Parses block with atomic displacements.
         :param file_obj: file object from which we read
@@ -255,6 +281,32 @@ class GAUSSIANLoader(AbInitioLoader):
             l = file_obj.readline().split()
             num_atom += 1
         self._num_read_freq += freq_per_line
+
+    def _read_atomic_disp_block_high_precision(self, *, file_obj: BufferedReader, disp: np.ndarray) -> None:
+        """
+        Parses block with atomic displacements.
+        :param file_obj: file object from which we read
+        :param disp: Complex-valued array [num_freq, num_atoms, dim] to be updated with displacement data
+        """
+        # Get the expected number of columns from reduced mass row of header
+        TextParser.find_first(file_obj=file_obj, msg="Reduced masses --- ")
+        n_columns = len(file_obj.readline().split()) - 3
+
+        sub_block_start = " Coord Atom Element:"
+        TextParser.find_first(file_obj=file_obj, msg=sub_block_start)
+
+        while re.match(r"\s+\d+\s+\d+\s+\d+\s+(-?\d+\.\d+)", (line := file_obj.readline().decode())):
+            # e.g. "  1  72 1  -0.0001  -0.0001 -0.0000"
+            line = line.split()
+            coord, atom, _ = map(int, line[:3])
+            displacements = map(float, line[3:])
+            disp[self._num_read_freq : self._num_read_freq + n_columns, atom - 1, coord - 1] = self._real_to_complex(displacements)
+
+        self._num_read_freq += n_columns
+
+    @staticmethod
+    def _real_to_complex(floats: Iterable[float]) -> list[complex]:
+        return [complex(x, 0) for x in floats]
 
     @staticmethod
     def _read_masses_from_file(file_obj: BufferedReader) -> List[float]:
