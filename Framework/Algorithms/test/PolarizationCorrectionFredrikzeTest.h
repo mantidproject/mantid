@@ -380,33 +380,35 @@ public:
     auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0", "1,0,0,0", "1,0,0,0");
     alg.setProperty("Efficiencies", efficiencies);
     alg.setProperty("InputSpinStateOrder", "pp,pa,ap,aa");
-    alg.setProperty("OutputSpinStateOrder", "xx,pa,ap,aa");
-    // Ensure that the algorithm executes without throwing any errors
+    alg.setProperty("OutputSpinStateOrder", "pa,pp,ap,aa");
     TS_ASSERT_THROWS_NOTHING(alg.execute());
   }
 
-  // void test_invalid_spinstate_order_does_not_match_input_workspaces() {
-  //   auto groupWS = std::make_shared<WorkspaceGroup>(); // Create group workspace
-  //   groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-  //   groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-  //   groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-  //   groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
-  //   auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,1,1,1", "1,1,1,1", "1,1,1,1", "1,1,1,1");
-  //
-  //   PolarizationCorrectionFredrikze alg;
-  //   alg.setChild(true);
-  //   alg.setRethrows(true);
-  //   alg.initialize();
-  //   alg.setProperty("InputWorkspace", groupWS);
-  //   alg.setPropertyValue("OutputWorkspace", "dummy");
-  //   alg.setProperty("PolarizationAnalysis", "PA");
-  //   alg.setProperty("Efficiencies", efficiencies);
-  //   alg.setProperty("InputSpinStateOrder", "pp,pa,ap");
-  //   alg.setProperty("OutputSpinStateOrder", "pp,pa,ap");
-  //
-  //   TSM_ASSERT_THROWS("Spin state order count does not match input workspaces count, should throw", alg.execute(),
-  //                     std::invalid_argument &);
-  // }
+  void test_invalid_input_and_output_spin_state_order_for_PA() {
+    auto groupWS = std::make_shared<WorkspaceGroup>();
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+
+    PolarizationCorrectionFredrikze alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", groupWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("PolarizationAnalysis", "PA");
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0", "1,0,0,0", "1,0,0,0");
+    alg.setProperty("Efficiencies", efficiencies);
+    TSM_ASSERT_THROWS("Invalid value for property InputSpinStateOrder (string) from string pu,pa,ap,aa: When setting "
+                      "value of property InputSpinStateOrder: The spin states must either be one or two characters, "
+                      "with each being either a p or a",
+                      alg.setProperty("InputSpinStateOrder", "pu,pa,ap,aa"), std::invalid_argument &);
+    TSM_ASSERT_THROWS("Invalid value for property OutputSpinStateOrder (string) from string pu,pa,ap,aa: When setting "
+                      "value of property OutputSpinStateOrder: The spin states must either be one or two characters, "
+                      "with each being either a p or a",
+                      alg.setProperty("OutputSpinStateOrder", "xx,pp,ap,aa"), std::invalid_argument &);
+  }
 
   // Test various combinations of spin state orders
   void test_various_spin_state_orders_for_PA() {
@@ -437,5 +439,48 @@ public:
         TS_ASSERT_THROWS_NOTHING(alg.execute());
       }
     }
+  }
+
+  void test_invalid_spin_state_order_for_PNR() {
+    auto groupWS = std::make_shared<WorkspaceGroup>();
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+
+    PolarizationCorrectionFredrikze alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", groupWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("PolarizationAnalysis", "PNR");
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0", "1,0,0,0", "1,0,0,0");
+    alg.setProperty("Efficiencies", efficiencies);
+    TSM_ASSERT_THROWS(
+        "Invalid value for property InputSpinStateOrder (string) from string x, y: When setting value of property "
+        "InputSpinStateOrder: The spin states must either be one or two characters, with each being either a p or a",
+        alg.setProperty("InputSpinStateOrder", "x, y"), std::invalid_argument &);
+    TSM_ASSERT_THROWS(
+        "Invalid value for property OutputSpinStateOrder (string) from string y, x: When setting value of property "
+        "OutputSpinStateOrder: The spin states must either be one or two characters, with each being either a p or a",
+        alg.setProperty("OutputSpinStateOrder", "y, x"), std::invalid_argument &);
+  }
+
+  void test_valid_spin_state_order_for_PNR() {
+    auto groupWS = std::make_shared<WorkspaceGroup>();
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+    groupWS->addWorkspace(create1DWorkspace(4, 1, 1));
+
+    PolarizationCorrectionFredrikze alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", groupWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("PolarizationAnalysis", "PNR");
+    auto efficiencies = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0", "1,0,0,0", "1,0,0,0");
+    alg.setProperty("Efficiencies", efficiencies);
+    alg.setProperty("InputSpinStateOrder", "p, a");
+    alg.setProperty("OutputSpinStateOrder", "a, p");
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
   }
 };

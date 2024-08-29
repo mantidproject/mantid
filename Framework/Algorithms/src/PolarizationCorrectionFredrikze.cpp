@@ -11,6 +11,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
+#include "MantidAlgorithms/PolarizationCorrections/SpinStateValidator.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
@@ -151,7 +152,7 @@ const std::string PolarizationCorrectionFredrikze::summary() const {
  * @param rhs : WS to multiply by (constant value)
  * @return Multiplied Workspace.
  */
-MatrixWorkspace_sptr PolarizationCorrectionFredrikze::multiply(const MatrixWorkspace_sptr &lhsWS, const double &rhs) {
+MatrixWorkspace_sptr PolarizationCorrectionFredrikze::multiply(const MatrixWorkspace_sptr &lhsWS, double &rhs) {
   auto multiply = this->createChildAlgorithm("Multiply");
   auto rhsWS = std::make_shared<DataObjects::WorkspaceSingleValue>(rhs);
   multiply->initialize();
@@ -244,13 +245,16 @@ void PolarizationCorrectionFredrikze::init() {
       std::make_unique<WorkspaceProperty<Mantid::API::WorkspaceGroup>>("OutputWorkspace", "", Direction::Output),
       "An output workspace.");
 
+  const auto spinStateValidator =
+      std::make_shared<SpinStateValidator>(std::unordered_set<int>{2, 4}, true, 'p', 'a', true);
+
   declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>(inputSpinStateOrderLabel, "", Direction::Input),
+      inputSpinStateOrderLabel, "", spinStateValidator,
       "The order of spin states in the input workspace group. TThe possible values are 'pp,pa,ap,aa' or 'p,a'.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>(outputSpinStateOrderLabel, "", Direction::Input),
-      "The order of spin states in the output workspace group. The possible values are 'pp,pa,ap,aa' or 'p,a'");
+      outputSpinStateOrderLabel, "", spinStateValidator,
+      "The order of spin states in the input workspace group. TThe possible values are 'pp,pa,ap,aa' or 'p,a'.");
 }
 
 WorkspaceGroup_sptr PolarizationCorrectionFredrikze::execPA(const WorkspaceGroup_sptr &inWS,
@@ -412,8 +416,6 @@ void PolarizationCorrectionFredrikze::exec() {
   const std::string inputOrderStr = getProperty(inputSpinStateOrderLabel);
   const std::string outputOrderStr = getProperty(outputSpinStateOrderLabel);
 
-  g_log.warning(inputOrderStr);
-
   const std::vector<std::string> inputOrder = PolarizationCorrectionsHelpers::splitSpinStateString(inputOrderStr);
   const std::vector<std::string> outputOrder = PolarizationCorrectionsHelpers::splitSpinStateString(outputOrderStr);
 
@@ -433,6 +435,7 @@ void PolarizationCorrectionFredrikze::exec() {
     outWS = execPNR(inWS, inputOrder, outputOrder);
     g_log.notice("PNR polarization correction");
   }
+
   this->setProperty("OutputWorkspace", outWS);
 }
 

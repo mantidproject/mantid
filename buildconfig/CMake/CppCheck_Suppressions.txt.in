@@ -291,7 +291,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MergeRuns.cp
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/RecordPythonScript.cpp:83
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PaalmanPingsAbsorptionCorrection.cpp:452
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionFredrikze.cpp:138
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionFredrikze.cpp:155
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/Rebin2D.h:26
 duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ReadGroupsFromFile.cpp:134
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/RebinByTimeBase.h:24

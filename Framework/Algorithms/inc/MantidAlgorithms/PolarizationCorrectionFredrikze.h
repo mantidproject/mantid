@@ -47,7 +47,7 @@ private:
   std::shared_ptr<Mantid::API::MatrixWorkspace> add(const std::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
                                                     const double &rhs);
   std::shared_ptr<Mantid::API::MatrixWorkspace> multiply(const std::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
-                                                         const double &rhs);
+                                                         double &rhs);
 };
 
 } // namespace Algorithms
