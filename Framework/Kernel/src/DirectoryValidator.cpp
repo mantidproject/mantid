@@ -7,8 +7,8 @@
 #include "MantidKernel/DirectoryValidator.h"
 #include "MantidKernel/IValidator.h"
 #include <Poco/Exception.h>
-#include <Poco/File.h>
 #include <Poco/Path.h>
+#include <filesystem>
 #include <memory>
 
 namespace Mantid::Kernel {
@@ -44,11 +44,13 @@ std::string DirectoryValidator::checkValidity(const std::string &value) const {
   // If the path is required to exist check it is there
   if (m_testExist) {
     try {
-      if (value.empty() || !Poco::File(value).exists())
+      if (value.empty() || !std::filesystem::exists(value))
         return "Directory \"" + value + "\" not found";
-      if (!Poco::File(value).isDirectory())
+      if (!std::filesystem::is_directory(value))
         return "Directory \"" + value + "\" specified is actually a file";
     } catch (Poco::FileException &) {
+      return "Error accessing directory \"" + value + "\"";
+    } catch (const std::filesystem::filesystem_error &) {
       return "Error accessing directory \"" + value + "\"";
     }
   }

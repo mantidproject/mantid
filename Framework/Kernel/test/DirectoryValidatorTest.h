@@ -9,7 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/DirectoryValidator.h"
-#include <Poco/File.h>
+#include <filesystem>
+#include <fstream>
 
 using namespace Mantid::Kernel;
 
@@ -24,10 +25,12 @@ public:
   void testFailsOnAFile() {
     DirectoryValidator v(true);
     std::string ThisIsAFile("directoryvalidatortestfile.txt");
-    Poco::File txt_file(ThisIsAFile);
-    txt_file.createFile();
+
+    std::filesystem::path txt_file(ThisIsAFile);
+    std::ofstream handle(txt_file);
+    handle.close();
     TS_ASSERT_EQUALS(v.isValid(ThisIsAFile), "Directory \"" + ThisIsAFile + "\" specified is actually a file");
-    txt_file.remove();
+    std::filesystem::remove(txt_file);
   }
 
   void testPassesOnNonexistentDirectoryIfYouSaySoForSomeReason() {
@@ -38,10 +41,10 @@ public:
 
   void testPassesOnExistingDirectory() {
     std::string TestDir("./MyTestFolder");
-    Poco::File dir(TestDir);
-    dir.createDirectory();
+    std::filesystem::path dir(TestDir);
+    TS_ASSERT(std::filesystem::create_directory(dir));
     DirectoryValidator v(true);
     TS_ASSERT_EQUALS(v.isValid(TestDir), "");
-    dir.remove(); // clean up your folder
+    std::filesystem::remove(dir); // clean up your folder
   }
 };

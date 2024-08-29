@@ -56,7 +56,6 @@ nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelp
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:168
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:169
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LiveListenerInfo.cpp:32
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FileDescriptor.cpp:85
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/EnabledWhenProperty.cpp:111
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/EnabledWhenProperty.cpp:151
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/DiskBuffer.cpp:363
@@ -681,7 +680,6 @@ duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCa
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:57
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadDNSEvent.h:44
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/BitStream.h:30
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/BinaryFile.h:52
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadDspacemap.cpp:342
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadANSTOHelper.cpp:210
 variableScope:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DetermineChunking.cpp:163
