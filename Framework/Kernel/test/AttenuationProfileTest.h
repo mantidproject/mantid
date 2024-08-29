@@ -26,7 +26,6 @@ public:
   void testLoadAttenuationFile() {
     std::string path = Mantid::Kernel::ConfigService::Instance().getFullPath("AttenuationProfile.DAT", false, 0);
     TS_ASSERT(!path.empty());
-    std::cout << "***" << path << "***\n";
     auto profile = AttenuationProfile(path, "");
     TS_ASSERT_THROWS_NOTHING(auto profile = AttenuationProfile(path, ""));
   }
