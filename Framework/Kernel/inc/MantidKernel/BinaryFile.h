@@ -8,8 +8,7 @@
 
 #include "MantidKernel/DllConfig.h"
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
+#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <string>
@@ -49,7 +48,7 @@ public:
 
   //------------------------------------------------------------------------------------
   /// Constructor - open a file
-  BinaryFile(std::string filename) { this->open(filename); }
+  BinaryFile(const std::string &filename) { this->open(filename); }
 
   /// Destructor, close the file if needed
   ~BinaryFile() { this->close(); }
@@ -63,7 +62,7 @@ public:
    * */
   void open(const std::string &filename) {
     this->handle.reset(nullptr);
-    if (!Poco::File(filename).exists()) {
+    if (!std::filesystem::exists(filename)) {
       std::stringstream msg;
       msg << "BinaryFile::open: File " << filename << " was not found.";
       throw std::invalid_argument("File does not exist.");

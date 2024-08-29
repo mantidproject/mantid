@@ -8,8 +8,8 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
-#include <Poco/File.h>
 #include <Poco/Path.h>
+#include <filesystem>
 #include <fstream>
 
 namespace Mantid::Kernel {
@@ -37,7 +37,7 @@ AttenuationProfile::AttenuationProfile(const std::string &inputFileName, const s
 
       if (!searchPath.empty()) {
         inputFilePath = Poco::Path(Poco::Path(searchPath).parent(), inputFileName);
-        if (Poco::File(inputFilePath).exists()) {
+        if (std::filesystem::exists(inputFilePath.toString())) {
           useSearchDirectories = false;
         }
       }
