@@ -286,7 +286,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/PD
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/NormaliseToMonitor.h:114
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MergeRuns.cpp:292
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MergeRuns.cpp:679
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/RecordPythonScript.cpp:83
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PaalmanPingsAbsorptionCorrection.cpp:452
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionFredrikze.cpp:138
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionFredrikze.cpp:155
