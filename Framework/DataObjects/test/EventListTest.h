@@ -2414,6 +2414,77 @@ public:
     TS_ASSERT_THROWS(el.compressFatEvents(-1, DateAndTime{0}, 10, &el_output), const std::runtime_error &)
   }
 
+  void test_compressEvents_unsorted() {
+    el = EventList();
+    el += TofEvent(2.8, 0);
+    el += TofEvent(2.9, 0);
+    el += TofEvent(3.0, 0);
+    el += TofEvent(3.1, 0);
+    el += TofEvent(3.2, 0);
+    el += TofEvent(1, 0);
+    compressEvents_unsorted(el, 1.0, false);
+    compressEvents_unsorted(el, 1.0, true);
+  }
+
+  void test_compressEvents_unsorted_weighted() {
+    el = EventList();
+    el.switchTo(WEIGHTED);
+    el += WeightedEvent(2.8, 0, 2.0, 2.0);
+    el += WeightedEvent(2.9, 0, 2.0, 2.0);
+    el += WeightedEvent(3.0, 0, 2.0, 2.0);
+    el += WeightedEvent(3.1, 0, 2.0, 2.0);
+    el += WeightedEvent(3.2, 0, 2.0, 2.0);
+    el += WeightedEvent(1, 0, 2.0, 2.0);
+    compressEvents_unsorted(el, 2.0, false);
+    compressEvents_unsorted(el, 2.0, true);
+  }
+
+  void test_compressEvents_unsorted_weighted_notime() {
+    el = EventList();
+    el.switchTo(WEIGHTED);
+    el += WeightedEvent(2.8, 0, 2.0, 2.0);
+    el += WeightedEvent(2.9, 0, 2.0, 2.0);
+    el += WeightedEvent(3.0, 0, 2.0, 2.0);
+    el += WeightedEvent(3.1, 0, 2.0, 2.0);
+    el += WeightedEvent(3.2, 0, 2.0, 2.0);
+    el += WeightedEvent(1, 0, 2.0, 2.0);
+    el.switchTo(WEIGHTED_NOTIME);
+    compressEvents_unsorted(el, 2.0, false);
+    compressEvents_unsorted(el, 2.0, true);
+  }
+
+  void compressEvents_unsorted(EventList el, double event_weight, bool inplace) {
+    auto histogram = std::make_shared<std::vector<double>>();
+    VectorHelper::createAxisFromRebinParams({1., 1., 4.0}, *histogram);
+    EventList *el_output;
+    if (inplace)
+      el_output = &el;
+    TS_ASSERT_THROWS_NOTHING(el.compressEvents(1., el_output, histogram));
+
+    // verify that the input remained unsorted if not inplace
+    if (!inplace)
+      TS_ASSERT_EQUALS(el.getSortType(), UNSORTED)
+    else
+      TS_ASSERT_EQUALS(el.getSortType(), TOF_SORT)
+
+    // now check events
+    TS_ASSERT_EQUALS(el_output->getEventType(), WEIGHTED_NOTIME);
+    TS_ASSERT_EQUALS(el_output->getSortType(), TOF_SORT);
+    TS_ASSERT_EQUALS(el_output->getNumberEvents(), 3);
+
+    TS_ASSERT_DELTA(el_output->getEvent(0).tof(), 1.5, 1e-5)
+    TS_ASSERT_EQUALS(el_output->getEvent(0).weight(), event_weight)
+    TS_ASSERT_EQUALS(el_output->getEvent(0).errorSquared(), event_weight)
+
+    TS_ASSERT_DELTA(el_output->getEvent(1).tof(), 2.5, 1e-5)
+    TS_ASSERT_EQUALS(el_output->getEvent(1).weight(), event_weight * 2)
+    TS_ASSERT_EQUALS(el_output->getEvent(1).errorSquared(), event_weight * 2)
+
+    TS_ASSERT_DELTA(el_output->getEvent(2).tof(), 3.5, 1e-5)
+    TS_ASSERT_EQUALS(el_output->getEvent(2).weight(), event_weight * 3)
+    TS_ASSERT_EQUALS(el_output->getEvent(2).errorSquared(), event_weight * 3)
+  }
+
   //==================================================================================
   // Mocking functions
   //==================================================================================
