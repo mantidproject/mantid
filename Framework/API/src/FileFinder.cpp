@@ -443,18 +443,17 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
   std::vector<std::string> extensionsToSearch;
   extensionsToSearch.reserve(1 + extensionsProvided.size() + facilityExtensions.size());
 
-  // If extension specified in filename
-  if (!extension.empty() && !useOnlyExtensionsProvided)
-    extensionsToSearch.emplace_back(extension);
-
-  // If no extension in filename and useExtsOnly
-  if (extension.empty() || useOnlyExtensionsProvided) {
+  if (useOnlyExtensionsProvided) {
     getUniqueExtensions(extensionsProvided, extensionsToSearch);
-  }
-  // If no extension in filename and useExtsOnly=Flase (most cases)
-  if (extension.empty() && !useOnlyExtensionsProvided) {
-    g_log.debug() << "Add facility extensions defined in the Facility.xml file" << std::endl;
-    getUniqueExtensions(facilityExtensions, extensionsToSearch);
+
+  } else {
+    if (!extension.empty()) {
+      extensionsToSearch.emplace_back(extension);
+
+    } else {
+      getUniqueExtensions(extensionsProvided, extensionsToSearch);
+      getUniqueExtensions(facilityExtensions, extensionsToSearch);
+    }
   }
 
   // determine which archive search facilities to use
@@ -465,9 +464,11 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
     g_log.information() << "Found path = " << path << '\n';
     return path;
   }
-
   // Path not found
+
+  // If only looked for extension in filename
   if (!useOnlyExtensionsProvided && extensionsToSearch.size() == 1) {
+
     extensionsToSearch.pop_back(); // No need to search for missing extension again
     getUniqueExtensions(extensionsProvided, extensionsToSearch);
     getUniqueExtensions(facilityExtensions, extensionsToSearch);
