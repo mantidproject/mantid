@@ -15,8 +15,8 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
-#include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -54,7 +54,7 @@ public:
     alg->setProperty("alpha", 90.0);
     alg->setProperty("beta", 90.0);
     alg->setProperty("gamma", 120.0);
-    auto detCalTempPath = boost::filesystem::temp_directory_path();
+    auto detCalTempPath = std::filesystem::temp_directory_path();
     detCalTempPath /= "topaz.detcal";
     alg->setPropertyValue("DetCalFilename", detCalTempPath.string());
     TS_ASSERT(alg->execute());

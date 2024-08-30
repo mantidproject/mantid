@@ -592,6 +592,13 @@ public:
     getLine(text, line);
     TSM_ASSERT_EQUALS("Strings::getLine didn't return empty string after eof.", line, "");
   }
+
+  void test_randomString() {
+    for (size_t length = 0; length < 5; ++length) {
+      const auto text = randomString(length);
+      TS_ASSERT_EQUALS(text.length(), length);
+    }
+  }
 };
 
 class StringsTestPerformance : public CxxTest::TestSuite {

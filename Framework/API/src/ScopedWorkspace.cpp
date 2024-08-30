@@ -9,6 +9,9 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/Strings.h"
+
+using Mantid::Kernel::Strings::randomString;
 
 namespace Mantid::API {
 
@@ -97,24 +100,4 @@ std::string ScopedWorkspace::generateUniqueName() {
 
   return newName;
 }
-
-/**
- * Generates random alpha-numeric string.
- * @param len :: Length of the string
- * @return Random string of the given length
- */
-std::string ScopedWorkspace::randomString(size_t len) {
-  static const std::string alphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
-
-  std::string result;
-  result.reserve(len);
-
-  while (result.size() != len) {
-    size_t randPos = ((rand() % (alphabet.size() - 1)));
-    result.push_back(alphabet[randPos]);
-  }
-
-  return result;
-}
-
 } // namespace Mantid::API

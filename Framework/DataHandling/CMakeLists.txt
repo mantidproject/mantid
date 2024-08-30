@@ -698,7 +698,7 @@ target_link_libraries(
          Mantid::Kernel
          Mantid::Indexing
          Mantid::Parallel
-  PRIVATE Mantid::Json Boost::filesystem Mantid::NexusGeometry
+  PRIVATE Mantid::Json Mantid::NexusGeometry
 )
 
 # Lib3mf is technically a public dependency as it is in our public headers. We are assuming here that it won't be used.

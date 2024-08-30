@@ -19,8 +19,7 @@ if(CXXTEST_FOUND)
   # into the test executable. It will go out of scope at the end of this file so doesn't need un-setting
   cxxtest_add_test(WorkflowAlgorithmsTest ${TEST_FILES})
   target_link_libraries(
-    WorkflowAlgorithmsTest PRIVATE Mantid::WorkflowAlgorithms Mantid::Algorithms Mantid::DataHandling Boost::filesystem
-                                   gmock
+    WorkflowAlgorithmsTest PRIVATE Mantid::WorkflowAlgorithms Mantid::Algorithms Mantid::DataHandling gmock
   )
   add_dependencies(WorkflowAlgorithmsTest CurveFitting)
   add_dependencies(FrameworkTests WorkflowAlgorithmsTest)

@@ -67,7 +67,7 @@ set_property(TARGET NexusGeometry PROPERTY FOLDER "MantidFramework")
 target_link_libraries(
   NexusGeometry
   PUBLIC Mantid::Geometry Mantid::API
-  PRIVATE Mantid::Kernel Mantid::Json Mantid::Indexing Boost::filesystem
+  PRIVATE Mantid::Kernel Mantid::Json Mantid::Indexing
 )
 
 # Add the unit tests directory

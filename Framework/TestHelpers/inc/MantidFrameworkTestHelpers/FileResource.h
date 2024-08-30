@@ -13,7 +13,7 @@
 
 #pragma once
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <iostream>
 #include <string>
 
@@ -27,7 +27,7 @@ public:
 
 private:
   bool m_debugMode;
-  boost::filesystem::path m_full_path; // full path to file
+  std::filesystem::path m_full_path; // full path to file
   // prevent heap allocation for ScopedFileHandle
 protected:
   static void *operator new(std::size_t);   // prevent heap allocation of scalar.

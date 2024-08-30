@@ -21,10 +21,9 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
-#include <boost/filesystem.hpp>
-
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <utility>
 
@@ -524,7 +523,7 @@ void LoadPLN::createWorkspace(const std::string &title) {
 
 void LoadPLN::exec(const std::string &hdfFile, const std::string &eventFile) {
 
-  namespace fs = boost::filesystem;
+  namespace fs = std::filesystem;
 
   // Create workspace
   // ----------------
@@ -852,7 +851,7 @@ int LoadPLN::confidence(Kernel::NexusDescriptor &descriptor) const {
 // exec() function that works with the two files.
 void LoadPLN::exec() {
 
-  namespace fs = boost::filesystem;
+  namespace fs = std::filesystem;
 
   // Open the hdf file and find the dirname and dataset number
   std::string hdfFile = getPropertyValue(FilenameStr);
@@ -862,8 +861,8 @@ void LoadPLN::exec() {
 
   // if relative ./ or ../ then append to the directory for the hdf file
   if (evtPath.rfind("./") == 0 || evtPath.rfind("../") == 0) {
-    fs::path hp = hdfFile;
-    evtPath = fs::canonical(evtPath, hp.parent_path()).generic_string();
+    fs::path hp(hdfFile);
+    evtPath = fs::canonical(hp.parent_path() / evtPath).string();
   }
 
   // dataset index to be loaded
