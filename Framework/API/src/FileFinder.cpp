@@ -363,6 +363,17 @@ std::vector<IArchiveSearch_sptr> FileFinderImpl::getArchiveSearch(const Kernel::
   return archs;
 }
 
+/**
+ * Find a path to a single file from a hint.
+ * @param hintstr :: hint string to look for filename.
+ * @param extensionsProvided :: Vector of aditional file extensions to consider. Optional.
+ *                  If not provided, facility extensions used.
+ * @param useOnlyExtensionsProvided :: Optional bool.
+ *                  If it's true (and extensionsProvided is not empty),
+ *                  search for the file using extensionsProvided only.
+ *                  If it's false, use extensionsProvided AND facility extensions.
+ * @return A vector of full paths or empty vector
+ */
 const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintstr,
                                                        const std::vector<std::string> &extensionsProvided,
                                                        const bool useOnlyExtensionsProvided) const {
