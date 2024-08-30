@@ -363,10 +363,11 @@ std::vector<IArchiveSearch_sptr> FileFinderImpl::getArchiveSearch(const Kernel::
   return archs;
 }
 
-const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintstr, const std::vector<std::string> &exts,
-                                                       const bool useExtsOnly) const {
+const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintstr,
+                                                       const std::vector<std::string> &extensionsProvided,
+                                                       const bool useOnlyExtensionsProvided) const {
   std::string hint = Kernel::Strings::strip(hintstr);
-  g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << exts.size() << "])\n";
+  g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << extensionsProvided.size() << "])\n";
 
   // if partial filename or run number is not supplied, return here
   if (hint.empty())
@@ -440,18 +441,18 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
   // Merge the extensions & throw out duplicates
   // On Windows throw out ones that only vary in case
   std::vector<std::string> extensionsToSearch;
-  extensionsToSearch.reserve(1 + exts.size() + facilityExtensions.size());
+  extensionsToSearch.reserve(1 + extensionsProvided.size() + facilityExtensions.size());
 
   // If extension specified in filename
-  if (!extension.empty() && !useExtsOnly)
+  if (!extension.empty() && !useOnlyExtensionsProvided)
     extensionsToSearch.emplace_back(extension);
 
   // If no extension in filename and useExtsOnly
-  if (extension.empty() || useExtsOnly) {
-    getUniqueExtensions(exts, extensionsToSearch);
+  if (extension.empty() || useOnlyExtensionsProvided) {
+    getUniqueExtensions(extensionsProvided, extensionsToSearch);
   }
   // If no extension in filename and useExtsOnly=Flase (most cases)
-  if (extension.empty() && !useExtsOnly) {
+  if (extension.empty() && !useOnlyExtensionsProvided) {
     g_log.debug() << "Add facility extensions defined in the Facility.xml file" << std::endl;
     getUniqueExtensions(facilityExtensions, extensionsToSearch);
   }
@@ -466,9 +467,9 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
   }
 
   // Path not found
-  if (!useExtsOnly && extensionsToSearch.size() == 1) {
+  if (!useOnlyExtensionsProvided && extensionsToSearch.size() == 1) {
     extensionsToSearch.pop_back(); // No need to search for missing extension again
-    getUniqueExtensions(exts, extensionsToSearch);
+    getUniqueExtensions(extensionsProvided, extensionsToSearch);
     getUniqueExtensions(facilityExtensions, extensionsToSearch);
 
     g_log.warning() << "Extension ['" << extension << "'] not found.\n";
@@ -534,8 +535,9 @@ std::string FileFinderImpl::validateRuns(const std::string &searchText) const {
  * @throw std::invalid_argument if the argument is malformed
  * @throw Exception::NotFoundError if a file could not be found
  */
-std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, const std::vector<std::string> &exts,
-                                                  const bool useExtsOnly) const {
+std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
+                                                  const std::vector<std::string> &extensionsProvided,
+                                                  const bool useOnlyExtensionsProvided) const {
   auto const error = validateRuns(hintstr);
   if (!error.empty())
     throw std::invalid_argument(error);
@@ -616,9 +618,9 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
 
         std::string path;
         if (boost::algorithm::istarts_with(hint, "PG3")) {
-          path = findRun(instrSName + run, exts, useExtsOnly).result();
+          path = findRun(instrSName + run, extensionsProvided, useOnlyExtensionsProvided).result();
         } else {
-          path = findRun(p1.first + run, exts, useExtsOnly).result();
+          path = findRun(p1.first + run, extensionsProvided, useOnlyExtensionsProvided).result();
         }
 
         if (!path.empty()) {
@@ -637,12 +639,12 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
       if (boost::algorithm::istarts_with(hint, "PG3")) {
         if (h == hints.begin()) {
           instrSName = "PG3";
-          path = findRun(*h, exts, useExtsOnly).result();
+          path = findRun(*h, extensionsProvided, useOnlyExtensionsProvided).result();
         } else {
-          path = findRun(instrSName + *h, exts, useExtsOnly).result();
+          path = findRun(instrSName + *h, extensionsProvided, useOnlyExtensionsProvided).result();
         }
       } else {
-        path = findRun(*h, exts, useExtsOnly).result();
+        path = findRun(*h, extensionsProvided, useOnlyExtensionsProvided).result();
       }
       if (!path.empty()) {
         res.emplace_back(path);
