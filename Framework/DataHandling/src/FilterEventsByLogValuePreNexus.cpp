@@ -726,14 +726,14 @@ void FilterEventsByLogValuePreNexus::runLoadInstrument(const std::string &eventf
   for (auto &eventExt : eventExts) {
     size_t pos = instrument.find(eventExt);
     if (pos != string::npos) {
-      instrument = instrument.substr(0, pos);
+      instrument.resize(pos);
       break;
     }
   }
 
   // determine the instrument parameter file
   size_t pos = instrument.rfind('_'); // get rid of the run number
-  instrument = instrument.substr(0, pos);
+  instrument.resize(pos);
 
   // do the actual work
   auto loadInst = createChildAlgorithm("LoadInstrument");
@@ -1083,7 +1083,7 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(DataObjects::EventWorkspac
 
   for (size_t ievent = 0; ievent < current_event_buffer_size; ++ievent) {
     // Load DasEvent
-    DasEvent &tempevent = *(event_buffer + ievent);
+    const DasEvent &tempevent = *(event_buffer + ievent);
 
     // DasEvetn's pixel ID
     PixelType pixelid = tempevent.pid;
@@ -1657,7 +1657,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(DataObjects::EventWorksp
   } else {
     size_t firstindex = 1234567890;
     for (size_t i = 0; i <= current_event_buffer_size; ++i) {
-      DasEvent &tempevent = *(event_buffer + i);
+      const DasEvent &tempevent = *(event_buffer + i);
       PixelType pixelid = tempevent.pid;
       if (pixelid == m_vecLogPixelID[0]) {
         filterstatus = -1;
@@ -1710,7 +1710,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(DataObjects::EventWorksp
   for (size_t ievent = 0; ievent < current_event_buffer_size; ++ievent) {
 
     // Load DasEvent
-    DasEvent &tempevent = *(event_buffer + ievent);
+    const DasEvent &tempevent = *(event_buffer + ievent);
 
     // DasEvetn's pixel ID
     PixelType pixelid = tempevent.pid;
@@ -1826,21 +1826,18 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(DataObjects::EventWorksp
         logpulsetime = pulsetime;
         // logtof = tof;
       } else {
-        double factor(1.0);
         if (m_corretctTOF) {
           if (std::find(detIds.begin(), detIds.end(), pixelid) == detIds.end())
             throw std::runtime_error("Unable to get access to detector ");
 
           // Calculate TOF correction value
-          double l2 = detectorInfo.l2(pixelid);
-          factor = (l1) / (l1 + l2);
-        }
-
-        // Examine whether to revert the filter
-        if (m_corretctTOF)
+          const double l2 = detectorInfo.l2(pixelid);
+          const double factor = (l1) / (l1 + l2);
+          // Examine whether to revert the filter
           abstime = pulsetime.totalNanoseconds() + static_cast<int64_t>(tof * factor * 1000);
-        else
+        } else
           abstime = pulsetime.totalNanoseconds() + static_cast<int64_t>(tof * 1000);
+
         if (abstime < boundtime) {
           // In case that the boundary time is bigger (DAS' mistake), seek
           // previous one

@@ -896,8 +896,8 @@ void RemovePeaks::parsePeakTableWorkspace(const TableWorkspace_sptr &peaktablews
 //----------------------------------------------------------------------------------------------
 /** Exclude peaks from
  */
-size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX, vector<double> v_centre,
-                                 vector<double> v_fwhm, double num_fwhm) {
+size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX, const vector<double> &v_centre,
+                                 const vector<double> &v_fwhm, double num_fwhm) {
   // Validate
   if (v_centre.size() != v_fwhm.size())
     throw runtime_error("Input different number of peak centres and fwhm.");
