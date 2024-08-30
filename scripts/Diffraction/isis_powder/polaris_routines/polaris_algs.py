@@ -104,7 +104,8 @@ def generate_ts_pdf(
 
     # convert diff cross section to S(Q) - 1
     material_builder = MaterialBuilder()
-    sample = material_builder.setFormula(sample_details.material_object.chemical_formula).build()
+    material_builder.setFormula(sample_details.material_object.chemical_formula)
+    sample = material_builder.setNumberDensity(1.0).build()  # number density not used in calculating xs (barns/atom)
     sample_total_scatter_cross_section = sample.totalScatterXSection()
     sample_coh_scatter_cross_section = sample.cohScatterXSection()
     focused_ws = focused_ws - sample_total_scatter_cross_section / (4 * math.pi)
