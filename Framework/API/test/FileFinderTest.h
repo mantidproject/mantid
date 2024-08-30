@@ -350,11 +350,9 @@ public:
   }
 
   void testFindRunWithOverwriteExtensionsAndCorrectExtensionInFilename() {
-    std::string path;
-
     // This file is .nxs or .RAW
     const std::vector<std::string> incorrect_extension = {".txt"};
-    path = FileFinder::Instance().findRun("MUSR15189.nxs", incorrect_extension, true).result();
+    std::string path = FileFinder::Instance().findRun("MUSR15189.nxs", incorrect_extension, true).result();
     TS_ASSERT_EQUALS(path, "");
   }
 
@@ -365,16 +363,13 @@ public:
   }
 
   void testFindRunWithOverwriteExtensionsAndIncorrectExtensions() {
-    std::string path;
-
     // This file is .nxs or .RAW
     const std::vector<std::string> incorrect_extension = {".txt"};
-    path = FileFinder::Instance().findRun("MUSR15189", incorrect_extension, true).result();
+    std::string path = FileFinder::Instance().findRun("MUSR15189", incorrect_extension, true).result();
     TS_ASSERT_EQUALS(path, "");
   }
 
   void testFindRunWithNoOverwriteAndIncorrectExtensionInFilename() {
-
     // Displays warning to user but still finds path using facility extensions
     std::string path = FileFinder::Instance().findRun("MUSR15189.txt").result();
     std::string actualExtension = path.substr(path.size() - 4, 4);
@@ -382,12 +377,10 @@ public:
   }
 
   void testFindRunWithOverwriteExtensionsAndOneCorrectExtension() {
-    std::string path;
-
     // This file is .nxs or .RAW
     // returns a .nxs if no extensions passed in
     const std::vector<std::string> extensions = {".a", ".txt", ".nxs"};
-    path = FileFinder::Instance().findRun("MUSR15189", extensions, true).result();
+    std::string path = FileFinder::Instance().findRun("MUSR15189", extensions, true).result();
     std::string actualExtension = "";
     if (!path.empty()) {
       actualExtension = path.substr(path.size() - 4, 4);
