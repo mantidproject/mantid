@@ -2,6 +2,7 @@ name: mantid-developer
 
 channels:
   - conda-forge
+  - mantid
 
 dependencies:
   # Common packages
@@ -21,6 +22,7 @@ dependencies:
   - libopenblas!=0.3.23,!=0.3.24,!=0.3.25, !=0.3.28 # v0.3.25 causing system test failures on linux. Others are for macOS consistency.
   - librdkafka>=1.6.0
   - matplotlib=3.7.*
+  - mslice
   - muparser>=2.3.2
   - nexus=4.4.*
   - ninja>=1.10.2

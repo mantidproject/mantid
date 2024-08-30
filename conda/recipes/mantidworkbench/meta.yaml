@@ -47,6 +47,7 @@ requirements:
     {% if environ.get('INCLUDE_MANTIDDOCS', 'True') != 'False' %}
     - mantiddocs {{ version }}
     {% endif %}
+    - mslice
 
 test:
   imports:

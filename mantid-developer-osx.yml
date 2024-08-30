@@ -2,6 +2,7 @@ name: mantid-developer
 
 channels:
   - conda-forge
+  - mantid
 
 dependencies:
   - ccache
@@ -19,6 +20,7 @@ dependencies:
   - libopenblas!=0.3.23,!=0.3.24,!=0.3.25, !=0.3.28 # v0.3.23 causes a hang for the system tests on OSX, v0.3.24 causing unit test failure - investigation needed, v0.3.25 causing a system test failure.
   - librdkafka>=1.6.0
   - matplotlib=3.7.*
+  - mslice
   - muparser>=2.3.2
   - nexus=4.4.*
   - ninja>=1.10.2

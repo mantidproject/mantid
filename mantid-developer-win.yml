@@ -2,6 +2,7 @@ name: mantid-developer
 
 channels:
   - conda-forge
+  - mantid
 
 dependencies:
   - ccache
@@ -20,6 +21,7 @@ dependencies:
   - libboost-python-devel=1.84.* # Use the same version as conda-forge
   - librdkafka>=1.6.0
   - matplotlib=3.7.*
+  - mslice
   - muparser>=2.3.2
   - nexus=4.4.*
   - ninja>=1.10.2
