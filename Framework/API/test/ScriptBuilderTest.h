@@ -372,13 +372,13 @@ public:
         "# Child algorithms of TopLevelAlgorithm",
         "",
         "## Child algorithms of NestedAlgorithm",
-        "BasicAlgorithm(PropertyA='FirstOne')",
-        "BasicAlgorithm(PropertyA='SecondOne')",
+        "BasicAlgorithm(PropertyA='FirstOne', StoreInADS=False)",
+        "BasicAlgorithm(PropertyA='SecondOne', StoreInADS=False)",
         "## End of child algorithms of NestedAlgorithm",
         "",
         "## Child algorithms of NestedAlgorithm",
-        "BasicAlgorithm(PropertyA='FirstOne')",
-        "BasicAlgorithm(PropertyA='SecondOne')",
+        "BasicAlgorithm(PropertyA='FirstOne', StoreInADS=False)",
+        "BasicAlgorithm(PropertyA='SecondOne', StoreInADS=False)",
         "## End of child algorithms of NestedAlgorithm",
         "",
         "# End of child algorithms of TopLevelAlgorithm",
@@ -419,16 +419,16 @@ public:
         "# Child algorithms of TopLevelAlgorithm",
         "",
         "## Child algorithms of NestedAlgorithm",
-        "BasicAlgorithm(PropertyA='FirstOne')",
-        "BasicAlgorithm(PropertyA='SecondOne')",
+        "BasicAlgorithm(PropertyA='FirstOne', StoreInADS=False)",
+        "BasicAlgorithm(PropertyA='SecondOne', StoreInADS=False)",
         "## End of child algorithms of NestedAlgorithm",
         "",
-        "NestedAlgorithm()",
+        "NestedAlgorithm(StoreInADS=False)",
         "# End of child algorithms of TopLevelAlgorithm",
         "",
         "# Child algorithms of TopLevelAlgorithm",
-        "NestedAlgorithm()",
-        "NestedAlgorithm()",
+        "NestedAlgorithm(StoreInADS=False)",
+        "NestedAlgorithm(StoreInADS=False)",
         "# End of child algorithms of TopLevelAlgorithm",
         "",
         "",
@@ -602,6 +602,41 @@ public:
     TS_ASSERT(scriptText.find(output_string) != std::string::npos);
 
     m_ads.remove("IRS21360");
+  }
+
+  void test_ScriptBuilderWithOutputWorkspaceOutsideOfADS() {
+    std::vector<double> xData = {1, 2, 3};
+    std::vector<double> yData = {1, 2, 3};
+
+    auto createWorkspaceAlg = m_algFactory.create("CreateWorkspace", 1);
+    createWorkspaceAlg->initialize();
+    createWorkspaceAlg->setProperty("DataX", xData);
+    createWorkspaceAlg->setProperty("DataY", yData);
+    createWorkspaceAlg->setProperty("OutputWorkspace", "ws");
+    createWorkspaceAlg->setAlwaysStoreInADS(false);
+    createWorkspaceAlg->execute();
+
+    MatrixWorkspace_sptr ws = createWorkspaceAlg->getProperty("OutputWorkspace");
+    std::vector<double> params = {1, 3, 10};
+    auto rebinAlg = m_algFactory.create("Rebin", 1);
+    rebinAlg->initialize();
+    rebinAlg->setProperty("InputWorkspace", ws);
+    rebinAlg->setProperty("Params", params);
+    rebinAlg->setProperty("Power", 0.5);
+    rebinAlg->setProperty("OutputWorkspace", "result");
+    rebinAlg->execute();
+
+    auto resultWs = m_ads.retrieveWS<MatrixWorkspace>("result");
+    auto wsHist = resultWs->getHistory();
+
+    ScriptBuilder builder(wsHist.createView());
+    const std::string scriptText = builder.build();
+    const std::string expectedCreateWorkspaceLine =
+        "ws = CreateWorkspace(DataX='1,2,3', DataY='1,2,3', StoreInADS=False)";
+    const std::string expectedRebinLine =
+        "Rebin(InputWorkspace=ws, OutputWorkspace='result', Params='1,3,10', Power=0.5)";
+    TS_ASSERT(scriptText.find(expectedCreateWorkspaceLine) != std::string::npos);
+    TS_ASSERT(scriptText.find(expectedRebinLine) != std::string::npos);
   }
 
 private:

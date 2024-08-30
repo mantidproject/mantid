@@ -206,7 +206,12 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
     g_log.error() << "Could not create a fresh version of " << name << " version " << algHistory.version() << "\n";
   }
 
-  for (auto &propIter : props) {
+  const bool storeInADS = algHistory.getStoreInADS();
+
+  for (const auto &propIter : props) {
+    if (!storeInADS && propIter->name() == "OutputWorkspace") {
+      continue;
+    }
     std::string prop = buildPropertyString(*propIter, name);
     if (prop.length() > 0) {
       properties << prop << ", ";
@@ -233,6 +238,16 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
   }
   // Third case is we never specify the version, so do nothing.
 
+  std::string assignmentStatement("");
+  if (!storeInADS) {
+    properties << "StoreInADS=False, ";
+    const auto it =
+        std::find_if(props.cbegin(), props.cend(), [](const auto &prop) { return prop->name() == "OutputWorkspace"; });
+    if (it != props.cend()) {
+      assignmentStatement = (*it)->value() + " = ";
+    }
+  }
+
   std::string propStr = properties.str();
   if (propStr.length() > 0) {
     // remove trailing comma & space
@@ -240,7 +255,7 @@ const std::string ScriptBuilder::buildAlgorithmString(const AlgorithmHistory &al
     propStr.erase(propStr.size() - 1);
   }
 
-  std::string historyEntry = name + "(" + propStr + ")";
+  std::string historyEntry = assignmentStatement + name + "(" + propStr + ")";
   historyEntry.erase(boost::remove_if(historyEntry, boost::is_any_of("\n\r")), historyEntry.end());
   return historyEntry;
 }
@@ -286,11 +301,15 @@ const std::string ScriptBuilder::buildPropertyString(const Mantid::Kernel::Prope
       // Handle all other property types
     } else {
       std::string opener = "='";
+      std::string closer = "'";
       if (propHistory.value().find('\\') != std::string::npos) {
         opener = "=r'";
+      } else if (propHistory.pythonVariable()) {
+        opener = "=";
+        closer = "";
       }
 
-      prop = propHistory.name() + opener + propHistory.value() + "'";
+      prop = propHistory.name() + opener + propHistory.value() + closer;
     }
   }
 

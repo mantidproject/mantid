@@ -514,12 +514,11 @@ AlgHistoryProperties::AlgHistoryProperties(QWidget *w, std::vector<PropertyHisto
   hList << "Name"
         << "Value"
         << "Default?:"
-        << "Direction"
-        << "";
+        << "Direction";
 
   m_histpropTree = new QTreeWidget(w);
   m_histpropTree->setTextElideMode(Qt::ElideMiddle);
-  m_histpropTree->setColumnCount(5);
+  m_histpropTree->setColumnCount(4);
   m_histpropTree->setSelectionMode(QAbstractItemView::NoSelection);
   m_histpropTree->setHeaderLabels(hList);
   m_histpropTree->setGeometry(213, 5, 350, 200);
@@ -713,7 +712,7 @@ void AlgHistoryTreeWidget::uncheckAllChildren(QTreeWidgetItem *item, int index) 
 }
 
 void AlgHistoryTreeWidget::treeSelectionChanged() {
-  if (AlgHistoryItem *item = dynamic_cast<AlgHistoryItem *>(this->selectedItems()[0])) {
+  if (const AlgHistoryItem *item = dynamic_cast<AlgHistoryItem *>(this->selectedItems()[0])) {
     emit updateAlgorithmHistoryWindow(item->getAlgorithmHistory());
   }
 }
