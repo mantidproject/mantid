@@ -76,8 +76,6 @@ static const string EVENT_PARAM("EventFilename");
 static const string PULSEID_PARAM("PulseidFilename");
 static const string MAP_PARAM("MappingFilename");
 static const string PID_PARAM("SpectrumList");
-static const string PARALLEL_PARAM("UseParallelProcessing");
-static const string BLOCK_SIZE_PARAM("LoadingBlockSize");
 static const string OUT_PARAM("OutputWorkspace");
 
 /// All pixel ids with matching this mask are errors.
