@@ -1753,6 +1753,91 @@ void EventList::compressEvents(double tolerance, EventList *destination) {
   destination->clearUnused();
 }
 
+template <class T>
+inline void EventList::createWeightedEvents(std::vector<WeightedEventNoTime> &out, std::vector<T> &weight,
+                                            std::vector<T> &error,
+                                            std::shared_ptr<std::vector<double>> histogram_bin_edges) {
+  out.clear();
+  auto binIter = histogram_bin_edges->begin();
+  for (size_t i = 0; i < weight.size(); ++i) {
+    const auto weights = static_cast<float>(weight[i]);
+    if (weights > 0)
+      out.emplace_back(0.5 * ((*binIter) + *(std::next(binIter))), weights, static_cast<float>(error[i]));
+    binIter++;
+  }
+}
+
+template <class T>
+inline void EventList::processWeightedEvents(
+    std::vector<T> events, std::vector<WeightedEventNoTime> &out,
+    std::shared_ptr<std::vector<double>> histogram_bin_edges, double divisor, double offset,
+    boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double, const double, const bool)) {
+  const auto NUM_BINS = histogram_bin_edges->size() - 1;
+  std::vector<float> weight(NUM_BINS, 0.);
+  std::vector<float> error(NUM_BINS, 0.);
+  for (const auto &ev : events) {
+    const auto &bin_optional = findBin(*histogram_bin_edges.get(), ev.m_tof, divisor, offset, false);
+    if (bin_optional) {
+      weight[bin_optional.get()] += ev.m_weight;
+      error[bin_optional.get()] += ev.m_errorSquared;
+    }
+  }
+
+  createWeightedEvents(out, weight, error, histogram_bin_edges);
+}
+void EventList::compressEvents(double tolerance, EventList *destination,
+                               std::shared_ptr<std::vector<double>> histogram_bin_edges) {
+  if (!this->empty()) {
+    const auto NUM_BINS = histogram_bin_edges->size() - 1;
+    const auto xmin = static_cast<double>(histogram_bin_edges->front());
+
+    double divisor, offset;
+    boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double, const double,
+                                       const bool); // function pointer
+
+    // store 1/divisor because multiplication is less flops than division
+    if (tolerance < 0) {
+      findBin = findLogBin;
+      divisor = 1. / log1p(abs(tolerance)); // use this to do change of base
+      offset = log(xmin) * divisor;
+    } else {
+      findBin = findLinearBin;
+      divisor = 1. / tolerance;
+      offset = xmin * divisor;
+    }
+
+    switch (eventType) {
+    case TOF: {
+      std::vector<uint32_t> count(NUM_BINS, 0);
+      for (const auto &ev : this->events) {
+        const auto &bin_optional = findBin(*histogram_bin_edges.get(), ev.m_tof, divisor, offset, false);
+        if (bin_optional)
+          count[bin_optional.get()]++;
+      }
+
+      createWeightedEvents(destination->weightedEventsNoTime, count, count, histogram_bin_edges);
+    } break;
+
+    case WEIGHTED:
+      processWeightedEvents(this->weightedEvents, destination->weightedEventsNoTime, histogram_bin_edges, divisor,
+                            offset, findBin);
+      break;
+
+    case WEIGHTED_NOTIME:
+      processWeightedEvents(this->weightedEventsNoTime, destination->weightedEventsNoTime, histogram_bin_edges, divisor,
+                            offset, findBin);
+      break;
+    }
+  }
+
+  // In all cases, you end up WEIGHTED_NOTIME.
+  destination->eventType = WEIGHTED_NOTIME;
+  // The result will be sorted
+  destination->order = TOF_SORT;
+  // Empty out storage for vectors that are now unused.
+  destination->clearUnused();
+}
+
 void EventList::compressFatEvents(const double tolerance, const Mantid::Types::Core::DateAndTime &timeStart,
                                   const double seconds, EventList *destination) {
 

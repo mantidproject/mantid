@@ -201,6 +201,8 @@ public:
   virtual size_t histogram_size() const;
 
   void compressEvents(double tolerance, EventList *destination);
+  void compressEvents(double tolerance, EventList *destination,
+                      std::shared_ptr<std::vector<double>> histogram_bin_edges);
   void compressFatEvents(const double tolerance, const Types::Core::DateAndTime &timeStart, const double seconds,
                          EventList *destination);
   // get EventType declaration
@@ -382,6 +384,17 @@ private:
   template <class T>
   static void compressEventsHelper(const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,
                                    double tolerance);
+
+  template <class T>
+  static void createWeightedEvents(std::vector<WeightedEventNoTime> &out, std::vector<T> &weight, std::vector<T> &error,
+                                   std::shared_ptr<std::vector<double>> histogram_bin_edges);
+
+  template <class T>
+  static void processWeightedEvents(std::vector<T> events, std::vector<WeightedEventNoTime> &out,
+                                    std::shared_ptr<std::vector<double>> histogram_bin_edges, double divisor,
+                                    double offset,
+                                    boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double,
+                                                                       const double, const bool));
 
   template <class T>
   static void compressFatEventsHelper(const std::vector<T> &events, std::vector<WeightedEvent> &out,

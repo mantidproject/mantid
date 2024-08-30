@@ -14,6 +14,7 @@
 #include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include "tbb/parallel_for.h"
 
@@ -70,6 +71,7 @@ void CompressEvents::init() {
                   "Binning behavior can be specified in the usual way through sign of tolerance and other properties "
                   "('Default'); or can be set to one of the allowed binning modes. This will override all other "
                   "specification or default behavior.");
+  declareProperty("Sort", true, "");
 }
 
 void CompressEvents::exec() {
@@ -105,50 +107,96 @@ void CompressEvents::exec() {
 
   // Sort the input workspace in-place by TOF. This can be faster if there are
   // few event lists. Compressing with wall clock does the sorting internally
-  if (!compressFat) {
+  if (!compressFat && getProperty("Sort")) {
     const auto timerStart = std::chrono::high_resolution_clock::now();
     inputWS->sortAll(TOF_SORT, &prog);
     addTimer("sortByTOF", timerStart, std::chrono::high_resolution_clock::now());
   }
 
-  // Are we making a copy of the input workspace?
-  if (!inplace) {
-    outputWS = create<EventWorkspace>(*inputWS, HistogramData::BinEdges(2));
-    // We DONT copy the data though
-    // Loop over the histograms (detector spectra)
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),
-                      [compressFat, toleranceTof, startTime, toleranceWallClock, &inputWS, &outputWS,
-                       &prog](const tbb::blocked_range<size_t> &range) {
-                        for (size_t index = range.begin(); index < range.end(); ++index) {
-                          // The input event list
-                          EventList &input_el = inputWS->getSpectrum(index);
-                          // And on the output side
-                          EventList &output_el = outputWS->getSpectrum(index);
-                          // Copy other settings into output
-                          output_el.setX(input_el.ptrX());
-                          // The EventList method does the work.
-                          if (compressFat)
-                            input_el.compressFatEvents(toleranceTof, startTime, toleranceWallClock, &output_el);
-                          else
-                            input_el.compressEvents(toleranceTof, &output_el);
-                          prog.report("Compressing");
-                        }
-                      });
-  } else { // inplace
-    tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),
-                      [compressFat, toleranceTof, startTime, toleranceWallClock, &outputWS,
-                       &prog](const tbb::blocked_range<size_t> &range) {
-                        for (size_t index = range.begin(); index < range.end(); ++index) {
-                          // The input (also output) event list
-                          auto &output_el = outputWS->getSpectrum(index);
-                          // The EventList method does the work.
-                          if (compressFat)
-                            output_el.compressFatEvents(toleranceTof, startTime, toleranceWallClock, &output_el);
-                          else
-                            output_el.compressEvents(toleranceTof, &output_el);
-                          prog.report("Compressing");
-                        }
-                      });
+  if (compressFat || getProperty("Sort") || inputWS->getSortType() == TOF_SORT) {
+    // Are we making a copy of the input workspace?
+    if (!inplace) {
+      outputWS = create<EventWorkspace>(*inputWS, HistogramData::BinEdges(2));
+      // We DONT copy the data though
+      // Loop over the histograms (detector spectra)
+      tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),
+                        [compressFat, toleranceTof, startTime, toleranceWallClock, &inputWS, &outputWS,
+                         &prog](const tbb::blocked_range<size_t> &range) {
+                          for (size_t index = range.begin(); index < range.end(); ++index) {
+                            // The input event list
+                            EventList &input_el = inputWS->getSpectrum(index);
+                            // And on the output side
+                            EventList &output_el = outputWS->getSpectrum(index);
+                            // Copy other settings into output
+                            output_el.setX(input_el.ptrX());
+                            // The EventList method does the work.
+                            if (compressFat)
+                              input_el.compressFatEvents(toleranceTof, startTime, toleranceWallClock, &output_el);
+                            else
+                              input_el.compressEvents(toleranceTof, &output_el);
+                            prog.report("Compressing");
+                          }
+                        });
+    } else { // inplace
+      tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),
+                        [compressFat, toleranceTof, startTime, toleranceWallClock, &outputWS,
+                         &prog](const tbb::blocked_range<size_t> &range) {
+                          for (size_t index = range.begin(); index < range.end(); ++index) {
+                            // The input (also output) event list
+                            auto &output_el = outputWS->getSpectrum(index);
+                            // The EventList method does the work.
+                            if (compressFat)
+                              output_el.compressFatEvents(toleranceTof, startTime, toleranceWallClock, &output_el);
+                            else
+                              output_el.compressEvents(toleranceTof, &output_el);
+                            prog.report("Compressing");
+                          }
+                        });
+    }
+  } else {
+    auto histogram_bin_edges = std::make_shared<std::vector<double>>();
+    double tof_min_fixed;
+    double tof_max_fixed;
+    inputWS->getEventXMinMax(tof_min_fixed, tof_max_fixed);
+    Mantid::Kernel::VectorHelper::createAxisFromRebinParams(
+        {tof_min_fixed, toleranceTof, (tof_max_fixed + std::abs(toleranceTof))}, *histogram_bin_edges, true, true);
+    const auto NUM_EDGES = histogram_bin_edges->size();
+    if (!inplace) {
+      outputWS = create<EventWorkspace>(*inputWS, HistogramData::BinEdges(2));
+      // We DONT copy the data though
+      // Loop over the histograms (detector spectra)
+      tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),
+                        [compressFat, toleranceTof, startTime, toleranceWallClock, NUM_EDGES, &inputWS, &outputWS,
+                         &prog, histogram_bin_edges](const tbb::blocked_range<size_t> &range) {
+                          for (size_t index = range.begin(); index < range.end(); ++index) {
+                            // The input event list
+                            EventList &input_el = inputWS->getSpectrum(index);
+                            // And on the output side
+                            EventList &output_el = outputWS->getSpectrum(index);
+                            // Copy other settings into output
+                            output_el.setX(input_el.ptrX());
+                            if (input_el.getNumberEvents() > NUM_EDGES)
+                              input_el.compressEvents(toleranceTof, &output_el, histogram_bin_edges);
+                            else
+                              input_el.compressEvents(toleranceTof, &output_el);
+                            prog.report("Compressing");
+                          }
+                        });
+    } else { // inplace
+      tbb::parallel_for(tbb::blocked_range<size_t>(0, noSpectra),
+                        [compressFat, toleranceTof, startTime, toleranceWallClock, NUM_EDGES, &outputWS, &prog,
+                         histogram_bin_edges](const tbb::blocked_range<size_t> &range) {
+                          for (size_t index = range.begin(); index < range.end(); ++index) {
+                            // The input (also output) event list
+                            auto &output_el = outputWS->getSpectrum(index);
+                            if (output_el.getNumberEvents() > NUM_EDGES)
+                              output_el.compressEvents(toleranceTof, &output_el, histogram_bin_edges);
+                            else
+                              output_el.compressEvents(toleranceTof, &output_el);
+                            prog.report("Compressing");
+                          }
+                        });
+    }
   }
 
   // Cast to the matrixOutputWS and save it
