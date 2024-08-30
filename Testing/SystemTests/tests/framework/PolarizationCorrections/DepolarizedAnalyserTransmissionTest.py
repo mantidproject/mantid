@@ -13,8 +13,8 @@ from mantid.simpleapi import *
 
 class DepolarizedAnalyzerTransmissionTest(systemtesting.MantidSystemTest):
     def runTest(self):
-        Load("/Users/caila.finn/MantidData/PolSANS/DepolAnalyser/ZOOM00038238.nxs", OutputWorkspace="mt_run")
-        Load("/Users/caila.finn/MantidData/PolSANS/DepolAnalyser/ZOOM00038335.nxs", OutputWorkspace="dep_run")
+        Load("ZOOM00038238.nxs", OutputWorkspace="mt_run")
+        Load("ZOOM00038335.nxs", OutputWorkspace="dep_run")
 
         self._prepare_workspace("mt_run", "mt")
         self._prepare_workspace("dep_run", "dep_group")
@@ -38,9 +38,9 @@ class DepolarizedAnalyzerTransmissionTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-5
         result_curves = "curves"
-        reference_curves = "/Users/caila.finn/MantidData/PolSANS/DepolAnalyser/DepolCurvesReference.nxs"
+        reference_curves = "DepolCurvesReference.nxs"
         result_params = "params"
-        reference_params = "/Users/caila.finn/MantidData/PolSANS/DepolAnalyser/DepolParamsReference.nxs"
+        reference_params = "DepolParamsReference.nxs"
 
         def validate_group(result, reference):
             value_names = [result, reference]
