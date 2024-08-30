@@ -164,7 +164,7 @@ class IN6(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-2
-        self.tolerance_is_rel_err = True
+        self.tolerance_is_rel_err = False
         self.disableChecking = ["Instrument", "Sample"]
         return ["cropped", "ILL_IN6_SofQW.nxs"]
 
