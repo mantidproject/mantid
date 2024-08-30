@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "REF_L" valid-from="2024-08-26 00:00:02" valid-to="2100-01-31 23:59:59">
+<parameter-file instrument = "REF_L" valid-from="2014-10-10 00:00:02" valid-to="2024-08-25 23:59:59">
 
   <component-link name = "REF_L">
 
@@ -17,12 +17,12 @@
     </parameter>
 
     <parameter name="sample-det-distance">
-      <value val="1.362"/>
+      <value val="1.83"/>
     </parameter>
 
     <!-- Effective distances used in the reduction, accounting for emission time -->
     <parameter name="source-det-distance">
-      <value val="15.282"/>
+      <value val="15.75"/>
     </parameter>
 
     <!-- xi-reference is the distance in mm between Si and the sample position for xi = 0 -->

@@ -1,8 +1,8 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="REF_L" valid-from="2024-08-26 00:00:00" 
-					     valid-to="2100-01-31 23:59:59"
+ name="REF_L" valid-from="2023-04-01 00:00:00" 
+					     valid-to="2024-08-25 23:59:59"
 					     last-modified="2024-08-29 00:00:00">
   <defaults>
     <length unit="metre"/>
@@ -51,7 +51,7 @@
     <component type="panel" idstart="0" idfillbyfirst="y">
       <location name="detector1">
         <parameter name="z">
-          <value val="1.362"/>
+          <value val="1.83"/>
         </parameter>
       </location>
     </component>
