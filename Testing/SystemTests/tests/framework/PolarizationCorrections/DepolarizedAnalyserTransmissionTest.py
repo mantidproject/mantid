@@ -54,7 +54,7 @@ class DepolarizedAnalyzerTransmissionTest(systemtesting.MantidSystemTest):
 
             compare_alg.execute()
             if compare_alg.getPropertyValue("Result") != "1":
-                print(" Workspaces do not match. Result: ", compare_alg.getPropertyValue("Result"))
+                print(" Workspaces do not match.")
                 print(self.__class__.__name__)
                 SaveNexus(InputWorkspace=value_names[0], Filename=self.__class__.__name__ + "-mismatch.nxs")
                 return False
