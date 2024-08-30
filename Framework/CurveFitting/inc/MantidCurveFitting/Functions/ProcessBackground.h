@@ -32,8 +32,8 @@ private:
                                std::vector<double> &vec_peakfwhm);
 
   /// Exclude peak regions
-  size_t excludePeaks(std::vector<double> v_inX, std::vector<bool> &v_useX, std::vector<double> v_centre,
-                      std::vector<double> v_fwhm, double num_fwhm);
+  size_t excludePeaks(std::vector<double> v_inX, std::vector<bool> &v_useX, const std::vector<double> &v_centre,
+                      const std::vector<double> &v_fwhm, double num_fwhm);
 
   std::vector<double> m_vecPeakCentre;
   std::vector<double> m_vecPeakFWHM;
