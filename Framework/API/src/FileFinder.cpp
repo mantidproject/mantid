@@ -280,18 +280,10 @@ std::string FileFinderImpl::makeFileName(const std::string &hint, const Kernel::
     filename = shortName + filename;
   }
 
-  std::pair<std::string, std::string> p = toInstrumentAndNumber(filename);
+  auto [instrumentName, runNumber] = toInstrumentAndNumber(filename);
 
-  filename = p.first;
-  if (!delimiter.empty()) {
-    filename += delimiter;
-  }
-  filename += p.second;
-
-  if (!suffix.empty()) {
-    filename += suffix;
-  }
-
+  // delimiter and suffix might be empty strings
+  filename = instrumentName + delimiter + runNumber + suffix;
   return filename;
 }
 
