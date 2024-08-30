@@ -42,7 +42,6 @@ const std::string TIMEZERO{"time_zero"};
 const std::string SAMPLE{"sample"};
 const std::string TEMPERATURE{"temperature"};
 const std::string MAGNETICFIELD{"magnetic_field"};
-const std::string RAWDATA{"/raw_data_1"};
 const std::string SEQUENCES{"sequences"};
 const std::string TYPE{"type"};
 const std::string REQUESTED{"frames_requested"};
