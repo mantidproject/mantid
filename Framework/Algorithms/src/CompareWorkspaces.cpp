@@ -1274,7 +1274,7 @@ void CompareWorkspaces::doTableComparison(const API::ITableWorkspace_const_sptr 
   const bool checkAllData = getProperty("CheckAllData");
   const bool isRelErr = getProperty("ToleranceRelErr");
   const double tolerance = getProperty("Tolerance");
-  bool mismatch;
+  bool mismatch = false;
   for (size_t i = 0; i < numCols; ++i) {
     const auto c1 = tws1->getColumn(i);
     const auto c2 = tws2->getColumn(i);
@@ -1366,9 +1366,14 @@ this error is within the limits requested.
 @returns true if error or false if the relative value is within the limits requested
 */
 bool CompareWorkspaces::withinRelativeTolerance(double const x1, double const x2, double const rtol) {
+  // calculate difference
   double const num = std::fabs(x1 - x2);
-  // create a standardized size to compare against
-  double const den = 0.5 * (std::fabs(x1) + std::fabs(x2));
+  // return early if the values are equal
+  if (num == 0.0)
+    return true;
+  // compare the difference to the midpoint value -- could lead to issues for negative values
+  double const den = 0.5 * std::fabs(x1 + x2);
+  // NOTE !(num > rtol*den) is not the same as (num <= rtol*den)
   return !(num > (rtol * den));
 }
 } // namespace Mantid::Algorithms
