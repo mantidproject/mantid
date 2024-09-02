@@ -15,7 +15,7 @@ namespace DataObjects {
 
 /** An OffsetsWorkspace is a specialized Workspace2D where
  * the Y value at each pixel is the offset to be used for correcting
- * calculations (specifically AlignDetectors).
+ * calculations.
  *
  * @author Janik Zikovsky
  * @date 2011-05-09
