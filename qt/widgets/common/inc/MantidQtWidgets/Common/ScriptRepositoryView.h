@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
+#include "MantidAPI/ScriptRepository.h"
 #include "MantidQtWidgets/Common/MantidDialog.h"
 #include "ui_ScriptRepositoryView.h"
 #include <QDialog>
@@ -67,6 +68,7 @@ signals:
 protected slots:
   // allow to interact with the cells, in order to update the description of the
   // files
+  bool chooseLocationAndInstall(Mantid::API::ScriptRepository_sptr repo_ptr);
   void cell_activated(const QModelIndex & /*in*/);
   void updateModel();
   void currentChanged(const QModelIndex &current);

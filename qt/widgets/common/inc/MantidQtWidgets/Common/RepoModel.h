@@ -9,6 +9,7 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QAbstractItemModel>
 #include <QDialog>
+#include <QFileSystemWatcher>
 #include <QFutureWatcher>
 #include <QList>
 #include <QMessageBox>
@@ -195,6 +196,8 @@ public:
   QString filePath(const QModelIndex &index);
   QString author(const QModelIndex &index);
 
+  Mantid::API::ScriptRepository_sptr getRepoPtr() { return repo_ptr; };
+
 signals:
   void executingThread(bool /*_t1*/);
 
@@ -218,14 +221,18 @@ private:
   void handleExceptions(const Mantid::API::ScriptRepoException &ex, const QString &title,
                         bool showWarning = true) const;
 
+  void addFilesToWatcher();
+
   // handle download in thread
   QFuture<QString> download_threads;
   QFutureWatcher<QString> download_watcher;
   QModelIndex download_index;
   QString downloading_path;
+  QFileSystemWatcher m_repoJsonFileWatcher;
   bool isDownloading(const QModelIndex &index) const;
 private slots:
   void downloadFinished();
+  void repoJsonFileChanged(const QString &path);
 
 private:
   // handle connection to the uploader server in thread

@@ -404,6 +404,8 @@ public:
   */
   virtual bool isValid() = 0;
 
+  virtual void setValid(const bool valid) = 0;
+
   /** Install the necessary resources at the local_path given that allows the
     ScriptRepository to operate
     locally.
@@ -582,6 +584,8 @@ public:
 
   */
   virtual int setAutoUpdate(const std::string &path, bool option = true) = 0;
+
+  virtual std::string localRepository() const = 0;
 };
 
 /// shared pointer to the function base class

@@ -161,7 +161,7 @@ DECLARE_SCRIPTREPOSITORY(ScriptRepositoryImpl)
  "https://repository.mantidproject.com");
  @endcode
  */
-ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep, const std::string &remote) : valid(false) {
+ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep, const std::string &remote) : m_valid(false) {
   // get the local path and the remote path
   std::string loc, rem;
   const ConfigServiceImpl &config = ConfigService::Instance();
@@ -259,7 +259,7 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep, const s
     local_repository.append("/");
 
   repo.clear();
-  valid = true;
+  m_valid = true;
 }
 
 /**
@@ -343,7 +343,7 @@ void ScriptRepositoryImpl::install(const std::string &path) {
   if (local_repository.back() != '/')
     local_repository.append("/");
 
-  valid = true;
+  m_valid = true;
 }
 
 void ScriptRepositoryImpl::ensureValidRepository() {
@@ -1154,7 +1154,9 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(const std::string &url, con
 
  An invalid repository accepts only the ::install method.
  */
-bool ScriptRepositoryImpl::isValid() { return valid; }
+bool ScriptRepositoryImpl::isValid() { return m_valid; }
+
+void ScriptRepositoryImpl::setValid(const bool valid) { m_valid = valid; }
 
 /**
  * Implements ScriptRepository::check4Update. It downloads the file
