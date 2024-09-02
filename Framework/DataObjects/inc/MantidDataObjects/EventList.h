@@ -386,13 +386,14 @@ private:
                                    double tolerance);
 
   template <class T>
-  static void createWeightedEvents(std::vector<WeightedEventNoTime> &out, std::vector<T> &weight, std::vector<T> &error,
-                                   std::shared_ptr<std::vector<double>> histogram_bin_edges);
+  static void createWeightedEvents(std::vector<WeightedEventNoTime> &out, const std::vector<T> &weight,
+                                   const std::vector<T> &error,
+                                   const std::shared_ptr<std::vector<double>> histogram_bin_edges);
 
   template <class T>
-  static void processWeightedEvents(std::vector<T> events, std::vector<WeightedEventNoTime> &out,
-                                    std::shared_ptr<std::vector<double>> histogram_bin_edges, double divisor,
-                                    double offset,
+  static void processWeightedEvents(const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,
+                                    const std::shared_ptr<std::vector<double>> histogram_bin_edges,
+                                    const double divisor, const double offset,
                                     boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double,
                                                                        const double, const bool));
 

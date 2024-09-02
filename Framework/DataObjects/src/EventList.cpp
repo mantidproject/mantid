@@ -1754,9 +1754,9 @@ void EventList::compressEvents(double tolerance, EventList *destination) {
 }
 
 template <class T>
-inline void EventList::createWeightedEvents(std::vector<WeightedEventNoTime> &out, std::vector<T> &weight,
-                                            std::vector<T> &error,
-                                            std::shared_ptr<std::vector<double>> histogram_bin_edges) {
+inline void EventList::createWeightedEvents(std::vector<WeightedEventNoTime> &out, const std::vector<T> &weight,
+                                            const std::vector<T> &error,
+                                            const std::shared_ptr<std::vector<double>> histogram_bin_edges) {
   out.clear();
   auto binIter = histogram_bin_edges->begin();
   for (size_t i = 0; i < weight.size(); ++i) {
@@ -1769,8 +1769,8 @@ inline void EventList::createWeightedEvents(std::vector<WeightedEventNoTime> &ou
 
 template <class T>
 inline void EventList::processWeightedEvents(
-    std::vector<T> events, std::vector<WeightedEventNoTime> &out,
-    std::shared_ptr<std::vector<double>> histogram_bin_edges, double divisor, double offset,
+    const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,
+    const std::shared_ptr<std::vector<double>> histogram_bin_edges, const double divisor, const double offset,
     boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double, const double, const bool)) {
   const auto NUM_BINS = histogram_bin_edges->size() - 1;
   std::vector<float> weight(NUM_BINS, 0.);

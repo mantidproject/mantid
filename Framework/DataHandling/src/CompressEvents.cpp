@@ -118,11 +118,11 @@ void CompressEvents::exec() {
 
   // created required variables if using unsorted methdo
   auto histogram_bin_edges = std::make_shared<std::vector<double>>();
-  double tof_min_fixed;
-  double tof_max_fixed;
   size_t num_edges{0};
   if (!compressFat && !sortFirst && !(inputWS->getSortType() == TOF_SORT)) {
     // only initialize if needed
+    double tof_min_fixed;
+    double tof_max_fixed;
     inputWS->getEventXMinMax(tof_min_fixed, tof_max_fixed);
     Mantid::Kernel::VectorHelper::createAxisFromRebinParams(
         {tof_min_fixed, toleranceTof, (tof_max_fixed + std::abs(toleranceTof))}, *histogram_bin_edges, true, true);
