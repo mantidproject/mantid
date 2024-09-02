@@ -21,6 +21,7 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Types::Core;
+using namespace Mantid::Types::Event;
 
 class CompressEventsTest : public CxxTest::TestSuite {
 public:
@@ -199,4 +200,86 @@ public:
   void test_Logarithmic_binning_default() { doLogarithmicTest("Default", -1.); }
   void test_Logarithmic_binning_WithPulseTime() { doLogarithmicTest("Logarithmic", 1., 64); }
   void test_Logarithmic_binning_default_WithPulseTime() { doLogarithmicTest("Default", -1., 64); }
+
+  void test_unsorted_compression() {
+    EventWorkspace_sptr input = WorkspaceCreationHelper::createEventWorkspace(1, 1, 0, 0, 1, 0);
+    EventList &el = input->getSpectrum(0);
+    el.addEventQuickly(TofEvent(2.8, 0));
+    el.addEventQuickly(TofEvent(2.9, 0));
+    el.addEventQuickly(TofEvent(3.0, 0));
+    el.addEventQuickly(TofEvent(3.1, 0));
+    el.addEventQuickly(TofEvent(3.2, 0));
+    el.addEventQuickly(TofEvent(1.0, 0));
+
+    TS_ASSERT_EQUALS(input->getNumberEvents(), 6);
+
+    AnalysisDataService::Instance().addOrReplace("CompressEvents_input", input);
+
+    CompressEvents alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", "CompressEvents_input");
+    alg.setPropertyValue("OutputWorkspace", "CompressEvents_output");
+    alg.setProperty("Tolerance", 1.0);
+    alg.setProperty("SortFirst", false);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // check that the input was not sorted
+    TS_ASSERT_EQUALS(input->getSortType(), UNSORTED);
+
+    EventWorkspace_sptr output = AnalysisDataService::Instance().retrieveWS<EventWorkspace>("CompressEvents_output");
+    TS_ASSERT_EQUALS(output->getNumberEvents(), 3);
+    TS_ASSERT_EQUALS(output->getSortType(), TOF_SORT);
+    TS_ASSERT_EQUALS(output->getEventType(), WEIGHTED_NOTIME);
+
+    EventList &output_el = output->getSpectrum(0);
+    TS_ASSERT_DELTA(output_el.getEvent(0).tof(), 1.5, 1e-9);
+    TS_ASSERT_DELTA(output_el.getEvent(0).weight(), 1.0, 1e-9);
+    TS_ASSERT_DELTA(output_el.getEvent(0).errorSquared(), 1.0, 1e-9);
+    TS_ASSERT_DELTA(output_el.getEvent(1).tof(), 2.5, 1e-9);
+    TS_ASSERT_DELTA(output_el.getEvent(1).weight(), 2.0, 1e-9);
+    TS_ASSERT_DELTA(output_el.getEvent(1).errorSquared(), 2.0, 1e-9);
+    TS_ASSERT_DELTA(output_el.getEvent(2).tof(), 3.5, 1e-9);
+    TS_ASSERT_DELTA(output_el.getEvent(2).weight(), 3.0, 1e-9);
+    TS_ASSERT_DELTA(output_el.getEvent(2).errorSquared(), 3.0, 1e-9);
+  }
+
+  void test_unsorted_compression_inplace() {
+    EventWorkspace_sptr input = WorkspaceCreationHelper::createEventWorkspace(1, 1, 0, 0, 1, 0);
+    EventList &el = input->getSpectrum(0);
+    el.addEventQuickly(TofEvent(2.8, 0));
+    el.addEventQuickly(TofEvent(2.9, 0));
+    el.addEventQuickly(TofEvent(3.0, 0));
+    el.addEventQuickly(TofEvent(3.1, 0));
+    el.addEventQuickly(TofEvent(3.2, 0));
+    el.addEventQuickly(TofEvent(1.0, 0));
+
+    TS_ASSERT_EQUALS(input->getNumberEvents(), 6);
+
+    AnalysisDataService::Instance().addOrReplace("CompressEvents_input", input);
+
+    CompressEvents alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setPropertyValue("InputWorkspace", "CompressEvents_input");
+    alg.setPropertyValue("OutputWorkspace", "CompressEvents_input");
+    alg.setProperty("Tolerance", 1.0);
+    alg.setProperty("SortFirst", false);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // check that the input has been updated since this was done inplace
+    TS_ASSERT_EQUALS(input->getNumberEvents(), 3);
+    TS_ASSERT_EQUALS(input->getSortType(), TOF_SORT);
+    TS_ASSERT_EQUALS(input->getEventType(), WEIGHTED_NOTIME);
+    TS_ASSERT_DELTA(el.getEvent(0).tof(), 1.5, 1e-9);
+    TS_ASSERT_DELTA(el.getEvent(0).weight(), 1.0, 1e-9);
+    TS_ASSERT_DELTA(el.getEvent(0).errorSquared(), 1.0, 1e-9);
+    TS_ASSERT_DELTA(el.getEvent(1).tof(), 2.5, 1e-9);
+    TS_ASSERT_DELTA(el.getEvent(1).weight(), 2.0, 1e-9);
+    TS_ASSERT_DELTA(el.getEvent(1).errorSquared(), 2.0, 1e-9);
+    TS_ASSERT_DELTA(el.getEvent(2).tof(), 3.5, 1e-9);
+    TS_ASSERT_DELTA(el.getEvent(2).weight(), 3.0, 1e-9);
+    TS_ASSERT_DELTA(el.getEvent(2).errorSquared(), 3.0, 1e-9);
+  }
 };

@@ -71,7 +71,9 @@ void CompressEvents::init() {
                   "Binning behavior can be specified in the usual way through sign of tolerance and other properties "
                   "('Default'); or can be set to one of the allowed binning modes. This will override all other "
                   "specification or default behavior.");
-  declareProperty("Sort", true, "");
+  declareProperty("SortFirst", true,
+                  "If false a different method, that will not sort events first, will be used to compress events which "
+                  "is faster when you have a large number of events per compress tolerance");
 }
 
 void CompressEvents::exec() {
@@ -81,6 +83,7 @@ void CompressEvents::exec() {
   double toleranceTof = getProperty("Tolerance");
   const double toleranceWallClock = getProperty("WallClockTolerance");
   const bool compressFat = !isEmpty(toleranceWallClock);
+  const bool sortFirst = getProperty("SortFirst");
 
   BINMODE mode = getPropertyValue("BinningMode");
   if (mode == BinningMode::LINEAR)
@@ -107,13 +110,13 @@ void CompressEvents::exec() {
 
   // Sort the input workspace in-place by TOF. This can be faster if there are
   // few event lists. Compressing with wall clock does the sorting internally
-  if (!compressFat && getProperty("Sort")) {
+  if (!compressFat && sortFirst) {
     const auto timerStart = std::chrono::high_resolution_clock::now();
     inputWS->sortAll(TOF_SORT, &prog);
     addTimer("sortByTOF", timerStart, std::chrono::high_resolution_clock::now());
   }
 
-  if (compressFat || getProperty("Sort") || inputWS->getSortType() == TOF_SORT) {
+  if (compressFat || sortFirst || inputWS->getSortType() == TOF_SORT) {
     // Are we making a copy of the input workspace?
     if (!inplace) {
       outputWS = create<EventWorkspace>(*inputWS, HistogramData::BinEdges(2));
@@ -175,7 +178,7 @@ void CompressEvents::exec() {
                             EventList &output_el = outputWS->getSpectrum(index);
                             // Copy other settings into output
                             output_el.setX(input_el.ptrX());
-                            if (input_el.getNumberEvents() > NUM_EDGES)
+                            if (!input_el.isSortedByTof() && input_el.getNumberEvents() > NUM_EDGES)
                               input_el.compressEvents(toleranceTof, &output_el, histogram_bin_edges);
                             else
                               input_el.compressEvents(toleranceTof, &output_el);
@@ -189,7 +192,7 @@ void CompressEvents::exec() {
                           for (size_t index = range.begin(); index < range.end(); ++index) {
                             // The input (also output) event list
                             auto &output_el = outputWS->getSpectrum(index);
-                            if (output_el.getNumberEvents() > NUM_EDGES)
+                            if (!output_el.isSortedByTof() && output_el.getNumberEvents() > NUM_EDGES)
                               output_el.compressEvents(toleranceTof, &output_el, histogram_bin_edges);
                             else
                               output_el.compressEvents(toleranceTof, &output_el);
