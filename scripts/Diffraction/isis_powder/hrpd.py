@@ -11,6 +11,7 @@ from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_param_mapping
 
 import mantid.simpleapi as mantid
+from mantid.api import MultiDomainFunction
 
 # A bug on the instrument when recording historic NeXus files (< 2015) caused
 # corrupted data. Use raw files for now until sufficient time has past and old
@@ -189,6 +190,63 @@ class HRPD(AbstractInst):
             mantid.MaskBins(
                 InputWorkspace=ws, OutputWorkspace=ws, XMin=centre - PROMPT_PULSE_LEFT_WIDTH, XMax=centre + PROMPT_PULSE_RIGHT_WIDTH
             )
+
+    def _subtract_prompt_pulses(self, ws, is_vanadium=False, npulses=[1, 3, 4, 5]):
+        """
+        HRPD has a long flight path from the moderator resulting
+        in sharp peaks from the proton pulse that maintain their
+        sharp resolution. Here we mask these pulses out that occur
+        at 20ms intervals.
+
+        :param ws: The workspace containing the pulses. It is
+        masked in place.
+        """
+        mantid.ConvertToDistribution(Workspace=ws, EnableLogging=False)  # so all pulses can be described by same profile
+        fit_kwargs = {"CostFunction": "Unweighted least squares", "Minimizer": "Simplex", "MaxIterations": 6000, "IgnoreInvalidData": True}
+        ispec_failed = []
+        for ispec in range(0, 61):
+            func = MultiDomainFunction()
+            for ipulse, npulse in enumerate(npulses):
+                cen = npulse * PROMPT_PULSE_INTERVAL
+                xlo = cen - PROMPT_PULSE_LEFT_WIDTH - 10  # add extra to ensure get background on both sides of peak
+                xhi = cen + PROMPT_PULSE_RIGHT_WIDTH + 10
+                comp_func = FunctionFactory.createInitialized(
+                    f"name=PearsonIV, Centre={cen}, Intensity=1,Sigma=8.5, Exponent=1.5, Skew=-5,"
+                    f"constraints=(0.2<Sigma,1.5<Exponent);name=FlatBackground, A0=0,constraints=(0<A0)"
+                )
+                comp_func[0].setHeight(ws.readY(ispec)[ws.yIndexOfX(cen)])
+                comp_func[0].addConstraints(f"{cen - 15}<Centre<{cen + 15}")
+                comp_func[0].addConstraints(f"{0}<Intensity")
+                comp_func[1]["A0"] = min(ws.readY(ispec)[ws.yIndexOfX(xlo)], ws.readY(ispec)[ws.yIndexOfX(xhi)])
+                func.add(comp_func)
+                func.setDomainIndex(ipulse, ipulse)
+                key_suffix = f"_{ipulse}" if ipulse > 0 else ""
+                fit_kwargs["InputWorkspace" + key_suffix] = ws.name()
+                fit_kwargs["StartX" + key_suffix] = xlo
+                fit_kwargs["EndX" + key_suffix] = xhi
+                fit_kwargs["WorkspaceIndex" + key_suffix] = ispec
+                if not is_vanadium:
+                    func.fixParameter(f"f{ipulse}.f1.A0")  # fix constant background
+            # tie peak parameters to be common for all prompt pulses
+            for idomain in range(len(npulses) - 1):
+                for param_name in ["Intensity", "Sigma", "Exponent", "Skew"]:
+                    func.tie(f"f{idomain}.f0.{param_name}", f"f{len(npulses) - 1}.f0.{param_name}")  # tie to first
+            # fix some peak parameters
+            for param_name in ["Sigma", "Exponent", "Skew"]:
+                func.fixParameter(f"f{len(npulses) - 1}.f0.{param_name}")
+            fit_output = mantid.Fit(Function=func, **fit_kwargs, CreateOutput=False)
+            # subtract prompt pulse only from spectrum
+            success = fit_output.OutputStatus == "success" or "Changes in function value are too small" in fit_output.OutputStatus
+            if success and do_subtract:
+                # accumulate peak functions
+                pk_func = FunctionWrapper(fit_output.Function.function[0][0])
+                for ifunc in range(1, fit_output.Function.nDomains):
+                    pk_func = pk_func + FunctionWrapper(fit_output.Function.function[ifunc][0])
+                ws_eval = mantid.EvaluateFunction(InputWorkspace=ws, Function=pk_func, EnableLogging=False, StoreInADS=False)
+                ws.setY(ispec, ws.readY(ispec) - ws_eval.readY(1))
+            else:
+                ispec_failed.append(ispec)
+        mantid.ConvertFromDistribution(Workspace=ws, EnableLogging=False)
 
     def _switch_tof_window_inst_settings(self, tof_window):
         self._inst_settings.update_attributes(advanced_config=hrpd_advanced_config.get_tof_window_dict(tof_window=tof_window))
