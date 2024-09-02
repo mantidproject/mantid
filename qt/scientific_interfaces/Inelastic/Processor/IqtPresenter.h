@@ -36,7 +36,7 @@ class MANTIDQT_INELASTIC_DLL IqtPresenter : public DataProcessor, public IIqtPre
 public:
   IqtPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner, IIqtView *view,
                std::unique_ptr<IIqtModel> model);
-  ~IqtPresenter() = default;
+  ~IqtPresenter() override = default;
 
   // runWidget
   void handleValidation(IUserInputValidator *validator) const override;
@@ -63,7 +63,6 @@ private:
   int getSelectedSpectrum() const;
   /// Sets the selected spectrum
   virtual void setSelectedSpectrum(int spectrum);
-  void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
   /// Set input workspace
   void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
 
@@ -74,8 +73,6 @@ private:
 
   /// Retrieve input workspace
   MatrixWorkspace_sptr getInputWorkspace() const;
-  MatrixWorkspace_sptr getPreviewPlotWorkspace();
-  std::weak_ptr<MatrixWorkspace> m_previewPlotWorkspace;
   MatrixWorkspace_sptr m_inputWorkspace;
 };
 } // namespace CustomInterfaces

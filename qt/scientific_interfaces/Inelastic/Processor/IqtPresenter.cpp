@@ -48,7 +48,6 @@ void IqtPresenter::handleSampDataReady(const std::string &wsname) {
     m_view->setPreviewSpectrumMaximum(0);
     return;
   }
-
   m_view->setPreviewSpectrumMaximum(static_cast<int>(getInputWorkspace()->getNumberHistograms()) - 1);
   m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
   m_view->setRangeSelectorDefault(getInputWorkspace(), WorkspaceUtils::getXRangeFromWorkspace(getInputWorkspace()));
@@ -88,22 +87,12 @@ void IqtPresenter::handleSaveClicked() {
  * the selected spectrum of the current input workspace.
  */
 void IqtPresenter::handlePlotCurrentPreview() {
-  auto previewWs = getPreviewPlotWorkspace();
-  auto inputWs = getInputWorkspace();
-  auto index = boost::numeric_cast<size_t>(m_selectedSpectrum);
-  auto const errorBars = SettingsHelper::externalPlotErrorBars();
+  auto const &inputWs = getInputWorkspace();
+  auto const &index = boost::numeric_cast<size_t>(m_selectedSpectrum);
 
-  // Check a workspace has been selected
-  if (previewWs) {
-
-    if (inputWs && previewWs->getName() == inputWs->getName()) {
-      m_plotter->plotSpectra(previewWs->getName(), std::to_string(index), errorBars);
-    } else {
-      m_plotter->plotSpectra(previewWs->getName(), "0-2", errorBars);
-    }
-  } else if (inputWs && index < inputWs->getNumberHistograms()) {
-    m_plotter->plotSpectra(inputWs->getName(), std::to_string(index), errorBars);
-  } else
+  if (inputWs && index < inputWs->getNumberHistograms())
+    m_plotter->plotSpectra(inputWs->getName(), std::to_string(index), SettingsHelper::externalPlotErrorBars());
+  else
     m_view->showMessageBox("Workspace not found - data may not be loaded.");
 }
 
@@ -147,7 +136,6 @@ void IqtPresenter::runComplete(bool error) {
 void IqtPresenter::handleValidation(IUserInputValidator *validator) const {
   validator->checkDataSelectorIsValid("Sample", m_view->getDataSelector("sample"));
   validator->checkDataSelectorIsValid("Resolution", m_view->getDataSelector("resolution"));
-
   if (m_model->EMin() >= m_model->EMax())
     validator->addErrorMessage("ELow must be less than EHigh.\n");
 }
@@ -196,23 +184,5 @@ void IqtPresenter::setInputWorkspace(MatrixWorkspace_sptr inputWorkspace) {
   m_inputWorkspace = std::move(inputWorkspace);
 }
 
-/**
- * Retrieves the workspace containing the data to be displayed in
- * the preview plot.
- *
- * @return  The workspace containing the data to be displayed in
- *          the preview plot.
- */
-MatrixWorkspace_sptr IqtPresenter::getPreviewPlotWorkspace() { return m_previewPlotWorkspace.lock(); }
-
-/**
- * Sets the workspace containing the data to be displayed in the
- * preview plot.
- *
- * @param previewPlotWorkspace The workspace to set.
- */
-void IqtPresenter::setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace) {
-  m_previewPlotWorkspace = previewPlotWorkspace;
-}
 } // namespace CustomInterfaces
 } // namespace MantidQt
