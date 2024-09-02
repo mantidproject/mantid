@@ -94,67 +94,21 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent) : MantidDialog(paren
   using Mantid::API::ScriptRepositoryFactory;
   using Mantid::Kernel::ConfigService;
   using Mantid::Kernel::ConfigServiceImpl;
-  enum EXC_OPTIONS { NOTWANTED, NODIRECTORY };
+
+  // create and instance of ScriptRepository
+  Mantid::API::ScriptRepository_sptr repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
 
   try {
-
-    // create and instance of ScriptRepository
-    Mantid::API::ScriptRepository_sptr repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
-
     // check if the ScriptRepository was ever installed
     if (!repo_ptr->isValid()) {
-      // No. It has never been installed.
-      // Ask the user if he wants to install the ScriptRepository
-      if (QMessageBox::Ok != QMessageBox::question(this, "Install Script Repository?", install_mantid_label,
-                                                   QMessageBox::Ok | QMessageBox::Cancel)) {
-        throw NOTWANTED;
+      bool successful = chooseLocationAndInstall(repo_ptr);
+      if (!successful) {
+        return;
       }
-      // get the directory to install the script repository
-      ConfigServiceImpl &config = ConfigService::Instance();
-      QString loc = QString::fromStdString(config.getString("ScriptLocalRepository"));
-
-      bool sureAboutDir = false;
-
-      QString dir;
-      while (!sureAboutDir) {
-        dir = QFileDialog::getExistingDirectory(this, tr("Where do you want to install Script Repository?"), loc,
-                                                QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-
-        // configuring
-        if (dir.isEmpty()) {
-          throw NODIRECTORY;
-        }
-
-        // warn if dir is not empty
-        if (0 == QDir(dir).entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot).count()) {
-          // empty dir, just go ahead
-          sureAboutDir = true;
-        } else {
-          // warn user in case the repo is being installed in its home, etc.
-          // directory
-          QMessageBox::StandardButton sel =
-              QMessageBox::question(this, "Are you sure you want to install the Script Repository here?",
-                                    dir_not_empty_label, QMessageBox::Yes | QMessageBox::No);
-          if (QMessageBox::Yes == sel)
-            sureAboutDir = true;
-        }
-      }
-
-      // attempt to install
-      repo_ptr->install(dir.toStdString());
-      g_log.information() << "ScriptRepository installed at " << dir.toStdString() << '\n';
     }
     // create the model
     model = new RepoModel(this);
 
-  } catch (EXC_OPTIONS &ex) {
-    if (ex == NODIRECTORY)
-      // probably the user change mind. He does not want to install any more.
-      QMessageBox::warning(this, "Installation Failed", "Invalid Folder to install Script Repository!\n");
-
-    close();
-    deleteLater();
-    return;
   } catch (Mantid::API::ScriptRepoException &ex) {
     // means that the installation failed
     g_log.warning() << "ScriptRepository installation: " << ex.what() << '\n';
@@ -206,6 +160,69 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent) : MantidDialog(paren
   connect(ui->folderPathLabel, SIGNAL(linkActivated(QString)), this, SLOT(openFolderLink(QString)));
 }
 
+/**
+ * @brief Prompt the user with where to install the script repository, and install it.
+ * Closes the view if the user declines to install.
+ * @param repo_ptr ScriptRepository pointer to be used to install the script repo
+ * @return true if successfully installed, false if not
+ */
+bool ScriptRepositoryView::chooseLocationAndInstall(Mantid::API::ScriptRepository_sptr repo_ptr) {
+  using Mantid::Kernel::ConfigService;
+  using Mantid::Kernel::ConfigServiceImpl;
+  enum EXC_OPTIONS { NOTWANTED, NODIRECTORY };
+
+  QString dir;
+  try {
+    // Ask the user if he wants to install the ScriptRepository
+    if (QMessageBox::Ok != QMessageBox::question(this, "Install Script Repository?", install_mantid_label,
+                                                 QMessageBox::Ok | QMessageBox::Cancel)) {
+      throw NOTWANTED;
+    }
+    // get the directory to install the script repository
+    ConfigServiceImpl &config = ConfigService::Instance();
+    QString loc = QString::fromStdString(config.getString("ScriptLocalRepository"));
+
+    bool sureAboutDir = false;
+
+    while (!sureAboutDir) {
+      dir = QFileDialog::getExistingDirectory(this, tr("Where do you want to install Script Repository?"), loc,
+                                              QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+
+      // configuring
+      if (dir.isEmpty()) {
+        throw NODIRECTORY;
+      }
+
+      // warn if dir is not empty
+      if (0 == QDir(dir).entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot).count()) {
+        // empty dir, just go ahead
+        sureAboutDir = true;
+      } else {
+        // warn user in case the repo is being installed in its home, etc.
+        // directory
+        QMessageBox::StandardButton sel =
+            QMessageBox::question(this, "Are you sure you want to install the Script Repository here?",
+                                  dir_not_empty_label, QMessageBox::Yes | QMessageBox::No);
+        if (QMessageBox::Yes == sel)
+          sureAboutDir = true;
+      }
+    }
+  } catch (EXC_OPTIONS &ex) {
+    if (ex == NODIRECTORY) {
+      // probably the user change mind. He does not want to install any more.
+      QMessageBox::warning(this, "Installation Failed", "Invalid Folder to install Script Repository!\n");
+    }
+
+    close();
+    deleteLater();
+    return false;
+  }
+  // attempt to install
+  repo_ptr->install(dir.toStdString());
+  g_log.information() << "ScriptRepository installed at " << dir.toStdString() << '\n';
+  return true;
+}
+
 /** This method refreshes the ScriptRepository and allows it
  *  to check list the files again. It will also check for
  *  new files and folders. It is easier to just recreate RepoModel
@@ -215,6 +232,13 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent) : MantidDialog(paren
  */
 void ScriptRepositoryView::updateModel() {
   RepoModel *before = model;
+  auto model_repo_ptr = model->getRepoPtr();
+  if (!model_repo_ptr->isValid()) {
+    const bool success = chooseLocationAndInstall(model_repo_ptr);
+    if (!success) {
+      return;
+    }
+  }
   model = new RepoModel();
   connect(model, SIGNAL(executingThread(bool)), ui->reloadPushButton, SLOT(setDisabled(bool)));
   ui->repo_treeView->setModel(model);
