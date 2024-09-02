@@ -2459,6 +2459,9 @@ public:
     EventList *el_output;
     if (inplace)
       el_output = &el;
+    else
+      el_output = new EventList();
+
     TS_ASSERT_THROWS_NOTHING(el.compressEvents(1., el_output, histogram));
 
     // verify that the input remained unsorted if not inplace
