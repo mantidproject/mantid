@@ -17,6 +17,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include <algorithm>
+#include <filesystem>
 
 using Mantid::API::ScriptRepoException;
 using Mantid::API::ScriptRepositoryImpl;
@@ -315,6 +316,22 @@ public:
     TSM_ASSERT("Why valid?", !repo->isValid());
     // the installation should throw, directory is not empty
     TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
+  }
+
+  void test_checkLocalInstallIsPresent_local_json() {
+    TS_ASSERT(!repo->checkLocalInstallIsPresent());
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
+    TS_ASSERT(repo->checkLocalInstallIsPresent());
+    std::filesystem::remove(local_rep.append("/.local.json"));
+    TS_ASSERT(!repo->checkLocalInstallIsPresent());
+  }
+
+  void test_checkLocalInstallIsPresent_repository_json() {
+    TS_ASSERT(!repo->checkLocalInstallIsPresent());
+    TS_ASSERT_THROWS_NOTHING(repo->install(local_rep));
+    TS_ASSERT(repo->checkLocalInstallIsPresent());
+    std::filesystem::remove(local_rep.append("/.repository.json"));
+    TS_ASSERT(!repo->checkLocalInstallIsPresent());
   }
 
   /*************************************

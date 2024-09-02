@@ -1075,9 +1075,7 @@ internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/OrMD.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNorm.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MergeMDFiles.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNormSCD.cpp:0
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/ScriptRepository/inc/MantidScriptRepository/ScriptRepositoryImpl.h:107
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/ScriptRepository/inc/MantidScriptRepository/ScriptRepositoryImpl.h:112
-stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/ScriptRepository/src/ScriptRepositoryImpl.cpp:1596
+virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/ScriptRepository/inc/MantidScriptRepository/ScriptRepositoryImpl.h:109
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveIsawQvector.cpp:0
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/icons/src/Icon.cpp:80
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveMD2.cpp:0
@@ -1179,7 +1177,6 @@ returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Comm
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ScriptRepositoryView.cpp:113
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:107
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:960
-unassignedVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:50
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/TextPropertyWidget.cpp:39
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FunctionTreeView.h:107
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionTreeView.cpp:974
