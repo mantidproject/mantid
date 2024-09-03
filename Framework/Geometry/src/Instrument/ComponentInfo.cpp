@@ -173,6 +173,14 @@ void ComponentInfo::setRotation(const std::pair<size_t, size_t> &index, const Ke
   m_componentInfo->setRotation(index, Kernel::toQuaterniond(newRotation));
 }
 
+void ComponentInfo::scaleComponent(const size_t componentIndex, const Kernel::V3D &newScaling) {
+  m_componentInfo->scaleComponent(componentIndex, Kernel::toVector3d(newScaling));
+}
+
+void ComponentInfo::scaleComponent(const std::pair<size_t, size_t> &index, const Kernel::V3D &newScaling) {
+  m_componentInfo->scaleComponent(index, Kernel::toVector3d(newScaling));
+}
+
 size_t ComponentInfo::parent(const size_t componentIndex) const { return m_componentInfo->parent(componentIndex); }
 
 bool ComponentInfo::hasParent(const size_t componentIndex) const { return m_componentInfo->hasParent(componentIndex); }
