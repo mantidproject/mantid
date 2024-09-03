@@ -169,13 +169,8 @@ def get_two_theta_and_q(workspace: Union[str, MatrixWorkspace]) -> Tuple[np.ndar
 
     # If axis is in Q need to calculate back to angles and just return axis values
     elif axis.isNumeric() and axis.getUnit().unitID() == "MomentumTransfer":
-        q_bin_edge = axis.extractValues()
-        q = list()
-        for i in range(1, len(q_bin_edge)):
-            q_centre = ((q_bin_edge[i] - q_bin_edge[i - 1]) / 2) + q_bin_edge[i - 1]
-            q.append(q_centre)
-        np_q = np.array(q)
-        two_theta = 2.0 * np.degrees(np.arcsin(np_q / k0))
+        q = axis.extractValues()
+        two_theta = 2.0 * np.degrees(np.arcsin(np.array(q) / k0))
 
     # Out of options here
     else:

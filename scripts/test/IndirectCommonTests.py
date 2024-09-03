@@ -9,7 +9,7 @@ import numpy as np
 from os.path import join
 
 from mantid import config
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, NumericAxis
 from mantid.simpleapi import (
     AddSampleLog,
     CreateSampleWorkspace,
@@ -96,13 +96,30 @@ class IndirectCommonTests(unittest.TestCase):
         actual_result = indirect_common.get_two_theta_angles(ws)
         self.assert_lists_almost_match(expected_result, actual_result)
 
-    def test_get_two_theta_and_q(self):
+    def test_get_two_theta_and_q_with_spectra_axis(self):
         ws = self.make_dummy_QENS_workspace()
         expected_theta_result = [29.700000000000006, 32.32, 34.949999999999996, 37.58, 40.209999999999994]
         expected_Q_result = [0.48372274526965625, 0.5253047207470042, 0.5667692111215948, 0.6079351677527525, 0.6487809073399485]
         actual_theta_result, actual_Q_result = indirect_common.get_two_theta_and_q(ws)
         self.assert_lists_almost_match(expected_theta_result, actual_theta_result)
         self.assert_lists_almost_match(expected_Q_result, actual_Q_result)
+
+    def test_get_two_theta_and_q_with_numeric_axis(self):
+        q_values = [0.48372274526965625, 0.5253047207470042, 0.5667692111215948, 0.6079351677527525, 0.6487809073399485]
+
+        ws = AnalysisDataService.retrieve(self.make_dummy_QENS_workspace())
+        numeric_axis = NumericAxis.create(len(q_values))
+        numeric_axis.setUnit("MomentumTransfer")
+        for i, q_value in enumerate(q_values):
+            numeric_axis.setValue(i, q_value)
+
+        ws.replaceAxis(1, numeric_axis)
+
+        actual_theta_values, actual_q_values = indirect_common.get_two_theta_and_q(ws)
+
+        expected_theta_values = [29.700000000000006, 32.32, 34.949999999999996, 37.58, 40.209999999999994]
+        self.assert_lists_almost_match(expected_theta_values, actual_theta_values)
+        self.assert_lists_almost_match(q_values, actual_q_values)
 
     def test_extract_float(self):
         data = "0.0 1 .2 3e-3 4.3 -5.5 6.0"
