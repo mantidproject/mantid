@@ -104,7 +104,7 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 
-  void test_exec_hit_tmin() {
+  void test_exec_hit() {
     inWSName = "RemovePromptPulseTest_InputWS_hit";
     outWSName = inWSName; //"RemovePromptPulseTest_OutputWS_hit";
     this->makeFakeEventWorkspace(inWSName);

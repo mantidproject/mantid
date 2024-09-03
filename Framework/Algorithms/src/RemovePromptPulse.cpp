@@ -99,6 +99,7 @@ void RemovePromptPulse::getTofRange(const MatrixWorkspace_const_sptr &wksp, doub
     }
   }
   // the fall-through case is to use the properties for both which was set at the top of the function
+
   addTimer("getTofRange", timerStart, std::chrono::high_resolution_clock::now());
 }
 
@@ -204,13 +205,14 @@ double RemovePromptPulse::getFrequency(const API::Run &run) {
 std::vector<double> RemovePromptPulse::calculatePulseTimes(const double tmin, const double tmax, const double period,
                                                            const double width) {
   std::vector<double> times;
-  double time = 0;
+  double time = 0.;
   // zero pulse should be taken into account
   if (tmin > 0 && tmin < width)
     times.emplace_back(time);
   // find when the first prompt pulse would be
   while (time < tmin)
     time += period;
+
   // calculate all times possible
   while (time < tmax) {
     times.emplace_back(time);
