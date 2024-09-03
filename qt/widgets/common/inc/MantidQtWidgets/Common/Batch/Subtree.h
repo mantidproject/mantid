@@ -11,6 +11,8 @@ developer.mantidproject.org/BatchWidget/index.html
 #pragma once
 #include "MantidQtWidgets/Common/Batch/Row.h"
 
+#include <algorithm>
+
 namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {

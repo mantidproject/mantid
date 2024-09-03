@@ -104,7 +104,7 @@ Python::Object constructKwargs(std::optional<std::vector<int>> spectrumNums,
   if (windowTitle)
     kwargs["window_title"] = *windowTitle;
 
-  return std::move(kwargs);
+  return kwargs;
 }
 
 Python::Object plot(const Python::Object &args, std::optional<std::vector<int>> spectrumNums,

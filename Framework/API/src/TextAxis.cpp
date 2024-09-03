@@ -74,19 +74,29 @@ size_t TextAxis::indexOfValue(const double value) const {
   return Mantid::Kernel::VectorHelper::indexOfValueFromCenters(spectraNumbers, value);
 }
 
+/** Check if two TextAxis are equivalent
+ *  @param axis2 :: Reference to the axis to compare to
+ *  @return true if self and other axis are equal
+ */
+bool TextAxis::operator==(const TextAxis &axis2) const { return compareToTextAxis(axis2); }
+
+bool TextAxis::compareToTextAxis(const TextAxis &axis2) const {
+  if (length() != axis2.length()) {
+    return false;
+  }
+  return std::equal(m_values.begin(), m_values.end(), axis2.m_values.begin());
+}
+
 /** Check if two axis defined as spectra or numeric axis are equivalent
  *  @param axis2 :: Reference to the axis to compare to
  *  @return true if self and other axis are equal
  */
 bool TextAxis::operator==(const Axis &axis2) const {
-  if (length() != axis2.length()) {
-    return false;
-  }
   const auto *spec2 = dynamic_cast<const TextAxis *>(&axis2);
   if (!spec2) {
     return false;
   }
-  return std::equal(m_values.begin(), m_values.end(), spec2->m_values.begin());
+  return compareToTextAxis(*spec2);
 }
 
 /** Returns a text label which shows the value at index and identifies the

@@ -27,7 +27,7 @@ namespace Mantid::API {
 namespace {
 /// static logger
 Kernel::Logger g_log("CompositeFunction");
-constexpr char *ATTNUMDERIV = "NumDeriv";
+constexpr const char *ATTNUMDERIV = "NumDeriv";
 constexpr int NUMDEFAULTATTRIBUTES = 1;
 /**
  * Helper function called when we replace a function within the composite

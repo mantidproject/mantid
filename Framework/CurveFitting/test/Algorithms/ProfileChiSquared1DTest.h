@@ -19,8 +19,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
 namespace {
-constexpr char *linearFunctionString = "name = LinearBackground, A0=0.8753627851076761,  A1 = "
-                                       "2.026706319695708 ";
+constexpr const char *linearFunctionString = "name = LinearBackground, A0=0.8753627851076761,  A1 = "
+                                             "2.026706319695708 ";
 }
 
 class ProfileChiSquared1DTest : public CxxTest::TestSuite {

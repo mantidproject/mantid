@@ -76,8 +76,8 @@ public:
   long use_count() const noexcept { return Data.use_count(); }
 
   /// Checks if *this is the only shared_ptr instance managing the current
-  /// object, i.e. whether use_count() == 1.
-  bool unique() const noexcept { return Data.unique(); }
+  /// object
+  bool unique() const noexcept { return Data.use_count() == 1; }
 
   const DataType &operator*() const { return *Data; }       ///< Pointer dereference access
   const DataType *operator->() const { return Data.get(); } ///< indirectrion dereference access
@@ -147,11 +147,11 @@ template <typename DataType> cow_ptr<DataType> &cow_ptr<DataType>::operator=(con
 template <typename DataType> DataType &cow_ptr<DataType>::access() {
   // Use a double-check for sharing so that we only acquire the lock if
   // absolutely necessary
-  if (!Data.unique()) {
+  if (Data.use_count() > 1) {
     std::lock_guard<std::mutex> lock{copyMutex};
     // Check again because another thread may have taken copy and dropped
     // reference count since previous check
-    if (!Data.unique()) {
+    if (Data.use_count() > 1) {
       std::atomic_store(&Data, std::make_shared<DataType>(*Data));
     }
   }
