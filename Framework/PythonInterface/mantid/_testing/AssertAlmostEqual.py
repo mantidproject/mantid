@@ -59,37 +59,23 @@ def assert_almost_equal(Workspace1, Workspace2, rtol=Property.EMPTY_DBL, atol=Pr
             raise AssertionError(msg)
 
     # if rtol set, perform relative comparison
+    rel_res, rel_msg = True, {}
     if use_relative:
-        if "tes" in Workspace1.name():
-            print("USE RELATIVE")
         rel_res, message = CompareWorkspaces(Workspace1, Workspace2, Tolerance=rtol, ToleranceRelErr=True, **kwargs)
         rel_msg = message.toDict()
-        if "tes" in Workspace1.name():
-            print(f"REL RES {rel_res} - {rel_msg}")
 
     # if atol set, perform absolute comparison
+    abs_res, abs_msg = True, {}
     if use_absolute:
         abs_res, message = CompareWorkspaces(Workspace1, Workspace2, Tolerance=atol, ToleranceRelErr=False, **kwargs)
         abs_msg = message.toDict()
 
     # validate the comparison results
 
-    # if both atol and rtol are specified, fail if either fails
-    if use_relative and use_absolute:
-        msg = ""
-        if not rel_res:
-            msg += ", ".join(rel_msg["Message"]) + f", Workspaces are not within relative tolerance ({rtol})"
-        if not abs_res:
-            msg += ", ".join(abs_msg["Message"]) + f", Workspaces are not within relative tolerance ({atol})"
-        if not rel_res or not abs_res:
-            raise AssertionError(msg)
-
-    # otherwise, if only rtol is specified, fail if relative failed
-    elif use_relative and not rel_res:
-        msg = ", ".join(rel_msg["Message"]) + f", Workspaces are not within relative tolerance ({rtol})"
-        raise AssertionError(msg)
-
-    # otherwise, if only atol is specified, fail if absolute failed
-    elif use_absolute and not abs_res:
-        msg = ", ".join(abs_msg["Message"]) + f", Workspaces are not within absolute tolerance ({atol})"
+    msg = ""
+    if not rel_res:
+        msg += ", ".join(rel_msg["Message"]) + f", Workspaces are not within relative tolerance ({rtol})"
+    if not abs_res:
+        msg += ", ".join(abs_msg["Message"]) + f", Workspaces are not within absolute tolerance ({atol})"
+    if not rel_res or not abs_res:
         raise AssertionError(msg)

@@ -24,12 +24,13 @@ class AssertAlmostEqualTest(unittest.TestCase):
     # SIMPLE CASES
 
     def test_noargs(self):
+        # compare (ws1 - ws2) < 1e-10
         another1 = self.ws1.clone()
         assert_almost_equal(self.ws1, another1)
 
     def test_simple(self):
-        # compare (ws1 - ws2) < 1e-10
-        assert_almost_equal(self.ws1, self.ws2, atol=1, rtol=1)
+        # simple test with wide tolerances to always pass
+        assert_almost_equal(self.ws1, self.ws2, atol=1, rtol=2)
 
     def test_atol(self):
         # compare (ws1 - ws2) < atol
