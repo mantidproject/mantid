@@ -537,10 +537,10 @@ std::string FileFinderImpl::validateRuns(const std::string &searchText) const {
  * @param hintstr :: Comma separated list of hints to findRun method.
  *  Can also include ranges of runs, e.g. 123-135 or equivalently 123-35.
  *  Only the beginning of a range can contain an instrument name.
- * @param exts :: Vector of allowed file extensions. Optional.
+ * @param extensionsProvided :: Vector of allowed file extensions. Optional.
  *                If provided, this provides the only extensions searched for.
  *                If not provided, facility extensions used.
- * @param useExtsOnly :: Optional bool. If it's true (and exts is not empty),
+ * @param useOnlyExtensionsProvided:: Optional bool. If it's true (and exts is not empty),
                            search the for the file using exts only.
                            If it's false, use exts AND facility extensions.
  * @return A vector of full paths or empty vector
