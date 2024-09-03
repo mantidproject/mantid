@@ -26,7 +26,7 @@ View::View(QWidget *parent) : QWidget(parent), m_presenter() {
 
   setLayout(layout);
 
-  connect(button, SIGNAL(clicked()), this, SLOT(notifyButtonClicked()));
+  connect(button, &QPushButton::clicked, this, &View::notifyButtonClicked);
 }
 
 void View::subscribe(IPresenter *presenter) {
