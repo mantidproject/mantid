@@ -16,32 +16,21 @@ class DepolarizedAnalyzerTransmissionTest(systemtesting.MantidSystemTest):
         Load("ZOOM00038238.nxs", OutputWorkspace="mt_run")
         Load("ZOOM00038335.nxs", OutputWorkspace="dep_run")
 
-        self._prepare_workspace("mt_run", "mt_group")
-        self._prepare_workspace("dep_run", "dep_group")
-        self._average_workspaces_in_group("mt_group", "mt")
-        self._average_workspaces_in_group("dep_group", "dep")
+        mt_group = self._prepare_workspace("mt_run")
+        dep_group = self._prepare_workspace("dep_run")
+        mt = self._average_workspaces_in_group(list(mt_group))
+        dep = self._average_workspaces_in_group(list(dep_group))
 
-        DepolarizedAnalyserTransmission("dep", "mt", OutputWorkspace="params", OutputFitCurves="curves", IgnoreFitQualityError=True)
+        DepolarizedAnalyserTransmission(dep, mt, OutputWorkspace="params" "", OutputFitCurves="curves")
 
-    def _prepare_workspace(self, input_ws_name, output_ws_name):
-        temp_workspaces = {"wl": "__temp_wavelength", "mon3": "__temp_mon3", "mon4": "__temp_mon4"}
-        ConvertUnits(input_ws_name, "Wavelength", AlignBins=True, OutputWorkspace=temp_workspaces["wl"])
-        CropWorkspace(temp_workspaces["wl"], StartWorkspaceIndex=2, EndWorkspaceIndex=2, OutputWorkspace=temp_workspaces["mon3"])
-        CropWorkspace(temp_workspaces["wl"], StartWorkspaceIndex=3, EndWorkspaceIndex=3, OutputWorkspace=temp_workspaces["mon4"])
-        Divide(LHSWorkspace=temp_workspaces["mon4"], RHSWorkspace=temp_workspaces["mon3"], OutputWorkspace=output_ws_name)
-        for ws_name in temp_workspaces.values():
-            self._safe_delete_workspace(ws_name)
+    def _prepare_workspace(self, input_ws_name):
+        converted = ConvertUnits(input_ws_name, "Wavelength", AlignBins=True, StoreInADS=False)
+        monitor_3 = CropWorkspace(converted, StartWorkspaceIndex=2, EndWorkspaceIndex=2, StoreInADS=False)
+        monitor_4 = CropWorkspace(converted, StartWorkspaceIndex=3, EndWorkspaceIndex=3, StoreInADS=False)
+        return monitor_4 / monitor_3
 
-    def _average_workspaces_in_group(self, input_group_name, output_name):
-        group = AnalysisDataService.retrieve(input_group_name)
-        summed = group.getItem(0)
-        for i in range(1, 3):
-            summed = summed + group.getItem(i)
-        AnalysisDataService.addOrReplace(output_name, summed / 4)
-
-    def _safe_delete_workspace(self, ws_name):
-        if AnalysisDataService.doesExist(ws_name):
-            DeleteWorkspace(ws_name)
+    def _average_workspaces_in_group(self, ws_list):
+        return sum(ws_list) / 4
 
     def validate(self):
         self.tolerance = 1e-5
@@ -71,5 +60,4 @@ class DepolarizedAnalyzerTransmissionTest(systemtesting.MantidSystemTest):
         return is_curves_match and is_params_match
 
     def cleanup(self):
-        for ws_name in ["mt_run", "dep_run", "mt_group", "dep_group", "mt", "dep"]:
-            self._safe_delete_workspace(ws_name)
+        AnalysisDataService.clear()
