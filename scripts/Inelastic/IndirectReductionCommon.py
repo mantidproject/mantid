@@ -993,13 +993,13 @@ def rename_reduction(workspace_name, multiple_files, suffix=None):
     elif convention == "AnalyserReflection":
         analyser = instrument.getStringParameter("analyser")[0]
         reflection = instrument.getStringParameter("reflection")[0]
-        new_name = "%s%s%s_%s%s_red" % (inst_name.lower(), run_number, multi_run_marker, analyser, reflection)
+        if not suffix:
+            new_name = "%s%s%s_%s%s_red" % (inst_name.lower(), run_number, multi_run_marker, analyser, reflection)
+        else:
+            new_name = "%s%s%s_%s%s_%s_red" % (inst_name.lower(), run_number, multi_run_marker, analyser, reflection, suffix)
 
     else:
         raise RuntimeError("No valid naming convention for workspace %s" % workspace_name)
-
-    if suffix:
-        new_name = "%s_%s" % (new_name, suffix)
 
     logger.information("New name for %s workspace: %s" % (workspace_name, new_name))
 
