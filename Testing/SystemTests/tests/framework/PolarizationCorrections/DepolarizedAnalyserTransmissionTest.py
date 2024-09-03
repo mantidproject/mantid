@@ -24,10 +24,13 @@ class DepolarizedAnalyzerTransmissionTest(systemtesting.MantidSystemTest):
         DepolarizedAnalyserTransmission("dep", "mt", OutputWorkspace="params", OutputFitCurves="curves", IgnoreFitQualityError=True)
 
     def _prepare_workspace(self, input_ws_name, output_ws_name):
-        ConvertUnits(input_ws_name, "Wavelength", AlignBins=True, OutputWorkspace="__temp_wl")
-        CropWorkspace("__temp_wl", StartWorkspaceIndex=2, EndWorkspaceIndex=2, OutputWorkspace="__temp_mon3")
-        CropWorkspace("__temp_wl", StartWorkspaceIndex=3, EndWorkspaceIndex=3, OutputWorkspace="__temp_mon4")
-        Divide(LHSWorkspace="__temp_mon4", RHSWorkspace="__temp_mon3", OutputWorkspace=output_ws_name)
+        temp_workspaces = {"wl": "__temp_wavelength", "mon3": "__temp_mon3", "mon4": "__temp_mon4"}
+        ConvertUnits(input_ws_name, "Wavelength", AlignBins=True, OutputWorkspace=temp_workspaces["wl"])
+        CropWorkspace(temp_workspaces["wl"], StartWorkspaceIndex=2, EndWorkspaceIndex=2, OutputWorkspace=temp_workspaces["mon3"])
+        CropWorkspace(temp_workspaces["wl"], StartWorkspaceIndex=3, EndWorkspaceIndex=3, OutputWorkspace=temp_workspaces["mon4"])
+        Divide(LHSWorkspace=temp_workspaces["mon4"], RHSWorkspace=temp_workspaces["mon3"], OutputWorkspace=output_ws_name)
+        for ws_name in temp_workspaces.values():
+            self._safe_delete_workspace(ws_name)
 
     def _average_workspaces_in_group(self, input_group_name, output_name):
         group = AnalysisDataService.retrieve(input_group_name)
@@ -35,6 +38,10 @@ class DepolarizedAnalyzerTransmissionTest(systemtesting.MantidSystemTest):
         for i in range(1, 3):
             summed = summed + group.getItem(i)
         AnalysisDataService.addOrReplace(output_name, summed / 4)
+
+    def _safe_delete_workspace(self, ws_name):
+        if AnalysisDataService.doesExist(ws_name):
+            DeleteWorkspace(ws_name)
 
     def validate(self):
         self.tolerance = 1e-5
@@ -62,3 +69,7 @@ class DepolarizedAnalyzerTransmissionTest(systemtesting.MantidSystemTest):
         is_curves_match = validate_group(result_curves, reference_curves)
         is_params_match = validate_group(result_params, reference_params)
         return is_curves_match and is_params_match
+
+    def cleanup(self):
+        for ws_name in ["mt_run", "dep_run", "mt_group", "dep_group", "mt", "dep"]:
+            self._safe_delete_workspace(ws_name)
