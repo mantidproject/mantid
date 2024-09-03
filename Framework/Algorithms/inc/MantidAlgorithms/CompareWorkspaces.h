@@ -78,6 +78,9 @@ public:
            "testing process.";
   }
 
+  static bool withinAbsoluteTolerance(double x1, double x2, double atol);
+  static bool withinRelativeTolerance(double x1, double x2, double rtol);
+
 private:
   /// Initialise algorithm
   void init() override;
@@ -116,8 +119,6 @@ private:
 
   /// Records a mismatch in the Messages workspace and sets Result to false
   void recordMismatch(const std::string &msg, std::string ws1 = "", std::string ws2 = "");
-
-  bool relErr(double x1, double x2, double errorVal) const;
 
   /// Result of comparison (true if equal, false otherwise)
   bool m_result{false};
