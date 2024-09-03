@@ -63,18 +63,15 @@ public:
   }
 
   void test_Saving_Workspace_Smaller_Than_Chunk_Size() {
-    // Create a small test workspace
-    const int nhist(3), nx(10);
-
-    MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
+    MatrixWorkspace_sptr input = makeWorkspace();
     auto loadedData = saveAndReloadWorkspace(input, 10);
     auto dims = loadedData.get<0>();
     auto signal = loadedData.get<1>();
     auto error = loadedData.get<2>();
 
     double tolerance(1e-08);
-    TS_ASSERT_EQUALS(nhist, dims[0]);
-    TS_ASSERT_EQUALS(nx, dims[1]);
+    TS_ASSERT_EQUALS(3, dims[0]);
+    TS_ASSERT_EQUALS(10, dims[1]);
     // element 0,0
     TS_ASSERT_DELTA(0.0, signal[0], tolerance);
     TS_ASSERT_DELTA(0.0, error[0], tolerance);
@@ -90,17 +87,8 @@ public:
   }
 
   void test_Ei_onProperty_superseeds_logs() {
-    // Create a small test workspace
-    const int nhist(3), nx(10);
-    MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
-    std::unique_ptr<Mantid::Kernel::PropertyWithValue<std::string>> mode(
-        new Mantid::Kernel::PropertyWithValue<std::string>("deltaE-mode", "Direct"));
-    // pointer is owned by run, no need to delete
-    input->mutableRun().addLogData(mode.release());
-
-    std::unique_ptr<Mantid::Kernel::PropertyWithValue<double>> EiLog(
-        new Mantid::Kernel::PropertyWithValue<double>("Ei", 12.0));
-    input->mutableRun().addLogData(EiLog.release());
+    MatrixWorkspace_sptr input = makeWorkspace();
+    input = makeWS_direct(input);
 
     auto loadedData = saveAndReloadWorkspace(input, 10, true);
     auto dims = loadedData.get<0>();
@@ -111,8 +99,8 @@ public:
     double tolerance(1e-08);
     TS_ASSERT_DELTA(10.0, Ei[0], tolerance);
     //
-    TS_ASSERT_EQUALS(nhist, dims[0]);
-    TS_ASSERT_EQUALS(nx, dims[1]);
+    TS_ASSERT_EQUALS(3, dims[0]);
+    TS_ASSERT_EQUALS(10, dims[1]);
     // element 0,0
     TS_ASSERT_DELTA(0.0, signal[0], tolerance);
     TS_ASSERT_DELTA(0.0, error[0], tolerance);
@@ -128,17 +116,8 @@ public:
   }
 
   void test_Saving_Workspace_Small_EiOnLog_direct() {
-    // Create a small test workspace
-    const int nhist(3), nx(10);
-    MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
-    std::unique_ptr<Mantid::Kernel::PropertyWithValue<std::string>> mode(
-        new Mantid::Kernel::PropertyWithValue<std::string>("deltaE-mode", "Direct"));
-    // pointer is owned by run, no need to delete
-    input->mutableRun().addLogData(mode.release());
-
-    std::unique_ptr<Mantid::Kernel::PropertyWithValue<double>> EiLog(
-        new Mantid::Kernel::PropertyWithValue<double>("Ei", 12.0));
-    input->mutableRun().addLogData(EiLog.release());
+    MatrixWorkspace_sptr input = makeWorkspace();
+    input = makeWS_direct(input);
 
     auto loadedData = saveAndReloadWorkspace(input, 10, false);
     auto dims = loadedData.get<0>();
@@ -149,8 +128,8 @@ public:
     double tolerance(1e-08);
     TS_ASSERT_DELTA(12.0, Ei[0], tolerance);
     //
-    TS_ASSERT_EQUALS(nhist, dims[0]);
-    TS_ASSERT_EQUALS(nx, dims[1]);
+    TS_ASSERT_EQUALS(3, dims[0]);
+    TS_ASSERT_EQUALS(10, dims[1]);
     // element 0,0
     TS_ASSERT_DELTA(0.0, signal[0], tolerance);
     TS_ASSERT_DELTA(0.0, error[0], tolerance);
@@ -165,23 +144,7 @@ public:
     TS_ASSERT_DELTA(58.0, error[dims[0] * dims[1] - 1], tolerance);
   }
 
-  void test_Saving_Workspace_Small_EiOnLog_indirect() {
-    // Create a small test workspace
-    const int nhist(3), nx(10);
-    MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
-
-    std::vector<double> EiValue(1, 12.0);
-    input = makeWS_indirect(input, EiValue);
-
-    auto loadedData = saveAndReloadWorkspace(input, 10, false);
-    auto Ei = loadedData.get<3>();
-
-    double tolerance(1e-08);
-    TS_ASSERT_DELTA(12.0, Ei[0], tolerance);
-  }
-
   void test_Saving_Workspace_Larger_Than_Chunk_Size() {
-    // Create a test workspace
     const int nhist(5250), nx(100);
     MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
     auto loadedData = saveAndReloadWorkspace(input, 10);
@@ -227,65 +190,17 @@ public:
       Poco::File(outputFile).remove();
   }
 
-  void xestSaveNXSPE_extractIndirectDetectorsEn() {
-    // TODO: for a future, I do not know how to set energy for a detector
-    // and modern Indirect have same EI anyway
-    const int nhist(3), nx(10);
-    MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
-
-    std::vector<double> EiValues(nhist);
-    for (int i = 0; i < nhist; i++)
-      EiValues[i] = double(i + 2);
-
-    input = makeWS_indirect(input, EiValues);
-
-    auto loadedData = saveAndReloadWorkspace(input, 10, false);
-    auto detEi = loadedData.get<3>();
-
-    for (int i = 0; i < nhist; i++) {
-      TS_ASSERT_DELTA(EiValues[i], detEi[i], 1.e-8);
-    }
-  }
-  void xest_saveIndirectDetectorsEn() {
-    // TODO: for a future, I do not know how to set energy for a detector
-    // and ISIS Indirect instruments have same EI anyway
-    const int nhist(3), nx(10);
-    MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
-
-    std::vector<double> EiValues(nhist);
-    for (int i = 0; i < nhist; i++)
-      EiValues[i] = double(i + 2);
-
-    input = makeWS_indirect(input, EiValues);
-
-    SaveNXSPE saver;
-
-    auto detEi = saver.getIndirectEfixed(input);
-    for (int i = 0; i < nhist; i++) {
-      TS_ASSERT_EQUALS(EiValues[i], detEi[i]);
-    }
-  }
-
 private:
-  MatrixWorkspace_sptr makeWS_indirect(MatrixWorkspace_sptr inputWS, std::vector<double> &detEi) {
+  MatrixWorkspace_sptr makeWS_direct(MatrixWorkspace_sptr inputWS, double ei = 12.0) {
     std::unique_ptr<Mantid::Kernel::PropertyWithValue<std::string>> mode(
-        new Mantid::Kernel::PropertyWithValue<std::string>("deltaE-mode", "Indirect"));
-    // pointer is owned by run, no need to delete it
+        new Mantid::Kernel::PropertyWithValue<std::string>("deltaE-mode", "Direct"));
+    // pointer is owned by run, no need to delete
     inputWS->mutableRun().addLogData(mode.release());
-    if (detEi.size() == 1) {
-      std::unique_ptr<Mantid::Kernel::PropertyWithValue<double>> EiLog(
-          new Mantid::Kernel::PropertyWithValue<double>("Ei", detEi[0]));
-      inputWS->mutableRun().addLogData(EiLog.release());
-    } else {
-      const auto nHist = static_cast<size_t>(inputWS->getNumberHistograms());
-      // auto &specInfo = inputWS->mutableSpectrumInfo(); //TODO: may be used to change detector energy. May be not
-      for (size_t i = 0; i < nHist; i++) {
-        // TODO:
-        // here should be code which sets different energies from detEi to each mutable detector
-        // possibly retrieved from spectrumInfo or instrument
-        continue;
-      }
-    }
+
+    std::unique_ptr<Mantid::Kernel::PropertyWithValue<double>> EiLog(
+        new Mantid::Kernel::PropertyWithValue<double>("Ei", ei));
+    inputWS->mutableRun().addLogData(EiLog.release());
+
     return inputWS;
   }
 
