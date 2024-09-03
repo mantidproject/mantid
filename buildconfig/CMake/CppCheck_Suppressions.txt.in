@@ -1664,3 +1664,4 @@ returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reductio
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:193
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:199
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:218
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CompareWorkspaces.cpp:1277
