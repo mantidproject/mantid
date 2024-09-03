@@ -91,7 +91,7 @@ class AnnulusTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-3
-        self.tolerance_is_rel_err = True
+        self.tolerance_is_rel_err = False
         return ["annulus_corr", "irs_PP_MC_annulus.nxs"]
 
     def runTest(self):

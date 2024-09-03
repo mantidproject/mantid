@@ -201,8 +201,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreatePSDBle
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreatePSDBleedMask.cpp:214
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreateLogPropertyTable.cpp:126
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreateGroupingWorkspace.cpp:684
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CompareWorkspaces.cpp:268
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CompareWorkspaces.cpp:947
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/EnabledWhenWorkspaceIsType.h:50
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DetectorEfficiencyCor.cpp:126
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DetectorEfficiencyCorUser.cpp:176
@@ -1638,3 +1636,4 @@ returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reductio
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:193
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:199
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:218
+unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CompareWorkspaces.cpp:1277
