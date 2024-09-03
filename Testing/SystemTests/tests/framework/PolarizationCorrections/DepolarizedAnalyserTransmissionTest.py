@@ -44,12 +44,10 @@ class DepolarizedAnalyzerTransmissionTest(systemtesting.MantidSystemTest):
         reference_params = "DepolParamsReference.nxs"
 
         def validate_group(result, reference):
-            value_names = [result, reference]
-
             Load(Filename=reference, OutputWorkspace=reference)
             compare_alg = AlgorithmManager.create("CompareWorkspaces")
-            compare_alg.setPropertyValue("Workspace1", value_names[0])
-            compare_alg.setPropertyValue("Workspace2", value_names[1])
+            compare_alg.setPropertyValue("Workspace1", result)
+            compare_alg.setPropertyValue("Workspace2", reference)
             compare_alg.setPropertyValue("Tolerance", str(self.tolerance))
             compare_alg.setChild(True)
 
@@ -57,7 +55,7 @@ class DepolarizedAnalyzerTransmissionTest(systemtesting.MantidSystemTest):
             if compare_alg.getPropertyValue("Result") != "1":
                 print("Workspaces do not match.")
                 print(self.__class__.__name__)
-                SaveNexus(InputWorkspace=value_names[0], Filename=f"{self.__class__.__name__}-{result}-mismatch.nxs")
+                SaveNexus(InputWorkspace=result, Filename=f"{self.__class__.__name__}-{result}-mismatch.nxs")
                 return False
             return True
 
