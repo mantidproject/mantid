@@ -133,7 +133,7 @@ void RemovePromptPulse::exec() {
   g_log.information() << "Data tmin=" << tmin << ", tmax=" << tmax << ", period=" << period << " microseconds\n";
 
   // calculate the times for the prompt pulse
-  std::vector<double> pulseTimes = this->calculatePulseTimes(tmin, tmax, period);
+  std::vector<double> pulseTimes = this->calculatePulseTimes(tmin, tmax, period, width);
   if (pulseTimes.empty()) {
     g_log.notice() << "Not applying filter since prompt pulse is not in data "
                       "range (period = "
@@ -198,17 +198,19 @@ double RemovePromptPulse::getFrequency(const API::Run &run) {
  * @param tmin The minimum time-of-flight measured.
  * @param tmax The maximum time-of-flight measured.
  * @param period The accelerator period.
+ * @param width The width of the time of flight (in microseconds) to remove from the data.
  * @return A vector of all prompt pulse times possible within the time-of-flight
  * range.
  */
-std::vector<double> RemovePromptPulse::calculatePulseTimes(const double tmin, const double tmax, const double period) {
+std::vector<double> RemovePromptPulse::calculatePulseTimes(const double tmin, const double tmax, const double period,
+                                                           const double width) {
   std::vector<double> times;
   double time = 0.;
-
+  if (tmin < 0.0)
+    time = tmin - width;
   // find when the first prompt pulse would be
   while (time < tmin)
     time += period;
-
   // calculate all times possible
   while (time < tmax) {
     times.emplace_back(time);

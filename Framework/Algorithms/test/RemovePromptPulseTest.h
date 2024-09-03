@@ -32,12 +32,15 @@ private:
   std::string inWSName;
   std::string outWSName;
 
-  void makeFakeEventWorkspace(const std::string &wsName) {
+  void makeFakeEventWorkspace(const std::string &wsName, int shift = 0) {
     // Make an event workspace with 2 events in each bin.
     EventWorkspace_sptr test_in =
         WorkspaceCreationHelper::createEventWorkspace(NUMPIXELS, NUMBINS, NUMEVENTS, 1000., BIN_DELTA, 2);
     // Fake a TOF unit in the data.
     test_in->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
+    for (auto i = 0; i < test_in->dataX(0).size(); ++i) {
+      test_in->dataX(0)[i] += shift;
+    }
     test_in->setInstrument(ComponentCreationHelper::createTestInstrumentCylindrical(NUMPIXELS / 9));
     // Make sure the detector IDs are ok
     for (int i = 0; i < NUMPIXELS; i++)
@@ -103,6 +106,38 @@ public:
     inWSName = "RemovePromptPulseTest_InputWS_hit";
     outWSName = inWSName; //"RemovePromptPulseTest_OutputWS_hit";
     this->makeFakeEventWorkspace(inWSName);
+
+    EventWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inWSName));
+    std::size_t num_events = ws->getNumberEvents();
+
+    RemovePromptPulse alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", inWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", outWSName));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Width", "1000."));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Frequency", "200"));
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Retrieve the workspace from data service. TODO: Change to your desired
+    // type
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName));
+    TS_ASSERT(ws);
+    if (!ws)
+      return;
+
+    // Verify the results
+    TS_ASSERT(num_events > ws->getNumberEvents()); // should drop events
+    // Clean up
+    AnalysisDataService::Instance().remove(inWSName);
+  }
+  void test_exec_hit_negative_tmin() {
+    inWSName = "RemovePromptPulseTest_InputWS_tmin";
+    outWSName = inWSName;
+    this->makeFakeEventWorkspace(inWSName, -100);
 
     EventWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inWSName));
