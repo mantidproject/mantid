@@ -144,7 +144,7 @@
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" name="color_selector_layout">
+         <layout class="QVBoxLayout" name="color_selector_layout">
           <item>
            <widget class="QLabel" name="label_2">
             <property name="text">
@@ -485,6 +485,18 @@ QGroupBox:title {subcontrol-origin: margin; subcontrol-position: top left; paddi
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>select_axes_combo_box</tabstop>
+  <tabstop>axes_title_line_edit</tabstop>
+  <tabstop>show_minor_ticks_check_box</tabstop>
+  <tabstop>show_minor_gridlines_check_box</tabstop>
+  <tabstop>label_line_edit</tabstop>
+  <tabstop>scale_combo_box</tabstop>
+  <tabstop>autoscale</tabstop>
+  <tabstop>lower_limit_line_edit</tabstop>
+  <tabstop>upper_limit_line_edit</tabstop>
+  <tabstop>apply_all_button</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

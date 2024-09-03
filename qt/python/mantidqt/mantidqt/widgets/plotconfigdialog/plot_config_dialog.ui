@@ -112,6 +112,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>apply_button</tabstop>
+  <tabstop>cancel_button</tabstop>
+  <tabstop>ok_button</tabstop>
+  <tabstop>help_button</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
