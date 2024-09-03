@@ -49,12 +49,20 @@ class AbinsLoadGAUSSIANTest(unittest.TestCase, abins.input.Tester):
         self.check(name=self._gaussian_system4, loader=abins.input.GAUSSIANLoader)
 
     # ===================================================================================
-    # | Use cases: molecular calculation for GAUSSIAN09 DFT, Win                        |
+    # | Use cases: GAUSSIAN16 DFT with frozen atom                                      |
     # ===================================================================================
     _gaussian_system5 = "ethanol_g16_frozen_atom_LoadGAUSSIAN"
 
     def test_gaussian_5(self):
         self.check(name=self._gaussian_system5, loader=abins.input.GAUSSIANLoader)
+
+    # ===================================================================================
+    # | Use cases: GAUSSIAN16 DFT with high-precision output                            |
+    # ===================================================================================
+    _gaussian_system6 = "ethanol_g16_high_precision_LoadGAUSSIAN"
+
+    def test_gaussian_6(self):
+        self.check(name=self._gaussian_system6, loader=abins.input.GAUSSIANLoader)
 
 
 if __name__ == "__main__":
