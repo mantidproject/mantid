@@ -99,6 +99,16 @@ public:
   bool operator==(const EnumeratedString &es) const { return value == es.value; }
   bool operator!=(const EnumeratedString &es) const { return value != es.value; }
 
+  template <typename OtherEnumType, const std::vector<std::string> *OtherEnumStrings>
+  bool operator==(const EnumeratedString<OtherEnumType, OtherEnumStrings> &) const {
+    return false; // Different enum types are always different
+  }
+
+  template <typename OtherEnumType, const std::vector<std::string> *OtherEnumStrings>
+  bool operator!=(const EnumeratedString<OtherEnumType, OtherEnumStrings> &other) const {
+    return !(*this == other);
+  }
+
   const char *c_str() const { return name.c_str(); }
   static size_t size() { return names->size(); }
 

@@ -107,6 +107,12 @@ void NumericAxis::setValue(const std::size_t &index, const double &value) {
   m_values[index] = value;
 }
 
+/** Check if two NumericAxis are equivalent
+ *  @param axis2 :: Reference to the axis to compare to
+ *  @return true if self and second axis are equal
+ */
+bool NumericAxis::operator==(const NumericAxis &axis2) const { return equalWithinTolerance(axis2, 1e-15); }
+
 /** Check if two axis defined as spectra or numeric axis are equivalent
  *  @param axis2 :: Reference to the axis to compare to
  *  @return true if self and second axis are equal

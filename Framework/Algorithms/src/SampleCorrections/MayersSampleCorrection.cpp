@@ -166,11 +166,11 @@ Kernel::IValidator_sptr MayersSampleCorrection::createInputWSValidator() const {
   using Kernel::CompositeValidator;
   auto validator = std::make_shared<CompositeValidator>();
 
-  unsigned int requires = (InstrumentValidator::SamplePosition | InstrumentValidator::SourcePosition);
-  validator->add<InstrumentValidator, unsigned int>(requires);
+  unsigned int require = (InstrumentValidator::SamplePosition | InstrumentValidator::SourcePosition);
+  validator->add<InstrumentValidator, unsigned int>(require);
 
-  requires = (SampleValidator::Shape | SampleValidator::Material);
-  validator->add<SampleValidator, unsigned int>(requires);
+  require = (SampleValidator::Shape | SampleValidator::Material);
+  validator->add<SampleValidator, unsigned int>(require);
 
   // NOTE: Mayers correction requires the input to be of TOF
   validator->add<WorkspaceUnitValidator>("TOF");

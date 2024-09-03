@@ -17,12 +17,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
-namespace {
-const std::string multiDetectorAnalysis = "MultiDetectorAnalysis";
-const std::string lineDetectorAnalysis = "LineDetectorAnalysis";
-const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
-} // namespace
-
 namespace Mantid::Reflectometry {
 
 // Register the algorithm into the AlgorithmFactory

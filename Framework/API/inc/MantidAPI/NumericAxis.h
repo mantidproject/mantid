@@ -41,6 +41,7 @@ public:
   /// Set the value at a specific index
   void setValue(const std::size_t &index, const double &value) override;
   size_t indexOfValue(const double value) const override;
+  bool operator==(const NumericAxis &) const;
   bool operator==(const Axis &) const override;
   virtual bool equalWithinTolerance(const Axis &axis2, const double tolerance) const;
   std::string label(const std::size_t &index) const override;
