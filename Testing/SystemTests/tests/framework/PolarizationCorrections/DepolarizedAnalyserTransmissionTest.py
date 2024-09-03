@@ -16,8 +16,9 @@ class DepolarizedAnalyzerTransmissionTest(systemtesting.MantidSystemTest):
         Load("ZOOM00038238.nxs", OutputWorkspace="mt_run")
         Load("ZOOM00038335.nxs", OutputWorkspace="dep_run")
 
-        self._prepare_workspace("mt_run", "mt")
+        self._prepare_workspace("mt_run", "mt_group")
         self._prepare_workspace("dep_run", "dep_group")
+        self._average_workspaces_in_group("mt_group", "mt")
         self._average_workspaces_in_group("dep_group", "dep")
 
         DepolarizedAnalyserTransmission("dep", "mt", OutputWorkspace="params", OutputFitCurves="curves", IgnoreFitQualityError=True)
@@ -54,10 +55,12 @@ class DepolarizedAnalyzerTransmissionTest(systemtesting.MantidSystemTest):
 
             compare_alg.execute()
             if compare_alg.getPropertyValue("Result") != "1":
-                print(" Workspaces do not match.")
+                print("Workspaces do not match.")
                 print(self.__class__.__name__)
-                SaveNexus(InputWorkspace=value_names[0], Filename=self.__class__.__name__ + "-mismatch.nxs")
+                SaveNexus(InputWorkspace=value_names[0], Filename=f"{self.__class__.__name__}-{result}-mismatch.nxs")
                 return False
             return True
 
-        return validate_group(result_curves, reference_curves) and validate_group(result_params, reference_params)
+        is_curves_match = validate_group(result_curves, reference_curves)
+        is_params_match = validate_group(result_params, reference_params)
+        return is_curves_match and is_params_match
