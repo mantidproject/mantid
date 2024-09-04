@@ -37,10 +37,12 @@ class PearsonIV(IPeakFunction):
             "Parameter determining the skew/asymmetry of the peak - a negative value of Skew produces a peak with "
             "centre of mass at larger x value than the peak centre/maximum.",
         )
+        # Non-fitting parameters
+        self.declareAttribute("CentreShift", 0.0)
 
     def functionLocal(self, xvals):
         intensity = self.getParameterValue("Intensity")
-        centre = self.getParameterValue("Centre")
+        centre = self.getParameterValue("Centre") + self.getAttributeValue("CentreShift")
         sigma = self.getParameterValue("Sigma")
         expon = self.getParameterValue("Exponent")
         skew = self.getParameterValue("Skew")
@@ -56,7 +58,7 @@ class PearsonIV(IPeakFunction):
         return self.getParameterValue("Intensity")
 
     def height(self):
-        return self.functionLocal(self.getParameterValue("Centre"))
+        return self.functionLocal(self.getParameterValue("Centre") + self.getAttributeValue("CentreShift"))
 
     def fwhm(self):
         # no exact form for FWHM - this is valid for skew=0
