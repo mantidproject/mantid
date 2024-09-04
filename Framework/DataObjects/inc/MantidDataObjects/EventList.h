@@ -393,9 +393,7 @@ private:
   template <class T>
   static void processWeightedEvents(const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,
                                     const std::shared_ptr<std::vector<double>> histogram_bin_edges,
-                                    const double divisor, const double offset,
-                                    boost::optional<size_t> (*findBin)(const MantidVec &, const double, const double,
-                                                                       const double, const bool));
+                                    struct FindBin findBin);
 
   template <class T>
   static void compressFatEventsHelper(const std::vector<T> &events, std::vector<WeightedEvent> &out,
