@@ -830,14 +830,14 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TableWorksp
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TableWorkspace.cpp:318
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/EventList.h:144
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/OffsetsWorkspace.cpp:49
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:999
-identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1095
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1020
+identicalConditionAfterEarlyExit:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1116
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:380
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:381
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/CenteringGroup.h:46
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/CompositeBraggScatterer.h:64
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/CompositeBraggScatterer.cpp:189
-derefInvalidIterator:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1590
+derefInvalidIterator:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventList.cpp:1611
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/Group.h:148
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MaskWorkspace.cpp:411
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h:35
