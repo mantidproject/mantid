@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import math
+from typing import Literal
 import warnings
 
 import numpy as np
@@ -164,6 +165,7 @@ M_2_HARTREE = constants.value("atomic mass unit-hartree relationship")  # amu * 
 
 # ALL_SAMPLE_FORMS = ["SingleCrystal", "Powder"]  # valid forms of samples
 ALL_SAMPLE_FORMS = ["Powder"]  # valid forms of samples
+ALL_SAMPLE_FORMS_TYPE = Literal["Powder"]
 
 # keywords which define data structure of KpointsData
 ALL_KEYWORDS_K_DATA = ["weights", "k_vectors", "frequencies", "atomic_displacements", "unit_cell"]
@@ -190,6 +192,9 @@ COMPLEX_TYPE = np.dtype(complex)
 
 INT_ID = np.dtype(np.uint32).num
 INT_TYPE = np.dtype(np.uint32)
+
+# Valid types for hdf5 attr read/write
+HDF5_ATTR_TYPE = np.int64 | int | np.float64 | float | str | bytes | bool
 
 HIGHER_ORDER_QUANTUM_EVENTS = 3  # number of quantum order effects taken into account
 HIGHER_ORDER_QUANTUM_EVENTS_DIM = HIGHER_ORDER_QUANTUM_EVENTS

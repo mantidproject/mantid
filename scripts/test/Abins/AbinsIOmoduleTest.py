@@ -7,6 +7,7 @@
 import unittest
 
 import numpy as np
+from pydantic import ValidationError
 from abins import IO, test_helpers
 
 
@@ -41,18 +42,22 @@ class IOTest(unittest.TestCase):
         # save attributes and datasets
         saver.save()
 
-    def _save_wrong_attribute(self):
+    def _add_wrong_attribute(self):
         poor_saver = IO(input_filename="BadCars.foo", group_name="Volksvagen")
-        poor_saver.add_attribute("BadPassengers", np.array([4]))
-        self.assertRaises(ValueError, poor_saver.save)
+
+        with self.assertRaisesRegex(ValidationError, "Input should be an instance of int64"):
+            poor_saver.add_attribute("BadPassengers", np.array([4, 5], dtype=np.int64))
 
     def _save_wrong_dataset(self):
         poor_saver = IO(input_filename="BadCars.foo", group_name="Volksvagen")
         poor_saver.add_data("BadPassengers", 4)
-        self.assertRaises(ValueError, poor_saver.save)
+        self.assertRaises(TypeError, poor_saver.save)
 
-    def _wrong_filename(self):
-        self.assertRaises(ValueError, IO, input_filename=1, group_name="goodgroup")
+    def _wrong_filename_type(self):
+        self.assertRaisesRegex(ValidationError, "Input should be a valid string", IO, input_filename=1, group_name="goodgroup")
+
+    def _empty_filename(self):
+        self.assertRaises(ValueError, IO, input_filename="", group_name="goodgroup")
 
     def _wrong_groupname(self):
         self.assertRaises(ValueError, IO, input_filename="goodfile", group_name=1)
@@ -107,12 +112,13 @@ class IOTest(unittest.TestCase):
 
         self._save_stuff()
 
-        self._save_wrong_attribute()
+        self._add_wrong_attribute()
         self._save_wrong_dataset()
 
         self.loader = IO(input_filename="Cars.foo", group_name="Volksvagen")
 
-        self._wrong_filename()
+        self._wrong_filename_type()
+        self._empty_filename()
         self._wrong_groupname()
         self._wrong_file()
 

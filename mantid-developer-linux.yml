@@ -51,6 +51,7 @@ dependencies:
   - versioningit>=2.1
   - joblib
   - orsopy==1.2.1 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
+  - pydantic
 
   # Not Windows, OpenGL implementation:
   - mesa-libgl-devel-cos7-x86_64>=18.3.4
