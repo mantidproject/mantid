@@ -27,7 +27,7 @@ class DNSReductionGuiWidget(DNSWidget):
         self.view = DNSReductionGUIView(parent=self, app=app, within_mantid=within_mantid)
         self.parameter_abo = ParameterAbo()
         self.model = self.parameter_abo
-        self.modus = DNSModus(name="powder_elastic", parent=self)
+        self.modus = DNSModus(name="single_crystal_elastic", parent=self)
         self.presenter = DNSReductionGUIPresenter(
             parent=self, view=self.view, modus=self.modus, name=name, parameter_abo=self.parameter_abo
         )
