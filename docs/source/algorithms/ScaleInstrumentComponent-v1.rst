@@ -9,13 +9,13 @@
 Description
 -----------
 
-This scales the detecors and pixels in a component. This can effectively expand or contract the overall dimensions
+This algorithm scales the detecor pixels in a component. This can effectively expand or contract the overall dimensions
 of the component by resizing its detector pixels, without moving its geometrical center. You can choose to scale the component
-without scaling the size of the detector pixels. This would allow you to expand or contract the detectors without changing the
+without scaling the size of the detector pixels. This would allow you to expand or contract the detector positions without changing the
 size of the pixels.
 
 The vector position of each detector is determined by :math:`Mr + (1 - M)R` where :math:`M` is a diagonal matrix with diagonal components given by parameter ``scalings``,
-:math:`R` is the position of the component, and :math:`r` is the position of the detector.
+:math:`R` is the geometrical center of the component, and :math:`r` is the position of the detector.
 
 You can specify a pathname as the name of a non-unique component (e.g.
 "WISH/panel03/WISHpanel03/tube005"). You can also skip parts not needed
