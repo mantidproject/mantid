@@ -211,11 +211,12 @@ class HRPD(AbstractInst):
                 xlo = cen - PROMPT_PULSE_LEFT_WIDTH - 10  # add extra to ensure get background on both sides of peak
                 xhi = cen + PROMPT_PULSE_RIGHT_WIDTH + 10
                 comp_func = FunctionFactory.createInitialized(
-                    f"name=PearsonIV, Centre={cen}, Intensity=1,Sigma=8.5, Exponent=1.5, Skew=-5,"
+                    f"name=PearsonIV, Centre={8}, Intensity=1,Sigma=8.5, Exponent=1.5, Skew=-5,"
                     f"constraints=(0.2<Sigma,1.5<Exponent);name=FlatBackground, A0=0,constraints=(0<A0)"
                 )
+                comp_func[0].setAttributeValue("CentreShift", cen)
                 comp_func[0].setHeight(ws.readY(ispec)[ws.yIndexOfX(cen)])
-                comp_func[0].addConstraints(f"{cen - 15}<Centre<{cen + 15}")
+                comp_func[0].addConstraints(f"{-15}<Centre<{15}")
                 comp_func[0].addConstraints(f"{0}<Intensity")
                 comp_func[1]["A0"] = min(ws.readY(ispec)[ws.yIndexOfX(xlo)], ws.readY(ispec)[ws.yIndexOfX(xhi)])
                 func.add(comp_func)
@@ -229,7 +230,7 @@ class HRPD(AbstractInst):
                     func.fixParameter(f"f{ipulse}.f1.A0")  # fix constant background
             # tie peak parameters to be common for all prompt pulses
             for idomain in range(len(npulses) - 1):
-                for param_name in ["Intensity", "Sigma", "Exponent", "Skew"]:
+                for param_name in ["Intensity", "Sigma", "Exponent", "Skew", "Centre"]:
                     func.tie(f"f{idomain}.f0.{param_name}", f"f{len(npulses) - 1}.f0.{param_name}")  # tie to first
             # fix some peak parameters
             for param_name in ["Sigma", "Exponent", "Skew"]:
