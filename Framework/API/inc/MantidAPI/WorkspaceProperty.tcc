@@ -180,6 +180,9 @@ template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::setDataItem(const std::shared_ptr<Kernel::DataItem> &value) {
   std::shared_ptr<TYPE> typed = std::dynamic_pointer_cast<TYPE>(value);
   if (typed) {
+    if (typed->getName().empty() && this->direction() == Kernel::Direction::Output) {
+      typed->setPythonVariableName(m_workspaceName);
+    }
     if (this->direction() == Kernel::Direction::Input) {
       m_workspaceName = typed->getName();
     }
@@ -299,15 +302,22 @@ template <typename TYPE> std::vector<std::string> WorkspaceProperty<TYPE>::allow
 template <typename TYPE> const Kernel::PropertyHistory WorkspaceProperty<TYPE>::createHistory() const {
   std::string wsName = m_workspaceName;
   bool isdefault = this->isDefault();
+  bool pythonVariable = false;
 
   if ((wsName.empty() || this->hasTemporaryValue()) && this->operator()()) {
-    // give the property a temporary name in the history
-    std::ostringstream os;
-    os << "__TMP" << this->operator()().get();
-    wsName = os.str();
+    const auto pvName = Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::m_value->getPythonVariableName();
+    pythonVariable = !pvName.empty();
+    if (pythonVariable) {
+      wsName = pvName;
+    } else {
+      // give the property a temporary name in the history
+      std::ostringstream os;
+      os << "__TMP" << this->operator()().get();
+      wsName = os.str();
+    }
     isdefault = false;
   }
-  return Kernel::PropertyHistory(this->name(), wsName, this->type(), isdefault, this->direction());
+  return Kernel::PropertyHistory(this->name(), wsName, this->type(), isdefault, this->direction(), pythonVariable);
 }
 
 /** If this is an output workspace, store it into the AnalysisDataService

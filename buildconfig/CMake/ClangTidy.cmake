@@ -5,7 +5,8 @@ if(ENABLE_CLANG_TIDY)
 
   find_program(
     CLANG_TIDY_EXE
-    NAMES "clang-tidy-14"
+    NAMES "clang-tidy-15"
+          "clang-tidy-14"
           "clang-tidy-13"
           "clang-tidy-12"
           "clang-tidy-11"
@@ -20,6 +21,9 @@ if(ENABLE_CLANG_TIDY)
   endif()
 
   message(STATUS "clang-tidy found: ${CLANG_TIDY_EXE}")
+
+  # set up build commands so clang-tidy can be run from the command line
+  set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
   set(CLANG_TIDY_CHECKS
       "${DEFAULT_CLANG_TIDY_CHECKS}"

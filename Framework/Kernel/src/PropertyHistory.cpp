@@ -22,13 +22,13 @@ namespace Mantid::Kernel {
 
 /// Constructor
 PropertyHistory::PropertyHistory(std::string name, std::string value, std::string type, const bool isdefault,
-                                 const unsigned int direction)
+                                 const unsigned int direction, const bool pythonVariable)
     : m_name(std::move(name)), m_value(std::move(value)), m_type(std::move(type)), m_isDefault(isdefault),
-      m_direction(direction) {}
+      m_direction(direction), m_pythonVariable(pythonVariable) {}
 
 PropertyHistory::PropertyHistory(Property const *const prop)
     : m_name(prop->name()), m_value(prop->valueAsPrettyStr(0, true)), m_type(prop->type()),
-      m_isDefault(prop->isDefault()), m_direction(prop->direction()) {}
+      m_isDefault(prop->isDefault()), m_direction(prop->direction()), m_pythonVariable(false) {}
 
 /** Prints a text representation of itself
  *  @param os :: The output stream to write to
