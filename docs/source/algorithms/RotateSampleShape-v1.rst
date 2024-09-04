@@ -44,9 +44,9 @@ Usage
                         'NumberDensity': 0.1})
     RotateSampleShape(Workspace=ws, Axis0="45,1,1,0,1", Axis1="15,0,0,1,-1")
 
-.. testcleanup:: RotateSampleShapeEx1
+.. testcleanup:: RotateSampleShape
 
-    DeleteWorkspace('ws')
+    DeleteWorkspace(ws)
 
 .. categories::
 
