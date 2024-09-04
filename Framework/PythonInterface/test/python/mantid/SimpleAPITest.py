@@ -32,11 +32,8 @@ class SimpleAPITest(unittest.TestCase):
     def test_simpleapi_does_not_import_qt(self):
         import sys
 
-        modules = [mod for mod in sys.modules]
-        qt_import = "qtpy"
-        matching_qtpy_imports = [mod for mod in modules if qt_import in mod]
         self.assertFalse(
-            len(matching_qtpy_imports) > 0,
+            "qtpy" in sys.modules,
             msg="The simpleapi shouldn't import qtpy, one or more of "
             "imports you've added includes a package which imports "
             "qtpy, please amend your imports.",
@@ -45,11 +42,8 @@ class SimpleAPITest(unittest.TestCase):
     def test_simpleapi_does_not_import_mantidqt(self):
         import sys
 
-        modules = [mod for mod in sys.modules]
-        mantidqt_import = "mantidqt"
-        matching_mantidqt_imports = [mod for mod in modules if mantidqt_import in mod]
         self.assertFalse(
-            len(matching_mantidqt_imports) > 0,
+            "mantidqt" in sys.modules,
             msg="The simpleapi shouldn't import mantidqt, one or more of "
             "imports you've added includes a package which imports "
             "mantidqt, please amend your imports.",
