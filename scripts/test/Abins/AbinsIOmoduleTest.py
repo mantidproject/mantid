@@ -45,7 +45,7 @@ class IOTest(unittest.TestCase):
     def _add_wrong_attribute(self):
         poor_saver = IO(input_filename="BadCars.foo", group_name="Volksvagen")
 
-        with self.assertRaises(ValidationError):
+        with self.assertRaisesRegex(ValidationError, "Input should be an instance of int64"):
             poor_saver.add_attribute("BadPassengers", np.array([4, 5], dtype=np.int64))
 
     def _save_wrong_dataset(self):
@@ -54,7 +54,7 @@ class IOTest(unittest.TestCase):
         self.assertRaises(TypeError, poor_saver.save)
 
     def _wrong_filename_type(self):
-        self.assertRaises(ValidationError, IO, input_filename=1, group_name="goodgroup")
+        self.assertRaisesRegex(ValidationError, "Input should be a valid string", IO, input_filename=1, group_name="goodgroup")
 
     def _empty_filename(self):
         self.assertRaises(ValueError, IO, input_filename="", group_name="goodgroup")

@@ -26,9 +26,9 @@ class TestAbinsData(unittest.TestCase):
         self.mock_kpd = MagicMock(spec=abins.KpointsData)
 
     def test_init_typeerror(self):
-        with self.assertRaises(ValidationError):
+        with self.assertRaisesRegex(ValidationError, "Input should be an instance of KpointsData"):
             AbinsData(k_points_data=1, atoms_data=self.mock_ad)
-        with self.assertRaises(ValidationError):
+        with self.assertRaisesRegex(ValidationError, "Input should be an instance of AtomsData"):
             AbinsData(k_points_data=self.mock_kpd, atoms_data={"key": "value"})
 
     def test_init_noloader(self):

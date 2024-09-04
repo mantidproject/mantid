@@ -53,7 +53,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
             good_data = AbinsData.from_dict(json.load(fp))
 
         # invalid filename
-        with self.assertRaises(ValidationError):
+        with self.assertRaisesRegex(ValidationError, "Input should be a valid string"):
             abins.SCalculatorFactory.init(
                 filename=1,
                 temperature=self._temperature,
@@ -64,7 +64,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
             )
 
         # invalid temperature
-        with self.assertRaises(ValidationError):
+        with self.assertRaisesRegex(ValidationError, "Input should be greater than 0"):
             abins.SCalculatorFactory.init(
                 filename=full_path_filename,
                 temperature=-1,
@@ -86,7 +86,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
             )
 
         # invalid abins data: content of abins data instead of object abins_data
-        with self.assertRaises(ValidationError):
+        with self.assertRaisesRegex(ValidationError, "Input should be an instance of AbinsData"):
             abins.SCalculatorFactory.init(
                 filename=full_path_filename,
                 temperature=self._temperature,
@@ -97,7 +97,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
             )
 
         # invalid instrument
-        with self.assertRaises(ValidationError):
+        with self.assertRaisesRegex(ValidationError, "Input should be an instance of Instrument"):
             abins.SCalculatorFactory.init(
                 filename=full_path_filename,
                 temperature=self._temperature,

@@ -190,7 +190,7 @@ class AbinsSDataTest(unittest.TestCase):
     def test_sample_form(self):
         sample_form = "Polycrystalline"
 
-        with self.assertRaises(ValidationError):
+        with self.assertRaisesRegex(ValidationError, "Input should be 'Powder'"):
             _ = SData(sample_form=sample_form, data=self.sample_data, frequencies=self.frequencies)
 
     def test_bin_width(self):
@@ -254,8 +254,12 @@ class AbinsSDataTest(unittest.TestCase):
         s_data_good_temperature = SData(frequencies=self.frequencies, data=self.sample_data, temperature=good_temperature)
         self.assertAlmostEqual(good_temperature, s_data_good_temperature.get_temperature())
 
-        for bad_temperature in (-20.0, 0, "10"):
-            with self.assertRaises(ValidationError):
+        for bad_temperature, regex in (
+            (-20.0, "Input should be greater than 0"),
+            (0, "Input should be greater than 0"),
+            ("10", "Input should be a valid number"),
+        ):
+            with self.assertRaisesRegex(ValidationError, regex):
                 _ = SData(frequencies=self.frequencies, data=self.sample_data, temperature=bad_temperature)
 
 
