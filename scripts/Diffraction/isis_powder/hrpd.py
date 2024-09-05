@@ -236,7 +236,7 @@ class HRPD(AbstractInst):
                     tof_pk = UnitConversion.run("dSpacing", "TOF", dpk, 0, DeltaEModeType.Elastic, diff_consts)
                     tof_pk_lo = tof_pk * (1 - tof_res)
                     tof_pk_hi = tof_pk * (1 + tof_res)
-                    if xlo < tof_pk_lo < xhi or xlo < tof_pk_hi < xhi:
+                    if xlo < tof_pk_lo < xhi or xlo < tof_pk_hi < xhi or (tof_pk_lo < xlo and tof_pk_hi > xhi):
                         exclude.extend([tof_pk_lo, tof_pk_hi])
                 if exclude:
                     fit_kwargs["Exclude" + key_suffix] = exclude
