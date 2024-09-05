@@ -233,13 +233,13 @@ public:
     TS_ASSERT_EQUALS(output->getEventType(), WEIGHTED_NOTIME);
 
     EventList &output_el = output->getSpectrum(0);
-    TS_ASSERT_DELTA(output_el.getEvent(0).tof(), 1.5, 1e-9);
+    TS_ASSERT_DELTA(output_el.getEvent(0).tof(), 1, 1e-9);
     TS_ASSERT_DELTA(output_el.getEvent(0).weight(), 1.0, 1e-9);
     TS_ASSERT_DELTA(output_el.getEvent(0).errorSquared(), 1.0, 1e-9);
-    TS_ASSERT_DELTA(output_el.getEvent(1).tof(), 2.5, 1e-9);
+    TS_ASSERT_DELTA(output_el.getEvent(1).tof(), 2.85, 1e-9);
     TS_ASSERT_DELTA(output_el.getEvent(1).weight(), 2.0, 1e-9);
     TS_ASSERT_DELTA(output_el.getEvent(1).errorSquared(), 2.0, 1e-9);
-    TS_ASSERT_DELTA(output_el.getEvent(2).tof(), 3.5, 1e-9);
+    TS_ASSERT_DELTA(output_el.getEvent(2).tof(), 3.1, 1e-9);
     TS_ASSERT_DELTA(output_el.getEvent(2).weight(), 3.0, 1e-9);
     TS_ASSERT_DELTA(output_el.getEvent(2).errorSquared(), 3.0, 1e-9);
   }
@@ -272,13 +272,13 @@ public:
     TS_ASSERT_EQUALS(input->getNumberEvents(), 3);
     TS_ASSERT_EQUALS(input->getSortType(), TOF_SORT);
     TS_ASSERT_EQUALS(input->getEventType(), WEIGHTED_NOTIME);
-    TS_ASSERT_DELTA(el.getEvent(0).tof(), 1.5, 1e-9);
+    TS_ASSERT_DELTA(el.getEvent(0).tof(), 1, 1e-9);
     TS_ASSERT_DELTA(el.getEvent(0).weight(), 1.0, 1e-9);
     TS_ASSERT_DELTA(el.getEvent(0).errorSquared(), 1.0, 1e-9);
-    TS_ASSERT_DELTA(el.getEvent(1).tof(), 2.5, 1e-9);
+    TS_ASSERT_DELTA(el.getEvent(1).tof(), 2.85, 1e-9);
     TS_ASSERT_DELTA(el.getEvent(1).weight(), 2.0, 1e-9);
     TS_ASSERT_DELTA(el.getEvent(1).errorSquared(), 2.0, 1e-9);
-    TS_ASSERT_DELTA(el.getEvent(2).tof(), 3.5, 1e-9);
+    TS_ASSERT_DELTA(el.getEvent(2).tof(), 3.1, 1e-9);
     TS_ASSERT_DELTA(el.getEvent(2).weight(), 3.0, 1e-9);
     TS_ASSERT_DELTA(el.getEvent(2).errorSquared(), 3.0, 1e-9);
   }

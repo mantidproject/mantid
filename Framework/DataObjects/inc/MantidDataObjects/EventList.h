@@ -386,9 +386,8 @@ private:
                                    double tolerance);
 
   template <class T>
-  static void createWeightedEvents(std::vector<WeightedEventNoTime> &out, const std::vector<T> &weight,
-                                   const std::vector<T> &error,
-                                   const std::shared_ptr<std::vector<double>> histogram_bin_edges);
+  static void createWeightedEvents(std::vector<WeightedEventNoTime> &out, const std::vector<double> &tof,
+                                   const std::vector<T> &weight, const std::vector<T> &error);
 
   template <class T>
   static void processWeightedEvents(const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,

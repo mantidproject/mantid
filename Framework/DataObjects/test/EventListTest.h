@@ -2475,15 +2475,15 @@ public:
     TS_ASSERT_EQUALS(el_output->getSortType(), TOF_SORT);
     TS_ASSERT_EQUALS(el_output->getNumberEvents(), 3);
 
-    TS_ASSERT_DELTA(el_output->getEvent(0).tof(), 1.5, 1e-5)
+    TS_ASSERT_DELTA(el_output->getEvent(0).tof(), 1, 1e-5)
     TS_ASSERT_EQUALS(el_output->getEvent(0).weight(), event_weight)
     TS_ASSERT_EQUALS(el_output->getEvent(0).errorSquared(), event_weight)
 
-    TS_ASSERT_DELTA(el_output->getEvent(1).tof(), 2.5, 1e-5)
+    TS_ASSERT_DELTA(el_output->getEvent(1).tof(), 2.85, 1e-5) // (2.8+2.9)/2 = 2.85
     TS_ASSERT_EQUALS(el_output->getEvent(1).weight(), event_weight * 2)
     TS_ASSERT_EQUALS(el_output->getEvent(1).errorSquared(), event_weight * 2)
 
-    TS_ASSERT_DELTA(el_output->getEvent(2).tof(), 3.5, 1e-5)
+    TS_ASSERT_DELTA(el_output->getEvent(2).tof(), 3.1, 1e-5) // (3.0+3.1+3.2)/3 = 3.1
     TS_ASSERT_EQUALS(el_output->getEvent(2).weight(), event_weight * 3)
     TS_ASSERT_EQUALS(el_output->getEvent(2).errorSquared(), event_weight * 3)
   }

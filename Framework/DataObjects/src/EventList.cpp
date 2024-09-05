@@ -1775,17 +1775,13 @@ void EventList::compressEvents(double tolerance, EventList *destination) {
 }
 
 template <class T>
-inline void EventList::createWeightedEvents(std::vector<WeightedEventNoTime> &out, const std::vector<T> &weight,
-                                            const std::vector<T> &error,
-                                            const std::shared_ptr<std::vector<double>> histogram_bin_edges) {
+inline void EventList::createWeightedEvents(std::vector<WeightedEventNoTime> &out, const std::vector<double> &tof,
+                                            const std::vector<T> &weight, const std::vector<T> &error) {
   out.clear();
-  auto binIter = histogram_bin_edges->begin();
-  // event TOF is calculated assuming uniform distribution of events within the bin
   for (size_t i = 0; i < weight.size(); ++i) {
     const auto errors = static_cast<float>(error[i]);
     if (errors > 0)
-      out.emplace_back(0.5 * ((*binIter) + *(std::next(binIter))), static_cast<float>(weight[i]), errors);
-    binIter++;
+      out.emplace_back(tof[i], static_cast<float>(weight[i]), errors);
   }
 }
 
@@ -1794,17 +1790,26 @@ inline void EventList::processWeightedEvents(const std::vector<T> &events, std::
                                              const std::shared_ptr<std::vector<double>> histogram_bin_edges,
                                              struct FindBin findBin) {
   const auto NUM_BINS = histogram_bin_edges->size() - 1;
+  std::vector<double> tof(NUM_BINS, 0.);
+  std::vector<double> normalization(NUM_BINS, 0.);
   std::vector<float> weight(NUM_BINS, 0.);
   std::vector<float> error(NUM_BINS, 0.);
   for (const auto &ev : events) {
     const auto &bin_optional = findBin(*histogram_bin_edges.get(), ev.m_tof, false);
     if (bin_optional) {
-      weight[bin_optional.get()] += ev.m_weight;
-      error[bin_optional.get()] += ev.m_errorSquared;
+      const auto bin = bin_optional.get();
+      const double norm = calcNorm(ev.m_errorSquared);
+      tof[bin] += ev.m_tof * norm;
+      normalization[bin] += norm;
+      weight[bin] += ev.m_weight;
+      error[bin] += ev.m_errorSquared;
     }
   }
 
-  createWeightedEvents(out, weight, error, histogram_bin_edges);
+  // normalize TOFs
+  std::transform(tof.begin(), tof.end(), normalization.begin(), tof.begin(), std::divides<double>());
+
+  createWeightedEvents(out, tof, weight, error);
 }
 
 void EventList::compressEvents(double tolerance, EventList *destination,
@@ -1817,14 +1822,21 @@ void EventList::compressEvents(double tolerance, EventList *destination,
 
     switch (eventType) {
     case TOF: {
+      std::vector<double> tof(NUM_BINS, 0);
       std::vector<uint32_t> count(NUM_BINS, 0);
       for (const auto &ev : this->events) {
         const auto &bin_optional = findBin(*histogram_bin_edges.get(), ev.m_tof, false);
-        if (bin_optional)
-          count[bin_optional.get()]++;
+        if (bin_optional) {
+          const auto bin = bin_optional.get();
+          count[bin]++;
+          tof[bin] += ev.m_tof;
+        }
       }
 
-      createWeightedEvents(destination->weightedEventsNoTime, count, count, histogram_bin_edges);
+      // average TOFs
+      std::transform(tof.begin(), tof.end(), count.begin(), tof.begin(), std::divides<double>());
+
+      createWeightedEvents(destination->weightedEventsNoTime, tof, count, count);
     } break;
 
     case WEIGHTED:

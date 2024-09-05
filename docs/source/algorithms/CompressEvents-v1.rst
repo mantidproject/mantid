@@ -50,9 +50,8 @@ method to compress events will be used where the events do not need to
 be sorted first. This will be faster when the number of events going
 into a single compressed events is large, so when you have lots of
 events per spectra. This method works by histogramming the events into
-a regular grid that is then converted into events using the bin center
-as the x value, so this assumes a uniform distribution of events
-within the bin.
+a regular grid that is then converted back into events using the
+weighted average x value.
 
 This method will not be used if the events are already sorted as that
 will be faster. This option will be ignored when used with
