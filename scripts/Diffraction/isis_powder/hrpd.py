@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
+import numpy as np
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.routines import absorb_corrections, common, instrument_settings
@@ -12,6 +13,7 @@ from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_para
 
 import mantid.simpleapi as mantid
 from mantid.api import MultiDomainFunction
+from mantid.kernel import UnitConversion, DeltaEModeType
 
 # A bug on the instrument when recording historic NeXus files (< 2015) caused
 # corrupted data. Use raw files for now until sufficient time has past and old
@@ -191,7 +193,7 @@ class HRPD(AbstractInst):
                 InputWorkspace=ws, OutputWorkspace=ws, XMin=centre - PROMPT_PULSE_LEFT_WIDTH, XMax=centre + PROMPT_PULSE_RIGHT_WIDTH
             )
 
-    def _subtract_prompt_pulses(self, ws, is_vanadium=False, npulses=[1, 3, 4, 5]):
+    def _subtract_prompt_pulses(self, ws, is_vanadium=False):
         """
         HRPD has a long flight path from the moderator resulting
         in sharp peaks from the proton pulse that maintain their
@@ -202,6 +204,7 @@ class HRPD(AbstractInst):
         masked in place.
         """
         mantid.ConvertToDistribution(Workspace=ws, EnableLogging=False)  # so all pulses can be described by same profile
+        _, npulses = _find_bragg_peak_dspacings_and_prompt_pulses(ws)
         fit_kwargs = {"CostFunction": "Unweighted least squares", "Minimizer": "Simplex", "MaxIterations": 6000, "IgnoreInvalidData": True}
         ispec_failed = []
         for ispec in range(0, 61):
@@ -248,6 +251,78 @@ class HRPD(AbstractInst):
             else:
                 ispec_failed.append(ispec)
         mantid.ConvertFromDistribution(Workspace=ws, EnableLogging=False)
+
+    def _find_bragg_peak_dspacings_and_prompt_pulses(self, ws, ispec_start=0, ispec_end=60, dspac_res=0.001):
+        """
+        Find d-spacing of Bragg peaks present in workspace
+        :param ws: workspace in which to find bragg peaks
+        :param ispec_start: start workspace index to look for peaks
+        :param ispec_end: stop workspace index to look for peaks (only includes backscattering bank by default)
+        :param dspac_res: delta(d)/d resolution to determine whether peaks are equivalent in different spectra
+        :return: dpks_bragg: array of avg. d-spacing of Bragg peaks
+        :return: npulses: array of prompt pulses observed
+        """
+
+        out = mantid.FindPeaksConvolve(
+            InputWorkspace=ws,
+            StartWorkspaceIndex=ispec_start,
+            EndWorkspaceIndex=ispec_end,
+            EstimatedPeakExtentNBins=30,
+            IOverSigmaThreshold=3.5,
+            MergeNearbyPeaks=False,
+            FindHighestDataPointInPeak=False,
+            CreateIntermediateWorkspaces=False,
+            StoreInADS=False,
+            EnableLogging=False,
+        )
+        peak_cens = out[0]  # table workspace with row per spectrum and col per peak
+
+        npulse_min = int(np.ceil(ws.getXDimension().getMinimum()) // PROMPT_PULSE_INTERVAL)
+        npulse_max = int(np.ceil(ws.getXDimension().getMaximum()) // PROMPT_PULSE_INTERVAL)
+
+        si = ws.spectrumInfo()
+        dpks = []
+        npulses = []
+        for ispec in range(out[0].rowCount()):
+            diff_consts = si.diffractometerConstants(ispec)
+            for icol in range(1, peak_cens.columnCount()):
+                tof_pk = peak_cens.cell(ispec, icol)
+                # check not NaN (happens if not all spectra have same number of peaks)
+                if np.isfinite(tof_pk):
+                    overlaps_npulse = [
+                        abs(tof_pk - npulse * PROMPT_PULSE_INTERVAL) < PROMPT_PULSE_LEFT_WIDTH
+                        for npulse in range(npulse_min, npulse_max + 1)
+                    ]  # incl. npulse_max
+                    if np.any(overlaps_npulse):
+                        npulses.append(npulse_min + np.flatnonzero(overlaps_npulse))
+                    else:
+                        # Bragg peak found
+                        dpks.append(UnitConversion.run("TOF", "dSpacing", tof_pk, 0, DeltaEModeType.Elastic, diff_consts))
+
+        # find top 4 prompt pulses observed
+        npulses, nobserved = np.unique(npulses, return_counts=True)
+        npulses = np.sort(npulses[np.argsort(-nobserved)[:4]])  # get 4 most likely prompt pulses
+
+        # categorise found Bragg peaks as the same within resolution
+        dpks_bragg = []
+        dpk_prev = dpks[0]
+        dpk_avg = dpks[0]
+        npks_in_cluster = 1
+        for dpk in dpks[1:]:
+            if abs(dpk - dpk_prev) < dspac_res * dpk_prev:
+                dpk_avg += dpk
+                npks_in_cluster += 1
+            else:
+                # end of peak - take avg and start new one
+                dpk_avg /= npks_in_cluster
+                dpks_bragg.append(dpk_avg)
+                dpk_avg = dpk
+                npks_in_cluster = 1
+            dpk_prev = dpk
+        # end last peak
+        dpk_avg /= npks_in_cluster
+        dpks_bragg.append(dpk_avg)
+        return dpks_bragg, npulses
 
     def _switch_tof_window_inst_settings(self, tof_window):
         self._inst_settings.update_attributes(advanced_config=hrpd_advanced_config.get_tof_window_dict(tof_window=tof_window))
