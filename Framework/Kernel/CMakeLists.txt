@@ -498,7 +498,7 @@ target_link_libraries(
          OpenSSL::SSL
          ${HDF5_LIBRARIES}
          ${HDF5_HL_LIBRARIES}
-  PRIVATE ${NETWORK_LIBRARIES} span
+  PRIVATE ${NETWORK_LIBRARIES}
 )
 if(WIN32)
   target_link_libraries(Kernel PRIVATE Psapi.lib) # For memory usage queries

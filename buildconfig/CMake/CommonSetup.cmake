@@ -108,8 +108,6 @@ if(BUILD_MANTIDFRAMEWORK)
   set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
 endif()
 
-include(Span)
-
 if(ENABLE_WORKBENCH)
   include(PyUnitTest)
   enable_testing()
