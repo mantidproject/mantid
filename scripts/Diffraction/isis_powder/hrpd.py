@@ -239,6 +239,7 @@ class HRPD(AbstractInst):
                     if xlo < tof_pk_lo < xhi or xlo < tof_pk_hi < xhi or (tof_pk_lo < xlo and tof_pk_hi > xhi):
                         exclude.extend([tof_pk_lo, tof_pk_hi])
                 if exclude:
+                    func.fixParameter(f"f{ipulse}.f1.A0")  # fix constant background - Bragg peak can mess with bg
                     fit_kwargs["Exclude" + key_suffix] = exclude
             # check that at least one fit region has no overlapping prompt pulse
             if len([key for key in fit_kwargs.keys() if "Exclude" in key]) < len(npulses):
