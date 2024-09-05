@@ -78,13 +78,13 @@ requirements:
     - cppcheck==2.14.2
     - gcovr>=4.2 # [linux]
     - pre-commit>=2.12.0
-    - libcxx {{ libcxx }} # [osx]
+    - libcxx # [osx]
 
     # Use conda version of clang to get matching CXXFLAGS.
     # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml
     - clang_osx-64 {{ c_compiler_version}} # [osx]
     - clangxx_osx-64 {{ cxx_compiler_version }} # [osx]
-    - llvm-openmp {{ llvm-openmp }} # [osx]
+    - llvm-openmp {{ llvm_openmp }} # [osx]
 
 about:
   home: https://github.com/mantidproject/mantid
