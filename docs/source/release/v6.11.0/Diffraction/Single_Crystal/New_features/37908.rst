@@ -1,0 +1,1 @@
+- New algorithm :ref:`RotateSampleShape <algm-rotatesampleshape>` that defines the initial orientation of a sample with respect to the beam and instrument.
