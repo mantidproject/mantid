@@ -1002,6 +1002,14 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.spec_min = 0
         self.spec_max = 41
 
+    def skipTests(self):
+        # In its current state this test is not fit for purpose. There is a large amount of randomness present such
+        # that a very very wide relative tolerance is required to pass reliably (50+). This was discovered after
+        # a change to CompareWorkspaces that made the comparison actually relative. Prior, this test was actually
+        # using an absolute tolerance of 5.0. A redesign is needed to remove some of the randomness or determine
+        # the actual required tolerance.
+        return True
+
     def get_reference_files(self):
         # Relative tolerance is used because the calculation of Monte Carlo errors means the Iqt errors are randomized
         # within a set amount
