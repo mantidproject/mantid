@@ -240,23 +240,27 @@ class HRPD(AbstractInst):
                         exclude.extend([tof_pk_lo, tof_pk_hi])
                 if exclude:
                     fit_kwargs["Exclude" + key_suffix] = exclude
-            # tie peak parameters to be common for all prompt pulses
-            for idomain in range(len(npulses) - 1):
-                for param_name in ["Intensity", "Sigma", "Exponent", "Skew", "Centre"]:
-                    func.tie(f"f{idomain}.f0.{param_name}", f"f{len(npulses) - 1}.f0.{param_name}")  # tie to first
-            # fix some peak parameters
-            for param_name in ["Sigma", "Exponent", "Skew"]:
-                func.fixParameter(f"f{len(npulses) - 1}.f0.{param_name}")
-            fit_output = mantid.Fit(Function=func, **fit_kwargs, CreateOutput=False)
-            # subtract prompt pulse only from spectrum
-            success = fit_output.OutputStatus == "success" or "Changes in function value are too small" in fit_output.OutputStatus
-            if success and do_subtract:
-                # accumulate peak functions
-                pk_func = FunctionWrapper(fit_output.Function.function[0][0])
-                for ifunc in range(1, fit_output.Function.nDomains):
-                    pk_func = pk_func + FunctionWrapper(fit_output.Function.function[ifunc][0])
-                ws_eval = mantid.EvaluateFunction(InputWorkspace=ws, Function=pk_func, EnableLogging=False, StoreInADS=False)
-                ws.setY(ispec, ws.readY(ispec) - ws_eval.readY(1))
+            # check that at least one fit region has no overlapping prompt pulse
+            if len([key for key in fit_kwargs.keys() if "Exclude" in key]) < len(npulses):
+                # tie peak parameters to be common for all prompt pulses
+                for idomain in range(len(npulses) - 1):
+                    for param_name in ["Intensity", "Sigma", "Exponent", "Skew", "Centre"]:
+                        func.tie(f"f{idomain}.f0.{param_name}", f"f{len(npulses) - 1}.f0.{param_name}")  # tie to first
+                # fix some peak parameters
+                for param_name in ["Sigma", "Exponent", "Skew"]:
+                    func.fixParameter(f"f{len(npulses) - 1}.f0.{param_name}")
+                fit_output = mantid.Fit(Function=func, **fit_kwargs, CreateOutput=False)
+                # subtract prompt pulse only from spectrum
+                success = fit_output.OutputStatus == "success" or "Changes in function value are too small" in fit_output.OutputStatus
+                if success and do_subtract:
+                    # accumulate peak functions
+                    pk_func = FunctionWrapper(fit_output.Function.function[0][0])
+                    for ifunc in range(1, fit_output.Function.nDomains):
+                        pk_func = pk_func + FunctionWrapper(fit_output.Function.function[ifunc][0])
+                    ws_eval = mantid.EvaluateFunction(InputWorkspace=ws, Function=pk_func, EnableLogging=False, StoreInADS=False)
+                    ws.setY(ispec, ws.readY(ispec) - ws_eval.readY(1))
+                else:
+                    ispec_failed.append(ispec)
             else:
                 ispec_failed.append(ispec)
         mantid.ConvertFromDistribution(Workspace=ws, EnableLogging=False)
