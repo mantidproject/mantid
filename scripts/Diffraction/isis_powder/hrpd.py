@@ -287,7 +287,9 @@ class HRPD(AbstractInst):
                     for ifunc in range(1, fit_output.Function.nDomains):
                         pk_func = pk_func + FunctionWrapper(fit_output.Function.function[ifunc][0])
                     ws_eval = mantid.EvaluateFunction(InputWorkspace=ws, Function=pk_func, EnableLogging=False, StoreInADS=False)
-                    ws.setY(ispec, ws.readY(ispec) - ws_eval.readY(1))
+                    y_nopulse = ws.readY(ispec) - ws_eval.readY(1)
+                    y_nopulse[y_nopulse < 0] = 0  # can't have negative counts
+                    ws.setY(ispec, y_nopulse)
                 else:
                     ispec_failed.append(ispec)
             else:
