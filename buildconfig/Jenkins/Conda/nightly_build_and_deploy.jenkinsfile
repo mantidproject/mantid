@@ -390,7 +390,7 @@ pipeline {
       steps {
         checkoutSource("${GIT_SHA}")
         sh "${CISCRIPT_DIR}/delete-old-packages.sh ${WORKSPACE}" + ' ${ANACONDA_TOKEN} ' +\
-          "--channel ${ANACONDA_CHANNEL} --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench"
+          "--channel ${ANACONDA_CHANNEL} --label ${ANACONDA_CHANNEL_LABEL} mantid mantidqt mantiddocs mantidworkbench mantid-developer"
       }
     }
 
@@ -518,7 +518,7 @@ def package_conda_options(platform, base_or_workbench) {
     if(platform.startsWith('linux') && BUILD_MANTIDDOCS_PACKAGE) {
       docs_flags = "--build-docs"
     }
-    package_flags = "--build-mantid --build-qt ${docs_flags}"
+    package_flags = "--build-mantid-developer --build-mantid --build-qt ${docs_flags}"
   }
   else if(base_or_workbench == 'workbench') {
     if(BUILD_MANTIDDOCS_PACKAGE) {
