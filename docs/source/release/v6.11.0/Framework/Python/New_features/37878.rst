@@ -1,0 +1,1 @@
+- Fix python fuction ``assert_almost_equal`` to fail for non-equal workspaces
