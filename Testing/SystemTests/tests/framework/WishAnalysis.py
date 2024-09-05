@@ -64,10 +64,8 @@ class WishAnalysis(systemtesting.MantidSystemTest):
         # align detectors
         ConvertUnits(InputWorkspace="w16748-1", OutputWorkspace="w16748-1", Target="TOF")
         ReplaceSpecialValues(InputWorkspace="w16748-1", OutputWorkspace="w16748-1", NaNValue="0", InfinityValue="0")
-        ApplyDiffCal(
-            InstrumentWorkspace="w16748-1", OutputWorkspace="w16748-1", CalibrationFile="wish_grouping_noends2_no_offsets_nov2009.cal"
-        )
-        AConvertUnits(InputWorkspace="w16748-1", OutputWorkspace="w16748-1", Target="d-spacing")
+        ApplyDiffCal(InstrumentWorkspace="w16748-1", CalibrationFile="wish_grouping_noends2_no_offsets_nov2009.cal")
+        ConvertUnits(InputWorkspace="w16748-1", OutputWorkspace="w16748-1", Target="d-spacing")
         # focus data
         DiffractionFocussing(
             InputWorkspace="w16748-1", OutputWorkspace="w16748-1foc", GroupingFileName="wish_grouping_noends2_no_offsets_nov2009.cal"
