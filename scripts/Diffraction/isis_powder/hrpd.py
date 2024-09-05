@@ -318,23 +318,24 @@ class HRPD(AbstractInst):
 
         # categorise found Bragg peaks as the same within resolution
         dpks_bragg = []
-        dpk_prev = dpks[0]
-        dpk_avg = dpks[0]
-        npks_in_cluster = 1
-        for dpk in dpks[1:]:
-            if abs(dpk - dpk_prev) < dspac_res * dpk_prev:
-                dpk_avg += dpk
-                npks_in_cluster += 1
-            else:
-                # end of peak - take avg and start new one
-                dpk_avg /= npks_in_cluster
-                dpks_bragg.append(dpk_avg)
-                dpk_avg = dpk
-                npks_in_cluster = 1
-            dpk_prev = dpk
-        # end last peak
-        dpk_avg /= npks_in_cluster
-        dpks_bragg.append(dpk_avg)
+        if dpks:
+            dpk_prev = dpks[0]
+            dpk_avg = dpks[0]
+            npks_in_cluster = 1
+            for dpk in dpks[1:]:
+                if abs(dpk - dpk_prev) < dspac_res * dpk_prev:
+                    dpk_avg += dpk
+                    npks_in_cluster += 1
+                else:
+                    # end of peak - take avg and start new one
+                    dpk_avg /= npks_in_cluster
+                    dpks_bragg.append(dpk_avg)
+                    dpk_avg = dpk
+                    npks_in_cluster = 1
+                dpk_prev = dpk
+            # end last peak
+            dpk_avg /= npks_in_cluster
+            dpks_bragg.append(dpk_avg)
         return dpks_bragg, npulses
 
     def _switch_tof_window_inst_settings(self, tof_window):
