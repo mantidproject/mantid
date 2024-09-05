@@ -326,6 +326,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>hide_errorbars_tickbox</tabstop>
+  <tabstop>width_spin_box</tabstop>
+  <tabstop>capsize_spin_box</tabstop>
+  <tabstop>cap_thickness_spin_box</tabstop>
+  <tabstop>error_every_spin_box</tabstop>
+  <tabstop>apply_to_all_button</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
