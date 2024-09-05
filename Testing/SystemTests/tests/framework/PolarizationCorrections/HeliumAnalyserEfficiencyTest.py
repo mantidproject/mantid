@@ -15,7 +15,7 @@ class HeliumAnalyserEfficiencyTest(PolarizationCorrectionsBase):
         self.tolerance = 1e-5
 
     def _run_test(self):
-        run = Load("/Users/caila.finn/MantidData/PolSANS/HeliumAnalyser/ZOOM00038249.nxs")
+        run = Load("ZOOM00038249.nxs")
 
         pre_processed = self._prepare_workspace(run)
 
@@ -25,11 +25,11 @@ class HeliumAnalyserEfficiencyTest(PolarizationCorrectionsBase):
 
     def _validate(self):
         result_eff = "efficiency"
-        reference_eff = "/Users/caila.finn/MantidData/PolSANS/HeliumAnalyser/HeliumAnalyserEfficiencyReference.nxs"
+        reference_eff = "HeliumAnalyserEfficiencyReference.nxs"
         result_curves = "curves"
-        reference_curves = "/Users/caila.finn/MantidData/PolSANS/HeliumAnalyser/HeliumAnalyserCurvesReference.nxs"
+        reference_curves = "HeliumAnalyserCurvesReference.nxs"
         result_params = "params"
-        reference_params = "/Users/caila.finn/MantidData/PolSANS/HeliumAnalyser/HeliumAnalyserParamsReference.nxs"
+        reference_params = "HeliumAnalyserParamsReference.nxs"
 
         is_efficiency_match = self._validate_workspace(result_eff, reference_eff)
         is_curves_match = self._validate_workspace(result_curves, reference_curves)
