@@ -5,19 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import systemtesting
-
-from mantid.api import AnalysisDataService
 from mantid.simpleapi import *
+from PolarizationCorrectionsBase import PolarizationCorrectionsBase
 
 
-class HeliumAnalyserEfficiencyTest(systemtesting.MantidSystemTest):
+class HeliumAnalyserEfficiencyTest(PolarizationCorrectionsBase):
+    def __init__(self):
+        PolarizationCorrectionsBase.__init__(self)
 
-    def runTest(self):
+    def _run_test(self):
         pass
 
-    def validate(self):
+    def _validate(self):
         pass
-
-    def cleanup(self):
-        AnalysisDataService.clear()
