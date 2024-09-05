@@ -12,7 +12,8 @@ from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_param_mapping
 
 import mantid.simpleapi as mantid
-from mantid.api import MultiDomainFunction
+from mantid.api import MultiDomainFunction, FunctionFactory
+from mantid.fitfunctions import FunctionWrapper
 from mantid.kernel import UnitConversion, DeltaEModeType
 
 # A bug on the instrument when recording historic NeXus files (< 2015) caused
@@ -204,9 +205,18 @@ class HRPD(AbstractInst):
         :param tof_res: fractional dTOF/TOF reoslution used to mask Bragg peaks that overlap prompt pulses
         """
         mantid.ConvertToDistribution(Workspace=ws, EnableLogging=False)  # so all pulses can be described by same profile
-        _, npulses = _find_bragg_peak_dspacings_and_prompt_pulses(ws)
-        fit_kwargs = {"CostFunction": "Unweighted least squares", "Minimizer": "Simplex", "MaxIterations": 6000, "IgnoreInvalidData": True}
+        dpks_bragg, npulses = self._find_bragg_peak_dspacings_and_prompt_pulses(ws)
+        fit_kwargs = {
+            "CostFunction": "Unweighted least squares",
+            "Minimizer": "Simplex",
+            "MaxIterations": 6000,
+            "IgnoreInvalidData": True,
+            "CreateOutput": False,
+            "EnableLogging": False,
+            "StoreInADS": False,
+        }
         ispec_failed = []
+        si = ws.spectrumInfo()
         for ispec in range(0, 61):
             func = MultiDomainFunction()
             for ipulse, npulse in enumerate(npulses):
@@ -250,10 +260,28 @@ class HRPD(AbstractInst):
                 # fix some peak parameters
                 for param_name in ["Sigma", "Exponent", "Skew"]:
                     func.fixParameter(f"f{len(npulses) - 1}.f0.{param_name}")
-                fit_output = mantid.Fit(Function=func, **fit_kwargs, CreateOutput=False)
+                fit_output = mantid.Fit(Function=func, **fit_kwargs)
                 # subtract prompt pulse only from spectrum
                 success = fit_output.OutputStatus == "success" or "Changes in function value are too small" in fit_output.OutputStatus
-                if success and do_subtract:
+                if success:
+                    func = fit_output.Function.function
+                    for ipulse in range(fit_output.Function.nDomains):
+                        func.removeTie(f"f{ipulse}.f0.Centre")
+                        key_suffix = f"_{ipulse}" if ipulse > 0 else ""
+                        if "Exclude" + key_suffix in fit_kwargs:
+                            func.fixParameter(f"f{ipulse}.f0.Centre")  # fix centre as can't fit independently with bragg
+                        else:
+                            fitted_cen = func[ipulse][0]["Centre"]
+                            func[ipulse][0].addConstraints(
+                                f"{fitted_cen - 5}<Centre<{fitted_cen + 5}"
+                            )  # free centre but stricter constraint
+                    fit_output_final = mantid.Fit(Function=func, **fit_kwargs)
+                    success_final = (
+                        fit_output_final.OutputStatus == "success"
+                        or "Changes in function value are too small" in fit_output_final.OutputStatus
+                    )
+                    if success_final:
+                        fit_output = fit_output_final
                     # accumulate peak functions
                     pk_func = FunctionWrapper(fit_output.Function.function[0][0])
                     for ifunc in range(1, fit_output.Function.nDomains):
@@ -265,8 +293,10 @@ class HRPD(AbstractInst):
             else:
                 ispec_failed.append(ispec)
         mantid.ConvertFromDistribution(Workspace=ws, EnableLogging=False)
+        return ispec_failed
 
-    def _find_bragg_peak_dspacings_and_prompt_pulses(self, ws, ispec_start=0, ispec_end=60, dspac_res=0.001):
+    @staticmethod
+    def _find_bragg_peak_dspacings_and_prompt_pulses(ws, ispec_start=0, ispec_end=60, dspac_res=0.001):
         """
         Find d-spacing of Bragg peaks present in workspace
         :param ws: workspace in which to find bragg peaks
@@ -286,9 +316,8 @@ class HRPD(AbstractInst):
             MergeNearbyPeaks=False,
             FindHighestDataPointInPeak=False,
             CreateIntermediateWorkspaces=False,
-            StoreInADS=False,
             EnableLogging=False,
-        )
+        )  # note StoreInADS=False still stores individual ws in group in ADS
         peak_cens = out[0]  # table workspace with row per spectrum and col per peak
 
         npulse_min = int(np.ceil(ws.getXDimension().getMinimum()) // PROMPT_PULSE_INTERVAL)
@@ -319,7 +348,7 @@ class HRPD(AbstractInst):
 
         # categorise found Bragg peaks as the same within resolution
         dpks_bragg = []
-        if dpks:
+        if len(dpks) > 0:
             dpk_prev = dpks[0]
             dpk_avg = dpks[0]
             npks_in_cluster = 1
@@ -337,6 +366,7 @@ class HRPD(AbstractInst):
             # end last peak
             dpk_avg /= npks_in_cluster
             dpks_bragg.append(dpk_avg)
+        mantid.DeleteWorkspace(out, EnableLogging=False)
         return dpks_bragg, npulses
 
     def _switch_tof_window_inst_settings(self, tof_window):
