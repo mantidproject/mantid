@@ -193,15 +193,15 @@ class HRPD(AbstractInst):
                 InputWorkspace=ws, OutputWorkspace=ws, XMin=centre - PROMPT_PULSE_LEFT_WIDTH, XMax=centre + PROMPT_PULSE_RIGHT_WIDTH
             )
 
-    def _subtract_prompt_pulses(self, ws, is_vanadium=False):
+    def _subtract_prompt_pulses(self, ws, tof_res=0.002):
         """
         HRPD has a long flight path from the moderator resulting
         in sharp peaks from the proton pulse that maintain their
         sharp resolution. Here we mask these pulses out that occur
         at 20ms intervals.
 
-        :param ws: The workspace containing the pulses. It is
-        masked in place.
+        :param ws: The workspace containing the pulses. It is masked in place.
+        :param tof_res: fractional dTOF/TOF reoslution used to mask Bragg peaks that overlap prompt pulses
         """
         mantid.ConvertToDistribution(Workspace=ws, EnableLogging=False)  # so all pulses can be described by same profile
         _, npulses = _find_bragg_peak_dspacings_and_prompt_pulses(ws)
@@ -229,8 +229,17 @@ class HRPD(AbstractInst):
                 fit_kwargs["StartX" + key_suffix] = xlo
                 fit_kwargs["EndX" + key_suffix] = xhi
                 fit_kwargs["WorkspaceIndex" + key_suffix] = ispec
-                if not is_vanadium:
-                    func.fixParameter(f"f{ipulse}.f1.A0")  # fix constant background
+                # work out how to exclude
+                exclude = []
+                diff_consts = si.diffractometerConstants(ispec)
+                for dpk in dpks_bragg:
+                    tof_pk = UnitConversion.run("dSpacing", "TOF", dpk, 0, DeltaEModeType.Elastic, diff_consts)
+                    tof_pk_lo = tof_pk * (1 - tof_res)
+                    tof_pk_hi = tof_pk * (1 + tof_res)
+                    if xlo < tof_pk_lo < xhi or xlo < tof_pk_hi < xhi:
+                        exclude.extend([tof_pk_lo, tof_pk_hi])
+                if exclude:
+                    fit_kwargs["Exclude" + key_suffix] = exclude
             # tie peak parameters to be common for all prompt pulses
             for idomain in range(len(npulses) - 1):
                 for param_name in ["Intensity", "Sigma", "Exponent", "Skew", "Centre"]:
