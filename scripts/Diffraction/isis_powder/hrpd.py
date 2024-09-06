@@ -173,28 +173,7 @@ class HRPD(AbstractInst):
 
         return self._cached_run_details[run_number_string_key]
 
-    def _mask_prompt_pulses(self, ws):
-        """
-        HRPD has a long flight path from the moderator resulting
-        in sharp peaks from the proton pulse that maintain their
-        sharp resolution. Here we mask these pulses out that occur
-        at 20ms intervals.
-
-        :param ws: The workspace containing the pulses. It is
-        masked in place.
-        """
-        # The number of pulse can vary depending on the data range
-        # Compute number of pulses that occur at each 20ms interval.
-        x_data = ws.readX(0)
-        pulse_min = int(round(x_data[0]) / PROMPT_PULSE_INTERVAL) + 1
-        pulse_max = int(round(x_data[-1]) / PROMPT_PULSE_INTERVAL) + 1
-        for i in range(pulse_min, pulse_max):
-            centre = PROMPT_PULSE_INTERVAL * float(i)
-            mantid.MaskBins(
-                InputWorkspace=ws, OutputWorkspace=ws, XMin=centre - PROMPT_PULSE_LEFT_WIDTH, XMax=centre + PROMPT_PULSE_RIGHT_WIDTH
-            )
-
-    def _subtract_prompt_pulses(self, ws, tof_res=0.002):
+    def _mask_prompt_pulses(self, ws, ispecs=None):
         """
         HRPD has a long flight path from the moderator resulting
         in sharp peaks from the proton pulse that maintain their
@@ -202,7 +181,36 @@ class HRPD(AbstractInst):
         at 20ms intervals.
 
         :param ws: The workspace containing the pulses. It is masked in place.
-        :param tof_res: fractional dTOF/TOF reoslution used to mask Bragg peaks that overlap prompt pulses
+        :param ispecs: list of spectra to mask
+        """
+        # The number of pulse can vary depending on the data range
+        # Compute number of pulses that occur at each 20ms interval.
+        x_data = ws.readX(0)
+        pulse_min = int(round(x_data[0]) / PROMPT_PULSE_INTERVAL) + 1
+        pulse_max = int(round(x_data[-1]) / PROMPT_PULSE_INTERVAL) + 1
+
+        mask_kwargs = {"InputWorkspaceIndexSet": ispecs} if ispecs is not None else {}
+        for i in range(pulse_min, pulse_max):
+            centre = PROMPT_PULSE_INTERVAL * float(i)
+            mantid.MaskBins(
+                InputWorkspace=ws,
+                OutputWorkspace=ws,
+                XMin=centre - PROMPT_PULSE_LEFT_WIDTH,
+                XMax=centre + PROMPT_PULSE_RIGHT_WIDTH,
+                **mask_kwargs,
+            )
+
+    def _subtract_prompt_pulses(self, ws, tof_res=0.002):
+        """
+        HRPD has a long flight path from the moderator resulting
+        in sharp peaks from the proton pulse that maintain their
+        sharp resolution. Here we fit these peaks and subtract
+        them from the backscattering bank spectra. For the other
+        banks (and spectra for which the fit failed) the peaks
+         are masked in TOF instead.
+
+        :param ws: The workspace containing the pulses. It is masked in place.
+        :param tof_res: fractional dTOF/TOF resolution used to mask Bragg peaks that overlap prompt pulses
         """
         mantid.ConvertToDistribution(Workspace=ws, EnableLogging=False)  # so all pulses can be described by same profile
         dpks_bragg, npulses = self._find_bragg_peak_dspacings_and_prompt_pulses(ws)
@@ -217,7 +225,8 @@ class HRPD(AbstractInst):
         }
         ispec_failed = []
         si = ws.spectrumInfo()
-        for ispec in range(0, 61):
+        ispec_max = 61  # includes only backscattering detectors
+        for ispec in range(0, ispec_max):
             func = MultiDomainFunction()
             for ipulse, npulse in enumerate(npulses):
                 cen = npulse * PROMPT_PULSE_INTERVAL
@@ -295,6 +304,10 @@ class HRPD(AbstractInst):
             else:
                 ispec_failed.append(ispec)
         mantid.ConvertFromDistribution(Workspace=ws, EnableLogging=False)
+        # Mask other banks and spectra for which fit failed
+        ispecs = list(range(ispec_max, ws.getNumberHistograms()))
+        ispecs.extend(ispec_failed)
+        self._mask_prompt_pulses(ws, ispecs)
         return ispec_failed
 
     @staticmethod
