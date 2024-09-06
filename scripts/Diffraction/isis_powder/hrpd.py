@@ -72,7 +72,10 @@ class HRPD(AbstractInst):
 
     def mask_prompt_pulses_if_necessary(self, ws_list):
         for ws in ws_list:
-            self._mask_prompt_pulses(ws)
+            if self._inst_settings.fit_prompt_pulse:
+                self._subtract_prompt_pulses(ws)
+            else:
+                self._mask_prompt_pulses(ws)
 
     def should_subtract_empty_inst(self):
         return self._inst_settings.subtract_empty_inst
@@ -213,7 +216,8 @@ class HRPD(AbstractInst):
         :param tof_res: fractional dTOF/TOF resolution used to mask Bragg peaks that overlap prompt pulses
         """
         mantid.ConvertToDistribution(Workspace=ws, EnableLogging=False)  # so all pulses can be described by same profile
-        dpks_bragg, npulses = self._find_bragg_peak_dspacings_and_prompt_pulses(ws)
+        ispec_max = 60  # last spectrum index in backscattering detector bank
+        dpks_bragg, npulses = self._find_bragg_peak_dspacings_and_prompt_pulses(ws, ispec_end=ispec_max)
         fit_kwargs = {
             "CostFunction": "Unweighted least squares",
             "Minimizer": "Simplex",
@@ -223,10 +227,10 @@ class HRPD(AbstractInst):
             "EnableLogging": False,
             "StoreInADS": False,
         }
-        ispec_failed = []
+        # for now only attempt backscattering detectors
+        ispec_failed = list(range(ispec_max + 1, ws.getNumberHistograms()))
         si = ws.spectrumInfo()
-        ispec_max = 61  # includes only backscattering detectors
-        for ispec in range(0, ispec_max):
+        for ispec in range(0, ispec_max + 1):
             func = MultiDomainFunction()
             for ipulse, npulse in enumerate(npulses):
                 cen = npulse * PROMPT_PULSE_INTERVAL
@@ -305,10 +309,7 @@ class HRPD(AbstractInst):
                 ispec_failed.append(ispec)
         mantid.ConvertFromDistribution(Workspace=ws, EnableLogging=False)
         # Mask other banks and spectra for which fit failed
-        ispecs = list(range(ispec_max, ws.getNumberHistograms()))
-        ispecs.extend(ispec_failed)
-        self._mask_prompt_pulses(ws, ispecs)
-        return ispec_failed
+        self._mask_prompt_pulses(ws, ispec_failed)
 
     @staticmethod
     def _find_bragg_peak_dspacings_and_prompt_pulses(ws, ispec_start=0, ispec_end=60, dspac_res=0.001):
