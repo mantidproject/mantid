@@ -14,6 +14,7 @@ from qtpy.QtCore import QObject, Qt, Signal
 from qtpy.QtGui import QColor, QFont, QFontMetrics
 from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
+import mantid
 from mantidqt.io import open_a_file_dialog
 from mantid.kernel import config
 from mantidqt.widgets.codeeditor.codecommenter import CodeCommenter
@@ -379,19 +380,28 @@ class PythonFileInterpreterPresenter(QObject):
     def _on_exec_error(self, task_error):
         exc_type, exc_value, exc_stack = task_error.exc_type, task_error.exc_value, task_error.stack
         exc_stack = traceback.extract_tb(exc_stack)[self.MAX_STACKTRACE_LENGTH :]
+
+        lineno = -1  # Default lineno in case of failure to retrieve it
+
         if hasattr(exc_value, "lineno"):
-            lineno = exc_value.lineno + self._code_start_offset
-        elif exc_stack is not None:
+            if exc_value.lineno is not None:
+                lineno = exc_value.lineno + self._code_start_offset
+        elif exc_stack:
             try:
-                lineno = exc_stack[0].lineno + self._code_start_offset
+                if exc_stack[0].lineno is not None:
+                    lineno = exc_stack[0].lineno + self._code_start_offset
             except (AttributeError, IndexError):
                 # Python 2 fallback
                 try:
-                    lineno = exc_stack[-1][1] + self._code_start_offset
+                    if exc_stack[-1][1] is not None:  # Ensure the last stack trace entry has a valid lineno
+                        lineno = exc_stack[-1][1] + self._code_start_offset
                 except IndexError:
-                    lineno = -1
-        else:
-            lineno = -1
+                    pass
+
+        # Log an error message if the XML is malformed or there's an issue with parsing
+        if exc_type is SyntaxError or "XML" in str(exc_value):
+            mantid.kernel.logger.error(f"Malformed XML detected. Error at line {lineno if lineno != -1 else 'unknown'}: {exc_value}")
+
         sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + os.linesep)
         self.view.editor.updateProgressMarker(lineno, True)
         self._finish(success=False, task_result=task_error)
