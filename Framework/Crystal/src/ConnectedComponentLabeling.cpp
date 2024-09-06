@@ -212,7 +212,7 @@ void memoryCheck(size_t nPoints) {
  * @param startId : Start Id to use for labeling
  * @param nThreads : Optional argument of number of threads to use.
  */
-ConnectedComponentLabeling::ConnectedComponentLabeling(const size_t &startId, std::optional<int> nThreads)
+ConnectedComponentLabeling::ConnectedComponentLabeling(const size_t &startId, const std::optional<int> &nThreads)
     : m_startId(startId) {
   if (nThreads.has_value()) {
     if (nThreads.value() < 0) {
