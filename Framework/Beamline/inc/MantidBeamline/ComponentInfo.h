@@ -105,6 +105,8 @@ public:
   void setPosition(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &newPosition);
   void setRotation(const size_t componentIndex, const Eigen::Quaterniond &newRotation);
   void setRotation(const std::pair<size_t, size_t> &index, const Eigen::Quaterniond &newRotation);
+  void scaleComponent(const size_t componentIndex, const Eigen::Vector3d &newScaling);
+  void scaleComponent(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &newScaling);
 
   size_t parent(const size_t componentIndex) const;
   bool hasParent(const size_t componentIndex) const;
@@ -161,6 +163,8 @@ private:
                      const ComponentInfo::Range &detectorRange);
   void doSetRotation(const std::pair<size_t, size_t> &index, const Eigen::Quaterniond &newRotation,
                      const ComponentInfo::Range &detectorRange);
+  void doScaleComponent(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &newScaling,
+                        const ComponentInfo::Range &detectorRange);
 };
 } // namespace Beamline
 } // namespace Mantid

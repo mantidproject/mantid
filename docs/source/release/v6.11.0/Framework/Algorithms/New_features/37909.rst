@@ -1,0 +1,1 @@
+- Created new algorithm :ref:`ScaleInstrumentComponent <algm-ScaleInstrumentComponent>` to scale all detectors in an instrument component around the component's geometrical position.
