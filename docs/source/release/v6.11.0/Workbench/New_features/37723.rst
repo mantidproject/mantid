@@ -1,0 +1,1 @@
+- Handled error where malformed XML code caused mantid to crash.
