@@ -15,7 +15,7 @@ from tempfile import NamedTemporaryFile
 
 TEST_MESSAGE = "Hello Mantid!"
 EXECUTABLE_SWITCHER = {
-    "linux": ["launch_mantidworkbench.sh", "mantidworkbench", "workbench"],
+    "linux": ["launch_mantidworkbench.sh", "workbench"],
     "darwin": ["workbench"],
     "win32": ["workbench"],
 }
