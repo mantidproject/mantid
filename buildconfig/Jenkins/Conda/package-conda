@@ -15,8 +15,6 @@
 #   1. WORKSPACE: path to the base of the working space for a build. The source
 #                 must be checked out into a subdirectory and the final conda-bld
 #                 outputs are placed in $WORKSPACE/conda-bld
-#                 Windows Caveat: Only use / for this argument do
-#                 not use \\ or \ in the path.
 #
 # Possible flags:
 #   --build-mantid-developer: build the mantid-developer metapackage using conda-build
@@ -38,11 +36,10 @@ if [[ -z "$WORKSPACE" ]]; then
 fi
 shift
 if [[ $OSTYPE == "msys"* ]]; then
+    # Convert all slashes to forward slashes for consistency with the rest of the script.
     if [[ "$WORKSPACE" == *'\'* ]]; then
-        echo "You have \ or \\ in your Workspace path, this is not supported on Windows."
-        exit 1
+        WORKSPACE="${WORKSPACE//\\//}" # Replace \ with /
     fi
-    WORKSPACE=${WORKSPACE////\\} # Replace // with \
     # Require git settings so that paths can be checked out with longer file names than 260 characters
     if [[ ! $(git config --system --get core.longpaths) == true ]]; then
         echo "This windows machine is does not have longpaths enabled for git, please run this command: git config --system core.longpaths true"
