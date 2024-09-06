@@ -30,6 +30,13 @@ class PolarizationCorrectionsBase(MantidSystemTest, metaclass=ABCMeta):
     def _average_workspaces_in_group(self, ws_list):
         return sum(ws_list) / len(ws_list)
 
+    def validate(self):
+        return self._validate()
+
+    @abstractmethod
+    def _validate(self):
+        raise NotImplementedError("validate() method must be implemented.")
+
     def _validate_workspace(self, result, reference):
         Load(Filename=reference, OutputWorkspace=reference)
         compare_alg = AlgorithmManager.create("CompareWorkspaces")
@@ -45,13 +52,6 @@ class PolarizationCorrectionsBase(MantidSystemTest, metaclass=ABCMeta):
             SaveNexus(InputWorkspace=result, Filename=f"{self.__class__.__name__}-{result}-mismatch.nxs")
             return False
         return True
-
-    def validate(self):
-        return self._validate()
-
-    @abstractmethod
-    def _validate(self):
-        raise NotImplementedError("validate() method must be implemented.")
 
     def cleanup(self):
         AnalysisDataService.clear()
