@@ -14,6 +14,8 @@ from mantid.simpleapi import *
 
 
 class PolarizationCorrectionsBase(MantidSystemTest, metaclass=ABCMeta):
+    _tolerance = 1e-5
+
     def runTest(self):
         self._run_test()
 
@@ -42,7 +44,7 @@ class PolarizationCorrectionsBase(MantidSystemTest, metaclass=ABCMeta):
         compare_alg = AlgorithmManager.create("CompareWorkspaces")
         compare_alg.setPropertyValue("Workspace1", result)
         compare_alg.setPropertyValue("Workspace2", reference)
-        compare_alg.setPropertyValue("Tolerance", str(self.tolerance))
+        compare_alg.setPropertyValue("Tolerance", str(self._tolerance))
         compare_alg.setChild(True)
 
         compare_alg.execute()

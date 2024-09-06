@@ -12,7 +12,6 @@ from PolarizationCorrectionsBase import PolarizationCorrectionsBase
 class HeliumAnalyserEfficiencyTest(PolarizationCorrectionsBase):
     def __init__(self):
         PolarizationCorrectionsBase.__init__(self)
-        self.tolerance = 1e-5
         self.reference_basename = "HeliumAnalyser"
         self.input_filename = "ZOOM00038249.nxs"
 

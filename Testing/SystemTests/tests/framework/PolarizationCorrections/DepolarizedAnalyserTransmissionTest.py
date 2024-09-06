@@ -12,7 +12,6 @@ from PolarizationCorrectionsBase import PolarizationCorrectionsBase
 class DepolarizedAnalyzerTransmissionTest(PolarizationCorrectionsBase):
     def __init__(self):
         PolarizationCorrectionsBase.__init__(self)
-        self.tolerance = 1e-5
 
     def _run_test(self):
         Load("ZOOM00038238.nxs", OutputWorkspace="mt_run")
