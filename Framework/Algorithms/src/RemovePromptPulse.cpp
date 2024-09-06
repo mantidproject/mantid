@@ -212,7 +212,6 @@ std::vector<double> RemovePromptPulse::calculatePulseTimes(const double tmin, co
   // find when the first prompt pulse would be
   while (time < tmin)
     time += period;
-
   // calculate all times possible
   while (time < tmax) {
     times.emplace_back(time);
