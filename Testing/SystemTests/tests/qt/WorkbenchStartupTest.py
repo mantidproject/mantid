@@ -14,7 +14,11 @@ from mantid.kernel import ConfigService
 from tempfile import NamedTemporaryFile
 
 TEST_MESSAGE = "Hello Mantid!"
-EXECUTABLE_SWITCHER = {"linux": ["launch_mantidworkbench.sh", "mantidworkbench"], "darwin": ["workbench"], "win32": ["workbench.exe"]}
+EXECUTABLE_SWITCHER = {
+    "linux": ["launch_mantidworkbench.sh", "mantidworkbench", "workbench"],
+    "darwin": ["workbench"],
+    "win32": ["workbench"],
+}
 SUBPROCESS_TIMEOUT_SECS = 300
 
 
@@ -23,15 +27,6 @@ def get_mantid_executables_for_platform(platform):
     if workbench_executables is None:
         raise RuntimeError(f"Unknown platform {platform}.")
     return workbench_executables
-
-
-def get_mantid_executable_path(platform):
-    directory = ConfigService.getPropertiesDir().replace("\\", "/")
-    for executable in get_mantid_executables_for_platform(platform):
-        workbench_exe = os.path.join(directory, executable)
-        if os.path.exists(workbench_exe):
-            return workbench_exe
-    raise RuntimeError(f"Could not find path to {workbench_exe}. Tried {get_mantid_executables_for_platform(platform)}")
 
 
 def start_and_wait_for_completion(args_list):
@@ -78,18 +73,21 @@ class WorkbenchStartupTest(systemtesting.MantidSystemTest):
 
         self._test_file = NamedTemporaryFile(suffix=".txt", delete=False).name.replace("\\", "/")
         self._test_script = NamedTemporaryFile(suffix=".py", delete=False).name.replace("\\", "/")
-        self._executable = get_mantid_executable_path(sys.platform)
+        self._executables = get_mantid_executables_for_platform(sys.platform)
         write_test_script(self._test_script, self._test_file)
 
     def runTest(self):
-        exitcode = start_and_wait_for_completion([self._executable, "--execute", self._test_script, "--quit"])
-
-        # Was the process successful
-        self.assertEqual(0, exitcode)
-        # Assert that the test script runs successfully by writing to a .txt file
-        with open(self._test_file, "r") as file:
-            self.assertEqual(TEST_MESSAGE, file.readline())
+        directory = ConfigService.getPropertiesDir().replace("\\", "/")
+        for executable in self._executables:
+            file_path = os.path.join(directory, executable)
+            executable = file_path if os.path.exists(file_path) else executable
+            exitcode = start_and_wait_for_completion([executable, "--execute", self._test_script, "--quit"])
+            # Was the process successful
+            self.assertEqual(0, exitcode)
+            # Assert that the test script runs successfully by writing to a .txt file
+            with open(self._test_file, "r") as file:
+                self.assertEqual(TEST_MESSAGE, file.readline())
+            remove_file(self._test_file)
 
     def cleanup(self):
         remove_file(self._test_script)
-        remove_file(self._test_file)
