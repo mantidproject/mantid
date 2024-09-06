@@ -42,6 +42,21 @@ with/without compression are identical. If your workspace has undergone
 changes to its X values (unit conversion for example), you have to use
 your best judgement for the Tolerance value.
 
+Compressing events without sorting
+**********************************
+
+If you set the option ``SortFirst`` to ``False`` then a different
+method to compress events will be used where the events do not need to
+be sorted first. This will be faster when the number of events going
+into a single compressed events is large, so when you have lots of
+events per spectra. This method works by histogramming the events into
+a regular grid that is then converted back into events using the
+weighted average x value.
+
+This method will not be used if the events are already sorted as that
+will be faster. This option will be ignored when used with
+``WallClockTolerance``.
+
 With pulsetime resolution
 #########################
 
