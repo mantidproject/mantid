@@ -38,6 +38,11 @@ using namespace Mantid::Geometry;
 using Mantid::MantidVec;
 using Mantid::Kernel::V3D;
 
+namespace {
+std::string const PROPERTY_VALUE_TRUE("1");
+std::string const PROPERTY_VALUE_FALSE("0");
+} // namespace
+
 class CompareWorkspacesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -45,9 +50,7 @@ public:
   static CompareWorkspacesTest *createSuite() { return new CompareWorkspacesTest(); }
   static void destroySuite(CompareWorkspacesTest *suite) { delete suite; }
 
-  CompareWorkspacesTest() : ws1(WorkspaceCreationHelper::create2DWorkspace123(2, 2)), PROPERTY_VALUE_TRUE("1") {
-    FrameworkManager::Instance();
-  }
+  CompareWorkspacesTest() : ws1(WorkspaceCreationHelper::create2DWorkspace123(2, 2)) { FrameworkManager::Instance(); }
 
   void testName() { TS_ASSERT_EQUALS(checker.name(), "CompareWorkspaces"); }
 
@@ -71,6 +74,154 @@ public:
     TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
     // Same, using the Mantid::API::equals() function
     TS_ASSERT(Mantid::API::equals(ws, ws));
+  }
+
+  void testNotMatches() {
+    if (!checker.isInitialized())
+      checker.initialize();
+
+    WorkspaceSingleValue_sptr ws1 = WorkspaceCreationHelper::createWorkspaceSingleValue(1.0);
+    WorkspaceSingleValue_sptr ws2 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.0);
+    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws1);
+    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws2);
+    //
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
+
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_FALSE);
+    // Same, using the Mantid::API::equals() function
+    TS_ASSERT(!Mantid::API::equals(ws1, ws2));
+    // cleanup
+    checker.resetProperties();
+  }
+
+  void testMatchesRelative_large() {
+    if (!checker.isInitialized())
+      checker.initialize();
+
+    WorkspaceSingleValue_sptr wks1 = WorkspaceCreationHelper::createWorkspaceSingleValue(100000.0);
+    WorkspaceSingleValue_sptr wks2 = WorkspaceCreationHelper::createWorkspaceSingleValue(100001.0);
+
+    // Ensure they are NOT equal within absolute tolerance
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", wks1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", wks2));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 0.01));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("ToleranceRelErr", false));
+    TS_ASSERT_THROWS_NOTHING(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_FALSE);
+    // Ensure they ARE equal within relative tolerance
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", wks1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", wks2));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 0.01));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("ToleranceRelErr", true));
+    TS_ASSERT_THROWS_NOTHING(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+  }
+
+  void testMatchesRelative_small() {
+    if (!checker.isInitialized())
+      checker.initialize();
+
+    WorkspaceSingleValue_sptr ws1 = WorkspaceCreationHelper::createWorkspaceSingleValue(0.000001);
+    WorkspaceSingleValue_sptr ws2 = WorkspaceCreationHelper::createWorkspaceSingleValue(0.000002);
+    WorkspaceSingleValue_sptr ws3 = WorkspaceCreationHelper::createWorkspaceSingleValue(0.00000201);
+
+    // Ensure ws1, ws2 ARE equal within absolute tolerance
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 0.1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("ToleranceRelErr", false));
+    TS_ASSERT_THROWS_NOTHING(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+    // Ensure ws1, ws2 ARE NOT equal within relative tolerance
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 0.1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("ToleranceRelErr", true));
+    TS_ASSERT_THROWS_NOTHING(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_FALSE);
+    // Ensure ws2, ws3 ARE equal within absolute tolerance
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws2));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws3));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 0.1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("ToleranceRelErr", false));
+    TS_ASSERT_THROWS_NOTHING(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+    // Ensure ws2, ws3 ARE equal within relative tolerance
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws2));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws3));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 0.1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("ToleranceRelErr", true));
+    TS_ASSERT_THROWS_NOTHING(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+    // cleanup
+    checker.resetProperties();
+  }
+
+  void testNotMatchesRelative() {
+    if (!checker.isInitialized())
+      checker.initialize();
+
+    WorkspaceSingleValue_sptr ws1 = WorkspaceCreationHelper::createWorkspaceSingleValue(1.1);
+    WorkspaceSingleValue_sptr ws2 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.2);
+    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws1);
+    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws2);
+    //
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 0.1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("ToleranceRelErr", true));
+    //
+    TS_ASSERT_THROWS_NOTHING(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_FALSE);
+    // cleanup
+    checker.resetProperties();
+  }
+
+  void testCheckErrorMatches() {
+    if (!checker.isInitialized())
+      checker.initialize();
+
+    WorkspaceSingleValue_sptr ws1 = WorkspaceCreationHelper::createWorkspaceSingleValueWithError(1.1, 2.0);
+    WorkspaceSingleValue_sptr ws2 = WorkspaceCreationHelper::createWorkspaceSingleValueWithError(1.1, 2.0);
+    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws1);
+    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws2);
+    //
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("CheckUncertainty", true));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
+    //
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+    // Same, using the Mantid::API::equals() function
+    TS_ASSERT(Mantid::API::equals(ws1, ws2));
+    // cleanup
+    checker.resetProperties();
+  }
+
+  void testCheckErrorNotMatches() {
+    if (!checker.isInitialized())
+      checker.initialize();
+
+    WorkspaceSingleValue_sptr ws1 = WorkspaceCreationHelper::createWorkspaceSingleValueWithError(1.1, 2.0);
+    WorkspaceSingleValue_sptr ws2 = WorkspaceCreationHelper::createWorkspaceSingleValueWithError(1.1, 4.0);
+    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws1);
+    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws2);
+    // make sure ARE equal if errors NOT checked
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("CheckUncertainty", false));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+    // make sure are NOT equal if errors ARE checked
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("CheckUncertainty", true));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_FALSE);
+    // cleanup
+    checker.resetProperties();
   }
 
   void testPeaks_matches() {
@@ -165,6 +316,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("ToleranceRelErr", true));
     TS_ASSERT(checker.execute());
     TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+    // cleanup
+    checker.resetProperties();
   }
 
   void testPeaks_extrapeak() {
@@ -501,6 +654,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 1.0e-5));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+    // cleanup
+    checker.resetProperties();
   }
 
   void testMDHist_different_error() {
@@ -513,6 +668,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Tolerance", 1.0e-5));
     TS_ASSERT(checker.execute());
     TS_ASSERT_DIFFERS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+    // cleanup
+    checker.resetProperties();
   }
 
   void testDifferentSize() {
@@ -1302,6 +1459,4 @@ private:
 private:
   Mantid::Algorithms::CompareWorkspaces checker;
   const Mantid::API::MatrixWorkspace_sptr ws1;
-
-  const std::string PROPERTY_VALUE_TRUE;
 };
