@@ -82,8 +82,6 @@ public:
 
     WorkspaceSingleValue_sptr ws1 = WorkspaceCreationHelper::createWorkspaceSingleValue(1.0);
     WorkspaceSingleValue_sptr ws2 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.0);
-    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws1);
-    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws2);
     //
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
@@ -165,8 +163,6 @@ public:
 
     WorkspaceSingleValue_sptr ws1 = WorkspaceCreationHelper::createWorkspaceSingleValue(1.1);
     WorkspaceSingleValue_sptr ws2 = WorkspaceCreationHelper::createWorkspaceSingleValue(2.2);
-    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws1);
-    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws2);
     //
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
@@ -185,8 +181,6 @@ public:
 
     WorkspaceSingleValue_sptr ws1 = WorkspaceCreationHelper::createWorkspaceSingleValueWithError(1.1, 2.0);
     WorkspaceSingleValue_sptr ws2 = WorkspaceCreationHelper::createWorkspaceSingleValueWithError(1.1, 2.0);
-    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws1);
-    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws2);
     //
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("CheckUncertainty", true));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
@@ -206,8 +200,6 @@ public:
 
     WorkspaceSingleValue_sptr ws1 = WorkspaceCreationHelper::createWorkspaceSingleValueWithError(1.1, 2.0);
     WorkspaceSingleValue_sptr ws2 = WorkspaceCreationHelper::createWorkspaceSingleValueWithError(1.1, 4.0);
-    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws1);
-    // AnalysisDataService::Instance().add(AnalysisDataService::Instance().uniqueName(), ws2);
     // make sure ARE equal if errors NOT checked
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("CheckUncertainty", false));
     TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));

@@ -657,8 +657,11 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
 
         for (int j = 0; j < static_cast<int>(Y1.size()); ++j) {
           bool err = (!m_compare(X1[j], X2[j]) || !m_compare(Y1[j], Y2[j]));
-          if (checkError)
-            err = err || !m_compare(E1[j], E2[j]);
+          // if CheckUncertianty flag is set, also compare the uncertainties
+          // only need to do this if not already a mismatch (err == false)
+          // then, there is a mismatch only if the uncertainties don't match
+          if (checkError && !err)
+            err = !m_compare(E1[j], E2[j]);
           if (err) {
             if (logDebug) {
               g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
@@ -1378,8 +1381,11 @@ bool CompareWorkspaces::withinRelativeTolerance(double const x1, double const x2
   // return early if the values are equal
   if (num == 0.0)
     return true;
-  // compare the difference to the midpoint value -- could lead to issues for negative values
+  // create the average magnitude for comparison
   double const den = 0.5 * (std::abs(x1) + std::abs(x2));
+  // return early, possibly avoids a multiplication
+  // NOTE if den<1, then divsion will only make num larger
+  // NOTE if den<1 but num<=rtol, we cannot conclude anything
   if (den <= 1.0 && num > rtol)
     return false;
   // NOTE !(num > rtol*den) is not the same as (num <= rtol*den)
