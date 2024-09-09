@@ -1,0 +1,1 @@
+- Added the :ref:`PearsonIV <func-PearsonIV>` fit function to model prompt pulses.
