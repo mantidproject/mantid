@@ -34,9 +34,7 @@ class HeliumAnalyserEfficiencyTestBase(SANSPolarizationCorrectionsBase, metaclas
         pass
 
     def _run_test(self):
-        run = Load(self.input_filename)
-
-        pre_processed = self._prepare_workspace(run)
+        pre_processed = self._prepare_workspace(self.input_filename)
 
         HeliumAnalyserEfficiency(
             pre_processed, "00,10,11,01", OutputWorkspace="efficiency", OutputFitCurves="curves", OutputFitParameters="params"
@@ -50,11 +48,7 @@ class HeliumAnalyserEfficiencyTestBase(SANSPolarizationCorrectionsBase, metaclas
         result_params = "params"
         reference_params = f"{self.reference_basename}ParamsReference.nxs"
 
-        is_efficiency_match = self._validate_workspace(result_eff, reference_eff)
-        is_curves_match = self._validate_workspace(result_curves, reference_curves)
-        is_params_match = self._validate_workspace(result_params, reference_params)
-
-        return is_efficiency_match and is_curves_match and is_params_match
+        return result_eff, reference_eff, result_curves, reference_curves, result_params, reference_params
 
 
 class HeliumAnalyserEfficiencyPolarisedTest(HeliumAnalyserEfficiencyTestBase):

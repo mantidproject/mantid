@@ -14,7 +14,7 @@ from mantid.simpleapi import *
 
 
 class SANSPolarizationCorrectionsBase(MantidSystemTest, metaclass=ABCMeta):
-    _tolerance = 1e-5
+    _tolerance = 1e-7
 
     def runTest(self):
         self._run_test()
@@ -23,8 +23,9 @@ class SANSPolarizationCorrectionsBase(MantidSystemTest, metaclass=ABCMeta):
     def _run_test(self):
         raise NotImplementedError("_run_test() method must be implemented.")
 
-    def _prepare_workspace(self, input_ws_name):
-        converted = ConvertUnits(input_ws_name, "Wavelength", AlignBins=True, StoreInADS=False)
+    def _prepare_workspace(self, input_filename):
+        run = Load(input_filename)
+        converted = ConvertUnits(run, "Wavelength", AlignBins=True, StoreInADS=False)
         monitor_3 = CropWorkspace(converted, StartWorkspaceIndex=2, EndWorkspaceIndex=2, StoreInADS=False)
         monitor_4 = CropWorkspace(converted, StartWorkspaceIndex=3, EndWorkspaceIndex=3, StoreInADS=False)
         return monitor_4 / monitor_3
@@ -38,22 +39,6 @@ class SANSPolarizationCorrectionsBase(MantidSystemTest, metaclass=ABCMeta):
     @abstractmethod
     def _validate(self):
         raise NotImplementedError("validate() method must be implemented.")
-
-    def _validate_workspace(self, result, reference):
-        Load(Filename=reference, OutputWorkspace=reference)
-        compare_alg = AlgorithmManager.create("CompareWorkspaces")
-        compare_alg.setPropertyValue("Workspace1", result)
-        compare_alg.setPropertyValue("Workspace2", reference)
-        compare_alg.setPropertyValue("Tolerance", str(self._tolerance))
-        compare_alg.setChild(True)
-
-        compare_alg.execute()
-        if compare_alg.getPropertyValue("Result") != "1":
-            print("Workspaces do not match.")
-            print(self.__class__.__name__)
-            SaveNexus(InputWorkspace=result, Filename=f"{self.__class__.__name__}-{result}-mismatch.nxs")
-            return False
-        return True
 
     def cleanup(self):
         AnalysisDataService.clear()

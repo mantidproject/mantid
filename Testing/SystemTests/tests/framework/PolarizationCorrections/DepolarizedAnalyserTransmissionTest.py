@@ -14,11 +14,8 @@ class DepolarizedAnalyzerTransmissionTest(SANSPolarizationCorrectionsBase):
         SANSPolarizationCorrectionsBase.__init__(self)
 
     def _run_test(self):
-        Load("ZOOM00038238.nxs", OutputWorkspace="mt_run")
-        Load("ZOOM00038335.nxs", OutputWorkspace="dep_run")
-
-        mt_group = self._prepare_workspace("mt_run")
-        dep_group = self._prepare_workspace("dep_run")
+        mt_group = self._prepare_workspace("ZOOM00038238.nxs")
+        dep_group = self._prepare_workspace("ZOOM00038335.nxs")
         mt = self._average_workspaces_in_group(list(mt_group))
         dep = self._average_workspaces_in_group(list(dep_group))
 
@@ -30,6 +27,4 @@ class DepolarizedAnalyzerTransmissionTest(SANSPolarizationCorrectionsBase):
         result_params = "params"
         reference_params = "DepolParamsReference.nxs"
 
-        is_curves_match = self._validate_workspace(result_curves, reference_curves)
-        is_params_match = self._validate_workspace(result_params, reference_params)
-        return is_curves_match and is_params_match
+        return result_curves, reference_curves, result_params, reference_params
