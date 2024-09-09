@@ -364,7 +364,6 @@ std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inp
   const auto &spectrumInfo = inputWS->spectrumInfo();
   Mantid::MantidVec AllEnergies(nHist);
   size_t nDet(0);
-  double mean(0);
   UnitParametersMap pmap;
   Units::Time inUnit;
   Units::DeltaE outUnit;
@@ -373,7 +372,6 @@ std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inp
       // a detector but not a monitor and not masked for indirect instrument should have efixed
       spectrumInfo.getDetectorValues(inUnit, outUnit, DeltaEMode::Indirect, true, i, pmap);
       AllEnergies[nDet] = pmap[UnitParams::efixed];
-      mean = mean + AllEnergies[nDet];
       nDet++;
     }
   }
@@ -381,13 +379,11 @@ std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inp
   if (nDet == 0)
     return AllEnergies; // Empty vector, no energies,
 
-  mean = mean / double(nDet);
   if (std::all_of(AllEnergies.begin(), AllEnergies.end(), [&AllEnergies](double energy) {
         return std::abs(energy - AllEnergies[0]) < std::numeric_limits<float>::epsilon();
       })) {
     // all detectors have same energy
     AllEnergies.resize(1);
-    AllEnergies[0] = mean;
   }
 
   return AllEnergies;
