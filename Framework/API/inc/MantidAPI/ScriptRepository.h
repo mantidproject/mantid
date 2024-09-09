@@ -585,7 +585,7 @@ public:
   */
   virtual int setAutoUpdate(const std::string &path, bool option = true) = 0;
 
-  virtual std::string localRepository() const = 0;
+  virtual std::string localRepository() = 0;
 };
 
 /// shared pointer to the function base class

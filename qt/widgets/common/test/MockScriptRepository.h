@@ -28,6 +28,7 @@ public:
   MOCK_METHOD4(remove, void(const std::string &, const std::string &, const std::string &, const std::string &));
   MOCK_METHOD1(setIgnorePatterns, void(const std::string &));
   MOCK_METHOD0(ignorePatterns, std::string());
+  MOCK_METHOD1(setValid, void(const bool));
 
   ScriptInfo info(const std::string &path) {
     ScriptInfo info;
@@ -49,6 +50,10 @@ public:
   std::vector<std::string> listFiles() override { return filePaths; }
 
   SCRIPTSTATUS fileStatus(const std::string &file_path) { return std::get<0>(testFiles[file_path]); }
+
+  std::string localRepository() override {
+    return Mantid::Kernel::ConfigService::Instance().getString("ScriptLocalRepository");
+  }
 
 private:
   // contains fake file entries: path, status, autoupdate, directory

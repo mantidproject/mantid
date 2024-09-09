@@ -111,7 +111,7 @@ public:
   int setAutoUpdate(const std::string &input_path, bool option = true) override;
 
   /// @deprecated Should avoid this, it is not in the design file.
-  std::string localRepository() const override { return local_repository; }
+  std::string localRepository() override { return local_repository; }
 
   virtual void doDownloadFile(const std::string &url_file, const std::string &local_file_path = "");
   // convenient method to allow to perform the unit tests on remove files.

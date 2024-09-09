@@ -878,8 +878,8 @@ void RepoModel::handleExceptions(const Mantid::API::ScriptRepoException &ex, con
 
 void RepoModel::addFilesToWatcher() {
   const auto baseRepoPath = repo_ptr->localRepository();
-  const auto localJsonPath = baseRepoPath + ".local.json";
-  const auto localRepositoryPath = baseRepoPath + ".repository.json";
+  const auto localJsonPath = baseRepoPath + "/.local.json";
+  const auto localRepositoryPath = baseRepoPath + "/.repository.json";
   QStringList filesToWatch = {QString::fromStdString(localJsonPath), QString::fromStdString(localRepositoryPath)};
   m_repoJsonFileWatcher.addPaths(filesToWatch);
 }
