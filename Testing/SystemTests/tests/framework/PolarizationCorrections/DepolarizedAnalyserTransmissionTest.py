@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.simpleapi import *
-from PolarizationCorrectionsBase import PolarizationCorrectionsBase
+from SANSPolarizationCorrectionsBase import SANSPolarizationCorrectionsBase
 
 
-class DepolarizedAnalyzerTransmissionTest(PolarizationCorrectionsBase):
+class DepolarizedAnalyzerTransmissionTest(SANSPolarizationCorrectionsBase):
     def __init__(self):
-        PolarizationCorrectionsBase.__init__(self)
+        SANSPolarizationCorrectionsBase.__init__(self)
 
     def _run_test(self):
         Load("ZOOM00038238.nxs", OutputWorkspace="mt_run")

@@ -13,7 +13,7 @@ from mantid.api import AnalysisDataService
 from mantid.simpleapi import *
 
 
-class PolarizationCorrectionsBase(MantidSystemTest, metaclass=ABCMeta):
+class SANSPolarizationCorrectionsBase(MantidSystemTest, metaclass=ABCMeta):
     _tolerance = 1e-5
 
     def runTest(self):

@@ -6,12 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.simpleapi import *
-from PolarizationCorrectionsBase import PolarizationCorrectionsBase
+from SANSPolarizationCorrectionsBase import SANSPolarizationCorrectionsBase
 
 
-class HeliumAnalyserEfficiencyTest(PolarizationCorrectionsBase):
+class HeliumAnalyserEfficiencyTest(SANSPolarizationCorrectionsBase):
     def __init__(self):
-        PolarizationCorrectionsBase.__init__(self)
+        SANSPolarizationCorrectionsBase.__init__(self)
         self.reference_basename = "HeliumAnalyser"
         self.input_filename = "ZOOM00038249.nxs"
 
