@@ -65,7 +65,7 @@ class WishAnalysis(systemtesting.MantidSystemTest):
         ConvertUnits(InputWorkspace="w16748-1", OutputWorkspace="w16748-1", Target="TOF")
         ReplaceSpecialValues(InputWorkspace="w16748-1", OutputWorkspace="w16748-1", NaNValue="0", InfinityValue="0")
         ApplyDiffCal(InstrumentWorkspace="w16748-1", CalibrationFile="wish_grouping_noends2_no_offsets_nov2009.cal")
-        ConvertUnits(InputWorkspace="w16748-1", OutputWorkspace="w16748-1", Target="d-spacing")
+        ConvertUnits(InputWorkspace="w16748-1", OutputWorkspace="w16748-1", Target="dSpacing")
         # focus data
         DiffractionFocussing(
             InputWorkspace="w16748-1", OutputWorkspace="w16748-1foc", GroupingFileName="wish_grouping_noends2_no_offsets_nov2009.cal"
