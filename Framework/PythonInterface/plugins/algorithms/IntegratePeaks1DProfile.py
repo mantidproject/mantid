@@ -386,11 +386,14 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         alg.initialize()
         alg.setProperties(kwargs)
         alg.setProperty("WorkspaceIndex", ispec)
-        alg.execute()
-        func = alg.getProperty("Function").value  # getPropertyValue returns FunctionProperty not IFunction
-        status = alg.getPropertyValue("OutputStatus")
-        success = status == "success" or "Changes in function value are too small" in status
-        return success, func
+        try:
+            alg.execute()
+            func = alg.getProperty("Function").value  # getPropertyValue returns FunctionProperty not IFunction
+            status = alg.getPropertyValue("OutputStatus")
+            success = status == "success" or "Changes in function value are too small" in status
+            return success, func
+        except:
+            return False, None
 
 
 class PeakFitter:
