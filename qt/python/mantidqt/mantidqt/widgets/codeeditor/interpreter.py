@@ -14,7 +14,6 @@ from qtpy.QtCore import QObject, Qt, Signal
 from qtpy.QtGui import QColor, QFont, QFontMetrics
 from qtpy.QtWidgets import QFileDialog, QMessageBox, QStatusBar, QVBoxLayout, QWidget
 
-import mantid
 from mantidqt.io import open_a_file_dialog
 from mantid.kernel import config
 from mantidqt.widgets.codeeditor.codecommenter import CodeCommenter
@@ -397,10 +396,6 @@ class PythonFileInterpreterPresenter(QObject):
                         lineno = exc_stack[-1][1] + self._code_start_offset
                 except IndexError:
                     pass
-
-        # Log an error message if the XML is malformed or there's an issue with parsing
-        if exc_type is SyntaxError or "XML" in str(exc_value):
-            mantid.kernel.logger.error(f"Malformed XML detected. Error at line {lineno if lineno != -1 else 'unknown'}: {exc_value}")
 
         sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + os.linesep)
         self.view.editor.updateProgressMarker(lineno, True)
