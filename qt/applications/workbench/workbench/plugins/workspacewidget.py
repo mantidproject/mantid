@@ -23,7 +23,7 @@ from mantidqt.plotting.functions import (
 )
 from mantidqt.plotting import sample_shape
 from mantid.plots.utility import MantidAxType
-from mantid.simpleapi import CreateDetectorTable, ExtractSpectra
+from mantid.simpleapi import CreateDetectorTable
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 from mantidqt.widgets.samplelogs.presenter import SampleLogs
@@ -267,14 +267,9 @@ class WorkspaceWidget(PluginWidget):
 
                     # Check if the q values are sorted, if not sort them
                     if sorted(spec_to_y_dim.values()) != spec_to_y_dim.values():
-                        sorted_dict = dict(sorted(spec_to_y_dim.items(), key=lambda item: item[1]))
-                        ws_sorted = ExtractSpectra(ws, OutputWorkspace=f"{ws.name()}_sorted", WorkspaceIndexList=list(sorted_dict.keys()))
-                        presenter = SliceViewer(ws=ws_sorted, conf=CONF, parent=parent, window_flags=flags)
-                        logger.warning("Warning: Data was sorted to display. Other view modes will not be affected")
-                    else:
-                        presenter = SliceViewer(ws=ws, conf=CONF, parent=parent, window_flags=flags)
-                else:
-                    presenter = SliceViewer(ws=ws, conf=CONF, parent=parent, window_flags=flags)
+                        logger.warning("Warning: Invalid Data Format. " "Consider sorting by sample number and try again")
+
+                presenter = SliceViewer(ws=ws, conf=CONF, parent=parent, window_flags=flags)
                 presenter.view.show()
             except Exception as exception:
                 logger.warning("Could not open slice viewer for workspace '{}'." "".format(ws.name()))
