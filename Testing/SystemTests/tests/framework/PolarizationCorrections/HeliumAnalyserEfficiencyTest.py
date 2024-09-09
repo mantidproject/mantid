@@ -5,15 +5,33 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from abc import ABCMeta, abstractmethod
 from mantid.simpleapi import *
 from SANSPolarizationCorrectionsBase import SANSPolarizationCorrectionsBase
 
 
-class HeliumAnalyserEfficiencyTest(SANSPolarizationCorrectionsBase):
+class HeliumAnalyserEfficiencyTestBase(SANSPolarizationCorrectionsBase, metaclass=ABCMeta):
     def __init__(self):
         SANSPolarizationCorrectionsBase.__init__(self)
-        self.reference_basename = "HeliumAnalyser"
-        self.input_filename = "ZOOM00038249.nxs"
+
+    @property
+    @abstractmethod
+    def reference_basename(self):
+        """
+        The algorithm outputs 3 workspaces. This value is the string that precedes the specific workspace's reference
+        file.
+        :return: The prefix all the reference files are preceded by for the given test.
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def input_filename(self):
+        """
+        The filename to use as the input to the algorithm in this test.
+        :return: The input workspace's filename.
+        """
+        pass
 
     def _run_test(self):
         run = Load(self.input_filename)
@@ -39,8 +57,17 @@ class HeliumAnalyserEfficiencyTest(SANSPolarizationCorrectionsBase):
         return is_efficiency_match and is_curves_match and is_params_match
 
 
-class HeliumAnalyserEfficiencyUnpolarisedTest(HeliumAnalyserEfficiencyTest):
+class HeliumAnalyserEfficiencyPolarisedTest(HeliumAnalyserEfficiencyTestBase):
+    reference_basename = "HeliumAnalyser"
+    input_filename = "ZOOM00038249.nxs"
+
     def __init__(self):
-        HeliumAnalyserEfficiencyTest.__init__(self)
-        self.reference_basename = "UnpolHeliumAnalyser"
-        self.input_filename = "ZOOM00038253.nxs"
+        HeliumAnalyserEfficiencyTestBase.__init__(self)
+
+
+class HeliumAnalyserEfficiencyUnpolarisedTest(HeliumAnalyserEfficiencyTestBase):
+    reference_basename = "UnpolHeliumAnalyser"
+    input_filename = "ZOOM00038253.nxs"
+
+    def __init__(self):
+        HeliumAnalyserEfficiencyTestBase.__init__(self)
