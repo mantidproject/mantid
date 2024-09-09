@@ -69,7 +69,7 @@ std::string FileSaver::assembleSavePath(std::string const &saveDirectory, std::s
 }
 
 Mantid::API::Workspace_sptr FileSaver::workspace(std::string const &workspaceName) const {
-  auto const &ads = Mantid::API::AnalysisDataService::Instance();
+  const auto &ads = Mantid::API::AnalysisDataService::Instance();
 
   if (!ads.doesExist(workspaceName)) {
     throw std::runtime_error("Cannot find workspace " + workspaceName + " in the ADS.");
@@ -95,8 +95,8 @@ void FileSaver::runSaveORSOAlgorithm(std::string const &savePath, std::vector<st
 
 void FileSaver::save(const Mantid::API::Workspace_sptr &workspace, std::string const &saveDirectory,
                      std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
-  auto const extension = extensionForFormat(fileFormat.format());
-  auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), workspace->getName(), extension);
+  const auto extension = extensionForFormat(fileFormat.format());
+  const auto savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), workspace->getName(), extension);
 
   if (fileFormat.isORSOFormat()) {
     const std::vector<std::string> workspaceNames{workspace->getName()};
@@ -108,9 +108,9 @@ void FileSaver::save(const Mantid::API::Workspace_sptr &workspace, std::string c
 
 void FileSaver::saveToSingleFile(std::vector<std::string> const &workspaceNames, std::string const &saveDirectory,
                                  FileFormatOptions const &fileFormat) const {
-  auto const extension = extensionForFormat(fileFormat.format());
-  auto filename = workspaceNames.front() + MULTI_DATASET_FILE_SUFFIX;
-  auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), filename, extension);
+  const auto extension = extensionForFormat(fileFormat.format());
+  const auto filename = workspaceNames.front() + MULTI_DATASET_FILE_SUFFIX;
+  const auto savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), filename, extension);
 
   if (fileFormat.isORSOFormat()) {
     runSaveORSOAlgorithm(savePath, workspaceNames, fileFormat);
@@ -130,8 +130,8 @@ void FileSaver::save(std::string const &saveDirectory, std::vector<std::string> 
   if (shouldSaveToSingleFile(workspaceNames, fileFormat)) {
     saveToSingleFile(workspaceNames, saveDirectory, fileFormat);
   } else {
-    for (auto const &name : workspaceNames) {
-      auto ws = workspace(name);
+    for (const auto &name : workspaceNames) {
+      const auto ws = workspace(name);
       if (ws->isGroup()) {
         // Save child workspaces into separate files
         Mantid::API::WorkspaceGroup_sptr group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
