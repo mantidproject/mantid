@@ -154,16 +154,10 @@ void ALCBaselineModellingModel::enableDisabledPoints(const MatrixWorkspace_sptr 
 void ALCBaselineModellingModel::setErrorsAfterFit(const MatrixWorkspace_sptr &data) { data->mutableE(2) = data->e(0); }
 
 MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace() {
-  if (m_data && m_data->getNumberHistograms() == 3) {
-
-    // Export results only if data have been fit, that is,
-    // if m_data has three histograms
+  if (m_data) {
     return std::const_pointer_cast<MatrixWorkspace>(m_data);
-
-  } else {
-
-    return MatrixWorkspace_sptr();
   }
+  return nullptr;
 }
 
 ITableWorkspace_sptr ALCBaselineModellingModel::exportSections() {
