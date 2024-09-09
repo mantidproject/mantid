@@ -1147,6 +1147,8 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
 
     @event_slice_optimisation.setter
     def event_slice_optimisation(self, value):
+        # Functionality is broken, so the checkbox for this setter is hidden. See here for more information:
+        # https://github.com/mantidproject/mantid/issues/37836
         pass
 
     @property
