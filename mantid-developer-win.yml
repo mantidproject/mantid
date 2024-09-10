@@ -52,6 +52,6 @@ dependencies:
 
   # Needed only for development
   - black  # may be out of sync with pre-commit
-  - cppcheck==2.14.2
+  - cppcheck==2.15.0
   - pre-commit>=2.12.0
 
