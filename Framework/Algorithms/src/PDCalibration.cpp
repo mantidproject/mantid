@@ -316,7 +316,7 @@ void PDCalibration::init() {
                   "is under this value, the peak will be excluded from fitting and calibration.");
 
   declareProperty("MinimumSignalToSigmaRatio", 0.,
-                  "Used for validating peaks before fitting. If the signal-to-sigma ratio is under this value, "
+                  "Used for validating peaks after fitting. If the signal-to-sigma ratio is under this value, "
                   "the peak will be excluded from fitting and calibration.");
 
   // make group for Input properties

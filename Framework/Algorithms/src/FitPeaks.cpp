@@ -434,7 +434,7 @@ void FitPeaks::init() {
                   "is under this value, the peak will be excluded from fitting and calibration.");
 
   declareProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_SIGMA_RATIO, 0.,
-                  "Used for validating peaks before fitting. If the signal-to-sigma ratio is under this value, "
+                  "Used for validating peaks after fitting. If the signal-to-sigma ratio is under this value, "
                   "the peak will be excluded from fitting and calibration.");
 
   const std::string addoutgrp("Analysis");
@@ -1295,7 +1295,7 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
         fit_result->setBadRecord(peak_index, -1.);
 
       if (m_minSignalToSigmaRatio > 0) {
-        if (calculateSignalToSigmaRatio(wi, peak_window_i, peakfunction, bkgdfunction); < m_minSignalToSigmaRatio) {
+        if (calculateSignalToSigmaRatio(wi, peak_window_i, peakfunction) < m_minSignalToSigmaRatio) {
           fit_result->setBadRecord(peak_index, -1.);
           cost = DBL_MAX;
         }
@@ -1552,34 +1552,26 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
 }
 
 double FitPeaks::calculateSignalToSigmaRatio(const size_t &iws, const std::pair<double, double> &peakWindow,
-                                             const API::IPeakFunction_sptr &peakFunction,
-                                             const API::IBackgroundFunction_sptr &backgroundFunction) {
+                                             const API::IPeakFunction_sptr &peakFunction) {
   const auto &vecX = m_fittedPeakWS->points(iws);
   auto startX = std::lower_bound(vecX.begin(), vecX.end(), peakWindow.first);
   auto stopX = std::lower_bound(vecX.begin(), vecX.end(), peakWindow.second);
 
   FunctionDomain1DVector domain(startX, stopX);
   FunctionValues values(domain);
-  CompositeFunction_sptr compFunc = std::make_shared<API::CompositeFunction>();
 
-  compFunc->addFunction(backgroundFunction);
-  compFunc->function(domain, values);
-  auto bkgdValues = values.toVector();
-
-  compFunc->addFunction(peakFunction);
-  compFunc->function(domain, values);
-  auto fittedValues = values.toVector();
+  peakFunction->function(domain, values);
+  auto peakValues = values.toVector();
 
   const auto &errors = m_fittedPeakWS->readE(iws);
   auto startE = std::lower_bound(errors.begin(), errors.end(), peakWindow.first);
   auto stopE = std::lower_bound(errors.begin(), errors.end(), peakWindow.second);
   std::vector<double> peakErrors(startE, stopE);
 
-  double fittedSum = std::accumulate(fittedValues.cbegin(), fittedValues.cend(), 0.0);
-  double bkgdSum = std::accumulate(bkgdValues.cbegin(), bkgdValues.cend(), 0.0);
+  double peakSum = std::accumulate(peakValues.cbegin(), peakValues.cend(), 0.0);
   double sigma = sqrt(std::accumulate(peakErrors.cbegin(), peakErrors.cend(), 0.0, VectorHelper::SumSquares<double>()));
 
-  return (fittedSum - bkgdSum) / ((sigma == 0) ? 1 : sigma);
+  return peakSum / ((sigma == 0) ? 1 : sigma);
 }
 
 namespace {

@@ -217,8 +217,7 @@ private:
   void calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> &fit_results);
 
   double calculateSignalToSigmaRatio(const size_t &iws, const std::pair<double, double> &peakWindow,
-                                     const API::IPeakFunction_sptr &peakFunction,
-                                     const API::IBackgroundFunction_sptr &backgroundFunction);
+                                     const API::IPeakFunction_sptr &peakFunction);
 
   /// Get the parameter name for peak height (I or height or etc)
   std::string getPeakHeightParameterName(const API::IPeakFunction_const_sptr &peak_function);
