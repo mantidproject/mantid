@@ -1308,6 +1308,24 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman.empty_bg_run = 1024
         self.assertEqual(p1.run_number(), 1024)
 
+    #
+    def test_set_psi_directly_works(self):
+        propman = self.prop_man
+
+        propman.psi = 10
+        self.assertEqual(propman.psi, 10)
+
+    def test_default_psi_is_nan(self):
+        propman = self.prop_man
+
+        self.assertTrue(np.isnan(propman.psi))
+
+    def test_psi_set_to0_works(self):
+        propman = self.prop_man
+
+        propman.psi = 0
+        self.assertEqual(propman.psi, 0)
+
 
 if __name__ == "__main__":
     # tester = DirectPropertyManagerTest('test_get_property')
