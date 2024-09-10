@@ -12,8 +12,8 @@
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 #include <cctype>
 #include <numeric>

@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FunctionQAddWorkspaceDialog.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <QSignalBlocker>
 

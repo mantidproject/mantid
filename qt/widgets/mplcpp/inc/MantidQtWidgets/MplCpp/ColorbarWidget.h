@@ -35,7 +35,7 @@ public:
   ColorbarWidget(QWidget *parent = nullptr);
 
   void setNorm(const NormalizeBase &norm);
-  void setClim(boost::optional<double> vmin, boost::optional<double> vmax);
+  void setClim(std::optional<double> vmin, std::optional<double> vmax);
   std::tuple<double, double> clim() const;
 
   ///@name Legacy API to match DraggableColorBarWidget for instrument view

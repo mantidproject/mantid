@@ -9,8 +9,8 @@
 #include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/ICluster.h"
 #include "MantidKernel/System.h"
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 namespace Mantid {
 namespace Crystal {
@@ -62,7 +62,7 @@ private:
   // void validateNoRepeat(CompositeCluster*const other) const;
 
   /// Label used by cluster
-  mutable boost::optional<size_t> m_label;
+  mutable std::optional<size_t> m_label;
   /// Attached clusters.
   std::vector<std::shared_ptr<ICluster>> m_ownedClusters;
 };

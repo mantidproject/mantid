@@ -13,7 +13,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace Mantid {
 namespace API {
@@ -122,7 +122,7 @@ private:
   // Methods called by exec()
   using Mantid::API::Algorithm::validateInputs;
   bool validateInputsForEventWorkspaces(const std::vector<std::string> &inputWorkspaces);
-  boost::optional<std::vector<double>> checkRebinning();
+  std::optional<std::vector<double>> checkRebinning();
   static std::vector<double> calculateRebinParams(const std::vector<double> &bins1, const std::vector<double> &bins2);
   static void noOverlapParams(const HistogramData::HistogramX &X1, const HistogramData::HistogramX &X2,
                               std::vector<double> &params);

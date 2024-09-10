@@ -85,7 +85,7 @@ void IntegratePeaksMDHKL::init() {
 void IntegratePeaksMDHKL::exec() {
   IMDWorkspace_sptr m_inputWS = getProperty("InputWorkspace");
   Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
-  boost::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem = converter(m_inputWS.get());
+  std::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem = converter(m_inputWS.get());
   if (*coordinateSystem != Mantid::Kernel::SpecialCoordinateSystem::HKL) {
     std::stringstream errmsg;
     errmsg << "Input MDWorkspace's coordinate system is not HKL.";

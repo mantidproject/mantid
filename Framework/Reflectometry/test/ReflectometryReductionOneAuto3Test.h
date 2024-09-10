@@ -91,7 +91,7 @@ public:
 
   void test_bad_input_workspace_units() {
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_notTOF, boost::none, "1");
+    setup_alg_on_workspace(alg, m_notTOF, std::nullopt, "1");
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
@@ -99,7 +99,7 @@ public:
 
   void test_bad_wavelength_range() {
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "1");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "1");
     alg.setProperty("WavelengthMin", 15.0);
     alg.setProperty("WavelengthMax", 1.0);
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
@@ -107,7 +107,7 @@ public:
 
   void test_bad_monitor_background_range() {
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "1");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "1");
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("MonitorBackgroundWavelengthMin", 3.0);
@@ -117,7 +117,7 @@ public:
 
   void test_bad_monitor_integration_range() {
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "1");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "1");
     alg.setProperty("WavelengthMin", 1.0);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("MonitorIntegrationWavelengthMin", 15.0);
@@ -127,7 +127,7 @@ public:
 
   void test_bad_first_transmission_run_units() {
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "1");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "1");
     alg.setChild(true);
     alg.initialize();
     alg.setProperty("FirstTransmissionRun", m_notTOF);
@@ -343,7 +343,7 @@ public:
 
     // Use theta from the logs to correct detector positions
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, inter, boost::none, "4");
+    setup_alg_on_workspace(alg, inter, std::nullopt, "4");
     alg.setProperty("ThetaLogName", "theta");
     alg.setProperty("CorrectDetectors", "1");
     alg.execute();
@@ -400,7 +400,7 @@ public:
   void test_IvsQ_linear_binning() {
 
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "2");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "2");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("MomentumTransferMin", 1.0);
@@ -427,7 +427,7 @@ public:
   void test_IvsQ_logarithmic_binning() {
 
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "2");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "2");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("MomentumTransferMin", 1.0);
@@ -445,7 +445,7 @@ public:
   void test_IvsLam_range() {
 
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "3");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("MomentumTransferStep", 0.04);
@@ -466,7 +466,7 @@ public:
   void test_IvsQ_range() {
 
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "3");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("MomentumTransferStep", 0.04);
@@ -492,7 +492,7 @@ public:
   void test_IvsQ_range_cropped() {
 
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "3");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("MomentumTransferMin", 0.5);
@@ -514,7 +514,7 @@ public:
   void test_IvsQ_values() {
 
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "3");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.execute();
@@ -530,7 +530,7 @@ public:
   void test_IvsQ_values_scaled() {
 
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "3");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("ScaleFactor", 0.1);
@@ -547,7 +547,7 @@ public:
   void test_IvsQ_binned_values() {
 
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "3");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("MomentumTransferMin", 0.0);
@@ -571,7 +571,7 @@ public:
   void test_IvsQ_binned_values_scaled() {
 
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "3");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("MomentumTransferMin", 0.0);
@@ -596,7 +596,7 @@ public:
   void test_IvsLam_values() {
 
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "3");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.execute();
@@ -612,7 +612,7 @@ public:
   void test_IvsLam_values_are_not_scaled() {
 
     ReflectometryReductionOneAuto3 alg;
-    setup_alg_on_workspace(alg, m_TOF, boost::none, "3");
+    setup_alg_on_workspace(alg, m_TOF, std::nullopt, "3");
     alg.setProperty("WavelengthMin", 1.5);
     alg.setProperty("WavelengthMax", 15.0);
     alg.setProperty("ScaleFactor", 0.1);
@@ -1937,8 +1937,8 @@ private:
   }
 
   void setup_alg_on_workspace(ReflectometryReductionOneAuto3 &alg, MatrixWorkspace_sptr &inter,
-                              boost::optional<double> theta = boost::none,
-                              boost::optional<const char *> processingInstructions = boost::none) {
+                              std::optional<double> theta = std::nullopt,
+                              std::optional<const char *> processingInstructions = std::nullopt) {
     alg.initialize();
     alg.setChild(true);
     alg.setProperty("InputWorkspace", inter);

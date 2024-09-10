@@ -52,8 +52,8 @@ std::string PeakShapeSpherical::toJSON() const {
   root["radius"] = Json::Value(m_radius);
 
   if (m_backgroundInnerRadius && m_backgroundOuterRadius) {
-    root["background_outer_radius"] = Json::Value(m_backgroundOuterRadius.get());
-    root["background_inner_radius"] = Json::Value(m_backgroundInnerRadius.get());
+    root["background_outer_radius"] = Json::Value(m_backgroundOuterRadius.value());
+    root["background_inner_radius"] = Json::Value(m_backgroundInnerRadius.value());
   }
 
   return Mantid::JsonHelpers::jsonToString(root);
@@ -78,12 +78,12 @@ bool PeakShapeSpherical::operator==(const PeakShapeSpherical &other) const {
  * @param type Which radius to get.
  * @return radius
  */
-boost::optional<double> PeakShapeSpherical::radius(RadiusType type) const {
+std::optional<double> PeakShapeSpherical::radius(RadiusType type) const {
 
-  boost::optional<double> value;
+  std::optional<double> value;
   switch (type) {
   case (RadiusType::Radius):
-    value = boost::optional<double>{m_radius};
+    value = std::optional<double>{m_radius};
     break;
   case (RadiusType::OuterRadius):
     value = m_backgroundOuterRadius;
@@ -98,16 +98,16 @@ boost::optional<double> PeakShapeSpherical::radius(RadiusType type) const {
 /**
  * @brief Get the background outer radius. The outer radius may not be set, so
  * this is optional.
- * @return boost optional outer radius
+ * @return std::optional outer radius
  */
-boost::optional<double> PeakShapeSpherical::backgroundOuterRadius() const { return m_backgroundOuterRadius; }
+std::optional<double> PeakShapeSpherical::backgroundOuterRadius() const { return m_backgroundOuterRadius; }
 
 /**
  * @brief Get the background inner radius. The inner radius may not be set, so
  * this is optional.
- * @return boost optional inner radius.
+ * @return std::optional inner radius.
  */
-boost::optional<double> PeakShapeSpherical::backgroundInnerRadius() const { return m_backgroundInnerRadius; }
+std::optional<double> PeakShapeSpherical::backgroundInnerRadius() const { return m_backgroundInnerRadius; }
 
 /**
  * @brief PeakShapeSpherical::sphereShapeName

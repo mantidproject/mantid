@@ -88,14 +88,14 @@ std::vector<size_t> getProcessingInstructionsAsIndices(std::string const &instru
  *
  * @param instrument : the instrument containing the parameters
  * @param param : the parameter name
- * @return : the parameter value converted to an integer, or boost::none if it was not found
+ * @return : the parameter value converted to an integer, or std::nullopt if it was not found
  * @throw : if the detector index is invalid
  */
-boost::optional<size_t> getDetectorParamOrNone(const Instrument_const_sptr &instrument,
-                                               const MatrixWorkspace_sptr &inputWS, const std::string &param) {
+std::optional<size_t> getDetectorParamOrNone(const Instrument_const_sptr &instrument,
+                                             const MatrixWorkspace_sptr &inputWS, const std::string &param) {
   const std::vector<double> value = instrument->getNumberParameter(param);
   if (value.empty()) {
-    return boost::none;
+    return std::nullopt;
   }
   // Check it's a valid workspace index
   if (value[0] < 0) {
@@ -673,43 +673,43 @@ void ReflectometryWorkflowBase2::populateMonitorProperties(const IAlgorithm_sptr
 
   const auto startOverlap =
       checkForOptionalInstrumentDefault<double>(this, "StartOverlap", instrument, "TransRunStartOverlap");
-  if (startOverlap.is_initialized())
-    alg->setProperty("StartOverlap", startOverlap.get());
+  if (startOverlap.has_value())
+    alg->setProperty("StartOverlap", startOverlap.value());
 
   const auto endOverlap =
       checkForOptionalInstrumentDefault<double>(this, "EndOverlap", instrument, "TransRunEndOverlap");
-  if (endOverlap.is_initialized())
-    alg->setProperty("EndOverlap", endOverlap.get());
+  if (endOverlap.has_value())
+    alg->setProperty("EndOverlap", endOverlap.value());
 
   const auto monitorIndex =
       checkForOptionalInstrumentDefault<int>(this, "I0MonitorIndex", instrument, "I0MonitorIndex");
-  if (monitorIndex.is_initialized())
-    alg->setProperty("I0MonitorIndex", monitorIndex.get());
+  if (monitorIndex.has_value())
+    alg->setProperty("I0MonitorIndex", monitorIndex.value());
 
   const auto backgroundMin = checkForOptionalInstrumentDefault<double>(this, "MonitorBackgroundWavelengthMin",
                                                                        instrument, "MonitorBackgroundMin");
-  if (backgroundMin.is_initialized())
-    alg->setProperty("MonitorBackgroundWavelengthMin", backgroundMin.get());
+  if (backgroundMin.has_value())
+    alg->setProperty("MonitorBackgroundWavelengthMin", backgroundMin.value());
 
   const auto backgroundMax = checkForOptionalInstrumentDefault<double>(this, "MonitorBackgroundWavelengthMax",
                                                                        instrument, "MonitorBackgroundMax");
-  if (backgroundMax.is_initialized())
-    alg->setProperty("MonitorBackgroundWavelengthMax", backgroundMax.get());
+  if (backgroundMax.has_value())
+    alg->setProperty("MonitorBackgroundWavelengthMax", backgroundMax.value());
 
   const auto integrationMin = checkForOptionalInstrumentDefault<double>(this, "MonitorIntegrationWavelengthMin",
                                                                         instrument, "MonitorIntegralMin");
-  if (integrationMin.is_initialized())
-    alg->setProperty("MonitorIntegrationWavelengthMin", integrationMin.get());
+  if (integrationMin.has_value())
+    alg->setProperty("MonitorIntegrationWavelengthMin", integrationMin.value());
 
   const auto integrationMax = checkForOptionalInstrumentDefault<double>(this, "MonitorIntegrationWavelengthMax",
                                                                         instrument, "MonitorIntegralMax");
-  if (integrationMax.is_initialized())
-    alg->setProperty("MonitorIntegrationWavelengthMax", integrationMax.get());
+  if (integrationMax.has_value())
+    alg->setProperty("MonitorIntegrationWavelengthMax", integrationMax.value());
 
   const auto integrationBool = checkForOptionalInstrumentDefault<bool>(this, "NormalizeByIntegratedMonitors",
                                                                        instrument, "NormalizeByIntegratedMonitors");
-  if (integrationBool.is_initialized())
-    alg->setProperty("NormalizeByIntegratedMonitors", integrationBool.get());
+  if (integrationBool.has_value())
+    alg->setProperty("NormalizeByIntegratedMonitors", integrationBool.value());
 }
 
 /** Finding processing instructions from the parameters file
@@ -722,8 +722,8 @@ std::string ReflectometryWorkflowBase2::findProcessingInstructions(const Instrum
   assert(instrument && inputWS && inputWS->getNumberHistograms() > 0);
   const std::string analysisMode = getProperty("AnalysisMode");
 
-  boost::optional<size_t> maybeStart;
-  boost::optional<size_t> maybeStop;
+  std::optional<size_t> maybeStart;
+  std::optional<size_t> maybeStop;
   if (analysisMode == "PointDetectorAnalysis") {
     maybeStart = getDetectorParamOrNone(instrument, inputWS, "PointDetectorStart");
     maybeStop = getDetectorParamOrNone(instrument, inputWS, "PointDetectorStop");

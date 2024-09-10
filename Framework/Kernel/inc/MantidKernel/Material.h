@@ -12,8 +12,8 @@
 #include "MantidKernel/AttenuationProfile.h"
 #include "MantidKernel/NeutronAtom.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include <boost/optional/optional.hpp>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -196,8 +196,8 @@ private:
   double m_linearAbsorpXSectionByWL;
   double m_totalScatterXSection;
 
-  boost::optional<AttenuationProfile> m_attenuationOverride;
-  boost::optional<AttenuationProfile> m_xRayAttenuationProfile;
+  std::optional<AttenuationProfile> m_attenuationOverride;
+  std::optional<AttenuationProfile> m_xRayAttenuationProfile;
 };
 
 /// Typedef for a shared pointer

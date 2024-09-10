@@ -74,7 +74,7 @@ FileFinderImpl::FileFinderImpl() {
 #ifdef _WIN32
   m_globOption = Poco::Glob::GLOB_DEFAULT;
 #else
-  setCaseSensitive(Kernel::ConfigService::Instance().getValue<bool>("filefinder.casesensitive").get_value_or(false));
+  setCaseSensitive(Kernel::ConfigService::Instance().getValue<bool>("filefinder.casesensitive").value_or(false));
 #endif
 }
 

@@ -392,7 +392,7 @@ PeakList PeakFindingStrategy::convertToSXPeaks(const HistogramData::HistogramX &
     return peaks;
   }
 
-  // Add a vector to the boost optional
+  // Add a vector to the std::optional
   peaks = std::vector<FindSXPeaksHelper::SXPeak>();
 
   for (const auto &peak : foundPeaks) {

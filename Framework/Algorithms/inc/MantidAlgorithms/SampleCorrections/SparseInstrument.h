@@ -10,7 +10,7 @@
 #include "MantidAlgorithms/DllConfig.h"
 
 #include <array>
-#include <boost/optional/optional.hpp>
+#include <optional>
 #include <tuple>
 #include <utility>
 
@@ -50,7 +50,7 @@ MANTID_ALGORITHMS_DLL HistogramData::Histogram interpolateFromDetectorGrid(const
                                                                            const std::array<size_t, 4> &indices);
 MANTID_ALGORITHMS_DLL HistogramData::Histogram
 bilinearInterpolateFromDetectorGrid(const double lat, const double lon, const API::MatrixWorkspace &ws,
-                                    const std::vector<std::vector<boost::optional<size_t>>> &indices);
+                                    const std::vector<std::vector<std::optional<size_t>>> &indices);
 MANTID_ALGORITHMS_DLL std::unique_ptr<const Algorithms::DetectorGridDefinition>
 createDetectorGridDefinition(const API::MatrixWorkspace &modelWS, const size_t rows, const size_t columns);
 } // namespace SparseInstrument

@@ -17,7 +17,6 @@
 #include <QHash>
 #include <QSetIterator>
 #include <QStringList>
-#include <boost/optional.hpp>
 #include <set>
 
 namespace MantidQt {
@@ -93,7 +92,7 @@ template <typename TYPE> void UserSubWindowFactoryImpl::subscribe() {
   // Make a record of each interface's categories.
   const QStringList interfaceCategories = TYPE::categoryInfo().split(";", Qt::SkipEmptyParts);
   QSet<QString> result;
-  foreach (const QString category, interfaceCategories) { result.insert(category.trimmed()); }
+  foreach (const QString &category, interfaceCategories) { result.insert(category.trimmed()); }
   m_categoryLookup[QString::fromStdString(realName)] = result;
 }
 

@@ -10,7 +10,7 @@
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include "boost/optional.hpp"
+#include <optional>
 namespace Mantid {
 namespace DataObjects {
 
@@ -19,11 +19,11 @@ namespace DataObjects {
 */
 class MANTID_DATAOBJECTS_DLL MDFramesToSpecialCoordinateSystem {
 public:
-  boost::optional<Mantid::Kernel::SpecialCoordinateSystem> operator()(const Mantid::API::IMDWorkspace *workspace) const;
+  std::optional<Mantid::Kernel::SpecialCoordinateSystem> operator()(const Mantid::API::IMDWorkspace *workspace) const;
 
 private:
   void checkQCompatibility(Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem,
-                           boost::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType) const;
+                           std::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType) const;
   bool isUnknownFrame(const Mantid::Geometry::IMDDimension_const_sptr &dimension) const;
 };
 

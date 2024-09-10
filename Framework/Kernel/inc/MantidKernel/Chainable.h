@@ -31,7 +31,7 @@ along the chain top to bottom.
 template <typename ChainableType> class DLLExport Chainable {
 protected:
   /// Successor factory
-  /// boost::optional<std::unique_ptr<ChainableType>> m_successor;
+  /// std::optional<std::unique_ptr<ChainableType>> m_successor;
   std::unique_ptr<ChainableType> m_successor;
   /// Provide option for derived classes to check successor and throw if bad
   virtual void checkSuccessor() const {}

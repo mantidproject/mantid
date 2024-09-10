@@ -9,7 +9,6 @@
 #include "MantidQtWidgets/Common/DllOption.h"
 
 #include <QString>
-#include <boost/optional.hpp>
 
 #include <string>
 #include <vector>

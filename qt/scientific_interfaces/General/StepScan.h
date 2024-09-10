@@ -15,8 +15,6 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_StepScan.h"
 
-#include "boost/optional.hpp"
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -79,7 +77,7 @@ private:
   API::QtAlgorithmRunner *m_algRunner; ///< Object for running algorithms asynchronously
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAddNotification> m_addObserver;
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAfterReplaceNotification> m_replObserver;
-  boost::optional<int> m_fignum;
+  std::optional<int> m_fignum;
   bool m_replaceObserverAdded;
 };
 

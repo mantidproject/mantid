@@ -8,7 +8,7 @@
 
 #include "MantidDataObjects/PeakShapeBase.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include <boost/optional.hpp>
+#include <optional>
 #include <string>
 
 namespace Mantid {
@@ -34,11 +34,11 @@ public:
   /// Equals operator
   bool operator==(const PeakShapeSpherical &other) const;
   /// Peak radius
-  boost::optional<double> radius(RadiusType type = RadiusType::Radius) const override;
+  std::optional<double> radius(RadiusType type = RadiusType::Radius) const override;
   /// Peak outer background radius
-  boost::optional<double> backgroundOuterRadius() const;
+  std::optional<double> backgroundOuterRadius() const;
   /// Peak inner background radius
-  boost::optional<double> backgroundInnerRadius() const;
+  std::optional<double> backgroundInnerRadius() const;
   /// Non-instance shape name
   static const std::string sphereShapeName();
 
@@ -46,9 +46,9 @@ private:
   /// Peak radius
   double m_radius;
   /// Background inner radius;
-  boost::optional<double> m_backgroundInnerRadius;
+  std::optional<double> m_backgroundInnerRadius;
   /// Background outer radius
-  boost::optional<double> m_backgroundOuterRadius;
+  std::optional<double> m_backgroundOuterRadius;
 };
 
 } // namespace DataObjects

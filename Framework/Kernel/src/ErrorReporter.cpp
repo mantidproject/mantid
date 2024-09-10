@@ -49,10 +49,10 @@ ErrorReporter::ErrorReporter(std::string application, Types::Core::time_duration
       m_share(share), m_name(std::move(name)), m_email(std::move(email)), m_textbox(std::move(textBox)),
       m_stacktrace(std::move(traceback)) {
   auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>("errorreports.rooturl");
-  if (!url.is_initialized()) {
+  if (!url.has_value()) {
     g_log.debug() << "Failed to load error report url\n";
   } else {
-    m_url = url.get();
+    m_url = url.value();
   }
 }
 

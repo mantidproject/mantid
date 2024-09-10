@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <fstream>
 
 #include "MantidDataHandling/SavePAR.h"
@@ -128,7 +129,7 @@ private:
     API::AnalysisDataService::Instance().remove(WSName);
     API::AnalysisDataService::Instance().remove(TestOutputParTableWSName);
     // delete test output file from the hdd;
-    unlink(TestOutputFile.c_str());
+    std::filesystem::remove(TestOutputFile);
   }
 
   MatrixWorkspace_sptr makeWorkspace(const std::string &input) {

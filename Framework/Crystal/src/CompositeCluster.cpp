@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CompositeCluster.h"
 
+#include <algorithm>
 #include <numeric>
+#include <stdexcept>
 
 namespace {
 /**
@@ -61,10 +63,10 @@ void CompositeCluster::writeTo(std::shared_ptr<Mantid::API::IMDHistoWorkspace> w
  */
 size_t CompositeCluster::getLabel() const {
   findMinimum();
-  if (!m_label.is_initialized()) {
+  if (!m_label.has_value()) {
     throw std::runtime_error("No child IClusters. CompositeCluster::getLabel() is not supported.");
   } else {
-    return m_label.get(); // Assumes all are uniform.
+    return m_label.value(); // Assumes all are uniform.
   }
 }
 
@@ -94,7 +96,7 @@ void CompositeCluster::addIndex(const size_t & /*index*/) {
  */
 void CompositeCluster::findMinimum() const {
   if (!m_ownedClusters.empty()) {
-    ICluster *minCluster = m_ownedClusters.front().get();
+    ICluster const *minCluster = m_ownedClusters.front().get();
     size_t minLabel = minCluster->getLabel();
     for (size_t i = 1; i < m_ownedClusters.size(); ++i) {
       size_t temp = m_ownedClusters[i]->getLabel();
@@ -112,7 +114,7 @@ void CompositeCluster::findMinimum() const {
  */
 void CompositeCluster::toUniformMinimum(std::vector<DisjointElement> &disjointSet) {
   if (!m_ownedClusters.empty()) {
-    ICluster *minCluster = m_ownedClusters.front().get();
+    ICluster const *minCluster = m_ownedClusters.front().get();
     size_t minLabel = minCluster->getLabel();
     for (size_t i = 1; i < m_ownedClusters.size(); ++i) {
       size_t temp = m_ownedClusters[i]->getLabel();

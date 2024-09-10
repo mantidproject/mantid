@@ -22,7 +22,7 @@
 #include <QPair>
 #include <QString>
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <unordered_map>
 
 class QCheckBox;

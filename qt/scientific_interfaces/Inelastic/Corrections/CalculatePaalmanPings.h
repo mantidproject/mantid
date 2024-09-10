@@ -13,8 +13,8 @@
 
 #include "MantidGeometry/Instrument_fwd.h"
 
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -64,8 +64,8 @@ private:
 
   void setSaveResultEnabled(bool enabled);
 
-  boost::optional<double> getInstrumentParameter(const Mantid::Geometry::Instrument_const_sptr &instrument,
-                                                 const std::string &parameterName);
+  std::optional<double> getInstrumentParameter(const Mantid::Geometry::Instrument_const_sptr &instrument,
+                                               const std::string &parameterName);
 
   Ui::CalculatePaalmanPings m_uiForm;
 

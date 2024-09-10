@@ -207,7 +207,7 @@ TMDE(std::vector<coord_t> MDEventWorkspace)::estimateResolution() const {
     size_t finestSplit = 1;
     size_t i = 0;
     if (splitTop) {
-      finestSplit *= splitTop.get()[d];
+      finestSplit *= splitTop.value()[d];
       i = 1;
     }
     for (; i < realDepth; i++)
@@ -822,7 +822,7 @@ TMDE(Kernel::SpecialCoordinateSystem MDEventWorkspace)::getSpecialCoordinateSyst
   auto coordinates = m_coordSystem;
 
   if (coordinatesFromMDFrames) {
-    coordinates = coordinatesFromMDFrames.get();
+    coordinates = coordinatesFromMDFrames.value();
   }
   return coordinates;
 }

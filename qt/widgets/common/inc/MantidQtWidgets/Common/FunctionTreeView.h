@@ -108,7 +108,7 @@ public:
   /// Clear all errors
   void clearErrors() override;
   /// Index of currently selected function.
-  boost::optional<std::string> currentFunctionIndex() const override;
+  std::optional<std::string> currentFunctionIndex() const override;
   /// Set a tie
   void setParameterTie(std::string const &parameterName, std::string const &tie) override;
   /// Set a constraint
@@ -376,7 +376,7 @@ protected:
   QAction *m_actionFunctionHelp;
   /// Index of currently selected function. Gets updated in
   /// updateCurrentFunctionIndex()
-  boost::optional<std::string> m_currentFunctionIndex;
+  std::optional<std::string> m_currentFunctionIndex;
   /// Set true if the constructed function is intended to be used in a
   /// multi-dataset fit
   bool m_multiDataset;

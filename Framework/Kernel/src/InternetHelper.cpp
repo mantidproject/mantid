@@ -441,7 +441,7 @@ void InternetHelper::throwNotConnected(const std::string &url, const HostNotFoun
 int InternetHelper::getTimeout() {
   if (!m_isTimeoutSet) {
     const auto timeout = ConfigService::Instance().getValue<int>("network.default.timeout");
-    m_timeout = timeout.is_initialized() ? timeout.get() : 30;
+    m_timeout = timeout.value_or(30);
   }
   return m_timeout;
 }

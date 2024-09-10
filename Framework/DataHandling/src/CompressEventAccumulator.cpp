@@ -43,7 +43,7 @@ template <typename INT_TYPE> double CompressEventAccumulator::getBinCenter(const
   return 0.5 * ((*binIter) + *(std::next(binIter)));
 }
 
-boost::optional<size_t> CompressEventAccumulator::findBin(const float tof) const {
+std::optional<size_t> CompressEventAccumulator::findBin(const float tof) const {
   // last parameter being false means don't find exact bin for raw events coming out of the file
   return m_findBin(*m_histogram_edges.get(), static_cast<double>(tof), m_divisor, m_offset, false);
 }
@@ -132,7 +132,7 @@ public:
       // this finds the bin for the current event, then moves the iterator until an event that is out of range is
       // encountered at that point, an event is added to the output and the iterators are moved
       const auto optional_bin_first = this->findBin(m_tof.front());
-      size_t lastBin = optional_bin_first.get();
+      size_t lastBin = optional_bin_first.value();
       double nextTof = m_histogram_edges->at(lastBin + 1);
       uint32_t counts = 0;
       for (const auto &tof : m_tof) {
@@ -159,7 +159,7 @@ public:
           } else {
             // find the bin to use
             const auto optional_bin = this->findBin(tof);
-            lastBin = optional_bin.get();
+            lastBin = optional_bin.value();
           }
           nextTof = m_histogram_edges->operator[](lastBin + 1);
         }
@@ -209,7 +209,7 @@ public:
     // add events
     const auto &bin_optional = this->findBin(tof);
     if (bin_optional) {
-      m_tof_bin.push_back(static_cast<uint32_t>(bin_optional.get()));
+      m_tof_bin.push_back(static_cast<uint32_t>(bin_optional.value()));
     }
   }
 
@@ -327,7 +327,7 @@ public:
     // add events
     const auto &bin_optional = this->findBin(tof);
     if (bin_optional) {
-      m_count[bin_optional.get()]++;
+      m_count[bin_optional.value()]++;
     }
   }
 

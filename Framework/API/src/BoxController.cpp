@@ -21,7 +21,7 @@
 #include <Poco/DOM/Text.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Strings::convert;
@@ -77,11 +77,11 @@ bool BoxController::operator==(const BoxController &other) const {
   }
 
   if (m_splitTopInto && other.m_splitTopInto) {
-    if (m_splitTopInto.get().size() != other.m_splitTopInto.get().size()) {
+    if (m_splitTopInto.value().size() != other.m_splitTopInto.value().size()) {
       return false;
     } else {
-      for (size_t i = 0; i < m_splitTopInto.get().size(); i++) {
-        if (m_splitTopInto.get()[i] != other.m_splitTopInto.get()[i])
+      for (size_t i = 0; i < m_splitTopInto.value().size(); i++) {
+        if (m_splitTopInto.value()[i] != other.m_splitTopInto.value()[i])
           return false;
       }
     }
@@ -162,7 +162,7 @@ std::string BoxController::toXMLString() const {
 
   element = pDoc->createElement("SplitTopInto");
   if (m_splitTopInto) {
-    vecStr = Kernel::Strings::join(this->m_splitTopInto.get().begin(), this->m_splitTopInto.get().end(), ",");
+    vecStr = Kernel::Strings::join(this->m_splitTopInto.value().begin(), this->m_splitTopInto.value().end(), ",");
   } else {
     vecStr = "";
   }
@@ -238,12 +238,12 @@ void BoxController::fromXMLString(const std::string &xml) {
   if (nodes->length() > 0) {
     s = pBoxElement->getChildElement("SplitTopInto")->innerText();
     if (s.empty()) {
-      this->m_splitTopInto = boost::none;
+      this->m_splitTopInto = std::nullopt;
     } else {
       this->m_splitTopInto = splitStringIntoVector<size_t>(s);
     }
   } else {
-    this->m_splitTopInto = boost::none;
+    this->m_splitTopInto = std::nullopt;
   }
 
   s = pBoxElement->getChildElement("NumMDBoxes")->innerText();

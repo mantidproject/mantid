@@ -19,7 +19,8 @@
 #include "MantidGeometry/MDGeometry/UnknownFrame.h"
 #include "MantidKernel/MDUnit.h"
 
-#include "boost/make_shared.hpp"
+#include <boost/make_shared.hpp>
+#include <optional>
 
 using namespace Mantid::Geometry;
 
@@ -64,7 +65,7 @@ public:
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
     // Act + Assert
-    auto coordinateSystem = boost::make_optional(false, Mantid::Kernel::SpecialCoordinateSystem::None);
+    std::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem;
     TSM_ASSERT_THROWS_NOTHING("Should throw nothing as coordinate system is "
                               "mixed only with one Q type.",
                               coordinateSystem = converter(ws.get()));
@@ -85,7 +86,7 @@ public:
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
     // Act + Assert
-    auto coordinateSystem = boost::make_optional(false, Mantid::Kernel::SpecialCoordinateSystem::None);
+    std::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem;
     TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws.get()));
     TSM_ASSERT_EQUALS("Should be Qlab", *coordinateSystem, Mantid::Kernel::SpecialCoordinateSystem::QLab);
   }
@@ -103,7 +104,7 @@ public:
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
     // Act + Assert
-    auto coordinateSystem = boost::make_optional(false, Mantid::Kernel::SpecialCoordinateSystem::None);
+    std::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem;
     TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws.get()));
     TSM_ASSERT_EQUALS("Should be QSample", *coordinateSystem, Mantid::Kernel::SpecialCoordinateSystem::QSample);
   }
@@ -121,7 +122,7 @@ public:
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
     // Act + Assert
-    auto coordinateSystem = boost::make_optional(false, Mantid::Kernel::SpecialCoordinateSystem::None);
+    std::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem;
     TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws.get()));
     TSM_ASSERT_EQUALS("Should be HKL", *coordinateSystem, Mantid::Kernel::SpecialCoordinateSystem::HKL);
   }
@@ -139,7 +140,7 @@ public:
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
     // Act + Assert
-    auto coordinateSystem = boost::make_optional(false, Mantid::Kernel::SpecialCoordinateSystem::None);
+    std::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem;
     TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws.get()));
     TSM_ASSERT_EQUALS("Should be None", *coordinateSystem, Mantid::Kernel::SpecialCoordinateSystem::None);
   }
@@ -157,7 +158,7 @@ public:
     Mantid::DataObjects::MDFramesToSpecialCoordinateSystem converter;
 
     // Act + Assert
-    boost::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem;
+    std::optional<Mantid::Kernel::SpecialCoordinateSystem> coordinateSystem;
     TS_ASSERT_THROWS_NOTHING(coordinateSystem = converter(ws.get()));
     TSM_ASSERT("Should not be initialized", !coordinateSystem);
   }

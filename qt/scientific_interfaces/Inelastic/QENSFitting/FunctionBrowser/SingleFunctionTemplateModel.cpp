@@ -146,7 +146,7 @@ void SingleFunctionTemplateModel::setGlobal(std::string const &parameterName, bo
   setGlobalParameters(globalParameters);
 }
 
-boost::optional<std::string> SingleFunctionTemplateModel::findFitTypeForFunctionName(const std::string &name) const {
+std::optional<std::string> SingleFunctionTemplateModel::findFitTypeForFunctionName(const std::string &name) const {
   auto result = std::find_if(m_fitTypeToFunctionStore.constBegin(), m_fitTypeToFunctionStore.constEnd(),
                              [&name](const auto &function) -> bool {
                                if (function)
@@ -155,9 +155,9 @@ boost::optional<std::string> SingleFunctionTemplateModel::findFitTypeForFunction
                                  return false;
                              });
   if (result != std::end(m_fitTypeToFunctionStore)) {
-    return boost::optional<std::string>{result.key()};
+    return std::optional<std::string>{result.key()};
   }
-  return boost::none;
+  return std::nullopt;
 }
 
 } // namespace MantidQt::CustomInterfaces::Inelastic
