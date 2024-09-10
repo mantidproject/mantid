@@ -18,6 +18,8 @@ We are proud to announce version 6.11.0 of Mantid.
 
 **TODO: Add paragraph summarizing big changes**
 
+**TODO: Add a note about new mantid-developer metapackage**
+
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
