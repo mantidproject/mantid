@@ -28,7 +28,7 @@ public:
   ~ALCPeakFittingView();
 
   Mantid::API::IFunction_const_sptr function(std::string const &index) const override;
-  boost::optional<std::string> currentFunctionIndex() const override;
+  std::optional<std::string> currentFunctionIndex() const override;
   Mantid::API::IPeakFunction_const_sptr peakPicker() const override;
   void emitFitRequested();
 

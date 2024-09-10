@@ -34,7 +34,7 @@ public:
 
 protected:
   template <typename INT_TYPE> double getBinCenter(const INT_TYPE bin) const;
-  boost::optional<size_t> findBin(const float tof) const;
+  std::optional<size_t> findBin(const float tof) const;
   /// shared pointer for the histogram bin boundaries
   const std::shared_ptr<std::vector<double>> m_histogram_edges;
 
@@ -45,7 +45,7 @@ private:
   double m_divisor;
   double m_offset;
   /// function pointer on how to find the bin boundaries
-  boost::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double, const bool);
+  std::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double, const bool);
 
 protected:
   /// track whether this has allocated the "big" memory objects

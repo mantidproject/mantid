@@ -204,8 +204,8 @@ void IntegratePeaksHybrid::exec() {
 
     HardThresholdBackground backgroundStrategy(threshold, normalization);
     // CCL. Multi-processor version.
-    const size_t startId = 1;
-    const size_t nThreads = 1;
+    constexpr size_t startId{1};
+    constexpr int nThreads{1};
     ConnectedComponentLabeling analysis(startId, nThreads); // CCL executed single threaded.
 
     Progress dummyProgress;

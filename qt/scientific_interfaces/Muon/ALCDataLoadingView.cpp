@@ -152,9 +152,9 @@ std::string ALCDataLoadingView::greenPeriod() const { return m_ui.greenPeriod->c
 
 bool ALCDataLoadingView::subtractIsChecked() const { return m_ui.subtractCheckbox->isChecked(); }
 
-boost::optional<std::pair<double, double>> ALCDataLoadingView::timeRange() const {
+std::optional<std::pair<double, double>> ALCDataLoadingView::timeRange() const {
   auto range = std::make_pair(m_ui.minTime->value(), m_ui.maxTime->value());
-  return boost::make_optional(range);
+  return std::make_optional(range);
 }
 
 void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {

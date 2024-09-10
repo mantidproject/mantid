@@ -46,7 +46,7 @@ public:
   std::string shapeName() const override;
 
   /// PeakBase interface
-  boost::optional<double> radius(RadiusType type = RadiusType::Radius) const override;
+  std::optional<double> radius(RadiusType type = RadiusType::Radius) const override;
   static const std::string ellipsoidShapeName();
 
 private:

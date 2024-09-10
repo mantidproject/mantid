@@ -298,7 +298,7 @@ void InstrumentWidget::init(bool resetGeometry, bool setDefaultView) {
       QString defaultView = QString::fromStdString(m_instrumentActor->getDefaultView());
       if (defaultView == "3D" && !Mantid::Kernel::ConfigService::Instance()
                                       .getValue<bool>("MantidOptions.InstrumentView.UseOpenGL")
-                                      .get_value_or(true)) {
+                                      .value_or(true)) {
         // if OpenGL is switched off don't open the 3D view at start up
         defaultView = "CYLINDRICAL_Y";
       }
@@ -717,7 +717,7 @@ void InstrumentWidget::replaceWorkspace(const std::string &newWs, const std::str
   QString defaultView = QString::fromStdString(m_instrumentActor->getDefaultView());
   if (defaultView == "3D" && !Mantid::Kernel::ConfigService::Instance()
                                   .getValue<bool>("MantidOptions.InstrumentView.UseOpenGL")
-                                  .get_value_or(true)) {
+                                  .value_or(true)) {
     // if OpenGL is switched off we don't open the 3D view
     defaultView = "CYLINDRICAL_Y";
   }

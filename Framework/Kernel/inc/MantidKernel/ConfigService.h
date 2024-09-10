@@ -12,7 +12,7 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ProxyInfo.h"
 #include "MantidKernel/SingletonHolder.h"
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 #include <map>
 #include <set>
@@ -125,7 +125,7 @@ public:
   /// Sets a configuration property
   void setString(const std::string &key, const std::string &value);
   // Searches for a configuration property and returns its value
-  template <typename T> boost::optional<T> getValue(const std::string &keyName);
+  template <typename T> std::optional<T> getValue(const std::string &keyName);
   /// Return the local properties filename.
   std::string getLocalFilename() const;
   /// Return the user properties filename

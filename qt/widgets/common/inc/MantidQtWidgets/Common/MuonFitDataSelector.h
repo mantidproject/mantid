@@ -72,7 +72,7 @@ public:
 public slots:
   /// Set starting run number, instrument and (optionally) file path
   void setWorkspaceDetails(const QString &runNumbers, const QString &instName,
-                           const boost::optional<QString> &filePath) override;
+                           const std::optional<QString> &filePath) override;
   /// Set start time for fit
   void setStartTime(double start) override;
   /// Set end time for fit

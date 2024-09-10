@@ -30,7 +30,7 @@ using namespace Mantid::Crystal;
 // Map of label ids to peak index in peaks workspace.
 using LabelMap = std::map<int, int>;
 // Optional set of labels
-using OptionalLabelPeakIndexMap = boost::optional<LabelMap>;
+using OptionalLabelPeakIndexMap = std::optional<LabelMap>;
 
 /**
  * Create an optional label set for filtering.
@@ -302,10 +302,10 @@ void FindClusterFaces::exec() {
   const auto nIterators = static_cast<int>(mdIterators.size());                      // Number of iterators yielded.
   VecClusterFaces clusterFaces(nIterators);
   size_t nSteps = 1000;
-  if (optionalAllowedLabels.is_initialized()) {
+  if (optionalAllowedLabels.has_value()) {
     nSteps = optionalAllowedLabels->size();
   }
-  const bool usingFiltering = optionalAllowedLabels.is_initialized();
+  const bool usingFiltering = optionalAllowedLabels.has_value();
 
   Progress progress(this, 0.0, 1.0, nSteps);
   PARALLEL_FOR_NO_WSP_CHECK()

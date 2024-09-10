@@ -31,8 +31,8 @@ IPowderDiffPeakFunction::IPowderDiffPeakFunction()
       mHKLSet(false), LATTICEINDEX(9999), HEIGHTINDEX(9999) {
   // Set peak's radius from configuration
   auto peakRadius = Kernel::ConfigService::Instance().getValue<int>("curvefitting.peakRadius");
-  if (peakRadius.is_initialized() && peakRadius.get() != s_peakRadius) {
-    setPeakRadius(peakRadius.get());
+  if (peakRadius.has_value() && peakRadius.value() != s_peakRadius) {
+    setPeakRadius(peakRadius.value());
   }
 }
 

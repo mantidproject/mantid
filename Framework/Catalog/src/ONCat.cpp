@@ -87,7 +87,7 @@ static const std::string DEFAULT_CLIENT_ID = "d16ea847-41ce-4b30-9167-40298588e7
  */
 ONCat_uptr ONCat::fromMantidSettings(bool authenticate) {
   if (!authenticate) {
-    return std::make_unique<ONCat>(DEFAULT_ONCAT_URL, nullptr, OAuthFlow::NONE, boost::none, boost::none);
+    return std::make_unique<ONCat>(DEFAULT_ONCAT_URL, nullptr, OAuthFlow::NONE, std::nullopt, std::nullopt);
   }
 
   auto &config = Mantid::Kernel::ConfigService::Instance();
@@ -103,14 +103,17 @@ ONCat_uptr ONCat::fromMantidSettings(bool authenticate) {
                   << "Falling back to default -- user login required." << std::endl;
   }
 
-  return std::make_unique<ONCat>(
-      DEFAULT_ONCAT_URL, std::make_unique<ConfigServiceTokenStore>(),
-      hasClientCredentials ? OAuthFlow::CLIENT_CREDENTIALS : OAuthFlow::RESOURCE_OWNER_CREDENTIALS,
-      hasClientCredentials ? client_id : DEFAULT_CLIENT_ID, boost::make_optional(hasClientCredentials, client_secret));
+  std::optional<std::string> client_secret_option =
+      hasClientCredentials ? std::make_optional(client_secret) : std::nullopt;
+
+  return std::make_unique<ONCat>(DEFAULT_ONCAT_URL, std::make_unique<ConfigServiceTokenStore>(),
+                                 hasClientCredentials ? OAuthFlow::CLIENT_CREDENTIALS
+                                                      : OAuthFlow::RESOURCE_OWNER_CREDENTIALS,
+                                 hasClientCredentials ? client_id : DEFAULT_CLIENT_ID, client_secret_option);
 }
 
-ONCat::ONCat(std::string url, IOAuthTokenStore_uptr tokenStore, OAuthFlow flow, boost::optional<std::string> clientId,
-             boost::optional<std::string> clientSecret)
+ONCat::ONCat(std::string url, IOAuthTokenStore_uptr tokenStore, OAuthFlow flow, std::optional<std::string> clientId,
+             std::optional<std::string> clientSecret)
     : m_url(std::move(url)), m_tokenStore(std::move(tokenStore)), m_clientId(std::move(clientId)),
       m_clientSecret(std::move(clientSecret)), m_flow(flow), m_internetHelper(new Mantid::Kernel::InternetHelper()) {}
 
@@ -167,7 +170,7 @@ bool ONCat::isUserLoggedIn() const {
     return false;
   }
 
-  return m_tokenStore->getToken().is_initialized();
+  return m_tokenStore->getToken().has_value();
 }
 
 std::string ONCat::url() const { return m_url; }
@@ -178,7 +181,7 @@ void ONCat::logout() {
   // spec).  A "logout", then, is simply throwing away whatever token we
   // previously stored client-side.
   if (m_tokenStore) {
-    m_tokenStore->setToken(boost::none);
+    m_tokenStore->setToken(std::nullopt);
     g_log.debug() << "Logging out." << std::endl;
   }
 }
@@ -204,9 +207,9 @@ void ONCat::login(const std::string &username, const std::string &password) {
   Poco::Net::HTMLForm form(Poco::Net::HTMLForm::ENCODING_MULTIPART);
   form.set("username", username);
   form.set("password", password);
-  form.set("client_id", m_clientId.get());
+  form.set("client_id", m_clientId.value());
   if (m_clientSecret) {
-    form.set("client_secret", m_clientSecret.get());
+    form.set("client_secret", m_clientSecret.value());
   }
   form.set("grant_type", "password");
 
@@ -311,9 +314,9 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime &currentTime) {
     }
 
     Poco::Net::HTMLForm form(Poco::Net::HTMLForm::ENCODING_MULTIPART);
-    form.set("client_id", m_clientId.get());
+    form.set("client_id", m_clientId.value());
     if (m_clientSecret) {
-      form.set("client_secret", m_clientSecret.get());
+      form.set("client_secret", m_clientSecret.value());
     }
     form.set("grant_type", "client_credentials");
 
@@ -333,7 +336,7 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime &currentTime) {
       throw CatalogError(ie.what());
     }
   } else if (m_flow == OAuthFlow::RESOURCE_OWNER_CREDENTIALS) {
-    if (!currentToken.is_initialized()) {
+    if (!currentToken.has_value()) {
       return;
     }
     if (!currentToken->isExpired(currentTime)) {
@@ -345,12 +348,12 @@ void ONCat::refreshTokenIfNeeded(const DateAndTime &currentTime) {
     }
 
     Poco::Net::HTMLForm form(Poco::Net::HTMLForm::ENCODING_MULTIPART);
-    form.set("client_id", m_clientId.get());
+    form.set("client_id", m_clientId.value());
     if (m_clientSecret) {
-      form.set("client_secret", m_clientSecret.get());
+      form.set("client_secret", m_clientSecret.value());
     }
     form.set("grant_type", "refresh_token");
-    form.set("refresh_token", currentRefreshToken.get());
+    form.set("refresh_token", currentRefreshToken.value());
 
     m_internetHelper->reset();
     m_internetHelper->setBody(form);

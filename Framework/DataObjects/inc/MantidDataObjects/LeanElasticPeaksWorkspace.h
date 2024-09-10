@@ -87,7 +87,7 @@ public:
   const LeanElasticPeak &getPeak(int peakNum) const override;
 
   std::unique_ptr<Geometry::IPeak> createPeak(const Kernel::V3D &QLabFrame,
-                                              boost::optional<double> detectorDistance = boost::none) const override;
+                                              std::optional<double> detectorDistance = std::nullopt) const override;
 
   std::unique_ptr<Geometry::IPeak> createPeak(const Kernel::V3D &Position,
                                               const Kernel::SpecialCoordinateSystem &frame) const override;

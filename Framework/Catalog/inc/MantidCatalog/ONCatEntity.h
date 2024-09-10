@@ -13,8 +13,8 @@
 #include <string>
 #include <vector>
 
-#include <boost/optional.hpp>
 #include <json/json.h>
+#include <optional>
 
 namespace Mantid {
 namespace Catalog {
@@ -41,13 +41,13 @@ using Mantid::Catalog::Exception::ContentError;
  * forces you to deal with the case where the field in question is not there.
  * There are two ways of doing this: the first is to specify a default value
  * to be used when a value is not present, and the second is to check for a
- * result on a boost::optional.
+ * result on a std::optional.
  *
  * However, if your projection is such that you *know* a field will be present
  * (note that most fields on API resources will always be returned as long
  * as they are requested as part of a projection, for example the "location"
  * field of the Datafile resource), then feel free to assume it will be
- * there and resolve the boost::optional without checking for a result.
+ * there and resolve the std::optional without checking for a result.
  *
  * @author Peter Parker
  * @date 2018
@@ -75,11 +75,11 @@ public:
   }
 
   // ... or, write conditional logic around boost's optional results.
-  template <typename T> boost::optional<T> get(const std::string &path) const {
+  template <typename T> std::optional<T> get(const std::string &path) const {
     try {
-      return boost::make_optional(getNestedContentValueAsType<T>(*m_content, path));
+      return std::make_optional(getNestedContentValueAsType<T>(*m_content, path));
     } catch (ContentError &) {
-      return boost::none;
+      return std::nullopt;
     }
   }
 

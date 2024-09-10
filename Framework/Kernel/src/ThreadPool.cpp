@@ -74,8 +74,8 @@ size_t ThreadPool::getNumPhysicalCores() {
 
   auto maxCores = Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
 
-  if (!maxCores.is_initialized())
-    return std::min(maxCores.get_value_or(0), physicalCores);
+  if (!maxCores.has_value())
+    return std::min(maxCores.value_or(0), physicalCores);
   else
     return physicalCores;
 }

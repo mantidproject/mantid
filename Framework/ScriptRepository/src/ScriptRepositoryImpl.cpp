@@ -1332,7 +1332,7 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file, const std
   try {
     Kernel::InternetHelper inetHelper;
     auto timeoutConfigVal = ConfigService::Instance().getValue<int>("network.scriptrepo.timeout");
-    int timeout = timeoutConfigVal.get_value_or(DEFAULT_TIMEOUT_SEC);
+    int timeout = timeoutConfigVal.value_or(DEFAULT_TIMEOUT_SEC);
     inetHelper.setTimeout(timeout);
 
     const auto status = inetHelper.downloadFile(url_file, local_file_path);

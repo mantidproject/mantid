@@ -10,7 +10,7 @@
 #include "MantidReflectometry/DllConfig.h"
 #include "ReflectometryWorkflowBase2.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace Mantid {
 namespace Reflectometry {
@@ -44,7 +44,7 @@ private:
   class RebinParams {
   public:
     RebinParams(const double qMin, const bool qMinIsDefault, const double qMax, const bool qMaxIsDefault,
-                const boost::optional<double> &qStep)
+                const std::optional<double> &qStep)
         : m_qMin(qMin), m_qMinIsDefault(qMinIsDefault), m_qMax(qMax), m_qMaxIsDefault(qMaxIsDefault), m_qStep(qStep){};
 
     double qMin() const { return m_qMin; };
@@ -52,7 +52,7 @@ private:
     double qMax() const { return m_qMax; };
     bool qMaxIsDefault() const { return m_qMaxIsDefault; }
     double qStep() const { return *m_qStep; };
-    bool hasQStep() const { return m_qStep.is_initialized(); }
+    bool hasQStep() const { return m_qStep.has_value(); }
     std::vector<double> asVector() const { return std::vector<double>{qMin(), qStep(), qMax()}; };
 
   private:
@@ -60,7 +60,7 @@ private:
     bool m_qMinIsDefault;
     double m_qMax;
     bool m_qMaxIsDefault;
-    boost::optional<double> m_qStep;
+    std::optional<double> m_qStep;
   };
 
   void init() override;
@@ -77,7 +77,7 @@ private:
   double calculateTheta(const Mantid::API::MatrixWorkspace_sptr &inputWS);
   /// Find cropping and binning parameters
   RebinParams getRebinParams(const MatrixWorkspace_sptr &inputWS, const double theta);
-  boost::optional<double> getQStep(const MatrixWorkspace_sptr &inputWS, const double theta);
+  std::optional<double> getQStep(const MatrixWorkspace_sptr &inputWS, const double theta);
   /// Rebin and scale a workspace in Q
   Mantid::API::MatrixWorkspace_sptr rebinAndScale(const Mantid::API::MatrixWorkspace_sptr &inputWS,
                                                   RebinParams const &params);

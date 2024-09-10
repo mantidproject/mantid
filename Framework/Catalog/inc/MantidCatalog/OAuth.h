@@ -9,7 +9,7 @@
 #include "MantidCatalog/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace Mantid {
 namespace Catalog {
@@ -35,14 +35,14 @@ class MANTID_CATALOG_DLL OAuthToken {
 public:
   OAuthToken() = delete;
   OAuthToken(std::string tokenType, int expiresIn, std::string accessToken, std::string scope,
-             boost::optional<std::string> refreshToken);
+             std::optional<std::string> refreshToken);
   ~OAuthToken();
 
   std::string tokenType() const;
   int expiresIn() const;
   std::string accessToken() const;
   std::string scope() const;
-  boost::optional<std::string> refreshToken() const;
+  std::optional<std::string> refreshToken() const;
 
   bool isExpired() const;
   bool isExpired(const DateAndTime &currentTime) const;
@@ -56,13 +56,13 @@ private:
   int m_expiresIn;
   std::string m_accessToken;
   std::string m_scope;
-  boost::optional<std::string> m_refreshToken;
+  std::optional<std::string> m_refreshToken;
 };
 
 class MANTID_CATALOG_DLL IOAuthTokenStore {
 public:
-  virtual void setToken(const boost::optional<OAuthToken> &token) = 0;
-  virtual boost::optional<OAuthToken> getToken() = 0;
+  virtual void setToken(const std::optional<OAuthToken> &token) = 0;
+  virtual std::optional<OAuthToken> getToken() = 0;
   virtual ~IOAuthTokenStore() = default;
 };
 
@@ -72,8 +72,8 @@ public:
   ConfigServiceTokenStore &operator=(const ConfigServiceTokenStore &other) = default;
   ~ConfigServiceTokenStore() override;
 
-  void setToken(const boost::optional<OAuthToken> &token) override;
-  boost::optional<OAuthToken> getToken() override;
+  void setToken(const std::optional<OAuthToken> &token) override;
+  std::optional<OAuthToken> getToken() override;
 };
 
 using IOAuthTokenStore_uptr = std::unique_ptr<IOAuthTokenStore>;

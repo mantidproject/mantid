@@ -13,7 +13,7 @@
 #include "DllConfig.h"
 
 #include <QObject>
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -28,7 +28,7 @@ public:
   virtual Mantid::API::IFunction_const_sptr function(std::string const &index) const = 0;
 
   /// @return Index of the function currently seleted in the Function Browser
-  virtual boost::optional<std::string> currentFunctionIndex() const = 0;
+  virtual std::optional<std::string> currentFunctionIndex() const = 0;
 
   /// @return A peak currently represented by the peak picker
   virtual Mantid::API::IPeakFunction_const_sptr peakPicker() const = 0;

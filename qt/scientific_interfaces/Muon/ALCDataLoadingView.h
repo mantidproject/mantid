@@ -50,7 +50,7 @@ public:
   std::string greenPeriod() const override;
   bool subtractIsChecked() const override;
   std::string calculationType() const override;
-  boost::optional<std::pair<double, double>> timeRange() const override;
+  std::optional<std::pair<double, double>> timeRange() const override;
   std::string getRunsText() const override;
   std::string getRunsFirstRunText() const override;
 

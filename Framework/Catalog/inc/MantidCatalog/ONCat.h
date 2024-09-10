@@ -14,7 +14,7 @@
 #include <memory>
 #include <vector>
 
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace Mantid {
 
@@ -120,8 +120,8 @@ public:
   // Exposed publicly for testing purposes only.
   //////////////////////////////////////////////////////////////////////
   ONCat(const std::string &url);
-  ONCat(std::string url, IOAuthTokenStore_uptr tokenStore, OAuthFlow flow, boost::optional<std::string> clientId,
-        boost::optional<std::string> clientSecret = boost::none);
+  ONCat(std::string url, IOAuthTokenStore_uptr tokenStore, OAuthFlow flow, std::optional<std::string> clientId,
+        std::optional<std::string> clientSecret = std::nullopt);
   void refreshTokenIfNeeded();
   void refreshTokenIfNeeded(const DateAndTime &currentTime);
   void setInternetHelper(const std::shared_ptr<Mantid::Kernel::InternetHelper> &internetHelper);
@@ -132,8 +132,8 @@ private:
 
   std::string m_url;
   IOAuthTokenStore_sptr m_tokenStore;
-  boost::optional<std::string> m_clientId;
-  boost::optional<std::string> m_clientSecret;
+  std::optional<std::string> m_clientId;
+  std::optional<std::string> m_clientSecret;
 
   OAuthFlow m_flow;
   std::shared_ptr<Mantid::Kernel::InternetHelper> m_internetHelper;

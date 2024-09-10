@@ -22,7 +22,7 @@ IFunction_const_sptr ALCPeakFittingView::function(std::string const &index) cons
   return m_ui.peaks->getFunctionByIndex(index);
 }
 
-boost::optional<std::string> ALCPeakFittingView::currentFunctionIndex() const {
+std::optional<std::string> ALCPeakFittingView::currentFunctionIndex() const {
   return m_ui.peaks->currentFunctionIndex();
 }
 

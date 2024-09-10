@@ -12,8 +12,8 @@
 #include "MantidQtWidgets/Common/FunctionModel.h"
 
 #include <QObject>
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace MantidQt {
@@ -47,7 +47,7 @@ public:
   void updateMultiDatasetParameters(const IFunction &fun);
   void updateMultiDatasetAttributes(const IFunction &fun);
   void clearErrors();
-  boost::optional<std::string> currentFunctionIndex() const;
+  std::optional<std::string> currentFunctionIndex() const;
   void setNumberOfDatasets(int);
   void setDatasets(const std::vector<std::string> &datasetNames);
   void setDatasets(const QList<FunctionModelDataset> &datasets);

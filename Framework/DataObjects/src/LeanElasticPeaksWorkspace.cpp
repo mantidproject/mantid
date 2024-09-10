@@ -200,7 +200,7 @@ const LeanElasticPeak &LeanElasticPeaksWorkspace::getPeak(const int peakNum) con
  * @return a pointer to a new Peak object.
  */
 std::unique_ptr<Geometry::IPeak> LeanElasticPeaksWorkspace::createPeak(const Kernel::V3D &,
-                                                                       boost::optional<double>) const {
+                                                                       std::optional<double>) const {
   throw Exception::NotImplementedError("LeanElasticPeak should be create in q sample frame");
 }
 

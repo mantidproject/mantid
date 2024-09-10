@@ -17,11 +17,11 @@
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/WarningSuppressions.h"
 
-#include <boost/optional.hpp>
 #include <boost/scoped_array.hpp>
 #include <cmath>
 #include <map>
 #include <memory>
+#include <optional>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -1265,7 +1265,7 @@ Kernel::SpecialCoordinateSystem MDHistoWorkspace::getSpecialCoordinateSystem() c
   auto coordinatesFromMDFrames = converter(this);
   auto coordinates = m_coordSystem;
   if (coordinatesFromMDFrames) {
-    coordinates = coordinatesFromMDFrames.get();
+    coordinates = coordinatesFromMDFrames.value();
   }
   return coordinates;
 }

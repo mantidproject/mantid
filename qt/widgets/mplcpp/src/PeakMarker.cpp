@@ -19,14 +19,14 @@ using Mantid::PythonInterface::PythonException;
 namespace {
 
 Python::Object newMarker(FigureCanvasQt *canvas, int peakID, double x, double height, double fwhm, double background,
-                         boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
+                         std::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
   Python::Object markersModule{Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
 
   auto const args =
       Python::NewRef(Py_BuildValue("(Oidddd)", canvas->pyobj().ptr(), peakID, x, height, fwhm, background));
-  Python::Dict kwargs = Python::qHashToDict(otherKwargs.get());
+  Python::Dict kwargs = Python::qHashToDict(otherKwargs.value());
 
   auto const marker = markersModule.attr("PeakMarker")(*args, **kwargs);
   return marker;

@@ -12,7 +12,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
-#include <boost/optional.hpp>
 #include <memory>
 #include <optional>
 #include <sstream>

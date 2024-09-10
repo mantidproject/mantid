@@ -15,9 +15,9 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
 
-#include <boost/optional.hpp>
 #include <map>
 #include <memory>
+#include <optional>
 
 namespace Mantid {
 //----------------------------------------------------------------------
@@ -155,10 +155,10 @@ public:
   int getPointInObject(Kernel::V3D &point) const override;
 
   /// Select a random point within the object
-  boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                     const size_t) const override;
-  boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                     const BoundingBox &activeRegion, const size_t) const override;
+  std::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                   const size_t) const override;
+  std::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                   const BoundingBox &activeRegion, const size_t) const override;
 
   // Rendering member functions
   void draw() const override;

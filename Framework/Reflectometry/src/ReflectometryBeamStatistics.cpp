@@ -17,7 +17,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 
 #include <boost/math/special_functions/pow.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace {
 namespace Prop {
@@ -161,7 +161,7 @@ void ReflectometryBeamStatistics::exec() {
 double ReflectometryBeamStatistics::beamRMSVariation(API::MatrixWorkspace_sptr &ws, const size_t start,
                                                      const size_t end) {
   // det_fwhm and detdb_fwhm in COSMOS
-  boost::optional<double> rmsVariation;
+  std::optional<double> rmsVariation;
   if (ws->run().hasProperty(LogEntry::BEAM_RMS_VARIATION)) {
     try {
       rmsVariation = ws->run().getPropertyValueAsType<double>(LogEntry::BEAM_RMS_VARIATION);

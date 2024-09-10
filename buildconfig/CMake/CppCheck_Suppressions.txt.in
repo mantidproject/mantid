@@ -426,16 +426,12 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo
 unsignedLessThanZero:${CMAKE_SOURCE_DIR}/Framework/Beamline/src/ComponentInfo.cpp:650
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectraAxisValidator.cpp:26
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspaceMDIterator.cpp:33
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/CompositeCluster.cpp:97
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/CompositeCluster.cpp:115
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/ClearUB.h:25
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:91
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:151
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:191
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:261
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:268
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/ConnectedComponentLabeling.cpp:337
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/ConnectedComponentLabeling.cpp:338
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/CalculateUMatrix.cpp:65
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:78
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:437
@@ -1290,7 +1286,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/InstrumentSelec
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ListPropertyWidget.cpp:46
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FitDomain.h:35
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ManageUserDirectories.h:39
-iterateByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/UserSubWindowFactory.h:96
 ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:318
 ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:320
 ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:329

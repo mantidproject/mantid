@@ -132,9 +132,9 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
   //
   if (mode == NXACC_RDWR) {
     size_t count = 0;
-    if (entryNumber.is_initialized()) {
+    if (entryNumber.has_value()) {
       // Use the entry number provided.
-      count = entryNumber.get();
+      count = entryNumber.value();
     } else {
       // Have to figure it our ourselves. Requires opening the exisitng file to
       // get the information via a search.
