@@ -12,7 +12,8 @@ Description
 
 Use this algorithm to define the initial orientation of the sample with respect
 to the beam and instrument by giving the axes, angle and directions of rotations.
-Enter each axis in the order of rotation, starting with the one farthest from the sample.
+Enter each axis in the order of rotation, starting with the one farthest from the
+sample similar to :ref:`algm-SetGoniometer`
 
 You may enter up to 6 axes, for each of which you must define 5 values as below separated by
 commas:
@@ -25,7 +26,7 @@ commas:
    clockwise rotation.
 
 The sample shape would then be rotated by the goniometer before being used in the
-calculation of various attenuation corrections. This algorithm work for CSG shapes
+calculation of various attenuation corrections. This algorithm work for both CSG shapes
 (e.g. cylinders, flat plates etc.) and Mesh files.
 
 
@@ -35,14 +36,20 @@ Usage
 
 .. testcode:: RotateSampleShape
 
+    from mantid.simpleapi import *
+    import xml.dom.minidom as md
+
     ws = CreateSampleWorkspace()
     SetSample(ws,
-            Geometry={'Shape': 'Cylinder', 'Height': 4.0,
-                        'Radius': 1.0,
-                        'Center': [0.,0.,0.]},
-            Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
-                        'NumberDensity': 0.1})
+    Geometry={'Shape': 'Cylinder', 'Height': 4.0,
+                'Radius': 1.0,
+                'Center': [0.,0.,0.]},
+    Material={'ChemicalFormula': '(Li7)2-C-H4-N-Cl6',
+                'NumberDensity': 0.1})
+
     RotateSampleShape(Workspace=ws, Axis0="45,1,1,0,1", Axis1="15,0,0,1,-1")
+
+    print(md.parseString(ws.sample().getShape().getShapeXML()).toprettyxml())
 
 .. testcleanup:: RotateSampleShape
 
