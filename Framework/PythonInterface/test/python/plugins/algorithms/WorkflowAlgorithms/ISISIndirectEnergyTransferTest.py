@@ -409,6 +409,23 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         red_ws = wks.getItem(0)
         self.assertEqual(red_ws.getSpectrum(0).getSpectrumNo(), 0)
 
+    def test_reduction_with_suffix(self):
+        """Check that the output suffix is appended at the end of output workspace names"""
+
+        wks = ISISIndirectEnergyTransfer(
+            InputFiles=["IRS26176.RAW"],
+            Instrument="IRIS",
+            Analyser="graphite",
+            Reflection="002",
+            SpectraRange=[3, 53],
+            OutputWorkspace="OutputGroup",
+            OutputSuffix="test",
+        )
+
+        self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
+        self.assertEqual(wks.name(), "OutputGroup")
+        self.assertEqual(wks.getNames()[0], "iris26176_graphite002_test_red")
+
 
 if __name__ == "__main__":
     unittest.main()
