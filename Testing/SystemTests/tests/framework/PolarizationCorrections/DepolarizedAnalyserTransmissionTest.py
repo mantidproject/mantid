@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.simpleapi import *
+from mantid.simpleapi import DepolarizedAnalyserTransmission
 from SANSPolarizationCorrectionsBase import SANSPolarizationCorrectionsBase
 
 

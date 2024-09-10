@@ -7,10 +7,8 @@
 
 from abc import ABCMeta, abstractmethod
 from systemtesting import MantidSystemTest
-
-
 from mantid.api import AnalysisDataService
-from mantid.simpleapi import *
+from mantid.simpleapi import Load, ConvertUnits, CropWorkspace
 
 
 class SANSPolarizationCorrectionsBase(MantidSystemTest, metaclass=ABCMeta):

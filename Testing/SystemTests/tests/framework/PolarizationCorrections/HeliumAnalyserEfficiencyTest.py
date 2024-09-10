@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from abc import ABCMeta, abstractmethod
-from mantid.simpleapi import *
+from mantid.simpleapi import HeliumAnalyserEfficiency
 from SANSPolarizationCorrectionsBase import SANSPolarizationCorrectionsBase
 
 
