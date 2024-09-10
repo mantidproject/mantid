@@ -205,7 +205,7 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
 
         LoadEventNexus(Filename="PG3_4866_event.nxs", OutputWorkspace="PG3_4866", Precount=True)
         FilterBadPulses(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866")
-        RemovePromptPulse(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Width=50)
+        RemovePromptPulse(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Width=1)
         CompressEvents(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Tolerance=0.01)
         SortEvents(InputWorkspace="PG3_4866")
         CropWorkspace(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", XMax=16666.669999999998)
@@ -248,7 +248,7 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
-        self.tolerance = 2e-1
+        self.tolerance = 1e-1
         self.tolerance_is_rel_err = True
         return ("PG3_4866", "PG3_4866_golden")
 
