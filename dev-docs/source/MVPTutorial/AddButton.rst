@@ -12,7 +12,7 @@ The View
 The below code creates a QWidget containing a single button. When the
 button is pressed it will print a message to the terminal screen. It
 should be noted that in practice this should be avoided and will be
-discussed in :ref:`this section <ReceivingSignalFromView>`.
+discussed in :ref:`this section <CreatingThePresenter>`.
 
 First we need to import the relevant components from PyQt and other modules.
 
@@ -42,18 +42,18 @@ Next, inside the constructor, we create a layout and add a button to it
    self._button.setStyleSheet("background-color:lightgrey")
 
    # connect button to signal
-   self._button.clicked.connect(self.btn_click)
+   self._button.clicked.connect(self._button_clicked)
    # add button to layout
    grid.addWidget(self._button)
    # set the layout for the view widget
    self.setLayout(grid)
 
 The above connect statement means that when the button is pressed, the
-function ``btn_click`` is called:
+function ``_button_clicked`` is called:
 
 .. code-block:: python
 
-   def btn_click(self) -> None:
+   def _button_clicked(self) -> None:
        print("Hello world")
 
 The Main
@@ -71,12 +71,12 @@ all been saved in ``view.py``, the ``main.py`` will contain:
     from view import View
 
 
-    def get_qapplication_instance() -> QApplication:
+    def _get_qapplication_instance() -> QApplication:
         if app := QApplication.instance():
             return app
         return QApplication(sys.argv)
 
-    app = get_qapplication_instance()
+    app = _get_qapplication_instance()
     window = View()
     window.show()
     app.exec_()

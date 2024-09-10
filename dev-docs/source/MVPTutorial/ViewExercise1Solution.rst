@@ -16,12 +16,12 @@ main.py
     from view import View
 
 
-    def get_qapplication_instance():
+    def _get_qapplication_instance():
         if app := QApplication.instance():
             return app
         return QApplication(sys.argv)
 
-    app = get_qapplication_instance()
+    app = _get_qapplication_instance()
     window = View()
     window.show()
     app.exec_()
@@ -35,6 +35,9 @@ view.py
     from qtpy.QtWidgets import QComboBox, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 
     from typing import Union
+
+    TEXT_COLUMN = 0
+    WIDGET_COLUMN = 1
 
 
     class View(QWidget):
@@ -57,14 +60,14 @@ view.py
             self._grid_lines = QTableWidgetItem()
             self._grid_lines.setFlags(ItemIsUserCheckable | ItemIsEnabled)
             self._grid_lines.setCheckState(Unchecked)
-            self.addItemToTable("Show grid lines", self._grid_lines, 1)
+            self._add_item_to_table("Show grid lines", self._grid_lines, 1)
 
             freq = QTableWidgetItem("1.0")
             phi = QTableWidgetItem("0.0")
 
-            self.addWidgetToTable("Colour", self._colours, 0)
-            self.addItemToTable("Frequency", freq, 2)
-            self.addItemToTable("Phase", phi, 3)
+            self._add_widget_to_table("Colour", self._colours, 0)
+            self._add_item_to_table("Frequency", freq, 2)
+            self._add_item_to_table("Phase", phi, 3)
 
             self._plot = QPushButton('Add', self)
             self._plot.setStyleSheet("background-color:lightgrey")
@@ -73,26 +76,23 @@ view.py
 
             self.setLayout(grid)
 
-        def setTableRow(self, name: str, row: int) -> None:
+        def _set_table_row(self, name: str, row: int) -> None:
             text = QTableWidgetItem(name)
             text.setFlags(ItemIsEnabled)
-            col = 0
-            self._table.setItem(row, col, text)
+            self._table.setItem(row, TEXT_COLUMN, text)
 
-        def addWidgetToTable(self, name: str, widget: QWidget, row: int) -> None:
-            self.setTableRow(name,row)
-            col = 1
-            self._table.setCellWidget(row, col, widget)
+        def _add_widget_to_table(self, name: str, widget: QWidget, row: int) -> None:
+            self._set_table_row(name,row)
+            self._table.setCellWidget(row, WIDGET_COLUMN, widget)
 
-        def addItemToTable(self, name: str, widget: QWidget, row: int) -> None:
-            self.setTableRow(name, row)
-            col = 1
-            self._table.setItem(row, col, widget)
+        def _add_item_to_table(self, name: str, widget: QWidget, row: int) -> None:
+            self._set_table_row(name, row)
+            self._table.setItem(row, WIDGET_COLUMN, widget)
 
 In the above code the following functions have been added to prevent
 repetition of code:
 
-- ``setTableRow`` sets the label for the table row
-- ``addWidgetToTable`` adds a widget to the table
-- ``addItemToTable`` adds an item to the table (needed because the
+- ``_set_table_row`` sets the label for the table row
+- ``_add_widget_to_table`` adds a widget to the table
+- ``_add_item_to_table`` adds an item to the table (needed because the
   frequency and phase are items and not widgets)
