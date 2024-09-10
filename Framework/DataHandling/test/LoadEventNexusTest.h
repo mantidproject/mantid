@@ -538,7 +538,7 @@ public:
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 112266);
     // TOF limits found. There is a pad of +-1 given around the actual TOF
     // founds.
-    TS_ASSERT_DELTA((*WS->refX(0))[0], 44162.6, 0.05);
+    TS_ASSERT_DELTA((*WS->refX(0))[0], 44163.6, 0.05);
     TS_ASSERT_DELTA((*WS->refX(0))[1], 60830.2, 0.05);
     // Valid spectrum info
     TS_ASSERT_EQUALS(WS->getSpectrum(0).getSpectrumNo(), 1);

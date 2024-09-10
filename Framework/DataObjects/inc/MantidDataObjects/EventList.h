@@ -201,6 +201,8 @@ public:
   virtual size_t histogram_size() const;
 
   void compressEvents(double tolerance, EventList *destination);
+  void compressEvents(double tolerance, EventList *destination,
+                      std::shared_ptr<std::vector<double>> histogram_bin_edges);
   void compressFatEvents(const double tolerance, const Types::Core::DateAndTime &timeStart, const double seconds,
                          EventList *destination);
   // get EventType declaration
@@ -357,13 +359,13 @@ private:
   void generateCountsHistogram(const double step, const MantidVec &X, MantidVec &Y) const;
 
 public:
-  static boost::optional<size_t> findLinearBin(const MantidVec &X, const double tof, const double divisor,
-                                               const double offset, const bool findExact = true);
-  static boost::optional<size_t> findLogBin(const MantidVec &X, const double tof, const double divisor,
-                                            const double offset, const bool findExact = true);
+  static std::optional<size_t> findLinearBin(const MantidVec &X, const double tof, const double divisor,
+                                             const double offset, const bool findExact = true);
+  static std::optional<size_t> findLogBin(const MantidVec &X, const double tof, const double divisor,
+                                          const double offset, const bool findExact = true);
 
 private:
-  static boost::optional<size_t> findExactBin(const MantidVec &X, const double tof, size_t n_bin);
+  static std::optional<size_t> findExactBin(const MantidVec &X, const double tof, size_t n_bin);
 
   void generateCountsHistogramPulseTime(const MantidVec &X, MantidVec &Y) const;
 
@@ -382,6 +384,15 @@ private:
   template <class T>
   static void compressEventsHelper(const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,
                                    double tolerance);
+
+  template <class T>
+  static void createWeightedEvents(std::vector<WeightedEventNoTime> &out, const std::vector<double> &tof,
+                                   const std::vector<T> &weight, const std::vector<T> &error);
+
+  template <class T>
+  static void processWeightedEvents(const std::vector<T> &events, std::vector<WeightedEventNoTime> &out,
+                                    const std::shared_ptr<std::vector<double>> histogram_bin_edges,
+                                    struct FindBin findBin);
 
   template <class T>
   static void compressFatEventsHelper(const std::vector<T> &events, std::vector<WeightedEvent> &out,

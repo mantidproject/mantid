@@ -10,7 +10,7 @@
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/V3D.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace Mantid {
 namespace Kernel {
@@ -34,18 +34,18 @@ MANTID_GEOMETRY_DLL Kernel::V3D inHollowCylinder(const detail::ShapeInfo &shapeI
 
 MANTID_GEOMETRY_DLL Kernel::V3D inSphere(const detail::ShapeInfo &shapeInfo, Kernel::PseudoRandomNumberGenerator &rng);
 
-MANTID_GEOMETRY_DLL boost::optional<Kernel::V3D>
+MANTID_GEOMETRY_DLL std::optional<Kernel::V3D>
 inGenericShape(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng, size_t maxAttempts);
 
 MANTID_GEOMETRY_DLL Kernel::V3D localPointInCylinder(const Kernel::V3D &basis, const Kernel::V3D &alongAxis,
                                                      double polarAngle, double radialLength);
 
 template <Kernel::V3D (*T)(const detail::ShapeInfo &, Kernel::PseudoRandomNumberGenerator &)>
-boost::optional<Kernel::V3D> bounded(const detail::ShapeInfo &shapeInfo, Kernel::PseudoRandomNumberGenerator &rng,
-                                     const BoundingBox &box, size_t maxAttempts);
+std::optional<Kernel::V3D> bounded(const detail::ShapeInfo &shapeInfo, Kernel::PseudoRandomNumberGenerator &rng,
+                                   const BoundingBox &box, size_t maxAttempts);
 
-MANTID_GEOMETRY_DLL boost::optional<Kernel::V3D>
-bounded(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng, const BoundingBox &box, size_t maxAttempts);
+MANTID_GEOMETRY_DLL std::optional<Kernel::V3D> bounded(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng,
+                                                       const BoundingBox &box, size_t maxAttempts);
 
 /**
  * Return a random point in a known shape restricted by a bounding box.
@@ -59,9 +59,9 @@ bounded(const IObject &object, Kernel::PseudoRandomNumberGenerator &rng, const B
  * @return a point or none if maxAttempts was exceeded
  */
 template <Kernel::V3D (*randomInShape)(const detail::ShapeInfo &, Kernel::PseudoRandomNumberGenerator &)>
-boost::optional<Kernel::V3D> bounded(const detail::ShapeInfo &shapeInfo, Kernel::PseudoRandomNumberGenerator &rng,
-                                     const BoundingBox &box, size_t maxAttempts) {
-  boost::optional<Kernel::V3D> point;
+std::optional<Kernel::V3D> bounded(const detail::ShapeInfo &shapeInfo, Kernel::PseudoRandomNumberGenerator &rng,
+                                   const BoundingBox &box, size_t maxAttempts) {
+  std::optional<Kernel::V3D> point;
   for (size_t attempt{0}; attempt < maxAttempts; ++attempt) {
     const Kernel::V3D pt{randomInShape(shapeInfo, rng)};
     if (box.isPointInside(pt)) {

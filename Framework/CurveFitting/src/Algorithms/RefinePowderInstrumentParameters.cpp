@@ -908,7 +908,7 @@ void RefinePowderInstrumentParameters::importMonteCarloParametersFromTable(const
   for (size_t ir = 0; ir < numrows; ++ir) {
     TableRow row = tablews->getRow(ir);
     string parname;
-    double tmax, tmin, tstepsize;
+    double tmax = 0, tmin = 0, tstepsize = 0;
     row >> parname;
     for (size_t ic = 1; ic < colnames.size(); ++ic) {
       double tmpdbl = std::numeric_limits<float>::quiet_NaN();

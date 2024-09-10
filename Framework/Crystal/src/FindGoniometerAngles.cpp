@@ -194,7 +194,7 @@ void FindGoniometerAngles::exec() {
       auto &peak = peakWS->getPeak(i);
       const auto q_lab = peak.getQLabFrame();
       peak.setGoniometerMatrix(R);
-      peak.setQLabFrame(q_lab, boost::none);
+      peak.setQLabFrame(q_lab, std::nullopt);
     }
   }
 }

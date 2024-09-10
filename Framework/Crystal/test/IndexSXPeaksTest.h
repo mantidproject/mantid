@@ -114,9 +114,9 @@ public:
     for (int i = 0; i < m_masterPeaks->getNumberPeaks(); i++) {
       IPeak &peak = m_masterPeaks->getPeak(i);
       Mantid::Kernel::V3D v(1, 0, 0);
-      peak.setQSampleFrame(v, boost::none); // Overwrite all Q
-                                            // samples to be
-                                            // co-linear.
+      peak.setQSampleFrame(v, std::nullopt); // Overwrite all Q
+                                             // samples to be
+                                             // co-linear.
     }
 
     TS_ASSERT_THROWS(doTest(6, "1, 2, 3, 4, 5, 6", 14.131, 19.247, 8.606, 90.0, 105.071, 90.0),

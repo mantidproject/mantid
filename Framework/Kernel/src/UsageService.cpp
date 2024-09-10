@@ -93,10 +93,10 @@ UsageServiceImpl::UsageServiceImpl()
       m_featureActiveMethod(this, &UsageServiceImpl::sendFeatureAsyncImpl) {
   setInterval(60);
   auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>("usagereports.rooturl");
-  if (!url.is_initialized()) {
+  if (!url.has_value()) {
     g_log.debug() << "Failed to load usage report url\n";
   } else {
-    m_url = url.get();
+    m_url = url.value();
     g_log.debug() << "Root usage reporting url is " << m_url << "\n";
   };
 }

@@ -76,8 +76,6 @@ static const string EVENT_PARAM("EventFilename");
 static const string PULSEID_PARAM("PulseidFilename");
 static const string MAP_PARAM("MappingFilename");
 static const string PID_PARAM("SpectrumList");
-static const string PARALLEL_PARAM("UseParallelProcessing");
-static const string BLOCK_SIZE_PARAM("LoadingBlockSize");
 static const string OUT_PARAM("OutputWorkspace");
 
 /// All pixel ids with matching this mask are errors.
@@ -579,14 +577,14 @@ void LoadEventPreNexus2::runLoadInstrument(const std::string &eventfilename,
   for (const auto &ending : eventExts) {
     size_t pos = instrument.find(ending);
     if (pos != string::npos) {
-      instrument = instrument.substr(0, pos);
+      instrument.resize(pos);
       break;
     }
   }
 
   // determine the instrument parameter file
   size_t pos = instrument.rfind('_'); // get rid of the run number
-  instrument = instrument.substr(0, pos);
+  instrument.resize(pos);
 
   // do the actual work
   auto loadInst = createChildAlgorithm("LoadInstrument");
@@ -669,7 +667,7 @@ void LoadEventPreNexus2::procEvents(DataObjects::EventWorkspace_sptr &workspace)
   loadOnlySomeSpectra = (!this->spectra_list.empty());
 
   // Turn the spectra list into a map, for speed of access
-  for (auto &spectrum : spectra_list)
+  for (const auto &spectrum : spectra_list)
     spectraLoadMap[spectrum] = true;
 
   // Pad all the pixels
@@ -939,7 +937,7 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
   std::stringstream dbss;
   // size_t numwrongpid = 0;
   for (size_t i = 0; i < current_event_buffer_size; i++) {
-    DasEvent &temp = *(event_buffer + i);
+    const DasEvent &temp = *(event_buffer + i);
     PixelType pid = temp.pid;
     bool iswrongdetid = false;
 
@@ -1105,11 +1103,6 @@ void LoadEventPreNexus2::procEventsLinear(DataObjects::EventWorkspace_sptr & /*w
       longest_tof = local_longest_tof;
   } // END_CRITICAL
 }
-
-//----------------------------------------------------------------------------------------------
-/** Comparator for sorting dasevent lists
- */
-bool vzintermediatePixelIDComp(IntermediateEvent x, IntermediateEvent y) { return (x.pid < y.pid); }
 
 //-----------------------------------------------------------------------------
 /**

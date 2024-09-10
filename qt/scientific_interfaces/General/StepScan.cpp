@@ -606,7 +606,7 @@ void StepScan::generateCurve(const QString &var) {
 }
 
 namespace {
-auto get_fig_ax(boost::optional<int> fignum) {
+auto get_fig_ax(std::optional<int> fignum) {
   std::string pyCode = "import matplotlib.pyplot as plt\n"
                        "from mantid import plots\n"
                        "from workbench.plotting.globalfiguremanager import GlobalFigureManager\n"

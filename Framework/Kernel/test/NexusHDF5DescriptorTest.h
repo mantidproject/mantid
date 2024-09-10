@@ -9,8 +9,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/NexusHDF5Descriptor.h"
 
-#include "Poco/File.h"
-#include "Poco/Path.h"
+#include <filesystem>
 
 #include <cstddef> // std::size_t
 
@@ -21,9 +20,9 @@ std::string getFullPath(const std::string &filename) {
   using Mantid::Kernel::ConfigService;
   auto dataPaths = ConfigService::Instance().getDataSearchDirs();
   for (auto &dataPath : dataPaths) {
-    Poco::Path hdf5Path(dataPath, filename);
-    if (Poco::File(hdf5Path).exists()) {
-      return hdf5Path.toString();
+    const auto hdf5Path = std::filesystem::path(dataPath) / filename;
+    if (std::filesystem::exists(hdf5Path)) {
+      return hdf5Path.string();
     }
   }
   return std::string();

@@ -50,7 +50,7 @@
 
 #include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 #include <algorithm>
 #include <cctype>
@@ -721,11 +721,16 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
   } // End while-loop
 
   // Any remaining keys within the changed key store weren't present in the
-  // current user properties so append them
+  // current user properties so append them IF they exist
   if (!m_changed_keys.empty()) {
     updated_file += "\n";
     auto key_end = m_changed_keys.end();
     for (auto key_itr = m_changed_keys.begin(); key_itr != key_end;) {
+      // if the key does not have a property, skip it
+      if (!hasProperty(*key_itr)) {
+        ++key_itr;
+        continue;
+      }
       updated_file += *key_itr + "=";
       std::string value = getString(*key_itr, false);
       Poco::replaceInPlace(value, "\\", "\\\\"); // replace single \ with double
@@ -932,16 +937,16 @@ void ConfigServiceImpl::setString(const std::string &key, const std::string &val
  *value of.
  *  @returns An optional container with the value if found
  */
-template <typename T> boost::optional<T> ConfigServiceImpl::getValue(const std::string &keyName) {
+template <typename T> std::optional<T> ConfigServiceImpl::getValue(const std::string &keyName) {
   std::string strValue = getString(keyName);
   T output;
   int result = Mantid::Kernel::Strings::convert(strValue, output);
 
   if (result != 1) {
-    return boost::none;
+    return std::nullopt;
   }
 
-  return boost::optional<T>(output);
+  return std::optional<T>(output);
 }
 
 /** Searches for a string within the currently loaded configuration values and
@@ -951,13 +956,13 @@ template <typename T> boost::optional<T> ConfigServiceImpl::getValue(const std::
  *value of.
  *  @returns An optional container with the value if found
  */
-template <> boost::optional<bool> ConfigServiceImpl::getValue(const std::string &keyName) {
+template <> std::optional<bool> ConfigServiceImpl::getValue(const std::string &keyName) {
   auto returnedValue = getValue<std::string>(keyName);
-  if (!returnedValue.is_initialized()) {
-    return boost::none;
+  if (!returnedValue.has_value()) {
+    return std::nullopt;
   }
 
-  auto &configVal = returnedValue.get();
+  auto &configVal = returnedValue.value();
 
   std::transform(configVal.begin(), configVal.end(), configVal.begin(), ::tolower);
 
@@ -1835,9 +1840,9 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
     auto proxyHost = getValue<std::string>("proxy.host");
     auto proxyPort = getValue<int>("proxy.port");
 
-    if (proxyHost.is_initialized() && proxyPort.is_initialized()) {
+    if (proxyHost.has_value() && proxyPort.has_value()) {
       // set it from the config values
-      m_proxyInfo = ProxyInfo(proxyHost.get(), proxyPort.get(), true);
+      m_proxyInfo = ProxyInfo(proxyHost.value(), proxyPort.value(), true);
     } else {
       // get the system proxy
       Poco::URI uri(url);
@@ -1916,7 +1921,7 @@ void ConfigServiceImpl::setLogLevel(int logLevel, bool quiet) {
   }
 }
 
-void ConfigServiceImpl::setLogLevel(std::string logLevel, bool quiet) {
+void ConfigServiceImpl::setLogLevel(std::string const &logLevel, bool quiet) {
   Mantid::Kernel::Logger::setLevelForAll(logLevel);
   // update the internal value to keep strings in sync
   m_pConf->setString(LOG_LEVEL_KEY, g_log.getLevelName());
@@ -1926,13 +1931,15 @@ void ConfigServiceImpl::setLogLevel(std::string logLevel, bool quiet) {
   }
 }
 
+std::string ConfigServiceImpl::getLogLevel() { return g_log.getLevelName(); }
+
 /// \cond TEMPLATE
-template DLLExport boost::optional<double> ConfigServiceImpl::getValue(const std::string &);
-template DLLExport boost::optional<std::string> ConfigServiceImpl::getValue(const std::string &);
-template DLLExport boost::optional<int> ConfigServiceImpl::getValue(const std::string &);
-template DLLExport boost::optional<size_t> ConfigServiceImpl::getValue(const std::string &);
+template DLLExport std::optional<double> ConfigServiceImpl::getValue(const std::string &);
+template DLLExport std::optional<std::string> ConfigServiceImpl::getValue(const std::string &);
+template DLLExport std::optional<int> ConfigServiceImpl::getValue(const std::string &);
+template DLLExport std::optional<size_t> ConfigServiceImpl::getValue(const std::string &);
 #ifdef _MSC_VER
-template DLLExport boost::optional<bool> ConfigServiceImpl::getValue(const std::string &);
+template DLLExport std::optional<bool> ConfigServiceImpl::getValue(const std::string &);
 #endif
 
 /// \endcond TEMPLATE

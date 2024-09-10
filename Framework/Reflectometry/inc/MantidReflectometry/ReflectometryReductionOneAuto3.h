@@ -10,7 +10,7 @@
 #include "MantidReflectometry/DllConfig.h"
 #include "ReflectometryWorkflowBase2.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace Mantid {
 namespace Reflectometry {
@@ -56,9 +56,9 @@ private:
     bool qMinIsDefault;
     double qMax;
     bool qMaxIsDefault;
-    boost::optional<double> qStep;
+    std::optional<double> qStep;
 
-    bool hasQStep() const { return qStep.is_initialized(); }
+    bool hasQStep() const { return qStep.has_value(); }
     std::vector<double> asVector() const { return {qMin, *qStep, qMax}; }
   };
 
@@ -76,7 +76,7 @@ private:
   double calculateTheta(const Mantid::API::MatrixWorkspace_sptr &inputWS);
   /// Find cropping and binning parameters
   RebinParams getRebinParams(const MatrixWorkspace_sptr &inputWS, const double theta);
-  boost::optional<double> getQStep(const MatrixWorkspace_sptr &inputWS, const double theta);
+  std::optional<double> getQStep(const MatrixWorkspace_sptr &inputWS, const double theta);
   // Optionally scale a workspace
   Mantid::API::MatrixWorkspace_sptr scale(Mantid::API::MatrixWorkspace_sptr inputWS);
   /// Rebin a workspace in Q

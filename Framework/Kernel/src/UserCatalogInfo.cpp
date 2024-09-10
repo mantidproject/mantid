@@ -24,21 +24,21 @@ const std::string UserCatalogInfo::catalogPrefix() const { return m_catInfo->cat
 
 const std::string UserCatalogInfo::windowsPrefix() const {
   if (m_mountPoint) {
-    return m_mountPoint.get();
+    return m_mountPoint.value();
   }
   return m_catInfo->windowsPrefix();
 }
 
 const std::string UserCatalogInfo::macPrefix() const {
   if (m_mountPoint) {
-    return m_mountPoint.get();
+    return m_mountPoint.value();
   }
   return m_catInfo->macPrefix();
 }
 
 const std::string UserCatalogInfo::linuxPrefix() const {
   if (m_mountPoint) {
-    return m_mountPoint.get();
+    return m_mountPoint.value();
   }
   return m_catInfo->linuxPrefix();
 }

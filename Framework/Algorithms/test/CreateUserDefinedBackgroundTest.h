@@ -23,6 +23,9 @@ using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 
 namespace {
+// flag for absolute or relative comparison
+enum Comparison : bool { CMP_RELATIVE = true, CMP_ABSOLUTE = false };
+
 // Gaussian
 double gauss(double x, double height, double centre, double fwhm) {
   const double factor = 2.0 * sqrt(2.0 * log(2.0));
@@ -108,7 +111,7 @@ public:
 
     // The expected result
     const auto expected = createExpectedResults(true);
-    TS_ASSERT(workspacesEqual(expected, outputWS, 0.1, true));
+    TS_ASSERT(workspacesEqual(expected, outputWS, 0.105, Comparison::CMP_RELATIVE));
   }
 
   void test_exec_HistoWS_NormalisePlotsOn() {
@@ -134,7 +137,7 @@ public:
 
     // The expected result
     const auto expected = createExpectedResults(true, true);
-    TS_ASSERT(workspacesEqual(expected, outputWS, 5e-2));
+    TS_ASSERT(workspacesEqual(expected, outputWS, 5e-2, Comparison::CMP_ABSOLUTE));
   }
 
   void test_exec_PointsWS_extend() {
@@ -244,7 +247,7 @@ public:
     const auto expected = createExpectedResults(true, false);
     Mantid::API::WorkspaceHelpers::makeDistribution(expected);
 
-    TS_ASSERT(workspacesEqual(expected, outputWS, 0.1, true));
+    TS_ASSERT(workspacesEqual(expected, outputWS, 0.105, Comparison::CMP_RELATIVE));
   }
 
 private:
@@ -302,7 +305,7 @@ private:
 
   /// Compare workspaces
   bool workspacesEqual(const MatrixWorkspace_sptr &lhs, const MatrixWorkspace_sptr &rhs, double tolerance,
-                       bool relativeError = false) {
+                       bool const relativeError = Comparison::CMP_ABSOLUTE) {
     auto alg = Mantid::API::AlgorithmFactory::Instance().create("CompareWorkspaces", 1);
     alg->setChild(true);
     alg->initialize();
@@ -336,7 +339,7 @@ private:
 
     // The expected result
     const auto expected = createExpectedResults(false);
-    TS_ASSERT(workspacesEqual(expected, outputWS, 1e-4));
+    TS_ASSERT(workspacesEqual(expected, outputWS, 1e-4, Comparison::CMP_ABSOLUTE));
   }
 
   /// Cached string for option

@@ -210,7 +210,7 @@ const Peak &PeaksWorkspace::getPeak(const int peakNum) const {
  * @return a pointer to a new Peak object.
  */
 std::unique_ptr<Geometry::IPeak> PeaksWorkspace::createPeak(const Kernel::V3D &QLabFrame,
-                                                            boost::optional<double> detectorDistance) const {
+                                                            std::optional<double> detectorDistance) const {
   // create a peak using the qLab frame
   std::unique_ptr<IPeak> peak = std::make_unique<Peak>(this->getInstrument(), QLabFrame, detectorDistance);
   // Set the goniometer

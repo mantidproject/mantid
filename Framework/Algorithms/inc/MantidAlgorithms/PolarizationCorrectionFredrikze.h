@@ -8,8 +8,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 namespace Mantid {
 namespace API {

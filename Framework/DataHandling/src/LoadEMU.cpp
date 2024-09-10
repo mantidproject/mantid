@@ -23,7 +23,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 
-#include <boost/filesystem.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <boost/math/tools/minima.hpp>
 
@@ -34,6 +33,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <filesystem>
 #include <fstream>
 #include <utility>
 
@@ -676,7 +676,7 @@ template <typename FD> void LoadEMU<FD>::createWorkspace(const std::string &titl
 ///   Setting up the masks
 template <typename FD> void LoadEMU<FD>::exec(const std::string &hdfFile, const std::string &eventFile) {
 
-  namespace fs = boost::filesystem;
+  namespace fs = std::filesystem;
 
   // Create workspace
   // ----------------
@@ -1217,7 +1217,7 @@ void LoadEMUHdf::init() { LoadEMU<Kernel::NexusDescriptor>::init(true); }
 // exec() function that works with the two files.
 void LoadEMUHdf::exec() {
 
-  namespace fs = boost::filesystem;
+  namespace fs = std::filesystem;
 
   // Open the hdf file and find the dirname and dataset number
   std::string hdfFile = Base::getPropertyValue(FilenameStr);
@@ -1227,8 +1227,8 @@ void LoadEMUHdf::exec() {
 
   // if relative ./ or ../ then append to the directory for the hdf file
   if (evtPath.rfind("./") == 0 || evtPath.rfind("../") == 0) {
-    fs::path hp = hdfFile;
-    evtPath = fs::canonical(evtPath, hp.parent_path()).generic_string();
+    fs::path hp(hdfFile);
+    evtPath = fs::canonical(hp.parent_path() / evtPath).string();
   }
 
   // dataset index to be loaded

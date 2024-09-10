@@ -71,17 +71,17 @@ void ColorbarWidget::setNorm(const NormalizeBase &norm) {
  * @param vmin An optional new minimum of the scale
  * @param vmax An optional new maximum of the scale
  */
-void ColorbarWidget::setClim(boost::optional<double> vmin, boost::optional<double> vmax) {
+void ColorbarWidget::setClim(std::optional<double> vmin, std::optional<double> vmax) {
   m_mappable.setClim(vmin, vmax);
   m_canvas->draw();
 
-  if (vmin.is_initialized()) {
-    m_ui.scaleMinEdit->setText(QString::number(vmin.get()));
-    emit minValueChanged(vmin.get());
+  if (vmin.has_value()) {
+    m_ui.scaleMinEdit->setText(QString::number(vmin.value()));
+    emit minValueChanged(vmin.value());
   }
-  if (vmax.is_initialized()) {
-    m_ui.scaleMaxEdit->setText(QString::number(vmax.get()));
-    emit maxValueChanged(vmax.get());
+  if (vmax.has_value()) {
+    m_ui.scaleMaxEdit->setText(QString::number(vmax.value()));
+    emit maxValueChanged(vmax.value());
   }
 }
 
@@ -112,13 +112,13 @@ void ColorbarWidget::setupColorBarScaling(const MantidColorMap &mtdCMap) {
  * Update the minimum value of the normalization scale
  * @param vmin New minimum of the scale
  */
-void ColorbarWidget::setMinValue(double vmin) { setClim(vmin, boost::none); }
+void ColorbarWidget::setMinValue(double vmin) { setClim(vmin, std::nullopt); }
 
 /**
  * Update the maximum value of the normalization scale
  * @param vmin New maximum of the scale
  */
-void ColorbarWidget::setMaxValue(double vmax) { setClim(boost::none, vmax); }
+void ColorbarWidget::setMaxValue(double vmax) { setClim(std::nullopt, vmax); }
 
 /**
  * @return The minimum color scale value as a string
@@ -198,7 +198,7 @@ void ColorbarWidget::scaleMinimumEdited() {
   // The validator ensures the text is a double
   const double value = m_ui.scaleMinEdit->text().toDouble();
   emit minValueEdited(value);
-  setClim(value, boost::none);
+  setClim(value, std::nullopt);
 }
 
 /**
@@ -208,7 +208,7 @@ void ColorbarWidget::scaleMaximumEdited() {
   // The validator ensures the text is a double
   const double value = m_ui.scaleMaxEdit->text().toDouble();
   emit maxValueEdited(value);
-  setClim(boost::none, value);
+  setClim(std::nullopt, value);
 }
 
 /**

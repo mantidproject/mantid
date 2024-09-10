@@ -755,6 +755,7 @@ void FitPeaks::processInputFitRanges() {
         double left_w_bound = peakWindowX[ipeak * 2];
         double right_w_bound = peakWindowX[ipeak * 2 + 1];
         double center = peakCenterX[ipeak];
+
         if (!(left_w_bound < center && center < right_w_bound)) {
           std::stringstream errss;
           errss << "Workspace index " << wi << " has incompatible peak window "

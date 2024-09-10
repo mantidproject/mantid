@@ -13,7 +13,7 @@ using namespace H5;
 
 /// Find a single dataset inside parent group (returns first match). Optional
 /// wrapped - empty to indicate nothing found.
-boost::optional<H5::DataSet> findDataset(const H5::Group &parentGroup, const H5std_string &name) {
+std::optional<H5::DataSet> findDataset(const H5::Group &parentGroup, const H5std_string &name) {
   // Iterate over children, and determine if a group
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == DATASET_TYPE) {
@@ -21,24 +21,24 @@ boost::optional<H5::DataSet> findDataset(const H5::Group &parentGroup, const H5s
       // Open the sub group
       if (childPath == name) {
         auto childDataset = parentGroup.openDataSet(childPath);
-        return boost::optional<DataSet>(childDataset);
+        return std::optional<DataSet>(childDataset);
       }
     }
   }
-  return boost::optional<DataSet>{}; // Empty
+  return std::optional<DataSet>{}; // Empty
 }
 
-boost::optional<H5::Group> findGroupByName(const H5::Group &parentGroup, const H5std_string &name) {
+std::optional<H5::Group> findGroupByName(const H5::Group &parentGroup, const H5std_string &name) {
 
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
       H5std_string childPath = parentGroup.getObjnameByIdx(i);
       if (childPath == name) {
-        return boost::optional<H5::Group>(parentGroup.openGroup(childPath));
+        return std::optional<H5::Group>(parentGroup.openGroup(childPath));
       }
     }
   }
-  return boost::optional<H5::Group>();
+  return std::optional<H5::Group>();
 }
 
 bool hasNXAttribute(const H5::Group &group, const std::string &attributeValue) {
@@ -70,7 +70,7 @@ bool isNamed(const H5::H5Object &object, const std::string &name) {
 
 /// Find a single group inside parent (returns first match). class type must
 /// match NX_class. Optional wrapped - empty to indicate nothing found.
-boost::optional<H5::Group> findGroup(const H5::Group &parentGroup, const H5std_string &classType) {
+std::optional<H5::Group> findGroup(const H5::Group &parentGroup, const H5std_string &classType) {
   // Iterate over children, and determine if a group
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
@@ -79,11 +79,11 @@ boost::optional<H5::Group> findGroup(const H5::Group &parentGroup, const H5std_s
       auto childGroup = parentGroup.openGroup(childPath);
       // Iterate through attributes to find NX_class
       if (hasNXAttribute(childGroup, classType)) {
-        return boost::optional<Group>(childGroup);
+        return std::optional<Group>(childGroup);
       }
     }
   }
-  return boost::optional<Group>{}; // Empty
+  return std::optional<Group>{}; // Empty
 } // namespace utilities
 
 /// Find all groups at the same level matching same class type. Returns first

@@ -39,8 +39,8 @@ public:
 
 private:
   int getComponentIndex(Kernel::PseudoRandomNumberGenerator &rng) const;
-  boost::optional<Kernel::V3D> generatePointInObjectByIndex(int componentIndex,
-                                                            Kernel::PseudoRandomNumberGenerator &rng) const;
+  std::optional<Kernel::V3D> generatePointInObjectByIndex(int componentIndex,
+                                                          Kernel::PseudoRandomNumberGenerator &rng) const;
   const std::shared_ptr<Geometry::IObject> m_sample;
   const Geometry::SampleEnvironment *m_env;
   Geometry::BoundingBox m_activeRegion;

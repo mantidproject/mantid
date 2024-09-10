@@ -296,7 +296,7 @@ void FunctionBrowser::setGlobalParameters(std::vector<std::string> const &global
   m_presenter->setGlobalParameters(globals);
 }
 
-boost::optional<std::string> FunctionBrowser::currentFunctionIndex() { return m_presenter->currentFunctionIndex(); }
+std::optional<std::string> FunctionBrowser::currentFunctionIndex() { return m_presenter->currentFunctionIndex(); }
 
 FunctionTreeView *FunctionBrowser::view() const { return dynamic_cast<FunctionTreeView *>(m_presenter->view()); }
 

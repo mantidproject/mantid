@@ -40,9 +40,6 @@ jemalloc:
 numpy:
   - 1.24.*
 
-libcxx:
-  - '<17'
-
 matplotlib:
   - 3.7.*
 

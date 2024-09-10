@@ -12,7 +12,7 @@
 
 #include <QString>
 #include <QWidget>
-#include <boost/optional.hpp>
+#include <optional>
 #include <type_traits>
 
 namespace MantidQt {
@@ -38,7 +38,7 @@ public:
   virtual IFunction::Attribute getAttribute(std::string const &attrName) const = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clearErrors() = 0;
-  virtual boost::optional<std::string> currentFunctionIndex() const = 0;
+  virtual std::optional<std::string> currentFunctionIndex() const = 0;
   virtual void setParameterTie(std::string const &parameterName, std::string const &tie) = 0;
   virtual void setParameterConstraint(std::string const &parameterName, std::string const &constraint) = 0;
   virtual void setGlobalParameters(const std::vector<std::string> &) = 0;

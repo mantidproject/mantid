@@ -33,14 +33,14 @@ MantidAxes::MantidAxes(Python::Object pyObj) : Axes{std::move(pyObj)} {}
  */
 Line2D MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace, const size_t wkspIndex,
                         const QString &lineColour, const QString &label,
-                        const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
+                        const std::optional<QHash<QString, QVariant>> &otherKwargs) {
   GlobalInterpreterLock lock;
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
   const auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
 
   Python::Dict kwargs;
   if (otherKwargs)
-    kwargs = Python::qHashToDict(otherKwargs.get());
+    kwargs = Python::qHashToDict(otherKwargs.value());
   kwargs["wkspIndex"] = wkspIndex;
   kwargs["color"] = lineColour.toLatin1().constData();
   kwargs["label"] = label.toLatin1().constData();
@@ -58,14 +58,14 @@ Line2D MantidAxes::plot(const Mantid::API::MatrixWorkspace_sptr &workspace, cons
  */
 ErrorbarContainer MantidAxes::errorbar(const Mantid::API::MatrixWorkspace_sptr &workspace, const size_t wkspIndex,
                                        const QString &lineColour, const QString &label,
-                                       const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
+                                       const std::optional<QHash<QString, QVariant>> &otherKwargs) {
   GlobalInterpreterLock lock;
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
   const auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
 
   Python::Dict kwargs;
   if (otherKwargs)
-    kwargs = Python::qHashToDict(otherKwargs.get());
+    kwargs = Python::qHashToDict(otherKwargs.value());
   kwargs["wkspIndex"] = wkspIndex;
   kwargs["color"] = lineColour.toLatin1().constData();
   kwargs["label"] = label.toLatin1().constData();
@@ -74,14 +74,14 @@ ErrorbarContainer MantidAxes::errorbar(const Mantid::API::MatrixWorkspace_sptr &
 }
 
 void MantidAxes::pcolormesh(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                            const boost::optional<QHash<QString, QVariant>> &otherKwargs) {
+                            const std::optional<QHash<QString, QVariant>> &otherKwargs) {
   GlobalInterpreterLock lock;
   const auto wksp = Python::NewRef(MatrixWorkpaceToPython()(workspace));
   const auto args = Python::NewRef(Py_BuildValue("(O)", wksp.ptr()));
 
   Python::Dict kwargs;
   if (otherKwargs)
-    kwargs = Python::qHashToDict(otherKwargs.get());
+    kwargs = Python::qHashToDict(otherKwargs.value());
 
   pyobj().attr("pcolormesh")(*args, **kwargs);
 }

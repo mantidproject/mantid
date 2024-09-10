@@ -1,0 +1,1 @@
+- Creating a script from a workspace's history, where that history includes algorithms using `StoreInADS=False`, should now create a functioning script.

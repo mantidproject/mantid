@@ -75,7 +75,7 @@ public:
   bool hasCurve(const QString &lineName) const;
 
   void setOverrideAxisLabel(AxisID const &axisID, char const *const label);
-  void tickLabelFormat(char *axis, char *style, bool useOffset);
+  void tickLabelFormat(const std::string &axis, const std::string &style, bool useOffset);
   void setAxisRange(const QPair<double, double> &range, AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
 
@@ -133,7 +133,7 @@ private:
   void setScaleType(AxisID id, const QString &actionName);
   void toggleLegend(const bool checked);
 
-  boost::optional<char const *> overrideAxisLabel(AxisID const &axisID);
+  std::optional<char const *> overrideAxisLabel(AxisID const &axisID);
   void setAxisLabel(AxisID const &axisID, char const *const label);
 
   // Block redrawing from taking place
@@ -173,8 +173,8 @@ private:
   Widgets::MplCpp::PanZoomTool m_panZoomTool;
 
   // Tick label style
-  char *m_axis;
-  char *m_style;
+  std::string m_axis;
+  std::string m_style;
   bool m_useOffset;
 
   // Axis scales

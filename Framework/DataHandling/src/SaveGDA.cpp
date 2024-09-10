@@ -14,7 +14,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Unit.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <cmath>
 #include <fstream>
@@ -56,7 +56,7 @@ std::string generateBankHeader(int bank, int minT, size_t numberBins, double del
   return stream.str();
 }
 
-boost::optional<std::vector<std::string>> getParamLinesFromGSASFile(const std::string &paramsFilename) {
+std::optional<std::vector<std::string>> getParamLinesFromGSASFile(const std::string &paramsFilename) {
   // ICONS signifies that a line contains TOF to D conversion factors
   const static std::string paramLineDelimiter = "ICONS";
   std::ifstream paramsFile;
@@ -72,7 +72,7 @@ boost::optional<std::vector<std::string>> getParamLinesFromGSASFile(const std::s
     }
     return paramLines;
   } else {
-    return boost::none;
+    return std::nullopt;
   }
 }
 
@@ -187,7 +187,7 @@ void SaveGDA::exec() {
 
 std::map<std::string, std::string> SaveGDA::validateInputs() {
   std::map<std::string, std::string> issues;
-  boost::optional<std::string> inputWSIssue;
+  std::optional<std::string> inputWSIssue;
 
   const API::WorkspaceGroup_sptr inputWS = getProperty(PROP_INPUT_WS);
   for (const auto &ws : *inputWS) {

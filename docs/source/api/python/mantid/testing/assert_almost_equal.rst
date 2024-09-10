@@ -5,12 +5,12 @@
 =====================
 
 This is a Python function for testing if two modules are within a tolerance.
-At least ``rtol`` or ``atol`` parameters should be specified. Neither being
-specified generates a ``ValueError`` exception. Both being specified runs
-the underlying :ref:`algm-CompareWorkspaces` algorithm
-twice, with relative tolerance being first.
-
-
+If ``rtol`` is specified, will compare using the relative difference.
+If ``atol`` is specified, will compare using the absolute difference.
+One or both of ``rtol`` and ``atol`` may be specified.
+Will run the underlying :ref:`algm-CompareWorkspaces` algorithm for each
+case specified, and fail if any of the comparisons fail.
+If neither ``rtol`` nor ``atol``  is specified, will perform an absolute compatison to within 1.e-10.
 
 .. module:`mantid.testing`
 

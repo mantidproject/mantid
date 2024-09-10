@@ -27,9 +27,9 @@
 #include "MantidKernel/UnitLabelTypes.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/filesystem.hpp>
 
 #include <algorithm>
+#include <filesystem>
 #include <fstream>
 #include <map>
 #include <memory>
@@ -800,7 +800,7 @@ std::string LoadPSIMuonBin::detectTempFile() {
   // directory containing the main file. The search has
   // a fixed limited depth to ensure we don't accidentally
   // crawl the while filesystem.
-  namespace fs = boost::filesystem;
+  namespace fs = std::filesystem;
   const fs::path searchDir{fs::path{getPropertyValue("Filename")}.parent_path()};
 
   std::deque<fs::path> queue{fs::path{searchDir}};

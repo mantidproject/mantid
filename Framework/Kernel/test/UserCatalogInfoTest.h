@@ -17,7 +17,7 @@ using namespace testing;
 namespace boost {
 template <class CharType, class CharTrait>
 std::basic_ostream<CharType, CharTrait> &operator<<(std::basic_ostream<CharType, CharTrait> &out,
-                                                    optional<std::string> const &maybe) {
+                                                    std::optional<std::string> const &maybe) {
   if (maybe)
     out << maybe;
   return out;
@@ -177,7 +177,7 @@ public:
     CatalogConfigService *service = makeCatalogConfigServiceAdapter(usertype, std::string("my_key"));
     OptionalPath mountPoint = service->preferredMountPoint();
     TS_ASSERT(mountPoint);
-    TS_ASSERT_EQUALS("my_value", mountPoint.get());
+    TS_ASSERT_EQUALS("my_value", mountPoint.value());
     delete service;
   }
 };

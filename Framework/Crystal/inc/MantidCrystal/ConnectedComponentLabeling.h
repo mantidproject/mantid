@@ -11,10 +11,10 @@
 #include "MantidCrystal/DllConfig.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include <boost/optional.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <map>
 #include <memory>
+#include <optional>
 #include <unordered_set>
 
 namespace Mantid {
@@ -47,7 +47,7 @@ class MANTID_CRYSTAL_DLL ConnectedComponentLabeling {
 
 public:
   /// Constructor
-  ConnectedComponentLabeling(const size_t &startId = 1, boost::optional<int> nThreads = boost::none);
+  ConnectedComponentLabeling(const size_t &startId = 1, const std::optional<int> &nThreads = std::nullopt);
 
   /// Getter for the start label id
   size_t getStartLabelId() const;
@@ -69,9 +69,6 @@ public:
   virtual ~ConnectedComponentLabeling();
 
 private:
-  /// Get the number of threads to use.
-  int getNThreads() const;
-
   /// Calculate the disjoint element tree across the image.
   ConnectedComponentMappingTypes::ClusterMap calculateDisjointTree(const Mantid::API::IMDHistoWorkspace_sptr &ws,
                                                                    BackgroundStrategy *const baseStrategy,
@@ -81,7 +78,7 @@ private:
   size_t m_startId;
 
   /// Run multithreaded
-  const boost::optional<int> m_nThreads;
+  int m_nThreadsToUse;
 };
 
 } // namespace Crystal

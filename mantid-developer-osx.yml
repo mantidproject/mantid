@@ -54,7 +54,7 @@ dependencies:
   - black  # may be out of sync with pre-commit
   - cppcheck==2.14.2
   - pre-commit>=2.12.0
-  - libcxx<17
+  - libcxx
 
   # Use conda version of clang to get matching CXXFLAGS.
   # Pinned to same version as conda forge: https://github.com/conda-forge/conda-forge-pinning-feedstock/blob/main/recipe/conda_build_config.yaml

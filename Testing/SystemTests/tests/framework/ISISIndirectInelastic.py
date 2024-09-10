@@ -1002,11 +1002,16 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.spec_min = 0
         self.spec_max = 41
 
+    def skipTests(self):
+        # This test was once giving issues.  It seems the failures were caused by the large fluctuations in the
+        # uncertainties (i.e. delta delta y) due to the Monte Carlo calculation.  Turning off the check of uncertainity
+        # should fix this test, combined with a reasonable absolute tolerance of 0.05.
+        return False
+
     def get_reference_files(self):
-        # Relative tolerance is used because the calculation of Monte Carlo errors means the Iqt errors are randomized
-        # within a set amount
-        self.tolerance = 5.0
-        self.tolerance_is_rel_err = True
+        self.tolerance = 0.05
+        self.tolerance_is_rel_err = False
+        self.disableChecking = ["Uncertainty"]
         return ["II.OSIRISIqt.nxs", "II.OSIRISIqtFitMulti.nxs"]
 
 

@@ -15,12 +15,13 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument.h"
-
-#include <boost/filesystem.hpp>
+#include "MantidKernel/Strings.h"
+#include <filesystem>
 
 using namespace Mantid;
 using Mantid::Geometry::deg2rad;
 using Mantid::Geometry::rad2deg;
+using Mantid::Kernel::Strings::randomString;
 
 class SofTwoThetaTOFTest : public CxxTest::TestSuite {
 public:
@@ -90,23 +91,22 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "_unused_for_child"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", angleStep))
-    auto tempXml = boost::filesystem::temp_directory_path();
-    tempXml /= boost::filesystem::unique_path("SofTwoThetaTest-%%%%%%%%.xml");
+    auto tempXml = std::filesystem::temp_directory_path() / ("SofTwoThetaTest-" + randomString(8) + ".xml");
     std::string const filename{tempXml.string()};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingFilename", filename))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
-    auto const xmlExists = boost::filesystem::exists(tempXml);
+    auto const xmlExists = std::filesystem::exists(tempXml);
     TS_ASSERT(xmlExists)
     if (xmlExists) {
-      boost::filesystem::remove(tempXml);
+      std::filesystem::remove(tempXml);
     }
     auto tempPar = tempXml;
     tempPar.replace_extension(".par");
-    auto const parExists = boost::filesystem::exists(tempPar);
+    auto const parExists = std::filesystem::exists(tempPar);
     TS_ASSERT(parExists)
     if (parExists) {
-      boost::filesystem::remove(tempPar);
+      std::filesystem::remove(tempPar);
     }
   }
 

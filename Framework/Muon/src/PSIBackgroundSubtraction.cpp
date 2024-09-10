@@ -23,7 +23,7 @@ using namespace Mantid::DataObjects;
 namespace Mantid::Muon {
 
 namespace {
-constexpr char *MINIMISER = "Levenberg-Marquardt";
+constexpr const char *MINIMISER = "Levenberg-Marquardt";
 constexpr double FIT_TOLERANCE = 10;
 const std::string FIRST_GOOD = "First good spectra ";
 const std::string LAST_GOOD = "Last good spectra ";

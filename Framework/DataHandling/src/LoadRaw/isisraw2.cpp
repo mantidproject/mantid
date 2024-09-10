@@ -24,11 +24,11 @@ ISISRAW2::ISISRAW2() : ISISRAW(nullptr, false), ndes(0), outbuff(nullptr), m_buf
   g_log.debug("Determining ioRaw buffer size\n");
   auto bufferSizeConfigVal = Mantid::Kernel::ConfigService::Instance().getValue<int>("loadraw.readbuffer.size");
 
-  if (!bufferSizeConfigVal.is_initialized()) {
+  if (!bufferSizeConfigVal.has_value()) {
     m_bufferSize = 200000;
     g_log.debug() << "loadraw.readbuffer.size not found, setting to " << m_bufferSize << "\n";
   } else {
-    m_bufferSize = bufferSizeConfigVal.get();
+    m_bufferSize = bufferSizeConfigVal.value();
     g_log.debug() << "loadraw.readbuffer.size set to " << m_bufferSize << "\n";
   }
 }

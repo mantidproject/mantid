@@ -8,13 +8,13 @@
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ICatalogInfo.h"
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 namespace Mantid {
 namespace Kernel {
 
-using OptionalPath = boost::optional<std::string>;
+using OptionalPath = std::optional<std::string>;
 
 class CatalogConfigService {
 public:
@@ -36,7 +36,7 @@ CatalogConfigService *makeCatalogConfigServiceAdapter(const T &adaptee,
       auto const mountPoint = m_adaptee.getString(m_key);
       if (!mountPoint.empty())
         return OptionalPath(mountPoint);
-      return OptionalPath(boost::none);
+      return OptionalPath(std::nullopt);
     }
   };
   return new Adapter(adaptee, key);

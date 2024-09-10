@@ -46,8 +46,8 @@ public:
     TS_ASSERT_EQUALS(frame, shape.frame());
     TS_ASSERT_EQUALS(algorithmName, shape.algorithmName());
     TS_ASSERT_EQUALS(algorithmVersion, shape.algorithmVersion());
-    TS_ASSERT(!shape.backgroundInnerRadius().is_initialized());
-    TS_ASSERT(!shape.backgroundOuterRadius().is_initialized());
+    TS_ASSERT(!shape.backgroundInnerRadius().has_value());
+    TS_ASSERT(!shape.backgroundOuterRadius().has_value());
   }
 
   void test_multiple_radii_constructor() {
@@ -70,15 +70,15 @@ public:
     TS_ASSERT_EQUALS(frame, shape.frame());
     TS_ASSERT_EQUALS(algorithmName, shape.algorithmName());
     TS_ASSERT_EQUALS(algorithmVersion, shape.algorithmVersion());
-    TS_ASSERT_EQUALS(backgroundInnerRadius, shape.backgroundInnerRadius().get());
-    TS_ASSERT_EQUALS(backgroundOuterRadius, shape.backgroundOuterRadius().get());
+    TS_ASSERT_EQUALS(backgroundInnerRadius, shape.backgroundInnerRadius().value());
+    TS_ASSERT_EQUALS(backgroundOuterRadius, shape.backgroundOuterRadius().value());
 
     PeakShapeSpherical badShape(radius, radius, radius, frame, algorithmName, algorithmVersion);
 
     TSM_ASSERT("Background inner radius should be set even when same as radius",
-               badShape.backgroundInnerRadius().is_initialized());
+               badShape.backgroundInnerRadius().has_value());
     TSM_ASSERT("Background outer radius should be unset since is same as radius",
-               !badShape.backgroundOuterRadius().is_initialized());
+               !badShape.backgroundOuterRadius().has_value());
   }
 
   void test_copy_constructor() {
@@ -98,8 +98,8 @@ public:
     TS_ASSERT_EQUALS(frame, b.frame());
     TS_ASSERT_EQUALS(algorithmName, b.algorithmName());
     TS_ASSERT_EQUALS(algorithmVersion, b.algorithmVersion());
-    TS_ASSERT_EQUALS(backgroundInnerRadius, b.backgroundInnerRadius().get());
-    TS_ASSERT_EQUALS(backgroundOuterRadius, b.backgroundOuterRadius().get());
+    TS_ASSERT_EQUALS(backgroundInnerRadius, b.backgroundInnerRadius().value());
+    TS_ASSERT_EQUALS(backgroundOuterRadius, b.backgroundOuterRadius().value());
   }
 
   void test_assignment() {
@@ -122,8 +122,8 @@ public:
     TS_ASSERT_EQUALS(a.frame(), b.frame());
     TS_ASSERT_EQUALS(a.algorithmName(), b.algorithmName());
     TS_ASSERT_EQUALS(a.algorithmVersion(), b.algorithmVersion());
-    TS_ASSERT_EQUALS(a.backgroundInnerRadius(), b.backgroundInnerRadius().get());
-    TS_ASSERT_EQUALS(a.backgroundOuterRadius(), b.backgroundOuterRadius().get());
+    TS_ASSERT_EQUALS(a.backgroundInnerRadius(), b.backgroundInnerRadius().value());
+    TS_ASSERT_EQUALS(a.backgroundOuterRadius(), b.backgroundOuterRadius().value());
   }
 
   void test_clone() {
@@ -142,8 +142,8 @@ public:
     TS_ASSERT_EQUALS(a.frame(), clone->frame());
     TS_ASSERT_EQUALS(a.algorithmName(), clone->algorithmName());
     TS_ASSERT_EQUALS(a.algorithmVersion(), clone->algorithmVersion());
-    TS_ASSERT_EQUALS(a.backgroundInnerRadius(), clone->backgroundInnerRadius().get());
-    TS_ASSERT_EQUALS(a.backgroundOuterRadius(), clone->backgroundOuterRadius().get());
+    TS_ASSERT_EQUALS(a.backgroundInnerRadius(), clone->backgroundInnerRadius().value());
+    TS_ASSERT_EQUALS(a.backgroundOuterRadius(), clone->backgroundOuterRadius().value());
     TS_ASSERT_DIFFERS(clone, &a);
     delete clone;
   }

@@ -53,11 +53,11 @@ class MockTokenStore : public IOAuthTokenStore {
 public:
   MockTokenStore();
 
-  void setToken(const boost::optional<OAuthToken> &token) override;
-  boost::optional<OAuthToken> getToken() override;
+  void setToken(const std::optional<OAuthToken> &token) override;
+  std::optional<OAuthToken> getToken() override;
 
 private:
-  boost::optional<OAuthToken> m_token;
+  std::optional<OAuthToken> m_token;
 };
 
 IOAuthTokenStore_uptr make_mock_token_store();

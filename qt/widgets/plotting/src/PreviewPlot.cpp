@@ -122,9 +122,9 @@ void PreviewPlot::addSpectrum(const QString &lineName, const Mantid::API::Matrix
       QSharedPointer<PlotCurveConfiguration>(new PlotCurveConfiguration(ws, lineName, wsIndex, lineColour, plotKwargs));
   m_plottedLines.insert(lineName, plotCurveConfig);
   if (auto const xLabel = overrideAxisLabel(AxisID::XBottom))
-    setAxisLabel(AxisID::XBottom, xLabel.get());
+    setAxisLabel(AxisID::XBottom, xLabel.value());
   if (auto const yLabel = overrideAxisLabel(AxisID::YLeft))
-    setAxisLabel(AxisID::YLeft, yLabel.get());
+    setAxisLabel(AxisID::YLeft, yLabel.value());
 
   regenerateLegend();
   axes.relim();
@@ -241,11 +241,11 @@ void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID, char const *const l
  * @param axisID The axis ID (XBottom or YLeft).
  * @return True if the axis should display an axis label.
  */
-boost::optional<char const *> PreviewPlot::overrideAxisLabel(AxisID const &axisID) {
+std::optional<char const *> PreviewPlot::overrideAxisLabel(AxisID const &axisID) {
   auto const iter = m_axisLabels.find(axisID);
   if (iter != m_axisLabels.end())
     return iter.value();
-  return boost::none;
+  return std::nullopt;
 }
 
 /**
@@ -741,10 +741,10 @@ void PreviewPlot::toggleLegend(const bool checked) {
  * @param bool useOffset :: True, the offset will be
  * calculated as needed, False no offset will be used
  */
-void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {
+void PreviewPlot::tickLabelFormat(const std::string &axis, const std::string &style, bool useOffset) {
   auto axes = m_canvas->gca();
-  const auto formatXTicks = *axis != 'y' && axes.getXScale().toStdString() == "linear";
-  const auto formatYTicks = *axis != 'x' && axes.getYScale().toStdString() == "linear";
+  const auto formatXTicks = axis != "y" && axes.getXScale().toStdString() == "linear";
+  const auto formatYTicks = axis != "x" && axes.getYScale().toStdString() == "linear";
 
   if (formatXTicks)
     axes.tickLabelFormat(std::string("x").c_str(), style, useOffset);

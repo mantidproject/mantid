@@ -11,7 +11,7 @@
 
 #include <Eigen/Dense>
 #include <H5Cpp.h>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -73,9 +73,9 @@ class NexusFileReader {
 
 public:
   NexusFileReader(const std::string &fullPath) {
-    boost::filesystem::path tmp = fullPath;
+    std::filesystem::path tmp = fullPath;
 
-    if (!boost::filesystem::exists(tmp)) {
+    if (!std::filesystem::exists(tmp)) {
       throw std::invalid_argument("no such file.\n");
     } else {
       m_file.openFile(fullPath, H5F_ACC_RDONLY);

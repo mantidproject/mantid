@@ -41,7 +41,7 @@ using WidthVector = std::vector<double>;
 using KernelVector = std::vector<double>;
 
 // Typedef for an optional md histo workspace
-using OptionalIMDHistoWorkspace_const_sptr = boost::optional<IMDHistoWorkspace_const_sptr>;
+using OptionalIMDHistoWorkspace_const_sptr = std::optional<IMDHistoWorkspace_const_sptr>;
 
 // Typedef for a smoothing function
 using SmoothFunction =

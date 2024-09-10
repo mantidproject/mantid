@@ -675,7 +675,7 @@ public:
     // inside hole
     auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
     constexpr size_t maxAttempts{1};
-    boost::optional<V3D> point = shell->generatePointInObject(rng, maxAttempts);
+    std::optional<V3D> point = shell->generatePointInObject(rng, maxAttempts);
     TS_ASSERT_EQUALS(!point, false);
 
     constexpr double tolerance{1e-10};
@@ -702,7 +702,7 @@ public:
     constexpr double zLength{0.2};
     auto cuboid = ComponentCreationHelper::createCuboid(xLength, yLength, zLength);
     constexpr size_t maxAttempts{0};
-    boost::optional<V3D> point = cuboid->generatePointInObject(rng, maxAttempts);
+    std::optional<V3D> point = cuboid->generatePointInObject(rng, maxAttempts);
     TS_ASSERT_EQUALS(!point, false);
 
     constexpr double tolerance{1e-10};
@@ -734,7 +734,7 @@ public:
     };
     auto cylinder = ComponentCreationHelper::createCappedCylinder(radius, height, bottomCentre, axis, "cyl");
     constexpr size_t maxAttempts{0};
-    boost::optional<V3D> point = cylinder->generatePointInObject(rng, maxAttempts);
+    std::optional<V3D> point = cylinder->generatePointInObject(rng, maxAttempts);
     TS_ASSERT_EQUALS(!point, false);
     // Global->cylinder local coordinates
     *point -= bottomCentre;
@@ -772,7 +772,7 @@ public:
     auto hollowCylinder =
         ComponentCreationHelper::createHollowCylinder(innerRadius, radius, height, bottomCentre, axis, "hol-cyl");
     constexpr size_t maxAttempts{0};
-    boost::optional<V3D> point;
+    std::optional<V3D> point;
     point = hollowCylinder->generatePointInObject(rng, maxAttempts);
     TS_ASSERT_EQUALS(!point, false);
     // Global->cylinder local coordinates
@@ -1279,7 +1279,7 @@ public:
     constexpr double radius{0.23};
     auto sphere = ComponentCreationHelper::createSphere(radius);
     constexpr size_t maxAttempts{0};
-    boost::optional<V3D> point;
+    std::optional<V3D> point;
     point = sphere->generatePointInObject(rng, maxAttempts);
     TS_ASSERT_EQUALS(!point, false);
     // Global->cylinder local coordinates
@@ -1306,7 +1306,7 @@ public:
     // inside hole
     auto shell = ComponentCreationHelper::createHollowShell(0.5, 1.0);
     constexpr size_t maxAttempts{1};
-    boost::optional<V3D> point = shell->generatePointInObject(rng, maxAttempts);
+    std::optional<V3D> point = shell->generatePointInObject(rng, maxAttempts);
     TS_ASSERT_EQUALS(!point, true);
   }
 
@@ -1328,7 +1328,7 @@ public:
     // Create a thin infinite rectangular region to restrict point generation
     BoundingBox activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
     constexpr size_t maxAttempts{1};
-    boost::optional<V3D> point = cuboid->generatePointInObject(rng, activeRegion, maxAttempts);
+    std::optional<V3D> point = cuboid->generatePointInObject(rng, activeRegion, maxAttempts);
     TS_ASSERT_EQUALS(!point, false);
     constexpr double tolerance{1e-10};
     TS_ASSERT_DELTA(-0.1 + randX * 0.2, point->X(), tolerance)
@@ -1356,7 +1356,7 @@ public:
     // Create a rectangular region to restrict point generation
     BoundingBox activeRegion(0.1, 0.1, 0.1, -0.1, -0.1, -0.1);
     constexpr size_t maxAttempts{1};
-    boost::optional<V3D> point = cuboid->generatePointInObject(rng, activeRegion, maxAttempts);
+    std::optional<V3D> point = cuboid->generatePointInObject(rng, activeRegion, maxAttempts);
     TS_ASSERT_EQUALS(!point, true);
   }
 

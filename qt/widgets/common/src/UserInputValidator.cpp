@@ -35,7 +35,7 @@ bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
 
-boost::optional<std::string> containsInvalidWorkspace(const WorkspaceGroup_const_sptr &group) {
+std::optional<std::string> containsInvalidWorkspace(const WorkspaceGroup_const_sptr &group) {
   if (group->isEmpty())
     return "The group workspace " + group->getName() + " is empty.";
 
@@ -43,7 +43,7 @@ boost::optional<std::string> containsInvalidWorkspace(const WorkspaceGroup_const
       std::find_if(std::cbegin(*group), std::cend(*group), [](const auto &workspace) { return !workspace; });
   if (it != std::cend(*group))
     return "The group workspace " + group->getName() + " contains an invalid workspace.";
-  return boost::none;
+  return std::nullopt;
 }
 
 } // anonymous namespace
@@ -372,7 +372,7 @@ bool UserInputValidator::checkWorkspaceGroupIsValid(QString const &groupName, QS
   if (checkWorkspaceType<WorkspaceGroup>(groupName, inputType, "WorkspaceGroup", silent)) {
     if (auto const group = WorkspaceUtils::getADSWorkspace<WorkspaceGroup>(groupName.toStdString())) {
       if (auto const error = containsInvalidWorkspace(group)) {
-        addErrorMessage(error.get(), silent);
+        addErrorMessage(error.value(), silent);
         return false;
       }
       return true;

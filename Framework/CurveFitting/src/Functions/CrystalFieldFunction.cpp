@@ -22,10 +22,10 @@
 
 #include "MantidKernel/Exception.h"
 
-#include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <utility>
 
 namespace Mantid::CurveFitting::Functions {

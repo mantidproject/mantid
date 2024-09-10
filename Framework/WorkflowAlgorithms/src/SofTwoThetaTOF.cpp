@@ -14,8 +14,11 @@
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/Strings.h"
 
-#include "boost/filesystem.hpp"
+#include <filesystem>
+
+using Mantid::Kernel::Strings::randomString;
 
 namespace {
 /// Constants for the algorithm's property names.
@@ -31,9 +34,9 @@ struct RemoveFileAtScopeExit {
   std::string name;
   ~RemoveFileAtScopeExit() {
     if (!name.empty()) {
-      auto const path = boost::filesystem::path(name);
-      if (boost::filesystem::exists(path)) {
-        boost::filesystem::remove(path);
+      auto const path = std::filesystem::path(name);
+      if (std::filesystem::exists(path)) {
+        std::filesystem::remove(path);
       }
     }
   }
@@ -78,7 +81,7 @@ double binWidth(Mantid::API::MatrixWorkspace const &ws) {
  */
 std::string ensureXMLExtension(std::string const &filename) {
   std::string name = filename;
-  auto const path = boost::filesystem::path(filename);
+  auto const path = std::filesystem::path(filename);
   if (path.extension() != ".xml") {
     name += ".xml";
   }
@@ -184,8 +187,9 @@ API::MatrixWorkspace_sptr SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_s
   std::string filename;
   RemoveFileAtScopeExit deleteThisLater;
   if (isDefault(Prop::FILENAME)) {
-    auto tempPath = boost::filesystem::temp_directory_path();
-    tempPath /= boost::filesystem::unique_path("detector-grouping-%%%%-%%%%-%%%%-%%%%.xml");
+    const std::string shortname = "detector-grouping-" + randomString(4) + "-" + randomString(4) + "-" +
+                                  randomString(4) + "-" + randomString(4) + ".xml";
+    const auto tempPath = std::filesystem::temp_directory_path() / shortname;
     filename = tempPath.string();
     generateGrouping->setProperty("GenerateParFile", false);
     // Make sure the file gets deleted at scope exit.

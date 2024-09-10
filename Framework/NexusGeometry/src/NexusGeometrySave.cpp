@@ -27,8 +27,8 @@
 #include "MantidNexusGeometry/NexusGeometryUtilities.h"
 #include <H5Cpp.h>
 #include <algorithm>
-#include <boost/filesystem/operations.hpp>
 #include <cmath>
+#include <filesystem>
 #include <list>
 #include <memory>
 #include <string>
@@ -541,14 +541,14 @@ SpectraMappings makeMappings(const Geometry::ComponentInfo &compInfo, const deti
 }
 
 void validateInputs(AbstractLogger &logger, const std::string &fullPath, const Geometry::ComponentInfo &compInfo) {
-  boost::filesystem::path tmp(fullPath);
-  if (!boost::filesystem::is_directory(tmp.root_directory())) {
+  std::filesystem::path tmp(fullPath);
+  if (!std::filesystem::is_directory(tmp.root_directory())) {
     throw std::invalid_argument("The path provided for saving the file is invalid: " + fullPath + "\n");
   }
 
   // check the file extension matches any of the valid extensions defined in
   // nexus_geometry_extensions
-  const auto ext = boost::filesystem::path(tmp).extension();
+  const auto ext = std::filesystem::path(tmp).extension();
   bool isValidExt = std::any_of(nexus_geometry_extensions.begin(), nexus_geometry_extensions.end(),
                                 [&ext](const std::string &str) { return ext.generic_string() == str; });
 
