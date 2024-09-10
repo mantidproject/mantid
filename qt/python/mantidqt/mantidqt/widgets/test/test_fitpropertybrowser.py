@@ -19,7 +19,7 @@ from mantid.api import AnalysisDataService, WorkspaceFactory
 from unittest.mock import MagicMock, Mock, patch
 from mantid import ConfigService
 from mantid.simpleapi import CreateSampleWorkspace, CreateWorkspace
-from mantidqt.plotting.functions import plot
+from mantid.plots.plotfunctions import plot
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
 from mantidqt.widgets.fitpropertybrowser.fitpropertybrowser import FitPropertyBrowser
@@ -58,6 +58,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         with patch.object(property_browser, "workspaceName", lambda: "ws_name"):
             property_browser.getFitMenu().aboutToShow.emit()
         property_browser.normaliseData.assert_called_once_with(False)
+        fig.clear()
 
     def test_workspace_index_selector_updates_if_new_curve_added(self):
         fig, canvas, ws = self._create_and_plot_matrix_workspace("ws_name", distribution=True)
@@ -67,6 +68,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         property_browser.setWorkspaceIndex(2)
         self.assertEqual(property_browser.workspaceIndex(), 2)
         property_browser.hide()
+        fig.clear()
 
     def test_workspace_index_selector_updates_if_curve_removed(self):
         fig, canvas, ws = self._create_and_plot_matrix_workspace("ws_name", distribution=True)
@@ -80,6 +82,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         # we removed the workspaceIndex 0 line, so spinbox should now show 2.
         self.assertEqual(property_browser.workspaceIndex(), 2)
         property_browser.hide()
+        fig.clear()
 
     def test_fit_curves_removed_when_workspaces_deleted(self):
         fig, canvas, _ = self._create_and_plot_matrix_workspace(name="ws")
@@ -110,6 +113,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
             AnalysisDataService.Instance().remove("ws_NormalisedCovarianceMatrix")
 
             self.assertEqual(1, len(fig.get_axes()[0].lines))
+        fig.clear()
 
     def test_fit_result_workspaces_are_added_to_browser_when_fitting_done(self):
         name = "ws"
@@ -131,6 +135,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         self.assertEqual(name + "_NormalisedCovarianceMatrix", workspaceList.item(0).text())
         self.assertEqual(name + "_Parameters", workspaceList.item(1).text())
         self.assertEqual(name + "_Workspace", workspaceList.item(2).text())
+        fig.clear()
 
     def test_fitting_done_follows_ads_clear_fitting_done_another(self):
         name_1 = "ws_1"
@@ -169,6 +174,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         property_browser.fitting_done_slot(name_2 + "_Workspace")
         self.assertEqual(property_browser.fit_result_ws_name, name_2 + "_Workspace")
         self.assertEqual(3, property_browser.getWorkspaceList().count())
+        fig.clear()
 
     def test_fit_result_matrix_workspace_in_browser_is_viewed_when_clicked(self):
         from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
@@ -192,6 +198,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         item = wsList.item(0).text()
         property_browser.workspaceClicked.emit(item)
         self.assertEqual(1, TableWorkspaceDisplay.show_view.call_count)
+        fig.clear()
 
     def test_workspaces_removed_from_workspace_list_widget_if_deleted_from_ADS(self):
         name = "ws"
@@ -211,6 +218,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
         wsList = property_browser.getWorkspaceList()
         self.assertEqual(1, len(wsList))
+        fig.clear()
 
     def test_plot_limits_are_not_changed_when_plotting_fit_lines_autoscale_true(self):
         fig, canvas, _ = self._create_and_plot_matrix_workspace()
@@ -244,6 +252,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         )
         widget.fitting_done_slot(fit_ws_name)
         self.assertEqual(ax_limits, fig.get_axes()[0].axis())
+        fig.clear()
 
     @patch("matplotlib.pyplot.get_figlabels")
     def test_output_workspace_name_changes_if_more_than_one_plot_of_same_workspace(self, figure_labels_mock):
@@ -339,6 +348,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
         # it should show a linear line with intercept 2 and gradient 1
         self.assertEqual(str(func.getFunction(0)), "name=LinearBackground,A0=2,A1=1")
+        fig.clear()
 
     def test_fit_property_browser_correctly_handles_bin_plots(self):
         # create & plot workspace
@@ -360,6 +370,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
 
         # check no spectra is now returned.
         self.assertFalse(property_browser._get_allowed_spectra())
+        fig.clear()
 
     # Private helper functions
     @classmethod
