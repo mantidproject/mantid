@@ -23,14 +23,16 @@ class SANSPolarizationCorrectionsBase(MantidSystemTest, metaclass=ABCMeta):
     def _run_test(self):
         raise NotImplementedError("_run_test() method must be implemented.")
 
-    def _prepare_workspace(self, input_filename):
+    @staticmethod
+    def _prepare_workspace(input_filename):
         run = Load(input_filename)
         converted = ConvertUnits(run, "Wavelength", AlignBins=True, StoreInADS=False)
         monitor_3 = CropWorkspace(converted, StartWorkspaceIndex=2, EndWorkspaceIndex=2, StoreInADS=False)
         monitor_4 = CropWorkspace(converted, StartWorkspaceIndex=3, EndWorkspaceIndex=3, StoreInADS=False)
         return monitor_4 / monitor_3
 
-    def _average_workspaces_in_group(self, ws_list):
+    @staticmethod
+    def _average_workspaces_in_group(ws_list):
         return sum(ws_list) / len(ws_list)
 
     def validate(self):
@@ -40,5 +42,6 @@ class SANSPolarizationCorrectionsBase(MantidSystemTest, metaclass=ABCMeta):
     def _validate(self):
         raise NotImplementedError("validate() method must be implemented.")
 
-    def cleanup(self):
+    @staticmethod
+    def cleanup():
         AnalysisDataService.clear()
