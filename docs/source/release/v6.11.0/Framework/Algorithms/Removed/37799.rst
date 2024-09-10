@@ -1,0 +1,1 @@
+- The AlignDetectors algorithm was deprecated in :ref:`Release 6.1 <v6.1.0>` and has now been removed. Please use a combination of :ref:`ApplyDiffCal <algm-ApplyDiffCal>` and :ref:`ConvertUnits <algm-ConvertUnits>` instead.
