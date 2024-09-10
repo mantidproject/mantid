@@ -1634,7 +1634,7 @@ class RotationAngle(PropDescriptor):
         if instance is None:
             return self
 
-        if self._own_psi_value:
+        if not (np.isnan(self._own_psi_value) or self._own_psi_value is None):
             return self._own_psi_value
         return self.read_psi_from_workspace(self._log_ws_name)
 
