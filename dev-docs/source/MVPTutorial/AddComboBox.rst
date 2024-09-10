@@ -13,10 +13,10 @@ The following code should be added to the view's ``__init__`` function.
 
 .. code-block:: python
 
-    self.combo = QtWidgets.QComboBox()
+    self._combo = QComboBox()
     options = ["one", "two", "three"]
-    self.combo.addItems(options)
-    grid.addWidget(self.combo)
+    self._combo.addItems(options)
+    grid.addWidget(self._combo)
 
 The first line creates a ComboBox widget. The second line defines the
 options that will be displayed within the ComboBox and the third line

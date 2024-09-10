@@ -16,37 +16,39 @@ pressed. First we will start with the view:
 
 .. code-block:: python
 
-    from qtpy import QtWidgets, QtCore, QtGui
+    from qtpy.QtCore import Signal
+    from qtpy.QtWidgets import QHBoxLayout, QLabel, QPushButton, QVBoxLayout, QWidget
+    from typing import Union
 
 
-    class View(QtWidgets.QWidget):
+    class View(QWidget):
 
-        doSomethingSignal = QtCore.Signal()
+        doSomethingSignal = Signal()
 
-        def __init__(self, parent=None):
+        def __init__(self, parent: Union[QWidget, None]=None):
             super().__init__(parent)
 
-            self.button = QtWidgets.QPushButton('Hi', self)
-            self.button.setStyleSheet("background-color:lightgrey")
+            self._button = QPushButton("Hi", self)
+            self._button.setStyleSheet("background-color:lightgrey")
             # connect button to signal
-            self.button.clicked.connect(self.btn_click)
+            self._button.clicked.connect(self.btn_click)
 
-            self.label = QtWidgets.QLabel()
-            self.label.setText("Button")
+            self._label = QLabel()
+            self._label.setText("Button")
 
             # add widgets to layout
-            self.sub_layout = QtWidgets.QHBoxLayout()
-            self.sub_layout.addWidget(self.label)
-            self.sub_layout.addWidget(self.button)
+            self._sub_layout = QHBoxLayout()
+            self._sub_layout.addWidget(self._label)
+            self._sub_layout.addWidget(self._button)
 
-            grid = QtWidgets.QVBoxLayout(self)
-            grid.addLayout(self.sub_layout)
+            grid = QVBoxLayout(self)
+            grid.addLayout(self._sub_layout)
             # set the layout for the view widget
             self.setLayout(grid)
 
-        #send signals
-        def btn_click(self):
-            print ("hellow from view")
+        # send signals
+        def btn_click(self) -> None:
+            print("hello from view")
             self.doSomethingSignal.emit()
 
 The above code has two new additions. The first is the creation of a
