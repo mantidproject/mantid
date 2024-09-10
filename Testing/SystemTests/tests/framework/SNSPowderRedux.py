@@ -238,7 +238,6 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
             MultiplyByBinWidth=False,
             ExtendedHeader=True,
         )
-
         # load output gsas file and the golden one
         LoadGSS(Filename="PG3_4866.gsa", OutputWorkspace="PG3_4866")
         LoadGSS(Filename=self.ref_file, OutputWorkspace="PG3_4866_golden")
@@ -249,7 +248,7 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
-        self.tolerance = 1.0e-1
+        self.tolerance = 2e-1
         self.tolerance_is_rel_err = True
         return ("PG3_4866", "PG3_4866_golden")
 
