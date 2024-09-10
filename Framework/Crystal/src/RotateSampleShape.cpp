@@ -138,20 +138,6 @@ void RotateSampleShape::prepareGoniometerAxes(Goniometer &gon, const API::Experi
       }
 
       std::string axisName = "RotateSampleShapeAxis" + Strings::toString(i) + "_FixedValue";
-      g_log.information() << "Axis " << i << " - create a new log value: " << axisName;
-      try {
-        Types::Core::DateAndTime now = Types::Core::DateAndTime::getCurrentTime();
-        auto tsp = new Kernel::TimeSeriesProperty<double>(axisName);
-        tsp->addValue(now, angle);
-        tsp->setUnits("degree");
-        if (ei->mutableRun().hasProperty(axisName)) {
-          ei->mutableRun().removeLogData(axisName);
-        }
-        ei->mutableRun().addLogData(tsp);
-      } catch (...) {
-        g_log.error("Could not add axis:" + axisName);
-      }
-
       double x = 0, y = 0, z = 0;
       if (!Strings::convert(tokens[1], x))
         throw std::invalid_argument("Error converting x string '" + tokens[1] + "' to a number.");
