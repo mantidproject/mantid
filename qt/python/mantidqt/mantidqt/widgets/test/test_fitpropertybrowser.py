@@ -221,6 +221,7 @@ class FitPropertyBrowserTest(unittest.TestCase):
         CreateSampleWorkspace(OutputWorkspace=fit_ws_name)
         widget.fitting_done_slot(fit_ws_name)
         self.assertEqual(ax_limits, fig.get_axes()[0].axis())
+        fig.clear()
 
     def test_plot_limits_are_not_changed_when_plotting_fit_lines_autoscale_false(self):
         fig, canvas, ws = self._create_and_plot_matrix_workspace()
