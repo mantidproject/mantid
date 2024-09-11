@@ -132,9 +132,9 @@ std::map<std::string, std::string> HeliumAnalyserEfficiency::validateInputs() {
 void HeliumAnalyserEfficiency::exec() {
   MatrixWorkspace_sptr eff = calculateAnalyserEfficiency();
 
-  // Theoretically, the analyser efficiency is given by (1 + tanh(mu * phe))/2.
+  // Theoretically, the analyser efficiency is given by (1 + tanh(mu * phe * wavelength))/2.
   // Using the analyser efficiency value that we calculated from the data,
-  // we fit (1 + tanh(mu * phe * x))/2 to find phe, the helium atom polarization in the analyser.
+  // we fit this function to find pHe, the helium atom polarization in the analyser.
   const double pd = getProperty(PropertyNames::PD);
   const double mu = ABSORPTION_CROSS_SECTION_CONSTANT * pd;
 
