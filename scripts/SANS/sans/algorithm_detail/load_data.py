@@ -331,7 +331,7 @@ def tag_workspaces_with_file_names(workspaces, file_information, is_transmission
 
     file_tags = get_expected_file_tags(file_information, is_transmission, period)
     if len(file_tags) != len(workspaces):
-        raise RuntimeError("Issue while tagging the loaded data. The number of tags does not match the number " "of workspaces.")
+        raise RuntimeError("Issue while tagging the loaded data. The number of tags does not match the number of workspaces.")
     for file_tag, workspace in zip(file_tags, workspaces):
         if not has_tag(SANS_FILE_TAG, workspace):
             if is_monitor:
@@ -709,7 +709,7 @@ class SANSLoadData(metaclass=ABCMeta):
     def _validate(data_info):
         if not isinstance(data_info, StateData):
             raise ValueError(
-                "SANSLoad: The provided state information is of the wrong type. It must be" " of type StateData,but was {0}".format(
+                "SANSLoad: The provided state information is of the wrong type. It must be of type StateData,but was {0}".format(
                     str(type(data_info))
                 )
             )

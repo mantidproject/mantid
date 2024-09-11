@@ -462,9 +462,7 @@ class RunTabPresenter(PresenterCommon):
         try:
             if not os.path.exists(batch_file_path):
                 raise RuntimeError(
-                    "The batch file path {} does not exist. Make sure a valid batch file path" " has been specified.".format(
-                        batch_file_path
-                    )
+                    f"The batch file path {batch_file_path} does not exist. Make sure a valid batch file path has been specified."
                 )
 
             # 2. Read the batch file
@@ -613,7 +611,7 @@ class RunTabPresenter(PresenterCommon):
         """
         if self._view.output_mode_file_radio_button.isChecked() or self._view.output_mode_both_radio_button.isChecked():
             if self._view.save_types == [SaveType.NO_TYPE]:
-                raise ValueError("You have selected an output mode which saves to file, " "but no file types have been selected.")
+                raise ValueError("You have selected an output mode which saves to file, but no file types have been selected.")
 
     def _check_if_SaveCanSAS1D_is_usable(self):
         """

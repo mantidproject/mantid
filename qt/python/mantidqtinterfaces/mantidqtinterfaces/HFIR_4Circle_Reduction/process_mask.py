@@ -103,7 +103,7 @@ def get_region_of_interest(mask_ws_name):
     # check before return
     if lower_left_corner is None or upper_right_corner is None:
         raise RuntimeError(
-            "It is impossible not to find either lower left corner {0} or upper right corner {1}" "".format(
+            "It is impossible not to find either lower left corner {0} or upper right corner {1}".format(
                 lower_left_corner, upper_right_corner
             )
         )

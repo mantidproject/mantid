@@ -466,7 +466,7 @@ class DirectILLCollectData(DataProcessorAlgorithm):
             MatrixWorkspaceProperty(
                 name=common.PROP_ELASTIC_CHANNEL_WS, defaultValue="", direction=Direction.Input, optional=PropertyMode.Optional
             ),
-            doc="A single value workspace containing the nominal elastic channel index" "(can be floating point). Overrides {}.".format(
+            doc="A single value workspace containing the nominal elastic channel index(can be floating point). Overrides {}.".format(
                 common.PROP_ELASTIC_CHANNEL_MODE
             ),
         )

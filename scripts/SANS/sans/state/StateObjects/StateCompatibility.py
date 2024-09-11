@@ -56,7 +56,5 @@ def get_compatibility_builder(data_info):
         return StateCompatibilityBuilder()
     else:
         raise NotImplementedError(
-            "StateCompatibilityBuilder: Could not find any valid compatibility builder for the " "specified StateData object {0}".format(
-                str(data_info)
-            )
+            f"StateCompatibilityBuilder: Could not find any valid compatibility builder for the specified StateData object {str(data_info)}"
         )

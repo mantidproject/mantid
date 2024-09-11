@@ -31,7 +31,7 @@ class UserInteraction(Enum):
 
 
 class MultipleRectangleSelectionLinePlot(KeyHandler):
-    STATUS_MESSAGE = "Press key to export: c=both cuts, x=X, y=Y, p=peaks. 'Del' deletes a ROI. " "'f' interpolates rectangles."
+    STATUS_MESSAGE = "Press key to export: c=both cuts, x=X, y=Y, p=peaks. 'Del' deletes a ROI. 'f' interpolates rectangles."
     SELECTION_KEYS = ("c", "x", "y", "f", "delete", "p")
     EPSILON = 1e-3
 
@@ -390,7 +390,7 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             self._place_interpolate_linear()
         else:
             logger.warning(
-                "Cannot place more regions of interest: current number of regions invalid " "(1 or 2 expected, {} found)".format(
+                "Cannot place more regions of interest: current number of regions invalid (1 or 2 expected, {} found)".format(
                     len(rectangles)
                 )
             )

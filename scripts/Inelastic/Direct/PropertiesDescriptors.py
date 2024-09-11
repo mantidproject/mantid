@@ -643,7 +643,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
             self.__set__(instance, val)
         else:
             raise KeyError(
-                "mon2_norm_energy_range needs to be initialized by two values.\n" "Trying to assign value {0} of unknown type {1}".format(
+                "mon2_norm_energy_range needs to be initialized by two values.\nTrying to assign value {0} of unknown type {1}".format(
                     val, type(val)
                 )
             )
@@ -680,7 +680,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
             return (
                 False,
                 2,
-                "mon2_normalization_energy_range can be initialized by list of two values only." " Got {0} values".format(len(range)),
+                "mon2_normalization_energy_range can be initialized by list of two values only. Got {0} values".format(len(range)),
             )
 
         result = (True, 0, "")
@@ -1095,7 +1095,7 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
             return (
                 False,
                 1,
-                "monovan integration is suspiciously wide: [{0}:{1}]. " "This may be incorrect".format(the_range[0], the_range[1]),
+                "monovan integration is suspiciously wide: [{0}:{1}]. This may be incorrect".format(the_range[0], the_range[1]),
             )
         return True, 0, ""
 

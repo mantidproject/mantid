@@ -9,7 +9,6 @@
 """State describing the adjustment workspace creation of the SANS reduction."""
 
 import copy
-import json
 
 from sans.common.enums import SANSFacility
 from sans.state.JsonSerializable import JsonSerializable
@@ -39,7 +38,7 @@ class StateAdjustment(metaclass=JsonSerializable):
             try:
                 self.calculate_transmission.validate()
             except ValueError as e:
-                is_invalid.update({"StateAdjustment": "The sub-CalculateTransmission state is invalid," " see here {0}".format(str(e))})
+                is_invalid.update({"StateAdjustment": "The sub-CalculateTransmission state is invalid, see here " + str(e)})
 
         # Normalize to monitor
         if not self.normalize_to_monitor:
@@ -48,7 +47,7 @@ class StateAdjustment(metaclass=JsonSerializable):
             try:
                 self.normalize_to_monitor.validate()
             except ValueError as e:
-                is_invalid.update({"StateAdjustment": "The sub-NormalizeToMonitor state is invalid," " see here {0}".format(str(e))})
+                is_invalid.update({"StateAdjustment": f"The sub-NormalizeToMonitor state is invalid, see here {str(e)}"})
 
         # Wavelength and pixel adjustment
         if not self.wavelength_and_pixel_adjustment:
@@ -57,11 +56,9 @@ class StateAdjustment(metaclass=JsonSerializable):
             try:
                 self.wavelength_and_pixel_adjustment.validate()
             except ValueError as e:
-                is_invalid.update(
-                    {"StateAdjustment": "The sub-WavelengthAndPixelAdjustment state is invalid," " see here {0}".format(str(e))}
-                )
+                is_invalid.update({"StateAdjustment": f"The sub-WavelengthAndPixelAdjustment state is invalid, see here {str(e)}"})
         if is_invalid:
-            raise ValueError("StateAdjustment: The provided inputs are illegal. " "Please see: {0}".format(json.dumps(is_invalid)))
+            raise ValueError("StateAdjustment: The provided inputs are illegal. Please see: {json.dumps(is_invalid)}")
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -86,7 +83,5 @@ def get_adjustment_builder(data_info):
         return StateAdjustmentBuilder()
     else:
         raise NotImplementedError(
-            "StateAdjustmentBuilder: Could not find any valid adjustment builder for the " "specified StateData object {0}".format(
-                str(data_info)
-            )
+            f"StateAdjustmentBuilder: Could not find any valid adjustment builder for the specified StateData object {str(data_info)}"
         )

@@ -147,10 +147,10 @@ class ScanPreProcessWindow(QMainWindow):
         import multi_threads_helpers
 
         # check inputs
-        assert isinstance(self._myController, reduce4circleControl.CWSCDReductionControl), (
-            "Reduction controller of type {0} is not accepted. It must be a CWSCDReductionControl instance." "".format(
-                self._myController.__class__.__name__
-            )
+        assert isinstance(
+            self._myController, reduce4circleControl.CWSCDReductionControl
+        ), "Reduction controller of type {0} is not accepted. It must be a CWSCDReductionControl instance.".format(
+            self._myController.__class__.__name__
         )
 
         # check whether it is well setup for reduction
@@ -362,10 +362,10 @@ class ScanPreProcessWindow(QMainWindow):
         :param controller:
         :return:
         """
-        assert isinstance(controller, reduce4circleControl.CWSCDReductionControl), (
-            "Reduction controller must be an instance of reduce4circleControl.CWSCDReductionControl but not a {0}." "".format(
-                controller.__class__.__name__
-            )
+        assert isinstance(
+            controller, reduce4circleControl.CWSCDReductionControl
+        ), "Reduction controller must be an instance of reduce4circleControl.CWSCDReductionControl but not a {0}.".format(
+            controller.__class__.__name__
         )
 
         self._myController = controller
