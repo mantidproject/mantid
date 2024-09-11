@@ -1,0 +1,1 @@
+- Fix a crash in :ref:`Convolution <convfit>` :ref:`QENS Fitting interface <interface-inelastic-qens-fitting>` interface when attempting to Fix all IsoDiffRot parameters from the EditLocalParameter dialog.
