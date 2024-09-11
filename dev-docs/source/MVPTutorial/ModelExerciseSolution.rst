@@ -8,7 +8,7 @@ The model should now contain the following top level function:
 
 .. code-block:: python
 
-    def line_colours():
+    def line_colours(self) -> List[str]:
         colour_table = ["red", "blue", "black"]
         return colour_table
 
@@ -16,35 +16,44 @@ The view should contain the following method:
 
 .. code-block:: python
 
-     def setColours(self,options):
-         self.colours.clear()
-         self.colours.addItems(options)
+     def set_colours(self, options: List[str]) -> None:
+         self._colours.clear()
+         self._colours.addItems(options)
 
 The presenter initialisation should now be:
 
 .. code-block:: python
 
-     def __init__(self, view, data_model, colour_list):
-        self.view = view
-        self.data_model = data_model
+     def __init__(self, view, model):
+        self._view = view
+        self._model = model
 
-        self.view.setColours(colour_list)
-        # connect statements
-        self.view.plotSignal.connect(self.updatePlot)
+        self._view.subscribe_presenter(self)
+
+        self._view.set_colours(self._model.line_colours())
 
 And the Main module should now pass the two models into the presenter:
 
 .. code-block:: python
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    import sys
 
-        self.window = QtWidgets.QMainWindow()
-        my_view = view.View()
-        data_model = model.DataGenerator()
-        colour_list = model.line_colours()
+    from qtpy.QtWidgets import QApplication
 
-        self.presenter = presenter.Presenter(my_view, data_model, colour_list)
-        # set the view for the main window
-        self.setCentralWidget(my_view)
-        self.setWindowTitle("view tutorial")
+    from model import Model
+    from view import View
+    from presenter import Presenter
+
+
+    def _get_qapplication_instance() -> QApplication:
+        if app := QApplication.instance():
+            return app
+        return QApplication(sys.argv)
+
+
+    app = _get_qapplication_instance()
+    model = Model()
+    view = View()
+    presenter = Presenter(view, model)
+    view.show()
+    app.exec_()

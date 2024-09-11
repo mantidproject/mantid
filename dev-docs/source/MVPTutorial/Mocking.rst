@@ -5,7 +5,7 @@ Mocking the Presenter
 The view should be so simple that it does not require
 testing. However, the presenter contains logic and should therefore be
 tested. When testing the presenter we do not want to create the actual
-GUI, instead we just want to ensure that the correct calls are made,
+GUI, instead we just want to ensure that the expected calls are made,
 this is done via mocking see `unittest docs
 <https://docs.python.org/3/library/unittest.mock-examples.html>`_ for
 a detailed discussion. Here we will have a brief discussion of the
