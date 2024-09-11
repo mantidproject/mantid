@@ -40,11 +40,9 @@ private:
   void init() override;
   void exec() override;
   MatrixWorkspace_sptr calculateAnalyserEfficiency();
-  MatrixWorkspace_sptr createWorkspace(const std::string &name, const std::string &title, const MantidVec &xData,
-                                       const MantidVec &yData, const MantidVec &eData);
   void fitAnalyserEfficiency(const double mu, const MatrixWorkspace_sptr eff, double &pHe, double &pHeError);
-  MatrixWorkspace_sptr createEfficiencyWorkspace(const MantidVec &wavelengthValues, const MantidVec &effValues,
-                                                 const double pHe, const double pHeError, const double mu);
+  void convertToTheoreticalEfficiency(MatrixWorkspace_sptr &eff, const double pHe, const double pHeError,
+                                      const double mu);
   double calculateTCrit(const size_t numberOfBins);
 
   static const double ABSORPTION_CROSS_SECTION_CONSTANT;
