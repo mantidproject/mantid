@@ -56,14 +56,10 @@ void ALCPeakFittingModel::setData(MatrixWorkspace_sptr newData) {
 }
 
 MatrixWorkspace_sptr ALCPeakFittingModel::exportWorkspace() {
-  if (m_data && m_data->getNumberHistograms() > 2) {
-
+  if (m_data) {
     return std::const_pointer_cast<MatrixWorkspace>(m_data);
-
-  } else {
-
-    return MatrixWorkspace_sptr();
   }
+  return nullptr;
 }
 
 ITableWorkspace_sptr ALCPeakFittingModel::exportFittedPeaks() {
