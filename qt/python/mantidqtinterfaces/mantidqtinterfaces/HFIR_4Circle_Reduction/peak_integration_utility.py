@@ -533,8 +533,9 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
         gauss_sigma = parameter_dict["s"]
     except KeyError as key_err:
         raise RuntimeError(
-            'Parameter dictionary must have "A", "s" (for sigma) but now only {0}. Error message: {1}'
-            "".format(parameter_dict.keys(), key_err)
+            'Parameter dictionary must have "A", "s" (for sigma) but now only {0}. Error message: {1}' "".format(
+                parameter_dict.keys(), key_err
+            )
         )
 
     # I = A\times s\times\sqrt{2 pi}

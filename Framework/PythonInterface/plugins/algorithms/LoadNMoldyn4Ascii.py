@@ -31,7 +31,6 @@ SLICE_2D_HEADER_REGEX = re.compile(r"#slice:\[([0-9]+)[A-z]*,\s+([0-9]+)[A-z]*\]
 
 
 class LoadNMoldyn4Ascii(PythonAlgorithm):
-
     _axis_cache = None
     _data_directory = None
 

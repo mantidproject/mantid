@@ -1228,9 +1228,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 If there is no split workspace defined, filter is (0., 0.) as the default
         """
         # supported case: support both workspace and workspace name
-        assert (
-            isinstance(split_ws_name, str) and len(split_ws_name) > 0
-        ), "SplittersWorkspace {0} must be a non-empty string but not a {1}." "".format(split_ws_name, type(split_ws_name))
+        assert isinstance(split_ws_name, str) and len(split_ws_name) > 0, (
+            "SplittersWorkspace {0} must be a non-empty string but not a {1}." "".format(split_ws_name, type(split_ws_name))
+        )
         if AnalysisDataService.doesExist(split_ws_name):
             split_ws = get_workspace(split_ws_name)
         else:

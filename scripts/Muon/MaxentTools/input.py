@@ -33,7 +33,6 @@ def INPUT(
     SENSE_taud,
     mylog,
 ):
-
     datum = np.zeros([npts, ngroups])
     sigma = np.zeros([npts, ngroups])
     RUNDATA_hists = np.zeros([ngroups])
@@ -64,7 +63,7 @@ def INPUT(
     datt = np.array(datum)
     tau = SENSE_taud / (RUNDATA_res * RUNDATA_hists * RUNDATA_frames * RUNDATA_fnorm)
     overloads = np.argwhere(datum * tau[np.newaxis, :] > 1.0)
-    for (i, j) in overloads:
+    for i, j in overloads:
         mylog.warning("overload [{0},{1}]: count={2} taud={3}".format(i, j, datum[i, j], tau[j]))
     corr = tau[np.newaxis, :] * datum**2
     sigma = np.where(datum > 0.5, sigma * (1.0 + 0.5 * corr / datum), sigma)
@@ -74,7 +73,7 @@ def INPUT(
     FAC_facfake = FAC_factor * FAC_ratio
     sigma = sigma * FAC_facfake
     zerosigs = np.argwhere(sigma == 0.0)
-    for (i, j) in zerosigs:
+    for i, j in zerosigs:
         mylog.warning("ZERO SIG!!! [{0},{1}]".format(i, j))
 
     return (datum, sigma, corr, datt, MISSCHANNELS_mm, RUNDATA_fnorm, RUNDATA_hists, FAC_facfake, FAC_ratio)

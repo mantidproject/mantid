@@ -24,6 +24,7 @@ Optional --script argument expects a name of a function which takes a widget as 
 If specified the script is imported and run after the widget is created.
 
 """
+
 import argparse
 import sys
 from gui_test_runner import open_in_window

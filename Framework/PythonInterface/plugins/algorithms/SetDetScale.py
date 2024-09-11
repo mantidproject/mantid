@@ -33,7 +33,6 @@ class SetDetScale(PythonAlgorithm):
         return "Set/change the detScale parameters for a MatrixWorkspace or PeaksWorkspace instrument"
 
     def PyInit(self):
-
         self.declareProperty(
             WorkspaceProperty("Workspace", "", validator=InstrumentValidator(), direction=Direction.InOut),
             doc="MatrixWorkspace or PeaksWorkspace with instrument.",

@@ -10,7 +10,6 @@ from .DrillParametersPresenter import DrillParametersPresenter
 
 
 class DrillSamplePresenter:
-
     """
     Reference to the dril table.
     """

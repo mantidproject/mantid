@@ -358,7 +358,6 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.setProperty("OutputWorkspace", out_ws_name)
 
     def __regroup_and_move(self, scan, grouping, height, distance):
-
         ws = scan.name()
 
         array = mtd[ws].getSignalArray().copy()

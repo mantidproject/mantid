@@ -62,7 +62,6 @@ class ISISMuonAnalysis(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
         # Rebin then...
         if self.rebin:
-
             ws = mtd[outputWS]
             binSize = ws.dataX(0)[1] - ws.dataX(0)[0]
             firstX = ws.dataX(0)[0]

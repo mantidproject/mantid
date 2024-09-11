@@ -12,9 +12,7 @@ import subprocess
 
 STYLE = dict()
 
-STYLE[
-    "global_style"
-] = """
+STYLE["global_style"] = """
 fontname = Helvetica
 labelloc = t
 ordering = out

@@ -230,7 +230,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     ##    tReducet.di
     def test_energy_to_TOF_range(self):
-
         ws = Load(Filename="MAR11001.raw", LoadMonitors="Include")
 
         en_range = [0.8 * 13, 13, 1.2 * 13]
@@ -323,7 +322,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertTrue(rez[0])
 
     def test_tof_range(self):
-
         run = CreateSampleWorkspace(
             Function="Multiple Peaks", NumBanks=6, BankPixelWidth=1, NumEvents=10, XUnit="Energy", XMin=5, XMax=75, BinWidth=0.2
         )

@@ -9,6 +9,7 @@
 Defines functions and classes to start the processing of Vesuvio data.
 The main entry point that most users should care about is fit_tof().
 """
+
 import re
 import numpy as np
 from functools import reduce
@@ -257,7 +258,7 @@ class VesuvioTOFFitRoutineIteration(object):
             MassIndexToSymbolMap=self._mass_profile_collection.index_to_symbol_map,
             OutputWorkspace=self._fit_namer.corrected_data_name,
             LinearFitResult=self._fit_namer.corrections_parameters_name,
-            **correction_args
+            **correction_args,
         )
 
     def _corrections_arguments(self, container_data, prefit_parameters, verbose_output):
@@ -388,7 +389,7 @@ class VesuvioTOFFitHelper(object):
             Ties=self._ties,
             MaxIterations=self._max_iterations,
             Minimizer=self._minimizer,
-            **fit_args
+            **fit_args,
         )
 
 
@@ -424,7 +425,7 @@ class VesuvioCorrectionsHelper(object):
             MultipleScattering=self._multiple_scattering,
             GammaBackgroundScale=self._gamma_background_scale,
             ContainerScale=self._container_scale,
-            **correction_args
+            **correction_args,
         )
 
 

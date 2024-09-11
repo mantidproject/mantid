@@ -7,8 +7,8 @@
 #  This file is part of the mantid workbench.
 #
 #
-""" Utility functions to deal with fetching fonts
-"""
+"""Utility functions to deal with fetching fonts"""
+
 # third-party imports
 from qtpy.QtGui import QFont, QFontDatabase
 

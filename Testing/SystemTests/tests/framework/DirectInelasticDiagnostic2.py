@@ -23,7 +23,6 @@ def getNamedParameter(ws, name):
 
 
 class DirectInelasticDiagnostic2(MantidSystemTest):
-
     saved_diag_file = ""
 
     def requiredMemoryMB(self):

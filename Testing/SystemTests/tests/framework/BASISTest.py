@@ -29,7 +29,7 @@ class PreppingMixin(object):
         config.appendDataSearchSubDir("BASIS/{}/".format(subdir))
 
     def preptear(self):
-        for (key, value) in self.config.items():
+        for key, value in self.config.items():
             config[key] = value  # config object does not have update method like python dict
 
 

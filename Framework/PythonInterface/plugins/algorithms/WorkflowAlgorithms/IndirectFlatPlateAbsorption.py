@@ -11,7 +11,6 @@ from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoun
 
 
 class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
-
     # Sample variables
     _sample_ws = None
     _sample_chemical_formula = None

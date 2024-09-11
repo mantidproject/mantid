@@ -27,7 +27,6 @@ IDENTITY_TRANSFORM = IdentityTransform()
 
 
 class ModestImage(MantidImage):
-
     """
     Computationally modest image class.
 
@@ -246,7 +245,7 @@ def imshow(
     resample=None,
     url=None,
     transpose=None,
-    **kwargs
+    **kwargs,
 ):
     """Similar to matplotlib's imshow command, but produces a ModestImage
 
@@ -268,7 +267,7 @@ def imshow(
         filterrad=filterrad,
         resample=resample,
         transpose=transpose,
-        **kwargs
+        **kwargs,
     )
 
     im.set_data(X)

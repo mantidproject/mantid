@@ -43,8 +43,9 @@ class AbinsData:
 
         if ab_initio_program.upper() not in all_loaders:
             raise ValueError(
-                "No loader available for {}: unknown program. "
-                "supported loaders: {}".format(ab_initio_program.upper(), " ".join(all_loaders.keys()))
+                "No loader available for {}: unknown program. " "supported loaders: {}".format(
+                    ab_initio_program.upper(), " ".join(all_loaders.keys())
+                )
             )
         loader = all_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename)
         data = loader.get_formatted_data()

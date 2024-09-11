@@ -99,9 +99,9 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True, num_de
     """
     # check
     assert isinstance(file_path, str), "File path must be a string but not a %s." % str(type(file_path))
-    assert (
-        len(ll_corner) == 2 and len(ur_corner) == 2
-    ), "Left corner and right corner coordinates must be 2-tuple but not of size {0} or {1}" "".format(len(ll_corner), len(ur_corner))
+    assert len(ll_corner) == 2 and len(ur_corner) == 2, (
+        "Left corner and right corner coordinates must be 2-tuple but not of size {0} or {1}" "".format(len(ll_corner), len(ur_corner))
+    )
 
     if num_det_row is None:
         num_det_row = NUM_DET_ROW
@@ -586,10 +586,10 @@ def get_merged_hkl_md_name(instrument_name, exp_no, scan_no, pt_list):
     assert isinstance(instrument_name, str), "Instrument name {0} shall be a string but not a {1}" "".format(
         instrument_name, type(instrument_name)
     )
-    assert isinstance(exp_no, int) and isinstance(
-        scan_no, int
-    ), "Both experiment number {0} ({1}) and scan number {2} ({3}) shall be integer." "".format(
-        exp_no, type(exp_no), scan_no, type(scan_no)
+    assert isinstance(exp_no, int) and isinstance(scan_no, int), (
+        "Both experiment number {0} ({1}) and scan number {2} ({3}) shall be integer." "".format(
+            exp_no, type(exp_no), scan_no, type(scan_no)
+        )
     )
     assert isinstance(pt_list, list), "Pt list {0} shall be a list but not a {1}".format(pt_list, type(pt_list))
     if len(pt_list) == 0:

@@ -229,8 +229,9 @@ class PeakProcessRecord(object):
         # check
         if self._integrationDict is None and self._myIntensity is None:
             raise RuntimeError(
-                "PeakInfo of Exp {0} Scan {1} ({2} | {3}) has not integrated setup."
-                "".format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
+                "PeakInfo of Exp {0} Scan {1} ({2} | {3}) has not integrated setup." "".format(
+                    self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self))
+                )
             )
         elif self._myIntensity is not None:
             # return ZERO intensity due to previously found error
@@ -398,8 +399,9 @@ class PeakProcessRecord(object):
         """
         if self._lorenzFactor is None:
             raise RuntimeError(
-                "Lorentz factor has not been calculated for Exp {0} Scan {1} ({2} | {3})."
-                "".format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
+                "Lorentz factor has not been calculated for Exp {0} Scan {1} ({2} | {3})." "".format(
+                    self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self))
+                )
             )
         return self._lorenzFactor
 
@@ -585,10 +587,10 @@ class PeakProcessRecord(object):
         :param peak_integration_dict:
         :return:
         """
-        assert isinstance(
-            peak_integration_dict, dict
-        ), "Integrated peak information {0} must be given by a dictionary but not a {1}." "".format(
-            peak_integration_dict, type(peak_integration_dict)
+        assert isinstance(peak_integration_dict, dict), (
+            "Integrated peak information {0} must be given by a dictionary but not a {1}." "".format(
+                peak_integration_dict, type(peak_integration_dict)
+            )
         )
 
         self._integrationDict = peak_integration_dict
@@ -706,8 +708,9 @@ class SinglePointPeakIntegration(object):
         # check
         if self._pt_intensity is None:
             raise RuntimeError(
-                "SinglePtPeakInfo of Exp {0} Scan {1} ({2} | {3}) has not integrated setup."
-                "".format(self._exp_number, self._scan_number, self._roi_name, hex(id(self)))
+                "SinglePtPeakInfo of Exp {0} Scan {1} ({2} | {3}) has not integrated setup." "".format(
+                    self._exp_number, self._scan_number, self._roi_name, hex(id(self))
+                )
             )
 
         # get intensity
@@ -783,9 +786,9 @@ class SinglePointPeakIntegration(object):
         assert isinstance(vec_x, numpy.ndarray), "X vector must be a numpy array"
         assert isinstance(vec_y, numpy.ndarray), "Y vector must be a numpy array"
         assert integral_direction in ["vertical", "horizontal"], (
-            "Peak integration direction {} must be a string "
-            "(now a {}) being either vertical or horizontal"
-            "".format(integral_direction, type(integral_direction))
+            "Peak integration direction {} must be a string " "(now a {}) being either vertical or horizontal" "".format(
+                integral_direction, type(integral_direction)
+            )
         )
 
         # set

@@ -7,6 +7,7 @@
 # pylint: disable=invalid-name
 
 """A base class to share functionality between SANSReductionCore algorithms."""
+
 import json
 import os
 from typing import Tuple, Dict

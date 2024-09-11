@@ -40,7 +40,6 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
         return {"OutputWorkspace": [MuonWorkspaceWrapper(workspace_mock)], "MainFieldDirection": "transverse"}
 
     def setUp(self):
-
         # Store an empty widget to parent all the views, and ensure they are deleted correctly
         self.obj = QWidget()
 

@@ -5,10 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Defines a set of aliases for the kernel module to make
-    accessing certain objects easier.
+Defines a set of aliases for the kernel module to make
+accessing certain objects easier.
 """
-
 
 from mantid.kernel import ConfigServiceImpl, Logger, PropertyManagerDataServiceImpl, UnitFactoryImpl, UsageServiceImpl
 

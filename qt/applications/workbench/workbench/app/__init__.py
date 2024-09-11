@@ -13,6 +13,7 @@ workbench.app
 
 Holds code related to application startup.
 """
+
 # Define the main window titles here so they can be imported elsewhere
 # without importing the main window (which starts the app).
 MAIN_WINDOW_OBJECT_NAME = "Mantid Workbench"

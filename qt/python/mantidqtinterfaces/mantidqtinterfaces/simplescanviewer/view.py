@@ -34,7 +34,6 @@ from .rectangle_controller import RectanglesManager
 
 
 class SimpleScanViewerView(QMainWindow):
-
     """Index of the slice viewer widget in the splitter. Used to replace it when needed."""
 
     SLICE_VIEWER_SPLITTER_INDEX = 0

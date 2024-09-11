@@ -13,7 +13,6 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_can
 
 class PlottingCanvasWidget(object):
     def __init__(self, parent, context, plot_model, figure_options=None):
-
         if figure_options:
             self._figure_options = figure_options
         else:

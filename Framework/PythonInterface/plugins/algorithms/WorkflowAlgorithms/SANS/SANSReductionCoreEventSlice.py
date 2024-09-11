@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
-""" SANSReductionCoreEventSlice algorithm runs the sequence of reduction steps which are necessary to reduce a data set,
+"""SANSReductionCoreEventSlice algorithm runs the sequence of reduction steps which are necessary to reduce a data set,
 for which data must be event sliced. These steps are: slicing, adjustment, convert to q."""
 
 from SANSReductionCoreBase import SANSReductionCoreBase

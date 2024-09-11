@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" This module contains bundle definitions for passing reduction settings between functions."""
+"""This module contains bundle definitions for passing reduction settings between functions."""
+
 from collections import namedtuple
 
 # The ReductionSettingBundle contains the information and data for starting a SANSReductionCore reduction.

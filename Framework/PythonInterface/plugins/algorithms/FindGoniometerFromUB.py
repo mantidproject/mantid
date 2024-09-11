@@ -141,7 +141,6 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
-
         # setup progress bar
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=3)
         # Get input

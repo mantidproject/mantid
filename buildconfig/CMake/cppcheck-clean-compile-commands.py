@@ -10,6 +10,7 @@ Accepts a compile_commands.json and removes entries for matching source
 files. Used to remove entries for generated cpp files that we want cppcheck
 to skip.
 """
+
 import argparse
 import json
 import logging

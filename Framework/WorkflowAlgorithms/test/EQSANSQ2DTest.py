@@ -10,7 +10,6 @@ from mantid.simpleapi import *
 
 class EQSANSQ2DTest(unittest.TestCase):
     def setUp(self):
-
         self.test_ws_name = "EQSANS_test_ws"
         x = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0]
         y = 491520 * [0.1]

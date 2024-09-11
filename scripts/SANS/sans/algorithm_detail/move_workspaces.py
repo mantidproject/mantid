@@ -46,8 +46,9 @@ def move_component(workspace, offsets, component_to_move, is_relative=True):
             move_options.update({"Z": value})
         else:
             raise RuntimeError(
-                "MoveInstrumentComponent: Trying to move the components along an unknown direction. "
-                "See here: {0}".format(str(component_to_move))
+                "MoveInstrumentComponent: Trying to move the components along an unknown direction. " "See here: {0}".format(
+                    str(component_to_move)
+                )
             )
     alg = create_unmanaged_algorithm(move_name, **move_options)
     alg.execute()
@@ -74,8 +75,9 @@ def rotate_component(workspace, angle, direction, component_to_rotate):
             rotate_options.update({"Z": value})
         else:
             raise RuntimeError(
-                "MoveInstrumentComponent: Trying to rotate the components along an unknown direction. "
-                "See here: {0}".format(str(component_to_rotate))
+                "MoveInstrumentComponent: Trying to rotate the components along an unknown direction. " "See here: {0}".format(
+                    str(component_to_rotate)
+                )
             )
     rotate_options.update({"Angle": angle})
     alg = create_unmanaged_algorithm(rotate_name, **rotate_options)

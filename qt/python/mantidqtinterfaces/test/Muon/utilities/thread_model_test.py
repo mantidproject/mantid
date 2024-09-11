@@ -151,7 +151,6 @@ class LoadFileWidgetViewTest(unittest.TestCase):
         self.assertEqual(self.warning_box_patcher.call_count, 1)
 
     def test_that_passing_non_callables_to_setUp_throws_AssertionError(self):
-
         with self.assertRaises(AssertionError):
             self.thread.threadWrapperSetUp(1, 2)
 

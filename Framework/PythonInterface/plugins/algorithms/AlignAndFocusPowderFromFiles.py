@@ -453,7 +453,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 progstart=prog_start,
                 progstop=prog_start + prog_per_chunk_step,
                 filterBadPulses=self.filterBadPulses,
-                **chunk
+                **chunk,
             )
             loader.execute()
             if j == 0:
@@ -533,7 +533,7 @@ class AlignAndFocusPowderFromFiles(DataProcessorAlgorithm):
                 UnfocussedWorkspace=unfocusname_chunk,
                 startProgress=prog_start,
                 endProgress=prog_start + 2.0 * prog_per_chunk_step,
-                **self.kwargs
+                **self.kwargs,
             )
             prog_start += 2.0 * prog_per_chunk_step  # AlignAndFocusPowder counts for two steps
 

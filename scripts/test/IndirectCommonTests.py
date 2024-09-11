@@ -25,7 +25,6 @@ import IndirectCommon as indirect_common
 
 
 class IndirectCommonTests(unittest.TestCase):
-
     def setUp(self):
         config["default.facility"] = "ISIS"
 

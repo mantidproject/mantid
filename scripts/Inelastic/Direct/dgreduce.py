@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-""" Empty class temporary left for compatibility with previous interfaces """
+"""Empty class temporary left for compatibility with previous interfaces"""
+
 import Direct.DirectEnergyConversion as DRC
 from mantid.simpleapi import *
 from mantid.kernel import funcinspect
@@ -202,7 +203,7 @@ def abs_units(
     rebin,
     map_file="default",
     monovan_mapfile="default",
-    **kwargs
+    **kwargs,
 ):
     """
     dgreduce.abs_units(wb_run          Whitebeam run number or file name or workspace

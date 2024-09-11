@@ -62,7 +62,6 @@ def get_vanadium_corrections(vanadium_ws):
 
 
 class DirectILLAutoProcess(DataProcessorAlgorithm):
-
     instrument = None
     sample = None
     process = None
@@ -192,7 +191,6 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.temperatures = set()
 
     def PyInit(self):
-
         positiveFloat = FloatBoundedValidator(0.0, exclusive=False)
         validRebinParams = RebinParamsValidator(AllowEmpty=True)
         orderedPairsValidator = FloatArrayOrderedPairsValidator()
@@ -493,8 +491,9 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         instrument = mtd[ws].getInstrument().getName()
         if self.instrument and instrument != self.instrument:
             self.log().error(
-                "Sample data: {} comes from different instruments that the rest of the data:"
-                " {} and {}".format(sample, instrument, self.instrument)
+                "Sample data: {} comes from different instruments that the rest of the data:" " {} and {}".format(
+                    sample, instrument, self.instrument
+                )
             )
         else:
             self.instrument = instrument
@@ -752,7 +751,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
                 OutputWorkspace=processed_sample,
                 OutputSofThetaEnergyWorkspace=processed_sample_tw,
                 AbsoluteUnitsNormalisation=self.getProperty(common.PROP_ABSOLUTE_UNITS).value,
-                **optional_parameters
+                **optional_parameters,
             )
         if len(to_remove) > 0 and self.clear_cache:
             self._clean_up(to_remove)
@@ -797,7 +796,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             OutputWorkspace=sofqw_output,
             OutputSofThetaEnergyWorkspace=softw_output,
             DiagnosticsWorkspace=vanadium_diagnostics,
-            **optional_parameters
+            **optional_parameters,
         )
 
         if len(to_remove) > 0 and self.clear_cache:

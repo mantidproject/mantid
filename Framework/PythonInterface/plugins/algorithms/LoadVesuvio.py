@@ -43,7 +43,6 @@ _LOGGING_ = False
 
 
 class LoadVesuvio(LoadEmptyVesuvio):
-
     _ws_index = None
     _spectrum_no = None
     foil_map = None

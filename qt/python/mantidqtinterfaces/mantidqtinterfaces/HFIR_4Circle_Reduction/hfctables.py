@@ -783,9 +783,9 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :param scan_number:
         :return:
         """
-        assert (
-            isinstance(scan_number, int) and scan_number >= 0
-        ), "Scan number %s (type %s) is invalid.  It must be a positive integer." "" % (str(scan_number), type(scan_number))
+        assert isinstance(scan_number, int) and scan_number >= 0, (
+            "Scan number %s (type %s) is invalid.  It must be a positive integer." "" % (str(scan_number), type(scan_number))
+        )
         num_rows = self.rowCount()
         ret_row_number = None
         for i_row in range(num_rows):
@@ -1025,9 +1025,9 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :return:
         """
         # check input's validity
-        assert (
-            isinstance(row_number, int) and 0 <= row_number < self.rowCount()
-        ), "Row number %s is not supported or out of boundary." % str(row_number)
+        assert isinstance(row_number, int) and 0 <= row_number < self.rowCount(), (
+            "Row number %s is not supported or out of boundary." % str(row_number)
+        )
         assert isinstance(peak_centre, str) or len(peak_centre) == 3, "Peak centre %s must be a string or a container with size 3." % str(
             peak_centre
         )
@@ -1329,8 +1329,9 @@ class ScanSurveyTable(tableBase.NTableWidget):
 
         if required_size is not None and required_size != len(row_index_list):
             raise RuntimeError(
-                "It is required to have {0} runs selected, but now there are {1} runs that are "
-                "selected.".format(required_size, row_index_list)
+                "It is required to have {0} runs selected, but now there are {1} runs that are " "selected.".format(
+                    required_size, row_index_list
+                )
             )
 
         # get all the scans and rows that are selected

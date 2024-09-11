@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" The elements of this module coordinate file access and information extraction from files."""
+"""The elements of this module coordinate file access and information extraction from files."""
 
 # pylint: disable=too-few-public-methods, invalid-name
 
@@ -264,8 +264,9 @@ def get_instrument_paths_for_sans_file(file_name=None, file_information=None):
         return idf_path, ipf_rule2
 
     raise RuntimeError(
-        "SANSFileInformation: There does not seem to be a corresponding instrument parameter file "
-        "available for {0}".format(str(idf_path))
+        "SANSFileInformation: There does not seem to be a corresponding instrument parameter file " "available for {0}".format(
+            str(idf_path)
+        )
     )
 
 

@@ -5,11 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    This module defines the interface control for HFIR SANS.
-    Each reduction method tab that needs to be presented is defined here.
-    The actual view/layout is define in .ui files. The state of the reduction
-    process is kept elsewhere (HFIRReduction object)
+This module defines the interface control for HFIR SANS.
+Each reduction method tab that needs to be presented is defined here.
+The actual view/layout is define in .ui files. The state of the reduction
+process is kept elsewhere (HFIRReduction object)
 """
+
 import sys
 from mantidqtinterfaces.reduction_gui.instruments.interface import InstrumentInterface
 from mantidqtinterfaces.reduction_gui.widgets.sans.hfir_instrument import SANSInstrumentWidget

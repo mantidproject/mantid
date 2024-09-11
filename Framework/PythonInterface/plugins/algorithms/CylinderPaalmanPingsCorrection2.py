@@ -31,7 +31,6 @@ def set_material_density(set_material_alg, density_type, density, number_density
 
 
 class CylinderPaalmanPingsCorrection(PythonAlgorithm):
-
     # Sample variables
     _sample_ws_name = None
     _use_sample_mass_density = None
@@ -570,7 +569,6 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
     # ------------------------------------------------------------------------------
 
     def _wave_range(self):
-
         if self._emode != "Elastic":
             self._fixed = math.sqrt(81.787 / self._efixed)
 

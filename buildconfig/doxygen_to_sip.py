@@ -2,6 +2,7 @@
 """Script that will grab doxygen strings from a
 .cpp file and stuff them in the corresponding
 .sip file under a %Docstring tag"""
+
 import os
 from optparse import OptionParser
 

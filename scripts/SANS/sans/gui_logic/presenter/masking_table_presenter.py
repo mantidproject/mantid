@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-"""  The presenter associated with the masking table view. """
+"""The presenter associated with the masking table view."""
 
 import copy
 from collections import namedtuple

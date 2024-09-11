@@ -102,7 +102,6 @@ def add_phasequad_extensions(pair_name):
 
 
 def get_pair_phasequad_name(context, pair_name, run, rebin):
-
     name = context.data_context._base_run_name(run) + PHASEQUAD_STR + pair_name + ";"
 
     if rebin:

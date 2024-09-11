@@ -19,7 +19,6 @@ TEST_LANG = "Python"
 
 @start_qapplication
 class CodeEditorTest(unittest.TestCase):
-
     # ---------------------------------------------------------------
     # Success tests
     # ---------------------------------------------------------------

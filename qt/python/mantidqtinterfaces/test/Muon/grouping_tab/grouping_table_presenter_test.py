@@ -137,7 +137,6 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.view.warning_popup.call_count, 1)
 
     def test_that_remove_group_when_table_is_empty_does_not_throw(self):
-
         self.presenter.handle_remove_group_button_clicked()
         self.assertEqual(self.view.warning_popup.call_count, 0)
 

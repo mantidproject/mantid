@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" Converts a workspace from wavelengths to momentum transfer."""
+"""Converts a workspace from wavelengths to momentum transfer."""
+
 from math import sqrt
 
 from sans.common.constants import EMPTY_NAME

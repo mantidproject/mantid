@@ -1,6 +1,6 @@
 #! /usr/bin/env python
-"""Creates a simple template for exporting a class to Python
-"""
+"""Creates a simple template for exporting a class to Python"""
+
 import optparse
 import os
 import re

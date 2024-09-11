@@ -10,7 +10,6 @@ import os
 
 
 class CompilationDirective(BaseDirective):
-
     """
     Obtains the summary for a given algorithm based on its name.
     """

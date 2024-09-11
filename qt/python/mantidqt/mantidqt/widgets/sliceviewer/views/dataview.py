@@ -364,7 +364,7 @@ class SliceViewerDataView(QWidget):
             transpose=self.dimensions.transpose,
             norm=self.colorbar.get_norm(),
             extent=old_extent,
-            **kwargs
+            **kwargs,
         )
         self.on_track_cursor_state_change(self.track_cursor_checked())
 

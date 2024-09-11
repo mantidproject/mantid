@@ -10,7 +10,6 @@ import h5py
 
 
 class EnggSaveSinglePeakFitResultsToHDF5(PythonAlgorithm):
-
     PROP_BANKIDS = "BankIDs"
     PROP_FILENAME = "Filename"
     PROP_INPUT_WS = "InputWorkspaces"

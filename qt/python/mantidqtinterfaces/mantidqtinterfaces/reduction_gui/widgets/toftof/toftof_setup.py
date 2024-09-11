@@ -10,6 +10,7 @@
 """
 TOFTOF reduction workflow gui.
 """
+
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QDoubleValidator
 from qtpy.QtWidgets import (

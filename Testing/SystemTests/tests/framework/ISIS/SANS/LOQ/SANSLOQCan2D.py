@@ -18,7 +18,6 @@ from sans.common.enums import SANSInstrument
 @ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQCan2D(systemtesting.MantidSystemTest):
     def runTest(self):
-
         LOQ()
         Set2D()
         Detector("main-detector-bank")

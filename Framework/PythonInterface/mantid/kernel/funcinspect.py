@@ -5,12 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Defines functions that can be used to inspect the properties of a
-    function call. For example
+Defines functions that can be used to inspect the properties of a
+function call. For example
 
-        lhs_info() can be used to get retrieve the names and number of
-                   arguments that are being assigned to a function
-                   return
+    lhs_info() can be used to get retrieve the names and number of
+               arguments that are being assigned to a function
+               return
 """
 
 import inspect

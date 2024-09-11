@@ -197,7 +197,7 @@ class DrillSettingsDialog(QDialog):
             values (dict(str: list(str))): setting name and allowed values
             doc (dict(str: str)): setting name and documentation
         """
-        for (n, t) in types.items():
+        for n, t in types.items():
             label = QLabel(n, self)
             self.settings[n] = DrillSetting(n, values[n], types[n], doc[n])
             self.settings[n].valueChanged.connect(self.onValueChanged)
@@ -230,7 +230,7 @@ class DrillSettingsDialog(QDialog):
                                        anything, other that bool will be
                                        converted to str.
         """
-        for (k, v) in settings.items():
+        for k, v in settings.items():
             if k in self.settings:
                 self.settings[k].setter(v)
 
@@ -242,7 +242,7 @@ class DrillSettingsDialog(QDialog):
             dict(str: any): setting name and value.
         """
         settings = dict()
-        for (k, v) in self.settings.items():
+        for k, v in self.settings.items():
             settings[k] = v.getter()
         return settings
 

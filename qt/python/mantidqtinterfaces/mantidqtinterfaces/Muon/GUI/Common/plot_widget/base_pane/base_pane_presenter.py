@@ -12,7 +12,6 @@ from mantid.dataobjects import Workspace2D
 
 class BasePanePresenter:
     def __init__(self, view, model, context, figure_presenter, external_plotting_view=None, external_plotting_model=None):
-
         self._name = model.name
         self._data_type = [""]
         self._sort_by = [""]

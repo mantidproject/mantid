@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
-""" SANSSingleReduction algorithm performs a single reduction."""
+"""SANSSingleReduction algorithm performs a single reduction."""
 
 from SANSSingleReductionBase import SANSSingleReductionBase
 
@@ -40,10 +40,12 @@ class SANSSingleReduction(SANSSingleReductionBase):
             WorkspaceGroupProperty("OutputWorkspaceLAB", "", optional=PropertyMode.Optional, direction=Direction.Output),
             doc="The output workspace for the low-angle bank.",
         )
-        self.declareProperty(
-            WorkspaceGroupProperty("OutputWorkspaceHAB", "", optional=PropertyMode.Optional, direction=Direction.Output),
-            doc="The output workspace for the high-angle bank.",
-        ),
+        (
+            self.declareProperty(
+                WorkspaceGroupProperty("OutputWorkspaceHAB", "", optional=PropertyMode.Optional, direction=Direction.Output),
+                doc="The output workspace for the high-angle bank.",
+            ),
+        )
         self.declareProperty(
             WorkspaceGroupProperty("OutputWorkspaceHABScaled", "", optional=PropertyMode.Optional, direction=Direction.Output),
             doc="The scaled output HAB workspace when merging",

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, too-many-branches, too-few-public-methods, too-many-arguments, too-many-locals
-""" SVN Info:      The variables below will only get subsituted at svn checkout if
+"""SVN Info:      The variables below will only get subsituted at svn checkout if
         the repository is configured for variable substitution.
 
     $Id$
@@ -13,6 +13,7 @@
 |=============================================================================|=======|
 1                                                                            80   <tab>
 """
+
 # these need to be moved into one NR folder or so
 # from ReflectometerCors import *
 from isis_reflectometry.l2q import *
@@ -408,7 +409,6 @@ def make_trans_corr(
 
         transWS = RenameWorkspace(InputWorkspace=transWS, OutputWorkspace="TRANS_" + slam + "_" + llam)
     else:
-
         to_lam = ConvertToWavelength(transrun)
         _monitor_ws_trans, _detector_ws_trans = to_lam.convert(
             wavelength_min=lambda_min,

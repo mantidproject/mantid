@@ -5,10 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Classes for each reduction step. Those are kept separately
-    from the interface class so that the HFIRReduction class could
-    be used independently of the interface implementation
+Classes for each reduction step. Those are kept separately
+from the interface class so that the HFIRReduction class could
+be used independently of the interface implementation
 """
+
 import inspect
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement

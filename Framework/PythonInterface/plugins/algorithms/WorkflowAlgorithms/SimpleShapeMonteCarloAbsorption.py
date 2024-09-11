@@ -217,7 +217,6 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-
         self.log().warning("SimpleShapeMonteCarloAbsorption is deprecated, please use PaalmanPingsMonteCarloAbsorption instead.")
 
         # setup progress reporting
@@ -316,7 +315,6 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setProperty("OutputWorkspace", output_ws)
 
     def _setup(self):
-
         # basic options
         self._input_ws = self.getProperty("InputWorkspace").value
         self._material_defined = self.getProperty("MaterialAlreadyDefined").value
@@ -360,7 +358,6 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self._output_ws = self.getPropertyValue("OutputWorkspace")
 
     def validateInputs(self):
-
         self._setup()
         issues = dict()
 

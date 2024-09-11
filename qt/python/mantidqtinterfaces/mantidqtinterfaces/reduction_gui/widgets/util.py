@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Utility functions used be the widgets
+Utility functions used be the widgets
 """
+
 CSS_VALID = """QLineEdit {
                 background-color: white;
             }"""

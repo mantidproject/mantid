@@ -7,7 +7,6 @@
 
 
 class RundexSettings(object):
-
     # instruments
     D11 = "D11"
     D16 = "D16"

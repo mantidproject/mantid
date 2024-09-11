@@ -117,7 +117,6 @@ class ThreadModel(QtWidgets.QWidget):
         self.model.loadData(inputs)
 
     def threadWrapperSetUp(self, on_thread_start_callback=lambda: 0, on_thread_end_callback=lambda: 0, on_thread_exception_callback=None):
-
         assert hasattr(on_thread_start_callback, "__call__")
         assert hasattr(on_thread_end_callback, "__call__")
 

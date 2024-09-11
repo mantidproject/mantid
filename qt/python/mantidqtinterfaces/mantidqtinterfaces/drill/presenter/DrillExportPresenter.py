@@ -7,7 +7,6 @@
 
 
 class DrillExportPresenter:
-
     """
     Export view.
     """

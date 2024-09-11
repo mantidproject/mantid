@@ -5,15 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Sample data options for EQSANS reduction
+Sample data options for EQSANS reduction
 """
+
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 from reduction_gui.reduction.sans.hfir_sample_script import SampleData as BaseSampleData
 
 
 class SampleData(BaseSampleData):
-
     calculation_method = BaseSampleData.DirectBeam()
     # Option list
     option_list = [BaseSampleData.DirectBeam]

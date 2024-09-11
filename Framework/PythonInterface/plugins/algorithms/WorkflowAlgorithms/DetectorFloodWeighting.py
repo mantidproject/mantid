@@ -22,7 +22,6 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         return "Generates a Detector flood weighting, or sensitivity workspace"
 
     def PyInit(self):
-
         self.declareProperty(
             MatrixWorkspaceProperty("InputWorkspace", "", direction=Direction.Input, validator=WorkspaceUnitValidator("Wavelength")),
             doc="Flood weighting measurement",
@@ -124,7 +123,6 @@ class DetectorFloodWeighting(DataProcessorAlgorithm):
         return accumulated_output
 
     def PyExec(self):
-
         progress = Progress(self, 0, 1, 4)  # Four coarse steps
 
         in_ws = self.getProperty("InputWorkspace").value

@@ -48,7 +48,7 @@ def CalibrateWish(run_per_panel_list):
     whole_instrument = mantid.LoadRaw(str(run_per_panel_list[0][0]))
     whole_instrument = mantid.Integration(whole_instrument)
 
-    for (run_number, panel_name) in run_per_panel_list:
+    for run_number, panel_name in run_per_panel_list:
         panel_name = str(panel_name)
         run_number = str(run_number)
         # load your data and integrate it

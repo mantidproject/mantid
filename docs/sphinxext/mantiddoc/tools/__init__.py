@@ -5,5 +5,5 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-   Subpackage containing tools to help in constructing the documentation
+Subpackage containing tools to help in constructing the documentation
 """

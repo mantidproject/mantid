@@ -36,7 +36,6 @@ class FrequencyPowderGenerator:
         if not (
             isinstance(fundamentals_array, np.ndarray) and len(fundamentals_array.shape) == 1 and fundamentals_array.dtype.num == FLOAT_ID
         ):
-
             raise ValueError("Fundamentals in the form of one dimensional array are expected.")
 
         if not (
@@ -61,7 +60,6 @@ class FrequencyPowderGenerator:
 
         # higher order quantum events.
         else:
-
             if not (isinstance(previous_array, np.ndarray) and len(previous_array.shape) == 1 and previous_array.dtype.num == FLOAT_ID):
                 raise ValueError("One dimensional previous_array is expected.")
 

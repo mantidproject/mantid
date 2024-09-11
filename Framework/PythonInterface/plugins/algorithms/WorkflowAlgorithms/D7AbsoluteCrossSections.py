@@ -25,7 +25,6 @@ import math
 
 
 class D7AbsoluteCrossSections(PythonAlgorithm):
-
     _sampleAndEnvironmentProperties = None
     _mode = None
     _debug = None
@@ -180,7 +179,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         return issues
 
     def PyInit(self):
-
         self.declareProperty(
             WorkspaceGroupProperty("InputWorkspace", "", direction=Direction.Input),
             doc="The input workspace with spin-flip and non-spin-flip data.",

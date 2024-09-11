@@ -9,6 +9,7 @@
 This is a Python algorithm, with profile
 fitting for integrating peaks.
 """
+
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *

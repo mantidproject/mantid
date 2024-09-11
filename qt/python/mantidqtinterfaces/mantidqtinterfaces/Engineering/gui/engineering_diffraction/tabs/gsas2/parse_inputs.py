@@ -29,7 +29,7 @@ class Gsas2Inputs:
         override_cell_lengths,
         refine_unit_cell,
         d_spacing_min,
-        number_of_regions
+        number_of_regions,
     ):
         self.path_to_gsas2 = path_to_gsas2
         self.temporary_save_directory = temporary_save_directory

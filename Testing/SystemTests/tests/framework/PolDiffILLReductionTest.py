@@ -11,7 +11,6 @@ from mantid.geometry import Instrument
 
 
 class PolDiffILLReductionTest(systemtesting.MantidSystemTest):
-
     _pixels_per_bank = 44
     _sampleProperties = None
 
