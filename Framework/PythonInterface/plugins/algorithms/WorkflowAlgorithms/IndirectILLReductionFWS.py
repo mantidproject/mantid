@@ -320,9 +320,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                 Scale(InputWorkspace=right, OutputWorkspace=right, Factor=right_factor)
             else:
                 self.log().notice(
-                    "Zero monitor integral has been found in one (or both) wings;" " left: {0}, right: {1}".format(
-                        left_monitor, right_monitor
-                    )
+                    "Zero monitor integral has been found in one (or both) wings; left: {0}, right: {1}".format(left_monitor, right_monitor)
                 )
 
             Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=left_right_sum)

@@ -474,7 +474,7 @@ class DirectEnergyConversion(object):
         if prop_man.motor_offset is not None and np.isnan(psi):
             # logs have a problem
             prop_man.log(
-                "*** Can not retrieve rotation value from sample environment logs: {0}.\n" "     Rotation angle remains undefined".format(
+                "*** Can not retrieve rotation value from sample environment logs: {0}.\n     Rotation angle remains undefined".format(
                     prop_man.motor_log_names
                 )
             )
@@ -1787,7 +1787,7 @@ class DirectEnergyConversion(object):
 
     def _do_mono_SNS(self, data_ws, result_name, ei_guess, white_run=None, map_file=None, spectra_masks=None, Tzero=None):
         # does not work -- retrieve from repo and fix if this functionality is needed.
-        raise NotImplementedError("Non currently implemented. Retrieve from repository" " if necessary and fix")
+        raise NotImplementedError("Non currently implemented. Retrieve from repository if necessary and fix")
         # return
 
     # -------------------------------------------------------------------------------

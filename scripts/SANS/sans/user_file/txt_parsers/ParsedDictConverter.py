@@ -354,7 +354,7 @@ class ParsedDictConverter(IStateParser):
                     start_times_lab.append(times.start)
                     stop_times_lab.append(times.stop)
                 else:
-                    RuntimeError("UserFileStateDirector: The specified detector {0} is not " "known".format(times.detector_type))
+                    RuntimeError("UserFileStateDirector: The specified detector {0} is not known".format(times.detector_type))
             if start_times_hab:
                 state_builder.set_HAB_bin_mask_start(start_times_hab)
             if stop_times_hab:
@@ -550,9 +550,7 @@ class ParsedDictConverter(IStateParser):
                     vertical_stop_lab.append(block.vertical2)
                 else:
                     raise RuntimeError(
-                        "UserFileStateDirector: The block mask has an unknown " "detector {0} associated " "with it.".format(
-                            block.detector_type
-                        )
+                        "UserFileStateDirector: The block mask has an unknown detector {0} associated with it.".format(block.detector_type)
                     )
             if horizontal_start_hab:
                 state_builder.set_HAB_block_horizontal_start(horizontal_start_hab)
@@ -581,7 +579,7 @@ class ParsedDictConverter(IStateParser):
                     vertical_lab.append(block_cross.vertical)
                 else:
                     raise RuntimeError(
-                        "UserFileStateDirector: The block cross mask has an unknown " "detector {0} associated " "with it.".format(
+                        "UserFileStateDirector: The block cross mask has an unknown detector {0} associated with it.".format(
                             block_cross.detector_type
                         )
                     )
@@ -621,7 +619,7 @@ class ParsedDictConverter(IStateParser):
             radius = radii[-1]
             if radius.start > radius.stop > 0:
                 raise RuntimeError(
-                    "UserFileStateDirector: The inner radius {0} appears to be larger that the outer" " radius {1} of the mask.".format(
+                    "UserFileStateDirector: The inner radius {0} appears to be larger that the outer radius {1} of the mask.".format(
                         radius.start, radius.stop
                     )
                 )
@@ -647,9 +645,7 @@ class ParsedDictConverter(IStateParser):
                     state_builder.set_LAB_x_translation_correction(_convert_mm_to_m(correction_x.entry))
                 else:
                     raise RuntimeError(
-                        "UserFileStateDirector: An unknown detector {0} was used for the" " x correction.".format(
-                            correction_x.detector_type
-                        )
+                        "UserFileStateDirector: An unknown detector {0} was used for the x correction.".format(correction_x.detector_type)
                     )
 
         if DetectorId.CORRECTION_Y in self._input_dict:
@@ -661,9 +657,7 @@ class ParsedDictConverter(IStateParser):
                     state_builder.set_LAB_y_translation_correction(_convert_mm_to_m(correction_y.entry))
                 else:
                     raise RuntimeError(
-                        "UserFileStateDirector: An unknown detector {0} was used for the" " y correction.".format(
-                            correction_y.detector_type
-                        )
+                        "UserFileStateDirector: An unknown detector {0} was used for the y correction.".format(correction_y.detector_type)
                     )
 
         if DetectorId.CORRECTION_Z in self._input_dict:
@@ -675,9 +669,7 @@ class ParsedDictConverter(IStateParser):
                     state_builder.set_LAB_z_translation_correction(_convert_mm_to_m(correction_z.entry))
                 else:
                     raise RuntimeError(
-                        "UserFileStateDirector: An unknown detector {0} was used for the" " z correction.".format(
-                            correction_z.detector_type
-                        )
+                        "UserFileStateDirector: An unknown detector {0} was used for the z correction.".format(correction_z.detector_type)
                     )
 
         # ---------------------------
@@ -692,7 +684,7 @@ class ParsedDictConverter(IStateParser):
                 state_builder.set_LAB_rotation_correction(rotation_correction.entry)
             else:
                 raise RuntimeError(
-                    "UserFileStateDirector: An unknown detector {0} was used for the" " rotation correction.".format(
+                    "UserFileStateDirector: An unknown detector {0} was used for the rotation correction.".format(
                         rotation_correction.detector_type
                     )
                 )
@@ -709,7 +701,7 @@ class ParsedDictConverter(IStateParser):
                     state_builder.set_LAB_radius_correction(_convert_mm_to_m(radius_correction.entry))
                 else:
                     raise RuntimeError(
-                        "UserFileStateDirector: An unknown detector {0} was used for the" " radius correction.".format(
+                        "UserFileStateDirector: An unknown detector {0} was used for the radius correction.".format(
                             radius_correction.detector_type
                         )
                     )
@@ -726,7 +718,7 @@ class ParsedDictConverter(IStateParser):
                     state_builder.set_LAB_side_correction(_convert_mm_to_m(side_correction.entry))
                 else:
                     raise RuntimeError(
-                        "UserFileStateDirector: An unknown detector {0} was used for the" " side correction.".format(
+                        "UserFileStateDirector: An unknown detector {0} was used for the side correction.".format(
                             side_correction.detector_type
                         )
                     )
@@ -743,9 +735,7 @@ class ParsedDictConverter(IStateParser):
                 state_builder.set_LAB_side_correction(tilt_correction.entry)
             else:
                 raise RuntimeError(
-                    "UserFileStateDirector: An unknown detector {0} was used for the" " titlt correction.".format(
-                        tilt_correction.detector_type
-                    )
+                    "UserFileStateDirector: An unknown detector {0} was used for the tilt correction.".format(tilt_correction.detector_type)
                 )
 
         if DetectorId.CORRECTION_Y_TILT in self._input_dict:
@@ -757,9 +747,7 @@ class ParsedDictConverter(IStateParser):
                 state_builder.set_LAB_side_correction(tilt_correction.entry)
             else:
                 raise RuntimeError(
-                    "UserFileStateDirector: An unknown detector {0} was used for the" " tilt correction.".format(
-                        tilt_correction.detector_type
-                    )
+                    "UserFileStateDirector: An unknown detector {0} was used for the tilt correction.".format(tilt_correction.detector_type)
                 )
 
         # ---------------------------

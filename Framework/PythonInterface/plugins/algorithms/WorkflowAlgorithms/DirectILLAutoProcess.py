@@ -491,7 +491,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         instrument = mtd[ws].getInstrument().getName()
         if self.instrument and instrument != self.instrument:
             self.log().error(
-                "Sample data: {} comes from different instruments that the rest of the data:" " {} and {}".format(
+                "Sample data: {} comes from different instruments that the rest of the data: {} and {}".format(
                     sample, instrument, self.instrument
                 )
             )

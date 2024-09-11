@@ -441,7 +441,7 @@ class MainWindow(QMainWindow):
         # Collecting all peaks that will be used to refine UB matrix
         row_index_list = self.ui.tableWidget_peaksCalUB.get_selected_rows(True)
         if len(row_index_list) < 3:
-            err_msg = "At least 3 peaks must be selected to refine UB matrix." "Now it is only %d selected." % len(row_index_list)
+            err_msg = "At least 3 peaks must be selected to refine UB matrix.Now it is only %d selected." % len(row_index_list)
             self.pop_one_button_dialog(err_msg)
             return None
 
@@ -533,7 +533,7 @@ class MainWindow(QMainWindow):
             project_file_name = project_file_name[0]
         # NEXT ISSUE - consider to allow incremental project saving technique
         if os.path.exists(project_file_name):
-            yes = gutil.show_message(self, "Project file %s does exist. This is supposed to be " "an incremental save." % project_file_name)
+            yes = gutil.show_message(self, "Project file %s does exist. This is supposed to be an incremental save." % project_file_name)
             if yes:
                 message = "Save project to {0} in incremental way.".format(project_file_name)
             else:
@@ -887,9 +887,7 @@ class MainWindow(QMainWindow):
             self.ui.lineEdit_preprocessedDir.setStyleSheet("color: green;")
         else:
             # user specifies a non-exist directory. make an error message
-            self.pop_one_button_dialog(
-                "Pre-processed directory {0} ({1}) does not exist." "".format(pre_process_dir, type(pre_process_dir))
-            )
+            self.pop_one_button_dialog("Pre-processed directory {0} ({1}) does not exist.".format(pre_process_dir, type(pre_process_dir)))
             self._myControl.pre_processed_dir = self._myControl.get_working_directory()
             self.ui.lineEdit_preprocessedDir.setStyleSheet("color: red;")
             self.ui.lineEdit_preprocessedDir.setText(self._myControl.pre_processed_dir)
@@ -1060,7 +1058,7 @@ class MainWindow(QMainWindow):
             scan_number = self.ui.tableWidget_mergeScans.get_scan_number(row_number)
             status, ret_obj = self._myControl.get_pt_numbers(exp_number, scan_number)
             if not status:
-                raise RuntimeError("It is not possible to fail to get Pt number list at this stage." "Error is due to %s." % str(ret_obj))
+                raise RuntimeError("It is not possible to fail to get Pt number list at this stage. Error is due to %s." % str(ret_obj))
             pt_number_list = ret_obj
 
             # set intensity to zero and error message if fails to get Pt.
@@ -1181,7 +1179,7 @@ class MainWindow(QMainWindow):
             status, pt_number_list = self._myControl.get_pt_numbers(self._current_exp_number, scan_number)
             # stop this loop if unable to get Pt. numbers
             if not status:
-                print("[DB...BAT] Unable to get list of Pt. number from scan {0} due to {1}." "".format(scan_number, pt_number_list))
+                print("[DB...BAT] Unable to get list of Pt. number from scan {0} due to {1}.".format(scan_number, pt_number_list))
                 continue
             # plot
             for pt_number in pt_number_list:
@@ -1200,7 +1198,7 @@ class MainWindow(QMainWindow):
         # END-FOR
 
         # write out the file list
-        list_name = os.path.join(self._myControl.get_working_directory(), "png_exp{0}_list.txt" "".format(self._current_exp_number))
+        list_name = os.path.join(self._myControl.get_working_directory(), "png_exp{0}_list.txt".format(self._current_exp_number))
         ofile = open(list_name, "w")
         ofile.write(file_name_out)
         ofile.close()
@@ -1389,7 +1387,7 @@ class MainWindow(QMainWindow):
                 background_pt_tuple=bkgd_pt_tuple,
             )
         except RuntimeError as run_error:
-            self.pop_one_button_dialog("Unable to integrate peak for scan {0} due to {1}." "".format(scan_number, run_error))
+            self.pop_one_button_dialog("Unable to integrate peak for scan {0} due to {1}.".format(scan_number, run_error))
             return
 
         # plot calculated motor position (or Pt.) - integrated intensity per Pts.
@@ -1436,7 +1434,7 @@ class MainWindow(QMainWindow):
             fit_gauss_dict = int_peak_dict["gauss parameters"]
         except KeyError as key_err:
             raise RuntimeError(
-                "Peak integration result dictionary has keys {0}. Error is caused by {1}." "".format(int_peak_dict.keys(), key_err)
+                "Peak integration result dictionary has keys {0}. Error is caused by {1}.".format(int_peak_dict.keys(), key_err)
             )
         except ValueError as value_err:
             self._show_message("[ERROR] Unable to fit by Gaussian due to {0}.".format(value_err))
@@ -1450,10 +1448,8 @@ class MainWindow(QMainWindow):
         :return:
         """
         # check inputs
-        assert isinstance(vec_x, numpy.ndarray), "vec X {0} must be a numpy.ndarray but not a {1}." "".format(vec_x, type(vec_x))
-        assert isinstance(params, dict), "Model parameters {0} must be given by a dictionary but not by a {1}." "".format(
-            params, type(params)
-        )
+        assert isinstance(vec_x, numpy.ndarray), "vec X {0} must be a numpy.ndarray but not a {1}.".format(vec_x, type(vec_x))
+        assert isinstance(params, dict), "Model parameters {0} must be given by a dictionary but not by a {1}.".format(params, type(params))
 
         # get parameters
         x0 = params["x0"]
@@ -1833,7 +1829,7 @@ class MainWindow(QMainWindow):
         current_roi_names = [str(self.ui.comboBox_maskNames1.itemText(i)) for i in range(self.ui.comboBox_maskNames1.count())]
         if roi_name in current_roi_names:
             self.pop_one_button_dialog(
-                "[Warning] ROI name {} is used before.  The previous ROI " "will be overwritten by the new defined.".format(roi_name)
+                "[Warning] ROI name {} is used before.  The previous ROI will be overwritten by the new defined.".format(roi_name)
             )
 
         # get current ROI
@@ -1902,9 +1898,7 @@ class MainWindow(QMainWindow):
             if convert_to_hkl:
                 status, ret_obj = self._myControl.get_pt_numbers(exp_number, scan_number)
                 if not status:
-                    raise RuntimeError(
-                        "It is not possible to fail to get Pt number list at this stage." "Error is due to %s." % str(ret_obj)
-                    )
+                    raise RuntimeError("It is not possible to fail to get Pt number list at this stage.Error is due to %s." % str(ret_obj))
                 pt_list = ret_obj
                 md_ws_name = hb3a_util.get_merged_hkl_md_name(self._instrument, exp_number, scan_number, pt_list)
             md_ws_list.append(md_ws_name)
@@ -2058,7 +2052,7 @@ class MainWindow(QMainWindow):
         :param project_file_name:
         :return:
         """
-        assert isinstance(project_file_name, str), "Project file name %s must be a string but not %s." "" % (
+        assert isinstance(project_file_name, str), "Project file name %s must be a string but not %s." % (
             str(project_file_name),
             type(project_file_name),
         )
@@ -2122,7 +2116,7 @@ class MainWindow(QMainWindow):
         :return:
         """
         # check inputs
-        assert isinstance(scan_integrate_info_dict, dict), "Input scan-pt pairs {0} must be in a dict but not a {1}" "".format(
+        assert isinstance(scan_integrate_info_dict, dict), "Input scan-pt pairs {0} must be in a dict but not a {1}".format(
             scan_integrate_info_dict, type(scan_integrate_info_dict)
         )
 
@@ -2192,7 +2186,7 @@ class MainWindow(QMainWindow):
 
         # launch the dialog to get min D and max D
         if (0 < min_d < max_d) is False:
-            self.pop_one_button_dialog("Range of d is not correct! FYI, min D = %.5f, max D = %.5f." "" % (min_d, max_d))
+            self.pop_one_button_dialog("Range of d is not correct! FYI, min D = %.5f, max D = %.5f." % (min_d, max_d))
             return
 
         # get PeakInfo list and check
@@ -2204,7 +2198,7 @@ class MainWindow(QMainWindow):
 
         # friendly suggestion
         if len(peak_info_list) <= 9:
-            self.pop_one_button_dialog("It is recommended to use at least 9 reflections" "to refine UB matrix without prior knowledge.")
+            self.pop_one_button_dialog("It is recommended to use at least 9 reflections to refine UB matrix without prior knowledge.")
 
         # refine
         try:
@@ -2461,7 +2455,7 @@ class MainWindow(QMainWindow):
             #     return
         else:
             # error
-            self.pop_one_button_dialog("User specified IPTS number {0} is not correct." "".format(str(self.ui.lineEdit_iptsNumber.text())))
+            self.pop_one_button_dialog("User specified IPTS number {0} is not correct.".format(str(self.ui.lineEdit_iptsNumber.text())))
 
     def do_set_experiment(self):
         """Set experiment
@@ -2558,7 +2552,7 @@ class MainWindow(QMainWindow):
             self._myControl.set_default_detector_sample_distance(default_det_sample_distance)
             self._myControl.set_default_pixel_size(pixel_x_size, pixel_y_size)
         else:
-            self.pop_one_button_dialog("[ERROR] Unable to parse default instrument geometry constants " "due to %s." % str(ret_obj))
+            self.pop_one_button_dialog("[ERROR] Unable to parse default instrument geometry constants due to %s." % str(ret_obj))
             return
 
         # set the detector center
@@ -2569,7 +2563,7 @@ class MainWindow(QMainWindow):
             center_col = int(terms[1])
             self._myControl.set_detector_center(exp_number, center_row, center_col, default=True)
         except (IndexError, ValueError) as error:
-            self.pop_one_button_dialog("[ERROR] Unable to parse default detector center %s due to %s." "" % (det_center_str, str(error)))
+            self.pop_one_button_dialog("[ERROR] Unable to parse default detector center %s due to %s." % (det_center_str, str(error)))
 
     def do_set_ub_tab_hkl_to_integers(self):
         """
@@ -2597,7 +2591,7 @@ class MainWindow(QMainWindow):
                 self.ui.tableWidget_peaksCalUB.set_hkl(row_index, peak_indexing, is_spice, round_error)
             except RuntimeError as run_err:
                 scan_number, pt_number = self.ui.tableWidget_peaksCalUB.get_scan_pt(row_index)
-                print("[ERROR] Unable to convert HKL to integer for scan " "{0} due to {1}.".format(scan_number, run_err))
+                print("[ERROR] Unable to convert HKL to integer for scan {0} due to {1}.".format(scan_number, run_err))
         # END-FOR
 
         # disable the set to integer button and enable the revert/undo button
@@ -2690,7 +2684,7 @@ class MainWindow(QMainWindow):
                 try:
                     ub_matrix = self._myControl.get_ub_matrix(exp_number)
                 except KeyError as key_err:
-                    self.pop_one_button_dialog("Unable to get UB matrix due to {0}.\nCheck whether UB matrix is set." "".format(key_err))
+                    self.pop_one_button_dialog("Unable to get UB matrix due to {0}.\nCheck whether UB matrix is set.".format(key_err))
                     return
                 index_status, ret_tup = self._myControl.index_peak(ub_matrix, scan_i, allow_magnetic=True)
                 if index_status:
@@ -2811,7 +2805,7 @@ class MainWindow(QMainWindow):
             exp_number = int(str(self.ui.lineEdit_exp.text()))
             user_lambda = float(str(self.ui.lineEdit_userWaveLength.text()))
         except ValueError:
-            self.pop_one_button_dialog("Unable to set user wave length with value %s." "" % str(self.ui.lineEdit_infoWavelength.text()))
+            self.pop_one_button_dialog("Unable to set user wave length with value %s." % str(self.ui.lineEdit_infoWavelength.text()))
             return
 
         self._myControl.set_user_wave_length(exp_number, user_lambda)
@@ -2907,7 +2901,7 @@ class MainWindow(QMainWindow):
         try:
             scan_number = int(str(self.ui.lineEdit_run.text()))
         except ValueError as val_err:
-            error_msg = "Scan number {0} in raw-data-view-tab is invalid. FYI: {1}." "".format(self.ui.lineEdit_run.text(), val_err)
+            error_msg = "Scan number {0} in raw-data-view-tab is invalid. FYI: {1}.".format(self.ui.lineEdit_run.text(), val_err)
             self.pop_one_button_dialog(error_msg)
             return
 
@@ -3091,7 +3085,7 @@ class MainWindow(QMainWindow):
         scan_number_list = self.ui.tableWidget_peaksCalUB.get_selected_scans()
         if len(scan_number_list) != 1:
             self.pop_one_button_dialog(
-                "To view scan data in 3D, one and only one scan can be selected." "Now there are {0} scans that are selected.".format(
+                "To view scan data in 3D, one and only one scan can be selected. Now there are {0} scans that are selected.".format(
                     len(scan_number_list)
                 )
             )
@@ -3278,7 +3272,7 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_viewRawDataMasks.setCurrentIndex(0)
 
         self.ui.lineEdit_message.setText(
-            "New selected ROI: ({0}, {1}), ({2}, {3})" "".format(lower_left_x, lower_left_y, upper_right_x, upper_right_y)
+            "New selected ROI: ({0}, {1}), ({2}, {3})".format(lower_left_x, lower_left_y, upper_right_x, upper_right_y)
         )
 
     def evt_show_survey(self):
@@ -3408,7 +3402,7 @@ class MainWindow(QMainWindow):
         :param message:
         :return:
         """
-        assert isinstance(message, str), "Input message %s must a string but not %s." "" % (str(message), type(message))
+        assert isinstance(message, str), "Input message %s must a string but not %s." % (str(message), type(message))
         QMessageBox.information(self, "4-circle Data Reduction", message)
 
     def report_peak_addition(self, exp_number, error_message):
@@ -3726,8 +3720,8 @@ class MainWindow(QMainWindow):
         :return:
         """
         # Check requirement
-        assert isinstance(peak_info, r4c.PeakProcessRecord), (
-            "Peak information instance must be a PeakProcessedRecord" "but not a {0}".format(type(peak_info))
+        assert isinstance(peak_info, r4c.PeakProcessRecord), "Peak information instance must be a PeakProcessedRecord but not a {0}".format(
+            type(peak_info)
         )
 
         # Get data
@@ -3896,10 +3890,8 @@ class MainWindow(QMainWindow):
         :return:
         """
         # check inputs
-        assert isinstance(exp_number, int), "Exp number {0} must be an integer but not of type {1}" "".format(exp_number, type(exp_number))
-        assert isinstance(scan_number, int), "Scan number {0} must be an integer but not of type {1}" "".format(
-            scan_number, type(scan_number)
-        )
+        assert isinstance(exp_number, int), "Exp number {0} must be an integer but not of type {1}".format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), "Scan number {0} must be an integer but not of type {1}".format(scan_number, type(scan_number))
 
         # Check and load SPICE table file
         load_spice = False
@@ -3932,9 +3924,9 @@ class MainWindow(QMainWindow):
         :return:
         """
         # check inputs
-        assert isinstance(exp_no, int), "Exp number {0} must be an integer but not of type {1}" "".format(exp_no, type(exp_no))
-        assert isinstance(scan_no, int), "Scan number {0} must be an integer but not of type {1}" "".format(scan_no, type(scan_no))
-        assert isinstance(pt_no, int), "Pt number {0} must be an integer but not of type {1}" "".format(pt_no, type(pt_no))
+        assert isinstance(exp_no, int), "Exp number {0} must be an integer but not of type {1}".format(exp_no, type(exp_no))
+        assert isinstance(scan_no, int), "Scan number {0} must be an integer but not of type {1}".format(scan_no, type(scan_no))
+        assert isinstance(pt_no, int), "Pt number {0} must be an integer but not of type {1}".format(pt_no, type(pt_no))
 
         # check data loaded with mask information
         does_loaded = self._myControl.does_raw_loaded(exp_no, scan_no, pt_no, roi_name)
@@ -3953,7 +3945,7 @@ class MainWindow(QMainWindow):
         this_title = "Exp {} Scan {} Pt {} ROI {}".format(exp_no, scan_no, pt_no, roi_name)
         self.ui.graphicsView_detector2dPlot.plot_detector_counts(raw_det_data, title=this_title)
         if save:
-            image_file = os.path.join(self.working_directory, "exp{}_scan{}_pt{}_{}.png" "".format(exp_no, scan_no, pt_no, roi_name))
+            image_file = os.path.join(self.working_directory, "exp{}_scan{}_pt{}_{}.png".format(exp_no, scan_no, pt_no, roi_name))
             self.ui.graphicsView_detector2dPlot.save_figure(image_file)
         else:
             image_file = None
@@ -4015,7 +4007,7 @@ class MainWindow(QMainWindow):
             try:
                 row_number = self.ui.tableWidget_mergeScans.get_row_by_scan(scan_number)
             except RuntimeError as run_err:
-                raise RuntimeError("Unable to find scan {0} in Peak-Processing table due to {1}." "".format(scan_number, run_err))
+                raise RuntimeError("Unable to find scan {0} in Peak-Processing table due to {1}.".format(scan_number, run_err))
 
             # get peak: simple summation intensity
             intensity, int_std_dev = peak_info_obj.get_intensity("simple intensity", False)
@@ -4090,7 +4082,7 @@ class MainWindow(QMainWindow):
         # check
         assert isinstance(exp_number, int), "Experiment number must be integer."
         assert isinstance(scan_number, int), "Scan number must be integer."
-        assert isinstance(mode, int), "Mode %s must be integer but not %s." "" % (str(mode), type(mode))
+        assert isinstance(mode, int), "Mode %s must be integer but not %s." % (str(mode), type(mode))
         assert isinstance(message, str) or isinstance(message, unicode), "Message %s must be a string/unicode but not %s." % (
             str(message),
             type(message),

@@ -1130,7 +1130,7 @@ class Qt4MplCanvas(FigureCanvas):
         # Check input
         if isinstance(vec_x, np.ndarray) is False or isinstance(vec_y, np.ndarray) is False:
             raise NotImplementedError(
-                "Input vec_x {0} or vec_y {1} for addPlot() must be numpy.array, but they are " "{2} and {3}.".format(
+                "Input vec_x {0} or vec_y {1} for addPlot() must be numpy.array, but they are {2} and {3}.".format(
                     vec_x, vec_y, type(vec_x), type(vec_y)
                 )
             )

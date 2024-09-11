@@ -46,7 +46,7 @@ def move_component(workspace, offsets, component_to_move, is_relative=True):
             move_options.update({"Z": value})
         else:
             raise RuntimeError(
-                "MoveInstrumentComponent: Trying to move the components along an unknown direction. " "See here: {0}".format(
+                "MoveInstrumentComponent: Trying to move the components along an unknown direction. See here: {0}".format(
                     str(component_to_move)
                 )
             )
@@ -75,7 +75,7 @@ def rotate_component(workspace, angle, direction, component_to_rotate):
             rotate_options.update({"Z": value})
         else:
             raise RuntimeError(
-                "MoveInstrumentComponent: Trying to rotate the components along an unknown direction. " "See here: {0}".format(
+                "MoveInstrumentComponent: Trying to rotate the components along an unknown direction. See here: {0}".format(
                     str(component_to_rotate)
                 )
             )

@@ -412,7 +412,7 @@ class SData(collections.abc.Sequence):
         if len(warning_cases) > 0:
             logger_call("Warning: some contributions had small S compared to threshold.")
             logger_call(
-                "The minimum S threshold ({}) is greater than {}% of the " "maximum S for the following:".format(
+                "The minimum S threshold ({}) is greater than {}% of the maximum S for the following:".format(
                     absolute_threshold, relative_threshold * 100
                 )
             )
@@ -571,7 +571,7 @@ class SDataByAngle(collections.abc.Sequence):
         for atom_key, atom_data in data.items():
             for order, order_data in atom_data["s"].items():
                 if order_data.shape != (n_angles, n_frequencies):
-                    raise IndexError("SDataByAngle input should have 2D array " "in (angles, frequencies)")
+                    raise IndexError("SDataByAngle input should have 2D array in (angles, frequencies)")
 
         self.angles = list(angles)
         self._data = data
@@ -701,7 +701,7 @@ class SDataByAngle(collections.abc.Sequence):
                     metadata[key] = getattr(sdata, f"get_{key}")()
                 else:
                     if not near_enough(metadata[key], getattr(sdata, f"get_{key}")()):
-                        raise ValueError(f"Property '{key}' must agree for all " "SData being collected.")
+                        raise ValueError(f"Property '{key}' must agree for all SData being collected.")
 
         atom_keys = list(data[0]._data.keys())
         sdata_collection = cls.get_empty(

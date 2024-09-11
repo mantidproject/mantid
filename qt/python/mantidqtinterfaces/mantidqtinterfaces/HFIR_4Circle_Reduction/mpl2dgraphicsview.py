@@ -222,16 +222,9 @@ class Qt4Mpl2dCanvas(FigureCanvas):
         """
         # Check
         assert isinstance(array2d, np.ndarray), "Input array2d must be a numpy array but not %s." % str(type(array2d))
-        assert isinstance(x_min, int) and isinstance(x_max, int) and x_min < x_max, (
-            "x_min = %s (of type %s) should be less than x_max = %s (of type %s)."
-            ""
-            % (
-                str(x_min),
-                str(type(x_min)),
-                str(x_max),
-                str(type(x_max)),
-            )
-        )
+        assert (
+            isinstance(x_min, int) and isinstance(x_max, int) and x_min < x_max
+        ), f"x_min = {x_min} (of type {type(x_min)}) should be less than x_max = {x_max} (of type {type(x_max)})."
         assert isinstance(y_min, int) and isinstance(y_max, int) and y_min < y_max
 
         # Release the current image

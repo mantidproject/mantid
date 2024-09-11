@@ -300,7 +300,7 @@ class EnggFitPeaks(PythonAlgorithm):
         fit_function = "name=LinearBackground;{0}".format(peak)
         (startx, endx) = self._estimate_start_end_fitting_range(center, width)
         self.log().debug(
-            "Fitting for peak expected in (d-spacing): {0}, Fitting peak function: " "{1}, with startx: {2}, endx: {3}".format(
+            "Fitting for peak expected in (d-spacing): {0}, Fitting peak function: {1}, with startx: {2}, endx: {3}".format(
                 expected_center, fit_function, startx, endx
             )
         )
@@ -428,7 +428,7 @@ class EnggFitPeaks(PythonAlgorithm):
             output_ws = ConvertUnits(InputWorkspace=ws_from, Target=target_units)
         except:
             raise RuntimeError(
-                "Conversion of units went wrong. Failed to run ConvertUnits for {0} " "peaks. Details: {1}".format(
+                "Conversion of units went wrong. Failed to run ConvertUnits for {0} peaks. Details: {1}".format(
                     len(expected_peaks), expected_peaks
                 )
             )
