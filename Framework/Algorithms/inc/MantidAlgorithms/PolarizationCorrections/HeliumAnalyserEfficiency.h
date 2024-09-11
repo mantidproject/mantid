@@ -39,16 +39,12 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
-  void validateGroupInput();
-  void calculateAnalyserEfficiency();
-  MatrixWorkspace_sptr addTwoWorkspaces(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr otherWs);
+  MatrixWorkspace_sptr calculateAnalyserEfficiency();
   MatrixWorkspace_sptr createWorkspace(const std::string &name, const std::string &title, const MantidVec &xData,
                                        const MantidVec &yData, const MantidVec &eData);
-  MatrixWorkspace_sptr divideWorkspace(MatrixWorkspace_sptr numerator, MatrixWorkspace_sptr denominator);
-  void fitAnalyserEfficiency(const double mu, MatrixWorkspace_sptr e, const MantidVec &wavelengthValues, double &pHe,
-                             double &pHeError, MantidVec &eCalc);
-  MatrixWorkspace_sptr calculateEfficiencyWorkspace(const MantidVec &wavelengthValues, const MantidVec &eValues,
-                                                    const double pHe, const double pHeError, const double mu);
+  void fitAnalyserEfficiency(const double mu, const MatrixWorkspace_sptr eff, double &pHe, double &pHeError);
+  MatrixWorkspace_sptr createEfficiencyWorkspace(const MantidVec &wavelengthValues, const MantidVec &effValues,
+                                                 const double pHe, const double pHeError, const double mu);
   double calculateTCrit(const size_t numberOfBins);
 
   static const double ABSORPTION_CROSS_SECTION_CONSTANT;
