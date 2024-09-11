@@ -45,7 +45,7 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
-  void prepareGoniometerAxes(Goniometer &gon, const API::ExperimentInfo_sptr &ei);
+  void prepareGoniometerAxes(Goniometer &gon);
   bool checkIsValidShape(const API::ExperimentInfo_sptr &ei, std::string &shapeXML, bool &isMeshShape);
 };
 

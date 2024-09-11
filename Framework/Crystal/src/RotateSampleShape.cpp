@@ -72,7 +72,7 @@ void RotateSampleShape::exec() {
 
   // Create a goniometer with provided rotations
   Goniometer gon;
-  prepareGoniometerAxes(gon, ei);
+  prepareGoniometerAxes(gon);
   if (gon.getNumberAxes() == 0)
     g_log.warning() << "Empty goniometer created; will always return an "
                        "identity rotation matrix.\n";
@@ -115,7 +115,7 @@ bool RotateSampleShape::checkIsValidShape(const API::ExperimentInfo_sptr &ei, st
   return false;
 }
 
-void RotateSampleShape::prepareGoniometerAxes(Goniometer &gon, const API::ExperimentInfo_sptr &ei) {
+void RotateSampleShape::prepareGoniometerAxes(Goniometer &gon) {
   for (size_t i = 0; i < NUM_AXES; i++) {
     std::ostringstream propName;
     propName << "Axis" << i;
