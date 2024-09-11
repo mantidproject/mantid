@@ -1,51 +1,41 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
 
-class Presenter(object):
-    # Pass the view and model into the presenter
-    def __init__(self, demo_view, demo_model):
-        self.model = demo_model
-        self.view = demo_view
+class Presenter:
 
-        # Define the initial view
-        # Note that, in the view, the drop-down could be replaced with a set of
-        # tick boxes and this line would remain unchanged - an advantage of
-        # decoupling the presenter and view
-        self.view.set_options("operations", ["+", "-"])
-        self.view.set_options("display", ["print", "update", "print and update"])
-        self.printToScreen = True
-        self.view.hide_display()
+    def __init__(self, view, model):
+        self._view = view
+        self._model = model
 
-        # Connect to the view's custom signals
-        self.view.btnSignal.connect(self.handle_button)
-        self.view.displaySignal.connect(self.display_update)
+        self._view.subscribe_presenter(self)
 
-    # The final two methods handle the signals
-    def display_update(self):
-        display = self.view.get_display()
-        if display == "update":
-            self.printToScreen = False
-            self.view.show_display()
-        elif display == "print":
-            self.printToScreen = True
-            self.view.hide_display()
-        else:
-            self.printToScreen = True
-            self.view.show_display()
+        self._view.set_options("operations", ["+", "-"])
+        self._view.set_options("display", ["print", "update", "print and update"])
+        self._view.show_display(False)
 
-    def handle_button(self):
-        # Get the values from view
-        value1 = self.view.get_value(0)
-        operation = self.view.get_operation()
-        value2 = self.view.get_value(2)
-        # The model does the hard work for us
-        result = self.model.calc(value1, operation, value2)
+    def handle_button_clicked(self) -> None:
+        value1 = self._view.get_value(0)
+        operation = self._view.get_operation()
+        value2 = self._view.get_value(2)
 
-        if self.printToScreen:
+        result = self._model.calculate(value1, operation, value2)
+
+        if self._model.print_to_screen():
             print(result)
-        self.view.setResult(result)
+
+        self._view.set_result(result)
+
+    def handle_display_changed(self) -> None:
+        display = self._view.get_display()
+        self._model.set_print_to_screen(display != "update")
+        if display == "update":
+            self._view.show_display(True)
+        elif display == "print":
+            self._view.show_display(False)
+        else:
+            self._view.show_display(True)
