@@ -248,7 +248,7 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
-        self.tolerance = 1e-1
+        self.tolerance = 1.0e-1
         self.tolerance_is_rel_err = True
         return ("PG3_4866", "PG3_4866_golden")
 
