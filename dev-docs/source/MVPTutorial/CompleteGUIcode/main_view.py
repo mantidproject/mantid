@@ -1,30 +1,32 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets
+from qtpy.QtWidgets import QVBoxLayout, QWidget
+from typing import Union
 
-import view
-import plot_view
+from view import View
+from plot_view import PlotView
 
 
-class MainView(QtWidgets.QWidget):
-    def __init__(self, parent=None):
+class MainView(QWidget):
+
+    def __init__(self, parent: Union[QWidget, None] = None):
         super().__init__(parent)
 
-        grid = QtWidgets.QVBoxLayout(self)
-        self.plot_view = plot_view.PlotView()
-        self.options_view = view.View()
+        grid = QVBoxLayout(self)
+        self._plot_view = PlotView()
+        self._options_view = View()
 
-        grid.addWidget(self.plot_view)
-        grid.addWidget(self.options_view)
+        grid.addWidget(self._plot_view)
+        grid.addWidget(self._options_view)
 
         self.setLayout(grid)
 
-    def getOptionView(self):
-        return self.options_view
+    def get_options_view(self) -> QWidget:
+        return self._options_view
 
-    def getPlotView(self):
-        return self.plot_view
+    def get_plot_view(self) -> QWidget:
+        return self._plot_view

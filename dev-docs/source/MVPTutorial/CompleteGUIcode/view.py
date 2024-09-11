@@ -1,82 +1,88 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets, QtCore
+from qtpy.QtCore.Qt import Checked, ItemIsEnabled, ItemIsUserCheckable, Unchecked
+from qtpy.QtWidgets import QComboBox, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
+from typing import List, Union
+
+TEXT_COLUMN = 0
+WIDGET_COLUMN = 1
 
 
-class View(QtWidgets.QWidget):
-    plotSignal = QtCore.Signal()
+class View(QWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Union[QWidget, None] = None):
         super().__init__(parent)
 
-        grid = QtWidgets.QVBoxLayout(self)
+        self._presenter = None
 
-        self.table = QtWidgets.QTableWidget(self)
-        self.table.setRowCount(4)
-        self.table.setColumnCount(2)
+        grid = QVBoxLayout(self)
 
-        grid.addWidget(self.table)
+        self._table = QTableWidget(self)
+        self._table.setRowCount(4)
+        self._table.setColumnCount(2)
 
-        self.colours = QtWidgets.QComboBox()
+        grid.addWidget(self._table)
+
+        self._colours = QComboBox()
         options = ["Blue", "Green", "Red"]
-        self.colours.addItems(options)
+        self._colours.addItems(options)
 
-        self.grid_lines = QtWidgets.QTableWidgetItem()
-        self.grid_lines.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-        self.grid_lines.setCheckState(QtCore.Qt.Unchecked)
-        self.addItemToTable("Show grid lines", self.grid_lines, 1)
+        self._grid_lines = QTableWidgetItem()
+        self._grid_lines.setFlags(ItemIsUserCheckable | ItemIsEnabled)
+        self._grid_lines.setCheckState(Unchecked)
+        self._add_item_to_table("Show grid lines", self._grid_lines, 1)
 
-        self.freq = QtWidgets.QTableWidgetItem("1.0")
-        self.phi = QtWidgets.QTableWidgetItem("0.0")
+        self._freq = QTableWidgetItem("1.0")
+        self._phi = QTableWidgetItem("0.0")
 
-        self.addWidgetToTable("Colour", self.colours, 0)
-        self.addItemToTable("Frequency", self.freq, 2)
-        self.addItemToTable("Phase", self.phi, 3)
+        self._add_widget_to_table("Colour", self._colours, 0)
+        self._add_item_to_table("Frequency", self._freq, 2)
+        self._add_item_to_table("Phase", self._phi, 3)
 
-        self.plot = QtWidgets.QPushButton("Add", self)
-        self.plot.setStyleSheet("background-color:lightgrey")
+        self._plot = QPushButton("Add", self)
+        self._plot.setStyleSheet("background-color:lightgrey")
 
-        grid.addWidget(self.plot)
+        grid.addWidget(self._plot)
 
         self.setLayout(grid)
 
-        self.plot.clicked.connect(self.buttonPressed)
+        self._plot.clicked.connect(self._button_clicked)
 
-    def getColour(self):
-        return self.colours.currentText()
+    def subscribe_presenter(self, presenter) -> None:
+        self._presenter = presenter
 
-    def getGridLines(self):
-        return self.grid_lines.checkState() == QtCore.Qt.Checked
+    def get_colour(self) -> str:
+        return self._colours.currentText()
 
-    def getFreq(self):
-        return float(self.freq.text())
+    def get_grid_lines(self) -> bool:
+        return self._grid_lines.checkState() == Checked
 
-    def getPhase(self):
-        return float(self.phi.text())
+    def get_freq(self) -> float:
+        return float(self._freq.text())
 
-    def buttonPressed(self):
-        self.plotSignal.emit()
+    def get_phase(self) -> float:
+        return float(self._phi.text())
 
-    def setTableRow(self, name, row):
-        text = QtWidgets.QTableWidgetItem(name)
-        text.setFlags(QtCore.Qt.ItemIsEnabled)
-        col = 0
-        self.table.setItem(row, col, text)
+    def _button_clicked(self):
+        self._presenter.handle_update_plot()
 
-    def addWidgetToTable(self, name, widget, row):
-        self.setTableRow(name, row)
-        col = 1
-        self.table.setCellWidget(row, col, widget)
+    def _set_table_row(self, name: str, row: int) -> None:
+        text = QTableWidgetItem(name)
+        text.setFlags(ItemIsEnabled)
+        self._table.setItem(row, TEXT_COLUMN, text)
 
-    def addItemToTable(self, name, widget, row):
-        self.setTableRow(name, row)
-        col = 1
-        self.table.setItem(row, col, widget)
+    def _add_widget_to_table(self, name: str, widget: QWidget, row: int) -> None:
+        self._set_table_row(name, row)
+        self._table.setCellWidget(row, WIDGET_COLUMN, widget)
 
-    def setColours(self, options):
-        self.colours.clear()
-        self.colours.addItems(options)
+    def _add_item_to_table(self, name: str, widget: QWidget, row: int) -> None:
+        self._set_table_row(name, row)
+        self._table.setItem(row, WIDGET_COLUMN, widget)
+
+    def set_colours(self, options: List[str]) -> None:
+        self._colours.clear()
+        self._colours.addItems(options)

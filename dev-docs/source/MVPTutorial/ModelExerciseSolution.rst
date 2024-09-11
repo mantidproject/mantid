@@ -40,7 +40,7 @@ And the Main module should now pass the two models into the presenter:
 
     from qtpy.QtWidgets import QApplication
 
-    from model import Model
+    from model import PlotModel
     from view import View
     from presenter import Presenter
 
@@ -52,7 +52,7 @@ And the Main module should now pass the two models into the presenter:
 
 
     app = _get_qapplication_instance()
-    model = Model()
+    model = PlotModel()
     view = View()
     presenter = Presenter(view, model)
     view.show()

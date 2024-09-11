@@ -12,7 +12,7 @@ The first model generates the data for the user:
 
     import numpy as np
 
-    class Model:
+    class PlotModel:
 
         def __init__(self):
             self._x_data = np.linspace(0.0, 10.0, 100)
