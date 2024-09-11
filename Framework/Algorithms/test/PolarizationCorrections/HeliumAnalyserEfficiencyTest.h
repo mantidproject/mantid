@@ -83,13 +83,11 @@ public:
   }
 
   void testZeroPdError() {
-    compareOutputValues(0, {0.30014653230974014, 0.57963318214497705, 0.66538755300925145, 0.60459494095906063,
-                            0.47973863354145241, 0.34991554915720857});
+    compareOutputValues(0, {0.4855492736, 0.6769211783, 0.6793691847, 0.5720548267, 0.4331271890});
   }
 
   void testNonZeroPdError() {
-    compareOutputValues(1000, {9.6118938419182438, 18.562175518594128, 21.308373860067174, 19.361550990241895,
-                               15.363152064368265, 11.205697051548009});
+    compareOutputValues(1000, {15.5492320180, 21.6777267458, 21.7561216833, 18.3194862144, 13.8704669868});
   }
 
   void testSmallNumberOfBins() {
@@ -113,10 +111,8 @@ public:
     TS_ASSERT(heliumAnalyserEfficiency->isExecuted());
     MatrixWorkspace_sptr eff = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("E");
     MatrixWorkspace_sptr firstWs = std::dynamic_pointer_cast<MatrixWorkspace>(wsGrp->getItem(0));
-    const auto originalXPoints = firstWs->dataX(0);
-    const auto xPoints = eff->dataE(0);
-    // The output wavelength range should match those from the input, not the fitting range.
-    TS_ASSERT_EQUALS(originalXPoints.size(), xPoints.size());
+    // The output number of wavelength bins should match those from the input.
+    TS_ASSERT_EQUALS(firstWs->blocksize(), eff->blocksize());
   }
 
   void testFitCurvesOutputWhenOptionalPropertySet() {
@@ -202,13 +198,12 @@ private:
     wsVec[2] = generateWorkspace("ws2", x, ySf, xUnit);
     wsVec[3] = generateWorkspace("ws3", x, yNsf, xUnit);
 
-    const auto histBins = wsVec[0]->dataX(0);
-    yNsf.resize(histBins.size());
-    ySf.resize(histBins.size());
-    expectedEfficiency.resize(histBins.size());
-    for (size_t i = 0; i < histBins.size(); ++i) {
-      yNsf[i] = 0.9 * std::exp(-0.0733 * histBins[i] * 12 * (1 - examplePHe));
-      ySf[i] = 0.9 * std::exp(-0.0733 * histBins[i] * 12 * (1 + examplePHe));
+    const auto histPoints = wsVec[0]->histogram(0).points();
+    const auto &wavelengthPoints = histPoints.rawData();
+    expectedEfficiency.resize(wavelengthPoints.size());
+    for (size_t i = 0; i < wavelengthPoints.size(); ++i) {
+      yNsf[i] = 0.9 * std::exp(-0.0733 * wavelengthPoints[i] * 12 * (1 - examplePHe));
+      ySf[i] = 0.9 * std::exp(-0.0733 * wavelengthPoints[i] * 12 * (1 + examplePHe));
       expectedEfficiency[i] = yNsf[i] / (yNsf[i] + ySf[i]);
     }
 
