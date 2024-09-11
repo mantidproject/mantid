@@ -27,7 +27,7 @@ namespace {
 /// Property names.
 namespace Prop {
 static const std::string FLIPPERS{"Flippers"};
-static const std::string SPIN_STATES{"SpinStatesOutWildes"};
+static const std::string OUTPUT_WILDES_SPIN_STATES{"SpinStatesOutWildes"};
 static const std::string POLARIZATION_ANALYSIS{"PolarizationAnalysis"};
 static const std::string EFFICIENCIES{"Efficiencies"};
 static const std::string INPUT_WORKSPACES{"InputWorkspaces"};
@@ -111,7 +111,7 @@ void PolarizationEfficiencyCor::init() {
 
   const auto spinStateValidator =
       std::make_shared<SpinStateValidator>(std::unordered_set<int>{0, 2, 4}, true, '+', '-', true);
-  declareProperty(Prop::SPIN_STATES, "", spinStateValidator,
+  declareProperty(Prop::OUTPUT_WILDES_SPIN_STATES, "", spinStateValidator,
                   "The order of the spin states in the output workspace. (Wildes method only).");
 
   std::vector<std::string> propOptions{"", "PA", "PNR"};
@@ -136,8 +136,9 @@ void PolarizationEfficiencyCor::init() {
       std::make_unique<WorkspaceProperty<WorkspaceGroup>>(Prop::OUTPUT_WORKSPACES, "", Kernel::Direction::Output),
       "A group of polarization efficiency corrected workspaces.");
 
-  setPropertySettings(Prop::SPIN_STATES, std::make_unique<EnabledWhenProperty>(
-                                             Prop::CORRECTION_METHOD, Kernel::IS_EQUAL_TO, CorrectionMethod::WILDES));
+  setPropertySettings(
+      Prop::OUTPUT_WILDES_SPIN_STATES,
+      std::make_unique<EnabledWhenProperty>(Prop::CORRECTION_METHOD, Kernel::IS_EQUAL_TO, CorrectionMethod::WILDES));
 
   setPropertySettings(Prop::FLIPPERS, std::make_unique<EnabledWhenProperty>(
                                           Prop::CORRECTION_METHOD, Kernel::IS_EQUAL_TO, CorrectionMethod::WILDES));
@@ -180,8 +181,8 @@ void PolarizationEfficiencyCor::execWildes() {
   if (!isDefault(Prop::FLIPPERS)) {
     alg->setPropertyValue("Flippers", getPropertyValue(Prop::FLIPPERS));
   }
-  if (!isDefault(Prop::SPIN_STATES)) {
-    alg->setPropertyValue("SpinStates", getPropertyValue(Prop::SPIN_STATES));
+  if (!isDefault(Prop::OUTPUT_WILDES_SPIN_STATES)) {
+    alg->setPropertyValue("SpinStates", getPropertyValue(Prop::OUTPUT_WILDES_SPIN_STATES));
   }
   auto out = getPropertyValue(Prop::OUTPUT_WORKSPACES);
   alg->setPropertyValue("OutputWorkspace", out);
@@ -203,10 +204,10 @@ void PolarizationEfficiencyCor::execFredrikze() {
     alg->setPropertyValue("PolarizationAnalysis", getPropertyValue(Prop::POLARIZATION_ANALYSIS));
   }
   if (!isDefault(Prop::INPUT_FRED_SPIN_STATES)) {
-    alg->setPropertyValue("InputSpinStateOrder", getPropertyValue(Prop::INPUT_FRED_SPIN_STATES));
+    alg->setPropertyValue("InputSpinStates", getPropertyValue(Prop::INPUT_FRED_SPIN_STATES));
   }
   if (!isDefault(Prop::OUTPUT_FRED_SPIN_STATES)) {
-    alg->setPropertyValue("OutputSpinStateOrder", getPropertyValue(Prop::OUTPUT_FRED_SPIN_STATES));
+    alg->setPropertyValue("OutputSpinStates", getPropertyValue(Prop::OUTPUT_FRED_SPIN_STATES));
   }
   alg->setPropertyValue("OutputWorkspace", getPropertyValue(Prop::OUTPUT_WORKSPACES));
   alg->execute();
@@ -257,8 +258,8 @@ void PolarizationEfficiencyCor::checkFredrikzeProperties() const {
   if (!isDefault(Prop::FLIPPERS)) {
     throw std::invalid_argument("Property Flippers cannot be used with the Fredrikze method.");
   }
-  if (!isDefault(Prop::SPIN_STATES)) {
-    throw std::invalid_argument("Property SpinStates cannot be used with the Fredrikze method.");
+  if (!isDefault(Prop::OUTPUT_WILDES_SPIN_STATES)) {
+    throw std::invalid_argument("Property SpinStatesOutWildes cannot be used with the Fredrikze method.");
   }
 }
 
