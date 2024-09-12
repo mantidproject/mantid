@@ -411,7 +411,6 @@ class PeakFitter:
         fit_kwargs,
         error_strategy,
     ):
-
         self.ws = peak_data.ws
         self.pk: IPeak = pk
         self.peak_pos: tuple[int, int] = (peak_data.irow, peak_data.icol)
