@@ -135,8 +135,7 @@ void HeliumAnalyserEfficiency::exec() {
   // Theoretically, the analyser efficiency is given by (1 + tanh(mu * phe * wavelength))/2.
   // Using the analyser efficiency value that we calculated from the data,
   // we fit this function to find pHe, the helium atom polarization in the analyser.
-  const double pd = getProperty(PropertyNames::PD);
-  const double mu = ABSORPTION_CROSS_SECTION_CONSTANT * pd;
+  const double mu = ABSORPTION_CROSS_SECTION_CONSTANT * static_cast<double>(getProperty(PropertyNames::PD));
 
   double pHe, pHeError;
   fitAnalyserEfficiency(mu, eff, pHe, pHeError);
