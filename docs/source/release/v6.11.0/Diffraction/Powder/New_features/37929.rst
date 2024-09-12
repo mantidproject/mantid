@@ -1,0 +1,1 @@
+- Add option ``fit_prompt_pulse`` to HRPD (ISIS) reduction to fit and subtract prompt pulse (as opposed to default method of masking of prompt pulse in TOF).

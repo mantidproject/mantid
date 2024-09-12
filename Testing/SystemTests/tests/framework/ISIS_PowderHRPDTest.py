@@ -11,6 +11,7 @@ import systemtesting
 
 import mantid.simpleapi as mantid
 from mantid import config
+from mantid.kernel import UnitConversion, DeltaEModeType
 
 from isis_powder import HRPD, SampleDetails
 
@@ -56,7 +57,7 @@ class CreateVanadiumNoSolidAngleTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         setup_mantid_paths()
-        self.calibration_results = run_vanadium_calibration(do_solid_angle_corrections=False, do_empty_subtraction=True)
+        self.calibration_results = run_vanadium_calibration(do_solid_angle_corrections=False, subtract_empty_instrument=True)
 
     def validate(self):
         self.checkInstrument = False  # want to check focused results, not the instrument geometry
@@ -81,7 +82,7 @@ class CreateVanadiumNoSolidAngleNoEmptySubtractionTest(systemtesting.MantidSyste
 
     def runTest(self):
         setup_mantid_paths()
-        self.calibration_results = run_vanadium_calibration(do_solid_angle_corrections=False, do_empty_subtraction=False)
+        self.calibration_results = run_vanadium_calibration(do_solid_angle_corrections=False, subtract_empty_instrument=False)
 
     def validate(self):
         self.checkInstrument = False  # want to check focused results, not the instrument geometry
@@ -160,6 +161,35 @@ class FocusNoSolidAngleTest(systemtesting.MantidSystemTest):
             mantid.mtd.clear()
 
 
+class FocusNoSolidAnglePromptSubtractedTest(systemtesting.MantidSystemTest):
+    calibration_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        setup_mantid_paths()
+        self.focus_results = run_focus(do_solid_angle_corrections=False, fit_prompt_pulse=True)
+
+    def validate(self):
+        # feature still in development - just assert value at TOF of a prompt pulse in backscattering bank
+        ws_backscatt = self.focus_results[0]
+        si = ws_backscatt.spectrumInfo()
+        diff_consts = si.diffractometerConstants(0)
+        tof_prompt = 20010
+        d_prompt = UnitConversion.run("TOF", "dSpacing", tof_prompt, 0, DeltaEModeType.Elastic, diff_consts)
+        self.assertAlmostEqual(ws_backscatt.readY(0)[ws_backscatt.yIndexOfX(d_prompt)], 7.3951, delta=1e-4)
+
+    def cleanup(self):
+        try:
+            _try_delete(output_dir)
+            _try_delete(spline_path)
+        finally:
+            mantid.mtd.clear()
+            config["datasearch.directories"] = self.existing_config
+
+
 class VanadiumAndFocusWithSolidAngleTest(systemtesting.MantidSystemTest):
     focus_results = None
     existing_config = config["datasearch.directories"]
@@ -201,16 +231,12 @@ def gen_required_run_numbers():
     return ["66028", "66031", "66063"]  # Sample empty  # Vanadium  # Run to focus
 
 
-def run_vanadium_calibration(do_solid_angle_corrections, do_empty_subtraction=True):
+def run_vanadium_calibration(**kwargs):
+    kwargs = {"subtract_empty_instrument": True, "do_solid_angle_corrections": True, **kwargs}
     vanadium_run = 66031  # Choose arbitrary run from cycle 16_5
     inst_obj = setup_inst_object()
     inst_obj.create_vanadium(
-        first_cycle_run_no=vanadium_run,
-        do_solid_angle_corrections=do_solid_angle_corrections,
-        do_absorb_corrections=True,
-        multiple_scattering=False,
-        subtract_empty_instrument=do_empty_subtraction,
-        window=WINDOW,
+        first_cycle_run_no=vanadium_run, do_absorb_corrections=True, multiple_scattering=False, window=WINDOW, **kwargs
     )
 
     # Check the spline looks good and was saved
@@ -220,7 +246,7 @@ def run_vanadium_calibration(do_solid_angle_corrections, do_empty_subtraction=Tr
     return splined_ws
 
 
-def run_focus(do_solid_angle_corrections):
+def run_focus(**kwargs):
     [sample_empty, _, run_number] = gen_required_run_numbers()
     sample_empty_scale = 1
 
@@ -242,9 +268,9 @@ def run_focus(do_solid_angle_corrections):
         sample_empty=sample_empty,
         sample_empty_scale=sample_empty_scale,
         vanadium_normalisation=True,
-        do_solid_angle_corrections=do_solid_angle_corrections,
         do_absorb_corrections=True,
         multiple_scattering=False,
+        **kwargs,
     )
 
 
