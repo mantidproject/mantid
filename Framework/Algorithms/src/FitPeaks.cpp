@@ -1553,7 +1553,7 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
 
 double FitPeaks::calculateSignalToSigmaRatio(const size_t &iws, const std::pair<double, double> &peakWindow,
                                              const API::IPeakFunction_sptr &peakFunction) {
-  const auto &vecX = m_fittedPeakWS->points(iws);
+  const auto &vecX = m_inputMatrixWS->points(iws);
   auto startX = std::lower_bound(vecX.begin(), vecX.end(), peakWindow.first);
   auto stopX = std::lower_bound(vecX.begin(), vecX.end(), peakWindow.second);
 
@@ -1563,9 +1563,9 @@ double FitPeaks::calculateSignalToSigmaRatio(const size_t &iws, const std::pair<
   peakFunction->function(domain, values);
   auto peakValues = values.toVector();
 
-  const auto &errors = m_fittedPeakWS->readE(iws);
-  auto startE = std::lower_bound(errors.begin(), errors.end(), peakWindow.first);
-  auto stopE = std::lower_bound(errors.begin(), errors.end(), peakWindow.second);
+  const auto &errors = m_inputMatrixWS->readE(iws);
+  auto startE = errors.begin() + (startX - vecX.begin());
+  auto stopE = errors.begin() + (stopX - vecX.begin());
   std::vector<double> peakErrors(startE, stopE);
 
   double peakSum = std::accumulate(peakValues.cbegin(), peakValues.cend(), 0.0);
