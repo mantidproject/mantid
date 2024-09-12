@@ -71,6 +71,6 @@ dependencies:
 
   # Development tooling
   - black  # may be out of sync with pre-commit
-  - cppcheck==2.14.2
+  - cppcheck==2.15.0
   - gcovr>=4.2
   - pre-commit>=2.12.0

@@ -302,8 +302,8 @@ void FitPeaks::init() {
   // properties about peak profile
   const std::vector<std::string> peakNames = FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
   declareProperty(PropertyNames::PEAK_FUNC, "Gaussian", std::make_shared<StringListValidator>(peakNames),
-                  "Use of a BackToBackExponential profile is only reccomended if the "
-                  "coeficients to calculate A and B are defined in the instrument "
+                  "Use of a BackToBackExponential profile is only recommended if the "
+                  "coefficients to calculate A and B are defined in the instrument "
                   "Parameters.xml file.");
   const vector<string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty(PropertyNames::BACK_FUNC, "Linear", std::make_shared<StringListValidator>(bkgdtypes),
