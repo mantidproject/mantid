@@ -34,7 +34,7 @@ Usage
 -----
 **Example - RotateSampleShape for sample with a CSG shape**
 
-.. testcode:: RotateSampleShape
+.. code-block:: python
 
     from mantid.simpleapi import *
     import xml.dom.minidom as md
@@ -50,10 +50,6 @@ Usage
     RotateSampleShape(Workspace=ws, Axis0="45,1,1,0,1", Axis1="15,0,0,1,-1")
 
     print(md.parseString(ws.sample().getShape().getShapeXML()).toprettyxml())
-
-.. testcleanup:: RotateSampleShape
-
-    DeleteWorkspace(ws)
 
 .. categories::
 
