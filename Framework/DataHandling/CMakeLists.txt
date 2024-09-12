@@ -21,7 +21,6 @@ set(SRC_FILES
     src/EventWorkspaceCollection.cpp
     src/ExtractMonitorWorkspace.cpp
     src/ExtractPolarizationEfficiencies.cpp
-    src/FilterEventsByLogValuePreNexus.cpp
     src/FindDetectorsInShape.cpp
     src/FindDetectorsPar.cpp
     src/GenerateGroupingPowder.cpp
@@ -245,7 +244,6 @@ set(INC_FILES
     inc/MantidDataHandling/EventWorkspaceCollection.h
     inc/MantidDataHandling/ExtractMonitorWorkspace.h
     inc/MantidDataHandling/ExtractPolarizationEfficiencies.h
-    inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
     inc/MantidDataHandling/FindDetectorsInShape.h
     inc/MantidDataHandling/FindDetectorsPar.h
     inc/MantidDataHandling/GenerateGroupingPowder.h
@@ -469,7 +467,6 @@ set(TEST_FILES
     EventWorkspaceCollectionTest.h
     ExtractMonitorWorkspaceTest.h
     ExtractPolarizationEfficienciesTest.h
-    FilterEventsByLogValuePreNexusTest.h
     FindDetectorsInShapeTest.h
     FindDetectorsParTest.h
     GenerateGroupingPowderTest.h
