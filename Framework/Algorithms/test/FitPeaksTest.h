@@ -1488,7 +1488,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("PeakCentersWorkspace", peak_center_ws_name));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("FitPeakWindowWorkspace", fit_window_ws_name));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("HighBackground", false));
-    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("MinimumSignalToSigmaRatio", 50.));
+    TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("MinimumSignalToSigmaRatio", 25.));
 
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("OutputWorkspace", "PeakPositionsWS3"));
     TS_ASSERT_THROWS_NOTHING(fitpeaks.setProperty("OutputPeakParametersWorkspace", "PeakParametersWS3"));
