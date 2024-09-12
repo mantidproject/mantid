@@ -46,7 +46,6 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
         Res = matrix([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
 
         if celltype == "O":
-
             Res[0, 0] = 1.0 / a
             Res[1, 1] = 1.0 / b
             Res[2, 2] = 1.0 / c
@@ -75,21 +74,18 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                 YY = Res[2, 0] + n * a
 
             else:
-
                 n = (int)(-a * Res[2, 0] / (c * c) - 0.5)
                 YY = n * Res[2, 0] + a
 
                 # print ["A",YY,n]
             sgn = 1
             if a <= c:
-
                 if math.fabs(YY + a) < math.fabs(YY) and a <= c:
                     YY += a
                     sgn = -1
                     n += 1
 
             elif (YY + Res[2, 0]) * (YY + Res[2, 0]) + (n + 1) * (n + 1) * Res[2, 2] * Res[2, 2] < a * a:
-
                 YY += Res[2, 0]
                 n += 1
                 sgn = -1
@@ -98,12 +94,10 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
 
             if n > 0:
                 if a <= c:
-
                     Res[2, 0] = sgn * YY
                     Res[2, 2] *= sgn
 
                 else:
-
                     if YY * Res[2, 0] + n * Res[2, 2] * Res[2, 2] > 0:
                         sgn = -1
 
@@ -168,7 +162,6 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
         s2 = 1
         for r in range(0, 3):
             for cc in range(3):
-
                 if cc == 0:
                     if r > 0:
                         s1 = (-1) ** r
@@ -199,7 +192,6 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
         res[r, 1] = res_p[r, 1]
         res[r, 2] = res_p[r, 2]
         for i in range(1, 3):
-
             if k == r:
                 k += 1
             for cc in range(3):
@@ -213,7 +205,6 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
         return res.I
 
     def CalcNiggliUB(self, a, b, c, alpha, beta, gamma, celltype, Center):
-
         if Center == "P":
             X = self.CalcConventionalUB(a, b, c, alpha, beta, gamma, celltype)
             return X
@@ -233,14 +224,12 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
             Res = Peak2ConvCell_Test._calc_result_center_I(Res, ResP)
 
         elif Center == "F":
-
             if celltype == "H" or celltype == "M":
                 return None
 
             Res = Peak2ConvCell_Test._calc_result_center_F(Res, ResP)
 
         elif Center == "A" or Center == "B" or Center == "C":
-
             if celltype == "H":
                 return None
             if celltype == "M" and Center == "B":
@@ -248,13 +237,11 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
 
             r = 2
             if Center == "A":
-
                 r = 0
                 if b == c and celltype == "O":  # result would be orthorhombic primitive
                     return None
 
             elif Center == "B":
-
                 r = 1
                 if a == c and celltype == "O":
                     return None
@@ -265,9 +252,7 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
             Res = Peak2ConvCell_Test._calc_result_center_ABC(Res, ResP, r)
 
         elif Center == "R":
-
             if celltype != "H" or alpha > 120:  # alpha =120 planar, >120 no go or c under a-b plane.
-
                 self.conventionalUB = None
                 return None
 
@@ -314,18 +299,15 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
             return hkl
 
         if math.fabs(hkl[0, 0]) + math.fabs(hkl[1, 0] + 1) <= S:
-
             # print "Nextb"
             hkl[1, 0] += 1
             hkl[2, 0] = -(S - math.fabs(hkl[0, 0]) - math.fabs(hkl[1, 0]))
         elif math.fabs(hkl[0, 0] + 1) <= S:
-
             # print "Nextc"
             hkl[0, 0] = hkl[0, 0] + 1.0
             hkl[1, 0] = -(S - math.fabs(hkl[0, 0]))
             hkl[2, 0] = 0
         else:
-
             # print "Nextd"
             hkl[1, 0] = 0
             hkl[2, 0] = 0
@@ -451,7 +433,6 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
             is90 = False
             odd = -1
             for i in range(0, 3):
-
                 if math.fabs(L[i]) < tolerance:
                     is90 = True
                     odd = i
@@ -488,7 +469,6 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
         return UB
 
     def getPeaks(self, _Inst, UB, error, Npeaks):
-
         CreatePeaksWorkspace(InstrumentWorkspace="Sws", NumberOfPeaks=0, OutputWorkspace="Peaks")
         Peaks = mtd["Peaks"]
 
@@ -497,7 +477,6 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
 
         for ii in range(3):
             for jj in range(ii, 3):
-
                 UBi = UB[ii, jj]
                 if math.fabs(UBi) < MinAbsQ and UBi != 0:
                     MinAbsQ = math.fabs(UBi)
@@ -509,7 +488,6 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
 
         done = False
         while not done:
-
             Qs = UB * hkl
             Qs *= 2 * math.pi
 
@@ -659,7 +637,6 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                 C = "C"
 
             if C == "C" or C == "I":  # 'I':
-
                 Z1 = self.AppendForms(LatNiggle[2] * LatNiggle[2] < 4 * math.fabs(LL[2]) + 0.001, "C", C, [10, 14, 39], Z1)
                 Z1 = self.AppendForms(LatNiggle[0] * LatNiggle[0] < 4 * math.fabs(LL[1]) + 0.001, "C", C, [20, 25, 41], Z1)
 
@@ -765,7 +742,6 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
         return Lat
 
     def GetConvCell(self, Peaks, XtalCenter1, wsName, nOrigIndexed, tolerance, matchLat):
-
         CopySample(Peaks, wsName, CopyMaterial="0", CopyEnvironment="0", CopyName="0", CopyShape="0", CopyLattice="1")
         OrLat = mtd[wsName].sample().getOrientedLattice()
         Lat1 = [OrLat.a(), OrLat.b(), OrLat.c(), OrLat.alpha(), OrLat.beta(), OrLat.gamma()]
@@ -799,7 +775,6 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
                         and math.fabs(Lat0[1] - Lat1[1]) < tolerance
                         and math.fabs(Lat0[2] - Lat1[2]) < tolerance
                     ):
-
                         for dummy_i in range(3):
                             if (
                                 math.fabs(Lat0[3] - Lat1[3]) < angTolerance
@@ -838,7 +813,6 @@ class Peak2ConvCell_Test(object):  # (systemtesting.MantidSystemTest):
         return []
 
     def runTest(self):
-
         CreateSingleValuedWorkspace(OutputWorkspace="Sws", DataValue="3")
 
         CreateSingleValuedWorkspace(OutputWorkspace="Temp", DataValue="3")

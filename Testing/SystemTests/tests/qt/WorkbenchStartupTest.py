@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
-import psutil
 import subprocess
 import sys
 import systemtesting
@@ -30,22 +29,8 @@ def get_mantid_executables_for_platform(platform):
 
 
 def start_and_wait_for_completion(args_list):
-    pids_before_open = set(psutil.pids())
     process = subprocess.Popen(args_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     exitcode = process.wait(timeout=SUBPROCESS_TIMEOUT_SECS)
-    if sys.platform == "win32":
-        # The setuptools generated .exe starts a new process using 'pythonw workbench-script.pyw'
-        # but this outer process does not wait for the child to finish so completes leaving workbench
-        # to continue. We attempt to find the python child process by looking at the created pids
-        # and we wait on that. A timeout is set just in case we pick the wrong process and we wait forever
-        pids_after_open = set(psutil.pids())
-        new_pids_created = pids_after_open - pids_before_open
-        for pid in new_pids_created:
-            proc = psutil.Process(pid)
-            if "python" in proc.exe():
-                print(f"Found Python subprocess {proc.exe()}. Pid={pid}. Waiting for completion...")
-                proc.wait(timeout=SUBPROCESS_TIMEOUT_SECS)
-
     return exitcode
 
 

@@ -30,7 +30,6 @@ class SofQWMoments(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-
         workflow_prog = Progress(self, start=0.0, end=1.0, nreports=20)
         self._setup()
 

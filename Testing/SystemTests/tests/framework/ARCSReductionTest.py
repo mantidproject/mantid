@@ -15,7 +15,6 @@ from mantid.simpleapi import *
 
 
 class ARCSReductionTest(systemtesting.MantidSystemTest):
-
     vanFile1 = ""
     vanFile0 = ""
     nxspeFile = ""

@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Defines a set of aliases to make accessing certain objects easier
+Defines a set of aliases to make accessing certain objects easier
 """
+
 from mantid.api import (
     AlgorithmFactoryImpl,
     AlgorithmManagerImpl,

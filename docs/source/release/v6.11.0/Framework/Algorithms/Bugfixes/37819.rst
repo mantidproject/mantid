@@ -1,0 +1,1 @@
+- Fixed bug when all sample times are before 01/01/1991

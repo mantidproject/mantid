@@ -14,7 +14,6 @@ from mantid.api import FileProperty, MultipleFileProperty, WorkspaceGroupPropert
 
 
 class DrillParameter(QObject):
-
     FILE_TYPE = "file"
     FILES_TYPE = "files"
     WORKSPACE_TYPE = "workspace"

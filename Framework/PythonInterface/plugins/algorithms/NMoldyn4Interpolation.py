@@ -23,7 +23,6 @@ class NMoldyn4Interpolation(PythonAlgorithm):
         return "Maps NMoldyn simulated s(q,e) data onto OSIRIS' Q and E values"
 
     def PyInit(self):
-
         self.declareProperty(
             WorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input), doc="Simulated workspace"
         )

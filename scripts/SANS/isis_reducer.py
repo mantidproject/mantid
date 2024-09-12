@@ -6,12 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
 """
-    ISIS-specific implementation of the SANS Reducer.
+ISIS-specific implementation of the SANS Reducer.
 
-    WARNING: I'm still playing around with the ISIS reduction to try to
-    understand what's happening and how best to fit it in the Reducer design.
+WARNING: I'm still playing around with the ISIS reduction to try to
+understand what's happening and how best to fit it in the Reducer design.
 
 """
+
 from reducer_singleton import Reducer
 import isis_reduction_steps
 import isis_instrument
@@ -232,6 +233,7 @@ class ISISReducer(Reducer):
     TODO: need documentation for all the data member
     TODO: need to see whether all those data members really belong here
     """
+
     ## Beam center finder ReductionStep object
     _beam_finder = None
     _front_beam_finder = None

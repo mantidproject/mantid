@@ -20,4 +20,5 @@ resolution = merlin.getResolution()
 
 resolution, flux = Instrument.calculate(inst='maps', chtyp='a', freq=500, ei=600, etrans=range(0,550,50))
 """
+
 from pychop import PyChop2  # noqa

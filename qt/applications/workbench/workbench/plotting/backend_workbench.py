@@ -13,6 +13,7 @@ Qt-based matplotlib backend that can operate when called from non-gui threads.
 It uses qtagg for rendering but the ensures that any rendering calls
 are done on the main thread of the application as the default
 """
+
 from inspect import signature
 from workbench.plotting.figuremanager import (
     MantidFigureCanvas,

@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" SANSNormalizeToMonitor algorithm calculates the normalization to the monitor."""
+"""SANSNormalizeToMonitor algorithm calculates the normalization to the monitor."""
+
 import json
 
 from sans.common.constants import EMPTY_NAME

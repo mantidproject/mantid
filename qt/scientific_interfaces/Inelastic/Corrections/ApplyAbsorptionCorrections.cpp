@@ -62,8 +62,12 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : Correc
 }
 
 ApplyAbsorptionCorrections::~ApplyAbsorptionCorrections() {
-  if (m_ppContainerWS)
+  if (m_ppContainerWS) {
+    (void)m_uiForm.dsSample->disconnect();
+    (void)m_uiForm.dsContainer->disconnect();
+    (void)m_uiForm.dsContainer->disconnect();
     AnalysisDataService::Instance().remove(m_containerWorkspaceName);
+  }
 }
 
 /**
@@ -472,6 +476,12 @@ void ApplyAbsorptionCorrections::setFileExtensionsByName(bool filter) {
   m_uiForm.dsContainer->setWSSuffixes(filter ? getContainerWSSuffixes(tabName) : noSuffixes);
   m_uiForm.dsCorrections->setFBSuffixes(filter ? getCorrectionsFBSuffixes(tabName) : getExtensions(tabName));
   m_uiForm.dsCorrections->setWSSuffixes(filter ? getCorrectionsWSSuffixes(tabName) : noSuffixes);
+}
+
+void ApplyAbsorptionCorrections::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsSample->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsContainer->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsCorrections->setLoadProperty("LoadHistory", doLoadHistory);
 }
 
 /**

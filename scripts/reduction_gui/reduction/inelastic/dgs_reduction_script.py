@@ -6,10 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    Classes for each reduction step. Those are kept separately
-    from the interface class so that the DgsReduction class could
-    be used independently of the interface implementation
+Classes for each reduction step. Those are kept separately
+from the interface class so that the DgsReduction class could
+be used independently of the interface implementation
 """
+
 import time
 import mantid
 from reduction_gui.reduction.scripter import BaseReductionScripter

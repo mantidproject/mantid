@@ -376,6 +376,7 @@ set(PYTHON_PLUGINS
     functions/PCRmagnetZFKT.py
     functions/PCRmagnetfnorm.py
     functions/PEARLTransVoigt.py
+    functions/PearsonIV.py
     functions/Porod.py
     functions/PrimStretchedExpFT.py
     functions/RFresonance.py

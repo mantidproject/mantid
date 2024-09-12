@@ -15,7 +15,6 @@ from mantid.api import (
     Progress,
     FunctionFactory,
     IPeak,
-    SpectrumInfo,
 )
 from mantid.kernel import (
     Direction,
@@ -30,13 +29,13 @@ from mantid.kernel import (
 )
 from mantid.fitfunctions import FunctionWrapper
 import numpy as np
-from collections.abc import Sequence
-from scipy.optimize import approx_fprime, minimize
 from scipy.ndimage import binary_dilation
-from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
-from IntegratePeaksShoeboxTOF import get_bin_width_at_tof, find_nearest_peak_in_data_window, set_peak_intensity
+from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params, PeakData
+from IntegratePeaksShoeboxTOF import get_bin_width_at_tof, set_peak_intensity
 from enum import Enum
 from typing import Callable
+
+MIN_TOF_WIDTH = 1e-3
 
 
 class IntegratePeaks1DProfile(DataProcessorAlgorithm):
@@ -284,23 +283,23 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         peaks = self.exec_child_alg("CloneWorkspace", InputWorkspace=peaks, OutputWorkspace="out_peaks")
 
         # select cost function
+        fit_kwargs = {"Minimizer": "Levenberg-Marquardt", "MaxIterations": 5000, "StepSizeMethod": "Sqrt epsilon"}
         match cost_func_name:
             case "RSq":
-                cost_func = cost_func_rsq
-                weight_func = calc_weights_rsq
+                fit_kwargs["CostFunction"] = "Unweighted least squares"
             case "ChiSq":
-                cost_func = cost_func_chisq
-                weight_func = calc_weights_chisq
+                fit_kwargs["CostFunction"] = "Least squares"
+                fit_kwargs["IgnoreInvalidData"] = True
             case "Poisson":
-                cost_func = cost_func_poisson
-                weight_func = calc_weights_poisson
+                fit_kwargs["CostFunction"] = "Poisson"
+                fit_kwargs["Minimizer"] = "Simplex"  # LM does not support Poisson cost function
 
         array_converter = InstrumentArrayConverter(ws)
-        bg_func = FunctionWrapper(bg_func_name)
         results = []
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=peaks.getNumberPeaks())
         for ipk, peak in enumerate(peaks):
             prog_reporter.report("Integrating")
+
             intens, sigma = 0.0, 0.0
             status = PEAK_STATUS.NO_PEAK
 
@@ -325,31 +324,28 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
 
                 # fit peak
                 peak_fitter = PeakFitter(
-                    ws,
-                    peaks,
-                    ipk,
                     peak,
                     peak_data,
                     nbins,
-                    error_strategy,
-                    weight_func,
-                    cost_func,
                     peak_func_name,
-                    bg_func,
+                    bg_func_name,
                     peak_params_to_fix,
                     frac_dspac_delta,
                     i_over_sig_threshold,
+                    self.exec_fit,
+                    fit_kwargs,
+                    error_strategy,
                 )
-                successful, attempted, yfits, intens_sum, sigma_sq_sum = peak_fitter.integrate_peak()
+                peak_fitter.integrate_peak()
 
                 # update intenisty and save results for later plotting
-                if np.any(successful):
+                if np.any(peak_fitter.successful):
                     # check edge
-                    is_on_edge = np.any(np.logical_and(attempted, peak_data.det_edges))
+                    is_on_edge = np.any(np.logical_and(peak_fitter.attempted, peak_data.det_edges))
                     if integrate_on_edge or not is_on_edge:
                         status = PEAK_STATUS.VALID
-                        intens = intens_sum
-                        sigma = np.sqrt(sigma_sq_sum)
+                        intens = peak_fitter.intens_sum
+                        sigma = np.sqrt(peak_fitter.sigma_sq_sum)
                     else:
                         status = PEAK_STATUS.ON_EDGE
                     if output_file:
@@ -359,13 +355,8 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
                                 ipk,
                                 peak,
                                 intens_over_sig,
-                                peak_fitter.tofs,
-                                peak_fitter.y,
-                                peak_fitter.esq,
-                                yfits,
-                                successful,
-                                peak_data.irow,
-                                peak_data.icol,
+                                peak_fitter,
+                                peak_data,
                                 status,
                             )
                         )
@@ -390,225 +381,222 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         else:
             return None
 
+    def exec_fit(self, ispec, **kwargs):
+        alg = self.createChildAlgorithm("Fit", enableLogging=False)
+        alg.initialize()
+        alg.setProperties(kwargs)
+        alg.setProperty("WorkspaceIndex", ispec)
+        try:
+            alg.execute()
+            func = alg.getProperty("Function").value  # getPropertyValue returns FunctionProperty not IFunction
+            status = alg.getPropertyValue("OutputStatus")
+            success = status == "success" or "Changes in function value are too small" in status
+            return success, func
+        except:
+            return False, None
+
 
 class PeakFitter:
     def __init__(
         self,
-        ws,
-        peaks,
-        ipk,
         pk,
         peak_data,
         nbins,
-        error_strategy,
-        weight_func,
-        cost_func,
         peak_func_name,
-        bg_func,
+        bg_func_name,
         peak_params_to_fix,
         frac_dspac_delta,
         i_over_sig_threshold,
+        exec_fit,
+        fit_kwargs,
+        error_strategy,
     ):
+        self.ws = peak_data.ws
         self.pk: IPeak = pk
         self.peak_pos: tuple[int, int] = (peak_data.irow, peak_data.icol)
-        self.spec_info: SpectrumInfo = ws.spectrumInfo()
-        self.error_strategy: str = error_strategy
-        self.weight_func: Callable = weight_func
-        self.cost_func: Callable = cost_func
-        self.det_edges: np.ndarray = peak_data.det_edges
         self.frac_dspac_delta: float = frac_dspac_delta
         self.i_over_sig_threshold: float = i_over_sig_threshold
+        # extract data
         self.tofs: np.ndarray = None
         self.y: np.ndarray = None
         self.esq: np.ndarray = None
         self.ispecs: np.ndarray = None
-        self.peak_func: IPeakFunction = None
-        self.profile_func: FunctionWrapper = None
-        self.nparams_pk: int = None
-        self.nparams_bg: int = None
-        self.iparam_cen: int = None
-        self.ifix_initial: list[int] = None  # parameters to keep fixed on initial fit
-        self.ifix_final: list[int] = None
+        self.yfit_foc: np.ndarray = None
+        self.successful: np.ndarray = None
+        self.attempted: np.ndarray = None
+        self.intens_sum: float = 0
+        self.sigma_sq_sum: float = 0
+        self.peak_func_name: str = peak_func_name
+        self.bg_func_name: str = bg_func_name
+        self.peak_params_to_fix: Seqence[str] = peak_params_to_fix
+        self.exec_fit: Callable = exec_fit
+        self.fit_kwargs: dict = None
+        self.error_strategy: str = error_strategy
+        self.cached_params: dict = None
+        self.nfixed_default: int = None
+        self.nfixed: int = None
 
-        self.get_data_arrays(ws, peak_data, nbins)
-        self.update_initial_peak_position(ws, peaks, ipk)
-        self.get_composite_function_with_initial_params(ws, peak_func_name, bg_func)
-        self.get_index_of_parameters_to_fix(peak_params_to_fix)
+        self.get_and_clip_data_arrays(peak_data, nbins)
+        self.calc_limits_on_fwhm()
+        self.ysum = self.y.sum(axis=2)
+        self.yfit_foc: np.ndarray = np.zeros(self.tofs.shape)
+        self.successful: np.ndarray = np.zeros(self.ispecs.shape, dtype=bool)
+        self.attempted: np.ndarray = self.successful.copy()
+        self.update_peak_position()
+        self.fit_kwargs = {
+            "InputWorkspace": self.ws,
+            "CreateOutput": False,
+            "CalcErrors": True,
+            "StartX": self.tofs[0],
+            "EndX": self.tofs[-1],
+            **fit_kwargs,
+        }
 
-    def get_data_arrays(self, ws, peak_data, nbins):
-        self.tofs, self.y, self.esq, self.ispecs = get_and_clip_data_arrays(ws, peak_data, self.pk.getTOF(), nbins)
-
-    def update_initial_peak_position(self, ws, peaks, ipk):
-        itof = np.argmin(abs(self.tofs - self.pk.getTOF()))
-        peak_pos = find_nearest_peak_in_data_window(
-            self.y, self.ispecs, self.tofs, ws, peaks, ipk, (*self.peak_pos, itof), min_threshold=0.0
+    def get_tof_slice_for_cropping(self, nbins):
+        # get tof indices and limits
+        self.ispec = int(self.ispecs[self.peak_pos])
+        itof = self.ws.yIndexOfX(self.pk.getTOF(), self.ispec)
+        if self.peak_func_name == "BackToBackExponential":
+            # take into account asymmetry of peak function in choosing window
+            nbins_left = nbins // 3
+            istart = itof - nbins_left
+            iend = itof + (nbins - nbins_left)
+        else:
+            istart = itof - nbins // 2
+            iend = itof + nbins // 2
+        self.tof_slice = slice(
+            int(np.clip(istart, a_min=0, a_max=self.ws.blocksize())), int(np.clip(iend, a_min=0, a_max=self.ws.blocksize()))
         )
-        self.peak_pos = (peak_pos[0], peak_pos[1]) if peak_pos is not None else None  # omit tof index
 
-    def get_composite_function_with_initial_params(self, ws, peak_func_name, bg_func):
-        # need to create from scratch for setMatrxiWorkspace to overwrite parameters
-        self.peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
-        # set centre and determine the index of the centre parameter
-        nparams = self.peak_func.nParams()
-        default_params = np.array([self.peak_func.getParameterValue(iparam) for iparam in range(nparams)])
-        self.peak_func.setCentre(self.pk.getTOF())
-        self.iparam_cen = next(
-            iparam for iparam in range(nparams) if not np.isclose(self.peak_func.getParameterValue(iparam), default_params[iparam])
-        )
-        if self.peak_pos is not None:
-            # initilaise instrument specific parameters (e.g A,B,S for case of BackTobackExponential)
-            self.peak_func.setMatrixWorkspace(ws, int(self.ispecs[self.peak_pos]), 0, 0)
-            if np.isclose(self.peak_func.fwhm(), 0.0):
-                # width not set by default - set width based max of d-spacing tolerance or bin-width
-                bin_width = self.tofs[-1] - self.tofs[-2]
-                fwhm = max(self.frac_dspac_delta * self.pk.getTOF(), bin_width)
-                self.peak_func.setFwhm(fwhm)
-        # combine peak and background function wrappers
-        self.profile_func = FunctionWrapper(self.peak_func) + bg_func
-        self.nparams_pk = self.peak_func.nParams()
-        self.nparams_bg = bg_func.nParams()
-        self.p_guess = np.array([self.profile_func.getParameter(iparam) for iparam in range(self.profile_func.nParams())])
+    def get_and_clip_data_arrays(self, peak_data, nbins):
+        tofs, y, esq, self.ispecs = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
+        self.get_tof_slice_for_cropping(nbins)
+        self.tofs = tofs[self.peak_pos[0], self.peak_pos[1], self.tof_slice]  # take x at peak cen, should be same for all det
+        # crop data array to TOF region of peak
+        self.y = y[:, :, self.tof_slice]
+        self.esq = esq[:, :, self.tof_slice]
 
-    def get_index_of_parameters_to_fix(self, peak_params_to_fix):
-        # get index of fixed peak parameters
-        self.ifix_final = [self.peak_func.getParameterIndex(param) for param in peak_params_to_fix]
-        self.ifix_initial = [iparam for iparam in range(self.nparams_pk) if self.peak_func.isFixed(iparam)]
-        # fix background parameter in initial fit
-        self.ifix_initial = [iparam + self.nparams_pk for iparam in range(self.nparams_bg)]
-        # make sure initial fit includes fixed parameters specified
-        self.ifix_initial = list(set(self.ifix_initial).union(set(self.ifix_final)))
+    def calc_limits_on_fwhm(self):
+        self.min_fwhm = self.tofs[1 + (len(self.tofs) // 2)] - self.tofs[len(self.tofs) // 2]  # FWHM > bin-width
+        self.max_fwhm = (self.tofs[-1] - self.tofs[0]) / 3  # must be at least 3 FWHM in data range
+
+    def update_peak_position(self):
+        # search for pixel with highest TOF integrated counts in 3x3 window around peak position
+        irow_min = np.clip(self.peak_pos[0] - 1, a_min=0, a_max=self.ysum.shape[0])
+        irow_max = np.clip(self.peak_pos[0] + 2, a_min=0, a_max=self.ysum.shape[0])  # add 1 as last index not in slice
+        icol_min = np.clip(self.peak_pos[1] - 1, a_min=0, a_max=self.ysum.shape[1])
+        icol_max = np.clip(self.peak_pos[1] + 2, a_min=0, a_max=self.ysum.shape[1])  # add 1 as last index not in slice
+        imax = np.unravel_index(np.argmax(self.ysum[irow_min:irow_max, icol_min:icol_max]), (irow_max - irow_min, icol_max - icol_min))
+        self.peak_pos = (imax[0] + irow_min, imax[1] + icol_min)
 
     def calc_tof_peak_centre_and_bounds(self, ispec):
-        diff_consts = self.spec_info.diffractometerConstants(int(ispec))
+        # need to do this for each spectrum as DIFC different for each
+        diff_consts = self.ws.spectrumInfo().diffractometerConstants(int(ispec))
         tof_pk = UnitConversion.run("dSpacing", "TOF", self.pk.getDSpacing(), 0, DeltaEModeType.Elastic, diff_consts)
         tof_pk_min = np.clip(tof_pk * (1 - self.frac_dspac_delta), a_min=self.tofs[0], a_max=self.tofs[-1])
         tof_pk_max = np.clip(tof_pk * (1 + self.frac_dspac_delta), a_min=self.tofs[0], a_max=self.tofs[-1])
         return tof_pk, tof_pk_min, tof_pk_max
 
-    def fit_spectrum(self, p_guess, weights, irow, icol, cen_min, cen_max, ifix):
-        # set bounds (lb=0.0 for all params)
-        bounds = np.array(len(p_guess) * [0.0, np.inf]).reshape(-1, 2)
-        for iparam in ifix:
-            bounds[iparam, :] = p_guess[iparam]
-        bounds[self.iparam_cen, :] = [cen_min, cen_max]
-        bounds[self.nparams_pk + 1 : self.profile_func.nParams(), 0] = -np.inf  # reset lower bound of higher order bg terms
-        # fit
-        result = minimize(
-            calc_cost_func,
-            p_guess,
-            args=(self.profile_func, self.tofs, self.y[irow, icol, :], weights, self.cost_func),
-            bounds=tuple(bounds),
-            method="Nelder-Mead",
-            options={"adaptive": True, "maxfev": 2000},
-        )
-        # set parameters (is this altered in-place?)
-        [self.profile_func.setParameter(iparam, param) for iparam, param in enumerate(result.x)]
-        yfit = self.profile_func(self.tofs)
-        return result, yfit
+    def create_peak_function_with_initial_params(self, ispec, intensity, bg, tof_pk, tof_pk_min, tof_pk_max):
+        # need to create from scratch for setMatrixWorkspace to overwrite parameters
+        peak_func = FunctionFactory.Instance().createPeakFunction(self.peak_func_name)
+        # set initial parameters of peak
+        peak_func.setCentre(tof_pk)
+        # initialise instrument specific parameters (e.g A,B,S for case of BackToBackExponential)
+        peak_func.setMatrixWorkspace(self.ws, ispec, 0, 0)
+        if np.isclose(peak_func.fwhm(), 0.0):
+            # width not set by default - set width based max of d-spacing tolerance or bin-width
+            fwhm = np.clip(self.frac_dspac_delta * tof_pk, a_min=self.min_fwhm, a_max=self.max_fwhm)
+            peak_func.setFwhm(fwhm)
+        peak_func.setIntensity(intensity)
+        # fix parameters
+        self.nfixed_default = len([ipar for ipar in range(peak_func.nParams()) if peak_func.isFixed(ipar)])
+        [peak_func.fixParameter(par_name) for par_name in self.peak_params_to_fix]
+        self.nfixed = len([ipar for ipar in range(peak_func.nParams()) if peak_func.isFixed(ipar)])
+        self.add_constraints_to_peak_function(peak_func, tof_pk_min, tof_pk_max)
+        bg_func = FunctionWrapper(self.bg_func_name)
+        bg_func.setParameter("A0", bg)  # set constant background
+        return FunctionWrapper(peak_func) + bg_func, peak_func
+
+    def add_constraints_to_peak_function(self, peak_func, tof_pk_min, tof_pk_max):
+        # set minimum of all parameters to be 0
+        [peak_func.addConstraints(f"0<{peak_func.parameterName(ipar)}") for ipar in range(peak_func.nParams())]
+        # constrain centre and width
+        peak_func.addConstraints(f"{tof_pk_min}<{peak_func.getCentreParameterName()}<{tof_pk_max}")
+        # assume constant scale factor between FWHM and width parameter
+        width_par_name = peak_func.getWidthParameterName()
+        scale_factor = peak_func.getParameterValue(width_par_name) / peak_func.fwhm()
+        peak_func.addConstraints(f"{self.min_fwhm*scale_factor}<{width_par_name}<{self.max_fwhm*scale_factor}")
+
+    def fit_spectrum(self, profile_func, ispec):
+        return self.exec_fit(ispec, Function=str(profile_func), **self.fit_kwargs)
 
     def integrate_peak(self):
-        successful = np.zeros(self.ispecs.shape, dtype=bool)
-        attempted = successful.copy()
-        inearest = [self.peak_pos]  # index of initial spectrum to fit
-        yfits = np.zeros(self.y.shape)
-        intens_sum, sigma_sq_sum = 0.0, 0.0
-        if self.peak_pos is None:
-            # no peak found
-            return successful, attempted, yfits, intens_sum, sigma_sq_sum
-        else:
-            return self.fit_nearest(attempted, successful, inearest, intens_sum, sigma_sq_sum, yfits)
+        self.fit_nearest([self.peak_pos])
 
-    def fit_nearest(self, attempted, successful, inearest, intens_sum, sigma_sq_sum, yfits):
-        # pre-calculate values used later to check validity of fit
-        bin_width = self.tofs[-1] - self.tofs[-2]
-        tof_range = self.tofs[-1] - self.tofs[0]
+    def fit_nearest(self, inearest):
         # fit in order of max intensity
-        isort = np.argsort([-self.y.sum(axis=2)[inear] for inear in inearest])
+        isort = np.argsort([-self.ysum[inear] for inear in inearest])
         any_successful = False
         for inear in isort:
             irow, icol = inearest[inear]
-            attempted[irow, icol] = True
+            self.attempted[irow, icol] = True
             # check enough counts in spectrum
-            intial_intens, intial_sigma, bg = self.estimate_intensity_sigma_and_background(irow, icol)
-            intens_over_sigma = intial_intens / intial_sigma if intial_sigma > 0 else 0.0
+            initial_intens, initial_sigma, bg = self.estimate_intensity_sigma_and_background(irow, icol)
+            intens_over_sigma = initial_intens / initial_sigma if initial_sigma > 0 else 0.0
             if intens_over_sigma < self.i_over_sig_threshold:
                 continue  # skip this spectrum
             # get center and check min data extent
-            tof_pk, tof_pk_min, tof_pk_max = self.calc_tof_peak_centre_and_bounds(self.ispecs[irow, icol])
+            ispec = int(self.ispecs[irow, icol])
+            tof_pk, tof_pk_min, tof_pk_max = self.calc_tof_peak_centre_and_bounds(ispec)
             if tof_pk < self.tofs[0] or tof_pk > self.tofs[-1]:
                 continue  # peak not in data limits
             # update initial parameter guesses
-            p_guess = self.p_guess.copy()
-            p_guess[self.iparam_cen] = tof_pk
-            self.set_peak_intensity(intial_intens, p_guess)
-            self.set_constant_background(bg, p_guess)
+            profile_func, peak_func = self.create_peak_function_with_initial_params(
+                ispec, initial_intens, bg, tof_pk, tof_pk_min, tof_pk_max
+            )
             # fit
-            weights = self.weight_func(self.y[irow, icol, :], self.esq[irow, icol, :])
-            nfix = len(self.ifix_initial)
-            result, yfit = self.fit_spectrum(p_guess, weights, irow, icol, tof_pk_min, tof_pk_max, ifix=self.ifix_initial)
-            if result.success:
+            success, profile_func = self.fit_spectrum(profile_func, ispec)
+            if success:
                 any_successful = True
-                if len(self.ifix_final) < len(self.ifix_initial):
-                    # fit again but free some previously fixed parameters
-                    result_final, yfit_final = self.fit_spectrum(
-                        result.x, weights, irow, icol, tof_pk_min, tof_pk_max, ifix=self.ifix_final
-                    )
-                    if result_final.success:
-                        result = result_final
-                        yfit = yfit_final
-                        nfix = len(self.ifix_final)
-                # check fit realistic (unfortunately Nelder-Mead does not support non-linear constraints in fit)
-                fwhm = self.get_fwhm_from_function_with_params()
-                if fwhm < bin_width or fwhm > tof_range:
+                profile_func.freeAll()
+                [profile_func[0].fixParameter(par_name) for par_name in self.peak_params_to_fix]
+                success_final, profile_func_final = self.fit_spectrum(profile_func, ispec)
+                if success_final:
+                    profile_func = profile_func_final
+                # make peak function and get fwhm and intensity
+                [peak_func.setParameter(iparam, profile_func.getParameterValue(iparam)) for iparam in range(peak_func.nParams())]
+                if not self.min_fwhm < peak_func.fwhm() < self.max_fwhm:
                     continue  # skip
-                intens = self.get_intensity_from_function()
-                # calculate intensity and errors
+                intens = peak_func.intensity()
                 if self.error_strategy == "Hessian":
-                    sigma = calc_sigma_from_hessian(
-                        result, self.profile_func, self.tofs, self.y[irow, icol, :], weights, self.cost_func, nfix
-                    )
+                    [peak_func.setError(iparam, profile_func.getError(iparam)) for iparam in range(peak_func.nParams())]
+                    sigma = peak_func.intensityError()
                 else:
-                    sigma = calc_sigma_from_summation(self.tofs, self.esq[irow, icol, :], self.profile_func[0](self.tofs))
+                    sigma = calc_sigma_from_summation(self.tofs, self.esq[irow, icol, :], FunctionWrapper(peak_func)(self.tofs))
                 intens_over_sigma = intens / sigma if sigma > 0 else 0.0
                 if intens_over_sigma > self.i_over_sig_threshold:
-                    successful[irow, icol] = True
-                    yfits[irow, icol, :] = yfit
-                    intens_sum = intens_sum + intens
-                    sigma_sq_sum = sigma_sq_sum + sigma**2
+                    self.successful[irow, icol] = True
+                    self.yfit_foc += FunctionWrapper(profile_func)(self.tofs)
+                    self.intens_sum = self.intens_sum + intens
+                    self.sigma_sq_sum = self.sigma_sq_sum + sigma**2
         if not any_successful:
             # no neighbours successfully fitted - terminate here
-            return successful, attempted, yfits, intens_sum, sigma_sq_sum
+            return
         # if did break start process again
-        inearest = self.find_neighbours(successful, attempted)
-        return self.fit_nearest(attempted, successful, inearest, intens_sum, sigma_sq_sum, yfits)
+        inearest = self.find_neighbours()
+        return self.fit_nearest(inearest)
 
-    def find_neighbours(self, successful, attempted):
-        mask = binary_dilation(successful)
-        mask = np.logical_and(mask, ~attempted)
+    def find_neighbours(self):
+        mask = binary_dilation(self.successful)
+        mask = np.logical_and(mask, ~self.attempted)
         return list(zip(*np.where(mask)))
 
-    def get_fwhm_from_function_with_params(self):
-        [self.peak_func.setParameter(iparam, self.profile_func.getParameterValue(iparam)) for iparam in range(self.nparams_pk)]
-        return self.peak_func.fwhm()
-
-    def get_intensity_from_function(self):
-        [self.peak_func.setParameter(iparam, self.profile_func.getParameterValue(iparam)) for iparam in range(self.nparams_pk)]
-        return self.peak_func.intensity()
-
-    def set_peak_intensity(self, intensity, params):
-        [self.peak_func.setParameter(iparam, params[iparam]) for iparam in range(self.nparams_pk)]
-        self.peak_func.setIntensity(intensity)
-        params[: self.nparams_pk] = [self.peak_func.getParameterValue(iparam) for iparam in range(self.nparams_pk)]
-
-    def set_constant_background(self, bg, params):
-        params[-self.nparams_bg :] = 0  # reset all background terms to zero
-        params[-self.nparams_bg] = bg  # constant is always first parameter in supported background functions
-
     def estimate_intensity_sigma_and_background(self, irow, icol):
-        ipositive = self.y[irow, icol, :] > 0
-        if not ipositive.any():
+        if not np.any(self.y[irow, icol, :] > 0):
             return 0.0, 0.0, 0.0
-        bg = np.min(self.y[irow, icol, :][ipositive])
+        ibg, _ = PeakData.find_bg_pts_seed_skew(self.y[irow, icol, :])
+        bg = np.mean(self.y[irow, icol, ibg])
         bin_width = np.diff(self.tofs)
         intensity = np.sum((0.5 * (self.y[irow, icol, 1:] + self.y[irow, icol, :-1]) - bg) * bin_width)
         sigma = np.sqrt(np.sum(0.5 * (self.esq[irow, icol, 1:] + self.esq[irow, icol, :-1]) * (bin_width**2)))
@@ -626,14 +614,14 @@ class LineProfileResult:
     This class holds result of line profile integration of a single-crystal Bragg peak
     """
 
-    def __init__(self, ipk, pk, intens_over_sig, tofs, y, esq, yfits, successful, irow, icol, status):
-        self.irow, self.icol = irow, icol
-        self.tofs = tofs
-        self.ysum = np.sum(y, axis=2)  # integrate over TOF
-        self.yfoc = y[successful].sum(axis=0)
-        self.efoc = np.sqrt(esq[successful].sum(axis=0))
-        self.yfoc_fit = yfits[successful].sum(axis=0)
-        self.successful = successful
+    def __init__(self, ipk, pk, intens_over_sig, peak_fitter, peak_data, status):
+        self.irow, self.icol = peak_data.irow, peak_data.icol
+        self.tofs = peak_fitter.tofs
+        self.ysum = peak_fitter.ysum
+        self.yfoc = peak_fitter.y[peak_fitter.successful].sum(axis=0)
+        self.efoc = np.sqrt(peak_fitter.esq[peak_fitter.successful].sum(axis=0))
+        self.yfoc_fit = peak_fitter.yfit_foc
+        self.successful = peak_fitter.successful
         # extract peak properties inot title
         intens_over_sig = np.round(intens_over_sig, 1)
         hkl = np.round(pk.getHKL(), 2)
@@ -676,95 +664,6 @@ def calc_sigma_from_summation(xspec, esq_spec, ypeak, cutoff=0.025):
     return np.sqrt(np.sum(0.5 * (esq_spec[ilo : ihi - 1] + esq_spec[ilo + 1 : ihi]) * (bin_width**2)))
 
 
-def calc_sigma_from_hessian(result, profile_func, x, y, weights, cost_func, nfixed, min_step=1e-5):
-    step_size = min_step * result.x
-    step_size[step_size < min_step] = min_step
-    hess = calc_hessian(calc_cost_func, result.x, step_size, profile_func, x, y, weights, cost_func)
-    cov = np.linalg.inv(hess) * 2.0 * result.fun / (len(y) - (len(result.x) - nfixed))
-    return np.sqrt(cov[0, 0])  # first parameter is intenisity for BackToBackExponential (only func supported)
-
-
-def is_sequence(seq):
-    # Strings are sequences so check for those separately
-    if isinstance(seq, str):
-        return False
-    # NumPy array is not a Sequence
-    return isinstance(seq, np.ndarray) or isinstance(seq, Sequence)
-
-
-def calc_hessian(func, x0, step_size, *args):
-    nparam = len(x0)
-    if not is_sequence(step_size):
-        step_size = nparam * [step_size]
-    hessian = np.zeros((nparam, nparam))
-    jac = approx_fprime(x0, func, step_size, *args)
-    for iparam in range(nparam):
-        x0[iparam] = x0[iparam] + step_size[iparam]
-        jac_dx = approx_fprime(x0, func, step_size, *args)
-        hessian[:, iparam] = (jac_dx - jac) / step_size
-        # reset param
-        x0[iparam] = x0[iparam] - step_size[iparam]
-    return hessian
-
-
-def replace_nans(arr):
-    isfinite = np.isfinite(arr)
-    if not isfinite.all():
-        isnan = ~isfinite
-        arr[isnan] = np.interp(np.flatnonzero(isnan), np.flatnonzero(isfinite), arr[isfinite])
-    return arr
-
-
-def calc_weights_rsq(y, esq):
-    return None
-
-
-def calc_weights_chisq(y, esq):
-    with np.errstate(divide="ignore", invalid="ignore"):
-        scale = replace_nans(y / esq)
-    weights = esq.copy()
-    iempty = np.isclose(esq, 0.0)
-    weights[iempty] = 1 / scale[iempty]
-    return weights
-
-
-def calc_weights_poisson(y, esq):
-    with np.errstate(divide="ignore", invalid="ignore"):
-        scale = replace_nans(y / esq)
-    return scale
-
-
-def cost_func_rsq(ycalc, y, ignored):
-    return np.sum((ycalc - y) ** 2)
-
-
-def cost_func_chisq(ycalc, y, weights):
-    # weights are e^2
-    return np.sum(((ycalc - y) ** 2) / weights)
-
-
-def cost_func_poisson(ycalc, y, weights):
-    # weights = y/e**2 (i.e. y = counts/weights, e = sqrt(counts)/weights)
-    y_cnts = y * weights
-    ycalc_cnts = ycalc * weights
-    inonzero = ~np.isclose(y_cnts, 0.0)
-    ycalc_cnts[np.logical_and(inonzero, np.isclose(ycalc_cnts, 0.0))] = 1e-4  # penalise fit but avoid overflow
-    # evaluate poisson deviation Eq. 1 in
-    # T.A. Laurence, B. Chromy (2009) Report LLNL-JRNL-420247; https://www.osti.gov/servlets/purl/991824
-    chisq_p = 2 * (np.sum(ycalc_cnts - y_cnts) - np.sum(y_cnts[inonzero] * np.log(ycalc_cnts[inonzero] / y_cnts[inonzero])))
-    return chisq_p
-
-
-def calc_cost_func(params, profile_func, x, y, weights, cost_func):
-    try:
-        [profile_func.setParameter(iparam, param) for iparam, param in enumerate(params)]
-        ycalc = profile_func(x)
-        ycalc[~np.isfinite(ycalc)] = 0  # can get NaNs far from peak in some functions
-    except:
-        ycalc = np.zeros(y.shape)
-    return cost_func(ycalc, y, weights)
-
-
 def plot_integration_results(output_file, results, prog_reporter):
     # import inside this function as not allowed to import at point algorithms are registered
     from matplotlib.pyplot import subplots, close
@@ -784,22 +683,6 @@ def plot_integration_results(output_file, results, prog_reporter):
             f"OutputFile ({output_file}) could not be opened - please check it is not open by "
             f"another programme and that the user has permission to write to that directory."
         )
-
-
-def get_and_clip_data_arrays(ws, peak_data, pk_tof, nbins):
-    x, y, esq, ispecs = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
-    x = x[peak_data.irow, peak_data.icol, :]  # take x at peak centre, should be same for all detectors
-    ispec = ispecs[peak_data.irow, peak_data.icol]
-    # crop data array to TOF region of peak
-    itof = ws.yIndexOfX(pk_tof, int(ispec))  # need index in y now (note x values are points even if were edges)
-    tof_slice = slice(
-        int(np.clip(itof - nbins // 2, a_min=0, a_max=len(x))),
-        int(np.clip(itof + nbins // 2, a_min=0, a_max=len(x))),
-    )
-    x = x[tof_slice]
-    y = y[:, :, tof_slice]
-    esq = esq[:, :, tof_slice]
-    return x, y, esq, ispecs
 
 
 # register algorithm with mantid

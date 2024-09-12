@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" The elements of this module contain various general-purpose functions for the SANS reduction framework."""
+"""The elements of this module contain various general-purpose functions for the SANS reduction framework."""
 
 # pylint: disable=invalid-name
 import copy

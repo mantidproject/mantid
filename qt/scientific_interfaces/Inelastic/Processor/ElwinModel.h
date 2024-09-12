@@ -22,15 +22,18 @@ namespace CustomInterfaces {
 class MANTIDQT_INELASTIC_DLL IElwinModel {
 public:
   virtual ~IElwinModel() = default;
-  virtual void setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &filepath,
-                                  std::string const &outputName) = 0;
-  virtual std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra) = 0;
-  virtual void setupGroupAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                   std::string const &inputWorkspacesString, std::string const &inputGroupWsName) = 0;
-  virtual void setupElasticWindowMultiple(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                          std::string const &workspaceBaseName, std::string const &inputGroupWsName,
-                                          std::string const &sampleEnvironmentLogName,
-                                          std::string const &sampleEnvironmentLogValue) = 0;
+
+  virtual API::IConfiguredAlgorithm_sptr setupLoadAlgorithm(std::string const &filepath,
+                                                            std::string const &outputName) const = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupExtractSpectra(MatrixWorkspace_sptr workspace,
+                                                             FunctionModelSpectra const &spectra,
+                                                             std::string const &outputName) const = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupGroupAlgorithm(std::string const &inputWorkspacesString,
+                                                             std::string const &inputGroupWsName) const = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupElasticWindowMultiple(std::string const &workspaceBaseName,
+                                                                    std::string const &inputGroupWsName,
+                                                                    std::string const &sampleEnvironmentLogName,
+                                                                    std::string const &sampleEnvironmentLogValue) = 0;
   virtual void ungroupAlgorithm(std::string const &inputWorkspace) const = 0;
   virtual void groupAlgorithm(std::string const &inputWorkspaces, std::string const &outputWorkspace) const = 0;
   virtual void setIntegrationStart(double integrationStart) = 0;
@@ -43,20 +46,22 @@ public:
   virtual std::string getOutputWorkspaceNames() const = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL ElwinModel : public IElwinModel {
+class MANTIDQT_INELASTIC_DLL ElwinModel final : public IElwinModel {
 
 public:
   ElwinModel();
-  ~ElwinModel() = default;
-  void setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &filepath,
-                          std::string const &outputName) override;
-  std::string createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra) override;
-  void setupGroupAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                           std::string const &inputWorkspacesString, std::string const &inputGroupWsName) override;
-  void setupElasticWindowMultiple(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                  std::string const &workspaceBaseName, std::string const &inputGroupWsName,
-                                  std::string const &sampleEnvironmentLogName,
-                                  std::string const &sampleEnvironmentLogValue) override;
+  ~ElwinModel() override = default;
+  API::IConfiguredAlgorithm_sptr setupLoadAlgorithm(std::string const &filepath,
+                                                    std::string const &outputName) const override;
+  API::IConfiguredAlgorithm_sptr setupExtractSpectra(MatrixWorkspace_sptr workspace,
+                                                     FunctionModelSpectra const &spectra,
+                                                     std::string const &outputName) const override;
+  API::IConfiguredAlgorithm_sptr setupGroupAlgorithm(std::string const &inputWorkspacesString,
+                                                     std::string const &inputGroupWsName) const override;
+  API::IConfiguredAlgorithm_sptr setupElasticWindowMultiple(std::string const &workspaceBaseName,
+                                                            std::string const &inputGroupWsName,
+                                                            std::string const &sampleEnvironmentLogName,
+                                                            std::string const &sampleEnvironmentLogValue) override;
   void ungroupAlgorithm(std::string const &inputWorkspace) const override;
   void groupAlgorithm(std::string const &inputWorkspaces, std::string const &outputWorkspace) const override;
   void setIntegrationStart(double integrationStart) override;

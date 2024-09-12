@@ -107,7 +107,7 @@ class TransformToIqt(PythonAlgorithm):
         Gets algorithm properties.
         """
 
-        from IndirectCommon import getWSprefix
+        from IndirectCommon import get_workspace_name_prefix
 
         self._sample = self.getPropertyValue("SampleWorkspace")
         self._resolution = self.getPropertyValue("ResolutionWorkspace")
@@ -118,7 +118,7 @@ class TransformToIqt(PythonAlgorithm):
 
         self._parameter_table = self.getPropertyValue("ParameterWorkspace")
         if self._parameter_table == "":
-            self._parameter_table = getWSprefix(self._sample) + "TransformToIqtParameters"
+            self._parameter_table = get_workspace_name_prefix(self._sample) + "TransformToIqtParameters"
 
         self._calculate_errors = self.getProperty("CalculateErrors").value
         self._enforce_normalization = self.getProperty("EnforceNormalization").value
@@ -127,7 +127,7 @@ class TransformToIqt(PythonAlgorithm):
 
         self._output_workspace = self.getPropertyValue("OutputWorkspace")
         if self._output_workspace == "":
-            self._output_workspace = getWSprefix(self._sample) + "iqt"
+            self._output_workspace = get_workspace_name_prefix(self._sample) + "iqt"
 
         self._dry_run = self.getProperty("DryRun").value
 
@@ -152,7 +152,7 @@ class TransformToIqt(PythonAlgorithm):
         """
         Calculates the TransformToIqt parameters and saves in a table workspace.
         """
-        from IndirectCommon import getEfixed
+        from IndirectCommon import get_efixed
 
         end_prog = 0.3 if self._calculate_errors else 0.9
         workflow_prog = Progress(self, start=0.0, end=end_prog, nreports=8)
@@ -184,7 +184,7 @@ class TransformToIqt(PythonAlgorithm):
             workflow_prog.report("IPF resolution obtained")
         except (AttributeError, IndexError):
             workflow_prog.report("Resorting to Default")
-            resolution = getEfixed(self._sample) * 0.01
+            resolution = get_efixed(self._sample) * 0.01
             logger.warning(
                 "Could not get the resolution from the IPF, using 1% of the E Fixed value for the " "resolution: {0}".format(resolution)
             )
@@ -239,13 +239,13 @@ class TransformToIqt(PythonAlgorithm):
         """
         Run TransformToIqt.
         """
-        from IndirectCommon import CheckHistZero, CheckHistSame
+        from IndirectCommon import check_hist_zero, check_dimensions_equal
 
         # Process resolution data
-        res_number_of_histograms = CheckHistZero(self._resolution)[0]
-        sample_number_of_histograms = CheckHistZero(self._sample)[0]
+        res_number_of_histograms = check_hist_zero(self._resolution)[0]
+        sample_number_of_histograms = check_hist_zero(self._sample)[0]
         if res_number_of_histograms > 1 and sample_number_of_histograms is not res_number_of_histograms:
-            CheckHistSame(self._sample, "Sample", self._resolution, "Resolution")
+            check_dimensions_equal(self._sample, "Sample", self._resolution, "Resolution")
 
         calculateiqt_alg = self.createChildAlgorithm(name="CalculateIqt", startProgress=0.3, endProgress=1.0, enableLogging=True)
         calculateiqt_alg.setAlwaysStoreInADS(False)
@@ -273,10 +273,10 @@ class TransformToIqt(PythonAlgorithm):
         return iqt
 
     def _check_analysers_and_reflection(self):
-        from IndirectCommon import CheckAnalysersOrEFixed
+        from IndirectCommon import check_analysers_or_e_fixed
 
         try:
-            CheckAnalysersOrEFixed(self._sample, self._resolution)
+            check_analysers_or_e_fixed(self._sample, self._resolution)
         except ValueError:
             # A genuine error the shows that the two runs are incompatible
             raise

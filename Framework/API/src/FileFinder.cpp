@@ -280,18 +280,10 @@ std::string FileFinderImpl::makeFileName(const std::string &hint, const Kernel::
     filename = shortName + filename;
   }
 
-  std::pair<std::string, std::string> p = toInstrumentAndNumber(filename);
+  auto [instrumentName, runNumber] = toInstrumentAndNumber(filename);
 
-  filename = p.first;
-  if (!delimiter.empty()) {
-    filename += delimiter;
-  }
-  filename += p.second;
-
-  if (!suffix.empty()) {
-    filename += suffix;
-  }
-
+  // delimiter and suffix might be empty strings
+  filename = instrumentName + delimiter + runNumber + suffix;
   return filename;
 }
 
@@ -371,10 +363,22 @@ std::vector<IArchiveSearch_sptr> FileFinderImpl::getArchiveSearch(const Kernel::
   return archs;
 }
 
-const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintstr, const std::vector<std::string> &exts,
-                                                       const bool useExtsOnly) const {
+/**
+ * Find a path to a single file from a hint.
+ * @param hintstr :: hint string to look for filename.
+ * @param extensionsProvided :: Vector of aditional file extensions to consider. Optional.
+ *                  If not provided, facility extensions used.
+ * @param useOnlyExtensionsProvided :: Optional bool.
+ *                  If it's true (and extensionsProvided is not empty),
+ *                  search for the file using extensionsProvided only.
+ *                  If it's false, use extensionsProvided AND facility extensions.
+ * @return A vector of full paths or empty vector
+ */
+const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintstr,
+                                                       const std::vector<std::string> &extensionsProvided,
+                                                       const bool useOnlyExtensionsProvided) const {
   std::string hint = Kernel::Strings::strip(hintstr);
-  g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << exts.size() << "])\n";
+  g_log.debug() << "vector findRun(\'" << hint << "\', exts[" << extensionsProvided.size() << "])\n";
 
   // if partial filename or run number is not supplied, return here
   if (hint.empty())
@@ -406,18 +410,12 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
   const Kernel::InstrumentInfo instrument = this->getInstrument(hint);
   const Kernel::FacilityInfo &facility = instrument.facility();
   // get facility extensions
-  const std::vector<std::string> facility_extensions = facility.extensions();
-  // select allowed extensions
-  std::vector<std::string> extensions;
-
-  g_log.debug() << "Add facility extensions defined in the Facility.xml file"
-                << "\n";
-  extensions.assign(facility_extensions.begin(), facility_extensions.end());
+  const std::vector<std::string> facilityExtensions = facility.extensions();
 
   // Do we need to try and form a filename from our preset rules
   std::string filename(hint);
-  std::string extension = getExtension(hint, extensions);
-  if (!extensions.empty())
+  std::string extension = getExtension(hint, facilityExtensions);
+  if (!facilityExtensions.empty())
     filename = hint.substr(0, hint.rfind(extension));
   if (hintPath.depth() == 0) {
     try {
@@ -453,31 +451,49 @@ const API::Result<std::string> FileFinderImpl::findRun(const std::string &hintst
 
   // Merge the extensions & throw out duplicates
   // On Windows throw out ones that only vary in case
-  std::vector<std::string> uniqueExts;
-  uniqueExts.reserve(1 + exts.size() + extensions.size());
-  if (!extension.empty())
-    uniqueExts.emplace_back(extension);
+  std::vector<std::string> extensionsToSearch;
+  extensionsToSearch.reserve(1 + extensionsProvided.size() + facilityExtensions.size());
 
-  // If provided exts are empty, or useExtsOnly is false,
-  // we want to include facility exts as well
-  getUniqueExtensions(exts, uniqueExts);
-  if (exts.empty() || !useExtsOnly) {
-    getUniqueExtensions(extensions, uniqueExts);
+  if (useOnlyExtensionsProvided) {
+    getUniqueExtensions(extensionsProvided, extensionsToSearch);
+
+  } else {
+    if (!extension.empty()) {
+      extensionsToSearch.emplace_back(extension);
+
+    } else {
+      getUniqueExtensions(extensionsProvided, extensionsToSearch);
+      getUniqueExtensions(facilityExtensions, extensionsToSearch);
+    }
   }
 
   // determine which archive search facilities to use
   std::vector<IArchiveSearch_sptr> archs = getArchiveSearch(facility);
 
-  auto path = getPath(archs, filenames, uniqueExts);
+  auto path = getPath(archs, filenames, extensionsToSearch);
   if (path) {
-    g_log.information() << "found path = " << path << '\n';
+    g_log.information() << "Found path = " << path << '\n';
     return path;
-  } else {
-    g_log.information() << "Unable to find run with hint " << hint << "\n";
   }
+  // Path not found
 
-  g_log.information() << "Unable to find file path for " << hint << "\n";
+  // If only looked for extension in filename
+  if (!useOnlyExtensionsProvided && extensionsToSearch.size() == 1) {
 
+    extensionsToSearch.pop_back(); // No need to search for missing extension again
+    getUniqueExtensions(extensionsProvided, extensionsToSearch);
+    getUniqueExtensions(facilityExtensions, extensionsToSearch);
+
+    g_log.warning() << "Extension ['" << extension << "'] not found.\n";
+    g_log.warning() << "Searching for other facility extensions." << std::endl;
+
+    path = getPath(archs, filenames, extensionsToSearch);
+    if (path) {
+      g_log.information() << "Found path = " << path << '\n';
+      return path;
+    }
+  }
+  g_log.information() << "Unable to find run with hint " << hint << "\n";
   return API::Result<std::string>("", path.errors());
 }
 
@@ -521,18 +537,19 @@ std::string FileFinderImpl::validateRuns(const std::string &searchText) const {
  * @param hintstr :: Comma separated list of hints to findRun method.
  *  Can also include ranges of runs, e.g. 123-135 or equivalently 123-35.
  *  Only the beginning of a range can contain an instrument name.
- * @param exts :: Vector of allowed file extensions. Optional.
+ * @param extensionsProvided :: Vector of allowed file extensions. Optional.
  *                If provided, this provides the only extensions searched for.
  *                If not provided, facility extensions used.
- * @param useExtsOnly :: Optional bool. If it's true (and exts is not empty),
+ * @param useOnlyExtensionsProvided:: Optional bool. If it's true (and exts is not empty),
                            search the for the file using exts only.
                            If it's false, use exts AND facility extensions.
  * @return A vector of full paths or empty vector
  * @throw std::invalid_argument if the argument is malformed
  * @throw Exception::NotFoundError if a file could not be found
  */
-std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, const std::vector<std::string> &exts,
-                                                  const bool useExtsOnly) const {
+std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr,
+                                                  const std::vector<std::string> &extensionsProvided,
+                                                  const bool useOnlyExtensionsProvided) const {
   auto const error = validateRuns(hintstr);
   if (!error.empty())
     throw std::invalid_argument(error);
@@ -613,9 +630,9 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
 
         std::string path;
         if (boost::algorithm::istarts_with(hint, "PG3")) {
-          path = findRun(instrSName + run, exts, useExtsOnly).result();
+          path = findRun(instrSName + run, extensionsProvided, useOnlyExtensionsProvided).result();
         } else {
-          path = findRun(p1.first + run, exts, useExtsOnly).result();
+          path = findRun(p1.first + run, extensionsProvided, useOnlyExtensionsProvided).result();
         }
 
         if (!path.empty()) {
@@ -634,12 +651,12 @@ std::vector<std::string> FileFinderImpl::findRuns(const std::string &hintstr, co
       if (boost::algorithm::istarts_with(hint, "PG3")) {
         if (h == hints.begin()) {
           instrSName = "PG3";
-          path = findRun(*h, exts, useExtsOnly).result();
+          path = findRun(*h, extensionsProvided, useOnlyExtensionsProvided).result();
         } else {
-          path = findRun(instrSName + *h, exts, useExtsOnly).result();
+          path = findRun(instrSName + *h, extensionsProvided, useOnlyExtensionsProvided).result();
         }
       } else {
-        path = findRun(*h, exts, useExtsOnly).result();
+        path = findRun(*h, extensionsProvided, useOnlyExtensionsProvided).result();
       }
       if (!path.empty()) {
         res.emplace_back(path);

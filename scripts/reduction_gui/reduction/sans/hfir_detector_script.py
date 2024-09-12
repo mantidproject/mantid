@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, R0902, R0904, R0912
 """
-    Detector options for reduction
+Detector options for reduction
 """
+
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 
@@ -23,7 +24,6 @@ except (ImportError, ImportWarning):
 
 
 class Detector(BaseScriptElement):
-
     # Flag to perform sensitivity correction
     sensitivity_corr = False
     # Data file to be used to calculate sensitivity

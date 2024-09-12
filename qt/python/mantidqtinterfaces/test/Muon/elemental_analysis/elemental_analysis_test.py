@@ -713,7 +713,6 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines")
     def test_deselect_elements(self, mock_remove_element_lines):
-
         self.gui.ptable.deselect_element = mock.Mock()
 
         self.gui.peaks.enable_deselect_elements_btn = mock.Mock()
@@ -733,7 +732,6 @@ class ElementalAnalysisTest(unittest.TestCase):
 
     @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._remove_element_lines")
     def test_deselect_elements_fails(self, mock_remove_element_lines):
-
         self.gui.ptable.deselect_element = mock.Mock()
 
         self.gui.peaks.enable_deselect_elements_btn = mock.Mock()

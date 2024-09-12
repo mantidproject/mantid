@@ -21,9 +21,8 @@ class MANTIDQT_INELASTIC_DLL ISymmetriseModel {
 
 public:
   virtual ~ISymmetriseModel() = default;
-  virtual void setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                     std::vector<int> const &spectraRange) = 0;
-  virtual std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupPreviewAlgorithm(std::vector<int> const &spectraRange) = 0;
+  virtual API::IConfiguredAlgorithm_sptr setupSymmetriseAlgorithm() = 0;
   virtual void reflectNegativeToPositive() = 0;
   virtual void setWorkspaceName(std::string const &workspaceName) = 0;
   virtual void setEMin(double value) = 0;
@@ -32,14 +31,13 @@ public:
   virtual bool getIsPositiveReflect() const = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL SymmetriseModel : public ISymmetriseModel {
+class MANTIDQT_INELASTIC_DLL SymmetriseModel final : public ISymmetriseModel {
 
 public:
   SymmetriseModel();
-  ~SymmetriseModel() = default;
-  void setupPreviewAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                             std::vector<int> const &spectraRange) override;
-  std::string setupSymmetriseAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner) override;
+  ~SymmetriseModel() override = default;
+  API::IConfiguredAlgorithm_sptr setupPreviewAlgorithm(std::vector<int> const &spectraRange) override;
+  API::IConfiguredAlgorithm_sptr setupSymmetriseAlgorithm() override;
   void reflectNegativeToPositive() override;
   void setWorkspaceName(std::string const &workspaceName) override;
   void setEMin(double value) override;

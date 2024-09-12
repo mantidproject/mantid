@@ -28,6 +28,7 @@
    plotting/index
    release/index
    workbench/index
+   */
 
 
 ======
@@ -66,6 +67,7 @@ This is the documentation for Mantid |release|.
   * :ref:`techniques contents`, with further information relevant to some of the specific scientific techniques.
   * API's for :ref:`Python <pythonapi>` and `C++ <http://doxygen.mantidproject.org/>`_.
   * :ref:`release_notes`, a catalog of all of the release notes since v3.5.2.
+  * :ref:`deprecation_policy`, our current policy for deprecating algorithms, interfaces and other parts of Mantid.
 
 **Other Help and Documentation:**
     * A `forum <http://forum.mantidproject.org/>`_, to ask for help, report issues, and discuss with other Mantid users.

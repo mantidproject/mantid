@@ -26,8 +26,9 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-MomentsPresenter::MomentsPresenter(QWidget *parent, IMomentsView *view, std::unique_ptr<IMomentsModel> model)
-    : DataProcessor(parent), m_view(view), m_model(std::move(model)) {
+MomentsPresenter::MomentsPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
+                                   IMomentsView *view, std::unique_ptr<IMomentsModel> model)
+    : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
@@ -97,7 +98,6 @@ void MomentsPresenter::handleValueChanged(std::string const &propName, double va
 void MomentsPresenter::runComplete(bool error) {
   if (error)
     return;
-
   MatrixWorkspace_sptr outputWorkspace =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_model->getOutputWorkspace());
 
@@ -117,12 +117,14 @@ void MomentsPresenter::setFileExtensionsByName(bool filter) {
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
+void MomentsPresenter::setLoadHistory(bool doLoadHistory) { m_view->setLoadHistory(doLoadHistory); }
+
 /**
  * Handle when Run is clicked
  */
 void MomentsPresenter::handleRun() {
   clearOutputPlotOptionsWorkspaces();
-  runAlgorithm(m_model->setupAlgorithm());
+  m_algorithmRunner->execute(m_model->setupMomentsAlgorithm());
 }
 
 /**
@@ -130,8 +132,7 @@ void MomentsPresenter::handleRun() {
  */
 void MomentsPresenter::handleSaveClicked() {
   if (checkADSForPlotSaveWorkspace(m_model->getOutputWorkspace(), false))
-    addSaveWorkspaceToQueue(m_model->getOutputWorkspace());
-  m_batchAlgoRunner->executeBatchAsync();
+    m_algorithmRunner->execute(setupSaveAlgorithm(m_model->getOutputWorkspace()));
 }
 
 } // namespace MantidQt::CustomInterfaces

@@ -46,6 +46,7 @@ public:
 
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "ISISEnergyTransfer"; }
 
 private:
   void validateInstrumentDetails(IUserInputValidator *validator) const;
@@ -57,6 +58,7 @@ private:
   InstrumentData getInstrumentData() const;
 
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   IIETView *m_view;
   std::unique_ptr<IIETModel> m_model;

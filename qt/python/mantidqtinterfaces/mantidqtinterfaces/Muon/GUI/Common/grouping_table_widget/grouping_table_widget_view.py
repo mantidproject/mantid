@@ -62,7 +62,7 @@ class GroupingTableView(QtWidgets.QWidget):
         self.group_range_min.setValidator(positive_float_validator)
 
         self.group_range_use_first_good_data = QtWidgets.QCheckBox()
-        self.group_range_use_first_good_data.setText("\u03BCs (From data file)")
+        self.group_range_use_first_good_data.setText("\u03bcs (From data file)")
 
         self.group_range_use_first_good_data.setChecked(True)
         self.group_range_max = QtWidgets.QLineEdit("1.0")
@@ -70,7 +70,7 @@ class GroupingTableView(QtWidgets.QWidget):
         self.group_range_max.setValidator(positive_float_validator)
 
         self.group_range_use_last_data = QtWidgets.QCheckBox()
-        self.group_range_use_last_data.setText("\u03BCs (From data file)")
+        self.group_range_use_last_data.setText("\u03bcs (From data file)")
         self.group_range_use_last_data.setChecked(True)
         self.group_range_to_label = QtWidgets.QLabel()
         self.group_range_to_label.setText("to:")

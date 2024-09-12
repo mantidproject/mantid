@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" Sample MARI reduction scrip used in testing ReductionWrapper """
+"""Sample MARI reduction scrip used in testing ReductionWrapper"""
+
 from Direct.AbsorptionShapes import *
 
 from Direct.ReductionWrapper import *
@@ -23,7 +24,6 @@ class ReduceMARI(ReductionWrapper):
     # -------------------------------------------------------------------------------------------------#
     @MainProperties
     def def_main_properties(self):
-
         """Define main properties used in reduction"""
         prop = {}
         prop["sample_run"] = 11001

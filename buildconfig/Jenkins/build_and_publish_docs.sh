@@ -12,8 +12,7 @@ GIT_USER_EMAIL="mantid-buildserver@mantidproject.org"
 
 # Install conda and environment
 setup_mamba $WORKSPACE/mambaforge "docs-build" true
-mamba env update -n docs-build -f source/mantid-developer-linux.yml --prune
-mamba install -c ${CONDA_LABEL} --yes mantidqt rsync
+mamba install -c ${CONDA_LABEL} --yes mantid-developer mantidqt rsync
 
 # Configure a clean build directory
 rm -rf build

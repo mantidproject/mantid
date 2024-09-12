@@ -1,0 +1,1 @@
+- Updated isotope densities, see https://pypi.org/project/periodictable/1.6.1/#history for notes about the updates from NIST

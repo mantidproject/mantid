@@ -31,6 +31,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "AbsorptionCorrections"; }
 
 private slots:
   virtual void algorithmComplete(bool error);
@@ -51,6 +52,7 @@ private slots:
 private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void validateSampleGeometryInputs(IUserInputValidator *uiv, const QString &shape) const;
   void validateContainerGeometryInputs(IUserInputValidator *uiv, const QString &shape) const;

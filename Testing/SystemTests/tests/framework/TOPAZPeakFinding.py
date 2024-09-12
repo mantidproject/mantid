@@ -10,6 +10,7 @@ System test that loads TOPAZ single-crystal data,
 converts to Q space, finds peaks and indexes
 them.
 """
+
 import systemtesting
 import numpy
 from mantid.simpleapi import *

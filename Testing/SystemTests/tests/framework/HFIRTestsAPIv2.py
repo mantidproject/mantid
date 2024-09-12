@@ -8,10 +8,10 @@
 # disable=invalid-name,no-init,bad-builtin,attribute-defined-outside-init,protected-access,too-many-arguments
 
 """
-    System tests for HFIR SANS reduction.
+System tests for HFIR SANS reduction.
 
-    The following tests were converted from the unittest framework
-    that is part of python to the systemtesting framework used in Mantid.
+The following tests were converted from the unittest framework
+that is part of python to the systemtesting framework used in Mantid.
 """
 
 from functools import reduce

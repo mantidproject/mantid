@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" The elements of this module define typed enums which are used in the SANS reduction framework."""
+"""The elements of this module define typed enums which are used in the SANS reduction framework."""
 
 from enum import Enum
 from sans.state.JsonSerializable import json_serializable

@@ -148,7 +148,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Run.h:43
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/WorkspaceJoiners.h:35
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/CalculateCountRate.h:31
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ListValidator.h:115
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AddNote.cpp:109
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculateCountRate.cpp:204
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AddTimeSeriesLog.cpp:111
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AppendSpectra.cpp:142
@@ -187,8 +186,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/Co
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CombineDiffCal.cpp:86
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ConvertAxisByFormula.cpp:246
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Objects/MeshObject.h:62
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ConvertEmptyToTof.cpp:134
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ConvertEmptyToTof.cpp:220
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h:41
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h:42
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CropWorkspaceRagged.cpp:17
@@ -234,11 +231,10 @@ uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgori
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/GetDetectorOffsets.h:60
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/Logarithm.h:52
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetDetectorOffsets.cpp:148
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/DiscusMultipleScatteringCorrection.h:82
+missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/DiscusMultipleScatteringCorrection.h:92
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateGoniometerIndependentBackground.cpp:189
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/FitPeak.h:67
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/FitPeak.h:70
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiscusMultipleScatteringCorrection.cpp:1354
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEiMonDet3.cpp:218
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEiMonDet3.cpp:261
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FitPeak.cpp:1410
@@ -287,7 +283,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/PD
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/NormaliseToMonitor.h:114
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MergeRuns.cpp:292
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MergeRuns.cpp:679
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/RecordPythonScript.cpp:83
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PaalmanPingsAbsorptionCorrection.cpp:452
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionFredrikze.cpp:138
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionFredrikze.cpp:155
@@ -324,10 +319,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SpatialGroup
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch.cpp:267
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UpdateScriptRepository.cpp:51
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/SofQWPolygon.h:55
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1D.cpp:357
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1D.cpp:374
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1D.cpp:189
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1D.cpp:218
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHasProperty.cpp:36
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:382
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SumEventsByLogValue.cpp:409
@@ -342,8 +333,8 @@ returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Expression.h:7
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Expression.h:74
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/CatalogManager.cpp:54
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:560
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:879
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:906
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:885
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:912
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/BoostOptionalToAlgorithmProperty.cpp:11
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/BoostOptionalToAlgorithmProperty.cpp:14
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/BoostOptionalToAlgorithmProperty.cpp:30
@@ -381,9 +372,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ParameterReference.cp
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:135
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:174
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/PeakFunctionIntegrator.cpp:190
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/LogManager.cpp:205
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/LogManager.cpp:235
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/LogManager.cpp:255
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MDGeometry.cpp:395
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/ScopedWorkspace.h:52
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IEventWorkspace.cpp:58
@@ -452,12 +440,6 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindClusterFaces
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:88
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:181
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/MatrixWorkspace.h:337
-variableScope:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:1635
-variableScope:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:1636
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:383
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:405
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:1638
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MatrixWorkspace.cpp:2126
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/PeaksIntersection.h:33
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakStatisticsTools.cpp:209
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakHKLErrors.cpp:73
@@ -1575,7 +1557,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectome
 unreadVariable:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/RunsTable/RunsTablePresenter.cpp:786
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Runs/RunsPresenter.cpp:545
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/TransmissionStitchOptions.h:34
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCBaselineModellingModel.cpp:177
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Experiment.h:54
 noCopyConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:225
 noOperatorEq:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:225

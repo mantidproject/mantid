@@ -262,7 +262,11 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
         Test_Time_intens = ConvertWANDSCDtoQTest_Time.getSignalArray().copy()
         Test_Time_sig = np.sqrt(ConvertWANDSCDtoQTest_Time.getErrorSquaredArray())
 
-        self.assertAlmostEqual(np.nanmax(Test_None_intens / Test_None_sig), np.nanmax(Test_Time_intens / Test_Time_sig))
+        signal_noise = Test_None_intens / Test_None_sig
+        time_signal_noise = Test_Time_intens / Test_Time_sig
+
+        self.assertAlmostEqual(signal_noise[np.isfinite(signal_noise)].max(), time_signal_noise[np.isfinite(time_signal_noise)].max())
+        self.assertGreater(signal_noise[np.isfinite(signal_noise)].max(), 0)
 
     def test_with_background(self):
         HFIRGoniometerIndependentBackground("ConvertWANDSCDtoQTest_gold", OutputWorkspace="ConvertWANDSCDtoQTest_background")

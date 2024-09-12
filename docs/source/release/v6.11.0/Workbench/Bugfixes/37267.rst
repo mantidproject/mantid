@@ -1,0 +1,1 @@
+- Fixed error that appered when editing the y-axis of plots generated in a python script within Workbench

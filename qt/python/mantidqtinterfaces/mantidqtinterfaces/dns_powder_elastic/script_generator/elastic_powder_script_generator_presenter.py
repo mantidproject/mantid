@@ -26,5 +26,5 @@ class DNSElasticPowderScriptGeneratorPresenter(DNSScriptGeneratorPresenter):
         self.own_dict["subtract"] = self._plot_list
         return self.own_dict
 
-    def _finish_script_run(self):
+    def _finish_script_run(self, options=None):
         self._plot_list = self.model.get_plot_list()

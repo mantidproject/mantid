@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
-""" Handles calibration of SANS workspaces."""
+"""Handles calibration of SANS workspaces."""
+
 from os.path import basename, splitext, isfile
 from mantid.api import AnalysisDataService
 

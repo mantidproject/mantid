@@ -9,7 +9,7 @@
 """
 Bayes routines
 Fortran programs use fixed length arrays whereas Python has variable length lists
-Input : the Python list is padded to Fortrans length using procedure PadArray
+Input : the Python list is padded to Fortrans length using procedure pad_array
 Output : the Fortran numpy array is sliced to Python length using dataY = yout[:ny]
 """
 
@@ -50,7 +50,7 @@ def CalcErange(inWS, ns, erange, binWidth):
     nout = [nbins, minIndex, maxIndex]
 
     # pad array for use in Fortran code
-    Xout = PadArray(Xout, array_len)
+    Xout = pad_array(Xout, array_len)
 
     return nout, bnorm, Xout, X, Y, E
 
@@ -60,7 +60,7 @@ def GetXYE(inWS, n, array_len):
     N = len(Xin) - 1  # get no. points from length of x array
     Yin = mtd[inWS].readY(n)
     Ein = mtd[inWS].readE(n)
-    X = PadArray(Xin, array_len)
-    Y = PadArray(Yin, array_len)
-    E = PadArray(Ein, array_len)
+    X = pad_array(Xin, array_len)
+    Y = pad_array(Yin, array_len)
+    E = pad_array(Ein, array_len)
     return N, X, Y, E

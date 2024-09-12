@@ -21,7 +21,6 @@ set(SRC_FILES
     src/EventWorkspaceCollection.cpp
     src/ExtractMonitorWorkspace.cpp
     src/ExtractPolarizationEfficiencies.cpp
-    src/FilterEventsByLogValuePreNexus.cpp
     src/FindDetectorsInShape.cpp
     src/FindDetectorsPar.cpp
     src/GenerateGroupingPowder.cpp
@@ -176,7 +175,6 @@ set(SRC_FILES
     src/SaveDaveGrp.cpp
     src/SaveDetectorsGrouping.cpp
     src/SaveDiffCal.cpp
-    src/SaveDiffFittingAscii.cpp
     src/SaveDspacemap.cpp
     src/SaveFITS.cpp
     src/SaveFocusedXYE.cpp
@@ -246,7 +244,6 @@ set(INC_FILES
     inc/MantidDataHandling/EventWorkspaceCollection.h
     inc/MantidDataHandling/ExtractMonitorWorkspace.h
     inc/MantidDataHandling/ExtractPolarizationEfficiencies.h
-    inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
     inc/MantidDataHandling/FindDetectorsInShape.h
     inc/MantidDataHandling/FindDetectorsPar.h
     inc/MantidDataHandling/GenerateGroupingPowder.h
@@ -399,7 +396,6 @@ set(INC_FILES
     inc/MantidDataHandling/SaveDaveGrp.h
     inc/MantidDataHandling/SaveDetectorsGrouping.h
     inc/MantidDataHandling/SaveDiffCal.h
-    inc/MantidDataHandling/SaveDiffFittingAscii.h
     inc/MantidDataHandling/SaveDspacemap.h
     inc/MantidDataHandling/SaveFITS.h
     inc/MantidDataHandling/SaveFocusedXYE.h
@@ -471,7 +467,6 @@ set(TEST_FILES
     EventWorkspaceCollectionTest.h
     ExtractMonitorWorkspaceTest.h
     ExtractPolarizationEfficienciesTest.h
-    FilterEventsByLogValuePreNexusTest.h
     FindDetectorsInShapeTest.h
     FindDetectorsParTest.h
     GenerateGroupingPowderTest.h

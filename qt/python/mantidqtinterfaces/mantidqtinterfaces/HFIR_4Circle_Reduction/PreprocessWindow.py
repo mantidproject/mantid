@@ -149,7 +149,7 @@ class ScanPreProcessWindow(QMainWindow):
         # check inputs
         assert isinstance(
             self._myController, reduce4circleControl.CWSCDReductionControl
-        ), "Reduction controller of type {0} is not accepted. It must be a CWSCDReductionControl instance." "".format(
+        ), "Reduction controller of type {0} is not accepted. It must be a CWSCDReductionControl instance.".format(
             self._myController.__class__.__name__
         )
 
@@ -364,7 +364,7 @@ class ScanPreProcessWindow(QMainWindow):
         """
         assert isinstance(
             controller, reduce4circleControl.CWSCDReductionControl
-        ), "Reduction controller must be an instance of reduce4circleControl.CWSCDReductionControl but not a {0}." "".format(
+        ), "Reduction controller must be an instance of reduce4circleControl.CWSCDReductionControl but not a {0}.".format(
             controller.__class__.__name__
         )
 

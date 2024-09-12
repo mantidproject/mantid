@@ -9,6 +9,7 @@
 """
 Defines interaction behaviour for plotting.
 """
+
 # std imports
 import numpy as np
 from contextlib import contextmanager
@@ -17,7 +18,6 @@ from copy import copy
 from functools import partial
 
 # third party imports
-from matplotlib.axes import Axes
 from matplotlib.container import ErrorbarContainer
 from matplotlib.contour import QuadContourSet
 from qtpy.QtCore import Qt
@@ -29,7 +29,7 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 # mantid imports
 from mantid.api import AnalysisDataService as ads
-from mantid.plots import datafunctions, MantidAxes, axesfunctions
+from mantid.plots import datafunctions, MantidAxes, axesfunctions, MantidAxes3D
 from mantid.plots.utility import zoom, MantidAxType, legend_set_draggable
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
@@ -323,7 +323,7 @@ class FigureInteraction(object):
             elif ax.xaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in ax.get_xticklabels()):
                 move_and_show(XAxisEditor(canvas, ax))
             elif ax.yaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in ax.get_yticklabels()):
-                if type(ax) is Axes:
+                if "colorbar" in ax._label:
                     move_and_show(ColorbarAxisEditor(canvas, ax))
                 else:
                     move_and_show(YAxisEditor(canvas, ax))
@@ -433,7 +433,8 @@ class FigureInteraction(object):
                 self._add_normalization_option_menu(menu, event.inaxes)
                 self._add_colorbar_axes_scale_menu(menu, event.inaxes)
         elif fig_type == FigureType.Surface:
-            self._add_colorbar_axes_scale_menu(menu, event.inaxes)
+            if isinstance(event.inaxes, MantidAxes3D):
+                self._add_colorbar_axes_scale_menu(menu, event.inaxes)
         elif fig_type != FigureType.Wireframe:
             if self.fit_browser.tool is not None:
                 self.fit_browser.add_to_menu(menu)

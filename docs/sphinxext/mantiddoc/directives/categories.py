@@ -5,13 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Provides directives for dealing with category pages.
+Provides directives for dealing with category pages.
 
-    While parsing the directives a list of the categories and associated pages/subcategories
-    is tracked. When the final set of html pages is collected, a processing function
-    creates "index" pages that lists the contents of each category. The display of each
-    "index" page is controlled by a jinja2 template.
+While parsing the directives a list of the categories and associated pages/subcategories
+is tracked. When the final set of html pages is collected, a processing function
+creates "index" pages that lists the contents of each category. The display of each
+"index" page is controlled by a jinja2 template.
 """
+
 from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version  # pylint: disable=unused-import
 from sphinx.util.osutil import relative_uri
 import os

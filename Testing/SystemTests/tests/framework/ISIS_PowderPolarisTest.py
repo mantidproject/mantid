@@ -145,7 +145,7 @@ class FocusTestNoAbsorption(systemtesting.MantidSystemTest):
             assert_output_file_exists(output_dat_dir, "POL98533-b_{}-d.dat".format(bankno))
 
         for ws in self.focus_results:
-            self.assertEqual(ws.sample().getMaterial().name(), "Si")
+            self.assertEqual(ws.sample().getMaterial().name(), "Si Si")
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-6
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
@@ -188,7 +188,7 @@ class FocusTestAbsorptionPaalmanPings(systemtesting.MantidSystemTest):
             assert_output_file_exists(output_dat_dir, "POL98533-b_{}-d.dat".format(bankno))
 
         for ws in self.focus_results:
-            self.assertEqual(ws.sample().getMaterial().name(), "Si")
+            self.assertEqual(ws.sample().getMaterial().name(), "Si Si")
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-6
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusPaalmanPings.nxs"
@@ -231,7 +231,7 @@ class FocusTestAbsorptionMayers(systemtesting.MantidSystemTest):
             assert_output_file_exists(output_dat_dir, "POL98533-b_{}-d.dat".format(bankno))
 
         for ws in self.focus_results:
-            self.assertEqual(ws.sample().getMaterial().name(), "Si")
+            self.assertEqual(ws.sample().getMaterial().name(), "Si Si")
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-5
         # MayersSampleCorrection involves a fit that may give slightly different results on different OS
@@ -261,7 +261,7 @@ class FocusTestChopperMode(systemtesting.MantidSystemTest):
     def validate(self):
         # This will only pass if instead of failing or deafaulting to PDF it correctly picks Rietveld
         for ws in self.focus_results:
-            self.assertEqual(ws.sample().getMaterial().name(), "Si")
+            self.assertEqual(ws.sample().getMaterial().name(), "Si Si")
         # this needs to be put in due to rounding errors between OS' for the proton_charge_by_period log
         self.disableChecking.append("Sample")
         self.tolerance = 1e-7
@@ -291,7 +291,7 @@ class FocusTestRunTwice(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance_is_rel_err = True
-        self.tolerance = 1e-6
+        self.tolerance = 1e-5  # same tolused in FocusTestAbsorptionMayers
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusMayers.nxs"
 
     def cleanup(self):
@@ -332,7 +332,7 @@ class FocusTestPerDetector(systemtesting.MantidSystemTest):
             assert_output_file_exists(output_dat_dir, "POL98533-b_{}-d.dat".format(bankno))
 
         for ws in self.focus_results:
-            self.assertEqual(ws.sample().getMaterial().name(), "Si")
+            self.assertEqual(ws.sample().getMaterial().name(), "Si Si")
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-5
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusPerDet.nxs"
@@ -358,7 +358,7 @@ class TotalScatteringTest(systemtesting.MantidSystemTest):
     def validate(self):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked
-        expected_peak_values = [0.8808, 1.1001, 2.9530, 4.6600, 4.3528]
+        expected_peak_values = [0.8808, 1.1001, 2.9530, 4.6593, 4.3521]
         for index, ws in enumerate(self.pdf_output):
             idx = get_bin_number_at_given_r(ws.dataX(0), 3.9)
             self.assertAlmostEqual(ws.dataY(0)[idx], expected_peak_values[index], places=3)
@@ -378,7 +378,7 @@ class TotalScatteringMergedTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.5806, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.5799, places=3)
 
 
 class TotalScatteringMergedPerDetTest(systemtesting.MantidSystemTest):
@@ -395,7 +395,7 @@ class TotalScatteringMergedPerDetTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.531, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 4.5305, places=3)
 
 
 class TotalScatteringPDFRebinTest(systemtesting.MantidSystemTest):
@@ -501,7 +501,7 @@ class TotalScatteringLorchFilterTest(systemtesting.MantidSystemTest):
         # Whilst total scattering is in development, the validation will avoid using reference files as they will have
         # to be updated very frequently. In the meantime, the expected peak in the PDF at ~3.9 Angstrom will be checked.
         idx = get_bin_number_at_given_r(self.pdf_output.dataX(0), 3.9)
-        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 8.8486, places=3)
+        self.assertAlmostEqual(self.pdf_output.dataY(0)[idx], 8.8473, places=3)
 
 
 def run_total_scattering(
@@ -672,7 +672,9 @@ def setup_inst_object(mode, with_container=False):
         )
 
     sample_details = SampleDetails(height=4.0, radius=0.2985, center=[0, 0, 0], shape="cylinder")
-    sample_details.set_material(chemical_formula="Si")
+    # define multi-atom cell to stop regression of bug calling MaterialBuilder.build() without setting number density
+    # which works for one atom cells as number density is automatically calculated
+    sample_details.set_material(chemical_formula="Si Si", number_density=0.04996)
     if with_container:
         sample_details.set_container(radius=0.3175, chemical_formula="V")
     inst_obj.set_sample_details(sample=sample_details)

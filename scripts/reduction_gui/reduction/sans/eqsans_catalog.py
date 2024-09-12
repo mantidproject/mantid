@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    Data catalog for EQSANS
+Data catalog for EQSANS
 """
+
 from reduction_gui.reduction.sans.data_cat import DataCatalog as BaseCatalog
 from reduction_gui.reduction.sans.data_cat import DataSet, DataType
 from reduction_gui.reduction.scripter import execute_script

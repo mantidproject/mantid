@@ -83,7 +83,6 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
-
         warnings.warn("This algorithm is depreciated (April-2017). Please use ISISIndirectDiffractionReduction")
 
         from IndirectReductionCommon import (

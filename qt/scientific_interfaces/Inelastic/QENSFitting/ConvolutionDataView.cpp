@@ -9,6 +9,7 @@
 #include "FitDataPresenter.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 
+#include <MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h>
 #include <QComboBox>
 #include <QHeaderView>
 #include <QtGlobal>
@@ -46,6 +47,7 @@ void ConvolutionDataView::showAddWorkspaceDialog() {
   dialog->setFBSuffices(InterfaceUtils::getSampleFBSuffixes(tabName));
   dialog->setResolutionWSSuffices(InterfaceUtils::getResolutionWSSuffixes(tabName));
   dialog->setResolutionFBSuffices(InterfaceUtils::getResolutionFBSuffixes(tabName));
+  dialog->setLoadProperty("LoadHistory", SettingsHelper::loadHistory());
   dialog->updateSelectedSpectra();
   dialog->show();
 }

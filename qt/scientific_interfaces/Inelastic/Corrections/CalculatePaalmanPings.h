@@ -27,6 +27,7 @@ public:
 
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "CalculatePaalmanPings"; }
 
 private slots:
   void absCorComplete(bool error);

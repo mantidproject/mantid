@@ -548,7 +548,6 @@ class CompareAbsorptionCorrectionToInternationalTablesCylinder(systemtesting.Man
     }
 
     def runTest(self):
-
         ws = create_test_ws()
 
         cylinder_height = 0.00001  # m
@@ -1110,7 +1109,6 @@ class CompareAbsorptionCorrectionToInternationalTablesSphere(systemtesting.Manti
     }
 
     def runTest(self):
-
         ws = create_test_ws()
 
         sphere_radius = 0.01

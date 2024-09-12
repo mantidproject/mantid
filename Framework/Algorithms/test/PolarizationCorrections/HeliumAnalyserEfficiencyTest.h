@@ -42,8 +42,8 @@ public:
     MatrixWorkspace_sptr ws1 = generateWorkspace("ws1", x, y);
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
-    heliumAnalyserEfficiency->setProperty("InputWorkspace", ws1->getName());
     heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
+    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("InputWorkspace", ws1), std::invalid_argument &);
     TS_ASSERT_THROWS(heliumAnalyserEfficiency->execute(), const std::runtime_error &);
   }
 
@@ -73,8 +73,13 @@ public:
     auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "TOF");
     auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
     heliumAnalyserEfficiency->initialize();
-    TS_ASSERT_THROWS(heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp->getName()),
-                     std::invalid_argument &);
+
+    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp);
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
+
+    TS_ASSERT_THROWS_EQUALS(
+        heliumAnalyserEfficiency->execute(), std::runtime_error const &e, std::string(e.what()),
+        "Some invalid Properties found: \n InputWorkspace: All input workspaces must be in units of Wavelength.");
   }
 
   void testZeroPdError() {
@@ -151,6 +156,23 @@ public:
     TS_ASSERT_EQUALS(outputWs->getNumberHistograms(), 1);
     const std::vector<std::string> &expectedColumns = {"Name", "Value", "Error"};
     TS_ASSERT_EQUALS(paramsWs->getColumnNames(), expectedColumns);
+  }
+
+  void testChildAlgorithmExecutesSuccessfully() {
+    MantidVec e;
+    auto wsGrp = createExampleGroupWorkspace("wsGrp", e);
+
+    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "E");
+    heliumAnalyserEfficiency->setChild(true);
+
+    heliumAnalyserEfficiency->execute();
+
+    TS_ASSERT(heliumAnalyserEfficiency->isExecuted());
+
+    MatrixWorkspace_sptr outputWorkspace = heliumAnalyserEfficiency->getProperty("OutputWorkspace");
+
+    TS_ASSERT_EQUALS(outputWorkspace->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outputWorkspace->dataY(0).size(), e.size());
   }
 
 private:

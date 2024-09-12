@@ -5,8 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-""" Main view for the ISIS SANS reduction interface.
-"""
+"""Main view for the ISIS SANS reduction interface."""
 
 from abc import ABCMeta, abstractmethod
 
@@ -387,6 +386,11 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.hide_geometry()
         self.hide_background_subtraction()
 
+        # Hide broken functionality: https://github.com/mantidproject/mantid/issues/37836
+        self.event_slice_optimisation_checkbox.setChecked(False)
+        self.event_slice_optimisation_checkbox.setHidden(True)
+        self.event_slice_optimisation_label.setHidden(True)
+
         return True
 
     def _on_wavelength_step_type_changed(self):
@@ -395,10 +399,10 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
             self.wavelength_step_label.setText("Step [\u00c5]")
         elif self.wavelength_step_type == RangeStepType.RANGE_LOG:
             self.wavelength_stacked_widget.setCurrentIndex(1)
-            self.wavelength_step_label.setText("Step [d\u03BB/\u03BB]")
+            self.wavelength_step_label.setText("Step [d\u03bb/\u03bb]")
         elif self.wavelength_step_type == RangeStepType.LOG:
             self.wavelength_stacked_widget.setCurrentIndex(0)
-            self.wavelength_step_label.setText("Step [d\u03BB/\u03BB]")
+            self.wavelength_step_label.setText("Step [d\u03bb/\u03bb]")
         elif self.wavelength_step_type == RangeStepType.LIN:
             self.wavelength_stacked_widget.setCurrentIndex(0)
             self.wavelength_step_label.setText("Step [\u00c5]")
@@ -1001,6 +1005,9 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
     def set_background_subtraction_mode(self, mode):
         self.background_subtraction_checkbox.setChecked(mode)
 
+    def set_plot_results_checkbox_visibility(self, visibility):
+        self.plot_results_checkbox.setVisible(visibility)
+
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     # $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
     # START ACCESSORS
@@ -1139,7 +1146,9 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
 
     @event_slice_optimisation.setter
     def event_slice_optimisation(self, value):
-        self.event_slice_optimisation_checkbox.setChecked(value)
+        # Functionality is broken, so the checkbox for this setter is hidden. See here for more information:
+        # https://github.com/mantidproject/mantid/issues/37836
+        pass
 
     @property
     def instrument(self):

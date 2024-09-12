@@ -80,6 +80,11 @@ public:
 
   void setUp() override { m_model = std::make_unique<ElwinModel>(); }
 
+  void tearDown() override {
+    AnalysisDataService::Instance().clear();
+    m_model.reset();
+  }
+
   void test_algorithm_set_up() {
     MantidQt::API::BatchAlgorithmRunner batch;
     std::string wsBaseName = "Workspace_name";
@@ -93,8 +98,9 @@ public:
     m_model->setBackgroundSubtraction(true);
     m_model->setNormalise(true);
 
-    m_model->setupElasticWindowMultiple(&batch, wsBaseName, "Workspace_name_sqw", "sampleLogName", "sampleLogValue");
-
+    auto const elwinAlg =
+        m_model->setupElasticWindowMultiple(wsBaseName, "Workspace_name_sqw", "sampleLogName", "sampleLogValue");
+    batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{elwinAlg});
     batch.executeBatch();
 
     ITableWorkspace_sptr outputWS =
@@ -119,7 +125,8 @@ public:
     auto workspace2 = WorkspaceCreationHelper::create2DWorkspace(5, 4);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name2_sqw", workspace2);
     std::string workspaceInputString = "Workspace_name1_sqw, Workspace_name2_sqw";
-    m_model->setupGroupAlgorithm(&batch, workspaceInputString, "groupedWS");
+    auto const groupAlg = m_model->setupGroupAlgorithm(workspaceInputString, "groupedWS");
+    batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{groupAlg});
     batch.executeBatch();
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("groupedWS"));
 
@@ -138,18 +145,26 @@ public:
   }
 
   void test_LoadAlgorithm_set_up() {
+    MantidQt::API::BatchAlgorithmRunner batch;
     // The ElasticWindowMultiple algorithm is a python algorithm and so can not be called in c++ tests
 
-    MantidQt::API::BatchAlgorithmRunner batch;
-    m_model->setupLoadAlgorithm(&batch, "MultispectralTestData.nxs", "LoadedWsName");
+    auto const loadAlg = m_model->setupLoadAlgorithm("MultispectralTestData.nxs", "LoadedWsName");
+    batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{loadAlg});
     batch.executeBatch();
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("LoadedWsName"));
   }
 
-  void test_createGroupedWorkspaces() {
+  void test_ExtractSpectra_set_up() {
+    MantidQt::API::BatchAlgorithmRunner batch;
+
     auto workspace1 = WorkspaceCreationHelper::create2DWorkspace(5, 4);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name1_sqw", workspace1);
-    m_model->createGroupedWorkspaces(workspace1, FunctionModelSpectra("0,1"));
+
+    auto const extractSpectra =
+        m_model->setupExtractSpectra(workspace1, FunctionModelSpectra("0,1"), "Workspace_name1_sqw_extracted_spectra");
+    batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{extractSpectra});
+    batch.executeBatch();
+
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("Workspace_name1_sqw_extracted_spectra"));
     TS_ASSERT_EQUALS(Mantid::API::AnalysisDataService::Instance()
                          .retrieveWS<MatrixWorkspace>("Workspace_name1_sqw_extracted_spectra")

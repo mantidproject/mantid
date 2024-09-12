@@ -34,7 +34,7 @@ Usage
    import numpy
 
    # Create dummy workspace.
-   out_ws = CreateSimulationWorkspace(Instrument="IRIS", BinParams="0,500,2000")
+   out_ws = CreateSimulationWorkspace(Instrument="MARI", BinParams="0,500,2000")
    out_ws.setY(0, numpy.array([10.0, 50.0, 30.0, 60.0]))
    AddSampleLog(out_ws, 'Ei', LogText='321', LogType='Number', NumberType='Double')
    out_ws.setDistribution(True)
@@ -67,7 +67,7 @@ Output:
 
 .. testoutput:: ExSimpleSavingRoundtrip
 
-   Contents of the first spectrum = [ 10.  50.  30.  60.].
+   Contents of the first spectrum = [10. 50. 30. 60.].
    Initial and loaded workspaces comparison is: True
    Loaded workspace has attached incident energy Ei=321.0 and rotation angle Psi= 32.0deg
 

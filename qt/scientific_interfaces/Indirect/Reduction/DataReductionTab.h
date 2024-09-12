@@ -58,6 +58,7 @@ public:
 
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
+  void enableLoadHistoryProperty(bool doLoadHistory);
 
 public slots:
 
@@ -91,6 +92,7 @@ private slots:
 
 private:
   virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
+  virtual void setLoadHistory(bool doLoadHistory) { (void)doLoadHistory; }
   virtual void updateInstrumentConfiguration() = 0;
 
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;

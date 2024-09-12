@@ -16,7 +16,6 @@ __author__ = "Stuart Campbell"
 
 
 def generate_file_changes_data(year_start, year_end):
-
     current_year = int(datetime.datetime.now().strftime("%Y"))
     current_month = int(datetime.datetime.now().strftime("%m"))
 
@@ -42,7 +41,6 @@ def generate_file_changes_data(year_start, year_end):
 
 
 def generate_commit_data(year_start, year_end):
-
     current_year = int(datetime.datetime.now().strftime("%Y"))
     current_month = int(datetime.datetime.now().strftime("%m"))
 

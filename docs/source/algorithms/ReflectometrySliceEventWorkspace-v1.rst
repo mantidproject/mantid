@@ -41,7 +41,7 @@ Usage
     for i in range(output.getNumberOfEntries()):
         print('Slice '  + str(i))
         for j in range(output[i].getNumberHistograms()):
-            print(output[i].dataY(j)[0])
+            print('{:.8f}'.format(output[i].dataY(j)[0]))
 
 Output:
 
@@ -51,23 +51,23 @@ Output:
     5 spectra
     Y values for first bin:
     Slice 0
-    0.0505263157895
-    0.0505263157895
-    0.0505263157895
-    4.0
-    4.0
+    0.05052632
+    0.05052632
+    0.05052632
+    4.00000000
+    4.00000000
     Slice 1
-    0.00947368421053
-    0.00947368421053
-    0.00947368421053
-    4.0
-    4.0
+    0.00947368
+    0.00947368
+    0.00947368
+    4.00000000
+    4.00000000
     Slice 2
-    0.0631578947368
-    0.0631578947368
-    0.0631578947368
-    1.0
-    1.0
+    0.06315789
+    0.06315789
+    0.06315789
+    1.00000000
+    1.00000000
 
 .. categories::
 

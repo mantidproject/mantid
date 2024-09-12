@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, arguments-differ, unused-variable
 """
-    Implementation of reduction steps for SANS
+Implementation of reduction steps for SANS
 """
+
 import math
 import pickle
 from reduction import ReductionStep
@@ -352,7 +353,6 @@ class Mask(ReductionStep):
         self._ignore_run_properties = ignore
 
     def execute(self, reducer, workspace):
-
         # Check whether the workspace has mask information
         run = mtd[workspace].run()
         if not self._ignore_run_properties and run.hasProperty("rectangular_masks"):

@@ -8,7 +8,6 @@ from qtpy import QtCore, QtWidgets
 
 
 class DummyView(QtWidgets.QWidget):
-
     buttonSignal = QtCore.pyqtSignal(object)
 
     def __init__(self, name, parent=None):

@@ -236,4 +236,11 @@ std::map<std::string, double> DataReductionTab::getRangesFromInstrument(QString 
  */
 void DataReductionTab::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
+/**
+ * Workspaces loading from data selectors load the history of that workspace.
+ *
+ * @param doLoadHistory :: true if you want to load the history
+ */
+void DataReductionTab::enableLoadHistoryProperty(bool doLoadHistory) { setLoadHistory(doLoadHistory); }
+
 } // namespace MantidQt::CustomInterfaces

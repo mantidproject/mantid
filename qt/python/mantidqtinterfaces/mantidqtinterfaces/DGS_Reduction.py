@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    Script used to start the DGS reduction GUI from MantidPlot
+Script used to start the DGS reduction GUI from MantidPlot
 """
+
 from mantidqtinterfaces.reduction_application import ReductionGUI
 import sys
 

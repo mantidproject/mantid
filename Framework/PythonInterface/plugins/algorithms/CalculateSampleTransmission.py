@@ -13,7 +13,6 @@ import numpy as np
 
 
 class CalculateSampleTransmission(PythonAlgorithm):
-
     _bin_params = None
     _chemical_formula = None
     _density_type = None

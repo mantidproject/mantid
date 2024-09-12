@@ -44,8 +44,8 @@ Output:
 
 .. testoutput::
 
-   Squared values of first spectrum: [  1.   4.   9.  16.]
-   Squared values of second spectrum: [ 25.  36.  49.  64.]
+   Squared values of first spectrum: [ 1.  4.  9. 16.]
+   Squared values of second spectrum: [25. 36. 49. 64.]
 
 .. categories::
 

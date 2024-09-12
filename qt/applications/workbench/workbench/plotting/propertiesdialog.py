@@ -297,7 +297,9 @@ class ColorbarAxisEditor(AxisEditor):
         self._memento = memento
         if len(self.images) > 0:
             memento.min, memento.max = self.images[0].get_clim()
-        memento.log = isinstance(self.images[0].norm, LogNorm)
+            memento.log = isinstance(self.images[0].norm, LogNorm)
+        else:
+            memento.log = False
         memento.grid = False
 
         self._fill(memento)

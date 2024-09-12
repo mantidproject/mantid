@@ -427,20 +427,20 @@ Output:
 .. testoutput:: ExGroupDetectorsWithSpectra
 
    Grouped first 3 spectra results in workspace with 8 spectra and the grouped spectra is spectrum 0:
-   [ 6.  6.  6.  6.  6.  6.  6.  6.  6.  6.]
+   [6. 6. 6. 6. 6. 6. 6. 6. 6. 6.]
    First unaffected spectrum is now spectrum 1, former spectrum 4:
-   [ 4.  4.  4.  4.  4.  4.  4.  4.  4.  4.]
+   [4. 4. 4. 4. 4. 4. 4. 4. 4. 4.]
    *********************************************************
    Grouped 3 spectra starting with second results in workspace with 8 spectra and the grouped spectra is spectrum 0:
-   [ 9.  9.  9.  9.  9.  9.  9.  9.  9.  9.]
+   [9. 9. 9. 9. 9. 9. 9. 9. 9. 9.]
    First unaffected spectrum is now spectrum 1, former spectrum 0:
-   [ 1.  1.  1.  1.  1.  1.  1.  1.  1.  1.]
+   [1. 1. 1. 1. 1. 1. 1. 1. 1. 1.]
    *********************************************************
    Grouped 6 spectra 3x3 twice results in workspace with 6 spectra and the grouped spectra is spectrum 0 and 1:
-   [ 15.  15.  15.  15.  15.  15.  15.  15.  15.  15.]
-   [ 6.  6.  6.  6.  6.  6.  6.  6.  6.  6.]
+   [15. 15. 15. 15. 15. 15. 15. 15. 15. 15.]
+   [6. 6. 6. 6. 6. 6. 6. 6. 6. 6.]
    First unaffected spectrum is now spectrum 3, former spectrum 7:
-   [ 7.  7.  7.  7.  7.  7.  7.  7.  7.  7.]
+   [7. 7. 7. 7. 7. 7. 7. 7. 7. 7.]
    *********************************************************
 
 **Example 7: Group detectors using map file:**
@@ -489,10 +489,10 @@ Output:
 .. testoutput:: ExGroupDetectorsWithMap
 
    Grouped workspace has 4 spectra
-   spectrum 1 (sum of spectra 1-3): [ 6.  6.  6.  6.  6.  6.  6.  6.  6.  6.]
-   spectrum 2 (sum of spectra 4-6): [ 15.  15.  15.  15.  15.  15.  15.  15.  15.  15.]
-   spectrum 3 (sum of spectra 7-8): [ 15.  15.  15.  15.  15.  15.  15.  15.  15.  15.]
-   spectrum 4 (sum of spectra 9-10): [ 19.  19.  19.  19.  19.  19.  19.  19.  19.  19.]
+   spectrum 1 (sum of spectra 1-3): [6. 6. 6. 6. 6. 6. 6. 6. 6. 6.]
+   spectrum 2 (sum of spectra 4-6): [15. 15. 15. 15. 15. 15. 15. 15. 15. 15.]
+   spectrum 3 (sum of spectra 7-8): [15. 15. 15. 15. 15. 15. 15. 15. 15. 15.]
+   spectrum 4 (sum of spectra 9-10): [19. 19. 19. 19. 19. 19. 19. 19. 19. 19.]
 
 **Example 8: Group detectors using grouping pattern:**
 
@@ -516,12 +516,12 @@ Output:
 
 .. testoutput:: ExGroupDetectorsWithPattern
 
-   [ 3.]
-   [ 4.]
-   [ 18.]
-   [ 8.]
-   [ 9.]
-   [ 10.]
+   [3.]
+   [4.]
+   [18.]
+   [8.]
+   [9.]
+   [10.]
 
 .. categories::
 

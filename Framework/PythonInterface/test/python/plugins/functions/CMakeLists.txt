@@ -31,6 +31,7 @@ set(TEST_PY_FILES
     PCRmagnetRedfieldTest.py
     PCRmagnetfnormTest.py
     PEARLTransVoigtTest.py
+    PearsonIVTest.py
     PrimStretchedExpFTTest.py
     RedfieldTest.py
     RFresonanceTest.py

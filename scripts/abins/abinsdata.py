@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Any, Dict, Type, TypedDict, TypeVar
 
+from pydantic import validate_call
+
 import mantid
 from abins.kpointsdata import KpointsData
 from abins.atomsdata import AtomsData
@@ -23,13 +25,9 @@ class AbinsData:
 
     """
 
+    @validate_call(config=dict(arbitrary_types_allowed=True, strict=True))
     def __init__(self, *, k_points_data: KpointsData, atoms_data: AtomsData) -> None:
-        if not isinstance(k_points_data, KpointsData):
-            raise TypeError("Invalid type of k-points data.: {}".format(type(k_points_data)))
         self._k_points_data = k_points_data
-
-        if not isinstance(atoms_data, AtomsData):
-            raise TypeError("Invalid type of atoms data.")
         self._atoms_data = atoms_data
         self._check_consistent_dimensions()
 
@@ -45,8 +43,9 @@ class AbinsData:
 
         if ab_initio_program.upper() not in all_loaders:
             raise ValueError(
-                "No loader available for {}: unknown program. "
-                "supported loaders: {}".format(ab_initio_program.upper(), " ".join(all_loaders.keys()))
+                "No loader available for {}: unknown program. supported loaders: {}".format(
+                    ab_initio_program.upper(), " ".join(all_loaders.keys())
+                )
             )
         loader = all_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename)
         data = loader.get_formatted_data()
@@ -66,7 +65,7 @@ class AbinsData:
         for k in data["k_points_data"]["atomic_displacements"]:
             if data["k_points_data"]["atomic_displacements"][k].shape[0] != len(data["atoms_data"]):
                 raise ValueError(
-                    "KpointsData and AtomsData are not consistent: number of atoms in structure " "does not match displacement data."
+                    "KpointsData and AtomsData are not consistent: number of atoms in structure does not match displacement data."
                 )
 
     def extract(self) -> Dict[str, Any]:

@@ -191,11 +191,11 @@ class IndirectTransmission(PythonAlgorithm):
         @param workspace Name of workspace to extract from
         @return Fixed energy value
         """
-        from IndirectCommon import getEfixed
+        from IndirectCommon import get_efixed
 
         try:
             # Try to get efixed from the parameters first
-            efixed = getEfixed(workspace)
+            efixed = get_efixed(workspace)
 
         except ValueError:
             # If that fails then get it by taking from group of all detectors

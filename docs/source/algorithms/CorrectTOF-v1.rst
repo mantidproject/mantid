@@ -102,9 +102,9 @@ Output:
 
 .. testoutput:: ExCorrectTOF2
 
-    5 X values of raw data:  [ 8218.59  8229.09  8239.59  8250.09  8260.59]
-    5 X values corrected data:  [ 8218.61  8229.11  8239.61  8250.11  8260.61]
-    5 X values after units conversion:  [ 0.02  0.03  0.03  0.04  0.05]
+    5 X values of raw data:  [8218.59 8229.09 8239.59 8250.09 8260.59]
+    5 X values corrected data:  [8218.61 8229.11 8239.61 8250.11 8260.61]
+    5 X values after units conversion:  [0.02 0.03 0.03 0.04 0.05]
 
 .. categories::
 

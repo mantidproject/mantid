@@ -37,7 +37,6 @@ class TestListSelectorPresenter(unittest.TestCase):
         self.view.addItems.assert_called_once_with([["property_one", True, True]])
 
     def test_handle_filter_changed_creates_filtered_model_and_updates_view_accordingly_for_no_filter(self):
-
         self.presenter.handle_filter_changed("")
 
         self.view.addItems.assert_called_once_with([["property_two", False, False], ["property_one", True, True]])

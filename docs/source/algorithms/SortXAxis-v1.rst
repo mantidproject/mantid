@@ -59,17 +59,17 @@ Output:
 .. testoutput:: SortXAxis
 
     Unordered Print
-    [ 2.  1.  3.]
-    [ 2.  1.  3.]
-    [ 2.  1.  3.]
+    [2. 1. 3.]
+    [2. 1. 3.]
+    [2. 1. 3.]
     In order print: Descending
-    [ 3.  2.  1.]
-    [ 3.  2.  1.]
-    [ 3.  2.  1.]
+    [3. 2. 1.]
+    [3. 2. 1.]
+    [3. 2. 1.]
     In order print: Ascending
-    [ 1.  2.  3.]
-    [ 1.  2.  3.]
-    [ 1.  2.  3.]
+    [1. 2. 3.]
+    [1. 2. 3.]
+    [1. 2. 3.]
 
 .. categories::
 

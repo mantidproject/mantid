@@ -73,7 +73,11 @@ std::vector<std::pair<std::string, size_t>> FitDataPresenter::getResolutionsForF
   return m_model->getResolutionsForFit();
 }
 
-void FitDataPresenter::validate(IUserInputValidator *validator) { m_view->validate(validator); }
+void FitDataPresenter::validate(IUserInputValidator *validator) {
+  m_view->validate(validator);
+  if (!MantidWidgets::WorkspaceUtils::doAllWsExistInADS(m_model->getWorkspaceNames()))
+    validator->addErrorMessage("No input data for fit : Some of the input workspaces have been removed from the ADS");
+}
 
 void FitDataPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
   try {

@@ -121,7 +121,6 @@ class TestBank(unittest.TestCase):
         DeleteWorkspaces(["table_20", "pixel_20", "PeakYTable", "ParametersTable"])  # a bit of clean-up
 
     def test_criterion_peak_vertical_position(self):
-
         # control bank, it has no problems
         fit_bank(self.cases["123455_bank20"], "bank20")
         expected = np.ones(16, dtype=bool)
@@ -317,7 +316,6 @@ class TestBank(unittest.TestCase):
         DeleteWorkspaces(["CalibTable", "fit_results", "parameters_tables", "PeakTable", "PeakYTable", "summary"])
 
     def test_calibrate_bank(self):
-
         # control bank, it has no problems. Thus, no mask to be created
         calibration, mask = calibrate_bank(self.cases["123455_bank20"], "bank20", "calibration_table")
         assert calibration.rowCount() == 256 * 16

@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    Data stitching for SANS and reflectometry
+Data stitching for SANS and reflectometry
 """
+
 import os
 import sys
 from mantid.simpleapi import *

@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    Command set for Direct Geometry reduction
+Command set for Direct Geometry reduction
 """
+
 # Import the specific commands that we need
 from mantid.api import AlgorithmManager
 from reduction.command_interface import *

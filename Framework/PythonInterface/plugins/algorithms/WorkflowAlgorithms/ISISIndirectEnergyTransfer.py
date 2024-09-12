@@ -156,6 +156,12 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             WorkspaceGroupProperty("OutputWorkspace", "", direction=Direction.Output), doc="Workspace group for the resulting workspaces."
         )
 
+        self.declareProperty(
+            name="OutputSuffix",
+            defaultValue="",
+            doc="A suffix that will be appended to each output workspace while preserving the naming convention",
+        )
+
     # pylint: disable=too-many-locals
     def PyExec(self):
         from IndirectReductionCommon import (
@@ -303,7 +309,9 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 ConvertUnits(InputWorkspace=c_ws_name, OutputWorkspace=c_ws_name, EMode="Indirect", Target=self._output_x_units)
 
         # Rename output workspaces
-        output_workspace_names = [rename_reduction(ws_name, self._sum_files) for ws_name in self._workspace_names]
+        output_workspace_names = [
+            rename_reduction(ws_name, self._sum_files, suffix=self._output_suffix) for ws_name in self._workspace_names
+        ]
 
         summary_prog = Progress(self, start=0.9, end=1.0, nreports=4)
 
@@ -311,12 +319,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         summary_prog.report("grouping workspaces")
         self.output_ws = GroupWorkspaces(InputWorkspaces=output_workspace_names, OutputWorkspace=self._output_ws)
 
-        # The spectrum numbers need to start at 1 not 0 if spectra are grouped
-        if self.output_ws.getNumberOfEntries() == 1:
-            for i in range(len(self.output_ws.getItem(0).getSpectrumNumbers())):
-                self.output_ws.getItem(0).getSpectrum(i).setSpectrumNo(i + 1)
-
-        self.setProperty("OutputWorkspace", mtd[self._output_ws])
+        self.setProperty("OutputWorkspace", self.output_ws)
 
         summary_prog.report("Algorithm complete")
 
@@ -411,6 +414,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._output_x_units = self.getPropertyValue("UnitX")
 
         self._output_ws = self.getPropertyValue("OutputWorkspace")
+        self._output_suffix = self.getPropertyValue("OutputSuffix")
 
         # Disable sum files if there is only one file
         if len(self._data_files) == 1:

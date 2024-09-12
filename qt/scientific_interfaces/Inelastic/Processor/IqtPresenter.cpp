@@ -28,8 +28,10 @@ Mantid::Kernel::Logger g_log("Iqt");
 namespace MantidQt {
 namespace CustomInterfaces {
 
-IqtPresenter::IqtPresenter(QWidget *parent, IIqtView *view, std::unique_ptr<IIqtModel> model)
-    : DataProcessor(parent), m_view(view), m_model(std::move(model)), m_selectedSpectrum(0) {
+IqtPresenter::IqtPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
+                           IIqtView *view, std::unique_ptr<IIqtModel> model)
+    : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)),
+      m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
@@ -70,16 +72,15 @@ void IqtPresenter::handleRun() {
   // Construct the result workspace for Python script export
   std::string sampleName = m_view->getSampleName();
   m_pythonExportWsName = sampleName.replace(sampleName.find_last_of("_"), sampleName.size(), "_iqt");
-  m_model->setupTransformToIqt(m_batchAlgoRunner, m_pythonExportWsName);
-  m_batchAlgoRunner->executeBatchAsync();
+  m_algorithmRunner->execute(m_model->setupTransformToIqt(m_pythonExportWsName));
 }
 /**
  * Handle saving of workspace
  */
 void IqtPresenter::handleSaveClicked() {
-  checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
-  addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
-  m_batchAlgoRunner->executeBatchAsync();
+  if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
+    m_algorithmRunner->execute(setupSaveAlgorithm(m_pythonExportWsName));
+  ;
 }
 
 /**
@@ -161,6 +162,8 @@ void IqtPresenter::setFileExtensionsByName(bool filter) {
                                          : InterfaceUtils::getExtensions(tabName));
   m_view->setResolutionWSSuffixes(filter ? InterfaceUtils::getResolutionWSSuffixes(tabName) : noSuffixes);
 }
+
+void IqtPresenter::setLoadHistory(bool doLoadHistory) { m_view->setLoadHistory(doLoadHistory); }
 
 /**
  * Retrieves the selected spectrum.

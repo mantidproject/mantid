@@ -67,7 +67,6 @@ class VesuvioCorrections(VesuvioBase):
 
     # pylint: disable=too-many-locals
     def PyInit(self):
-
         # -------------------------------------------------------------------------------------------
 
         # Input Property setup
@@ -475,7 +474,6 @@ class VesuvioCorrections(VesuvioBase):
         i = 0
 
         for idx, mass in enumerate(self._masses):
-
             if str(idx) in self._index_to_symbol_map:
                 symbol = self._index_to_symbol_map[str(idx)].value
             else:

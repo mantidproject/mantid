@@ -28,7 +28,6 @@ from sans.common.enums import SANSInstrument
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMultiPeriodSingleTest_V2(systemtesting.MantidSystemTest):
-
     reduced = ""
 
     def runTest(self):

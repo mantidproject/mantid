@@ -54,7 +54,6 @@ def MAXENT(
         base = np.zeros([MAXPAGE_n])
         base[:] = SPACE_blank
     else:
-
         SPACE_blank = np.mean(base)
     SPACE_chizer = float(p)
     SPACE_chtarg = SPACE_chizer

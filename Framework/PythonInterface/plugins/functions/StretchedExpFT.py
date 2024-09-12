@@ -18,7 +18,6 @@ from StretchedExpFTHelper import surrogate, function1Dcommon
 
 
 class StretchedExpFT(IFunction1D):
-
     # pylint: disable=super-on-old-class
     def __init__(self):
         super(self.__class__, self).__init__()

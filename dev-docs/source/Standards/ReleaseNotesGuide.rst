@@ -73,6 +73,7 @@ Release note files need to be saved in the directory that best represents their 
 or ``Bugfixes`` directory. For example a Bugfix release note for Engineering Diffraction should sit within ``/Diffraction/Engineering/Bugfixes`` .
 
 Release notes should not be placed in any directory outside of ``New_features`` or ``Bugfixes`` e.g. do not place release notes in ``/Diffraction/Engineering``. You should also not save release notes in any directory titled ``Used`` as this is for notes that have already been collated into the release notes.
+The only exception to this is for Algorithms and Fit Functions in the Framework Directory that additionally have ``Deprecated`` and ``Removed``.
 
 If you are uncertain where your release note should be see the :ref:`Standard File Structure <ReleaseNoteFileStructure>`.
 
@@ -191,11 +192,15 @@ This is the basic directory structure that is available to you for release notes
 
 	  + New features
 	  + Bugfixes
+	  + Deprecated
+	  + Removed
 
   - Fit Functions (Sub-heading)
 
 	  + New features
 	  + Bugfixes
+	  + Deprecated
+	  + Removed
 
   - Data Objects (Sub-heading)
 

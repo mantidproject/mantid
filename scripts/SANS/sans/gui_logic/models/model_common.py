@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" The settings diagnostic tab which visualizes the SANS state object. """
+"""The settings diagnostic tab which visualizes the SANS state object."""
+
 from abc import ABCMeta
 from sans.common.enums import SANSInstrument
 from sans.state.AllStates import AllStates

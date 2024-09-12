@@ -7,6 +7,7 @@
 Test interface for RegionSelector. This will be removed once the
 widget is embedded into ISISReflectometry - Preview tab.
 """
+
 from typing import List
 from mantid.api import AnalysisDataService
 

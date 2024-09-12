@@ -18,6 +18,7 @@
 
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MantidVersion.h"
+#include "MantidKernel/Unit.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -37,7 +38,7 @@ const double SaveNXSPE::MASK_FLAG = std::numeric_limits<double>::quiet_NaN();
 const double SaveNXSPE::MASK_ERROR = 0.0;
 // works fine but there were cases that some compilers crush on this (VS2008 in
 // mixed .net environment ?)
-const std::string SaveNXSPE::NXSPE_VER = "1.2";
+const std::string SaveNXSPE::NXSPE_VER = "1.3";
 // 4MB chunk size
 const size_t SaveNXSPE::MAX_CHUNK_SIZE = 4194304;
 
@@ -115,15 +116,54 @@ void SaveNXSPE::exec() {
 
   // Get the value out of the property first
   double efixed = getProperty("Efixed");
-  if (isEmpty(efixed))
+  bool efixed_provided(!isEmpty(efixed));
+  if (!efixed_provided) {
     efixed = MASK_FLAG;
-  // Now lets check to see if the workspace knows better.
-  // TODO: Check that this is the way round we want to do it.
-  const API::Run &run = inputWS->run();
-  if (run.hasProperty("Ei")) {
-    efixed = run.getPropertyValueAsType<double>("Ei");
   }
-  nxFile.writeData("fixed_energy", efixed);
+  auto eMode = inputWS->getEMode();
+  bool write_single_energy(true);
+  if (!efixed_provided) {
+    // efixed identified differently for different types of inelastic instruments
+    // Now lets check to see if we can retrieve energy from workspace.
+    switch (eMode) {
+    case (Kernel::DeltaEMode::Indirect): {
+      // here workspace detectors should always have the energy
+      auto detEfixed = getIndirectEfixed(inputWS);
+      if (detEfixed.size() == 1) {
+        efixed = detEfixed[0];
+      } else if (detEfixed.size() > 1) {
+        write_single_energy = false; // do not write single energy, write array of energies here
+        nxFile.writeData("fixed_energy", detEfixed);
+      }
+      if (!write_single_energy || (detEfixed[0] > std::numeric_limits<float>::epsilon()))
+        // this is generally incorrect, but following historical practice
+        break; // assume that indirect instrument without energy attached to detectors
+               // may have energy specified in Ei log. Some user scripts may depend on it.
+               // so here we break only if Ei is defined on detectors and look for
+               // Ei log otherwise
+    }
+    case (Kernel::DeltaEMode::Elastic):   // no efixed for elastic,
+                                          // whatever retrieved from the property should remain unchanged.
+                                          // Despite it is incorrect, previous tests were often using Instrument in
+                                          // Elastic mode as the source of data for Direct inelastic. Despite correct
+                                          // action would be no efixed for elastic, to keep tests happy here we try to
+                                          // derive efixed from Ei log similarly to Direct inelastic case if no external
+                                          // efixed provided to the algorithm.
+    case (Kernel::DeltaEMode::Undefined): // This should not happen
+      eMode = Kernel::DeltaEMode::Direct; // but to keep cpp-check happy and code consistent, set up Direct
+                                          // instrument in this case.
+    case (Kernel::DeltaEMode::Direct): {
+      const API::Run &run = inputWS->run();
+      if (run.hasProperty("Ei")) {
+        efixed = run.getPropertyValueAsType<double>("Ei");
+      }
+      break;
+    }
+    }
+  }
+  if (write_single_energy) // if multiple energies, they have already been written
+    nxFile.writeData("fixed_energy", efixed);
+
   nxFile.openData("fixed_energy");
   nxFile.putAttr("units", "meV");
   nxFile.closeData();
@@ -154,12 +194,18 @@ void SaveNXSPE::exec() {
   // TODO: Get the instrument short name
   nxFile.putAttr("short_name", inputWS->getInstrument()->getName());
   nxFile.closeData();
+  nxFile.writeData("run_number", inputWS->getRunNumber());
 
-  // NXfermi_chopper
-  nxFile.makeGroup("fermi", "NXfermi_chopper", true);
-
-  nxFile.writeData("energy", efixed);
-  nxFile.closeGroup(); // NXfermi_chopper
+  if (eMode == Kernel::DeltaEMode::Direct ||
+      eMode == Kernel::DeltaEMode::Elastic) { // Elastic is also not entirely correct but
+    // to maintain consistency with previous code, assume Direct instrument in Elastic mode.
+    // NXfermi_chopper
+    nxFile.makeGroup("fermi", "NXfermi_chopper", true);
+    nxFile.writeData("energy", efixed);
+    nxFile.closeGroup(); // NXfermi_chopper
+  }                      // TODO: Do not know what indirect people want for their instrument,
+                         // but they certainly do not have Fermi chopper.
+                         // This is for them to decide what(if) they want here in a future.
 
   nxFile.closeGroup(); // NXinstrument
 
@@ -303,4 +349,43 @@ void SaveNXSPE::exec() {
   nxFile.closeGroup(); // Top level NXentry
 }
 
+/**
+ * Calculate fixed energy for indirect instrument. Depending on actual workspace, this may be the same energy for all
+ * detectors or array of energies for all active detectors if some energies are different.
+ *
+ * @param inputWS pointer to matrix workspace with indirect instrument attached to it.
+ *
+ * @returns vector containing analyzer energies for each detector if the energies are different or single energy if they
+ * are the same
+ */
+std::vector<double> SaveNXSPE::getIndirectEfixed(const MatrixWorkspace_sptr &inputWS) const {
+  // Number of spectra
+  const auto nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
+  const auto &spectrumInfo = inputWS->spectrumInfo();
+  Mantid::MantidVec AllEnergies(nHist);
+  size_t nDet(0);
+  UnitParametersMap pmap;
+  Units::Time inUnit;
+  Units::DeltaE outUnit;
+  for (int64_t i = 0; i < nHist; ++i) {
+    if (spectrumInfo.hasDetectors(i) && !spectrumInfo.isMonitor(i)) {
+      // a detector but not a monitor and not masked for indirect instrument should have efixed
+      spectrumInfo.getDetectorValues(inUnit, outUnit, DeltaEMode::Indirect, true, i, pmap);
+      AllEnergies[nDet] = pmap[UnitParams::efixed];
+      nDet++;
+    }
+  }
+  AllEnergies.resize(nDet);
+  if (nDet == 0)
+    return AllEnergies; // Empty vector, no energies,
+
+  if (std::all_of(AllEnergies.begin(), AllEnergies.end(), [&AllEnergies](double energy) {
+        return std::abs(energy - AllEnergies[0]) < std::numeric_limits<float>::epsilon();
+      })) {
+    // all detectors have same energy
+    AllEnergies.resize(1);
+  }
+
+  return AllEnergies;
+}
 } // namespace Mantid::DataHandling

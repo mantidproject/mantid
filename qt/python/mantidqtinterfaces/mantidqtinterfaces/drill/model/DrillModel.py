@@ -26,7 +26,6 @@ from .DrillSampleGroup import DrillSampleGroup
 
 
 class DrillModel(QObject):
-
     """
     Data directory on Linux.
     """
@@ -439,7 +438,7 @@ class DrillModel(QObject):
 
         params.update(sample.getParameterValues())
         # remove empty params
-        for (k, v) in list(params.items()):
+        for k, v in list(params.items()):
             if v is None or v == "DEFAULT" or v == "":
                 del params[k]
         # add the output workspace param

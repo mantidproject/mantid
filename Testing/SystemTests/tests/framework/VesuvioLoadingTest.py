@@ -8,6 +8,7 @@
 """These are more integration tests as they will require that the test data is available
 and that mantid can be imported
 """
+
 import systemtesting
 
 from mantid.api import MatrixWorkspace  # mantid must be imported first to set the script paths correctly

@@ -60,8 +60,8 @@ Output:
 
 .. testoutput:: ExSampleWorkspace
 
-    Original counts: [ 1.  1.  1.  1.  1.]
-    Corrected counts: [ 417.07353051  139.35837696   83.81566631   60.01187609   46.787726  ]
+    Original counts: [1. 1. 1. 1. 1.]
+    Corrected counts: [417.07353051 139.35837696  83.81566631  60.01187609  46.787726  ]
 
 .. categories::
 

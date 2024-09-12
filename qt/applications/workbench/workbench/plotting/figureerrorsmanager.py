@@ -8,6 +8,7 @@
 """
 Controls the dynamic displaying of errors for line on the plot
 """
+
 from matplotlib.container import ErrorbarContainer
 from matplotlib.lines import Line2D
 

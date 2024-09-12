@@ -12,6 +12,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include <MantidQtWidgets/Common/ConfiguredAlgorithm.h>
 #include <QDoubleValidator>
 #include <QFileInfo>
 
@@ -22,21 +23,24 @@ namespace MantidQt::CustomInterfaces {
 
 MomentsModel::MomentsModel() : m_inputWorkspace(), m_outputWorkspaceName(), m_eMin(), m_eMax(), m_scale(false) {}
 
-IAlgorithm_sptr MomentsModel::setupAlgorithm() {
-  IAlgorithm_sptr momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
+API::IConfiguredAlgorithm_sptr MomentsModel::setupMomentsAlgorithm() const {
+  auto momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
   momentsAlg->initialize();
-  momentsAlg->setProperty("InputWorkspace", m_inputWorkspace);
-  momentsAlg->setProperty("EnergyMin", m_eMin);
-  momentsAlg->setProperty("EnergyMax", m_eMax);
-  momentsAlg->setProperty("OutputWorkspace", m_outputWorkspaceName);
+  auto properties = std::make_unique<AlgorithmRuntimeProps>();
+  properties->setProperty("InputWorkspace", m_inputWorkspace);
+  properties->setProperty("EnergyMin", m_eMin);
+  properties->setProperty("EnergyMax", m_eMax);
+  properties->setProperty("OutputWorkspace", m_outputWorkspaceName);
 
   if (m_scale) {
-    momentsAlg->setProperty("Scale", m_scaleValue);
+    properties->setProperty("Scale", m_scaleValue);
   } else {
-    momentsAlg->setProperty("Scale", 1.0);
+    properties->setProperty("Scale", 1.0);
   }
 
-  return momentsAlg;
+  MantidQt::API::IConfiguredAlgorithm_sptr confAlg =
+      std::make_shared<API::ConfiguredAlgorithm>(momentsAlg, std::move(properties));
+  return confAlg;
 }
 
 void MomentsModel::setInputWorkspace(const std::string &workspace) {

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>495</width>
-    <height>283</height>
+    <height>313</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -89,6 +89,16 @@
           <widget class="QCheckBox" name="ckPlotErrorBars">
            <property name="text">
             <string>Plot error bars for external plots</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="ckLoadHistory">
+           <property name="text">
+            <string>Load Workspace History (slower)</string>
            </property>
            <property name="checked">
             <bool>true</bool>

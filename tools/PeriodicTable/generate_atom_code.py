@@ -11,10 +11,6 @@ import sys
 
 try:
     import periodictable
-
-    if not periodictable.__version__.startswith("1.3."):
-        print("*****Require periodictable 1.3.*")
-        sys.exit(-1)
 except ImportError:
     print("*****To use this you must 'easy_install periodictable'")
     sys.exit(-1)
@@ -140,9 +136,9 @@ if __name__ == "__main__":
     handle.write("}};\n")
     handle.write("\n")
 
-    handle.write("static std::array<tcb::span<Atom>,%d> ATOMS = {{\n" % len(spanTable))
+    handle.write("static std::array<std::span<Atom>,%d> ATOMS = {{\n" % len(spanTable))
     for i, elem in enumerate(spanTable):
-        handle.write("tcb::span<Atom>(&ATOMS_ARRAY[%d], %d)" % (elem[0], elem[1]))
+        handle.write("std::span<Atom>(&ATOMS_ARRAY[%d], %d)" % (elem[0], elem[1]))
         if i + 1 < len(spanTable):
             handle.write(",")
         handle.write("\n")

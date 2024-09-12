@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    List of user commands.
+List of user commands.
 """
+
 from reduction_workflow.reducer import Reducer
 
 

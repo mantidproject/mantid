@@ -14,13 +14,13 @@ It uses the so-called IPeakFunction that should be used when there is a sensible
 calculate the centre, height & fwhm of the function. If it does not make sense, for example a in linear background,
 where does not give a peak shape, then see the more general Example1DFunction that does not require these concepts.
 """
+
 import math
 import numpy as np
 from mantid.api import IPeakFunction, FunctionFactory
 
 
 class ExamplePeakFunction(IPeakFunction):
-
     _nterms = None
 
     def category(self):

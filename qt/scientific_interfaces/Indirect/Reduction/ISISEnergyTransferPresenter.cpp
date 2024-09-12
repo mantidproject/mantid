@@ -297,4 +297,6 @@ void IETPresenter::setFileExtensionsByName(bool filter) {
   m_view->setFileExtensionsByName(fbSuffixes, wsSuffixes);
 }
 
+void IETPresenter::setLoadHistory(bool doLoadHistory) { m_view->setLoadHistory(doLoadHistory); }
+
 } // namespace MantidQt::CustomInterfaces

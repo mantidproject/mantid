@@ -23,7 +23,6 @@ set(SRC_FILES
     src/FindUBUsingFFT.cpp
     src/FindUBUsingIndexedPeaks.cpp
     src/FindUBUsingLatticeParameters.cpp
-    src/FindUBUsingMinMaxD.cpp
     src/GoniometerAnglesFromPhiRotation.cpp
     src/HardThresholdBackground.cpp
     src/HasUB.cpp
@@ -73,6 +72,7 @@ set(SRC_FILES
     src/SortPeaksWorkspace.cpp
     src/StatisticsOfPeaksWorkspace.cpp
     src/TransformHKL.cpp
+    src/RotateSampleShape.cpp
 )
 
 set(INC_FILES
@@ -101,7 +101,6 @@ set(INC_FILES
     inc/MantidCrystal/FindUBUsingFFT.h
     inc/MantidCrystal/FindUBUsingIndexedPeaks.h
     inc/MantidCrystal/FindUBUsingLatticeParameters.h
-    inc/MantidCrystal/FindUBUsingMinMaxD.h
     inc/MantidCrystal/GSLFunctions.h
     inc/MantidCrystal/GoniometerAnglesFromPhiRotation.h
     inc/MantidCrystal/HardThresholdBackground.h
@@ -153,6 +152,7 @@ set(INC_FILES
     inc/MantidCrystal/SortPeaksWorkspace.h
     inc/MantidCrystal/StatisticsOfPeaksWorkspace.h
     inc/MantidCrystal/TransformHKL.h
+    inc/MantidCrystal/RotateSampleShape.h
 )
 
 set(TEST_FILES
@@ -179,7 +179,6 @@ set(TEST_FILES
     FindUBUsingFFTTest.h
     FindUBUsingIndexedPeaksTest.h
     FindUBUsingLatticeParametersTest.h
-    FindUBUsingMinMaxDTest.h
     GoniometerAnglesFromPhiRotationTest.h
     HardThresholdBackgroundTest.h
     HasUBTest.h
@@ -226,6 +225,7 @@ set(TEST_FILES
     SortPeaksWorkspaceTest.h
     StatisticsOfPeaksWorkspaceTest.h
     TransformHKLTest.h
+    RotateSampleShapeTest.h
 )
 
 if(COVERAGE)
@@ -261,7 +261,7 @@ include_directories(inc)
 target_link_libraries(
   Crystal
   PUBLIC Mantid::API Mantid::Geometry Mantid::Kernel
-  PRIVATE Mantid::DataObjects Mantid::Indexing
+  PRIVATE Mantid::DataObjects Mantid::Indexing Mantid::DataHandling
 )
 
 # Add the unit tests directory

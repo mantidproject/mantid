@@ -9,12 +9,11 @@
 Description
 -----------
 
-The LoadEventNeXus algorithm loads data from an EventNexus file into an
-:ref:`EventWorkspace <EventWorkspace>`. The histogram bin
-boundaries depend on the setting of NumberOfBins, which by default will be the whole range of time of flight able to hold all events (in all
-pixels) split into NumberOfBins linear bins, and will have their :ref:`units <Unit Factory>` set to time-of-flight.
-Since it is an :ref:`EventWorkspace <EventWorkspace>`, it can be rebinned
-to finer bins with no loss of data.
+The LoadEventNeXus algorithm loads data from an `EventNexus file <https://manual.nexusformat.org/classes/base_classes/NXevent_data.html>`_ into an :ref:`EventWorkspace <EventWorkspace>`.
+The histogram bin boundaries depend on the setting of NumberOfBins,
+which by default will be the whole range of time of flight able to hold all events (in all pixels) split into NumberOfBins linear bins,
+and will have their :ref:`units <Unit Factory>` set to time-of-flight.
+Since it is an :ref:`EventWorkspace <EventWorkspace>`, it can be rebinned to finer bins with no loss of data.
 
 Child algorithms used
 #####################

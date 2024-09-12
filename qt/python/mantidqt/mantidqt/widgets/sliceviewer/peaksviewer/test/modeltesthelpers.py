@@ -4,8 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-"""A collection of functions to share creating models for tests
-"""
+"""A collection of functions to share creating models for tests"""
+
 # std imports
 from unittest.mock import MagicMock, create_autospec
 

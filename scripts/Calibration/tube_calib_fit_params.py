@@ -7,7 +7,6 @@
 
 
 class TubeCalibFitParams(object):
-
     # This class is to take the fitting method and parameters for fitting the peaks created by the calibration slits etc
     # and to deliver them to TubeCalib, so it can fit the peaks appropriately
 

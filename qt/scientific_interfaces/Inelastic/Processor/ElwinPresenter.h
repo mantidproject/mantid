@@ -15,6 +15,7 @@
 #include "ElwinModel.h"
 #include "ElwinView.h"
 #include "IElwinView.h"
+#include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
@@ -41,18 +42,25 @@ public:
   virtual void handleRemoveSelectedData() = 0;
   virtual void handleRowModeChanged() = 0;
   virtual void updateAvailableSpectra() = 0;
+  virtual MatrixWorkspace_sptr getInputWorkspace() const = 0;
+  virtual void removeWorkspace(std::string const &workspaceName) const = 0;
 };
 
-class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataProcessor, public IElwinPresenter, public IRunSubscriber {
+class MANTIDQT_INELASTIC_DLL ElwinPresenter : public DataProcessor,
+                                              public IElwinPresenter,
+                                              public IRunSubscriber,
+                                              public AnalysisDataServiceObserver {
 public:
-  ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model);
-  ElwinPresenter(QWidget *parent, IElwinView *view, std::unique_ptr<IElwinModel> model,
-                 std::unique_ptr<IDataModel> dataModel);
-  ~ElwinPresenter();
+  ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner, IElwinView *view,
+                 std::unique_ptr<IElwinModel> model);
+  ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner, IElwinView *view,
+                 std::unique_ptr<IElwinModel> model, std::unique_ptr<IDataModel> dataModel);
+  ~ElwinPresenter() override = default;
 
   // runWidget
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "Elwin"; }
 
   // Elwin interface methods
   void handleValueChanged(std::string const &propName, double) override;
@@ -66,28 +74,34 @@ public:
   void handleRowModeChanged() override;
   void updateAvailableSpectra() override;
 
-  void setInputWorkspace(MatrixWorkspace_sptr inputWorkspace);
+  void setInputWorkspace(const MatrixWorkspace_sptr &inputWorkspace);
   virtual void setSelectedSpectrum(int spectrum);
   int getSelectedSpectrum() const;
-  MatrixWorkspace_sptr getInputWorkspace() const;
+  MatrixWorkspace_sptr getInputWorkspace() const override;
   MatrixWorkspace_sptr getPreviewPlotWorkspace();
   void setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace);
 
+  void removeWorkspace(std::string const &workspaceName) const override;
+
+  // Analysis Data Service Observer
+  void renameHandle(const std::string &wsName, const std::string &newName) override;
+  void deleteHandle(const std::string &wsName, const Workspace_sptr &ws) override;
+  void clearHandle() override;
+
 protected:
   void runComplete(bool error) override;
-  void newInputDataFromDialog();
   virtual void addDataToModel(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
 private:
+  void updateInterface();
   void updateTableFromModel();
   void updateIntegrationRange();
 
   std::vector<std::string> getOutputWorkspaceNames();
   std::string getOutputBasename();
   bool checkForELTWorkspace();
-  void newPreviewFileSelected(const std::string &workspaceName, const std::string &filename);
-  void newPreviewWorkspaceSelected(const std::string &workspaceName);
-  WorkspaceID findWorkspaceID();
+  void newPreviewWorkspaceSelected(int index);
+  std::optional<WorkspaceID> findWorkspaceID(std::string const &name) const;
 
   IElwinView *m_view;
   std::unique_ptr<IElwinModel> m_model;

@@ -16,7 +16,7 @@
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
 
-typedef std::vector<std::pair<std::string, std::string>> stringPairVec;
+typedef std::vector<std::pair<std::string, std::string>> StringPairVec;
 namespace MantidQt {
 namespace MantidWidgets {
 /**
@@ -56,7 +56,7 @@ public:
 
   bool showWorkspaceGroups() const;
   void showWorkspaceGroups(bool show);
-  stringPairVec retrieveSelectedNameIndexPairs();
+  StringPairVec retrieveSelectedNameIndexPairs();
 
   QStringList getWorkspaceTypes() const;
   QStringList getWSSuffixes() const;

@@ -10,7 +10,6 @@ from systemtesting import MantidSystemTest
 
 
 class OSIRISDiffractionReductionTest(MantidSystemTest):
-
     def requiredFiles(self):
         return ["OSI10203.raw", "OSI10156.raw", "OSI10241.raw", "OSI10242.RAW", "osiris_041_RES10.cal", "OSIRIS10203_diff_red.nxs"]
 

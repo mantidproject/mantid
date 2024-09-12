@@ -25,7 +25,6 @@ def _maud_template_path():
 
 
 class SaveGEMMAUDParamFile(PythonAlgorithm):
-
     PROP_INPUT_WS = "InputWorkspace"
     PROP_TEMPLATE_FILE = "TemplateFilename"
     PROP_GROUPING_SCHEME = "GroupingScheme"

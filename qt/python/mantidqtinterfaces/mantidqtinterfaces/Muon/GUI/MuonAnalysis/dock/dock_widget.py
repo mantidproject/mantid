@@ -15,7 +15,6 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_context.muon_context import *
 
 
 class DockWidget(QtWidgets.QWidget):
-
     """
     This is a special case of the widget class structure.
     Normally we would only store the presenter and would

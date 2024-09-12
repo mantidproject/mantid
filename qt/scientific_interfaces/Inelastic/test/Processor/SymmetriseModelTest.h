@@ -66,7 +66,10 @@ public:
 
   void setUp() override { m_model = std::make_unique<SymmetriseModel>(); }
 
-  void tearDown() override { AnalysisDataService::Instance().clear(); }
+  void tearDown() override {
+    AnalysisDataService::Instance().clear();
+    m_model.reset();
+  }
 
   void test_preview_positive_setup() {
     std::string inputWS = "Workspace_name_red";
@@ -81,7 +84,8 @@ public:
     m_model->setIsPositiveReflect(true);
 
     std::vector<int> spectraRange(2, 4);
-    m_model->setupPreviewAlgorithm(&batch, spectraRange);
+    auto const previewAlgo = m_model->setupPreviewAlgorithm(spectraRange);
+    batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{previewAlgo});
     batch.executeBatch();
 
     ITableWorkspace_sptr outputWS =
@@ -108,7 +112,8 @@ public:
     m_model->setIsPositiveReflect(false);
 
     std::vector<int> spectraRange(2, 4);
-    m_model->setupPreviewAlgorithm(&batch, spectraRange);
+    auto const previewAlgo = m_model->setupPreviewAlgorithm(spectraRange);
+    batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{previewAlgo});
     batch.executeBatch();
 
     ITableWorkspace_sptr outputWS =
@@ -133,8 +138,8 @@ public:
     m_model->setEMax(0.6);
     m_model->setWorkspaceName(inputWS);
     m_model->setIsPositiveReflect(true);
-
-    m_model->setupSymmetriseAlgorithm(&batch);
+    auto const previewAlgo = m_model->setupSymmetriseAlgorithm();
+    batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{previewAlgo});
     batch.executeBatch();
 
     ITableWorkspace_sptr outputWS =
@@ -158,8 +163,8 @@ public:
     m_model->setEMax(0.6);
     m_model->setWorkspaceName(inputWS);
     m_model->setIsPositiveReflect(false);
-
-    m_model->setupSymmetriseAlgorithm(&batch);
+    auto previewAlgo = m_model->setupSymmetriseAlgorithm();
+    batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{previewAlgo});
     batch.executeBatch();
 
     ITableWorkspace_sptr outputWS =

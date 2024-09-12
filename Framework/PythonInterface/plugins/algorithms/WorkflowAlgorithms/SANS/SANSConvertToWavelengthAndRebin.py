@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
-""" SANSConvertToWavelengthAndRebin algorithm converts to wavelength units and performs a rebin."""
+"""SANSConvertToWavelengthAndRebin algorithm converts to wavelength units and performs a rebin."""
+
 import json
 from json import JSONDecodeError
 from typing import List, Tuple

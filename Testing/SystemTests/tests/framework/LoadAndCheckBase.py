@@ -17,7 +17,6 @@ from abc import ABCMeta, abstractmethod
 
 
 class LoadAndCheckBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
-
     __comparison_out_workspace_name = "a_integrated"
 
     @abstractmethod

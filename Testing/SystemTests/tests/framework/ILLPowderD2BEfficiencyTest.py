@@ -42,7 +42,6 @@ class ILLPowderD2BEfficiencyTest(systemtesting.MantidSystemTest):
         self.assertGreaterEqual(coeff_min, 0.3)
 
     def runTest(self):
-
         self.testAutoMasking()
 
         PowderILLEfficiency(

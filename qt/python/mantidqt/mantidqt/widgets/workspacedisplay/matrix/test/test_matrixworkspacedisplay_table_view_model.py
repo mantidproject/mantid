@@ -596,7 +596,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
         """
         ws = CreateWorkspace(DataX=[0, 1, 2], DataY=[3, 7, 5], DataE=[0.2, 0.3, 0.1], NSpec=1)
         label_unit = ws.getAxis(0).setUnit("Label")
-        microseconds = "\u00B5s"
+        microseconds = "\u00b5s"
         # Second argument will implicitly call the ascii only constructor of UnitLabel.
         # We are intentionally passing a non-ascii string to try and break it.
         label_unit.setLabel("Time", microseconds)

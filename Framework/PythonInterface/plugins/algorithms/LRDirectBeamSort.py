@@ -208,7 +208,6 @@ class LRDirectBeamSort(PythonAlgorithm):
             bck_ranges = []
 
             for run in g:
-
                 peak, low_res = self._find_peak(run)  # , use_low_res_cut)
 
                 att = run.getRun().getProperty("vAtt").value[0] - 1

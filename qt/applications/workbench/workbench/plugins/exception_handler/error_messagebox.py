@@ -21,9 +21,7 @@ class WorkbenchErrorMessageBox(QMessageBox):
             """Sorry, Mantid Workbench has caught an unexpected exception:\n
 {0}
 Would you like to terminate Mantid Workbench or try to continue working?
-If you choose to continue it is advisable to save your data and restart the application.""".format(
-                exception_message
-            )
+If you choose to continue it is advisable to save your data and restart the application.""".format(exception_message)
         )
 
         self.terminate_button = self.addButton("Terminate", QMessageBox.ActionRole)
