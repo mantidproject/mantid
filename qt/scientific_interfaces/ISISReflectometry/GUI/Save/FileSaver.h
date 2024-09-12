@@ -41,7 +41,7 @@ private:
                                std::string const &extension) const;
 
   Mantid::API::Workspace_sptr workspace(std::string const &workspaceName) const;
-  void save(const Mantid::API::Workspace_sptr &workspace, std::string const &saveDirectory,
+  void save(Mantid::API::Workspace_sptr const &workspace, std::string const &saveDirectory,
             std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const;
 
   void saveToSingleFile(std::vector<std::string> const &workspaceNames, std::string const &saveDirectory,
