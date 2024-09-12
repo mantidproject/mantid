@@ -797,7 +797,13 @@ void CompositeFunction::clearTies() {
  * @return True if successful
  */
 bool CompositeFunction::removeTie(size_t i) {
-  bool foundAndRemovedTie = IFunction::removeTie(i);
+  bool foundAndRemovedTie = false;
+  // Handle the case when IFunction::removeTie throws a runtime error because it is trying to unfix a tied parameter
+  try {
+    foundAndRemovedTie = IFunction::removeTie(i);
+  } catch (std::runtime_error &) {
+    foundAndRemovedTie = false;
+  }
   if (!foundAndRemovedTie) {
     size_t iFun = functionIndex(i);
     bool res = m_functions[iFun]->removeTie(i - m_paramOffsets[iFun]);

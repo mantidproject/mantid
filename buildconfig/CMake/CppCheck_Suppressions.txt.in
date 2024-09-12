@@ -333,8 +333,8 @@ returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Expression.h:7
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/Expression.h:74
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/CatalogManager.cpp:54
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:560
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:879
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:906
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:885
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:912
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/BoostOptionalToAlgorithmProperty.cpp:11
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/BoostOptionalToAlgorithmProperty.cpp:14
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/BoostOptionalToAlgorithmProperty.cpp:30
