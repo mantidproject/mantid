@@ -77,7 +77,7 @@ void SymmetrisePresenter::handleRun() {
   }
 
   // Execute the algorithm(s) on a separated thread
-  m_algorithmRunner->execute(configuredAlgorithm);
+  m_algorithmRunner->execute(std::move(configuredAlgorithm));
 }
 
 /**
@@ -116,6 +116,8 @@ void SymmetrisePresenter::setFileExtensionsByName(bool filter) {
   m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
+
+void SymmetrisePresenter::setLoadHistory(bool doLoadHistory) { m_view->setLoadHistory(doLoadHistory); }
 
 void SymmetrisePresenter::handleReflectTypeChanged(int value) {
   if (m_runPresenter->validate()) {

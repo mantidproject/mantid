@@ -72,4 +72,6 @@ void DataProcessor::setOutputPlotOptionsWorkspaces(std::vector<std::string> cons
  */
 void DataProcessor::filterInputData(bool filter) { setFileExtensionsByName(filter); }
 
+void DataProcessor::enableLoadHistoryProperty(bool doLoadHistory) { setLoadHistory(doLoadHistory); }
+
 } // namespace MantidQt::CustomInterfaces

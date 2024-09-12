@@ -61,8 +61,7 @@ Output:
 
 .. testoutput:: ExCarpenterSampleCorrection
 
-    Output:  [  6.1210107    6.57502041  19.47638255   7.58160094   8.13860778
-       2.33885171]
+    Output:  [ 6.1210107   6.57502041 19.47638255  7.58160094  8.13860778  2.33885171]
 
 
 References

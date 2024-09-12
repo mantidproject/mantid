@@ -38,7 +38,7 @@ public:
 
   /// Algorithm's version for identification
   int version() const override { return 1; };
-  const std::vector<std::string> seeAlso() const override { return {"RecordPythonScript", "GenerateIPythonNotebook"}; }
+  const std::vector<std::string> seeAlso() const override { return {"GenerateIPythonNotebook"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Utility\\Python"; }
 

@@ -102,11 +102,20 @@ void doReadNexusAnyVector(std::vector<T> &out, ::NeXus::File &file, const size_t
   } else if constexpr (std::is_same_v<T, U>) {
     if (size > 0)
       callGetData(file, out, close_file);
+    else {
+      if (close_file) {
+        file.closeData();
+      }
+    }
   } else {
     if (size > 0) {
       std::vector<U> buf(size);
       callGetData(file, buf, close_file);
       std::transform(buf.cbegin(), buf.cend(), out.begin(), [](U a) -> T { return static_cast<T>(a); });
+    } else {
+      if (close_file) {
+        file.closeData();
+      }
     }
   }
 }

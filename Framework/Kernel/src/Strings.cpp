@@ -1156,6 +1156,21 @@ std::istream &extractToEOL(std::istream &is, std::string &str) {
   return is;
 }
 
+//------------------------------------------------------------------------------------------------
+std::string randomString(size_t len) {
+  static const std::string alphabet = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+  std::string result;
+  result.reserve(len);
+
+  while (result.size() != len) {
+    size_t randPos = ((rand() % (alphabet.size() - 1)));
+    result.push_back(alphabet[randPos]);
+  }
+
+  return result;
+}
+
 /// \cond TEMPLATE
 template MANTID_KERNEL_DLL int section(std::string &, double &);
 template MANTID_KERNEL_DLL int section(std::string &, float &);

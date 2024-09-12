@@ -224,7 +224,16 @@ void DiffractionFocussing2::exec() {
       // get histogram version of the data
       if (eventInputWS) {
         const EventList &el = eventInputWS->getSpectrum(inWorkspaceIndex);
-        el.generateHistogram(group2xstep.at(group), Xout.rawData(), Yout, Eout);
+        // generateHistogram overwrites the data in Y and E so write to a temporary vector
+        MantidVec Ytemp;
+        MantidVec Etemp;
+        el.generateHistogram(group2xstep.at(group), Xout.rawData(), Ytemp, Etemp);
+        // accumulate the histogram into the output
+        std::transform(Ytemp.cbegin(), Ytemp.cend(), Yout.begin(), Yout.begin(),
+                       [](const auto &left, const auto &right) { return left + right; });
+        // accumulate the square of the error
+        std::transform(Etemp.cbegin(), Etemp.cend(), Eout.begin(), Eout.begin(),
+                       [](const auto &left, const auto &right) { return left * left + right; });
       } else {
         auto &Yin = inSpec.y();
         auto &Ein = inSpec.e();
@@ -300,9 +309,8 @@ void DiffractionFocussing2::exec() {
     std::vector<double> widths(Xout.size());
     std::adjacent_difference(Xout.begin(), Xout.end(), widths.begin());
 
-    // Take the square root of the errors, for EventWorkspace generateHistogram already gives sqrt of errors
-    if (!eventInputWS)
-      std::transform(Eout.begin(), Eout.end(), Eout.begin(), static_cast<double (*)(double)>(sqrt));
+    // Take the square root of the errors
+    std::transform(Eout.begin(), Eout.end(), Eout.begin(), static_cast<double (*)(double)>(sqrt));
 
     // Multiply the data and errors by the bin widths because the rebin
     // function, when used

@@ -741,10 +741,10 @@ void PreviewPlot::toggleLegend(const bool checked) {
  * @param bool useOffset :: True, the offset will be
  * calculated as needed, False no offset will be used
  */
-void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {
+void PreviewPlot::tickLabelFormat(const std::string &axis, const std::string &style, bool useOffset) {
   auto axes = m_canvas->gca();
-  const auto formatXTicks = *axis != 'y' && axes.getXScale().toStdString() == "linear";
-  const auto formatYTicks = *axis != 'x' && axes.getYScale().toStdString() == "linear";
+  const auto formatXTicks = axis != "y" && axes.getXScale().toStdString() == "linear";
+  const auto formatYTicks = axis != "x" && axes.getYScale().toStdString() == "linear";
 
   if (formatXTicks)
     axes.tickLabelFormat(std::string("x").c_str(), style, useOffset);

@@ -1,0 +1,1 @@
+- The python function ``assert_almost_equal`` for testing if two modules are within a tolerance was reworked

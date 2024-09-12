@@ -64,9 +64,7 @@ public:
 
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CheckWorkspacesMatch", "CompareSampleLogs", "CloneWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CompareSampleLogs", "CloneWorkspace"}; }
 
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string category() const override { return "Utility\\Workspaces"; }
@@ -77,6 +75,9 @@ public:
            "intended for use by the Mantid development team as part of the "
            "testing process.";
   }
+
+  static bool withinAbsoluteTolerance(double x1, double x2, double atol);
+  static bool withinRelativeTolerance(double x1, double x2, double rtol);
 
 private:
   /// Initialise algorithm
@@ -116,8 +117,6 @@ private:
 
   /// Records a mismatch in the Messages workspace and sets Result to false
   void recordMismatch(const std::string &msg, std::string ws1 = "", std::string ws2 = "");
-
-  bool relErr(double x1, double x2, double errorVal) const;
 
   /// Result of comparison (true if equal, false otherwise)
   bool m_result{false};

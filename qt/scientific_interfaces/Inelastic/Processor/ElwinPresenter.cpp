@@ -7,14 +7,11 @@
 #include "ElwinPresenter.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
-
-#include <QFileInfo>
 
 #include "MantidQtWidgets/Common/AddWorkspaceMultiDialog.h"
 #include <algorithm>
@@ -50,6 +47,9 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<API::IAlgorithmR
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
   m_view->setup();
+  observeRename(true);
+  observeDelete(true);
+  observeClear(true);
   updateAvailableSpectra();
 }
 
@@ -65,8 +65,6 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::I
   m_view->setup();
   updateAvailableSpectra();
 }
-
-ElwinPresenter::~ElwinPresenter() {}
 
 /**
  * Ungroups the output after the execution of the algorithm
@@ -134,21 +132,6 @@ void ElwinPresenter::handleValueChanged(std::string const &propName, bool value)
 }
 
 /**
- * Handles a new set of input files being entered.
- *
- * Updates preview selection combo box.
- */
-void ElwinPresenter::newInputDataFromDialog() {
-  // Clear the existing list of files
-  m_view->clearPreviewFile();
-  m_view->newInputDataFromDialog(m_dataModel->getWorkspaceNames());
-
-  std::string const wsname = m_view->getPreviewWorkspaceName(0);
-  auto const inputWs = WorkspaceUtils::getADSWorkspace(wsname);
-  setInputWorkspace(inputWs);
-}
-
-/**
  * Handles a new input file being selected for preview.
  *
  * Loads the file and resets the spectra selection spinner.
@@ -158,37 +141,22 @@ void ElwinPresenter::newInputDataFromDialog() {
 
 void ElwinPresenter::handlePreviewIndexChanged(int index) {
   auto const workspaceName = m_view->getPreviewWorkspaceName(index);
-  auto const filename = m_view->getPreviewFilename(index);
-
   if (!workspaceName.empty()) {
-    if (!filename.empty())
-      newPreviewFileSelected(workspaceName, filename);
-    else
-      newPreviewWorkspaceSelected(workspaceName);
+    newPreviewWorkspaceSelected(index);
   }
 }
 
-void ElwinPresenter::newPreviewFileSelected(const std::string &workspaceName, const std::string &filename) {
-  auto loadHistory = true;
-  if (loadFile(filename, workspaceName, -1, -1, loadHistory)) {
-    auto const workspace = WorkspaceUtils::getADSWorkspace(workspaceName);
-
-    setInputWorkspace(workspace);
-
-    updateAvailableSpectra();
-    m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
-  }
-}
-
-void ElwinPresenter::newPreviewWorkspaceSelected(const std::string &workspaceName) {
-  auto const workspace = WorkspaceUtils::getADSWorkspace(workspaceName);
+void ElwinPresenter::newPreviewWorkspaceSelected(int index) {
+  auto const workspace = m_dataModel->getWorkspace(WorkspaceID(index));
   setInputWorkspace(workspace);
   updateAvailableSpectra();
+  setSelectedSpectrum(m_view->getPreviewSpec());
+  m_view->updateSelectorRange(workspace);
   m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
 }
 
 void ElwinPresenter::handlePreviewSpectrumChanged(int spectrum) {
-  if (m_view->getPreviewSpec())
+  if (m_view->getPreviewSpec() >= 0)
     setSelectedSpectrum(spectrum);
   m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
 }
@@ -230,21 +198,21 @@ void ElwinPresenter::handleRun() {
   std::string const inputGroupWsName = "Elwin_Input";
   std::string outputWsBasename = WorkspaceUtils::parseRunNumbers(m_dataModel->getWorkspaceNames());
   // Load input files
+  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algQueue = {};
   std::string inputWorkspacesString;
   for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); ++i) {
-
     auto workspace = m_dataModel->getWorkspace(i);
     auto spectra = m_dataModel->getSpectra(i);
-    auto spectraWS = m_model->createGroupedWorkspaces(workspace, spectra);
+    auto spectraWS = workspace->getName() + "_extracted_spectra";
+    algQueue.emplace_back(m_model->setupExtractSpectra(workspace, spectra, spectraWS));
     inputWorkspacesString += spectraWS + ",";
   }
 
   // Group input workspaces
-  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algQueue = {};
   algQueue.emplace_back(m_model->setupGroupAlgorithm(inputWorkspacesString, inputGroupWsName));
   algQueue.emplace_back(m_model->setupElasticWindowMultiple(outputWsBasename, inputGroupWsName, m_view->getLogName(),
                                                             m_view->getLogValue()));
-  m_algorithmRunner->execute(algQueue);
+  m_algorithmRunner->execute(std::move(algQueue));
   // Set the result workspace for Python script export
   m_pythonExportWsName = outputWsBasename + "_elwin_eq2";
 }
@@ -256,7 +224,7 @@ void ElwinPresenter::handleSaveClicked() {
   std::deque<IConfiguredAlgorithm_sptr> saveQueue = {};
   for (auto const &name : getOutputWorkspaceNames())
     saveQueue.emplace_back(setupSaveAlgorithm(name));
-  m_algorithmRunner->execute(saveQueue);
+  m_algorithmRunner->execute(std::move(saveQueue));
 }
 
 std::vector<std::string> ElwinPresenter::getOutputWorkspaceNames() {
@@ -272,7 +240,7 @@ void ElwinPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dia
   try {
     addDataToModel(dialog);
     updateTableFromModel();
-    newInputDataFromDialog();
+    m_view->updatePreviewWorkspaceNames(m_dataModel->getWorkspaceNames());
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
@@ -309,22 +277,24 @@ void ElwinPresenter::handleRemoveSelectedData() {
     m_view->isRowCollapsed() ? m_dataModel->removeWorkspace(WorkspaceID(item->row()))
                              : m_dataModel->removeDataByIndex(FitDomainIndex(item->row()));
   }
-  updateTableFromModel();
-  updateAvailableSpectra();
+  updateInterface();
 }
 
 void ElwinPresenter::handleRowModeChanged() { updateTableFromModel(); }
 
 void ElwinPresenter::updateAvailableSpectra() {
-  auto spectra = m_dataModel->getSpectra(findWorkspaceID());
-  m_view->setAvailableSpectra(spectra.begin(), spectra.end());
+  if (auto const wsID = findWorkspaceID(m_view->getCurrentPreview()); wsID) {
+    auto const spectra = m_dataModel->getSpectra(*wsID);
+    m_view->setAvailableSpectra(spectra.begin(), spectra.end());
+  }
 }
 
-WorkspaceID ElwinPresenter::findWorkspaceID() {
-  auto currentWorkspace = m_view->getCurrentPreview();
+std::optional<WorkspaceID> ElwinPresenter::findWorkspaceID(std::string const &name) const {
   auto allWorkspaces = m_dataModel->getWorkspaceNames();
-  auto findWorkspace = find(allWorkspaces.begin(), allWorkspaces.end(), currentWorkspace);
-  size_t workspaceID = findWorkspace - allWorkspaces.begin();
+  auto const findWorkspace = find(allWorkspaces.begin(), allWorkspaces.end(), name);
+  size_t const workspaceID = findWorkspace - allWorkspaces.begin();
+  if (allWorkspaces.empty() || (allWorkspaces.size() == workspaceID))
+    return std::nullopt;
   return WorkspaceID{workspaceID};
 }
 
@@ -354,8 +324,8 @@ MatrixWorkspace_sptr ElwinPresenter::getInputWorkspace() const { return m_inputW
  *
  * @param inputWorkspace  The workspace to set.
  */
-void ElwinPresenter::setInputWorkspace(MatrixWorkspace_sptr inputWorkspace) {
-  m_inputWorkspace = std::move(inputWorkspace);
+void ElwinPresenter::setInputWorkspace(const MatrixWorkspace_sptr &inputWorkspace) {
+  m_inputWorkspace = inputWorkspace;
   updateIntegrationRange();
 }
 
@@ -383,6 +353,11 @@ void ElwinPresenter::handlePlotPreviewClicked() {
     m_view->showMessageBox("Workspace not found - data may not be loaded.");
 }
 
+void ElwinPresenter::updateInterface() {
+  updateTableFromModel();
+  m_view->updatePreviewWorkspaceNames(m_dataModel->getWorkspaceNames());
+}
+
 /**
  * Retrieves the workspace containing the data to be displayed in
  * the preview plot.
@@ -400,6 +375,35 @@ MatrixWorkspace_sptr ElwinPresenter::getPreviewPlotWorkspace() { return m_previe
  */
 void ElwinPresenter::setPreviewPlotWorkspace(const MatrixWorkspace_sptr &previewPlotWorkspace) {
   m_previewPlotWorkspace = previewPlotWorkspace;
+}
+
+/**
+ * Remove a workspace from the data model.
+ *
+ * @param workspaceName The name of the workspace to remove from the data model.
+ */
+
+void ElwinPresenter::removeWorkspace(std::string const &workspaceName) const {
+  if (auto const wsID = findWorkspaceID(workspaceName); wsID) {
+    m_dataModel->removeWorkspace(*wsID);
+  }
+}
+
+void ElwinPresenter::deleteHandle(std::string const &wsName, Workspace_sptr const &ws) {
+  (void)ws;
+  removeWorkspace(wsName);
+  updateInterface();
+}
+void ElwinPresenter::clearHandle() {
+  m_dataModel->clear();
+  updateInterface();
+}
+void ElwinPresenter::renameHandle(std::string const &wsName, std::string const &newName) {
+  // Remove renamed workspace if it is on the data model
+  removeWorkspace(wsName);
+  // Remove renamed workspace if new name replaces a workspace in data model
+  removeWorkspace(newName);
+  updateInterface();
 }
 
 } // namespace MantidQt::CustomInterfaces

@@ -218,26 +218,32 @@ font-size: {self.rescale_w(28)}px"""
         lbl_welcome.setText("Welcome")
         left_layout.addWidget(lbl_welcome)
         # release notes
+        self.clb_release_notes.setStyleSheet("QCommandLinkButton { color: black; }")
         self.setup_command_link_button(self.clb_release_notes, "Release Notes", ":/images/Notepad-Bloc-notes-icon-48x48.png")
         left_layout.addWidget(self.clb_release_notes)
         # sample datasets
+        self.clb_sample_datasets.setStyleSheet("QCommandLinkButton { color: black; }")
         self.setup_command_link_button(self.clb_sample_datasets, "Sample Datasets", ":/images/download-icon-48x48.png")
         left_layout.addWidget(self.clb_sample_datasets)
         # Tutorials Label
         lbl_tutorials = QLabel()
-        lbl_tutorials.setStyleSheet(f"color: rgb(45, 105, 45); font-size: {self.rescale_w(28)}px;")
+        lbl_tutorials.setStyleSheet(f"color: rgb(45, 105, 45) ; font-size: {self.rescale_w(28)}px;")
         lbl_tutorials.setText("Tutorials")
         left_layout.addWidget(lbl_tutorials)
         # Mantid Introduction
+        self.clb_mantid_introduction.setStyleSheet("QCommandLinkButton { color: black; }")
         self.setup_command_link_button(self.clb_mantid_introduction, "Mantid Introduction", ":/images/Misc-Tutorial-icon-48x48.png")
         left_layout.addWidget(self.clb_mantid_introduction)
         # Introduction to python
+        self.clb_python_introduction.setStyleSheet("QCommandLinkButton { color: black; }")
         self.setup_command_link_button(self.clb_python_introduction, "Introduction to Python", ":/images/Python-icon-48x48.png")
         left_layout.addWidget(self.clb_python_introduction)
         # Python in Mantid
+        self.clb_python_in_mantid.setStyleSheet("QCommandLinkButton { color: black; }")
         self.setup_command_link_button(self.clb_python_in_mantid, "Python In Mantid", ":/images/Circle_cog_48x48.png")
         left_layout.addWidget(self.clb_python_in_mantid)
         # Extending Mantid with python
+        self.clb_extending_mantid.setStyleSheet("QCommandLinkButton { color: black; }")
         self.setup_command_link_button(self.clb_extending_mantid, "Extending Mantid with Python", ":/images/Plugin-Python-icon-48x48.png")
         left_layout.addWidget(self.clb_extending_mantid)
 
@@ -258,6 +264,18 @@ QGroupBox QLabel{{
 }}
 QGroupBox QComboBox{{
     font: {self.rescale_w(12)}px;
+    color: black;
+}}
+QGroupBox QComboBox QAbstractItemView{{
+     background-color: rgb(240, 240, 240);
+}}
+QGroupBox QPushButton{{
+    font: {self.rescale_w(12)}px;
+    color: black;
+}}
+QGroupBox QComboBox::down-arrow{{
+     image: url(images/DropDownArrow.png)
+     color: black;
 }}
 font: {self.rescale_w(12)}px;
 """
@@ -377,6 +395,7 @@ font: {self.rescale_w(12)}px;
         # Close button
         close_button_layout = QVBoxLayout()
         close_button_layout.addSpacerItem(QSpacerItem(20, self.rescale_h(15), vPolicy=QSizePolicy.Expanding))
+        self.pb_close.setStyleSheet("color: black;")
         self.pb_close.setText("Close")
         self.pb_close.setDefault(True)
         close_button_layout.addWidget(self.pb_close)

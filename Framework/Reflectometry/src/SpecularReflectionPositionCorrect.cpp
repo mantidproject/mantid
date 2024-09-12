@@ -19,8 +19,6 @@ using namespace Mantid::Kernel;
 
 namespace Mantid::Reflectometry {
 namespace {
-const std::string multiDetectorAnalysis = "MultiDetectorAnalysis";
-const std::string lineDetectorAnalysis = "LineDetectorAnalysis";
 const std::string pointDetectorAnalysis = "PointDetectorAnalysis";
 
 /**

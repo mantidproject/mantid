@@ -69,7 +69,8 @@ void doInitializeFromParent<std::true_type>(const API::MatrixWorkspace &parent, 
  * @param ws
  */
 template <class UseIndexInfo> void initializeFromParent(const API::MatrixWorkspace &parent, API::MatrixWorkspace &ws) {
-  bool differentSize = (parent.x(0).size() != ws.x(0).size()) || (parent.y(0).size() != ws.y(0).size());
+  bool differentSize = (parent.x(0).size() != ws.x(0).size()) ||
+                       (parent.id() != "EventWorkspace" && (parent.y(0).size() != ws.y(0).size()));
   doInitializeFromParent<UseIndexInfo>(parent, ws, differentSize);
   // For EventWorkspace, `ws.y(0)` put entry 0 in the MRU. However, clients
   // would typically expect an empty MRU and fail to clear it. This dummy call

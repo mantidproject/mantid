@@ -1,0 +1,1 @@
+- Added a load compression parameter ``MinSizeCompressOnLoad`` for ref: :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` and ref: :ref:`SNSPowderReduction <algm-SNSPowderReduction>`

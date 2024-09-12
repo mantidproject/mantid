@@ -5,7 +5,7 @@ endif()
 if(CXXTEST_FOUND)
   include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR})
 
-  cxxtest_add_test(APITest ${TEST_FILES})
+  cxxtest_add_test(APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
 
   if(WIN32)
     set(BCRYPT bcrypt)
@@ -19,7 +19,6 @@ if(CXXTEST_FOUND)
             Mantid::Nexus
             Mantid::NexusGeometry
             ${BCRYPT}
-            Boost::filesystem
             gmock
             Python::Python
   )

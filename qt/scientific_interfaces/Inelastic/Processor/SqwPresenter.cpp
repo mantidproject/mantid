@@ -102,6 +102,8 @@ void SqwPresenter::setFileExtensionsByName(bool filter) {
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
+void SqwPresenter::setLoadHistory(bool doLoadHistory) { m_view->setLoadHistory(doLoadHistory); }
+
 void SqwPresenter::handleRun() {
   clearOutputPlotOptionsWorkspaces();
   std::deque<API::IConfiguredAlgorithm_sptr> algoQueue = {};
@@ -110,7 +112,7 @@ void SqwPresenter::handleRun() {
   algoQueue.emplace_back(m_model->setupSofQWAlgorithm());
   algoQueue.emplace_back(m_model->setupAddSampleLogAlgorithm());
   m_view->setEnableOutputOptions(false);
-  m_algorithmRunner->execute(algoQueue);
+  m_algorithmRunner->execute(std::move(algoQueue));
 }
 
 void SqwPresenter::handleSaveClicked() {

@@ -23,7 +23,6 @@ set(SRC_FILES
     src/FindUBUsingFFT.cpp
     src/FindUBUsingIndexedPeaks.cpp
     src/FindUBUsingLatticeParameters.cpp
-    src/FindUBUsingMinMaxD.cpp
     src/GoniometerAnglesFromPhiRotation.cpp
     src/HardThresholdBackground.cpp
     src/HasUB.cpp
@@ -101,7 +100,6 @@ set(INC_FILES
     inc/MantidCrystal/FindUBUsingFFT.h
     inc/MantidCrystal/FindUBUsingIndexedPeaks.h
     inc/MantidCrystal/FindUBUsingLatticeParameters.h
-    inc/MantidCrystal/FindUBUsingMinMaxD.h
     inc/MantidCrystal/GSLFunctions.h
     inc/MantidCrystal/GoniometerAnglesFromPhiRotation.h
     inc/MantidCrystal/HardThresholdBackground.h
@@ -179,7 +177,6 @@ set(TEST_FILES
     FindUBUsingFFTTest.h
     FindUBUsingIndexedPeaksTest.h
     FindUBUsingLatticeParametersTest.h
-    FindUBUsingMinMaxDTest.h
     GoniometerAnglesFromPhiRotationTest.h
     HardThresholdBackgroundTest.h
     HasUBTest.h
@@ -261,7 +258,7 @@ include_directories(inc)
 target_link_libraries(
   Crystal
   PUBLIC Mantid::API Mantid::Geometry Mantid::Kernel
-  PRIVATE Mantid::DataObjects Mantid::Indexing Boost::filesystem
+  PRIVATE Mantid::DataObjects Mantid::Indexing
 )
 
 # Add the unit tests directory

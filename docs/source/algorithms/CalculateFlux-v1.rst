@@ -41,7 +41,7 @@ Usage
 
   ws = CreateSampleWorkspace(XUnit="Wavelength", NumBanks=1, Function="One Peak")
   flux = CalculateFlux(InputWorkspace=ws, BeamRadius=0.05)
-  print(flux.readY(0)[5])
+  print("{:.1f}".format(flux.readY(0)[5]))
 
 Output:
 

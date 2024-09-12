@@ -298,6 +298,26 @@ void ComponentInfo::doSetRotation(const std::pair<size_t, size_t> &index, const 
   }
 }
 
+void ComponentInfo::doScaleComponent(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &newScaling,
+                                     const ComponentInfo::Range &detectorRange) {
+
+  const auto timeIndex = index.second;
+  const Eigen::Matrix3d scalingMatrix = newScaling.asDiagonal();
+  const Eigen::Vector3d compPos = position(index);
+  for (const auto &subIndex : detectorRange) {
+    Eigen::Vector3d oldPos = m_detectorInfo->position({subIndex, timeIndex});
+    Eigen::Vector3d newPos = scalingMatrix * oldPos + (Eigen::Matrix3d::Identity() - scalingMatrix) * compPos;
+    m_detectorInfo->setPosition({subIndex, timeIndex}, newPos);
+  }
+
+  for (const auto &subIndex : componentRangeInSubtree(index.first)) {
+    const size_t offsetIndex = compOffsetIndex(subIndex);
+    Eigen::Vector3d oldPos = position({subIndex, timeIndex});
+    Eigen::Vector3d newPos = scalingMatrix * oldPos + (Eigen::Matrix3d::Identity() - scalingMatrix) * compPos;
+    m_positions.access()[linearIndex({offsetIndex, timeIndex})] = newPos;
+  }
+}
+
 /**
  * Sets the position for a component described by target component index
  *
@@ -385,6 +405,43 @@ void ComponentInfo::setRotation(const std::pair<size_t, size_t> &index, const Ei
 
   const auto detectorRange = detectorRangeInSubtree(componentIndex);
   doSetRotation(index, newRotation, detectorRange);
+}
+
+/**
+ * Scales all detectors for a component around it's geometrical center described by target component index
+ *
+ * This will propagate and apply the derived scaling factors to all known
+ *sub-components
+ *
+ * @param componentIndex : Component index to update at
+ * @param newScaling : Absolute scaling factor to set
+ */
+void ComponentInfo::scaleComponent(const size_t componentIndex, const Eigen::Vector3d &newScaling) {
+  checkNoTimeDependence();
+
+  const auto detectorRange = detectorRangeInSubtree(componentIndex);
+  if (!detectorRange.empty())
+    failIfDetectorInfoScanning();
+
+  doScaleComponent({componentIndex, 0}, newScaling, detectorRange);
+}
+
+/**
+ * Scales all detectors for a component around it's geometrical center described by component and time index
+ *
+ * This will propagate and apply the derived scaling factors to all known
+ *sub-components
+ *
+ * @param index : Component and time index pair
+ * @param newScaling : Absolute scaling factor to set
+ */
+void ComponentInfo::scaleComponent(const std::pair<size_t, size_t> &index, const Eigen::Vector3d &newScaling) {
+  const auto componentIndex = index.first;
+  checkSpecialIndices(componentIndex);
+
+  const auto detectorRange = detectorRangeInSubtree(componentIndex);
+
+  doScaleComponent(index, newScaling, detectorRange);
 }
 
 void ComponentInfo::failIfDetectorInfoScanning() const {

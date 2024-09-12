@@ -79,6 +79,8 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
   add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
   # Silence issues with deprecated allocator methods in boost regex
   add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
+  # The new interface is not available in Clang yet so we haven't migrated
+  add_definitions(-D_SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING)
 
   find_package(Poco 1.4.6 REQUIRED)
   add_definitions(-DPOCO_ENABLE_CPP11)
@@ -108,8 +110,6 @@ if(BUILD_MANTIDFRAMEWORK)
   set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
 endif()
 
-include(Span)
-
 if(ENABLE_WORKBENCH)
   include(PyUnitTest)
   enable_testing()
@@ -126,9 +126,9 @@ if(OpenMP_CXX_FOUND)
 endif()
 
 # ######################################################################################################################
-# Set the c++ standard to 17 - cmake should do the right thing with msvc
+# Set the c++ standard to 20 - cmake should do the right thing with msvc
 # ######################################################################################################################
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ######################################################################################################################

@@ -139,8 +139,8 @@ Output:
 
 .. testoutput:: ExHistSimple
 
-   The rebinned X values are: [ 0.  2.  4.  6.  8.  9.]
-   The rebinned Y values are: [ 2.  2.  2.  2.  1.]
+   The rebinned X values are: [0. 2. 4. 6. 8. 9.]
+   The rebinned Y values are: [2. 2. 2. 2. 1.]
 
 **Example - logarithmic rebinning:**
 
@@ -160,7 +160,7 @@ Output:
 
 .. testoutput:: ExHistLog
 
-   The 2nd and 3rd rebinned X values are: [ 1.5   2.25]
+   The 2nd and 3rd rebinned X values are: [1.5  2.25]
 
 **Example - Reverse logarithmic rebinning:**
 
@@ -180,7 +180,7 @@ Output:
 
 .. testoutput:: ExHistRevLog
 
-   The rebinned X values are: [ 1.  6.  8.  9.]
+   The rebinned X values are: [1. 6. 8. 9.]
 
 **Example - Inverse power rebinning:**
 
@@ -222,7 +222,7 @@ Output:
 
 .. testoutput:: ExHistCustom
 
-   The rebinned X values are: [ 1.  3.  6.  9.]
+   The rebinned X values are: [1. 3. 6. 9.]
 
 **Example - use option FullBinsOnly:**
 
@@ -243,8 +243,8 @@ Output:
 
 .. testoutput:: ExHistFullBinsOnly
 
-   The rebinned X values are: [ 0.  2.  4.  6.  8.]
-   The rebinned Y values are: [ 2.  2.  2.  2.]
+   The rebinned X values are: [0. 2. 4. 6. 8.]
+   The rebinned Y values are: [2. 2. 2. 2.]
 
 **Example - use option PreserveEvents:**
 

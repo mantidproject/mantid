@@ -202,7 +202,7 @@ bool LogManager::hasEndTime() const {
  * @throw runtime_error if the time of the first pulse is not available.
  */
 const DateAndTime LogManager::getFirstPulseTime() const {
-  TimeSeriesProperty<double> *log =
+  const TimeSeriesProperty<double> *log =
       getTimeSeriesProperty<double>("proton_charge"); // guaranteed to be a valid pointer, if the call succeeds
   if (log->realSize() == 0)
     throw std::runtime_error("First pulse time is not available. Log \"proton_charge\" is empty.");
@@ -212,17 +212,17 @@ const DateAndTime LogManager::getFirstPulseTime() const {
   // a DAS bug at SNS around Mar 2011 where the first pulse time is Jan 1, 1990."
   // There was no explanation why 100 was picked as the maximum number of times to skip.
   // In the refactored algorithm below we keep 100 as is.
-  const size_t maxSkip{100};
   const DateAndTime reference("1991-01-01T00:00:00");
   const std::vector<DateAndTime> &times = log->timesAsVector();
+  const size_t maxSkip{100};
   size_t index;
   const size_t maxIndex = std::min(static_cast<size_t>(log->realSize()), maxSkip);
   for (index = 0; index < maxIndex; index++) {
     if (times[index] >= reference)
-      break;
+      return times[index];
   }
 
-  return times[index];
+  return times[maxIndex - 1];
 }
 
 /** Return the time of the last pulse received, by accessing the run's
@@ -232,7 +232,7 @@ const DateAndTime LogManager::getFirstPulseTime() const {
  * @throw runtime_error if the time of the last pulse is not available.
  */
 const DateAndTime LogManager::getLastPulseTime() const {
-  TimeSeriesProperty<double> *log =
+  const TimeSeriesProperty<double> *log =
       getTimeSeriesProperty<double>("proton_charge"); // guaranteed to be a valid pointer, if the call succeeds
   if (log->realSize() == 0)
     throw std::runtime_error("Last pulse time is not available. Log \"proton_charge\" is empty.");
@@ -252,7 +252,7 @@ bool LogManager::hasValidProtonChargeLog(std::string &error) const {
   }
 
   Kernel::Property *prop = getProperty(log_name);
-  TimeSeriesProperty<double> *log;
+  const TimeSeriesProperty<double> *log;
   if (!(log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(prop))) {
     error += " Log " + log_name + " is not a time series of floating-point values.";
     return false;

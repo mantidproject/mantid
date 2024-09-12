@@ -47,6 +47,7 @@ public:
   void setValue(const std::size_t &index, const double &value) override;
   size_t indexOfValue(const double value) const override;
 
+  bool operator==(const TextAxis &) const;
   bool operator==(const Axis &) const override;
   /// Get the label at the specified index
   std::string label(const std::size_t &index) const override;
@@ -60,6 +61,7 @@ public:
 private:
   /// A vector holding the axis values for the axis.
   std::vector<std::string> m_values;
+  bool compareToTextAxis(const TextAxis &axis2) const;
 };
 
 } // namespace API

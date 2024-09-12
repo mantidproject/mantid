@@ -116,6 +116,9 @@ public:
   MOCK_METHOD1(setPlotErrorBarsChecked, void(bool check));
   MOCK_CONST_METHOD0(isPlotErrorBarsChecked, bool());
 
+  MOCK_METHOD1(setLoadHistoryChecked, void(bool check));
+  MOCK_CONST_METHOD0(isLoadHistoryChecked, bool());
+
   MOCK_METHOD1(setDeveloperFeatureFlags, void(QStringList const &flags));
   MOCK_CONST_METHOD0(developerFeatureFlags, QStringList());
 

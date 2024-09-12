@@ -14,7 +14,6 @@
 
 using namespace Mantid::Kernel;
 
-using std::cout;
 using std::runtime_error;
 using std::size_t;
 using std::vector;
@@ -67,7 +66,7 @@ public:
     MakeDummyFile(dummy_file, 3);
     TS_ASSERT_THROWS(file.open(dummy_file), const std::runtime_error &);
     file.close();
-    Poco::File(dummy_file).remove();
+    std::filesystem::remove(dummy_file);
   }
 
   void testOpen() {
@@ -90,7 +89,7 @@ public:
     TS_ASSERT_EQUALS(data.at(num - 1).pid, 39);
 
     file.close();
-    Poco::File(dummy_file).remove();
+    std::filesystem::remove(dummy_file);
   }
 
   void testLoadAllIntoVector() {
@@ -111,7 +110,7 @@ public:
     TS_ASSERT_EQUALS(data.at(num - 1).tof, 38);
     TS_ASSERT_EQUALS(data.at(num - 1).pid, 39);
     file.close();
-    Poco::File(dummy_file).remove();
+    std::filesystem::remove(dummy_file);
   }
 
   void testLoadInBlocks() {
@@ -142,7 +141,7 @@ public:
     TS_ASSERT_EQUALS(data[9].tof, 38);
     TS_ASSERT_EQUALS(data[9].pid, 39);
     file.close();
-    Poco::File(dummy_file).remove();
+    std::filesystem::remove(dummy_file);
   }
 
   void testLoadBlockAt() {
@@ -169,7 +168,7 @@ public:
     loaded_size = file.loadBlock(data.get(), block_size);
     TS_ASSERT_EQUALS(loaded_size, 5);
     file.close();
-    Poco::File(dummy_file).remove();
+    std::filesystem::remove(dummy_file);
   }
 
   void testCallingDestructorOnUnitializedObject() { BinaryFile<DasEvent> file2; }

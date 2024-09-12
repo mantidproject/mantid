@@ -1,0 +1,1 @@
+- Fixed error when cropping a workspace after using the ``Plot All`` button

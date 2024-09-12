@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Any, Dict, Type, TypedDict, TypeVar
 
+from pydantic import validate_call
+
 import mantid
 from abins.kpointsdata import KpointsData
 from abins.atomsdata import AtomsData
@@ -23,13 +25,9 @@ class AbinsData:
 
     """
 
+    @validate_call(config=dict(arbitrary_types_allowed=True, strict=True))
     def __init__(self, *, k_points_data: KpointsData, atoms_data: AtomsData) -> None:
-        if not isinstance(k_points_data, KpointsData):
-            raise TypeError("Invalid type of k-points data.: {}".format(type(k_points_data)))
         self._k_points_data = k_points_data
-
-        if not isinstance(atoms_data, AtomsData):
-            raise TypeError("Invalid type of atoms data.")
         self._atoms_data = atoms_data
         self._check_consistent_dimensions()
 

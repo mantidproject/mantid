@@ -1,0 +1,1 @@
+- Fixed an 'index out of range' error in the :ref:`BayesQuasi <algm-BayesQuasi>` algorithm when using a sample with a Numeric Axis.

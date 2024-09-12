@@ -9,7 +9,7 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(CrystalTest ${TEST_FILES})
   target_link_libraries(
-    CrystalTest PRIVATE Mantid::Crystal Mantid::DataHandling Mantid::MDAlgorithms Mantid::Nexus Boost::filesystem gmock
+    CrystalTest PRIVATE Mantid::Crystal Mantid::DataHandling Mantid::MDAlgorithms Mantid::Nexus gmock
   )
   add_framework_test_helpers(CrystalTest)
   add_dependencies(CrystalTest Algorithms CurveFitting)

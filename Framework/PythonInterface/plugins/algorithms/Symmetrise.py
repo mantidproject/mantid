@@ -160,7 +160,7 @@ class Symmetrise(PythonAlgorithm):
         """
         Checks for invalid input properties.
         """
-        from IndirectCommon import CheckHistZero
+        from IndirectCommon import check_hist_zero
 
         issues = dict()
 
@@ -178,7 +178,7 @@ class Symmetrise(PythonAlgorithm):
             spec_min = spectra_range[0]
             spec_max = spectra_range[1]
 
-            num_sample_spectra, _ = CheckHistZero(input_workspace.name())
+            num_sample_spectra, _ = check_hist_zero(input_workspace.name())
             min_spectra_number = input_workspace.getSpectrum(0).getSpectrumNo()
             max_spectra_number = input_workspace.getSpectrum(num_sample_spectra - 1).getSpectrumNo()
 
@@ -225,7 +225,7 @@ class Symmetrise(PythonAlgorithm):
         """
         Get the algorithm properties and validate them.
         """
-        from IndirectCommon import CheckHistZero
+        from IndirectCommon import check_hist_zero
 
         self._sample = self.getPropertyValue("InputWorkspace")
 
@@ -235,7 +235,7 @@ class Symmetrise(PythonAlgorithm):
         self._spectra_range = self.getProperty("SpectraRange").value
         # If the user did not enter a spectra range, use the spectra range of the workspace
         if len(self._spectra_range) == 0:
-            num_sample_spectra, _ = CheckHistZero(self._sample)
+            num_sample_spectra, _ = check_hist_zero(self._sample)
             min_spectra_number = mtd[self._sample].getSpectrum(0).getSpectrumNo()
             max_spectra_number = mtd[self._sample].getSpectrum(num_sample_spectra - 1).getSpectrumNo()
             self._spectra_range = [min_spectra_number, max_spectra_number]

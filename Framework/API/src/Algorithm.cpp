@@ -33,6 +33,7 @@
 #include <Poco/RWLock.h>
 #include <Poco/Void.h>
 
+#include <H5Cpp.h>
 #include <json/json.h>
 
 #include <algorithm>
@@ -559,7 +560,7 @@ bool Algorithm::executeInternal() {
     // Reset name on input workspaces to trigger attempt at collection from ADS
     const auto &props = getProperties();
     for (auto &prop : props) {
-      auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+      const auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (wsProp && !(wsProp->getWorkspace())) {
         // Setting it's name to the same one it already had
         prop->setValue(prop->value());
@@ -617,7 +618,7 @@ bool Algorithm::executeInternal() {
       if (numErrors > 0) {
         std::stringstream msg;
         msg << "Some invalid Properties found: ";
-        for (auto &error : errors) {
+        for (const auto &error : errors) {
           msg << "\n " << error.first << ": " << error.second;
         }
         notificationCenter().postNotification(new ErrorNotification(this, "Some invalid Properties found"));
@@ -730,6 +731,20 @@ bool Algorithm::executeInternal() {
         (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
     setResultState(ResultState::Failed);
     notificationCenter().postNotification(new ErrorNotification(this, ex.what()));
+    this->unlockWorkspaces();
+
+    throw;
+  }
+
+  catch (H5::Exception &ex) {
+    m_runningAsync = false;
+    std::string errmsg;
+    errmsg.append(ex.getCFuncName()).append(": ").append(ex.getCDetailMsg());
+    getLogger().error() << "H5 Exception in execution of algorithm " << this->name() << ":\n" << errmsg << "\n";
+    m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+        (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
+    setResultState(ResultState::Failed);
+    notificationCenter().postNotification(new ErrorNotification(this, errmsg));
     this->unlockWorkspaces();
 
     throw;
@@ -872,7 +887,7 @@ void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg, const double st
   // validator
   const std::vector<Property *> &props = alg->getProperties();
   for (auto prop : props) {
-    auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+    const auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
     if (prop->direction() == Mantid::Kernel::Direction::Output && wsProp) {
       if (prop->value().empty() && !wsProp->isOptional()) {
         prop->createTemporaryValue();
@@ -1251,7 +1266,7 @@ bool Algorithm::doCallProcessGroups(Mantid::Types::Core::DateAndTime &startTime)
   // In the base implementation of processGroups, this normally calls
   // this->execute() again on each member of the group. Other algorithms may
   // choose to override that behavior (examples: CompareWorkspaces,
-  // CheckWorkspacesMatch, RenameWorkspace)
+  // RenameWorkspace)
 
   startTime = Mantid::Types::Core::DateAndTime::getCurrentTime();
   // Start a timer
@@ -1404,7 +1419,7 @@ bool Algorithm::processGroups() {
 
     // ---------- Set all the input workspaces ----------------------------
     for (size_t iwp = 0; iwp < m_unrolledInputWorkspaces.size(); iwp++) {
-      std::vector<Workspace_sptr> &thisGroup = m_unrolledInputWorkspaces[iwp];
+      const std::vector<Workspace_sptr> &thisGroup = m_unrolledInputWorkspaces[iwp];
       if (!thisGroup.empty()) {
         // By default (for a single group) point to the first/only workspace
         Workspace_sptr ws = thisGroup[0];
@@ -1530,7 +1545,7 @@ void Algorithm::copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum) {
   for (const auto &prop : props) {
     if (prop) {
 
-      auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+      const auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       // Copy the property using the string
       if (!wsProp)
         this->setOtherProperties(alg, prop->name(), prop->value(), periodNum);
@@ -2039,7 +2054,7 @@ MANTID_API_DLL API::IAlgorithm_sptr IPropertyManager::getValue<API::IAlgorithm_s
 template <>
 MANTID_API_DLL API::IAlgorithm_const_sptr
 IPropertyManager::getValue<API::IAlgorithm_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(getPointerToProperty(name));
+  const auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

@@ -82,7 +82,7 @@ class IndirectTwoPeakFit(PythonAlgorithm):
             self._output_name = "Two_peak"
 
     def PyExec(self):
-        from IndirectCommon import convertToElasticQ
+        from IndirectCommon import convert_to_elastic_q
 
         progress_tracker = Progress(self, start=0.05, end=0.95, nreports=2)
 
@@ -91,7 +91,7 @@ class IndirectTwoPeakFit(PythonAlgorithm):
         self._crop_workspace(self._sample_workspace, self._temporary_fit_name, self._e_min, self._e_max)
 
         self._convert_to_histogram(self._temporary_fit_name)
-        convertToElasticQ(self._temporary_fit_name)
+        convert_to_elastic_q(self._temporary_fit_name)
 
         # Perform fits
         progress_tracker.report("Fitting 1 peak...")
@@ -261,9 +261,9 @@ class IndirectTwoPeakFit(PythonAlgorithm):
         mtd[temporary_name].setY(0, array(new_y_array))
 
     def _get_amplitude_and_fwhm_from_fit(self, workspace):
-        from IndirectCommon import getEfixed
+        from IndirectCommon import get_efixed
 
-        parameter_values = self._get_fit_parameters_from_fit(workspace, getEfixed(self._temporary_fit_name))
+        parameter_values = self._get_fit_parameters_from_fit(workspace, get_efixed(self._temporary_fit_name))
         return parameter_values[0], parameter_values[2]
 
     def _get_fit_parameters_from_fit(self, input_name, e_fixed):

@@ -34,12 +34,24 @@ public:
 
   void testSurplusWhitespace() { runTest({"01 ", "11", " 10", " 00 "}); }
 
+  void testNoWorkspaceForRequestedSpinStateReturnsNull() {
+    // Create a group with more child workspaces than are in the spin state order that we'll use for the test.
+    // This is to test that we're getting the correct result even when the spin state order and workspace group sizes
+    // are not the same.
+    const auto grp = createGroupWorkspaceToMatchSpinStates({"01", "11", "10"});
+
+    const auto spinStateOrder = "01,11";
+    const auto missingSpinState = "00";
+
+    auto ws = PolarizationCorrectionsHelpers::workspaceForSpinState(grp, spinStateOrder, missingSpinState);
+    TS_ASSERT(ws == nullptr);
+  }
+
 private:
-  WorkspaceGroup_sptr createGroupWorkspaceWithFourSpinStates(const std::vector<std::string> &spinStateOrder) {
+  WorkspaceGroup_sptr createGroupWorkspaceToMatchSpinStates(const std::vector<std::string> &spinStateOrder) {
     WorkspaceGroup_sptr grp = std::make_shared<WorkspaceGroup>();
     for (size_t i = 0; i < spinStateOrder.size(); ++i) {
       auto trimmedSpinState = trimString(spinStateOrder[i]);
-      // The workspace name will be trimmed on creation
       grp->addWorkspace(createWorkspace(trimmedSpinState));
     }
     return grp;
@@ -58,7 +70,7 @@ private:
 
   void runTest(const std::vector<std::string> &spinStates) {
     auto spinStateOrder = boost::join(spinStates, ",");
-    auto grp = createGroupWorkspaceWithFourSpinStates(spinStates);
+    auto grp = createGroupWorkspaceToMatchSpinStates(spinStates);
     for (const auto &spinState : spinStates) {
       auto ws = PolarizationCorrectionsHelpers::workspaceForSpinState(grp, spinStateOrder, spinState);
       // The workspace name is not going to have any spaces in, regardless of the input. This is not

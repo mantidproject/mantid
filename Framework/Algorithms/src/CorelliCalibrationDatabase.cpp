@@ -26,8 +26,7 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <filesystem>
 #include <sstream>
 #include <string>
 
@@ -280,7 +279,7 @@ TableWorkspace_sptr CalibrationTableHandler::saveCompomentDatabase(const std::st
   // Load the database file for the specific component to a table workspace
   // if extant, otherwise instantiate an empty table
   TableWorkspace_sptr compcaltable = nullptr;
-  if (boost::filesystem::exists(filename)) {
+  if (std::filesystem::exists(filename)) {
     compcaltable = loadComponentCalibrationTable(filename, tablewsname);
   } else {
     compcaltable = createCalibrationTableWorkspace(tablewsname, true);
@@ -646,7 +645,7 @@ bool CorelliCalibrationDatabase::isFileExist(const std::string &filepath) {
 
   // TODO - replace by std::filesystem::exists(filename) until C++17 is properly
   // supported
-  return boost::filesystem::exists(filepath);
+  return std::filesystem::exists(filepath);
 }
 
 //-----------------------------------------------------------------------------
@@ -657,9 +656,9 @@ bool CorelliCalibrationDatabase::isFileExist(const std::string &filepath) {
  * @return
  */
 std::string CorelliCalibrationDatabase::joinPath(const std::string &directory, const std::string &basename) {
-  boost::filesystem::path dir(directory);
-  boost::filesystem::path file(basename);
-  boost::filesystem::path fullpath = dir / file;
+  std::filesystem::path dir(directory);
+  std::filesystem::path file(basename);
+  std::filesystem::path fullpath = dir / file;
 
   return fullpath.string();
 }

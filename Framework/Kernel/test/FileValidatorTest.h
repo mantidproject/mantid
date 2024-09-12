@@ -9,13 +9,17 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/FileValidator.h"
-#include <Poco/File.h>
-
-#if defined(__GNUC__) || defined(__clang__)
-#include "boost/filesystem.hpp"
-#endif
+#include <filesystem>
+#include <fstream>
 
 using namespace Mantid::Kernel;
+
+namespace {
+void createEmpty(const std::filesystem::path &path) {
+  std::ofstream handle(path);
+  handle.close();
+}
+} // namespace
 
 class FileValidatorTest : public CxxTest::TestSuite {
 public:
@@ -39,12 +43,12 @@ public:
     const std::string file_stub = "scratch.";
     const std::string ext1 = "txt";
     const std::string ext2 = "raw";
-    Poco::File txt_file(file_stub + ext1);
-    Poco::File raw_file(file_stub + ext2);
+    std::filesystem::path txt_file(file_stub + ext1);
+    std::filesystem::path raw_file(file_stub + ext2);
 
     try {
-      txt_file.createFile();
-      raw_file.createFile();
+      createEmpty(txt_file);
+      createEmpty(raw_file);
     } catch (std::exception &) {
       TS_FAIL("Error creating test file for \"testPassesOnExistentFile\" test.");
     }
@@ -53,12 +57,12 @@ public:
     std::vector<std::string> vec(1, "txt");
     FileValidator v1(vec);
 
-    TS_ASSERT_EQUALS(v1.isValid(txt_file.path()), "");
+    TS_ASSERT_EQUALS(v1.isValid(txt_file.string()), "");
     // Not correct extension but the file exists so we allow it
-    TS_ASSERT_EQUALS(v1.isValid(raw_file.path()), "");
+    TS_ASSERT_EQUALS(v1.isValid(raw_file.string()), "");
 
-    txt_file.remove();
-    raw_file.remove();
+    std::filesystem::remove(txt_file);
+    std::filesystem::remove(raw_file);
   }
 
   void testPassesForMoreComplicatedExtensions() {
@@ -66,11 +70,11 @@ public:
     const std::string file_stub = "scratch";
     const std::string ext1 = ".tar.gz";
     const std::string ext2 = "_event.dat";
-    Poco::File txt_file(file_stub + ext1);
-    Poco::File raw_file(file_stub + ext2);
+    std::filesystem::path txt_file(file_stub + ext1);
+    std::filesystem::path raw_file(file_stub + ext2);
     try {
-      txt_file.createFile();
-      raw_file.createFile();
+      createEmpty(txt_file);
+      createEmpty(raw_file);
     } catch (std::exception &) {
       TS_FAIL("Error creating test file for "
               "\"testPassesForMoreComplicatedExtensions\" test.");
@@ -80,12 +84,12 @@ public:
     std::vector<std::string> vec(1, ".tar.gz");
     FileValidator v1(vec);
 
-    TS_ASSERT_EQUALS(v1.isValid(txt_file.path()), "");
+    TS_ASSERT_EQUALS(v1.isValid(txt_file.string()), "");
     // Not correct extension but the file exists so we allow it
-    TS_ASSERT_EQUALS(v1.isValid(raw_file.path()), "");
+    TS_ASSERT_EQUALS(v1.isValid(raw_file.string()), "");
 
-    txt_file.remove();
-    raw_file.remove();
+    std::filesystem::remove(txt_file);
+    std::filesystem::remove(raw_file);
   }
 
   void testFailsOnNonexistentFile() {
@@ -104,14 +108,14 @@ public:
   void testFailsIfNoPermissions() {
 #if defined(__GNUC__) || defined(__clang__)
     const char *filename = "testfile.txt";
-    Poco::File txt_file(filename);
-    txt_file.createFile();
-    boost::filesystem::permissions(filename, boost::filesystem::perms::owner_read | boost::filesystem::remove_perms);
+    std::filesystem::path txt_file(filename);
+    createEmpty(txt_file);
+    std::filesystem::permissions(filename, std::filesystem::perms::owner_read, std::filesystem::perm_options::remove);
     std::vector<std::string> vec;
     FileValidator v(vec);
 
-    TS_ASSERT_EQUALS(v.isValid(txt_file.path()), "Failed to open testfile.txt: Permission denied");
-    txt_file.remove();
+    TS_ASSERT_EQUALS(v.isValid(txt_file.string()), "Failed to open testfile.txt: Permission denied");
+    std::filesystem::remove(txt_file);
 #endif
   }
 

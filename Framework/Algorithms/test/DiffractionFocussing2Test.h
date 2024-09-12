@@ -78,6 +78,126 @@ public:
     AnalysisDataService::Instance().remove("focusedWS");
   }
 
+  void test_preserve_compare() {
+    // processed nexus file in event mode
+    const std::string PG3_FILE("PG3_46577.nxs.h5");
+
+    const std::string inputWSname("PG3_46577");
+    const std::string groupWS("PG3_group");
+    { // load data from disk and get prepared for focussing
+      auto loader = AlgorithmFactory::Instance().create("Load", -1); // "LoadNexusProcessed", -1);
+      loader->initialize();
+      loader->setProperty("Filename", PG3_FILE);
+      loader->setProperty("OutputWorkspace", inputWSname);
+      loader->execute();
+      if (!loader->isExecuted())
+        throw std::runtime_error("Failed to load " + PG3_FILE);
+
+      auto cropworkspace = AlgorithmFactory::Instance().create("CropWorkspace", -1);
+      cropworkspace->initialize();
+      cropworkspace->setPropertyValue("InputWorkspace", inputWSname);
+      cropworkspace->setPropertyValue("OutputWorkspace", inputWSname);
+      cropworkspace->setProperty("XMin", 300.);
+      cropworkspace->execute();
+      if (!cropworkspace->isExecuted())
+        throw std::runtime_error("Failed to CropWorkspace");
+
+      auto compress = AlgorithmFactory::Instance().create("CompressEvents", -1);
+      compress->initialize();
+      compress->setPropertyValue("InputWorkspace", inputWSname);
+      compress->setPropertyValue("OutputWorkspace", inputWSname);
+      compress->execute();
+      if (!compress->isExecuted())
+        throw std::runtime_error("Failed to compress events");
+
+      auto resamplex = AlgorithmFactory::Instance().create("ResampleX", -1);
+      resamplex->initialize();
+      resamplex->setPropertyValue("InputWorkspace", inputWSname);
+      resamplex->setPropertyValue("OutputWorkspace", inputWSname);
+      resamplex->setProperty("NumberBins", 6000);
+      resamplex->setProperty("LogBinning", true);
+      resamplex->execute();
+      if (!resamplex->isExecuted())
+        throw std::runtime_error("Failed to resample x-axis in TOF");
+
+      auto convertunits = AlgorithmFactory::Instance().create("ConvertUnits", -1);
+      convertunits->initialize();
+      convertunits->setPropertyValue("InputWorkspace", inputWSname);
+      convertunits->setPropertyValue("OutputWorkspace", inputWSname);
+      convertunits->setProperty("Target", "dSpacing");
+      convertunits->execute();
+      if (!convertunits->isExecuted())
+        throw std::runtime_error("Failed to convert to dspacing");
+
+      auto creategroup = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", -1);
+      creategroup->initialize();
+      creategroup->setPropertyValue("InputWorkspace", inputWSname);
+      creategroup->setPropertyValue("OutputWorkspace", groupWS);
+      creategroup->setProperty("GroupDetectorsBy", "All");
+      creategroup->execute();
+      if (!creategroup->isExecuted())
+        throw std::runtime_error("Failed to create grouping workspace");
+    }
+
+    const std::string outputFalse(inputWSname + "_false");
+    {
+      DiffractionFocussing2 focussing;
+      focussing.initialize();
+      TS_ASSERT_THROWS_NOTHING(focussing.setPropertyValue("InputWorkspace", inputWSname));
+      TS_ASSERT_THROWS_NOTHING(focussing.setPropertyValue("OutputWorkspace", outputFalse));
+      TS_ASSERT_THROWS_NOTHING(focussing.setPropertyValue("GroupingWorkspace", groupWS));
+      TS_ASSERT_THROWS_NOTHING(focussing.setProperty("PreserveEvents", false));
+      TS_ASSERT_THROWS_NOTHING(focussing.execute());
+      if (!focussing.isExecuted())
+        throw std::runtime_error("Failed to DiffractionFocus PreserveEvents=False");
+    }
+
+    const std::string outputTrue(inputWSname + "_true");
+    {
+      DiffractionFocussing2 focussing;
+      focussing.initialize();
+      TS_ASSERT_THROWS_NOTHING(focussing.setPropertyValue("InputWorkspace", inputWSname));
+      TS_ASSERT_THROWS_NOTHING(focussing.setPropertyValue("OutputWorkspace", outputTrue));
+      TS_ASSERT_THROWS_NOTHING(focussing.setPropertyValue("GroupingWorkspace", groupWS));
+      TS_ASSERT_THROWS_NOTHING(focussing.setProperty("PreserveEvents", true));
+      TS_ASSERT_THROWS_NOTHING(focussing.execute());
+      if (!focussing.isExecuted())
+        throw std::runtime_error("Failed to DiffractionFocus PreserveEvents=True");
+    }
+
+    // cleanup inputs
+    AnalysisDataService::Instance().remove(inputWSname);
+    AnalysisDataService::Instance().remove(groupWS);
+
+    // make sure workspace types do not match
+    MatrixWorkspace_const_sptr wsFalse = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(outputFalse);
+    MatrixWorkspace_const_sptr wsTrue = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(outputTrue);
+    TS_ASSERT_DIFFERS(wsFalse->id(), wsTrue->id()); // different workspace types
+
+    // check x-axis and total counts match - this is easier to debug than CompareWorkspaces
+    const size_t NUM_HISTO = wsFalse->getNumberHistograms();
+    for (size_t ws_index = 0; ws_index < NUM_HISTO; ++ws_index) {
+      TS_ASSERT_EQUALS(wsFalse->readX(ws_index), wsTrue->readX(ws_index));
+      const auto totalFalse = std::accumulate(wsFalse->readY(ws_index).cbegin(), wsFalse->readY(ws_index).cend(), 0.);
+      const auto totalTrue = std::accumulate(wsTrue->readY(ws_index).cbegin(), wsTrue->readY(ws_index).cend(), 0.);
+      TS_ASSERT_DELTA(totalFalse, totalTrue, .1);
+    }
+
+    // compare workspaces
+    auto comparator = AlgorithmFactory::Instance().create("CompareWorkspaces", -1);
+    comparator->initialize();
+    comparator->setProperty("Workspace1", outputFalse);
+    comparator->setProperty("Workspace2", outputTrue);
+    comparator->setProperty("CheckType", false);
+    comparator->execute();
+    bool result = comparator->getProperty("Result");
+    TS_ASSERT(result);
+
+    // cleanup outputs
+    AnalysisDataService::Instance().remove(outputFalse);
+    AnalysisDataService::Instance().remove(outputTrue);
+  }
+
   void test_EventWorkspace_SameOutputWS() { dotestEventWorkspace(true, 2); }
 
   void test_EventWorkspace_DifferentOutputWS() { dotestEventWorkspace(false, 2); }

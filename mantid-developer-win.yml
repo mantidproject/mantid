@@ -16,8 +16,8 @@ dependencies:
   - hdf5>1.14.0,<1.15 # gets libcurl>=8.4
   - jsoncpp>=1.9.4,<2
   - lib3mf # windows only
-  - libboost-devel=1.82.* # Use the same version as conda-forge
-  - libboost-python-devel=1.82.* # Use the same version as conda-forge
+  - libboost-devel=1.84.* # Use the same version as conda-forge
+  - libboost-python-devel=1.84.* # Use the same version as conda-forge
   - librdkafka>=1.6.0
   - matplotlib=3.7.*
   - muparser>=2.3.2
@@ -47,8 +47,11 @@ dependencies:
   - toml>=0.10.2
   - versioningit>=2.1
   - joblib
-  - orsopy==1.2.0 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
+  - orsopy==1.2.1 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
+  - pydantic
+
   # Needed only for development
   - black  # may be out of sync with pre-commit
   - cppcheck==2.14.2
   - pre-commit>=2.12.0
+

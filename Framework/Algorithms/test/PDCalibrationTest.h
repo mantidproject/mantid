@@ -13,6 +13,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ChangeBinOffset.h"
 #include "MantidAlgorithms/ConvertToMatrixWorkspace.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
@@ -25,7 +26,11 @@
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidKernel/IPropertyManager.h"
+#include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTypes/SpectrumDefinition.h"
+
+#include <ctime>
 
 using Mantid::Algorithms::ChangeBinOffset;
 using Mantid::Algorithms::ConvertToMatrixWorkspace;
@@ -43,15 +48,22 @@ using Mantid::API::Workspace_sptr;
 using Mantid::DataHandling::GroupDetectors2;
 using Mantid::DataHandling::MoveInstrumentComponent;
 using Mantid::DataHandling::RotateInstrumentComponent;
+using Mantid::DataObjects::EventList;
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
 using Mantid::DataObjects::MaskWorkspace;
 using Mantid::DataObjects::MaskWorkspace_const_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::Kernel::IPropertyManager;
+using Mantid::Kernel::MersenneTwister;
+using Mantid::Kernel::PseudoRandomNumberGenerator;
+using Mantid::Types::Core::DateAndTime;
+using Mantid::Types::Event::TofEvent;
 
 namespace {
 // -- constants for creating the input event workspace
+
+const int TOTAL_EVENT_COUNT = 100000;
 
 // detID 155 is the middle at r,theta,phi = 5,90,0; DIFC = 5362.24
 const double DIFC_155 = 5362.24;
@@ -63,7 +75,8 @@ const size_t WKSPINDEX_195 = 95; // spectrum number 96
 
 const double TOF_MIN = 300.; // first frame for 60Hz source
 const double TOF_MAX = 16666.7;
-const std::vector<double> TOF_BINNING = {TOF_MIN, 1., TOF_MAX};
+const double BIN_WIDTH = 1.0; // microseconds
+const std::vector<double> TOF_BINNING = {TOF_MIN, BIN_WIDTH, TOF_MAX};
 // "Powder Diffraction" function makes 9 values of varying height and width that
 // are equally spaced
 const double PEAK_TOF_DELTA = (TOF_MAX - TOF_MIN) / 10.;
@@ -76,6 +89,16 @@ const double PEAK_TOF_DELTA = (TOF_MAX - TOF_MIN) / 10.;
 // 8178.5,
 //                                       9814.2, 11449.9, 13085.6, 14721.3};
 const std::vector<double> PEAK_TOFS = {1636.5, 3272.5, 4908.5, 6544.5, 8180.5, 9816.5, 11452.5, 13088.5, 14724.5};
+
+std::unique_ptr<PseudoRandomNumberGenerator> _randomGenerator;
+auto &randomNumberGenerator(int seedValue = 0) {
+  if (!_randomGenerator) {
+    if (seedValue == 0)
+      seedValue = static_cast<int>(std::time(nullptr));
+    _randomGenerator = std::make_unique<MersenneTwister>(seedValue);
+  }
+  return _randomGenerator;
+}
 
 /**
  * Creates a workspace with peaks at 400, 800, 1300, 1600 us
@@ -90,9 +113,9 @@ void createSampleWS() {
   createSampleWS.setPropertyValue("Function", "Powder Diffraction");
   createSampleWS.setProperty("XMin", TOF_MIN); // first frame
   createSampleWS.setProperty("XMax", TOF_MAX);
-  createSampleWS.setProperty("BinWidth", 1.); // micro-seconds
-  createSampleWS.setProperty("NumBanks", 1);  // detIds = [100,200)
-  createSampleWS.setProperty("NumEvents", 100000);
+  createSampleWS.setProperty("BinWidth", BIN_WIDTH); // micro-seconds
+  createSampleWS.setProperty("NumBanks", 1);         // detIds = [100,200)
+  createSampleWS.setProperty("NumEvents", TOTAL_EVENT_COUNT);
   createSampleWS.setProperty("PixelSpacing", .02); // 2cm pixels
   createSampleWS.setPropertyValue("OutputWorkspace", "PDCalibrationTest_WS");
   createSampleWS.execute();
@@ -134,6 +157,23 @@ std::vector<double> convertPosToD(const double difc) {
 
   return dValues;
 }
+
+// Add uniform noise to an event list.
+void addUniformNoiseToEventList(EventList &es, double tofMin, double tofMax, int totalCounts) {
+  // Based on the analogous section from `CreateSampleWorkspace`:
+
+  DateAndTime run_start("2010-01-01T00:00:00");
+  const double hourInSeconds = 60.0 * 60.0;
+  auto &randGen = randomNumberGenerator();
+  const double tofSpan = tofMax - tofMin;
+
+  for (int i = 0; i < totalCounts; ++i) {
+    // Create randomised events within the TOF span.
+    DateAndTime pulseTime = run_start + (randGen->nextValue() * hourInSeconds);
+    es += TofEvent(randGen->nextValue() * tofSpan + tofMin, pulseTime);
+  }
+}
+
 } // namespace
 
 class PDCalibrationTest : public CxxTest::TestSuite {
@@ -647,16 +687,20 @@ public:
     TS_ASSERT_THROWS_NOTHING(algorithmProperties.setProperty("PeakPositions", dValues));
 
     auto cleanup = [=]() {
-      AnalysisDataService::Instance().remove(inputWSName);
-      AnalysisDataService::Instance().remove(maskWSName);
-      AnalysisDataService::Instance().remove(diagnosticWSName + "_fitparam");
-      AnalysisDataService::Instance().remove(diagnosticWSName + "_fitted");
-      AnalysisDataService::Instance().remove(diagnosticWSName + "_fiterrors");
-      AnalysisDataService::Instance().remove(diagnosticWSName + "_dspacing");
-      AnalysisDataService::Instance().remove(diagnosticWSName + "_width");
-      AnalysisDataService::Instance().remove(diagnosticWSName + "_height");
-      AnalysisDataService::Instance().remove(diagnosticWSName + "_resolution");
-      AnalysisDataService::Instance().remove(outputWSName);
+      try {
+        AnalysisDataService::Instance().remove(inputWSName);
+        AnalysisDataService::Instance().remove(maskWSName);
+        AnalysisDataService::Instance().remove(diagnosticWSName + "_fitparam");
+        AnalysisDataService::Instance().remove(diagnosticWSName + "_fitted");
+        AnalysisDataService::Instance().remove(diagnosticWSName + "_fiterrors");
+        AnalysisDataService::Instance().remove(diagnosticWSName + "_dspacing");
+        AnalysisDataService::Instance().remove(diagnosticWSName + "_width");
+        AnalysisDataService::Instance().remove(diagnosticWSName + "_height");
+        AnalysisDataService::Instance().remove(diagnosticWSName + "_resolution");
+        AnalysisDataService::Instance().remove(outputWSName);
+      } catch (std::exception &x) {
+        std::cout << "error during workspaces cleanup: " << x.what() << std::endl;
+      }
     };
     return std::make_tuple(inputWSName, maskWSName, diagnosticWSName, outputWSName, dValues, cleanup);
   }
@@ -798,20 +842,23 @@ public:
   }
 
   /**
-   * Verify that failing spectra are masked: specific input spectra are zeroed.
+   * Verify that failing spectra are masked: event lists corresponding to specific input spectra are cleared.
    */
-  void test_failures_are_masked() {
+  void test_failures_are_masked_zero_pixels() {
     PDCalibration alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
-    const std::string uniquePrefix = "test_FAM";
+    const std::string uniquePrefix = "test_FAMZ";
     auto [inputWSName, maskWSName, diagnosticWSName, outputWSName, dValues, cleanup] =
         maskTestsInitialization(alg, uniquePrefix);
 
     const std::set<size_t> spectraToFail{1, 27, 35, 36, 54, 88, 99};
     EventWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWSName);
     for (std::size_t idx : spectraToFail) {
-      inputWS->getSpectrum(idx).multiply(0.0);
+      // Important: in order to zero a spectrum, "clear" the event list:
+      //   this is what `PDCalibration` expects.
+      inputWS->getSpectrum(idx).clear(false);
+      TS_ASSERT(inputWS->getSpectrum(idx).empty())
     }
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -840,6 +887,65 @@ public:
     MaskWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
     TS_ASSERT(mask);
     TS_ASSERT_EQUALS(mask->getNumberMasked(), spectraToFail.size());
+    for (std::size_t idx : spectraToFail)
+      TS_ASSERT(mask->isMaskedIndex(idx));
+
+    cleanup();
+  }
+
+  /**
+   * Verify that failing spectra are masked: event lists corresponding to specific spectra are initialized with uniform
+   * noise.
+   */
+  void test_failures_are_masked_noise_pixels() {
+    PDCalibration alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    const std::string uniquePrefix = "test_FAMN";
+    auto [inputWSName, maskWSName, diagnosticWSName, outputWSName, dValues, cleanup] =
+        maskTestsInitialization(alg, uniquePrefix);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxChiSq", 1.0));
+
+    const std::set<size_t> spectraToFail{1, 27, 35, 36, 54, 88, 99};
+    // In `createSampleWorkspace`: TOF bin offset is shifted towards zero by TOF_MIN.
+    const double tofMin = 0.0;
+    const double tofMax = TOF_MAX - TOF_MIN;
+    EventWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWSName);
+
+    for (std::size_t idx : spectraToFail) {
+      EventList &es = inputWS->getSpectrum(idx);
+      es.clear(false);
+      addUniformNoiseToEventList(es, tofMin, tofMax, TOTAL_EVENT_COUNT);
+    }
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    ITableWorkspace_sptr calTable = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(outputWSName);
+    TS_ASSERT(calTable);
+
+    Mantid::DataObjects::TableColumn_ptr<int> col0 = calTable->getColumn(0);
+    std::vector<int> detIDs = col0->data();
+
+    // since the wksp was calculated in TOF, all DIFC end up being the same
+    size_t index = std::find(detIDs.begin(), detIDs.end(), 155) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 155);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+
+    index = std::find(detIDs.begin(), detIDs.end(), 195) - detIDs.begin();
+    TS_ASSERT_EQUALS(calTable->cell<int>(index, 0), 195);             // detid
+    TS_ASSERT_DELTA(calTable->cell<double>(index, 1), DIFC_155, .01); // difc
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 2), 0);            // difa
+    TS_ASSERT_EQUALS(calTable->cell<double>(index, 3), 0);            // tzero
+    checkDSpacing(diagnosticWSName + "_dspacing", dValues);
+
+    MaskWorkspace_const_sptr mask = AnalysisDataService::Instance().retrieveWS<MaskWorkspace>(maskWSName);
+    TS_ASSERT(mask);
+
+    TS_ASSERT_EQUALS(mask->getNumberMasked(), spectraToFail.size());
+
     for (std::size_t idx : spectraToFail)
       TS_ASSERT(mask->isMaskedIndex(idx));
 
@@ -915,7 +1021,7 @@ public:
     const std::set<size_t> spectraToFail{1, 27, 35, 36, 54, 88, 99};
     EventWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWSName);
     for (std::size_t idx : spectraToFail) {
-      inputWS->getSpectrum(idx).multiply(0.0);
+      inputWS->getSpectrum(idx).clear(false);
     }
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -953,7 +1059,7 @@ public:
   }
 
   /**
-   * Verify that the output offsets and mask workspaces are have detector mask flags which are consistent with the mask
+   * Verify that the output offset and mask workspaces have detector mask flags which are consistent with the mask
    * values.
    */
   void test_masks_are_consistent_with_detector_flags() {
@@ -972,7 +1078,7 @@ public:
     const std::set<size_t> spectraToFail{1, 27, 35, 36, 54, 88, 99};
     EventWorkspace_sptr inputWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(inputWSName);
     for (std::size_t idx : spectraToFail) {
-      inputWS->getSpectrum(idx).multiply(0.0);
+      inputWS->getSpectrum(idx).clear(false);
     }
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());

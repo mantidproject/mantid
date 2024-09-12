@@ -440,16 +440,16 @@ public:
                void(const std::vector<MantidQt::MantidWidgets::WorkspaceIndex>::const_iterator &from,
                     const std::vector<MantidQt::MantidWidgets::WorkspaceIndex>::const_iterator &to));
   MOCK_METHOD2(plotInput, void(Mantid::API::MatrixWorkspace_sptr inputWS, int spectrum));
-  MOCK_METHOD1(newInputDataFromDialog, void(std::vector<std::string> const &names));
-  MOCK_METHOD0(clearPreviewFile, void());
 
   MOCK_METHOD1(setRunIsRunning, void(const bool running));
   MOCK_METHOD1(setSaveResultEnabled, void(const bool enabled));
   MOCK_CONST_METHOD0(getPreviewSpec, int());
+  MOCK_METHOD1(updateSelectorRange, void(const MatrixWorkspace_sptr &inputWS));
 
   MOCK_CONST_METHOD1(getPreviewWorkspaceName, std::string(int index));
-  MOCK_CONST_METHOD1(getPreviewFilename, std::string(int index));
+  MOCK_METHOD1(setPreviewWorkspaceName, void(int index));
   MOCK_CONST_METHOD0(getCurrentPreview, std::string());
+  MOCK_METHOD1(updatePreviewWorkspaceNames, void(const std::vector<std::string> &names));
 
   MOCK_METHOD0(clearDataTable, void());
   MOCK_METHOD3(addTableEntry, void(int row, std::string const &name, std::string const &wsIndexes));
@@ -485,8 +485,9 @@ public:
 
   MOCK_CONST_METHOD2(setupLoadAlgorithm, MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &filepath,
                                                                                   std::string const &outputName));
-  MOCK_METHOD2(createGroupedWorkspaces,
-               std::string(MatrixWorkspace_sptr workspce, FunctionModelSpectra const &spectra));
+  MOCK_CONST_METHOD3(setupExtractSpectra, MantidQt::API::IConfiguredAlgorithm_sptr(MatrixWorkspace_sptr workspce,
+                                                                                   FunctionModelSpectra const &spectra,
+                                                                                   std::string const &outputName));
   MOCK_CONST_METHOD2(setupGroupAlgorithm,
                      MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &inputWorkspacesString,
                                                               std::string const &inputGroupWsName));
@@ -521,6 +522,7 @@ public:
 
   MOCK_METHOD1(setFBSuffixes, void(QStringList const &suffix));
   MOCK_METHOD1(setWSSuffixes, void(QStringList const &suffix));
+  MOCK_METHOD1(setLoadHistory, void(bool doLoadHistory));
 
   MOCK_METHOD1(setPlotPropertyRange, void(const QPair<double, double> &bounds));
   MOCK_METHOD1(setRangeSelector, void(const QPair<double, double> &bounds));

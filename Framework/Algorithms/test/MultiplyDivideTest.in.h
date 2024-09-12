@@ -14,6 +14,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/Divide.h"
 #include "MantidAlgorithms/Multiply.h"
+#include "MantidHistogramData/HistogramBuilder.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -698,7 +699,12 @@ public:
       mess << "Event";
     else
       mess << "2D";
-    mess << "(" << ws->getNumberHistograms() << " spectra," << ws->blocksize() << " bins,";
+    mess << "(" << ws->getNumberHistograms() << " spectra, ";
+    if (ws->isRaggedWorkspace())
+      mess << "Ragged";
+    else
+      mess << ws->blocksize();
+    mess << " bins,";
     mess << "Y[0][0] = " << ws->y(0)[0] << ")";
     return mess.str();
   }
@@ -838,7 +844,11 @@ public:
       int loopOrientation, double expectedValue=-1.0, double expectedError=-1.0)
   {
     TSM_ASSERT_LESS_THAN( message, 0, work_out1->getNumberHistograms());
-    TSM_ASSERT_LESS_THAN( message, 0, work_out1->blocksize());
+    if (work_out1->isRaggedWorkspace()){
+      TSM_ASSERT_LESS_THAN( message, 0, work_out1->y(0).size());
+    } else {
+      TSM_ASSERT_LESS_THAN( message, 0, work_out1->blocksize());
+    }
     TSM_ASSERT_EQUALS( message, work_in1->getNumberHistograms(), work_out1->getNumberHistograms());
 
     if (expectedValue == -1.0 && expectedError == -1.0)
@@ -999,6 +1009,65 @@ public:
     AnalysisDataService::Instance().remove(rhs);
     if( !replaceInput ) AnalysisDataService::Instance().remove(outputSpace);
   }
+
+  MatrixWorkspace_sptr create_RaggedWorkspace()
+  {
+    // create workspace with 2 histograms
+    MatrixWorkspace_sptr raggedWS = WorkspaceCreationHelper::create2DWorkspace(2, 1);
+
+    // create and replace histograms with ragged ones
+    Mantid::MantidVec x_data{100., 200., 300., 400.};
+    Mantid::MantidVec y_data{2., 2., 2.};
+    Mantid::MantidVec e_data{2., 2., 2.};
+    Mantid::HistogramData::HistogramBuilder builder;
+    builder.setX(x_data);
+    builder.setY(y_data);
+    builder.setE(e_data);
+    raggedWS->setHistogram(0, builder.build());
+
+    Mantid::MantidVec x_data2{200., 400., 600.};
+    Mantid::MantidVec y_data2{2., 2.};
+    Mantid::MantidVec e_data2{2., 2.};
+    Mantid::HistogramData::HistogramBuilder builder2;
+    builder2.setX(x_data2);
+    builder2.setY(y_data2);
+    builder2.setE(e_data2);
+    raggedWS->setHistogram(1, builder2.build());
+
+    // quick check of the workspace
+    TS_ASSERT(raggedWS->isRaggedWorkspace());
+    TS_ASSERT_EQUALS(raggedWS->getNumberHistograms(), 2);
+    TS_ASSERT_EQUALS(raggedWS->x(0).size(), 4);
+    TS_ASSERT_EQUALS(raggedWS->x(1).size(), 3);
+    TS_ASSERT_EQUALS(raggedWS->y(0).size(), 3);
+    TS_ASSERT_EQUALS(raggedWS->y(1).size(), 2);
+    return raggedWS;
+  }
+
+  void test_RaggedWorkspace()
+  {
+    auto lhs = create_RaggedWorkspace();
+    auto rhs = create_RaggedWorkspace();
+    auto result = performTest(lhs, rhs, false, DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.4142135625 : 5.6568542436);
+    TS_ASSERT(result->isRaggedWorkspace());
+  }
+
+  void test_RaggedWorkspace_and_single_value()
+  {
+    auto lhs = create_RaggedWorkspace();
+    auto rhs = WorkspaceCreationHelper::createWorkspaceSingleValue(2);
+    auto result = performTest(lhs, rhs, false, DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.2247448711 : 4.8989794899);
+    TS_ASSERT(result->isRaggedWorkspace());
+  }
+
+  void test_RaggedWorkspace_not_compatible_x()
+  {
+    auto lhs = create_RaggedWorkspace();
+    auto rhs = WorkspaceCreationHelper::create2DWorkspace(2, 4);
+    performTest_fails(lhs, rhs);
+  }
+
+
 
 };
 

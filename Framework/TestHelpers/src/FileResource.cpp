@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidFrameworkTestHelpers/FileResource.h"
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <string>
 
 FileResource::FileResource(const std::string &fileName, bool debugMode) : m_debugMode(debugMode) {
 
-  const auto temp_dir = boost::filesystem::temp_directory_path();
+  const auto temp_dir = std::filesystem::temp_directory_path();
   auto temp_full_path = temp_dir;
   // append full path to temp directory to user input file name
   temp_full_path /= fileName;
@@ -18,7 +18,7 @@ FileResource::FileResource(const std::string &fileName, bool debugMode) : m_debu
   // Check proposed location and throw std::invalid argument if file does
   // not exist. otherwise set m_full_path to location.
 
-  if (boost::filesystem::is_directory(temp_dir)) {
+  if (std::filesystem::is_directory(temp_dir)) {
     m_full_path = temp_full_path;
 
   } else {
@@ -32,9 +32,9 @@ std::string FileResource::fullPath() const { return m_full_path.generic_string()
 FileResource::~FileResource() {
 
   // file is removed at end of file handle's lifetime
-  if (boost::filesystem::is_regular_file(m_full_path)) {
+  if (std::filesystem::is_regular_file(m_full_path)) {
     if (!m_debugMode)
-      boost::filesystem::remove(m_full_path);
+      std::filesystem::remove(m_full_path);
     else
       std::cout << "Debug file at: " << m_full_path << " not removed. " << std::endl;
   }

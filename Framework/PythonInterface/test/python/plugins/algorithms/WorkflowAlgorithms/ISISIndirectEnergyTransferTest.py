@@ -389,7 +389,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
                 GroupingString=custom_string,
             )
         red_ws = reduced_workspace.getItem(0)
-        self.assertEqual(red_ws.getSpectrum(0).getSpectrumNo(), 1)
+        self.assertEqual(red_ws.getSpectrum(0).getSpectrumNo(), 0)
 
     def test_change_spectra_for_individual(self):
         """Check that the spectra are changed for a custom grouping"""
@@ -407,7 +407,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         self.assertEqual(wks.getNames()[0], "iris26176_graphite002_red")
 
         red_ws = wks.getItem(0)
-        self.assertEqual(red_ws.getSpectrum(0).getSpectrumNo(), 1)
+        self.assertEqual(red_ws.getSpectrum(0).getSpectrumNo(), 0)
 
 
 if __name__ == "__main__":

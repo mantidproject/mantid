@@ -95,6 +95,7 @@ private:
     ON_CALL(*m_view, getSelectedFacility()).WillByDefault(Return(QString::fromStdString(facility)));
     ON_CALL(*m_view, isRestrictInputByNameChecked()).WillByDefault(Return(true));
     ON_CALL(*m_view, isPlotErrorBarsChecked()).WillByDefault(Return(true));
+    ON_CALL(*m_view, isLoadHistoryChecked()).WillByDefault(Return(true));
     ON_CALL(*m_view, developerFeatureFlags()).WillByDefault(Return(QStringList{""}));
 
     Expectation expectation = EXPECT_CALL(*m_view, getSelectedFacility()).Times(1);

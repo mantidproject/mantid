@@ -47,11 +47,11 @@ private slots:
 private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void plotInPreview(const QString &curveName, Mantid::API::MatrixWorkspace_sptr &ws, const QColor &curveColor);
 
   std::string createOutputName();
-  void removeOutput();
 
   Mantid::API::MatrixWorkspace_sptr requestRebinToSample(Mantid::API::MatrixWorkspace_sptr workspace) const;
 

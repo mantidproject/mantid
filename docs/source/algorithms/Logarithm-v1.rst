@@ -57,7 +57,7 @@ Usage
 .. testoutput:: ExLogarithm
 
    Log10 for spectra 0:  [-1.  1.  0.  0.  0.  0.  0.  0.  0.  0.]
-   Log10 for Err spectra 0:  [ 0.      0.0434  0.434   0.434 ]
+   Log10 for Err spectra 0:  [0.     0.0434 0.434  0.434 ]
 
 .. categories::
 

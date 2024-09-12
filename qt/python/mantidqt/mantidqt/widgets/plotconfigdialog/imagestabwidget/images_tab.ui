@@ -363,6 +363,8 @@
   <tabstop>label_line_edit</tabstop>
   <tabstop>colormap_combo_box</tabstop>
   <tabstop>reverse_colormap_check_box</tabstop>
+  <tabstop>min_value_line_edit</tabstop>
+  <tabstop>max_value_line_edit</tabstop>
   <tabstop>interpolation_combo_box</tabstop>
   <tabstop>scale_combo_box</tabstop>
  </tabstops>

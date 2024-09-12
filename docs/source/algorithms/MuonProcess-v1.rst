@@ -138,7 +138,7 @@ Output:
 
 .. testoutput:: ExPairAsymmetrySinglePeriod
 
-   Output: [ 0.77777778  0.66666667  0.6       ]
+   Output: [0.77777778 0.66666667 0.6       ]
 
 **Example -  Group asymmetry for two periods (analysis only):**
 

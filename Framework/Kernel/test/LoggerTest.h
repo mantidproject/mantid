@@ -12,9 +12,8 @@
 #include "MantidKernel/ThreadPool.h"
 
 #include <Poco/AutoPtr.h>
-#include <Poco/File.h>
-#include <Poco/Logger.h>
 #include <Poco/SimpleFileChannel.h>
+#include <filesystem>
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -40,7 +39,7 @@ public:
   /** Load the log file. Look at the first line
    * and compare to expected */
   void checkContents(std::string expected) {
-    if (Poco::File(m_logFile).exists()) {
+    if (std::filesystem::exists(m_logFile)) {
       std::ifstream t;
       t.open(m_logFile.c_str());
       std::string line;

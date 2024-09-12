@@ -721,11 +721,16 @@ void ConfigServiceImpl::saveConfig(const std::string &filename) const {
   } // End while-loop
 
   // Any remaining keys within the changed key store weren't present in the
-  // current user properties so append them
+  // current user properties so append them IF they exist
   if (!m_changed_keys.empty()) {
     updated_file += "\n";
     auto key_end = m_changed_keys.end();
     for (auto key_itr = m_changed_keys.begin(); key_itr != key_end;) {
+      // if the key does not have a property, skip it
+      if (!hasProperty(*key_itr)) {
+        ++key_itr;
+        continue;
+      }
       updated_file += *key_itr + "=";
       std::string value = getString(*key_itr, false);
       Poco::replaceInPlace(value, "\\", "\\\\"); // replace single \ with double
@@ -1916,7 +1921,7 @@ void ConfigServiceImpl::setLogLevel(int logLevel, bool quiet) {
   }
 }
 
-void ConfigServiceImpl::setLogLevel(std::string logLevel, bool quiet) {
+void ConfigServiceImpl::setLogLevel(std::string const &logLevel, bool quiet) {
   Mantid::Kernel::Logger::setLevelForAll(logLevel);
   // update the internal value to keep strings in sync
   m_pConf->setString(LOG_LEVEL_KEY, g_log.getLevelName());
@@ -1925,6 +1930,8 @@ void ConfigServiceImpl::setLogLevel(std::string logLevel, bool quiet) {
     g_log.log("logging set to " + logLevel + " priority", static_cast<Logger::Priority>(g_log.getLevel()));
   }
 }
+
+std::string ConfigServiceImpl::getLogLevel() { return g_log.getLevelName(); }
 
 /// \cond TEMPLATE
 template DLLExport boost::optional<double> ConfigServiceImpl::getValue(const std::string &);

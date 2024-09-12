@@ -1,0 +1,1 @@
+- H5 exceptions are now caught with improved error reporting.

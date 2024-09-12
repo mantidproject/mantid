@@ -206,7 +206,9 @@ public:
   /// Sets the log level priority for all log channels
   void setLogLevel(int logLevel, bool quiet = false);
   /// Sets the log level priority for all log channels
-  void setLogLevel(std::string logLevel, bool quiet = false);
+  void setLogLevel(std::string const &logLevel, bool quiet = false);
+  // return the string name for the log level
+  std::string getLogLevel();
 
   /// Look for an instrument
   const InstrumentInfo &getInstrument(const std::string &instrumentName = "") const;

@@ -47,7 +47,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         )
 
         self.declareProperty(
-            IntArrayProperty(name="DetectorRange", values=[0, 1]), doc="Range of detetcors to use in resolution calculation."
+            IntArrayProperty(name="DetectorRange", values=[0, 1]), doc="Range of detectors to use in resolution calculation."
         )
         self.declareProperty(FloatArrayProperty(name="BackgroundRange", values=[0.0, 0.0]), doc="Energy range to use as background.")
 

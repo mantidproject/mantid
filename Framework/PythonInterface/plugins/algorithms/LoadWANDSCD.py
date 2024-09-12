@@ -97,7 +97,11 @@ class LoadWANDSCD(PythonAlgorithm):
         )
 
         # apply goniometer tilt
-        self.declareProperty("ApplyGoniometerTilt", True, "Apply the goniometer sgl and sgu tilts to the UB-matrix")
+        self.declareProperty(
+            "ApplyGoniometerTilt",
+            False,
+            "Apply the goniometer sgl and sgu tilts to the UB-matrix. This is for backwards compatability only.",
+        )
 
         # Output workspace/data info
         self.declareProperty(
@@ -211,6 +215,8 @@ class LoadWANDSCD(PythonAlgorithm):
         data_array = np.empty((number_of_runs, x_dim, y_dim), dtype=np.float64)
 
         s1_array = []
+        sgl_array = []
+        sgu_array = []
         duration_array = []
         run_number_array = []
         monitor_count_array = []
@@ -247,6 +253,8 @@ class LoadWANDSCD(PythonAlgorithm):
                     )
                 data_array[n] = bc
                 s1_array.append(f["/entry/DASlogs/HB2C:Mot:s1.RBV/average_value"][0])
+                sgl_array.append(f["/entry/DASlogs/HB2C:Mot:sgl.RBV/average_value"][0])
+                sgu_array.append(f["/entry/DASlogs/HB2C:Mot:sgu.RBV/average_value"][0])
                 duration_array.append(float(f["/entry/duration"][0]))
                 run_number_array.append(float(f["/entry/run_number"][0]))
                 monitor_count_array.append(float(f["/entry/monitor1/total_counts"][0]))
@@ -270,7 +278,6 @@ class LoadWANDSCD(PythonAlgorithm):
         RemoveLogs(
             _tmp_ws,
             KeepLogs="HB2C:Mot:detz,HB2C:Mot:detz.RBV,HB2C:Mot:s2,HB2C:Mot:s2.RBV,"
-            "HB2C:Mot:sgl,HB2C:Mot:sgl.RBV,HB2C:Mot:sgu,HB2C:Mot:sgu.RBV,"
             "run_title,start_time,experiment_identifier,HB2C:CS:CrystalAlign:UBMatrix",
             EnableLogging=False,
         )
@@ -281,15 +288,18 @@ class LoadWANDSCD(PythonAlgorithm):
             UB = np.array(
                 re.findall(r"-?\d+\.*\d*", _tmp_ws.run().getProperty("HB2C:CS:CrystalAlign:UBMatrix").value[0]), dtype=float
             ).reshape(3, 3)
-            if self.getProperty("ApplyGoniometerTilt").value:
-                sgl = np.deg2rad(_tmp_ws.run().getProperty("HB2C:Mot:sgl.RBV").value[0])  # 'HB2C:Mot:sgl.RBV,1,0,0,-1'
-                sgu = np.deg2rad(_tmp_ws.run().getProperty("HB2C:Mot:sgu.RBV").value[0])  # 'HB2C:Mot:sgu.RBV,0,0,1,-1'
-                sgl_a = np.array([[1, 0, 0], [0, np.cos(sgl), np.sin(sgl)], [0, -np.sin(sgl), np.cos(sgl)]])
-                sgu_a = np.array([[np.cos(sgu), np.sin(sgu), 0], [-np.sin(sgu), np.cos(sgu), 0], [0, 0, 1]])
-                UB = sgl_a.dot(sgu_a).dot(UB)  # Apply the Goniometer tilts to the UB matrix
             SetUB(_tmp_ws, UB=UB, EnableLogging=False)
         except (RuntimeError, ValueError):
-            SetUB(_tmp_ws, EnableLogging=False)
+            UB = np.array([[0, 1, 0], [0, 0, 1], [1, 0, 0]])
+
+        if self.getProperty("ApplyGoniometerTilt").value:
+            sgl = np.deg2rad(np.mean(sgl_array))  # 'HB2C:Mot:sgl.RBV,1,0,0,-1'
+            sgu = np.deg2rad(np.mean(sgu_array))  # 'HB2C:Mot:sgu.RBV,0,0,1,-1'
+            sgl_a = np.array([[1, 0, 0], [0, np.cos(sgl), np.sin(sgl)], [0, -np.sin(sgl), np.cos(sgl)]])
+            sgu_a = np.array([[np.cos(sgu), np.sin(sgu), 0], [-np.sin(sgu), np.cos(sgu), 0], [0, 0, 1]])
+            UB = sgl_a.dot(sgu_a).dot(UB)  # Apply the Goniometer tilts to the UB matrix
+
+        SetUB(_tmp_ws, UB=UB, EnableLogging=False)
 
         if grouping > 1:
             detector_list = ""
@@ -318,8 +328,13 @@ class LoadWANDSCD(PythonAlgorithm):
         DeleteWorkspace("__PreprocessedDetectorsWS", EnableLogging=False)
         # end Hack
 
-        add_time_series_property("s1", outWS.getExperimentInfo(0).run(), time_ns_array, s1_array)
-        outWS.getExperimentInfo(0).run().getProperty("s1").units = "deg"
+        add_time_series_property("HB2C:Mot:s1", outWS.getExperimentInfo(0).run(), time_ns_array, s1_array)
+        outWS.getExperimentInfo(0).run().getProperty("HB2C:Mot:s1").units = "deg"
+        add_time_series_property("HB2C:Mot:sgl", outWS.getExperimentInfo(0).run(), time_ns_array, sgl_array)
+        outWS.getExperimentInfo(0).run().getProperty("HB2C:Mot:sgl").units = "deg"
+        add_time_series_property("HB2C:Mot:sgu", outWS.getExperimentInfo(0).run(), time_ns_array, sgu_array)
+        outWS.getExperimentInfo(0).run().getProperty("HB2C:Mot:sgu").units = "deg"
+
         add_time_series_property("duration", outWS.getExperimentInfo(0).run(), time_ns_array, duration_array)
         outWS.getExperimentInfo(0).run().getProperty("duration").units = "second"
         outWS.getExperimentInfo(0).run().addProperty("run_number", run_number_array, True)
@@ -329,7 +344,10 @@ class LoadWANDSCD(PythonAlgorithm):
 
         setGoniometer_alg = self.createChildAlgorithm("SetGoniometer", enableLogging=False)
         setGoniometer_alg.setProperty("Workspace", outWS)
-        setGoniometer_alg.setProperty("Axis0", "s1,0,1,0,1")
+        setGoniometer_alg.setProperty("Axis0", "HB2C:Mot:s1,0,1,0,1")
+        if not self.getProperty("ApplyGoniometerTilt").value:
+            setGoniometer_alg.setProperty("Axis1", "HB2C:Mot:sgl,1,0,0,-1")
+            setGoniometer_alg.setProperty("Axis2", "HB2C:Mot:sgu,0,0,1,-1")
         setGoniometer_alg.setProperty("Average", False)
         setGoniometer_alg.execute()
 

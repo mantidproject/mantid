@@ -233,6 +233,8 @@ public:
   void setSharedE(const size_t index, const Kernel::cow_ptr<HistogramData::HistogramE> &e) & {
     getSpectrumWithoutInvalidation(index).setSharedE(e);
   }
+  void resizeHistogram(const size_t index, size_t n) & { getSpectrum(index).resize(n); }
+  size_t histogramSize(const size_t index) const { return getSpectrum(index).size(); }
   // Methods for getting read-only access to the data.
   // Just passes through to the virtual dataX/Y/E function (const version)
   /// Deprecated, use x() instead. Returns a read-only (i.e. const) reference to
@@ -497,7 +499,7 @@ private:
   /// Flag indicating if the common bins flag is in a valid state
   mutable std::atomic<bool> m_isCommonBinsFlagValid{false};
   /// Flag indicating whether the data has common bins
-  mutable bool m_isCommonBinsFlag{false};
+  mutable std::atomic<bool> m_isCommonBinsFlag{false};
   /// A mutex protecting the update of m_isCommonBinsFlag.
   mutable std::mutex m_isCommonBinsMutex;
 

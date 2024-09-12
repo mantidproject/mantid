@@ -445,7 +445,7 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
   map<std::string, std::string> issues;
 
   // check that min/max spectra indices make sense - only matters if both are specified
-  if (!(isDefault(PropertyNames::START_WKSP_INDEX) && isDefault(PropertyNames::START_WKSP_INDEX))) {
+  if (!(isDefault(PropertyNames::START_WKSP_INDEX) && isDefault(PropertyNames::STOP_WKSP_INDEX))) {
     const int startIndex = getProperty(PropertyNames::START_WKSP_INDEX);
     const int stopIndex = getProperty(PropertyNames::STOP_WKSP_INDEX);
     if (startIndex > stopIndex) {
@@ -755,6 +755,7 @@ void FitPeaks::processInputFitRanges() {
         double left_w_bound = peakWindowX[ipeak * 2];
         double right_w_bound = peakWindowX[ipeak * 2 + 1];
         double center = peakCenterX[ipeak];
+
         if (!(left_w_bound < center && center < right_w_bound)) {
           std::stringstream errss;
           errss << "Workspace index " << wi << " has incompatible peak window "
