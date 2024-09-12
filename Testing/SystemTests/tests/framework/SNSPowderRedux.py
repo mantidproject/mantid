@@ -85,7 +85,7 @@ class PG3Analysis(systemtesting.MantidSystemTest):
             CalibrationFile=self.cal_file,
             CharacterizationRunsFile=self.char_file,
             LowResRef=15000,
-            RemovePromptPulseWidth=1,
+            RemovePromptPulseWidth=50,
             Binning=-0.0004,
             BinInDspace=True,
             FilterBadPulses=95,
@@ -205,7 +205,7 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
 
         LoadEventNexus(Filename="PG3_4866_event.nxs", OutputWorkspace="PG3_4866", Precount=True)
         FilterBadPulses(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866")
-        RemovePromptPulse(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Width=1)
+        RemovePromptPulse(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Width=50)
         CompressEvents(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Tolerance=0.01)
         SortEvents(InputWorkspace="PG3_4866")
         CropWorkspace(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", XMax=16666.669999999998)
@@ -283,7 +283,7 @@ class SeriesAndConjoinFilesTest(systemtesting.MantidSystemTest):
             CalibrationFile=self.cal_file,
             CharacterizationRunsFile=self.char_file,
             LowResRef=15000,
-            RemovePromptPulseWidth=1,
+            RemovePromptPulseWidth=50,
             Binning=-0.0004,
             BinInDspace=True,
             FilterBadPulses=25,
@@ -393,7 +393,7 @@ class ToPDFgetNTest(systemtesting.MantidSystemTest):
             PDFgetNFile=os.path.join(savedir, self.getn_file),
             CalibrationFile=self.cal_file,
             CharacterizationRunsFile=self.char_file,
-            RemovePromptPulseWidth=1,
+            RemovePromptPulseWidth=50,
             Binning=-0.0004,
         )
 
