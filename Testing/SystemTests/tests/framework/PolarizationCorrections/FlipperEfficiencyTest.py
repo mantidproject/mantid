@@ -7,21 +7,12 @@
 
 from mantid.simpleapi import FlipperEfficiency
 from SANSPolarizationCorrectionsBase import SANSPolarizationCorrectionsBase
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 
 
-class FlipperEfficiencyTestBase(SANSPolarizationCorrectionsBase):
+class FlipperEfficiencyTestBase(SANSPolarizationCorrectionsBase, metaclass=ABCMeta):
     def __init__(self):
         SANSPolarizationCorrectionsBase.__init__(self)
-
-    @property
-    @abstractmethod
-    def reference_basename(self):
-        """
-        The algorithm outputs one workspace. This value is the string that precedes the workspace's reference file.
-        :return: The prefix the reference file is preceded by for the given test.
-        """
-        pass
 
     @property
     @abstractmethod
