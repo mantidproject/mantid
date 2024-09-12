@@ -19,5 +19,5 @@ class FlipperEfficiencyTest(SANSPolarizationCorrectionsBase):
 
     def _validate(self):
         result = "result"
-        reference = "/Users/caila.finn/MantidData/PolSANS/FlipperEfficiency/FlipperEfficiencyReference.nxs"
+        reference = "FlipperEfficiencyReference.nxs"
         return result, reference
