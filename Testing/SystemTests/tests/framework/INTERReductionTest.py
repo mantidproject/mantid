@@ -8,6 +8,7 @@
 System Test for ISIS Reflectometry reduction
 Adapted from scripts provided by Max Skoda.
 """
+
 from ISISReflectometryWorkflowBase import *
 import systemtesting
 

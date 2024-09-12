@@ -11,7 +11,6 @@ from mantid.simpleapi import *
 
 
 class MuonMaxEntTest(systemtesting.MantidSystemTest):
-
     """Tests the MaxEnt algorithm on a MUSR workspace"""
 
     def fixPhasesTest(self, phases0):

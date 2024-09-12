@@ -8,7 +8,6 @@ from qtpy import QtWidgets, QtCore
 
 
 class TransformSelectionView(QtWidgets.QWidget):
-
     """
     Create the transformation selection widget's appearance
     """

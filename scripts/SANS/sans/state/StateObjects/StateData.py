@@ -7,6 +7,7 @@
 # pylint: disable=too-few-public-methods
 
 """State about the actual data which is to be reduced."""
+
 import json
 import copy
 

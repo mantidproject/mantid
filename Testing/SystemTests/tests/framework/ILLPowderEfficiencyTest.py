@@ -26,7 +26,6 @@ class ILLPowderEfficiencyTest(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def runTest(self):
-
         PowderILLEfficiency(CalibrationRun="967076.nxs", OutputWorkspace="calib", OutputResponseWorkspace="response")
         GroupWorkspaces(InputWorkspaces=["calib", "response"], OutputWorkspace="group")
 
@@ -49,7 +48,6 @@ class ILLPowderEfficiencyCycle203Test(systemtesting.MantidSystemTest):
         mtd.clear()
 
     def runTest(self):
-
         PowderILLEfficiency(
             CalibrationRun="167339", OutputWorkspace="calib", InterpolateOverlappingAngles=True, OutputResponseWorkspace="response"
         )

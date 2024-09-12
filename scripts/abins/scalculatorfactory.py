@@ -27,7 +27,7 @@ class SCalculatorFactory(object):
         abins_data: abins.AbinsData,
         instrument: Instrument,
         quantum_order_num: int,
-        autoconvolution_max: int = 0
+        autoconvolution_max: int = 0,
     ):
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon)
@@ -40,7 +40,6 @@ class SCalculatorFactory(object):
         """
         if sample_form in ALL_SAMPLE_FORMS:
             if sample_form == "Powder":
-
                 return abins.SPowderSemiEmpiricalCalculator(
                     filename=filename,
                     temperature=temperature,

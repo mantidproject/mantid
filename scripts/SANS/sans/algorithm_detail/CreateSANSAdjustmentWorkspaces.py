@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" CreateSANSAdjustmentWorkspaces algorithm creates workspaces for pixel adjustment,
-    wavelength adjustment and pixel-and-wavelength adjustment workspaces.
+"""CreateSANSAdjustmentWorkspaces algorithm creates workspaces for pixel adjustment,
+wavelength adjustment and pixel-and-wavelength adjustment workspaces.
 """
 
 from sans.algorithm_detail.calculate_sans_transmission import calculate_transmission

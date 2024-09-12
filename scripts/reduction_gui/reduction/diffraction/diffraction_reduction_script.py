@@ -6,10 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,R0912
 """
-    Classes for each reduction step. Those are kept separately
-    from the interface class so that the DgsReduction class could
-    be used independently of the interface implementation
+Classes for each reduction step. Those are kept separately
+from the interface class so that the DgsReduction class could
+be used independently of the interface implementation
 """
+
 import os
 from mantid.kernel import Logger
 from mantid.api import FileFinder

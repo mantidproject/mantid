@@ -61,8 +61,7 @@ class HRPD(AbstractInst):
         sample_details_obj = common.dictionary_key_helper(
             dictionary=kwargs,
             key=kwarg_name,
-            exception_msg="The argument containing sample details was not found. Please"
-            " set the following argument: {}".format(kwarg_name),
+            exception_msg="The argument containing sample details was not found. Please set the following argument: {}".format(kwarg_name),
         )
         self._sample_details = sample_details_obj
 

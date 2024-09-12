@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
-""" SANSLoad algorithm which handles loading SANS files"""
+"""SANSLoad algorithm which handles loading SANS files"""
 
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress, WorkspaceProperty
 from mantid.kernel import Direction, FloatArrayProperty

@@ -109,7 +109,6 @@ class IOTest(unittest.TestCase):
         self.assertRaises(ValueError, self.loader.load, list_of_datasets=1)
 
     def runTest(self):
-
         self._save_stuff()
 
         self._add_wrong_attribute()

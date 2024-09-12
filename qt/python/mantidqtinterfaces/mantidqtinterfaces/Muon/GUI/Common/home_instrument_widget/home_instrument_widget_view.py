@@ -176,7 +176,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.time_zero_edit.setText("")
 
         self.time_zero_unit_label = QtWidgets.QLabel(self)
-        self.time_zero_unit_label.setText("\u03BCs (From data file ")
+        self.time_zero_unit_label.setText("\u03bcs (From data file ")
 
         self.time_zero_checkbox = QtWidgets.QCheckBox(self)
         self.time_zero_checkbox.setChecked(True)
@@ -224,7 +224,6 @@ class InstrumentWidgetView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
 
     def setup_first_good_data_row(self):
-
         self.first_good_data_label = QtWidgets.QLabel(self)
         self.first_good_data_label.setText("First Good Data : ")
 
@@ -235,7 +234,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.first_good_data_edit.setText("")
 
         self.first_good_data_unit_label = QtWidgets.QLabel(self)
-        self.first_good_data_unit_label.setText(" \u03BCs (From data file ")
+        self.first_good_data_unit_label.setText(" \u03bcs (From data file ")
 
         self.first_good_data_checkbox = QtWidgets.QCheckBox(self)
         self.first_good_data_checkbox.setChecked(True)
@@ -283,7 +282,6 @@ class InstrumentWidgetView(QtWidgets.QWidget):
     # -------------------------------------------------------------------------------------------------------------------
 
     def setup_last_good_data_row(self):
-
         self.last_good_data_label = QtWidgets.QLabel(self)
         self.last_good_data_label.setText("Last Good Data : ")
 
@@ -294,7 +292,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.last_good_data_edit.setText("")
 
         self.last_good_data_unit_label = QtWidgets.QLabel(self)
-        self.last_good_data_unit_label.setText(" \u03BCs (From data file ")
+        self.last_good_data_unit_label.setText(" \u03bcs (From data file ")
 
         self.last_good_data_checkbox = QtWidgets.QCheckBox(self)
         self.last_good_data_checkbox.setChecked(True)
@@ -349,7 +347,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.double_pulse_data_edit.setText("0.33")
 
         self.double_pulse_data_unit_label = QtWidgets.QLabel(self)
-        self.double_pulse_data_unit_label.setText(" \u03BCs")
+        self.double_pulse_data_unit_label.setText(" \u03bcs")
 
         self.double_pulse_data_combobox = QtWidgets.QComboBox(self)
         self.double_pulse_data_combobox.addItem("Single Pulse")

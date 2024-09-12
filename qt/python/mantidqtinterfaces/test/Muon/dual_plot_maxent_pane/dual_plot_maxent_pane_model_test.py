@@ -57,7 +57,6 @@ class DuelPlotMaxentPaneModelTest(unittest.TestCase):
         self.count = 0
 
     def test_clear_data(self):
-
         self.model.reconstructed_data = {"test": 1}
         self.model.reconstructed_data_name = "unit"
         self.model._selection = "mantid"

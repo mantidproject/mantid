@@ -10,6 +10,7 @@
 """
 Functionality for dealing with legends on plots
 """
+
 from packaging.version import Version
 
 import matplotlib

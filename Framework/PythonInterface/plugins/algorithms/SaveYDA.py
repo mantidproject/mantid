@@ -206,7 +206,6 @@ class SaveYDA(PythonAlgorithm):
             bin = self._get_bin_centers(ax)
 
         for i in range(nHist):
-
             slicethis = OrderedDict()
 
             # add j to slices, j = counts

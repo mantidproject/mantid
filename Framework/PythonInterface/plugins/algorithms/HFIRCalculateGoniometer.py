@@ -57,7 +57,6 @@ class HFIRCalculateGoniometer(PythonAlgorithm):
         self.setPropertySettings("FlipX", condition)
 
     def PyExec(self):
-
         peaks = self.getProperty("Workspace").value
 
         wavelength = self.getProperty("Wavelength").value

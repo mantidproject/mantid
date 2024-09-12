@@ -396,8 +396,9 @@ class PropertyManager(NonIDF_Properties):
                 result[key] = getattr(self, key)
             except KeyError:
                 self.log(
-                    "--- Diagnostics property {0} is not found in instrument properties."
-                    "Default value: {1} is used instead \n".format(key, val),
+                    "--- Diagnostics property {0} is not found in instrument properties. Default value: {1} is used instead \n".format(
+                        key, val
+                    ),
                     "warning",
                 )
 

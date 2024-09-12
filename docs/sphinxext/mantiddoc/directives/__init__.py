@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-   Defines custom directives for Mantid documentation
+Defines custom directives for Mantid documentation
 
-   Each directive should be defined in a different module and have its own
-   setup(app) function.
+Each directive should be defined in a different module and have its own
+setup(app) function.
 """

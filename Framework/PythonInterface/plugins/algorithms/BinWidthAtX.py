@@ -11,7 +11,6 @@ import roundinghelper
 
 
 class BinWidthAtX(PythonAlgorithm):
-
     _PROP_BIN_WIDTH = "BinWidth"
     _PROP_INPUT_WS = "InputWorkspace"
     _PROP_X_VALUE = "X"

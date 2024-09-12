@@ -13,7 +13,6 @@ from reduction_workflow.find_data import find_data
 
 
 class HFIRSANSReduction(PythonAlgorithm):
-
     default_output_dir = None
 
     def category(self):

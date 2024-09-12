@@ -58,7 +58,6 @@ class D4ILLReduction(PythonAlgorithm):
         return issues
 
     def PyInit(self):
-
         self.declareProperty(MultipleFileProperty("Run", extensions=["nxs"]), doc="File path of run(s).")
 
         self.declareProperty(

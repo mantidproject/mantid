@@ -8,6 +8,7 @@
 """
 Qt-based matplotlib canvas
 """
+
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QPen, QColor, QPaintEvent
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, draw_if_interactive, show  # noqa: F401

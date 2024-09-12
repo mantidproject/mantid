@@ -41,7 +41,7 @@ class DNSElasticSCPlotOptionsMenu(QMenu):
     def __init__(self, parent):
         super().__init__("Plot Options")
         # adding action
-        action_omega_offset = self.addAction("Change \u03C9 Offset")
+        action_omega_offset = self.addAction("Change \u03c9 Offset")
         action_dx_dy = self.addAction("Change d-spacings")
 
         # connections

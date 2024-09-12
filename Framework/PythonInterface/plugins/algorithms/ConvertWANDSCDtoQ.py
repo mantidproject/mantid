@@ -431,7 +431,6 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
 
         # loop over symmetry operations for memory efficiency
         for sym_op in sym_ops:
-
             S = np.zeros((3, 3))
             S[:, 0] = sym_op.transformHKL([1, 0, 0])
             S[:, 1] = sym_op.transformHKL([0, 1, 0])

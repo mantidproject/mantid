@@ -6,9 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, bad-builtin
 """
-    Reduction scripter used to take reduction parameters
-    end produce a Mantid reduction script
+Reduction scripter used to take reduction parameters
+end produce a Mantid reduction script
 """
+
 import xml.dom.minidom
 import sys
 import time
@@ -352,7 +353,6 @@ class BaseReductionScripter(object):
     _observers = []
 
     class ReductionObserver(object):
-
         ## Script element class (for type checking)
         _state_cls = None
         ## Script element object

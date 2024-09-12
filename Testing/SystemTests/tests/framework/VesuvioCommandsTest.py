@@ -8,6 +8,7 @@
 """These are more integration tests as they will require that the test data is available
 and that mantid can be imported
 """
+
 import systemtesting
 import numpy as np
 
@@ -33,7 +34,6 @@ def _make_names_unique(names):
 
 
 def _test_caad_workspace(self, workspace_name, functions):
-
     try:
         caad_workspace = mtd[workspace_name]
     except RuntimeError:

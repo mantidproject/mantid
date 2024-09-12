@@ -11,7 +11,6 @@ import numpy
 
 
 class ILLIndirectReductionFWSTest(systemtesting.MantidSystemTest):
-
     # cache default instrument and datadirs
     facility = config["default.facility"]
     instrument = config["default.instrument"]
@@ -36,7 +35,6 @@ class ILLIndirectReductionFWSTest(systemtesting.MantidSystemTest):
         config["datasearch.directories"] = self.datadirs
 
     def requiredFiles(self):
-
         return [
             "165944.nxs",
             "165945.nxs",
@@ -66,7 +64,6 @@ class ILLIndirectReductionFWSTest(systemtesting.MantidSystemTest):
         ]
 
     def runTest(self):
-
         self._run_ifws()
 
         self._run_efws()

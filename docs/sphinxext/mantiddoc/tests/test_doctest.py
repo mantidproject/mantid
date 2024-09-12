@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Tests for the doctest addons
+Tests for the doctest addons
 """
+
 from mantiddoc.doctest import DocTestOutputParser, TestCaseReport, TestSuiteReport
 
 import unittest

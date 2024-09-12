@@ -32,7 +32,7 @@ class MantidImage(mimage.AxesImage):
             filternorm=filternorm,
             filterrad=filterrad,
             resample=resample,
-            **kwargs
+            **kwargs,
         )
 
     def calculate_greyscale_intensity(self) -> ImageIntensity:

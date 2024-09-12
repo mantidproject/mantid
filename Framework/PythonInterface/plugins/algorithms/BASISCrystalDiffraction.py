@@ -105,7 +105,6 @@ def pyexec_setup(new_options):
 
 
 class BASISCrystalDiffraction(DataProcessorAlgorithm):
-
     _mask_file = "/SNS/BSS/shared/autoreduce/new_masks_08_12_2015/" "BASIS_Mask_default_diff.xml"
     _solid_angle_ws_ = "/SNS/BSS/shared/autoreduce/solid_angle_diff.nxs"
     _flux_ws_ = "/SNS/BSS/shared/autoreduce/int_flux.nxs"
@@ -419,7 +418,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
                 OutputNormalizationWorkspace="_t_norm",
                 TemporaryDataWorkspace="_t_data" if mtd.doesExist("_t_data") else None,
                 TemporaryNormalizationWorkspace="_t_norm" if mtd.doesExist("_t_norm") else None,
-                **md_norm_scd_kwargs
+                **md_norm_scd_kwargs,
             )
             if self._bkg:
                 MDNormSCD(
@@ -428,7 +427,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
                     OutputNormalizationWorkspace="_t_bkg_norm",
                     TemporaryDataWorkspace="_t_bkg_data" if mtd.doesExist("_t_bkg_data") else None,
                     TemporaryNormalizationWorkspace="_t_bkg_norm" if mtd.doesExist("_t_bkg_norm") else None,
-                    **md_norm_scd_kwargs
+                    **md_norm_scd_kwargs,
                 )
             message = "Processing sample {} of {}".format(i_run + 1, len(run_numbers))
             diffraction_reporter.report(message)

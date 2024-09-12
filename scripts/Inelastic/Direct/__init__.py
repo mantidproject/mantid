@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" Classes and functions exported from Direct Reduction Package:
+"""Classes and functions exported from Direct Reduction Package:
 
 dgreduce               -- outdated functions, provided for compartibility with old qtiGenie
 DirectEnergyConversion -- main reduction class
@@ -15,4 +15,5 @@ RunDescriptor          -- Class descripbing a run and instantiated as property o
                           particular kind of run (e.g. sample run, monovan run etc...)
 
 """
+
 __all__ = ["dgreduce", "DirectEnergyConversion", "PropertyManager", "ReductionWrapper", "RunDescriptor"]

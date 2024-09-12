@@ -46,7 +46,6 @@ class RunStringUtilsListToStringTest(unittest.TestCase):
 
 
 class RunStringUtilsStringToListTest(unittest.TestCase):
-
     # Validation of the run_string
 
     def test_validate_run_string_returns_true_for_valid_strings(self):

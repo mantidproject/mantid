@@ -149,12 +149,12 @@ class IntegratePeaksThread(QThread):
         assert isinstance(norm_type, str), "Normalization type must be a string but not %s." "" % str(type(norm_type))
         assert (
             isinstance(num_pt_bg_left, int) and num_pt_bg_left >= 0
-        ), "Number of Pt at left for background {0} must be non-negative integers but not of type {1}." "".format(
+        ), "Number of Pt at left for background {0} must be non-negative integers but not of type {1}.".format(
             num_pt_bg_left, type(num_pt_bg_left)
         )
         assert (
             isinstance(num_pt_bg_right, int) and num_pt_bg_right >= 0
-        ), "Number of Pt at right for background {0} must be non-negative integers but not of type {1}." "".format(
+        ), "Number of Pt at right for background {0} must be non-negative integers but not of type {1}.".format(
             num_pt_bg_right, type(num_pt_bg_right)
         )
 
@@ -378,15 +378,14 @@ class MergePeaksThread(QThread):
             scan_number_list, type(scan_number_list)
         )
         assert isinstance(md_file_list, list) or md_file_list is None, (
-            "Output MDWorkspace file name list {0} "
-            "must be either a list or None but not {1}."
-            "".format(md_file_list, type(md_file_list))
+            "Output MDWorkspace file name list {0} " "must be either a list or None but not {1}.".format(md_file_list, type(md_file_list))
         )
 
         if md_file_list is not None and len(scan_number_list) != len(md_file_list):
             raise RuntimeError(
-                "If MD file list is not None, then it must have the same size ({0}) as the "
-                "scans ({1}) to merge.".format(len(md_file_list), len(scan_number_list))
+                "If MD file list is not None, then it must have the same size ({0}) as the scans ({1}) to merge.".format(
+                    len(md_file_list), len(scan_number_list)
+                )
             )
 
         # start thread

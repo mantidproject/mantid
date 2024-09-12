@@ -302,9 +302,7 @@ class WorkspaceWidget(PluginWidget):
                     presenter.show_view()
                 except ValueError:
                     logger.error(
-                        "Could not open workspace: {0} with neither "
-                        "MatrixWorkspaceDisplay nor TableWorkspaceDisplay."
-                        "".format(ws.name())
+                        "Could not open workspace: {0} with neither " "MatrixWorkspaceDisplay nor TableWorkspaceDisplay.".format(ws.name())
                     )
 
     def _do_show_algorithm_history(self, names):

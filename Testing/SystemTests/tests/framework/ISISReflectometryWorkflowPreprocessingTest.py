@@ -8,6 +8,7 @@
 System Test for ISIS Reflectometry autoreduction
 Adapted from scripts provided by Max Skoda.
 """
+
 from ISISReflectometryWorkflowBase import *
 import systemtesting
 

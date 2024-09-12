@@ -9,6 +9,7 @@
 System test that loads TOPAZ single-crystal data,
 and runs Diffraction Workflow.
 """
+
 import systemtesting
 import numpy
 import os

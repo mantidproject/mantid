@@ -11,7 +11,6 @@ from xml.dom import minidom
 
 
 def convertToVTU(infile, outpath):
-
     # first need to find some things from the file
     datafile = open(infile, "r")
     datalist = []
@@ -132,7 +131,6 @@ def convertToVTU(infile, outpath):
 
 
 def writeParallelVTU(files, prefix):
-
     doc = minidom.Document()
 
     vtkfile = doc.createElement("VTKFile")

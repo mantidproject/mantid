@@ -15,7 +15,6 @@ from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_
 
 class EAGroupingTabWidget(object):
     def __init__(self, context):
-
         self.group_tab_model = EAGroupingTabModel(context)
 
         self.grouping_table_view = EAGroupingTableView()

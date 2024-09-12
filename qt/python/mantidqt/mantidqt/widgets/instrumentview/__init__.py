@@ -20,6 +20,7 @@ You can run this widget independently by for example:
     window = InstrumentView(ws)
     app.exec_()
 """
+
 from mantidqt.project.decoderfactory import DecoderFactory
 from mantidqt.project.encoderfactory import EncoderFactory
 from mantidqt.widgets.instrumentview.io import InstrumentViewDecoder, InstrumentViewEncoder

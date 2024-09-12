@@ -5,8 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt.
-"""Provides a mixin to add zoom on scroll capability to a figure canvas
-"""
+"""Provides a mixin to add zoom on scroll capability to a figure canvas"""
 
 
 def _noop():

@@ -186,7 +186,6 @@ def run_focus(absorb_corrections):
 
     inst_object = setup_inst_object(mode="PDF")
     if absorb_corrections:
-
         sample = SampleDetails(height=5.0, radius=0.3, center=[0, 0, 0], shape="cylinder")
         sample.set_material(chemical_formula="(Li7)14 Mg1.05 Si2 S12.05", number_density=0.001641)
         inst_object.set_sample_details(sample=sample, mode="Rietveld")

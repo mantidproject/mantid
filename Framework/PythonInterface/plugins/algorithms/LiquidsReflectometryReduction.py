@@ -6,13 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 """
-    This algorithm is a refactored version of the RefLReduction algorithm.
-    It was written in an attempt to:
-      - Not rely on external code but only on algorithms.
-      - Do work using existing algorithms as opposed to doing everything in arrays.
-      - Keep the same parameters and work as a drop-in replacement for the old algorithm.
-      - Reproduce the output of the old algorithm.
+This algorithm is a refactored version of the RefLReduction algorithm.
+It was written in an attempt to:
+  - Not rely on external code but only on algorithms.
+  - Do work using existing algorithms as opposed to doing everything in arrays.
+  - Keep the same parameters and work as a drop-in replacement for the old algorithm.
+  - Reproduce the output of the old algorithm.
 """
+
 import time
 import math
 import os
@@ -564,7 +565,6 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                 and _value_check("S1H", data_dict, s1h)
                 and _value_check(s2h_key, data_dict, s2h)
             ):
-
                 if not match_slit_width or (_value_check("S1W", data_dict, s1w) and _value_check(s2w_key, data_dict, s2w)):
                     data_found = data_dict
                     break

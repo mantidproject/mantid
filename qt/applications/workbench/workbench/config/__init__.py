@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 #
-""" Main configuration module.
+"""Main configuration module.
 
 A singleton instance called CONF is defined. Modules wishing to access the settings
 should import the CONF object as
@@ -16,6 +16,7 @@ should import the CONF object as
 
 and use it to access the settings
 """
+
 # std imports
 from collections import namedtuple
 import os

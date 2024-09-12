@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 """
-    Extract or compute the Q values from reduced QENS data
+Extract or compute the Q values from reduced QENS data
 """
+
 from systemtesting import MantidSystemTest
 import mantid
 import mantid.simpleapi as sm
@@ -28,7 +29,6 @@ class GlobalFitTest(MantidSystemTest):
     #    return ["irs26173_graphite002_res.nxs", "irs26176_graphite002_red.nxs"]
 
     def runTest(self):
-
         data = sm.Load("irs26176_graphite002_red.nxs")
         sm.Load("irs26173_graphite002_res.nxs", OutputWorkspace="resolution")
 

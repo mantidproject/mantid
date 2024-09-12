@@ -13,7 +13,6 @@ from .DrillParameter import DrillParameter
 
 
 class DrillSample(QObject):
-
     """
     Status of sample when its processing is done.
     """

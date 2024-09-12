@@ -148,7 +148,6 @@ class AsyncTaskTest(unittest.TestCase):
 
 
 class BlockingAsyncTaskWithCallbackTest(unittest.TestCase):
-
     # ---------------------------------------------------------------
     # Success cases
     # ---------------------------------------------------------------

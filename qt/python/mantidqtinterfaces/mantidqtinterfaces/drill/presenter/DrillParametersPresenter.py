@@ -11,7 +11,6 @@ from qtpy.QtCore import *
 
 
 class DrillParametersPresenter:
-
     """
     Reference to the table model (QTableWidget).
     """

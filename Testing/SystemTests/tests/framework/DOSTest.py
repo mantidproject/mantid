@@ -133,7 +133,6 @@ class DOSPartialSummedContributionsTest(systemtesting.MantidSystemTest):
     """
 
     def runTest(self):
-
         file_name = "squaricn.phonon"
         spec_type = "DOS"
         self.ouput_ws_name = "squaricn"
@@ -183,7 +182,6 @@ class DOSPartialSummedContributionsCrossSectionScaleTest(systemtesting.MantidSys
     """
 
     def runTest(self):
-
         file_name = "squaricn.phonon"
         spec_type = "DOS"
         self.ouput_ws_name = "squaricn"

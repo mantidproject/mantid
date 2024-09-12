@@ -69,7 +69,6 @@ createDialogFromName_func_name = "mantidqt.interfacemanager.InterfaceManager." "
 @patch.object(AlgorithmFactoryImpl, "getDescriptors", mock_get_algorithm_descriptors)
 @start_qapplication
 class WidgetTest(unittest.TestCase):
-
     # def setUp(self):
     #     self.getDescriptors_orig = AlgorithmFactoryImpl.getDescriptors
     #     AlgorithmFactoryImpl.getDescriptors = mock_get_algorithm_descriptors

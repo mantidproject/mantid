@@ -11,7 +11,6 @@ import numpy
 
 
 class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
-
     PROP_BANKIDS = "BankIDs"
     PROP_LATTICE_PARAMS = "LatticeParamWorkspaces"
     PROP_SIGMA = "Sigma"

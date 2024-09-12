@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
-""" SANSSave algorithm performs saving of SANS reduction data."""
+"""SANSSave algorithm performs saving of SANS reduction data."""
 
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, FileProperty, FileAction, Progress
 from mantid.kernel import Direction, logger

@@ -16,7 +16,6 @@ from sans.common.enums import SANSInstrument
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANSCentreSample(systemtesting.MantidSystemTest):
     def runTest(self):
-
         SANS2D()
 
         Set1D()

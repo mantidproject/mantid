@@ -10,7 +10,6 @@ import h5py
 
 
 class ExportSampleLogsToHDF5(PythonAlgorithm):
-
     PROP_INPUT_WS = "InputWorkspace"
     PROP_BLACKLIST = "Blacklist"
     PROP_FILENAME = "Filename"

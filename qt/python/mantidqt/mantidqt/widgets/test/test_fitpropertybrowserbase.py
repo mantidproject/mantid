@@ -102,7 +102,6 @@ class TestFitPropertyBrowser(unittest.TestCase):
         self.assertEqual(15, len(h.ifun().getConstraints()))
 
     def test_single_function_string_loaded_correctly(self):
-
         property_browser = self.create_widget()
         func = "name=Gaussian,Height=487,PeakCentre=5,Sigma=5;ties=(f0.Sigma=f0.PeakCentre)"
 

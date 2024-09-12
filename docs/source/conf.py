@@ -108,9 +108,7 @@ try:
     del unicode_literals
 except NameError:
     pass
-""".format(
-    mantid_config_reset
-)
+""".format(mantid_config_reset)
 
 # Run this after each test group has executed
 doctest_global_cleanup = """

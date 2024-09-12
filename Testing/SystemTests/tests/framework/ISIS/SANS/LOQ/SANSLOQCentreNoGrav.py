@@ -42,7 +42,6 @@ class SANSLOQCentreNoGrav(systemtesting.MantidSystemTest):
 @ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQCentreNoGravDefineCentre(systemtesting.MantidSystemTest):
     def runTest(self):
-
         LOQ()
 
         Set1D()

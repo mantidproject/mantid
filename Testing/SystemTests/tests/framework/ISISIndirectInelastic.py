@@ -185,7 +185,7 @@ class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
             InputFiles=self.data_files,
             SumFiles=self.sum_files,
             SpectraRange=self.detector_range,
-            **kwargs
+            **kwargs,
         )
 
         self.result_names = sorted(reductions.getNames())

@@ -26,6 +26,7 @@ and assign it to the rebinned variable.
 
 Importing this module starts the FrameworkManager instance.
 """
+
 # std libs
 from collections import OrderedDict, namedtuple
 from contextlib import contextmanager

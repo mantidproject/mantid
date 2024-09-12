@@ -35,7 +35,6 @@ class VelocityAutoCorrelations(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), doc="Output workspace name")
 
     def PyExec(self):
-
         # Get file path
         file_name = self.getPropertyValue("InputFile")
 

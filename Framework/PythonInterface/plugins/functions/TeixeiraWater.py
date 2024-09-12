@@ -9,6 +9,7 @@
 @author Spencer Howells, ISIS
 @date December 05, 2013
 """
+
 import numpy as np
 
 from mantid.api import IFunction1D, FunctionFactory
@@ -16,7 +17,6 @@ from scipy import constants
 
 
 class TeixeiraWater(IFunction1D):
-
     planck_constant = constants.Planck / constants.e * 1e15  # meV*psec
     hbar = planck_constant / (2 * np.pi)  # meV * ps  = ueV * ns
 

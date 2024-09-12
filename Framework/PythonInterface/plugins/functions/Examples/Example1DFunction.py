@@ -15,6 +15,7 @@ to have meaningful concepts such as this then see ExamplePeakFunction.
 1D functions do not have to have a derivative defined, if they do not then they will use a numerical
 derivative
 """
+
 from mantid.api import IFunction1D, FunctionFactory
 
 

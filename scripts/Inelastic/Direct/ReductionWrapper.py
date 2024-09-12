@@ -354,13 +354,14 @@ class ReductionWrapper(object):
         if build_validation:
             self.reducer.prop_man.save_file_name = validation_file
             self.reducer.prop_man.log(
-                "*** WARNING:can not find or load validation file {0}\n"
-                "    Building validation file for run N:{1}".format(validation_file, sample_run),
+                "*** WARNING:can not find or load validation file {0}\n    Building validation file for run N:{1}".format(
+                    validation_file, sample_run
+                ),
                 "warning",
             )
         else:
             self.reducer.prop_man.log(
-                "*** FOUND VALIDATION FILE: {0}\n" "    Validating run {1} against this file".format(fileName, sample_run), "warning"
+                "*** FOUND VALIDATION FILE: {0}\n    Validating run {1} against this file".format(fileName, sample_run), "warning"
             )
 
         # just in case, to be sure
@@ -409,7 +410,7 @@ class ReductionWrapper(object):
             fname, _ = os.path.splitext(fileName)
             filename = fname + "-mismatch.nxs"
             self.reducer.prop_man.log(
-                "***WARNING: can not get results matching the reference file.\n" "   Saving new results to file {0}".format(filename),
+                "***WARNING: can not get results matching the reference file.\n   Saving new results to file {0}".format(filename),
                 "warning",
             )
             SaveNexus(reduced, Filename=filename)

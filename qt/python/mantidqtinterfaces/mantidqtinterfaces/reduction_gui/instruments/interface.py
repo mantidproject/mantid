@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    Base class for instrument-specific user interface
+Base class for instrument-specific user interface
 """
+
 from qtpy.QtWidgets import QMessageBox
 import sys
 import os
