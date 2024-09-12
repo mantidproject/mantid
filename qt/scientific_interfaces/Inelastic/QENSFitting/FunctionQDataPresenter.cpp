@@ -97,8 +97,9 @@ FunctionQDataPresenter::chooseFunctionQFunctions(std::optional<bool> paramWidth)
     return (paramWidth == std::nullopt) ? FunctionQ::ALL_FITS
            : *paramWidth                ? FunctionQ::WIDTH_FITS
                                         : FunctionQ::EISF_FITS;
-  auto widthFuncs = m_view->dataColumnContainsText("HWHM");
-  auto eisfFuncs = m_view->dataColumnContainsText("EISF") || m_view->dataColumnContainsText("A0");
+  auto const columnHeader = "Parameter";
+  auto widthFuncs = m_view->columnContains(columnHeader, "HWHM");
+  auto eisfFuncs = m_view->columnContains(columnHeader, "EISF") || m_view->columnContains(columnHeader, "A0");
   if (paramWidth != std::nullopt) {
     widthFuncs = widthFuncs || *paramWidth;
     eisfFuncs = eisfFuncs || !*paramWidth;

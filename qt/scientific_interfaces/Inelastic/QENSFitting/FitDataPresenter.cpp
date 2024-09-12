@@ -148,11 +148,11 @@ void FitDataPresenter::addTableEntry(FitDomainIndex row) {
 }
 
 void FitDataPresenter::handleCellChanged(int row, int column) {
-  if (m_view->getColumnIndexFromName("StartX") == column) {
+  if (m_view->columnIndex("StartX") == column) {
     setTableStartXAndEmit(m_view->getText(row, column).toDouble(), row, column);
-  } else if (m_view->getColumnIndexFromName("EndX") == column) {
+  } else if (m_view->columnIndex("EndX") == column) {
     setTableEndXAndEmit(m_view->getText(row, column).toDouble(), row, column);
-  } else if (m_view->getColumnIndexFromName("Mask X Range") == column) {
+  } else if (m_view->columnIndex("Mask X Range") == column) {
     setModelExcludeAndEmit(m_view->getText(row, column).toStdString(), row);
   }
 }
