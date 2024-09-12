@@ -39,11 +39,11 @@ public:
   void validate(IUserInputValidator *validator) override;
   virtual void addTableEntry(size_t row, FitDataRow const &newRow) override;
   virtual void updateNumCellEntry(double numEntry, size_t row, size_t column) override;
-  int getColumnIndexFromName(std::string const &ColName) override;
+  int columnIndex(std::string const &name) const override;
   void clearTable() override;
   QString getText(int row, int column) const override;
   QModelIndexList getSelectedIndexes() const override;
-  bool dataColumnContainsText(std::string const &columnText) const override;
+  bool columnContains(std::string const &columnHeader, std::string const &text) const override;
 
   void displayWarning(const std::string &warning) override;
 
