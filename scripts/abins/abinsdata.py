@@ -43,8 +43,9 @@ class AbinsData:
 
         if ab_initio_program.upper() not in all_loaders:
             raise ValueError(
-                "No loader available for {}: unknown program. "
-                "supported loaders: {}".format(ab_initio_program.upper(), " ".join(all_loaders.keys()))
+                "No loader available for {}: unknown program. supported loaders: {}".format(
+                    ab_initio_program.upper(), " ".join(all_loaders.keys())
+                )
             )
         loader = all_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename)
         data = loader.get_formatted_data()
@@ -64,7 +65,7 @@ class AbinsData:
         for k in data["k_points_data"]["atomic_displacements"]:
             if data["k_points_data"]["atomic_displacements"][k].shape[0] != len(data["atoms_data"]):
                 raise ValueError(
-                    "KpointsData and AtomsData are not consistent: number of atoms in structure " "does not match displacement data."
+                    "KpointsData and AtomsData are not consistent: number of atoms in structure does not match displacement data."
                 )
 
     def extract(self) -> Dict[str, Any]:

@@ -61,7 +61,6 @@ def d_rates_from_dimensionality(n_dimensions: int, d_parallel: float, d_perpendi
 
 
 class SpinDiffusion(IFunction1D):
-
     def category(self):
         return "Muon\\MuonSpecific"
 

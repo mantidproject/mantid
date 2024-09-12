@@ -14,7 +14,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace Mantid {
 namespace Geometry {
@@ -101,7 +101,7 @@ public:
    * @return a pointer to a new Peak object.
    */
   virtual std::unique_ptr<Geometry::IPeak> createPeak(const Mantid::Kernel::V3D &QLabFrame,
-                                                      boost::optional<double> detectorDistance = boost::none) const = 0;
+                                                      std::optional<double> detectorDistance = std::nullopt) const = 0;
 
   //---------------------------------------------------------------------------------------------
   /** Create an instance of a Peak

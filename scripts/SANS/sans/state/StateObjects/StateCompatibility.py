@@ -7,9 +7,9 @@
 # pylint: disable=too-few-public-methods
 
 """State which governs the SANS compatibility mode. This is not part of the reduction itself and should be removed
-   once the transition to the new reducer is satisfactory and complete. This feature allows users to have the
-   two reduction approaches produce the exact same results. If the results are different then that is a hint
-   that we are dealing with a bug
+once the transition to the new reducer is satisfactory and complete. This feature allows users to have the
+two reduction approaches produce the exact same results. If the results are different then that is a hint
+that we are dealing with a bug
 """
 
 import copy
@@ -56,6 +56,5 @@ def get_compatibility_builder(data_info):
         return StateCompatibilityBuilder()
     else:
         raise NotImplementedError(
-            "StateCompatibilityBuilder: Could not find any valid compatibility builder for the "
-            "specified StateData object {0}".format(str(data_info))
+            f"StateCompatibilityBuilder: Could not find any valid compatibility builder for the specified StateData object {str(data_info)}"
         )

@@ -25,5 +25,4 @@ def setup(self):
 def on_row_inserted(self, rowLocation):
     # If the depth is more than two then we can safely 'rollback' the insertion.
     if rowLocation.depth() > 2:
-
         self.table.removeRowAt(rowLocation)

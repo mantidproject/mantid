@@ -36,6 +36,7 @@ InputWorkspaceTypes = Union[str, Workspace2D, EventWorkspace]
 
 class TableType(enum.Enum):
     r"""Allowed types of calibration-related tables to be saved and/or loaded"""
+
     CALIBRATION = "calibration"
     FIT = "fit"
     MASK = "mask"
@@ -296,7 +297,6 @@ def combine_temporal_banks(database_path: str, date: str, table_type: str = "cal
 
     bank_stamps = list()  # list of (bank-number, day-stamp) pairs
     for bank_dir in bank_dirs:
-
         # extract files in bank calibration directory
         files = list(pathlib.Path(bank_dir).glob(table_type + "_corelli_bank" + ("[0-9]" * 3) + "*"))
 
@@ -312,7 +312,6 @@ def combine_temporal_banks(database_path: str, date: str, table_type: str = "cal
 
         # check available dates choose the latest in the past if not found for current date
         for available_date in available_dates:
-
             if available_date <= int(date):
                 bank_id: int = int(str(bank_dir)[-3:])
                 table = load_bank_table(bank_id, database_path, str(available_date), table_type)

@@ -6,10 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 """
-   Extends the basic test of the Load algorithm done by the LoadLotsOfFiles
-   test to encompass the complex multi-file loading that the Load
-   algorithm is capable of.
+Extends the basic test of the Load algorithm done by the LoadLotsOfFiles
+test to encompass the complex multi-file loading that the Load
+algorithm is capable of.
 """
+
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
@@ -24,7 +25,6 @@ DIFF_PLACES = 8
 
 
 class LoadTest(systemtesting.MantidSystemTest):
-
     _success = False
 
     def runTest(self):
@@ -52,7 +52,6 @@ class LoadTest(systemtesting.MantidSystemTest):
 
 @ISISSansSystemTest(SANSInstrument.LOQ)  # Helper to find LOQ data
 class LoadTests(unittest.TestCase):
-
     wsname = "__LoadTest"
     cleanup_names = []
 

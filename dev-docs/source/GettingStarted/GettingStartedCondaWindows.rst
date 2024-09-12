@@ -44,12 +44,12 @@ Install `Mambaforge <https://github.com/conda-forge/miniforge/releases>`_
 Setup the mantid conda environment
 ----------------------------------
 
-* Open a terminal or powershell with conda enabled there are two ways to do this:
+Open a terminal or powershell with conda enabled. Here are two ways to do this:
 
-    * Open an Anaconda prompt (Mambaforge).
-    * Add the path of your Mambaforge installation to your system path, if you didn't do it during installation (Follow the answers in the `FAQ <https://docs.anaconda.com/anaconda/user-guide/faq/#installing-anaconda>`_). Then you can use conda from the Command Prompt and Powershell.
+* Open an Anaconda prompt (Mambaforge).
+* Add the path of your Mambaforge installation to your system path, if you didn't do it during installation (Follow the answers in the `FAQ <https://docs.anaconda.com/anaconda/user-guide/faq/#installing-anaconda>`_). Then you can use conda from the Command Prompt and Powershell.
 
-* Create the mantid conda environment by navigating to your mantid source code directory in your terminal and running ``conda env create -f mantid-developer-win.yml``
+.. include:: ./MantidDeveloperSetup.rst
 
 Configure CMake and generate build files
 ----------------------------------------
@@ -59,7 +59,7 @@ Configure CMake and generate build files
     * For Ninja, open the ``x64 Native Tools Command Prompt for VS 2019`` or ``x64 Native Tools Command Prompt for VS 2022`` from your search bar.
 
 * Navigate to your mantid source directory.
-* Run ``conda activate mantid-developer`` to activate your conda environment.
+* If not already activated in the previous step, run ``conda activate mantid-developer`` to activate your conda environment.
 * If you want your build directory inside your source directory, run either:
 
     * ``cmake --preset=win-vs`` for configuring with Visual Studio 2022, or
@@ -89,7 +89,7 @@ Compile and Build using Ninja
     * Open Visual Studio with ``visual-studio_ninja.bat``, which is found in the build folder
     * Select "win-ninja" from the Configuration dropdown at the top of the screen
     * Select "Switch between solutions and available views" in the Solution Explorer and click on "CMake Targets View"
-    * It is recommmended that the "When cache is out of date" option is set to "Never run configure step automatically" in Tools->Options->CMake
+    * It is recommended that the "When cache is out of date" option is set to "Never run configure step automatically" in Tools->Options->CMake
 
 Building and debugging with CLion
 ---------------------------------

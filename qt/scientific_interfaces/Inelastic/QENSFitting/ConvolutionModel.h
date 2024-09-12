@@ -20,9 +20,9 @@ public:
   ConvolutionModel();
   ~ConvolutionModel() = default;
 
-  boost::optional<double> getInstrumentResolution(WorkspaceID workspaceID) const;
+  std::optional<double> getInstrumentResolution(WorkspaceID workspaceID) const;
 
-  void setTemperature(const boost::optional<double> &temperature);
+  void setTemperature(const std::optional<double> &temperature);
 
   void addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
 
@@ -34,11 +34,11 @@ private:
   std::unordered_map<std::string, std::string> mapDefaultParameterNames() const override;
   void addSampleLogs();
 
-  void setParameterNameChanges(const Mantid::API::IFunction &model, boost::optional<std::size_t> backgroundIndex);
+  void setParameterNameChanges(const Mantid::API::IFunction &model, std::optional<std::size_t> backgroundIndex);
 
   ResolutionCollectionType m_resolution;
   std::unordered_map<std::string, std::string> m_parameterNameChanges;
-  boost::optional<double> m_temperature;
+  std::optional<double> m_temperature;
 };
 
 } // namespace Inelastic

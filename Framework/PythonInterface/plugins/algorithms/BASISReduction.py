@@ -170,7 +170,6 @@ REFLECTIONS_DICT = {
 
 
 class BASISReduction(PythonAlgorithm):
-
     _short_inst = None
     _long_inst = None
     _extension = None

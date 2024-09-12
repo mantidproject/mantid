@@ -28,7 +28,6 @@ from mantid.simpleapi import *
 
 
 class PowderILLParameterScan(PythonAlgorithm):
-
     _calibration_file = None
     _roc_file = None
     _normalise_option = None
@@ -70,7 +69,6 @@ class PowderILLParameterScan(PythonAlgorithm):
         return issues
 
     def PyInit(self):
-
         self.declareProperty(MultipleFileProperty("Run", extensions=["nxs"]), doc="File path of run(s).")
 
         self.declareProperty(
@@ -136,7 +134,6 @@ class PowderILLParameterScan(PythonAlgorithm):
         )
 
     def PyExec(self):
-
         self._progress = Progress(self, start=0.0, end=1.0, nreports=4)
 
         self._configure()

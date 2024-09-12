@@ -20,7 +20,6 @@ The names from the library are not imported by default as it is best if the inte
 are used for checks such as isinstance()
 """
 
-
 ###############################################################################
 # Load the C++ library and register the C++ class exports
 ###############################################################################

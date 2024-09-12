@@ -23,6 +23,7 @@ only the ones that have been necessary so far. If another function
 needs to be mocked it can be freely added in the relevant class below
 and it should not break any existing tests.
 """
+
 from unittest.mock import Mock
 
 

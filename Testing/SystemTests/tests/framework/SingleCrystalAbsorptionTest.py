@@ -17,7 +17,6 @@ from mantid.simpleapi import (
 
 
 class SingleCrystalPeaksAbsorptionTest(systemtesting.MantidSystemTest):
-
     def tearDown(self):
         AnalysisDataService.clear()
 
@@ -63,13 +62,11 @@ class SingleCrystalPeaksAbsorptionTest(systemtesting.MantidSystemTest):
         AddAbsorptionWeightedPathLengths(InputWorkspace=peaks_orig, ApplyCorrection=True)
 
         for peak_orig, peak_corr in zip(peaks_orig, peaks_corr):
-
             self.assertAlmostEqual(peak_orig.getIntensity(), peak_corr.getIntensity(), 1)
             self.assertAlmostEqual(peak_orig.getSigmaIntensity(), peak_corr.getSigmaIntensity(), 3)
             self.assertAlmostEqual(peak_orig.getAbsorptionWeightedPathLength(), peak_corr.getAbsorptionWeightedPathLength(), 3)
 
         for peak_lean, peak_corr in zip(peaks_lean, peaks_corr):
-
             self.assertAlmostEqual(peak_lean.getIntensity(), peak_corr.getIntensity(), 1)
             self.assertAlmostEqual(peak_lean.getSigmaIntensity(), peak_corr.getSigmaIntensity(), 3)
             self.assertAlmostEqual(peak_lean.getAbsorptionWeightedPathLength(), peak_corr.getAbsorptionWeightedPathLength(), 3)
@@ -80,7 +77,6 @@ class SingleCrystalPeaksAbsorptionTest(systemtesting.MantidSystemTest):
         AddAbsorptionWeightedPathLengths(InputWorkspace=peaks_lean_no_inst, ApplyCorrection=True)
 
         for peak_lean, peak_lean_no_inst in zip(peaks_lean, peaks_lean_no_inst):
-
             self.assertAlmostEqual(peak_lean.getIntensity(), peak_lean_no_inst.getIntensity(), 1)
             self.assertAlmostEqual(peak_lean.getSigmaIntensity(), peak_lean_no_inst.getSigmaIntensity(), 3)
             self.assertAlmostEqual(peak_lean.getAbsorptionWeightedPathLength(), peak_lean_no_inst.getAbsorptionWeightedPathLength(), 3)

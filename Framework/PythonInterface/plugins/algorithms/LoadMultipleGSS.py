@@ -12,7 +12,6 @@ import os
 
 
 class LoadMultipleGSS(PythonAlgorithm):
-
     __exts = None
     __loader = None
 

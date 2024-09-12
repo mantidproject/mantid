@@ -84,7 +84,7 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name, unsigned int
     m_action = action;
   }
 
-  m_multiFileLoadingEnabled = Kernel::ConfigService::Instance().getValue<bool>("loading.multifile").get_value_or(false);
+  m_multiFileLoadingEnabled = Kernel::ConfigService::Instance().getValue<bool>("loading.multifile").value_or(false);
   std::copy_if(exts.cbegin(), exts.cend(), std::back_inserter(m_exts), doesNotContainWildCard);
 }
 

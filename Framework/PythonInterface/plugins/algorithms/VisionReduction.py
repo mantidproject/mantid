@@ -21,7 +21,6 @@ from string import ascii_letters, digits  # pylint: disable=deprecated-module
 
 
 def RemoveArtifact(WS, Xmin, Xmax, Xa, Delta):
-
     CropWorkspace(InputWorkspace=WS, OutputWorkspace="__aux0", XMin=str(Xmin), XMax=str(Xa))
     CropWorkspace(InputWorkspace=WS, OutputWorkspace="__aux3", XMin=str(Xa + Delta), XMax=str(Xmax))
     CropWorkspace(InputWorkspace=WS, OutputWorkspace="__aux1", XMin=str(Xa - Delta), XMax=str(Xa))
@@ -38,7 +37,6 @@ def RemoveArtifact(WS, Xmin, Xmax, Xa, Delta):
 
 
 class VisionReduction(PythonAlgorithm):
-
     __CalFile = "/SNS/VIS/shared/autoreduce/VIS_CalTab-03-03-2014.csv"
     __MonFile = "/SNS/VIS/shared/autoreduce/VIS_5447-5450_MonitorL-corrected-hist.nxs"
     # Pixels to be reduced

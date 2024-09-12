@@ -46,7 +46,7 @@ MuonFitDataSelector::MuonFitDataSelector(QWidget *parent, int runNumber, const Q
                                                                           const QStringList &groups)*/
     : MuonFitDataSelector(parent) {
   m_multiFit = false;
-  this->setWorkspaceDetails(QString::number(runNumber), instName, boost::optional<QString>{});
+  this->setWorkspaceDetails(QString::number(runNumber), instName, std::optional<QString>{});
   // not used in this case
   // but leave these here as a remainder
   // for future changes that may need to assign them
@@ -156,7 +156,7 @@ QStringList MuonFitDataSelector::getFilenames() const { return m_ui.runs->getFil
  * MUSRauto_E.tmp
  */
 void MuonFitDataSelector::setWorkspaceDetails(const QString &runNumbers, const QString &instName,
-                                              const boost::optional<QString> &filePath) {
+                                              const std::optional<QString> &filePath) {
   // Set the file finder to the correct instrument (not Mantid's default)
   m_ui.runs->setInstrumentOverride(instName);
 

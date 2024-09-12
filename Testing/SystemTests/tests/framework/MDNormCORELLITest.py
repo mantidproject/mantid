@@ -9,6 +9,7 @@
 """
 System test for MDNorm
 """
+
 from mantid.simpleapi import *
 import systemtesting
 

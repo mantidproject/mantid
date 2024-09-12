@@ -16,7 +16,7 @@ namespace Mantid::DataObjects {
  * @param workspace: the workspace which is being queried
  * @returns either a special coordinate or an empty optional
  */
-boost::optional<Mantid::Kernel::SpecialCoordinateSystem>
+std::optional<Mantid::Kernel::SpecialCoordinateSystem>
 MDFramesToSpecialCoordinateSystem::operator()(const Mantid::API::IMDWorkspace *workspace) const {
   // Make sure that the workspaces are either an MDHisto or MDEvent workspaces
   if (!dynamic_cast<const Mantid::API::IMDEventWorkspace *>(workspace) &&
@@ -31,7 +31,7 @@ MDFramesToSpecialCoordinateSystem::operator()(const Mantid::API::IMDWorkspace *w
   // This dimension will define the special coordinate system. Otherwise, we
   // don't have a special coordinate system
 
-  boost::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType =
+  std::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType =
       Mantid::Kernel::SpecialCoordinateSystem::None; // Set to none just to have
                                                      // it initialized
   auto hasQFrame = false;
@@ -40,7 +40,7 @@ MDFramesToSpecialCoordinateSystem::operator()(const Mantid::API::IMDWorkspace *w
     auto dimension = workspace->getDimension(dimIndex);
     auto &frame = dimension->getMDFrame();
     // Check for QCompatibility. This has gotten a bit more complicated than
-    // necessary since the boost optional
+    // necessary since the std::optional
     // caused a GCC error, when it was not initialized. Using -Wuninitialized
     // didn't make the compiler happy.
     if (frame.getMDUnit().isQUnit()) {
@@ -55,7 +55,7 @@ MDFramesToSpecialCoordinateSystem::operator()(const Mantid::API::IMDWorkspace *w
     isUnknown = isUnknownFrame(dimension);
   }
 
-  boost::optional<Mantid::Kernel::SpecialCoordinateSystem> output;
+  std::optional<Mantid::Kernel::SpecialCoordinateSystem> output;
   if (hasQFrame) {
     output = qFrameType;
   } else {
@@ -75,9 +75,9 @@ MDFramesToSpecialCoordinateSystem::operator()(const Mantid::API::IMDWorkspace *w
  */
 void MDFramesToSpecialCoordinateSystem::checkQCompatibility(
     Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem,
-    boost::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType) const {
+    std::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType) const {
   if (qFrameType) {
-    if (specialCoordinateSystem != qFrameType.get()) {
+    if (specialCoordinateSystem != qFrameType.value()) {
       throw std::invalid_argument("Error in MDFrameFromWorkspace: Coordinate "
                                   "system in the different dimensions don't "
                                   "match.");

@@ -141,7 +141,6 @@ class EQSANSNormalise(PythonAlgorithm):
 
         monitor_ws_name = input_ws_name + "_monitors"
         if AnalysisDataService.doesExist(monitor_ws_name):
-
             alg = AlgorithmManager.create("EQSANSMonitorTOF")
             alg.initialize()
             alg.setChild(True)

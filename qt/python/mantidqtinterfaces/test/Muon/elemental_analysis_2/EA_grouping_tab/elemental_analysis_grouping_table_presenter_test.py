@@ -241,7 +241,6 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
     @mock.patch("qtpy.QtWidgets.QTableWidgetItem.text")
     def test_rebin_with_steps_is_called(self, mock_text):
-
         self.presenter.notify_data_changed = mock.Mock()
         self.presenter.update_view_from_model = mock.Mock()
         self.presenter.update_model_from_view = mock.Mock()

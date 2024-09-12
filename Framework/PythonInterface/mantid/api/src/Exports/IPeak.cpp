@@ -11,9 +11,9 @@
 #include "MantidPythonInterface/core/GetPointer.h"
 #include "MantidPythonInterface/core/Policies/MatrixToNumpy.h"
 #include "MantidPythonInterface/core/Policies/RemoveConst.h"
-#include <boost/optional.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <optional>
 
 using Mantid::Geometry::IPeak;
 using Mantid::Geometry::ReferenceFrame;
@@ -32,7 +32,7 @@ Mantid::Geometry::PeakShape_sptr getPeakShape(const IPeak &peak) {
 void setPeakShape(IPeak &peak, Mantid::Geometry::PeakShape_sptr shape) { peak.setPeakShape(shape->clone()); }
 void setQLabFrame1(IPeak &peak, Mantid::Kernel::V3D qLabFrame) {
   // Set the q lab frame. No explicit detector distance.
-  return peak.setQLabFrame(qLabFrame, boost::none);
+  return peak.setQLabFrame(qLabFrame, std::nullopt);
 }
 void setQLabFrame2(IPeak &peak, Mantid::Kernel::V3D qLabFrame, double distance) {
   // Set the q lab frame. Detector distance specified.
@@ -41,7 +41,7 @@ void setQLabFrame2(IPeak &peak, Mantid::Kernel::V3D qLabFrame, double distance) 
 
 void setQSampleFrame1(IPeak &peak, Mantid::Kernel::V3D qSampleFrame) {
   // Set the qsample frame. No explicit detector distance.
-  return peak.setQSampleFrame(qSampleFrame, boost::none);
+  return peak.setQSampleFrame(qSampleFrame, std::nullopt);
 }
 
 void setQSampleFrame2(IPeak &peak, Mantid::Kernel::V3D qSampleFrame, double distance) {

@@ -88,16 +88,16 @@ void ScalarMappable::setNorm(const NormalizeBase &norm) {
  * @param vmin An optional new minmum value
  * @param vmax An optional new maximum value
  */
-void ScalarMappable::setClim(boost::optional<double> vmin, boost::optional<double> vmax) {
+void ScalarMappable::setClim(std::optional<double> vmin, std::optional<double> vmax) {
   GlobalInterpreterLock lock;
   Python::Object none;
   auto setClimAttr = pyobj().attr("set_clim");
-  if (vmin.is_initialized() && vmax.is_initialized()) {
-    setClimAttr(vmin.get(), vmax.get());
-  } else if (vmin.is_initialized()) {
-    setClimAttr(vmin.get(), none);
-  } else if (vmax.is_initialized()) {
-    setClimAttr(none, vmax.get());
+  if (vmin.has_value() && vmax.has_value()) {
+    setClimAttr(vmin.value(), vmax.value());
+  } else if (vmin.has_value()) {
+    setClimAttr(vmin.value(), none);
+  } else if (vmax.has_value()) {
+    setClimAttr(none, vmax.value());
   }
 }
 

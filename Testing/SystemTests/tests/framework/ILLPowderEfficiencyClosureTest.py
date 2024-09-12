@@ -12,7 +12,6 @@ from mantid import config, mtd
 
 
 class ILLPowderEfficiencyClosureTest(systemtesting.MantidSystemTest):
-
     _m_tmp_file = None
 
     def __init__(self):
@@ -33,7 +32,6 @@ class ILLPowderEfficiencyClosureTest(systemtesting.MantidSystemTest):
         remove(self._m_tmp_file)
 
     def runTest(self):
-
         PowderILLEfficiency(CalibrationRun="967076.nxs", OutputWorkspace="calib")
 
         SaveNexusProcessed(InputWorkspace="calib", Filename=self._m_tmp_file)

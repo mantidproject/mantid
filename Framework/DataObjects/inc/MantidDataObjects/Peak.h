@@ -14,8 +14,8 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 namespace Mantid {
 
@@ -35,9 +35,9 @@ class MANTID_DATAOBJECTS_DLL Peak : public BasePeak {
 public:
   Peak();
   Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::V3D &QLabFrame,
-       boost::optional<double> detectorDistance = boost::none);
+       std::optional<double> detectorDistance = std::nullopt);
   Peak(const Geometry::Instrument_const_sptr &m_inst, const Mantid::Kernel::V3D &QSampleFrame,
-       const Mantid::Kernel::Matrix<double> &goniometer, boost::optional<double> detectorDistance = boost::none);
+       const Mantid::Kernel::Matrix<double> &goniometer, std::optional<double> detectorDistance = std::nullopt);
   Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, double m_Wavelength);
   Peak(const Geometry::Instrument_const_sptr &m_inst, int m_detectorID, double m_Wavelength,
        const Mantid::Kernel::V3D &HKL);
@@ -68,7 +68,7 @@ public:
 
   // Construct a peak from LeanPeak
   Peak(const Mantid::DataObjects::LeanElasticPeak &lpeak, const Geometry::Instrument_const_sptr &inst,
-       boost::optional<double> detectorDistance = boost::none);
+       std::optional<double> detectorDistance = std::nullopt);
 
   void setDetectorID(int id);
   int getDetectorID() const override;
@@ -99,8 +99,8 @@ public:
   Mantid::Kernel::V3D getDetectorPositionNoCheck() const;
 
   void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame,
-                       boost::optional<double> detectorDistance = boost::none) override;
-  void setQLabFrame(const Mantid::Kernel::V3D &qLab, boost::optional<double> detectorDistance = boost::none) override;
+                       std::optional<double> detectorDistance = std::nullopt) override;
+  void setQLabFrame(const Mantid::Kernel::V3D &qLab, std::optional<double> detectorDistance = std::nullopt) override;
 
   void setWavelength(double wavelength) override;
   double getWavelength() const override;

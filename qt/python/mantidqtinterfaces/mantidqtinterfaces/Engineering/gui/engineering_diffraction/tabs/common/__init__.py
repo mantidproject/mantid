@@ -7,6 +7,7 @@
 """
 Holds some common constants across all tabs.
 """
+
 from qtpy.QtWidgets import QMessageBox
 from mantidqt.utils.observer_pattern import Observer
 

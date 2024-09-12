@@ -8,6 +8,7 @@
 """
 Defines a set of custom axis scales
 """
+
 from matplotlib.scale import ScaleBase
 from matplotlib.ticker import AutoLocator, NullFormatter, NullLocator, ScalarFormatter
 from matplotlib.transforms import Transform

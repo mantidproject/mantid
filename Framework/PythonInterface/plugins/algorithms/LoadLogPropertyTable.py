@@ -82,7 +82,6 @@ class LoadLogPropertyTable(PythonAlgorithm):
 
     # pylint: disable=too-many-branches
     def PyExec(self):
-
         firstFileName = self.getProperty("FirstFile").value
         lastFileName = self.getProperty("LastFile").value
 

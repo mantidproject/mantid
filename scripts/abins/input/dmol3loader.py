@@ -60,7 +60,6 @@ class DMOL3Loader(AbInitioLoader):
             self._clerk.get_input_filename(),
             "rb",
         ) as dmol3_file:
-
             # Move read file pointer to the last calculation recorded in the .outmol file. First calculation could be
             # geometry optimization. The last calculation in the file is expected to be calculation of vibrational data.
             # There may be some intermediate resume calculations.

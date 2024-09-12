@@ -168,7 +168,7 @@ public:
   }
 
   void test_retrieve_entity_unauthenticated() {
-    ONCat oncat(DUMMY_URL, nullptr, OAuthFlow::NONE, boost::none, boost::none);
+    ONCat oncat(DUMMY_URL, nullptr, OAuthFlow::NONE, std::nullopt, std::nullopt);
 
     TS_ASSERT(!oncat.isUserLoggedIn());
 
@@ -267,7 +267,7 @@ public:
 
   void test_client_credentials_flow_with_refresh() {
     ONCat oncat(DUMMY_URL, make_mock_token_store(), OAuthFlow::CLIENT_CREDENTIALS, DUMMY_CLIENT_ID,
-                boost::make_optional<std::string>("9a2ad07a-a139-438b-8116-08c5452f96ad"));
+                std::make_optional<std::string>("9a2ad07a-a139-438b-8116-08c5452f96ad"));
 
     auto mock_oncat_api = make_mock_oncat_api(
         {{DUMMY_URL + "/oauth/token",
@@ -303,9 +303,9 @@ public:
   void test_config_service_token_store_roundtrip() {
     ConfigServiceTokenStore tokenStore;
 
-    const auto testToken = boost::make_optional(
+    const auto testToken = std::make_optional(
         OAuthToken("Bearer", 3600, "2KSL5aEnLvIudMHIjc7LcBWBCfxOHZ", "api:read data:read settings:read",
-                   boost::make_optional<std::string>("eZEiz7LbgFrkL5ZHv7R4ck9gOzXexb")));
+                   std::make_optional<std::string>("eZEiz7LbgFrkL5ZHv7R4ck9gOzXexb")));
 
     tokenStore.setToken(testToken);
 

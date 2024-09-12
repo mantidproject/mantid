@@ -18,7 +18,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include <boost/math/special_functions/round.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <ostream>
 
 // These pragmas ignores the warning in the ctor where "d<nd-1" for nd=1.
@@ -69,10 +69,10 @@ template <typename MDE, size_t nd> size_t MDGridBox<MDE, nd>::initGridBox() {
   // How many is it split?
   // If we are at the top level and we have a specific top level split, then set
   // it.
-  boost::optional<std::vector<size_t>> splitTopInto = this->m_BoxController->getSplitTopInto();
+  std::optional<std::vector<size_t>> splitTopInto = this->m_BoxController->getSplitTopInto();
   if (this->getDepth() == 0 && splitTopInto) {
     for (size_t d = 0; d < nd; d++)
-      split[d] = splitTopInto.get()[d];
+      split[d] = splitTopInto.value()[d];
   } else {
     for (size_t d = 0; d < nd; d++)
       split[d] = this->m_BoxController->getSplitInto(d);

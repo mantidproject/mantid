@@ -105,9 +105,9 @@ int MCInteractionVolume::getComponentIndex(Kernel::PseudoRandomNumberGenerator &
  * @return The generated point
  */
 
-boost::optional<Kernel::V3D>
+std::optional<Kernel::V3D>
 MCInteractionVolume::generatePointInObjectByIndex(int componentIndex, Kernel::PseudoRandomNumberGenerator &rng) const {
-  boost::optional<Kernel::V3D> pointGenerated{boost::none};
+  std::optional<Kernel::V3D> pointGenerated{std::nullopt};
   if (componentIndex == -1) {
     pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 1);
   } else {
@@ -129,7 +129,7 @@ MCInteractionVolume::generatePointInObjectByIndex(int componentIndex, Kernel::Ps
 ComponentScatterPoint MCInteractionVolume::generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const {
   for (size_t i = 0; i < m_maxScatterAttempts; i++) {
     int componentIndex = getComponentIndex(rng);
-    boost::optional<Kernel::V3D> pointGenerated = generatePointInObjectByIndex(componentIndex, rng);
+    std::optional<Kernel::V3D> pointGenerated = generatePointInObjectByIndex(componentIndex, rng);
     if (pointGenerated) {
       return {componentIndex, *pointGenerated};
     }

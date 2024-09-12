@@ -8,7 +8,6 @@ from qtpy import QtCore, QtWidgets
 
 
 class SelectSubplot(QtWidgets.QDialog):
-
     subplotSelectorSignal = QtCore.Signal(object)
     closeEventSignal = QtCore.Signal()
 

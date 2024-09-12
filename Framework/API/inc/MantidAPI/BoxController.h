@@ -14,8 +14,8 @@
 #include "MantidKernel/ThreadPool.h"
 #include <nexus/NeXusFile.hpp>
 
-#include <boost/optional.hpp>
 #include <numeric>
+#include <optional>
 #include <vector>
 
 namespace Mantid {
@@ -38,7 +38,7 @@ public:
    * @param nd :: number of dimensions
    */
   BoxController(size_t nd)
-      : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_splitTopInto(boost::none), m_numSplit(1), m_numTopSplit(1),
+      : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_splitTopInto(std::nullopt), m_numSplit(1), m_numTopSplit(1),
         m_fileIO(std::shared_ptr<API::IBoxControllerIO>()) {
     // TODO: Smarter ways to determine all of these values
     m_maxDepth = 5;
@@ -134,7 +134,7 @@ public:
    *
    * @return the splits in each dimesion for the top level
    */
-  boost::optional<std::vector<size_t>> getSplitTopInto() const {
+  std::optional<std::vector<size_t>> getSplitTopInto() const {
     //      if (dim >= nd)
     //        throw std::invalid_argument("BoxController::setSplitInto() called
     //        with too high of a dimension index.");
@@ -182,7 +182,7 @@ public:
     if (!m_splitTopInto) {
       m_splitTopInto = std::vector<size_t>(nd, 1);
     }
-    m_splitTopInto.get()[dim] = num;
+    m_splitTopInto.value()[dim] = num;
     calcNumTopSplit();
   }
 
@@ -314,7 +314,7 @@ public:
     // We need to account for optional top level splitting
     if (depth == 0 && m_splitTopInto) {
 
-      const auto &splitTopInto = m_splitTopInto.get();
+      const auto &splitTopInto = m_splitTopInto.value();
       size_t numSplitTop =
           std::accumulate(splitTopInto.cbegin(), splitTopInto.cend(), size_t{1}, std::multiplies<size_t>());
       m_numMDBoxes[depth + 1] += numSplitTop;
@@ -413,7 +413,7 @@ private:
   void calcNumTopSplit() {
     m_numTopSplit = 1;
     for (size_t d = 0; d < nd; d++) {
-      m_numTopSplit *= m_splitTopInto.get()[d];
+      m_numTopSplit *= m_splitTopInto.value()[d];
     }
     /// And this changes the max # of boxes too
     resetMaxNumBoxes();
@@ -473,7 +473,7 @@ private:
   std::vector<size_t> m_splitInto;
 
   /// Splittin # for all dimensions in the top level
-  boost::optional<std::vector<size_t>> m_splitTopInto;
+  std::optional<std::vector<size_t>> m_splitTopInto;
 
   /// When you split a MDBox, it becomes this many sub-boxes
   size_t m_numSplit;

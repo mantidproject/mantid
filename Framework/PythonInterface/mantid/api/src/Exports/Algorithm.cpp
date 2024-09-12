@@ -18,12 +18,12 @@
 #include "MantidPythonInterface/core/GetPointer.h"
 
 #include "MantidKernel/WarningSuppressions.h"
-#include <boost/optional.hpp>
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/exception_translator.hpp>
 #include <boost/python/overloads.hpp>
+#include <optional>
 // As of boost 1.67 raw_function.hpp tries to pass
 // through size_t types through to make_function
 // which accepts int type, emitting a warning
@@ -111,23 +111,23 @@ void translateH5Exception(const H5::Exception &exc) {
   PyErr_SetString(PyExc_RuntimeError, ss.str().c_str());
 }
 
-template <typename T> boost::optional<T> extractArg(ssize_t index, const tuple &args) {
+template <typename T> std::optional<T> extractArg(ssize_t index, const tuple &args) {
   if (index < len(args)) {
-    return boost::optional<T>(extract<T>(args[index]));
+    return std::optional<T>(extract<T>(args[index]));
   }
-  return boost::none;
+  return std::nullopt;
 }
 
-template <typename T> void extractKwargs(const dict &kwargs, const std::string &keyName, boost::optional<T> &out) {
+template <typename T> void extractKwargs(const dict &kwargs, const std::string &keyName, std::optional<T> &out) {
   if (!kwargs.has_key(keyName)) {
     return;
   }
-  if (out != boost::none) {
+  if (out != std::nullopt) {
     throw std::invalid_argument("Parameter called '" + keyName +
                                 "' was specified twice."
                                 " This must be either positional or a kwarg, but not both.");
   }
-  out = boost::optional<T>(extract<T>(kwargs.get(keyName)));
+  out = std::optional<T>(extract<T>(kwargs.get(keyName)));
 }
 
 class SetPropertyVisitor final : public Mantid::PythonInterface::IPyTypeVisitor {
@@ -172,7 +172,7 @@ object createChildWithProps(tuple args, dict kwargs) {
   extractKwargs<bool>(kwargs, reservedNames[3], enableLogging);
   extractKwargs<int>(kwargs, reservedNames[4], version);
 
-  if (!name.is_initialized()) {
+  if (!name.has_value()) {
     throw std::invalid_argument("Please specify the algorithm name");
   }
   auto childAlg = parentAlg->createChildAlgorithm(name.value(), startProgress.value_or(-1), endProgress.value_or(-1),

@@ -14,8 +14,8 @@
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 
-#include <boost/optional.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <optional>
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -69,7 +69,7 @@ private:
 
   void loadQConvention();
 
-  void loadVisualNormalization(const std::string &key, boost::optional<Mantid::API::MDNormalization> &normalization);
+  void loadVisualNormalization(const std::string &key, std::optional<Mantid::API::MDNormalization> &normalization);
 
   /// Load all the affine matricies
   void loadAffineMatricies(const API::IMDWorkspace_sptr &ws);
@@ -109,8 +109,8 @@ private:
   int m_saveMDVersion;
 
   /// Visual normalization
-  boost::optional<Mantid::API::MDNormalization> m_visualNormalization;
-  boost::optional<Mantid::API::MDNormalization> m_visualNormalizationHisto;
+  std::optional<Mantid::API::MDNormalization> m_visualNormalization;
+  std::optional<Mantid::API::MDNormalization> m_visualNormalizationHisto;
 
   /// Named entry
   static const std::string VISUAL_NORMALIZATION_KEY;

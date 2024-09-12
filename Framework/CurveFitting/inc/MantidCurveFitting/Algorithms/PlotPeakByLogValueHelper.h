@@ -13,7 +13,7 @@
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidCurveFitting/DllConfig.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -35,7 +35,7 @@ struct InputSpectraToFit {
 /// Get a workspace
 MANTID_CURVEFITTING_DLL std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace &ws, int workspaceIndex,
                                                                      int spectrumNumber, double start, double end);
-MANTID_CURVEFITTING_DLL boost::optional<API::Workspace_sptr> getWorkspace(const std::string &name, int period);
+MANTID_CURVEFITTING_DLL std::optional<API::Workspace_sptr> getWorkspace(const std::string &name, int period);
 
 /// Create a list of input workspace names
 MANTID_CURVEFITTING_DLL std::vector<InputSpectraToFit> makeNames(const std::string &inputList, int default_wi,

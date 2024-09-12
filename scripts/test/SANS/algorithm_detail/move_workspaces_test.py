@@ -111,7 +111,6 @@ class MoveSans2DMonitor(unittest.TestCase):
         self.assertAlmostEqual(calculate_new_pos_rel_to_rear(ws=workspace, inst_info=inst_info, offset=mon_4_dist), z_pos_mon_4_after)
 
     def test_not_moving_monitors(self):
-
         # Unused for unit test
         component = None
         is_transmission_workspace = None
@@ -169,7 +168,6 @@ class MoveZoomMonitors(unittest.TestCase):
         return state
 
     def test_move_both_zoom_monitors(self):
-
         # Unused for unit test
         component = None
         is_transmission_workspace = None

@@ -72,7 +72,6 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             os.makedirs(self.userRootDir)
 
     def makeFakeSourceReductionFile(self, mcf, contents=None):
-
         all_instr_names = mcf._user.get_all_instruments()
         all_files = []
         for instr in all_instr_names:
@@ -169,7 +168,6 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertEqual(user.instrument, "MERLIN")
 
     def test_build_config(self):
-
         # script verifies the presence of a folder, not its contents.
         # for the script to work, let's run it on default save directory
         MantidDir = os.path.split(os.path.realpath(__file__))[0]
@@ -324,7 +322,6 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertEqual(user.GID, "1310168")
 
     def test_parse_file_description(self):
-
         this_file = os.path.realpath(__file__)
         file_dir = os.path.dirname(this_file)
         test_xml = os.path.join(file_dir, "User_files_description_test.xml")
@@ -395,7 +392,6 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertRaises(RuntimeError, mcf.init_user, "bla_bla_bla")
 
     def test_various_user_constructors(self):
-
         user = UserProperties("tusxxx MARI RB1040506 153 150821")
         sus = str(user)
         self.assertEqual(sus, "tusxxx MARI RB1040506 2015_3 2015-08-21")

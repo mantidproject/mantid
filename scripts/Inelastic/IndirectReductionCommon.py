@@ -286,7 +286,6 @@ def crop_workspaces(workspace_names, spec_min, spec_max, extract_monitors=True, 
     from mantid.simpleapi import ExtractSingleSpectrum, CropWorkspace
 
     for workspace_name in workspace_names:
-
         if extract_monitors:
             # Get the monitor spectrum
             monitor_ws_name = workspace_name + "_mon"
@@ -939,7 +938,7 @@ def fold_chopped(workspace_name):
 # -------------------------------------------------------------------------------
 
 
-def rename_reduction(workspace_name, multiple_files):
+def rename_reduction(workspace_name, multiple_files, suffix=None):
     """
     Renames a workspace according to the naming policy in the Workflow.NamingConvention parameter.
 
@@ -993,7 +992,10 @@ def rename_reduction(workspace_name, multiple_files):
     elif convention == "AnalyserReflection":
         analyser = instrument.getStringParameter("analyser")[0]
         reflection = instrument.getStringParameter("reflection")[0]
-        new_name = "%s%s%s_%s%s_red" % (inst_name.lower(), run_number, multi_run_marker, analyser, reflection)
+        if not suffix:
+            new_name = "%s%s%s_%s%s_red" % (inst_name.lower(), run_number, multi_run_marker, analyser, reflection)
+        else:
+            new_name = "%s%s%s_%s%s_%s_red" % (inst_name.lower(), run_number, multi_run_marker, analyser, reflection, suffix)
 
     else:
         raise RuntimeError("No valid naming convention for workspace %s" % workspace_name)

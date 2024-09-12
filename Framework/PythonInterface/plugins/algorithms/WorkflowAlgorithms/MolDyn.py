@@ -52,7 +52,6 @@ class MolDyn(PythonAlgorithm):
 
     # pylint: disable=too-many-branches
     def PyExec(self):
-
         output_ws_name = self.getPropertyValue("OutputWorkspace")
         version, data_name, _ = self._get_version_and_data_path()
 

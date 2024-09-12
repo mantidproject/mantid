@@ -17,7 +17,6 @@ class LoadWidgetView(QtWidgets.QWidget):
         self.setup_interface_layout()
 
     def setup_interface_layout(self):
-
         self.clear_button = QtWidgets.QPushButton(self)
         self.clear_button.setObjectName("clearButton")
         self.clear_button.setToolTip("Clear the currently loaded data")

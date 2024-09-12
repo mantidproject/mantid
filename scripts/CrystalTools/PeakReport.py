@@ -8,6 +8,7 @@
 """
 This is a module for creating peak integration reports.
 """
+
 import os
 import mantid.api
 from mantidplot import plotSlice

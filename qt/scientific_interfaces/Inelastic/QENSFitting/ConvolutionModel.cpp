@@ -63,7 +63,7 @@ Mantid::Geometry::IComponent_const_sptr getAnalyser(const MatrixWorkspace_sptr &
   return instrument->getComponentByName(analysers[0]);
 }
 
-boost::optional<double> instrumentResolution(const MatrixWorkspace_sptr &workspace) {
+std::optional<double> instrumentResolution(const MatrixWorkspace_sptr &workspace) {
   try {
     auto const analyser = getAnalyser(workspace);
     if (analyser && analyser->hasParameter("resolution"))
@@ -75,13 +75,13 @@ boost::optional<double> instrumentResolution(const MatrixWorkspace_sptr &workspa
     else if (instrument && instrument->hasParameter("EFixed"))
       return instrument->getNumberParameter("EFixed")[0] * 0.01;
 
-    return boost::none;
+    return std::nullopt;
   } catch (Mantid::Kernel::Exception::NotFoundError const &) {
-    return boost::none;
+    return std::nullopt;
   } catch (std::invalid_argument const &) {
-    return boost::none;
+    return std::nullopt;
   } catch (std::exception const &) {
-    return boost::none;
+    return std::nullopt;
   }
 }
 
@@ -148,7 +148,7 @@ parameterNameChanges(const IFunction &model, const std::string &prefixPrefix, co
 }
 
 std::unordered_map<std::string, std::string> constructParameterNameChanges(const IFunction &model,
-                                                                           boost::optional<std::size_t> backgroundIndex,
+                                                                           std::optional<std::size_t> backgroundIndex,
                                                                            bool temperatureUsed) {
   std::string prefixPrefix = backgroundIndex ? "f1.f1." : "f1.";
   std::string prefixSuffix = temperatureUsed ? "f1." : "";
@@ -219,10 +219,10 @@ IAlgorithm_sptr ConvolutionModel::simultaneousFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSimultaneous");
 }
 
-boost::optional<double> ConvolutionModel::getInstrumentResolution(WorkspaceID workspaceID) const {
+std::optional<double> ConvolutionModel::getInstrumentResolution(WorkspaceID workspaceID) const {
   if (workspaceID < getNumberOfWorkspaces())
     return instrumentResolution(getWorkspace(workspaceID));
-  return boost::none;
+  return std::nullopt;
 }
 
 MultiDomainFunction_sptr ConvolutionModel::getMultiDomainFunction() const {
@@ -234,7 +234,7 @@ MultiDomainFunction_sptr ConvolutionModel::getMultiDomainFunction() const {
   return function;
 }
 
-void ConvolutionModel::setTemperature(const boost::optional<double> &temperature) { m_temperature = temperature; }
+void ConvolutionModel::setTemperature(const std::optional<double> &temperature) { m_temperature = temperature; }
 
 std::unordered_map<std::string, ParameterValue>
 ConvolutionModel::createDefaultParameters(WorkspaceID workspaceID) const {
@@ -279,9 +279,9 @@ void ConvolutionModel::addSampleLogs() {
   AddSampleLogRunner addSampleLog(result, group);
   addSampleLog("resolution_filename", boost::algorithm::join(getNames(m_resolution), ","), "String");
 
-  if (m_temperature && m_temperature.get() != 0.0) {
+  if (m_temperature && m_temperature.value() != 0.0) {
     addSampleLog("temperature_correction", "true", "String");
-    addSampleLog("temperature_value", std::to_string(m_temperature.get()), "Number");
+    addSampleLog("temperature_value", std::to_string(m_temperature.value()), "Number");
   }
 }
 
@@ -290,9 +290,8 @@ void ConvolutionModel::addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   addSampleLogs();
 }
 
-void ConvolutionModel::setParameterNameChanges(const IFunction &model, boost::optional<std::size_t> backgroundIndex) {
-  m_parameterNameChanges =
-      constructParameterNameChanges(model, std::move(backgroundIndex), m_temperature.is_initialized());
+void ConvolutionModel::setParameterNameChanges(const IFunction &model, std::optional<std::size_t> backgroundIndex) {
+  m_parameterNameChanges = constructParameterNameChanges(model, std::move(backgroundIndex), m_temperature.has_value());
 }
 
 } // namespace MantidQt::CustomInterfaces::Inelastic

@@ -78,7 +78,7 @@ void LoadInstrumentFromNexus::exec() {
   // Otherwise try and get it from the nexus file - but not there at present!
   // l1 = nxload.ivpb.i_l1;
   // Default to 10 if the file doesn't have it set
-  double l1 = l1ConfigVal.get_value_or(10.0);
+  double l1 = l1ConfigVal.value_or(10.0);
 
   source->setPos(0.0, -1.0 * l1, 0.0);
   localWorkspace->setInstrument(instrument);

@@ -610,8 +610,8 @@ auto ReflectometryReductionOneAuto2::getRebinParams(const MatrixWorkspace_sptr &
  * @param theta :: the angle of this run
  * @return :: the rebin step in Q, or none if it could not be found
  */
-boost::optional<double> ReflectometryReductionOneAuto2::getQStep(const MatrixWorkspace_sptr &inputWS,
-                                                                 const double theta) {
+std::optional<double> ReflectometryReductionOneAuto2::getQStep(const MatrixWorkspace_sptr &inputWS,
+                                                               const double theta) {
   Property *qStepProp = getProperty("MomentumTransferStep");
   double qstep;
   if (!qStepProp->isDefault()) {
@@ -631,7 +631,7 @@ boost::optional<double> ReflectometryReductionOneAuto2::getQStep(const MatrixWor
     calcRes->execute();
 
     if (!calcRes->isExecuted()) {
-      return boost::none;
+      return std::nullopt;
     }
     qstep = calcRes->getProperty("Resolution");
     qstep = -qstep;

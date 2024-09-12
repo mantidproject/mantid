@@ -535,7 +535,7 @@ std::vector<std::vector<unsigned int>> generateRange(unsigned int const from, un
 
   size_t limit;
   auto limitStr = ConfigService::Instance().getValue<std::string>("loading.multifilelimit");
-  if (!limitStr.is_initialized() || !Strings::convert(limitStr.get(), limit)) {
+  if (!limitStr.has_value() || !Strings::convert(limitStr.value(), limit)) {
     limit = ConfigService::Instance().getFacility().multiFileLimit();
   }
 

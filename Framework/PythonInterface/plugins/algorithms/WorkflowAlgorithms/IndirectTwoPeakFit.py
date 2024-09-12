@@ -18,7 +18,6 @@ def set_y_axis_labels(workspace, labels):
 
 
 class IndirectTwoPeakFit(PythonAlgorithm):
-
     _sample_workspace = None
     _res_ws = None
     _e_min = None

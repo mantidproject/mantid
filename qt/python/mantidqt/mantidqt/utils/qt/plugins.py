@@ -5,6 +5,7 @@
 a generated file. Any changes made here will be lost. See
 qt/python/mantidqt/utils/qt/plugins.py.in
 """
+
 import os
 
 # Qt needs to be able to find its plugins and by default it looks in the

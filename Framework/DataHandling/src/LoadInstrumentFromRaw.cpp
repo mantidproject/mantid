@@ -85,7 +85,7 @@ void LoadInstrumentFromRaw::exec() {
   // If user has provided an L1, use that
   auto l1ConfigValue = Kernel::ConfigService::Instance().getValue<double>("instrument.L1");
   // Otherwise try and get it from the raw file
-  double l1 = l1ConfigValue.get_value_or(iraw.ivpb.i_l1);
+  double l1 = l1ConfigValue.value_or(iraw.ivpb.i_l1);
   // Default to 10 if the raw file doesn't have it set
   if (l1 == 0)
     l1 = 10.0;

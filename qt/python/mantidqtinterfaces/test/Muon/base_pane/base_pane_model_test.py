@@ -19,20 +19,17 @@ class BasePaneModelTest(unittest.TestCase):
         self.assertEqual(self.model.get_workspaces_to_plot(True, True), [])
 
     def test_get_workspace_list_and_indices_to_plot_returns_correctly(self):
-
         workspaces, indices = self.model.get_workspace_list_and_indices_to_plot(True, "Asymmetry")
 
         self.assertEqual(workspaces, [])
         self.assertEqual(indices, [])
 
     def test_get_workspaces_to_remove(self):
-
         workspaces = self.model.get_workspaces_to_remove("fwd", True, "Asymmetry")
 
         self.assertEqual(workspaces, [])
 
     def test_create_tiled_keys_returns_correctly_for_tiled_by_group(self):
-
         keys = self.model.create_tiled_keys("something")
 
         self.assertEqual(keys, [])

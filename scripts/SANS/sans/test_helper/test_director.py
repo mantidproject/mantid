@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" A Test director """
+"""A Test director"""
+
 from sans.state.StateObjects.StateData import get_data_builder
 from sans.state.StateObjects.StateMoveDetectors import get_move_builder
 from sans.state.StateObjects.StateReductionMode import StateReductionMode

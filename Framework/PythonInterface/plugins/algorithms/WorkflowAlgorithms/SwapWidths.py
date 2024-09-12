@@ -12,7 +12,6 @@ import numpy as np
 
 
 class SwapWidths(DataProcessorAlgorithm):
-
     _input_ws = None
     _output_ws = None
     _swap_point = None

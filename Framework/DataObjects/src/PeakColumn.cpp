@@ -90,8 +90,8 @@ PeakColumn<T>::PeakColumn(std::vector<T> &peaks, const std::string &name) : m_pe
   this->m_type = typeFromName(name); // Throws if the name is unknown
   const std::string key = "PeakColumn.hklPrec";
   auto hklPrec = ConfigService::Instance().getValue<int>(key);
-  this->m_hklPrec = hklPrec.get_value_or(2);
-  if (!hklPrec.is_initialized()) {
+  this->m_hklPrec = hklPrec.value_or(2);
+  if (!hklPrec.has_value()) {
     g_log.information() << "In PeakColumn constructor, did not find any value for '" << key
                         << "' from the Config Service. Using default: " << this->m_hklPrec << "\n";
   }

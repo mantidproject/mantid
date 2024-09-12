@@ -121,6 +121,9 @@ private:
   /// Result of comparison (true if equal, false otherwise)
   bool m_result{false};
 
+  /// The comparison method to use (true if equal, false otherwise)
+  std::function<bool(const double, const double)> m_compare;
+
   /// Mismatch messages that resulted from comparison
   API::ITableWorkspace_sptr m_messages;
 

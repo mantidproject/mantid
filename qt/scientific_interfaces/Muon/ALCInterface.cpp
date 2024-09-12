@@ -270,32 +270,20 @@ void ALCInterface::importResults() {
 
 void ALCInterface::importLoadedData(const std::string &workspaceName) {
   if (const auto dataWS = getWorkspace(workspaceName)) {
-    if (dataWS->getNumberHistograms() != 1) {
-      logger.warning("Workspace " + workspaceName + " must contain one spectrum only.");
-    } else {
-      m_dataLoading->setData(dataWS);
-    }
+    m_dataLoading->setData(dataWS);
   }
 }
 
 void ALCInterface::importBaselineData(const std::string &workspaceName) {
   if (const auto baselineWS = getWorkspace(workspaceName)) {
-    if (baselineWS->getNumberHistograms() != 3) {
-      logger.warning("Workspace " + workspaceName + " must contain three spectra.");
-    } else {
-      m_baselineModellingModel->setData(baselineWS);
-      m_baselineModellingModel->setCorrectedData(baselineWS);
-    }
+    m_baselineModellingModel->setData(baselineWS);
+    m_baselineModellingModel->setCorrectedData(baselineWS);
   }
 }
 
 void ALCInterface::importPeakData(const std::string &workspaceName) {
   if (const auto peaksWS = getWorkspace(workspaceName)) {
-    if (peaksWS->getNumberHistograms() < 3) {
-      logger.warning("Workspace " + workspaceName + " must contain at least three spectra.");
-    } else {
-      m_peakFittingModel->setData(peaksWS);
-    }
+    m_peakFittingModel->setData(peaksWS);
   }
 }
 

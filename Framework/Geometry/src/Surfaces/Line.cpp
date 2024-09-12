@@ -13,7 +13,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Tolerance.h"
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace {
 Mantid::Kernel::Logger logger("Line");
@@ -122,7 +122,7 @@ cases exist.
   if (ix < 1)
     return 0;
 
-  boost::optional<Kernel::V3D> Ans1;
+  std::optional<Kernel::V3D> Ans1;
   if (SQ.first.imag() == 0.0 && SQ.first.real() >= 0.0) // +ve roots only
   {
     const double lambda = SQ.first.real();

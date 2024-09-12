@@ -86,7 +86,6 @@ class MatrixWorkspaceDisplayPresenterTest(unittest.TestCase):
     @patch(copy_to_clipboard_package)
     @with_mock_presenter
     def test_action_copy_spectrum_values_no_selection(self, ws, view, presenter, mock_copy, mock_show_mouse_toast):
-
         mock_table = MockQTableView()
         mock_table.mock_selection_model.hasSelection = Mock(return_value=False)
         mock_table.mock_selection_model.selectedRows = Mock()

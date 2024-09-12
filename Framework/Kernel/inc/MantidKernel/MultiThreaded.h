@@ -201,8 +201,8 @@ template <typename T, typename BinaryOp> void AtomicOp(std::atomic<T> &f, T d, B
 
 inline void setMaxCoresToConfig() {
   const auto maxCores = Mantid::Kernel::ConfigService::Instance().getValue<int>("MultiThreaded.MaxCores");
-  if (maxCores.get_value_or(0) > 0) {
-    PARALLEL_SET_NUM_THREADS(maxCores.get());
+  if (maxCores.value_or(0) > 0) {
+    PARALLEL_SET_NUM_THREADS(maxCores.value());
   }
 }
 

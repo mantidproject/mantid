@@ -8,12 +8,12 @@
 """
 System test for ARCS reduction
 """
+
 import systemtesting
 from mantid.simpleapi import *
 
 
 class CompareMDWorkspacesTest(systemtesting.MantidSystemTest):
-
     compare_result_1 = ""
     compare_result_2 = ""
     compare_result_3 = ""
@@ -25,7 +25,6 @@ class CompareMDWorkspacesTest(systemtesting.MantidSystemTest):
         return 4000
 
     def cleanup(self):
-
         for ws_name in ["md_1", "md_2", "ev_ws_1", "ev_ws_2"]:
             if mtd.doesExist(ws_name):
                 mtd.remove(ws_name)

@@ -17,7 +17,7 @@
 #include "MantidKernel/MersenneTwister.h"
 #include "MockRNG.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <cxxtest/TestSuite.h>
 
@@ -781,7 +781,7 @@ public:
     //  Random sequence set up so as to give point (0.90, 1.10, 0.65)
     auto geom_obj = createLShape();
     size_t maxAttempts(1);
-    boost::optional<Kernel::V3D> point;
+    std::optional<Kernel::V3D> point;
     TS_ASSERT_THROWS_NOTHING(point = geom_obj->generatePointInObject(rng, maxAttempts));
 
     const double tolerance(1e-10);
@@ -804,7 +804,7 @@ public:
     //  which is outside the octahedron
     auto geom_obj = createOctahedron();
     size_t maxAttempts(1);
-    boost::optional<V3D> point;
+    std::optional<V3D> point;
     point = geom_obj->generatePointInObject(rng, maxAttempts);
     TS_ASSERT_EQUALS(!point, true);
   }
@@ -998,7 +998,7 @@ public:
   void test_generatePointInside_Convex_Solid() {
     const size_t npoints(6000);
     const size_t maxAttempts(500);
-    boost::optional<V3D> point;
+    std::optional<V3D> point;
     for (size_t i = 0; i < npoints; ++i) {
       point = octahedron->generatePointInObject(rng, maxAttempts);
     }
@@ -1007,7 +1007,7 @@ public:
   void test_generatePointInside_NonConvex_Solid() {
     const size_t npoints(6000);
     const size_t maxAttempts(500);
-    boost::optional<V3D> point;
+    std::optional<V3D> point;
     for (size_t i = 0; i < npoints; ++i) {
       point = lShape->generatePointInObject(rng, maxAttempts);
     }

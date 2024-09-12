@@ -216,7 +216,7 @@ void CalculatePaalmanPings::handleRun() {
 
     auto const convertedSampleWorkspace = addConvertUnitsStep(sampleWs, "Wavelength", "UNIT", emode, efixed);
     if (convertedSampleWorkspace)
-      absCorProps->setPropertyValue("SampleWorkspace", convertedSampleWorkspace.get());
+      absCorProps->setPropertyValue("SampleWorkspace", convertedSampleWorkspace.value());
     else {
       m_runPresenter->setRunEnabled(true);
       return;
@@ -256,7 +256,7 @@ void CalculatePaalmanPings::handleRun() {
 
       auto const convertedWorkspace = addConvertUnitsStep(canWs, "Wavelength", "UNIT", emode);
       if (convertedWorkspace)
-        absCorProps->setPropertyValue("CanWorkspace", convertedWorkspace.get());
+        absCorProps->setPropertyValue("CanWorkspace", convertedWorkspace.value());
       else {
         m_runPresenter->setRunEnabled(true);
         return;
@@ -445,15 +445,15 @@ void CalculatePaalmanPings::getBeamWidthFromWorkspace(const QString &wsName) {
   const auto beamWidth = getInstrumentParameter(instrument, "Workflow.beam-width");
 
   if (beamWidth) {
-    m_uiForm.spCylBeamWidth->setValue(beamWidth.get());
-    m_uiForm.spAnnBeamWidth->setValue(beamWidth.get());
+    m_uiForm.spCylBeamWidth->setValue(beamWidth.value());
+    m_uiForm.spAnnBeamWidth->setValue(beamWidth.value());
   }
 
   const auto beamHeight = getInstrumentParameter(instrument, "Workflow.beam-height");
 
   if (beamHeight) {
-    m_uiForm.spCylBeamHeight->setValue(beamHeight.get());
-    m_uiForm.spAnnBeamHeight->setValue(beamHeight.get());
+    m_uiForm.spCylBeamHeight->setValue(beamHeight.value());
+    m_uiForm.spAnnBeamHeight->setValue(beamHeight.value());
   }
 }
 
@@ -465,9 +465,9 @@ void CalculatePaalmanPings::getBeamWidthFromWorkspace(const QString &wsName) {
  * @param parameterName The name of the parameter to extract.
  *
  * @return              The extracted parameter if it is found, else
- *                      boost::none.
+ *                      std::nullopt.
  */
-boost::optional<double>
+std::optional<double>
 CalculatePaalmanPings::getInstrumentParameter(const Mantid::Geometry::Instrument_const_sptr &instrument,
                                               const std::string &parameterName) {
 
@@ -475,7 +475,7 @@ CalculatePaalmanPings::getInstrumentParameter(const Mantid::Geometry::Instrument
     const auto parameterValue = QString::fromStdString(instrument->getStringParameter(parameterName)[0]);
     return parameterValue.toDouble();
   }
-  return boost::none;
+  return std::nullopt;
 }
 
 /**

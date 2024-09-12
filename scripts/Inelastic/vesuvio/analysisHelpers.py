@@ -319,9 +319,7 @@ def calculate_resolution(spectrum, data_x, mass, IPFile):
     dEE += (2.0 * E0**1.5 / Ef**0.5 / L0) ** 2 * dL1**2 + (2.0 * E0 / L0) ** 2 * dL0**2
     dQQ = (1.0 - (E0 / Ef) ** 1.5 * L1 / L0 - np.cos(angle / 180.0 * np.pi) * ((E0 / Ef) ** 0.5 - L1 / L0 * E0 / Ef)) ** 2 * dE1**2
     DQQ_2 = np.abs(Ef / E0 * np.cos(angle / 180.0 * np.pi) - 1.0)
-    dQQ += (
-        (2.0 * E0 * v0 / L0) ** 2 * dTOF**2 + (2.0 * E0**1.5 / L0 / Ef**0.5) ** 2 * dL1**2 + (2.0 * E0 / L0) ** 2 * dL0**2
-    ) * DQQ_2
+    dQQ += ((2.0 * E0 * v0 / L0) ** 2 * dTOF**2 + (2.0 * E0**1.5 / L0 / Ef**0.5) ** 2 * dL1**2 + (2.0 * E0 / L0) ** 2 * dL0**2) * DQQ_2
     dQQ += (2.0 * np.sqrt(E0 * Ef) * np.sin(angle / 180.0 * np.pi)) ** 2 * dTheta**2
     # conversion from meV^2 to A^-2
     dEE *= (mass / hbar**2 / delta_Q) ** 2

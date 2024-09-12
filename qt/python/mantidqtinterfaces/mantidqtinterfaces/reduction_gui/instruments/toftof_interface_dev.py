@@ -8,6 +8,7 @@
 """
 TOFTOF reduction workflow gui.
 """
+
 from mantidqtinterfaces.reduction_gui.instruments.interface import InstrumentInterface
 
 from reduction_gui.reduction.toftof.toftof_reduction import TOFTOFReductionScripter

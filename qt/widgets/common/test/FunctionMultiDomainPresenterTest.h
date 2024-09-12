@@ -56,7 +56,7 @@ public:
       m_function->setError(i, 0.0);
     }
   }
-  boost::optional<QString> currentFunctionIndex() const override { return m_currentFunctionIndex; }
+  std::optional<QString> currentFunctionIndex() const override { return m_currentFunctionIndex; }
 
   void setParameterTie(const QString &paramName, const QString &tie) override {
     if (!tie.isEmpty()) {
@@ -113,7 +113,7 @@ public:
 
 private:
   IFunction_sptr m_function;
-  boost::optional<QString> m_currentFunctionIndex;
+  std::optional<QString> m_currentFunctionIndex;
   bool m_areErrorsEnabled{true};
   QStringList m_globals;
   MOCK_METHOD2(setDoubleAttribute, void(const QString &, double));

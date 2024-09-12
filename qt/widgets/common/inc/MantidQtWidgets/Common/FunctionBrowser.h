@@ -14,8 +14,8 @@
 
 #include <QWidget>
 
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 namespace Mantid {
 namespace API {
@@ -60,7 +60,7 @@ public:
   /// Return a function with specified index
   IFunction_sptr getFunctionByIndex(std::string const &index);
   /// Return index of the current function, if one is selected
-  boost::optional<std::string> currentFunctionIndex();
+  std::optional<std::string> currentFunctionIndex();
   /// Update the function parameter value
   void setParameter(std::string const &parameterName, double value);
   /// Update the function parameter error

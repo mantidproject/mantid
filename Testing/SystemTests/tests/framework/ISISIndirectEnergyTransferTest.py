@@ -10,9 +10,7 @@ from mantid.simpleapi import ISISIndirectEnergyTransfer
 
 
 class ISISIndirectEnergyTransferTest(MantidSystemTest):
-
     def runTest(self):
-
         ISISIndirectEnergyTransfer(
             InputFiles="TSC05224.RAW",
             Instrument="TOSCA",

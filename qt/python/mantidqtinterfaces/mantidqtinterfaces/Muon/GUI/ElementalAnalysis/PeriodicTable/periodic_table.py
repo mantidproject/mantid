@@ -602,7 +602,7 @@ class PeriodicTable(QtWidgets.QWidget):
         if isinstance(symbols[0], PeriodicTableItem):
             symbols = [elmt.symbol for elmt in symbols]
 
-        for (e, b) in self._eltButtons.items():
+        for e, b in self._eltButtons.items():
             b.setSelected(e in symbols)
         self.sigSelectionChanged.emit(self.getSelection())
 

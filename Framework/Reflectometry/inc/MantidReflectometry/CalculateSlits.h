@@ -9,7 +9,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidReflectometry/DllConfig.h"
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace Mantid {
 namespace Reflectometry {

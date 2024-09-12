@@ -19,7 +19,6 @@ from IndirectReductionCommon import (
 
 
 class IndirectReductionCommonTest(unittest.TestCase):
-
     @classmethod
     def setUpClass(cls) -> None:
         workspace = Load(Filename="OSI10203.raw", StoreInADS=False)

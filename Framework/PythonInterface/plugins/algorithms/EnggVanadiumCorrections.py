@@ -222,7 +222,6 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
         vanadium_integration_ws = mantid.Integration(InputWorkspace=vanadium_ws, StoreInADS=False)
         if 1 != vanadium_integration_ws.blocksize() or vanadium_integration_ws.getNumberHistograms() < vanadium_ws.getNumberHistograms():
-
             raise RuntimeError(
                 "Error while integrating vanadium workspace, the Integration algorithm "
                 "produced a workspace with %d bins and %d spectra. The workspace "

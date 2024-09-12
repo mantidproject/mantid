@@ -373,9 +373,9 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         if read_from == "User":
             n_thick = len(thicknesses)
             if n_thick > 1 and n_thick != self.n_samples:
-                issues[
-                    "SampleThickness"
-                ] = f"SampleThickness has {n_thick} elements which does not match the number of samples {self.n_samples}."
+                issues["SampleThickness"] = (
+                    f"SampleThickness has {n_thick} elements which does not match the number of samples {self.n_samples}."
+                )
         return issues
 
     def _check_sample_names_dimensions(self):

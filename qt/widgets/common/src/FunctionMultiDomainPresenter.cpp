@@ -111,7 +111,7 @@ void FunctionMultiDomainPresenter::updateMultiDatasetAttributes(const IFunction 
 
 void FunctionMultiDomainPresenter::clearErrors() { m_view->clearErrors(); }
 
-boost::optional<std::string> FunctionMultiDomainPresenter::currentFunctionIndex() const {
+std::optional<std::string> FunctionMultiDomainPresenter::currentFunctionIndex() const {
   return m_view->currentFunctionIndex();
 }
 

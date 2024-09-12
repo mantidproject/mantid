@@ -13,7 +13,6 @@ class MissingSettings(Exception):
 
 
 class Settings(object):
-
     __contents = None
     __filename = None
 

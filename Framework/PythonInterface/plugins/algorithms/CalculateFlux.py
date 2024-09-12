@@ -21,7 +21,6 @@ class CalculateFlux(PythonAlgorithm):
         return "CalculateFlux"
 
     def PyInit(self):
-
         self.declareProperty(
             MatrixWorkspaceProperty("InputWorkspace", defaultValue="", validator=InstrumentValidator(), direction=Direction.Input),
             doc="The input workspace",

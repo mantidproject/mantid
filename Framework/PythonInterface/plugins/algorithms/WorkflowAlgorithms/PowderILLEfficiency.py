@@ -60,7 +60,6 @@ def _plus_friendly(ws1, ws2, out):
 
 
 class PowderILLEfficiency(PythonAlgorithm):
-
     _out_name = None  # the name of the output workspace
     _input_files = None  # input files (numor), must be detector scans (to list for D2B, to merge for D20)
     _calib_file = None  # file containing previously derived calibration constants

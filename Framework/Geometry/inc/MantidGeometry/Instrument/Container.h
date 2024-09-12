@@ -68,12 +68,12 @@ public:
   }
 
   int getPointInObject(Kernel::V3D &point) const override { return m_shape->getPointInObject(point); }
-  boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                     const size_t i) const override {
+  std::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                   const size_t i) const override {
     return m_shape->generatePointInObject(rng, i);
   }
-  boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                     const BoundingBox &activeRegion, const size_t i) const override {
+  std::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                   const BoundingBox &activeRegion, const size_t i) const override {
     return m_shape->generatePointInObject(rng, activeRegion, i);
   }
 

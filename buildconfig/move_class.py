@@ -5,7 +5,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-""" Utility for moving a class file to a different project."""
+"""Utility for moving a class file to a different project."""
+
 import argparse
 
 from cmakelists_utils import *
@@ -49,7 +50,6 @@ def move_one(subproject, classname, newproject, newclassname, oldfilename, newfi
 
 
 def move_all(subproject, classname, newproject, newclassname, args):
-
     # Directory at base of subproject
     basedir, header_folder = find_basedir(args.project, subproject)
     newbasedir, new_header_folder = find_basedir(args.project, newproject)

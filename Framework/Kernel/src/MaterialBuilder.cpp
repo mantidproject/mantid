@@ -19,7 +19,7 @@ using PhysicalConstants::NeutronAtom;
 namespace Kernel {
 
 namespace {
-inline bool isEmpty(const boost::optional<double> &value) { return !value || value == Mantid::EMPTY_DBL(); }
+inline bool isEmpty(const std::optional<double> &value) { return !value || value == Mantid::EMPTY_DBL(); }
 constexpr auto LARGE_LAMBDA = 100; // Lambda likely to be beyond max lambda in
                                    // any measured spectra. In Angstroms
 } // namespace
@@ -270,15 +270,15 @@ Material MaterialBuilder::build() const {
         std::make_unique<Material>(m_name, formula, density_struct.number_density, density_struct.packing_fraction);
   }
   if (m_attenuationProfileFileName) {
-    AttenuationProfile materialAttenuation(m_attenuationProfileFileName.get(), m_attenuationFileSearchPath,
+    AttenuationProfile materialAttenuation(m_attenuationProfileFileName.value(), m_attenuationFileSearchPath,
                                            material.get(), LARGE_LAMBDA);
     material->setAttenuationProfile(materialAttenuation);
   }
   if (m_xRayAttenuationProfileFileName) {
     // don't supply a material so that extrapolation using the neutron tabulated
     // attenuation data is turned off
-    AttenuationProfile materialAttenuation(m_xRayAttenuationProfileFileName.get(), m_attenuationFileSearchPath, nullptr,
-                                           -1);
+    AttenuationProfile materialAttenuation(m_xRayAttenuationProfileFileName.value(), m_attenuationFileSearchPath,
+                                           nullptr, -1);
     material->setXRayAttenuationProfile(materialAttenuation);
   }
   return *material;
@@ -290,7 +290,7 @@ Material MaterialBuilder::build() const {
  */
 Material::ChemicalFormula MaterialBuilder::createCompositionFromAtomicNumber() const {
   Material::FormulaUnit unit{std::make_shared<PhysicalConstants::Atom>(
-                                 getAtom(static_cast<uint16_t>(m_atomicNo.get()), static_cast<uint16_t>(m_massNo))),
+                                 getAtom(static_cast<uint16_t>(m_atomicNo.value()), static_cast<uint16_t>(m_massNo))),
                              1.};
   Material::ChemicalFormula formula;
   formula.emplace_back(unit);
@@ -310,11 +310,11 @@ MaterialBuilder::getOrCalculateRhoAndPacking(const Material::ChemicalFormula &fo
 
   // get the packing fraction
   if (m_packingFraction)
-    result.packing_fraction = m_packingFraction.get();
+    result.packing_fraction = m_packingFraction.value();
 
   // if effective density has been specified
   if (m_numberDensityEff)
-    result.effective_number_density = m_numberDensityEff.get();
+    result.effective_number_density = m_numberDensityEff.value();
 
   // total number of atoms is used in both density calculations
   const double totalNumAtoms =
@@ -323,12 +323,12 @@ MaterialBuilder::getOrCalculateRhoAndPacking(const Material::ChemicalFormula &fo
 
   // calculate the number density by one of many ways
   if (m_numberDensity) {
-    result.number_density = m_numberDensity.get();
+    result.number_density = m_numberDensity.value();
     if (m_numberDensityUnit == NumberDensityUnit::FormulaUnits && totalNumAtoms > 0.) {
-      result.number_density = m_numberDensity.get() * totalNumAtoms;
+      result.number_density = m_numberDensity.value() * totalNumAtoms;
     }
   } else if (m_zParam && m_cellVol) {
-    result.number_density = totalNumAtoms * m_zParam.get() / m_cellVol.get();
+    result.number_density = totalNumAtoms * m_zParam.value() / m_cellVol.value();
   } else if (!formula.empty() && formula.size() == 1) {
     result.number_density = formula.front().atom->number_density;
   }
@@ -339,7 +339,7 @@ MaterialBuilder::getOrCalculateRhoAndPacking(const Material::ChemicalFormula &fo
     const double rmm =
         std::accumulate(formula.cbegin(), formula.cend(), 0.,
                         [](double sum, const Material::FormulaUnit &f) { return sum + f.atom->mass * f.multiplicity; });
-    result.effective_number_density = (m_massDensity.get() * totalNumAtoms / rmm) * PhysicalConstants::N_A * 1e-24;
+    result.effective_number_density = (m_massDensity.value() * totalNumAtoms / rmm) * PhysicalConstants::N_A * 1e-24;
   }
 
   // count the number of values that were set and generate errors
@@ -393,7 +393,7 @@ PhysicalConstants::NeutronAtom MaterialBuilder::generateCustomNeutron() const {
 
   // generate the default neutron
   if (m_atomicNo) {
-    auto atom = getAtom(static_cast<uint16_t>(m_atomicNo.get()), static_cast<uint16_t>(m_massNo));
+    auto atom = getAtom(static_cast<uint16_t>(m_atomicNo.value()), static_cast<uint16_t>(m_massNo));
     neutronAtom = atom.neutron;
     overrideNeutronProperties(neutronAtom);
   } else if (!m_formula.empty()) {
@@ -423,13 +423,13 @@ PhysicalConstants::NeutronAtom MaterialBuilder::generateCustomNeutron() const {
  */
 void MaterialBuilder::overrideNeutronProperties(PhysicalConstants::NeutronAtom &neutron) const {
   if (!isEmpty(m_totalXSection))
-    neutron.tot_scatt_xs = m_totalXSection.get();
+    neutron.tot_scatt_xs = m_totalXSection.value();
   if (!isEmpty(m_cohXSection))
-    neutron.coh_scatt_xs = m_cohXSection.get();
+    neutron.coh_scatt_xs = m_cohXSection.value();
   if (!isEmpty(m_incXSection))
-    neutron.inc_scatt_xs = m_incXSection.get();
+    neutron.inc_scatt_xs = m_incXSection.value();
   if (!isEmpty(m_absSection))
-    neutron.abs_scatt_xs = m_absSection.get();
+    neutron.abs_scatt_xs = m_absSection.value();
 }
 
 } // namespace Kernel

@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init, invalid-name, bare-except
 """
-    Magnetism reflectometry reduction
+Magnetism reflectometry reduction
 """
+
 import sys
 import math
 import numpy as np

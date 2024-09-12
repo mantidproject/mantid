@@ -225,7 +225,6 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         return inputs
 
     def check_geometry_and_cuts(self, inputs):
-
         scale = self.getProperty("ScalingFactor").value
         thickness = self.getProperty("SampleThickness").value
 

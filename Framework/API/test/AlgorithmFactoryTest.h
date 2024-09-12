@@ -10,8 +10,8 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidKernel/Instantiator.h"
 #include <algorithm>
-#include <boost/optional.hpp>
 #include <cxxtest/TestSuite.h>
+#include <optional>
 
 class AlgorithmFactoryTest : public CxxTest::TestSuite {
 public:

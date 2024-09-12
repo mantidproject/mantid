@@ -137,7 +137,6 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
 
     @run_test_with_and_without_threading
     def test_that_if_decrement_run_fails_the_data_are_returned_to_previous_state(self):
-
         self.load_runs([2, 3, 4], ["file2.nxs", "file3.nxs", "file4.nxs"], [[2], [3], [4]])
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 
@@ -152,7 +151,6 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
 
     @run_test_with_and_without_threading
     def test_that_if_increment_run_fails_the_data_are_returned_to_previous_state(self):
-
         self.load_runs([2, 3, 4], ["file2.nxs", "file3.nxs", "file4.nxs"], [[2], [3], [4]])
         self.load_utils_patcher.load_workspace_from_filename = mock.Mock(side_effect=self.load_failure)
 

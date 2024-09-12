@@ -474,7 +474,7 @@ public:
 
   static bool showingHiddenObjects() {
     auto showingHiddenFlag = ConfigService::Instance().getValue<bool>("MantidOptions.InvisibleWorkspaces");
-    return showingHiddenFlag.get_value_or(false);
+    return showingHiddenFlag.value_or(false);
   }
 
   /// Sends notifications to observers. Observers can subscribe to
