@@ -12,7 +12,6 @@ from mantid.api import IPeakFunction, FunctionFactory
 
 
 class PearsonIV(IPeakFunction):
-
     def init(self):
         self.declareParameter("Intensity", 1.0, "Area under the peak.")
         self.declareParameter(

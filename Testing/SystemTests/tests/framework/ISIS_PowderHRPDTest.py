@@ -270,7 +270,7 @@ def run_focus(**kwargs):
         vanadium_normalisation=True,
         do_absorb_corrections=True,
         multiple_scattering=False,
-        **kwargs
+        **kwargs,
     )
 
 
