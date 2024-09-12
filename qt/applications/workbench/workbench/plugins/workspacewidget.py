@@ -263,7 +263,7 @@ class WorkspaceWidget(PluginWidget):
                 specs = ws.getSpectrumNumbers()
                 y = ws.getYDimension()
                 if y.getName() == "sample":
-                    spec_to_y_dim = {s: y.getX(s) for s in specs}
+                    spec_xvals = [ws.getYDimension().getX(ispec) for ispec in range(ws.getNumberHistograms())]
 
                     # Check if the q values are sorted, if not sort them
                     if sorted(spec_to_y_dim.values()) != spec_to_y_dim.values():
