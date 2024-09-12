@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init, invalid-name, no-self-use, attribute-defined-outside-init
 """
-    Top-level auto-reduction algorithm for the SNS Liquids Reflectometer
+Top-level auto-reduction algorithm for the SNS Liquids Reflectometer
 """
+
 import sys
 import math
 import re

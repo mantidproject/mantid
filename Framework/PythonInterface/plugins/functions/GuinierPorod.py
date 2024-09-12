@@ -9,6 +9,7 @@
 @author Mathieu Doucet, ORNL
 @date Oct 13, 2014
 """
+
 import math
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory

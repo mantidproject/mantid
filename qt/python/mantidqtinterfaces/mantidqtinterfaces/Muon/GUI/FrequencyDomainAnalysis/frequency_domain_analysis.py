@@ -271,7 +271,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.set_tab_warning(TAB_ORDER.index(tab_name), message)
 
     def setup_disable_notifier(self):
-
         self.disable_notifier.add_subscriber(self.home_tab.home_tab_widget.disable_observer)
 
         self.disable_notifier.add_subscriber(self.load_widget.load_widget.disable_observer)
@@ -291,7 +290,6 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.disable_notifier.add_subscriber(self.transform.disable_observer)
 
     def setup_enable_notifier(self):
-
         self.enable_notifier.add_subscriber(self.home_tab.home_tab_widget.enable_observer)
 
         self.enable_notifier.add_subscriber(self.load_widget.load_widget.enable_observer)

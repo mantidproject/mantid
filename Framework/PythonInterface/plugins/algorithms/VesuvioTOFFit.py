@@ -143,7 +143,6 @@ class VesuvioTOFFit(VesuvioBase):
 
     # pylint: disable=too-many-arguments
     def _do_fit(self, function_str, data_ws, index, constraints, ties, max_iter):
-
         # The tof data is required to be in seconds for the fitting
         # in order to re-use the standard Mantid Polynomial function. This polynomial simply
         # accepts the data "as is" in the workspace so if it is in microseconds then the

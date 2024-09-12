@@ -9,6 +9,7 @@
 These system tests are to verify the behaviour of the
 ISIS reflectometry instruments signed theta value
 """
+
 import os
 from mantid.simpleapi import *
 import systemtesting

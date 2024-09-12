@@ -241,7 +241,6 @@ class AtomListBuilder(object):
         return re.sub(nonCharacterRe, "", atomSymbol)
 
     def _getIsotropicUs(self, cifData, labels, unitCell):
-
         keyUIso = "_atom_site_u_iso_or_equiv"
         keyBIso = "_atom_site_b_iso_or_equiv"
 
@@ -510,9 +509,7 @@ class LoadCIF(PythonAlgorithm):
     {1}
   Atoms:
     {2}
-""".format(
-                builder.unitCell, builder.spaceGroup, "\n    ".join(builder.atoms.split(";"))
-            )
+""".format(builder.unitCell, builder.spaceGroup, "\n    ".join(builder.atoms.split(";")))
         )
 
         return crystalStructure

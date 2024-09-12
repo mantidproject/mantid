@@ -20,7 +20,6 @@ from mantid.kernel import (
 
 
 class IndirectCylinderAbsorption(DataProcessorAlgorithm):
-
     # Sample variables
     _sample_ws_name = None
     _sample_chemical_formula = None

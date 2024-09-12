@@ -13,7 +13,6 @@ import numpy as np
 
 class LinkedUBs_Test(systemtesting.MantidSystemTest):
     def runTest(self):
-
         ws1 = LoadRaw(Filename="SXD30904.raw.md5", OutputWorkspace="SXD30904")
 
         ws2 = LoadRaw(Filename="SXD30905.raw.md5", OutputWorkspace="SXD30905")

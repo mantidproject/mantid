@@ -7,7 +7,7 @@
 # pylint: disable=too-many-lines
 # pylint: disable=invalid-name
 # pylint: disable=attribute-defined-outside-init
-""" File contains Descriptors used describe run for direct inelastic reduction """
+"""File contains Descriptors used describe run for direct inelastic reduction"""
 
 from mantid.simpleapi import *
 from mantid.dataobjects import *
@@ -1174,7 +1174,7 @@ class RunDescriptor(PropDescriptor):
         use_ws_calibration=True,
         filePath=None,
         fileExt=None,
-        **kwargs
+        **kwargs,
     ):
         """Loads run into workspace with name provided.
 
@@ -1273,9 +1273,7 @@ class RunDescriptor(PropDescriptor):
         if "NormalizationFactor" not in source_ws.getRun():
             raise RuntimeError(
                 """ Can not change normalization of target workspace {0}
-                               as source workspace {1} is not normalized""".format(
-                    source_ws.name(), targ_ws.name()
-                )
+                               as source workspace {1} is not normalized""".format(source_ws.name(), targ_ws.name())
             )
         TargFactor = source_ws.getRun().getLogData("NormalizationFactor").value
         if "NormalizationFactor" in targ_ws.getRun():
@@ -1843,7 +1841,7 @@ class RunDescriptorDependent(RunDescriptor):
         use_ws_calibration=True,
         filePath=None,
         fileExt=None,
-        **kwargs
+        **kwargs,
     ):
         if self._has_own_value:
             return super(RunDescriptorDependent, self).load_run(

@@ -9,6 +9,7 @@
 These scripts are used by the ISIS Indirect geometry interfaces such as Indirect Convert to Energy,
 Data Analysis, and Bayes.
 """
+
 import unittest
 import numpy as np
 
@@ -420,7 +421,7 @@ class IndirectCommonTests(unittest.TestCase):
             Output=table_name,
             CreateOutput=True,
             MaxIterations=0,
-            **fit_kwargs
+            **fit_kwargs,
         )
         return table_name + "_Parameters"
 

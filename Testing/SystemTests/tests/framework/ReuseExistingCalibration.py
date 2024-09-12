@@ -6,9 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 """
-    Verifies that a calibration file can be loaded once and reused to apply, using CopyInstrumentParameters, the same calibration
-    in successive reductions.
+Verifies that a calibration file can be loaded once and reused to apply, using CopyInstrumentParameters, the same calibration
+in successive reductions.
 """
+
 import systemtesting
 
 

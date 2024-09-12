@@ -219,16 +219,18 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
                         else:
                             detector_counts_col = self.DETECTOR_COUNT_COL_DEFAULT
                             self.log().warning(
-                                "Could not find detector counts column in file {}. "
-                                "Defaulting to column {}".format(file, self.DETECTOR_COUNT_COL_DEFAULT)
+                                "Could not find detector counts column in file {}. " "Defaulting to column {}".format(
+                                    file, self.DETECTOR_COUNT_COL_DEFAULT
+                                )
                             )
                         if "M1" in next_line:
                             monitor_counts_col = next_line.index("M1")
                         else:
                             monitor_counts_col = self.MONITOR_COUNT_COL_DEFAULT
                             self.log().warning(
-                                "Could not find monitor counts column in file {}. "
-                                "Defaulting to column {}".format(file, self.MONITOR_COUNT_COL_DEFAULT)
+                                "Could not find monitor counts column in file {}. " "Defaulting to column {}".format(
+                                    file, self.MONITOR_COUNT_COL_DEFAULT
+                                )
                             )
                         if "TIME" in next_line:
                             time_col = next_line.index("TIME")

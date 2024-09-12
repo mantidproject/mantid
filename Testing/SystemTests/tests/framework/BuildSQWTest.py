@@ -6,13 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,super-on-old-class
 """
-    Defines a system test for converting a set of reduced direct inelastic data
-    to a single SQW file.
+Defines a system test for converting a set of reduced direct inelastic data
+to a single SQW file.
 
-    The test requires as input the set of reduced files, which are ~16Gb along with
-    the result file that is ~30Gb. The files are not included with the standard
-    repository & required to be accessible from any machine that wishes to run the test.
+The test requires as input the set of reduced files, which are ~16Gb along with
+the result file that is ~30Gb. The files are not included with the standard
+repository & required to be accessible from any machine that wishes to run the test.
 """
+
 import systemtesting
 import os
 from mantid.simpleapi import *
@@ -22,7 +23,6 @@ FILE_LOCATIONS = ["/isis/mantid/localtestdata/"]  # ,"d:/Data/MantidSystemTests/
 
 
 class BuildSQWTest(systemtesting.MantidSystemTest):
-
     _startrun = 15058
     _endrun = 15178
     _input_data = []
@@ -120,7 +120,6 @@ class LoadSQW_FileBasedTest(BuildSQWTest):
         self._input_data = ["Test22meV2f.sqw", "Test22meVMD.nxs"]
 
     def runTest(self):
-
         MDws_file = os.path.join(config["defaultsave.directory"], "LoadSQWTestFileBased.nxs")
         sqw_file = os.path.join(self._input_location, self._input_data[0])
 
@@ -147,7 +146,6 @@ class LoadSQW_MemBasedTest(BuildSQWTest):
         self._input_data = ["Test22meV2f.sqw", "Test22meVMD.nxs"]
 
     def runTest(self):
-
         sqw_file = os.path.join(self._input_location, self._input_data[0])
 
         LoadSQW(Filename=sqw_file, OutputWorkspace="dummy_wsMD")

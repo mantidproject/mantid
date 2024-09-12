@@ -71,9 +71,7 @@ Other Useful Methods
 
 .. autofunction:: tube.readCalibrationFile
 
-""".format(
-    CALIBRATE_SIGNATURE
-)
+""".format(CALIBRATE_SIGNATURE)
 
 
 def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):

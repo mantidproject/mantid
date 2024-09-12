@@ -20,7 +20,6 @@ from mantid.kernel import *
 
 
 class PlusMDTest(systemtesting.MantidSystemTest):
-
     _saved_filename = None
     original_binned = None
 
@@ -153,7 +152,6 @@ class PlusMDTest(systemtesting.MantidSystemTest):
 
 
 class MergeMDTest(systemtesting.MantidSystemTest):
-
     _saved_filenames = []
 
     def make_files_to_merge_string(self):

@@ -8,7 +8,6 @@ import mantid.simpleapi as mantid
 
 
 class FFTWrapper(object):
-
     """
     A class to wrap the different parts
     of the FFT and its preprocessing.
@@ -65,7 +64,6 @@ class FFTWrapper(object):
 
 
 class FFTModel(object):
-
     """
     A simple class which executes
     the relevant algorithms for

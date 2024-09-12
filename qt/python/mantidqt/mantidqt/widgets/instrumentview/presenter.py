@@ -10,6 +10,7 @@
 """
 Contains the presenter for displaying the InstrumentWidget
 """
+
 from qtpy.QtCore import Qt
 
 from mantid.api import AnalysisDataService

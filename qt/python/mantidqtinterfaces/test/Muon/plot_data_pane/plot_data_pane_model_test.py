@@ -118,7 +118,6 @@ class PlotDataPaneModelTest(unittest.TestCase):
         self.assertEqual(keys, ["62260-62261"])
 
     def test_create_tiled_keys_returns_correctly_for_tiled_by_group(self):
-
         self.context.group_pair_context.add_group(MuonGroup(group_name="bwd", detector_ids=[2]))
         self.context.group_pair_context.add_group(MuonGroup(group_name="top", detector_ids=[3]))
         self.context.group_pair_context._selected_groups = ["fwd", "bwd", "top"]

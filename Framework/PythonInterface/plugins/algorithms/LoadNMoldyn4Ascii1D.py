@@ -22,7 +22,6 @@ SLICE_HEADER_REGEX = re.compile(r"#slice:\[([0-9]+)[A-z]*\]")
 
 
 class LoadNMoldyn4Ascii1D(PythonAlgorithm):
-
     data_directory = None
 
     def category(self):

@@ -412,8 +412,9 @@ class SData(collections.abc.Sequence):
         if len(warning_cases) > 0:
             logger_call("Warning: some contributions had small S compared to threshold.")
             logger_call(
-                "The minimum S threshold ({}) is greater than {}% of the "
-                "maximum S for the following:".format(absolute_threshold, relative_threshold * 100)
+                "The minimum S threshold ({}) is greater than {}% of the " "maximum S for the following:".format(
+                    absolute_threshold, relative_threshold * 100
+                )
             )
 
             # Sort the warnings by atom number, order number

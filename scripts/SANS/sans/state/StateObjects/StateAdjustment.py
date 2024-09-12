@@ -86,6 +86,7 @@ def get_adjustment_builder(data_info):
         return StateAdjustmentBuilder()
     else:
         raise NotImplementedError(
-            "StateAdjustmentBuilder: Could not find any valid adjustment builder for the "
-            "specified StateData object {0}".format(str(data_info))
+            "StateAdjustmentBuilder: Could not find any valid adjustment builder for the " "specified StateData object {0}".format(
+                str(data_info)
+            )
         )

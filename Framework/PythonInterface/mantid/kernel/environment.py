@@ -5,12 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-   Defines a set functions for interrogating the current environment.
+Defines a set functions for interrogating the current environment.
 
-   The standard platform module doesn't have simple things like is_windows(),
-   is_linux(). The set of functions defined here should make it clearer what is going
-   on when they are used.
+The standard platform module doesn't have simple things like is_windows(),
+is_linux(). The set of functions defined here should make it clearer what is going
+on when they are used.
 """
+
 import platform as _platform
 import sys as _sys
 import os.path as _osp

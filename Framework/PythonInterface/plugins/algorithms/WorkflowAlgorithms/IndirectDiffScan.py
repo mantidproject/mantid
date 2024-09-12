@@ -78,7 +78,6 @@ class IndirectDiffScan(DataProcessorAlgorithm):
         self.declareProperty(name="OutputWorkspace", defaultValue="Output", doc="Workspace group for the resulting workspaces.")
 
     def PyExec(self):
-
         self._setup()
 
         process_prog = Progress(self, start=0.1, end=0.9, nreports=len(self._workspace_names))

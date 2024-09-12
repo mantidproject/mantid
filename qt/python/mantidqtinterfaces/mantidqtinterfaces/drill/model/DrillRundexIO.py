@@ -13,7 +13,6 @@ from .configurations import RundexSettings
 
 
 class DrillRundexIO:
-
     """
     Name of the file where the data will be read or saved.
     """

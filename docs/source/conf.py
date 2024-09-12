@@ -117,9 +117,7 @@ try:
     np.set_printoptions(legacy='1.13')
 except TypeError:
     pass
-""".format(
-    mantid_config_reset
-)
+""".format(mantid_config_reset)
 
 # Run this after each test group has executed
 doctest_global_cleanup = """

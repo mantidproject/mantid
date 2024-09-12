@@ -8,6 +8,7 @@
 #
 #
 """Provides our custom figure manager to wrap the canvas, window and our custom toolbar"""
+
 import copy
 import io
 import sys

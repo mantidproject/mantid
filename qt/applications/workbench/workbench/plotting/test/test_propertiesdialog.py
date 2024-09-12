@@ -152,7 +152,7 @@ class PropertiesDialogTest(unittest.TestCase):
                 "size": 6,
                 "tickdir": "out",
                 "width": 1,
-            }
+            },
         )
         ax.tick_params(
             axis="y",
@@ -166,7 +166,7 @@ class PropertiesDialogTest(unittest.TestCase):
                 "size": 6,
                 "tickdir": "out",
                 "width": 1,
-            }
+            },
         )
 
         # get an AxisEditor object for x/y axes

@@ -174,9 +174,9 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         self.assertEqual(
             returned_name,
             [],
-            "Should have returned an empty string because "
-            "transmission sample base name was None. "
-            "Returned {} instead".format(returned_name),
+            "Should have returned an empty string because " "transmission sample base name was None. " "Returned {} instead".format(
+                returned_name
+            ),
         )
 
         # Test when base name is not None but name is None
@@ -186,9 +186,9 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         self.assertEqual(
             returned_name,
             [],
-            "Should have returned an empty string because "
-            "transmission sample name was None. "
-            "Returned {} instead".format(returned_name),
+            "Should have returned an empty string because " "transmission sample name was None. " "Returned {} instead".format(
+                returned_name
+            ),
         )
 
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(False))
@@ -198,9 +198,9 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         self.assertEqual(
             returned_name,
             [],
-            "Should have returned an empty string because "
-            "transmission sample was not in the ADS. "
-            "Returned {} instead.".format(returned_name),
+            "Should have returned an empty string because " "transmission sample was not in the ADS. " "Returned {} instead.".format(
+                returned_name
+            ),
         )
 
         # Check transmission_can
@@ -208,9 +208,9 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         self.assertEqual(
             returned_name,
             [],
-            "Should have returned an empty string because "
-            "transmission can was not in the ADS. "
-            "Returned {} instead".format(returned_name),
+            "Should have returned an empty string because " "transmission can was not in the ADS. " "Returned {} instead".format(
+                returned_name
+            ),
         )
 
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))
@@ -234,9 +234,9 @@ class GetAllNamesToSaveTest(unittest.TestCase):
         self.assertEqual(
             returned_name,
             ["transmission_can"],
-            "Should have returned transmission can as name because "
-            "transmission can was not in the ADS. "
-            "Returned {} instead.".format(returned_name),
+            "Should have returned transmission can as name because " "transmission can was not in the ADS. " "Returned {} instead.".format(
+                returned_name
+            ),
         )
 
     @mock.patch("sans.algorithm_detail.batch_execution.AnalysisDataService", new=ADSMock(True))

@@ -5,8 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-""" Main view for the ISIS SANS reduction interface.
-"""
+"""Main view for the ISIS SANS reduction interface."""
 
 from abc import ABCMeta, abstractmethod
 
@@ -395,10 +394,10 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
             self.wavelength_step_label.setText("Step [\u00c5]")
         elif self.wavelength_step_type == RangeStepType.RANGE_LOG:
             self.wavelength_stacked_widget.setCurrentIndex(1)
-            self.wavelength_step_label.setText("Step [d\u03BB/\u03BB]")
+            self.wavelength_step_label.setText("Step [d\u03bb/\u03bb]")
         elif self.wavelength_step_type == RangeStepType.LOG:
             self.wavelength_stacked_widget.setCurrentIndex(0)
-            self.wavelength_step_label.setText("Step [d\u03BB/\u03BB]")
+            self.wavelength_step_label.setText("Step [d\u03bb/\u03bb]")
         elif self.wavelength_step_type == RangeStepType.LIN:
             self.wavelength_stacked_widget.setCurrentIndex(0)
             self.wavelength_step_label.setText("Step [\u00c5]")

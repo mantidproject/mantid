@@ -354,8 +354,9 @@ class ReductionWrapper(object):
         if build_validation:
             self.reducer.prop_man.save_file_name = validation_file
             self.reducer.prop_man.log(
-                "*** WARNING:can not find or load validation file {0}\n"
-                "    Building validation file for run N:{1}".format(validation_file, sample_run),
+                "*** WARNING:can not find or load validation file {0}\n" "    Building validation file for run N:{1}".format(
+                    validation_file, sample_run
+                ),
                 "warning",
             )
         else:

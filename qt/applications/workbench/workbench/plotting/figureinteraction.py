@@ -9,6 +9,7 @@
 """
 Defines interaction behaviour for plotting.
 """
+
 # std imports
 import numpy as np
 from contextlib import contextmanager

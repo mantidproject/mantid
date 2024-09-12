@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 """
-    Extract or compute the Q values from reduced QENS data
+Extract or compute the Q values from reduced QENS data
 """
+
 from systemtesting import MantidSystemTest
 import mantid.simpleapi as sm
 import hashlib

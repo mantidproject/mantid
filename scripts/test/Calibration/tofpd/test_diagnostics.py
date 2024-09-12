@@ -11,7 +11,6 @@ from Calibration.tofpd import diagnostics
 
 
 class TestDiagnostics(unittest.TestCase):
-
     PEAK = 1.2615
 
     @classmethod

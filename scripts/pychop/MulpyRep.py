@@ -55,10 +55,10 @@ def checkPath(chop_times, lines, chopDist, chop5Dist):
 
         # then compare this time window to when this chopper is open, keep the range if it is possible
         for i in range(len(chop_times[0])):
-            if (chop_times[0][i][0] < earlyT) and ((chop_times[0][i][1] > lateT)):
+            if (chop_times[0][i][0] < earlyT) and (chop_times[0][i][1] > lateT):
                 # the chopper window is larger than the maximum possible spread, change nothing
                 newLines.append(line)
-            elif (chop_times[0][i][0] > earlyT) and ((chop_times[0][i][1] < lateT)):
+            elif (chop_times[0][i][0] > earlyT) and (chop_times[0][i][1] < lateT):
                 # both are within the window, draw a new box
                 chop5_open = (chop5Dist - line[0][1]) / line[0][0]
                 leftM = (chopDist[0] - chop5Dist) / (chop_times[0][i][0] - chop5_open)

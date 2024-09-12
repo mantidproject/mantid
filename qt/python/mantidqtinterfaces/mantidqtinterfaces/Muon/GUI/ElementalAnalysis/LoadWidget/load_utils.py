@@ -31,7 +31,6 @@ class LModel(object):
             workspace.getAxis(0).setUnit("Label").setLabel("Energy", "keV")
 
     def load_run(self):
-
         to_load = search_user_dirs(self.run)
         if not to_load:
             return None

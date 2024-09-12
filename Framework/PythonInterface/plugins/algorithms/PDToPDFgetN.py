@@ -164,7 +164,7 @@ class PDToPDFgetN(DataProcessorAlgorithm):
                 Characterizations=charac,
                 FrequencyLogNames=self.getProperty("FrequencyLogNames").value,
                 WaveLengthLogNames=self.getProperty("WaveLengthLogNames").value,
-                **(self._alignArgs)
+                **(self._alignArgs),
             )
         else:  # process the input workspace
             self.log().information(

@@ -50,7 +50,6 @@ def _count_monitors(raw_file):
 
 
 class TimeSlice(PythonAlgorithm):
-
     _raw_files = None
     _spectra_range = None
     _peak_range = None

@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    Main window for reduction UIs
+Main window for reduction UIs
 """
+
 import sys
 import os
 import traceback

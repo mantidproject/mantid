@@ -9,6 +9,7 @@
 """
 System test for MDNorm background
 """
+
 from mantid.simpleapi import (
     CloneMDWorkspace,
     CompareMDWorkspaces,

@@ -61,8 +61,9 @@ class NTableWidget(QTableWidget):
             )
             if len(row_value_list) != len(type_list):
                 raise RuntimeError(
-                    "If value types are given, then they must have the same "
-                    "numbers ({0}) and values ({1})".format(len(row_value_list), len(type_list))
+                    "If value types are given, then they must have the same " "numbers ({0}) and values ({1})".format(
+                        len(row_value_list), len(type_list)
+                    )
                 )
         else:
             type_list = self._myColumnTypeList
@@ -202,8 +203,9 @@ class NTableWidget(QTableWidget):
                     return_value = int(return_value)
                 except ValueError as val_err:
                     raise RuntimeError(
-                        'Unable to convert cell ({0}, {1}) with value "{2}" to integer due to {3}.'
-                        "".format(row_index, col_index, return_value, val_err)
+                        'Unable to convert cell ({0}, {1}) with value "{2}" to integer due to {3}.' "".format(
+                            row_index, col_index, return_value, val_err
+                        )
                     )
             elif cell_data_type == "float" or cell_data_type == "double":
                 # float or double
@@ -211,8 +213,9 @@ class NTableWidget(QTableWidget):
                     return_value = float(return_value)
                 except ValueError as val_err:
                     raise RuntimeError(
-                        'Unable to convert cell ({0}, {1}) with value "{2}" to float due to {3}.'
-                        "".format(row_index, col_index, return_value, val_err)
+                        'Unable to convert cell ({0}, {1}) with value "{2}" to float due to {3}.' "".format(
+                            row_index, col_index, return_value, val_err
+                        )
                     )
             # END-IF-ELSE
         # END-IF-ELSE
@@ -437,10 +440,10 @@ class NTableWidget(QTableWidget):
         :return:
         """
         # check inputs
-        assert (
-            isinstance(column_index, int) and 0 <= column_index < self.columnCount()
-        ), "Column index {0} must be an integer (now {1}) and in range (0, {2}]" "".format(
-            column_index, type(column_index), self.columnCount()
+        assert isinstance(column_index, int) and 0 <= column_index < self.columnCount(), (
+            "Column index {0} must be an integer (now {1}) and in range (0, {2}]" "".format(
+                column_index, type(column_index), self.columnCount()
+            )
         )
         if self._colIndexSelect is None:
             raise RuntimeError("Column for selection is never set up.")

@@ -16,7 +16,6 @@ import mantid.simpleapi as mantid
 
 
 class CheckSampleOnlyAndEnvOnlyMatch(systemtesting.MantidSystemTest):
-
     abs_e = None
     abs_s = None
 

@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    Base reduction class. Uses version 2 python API.
+Base reduction class. Uses version 2 python API.
 """
+
 import os
 import sys
 import time

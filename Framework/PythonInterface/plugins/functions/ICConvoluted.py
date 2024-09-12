@@ -103,7 +103,6 @@ class IkedaCarpenterConvoluted(IFunction1D):
 
     # Evaluate the function for a differnt set of paremeters (trialc)
     def function1DDiffParams(self, xvals, trialc):
-
         # First, grab the original parameters and set to trialc
         c = np.zeros(self.numParams())
         for i in range(self.numParams()):

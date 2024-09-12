@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    Script used to start the Test Interface from MantidPlot
+Script used to start the Test Interface from MantidPlot
 """
+
 import sys
 from qtpy import QtCore
 from sans.common.enums import SANSFacility

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" The run tab presenter.
+"""The run tab presenter.
 
 This abstract class allows other presenters to share functions which set attributes on
 the view or retrieve them from the view

@@ -199,7 +199,6 @@ class AbInitioLoader(metaclass=NamedAbstractClass):
 
         # if loading from *.hdf5 file failed than read data directly from input ab initio file and erase hdf file
         except (IOError, ValueError) as err:
-
             logger.notice(str(err))
             self._clerk.erase_hdf_file()
             ab_initio_data = self.read_vibrational_or_phonon_data()

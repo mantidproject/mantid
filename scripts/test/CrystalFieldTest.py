@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-"""Test suite for the crystal field calculations in the Inelastic/CrystalField package
-"""
+"""Test suite for the crystal field calculations in the Inelastic/CrystalField package"""
+
 import re
 import unittest
 from unittest import mock

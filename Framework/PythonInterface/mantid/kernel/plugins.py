@@ -11,7 +11,6 @@ These modules may define extensions to C++ types, e.g.
 algorithms, fit functions etc.
 """
 
-
 import os as _os
 from traceback import format_exc
 from importlib.machinery import SourceFileLoader

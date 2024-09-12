@@ -27,7 +27,6 @@ class DifferenceView(QtWidgets.QWidget):
         self.setup_interface_layout()
 
     def setup_interface_layout(self):
-
         self.label = QtWidgets.QLabel("Difference Table for:")
         self.pair_button = QtWidgets.QRadioButton("Pairs")
         self.pair_button.setChecked(True)

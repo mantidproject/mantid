@@ -20,7 +20,6 @@ class IteratorWithException:
         return self
 
     def __next__(self):
-
         if self.n in self.throw_indices:
             next(self.iterable)
             self.n += 1

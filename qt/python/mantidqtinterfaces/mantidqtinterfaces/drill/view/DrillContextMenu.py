@@ -12,7 +12,6 @@ from mantidqt import icons
 
 
 class DrillContextMenu(QMenu):
-
     """
     DrillContextMenuPresenter
     """

@@ -3091,8 +3091,9 @@ class MainWindow(QMainWindow):
         scan_number_list = self.ui.tableWidget_peaksCalUB.get_selected_scans()
         if len(scan_number_list) != 1:
             self.pop_one_button_dialog(
-                "To view scan data in 3D, one and only one scan can be selected."
-                "Now there are {0} scans that are selected.".format(len(scan_number_list))
+                "To view scan data in 3D, one and only one scan can be selected." "Now there are {0} scans that are selected.".format(
+                    len(scan_number_list)
+                )
             )
             return
         else:
@@ -3725,9 +3726,9 @@ class MainWindow(QMainWindow):
         :return:
         """
         # Check requirement
-        assert isinstance(
-            peak_info, r4c.PeakProcessRecord
-        ), "Peak information instance must be a PeakProcessedRecord" "but not a {0}".format(type(peak_info))
+        assert isinstance(peak_info, r4c.PeakProcessRecord), (
+            "Peak information instance must be a PeakProcessedRecord" "but not a {0}".format(type(peak_info))
+        )
 
         # Get data
         exp_number, scan_number = peak_info.get_experiment_info()

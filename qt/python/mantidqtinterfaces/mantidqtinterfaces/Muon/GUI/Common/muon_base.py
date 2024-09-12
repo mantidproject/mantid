@@ -58,7 +58,6 @@ class MuonBase(object):
     """
 
     def __init__(self, name, periods=[1]):
-
         self._name = name
         self._workspace = {}
         self.workspace_rebin = {}

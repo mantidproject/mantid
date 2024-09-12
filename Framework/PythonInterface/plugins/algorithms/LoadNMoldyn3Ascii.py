@@ -95,7 +95,6 @@ def _cdl_find_dimensions(data):
 
 
 class LoadNMoldyn3Ascii(PythonAlgorithm):
-
     _file_name = None
     _file_type = None
     _functions = None

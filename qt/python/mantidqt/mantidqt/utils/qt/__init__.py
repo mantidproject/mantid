@@ -7,8 +7,8 @@
 #  This file is part of the mantid workbench.
 #
 #
-"""A selection of utility functions related to Qt functionality
-"""
+"""A selection of utility functions related to Qt functionality"""
+
 # stdlib modules
 import os
 import os.path as osp

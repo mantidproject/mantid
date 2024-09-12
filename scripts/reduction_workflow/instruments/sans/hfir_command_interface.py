@@ -10,6 +10,7 @@
 List of common user commands for HFIR SANS
 
 """
+
 import os.path
 import mantid
 

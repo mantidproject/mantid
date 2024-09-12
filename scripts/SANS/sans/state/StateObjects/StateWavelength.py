@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" Defines the state of the event slices which should be reduced."""
+"""Defines the state of the event slices which should be reduced."""
 
 import json
 import copy
@@ -91,6 +91,7 @@ def get_wavelength_builder(data_info):
         return StateWavelengthBuilder()
     else:
         raise NotImplementedError(
-            "StateWavelengthBuilder: Could not find any valid wavelength builder for the "
-            "specified StateData object {0}".format(str(data_info))
+            "StateWavelengthBuilder: Could not find any valid wavelength builder for the " "specified StateData object {0}".format(
+                str(data_info)
+            )
         )

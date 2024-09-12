@@ -448,8 +448,7 @@ class CWSCDReductionControl(object):
         # check whether the detector counts has been calculated and get the value
         if (exp_number, scan_number, pt_number, roi_name) not in self._single_pt_integration_dict:
             raise RuntimeError(
-                "Exp {0} Scan {1} Pt {2} ROI {3} does not exist in single-point integration "
-                "dictionary, whose keys are {4}".format(
+                "Exp {0} Scan {1} Pt {2} ROI {3} does not exist in single-point integration " "dictionary, whose keys are {4}".format(
                     exp_number, scan_number, pt_number, roi_name, self._single_pt_integration_dict.keys()
                 )
             )
@@ -869,10 +868,9 @@ class CWSCDReductionControl(object):
         # check
         assert isinstance(exp_number, int), "Experiment number must be an integer but not %s." % str(type(exp_number))
         if exp_number not in self._myUBMatrixDict:
-            err_msg = (
-                "Experiment number %d has no UB matrix set up. Here "
-                "are list of experiments that have UB matrix set up: %s."
-                "" % (exp_number, str(self._myUBMatrixDict.keys()))
+            err_msg = "Experiment number %d has no UB matrix set up. Here " "are list of experiments that have UB matrix set up: %s." "" % (
+                exp_number,
+                str(self._myUBMatrixDict.keys()),
             )
             raise KeyError(err_msg)
 
@@ -1047,8 +1045,9 @@ class CWSCDReductionControl(object):
                     # error is huge, very likely bad gaussian fit
                     if self._debugPrintMode:
                         print(
-                            "[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {3} "
-                            "Excluded from exporting.".format(algorithm_type, scan_number, intensity, std_dev)
+                            "[INFO] Integration Type {0}: Scan {1} Intensity {2} < Std Dev {3} " "Excluded from exporting.".format(
+                                algorithm_type, scan_number, intensity, std_dev
+                            )
                         )
                     continue
                 # END-IF
@@ -1315,7 +1314,6 @@ class CWSCDReductionControl(object):
             log_value = spice_table_ws.toDict()[log_name][0]
 
         else:
-
             try:
                 status, pt_number_list = self.get_pt_numbers(exp_number, scan_number)
                 assert status
@@ -1932,7 +1930,6 @@ class CWSCDReductionControl(object):
             spectrum_scan_map = dict()
 
             for ws_index, scan_number in enumerate(scan_number_list):
-
                 scan_spectrum_map[scan_number] = ws_index
                 spectrum_scan_map[ws_index] = scan_number
 
@@ -2174,8 +2171,9 @@ class CWSCDReductionControl(object):
 
             if not file_available:
                 raise IOError(
-                    "SPICE file for Exp {0} Scan {1} cannot be found at {2} or downloaded ({3})"
-                    "".format(exp_no, scan_no, spice_file_name, download_result)
+                    "SPICE file for Exp {0} Scan {1} cannot be found at {2} or downloaded ({3})" "".format(
+                        exp_no, scan_no, spice_file_name, download_result
+                    )
                 )
 
             try:
@@ -2270,9 +2268,9 @@ class CWSCDReductionControl(object):
         # check validity
         assert isinstance(scan_md_ws_list, list), "Scan MDWorkspace name list cannot be of type %s." "" % type(scan_md_ws_list)
         assert isinstance(scan_peak_centre_list, list), "Scan peak center list cannot be of type %s." "" % type(scan_peak_centre_list)
-        assert len(scan_md_ws_list) >= 2 and len(scan_md_ws_list) == len(
-            scan_peak_centre_list
-        ), "Number of MDWorkspace %d and peak centers %d are not correct." % (len(scan_md_ws_list), len(scan_peak_centre_list))
+        assert len(scan_md_ws_list) >= 2 and len(scan_md_ws_list) == len(scan_peak_centre_list), (
+            "Number of MDWorkspace %d and peak centers %d are not correct." % (len(scan_md_ws_list), len(scan_peak_centre_list))
+        )
         assert isinstance(merged_ws_name, str), "Target MDWorkspace name for merged scans %s (%s) must " "be a string." % (
             str(merged_ws_name),
             type(merged_ws_name),
@@ -2443,8 +2441,9 @@ class CWSCDReductionControl(object):
         if unmatch_score > 0:
             if self._debugPrintMode:
                 print(
-                    "[INFO] Exp {0} Scan {1} has a unmatched calibrated record from pre-processed data. ID = {2}"
-                    "".format(exp_number, scan_number, unmatch_score)
+                    "[INFO] Exp {0} Scan {1} has a unmatched calibrated record from pre-processed data. ID = {2}" "".format(
+                        exp_number, scan_number, unmatch_score
+                    )
                 )
             return False
 
@@ -2878,12 +2877,12 @@ class CWSCDReductionControl(object):
         """
         # check
         assert isinstance(exp_number, int) and exp_number > 0, "Experiment number must be integer"
-        assert center_row is None or (
-            isinstance(center_row, int) and center_row >= 0
-        ), "Center row number {0} of type {1} must either None or non-negative integer." "".format(center_row, type(center_row))
-        assert center_col is None or (
-            isinstance(center_col, int) and center_col >= 0
-        ), "Center column number {0} of type {1} must be either None or non-negative integer." "".format(center_col, type(center_col))
+        assert center_row is None or (isinstance(center_row, int) and center_row >= 0), (
+            "Center row number {0} of type {1} must either None or non-negative integer." "".format(center_row, type(center_row))
+        )
+        assert center_col is None or (isinstance(center_col, int) and center_col >= 0), (
+            "Center column number {0} of type {1} must be either None or non-negative integer." "".format(center_col, type(center_col))
+        )
 
         if default:
             self._defaultDetectorCenter = center_row, center_col
@@ -3099,8 +3098,9 @@ class CWSCDReductionControl(object):
             int_record = self._single_pt_integration_dict[dict_key]
         else:
             raise RuntimeError(
-                "Scan number {0} shall be in the single-pt integration dictionary.  Keys are {1}."
-                "".format(scan_number, self._single_pt_integration_dict.keys())
+                "Scan number {0} shall be in the single-pt integration dictionary.  Keys are {1}." "".format(
+                    scan_number, self._single_pt_integration_dict.keys()
+                )
             )
 
         # set sigma: SinglePointPeakIntegration
@@ -3520,12 +3520,14 @@ class CWSCDReductionControl(object):
             if self._debugPrintMode:
                 print("[ERROR] PeakProcessRecord for Exp {0} Scan {1} shall not " "be created twice!".format(exp_number, scan_number))
                 print(
-                    "[CONTINUE] New PeaksWorkspace = {0} vs Existing "
-                    "PeaksWorkspace = {1}.".format(peak_ws_name, peak_info.peaks_workspace)
+                    "[CONTINUE] New PeaksWorkspace = {0} vs Existing " "PeaksWorkspace = {1}.".format(
+                        peak_ws_name, peak_info.peaks_workspace
+                    )
                 )
                 print(
-                    "[CONTINUE] New MDEventWorkspace = {0} vs Existing "
-                    "MDEventWorkspace = {1}.".format(md_ws_name, peak_info.md_workspace)
+                    "[CONTINUE] New MDEventWorkspace = {0} vs Existing " "MDEventWorkspace = {1}.".format(
+                        md_ws_name, peak_info.md_workspace
+                    )
                 )
             return False, peak_info
         # END-IF

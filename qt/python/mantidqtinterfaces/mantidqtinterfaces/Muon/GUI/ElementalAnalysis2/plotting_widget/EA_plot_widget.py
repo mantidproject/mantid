@@ -16,7 +16,6 @@ from mantidqtinterfaces.Muon.GUI.Common.plot_widget.base_pane.base_pane_view imp
 
 class EAPlotWidget(object):
     def __init__(self, context=None, get_active_fit_results=lambda: [], parent=None):
-
         self.data_model = EAPlotDataPaneModel(context)
 
         self.plotting_canvas_widgets = {

@@ -13,6 +13,7 @@ Provides a compatibility layer to backport features found in later
 Python versions (3.7 onwards) to Ubuntu 18.04 / RHEL 7
 which are both on Python 3.6.
 """
+
 import sys
 
 __requires_compat = False if sys.version_info[0:2] > (3, 6) else True

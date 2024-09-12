@@ -12,7 +12,6 @@ from mantidqtinterfaces.Muon.GUI.Common.data_selectors.cyclic_data_selector_view
 
 
 class MaxEntView(QtWidgets.QWidget):
-
     """
     The view for the MaxEnt widget. This
     creates the look of the widget

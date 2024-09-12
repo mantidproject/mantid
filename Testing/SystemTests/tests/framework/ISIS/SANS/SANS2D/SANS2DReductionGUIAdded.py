@@ -60,7 +60,6 @@ class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
     def runTest(self):
-
         i.SANS2DTUBES()
         i.MaskFile("USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt")
         i.SetDetectorOffsets("REAR", -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
@@ -104,7 +103,6 @@ class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithOverlayAndTimeShift(sansgui.SANS2DGUIReduction):
     def runTest(self):
-
         i.SANS2DTUBES()
         i.MaskFile("USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt")
         i.SetDetectorOffsets("REAR", -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
@@ -165,7 +163,6 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShift(sansgui.SANS2DGUIReduction):
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
     def runTest(self):
-
         i.SANS2DTUBES()
         i.MaskFile("USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt")
         i.SetDetectorOffsets("REAR", -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
@@ -211,7 +208,6 @@ class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithoutOverlayWithISISCommandInterface(sansgui.SANS2DGUIReduction):
     def runTest(self):
-
         i.SANS2DTUBES()
         i.MaskFile("USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt")
         i.SetDetectorOffsets("REAR", -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)

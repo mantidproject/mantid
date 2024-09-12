@@ -38,7 +38,6 @@ import math
 
 
 class PolDiffILLReduction(PythonAlgorithm):
-
     _mode = "Monochromatic"
     _method_data_structure = None  # measurement method determined from the data
     _instrument = None
@@ -147,7 +146,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         return issues
 
     def PyInit(self):
-
         validRebinParams = RebinParamsValidator(AllowEmpty=True)
 
         self.declareProperty(MultipleFileProperty("Run", extensions=["nxs"]), doc="File path of run(s).")

@@ -177,7 +177,6 @@ class AbinsSDataTest(unittest.TestCase):
                 },
             ),
         ]:
-
             sdata = SData(data=deepcopy(self.sample_data_two_orders), frequencies=self.frequencies)
             sdata.apply_dw(dw, min_order=min_order, max_order=max_order)
             for atom_key, atom_data in sdata.extract().items():
@@ -485,7 +484,6 @@ class AbinsSDataByAngleTest(unittest.TestCase):
         sdba = self.get_s_data_by_angle(temperature=temperature, sample_form=sample_form)
 
         for kwargs, ref_data in [({}, self.sum_data), ({"average": True}, self.avg_data), ({"weights": [2, 1]}, self.weighted_data)]:
-
             summed_data = sdba.sum_over_angles(**kwargs)
             for atom_key in ref_data:
                 self.assertTrue(np.allclose(summed_data.extract()[atom_key]["s"]["order_1"], ref_data[atom_key]["s"]["order_1"]))

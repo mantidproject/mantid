@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" Defines the state of the event slices which should be reduced."""
+"""Defines the state of the event slices which should be reduced."""
 
 import json
 import copy
@@ -106,6 +106,7 @@ def get_slice_event_builder(data_info):
         return StateSliceEventBuilder()
     else:
         raise NotImplementedError(
-            "StateSliceEventBuilder: Could not find any valid slice builder for the "
-            "specified StateData object {0}".format(str(data_info))
+            "StateSliceEventBuilder: Could not find any valid slice builder for the " "specified StateData object {0}".format(
+                str(data_info)
+            )
         )

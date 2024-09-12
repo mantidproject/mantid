@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods,redefined-builtin
-"""Holds classes that define the backgrounds for fitting
-"""
+"""Holds classes that define the backgrounds for fitting"""
+
 import ast
 
 # --------------------------------------------------------------------------------
@@ -26,7 +26,6 @@ class Background(object):
 
 
 class PolynomialBackground(object):
-
     cfunction = "Polynomial"
 
     def __init__(self, order):

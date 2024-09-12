@@ -6,9 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, redefined-builtin, protected-access, too-many-arguments
 """
-    Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
-    be run
+Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
+be run
 """
+
 import isis_instrument
 from reducer_singleton import ReductionSingleton
 from mantid.kernel import Logger

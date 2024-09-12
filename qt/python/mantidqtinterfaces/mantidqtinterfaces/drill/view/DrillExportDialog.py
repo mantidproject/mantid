@@ -16,7 +16,6 @@ from mantidqt.interfacemanager import InterfaceManager
 
 
 class DrillExportDialog(QDialog):
-
     UI_FILENAME = "ui/export.ui"
 
     """
@@ -64,7 +63,7 @@ class DrillExportDialog(QDialog):
             tooltips (dict(str:str)): short doc of each algorithm
         """
         i = 0
-        for (name, ext) in algorithms:
+        for name, ext in algorithms:
             text = name + " (" + ext + ")"
             widget = QCheckBox(text, self)
             if name in tooltips:

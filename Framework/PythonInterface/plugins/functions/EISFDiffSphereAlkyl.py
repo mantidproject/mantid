@@ -9,6 +9,7 @@
 @author Jose Borreguero, ORNL
 @date December 06, 2017
 """
+
 import numpy as np
 from scipy.special import spherical_jn
 from mantid.api import IFunction1D, FunctionFactory

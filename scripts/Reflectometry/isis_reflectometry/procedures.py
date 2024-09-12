@@ -490,14 +490,7 @@ def nrCalcSEConst(RFFrequency, poleShoeAngle):
     # calibration of th0 using gold grating Dec 2010
     #
     th0 = float(poleShoeAngle)
-    th0 = (
-        -0.0000000467796 * (th0**5)
-        + 0.0000195413 * (th0**4)
-        - 0.00326229 * (th0**3)
-        + 0.271767 * (th0**2)
-        - 10.4269 * th0
-        + 198.108
-    )
+    th0 = -0.0000000467796 * (th0**5) + 0.0000195413 * (th0**4) - 0.00326229 * (th0**3) + 0.271767 * (th0**2) - 10.4269 * th0 + 198.108
     c1 = Gl * m * 2.0 * B * L / (2.0 * pi * h * tan(th0 * pi / 180.0) * 1.0e20)
     print(c1 * 1e8)
     return c1 * 1e8

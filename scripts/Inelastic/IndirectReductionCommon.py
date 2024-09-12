@@ -286,7 +286,6 @@ def crop_workspaces(workspace_names, spec_min, spec_max, extract_monitors=True, 
     from mantid.simpleapi import ExtractSingleSpectrum, CropWorkspace
 
     for workspace_name in workspace_names:
-
         if extract_monitors:
             # Get the monitor spectrum
             monitor_ws_name = workspace_name + "_mon"

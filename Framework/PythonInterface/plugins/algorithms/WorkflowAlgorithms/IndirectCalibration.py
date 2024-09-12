@@ -14,7 +14,6 @@ import os.path
 
 
 class IndirectCalibration(DataProcessorAlgorithm):
-
     _input_files = None
     _out_ws = None
     _peak_range = None

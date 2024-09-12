@@ -781,6 +781,7 @@ def _create_wrapper_function(name):
 
     :param name: name of fake function
     """
+
     # ------------------------------------------------------------------------------------------------
     def wrapper_function(*args, **kwargs):
         return FunctionWrapper.wrap(name, *args, **kwargs)

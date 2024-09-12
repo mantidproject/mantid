@@ -4,11 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" The run tab presenter.
+"""The run tab presenter.
 
 This presenter is essentially the brain of the reduction gui. It controls other presenters and is mainly responsible
 for presenting and generating the reduction settings.
 """
+
 import os
 import time
 import traceback
@@ -446,8 +447,9 @@ class RunTabPresenter(PresenterCommon):
         try:
             if not os.path.exists(batch_file_path):
                 raise RuntimeError(
-                    "The batch file path {} does not exist. Make sure a valid batch file path"
-                    " has been specified.".format(batch_file_path)
+                    "The batch file path {} does not exist. Make sure a valid batch file path" " has been specified.".format(
+                        batch_file_path
+                    )
                 )
 
             # 2. Read the batch file

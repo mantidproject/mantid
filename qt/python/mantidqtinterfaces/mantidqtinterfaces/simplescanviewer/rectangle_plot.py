@@ -390,8 +390,9 @@ class MultipleRectangleSelectionLinePlot(KeyHandler):
             self._place_interpolate_linear()
         else:
             logger.warning(
-                "Cannot place more regions of interest: current number of regions invalid "
-                "(1 or 2 expected, {} found)".format(len(rectangles))
+                "Cannot place more regions of interest: current number of regions invalid " "(1 or 2 expected, {} found)".format(
+                    len(rectangles)
+                )
             )
             return
 

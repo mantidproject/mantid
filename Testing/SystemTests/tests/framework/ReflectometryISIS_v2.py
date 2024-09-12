@@ -22,7 +22,6 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         raise NotImplementedError("Implement get_workspace_name to return ")
 
     def runTest(self):
-
         workspace_name = self.get_workspace_name()
         workspace_nexus_file = workspace_name + ".nxs"
 
