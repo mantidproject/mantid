@@ -260,14 +260,12 @@ class WorkspaceWidget(PluginWidget):
         parent, flags = get_window_config()
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
-                specs = ws.getSpectrumNumbers()
                 y = ws.getYDimension()
                 if y.getName() == "sample":
                     spec_xvals = [ws.getYDimension().getX(ispec) for ispec in range(ws.getNumberHistograms())]
-
-                    # Check if the q values are sorted, if not sort them
-                    if sorted(spec_to_y_dim.values()) != spec_to_y_dim.values():
-                        logger.warning("Warning: Invalid Data Format. " "Consider sorting by sample number and try again")
+                    # Check if the q values are sorted, if not display error
+                    if sorted(spec_xvals) != spec_xvals:
+                        logger.warning("Warning: Invalid Data Format. Consider sorting by sample number and try again")
 
                 presenter = SliceViewer(ws=ws, conf=CONF, parent=parent, window_flags=flags)
                 presenter.view.show()
