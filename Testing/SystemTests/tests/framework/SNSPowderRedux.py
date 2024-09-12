@@ -346,7 +346,7 @@ class SumFilesTest(systemtesting.MantidSystemTest):
             CalibrationFile=self.cal_file,
             CharacterizationRunsFile=self.char_file,
             LowResRef=15000,
-            RemovePromptPulseWidth=1,
+            RemovePromptPulseWidth=50,
             Binning=-0.0004,
             BinInDspace=True,
             FilterBadPulses=25,
