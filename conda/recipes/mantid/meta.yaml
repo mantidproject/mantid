@@ -16,9 +16,9 @@ requirements:
   build:
     - {{ compiler("c") }}
     - {{ compiler("cxx") }}
-    - llvm-openmp                            # [osx]
+    - llvm-openmp {{ llvm_openmp }}          # [osx]
     - libgomp                                # [linux]
-    - ninja                                  # [osx or linux]
+    - ninja {{ ninja }}                      # [osx or linux]
     - cmake {{ cmake }}
     - git
     - python {{ python }}                    # [build_platform != target_platform]
@@ -32,45 +32,45 @@ requirements:
     - {{ cdt('xorg-x11-proto-devel') }}      # [linux]
 
   host:
-    - eigen
+    - eigen {{ eigen }}
     - gsl {{ gsl }}
     - h5py
     - hdf5 {{ hdf5 }}
     - jemalloc  {{ jemalloc }} # [osx or linux]
-    - jsoncpp
+    - jsoncpp {{ jsoncpp }}
     - libboost-devel {{ libboost_devel }}
     - libboost-python-devel {{ libboost_python_devel }}
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - librdkafka {{ librdkafka }}
     - lib3mf  # [win]
-    - muparser
-    - nexus
+    - muparser {{ muparser }}
+    - nexus {{ nexus }}
     - numpy {{ numpy }}
     - occt {{ occt }}
     - python {{ python }}
     - poco {{ poco }}
     - setuptools
     - tbb-devel {{ tbb }}
-    - pip
-    - versioningit
-    - libglu  # [linux]
+    - pip {{ pip }}
+    - versioningit {{ versioningit }}
+    - libglu {{ libglu }}  # [linux]
   run:
     - {{ pin_compatible("gsl", max_pin="x.x") }}
     - h5py
     - {{ pin_compatible("hdf5", max_pin="x.x") }}
-    - jemalloc  {{ jemalloc }} # [osx or linux]
+    - jemalloc {{ jemalloc }}  # [osx or linux]
     - lib3mf  # [win]
-    - nexus
+    - nexus {{ nexus }}
     - {{ pin_compatible("numpy", upper_bound="1.27") }}
     - occt {{ occt }}
     - pycifrw
     - python
-    - python-dateutil
-    - pyyaml
+    - python-dateutil {{ python_dateutil }}
+    - pyyaml {{ pyyaml }}
     - scipy {{ scipy }}
     - euphonic {{ euphonic }}
-    - toml
-    - libglu  # [linux]
+    - toml {{ toml }}
+    - libglu {{ libglu }}  # [linux]
     - joblib
     - orsopy {{ orsopy }}
     - quasielasticbayes

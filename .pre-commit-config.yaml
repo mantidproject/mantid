@@ -21,7 +21,7 @@ repos:
       - id: check-xml
       - id: check-yaml
         args: [--allow-multiple-documents]
-        exclude: conda/recipes/mantid/meta.yaml|conda/recipes/mantidqt/meta.yaml|conda/recipes/mantiddocs/meta.yaml|conda/recipes/mantidworkbench/meta.yaml
+        exclude: conda/recipes/mantid/meta.yaml|conda/recipes/mantid-developer/meta.yaml|conda/recipes/mantidqt/meta.yaml|conda/recipes/mantiddocs/meta.yaml|conda/recipes/mantidworkbench/meta.yaml
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v11.1.0 # updating to a new version should wait until maintenance

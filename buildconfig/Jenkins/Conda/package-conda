@@ -1,9 +1,9 @@
 #!/bin/bash -ex
 
-# This script expects to be in a POSIX environment, the script clones the conda-recipes
-# repo and then runs conda builds based on passed args. By default it only clones the
-# source, you need to pass a flag to actually build something useful. If building a
-# package dependent on a different one it will build and produce that package too.
+# This script expects to be in a POSIX environment. Uses boa to build the suite of
+# mantid packages. You must pass flags to specify which packages to build. If building
+# a package dependent on another one it will either install a locally built package
+# (if present from a previous build step) or build and produce that package too.
 #
 # Script usage:
 # package-conda WORKSPACE [options]
@@ -15,10 +15,9 @@
 #   1. WORKSPACE: path to the base of the working space for a build. The source
 #                 must be checked out into a subdirectory and the final conda-bld
 #                 outputs are placed in $WORKSPACE/conda-bld
-#                 Windows Caveat: Only use / for this argument do
-#                 not use \\ or \ in the path.
 #
 # Possible flags:
+#   --build-mantid-developer: build the mantid-developer metapackage using conda-build
 #   --build-mantid: build the mantid package using conda-build
 #   --build-qt: build the qt package using conda-build (this will implicitly build mantid)
 #   --build-docs: build the HTML/Qthelp documentation
@@ -37,11 +36,10 @@ if [[ -z "$WORKSPACE" ]]; then
 fi
 shift
 if [[ $OSTYPE == "msys"* ]]; then
+    # Convert all slashes to forward slashes for consistency with the rest of the script.
     if [[ "$WORKSPACE" == *'\'* ]]; then
-        echo "You have \ or \\ in your Workspace path, this is not supported on Windows."
-        exit 1
+        WORKSPACE="${WORKSPACE//\\//}" # Replace \ with /
     fi
-    WORKSPACE=${WORKSPACE////\\} # Replace // with \
     # Require git settings so that paths can be checked out with longer file names than 260 characters
     if [[ ! $(git config --system --get core.longpaths) == true ]]; then
         echo "This windows machine is does not have longpaths enabled for git, please run this command: git config --system core.longpaths true"
@@ -51,6 +49,7 @@ fi
 RECIPES_DIR=$REPO_ROOT_DIR/conda/recipes/
 
 # Parse flags
+ENABLE_BUILD_MANTID_DEVELOPER=false
 ENABLE_BUILD_MANTID=false
 ENABLE_BUILD_QT=false
 ENABLE_BUILD_WORKBENCH=false
@@ -61,6 +60,7 @@ BUILD_WORKBENCH_WITH_DOCS=true
 while [ ! $# -eq 0 ]
 do
     case "$1" in
+        --build-mantid-developer) ENABLE_BUILD_MANTID_DEVELOPER=true ;;
         --build-mantid) ENABLE_BUILD_MANTID=true ;;
         --build-qt) ENABLE_BUILD_QT=true ;;
         --build-workbench) ENABLE_BUILD_WORKBENCH=true ;;
@@ -106,10 +106,10 @@ fi
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
 export LC_ALL=C
 
-# Run conda build. Use a known path so packages built in other steps can be
+# Use a known path so packages built in other steps can be
 # copied to a known location and reused.
 # Use the workspace root outside of the git tree or conda-build cannot
-# copy the source to a working folder
+# copy the source to a working folder.
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
 if [[ -d $CONDA_BLD_PATH ]]; then
     python -m conda_index $CONDA_BLD_PATH
@@ -126,6 +126,10 @@ elif [[ $OSTYPE == 'darwin'* ]]; then
     EXTRA_BUILD_OPTIONS+="-m ./osx_64.yaml"
 fi
 
+# Run conda build.
+if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
+    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS
+fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
     conda mambabuild ./mantid/ $EXTRA_BUILD_OPTIONS
 fi

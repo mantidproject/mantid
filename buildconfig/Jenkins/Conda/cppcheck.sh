@@ -32,7 +32,7 @@ fi
 
 # Setup conda environment
 setup_mamba $WORKSPACE/mambaforge
-create_and_activate_mantid_developer_env
+create_and_activate_mantid_developer_env $WORKSPACE
 
 ###############################################################################
 # Run Cppcheck
