@@ -1,0 +1,1 @@
+- Add a minimum signal-to-sigma post-fitting check to :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>`, where peaks with a signal below the provided threshold will be rejected.
