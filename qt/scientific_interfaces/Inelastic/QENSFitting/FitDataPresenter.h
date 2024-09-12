@@ -56,6 +56,8 @@ public:
   std::vector<std::string> createDisplayNames() const;
   void validate(IUserInputValidator *validator);
 
+  virtual void updateFitFunctionList() const {};
+
   virtual void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) {
     UNUSED_ARG(workspaceName);
     UNUSED_ARG(paramType);

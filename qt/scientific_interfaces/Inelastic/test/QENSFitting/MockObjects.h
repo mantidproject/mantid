@@ -292,11 +292,11 @@ public:
   MOCK_METHOD1(validate, void(MantidQt::CustomInterfaces::IUserInputValidator *validator));
   MOCK_METHOD2(addTableEntry, void(size_t row, FitDataRow const &newRow));
   MOCK_METHOD3(updateNumCellEntry, void(double numEntry, size_t row, size_t column));
-  MOCK_METHOD1(getColumnIndexFromName, int(std::string const &ColName));
+  MOCK_CONST_METHOD1(columnIndex, int(std::string const &name));
   MOCK_METHOD0(clearTable, void());
   MOCK_CONST_METHOD2(getText, QString(int row, int column));
   MOCK_CONST_METHOD0(getSelectedIndexes, QModelIndexList());
-  MOCK_CONST_METHOD1(dataColumnContainsText, bool(const std::string &columnText));
+  MOCK_CONST_METHOD2(columnContains, bool(const std::string &columnHeader, const std::string &text));
 
   MOCK_METHOD1(setSampleWSSuffices, void(const QStringList &suffices));
   MOCK_METHOD1(setSampleFBSuffices, void(const QStringList &suffices));

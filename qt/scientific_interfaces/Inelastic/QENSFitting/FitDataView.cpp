@@ -59,11 +59,11 @@ void FitDataView::setHorizontalHeaders(const QStringList &headers) {
   auto header = m_uiForm->tbFitData->horizontalHeader();
   header->setSectionResizeMode(0, QHeaderView::Stretch);
 
-  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("StartX"),
+  m_uiForm->tbFitData->setItemDelegateForColumn(columnIndex("StartX"),
                                                 new NumericInputDelegate(m_uiForm->tbFitData, NUMERICAL_PRECISION));
-  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("EndX"),
+  m_uiForm->tbFitData->setItemDelegateForColumn(columnIndex("EndX"),
                                                 new NumericInputDelegate(m_uiForm->tbFitData, NUMERICAL_PRECISION));
-  m_uiForm->tbFitData->setItemDelegateForColumn(getColumnIndexFromName("Mask X Range"),
+  m_uiForm->tbFitData->setItemDelegateForColumn(columnIndex("Mask X Range"),
                                                 new RegexInputDelegate(m_uiForm->tbFitData, MASK_LIST));
 
   m_uiForm->tbFitData->verticalHeader()->setVisible(false);
@@ -89,16 +89,16 @@ void FitDataView::addTableEntry(size_t row, FitDataRow const &newRow) {
 
   cell = std::make_unique<QTableWidgetItem>(QString::number(newRow.workspaceIndex));
   cell->setFlags(flags);
-  setCell(std::move(cell), row, getColumnIndexFromName("WS Index"));
+  setCell(std::move(cell), row, columnIndex("WS Index"));
 
   cell = std::make_unique<QTableWidgetItem>(makeQStringNumber(newRow.startX, NUMERICAL_PRECISION));
-  setCell(std::move(cell), row, getColumnIndexFromName("StartX"));
+  setCell(std::move(cell), row, columnIndex("StartX"));
 
   cell = std::make_unique<QTableWidgetItem>(makeQStringNumber(newRow.endX, NUMERICAL_PRECISION));
-  setCell(std::move(cell), row, getColumnIndexFromName("EndX"));
+  setCell(std::move(cell), row, columnIndex("EndX"));
 
   cell = std::make_unique<QTableWidgetItem>(QString::fromStdString(newRow.exclude));
-  setCell(std::move(cell), row, getColumnIndexFromName("Mask X Range"));
+  setCell(std::move(cell), row, columnIndex("Mask X Range"));
 }
 
 void FitDataView::updateNumCellEntry(double numEntry, size_t row, size_t column) {
@@ -109,8 +109,8 @@ void FitDataView::updateNumCellEntry(double numEntry, size_t row, size_t column)
 
 bool FitDataView::isTableEmpty() const { return m_uiForm->tbFitData->rowCount() == 0; }
 
-int FitDataView::getColumnIndexFromName(std::string const &ColName) {
-  return m_HeaderLabels.indexOf(QString::fromStdString(ColName));
+int FitDataView::columnIndex(std::string const &name) const {
+  return m_HeaderLabels.indexOf(QString::fromStdString(name));
 }
 
 void FitDataView::clearTable() { m_uiForm->tbFitData->setRowCount(0); }
@@ -119,8 +119,15 @@ void FitDataView::setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, si
   m_uiForm->tbFitData->setItem(static_cast<int>(row), static_cast<int>(column), cell.release());
 }
 
-bool FitDataView::dataColumnContainsText(std::string const &columnText) const {
-  return !m_uiForm->tbFitData->findItems(QString::fromStdString(columnText), Qt::MatchContains).isEmpty();
+bool FitDataView::columnContains(std::string const &columnHeader, std::string const &text) const {
+  auto const column = columnIndex(columnHeader);
+  for (auto row = 0; row < m_uiForm->tbFitData->rowCount(); ++row) {
+    auto const itemText = m_uiForm->tbFitData->item(row, column)->text();
+    if (itemText.contains(QString::fromStdString(text))) {
+      return true;
+    }
+  }
+  return false;
 }
 
 QString FitDataView::getText(int row, int column) const {
