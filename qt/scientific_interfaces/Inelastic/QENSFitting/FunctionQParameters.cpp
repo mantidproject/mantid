@@ -51,7 +51,7 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 FunctionQParameters::FunctionQParameters() : m_widths(), m_eisfs() {}
 
 FunctionQParameters::FunctionQParameters(const MatrixWorkspace_sptr &workspace)
-    : m_widths(findAxisLabels(workspace, {".Width", ".FWHM"})), m_eisfs(findAxisLabels(workspace, {".EISF"})),
+    : m_widths(findAxisLabels(workspace, {".Width", ".FWHM", ".HWHM"})), m_eisfs(findAxisLabels(workspace, {".EISF"})),
       m_a0s(findAxisLabels(workspace, {".A0"})) {}
 
 std::vector<std::string> FunctionQParameters::names(std::string const &parameterType) const {
