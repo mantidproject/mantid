@@ -121,7 +121,7 @@ void FitDataView::setCell(std::unique_ptr<QTableWidgetItem> cell, size_t row, si
 
 bool FitDataView::columnContains(std::string const &columnHeader, std::string const &text) const {
   auto const column = columnIndex(columnHeader);
-  for (auto row = 0u; row < m_uiForm->tbFitData->rowCount(); ++row) {
+  for (auto row = 0; row < m_uiForm->tbFitData->rowCount(); ++row) {
     auto const itemText = m_uiForm->tbFitData->item(row, column)->text();
     if (itemText.contains(QString::fromStdString(text))) {
       return true;
