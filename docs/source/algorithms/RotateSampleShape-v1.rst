@@ -51,6 +51,26 @@ Usage
 
     print(md.parseString(ws.sample().getShape().getShapeXML()).toprettyxml())
 
+Output:
+
+.. testoutput:: RotateSampleShape
+
+    <?xml version="1.0" ?>
+    <type name="userShape">
+
+        <cylinder id="sample-shape">
+
+            <centre-of-bottom-base x="0" y="-0.02" z="0"/>
+
+            <axis x="0" y="1" z="0"/>
+            <height val="0.04"/>
+
+            <radius val="0.01"/>
+        </cylinder>
+
+        <goniometer a11="0.786566" a12="0.362372" a13="0.500000" a21="-0.079459" a22="0.862372" a23="-0.500000" a31="-0.612372" a32="0.353553" a33="0.707107"/>
+    </type>
+
 .. testcleanup:: RotateSampleShape
 
     DeleteWorkspace(ws)
