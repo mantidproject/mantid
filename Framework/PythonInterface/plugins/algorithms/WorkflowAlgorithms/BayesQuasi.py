@@ -8,6 +8,7 @@
 
 import os
 import numpy as np
+from typing import Tuple
 
 from mantid.api import (
     AlgorithmFactory,
@@ -22,6 +23,14 @@ from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
 from mantid import config, logger
 from IndirectCommon import *
+
+
+def _calculate_eisf(
+    height: np.ndarray, height_error: np.ndarray, amplitude: np.ndarray, amplitude_error: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
+    eisf = height / (height + amplitude)
+    eisf_error = (1 / (height + amplitude) ** 2) * np.sqrt((amplitude * height_error) ** 2 + (height * amplitude_error) ** 2)
+    return eisf, eisf_error
 
 
 class BayesQuasi(PythonAlgorithm):
@@ -654,10 +663,7 @@ class BayesQuasi(PythonAlgorithm):
             height_data, height_error = np.asarray(height_data), np.asarray(height_error)
 
             # calculate EISF and EISF error
-            eisf_data = height_data / (height_data + amplitude_data)
-            eisf_error = (1 / (height_data + amplitude_data) ** 2) * np.sqrt(
-                (amplitude_data * height_error) ** 2 + (height_data * amplitude_error) ** 2
-            )
+            eisf_data, eisf_error = _calculate_eisf(height_data, height_error, amplitude_data, amplitude_error)
 
             # interlace amplitudes and widths of the peaks
             y.append(np.asarray(height_data))

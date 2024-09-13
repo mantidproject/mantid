@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
-from mantid.simpleapi import *
+from mantid.simpleapi import BayesQuasi, CreateWorkspace, DeleteWorkspace, Load
 from mantid.api import MatrixWorkspace, WorkspaceGroup
+from plugins.algorithms.WorkflowAlgorithms.BayesQuasi import _calculate_eisf
 
 
 class BayesQuasiTest(unittest.TestCase):
@@ -113,6 +114,18 @@ class BayesQuasiTest(unittest.TestCase):
         self.assertTrue(isinstance(fit_group, WorkspaceGroup))
         self.assertTrue(isinstance(result, MatrixWorkspace))
         self.assertTrue(isinstance(prob, MatrixWorkspace))
+
+    def test_calculate_eisf_with_positive_height_and_amplitudes(self):
+        height = np.array([0.2, 0.4, 0.6, 0.8, 1.0])
+        height_error = np.full(5, 0.02)
+        amplitude = np.array([0.5, 0.4, 0.3, 0.2, 0.1])
+        amplitude_error = np.full(5, 0.01)
+        eisf, eisf_error = _calculate_eisf(height, height_error, amplitude, amplitude_error)
+
+        expected_eisf = [0.28571429, 0.5, 0.66666667, 0.8, 0.90909091]
+        expected_eisf_error = [0.02081232, 0.01397542, 0.01047566, 0.00894427, 0.00842813]
+        self.assertTrue(np.allclose(expected_eisf, eisf))
+        self.assertTrue(np.allclose(expected_eisf_error, eisf_error))
 
     # --------------------------------Validate results------------------------------------------------
 
