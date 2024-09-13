@@ -14,18 +14,18 @@
 namespace Mantid {
 namespace Kernel {
 /// Test for equality of doubles using compiler-defined precision
-template <typename T> MANTID_KERNEL_DLL bool equals(const T x, const T y);
+template <typename T> MANTID_KERNEL_DLL bool equals(T const x, T const y);
 /// Test whether x<=y within machine precision
-template <typename T> MANTID_KERNEL_DLL bool ltEquals(const T x, const T y);
+template <typename T> MANTID_KERNEL_DLL bool ltEquals(T const x, T const y);
 /// Test whether x>=y within machine precision
-template <typename T> MANTID_KERNEL_DLL bool gtEquals(const T x, const T y);
+template <typename T> MANTID_KERNEL_DLL bool gtEquals(T const x, T const y);
 /// Calculate absolute difference between x, y
-template <typename T> MANTID_KERNEL_DLL T absoluteDifference(const T x, const T y);
+template <typename T> MANTID_KERNEL_DLL T absoluteDifference(T const x, T const y);
 /// Calculate relative difference between x, y
-template <typename T> MANTID_KERNEL_DLL T relativeDifference(const T x, const T y);
+template <typename T> MANTID_KERNEL_DLL T relativeDifference(T const x, T const y);
 /// Test whether x, y are within absolute tolerance tol
-template <typename T> MANTID_KERNEL_DLL bool withinAbsoluteDifference(const T x, const T y, const T tolerance);
+template <typename T> MANTID_KERNEL_DLL bool withinAbsoluteDifference(T const x, T const y, T const tolerance);
 /// Test whether x, y are within relative tolerance tol
-template <typename T> MANTID_KERNEL_DLL bool withinRelativeDifference(const T x, const T y, const T tolerance);
+template <typename T> MANTID_KERNEL_DLL bool withinRelativeDifference(T const x, T const y, T const tolerance);
 } // namespace Kernel
 } // namespace Mantid
