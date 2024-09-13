@@ -132,9 +132,9 @@ public:
         polariserEfficiency->getProperty("OutputWorkspace"));
 
     // The T_para and T_anti curves are 4 and 2 (constant wrt wavelength) respectively, and the analyser
-    // efficiency is 1 for all wavelengths, which should give us a polarizer efficiency of 7/12
+    // efficiency is 1 for all wavelengths, which should give us a polarizer efficiency of 2/3
     for (const double &y : calculatedPolariserEfficiency->dataY(0)) {
-      TS_ASSERT_DELTA(7.0 / 12.0, y, 1e-8);
+      TS_ASSERT_DELTA(2.0 / 3.0, y, 1e-8);
     }
   }
 
@@ -151,9 +151,9 @@ public:
         polariserEfficiency->getProperty("OutputWorkspace"));
 
     // The T_para and T_anti curves are 4 and 2 (constant wrt wavelength) respectively, and the analyser
-    // efficiency is 1 for all wavelengths, which should give us a polarizer efficiency of 7/12
+    // efficiency is 1 for all wavelengths, which should give us a polarizer efficiency of 2/3
     for (const double &y : calculatedPolariserEfficiency->dataY(0)) {
-      TS_ASSERT_DELTA(7.0 / 12.0, y, 1e-8);
+      TS_ASSERT_DELTA(2.0 / 3.0, y, 1e-8);
     }
   }
 
@@ -164,8 +164,7 @@ public:
         polarizerEfficiency->getProperty("OutputWorkspace"));
     const auto &errors = eff->dataE(0);
     // Skip the first error because with this toy data it'll be NaN
-    const std::vector<double> expectedErrors{44.194173824159222, 19.641855032959654, 11.048543456039805,
-                                             7.0710678118654755};
+    const std::vector<double> expectedErrors{88.3883476283, 39.2837100613, 22.0970869124, 14.1421356255};
     for (size_t i = 0; i < expectedErrors.size(); ++i) {
       TS_ASSERT_DELTA(expectedErrors[i], errors[i + 1], 1e-7);
     }
