@@ -22,7 +22,7 @@ The polarization of the polarizer, :math:`P_{SM}`, is given by [#KRYCKA]_
 Since the efficiency, :math:`\epsilon_{SM}`, is given by :math:`\frac{1 + P_{SM}}{2}`, we have that
 
 .. math::
-    \epsilon_{SM} = \frac{1}{2} + \frac{T_{00} - T_{01}}{4(2\epsilon_{cell} - 1)(T_{00} + T_{01})}
+    \epsilon_{SM} = \frac{1}{2} + \frac{T_{00} - T_{01}}{2(2\epsilon_{cell} - 1)(T_{00} + T_{01})}
 
 The error in the calculation can then be determined thus:
 
@@ -34,13 +34,13 @@ The error in the calculation can then be determined thus:
 where:
 
 .. math::
-    \frac{\delta \epsilon_{SM}}{\delta T_{00}} = \frac{T_{01}}{2(2\epsilon_{cell} - 1)(T_{00} + T_{01})^2}
+    \frac{\delta \epsilon_{SM}}{\delta T_{00}} = \frac{T_{01}}{(2\epsilon_{cell} - 1)(T_{00} + T_{01})^2}
 
 .. math::
-    \frac{\delta \epsilon_{SM}}{\delta T_{01}} = \frac{-T_{00}}{2(2\epsilon_{cell} - 1)(T_{00} + T_{01})^2}
+    \frac{\delta \epsilon_{SM}}{\delta T_{01}} = \frac{-T_{00}}{(2\epsilon_{cell} - 1)(T_{00} + T_{01})^2}
 
 .. math::
-    \frac{\delta \epsilon_{SM}}{\delta \epsilon_{cell}} = \frac{T_{01} - T_{00}}{2(2\epsilon_{cell} - 1)^2(T_{00} + T_{01})}
+    \frac{\delta \epsilon_{SM}}{\delta \epsilon_{cell}} = \frac{T_{01} - T_{00}}{(2\epsilon_{cell} - 1)^2(T_{00} + T_{01})}
 
 Usage
 -----
