@@ -654,24 +654,24 @@ class BayesQuasi(PythonAlgorithm):
             height_data, height_error = np.asarray(height_data), np.asarray(height_error)
 
             # calculate EISF and EISF error
-            total = height_data + amplitude_data
-            EISF_data = height_data / total
-            total_error = height_error**2 + amplitude_error**2
-            EISF_error = EISF_data * np.sqrt((height_error**2 / height_data**2) + (total_error / total**2))
+            eisf_data = height_data / (height_data + amplitude_data)
+            eisf_error = (1 / (height_data + amplitude_data) ** 2) * np.sqrt(
+                (amplitude_data * height_error) ** 2 + (height_data * amplitude_error) ** 2
+            )
 
             # interlace amplitudes and widths of the peaks
             y.append(np.asarray(height_data))
-            for amp, width, EISF in zip(amplitude_data, width_data, EISF_data):
+            for amp, width, eisf in zip(amplitude_data, width_data, eisf_data):
                 y.append(amp)
                 y.append(width)
-                y.append(EISF)
+                y.append(eisf)
 
             # interlace amplitude and width errors of the peaks
             e.append(np.asarray(height_error))
-            for amp, width, EISF in zip(amplitude_error, width_error, EISF_error):
+            for amp, width, eisf in zip(amplitude_error, width_error, eisf_error):
                 e.append(amp)
                 e.append(width)
-                e.append(EISF)
+                e.append(eisf)
 
             # create x data and axis names for each function
             axis_names.append("f" + str(nl) + ".f0." + "Height")
