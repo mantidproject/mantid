@@ -1,0 +1,43 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "View.h"
+
+#include "Presenter.h"
+
+#include <string>
+
+#include <QVBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QString>
+
+
+View::View(QWidget *parent) : QWidget(parent), m_presenter() {
+  auto layout = new QVBoxLayout();
+  auto button = new QPushButton("Increment", this);
+  m_label = new QLabel("0", this);
+
+  layout->addWidget(button);
+  layout->addWidget(m_label);
+
+  setLayout(layout);
+
+  connect(button, &QPushButton::clicked, this, &View::notifyButtonClicked);
+}
+
+void View::subscribe(IPresenter *presenter) {
+  m_presenter = presenter;
+}
+
+void View::notifyButtonClicked() {
+  // An example event slot which notifies the presenter
+  m_presenter->handleButtonClicked();
+}
+
+void View::setLabel(std::string const &text) {
+  m_label->setText(QString::fromStdString(text));
+}

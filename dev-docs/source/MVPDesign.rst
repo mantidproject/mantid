@@ -179,6 +179,74 @@ in C++, or `unittest.mock
 can set expectations in the unit tests for certain methods to be
 called, and with certain arguments.
 
+MVP Template tool
+#################
+
+The `template.py script <https://github.com/mantidproject/mantid/blob/main/tools/MVP/template.py>`__
+provides a tool which is designed to generate initial files for an MVP-based
+widget written in either Python or C++. These generated files serve as a
+foundation or template for creating any widget using the MVP design pattern.
+It can also be used to create the necessary files when refactoring an existing
+widget which is not currently using MVP. The script is designed to be run from
+within a `mantid-developer` Conda environment.
+
+Python
+------
+
+To generate files for a Python widget with name "Example", run:
+
+.. code-block:: sh
+
+  python tools/MVP/template.py --name Example --language python --include-setup --output-dir $PWD/..
+
+
+This command will generate four python files including `example_model.py`, `example_view.py`
+and `example_presenter.py`. These files will be saved in the provided output directory,
+as specified by `$PWD/..`. An additional file named `launch.py` will be generated if the
+``--include-setup`` flag is provided to the script. This can be used to open the widget as
+follows:
+
+.. code-block:: sh
+
+  python $PWD/../launch.py
+
+C++
+---
+
+To generate files for a C++ widget with name "Example", run:
+
+.. code-block:: sh
+
+  python tools/MVP/template.py --name Example --language c++ --include-setup --output-dir $PWD/..
+
+This command will generate eight files including `ExampleModel.cpp`, `ExampleModel.h`,
+`ExampleView.cpp`, `ExampleView.h`, `ExamplePresenter.cpp` and `ExamplePresenter.h`.
+An additional file named `main.cpp` and a `CMakeLists.txt` will be generated if the
+``--include-setup`` flag is provided to the script. These files can be used to build
+the widget as follows:
+
+.. code-block:: sh
+
+  mkdir buildmvp
+  cd buildmvp
+  cmake ..
+  cmake --build .
+
+The example widget can then be opened with:
+
+.. code-block:: sh
+
+  cd buildmvp
+  # On a Unix system
+  ./launch
+  # On a Windows system from a shell or bash
+  ./Debug/launch.exe
+
+The `main.cpp` and a `CMakeLists.txt` files are intended as an example for how you can
+build, and then instantiate your widget. If you are refactoring or creating a new
+widget for Mantid, the headers and cpp files should be included in the relevant
+CMakeLists file elsewhere in the project.
+
 Visual Design
 #############
 

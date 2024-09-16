@@ -1,0 +1,20 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+
+
+class Model:
+
+    def __init__(self):
+        self._count: int = 0
+
+    @property
+    def count(self) -> int:
+        return self._count
+
+    @count.setter
+    def count(self, value: int) -> None:
+        self._count = value

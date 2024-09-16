@@ -1,0 +1,21 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+
+
+class Presenter:
+
+    def __init__(self, model, view):
+        self._model = model
+        self._view = view
+
+        # Use a subscriber to avoid Qt connections in the presenter
+        self._view.subscribe_presenter(self)
+
+    def handle_button_clicked(self):
+        # An example method to handle a view event
+        self._model.count += 1
+        self._view.set_label(str(self._model.count))
