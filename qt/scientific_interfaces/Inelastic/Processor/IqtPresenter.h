@@ -62,7 +62,7 @@ private:
   /// Retrieve the selected spectrum
   int getSelectedSpectrum() const;
   /// Sets the selected spectrum
-  virtual void setSelectedSpectrum(int spectrum);
+  void setSelectedSpectrum(int spectrum);
   /// Set input workspace
   void setInputWorkspace(Mantid::API::MatrixWorkspace_sptr inputWorkspace);
 
