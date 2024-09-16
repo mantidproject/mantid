@@ -786,9 +786,9 @@ public:
     if (m_compressStartTime != "0")
       align_and_focus.setProperty("CompressStartTime", m_compressStartTime);
 
-    // Remove prompt pulse; will cutoff last 6 long-TOF peaks (freq is 200 Hz)
+    // Remove prompt pulse; will cutoff the first peak
     if (m_removePromptPulse)
-      align_and_focus.setProperty("RemovePromptPulseWidth", 1e4);
+      align_and_focus.setProperty("RemovePromptPulseWidth", 2200.0);
 
     // Filter absorption resonances - default unit is wavelength
     align_and_focus.setPropertyValue("ResonanceFilterLowerLimits", m_filterResonanceLower);
