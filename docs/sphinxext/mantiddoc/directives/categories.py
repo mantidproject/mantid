@@ -129,7 +129,10 @@ class Category(LinkItem):
         self.section = docname.parts[0]
         dirpath = docname.parent
         html_dir = dirpath.joinpath(CATEGORIES_DIR)
-        self.html_path = html_dir.joinpath(name + ".html")
+        # name can arrive with a format like "MyAlgorithmCategory\\NameOfAlgorithm", so we
+        # have to sort those slashes out
+        name_with_slashes_fixed = name.replace("\\", "/").replace("//", "/")
+        self.html_path = html_dir.joinpath(name_with_slashes_fixed + ".html")
         super(Category, self).__init__(name, self.html_path)
         self.pages = set([])
         self.subcategories = set([])
@@ -446,7 +449,7 @@ def create_top_algorithm_category(categories):
     top_context["facilitycategories"] = sorted(facility_categories, key=lambda x: x.name)
     top_context["title"] = "Algorithm Contents"
     top_html_path_noext = str(Path("algorithms", "index"))
-    return (str(top_html_path_noext), top_context, template)
+    return (top_html_path_noext, top_context, template)
 
 
 def extract_matching_categories(input_categories, filepath):
