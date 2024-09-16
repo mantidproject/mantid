@@ -81,7 +81,7 @@ if [ ! -f $EXPECTED_MAMBA_EXE ]; then
           sed -e '/^export\ CONDA_/s/\\/\//g' | \
           sed -e '/^export\ CONDA_/s/\(\w\)\:/\/\1/g' > $EXPECTED_MAMBAFORGE_PATH/etc/profile.d/conda.sh
     else
-        bash $MAMBAFORGE_SCRIPT_NAME -b -p $EXPECTED_MAMBAFORGE_PATH
+        bash $MAMBAFORGE_SCRIPT_NAME -b -p $EXPECTED_MAMBAFORGE_PATH -u
     fi
     rm $MAMBAFORGE_SCRIPT_NAME
 fi
