@@ -41,6 +41,7 @@ from mantid.plots.datafunctions import (
 )
 from mantid.plots.utility import MantidAxType
 from mantid.plots.quad_mesh_wrapper import QuadMeshWrapper
+from mantid import logger
 
 # Used for initializing searches of max, min values
 _LARGEST, _SMALLEST = float(sys.maxsize), -sys.maxsize
@@ -285,6 +286,14 @@ def errorbar(axes, workspace, *args, **kwargs):
     if kwargs.pop("update_axes_labels", True):
         _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width, axis=axis)
     kwargs.pop("normalize_by_bin_width", None)
+
+    if dy is not None and min(dy) < 0:
+        dy = abs(dy)
+        logger.warning("Negative values found in y error when plotting error bars. Converting to positive and continuing.")
+
+    if dx is not None and min(dx) < 0:
+        dx = abs(dx)
+        logger.warning("Negative values found in x error when plotting error bars. Converting to positive and continuing.")
 
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
