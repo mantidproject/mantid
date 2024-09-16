@@ -16,16 +16,6 @@ class HeliumAnalyserEfficiencyTestBase(SANSPolarizationCorrectionsBase, metaclas
 
     @property
     @abstractmethod
-    def reference_basename(self):
-        """
-        The algorithm outputs 3 workspaces. This value is the string that precedes the specific workspace's reference
-        file.
-        :return: The prefix all the reference files are preceded by for the given test.
-        """
-        pass
-
-    @property
-    @abstractmethod
     def input_filename(self):
         """
         The filename to use as the input to the algorithm in this test.
