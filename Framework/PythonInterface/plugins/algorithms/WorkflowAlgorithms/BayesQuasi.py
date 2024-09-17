@@ -666,33 +666,23 @@ class BayesQuasi(PythonAlgorithm):
             eisf_data, eisf_error = _calculate_eisf(height_data, height_error, amplitude_data, amplitude_error)
 
             # interlace amplitudes and widths of the peaks
-            y.append(np.asarray(height_data))
-            for amp, width, eisf in zip(amplitude_data, width_data, eisf_data):
-                y.append(amp)
-                y.append(width)
-                y.append(eisf)
+            y.extend(height_data)
+            y.extend(np.hstack((amplitude_data, width_data, eisf_data)).flatten("F"))
 
             # interlace amplitude and width errors of the peaks
-            e.append(np.asarray(height_error))
-            for amp, width, eisf in zip(amplitude_error, width_error, eisf_error):
-                e.append(amp)
-                e.append(width)
-                e.append(eisf)
+            e.extend(height_error)
+            e.extend(np.hstack((amplitude_error, width_error, eisf_error)).flatten("F"))
 
             # create x data and axis names for each function
             axis_names.append("f" + str(nl) + ".f0." + "Height")
-            x.append(x_data)
+            x.extend(x_data)
             for j in range(1, nl + 1):
                 axis_names.append("f" + str(nl) + ".f" + str(j) + ".Amplitude")
-                x.append(x_data)
+                x.extend(x_data)
                 axis_names.append("f" + str(nl) + ".f" + str(j) + ".FWHM")
-                x.append(x_data)
+                x.extend(x_data)
                 axis_names.append("f" + str(nl) + ".f" + str(j) + ".EISF")
-                x.append(x_data)
-
-        x = np.asarray(x).flatten()
-        y = np.asarray(y).flatten()
-        e = np.asarray(e).flatten()
+                x.extend(x_data)
 
         s_api.CreateWorkspace(
             OutputWorkspace=output_workspace,
