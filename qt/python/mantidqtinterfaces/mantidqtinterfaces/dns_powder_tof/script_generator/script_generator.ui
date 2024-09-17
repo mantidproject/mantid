@@ -25,7 +25,7 @@
      <item>
       <widget class="QPushButton" name="pB_generate_script">
        <property name="text">
-        <string>Generate Script</string>
+        <string>Generate and Run Script</string>
        </property>
       </widget>
      </item>

@@ -19,35 +19,6 @@ class DNSElasticSCOptionsModel(DNSCommonOptionsModel):
     def get_dx_dy(options):
         hkl1 = convert_hkl_string_to_float(options["hkl1"])
         hkl2 = convert_hkl_string_to_float(options["hkl2"])
-        dx = round(
-            d_spacing_from_lattice(
-                a=options["a"],
-                b=options["b"],
-                c=options["c"],
-                alpha=options["alpha"],
-                beta=options["beta"],
-                gamma=options["gamma"],
-                hkl=hkl1,
-            ),
-            5,
-        )
-        dy = round(
-            d_spacing_from_lattice(
-                a=options["a"],
-                b=options["b"],
-                c=options["c"],
-                alpha=options["alpha"],
-                beta=options["beta"],
-                gamma=options["gamma"],
-                hkl=hkl2,
-            ),
-            5,
-        )
+        dx = d_spacing_from_lattice(options["a"], options["b"], options["c"], options["alpha"], options["beta"], options["gamma"], hkl1)
+        dy = d_spacing_from_lattice(options["a"], options["b"], options["c"], options["alpha"], options["beta"], options["gamma"], hkl2)
         return [dx, dy]
-
-    @staticmethod
-    def convert_hkl_string(hkl):
-        # catches if user uses brackets or spaces in hkl specification
-        hkl = hkl.strip("[]()")
-        hkl = hkl.replace(" ", ",")
-        return hkl

@@ -10,7 +10,7 @@ DNS file selector tab view of DNS reduction GUI.
 """
 
 from mantidqt.utils.qt import load_ui
-from qtpy.QtCore import QModelIndex, Qt, Signal
+from qtpy.QtCore import QModelIndex, Qt, Signal, QSignalBlocker
 from qtpy.QtWidgets import QProgressDialog
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem import TreeItemEnum
@@ -113,16 +113,14 @@ class DNSFileSelectorView(DNSView):
         self.sig_check_last.emit(sender_name)
 
     def _un_expand_all(self):
-        self._treeview.blockSignals(True)
-        self._treeview.collapseAll()
-        self._treeview.blockSignals(False)
+        with QSignalBlocker(self._treeview):
+            self._treeview.collapseAll()
         self.adjust_treeview_columns_width(TREEVIEW_MAX_NUMBER_COLUMNS)
 
     # public can be called from presenter
     def expand_all(self):
-        self._treeview.blockSignals(True)
-        self._treeview.expandAll()
-        self._treeview.blockSignals(False)
+        with QSignalBlocker(self._treeview):
+            self._treeview.expandAll()
         self.adjust_treeview_columns_width(TREEVIEW_MAX_NUMBER_COLUMNS)
 
     def _filter_scans_checked(self):

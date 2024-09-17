@@ -12,8 +12,11 @@ DNS script generator model for elastic single crystal data.
 from mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset import DNSElasticDataset
 from mantidqtinterfaces.dns_powder_tof.helpers.list_range_converters import get_normalisation
 from mantidqtinterfaces.dns_powder_tof.script_generator.common_script_generator_model import DNSScriptGeneratorModel
+from mantidqtinterfaces.dns_powder_elastic.helpers.converters import convert_hkl_string_to_float
+from mantidqtinterfaces.dns_single_crystal_elastic.helpers.converters import d_spacing_from_lattice
 import numpy as np
 from mantid.simpleapi import mtd
+
 
 INDENT_SPACE = 4 * " "
 
@@ -46,10 +49,12 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         self._nexus = None
         self._norm = None
         self._selected_sample_fields = None
+        self._use_lattice_parameters = None
 
     def script_maker(self, options, paths, file_selector=None):
         self._script = []
         # shortcuts for options
+        self._use_lattice_parameters = not options["use_dx_dy"]
         self._vana_correction = options["corrections"] and options["det_efficiency"]
         self._nicr_correction = options["corrections"] and options["flipping_ratio"]
         self._sample_background_correction = options["corrections"] and options["subtract_background_from_sample"]
@@ -132,25 +137,56 @@ class DNSElasticSCScriptGeneratorModel(DNSScriptGeneratorModel):
         return [""]
 
     def _get_param_lines(self, options):
-        return [
-            "",
-            f"params = {{'a': {options['a']}, "
-            f"\n          'b': {options['b']},"
-            f"\n          'c': {options['c']},"
-            f"\n          'alpha': {options['alpha']},"
-            f"\n          'beta': {options['beta']},"
-            f"\n          'gamma': {options['gamma']},"
-            f"\n          'hkl1': '{options['hkl1']}',"
-            f"\n          'hkl2': '{options['hkl2']}',"
-            f"\n          'omega_offset': {options['omega_offset']},"
-            f"\n          'norm_to': '{self._norm}',"
-            f"\n          'dx': '{options['dx']}',"
-            f"\n          'dy': '{options['dy']}',"
-            f"\n          'ignore_vana': '{options['ignore_vana_fields']}',"
-            f"\n          'sample_fields': {self._selected_sample_fields},"
-            "}",
-            "",
-        ]
+        indent = "\n" + INDENT_SPACE
+        if self._use_lattice_parameters:
+            dx = d_spacing_from_lattice(
+                options["a"],
+                options["b"],
+                options["c"],
+                options["alpha"],
+                options["beta"],
+                options["gamma"],
+                convert_hkl_string_to_float(options["hkl1"]),
+            )
+            dy = d_spacing_from_lattice(
+                options["a"],
+                options["b"],
+                options["c"],
+                options["alpha"],
+                options["beta"],
+                options["gamma"],
+                convert_hkl_string_to_float(options["hkl2"]),
+            )
+            lattice_parameters_str = (
+                "params = {"
+                f"{indent}'use_lattice_params': True, "
+                f"{indent}'a': {options['a']}, "
+                f"{indent}'b': {options['b']}, "
+                f"{indent}'c': {options['c']}, "
+                f"{indent}'alpha': {options['alpha']}, "
+                f"{indent}'beta': {options['beta']}, "
+                f"{indent}'gamma': {options['gamma']}, "
+                f"{indent}'hkl1': '{options['hkl1']}', "
+                f"{indent}'hkl2': '{options['hkl2']}', "
+                f"{indent}'dx': {dx}, "
+                f"{indent}'dy': {dy}, "
+            )
+        else:
+            lattice_parameters_str = (
+                "params = {"
+                f"{indent}'use_lattice_params': False, "
+                f"{indent}'dx': '{options['dx']}',"
+                f"{indent}'dy': '{options['dy']}',"
+            )
+        parameters_str = (
+            f"{lattice_parameters_str}"
+            f"{indent}'omega_offset': {options['omega_offset']}, "
+            f"{indent}'norm_to': '{self._norm}', "
+            f"{indent}'ignore_vana': '{options['ignore_vana_fields']}', "
+            f"{indent}'sample_fields': {self._selected_sample_fields}"
+            "\n}"
+        )
+        return ["", parameters_str, ""]
 
     def _get_binning_lines(self, options):
         two_theta_min = options["two_theta_min"]
