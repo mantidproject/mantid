@@ -8,6 +8,7 @@
 
 import os
 import numpy as np
+from typing import Tuple
 
 from mantid.api import (
     AlgorithmFactory,
@@ -22,6 +23,14 @@ from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
 from mantid import config, logger
 from IndirectCommon import *
+
+
+def _calculate_eisf(
+    height: np.ndarray, height_error: np.ndarray, amplitude: np.ndarray, amplitude_error: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
+    eisf = height / (height + amplitude)
+    eisf_error = (1 / (height + amplitude) ** 2) * np.sqrt((amplitude * height_error) ** 2 + (height * amplitude_error) ** 2)
+    return eisf, eisf_error
 
 
 class BayesQuasi(PythonAlgorithm):
@@ -654,39 +663,26 @@ class BayesQuasi(PythonAlgorithm):
             height_data, height_error = np.asarray(height_data), np.asarray(height_error)
 
             # calculate EISF and EISF error
-            total = height_data + amplitude_data
-            EISF_data = height_data / total
-            total_error = height_error**2 + amplitude_error**2
-            EISF_error = EISF_data * np.sqrt((height_error**2 / height_data**2) + (total_error / total**2))
+            eisf_data, eisf_error = _calculate_eisf(height_data, height_error, amplitude_data, amplitude_error)
 
             # interlace amplitudes and widths of the peaks
-            y.append(np.asarray(height_data))
-            for amp, width, EISF in zip(amplitude_data, width_data, EISF_data):
-                y.append(amp)
-                y.append(width)
-                y.append(EISF)
+            y.extend(height_data)
+            y.extend(np.hstack((amplitude_data, width_data, eisf_data)).flatten("F"))
 
             # interlace amplitude and width errors of the peaks
-            e.append(np.asarray(height_error))
-            for amp, width, EISF in zip(amplitude_error, width_error, EISF_error):
-                e.append(amp)
-                e.append(width)
-                e.append(EISF)
+            e.extend(height_error)
+            e.extend(np.hstack((amplitude_error, width_error, eisf_error)).flatten("F"))
 
             # create x data and axis names for each function
             axis_names.append("f" + str(nl) + ".f0." + "Height")
-            x.append(x_data)
+            x.extend(x_data)
             for j in range(1, nl + 1):
                 axis_names.append("f" + str(nl) + ".f" + str(j) + ".Amplitude")
-                x.append(x_data)
+                x.extend(x_data)
                 axis_names.append("f" + str(nl) + ".f" + str(j) + ".FWHM")
-                x.append(x_data)
+                x.extend(x_data)
                 axis_names.append("f" + str(nl) + ".f" + str(j) + ".EISF")
-                x.append(x_data)
-
-        x = np.asarray(x).flatten()
-        y = np.asarray(y).flatten()
-        e = np.asarray(e).flatten()
+                x.extend(x_data)
 
         s_api.CreateWorkspace(
             OutputWorkspace=output_workspace,
@@ -763,12 +759,12 @@ class BayesQuasi(PythonAlgorithm):
                 # SIGIK
                 line = next(line_pointer)
                 amp = AMAX * math.sqrt(math.fabs(line[0]) + 1.0e-20)
-                block_amplitude_e.append(amp)
+                block_amplitude_e.append(abs(amp))
 
                 # SIGFK
                 line = next(line_pointer)
                 FWHM = 2.0 * HWHM * math.sqrt(math.fabs(line[0]) + 1.0e-20)
-                block_FWHM_e.append(FWHM)
+                block_FWHM_e.append(abs(FWHM))
 
             # append data from block
             amp_data.append(block_amplitude)
@@ -778,7 +774,7 @@ class BayesQuasi(PythonAlgorithm):
             # append error values from block
             amp_error.append(block_amplitude_e)
             FWHM_error.append(block_FWHM_e)
-            height_error.append(block_height_e)
+            height_error.append(abs(block_height_e))
 
         return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)
 
