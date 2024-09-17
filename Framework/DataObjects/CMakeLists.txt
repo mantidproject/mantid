@@ -128,6 +128,7 @@ set(INC_FILES
     inc/MantidDataObjects/SplittersWorkspace.h
     inc/MantidDataObjects/TableColumn.h
     inc/MantidDataObjects/TableWorkspace.h
+    inc/MantidDataObjects/TableWorkspaceValidator.h
     inc/MantidDataObjects/TableWorkspace_fwd.h
     inc/MantidDataObjects/TimeSplitter.h
     inc/MantidDataObjects/VectorColumn.h
