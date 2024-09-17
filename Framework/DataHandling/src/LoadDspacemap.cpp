@@ -341,7 +341,7 @@ struct VulcanCorrectionFactor {
 void LoadDspacemap::readVulcanBinaryFile(const std::string &fileName, std::map<detid_t, double> &vulcan) {
   BinaryFile<VulcanCorrectionFactor> file(fileName);
   std::vector<VulcanCorrectionFactor> results = file.loadAll();
-  for (auto &result : results) {
+  for (const auto &result : results) {
     vulcan[static_cast<detid_t>(result.pixelID)] = result.factor;
   }
 }
