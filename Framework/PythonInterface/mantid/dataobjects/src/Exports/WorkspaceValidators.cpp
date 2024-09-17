@@ -7,6 +7,7 @@
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/TableWorkspaceNotEmptyValidator.h"
 #include "MantidDataObjects/TableWorkspaceValidator.h"
 #include "MantidPythonInterface/core/TypedValidatorExporter.h"
 #include <boost/python/class.hpp>
@@ -44,4 +45,8 @@ void export_TableWorkspaceValidator() {
   class_<ValidatorType, bases<TableWorkspaceValidator>, boost::noncopyable>(                                           \
       #ValidatorType, init<ArgType>(arg(ArgName) = DefaultValue, DocString));
 
-void export_WorkspaceValidators() { using namespace Mantid::DataObjects; }
+void export_WorkspaceValidators() {
+  using namespace Mantid::DataObjects;
+
+  EXPORT_WKSP_VALIDATOR_NO_ARG(TableWorkspaceNotEmptyValidator, "Checks that the workspace is not empty");
+}

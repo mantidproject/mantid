@@ -47,6 +47,7 @@ set(SRC_FILES
     src/SplittersWorkspace.cpp
     src/TableColumn.cpp
     src/TableWorkspace.cpp
+    src/TableWorkspaceNotEmptyValidator.cpp
     src/TimeSplitter.cpp
     src/VectorColumn.cpp
     src/Workspace2D.cpp
@@ -129,6 +130,7 @@ set(INC_FILES
     inc/MantidDataObjects/TableColumn.h
     inc/MantidDataObjects/TableWorkspace.h
     inc/MantidDataObjects/TableWorkspaceValidator.h
+    inc/MantidDataObjects/TableWorkspaceNotEmptyValidator.h
     inc/MantidDataObjects/TableWorkspace_fwd.h
     inc/MantidDataObjects/TimeSplitter.h
     inc/MantidDataObjects/VectorColumn.h
