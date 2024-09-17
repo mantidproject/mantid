@@ -8,6 +8,8 @@ added to the ``__init__`` function of the view:
 
 .. code-block:: python
 
+    from qtpy.QWidgets import QTableWidget
+
     self._table = QTableWidget(self)
     self._table.setRowCount(2)
     self._table.setColumnCount(2)
@@ -27,6 +29,8 @@ following imports at the top of the file:
 We then need to add this code to the ``__init__`` function:
 
 .. code-block:: python
+
+    from qtpy.QWidgets import QTableWidgetItem
 
     text = QTableWidgetItem(("test"))
     text.setFlags(ItemIsEnabled)

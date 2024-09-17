@@ -14,7 +14,6 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 
 class PlotView(QWidget):
-
     def __init__(self, parent: Union[QWidget, None] = None):
         super().__init__(parent)
 
@@ -34,7 +33,7 @@ class PlotView(QWidget):
         ax.set_ylabel("$f(t)$")
         return ax
 
-    def addData(self, xvalues: ndarray, yvalues: ndarray, visible: bool, colour: str, marker: str) -> None:
+    def plot_data(self, xvalues: ndarray, yvalues: ndarray, visible: bool, colour: str, marker: str) -> None:
         ax = self.draw()
         ax.grid(visible)
         ax.plot(xvalues, yvalues, color=colour, marker=marker, linestyle="--")

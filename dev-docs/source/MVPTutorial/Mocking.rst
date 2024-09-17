@@ -32,9 +32,8 @@ The test class is then initialised:
             self.view = mock.create_autospec(view.View)
 
             # mock view
-            self.view.doSomethingSignal = mock.Mock()
-            self.view.btn_click = mock.Mock()
-            self.view.getValue = mock.Mock(return_value=3.14)
+            self.view._button_clicked = mock.Mock()
+            self.view.get_value = mock.Mock(return_value=3.14)
 
             self.presenter = presenter.Presenter(self.view)
 

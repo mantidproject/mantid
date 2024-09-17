@@ -58,10 +58,11 @@ The main only needs to import the main_view:
         return QApplication(sys.argv)
 
 
-    app = _get_qapplication_instance()
-    view = MainView()
-    view.show()
-    app.exec_()
+    if __name__ == "__main__" :
+        app = _get_qapplication_instance()
+        view = MainView()
+        view.show()
+        app.exec_()
 
 You may notice that this main does not incorporate the presenter.
 Now that we have embedded our two views into MainView, Presenter

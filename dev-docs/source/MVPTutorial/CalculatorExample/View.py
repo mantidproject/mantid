@@ -10,7 +10,6 @@ from typing import List, Union
 
 
 class View(QWidget):
-
     def __init__(self, parent: Union[QWidget, None] = None):
         super(View, self).__init__(parent)
 
@@ -71,7 +70,7 @@ class View(QWidget):
         self._table.setItem(4, 1, QTableWidgetItem(str(value)))
 
     def show_display(self, show: bool) -> None:
-        self._table.setRowHidden(4, show)
+        self._table.setRowHidden(4, not show)
 
     def get_value(self, row: int) -> float:
         return float(self._table.item(row, 1).text())

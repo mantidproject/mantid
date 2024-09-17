@@ -13,6 +13,8 @@ The following code should be added to the view's ``__init__`` function.
 
 .. code-block:: python
 
+    from qtpy.QWidgets import QComboBox
+
     self._combo = QComboBox()
     options = ["one", "two", "three"]
     self._combo.addItems(options)

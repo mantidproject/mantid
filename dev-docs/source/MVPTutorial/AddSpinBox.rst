@@ -11,6 +11,8 @@ constraints on the spin box such as a maximum value.
 
 .. code-block:: python
 
+    from qtpy.QWidgets import QSpinBox
+
     self._spin = QSpinBox()
     grid.addWidget(self._spin)
 

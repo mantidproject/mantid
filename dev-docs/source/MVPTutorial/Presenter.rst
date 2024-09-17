@@ -136,11 +136,12 @@ The main is now:
         return QApplication(sys.argv)
 
 
-    app = _get_qapplication_instance()
-    view = View()
-    presenter = Presenter(view)
-    view.show()
-    app.exec_()
+    if __name__ == "__main__" :
+        app = _get_qapplication_instance()
+        view = View()
+        presenter = Presenter(view)
+        view.show()
+        app.exec_()
 
 The view and presenter are both created, and the view is passed
 into the presenter.

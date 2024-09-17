@@ -57,6 +57,11 @@ The View
 
             self._plot.clicked.connect(self._button_clicked)
 
+        def subscribe_presenter(self, presenter) -> None:
+            # Subscribe the presenter to the view so we do not need to
+            # make a Qt connection between the presenter and view
+            self._presenter = presenter
+
         def get_colour(self) -> str:
             return self._colours.currentText()
 
@@ -122,8 +127,9 @@ The Main
         return QApplication(sys.argv)
 
 
-    app = _get_qapplication_instance()
-    view = View()
-    presenter = Presenter(view)
-    view.show()
-    app.exec_()
+    if __name__ == "__main__" :
+        app = _get_qapplication_instance()
+        view = View()
+        presenter = Presenter(view)
+        view.show()
+        app.exec_()

@@ -8,6 +8,8 @@ The model should now contain the following top level function:
 
 .. code-block:: python
 
+    from typing import List
+
     def line_colours(self) -> List[str]:
         colour_table = ["red", "blue", "black"]
         return colour_table
@@ -51,9 +53,10 @@ And the Main module should now pass the two models into the presenter:
         return QApplication(sys.argv)
 
 
-    app = _get_qapplication_instance()
-    model = PlotModel()
-    view = View()
-    presenter = Presenter(view, model)
-    view.show()
-    app.exec_()
+    if __name__ == "__main__" :
+        app = _get_qapplication_instance()
+        model = PlotModel()
+        view = View()
+        presenter = Presenter(view, model)
+        view.show()
+        app.exec_()

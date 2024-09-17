@@ -21,10 +21,11 @@ main.py
             return app
         return QApplication(sys.argv)
 
-    app = _get_qapplication_instance()
-    window = View()
-    window.show()
-    app.exec_()
+    if __name__ == "__main__" :
+        app = _get_qapplication_instance()
+        window = View()
+        window.show()
+        app.exec_()
 
 view.py
 #######

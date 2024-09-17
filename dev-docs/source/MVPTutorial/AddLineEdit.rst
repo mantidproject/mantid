@@ -9,6 +9,8 @@ the ``__init__`` function of the view will add a line edit:
 
 .. code-block:: python
 
+   from qtpy.QWidgets import QLineEdit
+
    self._line_edit = QLineEdit()
    grid.addWidget(self._line_edit)
 

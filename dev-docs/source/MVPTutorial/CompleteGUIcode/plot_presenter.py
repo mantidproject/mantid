@@ -8,9 +8,8 @@ from numpy import ndarray
 
 
 class PlotPresenter:
-
     def __init__(self, view):
         self._view = view
 
     def plot(self, x_data: ndarray, y_data: ndarray, grid_lines: bool, colour_code: str) -> None:
-        self._view.add_data(x_data, y_data, grid_lines, colour_code, "x")
+        self._view.plot_data(x_data, y_data, grid_lines, colour_code, "x")

@@ -76,10 +76,12 @@ all been saved in ``view.py``, the ``main.py`` will contain:
             return app
         return QApplication(sys.argv)
 
-    app = _get_qapplication_instance()
-    window = View()
-    window.show()
-    app.exec_()
+
+    if __name__ == "__main__" :
+        app = _get_qapplication_instance()
+        window = View()
+        window.show()
+        app.exec_()
 
 
 Note that there needs to be a QApplication instance running in the

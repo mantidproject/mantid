@@ -6,11 +6,12 @@ In the previous task a label was added to the view. However, the label
 appeared below the button. It would be sensible to place the label
 next to the button. This is possible by using **layouts**.
 
-So far we have used the vertical layout (``QtWidgets.QVBoxLayout``) and we
+So far we have used a grid layout (``QtWidgets.QGridLayout``) and we
 will now use the horizontal layout. It is possible to add sub-layouts
 to a layout, which we will do here by adding a horizontal layout
-(``QtWidgets.QHBoxLayout``) to the vertical one. The order in which
-widgets are added to the layout will determine their location.
+(``QtWidgets.QHBoxLayout``) to the grid one. The order in which
+widgets are added to the layout will determine their location. We will
+also use a vertical layout (``QtWidgets.QVBoxLayout``) in this example.
 
 In the view we will replace the ``__init__`` with the following:
 
@@ -23,7 +24,7 @@ In the view we will replace the ``__init__`` with the following:
         self._button.setStyleSheet("background-color:lightgrey")
 
         # connect button to signal
-        self._button.clicked.connect(self.btn_click)
+        self._button.clicked.connect(self._button_clicked)
         self._label = QLabel()
         self._label.setText("Button")
 

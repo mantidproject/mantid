@@ -20,7 +20,8 @@ set of rules. On this occasion it has been decided that it should be a
 view.
 
 This view will exist alongside with the view from the exercise. So we
-will need to call it something different, such as PlotView.
+will need to call it something different, such as PlotView. The python
+file will be named `plot_view.py` for the rest of this tutorial.
 
 The view has the following imports:
 
@@ -62,7 +63,7 @@ the plot and creating an empty plot (no data).
             ax.set_ylabel("$f(t)$")
             return ax
 
-        def add_data(self, xvalues: ndarray, yvalues: ndarray, visible: bool, colour: str, marker: str) -> None:
+        def plot_data(self, xvalues: ndarray, yvalues: ndarray, visible: bool, colour: str, marker: str) -> None:
             ax = self.draw()
             ax.grid(visible)
             ax.plot(xvalues, yvalues, color=colour, marker=marker, linestyle="--")
