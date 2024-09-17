@@ -21,53 +21,50 @@ class DNSElasticSCOptionsPresenter(DNSCommonOptionsPresenter):
 
     def _set_binning(self):
         sample_data = self.param_dict["file_selector"]["full_data"]
-        auto_binning_is_on = self._get_automatic_binning_state()
         if sample_data:
-            self._set_min_max_binning_lims(sample_data)
-            if auto_binning_is_on:
+            self._set_binning_lims(sample_data)
+            if self._get_automatic_binning_is_checked():
                 self._set_auto_binning(sample_data)
             self.set_view_from_param()
         else:
-            if auto_binning_is_on:
+            if self._get_automatic_binning_is_checked():
                 self._set_default_auto_binning_no_data()
 
     def _set_auto_binning(self, sample_data):
         own_options = self.get_option_dict()
-        binning_param_dict = {}
-        binning_param_dict["two_theta"] = get_automatic_two_theta_binning(sample_data)
-        binning_param_dict["omega"] = get_automatic_omega_binning(sample_data)
+        binning_data_dict = {}
+        binning_data_dict["two_theta"] = get_automatic_two_theta_binning(sample_data)
+        binning_data_dict["omega"] = get_automatic_omega_binning(sample_data)
         for key in ["two_theta", "omega"]:
-            for parameter in binning_param_dict[key].keys():
-                own_options[parameter] = binning_param_dict[key][parameter]
+            for data in binning_data_dict[key].keys():
+                own_options[data] = binning_data_dict[key][data]
 
-    def _set_min_max_binning_lims(self, sample_data):
-        binning_param_dict = {}
-        binning_param_dict["two_theta"] = get_automatic_two_theta_binning(sample_data)
-        binning_param_dict["omega"] = get_automatic_omega_binning(sample_data)
+    def _set_binning_lims(self, sample_data):
+        binning_data_dict = {}
+        binning_data_dict["two_theta"] = get_automatic_two_theta_binning(sample_data)
+        binning_data_dict["omega"] = get_automatic_omega_binning(sample_data)
         for key in ["two_theta", "omega"]:
-            min_limit = binning_param_dict[key][f"{key}_min"]
-            max_limit = binning_param_dict[key][f"{key}_max"]
+            min_limit = binning_data_dict[key][f"{key}_min"]
+            max_limit = binning_data_dict[key][f"{key}_max"]
             self.view._map[f"{key}_min"].setMinimum(min_limit)
             self.view._map[f"{key}_max"].setMinimum(min_limit)
             self.view._map[f"{key}_min"].setMaximum(max_limit)
             self.view._map[f"{key}_max"].setMaximum(max_limit)
 
-    def _get_automatic_binning_state(self):
+    def _get_automatic_binning_is_checked(self):
         return self.view._map["automatic_binning"].isChecked()
 
-    def _get_wavelength_from_data_state(self):
+    def _get_wavelength_from_data_is_checked(self):
         return self.view._map["get_wavelength"].isChecked()
 
     def tab_got_focus(self):
         selected_data = self.param_dict["file_selector"]["full_data"]
         if selected_data:
-            get_wavelength_from_data_is_on = self._get_wavelength_from_data_state()
-            if get_wavelength_from_data_is_on:
+            if self._get_wavelength_from_data_is_checked():
                 self._determine_wavelength()
             self._set_binning()
         else:
-            auto_binning_is_on = self._get_automatic_binning_state()
-            if auto_binning_is_on:
+            if self._get_automatic_binning_is_checked():
                 self._set_default_auto_binning_no_data()
 
     def _set_default_auto_binning_no_data(self):
@@ -94,8 +91,6 @@ class DNSElasticSCOptionsPresenter(DNSCommonOptionsPresenter):
         if self.view is not None:
             self.own_dict.update(self.view.get_state())
             o_dic = self.own_dict
-            o_dic["hkl1"] = self.model.convert_hkl_string(o_dic["hkl1"])
-            o_dic["hkl2"] = self.model.convert_hkl_string(o_dic["hkl2"])
             if not self.own_dict.get("use_dx_dy", False):
                 o_dic["dx"], o_dic["dy"] = self.model.get_dx_dy(o_dic)
         return self.own_dict

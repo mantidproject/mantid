@@ -617,65 +617,67 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="hBL_two_theta_and_omega_bin_size">
-        <property name="spacing">
-         <number>30</number>
-        </property>
-        <property name="leftMargin">
-         <number>15</number>
-        </property>
-        <item>
-         <layout class="QHBoxLayout" name="hBL_two_theta_bin_size" stretch="1,2">
-          <property name="spacing">
-           <number>15</number>
-          </property>
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="l_two_theta_bin_size">
-            <property name="text">
-             <string>2θ bin size, deg</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="dSB_two_theta_bin_size">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="maximum">
-             <double>0.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="hBL_omega_bin_size" stretch="1,2">
-          <property name="spacing">
-           <number>15</number>
-          </property>
-          <item>
-           <widget class="QLabel" name="l_omega_bin_size">
-            <property name="text">
-             <string>ω bin size, deg</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QDoubleSpinBox" name="dSB_omega_bin_size">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="maximum">
-             <double>0.000000000000000</double>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
+       <widget class="QWidget" name="widget" native="true">
+        <layout class="QHBoxLayout" name="hBL_two_theta_and_omega_bin_size">
+         <property name="spacing">
+          <number>30</number>
+         </property>
+         <property name="leftMargin">
+          <number>15</number>
+         </property>
+         <item>
+          <layout class="QHBoxLayout" name="hBL_two_theta_bin_size" stretch="1,2">
+           <property name="spacing">
+            <number>15</number>
+           </property>
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="l_two_theta_bin_size">
+             <property name="text">
+              <string>2θ bin size, deg</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="dSB_two_theta_bin_size">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="maximum">
+              <double>0.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="hBL_omega_bin_size" stretch="1,2">
+           <property name="spacing">
+            <number>15</number>
+           </property>
+           <item>
+            <widget class="QLabel" name="l_omega_bin_size">
+             <property name="text">
+              <string>ω bin size, deg</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QDoubleSpinBox" name="dSB_omega_bin_size">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="maximum">
+              <double>0.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -724,6 +726,9 @@
           <property name="text">
            <string>1,1,0</string>
           </property>
+          <property name="clearButtonEnabled">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
        </layout>
@@ -759,6 +764,9 @@
           </property>
           <property name="text">
            <string>1,-1,0</string>
+          </property>
+          <property name="clearButtonEnabled">
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -921,6 +929,38 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>dSB_wavelength</tabstop>
+  <tabstop>cB_get_wavelength</tabstop>
+  <tabstop>rB_norm_time</tabstop>
+  <tabstop>rB_norm_monitor</tabstop>
+  <tabstop>gB_corrections</tabstop>
+  <tabstop>cB_det_efficiency</tabstop>
+  <tabstop>cB_sum_vana_sf_nsf</tabstop>
+  <tabstop>cB_ignore_vana_fields</tabstop>
+  <tabstop>cB_flipping_ratio</tabstop>
+  <tabstop>cB_subtract_background_from_sample</tabstop>
+  <tabstop>dSB_background_factor</tabstop>
+  <tabstop>dSB_a</tabstop>
+  <tabstop>dSB_b</tabstop>
+  <tabstop>dSB_c</tabstop>
+  <tabstop>dSB_alpha</tabstop>
+  <tabstop>dSB_beta</tabstop>
+  <tabstop>dSB_gamma</tabstop>
+  <tabstop>lE_hkl1</tabstop>
+  <tabstop>lE_hkl2</tabstop>
+  <tabstop>dSB_omega_offset</tabstop>
+  <tabstop>cB_use_dx_dy</tabstop>
+  <tabstop>dSB_dx</tabstop>
+  <tabstop>dSB_dy</tabstop>
+  <tabstop>cB_automatic_binning</tabstop>
+  <tabstop>dSB_two_theta_min</tabstop>
+  <tabstop>dSB_two_theta_max</tabstop>
+  <tabstop>dSB_two_theta_bin_size</tabstop>
+  <tabstop>dSB_omega_min</tabstop>
+  <tabstop>dSB_omega_max</tabstop>
+  <tabstop>dSB_omega_bin_size</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

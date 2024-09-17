@@ -10,6 +10,8 @@ DNS single crystal elastic options tab view of DNS reduction GUI.
 """
 
 from qtpy.QtCore import Signal
+from qtpy.QtCore import QRegExp
+from qtpy.QtGui import QRegExpValidator
 
 from mantidqt.utils.qt import load_ui
 
@@ -62,6 +64,11 @@ class DNSElasticSCOptionsView(DNSView):
             "dx": self._content.dSB_dx,
             "dy": self._content.dSB_dy,
         }
+        # only one space after comma is allowed as optional
+        allowed_pattern = QRegExp(r"^-?\d+(\.\d+)?,( |-| -)?\d+(\.\d+)?,( |-| -)?\d+(\.\d+)?$")
+        validator = QRegExpValidator(allowed_pattern)
+        self._content.lE_hkl1.setValidator(validator)
+        self._content.lE_hkl2.setValidator(validator)
 
         # connect signals
         self._attach_signal_slots()

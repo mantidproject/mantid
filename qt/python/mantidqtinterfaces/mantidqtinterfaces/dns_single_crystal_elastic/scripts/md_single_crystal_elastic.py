@@ -45,74 +45,25 @@ def load_binned(workspace_name, binning, params, path, file_numbers, standard):
     sample_fields = params["sample_fields"]
     if workspace_name.endswith("_sf"):
         field_name = workspace_name[-4:]
-        sample_fields_to_try = [field for field in sample_fields if field.endswith("_sf")]
+        huber_field_name = field_name
+        sample_sf_fields = [field for field in sample_fields if field.endswith("_sf")]
+        if (huber_field_name not in sample_sf_fields) and params["ignore_vana"] and standard:
+            huber_field_name = sample_sf_fields[0]
     else:
         field_name = workspace_name[-5:]
-        sample_fields_to_try = [field for field in sample_fields if field.endswith("_nsf")]
-    if not standard:
-        LoadDNSSCD(
-            FileNames=filepaths,
-            OutputWorkspace=workspace_name,
-            NormalizationWorkspace=norm_name,
-            Normalization=params["norm_to"],
-            a=params["a"],
-            b=params["b"],
-            c=params["c"],
-            alpha=params["alpha"],
-            beta=params["beta"],
-            gamma=params["gamma"],
-            OmegaOffset=params["omega_offset"],
-            HKL1=params["hkl1"],
-            HKL2=params["hkl2"],
-            LoadAs="raw",
-            SaveHuberTo=f"huber_{field_name}",
-        )
-    else:
-        try:
-            LoadDNSSCD(
-                FileNames=filepaths,
-                OutputWorkspace=workspace_name,
-                NormalizationWorkspace=norm_name,
-                Normalization=params["norm_to"],
-                a=params["a"],
-                b=params["b"],
-                c=params["c"],
-                alpha=params["alpha"],
-                beta=params["beta"],
-                gamma=params["gamma"],
-                OmegaOffset=params["omega_offset"],
-                HKL1=params["hkl1"],
-                HKL2=params["hkl2"],
-                LoadAs="raw",
-                LoadHuberFrom=f"huber_{field_name}",
-            )
-        # handling of std data when sample and vana fields are different but ignore
-        # vanadium fields option is selected
-        except ValueError:
-            if params["ignore_vana"]:
-                for field in sample_fields_to_try:
-                    try:
-                        LoadDNSSCD(
-                            FileNames=filepaths,
-                            OutputWorkspace=workspace_name,
-                            NormalizationWorkspace=norm_name,
-                            Normalization=params["norm_to"],
-                            a=params["a"],
-                            b=params["b"],
-                            c=params["c"],
-                            alpha=params["alpha"],
-                            beta=params["beta"],
-                            gamma=params["gamma"],
-                            OmegaOffset=params["omega_offset"],
-                            HKL1=params["hkl1"],
-                            HKL2=params["hkl2"],
-                            LoadAs="raw",
-                            LoadHuberFrom=f"huber_{field}",
-                        )
-                        # leave the for loop on first success
-                        break
-                    except ValueError:
-                        continue
+        huber_field_name = field_name
+        sample_nsf_fields = [field for field in sample_fields if field.endswith("_nsf")]
+        if (huber_field_name not in sample_nsf_fields) and params["ignore_vana"] and standard:
+            huber_field_name = sample_nsf_fields[0]
+    process_dns_scd_raw(
+        filenames=filepaths,
+        out_workspace=workspace_name,
+        norm_workspace=norm_name,
+        normalize_to=params["norm_to"],
+        omega_offset=params["omega_offset"],
+        standard=standard,
+        huber_field=huber_field_name,
+    )
     BinMD(InputWorkspace=workspace_name, OutputWorkspace=workspace_name, AxisAligned=True, AlignedDim0=ad0, AlignedDim1=ad1)
     BinMD(InputWorkspace=norm_name, OutputWorkspace=norm_name, AxisAligned=True, AlignedDim0=ad0, AlignedDim1=ad1)
     return mtd[workspace_name]
@@ -144,10 +95,10 @@ def vanadium_correction(workspace_name, vana_set=None, ignore_vana_fields=False,
                 if field != "path":
                     vana_name = "_".join(("vana", field))
                     vana_norm = "_".join((vana_name, "norm"))
-                    try:
+                    if mtd.doesExist(vana_name) and mtd.doesExist(vana_name):
                         vana = mtd[vana_name]
                         vana_norm = mtd[vana_norm]
-                    except KeyError:
+                    else:
                         raise_error(f"No vanadium file for field {field_name}.")
                         return mtd[workspace_name]
                     vana_list.append(vana)
@@ -162,16 +113,16 @@ def vanadium_correction(workspace_name, vana_set=None, ignore_vana_fields=False,
         vana_sf = "_".join(("vana", polarization, "sf"))
         vana_nsf_norm = "_".join((vana_nsf, "norm"))
         vana_sf_norm = "_".join((vana_sf, "norm"))
-        try:
+        if mtd.doesExist(vana_sf) and mtd.doesExist(vana_sf_norm):
             vana_sf = mtd[vana_sf]
             vana_sf_norm = mtd[vana_sf_norm]
-        except KeyError:
+        else:
             raise_error(f"No vanadium file for {polarization}_sf . You can choose to ignore vanadium fields in the options.")
             return mtd[workspace_name]
-        try:
+        if mtd.doesExist(vana_nsf) and mtd.doesExist(vana_nsf_norm):
             vana_nsf = mtd[vana_nsf]
             vana_nsf_norm = mtd[vana_nsf_norm]
-        except KeyError:
+        else:
             raise_error(f"No vanadium file for {polarization}_nsf. You can choose to ignore vanadium fields in the options.")
             return mtd[workspace_name]
         vana_sum = vana_sf + vana_nsf
@@ -179,10 +130,10 @@ def vanadium_correction(workspace_name, vana_set=None, ignore_vana_fields=False,
     else:
         vana_name = "_".join(("vana", field_name))
         vana_norm = "_".join((vana_name, "norm"))
-        try:
+        if mtd.doesExist(vana_name) and mtd.doesExist(vana_norm):
             vana_sum = mtd[vana_name]
             vana_sum_norm = mtd[vana_norm]
-        except KeyError:
+        else:
             raise_error(f"No vanadium file for {field_name}. You can choose to ignore vanadium fields in the options.")
             return mtd[workspace_name]
     # common code, which will be run regardless of the case
@@ -205,3 +156,19 @@ def vanadium_correction(workspace_name, vana_set=None, ignore_vana_fields=False,
     MultiplyMD(coef, workspace_norm, OutputWorkspace=workspace_norm)
     DivideMD(workspace_name, workspace_norm, OutputWorkspace=workspace_name)
     return mtd[workspace_name]
+
+
+def process_dns_scd_raw(filenames, out_workspace, norm_workspace, normalize_to, omega_offset, standard, huber_field):
+    common_args = {
+        "FileNames": filenames,
+        "OutputWorkspace": out_workspace,
+        "NormalizationWorkspace": norm_workspace,
+        "Normalization": normalize_to,
+        "OmegaOffset": omega_offset,
+        "LoadAs": "raw",
+    }
+    if not standard:
+        common_args["SaveHuberTo"] = f"huber_{huber_field}"
+    else:
+        common_args["LoadHuberFrom"] = f"huber_{huber_field}"
+    LoadDNSSCD(**common_args)
