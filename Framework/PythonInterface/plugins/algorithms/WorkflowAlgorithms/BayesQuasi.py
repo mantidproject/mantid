@@ -759,12 +759,12 @@ class BayesQuasi(PythonAlgorithm):
                 # SIGIK
                 line = next(line_pointer)
                 amp = AMAX * math.sqrt(math.fabs(line[0]) + 1.0e-20)
-                block_amplitude_e.append(amp)
+                block_amplitude_e.append(abs(amp))
 
                 # SIGFK
                 line = next(line_pointer)
                 FWHM = 2.0 * HWHM * math.sqrt(math.fabs(line[0]) + 1.0e-20)
-                block_FWHM_e.append(FWHM)
+                block_FWHM_e.append(abs(FWHM))
 
             # append data from block
             amp_data.append(block_amplitude)
@@ -774,7 +774,7 @@ class BayesQuasi(PythonAlgorithm):
             # append error values from block
             amp_error.append(block_amplitude_e)
             FWHM_error.append(block_FWHM_e)
-            height_error.append(block_height_e)
+            height_error.append(abs(block_height_e))
 
         return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)
 
