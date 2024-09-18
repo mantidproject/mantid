@@ -1,0 +1,1 @@
+- Fixed an invalid calculation of the EISF errors calculated on the Quasi tab of the :ref:`Inelastic Bayes fitting <interface-inelastic-bayes-fitting>` interface.
