@@ -24,7 +24,7 @@ following imports at the top of the file:
 
 .. code-block:: python
 
-    from qtpy.QtCore.Qt import ItemIsEnabled
+    from qtpy.QtCore import Qt
 
 We then need to add this code to the ``__init__`` function:
 
@@ -33,14 +33,14 @@ We then need to add this code to the ``__init__`` function:
     from qtpy.QWidgets import QTableWidgetItem
 
     text = QTableWidgetItem(("test"))
-    text.setFlags(ItemIsEnabled)
+    text.setFlags(Qt.ItemIsEnabled)
     row = 0
     col = 0
     self._table.setItem(row, col, text)
 
     row = 1
     text2 = QTableWidgetItem(("another test"))
-    text2.setFlags(ItemIsEnabled)
+    text2.setFlags(Qt.ItemIsEnabled)
     self._table.setItem(row, col, text2)
 
     row = 0

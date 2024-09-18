@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtCore.Qt import ItemIsEnabled
+from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QComboBox, QGridLayout, QPushButton, QTableWidget, QTableWidgetItem, QWidget
 from typing import List, Union
 
@@ -59,7 +59,7 @@ class View(QWidget):
 
     def _set_names(self, name: str, row: int) -> None:
         text = QTableWidgetItem(name)
-        text.setFlags(ItemIsEnabled)
+        text.setFlags(Qt.ItemIsEnabled)
         self._table.setItem(row, 0, text)
 
     def set_options(self, key: str, options: List[str]) -> None:

@@ -32,7 +32,7 @@ view.py
 
 .. code-block:: python
 
-    from qtpy.QtCore.Qt import ItemIsEnabled, ItemIsUserCheckable, Unchecked
+    from qtpy.QtCore import Qt
     from qtpy.QtWidgets import QComboBox, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
 
     from typing import Union
@@ -59,8 +59,8 @@ view.py
             self._colours.addItems(options)
 
             self._grid_lines = QTableWidgetItem()
-            self._grid_lines.setFlags(ItemIsUserCheckable | ItemIsEnabled)
-            self._grid_lines.setCheckState(Unchecked)
+            self._grid_lines.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            self._grid_lines.setCheckState(Qt.Unchecked)
             self._add_item_to_table("Show grid lines", self._grid_lines, 1)
 
             freq = QTableWidgetItem("1.0")
@@ -79,7 +79,7 @@ view.py
 
         def _set_table_row(self, name: str, row: int) -> None:
             text = QTableWidgetItem(name)
-            text.setFlags(ItemIsEnabled)
+            text.setFlags(Qt.ItemIsEnabled)
             self._table.setItem(row, TEXT_COLUMN, text)
 
         def _add_widget_to_table(self, name: str, widget: QWidget, row: int) -> None:

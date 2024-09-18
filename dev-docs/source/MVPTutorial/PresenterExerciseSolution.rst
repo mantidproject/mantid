@@ -9,7 +9,7 @@ The View
 
 .. code-block:: python
 
-    from qtpy.QtCore import Checked, ItemIsEnabled, ItemIsUserCheckable, Unchecked
+    from qtpy.QtCore import Qt
     from qtpy.QtWidgets import QComboBox, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
     from typing import Union
 
@@ -37,8 +37,8 @@ The View
             self._colours.addItems(options)
 
             self._grid_lines= QTableWidgetItem()
-            self._grid_lines.setFlags(ItemIsUserCheckable | ItemIsEnabled)
-            self._grid_lines.setCheckState(Unchecked)
+            self._grid_lines.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            self._grid_lines.setCheckState(Qt.Unchecked)
             self._add_item_to_table("Show grid lines", self._grid_lines, 1)
 
             self._freq = QTableWidgetItem("1.0")
@@ -66,7 +66,7 @@ The View
             return self._colours.currentText()
 
         def get_grid_lines(self) -> bool:
-            return self._grid_lines.checkState() == Checked
+            return self._grid_lines.checkState() == Qt.Checked
 
         def get_freq(self) -> float:
             return float(self._freq.text())
@@ -79,7 +79,7 @@ The View
 
         def _set_table_row(self, name: str, row: int) -> None:
             text = QTableWidgetItem(name)
-            text.setFlags(ItemIsEnabled)
+            text.setFlags(Qt.ItemIsEnabled)
             self._table.setItem(row, TEXT_COLUMN, text)
 
         def _add_widget_to_table(self, name: str, widget: QWidget, row: int) -> None:
