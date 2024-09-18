@@ -9,7 +9,7 @@ from mantid.simpleapi import AnalysisDataService, logger
 from mantid.kernel import Direction, FloatBoundedValidator, StringArrayProperty
 import numpy as np
 from scipy.optimize import leastsq
-from FindGoniometerFromUB import getSignMaxAbsValInCol
+from plugins.algorithms.FindGoniometerFromUB import getSignMaxAbsValInCol
 
 _MIN_NUM_PEAKS = 6  # minimum required to use FindUBUsingLatticeParameters assuming all linearly indep.
 _MIN_NUM_INDEXED_PEAKS = 3  # minimum indexed peaks required for CalculateUMatrix

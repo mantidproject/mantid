@@ -10,7 +10,7 @@ from enum import Enum
 import mantid.simpleapi as mantid
 from mantid.api import FunctionFactory, AnalysisDataService as ADS, IMDEventWorkspace, IPeaksWorkspace, IPeak
 from mantid.kernel import logger, SpecialCoordinateSystem
-from FindGoniometerFromUB import getSignMaxAbsValInCol
+from plugins.algorithms.FindGoniometerFromUB import getSignMaxAbsValInCol
 from mantid.geometry import CrystalStructure, SpaceGroupFactory, ReflectionGenerator, ReflectionConditionFilter, PeakShape
 from os import path
 from json import loads as json_loads
