@@ -28,6 +28,8 @@ namespace Mantid::DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadDspacemap)
 
+LoadDspacemap::LoadDspacemap() { this->deprecatedDate("2024-09-17"); }
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
@@ -339,7 +341,7 @@ struct VulcanCorrectionFactor {
 void LoadDspacemap::readVulcanBinaryFile(const std::string &fileName, std::map<detid_t, double> &vulcan) {
   BinaryFile<VulcanCorrectionFactor> file(fileName);
   std::vector<VulcanCorrectionFactor> results = file.loadAll();
-  for (auto &result : results) {
+  for (const auto &result : results) {
     vulcan[static_cast<detid_t>(result.pixelID)] = result.factor;
   }
 }
