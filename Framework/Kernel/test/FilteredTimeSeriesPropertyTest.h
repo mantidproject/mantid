@@ -599,6 +599,24 @@ public:
     TS_ASSERT_DELTA(log->timeAverageValue(), 5.588, 1e-3);
   }
 
+  void test_timeAverageValue_one_filter_interval() {
+    TimeSeriesProperty<double> tsp("timeAvgVal");
+    tsp.addValue("2007-11-30T16:17:00", 1);
+    tsp.addValue("2007-11-30T16:17:10", 2);
+    tsp.addValue("2007-11-30T16:17:20", 3); // Time Avg Value using only this value
+    tsp.addValue("2007-11-30T16:17:30", 4);
+    tsp.addValue("2007-11-30T16:17:40", 5);
+
+    TimeSeriesProperty<bool> filter("filter");
+    filter.addValue("2007-11-30T16:17:20", true);
+    filter.addValue("2007-11-30T16:17:30", false);
+
+    FilteredTimeSeriesProperty<double> filtered_tsp(&tsp, filter);
+    TS_ASSERT_DELTA(filtered_tsp.timeAverageValue(), 3., 1e-8);
+    TS_ASSERT_DELTA(filtered_tsp.getStatistics().time_mean, 3., 1e-8);
+    TS_ASSERT_DELTA(filtered_tsp.getStatistics().time_standard_deviation, 0., 1e-8);
+  }
+
   void test_filteredValuesAsVector() {
     const auto &log = getFilteredTestLog();
 

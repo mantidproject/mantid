@@ -92,7 +92,6 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs, const std::stri
   const auto algoName = (lhs_mat || lhs_grp) && (rhs_mat || rhs_grp) ? op : op + "MD";
 
   ResultType result;
-  std::string error;
   try {
     ReleaseGlobalInterpreterLock releaseGIL;
     if (reverse) {
@@ -103,7 +102,7 @@ ResultType performBinaryOp(const LHSType lhs, const RHSType rhs, const std::stri
                                                                                             false, name, true);
     }
   } catch (std::runtime_error &exc) {
-    error = exc.what();
+    std::string error = exc.what();
     if (error == "algorithm") {
       error = "Unknown binary operation requested: " + op;
       throw std::runtime_error(error);

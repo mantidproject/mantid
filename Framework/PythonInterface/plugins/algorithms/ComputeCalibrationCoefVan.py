@@ -180,10 +180,10 @@ class ComputeCalibrationCoefVan(PythonAlgorithm):
         if temp_ratio < 1.0e-3:
             integral = 0.5
         else:
-            integral = integrate.quad(lambda x: x / sp.tanh(0.5 * x / temp_ratio), 0, 1)[0]
+            integral = integrate.quad(lambda x: x / np.tanh(0.5 * x / temp_ratio), 0, 1)[0]
 
         msd = 3.0 * sp.constants.hbar**2 / (2.0 * mass_vana * sp.constants.k * self.DebyeT) * integral * 1.0e20
-        return np.exp(-msd * (4.0 * sp.pi * sp.sin(thetasort) / wlength) ** 2)
+        return np.exp(-msd * (4.0 * sp.constants.pi * np.sin(thetasort) / wlength) ** 2)
 
 
 # Register algorithm with Mantid.

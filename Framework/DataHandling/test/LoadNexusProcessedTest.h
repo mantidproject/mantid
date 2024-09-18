@@ -25,6 +25,7 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidHistogramData/Histogram.h"
 
 #include "SaveNexusProcessedTest.h"
 
@@ -42,6 +43,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
+using namespace Mantid::HistogramData;
 using Mantid::detid_t;
 
 // Note that this suite tests an old version of Nexus processed files that we
@@ -667,6 +669,26 @@ public:
     TS_ASSERT_EQUALS("none", peakWS->getPeak(2).getPeakShape().shapeName());
   }
 
+  void test_lean_peaks_workspace_with_shape_format() {
+    LoadNexusProcessed loadAlg;
+    loadAlg.setChild(true);
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", "SingleCrystalLeanElasticPeakTableNew.nxs");
+    loadAlg.setPropertyValue("OutputWorkspace", "dummy");
+    loadAlg.execute();
+
+    Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
+    auto peakWS = std::dynamic_pointer_cast<Mantid::DataObjects::LeanElasticPeaksWorkspace>(ws);
+    TS_ASSERT(peakWS);
+
+    TS_ASSERT_EQUALS(3, peakWS->getNumberPeaks());
+    // In this peaks workspace one of the peaks has been marked as spherically
+    // integrated.
+    TS_ASSERT_EQUALS("none", peakWS->getPeak(0).getPeakShape().shapeName());
+    TS_ASSERT_EQUALS("spherical", peakWS->getPeak(1).getPeakShape().shapeName());
+    TS_ASSERT_EQUALS("spherical", peakWS->getPeak(2).getPeakShape().shapeName());
+  }
+
   /* The nexus format for this type of workspace has a legacy format with no
    * shape information
    * We should still be able to load that */
@@ -1222,6 +1244,68 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().remove("test_CreateWorkspace"));
   }
 
+  void test_ragged_Workspace2D() {
+    // create ragged workspace
+    MatrixWorkspace_sptr raggedWS = WorkspaceCreationHelper::create2DWorkspace(2, 1);
+
+    // create and replace histograms with ragged ones
+    raggedWS->setHistogram(0, Histogram(BinEdges{100., 200., 300., 400.}, Counts{1., 2., 3.}));
+    raggedWS->setHistogram(1, Histogram(BinEdges{200., 400., 600.}, Counts{4., 5.}));
+
+    // quick check of the input workspace
+    TS_ASSERT(raggedWS->isRaggedWorkspace());
+    TS_ASSERT_EQUALS(raggedWS->getNumberHistograms(), 2);
+
+    TS_ASSERT_EQUALS(raggedWS->histogram(0).xMode(), Histogram::XMode::BinEdges);
+    TS_ASSERT_EQUALS(raggedWS->histogram(1).xMode(), Histogram::XMode::BinEdges);
+    TS_ASSERT_EQUALS(raggedWS->x(0).size(), 4);
+    TS_ASSERT_EQUALS(raggedWS->x(1).size(), 3);
+    TS_ASSERT_EQUALS(raggedWS->y(0).size(), 3);
+    TS_ASSERT_EQUALS(raggedWS->y(1).size(), 2);
+
+    doRaggedWorkspaceTest(raggedWS);
+  }
+
+  void test_ragged_Workspace2D_pointdata() {
+    // create ragged workspace
+    MatrixWorkspace_sptr raggedWS = WorkspaceCreationHelper::create2DWorkspacePoints(2, 1);
+
+    // create and replace histograms with ragged ones
+    raggedWS->setHistogram(0, Histogram(Points{100., 200., 300.}, Counts{1., 2., 3.}));
+    raggedWS->setHistogram(1, Histogram(Points{200., 400.}, Counts{4., 5.}));
+
+    // quick check of the input workspace
+    TS_ASSERT(raggedWS->isRaggedWorkspace());
+    TS_ASSERT_EQUALS(raggedWS->getNumberHistograms(), 2);
+
+    TS_ASSERT_EQUALS(raggedWS->histogram(0).xMode(), Histogram::XMode::Points);
+    TS_ASSERT_EQUALS(raggedWS->histogram(1).xMode(), Histogram::XMode::Points);
+    TS_ASSERT_EQUALS(raggedWS->x(0).size(), 3);
+    TS_ASSERT_EQUALS(raggedWS->x(1).size(), 2);
+    TS_ASSERT_EQUALS(raggedWS->y(0).size(), 3);
+    TS_ASSERT_EQUALS(raggedWS->y(1).size(), 2);
+
+    doRaggedWorkspaceTest(raggedWS);
+  }
+
+  void test_ragged_EventWorkspace() {
+    // create ragged workspace
+    MatrixWorkspace_sptr raggedWS = WorkspaceCreationHelper::createEventWorkspace2(2, 1);
+
+    // create and replace histograms with ragged ones
+    raggedWS->setHistogram(0, BinEdges{100., 200., 300., 400.});
+    raggedWS->setHistogram(1, BinEdges{200., 400., 600.});
+
+    // quick check of the input workspace
+    TS_ASSERT(raggedWS->isRaggedWorkspace());
+    TS_ASSERT_EQUALS(raggedWS->getNumberHistograms(), 2);
+
+    TS_ASSERT_EQUALS(raggedWS->x(0).size(), 4);
+    TS_ASSERT_EQUALS(raggedWS->x(1).size(), 3);
+
+    doRaggedWorkspaceTest(raggedWS);
+  }
+
 private:
   template <typename TYPE>
   void check_log(Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &logName, const int noOfEntries,
@@ -1538,6 +1622,42 @@ private:
 
     // Remove workspace and saved nexus file
     AnalysisDataService::Instance().remove("output");
+    if (Poco::File(filename).exists())
+      Poco::File(filename).remove();
+  }
+
+  void doRaggedWorkspaceTest(MatrixWorkspace_sptr raggedWS) {
+    // save the ragged workspace
+    std::string filename = "testRaggedWorkspace.nxs";
+    SaveNexusProcessed save;
+    save.initialize();
+    save.setProperty("InputWorkspace", raggedWS);
+    save.setPropertyValue("Filename", filename);
+    save.execute();
+
+    // load it back with the loader
+    LoadNexusProcessed load;
+    load.setChild(true);
+    load.initialize();
+    load.setProperty("Filename", filename);
+    load.setProperty("OutputWorkspace", "dummy");
+    load.execute();
+
+    Workspace_sptr loadedWS = load.getProperty("OutputWorkspace");
+
+    // compare original to loaded workspace
+    auto compare = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+    compare->initialize();
+    compare->setProperty<MatrixWorkspace_sptr>("Workspace1", raggedWS);
+    compare->setProperty<Workspace_sptr>("Workspace2", loadedWS);
+    ;
+    compare->execute();
+    if (compare->isExecuted()) {
+      TS_ASSERT(compare->getProperty("Result"));
+    } else {
+      TS_ASSERT(false);
+    }
+
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();
   }

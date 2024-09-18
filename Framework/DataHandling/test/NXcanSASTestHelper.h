@@ -47,8 +47,11 @@ struct NXcanSASTestParameters {
   std::string sampleDirectRun;
   std::string canScatterRun;
   std::string canDirectRun;
+  std::string scaledBgSubWorkspace;
+  double scaledBgSubScaleFactor;
   bool hasCanRuns{false};
   bool hasSampleRuns{false};
+  bool hasBgSub{false};
 };
 
 struct NXcanSASTestTransmissionParameters {

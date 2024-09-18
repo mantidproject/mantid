@@ -123,9 +123,10 @@ bool isEventMonitor(::NeXus::File &file) {
 //------------------------------------------------------------------------------
 /// Initialization method.
 void LoadNexusMonitors2::init() {
-  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, ".nxs"),
+  const std::vector<std::string> exts{".nxs.h5", ".nxs"};
+  declareProperty(std::make_unique<API::FileProperty>("Filename", "", API::FileProperty::Load, exts),
                   "The name (including its full or relative path) of the NeXus file to "
-                  "attempt to load. The file extension must either be .nxs or .NXS");
+                  "attempt to load. The file extension must either be .nxs, .NXS, or .nxs.h5");
 
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::Workspace>>("OutputWorkspace", "", Kernel::Direction::Output),
@@ -175,16 +176,15 @@ void LoadNexusMonitors2::exec() {
 
   // open the correct entry
   using string_map_t = std::map<std::string, std::string>;
-  string_map_t::const_iterator it;
   string_map_t entries = file.getEntries();
 
   if (m_top_entry_name.empty()) {
-    for (it = entries.begin(); it != entries.end(); ++it) {
-      if (((it->first == "entry") || (it->first == "raw_data_1")) && (it->second == "NXentry")) {
-        file.openGroup(it->first, it->second);
-        m_top_entry_name = it->first;
-        break;
-      }
+    const auto it = std::find_if(entries.cbegin(), entries.cend(), [](const auto &entry) {
+      return ((entry.first == "entry" || entry.first == "raw_data_1") && entry.second == "NXentry");
+    });
+    if (it != entries.cend()) {
+      file.openGroup(it->first, it->second);
+      m_top_entry_name = it->first;
     }
   } else {
     if (!keyExists(m_top_entry_name, entries)) {
@@ -225,6 +225,9 @@ void LoadNexusMonitors2::exec() {
 
   API::Progress prog3(this, 0.6, 1.0, m_monitor_count);
 
+  // cache path to entry for later
+  const std::string entryPath = file.getPath();
+
   // TODO-NEXT: load event monitor if it is required to do so
   //            load histogram monitor if it is required to do so
   // Require a tuple: monitorNames[i], loadAsEvent[i], loadAsHistogram[i]
@@ -261,7 +264,21 @@ void LoadNexusMonitors2::exec() {
     double xmin, xmax;
     eventWS->getEventXMinMax(xmin, xmax);
 
-    auto axis = HistogramData::BinEdges{xmin - 1, xmax + 1};
+    if (xmin > xmax) {
+      xmin = 0;
+      xmax = 1;
+      if (eventWS->getNumberEvents() == 0) {
+        g_log.warning("No events loading. Resetting time-of-flight range 0 to 1");
+      } else {
+        g_log.warning("time-of-flight range of events are unusual. Resetting time-of-flight range 0 to 1");
+      }
+    } else {
+      // move out by one just like LoadEventNexus
+      xmin = xmin - 1;
+      xmax = xmax + 1;
+    }
+
+    auto axis = HistogramData::BinEdges{xmin, xmax};
     eventWS->setAllX(axis); // Set the binning axis using this.
 
     // a certain generation of ISIS files modify the time-of-flight
@@ -281,6 +298,7 @@ void LoadNexusMonitors2::exec() {
 
   // Need to get the instrument name from the file
   std::string instrumentName;
+  file.openPath(entryPath); // reset path in case of unusual behavior
   file.openGroup("instrument", "NXinstrument");
   try {
     file.openData("name");
@@ -672,6 +690,12 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file, size_t ws_in
   Kernel::Units::timeConversionVector(time_of_flight, tof_units, "microseconds");
   file.closeData();
 
+  // warn the user if no events were found
+  if (time_of_flight.empty()) {
+    g_log.error() << "No events found in \"" << m_monitorInfo[ws_index].name << "\"\n";
+    return; // early
+  }
+
   file.openData("event_time_zero"); // pulse time
   MantidVec seconds = NeXus::NeXusIOHelper::readNexusVector<double>(file);
   file.getAttr("units", event_time_zero_units);
@@ -687,7 +711,7 @@ void LoadNexusMonitors2::readEventMonitorEntry(::NeXus::File &file, size_t ws_in
   // load up the event list
   DataObjects::EventList &event_list = eventWS->getSpectrum(ws_index);
 
-  Mantid::Types::Core::DateAndTime pulsetime(0);
+  Mantid::Types::Core::DateAndTime pulsetime;
   Mantid::Types::Core::DateAndTime lastpulsetime(0);
   std::size_t numEvents = time_of_flight.size();
   bool pulsetimesincreasing = true;

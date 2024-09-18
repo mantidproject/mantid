@@ -85,7 +85,7 @@ class ErrorReportPresenterTest(unittest.TestCase):
         email = "john.smith@example.com"
         text_box = "Details about error"
         continue_working = False
-        share = 0
+        share = True
         self.error_report_presenter._send_report_to_server = mock.MagicMock(return_value=201)
         self.error_report_presenter._handle_exit = mock.MagicMock()
 
@@ -96,26 +96,12 @@ class ErrorReportPresenterTest(unittest.TestCase):
         )
         self.error_report_presenter._handle_exit.assert_called_once_with(False)
 
-    def test_error_handler_share_non_id_sunny_day_case(self):
-        name = "John Smith"
-        email = "john.smith@example.com"
-        text_box = "Details about error"
-        continue_working = True
-        share = 1
-        self.error_report_presenter._send_report_to_server = mock.MagicMock()
-        self.error_report_presenter._handle_exit = mock.MagicMock()
-
-        self.error_report_presenter.error_handler(continue_working, share, name, email, text_box)
-
-        self.error_report_presenter._send_report_to_server.called_once_with(share_identifiable=False, uptime=mock.ANY)
-        self.error_report_presenter._handle_exit.assert_called_once_with(True)
-
     def test_error_handler_share_nothing_sunny_day_case(self):
         name = "John Smith"
         email = "john.smith@example.com"
         text_box = "Details about error"
         continue_working = True
-        share = 2
+        share = False
         self.error_report_presenter._send_report_to_server = mock.MagicMock()
         self.error_report_presenter._handle_exit = mock.MagicMock()
 

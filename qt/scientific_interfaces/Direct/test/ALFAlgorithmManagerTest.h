@@ -12,6 +12,7 @@
 #include "ALFAlgorithmManager.h"
 #include "MockALFAlgorithmManagerSubscriber.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -123,10 +124,13 @@ public:
 
   void test_notifyAlgorithmError_will_notify_the_subscriber() {
     std::string const errorMessage("Error message");
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("Rebin");
+    MantidQt::API::IConfiguredAlgorithm_sptr configuredAlg =
+        std::make_shared<MantidQt::API::ConfiguredAlgorithm>(std::move(alg), std::move(m_algProperties));
 
     EXPECT_CALL(*m_subscriber, notifyAlgorithmError(errorMessage)).Times(1);
 
-    m_algorithmManager->notifyAlgorithmError(nullptr, errorMessage);
+    m_algorithmManager->notifyAlgorithmError(configuredAlg, errorMessage);
   }
 
 private:

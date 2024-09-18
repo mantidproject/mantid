@@ -24,6 +24,7 @@ class TransformToIqt(PythonAlgorithm):
     _output_workspace = None
     _dry_run = None
     _calculate_errors = None
+    _enforce_normalization = None
     _number_of_iterations = None
     _seed = None
 
@@ -78,6 +79,7 @@ class TransformToIqt(PythonAlgorithm):
 
         self.declareProperty(name="DryRun", defaultValue=False, doc="Only calculate and output the parameters")
         self.declareProperty("CalculateErrors", defaultValue=True, doc="Calculate monte-carlo errors.")
+        self.declareProperty("EnforceNormalization", defaultValue=True, doc="Normalization to enforce I(t=0)")
 
     def PyExec(self):
         self._setup()
@@ -119,6 +121,7 @@ class TransformToIqt(PythonAlgorithm):
             self._parameter_table = getWSprefix(self._sample) + "TransformToIqtParameters"
 
         self._calculate_errors = self.getProperty("CalculateErrors").value
+        self._enforce_normalization = self.getProperty("EnforceNormalization").value
         self._number_of_iterations = self.getProperty("NumberOfIterations").value
         self._seed = self.getProperty("SeedValue").value
 
@@ -154,10 +157,9 @@ class TransformToIqt(PythonAlgorithm):
         end_prog = 0.3 if self._calculate_errors else 0.9
         workflow_prog = Progress(self, start=0.0, end=end_prog, nreports=8)
         workflow_prog.report("Cropping Workspace")
-        CropWorkspace(InputWorkspace=self._sample, OutputWorkspace="__TransformToIqt_sample_cropped", Xmin=self._e_min, Xmax=self._e_max)
+        cropped_workspace = CropWorkspace(InputWorkspace=self._sample, Xmin=self._e_min, Xmax=self._e_max, StoreInADS=False)
         workflow_prog.report("Calculating table properties")
-        x_data = mtd["__TransformToIqt_sample_cropped"].readX(0)
-        number_input_points = len(x_data) - 1
+        number_input_points = cropped_workspace.blocksize()
         num_bins = int(number_input_points / self._number_points_per_bin)
         self._e_width = (abs(self._e_min) + abs(self._e_max)) / num_bins
 
@@ -218,10 +220,6 @@ class TransformToIqt(PythonAlgorithm):
             ]
         )
 
-        workflow_prog.report("Deleting temp Workspace")
-        if mtd.doesExist("__TransformToIqt_sample_cropped"):
-            DeleteWorkspace("__TransformToIqt_sample_cropped")
-
         self.setProperty("ParameterWorkspace", param_table)
 
     def _add_logs(self):
@@ -259,6 +257,7 @@ class TransformToIqt(PythonAlgorithm):
             "EnergyMax": self._e_max,
             "EnergyWidth": self._e_width,
             "CalculateErrors": self._calculate_errors,
+            "EnforceNormalization": self._enforce_normalization,
             "NumberOfIterations": self._number_of_iterations,
             "SeedValue": self._seed,
         }

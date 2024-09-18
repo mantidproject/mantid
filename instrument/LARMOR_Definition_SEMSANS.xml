@@ -5,8 +5,8 @@
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="LARMOR" valid-from   ="2018-11-15 00:00:00"
-                          valid-to     ="2100-01-31 23:59:59"
-		          last-modified="2100-01-01 10:30:00">
+                          valid-to     ="2024-02-21 19:59:59"
+		          last-modified="2024-03-28 13:19:00">
 
   <defaults>
     <length unit="meter"/>

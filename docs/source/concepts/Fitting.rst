@@ -93,7 +93,7 @@ through mathematical formulas.
 Multiple datasets and sequential fitting
 ----------------------------------------
 Mantid can fit multiple datasets to one model. This can perhaps most easily be
-done using the :ref:`Multi-Dataset Fitting interface <QENS-fitting-ref>`
+done using the :ref:`Fit Script Generator interface <Fit_Script_Generator-ref>`.
 
 Sequential fitting is simply the sequential fitting of datasets
 using the same fit function, and where, for example, fitting parameters obtained

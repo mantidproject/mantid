@@ -124,7 +124,7 @@ void Axes::setTitle(const char *label) { callMethodNoCheck<void, const char *>(p
  * @param bool useOffset :: True, the offset will be
  * calculated as needed, False no offset will be used
  */
-void Axes::tickLabelFormat(const char *axis, const char *style, const bool useOffset) {
+void Axes::tickLabelFormat(const std::string &axis, const std::string &style, const bool useOffset) {
   try {
     GlobalInterpreterLock lock;
     Python::List args;

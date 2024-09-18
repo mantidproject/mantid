@@ -1,1 +1,0 @@
-- Home button on a 3D plot will now reset the view to the default view.

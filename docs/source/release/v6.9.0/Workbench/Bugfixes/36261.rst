@@ -1,1 +1,0 @@
-- Fix a bug where changing waterfall x and y off sets would not update the plot axes limits.

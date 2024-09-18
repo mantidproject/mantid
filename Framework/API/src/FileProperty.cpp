@@ -229,9 +229,8 @@ std::string FileProperty::setValue(const std::string &propValue) {
   // sure the
   // directory exists for a Save property
   if (Poco::Path(strippedValue).isAbsolute()) {
-    std::string error;
     if (isSaveProperty()) {
-      error = createDirectory(strippedValue);
+      std::string error = createDirectory(strippedValue);
       if (!error.empty())
         return error;
     }
@@ -288,16 +287,11 @@ bool FileProperty::extsMatchRunFiles() {
   try {
     Kernel::FacilityInfo facilityInfo = Kernel::ConfigService::Instance().getFacility();
     const std::vector<std::string> facilityExts = facilityInfo.extensions();
-    auto facilityExtsBegin = facilityExts.cbegin();
-    auto facilityExtsEnd = facilityExts.cend();
     const std::vector<std::string> allowedExts = this->allowedValues();
+    match = std::any_of(allowedExts.cbegin(), allowedExts.cend(), [&facilityExts](const auto &ext) {
+      return std::find(facilityExts.cbegin(), facilityExts.cend(), ext) != facilityExts.cend();
+    });
 
-    for (const auto &ext : allowedExts) {
-      if (std::find(facilityExtsBegin, facilityExtsEnd, ext) != facilityExtsEnd) {
-        match = true;
-        break;
-      }
-    }
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
   } // facility could not be found, do nothing this will return the default
   // match of false
@@ -344,7 +338,7 @@ std::string FileProperty::setLoadProperty(const std::string &propValue) {
         addExtension(lower, exts);
         addExtension(upper, exts);
       }
-      foundFile = FileFinder::Instance().findRun(propValue, exts);
+      foundFile = FileFinder::Instance().findRun(propValue, exts).result();
     } else // non-runfiles go through FileFinder::getFullPath
     {
       foundFile = FileFinder::Instance().getFullPath(propValue);

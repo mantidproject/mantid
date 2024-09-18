@@ -87,11 +87,11 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   VecVecV3D faces = this->createFaces();
 
   const int nPeaks = ws->getNumberPeaks();
-  const int numberOfFaces = this->numberOfFaces();
+  const int facesN = this->numberOfFaces();
 
   // Calculate the normals for each face.
-  VecV3D normals(numberOfFaces);
-  for (int i = 0; i < numberOfFaces; ++i) {
+  VecV3D normals(facesN);
+  for (int i = 0; i < facesN; ++i) {
     VecV3D face = faces[i];
     normals[i] = (face[1] - face[0]).cross_prod((face[2] - face[0]));
     const auto norm = normals[i].norm();
@@ -140,7 +140,7 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
 
       if (checkPeakExtents) {
         // Take account of radius spherical extents.
-        for (int j = 0; j < numberOfFaces; ++j) {
+        for (int j = 0; j < facesN; ++j) {
           distance = normals[j].scalar_prod(faces[j][0] - peakCenter); // Distance between plane and peak center.
           if (m_peakRadius >= std::abs(distance))                      // Sphere passes through one
                                                                        // of the PLANES defined by

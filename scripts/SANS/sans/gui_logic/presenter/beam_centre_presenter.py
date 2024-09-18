@@ -7,6 +7,7 @@
 import copy
 from typing import Dict
 
+from sans.common.enums import DetectorType
 from mantid import UsageService
 from mantid.kernel import FeatureType
 from mantid.kernel import Logger
@@ -114,29 +115,33 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.front_pos_2 = self._view.front_pos_2
         self._beam_centre_model.q_min = self._view.q_min
         self._beam_centre_model.q_max = self._view.q_max
-        self._beam_centre_model.component = self._view.component
-        self._beam_centre_model.update_front = self._view.update_front
-        self._beam_centre_model.update_rear = self._view.update_rear
+        self._beam_centre_model.component = self._get_selected_component()
+
+    def _get_selected_component(self):
+        return DetectorType.HAB if self._view.update_front else DetectorType.LAB
 
     def copy_centre_positions(self, state_model):
         """
         Copies rear / front positions from an external model
         """
-        rear_pos_1 = getattr(state_model, "rear_pos_1")
-        rear_pos_2 = getattr(state_model, "rear_pos_2")
+        self._beam_centre_model.rear_pos_1 = getattr(state_model, "rear_pos_1")
+        self._beam_centre_model.rear_pos_2 = getattr(state_model, "rear_pos_2")
 
-        self._beam_centre_model.rear_pos_1 = rear_pos_1
-        self._beam_centre_model.rear_pos_2 = rear_pos_2
+        self._beam_centre_model.front_pos_1 = getattr(state_model, "front_pos_1")
+        self._beam_centre_model.front_pos_2 = getattr(state_model, "front_pos_2")
 
-        self._beam_centre_model.front_pos_1 = getattr(state_model, "front_pos_1") if getattr(state_model, "front_pos_1") else rear_pos_1
-        self._beam_centre_model.front_pos_2 = getattr(state_model, "front_pos_2") if getattr(state_model, "front_pos_2") else rear_pos_2
+    def set_meters_mode_enabled(self, is_meters: bool) -> None:
+        if is_meters:
+            self._view.set_position_unit("m")
+            return
+        self._view.set_position_unit("mm")
 
     def update_centre_positions(self):
         rear_pos_1 = self._beam_centre_model.rear_pos_1
         rear_pos_2 = self._beam_centre_model.rear_pos_2
 
-        front_pos_1 = self._beam_centre_model.front_pos_1 if self._beam_centre_model.front_pos_1 != "" else rear_pos_1
-        front_pos_2 = self._beam_centre_model.front_pos_2 if self._beam_centre_model.front_pos_2 != "" else rear_pos_2
+        front_pos_1 = self._beam_centre_model.front_pos_1
+        front_pos_2 = self._beam_centre_model.front_pos_2
 
         self._view.rear_pos_1 = self._round(rear_pos_1)
         self._view.rear_pos_2 = self._round(rear_pos_2)

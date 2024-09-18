@@ -48,7 +48,7 @@ void ALCBaselineModellingView::initialize() {
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
 }
 
-QString ALCBaselineModellingView::function() const { return m_ui.function->getFunctionString(); }
+std::string ALCBaselineModellingView::function() const { return m_ui.function->getFunctionString(); }
 
 IALCBaselineModellingView::SectionRow ALCBaselineModellingView::sectionRow(int row) const {
   QString first = m_ui.sections->item(row, 0)->text();
@@ -106,7 +106,7 @@ void ALCBaselineModellingView::setFunction(IFunction_const_sptr func) {
     size_t nParams = func->nParams();
     for (size_t i = 0; i < nParams; i++) {
 
-      QString name = QString::fromStdString(func->parameterName(i));
+      auto name = func->parameterName(i);
       double value = func->getParameter(i);
       double error = func->getError(i);
 

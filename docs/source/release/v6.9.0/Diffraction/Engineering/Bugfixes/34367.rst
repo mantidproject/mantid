@@ -1,1 +1,0 @@
-- Validate the characters entered in the RB Number box in :ref:`Engineering Diffraction GUI<Engineering_Diffraction-ref>` prior to creating a custom directory structure to write the artifacts in Calibration, Focus, and GSAS II tabs.

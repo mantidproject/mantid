@@ -220,7 +220,6 @@ void IntegratePeakTimeSlices::exec() {
   BoundingBox box;
   panel->getBoundingBox(box);
 
-  int detID = peak.getDetectorID();
   if (!box.isPointInside(peak.getDetPos())) {
     g_log.error("Detector pixel is NOT inside the Peaks Bank");
     throw std::runtime_error("Detector pixel is NOT inside the Peaks Bank");
@@ -246,6 +245,7 @@ void IntegratePeakTimeSlices::exec() {
   //----------------------------- get Peak extents
   //------------------------------
   try {
+    int detID = peak.getDetectorID();
 
     // Find the workspace index for this detector ID
     detid2index_map::const_iterator it = m_wi_to_detid_map.find(detID);
@@ -1055,7 +1055,7 @@ bool DataModeHandler::setStatBase(std::vector<double> const &statBase)
 
   bool done = false;
   int ntimes = 0;
-  double Mx, My, Sxx, Syy, Sxy;
+  double Mx = 0, My = 0, Sxx = 0, Syy = 0, Sxy = 0;
 
   double RangeX = statBase[INCol] / 2;
   double RangeY = statBase[INRows] / 2;

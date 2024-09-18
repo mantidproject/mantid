@@ -10,13 +10,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/ObjComponent.h"
-#include "MantidGeometry/Objects/CSGObject.h"
-
-#include <cstdio>
-#include <fstream>
 
 namespace Mantid::DataHandling {
 
@@ -39,22 +32,11 @@ void SavePAR::init() {
 }
 
 void SavePAR::exec() {
-
   // Get the input workspace
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
   // Retrieve the filename from the properties
   const std::string filename = getProperty("Filename");
-
-  // Get a pointer to the sample
-  IComponent_const_sptr sample = inputWorkspace->getInstrument()->getSample();
-
-  std::ofstream outPAR_file(filename.c_str());
-
-  if (!outPAR_file) {
-    g_log.error("Failed to open (PAR) file:" + filename);
-    throw Kernel::Exception::FileError("Failed to open (PAR) file:", filename);
-  }
 
   // execute the ChildAlgorithm to calculate the detector's parameters;
   auto spCalcDetPar = createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
@@ -68,14 +50,9 @@ void SavePAR::exec() {
     spCalcDetPar->setPropertyValue("OutputParTable", det_par_ws_name);
   }
 
-  // let's not do this for the time being
-  /* std::string parFileName = this->getPropertyValue("ParFile");
-      if(!(parFileName.empty()||parFileName=="not_used.par")){
-                spCalcDetPar->setPropertyValue("ParFile",parFileName);
-                    }*/
   spCalcDetPar->execute();
   //
-  auto *pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
+  const auto *pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
   if (!pCalcDetPar) { // "can not get pointer to FindDetectorsPar algorithm"
     throw(std::bad_cast());
   }
@@ -88,6 +65,18 @@ void SavePAR::exec() {
 
   size_t nDetectors = pCalcDetPar->getNDetectors();
 
+  writePAR(filename, azimuthal, polar, azimuthal_width, polar_width, secondary_flightpath, det_ID, nDetectors);
+}
+
+void SavePAR::writePAR(const std::string &filename, const std::vector<double> &azimuthal,
+                       const std::vector<double> &polar, const std::vector<double> &azimuthal_width,
+                       const std::vector<double> &polar_width, const std::vector<double> &secondary_flightpath,
+                       const std::vector<size_t> &det_ID, const size_t nDetectors) {
+  std::ofstream outPAR_file(filename.c_str());
+
+  if (!outPAR_file) {
+    throw Kernel::Exception::FileError("Failed to open (PAR) file:", filename);
+  }
   // Write the number of detectors to the file.
   outPAR_file << " " << nDetectors << '\n';
 

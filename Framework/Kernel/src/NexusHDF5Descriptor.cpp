@@ -105,6 +105,7 @@ std::pair<std::string, herr_t> readStringAttributeN(hid_t attr) {
   if (iRet >= 0) {
     attrData = vdat;
   }
+  free(vdat);
   return std::make_pair(attrData, iRet);
 }
 
@@ -220,13 +221,8 @@ bool NexusHDF5Descriptor::isEntry(const std::string &entryName, const std::strin
 }
 
 bool NexusHDF5Descriptor::isEntry(const std::string &entryName) const noexcept {
-
-  for (auto itClass = m_allEntries.rbegin(); itClass != m_allEntries.rend(); ++itClass) {
-    if (itClass->second.count(entryName) == 1) {
-      return true;
-    }
-  }
-  return false;
+  return std::any_of(m_allEntries.rbegin(), m_allEntries.rend(),
+                     [&entryName](const auto &entry) { return entry.second.count(entryName) == 1; });
 }
 
 } // namespace Mantid::Kernel

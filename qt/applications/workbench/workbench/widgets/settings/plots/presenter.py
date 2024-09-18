@@ -17,6 +17,7 @@ from workbench.plotting.style import VALID_LINE_STYLE, VALID_DRAW_STYLE
 from qtpy.QtCore import Qt
 
 from enum import Enum
+import sys
 
 
 class PlotProperties(Enum):
@@ -24,6 +25,10 @@ class PlotProperties(Enum):
     CAP_THICKNESS = "plots.errorbar.CapThickness"
     X_AXES_SCALE = "plots.xAxesScale"
     Y_AXES_SCALE = "plots.yAxesScale"
+    X_MIN = "plots.x_min"
+    X_MAX = "plots.x_max"
+    Y_MIN = "plots.y_min"
+    Y_MAX = "plots.y_max"
     AXES_LINE_WIDTH = "plots.axesLineWidth"
     SHOW_TICKS_LEFT = "plots.showTicksLeft"
     SHOW_TICKS_BOTTOM = "plots.showTicksBottom"
@@ -116,6 +121,10 @@ class PlotSettings(object):
         x_axes_scale = ConfigService.getString(PlotProperties.X_AXES_SCALE.value)
         y_axes_scale = ConfigService.getString(PlotProperties.Y_AXES_SCALE.value)
         axes_line_width = float(ConfigService.getString(PlotProperties.AXES_LINE_WIDTH.value))
+        x_min_str = ConfigService.getString(PlotProperties.X_MIN.value)
+        x_max_str = ConfigService.getString(PlotProperties.X_MAX.value)
+        y_min_str = ConfigService.getString(PlotProperties.Y_MIN.value)
+        y_max_str = ConfigService.getString(PlotProperties.Y_MAX.value)
 
         if x_axes_scale in self.AXES_SCALE:
             self.view.x_axes_scale.setCurrentIndex(self.view.x_axes_scale.findText(x_axes_scale))
@@ -128,6 +137,31 @@ class PlotSettings(object):
             self.view.y_axes_scale.setCurrentIndex(0)
 
         self.view.axes_line_width.setValue(axes_line_width)
+
+        float_max = sys.float_info.max
+        self.view.x_min.setRange(-float_max, float_max)
+        if x_min_str:
+            self.view.x_min.setEnabled(True)
+            self.view.x_min.setValue(float(x_min_str))
+            self.view.x_min_box.setChecked(True)
+
+        self.view.x_max.setRange(-float_max, float_max)
+        if x_max_str:
+            self.view.x_max.setEnabled(True)
+            self.view.x_max.setValue(float(x_max_str))
+            self.view.x_max_box.setChecked(True)
+
+        self.view.y_min.setRange(-float_max, float_max)
+        if y_min_str:
+            self.view.y_min.setEnabled(True)
+            self.view.y_min.setValue(float(y_min_str))
+            self.view.y_min_box.setChecked(True)
+
+        self.view.y_max.setRange(-float_max, float_max)
+        if y_max_str:
+            self.view.y_max.setEnabled(True)
+            self.view.y_max.setValue(float(y_max_str))
+            self.view.y_max_box.setChecked(True)
 
     def setup_ticks_group(self):
         show_ticks_left = "on" == ConfigService.getString(PlotProperties.SHOW_TICKS_LEFT.value).lower()
@@ -250,6 +284,14 @@ class PlotSettings(object):
         self.view.line_style.currentTextChanged.connect(self.action_line_style_changed)
         self.view.draw_style.currentTextChanged.connect(self.action_draw_style_changed)
         self.view.line_width.valueChanged.connect(self.action_line_width_changed)
+        self.view.x_min.valueChanged.connect(self.action_x_min_changed)
+        self.view.x_max.valueChanged.connect(self.action_x_max_changed)
+        self.view.y_min.valueChanged.connect(self.action_y_min_changed)
+        self.view.y_max.valueChanged.connect(self.action_y_max_changed)
+        self.view.x_min_box.stateChanged.connect(self.action_x_min_box_changed)
+        self.view.x_max_box.stateChanged.connect(self.action_x_max_box_changed)
+        self.view.y_min_box.stateChanged.connect(self.action_y_min_box_changed)
+        self.view.y_max_box.stateChanged.connect(self.action_y_max_box_changed)
 
         # Ticks
         self.view.enable_grid.stateChanged.connect(self.action_enable_grid_changed)
@@ -374,6 +416,46 @@ class PlotSettings(object):
 
     def action_line_width_changed(self, value):
         ConfigService.setString(PlotProperties.LINE_WIDTH.value, str(value))
+
+    def action_x_min_changed(self, value):
+        ConfigService.setString(PlotProperties.X_MIN.value, str(value))
+
+    def action_x_max_changed(self, value):
+        ConfigService.setString(PlotProperties.X_MAX.value, str(value))
+
+    def action_y_min_changed(self, value):
+        ConfigService.setString(PlotProperties.Y_MIN.value, str(value))
+
+    def action_y_max_changed(self, value):
+        ConfigService.setString(PlotProperties.Y_MAX.value, str(value))
+
+    def action_x_min_box_changed(self, state):
+        self.view.x_min.setEnabled(state)
+        if state:
+            self.action_x_min_changed(self.view.x_min.value())
+        else:
+            self.action_x_min_changed("")
+
+    def action_x_max_box_changed(self, state):
+        self.view.x_max.setEnabled(state)
+        if state:
+            self.action_x_max_changed(self.view.x_max.value())
+        else:
+            self.action_x_max_changed("")
+
+    def action_y_min_box_changed(self, state):
+        self.view.y_min.setEnabled(state)
+        if state:
+            self.action_y_min_changed(self.view.y_min.value())
+        else:
+            self.action_y_min_changed("")
+
+    def action_y_max_box_changed(self, state):
+        self.view.y_max.setEnabled(state)
+        if state:
+            self.action_y_max_changed(self.view.y_max.value())
+        else:
+            self.action_y_max_changed("")
 
     def action_marker_style_changed(self, style):
         ConfigService.setString(PlotProperties.MARKER_STYLE.value, style)

@@ -92,13 +92,13 @@ void AddNote::init() {
  */
 void AddNote::exec() {
   MatrixWorkspace_sptr logWS = getProperty("Workspace");
-  std::string name = getProperty("Name");
+  std::string logName = getProperty("Name");
   const bool deleteExisting = getProperty("DeleteExisting");
   auto &run = logWS->mutableRun();
-  if (deleteExisting && run.hasProperty(name)) {
-    removeExisting(logWS, name);
+  if (deleteExisting && run.hasProperty(logName)) {
+    removeExisting(logWS, logName);
   }
-  createOrUpdate(run, name);
+  createOrUpdate(run, logName);
 }
 
 /**

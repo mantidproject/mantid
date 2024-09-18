@@ -217,19 +217,19 @@ void LoadBBY::exec() {
 
   // set title
   const std::vector<std::string> &subFiles = tarFile.files();
-  for (const auto &subFile : subFiles)
-    if (subFile.compare(0, 3, "BBY") == 0) {
-      std::string title = subFile;
+  const auto it = std::find_if(subFiles.cbegin(), subFiles.cend(),
+                               [](const auto &subFile) { return subFile.compare(0, 3, "BBY") == 0; });
+  if (it != subFiles.cend()) {
+    std::string title = *it;
 
-      if (title.rfind(".hdf") == title.length() - 4)
-        title.resize(title.length() - 4);
+    if (title.rfind(".hdf") == title.length() - 4)
+      title.resize(title.length() - 4);
 
-      if (title.rfind(".nx") == title.length() - 3)
-        title.resize(title.length() - 3);
+    if (title.rfind(".nx") == title.length() - 3)
+      title.resize(title.length() - 3);
 
-      eventWS->setTitle(title);
-      break;
-    }
+    eventWS->setTitle(title);
+  }
 
   // load events
   size_t numberHistograms = eventWS->getNumberHistograms();
@@ -446,14 +446,14 @@ void LoadBBY::loadInstrumentParameters(const NeXus::NXEntry &entry, std::map<std
     while (pNode) {
       if (pNode->nodeName() == "parameter") {
         auto pElem = dynamic_cast<Element *>(pNode);
-        std::string name = pElem->getAttribute("name");
+        std::string paramName = pElem->getAttribute("name");
         Poco::AutoPtr<NodeList> nodeList = pElem->childNodes();
         for (unsigned long i = 0; i < nodeList->length(); i++) {
           auto cNode = nodeList->item(i);
           if (cNode->nodeName() == "value") {
             auto cElem = dynamic_cast<Poco::XML::Element *>(cNode);
             std::string value = cElem->getAttribute("val");
-            allParams[name] = value;
+            allParams[paramName] = value;
           }
         }
       }

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.kernel import V3D
+from mantid.dataobjects import NoShape, PeakShapeSpherical, PeakShapeEllipsoid
 from mantid.simpleapi import CreateSimulationWorkspace, CreatePeaksWorkspace, LoadInstrument
 import numpy as np
 import numpy.testing as npt
@@ -167,6 +168,22 @@ class IPeakTest(unittest.TestCase):
         test_vector = V3D(0.5, 0, 0.2)
         self._peak.setIntHKL(test_vector)
         self.assertEqual(self._peak.getIntHKL(), V3D(1, 0, 0))
+
+    def test_set_peak_shape(self):
+        no_shape = NoShape()
+        sphere = PeakShapeSpherical(1)
+        ellipse = PeakShapeEllipsoid([V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)], [0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9])
+
+        self.assertEqual(self._peak.getPeakShape().shapeName(), "none")
+
+        self._peak.setPeakShape(sphere)
+        self.assertEqual(self._peak.getPeakShape().shapeName(), "spherical")
+
+        self._peak.setPeakShape(ellipse)
+        self.assertEqual(self._peak.getPeakShape().shapeName(), "ellipsoid")
+
+        self._peak.setPeakShape(no_shape)
+        self.assertEqual(self._peak.getPeakShape().shapeName(), "none")
 
 
 if __name__ == "__main__":

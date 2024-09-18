@@ -39,8 +39,6 @@ set(SRC_FILES
     src/WorkflowAlgorithmHelpers.cpp
 )
 
-set(SRC_UNITY_IGNORE_FILES)
-
 set(INC_FILES
     inc/MantidWorkflowAlgorithms/AlignAndFocusPowder.h
     inc/MantidWorkflowAlgorithms/ComputeSensitivity.h
@@ -102,11 +100,6 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(WorkflowAlgorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
-
 # Use a precompiled header where they are supported
 enable_precompiled_headers(inc/MantidWorkflowAlgorithms/PrecompiledHeader.h SRC_FILES)
 
@@ -132,7 +125,7 @@ set_property(TARGET WorkflowAlgorithms PROPERTY FOLDER "MantidFramework")
 target_link_libraries(
   WorkflowAlgorithms
   PUBLIC Mantid::Nexus Mantid::API Mantid::DataObjects
-  PRIVATE Mantid::Kernel Boost::filesystem
+  PRIVATE Mantid::Kernel
 )
 
 # Add the unit tests directory

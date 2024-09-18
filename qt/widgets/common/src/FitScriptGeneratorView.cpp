@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/FittingGlobals.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
+#include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
@@ -33,41 +34,11 @@ using namespace MantidQt::API;
 namespace {
 using MantidQt::MantidWidgets::WorkspaceIndex;
 
-std::vector<WorkspaceIndex> convertToWorkspaceIndex(std::vector<int> const &indices) {
-  std::vector<WorkspaceIndex> workspaceIndices;
-  workspaceIndices.reserve(indices.size());
-  std::transform(indices.cbegin(), indices.cend(), std::back_inserter(workspaceIndices),
-                 [](int index) { return WorkspaceIndex(index); });
-  return workspaceIndices;
-}
-
-std::vector<std::string> convertToStdVector(QStringList const &qList) {
-  std::vector<std::string> vec;
-  vec.reserve(static_cast<std::size_t>(qList.size()));
-  std::transform(qList.cbegin(), qList.cend(), std::back_inserter(vec),
-                 [](QString const &element) { return element.toStdString(); });
-  return vec;
-}
-
 template <typename T> std::vector<T> convertQListToStdVector(QList<T> const &qList) {
   std::vector<T> vec;
   vec.reserve(static_cast<std::size_t>(qList.size()));
   std::transform(qList.cbegin(), qList.cend(), std::back_inserter(vec), [](T const &element) { return element; });
   return vec;
-}
-
-QString toQString(std::string const &str) { return QString::fromStdString(str); }
-
-QString globalToQString(MantidQt::MantidWidgets::GlobalParameter const &global) {
-  return toQString(global.m_parameter);
-}
-
-template <typename Function, typename T>
-QStringList convertToQStringList(Function const &func, std::vector<T> const &vec) {
-  QStringList qList;
-  qList.reserve(static_cast<int>(vec.size()));
-  std::transform(vec.cbegin(), vec.cend(), std::back_inserter(qList), func);
-  return qList;
 }
 
 template <typename T> QList<T> convertToQList(std::vector<T> const &vec) {
@@ -117,9 +88,6 @@ FitScriptGeneratorView::~FitScriptGeneratorView() {
   observeClear(false);
   observeRename(false);
 
-  if (m_addWorkspaceDialog)
-    closeAddWorkspaceDialog();
-
   m_dataTable.reset();
   m_functionTreeView.reset();
   m_fitOptionsBrowser.reset();
@@ -131,28 +99,28 @@ void FitScriptGeneratorView::connectUiSignals() {
   connect(m_dataTable.get(), SIGNAL(cellChanged(int, int)), this, SLOT(onCellChanged(int, int)));
   connect(m_dataTable.get(), SIGNAL(itemSelectionChanged()), this, SLOT(onItemSelected()));
 
-  connect(m_functionTreeView.get(), SIGNAL(functionRemovedString(QString const &)), this,
-          SLOT(onFunctionRemoved(QString const &)));
-  connect(m_functionTreeView.get(), SIGNAL(functionAdded(QString const &)), this,
-          SLOT(onFunctionAdded(const QString &)));
-  connect(m_functionTreeView.get(), SIGNAL(functionReplaced(QString const &)), this,
-          SLOT(onFunctionReplaced(QString const &)));
-  connect(m_functionTreeView.get(), SIGNAL(parameterChanged(QString const &)), this,
-          SLOT(onParameterChanged(QString const &)));
-  connect(m_functionTreeView.get(), SIGNAL(attributePropertyChanged(QString const &)), this,
-          SLOT(onAttributeChanged(QString const &)));
-  connect(m_functionTreeView.get(), SIGNAL(parameterTieChanged(QString const &, QString const &)), this,
-          SLOT(onParameterTieChanged(QString const &, QString const &)));
-  connect(m_functionTreeView.get(), SIGNAL(parameterConstraintRemoved(QString const &)), this,
-          SLOT(onParameterConstraintRemoved(QString const &)));
-  connect(m_functionTreeView.get(), SIGNAL(parameterConstraintAdded(QString const &, QString const &)), this,
-          SLOT(onParameterConstraintChanged(QString const &, QString const &)));
-  connect(m_functionTreeView.get(), SIGNAL(globalsChanged(QStringList const &)), this,
-          SLOT(onGlobalParametersChanged(QStringList const &)));
+  connect(m_functionTreeView.get(), SIGNAL(functionRemovedString(std::string const &)), this,
+          SLOT(onFunctionRemoved(std::string const &)));
+  connect(m_functionTreeView.get(), SIGNAL(functionAdded(std::string const &)), this,
+          SLOT(onFunctionAdded(const std::string &)));
+  connect(m_functionTreeView.get(), SIGNAL(functionReplaced(std::string const &)), this,
+          SLOT(onFunctionReplaced(std::string const &)));
+  connect(m_functionTreeView.get(), SIGNAL(parameterChanged(std::string const &)), this,
+          SLOT(onParameterChanged(std::string const &)));
+  connect(m_functionTreeView.get(), SIGNAL(attributePropertyChanged(std::string const &)), this,
+          SLOT(onAttributeChanged(std::string const &)));
+  connect(m_functionTreeView.get(), SIGNAL(parameterTieChanged(std::string const &, std::string const &)), this,
+          SLOT(onParameterTieChanged(std::string const &, std::string const &)));
+  connect(m_functionTreeView.get(), SIGNAL(parameterConstraintRemoved(std::string const &)), this,
+          SLOT(onParameterConstraintRemoved(std::string const &)));
+  connect(m_functionTreeView.get(), SIGNAL(parameterConstraintAdded(std::string const &, std::string const &)), this,
+          SLOT(onParameterConstraintChanged(std::string const &, std::string const &)));
+  connect(m_functionTreeView.get(), SIGNAL(globalsChanged(std::vector<std::string> const &)), this,
+          SLOT(onGlobalParametersChanged(std::vector<std::string> const &)));
   connect(m_functionTreeView.get(), SIGNAL(copyToClipboardRequest()), this, SLOT(onCopyFunctionToClipboard()));
   connect(m_functionTreeView.get(), SIGNAL(functionHelpRequest()), this, SLOT(onFunctionHelpRequested()));
-  connect(m_functionTreeView.get(), SIGNAL(localParameterButtonClicked(QString const &)), this,
-          SLOT(onEditLocalParameterClicked(QString const &)));
+  connect(m_functionTreeView.get(), SIGNAL(localParameterButtonClicked(std::string const &)), this,
+          SLOT(onEditLocalParameterClicked(std::string const &)));
 
   connect(m_fitOptionsBrowser.get(), SIGNAL(outputBaseNameChanged(std::string const &)), this,
           SLOT(onOutputBaseNameChanged(std::string const &)));
@@ -239,41 +207,41 @@ void FitScriptGeneratorView::onCellChanged(int row, int column) {
 
 void FitScriptGeneratorView::onItemSelected() { m_presenter->notifyPresenter(ViewEvent::SelectionChanged); }
 
-void FitScriptGeneratorView::onFunctionRemoved(QString const &function) {
-  m_presenter->notifyPresenter(ViewEvent::FunctionRemoved, function.toStdString());
+void FitScriptGeneratorView::onFunctionRemoved(std::string const &function) {
+  m_presenter->notifyPresenter(ViewEvent::FunctionRemoved, function);
 }
 
-void FitScriptGeneratorView::onFunctionAdded(QString const &function) {
-  m_presenter->notifyPresenter(ViewEvent::FunctionAdded, function.toStdString());
+void FitScriptGeneratorView::onFunctionAdded(std::string const &function) {
+  m_presenter->notifyPresenter(ViewEvent::FunctionAdded, function);
 }
 
-void FitScriptGeneratorView::onFunctionReplaced(QString const &function) {
-  m_presenter->notifyPresenter(ViewEvent::FunctionReplaced, function.toStdString());
+void FitScriptGeneratorView::onFunctionReplaced(std::string const &function) {
+  m_presenter->notifyPresenter(ViewEvent::FunctionReplaced, function);
 }
 
-void FitScriptGeneratorView::onParameterChanged(QString const &parameter) {
-  m_presenter->notifyPresenter(ViewEvent::ParameterChanged, parameter.toStdString());
+void FitScriptGeneratorView::onParameterChanged(std::string const &parameter) {
+  m_presenter->notifyPresenter(ViewEvent::ParameterChanged, parameter);
 }
 
-void FitScriptGeneratorView::onAttributeChanged(QString const &attribute) {
-  m_presenter->notifyPresenter(ViewEvent::AttributeChanged, attribute.toStdString());
+void FitScriptGeneratorView::onAttributeChanged(std::string const &attribute) {
+  m_presenter->notifyPresenter(ViewEvent::AttributeChanged, attribute);
 }
 
-void FitScriptGeneratorView::onParameterTieChanged(QString const &parameter, QString const &tie) {
-  m_presenter->notifyPresenter(ViewEvent::ParameterTieChanged, parameter.toStdString(), tie.toStdString());
+void FitScriptGeneratorView::onParameterTieChanged(std::string const &parameter, std::string const &tie) {
+  m_presenter->notifyPresenter(ViewEvent::ParameterTieChanged, parameter, tie);
 }
 
-void FitScriptGeneratorView::onParameterConstraintRemoved(QString const &parameter) {
-  m_presenter->notifyPresenter(ViewEvent::ParameterConstraintRemoved, parameter.toStdString());
+void FitScriptGeneratorView::onParameterConstraintRemoved(std::string const &parameter) {
+  m_presenter->notifyPresenter(ViewEvent::ParameterConstraintRemoved, parameter);
 }
 
-void FitScriptGeneratorView::onParameterConstraintChanged(QString const &functionIndex, QString const &constraint) {
-  m_presenter->notifyPresenter(ViewEvent::ParameterConstraintChanged, functionIndex.toStdString(),
-                               constraint.toStdString());
+void FitScriptGeneratorView::onParameterConstraintChanged(std::string const &functionIndex,
+                                                          std::string const &constraint) {
+  m_presenter->notifyPresenter(ViewEvent::ParameterConstraintChanged, functionIndex, constraint);
 }
 
-void FitScriptGeneratorView::onGlobalParametersChanged(QStringList const &globalParameters) {
-  m_presenter->notifyPresenter(ViewEvent::GlobalParametersChanged, convertToStdVector(globalParameters));
+void FitScriptGeneratorView::onGlobalParametersChanged(std::vector<std::string> const &globalParameters) {
+  m_presenter->notifyPresenter(ViewEvent::GlobalParametersChanged, globalParameters);
 }
 
 void FitScriptGeneratorView::onCopyFunctionToClipboard() {
@@ -283,7 +251,7 @@ void FitScriptGeneratorView::onCopyFunctionToClipboard() {
 
 void FitScriptGeneratorView::onFunctionHelpRequested() {
   if (auto const function = m_functionTreeView->getSelectedFunction())
-    m_functionTreeView->showFunctionHelp(QString::fromStdString(function->name()));
+    m_functionTreeView->showFunctionHelp(function->name());
 }
 
 void FitScriptGeneratorView::onOutputBaseNameChanged(std::string const &outputBaseName) {
@@ -294,8 +262,8 @@ void FitScriptGeneratorView::onFittingModeChanged(FittingMode fittingMode) {
   m_presenter->notifyPresenter(ViewEvent::FittingModeChanged, fittingMode);
 }
 
-void FitScriptGeneratorView::onEditLocalParameterClicked(QString const &parameter) {
-  m_presenter->notifyPresenter(ViewEvent::EditLocalParameterClicked, parameter.toStdString());
+void FitScriptGeneratorView::onEditLocalParameterClicked(std::string const &parameter) {
+  m_presenter->notifyPresenter(ViewEvent::EditLocalParameterClicked, parameter);
 }
 
 void FitScriptGeneratorView::onEditLocalParameterFinished(int result) {
@@ -338,11 +306,11 @@ FitDomainIndex FitScriptGeneratorView::currentRow() const { return m_dataTable->
 bool FitScriptGeneratorView::hasLoadedData() const { return m_dataTable->hasLoadedData(); }
 
 double FitScriptGeneratorView::parameterValue(std::string const &parameter) const {
-  return m_functionTreeView->getParameter(QString::fromStdString(parameter));
+  return m_functionTreeView->getParameter(parameter);
 }
 
 IFunction::Attribute FitScriptGeneratorView::attributeValue(std::string const &attribute) const {
-  return m_functionTreeView->getAttribute(QString::fromStdString(attribute));
+  return m_functionTreeView->getAttribute(attribute);
 }
 
 void FitScriptGeneratorView::renameWorkspace(std::string const &workspaceName, std::string const &newName) {
@@ -357,41 +325,32 @@ void FitScriptGeneratorView::addWorkspaceDomain(std::string const &workspaceName
 }
 
 void FitScriptGeneratorView::openAddWorkspaceDialog() {
-  m_addWorkspaceDialog = std::make_unique<AddWorkspaceDialog>(this);
-  m_addWorkspaceDialog->show();
-  connect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeAddWorkspaceDialog()));
-  connect(m_addWorkspaceDialog.get(), SIGNAL(okClicked(bool)), this, SLOT(addWorkspaceDialogAccepted(bool)));
+  auto dialog = new AddWorkspaceDialog(this);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->show();
+  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
+          SLOT(addWorkspaceDialogAccepted(MantidWidgets::IAddWorkspaceDialog *)));
 }
 
-void FitScriptGeneratorView::closeAddWorkspaceDialog() {
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(closeDialog()), this, SLOT(closeAddWorkspaceDialog()));
-  disconnect(m_addWorkspaceDialog.get(), SIGNAL(okClicked(bool)), this, SLOT(addWorkspaceDialogAccepted(bool)));
-  m_addWorkspaceDialog->close();
-  m_addWorkspaceDialog.reset();
+void FitScriptGeneratorView::addWorkspaceDialogAccepted(MantidWidgets::IAddWorkspaceDialog *dialog) {
+  if (auto addWorkspaceDialog = dynamic_cast<MantidWidgets::AddWorkspaceDialog const *>(dialog)) {
+    m_presenter->handleAddDomainAccepted(getDialogWorkspaces(dialog), addWorkspaceDialog->workspaceIndices());
+  }
 }
 
-void FitScriptGeneratorView::addWorkspaceDialogAccepted(bool close) {
-  m_presenter->notifyPresenter(ViewEvent::AddDomainAccepted);
-  if (close)
-    closeAddWorkspaceDialog();
-}
-
-std::vector<MatrixWorkspace_const_sptr> FitScriptGeneratorView::getDialogWorkspaces() {
+std::vector<MatrixWorkspace_const_sptr>
+FitScriptGeneratorView::getDialogWorkspaces(MantidWidgets::IAddWorkspaceDialog *dialog) {
   std::vector<MatrixWorkspace_const_sptr> workspaces;
-  if (m_addWorkspaceDialog) {
-    workspaces = m_addWorkspaceDialog->getWorkspaces();
-    if (workspaces.empty())
-      displayWarning("Failed to add workspace: '" + m_addWorkspaceDialog->workspaceName().toStdString() +
-                     "' doesn't exist.");
+  if (dialog) {
+    auto const wsName = dialog->workspaceName();
+    auto &ads = AnalysisDataService::Instance();
+    if (ads.doesExist(wsName)) {
+      workspaces.emplace_back(ads.retrieveWS<MatrixWorkspace>(wsName));
+    } else {
+      displayWarning("Failed to add workspace: '" + wsName + "' doesn't exist.");
+    }
   }
   return workspaces;
-}
-
-std::vector<WorkspaceIndex> FitScriptGeneratorView::getDialogWorkspaceIndices() const {
-  std::vector<WorkspaceIndex> workspaceIndices;
-  if (m_addWorkspaceDialog)
-    workspaceIndices = convertToWorkspaceIndex(m_addWorkspaceDialog->workspaceIndices());
-  return workspaceIndices;
 }
 
 void FitScriptGeneratorView::openEditLocalParameterDialog(
@@ -399,9 +358,8 @@ void FitScriptGeneratorView::openEditLocalParameterDialog(
     std::vector<std::string> const &domainNames, std::vector<double> const &values, std::vector<bool> const &fixes,
     std::vector<std::string> const &ties, std::vector<std::string> const &constraints) {
   m_editLocalParameterDialog = new EditLocalParameterDialog(
-      this, QString::fromStdString(parameter), convertToQStringList(toQString, workspaceNames),
-      convertToQStringList(toQString, domainNames), convertToQList(values), convertToQList(fixes),
-      convertToQStringList(toQString, ties), convertToQStringList(toQString, constraints));
+      this, parameter, workspaceNames, domainNames, convertToQList(values), convertToQList(fixes),
+      stdVectorToQStringList(ties), stdVectorToQStringList(constraints));
 
   connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this, SLOT(onEditLocalParameterFinished(int)));
 
@@ -410,11 +368,11 @@ void FitScriptGeneratorView::openEditLocalParameterDialog(
 
 std::tuple<std::string, std::vector<double>, std::vector<bool>, std::vector<std::string>, std::vector<std::string>>
 FitScriptGeneratorView::getEditLocalParameterResults() const {
-  return {m_editLocalParameterDialog->getParameterName().toStdString(),
+  return {m_editLocalParameterDialog->getParameterName(),
           convertQListToStdVector(m_editLocalParameterDialog->getValues()),
           convertQListToStdVector(m_editLocalParameterDialog->getFixes()),
-          convertToStdVector(m_editLocalParameterDialog->getTies()),
-          convertToStdVector(m_editLocalParameterDialog->getConstraints())};
+          qStringListToStdVector(m_editLocalParameterDialog->getTies()),
+          qStringListToStdVector(m_editLocalParameterDialog->getConstraints())};
 }
 
 std::tuple<std::string, std::string, std::string, std::string, std::string, bool>
@@ -445,7 +403,8 @@ void FitScriptGeneratorView::clearFunction() { m_functionTreeView->clear(); }
 
 void FitScriptGeneratorView::setSimultaneousMode(bool simultaneousMode) {
   m_dataTable->setFunctionPrefixVisible(simultaneousMode);
-  m_functionTreeView->setMultiDomainFunctionPrefix(simultaneousMode ? m_dataTable->selectedDomainFunctionPrefix() : "");
+  m_functionTreeView->setMultiDomainFunctionPrefix(
+      simultaneousMode ? m_dataTable->selectedDomainFunctionPrefix().toStdString() : "");
 
   if (simultaneousMode)
     m_functionTreeView->showGlobals();
@@ -465,7 +424,11 @@ void FitScriptGeneratorView::setGlobalTies(std::vector<GlobalTie> const &globalT
 }
 
 void FitScriptGeneratorView::setGlobalParameters(std::vector<GlobalParameter> const &globalParameters) {
-  m_functionTreeView->setGlobalParameters(convertToQStringList(globalToQString, globalParameters));
+  std::vector<std::string> globals;
+  globals.reserve(globalParameters.size());
+  std::transform(globalParameters.cbegin(), globalParameters.cend(), std::back_inserter(globals),
+                 [](GlobalParameter const &globalParam) { return globalParam.m_parameter; });
+  m_functionTreeView->setGlobalParameters(globals);
 }
 
 void FitScriptGeneratorView::setSuccessText(std::string const &text) {
@@ -479,12 +442,6 @@ void FitScriptGeneratorView::saveTextToClipboard(std::string const &text) const 
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {
   QMessageBox::warning(this, "Warning!", QString::fromStdString(message));
-}
-
-void FitScriptGeneratorView::closeEvent(QCloseEvent *event) {
-  if (m_addWorkspaceDialog)
-    closeAddWorkspaceDialog();
-  QWidget::closeEvent(event);
 }
 
 } // namespace MantidQt::MantidWidgets

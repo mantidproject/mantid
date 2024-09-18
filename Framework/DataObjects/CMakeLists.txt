@@ -55,8 +55,6 @@ set(SRC_FILES
     src/WorkspaceSingleValue.cpp
 )
 
-set(SRC_UNITY_IGNORE_FILES src/Workspace2D.cpp src/WorkspaceSingleValue.cpp src/EventWorkspace.cpp)
-
 set(INC_FILES
     inc/MantidDataObjects/AffineMatrixParameter.h
     inc/MantidDataObjects/AffineMatrixParameterParser.h
@@ -205,11 +203,6 @@ set(TEST_FILES
     WorkspaceValidatorsTest.h
     MortonIndex/BitInterleavingTest.h
 )
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(DataObjects SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
 
 if(COVERAGE)
   foreach(loop_var ${SRC_FILES} ${INC_FILES})

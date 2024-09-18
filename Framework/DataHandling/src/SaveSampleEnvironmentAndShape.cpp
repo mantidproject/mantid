@@ -74,7 +74,7 @@ void SaveSampleEnvironmentAndShape::exec() {
   size_t numVertices = 0;
 
   // Get the shape of the sample
-  auto &sampleShape = toMeshObject(inputWS->sample().getShape());
+  const auto &sampleShape = toMeshObject(inputWS->sample().getShape());
   if (!sampleShape.hasValidShape()) {
     throw std::invalid_argument("Sample Shape is not complete");
   }
@@ -129,7 +129,8 @@ void SaveSampleEnvironmentAndShape::exec() {
   } else {
 #ifdef ENABLE_LIB3MF
     Mantid3MFFileIO Mesh3MF;
-    Mesh3MF.writeMeshObjects(environmentPieces, MeshObject_const_sptr(&sampleShape), scaleType);
+    auto samplePtr = MeshObject_const_sptr(&sampleShape);
+    Mesh3MF.writeMeshObjects(environmentPieces, samplePtr, scaleType);
     Mesh3MF.saveFile(filename);
 #else
     throw std::runtime_error("3MF format not supported on this platform");

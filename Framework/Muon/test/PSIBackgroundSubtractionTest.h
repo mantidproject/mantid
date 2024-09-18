@@ -17,7 +17,7 @@ using namespace Mantid::Muon;
 
 namespace {
 
-constexpr char *WORKSPACE_NAME = "DummyWS";
+constexpr const char *WORKSPACE_NAME = "DummyWS";
 
 MatrixWorkspace_sptr createCountsTestWorkspace(const size_t numberOfHistograms, const size_t numberOfBins,
                                                bool addLogs = true) {

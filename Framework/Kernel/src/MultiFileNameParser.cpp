@@ -63,8 +63,8 @@ bool matchesFully(const std::string &stringToMatch, const std::string &regexStri
 std::string getMatchingString(const std::string &regexString, const std::string &toParse, const bool caseless = false);
 std::string pad(const unsigned int run, const std::string &instString);
 
-std::set<std::pair<unsigned int, unsigned int>> &
-mergeAdjacentRanges(std::set<std::pair<unsigned int, unsigned int>> &ranges,
+std::set<std::pair<unsigned int, unsigned int>>
+mergeAdjacentRanges(std::set<std::pair<unsigned int, unsigned int>> ranges,
                     const std::pair<unsigned int, unsigned int> &range);
 
 // Helper functor.
@@ -74,7 +74,7 @@ struct RangeContainsRun {
 };
 
 std::string toString(const RunRangeList &runRangeList);
-std::string &accumulateString(std::string &output, std::pair<unsigned int, unsigned int> runRange);
+std::string accumulateString(std::string output, std::pair<unsigned int, unsigned int> runRange);
 } // namespace
 
 /////////////////////////////////////////////////////////////////////////////
@@ -535,7 +535,7 @@ std::vector<std::vector<unsigned int>> generateRange(unsigned int const from, un
 
   size_t limit;
   auto limitStr = ConfigService::Instance().getValue<std::string>("loading.multifilelimit");
-  if (!limitStr.is_initialized() || !Strings::convert(limitStr.get(), limit)) {
+  if (!limitStr.has_value() || !Strings::convert(limitStr.value(), limit)) {
     limit = ConfigService::Instance().getFacility().multiFileLimit();
   }
 
@@ -711,8 +711,8 @@ bool RangeContainsRun::operator()(const unsigned int run, const std::pair<unsign
  *
  * @returns the original ranges, with the extra range added/merged.
  */
-std::set<std::pair<unsigned int, unsigned int>> &
-mergeAdjacentRanges(std::set<std::pair<unsigned int, unsigned int>> &ranges,
+std::set<std::pair<unsigned int, unsigned int>>
+mergeAdjacentRanges(std::set<std::pair<unsigned int, unsigned int>> ranges,
                     const std::pair<unsigned int, unsigned int> &range) {
   // If ranges is empty, just insert the new range.
   if (ranges.empty()) {
@@ -747,7 +747,7 @@ mergeAdjacentRanges(std::set<std::pair<unsigned int, unsigned int>> &ranges,
  *
  * @returns the updated output
  */
-std::string &accumulateString(std::string &output, std::pair<unsigned int, unsigned int> runRange) {
+std::string accumulateString(std::string output, std::pair<unsigned int, unsigned int> runRange) {
   if (!output.empty())
     output += "_and_";
 

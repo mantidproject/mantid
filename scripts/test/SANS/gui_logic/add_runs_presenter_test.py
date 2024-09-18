@@ -37,7 +37,7 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
     def _make_mock_view(self):
         mock_view = mock.create_autospec(AddRunsPage, spec_set=True)
         mock_view.sum = FakeSignal()
-        mock_view.outFileChanged = FakeSignal()
+        mock_view.customOutFileChanged = FakeSignal()
         mock_view.saveDirectoryClicked = FakeSignal()
         return mock_view
 
@@ -109,8 +109,9 @@ class SummationSettingsViewEnablednessTest(AddRunsPagePresenterTestCase):
         presenter._get_filename_manager = mock.Mock(return_value=MockedOutAddRunsFilenameManager())
         return presenter
 
+    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.AddRunsPagePresenter._handle_custom_outfile_check_changed")
     @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
-    def test_enables_summation_settings_when_event_data(self, patched_init_run_selector):
+    def test_enables_summation_settings_when_event_data(self, _patched_init_run_selector, _):
         histogram_run = self._make_fake_histogram_run()
         runs = mock.MagicMock()
         runs.has_any_runs.return_value = True
@@ -120,8 +121,9 @@ class SummationSettingsViewEnablednessTest(AddRunsPagePresenterTestCase):
         presenter._handle_selection_changed(run_selection=runs)
         self.view.enable_summation_settings.assert_called_once()
 
+    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.AddRunsPagePresenter._handle_custom_outfile_check_changed")
     @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
-    def test_enables_summation_settings_when_event_and_histogram_data(self, _):
+    def test_enables_summation_settings_when_event_and_histogram_data(self, _, _handle_check):
         histogram_run = self._make_fake_histogram_run()
         event_run = self._make_fake_event_run()
 
@@ -139,8 +141,9 @@ class SummationConfigurationTest(AddRunsPagePresenterTestCase):
         self.view = self._make_mock_view()
         self.parent_view = self._make_mock_parent_view()
 
+    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.AddRunsPagePresenter._handle_custom_outfile_check_changed")
     @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectorPresenter", autospec=True)
-    def test_passes_correct_config_when_summation_requested(self, patched_run_selector):
+    def test_passes_correct_config_when_summation_requested(self, patched_run_selector, _):
         # Ensure we know the type that was returned by the constructor
         run_selector_mock = mock.Mock()
         patched_run_selector.return_value = run_selector_mock
@@ -161,8 +164,9 @@ class SummationConfigurationTest(AddRunsPagePresenterTestCase):
         self.view.sum.emit()
         run_summation.assert_called_with(mock.ANY, mock.ANY, "LOQ00003-add")
 
+    @mock.patch("sans.gui_logic.presenter.add_runs_presenter.AddRunsPagePresenter._handle_custom_outfile_check_changed")
     @mock.patch("sans.gui_logic.presenter.add_runs_presenter.RunSelectionModel", autospec=True)
-    def test_shows_error_when_empty_default_directory(self, _):
+    def test_shows_error_when_empty_default_directory(self, _, _handle_check):
         view = self._make_mock_view()
         presenter = AddRunsPagePresenter(mock.MagicMock(), view, mock.Mock())
         presenter.save_directory = ""
@@ -224,7 +228,7 @@ class BaseFileNameTest(AddRunsPagePresenterTestCase):
 
         self.assertEqual("LOQ00005-add", returned)
 
-    def test_correct_base_name_after_set_by_user(self):
+    def test_correct_base_name_after_set_by_user_and_custom_selected(self):
         user_out_file_name = "Output"
         run_summation = mock.MagicMock()
         presenter = self._make_presenter(run_summation)
@@ -235,13 +239,13 @@ class BaseFileNameTest(AddRunsPagePresenterTestCase):
         run_summation.__iter__.return_value = run_selection
 
         self.view.out_file_name.return_value = user_out_file_name
-        self.view.outFileChanged.emit()
+        self.view.customOutFileChanged.emit(True)
 
         returned = presenter._sum_base_file_name(run_selection=run_selection)
 
         self.assertEqual(returned, user_out_file_name)
 
-    def test_base_name_not_reset_after_set_by_user(self):
+    def test_base_name_not_reset_when_custom_selected(self):
         run_summation = mock.MagicMock()
         presenter = self._make_presenter(run_summation)
         # Runs 4 / 5 / 6
@@ -249,7 +253,7 @@ class BaseFileNameTest(AddRunsPagePresenterTestCase):
 
         user_out_file_name = "Output"
         self.view.out_file_name.return_value = user_out_file_name
-        self.view.outFileChanged.emit()
+        self.view.customOutFileChanged.emit(True)
 
         run_summation.__iter__.return_value = run_selection
         returned = presenter._sum_base_file_name(run_selection=run_selection)
@@ -272,6 +276,32 @@ class BaseFileNameTest(AddRunsPagePresenterTestCase):
         presenter._refresh_view(run_selection=run_summation)
 
         self.view.set_out_file_name.assert_called_with("LOQ00006-add")
+
+    def test_custom_filename_box_disabled_and_repopulated_when_custom_filename_unchecked(self):
+        run_summation = mock.MagicMock()
+        presenter = self._make_presenter(run_summation)
+
+        run_summation.has_any_runs.return_value = True
+
+        # Runs 4 / 5 / 6
+        run_selection = create_mocked_runs(start=4, len=3)
+
+        run_summation.__iter__.return_value = run_selection
+        presenter._run_selector_presenter.run_selection = mock.MagicMock()
+        presenter._run_selector_presenter.run_selection.return_value = run_summation
+        presenter._handle_custom_outfile_check_changed(False)
+
+        self.view.disable_output_file_name_edit.assert_called()
+        self.assertEqual(self.view.disable_output_file_name_edit.call_count, 2)
+        self.view.set_out_file_name.assert_called_with("LOQ00006-add")
+
+    def test_custom_filename_box_enabled_when_custom_filename_checked(self):
+        run_summation = mock.MagicMock()
+        _ = self._make_presenter(run_summation)
+        self.view.customOutFileChanged.emit(True)
+
+        self.view.enable_output_file_name_edit.assert_called_once()
+        self.view.clear_output_file_name_edit.assert_called_once()
 
 
 class SumButtonTest(AddRunsPagePresenterTestCase):

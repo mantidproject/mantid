@@ -1,1 +1,0 @@
-- Fix some minor usability bugs and improve the layout of the TOF Converter window. It can now take an input value from any single valued workspace. It no longer requires a scattering angle to convert between momentum transfer and d-spacing.

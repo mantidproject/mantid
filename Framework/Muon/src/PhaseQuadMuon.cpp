@@ -118,17 +118,19 @@ std::map<std::string, std::string> PhaseQuadMuon::validateInputs() {
   if (tabWS->columnCount() != 3) {
     result["PhaseTable"] = "PhaseTable must have three columns";
   }
-  auto names = tabWS->getColumnNames();
-  for (auto &name : names) {
-    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  auto columnNames = tabWS->getColumnNames();
+  for (auto &columnName : columnNames) {
+    std::transform(columnName.begin(), columnName.end(), columnName.begin(), ::tolower);
   }
   int phaseCount = 0;
   int asymmetryCount = 0;
-  for (const std::string &name : names) {
-    phaseCount += static_cast<int>(std::count_if(phaseNames.cbegin(), phaseNames.cend(),
-                                                 [&name](const auto &goodName) { return goodName == name; }));
-    asymmetryCount += static_cast<int>(std::count_if(asymmNames.cbegin(), asymmNames.cend(),
-                                                     [&name](const auto &goodName) { return goodName == name; }));
+  for (const std::string &columnName : columnNames) {
+    phaseCount +=
+        static_cast<int>(std::count_if(phaseNames.cbegin(), phaseNames.cend(),
+                                       [&columnName](const auto &goodName) { return goodName == columnName; }));
+    asymmetryCount +=
+        static_cast<int>(std::count_if(asymmNames.cbegin(), asymmNames.cend(),
+                                       [&columnName](const auto &goodName) { return goodName == columnName; }));
   }
   if (phaseCount == 0) {
     result["PhaseTable"] = "PhaseTable needs phases column";
@@ -215,12 +217,12 @@ API::MatrixWorkspace_sptr PhaseQuadMuon::squash(const API::MatrixWorkspace_sptr 
     throw std::invalid_argument("Invalid normalization constants");
   }
 
-  auto names = phase->getColumnNames();
-  for (auto &name : names) {
-    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+  auto columnNames = phase->getColumnNames();
+  for (auto &columnName : columnNames) {
+    std::transform(columnName.begin(), columnName.end(), columnName.begin(), ::tolower);
   }
-  auto phaseIndex = findName(phaseNames, names);
-  auto asymmetryIndex = findName(asymmNames, names);
+  auto phaseIndex = findName(phaseNames, columnNames);
+  auto asymmetryIndex = findName(asymmNames, columnNames);
 
   // Get the maximum asymmetry
   double maxAsym = 0.;

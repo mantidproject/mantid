@@ -76,7 +76,12 @@ class SpaceGroupBuilder(object):
             raise RuntimeError("No space group symbol in CIF.")
 
         cleanSpaceGroupSymbol = self._getCleanSpaceGroupSymbol(rawSpaceGroupSymbol[0])
-
+        if not SpaceGroupFactory.isSubscribedSymbol(cleanSpaceGroupSymbol):
+            # try adding rotoinversion (i.e. prefix '-' to first digit,  sometimes omitted but is implicit)
+            match = re.search(r"\d", cleanSpaceGroupSymbol)
+            if match:
+                idigit = match.start()
+                cleanSpaceGroupSymbol = cleanSpaceGroupSymbol[:idigit] + "-" + cleanSpaceGroupSymbol[idigit:]
         # If the symbol is not registered, throw as well.
         return SpaceGroupFactory.createSpaceGroup(cleanSpaceGroupSymbol).getHMSymbol()
 
@@ -487,16 +492,7 @@ class LoadCIF(PythonAlgorithm):
         raise RuntimeError(f"Could not find any UB Matrix keys. Missing one of the following: " f"{UBMatrixBuilder.ub_matrix_keys}")
 
     def _getFileUrl(self):
-        # ReadCif requires a URL, windows path specs seem to confuse urllib,
-        # so the pathname is converted to a URL before passing it to ReadCif.
-        # pylint: disable=no-name-in-module
-        try:
-            from urllib import pathname2url
-        except ImportError:
-            from urllib.request import pathname2url
-
-        cifFileName = self.getProperty("InputFile").value
-        return pathname2url(cifFileName)
+        return self.getProperty("InputFile").value
 
     def _setCrystalStructureFromCifFile(self, workspace, cif_data):
         crystalStructure = self._getCrystalStructureFromCifFile(cif_data)

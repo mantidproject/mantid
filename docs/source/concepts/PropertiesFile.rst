@@ -54,6 +54,8 @@ General properties
 |                                  | will use one thread per logical core available.  |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
 
+.. _Facility Properties:
+
 Facility and instrument properties
 **********************************
 
@@ -75,6 +77,8 @@ Facility and instrument properties
 |                              | ``Crystallography`` the convention is kf-ki.       |                     |
 +------------------------------+----------------------------------------------------+---------------------+
 
+.. _Directory Properties:
+
 Directory Properties
 ********************
 
@@ -85,6 +89,8 @@ Directory Properties
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
 | ``datasearch.directories``           | A semi-colon(``;``) separated list of directories | ``../data;\\\\isis\\isis$\\ndxgem`` |
 |                                      | to use to search for data.                        |                                     |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
+| ``datacachesearch.directory``        | The directory where data cache is located         | ``/data/instrument``                |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
 | ``datasearch.searcharchive``         | ``on`` (only the default facility), ``off``       | ``on`` or ``hfir,sns``              |
 |                                      | (none), ``all`` (all archives), or a list of      |                                     |
@@ -172,26 +178,34 @@ The logging priority levels for the file logging and console logging can also be
   # Set the log to information and do not log that it was changed
   ConfigService.setLogLevel("information", True)
 
+More details on logging can be found in the :ref:`developer docs <mantid-dev:Logging>` .
 
 
 Mantid Graphical User Interface Properties
 ******************************************
 
-+--------------------------------------------+---------------------------------------------------+-----------------+
-|Property                                    |Description                                        |Example value    |
-+============================================+===================================================+=================+
-| ``Notifications.Enabled``                  |Should Mantid use System Notifications for         | ``On``, ``Off`` |
-|                                            |important messages?                                |                 |
-+--------------------------------------------+---------------------------------------------------+-----------------+
-| ``cluster.submission``                     |Enable cluster submission elements in GUIs         | ``On``, ``Off`` |
-+--------------------------------------------+---------------------------------------------------+-----------------+
-| ``MantidOptions.InstrumentView.UseOpenGL`` |Controls the use of OpenGL in rendering the        | ``On``, ``Off`` |
-|                                            |"unwrapped" (flat) instrument views.               |                 |
-+--------------------------------------------+---------------------------------------------------+-----------------+
-| ``MantidOptions.InvisibleWorkspaces``      |Do not show 'invisible' workspaces                 | ``0``, ``1``    |
-+--------------------------------------------+---------------------------------------------------+-----------------+
-| ``PeakColumn.hklPrec``                     |Precision of hkl values shown in tables            | ``2``           |
-+--------------------------------------------+---------------------------------------------------+-----------------+
++----------------------------------------------------+----------------------------------------------------+-----------------+
+|Property                                            |Description                                         |Example value    |
++====================================================+====================================================+=================+
+| ``Notifications.Enabled``                          |Should Mantid use System Notifications for          | ``On``, ``Off`` |
+|                                                    |important messages?                                 |                 |
++----------------------------------------------------+----------------------------------------------------+-----------------+
+| ``cluster.submission``                             |Enable cluster submission elements in GUIs          | ``On``, ``Off`` |
++----------------------------------------------------+----------------------------------------------------+-----------------+
+| ``MantidOptions.InstrumentView.UseOpenGL``         |Controls the use of OpenGL in rendering the         | ``On``, ``Off`` |
+|                                                    |"unwrapped" (flat) instrument views.                |                 |
++----------------------------------------------------+----------------------------------------------------+-----------------+
+| ``MantidOptions.InstrumentView.MesaBugWorkaround`` |Will reduce the size of the OpenGL display lists    | ``On``, ``Off`` |
+|                                                    |used when drawing the Instrument View. By doing     |                 |
+|                                                    |this we reduce the chance that we will hit a memory |                 |
+|                                                    |allocation bug in the Mesa graphics library. This   |                 |
+|                                                    |is only relevant if you using both Linux and a      |                 |
+|                                                    |broken version of Mesa.                             |                 |
++----------------------------------------------------+----------------------------------------------------+-----------------+
+| ``MantidOptions.InvisibleWorkspaces``              |Do not show 'invisible' workspaces                  | ``0``, ``1``    |
++----------------------------------------------------+----------------------------------------------------+-----------------+
+| ``PeakColumn.hklPrec``                             |Precision of hkl values shown in tables             | ``2``           |
++----------------------------------------------------+----------------------------------------------------+-----------------+
 
 
 Network Properties
@@ -294,6 +308,14 @@ Plotting Settings
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.yAxesScale``             |The default y scale on 1d plots                                   |``Linear``, ``Log``  |
 +---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.x_min``                  |The default minimum x range                                       |``10``               |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.x_max``                  |The default maximum x range                                       |``1000``             |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.y_min``                  |The default minimum y range                                       |``10``               |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.y_max``                  |The default maximum y range                                       |``1000``             |
++---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.axesLineWidth``          |The default width of the lines that make the axes                 |``1``                |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.enableGrid``             |The default y scale on 1d plots                                   |``Linear``, ``Log``  |
@@ -369,5 +391,14 @@ To get access to, e.g. data saving path property from a C++ program one has to i
 .. testcode:: properties
 
   path = ConfigService.getString("defaultsave.directory")
+
+
+Modifying User Properties at Run Time
+**************************************
+
+:ref:`amend_config <Amend Config>` is a context manager that allows you to temporarily modify configuration settings
+related to a facility, instrument, data directory, or any additional keyword arguments. It ensures that the changes are
+only applied temporarily within the context and then restored to their original state when the context exits.
+
 
 .. categories:: Concepts

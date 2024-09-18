@@ -11,10 +11,9 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
-#include <Poco/File.h>
-#include <Poco/Path.h>
-
+#include <algorithm>
 #include <cstring>
+#include <filesystem>
 #include <string>
 
 namespace Mantid::Kernel {
@@ -114,7 +113,7 @@ NexusDescriptor::NexusDescriptor(const std::string &filename, const bool init)
   if (filename.empty()) {
     throw std::invalid_argument("NexusDescriptor() - Empty filename '" + filename + "'");
   }
-  if (!Poco::File(filename).exists()) {
+  if (!std::filesystem::exists(filename)) {
     throw std::invalid_argument("NexusDescriptor() - File '" + filename + "' does not exist");
   }
 
@@ -169,10 +168,10 @@ bool NexusDescriptor::pathOfTypeExists(const std::string &path, const std::strin
  * e.g. /raw_data_1, /entry/bank1
  */
 std::string NexusDescriptor::pathOfType(const std::string &type) const {
-  auto iend = m_pathsToTypes.end();
-  for (auto it = m_pathsToTypes.begin(); it != iend; ++it) {
-    if (type == it->second)
-      return it->first;
+  const auto it = std::find_if(m_pathsToTypes.cbegin(), m_pathsToTypes.cend(),
+                               [&type](const auto &typeMap) { return type == typeMap.second; });
+  if (it != m_pathsToTypes.cend()) {
+    return it->first;
   }
   return "";
 }
@@ -197,12 +196,8 @@ std::vector<std::string> NexusDescriptor::allPathsOfType(const std::string &type
  * @return True if the type exists in the file, false otherwise
  */
 bool NexusDescriptor::classTypeExists(const std::string &classType) const {
-  auto iend = m_pathsToTypes.end();
-  for (auto it = m_pathsToTypes.begin(); it != iend; ++it) {
-    if (classType == it->second)
-      return true;
-  }
-  return false;
+  return std::any_of(m_pathsToTypes.cbegin(), m_pathsToTypes.cend(),
+                     [&classType](const auto typeMap) { return classType == typeMap.second; });
 }
 
 //---------------------------------------------------------------------------------------------------------------------------
@@ -214,7 +209,7 @@ bool NexusDescriptor::classTypeExists(const std::string &classType) const {
  */
 void NexusDescriptor::initialize(const std::string &filename) {
   m_filename = filename;
-  m_extension = "." + Poco::Path(filename).getExtension();
+  m_extension = std::filesystem::path(filename).extension().string();
 
   m_file = std::make_unique<::NeXus::File>(this->filename());
 
@@ -257,8 +252,10 @@ void NexusDescriptor::walkFile(::NeXus::File &file, const std::string &rootPath,
     } else {
       if (level == 0)
         m_firstEntryNameType = (*it); // copy first entry name & type
-      file.openGroup(entryName, entryClass);
-      walkFile(file, entryPath, entryClass, pmap, level + 1);
+      if (!entryClass.empty()) {      // handles buggy files
+        file.openGroup(entryName, entryClass);
+        walkFile(file, entryPath, entryClass, pmap, level + 1);
+      }
     }
   }
   file.closeGroup();

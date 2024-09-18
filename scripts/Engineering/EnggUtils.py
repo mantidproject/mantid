@@ -336,9 +336,10 @@ def run_calibration(ceria_ws, calibration, full_instrument_cal_ws):
     foc_name = focused_ceria.name()  # PDCal invalidates ptr during rebin so keep track of ws name
     cal_table_name = "engggui_calibration_" + calibration.get_group_suffix()
     diag_ws_name = "diag_" + calibration.get_group_suffix()
-    cal_table, diag_ws, mask = mantid.PDCalibration(
+    cal_table, mask, diag_ws = mantid.PDCalibration(
         InputWorkspace=foc_name,
         OutputCalibrationTable=cal_table_name,
+        MaskWorkspace=cal_table_name + "_mask",
         DiagnosticWorkspaces=diag_ws_name,
         PeakPositions=default_ceria_expected_peaks(final=True),
         TofBinning=[12000, -0.0003, 52000],

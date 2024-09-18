@@ -109,10 +109,11 @@ void ElasticWindow::exec() {
 
   if (axisIsSpectrumNumber) {
     // Use ConvertSpectrumAxis v2 for correct result
-    const int version = 2;
+    const int convertSpectrumAxisVersion = 2;
 
     // ... ConvertSpectrumAxis (Q) ...
-    auto csaQ = createChildAlgorithm("ConvertSpectrumAxis", startProgress, endProgress, childAlgLogging, version);
+    auto csaQ = createChildAlgorithm("ConvertSpectrumAxis", startProgress, endProgress, childAlgLogging,
+                                     convertSpectrumAxisVersion);
     csaQ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
     csaQ->setPropertyValue("Target", "ElasticQ");
     csaQ->setPropertyValue("EMode", "Indirect");
@@ -123,7 +124,8 @@ void ElasticWindow::exec() {
     endProgress += stepProgress;
 
     // ... ConvertSpectrumAxis (Q2) ...
-    auto csaQ2 = createChildAlgorithm("ConvertSpectrumAxis", startProgress, endProgress, childAlgLogging, version);
+    auto csaQ2 = createChildAlgorithm("ConvertSpectrumAxis", startProgress, endProgress, childAlgLogging,
+                                      convertSpectrumAxisVersion);
     csaQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
     csaQ2->setPropertyValue("Target", "ElasticQSquared");
     csaQ2->setPropertyValue("EMode", "Indirect");

@@ -18,10 +18,13 @@ class LiveValue:
     approach altogether in the long run so this is sufficient for now.
     """
 
-    def __init__(self, value, unit, alternative_name):
+    LOG_TYPE_NUM_SERIES = "Number Series"
+
+    def __init__(self, value, unit, alternative_name, log_type):
         self.value = value
         self.unit = unit
         self.alternative_name = alternative_name
+        self.log_type = log_type
 
 
 class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
@@ -104,6 +107,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
             "CalibrationFile",
             "OutputWorkspace",
             "PolarizationEfficiencies",
+            "ROIDetectorIDs",
         ]
         self.copyProperties("ReflectometryISISLoadAndProcess", self._child_properties)
 
@@ -116,11 +120,13 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         """Set up the workspace ready for the reduction"""
         in_ws_name = self.getPropertyValue("InputWorkspace")
         self._temp_ws_name = "__" + self.getPropertyValue("OutputWorkspace")
+        self._instrument = self.getProperty("Instrument").value
         # Set up a clone for the output because we need to do some in-place manipulations
         CloneWorkspace(InputWorkspace=in_ws_name, OutputWorkspace=self._temp_ws_name)
-        self._setup_instrument()
         liveValues = self._get_live_values_from_instrument()
         self._setup_sample_logs(liveValues)
+        # Set up the instrument after adding the sample logs in case the IDF uses any log values
+        self._setup_instrument()
         self._setup_slits(liveValues)
 
     def _setup_reduction_algorithm(self):
@@ -143,15 +149,23 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
 
     def _setup_instrument(self):
         """Sets the instrument name and loads the instrument on the workspace"""
-        self._instrument = self.getProperty("Instrument").value
         LoadInstrument(Workspace=self._temp_ws_name, RewriteSpectraMap=True, InstrumentName=self._instrument)
 
     def _setup_sample_logs(self, liveValues):
         """Set up the sample logs based on live values from the instrument"""
-        logNames = [key for key in liveValues]
-        logValues = [liveValues[key].value for key in liveValues]
-        logUnits = [liveValues[key].unit for key in liveValues]
-        AddSampleLogMultiple(Workspace=self._temp_ws_name, LogNames=logNames, LogValues=logValues, LogUnits=logUnits)
+        log_names = []
+        log_values = []
+        log_units = []
+        log_types = []
+        for key, live_values in liveValues.items():
+            log_names.append(key)
+            log_values.append(live_values.value)
+            log_units.append(live_values.unit)
+            log_types.append(live_values.log_type)
+
+        AddSampleLogMultiple(
+            Workspace=self._temp_ws_name, LogNames=log_names, LogValues=log_values, LogUnits=log_units, LogTypes=log_types, ParseType=False
+        )
 
     def _setup_slits(self, liveValues):
         """Set up instrument parameters for the slits"""
@@ -187,9 +201,9 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
     def _live_value_list(self):
         """Get the list of required live value names and their unit type"""
         liveValues = {
-            self._theta_name(): LiveValue(None, "deg", self._alternative_theta_name()),
-            self._s1vg_name(): LiveValue(None, "m", self._alternative_s1vg_name()),
-            self._s2vg_name(): LiveValue(None, "m", self._alternative_s2vg_name()),
+            self._theta_name(): LiveValue(None, "deg", self._alternative_theta_name(), LiveValue.LOG_TYPE_NUM_SERIES),
+            self._s1vg_name(): LiveValue(None, "m", self._alternative_s1vg_name(), LiveValue.LOG_TYPE_NUM_SERIES),
+            self._s2vg_name(): LiveValue(None, "m", self._alternative_s2vg_name(), LiveValue.LOG_TYPE_NUM_SERIES),
         }
         return liveValues
 
@@ -200,16 +214,16 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         return "Theta"
 
     def _s1vg_name(self):
-        return "s1vgap" if self._instrument == "OFFSPEC" else "S1VG"
+        return "S1VG"
 
     def _alternative_s1vg_name(self):
-        return "S1VG" if self._instrument == "OFFSPEC" else "s1vg"
+        return "s1vg"
 
     def _s2vg_name(self):
-        return "s2vgap" if self._instrument == "OFFSPEC" else "S2VG"
+        return "S2VG"
 
     def _alternative_s2vg_name(self):
-        return "S1VG" if self._instrument == "OFFSPEC" else "s2vg"
+        return "s2vg"
 
     def _get_double_or_none(self, propertyName):
         value = self.getProperty(propertyName)

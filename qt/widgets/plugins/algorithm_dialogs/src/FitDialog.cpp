@@ -313,7 +313,7 @@ void FitDialog::initLayout() {
  */
 void FitDialog::saveInput() {
   storePropertyValue("DomainType", getDomainTypeString());
-  QString funStr = m_form.function->getFunctionString();
+  QString funStr = QString::fromStdString(m_form.function->getFunctionString());
   if (!funStr.isEmpty()) {
     storePropertyValue("Function", funStr);
   }
@@ -327,10 +327,10 @@ void FitDialog::parseInput() {
   // int domainType = getDomainType();
   storePropertyValue("DomainType", getDomainTypeString());
   getAlgorithm()->setPropertyValue("DomainType", getDomainTypeString().toStdString());
-  QString funStr = m_form.function->getFunctionString();
-  if (!funStr.isEmpty()) {
-    storePropertyValue("Function", funStr);
-    getAlgorithm()->setPropertyValue("Function", funStr.toStdString());
+  auto funStr = m_form.function->getFunctionString();
+  if (!funStr.empty()) {
+    storePropertyValue("Function", QString::fromStdString(funStr));
+    getAlgorithm()->setPropertyValue("Function", funStr);
   } else {
     // Cannot set any other properties until Function is set
     return;
@@ -350,7 +350,7 @@ void FitDialog::parseInput() {
 void FitDialog::tieStaticWidgets(const bool readHistory) {
   QString funValue = getPreviousValue("Function");
   if (!funValue.isEmpty()) {
-    m_form.function->setFunction(funValue);
+    m_form.function->setFunction(funValue.toStdString());
   }
 
   tie(m_form.chbCreateOutput, "CreateOutput", m_form.staticLayout, readHistory);

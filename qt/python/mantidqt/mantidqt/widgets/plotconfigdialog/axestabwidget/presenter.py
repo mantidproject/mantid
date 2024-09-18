@@ -117,7 +117,7 @@ class AxesTabWidgetPresenter:
 
         if isinstance(ax, Axes3D) and "zlabel" in self.current_view_props:
             ax.set_zlabel(self.current_view_props["zlabel"])
-            ax.set_zscale(self.current_view_props["zscale"])
+            ax.set_zscale(self.current_view_props["zscale"].lower())
             if self.current_view_props["zautoscale"]:
                 ax.autoscale(True, axis="z")
             else:

@@ -68,7 +68,7 @@ public:
   static bool isIncludeMonitors(const std::string &monitorOption);
 
   static void ProcessLoadMonitorOptions(bool &bincludeMonitors, bool &bseparateMonitors, bool &bexcludeMonitors,
-                                        API::Algorithm *const pAlgo);
+                                        const API::Algorithm *pAlgo);
   /// creates monitor workspace
   static void createMonitorWorkspace(DataObjects::Workspace2D_sptr &monws_sptr,
                                      const DataObjects::Workspace2D_sptr &normalws_sptr,

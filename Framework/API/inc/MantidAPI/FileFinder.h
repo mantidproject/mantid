@@ -36,22 +36,25 @@ number
 class MANTID_API_DLL FileFinderImpl {
 public:
   std::string getFullPath(const std::string &filename, const bool ignoreDirs = false) const;
-  std::string getPath(const std::vector<IArchiveSearch_sptr> &archs, const std::set<std::string> &filenames,
-                      const std::vector<std::string> &exts) const;
+  std::string extractAllowedSuffix(std::string &userString) const;
+  const API::Result<std::string> getPath(const std::vector<IArchiveSearch_sptr> &archs,
+                                         const std::set<std::string> &filenames,
+                                         const std::vector<std::string> &exts) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   std::string makeFileName(const std::string &hint, const Kernel::InstrumentInfo &instrument) const;
   void setCaseSensitive(const bool cs);
   bool getCaseSensitive() const;
-  std::vector<IArchiveSearch_sptr> getArchiveSearch(const Kernel::FacilityInfo &facility) const;
-  std::string findRun(const std::string &hintstr, const std::vector<std::string> &exts = {},
-                      const bool useExtsOnly = false) const;
+  static std::vector<IArchiveSearch_sptr> getArchiveSearch(const Kernel::FacilityInfo &facility);
+  const API::Result<std::string> findRun(const std::string &hintstr, const std::vector<std::string> &exts = {},
+                                         const bool useExtsOnly = false) const;
   std::vector<std::string> findRuns(const std::string &hintstr, const std::vector<std::string> &exts = {},
                                     const bool useExtsOnly = false) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
-  const Kernel::InstrumentInfo getInstrument(const std::string &hint) const;
+  const Kernel::InstrumentInfo getInstrument(const std::string &hint, const bool returnDefaultIfNotFound = true) const;
   /// DO NOT USE! MADE PUBLIC FOR TESTING ONLY.
   std::string getExtension(const std::string &filename, const std::vector<std::string> &exts) const;
   void getUniqueExtensions(const std::vector<std::string> &extensionsToAdd, std::vector<std::string> &uniqueExts) const;
+  std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hint) const;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;
@@ -66,10 +69,12 @@ private:
   FileFinderImpl &operator=(const FileFinderImpl &);
   /// A method that returns error messages if the provided runs are invalid
   std::string validateRuns(const std::string &searchText) const;
-  std::string extractAllowedSuffix(std::string &userString) const;
-  std::pair<std::string, std::string> toInstrumentAndNumber(const std::string &hint) const;
-  std::string getArchivePath(const std::vector<IArchiveSearch_sptr> &archs, const std::set<std::string> &filenames,
-                             const std::vector<std::string> &exts) const;
+  const API::Result<std::string> getISISInstrumentDataCachePath(const std::string &cachePathToSearch,
+                                                                const std::set<std::string> &filenames,
+                                                                const std::vector<std::string> &exts) const;
+  const API::Result<std::string> getArchivePath(const std::vector<IArchiveSearch_sptr> &archs,
+                                                const std::set<std::string> &filenames,
+                                                const std::vector<std::string> &exts) const;
   std::string toUpper(const std::string &src) const;
   /// glob option - set to case sensitive or insensitive
   int m_globOption;

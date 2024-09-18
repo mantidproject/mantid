@@ -34,7 +34,7 @@ class Property;
 class MANTID_KERNEL_DLL PropertyHistory {
 public:
   PropertyHistory(std::string name, std::string value, std::string type, const bool isdefault,
-                  const unsigned int direction = 99);
+                  const unsigned int direction = 99, const bool pythonVariable = false);
 
   /// construct a property history from a property object
   PropertyHistory(Property const *const prop);
@@ -57,6 +57,7 @@ public:
   /// get whether algorithm parameter was left as default EMPTY_INT,LONG,DBL
   /// const
   bool isEmptyDefault() const;
+  bool pythonVariable() const { return m_pythonVariable; };
 
   /// this is required for boost.python
   bool operator==(const PropertyHistory &other) const {
@@ -75,6 +76,8 @@ private:
   bool m_isDefault;
   /// direction of parameter
   unsigned int m_direction;
+  /// Whether the property should be treated as a python variable instead of string when building a script from history
+  bool m_pythonVariable;
 };
 
 // typedefs for property history pointers

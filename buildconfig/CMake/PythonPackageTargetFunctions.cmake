@@ -53,8 +53,9 @@ function(add_python_package pkg_name)
   set(_version_str ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK})
   add_custom_command(
     OUTPUT ${_outputs}
-    COMMAND ${CMAKE_COMMAND} -E env PYTHONPATH=${_egg_link_dir} MANTID_VERSION_STR=${_version_str} ${Python_EXECUTABLE}
-            ${_setup_py} develop --install-dir ${_egg_link_dir} --script-dir ${_egg_link_dir}
+    COMMAND
+      ${CMAKE_COMMAND} -E env PYTHONPATH=${_egg_link_dir} PYTHONUSERBASE=${_egg_link_dir} PATH=${_egg_link_dir}:$PATH
+      MANTID_VERSION_STR=${_version_str} ${Python_EXECUTABLE} -m pip install --editable .
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     DEPENDS ${_setup_py}
   )

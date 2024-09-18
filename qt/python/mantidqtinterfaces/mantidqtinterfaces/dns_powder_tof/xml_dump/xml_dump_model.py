@@ -94,7 +94,6 @@ class DNSXMLDumpModel(DNSObsModel):
             return "None"
         if isinstance(value, str):
             return "str"
-        print(value)
         return "str"
 
     @staticmethod

@@ -117,7 +117,7 @@ Indirect Settings Interface
 
 New Features
 ############
-- A :ref:`Settings <interface-indirect-settings>` GUI is now available and can be opened using the button
+- A :ref:`Settings <inelastic-interface-settings>` GUI is now available and can be opened using the button
   next to the help *?* button on the bottom left of the interfaces. It can also be opened from the Indirect
   interfaces menu.
 

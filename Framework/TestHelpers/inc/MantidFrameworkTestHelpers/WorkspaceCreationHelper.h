@@ -38,7 +38,8 @@
 namespace Mantid {
 namespace DataObjects {
 class PeaksWorkspace;
-}
+class LeanElasticPeaksWorkspace;
+} // namespace DataObjects
 namespace Kernel {
 class Logger;
 class V3D;
@@ -177,7 +178,7 @@ struct ReturnOne {
 
 /**
  * Creates a 2D workspace from taking the function values from the input
- * function. The type must define operator()()
+ * function. The function type must define operator()(double, int)
  * @param yFunc :: A function to use for the y values
  * @param nSpec :: The number of spectra
  * @param x0 :: The start of the x range
@@ -215,7 +216,7 @@ Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceFromFunction(fT yFunc, in
   return ws;
 }
 
-/// Add random noise to the signalcreate2DWorkspaceWithFullInstrument
+/// Add random noise to a 2D workspace.
 void addNoise(const Mantid::API::MatrixWorkspace_sptr &ws, double noise, const double lower = -0.5,
               const double upper = 0.5);
 
@@ -305,8 +306,9 @@ Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithStartTime(
     int start_at_pixelID = 0,
     Mantid::Types::Core::DateAndTime run_start = Mantid::Types::Core::DateAndTime("2010-01-01T00:00:00"));
 
-Mantid::DataObjects::EventWorkspace_sptr createGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins,
-                                                                     double binDelta = 1., double xOffset = 0.);
+Mantid::DataObjects::EventWorkspace_sptr createGroupedEventWorkspace(std::vector<std::vector<int>> const &groups,
+                                                                     int numBins, double binDelta = 1.,
+                                                                     double xOffset = 0.);
 
 Mantid::DataObjects::EventWorkspace_sptr createRandomEventWorkspace(size_t numbins, size_t numpixels,
                                                                     double bin_delta = 1.0);
@@ -364,6 +366,15 @@ std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> createPeaksWorkspace(const 
 /// matrix
 std::shared_ptr<Mantid::DataObjects::PeaksWorkspace> createPeaksWorkspace(const int numPeaks,
                                                                           const Mantid::Kernel::DblMatrix &ubMat);
+
+/// Create a simple lean peaks workspace containing the given number of peaks
+std::shared_ptr<Mantid::DataObjects::LeanElasticPeaksWorkspace>
+createLeanPeaksWorkspace(const int numPeaks, const bool createOrientedLattice = false);
+/// Create a simple lean peaks workspace containing the given number of peaks and UB
+/// matrix
+std::shared_ptr<Mantid::DataObjects::LeanElasticPeaksWorkspace>
+createLeanPeaksWorkspace(const int numPeaks, const Mantid::Kernel::DblMatrix &ubMat);
+
 /**Build table workspace with preprocessed detectors for existing workspace with
  * instrument */
 std::shared_ptr<Mantid::DataObjects::TableWorkspace>

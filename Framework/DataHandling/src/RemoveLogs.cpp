@@ -65,10 +65,10 @@ void RemoveLogs::exec() {
   logNames.reserve(logData.size());
   std::transform(logData.cbegin(), logData.cend(), std::back_inserter(logNames),
                  [](const auto &property) { return property->name(); });
-  for (const auto &name : logNames) {
-    auto location = std::find(keepLogs.cbegin(), keepLogs.cend(), name);
+  for (const auto &logName : logNames) {
+    auto location = std::find(keepLogs.cbegin(), keepLogs.cend(), logName);
     if (location == keepLogs.cend()) {
-      localWorkspace->mutableRun().removeLogData(name);
+      localWorkspace->mutableRun().removeLogData(logName);
     }
   }
 

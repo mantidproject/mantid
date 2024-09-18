@@ -31,8 +31,9 @@ def add_main_window_mock(loader):
 class ProjectRecoveryLoaderTest(unittest.TestCase):
     def setUp(self):
         self.working_directory = tempfile.mkdtemp()
+        mock_mfi = mock.MagicMock()
 
-        self.pr = ProjectRecovery(None)
+        self.pr = ProjectRecovery(mock_mfi)
         self.pr_loader = self.pr.loader
 
     def tearDown(self):
@@ -83,7 +84,7 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
 
         self.assertEqual(loader.return_value.load_project.call_args, mock.call(file_name=self.pr.recovery_file_ext, load_workspaces=False))
 
-    def test_compile_recovery_script(self):
+    def test_copy_in_recovery_script(self):
         # make sure to clear out the script if it exists
         if os.path.exists(self.pr.recovery_order_workspace_history_file):
             os.remove(self.pr.recovery_order_workspace_history_file)
@@ -97,7 +98,7 @@ class ProjectRecoveryLoaderTest(unittest.TestCase):
         checkpoints = os.listdir(self.pr.recovery_directory_pid)
         checkpoint = os.path.join(self.pr.recovery_directory_pid, checkpoints[0])
 
-        self.pr_loader._compile_recovery_script(checkpoint)
+        self.pr_loader._copy_in_recovery_script(checkpoint)
 
         self.assertTrue(os.path.exists(self.pr.recovery_order_workspace_history_file))
 

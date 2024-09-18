@@ -10,7 +10,7 @@
 #include "MantidQtWidgets/MplCpp/Colors.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 #include <QRgb>
 #include <QString>
@@ -34,7 +34,7 @@ public:
   void setCmap(const Colormap &cmap);
   void setCmap(const QString &cmap);
   void setNorm(const NormalizeBase &norm);
-  void setClim(boost::optional<double> vmin = boost::none, boost::optional<double> vmax = boost::none);
+  void setClim(std::optional<double> vmin = std::nullopt, std::optional<double> vmax = std::nullopt);
   QRgb toRGBA(double x, double alpha = 1.0) const;
   std::vector<QRgb> toRGBA(const std::vector<double> &x, double alpha = 1.0) const;
 };

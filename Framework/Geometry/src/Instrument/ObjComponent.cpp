@@ -134,15 +134,15 @@ int ObjComponent::interceptSurface(Track &track) const {
 
 /** Finds the approximate solid angle covered by the component when viewed from
  * the point given
- *  @param observer :: The position from which the component is being viewed
+ *  @param params :: The position from which the component is being viewed, and number of cylinder slices
  *  @returns The solid angle in steradians
  *  @throw NullPointerException if the underlying geometrical Object has not
  * been set
  */
-double ObjComponent::solidAngle(const V3D &observer) const {
+double ObjComponent::solidAngle(const Geometry::SolidAngleParams &params) const {
   if (m_map) {
     if (hasComponentInfo()) {
-      return m_map->componentInfo().solidAngle(index(), observer);
+      return m_map->componentInfo().solidAngle(index(), params);
     }
   }
   // If the form of this component is not defined, throw NullPointerException
@@ -150,14 +150,15 @@ double ObjComponent::solidAngle(const V3D &observer) const {
     throw Kernel::Exception::NullPointerException("ObjComponent::solidAngle", "shape");
   // Otherwise pass through the shifted point to the Object::solidAngle method
   V3D scaleFactor = this->getScaleFactor();
+  // This is the observer position in the shape's coordinate system.
+  const auto paramsWithFactoredOutComponentPosition =
+      params.copyWithNewObserver(factorOutComponentPosition(params.observer()));
   if ((scaleFactor - V3D(1.0, 1.0, 1.0)).norm() < 1e-12)
-    return shape()->solidAngle(factorOutComponentPosition(observer));
+    return shape()->solidAngle(paramsWithFactoredOutComponentPosition);
   else {
-    // This is the observer position in the shape's coordinate system.
-    V3D relativeObserver = factorOutComponentPosition(observer);
     // This function will scale the object shape when calculating the solid
     // angle.
-    return shape()->solidAngle(relativeObserver, scaleFactor);
+    return shape()->solidAngle(paramsWithFactoredOutComponentPosition, scaleFactor);
   }
 }
 

@@ -80,6 +80,7 @@ set(SRC_FILES
     src/IPeakFunction.cpp
     src/IPeaksWorkspace.cpp
     src/IPowderDiffPeakFunction.cpp
+    src/ISISInstrumentDataCache.cpp
     src/ISpectrum.cpp
     src/ITableWorkspace.cpp
     src/ImmutableCompositeFunction.cpp
@@ -153,17 +154,8 @@ set(SRC_FILES
     src/WorkspaceNearestNeighbours.cpp
     src/WorkspaceOpOverloads.cpp
     src/WorkspaceProperty.cpp
+    src/WorkspacePropertyUtils.cpp
     src/WorkspaceUnitValidator.cpp
-)
-
-set(SRC_UNITY_IGNORE_FILES
-    src/CompositeFunction.cpp
-    src/IDataFileChecker.cpp
-    src/MatrixWorkspace.cpp
-    src/IEventWorkspace.cpp
-    src/IFunctionMD.cpp
-    src/IPeakFunction.cpp
-    src/IPowderDiffPeakFunction.cpp
 )
 
 set(INC_FILES
@@ -272,6 +264,7 @@ set(INC_FILES
     inc/MantidAPI/IPeaksWorkspace.h
     inc/MantidAPI/IPeaksWorkspace_fwd.h
     inc/MantidAPI/IPowderDiffPeakFunction.h
+    inc/MantidAPI/ISISInstrumentDataCache.h
     inc/MantidAPI/IPreview.h
     inc/MantidAPI/ISpectrum.h
     inc/MantidAPI/ISplittersWorkspace.h
@@ -331,6 +324,7 @@ set(INC_FILES
     inc/MantidAPI/RefAxis.h
     inc/MantidAPI/RegionSelectorObserver.h
     inc/MantidAPI/ResizeRectangularDetectorHelper.h
+    inc/MantidAPI/Result.h
     inc/MantidAPI/Run.h
     inc/MantidAPI/Sample.h
     inc/MantidAPI/SampleShapeValidator.h
@@ -364,6 +358,7 @@ set(INC_FILES
     inc/MantidAPI/WorkspaceOpOverloads.h
     inc/MantidAPI/WorkspaceProperty.h
     inc/MantidAPI/WorkspaceProperty.tcc
+    inc/MantidAPI/WorkspacePropertyUtils.h
     inc/MantidAPI/WorkspaceUnitValidator.h
     inc/MantidAPI/Workspace_fwd.h
 )
@@ -430,6 +425,7 @@ set(TEST_FILES
     ILatticeFunctionTest.h
     IMDWorkspaceTest.h
     IPreviewTest.h
+    ISISInstrumentDataCacheTest.h
     ISpectrumTest.h
     ImmutableCompositeFunctionTest.h
     ImplicitFunctionParserFactoryTest.h
@@ -466,6 +462,7 @@ set(TEST_FILES
     ProjectionTest.h
     RawCountValidatorTest.h
     ResizeRectangularDetectorHelperTest.h
+    ResultTest.h
     RunTest.h
     SampleShapeValidatorTest.h
     SampleTest.h
@@ -489,6 +486,7 @@ set(TEST_FILES
     WorkspaceNearestNeighboursTest.h
     WorkspaceOpOverloadsTest.h
     WorkspacePropertyTest.h
+    WorkspacePropertyUtilsTest.h
     WorkspaceUnitValidatorTest.h
 )
 
@@ -499,11 +497,6 @@ if(COVERAGE)
     set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(API SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
 
 # Have to link to winsock and bcrypt library on Windows
 if(WIN32)

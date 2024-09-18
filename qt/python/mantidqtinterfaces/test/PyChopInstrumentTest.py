@@ -14,6 +14,7 @@ import warnings
 import numpy as np
 
 from pychop.Instruments import Instrument
+from pychop import MulpyRep
 
 
 class PyChopInstrumentTests(unittest.TestCase):
@@ -184,90 +185,114 @@ class MockImports:
             return getattr(self.loaded_from[module_name], module_name)
 
 
+class fake_QMainWindow:
+    def __init__(self, *args, **kwargs):
+        self.menuBar = mock.MagicMock()
+        self.setCentralWidget = mock.MagicMock()
+        self.setWindowTitle = mock.MagicMock()
+
+    def setWindowFlags(self, *args, **kwargs):
+        pass
+
+    def show(self):
+        pass
+
+
+class fake_QCombo(mock.MagicMock):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.clear()
+
+    def clear(self):
+        self.items = []
+        self.currentIndex = 0
+
+    def addItem(self, item):
+        self.items.append(item)
+
+    def currentText(self):
+        return self.items[self.currentIndex]
+
+    def count(self):
+        return len(self.items)
+
+    def itemText(self, idx):
+        return self.items[idx]
+
+    def setCurrentIndex(self, idx):
+        self.currentIndex = idx
+
+    def __getattr__(self, attribute):
+        if attribute not in self.__dict__:
+            self.__dict__[attribute] = mock.MagicMock()
+        return self.__dict__[attribute]
+
+
+class fake_QLineEdit(mock.MagicMock):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.value = "1.0"
+
+    def setText(self, value):
+        self.value = value
+
+    def text(self):
+        return self.value
+
+    def __getattr__(self, attribute):
+        if attribute not in self.__dict__:
+            self.__dict__[attribute] = mock.MagicMock()
+        return self.__dict__[attribute]
+
+
+class fake_Line(mock.MagicMock):
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.parent = parent
+
+    def set_label(self, label):
+        self.parent.legends[self] = label
+
+
+class fake_Axes(mock.MagicMock):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.legends = {}
+
+    def plot(self, *args, **kwargs):
+        self.lines.append(fake_Line(self))
+        return (self.lines[-1],)
+
+    def get_legend_handles_labels(self):
+        labels = [self.legends[line] for line in self.lines]
+        return self.lines, labels
+
+
+class fake_Figure(mock.MagicMock):
+    def add_subplot(self, *args, **kwargs):
+        return fake_Axes()
+
+
+class fake_Slider(mock.MagicMock):
+    def __init__(self, parent, label, valmin, valmax, **kwargs):
+        super().__init__(parent, label, valmin, valmax, **kwargs)
+        self.parent, self.label, self.valmin, self.valmax = parent, label, valmin, valmax
+        self.val = kwargs.pop("valinit", 0.5)
+        self.valtext = mock.MagicMock()
+        self.on_changed = mock.MagicMock()
+
+
 class PyChopGuiTests(unittest.TestCase):
     # Tests GUI routines
 
     @classmethod
     def setUpClass(cls):
-        class fake_QMainWindow:
-            def __init__(self, *args, **kwargs):
-                self.menuBar = mock.MagicMock()
-                self.setCentralWidget = mock.MagicMock()
-                self.setWindowTitle = mock.MagicMock()
-
-            def setWindowFlags(self, *args, **kwargs):
-                pass
-
-            def show(self):
-                pass
-
-        class fake_QCombo(mock.MagicMock):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-                self.clear()
-
-            def clear(self):
-                self.items = []
-                self.currentIndex = 0
-
-            def addItem(self, item):
-                self.items.append(item)
-
-            def currentText(self):
-                return self.items[self.currentIndex]
-
-            def count(self):
-                return len(self.items)
-
-            def itemText(self, idx):
-                return self.items[idx]
-
-            def setCurrentIndex(self, idx):
-                self.currentIndex = idx
-
-            def __getattr__(self, attribute):
-                if attribute not in self.__dict__:
-                    self.__dict__[attribute] = mock.MagicMock()
-                return self.__dict__[attribute]
-
-        class fake_Line(mock.MagicMock):
-            def __init__(self, parent, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-                self.parent = parent
-
-            def set_label(self, label):
-                self.parent.legends[self] = label
-
-        class fake_Axes(mock.MagicMock):
-            def __init__(self, *args, **kwargs):
-                super().__init__(*args, **kwargs)
-                self.legends = {}
-
-            def plot(self, *args, **kwargs):
-                self.lines.append(fake_Line(self))
-                return (self.lines[-1],)
-
-            def get_legend_handles_labels(self):
-                labels = [self.legends[line] for line in self.lines]
-                return self.lines, labels
-
-        class fake_Figure(mock.MagicMock):
-            def add_subplot(self, *args, **kwargs):
-                return fake_Axes()
-
-        class fake_Slider(mock.MagicMock):
-            def __init__(self, parent, label, valmin, valmax, **kwargs):
-                super().__init__(parent, label, valmin, valmax, **kwargs)
-                self.parent, self.label, self.valmin, self.valmax = parent, label, valmin, valmax
-                self.val = kwargs.pop("valinit", 0.5)
-                self.valtext = mock.MagicMock()
-                self.on_changed = mock.MagicMock()
-
         cls.mock_modules = MockImports(
             include=["qtpy", "matplotlib", "mantidqt", "mantid.plots"],
             replace={
                 "QMainWindow": fake_QMainWindow,
                 "QComboBox": MockedModule(mock_class=fake_QCombo),
+                "QLineEdit": MockedModule(mock_class=fake_QLineEdit),
                 "Figure": MockedModule(mock_class=fake_Figure),
                 "Slider": MockedModule(mock_class=fake_Slider),
             },
@@ -287,6 +312,8 @@ class PyChopGuiTests(unittest.TestCase):
             self.window.calc_callback()
             setS2.assert_not_called()
             self.window.setInstrument("HYSPEC")
+            self.window.widgets["EiEdit"]["Edit"].setText("50")
+            self.window.setEi()
             self.window.calc_callback()
             setS2.assert_called()
         # Test that the value of S2 is set correctly
@@ -356,6 +383,60 @@ class PyChopGuiTests(unittest.TestCase):
         self.window.instSciAct.isChecked = mock.MagicMock(return_value=True)
         self.window.setChopper("G")
         self.window.widgets["Chopper0Phase"]["Edit"].show.assert_called()
+
+    def test_pychop_numerics(self):
+        # Tests all instruments resolution and flux values against reference
+        instruments = ["ARCS", "CNCS", "HYSPEC", "LET", "MAPS", "MARI", "MERLIN", "SEQUOIA"]
+        choppers = ["ARCS-100-1.5-AST", "High Flux", "OnlyOne", "High Flux", "S", "S", "G", "SEQ-100-2.0-AST"]
+        freqs = [[300], [300, 60], [180], [240, 120], [400, 50], [400], [400], [300]]
+        eis = [120, 3.7, 45, 3.7, 120, 80, 120, 120]
+        ref_res = [
+            10.278744237772832,
+            0.13188102618129077,
+            3.6751279831313703,
+            0.08079912729715726,
+            4.9611687063450995,
+            2.6049587487601764,
+            6.8755979524827255,
+            5.396705255853653,
+        ]
+        ref_flux = [
+            2055.562054927915,
+            128986.24972543867,
+            0.014779264739956933,
+            45438.33797146135,
+            24196.496233770937,
+            5747.118187298609,
+            22287.647098883135,
+            4063.3113893387676,
+        ]
+        for inst, ch, frq, ei, res0, flux0 in zip(instruments, choppers, freqs, eis, ref_res, ref_flux):
+            res, flux = Instrument.calculate(inst, ch, frq, ei, 0)
+            np.testing.assert_allclose(res[0], res0, rtol=1e-4, atol=0)
+            np.testing.assert_allclose(flux, flux0, rtol=1e-4, atol=0)
+
+    def test_erange(self):
+        # Tests MARI raises if Ei outside range [0, 180meV] with G chopper only ('S' chopper ok up to 1000meV)
+        obj = Instrument("MARI", "S", 400)
+        obj.setEi(500)
+        obj.setChopper("G", 400)
+        with self.assertRaises(ValueError):
+            obj.setEi(500)
+        obj.setEi(180)
+
+    def test_phase_offset(self):
+        # Tests calcChopTimes applies new phase offset parameter
+        instpars = [[9.3, 9.995], [1, 2], None, [950, 10.0], [64, 10.0], [250, 290.0], [1, 1], 2.5, 1.925, [50, 1], 0, 0.9, [0]]
+        phaseoffset = None
+        Eis_none, _, _, _, _ = MulpyRep.calcChopTimes(50.0, [50.0, 400.0], instpars, [17000], phaseoffset)
+        self.assertAlmostEqual(Eis_none[5], 10.71281984, places=7)
+        self.assertAlmostEqual(Eis_none[6], 7.70630740, places=7)
+        self.assertAlmostEqual(Eis_none[7], 5.80834507, places=7)
+        phaseoffset = 4500
+        Eis_offset, _, _, _, _ = MulpyRep.calcChopTimes(50.0, [50.0, 400.0], instpars, [17000], phaseoffset)
+        self.assertAlmostEqual(Eis_offset[5], 2.48991457, places=7)
+        self.assertAlmostEqual(Eis_offset[6], 2.10994937, places=7)
+        self.assertAlmostEqual(Eis_offset[7], 1.81075983, places=7)
 
 
 if __name__ == "__main__":

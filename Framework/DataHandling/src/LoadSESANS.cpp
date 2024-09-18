@@ -245,10 +245,10 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line, int 
   while (std::getline(infile, line)) {
     lineNum++;
 
-    // Tokens in a line
-    std::vector<std::string> tokens;
-
     if (boost::regex_match(line, lineRegex)) {
+      // Tokens in a line
+      std::vector<std::string> tokens;
+
       boost::trim(line);
       boost::split(tokens, line, isspace, boost::token_compress_on);
 
@@ -312,12 +312,12 @@ void LoadSESANS::throwFormatError(const std::string &line, const std::string &me
  * @throw runtime_error If any other the mandatory headers are missing
  */
 void LoadSESANS::checkMandatoryHeaders(const AttributeMap &attributes) {
-  for (const std::string &attr : m_mandatoryAttributes) {
-    if (!attributes.count(attr)) {
-      std::string err = "Failed to supply parameter: \"" + attr + "\"";
-      g_log.error(err);
-      throw std::runtime_error(err);
-    }
+  const auto it = std::find_if(m_mandatoryAttributes.cbegin(), m_mandatoryAttributes.cend(),
+                               [&attributes](const auto &attr) { return !attributes.count(attr); });
+  if (it != m_mandatoryAttributes.cend()) {
+    std::string err = "Failed to supply parameter: \"" + *it + "\"";
+    g_log.error(err);
+    throw std::runtime_error(err);
   }
 }
 

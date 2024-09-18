@@ -186,6 +186,8 @@ bool Logger::is(int level) const {
   return retVal;
 }
 
+bool Logger::isDebug() const { return this->is(Priority::PRIO_DEBUG); }
+
 void Logger::setLevel(int level) {
   try {
     const int levelActual = fixLevel(level);

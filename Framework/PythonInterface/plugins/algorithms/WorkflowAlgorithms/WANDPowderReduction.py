@@ -169,6 +169,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
             doc="Output Workspace",
         )
+        self.getProperty("OutputWorkspace").setDisableReplaceWSButton(True)
 
         self.declareProperty(
             "Sum",
@@ -423,7 +424,18 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         # such that all data can be binned exactly the same way.
 
         # BEGIN_FOR: located_global_xMin&xMax
-        output_workspaces = [f"{outname}{n+1}" for n in range(len(input_workspaces))]
+        output_workspaces = list()
+        for n, in_wksp in enumerate(input_workspaces):
+            try:
+                temp_val = mtd[in_wksp].run().getTimeAveragedValue("HB2C:SE:SampleTemp")
+            except RuntimeError:
+                temp_val = 300.0
+
+            if temp_val == 0.0:
+                temp_val = 300.0
+            temp_val = "{:.1F}".format(temp_val).replace(".", "p")
+            out_tmp = f"{outname}{n+1}_T{temp_val}K"
+            output_workspaces.append(out_tmp)
         mask_workspaces = []
         for n, (_wksp_in, _wksp_out) in enumerate(zip(input_workspaces, output_workspaces)):
             _wksp_in = str(_wksp_in)

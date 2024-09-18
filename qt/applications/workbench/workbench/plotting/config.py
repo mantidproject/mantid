@@ -39,6 +39,10 @@ def initialize_matplotlib():
     mpl.rcParams["figure.dpi"] = QApplication.instance().desktop().physicalDpiX()
     # Hide warning made by matplotlib before checking our backend.
     warnings.filterwarnings("ignore", message="Starting a Matplotlib GUI outside of the main thread will likely fail.")
+    # Disabling default key shortcuts for toggling axes scale
+    mpl.rcParams["keymap.xscale"].remove("k")
+    mpl.rcParams["keymap.xscale"].remove("L")
+    mpl.rcParams["keymap.yscale"].remove("l")
 
 
 def init_mpl_gcf():

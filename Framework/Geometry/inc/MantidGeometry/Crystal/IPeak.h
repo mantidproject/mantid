@@ -12,7 +12,7 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/V3D.h"
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace Mantid {
 namespace Geometry {
@@ -52,8 +52,8 @@ public:
 
   virtual Mantid::Kernel::V3D getQLabFrame() const = 0;
   virtual Mantid::Kernel::V3D getQSampleFrame() const = 0;
-  virtual void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame, boost::optional<double> detectorDistance) = 0;
-  virtual void setQLabFrame(const Mantid::Kernel::V3D &QLabFrame, boost::optional<double> detectorDistance) = 0;
+  virtual void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame, std::optional<double> detectorDistance) = 0;
+  virtual void setQLabFrame(const Mantid::Kernel::V3D &QLabFrame, std::optional<double> detectorDistance) = 0;
 
   virtual void setWavelength(double wavelength) = 0;
   virtual double getWavelength() const = 0;

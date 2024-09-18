@@ -95,14 +95,12 @@ class BasicFittingPresenter:
         self.model.evaluation_type = self.view.evaluation_type
         self.model.fit_to_raw = self.view.fit_to_raw
 
-    def handle_ads_clear_or_remove_workspace_event(self, _: str = None) -> None:
+    def handle_ads_clear_or_remove_workspace_event(self, name: str) -> None:
         """Handle when there is a clear or remove workspace event in the ADS."""
-        self.update_and_reset_all_data()
+        if name not in self.model.dataset_names:
+            return
 
-        if self.model.number_of_datasets == 0:
-            self.view.disable_view()
-        else:
-            self.enable_editing_notifier.notify_subscribers()
+        self.update_and_reset_all_data()
 
     def handle_gui_changes_made(self, changed_values: dict) -> None:
         """Handle when the good data checkbox is changed in the home tab."""
@@ -116,11 +114,6 @@ class BasicFittingPresenter:
 
         self.view.plot_guess, self.model.plot_guess = False, False
         self.clear_undo_data()
-
-        if self.model.number_of_datasets == 0:
-            self.view.disable_view()
-        else:
-            self.enable_editing_notifier.notify_subscribers()
 
     def handle_instrument_changed(self) -> None:
         """Handles when an instrument is changed and switches to normal fitting mode. Overridden by child."""
@@ -399,6 +392,11 @@ class BasicFittingPresenter:
         self.view.set_datasets_in_function_browser(self.model.dataset_names)
         self.view.update_dataset_name_combo_box(self.model.dataset_names)
         self.model.current_dataset_index = self.view.current_dataset_index
+
+        if self.model.number_of_datasets == 0:
+            self.view.disable_view()
+        else:
+            self.enable_editing_notifier.notify_subscribers()
 
     def update_fit_statuses_and_chi_squared_in_model(self, fit_status: str, chi_squared: float) -> None:
         """Updates the fit status and chi squared stored in the model. This is used after a fit."""

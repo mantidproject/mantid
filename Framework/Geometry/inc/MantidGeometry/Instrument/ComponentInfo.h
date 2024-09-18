@@ -9,6 +9,7 @@
 #include "MantidBeamline/ComponentType.h"
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/ComponentInfoIterator.h"
+#include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidKernel/DateAndTime.h"
 #include <memory>
@@ -121,7 +122,7 @@ public:
 
   const Geometry::IObject &shape(const size_t componentIndex) const;
 
-  double solidAngle(const size_t componentIndex, const Kernel::V3D &observer) const;
+  double solidAngle(const size_t componentIndex, const Geometry::SolidAngleParams &params) const;
   BoundingBox boundingBox(const size_t componentIndex, const BoundingBox *reference = nullptr,
                           const bool excludeMonitors = false) const;
   Beamline::ComponentType componentType(const size_t componentIndex) const;

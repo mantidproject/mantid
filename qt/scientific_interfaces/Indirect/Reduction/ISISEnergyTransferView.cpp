@@ -6,41 +6,39 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "ISISEnergyTransferView.h"
-#include "IndirectDataValidationHelper.h"
+#include "Common/DetectorGroupingOptions.h"
+#include "ISISEnergyTransferPresenter.h"
+#include "MantidQtWidgets/Spectroscopy/DataValidationHelper.h"
+#include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
-using namespace IndirectDataValidationHelper;
+using namespace DataValidationHelper;
 using namespace Mantid::API;
 using namespace MantidQt::API;
 
 namespace MantidQt::CustomInterfaces {
 
-IETView::IETView(IETViewSubscriber *subscriber, QWidget *parent) : m_subscriber(subscriber) {
+IETView::IETView(QWidget *parent) {
   m_uiForm.setupUi(parent);
 
-  connect(m_uiForm.cbGroupingOptions, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(mappingOptionSelected(const QString &)));
-  connect(m_uiForm.pbSaveCustomGrouping, SIGNAL(clicked()), this, SLOT(saveCustomGroupingClicked()));
   connect(m_uiForm.pbPlotTime, SIGNAL(clicked()), this, SLOT(plotRawClicked()));
-  connect(m_uiForm.dsRunFiles, SIGNAL(fileTextChanged(const QString &)), this, SLOT(pbRunEditing()));
   connect(m_uiForm.dsRunFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
   connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
   connect(m_uiForm.dsCalibrationFile, SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady()));
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
   connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
 
   m_uiForm.dsCalibrationFile->isOptional(true);
 
-  mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
-
-  QRegExp re("([0-9]+[-:+]?[0-9]*([+]?[0-9]*)*,[ ]?)*[0-9]+[-:+]?[0-9]*([+]?[0-9]*)*");
-  m_uiForm.leCustomGroups->setValidator(new QRegExpValidator(re, this));
+  m_groupingWidget = new DetectorGroupingOptions(m_uiForm.fDetectorGrouping);
+  m_uiForm.fDetectorGrouping->layout()->addWidget(m_groupingWidget);
+  connect(m_groupingWidget, SIGNAL(saveCustomGrouping(std::string const &)), this,
+          SLOT(saveCustomGroupingClicked(std::string const &)));
 }
 
-IETView::~IETView() {}
+void IETView::subscribePresenter(IIETPresenter *presenter) { m_presenter = presenter; }
 
 IETRunData IETView::getRunData() const {
   IETInputData inputDetails(m_uiForm.dsRunFiles->getFilenames().join(",").toStdString(),
@@ -51,15 +49,10 @@ IETRunData IETView::getRunData() const {
   IETConversionData conversionDetails(m_uiForm.spEfixed->value(), m_uiForm.spSpectraMin->value(),
                                       m_uiForm.spSpectraMax->value());
 
-  IETGroupingData groupingDetails(m_uiForm.cbGroupingOptions->currentText().toStdString(),
-                                  m_uiForm.spNumberGroups->value(),
-                                  m_uiForm.dsMapFile->getFirstFilename().toStdString());
-
   IETBackgroundData backgroundDetails(m_uiForm.ckBackgroundRemoval->isChecked(), m_uiForm.spBackgroundStart->value(),
                                       m_uiForm.spBackgroundEnd->value());
 
-  IETAnalysisData analysisDetails(m_uiForm.ckDetailedBalance->isChecked(), m_uiForm.spDetailedBalance->value(),
-                                  m_uiForm.ckScaleMultiplier->isChecked(), m_uiForm.spScaleMultiplier->value());
+  IETAnalysisData analysisDetails(m_uiForm.ckDetailedBalance->isChecked(), m_uiForm.spDetailedBalance->value());
 
   IETRebinData rebinDetails(!m_uiForm.ckDoNotRebin->isChecked(), m_uiForm.cbRebinType->currentText().toStdString(),
                             m_uiForm.spRebinLow->value(), m_uiForm.spRebinHigh->value(), m_uiForm.spRebinWidth->value(),
@@ -67,8 +60,8 @@ IETRunData IETView::getRunData() const {
 
   IETOutputData outputDetails(m_uiForm.ckCm1Units->isChecked(), m_uiForm.ckFold->isChecked());
 
-  IETRunData runParams(inputDetails, conversionDetails, groupingDetails, backgroundDetails, analysisDetails,
-                       rebinDetails, outputDetails);
+  IETRunData runParams(inputDetails, conversionDetails, m_groupingWidget->groupingProperties(), backgroundDetails,
+                       analysisDetails, rebinDetails, outputDetails);
 
   return runParams;
 }
@@ -92,30 +85,35 @@ IETPlotData IETView::getPlotData() const {
 
 IETSaveData IETView::getSaveData() const {
   IETSaveData saveTypes(m_uiForm.ckSaveNexus->isChecked(), m_uiForm.ckSaveSPE->isChecked(),
-                        m_uiForm.ckSaveNXSPE->isChecked(), m_uiForm.ckSaveASCII->isChecked(),
-                        m_uiForm.ckSaveAclimax->isChecked(), m_uiForm.ckSaveDaveGrp->isChecked());
+                        m_uiForm.ckSaveASCII->isChecked(), m_uiForm.ckSaveAclimax->isChecked(),
+                        m_uiForm.ckSaveDaveGrp->isChecked());
 
   return saveTypes;
 }
-
-std::string IETView::getCustomGrouping() const { return m_uiForm.leCustomGroups->text().toStdString(); }
 
 std::string IETView::getGroupOutputOption() const { return m_uiForm.cbGroupOutput->currentText().toStdString(); }
 
 bool IETView::getGroupOutputCheckbox() const { return m_uiForm.ckGroupOutput->isChecked(); }
 
-IndirectPlotOptionsView *IETView::getPlotOptionsView() const { return m_uiForm.ipoPlotOptions; }
+IRunView *IETView::getRunView() const { return m_uiForm.runWidget; }
+
+IOutputPlotOptionsView *IETView::getPlotOptionsView() const { return m_uiForm.ipoPlotOptions; }
 
 std::string IETView::getFirstFilename() const { return m_uiForm.dsRunFiles->getFirstFilename().toStdString(); }
 
 bool IETView::isRunFilesValid() const { return m_uiForm.dsRunFiles->isValid(); }
 
-void IETView::validateCalibrationFileType(UserInputValidator &uiv) const {
+void IETView::validateCalibrationFileType(IUserInputValidator *uiv) const {
   validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration", DataType::Calib);
 }
 
-void IETView::validateRebinString(UserInputValidator &uiv) const {
-  uiv.checkFieldIsNotEmpty("Rebin string", m_uiForm.leRebinString, m_uiForm.valRebinString);
+void IETView::validateRebinString(IUserInputValidator *uiv) const {
+  uiv->checkFieldIsNotEmpty("Rebin string", m_uiForm.leRebinString, m_uiForm.valRebinString);
+}
+
+std::optional<std::string> IETView::validateGroupingProperties(std::size_t const &spectraMin,
+                                                               std::size_t const &spectraMax) const {
+  return m_groupingWidget->validateGroupingProperties(spectraMin, spectraMax);
 }
 
 bool IETView::showRebinWidthPrompt() const {
@@ -148,20 +146,27 @@ void IETView::displayWarning(std::string const &message) const {
   QMessageBox::warning(nullptr, "", QString::fromStdString(message));
 }
 
+void IETView::setCalibVisible(bool visible) {
+  m_uiForm.ckUseCalib->setVisible(visible);
+  m_uiForm.dsCalibrationFile->setVisible(visible);
+}
+
+void IETView::setEfixedVisible(bool visible) {
+  m_uiForm.spEfixed->setVisible(visible);
+  m_uiForm.lbEfixed->setVisible(visible);
+}
+
 void IETView::setBackgroundSectionVisible(bool visible) { m_uiForm.gbBackgroundRemoval->setVisible(visible); }
 
 void IETView::setPlotTimeSectionVisible(bool visible) { m_uiForm.gbPlotTime->setVisible(visible); }
 
-void IETView::setPlottingOptionsVisible(bool visible) { m_uiForm.fPlottingOptions->setVisible(visible); }
+void IETView::setAnalysisSectionVisible(bool visible) { m_uiForm.gbAnalysis->setVisible(visible); }
 
-void IETView::setScaleFactorVisible(bool visible) {
-  m_uiForm.ckScaleMultiplier->setVisible(visible);
-  m_uiForm.spScaleMultiplier->setVisible(visible);
-}
+void IETView::setPlottingOptionsVisible(bool visible) { m_uiForm.fPlottingOptions->setVisible(visible); }
 
 void IETView::setAclimaxSaveVisible(bool visible) { m_uiForm.ckSaveAclimax->setVisible(visible); }
 
-void IETView::setNXSPEVisible(bool visible) { m_uiForm.ckSaveNXSPE->setVisible(visible); }
+void IETView::setSPEVisible(bool visible) { m_uiForm.ckSaveSPE->setVisible(visible); }
 
 void IETView::setFoldMultipleFramesVisible(bool visible) { m_uiForm.ckFold->setVisible(visible); }
 
@@ -184,19 +189,17 @@ void IETView::setSingleRebin(bool enable) {
 void IETView::setMultipleRebin(bool enable) { m_uiForm.valRebinString->setVisible(enable); }
 
 void IETView::setSaveEnabled(bool enable) {
-  enable = !m_outputWorkspaces.empty() ? enable : false;
   m_uiForm.pbSave->setEnabled(enable);
   m_uiForm.ckSaveAclimax->setEnabled(enable);
   m_uiForm.ckSaveASCII->setEnabled(enable);
   m_uiForm.ckSaveDaveGrp->setEnabled(enable);
   m_uiForm.ckSaveNexus->setEnabled(enable);
-  m_uiForm.ckSaveNXSPE->setEnabled(enable);
   m_uiForm.ckSaveSPE->setEnabled(enable);
 }
 
 void IETView::setPlotTimeIsPlotting(bool plotting) {
   m_uiForm.pbPlotTime->setText(plotting ? "Plotting..." : "Plot");
-  setButtonsEnabled(!plotting);
+  setEnableOutputOptions(!plotting);
 }
 
 void IETView::setFileExtensionsByName(QStringList calibrationFbSuffixes, QStringList calibrationWSSuffixes) {
@@ -204,152 +207,104 @@ void IETView::setFileExtensionsByName(QStringList calibrationFbSuffixes, QString
   m_uiForm.dsCalibrationFile->setWSSuffixes(calibrationWSSuffixes);
 }
 
-void IETView::setOutputWorkspaces(std::vector<std::string> const &outputWorkspaces) {
-  m_outputWorkspaces = outputWorkspaces;
-}
-
-void IETView::setInstrumentDefault(InstrumentData const &instrumentDetails) {
-  auto const instrumentName = instrumentDetails.getInstrument();
-  auto const specMin = instrumentDetails.getDefaultSpectraMin();
-  auto const specMax = instrumentDetails.getDefaultSpectraMax();
-
-  m_uiForm.dsRunFiles->setInstrumentOverride(QString::fromStdString(instrumentName));
-
-  QStringList qens;
-  qens << "IRIS"
-       << "OSIRIS";
-  m_uiForm.spEfixed->setEnabled(qens.contains(QString::fromStdString(instrumentName)));
-
-  QStringList allowDefaultGroupingInstruments;
-  allowDefaultGroupingInstruments << "TOSCA";
-  includeExtraGroupingOption(allowDefaultGroupingInstruments.contains(QString::fromStdString(instrumentName)),
-                             "Default");
-
-  m_uiForm.spSpectraMin->setMinimum(specMin);
-  m_uiForm.spSpectraMin->setMaximum(specMax);
+void IETView::setInstrumentSpectraRange(int specMin, int specMax) {
+  m_uiForm.spSpectraMin->setRange(specMin, specMax);
   m_uiForm.spSpectraMin->setValue(specMin);
 
-  m_uiForm.spSpectraMax->setMinimum(specMin);
-  m_uiForm.spSpectraMax->setMaximum(specMax);
+  m_uiForm.spSpectraMax->setRange(specMin, specMax);
   m_uiForm.spSpectraMax->setValue(specMax);
 
-  m_uiForm.spPlotTimeSpecMin->setMinimum(1);
-  m_uiForm.spPlotTimeSpecMin->setMaximum(specMax);
+  m_uiForm.spPlotTimeSpecMin->setRange(1, specMax);
   m_uiForm.spPlotTimeSpecMin->setValue(1);
 
-  m_uiForm.spPlotTimeSpecMax->setMinimum(1);
-  m_uiForm.spPlotTimeSpecMax->setMaximum(specMax);
+  m_uiForm.spPlotTimeSpecMax->setRange(1, specMax);
   m_uiForm.spPlotTimeSpecMax->setValue(1);
+}
 
-  m_uiForm.spEfixed->setValue(instrumentDetails.getDefaultEfixed());
+void IETView::setInstrumentRebinning(std::vector<double> const &rebinParams, std::string const &rebinText, bool checked,
+                                     int tabIndex) {
+  m_uiForm.ckDoNotRebin->setChecked(checked);
+  m_uiForm.cbRebinType->setCurrentIndex(tabIndex);
+  m_uiForm.spRebinLow->setValue(rebinParams[0]);
+  m_uiForm.spRebinWidth->setValue(rebinParams[1]);
+  m_uiForm.spRebinHigh->setValue(rebinParams[2]);
+  m_uiForm.leRebinString->setText(QString::fromStdString(rebinText));
+}
 
-  auto const rebinDefault = QString::fromStdString(instrumentDetails.getDefaultRebin());
-  if (!rebinDefault.isEmpty()) {
-    m_uiForm.leRebinString->setText(rebinDefault);
-    m_uiForm.ckDoNotRebin->setChecked(false);
-    auto const rbp = rebinDefault.split(",", Qt::SkipEmptyParts);
-    if (rbp.size() == 3) {
-      m_uiForm.spRebinLow->setValue(rbp[0].toDouble());
-      m_uiForm.spRebinWidth->setValue(rbp[1].toDouble());
-      m_uiForm.spRebinHigh->setValue(rbp[2].toDouble());
-      m_uiForm.cbRebinType->setCurrentIndex(0);
-    } else {
-      m_uiForm.cbRebinType->setCurrentIndex(1);
-    }
-  } else {
-    m_uiForm.ckDoNotRebin->setChecked(true);
-    m_uiForm.spRebinLow->setValue(0.0);
-    m_uiForm.spRebinWidth->setValue(0.0);
-    m_uiForm.spRebinHigh->setValue(0.0);
-    m_uiForm.leRebinString->setText("");
-  }
+void IETView::setInstrumentGrouping(std::string const &instrumentName) {
 
+  setGroupOutputCheckBoxVisible(instrumentName == "OSIRIS");
+  setGroupOutputDropdownVisible(instrumentName == "IRIS");
+
+  m_groupingWidget->setGroupingMethod(instrumentName == "TOSCA" ? "IPF" : "Individual");
   m_uiForm.cbGroupOutput->clear();
-
   m_uiForm.cbGroupOutput->addItem(QString::fromStdString(IETGroupOption::UNGROUPED));
   m_uiForm.cbGroupOutput->addItem(QString::fromStdString(IETGroupOption::GROUP));
   if (instrumentName == "IRIS") {
     m_uiForm.cbGroupOutput->addItem(QString::fromStdString(IETGroupOption::SAMPLECHANGERGROUPED));
   }
-
-  m_uiForm.ckCm1Units->setChecked(instrumentDetails.getDefaultUseDeltaEInWavenumber());
-  m_uiForm.ckSaveNexus->setChecked(instrumentDetails.getDefaultSaveNexus());
-  m_uiForm.ckSaveASCII->setChecked(instrumentDetails.getDefaultSaveASCII());
-  m_uiForm.ckFold->setChecked(instrumentDetails.getDefaultFoldMultipleFrames());
 }
 
-void IETView::updateRunButton(bool enabled, std::string const &enableOutputButtons, QString const &message,
-                              QString const &tooltip) {
-  setRunEnabled(enabled);
-  m_uiForm.pbRun->setText(message);
-  m_uiForm.pbRun->setToolTip(tooltip);
-  if (enableOutputButtons != "unchanged") {
-    auto const enableButtons = enableOutputButtons == "enable";
-    setPlotTimeEnabled(enableButtons);
-    setSaveEnabled(enableButtons);
-  }
+void IETView::setInstrumentEFixed(std::string const &instrumentName, double eFixed) {
+  QStringList qens;
+  qens << "IRIS"
+       << "OSIRIS";
+  auto instName = QString::fromStdString(instrumentName);
+  m_uiForm.spEfixed->setEnabled(qens.contains(instName));
+  m_uiForm.dsRunFiles->setInstrumentOverride(instName);
+  m_uiForm.spEfixed->setValue(eFixed);
 }
 
-void IETView::showMessageBox(const QString &message) { m_subscriber->notifyNewMessage(message); }
+void IETView::setInstrumentSpecDefault(std::map<std::string, bool> &specMap) {
+  setBackgroundSectionVisible(specMap["irsORosiris"]);
+  setPlotTimeSectionVisible(specMap["irsORosiris"]);
+  setAclimaxSaveVisible(specMap["irsORosiris"]);
+  setFoldMultipleFramesVisible(specMap["irsORosiris"]);
+  setOutputInCm1Visible(specMap["irsORosiris"]);
 
-void IETView::saveClicked() { m_subscriber->notifySaveClicked(); }
+  setSPEVisible(specMap["toscaORtfxa"]);
+  setAnalysisSectionVisible(specMap["toscaORtfxa"]);
+  setCalibVisible(specMap["toscaORtfxa"]);
+  setEfixedVisible(specMap["toscaORtfxa"]);
 
-void IETView::runClicked() { m_subscriber->notifyRunClicked(); }
+  m_uiForm.ckCm1Units->setChecked(specMap["defaultEUnits"]);
+  m_uiForm.ckSaveNexus->setChecked(specMap["defaultSaveNexus"]);
+  m_uiForm.ckSaveASCII->setChecked(specMap["defaultSaveASCII"]);
+  m_uiForm.ckFold->setChecked(specMap["defaultFoldMultiple"]);
+}
 
-void IETView::plotRawClicked() { m_subscriber->notifyPlotRawClicked(); }
+void IETView::setEnableOutputOptions(bool const enable) {
+  setPlotTimeEnabled(enable);
+  setSaveEnabled(enable);
+}
 
-void IETView::saveCustomGroupingClicked() { m_subscriber->notifySaveCustomGroupingClicked(); }
+void IETView::showMessageBox(std::string const &message) {
+  QMessageBox::warning(this, "Warning!", QString::fromStdString(message));
+}
 
-void IETView::pbRunFinished() { m_subscriber->notifyRunFinished(); }
+void IETView::saveClicked() { m_presenter->notifySaveClicked(); }
+
+void IETView::plotRawClicked() { m_presenter->notifyPlotRawClicked(); }
+
+void IETView::saveCustomGroupingClicked(std::string const &customGrouping) {
+  m_presenter->notifySaveCustomGroupingClicked(customGrouping);
+}
+
+void IETView::pbRunFinished() { m_presenter->notifyRunFinished(); }
 
 void IETView::handleDataReady() {
-  UserInputValidator uiv;
-  validateDataIsOfType(uiv, m_uiForm.dsCalibrationFile, "Calibration", DataType::Calib);
+  auto uiv = std::make_unique<UserInputValidator>();
+  validateDataIsOfType(uiv.get(), m_uiForm.dsCalibrationFile, "Calibration", DataType::Calib);
 
-  auto const errorMessage = uiv.generateErrorMessage();
-  if (!errorMessage.isEmpty())
-    emit showMessageBox(errorMessage);
-}
-
-void IETView::mappingOptionSelected(const QString &groupType) {
-  if (groupType == "File")
-    m_uiForm.swGrouping->setCurrentIndex(0);
-  else if (groupType == "Groups")
-    m_uiForm.swGrouping->setCurrentIndex(1);
-  else if (groupType == "Custom")
-    m_uiForm.swGrouping->setCurrentIndex(2);
-  else
-    m_uiForm.swGrouping->setCurrentIndex(3);
-}
-
-void IETView::pbRunEditing() {
-  updateRunButton(false, "unchanged", "Editing...", "Run numbers are currently being edited.");
+  auto const errorMessage = uiv->generateErrorMessage();
+  if (!errorMessage.empty())
+    showMessageBox(errorMessage);
 }
 
 void IETView::pbRunFinding() {
-  updateRunButton(false, "unchanged", "Finding files...", "Searching for data files for the run numbers entered...");
+  m_presenter->notifyFindingRun();
   m_uiForm.dsRunFiles->setEnabled(false);
 }
-
-int IETView::getGroupingOptionIndex(QString const &option) {
-  auto const index = m_uiForm.cbGroupingOptions->findText(option);
-  return index >= 0 ? index : 0;
-}
-
-bool IETView::isOptionHidden(QString const &option) {
-  auto const index = m_uiForm.cbGroupingOptions->findText(option);
-  return index == -1;
-}
-
-void IETView::includeExtraGroupingOption(bool includeOption, QString const &option) {
-  if (includeOption && isOptionHidden(option)) {
-    m_uiForm.cbGroupingOptions->addItem(option);
-    m_uiForm.cbGroupingOptions->setCurrentIndex(getGroupingOptionIndex(option));
-  } else if (!includeOption && !isOptionHidden(option))
-    m_uiForm.cbGroupingOptions->removeItem(getGroupingOptionIndex(option));
-}
-
-void IETView::setRunEnabled(bool enable) { m_uiForm.pbRun->setEnabled(enable); }
 
 void IETView::setPlotTimeEnabled(bool enable) {
   m_uiForm.pbPlotTime->setEnabled(enable);
@@ -357,9 +312,4 @@ void IETView::setPlotTimeEnabled(bool enable) {
   m_uiForm.spPlotTimeSpecMax->setEnabled(enable);
 }
 
-void IETView::setButtonsEnabled(bool enable) {
-  setRunEnabled(enable);
-  setPlotTimeEnabled(enable);
-  setSaveEnabled(enable);
-}
 } // namespace MantidQt::CustomInterfaces

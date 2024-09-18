@@ -47,9 +47,10 @@ For setting scales, axis titles, plot titles etc. you can use:
 
     # Rescale the axis limits
     axes.set_xlim(0,5000)
+    axes.set_ylim(0.001,1500)
 
     #C hange the y-axis label
-    axes.set_ylabel('Counts ($\mu s$)$^{-1}$')
+    axes.set_ylabel(r'Counts ($\mu s$)$^{-1}$')
 
     # Add legend entries
     axes.legend(['Good Line'])
@@ -107,7 +108,7 @@ To overplot on the same window:
     c = axes.imshow(data, origin = 'lower', cmap='viridis', aspect='auto', norm=LogNorm())
     cbar=fig.colorbar(c)
     cbar.set_label('Counts ($\mu s$)$^{-1}$') #add text to colorbar
-    #plt.show()
+    #fig.show()
 
 
 .. plot::
@@ -129,7 +130,7 @@ To overplot on the same window:
     c = ax.pcolormesh(sqw, cmap='plasma', norm=LogNorm())
     cbar=fig.colorbar(c)
     cbar.set_label('Intensity (arb. units)') #add text to colorbar
-    #plt.show()
+    #fig.show()
 
 `Contour lines <https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.contour.html>`_ can be overlayed on a 2D colorfill:
 
@@ -154,7 +155,7 @@ To overplot on the same window:
 
     cbar=fig.colorbar(c)
     cbar.set_label('Counts ($\mu s$)$^{-1}$') #add text to colorbar
-    #plt.show()
+    #fig.show()
 
 
 3D Surface and Wireframe Plots
@@ -175,7 +176,7 @@ To overplot on the same window:
 
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
     ax.plot_surface(data, cmap='viridis')
-    #plt.show()
+    #fig.show()
 
 .. plot::
    :include-source:
@@ -185,11 +186,13 @@ To overplot on the same window:
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
 
+    # This file can be found in the Usage Examples folder, available
+    # here https://www.mantidproject.org/installation/index#sample-data
     data = Load('PG3_733.nxs')
 
     fig, ax = plt.subplots(subplot_kw={'projection':'mantid3d'})
     ax.plot_wireframe(data, color='green')
-    #plt.show()
+    #fig.show()
 
 
 * See :ref:`here <plotting>` for custom color cycles and colormaps

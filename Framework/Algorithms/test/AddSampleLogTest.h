@@ -12,7 +12,9 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/AddSampleLog.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::Kernel;
@@ -21,6 +23,11 @@ using namespace Mantid::Algorithms;
 using Mantid::Types::Core::DateAndTime;
 
 class AddSampleLogTest : public CxxTest::TestSuite {
+private:
+  void setStartEndTime(MatrixWorkspace_sptr &ws) {
+    ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"), DateAndTime("2013-12-18T13:42:00"));
+  }
+
 public:
   void test_Workspace2D() {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
@@ -59,7 +66,7 @@ public:
 
   void test_NumberSeries() {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"), DateAndTime("2013-12-18T13:42:00"));
+    this->setStartEndTime(ws);
     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "1.234", 1.234);
     ExecuteAlgorithm(ws, "My Name NS1", "Number Series", "2.456", 2.456);
     // Only double is allowed if using default type
@@ -70,7 +77,7 @@ public:
 
   void test_Units() {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"), DateAndTime("2013-12-18T13:42:00"));
+    this->setStartEndTime(ws);
     ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234, false, "myUnit");
     ExecuteAlgorithm(ws, "My New Name", "Number", "963", 963, false, "differentUnit");
     ExecuteAlgorithm(ws, "My Name", "String", "My Value", 0.0, false, "stringUnit");
@@ -78,7 +85,7 @@ public:
 
   void test_number_type() {
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
-    ws->mutableRun().setStartAndEndTime(DateAndTime("2013-12-18T13:40:00"), DateAndTime("2013-12-18T13:42:00"));
+    this->setStartEndTime(ws);
     ExecuteAlgorithm(ws, "My Name", "Number Series", "1.234", 1.234, false, "myUnit", "Double");
     ExecuteAlgorithm(ws, "My New Name", "Number", "963", 963, false, "differentUnit", "Int");
     // Can force '963' to be interpreted as a double
@@ -148,7 +155,7 @@ public:
   void ExecuteAlgorithm(const MatrixWorkspace_sptr &testWS, const std::string &LogName, const std::string &LogType,
                         const std::string &LogText, T expectedValue, bool fails = false,
                         const std::string &LogUnit = "", const std::string &NumberType = "AutoDetect",
-                        bool throws = false) {
+                        bool throws = false, bool updateInstrumentParams = false) {
     // add the workspace to the ADS
     AnalysisDataService::Instance().addOrReplace("AddSampleLogTest_Temporary", testWS);
 
@@ -165,6 +172,7 @@ public:
     alg.setPropertyValue("LogUnit", LogUnit);
     alg.setPropertyValue("LogType", LogType);
     alg.setPropertyValue("NumberType", NumberType);
+    alg.setProperty("UpdateInstrumentParameters", updateInstrumentParams);
     if (throws) {
       TS_ASSERT_THROWS_ANYTHING(alg.execute())
       return;
@@ -203,5 +211,63 @@ public:
     }
     // cleanup
     AnalysisDataService::Instance().remove(output->getName());
+  }
+
+  /*
+   * SNAP has detector positions that depend on the sample logs. This test load the instrument add the logs, then
+   * verifies the derived positions are set correctly.
+   */
+  void test_instrumentWithParameters() {
+    const std::string wkspName("SNAP_det_pos");
+    const Mantid::Kernel::V3D ORIGIN(0, 0, 0);
+
+    // load the empty instrument
+    Mantid::DataHandling::LoadEmptyInstrument loadAlg;
+    loadAlg.initialize();
+    loadAlg.setProperty("InstrumentName", "SNAP");
+    loadAlg.setProperty("OutputWorkspace", wkspName);
+    loadAlg.execute();
+    TS_ASSERT(loadAlg.isExecuted());
+    // get the workspace
+    MatrixWorkspace_sptr ws =
+        std::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wkspName));
+    this->setStartEndTime(ws);
+
+    // values taken from logs of SNAP_57514
+    constexpr double det_lin1{0.045};
+    constexpr double det_lin2{0.043};
+    constexpr double det_arc1{-65.3};
+    constexpr double det_arc2{104.95};
+
+    // add the logs for detector information and make sure the logs are set correctly
+    // none of these update the instrument
+    ExecuteAlgorithm(ws, "det_lin1", "Number Series", "0.045", det_lin1);
+    ExecuteAlgorithm(ws, "det_lin2", "Number Series", "0.043", det_lin2);
+    ExecuteAlgorithm(ws, "det_arc1", "Number Series", "-65.3", det_arc1);
+    ExecuteAlgorithm(ws, "det_arc2", "Number Series", "104.95", det_arc2);
+
+    // not updating the instrument puts the banks at the origin
+    const auto westPosBad = ws->getInstrument()->getComponentByName("West")->getPos();
+    const auto eastPosBad = ws->getInstrument()->getComponentByName("East")->getPos();
+    TS_ASSERT_EQUALS(westPosBad, ORIGIN);
+    TS_ASSERT_EQUALS(eastPosBad, ORIGIN);
+
+    // re-run the last call and requests for the instrument to be updated, the other function parameters are the default
+    // values
+    ExecuteAlgorithm(ws, "det_arc2", "Number Series", "104.95", det_arc2, false, "", "AutoDetect", false, true);
+
+    // positions for the center of SNAP's two sides
+    const auto westPosGood = ws->getInstrument()->getComponentByName("West")->getPos();
+    const auto eastPosGood = ws->getInstrument()->getComponentByName("East")->getPos();
+
+    // check the center angles from downstream
+    // V3D::angle returns radians
+    const Mantid::Kernel::V3D downstream(0, 0, 1);
+    TS_ASSERT_EQUALS(westPosGood.angle(downstream) * 180 / M_PI, abs(det_arc1));
+    TS_ASSERT_EQUALS(eastPosGood.angle(downstream) * 180 / M_PI, abs(det_arc2));
+
+    // check the center distance - detector is 0.5m + det_lin motor
+    TS_ASSERT_EQUALS(westPosGood.distance(ORIGIN), 0.5 + det_lin1);
+    TS_ASSERT_EQUALS(eastPosGood.distance(ORIGIN), 0.5 + det_lin2);
   }
 };

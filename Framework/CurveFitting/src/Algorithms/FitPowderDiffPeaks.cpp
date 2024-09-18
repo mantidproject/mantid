@@ -1540,9 +1540,9 @@ bool FitPowderDiffPeaks::doFit1PeakSimple(const Workspace2D_sptr &dataws, size_t
   stringstream dbss;
   dbss << peakfunction->asString() << '\n';
   dbss << "Starting Value: ";
-  vector<string> names = peakfunction->getParameterNames();
-  for (auto &name : names)
-    dbss << name << "= " << peakfunction->getParameter(name) << ", \t";
+  vector<string> paramNames = peakfunction->getParameterNames();
+  for (auto &paramName : paramNames)
+    dbss << paramName << "= " << peakfunction->getParameter(paramName) << ", \t";
   for (size_t i = 0; i < dataws->x(workspaceindex).size(); ++i)
     dbss << dataws->x(workspaceindex)[i] << "\t\t" << dataws->y(workspaceindex)[i] << "\t\t"
          << dataws->e(workspaceindex)[i] << '\n';
@@ -1757,27 +1757,27 @@ bool FitPowderDiffPeaks::fitOverlappedPeaks(vector<BackToBackExponential_sptr> p
   estimateBackgroundCoarse(peaksws, backgroundfunction, 0, 2, 1);
 
   // [DB] Debug output
-  stringstream piss;
-  piss << peaks.size() << "-Peaks Group Information: \n";
+  stringstream peakInfo;
+  peakInfo << peaks.size() << "-Peaks Group Information: \n";
   for (size_t ipk = 0; ipk < tofpeakpairs.size(); ++ipk) {
     BackToBackExponential_sptr tmppeak = tofpeakpairs[ipk].second;
-    piss << "Peak " << ipk << "  @ TOF = " << tmppeak->centre() << ", A = " << tmppeak->getParameter("A")
-         << ", B = " << tmppeak->getParameter("B") << ", S = " << tmppeak->getParameter("S")
-         << ", FWHM = " << tmppeak->fwhm() << '\n';
+    peakInfo << "Peak " << ipk << "  @ TOF = " << tmppeak->centre() << ", A = " << tmppeak->getParameter("A")
+             << ", B = " << tmppeak->getParameter("B") << ", S = " << tmppeak->getParameter("S")
+             << ", FWHM = " << tmppeak->fwhm() << '\n';
   }
-  g_log.information() << "[DB1034] " << piss.str();
+  g_log.information() << "[DB1034] " << peakInfo.str();
 
-  stringstream datass;
-  datass << "Partial workspace for peaks: \n";
+  stringstream peakWSData;
+  peakWSData << "Partial workspace for peaks: \n";
   for (size_t i = 0; i < peaksws->x(0).size(); ++i)
-    datass << peaksws->x(1)[i] << "\t\t" << peaksws->y(1)[i] << "\t\t" << peaksws->e(1)[i] << "\t\t" << peaksws->y(0)[i]
-           << '\n';
-  g_log.information() << "[DB1042] " << datass.str();
+    peakWSData << peaksws->x(1)[i] << "\t\t" << peaksws->y(1)[i] << "\t\t" << peaksws->e(1)[i] << "\t\t"
+               << peaksws->y(0)[i] << '\n';
+  g_log.information() << "[DB1042] " << peakWSData.str();
 
   // 5. Estimate peak height according to pre-set peak value
   estimatePeakHeightsLeBail(peaksws, 1, peaks);
 
-  // 6. Set bundaries
+  // 6. Set boundaries
   setOverlappedPeaksConstraints(peaks);
 
   // 7. Set up the composite function
@@ -1979,9 +1979,9 @@ bool FitPowderDiffPeaks::doFitNPeaksSimple(const Workspace2D_sptr &dataws, size_
   // 1. Debug output
   stringstream dbss0;
   dbss0 << "Starting Value: ";
-  vector<string> names = peaksfunc->getParameterNames();
-  for (auto &name : names)
-    dbss0 << name << "= " << peaksfunc->getParameter(name) << ", \t";
+  vector<string> paramNames = peaksfunc->getParameterNames();
+  for (auto &paramName : paramNames)
+    dbss0 << paramName << "= " << peaksfunc->getParameter(paramName) << ", \t";
   g_log.information() << "DBx430 " << dbss0.str() << '\n';
 
   // 2. Create fit

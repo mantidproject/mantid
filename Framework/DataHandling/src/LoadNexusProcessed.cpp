@@ -48,7 +48,7 @@
 namespace Mantid::DataHandling {
 
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNexusProcessed)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadNexusProcessed)
 
 using namespace Mantid::NeXus;
 using namespace DataObjects;
@@ -80,7 +80,7 @@ struct SpectraInfo {
 };
 
 // Helper typdef.
-using SpectraInfo_optional = boost::optional<SpectraInfo>;
+using SpectraInfo_optional = std::optional<SpectraInfo>;
 
 /**
  * Extract ALL the detector, spectrum number and workspace index mapping
@@ -190,8 +190,8 @@ LoadNexusProcessed::~LoadNexusProcessed() = default;
  * @returns An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadNexusProcessed::confidence(Kernel::NexusDescriptor &descriptor) const {
-  if (descriptor.pathExists("/mantid_workspace_1"))
+int LoadNexusProcessed::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+  if (descriptor.isEntry("/mantid_workspace_1"))
     return 80;
   else
     return 0;
@@ -370,7 +370,7 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(NXRoot &root
  *
  *  @throw runtime_error Thrown if algorithm cannot execute
  */
-void LoadNexusProcessed::exec() {
+void LoadNexusProcessed::execLoader() {
 
   API::Workspace_sptr tempWS;
   int nWorkspaceEntries = 0;
@@ -422,7 +422,7 @@ void LoadNexusProcessed::exec() {
       // multiperiod workspace.
       const bool bFastMultiPeriod = this->getProperty("FastMultiPeriod");
       const bool bIsMultiPeriod = isMultiPeriodFile(nWorkspaceEntries, tempWS, g_log);
-      Property *specListProp = this->getProperty("SpectrumList");
+      const Property *specListProp = this->getProperty("SpectrumList");
       m_list = !specListProp->isDefault();
 
       // Load all first level entries
@@ -731,6 +731,12 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData &wksp_cls, N
 
         for (int i = 0; i < xbins.dim1(); i++)
           x[i] = xbins(static_cast<int>(wi), i);
+
+        // for ragged workspace we need to remove all NaN value from end of vector
+        const auto idx =
+            std::distance(x.rbegin(), std::find_if_not(x.rbegin(), x.rend(), [](auto val) { return std::isnan(val); }));
+        if (idx > 0)
+          x.resize(x.size() - idx);
         // Workspace and el was just created, so we can just set a new histogram
         // We can move x as it is not longer used after this point
         el.setHistogram(HistogramData::BinEdges(std::move(x)));
@@ -925,7 +931,7 @@ void LoadNexusProcessed::loadV3DColumn(Mantid::NeXus::NXDouble &data, const API:
  * @param entry
  * @return API::Workspace_sptr
  */
-API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry) {
+API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(const NXEntry &entry) {
   g_log.notice("Load as LeanElasticPeaks");
 
   // API::IPeaksWorkspace_sptr workspace;
@@ -967,8 +973,6 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry
 
   } while (true);
 
-  // Get information from all but data group
-  std::string parameterStr;
   // Hop to the right point /mantid_workspace_1
   try {
     m_nexusFile->openPath(entry.path()); // This is
@@ -979,6 +983,8 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry
                              entry.path() + ". Lower level error description: " + re.what());
   }
   try {
+    // Get information from all but data group
+    std::string parameterStr;
     // This loads logs, sample, and instrument.
     peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"), m_nexusFile.get(), parameterStr);
     // Populate the instrument parameters in this workspace
@@ -1133,6 +1139,35 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry
         }
         peakWS->getPeak(r).setGoniometerMatrix(gm);
       }
+    } else if (str == "column_14") {
+      // Read shape information
+      using namespace Mantid::DataObjects;
+
+      PeakShapeFactory_sptr peakFactoryEllipsoid = std::make_shared<PeakShapeEllipsoidFactory>();
+      PeakShapeFactory_sptr peakFactorySphere = std::make_shared<PeakShapeSphericalFactory>();
+      PeakShapeFactory_sptr peakFactoryNone = std::make_shared<PeakNoShapeFactory>();
+
+      peakFactoryEllipsoid->setSuccessor(peakFactorySphere);
+      peakFactorySphere->setSuccessor(peakFactoryNone);
+
+      NXInfo info = nx_tw.getDataSetInfo(str);
+      NXChar data = nx_tw.openNXChar(str);
+
+      const int maxShapeJSONLength = info.dims[1];
+      data.load();
+      for (int i = 0; i < numberPeaks; ++i) {
+
+        // iR = peak row number
+        auto startPoint = data() + (maxShapeJSONLength * i);
+        std::string shapeJSON(startPoint, startPoint + maxShapeJSONLength);
+        boost::trim_right(shapeJSON);
+
+        // Make the shape
+        Mantid::Geometry::PeakShape *peakShape = peakFactoryEllipsoid->create(shapeJSON);
+
+        // Set the shape
+        peakWS->getPeak(i).setPeakShape(peakShape);
+      }
     } else if (str == "column_15") {
       NXDouble nxDouble = nx_tw.openNXDouble(str);
       nxDouble.load();
@@ -1176,7 +1211,7 @@ API::Workspace_sptr LoadNexusProcessed::loadLeanElasticPeaksEntry(NXEntry &entry
 /**
  * Load peaks
  */
-API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
+API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(const NXEntry &entry) {
   // API::IPeaksWorkspace_sptr workspace;
   API::ITableWorkspace_sptr tWorkspace;
   // PeaksWorkspace_sptr workspace;
@@ -1216,8 +1251,6 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
 
   } while (true);
 
-  // Get information from all but data group
-  std::string parameterStr;
   // Hop to the right point /mantid_workspace_1
   try {
     m_nexusFile->openPath(entry.path()); // This is
@@ -1228,6 +1261,8 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
                              entry.path() + ". Lower level error description: " + re.what());
   }
   try {
+    // Get information from all but data group
+    std::string parameterStr;
     // This loads logs, sample, and instrument.
     peakWS->loadExperimentInfoNexus(getPropertyValue("Filename"), m_nexusFile.get(), parameterStr);
     // Populate the instrument parameters in this workspace
@@ -1687,6 +1722,15 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadNonEventEntry(NXData &wksp_cls
                   nchannels, hist_index, wsIndex, local_workspace);
       }
     }
+
+    // now check for NaN at end of X which would signify ragged binning
+    for (size_t i = 0; i < local_workspace->getNumberHistograms(); i++) {
+      const auto x = local_workspace->readX(i);
+      const auto idx =
+          std::distance(x.rbegin(), std::find_if_not(x.rbegin(), x.rend(), [](auto val) { return std::isnan(val); }));
+      if (idx > 0)
+        local_workspace->resizeHistogram(i, local_workspace->histogramSize(i) - idx);
+    }
   }
   return local_workspace;
 }
@@ -1829,14 +1873,14 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
     local_workspace->setDistribution(false);
   }
 
-  // Get information from all but data group
-  std::string parameterStr;
-
   progress(progressStart + 0.05 * progressRange, "Reading the sample details...");
 
   // Hop to the right point
   m_nexusFile->openPath(mtd_entry.path());
   try {
+    // Get information from all but data group
+    std::string parameterStr;
+
     // This loads logs, sample, and instrument.
     local_workspace->loadExperimentInfoNexus(getPropertyValue("Filename"), m_nexusFile.get(),
                                              parameterStr); // REQUIRED PER PERIOD
@@ -1962,7 +2006,7 @@ std::map<std::string, std::string> LoadNexusProcessed::validateInputs() {
  * @param local_workspace :: pointer to workspace object
  * @param data :: reference to the NeXuS data for the axis
  */
-void LoadNexusProcessed::loadNonSpectraAxis(const API::MatrixWorkspace_sptr &local_workspace, NXData &data) {
+void LoadNexusProcessed::loadNonSpectraAxis(const API::MatrixWorkspace_sptr &local_workspace, const NXData &data) {
   Axis *axis = local_workspace->getAxis(1);
 
   if (axis->isNumeric()) {

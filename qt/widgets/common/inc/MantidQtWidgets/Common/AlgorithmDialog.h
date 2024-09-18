@@ -260,6 +260,8 @@ public:
   void addEnabledAndDisableLists(const QStringList &enabled, const QStringList &disabled);
   /// Add an AlgorithmObserver to the algorithm
   void addAlgorithmObserver(Mantid::API::AlgorithmObserver *observer);
+  /// Disable the exit button
+  void disableExitButton();
 
 protected:
   /** @name Member variables. */

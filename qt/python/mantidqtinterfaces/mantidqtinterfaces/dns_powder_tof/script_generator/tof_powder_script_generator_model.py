@@ -61,26 +61,24 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
                 "greater than zero, as well as q_max > q_min and dE_max > dE_min."
             )
         if not self._validate_nb_vana_banks():
-            return "Vanadium correction option is chosen, but " "the number of selected vanadium scans " "is either 0 or greater than 1."
+            return "Vanadium correction option is chosen, but the number of selected vanadium scans is either 0 or greater than 1."
         if not self._validate_nb_empty_banks():
-            return (
-                "Background subtraction option is chosen, but " "the number of selected background scans " "is either 0 or greater than 1."
-            )
+            return "Background subtraction option is chosen, but the number of selected background scans is either 0 or greater than 1."
         return ""
 
     def _get_vana_string(self):
         if self._vana_cor:
-            return f"          'vana_temperature': " f"{self._tof_opt['vanadium_temperature']},\n"
+            return f"          'vana_temperature': {self._tof_opt['vanadium_temperature']},\n"
         return ""
 
     def _get_back_string(self):
         if self._bg_cor:
-            return "          'ecVanaFactor': " f"{self._tof_opt['vana_back_factor']},\n"
+            return f"          'ecVanaFactor': {self._tof_opt['vana_back_factor']},\n"
         return ""
 
     def _get_back_tof_string(self):
         if self._bg_cor:
-            return "          'ecSampleFactor': " f"{self._tof_opt['sample_back_factor']},"
+            return f"          'ecSampleFactor': {self._tof_opt['sample_back_factor']},"
         return ""
 
     def _get_parameter_lines(self):
@@ -109,10 +107,10 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     @staticmethod
     def _get_header_lines():
         lines = [
-            "from mantid.simpleapi import MonitorEfficiencyCorUser, " "FindEPP, mtd",
-            "from mantid.simpleapi import ComputeCalibrationCoefVan, Divide, " "CorrectTOF",
+            "from mantid.simpleapi import MonitorEfficiencyCorUser, FindEPP, mtd",
+            "from mantid.simpleapi import ComputeCalibrationCoefVan, Divide, CorrectTOF",
             "from mantid.simpleapi import SaveAscii, SaveNexus, MaskDetectors",
-            "from mantidqtinterfaces.dns_powder_tof.scripts.dnstof import " "convert_to_de, get_sqw, load_data",
+            "from mantidqtinterfaces.dns_powder_tof.scripts.md_powder_tof import convert_to_de, get_sqw, load_data",
             "import numpy as np",
         ]
         return lines
@@ -166,7 +164,7 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         return [
             "# detector efficiency correction: compute coefficients",
             "EPP_table = FindEPP(vanadium)",
-            "coefs = ComputeCalibrationCoefVan(vanadium, EPP_table," " Temperature=params['vana_temperature'])",
+            "coefs = ComputeCalibrationCoefVan(vanadium, EPP_table, Temperature=params['vana_temperature'])",
         ]
 
     def _get_corr_epp_lines(self):
@@ -176,8 +174,8 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _get_bad_det_lines(self):
         if self._nb_vana_banks > 1 or self._nb_vana_banks == self._nb_banks:
-            return ["badDetectors = np.where(np.array(coefs[0]" ".extractY()).flatten() <= 0)[0]"]
-        return ["badDetectors = np.where(np.array(coefs.extractY())" ".flatten() <= 0)[0]"]
+            return ["badDetectors = np.where(np.array(coefs[0].extractY()).flatten() <= 0)[0]"]
+        return ["badDetectors = np.where(np.array(coefs.extractY()).flatten() <= 0)[0]"]
 
     def _get_mask_det_lines(self):
         if self._tof_opt["mask_bad_detectors"]:
@@ -225,9 +223,9 @@ class DNSTofPowderScriptGeneratorModel(DNSScriptGeneratorModel):
         lines = []
         ascii, nexus = self._check_if_to_save(paths)
         if ascii:
-            lines += ["SaveAscii('data1_dE_S', '" f"{paths['export_dir']}" "/data1_dE_S.csv', " "WriteSpectrumID=False)"]
+            lines += [f"SaveAscii('data1_dE_S', '{paths['export_dir']}/data1_dE_S.csv', WriteSpectrumID=False)"]
         if nexus:
-            lines += ["SaveNexus('data1_dE_S', '" f"{paths['export_dir']}/data1_dE_S.csv', )" ""]
+            lines += [f"SaveNexus('data1_dE_S', '{paths['export_dir']}/data1_dE_S.nxs')"]
         return lines
 
     @staticmethod

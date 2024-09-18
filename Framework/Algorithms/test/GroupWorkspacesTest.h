@@ -352,7 +352,7 @@ public:
     removeFromADS("", inputs);
   }
 
-  void test_OutputGroup_cannot_contain_workspaces_from_the_ADS() {
+  void test_OutputGroup_can_supplant_a_workspace_with_the_same_name_in_the_ADS() {
     std::vector<std::string> inputs{"ws1", "ws2"};
     addTestMatrixWorkspacesToADS(inputs);
     Mantid::Algorithms::GroupWorkspaces alg;
@@ -360,9 +360,14 @@ public:
     alg.setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspaces", inputs));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws1"));
-    TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
-    TS_ASSERT(!alg.isExecuted());
-    removeFromADS("", inputs);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    auto &ads = Mantid::API::AnalysisDataService::Instance();
+    TS_ASSERT(ads.doesExist("ws1"));
+    TS_ASSERT(ads.doesExist("ws2"));
+    TS_ASSERT(ads.doesExist("ws1_1"));
+    removeFromADS("ws1", {"ws1_1", "ws2"});
   }
 
   void test_OutputWorkspace_can_overwrite_input_group_workspaces() {

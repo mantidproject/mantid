@@ -1,1 +1,0 @@
-- Editing a plot's title will now automatically update its name in the plot selector (and vice versa).

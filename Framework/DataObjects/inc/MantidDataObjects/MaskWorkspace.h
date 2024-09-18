@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/DetectorInfo.h"
 
 namespace Mantid {
 namespace DataObjects {
@@ -40,6 +41,24 @@ public:
 
   /// Copy the set up from another workspace
   void copyFrom(std::shared_ptr<const SpecialWorkspace2D> sourcews) override;
+
+  /// Ensure that these detectors' mask flags include the values from this mask workspace.
+  void combineToDetectorMasks(Mantid::Geometry::DetectorInfo &detectors) const;
+
+  /// Ensure that this mask workspace's detectors mask flags include the workspace values.
+  void combineToDetectorMasks() { combineToDetectorMasks(mutableDetectorInfo()); }
+
+  /// Ensure that this workspace includes the values from these detectors' mask flags.
+  void combineFromDetectorMasks(const Mantid::Geometry::DetectorInfo &detectors);
+
+  /// Ensure that this workspace's values include the values from its own detectors' mask flags.
+  void combineFromDetectorMasks() { combineFromDetectorMasks(detectorInfo()); }
+
+  /// Test consistency between the values from this workspace and the specified detectors' mask flags.
+  bool isConsistentWithDetectorMasks(const Mantid::Geometry::DetectorInfo &detectors) const;
+
+  /// Test consistency between the values from this workspace and its own detectors' mask flags.
+  bool isConsistentWithDetectorMasks() const { return isConsistentWithDetectorMasks(detectorInfo()); }
 
 protected:
   /// Protected copy constructor. May be used by childs for cloning.

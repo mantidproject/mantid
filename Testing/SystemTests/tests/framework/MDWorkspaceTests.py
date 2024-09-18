@@ -168,8 +168,14 @@ class MergeMDTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         configI = ConfigService.Instance()
+        # cleanup from previous failed run
+        merged_filename = os.path.join(configI["defaultsave.directory"], r"merged.nxs")
+        if os.path.exists(merged_filename):
+            os.remove(merged_filename)
 
         LoadEventNexus(Filename="CNCS_7860_event.nxs", OutputWorkspace="CNCS_7860_event_NXS", CompressTolerance=0.1)
+        # LoadEventNexus(Filename="CNCS_7860_event.nxs", OutputWorkspace="CNCS_7860_event_NXS")
+        # CompressEvents(InputWorkspace="CNCS_7860_event_NXS", OutputWorkspace="CNCS_7860_event_NXS", Tolerance=0.1)
 
         for omega in range(0, 5):
             print("Starting omega %03d degrees" % omega)
@@ -205,12 +211,12 @@ class MergeMDTest(systemtesting.MantidSystemTest):
             SaveMD("CNCS_7860_event_MD", Filename=filename)
             self._saved_filenames.append(filename)
         # End for loop
-        filename = os.path.join(configI["defaultsave.directory"], r"merged.nxs")
-        MergeMDFiles(Filenames=self.make_files_to_merge_string(), OutputFilename=filename, OutputWorkspace="merged")
-        self._saved_filenames.append(filename)
+        MergeMDFiles(Filenames=self.make_files_to_merge_string(), OutputFilename=merged_filename, OutputWorkspace="merged")
+        self._saved_filenames.append(merged_filename)
 
         # 5 times the number of events in the output workspace.
-        self.assertDelta(mtd["merged"].getNPoints(), 553035, 1)
+        # 553035 events if compression is done outside of loading
+        self.assertDelta(mtd["merged"].getNPoints(), 554720, 1)
 
     def doValidation(self):
         # If we reach here, no validation failed

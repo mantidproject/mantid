@@ -14,6 +14,6 @@ from setuptools import find_packages, setup
 setup(
     name="mantid",
     version=os.environ["MANTID_VERSION_STR"],
-    packages=find_packages(exclude=["*.test", "plugins*"]),
-    package_data={"": ["*.ui"]},
+    packages=find_packages(exclude=["*.test"]),
+    package_data={"": ["*.json", "*.ui"]},
 )

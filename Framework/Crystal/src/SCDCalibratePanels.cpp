@@ -97,9 +97,9 @@ void SCDCalibratePanels::exec() {
     PARALLEL_CHECK_INTERRUPT_REGION
   } else {
     for (int i = 0; i < nPeaks; ++i) {
-      std::string name = peaksWs->getPeak(i).getBankName();
-      if (name != "None")
-        MyBankNames.insert(name);
+      std::string bankName = peaksWs->getPeak(i).getBankName();
+      if (bankName != "None")
+        MyBankNames.insert(bankName);
     }
   }
 

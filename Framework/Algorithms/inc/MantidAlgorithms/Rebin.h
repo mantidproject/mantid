@@ -61,7 +61,7 @@ public:
 
   static std::vector<double> rebinParamsFromInput(const std::vector<double> &inParams,
                                                   const API::MatrixWorkspace &inputWS, Kernel::Logger &logger,
-                                                  std::string binModeName = "Default");
+                                                  const std::string &binModeName = "Default");
 
 protected:
   const std::string workspaceMethodName() const override { return "rebin"; }

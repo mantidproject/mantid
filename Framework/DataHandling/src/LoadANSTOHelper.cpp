@@ -403,21 +403,24 @@ int File::read_byte() {
 bool File::append(const std::string &path, const std::string &name, const void *buffer, size_t size) {
   std::unique_ptr<FILE, decltype(&fclose)> handle(fopen(path.c_str(), "rb+"), fclose);
 
-  bool good = handle != nullptr;
+  if (handle == nullptr)
+    return false;
+
   int64_t lastHeaderPosition = 0;
   int64_t targetPosition = -1;
 
-  while (good) {
+  bool fileStatus = true;
+  while (fileStatus) {
     EntryHeader header;
     int64_t position;
 
     lastHeaderPosition = static_cast<int64_t>(ftell(handle.get()));
 
-    good &= 1 == fread(&header, sizeof(EntryHeader), 1, handle.get());
-    good &= 0 == fseek(handle.get(), 512 - sizeof(EntryHeader), SEEK_CUR);
-    good &= 0 <= (position = static_cast<int64_t>(ftell(handle.get())));
+    fileStatus &= 1 == fread(&header, sizeof(EntryHeader), 1, handle.get());
+    fileStatus &= 0 == fseek(handle.get(), 512 - sizeof(EntryHeader), SEEK_CUR);
+    fileStatus &= 0 <= (position = static_cast<int64_t>(ftell(handle.get())));
 
-    if (!good)
+    if (!fileStatus)
       return false;
 
     std::string fileName(header.FileName);
@@ -437,11 +440,8 @@ bool File::append(const std::string &path, const std::string &name, const void *
     if (offset != 0)
       offset = 512 - offset;
 
-    good &= 0 == fseek(handle.get(), static_cast<long>(fileInfo.Size + offset), SEEK_CUR);
+    fileStatus &= 0 == fseek(handle.get(), static_cast<long>(fileInfo.Size + offset), SEEK_CUR);
   }
-
-  if (!good)
-    return false;
 
   if (targetPosition < 0)
     targetPosition = lastHeaderPosition;
@@ -464,25 +464,25 @@ bool File::append(const std::string &path, const std::string &name, const void *
   header.writeChecksum();
 
   // write header
-  good &= 0 == fseek(handle.get(), static_cast<long>(targetPosition), SEEK_SET);
-  good &= 1 == fwrite(&header, sizeof(EntryHeader), 1, handle.get());
-  good &= 1 == fwrite(padding, 512 - sizeof(EntryHeader), 1, handle.get());
+  fileStatus &= 0 == fseek(handle.get(), static_cast<long>(targetPosition), SEEK_SET);
+  fileStatus &= 1 == fwrite(&header, sizeof(EntryHeader), 1, handle.get());
+  fileStatus &= 1 == fwrite(padding, 512 - sizeof(EntryHeader), 1, handle.get());
 
   // write content
-  good &= 1 == fwrite(buffer, size, 1, handle.get());
+  fileStatus &= 1 == fwrite(buffer, size, 1, handle.get());
 
   // write padding
   auto offset = static_cast<size_t>(size % 512);
   if (offset != 0) {
     offset = 512 - offset;
 
-    good &= 1 == fwrite(padding, offset, 1, handle.get());
+    fileStatus &= 1 == fwrite(padding, offset, 1, handle.get());
   }
 
   // write final
-  good &= 1 == fwrite(padding, 512, 1, handle.get());
+  fileStatus &= 1 == fwrite(padding, 512, 1, handle.get());
 
-  return good;
+  return fileStatus;
 }
 
 } // namespace Tar

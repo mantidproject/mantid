@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import re
 
 from qtpy import QtCore, QtGui, QtWidgets
 from qtpy.QtCore import Signal, QSettings
@@ -74,10 +75,21 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
             self.requestTextBrowser.insertHtml(msg)
 
         self.input_name_line_edit.textChanged.connect(self.set_button_status)
+        self.input_email_line_edit.textChanged.connect(self.toggle_valid_email)
         self.input_email_line_edit.textChanged.connect(self.set_button_status)
         self.input_free_text.textChanged.connect(self.set_plain_text_edit_field)
         self.input_free_text.textChanged.connect(self.set_plain_text_length_lable)
         self.input_free_text.textChanged.connect(self.set_button_status)
+
+        self.email_notice_expanded_text.hide()
+        self.email_notice_button.clicked.connect(self.expand_or_hide_email_notice_text)
+
+        # https://emailregex.com/
+        self.email_regex = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
+        self.valid_email = False
+
+        # setting the border colour in self.toggle_valid_email was making the height slightly less for some reason
+        self.input_email_line_edit.setFixedHeight(self.input_email_line_edit.sizeHint().height())
 
         self.privacy_policy_label.linkActivated.connect(self.launch_privacy_policy)
 
@@ -86,7 +98,6 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
         #  These are the options along the bottom
         self.fullShareButton.clicked.connect(self.fullShare)
-        self.nonIDShareButton.clicked.connect(self.nonIDShare)
         self.noShareButton.clicked.connect(self.noShare)
 
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint | QtCore.Qt.WindowTitleHint | QtCore.Qt.WindowStaysOnTopHint)
@@ -107,20 +118,19 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
         if self.saved_name or self.saved_email:
             self.input_name_line_edit.setText(self.saved_name)
             self.input_email_line_edit.setText(self.saved_email)
-            self.nonIDShareButton.setEnabled(True)
             self.rememberContactInfoCheckbox.setChecked(True)
+
+        self.toggle_valid_email()
+        self.set_button_status()
 
     def quit(self):
         self.quit_signal.emit()
 
     def fullShare(self):
-        self.action.emit(self.continue_working, 0, self.input_name, self.input_email, self.input_text)
-
-    def nonIDShare(self):
-        self.action.emit(self.continue_working, 1, self.input_name, self.input_email, self.input_text)
+        self.action.emit(self.continue_working, True, self.input_name, self.input_email, self.input_text)
 
     def noShare(self):
-        self.action.emit(self.continue_working, 2, self.input_name, self.input_email, self.input_text)
+        self.action.emit(self.continue_working, False, self.input_name, self.input_email, self.input_text)
 
     def close_reporter(self, status):
         if status == 201 or status == -1:
@@ -156,17 +166,16 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
     def launch_privacy_policy(self, link):
         self.interface_manager.showWebPage(link)
 
-    def set_button_status(self):
-        if not self.input_name and not self.input_email:
-            self.nonIDShareButton.setEnabled(True)
-        elif self.input_name == self.saved_name and self.input_email == self.saved_email:
-            self.nonIDShareButton.setEnabled(True)
+    def toggle_valid_email(self):
+        self.valid_email = re.fullmatch(self.email_regex, self.input_email)
+        if not self.valid_email:
+            self.input_email_line_edit.setStyleSheet("border: 1px solid red")
         else:
-            self.nonIDShareButton.setEnabled(False)
+            self.input_email_line_edit.setStyleSheet("border: 1px solid gray")
 
-        if len(self.input_text) > PLAIN_TEXT_MAX_LENGTH:
+    def set_button_status(self):
+        if not self.valid_email or len(self.input_text) > PLAIN_TEXT_MAX_LENGTH:
             self.fullShareButton.setEnabled(False)
-            self.nonIDShareButton.setEnabled(False)
         else:
             self.fullShareButton.setEnabled(True)
 
@@ -188,6 +197,14 @@ class CrashReportPage(ErrorReportUIBase, ErrorReportUI):
 
     def set_report_callback(self, callback):
         self.action.connect(callback)
+
+    def expand_or_hide_email_notice_text(self):
+        if self.email_notice_expanded_text.isVisible():
+            self.email_notice_expanded_text.hide()
+            self.email_notice_button.setText("Read More")
+        else:
+            self.email_notice_expanded_text.show()
+            self.email_notice_button.setText("Read Less")
 
     @property
     def input_name(self):

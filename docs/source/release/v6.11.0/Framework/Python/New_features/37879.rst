@@ -1,0 +1,1 @@
+- Creates documentation for :mod:`mantid.dataobjects` python bindings

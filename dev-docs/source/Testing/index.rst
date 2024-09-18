@@ -21,16 +21,24 @@ creation is outlined in :ref:`issue_tracking`.
    :maxdepth: 1
 
    Core/Core
+   Direct/ALFViewTests
+   Direct/DGSReductionTests
+   Direct/MSliceTestGuide
    SliceViewer/SliceViewer
    MuonAnalysis_test_guides/index
    ElementalAnalysis/ElementalAnalysisTests
-   IndirectInelastic/IndirectInelasticAcceptanceTests
+   Indirect/DiffractionTests
+   Indirect/DataReductionTests
+   Inelastic/CorrectionsTests
+   Inelastic/DataProcessorTests
+   Inelastic/QENSFittingTests
+   Inelastic/BayesFittingTests
    EngineeringDiffraction/EngineeringDiffractionTestGuide
    ErrorReporter-ProjectRecovery/ErrorReporterTesting
    ErrorReporter-ProjectRecovery/ProjectRecoveryTesting
    LiveData/LiveDataTests
    ReflectometryGUI/ReflectometryGUITests
    SANSGUI/ISISSANSGUITests
-   DirectInelastic/ALFViewTests
-   DirectInelastic/MSliceTestGuide
    General/SampleTransmissionCalculatorTestGuide
+   Utility/FilterEventsInterfaceTest
+   Documentation/DocumentationTest

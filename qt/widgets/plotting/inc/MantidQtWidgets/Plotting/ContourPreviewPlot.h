@@ -7,11 +7,10 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Plotting/AxisID.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
-
-#include <Poco/NObserver.h>
 
 #include <QColor>
 #include <QWidget>
@@ -28,33 +27,29 @@ class FigureCanvasQt;
 
 namespace MantidWidgets {
 
-class EXPORT_OPT_MANTIDQT_PLOTTING ContourPreviewPlot : public QWidget {
+class EXPORT_OPT_MANTIDQT_PLOTTING ContourPreviewPlot : public QWidget, public AnalysisDataServiceObserver {
   Q_OBJECT
 
 public:
   ContourPreviewPlot(QWidget *parent = nullptr, bool observeADS = true);
-  ~ContourPreviewPlot() override;
 
   void watchADS(bool on);
 
   void setCanvasColour(QColor const &colour);
 
   void setWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace);
+  void clearPlot();
 
   std::tuple<double, double> getAxisRange(AxisID axisID) const;
 
 private:
   void createLayout();
 
-  void onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf);
-  void onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf);
+  void replaceHandle(const std::string &wsName, const Workspace_sptr &workspace) override;
+  void deleteHandle(const std::string &wsName, const Workspace_sptr &workspace) override;
 
   /// Canvas objects
   Widgets::MplCpp::FigureCanvasQt *m_canvas;
-
-  /// Observers for ADS Notifications
-  Poco::NObserver<ContourPreviewPlot, Mantid::API::WorkspacePreDeleteNotification> m_wsRemovedObserver;
-  Poco::NObserver<ContourPreviewPlot, Mantid::API::WorkspaceBeforeReplaceNotification> m_wsReplacedObserver;
 };
 
 } // namespace MantidWidgets

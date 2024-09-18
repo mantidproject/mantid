@@ -285,9 +285,9 @@ class ApplyAllPropertiesTest(unittest.TestCase):
     def test_apply_properties_on_figure_with_curve_sets_errorbar_color(self):
         cap_color = self.new_curve[1][0].get_color()
         bar_color = self.new_curve[2][0].get_color()
-        if cap_color[0] != "#":
+        if not isinstance(cap_color, str) or not cap_color.startswith("#"):
             cap_color = convert_color_to_hex(cap_color[0])
-        if bar_color[0] != "#":
+        if not isinstance(bar_color, str) or not bar_color.startswith("#"):
             bar_color = convert_color_to_hex(bar_color[0])
         self.assertEqual(new_curve_view_props["ecolor"], cap_color)
         self.assertEqual(new_curve_view_props["ecolor"], bar_color)

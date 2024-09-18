@@ -78,8 +78,8 @@ void ParamFunction::setParameter(const std::string &name, const double &value, b
     msg << "ParamFunction tries to set value to non-exist parameter (" << name << ") "
         << "of function " << this->name();
     msg << "\nAllowed parameters: ";
-    for (const auto &parameterName : m_parameterNames) {
-      msg << parameterName << ", ";
+    for (const auto &parName : m_parameterNames) {
+      msg << parName << ", ";
     }
     throw std::invalid_argument(msg.str());
   }
@@ -97,8 +97,8 @@ void ParamFunction::setParameterDescription(const std::string &name, const std::
     std::ostringstream msg;
     msg << "ParamFunction tries to set description to non-exist parameter (" << name << "). ";
     msg << "\nAllowed parameters: ";
-    for (const auto &parameterName : m_parameterNames)
-      msg << parameterName << ", ";
+    for (const auto &parName : m_parameterNames)
+      msg << parName << ", ";
     throw std::invalid_argument(msg.str());
   }
   setParameterDescription(static_cast<int>(it - m_parameterNames.begin()), description);
@@ -116,8 +116,8 @@ double ParamFunction::getParameter(const std::string &name) const {
     msg << "ParamFunction tries to get value of non-existing parameter (" << name << ") "
         << "to function " << this->name();
     msg << "\nAllowed parameters: ";
-    for (const auto &parameterName : m_parameterNames)
-      msg << parameterName << ", ";
+    for (const auto &parName : m_parameterNames)
+      msg << parName << ", ";
     throw std::invalid_argument(msg.str());
   }
 
@@ -194,8 +194,8 @@ double ParamFunction::getError(const std::string &name) const {
     msg << "ParamFunction tries to get error of non-existing parameter (" << name << ") "
         << "to function " << this->name();
     msg << "\nAllowed parameters: ";
-    for (const auto &parameterName : m_parameterNames)
-      msg << parameterName << ", ";
+    for (const auto &parName : m_parameterNames)
+      msg << parName << ", ";
     throw std::invalid_argument(msg.str());
   }
   return m_errors[static_cast<int>(it - m_parameterNames.begin())];
@@ -223,8 +223,8 @@ void ParamFunction::setError(const std::string &name, double err) {
     msg << "ParamFunction tries to set error of non-existing parameter (" << name << ") "
         << "to function " << this->name();
     msg << "\nAllowed parameters: ";
-    for (const auto &parameterName : m_parameterNames)
-      msg << parameterName << ", ";
+    for (const auto &parName : m_parameterNames)
+      msg << parName << ", ";
     throw std::invalid_argument(msg.str());
   }
   m_errors[static_cast<int>(it - m_parameterNames.begin())] = err;

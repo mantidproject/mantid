@@ -38,12 +38,13 @@ void GroupWorkspaces::exec() {
   const std::vector<std::string> inputWorkspaces = getProperty("InputWorkspaces");
 
   const std::string globExpression = getProperty("GlobExpression");
+  std::string outputWorkspace = getProperty("OutputWorkspace");
 
   // Clear WorkspaceGroup in case algorithm instance is reused.
   m_group = nullptr;
 
   if (!inputWorkspaces.empty())
-    addToGroup(inputWorkspaces);
+    addToGroup(inputWorkspaces, outputWorkspace);
   if (!globExpression.empty())
     addToGroup(globExpression);
   if ((m_group == nullptr) || m_group->isEmpty())
@@ -58,16 +59,6 @@ std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
   const std::vector<std::string> inputWorkspaces = getProperty("InputWorkspaces");
   std::string globExpression = getProperty("GlobExpression");
   std::string outputWorkspace = getProperty("OutputWorkspace");
-
-  // Peform a check that inputworkspaces cannot contain a workspace with the
-  // same name as the group/output workspace
-  for (const auto &ws : inputWorkspaces) {
-    if (ws == outputWorkspace) {
-      if (!AnalysisDataService::Instance().retrieve(ws)->isGroup())
-        results["OutputWorkspace"] = "The output workspace has the same name as "
-                                     "one of the input workspaces";
-    }
-  }
 
   for (auto it = globExpression.begin(); it < globExpression.end(); ++it) {
     if (*it == '\\') {
@@ -109,10 +100,10 @@ void GroupWorkspaces::addToGroup(const std::string &globExpression) {
   Poco::Glob glob(globExpression);
 
   const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-  const auto names = ads.topLevelItems();
-  for (const auto &name : names) {
-    if (glob.match(name.first)) {
-      addToGroup(name.second);
+  const auto wsNames = ads.topLevelItems();
+  for (const auto &wsName : wsNames) {
+    if (glob.match(wsName.first)) {
+      addToGroup(wsName.second);
     }
   }
 }
@@ -120,13 +111,13 @@ void GroupWorkspaces::addToGroup(const std::string &globExpression) {
 /**
  * Add a list of names to the new group
  * @param names The list of names to add from the ADS
+ * @param outputName The name to give the group workspace
  */
-void GroupWorkspaces::addToGroup(const std::vector<std::string> &names) {
+void GroupWorkspaces::addToGroup(const std::vector<std::string> &names, const std::string &outputName) {
 
-  const AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
-  for (const auto &name : names) {
-    auto workspace = ads.retrieve(name);
-    addToGroup(workspace);
+  AnalysisDataServiceImpl &ads = AnalysisDataService::Instance();
+  for (const auto &wsName : names) {
+    addToGroup(wsName != outputName ? ads.retrieve(wsName) : ads.remove(wsName));
   }
 }
 
@@ -136,10 +127,13 @@ void GroupWorkspaces::addToGroup(const std::vector<std::string> &names) {
  */
 void GroupWorkspaces::addToGroup(const API::Workspace_sptr &workspace) {
   auto localGroup = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+  auto &ads = AnalysisDataService::Instance();
   if (localGroup) {
     addToGroup(localGroup->getNames());
-    // Remove the group from the ADS
-    AnalysisDataService::Instance().remove(workspace->getName());
+    if (ads.doesExist(workspace->getName())) {
+      // Remove the group from the ADS
+      ads.remove(workspace->getName());
+    }
   } else {
     if (!m_group)
       m_group = std::make_shared<WorkspaceGroup>();

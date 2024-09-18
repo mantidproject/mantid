@@ -68,7 +68,7 @@ class ProjectRecoverySaverTest(unittest.TestCase):
 
         # Check 0.py was made
         checkpoint = self.pr.listdir_fullpath(self.pr.recovery_directory_pid)[0]
-        self.assertTrue(os.path.exists(os.path.join(checkpoint, "0.py")))
+        self.assertTrue(os.path.exists(os.path.join(checkpoint, "load_workspaces.py")))
         self.assertEqual(self.pr_saver._spin_off_another_time_thread.call_count, 1)
 
     @mock.patch("workbench.projectrecovery.projectrecoverysaver.find_all_windows_that_are_savable")
@@ -85,7 +85,7 @@ class ProjectRecoverySaverTest(unittest.TestCase):
 
         # Check no 0.py was made
         checkpoint = self.pr.listdir_fullpath(self.pr.recovery_directory_pid)[0]
-        self.assertTrue(not os.path.exists(os.path.join(checkpoint, "0.py")))
+        self.assertTrue(not os.path.exists(os.path.join(checkpoint, "load_workspaces.py")))
         self.assertEqual(self.pr_saver._spin_off_another_time_thread.call_count, 1)
 
         # Read the .json file and check nothing is in workspace and something is in the interfaces dictionary
@@ -115,9 +115,12 @@ class ProjectRecoverySaverTest(unittest.TestCase):
 
         self.pr_saver._save_workspaces(self.working_directory)
 
-        # Assert that the 0.py and 1.py that are expected are made
-        self.assertTrue(os.path.exists(os.path.join(self.working_directory, "0.py")))
-        self.assertTrue(os.path.exists(os.path.join(self.working_directory, "1.py")))
+        load_workspaces_script = os.path.join(self.working_directory, "load_workspaces.py")
+        self.assertTrue(os.path.exists(load_workspaces_script))
+        with open(load_workspaces_script, "r") as reader:
+            content = reader.read()
+            self.assertIn("CreateSampleWorkspace(OutputWorkspace='ws1')", content)
+            self.assertIn("CreateSampleWorkspace(OutputWorkspace='ws2')", content)
 
     def test_save_project(self):
         self.pr_saver.gfm = mock.MagicMock()
@@ -145,7 +148,7 @@ class ProjectRecoverySaverTest(unittest.TestCase):
 
         # Check 0.py was made
         checkpoint = self.pr.listdir_fullpath(self.pr.recovery_directory_pid)[0]
-        self.assertTrue(os.path.exists(os.path.join(checkpoint, "0.py")))
+        self.assertTrue(os.path.exists(os.path.join(checkpoint, "load_workspaces.py")))
         self.assertEqual(self.pr_saver._spin_off_another_time_thread.call_count, 1)
 
         # Read the .json file and check nothing is in workspace and something is in the interfaces dictionary

@@ -28,7 +28,7 @@ public:
 
   /// Function chosen to fit the data to
   /// @return Function string, or empty string if nothing chosen
-  virtual QString function() const = 0;
+  virtual std::string function() const = 0;
 
   /**
    * @param row :: Row number

@@ -88,40 +88,42 @@ public:
 
     // These two inputs are valid, and should return a result after making the
     // exact same underlying call to ONCat.
-    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_7390"}, {"_event.nxs"}),
+    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_7390"}, {"_event.nxs"}).result(),
                      "/SNS/PG3/IPTS-2767/0/7390/NeXus/PG3_7390_event.nxs");
-    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_7390_event.nxs"}, {}),
+    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_7390_event.nxs"}, {}).result(),
                      "/SNS/PG3/IPTS-2767/0/7390/NeXus/PG3_7390_event.nxs");
 
     // Make sure we support HFIR, too!
-    TS_ASSERT_EQUALS(arch.getArchivePath({"HB2C_26506"}, {".nxs.h5"}), "/HFIR/HB2C/IPTS-7776/nexus/HB2C_26506.nxs.h5");
-    TS_ASSERT_EQUALS(arch.getArchivePath({"HB2C_26506.nxs.h5"}, {}), "/HFIR/HB2C/IPTS-7776/nexus/HB2C_26506.nxs.h5");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"HB2C_26506"}, {".nxs.h5"}).result(),
+                     "/HFIR/HB2C/IPTS-7776/nexus/HB2C_26506.nxs.h5");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"HB2C_26506.nxs.h5"}, {}).result(),
+                     "/HFIR/HB2C/IPTS-7776/nexus/HB2C_26506.nxs.h5");
 
     // Return nothing when the run has not been cataloged in ONCat.
-    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_9999999"}, {"_event.nxs"}), "");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_9999999"}, {"_event.nxs"}).result(), "");
 
     // Mimic old behaviour by returning nothing when asking for a run known to
     // ONCat but without providing the "suffix" of the basename.
-    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_7390"}, {}), "");
-    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_7390"}, {""}), "");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_7390"}, {}).result(), "");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_7390"}, {""}).result(), "");
 
     // Ask stupid questions, get stupid answers.
-    TS_ASSERT_EQUALS(arch.getArchivePath({"PG37390"}, {"_event.nxs"}), "");
-    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3-7390"}, {"_event.nxs"}), "");
-    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_x7390"}, {"_event.nxs"}), "");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"PG37390"}, {"_event.nxs"}).result(), "");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3-7390"}, {"_event.nxs"}).result(), "");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_x7390"}, {"_event.nxs"}).result(), "");
 
     // When an error is returned from ONCat, this should result in an empty
     // string as if the file is not found.  The error will be logged.
-    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_500"}, {"_event.nxs"}), "");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_500"}, {"_event.nxs"}).result(), "");
 
     // Make sure we don't seg fault or similar when an OK status and incomplete
     // bit of JSON has been returned.
-    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_200"}, {"_event.nxs"}), "");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"PG3_200"}, {"_event.nxs"}).result(), "");
 
     // Instruments not known to Mantid, or not compatible with the archive
     // class should not return anything, either.
-    TS_ASSERT_EQUALS(arch.getArchivePath({"DOESNOTEXIST_200"}, {""}), "");
-    TS_ASSERT_EQUALS(arch.getArchivePath({"MERLIN_200"}, {""}), "");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"DOESNOTEXIST_200"}, {""}).result(), "");
+    TS_ASSERT_EQUALS(arch.getArchivePath({"MERLIN_200"}, {""}).result(), "");
 
     TS_ASSERT(mockAPI->allResponsesCalled());
   }

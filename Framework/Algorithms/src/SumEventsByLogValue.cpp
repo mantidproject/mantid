@@ -240,7 +240,7 @@ void SumEventsByLogValue::createTableOutput(const Kernel::TimeSeriesProperty<int
       // of the main log
       // Have to (maybe inefficiently) fetch back column by name - move outside
       // loop if too slow
-      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) = otherLog.second->timeAverageValue(&timeRoi);
+      outputWorkspace->getColumn(otherLog.first)->cell<double>(row) = run.getTimeAveragedValue(otherLog.first);
     }
 
     prog.report();

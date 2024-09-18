@@ -83,9 +83,9 @@ void EventDataPartitioner<IndexType, TimeZeroType, TimeOffsetType>::partition(
   m_pulseTimes.seek(range.eventOffset);
   for (size_t event = 0; event < range.eventCount; ++event) {
     // Currently this supports only a hard-coded round-robin partitioning.
-    int partition = globalSpectrumIndex[event] % workers;
+    int eventPartition = globalSpectrumIndex[event] % workers;
     auto index = globalSpectrumIndex[event] / workers;
-    partitioned[partition].emplace_back(
+    partitioned[eventPartition].emplace_back(
         detail::Event<TimeOffsetType>{index, eventTimeOffset[event], m_pulseTimes.next()});
   }
 }

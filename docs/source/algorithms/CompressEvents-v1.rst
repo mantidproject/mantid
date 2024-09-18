@@ -42,6 +42,21 @@ with/without compression are identical. If your workspace has undergone
 changes to its X values (unit conversion for example), you have to use
 your best judgement for the Tolerance value.
 
+Compressing events without sorting
+**********************************
+
+If you set the option ``SortFirst`` to ``False`` then a different
+method to compress events will be used where the events do not need to
+be sorted first. This will be faster when the number of events going
+into a single compressed events is large, so when you have lots of
+events per spectra. This method works by histogramming the events into
+a regular grid that is then converted back into events using the
+weighted average x value.
+
+This method will not be used if the events are already sorted as that
+will be faster. This option will be ignored when used with
+``WallClockTolerance``.
+
 With pulsetime resolution
 #########################
 
@@ -67,6 +82,11 @@ appear in the ``OutputWorkspace``. If it is not specified, then the
 `ISO8601 <https://www.iso.org/iso-8601-date-and-time-format.html>`_
 format for the ``StartTime`` is ``2010-09-14T04:20:12``. Normally this
 parameter can be left unset.
+
+Logarithmic binning
+###################
+
+If you provide a negative tolerance or select ``Logarithmic`` as the ``BinningMode`` then the events will be combined together in increase large tolerances starting from the smallest TOF value. This follows the same method as the logarithmic binning of :ref:`algm-Rebin`. This mode will fail if any of the TOF values are negative.
 
 Usage
 -----

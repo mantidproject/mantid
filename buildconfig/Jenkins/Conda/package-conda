@@ -55,6 +55,7 @@ ENABLE_BUILD_MANTID=false
 ENABLE_BUILD_QT=false
 ENABLE_BUILD_WORKBENCH=false
 ENABLE_BUILD_DOCS=false
+BUILD_WORKBENCH_WITH_DOCS=true
 
 # Handle flag inputs
 while [ ! $# -eq 0 ]
@@ -64,6 +65,10 @@ do
         --build-qt) ENABLE_BUILD_QT=true ;;
         --build-workbench) ENABLE_BUILD_WORKBENCH=true ;;
         --build-docs) ENABLE_BUILD_DOCS=true ;;
+        --build-workbench-without-docs)
+            ENABLE_BUILD_WORKBENCH=true
+            BUILD_WORKBENCH_WITH_DOCS=false
+            ;;
         --git-tag)
             GIT_TAG="$2"
             shift ;;
@@ -79,7 +84,7 @@ done
 # Mamba
 setup_mamba $WORKSPACE/mambaforge "package-conda" true
 # boa 0.15.1 causes an issue with zstd import on Windows
-mamba install --yes boa=0.14.0 conda-verify versioningit
+mamba install --yes boa conda-verify versioningit
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
@@ -107,7 +112,7 @@ export LC_ALL=C
 # copy the source to a working folder
 export CONDA_BLD_PATH=$WORKSPACE/conda-bld
 if [[ -d $CONDA_BLD_PATH ]]; then
-    conda index $CONDA_BLD_PATH
+    python -m conda_index $CONDA_BLD_PATH
 fi
 cd $RECIPES_DIR
 
@@ -131,6 +136,9 @@ if [[ $ENABLE_BUILD_DOCS == true ]]; then
     conda mambabuild ./mantiddocs/ $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
+    if [[ $BUILD_WORKBENCH_WITH_DOCS == false ]]; then
+	export INCLUDE_MANTIDDOCS=False
+    fi
     conda mambabuild ./mantidworkbench/ $EXTRA_BUILD_OPTIONS
 fi
 

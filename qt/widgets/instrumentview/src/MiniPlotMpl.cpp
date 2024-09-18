@@ -86,6 +86,8 @@ MiniPlotMpl::MiniPlotMpl(QWidget *parent)
   plotLayout->addWidget(m_canvas, 0, 0);
   plotLayout->addWidget(m_homeBtn, 0, 0, Qt::AlignLeft | Qt::AlignBottom);
   setLayout(plotLayout);
+  // Avoid squishing the plot to the point mpl outputs loads of warnings about the tight layout
+  setMinimumSize(50, 125);
 
   // Capture mouse events destined for the plot canvas
   m_canvas->installEventFilterToMplCanvas(this);

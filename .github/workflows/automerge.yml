@@ -1,0 +1,51 @@
+# this uses the action to merge special branches on push
+# https://github.com/marketplace/actions/merge-branch
+name: Merge protected branches
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ornl-next, release-next]
+
+jobs:
+  merge-release-into-main:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'release-next' }}
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Merge release-next into main
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          target_branch: main
+          message: Merge release-next into main
+          github_token: ${{ secrets.MANTID_BUILDER_TOKEN }}
+
+  merge-ornl-into-main:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'ornl-next' }}
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Merge ornl-next into main
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          target_branch: main
+          message: Merge ornl-next into main
+          github_token: ${{ secrets.MANTID_BUILDER_TOKEN }}
+
+  merge-release-into-ornl:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref_name == 'release-next' }}
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Merge release-next into ornl-next
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          target_branch: ornl-next
+          message: Merge release-next into ornl-next
+          github_token: ${{ secrets.MANTID_BUILDER_TOKEN }}

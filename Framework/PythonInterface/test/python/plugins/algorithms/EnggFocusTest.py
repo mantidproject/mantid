@@ -60,20 +60,20 @@ class EnggFocusTest(unittest.TestCase):
         """
 
         # No InputWorkspace property
-        self.assertRaises(RuntimeError, EnggFocus, Bank="1", OutputWorkspace="nop")
+        self.assertRaises(TypeError, EnggFocus, Bank="1", OutputWorkspace="nop")
 
         # Mispelled InputWorkspace prop
-        self.assertRaises(RuntimeError, EnggFocus, InputWrkspace="anything_goes", Bank="1", OutputWorkspace="nop")
+        self.assertRaises(TypeError, EnggFocus, InputWrkspace="anything_goes", Bank="1", OutputWorkspace="nop")
 
         # Wrong InputWorkspace name
         self.assertRaises(ValueError, EnggFocus, InputWorkspace="foo_is_not_there", Bank="1", OutputWorkspace="nop")
 
         # mispelled bank
-        self.assertRaises(RuntimeError, EnggFocus, InputWorkspace=self.__class__._data_ws, bnk="2", OutputWorkspace="nop")
+        self.assertRaises(TypeError, EnggFocus, InputWorkspace=self.__class__._data_ws, bnk="2", OutputWorkspace="nop")
 
         # mispelled DetectorsPosition
         tbl = CreateEmptyTableWorkspace()
-        self.assertRaises(RuntimeError, EnggFocus, InputWorkspace=self.__class__._data_ws, Detectors=tbl, OutputWorkspace="nop")
+        self.assertRaises(TypeError, EnggFocus, InputWorkspace=self.__class__._data_ws, Detectors=tbl, OutputWorkspace="nop")
 
         # bank and indices list clash. This starts as a ValueError but the managers is raising a RuntimeError
         self.assertRaisesRegex(

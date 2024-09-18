@@ -54,9 +54,8 @@ namespace MantidQt::MantidWidgets {
  */
 PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
     : QWidget(parent), m_canvas{new FigureCanvasQt(111, MANTID_PROJECTION, parent)}, m_panZoomTool(m_canvas),
-      m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
-      m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced), m_axis("both"), m_style("sci"), m_useOffset(true),
-      m_xAxisScale("linear"), m_yAxisScale("linear"), m_redrawOnPaint(false) {
+      m_axis("both"), m_style("sci"), m_useOffset(true), m_xAxisScale("linear"), m_yAxisScale("linear"),
+      m_redrawOnPaint(false) {
   createLayout();
   createActions();
 
@@ -67,24 +66,12 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
 }
 
 /**
- * Destructor.
- * Removes ADS observers
- */
-PreviewPlot::~PreviewPlot() { watchADS(false); }
-
-/**
  * Enable/disable the ADS observers
  * @param on If true ADS observers are enabled else they are disabled
  */
 void PreviewPlot::watchADS(bool on) {
-  auto &notificationCenter = AnalysisDataService::Instance().notificationCenter;
-  if (on) {
-    notificationCenter.addObserver(m_wsRemovedObserver);
-    notificationCenter.addObserver(m_wsReplacedObserver);
-  } else {
-    notificationCenter.removeObserver(m_wsReplacedObserver);
-    notificationCenter.removeObserver(m_wsRemovedObserver);
-  }
+  this->observeReplace(on);
+  this->observeDelete(on);
 }
 
 /**
@@ -135,9 +122,9 @@ void PreviewPlot::addSpectrum(const QString &lineName, const Mantid::API::Matrix
       QSharedPointer<PlotCurveConfiguration>(new PlotCurveConfiguration(ws, lineName, wsIndex, lineColour, plotKwargs));
   m_plottedLines.insert(lineName, plotCurveConfig);
   if (auto const xLabel = overrideAxisLabel(AxisID::XBottom))
-    setAxisLabel(AxisID::XBottom, xLabel.get());
+    setAxisLabel(AxisID::XBottom, xLabel.value());
   if (auto const yLabel = overrideAxisLabel(AxisID::YLeft))
-    setAxisLabel(AxisID::YLeft, yLabel.get());
+    setAxisLabel(AxisID::YLeft, yLabel.value());
 
   regenerateLegend();
   axes.relim();
@@ -201,11 +188,12 @@ RangeSelector *PreviewPlot::getRangeSelector(const QString &name) const {
  * @param type The type of the single selector
  * @return The single selector
  */
-SingleSelector *PreviewPlot::addSingleSelector(const QString &name, SingleSelector::SelectType type, double position) {
+SingleSelector *PreviewPlot::addSingleSelector(const QString &name, SingleSelector::SelectType type, double position,
+                                               PlotLineStyle style) {
   if (m_singleSelectors.contains(name))
     throw std::runtime_error("SingleSelector already exists on PreviewPlot.");
 
-  m_singleSelectors[name] = new MantidWidgets::SingleSelector(this, type, position);
+  m_singleSelectors[name] = new MantidWidgets::SingleSelector(this, type, position, style);
   return m_singleSelectors[name];
 }
 
@@ -253,11 +241,11 @@ void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID, char const *const l
  * @param axisID The axis ID (XBottom or YLeft).
  * @return True if the axis should display an axis label.
  */
-boost::optional<char const *> PreviewPlot::overrideAxisLabel(AxisID const &axisID) {
+std::optional<char const *> PreviewPlot::overrideAxisLabel(AxisID const &axisID) {
   auto const iter = m_axisLabels.find(axisID);
   if (iter != m_axisLabels.end())
     return iter.value();
-  return boost::none;
+  return std::nullopt;
 }
 
 /**
@@ -596,19 +584,22 @@ QStringList PreviewPlot::linesWithErrors() const {
 
 /**
  * Observer method called when a workspace is removed from the ADS
- * @param nf A pointer to the notification object
+ * @param wsName The name of the workspace which has been removed.
+ * @param ws The workspace which has been removed.
  */
-void PreviewPlot::onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification_ptr nf) {
+void PreviewPlot::deleteHandle(const std::string &wsName, const Workspace_sptr &ws) {
+  (void)wsName;
+
   if (m_lines.isEmpty()) {
     return;
   }
   // Ignore non matrix workspaces
-  if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
+  if (auto deletedWs = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
     // the artist may have already been removed. ignore the event is that is the
     // case
     bool removed = false;
     try {
-      removed = m_canvas->gca<MantidAxes>().removeWorkspaceArtists(ws);
+      removed = m_canvas->gca<MantidAxes>().removeWorkspaceArtists(deletedWs);
     } catch (Mantid::PythonInterface::PythonException &) {
     }
     if (removed) {
@@ -619,18 +610,19 @@ void PreviewPlot::onWorkspaceRemoved(Mantid::API::WorkspacePreDeleteNotification
 
 /**
  * Observer method called when a workspace is replaced in the ADS
- * @param nf A pointer to the notification object
+ * @param wsName The name of the workspace which has been replaced.
+ * @param ws The new workspace.
  */
-void PreviewPlot::onWorkspaceReplaced(Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf) {
+void PreviewPlot::replaceHandle(const std::string &wsName, const Workspace_sptr &ws) {
+  (void)wsName;
+
   if (m_lines.isEmpty()) {
     return;
   }
   // Ignore non matrix workspaces
-  if (std::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
-    if (auto newWS = std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
-      if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS)) {
-        this->replot();
-      }
+  if (auto newWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+    if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS)) {
+      this->replot();
     }
   }
 }
@@ -749,10 +741,10 @@ void PreviewPlot::toggleLegend(const bool checked) {
  * @param bool useOffset :: True, the offset will be
  * calculated as needed, False no offset will be used
  */
-void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {
+void PreviewPlot::tickLabelFormat(const std::string &axis, const std::string &style, bool useOffset) {
   auto axes = m_canvas->gca();
-  const auto formatXTicks = *axis != 'y' && axes.getXScale().toStdString() == "linear";
-  const auto formatYTicks = *axis != 'x' && axes.getYScale().toStdString() == "linear";
+  const auto formatXTicks = axis != "y" && axes.getXScale().toStdString() == "linear";
+  const auto formatYTicks = axis != "x" && axes.getYScale().toStdString() == "linear";
 
   if (formatXTicks)
     axes.tickLabelFormat(std::string("x").c_str(), style, useOffset);

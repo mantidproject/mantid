@@ -19,6 +19,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -366,11 +367,10 @@ void ProcessBackground::addRegion() {
   }
 
   // Check
-  for (auto it = vx.begin() + 1; it != vx.end(); ++it) {
-    if (*it <= *it - 1) {
-      g_log.error() << "The vector X with value inserted is not ordered incrementally\n";
-      throw std::runtime_error("Build new vector error!");
-    }
+  const auto it = std::adjacent_find(vx.cbegin(), vx.cend(), std::greater_equal<double>());
+  if (it != vx.cend()) {
+    g_log.error() << "The vector X with value inserted is not ordered incrementally" << std::endl;
+    throw std::runtime_error("Build new vector error!");
   }
 
   // Construct the new Workspace
@@ -504,7 +504,7 @@ void ProcessBackground::selectFromGivenFunction() {
 
   auto bkgdorder = static_cast<int>(parmap.size() - 1); // A0 - A(n) total n+1 parameters
   bkgdfunc->setAttributeValue("n", bkgdorder);
-  for (auto &mit : parmap) {
+  for (const auto &mit : parmap) {
     string parname = mit.first;
     double parvalue = mit.second;
     bkgdfunc->setParameter(parname, parvalue);
@@ -896,8 +896,8 @@ void RemovePeaks::parsePeakTableWorkspace(const TableWorkspace_sptr &peaktablews
 //----------------------------------------------------------------------------------------------
 /** Exclude peaks from
  */
-size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX, vector<double> v_centre,
-                                 vector<double> v_fwhm, double num_fwhm) {
+size_t RemovePeaks::excludePeaks(vector<double> v_inX, vector<bool> &v_useX, const vector<double> &v_centre,
+                                 const vector<double> &v_fwhm, double num_fwhm) {
   // Validate
   if (v_centre.size() != v_fwhm.size())
     throw runtime_error("Input different number of peak centres and fwhm.");

@@ -81,6 +81,7 @@ public:
   std::vector<Mantid::Kernel::TimeInterval> getTimeIntervals() const override;
 
   const Kernel::TimeROI &getTimeROI() const;
+  double timeAverageValue(const TimeROI *timeRoi = nullptr) const override;
 
   bool operator==(const TimeSeriesProperty<HeldType> &right) const override;
   bool operator==(const Property &right) const override;

@@ -23,6 +23,7 @@ public:
   static bool hasError(const std::string &funName) { return check(funName); }
   static std::ostream &log();
   static std::ostream &logDebug();
+  static std::string openGlVersion();
 
 private:
   std::string m_msg;

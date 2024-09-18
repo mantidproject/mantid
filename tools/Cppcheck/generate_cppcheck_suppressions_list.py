@@ -70,6 +70,9 @@ def generate_suppressions(xml_tree: ET.ElementTree, old_source_root: str) -> Lis
 
     for error in errors:
         error_type = error.get("id")
+        # checkersReport has no location
+        if error_type == "checkersReport":
+            continue
         # Only interested in the primary location, so just take the first location element.
         location = error.find("location")
         # Replace the root of the source file so that it is consistent with what cmake expects.

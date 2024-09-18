@@ -103,7 +103,6 @@ void ReflectometryBackgroundSubtraction::calculatePolynomialBackground(MatrixWor
   // Matrix workspace as cannot transpose an event workspace
 
   DataObjects::EventWorkspace_const_sptr eventW = std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(inputWS);
-  MatrixWorkspace_sptr outputWorkspace;
   if (eventW) {
     auto convert = createChildAlgorithm("ConvertToMatrixWorkspace");
     convert->setProperty("InputWorkspace", inputWS);

@@ -906,9 +906,9 @@ Interval::Interval(const QString &intervalString) {
     init(single, single);
   } else if (regExpRange.exactMatch(intervalString)) {
     QStringList range = intervalString.split("-");
-    int start = range[0].toInt();
-    int end = range[1].toInt();
-    init(start, end);
+    int first = range[0].toInt();
+    int last = range[1].toInt();
+    init(first, last);
   } else {
     throw std::exception();
   }

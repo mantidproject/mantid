@@ -46,11 +46,11 @@ std::map<std::string, std::string> AsymmetryCalc::validateInputs() {
 
   std::map<std::string, std::string> result;
 
-  std::vector<int> forwd = getProperty("ForwardSpectra");
-  std::vector<int> backwd = getProperty("BackwardSpectra");
-
   API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   if (inputWS) {
+    std::vector<int> forwd = getProperty("ForwardSpectra");
+    std::vector<int> backwd = getProperty("BackwardSpectra");
+
     auto list = inputWS->getIndicesFromSpectra(forwd);
     if (forwd.size() != list.size()) {
       result["ForwardSpectra"] = "Some of the spectra can not be found in the input workspace";

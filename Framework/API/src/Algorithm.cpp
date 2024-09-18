@@ -14,6 +14,7 @@
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAPI/WorkspacePropertyUtils.h"
 
 #include "MantidJson/Json.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -32,6 +33,7 @@
 #include <Poco/RWLock.h>
 #include <Poco/Void.h>
 
+#include <H5Cpp.h>
 #include <json/json.h>
 
 #include <algorithm>
@@ -178,7 +180,16 @@ void Algorithm::enableHistoryRecordingForChild(const bool on) { m_recordHistoryF
  *
  * @param doStore :: always store in ADS
  */
-void Algorithm::setAlwaysStoreInADS(const bool doStore) { m_alwaysStoreInADS = doStore; }
+void Algorithm::setAlwaysStoreInADS(const bool doStore) {
+  m_alwaysStoreInADS = doStore;
+
+  // Set OutputWorkspace as an optional property in the case where alwaysStoreInADS is false. In
+  // this case, the output workspace name is not always required.
+  if (!m_alwaysStoreInADS && m_properties.existsProperty("OutputWorkspace")) {
+    Property *property = m_properties.getPointerToProperty("OutputWorkspace");
+    setPropertyModeForWorkspaceProperty(property, PropertyMode::Type::Optional);
+  }
+}
 
 /** Returns true if we always store in the AnalysisDataService.
  *  @return true if output is saved to the AnalysisDataService.
@@ -407,8 +418,8 @@ void Algorithm::cacheInputWorkspaceHistories() {
       if (!isADSValidator(strArrayProp->getValidator()))
         continue;
       const auto &wsNames((*strArrayProp)());
-      for (const auto &name : wsNames) {
-        cacheHistories(ads.retrieve(name));
+      for (const auto &wsName : wsNames) {
+        cacheHistories(ads.retrieve(wsName));
       }
     }
   }
@@ -549,7 +560,7 @@ bool Algorithm::executeInternal() {
     // Reset name on input workspaces to trigger attempt at collection from ADS
     const auto &props = getProperties();
     for (auto &prop : props) {
-      auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+      const auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (wsProp && !(wsProp->getWorkspace())) {
         // Setting it's name to the same one it already had
         prop->setValue(prop->value());
@@ -607,7 +618,7 @@ bool Algorithm::executeInternal() {
       if (numErrors > 0) {
         std::stringstream msg;
         msg << "Some invalid Properties found: ";
-        for (auto &error : errors) {
+        for (const auto &error : errors) {
           msg << "\n " << error.first << ": " << error.second;
         }
         notificationCenter().postNotification(new ErrorNotification(this, "Some invalid Properties found"));
@@ -720,6 +731,20 @@ bool Algorithm::executeInternal() {
         (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
     setResultState(ResultState::Failed);
     notificationCenter().postNotification(new ErrorNotification(this, ex.what()));
+    this->unlockWorkspaces();
+
+    throw;
+  }
+
+  catch (H5::Exception &ex) {
+    m_runningAsync = false;
+    std::string errmsg;
+    errmsg.append(ex.getCFuncName()).append(": ").append(ex.getCDetailMsg());
+    getLogger().error() << "H5 Exception in execution of algorithm " << this->name() << ":\n" << errmsg << "\n";
+    m_gcTime = Mantid::Types::Core::DateAndTime::getCurrentTime() +=
+        (Mantid::Types::Core::DateAndTime::ONE_SECOND * DELAY_BEFORE_GC);
+    setResultState(ResultState::Failed);
+    notificationCenter().postNotification(new ErrorNotification(this, errmsg));
     this->unlockWorkspaces();
 
     throw;
@@ -862,7 +887,7 @@ void Algorithm::setupAsChildAlgorithm(const Algorithm_sptr &alg, const double st
   // validator
   const std::vector<Property *> &props = alg->getProperties();
   for (auto prop : props) {
-    auto wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+    const auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
     if (prop->direction() == Mantid::Kernel::Direction::Output && wsProp) {
       if (prop->value().empty() && !wsProp->isOptional()) {
         prop->createTemporaryValue();
@@ -975,8 +1000,8 @@ IAlgorithm_sptr Algorithm::fromString(const std::string &input) {
  */
 IAlgorithm_sptr Algorithm::fromJson(const Json::Value &serialized) {
   const std::string algName = serialized["name"].asString();
-  const int version = serialized.get("version", -1).asInt();
-  auto alg = AlgorithmManager::Instance().createUnmanaged(algName, version);
+  const int versionNumber = serialized.get("version", -1).asInt();
+  auto alg = AlgorithmManager::Instance().createUnmanaged(algName, versionNumber);
   alg->initialize();
   alg->setProperties(serialized["properties"]);
   return alg;
@@ -1146,7 +1171,7 @@ void Algorithm::logAlgorithmInfo() const {
  */
 bool Algorithm::checkGroups() {
   size_t numGroups = 0;
-  bool processGroups = false;
+  bool doProcessGroups = false;
 
   // Unroll the groups or single inputs into vectors of workspaces
   const auto &ads = AnalysisDataService::Instance();
@@ -1173,7 +1198,7 @@ bool Algorithm::checkGroups() {
     // If the property is of type WorkspaceGroup then don't unroll
     if (wsGroup && !wsGroupProp) {
       numGroups++;
-      processGroups = true;
+      doProcessGroups = true;
       m_unrolledInputWorkspaces.emplace_back(wsGroup->getAllItems());
     } else {
       // Single Workspace. Treat it as a "group" with only one member
@@ -1189,7 +1214,7 @@ bool Algorithm::checkGroups() {
 
   // No groups? Get out.
   if (numGroups == 0)
-    return processGroups;
+    return doProcessGroups;
 
   // ---- Confirm that all the groups are the same size -----
   // Index of the single group
@@ -1226,7 +1251,7 @@ bool Algorithm::checkGroups() {
   } // end for each group
 
   // If you get here, then the groups are compatible
-  return processGroups;
+  return doProcessGroups;
 }
 
 /**
@@ -1394,7 +1419,7 @@ bool Algorithm::processGroups() {
 
     // ---------- Set all the input workspaces ----------------------------
     for (size_t iwp = 0; iwp < m_unrolledInputWorkspaces.size(); iwp++) {
-      std::vector<Workspace_sptr> &thisGroup = m_unrolledInputWorkspaces[iwp];
+      const std::vector<Workspace_sptr> &thisGroup = m_unrolledInputWorkspaces[iwp];
       if (!thisGroup.empty()) {
         // By default (for a single group) point to the first/only workspace
         Workspace_sptr ws = thisGroup[0];
@@ -1520,7 +1545,7 @@ void Algorithm::copyNonWorkspaceProperties(IAlgorithm *alg, int periodNum) {
   for (const auto &prop : props) {
     if (prop) {
 
-      auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+      const auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       // Copy the property using the string
       if (!wsProp)
         this->setOtherProperties(alg, prop->name(), prop->value(), periodNum);
@@ -2029,7 +2054,7 @@ MANTID_API_DLL API::IAlgorithm_sptr IPropertyManager::getValue<API::IAlgorithm_s
 template <>
 MANTID_API_DLL API::IAlgorithm_const_sptr
 IPropertyManager::getValue<API::IAlgorithm_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(getPointerToProperty(name));
+  const auto *prop = dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

@@ -1,3 +1,7 @@
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-Wno-maybe-uninitialized)
+endif()
+
 # Testing
 set(TEST_FILES
     Instrument/InstrumentOptionDefaultsTest.h
@@ -19,6 +23,7 @@ set(TEST_FILES
     RunsTable/RunsTablePresenterDisplayTest.h
     RunsTable/RunsTablePresenterGroupDeletionTest.h
     RunsTable/RunsTablePresenterMergeJobsTest.h
+    Save/FileSaverTest.h
     Save/SavePresenterTest.h
     Runs/RunsPresenterTest.h
     Runs/CatalogRunNotifierTest.h

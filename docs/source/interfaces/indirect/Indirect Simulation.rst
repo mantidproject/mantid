@@ -1,3 +1,5 @@
+.. _interface-indirect-simulation:
+
 Indirect Simulation
 ===================
 
@@ -17,7 +19,7 @@ Action Buttons
 ~~~~~~~~~~~~~~
 
 Settings
-  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  Opens the :ref:`Settings <inelastic-interface-settings>` GUI which allows you to
   customize the settings for the Indirect interfaces.
 
 ?
@@ -68,8 +70,8 @@ Run
 Plot Spectra
   If enabled, it will plot the selected workspace indices in the selected output workspace.
 
-Plot Contour
-  If enabled, it will plot the selected output workspace as a contour plot.
+Open Slice Viewer
+  If enabled, it will open the slice viewer for the selected output workspace.
 
 Save Result
   Saves the result in the default save directory.

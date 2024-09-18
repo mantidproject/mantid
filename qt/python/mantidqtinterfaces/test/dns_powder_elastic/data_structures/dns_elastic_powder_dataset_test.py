@@ -94,7 +94,7 @@ class DNSDatasetTest(unittest.TestCase):
         test_v = list_to_set([])
         self.assertEqual(test_v, [])
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.data_structures." "dns_elastic_powder_dataset.DNSBinning")
+    @patch("mantidqtinterfaces.dns_powder_elastic.data_structures.dns_elastic_powder_dataset.DNSBinning")
     def test_automatic_omega_binning(self, mock_binning):
         test_v = automatic_omega_binning(self.full_data)
         self.assertEqual(test_v, mock_binning.return_value)
@@ -110,7 +110,8 @@ class DNSDatasetTest(unittest.TestCase):
 
     def test_create_dataset(self):
         test_v = create_dataset(self.full_data, "C:/123")
-        self.assertEqual(test_v, {"4p1K_map": {"z_nsf": [788058], "path": os.path.join("C:/123", "service")}})
+        star_pattern = "*" * len(str(self.full_data[0]["file_number"]))
+        self.assertEqual(test_v, {"4p1K_map": {"z_nsf": [788058], "path": os.path.join("C:/123", f"service_{star_pattern}.d_dat")}})
         test_v = create_dataset(self.standard_data, "C:/123")
         self.assertEqual(
             test_v,
@@ -130,7 +131,6 @@ class DNSDatasetTest(unittest.TestCase):
         test_v = remove_unnecessary_standard_fields(self.standard_data, ["x_sf"], False)
         self.assertEqual(test_v, [])
         test_v = remove_unnecessary_standard_fields(self.standard_data, ["z_nsf"], False)
-        print("test_v", test_v)
         self.assertIsInstance(test_v, list)
         self.assertEqual(len(test_v), 2)
         self.assertEqual(test_v[0]["file_number"], 788058)

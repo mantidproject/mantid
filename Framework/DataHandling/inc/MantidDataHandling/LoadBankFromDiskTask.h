@@ -13,14 +13,13 @@
 
 #include <cstdint>
 
-class BankPulseTimes;
-
 namespace NeXus {
 class File;
 }
 
 namespace Mantid {
 namespace DataHandling {
+class BankPulseTimes;
 class DefaultEventLoader;
 
 /** This task does the disk IO from loading the NXS file, and so will be on a
@@ -40,7 +39,7 @@ private:
   void loadPulseTimes(::NeXus::File &file);
   std::unique_ptr<std::vector<uint64_t>> loadEventIndex(::NeXus::File &file);
   void prepareEventId(::NeXus::File &file, int64_t &start_event, int64_t &stop_event,
-                      const std::vector<uint64_t> &event_index);
+                      const uint64_t &start_event_index);
   std::unique_ptr<std::vector<uint32_t>> loadEventId(::NeXus::File &file);
   std::unique_ptr<std::vector<float>> loadTof(::NeXus::File &file);
   std::unique_ptr<std::vector<float>> loadEventWeights(::NeXus::File &file);

@@ -23,10 +23,10 @@ DataBlockGenerator::DataBlockGenerator(std::vector<SpectrumPair> intervals) : m_
   // the sorted container
   if (!m_intervals.empty()) {
     m_currentIntervalIndex = 0;
-    m_currentSpectrum = m_intervals[m_currentIntervalIndex.get()].first;
+    m_currentSpectrum = m_intervals[m_currentIntervalIndex.value()].first;
 
   } else {
-    m_currentIntervalIndex = boost::none;
+    m_currentIntervalIndex = std::nullopt;
     m_currentSpectrum = -1;
   }
 }
@@ -44,18 +44,18 @@ DataBlockGenerator &DataBlockGenerator::operator++() {
     // We need to check if this index is still in the current interval
     // If not we need to increment the interval or set the interval index
     // to a final state
-    auto isinCurrentInterval = m_intervals[m_currentIntervalIndex.get()].first <= m_currentSpectrum &&
-                               m_currentSpectrum <= m_intervals[m_currentIntervalIndex.get()].second;
+    auto isinCurrentInterval = m_intervals[m_currentIntervalIndex.value()].first <= m_currentSpectrum &&
+                               m_currentSpectrum <= m_intervals[m_currentIntervalIndex.value()].second;
 
     if (!isinCurrentInterval) {
       ++(*m_currentIntervalIndex);
 
       // Check if we are past the last interval or else set it to the
       // first element of the new interval
-      if (m_currentIntervalIndex.get() > (m_intervals.size() - 1)) {
-        m_currentIntervalIndex = boost::none;
+      if (m_currentIntervalIndex.value() > (m_intervals.size() - 1)) {
+        m_currentIntervalIndex = std::nullopt;
       } else {
-        m_currentSpectrum = m_intervals[m_currentIntervalIndex.get()].first;
+        m_currentSpectrum = m_intervals[m_currentIntervalIndex.value()].first;
       }
     }
   }

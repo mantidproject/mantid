@@ -41,8 +41,8 @@ constexpr std::string_view URL_PREFIX = "http://data.isis.rl.ac.uk/where.py/unix
  * @param exts :: A vector of file extensions to search over.
  * @returns The full path to the first found
  */
-std::string ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
-                                            const std::vector<std::string> &exts) const {
+const API::Result<std::string> ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
+                                                               const std::vector<std::string> &exts) const {
   if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
     for (const auto &filename : filenames) {
       g_log.debug() << filename << ")\n";
@@ -52,6 +52,7 @@ std::string ISISDataArchive::getArchivePath(const std::set<std::string> &filenam
     }
   }
 
+  std::string errors = "";
   for (const auto &filename : filenames) {
     std::string path_without_extension = getPath(filename);
     if (!path_without_extension.empty()) {
@@ -63,10 +64,16 @@ std::string ISISDataArchive::getArchivePath(const std::set<std::string> &filenam
 #endif
       std::string fullPath = getCorrectExtension(path_without_extension, exts);
       if (!fullPath.empty())
-        return fullPath;
+        return API::Result<std::string>(fullPath);
+      errors += "No file found. ";
+#ifdef __linux__
+      errors +=
+          "If you are an IDAaaS user, and your file is in the ISIS archive, then check if the archive is mounted. If it is not mounted, \
+                \nthen click Applications->Data->Experiment Archive (Staff Only), and enter your federal ID credentials with 'clrc' as the domain.";
+#endif // __linux__
     }
   }
-  return "";
+  return API::Result<std::string>("", errors);
 }
 
 /**

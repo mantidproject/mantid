@@ -1,1 +1,0 @@
-- Fixed bug in :ref:`UnGroupWorksapce <algm-UnGroupWorkspace>` where the algorithm history would not be added to the workspaces being ungrouped.

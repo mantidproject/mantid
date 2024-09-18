@@ -144,9 +144,9 @@ std::vector<std::string> splitDetectorNames(std::string detectorNames) {
   const std::string delimiter = ",";
   std::vector<std::string> detectors;
   size_t pos(0);
-  std::string detectorName;
+
   while ((pos = detectorNames.find(delimiter)) != std::string::npos) {
-    detectorName = detectorNames.substr(0, pos);
+    std::string detectorName = detectorNames.substr(0, pos);
     boost::algorithm::trim(detectorName);
     detectors.emplace_back(detectorName);
     detectorNames.erase(0, pos + delimiter.length());
@@ -385,33 +385,15 @@ void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &works
 }
 
 /**
- * Create a note class within process
+ * Add an entry to the process group.
  * @param group: the sasEntry
+ * @param entryName: string containing the name of the value to save
+ * @param entryValue: string containing the value to save
  */
-void createNote(H5::Group &group) {
+void addProcessEntry(H5::Group &group, const std::string &entryName, const std::string &entryValue) {
   auto process = group.openGroup(sasProcessGroupName);
-  Mantid::DataHandling::H5Util::createGroupCanSAS(process, sasNoteGroupName, nxNoteClassAttr, sasNoteClassAttr);
-}
-
-/**
- * Add a note containing sample or can run numbers to the process group.
- * We can add two sample runs, direct and trans, and two can runs, scatter and
- * direct. Sample Scatter and Can Transmission are added to the data elsewhere
- * @param group: the sasEntry
- * @param firstEntryName: string containing the name of the first value to save
- * @param firstEntryValue: string containing the first value to save
- * @param secondEntryName: string contianing the name of the second value to
- * save
- * @param secondEntryValue: string containing the second value to save
- */
-void addNoteToProcess(H5::Group &group, const std::string &firstEntryName, const std::string &firstEntryValue,
-                      const std::string &secondEntryName, const std::string &secondEntryValue) {
-  auto process = group.openGroup(sasProcessGroupName);
-  auto note = process.openGroup(sasNoteGroupName);
-
-  // Populate note
-  Mantid::DataHandling::H5Util::write(note, firstEntryName, firstEntryValue);
-  Mantid::DataHandling::H5Util::write(note, secondEntryName, secondEntryValue);
+  // Populate process entry
+  Mantid::DataHandling::H5Util::write(process, entryName, entryValue);
 }
 
 WorkspaceDimensionality getWorkspaceDimensionality(const Mantid::API::MatrixWorkspace_sptr &workspace) {
@@ -515,14 +497,9 @@ void addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
 }
 
 bool areAxesNumeric(const Mantid::API::MatrixWorkspace_sptr &workspace) {
-  const unsigned indices[] = {0, 1};
-  for (const auto index : indices) {
-    auto axis = workspace->getAxis(index);
-    if (!axis->isNumeric()) {
-      return false;
-    }
-  }
-  return true;
+  const std::array<int, 2> indices = {0, 1};
+  return std::all_of(indices.cbegin(), indices.cend(),
+                     [workspace](auto const &index) { return workspace->getAxis(index)->isNumeric(); });
 }
 
 class SpectrumAxisValueProvider {
@@ -618,8 +595,7 @@ public:
  */
 void addData2D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspace) {
   if (!areAxesNumeric(workspace)) {
-    std::invalid_argument("SaveNXcanSAS: The provided 2D workspace needs "
-                          "to have 2 numeric axes.");
+    throw std::invalid_argument("SaveNXcanSAS: The provided 2D workspace needs to have 2 numeric axes.");
   }
   // Add attributes for @signal, @I_axes, @Q_indices,
   Mantid::DataHandling::H5Util::writeStrAttribute(data, sasSignal, sasDataI);
@@ -755,7 +731,7 @@ void SaveNXcanSAS::init() {
   inputWSValidator->add<API::CommonBinsValidator>();
   declareProperty(std::make_unique<Mantid::API::WorkspaceProperty<>>("InputWorkspace", "", Kernel::Direction::Input,
                                                                      inputWSValidator),
-                  "The input workspace, which must be in units of Q");
+                  "The input workspace, which must be in units of Q. Can be a 1D or a 2D workspace.");
   declareProperty(std::make_unique<Mantid::API::FileProperty>("Filename", "", API::FileProperty::Save, ".h5"),
                   "The name of the .h5 file to save");
 
@@ -794,6 +770,13 @@ void SaveNXcanSAS::init() {
   declareProperty("SampleDirectRunNumber", "", "The run number for the sample direct workspace. Optional.");
   declareProperty("CanScatterRunNumber", "", "The run number for the can scatter workspace. Optional.");
   declareProperty("CanDirectRunNumber", "", "The run number for the can direct workspace. Optional.");
+
+  declareProperty(
+      "BackgroundSubtractionWorkspace", "",
+      "The name of the workspace used in the scaled background subtraction, to be included in the metadata. Optional.");
+  declareProperty(
+      "BackgroundSubtractionScaleFactor", 0.0,
+      "The scale factor used in the scaled background subtraction, to be included in the metadata. Optional.");
 
   std::vector<std::string> const geometryOptions{"Cylinder", "FlatPlate", "Flat plate", "Disc", "Unknown"};
   declareProperty("Geometry", "Unknown", std::make_shared<Kernel::StringListValidator>(geometryOptions),
@@ -889,6 +872,11 @@ void SaveNXcanSAS::exec() {
   const auto canScatterRun = getPropertyValue("CanScatterRunNumber");
   const auto canDirectRun = getPropertyValue("CanDirectRunNumber");
 
+  // Get scaled background subtraction information
+
+  const auto scaledBgSubWorkspace = getPropertyValue("BackgroundSubtractionWorkspace");
+  const auto scaledBgSubScaleFactor = getPropertyValue("BackgroundSubtractionScaleFactor");
+
   // Add the process information
   progress.report("Adding process information.");
   if (transmissionCan) {
@@ -897,13 +885,19 @@ void SaveNXcanSAS::exec() {
     addProcess(sasEntry, workspace);
   }
 
-  if (transmissionCan || transmissionSample) {
-    createNote(sasEntry);
-    if (transmissionCan)
-      addNoteToProcess(sasEntry, sasProcessTermCanScatter, canScatterRun, sasProcessTermCanDirect, canDirectRun);
-    if (transmissionSample)
-      addNoteToProcess(sasEntry, sasProcessTermSampleTrans, sampleTransmissionRun, sasProcessTermSampleDirect,
-                       sampleDirectRun);
+  if (transmissionCan) {
+    addProcessEntry(sasEntry, sasProcessTermCanScatter, canScatterRun);
+    addProcessEntry(sasEntry, sasProcessTermCanDirect, canDirectRun);
+  }
+  if (transmissionSample) {
+    addProcessEntry(sasEntry, sasProcessTermSampleTrans, sampleTransmissionRun);
+    addProcessEntry(sasEntry, sasProcessTermSampleDirect, sampleDirectRun);
+  }
+
+  if (!scaledBgSubWorkspace.empty()) {
+    progress.report("Adding scaled background subtraction information.");
+    addProcessEntry(sasEntry, sasProcessTermScaledBgSubWorkspace, scaledBgSubWorkspace);
+    addProcessEntry(sasEntry, sasProcessTermScaledBgSubScaleFactor, scaledBgSubScaleFactor);
   }
 
   // Add the transmissions for sample

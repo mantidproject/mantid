@@ -95,10 +95,10 @@ std::map<std::string, std::string> RenameWorkspaces::validateInputs() {
  */
 void RenameWorkspaces::exec() {
   // Get the input workspace list
-  std::vector<std::string> inputWsName = getProperty("InputWorkspaces");
+  std::vector<std::string> inputWsNames = getProperty("InputWorkspaces");
 
   // Get the workspace name list
-  std::vector<std::string> newWsName = getProperty("WorkspaceNames");
+  std::vector<std::string> newWsNames = getProperty("WorkspaceNames");
   // Get the prefix and suffix
   std::string prefix = getPropertyValue("Prefix");
   std::string suffix = getPropertyValue("Suffix");
@@ -107,27 +107,27 @@ void RenameWorkspaces::exec() {
 
   // Check properties
 
-  size_t nWs = inputWsName.size();
-  if (!newWsName.empty()) {
+  size_t nWs = inputWsNames.size();
+  if (!newWsNames.empty()) {
     // We are using a list of new names
-    if (nWs > newWsName.size()) {
-      nWs = newWsName.size();
+    if (nWs > newWsNames.size()) {
+      nWs = newWsNames.size();
       // could issue warning here
     }
   } else { // We are using prefix and/or suffix
     // Build new names.
     for (size_t i = 0; i < nWs; ++i) {
-      newWsName.emplace_back(prefix + inputWsName[i] + suffix);
+      newWsNames.emplace_back(prefix + inputWsNames[i] + suffix);
     }
   }
 
   // Check all names are not used already before starting rename
-  for (const auto &name : newWsName) {
-    if (AnalysisDataService::Instance().doesExist(name)) {
+  for (const auto &newWsName : newWsNames) {
+    if (AnalysisDataService::Instance().doesExist(newWsName)) {
       // Name exists, stop if override if not set but let
       // RenameWorkspace handle deleting if we are overriding
       if (!overrideWorkspace) {
-        throw std::runtime_error("A workspace called " + name + " already exists");
+        throw std::runtime_error("A workspace called " + newWsName + " already exists");
       }
     }
   }
@@ -136,10 +136,10 @@ void RenameWorkspaces::exec() {
   for (size_t i = 0; i < nWs; ++i) {
     std::ostringstream os;
     os << "OutputWorkspace_" << i + 1;
-    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(os.str(), newWsName[i], Direction::Output));
+    declareProperty(std::make_unique<WorkspaceProperty<Workspace>>(os.str(), newWsNames[i], Direction::Output));
     auto alg = createChildAlgorithm("RenameWorkspace");
-    alg->setPropertyValue("InputWorkspace", inputWsName[i]);
-    alg->setPropertyValue("OutputWorkspace", newWsName[i]);
+    alg->setPropertyValue("InputWorkspace", inputWsNames[i]);
+    alg->setPropertyValue("OutputWorkspace", newWsNames[i]);
     alg->setProperty("OverwriteExisting", overrideWorkspace);
 
     alg->executeAsChildAlg();

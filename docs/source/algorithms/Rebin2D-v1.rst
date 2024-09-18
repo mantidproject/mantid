@@ -24,11 +24,16 @@ where :math:`F_i = A^{\mathrm{overlap}}_i / A^{\mathrm{old}}_i` is the
 ratio of the overlap area of the new and old bin over the area of the
 old bin.
 
-If the input workspace is not of type: **RebinnedOutput**, and the
-`UseFractionalArea` option is set to `True`, the algorithm
-will assume that the input fraction is unity. This is correct if this
+If the input to :ref:`algm-Rebin2D` is a **RebinnedOutput** workspace,
+the algorithm will make use of the fractional weights stored in each bin of
+the input **RebinnedOutput** workspace. A more detailed explanation of this
+appproach is described in :ref:`FractionalRebinning <FractionalRebinning>`.
+
+If the `UseFractionalArea` option is set to `True` and the input workspace
+is not of type **RebinnedOutput**, the algorithm will be correct if the input
 workspace has not been previously rebinned, but will give incorrect
-error (standard deviation) estimates if it has been rebinned.
+error (standard deviation) estimates if it has been rebinned. You can find more
+information on why this is the case in :ref:`FractionalRebinning <FractionalRebinning>`.
 
 .. note:: Rebin2D looks at the histogram representation of the input
           workspace, so while it will accept EventWorkspaces, number of bins

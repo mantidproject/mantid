@@ -18,14 +18,14 @@ using namespace MantidQt::Widgets::MplCpp;
 namespace {
 
 Python::Object newMarker(FigureCanvasQt *canvas, QString const &colour, double minimum, double maximum,
-                         QString const &rangeType, boost::optional<QHash<QString, QVariant>> const &otherKwargs) {
+                         QString const &rangeType, std::optional<QHash<QString, QVariant>> const &otherKwargs) {
   GlobalInterpreterLock lock;
 
   Python::Object markersModule{Python::NewRef(PyImport_ImportModule("mantidqt.plotting.markers"))};
 
   auto const args = Python::NewRef(Py_BuildValue("(Osdds)", canvas->pyobj().ptr(), colour.toLatin1().constData(),
                                                  minimum, maximum, rangeType.toLatin1().constData()));
-  Python::Dict kwargs = Python::qHashToDict(otherKwargs.get());
+  Python::Dict kwargs = Python::qHashToDict(otherKwargs.value());
 
   auto const marker = markersModule.attr("RangeMarker")(*args, **kwargs);
   return marker;

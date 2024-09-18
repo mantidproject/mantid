@@ -17,10 +17,10 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/scoped_array.hpp>
 
-#include <boost/optional.hpp>
 #include <climits>
 #include <memory>
 #include <nexus/NeXusFile.hpp>
+#include <optional>
 
 namespace Mantid {
 namespace NeXus {
@@ -39,7 +39,7 @@ class MANTID_NEXUS_DLL NexusFileIO {
 
 public:
   // Helper typedef
-  using optional_size_t = boost::optional<size_t>;
+  using optional_size_t = std::optional<size_t>;
 
   /// Default constructor
   NexusFileIO();
@@ -63,7 +63,8 @@ public:
   int writeNexusSampleLogs(const Mantid::API::Run &runProperties) const;
   /// write the workspace data
   int writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr &localworkspace, const bool &uniformSpectra,
-                                const std::vector<int> &indices, const char *group_name, bool write2Ddata) const;
+                                const bool &raggedSpectra, const std::vector<int> &indices, const char *group_name,
+                                bool write2Ddata) const;
 
   /// write table workspace
   int writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr &itableworkspace, const char *group_name) const;

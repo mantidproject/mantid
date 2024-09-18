@@ -443,12 +443,12 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value, int rol
       QSettings settings;
       settings.beginGroup("Mantid/ScriptRepository");
       QString email = settings.value("UploadEmail", QString()).toString();
-      QString author = settings.value("UploadAuthor", QString()).toString();
+      QString uploadAuthor = settings.value("UploadAuthor", QString()).toString();
       bool lastChk = settings.value("UploadSaveInfo", false).toBool();
       if (!email.isEmpty())
         form->setEmail(email);
-      if (!author.isEmpty())
-        form->setAuthor(author);
+      if (!uploadAuthor.isEmpty())
+        form->setAuthor(uploadAuthor);
       form->lastSaveOption(lastChk);
       if (form->exec()) {
         settings.setValue("UploadEmail", form->saveInfo() ? form->email() : "");
@@ -534,10 +534,10 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value, int rol
     QSettings settings;
     settings.beginGroup("Mantid/ScriptRepository");
     QString email = settings.value("UploadEmail", QString()).toString();
-    QString author = settings.value("UploadAuthor", QString()).toString();
+    QString uploadAuthor = settings.value("UploadAuthor", QString()).toString();
     settings.endGroup();
 
-    if (author.isEmpty() || email.isEmpty()) {
+    if (uploadAuthor.isEmpty() || email.isEmpty()) {
       QMessageBox::information(father, "You have not uploaded this file",
                                "You are not allowed to remove files that you "
                                "have not updloaded through ScriptRepository");
@@ -551,7 +551,7 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value, int rol
     upload_index = index;
     uploading_path = QString::fromStdString(path);
     emit executingThread(true);
-    upload_threads = QtConcurrent::run(delete_thread, repo_ptr, path, email, author, comment);
+    upload_threads = QtConcurrent::run(delete_thread, repo_ptr, path, email, uploadAuthor, comment);
     upload_watcher.setFuture(upload_threads);
     ret = true;
   } // end delete action
@@ -786,12 +786,11 @@ RepoModel::RepoItem *RepoModel::getParent(const QString &folder, QList<RepoItem 
 
     if (try_to_find) {
       // this means that the previous folders were found
-      foreach (RepoItem *the_parent, parents) {
-        if (the_parent->path() == aux_folder) {
-          found = true;
-          father = the_parent;
-          break;
-        }
+      const auto it = std::find_if(parents.cbegin(), parents.cend(),
+                                   [&aux_folder](const auto &parent) { return parent->path() == aux_folder; });
+      if (it != parents.cend()) {
+        found = true;
+        father = *it;
       }
     }
     // there is not RepoItem related to the current folder,
@@ -819,8 +818,6 @@ RepoModel::RepoItem *RepoModel::getParent(const QString &folder, QList<RepoItem 
  * @param root: The RepoItem root
  */
 void RepoModel::setupModelData(RepoItem *root) {
-
-  QStringList lines;
   // check server for updates to repository
   repo_ptr->check4Update();
   // get the list of entries inside the scriptrepository
@@ -846,9 +843,9 @@ void RepoModel::setupModelData(RepoItem *root) {
       folder = pathStrings.join("/");
 
     // get parent for this entry
-    RepoItem *parent = getParent(folder, parents);
+    RepoItem *parentOfFolder = getParent(folder, parents);
     // a new folder has started
-    if (parent == root) {
+    if (parentOfFolder == root) {
       // this test is just for the sake of performance, to reduce the numbers of
       // parents
       parents.clear();
@@ -858,15 +855,16 @@ void RepoModel::setupModelData(RepoItem *root) {
     // check if the current entry is a directory
     if (repo_ptr->info(lineData.toStdString()).directory) {
       // directories will be appended to parents list
-      RepoItem *aux = new RepoItem(current_file, lineData, parent);
-      parent->appendChild(aux);
+      RepoItem *aux = new RepoItem(current_file, lineData, parentOfFolder);
+      parentOfFolder->appendChild(aux);
       parents << aux;
     } else {
       // files will just be created and appended to the parent
-      parent->appendChild(new RepoItem(current_file, lineData, parent));
+      parentOfFolder->appendChild(new RepoItem(current_file, lineData, parentOfFolder));
     }
   }
 }
+
 void RepoModel::handleExceptions(const Mantid::API::ScriptRepoException &ex, const QString &title,
                                  bool showWarning) const {
   g_log.information() << "Download failed " << ex.what() << "\n Detail: " << ex.systemError() << '\n';
@@ -895,7 +893,7 @@ void RepoModel::downloadFinished(void) {
 }
 
 bool RepoModel::isDownloading(const QModelIndex &index) const {
-  auto *item = static_cast<RepoItem *>(index.internalPointer());
+  const auto *item = static_cast<RepoItem *>(index.internalPointer());
   if (item)
     return item->path() == downloading_path;
   return false;
@@ -923,7 +921,7 @@ void RepoModel::uploadFinished(void) {
 }
 
 bool RepoModel::isUploading(const QModelIndex &index) const {
-  auto *item = static_cast<RepoItem *>(index.internalPointer());
+  const auto *item = static_cast<RepoItem *>(index.internalPointer());
   if (item)
     return item->path() == uploading_path;
   return false;

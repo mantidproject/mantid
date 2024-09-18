@@ -8,10 +8,12 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/AlgorithmFactory.h"
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
 #include "Poco/File.h"
@@ -140,6 +142,59 @@ public:
 
     // Clean-up
     API::AnalysisDataService::Instance().remove(testWs);
+
+    Poco::File file(testFile);
+    file.remove();
+  }
+
+  void test_SaveUngroupedDetectors() {
+    // Create a grouping workspace with a single detector in a single group
+    auto alg = Mantid::API::AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
+    alg->initialize();
+    alg->setChild(true);
+    alg->setProperty("InstrumentName", "IRIS");
+    alg->setProperty("ComponentName", "graphite");
+    alg->setProperty("CustomGroupingString", "42");
+    alg->setProperty("OutputWorkspace", "unused");
+    alg->execute();
+
+    DataObjects::GroupingWorkspace_sptr output = alg->getProperty("OutputWorkspace");
+
+    // Save the test workspace, first saving ungrouped detectors
+    SaveDetectorsGrouping save;
+    save.initialize();
+    TS_ASSERT(save.setProperty("InputWorkspace", output));
+    TS_ASSERT(save.setProperty("OutputFile", "grouptemp.xml"));
+    save.execute();
+    TS_ASSERT(save.isExecuted());
+
+    // Get full path of the file
+    std::string testFile = save.getPropertyValue("OutputFile");
+
+    // Check that both group 0 and 1 are in the file
+    std::string xmlText = Kernel::Strings::loadFile(testFile);
+    TS_ASSERT_DIFFERS(xmlText.find("<group ID=\"0\">"), std::string::npos)             // group 0 found
+    TS_ASSERT_DIFFERS(xmlText.find("<detids>3-41,43-112</detids>"), std::string::npos) // group 0 found
+    TS_ASSERT_DIFFERS(xmlText.find("<group ID=\"1\">"), std::string::npos)             // group 1 found
+    TS_ASSERT_DIFFERS(xmlText.find("<detids>42</detids>"), std::string::npos)          // group 1 found
+
+    // Now repeat but don't save ungrouped detectors
+    SaveDetectorsGrouping save2;
+    save2.initialize();
+    TS_ASSERT(save2.setProperty("InputWorkspace", output));
+    TS_ASSERT(save2.setProperty("OutputFile", "grouptemp.xml"));
+    TS_ASSERT(save2.setProperty("SaveUngroupedDetectors", false));
+    save2.execute();
+    TS_ASSERT(save2.isExecuted());
+
+    testFile = save2.getPropertyValue("OutputFile");
+
+    // Check that only group 1 and not 0 is in the file
+    xmlText = Kernel::Strings::loadFile(testFile);
+    TS_ASSERT_EQUALS(xmlText.find("<group ID=\"0\">"), std::string::npos)             // group 0 NOT found
+    TS_ASSERT_EQUALS(xmlText.find("<detids>3-41,43-112</detids>"), std::string::npos) // group 0 NOT found
+    TS_ASSERT_DIFFERS(xmlText.find("<group ID=\"1\">"), std::string::npos)            // group 1 found
+    TS_ASSERT_DIFFERS(xmlText.find("<detids>42</detids>"), std::string::npos)         // group 1 found
 
     Poco::File file(testFile);
     file.remove();

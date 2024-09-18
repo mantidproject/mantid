@@ -110,9 +110,9 @@ std::string Goniometer::axesInfo() {
       info << "No axis is found\n";
     } else {
       info << "Name \t Direction \t Sense \t Angle \n";
-      std::string strCW("CW"), strCCW("CCW"), sense;
+      std::string strCW("CW"), strCCW("CCW");
       for (it = motors.begin(); it < motors.end(); ++it) {
-        sense = ((*it).sense == CCW) ? strCCW : strCW;
+        std::string sense = ((*it).sense == CCW) ? strCCW : strCW;
         double angle = ((*it).angleunit == angDegrees) ? ((*it).angle) : ((*it).angle * rad2deg);
         info << (*it).name << "\t" << (*it).rotationaxis << "\t" << sense << "\t" << angle << '\n';
       }
@@ -142,11 +142,11 @@ void Goniometer::pushAxis(const std::string &name, double axisx, double axisy, d
                       << "\nangle" << angle;
       return;
     }
-    std::vector<GoniometerAxis>::iterator it;
     // check if such axis is already defined
-    for (it = motors.begin(); it < motors.end(); ++it) {
-      if (name == it->name)
-        throw std::invalid_argument("Motor name already defined");
+    const auto it =
+        std::find_if(motors.cbegin(), motors.cend(), [&name](const auto &axis) { return axis.name == name; });
+    if (it != motors.cend()) {
+      throw std::invalid_argument("Motor name already defined");
     }
     GoniometerAxis a(name, V3D(axisx, axisy, axisz), angle, sense, angUnit);
     motors.emplace_back(a);
@@ -250,10 +250,10 @@ const GoniometerAxis &Goniometer::getAxis(size_t axisnumber) const {
 /// Get GoniometerAxis object using motor name
 /// @param axisname :: axis name
 const GoniometerAxis &Goniometer::getAxis(const std::string &axisname) const {
-  for (auto it = motors.begin(); it < motors.end(); ++it) {
-    if (axisname == it->name) {
-      return (*it);
-    }
+  const auto it =
+      std::find_if(motors.cbegin(), motors.cend(), [&axisname](const auto &axis) { return axis.name == axisname; });
+  if (it != motors.cend()) {
+    return *it;
   }
   throw std::invalid_argument("Motor name " + axisname + " not found");
 }

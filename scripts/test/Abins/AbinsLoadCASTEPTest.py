@@ -40,7 +40,7 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
             bad_castep_reader = CASTEPLoader(input_ab_initio_filename="NonExistingFile.txt")
             bad_castep_reader.read_vibrational_or_phonon_data()
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             # noinspection PyUnusedLocal
             CASTEPLoader(input_ab_initio_filename=1)
 

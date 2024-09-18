@@ -245,7 +245,7 @@ def load_default_file(line_edit_field, q_settings_group_key, q_settings_key):
 def load_property(q_settings_group_key, q_settings_key, type=str):
     settings = QSettings()
     settings.beginGroup(q_settings_group_key)
-    default = False if type == bool else ""
+    default = False if type is bool else ""
     default_property = settings.value(q_settings_key, default, type=type)
     settings.endGroup()
 

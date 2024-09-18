@@ -116,11 +116,11 @@ void ConjoinWorkspaces::checkForOverlap(const MatrixWorkspace &ws1, const Matrix
       }
     }
     const auto &dets = spec.getDetectorIDs();
-    for (const auto &det : dets) {
-      if (detectors.find(det) != detectors.end()) {
-        g_log.error() << "The input workspaces have common detectors: " << (det) << "\n";
-        throw std::invalid_argument("The input workspaces have common detectors");
-      }
+    const auto it = std::find_if(dets.cbegin(), dets.cend(),
+                                 [&detectors](const auto &det) { return detectors.find(det) != detectors.cend(); });
+    if (it != dets.cend()) {
+      g_log.error() << "The input workspaces have common detectors: " << (*it) << std::endl;
+      throw std::invalid_argument("The input workspaces have common detectors");
     }
   }
 }

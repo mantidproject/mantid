@@ -58,9 +58,9 @@ void MDBoxImplicitFunction::construct(const Mantid::Kernel::VMD &min, const Mant
   if (nd == 0 || nd > 100)
     throw std::invalid_argument("MDBoxImplicitFunction::ctor(): Invalid number of dimensions!");
 
-  double volume = 1;
+  double boxVolume = 1;
   for (size_t d = 0; d < nd; d++) {
-    volume *= (max[d] - min[d]);
+    boxVolume *= (max[d] - min[d]);
 
     // Make two parallel planes per dimension
 
@@ -86,7 +86,7 @@ void MDBoxImplicitFunction::construct(const Mantid::Kernel::VMD &min, const Mant
     MDPlane p_max(normal_max, origin_max);
     this->addPlane(p_max);
   }
-  m_volume = volume;
+  m_volume = boxVolume;
 }
 
 /**

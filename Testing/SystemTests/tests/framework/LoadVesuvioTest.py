@@ -17,7 +17,6 @@ DIFF_PLACES = 12
 
 
 class VesuvioTests(unittest.TestCase):
-
     ws_name = "evs_raw"
 
     def tearDown(self):
@@ -379,10 +378,10 @@ class VesuvioTests(unittest.TestCase):
     # ================== Failure cases ================================
 
     def test_run_range_bad_order_raises_error(self):
-        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188-14187", OutputWorkspace=self.ws_name)
+        self.assertRaises(TypeError, ms.LoadVesuvio, Filename="14188-14187", OutputWorkspace=self.ws_name)
 
     def test_missing_spectra_property_raises_error(self):
-        self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188", OutputWorkspace=self.ws_name)
+        self.assertRaises(TypeError, ms.LoadVesuvio, Filename="14188", OutputWorkspace=self.ws_name)
 
     def test_load_with_invalid_spectra_raises_error(self):
         self.assertRaises(RuntimeError, ms.LoadVesuvio, Filename="14188", OutputWorkspace=self.ws_name, SpectrumList="200")
@@ -444,7 +443,6 @@ class VesuvioTests(unittest.TestCase):
 
 
 class LoadVesuvioTest(systemtesting.MantidSystemTest):
-
     _success = False
 
     def runTest(self):

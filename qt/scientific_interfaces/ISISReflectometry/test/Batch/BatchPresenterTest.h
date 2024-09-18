@@ -55,11 +55,17 @@ public:
     Mantid::API::FrameworkManager::Instance();
   }
 
+  void tearDown() override {
+    // Verifying and clearing of expectations happens when mock variables are destroyed.
+    // Some of our mocks are created as member variables and will exist until all tests have run, so we need to
+    // explicitly verify and clear them after each test.
+    verifyAndClear();
+  }
+
   void testInitInstrumentListUpdatesRunsPresenter() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_runsPresenter, initInstrumentList(_)).Times(1);
     presenter->initInstrumentList();
-    verifyAndClear();
   }
 
   void testMainPresenterUpdatedWhenChangeInstrumentRequested() {
@@ -67,7 +73,6 @@ public:
     auto const instrument = std::string("POLREF");
     EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument)).Times(1);
     presenter->notifyChangeInstrumentRequested(instrument);
-    verifyAndClear();
   }
 
   void testChildPresentersAreUpdatedWhenInstrumentChanged() {
@@ -77,7 +82,6 @@ public:
     EXPECT_CALL(*m_experimentPresenter, notifyInstrumentChanged(instrument)).Times(1);
     EXPECT_CALL(*m_instrumentPresenter, notifyInstrumentChanged(instrument)).Times(1);
     presenter->notifyInstrumentChanged(instrument);
-    verifyAndClear();
   }
 
   void testMainPresenterUpdatedWhenUpdateInstrumentRequested() {
@@ -85,35 +89,30 @@ public:
     auto const instrument = std::string("POLREF");
     EXPECT_CALL(m_mainPresenter, notifyUpdateInstrumentRequested()).Times(1);
     presenter->notifyUpdateInstrumentRequested();
-    verifyAndClear();
   }
 
   void testChildPresentersUpdatedWhenSettingsChanged() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_runsPresenter, settingsChanged()).Times(1);
     presenter->notifySettingsChanged();
-    verifyAndClear();
   }
 
   void testModelUpdatedWhenReductionResumed() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_jobManager, notifyReductionResumed()).Times(1);
     presenter->notifyResumeReductionRequested();
-    verifyAndClear();
   }
 
   void testBatchIsExecutedWhenReductionResumed() {
     auto presenter = makePresenter(makeModel());
     expectBatchIsExecuted();
     presenter->notifyResumeReductionRequested();
-    verifyAndClear();
   }
 
   void testOtherPresentersUpdatedWhenReductionResumed() {
     auto presenter = makePresenter(makeModel());
     expectReductionResumed();
     presenter->notifyResumeReductionRequested();
-    verifyAndClear();
   }
 
   void testJobManagerGetProcessAll() {
@@ -121,7 +120,6 @@ public:
     TS_ASSERT_EQUALS(m_jobManager->getProcessAll(), false);
     expectReductionResumed();
     presenter->notifyResumeReductionRequested();
-    verifyAndClear();
   }
 
   void testJobManagerGetProcessPartial() {
@@ -129,7 +127,6 @@ public:
     TS_ASSERT_EQUALS(m_jobManager->getProcessPartial(), false);
     expectReductionResumed();
     presenter->notifyResumeReductionRequested();
-    verifyAndClear();
   }
 
   void testWarnProcessAllWhenReductionResumedOptionChecked() {
@@ -138,7 +135,6 @@ public:
     EXPECT_CALL(*m_jobManager, notifyReductionResumed()).Times(1);
     EXPECT_CALL(m_mainPresenter, isProcessAllPrevented()).Times(1).WillOnce(Return(true));
     presenter->notifyResumeReductionRequested();
-    verifyAndClear();
   }
 
   void testNoWarnProcessAllWhenReductionResumedOptionUnchecked() {
@@ -147,7 +143,6 @@ public:
     EXPECT_CALL(*m_jobManager, notifyReductionResumed()).Times(1);
     EXPECT_CALL(m_mainPresenter, isProcessAllPrevented()).Times(1).WillOnce(Return(false));
     presenter->notifyResumeReductionRequested();
-    verifyAndClear();
   }
 
   void testWarnProcessPartialGroupWhenReductionResumedOptionChecked() {
@@ -156,7 +151,6 @@ public:
     EXPECT_CALL(*m_jobManager, notifyReductionResumed()).Times(1);
     EXPECT_CALL(m_mainPresenter, isProcessPartialGroupPrevented()).Times(1).WillOnce(Return(true));
     presenter->notifyResumeReductionRequested();
-    verifyAndClear();
   }
 
   void testNoWarnProcessPartialGroupWhenReductionResumedOptionUnchecked() {
@@ -165,14 +159,12 @@ public:
     EXPECT_CALL(*m_jobManager, notifyReductionResumed()).Times(1);
     EXPECT_CALL(m_mainPresenter, isProcessPartialGroupPrevented()).Times(1).WillOnce(Return(false));
     presenter->notifyResumeReductionRequested();
-    verifyAndClear();
   }
 
   void testChildPresentersUpdatedWhenAnyBatchReductionResumed() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_runsPresenter, notifyAnyBatchReductionResumed()).Times(1);
     presenter->notifyAnyBatchReductionResumed();
-    verifyAndClear();
   }
 
   void testChildPresentersUpdatedWhenAnyBatchReductionPaused() {
@@ -186,14 +178,12 @@ public:
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_runsPresenter, notifyAnyBatchAutoreductionResumed()).Times(1);
     presenter->notifyAnyBatchAutoreductionResumed();
-    verifyAndClear();
   }
 
   void testChildPresentersUpdatedWhenAnyBatchAutoreductionPaused() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_runsPresenter, notifyAnyBatchAutoreductionPaused()).Times(1);
     presenter->notifyAnyBatchAutoreductionPaused();
-    verifyAndClear();
   }
 
   void testMainPresenterQueriedWhenCheckingAnyBatchProcessing() {
@@ -201,7 +191,6 @@ public:
     EXPECT_CALL(m_mainPresenter, isAnyBatchProcessing()).Times(1).WillOnce(Return(true));
     auto result = presenter->isAnyBatchProcessing();
     TS_ASSERT_EQUALS(result, true);
-    verifyAndClear();
   }
 
   void testMainPresenterQueriedWhenCheckingAnyBatchAutoreducing() {
@@ -209,7 +198,6 @@ public:
     EXPECT_CALL(m_mainPresenter, isAnyBatchAutoreducing()).Times(1).WillOnce(Return(true));
     auto result = presenter->isAnyBatchAutoreducing();
     TS_ASSERT_EQUALS(result, true);
-    verifyAndClear();
   }
 
   void testAutoreductionCompletedWhenReductionResumedWithNoRemainingJobs() {
@@ -218,28 +206,24 @@ public:
     EXPECT_CALL(*m_jobManager, isAutoreducing()).Times(AtLeast(1)).WillRepeatedly(Return(true));
     EXPECT_CALL(*m_runsPresenter, autoreductionCompleted()).Times(1);
     presenter->notifyResumeReductionRequested();
-    verifyAndClear();
   }
 
   void testAutoreductionNotCompletedWhenReductionResumedWithRemainingJobs() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_runsPresenter, autoreductionCompleted()).Times(0);
     presenter->notifyResumeReductionRequested();
-    verifyAndClear();
   }
 
   void testBatchIsCancelledWhenReductionPaused() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_jobRunner, cancelAlgorithmQueue()).Times(1);
     presenter->notifyPauseReductionRequested();
-    verifyAndClear();
   }
 
   void testModelUpdatedWhenBatchCancelled() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_jobManager, notifyReductionPaused()).Times(1);
     presenter->notifyBatchCancelled();
-    verifyAndClear();
   }
 
   void testChildPresentersUpdatedWhenBatchCancelled() {
@@ -247,7 +231,6 @@ public:
     expectReductionPaused();
     expectAutoreductionPaused();
     presenter->notifyBatchCancelled();
-    verifyAndClear();
   }
 
   void testModelUpdatedWhenAutoreductionResumed() {
@@ -255,14 +238,12 @@ public:
     EXPECT_CALL(*m_jobManager, notifyAutoreductionResumed()).Times(1);
     EXPECT_CALL(*m_jobManager, notifyAutoreductionPaused()).Times(0);
     presenter->notifyResumeAutoreductionRequested();
-    verifyAndClear();
   }
 
   void testRunsPresenterCalledWhenAutoreductionResumed() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_runsPresenter, resumeAutoreduction()).Times(1);
     presenter->notifyResumeAutoreductionRequested();
-    verifyAndClear();
   }
 
   void testModelResetWhenAutoreductionCancelled() {
@@ -270,14 +251,12 @@ public:
     EXPECT_CALL(*m_runsPresenter, resumeAutoreduction()).Times(1).WillOnce(Return(false));
     EXPECT_CALL(*m_jobManager, notifyAutoreductionPaused()).Times(1);
     presenter->notifyResumeAutoreductionRequested();
-    verifyAndClear();
   }
 
   void testOtherPresentersUpdatedWhenAutoreductionResumed() {
     auto presenter = makePresenter(makeModel());
     expectAutoreductionResumed();
     presenter->notifyResumeAutoreductionRequested();
-    verifyAndClear();
   }
 
   void testChildPresentersNotUpdatedWhenAutoreductionCanelled() {
@@ -289,28 +268,24 @@ public:
     EXPECT_CALL(*m_instrumentPresenter, notifyAutoreductionResumed()).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyAutoreductionResumed()).Times(0);
     presenter->notifyResumeAutoreductionRequested();
-    verifyAndClear();
   }
 
   void testModelUpdatedWhenAutoreductionPaused() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_jobManager, notifyAutoreductionPaused()).Times(1);
     presenter->notifyPauseAutoreductionRequested();
-    verifyAndClear();
   }
 
   void testBatchIsCancelledWhenAutoreductionPaused() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_jobRunner, cancelAlgorithmQueue()).Times(1);
     presenter->notifyPauseAutoreductionRequested();
-    verifyAndClear();
   }
 
   void testOtherPresentersUpdatedWhenAutoreductionPaused() {
     auto presenter = makePresenter(makeModel());
     expectAutoreductionPaused();
     presenter->notifyPauseAutoreductionRequested();
-    verifyAndClear();
   }
 
   void testAutoreductionComplete() {
@@ -318,14 +293,12 @@ public:
     EXPECT_CALL(*m_runsPresenter, autoreductionCompleted()).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowStateChanged()).Times(1);
     presenter->notifyAutoreductionCompleted();
-    verifyAndClear();
   }
 
   void testNextBatchIsStartedWhenBatchFinished() {
     auto presenter = makePresenter(makeModel());
     expectBatchIsExecuted();
     presenter->notifyBatchComplete(false);
-    verifyAndClear();
   }
 
   void testChildPresentersUpdatedWhenBatchFinishedAndNothingLeftToProcess() {
@@ -333,7 +306,6 @@ public:
     EXPECT_CALL(*m_jobManager, getAlgorithms()).Times(1).WillOnce(Return(std::deque<IConfiguredAlgorithm_sptr>()));
     expectReductionPaused();
     presenter->notifyBatchComplete(false);
-    verifyAndClear();
   }
 
   void testNotifyAlgorithmStarted() {
@@ -344,7 +316,6 @@ public:
     EXPECT_CALL(*m_jobManager, algorithmStarted(algorithm)).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(1);
     presenter->notifyAlgorithmStarted(algorithm);
-    verifyAndClear();
   }
 
   void testNotifyAlgorithmComplete() {
@@ -355,7 +326,6 @@ public:
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(1);
     presenter->notifyAlgorithmComplete(algorithm);
-    verifyAndClear();
   }
 
   void testNotifyAlgorithmStartedSkipsNonItems() {
@@ -365,7 +335,6 @@ public:
     EXPECT_CALL(*m_jobManager, algorithmStarted(_)).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(0);
     presenter->notifyAlgorithmStarted(algorithm);
-    verifyAndClear();
   }
 
   void testNotifyAlgorithmCompleteSkipsNonItems() {
@@ -375,7 +344,6 @@ public:
     EXPECT_CALL(*m_jobManager, algorithmComplete(_)).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(0);
     presenter->notifyAlgorithmComplete(algorithm);
-    verifyAndClear();
   }
 
   void testNotifyAlgorithmErrorSkipsNonItems() {
@@ -385,7 +353,6 @@ public:
     EXPECT_CALL(*m_jobManager, algorithmError(_, _)).Times(0);
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(0);
     presenter->notifyAlgorithmError(algorithm, "");
-    verifyAndClear();
   }
 
   void testOutputWorkspacesSavedOnAlgorithmComplete() {
@@ -398,9 +365,8 @@ public:
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
     EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(algorithm, false)).Times(1).WillOnce(Return(workspaces));
-    EXPECT_CALL(*m_savePresenter, saveWorkspaces(workspaces)).Times(1);
+    EXPECT_CALL(*m_savePresenter, saveWorkspaces(workspaces, true)).Times(1);
     presenter->notifyAlgorithmComplete(algorithm);
-    verifyAndClear();
   }
 
   void testOutputWorkspacesSavedOnAlgorithmCompleteWithAutosaveGroupRows() {
@@ -413,9 +379,8 @@ public:
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
     EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(algorithm, true)).Times(1).WillOnce(Return(workspaces));
-    EXPECT_CALL(*m_savePresenter, saveWorkspaces(workspaces)).Times(1);
+    EXPECT_CALL(*m_savePresenter, saveWorkspaces(workspaces, true)).Times(1);
     presenter->notifyAlgorithmComplete(algorithm);
-    verifyAndClear();
   }
 
   void testOutputWorkspacesNotSavedIfAutosaveDisabled() {
@@ -426,9 +391,22 @@ public:
     EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
     EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
     EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(_, _)).Times(0);
-    EXPECT_CALL(*m_savePresenter, saveWorkspaces(_)).Times(0);
+    EXPECT_CALL(*m_savePresenter, saveWorkspaces(_, true)).Times(0);
     presenter->notifyAlgorithmComplete(algorithm);
-    verifyAndClear();
+  }
+
+  void testOutputWorkspacesNotSavedWithAutosaveIfNoWorkspacesToSave() {
+    auto presenter = makePresenter(makeModel());
+    IConfiguredAlgorithm_sptr algorithm = std::make_shared<MockBatchJobAlgorithm>();
+    EXPECT_CALL(*m_savePresenter, shouldAutosave()).Times(1).WillOnce(Return(true));
+    EXPECT_CALL(*m_savePresenter, shouldAutosaveGroupRows()).Times(1).WillOnce(Return(true));
+    const std::vector<std::string> workspaces;
+    auto row = makeRow();
+    EXPECT_CALL(*m_jobManager, getRunsTableItem(algorithm)).Times(1).WillOnce(Return(row));
+    EXPECT_CALL(*m_jobManager, algorithmComplete(algorithm)).Times(1);
+    EXPECT_CALL(*m_jobManager, algorithmOutputWorkspacesToSave(algorithm, true)).Times(1).WillOnce(Return(workspaces));
+    EXPECT_CALL(*m_savePresenter, saveWorkspaces(workspaces, true)).Times(0);
+    presenter->notifyAlgorithmComplete(algorithm);
   }
 
   void testNotifyAlgorithmError() {
@@ -440,7 +418,6 @@ public:
     EXPECT_CALL(*m_jobManager, algorithmError(algorithm, errorMessage)).Times(1);
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(1);
     presenter->notifyAlgorithmError(algorithm, errorMessage);
-    verifyAndClear();
   }
 
   void testModelUpdatedWhenWorkspaceDeleted() {
@@ -448,14 +425,12 @@ public:
     auto name = std::string("test_workspace");
     EXPECT_CALL(*m_jobManager, notifyWorkspaceDeleted(name)).Times(1);
     presenter->postDeleteHandle(name);
-    verifyAndClear();
   }
 
   void testRowStateUpdatedWhenWorkspaceDeleted() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(1);
     presenter->postDeleteHandle("");
-    verifyAndClear();
   }
 
   void testModelUpdatedWhenWorkspaceRenamed() {
@@ -464,28 +439,24 @@ public:
     auto newName = std::string("test_workspace2");
     EXPECT_CALL(*m_jobManager, notifyWorkspaceRenamed(oldName, newName)).Times(1);
     presenter->renameHandle(oldName, newName);
-    verifyAndClear();
   }
 
   void testRowStateUpdatedWhenWorkspaceRenamed() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged(_)).Times(1);
     presenter->renameHandle("", "");
-    verifyAndClear();
   }
 
   void testModelUpdatedWhenWorkspacesCleared() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_jobManager, notifyAllWorkspacesDeleted()).Times(1);
     presenter->clearADSHandle();
-    verifyAndClear();
   }
 
   void testRowStateUpdatedWhenWorkspacesCleared() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_runsPresenter, notifyRowModelChanged()).Times(1);
     presenter->clearADSHandle();
-    verifyAndClear();
   }
 
   void testPercentCompleteIsRequestedFromJobManager() {
@@ -493,7 +464,6 @@ public:
     auto progress = 33;
     EXPECT_CALL(*m_jobManager, percentComplete()).Times(1).WillOnce(Return(progress));
     TS_ASSERT_EQUALS(presenter->percentComplete(), progress);
-    verifyAndClear();
   }
 
   void testRunsPresenterNotifiesSetRoundPrecision() {
@@ -501,21 +471,18 @@ public:
     auto prec = 2;
     EXPECT_CALL(*m_runsPresenter, setRoundPrecision(prec));
     presenter->notifySetRoundPrecision(prec);
-    verifyAndClear();
   }
 
   void testRunsPresenterNotifiesResetRoundPrecision() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_runsPresenter, resetRoundPrecision());
     presenter->notifyResetRoundPrecision();
-    verifyAndClear();
   }
 
   void testNotifyBatchLoaded() {
     auto presenter = makePresenter(makeModel());
     EXPECT_CALL(*m_runsPresenter, notifyBatchLoaded());
     presenter->notifyBatchLoaded();
-    verifyAndClear();
   }
 
   void testWarningShownOnResumeWhenExperimentSettingsInvalid() {

@@ -1,1 +1,0 @@
-- Fix bug in instrument viewer that caused a crash if you tried to delete a peak after having selected that peak and dragged the peak workspace onto the viewer.

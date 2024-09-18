@@ -738,7 +738,7 @@ int GridDetector::interceptSurface(Track & /*track*/) const {
 //-------------------------------------------------------------------------------------------------
 /// Finds the approximate solid angle covered by the component when viewed from
 /// the point given
-double GridDetector::solidAngle(const V3D & /*observer*/) const {
+double GridDetector::solidAngle(const Geometry::SolidAngleParams & /*params*/) const {
   throw Kernel::Exception::NotImplementedError("GridDetector::solidAngle() is not implemented.");
 }
 

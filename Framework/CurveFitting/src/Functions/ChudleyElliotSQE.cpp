@@ -79,8 +79,8 @@ void ChudleyElliotSQE::functionDeriv1D(Mantid::API::Jacobian *jacobian, const do
   this->function1D(out.data(), xValues, nData);
 
   for (size_t iP = 0; iP < nParam; iP++) {
-    std::vector<double> derivative(nData);
     if (this->isActive(iP)) {
+      std::vector<double> derivative(nData);
       const double pVal = this->activeParameter(iP);
       const std::string pName = this->parameterName(iP);
       if (pName == "Height") {

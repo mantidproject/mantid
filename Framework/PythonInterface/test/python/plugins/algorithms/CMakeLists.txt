@@ -4,6 +4,7 @@ add_subdirectory(WorkflowAlgorithms)
 
 set(TEST_PY_FILES
     AbinsBasicTest.py
+    Abins2BasicTest.py
     AbinsAdvancedParametersTest.py
     AlignComponentsTest.py
     AngularAutoCorrelationsSingleAxisTest.py
@@ -36,7 +37,6 @@ set(TEST_PY_FILES
     DNSComputeDetEffCorrCoefsTest.py
     DNSMergeRunsTest.py
     DNSFlippingRatioCorrTest.py
-    DSFinterpTest.py
     EnggCalibrateFullTest.py
     EnggCalibrateTest.py
     EnggEstimateFocussedBackgroundTest.py
@@ -52,9 +52,11 @@ set(TEST_PY_FILES
     FitGaussianTest.py
     FindGoniometerFromUBTest.py
     FindGlobalBMatrixTest.py
+    FindMultipleUMatricesTest.py
     FindSXPeaksConvolveTest.py
     FitIncidentSpectrumTest.py
     FractionalIndexingTest.py
+    GenerateGroupingSNSInelasticTest.py
     GenerateLogbookTest.py
     GetEiT0atSNSTest.py
     GroupBySampleChangerPositionTest.py
@@ -69,6 +71,8 @@ set(TEST_PY_FILES
     IndexPeaksTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
+    IntegratePeaks1DProfileTest.py
+    IntegratePeaksShoeboxTOFTest.py
     IntegratePeaksSkewTest.py
     LeadPressureCalcTest.py
     LoadAndMergeTest.py
@@ -112,9 +116,11 @@ set(TEST_PY_FILES
     SANSWideAngleCorrectionTest.py
     SaveGEMMAUDParamFileTest.py
     SaveNexusPDTest.py
+    SaveMDHistoToVTKTest.py
     SaveGSSCWTest.py
     SaveHKLCWTest.py
     SaveINSTest.py
+    SaveISISReflectometryORSOTest.py
     SavePlot1DAsJsonTest.py
     SaveReflectionsTest.py
     ExtractMonitorsTest.py
@@ -127,6 +133,7 @@ set(TEST_PY_FILES
     CNCSSuggestTIBTest.py
     HYSPECSuggestTIBTest.py
     SymmetriseTest.py
+    SymmetriseMDHistoTest.py
     UpdatePeakParameterTableValueTest.py
     SANSSubtractTest.py
     TOFTOFCropWorkspaceTest.py

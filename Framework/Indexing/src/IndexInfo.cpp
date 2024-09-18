@@ -224,25 +224,25 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(const std::vector<size_t> &d
 
   // Global vector of spectrum definitions. For this purpose we do not need
   // actual definitions either single detector or error flag.
-  std::vector<std::pair<int64_t, size_t>> spectrumDefinitions;
-  spectrumDefinitions.resize(size());
+  std::vector<std::pair<int64_t, size_t>> specDefinitions;
+  specDefinitions.resize(size());
   for (size_t i = 0; i < size(); ++i) {
     const auto &spectrumDefinition = m_spectrumDefinitions->operator[](i);
     if (spectrumDefinition.size() == 1) {
       const auto detectorIndex = spectrumDefinition[0].first;
       const auto timeIndex = spectrumDefinition[0].second;
-      spectrumDefinitions[i] = std::make_pair(detectorIndex, timeIndex);
+      specDefinitions[i] = std::make_pair(detectorIndex, timeIndex);
     }
     // detectorIndex is unsigned so we can use negative values as error flags.
     if (spectrumDefinition.size() == 0)
-      spectrumDefinitions[i] = {-1, 0};
+      specDefinitions[i] = {-1, 0};
     if (spectrumDefinition.size() > 1)
-      spectrumDefinitions[i] = {-2, 0};
+      specDefinitions[i] = {-2, 0};
   }
 
   std::vector<GlobalSpectrumIndex> spectrumIndices;
   for (size_t i = 0; i < globalSize(); ++i) {
-    const auto spectrumDefinition = spectrumDefinitions[i];
+    const auto spectrumDefinition = specDefinitions[i];
     if (spectrumDefinition.first >= 0) {
       const auto detectorIndex = static_cast<size_t>(spectrumDefinition.first);
       const auto timeIndex = static_cast<size_t>(spectrumDefinition.second);

@@ -30,18 +30,18 @@ void Gaussian::init() {
 }
 
 void Gaussian::functionLocal(double *out, const double *xValues, const size_t nData) const {
-  const double height = getParameter("Height");
+  const double peakHeight = getParameter("Height");
   const double peakCentre = getParameter("PeakCentre");
   const double weight = pow(1 / getParameter("Sigma"), 2);
 
   for (size_t i = 0; i < nData; i++) {
     double diff = xValues[i] - peakCentre;
-    out[i] = height * exp(-0.5 * diff * diff * weight);
+    out[i] = peakHeight * exp(-0.5 * diff * diff * weight);
   }
 }
 
 void Gaussian::functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) {
-  const double height = getParameter("Height");
+  const double peakHeight = getParameter("Height");
   const double peakCentre = getParameter("PeakCentre");
   const double weight = pow(1 / getParameter("Sigma"), 2);
 
@@ -49,9 +49,9 @@ void Gaussian::functionDerivLocal(Jacobian *out, const double *xValues, const si
     double diff = xValues[i] - peakCentre;
     double e = exp(-0.5 * diff * diff * weight);
     out->set(i, 0, e);
-    out->set(i, 1, diff * height * e * weight);
+    out->set(i, 1, diff * peakHeight * e * weight);
     out->set(i, 2,
-             -0.5 * diff * diff * height * e); // derivative with respect to weight not sigma
+             -0.5 * diff * diff * peakHeight * e); // derivative with respect to weight not sigma
   }
 }
 
@@ -81,9 +81,9 @@ double Gaussian::fwhm() const { return 2.0 * sqrt(2.0 * M_LN2) * getParameter("S
 double Gaussian::intensity() const {
   auto sigma = getParameter("Sigma");
   if (sigma == 0.0) {
-    auto height = getParameter("Height");
-    if (std::isfinite(height)) {
-      m_intensityCache = height;
+    auto peakHeight = getParameter("Height");
+    if (std::isfinite(peakHeight)) {
+      m_intensityCache = peakHeight;
     }
   } else {
     m_intensityCache = getParameter("Height") * getParameter("Sigma") * sqrt(2.0 * M_PI);

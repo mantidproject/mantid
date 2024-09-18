@@ -110,11 +110,11 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
   std::map<std::string, std::string> entries = file.getEntries();
   std::map<std::string, std::string>::iterator it;
   for (it = entries.begin(); it != entries.end(); ++it) {
-    std::string name = it->first;
-    if (name.size() > 4) {
-      if (name.substr(0, 4) == "bank") {
+    std::string entryName = it->first;
+    if (entryName.size() > 4) {
+      if (entryName.substr(0, 4) == "bank") {
         // OK, this is some bank data
-        file.openGroup(name, it->second);
+        file.openGroup(entryName, it->second);
 
         // -------------- Find the data field name ----------------------------
         if (m_dataField.empty()) {
@@ -175,15 +175,15 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
                              "'bankX' group. Cannot load file.");
 
   for (it = entries.begin(); it != entries.end(); ++it) {
-    std::string name = it->first;
-    if (name.size() > 4) {
-      if (name.substr(0, 4) == "bank") {
+    std::string entryName = it->first;
+    if (entryName.size() > 4) {
+      if (entryName.substr(0, 4) == "bank") {
         // OK, this is some bank data
-        file.openGroup(name, it->second);
+        file.openGroup(entryName, it->second);
         const auto bankEntries = file.getEntries();
 
         if (bankEntries.find("pixel_id") != bankEntries.end()) {
-          bankNames.emplace_back(name);
+          bankNames.emplace_back(entryName);
 
           // Count how many pixels in the bank
           file.openData("pixel_id");
@@ -196,7 +196,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
             m_numPixels += newPixels;
           }
         } else {
-          bankNames.emplace_back(name);
+          bankNames.emplace_back(entryName);
 
           // Get the number of pixels from the offsets arrays
           file.openData("x_pixel_offset");

@@ -21,7 +21,7 @@ In addition to many improvements we are delighted to announce some new features 
 
 - A significant :ref:`ALFView-ref` upgrade, which enhances usability, streamlines the workflow, and delivers a more intuitive user experience.
 - The addition of a :ref:`Reduction Preview <refl_preview>` tab to the ISIS Reflectometry interface.
-- The new :ref:`interface-inelastic-data-manipulation` interface, which has been created from the old Data Reduction interface and two of the tabs from the Analysis interface.
+- The new :ref:`interface-inelastic-data-processor` interface, which has been created from the old Data Reduction interface and two of the tabs from the Analysis interface.
 - New :ref:`plots using matplotlib 3D<Mesh_Plots>` for viewing the Sample Shape of a workspace.
 
 

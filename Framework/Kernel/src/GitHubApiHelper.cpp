@@ -66,14 +66,6 @@ std::string getApiToken() {
   // unset is the user's way of intentionally turning of authentication
   if (token.empty() || boost::istarts_with(token, "unset")) {
     token = "";
-  } else {
-    // error check that token is possibly valid - 40 char
-    // TODO example: 8ec7afc857540ee60af78cba1cf7779a6ed0b6b9
-    if (token.size() != 40) {
-      g_log.notice() << "GitHub API token is not 40 characters (found " << token.size() << ") with token =\"" << token
-                     << "\" using unauthenticated connection\n";
-      token = "";
-    }
   }
 
   // log what the token is and create final string to set in header

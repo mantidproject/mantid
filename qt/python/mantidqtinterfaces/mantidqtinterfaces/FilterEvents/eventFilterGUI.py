@@ -5,12 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, too-many-lines, too-many-instance-attributes
-import numpy
+import numpy as np
 
 from qtpy.QtWidgets import QFileDialog, QMainWindow, QMessageBox, QSlider, QVBoxLayout, QWidget
-from qtpy.QtGui import QDoubleValidator, QDesktopServices, QRegExpValidator  # noqa
-from qtpy.QtCore import QUrl, QRegExp
-
+from qtpy.QtGui import QDoubleValidator, QDesktopServices
+from qtpy.QtCore import QUrl, QLocale
 
 import mantid
 import mantid.simpleapi as api
@@ -58,9 +57,9 @@ class MainWindow(QMainWindow):
         self.ui = load_ui(__file__, "MainWindow.ui", baseinstance=self)
         mpl_layout = QVBoxLayout()
         self.ui.graphicsView.setLayout(mpl_layout)
-        self.fig = Figure()
+        self.fig = Figure(figsize=(4, 3), layout="constrained")
         self.canvas = FigureCanvas(self.fig)
-        self.ui.mainplot = self.fig.add_subplot(111, projection="mantid")
+        self.ui.mainplot = self.fig.add_subplot(111, projection="mantid", xlabel="x-units", ylabel="y-units")
         mpl_layout.addWidget(self.canvas)
 
         # Do initialize plotting
@@ -85,7 +84,7 @@ class MainWindow(QMainWindow):
 
         # Set up horizontal slide (integer) and string value
         self._leftSlideValue = 0
-        self._rightSlideValue = 99
+        self._rightSlideValue = 100
 
         self.ui.horizontalSlider.setRange(0, 100)
         self.ui.horizontalSlider.setValue(self._leftSlideValue)
@@ -99,11 +98,6 @@ class MainWindow(QMainWindow):
         self.ui.horizontalSlider_2.setTickPosition(QSlider.NoTicks)
         self.ui.horizontalSlider_2.valueChanged.connect(self.move_rightSlider)
 
-        self.ui.lineEdit_3.editingFinished.connect(self.set_startTime)
-        self.ui.pushButton_setT0.clicked.connect(self.set_startTime)
-        self.ui.lineEdit_4.editingFinished.connect(self.set_stopTime)
-        self.ui.pushButton_setTf.clicked.connect(self.set_stopTime)
-
         # File loader
         self.scanEventWorkspaces()
         self.ui.pushButton_refreshWS.clicked.connect(self.scanEventWorkspaces)
@@ -111,30 +105,9 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_load.clicked.connect(self.load_File)
         self.ui.pushButton_3.clicked.connect(self.use_existWS)
 
-        # validates any number, but does not accept comma, contrary to QDoubleValidator
-        # this way, it is possible to cast to float without checking for stray commas.
-        regexp = QRegExp("[-+]?((\d+\.?\d*)|(\.\d+))(e[-+]?\d+)?")  # noqa
-        # because flake is not happy about regex escape sequences
-
-        regexp_val = QRegExpValidator(regexp, self)
-
-        # Set up time
-        self.ui.lineEdit_3.setValidator(regexp_val)
-        self.ui.lineEdit_4.setValidator(regexp_val)
-
         # Filter by time
         self.ui.pushButton_filterTime.clicked.connect(self.filterByTime)
         self.ui.lineEdit_timeInterval.returnPressed.connect(self.filterByTime)
-
-        # Filter by log value
-        self.ui.lineEdit_5.setValidator(regexp_val)
-        self.ui.lineEdit_6.setValidator(regexp_val)
-        self.ui.lineEdit_7.setValidator(regexp_val)
-        self.ui.lineEdit_8.setValidator(regexp_val)
-        self.ui.lineEdit_9.setValidator(regexp_val)
-
-        self.ui.lineEdit_5.textChanged.connect(self.set_minLogValue)
-        self.ui.lineEdit_6.textChanged.connect(self.set_maxLogValue)
 
         dirchangeops = ["Both", "Increase", "Decrease"]
         self.ui.comboBox_4.addItems(dirchangeops)
@@ -163,6 +136,29 @@ class MainWindow(QMainWindow):
         self.ui.verticalSlider_2.setTracking(True)
         self.ui.verticalSlider_2.valueChanged.connect(self.move_lowerSlider)
 
+        # Set up validators for numeric edits
+        self.dvalidator = QDoubleValidator()
+        locale = QLocale.c()
+        locale.setNumberOptions(QLocale.RejectGroupSeparator)
+        self.dvalidator.setLocale(locale)
+        self.dvalidator.setDecimals(6)
+        self.populate_line_edits_default()
+        self.doubleLineEdits = [
+            (self.ui.leStartTime, self.set_startTime),
+            (self.ui.leStopTime, self.set_stopTime),
+            (self.ui.leMinimumValue, self.set_minLogValue),
+            (self.ui.leMaximumValue, self.set_maxLogValue),
+            (self.ui.leStepSize, None),
+            (self.ui.leValueTolerance, None),
+            (self.ui.leTimeTolerance, None),
+            (self.ui.leIncidentEnergy, None),
+        ]
+
+        for edit in self.doubleLineEdits:
+            edit[0].setValidator(self.dvalidator)
+            edit[0].callback = edit[1]
+        self.connect_signals()
+
         # Set up for filtering (advanced setup)
         self._tofcorrection = False
         self.ui.checkBox_fastLog.setChecked(False)
@@ -173,10 +169,8 @@ class MainWindow(QMainWindow):
         self.ui.comboBox_tofCorr.currentIndexChanged.connect(self.showHideEi)
         self.ui.pushButton_refreshCorrWSList.clicked.connect(self._searchTableWorkspaces)
 
-        self.ui.lineEdit_Ei.setValidator(regexp_val)
-
         self.ui.label_Ei.hide()
-        self.ui.lineEdit_Ei.hide()
+        self.ui.leIncidentEnergy.hide()
         self.ui.label_Ei_2.hide()
         self.ui.comboBox_corrWS.hide()
         self.ui.pushButton_refreshCorrWSList.hide()
@@ -213,6 +207,23 @@ class MainWindow(QMainWindow):
             msg = "You've clicked on a bar with coords:\n %f, %f" % (x, y)
             QMessageBox.information(self, "Click!", msg)
 
+    def reformat(self):
+        self.sender().setText(f"{float(self.sender().text()):.6f}")
+
+    def callback(self):
+        sender_edit = getattr(self.ui, self.sender().objectName())
+        if sender_edit.callback is not None:
+            sender_edit.callback()
+
+    def populate_line_edits_default(self):
+        ylim = self.ui.mainplot.get_ylim()
+        xlim = self.ui.mainplot.get_xlim()
+
+        self.ui.leStartTime.setText(f"{xlim[0]:.6f}")
+        self.ui.leStopTime.setText(f"{xlim[1]:.6f}")
+        self.ui.leMinimumValue.setText(f"{ylim[0]:.6f}")
+        self.ui.leMaximumValue.setText(f"{ylim[1]:.6f}")
+
     def computeMock(self):
         """Compute vecx and vecy as mocking"""
         x0 = 0.0
@@ -247,8 +258,8 @@ class MainWindow(QMainWindow):
             # Move the vertical line
             xlim = self.ui.mainplot.get_xlim()
 
-            if self.ui.lineEdit_4.text():
-                newx = min(xlim[0] + newx * (xlim[1] - xlim[0]) * 0.01, float(self.ui.lineEdit_4.text()))
+            if self.ui.leStopTime.text():
+                newx = min(xlim[0] + newx * (xlim[1] - xlim[0]) * 0.01, float(self.ui.leStopTime.text()))
             else:
                 newx = xlim[0] + newx * (xlim[1] - xlim[0]) * 0.01
 
@@ -258,7 +269,7 @@ class MainWindow(QMainWindow):
             self.canvas.draw()
 
             # Change value
-            self.ui.lineEdit_3.setText(str(newx))
+            self.ui.leStartTime.setText(f"{newx:.6f}")
 
         else:
             # Reset the value to original value
@@ -266,39 +277,18 @@ class MainWindow(QMainWindow):
 
     def set_startTime(self):
         """Set the starting time and left slide bar"""
-        inps = str(self.ui.lineEdit_3.text())
-        info_msg = "Starting time = %s" % (inps)
+        inps = float(self.ui.leStartTime.text())
+        info_msg = "Starting time = %s" % inps
         Logger("Filter_Events").information(info_msg)
 
         xlim = self.ui.mainplot.get_xlim()
-        if inps == "":
-            # Empty. Use default
-            newtime0 = xlim[0]
-        else:
-            newtime0 = float(inps)
-
+        # Set value to valid range
+        newtime0 = np.clip(inps, xlim[0], float(self.ui.leStopTime.text()))
         # Convert to integer slide value
-        ileftvalue = int((newtime0 - xlim[0]) / (xlim[1] - xlim[0]) * 100)
+        ileftvalue = np.clip(int((newtime0 - xlim[0]) / (xlim[1] - xlim[0]) * 100), 0, self._rightSlideValue)
         debug_msg = "iLeftSlide = %s" % str(ileftvalue)
         Logger("Filter_Events").debug(debug_msg)
 
-        # Skip if same as original
-        if ileftvalue == self._leftSlideValue:
-            return
-
-        # Set the value if out of range
-        resetT = True
-        if ileftvalue < 0:
-            # Minimum value as 0
-            ileftvalue = 0
-        elif ileftvalue > self._rightSlideValue:
-            # Maximum value as right slide value
-            ileftvalue = self._rightSlideValue
-        else:
-            resetT = False
-
-        if resetT is True:
-            newtime0 = xlim[0] + ileftvalue * (xlim[1] - xlim[0]) * 0.01
         info_msg = "Corrected iLeftSlide = {} (vs. right = {})".format(ileftvalue, self._rightSlideValue)
         Logger("Filter_Events").information(info_msg)
 
@@ -314,8 +304,8 @@ class MainWindow(QMainWindow):
         # Set the value to left slider
         self.ui.horizontalSlider.setValue(self._leftSlideValue)
         # Reset the value of line edit
-        if resetT is True:
-            self.ui.lineEdit_3.setText(str(newtime0))
+        if newtime0 != inps:
+            self.ui.leStartTime.setText(f"{newtime0:.6f}")
 
     def move_rightSlider(self):
         """Re-setup left range line in figure.
@@ -328,10 +318,10 @@ class MainWindow(QMainWindow):
 
             xlim = self.ui.mainplot.get_xlim()
 
-            if self.ui.lineEdit_3.text():
+            if self.ui.leStartTime.text():
                 # that is not entirely fool proof, as the user could still remove the value in the field after putting
                 # a non round percent, but this a) is unlikely and b) will not crash mantid, only show an artifact
-                newx = max(xlim[0] + newx * (xlim[1] - xlim[0]) * 0.01, float(self.ui.lineEdit_3.text()))
+                newx = max(xlim[0] + newx * (xlim[1] - xlim[0]) * 0.01, float(self.ui.leStartTime.text()))
             else:
                 newx = xlim[0] + newx * (xlim[1] - xlim[0]) * 0.01
 
@@ -341,7 +331,7 @@ class MainWindow(QMainWindow):
             self.canvas.draw()
 
             # Change value
-            self.ui.lineEdit_4.setText(str(newx))
+            self.ui.leStopTime.setText(f"{newx:.6f}")
 
         else:
             # Reset the value
@@ -349,36 +339,15 @@ class MainWindow(QMainWindow):
 
     def set_stopTime(self):
         """Set the stopping time and right slide bar"""
-        inps = str(self.ui.lineEdit_4.text())
+        inps = float(self.ui.leStopTime.text())
         Logger("Filter_Events").information("Stopping time = {}".format(inps))
 
         xlim = self.ui.mainplot.get_xlim()
-        if inps == "":
-            # Empty. Use default
-            newtimef = xlim[1]
-        else:
-            # Parse
-            newtimef = float(inps)
-
+        # Set value to valid range
+        newtimef = np.clip(inps, float(self.ui.leStartTime.text()), xlim[1])
         # Convert to integer slide value
-        irightvalue = int((newtimef - xlim[0]) / (xlim[1] - xlim[0]) * 100)
+        irightvalue = np.clip(int((newtimef - xlim[0]) / (xlim[1] - xlim[0]) * 100), self._leftSlideValue, 100)
         Logger("Filter_Events").information("iRightSlide = {}".format(irightvalue))
-
-        # Return if no change
-        if irightvalue == self._rightSlideValue:
-            return
-
-        # Correct value
-        resetT = True
-        if irightvalue > 100:
-            irightvalue = 100
-        elif irightvalue < self._leftSlideValue:
-            irightvalue = self._leftSlideValue
-        else:
-            resetT = False
-
-        if resetT:
-            newtimef = xlim[0] + irightvalue * (xlim[1] - xlim[0]) * 0.01
 
         # Move the slide bar (right)
         self._rightSlideValue = irightvalue
@@ -393,8 +362,8 @@ class MainWindow(QMainWindow):
         self.ui.horizontalSlider_2.setValue(self._rightSlideValue)
 
         # Reset to line edit
-        if resetT:
-            self.ui.lineEdit_4.setText(str(newtimef))
+        if newtimef != inps:
+            self.ui.leStopTime.setText(f"{newtimef:.6f}")
 
     def move_lowerSlider(self):
         """Re-setup upper range line in figure.
@@ -426,41 +395,22 @@ class MainWindow(QMainWindow):
         # Set line edit input
         if setLineEdit is True:
             # Change value to line edit (5)
-            self.ui.lineEdit_5.setText(str(newy))
+            self.ui.leMinimumValue.setText(f"{newy:.6f}")
             # Reset the class variable
             self._lowerSlideValue = inewy
 
     def set_minLogValue(self):
         """Set the starting time and left slide bar"""
-        debug_msg = "Minimum Log Value = {}".format(self.ui.lineEdit_5.text())
+        inps = float(self.ui.leMinimumValue.text())
+        debug_msg = "Minimum Log Value = {}".format(self.ui.leMinimumValue.text())
         Logger("Filter_Events").debug(debug_msg)
 
         ylim = self.ui.mainplot.get_ylim()
-
-        if str(self.ui.lineEdit_5.text()) == "":
-            # Empty. Default to minY
-            newminY = ylim[0]
-        else:
-            # Non empty.  Parse
-            newminY = float(self.ui.lineEdit_5.text())
-
+        # Set value to valid range
+        newminY = np.clip(inps, ylim[0], float(self.ui.leMaximumValue.text()))
         # Convert to integer slide value
-        iminlogval = int((newminY - ylim[0]) / (ylim[1] - ylim[0]) * 100)
+        iminlogval = np.clip(int((newminY - ylim[0]) / (ylim[1] - ylim[0]) * 100), 0, self._upperSlideValue)
         Logger("Filter_Events").debug("ilowerSlide = {}".format(iminlogval))
-
-        # Return if no change
-        if iminlogval == self._lowerSlideValue:
-            return
-
-        # Set value if out of range
-        resetL = True
-        if iminlogval >= self._upperSlideValue:
-            iminlogval = self._upperSlideValue - 1
-        else:
-            resetL = False
-
-        if resetL:
-            newminY = ylim[0] + iminlogval * (ylim[1] - ylim[0]) * 0.01
 
         # Move the vertical line
         lowerx = self.ui.mainplot.get_xlim()
@@ -475,8 +425,8 @@ class MainWindow(QMainWindow):
         self.ui.verticalSlider_2.setValue(self._lowerSlideValue)
 
         # Reset line Edit if using default
-        if resetL is True:
-            self.ui.lineEdit_5.setText(str(newminY))
+        if newminY != inps:
+            self.ui.leMinimumValue.setText(f"{newminY:.6f}")
 
     def move_upperSlider(self):
         """Re-setup upper range line in figure.
@@ -509,44 +459,23 @@ class MainWindow(QMainWindow):
 
         # Change value
         if setLineEdit:
-            self.ui.lineEdit_6.setText(str(newy))
+            self.ui.leMaximumValue.setText(f"{newy:.6f}")
             self._upperSlideValue = inewy
 
     def set_maxLogValue(self):
         """Set maximum log value from line-edit"""
-        inps = str(self.ui.lineEdit_6.text())
+        inps = float(self.ui.leMaximumValue.text())
         debug_msg = "Maximum Log Value = {}".format(inps)
         Logger("Filter_Events").debug(debug_msg)
 
         ylim = self.ui.mainplot.get_ylim()
-        if inps == "":
-            # Empty. Default to minY
-            newmaxY = ylim[1]
-        else:
-            # Parse
-            newmaxY = float(inps)
-
+        # Set value to valid range
+        newmaxY = np.clip(inps, float(self.ui.leMinimumValue.text()), ylim[1])
         # Convert to integer slide value
-        imaxlogval = int((newmaxY - ylim[0]) / (ylim[1] - ylim[0]) * 100)
+        imaxlogval = np.clip(int((newmaxY - ylim[0]) / (ylim[1] - ylim[0]) * 100), self._lowerSlideValue, 100)
+
         debug_msg = "iUpperSlide = {}".format(imaxlogval)
         Logger("Filter_Events").debug(debug_msg)
-
-        # Return if no change
-        if imaxlogval == self._upperSlideValue:
-            return
-
-        # Set to default if out of range
-        resetL = True
-        # if imaxlogval >= 100:
-        #     imaxlogval = 100
-        if imaxlogval < self._lowerSlideValue:
-            imaxlogval = self._lowerSlideValue + 1
-        else:
-            resetL = False
-
-        # Set newmaxY if necessary
-        if resetL is True:
-            newmaxY = ylim[0] + imaxlogval * (ylim[1] - ylim[0]) * 0.01
 
         # Move the vertical line
         upperx = self.ui.mainplot.get_xlim()
@@ -559,8 +488,8 @@ class MainWindow(QMainWindow):
         self.ui.verticalSlider.setValue(self._upperSlideValue)
 
         # Set the value to editor if necessary
-        if resetL is True:
-            self.ui.lineEdit_6.setText(str(newmaxY))
+        if newmaxY != inps:
+            self.ui.leMaximumValue.setText(f"{newmaxY:.6f}")
 
     def browse_File(self):
         """Open a file dialog to get file"""
@@ -624,12 +553,13 @@ class MainWindow(QMainWindow):
 
         # append 1 more log if original log only has 1 value
         tf = self._dataWS.getRun().getProperty("proton_charge").times[-1]
-        vectimes = numpy.append(vectimes, tf)
-        vecvalue = numpy.append(vecvalue, vecvalue[-1])
+        vectimes = np.append(vectimes, tf)
+        vecvalue = np.append(vecvalue, vecvalue[-1])
 
-        vecreltimes = (vectimes - t0) / numpy.timedelta64(1, "s")
+        vecreltimes = (vectimes - t0) / np.timedelta64(1, "s")
 
         # Set to plot
+        self.disconnect_signals()
         xlim = [vecreltimes.min(), vecreltimes.max()]
         ylim = [vecvalue.min(), vecvalue.max()]
         self.ui.mainplot.set_xlim(xlim[0], xlim[1])
@@ -652,12 +582,12 @@ class MainWindow(QMainWindow):
         setp(self.lowerslideline, xdata=xlim, ydata=[ylim[0], ylim[0]])
         self._lowerSlideValue = 0
         self.ui.verticalSlider_2.setValue(self._lowerSlideValue)
-        self.ui.lineEdit_5.setText("")
 
         setp(self.upperslideline, xdata=xlim, ydata=[ylim[1], ylim[1]])
         self._upperSlideValue = 100
         self.ui.verticalSlider.setValue(self._upperSlideValue)
-        self.ui.lineEdit_6.setText("")
+        self.populate_line_edits_default()
+        self.connect_signals()
         self.canvas.draw()
 
         # Load property's statistic and give suggestion on parallel and fast log
@@ -722,7 +652,7 @@ class MainWindow(QMainWindow):
         for p in plist:
             try:
                 times = p.times
-                if len(times) > 1 and numpy.isreal(p.value[0]):
+                if len(times) > 1 and np.isreal(p.value[0]):
                     self._sampleLogNames.append(p.name)
             # This is here for FloatArrayProperty. If a log value is of this type it does not have times
             except AttributeError:
@@ -882,8 +812,8 @@ class MainWindow(QMainWindow):
         self.ui.mainplot.set_xlim(xmin, xmax)
         self.ui.mainplot.set_ylim(ymin, ymax)
 
-        self.ui.mainplot.set_xlabel("Time (seconds)", fontsize=13)
-        self.ui.mainplot.set_ylabel("Counts", fontsize=13)
+        self.ui.mainplot.set_xlabel("Time (seconds)")
+        self.ui.mainplot.set_ylabel("Counts")
 
         # Set up main line
         setp(self.mainline, xdata=vecx, ydata=vecy)
@@ -909,8 +839,8 @@ class MainWindow(QMainWindow):
         kwargs = {}
 
         xlim = self.ui.mainplot.get_xlim()
-        kwargs["StartTime"] = self.ui.lineEdit_3.text() if self.ui.lineEdit_3.text() != "" else str(xlim[0])
-        kwargs["StopTime"] = self.ui.lineEdit_4.text() if self.ui.lineEdit_4.text() != "" else str(xlim[1])
+        kwargs["StartTime"] = self.ui.leStartTime.text() if self.ui.leStartTime.text() != "" else str(xlim[0])
+        kwargs["StopTime"] = self.ui.leStopTime.text() if self.ui.leStopTime.text() != "" else str(xlim[1])
 
         if self.ui.lineEdit_timeInterval.text() != "":
             kwargs["TimeInterval"] = self.ui.lineEdit_timeInterval.text()
@@ -930,13 +860,12 @@ class MainWindow(QMainWindow):
                 OutputWorkspace=splitwsname,
                 FastLog=fastLog,
                 InformationWorkspace=splitinfowsname,
-                **kwargs
+                **kwargs,
             )
+            self.splitWksp(splitws, infows)
         except (RuntimeError, ValueError) as e:
             Logger("Filter_Events").error("Splitting failed ! \n {0}".format(e))
             return
-
-        self.splitWksp(splitws, infows)
 
     def filterByLogValue(self):
         """Filter by log value"""
@@ -948,36 +877,36 @@ class MainWindow(QMainWindow):
             Logger("Filter_Events").error(error_msg)
             return
 
-        if self.ui.lineEdit_3.text() != "":
-            rel_starttime = float(self.ui.lineEdit_3.text())
+        if self.ui.leStartTime.text() != "":
+            rel_starttime = float(self.ui.leStartTime.text())
             kwargs["StartTime"] = str(rel_starttime)
 
-        if self.ui.lineEdit_4.text() != "":
-            rel_stoptime = float(self.ui.lineEdit_4.text())
+        if self.ui.leStopTime.text() != "":
+            rel_stoptime = float(self.ui.leStopTime.text())
             kwargs["StopTime"] = str(rel_stoptime)
 
-        if self.ui.lineEdit_5.text() != "":
-            minlogvalue = float(self.ui.lineEdit_5.text())
+        if self.ui.leMinimumValue.text() != "":
+            minlogvalue = float(self.ui.leMinimumValue.text())
             kwargs["MinimumLogValue"] = minlogvalue
 
-        if self.ui.lineEdit_6.text() != "":
-            maxlogvalue = float(self.ui.lineEdit_6.text())
+        if self.ui.leMaximumValue.text() != "":
+            maxlogvalue = float(self.ui.leMaximumValue.text())
             kwargs["MaximumLogValue"] = maxlogvalue
 
-        if self.ui.lineEdit_7.text() != "":
-            logvalueintv = float(self.ui.lineEdit_7.text())
+        if self.ui.leStepSize.text() != "":
+            logvalueintv = float(self.ui.leStepSize.text())
             kwargs["LogValueInterval"] = logvalueintv
         logvalchangedir = str(self.ui.comboBox_4.currentText())
         kwargs["FilterLogValueByChangingDirection"] = logvalchangedir
 
-        if self.ui.lineEdit_9.text() != "":
-            logvalueintv = float(self.ui.lineEdit_9.text())
+        if self.ui.leTimeTolerance.text() != "":
+            logvalueintv = float(self.ui.leTimeTolerance.text())
             kwargs["TimeTolerance"] = logvalueintv
         logboundtype = str(self.ui.comboBox_5.currentText())
         kwargs["LogBoundary"] = logboundtype
 
-        if self.ui.lineEdit_8.text() != "":
-            logvaluetol = float(self.ui.lineEdit_8.text())
+        if self.ui.leValueTolerance.text() != "":
+            logvaluetol = float(self.ui.leValueTolerance.text())
             kwargs["LogValueTolerance"] = logvaluetol
 
         splitwsname = str(self._dataWS) + "_splitters"
@@ -994,7 +923,7 @@ class MainWindow(QMainWindow):
                 LogName=samplelog,
                 FastLog=fastLog,
                 InformationWorkspace=splitinfowsname,
-                **kwargs
+                **kwargs,
             )
             self.splitWksp(splitws, infows)
         except RuntimeError as e:
@@ -1012,7 +941,9 @@ class MainWindow(QMainWindow):
 
         kwargs = {}
         if corr2sample == "Direct":
-            ei = float(self.ui.lineEdit_Ei.text())
+            if not self.ui.leIncidentEnergy.text():
+                raise RuntimeError("To use direct corrections, incident energy field must have a valid value")
+            ei = float(self.ui.leIncidentEnergy.text())
             kwargs["IncidentEnergy"] = ei
         elif corr2sample == "Customized":
             corrws = str(self.ui.comboBox_corrWS.currentText())
@@ -1036,7 +967,7 @@ class MainWindow(QMainWindow):
             SplitSampleLogs=splitsamplelog,
             OutputWorkspaceIndexedFrom1=startfrom1,
             OutputTOFCorrectionWorkspace="TOFCorrTable",
-            **kwargs
+            **kwargs,
         )
 
     def showHideEi(self):
@@ -1046,10 +977,10 @@ class MainWindow(QMainWindow):
         # Incident energy
         if corrtype == "Direct":
             self.ui.label_Ei.show()
-            self.ui.lineEdit_Ei.show()
+            self.ui.leIncidentEnergy.show()
         else:
             self.ui.label_Ei.hide()
-            self.ui.lineEdit_Ei.hide()
+            self.ui.leIncidentEnergy.hide()
 
         # Workspace
         if corrtype == "Customized":
@@ -1100,26 +1031,31 @@ class MainWindow(QMainWindow):
             url = "http://docs.mantidproject.org/nightly/interfaces/{}.html" "".format("Filter Events")
             QDesktopServices.openUrl(QUrl(url))
 
+    def connect_signals(self):
+        for edit in self.doubleLineEdits:
+            edit[0].editingFinished.connect(self.reformat)
+            edit[0].editingFinished.connect(self.callback)
+
+    def disconnect_signals(self):
+        for edit in self.doubleLineEdits:
+            edit[0].editingFinished.disconnect(self.reformat)
+            edit[0].editingFinished.disconnect(self.callback)
+
     def _resetGUI(self, resetfilerun=False):
         """Reset GUI including all text edits and etc."""
         if resetfilerun is True:
             self.ui.lineEdit.clear()
 
         # Plot related
-        self.ui.lineEdit_3.clear()
-        self.ui.lineEdit_4.clear()
+        self.disconnect_signals()
         self.ui.horizontalSlider.setValue(0)
         self.ui.horizontalSlider_2.setValue(100)
-
-        self.ui.lineEdit_outwsname.clear()
-        self.ui.lineEdit_title.clear()
-
-        # Filter by log value
-        self.ui.lineEdit_5.clear()
-        self.ui.lineEdit_6.clear()
-
         self.ui.verticalSlider_2.setValue(0)
         self.ui.verticalSlider.setValue(100)
+        self.populate_line_edits_default()
+        self.ui.lineEdit_outwsname.clear()
+        self.ui.lineEdit_title.clear()
+        self.connect_signals()
 
         ylim = self.ui.mainplot.get_ylim()
         miny = ylim[0]
@@ -1128,16 +1064,16 @@ class MainWindow(QMainWindow):
         setp(self.lowerslideline, xdata=xlim, ydata=[miny, miny])
         setp(self.upperslideline, xdata=xlim, ydata=[maxy, maxy])
 
-        self.ui.lineEdit_7.clear()
-        self.ui.lineEdit_8.clear()
-        self.ui.lineEdit_9.clear()
+        self.ui.leStepSize.clear()
+        self.ui.leValueTolerance.clear()
+        self.ui.leTimeTolerance.clear()
 
         # Filter by time
         self.ui.lineEdit_timeInterval.clear()
 
         # Advanced setup
         self.ui.comboBox_tofCorr.setCurrentIndex(0)
-        self.ui.lineEdit_Ei.clear()
+        self.ui.leIncidentEnergy.clear()
 
         self.ui.checkBox_fastLog.setCheckState(False)
         self.ui.checkBox_doParallel.setCheckState(False)

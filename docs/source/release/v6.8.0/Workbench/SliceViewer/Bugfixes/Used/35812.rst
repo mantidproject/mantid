@@ -1,1 +1,0 @@
-- Resolved issue with projection matrix calcluation using basis vectors with non-q dimensions

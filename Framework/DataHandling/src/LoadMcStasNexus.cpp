@@ -44,15 +44,12 @@ const std::string LoadMcStasNexus::category() const { return "DataHandling\\Nexu
 int LoadMcStasNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   int confidence(0);
   const auto &entries = descriptor.getAllEntries();
-  const static auto target_dataset = "information";
   for (auto iter = entries.begin(); iter != entries.end(); ++iter) {
     const auto grouped_entries = iter->second;
-    for (const auto &path : grouped_entries) {
-      // Mccode writes an information dataset so can be reasonably confident if we find it
-      if (boost::ends_with(path, target_dataset)) {
-        confidence = 40;
-        break;
-      }
+    if (std::any_of(grouped_entries.cbegin(), grouped_entries.cend(),
+                    [](const auto &path) { return boost::ends_with(path, "information"); })) {
+      confidence = 40;
+      break;
     }
   }
   return confidence;
@@ -85,9 +82,9 @@ void LoadMcStasNexus::exec() {
   WorkspaceGroup_sptr outputGroup(new WorkspaceGroup);
 
   for (auto it = entries.begin(); it != itend; ++it) {
-    std::string name = it->first;
+    std::string entryName = it->first;
     std::string type = it->second;
-    nxFile.openGroup(name, type);
+    nxFile.openGroup(entryName, type);
     auto dataEntries = nxFile.getEntries();
 
     for (auto &dataEntry : dataEntries) {

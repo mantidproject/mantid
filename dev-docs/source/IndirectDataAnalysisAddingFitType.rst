@@ -6,32 +6,30 @@ Adding a new fitting function to IDA
 The tabs in Indirect Data Analysis use each fit spectra to a predefined list of functions, adding new functions to the
 list of available ones can seem daunting at first but it can be done by following some steps.
 
-FqFit
------
+Function(Q)
+-----------
 
-In the `FQFitConstants.h` file, there are sets of maps of {"Fit function class name", "Fit function class initialization string"}, e.g.
+In the `FitTabConstants.h` file, there are sets of maps of {"Fit function class name", "Fit function class initialization string"}, e.g.
 `{std::string("TeixeiraWater"), std::string("name=TeixeiraWater, Tau=1, L=1.5, constraints=(Tau>0, L>0)")}`. To add
-a new fit function to FqFit you simply need to add it to this list of available functions. Currently, we divide up the
+a new fit function to Function(Q) you simply need to add it to this list of available functions. Currently, we divide up the
 functions into Width, EISF, and All with the intent that the list of functions would change depending on what data is
 loaded into the tab, however as it is not yet implemented for the workspace input it uses the list for All.
 
-MSDFit
-------
+MSD
+---
 
-The fit function strings in MSDFit are stored in the `IndirectDataAnalysisMSDFitTab.cpp` file in `msdFunctionStrings`,
-To add a function you just need to add it to this map and add the function to the others in `createParameterEstimation`
-e.e. `parameterEstimation.addParameterEstimationFunction(MSDGAUSSFUNC, estimateMsd);`
+The fit function strings for MSD are also stored in the `FitTabConstants.h` file.
 
 IqtFit
 ------
 
-The fitting functions in IqtFit are hard coded into the template browser because it is not expected for other functions to be
-added to it.
+The fitting functions in IqtFit are hard coded into the template browser. These should be moved into the `FitTabConstants.h` file to
+allow us to add more functions easily in the future.
 
-ConvFit
--------
+Convolution
+-----------
 
-ConvFit has the most involved process of adding a function to it's library and it needs to be added in its entirety.
+Convolution has the most involved process of adding a function to it's library and it needs to be added in its entirety.
 
 Firstly, in `ConvTypes.h` add the function name to the enumerated list FitType e.g. `TeixeiraWater`, and in the paramID
 enum add an entry for each parameter in the function along with a unique prefix denoting which function they are for.
@@ -68,18 +66,15 @@ if it is a background function add it between the range from FLAT_BG_A0 to LINEA
 Moreover, to tie it all together add param ranges to g_typeMap in the form
 `{FitType, {"Function name displayed in tab", "Function class name", {ParamID::first, ParamID::last}}}` this allows the template
 to construct a function out of the related parameters. There are several places where this can be added, those being FitType,
-LorentzianType, and BackgroundType. ConvFit can run fits with one of each Fit, Lorentzian, and Background but only one of each.
+LorentzianType, and BackgroundType. Convolution can run fits with one of each Fit, Lorentzian, and Background but only one of each.
 
 .. code-block:: cpp
 
-    {FitType::TeixeiraWater, {"Teixeira Water", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
+    {FitType::TeixeiraWater, {"Teixeira Water SQE", "TeixeiraWaterSQE", {ParamID::TW_HEIGHT, ParamID::TW_CENTRE}}},
 
 
-Finally, in IndirectDataAnalysisConvFitTab in setupFitTab add to m_fitStrings with the fit function name and shortened key, this key will be used in the output workspace from the fit.
-
-.. code-block:: cpp
-
-   m_fitStrings["TeixeiraWaterSQE"] = "TxWater";
+Finally, in `FitTabConstants.h` add the fit function name and shortened key to the `FUNCTION_STRINGS` variable. This key will be used in the output
+workspace from the fit.
 
 In ConvFunctionModel add the build function string function
 

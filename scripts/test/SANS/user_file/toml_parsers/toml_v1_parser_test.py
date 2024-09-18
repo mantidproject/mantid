@@ -125,22 +125,88 @@ class TomlV1ParserTest(unittest.TestCase):
         self.assertEqual((2, 3), get_beam_position(state_move, DetectorType.LAB))
 
     def test_all_centre_entry(self):
-        input_dict = {"detector": {"configuration": {"all_centre": {"x": 2, "y": 3.4}}}}
+        input_dict = {
+            "detector": {"configuration": {"all_centre": {"x": 2, "y": 3.4}, "selected_detector": "all"}},
+            "instrument": {"name": "SANS2D"},
+        }
         parser = self._setup_parser(input_dict)
         for i in [ReductionMode.HAB, ReductionMode.LAB]:
             move = parser.get_state_move(None)
             self.assertEqual(2, move.detectors[i.value].sample_centre_pos1)
             self.assertEqual(3.4, move.detectors[i.value].sample_centre_pos2)
 
-    def test_throws_when_all_and_rear_specified(self):
-        input_dict = {"detector": {"configuration": {"all_centre": {"x": 2, "y": 3.4}, "rear_centre": {"x": 2}}}}
-        with self.assertRaisesRegex(ValueError, "front_centre"):
-            self._setup_parser(input_dict)
+    def test_loq_uses_front_and_rear_not_all_centre(self):
+        input_dict = {
+            "detector": {
+                "configuration": {
+                    "all_centre": {"x": 2, "y": 3.4},
+                    "front_centre": {"x": 2.1, "y": 3.5},
+                    "rear_centre": {"x": 2.2, "y": 3.6},
+                    "selected_detector": "all",
+                }
+            },
+            "instrument": {"name": "LOQ"},
+        }
+        parser = self._setup_parser(input_dict)
+        move = parser.get_state_move(None)
+        self.assertEqual(2.1, move.detectors[ReductionMode.HAB.value].sample_centre_pos1)
+        self.assertEqual(3.5, move.detectors[ReductionMode.HAB.value].sample_centre_pos2)
+        self.assertEqual(2.2, move.detectors[ReductionMode.LAB.value].sample_centre_pos1)
+        self.assertEqual(3.6, move.detectors[ReductionMode.LAB.value].sample_centre_pos2)
 
-    def test_throws_when_all_and_front_specified(self):
-        input_dict = {"detector": {"configuration": {"all_centre": {"x": 2, "y": 3.4}, "front_centre": {"x": 2}}}}
-        with self.assertRaisesRegex(ValueError, "front_centre"):
-            self._setup_parser(input_dict)
+    def test_sets_rear_and_front_centre_when_rear_detector_selected(self):
+        input_dict = {
+            "detector": {
+                "configuration": {
+                    "all_centre": {"x": 2, "y": 3.4},
+                    "front_centre": {"x": 2.1, "y": 3.5},
+                    "rear_centre": {"x": 2.2, "y": 3.6},
+                    "selected_detector": "rear",
+                }
+            }
+        }
+        parser = self._setup_parser(input_dict)
+        move = parser.get_state_move(None)
+        self.assertEqual(2.1, move.detectors[ReductionMode.HAB.value].sample_centre_pos1)
+        self.assertEqual(3.5, move.detectors[ReductionMode.HAB.value].sample_centre_pos2)
+        self.assertEqual(2.2, move.detectors[ReductionMode.LAB.value].sample_centre_pos1)
+        self.assertEqual(3.6, move.detectors[ReductionMode.LAB.value].sample_centre_pos2)
+
+    def test_sets_front_and_rear_centre_when_front_detector_selected(self):
+        input_dict = {
+            "detector": {
+                "configuration": {
+                    "all_centre": {"x": 2, "y": 3.4},
+                    "front_centre": {"x": 2.1, "y": 3.5},
+                    "rear_centre": {"x": 2.2, "y": 3.6},
+                    "selected_detector": "front",
+                }
+            }
+        }
+        parser = self._setup_parser(input_dict)
+        move = parser.get_state_move(None)
+        self.assertEqual(2.1, move.detectors[ReductionMode.HAB.value].sample_centre_pos1)
+        self.assertEqual(3.5, move.detectors[ReductionMode.HAB.value].sample_centre_pos2)
+        self.assertEqual(2.2, move.detectors[ReductionMode.LAB.value].sample_centre_pos1)
+        self.assertEqual(3.6, move.detectors[ReductionMode.LAB.value].sample_centre_pos2)
+
+    def test_loaded_correctly_when_on_single_bank_instrument(self):
+        input_dict = {
+            "instrument": {"name": "LARMOR"},
+            "detector": {
+                "configuration": {
+                    "all_centre": {"x": 2, "y": 3.4},
+                    "front_centre": {"x": 2.1, "y": 3.5},
+                    "rear_centre": {"x": 2.2, "y": 3.6},
+                    "selected_detector": "front",
+                }
+            },
+        }
+        parser = self._setup_parser(input_dict)
+        move = parser.get_state_move(None)
+        self.assertTrue(ReductionMode.HAB.value not in move.detectors.keys())
+        self.assertEqual(2.2, move.detectors[ReductionMode.LAB.value].sample_centre_pos1)
+        self.assertEqual(3.6, move.detectors[ReductionMode.LAB.value].sample_centre_pos2)
 
     def test_rear_front_maps_to_enum_correctly(self):
         for user_input, enum_val in [

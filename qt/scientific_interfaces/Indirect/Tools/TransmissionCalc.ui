@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TransmissionCalc</class>
+ <widget class="QWidget" name="TransmissionCalc">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>320</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_3">
+   <item row="0" column="0">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QGroupBox" name="gbInstrumentConfig">
+       <property name="title">
+        <string>Instrument Setup</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="MantidQt::MantidWidgets::InstrumentConfig" name="iicInstrumentConfiguration">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="techniques" stdset="0">
+           <stringlist>
+            <string>TOF Indirect Geometry Spectroscopy</string>
+            <string>Reactor Indirect Geometry Spectroscopy</string>
+           </stringlist>
+          </property>
+          <property name="disabledInstruments" stdset="0">
+           <stringlist>
+            <string>TFXA</string>
+           </stringlist>
+          </property>
+          <property name="enableDiffraction" stdset="0">
+           <bool>false</bool>
+          </property>
+          <property name="showInstrumentLabel" stdset="0">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="gbSampleDetails">
+       <property name="title">
+        <string>Sample Details</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="0">
+         <widget class="QLabel" name="lbChemicalFormula">
+          <property name="text">
+           <string>Chemical Formula</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="lbThickness">
+          <property name="text">
+           <string>Thickness</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QDoubleSpinBox" name="spThickness">
+          <property name="suffix">
+           <string> cm</string>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.100000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QDoubleSpinBox" name="spDensity">
+          <property name="suffix">
+           <string/>
+          </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
+          <property name="maximum">
+           <double>10000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.100000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <layout class="QHBoxLayout" name="loChemicalFormula">
+          <item>
+           <widget class="QLineEdit" name="leChemicalFormula"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="valChemicalFormula">
+            <property name="styleSheet">
+             <string notr="true">color: rgb(255, 0, 0);</string>
+            </property>
+            <property name="text">
+             <string>*</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0">
+         <widget class="QComboBox" name="cbDensityType">
+          <item>
+           <property name="text">
+            <string>Mass Density (g/cm^3)</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Number Density  (atoms/Å^3)</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item row="0" column="1">
+    <widget class="QTreeWidget" name="tvResultsTable">
+     <property name="columnCount">
+      <number>2</number>
+     </property>
+     <attribute name="headerMinimumSectionSize">
+      <number>50</number>
+     </attribute>
+     <attribute name="headerDefaultSectionSize">
+      <number>200</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Property</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Value</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true"/>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::InstrumentConfig</class>
+   <extends>QComboBox</extends>
+   <header>Common/InstrumentConfig.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::RunView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Spectroscopy/RunWidget/RunView.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

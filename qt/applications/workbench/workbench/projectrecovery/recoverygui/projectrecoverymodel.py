@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-
+import json
 import os
 
 from qtpy.QtCore import Slot, QObject
@@ -40,14 +40,23 @@ class ProjectRecoveryModel(QObject):
         """
         if not os.path.exists(path):
             raise AttributeError("Project Recovery Model: Path is not valid")
-        files = self.project_recovery.listdir_fullpath(path)
-        total_counted = 0
-        for file in files:
-            _, file_ext = os.path.splitext(file)
-            if file_ext == ".py":
-                total_counted += 1
 
-        return total_counted
+        rec_file = os.path.join(path, os.path.basename(path) + self.project_recovery.recovery_file_ext)
+        if os.path.exists(rec_file):
+            rec_file_dict = {}
+            with open(rec_file) as reader:
+                try:
+                    rec_file_dict = json.load(reader)
+                except json.decoder.JSONDecodeError:
+                    logger.warning(
+                        f"Project Recovery Model: Recovery file {rec_file} is corrupted, open plots and interfaces will "
+                        "fail to recover, but workspaces may reload."
+                    )
+                    return 0
+
+            return len(rec_file_dict.get("workspaces", 0))
+        else:
+            return 0
 
     def get_row(self, checkpoint):
         """

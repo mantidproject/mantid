@@ -17,12 +17,13 @@
 #include "MantidPythonInterface/core/Converters/PyNativeTypeExtractor.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 
-#include <boost/optional.hpp>
+#include "MantidKernel/WarningSuppressions.h"
 #include <boost/python/bases.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/exception_translator.hpp>
 #include <boost/python/overloads.hpp>
+#include <optional>
 // As of boost 1.67 raw_function.hpp tries to pass
 // through size_t types through to make_function
 // which accepts int type, emitting a warning
@@ -39,6 +40,7 @@
 #include <boost/variant.hpp>
 #include <boost/variant/static_visitor.hpp>
 
+#include <H5Cpp.h>
 #include <cstddef>
 #include <string>
 #include <variant>
@@ -78,6 +80,7 @@ BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType3_Overload, PythonAlgorithm::
 GNU_DIAG_ON("conversion")
 GNU_DIAG_ON("unused-local-typedef")
 
+GNU_DIAG_OFF("maybe-uninitialized")
 /**
  * Map a CancelException to a Python KeyboardInterupt
  * @param exc A cancel exception to translate. Unused here as the message is
@@ -88,23 +91,43 @@ void translateCancel(const Algorithm::CancelException &exc) {
   PyErr_SetString(PyExc_KeyboardInterrupt, "");
 }
 
-template <typename T> boost::optional<T> extractArg(ssize_t index, const tuple &args) {
-  if (index < len(args)) {
-    return boost::optional<T>(extract<T>(args[index]));
-  }
-  return boost::none;
+/**
+ * @brief Map an H5::Exception to a Python RuntimeError. Its error stack will be reported
+ *
+ * @param exc - The caught H5::Exception. Its error stack is reported
+ */
+void translateH5Exception(const H5::Exception &exc) {
+  auto handleFrame = [](unsigned int n, const H5E_error_t *err, void *ss_arg) -> herr_t {
+    std::stringstream &ss_ = *((std::stringstream *)ss_arg);
+
+    ss_ << "  #" << n << ": " << err->desc << "\n";
+
+    return (herr_t)0;
+  };
+
+  std::stringstream ss;
+  exc.walkErrorStack(H5E_WALK_DOWNWARD, handleFrame, /*client_data*/ &ss);
+
+  PyErr_SetString(PyExc_RuntimeError, ss.str().c_str());
 }
 
-template <typename T> void extractKwargs(const dict &kwargs, const std::string &keyName, boost::optional<T> &out) {
+template <typename T> std::optional<T> extractArg(ssize_t index, const tuple &args) {
+  if (index < len(args)) {
+    return std::optional<T>(extract<T>(args[index]));
+  }
+  return std::nullopt;
+}
+
+template <typename T> void extractKwargs(const dict &kwargs, const std::string &keyName, std::optional<T> &out) {
   if (!kwargs.has_key(keyName)) {
     return;
   }
-  if (out != boost::none) {
+  if (out != std::nullopt) {
     throw std::invalid_argument("Parameter called '" + keyName +
                                 "' was specified twice."
                                 " This must be either positional or a kwarg, but not both.");
   }
-  out = boost::optional<T>(extract<T>(kwargs.get(keyName)));
+  out = std::optional<T>(extract<T>(kwargs.get(keyName)));
 }
 
 class SetPropertyVisitor final : public Mantid::PythonInterface::IPyTypeVisitor {
@@ -113,13 +136,13 @@ public:
       : m_alg(alg), m_propName(propName) {}
 
   void operator()(bool value) const override { setProp(value); }
-  void operator()(long value) const override { setProp(static_cast<int>(value)); }
+  void operator()(int value) const override { setProp(value); }
   void operator()(double value) const override { setProp(value); }
   void operator()(std::string value) const override { m_alg->setPropertyValue(m_propName, value); }
   void operator()(Mantid::API::Workspace_sptr ws) const override { m_alg->setProperty(m_propName, std::move(ws)); }
 
   void operator()(std::vector<bool> value) const override { setProp(value); }
-  void operator()(std::vector<long> value) const override { setProp(value); }
+  void operator()(std::vector<int> value) const override { setProp(value); }
   void operator()(std::vector<double> value) const override { setProp(value); }
   void operator()(std::vector<std::string> value) const override { setProp(value); }
 
@@ -149,7 +172,7 @@ object createChildWithProps(tuple args, dict kwargs) {
   extractKwargs<bool>(kwargs, reservedNames[3], enableLogging);
   extractKwargs<int>(kwargs, reservedNames[4], version);
 
-  if (!name.is_initialized()) {
+  if (!name.has_value()) {
     throw std::invalid_argument("Please specify the algorithm name");
   }
   auto childAlg = parentAlg->createChildAlgorithm(name.value(), startProgress.value_or(-1), endProgress.value_or(-1),
@@ -174,11 +197,13 @@ object createChildWithProps(tuple args, dict kwargs) {
   return object(childAlg);
 }
 
+GNU_DIAG_ON("maybe-uninitialized")
 } // namespace
 
 void export_leaf_classes() {
   register_ptr_to_python<std::shared_ptr<Algorithm>>();
   register_exception_translator<Algorithm::CancelException>(&translateCancel);
+  register_exception_translator<H5::Exception>(&translateH5Exception);
 
   // Export Algorithm but the actual held type in Python is
   // std::shared_ptr<AlgorithmAdapter>

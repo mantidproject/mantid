@@ -7,10 +7,10 @@
 #include "QtRunsView.h"
 #include "MantidKernel/UsageService.h"
 #include "MantidQtIcons/Icon.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/HintingLineEditFactory.h"
+#include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 #include <QMenu>
 #include <QMessageBox>
 
@@ -64,8 +64,8 @@ void QtRunsView::initLayout() {
   m_ui.actionTransfer->setIcon(getIcon("mdi.file-move", "black", 1.3));
   m_ui.actionExport->setIcon(getIcon("mdi.content-save", "black", 1.3));
 
-  m_algoRunner = std::make_shared<MantidQt::API::AlgorithmRunner>(this);
-  m_monitorAlgoRunner = std::make_shared<MantidQt::API::AlgorithmRunner>(this);
+  m_algoRunner = std::make_shared<MantidQt::API::QtAlgorithmRunner>(this);
+  m_monitorAlgoRunner = std::make_shared<MantidQt::API::QtAlgorithmRunner>(this);
 
   // Custom context menu for table
   connect(m_ui.searchPane, SIGNAL(customContextMenuRequested(const QPoint &)), this,
@@ -351,9 +351,9 @@ std::set<int> QtRunsView::getAllSearchRows() const {
   return rows;
 }
 
-std::shared_ptr<MantidQt::API::AlgorithmRunner> QtRunsView::getAlgorithmRunner() const { return m_algoRunner; }
+std::shared_ptr<MantidQt::API::QtAlgorithmRunner> QtRunsView::getAlgorithmRunner() const { return m_algoRunner; }
 
-std::shared_ptr<MantidQt::API::AlgorithmRunner> QtRunsView::getMonitorAlgorithmRunner() const {
+std::shared_ptr<MantidQt::API::QtAlgorithmRunner> QtRunsView::getMonitorAlgorithmRunner() const {
   return m_monitorAlgoRunner;
 }
 

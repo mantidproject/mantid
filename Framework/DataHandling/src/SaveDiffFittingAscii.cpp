@@ -79,9 +79,9 @@ bool SaveDiffFittingAscii::processGroups() {
 
   try {
 
-    std::string name = getPropertyValue("InputWorkspace");
+    std::string wsName = getPropertyValue("InputWorkspace");
 
-    WorkspaceGroup_sptr inputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
+    WorkspaceGroup_sptr inputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName);
 
     std::vector<API::ITableWorkspace_sptr> input_ws;
     input_ws.reserve(inputGroup->getNumberOfEntries());

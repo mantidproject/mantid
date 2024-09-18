@@ -79,12 +79,14 @@ class CodeEditorTabWidget(QTabWidget):
         run_button.setObjectName(self.RUN_BUTTON_OBJECT_NAME)
         run_button.setIcon(get_icon("mdi.play", PLAY_BUTTON_GREEN_COLOR, 1.6))
         run_button.clicked.connect(parent.execute_current_async)
+        run_button.setToolTip("Run Ctrl+Enter")
         layout.addWidget(run_button)
 
         abort_button = QPushButton(container_widget)
         abort_button.setObjectName(self.ABORT_BUTTON_OBJECT_NAME)
         abort_button.setIcon(get_icon("mdi.square", ABORT_BUTTON_RED_COLOR, 1.1))
         abort_button.clicked.connect(parent.abort_current)
+        abort_button.setToolTip("Abort Ctrl+D")
         layout.addWidget(abort_button)
 
         options_button = QPushButton(container_widget)

@@ -27,7 +27,7 @@ namespace Mantid::API {
 namespace {
 /// static logger
 Kernel::Logger g_log("CompositeFunction");
-constexpr char *ATTNUMDERIV = "NumDeriv";
+constexpr const char *ATTNUMDERIV = "NumDeriv";
 constexpr int NUMDEFAULTATTRIBUTES = 1;
 /**
  * Helper function called when we replace a function within the composite
@@ -256,8 +256,8 @@ double CompositeFunction::getParameter(size_t i, size_t j) const { return m_func
  */
 bool CompositeFunction::hasParameter(const std::string &name) const {
   try {
-    const auto [parameterName, index] = parseName(name);
-    return index < m_functions.size() ? m_functions[index]->hasParameter(parameterName) : false;
+    const auto [parName, index] = parseName(name);
+    return index < m_functions.size() ? m_functions[index]->hasParameter(parName) : false;
   } catch (std::invalid_argument &) {
     return false;
   }
@@ -273,8 +273,8 @@ bool CompositeFunction::hasAttribute(const std::string &name) const {
     if (std::find(m_globalAttributeNames.begin(), m_globalAttributeNames.end(), name) != m_globalAttributeNames.end()) {
       return true;
     }
-    const auto [attributeName, index] = parseName(name);
-    return index < m_functions.size() ? m_functions[index]->hasAttribute(attributeName) : false;
+    const auto [attrName, index] = parseName(name);
+    return index < m_functions.size() ? m_functions[index]->hasAttribute(attrName) : false;
   } catch (std::invalid_argument &) {
     return false;
   }
@@ -288,8 +288,8 @@ bool CompositeFunction::hasAttribute(const std::string &name) const {
  * (by user)
  */
 void CompositeFunction::setParameter(const std::string &name, const double &value, bool explicitlySet) {
-  const auto [parameterName, index] = parseName(name);
-  getFunction(index)->setParameter(parameterName, value, explicitlySet);
+  const auto [parName, index] = parseName(name);
+  getFunction(index)->setParameter(parName, value, explicitlySet);
 }
 
 /**
@@ -298,8 +298,8 @@ void CompositeFunction::setParameter(const std::string &name, const double &valu
  * @param description :: The new description
  */
 void CompositeFunction::setParameterDescription(const std::string &name, const std::string &description) {
-  const auto [parameterName, index] = parseName(name);
-  getFunction(index)->setParameterDescription(parameterName, description);
+  const auto [parName, index] = parseName(name);
+  getFunction(index)->setParameterDescription(parName, description);
 }
 
 /**
@@ -308,8 +308,8 @@ void CompositeFunction::setParameterDescription(const std::string &name, const s
  * @return value of the requested named parameter
  */
 double CompositeFunction::getParameter(const std::string &name) const {
-  const auto [parameterName, index] = parseName(name);
-  return getFunction(index)->getParameter(parameterName);
+  const auto [parName, index] = parseName(name);
+  return getFunction(index)->getParameter(parName);
 }
 
 /**
@@ -321,8 +321,8 @@ API::IFunction::Attribute CompositeFunction::getAttribute(const std::string &nam
     if (std::find(m_globalAttributeNames.begin(), m_globalAttributeNames.end(), name) != m_globalAttributeNames.end()) {
       return IFunction::getAttribute(name);
     }
-    const auto [attributeName, index] = parseName(name);
-    return m_functions[index]->getAttribute(attributeName);
+    const auto [attrName, index] = parseName(name);
+    return m_functions[index]->getAttribute(attrName);
   } catch (std::invalid_argument &) {
     throw std::invalid_argument("ParamFunctionAttributeHolder::getAttribute - Unknown attribute '" + name + "'");
   }
@@ -337,8 +337,8 @@ void CompositeFunction::setAttribute(const std::string &name, const API::IFuncti
   if (std::find(m_globalAttributeNames.begin(), m_globalAttributeNames.end(), name) != m_globalAttributeNames.end()) {
     return IFunction::setAttribute(name, value);
   }
-  const auto [attributeName, index] = parseName(name);
-  return m_functions[index]->setAttribute(attributeName, value);
+  const auto [attrName, index] = parseName(name);
+  return m_functions[index]->setAttribute(attrName, value);
 }
 
 /// Total number of parameters
@@ -356,8 +356,8 @@ size_t CompositeFunction::nAttributes() const {
  * @return index of the requested named parameter
  */
 size_t CompositeFunction::parameterIndex(const std::string &name) const {
-  const auto [parameterName, index] = parseName(name);
-  return getFunction(index)->parameterIndex(parameterName) + m_paramOffsets[index];
+  const auto [parName, index] = parseName(name);
+  return getFunction(index)->parameterIndex(parName) + m_paramOffsets[index];
 }
 
 /// Returns the name of parameter
@@ -389,9 +389,9 @@ std::string CompositeFunction::attributeName(size_t index) const {
 
   // Offset the index by the number of global attributes
   const size_t offsetIndex = index - nGlobalAttributes();
-  size_t functionIndex = attributeFunctionIndex(offsetIndex);
+  size_t funcIndex = attributeFunctionIndex(offsetIndex);
   std::ostringstream ostr;
-  ostr << 'f' << functionIndex << '.' << m_functions[functionIndex]->attributeName(getAttributeOffset(offsetIndex));
+  ostr << 'f' << funcIndex << '.' << m_functions[funcIndex]->attributeName(getAttributeOffset(offsetIndex));
   return ostr.str();
 }
 
@@ -427,8 +427,8 @@ double CompositeFunction::getError(size_t i, size_t j) const { return m_function
  * @return value of the requested named parameter
  */
 double CompositeFunction::getError(const std::string &name) const {
-  const auto [parameterName, index] = parseName(name);
-  return getFunction(index)->getError(parameterName);
+  const auto [parName, index] = parseName(name);
+  return getFunction(index)->getError(parName);
 }
 
 /**
@@ -447,8 +447,8 @@ void CompositeFunction::setError(size_t i, double err) {
  * @param err :: The error value to set
  */
 void CompositeFunction::setError(const std::string &name, double err) {
-  auto [parameterName, index] = parseName(name);
-  getFunction(index)->setError(parameterName, err);
+  auto [parName, index] = parseName(name);
+  getFunction(index)->setError(parName, err);
 }
 
 /// Value of i-th active parameter. Override this method to make fitted
@@ -965,7 +965,7 @@ size_t CompositeFunction::getNumberDomains() const {
   }
   size_t nd = getFunction(0)->getNumberDomains();
   for (size_t iFun = 1; iFun < n; ++iFun) {
-    if (getFunction(0)->getNumberDomains() != nd) {
+    if (getFunction(iFun)->getNumberDomains() != nd) {
       throw std::runtime_error("CompositeFunction has members with "
                                "inconsistent domain numbers.");
     }
@@ -1003,8 +1003,8 @@ std::vector<IFunction_sptr> CompositeFunction::createEquivalentFunctions() const
   return funs;
 }
 size_t CompositeFunction::getAttributeOffset(size_t attributeIndex) const {
-  auto functionIndex = m_attributeIndex[attributeIndex];
-  return std::distance(std::find(m_attributeIndex.begin(), m_attributeIndex.end(), functionIndex),
+  auto funcIndex = m_attributeIndex[attributeIndex];
+  return std::distance(std::find(m_attributeIndex.begin(), m_attributeIndex.end(), funcIndex),
                        m_attributeIndex.begin() + attributeIndex);
 }
 

@@ -6,15 +6,18 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <utility>
 
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MaskWorkspace.h"
-#include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/System.h"
 
 #include <algorithm>
 
 namespace Mantid::DataObjects {
+using Mantid::API::SpectrumInfo;
+using Mantid::Geometry::DetectorInfo;
+using Mantid::Kernel::Exception::NotImplementedError;
 using std::set;
 using std::size_t;
 
@@ -110,7 +113,7 @@ set<detid_t> MaskWorkspace::getMaskedDetectors() const {
   set<detid_t> detIDs;
   /*
    * Note
-   * This test originally just checked if there was an instument and ignored
+   * This test originally just checked if there was an instrument and ignored
    * the number of detectors
    */
   if (this->hasInstrument()) {
@@ -240,6 +243,121 @@ const std::string MaskWorkspace::id() const { return "MaskWorkspace"; }
  */
 void MaskWorkspace::copyFrom(std::shared_ptr<const SpecialWorkspace2D> sourcews) {
   SpecialWorkspace2D::copyFrom(sourcews);
+}
+
+/// Ensure that the detector mask flags include the values from this workspace.
+void MaskWorkspace::combineToDetectorMasks(DetectorInfo &detectors) const {
+  if (!hasInstrument())
+    throw std::logic_error("MaskWorkspace has no instrument");
+
+  // detectors which are monitors are not included in the mask
+  const auto &detids = getInstrument()->getDetectorIDs(true);
+  const size_t N_spectra(getNumberHistograms());
+  const size_t N_monitors(detectorInfo().size() - detids.size());
+  const size_t N_detectors(detectors.size());
+  if (N_spectra == N_detectors - N_monitors) {
+    // One detector per spectrum
+    for (const auto &det : detids) {
+      if (isMasked(det))
+        detectors.setMasked(detectors.indexOf(det), true);
+    }
+    return;
+  }
+  // Multiple detectors per spectrum
+  throw NotImplementedError(
+      "MaskWorkspace::combineToDetectorMasks: not implemented for the case of multiple detectors per spectrum.");
+#if 0 // Probably works: requires unit tests implementation.
+  const SpectrumInfo &info(spectrumInfo());
+  for (size_t ns = 0; ns < N_spectra; ++ns) {
+    const auto &spectrumDef = info.spectrumDefinition(ns);
+    if (isMaskedIndex(ns)) {
+      for (const auto &det_idx : spectrumDef)
+        detectors.setMasked(det_idx, true);
+    }
+  }
+#endif
+}
+
+} // namespace Mantid::DataObjects
+
+#if 0 // Probably works: requires unit tests implementation.
+namespace { // anonymous
+
+// Note: the following code replicates SpectrumInfo.cpp: lines 61-66, but as an anonymous utility method:
+bool isMaskedSpectrum(const Mantid::SpectrumDefinition &spectrumDef,
+                      const Mantid::Geometry::DetectorInfo &detectorInfo) {
+  return std::all_of(
+      spectrumDef.cbegin(), spectrumDef.cend(),
+      [&detectorInfo](const std::pair<size_t, size_t> &detIndex) { return detectorInfo.isMasked(detIndex); });
+}
+
+} // namespace
+#endif
+
+namespace Mantid::DataObjects {
+
+/// Ensure that this workspace includes the values from the detector mask flags.
+void MaskWorkspace::combineFromDetectorMasks(const DetectorInfo &detectors) {
+  if (!hasInstrument())
+    throw std::logic_error("MaskWorkspace has no instrument");
+
+  // detectors which are monitors are not included in the mask
+  const auto &detids = getInstrument()->getDetectorIDs(true);
+  const size_t N_spectra(getNumberHistograms());
+  const size_t N_monitors(detectorInfo().size() - detids.size());
+  const size_t N_detectors(detectors.size());
+  if (N_spectra == N_detectors - N_monitors) {
+    // One detector per spectrum
+    for (const auto &det : detids) {
+      if (detectors.isMasked(detectors.indexOf(det)))
+        setMasked(det, true);
+    }
+    return;
+  }
+  // Multiple detectors per spectrum
+  throw NotImplementedError(
+      "MaskWorkspace::combineFromDetectorMasks: not implemented for the case of multiple detectors per spectrum.");
+#if 0 // Probably works: requires unit tests implementation.
+  const SpectrumInfo &info(spectrumInfo());
+  for (size_t ns = 0; ns < N_spectra; ++ns) {
+    const auto &spectrumDef = info.spectrumDefinition(ns);
+    if (isMaskedSpectrum(spectrumDef, detectors)) {
+      setMaskedIndex(ns, true);
+    }
+  }
+#endif
+}
+
+/// Test consistency between the values from this workspace and the detector mask flags.
+bool MaskWorkspace::isConsistentWithDetectorMasks(const DetectorInfo &detectors) const {
+  if (!hasInstrument())
+    throw std::logic_error("MaskWorkspace has no instrument");
+
+  // detectors which are monitors are not included in the mask
+  const auto &detids = getInstrument()->getDetectorIDs(true);
+  const size_t N_spectra(getNumberHistograms());
+  const size_t N_monitors(detectorInfo().size() - detids.size());
+  const size_t N_detectors(detectors.size());
+  if (N_spectra == N_detectors - N_monitors) {
+    // One detector per spectrum
+    for (const auto &det : detids) {
+      if (isMasked(det) != detectors.isMasked(detectors.indexOf(det)))
+        return false;
+    }
+    return true;
+  }
+  // Multiple detectors per spectrum
+  throw NotImplementedError(
+      "MaskWorkspace::isConsistentWithDetectorMasks: not implemented for the case of multiple detectors per spectrum.");
+#if 0 // Probably works: requires unit tests implementation.
+  const SpectrumInfo &info(spectrumInfo());
+  for (size_t ns = 0; ns < N_spectra; ++ns) {
+    const auto &spectrumDef = info.spectrumDefinition(ns);
+    if (isMaskedIndex(ns) != isMaskedSpectrum(spectrumDef, detectors))
+      return false;
+  }
+  return true;
+#endif
 }
 
 /**

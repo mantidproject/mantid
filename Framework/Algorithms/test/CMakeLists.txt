@@ -1,3 +1,7 @@
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(-Wno-maybe-uninitialized)
+endif()
+
 if(CXXTEST_FOUND)
   include_directories(SYSTEM ${CXXTEST_INCLUDE_DIR})
   check_include_files(stdint.h stdint)
@@ -38,7 +42,6 @@ if(CXXTEST_FOUND)
             Mantid::DataObjects
             Mantid::Kernel
             Boost::boost
-            Boost::filesystem
             ${BCRYPT}
             gmock
   )

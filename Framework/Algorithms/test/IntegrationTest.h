@@ -285,6 +285,13 @@ public:
     doTestRebinned("-1.5", "1.75", 0, 3, true, 4, truth);
   }
 
+  void testRebinnedOutput_FnorEquals0() {
+    // Validate a bug fix that caused a divide by 0 error for some cases
+
+    const double truth[] = {0, 0};
+    doTestRebinned("-0.12", "0.12", 0, 3, false, 4, truth);
+  }
+
   void makeRealBinBoundariesWorkspace(const std::string &inWsName) {
     const unsigned int lenX = 11, lenY = 10, lenE = lenY;
 

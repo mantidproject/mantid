@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include <boost/algorithm/string.hpp>
 
 /*
@@ -14,8 +15,6 @@
   ensuring the stability and integrity of the communication process. The classes are as the following
   IETInputData (line 35): contains the parameters values for the input section
   IETConversionData(line 57): contains the parameters values for the conversion section
-  IETGroupingType(line 72): contains the types of the grouping
-  IETGroupingData(line 83): contains the parameters values for the grouping section
   IETBackgroundData(line 102): contains the parameters values for the background section
   IETAnalysisData(line 117): contains the parameters values for the spectra range (this is used by algorithm and plot
   spectra range)
@@ -72,36 +71,6 @@ private:
   int m_spectraMax;
 };
 
-class IETGroupingType {
-public:
-  static inline const std::string DEFAULT = "Default";
-  static inline const std::string FILE = "File";
-  static inline const std::string GROUPS = "Groups";
-  static inline const std::string CUSTOM = "Custom";
-  static inline const std::string IPF = "IPF";
-  static inline const std::string ALL = "All";
-  static inline const std::string INDIVIDUAL = "Individual";
-};
-
-class IETGroupingData {
-public:
-  IETGroupingData(const std::string &groupingType = IETGroupingType::DEFAULT, const int &nGroups = 0,
-                  const std::string &groupingMapFile = "", const std::string &customGroups = "")
-      : m_groupingType(groupingType), m_nGroups(nGroups), m_groupingMapFile(groupingMapFile),
-        m_customGroups(customGroups) {}
-
-  std::string getGroupingType() const { return m_groupingType; }
-  int getNGroups() const { return m_nGroups; }
-  std::string getGroupingMapFile() const { return m_groupingMapFile; }
-  std::string getCustomGroups() const { return m_customGroups; }
-
-private:
-  std::string m_groupingType;
-  int m_nGroups;
-  std::string m_groupingMapFile;
-  std::string m_customGroups;
-};
-
 class IETBackgroundData {
 public:
   IETBackgroundData(const bool &removeBackground = false, const int &backgroundStart = 0, const int &backgroundEnd = 0)
@@ -119,21 +88,15 @@ private:
 
 class IETAnalysisData {
 public:
-  IETAnalysisData(const bool &useDetailedBalance = false, const double &detailedBalance = 0.0,
-                  const bool &useScaleFactor = false, const double &scaleFactor = 0.0)
-      : m_useDetailedBalance(useDetailedBalance), m_detailedBalance(detailedBalance), m_useScaleFactor(useScaleFactor),
-        m_scaleFactor(scaleFactor) {}
+  IETAnalysisData(const bool &useDetailedBalance = false, const double &detailedBalance = 0.0)
+      : m_useDetailedBalance(useDetailedBalance), m_detailedBalance(detailedBalance) {}
 
   bool getUseDetailedBalance() const { return m_useDetailedBalance; }
   double getDetailedBalance() const { return m_detailedBalance; }
-  bool getUseScaleFactor() const { return m_useScaleFactor; }
-  double getScaleFactor() const { return m_scaleFactor; }
 
 private:
   bool m_useDetailedBalance;
   double m_detailedBalance;
-  bool m_useScaleFactor;
-  double m_scaleFactor;
 };
 
 class IETRebinData {
@@ -220,15 +183,17 @@ private:
 class IETRunData {
 public:
   IETRunData(const IETInputData &inputData, const IETConversionData &conversionData,
-             const IETGroupingData &groupingData, const IETBackgroundData &backgroundData,
-             const IETAnalysisData &analysisData, const IETRebinData &rebinData, const IETOutputData &outputData)
-      : m_inputData(inputData), m_conversionData(conversionData), m_groupingData(groupingData),
+             std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> groupingProperties,
+             const IETBackgroundData &backgroundData, const IETAnalysisData &analysisData,
+             const IETRebinData &rebinData, const IETOutputData &outputData)
+      : m_inputData(inputData), m_conversionData(conversionData), m_groupingProperties(std::move(groupingProperties)),
         m_backgroundData(backgroundData), m_analysisData(analysisData), m_rebinData(rebinData),
         m_outputData(outputData) {}
 
   IETInputData getInputData() const { return m_inputData; }
   IETConversionData getConversionData() const { return m_conversionData; }
-  IETGroupingData getGroupingData() const { return m_groupingData; }
+  Mantid::API::AlgorithmRuntimeProps *groupingPropertiesRaw() const { return m_groupingProperties.get(); }
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> groupingProperties() { return std::move(m_groupingProperties); }
   IETBackgroundData getBackgroundData() const { return m_backgroundData; }
   IETAnalysisData getAnalysisData() const { return m_analysisData; }
   IETRebinData getRebinData() const { return m_rebinData; }
@@ -237,7 +202,7 @@ public:
 private:
   IETInputData m_inputData;
   IETConversionData m_conversionData;
-  IETGroupingData m_groupingData;
+  std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> m_groupingProperties;
   IETBackgroundData m_backgroundData;
   IETAnalysisData m_analysisData;
   IETRebinData m_rebinData;
@@ -262,13 +227,12 @@ private:
 
 class IETSaveData {
 public:
-  IETSaveData(const bool &nexus = false, const bool &spe = false, const bool &nxspe = false, const bool &ascii = false,
+  IETSaveData(const bool &nexus = false, const bool &spe = false, const bool &ascii = false,
               const bool &aclimax = false, const bool &daveGrp = false)
-      : m_nexus(nexus), m_spe(spe), m_nxspe(nxspe), m_ascii(ascii), m_aclimax(aclimax), m_daveGrp(daveGrp) {}
+      : m_nexus(nexus), m_spe(spe), m_ascii(ascii), m_aclimax(aclimax), m_daveGrp(daveGrp) {}
 
   bool getNexus() const { return m_nexus; }
   bool getSPE() const { return m_spe; }
-  bool getNXSPE() const { return m_nxspe; }
   bool getASCII() const { return m_ascii; }
   bool getAclimax() const { return m_aclimax; }
   bool getDaveGrp() const { return m_daveGrp; }
@@ -276,7 +240,6 @@ public:
 private:
   bool m_nexus;
   bool m_spe;
-  bool m_nxspe;
   bool m_ascii;
   bool m_aclimax;
   bool m_daveGrp;

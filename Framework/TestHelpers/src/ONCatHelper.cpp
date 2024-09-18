@@ -75,18 +75,18 @@ std::unique_ptr<ONCat> make_oncat_with_mock_api(const std::shared_ptr<MockONCatA
   return oncat;
 }
 
-MockTokenStore::MockTokenStore() : m_token(boost::none) {}
+MockTokenStore::MockTokenStore() : m_token(std::nullopt) {}
 
-void MockTokenStore::setToken(const boost::optional<OAuthToken> &token) { m_token = token; }
+void MockTokenStore::setToken(const std::optional<OAuthToken> &token) { m_token = token; }
 
-boost::optional<OAuthToken> MockTokenStore::getToken() { return m_token; }
+std::optional<OAuthToken> MockTokenStore::getToken() { return m_token; }
 
 IOAuthTokenStore_uptr make_mock_token_store() { return std::make_unique<MockTokenStore>(); }
 
 IOAuthTokenStore_uptr make_mock_token_store_already_logged_in() {
   auto tokenStore = std::make_unique<MockTokenStore>();
   tokenStore->setToken(OAuthToken("Bearer", 3600, "2KSL5aEnLvIudMHIjc7LcBWBCfxOHZ", "api:read data:read settings:read",
-                                  boost::make_optional<std::string>("eZEiz7LbgFrkL5ZHv7R4ck9gOzXexb")));
+                                  std::make_optional<std::string>("eZEiz7LbgFrkL5ZHv7R4ck9gOzXexb")));
   return tokenStore;
 }
 

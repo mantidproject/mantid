@@ -9,7 +9,7 @@
 #include "DllOption.h"
 #include <QString>
 #include <QStringList>
-#include <boost/optional/optional.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -28,7 +28,7 @@ public:
   virtual double getEndTime() const = 0;
   virtual QStringList getPeriodSelections() const = 0;
   virtual void setWorkspaceDetails(const QString &runNumbers, const QString &instName,
-                                   const boost::optional<QString> &filePath) = 0;
+                                   const std::optional<QString> &filePath) = 0;
   virtual QStringList getChosenGroups() const = 0;
   virtual void setStartTime(double start) = 0;
   virtual void setEndTime(double end) = 0;

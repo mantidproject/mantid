@@ -450,6 +450,14 @@ void ScriptEditor::updateCompletionAPI(const QStringList &keywords) {
 }
 
 /**
+ * Mark the file as having been modified by the user. There is a setModified(bool)
+ * method on QsciScintilla, but the documentation says that it won't do anything if
+ * you pass in true to that method. As a workarond, this method will overwrite a
+ * line of text with the same text.
+ */
+void ScriptEditor::markFileAsModified() { this->setText(0, text(0), 0); }
+
+/**
  * Accept a drag move event and selects whether to accept the action
  * @param de :: The drag move event
  */
@@ -490,6 +498,13 @@ void ScriptEditor::dropEvent(QDropEvent *de) {
     QDropEvent localDrop(*de);
     // pass to base class - This handles text appropriately
     QsciScintilla::dropEvent(&localDrop);
+  }
+}
+
+void ScriptEditor::focusInEvent(QFocusEvent *fe) {
+  if (fe->gotFocus()) { // Probably always true but no harm in checking
+    emit editorFocusIn(m_filename);
+    QsciScintilla::focusInEvent(fe);
   }
 }
 

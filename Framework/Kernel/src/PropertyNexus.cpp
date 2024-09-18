@@ -85,7 +85,6 @@ std::unique_ptr<Property> makeTimeSeriesBoolProperty(::NeXus::File *file, const 
 /** Make a string/vector\<string\> property */
 std::unique_ptr<Property> makeStringProperty(::NeXus::File *file, const std::string &name,
                                              const std::vector<Types::Core::DateAndTime> &times) {
-  std::vector<std::string> values;
   if (times.empty()) {
     std::string bigString = file->getStrData();
     return std::make_unique<PropertyWithValue<std::string>>(name, bigString);
@@ -96,6 +95,7 @@ std::unique_ptr<Property> makeStringProperty(::NeXus::File *file, const std::str
     int64_t span = file->getInfo().dims[1];
     auto data = std::make_unique<char[]>(numStrings * span);
     file->getData(data.get());
+    std::vector<std::string> values;
     values.reserve(static_cast<size_t>(numStrings));
     for (int64_t i = 0; i < numStrings; i++)
       values.emplace_back(data.get() + i * span);

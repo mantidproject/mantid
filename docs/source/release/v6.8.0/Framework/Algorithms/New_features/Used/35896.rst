@@ -1,1 +1,0 @@
-- :ref:`Rebin <algm-Rebin>` now has an optional parameter to explicitly set binning mode (linear/log/reverse log/power) regardless of binwidth sign or other properties set.  This can enforce a particular binning type, reducing inadvertent errors from errant binning mode specifications.

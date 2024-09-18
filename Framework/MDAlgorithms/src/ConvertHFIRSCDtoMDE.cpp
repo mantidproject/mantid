@@ -135,6 +135,10 @@ void ConvertHFIRSCDtoMDE::init() {
       std::make_unique<PropertyWithValue<double>>(
           "Wavelength", DBL_MAX, std::make_shared<BoundedValidator<double>>(0.0, 100.0, true), Direction::Input),
       "Wavelength");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("LorentzCorrection", false, Direction::Input),
+                  "Correct the weights of events or signals and errors transformed into "
+                  "reciprocal space by multiplying them "
+                  "by the Lorentz multiplier:\n :math:`sin(2\\theta)cos(\\phi)/\\lambda^3`");
   declareProperty(std::make_unique<ArrayProperty<double>>("MinValues", "-10,-10,-10"),
                   "It has to be 3 comma separated values, one for each dimension in "
                   "q_sample."
@@ -157,13 +161,14 @@ void ConvertHFIRSCDtoMDE::init() {
  */
 void ConvertHFIRSCDtoMDE::exec() {
   double wavelength = this->getProperty("Wavelength");
+  bool lorentz = getProperty("LorentzCorrection");
 
   API::IMDHistoWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   auto &expInfo = *(inputWS->getExperimentInfo(static_cast<uint16_t>(0)));
   std::string instrument = expInfo.getInstrument()->getName();
 
   std::vector<double> twotheta, azimuthal;
-  if (instrument == "HB3A") {
+  if (instrument == "HB3A" && !expInfo.run().hasProperty("azimuthal")) { // HB3A Load MD
     const auto &di = expInfo.detectorInfo();
     for (size_t x = 0; x < 512; x++) {
       for (size_t y = 0; y < 512 * 3; y++) {
@@ -174,7 +179,7 @@ void ConvertHFIRSCDtoMDE::exec() {
         }
       }
     }
-  } else { // HB2C
+  } else { // HB2C LoadWAND or HB3A HB3AAdjustSampleNorm
     azimuthal = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("azimuthal"))))();
     twotheta = (*(dynamic_cast<Kernel::PropertyWithValue<std::vector<double>> *>(expInfo.getLog("twotheta"))))();
   }
@@ -205,19 +210,24 @@ void ConvertHFIRSCDtoMDE::exec() {
   float coeff = static_cast<float>(cop);
 
   float k = boost::math::float_constants::two_pi / static_cast<float>(wavelength);
+  float inv_wl_cube = static_cast<float>(1 / (wavelength * wavelength * wavelength));
   // check convention to determine the sign of k
   std::string convention = Kernel::ConfigService::Instance().getString("Q.convention");
   if (convention == "Crystallography") {
     k *= -1.f;
   }
   std::vector<Eigen::Vector3f> q_lab_pre;
+  std::vector<float> lorentz_pre;
   q_lab_pre.reserve(azimuthal.size());
+  lorentz_pre.reserve(azimuthal.size());
   for (size_t m = 0; m < azimuthal.size(); ++m) {
     auto twotheta_f = static_cast<float>(twotheta[m]);
     auto azimuthal_f = static_cast<float>(azimuthal[m]);
     q_lab_pre.push_back({-std::sin(twotheta_f) * std::cos(azimuthal_f) * k,
                          -std::sin(twotheta_f) * std::sin(azimuthal_f) * k * coeff, (1.f - std::cos(twotheta_f)) * k});
+    lorentz_pre.push_back(std::abs(std::sin(twotheta_f) * std::cos(azimuthal_f)) * inv_wl_cube);
   }
+  float factor = 1;
   const auto run = inputWS->getExperimentInfo(0)->run();
   for (size_t n = 0; n < inputWS->getDimension(2)->getNBins(); n++) {
     auto gon = run.getGoniometerMatrix(n);
@@ -232,7 +242,10 @@ void ConvertHFIRSCDtoMDE::exec() {
       coord_t signal = static_cast<coord_t>(inputWS->getSignalAt(idx));
       if (signal > 0.f && std::isfinite(signal)) {
         Eigen::Vector3f q_sample = goniometer * q_lab_pre[m];
-        inserter.insertMDEvent(signal, signal, 0, goniometerIndex, 0, q_sample.data());
+        if (lorentz) {
+          factor = lorentz_pre[m];
+        }
+        inserter.insertMDEvent(signal * factor, signal * factor * factor, 0, goniometerIndex, 0, q_sample.data());
       }
     }
   }

@@ -180,6 +180,9 @@ template <typename TYPE>
 std::string WorkspaceProperty<TYPE>::setDataItem(const std::shared_ptr<Kernel::DataItem> &value) {
   std::shared_ptr<TYPE> typed = std::dynamic_pointer_cast<TYPE>(value);
   if (typed) {
+    if (typed->getName().empty() && this->direction() == Kernel::Direction::Output) {
+      typed->setPythonVariableName(m_workspaceName);
+    }
     if (this->direction() == Kernel::Direction::Input) {
       m_workspaceName = typed->getName();
     }
@@ -190,6 +193,13 @@ std::string WorkspaceProperty<TYPE>::setDataItem(const std::shared_ptr<Kernel::D
   return isValid();
 }
 
+/** Set the property mode of the property e.g. Mandatory or Optional
+ *  @param optional :: Property mode Mandatory or Optional
+ */
+template <typename TYPE> void WorkspaceProperty<TYPE>::setPropertyMode(const PropertyMode::Type &optional) {
+  m_optional = optional;
+}
+
 /** Checks whether the entered workspace is valid.
  *  To be valid, in addition to satisfying the conditions of any validators,
  *  an output property must not have an empty name and an input one must point
@@ -198,8 +208,6 @@ std::string WorkspaceProperty<TYPE>::setDataItem(const std::shared_ptr<Kernel::D
  *  @returns A user level description of the problem or "" if it is valid.
  */
 template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
-  // start with the no error condition
-  std::string error;
 
   // If an output workspace it must have a name, although it might not exist
   // in the ADS yet
@@ -229,9 +237,9 @@ template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValid() const {
       // test whether it is a group
       if (std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp)) {
         return isValidGroup(std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(wksp));
-      } else {
-        error = "Workspace " + this->value() + " is not of the correct type";
       }
+
+      std::string error = "Workspace " + this->value() + " is not of the correct type";
       return error;
     }
   }
@@ -294,15 +302,22 @@ template <typename TYPE> std::vector<std::string> WorkspaceProperty<TYPE>::allow
 template <typename TYPE> const Kernel::PropertyHistory WorkspaceProperty<TYPE>::createHistory() const {
   std::string wsName = m_workspaceName;
   bool isdefault = this->isDefault();
+  bool pythonVariable = false;
 
   if ((wsName.empty() || this->hasTemporaryValue()) && this->operator()()) {
-    // give the property a temporary name in the history
-    std::ostringstream os;
-    os << "__TMP" << this->operator()().get();
-    wsName = os.str();
+    const auto pvName = Kernel::PropertyWithValue<std::shared_ptr<TYPE>>::m_value->getPythonVariableName();
+    pythonVariable = !pvName.empty();
+    if (pythonVariable) {
+      wsName = pvName;
+    } else {
+      // give the property a temporary name in the history
+      std::ostringstream os;
+      os << "__TMP" << this->operator()().get();
+      wsName = os.str();
+    }
     isdefault = false;
   }
-  return Kernel::PropertyHistory(this->name(), wsName, this->type(), isdefault, this->direction());
+  return Kernel::PropertyHistory(this->name(), wsName, this->type(), isdefault, this->direction(), pythonVariable);
 }
 
 /** If this is an output workspace, store it into the AnalysisDataService
@@ -388,10 +403,10 @@ std::string WorkspaceProperty<TYPE>::isValidGroup(const std::shared_ptr<Workspac
  */
 template <typename TYPE> std::string WorkspaceProperty<TYPE>::isValidOutputWs() const {
   std::string error;
-  const std::string value = this->value();
-  if (!value.empty()) {
+  const std::string workspaceName = this->value();
+  if (!workspaceName.empty()) {
     // Will the ADS accept it
-    error = AnalysisDataService::Instance().isValid(value);
+    error = AnalysisDataService::Instance().isValid(workspaceName);
   } else {
     if (isOptional())
       error = ""; // Optional ones don't need a name

@@ -5,24 +5,24 @@
 # made to something other than a .rst file.
 #
 # Script usage:
-# buildscript <path-to-workspace> <cmake-preset-name> [options]
+# conda-buildscript <path-to-workspace> <cmake-preset-name> [options]
 #
 # Example command to run a PR build on ubuntu:
-# buildscript /jenkins/workspace_dir/ linux-ci --enable-systemtests --enable-coverage --enable-docs
+# conda-buildscript /jenkins/workspace_dir/ linux-ci --enable-systemtests --enable-coverage --enable-docs
 #
 # Expected args:
 #   1. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
 #                 this argument do not use \\ or \ in the path.
-#   2. CMAKE_PRESET: the CMake preset that should be ran to generate the cmake files for this CI job
+#   2. CMAKE_PRESET: the CMake preset that should be run to generate the cmake files for this CI job
 #
 # Possible flags:
-#   --enable-systemtests: Runs the system tests from being compiled or ran
-#   --enable-package: Runs a package being produced
-#   --enable-docs: Runs the docs from being built
-#   --enable-dev-docs: Runs the developer docs from being built
-#   --enable-doctests: Runs the documentation tests
-#   --enable-coverity: Runs coverity and submits results, ignore all other options and does not run unit tests
-#   --clean-build: Clears the build folder and builds from scratch
+#   --disable-unittests: Disable the unit tests. Otherwise they're run by default.
+#   --enable-systemtests: Build and run the system tests
+#   --enable-docs: Build the docs
+#   --enable-dev-docs: Build the developer docs
+#   --enable-doctests: Run the documentation tests
+#   --enable-coverity: Run coverity and submit results; ignores all other options and does not run unit tests
+#   --clean-build: Clear the build folder and build from scratch
 #   --clean-external-projects: Clear the external projects from the build folder
 #
 # Possible parameters:
@@ -34,7 +34,7 @@ start_time=$(date +%s)
 
 # Check arguments passed are 2 or higher, and aren't optional flags.
 if [[ $# < 2 || $1 == "--"* || $2 == "--"* ]]; then
-    echo "Pass 2 arguments followed by optional flags usage: buildscript <path-to-workspace> <cmake-preset-name> [options]"
+    echo "Pass 2 arguments followed by optional flags usage: conda-buildscript <path-to-workspace> <cmake-preset-name> [options]"
     exit 1
 fi
 
@@ -57,7 +57,6 @@ BUILD_DIR=$WORKSPACE/build
 ENABLE_BUILD_CODE=true
 ENABLE_UNIT_TESTS=true
 ENABLE_SYSTEM_TESTS=false
-ENABLE_PACKAGE=false
 ENABLE_DOCS=false
 ENABLE_DOC_TESTS=false
 ENABLE_DEV_DOCS=false
@@ -70,8 +69,8 @@ EXTRA_CMAKE_FLAGS="-DENABLE_PRECOMMIT=OFF"
 while [ ! $# -eq 0 ]
 do
     case "$1" in
+        --disable-unittests) ENABLE_UNIT_TESTS=false ;;
         --enable-systemtests) ENABLE_SYSTEM_TESTS=true ;;
-        --enable-package) ENABLE_PACKAGE=true ;;
         --enable-docs) ENABLE_DOCS=true ;;
         --enable-doctests)
             ENABLE_DOCS=true
@@ -79,8 +78,8 @@ do
             ;;
         --enable-dev-docs) ENABLE_DEV_DOCS=true ;;
         --enable-coverity)
-	    ENABLE_COVERITY=true
-	    ENABLE_UNIT_TESTS=false
+            ENABLE_COVERITY=true
+            ENABLE_UNIT_TESTS=false
 	    ;;
         --clean-build) CLEAN_BUILD=true ;;
         --clean-external-projects) CLEAN_EXTERNAL_PROJECTS=true ;;
@@ -118,10 +117,15 @@ create_and_activate_mantid_developer_env
 
 # Check whether this is an incremental build that only changes rst files
 if [ -d $BUILD_DIR ]; then
-    if ${SCRIPT_DIR}/../check_for_changes dev-docs-only || ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
+    if ${SCRIPT_DIR}/../check_for_changes user-docs-only; then
       ENABLE_BUILD_CODE=false
       ENABLE_UNIT_TESTS=false
       ENABLE_SYSTEM_TESTS=false
+    elif ${SCRIPT_DIR}/../check_for_changes dev-docs-only; then
+      ENABLE_BUILD_CODE=false
+      ENABLE_UNIT_TESTS=false
+      ENABLE_SYSTEM_TESTS=false
+      ENABLE_DOC_TESTS=false
     fi
     rm -rf ${BUILD_DIR}/bin ${BUILD_DIR}/ExternalData ${BUILD_DIR}/Testing
     find $WORKSPACE \( -iname 'TEST-*.xml' -o -name 'Test.xml' \) -delete
@@ -146,7 +150,7 @@ if [[ $ENABLE_DOCS == true ]]; then
 fi
 
 # Run the script that handles the build
-$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS
+$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS
 
 # Run unit and system tests
 $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS

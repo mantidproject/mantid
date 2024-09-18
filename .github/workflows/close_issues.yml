@@ -1,0 +1,16 @@
+name: Close issues with PRs merged into release-next.
+
+on:
+  pull_request_target:
+    types: [closed]
+    branches:
+      - release-next
+
+jobs:
+  close-issue-on-pr-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Closes issues related to a merged pull request.
+        uses: ldez/gha-mjolnir@v1.4.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -89,6 +89,7 @@ void export_PointGroup() {
       .def("getEquivalents", &getEquivalents, (arg("self"), arg("hkl")),
            "Returns an array with all symmetry equivalents of the supplied "
            "HKL.")
+      .def("getLauePointGroupSymbol", &PointGroup::getLauePointGroupSymbol, arg("self"))
       .def("getReflectionFamily", &getReflectionFamily, (arg("self"), arg("hkl")),
            "Returns the same HKL for all symmetry equivalents.")
       .def(str(self))

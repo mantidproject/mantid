@@ -88,7 +88,7 @@ void PreviewJobManager::notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &
   };
 }
 
-void PreviewJobManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr algorithm, std::string const &message) {
+void PreviewJobManager::notifyAlgorithmError(API::IConfiguredAlgorithm_sptr &algorithm, std::string const &message) {
   auto jobAlgorithm = std::dynamic_pointer_cast<IBatchJobAlgorithm>(algorithm);
   auto item = jobAlgorithm->item();
   if (!item || !item->isPreview())

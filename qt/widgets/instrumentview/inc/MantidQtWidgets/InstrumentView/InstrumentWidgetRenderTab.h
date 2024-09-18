@@ -69,6 +69,7 @@ public slots:
   void setLegendScaleType(int /*index*/);
   void changeColorMap(const QString &filename = "", const bool highlightZeroDets = false);
   void setSurfaceType(int /*index*/);
+  void setMaintainAspectRatio(bool /*on*/);
   void flipUnwrappedView(bool /*on*/);
   void resetView();
   void saveImage(const QString &filename = "");
@@ -79,6 +80,7 @@ private slots:
   void displaySettingsAboutToshow();
   /// Change the type of the surfac
   void surfaceTypeChanged(int index);
+  void maintainAspectRatioChanged(bool on);
   void colorMapChanged();
   void scaleTypeChanged(int /*type*/);
   void nthPowerChanged(double /*nth_power*/);

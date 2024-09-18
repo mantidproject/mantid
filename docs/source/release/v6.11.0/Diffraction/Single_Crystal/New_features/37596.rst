@@ -1,0 +1,6 @@
+- Improve determination of background bins by minimising third-moment (skew) in :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` by forcing skew > 0 (minimum skew would expect in background)
+- Add cabability to not integrate peaks which include a masked detector in the following algorithms
+
+  - :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>`
+  - :ref:`IntegratePeaksShoeboxTOF <algm-IntegratePeaksShoeboxTOF>`
+  - :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>`

@@ -60,7 +60,7 @@ class BasicFittingContextTest(unittest.TestCase):
 
     def test_that_current_dataset_index_will_raise_if_the_index_is_greater_than_or_equal_to_the_number_of_datasets(self):
         self.fitting_context.dataset_names = self.dataset_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.fitting_context.current_dataset_index = 2
 
     def test_that_current_dataset_index_does_not_throw_when_provided_None_and_there_are_no_datasets_loaded(self):
@@ -72,37 +72,37 @@ class BasicFittingContextTest(unittest.TestCase):
 
     def test_that_start_xs_will_raise_if_the_number_of_xs_is_greater_than_or_equal_to_the_number_of_datasets(self):
         self.fitting_context.dataset_names = self.dataset_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.fitting_context.start_xs = [1.0, 2.0, 3.0]
 
     def test_that_end_xs_will_raise_if_the_number_of_xs_is_greater_than_or_equal_to_the_number_of_datasets(self):
         self.fitting_context.dataset_names = self.dataset_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.fitting_context.end_xs = [1.0, 2.0, 3.0]
 
     def test_that_exclude_start_xs_will_raise_if_the_number_of_xs_is_greater_than_or_equal_to_the_number_of_datasets(self):
         self.fitting_context.dataset_names = self.dataset_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.fitting_context.exclude_start_xs = [1.0, 2.0, 3.0]
 
     def test_that_exclude_end_xs_will_raise_if_the_number_of_xs_is_greater_than_or_equal_to_the_number_of_datasets(self):
         self.fitting_context.dataset_names = self.dataset_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.fitting_context.exclude_end_xs = [1.0, 2.0, 3.0]
 
     def test_that_single_fit_functions_will_raise_if_the_num_of_funcs_is_greater_than_or_equal_to_the_num_of_datasets(self):
         self.fitting_context.dataset_names = ["Name1"]
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.fitting_context.single_fit_functions = self.single_fit_functions
 
     def test_that_fit_statuses_will_raise_if_the_number_of_datasets_is_smaller_than_the_provided_list_size(self):
         self.fitting_context.dataset_names = self.dataset_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.fitting_context.fit_statuses = ["Success", "Success", "Success"]
 
     def test_that_chi_squared_will_raise_if_the_number_of_datasets_is_smaller_than_the_provided_list_size(self):
         self.fitting_context.dataset_names = self.dataset_names
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(AssertionError):
             self.fitting_context.chi_squared = [1.0, 2.0, 3.0]
 
     def test_that_guess_workspace_name_will_not_raise_if_the_workspace_does_not_exist(self):

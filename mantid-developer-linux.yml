@@ -5,39 +5,41 @@ channels:
 
 dependencies:
   # Common packages
-  - boost=1.78.* # Also pulls in boost-cpp. Use the same version as conda-forge
   - ccache
-  - cmake=3.19.*|>=3.21.0 # Avoid bug in 3.20.* with updating external projects
-  - doxygen>=1.9.*
+  - cmake>=3.21.0
+  - doxygen=1.9.* # 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
   - eigen=3.4.*
   - euphonic>=1.2.1,<2.0
   - graphviz>=2.47.0
   - gsl=2.7 # Keep gsl a specific version to reduce changes in our fitting
   - h5py
-  - hdf5>=1.12,<1.13
+  - hdf5>1.14.0,<1.15 # gets libcurl>=8.4
   - jemalloc=5.2.0 # We have noticed 5.2.1 can cause a hang on older glibc versions (Cent OS 7, Ubuntu 18.04). Observed with import CaChannel and also our MeierTest.
   - jsoncpp>=1.9.4,<2
-  - libopenblas!=0.3.23,!=0.3.24 # pinned the same as macOS for consistency
+  - libboost-devel=1.84.* # Use the same version as conda-forge
+  - libboost-python-devel=1.84.* # Use the same version as conda-forge
+  - libopenblas!=0.3.23,!=0.3.24,!=0.3.25, !=0.3.28 # v0.3.25 causing system test failures on linux. Others are for macOS consistency.
   - librdkafka>=1.6.0
   - matplotlib=3.7.*
   - muparser>=2.3.2
   - nexus=4.4.*
   - ninja>=1.10.2
-  - numpy>=1.22,<1.25
-  - occt
+  - numpy>=1.24,<1.27
+  - occt=*=novtk* # Use novtk version, otherwise a lot of extra packages are installed, including qt6-main, which can cause issues when launching on Windows
   - pip>=21.0.1
   - poco=1.12.1|>=1.12.6 # 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning. It's resolved on their devel branch but not yet included in a release, as of 1.12.5.
   - psutil>=5.8.0
-  - pycifrw==4.4.1 # Force to 4.4.1 as later versions cause issues with loading CIF files
+  - pycifrw
   - pyqt>=5.15,<6
   - python-dateutil>=2.8.1
   - python=3.10.*
   - pyyaml>=5.4.1
   - qscintilla2
-  - qt=5.15.8 # Avoid unexpected qt upgrades
-  - qtconsole!=5.4.2 # 5.4.2 crashes the jupyter console. Bug was fixed in 5.4.3
+  - qt==5.15.8 # Avoid unexpected qt upgrades
+  - qtconsole>5.4.2,!=5.5.0 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
   - qtpy>=1.9.0
   - qt-gtk-platformtheme # Use native theme on GTK-based systems, which provides a significantly better performing file browser.
+  - quasielasticbayes
   - requests>=2.25.1
   - scipy>=1.10.0
   - setuptools
@@ -48,17 +50,14 @@ dependencies:
   - toml>=0.10.2
   - versioningit>=2.1
   - joblib
+  - orsopy==1.2.1 # Fix the version to avoid updates being pulled in automatically, which might change the Reflectometry ORSO file content or layout and cause tests to fail.
 
   # Not Windows, OpenGL implementation:
-  - mesalib>=18.0.0
   - mesa-libgl-devel-cos7-x86_64>=18.3.4
-  - mesa-libgl-cos7-x86_64>=18.3.4
 
   # Linux only
-  - gxx_linux-64==10.3.*
-  - libglu>=9.0.0
-  - readline<8.2
-  - filelock<3.10.2 # Pinned to prevent a segmentation fault when running doc tests
+  - gxx_linux-64==12.*
+  - libglu>=9.0
 
   # Needed for test suite on Linux
   - pciutils-libs-cos7-x86_64>=3.5.1
@@ -71,8 +70,6 @@ dependencies:
 
   # Development tooling
   - black  # may be out of sync with pre-commit
-  - cppcheck==2.10.3
+  - cppcheck==2.14.2
   - gcovr>=4.2
   - pre-commit>=2.12.0
-
-

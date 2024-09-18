@@ -311,7 +311,7 @@ void CalculateCountRate::setOutLogParameters(const DataObjects::EventWorkspace_s
   }
 
   m_normalizeResult = getProperty("NormalizeTheRate");
-  bool useLogDerivative = getProperty("UseLogDerivative");
+  bool useLogDeriv = getProperty("UseLogDerivative");
   bool useLogAccuracy = getProperty("UseNormLogGranularity");
 
   bool logPresent = InputWorkspace->run().hasProperty(NormLogName);
@@ -321,12 +321,12 @@ void CalculateCountRate::setOutLogParameters(const DataObjects::EventWorkspace_s
                                  "' values requested but the log is not attached to the "
                                  "workspace. Normalization disabled");
     }
-    if (useLogDerivative) {
+    if (useLogDeriv) {
       g_log.warning() << "Normalization by log: '" << NormLogName
                       << "' -- log derivative requested but the source log is "
                          "not attached to "
                          "the workspace. Log derivative will not be used.\n";
-      useLogDerivative = false;
+      useLogDeriv = false;
     }
     if (useLogAccuracy) {
       g_log.warning() << "Using accuracy of the log: '" << NormLogName
@@ -342,7 +342,7 @@ void CalculateCountRate::setOutLogParameters(const DataObjects::EventWorkspace_s
   // Analyse properties interactions
 
   // if property derivative is specified.
-  if (useLogDerivative) {
+  if (useLogDeriv) {
     m_tmpLogHolder = m_pNormalizationLog->getDerivative();
     m_pNormalizationLog = m_tmpLogHolder.get();
     m_useLogDerivative = true;

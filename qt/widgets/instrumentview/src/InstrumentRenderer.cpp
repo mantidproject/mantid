@@ -7,7 +7,6 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentRenderer.h"
 #include "MantidAPI/IMaskWorkspace.h"
 #include "MantidBeamline/ComponentType.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
@@ -32,31 +31,16 @@ size_t decodePickColorRGB(unsigned char r, unsigned char g, unsigned char b) {
   index += b - 1;
   return index;
 }
-
-void updateVisited(const Mantid::Geometry::ComponentInfo &compInfo, const size_t bankIndex,
-                   std::vector<bool> &visited) {
-  visited[bankIndex] = true;
-  const auto &children = compInfo.children(bankIndex);
-  for (auto child : children) {
-    const auto &subchildren = compInfo.children(child);
-    if (subchildren.size() > 0)
-      updateVisited(compInfo, child, visited);
-    else
-      visited[child] = true;
-  }
-}
 } // namespace
 
 InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
     : m_actor(actor), m_isUsingLayers(false), m_HighlightDetsWithZeroCount(false) {
-
-  m_displayListId[0] = 0;
-  m_displayListId[1] = 0;
-  m_useDisplayList[0] = false;
-  m_useDisplayList[1] = false;
-
   const auto &componentInfo = actor.componentInfo();
+
   size_t textureIndex = 0;
+  if (componentInfo.size() <= 1) {
+    return;
+  }
   for (size_t i = componentInfo.root(); !componentInfo.isDetector(i); --i) {
     auto type = componentInfo.componentType(i);
     if (type == ComponentType::Rectangular || type == ComponentType::OutlineComposite || type == ComponentType::Grid) {
@@ -67,89 +51,65 @@ InstrumentRenderer::InstrumentRenderer(const InstrumentActor &actor)
   }
 }
 
-InstrumentRenderer::~InstrumentRenderer() {
-  for (unsigned int i : m_displayListId) {
-    if (i != 0) {
-      glDeleteLists(i, 1);
-    }
+void InstrumentRenderer::updateVisited(const Mantid::Geometry::ComponentInfo &compInfo, const size_t bankIndex,
+                                       std::vector<bool> &visited) {
+  visited[bankIndex] = true;
+  const auto &children = compInfo.children(bankIndex);
+  for (auto child : children) {
+    const auto &subchildren = compInfo.children(child);
+    if (subchildren.size() > 0)
+      updateVisited(compInfo, child, visited);
+    else
+      visited[child] = true;
   }
 }
 
-void InstrumentRenderer::renderInstrument(const std::vector<bool> &visibleComps, bool showGuides, bool picking) {
-  if (std::none_of(visibleComps.cbegin(), visibleComps.cend(), [](bool visible) { return visible; }))
+void InstrumentRenderer::drawComponent(const size_t i, const std::vector<bool> &visibleComps, bool showGuides,
+                                       bool picking, const Mantid::Geometry::ComponentInfo &compInfo,
+                                       std::vector<bool> &visited) {
+  auto type = compInfo.componentType(i);
+  if (type == ComponentType::Infinite)
     return;
 
-  if (!m_actor.isInitialized()) {
+  if (type == ComponentType::Grid) {
+    if (visibleComps[i]) {
+      drawGridBank(i, picking);
+      updateVisited(compInfo, i, visited);
+    }
+    return;
+  }
+  if (type == ComponentType::Rectangular) {
+    if (visibleComps[i]) {
+      drawRectangularBank(i, picking);
+      updateVisited(compInfo, i, visited);
+    }
     return;
   }
 
-  OpenGLError::check("InstrumentActor::draw()");
-  size_t i = picking ? 1 : 0;
-  if (m_useDisplayList[i]) {
-    glCallList(m_displayListId[i]);
-  } else {
-    m_displayListId[i] = glGenLists(1);
-    m_useDisplayList[i] = true;
-    glNewList(m_displayListId[i],
-              GL_COMPILE); // Construct display list for object representation
-    draw(visibleComps, showGuides, picking);
-    glEndList();
-    if (glGetError() == GL_OUT_OF_MEMORY) // Throw an exception
-      throw Mantid::Kernel::Exception::OpenGLError("OpenGL: Out of video memory");
-    glCallList(m_displayListId[i]);
+  if (type == ComponentType::OutlineComposite) {
+    if (visibleComps[i]) {
+      drawTube(i, picking);
+      updateVisited(compInfo, i, visited);
+    }
+    return;
   }
-  OpenGLError::check("InstrumentActor::draw()");
-}
 
-void InstrumentRenderer::draw(const std::vector<bool> &visibleComps, bool showGuides, bool picking) {
-  const auto &compInfo = m_actor.componentInfo();
-  std::vector<bool> visited(compInfo.size(), false);
-
-  for (size_t i = compInfo.root(); i != std::numeric_limits<size_t>::max(); --i) {
-    auto type = compInfo.componentType(i);
-    if (type == ComponentType::Infinite)
-      continue;
-
-    if (type == ComponentType::Grid) {
-      if (visibleComps[i]) {
-        drawGridBank(i, picking);
-        updateVisited(compInfo, i, visited);
-      }
-      continue;
+  if (type == ComponentType::Structured) {
+    if (visibleComps[i]) {
+      drawStructuredBank(i, picking);
+      updateVisited(compInfo, i, visited);
     }
-    if (type == ComponentType::Rectangular) {
-      if (visibleComps[i]) {
-        drawRectangularBank(i, picking);
-        updateVisited(compInfo, i, visited);
-      }
-      continue;
-    }
+    return;
+  }
 
-    if (type == ComponentType::OutlineComposite) {
-      if (visibleComps[i]) {
-        drawTube(i, picking);
-        updateVisited(compInfo, i, visited);
-      }
-      continue;
-    }
+  if (!compInfo.isDetector(i) && !showGuides) {
+    visited[i] = true;
+    return;
+  }
 
-    if (type == ComponentType::Structured) {
-      if (visibleComps[i]) {
-        drawStructuredBank(i, picking);
-        updateVisited(compInfo, i, visited);
-      }
-      continue;
-    }
-
-    if (!compInfo.isDetector(i) && !showGuides) {
-      visited[i] = true;
-      continue;
-    }
-
-    if (compInfo.hasValidShape(i) && visibleComps[i] && !visited[i]) {
-      visited[i] = true;
-      drawSingleDetector(i, picking);
-    }
+  if (compInfo.hasValidShape(i) && visibleComps[i] && !visited[i]) {
+    visited[i] = true;
+    drawSingleDetector(i, picking);
   }
 }
 
@@ -308,11 +268,15 @@ void InstrumentRenderer::reset() {
 
   /// Invalidate the OpenGL display lists to force full re-drawing of the
   /// instrument and creation of new lists.
-  for (size_t i = 0; i < 2; ++i) {
-    if (m_displayListId[i] != 0) {
-      glDeleteLists(m_displayListId[i], 1);
-      m_displayListId[i] = 0;
-      m_useDisplayList[i] = false;
+  resetDisplayLists();
+}
+
+void InstrumentRenderer::invalidateAndDeleteDisplayList(std::vector<GLuint> &displayList, bool &useList) {
+  useList = false;
+  for (size_t i = 0; i < m_actor.componentInfo().size(); ++i) {
+    if (displayList[i] != 0) {
+      glDeleteLists(displayList[i], 1);
+      displayList[i] = 0;
     }
   }
 }

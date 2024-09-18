@@ -173,7 +173,7 @@ manually input data every time the unit tests are run - instead we can
 mock the **get** methods to simulate the user entering data.
 
 Using `GMock
-<https://github.com/google/googletest/blob/master/googlemock/docs/Documentation.md>`_
+<https://github.com/google/googletest/tree/main/googlemock>`_
 in C++, or `unittest.mock
 <https://docs.python.org/3/library/unittest.mock.html>`_ in Python, we
 can set expectations in the unit tests for certain methods to be

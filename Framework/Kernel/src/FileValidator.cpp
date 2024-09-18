@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/FileValidator.h"
 #include "MantidKernel/Logger.h"
-#include <Poco/File.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string/case_conv.hpp>
+#include <filesystem>
 #include <fstream>
 #include <memory>
 #include <sstream>
@@ -75,17 +75,17 @@ std::string FileValidator::checkValidity(const std::string &value) const {
   // create a variable for the absolute path to be used in error messages
   std::string abspath(value);
   if (!value.empty()) {
-    Poco::Path path(value);
-    if (path.isAbsolute())
-      abspath = path.toString();
+    std::filesystem::path path(value);
+    if (path.is_absolute())
+      abspath = std::filesystem::absolute(path).string();
   }
 
   // If the file is required to exist check it is there
-  if (m_testExist && (value.empty() || !Poco::File(value).exists())) {
+  if (m_testExist && (value.empty() || !std::filesystem::exists(value))) {
     return "File \"" + abspath + "\" not found";
   }
 
-  if (m_testExist && (Poco::File(value).exists())) {
+  if (m_testExist && (std::filesystem::exists(value))) {
     std::ifstream in;
     in.open(value.c_str());
     if (!in) {
@@ -130,13 +130,9 @@ bool FileValidator::endswith(const std::string &value) const {
   std::transform(value_copy.begin(), value_copy.end(), value_copy.begin(), tolower);
 
   // check for the ending
-  for (const auto &extension : m_extensions) {
-    if (has_ending(value, extension)) // original case
-      return true;
-    if (has_ending(value_copy, extension)) // lower case
-      return true;
-  }
-  return false;
+  return std::any_of(m_extensions.cbegin(), m_extensions.cend(), [&](const auto extension) {
+    return has_ending(value, extension) || has_ending(value_copy, extension);
+  });
 }
 
 } // namespace Mantid::Kernel

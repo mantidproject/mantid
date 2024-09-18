@@ -39,7 +39,15 @@ Spectrum Numbers
 
 If there is an overlap in the spectrum numbers of both inputs, then the
 output workspace will have its spectrum numbers reset starting at 0 and
-increasing by 1 for each spectrum.
+increasing by 1 for each spectrum. In addition, the y-axis value will be copied
+from previous workspaces in order of the first workspace then the second workspace.
+
+Note that when spectra numbers do not overlap,
+it doesn't automatically imply that y-axis values are carried over from previous workspaces.
+To address this, use the 'AppendYAxisLabels' option.
+This will combine y-axis values from two input workspaces into the new output workspace,
+arranging them in the order of the first workspace followed by the second. In addition, the axes
+should have the same type.
 
 .. seealso:: :ref:`algm-ConjoinWorkspaces` for joining parts of the same workspace.
 

@@ -14,6 +14,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 class PreviewPlot;
+enum PlotLineStyle { Dash, Dotted, Solid };
 
 /**
  * Displays a line for selecting a value on a previewplot in MPL
@@ -24,8 +25,8 @@ class EXPORT_OPT_MANTIDQT_PLOTTING SingleSelector : public QObject {
 public:
   enum SelectType { XSINGLE, YSINGLE };
 
-  SingleSelector(PreviewPlot *plot, SelectType type = XSINGLE, double position = 0.0, bool visible = true,
-                 const QColor &colour = Qt::black);
+  SingleSelector(PreviewPlot *plot, SelectType type = XSINGLE, double position = 0.0,
+                 PlotLineStyle style = PlotLineStyle::Dash, bool visible = true, const QColor &colour = Qt::black);
 
   void setColour(const QColor &colour);
 
@@ -40,6 +41,7 @@ public:
   void setVisible(bool visible);
 
   void detach();
+  void disconnectMouseSignals();
 
 signals:
   void resetScientificBounds();

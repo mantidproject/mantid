@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/DllConfig.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/SplittingInterval.h"
 #include "MantidKernel/TimeROI.h"
@@ -430,6 +431,20 @@ template <typename TYPE> std::vector<TimeInterval> FilteredTimeSeriesProperty<TY
 }
 
 template <typename HeldType>
+double FilteredTimeSeriesProperty<HeldType>::timeAverageValue(const TimeROI *timeRoi) const {
+  const TimeROI *roi = intersectFilterWithOther(timeRoi);
+
+  if (size() == 1)
+    return static_cast<double>(TimeSeriesProperty<HeldType>::firstValue(*roi));
+  else
+    return TimeSeriesProperty<HeldType>::timeAverageValue(roi);
+}
+
+template <> double FilteredTimeSeriesProperty<std::string>::timeAverageValue(const TimeROI * /*timeRoi*/) const {
+  throw Exception::NotImplementedError("TimeSeriesProperty::timeAverageValue is not implemented for string properties");
+}
+
+template <typename HeldType>
 bool FilteredTimeSeriesProperty<HeldType>::operator==(const TimeSeriesProperty<HeldType> &right) const {
   const bool time_and_value_compare = TimeSeriesProperty<HeldType>::operator==(right);
   if (!time_and_value_compare) {
@@ -463,7 +478,7 @@ template <typename HeldType> bool FilteredTimeSeriesProperty<HeldType>::operator
 /// @cond
 // -------------------------- Macro to instantiation concrete types
 // --------------------------------
-#define INSTANTIATE(TYPE) template class MANTID_KERNEL_DLL FilteredTimeSeriesProperty<TYPE>;
+#define INSTANTIATE(TYPE) template class FilteredTimeSeriesProperty<TYPE>;
 
 // -------------------------- Concrete instantiation
 // -----------------------------------------------

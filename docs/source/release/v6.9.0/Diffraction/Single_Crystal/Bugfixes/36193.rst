@@ -1,1 +1,0 @@
-- Set default number density units as formula units per cubic Angstrom in the ISIS single crystal reduction classes (the units can be changed by passing the ``NumberDensityUnit`` argument in the material dictionary in ``set_sample`` - see :ref:`SetSampleMaterial<algm-SetSampleMaterial>` for details).

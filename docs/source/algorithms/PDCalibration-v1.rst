@@ -10,37 +10,36 @@
 Description
 -----------
 
-This algorithm calibrates the detector pixels and creates a
-:ref:`diffraction calibration workspace
-<DiffractionCalibrationWorkspace>`. Unlike
-`CalibrateRectangularDetectors` the peak fitting and
-calibration is done in TOF not d spacing. The peak d values are
-converted to TOF based on either the old calibration or the instrument
-geometry. The ``InputWorkspace`` contains the data from a standard
-sample. The results are then fitted with up to (in order) ``difc``,
-``t_zero``, and ``difa``. These values are described in detail
-in :ref:`algm-AlignDetectors`.
+This algorithm takes an ``InputWorkspace`` containing powder diffraction spectra from a standard sample with x-units of time-of-flight (TOF).
+These spectra are fitted to extract the Bragg peak positions. The extracted peak positions are then used to
+determine the diffractometer constants that convert diffraction spectra from TOF to d-spacing. These constants are described in detail
+in :ref:`algm-AlignDetectors`. The number of the constants being determined (1,2,or 3) is controlled by ``CalibrationParameters``.
+The results are output to a :ref:`diffraction calibration workspace <DiffractionCalibrationWorkspace>`.
+
+Unlike other calibration algorithms (see `Time-of-Flight Powder Diffraction Calibration <../concepts/calibration/PowderDiffractionCalibration.html>`_),
+peak fitting in `PDCalibration` is done in TOF, not d-spacing. Correspondingly, the input ``PeakPositions`` and ``PeakWindow`` values are converted
+from d-spacing to TOF. The conversion is based on either the old calibration (see ``PreviousCalibrationFile`` and ``PreviousCalibrationTable``) or,
+if not provided, on the instrument geometry contained in the ``InputWorkspace``.
 
 The peak fitting properties are explained in more detail in
-:ref:`algm-FitPeaks`. This is used to perform a refinement of peaks
+:ref:`algm-FitPeaks`. This is used to perform a least-squares fitting of peaks
 using as much information as is provided as possible. Each input
 spectrum is calibrated separately following the same basic steps:
 
 1. The ``PeakPositions`` are used to determine fit windows in combination with ``PeakWindow``. The windows are half the distance between the provided peak positions, with a maximum size of ``PeakWindow``.
-2. The positions and windows are converted to time-of-flight for the spectrum using either the previous calibration information or the spectrum's geometry.
+2. The positions and windows are converted to TOF for the spectrum using either the previous calibration information or the instrument geometry.
 3. For each peak, the background is estimated from the first and last ten points in the fit window.
 4. For each peak, the nominal center is selected by locating the highest point near the expected position. The height is used as the initial guess as well.
-5. For each peak, the width is estimated by multiplying the peak center position with ``PeakWidthPercent`` or by calculating the second moment of the data in the window.
-6. For each peak, the peak fit parameters are refined.
-7. All of the fitted peak centers are used to fit the calibration constants, weighted by peak height.
+5. For each peak, the width is estimated by multiplying the peak center position with ``PeakWidthPercent`` or by calculating FWHM of the data in the window.
+6. For each peak, parameters (such as center, height, and width) are fitted with least-squares.
+7. All of the fitted peak centers, weighted according to ``UseChiSq``, are used in a separate least-squares procedure to determine the diffractometer constants.
 
 If more than one constant is requested, the result that has the lowest
 `reduced chi-squared value
 <https://en.wikipedia.org/wiki/Reduced_chi-squared_statistic>`_ is
 returned. This favors using less parameters.
 
-A mask workspace is created, named with the ``OutputCalibrationTable`` parameter + ``_mask``,
-with uncalibrated pixels masked.
+When not specified using the ``MaskWorkspace`` parameter, the default name for the mask workspace will be the ``OutputCalibrationTable`` parameter + ``_mask``.  If the mask workspace already exists, its masked values will be combined with those from any uncalibrated pixels detected during the algorithm's execution.
 
 The resulting calibration table can be saved with
 :ref:`algm-SaveDiffCal`, loaded with :ref:`algm-LoadDiffCal` and
@@ -50,7 +49,7 @@ three workspaces placed in the ``DiagnosticWorkspace`` group. They are:
 * evaluated fit functions (``_fitted``) which is the ``OutputPeakParametersWorkspace`` from :ref:`FitPeaks <algm-FitPeaks>`
 * raw peak fit values (``_fitparam``) which is the ``FittedPeaksWorkspace`` from :ref:`FitPeaks <algm-FitPeaks>`
 * uncertainties in raw fit values (``_fiterror``) which is the ``OutputParameterFitErrorsWorkspace`` from :ref:`FitPeaks <algm-FitPeaks>` when ``UseChisSq=True`` is set
-* contain the fitted positions in dspace( ``_dspacing``) derived from the effective peak parameters
+* peak fitted positions in d-space ( ``_dspacing``) derived from the effective peak parameters
 * peak widths (``_width``) derived from the effective peak parameters
 * peak heights (``_height``) derived from the effective peak parameters
 * instrument resolution (delta-d/d ``_resolution``) derived from the average of effective width/height of each peak.

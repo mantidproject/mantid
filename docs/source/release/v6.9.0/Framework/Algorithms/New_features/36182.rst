@@ -1,1 +1,0 @@
-- :ref:`RebinRagged <algm-RebinRagged>` has been converted from a python algorithm to a c++ algorithm. This should improve the performance of the algorithm. You can still use the Python version of :ref:`RebinRagged <algm-RebinRagged-v1>` by adding the option ``Version=1``.

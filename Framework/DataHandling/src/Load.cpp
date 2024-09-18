@@ -118,6 +118,7 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
       auto loader = getFileLoader(getPropertyValue(name));
       assert(loader); // (getFileLoader should throw if no loader is found.)
       declareLoaderProperties(loader);
+      m_loader = std::move(loader);
     }
     // Else we've got multiple files, and must enforce the rule that only one
     // type of loader is allowed.
@@ -132,7 +133,7 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
         // ... store its name and version and check that all other files have
         // loaders with the same name and version.
         const std::string loaderName = loader->name();
-        int version = loader->version();
+        int firstFileLoaderVersion = loader->version();
 
         // std::string ext =
         // fileNames[0].substr(fileNames[0].find_last_of("."));
@@ -155,7 +156,7 @@ void Load::setPropertyValue(const std::string &name, const std::string &value) {
           } else {
             loader = getFileLoader(fileNames[i]);
 
-            if (loaderName != loader->name() || version != loader->version())
+            if (loaderName != loader->name() || firstFileLoaderVersion != loader->version())
               throw std::runtime_error("Cannot load multiple files when more "
                                        "than one Loader is needed.");
           }
@@ -208,9 +209,9 @@ void Load::findFilenameProperty(const API::IAlgorithm_sptr &loader) {
   } else {
     // Use the first file property as the main Filename
     const auto &props = loader->getProperties();
-    for (auto prop : props) {
-      auto *multiprop = dynamic_cast<API::MultipleFileProperty *>(prop);
-      auto *singleprop = dynamic_cast<API::FileProperty *>(prop);
+    for (auto const &prop : props) {
+      auto const *multiprop = dynamic_cast<API::MultipleFileProperty *>(prop);
+      auto const *singleprop = dynamic_cast<API::FileProperty *>(prop);
       if (multiprop) {
         m_filenamePropName = multiprop->name();
         break;
@@ -245,17 +246,17 @@ void Load::declareLoaderProperties(const API::IAlgorithm_sptr &loader) {
   // THIS IS A COPY as the properties are mutated as we move through them
   const std::vector<Property *> existingProps = this->getProperties();
   for (auto existingProp : existingProps) {
-    const std::string &name = existingProp->name();
+    const std::string &propName = existingProp->name();
     // Wipe all properties except the Load native ones
-    if (m_baseProps.find(name) == m_baseProps.end()) {
-      this->removeProperty(name);
+    if (m_baseProps.find(propName) == m_baseProps.end()) {
+      this->removeProperty(propName);
     }
   }
 
   const std::vector<Property *> &loaderProps = loader->getProperties();
   size_t numProps(loaderProps.size());
   for (size_t i = 0; i < numProps; ++i) {
-    Property *loadProp = loaderProps[i];
+    Property const *loadProp = loaderProps[i];
     if (loadProp->name() == m_filenamePropName)
       continue;
     try {
@@ -323,9 +324,10 @@ void Load::exec() {
   std::vector<std::vector<std::string>> fileNames = getProperty("Filename");
 
   // Test for loading as a single file
-  auto loader = getFileLoader(fileNames[0][0]);
-  auto ifl = std::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(loader);
-  auto iflNexus = std::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(loader);
+  if (!m_loader)
+    m_loader = getFileLoader(fileNames[0][0]);
+  auto ifl = std::dynamic_pointer_cast<IFileLoader<Kernel::FileDescriptor>>(m_loader);
+  auto iflNexus = std::dynamic_pointer_cast<IFileLoader<Kernel::NexusDescriptor>>(m_loader);
 
   if (isSingleFile(fileNames) || (ifl && ifl->loadMutipleAsOne()) || (iflNexus && iflNexus->loadMutipleAsOne())) {
     // This is essentially just the same code that was called before multiple
@@ -338,18 +340,25 @@ void Load::exec() {
 
   // Set the remaining properties of the loader
   setOutputProperties(m_loader);
+
+  /**
+   * Set the loader and version from correct loader IF one has been found,
+   * so that caller can reuse these variables for later calls.
+   * Though these are set in call to getFileLoader, they can be errantly
+   * changed by the init process .
+   */
+  if (m_loader) {
+    setPropertyValue("LoaderName", m_loader->name());
+    setProperty("LoaderVersion", m_loader->version());
+  }
 }
 
 void Load::loadSingleFile() {
-  std::string loaderName = getPropertyValue("LoaderName");
-  if (loaderName.empty()) {
+  if (!m_loader) {
     m_loader = getFileLoader(getPropertyValue("Filename"));
-    loaderName = m_loader->name();
-  } else {
-    m_loader = createLoader(0, 1);
-    findFilenameProperty(m_loader);
   }
-  g_log.information() << "Using " << loaderName << " version " << m_loader->version() << ".\n";
+
+  g_log.information() << "Using " << m_loader->name() << " version " << m_loader->version() << ".\n";
   /// get the list properties for the concrete loader load algorithm
   const std::vector<Kernel::Property *> &loader_props = m_loader->getProperties();
 
@@ -473,9 +482,9 @@ void Load::loadMultipleFiles() {
  */
 API::IAlgorithm_sptr Load::createLoader(const double startProgress, const double endProgress,
                                         const bool logging) const {
-  std::string name = getPropertyValue("LoaderName");
-  int version = getProperty("LoaderVersion");
-  auto loader = API::AlgorithmManager::Instance().createUnmanaged(name, version);
+  std::string loaderName = getPropertyValue("LoaderName");
+  int loaderVersion = getProperty("LoaderVersion");
+  auto loader = API::AlgorithmManager::Instance().createUnmanaged(loaderName, loaderVersion);
   loader->initialize();
   if (!loader) {
     throw std::runtime_error("Cannot create loader for \"" + getPropertyValue("Filename") + "\"");

@@ -135,10 +135,10 @@ int Cylinder::side(const Kernel::V3D &Pt) const
       x *= x;
       double y = Pt[(m_normVec + 1) % 3] - m_centre[(m_normVec + 1) % 3];
       y *= y;
-      double displace = x + y - m_radius * m_radius;
-      if (fabs(displace * m_oneoverradius) < Tolerance)
+      double displacement = x + y - m_radius * m_radius;
+      if (fabs(displacement * m_oneoverradius) < Tolerance)
         return 0;
-      return (displace > 0.0) ? 1 : -1;
+      return (displacement > 0.0) ? 1 : -1;
     } else {
       return -1;
     }

@@ -26,7 +26,6 @@ public:
 protected:
   API::ITableWorkspace_sptr determineChunk(const std::string &filename) override;
   API::MatrixWorkspace_sptr loadChunk(const size_t rowIndex) override;
-  API::MatrixWorkspace_sptr processChunk(API::MatrixWorkspace_sptr &wksp);
 
 private:
   void init() override;

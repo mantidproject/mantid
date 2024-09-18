@@ -1,0 +1,1562 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ILLEnergyTransfer</class>
+ <widget class="QWidget" name="ILLEnergyTransfer">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>672</width>
+    <height>690</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>650</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QGroupBox" name="gbInput">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Sample File(s)</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="MantidQt::API::FileFinderWidget" name="rfInput" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Input files</string>
+          </property>
+          <property name="label" stdset="0">
+           <string>Run</string>
+          </property>
+          <property name="multipleFiles" stdset="0">
+           <bool>true</bool>
+          </property>
+          <property name="algorithmAndProperty" stdset="0">
+           <string>IndirectILLReductionQENS|Run</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="ckSum">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Sum all the input files</string>
+          </property>
+          <property name="text">
+           <string>Sum All Runs</string>
+          </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbType">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>80</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>Reduction Type</string>
+     </property>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>30</y>
+        <width>611</width>
+        <height>29</height>
+       </rect>
+      </property>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QRadioButton" name="rdQENS">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Quasi-Elastic Neutron Scattering</string>
+         </property>
+         <property name="text">
+          <string>QENS</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">buttonGroup</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QRadioButton" name="rdFWS">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Elastic/Inelastic Fixed Window Scan</string>
+         </property>
+         <property name="text">
+          <string>E/I - FWS</string>
+         </property>
+         <property name="checked">
+          <bool>false</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">buttonGroup</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_5">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cbCrop">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="toolTip">
+          <string>Whether or not to crop the first and last channels with zero monitor count</string>
+         </property>
+         <property name="text">
+          <string>Crop Dead Monitor Channels</string>
+         </property>
+        </widget>
+       </item>
+       <item alignment="Qt::AlignRight">
+        <widget class="QLabel" name="lbObservable">
+         <property name="visible">
+          <bool>false</bool>
+         </property>
+         <property name="text">
+          <string>Observable</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="cbObservable">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>450</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="visible">
+          <bool>false</bool>
+         </property>
+         <property name="toolTip">
+          <string>Select or type the desired observable. See Sample Logs for the list of valid parameters.</string>
+         </property>
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+         <item>
+          <property name="text">
+           <string>sample.temperature</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>sample.pressure</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>start_time</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>run_number</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="cbSortX">
+         <property name="visible">
+          <bool>false</bool>
+         </property>
+         <property name="toolTip">
+          <string>Whether or not to sort the x-axis.</string>
+         </property>
+         <property name="text">
+          <string>SortXAxis</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbGrouping">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>80</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>Detector Grouping</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_8">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QRadioButton" name="rdGroupDefault">
+          <property name="toolTip">
+           <string>By default, all the pixels of each tube will be summed.</string>
+          </property>
+          <property name="text">
+           <string>Default</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">buttonGroup_2</string>
+          </attribute>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rdGroupRange">
+          <property name="toolTip">
+           <string>Choose the pixel range manually, will be applied to all PSD tubes.</string>
+          </property>
+          <property name="text">
+           <string>Choose Range</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">buttonGroup_2</string>
+          </attribute>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="rdGroupChoose">
+          <property name="toolTip">
+           <string>Choose a detector grouping file, if separate range is needed per each PSD tube.</string>
+          </property>
+          <property name="text">
+           <string>Choose File</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">buttonGroup_2</string>
+          </attribute>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lePixelRange">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>75</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="visible">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Pixel range to sum for each PSD tube, e.g. 1,128</string>
+          </property>
+          <property name="text">
+           <string>1,128</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QStackedWidget" name="swGroupingTypes">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>250</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string/>
+          </property>
+          <property name="currentIndex">
+           <number>1</number>
+          </property>
+          <property name="algorithmAndProperty" stdset="0">
+           <string>IndirectILLReductionQENS|MapFile</string>
+          </property>
+          <widget class="QWidget" name="pgILLMapDefault"/>
+          <widget class="QWidget" name="pgILLMapFile">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <widget class="MantidQt::API::FileFinderWidget" name="rfMapFile" native="true">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>261</width>
+              <height>30</height>
+             </rect>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>250</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="visible">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Choose an .xml or .map file for detector grouping</string>
+            </property>
+            <property name="label" stdset="0">
+             <string/>
+            </property>
+            <property name="fileExtensions" stdset="0">
+             <stringlist>
+              <string>.xml</string>
+              <string>.map</string>
+             </stringlist>
+            </property>
+           </widget>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbBackground">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Background Subtraction (empty container)</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_7">
+        <item>
+         <widget class="MantidQt::API::FileFinderWidget" name="rfBackgroundRun" native="true">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Background files (empty can)</string>
+          </property>
+          <property name="algorithmAndProperty" stdset="0">
+           <string>IndirectILLReductionQENS|BackgroundRun</string>
+          </property>
+          <property name="label" stdset="0">
+           <string>Run</string>
+          </property>
+          <property name="multipleFiles" stdset="0">
+           <bool>true</bool>
+          </property>
+          <property name="optional" stdset="0">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lbScale">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Scaling Factor</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="leBackgroundFactor">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>50</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>1.0</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lbBackOption">
+          <property name="visible">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Option</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cbBackOption">
+          <property name="visible">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Background subtraction option</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Sum</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Interpolate</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbCalibration">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Detector Calibration (vanadium)</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <widget class="MantidQt::API::FileFinderWidget" name="rfCalibrationRun" native="true">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Calibration files (vanadium)</string>
+          </property>
+          <property name="label" stdset="0">
+           <string>Run</string>
+          </property>
+          <property name="algorithmAndProperty" stdset="0">
+           <string>IndirectILLReductionQENS|CalibrationRun</string>
+          </property>
+          <property name="multipleFiles" stdset="0">
+           <bool>true</bool>
+          </property>
+          <property name="optional" stdset="0">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lbPeakRange">
+          <property name="text">
+           <string>Peak Range</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="lePeakRange">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Peak integration range for calibration (in mev).</string>
+          </property>
+          <property name="text">
+           <string>-0.003,0.003</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lbCalibOption">
+          <property name="visible">
+           <bool>false</bool>
+          </property>
+          <property name="text">
+           <string>Option</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cbCalibOption">
+          <property name="visible">
+           <bool>false</bool>
+          </property>
+          <property name="toolTip">
+           <string>Detector calibration option</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>Sum</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Interpolate</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Background for Calibration</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_10">
+           <item>
+            <widget class="MantidQt::API::FileFinderWidget" name="rfBackCalibrationRun" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>280</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>Empty container for calibration run</string>
+             </property>
+             <property name="label" stdset="0">
+              <string>Run</string>
+             </property>
+             <property name="multipleFiles" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="optional" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="algorithmAndProperty" stdset="0">
+              <string>IndirectILLReductionQENS|CalibrationBackgroundRun</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lbBackCalib">
+             <property name="text">
+              <string>Scaling Factor</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="leBackCalibScale">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>20</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>1.0</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLabel" name="lbBackCalibOption">
+             <property name="visible">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Option</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QComboBox" name="cbBackCalibOption">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>26</height>
+              </size>
+             </property>
+             <property name="visible">
+              <bool>false</bool>
+             </property>
+             <property name="toolTip">
+              <string>Background subtraction option</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Sum</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Interpolate</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbOptions">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="title">
+      <string>Unmirror Options</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_7">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QLabel" name="lbUnmirror">
+          <property name="text">
+           <string>Unmirror Option</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSpinBox" name="sbUnmirrorOption">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Unmirroring options:
+0 no unmirroring
+1 sum of left and right
+2 left
+3 right
+4 shift right according to left and sum
+5 shift right according to Vanadium run for peak positions
+6 center both left and right at zero and sum
+7 shift both left and right according to Vanadium run for peak positions</string>
+          </property>
+          <property name="minimum">
+           <number>0</number>
+          </property>
+          <property name="maximum">
+           <number>7</number>
+          </property>
+          <property name="value">
+           <number>6</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="MantidQt::API::FileFinderWidget" name="rfAlignmentRun" native="true">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Alignment files (vanadium) for unmirror option 5 or 7</string>
+          </property>
+          <property name="label" stdset="0">
+           <string>Alignment Run </string>
+          </property>
+          <property name="algorithmAndProperty" stdset="0">
+           <string>IndirectILLReductionQENS|AlignmentRun</string>
+          </property>
+          <property name="multipleFiles" stdset="0">
+           <bool>true</bool>
+          </property>
+          <property name="optional" stdset="0">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbOutput">
+     <property name="title">
+      <string>Output Options</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_6">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QCheckBox" name="ckPlot">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Plot the reduced workspace</string>
+          </property>
+          <property name="text">
+           <string>Plot</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lbOut">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Output Name:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="leOutWS">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Output workspace name</string>
+          </property>
+          <property name="text">
+           <string>sample</string>
+          </property>
+          <property name="placeholderText">
+           <string>result</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="lbSpectrumAxis">
+          <property name="text">
+           <string>Spectrum Axis:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="cbSpectrumTarget">
+          <property name="toolTip">
+           <string>Choose the target for spectrum axis.</string>
+          </property>
+          <item>
+           <property name="text">
+            <string>SpectrumNumber</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>2Theta</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Q</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Q2</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <widget class="Line" name="line_2">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="ckSave">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string>Save the reduced workspace</string>
+          </property>
+          <property name="text">
+           <string>Save</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true"/>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>0</width>
+       <height>5</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::API::FileFinderWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::RunView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Spectroscopy/RunWidget/RunView.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbObservable</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>70</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>499</x>
+     <y>116</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbObservable</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>171</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>499</x>
+     <y>116</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>ckSum</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>171</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>536</x>
+     <y>45</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>ckSum</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>70</x>
+     <y>116</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>536</x>
+     <y>45</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdGroupDefault</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>rfMapFile</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>59</x>
+     <y>245</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>391</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdGroupChoose</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>rfMapFile</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>151</x>
+     <y>245</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>391</x>
+     <y>244</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>gbOptions</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>218</x>
+     <y>112</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>295</x>
+     <y>359</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>gbOptions</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>85</x>
+     <y>112</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>295</x>
+     <y>359</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbSortX</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>113</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>531</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbSortX</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>136</x>
+     <y>113</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>531</x>
+     <y>112</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbCrop</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>109</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>390</x>
+     <y>108</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbCrop</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>109</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>390</x>
+     <y>108</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lePeakRange</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>109</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>510</x>
+     <y>298</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbPeakRange</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>109</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>403</x>
+     <y>298</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbPeakRange</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>109</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>403</x>
+     <y>298</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lePeakRange</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>109</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>510</x>
+     <y>298</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbBackOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbCalibOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>318</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbBackOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>523</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbCalibOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>55</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>523</x>
+     <y>318</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbBackOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbCalibOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>446</x>
+     <y>318</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbBackOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>523</x>
+     <y>254</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbCalibOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>523</x>
+     <y>318</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdGroupDefault</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lePixelRange</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>59</x>
+     <y>185</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>289</x>
+     <y>185</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdGroupChoose</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lePixelRange</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>409</x>
+     <y>185</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>289</x>
+     <y>185</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdGroupRange</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lePixelRange</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>185</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>289</x>
+     <y>185</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdGroupRange</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>rfMapFile</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>160</x>
+     <y>185</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>517</x>
+     <y>184</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbObservable</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>52</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>431</x>
+     <y>106</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbObservable</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>131</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>431</x>
+     <y>106</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbBackCalibOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>52</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>520</x>
+     <y>387</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdQENS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbBackCalibOption</receiver>
+   <slot>setHidden(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>52</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>605</x>
+     <y>387</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>lbBackCalibOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>131</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>520</x>
+     <y>387</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rdFWS</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>cbBackCalibOption</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>131</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>605</x>
+     <y>387</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
+ </buttongroups>
+</ui>

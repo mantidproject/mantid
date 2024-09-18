@@ -197,31 +197,31 @@ void BoundingBox::realign(std::vector<Kernel::V3D> const *const pCS) {
   this->getFullBox(BBpoints, this->coord_system[0]);
 
   // identify min-max vrt the new coordinate system;
-  double xMin(FLT_MAX), yMin(FLT_MAX), zMin(FLT_MAX);
-  double xMax(-FLT_MAX), yMax(-FLT_MAX), zMax(-FLT_MAX);
+  double xMinNew(FLT_MAX), yMinNew(FLT_MAX), zMinNew(FLT_MAX);
+  double xMaxNew(-FLT_MAX), yMaxNew(-FLT_MAX), zMaxNew(-FLT_MAX);
   for (unsigned int i = 0; i < 8; i++) {
     double x = coord_system[1].scalar_prod(BBpoints[i]);
     double y = coord_system[2].scalar_prod(BBpoints[i]);
     double z = coord_system[3].scalar_prod(BBpoints[i]);
-    if (x < xMin)
-      xMin = x;
-    if (x > xMax)
-      xMax = x;
-    if (y < yMin)
-      yMin = y;
-    if (y > yMax)
-      yMax = y;
-    if (z < zMin)
-      zMin = z;
-    if (z > zMax)
-      zMax = z;
+    if (x < xMinNew)
+      xMinNew = x;
+    if (x > xMaxNew)
+      xMaxNew = x;
+    if (y < yMinNew)
+      yMinNew = y;
+    if (y > yMaxNew)
+      yMaxNew = y;
+    if (z < zMinNew)
+      zMinNew = z;
+    if (z > zMaxNew)
+      zMaxNew = z;
   }
-  this->xMin() = xMin;
-  this->xMax() = xMax;
-  this->yMin() = yMin;
-  this->yMax() = yMax;
-  this->zMin() = zMin;
-  this->zMax() = zMax;
+  this->xMin() = xMinNew;
+  this->xMax() = xMaxNew;
+  this->yMin() = yMinNew;
+  this->yMax() = yMaxNew;
+  this->zMin() = zMinNew;
+  this->zMax() = zMaxNew;
 }
 
 /**

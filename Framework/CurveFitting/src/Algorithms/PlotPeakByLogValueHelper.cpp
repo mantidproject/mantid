@@ -71,7 +71,7 @@ void parseValueRange(const std::string &index, double &start, double &end, int &
 void addGroupWorkspace(std::vector<InputSpectraToFit> &nameList, double start, double end, int wi, int spec, int period,
                        const std::shared_ptr<API::WorkspaceGroup> &wsg);
 void addMatrixworkspace(std::vector<InputSpectraToFit> &nameList, double start, double end, std::string &name, int wi,
-                        int spec, int period, const boost::optional<API::Workspace_sptr> &workspaceOptional,
+                        int spec, int period, const std::optional<API::Workspace_sptr> &workspaceOptional,
                         const std::shared_ptr<API::MatrixWorkspace> &wsMatrix);
 /// Create a list of input workspace names
 std::vector<InputSpectraToFit> makeNames(const std::string &inputList, int default_wi, int default_spec) {
@@ -122,7 +122,7 @@ std::vector<InputSpectraToFit> makeNames(const std::string &inputList, int defau
   return nameList;
 }
 void addMatrixworkspace(std::vector<InputSpectraToFit> &nameList, double start, double end, std::string &name, int wi,
-                        int spec, int period, const boost::optional<API::Workspace_sptr> &workspaceOptional,
+                        int spec, int period, const std::optional<API::Workspace_sptr> &workspaceOptional,
                         const std::shared_ptr<API::MatrixWorkspace> &wsMatrix) {
   auto workspaceIndices = getWorkspaceIndicesFromAxes(*wsMatrix, wi, spec, start, end);
 
@@ -199,7 +199,7 @@ std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace &ws, int works
   return out;
 }
 
-boost::optional<API::Workspace_sptr> getWorkspace(const std::string &workspaceName, int period) {
+std::optional<API::Workspace_sptr> getWorkspace(const std::string &workspaceName, int period) {
   if (API::AnalysisDataService::Instance().doesExist(workspaceName)) {
     return API::AnalysisDataService::Instance().retrieve(workspaceName);
   } else {

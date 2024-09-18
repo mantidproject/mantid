@@ -13,6 +13,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 
 #include <algorithm>
+#include <cctype>
 
 namespace {
 template <typename type> std::string convertVectorToString(const std::vector<type> &vector) {
@@ -41,7 +42,6 @@ const std::string TIMEZERO{"time_zero"};
 const std::string SAMPLE{"sample"};
 const std::string TEMPERATURE{"temperature"};
 const std::string MAGNETICFIELD{"magnetic_field"};
-const std::string RAWDATA{"/raw_data_1"};
 const std::string SEQUENCES{"sequences"};
 const std::string TYPE{"type"};
 const std::string REQUESTED{"frames_requested"};
@@ -120,7 +120,7 @@ std::string LoadMuonNexusV2NexusHelper::loadMainFieldDirectionFromNexus() {
     NXChar orientation = m_entry.openNXChar(NeXusEntry::ORIENTATON);
     // some files have no data there
     orientation.load();
-    if (orientation[0] == 't') {
+    if (std::tolower(orientation[0]) == 't') {
       mainFieldDirection = "Transverse";
     }
   } catch (std::runtime_error &) {

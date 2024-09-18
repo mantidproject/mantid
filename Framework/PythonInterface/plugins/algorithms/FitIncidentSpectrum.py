@@ -142,7 +142,7 @@ class FitIncidentSpectrum(PythonAlgorithm):
     def fit_cubic_spline_with_gauss_conv(self, x_fit, y_fit, x, n_gouss=39, sigma=3.0):
         # Fit with Cubic Spline using a Gaussian Convolution to get weights
         def moving_average(y, n=n_gouss, sig=sigma):
-            from scipy.signal import gaussian
+            from scipy.signal.windows import gaussian
 
             b = gaussian(n, sig)
             average = ndimage.filters.convolve1d(y, b / b.sum())

@@ -18,9 +18,13 @@ ALCPeakFittingView::ALCPeakFittingView(QWidget *widget) : m_widget(widget), m_ui
 
 ALCPeakFittingView::~ALCPeakFittingView() = default;
 
-IFunction_const_sptr ALCPeakFittingView::function(QString index) const { return m_ui.peaks->getFunctionByIndex(index); }
+IFunction_const_sptr ALCPeakFittingView::function(std::string const &index) const {
+  return m_ui.peaks->getFunctionByIndex(index);
+}
 
-boost::optional<QString> ALCPeakFittingView::currentFunctionIndex() const { return m_ui.peaks->currentFunctionIndex(); }
+std::optional<std::string> ALCPeakFittingView::currentFunctionIndex() const {
+  return m_ui.peaks->currentFunctionIndex();
+}
 
 IPeakFunction_const_sptr ALCPeakFittingView::peakPicker() const { return m_peakPicker->peak(); }
 
@@ -79,7 +83,7 @@ void ALCPeakFittingView::setFunction(const IFunction_const_sptr &newFunction) {
     size_t nParams = newFunction->nParams();
     for (size_t i = 0; i < nParams; i++) {
 
-      QString name = QString::fromStdString(newFunction->parameterName(i));
+      auto name = newFunction->parameterName(i);
       double value = newFunction->getParameter(i);
       double error = newFunction->getError(i);
 
@@ -91,7 +95,7 @@ void ALCPeakFittingView::setFunction(const IFunction_const_sptr &newFunction) {
   }
 }
 
-void ALCPeakFittingView::setParameter(const QString &funcIndex, const QString &paramName, double value) {
+void ALCPeakFittingView::setParameter(std::string const &funcIndex, std::string const &paramName, double value) {
   m_ui.peaks->setParameter(funcIndex + paramName, value);
 }
 

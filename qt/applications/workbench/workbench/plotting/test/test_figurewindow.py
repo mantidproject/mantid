@@ -13,7 +13,7 @@ from mantid import plots  # noqa: F401  # need mantid projection
 from unittest.mock import Mock, patch
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.utils.qt.testing import start_qapplication
-from workbench.plotting.figurewindow import FigureWindow
+from workbench.plotting.figurewindow import FigureWindow, _validate_workspaces
 
 matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
@@ -50,6 +50,13 @@ class Test(unittest.TestCase):
     def test_drag_and_drop_wont_plot_a_single_binned_workspace(self):
         ax = self._drop_workspace("single_bin_ws")
         self.assertEqual(1, len(ax.lines))
+
+    def test_validate_workspaces_does_not_raise_keyerror_for_non_existent_workspace(self):
+        try:
+            result = _validate_workspaces(["non_existent_workspace", "second_non_existent_workspace"])
+            self.assertEqual(result, [False, False])
+        except KeyError:
+            self.fail("KeyError was raised for non-existent workspaces.")
 
     def _drop_workspace(self, ws_name: str):
         ax = self.fig.get_axes()[1]

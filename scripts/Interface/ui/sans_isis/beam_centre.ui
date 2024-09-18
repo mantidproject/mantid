@@ -45,13 +45,6 @@
          <item row="3" column="1">
           <widget class="QLineEdit" name="front_pos_2_line_edit"/>
          </item>
-         <item row="4" column="0">
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>Detector</string>
-           </property>
-          </widget>
-         </item>
          <item row="2" column="0">
           <widget class="QLabel" name="front_centre_label">
            <property name="text">
@@ -62,20 +55,20 @@
          <item row="1" column="1">
           <widget class="QLineEdit" name="rear_pos_2_line_edit"/>
          </item>
-         <item row="5" column="0">
-          <widget class="QComboBox" name="component_combo_box"/>
-         </item>
-         <item row="4" column="1">
-          <widget class="QCheckBox" name="update_rear_check_box">
+         <item row="4" column="0" colspan="2">
+          <widget class="QRadioButton" name="update_rear_radio">
            <property name="text">
-            <string>Use Rear Centre in Reduction</string>
+            <string>Find Rear Centre</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
-         <item row="5" column="1">
-          <widget class="QCheckBox" name="update_front_check_box">
+         <item row="5" column="0" colspan="2">
+          <widget class="QRadioButton" name="update_front_radio">
            <property name="text">
-            <string>Use Front Centre in Reduction</string>
+            <string>Find Front Centre</string>
            </property>
           </widget>
          </item>
@@ -322,9 +315,8 @@
   <tabstop>rear_pos_2_line_edit</tabstop>
   <tabstop>front_pos_1_line_edit</tabstop>
   <tabstop>front_pos_2_line_edit</tabstop>
-  <tabstop>component_combo_box</tabstop>
-  <tabstop>update_rear_check_box</tabstop>
-  <tabstop>update_front_check_box</tabstop>
+  <tabstop>update_rear_radio</tabstop>
+  <tabstop>update_front_radio</tabstop>
   <tabstop>r_min_line_edit</tabstop>
   <tabstop>r_max_line_edit</tabstop>
   <tabstop>q_min_line_edit</tabstop>

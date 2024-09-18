@@ -10,7 +10,6 @@ import mantid.simpleapi as sapi
 
 
 class EnggVanadiumCorrectionsTest(unittest.TestCase):
-
     _data_ws = None
     _van_integ_tbl = None
     _van_curves_ws = None
@@ -45,14 +44,14 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
         """
 
         # absolutely wrong properties passed
-        self.assertRaises(RuntimeError, sapi.EnggVanadiumCorrections, File="foo", Bank="1")
+        self.assertRaises(TypeError, sapi.EnggVanadiumCorrections, File="foo", Bank="1")
 
         # Wrong (mispelled) Workspace property
-        self.assertRaises(RuntimeError, sapi.EnggVanadiumCorrections, InputWorkspace="anything_goes")
+        self.assertRaises(TypeError, sapi.EnggVanadiumCorrections, InputWorkspace="anything_goes")
 
         # mispelled VanadiumWorkspace
         self.assertRaises(
-            RuntimeError,
+            TypeError,
             sapi.EnggVanadiumCorrections,
             VanWorkspace=self.__class__._data_ws,
             IntegrationWorkspace=self.__class__._van_integ_tbl,
@@ -61,7 +60,7 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
 
         # mispelled CurvesWorkspace
         self.assertRaises(
-            RuntimeError,
+            TypeError,
             sapi.EnggVanadiumCorrections,
             IntegrationWorkspace=self.__class__._van_integ_tbl,
             CurveWorkspace=self.__class__._van_curves_ws,
@@ -69,7 +68,7 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
 
         # mispelled IntegrationWorkspace
         self.assertRaises(
-            RuntimeError,
+            TypeError,
             sapi.EnggVanadiumCorrections,
             IntegWorkspace=self.__class__._van_integ_tbl,
             CurvesWorkspace=self.__class__._van_curves_ws,
@@ -77,7 +76,7 @@ class EnggVanadiumCorrectionsTest(unittest.TestCase):
 
         # mispelled SplineBreakPoints
         self.assertRaises(
-            RuntimeError,
+            TypeError,
             sapi.EnggVanadiumCorrections,
             BreakPoints=self.__class__._van_integ_tbl,
             IntegrationWorkspace=self.__class__._van_integ_tbl,

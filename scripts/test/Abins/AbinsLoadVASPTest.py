@@ -20,7 +20,7 @@ class AbinsLoadVASPTest(unittest.TestCase, abins.input.Tester):
             bad_vasp_reader = VASPLoader(input_ab_initio_filename="NonExistingFile.txt")
             bad_vasp_reader.read_vibrational_or_phonon_data()
 
-        with self.assertRaises(ValueError):
+        with self.assertRaises(TypeError):
             _ = VASPLoader(input_ab_initio_filename=1)
 
     # Not a real vibration calc; check the appropriate error is raised

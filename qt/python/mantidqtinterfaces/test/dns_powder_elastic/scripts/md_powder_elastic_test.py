@@ -84,7 +84,7 @@ class MDPowderElasticTest(unittest.TestCase):
         self.assertAlmostEqual(error[0, 0, 0], 170199.7651184383)
 
     @staticmethod
-    @patch("mantidqtinterfaces.dns_powder_elastic.scripts." "md_powder_elastic.load_binned")
+    @patch("mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic.load_binned")
     def test_load_all(mock_load_binned):
         data_dict = get_fake_elastic_data_dic()
         load_all(data_dict, [0, 1, 2], normalize_to="monitor")
@@ -98,13 +98,13 @@ class MDPowderElasticTest(unittest.TestCase):
         ]
         mock_load_binned.assert_has_calls(calls)
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.scripts." "md_powder_elastic.mtd")
-    @patch("mantidqtinterfaces.dns_powder_elastic.scripts." "md_powder_elastic.BinMD")
-    @patch("mantidqtinterfaces.dns_powder_elastic.scripts." "md_powder_elastic.LoadDNSSCD")
+    @patch("mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic.mtd")
+    @patch("mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic.BinMD")
+    @patch("mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic.LoadDNSSCD")
     def test_load_binned(self, mock_load, mock_bin_md, mock_mtd):
-        test_v = load_binned("knso_x_nsf", [0, 1, 2], "C:/data", range(554574, 554578, 2), "monitor")
+        test_v = load_binned("knso_x_nsf", [0, 1, 2], "C:/data_******.d_dat", range(554574, 554578, 2), "monitor")
         mock_load.assert_called_once_with(
-            "C:/data_554574.d_dat," " C:/data_554576.d_dat",
+            "C:/data_554574.d_dat, C:/data_554576.d_dat",
             OutputWorkspace="knso_x_nsf",
             NormalizationWorkspace="knso_x_nsf_norm",
             Normalization="monitor",

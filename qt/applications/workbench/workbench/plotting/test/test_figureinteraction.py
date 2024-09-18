@@ -87,6 +87,7 @@ class FigureInteractionTest(unittest.TestCase):
             call("resize_event", interactor.mpl_redraw_annotations),
             call("figure_leave_event", interactor.on_leave),
             call("scroll_event", interactor.on_scroll),
+            call("key_press_event", interactor.on_key_press),
         ]
         fig_manager.canvas.mpl_connect.assert_has_calls(expected_call)
         self.assertEqual(len(expected_call), fig_manager.canvas.mpl_connect.call_count)
@@ -647,6 +648,35 @@ class FigureInteractionTest(unittest.TestCase):
         interactor.on_mouse_button_release(mouse_event)
         interactor._add_all_marker_annotations.assert_called_once()
 
+    def test_open_double_click_dialog_called_on_mouse_release(self):
+        """
+        The logic for opening dialogs by double-clicking is inside the mouse release callback.
+        """
+        fig_manager = self._create_mock_fig_manager_to_accept_left_click()
+        fig_manager.fit_browser.tool = None
+        interactor = FigureInteraction(fig_manager)
+        mouse_event = self._create_mock_double_left_click()
+
+        interactor._open_double_click_dialog = MagicMock()
+        interactor.on_mouse_button_press(mouse_event)
+        interactor.on_mouse_button_release(event=MagicMock())
+
+        interactor._open_double_click_dialog.assert_called_once()
+
+    def test_open_double_click_dialog_not_called_on_mouse_release_when_no_double_click(self):
+        """
+        The function that opens the settings dialogs after a double click should not
+        be called if there wasn't a double click.
+        """
+        fig_manager = self._create_mock_fig_manager_to_accept_left_click()
+        fig_manager.fit_browser.tool = None
+        interactor = FigureInteraction(fig_manager)
+
+        interactor._open_double_click_dialog = MagicMock()
+        interactor.on_mouse_button_release(event=MagicMock())
+
+        interactor._open_double_click_dialog.assert_not_called()
+
     def test_double_left_click_calls_show_axis_editor(self):
         fig_manager = self._create_mock_fig_manager_to_accept_left_click()
         fig_manager.fit_browser.tool = None
@@ -655,6 +685,7 @@ class FigureInteractionTest(unittest.TestCase):
 
         interactor._show_axis_editor = MagicMock()
         interactor.on_mouse_button_press(mouse_event)
+        interactor.on_mouse_button_release(event=MagicMock())
         interactor._show_axis_editor.assert_called_once()
 
     @mock.patch("workbench.plotting.figureinteraction.XAxisEditor")
@@ -676,7 +707,7 @@ class FigureInteractionTest(unittest.TestCase):
         mock_y_editor.assert_called_once()
 
     @mock.patch("workbench.plotting.figureinteraction.XAxisEditor")
-    def test_click_x_axes_tick_lable_launches_x_axes_editor(self, mock_x_editor):
+    def test_click_x_axes_tick_label_launches_x_axes_editor(self, mock_x_editor):
         self.interactor.canvas.figure = MagicMock()
         axes = self._create_axes_for_axes_editor_test(mouse_over="xaxis_tick")
         self.interactor.canvas.figure.get_axes.return_value = axes
@@ -685,13 +716,56 @@ class FigureInteractionTest(unittest.TestCase):
         mock_x_editor.assert_called_once()
 
     @mock.patch("workbench.plotting.figureinteraction.YAxisEditor")
-    def test_click_y_axes_tick_lable_launches_y_axes_editor(self, mock_y_editor):
+    def test_click_y_axes_tick_label_launches_y_axes_editor(self, mock_y_editor):
         self.interactor.canvas.figure = MagicMock()
         axes = self._create_axes_for_axes_editor_test(mouse_over="yaxis_tick")
         self.interactor.canvas.figure.get_axes.return_value = axes
         self.interactor._show_axis_editor(event=MagicMock())
 
         mock_y_editor.assert_called_once()
+
+    def test_keyboard_shortcut_switch_x_scale(self):
+        key_press_event = self._create_mock_key_press_event("k")
+        key_press_event.inaxes.get_xscale.return_value = "linear"
+        key_press_event.inaxes.get_yscale.return_value = "log"
+        key_press_event.inaxes.get_xlim.return_value = (0, 100)
+        key_press_event.inaxes.get_ylim.return_value = (5, 10)
+        key_press_event.inaxes.get_lines.return_value = ["fake_line"]
+        fig_manager = MagicMock()
+        fig_manager.canvas = MagicMock()
+        interactor = FigureInteraction(fig_manager)
+        interactor.on_key_press(key_press_event)
+        key_press_event.inaxes.set_xscale.assert_called_once_with("log")
+        key_press_event.inaxes.set_yscale.assert_called_once_with("log")
+        key_press_event.inaxes.set_xlim.assert_called_once_with((0, 100))
+        key_press_event.inaxes.set_ylim.assert_called_once_with((5, 10))
+
+    def test_keyboard_shortcut_switch_y_scale(self):
+        key_press_event = self._create_mock_key_press_event("l")
+        key_press_event.inaxes.get_xscale.return_value = "linear"
+        key_press_event.inaxes.get_yscale.return_value = "log"
+        key_press_event.inaxes.get_xlim.return_value = (0, 100)
+        key_press_event.inaxes.get_ylim.return_value = (5, 10)
+        key_press_event.inaxes.get_lines.return_value = ["fake_line"]
+        fig_manager = MagicMock()
+        fig_manager.canvas = MagicMock()
+        interactor = FigureInteraction(fig_manager)
+        interactor.on_key_press(key_press_event)
+        key_press_event.inaxes.set_xscale.assert_called_once_with("linear")
+        key_press_event.inaxes.set_yscale.assert_called_once_with("linear")
+        key_press_event.inaxes.set_xlim.assert_called_once_with((0, 100))
+        key_press_event.inaxes.set_ylim.assert_called_once_with((5, 10))
+
+    def test_legend_not_picked_up_from_scroll_event(self):
+        event = self._create_mock_scroll_event(button="up")
+        type(event.inaxes).lines = PropertyMock(return_value=["fake_line"])
+        legend = MagicMock()
+        legend.get_draggable.return_value = True
+        legend.contains.return_value = True
+        event.inaxes.axes.get_legend.return_value = legend
+        self.interactor.on_scroll(event)
+        calls = [call(False, False, "loc"), call(True, False, "loc")]
+        legend.set_draggable.assert_has_calls(calls)
 
     # Private methods
     def _create_mock_fig_manager_to_accept_right_click(self):
@@ -725,11 +799,21 @@ class FigureInteractionTest(unittest.TestCase):
         type(mouse_event).button = PropertyMock(return_value=4)
         return mouse_event
 
-    def _create_mock_double_left_click(self):
+    def _create_mock_double_left_click(self) -> object:
         mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections=[], creation_args=[{}]))
         type(mouse_event).button = PropertyMock(return_value=1)
         type(mouse_event).dblclick = PropertyMock(return_value=True)
         return mouse_event
+
+    def _create_mock_key_press_event(self, key):
+        key_press_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections=[], creation_args=[{}]))
+        type(key_press_event).key = PropertyMock(return_value=key)
+        return key_press_event
+
+    def _create_mock_scroll_event(self, button):
+        event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections=[], creation_args=[{}]))
+        type(event).button = MagicMock(return_value=button)
+        return event
 
     def _create_axes_for_axes_editor_test(self, mouse_over: str):
         ax = MagicMock()

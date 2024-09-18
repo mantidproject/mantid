@@ -267,14 +267,14 @@ void MeshObject::getBoundingBox(double &xmax, double &ymax, double &zmax, double
 
 /**
  * Find solid angle of object wrt the observer.
- * @param observer :: point to measure solid angle from
+ * @param params :: point to measure solid angle from, and number of cylinder slices.
  * @return :: estimate of solid angle of object.
  */
-double MeshObject::solidAngle(const Kernel::V3D &observer) const {
+double MeshObject::solidAngle(const SolidAngleParams &params) const {
   double solidAngleSum(0), solidAngleNegativeSum(0);
   Kernel::V3D vertex1, vertex2, vertex3;
   for (size_t i = 0; this->getTriangle(i, vertex1, vertex2, vertex3); ++i) {
-    double sa = MeshObjectCommon::getTriangleSolidAngle(vertex1, vertex2, vertex3, observer);
+    double sa = MeshObjectCommon::getTriangleSolidAngle(vertex1, vertex2, vertex3, params.observer());
     if (sa > 0.0) {
       solidAngleSum += sa;
     } else {
@@ -294,17 +294,17 @@ double MeshObject::solidAngle(const Kernel::V3D &observer) const {
 /**
  * Find solid angle of object wrt the observer with a scaleFactor for the
  * object.
- * @param observer :: point to measure solid angle from
+ * @param params :: point to measure solid angle from, and number of cylinder slices
  * @param scaleFactor :: Kernel::V3D giving scaling of the object
  * @return :: estimate of solid angle of object.
  */
-double MeshObject::solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const {
+double MeshObject::solidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const {
   std::vector<Kernel::V3D> scaledVertices;
   scaledVertices.reserve(m_vertices.size());
   std::transform(m_vertices.cbegin(), m_vertices.cend(), std::back_inserter(scaledVertices),
                  [&scaleFactor](const auto &vertex) { return scaleFactor * vertex; });
   MeshObject meshScaled(m_triangles, scaledVertices, m_material);
-  return meshScaled.solidAngle(observer);
+  return meshScaled.solidAngle(params);
 }
 
 /**
@@ -374,8 +374,8 @@ int MeshObject::getPointInObject(Kernel::V3D &point) const {
  * @param maxAttempts The maximum number of attempts at generating a point
  * @return The generated point
  */
-boost::optional<Kernel::V3D> MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                               const size_t maxAttempts) const {
+std::optional<Kernel::V3D> MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                             const size_t maxAttempts) const {
   const auto &bbox = getBoundingBox();
   if (bbox.isNull()) {
     throw std::runtime_error("Object::generatePointInObject() - Invalid "
@@ -394,9 +394,9 @@ boost::optional<Kernel::V3D> MeshObject::generatePointInObject(Kernel::PseudoRan
  * @param maxAttempts The maximum number of attempts at generating a point
  * @return The generated point
  */
-boost::optional<Kernel::V3D> MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                               const BoundingBox &activeRegion,
-                                                               const size_t maxAttempts) const {
+std::optional<Kernel::V3D> MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                             const BoundingBox &activeRegion,
+                                                             const size_t maxAttempts) const {
 
   const auto point = RandomPoint::bounded(*this, rng, activeRegion, maxAttempts);
 

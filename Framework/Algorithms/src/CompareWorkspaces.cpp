@@ -78,13 +78,13 @@ int compareEventLists(Kernel::Logger &logger, const EventList &el1, const EventL
       diffpulse = true;
       ++numdiffpulse;
     }
-    if (fabs(e1.tof() - e2.tof()) > tolTof) {
+    if (std::abs(e1.tof() - e2.tof()) > tolTof) {
       difftof = true;
       ++numdifftof;
     }
     if (diffpulse && difftof)
       ++numdiffboth;
-    if (fabs(e1.weight() - e2.weight()) > tolWeight) {
+    if (std::abs(e1.weight() - e2.weight()) > tolWeight) {
       diffweight = true;
       ++numdiffweight;
     }
@@ -122,6 +122,9 @@ void CompareWorkspaces::init() {
 
   declareProperty("Tolerance", 1e-10, "The maximum amount by which values may differ between the workspaces.");
 
+  declareProperty("CheckUncertainty", true,
+                  "Whether to check that the y-value uncertainties (E) match "
+                  "(only for matrix workspaces). ");
   declareProperty("CheckType", true,
                   "Whether to check that the data types "
                   "(Workspace2D vs EventWorkspace) match.");
@@ -167,6 +170,17 @@ void CompareWorkspaces::exec() {
 
   if (g_log.is(Logger::Priority::PRIO_DEBUG))
     m_parallelComparison = false;
+
+  double const tolerance = getProperty("Tolerance");
+  if (getProperty("ToleranceRelErr")) {
+    this->m_compare = [tolerance](double const x1, double const x2) -> bool {
+      return CompareWorkspaces::withinRelativeTolerance(x1, x2, tolerance);
+    };
+  } else {
+    this->m_compare = [tolerance](double const x1, double const x2) -> bool {
+      return CompareWorkspaces::withinAbsoluteTolerance(x1, x2, tolerance);
+    };
+  }
 
   this->doComparison();
 
@@ -265,7 +279,7 @@ void CompareWorkspaces::processGroups(const std::shared_ptr<const API::Workspace
     checker->setPropertyValue("Workspace1", namesOne[i]);
     checker->setPropertyValue("Workspace2", namesTwo[i]);
     for (size_t j = 0; j < numNonDefault; ++j) {
-      Property *p = nonDefaultProps[j];
+      Property const *p = nonDefaultProps[j];
       checker->setPropertyValue(p->name(), p->value());
     }
     checker->execute();
@@ -591,13 +605,20 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
                                   const API::MatrixWorkspace_const_sptr &ws2) {
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
-  const size_t numBins = ws1->blocksize();
+  bool raggedWorkspace{false};
+  size_t numBins(0UL);
+  try {
+    numBins = ws1->blocksize();
+  } catch (std::length_error &) {
+    raggedWorkspace = true;
+  }
   const bool histogram = ws1->isHistogramData();
   const bool checkAllData = getProperty("CheckAllData");
-  const bool RelErr = getProperty("ToleranceRelErr");
+  const bool checkError = getProperty("CheckUncertainty");
 
   // First check that the workspace are the same size
-  if (numHists != ws2->getNumberHistograms() || numBins != ws2->blocksize()) {
+  if (numHists != ws2->getNumberHistograms() ||
+      (raggedWorkspace ? !ws2->isRaggedWorkspace() : numBins != ws2->blocksize())) {
     recordMismatch("Size mismatch");
     return false;
   }
@@ -608,8 +629,8 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
     return false;
   }
 
-  const double tolerance = getProperty("Tolerance");
   bool resultBool = true;
+  bool logDebug = g_log.is(Logger::Priority::PRIO_DEBUG);
 
   // Now check the data itself
   PARALLEL_FOR_IF(m_parallelComparison && ws1->threadSafe() && ws2->threadSafe())
@@ -627,31 +648,42 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
       const auto &Y2 = ws2->y(i);
       const auto &E2 = ws2->e(i);
 
-      for (int j = 0; j < static_cast<int>(numBins); ++j) {
-        bool err;
-        if (RelErr) {
-          err = (relErr(X1[j], X2[j], tolerance) || relErr(Y1[j], Y2[j], tolerance) || relErr(E1[j], E2[j], tolerance));
-        } else
-          err = (std::fabs(X1[j] - X2[j]) > tolerance || std::fabs(Y1[j] - Y2[j]) > tolerance ||
-                 std::fabs(E1[j] - E2[j]) > tolerance);
+      if (Y1.size() != Y2.size()) {
+        g_log.debug() << "Spectra " << i << " have different lenghts, " << X1.size() << " vs " << X2.size() << "\n";
+        recordMismatch("Mismatch in spectra length");
+        PARALLEL_CRITICAL(resultBool)
+        resultBool = false;
+      } else {
 
-        if (err) {
-          g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
-          g_log.debug() << " Dataset #1 (X,Y,E) = (" << X1[j] << "," << Y1[j] << "," << E1[j] << ")\n";
-          g_log.debug() << " Dataset #2 (X,Y,E) = (" << X2[j] << "," << Y2[j] << "," << E2[j] << ")\n";
-          g_log.debug() << " Difference (X,Y,E) = (" << std::fabs(X1[j] - X2[j]) << "," << std::fabs(Y1[j] - Y2[j])
-                        << "," << std::fabs(E1[j] - E2[j]) << ")\n";
+        for (int j = 0; j < static_cast<int>(Y1.size()); ++j) {
+          bool err = (!m_compare(X1[j], X2[j]) || !m_compare(Y1[j], Y2[j]));
+          // if CheckUncertianty flag is set, also compare the uncertainties
+          // only need to do this if not already a mismatch (err == false)
+          // then, there is a mismatch only if the uncertainties don't match
+          if (checkError && !err)
+            err = !m_compare(E1[j], E2[j]);
+          if (err) {
+            if (logDebug) {
+              g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
+              g_log.debug() << " Dataset #1 (X,Y,E) = (" << X1[j] << "," << Y1[j] << "," << E1[j] << ")\n";
+              g_log.debug() << " Dataset #2 (X,Y,E) = (" << X2[j] << "," << Y2[j] << "," << E2[j] << ")\n";
+              g_log.debug() << " Difference (X,Y,E) = (" << std::abs(X1[j] - X2[j]) << "," << std::abs(Y1[j] - Y2[j])
+                            << "," << std::abs(E1[j] - E2[j]) << ")\n";
+            }
+            PARALLEL_CRITICAL(resultBool)
+            resultBool = false;
+          }
+        }
+
+        // Extra one for histogram data
+        if (histogram && !m_compare(X1.back(), X2.back())) {
+          if (logDebug) {
+            g_log.debug() << " Data ranges mismatch for spectra N: (" << i << ")\n";
+            g_log.debug() << " Last bin ranges (X1_end vs X2_end) = (" << X1.back() << "," << X2.back() << ")\n";
+          }
           PARALLEL_CRITICAL(resultBool)
           resultBool = false;
         }
-      }
-
-      // Extra one for histogram data
-      if (histogram && std::fabs(X1.back() - X2.back()) > tolerance) {
-        g_log.debug() << " Data ranges mismatch for spectra N: (" << i << ")\n";
-        g_log.debug() << " Last bin ranges (X1_end vs X2_end) = (" << X1.back() << "," << X2.back() << ")\n";
-        PARALLEL_CRITICAL(resultBool)
-        resultBool = false;
       }
     }
     PARALLEL_END_INTERRUPT_REGION
@@ -660,7 +692,7 @@ bool CompareWorkspaces::checkData(const API::MatrixWorkspace_const_sptr &ws1,
 
   if (!resultBool)
     recordMismatch("Data mismatch");
-  // If all is well, return true
+  // return result
   return resultBool;
 }
 
@@ -928,7 +960,7 @@ bool CompareWorkspaces::checkRunProperties(const API::Run &run1, const API::Run 
     return false;
   } else {
     // Sort logs by name before one-by-one comparison
-    auto compareNames = [](Kernel::Property *p1, Kernel::Property *p2) { return p1->name() < p2->name(); };
+    auto compareNames = [](Kernel::Property const *p1, Kernel::Property const *p2) { return p1->name() < p2->name(); };
     std::sort(ws1logs.begin(), ws1logs.end(), compareNames);
     std::sort(ws2logs.begin(), ws2logs.end(), compareNames);
     for (size_t i = 0; i < ws1logs.size(); ++i) {
@@ -1016,7 +1048,6 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
     tws2 = std::dynamic_pointer_cast<PeaksWorkspace>(tmp2);
   }
 
-  const double tolerance = getProperty("Tolerance");
   const bool isRelErr = getProperty("ToleranceRelErr");
   for (int i = 0; i < tws1->getNumberPeaks(); i++) {
     const Peak &peak1 = tws1->getPeak(i);
@@ -1081,17 +1112,13 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
       }
       bool mismatch = false;
       if (isRelErr) {
-        if (relErr(s1, s2, tolerance)) {
-          mismatch = true;
-        }
-      } else if (std::fabs(s1 - s2) > tolerance) {
-        mismatch = true;
-      } else if (std::fabs(v1[0] - v2[0]) > tolerance) {
-        mismatch = true;
-      } else if (std::fabs(v1[1] - v2[1]) > tolerance) {
-        mismatch = true;
-      } else if (std::fabs(v1[2] - v2[2]) > tolerance) {
-        mismatch = true;
+        mismatch = !m_compare(s1, s2);
+        // Q: why should we not also compare the vectors?
+      } else {
+        mismatch = !m_compare(s1, s2) ||       //
+                   !m_compare(v1[0], v2[0]) || //
+                   !m_compare(v1[1], v2[1]) || //
+                   !m_compare(v1[2], v2[2]);   //
       }
       if (mismatch) {
         g_log.notice(name);
@@ -1197,11 +1224,15 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(const LeanElasticPeaksWorks
         g_log.information() << "Column " << name << " is not compared\n";
       }
       bool mismatch = false;
+      // Q: why does it not perform the user-specified operation for QLab and QSample?
+      // if this is not necessary, then
+      //   bool mismatch = !m_compare(s1, s2)
+      // can replace this if/else, and isRelErr and tolerance can be deleted
       if (isRelErr && name != "QLab" && name != "QSample") {
-        if (relErr(s1, s2, tolerance)) {
+        if (!withinRelativeTolerance(s1, s2, tolerance)) {
           mismatch = true;
         }
-      } else if (std::fabs(s1 - s2) > tolerance) {
+      } else if (!withinAbsoluteTolerance(s1, s2, tolerance)) {
         mismatch = true;
       }
       if (mismatch) {
@@ -1251,27 +1282,21 @@ void CompareWorkspaces::doTableComparison(const API::ITableWorkspace_const_sptr 
   }
 
   const bool checkAllData = getProperty("CheckAllData");
-  const bool relErr = getProperty("ToleranceRelErr");
+  const bool isRelErr = getProperty("ToleranceRelErr");
   const double tolerance = getProperty("Tolerance");
-  bool mismatch = false;
+  bool mismatch;
   for (size_t i = 0; i < numCols; ++i) {
     const auto c1 = tws1->getColumn(i);
     const auto c2 = tws2->getColumn(i);
 
-    if (relErr) {
-      if (!c1->equalsRelErr(*c2, tolerance)) {
-        mismatch = true;
-      }
+    if (isRelErr) {
+      mismatch = !c1->equalsRelErr(*c2, tolerance);
     } else {
-
-      if (!c1->equals(*c2, tolerance)) {
-        mismatch = true;
-      }
+      mismatch = !c1->equals(*c2, tolerance);
     }
     if (mismatch) {
       g_log.debug() << "Table data mismatch at column " << i << "\n";
       recordMismatch("Table data mismatch");
-      mismatch = false;
       if (!checkAllData) {
         return;
       }
@@ -1325,26 +1350,45 @@ void CompareWorkspaces::recordMismatch(const std::string &msg, std::string ws1, 
 }
 
 //------------------------------------------------------------------------------------------------
-/** Function which calculates relative error between two values and analyses if
-this error is within the limits
-* requested. When the absolute value of the difference is smaller then the value
-of the error requested,
-* absolute error is used instead of relative error.
+/** Function which calculates absolute error between two values and analyses if
+this error is within the limits requested.
 
-@param x1       -- first value to check difference
-@param x2       -- second value to check difference
-@param errorVal -- the value of the error, to check against. Should  be large
-then 0
+@param x1    -- first value to check difference
+@param x2    -- second value to check difference
+@param atol  -- the tolerance of the comparison. Must be nonnegative
 
-@returns true if error or false if the value is within the limits requested
+@returns true if absolute difference is within the tolerance; false otherwise
 */
-bool CompareWorkspaces::relErr(double x1, double x2, double errorVal) const {
-  double num = std::fabs(x1 - x2);
-  // how to treat x1<0 and x2 > 0 ?  probably this way
-  double den = 0.5 * (std::fabs(x1) + std::fabs(x2));
-  if (den < errorVal)
-    return (num > errorVal);
+bool CompareWorkspaces::withinAbsoluteTolerance(double const x1, double const x2, double const atol) {
+  // NOTE !(|x1-x2| > atol) is not the same as |x1-x2| <= atol
+  return !(std::abs(x1 - x2) > atol);
+}
 
-  return (num / den > errorVal);
+//------------------------------------------------------------------------------------------------
+/** Function which calculates relative error between two values and analyses if
+this error is within the limits requested.
+
+@param x1    -- first value to check difference
+@param x2    -- second value to check difference
+@param rtol  -- the tolerance of the comparison. Must be nonnegative
+
+@returns true if relative difference is within the tolerance; false otherwise
+@returns true if error or false if the relative value is within the limits requested
+*/
+bool CompareWorkspaces::withinRelativeTolerance(double const x1, double const x2, double const rtol) {
+  // calculate difference
+  double const num = std::abs(x1 - x2);
+  // return early if the values are equal
+  if (num == 0.0)
+    return true;
+  // create the average magnitude for comparison
+  double const den = 0.5 * (std::abs(x1) + std::abs(x2));
+  // return early, possibly avoids a multiplication
+  // NOTE if den<1, then divsion will only make num larger
+  // NOTE if den<1 but num<=rtol, we cannot conclude anything
+  if (den <= 1.0 && num > rtol)
+    return false;
+  // NOTE !(num > rtol*den) is not the same as (num <= rtol*den)
+  return !(num > (rtol * den));
 }
 } // namespace Mantid::Algorithms

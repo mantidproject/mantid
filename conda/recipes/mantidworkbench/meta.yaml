@@ -18,13 +18,14 @@ build:
 requirements:
   build:
     - {{ compiler("cxx") }}
-    - ninja  # [unix]
-    - cmake
+    - ninja  # [osx or linux]
+    - cmake {{ cmake }}
     - git
     - python {{ python }}                    # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
     - setuptools                             # [build_platform != target_platform]
     - numpy {{ numpy }}                      # [build_platform != target_platform]
+    - pyqt {{ pyqt }}                        # [build_platform != target_platform]
     - {{ cdt('mesa-libgl-devel') }}  # [linux]
     - {{ cdt('mesa-dri-drivers') }}  # [linux]
     - {{ cdt('libxxf86vm') }}  # [linux]
@@ -43,6 +44,9 @@ requirements:
     - python.app  # [osx]
     - qtconsole {{ qtconsole }}
     - {{ pin_compatible("setuptools", max_pin="x.x") }}
+    {% if environ.get('INCLUDE_MANTIDDOCS', 'True') != 'False' %}
+    - mantiddocs {{ version }}
+    {% endif %}
 
 test:
   imports:

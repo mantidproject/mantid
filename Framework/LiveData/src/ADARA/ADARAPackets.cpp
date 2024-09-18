@@ -365,7 +365,7 @@ RunInfoPkt::RunInfoPkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
 
 TransCompletePkt::TransCompletePkt(const uint8_t *data, uint32_t len) : Packet(data, len) {
   uint32_t size = *reinterpret_cast<const uint32_t *>(payload());
-  const char *reason = reinterpret_cast<const char *>(payload()) + sizeof(uint32_t);
+  const char *reasonStr = reinterpret_cast<const char *>(payload()) + sizeof(uint32_t);
 
   if (m_version == 0x00 && m_payload_len < sizeof(uint32_t))
     throw invalid_packet("TransComplete V0 packet is too short");
@@ -383,7 +383,7 @@ TransCompletePkt::TransCompletePkt(const uint8_t *data, uint32_t len) : Packet(d
   /* TODO it would be better to create the string on access
    * rather than object construction; the user may not care.
    */
-  m_reason.assign(reason, size);
+  m_reason.assign(reasonStr, size);
 }
 
 TransCompletePkt::TransCompletePkt(const TransCompletePkt &pkt)
@@ -571,19 +571,19 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
   uint32_t baseSectionOffsetNoBanks = baseSectionOffsetPart1 + baseSectionOffsetPart2;
 
   // Running Section Offset (in number of uint32_t elements)
-  uint32_t sectionOffset = 1; // for Detector Bank Set Count...
+  uint32_t offset = 1; // for Detector Bank Set Count...
 
   for (uint32_t i = 0; i < numSets; i++) {
     // Section Offset
-    m_sectionOffsets[i] = sectionOffset;
+    m_sectionOffsets[i] = offset;
 
-    if (m_version == 0x00 && m_payload_len < ((sectionOffset + baseSectionOffsetNoBanks) * sizeof(uint32_t))) {
+    if (m_version == 0x00 && m_payload_len < ((offset + baseSectionOffsetNoBanks) * sizeof(uint32_t))) {
       std::string msg("DetectorBankSets V0 packet: too short for Set ");
       msg += std::to_string(i + 1);
       msg += " of ";
       msg += std::to_string(numSets);
       msg += " sectionOffset=";
-      msg += std::to_string(sectionOffset);
+      msg += std::to_string(offset);
       msg += " baseSectionOffsetNoBanks=";
       msg += std::to_string(baseSectionOffsetNoBanks);
       msg += " payload_len=";
@@ -594,13 +594,13 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
       m_after_banks_offset = nullptr;
       throw invalid_packet(msg);
     } else if (m_version > ADARA::PacketType::DETECTOR_BANK_SETS_VERSION &&
-               m_payload_len < ((sectionOffset + baseSectionOffsetNoBanks) * sizeof(uint32_t))) {
+               m_payload_len < ((offset + baseSectionOffsetNoBanks) * sizeof(uint32_t))) {
       std::string msg("Newer DetectorBankSets packet: too short for Set ");
       msg += std::to_string(i + 1);
       msg += " of ";
       msg += std::to_string(numSets);
       msg += " sectionOffset=";
-      msg += std::to_string(sectionOffset);
+      msg += std::to_string(offset);
       msg += " baseSectionOffsetNoBanks=";
       msg += std::to_string(baseSectionOffsetNoBanks);
       msg += " payload_len=";
@@ -613,24 +613,24 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
     }
 
     // Offset thru end of Bank Ids list...
-    sectionOffset += baseSectionOffsetPart1 + bankCount(i); // just in time m_sectionOffset delivery...!
+    offset += baseSectionOffsetPart1 + bankCount(i); // just in time m_sectionOffset delivery...!
 
     // Save as "After Banks" Offset...
-    m_after_banks_offset[i] = sectionOffset;
+    m_after_banks_offset[i] = offset;
 
     // Rest of Set Offset...
-    sectionOffset += baseSectionOffsetPart2;
+    offset += baseSectionOffsetPart2;
   }
 
   // Final Payload Size Check... ;-D
-  if (m_version == 0x00 && m_payload_len < (sectionOffset * sizeof(uint32_t))) {
+  if (m_version == 0x00 && m_payload_len < (offset * sizeof(uint32_t))) {
     std::string msg("DetectorBankSets V0 packet: overall too short ");
     msg += " numSets=";
     msg += std::to_string(numSets);
     msg += " baseSectionOffsetNoBanks=";
     msg += std::to_string(baseSectionOffsetNoBanks);
     msg += " final sectionOffset=";
-    msg += std::to_string(sectionOffset);
+    msg += std::to_string(offset);
     msg += " payload_len=";
     msg += std::to_string(m_payload_len);
     delete[] m_sectionOffsets;
@@ -638,15 +638,14 @@ DetectorBankSetsPkt::DetectorBankSetsPkt(const uint8_t *data, uint32_t len)
     delete[] m_after_banks_offset;
     m_after_banks_offset = nullptr;
     throw invalid_packet(msg);
-  } else if (m_version > ADARA::PacketType::DETECTOR_BANK_SETS_VERSION &&
-             m_payload_len < (sectionOffset * sizeof(uint32_t))) {
+  } else if (m_version > ADARA::PacketType::DETECTOR_BANK_SETS_VERSION && m_payload_len < (offset * sizeof(uint32_t))) {
     std::string msg("Newer DetectorBankSets packet: overall too short ");
     msg += " numSets=";
     msg += std::to_string(numSets);
     msg += " baseSectionOffsetNoBanks=";
     msg += std::to_string(baseSectionOffsetNoBanks);
     msg += " final sectionOffset=";
-    msg += std::to_string(sectionOffset);
+    msg += std::to_string(offset);
     msg += " payload_len=";
     msg += std::to_string(m_payload_len);
     delete[] m_sectionOffsets;

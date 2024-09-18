@@ -1,0 +1,1 @@
+- Implemented an alternative input option :ref:`InstrumentDefinitionFile` in :ref:`GenerateGroupingSNSInelastic <algm-GenerateGroupingSNSInelastic>`, selecting the new ``InstrumentDefinitionFile`` option in instrument drop down menu will create a new field allowing users selecting older instrument definition files.

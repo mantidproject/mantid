@@ -1,1 +1,0 @@
-- Add ability to :ref:`SaveDiffCal <algm-SaveDiffCal>` to not supply a ``CalibrationWorkspace``. It can be used in this mode to save the grouping information.

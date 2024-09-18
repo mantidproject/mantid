@@ -9,16 +9,16 @@
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 
-#include <boost/optional.hpp>
+#include <optional>
 
 #include <algorithm>
 #include <numeric>
 #include <tuple>
 
-using boost::none;
-using boost::optional;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::PythonException;
+using std::nullopt;
+using std::optional;
 
 using OptionalTupleDouble = optional<std::tuple<double, double>>;
 
@@ -35,10 +35,10 @@ Python::Object colorsModule() { return Python::NewRef(PyImport_ImportModule("mat
 
 // Factory function for creating a Normalize instance
 // Holds the GIL
-Python::Object createNormalize(OptionalTupleDouble clim = none) {
+Python::Object createNormalize(OptionalTupleDouble clim = std::nullopt) {
   GlobalInterpreterLock lock;
-  if (clim.is_initialized()) {
-    const auto &range = clim.get();
+  if (clim.has_value()) {
+    const auto &range = clim.value();
     return colorsModule().attr("Normalize")(std::get<0>(range), std::get<1>(range));
   } else
     return colorsModule().attr("Normalize")();
@@ -46,10 +46,10 @@ Python::Object createNormalize(OptionalTupleDouble clim = none) {
 
 // Factory function for creating a SymLogNorm instance
 // Holds the GIL
-Python::Object createSymLog(double linthresh, double linscale, OptionalTupleDouble clim = none) {
+Python::Object createSymLog(double linthresh, double linscale, OptionalTupleDouble clim = std::nullopt) {
   GlobalInterpreterLock lock;
-  if (clim.is_initialized()) {
-    const auto &range = clim.get();
+  if (clim.has_value()) {
+    const auto &range = clim.value();
     return colorsModule().attr("SymLogNorm")(linthresh, linscale, std::get<0>(range), std::get<1>(range));
   } else
     return colorsModule().attr("SymLogNorm")(linthresh, linscale);
@@ -57,10 +57,10 @@ Python::Object createSymLog(double linthresh, double linscale, OptionalTupleDoub
 
 // Factory function for creating a SymLogNorm instance
 // Holds the GIL
-Python::Object createPowerNorm(double gamma, OptionalTupleDouble clim = none) {
+Python::Object createPowerNorm(double gamma, OptionalTupleDouble clim = std::nullopt) {
   GlobalInterpreterLock lock;
-  if (clim.is_initialized()) {
-    const auto &range = clim.get();
+  if (clim.has_value()) {
+    const auto &range = clim.value();
     return colorsModule().attr("PowerNorm")(gamma, std::get<0>(range), std::get<1>(range));
   } else {
     return colorsModule().attr("PowerNorm")(gamma);

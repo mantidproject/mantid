@@ -6,11 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <iosfwd>
-
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
+
+#include <iosfwd>
 
 namespace Mantid {
 namespace DataHandling {

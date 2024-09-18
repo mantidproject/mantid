@@ -12,13 +12,14 @@ import os.path as osp
 from os import linesep
 
 # 3rd party imports
-from qtpy.QtCore import Qt, Slot, Signal
-from qtpy.QtWidgets import QVBoxLayout, QWidget
+from qtpy.QtCore import Qt, Slot, Signal, QFileSystemWatcher
+from qtpy.QtWidgets import QVBoxLayout, QWidget, QMessageBox
 
 # local imports
 from mantidqt.widgets.codeeditor.interpreter import PythonFileInterpreter
 from mantidqt.widgets.codeeditor.scriptcompatibility import add_mantid_api_import, mantid_api_import_needed
 from mantidqt.widgets.codeeditor.tab_widget.codeeditor_tab_view import CodeEditorTabWidget
+from mantid.kernel import logger
 
 
 NEW_TAB_TITLE = "New"
@@ -66,6 +67,15 @@ class MultiPythonFileInterpreter(QWidget):
         # setting defaults
         self.confirm_on_save = True
 
+        # Object to monitor file changes
+        self.file_watcher = QFileSystemWatcher()
+        self.file_watcher.fileChanged.connect(self.file_changed_event)
+        # We need to disable/ignore the file monitoring when we want to save the file so
+        # we don't get notified about our own save. Hence we have a counter that keeps
+        # track of events to ignore.
+        self.files_changed_unhandled = {}
+        self.files_that_we_have_changed = {}
+
     def _tab_title_and_tooltip(self, filename):
         """Create labels for the tab title and tooltip from a filename"""
         if filename is None:
@@ -95,6 +105,13 @@ class MultiPythonFileInterpreter(QWidget):
         self.confirm_on_save = config.get("project", "prompt_save_editor_modified", type=bool)
         self.completion_enabled = config.get("Editors", "completion_enabled", type=bool)
         self.on_completion_change()
+
+    def file_changed_event(self, filename):
+        timestamp = osp.getmtime(filename) if osp.exists(filename) else None
+        duplicate_notfication = filename in self.files_changed_unhandled and self.files_changed_unhandled[filename] == timestamp
+        our_modification = filename in self.files_that_we_have_changed and self.files_that_we_have_changed[filename] == timestamp
+        if not duplicate_notfication and not our_modification:
+            self.files_changed_unhandled[filename] = timestamp
 
     @property
     def editor_count(self):
@@ -134,6 +151,8 @@ class MultiPythonFileInterpreter(QWidget):
             # Or the default (0) if this is the very first tab
             current_zoom = self.zoom_level
 
+        self.add_file_to_watcher(filename)
+
         interpreter = PythonFileInterpreter(font, content, filename=filename, parent=self, completion_enabled=self.completion_enabled)
 
         interpreter.editor.zoomTo(current_zoom)
@@ -146,6 +165,7 @@ class MultiPythonFileInterpreter(QWidget):
         interpreter.sig_filename_modified.connect(self.on_filename_modified)
         interpreter.editor.textZoomedIn.connect(self.zoom_in_all_tabs)
         interpreter.editor.textZoomedOut.connect(self.zoom_out_all_tabs)
+        interpreter.sig_focus_in.connect(self.focus_in)
 
         tab_title, tab_tooltip = self._tab_title_and_tooltip(filename)
         tab_idx = self._tabs.addTab(interpreter, tab_title)
@@ -158,6 +178,10 @@ class MultiPythonFileInterpreter(QWidget):
             line_count = content.count(linesep)
             interpreter.editor.setCursorPosition(line_count, 0)
         return tab_idx
+
+    def add_file_to_watcher(self, file):
+        if file is not None and file not in self.file_watcher.files():
+            self.file_watcher.addPath(file)
 
     def abort_current(self):
         """Request that that the current execution be cancelled"""
@@ -202,6 +226,10 @@ class MultiPythonFileInterpreter(QWidget):
 
             widget = self.editor_at(idx)
             filename = self.editor_at(idx).filename
+            if filename in self.file_watcher.files():
+                self.file_watcher.removePath(filename)
+            if filename in self.files_changed_unhandled:
+                self.files_changed_unhandled.pop(filename, None)
             # note: this does not close the widget, that is why we manually close it
             self._tabs.removeTab(idx)
             widget.close()
@@ -311,14 +339,14 @@ class MultiPythonFileInterpreter(QWidget):
         :param filepath: A path to an existing file
         :param startup: Flag for if function is being called on startup
         """
-        with open(filepath, "r") as code_file:
-            content = code_file.read()
+        try:
+            with open(filepath, "r", encoding="utf_8") as code_file:
+                content = code_file.read()
+        except FileNotFoundError:
+            logger.warning(f"Failed to find {filepath}, path does not exist.")
+            return
 
-        matching_index = -1
-        for i in range(self.editor_count):
-            if self.editor_at(i).filename == filepath:
-                matching_index = i
-                break
+        matching_index = self.find_matching_tab(filepath)
 
         # If the file is currently open, select that tab
         if matching_index > -1:
@@ -333,6 +361,24 @@ class MultiPythonFileInterpreter(QWidget):
         for filepath in filepaths:
             self.open_file_in_new_tab(filepath)
 
+    def find_matching_tab(self, file):
+        for i in range(self.editor_count):
+            if self.editor_at(i).filename == file:
+                return i
+        return -1
+
+    def reload_file(self, file):
+        matching_tab_index = self.find_matching_tab(file)
+        if matching_tab_index < 0:
+            self.open_file_in_new_tab(file)
+            return
+
+        with open(file, "r", encoding="utf_8") as code_file:
+            content = code_file.read()
+
+        editor = self.editor_at(matching_tab_index)
+        editor.replace_all_text_no_modified_flag(content)
+
     def plus_button_clicked(self, _):
         """Add a new tab when the plus button is clicked"""
         self.append_new_editor()
@@ -346,19 +392,30 @@ class MultiPythonFileInterpreter(QWidget):
             self.close_tab(0)  # close default empty script
 
     def save_current_file(self):
-        """Save the current file"""
         self.current_editor().save(force_save=True)
+        filename = self.current_editor().filename
+        if not filename:
+            return
+        self.add_file_to_watcher(filename)
+        self.mark_file_change_as_ours(filename)
 
     def save_current_file_as(self):
         previous_filename = self.current_editor().filename
         current_editor_before_saving = self.current_editor()
         saved, filename = self.current_editor().save_as()
-        if saved:
+        if not saved:
+            return
+        self.add_file_to_watcher(filename)
+        if previous_filename != filename:
             self.open_file_in_new_tab(filename)
             tab_index = self._tabs.indexOf(current_editor_before_saving)
             self.close_tab(tab_index)
             if previous_filename:
                 self.sig_file_name_changed.emit(previous_filename, filename)
+        self.mark_file_change_as_ours(filename)
+
+    def mark_file_change_as_ours(self, filename):
+        self.files_that_we_have_changed[filename] = osp.getmtime(filename)
 
     def spaces_to_tabs_current(self):
         self.current_editor().replace_spaces_with_tabs()
@@ -403,3 +460,32 @@ class MultiPythonFileInterpreter(QWidget):
     def on_completion_change(self):
         for idx in range(self.editor_count):
             self.editor_at(idx).setCompletion(self.completion_enabled)
+
+    def focus_in(self, file):
+        self.check_file_for_external_modifications(file)
+
+    def check_file_for_external_modifications(self, file):
+        if file not in self.files_changed_unhandled:
+            return
+
+        self.files_changed_unhandled.pop(file, None)
+        if osp.isfile(file):
+            reload_button = QMessageBox.question(
+                self,
+                "",
+                f"The current file ({file}) has been modified by an external source. \n\nWould you like to reload the file?",
+                buttons=(QMessageBox.Yes | QMessageBox.No),
+                defaultButton=QMessageBox.Yes,
+            )
+            if reload_button == QMessageBox.Yes:
+                self.reload_file(file)
+            else:
+                self.current_editor().mark_as_modified()
+        else:
+            QMessageBox.warning(
+                self,
+                "",
+                f"The current file ({file}) doesn't exist anymore, which is due to an external source deleting or renaming the"
+                + " file. The contents of this tab will remain unchanged, but are unsaved. Saving will recreate the file.",
+            )
+            self.current_editor().mark_as_modified()

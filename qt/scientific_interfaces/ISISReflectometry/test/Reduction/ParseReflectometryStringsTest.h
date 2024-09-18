@@ -173,6 +173,12 @@ public:
     TS_ASSERT_EQUALS(boost::get<RangeInQ>(result), RangeInQ(0.05, 0.02, 0.16));
   }
 
+  void testParseQRangeNegativeQStep() {
+    auto result = parseQRange("0.05", "0.16", "-1");
+    TS_ASSERT_EQUALS(result.which(), asInt(Result::Value));
+    TS_ASSERT_EQUALS(boost::get<RangeInQ>(result), RangeInQ(0.05, -1, 0.16));
+  }
+
   void testParseQRangeInvalidQMin() {
     auto result = parseQRange("bad", "0.16", "0.02");
     std::vector<int> expected = {0};

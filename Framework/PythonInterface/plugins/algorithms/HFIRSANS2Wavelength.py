@@ -12,6 +12,9 @@ class HFIRSANS2Wavelength(PythonAlgorithm):
     def category(self):
         return "SANS\\Wavelength"
 
+    def seeAlso(self):
+        return ["LoadEventAsWorkspace2D"]
+
     def summary(self):
         return "Convert the fake time of flight event workspace into a Workspace2D with units of wavelength"
 

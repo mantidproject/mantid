@@ -15,9 +15,9 @@ using namespace MantidQt::API;
 
 namespace MantidQt::API {
 
-QtJobRunner::QtJobRunner() : QObject(), m_batchAlgoRunner(this) {
+QtJobRunner::QtJobRunner(bool const stopOnFailure) : QObject(), m_batchAlgoRunner(this) {
   qRegisterMetaType<API::IConfiguredAlgorithm_sptr>("MantidQt::API::IConfiguredAlgorithm_sptr");
-  m_batchAlgoRunner.stopOnFailure(false);
+  m_batchAlgoRunner.stopOnFailure(stopOnFailure);
   connectBatchAlgoRunnerSlots();
 }
 
@@ -26,7 +26,7 @@ void QtJobRunner::subscribe(JobRunnerSubscriber *notifyee) { m_notifyee = notify
 void QtJobRunner::clearAlgorithmQueue() { m_batchAlgoRunner.clearQueue(); }
 
 void QtJobRunner::setAlgorithmQueue(std::deque<IConfiguredAlgorithm_sptr> algorithms) {
-  m_batchAlgoRunner.setQueue(algorithms);
+  m_batchAlgoRunner.setQueue(std::move(algorithms));
 }
 
 void QtJobRunner::executeAlgorithmQueue() { m_batchAlgoRunner.executeBatchAsync(); }

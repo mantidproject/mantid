@@ -119,11 +119,10 @@ void TransformHKL::exec() {
 
   o_lattice.setModHKL(hkl_tran * modHKL);
 
-  std::vector<double> sigabc(6);
-
   bool redetermine_error = this->getProperty("FindError");
 
   if (redetermine_error) {
+    std::vector<double> sigabc(6);
     SelectCellWithForm::DetermineErrors(sigabc, UB, modUB, ws, tolerance);
     o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4], sigabc[5]);
   } else {

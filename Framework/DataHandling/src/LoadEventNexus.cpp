@@ -26,6 +26,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
+#include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -35,6 +36,7 @@
 #include "MantidNexus/NexusIOHelper.h"
 
 #include <H5Cpp.h>
+#include <boost/format.hpp>
 #include <memory>
 
 #include <regex>
@@ -58,6 +60,18 @@ using Types::Core::DateAndTime;
 namespace {
 // detnotes the end of iteration for NeXus::getNextEntry
 const std::string NULL_STR("NULL");
+
+const std::vector<std::string> binningModeNames{"Default", "Linear", "Logarithmic"};
+enum class BinningMode { DEFAULT, LINEAR, LOGARITHMIC, enum_count };
+typedef Mantid::Kernel::EnumeratedString<BinningMode, &binningModeNames> BINMODE;
+
+const std::string LOG_CHARGE_NAME("proton_charge");
+
+namespace PropertyNames {
+const std::string COMPRESS_TOL("CompressTolerance");
+const std::string COMPRESS_MODE("CompressBinningMode");
+const std::string BAD_PULSES_CUTOFF("FilterBadPulsesLowerCutoff");
+} // namespace PropertyNames
 } // namespace
 
 /**
@@ -80,8 +94,10 @@ bool exists(const std::map<std::string, std::string> &entries, const std::string
  */
 LoadEventNexus::LoadEventNexus()
     : filter_tof_min(0), filter_tof_max(0), m_specMin(0), m_specMax(0), longest_tof(0), shortest_tof(0), bad_tofs(0),
-      discarded_events(0), compressTolerance(0), m_instrument_loaded_correctly(false), loadlogs(false),
-      event_id_is_spec(false) {}
+      discarded_events(0), compressEvents(false), m_instrument_loaded_correctly(false), loadlogs(false),
+      event_id_is_spec(false) {
+  compressTolerance = EMPTY_DBL();
+}
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -141,11 +157,16 @@ void LoadEventNexus::init() {
                   "Optional: To only include events before the provided stop "
                   "time, in seconds (relative to the start of the run).");
 
+  declareProperty(
+      std::make_unique<PropertyWithValue<double>>(PropertyNames::BAD_PULSES_CUTOFF, EMPTY_DBL(), Direction::Input),
+      "Optional: To filter bad pulses set the Lower Cutoff percentage to use.");
+
   std::string grp1 = "Filter Events";
   setPropertyGroup("FilterByTofMin", grp1);
   setPropertyGroup("FilterByTofMax", grp1);
   setPropertyGroup("FilterByTimeStart", grp1);
   setPropertyGroup("FilterByTimeStop", grp1);
+  setPropertyGroup("FilterBadPulsesLowerCutoff", grp1);
 
   declareProperty(std::make_unique<ArrayProperty<string>>("BankName", Direction::Input),
                   "Optional: To only include events from one bank. Any bank "
@@ -169,11 +190,18 @@ void LoadEventNexus::init() {
                   "This can significantly reduce memory use and memory fragmentation; it "
                   "may also speed up loading.");
 
-  declareProperty(std::make_unique<PropertyWithValue<double>>("CompressTolerance", -1.0, Direction::Input),
-                  "Run CompressEvents while loading (optional, leave blank or "
-                  "negative to not do). "
-                  "This specified the tolerance to use (in microseconds) when "
-                  "compressing.");
+  declareProperty(
+      std::make_unique<PropertyWithValue<double>>(PropertyNames::COMPRESS_TOL, EMPTY_DBL(), Direction::Input),
+      "CompressEvents while loading (optional, default: off). "
+      "This specified the tolerance to use (in microseconds) when compressing where positive is linear tolerance, "
+      "negative is logorithmic tolerance, and zero indicates that time-of-flight must be identical to compress.");
+  declareProperty(
+      PropertyNames::COMPRESS_MODE, binningModeNames[size_t(BinningMode::DEFAULT)],
+      std::make_shared<Mantid::Kernel::StringListValidator>(binningModeNames),
+      "Optional. "
+      "Binning behavior can be specified in the usual way through sign of binwidth and other properties ('Default'); "
+      "or can be set to one of the allowed binning modes. "
+      "This will override all other specification or default behavior.");
 
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
@@ -190,7 +218,8 @@ void LoadEventNexus::init() {
 
   std::string grp3 = "Reduce Memory Use";
   setPropertyGroup("Precount", grp3);
-  setPropertyGroup("CompressTolerance", grp3);
+  setPropertyGroup(PropertyNames::COMPRESS_TOL, grp3);
+  setPropertyGroup(PropertyNames::COMPRESS_MODE, grp3);
   setPropertyGroup("ChunkNumber", grp3);
   setPropertyGroup("TotalChunks", grp3);
 
@@ -287,6 +316,18 @@ void LoadEventNexus::init() {
                   "separated by a space).");
 }
 
+std::map<std::string, std::string> LoadEventNexus::validateInputs() {
+  std::map<std::string, std::string> result;
+
+  if (!isDefault(PropertyNames::BAD_PULSES_CUTOFF)) {
+    const double cutoff = getProperty(PropertyNames::BAD_PULSES_CUTOFF);
+    if (cutoff < 0 || cutoff > 100)
+      result[PropertyNames::BAD_PULSES_CUTOFF] = "Must be empty or between 0 and 100";
+  }
+
+  return result;
+}
+
 //----------------------------------------------------------------------------------------------
 /** set the name of the top level NXentry m_top_entry_name
  */
@@ -358,7 +399,6 @@ void LoadEventNexus::filterDuringPause<EventWorkspaceCollection_sptr>(EventWorks
 template <typename T>
 T LoadEventNexus::filterEventsByTime(T workspace, Mantid::Types::Core::DateAndTime &startTime,
                                      Mantid::Types::Core::DateAndTime &stopTime) {
-
   auto filterByTime = createChildAlgorithm("FilterByTime");
   g_log.information("Filtering events by time...");
   filterByTime->setProperty("InputWorkspace", workspace);
@@ -389,7 +429,15 @@ void LoadEventNexus::execLoader() {
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 
-  compressTolerance = getProperty("CompressTolerance");
+  compressEvents = !isDefault(PropertyNames::COMPRESS_TOL);
+  compressTolerance = getProperty(PropertyNames::COMPRESS_TOL);
+  if (compressEvents) {
+    BINMODE mode = getPropertyValue(PropertyNames::COMPRESS_MODE);
+    if (mode == BinningMode::LINEAR)
+      compressTolerance = std::fabs(compressTolerance);
+    else if (mode == BinningMode::LOGARITHMIC)
+      compressTolerance = -1. * std::fabs(compressTolerance);
+  }
 
   loadlogs = getProperty("LoadLogs");
 
@@ -444,7 +492,6 @@ void LoadEventNexus::execLoader() {
 
 std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
   file.openData("event_time_zero");
-  std::string isooffset; // ISO8601 offset
   DateAndTime offset;
   // According to the Nexus standard, if the offset is not present, it implies
   // the offset is and absolute timestamp, which is relative to the start of
@@ -454,6 +501,7 @@ std::pair<DateAndTime, DateAndTime> firstLastPulseTimes(::NeXus::File &file, Ker
     logger.warning("In firstLastPulseTimes: no ISO8601 offset attribute "
                    "provided for event_time_zero, using UNIX epoch instead");
   } else {
+    std::string isooffset; // ISO8601 offset
     file.getAttr("offset", isooffset);
     offset = DateAndTime(isooffset);
   }
@@ -572,16 +620,19 @@ LoadEventNexus::runLoadNexusLogs(const std::string &nexusfilename, T localWorksp
     }
     // Get the period log. Map of DateAndTime to Period int values.
     if (run.hasProperty("period_log")) {
-      auto *temp = run.getProperty("period_log");
+      const auto *temp = run.getProperty("period_log");
       // Check for corrupted period logs
+      std::string status = "";
       std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
-      checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods, nexusfilename);
+      nPeriods = checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods, nexusfilename, status);
+      if (!status.empty())
+        alg.getLogger().warning(status);
     }
 
     // If successful, we can try to load the pulse times
     std::vector<Types::Core::DateAndTime> temp;
     if (localWorkspace->run().hasProperty("proton_charge")) {
-      auto *log =
+      const auto *log =
           dynamic_cast<Kernel::TimeSeriesProperty<double> *>(localWorkspace->mutableRun().getProperty("proton_charge"));
       if (log)
         temp = log->timesAsVector();
@@ -677,9 +728,12 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
     // Get the period log. Map of DateAndTime to Period int values.
     if (run.hasProperty("period_log")) {
       auto *temp = run.getProperty("period_log");
+      std::string status = "";
       // Check for corrupted period logs
       std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog(dynamic_cast<TimeSeriesProperty<int> *>(temp->clone()));
-      checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods, nexusfilename);
+      nPeriods = checkForCorruptedPeriods(std::move(tempPeriodLog), periodLog, nPeriods, nexusfilename, status);
+      if (!status.empty())
+        alg.getLogger().warning(status);
     }
 
     // If successful, we can try to load the pulse times
@@ -740,12 +794,17 @@ std::shared_ptr<BankPulseTimes> LoadEventNexus::runLoadNexusLogs(
  * @param nPeriods :: the value in the nperiods log of the run. Number of
  * expected periods
  * @param nexusfilename :: the filename of the run to load
+ * @param status :: will contain any status message. Empty if no problems.
+ * @return Number of periods with data
  */
-void LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog,
-                                              std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
-                                              const int &nPeriods, const std::string &nexusfilename) {
+int LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<TimeSeriesProperty<int>> tempPeriodLog,
+                                             std::unique_ptr<const TimeSeriesProperty<int>> &periodLog,
+                                             const int &nPeriods, const std::string &nexusfilename,
+                                             std::string &status) {
   const auto valuesAsVector = tempPeriodLog->valuesAsVector();
   const auto nPeriodsInLog = *std::max_element(valuesAsVector.begin(), valuesAsVector.end());
+  int numberOfValidPeriods = nPeriodsInLog;
+  status = "";
 
   // Check for historic files
   if (nPeriodsInLog == 0 && nPeriods == 1) {
@@ -754,7 +813,13 @@ void LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<TimeSeriesProperty
     const std::vector<int> newValues(tempPeriodLog->realSize(), 1);
     const auto times = tempPeriodLog->timesAsVector();
     periodLog.reset(new const TimeSeriesProperty<int>("period_log", times, newValues));
-  } else if (nPeriodsInLog != nPeriods) {
+    numberOfValidPeriods = 1;
+  } else if (nPeriodsInLog < nPeriods) {
+    status = boost::str(
+        boost::format(
+            "The number of periods specified in the file (%1%) is greater than the maximum period in the data (%2%).") %
+        nPeriods % nPeriodsInLog);
+  } else if (nPeriodsInLog > nPeriods) {
     // Sanity check here that period_log only contains period numbers up to
     // nperiods. These values can be different due to instrument noise, and
     // cause undescriptive crashes if not caught.
@@ -771,6 +836,7 @@ void LoadEventNexus::checkForCorruptedPeriods(std::unique_ptr<TimeSeriesProperty
     periodLog = std::make_unique<const TimeSeriesProperty<int>>(*tempPeriodLog);
     tempPeriodLog.reset();
   }
+  return numberOfValidPeriods;
 }
 
 /** Load the instrument from the nexus file
@@ -950,7 +1016,6 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   vector<string> bankNames;
   vector<std::size_t> bankNumEvents;
   std::string classType = monitors ? "NXmonitor" : "NXevent_data";
-  ::NeXus::Info info;
   bool oldNeXusFileNames(false);
   bool haveWeights = false;
   auto firstPulseT = DateAndTime::maximum();
@@ -1020,21 +1085,20 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   filter_time_stop_sec = getProperty("FilterByTimeStop");
 
   // Default to ALL pulse times
-  bool is_time_filtered = false;
   filter_time_start = Types::Core::DateAndTime::minimum();
   filter_time_stop = Types::Core::DateAndTime::maximum();
 
-  if (m_allBanksPulseTimes->pulseTimes.size() > 0) {
+  if (m_allBanksPulseTimes->numberOfPulses() > 0) {
     // If not specified, use the limits of doubles. Otherwise, convert from
     // seconds to absolute PulseTime
     if (filter_time_start_sec != EMPTY_DBL()) {
       filter_time_start = run_start + filter_time_start_sec;
-      is_time_filtered = true;
+      m_is_time_filtered = true;
     }
 
     if (filter_time_stop_sec != EMPTY_DBL()) {
       filter_time_stop = run_start + filter_time_stop_sec;
-      is_time_filtered = true;
+      m_is_time_filtered = true;
     }
 
     // Silly values?
@@ -1045,6 +1109,20 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
       msg += "filter for time's Stop value is smaller than the Start value.";
       throw std::invalid_argument(msg);
     }
+  }
+
+  // setup filter bad pulses
+  filter_bad_pulses = !isDefault(PropertyNames::BAD_PULSES_CUTOFF);
+
+  if (filter_bad_pulses) {
+    double min_pcharge, max_pcharge;
+    std::tie(min_pcharge, max_pcharge, std::ignore) =
+        m_ws->run().getBadPulseRange(LOG_CHARGE_NAME, getProperty(PropertyNames::BAD_PULSES_CUTOFF));
+
+    const auto *pcharge_log =
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(m_ws->run().getLogData(LOG_CHARGE_NAME));
+    bad_pulses_timeroi = std::make_shared<TimeROI>(
+        pcharge_log->makeFilterByValue(min_pcharge, max_pcharge, false, TimeInterval(0, 1), 0., true));
   }
 
   if (metaDataOnly) {
@@ -1143,11 +1221,14 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
     safeOpenFile(m_filename);
   }
   if (!loaded) {
+    loaderType = LoaderType::DEFAULT; // to be used later
     bool precount = getProperty("Precount");
     int chunk = getProperty("ChunkNumber");
     int totalChunks = getProperty("TotalChunks");
+    const auto startTime = std::chrono::high_resolution_clock::now();
     DefaultEventLoader::load(this, *m_ws, haveWeights, event_id_is_spec, bankNames, periodLog->valuesAsVector(),
                              classType, bankNumEvents, oldNeXusFileNames, precount, chunk, totalChunks);
+    addTimer("loadEvents", startTime, std::chrono::high_resolution_clock::now());
   }
 
   // Info reporting
@@ -1190,8 +1271,8 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   if (eventsLoaded > 0) {
     int nBins = getProperty("NumberOfBins");
     auto binEdgesVec = std::vector<double>(nBins + 1);
-    binEdgesVec[0] = shortest_tof - 1;
-    binEdgesVec[nBins] = longest_tof + 1;
+    binEdgesVec[0] = shortest_tof;        // left edge is inclusive
+    binEdgesVec[nBins] = longest_tof + 1; // right edge is exclusive
     double binStep = (binEdgesVec[nBins] - binEdgesVec[0]) / nBins;
     for (int binIndex = 1; binIndex < nBins; binIndex++) {
       binEdgesVec[binIndex] = binEdgesVec[0] + (binStep * binIndex);
@@ -1203,10 +1284,23 @@ void LoadEventNexus::loadEvents(API::Progress *const prog, const bool monitors) 
   // if there is time_of_flight load it
   adjustTimeOfFlightISISLegacy(*m_file, m_ws, m_top_entry_name, classType, descriptor.get());
 
-  if (is_time_filtered) {
-    // Now filter out the run and events, using the DateAndTime type.
-    // This will sort both by pulse time
-    filterEventsByTime(m_ws, filter_time_start, filter_time_stop);
+  if (m_is_time_filtered) {
+    if (loaderType == LoaderType::MULTIPROCESS) {
+      // Now filter out the run and events, using the DateAndTime type.
+      // This will sort both by pulse time
+      filterEventsByTime(m_ws, filter_time_start, filter_time_stop);
+    } else {
+      // events were filtered during read
+      // filter the logs the same way FilterByTime does
+      TimeROI timeroi(filter_time_start, filter_time_stop);
+      if (filter_bad_pulses)
+        timeroi.update_intersection(*bad_pulses_timeroi);
+      m_ws->mutableRun().setTimeROI(timeroi);
+      m_ws->mutableRun().removeDataOutsideTimeROI();
+    }
+  } else if (filter_bad_pulses) {
+    m_ws->mutableRun().setTimeROI(*bad_pulses_timeroi);
+    m_ws->mutableRun().removeDataOutsideTimeROI();
   }
 }
 
@@ -1334,7 +1428,7 @@ void LoadEventNexus::deleteBanks(const EventWorkspaceCollection_sptr &workspace,
   for (auto &det : detList) {
     bool keep = false;
     std::string det_name = det->getName();
-    for (auto &bankName : bankNames) {
+    for (const auto &bankName : bankNames) {
       size_t pos = bankName.find("_events");
       if (det_name == bankName.substr(0, pos))
         keep = true;
@@ -1531,8 +1625,6 @@ void LoadEventNexus::setTimeFilters(const bool monitors) {
   filter_tof_max = getProperty(prefix + "ByTofMax");
   if ((filter_tof_min == EMPTY_DBL()) && (filter_tof_max == EMPTY_DBL())) {
     // Nothing specified. Include everything
-    filter_tof_min = -1e20;
-    filter_tof_max = +1e20;
     filter_tof_range = false;
   } else if ((filter_tof_min != EMPTY_DBL()) && (filter_tof_max != EMPTY_DBL())) {
     // Both specified. Keep these values
@@ -1624,10 +1716,10 @@ LoadEventNexus::LoaderType LoadEventNexus::defineLoaderType(const bool haveWeigh
   noParallelConstrictions &= !(m_ws->nPeriods() != 1);
   noParallelConstrictions &= !haveWeights;
   noParallelConstrictions &= !oldNeXusFileNames;
-  noParallelConstrictions &= !(filter_tof_min != -1e20 || filter_tof_max != 1e20);
+  noParallelConstrictions &= !(filter_tof_range);
   noParallelConstrictions &= !((filter_time_start != Types::Core::DateAndTime::minimum() ||
                                 filter_time_stop != Types::Core::DateAndTime::maximum()));
-  noParallelConstrictions &= !((!isDefault("CompressTolerance") || !isDefault("SpectrumMin") ||
+  noParallelConstrictions &= !((!isDefault(PropertyNames::COMPRESS_TOL) || !isDefault("SpectrumMin") ||
                                 !isDefault("SpectrumMax") || !isDefault("SpectrumList") || !isDefault("ChunkNumber")));
   noParallelConstrictions &= !(classType != "NXevent_data");
 

@@ -243,13 +243,13 @@ void LoadSampleEnvironment::loadEnvironmentFromSTL(const std::string &filename, 
   const std::vector<double> translationVector = getProperty("TranslationVector");
   environmentMesh = reader->translate(environmentMesh, translationVector);
 
-  std::string name = getProperty("EnvironmentName");
   if (add) {
     environment = std::make_unique<SampleEnvironment>(sample.getEnvironment());
     environment->add(environmentMesh);
   } else {
     auto can = std::make_shared<Container>(environmentMesh);
-    environment = std::make_unique<SampleEnvironment>(name, can);
+    std::string environmentName = getProperty("EnvironmentName");
+    environment = std::make_unique<SampleEnvironment>(environmentName, can);
   }
 
   debugString += "Environment has: " + std::to_string(environment->nelements()) + " elements.";

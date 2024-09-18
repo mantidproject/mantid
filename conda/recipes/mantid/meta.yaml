@@ -18,8 +18,8 @@ requirements:
     - {{ compiler("cxx") }}
     - llvm-openmp                            # [osx]
     - libgomp                                # [linux]
-    - ninja                                  # [unix]
-    - cmake
+    - ninja                                  # [osx or linux]
+    - cmake {{ cmake }}
     - git
     - python {{ python }}                    # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
@@ -30,50 +30,55 @@ requirements:
     - {{ cdt('libxxf86vm') }}                # [linux]
     - {{ cdt('libx11-devel') }}              # [linux]
     - {{ cdt('xorg-x11-proto-devel') }}      # [linux]
-    - libcxx                                 # [osx]
 
   host:
-    - boost {{ boost }}
     - eigen
     - gsl {{ gsl }}
     - h5py
     - hdf5 {{ hdf5 }}
-    - jemalloc  # [unix]
+    - jemalloc  {{ jemalloc }} # [osx or linux]
     - jsoncpp
+    - libboost-devel {{ libboost_devel }}
+    - libboost-python-devel {{ libboost_python_devel }}
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - librdkafka {{ librdkafka }}
     - lib3mf  # [win]
     - muparser
     - nexus
     - numpy {{ numpy }}
-    - occt
+    - occt {{ occt }}
     - python {{ python }}
     - poco {{ poco }}
     - setuptools
     - tbb-devel {{ tbb }}
     - pip
-    - openssl
     - versioningit
     - libglu  # [linux]
   run:
-    - {{ pin_compatible("boost", max_pin="x.x") }}
     - {{ pin_compatible("gsl", max_pin="x.x") }}
     - h5py
     - {{ pin_compatible("hdf5", max_pin="x.x") }}
+    - jemalloc  {{ jemalloc }} # [osx or linux]
     - lib3mf  # [win]
     - nexus
-    - {{ pin_compatible("numpy", upper_bound="1.25") }}
-    - {{ pin_compatible("occt", max_pin="x.x.x") }}
-    - pycifrw {{ pycifrw }}
+    - {{ pin_compatible("numpy", upper_bound="1.27") }}
+    - occt {{ occt }}
+    - pycifrw
     - python
     - python-dateutil
     - pyyaml
     - scipy {{ scipy }}
-    - openssl
     - euphonic {{ euphonic }}
     - toml
     - libglu  # [linux]
     - joblib
+    - orsopy {{ orsopy }}
+    - quasielasticbayes
+
+test:
+  imports:
+    - mantid
+    - mantid.kernel
 
 about:
   home: https://github.com/mantidproject/mantid

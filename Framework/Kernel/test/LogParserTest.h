@@ -17,8 +17,9 @@
 
 #include <boost/lexical_cast.hpp>
 
-#include <Poco/File.h>
+#include <filesystem>
 
+using namespace std;
 using namespace Mantid::Kernel;
 using namespace Mantid::Types::Core;
 
@@ -28,16 +29,16 @@ public:
   static void destroySuite(LogParserTest *suite) { delete suite; }
 
   class TmpFile {
-    Poco::File m_file;
+    filesystem::path m_file;
 
   public:
     TmpFile(const std::string &fname) : m_file(fname) {}
     ~TmpFile() { remove(); }
-    const std::string &path() const { return m_file.path(); }
-    bool exists() const { return m_file.exists(); }
+    const std::string path() const { return m_file.string(); }
+    bool exists() const { return filesystem::exists(m_file); }
     void remove() {
-      if (m_file.exists())
-        m_file.remove();
+      if (filesystem::exists(m_file))
+        filesystem::remove(m_file);
     }
   };
 

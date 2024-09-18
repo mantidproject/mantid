@@ -7,6 +7,7 @@
 #include "MantidPythonInterface/core/VersionCompat.h"
 #include <boost/optional.hpp>
 #include <memory>
+#include <string>
 #include <vector>
 
 bool isIterable(PyObject *iterable) {
@@ -106,11 +107,8 @@ template <typename T> boost::optional<T> asOptional(int *sipIsErr, T *sipCppPtr)
 }
 
 inline boost::optional<std::string> pythonStringToStdString(PyObject *pyString) {
-  if (PyUnicode_Check(pyString)) {
-    PyObject *s = PyUnicode_AsEncodedString(pyString, "UTF-8", "");
-    auto val = std::string(TO_CSTRING(s));
-    Py_DECREF(s);
-    return val;
+  if (PyBytes_Check(pyString)) {
+    return std::string(PyBytes_AsString(pyString));
   } else if (STR_CHECK(pyString)) {
     return std::string(TO_CSTRING(pyString));
   } else {

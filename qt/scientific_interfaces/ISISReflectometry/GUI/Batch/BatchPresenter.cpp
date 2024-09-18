@@ -18,6 +18,10 @@
 #include "Reduction/RowExceptions.h"
 #include <memory>
 
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry Batch Presenter");
+} // namespace
+
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 using API::IConfiguredAlgorithm_sptr;
@@ -32,7 +36,7 @@ using API::IConfiguredAlgorithm_sptr;
  * presenter
  * @param instrumentPresenter :: [input] A pointer to the 'Instrument' tab
  * presenter
- * @param savePresenter :: [input] A pointer to the 'Save ASCII' tab presenter
+ * @param savePresenter :: [input] A pointer to the 'Save' tab presenter
  */
 BatchPresenter::BatchPresenter(
     IBatchView *view, std::unique_ptr<IBatch> model, std::unique_ptr<API::IJobRunner> jobRunner,
@@ -139,11 +143,22 @@ void BatchPresenter::notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorith
   if (m_savePresenter->shouldAutosave()) {
     auto const workspaces =
         m_jobManager->algorithmOutputWorkspacesToSave(algorithm, m_savePresenter->shouldAutosaveGroupRows());
-    m_savePresenter->saveWorkspaces(workspaces);
+
+    if (!workspaces.empty()) {
+      try {
+        m_savePresenter->saveWorkspaces(workspaces, true);
+      } catch (std::runtime_error const &e) {
+        g_log.error(e.what());
+      } catch (std::exception const &e) {
+        g_log.error(e.what());
+      } catch (...) {
+        g_log.error("Unknown error while saving workspaces.");
+      }
+    }
   }
 }
 
-void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr algorithm, std::string const &message) {
+void BatchPresenter::notifyAlgorithmError(IConfiguredAlgorithm_sptr &algorithm, std::string const &message) {
   auto item = m_jobManager->getRunsTableItem(algorithm);
   if (!item) {
     return;

@@ -196,16 +196,16 @@ void ConvolutionFunctionModel::findComponentPrefixes() {
   m_deltaFunctionPrefix.reset();
   m_tempFunctionPrefix.reset();
   m_fitTypePrefix.reset();
-  m_peakPrefixes = QStringList();
+  m_peakPrefixes = std::vector<std::string>{};
   m_resolutionWorkspace.clear();
   m_resolutionWorkspaceIndex = 0;
 
   auto function = getCurrentFunction();
   if (!function)
     return;
-  iterateThroughFunction(function.get(), QString());
+  iterateThroughFunction(function.get(), "");
 
-  if (m_peakPrefixes->isEmpty()) {
+  if (m_peakPrefixes->empty()) {
     m_peakPrefixes.reset();
   }
   if (!m_convolutionPrefix) {
@@ -213,7 +213,7 @@ void ConvolutionFunctionModel::findComponentPrefixes() {
   }
 }
 
-void ConvolutionFunctionModel::iterateThroughFunction(IFunction *func, const QString &prefix) {
+void ConvolutionFunctionModel::iterateThroughFunction(IFunction *func, std::string const &prefix) {
   auto numberOfSubFunction = func->nFunctions();
 
   setPrefix(func, prefix);
@@ -222,12 +222,12 @@ void ConvolutionFunctionModel::iterateThroughFunction(IFunction *func, const QSt
   }
   if (!isfitTypeFunction(func)) {
     for (size_t k = 0; k < numberOfSubFunction; ++k) {
-      iterateThroughFunction(func->getFunction(k).get(), prefix + QString("f%1.").arg(k));
+      iterateThroughFunction(func->getFunction(k).get(), prefix + "f" + std::to_string(k) + ".");
     }
   }
 }
 
-void ConvolutionFunctionModel::setPrefix(IFunction *func, const QString &prefix) {
+void ConvolutionFunctionModel::setPrefix(IFunction *func, std::string const &prefix) {
   if (isBackground(func)) {
     if (m_backgroundPrefix) {
       throw std::runtime_error("Model cannot have more than one background.");
@@ -249,7 +249,7 @@ void ConvolutionFunctionModel::setPrefix(IFunction *func, const QString &prefix)
     m_resolutionWorkspace = func->getAttribute("Workspace").asString();
     m_resolutionWorkspaceIndex = func->getAttribute("WorkspaceIndex").asInt();
   } else if (isLorentzianFunction(func)) {
-    m_peakPrefixes->append(prefix);
+    m_peakPrefixes->emplace_back(prefix);
   } else if (isfitTypeFunction(func)) {
     m_fitTypePrefix = prefix;
   }

@@ -839,7 +839,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path, const std::strin
     }
     g_log.debug() << "Form Output: " << answer.str() << '\n';
 
-    std::string info;
+    std::string messageInfo;
     std::string detail;
     std::string published_date;
 
@@ -848,14 +848,14 @@ void ScriptRepositoryImpl::upload(const std::string &file_path, const std::strin
     if (!Mantid::JsonHelpers::parse(answerString, &pt)) {
       throw ScriptRepoException("Bad answer from the Server");
     }
-    info = pt.get("message", "").asString();
+    messageInfo = pt.get("message", "").asString();
     detail = pt.get("detail", "").asString();
     published_date = pt.get("pub_date", "").asString();
     std::string cmd = pt.get("shell", "").asString();
     if (!cmd.empty())
       detail.append("\nFrom Command: ").append(cmd);
 
-    if (info == "success") {
+    if (messageInfo == "success") {
       g_log.notice() << "ScriptRepository:" << file_path << " uploaded!\n";
 
       // update the file
@@ -887,7 +887,7 @@ void ScriptRepositoryImpl::upload(const std::string &file_path, const std::strin
       updateRepositoryJson(file_path, remote_entry);
 
     } else
-      throw ScriptRepoException(info, detail);
+      throw ScriptRepoException(messageInfo, detail);
 
   } catch (Poco::Exception &ex) {
     throw ScriptRepoException(ex.displayText(), ex.className());
@@ -1021,7 +1021,7 @@ void ScriptRepositoryImpl::remove(const std::string &file_path, const std::strin
 
     // analyze the answer from the server, to see if the file was removed or
     // not.
-    std::string info;
+    std::string messageInfo;
     std::string detail;
     Json::Value answer_json;
     auto answerString = answer.str();
@@ -1029,17 +1029,17 @@ void ScriptRepositoryImpl::remove(const std::string &file_path, const std::strin
       throw ScriptRepoException("Bad answer from the Server");
     }
 
-    info = answer_json.get("message", "").asString();
+    messageInfo = answer_json.get("message", "").asString();
     detail = answer_json.get("detail", "").asString();
     std::string cmd = answer_json.get("shell", "").asString();
 
     if (!cmd.empty())
       detail.append("\nFrom Command: ").append(cmd);
 
-    g_log.debug() << "Checking if success info=" << info << '\n';
+    g_log.debug() << "Checking if success info=" << messageInfo << '\n';
     // check if the server removed the file from the central repository
-    if (info != "success")
-      throw ScriptRepoException(info, detail); // no
+    if (messageInfo != "success")
+      throw ScriptRepoException(messageInfo, detail); // no
 
     g_log.notice() << "ScriptRepository " << file_path << " removed from central repository\n";
 
@@ -1332,16 +1332,16 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file, const std
   try {
     Kernel::InternetHelper inetHelper;
     auto timeoutConfigVal = ConfigService::Instance().getValue<int>("network.scriptrepo.timeout");
-    int timeout = timeoutConfigVal.get_value_or(DEFAULT_TIMEOUT_SEC);
+    int timeout = timeoutConfigVal.value_or(DEFAULT_TIMEOUT_SEC);
     inetHelper.setTimeout(timeout);
 
     const auto status = inetHelper.downloadFile(url_file, local_file_path);
     g_log.debug() << "Answer from server: " << static_cast<int>(status) << '\n';
   } catch (Kernel::Exception::InternetError &ie) {
-    std::stringstream info;
-    info << "Failed to download " << given_path << " from "
-         << "<a href=\"" << url_file << "\">" << url_file << "</a>.\n";
-    throw ScriptRepoException(info.str(), ie.what());
+    std::stringstream exceptionInfo;
+    exceptionInfo << "Failed to download " << given_path << " from "
+                  << "<a href=\"" << url_file << "\">" << url_file << "</a>.\n";
+    throw ScriptRepoException(exceptionInfo.str(), ie.what());
   }
 }
 

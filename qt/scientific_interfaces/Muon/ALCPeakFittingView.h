@@ -27,8 +27,8 @@ public:
   ALCPeakFittingView(QWidget *widget);
   ~ALCPeakFittingView();
 
-  Mantid::API::IFunction_const_sptr function(QString index) const override;
-  boost::optional<QString> currentFunctionIndex() const override;
+  Mantid::API::IFunction_const_sptr function(std::string const &index) const override;
+  std::optional<std::string> currentFunctionIndex() const override;
   Mantid::API::IPeakFunction_const_sptr peakPicker() const override;
   void emitFitRequested();
 
@@ -40,7 +40,7 @@ public slots:
   void setGuessCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) override;
   void removePlot(QString const &plotName) override;
   void setFunction(const Mantid::API::IFunction_const_sptr &newFunction) override;
-  void setParameter(const QString &funcIndex, const QString &paramName, double value) override;
+  void setParameter(std::string const &funcIndex, std::string const &paramName, double value) override;
   void setPeakPickerEnabled(bool enabled) override;
   void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) override;
   void displayError(const QString &message) override;

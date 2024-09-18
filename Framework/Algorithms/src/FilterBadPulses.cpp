@@ -70,29 +70,8 @@ void FilterBadPulses::exec() {
     this->g_log.warning() << "Failed to find \"" << INT_CHARGE_NAME << "\" in run object.\n";
   }
 
-  // get the proton charge exists in the run object
-  if (!runlogs.hasProperty(LOG_CHARGE_NAME)) {
-    throw std::runtime_error("Failed to find \"" + LOG_CHARGE_NAME + "\" in sample logs");
-  }
-  auto *pcharge_log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(runlogs.getLogData(LOG_CHARGE_NAME));
-  if (!pcharge_log) {
-    throw std::logic_error("Failed to find \"" + LOG_CHARGE_NAME + "\" in sample logs");
-  }
-  Kernel::TimeSeriesPropertyStatistics stats = pcharge_log->getStatistics();
+  const auto [min_pcharge, max_pcharge, mean] = runlogs.getBadPulseRange(LOG_CHARGE_NAME, getProperty("LowerCutoff"));
 
-  // check that the maximum value is greater than zero
-  if (stats.maximum <= 0.) {
-    throw std::runtime_error("Maximum value of charge is not greater than zero (" + LOG_CHARGE_NAME + ")");
-  }
-
-  // set the range
-  double min_percent = this->getProperty("LowerCutoff");
-  min_percent *= .01; // convert it to a percentage (0<x<1)
-  double min_pcharge = stats.mean * min_percent;
-  double max_pcharge = stats.maximum * 1.1; // make sure everything high is in
-  if (min_pcharge >= max_pcharge) {
-    throw std::runtime_error("proton_charge window filters out all of the data");
-  }
   this->g_log.information() << "Filtering pcharge outside of " << min_pcharge << " to " << max_pcharge << '\n';
   size_t inputNumEvents = inputWS->getNumberEvents();
 
@@ -119,8 +98,8 @@ void FilterBadPulses::exec() {
   } else {
     this->g_log.notice() << "Deleted " << (inputNumEvents - outputNumEvents) << " of " << inputNumEvents << " events ("
                          << static_cast<float>(percent) << "%)"
-                         << " by proton charge from " << min_pcharge << " to " << max_pcharge
-                         << " with mean = " << stats.mean << "\n";
+                         << " by proton charge from " << min_pcharge << " to " << max_pcharge << " with mean = " << mean
+                         << "\n";
   }
 }
 

@@ -19,10 +19,10 @@
 # 'Remote determination of sample temperature by neutron resonance spectroscopy' - Nuclear Instruments and Methods in
 # Physics Research A 547 (2005) 601-615
 # -----------------------------------------------------------------------
-from mantid.kernel import Direction, StringListValidator
+from mantid.kernel import Direction, StringListValidator, EnabledWhenProperty, PropertyCriterion
 from mantid.api import PythonAlgorithm, MultipleFileProperty, AlgorithmFactory, mtd
 from mantid.simpleapi import (
-    LoadRaw,
+    Load,
     DeleteWorkspace,
     CropWorkspace,
     NormaliseByCurrent,
@@ -127,7 +127,8 @@ class PEARLTransfit(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(
-            MultipleFileProperty("Files", extensions=[".raw", ".s0x"]), doc="Files of calibration runs (numors). Must be detector scans."
+            MultipleFileProperty("Files", extensions=[".raw", ".s0x", ".nxs"]),
+            doc="Files of calibration runs (numors). Must be detector scans.",
         )
         self.declareProperty(
             name="FoilType",
@@ -150,6 +151,35 @@ class PEARLTransfit(PythonAlgorithm):
             direction=Direction.Input,
             doc="True/False - provides more verbose output of procedure for debugging purposes",
         )
+        self.declareProperty(
+            name="EstimateBackground",
+            defaultValue=True,
+            direction=Direction.Input,
+            doc="Estimate background parameters from data.",
+        )
+
+        self.declareProperty(
+            name="Bg0guessFraction",
+            defaultValue=0.84,
+            direction=Direction.Input,
+            doc="Starting guess for constant term of polynomial background is calculated as Bg0guessScaleFactor*y0 where"
+            "y0 is the intensity in the first bin of the data to be fitted.",
+        )
+        self.declareProperty(
+            name="Bg1guess",
+            defaultValue=0.0173252,
+            direction=Direction.Input,
+            doc="Starting guess for linear term of polynomial background.",
+        )
+        self.declareProperty(
+            name="Bg2guess",
+            defaultValue=0.0000004,
+            direction=Direction.Input,
+            doc="Starting guess for quadratic term of polynomial background.",
+        )
+        enable_bg_params = EnabledWhenProperty("EstimateBackground", PropertyCriterion.IsNotDefault)
+        for prop in ["Bg0guessFraction", "Bg1guess", "Bg2guess"]:
+            self.setPropertySettings(prop, enable_bg_params)
 
     def validateFileInputs(self, filesList):
         # MultipleFileProperty returns a list of list(s) of files, or a list containing a single (string) file
@@ -181,6 +211,7 @@ class PEARLTransfit(PythonAlgorithm):
         endE = self.ResParamsDict[foilType + "_endE"]
         refTemp = float(self.getProperty("ReferenceTemp").value)
         isDebug = self.getProperty("Debug").value
+        estimate_backround = self.getProperty("EstimateBackground").value
 
         if not isCalib:
             if "S_fit_Parameters" not in mtd:
@@ -210,7 +241,13 @@ class PEARLTransfit(PythonAlgorithm):
             fileName_monitor = fnNoExt + "_monitor"
             # For guessing initial background values, read in y-data and use starting value as value for b0
             wsBgGuess = mtd[fileName_monitor]
-            bg0guess = 0.86 * wsBgGuess.readY(0)[0]
+            if estimate_backround:
+                bg1guess, bg0guess = estimate_linear_background(wsBgGuess.readX(0), wsBgGuess.readY(0))
+                bg2guess = 0.0
+            else:
+                bg0guess = self.getProperty("Bg0guessFraction").value * wsBgGuess.readY(0)[0]
+                bg1guess = self.getProperty("Bg1guess").value
+                bg2guess = self.getProperty("Bg2guess").value
             # New Voigt function as from Igor pro function
             Fit(
                 Function="name=PEARLTransVoigt,Position="
@@ -221,7 +258,11 @@ class PEARLTransfit(PythonAlgorithm):
                 + str(width_300)
                 + ",Amplitude=1.6,Bg0="
                 + str(bg0guess)
-                + ",Bg1=0.0063252,Bg2=0,constraints=(1<LorentzianFWHM,"
+                + ",Bg1="
+                + str(bg1guess)
+                + ",Bg2="
+                + str(bg2guess)
+                + ",constraints=(1<LorentzianFWHM,"
                 + str(width_300)
                 + "<GaussianFWHM)",
                 InputWorkspace=fileName_monitor,
@@ -335,13 +376,13 @@ class PEARLTransfit(PythonAlgorithm):
             fnNoExt = path.splitext(fileName)[0]
             if isFirstFile:
                 firstFileName = fnNoExt
-            fileName_Raw = fnNoExt + "_raw"
+            fileName_format = fnNoExt + "_" + fileName.split(".")[-1]
             fileName_3 = fnNoExt + "_3"
-            LoadRaw(Filename=file, OutputWorkspace=fileName_Raw)
-            CropWorkspace(InputWorkspace=fileName_Raw, OutputWorkspace=fileName_Raw, XMin=100, XMax=19990)
-            NormaliseByCurrent(InputWorkspace=fileName_Raw, OutputWorkspace=fileName_Raw)
-            ExtractSingleSpectrum(InputWorkspace=fileName_Raw, OutputWorkspace=fileName_3, WorkspaceIndex=3)
-            DeleteWorkspace(fileName_Raw)
+            Load(Filename=file, OutputWorkspace=fileName_format)
+            CropWorkspace(InputWorkspace=fileName_format, OutputWorkspace=fileName_format, XMin=100, XMax=19990)
+            NormaliseByCurrent(InputWorkspace=fileName_format, OutputWorkspace=fileName_format)
+            ExtractSingleSpectrum(InputWorkspace=fileName_format, OutputWorkspace=fileName_3, WorkspaceIndex=3)
+            DeleteWorkspace(fileName_format)
             ConvertUnits(InputWorkspace=fileName_3, Target="Energy", OutputWorkspace=fileName_3)
             self.TransfitRebin(fileName_3, fileName_3, foilType, divE)
             if not isFirstFile:
@@ -404,6 +445,17 @@ class PEARLTransfit(PythonAlgorithm):
         outputWS = CreateWorkspace(DataX=xData_out, DataY=yData_out, NSpec=1, UnitX="meV")
         CropWorkspace(InputWorkspace=outputWS, OutputWorkspace=outputWS, XMin=1000 * startE, XMax=1000 * endE)
         RenameWorkspace(InputWorkspace=outputWS, OutputWorkspace=outputWSName)
+
+
+def estimate_linear_background(x, y, nbg=3):
+    if len(y) < 2 * nbg:
+        # not expected as trying to fit a function with 7 parameters
+        return 2 * [0.0]
+    dy = y[:nbg].mean() - y[-nbg:].mean()
+    dx = x[:nbg].mean() - x[-nbg:].mean()
+    gradient = dy / dx
+    slope = y[:nbg].mean() - gradient * x[:nbg].mean()
+    return gradient, slope
 
 
 AlgorithmFactory.subscribe(PEARLTransfit)

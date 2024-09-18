@@ -457,6 +457,8 @@ void Decoder::decodeSave(const QtSaveView *gui, const QMap<QString, QVariant> &m
   gui->m_ui.prefixEdit->setText(map[QString("prefixEdit")].toString());
   gui->m_ui.headerCheckBox->setChecked(map[QString("headerCheckBox")].toBool());
   gui->m_ui.qResolutionCheckBox->setChecked(map[QString("qResolutionCheckBox")].toBool());
+  gui->m_ui.extraColumnsCheckBox->setChecked(map[QString("extraColumnsCheckBox")].toBool());
+  gui->m_ui.multipleDatasetsCheckBox->setChecked(map[QString("multipleDatasetsCheckBox")].toBool());
   gui->m_ui.commaRadioButton->setChecked(map[QString("commaRadioButton")].toBool());
   gui->m_ui.spaceRadioButton->setChecked(map[QString("spaceRadioButton")].toBool());
   gui->m_ui.tabRadioButton->setChecked(map[QString("tabRadioButton")].toBool());

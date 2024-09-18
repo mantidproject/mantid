@@ -25,16 +25,6 @@ namespace Mantid::DataHandling {
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::PropertyWithValue;
 
-namespace {
-namespace PropertyNames {
-const std::string CAL_FILE("Filename");
-const std::string GROUP_FILE("GroupFilename");
-const std::string MAKE_CAL("MakeCalWorkspace");
-const std::string MAKE_GRP("MakeGroupingWorkspace");
-const std::string MAKE_MSK("MakeMaskWorkspace");
-} // namespace PropertyNames
-} // namespace
-
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ApplyDiffCal)
 

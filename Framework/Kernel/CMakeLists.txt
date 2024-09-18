@@ -128,17 +128,6 @@ set(SRC_FILES
     src/WriteLock.cpp
 )
 
-set(SRC_UNITY_IGNORE_FILES
-    src/Atom.cpp
-    src/NeutronAtom.cpp
-    src/FacilityInfo.cpp
-    src/FileValidator.cpp
-    src/DirectoryValidator.cpp
-    src/PropertyManager.cpp
-    src/Unit.cpp
-    src/System.cpp
-)
-
 set(INC_FILES
     inc/MantidKernel/ANN/ANN.h
     inc/MantidKernel/ANN/ANNperf.h
@@ -470,11 +459,6 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 else()
   list(APPEND SRC_FILES src/NetworkProxyLinux.cpp)
 endif()
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(Kernel SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
 
 # Enable precompiled headers where supported (must be done before target is added)
 enable_precompiled_headers(inc/MantidKernel/PrecompiledHeader.h SRC_FILES)

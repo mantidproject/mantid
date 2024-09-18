@@ -27,14 +27,14 @@ FakeEventDataListener::FakeEventDataListener()
       m_numExtractDataCalls(0), m_runNumber(1) {
 
   auto datarateConfigVal = ConfigService::Instance().getValue<int>("fakeeventdatalistener.datarate");
-  m_datarate = datarateConfigVal.get_value_or(200); // Default data rate. Low so that our lowest-powered
-                                                    // buildserver can cope.
-                                                    // For auto-ending and restarting runs
+  m_datarate = datarateConfigVal.value_or(200); // Default data rate. Low so that our lowest-powered
+                                                // buildserver can cope.
+                                                // For auto-ending and restarting runs
   auto endRunEveryConfigVal = ConfigService::Instance().getValue<int>("fakeeventdatalistener.endrunevery");
-  m_endRunEvery = endRunEveryConfigVal.get_value_or(0);
+  m_endRunEvery = endRunEveryConfigVal.value_or(0);
 
   auto notyettimesConfigVal = ConfigService::Instance().getValue<int>("fakeeventdatalistener.notyettimes");
-  m_notyettimes = notyettimesConfigVal.get_value_or(0);
+  m_notyettimes = notyettimesConfigVal.value_or(0);
 }
 
 /// Destructor

@@ -295,9 +295,9 @@ ExtractQENSMembers::addMembersToADS(const std::vector<std::string> &members,
     else
       count = std::to_string(++nameCounts[members[i]]);
 
-    const auto name = outputWSName + "_" + members[i] + count;
-    AnalysisDataService::Instance().addOrReplace(name, memberWorkspaces[i]);
-    workspaceNames.emplace_back(name);
+    const auto wsName = outputWSName + "_" + members[i] + count;
+    AnalysisDataService::Instance().addOrReplace(wsName, memberWorkspaces[i]);
+    workspaceNames.emplace_back(wsName);
   }
   return workspaceNames;
 }

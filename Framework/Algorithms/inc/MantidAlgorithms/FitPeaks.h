@@ -214,7 +214,7 @@ private:
                                   const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
 
   /// calculate peak+background for fitted
-  void calculateFittedPeaks(std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_results);
+  void calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> &fit_results);
 
   /// Get the parameter name for peak height (I or height or etc)
   std::string getPeakHeightParameterName(const API::IPeakFunction_const_sptr &peak_function);
@@ -327,6 +327,7 @@ private:
 
   // Criteria for rejecting non-peaks or weak peaks from fitting
   double m_minSignalToNoiseRatio;
+  double m_minPeakTotalCount;
 
   /// flag for high background
   bool m_highBackground;

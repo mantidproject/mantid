@@ -86,5 +86,5 @@ BoundedValidator<T> *createExclusiveBoundedValidator(object lower = object(), ob
 
 void export_BoundedValidator() {
   EXPORT_BOUNDEDVALIDATOR(double, Float);
-  EXPORT_BOUNDEDVALIDATOR(long, Int);
+  EXPORT_BOUNDEDVALIDATOR(int, Int);
 }

@@ -8,6 +8,7 @@
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SymmetryElementFactory.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 
 #include <algorithm>
@@ -18,6 +19,10 @@
 namespace Mantid::Geometry {
 using Kernel::IntMatrix;
 using Kernel::V3D;
+namespace {
+/// static logger object
+Kernel::Logger g_log("PointGroup");
+} // namespace
 
 /**
  * Returns all equivalent reflections for the supplied hkl.
@@ -78,6 +83,60 @@ bool PointGroup::isEquivalent(const Kernel::V3D &hkl, const Kernel::V3D &hkl2) c
   auto hklEquivalents = getAllEquivalents(hkl);
 
   return (std::find(hklEquivalents.cbegin(), hklEquivalents.cend(), hkl2) != hklEquivalents.end());
+}
+
+std::string PointGroup::getLauePointGroupSymbol() const {
+  switch (m_crystalSystem) {
+  case CrystalSystem::Triclinic:
+    return "-1";
+  case CrystalSystem::Monoclinic:
+    if (m_symbolHM.substr(0, 2) == "11") {
+      return "112/m"; // unique axis c
+    } else {
+      return "2/m"; // unique axis b
+    }
+  case CrystalSystem::Orthorhombic:
+    return "mmm";
+  case CrystalSystem::Tetragonal:
+    if (m_symbolHM == "4" || m_symbolHM == "-4" || m_symbolHM == "4/m") {
+      return "4/m";
+    } else {
+      return "4/mmm";
+    }
+  case CrystalSystem::Hexagonal:
+    if (m_symbolHM == "6" || m_symbolHM == "-6" || m_symbolHM == "6/m") {
+      return "6/m";
+    } else {
+      return "6/mmm";
+    }
+  case CrystalSystem::Trigonal:
+    if (m_symbolHM.substr(m_symbolHM.size() - 1) == "r") {
+      // Rhombohedral
+      if (m_symbolHM == "3" || m_symbolHM == "-3") {
+        return "-3 r";
+      } else {
+        return "-3m r";
+      }
+    } else {
+      // Hexagonal
+      if (m_symbolHM == "3" || m_symbolHM == "-3") {
+        return "-3";
+      } else if (m_symbolHM.substr(1) == "1") {
+        return "-31m";
+      } else {
+        return "-3m1";
+      }
+    }
+  case CrystalSystem::Cubic:
+    if (m_symbolHM == "23" || m_symbolHM == "m-3") {
+      return "m-3";
+    } else {
+      return "m-3m";
+    }
+  default:
+    g_log.warning() << "Invalid crystal system - returning group with lowest symmetry (inversion only).\n";
+    return "-1"; // never used but required for gcc warning
+  }
 }
 
 /**

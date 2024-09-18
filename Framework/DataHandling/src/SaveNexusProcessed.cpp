@@ -60,10 +60,10 @@ bool makeMappings(const MatrixWorkspace &ws, const std::vector<int> &ws_indices,
                   std::vector<int32_t> &out_detector_list, int &numberSpec, size_t &numberDetectors) {
 
   // Count the total number of detectors
-  numberDetectors = 0;
-  for (auto index : ws_indices) {
-    numberDetectors += ws.getSpectrum(static_cast<size_t>(index)).getDetectorIDs().size();
-  }
+  numberDetectors =
+      std::accumulate(ws_indices.cbegin(), ws_indices.cend(), size_t(0), [&ws](size_t sum, const auto &index) {
+        return sum + ws.getSpectrum(static_cast<size_t>(index)).getDetectorIDs().size();
+      });
   if (numberDetectors < 1) {
     return false;
   }
@@ -286,6 +286,7 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
 
     // check if all X() are in fact the same array
     const bool uniformSpectra = matrixWorkspace->isCommonBins();
+    const bool raggedSpectra = matrixWorkspace->isRaggedWorkspace();
 
     // Retrieve the workspace indices (from params)
     std::vector<int> indices;
@@ -294,7 +295,7 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
     prog_init.reportIncrement(1, "Writing data");
     // Write out the data (2D or event)
     if (m_eventWorkspace && PreserveEvents) {
-      this->execEvent(nexusFile.get(), uniformSpectra, indices);
+      this->execEvent(nexusFile.get(), uniformSpectra, raggedSpectra, indices);
     } else {
       std::string workspaceTypeGroupName;
       if (offsetsWorkspace)
@@ -306,8 +307,8 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
       else
         workspaceTypeGroupName = "workspace";
 
-      nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra, indices, workspaceTypeGroupName.c_str(),
-                                           true);
+      nexusFile->writeNexusProcessedData2D(matrixWorkspace, uniformSpectra, raggedSpectra, indices,
+                                           workspaceTypeGroupName.c_str(), true);
     }
 
     if (saveLegacyInstrument()) {
@@ -407,12 +408,12 @@ void SaveNexusProcessed::appendEventListData(const std::vector<T> &events, size_
 /** Execute the saving of event data.
  * This will make one long event list for all events contained.
  * */
-void SaveNexusProcessed::execEvent(Mantid::NeXus::NexusFileIO *nexusFile, const bool uniformSpectra,
-                                   const std::vector<int> &spec) {
+void SaveNexusProcessed::execEvent(const Mantid::NeXus::NexusFileIO *nexusFile, const bool uniformSpectra,
+                                   const bool raggedSpectra, const std::vector<int> &spec) {
   m_progress = std::make_unique<Progress>(this, m_timeProgInit, 1.0, m_eventWorkspace->getNumberEvents() * 2);
 
   // Start by writing out the axes and crap
-  nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, spec, "event_workspace", false);
+  nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, raggedSpectra, spec, "event_workspace", false);
 
   // Make a super long list of tofs, weights, etc.
   std::vector<int64_t> indices;

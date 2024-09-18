@@ -36,10 +36,16 @@ public:
 
   InstrumentPresenterTest() : m_view() { Mantid::API::FrameworkManager::Instance(); }
 
+  void tearDown() override {
+    // Verifying and clearing of expectations happens when mock variables are destroyed.
+    // Some of our mocks are created as member variables and will exist until all tests have run, so we need to
+    // explicitly verify and clear them after each test.
+    verifyAndClear();
+  }
+
   void testPresenterSubscribesToView() {
     EXPECT_CALL(m_view, subscribe(_)).Times(1);
     auto presenter = makePresenter();
-    verifyAndClear();
   }
 
   void testSetValidWavelengthRange() {
@@ -80,7 +86,6 @@ public:
     presenter.notifySettingsChanged();
 
     TS_ASSERT_EQUALS(presenter.instrument().integratedMonitors(), integrate);
-    verifyAndClear();
   }
 
   void testSetMonitorIndex() {
@@ -91,7 +96,6 @@ public:
     presenter.notifySettingsChanged();
 
     TS_ASSERT_EQUALS(presenter.instrument().monitorIndex(), monitorIndex);
-    verifyAndClear();
   }
 
   void testSetValidMonitorIntegralRange() {
@@ -162,7 +166,6 @@ public:
     presenter.notifySettingsChanged();
 
     TS_ASSERT_EQUALS(presenter.instrument().correctDetectors(), correctDetectors);
-    verifyAndClear();
   }
 
   void testEnablingCorrectDetectorsEnablesCorrectionType() {
@@ -171,8 +174,6 @@ public:
     EXPECT_CALL(m_view, getCorrectDetectors()).WillOnce(Return(true));
     EXPECT_CALL(m_view, enableDetectorCorrectionType()).Times(1);
     presenter.notifySettingsChanged();
-
-    verifyAndClear();
   }
 
   void testDiablingCorrectDetectorsDisablesCorrectionType() {
@@ -181,8 +182,6 @@ public:
     EXPECT_CALL(m_view, getCorrectDetectors()).WillOnce(Return(false));
     EXPECT_CALL(m_view, disableDetectorCorrectionType()).Times(1);
     presenter.notifySettingsChanged();
-
-    verifyAndClear();
   }
 
   void testSetDetectorCorrectionTypeUpdatesModel() {
@@ -192,7 +191,6 @@ public:
     presenter.notifySettingsChanged();
 
     TS_ASSERT_EQUALS(presenter.instrument().detectorCorrectionType(), DetectorCorrectionType::RotateAroundSample);
-    verifyAndClear();
   }
 
   void testSetCalibrationFileUpdatesModel() {
@@ -203,7 +201,6 @@ public:
     presenter.notifySettingsChanged();
 
     TS_ASSERT_EQUALS(presenter.instrument().calibrationFilePath(), calibrationFilePath);
-    verifyAndClear();
   }
 
   void testAllWidgetsAreEnabledWhenReductionPaused() {
@@ -212,8 +209,6 @@ public:
     EXPECT_CALL(m_view, enableAll()).Times(1);
     expectNotProcessingOrAutoreducing();
     presenter.notifyReductionPaused();
-
-    verifyAndClear();
   }
 
   void testAllWidgetsAreDisabledWhenReductionResumed() {
@@ -222,8 +217,6 @@ public:
     EXPECT_CALL(m_view, disableAll()).Times(1);
     expectProcessing();
     presenter.notifyReductionResumed();
-
-    verifyAndClear();
   }
 
   void testAllWidgetsAreEnabledWhenAutoreductionPaused() {
@@ -232,8 +225,6 @@ public:
     EXPECT_CALL(m_view, enableAll()).Times(1);
     expectNotProcessingOrAutoreducing();
     presenter.notifyAutoreductionPaused();
-
-    verifyAndClear();
   }
 
   void testAllWidgetsAreDisabledWhenAutoreductionResumed() {
@@ -242,8 +233,6 @@ public:
     EXPECT_CALL(m_view, disableAll()).Times(1);
     expectAutoreducing();
     presenter.notifyAutoreductionResumed();
-
-    verifyAndClear();
   }
 
   void testSettingsChangedNotifiesMainPresenter() {
@@ -251,15 +240,12 @@ public:
 
     EXPECT_CALL(m_mainPresenter, notifySettingsChanged()).Times(AtLeast(1));
     presenter.notifySettingsChanged();
-
-    verifyAndClear();
   }
 
   void testRestoreDefaultsUpdatesInstrument() {
     auto presenter = makePresenter();
     EXPECT_CALL(m_mainPresenter, notifyUpdateInstrumentRequested()).Times(1);
     presenter.notifyRestoreDefaultsRequested();
-    verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesMonitorOptionsInView() {
@@ -274,7 +260,6 @@ public:
     EXPECT_CALL(m_view, setMonitorIntegralMin(4.0)).Times(1);
     EXPECT_CALL(m_view, setMonitorIntegralMax(10.0)).Times(1);
     presenter.notifyInstrumentChanged("POLREF");
-    verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesMonitorOptionsInModel() {
@@ -287,7 +272,6 @@ public:
     TS_ASSERT_EQUALS(presenter.instrument().integratedMonitors(), true);
     TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(), RangeInLambda(17.0, 18.0));
     TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(), RangeInLambda(4.0, 10.0));
-    verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesWavelengthRangeInView() {
@@ -297,7 +281,6 @@ public:
     EXPECT_CALL(m_view, setLambdaMin(1.5)).Times(1);
     EXPECT_CALL(m_view, setLambdaMax(17.0)).Times(1);
     presenter.notifyInstrumentChanged("POLREF");
-    verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesWavelengthRangeInModel() {
@@ -306,7 +289,6 @@ public:
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
     TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(), RangeInLambda(1.5, 17.0));
-    verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesUpdatesDetectorOptionsInView() {
@@ -317,7 +299,6 @@ public:
     EXPECT_CALL(m_view, setCorrectDetectors(true)).Times(1);
     EXPECT_CALL(m_view, setDetectorCorrectionType("RotateAroundSample")).Times(1);
     presenter.notifyInstrumentChanged("POLREF");
-    verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesUpdatesDetectorOptionsInModel() {
@@ -328,7 +309,6 @@ public:
     presenter.notifyInstrumentChanged("POLREF");
     auto const expected = DetectorCorrections(true, DetectorCorrectionType::RotateAroundSample);
     TS_ASSERT_EQUALS(presenter.instrument().detectorCorrections(), expected);
-    verifyAndClear();
   }
 
   void testInstrumentChangedUpdatesCalibrationFilePathInView() {
@@ -338,7 +318,6 @@ public:
     auto presenter = makePresenter(std::move(defaultOptions));
     EXPECT_CALL(m_view, setCalibrationFilePath(defaultFilepath)).Times(1);
     presenter.notifyInstrumentChanged("POLREF");
-    verifyAndClear();
   }
 
   void testEnteringInvalidCalibrationFilePathTriggersError() {
@@ -347,7 +326,6 @@ public:
     EXPECT_CALL(m_fileHandler, fileExists("test")).WillOnce(Return(false));
     EXPECT_CALL(m_view, showCalibrationFilePathInvalid()).Times(1);
     presenter.notifySettingsChanged();
-    verifyAndClear();
   }
 
   void testEnteringEmptyCalibrationFilePathDoesNotTriggerError() {
@@ -356,7 +334,6 @@ public:
     EXPECT_CALL(m_fileHandler, fileExists("")).Times(0);
     EXPECT_CALL(m_view, showCalibrationFilePathValid()).Times(1);
     presenter.notifySettingsChanged();
-    verifyAndClear();
   }
 
 private:
@@ -428,7 +405,6 @@ private:
     EXPECT_CALL(m_view, showLambdaRangeValid()).Times(1);
     presenter.notifySettingsChanged();
     TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(), result);
-    verifyAndClear();
   }
 
   void runTestForInvalidWavelengthRange(RangeInLambda const &range) {
@@ -438,7 +414,6 @@ private:
     EXPECT_CALL(m_view, showLambdaRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
     TS_ASSERT_EQUALS(presenter.instrument().wavelengthRange(), boost::none);
-    verifyAndClear();
   }
 
   void runTestForValidMonitorIntegralRange(RangeInLambda const &range, boost::optional<RangeInLambda> const &result) {
@@ -448,7 +423,6 @@ private:
     EXPECT_CALL(m_view, showMonitorIntegralRangeValid()).Times(1);
     presenter.notifySettingsChanged();
     TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(), result);
-    verifyAndClear();
   }
 
   void runTestForInvalidMonitorIntegralRange(RangeInLambda const &range) {
@@ -458,7 +432,6 @@ private:
     EXPECT_CALL(m_view, showMonitorIntegralRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
     TS_ASSERT_EQUALS(presenter.instrument().monitorIntegralRange(), boost::none);
-    verifyAndClear();
   }
 
   void runTestForValidMonitorBackgroundRange(RangeInLambda const &range, boost::optional<RangeInLambda> const &result) {
@@ -468,7 +441,6 @@ private:
     EXPECT_CALL(m_view, showMonitorBackgroundRangeValid()).Times(1);
     presenter.notifySettingsChanged();
     TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(), result);
-    verifyAndClear();
   }
 
   void runTestForInvalidMonitorBackgroundRange(RangeInLambda const &range) {
@@ -478,6 +450,5 @@ private:
     EXPECT_CALL(m_view, showMonitorBackgroundRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
     TS_ASSERT_EQUALS(presenter.instrument().monitorBackgroundRange(), boost::none);
-    verifyAndClear();
   }
 };

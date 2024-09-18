@@ -52,8 +52,12 @@ def _get_sample_string(sample_name):
 
 
 def _get_data_path(entry, path):
-    proposal = get_proposal_from_filename(entry["filename"], entry["file_number"])
-    return os.path.join(path, proposal)
+    data_path = os.path.join(path, entry["filename"])
+    file_number_string = str(entry["file_number"])
+    file_number_string_length = len(file_number_string)
+    star_pattern = "*" * file_number_string_length
+    data_path_modified = data_path.replace(file_number_string, star_pattern)
+    return data_path_modified
 
 
 def _convert_list_to_range(dataset):

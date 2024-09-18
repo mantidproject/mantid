@@ -1,4 +1,4 @@
-﻿.. _interface-indirect-settings:
+﻿.. _inelastic-interface-settings:
 
 Indirect Settings
 =================
@@ -11,9 +11,6 @@ Overview
 
 Provides options which allow you to customise and save the behaviour of features on the
 Indirect interfaces.
-
-.. interface:: Settings
-  :width: 450
 
 Action Buttons
 --------------
@@ -40,8 +37,8 @@ Facility
   Allows you to choose the selected facility.
 
 
-Interface Settings
-------------------
+Basic
+-----
 
 This section contains settings which are more specific to the Indirect interfaces.
 
@@ -59,36 +56,54 @@ Plot error bars for external plots
   externally (i.e. in a separate window) from the indirect interfaces.
 
 
+Advanced
+--------
+
+This section contains settings which are for use by more advanced users of the software.
+
+Options
+~~~~~~~
+
+Developer Feature Flags
+  This will allow you to provide a "development flag" that serves as a toggle for specific
+  features which are currently under development. This will facilitate rapid prototyping
+  of new features, and will also shorten the feedback loop for developers. Note that this
+  option should only be used for testing features which are still under development. When
+  users are satisfied with the new feature, the "development flag" in question should be
+  removed from the software, and the feature should be made permanently available.
+  **The interface must be restarted for changes to take effect**.
+
+
 Glossary of Allowed Suffixes
 ----------------------------
 
-+--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| Suffix       | X axis                       | Histogram axis                                 | Produced on                                                                                                        |
-+==============+==============================+================================================+====================================================================================================================+
-| _red         | EnergyTransfer (:math:`meV`) | Spectrum Number                                | :ref:`Data Reduction <interface-indirect-data-reduction>` in ISISEnergyTransfer                                    |
-+--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| _res         | EnergyTransfer (:math:`meV`) | Spectrum Number                                | :ref:`Data Reduction <interface-indirect-data-reduction>` in ISISCalibration                                       |
-+--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| _calib       | Single Point                 | Spectrum Number                                | :ref:`Data Reduction <interface-indirect-data-reduction>` in ISISCalibration                                       |
-+--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| _sqw         | EnergyTransfer (:math:`meV`) | Q (:math:`A^-1`)                               | :ref:`Data Reduction <interface-indirect-data-reduction>` in S(Q, w)                                               |
-+--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| _Corrections | EnergyTransfer (:math:`meV`) | Spectrum Number                                | :ref:`Data Corrections <interface-indirect-corrections>` in CalculatePaalmanPings or CalculateMonteCarloAbsorption |
-+--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| _eq          | Q (:math:`A^-1`)             | Sample Environment variable (e.g. Temperature) | :ref:`Data Analysis <interface-inelastic-data-analysis>` in Elwin                                                  |
-+--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| _elf         | Intensity                    | Q (:math:`A^-1`)                               | :ref:`Data Analysis <interface-inelastic-data-analysis>` in Elwin                                                  |
-+--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| _iqt         | Time (:math:`ns`)            | Spectrum Number or Q (:math:`A^-1`)            | :ref:`Data Analysis <interface-inelastic-data-analysis>` in I(Q,t)                                                 |
-+--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
-| _Result      | Q (:math:`A^-1`)             | Fit Parameter Name                             | :ref:`Data Analysis <interface-inelastic-data-analysis>` in MSDFit, IqtFit, ConvFit or F(Q)Fit                     |
-+--------------+------------------------------+------------------------------------------------+--------------------------------------------------------------------------------------------------------------------+
++--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
+| Suffix       | X axis                       | Histogram axis                                 | Produced on                                                                                                         |
++==============+==============================+================================================+=====================================================================================================================+
+| _red         | EnergyTransfer (:math:`meV`) | Spectrum Number                                | :ref:`Data Reduction <interface-indirect-data-reduction>` in ISISEnergyTransfer                                     |
++--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
+| _res         | EnergyTransfer (:math:`meV`) | Spectrum Number                                | :ref:`Data Reduction <interface-indirect-data-reduction>` in ISISCalibration                                        |
++--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
+| _calib       | Single Point                 | Spectrum Number                                | :ref:`Data Reduction <interface-indirect-data-reduction>` in ISISCalibration                                        |
++--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
+| _sqw         | EnergyTransfer (:math:`meV`) | Q (:math:`A^-1`)                               | :ref:`Data Reduction <interface-indirect-data-reduction>` in S(Q, w)                                                |
++--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
+| _Corrections | EnergyTransfer (:math:`meV`) | Spectrum Number                                | :ref:`Data Corrections <interface-inelastic-corrections>` in CalculatePaalmanPings or CalculateMonteCarloAbsorption |
++--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
+| _eq          | Q (:math:`A^-1`)             | Sample Environment variable (e.g. Temperature) | :ref:`Data Processor <interface-inelastic-data-processor>` in Elwin                                                 |
++--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
+| _elf         | Intensity                    | Q (:math:`A^-1`)                               | :ref:`Data Processor <interface-inelastic-data-processor>` in Elwin                                                 |
++--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
+| _iqt         | Time (:math:`ns`)            | Spectrum Number or Q (:math:`A^-1`)            | :ref:`Data Processor <interface-inelastic-data-processor>` in I(Q,t)                                                |
++--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
+| _Result      | Q (:math:`A^-1`)             | Fit Parameter Name                             | :ref:`QENS Fitting <interface-inelastic-qens-fitting>` in MSD, I(Q,t), Convolution or Function(Q)                   |
++--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 
 When **Restrict allowed input files by name** is ticked, the input data is restricted by name
 according to the suffixes below.
 
-Indirect Bayes Suffixes
-~~~~~~~~~~~~~~~~~~~~~~~
+Bayes Fitting Suffixes
+~~~~~~~~~~~~~~~~~~~~~~
 ResNorm
 #######
 
@@ -116,16 +131,11 @@ Sample Suffixes
 Resolution Suffixes
   _res
 
-Data Analysis Suffixes
-~~~~~~~~~~~~~~~~~~~~~~
-Elwin
-#####
+QENS Fitting Suffixes
+~~~~~~~~~~~~~~~~~~~~~
 
-Input Suffixes
-  _red, _sqw
-
-MSDFit
-######
+MSD
+###
 
 Sample Suffixes
   _eq
@@ -134,19 +144,10 @@ I(Q,t)
 ######
 
 Sample Suffixes
-  _red, _sqw
-
-Resolution Suffixes
-  _res, _red, _sqw
-
-I(Q,t)Fit
-#########
-
-Sample Suffixes
   _iqt
 
-ConvFit
-#######
+Convolution
+###########
 
 Sample Suffixes
   _red, _sqw
@@ -154,14 +155,14 @@ Sample Suffixes
 Resolution Suffixes
   _res, _red, _sqw
 
-F(Q)Fit
-#######
+Function(Q)
+###########
 
 Sample Suffixes
   _Result
 
-Data Corrections Suffixes
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Corrections Suffixes
+~~~~~~~~~~~~~~~~~~~~
 Container Subtraction
 #####################
 
@@ -227,6 +228,8 @@ Transmission
 ############
 No restrictions.
 
+Data Processor Suffixes
+~~~~~~~~~~~~~~~~~~~~~~~
 Symmetrise
 ##########
 
@@ -244,6 +247,21 @@ Moments
 
 Input Suffixes
   _sqw
+
+Elwin
+#####
+
+Input Suffixes
+  _red, _sqw
+
+I(Q,t)
+######
+
+Sample Suffixes
+  _red, _sqw
+
+Resolution Suffixes
+  _res, _red, _sqw
 
 Diffraction Suffixes
 ~~~~~~~~~~~~~~~~~~~~

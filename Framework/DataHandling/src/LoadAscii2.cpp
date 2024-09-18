@@ -210,19 +210,19 @@ API::Workspace_sptr LoadAscii2::readTable(std::ifstream &file) {
         size_t colData = this->splitIntoColumns(data, line);
         if (colNames > 0 && colNames == colTypes && colTypes == colData) {
           // we seem to have a table workspace
-          // if we have no already created a workspace
+          // if we have not already created a workspace
           if (!ws) {
             ws = std::make_shared<DataObjects::TableWorkspace>();
             // create the columns
             auto itName = names.begin();
             auto itTypes = types.begin();
             for (size_t i = 0; i < colNames; i++) {
-              std::string name = *itName;
+              std::string colName = *itName;
               std::string type = *itTypes;
               // trim the strings
-              boost::trim(name);
+              boost::trim(colName);
               boost::trim(type);
-              ws->addColumn(type, name);
+              ws->addColumn(type, colName);
               itName++;
               itTypes++;
             }
@@ -408,7 +408,6 @@ void LoadAscii2::writeToWorkspace(API::MatrixWorkspace_sptr &localWorkspace, con
  */
 void LoadAscii2::setcolumns(std::ifstream &file, std::string &line, std::list<std::string> &columns) {
   m_lineNo = 0;
-  std::vector<double> values;
   // processheader will also look for a base number of columns, to save time
   // here if possible
   // but if the user specifies a number of lines to skip that check won't happen
@@ -433,6 +432,7 @@ void LoadAscii2::setcolumns(std::ifstream &file, std::string &line, std::list<st
                                      std::to_string(cols) + ".");
           } else if (cols != 1) {
             try {
+              std::vector<double> values;
               fillInputValues(values, columns);
             } catch (boost::bad_lexical_cast &) {
               continue;
@@ -484,7 +484,6 @@ void LoadAscii2::processHeader(std::ifstream &file) {
       ++row;
       boost::trim(line);
 
-      std::list<std::string> columns;
       size_t lineCols = 0;
 
       if (!line.empty()) {
@@ -502,6 +501,7 @@ void LoadAscii2::processHeader(std::ifstream &file) {
           continue;
         }
         if (std::isdigit(static_cast<unsigned char>(line.at(0))) || line.at(0) == '-' || line.at(0) == '+') {
+          std::list<std::string> columns;
           lineCols = this->splitIntoColumns(columns, line);
           // we might have the first set of values but there can't be more than
           // 3 delimiters if it is
@@ -601,11 +601,8 @@ void LoadAscii2::addToCurrentSpectra(const std::list<std::string> &columns) {
   m_spectraStart = false;
   fillInputValues(values, columns);
   // add X and Y
-  auto histo = m_curSpectra->histogram();
-  histo.resize(histo.size() + 1);
-
-  histo.mutableX().back() = values[0];
-  histo.mutableY().back() = values[1];
+  m_curHistoX.emplace_back(values[0]);
+  m_curHistoY.emplace_back(values[1]);
 
   // check for E and DX
   switch (m_baseCols) {
@@ -613,17 +610,16 @@ void LoadAscii2::addToCurrentSpectra(const std::list<std::string> &columns) {
   // workspace, omit DX
   case 3: {
     // E in file, include it, omit DX
-    histo.mutableE().back() = values[2];
+    m_curHistoE.emplace_back(values[2]);
     break;
   }
   case 4: {
     // E and DX in file, include both
-    histo.mutableE().back() = values[2];
+    m_curHistoE.emplace_back(values[2]);
     m_curDx.emplace_back(values[3]);
     break;
   }
   }
-  m_curSpectra->setHistogram(histo);
   m_curBins++;
 }
 
@@ -673,12 +669,33 @@ void LoadAscii2::newSpectra() {
     }
 
     if (m_curSpectra) {
+      auto numXPoints = m_curHistoX.size();
+      if (numXPoints > 0) {
+        auto hist = m_curSpectra->histogram();
+        hist.resize(numXPoints);
+        auto &x = hist.mutableX();
+        auto &y = hist.mutableY();
+
+        for (size_t i = 0; i < numXPoints; ++i) {
+          x[i] = m_curHistoX[i];
+          y[i] = m_curHistoY[i];
+        }
+
+        if (m_baseCols > 2) {
+          auto &e = hist.mutableE();
+          for (size_t i = 0; i < numXPoints; ++i)
+            e[i] = m_curHistoE[i];
+        }
+        m_curSpectra->setHistogram(hist);
+      }
+
       size_t specSize = m_curSpectra->size();
       if (specSize > 0 && specSize == m_lastBins) {
         if (m_curSpectra->x().size() == m_curDx.size())
           m_curSpectra->setPointStandardDeviations(std::move(m_curDx));
         m_spectra.emplace_back(*m_curSpectra);
       }
+
       m_curSpectra.reset();
     }
 
@@ -686,6 +703,9 @@ void LoadAscii2::newSpectra() {
                                                               HistogramData::Histogram::YMode::Counts);
     m_curDx.clear();
     m_spectraStart = true;
+    m_curHistoX.clear();
+    m_curHistoY.clear();
+    m_curHistoE.clear();
   }
 }
 

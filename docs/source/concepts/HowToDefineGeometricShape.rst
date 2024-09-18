@@ -332,7 +332,7 @@ Here the dimensions are used to define a 2m x 4m x 0.2m cuboid with its centre a
     axes.text(10.5,11.5,11, "WIDTH", color='b', fontsize=12)
     axes.text(11,9.5,9, "HEIGHT", color='purple', fontsize=12)
 
-    plt.show()
+    fig.show()
 
 In the next example, four points are used to describe a 2m x 0.8m x 0.4m cuboid with the its centre at the origin.
 
@@ -406,7 +406,7 @@ In the next example, four points are used to describe a 2m x 0.8m x 0.4m cuboid 
     axes.scatter(0,0,0, color='b')
     axes.text(0,0.1,-0.15, "ORIGIN", color='b', fontsize=12)
 
-    plt.show()
+    fig.show()
 
 
 Hexahedron

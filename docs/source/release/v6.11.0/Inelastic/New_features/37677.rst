@@ -1,0 +1,1 @@
+- Add `Output Composite Members` option to I(Q, t) tab in :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>`

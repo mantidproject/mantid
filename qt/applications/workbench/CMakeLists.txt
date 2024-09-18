@@ -8,7 +8,7 @@ if(APPLE OR WIN32)
   endif()
   add_python_package(workbench EXECUTABLE EGGLINKNAME MantidWorkbench EXCLUDE_FROM_INSTALL ${_exclude_on_install})
   # Allow VS to start workbench for debugging
-  set(_vs_debugger_args "${MSVC_BIN_DIR}/workbench-script.pyw --single-process")
+  set(_vs_debugger_args "-m workbench --single-process")
   # cmake-format: off
   set_target_properties(
     workbench

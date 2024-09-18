@@ -37,15 +37,11 @@ using namespace API;
  * Usually of the form: entry0/\<NXinstrument class\>/name
  */
 std::string LoadHelper::findInstrumentNexusPath(const Mantid::NeXus::NXEntry &firstEntry) {
-  std::string insNamePath;
   std::vector<Mantid::NeXus::NXClassInfo> v = firstEntry.groups();
-  for (auto it = v.begin(); it < v.end(); it++) {
-    if (it->nxclass == "NXinstrument") {
-      insNamePath = it->nxname;
-      break;
-    }
-  }
-  return insNamePath;
+  const auto it = std::find_if(v.cbegin(), v.cend(), [](const auto &group) { return group.nxclass == "NXinstrument"; });
+  if (it != v.cend())
+    return it->nxname;
+  return "";
 }
 
 std::string LoadHelper::getStringFromNexusPath(const Mantid::NeXus::NXEntry &firstEntry, const std::string &nexusPath) {
@@ -132,7 +128,6 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &worksp
  */
 void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, const std::string &entryName,
                                        bool useFullPath) {
-  std::string emptyStr; // needed for first call
   int datatype;
   char nxname[NX_MAXNAMELEN], nxclass[NX_MAXNAMELEN];
   if (!entryName.empty()) {
@@ -148,6 +143,7 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
   NXstatus getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
   if (getnextentry_status == NX_OK) {
     if ((NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
+      std::string emptyStr;
       recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, emptyStr, emptyStr, 1 /* level */, useFullPath);
       NXclosegroup(nxfileID);
     }
@@ -167,8 +163,9 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
  * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
  *
  */
-void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, std::string &parent_name,
-                                                 std::string &parent_class, int level, bool useFullPath) {
+void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
+                                                 const std::string &parent_name, const std::string &parent_class,
+                                                 int level, bool useFullPath) {
   // Classes
   NXstatus getnextentry_status; ///< return status
   int datatype;                 ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see

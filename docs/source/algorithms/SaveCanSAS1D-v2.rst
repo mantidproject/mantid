@@ -13,15 +13,20 @@
 Description
 -----------
 
-Saves the given :ref:`MatrixWorkspace` to a file in the canSAS 1-D format.
+Saves the given :ref:`MatrixWorkspace` to a file in the CanSAS1D XML format.
+
+This format is only intended to be used for 1D workspaces.
 
 If the workspace contains several spectra, two options are available:
 
-* if OneSpectrumPerFile if false (default value), all spectra will be appended
-  into the same file (into different <SASdata> entries)
-* if OneSpectrumPerFile is true, each spectrum will be written in a separate
-  file. The name of the file will be created as follows: <Filename property>_
-  <spectrum index>_<axis value><axis unit>.<extension>
+* if ``OneSpectrumPerFile`` is ``false`` (default value), all spectra will be appended
+  into the same file (into different ``<SASdata>`` entries)
+* if ``OneSpectrumPerFile`` is ``true``, each spectrum will be written in a separate
+  file. The name of the file will be created as follows:
+
+  ``<Filename property>_<spectrum index>_<axis value><axis unit>.<extension>``
+
+The created file can be loaded back into Mantid using the :ref:`algm-LoadCanSAS1D` algorithm.
 
 The canSAS 1-D Format
 #####################

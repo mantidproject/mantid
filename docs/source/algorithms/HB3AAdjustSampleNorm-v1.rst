@@ -40,6 +40,12 @@ intensities found with :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`
 to be directly compared between scans measured with different step
 sizes.
 
+Grouping
+--------
+
+A grouping option is available group pixels by either 2x2 or 4x4 which reduces memory
+usage and improves the performance of subsequent reduction steps. The default is the original detetor pixelation.
+
 See :ref:`HB3AIntegratePeaks <algm-HB3AIntegratePeaks>` for complete examples of the HB3A workflow.
 
 .. categories::

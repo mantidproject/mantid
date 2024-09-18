@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidAlgorithms/DllConfig.h"
 
@@ -60,7 +61,8 @@ private:
   /// Create output workspace
   API::MatrixWorkspace_sptr createOutputWS(const API::MatrixWorkspace_sptr &input);
   /// Get the scale factor for the given spectrum
-  double getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS, const size_t index);
+  double getScaleFactor(const API::MatrixWorkspace_const_sptr &inputWS, const Mantid::API::SpectrumInfo &spectrumInfo,
+                        const size_t index);
 
   /// The progress reporting object
   std::unique_ptr<API::Progress> m_progress;

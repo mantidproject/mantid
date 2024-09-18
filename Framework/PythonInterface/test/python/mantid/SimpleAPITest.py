@@ -32,11 +32,8 @@ class SimpleAPITest(unittest.TestCase):
     def test_simpleapi_does_not_import_qt(self):
         import sys
 
-        modules = [mod for mod in sys.modules]
-        qt_import = "qtpy"
-        matching_qtpy_imports = [mod for mod in modules if qt_import in mod]
         self.assertFalse(
-            len(matching_qtpy_imports) > 0,
+            "qtpy" in sys.modules,
             msg="The simpleapi shouldn't import qtpy, one or more of "
             "imports you've added includes a package which imports "
             "qtpy, please amend your imports.",
@@ -45,11 +42,8 @@ class SimpleAPITest(unittest.TestCase):
     def test_simpleapi_does_not_import_mantidqt(self):
         import sys
 
-        modules = [mod for mod in sys.modules]
-        mantidqt_import = "mantidqt"
-        matching_mantidqt_imports = [mod for mod in modules if mantidqt_import in mod]
         self.assertFalse(
-            len(matching_mantidqt_imports) > 0,
+            "mantidqt" in sys.modules,
             msg="The simpleapi shouldn't import mantidqt, one or more of "
             "imports you've added includes a package which imports "
             "mantidqt, please amend your imports.",
@@ -110,7 +104,7 @@ class SimpleAPITest(unittest.TestCase):
 
     def test_function_call_raises_RuntimeError_when_passed_incorrect_args(self):
         for func_call in (simpleapi.LoadNexus, simpleapi.Load):
-            self.assertRaises(RuntimeError, func_call, NotAProperty=1)
+            self.assertRaises(TypeError, func_call, NotAProperty=1)
 
     def test_function_call_returns_tuple_when_a_single_argument_is_provided(self):
         dataX = numpy.linspace(start=1, stop=3, num=11)

@@ -2,7 +2,7 @@
 
 # Constructs a standalone windows MantidWorkbench installer using NSIS.
 # The package is created from a pre-packaged version of Mantid from conda
-# and removes any excess that is not necessary in a standalone
+# and removes some excess that is not necessary in a standalone
 # package
 
 # Print usage and exit
@@ -86,9 +86,6 @@ echo "Removing jq from conda env"
 "$CONDA_EXE" remove --prefix $CONDA_ENV_PATH --yes m2w64-jq
 echo "jq removed from conda env"
 
-# Pip install quasielasticbayes so it can be packaged alongside workbench on windows
-# Version 0.2.0 is built for Python 3.10
-$CONDA_ENV_PATH/python.exe -m pip install quasielasticbayes==0.2.0
 # Pip install quickBayes until there's a conda package
 $CONDA_ENV_PATH/python.exe -m pip install quickBayes==1.0.0b15
 
@@ -132,7 +129,7 @@ mv $CONDA_ENV_PATH/Library/plugins/imageformats $COPY_DIR/plugins/qt5/
 mv $CONDA_ENV_PATH/Library/plugins/printsupport $COPY_DIR/plugins/qt5/
 mv $CONDA_ENV_PATH/Library/plugins/sqldrivers $COPY_DIR/plugins/qt5/
 mv $CONDA_ENV_PATH/Library/plugins/styles $COPY_DIR/plugins/qt5/
-mv $CONDA_ENV_PATH/Library/plugins/qt5/*.dll $COPY_DIR/plugins/qt5
+mv $CONDA_ENV_PATH/Library/plugins/qt5/*.dll $COPY_DIR/plugins/qt5/
 mv $CONDA_ENV_PATH/Library/plugins/*.dll $COPY_DIR/plugins/
 mv $CONDA_ENV_PATH/Library/plugins/python $COPY_DIR/plugins/
 
@@ -216,7 +213,13 @@ OUTFILE_NAME="$SCRIPT_DRIVE_LETTER:${OUTFILE_NAME:2}"
 
 # Run the makensis command from our nsis Conda environment
 echo makensis /V4 /O\"$NSIS_OUTPUT_LOG\" /DVERSION=$VERSION /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\"
-cmd.exe /C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$VERSION /O\"$NSIS_OUTPUT_LOG\" /DPACKAGE_DIR=\"$COPY_DIR\" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH \"$NSIS_SCRIPT\""
+cmd.exe //C "START /wait "" $MAKENSIS_COMMAND /V4 /DVERSION=$VERSION /O"$NSIS_OUTPUT_LOG" /DPACKAGE_DIR="$COPY_DIR" /DPACKAGE_SUFFIX=$SUFFIX /DOUTFILE_NAME=$OUTFILE_NAME /DMANTID_ICON=$MANTID_ICON /DMUI_PAGE_LICENSE_PATH=$LICENSE_PATH "$NSIS_SCRIPT""
+
+if [ ! -f "$OUTFILE_NAME" ]; then
+  echo "Error creating package, no file found at $OUTFILE_NAME"
+  exit 1
+fi
+
 echo "Package packaged, find it here: $OUTFILE_NAME"
 
 echo "Done"

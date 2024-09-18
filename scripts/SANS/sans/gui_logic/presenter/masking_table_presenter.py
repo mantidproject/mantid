@@ -52,7 +52,7 @@ class MaskingTablePresenter(object):
             state = self.get_state(row_index)
         except Exception as e:
             self.on_processing_error_masking_display(e)
-            raise e  # propagate errors for run_tab_presenter to deal with
+            return
 
         if not state:
             self._logger.error(
@@ -76,7 +76,7 @@ class MaskingTablePresenter(object):
         self._view.set_display_mask_button_to_normal()
 
     def on_processing_error_masking_display(self, error):
-        self._logger.warning("There has been an error. See more: {}".format(error))
+        self._logger.error("There has been an error. See more: {}".format(error))
         # Enable button
         self._view.set_display_mask_button_to_normal()
 

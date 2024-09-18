@@ -36,7 +36,6 @@
 #include "MantidKernel/Unit.h"
 
 #include <algorithm>
-#include <cassert>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
 #include <limits>
@@ -46,11 +45,16 @@ namespace Mantid::Algorithms {
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
+using Mantid::API::AnalysisDataService;
 using Mantid::API::FileProperty;
 using Mantid::API::MatrixWorkspace;
+using Mantid::API::MatrixWorkspace_const_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
+using Mantid::API::PropertyMode;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::EventWorkspace;
+using Mantid::DataObjects::MaskWorkspace;
+using Mantid::DataObjects::MaskWorkspace_const_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::Geometry::Instrument_const_sptr;
 using Mantid::Kernel::ArrayBoundedValidator;
@@ -58,6 +62,7 @@ using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::BoundedValidator;
 using Mantid::Kernel::CompositeValidator;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::Logger;
 using Mantid::Kernel::MandatoryValidator;
 using Mantid::Kernel::RebinParamsValidator;
 using Mantid::Kernel::StringListValidator;
@@ -179,40 +184,47 @@ const std::string PDCalibration::category() const { return "Diffraction\\Calibra
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string PDCalibration::summary() const {
-  return "Calibrate the detector pixels and create a calibration table";
+  return "This algorithm determines the diffractometer constants that convert diffraction spectra "
+         "from time-of-flight (TOF) to d-spacing. The results are output to a calibration table.";
 }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void PDCalibration::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::InOut),
-                  "Input signal workspace");
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
+                  "Input workspace containing spectra as a function of TOF measured on a standard sample.");
+
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive, "Starting workspace index for fit");
-  declareProperty("StopWorkspaceIndex", EMPTY_INT(),
-                  "Last workspace index to fit (which is included). "
-                  "If a value larger than the workspace index of last spectrum, "
-                  "then the workspace index of last spectrum is used.");
+  declareProperty(
+      "StopWorkspaceIndex", EMPTY_INT(),
+      "Last workspace index for fit is the smaller of this value and the workspace index of last spectrum.");
 
-  declareProperty(std::make_unique<ArrayProperty<double>>("TofBinning", std::make_shared<RebinParamsValidator>()),
-                  "Min, Step, and Max of time-of-flight bins. "
-                  "Logarithmic binning is used if Step is negative.");
+  declareProperty(
+      std::make_unique<ArrayProperty<double>>("TofBinning", std::make_shared<RebinParamsValidator>()),
+      "Min, Step, and Max of TOF bins. "
+      "Logarithmic binning is used if Step is negative. Chosen binning should ensure sufficient datapoints across "
+      "the peaks to be fitted, considering the number of parameters required by PeakFunction and BackgroundType.");
 
   const std::vector<std::string> exts2{".h5", ".cal"};
   declareProperty(std::make_unique<FileProperty>("PreviousCalibrationFile", "", FileProperty::OptionalLoad, exts2),
-                  "Previous calibration file");
+                  "An existent file to be loaded into a calibration table, which is used for converting PeakPositions "
+                  "from d-spacing to TOF.");
   declareProperty(std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
                       "PreviousCalibrationTable", "", Direction::Input, API::PropertyMode::Optional),
-                  "Previous calibration table. This overrides results from previous file.");
+                  "An existent calibration table used for converting PeakPositions from d-spacing to TOF. "
+                  "This property has precedence over PreviousCalibrationFile.");
 
   // properties about peak positions to fit
   std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian", "Lorentzian", "PseudoVoigt",
                                      "IkedaCarpenterPV"};
-  declareProperty("PeakFunction", "Gaussian", std::make_shared<StringListValidator>(peaktypes));
+  declareProperty("PeakFunction", "Gaussian", std::make_shared<StringListValidator>(peaktypes),
+                  "Function to fit input peaks.");
   vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
-  declareProperty("BackgroundType", "Linear", std::make_shared<StringListValidator>(bkgdtypes), "Type of Background.");
+  declareProperty("BackgroundType", "Linear", std::make_shared<StringListValidator>(bkgdtypes),
+                  "Function to fit input peaks background.");
 
   auto peaksValidator = std::make_shared<CompositeValidator>();
   auto mustBePosArr = std::make_shared<Kernel::ArrayBoundedValidator<double>>();
@@ -220,7 +232,8 @@ void PDCalibration::init() {
   peaksValidator->add(mustBePosArr);
   peaksValidator->add(std::make_shared<MandatoryValidator<std::vector<double>>>());
   declareProperty(std::make_unique<ArrayProperty<double>>("PeakPositions", peaksValidator),
-                  "Comma delimited d-space positions of reference peaks.");
+                  "Comma-delimited positions (d-spacing) of reference peaks. Care should be taken to avoid using peaks "
+                  "whose predicted positions are too close considering their peak windows.");
 
   auto windowValidator = std::make_shared<CompositeValidator>();
   windowValidator->add(mustBePosArr);
@@ -229,62 +242,78 @@ void PDCalibration::init() {
   windowValidator->add(lengthValidator);
   windowValidator->add(std::make_shared<MandatoryValidator<std::vector<double>>>());
   declareProperty(std::make_unique<ArrayProperty<double>>("PeakWindow", "0.1", windowValidator),
-                  "Window over which to fit a peak in d-spacing (if a single value is supplied it will used as half "
-                  "the window width for all peaks, otherwise a comma delimited list of boundaries).");
+                  "Width of the window (d-spacing) over which to fit a peak. If a single value is supplied, it will be "
+                  "used as half "
+                  "the window width for all peaks. Otherwise, the expected input is a comma-delimited list of 2*N "
+                  "window boundaries, "
+                  "where N is the number of values in PeakPositions. The order of the window boundaries should match "
+                  "the order in PeakPositions.");
 
   auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(1e-3);
   declareProperty("PeakWidthPercent", EMPTY_DBL(), min,
-                  "The estimated peak width as a percent of the peak"
-                  "center value, in d-spacing or TOF units.");
+                  "Used for estimating peak width (an initial parameter for peak fitting) by multiplying peak's value "
+                  "in PeakPositions by this factor.");
 
   declareProperty("MinimumPeakHeight", 2.,
-                  "Minimum peak height such that all the fitted peaks with "
-                  "height under this value will be excluded. The same property is used "
-                  "for pre-checking peaks before fitting, such that all the peaks with the total Y-count "
-                  "under this value will be excluded.");
+                  "Used for validating peaks before and after fitting. If a peak's observed/estimated or "
+                  "fitted height is under this value, the peak will be marked as an error.");
 
-  declareProperty("MaxChiSq", 100., "Maximum chisq value for individual peak fit allowed. (Default: 100)");
+  declareProperty("MaxChiSq", 100.,
+                  "Used for validating peaks after fitting. If the chi-squared value is higher than this value, "
+                  "the peak will be excluded from calibration. The recommended value is between 2 and 10.");
 
   declareProperty("ConstrainPeakPositions", false,
-                  "If true, peak centers will be constrained by estimated positions "
-                  "(highest Y value position) and "
-                  "the peak width will either be estimated by observation or calculated.");
+                  "If true, a peak center being fit will be constrained by the estimated peak position "
+                  "+/- 0.5 * \"estimated peak width\", where the estimated peak position is the highest Y-value "
+                  "position in the window, "
+                  " and the estimated peak width is FWHM calculated over the window data.");
 
   declareProperty("HighBackground", false,
-                  "Flag whether the data has high background comparing to "
-                  "peaks' intensities. "
-                  "For example, vanadium peaks usually have high background.");
+                  "Flag whether the input data has high background compared to peaks' heights. "
+                  "This option is recommended for data with peak-to-background ratios under ~5.");
 
   declareProperty("MinimumSignalToNoiseRatio", 0.,
-                  "Minimum signal-to-noise ratio such that all the peaks with "
-                  "signal-to-noise ratio under this value will be excluded."
-                  "Note, the algorithm will not exclude a peak for which the noise cannot be estimated.");
+                  "Used for validating peaks before fitting. If the signal-to-noise ratio is under this value, "
+                  "the peak will be excluded from fitting and calibration. This check does not apply to peaks for "
+                  "which the noise cannot be estimated. "
+                  "The minimum recommended value is 12.");
 
   std::vector<std::string> modes{"DIFC", "DIFC+TZERO", "DIFC+TZERO+DIFA"};
   declareProperty("CalibrationParameters", "DIFC", std::make_shared<StringListValidator>(modes),
-                  "Select calibration parameters to fit.");
+                  "Select which diffractometer constants (GSAS convention) to determine.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("TZEROrange"),
-                  "Range for allowable TZERO from calibration (default is all)");
+                  "Range for allowable calibrated TZERO value. Default: no restriction.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("DIFArange"),
-                  "Range for allowable DIFA from calibration (default "
-                  "is all)");
+                  "Range for allowable calibrated DIFA value. Default: no restriction.");
 
   declareProperty("UseChiSq", false,
-                  "By default the square of the peak height is used as weights "
-                  "in the least-squares fit to find the diffractometer "
-                  "constants, if UseChiSq is true then the inverse square of "
-                  "the error on the fitted peak centres will be used instead.");
+                  "Defines the weighting scheme used in the least-squares fit of the extracted peak centers "
+                  "that determines the diffractometer constants. If true, the peak weight will be "
+                  "the inverse square of the error on the fitted peak center. If false, the peak weight will be "
+                  "the square of the fitted peak height.");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<API::ITableWorkspace>>("OutputCalibrationTable", "", Direction::Output),
-      "Output table workspace containing the calibration");
+      "Output table workspace containing the calibration.");
+
+  // Mantid's python API _requires_ a non empty-string name for any Output workspace, even when 'PropertyMode::Optional'
+  // is specified.
+  declareProperty(std::make_unique<WorkspaceProperty<MaskWorkspace>>("MaskWorkspace", "_empty_", Direction::Output,
+                                                                     PropertyMode::Optional),
+                  "Mask workspace (optional input / output workspace):"
+                  "  when specified, if the workspace already exists, any incoming masked detectors will be combined"
+                  "  with any additional outgoing masked detectors detected by the algorithm");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<API::WorkspaceGroup>>("DiagnosticWorkspaces", "", Direction::Output),
-      "Workspaces to promote understanding of calibration results");
+      "Auxiliary workspaces containing extended information on the calibration results.");
+
+  declareProperty("MinimumPeakTotalCount", EMPTY_DBL(),
+                  "Used for validating peaks before fitting. If the total peak window Y-value count "
+                  "is under this value, the peak will be excluded from fitting and calibration.");
 
   // make group for Input properties
   std::string inputGroup("Input Options");
@@ -306,6 +335,7 @@ void PDCalibration::init() {
   setPropertyGroup("PeakWidthPercent", fitPeaksGroup);
   setPropertyGroup("MinimumPeakHeight", fitPeaksGroup);
   setPropertyGroup("MinimumSignalToNoiseRatio", fitPeaksGroup);
+  setPropertyGroup("MinimumPeakTotalCount", fitPeaksGroup);
   setPropertyGroup("HighBackground", fitPeaksGroup);
   setPropertyGroup("MaxChiSq", fitPeaksGroup);
   setPropertyGroup("ConstrainPeakPositions", fitPeaksGroup);
@@ -320,6 +350,17 @@ void PDCalibration::init() {
 
 std::map<std::string, std::string> PDCalibration::validateInputs() {
   std::map<std::string, std::string> messages;
+
+  if (MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace")) {
+    MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+
+    // detectors which are monitors are not included in the mask
+    if (maskWS->getInstrument()->getNumberDetectors(true) != inputWS->getInstrument()->getNumberDetectors(true)) {
+      messages["MaskWorkspace"] = "incoming mask workspace must have the same instrument as the input workspace";
+    } else if (maskWS->getNumberHistograms() != inputWS->getInstrument()->getNumberDetectors(true)) {
+      messages["MaskWorkspace"] = "incoming mask workspace must have one spectrum per detector";
+    }
+  }
 
   vector<double> tzeroRange = getProperty("TZEROrange");
   if (!tzeroRange.empty()) {
@@ -446,6 +487,7 @@ void PDCalibration::exec() {
   }
 
   const double minPeakHeight = getProperty("MinimumPeakHeight");
+  const double minPeakTotalCount = getProperty("MinimumPeakTotalCount");
   const double minSignalToNoiseRatio = getProperty("MinimumSignalToNoiseRatio");
   const double maxChiSquared = getProperty("MaxChiSq");
 
@@ -478,16 +520,20 @@ void PDCalibration::exec() {
   }
   createInformationWorkspaces();
 
-  // Initialize the mask workspace, will all detectors masked by default
-  std::string maskWSName = getPropertyValue("OutputCalibrationTable");
-  maskWSName += "_mask";
-  declareProperty(std::make_unique<WorkspaceProperty<>>("MaskWorkspace", maskWSName, Direction::Output),
-                  "An output workspace containing the mask");
-
-  MaskWorkspace_sptr maskWS = std::make_shared<DataObjects::MaskWorkspace>(m_uncalibratedWS->getInstrument());
-  for (size_t i = 0; i < maskWS->getNumberHistograms(); ++i) // REMOVE
-    maskWS->setMaskedIndex(i, true);                         // mask everything to start
-  setProperty("MaskWorkspace", maskWS);
+  // Use the incoming mask workspace, or start a new one if the workspace does not exist.
+  MaskWorkspace_sptr maskWS;
+  if (!isDefault("MaskWorkspace")) {
+    maskWS = getProperty("MaskWorkspace");
+  }
+  if (!maskWS) {
+    g_log.debug() << "[PDCalibration]: CREATING new MaskWorkspace.\n";
+    // A new mask is completely cleared at creation.
+    maskWS = std::make_shared<MaskWorkspace>(m_uncalibratedWS->getInstrument());
+  } else {
+    g_log.debug() << "[PDCalibration]: Using EXISTING MaskWorkspace.\n";
+  }
+  // Include any incoming masked detector flags in the mask-workspace values.
+  maskWS->combineFromDetectorMasks(m_uncalibratedWS->detectorInfo());
 
   const std::string peakFunction = getProperty("PeakFunction");
   const double WIDTH_TO_FWHM = getWidthToFWHM(peakFunction);
@@ -498,7 +544,7 @@ void PDCalibration::exec() {
   }
   auto NUMHIST = m_stopWorkspaceIndex - m_startWorkspaceIndex + 1;
 
-  // A pair of workspaces, one containing the nominal peak centers in TOF units,
+  // Create a pair of workspaces, one containing the nominal peak centers in TOF units,
   // the other containing the left and right fitting ranges around each nominal
   // peak center, also in TOF units. This for each pixel of the instrument
   auto matrix_pair = createTOFPeakCenterFitWindowWorkspaces(m_uncalibratedWS, peakWindow);
@@ -530,6 +576,7 @@ void PDCalibration::exec() {
   algFitPeaks->setProperty("FitPeakWindowWorkspace", tof_peak_window_ws);
   algFitPeaks->setProperty("PeakWidthPercent", peak_width_percent);
   algFitPeaks->setProperty("MinimumPeakHeight", minPeakHeight);
+  algFitPeaks->setProperty("MinimumPeakTotalCount", minPeakTotalCount);
   algFitPeaks->setProperty("MinimumSignalToNoiseRatio", minSignalToNoiseRatio);
   // some fitting strategy
   algFitPeaks->setProperty("FitFromRight", true);
@@ -600,187 +647,214 @@ void PDCalibration::exec() {
   // parameters for peaks that were successfully fitting, then use this info
   // to obtain difc, difa, and tzero for each pixel
 
-   PRAGMA_OMP(parallel for schedule(dynamic, 1))
-   for (int wkspIndex = m_startWorkspaceIndex; wkspIndex <= m_stopWorkspaceIndex; ++wkspIndex) {
-     PARALLEL_START_INTERRUPT_REGION
-     if ((isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) || !spectrumInfo.hasDetectors(wkspIndex) ||
-         spectrumInfo.isMonitor(wkspIndex)) {
-       prog.report();
-       continue;
-     }
+  PRAGMA_OMP(parallel for schedule(dynamic, 1))
+  for (int wkspIndex = m_startWorkspaceIndex; wkspIndex <= m_stopWorkspaceIndex; ++wkspIndex) {
+    PARALLEL_START_INTERRUPT_REGION
+    if ((isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) || !spectrumInfo.hasDetectors(wkspIndex) ||
+        spectrumInfo.isMonitor(wkspIndex) ||
+        maskWS->isMasked(m_uncalibratedWS->getSpectrum(wkspIndex).getDetectorIDs())) {
+      prog.report();
 
-     // object to hold the information about the peak positions, detid, and wksp
-     // index
-     PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
-     const auto [dif_c, dif_a, tzero] =
-         getDSpacingToTof(peaks.detid); // doesn't matter which one - all have same difc etc.
-     peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, dif_a, dif_c, tzero);
+      if (spectrumInfo.hasDetectors(wkspIndex) && !spectrumInfo.isMonitor(wkspIndex)) {
+        if (isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) {
+          maskWS->setMasked(m_uncalibratedWS->getSpectrum(wkspIndex).getDetectorIDs(), true);
+          g_log.debug() << "FULLY masked spectrum, index: " << wkspIndex << "\n";
+        }
+      }
 
-     // includes peaks that aren't used in the fit
-     // The following data structures will hold information for the peaks
-     // found in the current spectrum
-     const size_t numPeaks = m_peaksInDspacing.size();
-     // TOF of fitted peak centers, default `nan` for failed fitted peaks
-     std::vector<double> tof_vec_full(numPeaks, std::nan(""));
-     std::vector<double> d_vec;   // nominal peak centers of fitted peaks
-     std::vector<double> tof_vec; // TOF of fitted peak centers only
-     // width of fitted peak centers, default `nan` for failed fitted peaks
-     std::vector<double> width_vec_full(numPeaks, std::nan(""));
-     // height of fitted peak centers, default `nan` for failed fitted peaks
-     std::vector<double> height_vec_full(numPeaks, std::nan(""));
-     std::vector<double> weights; // weights for diff const fits
-     // row where first peak occurs
-     const size_t rowNumInFitTableOffset = (wkspIndex - m_startWorkspaceIndex) * numPeaks;
-     // We assumed that the current spectrum contains peaks near the nominal
-     // peak centers. Now we check how many peaks we actually found
-     for (size_t peakIndex = 0; peakIndex < numPeaks; ++peakIndex) {
-       size_t rowIndexInFitTable = rowNumInFitTableOffset + peakIndex;
+      continue;
+    }
 
-       // check indices in PeaksTable
-       if (fittedTable->getRef<int>("wsindex", rowIndexInFitTable) != wkspIndex)
-         throw std::runtime_error("workspace index mismatch!");
-       if (fittedTable->getRef<int>("peakindex", rowIndexInFitTable) != static_cast<int>(peakIndex))
-         throw std::runtime_error("peak index mismatch but workspace index matched");
+    // object to hold  information about the peak positions, detid, and workspace index
+    PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
+    const auto [dif_c, dif_a, tzero] =
+        getDSpacingToTof(peaks.detid); // doesn't matter which one - all have same difc etc.
+    peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, dif_a, dif_c, tzero);
 
-       const double chi2 = fittedTable->getRef<double>("chi2", rowIndexInFitTable);
-       double centre = 0.0;
-       double centre_error = 0.0; // only used if useChiSq true
-       double width = 0.0;
-       double height = 0.0;
-       if (!useChiSq) {
-         // get the effective peak parameters from FitPeaks output
-         centre = fittedTable->getRef<double>("centre", rowIndexInFitTable);
-         width = fittedTable->getRef<double>("width", rowIndexInFitTable);
-         height = fittedTable->getRef<double>("height", rowIndexInFitTable);
-       } else {
-         // FitPeaks outputs actual fitting parameters
-         // extract these from the peak function (not efficient)
-         auto peakfunc = std::dynamic_pointer_cast<API::IPeakFunction>(
-             API::FunctionFactory::Instance().createFunction(peakFunction));
-         // set peak functio nparameters from fit
-         for (size_t ipar = 0; ipar < peakfunc->nParams(); ipar++) {
-           peakfunc->setParameter(ipar, fittedTable->getRef<double>(peakfunc->parameterName(ipar), rowIndexInFitTable));
-         }
-         centre = peakfunc->centre();
-         width = peakfunc->fwhm();
-         height = peakfunc->height();
-         centre_error = errorTable->getRef<double>(peakfunc->getCentreParameterName(), rowIndexInFitTable);
-       }
+    // includes peaks that aren't used in the fit
+    // The following data structures will hold information for the peaks
+    // found in the current spectrum
+    const size_t numPeaks = m_peaksInDspacing.size();
+    // TOF of fitted peak centers, default `nan` for failed fitted peaks
+    std::vector<double> tof_vec_full(numPeaks, std::nan(""));
+    std::vector<double> d_vec;   // nominal peak centers of fitted peaks
+    std::vector<double> tof_vec; // TOF of fitted peak centers only
+    // width of fitted peak centers, default `nan` for failed fitted peaks
+    std::vector<double> width_vec_full(numPeaks, std::nan(""));
+    // height of fitted peak centers, default `nan` for failed fitted peaks
+    std::vector<double> height_vec_full(numPeaks, std::nan(""));
+    std::vector<double> weights; // weights for diff const fits
+    // row where first peak occurs
+    const size_t rowNumInFitTableOffset = (wkspIndex - m_startWorkspaceIndex) * numPeaks;
+    // We assumed that the current spectrum contains peaks near the nominal
+    // peak centers. Now we check how many peaks we actually found
+    for (size_t peakIndex = 0; peakIndex < numPeaks; ++peakIndex) {
+      size_t rowIndexInFitTable = rowNumInFitTableOffset + peakIndex;
 
-       // check chi-square
-       if (chi2 > maxChiSquared || chi2 < 0.) {
-         continue; // peak fit deemed as failure
-       }
+      // check indices in PeaksTable
+      if (fittedTable->getRef<int>("wsindex", rowIndexInFitTable) != wkspIndex)
+        throw std::runtime_error("workspace index mismatch!");
+      if (fittedTable->getRef<int>("peakindex", rowIndexInFitTable) != static_cast<int>(peakIndex))
+        throw std::runtime_error("peak index mismatch but workspace index matched");
 
-       // rule out of peak with wrong position. `centre` should be within its
-       // left and right window ranges
-       if (peaks.inTofWindows[2 * peakIndex] >= centre || peaks.inTofWindows[2 * peakIndex + 1] <= centre) {
-         continue; // peak fit deemed as failure
-       }
+      const double chi2 = fittedTable->getRef<double>("chi2", rowIndexInFitTable);
+      double centre = 0.0;
+      double centre_error = 0.0; // only used if useChiSq true
+      double width = 0.0;
+      double height = 0.0;
+      if (!useChiSq) {
+        // get the effective peak parameters from FitPeaks output
+        centre = fittedTable->getRef<double>("centre", rowIndexInFitTable);
+        width = fittedTable->getRef<double>("width", rowIndexInFitTable);
+        height = fittedTable->getRef<double>("height", rowIndexInFitTable);
+      } else {
+        // FitPeaks outputs actual fitting parameters
+        // extract these from the peak function (not efficient)
+        auto peakfunc = std::dynamic_pointer_cast<API::IPeakFunction>(
+            API::FunctionFactory::Instance().createFunction(peakFunction));
+        // set peak functio nparameters from fit
+        for (size_t ipar = 0; ipar < peakfunc->nParams(); ipar++) {
+          peakfunc->setParameter(ipar, fittedTable->getRef<double>(peakfunc->parameterName(ipar), rowIndexInFitTable));
+        }
+        centre = peakfunc->centre();
+        width = peakfunc->fwhm();
+        height = peakfunc->height();
+        centre_error = errorTable->getRef<double>(peakfunc->getCentreParameterName(), rowIndexInFitTable);
+      }
 
-       // check height: make sure 0 is smaller than 0
-       if (height < minPeakHeight + 1.E-15) {
-         continue; // peak fit deemed as failure
-       }
+      // check chi-square
+      if (chi2 > maxChiSquared || chi2 < 0.) {
+        g_log.debug("failure to fit: chi2 > maximum");
+        continue; // peak fit deemed as failure
+      }
 
-       // the peak fit was a success. Collect info
-       d_vec.emplace_back(m_peaksInDspacing[peakIndex]);
-       tof_vec.emplace_back(centre);
-       if (!useChiSq) {
-         weights.emplace_back(height * height);
-       } else {
-         weights.emplace_back(1 / (centre_error * centre_error));
-       }
-       tof_vec_full[peakIndex] = centre;
-       width_vec_full[peakIndex] = width;
-       height_vec_full[peakIndex] = height;
-     }
+      // rule out of peak with wrong position. `centre` should be within its
+      // left and right window ranges
+      if (peaks.inTofWindows[2 * peakIndex] >= centre || peaks.inTofWindows[2 * peakIndex + 1] <= centre) {
+        g_log.debug("failure to fit: peak center is out-of-range");
+        continue; // peak fit deemed as failure
+      }
 
-     // mask a detector if less than two peaks were fitted successfully
-     maskWS->setMasked(peaks.detid, d_vec.size() < 2);
+      // check height: make sure 0 is smaller than 0
+      if (height < minPeakHeight + 1.E-15) {
+        g_log.debug("failure to fit: peak height is less than minimum");
+        continue; // peak fit deemed as failure
+      }
 
-     if (d_vec.size() < 2) { // not enough peaks were found
-       continue;
-     } else {
-       // obtain difc, difa, and t0 by fitting the nominal peak center
-       // positions, in d-spacing against the fitted peak center positions, in
-       // TOF units.
-       double difc = 0., t0 = 0., difa = 0.;
-       fitDIFCtZeroDIFA_LM(d_vec, tof_vec, weights, difc, t0, difa);
-       for (auto iter = peaks.detid.begin(); iter != peaks.detid.end(); ++iter) {
-         auto det = *iter;
-         const auto rowIndexOutputPeaks = m_detidToRow[det];
-         // chisq represent the deviations between the nominal peak positions
-         // and the peak positions using the GSAS formula with optimized difc,
-         // difa, and tzero
-         double chisq = 0.;
-         Mantid::Kernel::Units::dSpacing dSpacingUnit;
-         dSpacingUnit.initialize(-1., 0,
-                                 Kernel::UnitParametersMap{{Kernel::UnitParams::difa, difa},
-                                                           {Kernel::UnitParams::difc, difc},
-                                                           {Kernel::UnitParams::tzero, t0}});
-         for (std::size_t i = 0; i < numPeaks; ++i) {
-           if (std::isnan(tof_vec_full[i]))
-             continue;
-           // Find d-spacing using the GSAS formula with optimized difc, difa,
-           // t0 for the TOF of the current peak's center.
-           const double dspacing = dSpacingUnit.singleFromTOF(tof_vec_full[i]);
-           // `temp` is residual between the nominal position in d-spacing for
-           // the current peak, and the fitted position in d-spacing
-           const double temp = m_peaksInDspacing[i] - dspacing;
-           chisq += (temp * temp);
-           m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) = dspacing;
-           m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-               WIDTH_TO_FWHM * (width_vec_full[i] / (2 * difa * dspacing + difc));
-           m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) = height_vec_full[i];
-         }
-         m_peakPositionTable->cell<double>(rowIndexOutputPeaks, m_peaksInDspacing.size() + 1) = chisq;
-         m_peakPositionTable->cell<double>(rowIndexOutputPeaks, m_peaksInDspacing.size() + 2) =
-             chisq / static_cast<double>(numPeaks - 1);
+      // the peak fit was a success. Collect info
+      g_log.getLogStream(Logger::Priority::PRIO_TRACE) << "successful fit: peak centered at " << centre << "\n";
 
-         setCalibrationValues(det, difc, difa, t0);
-       }
-     }
-     prog.report();
+      d_vec.emplace_back(m_peaksInDspacing[peakIndex]);
+      tof_vec.emplace_back(centre);
+      if (!useChiSq) {
+        weights.emplace_back(height * height);
+      } else {
+        weights.emplace_back(1 / (centre_error * centre_error));
+      }
+      tof_vec_full[peakIndex] = centre;
+      width_vec_full[peakIndex] = width;
+      height_vec_full[peakIndex] = height;
+    }
 
-     PARALLEL_END_INTERRUPT_REGION
-   }
-   PARALLEL_CHECK_INTERRUPT_REGION
+    if (d_vec.size() < 2) {
+      // If less than two peaks were fitted successfully, indicate failure by
+      //   masking all of the detectors contributing to the spectrum.
+      maskWS->setMasked(peaks.detid, true);
 
-   // sort the calibration tables by increasing detector ID
-   m_calibrationTable = sortTableWorkspace(m_calibrationTable);
-   setProperty("OutputCalibrationTable", m_calibrationTable);
+      g_log.debug() << "MASKING:\n";
+      for (const auto &det : peaks.detid) {
+        g_log.debug() << "  " << det << "\n";
+      }
+      g_log.debug() << "\n";
 
-   // fix-up the diagnostic workspaces
-   m_peakPositionTable = sortTableWorkspace(m_peakPositionTable);
-   m_peakWidthTable = sortTableWorkspace(m_peakWidthTable);
-   m_peakHeightTable = sortTableWorkspace(m_peakHeightTable);
+      continue;
+    } else {
+      // obtain difc, difa, and t0 by fitting the nominal peak center
+      // positions, in d-spacing against the fitted peak center positions, in
+      // TOF units.
+      double difc = 0., t0 = 0., difa = 0.;
+      fitDIFCtZeroDIFA_LM(d_vec, tof_vec, weights, difc, t0, difa);
+      for (auto iter = peaks.detid.begin(); iter != peaks.detid.end(); ++iter) {
+        auto det = *iter;
+        const auto rowIndexOutputPeaks = m_detidToRow[det];
+        // chisq represent the deviations between the nominal peak positions
+        // and the peak positions using the GSAS formula with optimized difc,
+        // difa, and tzero
+        double chisq = 0.;
+        Mantid::Kernel::Units::dSpacing dSpacingUnit;
+        dSpacingUnit.initialize(-1., 0,
+                                Kernel::UnitParametersMap{{Kernel::UnitParams::difa, difa},
+                                                          {Kernel::UnitParams::difc, difc},
+                                                          {Kernel::UnitParams::tzero, t0}});
+        for (std::size_t i = 0; i < numPeaks; ++i) {
+          if (std::isnan(tof_vec_full[i]))
+            continue;
+          // Find d-spacing using the GSAS formula with optimized difc, difa,
+          // t0 for the TOF of the current peak's center.
+          const double dspacing = dSpacingUnit.singleFromTOF(tof_vec_full[i]);
+          // `temp` is residual between the nominal position in d-spacing for
+          // the current peak, and the fitted position in d-spacing
+          const double temp = m_peaksInDspacing[i] - dspacing;
+          chisq += (temp * temp);
+          m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) = dspacing;
+          m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
+              WIDTH_TO_FWHM * (width_vec_full[i] / (2 * difa * dspacing + difc));
+          m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) = height_vec_full[i];
+        }
+        m_peakPositionTable->cell<double>(rowIndexOutputPeaks, m_peaksInDspacing.size() + 1) = chisq;
+        m_peakPositionTable->cell<double>(rowIndexOutputPeaks, m_peaksInDspacing.size() + 2) =
+            chisq / static_cast<double>(numPeaks - 1);
 
-   // a derived table from the position and width
-   auto resolutionWksp = calculateResolutionTable();
+        setCalibrationValues(det, difc, difa, t0);
+      }
+    }
+    prog.report();
 
-   // set the diagnostic workspaces out
-   auto diagnosticGroup = std::make_shared<API::WorkspaceGroup>();
-   // add workspaces calculated by FitPeaks
-   API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_fitparam", fittedTable);
-   diagnosticGroup->addWorkspace(fittedTable);
-   API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_fitted", calculatedWS);
-   diagnosticGroup->addWorkspace(calculatedWS);
-   if (useChiSq) {
-     API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_fiterror", errorTable);
-     diagnosticGroup->addWorkspace(errorTable);
-   }
+    PARALLEL_END_INTERRUPT_REGION
+  }
+  PARALLEL_CHECK_INTERRUPT_REGION
 
-   // add workspaces calculated by PDCalibration
-   API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_dspacing", m_peakPositionTable);
-   diagnosticGroup->addWorkspace(m_peakPositionTable);
-   API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_width", m_peakWidthTable);
-   diagnosticGroup->addWorkspace(m_peakWidthTable);
-   API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_height", m_peakHeightTable);
-   diagnosticGroup->addWorkspace(m_peakHeightTable);
-   API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_resolution", resolutionWksp);
-   diagnosticGroup->addWorkspace(resolutionWksp);
-   setProperty("DiagnosticWorkspaces", diagnosticGroup);
+  // sort the calibration tables by increasing detector ID
+  m_calibrationTable = sortTableWorkspace(m_calibrationTable);
+  setProperty("OutputCalibrationTable", m_calibrationTable);
+
+  // Return the mask workspace only if it was specified as a parameter.
+  if (!isDefault("MaskWorkspace")) {
+    // Align the detector mask flags of the mask workspace with the workspace values:
+    maskWS->combineToDetectorMasks();
+    setProperty("MaskWorkspace", maskWS);
+  }
+
+  // fix-up the diagnostic workspaces
+  m_peakPositionTable = sortTableWorkspace(m_peakPositionTable);
+  m_peakWidthTable = sortTableWorkspace(m_peakWidthTable);
+  m_peakHeightTable = sortTableWorkspace(m_peakHeightTable);
+
+  // a derived table from the position and width
+  auto resolutionWksp = calculateResolutionTable();
+
+  // set the diagnostic workspaces out
+  auto diagnosticGroup = std::make_shared<API::WorkspaceGroup>();
+  // add workspaces calculated by FitPeaks
+  API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_fitparam", fittedTable);
+  diagnosticGroup->addWorkspace(fittedTable);
+  API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_fitted", calculatedWS);
+  diagnosticGroup->addWorkspace(calculatedWS);
+  if (useChiSq) {
+    API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_fiterror", errorTable);
+    diagnosticGroup->addWorkspace(errorTable);
+  }
+
+  // add workspaces calculated by PDCalibration
+  API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_dspacing", m_peakPositionTable);
+  diagnosticGroup->addWorkspace(m_peakPositionTable);
+  API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_width", m_peakWidthTable);
+  diagnosticGroup->addWorkspace(m_peakWidthTable);
+  API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_height", m_peakHeightTable);
+  diagnosticGroup->addWorkspace(m_peakHeightTable);
+  API::AnalysisDataService::Instance().addOrReplace(diagnostic_prefix + "_resolution", resolutionWksp);
+  diagnosticGroup->addWorkspace(resolutionWksp);
+  setProperty("DiagnosticWorkspaces", diagnosticGroup);
 }
 
 namespace { // anonymous namespace
@@ -1021,10 +1095,16 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std:
 vector<double> PDCalibration::dSpacingWindows(const std::vector<double> &centres,
                                               const std::vector<double> &windows_in) {
 
+  if (!(windows_in.size() == 1 || windows_in.size() / 2 == centres.size()))
+    throw std::logic_error("the peak-window vector must contain either a single peak-width value, or a pair of values "
+                           "for each peak center specified");
+
   const std::size_t numPeaks = centres.size();
 
   // assumes distance between peaks can be used for window sizes
-  assert(numPeaks >= 2);
+  if (!(numPeaks >= 2))
+    throw std::logic_error("at least two peak centres must be specified: the distance between these centres will be "
+                           "used to estimate the peak widths");
 
   vector<double> windows_out(2 * numPeaks);
   double left;
@@ -1401,9 +1481,9 @@ API::ITableWorkspace_sptr PDCalibration::sortTableWorkspace(API::ITableWorkspace
 }
 
 /**
- *  A pair of workspaces, one containing the nominal peak centers in TOF units,
+ *  Create a pair of workspaces, one containing the nominal peak centers in TOF units,
  *  the other containing the left and right fitting ranges around each nominal
- *  peak center, also in TOF units
+ *  peak center, also in TOF units.
  *
  *  Because each pixel has a different set of difc, difa, and tzero values,
  *  the position of the nominal peak centers (and the fitting ranges)
@@ -1411,8 +1491,8 @@ API::ITableWorkspace_sptr PDCalibration::sortTableWorkspace(API::ITableWorkspace
  *  calculated for each pixel.
  *
  *  @param dataws :: input signal workspace
- *  @param peakWindow:: A vector of boundaries in d-sapcing (if only one element this is half the width of the window
- * for all peaks) left and right of the nominal peak center to look for the peak
+ *  @param peakWindow:: A vector of boundaries in d-spacing (if the vector has only one element this is half the width
+ * of the window for all peaks) left and right of the nominal peak center to look for the peak
  */
 std::pair<API::MatrixWorkspace_sptr, API::MatrixWorkspace_sptr>
 PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace_sptr &dataws,
@@ -1425,7 +1505,7 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace
   g_log.information() << "DSPACING WINDOWS\n";
   for (std::size_t i = 0; i < m_peaksInDspacing.size(); ++i) {
     g_log.information() << "[" << i << "] " << windowsInDSpacing[2 * i] << " < " << m_peaksInDspacing[i] << " < "
-                        << windowsInDSpacing[2 * i + 1] << std::endl;
+                        << windowsInDSpacing[2 * i + 1] << "\n";
   }
 
   // create workspaces for nominal peak centers and fit ranges
@@ -1455,7 +1535,7 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(const API::MatrixWorkspace
 
     for (std::size_t i = 0; i < peaks.inTofPos.size(); i++) {
       g_log.information() << "[" << iws << "," << i << "] " << peaks.inTofWindows[2 * i] << " < " << peaks.inTofPos[i]
-                          << " < " << peaks.inTofWindows[2 * i + 1] << std::endl;
+                          << " < " << peaks.inTofWindows[2 * i + 1] << "\n";
     }
 
     PARALLEL_END_INTERRUPT_REGION

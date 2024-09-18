@@ -429,21 +429,23 @@ void AlgorithmHistoryWindow::writeToScriptFile() {
 }
 
 void AlgEnvHistoryGrpBox::fillEnvHistoryGroupBox(const EnvironmentHistory &envHistory) {
-  std::string osname = envHistory.osName();
-  std::string osversion = envHistory.osVersion();
-  std::string frwkversn = envHistory.frameworkVersion();
-
   QLineEdit *osNameEdit = getosNameEdit();
-  if (osNameEdit)
+  if (osNameEdit) {
+    std::string osname = envHistory.osName();
     osNameEdit->setText(osname.c_str());
+  }
 
   QLineEdit *osVersionEdit = getosVersionEdit();
-  if (osVersionEdit)
+  if (osVersionEdit) {
+    std::string osversion = envHistory.osVersion();
     osVersionEdit->setText(osversion.c_str());
+  }
 
   QLineEdit *frmwkVersnEdit = getfrmworkVersionEdit();
-  if (frmwkVersnEdit)
+  if (frmwkVersnEdit) {
+    std::string frwkversn = envHistory.frameworkVersion();
     frmwkVersnEdit->setText(frwkversn.c_str());
+  }
 }
 
 void AlgorithmHistoryWindow::updateAll(const Mantid::API::AlgorithmHistory_const_sptr &algHistory) {
@@ -512,12 +514,11 @@ AlgHistoryProperties::AlgHistoryProperties(QWidget *w, std::vector<PropertyHisto
   hList << "Name"
         << "Value"
         << "Default?:"
-        << "Direction"
-        << "";
+        << "Direction";
 
   m_histpropTree = new QTreeWidget(w);
   m_histpropTree->setTextElideMode(Qt::ElideMiddle);
-  m_histpropTree->setColumnCount(5);
+  m_histpropTree->setColumnCount(4);
   m_histpropTree->setSelectionMode(QAbstractItemView::NoSelection);
   m_histpropTree->setHeaderLabels(hList);
   m_histpropTree->setGeometry(213, 5, 350, 200);
@@ -575,10 +576,9 @@ void AlgHistoryProperties::copySelectedItemText() {
  */
 void AlgHistoryProperties::displayAlgHistoryProperties() {
   QStringList propList;
-  std::string sProperty;
   for (std::vector<PropertyHistory_sptr>::const_iterator pIter = m_Histprop.begin(); pIter != m_Histprop.end();
        ++pIter) {
-    sProperty = (*pIter)->name();
+    std::string sProperty = (*pIter)->name();
     propList.append(sProperty.c_str());
 
     sProperty = (*pIter)->value();
@@ -712,7 +712,7 @@ void AlgHistoryTreeWidget::uncheckAllChildren(QTreeWidgetItem *item, int index) 
 }
 
 void AlgHistoryTreeWidget::treeSelectionChanged() {
-  if (AlgHistoryItem *item = dynamic_cast<AlgHistoryItem *>(this->selectedItems()[0])) {
+  if (const AlgHistoryItem *item = dynamic_cast<AlgHistoryItem *>(this->selectedItems()[0])) {
     emit updateAlgorithmHistoryWindow(item->getAlgorithmHistory());
   }
 }

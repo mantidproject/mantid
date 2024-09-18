@@ -28,6 +28,12 @@ The average Debye-Waller factor :math:`\exp\left(-2\bar{W}(Q)\right)` is
 calculated using an average mean-square displacement :math:`\langle u^2 \rangle`,
 using :math:`W=Q^2\langle u^2\rangle/2`.
 
+:math:`\langle u^2 \rangle` is also called the isotropic atomic displacement
+parameter :math:`U_{\mathrm{iso}}` in Rietveld refinement programs
+like `GSAS <https://subversion.xray.aps.anl.gov/trac/EXPGUI/wiki/GSASIntro>`_.
+There is also another, related, type of atomic displacement parameter used in programs like
+`FullProf <https://www.ill.eu/sites/fullprof/>`_ called :math:`B_{\mathrm{iso}}` : :math:`B_{\mathrm{iso}}=8\pi^2U_{\mathrm{iso}}` [#GSASREF]_.
+
 The algorithm accepts both :math:`S(Q,E)` workspaces as well as
 :math:`S(2\theta,E)` workspaces. In the latter case :math:`Q` values are
 calculated from :math:`2\theta` and :math:`E` before applying the formula
@@ -109,6 +115,8 @@ References
 ----------
 
 .. [#CHAPLOT] Thermodynamic Properties of Solids, eds. Chaplot, Mittal, Choudhury, Chapter 3
+
+.. [#GSASREF] `GSAS Manual <https://subversion.xray.aps.anl.gov/EXPGUI/gsas/all/GSAS%20Manual.pdf>`_, page 123
 
 .. categories::
 

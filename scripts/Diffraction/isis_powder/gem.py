@@ -207,6 +207,7 @@ class Gem(AbstractInst):
                 msevents=self._inst_settings.mayers_mult_scat_events,
             )
         else:
+            self._check_sample_details()
             return absorb_corrections.run_cylinder_absorb_corrections(
                 ws_to_correct=ws_to_correct,
                 multiple_scattering=self._inst_settings.multiple_scattering,

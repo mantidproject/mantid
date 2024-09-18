@@ -176,6 +176,11 @@ class ModelFittingPresenter(BasicFittingPresenter):
             # Triggers handle_results_table_changed
             self.view.update_result_table_names(self.model.result_table_names)
 
+        if self.model.number_of_result_tables() == 0:
+            self.view.disable_view()
+        else:
+            self.enable_editing_notifier.notify_subscribers()
+
     def update_fit_functions_in_model_from_view(self) -> None:
         """Update the fit function in the model only for the currently selected dataset."""
         self.model.current_single_fit_function = self.view.current_fit_function()

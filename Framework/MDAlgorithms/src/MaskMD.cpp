@@ -126,8 +126,8 @@ void MaskMD::exec() {
   std::vector<std::string> dimensions = parseDimensionNames(dimensions_string);
   // Report what dimension names were found
   g_log.debug() << "Dimension names parsed as: \n";
-  for (const auto &name : dimensions) {
-    g_log.debug() << name << '\n';
+  for (const auto &dimension : dimensions) {
+    g_log.debug() << dimension << '\n';
   }
 
   size_t nDims = ws->getNumDims();
@@ -217,8 +217,8 @@ std::map<std::string, std::string> MaskMD::validateInputs() {
   // Check cardinality on names/ids
   if (nDimensionIds % nDims != 0) {
     messageStream << "Number of dimension ids/names must be n * " << nDims << ". The following names were given: ";
-    for (const auto &name : dimensions) {
-      messageStream << name << ", ";
+    for (const auto &dimension : dimensions) {
+      messageStream << dimension << ", ";
     }
 
     validation_output["Dimensions"] = messageStream.str();

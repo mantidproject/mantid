@@ -219,17 +219,17 @@ DownloadInstrument::StringToStringMap DownloadInstrument::processRepository() {
   std::unordered_set<std::string> repoFilenames;
 
   for (auto &serverElement : serverContents) {
-    std::string name = serverElement.get("name", "").asString();
-    repoFilenames.insert(name);
-    Poco::Path filePath(localPath, name);
+    std::string elementName = serverElement.get("name", "").asString();
+    repoFilenames.insert(elementName);
+    Poco::Path filePath(localPath, elementName);
     if (filePath.getExtension() != "xml")
       continue;
     std::string sha = serverElement.get("sha", "").asString();
     std::string downloadUrl = getDownloadUrl(serverElement);
 
     // Find shas
-    std::string localSha = getValueOrDefault(localShas, name, "");
-    std::string installSha = getValueOrDefault(installShas, name, "");
+    std::string localSha = getValueOrDefault(localShas, elementName, "");
+    std::string installSha = getValueOrDefault(installShas, elementName, "");
     // Different sha1 on github cf local and global
     // this will also catch when file is only present on github (as local sha
     // will be "")

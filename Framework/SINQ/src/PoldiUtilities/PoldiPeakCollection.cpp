@@ -105,13 +105,13 @@ void PoldiPeakCollection::setUnitCell(const UnitCell &unitCell) { m_unitCell = u
 UnitCell PoldiPeakCollection::unitCell() const { return m_unitCell; }
 
 TableWorkspace_sptr PoldiPeakCollection::asTableWorkspace() {
-  TableWorkspace_sptr peaks = std::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
+  TableWorkspace_sptr peaksws = std::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable());
 
-  prepareTable(peaks);
-  dataToTableLog(peaks);
-  peaksToTable(peaks);
+  prepareTable(peaksws);
+  dataToTableLog(peaksws);
+  peaksToTable(peaksws);
 
-  return peaks;
+  return peaksws;
 }
 
 void PoldiPeakCollection::prepareTable(const TableWorkspace_sptr &table) {

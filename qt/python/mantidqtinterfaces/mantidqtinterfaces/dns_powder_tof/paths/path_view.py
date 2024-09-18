@@ -44,13 +44,10 @@ class DNSPathView(DNSView):
         self._attach_signal_slots()
 
     # signals
-    sig_data_path_set = Signal(str)
+    sig_data_path_is_set = Signal(str)
     sig_clear_cache = Signal()
     sig_file_dialog_requested = Signal(str)
     sig_data_dir_editing_finished = Signal()
-
-    def _data_dir_editing_finished(self):
-        self.sig_data_dir_editing_finished.emit()
 
     def _file_dialog(self):
         sender = self.sender().objectName()[8:]
@@ -62,10 +59,14 @@ class DNSPathView(DNSView):
 
     def set_data_path(self, dir_name):
         self.set_path("data_dir", dir_name)
-        self.sig_data_path_set.emit(dir_name)
+        self.sig_data_path_is_set.emit(dir_name)
 
     def _clear_cache(self):
         self.sig_clear_cache.emit()
+
+    def _clear_user_and_proposal_number(self):
+        self._map["user"].setText("")
+        self._map["prop_nb"].setText("")
 
     def _toggle_editable_directories(self):
         state = not self._map["auto_set_other_dir"].checkState()
@@ -115,4 +116,3 @@ class DNSPathView(DNSView):
         self._ui.pB_file_script.clicked.connect(self._file_dialog)
         self._ui.pB_export.clicked.connect(self._file_dialog)
         self._ui.pB_clear_cache.clicked.connect(self._clear_cache)
-        self._map["data_dir"].editingFinished.connect(self._data_dir_editing_finished)

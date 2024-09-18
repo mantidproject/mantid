@@ -9,6 +9,7 @@
 #include "DllOption.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/ImageInfoModel.h"
+#include <QTableWidget>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -21,6 +22,10 @@ public:
   virtual void showInfo(const ImageInfoModel::ImageInfo &info) = 0;
   virtual void setWorkspace(const Mantid::API::Workspace_sptr &ws) = 0;
   virtual void setRowCount(const int count) = 0;
+  virtual void setColumnCount(const int count) = 0;
+  virtual void setItem(const int rowIndex, const int columnIndex, QTableWidgetItem *item) = 0;
+  virtual void hideColumn(const int index) = 0;
+  virtual void showColumn(const int index) = 0;
 };
 
 } // namespace MantidWidgets

@@ -17,7 +17,16 @@ import numpy as np
 from typing import List
 
 from mantid.geometry import CrystalStructure, ReflectionGenerator, ReflectionConditionFilter
-from mantid.simpleapi import CreateWorkspace, LoadGSS, DeleteWorkspace, CreateEmptyTableWorkspace, Load, logger
+from mantid.simpleapi import (
+    CreateWorkspace,
+    LoadGSS,
+    DeleteWorkspace,
+    CreateEmptyTableWorkspace,
+    Load,
+    logger,
+    LoadCIF,
+    CreateSampleWorkspace,
+)
 from mantid.api import AnalysisDataService as ADS
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2 import parse_inputs
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.common import output_settings
@@ -57,6 +66,7 @@ class GSAS2Model(object):
         self.limits = None
         self.override_cell_length_string = None
         self.mantid_pawley_reflections = None
+        self.crystal_structures = None
         self.chosen_cell_lengths = None
         self.out_call_gsas2 = None
         self.err_call_gsas2 = None
@@ -92,17 +102,20 @@ class GSAS2Model(object):
         self.limits = None
         self.override_cell_length_string = None
         self.mantid_pawley_reflections = None
+        self.crystal_structures = None
         self.chosen_cell_lengths = None
         self.out_call_gsas2 = None
         self.err_call_gsas2 = None
         self.phase_names_list = None
 
-    def run_model(self, load_parameters, refinement_parameters, project_name, rb_num, user_limits):
+    def run_model(self, load_parameters, refinement_parameters, project_name, rb_num, user_x_limits):
         self.clear_input_components()
         if not self.initial_validation(project_name, load_parameters):
             return None
         self.set_components_from_inputs(load_parameters, refinement_parameters, project_name, rb_num)
-        self.evaluate_further_inputs(user_limits)
+        self.read_phase_files()
+        self.generate_reflections_from_space_group()
+        self.validate_x_limits(user_x_limits)
         if not self.further_validation():
             return None
 
@@ -146,24 +159,6 @@ class GSAS2Model(object):
         self.refine_background = True
         self.refine_unit_cell = True
         self.refine_histogram_scale_factor = True  # True by default
-
-    def evaluate_further_inputs(self, user_x_limits):
-        if not self.loop_phase_files() or not self.validate_x_limits(user_x_limits):
-            return None
-        return True
-
-    def loop_phase_files(self):
-        self.mantid_pawley_reflections = []
-        for loop_phase_filepath in self.phase_filepaths:
-            self.chosen_cell_lengths = self.choose_cell_lengths(loop_phase_filepath)
-            if not self.chosen_cell_lengths:
-                return None
-            if self.refinement_method == "Pawley":
-                generated_reflections = self.generate_reflections_from_space_group(loop_phase_filepath, self.chosen_cell_lengths)
-                if not generated_reflections:
-                    return None
-                self.mantid_pawley_reflections.extend(generated_reflections)
-        return True
 
     # ===========
     # Validation
@@ -220,7 +215,7 @@ class GSAS2Model(object):
             instrument_files=self.instrument_files,
             limits=self.limits,
             mantid_pawley_reflections=self.mantid_pawley_reflections,
-            override_cell_lengths=[float(x) for x in self.chosen_cell_lengths.split(" ")],
+            override_cell_lengths=self.get_override_lattice_parameters(),
             refine_unit_cell=self.refine_unit_cell,
             d_spacing_min=self.dSpacing_min,
             number_of_regions=self.number_of_regions,
@@ -272,7 +267,13 @@ class GSAS2Model(object):
                 universal_newlines=True,
                 env=env,
             )
+
             shell_output = shell_process.communicate(timeout=self.timeout)
+
+            if shell_process.returncode != 0:
+                logger.error(f"GSAS-II call failed with error: {shell_output[-1]}")
+                return None
+
             return shell_output
         except subprocess.TimeoutExpired:
             shell_process.terminate()
@@ -314,76 +315,6 @@ class GSAS2Model(object):
                             value_string = value_string.strip(" ")
         return value_string
 
-    def find_basis_block_in_file(self, file_path, marker_string, start_of_value, end_of_value):
-        value_string = None
-        if os.path.exists(file_path):
-            with open(file_path, "rt", encoding="utf-8") as file:
-                full_file_string = file.read()
-                where_marker = full_file_string.find(marker_string)
-                if where_marker != -1:
-                    where_first_digit = -1
-                    index = int(where_marker)
-                    while index < len(full_file_string):
-                        if full_file_string[index].isdecimal():
-                            where_first_digit = index
-                            break
-                        index += 1
-                    if where_first_digit != -1:
-                        where_start_of_line = full_file_string.rfind(start_of_value, 0, where_first_digit - 1)
-                        if where_start_of_line != -1:
-                            where_end_of_block = full_file_string.find(end_of_value, where_start_of_line)
-                            # if "loop" not found then assume the end of the file is the end of this block
-                            value_string = full_file_string[where_start_of_line:where_end_of_block]
-        return value_string
-
-    def read_basis(self, phase_file_path):
-        basis_string = self.find_basis_block_in_file(phase_file_path, "atom", "\n", "loop")
-        if not basis_string:
-            logger.error(f"Invalid Phase file format in {phase_file_path}")
-            return None
-        list_of_lines = basis_string.split("\n")
-        list_of_lines = [k for k in list_of_lines if k != ""]
-        basis = []
-        for line in list_of_lines:
-            split_line = line.split()
-            split_line = self.remove_elements_after_the_first_that_are_alphabetic(split_line)
-            split_line = self.format_element_symbol(split_line)
-            basis.append(" ".join(split_line[0:6]))
-        return basis
-
-    def remove_elements_after_the_first_that_are_alphabetic(self, line_split):
-        indices_to_remove = []
-        for index in range(1, len(line_split)):
-            if line_split[index].isalpha():
-                indices_to_remove.append(index)
-        if indices_to_remove:
-            indices_to_remove = sorted(indices_to_remove, reverse=True)
-            for index in indices_to_remove:
-                del line_split[index]
-        return line_split
-
-    def format_element_symbol(self, line_split):
-        # Now convert FE1 to Fe
-        line_split[0] = "".join([i for i in line_split[0] if not i.isdigit()])
-        if len(line_split[0]) == 2:
-            line_split[0] = "".join([line_split[0][0].upper(), line_split[0][1].lower()])
-        return line_split
-
-    def read_space_group(self, phase_file_path):
-        space_group = self.find_in_file(phase_file_path, "_symmetry_space_group_name_H-M", '"', '"', strip_separator='"')
-        return space_group
-
-    def insert_minus_before_first_digit(self, original_space_group):
-        # https://docs.mantidproject.org/nightly/concepts/PointAndSpaceGroups.html
-        roto_inverted_space_group = original_space_group
-        for character_index, character in enumerate(roto_inverted_space_group):
-            if character.isdigit():
-                split_string = list(roto_inverted_space_group)
-                split_string.insert(character_index, "-")
-                roto_inverted_space_group = "".join(split_string)
-                break  # only apply to first digit
-        return roto_inverted_space_group
-
     def get_crystal_params_from_instrument(self, instrument):
         crystal_params = []
         if not self.number_of_regions:
@@ -417,117 +348,60 @@ class GSAS2Model(object):
     # Pawley Reflections
     # ===================
 
-    def choose_cell_lengths(self, phase_file_path: str):
-        if self.override_cell_length_string:
-            if "," not in self.override_cell_length_string:
-                overriding_cell_lengths_list = [float(self.override_cell_length_string)] * 3
-            else:
-                overriding_cell_lengths_list = [float(x) for x in self.override_cell_length_string.split(",")]
-
-            if len(overriding_cell_lengths_list) != 3:
-                logger.error(
-                    f"The number of Override Cell Length values ({len(overriding_cell_lengths_list)}) "
-                    f"must be 1 or 3 (and separated by commas)."
-                )
-                return None
-
-            cell_lengths = " ".join(
-                [str(overriding_cell_lengths_list[0]), str(overriding_cell_lengths_list[1]), str(overriding_cell_lengths_list[2])]
-            )
-        else:
-            cell_length_a = self.find_in_file(phase_file_path, "_cell_length_a", " ", "_cell_length_b")
-            cell_length_b = self.find_in_file(phase_file_path, "_cell_length_b", " ", "_cell_length_c")
-            cell_length_c = self.find_in_file(phase_file_path, "_cell_length_c", " ", "_cell")
-            if not cell_length_a or not cell_length_b or not cell_length_c:
-                logger.error(f"Invalid Phase file format in {phase_file_path}")
-                return None
-            cell_lengths = " ".join([cell_length_a, cell_length_b, cell_length_c])
-        return cell_lengths
-
-    def create_pawley_reflections(self, cell_lengths, space_group, basis):
-        generated_reflections = []
-        try:
-            for atom in basis:
-                structure = CrystalStructure(cell_lengths, space_group, atom)
-
-                generator = ReflectionGenerator(structure)
-
-                hkls = generator.getUniqueHKLsUsingFilter(self.dSpacing_min, 3.0, ReflectionConditionFilter.StructureFactor)
-                dValues = generator.getDValues(hkls)
-                pg = structure.getSpaceGroup().getPointGroup()
-                # Make list of tuples and sort by d-values, descending, include point group for multiplicity.
-                loop_reflections = sorted(
-                    [[list(hkl), d, len(pg.getEquivalents(hkl))] for hkl, d in zip(hkls, dValues)],
-                    key=lambda x: x[1] - x[0][0] * 1e-6,
-                    reverse=True,
-                )
-                generated_reflections.extend(loop_reflections)
-        except RuntimeError:
-            logger.error(
-                f"Check the Refinement Method (now {self.refinement_method}) is set correctly. "
-                f"The current inputs are causing an unidentifiable C++ exception."
-            )
-            return None
+    def create_pawley_reflections(self, crystal_structure):
+        generator = ReflectionGenerator(crystal_structure)
+        hkls = generator.getUniqueHKLsUsingFilter(self.dSpacing_min, 4.2, ReflectionConditionFilter.StructureFactor)
+        dValues = generator.getDValues(hkls)
+        pg = crystal_structure.getSpaceGroup().getPointGroup()
+        # Make list of tuples and sort by d-values, descending, include point group for multiplicity.
+        generated_reflections = sorted(
+            [[list(hkl), d, len(pg.getEquivalents(hkl))] for hkl, d in zip(hkls, dValues)],
+            key=lambda x: x[1] - x[0][0] * 1e-6,
+            reverse=True,
+        )
         return generated_reflections
 
-    def generate_reflections_from_space_group(self, phase_filepath, cell_lengths):
-        space_group = self.read_space_group(phase_filepath)
-        found_basis = self.read_basis(phase_filepath)
-        if not found_basis:
-            return None
-        mantid_pawley_reflections = None
-        try:
-            mantid_pawley_reflections = self.create_pawley_reflections(cell_lengths, space_group, found_basis)
-        except ValueError:
-            roto_inversion_space_group = self.insert_minus_before_first_digit(space_group)
-            try:
-                mantid_pawley_reflections = self.create_pawley_reflections(cell_lengths, roto_inversion_space_group, found_basis)
-                if mantid_pawley_reflections:
-                    logger.warning(
-                        f"Note the roto-inversion space group {roto_inversion_space_group} has been "
-                        f"used rather than {space_group} read from {phase_filepath} as "
-                        f"it is not in the accepted list of space groups."
-                    )
-            except ValueError:
-                from mantid.geometry import SpaceGroupFactory
+    def read_phase_files(self):
+        self.crystal_structures = []
+        for phase_filepath in self.phase_filepaths:
+            self.crystal_structures.append(self._read_cif_file(phase_filepath))
+        if self.override_cell_length_string:
+            # override lattice parameters of first file
+            self.crystal_structures[0] = self.set_lattice_params_from_user_input(self.crystal_structures[0])
 
-                space_group_list = SpaceGroupFactory.getAllSpaceGroupSymbols()
-                logger.error(
-                    f"Space group {space_group} read from {phase_filepath} and its "
-                    f"roto_inversion {roto_inversion_space_group} are not in the accepted list"
-                    f"of space groups: \n\n {space_group_list} \n\n The phase file may need to be"
-                    f"edited. For more information see: "
-                    f"https://docs.mantidproject.org/nightly/concepts/PointAndSpaceGroups.html"
-                )
+    def get_override_lattice_parameters(self):
+        if self.override_cell_length_string:
+            return [self._get_lattice_parameters_from_crystal_structure(xtal) for xtal in self.crystal_structures]
+        else:
+            None
 
-        return mantid_pawley_reflections
+    def _get_lattice_parameters_from_crystal_structure(self, crystal_structure):
+        return [getattr(crystal_structure.getUnitCell(), method)() for method in ("a", "b", "c", "alpha", "beta", "gamma")]
+
+    def _read_cif_file(self, phase_filepath):
+        ws = CreateSampleWorkspace(StoreInADS=False)
+        LoadCIF(ws, phase_filepath, StoreInADS=False)  # error if not StoreInADS=False even though no output
+        return ws.sample().getCrystalStructure()
+
+    def set_lattice_params_from_user_input(self, crystal_structure):
+        # user can delimit with , or whitespace
+        user_alatt = [param for param in self.override_cell_length_string.replace(",", " ").split()]
+        if len(user_alatt) == 1:
+            user_alatt = 3 * user_alatt  # assume cubic
+        crystal_structure = CrystalStructure(
+            " ".join(user_alatt), crystal_structure.getSpaceGroup().getHMSymbol(), ";".join(crystal_structure.getScatterers())
+        )
+        return crystal_structure
+
+    def generate_reflections_from_space_group(self):
+        self.mantid_pawley_reflections = []
+        for crystal_structure in self.crystal_structures:
+            self.mantid_pawley_reflections.append(self.create_pawley_reflections(crystal_structure))
+        return
 
     # =========
     # X Limits
     # =========
-
-    def determine_x_limits(self):
-        tof_min = self.determine_tof_min()
-        if not tof_min:
-            return None
-        for workspace_index in range(len(self.x_min)):
-            if tof_min[workspace_index] > self.x_min[workspace_index]:
-                self.x_min[workspace_index] = tof_min[workspace_index]
-        return True
-
-    def determine_tof_min(self):
-        tof_min = []
-        if self.number_of_regions > 1 and len(self.instrument_files) == 1:
-            tof_min = self.get_crystal_params_from_instrument(self.instrument_files[0])
-            if not tof_min:
-                return None
-        elif self.number_of_regions == len(self.instrument_files):
-            for input_instrument in self.instrument_files:
-                loop_instrument_tof_min = self.get_crystal_params_from_instrument(input_instrument)
-                if not loop_instrument_tof_min:
-                    return None
-                tof_min.append(loop_instrument_tof_min[0])
-        return tof_min
 
     def understand_data_structure(self):
         self.data_x_min = []
@@ -565,15 +439,7 @@ class GSAS2Model(object):
         else:
             self.x_min = self.data_x_min
             self.x_max = self.data_x_max
-            success = self.determine_x_limits()
-            if not success:
-                return None
-            if not self.x_min:
-                logger.error(
-                    "Could not determine Minimum and Maximum X values from input files. "
-                    "Please set these values in the Plot Widget on the GSAS-II tab."
-                )
-                return None
+
         self.limits = [self.x_min, self.x_max]
         return True
 
@@ -730,7 +596,7 @@ class GSAS2Model(object):
             )
             if os.path.exists(result_reflections_txt):
                 # omit first 2 lines in file (which are histogram and phase name)
-                loaded_reflections.append(np.genfromtxt(result_reflections_txt)[2:])
+                loaded_reflections.append(np.genfromtxt(result_reflections_txt, skip_header=2))
             else:
                 logger.warning(f"No reflections found for phase {phase_name} within x-limits of the fit.")
         return loaded_reflections
@@ -739,7 +605,8 @@ class GSAS2Model(object):
         result_reflections_rows = []
         output_reflections_files = self.get_txt_files_that_include("_reflections_")
         for file in output_reflections_files:
-            loop_file_text = np.genfromtxt(file, dtype="str")
+            # note delimiter="," specified so as to accept whitespace in phase name (2nd header row)
+            loop_file_text = np.genfromtxt(file, delimiter=",", dtype="str")
             loop_histogram_name = loop_file_text[0]
             loop_phase_name = loop_file_text[1]
             loop_reflections_text = ",    ".join(str(num) for num in loop_file_text[2:])

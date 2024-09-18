@@ -65,7 +65,7 @@ WorkspaceTreeWidget::WorkspaceTreeWidget(MantidDisplayBase *mdb, bool viewOnly, 
   setupLoadButtonMenu();
 
   // Dialog box used for user to specify folder to save multiple workspaces into
-  m_saveFolderDialog = new QFileDialog;
+  m_saveFolderDialog = new QFileDialog(this);
   m_saveFolderDialog->setFileMode(QFileDialog::Directory);
   m_saveFolderDialog->setOption(QFileDialog::ShowDirsOnly);
 
@@ -118,8 +118,7 @@ void WorkspaceTreeWidget::setupWidgetLayout() {
   m_sortButton = new QPushButton("Sort");
   m_sortButton->setToolTip("Sort all workspaces by name, size, or the last time they were modified");
 
-  if (m_groupButton)
-    m_groupButton->setEnabled(false);
+  m_groupButton->setEnabled(false);
   m_deleteButton->setEnabled(false);
   m_clearButton->setEnabled(false);
   m_saveButton->setEnabled(false);
@@ -232,7 +231,7 @@ void WorkspaceTreeWidget::showCriticalUserMessage(const std::string &caption, co
 
 void WorkspaceTreeWidget::onLoadAccept() {
   QObject *sender = QObject::sender();
-  auto *dlg = reinterpret_cast<MantidQt::API::AlgorithmDialog *>(sender);
+  const auto *dlg = reinterpret_cast<MantidQt::API::AlgorithmDialog *>(sender);
   if (!dlg)
     return; // should never happen
 
@@ -256,7 +255,7 @@ void WorkspaceTreeWidget::renameWorkspace() { m_presenter->notifyFromView(ViewNo
 void WorkspaceTreeWidget::showRenameDialog(const StringList &wsNames) {
   QStringList names;
 
-  for (auto &ws : wsNames)
+  for (const auto &ws : wsNames)
     names.append(QString::fromStdString(ws));
 
   m_mantidDisplayModel->renameWorkspace(names);
@@ -278,7 +277,7 @@ void WorkspaceTreeWidget::recordWorkspaceRename(const std::string &oldName, cons
   QList<QString> oldNames = m_renameMap.keys(qs_oldName);
   // non-empty list of oldNames become new_name
   if (!oldNames.isEmpty()) {
-    for (auto &name : oldNames)
+    for (const auto &name : oldNames)
       m_renameMap[name] = qs_newName;
   } else {
     // record a new rename pair
@@ -299,7 +298,7 @@ bool WorkspaceTreeWidget::deleteConfirmation() const {
 
 void WorkspaceTreeWidget::deleteWorkspaces(const StringList &wsNames) {
   QStringList names;
-  for (auto &ws : wsNames)
+  for (const auto &ws : wsNames)
     names.append(QString::fromStdString(ws));
   m_mantidDisplayModel->deleteWorkspaces(names);
 }
@@ -371,7 +370,7 @@ void WorkspaceTreeWidget::saveWorkspaceCollection() {
 }
 
 void WorkspaceTreeWidget::handleShowSaveAlgorithm() {
-  QAction *sendingAction = dynamic_cast<QAction *>(sender());
+  const QAction *sendingAction = dynamic_cast<QAction *>(sender());
 
   if (sendingAction) {
     QString actionName = sendingAction->text();
@@ -448,8 +447,8 @@ void WorkspaceTreeWidget::filterWorkspaces(const std::string &filterText) {
   }
 
   int hiddenCount = 0;
-  QList<QTreeWidgetItem *> visibleGroups;
   if (!text.isEmpty()) {
+    QList<QTreeWidgetItem *> visibleGroups;
     // Loop over everything (currently loaded) and top level
     // find out what is already expanded
     QStringList expanded;
@@ -634,52 +633,52 @@ void WorkspaceTreeWidget::createWorkspaceMenuActions() {
  */
 void WorkspaceTreeWidget::createSortMenuActions() {
   m_sortCriteria = SortCriteria::ByName;
-  m_sortMenu = new QMenu(this);
+  QMenu *sortMenu = new QMenu(this);
 
-  QAction *m_ascendingSortAction = new QAction("Ascending", this);
-  QAction *m_descendingSortAction = new QAction("Descending", this);
-  QAction *m_byNameChoice = new QAction("Name", this);
-  QAction *m_byLastModifiedChoice = new QAction("Last Modified", this);
-  QAction *m_byMemorySize = new QAction("Size", this);
+  QAction *ascendingSortAction = new QAction("Ascending", this);
+  QAction *descendingSortAction = new QAction("Descending", this);
+  QAction *byNameChoice = new QAction("Name", this);
+  QAction *byLastModifiedChoice = new QAction("Last Modified", this);
+  QAction *byMemorySize = new QAction("Size", this);
 
-  m_ascendingSortAction->setCheckable(true);
-  m_ascendingSortAction->setEnabled(true);
+  ascendingSortAction->setCheckable(true);
+  ascendingSortAction->setEnabled(true);
 
-  m_descendingSortAction->setCheckable(true);
-  m_descendingSortAction->setEnabled(true);
+  descendingSortAction->setCheckable(true);
+  descendingSortAction->setEnabled(true);
 
-  QActionGroup *sortDirectionGroup = new QActionGroup(m_sortMenu);
-  sortDirectionGroup->addAction(m_ascendingSortAction);
-  sortDirectionGroup->addAction(m_descendingSortAction);
+  QActionGroup *sortDirectionGroup = new QActionGroup(sortMenu);
+  sortDirectionGroup->addAction(ascendingSortAction);
+  sortDirectionGroup->addAction(descendingSortAction);
   sortDirectionGroup->setExclusive(true);
-  m_ascendingSortAction->setChecked(true);
+  ascendingSortAction->setChecked(true);
 
-  m_byNameChoice->setCheckable(true);
-  m_byNameChoice->setEnabled(true);
+  byNameChoice->setCheckable(true);
+  byNameChoice->setEnabled(true);
 
-  m_byLastModifiedChoice->setCheckable(true);
-  m_byLastModifiedChoice->setEnabled(true);
+  byLastModifiedChoice->setCheckable(true);
+  byLastModifiedChoice->setEnabled(true);
 
-  m_byMemorySize->setCheckable(true);
-  m_byMemorySize->setEnabled(true);
+  byMemorySize->setCheckable(true);
+  byMemorySize->setEnabled(true);
 
-  m_sortChoiceGroup = new QActionGroup(m_sortMenu);
-  m_sortChoiceGroup->addAction(m_byNameChoice);
-  m_sortChoiceGroup->addAction(m_byLastModifiedChoice);
-  m_sortChoiceGroup->addAction(m_byMemorySize);
-  m_sortChoiceGroup->setExclusive(true);
-  m_byNameChoice->setChecked(true);
+  QActionGroup *sortChoiceGroup = new QActionGroup(sortMenu);
+  sortChoiceGroup->addAction(byNameChoice);
+  sortChoiceGroup->addAction(byLastModifiedChoice);
+  sortChoiceGroup->addAction(byMemorySize);
+  sortChoiceGroup->setExclusive(true);
+  byNameChoice->setChecked(true);
 
-  connect(m_ascendingSortAction, SIGNAL(triggered()), this, SLOT(sortAscending()));
-  connect(m_descendingSortAction, SIGNAL(triggered()), this, SLOT(sortDescending()));
-  connect(m_byNameChoice, SIGNAL(triggered()), this, SLOT(chooseByName()));
-  connect(m_byLastModifiedChoice, SIGNAL(triggered()), this, SLOT(chooseByLastModified()));
-  connect(m_byMemorySize, SIGNAL(triggered()), this, SLOT(chooseByMemorySize()));
+  connect(ascendingSortAction, SIGNAL(triggered()), this, SLOT(sortAscending()));
+  connect(descendingSortAction, SIGNAL(triggered()), this, SLOT(sortDescending()));
+  connect(byNameChoice, SIGNAL(triggered()), this, SLOT(chooseByName()));
+  connect(byLastModifiedChoice, SIGNAL(triggered()), this, SLOT(chooseByLastModified()));
+  connect(byMemorySize, SIGNAL(triggered()), this, SLOT(chooseByMemorySize()));
 
-  m_sortMenu->addActions(sortDirectionGroup->actions());
-  m_sortMenu->addSeparator();
-  m_sortMenu->addActions(m_sortChoiceGroup->actions());
-  m_sortButton->setMenu(m_sortMenu);
+  sortMenu->addActions(sortDirectionGroup->actions());
+  sortMenu->addSeparator();
+  sortMenu->addActions(sortChoiceGroup->actions());
+  m_sortButton->setMenu(sortMenu);
 }
 
 /**
@@ -806,11 +805,8 @@ bool WorkspaceTreeWidget::shouldBeSelected(const QString &name) const {
   QMutexLocker lock(&m_mutex);
   QStringList renamed = m_renameMap.keys(name);
   if (!renamed.isEmpty()) {
-    foreach (QString oldName, renamed) {
-      if (m_selectedNames.contains(oldName)) {
-        return true;
-      }
-    }
+    return std::any_of(renamed.cbegin(), renamed.cend(),
+                       [&](const auto &oldName) { return m_selectedNames.contains(oldName); });
   } else if (m_selectedNames.contains(name)) {
     return true;
   }
@@ -1200,7 +1196,7 @@ void WorkspaceTreeWidget::popupContextMenu() {
         (Mantid::Kernel::ConfigService::Instance().getKeys("workspace.sendto.name"));
     bool firstPass(true);
     // Check to see if any options aren't visible
-    for (auto &programName : programNames) {
+    for (const auto &programName : programNames) {
       std::string visible =
           Mantid::Kernel::ConfigService::Instance().getString("workspace.sendto." + programName + ".visible");
       std::string target =
@@ -1454,7 +1450,7 @@ void WorkspaceTreeWidget::showColourFillPlot() {
     auto ws = item->data(0, Qt::UserRole).value<Workspace_sptr>();
 
     if (auto wsGroup = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
-      for (auto &name : wsGroup->getNames())
+      for (const auto &name : wsGroup->getNames())
         allWsNames.append(QString::fromStdString(name));
     } else
       allWsNames.append(item->text(0));
@@ -1482,7 +1478,7 @@ void WorkspaceTreeWidget::onClickShowDetectorTable() {
 void WorkspaceTreeWidget::showDetectorsTable() {
   // get selected workspace
   auto ws = QString::fromStdString(getSelectedWorkspaceNames()[0]);
-  auto table = m_mantidDisplayModel->createDetectorTable(ws, std::vector<int>(), false);
+  const auto *table = m_mantidDisplayModel->createDetectorTable(ws, std::vector<int>(), false);
   if (!table) {
     QMessageBox::information(this, "Error", QString("Cannot create detectors tables for workspace ") + ws);
   }

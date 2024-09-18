@@ -417,6 +417,55 @@ void TimeROI::replaceROI(const std::vector<Types::Core::DateAndTime> &roi) {
     m_roi.assign(roi.cbegin(), roi.cend());
 }
 
+namespace ROI {
+template <typename TYPE>
+std::vector<TYPE> calculate_intersection(const std::vector<TYPE> &left, const std::vector<TYPE> &right) {
+  // empty is interpreted to mean use everything
+  // these checks skip putting together temporary variables for the loops
+  if (left == right || right.empty())
+    return left;
+  else if (left.empty())
+    return right;
+
+  // verify that the dimensionality is reasonable
+  if (left.size() % 2 != 0)
+    throw std::runtime_error("Cannot calculate_intersection with odd left dimension");
+  if (right.size() % 2 != 0)
+    throw std::runtime_error("Cannot calculate_intersection with odd right dimension");
+
+  // create vector to hold the intersection results
+  std::vector<TYPE> result;
+
+  // iterators are faster access than random access via operator[]
+  auto it1 = left.cbegin();
+  auto it2 = right.cbegin();
+
+  while (it1 != left.cend() && it2 != right.cend()) {
+    // Left bound for intersecting segment
+    const TYPE &leftBound = std::max(*it1, *it2);
+
+    // Right bound for intersecting segment
+    const auto it1_next = std::next(it1);
+    const auto it2_next = std::next(it2);
+    const TYPE &rightBound = std::min(*it1_next, *it2_next);
+
+    // If segment is valid, include it
+    if (leftBound < rightBound) {
+      result.emplace_back(leftBound);
+      result.emplace_back(rightBound);
+    }
+
+    // If it1 right bound is smaller, increment it1; else increment it2
+    if (*it1_next < *it2_next)
+      std::advance(it1, 2);
+    else
+      std::advance(it2, 2);
+  }
+
+  return result;
+}
+} // namespace ROI
+
 /**
  * Updates the TimeROI values with the intersection with another TimeROI.
  * See https://en.wikipedia.org/wiki/Intersection for the intersection theory.
@@ -431,40 +480,17 @@ void TimeROI::update_intersection(const TimeROI &other) {
 
   if (other.useAll() || this->useAll()) {
     // empty out this environment
+    // this behavior is required by existing calling code due to not universal use of TimeROI
     m_roi.clear();
     return;
   }
 
-  TimeROI output;
-  auto it1 = m_roi.cbegin();
-  auto it2 = other.m_roi.cbegin();
-
-  while (it1 != m_roi.end() && it2 != other.m_roi.end()) {
-    // Left bound for intersecting segment
-    const DateAndTime &leftBound = std::max(*it1, *it2);
-
-    // Right bound for intersecting segment
-    const auto it1_next = std::next(it1);
-    const auto it2_next = std::next(it2);
-    const DateAndTime &rightBound = std::min(*it1_next, *it2_next);
-
-    // If segment is valid, include it
-    if (leftBound < rightBound) {
-      output.m_roi.emplace_back(leftBound);
-      output.m_roi.emplace_back(rightBound);
-    }
-
-    // If it1 right bound is smaller, increment it1; else increment it2
-    if (*it1_next < *it2_next)
-      std::advance(it1, 2);
-    else
-      std::advance(it2, 2);
-  }
+  auto output = ROI::calculate_intersection(m_roi, other.m_roi);
 
   if (output.empty())
-    output.replaceROI(USE_NONE);
-
-  m_roi = std::move(output.m_roi);
+    this->replaceROI(USE_NONE);
+  else
+    m_roi = std::move(output);
 }
 
 /**
@@ -655,6 +681,15 @@ void TimeROI::saveNexus(::NeXus::File *file) const {
   // save things to to disk
   tsp.saveProperty(file);
 }
+
+namespace ROI {
+// concrete instantiations need to be exported
+template MANTID_KERNEL_DLL std::vector<std::size_t> calculate_intersection(const std::vector<std::size_t> &left,
+                                                                           const std::vector<std::size_t> &right);
+template MANTID_KERNEL_DLL std::vector<Types::Core::DateAndTime>
+calculate_intersection(const std::vector<Types::Core::DateAndTime> &left,
+                       const std::vector<Types::Core::DateAndTime> &right);
+} // namespace ROI
 
 } // namespace Kernel
 } // namespace Mantid

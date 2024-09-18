@@ -17,8 +17,8 @@ lambda_min = 0.8
 
 
 class WishSX(BaseSX):
-    def __init__(self, vanadium_runno=None, file_ext=".raw"):
-        super().__init__(vanadium_runno, file_ext)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.sphere_shape = """<sphere id="sphere">
                                <centre x="0.0"  y="0.0" z="0.0" />
                                <radius val="0.0025"/>
@@ -62,16 +62,19 @@ class WishSX(BaseSX):
             # set sample (must be done after gonio to rotate shape) and correct for attenuation
             if self.sample_dict is not None:
                 mantid.SetSample(wsname, EnableLogging=False, **self.sample_dict)
-                mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength", EnableLogging=False)
-                if "<sphere" in ADS.retrieve(wsname).sample().getShape().getShapeXML():
-                    transmission = mantid.SphericalAbsorption(InputWorkspace=wsname, OutputWorkspace="transmission", EnableLogging=False)
-                else:
-                    transmission = mantid.MonteCarloAbsorption(
-                        InputWorkspace=wsname, OutputWorkspace="transmission", EventsPerPoint=self.n_mcevents, EnableLogging=False
-                    )
-                self._divide_workspaces(wsname, transmission)
-                mantid.DeleteWorkspace(transmission)
-                mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="TOF", EnableLogging=False)
+                if not self.scale_integrated:
+                    mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="Wavelength", EnableLogging=False)
+                    if "<sphere" in ADS.retrieve(wsname).sample().getShape().getShapeXML():
+                        transmission = mantid.SphericalAbsorption(
+                            InputWorkspace=wsname, OutputWorkspace="transmission", EnableLogging=False
+                        )
+                    else:
+                        transmission = mantid.MonteCarloAbsorption(
+                            InputWorkspace=wsname, OutputWorkspace="transmission", EventsPerPoint=self.n_mcevents, EnableLogging=False
+                        )
+                    self._divide_workspaces(wsname, transmission)
+                    mantid.DeleteWorkspace(transmission)
+                    mantid.ConvertUnits(InputWorkspace=wsname, OutputWorkspace=wsname, Target="TOF", EnableLogging=False)
             # save results in dictionary
             self.set_ws(run, wsname)
         return wsname
@@ -130,7 +133,7 @@ class WishSX(BaseSX):
         wsname = WishSX.retrieve(ws).name()
         ws_rb = wsname + "_rb"
         mantid.Rebunch(InputWorkspace=ws, OutputWorkspace=ws_rb, NBunch=nbunch, EnableLogging=False)
-        WishSX.mask_detector_edges(ws_rb, nedge=16, ntube=3)
+        WishSX.mask_detector_edges(ws_rb, nedge=16, ntubes=3)
         WishSX.crop_ws(ws_rb, lambda_min, lambda_max, xunit="Wavelength")
         if out_peaks is None:
             out_peaks = wsname + "_peaks"  # need to do this so not "_rb_peaks"
@@ -139,20 +142,20 @@ class WishSX(BaseSX):
         return out_peaks
 
     @staticmethod
-    def remove_peaks_on_edge(peaks, nedge_tube=2, nedge_pix=16):
+    def remove_peaks_on_detector_edge(peaks, nedge=16, ntubes=2):
         peaks = WishSX.retrieve(peaks)
         # filter peaks on edge of tubes
         row = np.array(peaks.column("Row"))
-        iremove = np.where(np.logical_or(row < nedge_pix, row > 512 - nedge_pix))[0]
+        iremove = np.where(np.logical_or(row < nedge, row > 512 - nedge))[0]
         mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove)
         # filter out peaks on tubes at edge of detector banks
         col = np.array(peaks.column("Col"))
         bank = np.array([int(name[-2:]) for name in peaks.column("BankName")])
-        iremove = np.where(np.logical_and(col < nedge_tube, bank == 1))[0]
+        iremove = np.where(np.logical_and(col < ntubes, bank == 1))[0]
         mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove)
-        iremove = np.where(np.logical_and(col > 152 - nedge_tube, bank == 5))[0]
+        iremove = np.where(np.logical_and(col > 152 - ntubes, bank == 5))[0]
         mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove)
-        iremove = np.where(np.logical_and(col < nedge_tube, bank == 10))[0]
+        iremove = np.where(np.logical_and(col < ntubes, bank == 10))[0]
         mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove)
-        iremove = np.where(np.logical_and(col > 152 - nedge_tube, bank == 6))[0]
+        iremove = np.where(np.logical_and(col > 152 - ntubes, bank == 6))[0]
         mantid.DeleteTableRows(TableWorkspace=peaks, Rows=iremove)

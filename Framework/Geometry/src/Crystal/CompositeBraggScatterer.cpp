@@ -54,15 +54,18 @@ void CompositeBraggScatterer::addScatterer(const BraggScatterer_sptr &scatterer)
   redeclareProperties();
 }
 
-/// Clears all scatterers and assigns clones of the supplied ones.
-void CompositeBraggScatterer::setScatterers(const std::vector<BraggScatterer_sptr> &scatterers) {
-  removeAllScatterers();
-
+/// Adds scatterers and assigns clones of the supplied ones.
+void CompositeBraggScatterer::addScatterers(const std::vector<BraggScatterer_sptr> &scatterers) {
   for (const auto &scatterer : scatterers) {
     addScattererImplementation(scatterer);
   }
-
   redeclareProperties();
+}
+
+/// Clears all scatterers and assigns clones of the supplied ones.
+void CompositeBraggScatterer::setScatterers(const std::vector<BraggScatterer_sptr> &scatterers) {
+  removeAllScatterers();
+  addScatterers(scatterers);
 }
 
 /// Returns the number of scatterers contained in the composite.
@@ -76,6 +79,9 @@ BraggScatterer_sptr CompositeBraggScatterer::getScatterer(size_t i) const {
 
   return m_scatterers[i];
 }
+
+/// Returns the scatterers.
+std::vector<BraggScatterer_sptr> CompositeBraggScatterer::getScatterers() const { return m_scatterers; }
 
 /// Removes the i-th scatterer from the composite or throws an std::out_of_range
 /// exception.

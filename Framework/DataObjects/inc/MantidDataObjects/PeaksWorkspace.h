@@ -83,7 +83,7 @@ public:
   const Peak &getPeak(int peakNum) const override;
 
   IPeak_uptr createPeak(const Kernel::V3D &QLabFrame,
-                        boost::optional<double> detectorDistance = boost::none) const override;
+                        std::optional<double> detectorDistance = std::nullopt) const override;
 
   IPeak_uptr createPeak(const Kernel::V3D &Position, const Kernel::SpecialCoordinateSystem &frame) const override;
 

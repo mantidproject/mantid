@@ -56,7 +56,8 @@ Mantid::API::MatrixWorkspace_sptr setUpResolutionWorkspace() {
 
 IAlgorithm_sptr calculateIqtAlgorithm(const MatrixWorkspace_sptr &sample, const MatrixWorkspace_sptr &resolution,
                                       const double EnergyMin = -0.5, const double EnergyMax = 0.5,
-                                      const double EnergyWidth = 0.1, const int NumberOfIterations = 10) {
+                                      const double EnergyWidth = 0.1, const int NumberOfIterations = 10,
+                                      const bool EnforceNormalization = true) {
   auto calculateIqt = AlgorithmManager::Instance().create("CalculateIqt");
   calculateIqt->setChild(true);
   calculateIqt->initialize();
@@ -67,6 +68,8 @@ IAlgorithm_sptr calculateIqtAlgorithm(const MatrixWorkspace_sptr &sample, const 
   calculateIqt->setProperty("EnergyMax", EnergyMax);
   calculateIqt->setProperty("EnergyWidth", EnergyWidth);
   calculateIqt->setProperty("NumberOfIterations", NumberOfIterations);
+  calculateIqt->setProperty("EnforceNormalization", EnforceNormalization);
+
   return calculateIqt;
 }
 } // namespace
@@ -107,6 +110,33 @@ public:
     TS_ASSERT_DELTA(yValues[1], 0, 0.0001);
     TS_ASSERT_DELTA(yValues[4], 0.4831171, 0.0001);
     TS_ASSERT_DELTA(eValues[0], 0, 0.0001);
+  }
+
+  void test_sample_output_values_are_correct_normalization() {
+    // the results should the same as the default ones: test_sample_output_values_are_correct
+    bool enforceNorm = true;
+    auto algorithm = calculateIqtAlgorithm(m_sampleWorkspace, m_resolutionWorkspace, -0.5, 0.5, 0.1, 10, enforceNorm);
+    algorithm->execute();
+    MatrixWorkspace_sptr outWorkspace = algorithm->getProperty("OutputWorkspace");
+    const auto &yValues = outWorkspace->y(0);
+    const auto &eValues = outWorkspace->e(0);
+    TS_ASSERT_DELTA(yValues[0], 1, 0.0001);
+    TS_ASSERT_DELTA(yValues[1], 0, 0.0001);
+    TS_ASSERT_DELTA(yValues[4], 0.4831171, 0.0001);
+    TS_ASSERT_DELTA(eValues[0], 0, 0.0001);
+  }
+
+  void test_sample_output_values_are_correct_no_normalization() {
+    bool enforceNorm = false;
+    auto algorithm = calculateIqtAlgorithm(m_sampleWorkspace, m_resolutionWorkspace, -0.5, 0.5, 0.1, 10, enforceNorm);
+    algorithm->execute();
+    MatrixWorkspace_sptr outWorkspace = algorithm->getProperty("OutputWorkspace");
+    const auto &yValues = outWorkspace->y(0);
+    const auto &eValues = outWorkspace->e(0);
+    TS_ASSERT_DELTA(yValues[0], 0.701429, 0.0001);
+    TS_ASSERT_DELTA(yValues[1], 0.854227, 0.0001);
+    TS_ASSERT_DELTA(yValues[4], 0.338872, 0.0001);
+    TS_ASSERT_DELTA(eValues[0], 1.17028e-16, 0.0001);
   }
 
   void test_throws_if_energy_bounds_invalid() {

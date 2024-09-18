@@ -17,8 +17,8 @@ build:
 requirements:
   build:
     - {{ compiler("cxx") }}
-    - ninja  # [unix]
-    - cmake
+    - ninja  # [osx or linux]
+    - cmake {{ cmake }}
     - git
     - python {{ python }}                    # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
@@ -36,7 +36,6 @@ requirements:
     - sphinx_bootstrap_theme {{ sphinx_bootstrap_theme }}
     - mantidqt {{ version }}
     - versioningit
-    - readline {{ readline }}  # [linux]
 
 # there are no run requirements as it's just pure html
 

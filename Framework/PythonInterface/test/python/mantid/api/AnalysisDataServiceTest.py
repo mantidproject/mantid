@@ -218,6 +218,40 @@ class AnalysisDataServiceTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             str(workspaces[0])
 
+    def test_unique_name(self):
+        ws_name = mtd.unique_name()
+        self.assertEqual(5, len(ws_name))
+
+        prefix = "un_test_"
+        ws_name = mtd.unique_name(7, prefix)
+        self.assertEqual(len(prefix) + 7, len(ws_name))
+        self.assertTrue(ws_name.startswith(prefix))
+
+        suffix = "_test_ws"
+        ws_name = mtd.unique_name(3, suffix=suffix)
+        self.assertEqual(len(suffix) + 3, len(ws_name))
+        self.assertTrue(ws_name.endswith(suffix))
+
+    def test_hidden_name(self):
+        ws_name = mtd.unique_hidden_name()
+        self.assertEqual(11, len(ws_name))
+        self.assertTrue(ws_name.startswith("__"))
+
+    def test_unique_name_collision(self):
+        import string
+        from mantid.simpleapi import CreateSampleWorkspace
+
+        for letter in string.ascii_lowercase:
+            if letter == "c":
+                continue
+            CreateSampleWorkspace(OutputWorkspace=f"unique_{letter}")
+
+        self.assertEqual("unique_c", mtd.unique_name(1, "unique_"))
+        CreateSampleWorkspace(OutputWorkspace="unique_c")
+
+        with self.assertRaises(RuntimeError):
+            mtd.unique_name(1, "unique_")
+
 
 if __name__ == "__main__":
     unittest.main()

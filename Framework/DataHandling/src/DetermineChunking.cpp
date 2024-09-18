@@ -28,6 +28,7 @@
 #include <exception>
 #include <fstream>
 #include <set>
+#include <vector>
 
 using namespace ::NeXus;
 using namespace Mantid::Kernel;
@@ -38,18 +39,14 @@ using std::string;
 using std::vector;
 
 namespace Mantid::DataHandling {
-const int NUM_EXT_PRENEXUS(1); ///< Number of prenexus extensions
 /// Valid extensions for prenexus files
-const std::string PRENEXUS_EXT[NUM_EXT_PRENEXUS] = {"_runinfo.xml"};
-const int NUM_EXT_EVENT_NEXUS(3); ///< Number of event nexus extensions
+const std::vector<std::string> PRENEXUS_EXT = {"_runinfo.xml"};
 /// Valid extensions for event nexus files
-const std::string EVENT_NEXUS_EXT[NUM_EXT_EVENT_NEXUS] = {"_event.nxs", ".nxs", ".nxs.h5"};
-const int NUM_EXT_HISTO_NEXUS(1); ///< Number of histogram nexus extensions
+const std::vector<std::string> EVENT_NEXUS_EXT = {"_event.nxs", ".nxs", ".nxs.h5"};
 /// Valid extensions for histogram nexus files
-const std::string HISTO_NEXUS_EXT[NUM_EXT_HISTO_NEXUS] = {"_histo.nxs"};
-const int NUM_EXT_RAW(1); ///< Number of raw file extensions
+const std::vector<std::string> HISTO_NEXUS_EXT = {"_histo.nxs"};
 /// Valid extensions for ISIS raw files
-const std::string RAW_EXT[NUM_EXT_RAW] = {".raw"};
+const std::vector<std::string> RAW_EXT = {".raw"};
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DetermineChunking)
@@ -73,10 +70,10 @@ const std::string DetermineChunking::category() const { return "DataHandling\\Pr
 void DetermineChunking::init() {
   // runfile to read in
   std::set<std::string> exts_set;
-  exts_set.insert(PRENEXUS_EXT, PRENEXUS_EXT + NUM_EXT_PRENEXUS);
-  exts_set.insert(EVENT_NEXUS_EXT, EVENT_NEXUS_EXT + NUM_EXT_EVENT_NEXUS);
-  exts_set.insert(HISTO_NEXUS_EXT, HISTO_NEXUS_EXT + NUM_EXT_HISTO_NEXUS);
-  exts_set.insert(RAW_EXT, RAW_EXT + NUM_EXT_RAW);
+  exts_set.insert(PRENEXUS_EXT.cbegin(), PRENEXUS_EXT.cend());
+  exts_set.insert(EVENT_NEXUS_EXT.cbegin(), EVENT_NEXUS_EXT.cend());
+  exts_set.insert(HISTO_NEXUS_EXT.cbegin(), HISTO_NEXUS_EXT.cend());
+  exts_set.insert(RAW_EXT.cbegin(), RAW_EXT.end());
   std::vector<std::string> exts(exts_set.begin(), exts_set.end());
   this->declareProperty(std::make_unique<FileProperty>("Filename", "", FileProperty::Load, exts),
                         "The name of the event nexus, runinfo.xml, raw, or histo nexus file to "
@@ -141,7 +138,7 @@ void DetermineChunking::exec() {
     string dataDir;
     LoadPreNexus lp;
     lp.parseRuninfo(filename, dataDir, eventFilenames);
-    for (auto &eventFilename : eventFilenames) {
+    for (const auto &eventFilename : eventFilenames) {
       BinaryFile<DasEvent> eventfile(dataDir + eventFilename);
       // Factor of 2 for compression
       wkspSizeGiB += static_cast<double>(eventfile.getNumElements()) * 48.0 * BYTES_TO_GiB;
@@ -290,37 +287,36 @@ std::string DetermineChunking::setTopEntryName(const std::string &filename) {
  */
 FileType DetermineChunking::getFileType(const string &filename) {
   // check for prenexus
-  for (const auto &extension : PRENEXUS_EXT) {
-    if (filename.find(extension) != std::string::npos) {
-      g_log.information() << "Determined \'" << filename << "\' is a prenexus file\n";
-      return PRENEXUS_FILE;
-    }
+  if (filenameHasExtension(filename, PRENEXUS_EXT)) {
+    g_log.information() << "Determined \'" << filename << "\' is a prenexus file\n";
+    return PRENEXUS_FILE;
   }
 
   // check for histogram nexus
-  for (const auto &extension : HISTO_NEXUS_EXT) {
-    if (filename.find(extension) != std::string::npos) {
-      g_log.information() << "Determined \'" << filename << "\' is a  histogram nexus file\n";
-      return HISTO_NEXUS_FILE;
-    }
+  if (filenameHasExtension(filename, HISTO_NEXUS_EXT)) {
+    g_log.information() << "Determined \'" << filename << "\' is a  histogram nexus file\n";
+    return HISTO_NEXUS_FILE;
   }
 
   // check for event nexus - must be last because a valid extension is ".nxs"
-  for (const auto &extension : EVENT_NEXUS_EXT) {
-    if (filename.find(extension) != std::string::npos) {
-      g_log.information() << "Determined \'" << filename << "\' is an event nexus file\n";
-      return EVENT_NEXUS_FILE;
-    }
+  if (filenameHasExtension(filename, EVENT_NEXUS_EXT)) {
+    g_log.information() << "Determined \'" << filename << "\' is an event nexus file\n";
+    return EVENT_NEXUS_FILE;
   }
 
   // check for isis raw files
-  for (const auto &extension : RAW_EXT) {
-    if (filename.find(extension) != std::string::npos) {
-      g_log.information() << "Determined \'" << filename << "\' is an ISIS raw file\n";
-      return RAW_FILE;
-    }
+  if (filenameHasExtension(filename, RAW_EXT)) {
+    g_log.information() << "Determined \'" << filename << "\' is an ISIS raw file\n";
+    return RAW_FILE;
   }
 
   throw std::invalid_argument("Unsupported file type");
 }
+
+bool DetermineChunking::filenameHasExtension(const std::string &filename,
+                                             const std::vector<std::string> &fileExtensions) {
+  return std::any_of(fileExtensions.cbegin(), fileExtensions.cend(),
+                     [&filename](const auto &extension) { return filename.find(extension) != std::string::npos; });
+}
+
 } // namespace Mantid::DataHandling

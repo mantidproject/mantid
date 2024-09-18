@@ -116,22 +116,22 @@ void ExtractPolarizationEfficiencies::exec() {
 
   auto alg = createChildAlgorithm("JoinISISPolarizationEfficiencies");
   auto const &efficiencies = EFFICIENCIES.at(method);
-  for (auto const &name : efficiencies) {
-    auto propValue = instrument->getParameterAsString(name);
+  for (auto const &paramName : efficiencies) {
+    auto propValue = instrument->getParameterAsString(paramName);
     if (propValue.empty()) {
-      throw std::invalid_argument("Parameter " + name + " is missing from the correction parameters");
+      throw std::invalid_argument("Parameter " + paramName + " is missing from the correction parameters");
     }
-    auto const prop = parseVector(name, propValue);
+    auto const prop = parseVector(paramName, propValue);
     if (lambda.size() != prop.size()) {
-      throw std::runtime_error("Instrument vector parameter \"" + name + "\" is expected to be the same size as \"" +
-                               LAMBDA_PARAMETER + "\" but " + std::to_string(prop.size()) +
-                               " != " + std::to_string(lambda.size()));
+      throw std::runtime_error("Instrument vector parameter \"" + paramName +
+                               "\" is expected to be the same size as \"" + LAMBDA_PARAMETER + "\" but " +
+                               std::to_string(prop.size()) + " != " + std::to_string(lambda.size()));
     }
-    auto const errorName = name + "_Errors";
+    auto const errorName = paramName + "_Errors";
     propValue = instrument->getParameterAsString(errorName);
     auto const errorProp = propValue.empty() ? std::vector<double>() : parseVector(errorName, propValue);
     auto ws = createWorkspace(lambda, prop, errorProp);
-    alg->setProperty(name, ws);
+    alg->setProperty(paramName, ws);
   }
   alg->execute();
   MatrixWorkspace_sptr result = alg->getProperty("OutputWorkspace");

@@ -100,7 +100,7 @@ public:
 
   /// Finds the approximate solid angle covered by the component when viewed
   /// from the point given
-  double solidAngle(const Kernel::V3D &observer) const override;
+  double solidAngle(const Geometry::SolidAngleParams &params) const override;
   /// Retrieve the cached bounding box
   void getBoundingBox(BoundingBox &assemblyBox) const override;
 

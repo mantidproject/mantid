@@ -1,0 +1,1 @@
+- Fixed a bug where opening the instrument viewer with old muon data (DEVA) would cause a crash.

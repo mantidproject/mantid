@@ -143,7 +143,7 @@ class MplPainter:
         :param angle: Angle in degrees w.r.t X axis
         :param kwargs: Additional matplotlib properties to pass to the call
         """
-        return self.axes.add_patch(Ellipse((x, y), width, height, angle, **kwargs))
+        return self.axes.add_patch(Ellipse((x, y), width, height, angle=angle, **kwargs))
 
     def elliptical_shell(self, x, y, outer_width, outer_height, frac_thick, angle=0.0, **kwargs):
         """Draw an ellipse at the given location

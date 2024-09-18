@@ -107,6 +107,20 @@ pipeline {
         }
       }
     }
+    // Generate the git tag only once to avoid issues where tags are not up to date on
+    // certain agents. In particular, this can be a problem when the branch being built
+    // is on a fork.
+    stage('Generate git tag') {
+      agent { label 'linux-64' }
+      steps {
+        checkoutSource("${GIT_SHA}")
+        script {
+          env.GIT_TAG = generate_git_tag()
+        }
+        echo "${env.GIT_TAG}"
+      }
+    }
+
     // Verify developer environment build/test while also building conda packages
     // in parallel. Running both steps in parallel reduces the overall pipeline
     // time, however if either part breaks then no publishing occurs.
@@ -361,13 +375,13 @@ pipeline {
       }
     }
 
-    stage ('Delete old non-main packages from Anaconda') {
+    stage ('Delete old nightly packages from Anaconda') {
       when {
         beforeAgent true
         beforeOptions true
         allOf {
             expression { env.PUBLISH_TO_ANACONDA == 'true' }
-            expression { env.ANACONDA_CHANNEL_LABEL != '' }
+            expression { env.ANACONDA_CHANNEL_LABEL.trim() == 'nightly' }
         }
       }
       agent { label 'linux-64' } // Use linux for simplicity with shell scripts
@@ -417,7 +431,7 @@ pipeline {
         sh 'tar -cvf conda-packages.tar ${WORKSPACE}/conda-packages/'
         // Publish to github. Single quotes are required for token variables to avoid them leaking
         sh "${CISCRIPT_DIR}/publish-to-github ${WORKSPACE}" + ' ${GITHUB_TOKEN} ' +\
-          "${GITHUB_RELEASES_REPO} ${generate_git_tag()} ${GIT_SHA} ${prerelease_option()} " +\
+          "${GITHUB_RELEASES_REPO} ${GIT_TAG} ${GIT_SHA} ${prerelease_option()} " +\
           "${WORKSPACE}/standalone-packages/* ${WORKSPACE}/conda-packages.tar"
       }
     }
@@ -428,7 +442,13 @@ pipeline {
 
 def git_branch_name() {
   name = scm.branches[0].name
-  if(name.contains("*/")) {
+  // Some jobs define a BRANCH_NAME parameter to allow customisable builds.
+  // In this case the value of scm.branches[0].name will literally be
+  // $BRANCH_NAME and instead we have to get it from the environment.
+  if(name.contains('$BRANCH_NAME')) {
+    name = env.BRANCH_NAME
+  }
+  else if(name.contains("*/")) {
     name = name.split("\\*/")[1]
   }
   return name
@@ -464,7 +484,12 @@ def build_and_test(platform) {
     bat "\"${WIN_BASH}\" -ex -c \"${buildscript_path}\
       ${workspace_unix_style}/${CHECKOUT_DIR} ${cmake_preset} ${common_args}\""
   } else {
-    sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} --enable-doctests"
+    // Only run doctests on Linux
+    doctests = ""
+    if(platform.startsWith('linux')) {
+      doctests = "--enable-doctests"
+    }
+    sh "${buildscript_path} ${WORKSPACE}/${CHECKOUT_DIR} ${cmake_preset} ${common_args} ${doctests}"
   }
 }
 
@@ -496,10 +521,14 @@ def package_conda_options(platform, base_or_workbench) {
     package_flags = "--build-mantid --build-qt ${docs_flags}"
   }
   else if(base_or_workbench == 'workbench') {
-    package_flags = "--build-workbench"
+    if(BUILD_MANTIDDOCS_PACKAGE) {
+      package_flags = "--build-workbench"
+    } else {
+      package_flags = "--build-workbench-without-docs"
+    }
   }
 
-  package_options = "${package_flags} --git-tag ${generate_git_tag()}"
+  package_options = "${package_flags} --git-tag ${GIT_TAG}"
   return package_options.trim()
 }
 

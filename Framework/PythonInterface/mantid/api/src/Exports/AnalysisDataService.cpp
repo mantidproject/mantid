@@ -38,9 +38,13 @@ AnalysisDataServiceImpl &instance() {
   // start the framework (if necessary)
   auto &ads = AnalysisDataService::Instance();
   std::call_once(INIT_FLAG, []() {
+    // Passing True as an argument suppresses a warning that is normally
+    // displayed when calling AnalysisDataService.clear()
     PyRun_SimpleString("import atexit\n"
-                       "from mantid.api import AnalysisDataService\n"
-                       "atexit.register(lambda: AnalysisDataService.clear())");
+                       "def cleanup_ADS():\n"
+                       "    from mantid.api import AnalysisDataService\n"
+                       "    AnalysisDataService.clear(True)\n"
+                       "atexit.register(cleanup_ADS)");
   });
   return ads;
 }
@@ -85,5 +89,16 @@ void export_AnalysisDataService() {
       .def("addToGroup", &AnalysisDataServiceImpl::addToGroup, (arg("groupName"), arg("wsName")),
            "Add a workspace in the ADS to a group in the ADS")
       .def("removeFromGroup", &AnalysisDataServiceImpl::removeFromGroup, (arg("groupName"), arg("wsName")),
-           "Remove a workspace from a group in the ADS");
+           "Remove a workspace from a group in the ADS")
+      .def("unique_name", &AnalysisDataServiceImpl::uniqueName,
+           (arg("self"), arg("n") = 5, arg("prefix") = "", arg("suffix") = ""),
+           "Return a randomly generated unique name for a workspace\n"
+           "\n"
+           ":param str n: length of string of random numbers\n"
+           ":param str prefix: String to be prepended to the generated string\n"
+           ":param str suffix: String to be appended to the generated string\n"
+           ":return: prefix + n*random characters + suffix\n"
+           ":rtype: str\n")
+      .def("unique_hidden_name", &AnalysisDataServiceImpl::uniqueHiddenName, arg("self"),
+           "Return a randomly generated unique hidden workspace name.");
 }

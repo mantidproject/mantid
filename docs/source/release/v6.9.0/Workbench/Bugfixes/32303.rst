@@ -1,1 +1,0 @@
-- Fixed bug in the plot settings axes tab where editing an axis title and clicking ``Apply to all`` would clear your changes. The ui has been slightly reworked to make it clearer what ``Apply to all`` interacts with.

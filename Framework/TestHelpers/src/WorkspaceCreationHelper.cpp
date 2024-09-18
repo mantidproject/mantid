@@ -26,6 +26,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -211,7 +212,9 @@ Workspace2D_sptr create2DWorkspaceWithValues(int64_t nHist, int64_t nBins, bool 
     retVal->getSpectrum(i).setDetectorID(i);
     retVal->getSpectrum(i).setSpectrumNo(i);
   }
-  retVal = maskSpectra(retVal, maskedWorkspaceIndices);
+  if (maskedWorkspaceIndices.size() > 0) {
+    retVal = maskSpectra(retVal, maskedWorkspaceIndices);
+  }
   return retVal;
 }
 
@@ -286,7 +289,7 @@ WorkspaceGroup_sptr createWorkspaceGroup(int nEntries, int nHist, int nBins, con
 }
 
 /** Create a 2D workspace with this many histograms and bins.
- * Filled with Y = 2.0 and E = M_SQRT2w
+ * Filled with Y = 2.0 and E = M_SQRT2
  */
 Workspace2D_sptr create2DWorkspaceBinned(size_t nhist, size_t numVals, double x0, double deltax) {
   BinEdges x(numVals + 1, LinearGenerator(x0, deltax));
@@ -296,7 +299,7 @@ Workspace2D_sptr create2DWorkspaceBinned(size_t nhist, size_t numVals, double x0
 }
 
 /** Create a 2D workspace with this many point-histograms and bins.
- * Filled with Y = 2.0 and E = M_SQRT2w
+ * Filled with Y = 2.0 and E = M_SQRT2
  */
 Workspace2D_sptr create2DWorkspacePoints(size_t nhist, size_t numVals, double x0, double deltax) {
   Points x(numVals, LinearGenerator(x0, deltax));
@@ -307,7 +310,7 @@ Workspace2D_sptr create2DWorkspacePoints(size_t nhist, size_t numVals, double x0
 
 /** Create a 2D workspace with this many histograms and bins. The bins are
  * assumed to be non-uniform and given by the input array
- * Filled with Y = 2.0 and E = M_SQRT2w
+ * Filled with Y = 2.0 and E = M_SQRT2
  * If hasDx is true, all spectra will have dx values, starting from 0.1 and
  * increased by 0.1 for each bin.
  */
@@ -770,8 +773,8 @@ EventWorkspace_sptr createEventWorkspaceWithStartTime(int numPixels, int numBins
 // =====================================================================================
 /** Create event workspace, with several detector IDs in one event list.
  */
-EventWorkspace_sptr createGroupedEventWorkspace(std::vector<std::vector<int>> groups, int numBins, double binDelta,
-                                                double xOffset) {
+EventWorkspace_sptr createGroupedEventWorkspace(std::vector<std::vector<int>> const &groups, int numBins,
+                                                double binDelta, double xOffset) {
 
   auto retVal = std::make_shared<EventWorkspace>();
   retVal->initialize(groups.size(), 2, 1);
@@ -1105,17 +1108,10 @@ createEventWorkspace3(const Mantid::DataObjects::EventWorkspace_const_sptr &sour
   detid2det_map detector_map;
   outputWS->getInstrument()->getDetectors(detector_map);
 
-  // b) determine maximum pixel id
-  detid2det_map::iterator it;
-  detid_t detid_max = 0; // seems like a safe lower bound
-  for (it = detector_map.begin(); it != detector_map.end(); ++it)
-    if (it->first > detid_max)
-      detid_max = it->first;
-
-  // c) Pad all the pixels and Set to zero
+  // b) Pad all the pixels and Set to zero
   size_t workspaceIndex = 0;
   const auto &detectorInfo = outputWS->detectorInfo();
-  for (it = detector_map.begin(); it != detector_map.end(); ++it) {
+  for (auto it = detector_map.begin(); it != detector_map.end(); ++it) {
     if (!detectorInfo.isMonitor(detectorInfo.indexOf(it->first))) {
       auto &spec = outputWS->getSpectrum(workspaceIndex);
       spec.addDetectorID(it->first);
@@ -1254,6 +1250,33 @@ Mantid::DataObjects::PeaksWorkspace_sptr createPeaksWorkspace(const int numPeaks
   }
 
   auto peaksWS = createPeaksWorkspace(numPeaks, true);
+  peaksWS->mutableSample().getOrientedLattice().setUB(ubMat);
+  return peaksWS;
+}
+
+Mantid::DataObjects::LeanElasticPeaksWorkspace_sptr createLeanPeaksWorkspace(const int numPeaks,
+                                                                             const bool createOrientedLattice) {
+  auto peaksWS = std::make_shared<LeanElasticPeaksWorkspace>();
+  Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+  for (int i = 0; i < numPeaks; ++i) {
+    Peak peak(inst, i, i + 0.5);
+    LeanElasticPeak lpeak(peak);
+    peaksWS->addPeak(lpeak);
+  }
+
+  if (createOrientedLattice) {
+    peaksWS->mutableSample().setOrientedLattice(std::make_unique<OrientedLattice>());
+  }
+  return peaksWS;
+}
+
+Mantid::DataObjects::LeanElasticPeaksWorkspace_sptr createLeanPeaksWorkspace(const int numPeaks,
+                                                                             const Mantid::Kernel::DblMatrix &ubMat) {
+  if (ubMat.numRows() != 3 || ubMat.numCols() != 3) {
+    throw std::invalid_argument("UB matrix is not 3x3");
+  }
+
+  auto peaksWS = createLeanPeaksWorkspace(numPeaks, true);
   peaksWS->mutableSample().getOrientedLattice().setUB(ubMat);
   return peaksWS;
 }

@@ -52,8 +52,8 @@ QHash<QString, QVariant> createLineKwargs() {
   return kwargs;
 }
 
-std::vector<boost::optional<QHash<QString, QVariant>>> createPointAndLineKwargs() {
-  std::vector<boost::optional<QHash<QString, QVariant>>> kwargs;
+std::vector<std::optional<QHash<QString, QVariant>>> createPointAndLineKwargs() {
+  std::vector<std::optional<QHash<QString, QVariant>>> kwargs;
   kwargs.emplace_back(createPointKwargs());
   kwargs.emplace_back(createLineKwargs());
   return kwargs;
@@ -131,7 +131,7 @@ void ALCInterface::updateBaselineData() {
 
     // If we have a fitting function and a fitting range
     // we can update the baseline model
-    if ((!m_baselineModellingView->function().isEmpty()) && (m_baselineModellingView->noOfSectionRows() > 0)) {
+    if ((!m_baselineModellingView->function().empty()) && (m_baselineModellingView->noOfSectionRows() > 0)) {
 
       // Fit the data
       m_baselineModellingView->emitFitRequested();
@@ -328,7 +328,7 @@ void ALCInterface::externalPlotRequested() {
  */
 void ALCInterface::externallyPlotWorkspace(MatrixWorkspace_sptr &data, std::string const &workspaceName,
                                            std::string const &workspaceIndices, bool errorBars,
-                                           boost::optional<QHash<QString, QVariant>> const &kwargs) {
+                                           std::optional<QHash<QString, QVariant>> const &kwargs) {
   AnalysisDataService::Instance().addOrReplace(workspaceName, data);
   m_externalPlotter->plotSpectra(workspaceName, workspaceIndices, errorBars, kwargs);
 }
@@ -344,7 +344,7 @@ void ALCInterface::externallyPlotWorkspace(MatrixWorkspace_sptr &data, std::stri
 void ALCInterface::externallyPlotWorkspaces(MatrixWorkspace_sptr &data, std::vector<std::string> const &workspaceNames,
                                             std::vector<int> const &workspaceIndices,
                                             std::vector<bool> const &errorBars,
-                                            std::vector<boost::optional<QHash<QString, QVariant>>> const &kwargs) {
+                                            std::vector<std::optional<QHash<QString, QVariant>>> const &kwargs) {
   AnalysisDataService::Instance().addOrReplace(workspaceNames[0], data);
   m_externalPlotter->plotCorrespondingSpectra(workspaceNames, workspaceIndices, errorBars, kwargs);
 }

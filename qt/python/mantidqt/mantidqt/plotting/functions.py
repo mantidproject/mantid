@@ -183,7 +183,7 @@ def plot_from_names(names, errors, overplot, fig=None, show_colorfill_btn=False,
         )
     else:
         return plot(
-            selection.workspaces,
+            names,
             spectrum_nums=selection.spectra,
             wksp_indices=selection.wksp_indices,
             errors=errors,
@@ -383,14 +383,13 @@ def plot_wireframe(workspaces, fig=None):
 
 @manage_workspace_names
 def plot_contour(workspaces, fig=None):
-    for ws in workspaces:
-        fig = pcolormesh(workspaces, fig)
-        ax = fig.get_axes()[0]
+    fig = pcolormesh(workspaces, fig)
+    for idx, ws in enumerate(workspaces):
+        ax = fig.get_axes()[idx]
         try:
             ax.contour(ws, levels=DEFAULT_CONTOUR_LEVELS, colors=DEFAULT_CONTOUR_COLOUR, linewidths=DEFAULT_CONTOUR_WIDTH)
         except TypeError as type_error:
             LOGGER.warning(str(type_error))
 
-        fig.show()
-
+    fig.show()
     return fig

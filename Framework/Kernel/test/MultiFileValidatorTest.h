@@ -9,7 +9,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/MultiFileValidator.h"
-#include <Poco/File.h>
+#include <filesystem>
+#include <fstream>
 #include <string>
 #include <vector>
 
@@ -19,6 +20,11 @@ namespace {
 void addSingleFile(std::vector<std::vector<std::string>> &fileNames, const std::string &fileNameToAdd) {
   const std::vector<std::string> fileNameList(1, fileNameToAdd);
   fileNames.emplace_back(fileNameList);
+}
+
+void createEmpty(const std::filesystem::path &path) {
+  std::ofstream handle(path);
+  handle.close();
 }
 } // namespace
 
@@ -50,28 +56,28 @@ public:
     const std::string file_stub = "scratch.";
     const std::string ext1 = "txt";
     const std::string ext2 = "raw";
-    Poco::File txt_file_1(file_stub + "_1" + ext1);
-    Poco::File txt_file_2(file_stub + "_2" + ext1);
-    Poco::File raw_file_1(file_stub + "_1" + ext2);
-    Poco::File raw_file_2(file_stub + "_2" + ext2);
+    std::filesystem::path txt_file_1(file_stub + "_1" + ext1);
+    std::filesystem::path txt_file_2(file_stub + "_2" + ext1);
+    std::filesystem::path raw_file_1(file_stub + "_1" + ext2);
+    std::filesystem::path raw_file_2(file_stub + "_2" + ext2);
 
     std::vector<std::vector<std::string>> txt_files;
     std::vector<std::vector<std::string>> raw_files;
 
     try {
-      txt_file_1.createFile();
-      txt_file_2.createFile();
+      createEmpty(txt_file_1);
+      createEmpty(txt_file_2);
 
-      raw_file_1.createFile();
-      raw_file_2.createFile();
+      createEmpty(raw_file_1);
+      createEmpty(raw_file_2);
     } catch (std::exception &) {
       TS_FAIL("Error creating test file for \"testPassesOnExistentFile\" test.");
     }
 
-    addSingleFile(txt_files, txt_file_1.path());
-    addSingleFile(txt_files, txt_file_2.path());
-    addSingleFile(raw_files, txt_file_1.path());
-    addSingleFile(raw_files, txt_file_2.path());
+    addSingleFile(txt_files, txt_file_1.string());
+    addSingleFile(txt_files, txt_file_2.string());
+    addSingleFile(raw_files, txt_file_1.string());
+    addSingleFile(raw_files, txt_file_2.string());
 
     // FileValidator will suggest txt files as correct extension
     std::vector<std::string> vec(1, "txt");
@@ -81,31 +87,31 @@ public:
     // Not correct extension but the file exists so we allow it
     TS_ASSERT_EQUALS(v1.isValid(raw_files), "");
 
-    txt_file_1.remove();
-    txt_file_2.remove();
-    raw_file_1.remove();
-    raw_file_2.remove();
+    std::filesystem::remove(txt_file_1);
+    std::filesystem::remove(txt_file_2);
+    std::filesystem::remove(raw_file_1);
+    std::filesystem::remove(raw_file_2);
   }
 
   void testFailsOnSomeNonExistentFiles() {
     // Create two files, numbered 1 and 3.
     const std::string file_stub = "scratch.";
     const std::string ext = "txt";
-    Poco::File txt_file_1(file_stub + "_1" + ext);
-    Poco::File txt_file_3(file_stub + "_3" + ext);
+    std::filesystem::path txt_file_1(file_stub + "_1" + ext);
+    std::filesystem::path txt_file_3(file_stub + "_3" + ext);
 
     std::vector<std::vector<std::string>> txt_files;
 
     try {
-      txt_file_1.createFile();
-      txt_file_3.createFile();
+      createEmpty(txt_file_1);
+      createEmpty(txt_file_3);
     } catch (std::exception &) {
       TS_FAIL("Error creating test file for \"testPassesOnExistentFile\" test.");
     }
 
-    addSingleFile(txt_files, txt_file_1.path());
+    addSingleFile(txt_files, txt_file_1.string());
     addSingleFile(txt_files, "doesNotExist_2.txt");
-    addSingleFile(txt_files, txt_file_3.path());
+    addSingleFile(txt_files, txt_file_3.string());
     addSingleFile(txt_files, "doesNotExist_4.txt");
 
     // FileValidator will suggest txt files as correct extension
@@ -117,8 +123,8 @@ public:
                                            "doesNotExist_4.txt");
 
     // Clean up.
-    txt_file_1.remove();
-    txt_file_3.remove();
+    std::filesystem::remove(txt_file_1);
+    std::filesystem::remove(txt_file_3);
   }
 
   void testFailsOnNoFiles() {

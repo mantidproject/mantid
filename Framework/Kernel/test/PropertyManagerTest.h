@@ -13,6 +13,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
+#include "MantidKernel/LogFilter.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyManager.h"
@@ -109,8 +110,8 @@ public:
     manager.declareProperty(createTestSeries("log2"));
     manager.declareProperty(createTestSeries("log3"));
 
-    auto filter = createTestFilter();
-    manager.filterByProperty(*filter);
+    auto filter = std::make_unique<LogFilter>(*createTestFilter());
+    manager.filterByProperty(filter.get());
 
     TS_ASSERT_EQUALS(manager.propertyCount(), 3);
 
@@ -126,8 +127,6 @@ public:
     Property *log2 = manager.getProperty("log2");
     auto filteredProp = dynamic_cast<FilteredTimeSeriesProperty<double> *>(log2);
     TSM_ASSERT("getProperty has not returned a FilteredProperty as expected", filteredProp);
-
-    delete filter;
   }
 
   void testCopyConstructor() {
@@ -669,18 +668,20 @@ public:
   static PropertyManagerTestPerformance *createSuite() { return new PropertyManagerTestPerformance(); }
   static void destroySuite(PropertyManagerTestPerformance *suite) { delete suite; }
 
-  PropertyManagerTestPerformance() : m_manager(), m_filter(createTestFilter()) {
+  PropertyManagerTestPerformance() : m_manager(), m_filter(std::make_unique<LogFilter>(*createTestFilter())) {
     const size_t nprops = 2000;
     for (size_t i = 0; i < nprops; ++i) {
       m_manager.declareProperty(createTestSeries("prop" + boost::lexical_cast<std::string>(i)));
     }
   }
 
-  void test_Perf_Of_Filtering_Large_Number_Of_Properties_By_Other_Property() { m_manager.filterByProperty(*m_filter); }
+  void test_Perf_Of_Filtering_Large_Number_Of_Properties_By_Other_Property() {
+    m_manager.filterByProperty(m_filter.get());
+  }
 
 private:
   /// Test manager
   PropertyManagerHelper m_manager;
   /// Test filter
-  boost::scoped_ptr<TimeSeriesProperty<bool>> m_filter;
+  std::unique_ptr<LogFilter> m_filter;
 };

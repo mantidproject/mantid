@@ -131,8 +131,6 @@ set(SRC_FILES
     src/Surfaces/Torus.cpp
 )
 
-set(SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp src/Instrument/ObjCompAssembly.cpp)
-
 set(INC_FILES
     inc/MantidGeometry/ComponentParser.h
     inc/MantidGeometry/Crystal/BasicHKLFilters.h
@@ -220,6 +218,7 @@ set(INC_FILES
     inc/MantidGeometry/Instrument/RectangularDetector.h
     inc/MantidGeometry/Instrument/ReferenceFrame.h
     inc/MantidGeometry/Instrument/SampleEnvironment.h
+    inc/MantidGeometry/Instrument/SolidAngleParams.h
     inc/MantidGeometry/Instrument/StructuredDetector.h
     inc/MantidGeometry/Instrument/XMLInstrumentParameter.h
     inc/MantidGeometry/Instrument_fwd.h
@@ -432,11 +431,6 @@ if(COVERAGE)
     set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(Geometry SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
 
 # A few defines needed for OpenCascade on the Mac
 

@@ -24,9 +24,9 @@ import os
 import sys
 import time
 import unittest
-import platform
 import subprocess
 import systemtesting
+import platform
 from multiprocessing import Process
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
@@ -49,7 +49,6 @@ ConfigService["CheckMantidVersion.OnStartup"] = "{CheckMantidVersion}"
 ConfigService["UpdateInstrumentDefinitions.OnStartup"] = "{UpdateInstrumentDefinitions}"
 
 import mantid.simpleapi
-time.sleep(10)
 """
 
 TEST_SCRIPT_NAME = "pythonloggingtestscript.py"

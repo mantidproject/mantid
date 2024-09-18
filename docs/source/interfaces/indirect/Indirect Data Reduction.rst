@@ -11,7 +11,7 @@ Overview
 
 The Indirect Data Reduction interface provides the initial reduction that
 is used to convert raw instrument data to S(Q, w) for analysis in the
-Indirect Data Analysis and Indirect Bayes interfaces.
+Inelastic QENS Fitting and Bayes Fitting interfaces.
 
 The tabs shown on this interface will vary depending on the current default
 facility such that only tabs that will work with data from the facility are
@@ -19,7 +19,7 @@ shown, this page describes all the tabs which can possibly be shown.
 
 .. interface:: Data Reduction
   :align: right
-  :width: 350
+  :width: 750
 
 Instrument Options
 ~~~~~~~~~~~~~~~~~~
@@ -41,7 +41,7 @@ Action Buttons
 ~~~~~~~~~~~~~~
 
 Settings
-  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  Opens the :ref:`Settings <inelastic-interface-settings>` GUI which allows you to
   customize the settings for the Indirect interfaces.
 
 ?
@@ -100,9 +100,9 @@ Spectra Min/Spectra Max
   Used to specify a range of spectra.
 
 Detector Grouping
-  Used to specify a method for grouping spectra. Possible grouping options include Individual, All,
-  File, Groups and Custom. The TOSCA instrument also has the Default grouping option which will use the grouping
-  specified in the IPF.
+  Used to specify a method for grouping detectors. Possible grouping options include 'Individual', 'All', 'IPF',
+  'File', 'Groups' and 'Custom'. The TOSCA instrument will default to grouping using 'IPF', and the other instruments
+  will default to 'Individual' grouping.
 
 Background Removal
   Allows removal of a background given a time-of-flight range.
@@ -138,8 +138,8 @@ Run
 Plot Spectra
   If enabled, it will plot the selected workspace indices in the selected output workspace.
 
-Plot Contour
-  If enabled, it will plot the selected output workspace as a contour plot.
+Open Slice Viewer
+  If enabled, it will open the slice viewer for the selected output workspace.
 
 Group Output
   This will place the output reduced files from a reduction into a group workspace.

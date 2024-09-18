@@ -73,6 +73,7 @@ WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = YES
 WARN_FORMAT            = @DOXY_WARN_FORMAT@
 WARN_LOGFILE           =
+WARN_AS_ERROR          = YES
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------

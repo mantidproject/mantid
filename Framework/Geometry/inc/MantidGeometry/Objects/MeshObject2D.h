@@ -47,8 +47,8 @@ public:
   MeshObject2D *clone() const override;
   MeshObject2D *cloneWithMaterial(const Kernel::Material &material) const override;
   int getName() const override;
-  double solidAngle(const Kernel::V3D &observer) const override;
-  double solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const override;
+  double solidAngle(const SolidAngleParams &params) const override;
+  double solidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const override;
   bool operator==(const MeshObject2D &other) const;
   const BoundingBox &getBoundingBox() const override;
   const static double MinThickness;
@@ -57,10 +57,10 @@ public:
                       double &zmin) const override;
   int getPointInObject(Kernel::V3D &point) const override;
 
-  boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                     const size_t) const override;
-  boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                     const BoundingBox &activeRegion, const size_t) const override;
+  std::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                   const size_t) const override;
+  std::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                   const BoundingBox &activeRegion, const size_t) const override;
   detail::ShapeInfo::GeometryShape shape() const override;
   const detail::ShapeInfo &shapeInfo() const override;
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type, std::vector<Kernel::V3D> &vectors, double &innerRadius,

@@ -12,6 +12,7 @@
 
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <boost/python/call_method.hpp>
 #include <boost/python/converter/arg_from_python.hpp>
@@ -21,6 +22,7 @@
 #include <string>
 
 namespace Mantid::PythonInterface::Registry {
+GNU_DIAG_OFF("maybe-uninitialized")
 /**
  * This class provides a templated class object that is able to take a
  * python object and perform operations with a given C type.
@@ -67,5 +69,5 @@ struct DLLExport TypedPropertyValueHandler : public PropertyValueHandler {
     return valueProp;
   }
 };
-
+GNU_DIAG_ON("maybe-uninitialized")
 } // namespace Mantid::PythonInterface::Registry

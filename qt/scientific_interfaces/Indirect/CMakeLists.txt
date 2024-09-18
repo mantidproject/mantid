@@ -1,160 +1,26 @@
-set(SRC_FILES
-    AbsorptionCorrections.cpp
-    ApplyAbsorptionCorrections.cpp
-    CalculatePaalmanPings.cpp
-    ContainerSubtraction.cpp
-    CorrectionsTab.cpp
-    DensityOfStates.cpp
-    ILLEnergyTransfer.cpp
-    ISISCalibration.cpp
-    ISISDiagnostics.cpp
-    IndirectAddWorkspaceDialog.cpp
-    IndirectBayes.cpp
-    IndirectBayesTab.cpp
-    IndirectCorrections.cpp
-    IndirectDataReduction.cpp
-    IndirectDataReductionTab.cpp
-    IndirectDataValidationHelper.cpp
-    IndirectDiffractionReduction.cpp
-    IndirectInstrumentConfig.cpp
-    IndirectInterface.cpp
-    IndirectMolDyn.cpp
-    IndirectPlotOptionsModel.cpp
-    IndirectPlotOptionsPresenter.cpp
-    IndirectPlotOptionsView.cpp
-    IndirectSassena.cpp
-    IndirectSettings.cpp
-    IndirectSettingsHelper.cpp
-    IndirectSettingsModel.cpp
-    IndirectSettingsPresenter.cpp
-    IndirectSettingsView.cpp
-    IndirectSimulation.cpp
-    IndirectSimulationTab.cpp
-    IndirectTab.cpp
-    IndirectTools.cpp
-    IndirectToolsTab.cpp
-    IndirectTransmission.cpp
-    IndirectTransmissionCalc.cpp
-    Quasi.cpp
-    ResNorm.cpp
-    Stretch.cpp
-    Reduction/ISISEnergyTransferValidator.cpp
-    Reduction/ISISEnergyTransferModel.cpp
-    Reduction/ISISEnergyTransferView.cpp
-    Reduction/ISISEnergyTransferPresenter.cpp
-)
+set(ALL_SRC_FILES)
+set(ALL_MOC_FILES)
+set(ALL_INC_FILES DllConfig.h PrecompiledHeader.h)
+set(ALL_UI_FILES)
 
-set(MOC_FILES
-    AbsorptionCorrections.h
-    ApplyAbsorptionCorrections.h
-    CalculatePaalmanPings.h
-    ContainerSubtraction.h
-    CorrectionsTab.h
-    DensityOfStates.h
-    IAddWorkspaceDialog.h
-    IIndirectSettingsView.h
-    ILLEnergyTransfer.h
-    IndirectAddWorkspaceDialog.h
-    IndirectBayes.h
-    IndirectBayesTab.h
-    IndirectCorrections.h
-    IndirectDataReduction.h
-    IndirectDataReductionTab.h
-    IndirectDiffractionReduction.h
-    IndirectInstrumentConfig.h
-    IndirectInterface.h
-    IndirectMolDyn.h
-    IndirectPlotOptionsPresenter.h
-    IndirectPlotOptionsView.h
-    IndirectSassena.h
-    IndirectSettings.h
-    IndirectSettingsView.h
-    IndirectSimulation.h
-    IndirectSimulationTab.h
-    IndirectTab.h
-    IndirectTools.h
-    IndirectToolsTab.h
-    IndirectTransmissionCalc.h
-    IndirectTransmission.h
-    ISISCalibration.h
-    ISISDiagnostics.h
-    Quasi.h
-    ResNorm.h
-    Stretch.h
-    Reduction/ISISEnergyTransferView.h
-    Reduction/ISISEnergyTransferPresenter.h
-)
-
-set(INC_FILES
-    DllConfig.h
-    IndirectDataValidationHelper.h
-    IndirectPlotOptionsModel.h
-    IndirectSettingsHelper.h
-    IndirectSettingsPresenter.h
-    Notifier.h
-    Reduction/ISISEnergyTransferData.h
-    Reduction/ISISEnergyTransferValidator.h
-    Reduction/ISISEnergyTransferModelUtils.h
-    Reduction/ISISEnergyTransferModel.h
-)
-
-set(UI_FILES
-    AbsorptionCorrections.ui
-    ApplyAbsorptionCorrections.ui
-    CalculatePaalmanPings.ui
-    ContainerSubtraction.ui
-    DensityOfStates.ui
-    ILLEnergyTransfer.ui
-    ISISCalibration.ui
-    ISISDiagnostics.ui
-    Reduction/ISISEnergyTransfer.ui
-    IndirectAddWorkspaceDialog.ui
-    IndirectBayes.ui
-    IndirectCorrections.ui
-    IndirectDataReduction.ui
-    IndirectDiffractionReduction.ui
-    IndirectInstrumentConfig.ui
-    IndirectInterfaceSettings.ui
-    IndirectMolDyn.ui
-    IndirectPlotOptions.ui
-    IndirectSassena.ui
-    IndirectSettings.ui
-    IndirectSimulation.ui
-    IndirectTools.ui
-    IndirectTransmission.ui
-    IndirectTransmissionCalc.ui
-    Quasi.ui
-    ResNorm.ui
-    Stretch.ui
-)
-
-set(RES_FILES IndirectInterfaceResources.qrc)
-
-# XML is required to parse the settings file
-find_package(
-  Qt5 ${QT_MIN_VERSION}
-  COMPONENTS Concurrent Xml
-  REQUIRED
-)
+add_subdirectory(Common)
+add_subdirectory(Diffraction)
+add_subdirectory(Reduction)
+add_subdirectory(Simulation)
+add_subdirectory(Tools)
 
 mtd_add_qt_library(
   TARGET_NAME MantidScientificInterfacesIndirect
   QT_VERSION 5
-  SRC ${SRC_FILES}
-  MOC ${MOC_FILES}
-  NOMOC ${INC_FILES}
-  UI ${UI_FILES}
-  RES ${RES_FILES}
+  SRC ${ALL_SRC_FILES}
+  MOC ${ALL_MOC_FILES}
+  NOMOC ${ALL_INC_FILES}
+  UI ${ALL_UI_FILES}
   DEFS IN_MANTIDQT_INDIRECT PRECOMPILED PrecompiledHeader.h
   INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}
-  LINK_LIBS ${CORE_MANTIDLIBS}
-            Mantid::PythonInterfaceCore
-            ${POCO_LIBRARIES}
-            ${Boost_LIBRARIES}
-            Python::Python
-            Qt5::Concurrent
-            Qt5::Xml
-  MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp MantidQtIcons
+  LINK_LIBS ${CORE_MANTIDLIBS} Mantid::PythonInterfaceCore ${POCO_LIBRARIES} ${Boost_LIBRARIES} Python::Python
+  MTD_QT_LINK_LIBS MantidQtWidgetsCommon MantidQtWidgetsPlotting MantidQtWidgetsMplCpp MantidQtWidgetsSpectroscopy
+                   MantidQtIcons
   INSTALL_DIR_BASE ${WORKBENCH_PLUGINS_DIR}
   OSX_INSTALL_RPATH @loader_path/../../MacOS @loader_path/../../Frameworks @loader_path/../../plugins/qt5
   LINUX_INSTALL_RPATH "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt5/"

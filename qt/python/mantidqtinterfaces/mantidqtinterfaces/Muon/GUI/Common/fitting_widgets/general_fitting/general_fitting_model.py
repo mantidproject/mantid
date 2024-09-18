@@ -197,10 +197,10 @@ class GeneralFittingModel(BasicFittingModel):
         simultaneous_function = self.fitting_context.simultaneous_fit_function
 
         if len(dataset_names) == len(new_dataset_names) and simultaneous_function is not None:
-            if len(dataset_names) == 1:
-                return [simultaneous_function.clone()]
-            else:
+            if isinstance(simultaneous_function, MultiDomainFunction):
                 return [simultaneous_function.getFunction(i).clone() for i in range(simultaneous_function.nFunctions())]
+            else:
+                return [simultaneous_function.clone()]
         elif len(dataset_names) <= 1:
             return [self._clone_function(simultaneous_function) for _ in range(len(new_dataset_names))]
         else:
@@ -211,13 +211,16 @@ class GeneralFittingModel(BasicFittingModel):
         dataset_names = self.fitting_context.dataset_names
         simultaneous_function = self.fitting_context.simultaneous_fit_function
 
-        if new_dataset_name in dataset_names and simultaneous_function is not None:
+        if new_dataset_name in dataset_names and isinstance(simultaneous_function, MultiDomainFunction):
             return self._clone_function(simultaneous_function.getFunction(dataset_names.index(new_dataset_name)))
         else:
             return self._clone_function(self.current_domain_fit_function())
 
     def _add_global_ties_to_simultaneous_function(self) -> None:
         """Creates and adds ties to the simultaneous function to represent the global parameters."""
+        assert self.simultaneous_fit_function is not None, "This method assumes the simultaneous fit function is not None."
+        self._remove_non_existing_global_parameters()
+
         current_dataset_index = self.fitting_context.current_dataset_index
 
         for global_parameter in self.fitting_context.global_parameters:
@@ -226,11 +229,17 @@ class GeneralFittingModel(BasicFittingModel):
 
     def _create_global_tie_string(self, index: int, global_parameter: str) -> str:
         """Create a string to represent the tying of a global parameter."""
-        ties = [
-            "f" + str(i) + "." + global_parameter for i in range(self.fitting_context.simultaneous_fit_function.nFunctions()) if i != index
-        ]
+        ties = ["f" + str(i) + "." + global_parameter for i in range(self.simultaneous_fit_function.nFunctions()) if i != index]
         ties.append("f" + str(index) + "." + global_parameter)
         return "=".join(ties)
+
+    def _remove_non_existing_global_parameters(self) -> None:
+        """Removes non-existing parameters from the global parameters list."""
+        self.global_parameters = [
+            global_parameter
+            for global_parameter in self.global_parameters
+            if self.simultaneous_fit_function.hasParameter(f"f0.{global_parameter}")
+        ]
 
     def _get_plot_guess_fit_function(self) -> IFunction:
         """Returns the fit function to evaluate when plotting a guess."""

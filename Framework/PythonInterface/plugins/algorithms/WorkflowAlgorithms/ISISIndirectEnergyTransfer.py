@@ -48,12 +48,16 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
     _grouping_method = None
     _grouping_ws = None
     _grouping_string = None
-    _grouping_map_file = None
+    _grouping_file = None
     _output_x_units = None
     _output_ws = None
     _sum_files = None
     _ipf_filename = None
     _workspace_names = None
+
+    def alias(self):
+        """Alternative name for algorithm"""
+        return "ISISIndirectEnergyTransferWrapper"
 
     def category(self):
         return "Workflow\\Inelastic;Inelastic\\Indirect"
@@ -117,18 +121,29 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(
             name="GroupingMethod",
             defaultValue="IPF",
-            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom"]),
-            doc="Method used to group spectra.",
+            validator=StringListValidator(["Individual", "All", "File", "Workspace", "IPF", "Custom", "Groups"]),
+            doc="The method used to group detectors.",
         )
         self.declareProperty(
             WorkspaceProperty("GroupingWorkspace", "", direction=Direction.Input, optional=PropertyMode.Optional),
-            doc="Workspace containing spectra grouping.",
+            doc="A workspace containing a detector grouping.",
         )
-        self.declareProperty(name="GroupingString", defaultValue="", direction=Direction.Input, doc="Spectra to group as string")
+        self.declareProperty(name="GroupingString", defaultValue="", direction=Direction.Input, doc="Detectors to group as a string")
         self.declareProperty(
-            FileProperty("MapFile", "", action=FileAction.OptionalLoad, extensions=[".map"]), doc="Workspace containing spectra grouping."
+            FileProperty("MapFile", "", action=FileAction.OptionalLoad, extensions=[".map"]),
+            doc="This property is deprecated (since v6.10), please use the 'GroupingFile' property instead.",
         )
-
+        self.declareProperty(
+            FileProperty("GroupingFile", "", action=FileAction.OptionalLoad, extensions=[".map"]),
+            doc="A file containing a detector grouping.",
+        )
+        self.declareProperty(
+            name="NGroups",
+            defaultValue=1,
+            validator=IntBoundedValidator(lower=1),
+            direction=Direction.Input,
+            doc="The number of groups for grouping the detectors.",
+        )
         # Output properties
         self.declareProperty(
             name="UnitX",
@@ -155,6 +170,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             group_spectra,
             fold_chopped,
             rename_reduction,
+            mask_detectors,
         )
 
         self._setup()
@@ -251,6 +267,10 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target="DeltaE", EMode="Indirect")
                 CorrectKiKf(InputWorkspace=ws_name, OutputWorkspace=ws_name, EMode="Indirect")
 
+                # Mask noisy detectors
+                if len(masked_detectors) > 0:
+                    mask_detectors(ws_name, masked_detectors)
+
                 # Handle rebinning
                 rebin_reduction(ws_name, self._rebin_string, rebin_string_2, num_bins)
 
@@ -264,14 +284,16 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                     Scale(InputWorkspace=ws_name, OutputWorkspace=ws_name, Factor=self._scale_factor, Operation="Multiply")
 
                 # Group spectra
-                group_spectra(
+                grouped = group_spectra(
                     ws_name,
-                    masked_detectors=masked_detectors,
                     method=self._grouping_method,
-                    group_file=self._grouping_map_file,
+                    group_file=self._grouping_file,
                     group_ws=self._grouping_ws,
                     group_string=self._grouping_string,
+                    number_of_groups=self._number_of_groups,
+                    spectra_range=self._spectra_range,
                 )
+                AnalysisDataService.addOrReplace(ws_name, grouped)
 
             if self._fold_multiple_frames and is_multi_frame:
                 fold_chopped(c_ws_name)
@@ -341,6 +363,13 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         if grouping_method == "Workspace" and grouping_ws is None:
             issues["GroupingWorkspace"] = "Must select a grouping workspace for current GroupingWorkspace"
 
+        map_file = _str_or_none(self.getPropertyValue("MapFile"))
+        if map_file is not None:
+            logger.warning(
+                "The 'MapFile' algorithm property has been deprecated (since v6.10). Please use the 'GroupingFile' "
+                "algorithm property instead."
+            )
+
         efixed = self.getProperty("Efixed").value
         if efixed != Property.EMPTY_DBL and instrument_name not in ["IRIS", "OSIRIS"]:
             issues["Efixed"] = "Can only override Efixed on IRIS and OSIRIS"
@@ -373,7 +402,11 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self._grouping_method = self.getPropertyValue("GroupingMethod")
         self._grouping_ws = _ws_or_none(self.getPropertyValue("GroupingWorkspace"))
         self._grouping_string = _str_or_none(self.getPropertyValue("GroupingString"))
-        self._grouping_map_file = _str_or_none(self.getPropertyValue("MapFile"))
+        map_file = _str_or_none(self.getPropertyValue("MapFile"))
+        grouping_file = _str_or_none(self.getPropertyValue("GroupingFile"))
+        # 'MapFile' is deprecated, but if it is provided instead of 'GroupingFile' then try to use it anyway
+        self._grouping_file = map_file if map_file is not None and grouping_file is None else grouping_file
+        self._number_of_groups = self.getProperty("NGroups").value
 
         self._output_x_units = self.getPropertyValue("UnitX")
 
@@ -396,8 +429,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         if self._grouping_method != "Workspace" and self._grouping_ws is not None:
             logger.warning("GroupingWorkspace will be ignored by selected GroupingMethod")
 
-        if self._grouping_method != "File" and self._grouping_map_file is not None:
-            logger.warning("MapFile will be ignored by selected GroupingMethod")
+        if self._grouping_method != "File" and self._grouping_file is not None:
+            logger.warning("GroupingFile will be ignored by selected GroupingMethod")
 
         # The list of workspaces being processed
         self._workspace_names = []

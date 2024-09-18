@@ -11,8 +11,8 @@ for which it uses the build artifacts.
 Example use:
 dependency_spotter -f 593 -s 598
 dependency_spotter -f 593 -s 598 -os win-64
-dependency_spotter -f 593 -s 598 --pipeline main_nightly_deployment_prototype
-This will compare builds 593 and 598 from the "main_nightly_deployment_prototype" pipeline
+dependency_spotter -f 593 -s 598 --pipeline main_nightly_deployment
+This will compare builds 593 and 598 from the "main_nightly_deployment" pipeline
 """
 
 import argparse
@@ -27,7 +27,7 @@ def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeli
     :param os_name: Operating string label, e.g. linux-64
     :param first_build: Build number of the first build for comparison
     :param second_build: Build number of the second build for comparison
-    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly_deployment_prototype
+    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly_deployment
     :param log_file: Name of the file to compare, e.g. mantid_build_environment.txt
     """
     if second_build < first_build:
@@ -93,7 +93,7 @@ def extract_available_log_files(os_name: str, build_number: int, pipeline: str) 
     available files, e.g. mantid_build_environment.txt. Returns a list of these filenames
     :param os_name: Operating string label, e.g. linux-64
     :param build_number: Build number
-    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly_deployment_prototype
+    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly_deployment
     :return: List of log file names
     """
     url = form_url_for_build_artifact(build_number, os_name, pipeline, "")
@@ -115,7 +115,7 @@ def compare_dependencies_for_file(os_name: str, first_build: int, second_build: 
     :param os_name: Operating string label, e.g. linux-64
     :param first_build: Build number of the first build for comparison
     :param second_build: Build number of the second build for comparison
-    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly_deployment_prototype
+    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly_deployment
     :param log_file: Name of the file to compare, e.g. mantid_build_environment.txt
     """
     # Form URLs for each build artifact file
@@ -174,7 +174,7 @@ def form_url_for_build_artifact(build_number: int, os_name: str, pipeline: str, 
     Form Jenkins URL from specified info.
     :param build_number: Build number
     :param os_name: Operating string label, e.g. linux-64
-    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly_deployment_prototype
+    :param pipeline: Name of the Jenkins pipeline, e.g. main_nightly_deployment
     :param log_file: Name of the file to compare, e.g. mantid_build_environment.txt
     :return: URL for build artifact
     """
@@ -208,7 +208,7 @@ if __name__ == "__main__":
     parser.add_argument("-os", help="Operating system string, e.g. linux-64", default="linux-64", type=str)
     parser.add_argument("--first", "-f", help="First (usually passing) build number", type=int, required=True)
     parser.add_argument("--second", "-s", help="Second (usually failing) build number", type=int, required=True)
-    parser.add_argument("--pipeline", "-p", help="Build pipeline", default="main_nightly_deployment_prototype", type=str)
+    parser.add_argument("--pipeline", "-p", help="Build pipeline", default="main_nightly_deployment", type=str)
     parser.add_argument(
         "--logfile",
         "-l",

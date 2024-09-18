@@ -46,7 +46,7 @@ private:
   /// overridden execute method
   void exec() override;
   /// Add a list of names to the new group
-  void addToGroup(const std::vector<std::string> &names);
+  void addToGroup(const std::vector<std::string> &names, const std::string &outputName = "");
   /// Add a workspace to the new group, checking for a WorkspaceGroup and
   /// unrolling it
   void addToGroup(const API::Workspace_sptr &workspace);

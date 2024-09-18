@@ -48,7 +48,7 @@ class InstrumentView(QWidget, ObservingView):
 
         self.name = name
 
-        self.setWindowTitle(name)
+        self.setWindowTitle("Instrument - " + name)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.setWindowFlags(window_flags)
 

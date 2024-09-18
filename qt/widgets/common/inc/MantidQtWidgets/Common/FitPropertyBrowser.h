@@ -20,6 +20,7 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/FitPropertyBrowserFindPeaksExt.h"
 #include "MantidQtWidgets/Common/IWorkspaceFitControl.h"
 #include "MantidQtWidgets/Common/SelectFunctionDialog.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
@@ -305,6 +306,9 @@ public:
   std::string getCentreParameterNameOf(const QString &prefix);
   bool isParameterExplicitlySetOf(const QString &prefix, const std::string &param);
   QStringList getPeakPrefixes() const;
+  void findPeaks(const std::unique_ptr<FindPeakStrategyGeneric> findPeakStrategy);
+  bool createAndAddFunction(const Mantid::API::MatrixWorkspace_sptr inputWS, const size_t peakIndex,
+                            const std::unique_ptr<FindPeakStrategyGeneric> &findPeakStrategy);
 
   // Emits a signal for when the sequential fit has finished
 
@@ -320,10 +324,10 @@ public slots:
   virtual void clear();
   void clearBrowser();
   void setPeakToolOn(bool on);
-  void findPeaks();
   virtual void executeFitMenu(const QString & /*item*/);
   void executeDisplayMenu(const QString & /*item*/);
   void executeSetupMenu(const QString & /*item*/);
+  void executePeakFindingAlgMenu(const QString & /*item*/);
   void executeSetupManageMenu(const QString & /*item*/);
   void workspaceDoubleClicked(QListWidgetItem *item);
   void executeCustomSetupRemove(const QString &name);
@@ -594,7 +598,7 @@ private:
   virtual void workspaceChange(const QString &wsName);
 
   /// Does a parameter have a tie
-  void hasConstraints(QtProperty *parProp, bool &hasTie, bool &hasBounds) const;
+  void hasConstraints(QtProperty *parProp, bool &hasTie, bool &hasFix, bool &hasBounds) const;
   /// Returns the tie property for a parameter property, or NULL
   QtProperty *getTieProperty(QtProperty *parProp) const;
 

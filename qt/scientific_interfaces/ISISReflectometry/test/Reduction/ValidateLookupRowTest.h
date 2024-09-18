@@ -133,6 +133,13 @@ public:
     TS_ASSERT_EQUALS(result.assertValid().qRange(), RangeInQ(0.05, 0.02, 1.3));
   }
 
+  void testParseQRangeNegativeStep() {
+    LookupRowValidator validator;
+    auto result = validator({"", "", "", "", "", "0.05", "1.3", "-1"});
+    TS_ASSERT(result.isValid());
+    TS_ASSERT_EQUALS(result.assertValid().qRange(), RangeInQ(0.05, -1, 1.3));
+  }
+
   void testParseQRangeError() {
     LookupRowValidator validator;
     auto result = validator({"", "", "", "", "", "bad", "bad", "bad"});

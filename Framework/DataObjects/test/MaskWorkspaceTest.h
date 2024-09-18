@@ -8,13 +8,18 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/DetectorInfoIterator.h"
 #include "PropertyManagerHelper.h"
 
+using Mantid::API::ExperimentInfo;
 using Mantid::DataObjects::MaskWorkspace_const_sptr;
 using Mantid::DataObjects::MaskWorkspace_sptr;
+using Mantid::Geometry::DetectorInfo;
+using Mantid::Geometry::DetectorInfoConstIt;
 
 class MaskWorkspaceTest : public CxxTest::TestSuite {
 public:
@@ -39,8 +44,9 @@ public:
     inst->setName("MaskWorkspaceTest_Instrument");
 
     Mantid::DataObjects::MaskWorkspace maskWS(inst, false);
+    TS_ASSERT_EQUALS(maskWS.getNumberMasked(), 0);
     for (int i = 0; i < pixels; i++)
-      maskWS.setValue(i, 1); // mask the pixel
+      maskWS.setMasked(i); // mask the pixel
 
     TS_ASSERT_EQUALS(maskWS.getNumberHistograms(), pixels * pixels);
     TS_ASSERT_EQUALS(maskWS.getNumberMasked(), pixels);
@@ -142,5 +148,156 @@ public:
     TS_ASSERT_THROWS_NOTHING(wsCastNonConst = (MaskWorkspace_sptr)val);
     TS_ASSERT(wsCastNonConst != nullptr);
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
+  }
+
+  /**
+   * Test that workspace creation clears the detector mask flags
+   */
+  void test_detector_flags_cleared_at_construction() {
+    int pixels = 10;
+
+    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
+    inst->setName("MaskWorkspaceTest_Instrument");
+
+    // Use the ExperimentInfo API to create complete DetectorInfo prior to workspace creation.
+    Mantid::API::ExperimentInfo experiment;
+    experiment.setInstrument(inst);
+
+    // Set a few of the instrument's detector mask flags
+    DetectorInfo &detectors(experiment.mutableDetectorInfo());
+    for (int i = 0; i < pixels; i++)
+      detectors.setMasked(i, true);
+
+    Mantid::DataObjects::MaskWorkspace maskWS(experiment.getInstrument(), false);
+    TS_ASSERT_EQUALS(maskWS.getNumberHistograms(), pixels * pixels);
+    TS_ASSERT_EQUALS(maskWS.getNumberMasked(), 0);
+
+    const Mantid::Geometry::DetectorInfo &wsDetectors(maskWS.detectorInfo());
+    TS_ASSERT(
+        std::all_of(wsDetectors.cbegin(), wsDetectors.cend(),
+                    [](typename std::iterator_traits<DetectorInfoConstIt>::reference det) { return !det.isMasked(); }));
+  }
+
+  /**
+   * Test the workspace value to corresponding detector mask consistency check.
+   */
+  void test_isConsistentWithDetectorMasks() {
+    int pixels = 10;
+
+    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
+    inst->setName("MaskWorkspaceTest_Instrument");
+
+    // Use the ExperimentInfo API to create a complete DetectorInfo prior to workspace creation.
+    // With respect to the intended application of these methods, it's important to test using a DetectorInfo
+    // object that is distinct from that owned by the MaskWorkspace.
+    Mantid::API::ExperimentInfo experiment;
+    experiment.setInstrument(inst);
+    DetectorInfo &detectors(experiment.mutableDetectorInfo());
+
+    Mantid::DataObjects::MaskWorkspace maskWS(experiment.getInstrument(), false);
+    TS_ASSERT_EQUALS(maskWS.getNumberHistograms(), pixels * pixels);
+    TS_ASSERT_EQUALS(maskWS.getNumberMasked(), 0);
+
+    // mask a few of the pixels
+    for (int i = 0; i < pixels; i++)
+      TS_ASSERT_THROWS_NOTHING(maskWS.setMaskedIndex(i));
+    TS_ASSERT_EQUALS(maskWS.getNumberMasked(), pixels);
+    TS_ASSERT(!maskWS.isConsistentWithDetectorMasks(detectors));
+    // set the corresponding detector mask flags
+    for (int i = 0; i < pixels; i++)
+      detectors.setMasked(i, true);
+    TS_ASSERT(maskWS.isConsistentWithDetectorMasks(detectors));
+  }
+
+  /*
+   * Test adjustment of workspace values to include detector mask flag values.
+   */
+  void test_combineFromDetectorMasks() {
+    int pixels = 10;
+
+    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
+    inst->setName("MaskWorkspaceTest_Instrument");
+
+    // Use the ExperimentInfo API to create a complete DetectorInfo prior to workspace creation.
+    // With respect to the intended application of these methods, it's important to test using a DetectorInfo
+    // object that is distinct from that owned by the MaskWorkspace.
+    Mantid::API::ExperimentInfo experiment;
+    experiment.setInstrument(inst);
+    DetectorInfo &detectors(experiment.mutableDetectorInfo());
+
+    Mantid::DataObjects::MaskWorkspace maskWS(experiment.getInstrument(), false);
+    TS_ASSERT_EQUALS(maskWS.getNumberHistograms(), pixels * pixels);
+    TS_ASSERT_EQUALS(maskWS.getNumberMasked(), 0);
+
+    // mask a few of the detectors
+    for (int i = 0; i < pixels; i++)
+      detectors.setMasked(i, true);
+    TS_ASSERT(!maskWS.isConsistentWithDetectorMasks(detectors));
+    TS_ASSERT_THROWS_NOTHING(maskWS.combineFromDetectorMasks(detectors));
+    TS_ASSERT(maskWS.isConsistentWithDetectorMasks(detectors));
+    TS_ASSERT_EQUALS(maskWS.getNumberMasked(), pixels);
+  }
+
+  /*
+   * Test adjustment of detector mask flags to include workspace values.
+   */
+  void test_combineToDetectorMasks() {
+    int pixels = 10;
+
+    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
+    inst->setName("MaskWorkspaceTest_Instrument");
+
+    // Use the ExperimentInfo API to create a complete DetectorInfo prior to workspace creation.
+    // With respect to the intended application of these methods, it's important to test using a DetectorInfo
+    // object that is distinct from that owned by the MaskWorkspace.
+    Mantid::API::ExperimentInfo experiment;
+    experiment.setInstrument(inst);
+    DetectorInfo &detectors(experiment.mutableDetectorInfo());
+
+    Mantid::DataObjects::MaskWorkspace maskWS(experiment.getInstrument(), false);
+    TS_ASSERT_EQUALS(maskWS.getNumberHistograms(), pixels * pixels);
+    TS_ASSERT_EQUALS(maskWS.getNumberMasked(), 0);
+
+    // mask a few of the pixels
+    for (int i = 0; i < pixels; i++)
+      maskWS.setMasked(i);
+    TS_ASSERT_EQUALS(maskWS.getNumberMasked(), pixels);
+    TS_ASSERT(!maskWS.isConsistentWithDetectorMasks(detectors));
+    TS_ASSERT_THROWS_NOTHING(maskWS.combineToDetectorMasks(detectors));
+    TS_ASSERT(maskWS.isConsistentWithDetectorMasks(detectors));
+  }
+
+  /*
+   * Test detector-mask flags consistency methods with no instrument.
+   */
+  void test_maskConsistencyWithNoInstrument() {
+    int pixels = 10;
+
+    Mantid::Geometry::Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular2(1, pixels);
+    inst->setName("MaskWorkspaceTest_Instrument");
+
+    // Use the ExperimentInfo API to create a complete DetectorInfo prior to workspace creation.
+    // With respect to the intended application of these methods, it's important to test using a DetectorInfo
+    // object that is distinct from that owned by the MaskWorkspace.
+    Mantid::API::ExperimentInfo experiment;
+    experiment.setInstrument(inst);
+    DetectorInfo &detectors(experiment.mutableDetectorInfo());
+
+    Mantid::DataObjects::MaskWorkspace maskWS(pixels * pixels);
+    TS_ASSERT_EQUALS(maskWS.getNumberHistograms(), pixels * pixels);
+    TS_ASSERT(!maskWS.getInstrument() || maskWS.getInstrument()->getNumberDetectors() == 0);
+
+    // All of the consistency methods should throw std::logic_error if called.
+    TS_ASSERT_THROWS(maskWS.isConsistentWithDetectorMasks(), const std::logic_error &);
+
+    TS_ASSERT_THROWS(maskWS.combineToDetectorMasks(), const std::logic_error &);
+
+    TS_ASSERT_THROWS(maskWS.combineFromDetectorMasks(), const std::logic_error &);
+
+    TS_ASSERT_THROWS(maskWS.isConsistentWithDetectorMasks(detectors), const std::logic_error &);
+
+    TS_ASSERT_THROWS(maskWS.combineToDetectorMasks(detectors), const std::logic_error &);
+
+    TS_ASSERT_THROWS(maskWS.combineFromDetectorMasks(detectors), const std::logic_error &);
   }
 };

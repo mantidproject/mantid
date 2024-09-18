@@ -1,0 +1,681 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DiffractionReduction</class>
+ <widget class="QMainWindow" name="DiffractionReduction">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>547</width>
+    <height>614</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Indirect Diffraction</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout_2">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="frameShape">
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <property name="widgetResizable">
+       <bool>true</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>543</width>
+         <height>570</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <widget class="QGroupBox" name="gbInstrument">
+          <property name="title">
+           <string>Instrument</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_6">
+           <item>
+            <widget class="MantidQt::MantidWidgets::InstrumentConfig" name="iicInstrumentConfiguration">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="techniques" stdset="0">
+              <stringlist>
+               <string>TOF Indirect Geometry Spectroscopy</string>
+               <string>TOF Indirect Geometry Diffraction</string>
+              </stringlist>
+             </property>
+             <property name="disabledInstruments" stdset="0">
+              <stringlist>
+               <string>TFXA</string>
+              </stringlist>
+             </property>
+             <property name="facility" stdset="0">
+              <string>ISIS</string>
+             </property>
+             <property name="forceDiffraction" stdset="0">
+              <bool>true</bool>
+             </property>
+             <property name="showInstrumentLabel" stdset="0">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="gbInput">
+          <property name="title">
+           <string>Input</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>6</number>
+           </property>
+           <property name="rightMargin">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>6</number>
+           </property>
+           <item row="2" column="0">
+            <widget class="QLabel" name="lbSpecMin">
+             <property name="text">
+              <string>Spectra Min:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QSpinBox" name="spSpecMin">
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>5000</number>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QCheckBox" name="ckUseCan">
+             <property name="text">
+              <string>Use Container:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="lbSpecMax">
+             <property name="text">
+              <string>Spectra Max:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QCheckBox" name="ckSumFiles">
+             <property name="text">
+              <string>Sum Sample Files</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QSpinBox" name="spSpecMax">
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>5000</number>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QCheckBox" name="ckLoadLogs">
+             <property name="text">
+              <string>Load Log Files</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1" colspan="2">
+            <widget class="MantidQt::API::FileFinderWidget" name="rfCanFiles" native="true">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="label" stdset="0">
+              <string/>
+             </property>
+             <property name="multipleFiles" stdset="0">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="3">
+            <widget class="MantidQt::API::FileFinderWidget" name="rfSampleFiles" native="true">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>41</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="label" stdset="0">
+              <string>Run Numbers</string>
+             </property>
+             <property name="multipleFiles" stdset="0">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QCheckBox" name="ckCanScale">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Scale Container:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QDoubleSpinBox" name="spCanScale">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="decimals">
+              <number>3</number>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>1.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="wCalVanRebin" native="true">
+          <layout class="QVBoxLayout" name="verticalLayout_8">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <widget class="QGroupBox" name="gbCalibOnly">
+             <property name="title">
+              <string>Calibration</string>
+             </property>
+             <layout class="QGridLayout" name="gridLayout_3">
+              <item row="1" column="0">
+               <widget class="MantidQt::API::FileFinderWidget" name="rfVanFile" native="true">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>41</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="findRunFiles" stdset="0">
+                 <bool>true</bool>
+                </property>
+                <property name="label" stdset="0">
+                 <string>Vanadium File</string>
+                </property>
+                <property name="multipleFiles" stdset="0">
+                 <bool>true</bool>
+                </property>
+                <property name="optional" stdset="0">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="0">
+               <widget class="QCheckBox" name="ckUseVanadium">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>22</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Use Vanadium File</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="0">
+               <widget class="QCheckBox" name="ckUseCalib">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>22</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Use Calibration File</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
+               <widget class="MantidQt::API::FileFinderWidget" name="rfCalFile" native="true">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>41</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="findRunFiles" stdset="0">
+                 <bool>false</bool>
+                </property>
+                <property name="label" stdset="0">
+                 <string>Cal File</string>
+                </property>
+                <property name="multipleFiles" stdset="0">
+                 <bool>false</bool>
+                </property>
+                <property name="optional" stdset="0">
+                 <bool>true</bool>
+                </property>
+                <property name="fileExtensions" stdset="0">
+                 <string>.cal</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+             <zorder>ckUseCalib</zorder>
+             <zorder>rfCalFile</zorder>
+             <zorder>rfVanFile</zorder>
+             <zorder>ckUseVanadium</zorder>
+            </widget>
+           </item>
+           <item>
+            <widget class="QGroupBox" name="gbDspaceRebinCalibOnly">
+             <property name="title">
+              <string>Rebin in D-Spacing (optional)</string>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <property name="spacing">
+               <number>6</number>
+              </property>
+              <property name="leftMargin">
+               <number>6</number>
+              </property>
+              <property name="topMargin">
+               <number>6</number>
+              </property>
+              <property name="rightMargin">
+               <number>6</number>
+              </property>
+              <property name="bottomMargin">
+               <number>6</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="lbRebinStart">
+                <property name="text">
+                 <string>Start:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="leRebinStart"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="valRebinStart">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(170, 0, 0);</string>
+                </property>
+                <property name="text">
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lbRebinWidth">
+                <property name="text">
+                 <string>Width:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="leRebinWidth"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="valRebinWidth">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(170, 0, 0);</string>
+                </property>
+                <property name="text">
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="lbRebinEnd">
+                <property name="text">
+                 <string>End:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLineEdit" name="leRebinEnd"/>
+              </item>
+              <item>
+               <widget class="QLabel" name="valRebinEnd">
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(170, 0, 0);</string>
+                </property>
+                <property name="text">
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QFrame" name="fDetectorGrouping">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="MantidQt::CustomInterfaces::RunView" name="runWidget" native="true"/>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="gbOutput">
+          <property name="title">
+           <string>Output</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout">
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>6</number>
+           </property>
+           <property name="rightMargin">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>6</number>
+           </property>
+           <item>
+            <widget class="MantidQt::CustomInterfaces::OutputPlotOptionsView" name="ipoPlotOptions" native="true"/>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="gbSave">
+          <property name="toolTip">
+           <string>Select which file formats the data should be saved in.</string>
+          </property>
+          <property name="title">
+           <string>Save Formats</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>6</number>
+           </property>
+           <property name="rightMargin">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>6</number>
+           </property>
+           <item>
+            <widget class="QCheckBox" name="ckGSS">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>GSS</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="ckNexus">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Nexus</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QCheckBox" name="ckAscii">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>ASCII (DAT)</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbSave">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Save</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_10">
+      <property name="leftMargin">
+       <number>9</number>
+      </property>
+      <property name="rightMargin">
+       <number>9</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="pbSettings">
+        <property name="maximumSize">
+         <size>
+          <width>6567567</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbHelp">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>6567567</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>?</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_14">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbManageDirs">
+        <property name="text">
+         <string>Manage Directories</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::OutputPlotOptionsView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::InstrumentConfig</class>
+   <extends>QComboBox</extends>
+   <header>Common/InstrumentConfig.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::API::FileFinderWidget</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::CustomInterfaces::RunView</class>
+   <extends>QWidget</extends>
+   <header>MantidQtWidgets/Spectroscopy/RunWidget/RunView.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>iicInstrumentConfiguration</tabstop>
+  <tabstop>spSpecMin</tabstop>
+  <tabstop>ckSumFiles</tabstop>
+  <tabstop>spSpecMax</tabstop>
+  <tabstop>ckLoadLogs</tabstop>
+  <tabstop>ckUseCan</tabstop>
+  <tabstop>ckCanScale</tabstop>
+  <tabstop>spCanScale</tabstop>
+  <tabstop>leRebinStart</tabstop>
+  <tabstop>leRebinWidth</tabstop>
+  <tabstop>leRebinEnd</tabstop>
+  <tabstop>ckGSS</tabstop>
+  <tabstop>ckNexus</tabstop>
+  <tabstop>ckAscii</tabstop>
+  <tabstop>pbHelp</tabstop>
+  <tabstop>pbManageDirs</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>rfCanFiles</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>106</x>
+     <y>193</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>483</x>
+     <y>193</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>ckCanScale</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>70</x>
+     <y>193</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>71</x>
+     <y>217</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckCanScale</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spCanScale</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>157</x>
+     <y>217</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>325</x>
+     <y>219</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

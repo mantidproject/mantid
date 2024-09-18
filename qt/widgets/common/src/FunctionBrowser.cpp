@@ -45,16 +45,16 @@ using namespace Mantid::Kernel;
  */
 FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi, const std::vector<std::string> &categories)
     : QWidget(parent) {
-  auto view = new FunctionTreeView(this, multi, categories);
-  m_presenter = std::make_unique<FunctionMultiDomainPresenter>(view);
+  auto treeView = new FunctionTreeView(this, multi, categories);
+  m_presenter = std::make_unique<FunctionMultiDomainPresenter>(treeView);
   QHBoxLayout *layout = new QHBoxLayout(this);
   layout->setMargin(0);
-  layout->addWidget(view);
+  layout->addWidget(treeView);
   connect(m_presenter.get(), SIGNAL(functionStructureChanged()), this, SIGNAL(functionStructureChanged()));
-  connect(m_presenter.get(), SIGNAL(parameterChanged(const QString &, const QString &)), this,
-          SIGNAL(parameterChanged(const QString &, const QString &)));
-  connect(m_presenter.get(), SIGNAL(attributeChanged(const QString &)), this,
-          SIGNAL(attributeChanged(const QString &)));
+  connect(m_presenter.get(), SIGNAL(parameterChanged(std::string const &, std::string const &)), this,
+          SIGNAL(parameterChanged(std::string const &, std::string const &)));
+  connect(m_presenter.get(), SIGNAL(attributeChanged(std::string const &)), this,
+          SIGNAL(attributeChanged(std::string const &)));
 }
 
 /**
@@ -71,7 +71,7 @@ void FunctionBrowser::clear() { m_presenter->clear(); }
  * Set the function in the browser
  * @param funStr :: FunctionFactory function creation string
  */
-void FunctionBrowser::setFunction(const QString &funStr) { m_presenter->setFunctionString(funStr); }
+void FunctionBrowser::setFunction(std::string const &funStr) { m_presenter->setFunctionString(funStr); }
 
 /**
  * Set the function in the browser
@@ -84,32 +84,34 @@ void FunctionBrowser::setFunction(IFunction_sptr fun) { m_presenter->setFunction
  * @param index :: Index of the function, or empty string for top-level function
  * @return Function at index, or null pointer if not found
  */
-IFunction_sptr FunctionBrowser::getFunctionByIndex(const QString &index) {
+IFunction_sptr FunctionBrowser::getFunctionByIndex(std::string const &index) {
   return m_presenter->getFunctionByIndex(index);
 }
 /**
  * Updates the function parameter value
- * @param paramName :: Fully qualified parameter name (includes function index)
+ * @param parameterName :: Fully qualified parameter name (includes function index)
  * @param value :: New value
  */
-void FunctionBrowser::setParameter(const QString &paramName, double value) {
-  m_presenter->setParameter(paramName, value);
+void FunctionBrowser::setParameter(std::string const &parameterName, double value) {
+  m_presenter->setParameter(parameterName, value);
 }
 
 /**
  * Updates the function parameter error
- * @param paramName :: Fully qualified parameter name (includes function index)
+ * @param parameterName :: Fully qualified parameter name (includes function index)
  * @param error :: New error
  */
-void FunctionBrowser::setParameterError(const QString &paramName, double error) {
-  m_presenter->setParameterError(paramName, error);
+void FunctionBrowser::setParameterError(std::string const &parameterName, double error) {
+  m_presenter->setParameterError(parameterName, error);
 }
 
 /**
  * Get a value of a parameter
- * @param paramName :: Fully qualified parameter name (includes function index)
+ * @param parameterName :: Fully qualified parameter name (includes function index)
  */
-double FunctionBrowser::getParameter(const QString &paramName) const { return m_presenter->getParameter(paramName); }
+double FunctionBrowser::getParameter(std::string const &parameterName) const {
+  return m_presenter->getParameter(parameterName);
+}
 
 /**
  * Update parameter values in the browser to match those of a function.
@@ -121,7 +123,7 @@ void FunctionBrowser::updateParameters(const IFunction &fun) { m_presenter->upda
 /**
  * Return FunctionFactory function string
  */
-QString FunctionBrowser::getFunctionString() { return m_presenter->getFunctionString(); }
+std::string FunctionBrowser::getFunctionString() { return m_presenter->getFunctionString(); }
 
 Mantid::API::IFunction_sptr FunctionBrowser::getFunction() { return m_presenter->getFunction(); }
 
@@ -131,10 +133,10 @@ bool FunctionBrowser::hasFunction() const { return m_presenter->hasFunction(); }
 int FunctionBrowser::getNumberOfDatasets() const { return m_presenter->getNumberOfDatasets(); }
 
 /// Get the names of datasets
-QStringList FunctionBrowser::getDatasetNames() const { return m_presenter->getDatasetNames(); }
+std::vector<std::string> FunctionBrowser::getDatasetNames() const { return m_presenter->getDatasetNames(); }
 
 /// Get the names of the dataset domains
-QStringList FunctionBrowser::getDatasetDomainNames() const { return m_presenter->getDatasetDomainNames(); }
+std::vector<std::string> FunctionBrowser::getDatasetDomainNames() const { return m_presenter->getDatasetDomainNames(); }
 
 /// Set new number of the datasets
 /// @param n :: New value for the number of datasets.
@@ -143,7 +145,9 @@ void FunctionBrowser::setNumberOfDatasets(int n) { m_presenter->setNumberOfDatas
 /// Sets the datasets being fitted. They will be displayed by the
 /// local parameter editing dialog.
 /// @param datasetNames :: Names of the datasets
-void FunctionBrowser::setDatasets(const QStringList &datasetNames) { m_presenter->setDatasets(datasetNames); }
+void FunctionBrowser::setDatasets(const std::vector<std::string> &datasetNames) {
+  m_presenter->setDatasets(datasetNames);
+}
 
 /// Sets the datasets being fitted. They will be displayed by the
 /// local parameter editing dialog.
@@ -152,24 +156,24 @@ void FunctionBrowser::setDatasets(const QList<FunctionModelDataset> &datasets) {
 
 /**
  * Get value of a local parameter
- * @param parName :: Name of a parameter.
+ * @param parameterName :: Name of a parameter.
  * @param i :: Data set index.
  */
-double FunctionBrowser::getLocalParameterValue(const QString &parName, int i) const {
-  return m_presenter->getLocalParameterValue(parName, i);
+double FunctionBrowser::getLocalParameterValue(std::string const &parameterName, int i) const {
+  return m_presenter->getLocalParameterValue(parameterName, i);
 }
 
-void FunctionBrowser::setLocalParameterValue(const QString &parName, int i, double value) {
-  m_presenter->setLocalParameterValue(parName, i, value);
+void FunctionBrowser::setLocalParameterValue(std::string const &parameterName, int i, double value) {
+  m_presenter->setLocalParameterValue(parameterName, i, value);
 }
 
-void FunctionBrowser::setLocalParameterValue(const QString &parName, int i, double value, double error) {
-  m_presenter->setLocalParameterValue(parName, i, value, error);
+void FunctionBrowser::setLocalParameterValue(std::string const &parameterName, int i, double value, double error) {
+  m_presenter->setLocalParameterValue(parameterName, i, value, error);
 }
 
 /// Get error of a local parameter
-double FunctionBrowser::getLocalParameterError(const QString &parName, int i) const {
-  return m_presenter->getLocalParameterValue(parName, i);
+double FunctionBrowser::getLocalParameterError(std::string const &parameterName, int i) const {
+  return m_presenter->getLocalParameterValue(parameterName, i);
 }
 
 void FunctionBrowser::resetLocalParameters() {}
@@ -183,39 +187,39 @@ void FunctionBrowser::removeDatasets(const QList<int> &indices) { m_presenter->r
 
 /// Add some datasets to those already set.
 /// @param names :: A list of names for the new datasets.
-void FunctionBrowser::addDatasets(const QStringList &names) { m_presenter->addDatasets(names); }
+void FunctionBrowser::addDatasets(const std::vector<std::string> &names) { m_presenter->addDatasets(names); }
 
 /// Return the multidomain function for multi-dataset fitting
 IFunction_sptr FunctionBrowser::getGlobalFunction() { return m_presenter->getFitFunction(); }
 
 /// Fix/unfix a local parameter
-/// @param parName :: Parameter name
+/// @param parameterName :: Parameter name
 /// @param i :: Index of a dataset.
 /// @param fixed :: Make it fixed (true) or free (false)
-void FunctionBrowser::setLocalParameterFixed(const QString &parName, int i, bool fixed) {
-  m_presenter->setLocalParameterFixed(parName, i, fixed);
+void FunctionBrowser::setLocalParameterFixed(std::string const &parameterName, int i, bool fixed) {
+  m_presenter->setLocalParameterFixed(parameterName, i, fixed);
 }
 
 /// Check if a local parameter is fixed
-/// @param parName :: Parameter name
+/// @param parameterName :: Parameter name
 /// @param i :: Index of a dataset.
-bool FunctionBrowser::isLocalParameterFixed(const QString &parName, int i) const {
-  return m_presenter->isLocalParameterFixed(parName, i);
+bool FunctionBrowser::isLocalParameterFixed(std::string const &parameterName, int i) const {
+  return m_presenter->isLocalParameterFixed(parameterName, i);
 }
 
 /// Get the tie for a local parameter.
-/// @param parName :: Parameter name
+/// @param parameterName :: Parameter name
 /// @param i :: Index of a dataset.
-QString FunctionBrowser::getLocalParameterTie(const QString &parName, int i) const {
-  return m_presenter->getLocalParameterTie(parName, i);
+std::string FunctionBrowser::getLocalParameterTie(std::string const &parameterName, int i) const {
+  return m_presenter->getLocalParameterTie(parameterName, i);
 }
 
 /// Set a tie for a local parameter.
-/// @param parName :: Parameter name
+/// @param parameterName :: Parameter name
 /// @param i :: Index of a dataset.
 /// @param tie :: A tie string.
-void FunctionBrowser::setLocalParameterTie(const QString &parName, int i, QString tie) {
-  m_presenter->setLocalParameterTie(parName, i, tie);
+void FunctionBrowser::setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie) {
+  m_presenter->setLocalParameterTie(parameterName, i, tie);
 }
 
 /// Update the interface to have the same parameter values as in a function.
@@ -237,16 +241,16 @@ void FunctionBrowser::updateMultiDatasetParameters(const ITableWorkspace &paramT
 
   auto const globalParameterNames = getGlobalParameters();
   for (auto &&name : globalParameterNames) {
-    auto valueColumn = paramTable.getColumn(name.toStdString());
-    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
+    auto valueColumn = paramTable.getColumn(name);
+    auto errorColumn = paramTable.getColumn(name + "_Err");
     setParameter(name, valueColumn->toDouble(0));
     setParameterError(name, errorColumn->toDouble(0));
   }
 
   auto const localParameterNames = getLocalParameters();
   for (auto &&name : localParameterNames) {
-    auto valueColumn = paramTable.getColumn(name.toStdString());
-    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
+    auto valueColumn = paramTable.getColumn(name);
+    auto errorColumn = paramTable.getColumn(name + "_Err");
     if (nRows > 1) {
       for (size_t i = 0; i < nRows; ++i) {
         setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(i), errorColumn->toDouble(i));
@@ -284,17 +288,19 @@ void FunctionBrowser::setErrorsEnabled(bool enabled) { m_presenter->setErrorsEna
  */
 void FunctionBrowser::clearErrors() { m_presenter->clearErrors(); }
 
-QStringList FunctionBrowser::getGlobalParameters() const { return m_presenter->getGlobalParameters(); }
+std::vector<std::string> FunctionBrowser::getGlobalParameters() const { return m_presenter->getGlobalParameters(); }
 
-QStringList FunctionBrowser::getLocalParameters() const { return m_presenter->getLocalParameters(); }
+std::vector<std::string> FunctionBrowser::getLocalParameters() const { return m_presenter->getLocalParameters(); }
 
-void FunctionBrowser::setGlobalParameters(const QStringList &globals) { m_presenter->setGlobalParameters(globals); }
+void FunctionBrowser::setGlobalParameters(std::vector<std::string> const &globals) {
+  m_presenter->setGlobalParameters(globals);
+}
 
-boost::optional<QString> FunctionBrowser::currentFunctionIndex() { return m_presenter->currentFunctionIndex(); }
+std::optional<std::string> FunctionBrowser::currentFunctionIndex() { return m_presenter->currentFunctionIndex(); }
 
 FunctionTreeView *FunctionBrowser::view() const { return dynamic_cast<FunctionTreeView *>(m_presenter->view()); }
 
-QString FunctionBrowser::getFitFunctionString() const { return m_presenter->getFitFunctionString(); }
+std::string FunctionBrowser::getFitFunctionString() const { return m_presenter->getFitFunctionString(); }
 
 void FunctionBrowser::setBackgroundA0(double value) { m_presenter->setBackgroundA0(value); }
 

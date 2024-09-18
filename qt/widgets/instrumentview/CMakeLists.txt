@@ -9,7 +9,7 @@ set(SRC_FILES
     src/BankRenderingHelpers.cpp
     src/BankTextureBuilder.cpp
     src/BinDialog.cpp
-    src/CollapsiblePanel.cpp
+    src/CollapsibleStack.cpp
     src/DetXMLFile.cpp
     src/GLColor.cpp
     src/InstrumentActor.cpp
@@ -22,6 +22,8 @@ set(SRC_FILES
     src/InstrumentWidgetMaskTab.cpp
     src/InstrumentWidgetPickTab.cpp
     src/InstrumentWidgetRenderTab.cpp
+    src/InstrumentRendererClassic.cpp
+    src/InstrumentRendererMultiList.cpp
     src/InstrumentRenderer.cpp
     src/InstrumentWidgetTab.cpp
     src/InstrumentWidgetTreeTab.cpp
@@ -50,7 +52,7 @@ set(SRC_FILES
 
 set(MOC_FILES
     inc/MantidQtWidgets/InstrumentView/BinDialog.h
-    inc/MantidQtWidgets/InstrumentView/CollapsiblePanel.h
+    inc/MantidQtWidgets/InstrumentView/CollapsibleStack.h
     inc/MantidQtWidgets/InstrumentView/InstrumentActor.h
     inc/MantidQtWidgets/InstrumentView/InstrumentTreeModel.h
     inc/MantidQtWidgets/InstrumentView/InstrumentTreeWidget.h
@@ -76,7 +78,7 @@ set(INC_FILES
     inc/MantidQtWidgets/InstrumentView/BankRenderingHelpers.h
     inc/MantidQtWidgets/InstrumentView/BankTextureBuilder.h
     inc/MantidQtWidgets/InstrumentView/BinDialog.h
-    inc/MantidQtWidgets/InstrumentView/CollapsiblePanel.h
+    inc/MantidQtWidgets/InstrumentView/CollapsibleStack.h
     inc/MantidQtWidgets/InstrumentView/ColorMap.h
     inc/MantidQtWidgets/InstrumentView/DetXMLFile.h
     inc/MantidQtWidgets/InstrumentView/DllOption.h
@@ -94,6 +96,8 @@ set(INC_FILES
     inc/MantidQtWidgets/InstrumentView/InstrumentWidget.h
     inc/MantidQtWidgets/InstrumentView/InstrumentWidgetEncoder.h
     inc/MantidQtWidgets/InstrumentView/InstrumentWidgetDecoder.h
+    inc/MantidQtWidgets/InstrumentView/InstrumentRendererClassic.h
+    inc/MantidQtWidgets/InstrumentView/InstrumentRendererMultiList.h
     inc/MantidQtWidgets/InstrumentView/InstrumentRenderer.h
     inc/MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h
     inc/MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h

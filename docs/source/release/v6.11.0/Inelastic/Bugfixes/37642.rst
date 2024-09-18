@@ -1,0 +1,2 @@
+- Fixed a crash on the Quasi tab of the :ref:`Inelastic Bayes Fitting <interface-inelastic-bayes-fitting>` interface caused by attempting to load a WorkspaceGroup rather than the expected Workspace2D.
+- Prevented a crash on the Quasi tab of the :ref:`Inelastic Bayes Fitting <interface-inelastic-bayes-fitting>` interface caused by clicking `Run` before data has finished loading.

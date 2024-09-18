@@ -41,7 +41,7 @@ public:
 
   MOCK_METHOD0(initialize, void());
 
-  MOCK_CONST_METHOD0(function, QString());
+  MOCK_CONST_METHOD0(function, std::string());
   MOCK_CONST_METHOD1(sectionRow, SectionRow(int));
 
   MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
@@ -265,7 +265,7 @@ public:
     ON_CALL(*m_view, sectionRow(0)).WillByDefault(Return(sectionRow(10, 20)));
     ON_CALL(*m_view, sectionRow(1)).WillByDefault(Return(sectionRow(40, 55)));
 
-    ON_CALL(*m_view, function()).WillByDefault(Return(QString("name=FlatBackground,A0=3")));
+    ON_CALL(*m_view, function()).WillByDefault(Return(std::string("name=FlatBackground,A0=3")));
 
     EXPECT_CALL(*m_model, fit(AllOf(FunctionName("FlatBackground"), FunctionParameter("A0", 3, 1E-8)),
                               ElementsAre(Pair(10, 20), Pair(40, 55))));
@@ -279,7 +279,7 @@ public:
     ON_CALL(*m_view, sectionRow(0)).WillByDefault(Return(sectionRow(1, 2)));
 
     // Valid function
-    ON_CALL(*m_view, function()).WillByDefault(Return(QString("name=FlatBackground,A0=3")));
+    ON_CALL(*m_view, function()).WillByDefault(Return(std::string("name=FlatBackground,A0=3")));
 
     std::string errorMsg = "Bad error";
 
@@ -295,7 +295,7 @@ public:
     ON_CALL(*m_view, sectionRow(0)).WillByDefault(Return(sectionRow(1, 2)));
 
     // Invalid function
-    ON_CALL(*m_view, function()).WillByDefault(Return(QString("bla-bla")));
+    ON_CALL(*m_view, function()).WillByDefault(Return(std::string("bla-bla")));
 
     EXPECT_CALL(*m_model, fit(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(_));
@@ -309,7 +309,7 @@ public:
     ON_CALL(*m_view, sectionRow(0)).WillByDefault(Return(sectionRow(1, 2)));
 
     // Empty function
-    ON_CALL(*m_view, function()).WillByDefault(Return(QString("")));
+    ON_CALL(*m_view, function()).WillByDefault(Return(std::string("")));
 
     EXPECT_CALL(*m_model, fit(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(_));
@@ -322,7 +322,7 @@ public:
     ON_CALL(*m_view, noOfSectionRows()).WillByDefault(Return(0));
 
     // Any valid function
-    ON_CALL(*m_view, function()).WillByDefault(Return(QString("name=FlatBackground,A0=0")));
+    ON_CALL(*m_view, function()).WillByDefault(Return(std::string("name=FlatBackground,A0=0")));
 
     EXPECT_CALL(*m_model, fit(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(_));

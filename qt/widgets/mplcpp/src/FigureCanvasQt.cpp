@@ -72,10 +72,12 @@ QWidget *initLayout(FigureCanvasQt *cppCanvas) {
  * @param parent The owning parent widget
  */
 FigureCanvasQt::FigureCanvasQt(const int subplotspec, const QString &projection, QWidget *parent)
-    : QWidget(parent), InstanceHolder(createPyCanvas(subplotspec, projection), "draw"),
-      m_figure(Figure(Python::Object(pyobj().attr("figure")))) {
-  // Cannot use delegating constructor here as InstanceHolder needs to be
-  // initialized before the axes can be created
+    : QWidget(parent), InstanceHolder(createPyCanvas(subplotspec, projection), "draw") {
+  // Cannot use delegating constructor here as we have to ensure that we have acquired the GIL
+  // before creating the Figure...
+  GlobalInterpreterLock lock;
+  m_figure = Figure(Python::Object(pyobj().attr("figure")));
+  // ... and the InstanceHolder needs to be initialized before the axes can be created
   m_mplCanvas = initLayout(this);
 }
 

@@ -100,6 +100,43 @@ File > Settings
 |
 |
 
+Useful Key Shortcuts
+====================
+
+Mantid plots support multiple key shortcuts by default.
+Please note especially the shortcuts `k` and `l`, which are useful for quickly switching between linear and log axes scales.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Action
+     - Key shortcuts
+   * - Toggle fullscreen
+     - f, ctrl+f
+   * - Reset to homme
+     - h, r
+   * - Go back to previous view
+     - c, backspace
+   * - Go forward to next view
+     - v
+   * - Pan
+     - p
+   * - Zoom
+     - o
+   * - Save
+     - s
+   * - Quit figure
+     - q, ctrl+w, cmd+w
+   * - Toggle major grids
+     - g
+   * - Toggle minor grids
+     - G
+   * - Switch x scale between log/linear
+     - k
+   * - Switch y scale between log/linear
+     - l
+
+
 **Other Plotting Documentation**
 
 * :ref:`02_scripting_plots`

@@ -255,7 +255,7 @@ void AlgorithmPropertiesWidget::initLayout() {
 
       // Only show the "Replace Workspace" button if the algorithm has an input
       // workspace.
-      if (hasInputWS)
+      if (hasInputWS && !prop->disableReplaceWSButton())
         widget->addReplaceWSButton();
 
       ++row;
@@ -286,10 +286,10 @@ bool isCalledInputWorkspaceOrLHSWorkspace(PropertyWidget *const candidate) {
  */
 void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
   if (m_propWidgets.contains(propName)) {
-    using CollectionOfPropertyWidget = std::vector<PropertyWidget *>;
-    CollectionOfPropertyWidget candidateReplacementSources;
     PropertyWidget *propWidget = m_propWidgets[propName];
     if (propWidget) {
+      using CollectionOfPropertyWidget = std::vector<PropertyWidget *>;
+      CollectionOfPropertyWidget candidateReplacementSources;
       // Find the name to put in the spot
       QString wsName("");
       for (auto it = m_propWidgets.begin(); it != m_propWidgets.end(); it++) {

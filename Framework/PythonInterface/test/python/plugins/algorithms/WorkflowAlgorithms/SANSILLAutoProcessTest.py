@@ -31,10 +31,10 @@ class SANSILLAutoProcessTest(unittest.TestCase):
         config["datasearch.directories"] = cls._data_search_dirs
 
     def test_noSampleRun(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess)
+        self.assertRaises(TypeError, SANSILLAutoProcess)
 
     def test_noOutputWs(self):
-        self.assertRaises(RuntimeError, SANSILLAutoProcess, SampleRuns="010462")
+        self.assertRaises(TypeError, SANSILLAutoProcess, SampleRuns="010462")
 
     def test_wrongAbsorberDim(self):
         self.assertRaisesRegex(

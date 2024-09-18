@@ -1,1 +1,0 @@
-- Fix bug that made settings window disappear behind the Workbench window on Linux when opening the font selection menu.

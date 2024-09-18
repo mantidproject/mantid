@@ -172,6 +172,56 @@ public:
     TSM_ASSERT_EQUALS("Wrong peak intensity matched on found peak", 60, results[2]);
   }
 
+  void testWhenMinSpectrasNotFound() {
+    // creates a workspace where all y-values are 2
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    // Stick three peaks in different histograms.
+    makeOnePeak(1, 40, 2, workspace);
+    makeOnePeak(2, 60, 2, workspace);
+    makeOnePeak(3, 45, 2, workspace);
+
+    auto alg = createFindSXPeaks(workspace);
+    alg->setProperty("MinNSpectraPerPeak", 2);
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
+
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+    TSM_ASSERT_EQUALS("Should have found no peaks!", 0, result->rowCount());
+  }
+
+  void testWhenMaxSpectraSpecified() {
+    // creates a workspace where all y-values are 2
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(10, 10);
+    // Stick three peaks in different histograms.
+    makeOnePeak(1, 40, 2, workspace);
+    makeOnePeak(2, 60, 2, workspace);
+    makeOnePeak(3, 45, 2, workspace);
+
+    auto alg = createFindSXPeaks(workspace);
+    alg->setProperty("maxNSpectraPerPeak", 3);
+    alg->execute();
+    TSM_ASSERT("FindSXPeak should have been executed.", alg->isExecuted());
+
+    IPeaksWorkspace_sptr result = std::dynamic_pointer_cast<IPeaksWorkspace>(
+        Mantid::API::AnalysisDataService::Instance().retrieve("found_peaks"));
+    TSM_ASSERT_EQUALS("Should have found three peaks!", 3, result->rowCount());
+  }
+
+  void updateYAndEData(Mantid::HistogramData::HistogramY &y, const std::vector<double> &newYValues,
+                       Mantid::HistogramData::HistogramE &e, const std::vector<double> &newErrorValues) {
+
+    if (y.size() != newYValues.size() || e.size() != newErrorValues.size()) {
+      throw std::runtime_error("The data sizes don't match. This is a test setup issue. "
+                               "Make sure there is one fake data point per entry in the histogram.");
+    }
+
+    for (size_t index = 0; index < y.size(); ++index) {
+      y[index] = newYValues[index];
+      e[index] = newErrorValues[index];
+    }
+  }
+
   void testSpectrumWithoutUniqueDetectorsDoesNotThrow() {
     const int nHist = 10;
     Workspace2D_sptr workspace = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(nHist, 10);

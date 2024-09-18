@@ -1,2 +1,0 @@
-- Avoid writing invalid background estimation parameters in the Engineering Diffration's table of fitting tab.
-- When invalid parameters are entered for the background estimation in the :ref:`Fitting tab <ui engineering fitting>` of the :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` they are overwritten with the last valid parameters used when the background is next calculated (immediately if `Subtract BG` is checked in the table).

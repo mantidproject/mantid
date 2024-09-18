@@ -140,7 +140,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
         scan_alg.setProperty("FoldMultipleFrames", self._fold_multiple_frames)
         scan_alg.setProperty("GroupingMethod", self._grouping_method)
         scan_alg.setProperty("GroupingWorkspace", self._grouping_ws)
-        scan_alg.setProperty("MapFile", self._grouping_map_file)
+        scan_alg.setProperty("GroupingFile", self._grouping_map_file)
         scan_alg.setProperty("UnitX", self._output_x_units)
         scan_alg.setProperty("OutputWorkspace", self._red_ws)
         scan_alg.execute()

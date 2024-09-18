@@ -64,7 +64,6 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
   # ####################################################################################################################
   # Look for dependencies Do NOT add include_directories commands here. They will affect every target.
   # ####################################################################################################################
-  set(BOOST_VERSION_REQUIRED 1.65.0)
   set(Boost_NO_BOOST_CMAKE TRUE)
   # Unless specified see if the boost169 package is installed
   if(EXISTS /usr/lib64/boost169 AND NOT (BOOST_LIBRARYDIR OR BOOST_INCLUDEDIR))
@@ -72,12 +71,16 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
     set(BOOST_INCLUDEDIR /usr/include/boost169)
     set(BOOST_LIBRARYDIR /usr/lib64/boost169)
   endif()
-  find_package(Boost ${BOOST_VERSION_REQUIRED} REQUIRED COMPONENTS date_time regex serialization filesystem system)
+
+  set(Boost_VERBOSE "ON")
+  find_package(Boost CONFIG REQUIRED COMPONENTS date_time regex serialization filesystem system)
   add_definitions(-DBOOST_ALL_DYN_LINK -DBOOST_ALL_NO_LIB -DBOOST_BIND_GLOBAL_PLACEHOLDERS)
   # Need this defined globally for our log time values
   add_definitions(-DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG)
   # Silence issues with deprecated allocator methods in boost regex
   add_definitions(-D_SILENCE_CXX17_OLD_ALLOCATOR_MEMBERS_DEPRECATION_WARNING)
+  # The new interface is not available in Clang yet so we haven't migrated
+  add_definitions(-D_SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING)
 
   find_package(Poco 1.4.6 REQUIRED)
   add_definitions(-DPOCO_ENABLE_CPP11)
@@ -125,9 +128,9 @@ if(OpenMP_CXX_FOUND)
 endif()
 
 # ######################################################################################################################
-# Set the c++ standard to 17 - cmake should do the right thing with msvc
+# Set the c++ standard to 20 - cmake should do the right thing with msvc
 # ######################################################################################################################
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ######################################################################################################################
@@ -226,13 +229,6 @@ if(ENABLE_PRECOMMIT)
     if(NOT PRE_COMMIT_RESULT EQUAL "0")
       message(FATAL_ERROR "Pre-commit install failed with ${PRE_COMMIT_RESULT}")
     endif()
-    # Create pre-commit script wrapper to use mantid third party python for pre-commit
-    file(TO_CMAKE_PATH $ENV{CONDA_PREFIX} CONDA_SHELL_PATH)
-    file(RENAME "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit" "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py")
-    file(
-      WRITE "${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit"
-      "#!/usr/bin/env sh\n${CONDA_SHELL_PATH}/Scripts/wrappers/conda/python.bat ${PROJECT_SOURCE_DIR}/.git/hooks/pre-commit-script.py"
-    )
   else() # linux and osx
     execute_process(
       COMMAND bash -c "${PRE_COMMIT_EXE} install"

@@ -73,9 +73,9 @@ void LoadMuonLog::exec() {
   auto logs = localWorkspace->mutableRun().getLogData();
   // need to remove case
   for (auto log : logs) {
-    std::string name = log->name();
-    toLower(name);
-    logNames.insert(name);
+    std::string logName = log->name();
+    toLower(logName);
+    logNames.insert(logName);
   }
 
   // Attempt to load the content of each NXlog section into the Sample object

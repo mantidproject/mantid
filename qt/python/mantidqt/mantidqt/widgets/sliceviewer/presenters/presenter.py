@@ -49,7 +49,6 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             else SliceViewerView(self, Dimensions.get_dimensions_info(ws), model.can_normalize_workspace(), parent, window_flags, conf)
         )
         super().__init__(ws, self.view.data_view, model)
-
         self._logger = Logger("SliceViewer")
         self._peaks_presenter: PeaksViewerCollectionPresenter = None
         self._cutviewer_presenter = None
@@ -312,6 +311,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         :param state: If true a request is being made to turn them on, else they should be turned off
         """
         data_view = self.view.data_view
+        data_view.image_info_widget.setShowSignal(not state)
         if state:
             data_view.deactivate_and_disable_tool(ToolItemText.REGIONSELECTION)
             data_view.disable_tool_button(ToolItemText.LINEPLOTS)
@@ -422,6 +422,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             self.new_plot()
         finally:
             ws.unlock()
+
+    def show_view(self):
+        self.view.show()
 
     def rename_workspace(self, old_name, new_name):
         if self.model.workspace_equals(old_name):
@@ -551,6 +554,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
             return self.get_sliceinfo().is_xy_q_frame()
 
     def get_extra_image_info_columns(self, xdata, ydata):
+        if self.view is None:
+            return {"H": "0", "K": "0", "L": "0"}
+
         qdims = [i for i, v in enumerate(self.view.data_view.dimensions.qflags) if v]
 
         if len(qdims) != 3 or self.get_frame() != SpecialCoordinateSystem.HKL:

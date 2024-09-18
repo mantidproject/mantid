@@ -20,7 +20,7 @@ from qtpy.QtWidgets import QMainWindow
 # local imports
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.widgets.observers.observing_view import ObservingView
-from mantid.api import AnalysisDataServiceImpl
+from mantid.api import AnalysisDataServiceImpl, WorkspaceGroup, MatrixWorkspace
 import mantid.kernel
 
 
@@ -33,17 +33,28 @@ def _validate_workspaces(names: List[str]) -> List[bool]:
     ads = AnalysisDataServiceImpl.Instance()
     has_multiple_bins = []
     for name in names:
-        result = False
-        ws = ads.retrieve(name)
+        ws = None
+        result = None
+
         try:
-            result = ws.blocksize() > 1
-        except RuntimeError:
-            # blocksize() implementation in Workspace2D and EventWorkspace can through an error if histograms are not equal
-            for i in ws.getNumberHistograms():
-                if ws.y(i).size() > 1:
-                    result = True
-                    break
-        finally:
+            ws = ads.retrieve(name)
+        except KeyError:
+            # Handle the case where the workspace name does not exist
+            mantid.kernel.logger.warning(f"Workspace '{name}' does not exist.")
+            result = False
+        if isinstance(ws, WorkspaceGroup):
+            result = all(_validate_workspaces(ws.getNames()))
+        elif isinstance(ws, MatrixWorkspace):
+            try:
+                result = ws.blocksize() > 1
+            except RuntimeError:
+                # blocksize() implementation in Workspace2D and EventWorkspace can throw an error if histograms are not equal
+                for i in range(ws.getNumberHistograms()):
+                    if ws.y(i).size() > 1:
+                        result = True
+                        break
+
+        if result is not None:
             has_multiple_bins.append(result)
 
     return has_multiple_bins

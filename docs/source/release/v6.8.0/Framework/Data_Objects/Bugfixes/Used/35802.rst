@@ -1,1 +1,0 @@
-- It is now possible to use the archive on macOS once it has been mounted. Follow the archive mounting instructions here: https://developer.mantidproject.org/GettingStarted/GettingStarted.html#osx

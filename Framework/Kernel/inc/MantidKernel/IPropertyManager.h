@@ -41,6 +41,7 @@ class OptionalBool;
 class Property;
 class PropertyManager;
 class SplittingInterval;
+class LogFilter;
 template <typename T> class TimeSeriesProperty;
 template <typename T> class Matrix;
 
@@ -333,8 +334,10 @@ public:
   /// Get the list of managed properties in a given group.
   std::vector<Property *> getPropertiesInGroup(const std::string &group) const;
 
-  virtual void filterByProperty(const TimeSeriesProperty<bool> & /*filter*/, const std::vector<std::string> &
-                                /* excludedFromFiltering */) = 0;
+  virtual void filterByProperty(Mantid::Kernel::LogFilter * /*logFilter*/, const std::vector<std::string> &
+                                /* excludedFromFiltering */) {
+    throw std::logic_error("Not implemented yet.");
+  }
 
 protected:
   /// Get a property by an index

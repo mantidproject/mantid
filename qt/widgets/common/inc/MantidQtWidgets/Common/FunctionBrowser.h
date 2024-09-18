@@ -14,8 +14,8 @@
 
 #include <QWidget>
 
-#include <boost/optional.hpp>
 #include <memory>
+#include <optional>
 
 namespace Mantid {
 namespace API {
@@ -48,54 +48,54 @@ public:
   /// Clear the contents
   void clear() override;
   /// Set the function in the browser
-  void setFunction(const QString &funStr) override;
+  void setFunction(std::string const &funStr) override;
   /// Set the function in the browser
   void setFunction(IFunction_sptr fun);
   /// Return FunctionFactory function string
-  QString getFunctionString() override;
+  std::string getFunctionString() override;
   /// Return the function
   IFunction_sptr getFunction();
   /// Check if a function is set
   bool hasFunction() const;
   /// Return a function with specified index
-  IFunction_sptr getFunctionByIndex(const QString &index);
+  IFunction_sptr getFunctionByIndex(std::string const &index);
   /// Return index of the current function, if one is selected
-  boost::optional<QString> currentFunctionIndex();
+  std::optional<std::string> currentFunctionIndex();
   /// Update the function parameter value
-  void setParameter(const QString &paramName, double value);
+  void setParameter(std::string const &parameterName, double value);
   /// Update the function parameter error
-  void setParameterError(const QString &paramName, double error);
+  void setParameterError(std::string const &parameterName, double error);
   /// Get a value of a parameter
-  double getParameter(const QString &paramName) const;
+  double getParameter(std::string const &parameterName) const;
   /// Update parameter values in the browser to match those of a function.
   void updateParameters(const IFunction &fun) override;
   /// Get a list of names of global parameters
-  QStringList getGlobalParameters() const;
-  void setGlobalParameters(const QStringList &globals);
+  std::vector<std::string> getGlobalParameters() const;
+  void setGlobalParameters(std::vector<std::string> const &globals);
   /// Get a list of names of local parameters
-  QStringList getLocalParameters() const;
+  std::vector<std::string> getLocalParameters() const;
   /// Get the number of datasets
   int getNumberOfDatasets() const override;
   /// Get the names of datasets
-  QStringList getDatasetNames() const override;
+  std::vector<std::string> getDatasetNames() const override;
   /// Get the names of the dataset domains
-  QStringList getDatasetDomainNames() const override;
+  std::vector<std::string> getDatasetDomainNames() const override;
   /// Get value of a local parameter
-  double getLocalParameterValue(const QString &parName, int i) const override;
+  double getLocalParameterValue(std::string const &parameterName, int i) const override;
   /// Set value of a local parameter
-  void setLocalParameterValue(const QString &parName, int i, double value) override;
+  void setLocalParameterValue(std::string const &parameterName, int i, double value) override;
   /// Set value and error of a local parameter
-  void setLocalParameterValue(const QString &parName, int i, double value, double error);
+  void setLocalParameterValue(std::string const &parameterName, int i, double value, double error);
   /// Get error of a local parameter
-  double getLocalParameterError(const QString &parName, int i) const;
+  double getLocalParameterError(std::string const &parameterName, int i) const;
   /// Check if a local parameter is fixed
-  bool isLocalParameterFixed(const QString &parName, int i) const override;
+  bool isLocalParameterFixed(std::string const &parameterName, int i) const override;
   /// Fix/unfix local parameter
-  void setLocalParameterFixed(const QString &parName, int i, bool fixed) override;
+  void setLocalParameterFixed(std::string const &parameterName, int i, bool fixed) override;
   /// Get the tie for a local parameter.
-  QString getLocalParameterTie(const QString &parName, int i) const override;
+  std::string getLocalParameterTie(std::string const &parameterName, int i) const override;
   /// Set a tie for a local parameter.
-  void setLocalParameterTie(const QString &parName, int i, QString tie) override;
+  void setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie) override;
   /// Return the multidomain function if number of datasets is greater than 1
   IFunction_sptr getGlobalFunction() override;
   /// Update parameter values in the browser to match those of a function.
@@ -123,26 +123,26 @@ public:
   void showGlobalCheckbox();
 
 signals:
-  void parameterChanged(const QString &funcIndex, const QString &paramName);
-  void attributeChanged(const QString &attributeName);
+  void parameterChanged(std::string const &funcIndex, std::string const &paramName);
+  void attributeChanged(std::string const &attributeName);
   void functionStructureChanged();
   /// User selects a different function (or one of it's sub-properties)
   void currentFunctionChanged();
 
   /// In multi-dataset context a button value editor was clicked
-  void localParameterButtonClicked(const QString &parName);
+  void localParameterButtonClicked(std::string const &parName);
   void globalsChanged();
 
 public slots:
 
   // Handling of multiple datasets
   void setNumberOfDatasets(int n) override;
-  void setDatasets(const QStringList &datasetNames) override;
+  void setDatasets(const std::vector<std::string> &datasetNames) override;
   void setDatasets(const QList<FunctionModelDataset> &datasets) override;
   void resetLocalParameters();
   void setCurrentDataset(int i) override;
   void removeDatasets(const QList<int> &indices);
-  void addDatasets(const QStringList &names);
+  void addDatasets(const std::vector<std::string> &names);
 
 protected:
   std::unique_ptr<FunctionMultiDomainPresenter> m_presenter;
@@ -150,7 +150,7 @@ protected:
 public:
   // Intended for testing only
   FunctionTreeView *view() const;
-  QString getFitFunctionString() const;
+  std::string getFitFunctionString() const;
 };
 
 } // namespace MantidWidgets

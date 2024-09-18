@@ -41,6 +41,7 @@ export STANDARD_TEST_DATA_DIR=$PWD/ExternalData/Testing/Data
 echo 'datasearch.directories = '$STANDARD_TEST_DATA_DIR'/UnitTest/;'$STANDARD_TEST_DATA_DIR'/DocTest/' >> $WORKSPACE/mambaforge/envs/docs-build/bin/Mantid.properties
 
 # Build the html docs
+export LC_ALL=C
 QT_QPA_PLATFORM=offscreen cmake --build . --target docs-html
 
 # Publish. Clone current docs to publish directory

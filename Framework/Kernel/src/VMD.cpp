@@ -425,10 +425,10 @@ template <typename TYPE> TYPE VMDBase<TYPE>::norm2() const { return this->scalar
 /** Normalize this vector to unity length
  * @return the length of this vector BEFORE normalizing */
 template <typename TYPE> TYPE VMDBase<TYPE>::normalize() {
-  TYPE length = this->length();
+  TYPE lengthPreNormalisation = this->length();
   for (size_t d = 0; d < nd; d++)
-    data[d] /= length;
-  return length;
+    data[d] /= lengthPreNormalisation;
+  return lengthPreNormalisation;
 }
 
 /** Return the angle between this and another vector
@@ -533,8 +533,8 @@ template <typename TYPE> VMDBase<TYPE> VMDBase<TYPE>::getNormalVector(const std:
   } // each dimension of the normal vector
 
   // Unity normal is better.
-  double length = normal.normalize();
-  if (length == 0)
+  double lengthPreNormilisation = normal.normalize();
+  if (lengthPreNormilisation == 0)
     throw std::runtime_error("VMDBase::getNormalVector: 0-length normal found. "
                              "Are your vectors collinear?");
 

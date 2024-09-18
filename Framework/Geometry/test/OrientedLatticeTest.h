@@ -81,6 +81,23 @@ public:
     th.createFile("OrientedLatticeTest.nxs");
     DblMatrix U(3, 3, true);
     OrientedLattice u(1, 2, 3, 90, 89, 88);
+    u.setError(0.1, 0.2, 0.3, 0.4, 0.5, 0.6);
+    u.setMaxOrder(1);
+    u.setCrossTerm(true);
+
+    DblMatrix modUB(3, 3);
+    modUB[0][0] = 1.;
+    modUB[1][0] = 2.;
+    modUB[2][0] = 3.;
+    modUB[0][1] = 4.;
+    modUB[1][1] = 5.;
+    modUB[2][1] = 6.;
+    modUB[0][2] = 7.;
+    modUB[1][2] = 8.;
+    modUB[2][2] = 9.;
+    u.setModUB(modUB);
+    u.setErrorModHKL(0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9);
+
     u.saveNexus(th.file.get(), "lattice");
     th.reopenFile();
 
@@ -93,6 +110,24 @@ public:
     TS_ASSERT_DELTA(u2.alpha(), 90.0, 1e-5);
     TS_ASSERT_DELTA(u2.beta(), 89.0, 1e-5);
     TS_ASSERT_DELTA(u2.gamma(), 88.0, 1e-5);
+    TS_ASSERT_DELTA(u2.errora(), 0.1, 1e-5);
+    TS_ASSERT_DELTA(u2.errorb(), 0.2, 1e-5);
+    TS_ASSERT_DELTA(u2.errorc(), 0.3, 1e-5);
+    TS_ASSERT_DELTA(u2.erroralpha(), 0.4, 1e-5);
+    TS_ASSERT_DELTA(u2.errorbeta(), 0.5, 1e-5);
+    TS_ASSERT_DELTA(u2.errorgamma(), 0.6, 1e-5);
+    TS_ASSERT_EQUALS(u2.getMaxOrder(), 1);
+    TS_ASSERT_EQUALS(u2.getCrossTerm(), true);
+    TS_ASSERT_EQUALS(u2.getModUB(), modUB);
+    TS_ASSERT_DELTA(u2.getdherr(0), 0.1, 1e-5);
+    TS_ASSERT_DELTA(u2.getdkerr(0), 0.2, 1e-5);
+    TS_ASSERT_DELTA(u2.getdlerr(0), 0.3, 1e-5);
+    TS_ASSERT_DELTA(u2.getdherr(1), 0.4, 1e-5);
+    TS_ASSERT_DELTA(u2.getdkerr(1), 0.5, 1e-5);
+    TS_ASSERT_DELTA(u2.getdlerr(1), 0.6, 1e-5);
+    TS_ASSERT_DELTA(u2.getdherr(2), 0.7, 1e-5);
+    TS_ASSERT_DELTA(u2.getdkerr(2), 0.8, 1e-5);
+    TS_ASSERT_DELTA(u2.getdlerr(2), 0.9, 1e-5);
   }
 
   /** @author Alex Buts, fixed by Andrei Savici */

@@ -18,8 +18,8 @@ requirements:
     - {{ compiler("cxx") }}
     - llvm-openmp  # [osx]
     - libgomp  # [linux]
-    - ninja  # [unix]
-    - cmake
+    - ninja  # [osx or linux]
+    - cmake {{ cmake }}
     - git
     - python {{ python }}                    # [build_platform != target_platform]
     - cross-python_{{ target_platform }}     # [build_platform != target_platform]
@@ -27,16 +27,17 @@ requirements:
     - numpy {{ numpy }}                      # [build_platform != target_platform]
     - pyqt {{ pyqt }}                        # [build_platform != target_platform]
     - qt-main {{ qt_main }}                  # [build_platform != target_platform]
+    - sip {{ sip }}                          # [build_platform != target_platform]
     - {{ cdt('mesa-libgl-devel') }}  # [linux]
     - {{ cdt('mesa-dri-drivers') }}  # [linux]
     - {{ cdt('libxxf86vm') }}  # [linux]
     - {{ cdt('libx11-devel') }}  # [linux]
     - {{ cdt('xorg-x11-proto-devel') }}  # [linux]
-    - libcxx  # [osx]
 
   host:
+    - libboost-devel {{ libboost_devel }}
+    - libboost-python-devel {{ libboost_python_devel }}
     - eigen
-    - jemalloc  # [unix]
     - libopenblas {{ libopenblas }}  # [osx or linux]
     - mantid {{ version }}
     - python {{ python }}
@@ -48,6 +49,7 @@ requirements:
     - tbb-devel {{ tbb }}
     - versioningit
     - numpy {{ numpy }}                      # [build_platform != target_platform]
+    - sip {{ sip }}                          # [build_platform != target_platform]
 
   run:
     - matplotlib {{ matplotlib }}

@@ -22,7 +22,8 @@ from workbench.projectrecovery.recoverygui.projectrecoverymodel import ProjectRe
 
 class ProjectRecoveryModelTest(unittest.TestCase):
     def setUp(self):
-        self.pr = ProjectRecovery(multifileinterpreter=None)
+        mock_gfm = mock.MagicMock()
+        self.pr = ProjectRecovery(multifileinterpreter=None, globalfiguremanager=mock_gfm)
 
         # Make absolutely sure that the workbench-recovery directory is cleared.
         if os.path.exists(self.pr.recovery_directory):

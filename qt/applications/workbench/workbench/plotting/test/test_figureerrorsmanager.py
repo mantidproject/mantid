@@ -68,6 +68,7 @@ class FigureErrorsManagerTest(unittest.TestCase):
 
     def tearDown(self):
         plt.close("all")
+        self.ax.clear()
         del self.fig
         del self.ax
         del self.errors_manager

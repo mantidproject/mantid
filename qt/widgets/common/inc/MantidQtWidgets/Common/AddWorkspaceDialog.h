@@ -7,61 +7,45 @@
 #pragma once
 
 #include "DllOption.h"
-#include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
+#include "MantidQtWidgets/Common/IAddWorkspaceDialog.h"
 #include "ui_AddWorkspaceDialog.h"
 
 #include <vector>
 
-#include <QComboBox>
 #include <QDialog>
-#include <QLineEdit>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-/**
- * A dialog for selecting a workspace from the ADS.
- */
-class EXPORT_OPT_MANTIDQT_COMMON AddWorkspaceDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON AddWorkspaceDialog : public QDialog, public IAddWorkspaceDialog {
   Q_OBJECT
-
 public:
-  explicit AddWorkspaceDialog(QWidget *parent = nullptr);
-  QString workspaceName() const { return m_workspaceName; }
-  std::vector<int> workspaceIndices() const { return m_wsIndices; }
+  explicit AddWorkspaceDialog(QWidget *parent);
 
-  std::vector<Mantid::API::MatrixWorkspace_const_sptr> getWorkspaces() const;
+  std::string workspaceName() const override;
+  FunctionModelSpectra workspaceIndices() const;
 
-public:
-  /// Testing accessors
-  QComboBox *workspaceNameComboBox() const { return m_uiForm.cbWorkspaceName; }
-  QLineEdit *workspaceIndiceLineEdit() const { return m_uiForm.leWSIndices; }
+  void setWSSuffices(const QStringList &suffices) override;
+  void setFBSuffices(const QStringList &suffices) override;
+
+  void updateSelectedSpectra() override;
+
+  std::string getFileName() const;
 
 signals:
-  void closeDialog();
-  void okClicked(bool close);
-
-public slots:
-  void handleCancelClicked();
-  void handleOKClicked();
+  void addData(MantidWidgets::IAddWorkspaceDialog *dialog);
 
 private slots:
-  void workspaceNameChanged(const QString & /*wsName*/);
   void selectAllSpectra(int state);
+  void workspaceChanged(const QString &workspaceName);
+  void emitAddData();
+  void handleAutoLoaded();
 
 private:
-  void addWorkspacesFromGroup(std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
-                              Mantid::API::WorkspaceGroup_const_sptr const &group) const;
+  void setWorkspace(const std::string &workspace);
+  void setAllSpectraSelectionEnabled(bool doEnable);
 
-  QStringList availableWorkspaces() const;
-  void findCommonMaxIndex(const QString &wsName);
-  /// Name of the selected workspace
-  QString m_workspaceName;
-  /// Selected workspace index
-  std::vector<int> m_wsIndices;
-  /// Maximum index in the selected workspace
-  int m_maxIndex;
   Ui::AddWorkspaceDialog m_uiForm;
 };
 

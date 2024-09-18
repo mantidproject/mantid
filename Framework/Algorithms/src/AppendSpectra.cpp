@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AppendSpectra.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Run.h"
@@ -49,6 +50,8 @@ void AppendSpectra::init() {
                   "The name of the output workspace");
 
   declareProperty("MergeLogs", false, "Whether to combine the logs of the two input workspaces");
+  declareProperty("AppendYAxisLabels", false,
+                  "Whether to append y axis labels; this is done automatically if there is spectra overlap");
 }
 
 /** Execute the algorithm.
@@ -106,7 +109,7 @@ void AppendSpectra::exec() {
   setProperty("OutputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(output));
 }
 
-/** If there is an overlap in spectrum numbers between ws1 and ws2,
+/** If there is an overlap in spectrum numbers between ws1 and ws2 or the y axis is a bin edges axis,
  * then the spectrum numbers are reset as a simple 1-1 correspondence
  * with the workspace index.
  *
@@ -124,33 +127,50 @@ void AppendSpectra::fixSpectrumNumbers(const MatrixWorkspace &ws1, const MatrixW
   specnum_t ws2max;
   getMinMax(ws2, ws2min, ws2max);
 
-  // is everything possibly ok?
-  if (ws2min > ws1max)
-    return;
+  const bool appendYAxis = getProperty("AppendYAxisLabels");
+  if (ws2min <= ws1max) {
+    auto indexInfo = output.indexInfo();
+    indexInfo.setSpectrumNumbers(0, static_cast<int32_t>(output.getNumberHistograms() - 1));
+    output.setIndexInfo(indexInfo);
 
-  auto indexInfo = output.indexInfo();
-  indexInfo.setSpectrumNumbers(0, static_cast<int32_t>(output.getNumberHistograms() - 1));
-  output.setIndexInfo(indexInfo);
+    appendYAxisLabels(ws1, ws2, output);
+  } else if (appendYAxis) {
+    appendYAxisLabels(ws1, ws2, output);
+  }
+}
 
-  const int yAxisNum = 1;
+void AppendSpectra::appendYAxisLabels(const MatrixWorkspace &ws1, const MatrixWorkspace &ws2, MatrixWorkspace &output) {
+  const auto yAxisNum = 1;
   const auto yAxisWS1 = ws1.getAxis(yAxisNum);
   const auto yAxisWS2 = ws2.getAxis(yAxisNum);
-  auto outputYAxis = output.getAxis(yAxisNum);
-  const auto ws1len = ws1.getNumberHistograms();
+  const auto outputYAxis = output.getAxis(yAxisNum);
+  const auto ws1Len = ws1.getNumberHistograms();
 
+  const bool isSpectra = yAxisWS1->isSpectra() && yAxisWS2->isSpectra();
   const bool isTextAxis = yAxisWS1->isText() && yAxisWS2->isText();
   const bool isNumericAxis = yAxisWS1->isNumeric() && yAxisWS2->isNumeric();
 
+  if (!isSpectra && !isTextAxis && !isNumericAxis) {
+    const std::string message(
+        "Y-Axis type mismatch. Ensure that the Y-axis types in both workspaces match. The Y-axis should be set to the "
+        "same type in each workspace, whether it be Numeric, Spectra, or Text.");
+
+    throw std::invalid_argument(message);
+  }
+
+  bool isBinEdgeAxis =
+      dynamic_cast<BinEdgeAxis *>(yAxisWS1) != nullptr && dynamic_cast<BinEdgeAxis *>(yAxisWS2) != nullptr;
   auto outputTextAxis = dynamic_cast<TextAxis *>(outputYAxis);
-  for (size_t i = 0; i < output.getNumberHistograms(); ++i) {
+  const auto outputLen = output.getNumberHistograms() + (isBinEdgeAxis ? 1 : 0);
+  for (size_t i = 0; i < outputLen; ++i) {
     if (isTextAxis) {
       // check if we're outside the spectra of the first workspace
-      const std::string inputLabel = i < ws1len ? yAxisWS1->label(i) : yAxisWS2->label(i - ws1len);
+      const std::string inputLabel = i < ws1Len ? yAxisWS1->label(i) : yAxisWS2->label(i - ws1Len);
       outputTextAxis->setLabel(i, !inputLabel.empty() ? inputLabel : "");
 
     } else if (isNumericAxis) {
       // check if we're outside the spectra of the first workspace
-      const double inputVal = i < ws1len ? yAxisWS1->getValue(i) : yAxisWS2->getValue(i - ws1len);
+      const double inputVal = i < ws1Len ? yAxisWS1->getValue(i) : yAxisWS2->getValue(i - ws1Len);
       outputYAxis->setValue(i, inputVal);
     }
   }

@@ -132,6 +132,44 @@ class FitPropertyBrowserTest(unittest.TestCase):
         self.assertEqual(name + "_Parameters", workspaceList.item(1).text())
         self.assertEqual(name + "_Workspace", workspaceList.item(2).text())
 
+    def test_fitting_done_follows_ads_clear_fitting_done_another(self):
+        name_1 = "ws_1"
+        fig, canvas, _ = self._create_and_plot_matrix_workspace(name_1)
+        property_browser = self._create_widget(canvas=canvas)
+        property_browser.setOutputName(name_1)
+
+        # create fake fit output results
+        matrixWorkspace = WorkspaceFactory.Instance().create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+        tableWorkspace = WorkspaceFactory.createTable()
+        AnalysisDataService.Instance().addOrReplace(name_1 + "_Workspace", matrixWorkspace)
+        AnalysisDataService.Instance().addOrReplace(name_1 + "_Parameters", tableWorkspace)
+        AnalysisDataService.Instance().addOrReplace(name_1 + "_NormalisedCovarianceMatrix", tableWorkspace)
+
+        property_browser.fitting_done_slot(name_1 + "_Workspace")
+        workspaceList = property_browser.getWorkspaceList()
+        self.assertEqual(3, workspaceList.count())
+
+        # Removing the specific workspaces created during the test
+        AnalysisDataService.remove(name_1)
+        AnalysisDataService.remove(name_1 + "_Workspace")
+        AnalysisDataService.remove(name_1 + "_Parameters")
+        AnalysisDataService.remove(name_1 + "_NormalisedCovarianceMatrix")
+
+        name_2 = "ws_2"
+        ws = CreateWorkspace(OutputWorkspace=name_2, DataX=np.arange(10), DataY=2 + np.arange(10), NSpec=5)
+        property_browser.do_plot(ws)
+
+        # create fake fit output results
+        matrixWorkspace = WorkspaceFactory.Instance().create("Workspace2D", NVectors=3, YLength=5, XLength=5)
+        tableWorkspace = WorkspaceFactory.createTable()
+        AnalysisDataService.Instance().addOrReplace(name_2 + "_Workspace", matrixWorkspace)
+        AnalysisDataService.Instance().addOrReplace(name_2 + "_Parameters", tableWorkspace)
+        AnalysisDataService.Instance().addOrReplace(name_2 + "_NormalisedCovarianceMatrix", tableWorkspace)
+
+        property_browser.fitting_done_slot(name_2 + "_Workspace")
+        self.assertEqual(property_browser.fit_result_ws_name, name_2 + "_Workspace")
+        self.assertEqual(3, property_browser.getWorkspaceList().count())
+
     def test_fit_result_matrix_workspace_in_browser_is_viewed_when_clicked(self):
         from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 

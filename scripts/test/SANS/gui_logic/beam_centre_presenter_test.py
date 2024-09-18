@@ -165,9 +165,13 @@ class BeamCentrePresenterTest(unittest.TestCase):
         for attr in rear_attr:
             self.assertEqual(getattr(mocked_external_model, attr), getattr(self.presenter._beam_centre_model, attr))
 
-        # When front isn't present we should take rear values
-        for front_attr, rear_attr in zip(front_list, rear_attr):
-            self.assertEqual(getattr(mocked_external_model, rear_attr), getattr(self.presenter._beam_centre_model, front_attr))
+    def test_set_scale_to_meters_on(self):
+        self.presenter.set_meters_mode_enabled(True)
+        self.view.set_position_unit.assert_called_with("m")
+
+    def test_set_scale_to_meters_off(self):
+        self.presenter.set_meters_mode_enabled(False)
+        self.view.set_position_unit.assert_called_with("mm")
 
     def test_on_update_rows_updates_centres(self):
         # As the rear centres can update when the rows change (due to different run number groups)
@@ -187,18 +191,6 @@ class BeamCentrePresenterTest(unittest.TestCase):
         self.assertEqual(1.2, self.view.rear_pos_2)
         self.assertEqual(2.1, self.view.front_pos_1)
         self.assertEqual(2.2, self.view.front_pos_2)
-
-    def test_update_center_positions_with_empty_front(self):
-        self.BeamCentreModel.rear_pos_1 = 1.1
-        self.BeamCentreModel.rear_pos_2 = 1.2
-        self.BeamCentreModel.front_pos_1 = ""
-        self.BeamCentreModel.front_pos_2 = ""
-        self.presenter.update_centre_positions()
-
-        self.assertEqual(1.1, self.view.rear_pos_1)
-        self.assertEqual(1.2, self.view.rear_pos_2)
-        self.assertEqual(self.BeamCentreModel.rear_pos_1, self.view.front_pos_1)
-        self.assertEqual(self.BeamCentreModel.rear_pos_2, self.view.front_pos_2)
 
     def test_update_center_positions_with_zero_front(self):
         self.BeamCentreModel.rear_pos_1 = 1.1

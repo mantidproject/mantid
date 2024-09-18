@@ -212,4 +212,45 @@ File Filters
     :width: 600px
     :align: center
 
+.. _ui engineering gsas:
+
+GSAS-II Refinement
+------------------
+
+This tab calls GSAS-II python interface (path to GSAS-II supplied by the user in the interface settings).
+Currently only Pawley refinements are supported and the lattice parameters in the .cif phase file can be overidden.
+
+Parameters
+^^^^^^^^^^
+
+Project Name
+    Name of the GSAS project file.
+
+Instrument Group
+    Path to .prm file produced by the Calibration tab
+
+Phase
+    Path to the .cif file defining the initial crystal structure (more than one path can be supplied, the lattice
+    parameters will be overridden for the first phase only).
+
+Focused Data
+    Path to focused .gss files (note it should have the same number of spectra as in .prm file)
+
+Refinement Method
+    Only Pawley refinement currently supported
+
+Override Unit Cell Length
+    Lattice parameters (a, b, c, alpha, beta, gamma) can be supplied to overwrite the lattice parameters in the first .cif file
+
+Refine Microstrain
+
+Refine Sigma_1
+
+Refine Gamma
+
+.. image:: figure:: ../../../../images/6_5_release/Diffraction/GSASII_tab.png
+    :align: center
+    :width: 600px
+
 .. categories:: Interfaces Diffraction
+

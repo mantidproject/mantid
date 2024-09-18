@@ -638,6 +638,7 @@ void FilterEvents::createOutputWorkspaces() {
   std::shared_ptr<EventWorkspace> templateWorkspace = create<EventWorkspace>(*m_eventWS);
   templateWorkspace->setSharedRun(Kernel::make_cow<Run>()); // clear the run object
   templateWorkspace->clearMRU();
+  templateWorkspace->switchEventType(m_eventWS->getEventType());
 
   // Set up target workspaces
   size_t number_of_output_workspaces{0};
@@ -667,9 +668,9 @@ void FilterEvents::createOutputWorkspaces() {
       } else if (descriptiveNames) {
         auto infoiter = infomap.find(wsindex);
         if (infoiter != infomap.end()) {
-          std::string name = infoiter->second;
-          name = Kernel::Strings::removeSpace(name);
-          wsname << name;
+          std::string nameFromMap = infoiter->second;
+          nameFromMap = Kernel::Strings::removeSpace(nameFromMap);
+          wsname << nameFromMap;
         } else {
           wsname << m_timeSplitter.getWorkspaceIndexName(wsindex, delta_wsindex);
         }
@@ -997,8 +998,8 @@ void FilterEvents::filterEvents(double progressamount) {
     PARALLEL_START_INTERRUPT_REGION
     if (!m_vecSkip[iws]) {                                                        // Filter the non-skipped
       const DataObjects::EventList &inputEventList = m_eventWS->getSpectrum(iws); // input event list
-      std::map<int, DataObjects::EventList *> partialEvenLists; // event lists receiving the events from input list
-      if (!inputEventList.empty()) {                            // nothing to split if there aren't events
+      if (!inputEventList.empty()) {                              // nothing to split if there aren't events
+        std::map<int, DataObjects::EventList *> partialEvenLists; // event lists receiving the events from input list
         for (auto &ws : m_outputWorkspacesMap) {
           const int index = ws.first;
           auto &partialEventList = ws.second->getSpectrum(iws);

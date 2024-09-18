@@ -1,1 +1,0 @@
-- Drop support for numpy v1.21 because it's no longer maintained.

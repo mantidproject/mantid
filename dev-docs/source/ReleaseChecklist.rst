@@ -130,8 +130,6 @@ Beta Testing Ends - Prepare for Smoke Testing
 * Send an invite to developers for 1.5 hours maximum Smoke Testing. Include an introduction message to assign all testers to a certain operating system.
   Link to the release pipeline builds where the release packages *WILL* be. Encourage testers to download
   in the 30 minutes before smoke testing. Inform that ticking on a testing issue means that someone has assigned themselves and will tackle that task.
-* The QA manager should pre-setup 3 ISIS IDAaaS Mantid dev instances and manually install the release package before testing
-  so the 1.5 hours is clear for testing time. Then share the instances with the relevant testers from the IDAaaS workspace settings.
 
 Smoke Testing
 #############
@@ -201,9 +199,10 @@ Just before release
 
 * As one of the final steps in preparing to tag the release:
 
-  * Add any final release notes manually to the main release note pages. (Make sure to check `main` for any release notes that have been merged into the wrong branch)
-  * Remove unused headings from the main release note pages.
-  * Remove all separate release note files and sub-file structure to leave just the main release note pages.
+  * Check for uncollected release notes using the `unused_release_note_finder.py script <https://github.com/mantidproject/mantid/blob/main/tools/ReleaseNotes/unused_release_note_finder.py>`__.
+  * Check ``main`` for any release notes that have been merged into the wrong branch.
+  * Remove any unused headings which have not already been removed from the release notes.
+  * Remove all the "Used" release note files and their sub-structure.
 
 .. _release-manager-checklist:
 
@@ -292,7 +291,7 @@ Beta Testing Begins
 
    ``swg<AT>mantidproject.org``
 
-   using the template as a guide:
+   using the following templates as a guide (the first template is for users at ISIS, the second one for everyone else):
 
    * Dear all,
 
@@ -303,12 +302,42 @@ Beta Testing Begins
 
      Packages
 
-     The nightly test installers for this version are available here to download: https://www.mantidproject.org/installation/index#nightly-build.
+     To test the Mantid nightly version, it is recommended to install it as a Conda package in a new Conda environment. To achieve this, use the
+     following command: ``mamba create -n mantid_env_test -c mantid/label/nightly mantidworkbench``
+     Alternatively, the nightly test installers for this version are available here to download: https://www.mantidproject.org/installation/index#nightly-build.
      The nightly builds install alongside a full release and so will not affect its operation but will overwrite any other nightly builds you have.
      For Windows users at ISIS, install Mantid as your standard user account (not an 03 account).
      It will install just for your user, rather than for the whole PC.
+     Another possibility is to conduct testing on IDAaaS. Please be aware that the version on IDAaaS is typically one day behind the nightly version available on Conda.
 
      We have an early draft of the release notes at https://docs.mantidproject.org/nightly/release/<version>/index.html.
+
+     Please report any bugs to ``mantid-help@mantidproject.org`` and
+     if the problem is a bug that would prevent your normal workflow from working then start the email subject with ``URGENT:``.
+     It would be most helpful for the team if bugs are communicated back to us as soon as possible.
+
+     Thank you all for your help.
+
+     Regards,
+
+     Mantid Team
+
+   * Dear all,
+
+     We are busy making preparations for the release of version *<version>* of Mantid.
+     We have completed our first round of developer testing and are now ready for beta-testing feedback.
+     The beta testing period for this release is between today (*<start date>*) and the end of play on *<end date>*.
+     We then hope to release the following week.
+
+     Packages
+
+     To test the Mantid nightly version, it is recommended to install it as a Conda package in a new Conda environment. To achieve this, use the
+     following command: ``mamba create -n mantid_env_test -c mantid/label/nightly mantidworkbench``
+     Alternatively, the nightly test installers for this version are available here to download: https://github.com/mantidproject/mantid/releases.
+     The nightly builds install alongside a full release and so will not affect its operation but will overwrite any other nightly builds you have.
+
+     We have an early draft of the release notes at https://docs.mantidproject.org/nightly/release/<version>/index.html.
+
      Please report any bugs to ``mantid-help@mantidproject.org`` and
      if the problem is a bug that would prevent your normal workflow from working then start the email subject with ``URGENT:``.
      It would be most helpful for the team if bugs are communicated back to us as soon as possible.
@@ -339,6 +368,8 @@ Smoke Testing
 #############
 
 * This is the final day for code changes to the build for blocker issues.
+
+.. _release-manager-announcements:
 
 Release Day
 ###########
@@ -382,19 +413,24 @@ Code Freeze
 **Create the Release Branch (once most PRs are merged)**
 
 * Ensure the latest `main nightly deployment pipeline
-  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment_prototype/>`__
+  <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/main_nightly_deployment/>`__
   has passed for all build environments. If it fails, decide if a fix is needed before moving on to
   the next steps.
+* Ask a mantid gatekeeper or administrator to update the ``release-next`` branch so that it's up to
+  date with the ``main`` branch, pushing the changes directly to GitHub:
+
+.. code-block:: bash
+
+    git checkout release-next
+    git fetch origin main
+    git reset --hard origin/main
+    git push origin release-next --force
+
+* Verify that the latest commit on ``release-next`` is correct before moving to the next step.
 * Click ``Build Now`` on `open-release-testing
-  <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__,
-  which will perform the following actions:
-
-  * Create or update the ``release-next`` branch.
-  * Enable the job to periodically merge ``release-next`` into ``main``.
-  * Set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``release-next``.
-    This will turn off publishing for the ``main`` branch pipeline and switch it on for the
-    ``release-next`` pipeline.
-
+  <https://builds.mantidproject.org/view/All/job/open-release-testing/>`__. This will
+  set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``release-next``,
+  which will re-enable package publishing for the ``release-next`` nightly pipeline.
 * Check the state of all open pull requests for this milestone and decide which
   should be kept for the release, liaise with the Release Manager on this. Move any
   pull requests not targeted for this release out of the milestone, and then change
@@ -445,16 +481,14 @@ have been fixed. Then:
   index page has been removed. Remove the paragraph if it still exists.
 * Ensure that all changes, including release notes, have been merged into the ``release-next`` branch.
 * On the ``release-next`` branch, check whether the `git SHA
-  <https://github.com/mantidproject/mantid/blob/343037c685c0aca9151523d6a3e105504f8cf218/scripts/ExternalInterfaces/CMakeLists.txt#L11>`__
+  <https://github.com/mantidproject/mantid/blob/release-next/scripts/ExternalInterfaces/CMakeLists.txt>`__
   for MSlice is up to date. If not, create a PR to update it and ask a gatekeeper to merge it.
-* Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually trigger the `Jenkins job
-  <https://builds.mantidproject.org/job/merge_release-next_into_main/>`__ to merge the changes.
-* Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__
-  job, which will do the following:
-
-  * Disable the job that periodically merges ``release-next`` into ``main``.
-  * Set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``. This will re-enable
-    package publishing for the ``main`` nightly pipeline.
+* Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually run the `GitHub workflow
+  <https://github.com/mantidproject/mantid/actions/workflows/automerge.yml/>`__ using the ``release-next`` branch to
+  merge the changes.
+* Run the `close-release-testing <https://builds.mantidproject.org/view/All/job/close-release-testing>`__ Jenkins job.
+  This will set the value of the Jenkins global property ``BRANCH_TO_PUBLISH`` to ``main``, which will re-enable package
+  publishing for the ``main`` nightly pipeline.
 
 **Create the Release Candidates For Smoke Testing**
 
@@ -467,7 +501,8 @@ We are now ready to create the release candidates for Smoke testing.
   * set ``BUILD_DEVEL`` to ``all``
   * set ``BUILD_PACKAGE`` to ``all``
   * set ``PACKAGE_SUFFIX`` to an **empty string**
-  * tick the ``PUBLISH_PACKAGES`` checkbox
+  * tick the ``PUBLISH_TO_ANACONDA`` checkbox
+  * tick the ``PUBLISH_TO_GITHUB`` checkbox
   * set the ``ANACONDA_CHANNEL`` to ``mantid``
   * set the ``ANACONDA_CHANNEL_LABEL`` to ``vX.Y.ZrcN`` where ``X.Y.Z`` is the release number,
     and ``N`` is an incremental build number for release candidates, starting at ``1`` (e.g. ``v6.7.0rc1``)
@@ -481,7 +516,11 @@ We are now ready to create the release candidates for Smoke testing.
 * Liaise with the Quality Assurance Manager and together announce the creation of the smoke testing
   issues and Release Candidates in the *\#general* slack channel.
 
-**Create the Release Candidates For Release**
+
+.. _technical-release-manager-release-candidates:
+
+Create Final Release Candidates
+###############################
 
 Check with the Quality Assurance Manager that the Smoke testing has been completed, and any issues
 have been fixed. The release candidates must now be recreated with their final version numbers. To do this, build the
@@ -492,12 +531,14 @@ with the following parameters (most are already defaulted to the correct values)
 * set ``BUILD_DEVEL`` to ``all``
 * set ``BUILD_PACKAGE`` to ``all``
 * set ``PACKAGE_SUFFIX`` to an **empty string**
-* tick the ``PUBLISH_PACKAGES`` checkbox
+* tick the ``PUBLISH_TO_ANACONDA`` checkbox
+* tick the ``PUBLISH_TO_GITHUB`` checkbox
 * set the ``ANACONDA_CHANNEL`` to ``mantid``
 * set the ``ANACONDA_CHANNEL_LABEL`` to ``draft-vX.Y.Z`` where ``X.Y.Z`` is the release number
 * set ``GITHUB_RELEASES_REPO`` to ``mantidproject/mantid``
 * set ``GITHUB_RELEASES_TAG`` to ``vX.Y.Z``, where ``X.Y.Z`` is the release number.
 
+.. _technical-release-manager-release-day:
 
 Release Day
 ###########
@@ -522,7 +563,7 @@ Anaconda channel.
    <https://github.com/ral-facilities/daaas-ansible-workspace>`__ (a member of the ISIS core team or IDAaaS support)
    to add the new release to IDAaaS. They can do this by creating a PR targeting the ``preprod`` branch, adding
    the new release version to the list of versions installed on IDAaaS `here
-   <https://github.com/ral-facilities/daaas-ansible-workspace/blob/master/roles/software/analysis/mantid/defaults/main.yml>`__.
+   <https://github.com/ral-facilities/daaas-ansible-workspace/blob/main/roles/software/analysis/mantid/defaults/main.yml>`__.
    Make sure that there are only three ``mantid_versions`` in the list (delete the oldest one if applicable).
    The changes need to be verified on an IDAaaS test instance before the PR can be accepted.
 

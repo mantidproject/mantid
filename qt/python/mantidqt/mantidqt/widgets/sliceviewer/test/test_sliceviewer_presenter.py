@@ -310,6 +310,16 @@ class SliceViewerTest(unittest.TestCase):
 
         self.assertTrue(mock.call(ToolItemText.NONAXISALIGNEDCUTS) not in data_view_mock.enable_tool_button.call_args_list)
 
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
+    def test_non_orthognoal_axes_toggled_will_hide_or_show_the_signal(self, mock_sliceinfo_cls):
+        presenter, data_view_mock = _create_presenter(
+            self.model, self.view, mock_sliceinfo_cls, enable_nonortho_axes=True, supports_nonortho=True
+        )
+        for button_state in {False, True}:
+            data_view_mock.image_info_widget.setShowSignal.reset_mock()
+            presenter.nonorthogonal_axes(button_state)
+            data_view_mock.image_info_widget.setShowSignal.assert_called_once_with(not button_state)
+
     def test_cut_view_button_disabled_if_model_cannot_support_it(self):
         self.patched_deps["WorkspaceInfo"].get_ws_type.return_value = WS_TYPE.MATRIX
         self.model.can_support_non_axis_cuts.return_value = False

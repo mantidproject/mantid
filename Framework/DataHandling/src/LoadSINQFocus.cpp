@@ -220,8 +220,8 @@ void LoadSINQFocus::loadRunDetails(const NXEntry &entry) {
  */
 void LoadSINQFocus::loadExperimentDetails(const NXEntry &entry) {
 
-  std::string name = boost::lexical_cast<std::string>(entry.getFloat("sample/name"));
-  m_localWorkspace->mutableSample().setName(name);
+  std::string sampleName = boost::lexical_cast<std::string>(entry.getFloat("sample/name"));
+  m_localWorkspace->mutableSample().setName(sampleName);
 }
 
 /**

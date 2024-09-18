@@ -42,7 +42,7 @@ A - Direct Matplotlib with SNS Data
 
     # Add a legend with the chosen labels and show the plot
     axes.legend()
-    #plt.show() #uncomment to show the plot
+    #fig.show() #uncomment to show the plot
 
     # Note with the Direct Matplotlib method,
     # there are many more options for formatting the plot
@@ -148,4 +148,5 @@ C - 2D and 3D Plot ILL Data
     ax3d[0].set_title("Surface")
     ax3d[1].set_title("Wireframe")
 
-    #plt.show()# uncomment to show the plots
+    #figC.show()# uncomment to show the plots
+    #fig3d.show()

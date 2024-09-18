@@ -13,7 +13,7 @@
 #include "MantidKernel/System.h"
 
 #include <QObject>
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -69,7 +69,7 @@ public:
 
   /// @return Selected integration time range, or nothing if limiting is
   /// disabled
-  virtual boost::optional<std::pair<double, double>> timeRange() const = 0;
+  virtual std::optional<std::pair<double, double>> timeRange() const = 0;
 
   /// Sets all available info to empty
   virtual void setAvailableInfoToEmpty() = 0;

@@ -25,7 +25,16 @@ from ui.sans_isis.sans_gui_observable import SansGuiObservable
 from mantid.api import FileFinder
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
 from sans.command_interface.batch_csv_parser import BatchCsvParser
-from sans.common.enums import ReductionMode, RangeStepType, RowState, SampleShape, SaveType, SANSInstrument
+from sans.common.enums import (
+    ReductionMode,
+    RangeStepType,
+    RowState,
+    SampleShape,
+    SaveType,
+    SANSInstrument,
+    ReductionDimensionality,
+    OutputMode,
+)
 from sans.gui_logic.gui_common import (
     add_dir_to_datasearch,
     get_reduction_mode_from_gui_selection,
@@ -396,6 +405,7 @@ class RunTabPresenter(PresenterCommon):
 
             self._beam_centre_presenter.copy_centre_positions(self._model)
             self._beam_centre_presenter.update_centre_positions()
+            self._beam_centre_presenter.set_meters_mode_enabled(self._view.instrument == SANSInstrument.LARMOR)
 
             self._masking_table_presenter.on_update_rows()
             self._workspace_diagnostic_presenter.on_user_file_load(user_file_path)
@@ -570,10 +580,12 @@ class RunTabPresenter(PresenterCommon):
         )
 
     def on_reduction_dimensionality_changed(self):
-        self._run_tab_model.update_reduction_mode(self._view.reduction_dimensionality)
+        dimensionality = self._view.reduction_dimensionality
+        self._run_tab_model.update_reduction_mode(dimensionality)
         # Update save options in case they've updated in the model
         save_opts = self._run_tab_model.get_save_types()
         self._view.save_types = save_opts
+        self._check_if_SaveCanSAS1D_is_usable()
 
     def _validate_output_modes(self):
         """
@@ -586,6 +598,17 @@ class RunTabPresenter(PresenterCommon):
             if self._view.save_types == [SaveType.NO_TYPE]:
                 raise ValueError("You have selected an output mode which saves to file, " "but no file types have been selected.")
 
+    def _check_if_SaveCanSAS1D_is_usable(self):
+        """
+        SaveCanSAS1D is only allowed to be used for 1D data. Check that we're in a file saving mode and in one dimension
+        before enabling the checkbox.
+        """
+        if self._view.output_mode is OutputMode.BOTH or self._view.output_mode is OutputMode.SAVE_TO_FILE:
+            if self._view.reduction_dimensionality is ReductionDimensionality.TWO_DIM:
+                self._view.disable_can_sas_1D_button()
+                return
+            self._view.enable_can_sas_1D_button()
+
     def on_output_mode_changed(self):
         """
         When output mode changes, dis/enable file type buttons
@@ -596,6 +619,7 @@ class RunTabPresenter(PresenterCommon):
             self._view.disable_file_type_buttons()
         else:
             self._view.enable_file_type_buttons()
+            self._check_if_SaveCanSAS1D_is_usable()
 
     def on_process_all_clicked(self):
         """
@@ -1133,6 +1157,8 @@ class RunTabPresenter(PresenterCommon):
             # Beam Centre
             self._beam_centre_presenter.set_on_state_model("rear_pos_1", state_model)
             self._beam_centre_presenter.set_on_state_model("rear_pos_2", state_model)
+            self._beam_centre_presenter.set_on_state_model("front_pos_1", state_model)
+            self._beam_centre_presenter.set_on_state_model("front_pos_2", state_model)
         except (RuntimeError, ValueError) as e:
             self.display_warning_box(title="Invalid Settings Entered", text=str(e), detailed_text=str(e))
 

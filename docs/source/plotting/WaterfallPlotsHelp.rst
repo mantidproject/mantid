@@ -132,7 +132,7 @@ An example script for a Waterfall Plot:
    # Update the offsets
    ax.update_waterfall(x_offset=10, y_offset=30)
 
-   plt.show()
+   fig.show()
 
 For more advice: :ref:`02_scripting_plots`
 

@@ -13,6 +13,7 @@
  * $Id: vms_convert.cpp 4 2004-09-09 22:03:23Z faa59 $
  */
 #include "vms_convert.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 /*
  * Byte swaps for int and short
@@ -266,6 +267,8 @@ static int maybe_flip_bytes(void *p, size_t n) {
 #define maybe_flip_bytes(__p, __n)
 #endif /* WORDS_BIGENDIAN */
 
+GNU_DIAG_OFF("uninitialized")
+
 /* convert VAX F FLOAT into a local IEEE single float */
 static int vax_to_ieee_float(float *fp) {
   struct ieee_single is;
@@ -344,6 +347,8 @@ static int ieee_to_vax_float(float *fp) {
   maybe_flip_bytes(fp, sizeof(float)); /* Make little endian */
   return 0;
 }
+
+GNU_DIAG_ON("uninitialized")
 
 void vaxf_to_local(float *val, const int *n, int *errcode) {
 #if defined(VAXFP)

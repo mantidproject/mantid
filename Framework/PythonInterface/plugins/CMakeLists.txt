@@ -43,7 +43,6 @@ set(PYTHON_PLUGINS
     algorithms/DNSFlippingRatioCorr.py
     algorithms/DNSMergeRuns.py
     algorithms/DPDFreduction.py
-    algorithms/DSFinterp.py
     algorithms/DakotaChiSquared.py
     algorithms/DeltaPDF3D.py
     algorithms/LoadElementalAnalysisData.py
@@ -71,6 +70,7 @@ set(PYTHON_PLUGINS
     algorithms/FindGlobalBMatrix.py
     algorithms/FindSatellitePeaks.py
     algorithms/FindSXPeaksConvolve.py
+    algorithms/FindMultipleUMatrices.py
     algorithms/FitGaussian.py
     algorithms/FitIncidentSpectrum.py
     algorithms/GSASIIRefineFitPeaks.py
@@ -91,8 +91,10 @@ set(PYTHON_PLUGINS
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
     algorithms/InelasticEMUauReduction.py
+    algorithms/IntegratePeaks1DProfile.py
     algorithms/IntegratePeaksProfileFitting.py
     algorithms/IntegratePeaksSkew.py
+    algorithms/IntegratePeaksShoeboxTOF.py
     algorithms/LRAutoReduction.py
     algorithms/LRDirectBeamSort.py
     algorithms/LRPeakSelection.py
@@ -170,6 +172,8 @@ set(PYTHON_PLUGINS
     algorithms/SaveGSSCW.py
     algorithms/SaveHKLCW.py
     algorithms/SaveINS.py
+    algorithms/SaveISISReflectometryORSO.py
+    algorithms/SaveMDHistoToVTK.py
     algorithms/SaveNexusPD.py
     algorithms/SaveP2D.py
     algorithms/SavePlot1DAsJson.py
@@ -185,6 +189,7 @@ set(PYTHON_PLUGINS
     algorithms/CNCSSuggestTIB.py
     algorithms/HYSPECSuggestTIB.py
     algorithms/Symmetrise.py
+    algorithms/SymmetriseMDHisto.py
     algorithms/TOFTOFCropWorkspace.py
     algorithms/TOFTOFMergeRuns.py
     algorithms/TestWorkspaceGroupProperty.py
@@ -344,7 +349,6 @@ set(PYTHON_PLUGINS
     functions/ChudleyElliot.py
     functions/CombGaussLorentzKT.py
     functions/CompositePCRmagnet.py
-    functions/DSFinterp1DFit.py
     functions/DampedBessel.py
     functions/EISFDiffCylinder.py
     functions/EISFDiffSphere.py
@@ -377,6 +381,7 @@ set(PYTHON_PLUGINS
     functions/RFresonance.py
     functions/Redfield.py
     functions/SCgapSwave.py
+    functions/SpinDiffusion.py
     functions/SpinGlass.py
     functions/StandardSC.py
     functions/StaticLorentzianKT.py
@@ -385,6 +390,7 @@ set(PYTHON_PLUGINS
     functions/StretchedKT.py
     functions/TFMuonium.py
     functions/TeixeiraWater.py
+    functions/TeixeiraWaterIqt.py
     functions/ZFMuonium.py
     functions/ZFdipole.py
     functions/ZFelectronDipole.py

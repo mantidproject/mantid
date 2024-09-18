@@ -34,7 +34,6 @@ namespace {
  * @param on bool; whether to turn on or off the observer for the specific method
  * @param method ObserverMethod; the method to call with the on parameter.
  */
-// cppcheck-suppress constParameterCallback
 void callReleasingGIL(AnalysisDataServiceObserver &self, bool on, ObserverMethod method) {
   ReleaseGlobalInterpreterLock releaseGil;
   (self.*method)(on);

@@ -59,21 +59,21 @@ void SaveFocusedXYE::exec() {
 
   // this would be a subroutine if it were easier to return
   // two strings
-  std::string filename = getProperty("Filename");
+  std::string filepath = getProperty("Filename");
   std::string ext;
   {
-    Poco::Path path(filename);
+    Poco::Path path(filepath);
     std::string directory = path.parent().toString();
-    std::string name = path.getFileName();
+    std::string filename = path.getFileName();
 
-    std::size_t pos = name.find_first_of('.');
+    std::size_t pos = filename.find_first_of('.');
     if (pos != std::string::npos) // Remove the extension
     {
-      ext = name.substr(pos + 1, name.npos);
-      name = name.substr(0, pos);
+      ext = filename.substr(pos + 1, filename.npos);
+      filename = filename.substr(0, pos);
     }
 
-    filename = Poco::Path(directory, name).toString();
+    filepath = Poco::Path(directory, filename).toString();
   }
 
   const bool append = getProperty("Append");
@@ -107,7 +107,7 @@ void SaveFocusedXYE::exec() {
   const auto &detectorInfo = inputWS->detectorInfo();
 
   if (!split) {
-    const std::string file(std::string(filename).append(".").append(ext));
+    const std::string file(std::string(filepath).append(".").append(ext));
     Poco::File fileObj(file);
     const bool exists = fileObj.exists();
     out.open(file.c_str(), mode);
@@ -142,7 +142,7 @@ void SaveFocusedXYE::exec() {
     if (split) {
       // Several files will be created with names filename-i.ext
       number << "-" << i + startingbank;
-      const std::string file(std::string(filename).append(number.str()).append(".").append(ext));
+      const std::string file(std::string(filepath).append(number.str()).append(".").append(ext));
       Poco::File fileObj(file);
       const bool exists = fileObj.exists();
       out.open(file.c_str(), mode);
@@ -152,8 +152,8 @@ void SaveFocusedXYE::exec() {
     }
 
     if (!out.is_open()) {
-      g_log.information("Could not open filename: " + filename);
-      throw std::runtime_error("Could not open filename: " + filename);
+      g_log.information("Could not open filename: " + filepath);
+      throw std::runtime_error("Could not open filename: " + filepath);
     }
 
     if (headers) {

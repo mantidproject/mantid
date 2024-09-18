@@ -53,12 +53,8 @@ IPropertyManager *IPropertyManager::setProperty<std::string>(const std::string &
  * @return True if the property is managed by this.
  */
 bool IPropertyManager::existsProperty(const std::string &name) const {
-  auto props = this->getProperties();
-  for (std::vector<Property *>::const_iterator prop = props.begin(); prop != props.end(); ++prop) {
-    if (name == (*prop)->name())
-      return true;
-  }
-  return false;
+  auto const &props = this->getProperties();
+  return std::any_of(props.cbegin(), props.cend(), [&name](const auto prop) { return name == prop->name(); });
 }
 
 /**

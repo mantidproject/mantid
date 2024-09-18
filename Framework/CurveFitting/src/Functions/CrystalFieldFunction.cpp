@@ -22,10 +22,10 @@
 
 #include "MantidKernel/Exception.h"
 
-#include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <utility>
 
 namespace Mantid::CurveFitting::Functions {
@@ -440,11 +440,11 @@ void CrystalFieldFunction::buildAttributeNames() const {
   for (size_t iSpec = 0; iSpec < m_control.nFunctions(); ++iSpec) {
     std::string prefix(SPECTRUM_PREFIX);
     prefix.append(std::to_string(iSpec)).append(".");
-    auto names = m_control.getFunction(iSpec)->getAttributeNames();
-    for (auto &name : names) {
-      name.insert(name.begin(), prefix.begin(), prefix.end());
+    auto attrNames = m_control.getFunction(iSpec)->getAttributeNames();
+    for (auto &attrName : attrNames) {
+      attrName.insert(attrName.begin(), prefix.begin(), prefix.end());
     }
-    m_attributeNames.insert(m_attributeNames.end(), names.begin(), names.end());
+    m_attributeNames.insert(m_attributeNames.end(), attrNames.begin(), attrNames.end());
   }
   // Attributes of physical properties
   for (size_t iSpec = nSpectra(); iSpec < m_target->nFunctions(); ++iSpec) {
@@ -527,14 +527,14 @@ bool CrystalFieldFunction::hasAttribute(const std::string &attName) const {
 std::pair<API::IFunction *, std::string> CrystalFieldFunction::getAttributeReference(const std::string &attName) const {
   boost::smatch match;
   if (boost::regex_match(attName, match, SPECTRUM_ATTR_REGEX)) {
-    auto i = std::stoul(match[1]);
-    auto name = match[2].str();
+    auto index = std::stoul(match[1]);
+    auto attNameNoIndex = match[2].str();
     if (m_control.nFunctions() == 0) {
       m_control.buildControls();
     }
-    if (name == "FWHMX" || name == "FWHMY") {
-      if (i < m_control.nFunctions()) {
-        return std::make_pair(m_control.getFunction(i).get(), name);
+    if (attNameNoIndex == "FWHMX" || attNameNoIndex == "FWHMY") {
+      if (index < m_control.nFunctions()) {
+        return std::make_pair(m_control.getFunction(index).get(), attNameNoIndex);
       } else {
         return std::make_pair(nullptr, "");
       }
@@ -542,10 +542,10 @@ std::pair<API::IFunction *, std::string> CrystalFieldFunction::getAttributeRefer
     return std::make_pair(nullptr, "");
   } else if (boost::regex_match(attName, match, PHYS_PROP_ATTR_REGEX)) {
     auto prop = match[1].str();
-    auto name = match[4].str();
+    auto nameRemainder = match[4].str();
     auto propIt = m_mapPrefixes2PhysProps.find(prop);
     if (propIt != m_mapPrefixes2PhysProps.end()) {
-      return std::make_pair(propIt->second.get(), name);
+      return std::make_pair(propIt->second.get(), nameRemainder);
     }
     return std::make_pair(nullptr, "");
   }
@@ -1193,10 +1193,10 @@ size_t CrystalFieldFunction::makeMapsForFunction(const IFunction &fun, size_t iF
   auto n = fun.nParams();
   for (size_t i = 0; i < n; ++i) {
     size_t j = i + iFirst;
-    auto name(prefix);
-    name.append(fun.parameterName(i));
-    m_mapNames2Indices[name] = j;
-    m_mapIndices2Names[j] = name;
+    auto paramName(prefix);
+    paramName.append(fun.parameterName(i));
+    m_mapNames2Indices[paramName] = j;
+    m_mapIndices2Names[j] = paramName;
   }
   return n;
 }

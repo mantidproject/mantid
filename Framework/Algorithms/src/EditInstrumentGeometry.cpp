@@ -256,8 +256,8 @@ void EditInstrumentGeometry::exec() {
 
   // Generate a new instrument
   // Name of the new instrument
-  std::string name = std::string(getProperty("InstrumentName"));
-  if (name.empty()) {
+  std::string instruentName = std::string(getProperty("InstrumentName"));
+  if (instruentName.empty()) {
     // Use the original L1
     if (!originstrument) {
       std::string errmsg("It is not supported that InstrumentName is not given, ",
@@ -265,11 +265,11 @@ void EditInstrumentGeometry::exec() {
       g_log.error(errmsg);
       throw std::runtime_error(errmsg);
     }
-    name = originstrument->getName();
+    instruentName = originstrument->getName();
   }
 
   // Create a new instrument from scratch any way.
-  auto instrument = std::make_shared<Geometry::Instrument>(name);
+  auto instrument = std::make_shared<Geometry::Instrument>(instruentName);
   if (!bool(instrument)) {
     stringstream errss;
     errss << "Trying to use a Parametrized Instrument as an Instrument.";

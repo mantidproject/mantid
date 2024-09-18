@@ -23,7 +23,6 @@ from mantid.kernel import (
     FloatArrayProperty,
     FloatArrayLengthValidator,
     FloatPropertyWithValue,
-    V3D,
     StringListValidator,
 )
 from mantid.simpleapi import (
@@ -40,6 +39,15 @@ from mantid.simpleapi import (
     mtd,
     GroupWorkspaces,
     RenameWorkspace,
+    ConvertToMD,
+    GroupDetectors,
+    LoadInstrument,
+    CreateMDHistoWorkspace,
+    CreateSimulationWorkspace,
+    MoveInstrumentComponent,
+    AddSampleLog,
+    CopySample,
+    Rebin,
 )
 import os
 import numpy as np
@@ -182,6 +190,11 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.setPropertySettings("BinningDim1", histo_settings)
         self.setPropertySettings("BinningDim2", histo_settings)
 
+        # Grouping info
+        self.declareProperty(
+            "Grouping", "None", StringListValidator(["None", "2x2", "4x4"]), "Group pixels (shared by input and normalization)"
+        )
+
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
             doc="Output MDWorkspace in Q-space, name is prefix if multiple input files were provided.",
@@ -246,11 +259,18 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         wslist = []
 
+        grouping = self.getProperty("Grouping").value
+        if grouping == "None":
+            grouping = 1
+        else:
+            grouping = 2 if grouping == "2x2" else 4
+
         out_ws = self.getPropertyValue("OutputWorkspace")
         out_ws_name = out_ws
 
         if load_van:
-            vanws = LoadMD(vanadiumfile, StoreInADS=False)
+            vanws = LoadMD(vanadiumfile, StoreInADS=True)
+            vanws = self.__regroup_and_move(vanws, grouping, height, distance)
 
         has_multiple = len(datafiles) > 1
 
@@ -258,11 +278,15 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             if load_files:
                 scan = LoadMD(in_file, LoadHistory=False, OutputWorkspace="__scan")
             else:
-                scan = mtd[in_file]
+                scan = CloneMDWorkspace(in_file)
 
             # Make sure the workspace has experiment info, otherwise SetGoniometer will add some, causing issues.
             if scan.getNumExperimentInfo() == 0:
                 raise RuntimeError("No experiment info was found in '{}'".format(in_file))
+
+            self.log().information("Detector adjustments '({},{})m'".format(height, distance))
+
+            scan = self.__regroup_and_move(scan, grouping, height, distance)
 
             prog.report()
             self.log().information("Processing '{}'".format(in_file))
@@ -276,10 +300,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                     out_ws_name = out_ws + "_" + in_file
                 wslist.append(out_ws_name)
 
-            exp_info = scan.getExperimentInfo(0)
-            self.__move_components(exp_info, height, distance)
-
             # Get the wavelength from experiment info if it exists, or fallback on property value
+            exp_info = scan.getExperimentInfo(0)
             wavelength = self.__get_wavelength(exp_info)
 
             # set the run number to be the same as scan number, this will be used for peaks
@@ -316,8 +338,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                     BinningDim2=bin2,
                     OutputWorkspace=out_ws_name,
                 )
-                if load_files:
-                    DeleteWorkspace(scan)
+                DeleteWorkspace(scan)
             else:
                 norm_data = self.__normalization(scan, vanws, load_files)
                 RenameWorkspace(norm_data, OutputWorkspace=out_ws_name)
@@ -330,11 +351,98 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             else:
                 GroupWorkspaces(InputWorkspaces=wslist, OutputWorkspace=out_ws_name)
 
-        # Don't delete workspaces if they were passed in
+        # Delete workspaces
         if load_van:
             DeleteWorkspace(vanws)
 
         self.setProperty("OutputWorkspace", out_ws_name)
+
+    def __regroup_and_move(self, scan, grouping, height, distance):
+
+        ws = scan.name()
+
+        array = mtd[ws].getSignalArray().copy()
+
+        if grouping == 2:
+            array = array[0::2, 0::2] + array[1::2, 0::2] + array[0::2, 1::2] + array[1::2, 1::2]
+        elif grouping == 4:
+            array = (
+                array[0::4, 0::4]
+                + array[1::4, 0::4]
+                + array[2::4, 0::4]
+                + array[3::4, 0::4]
+                + array[0::4, 1::4]
+                + array[1::4, 1::4]
+                + array[2::4, 1::4]
+                + array[3::4, 1::4]
+                + array[0::4, 2::4]
+                + array[1::4, 2::4]
+                + array[2::4, 2::4]
+                + array[3::4, 2::4]
+                + array[0::4, 3::4]
+                + array[1::4, 3::4]
+                + array[2::4, 3::4]
+                + array[3::4, 3::4]
+            )
+
+        y_dim, x_dim, number_of_runs = array.shape
+        array = array.T
+
+        run = mtd[ws].getExperimentInfo(0).run()
+        det_trans = run.getProperty("det_trans").timeAverageValue()
+        two_theta = run.getProperty("2theta").timeAverageValue()
+        logs = run.getLogData()
+
+        _tmp_ws = CreateSimulationWorkspace(Instrument="HB3A", BinParams="0,1,2", UnitX="TOF", SetErrors=True)
+        AddSampleLog(Workspace=_tmp_ws, LogName="det_trans", LogText=str(det_trans), LogType="Number Series", NumberType="Double")
+        AddSampleLog(Workspace=_tmp_ws, LogName="2theta", LogText=str(two_theta), LogType="Number Series", NumberType="Double")
+        LoadInstrument(Workspace=_tmp_ws, RewriteSpectraMap=True, InstrumentName="HB3A")
+        self.__move_components(_tmp_ws, height, distance)
+
+        if grouping > 1:
+            CreateMDHistoWorkspace(
+                SignalInput=array,
+                ErrorInput=np.sqrt(array),
+                Dimensionality=3,
+                Extents="0.5,{},0.5,{},0.5,{}".format(y_dim + 0.5, x_dim + 0.5, number_of_runs + 0.5),
+                NumberOfBins="{},{},{}".format(y_dim, x_dim, number_of_runs),
+                Names="y,x,scanIndex",
+                Units="bin,bin,number",
+                OutputWorkspace="__scan_grouped",
+            )
+            detector_list = ""
+            for x in range(0, 512, grouping):
+                for y in range(0, 512 * 3, grouping):
+                    spectra_list = []
+                    for j in range(grouping):
+                        for i in range(grouping):
+                            spectra_list.append(str(x + i + (y + j) * 512))
+                    detector_list += "," + "+".join(spectra_list)
+            _tmp_ws = GroupDetectors(InputWorkspace=_tmp_ws, GroupingPattern=detector_list, EnableLogging=False)
+
+        _tmp_ws = Rebin(InputWorkspace=_tmp_ws, Params="0,1,2", EnableLogging=False)
+        _tmp_ws = ConvertToMD(
+            InputWorkspace=_tmp_ws, dEAnalysisMode="Elastic", EnableLogging=False, PreprocDetectorsWS="_PreprocessedDetectorsWS"
+        )
+
+        run = _tmp_ws.getExperimentInfo(0).run()
+        for log in logs:
+            run[log.name] = log
+        run["twotheta"] = np.array(mtd["_PreprocessedDetectorsWS"].column(2)).reshape(y_dim, x_dim).T.flatten().tolist()
+        run["azimuthal"] = np.array(mtd["_PreprocessedDetectorsWS"].column(3)).reshape(y_dim, x_dim).T.flatten().tolist()
+        CopySample(scan, _tmp_ws, CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False)
+
+        donor_workspace = "__scan_grouped" if grouping > 1 else ws
+        mtd[donor_workspace].copyExperimentInfos(_tmp_ws)
+
+        DeleteWorkspace(_tmp_ws, EnableLogging=False)
+        DeleteWorkspace("_PreprocessedDetectorsWS", EnableLogging=False)
+
+        if grouping > 1:
+            DeleteWorkspace(scan)
+            RenameWorkspace("__scan_grouped", OutputWorkspace=ws)
+
+        return mtd[ws]
 
     def __normalization(self, data, vanadium, load_files):
         if vanadium:
@@ -378,35 +486,30 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         return norm_data
 
-    def __move_components(self, exp_info, height, distance):
+    def __move_components(self, ws, height, distance):
         """
         Moves all instrument banks by a given height (y) and distance (x-z) in meters,
         relative to the current instrument position.
-        :param exp_info: experiment info of the run, used to get the instrument components
+        :param ws: Workspace2d with instrument definition
         :param height: Distance to move the instrument along y axis
         :param distance: Distance to move the instrument in the x-z plane
         """
         # Adjust detector height and distance with new offsets
-        component = exp_info.componentInfo()
+        instrument = ws.getInstrument()
         for bank in range(1, 4):
-            # Set height offset (y) first on bank?
-            index = component.indexOfAny("bank{}".format(bank))
-
+            # Set height offset (y) first on bank
+            panel_name = "bank{}/panel".format(bank)
             if height != 0.0:
-                offset = V3D(0, height, 0)
-                pos = component.position(index)
-                offset += pos
-                component.setPosition(index, offset)
+                MoveInstrumentComponent(Workspace=ws, ComponentName=panel_name, Y=height)
 
-            # Set distance offset to detector (x,z) on bank?/panel
+            # Set distance offset to detector (x,z) on bank/panel
             if distance != 0.0:
-                panel_index = int(component.children(index)[0])  # should only have one child
-                panel_pos = component.position(panel_index)
-                panel_rel_pos = component.relativePosition(panel_index)
+                component = instrument.getComponentByName(panel_name)
+                panel_pos = component.getPos()
                 # need to move detector in direction in x-z plane
-                panel_offset = panel_rel_pos * (distance / panel_rel_pos.norm())
-                panel_offset += panel_pos
-                component.setPosition(panel_index, panel_offset)
+                panel_pos[1] = 0
+                panel_offset = panel_pos * (distance / panel_pos.norm())
+                MoveInstrumentComponent(Workspace=ws, ComponentName=panel_name, X=panel_offset[0], Z=panel_offset[2])
 
     def __get_wavelength(self, exp_info):
         """

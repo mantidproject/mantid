@@ -23,6 +23,8 @@ public:
 protected:
   void rotate(const UnwrappedDetector &udet, Mantid::Kernel::Quat &R) const override;
   void project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const override;
+  void project(const Mantid::Kernel::V3D &position, double &u, double &v, double &uscale,
+               double &vscale) const override;
 };
 
 } // namespace MantidWidgets

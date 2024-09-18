@@ -52,7 +52,9 @@ message(STATUS "Minor: ${VERSION_MINOR}")
 message(STATUS "Patch: ${VERSION_PATCH}")
 message(STATUS "Tweak: ${VERSION_TWEAK}")
 if(NOT _version_str STREQUAL "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}${VERSION_TWEAK}")
-  message(FATAL_ERROR "Error when extracting version information from version string: ${_version_str}")
+  message(WARNING "most recent git tag found by versioningit is ${_version_str} which is not pep440 compliant")
+  message(WARNING "try git fetch --prune --prune-tags from mantidproject/mantid remote")
+  message(FATAL_ERROR "Error when extracting version information from version string ${_version_str}")
 endif()
 
 # Revision information

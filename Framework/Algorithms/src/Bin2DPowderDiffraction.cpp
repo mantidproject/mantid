@@ -321,17 +321,15 @@ void Bin2DPowderDiffraction::ReadBinsFromFile(std::vector<double> &Ybins,
  * @param[in] Xbins --- bins to unify. Will be overwritten.
  */
 size_t Bin2DPowderDiffraction::UnifyXBins(std::vector<std::vector<double>> &Xbins) const {
-  // get maximal vector size
-  size_t max_size = 0;
-  for (const auto &v : Xbins) {
-    max_size = std::max(v.size(), max_size);
-  }
+  size_t maxSize = std::accumulate(Xbins.cbegin(), Xbins.cend(), size_t(0), [](size_t currentMax, const auto &xbin) {
+    return std::max(currentMax, xbin.size());
+  });
   // resize all vectors to maximum size, fill last vector element at the end
   for (auto &v : Xbins) {
-    if (v.size() < max_size)
-      v.resize(max_size, v.back());
+    if (v.size() < maxSize)
+      v.resize(maxSize, v.back());
   }
-  return max_size;
+  return maxSize;
 }
 
 void Bin2DPowderDiffraction::normalizeToBinArea(const MatrixWorkspace_sptr &outWS) {

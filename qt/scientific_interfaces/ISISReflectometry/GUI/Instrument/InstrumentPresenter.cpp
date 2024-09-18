@@ -119,12 +119,12 @@ void InstrumentPresenter::notifyInstrumentChanged(std::string const &instrumentN
 }
 
 void InstrumentPresenter::restoreDefaults() {
-  auto const instrument = m_mainPresenter->instrument();
+  auto const instr = m_mainPresenter->instrument();
   try {
-    m_model = m_instrumentDefaults->get(instrument);
+    m_model = m_instrumentDefaults->get(instr);
   } catch (std::invalid_argument &ex) {
     std::ostringstream msg;
-    msg << "Error setting default Instrument Settings: " << ex.what() << ". Please check the " << instrument->getName()
+    msg << "Error setting default Instrument Settings: " << ex.what() << ". Please check the " << instr->getName()
         << " parameters file.";
     g_log.error(msg.str());
     m_model = Instrument();

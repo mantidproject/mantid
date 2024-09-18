@@ -389,7 +389,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDet
  */
 int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank, int is_definition) {
   int dataType, dataRank, dataDimensions[NX_MAXRANK];
-  NXname name;
+  NXname nxName;
   void *dataBuffer;
 
   if (NXgetinfo(inId, &dataRank, dataDimensions, &dataType) != NX_OK)
@@ -405,9 +405,9 @@ int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank, int is_defi
       return NX_ERROR;
     if (NXgetdata(inId, dataBuffer) != NX_OK)
       return NX_ERROR;
-    if (NXcompmakedata(outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK)
+    if (NXcompmakedata(outId, nxName, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK)
       return NX_ERROR;
-    if (NXopendata(outId, name) != NX_OK)
+    if (NXopendata(outId, nxName) != NX_OK)
       return NX_ERROR;
     if (WriteAttributes(is_definition) != NX_OK)
       return NX_ERROR;
@@ -469,52 +469,52 @@ int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank, int is_defi
 /** Prints the contents of each group as XML tags and values */
 int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
   int status, dataType, dataRank, dataDimensions[NX_MAXRANK];
-  NXname name, theClass;
+  NXname nxName, theClass;
   void *dataBuffer;
   NXlink link;
 
   do {
-    status = NXgetnextentry(inId, name, theClass, &dataType);
+    status = NXgetnextentry(inId, nxName, theClass, &dataType);
     //      std::cout << name << "(" << theClass << ")\n";
 
     if (status == NX_ERROR)
       return NX_ERROR;
     if (status == NX_OK) {
       if (!strncmp(theClass, "NX", 2)) {
-        if (NXopengroup(inId, name, theClass) != NX_OK)
+        if (NXopengroup(inId, nxName, theClass) != NX_OK)
           return NX_ERROR;
-        add_path(name);
+        add_path(nxName);
 
         if (NXgetgroupID(inId, &link) != NX_OK)
           return NX_ERROR;
         if (!strcmp(current_path, link.targetPath)) {
           // Create a copy of the group
-          if (NXmakegroup(outId, name, theClass) != NX_OK)
+          if (NXmakegroup(outId, nxName, theClass) != NX_OK)
             return NX_ERROR;
-          if (NXopengroup(outId, name, theClass) != NX_OK)
+          if (NXopengroup(outId, nxName, theClass) != NX_OK)
             return NX_ERROR;
           if (WriteAttributes(is_definition) != NX_OK)
             return NX_ERROR;
           if (WriteGroup(is_definition) != NX_OK)
             return NX_ERROR;
-          remove_path(name);
+          remove_path(nxName);
         } else {
-          remove_path(name);
+          remove_path(nxName);
           strcpy(links_to_make[links_count].from, current_path);
           strcpy(links_to_make[links_count].to, link.targetPath);
-          strcpy(links_to_make[links_count].name, name);
+          strcpy(links_to_make[links_count].name, nxName);
           links_count++;
           if (NXclosegroup(inId) != NX_OK)
             return NX_ERROR;
         }
       } else if (!strncmp(theClass, "SDS", 3)) {
-        add_path(name);
-        if (NXopendata(inId, name) != NX_OK)
+        add_path(nxName);
+        if (NXopendata(inId, nxName) != NX_OK)
           return NX_ERROR;
         if (NXgetdataID(inId, &link) != NX_OK)
           return NX_ERROR;
 
-        std::string data_label(name);
+        std::string data_label(nxName);
 
         if (!strcmp(current_path, link.targetPath)) {
           // Look for the bank name
@@ -552,9 +552,9 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
             // And fill it with the X data
             std::transform(X.cbegin(), X.cend(), tof_data.begin(), [](double x) { return static_cast<float>(x); });
 
-            if (NXcompmakedata(outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK)
+            if (NXcompmakedata(outId, nxName, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK)
               return NX_ERROR;
-            if (NXopendata(outId, name) != NX_OK)
+            if (NXopendata(outId, nxName) != NX_OK)
               return NX_ERROR;
             if (WriteAttributes(is_definition) != NX_OK)
               return NX_ERROR;
@@ -574,9 +574,9 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
               return NX_ERROR;
             if (NXgetdata(inId, dataBuffer) != NX_OK)
               return NX_ERROR;
-            if (NXcompmakedata(outId, name, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK)
+            if (NXcompmakedata(outId, nxName, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK)
               return NX_ERROR;
-            if (NXopendata(outId, name) != NX_OK)
+            if (NXopendata(outId, nxName) != NX_OK)
               return NX_ERROR;
             if (WriteAttributes(is_definition) != NX_OK)
               return NX_ERROR;
@@ -588,13 +588,13 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
               return NX_ERROR;
           }
 
-          remove_path(name);
+          remove_path(nxName);
         } else {
           // Make a link
-          remove_path(name);
+          remove_path(nxName);
           strcpy(links_to_make[links_count].from, current_path);
           strcpy(links_to_make[links_count].to, link.targetPath);
-          strcpy(links_to_make[links_count].name, name);
+          strcpy(links_to_make[links_count].name, nxName);
           links_count++;
         }
         if (NXclosedata(inId) != NX_OK)

@@ -5,10 +5,10 @@
 #
 # Expected args:
 #   1. WORKSPACE: path to the workspace/source code that this should run inside
-#   2. ENABLE_SYSTEM_TESTS: whether or not system tests are being ran/built
-#   3. ENABLE_UNIT_TESTS: whether or not unit tests are being ran/built
+#   2. ENABLE_SYSTEM_TESTS: whether or not system tests are being run/built
+#   3. ENABLE_UNIT_TESTS: whether or not unit tests are being run/built
 #   4. ENABLE_DOCS: Whether or not the docs have been built
-#   5. ENABLE_DOC_TESTS: Whether or not the doc tests should be ran
+#   5. ENABLE_DOC_TESTS: Whether or not the doc tests should be run
 #   6. BUILD_THREADS: The number of threads to use during testing
 
 WORKSPACE=$1
@@ -18,9 +18,13 @@ ENABLE_DOCS=$4
 ENABLE_DOC_TESTS=$5
 BUILD_THREADS=$6
 
-# Run only 3 tests at a time because of memory constraints in the system tests
-BUILD_THREADS_SYSTEM_TESTS=3
 XVFB_SERVER_NUM=101
+
+# If this isn't specified for a Jenkins agent, revert to default value
+if [[ -z "$BUILD_THREADS_SYSTEM_TESTS" ]]; then
+    # Default to 3 system tests running in parallel, assuming builders have >= 32GB RAM
+    BUILD_THREADS_SYSTEM_TESTS=3
+fi
 
 function run_with_xvfb {
     if [ $(command -v xvfb-run) ]; then
@@ -105,5 +109,11 @@ if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
     echo "usagereports.enabled = 0" >> $userprops
     echo "CheckMantidVersion.OnStartup = 0" >> $userprops
 
-    run_with_xvfb $SYSTEM_TEST_EXECUTABLE $WINDOWS_TEST_OPTIONS -j$BUILD_THREADS_SYSTEM_TESTS -l information --quiet --output-on-failure
+    SYSTEM_TEST_OPTIONS="-j${BUILD_THREADS_SYSTEM_TESTS} -l information --quiet --output-on-failure"
+
+    if [[ ${JOB_NAME} == *pull_requests* ]]; then
+        SYSTEM_TEST_OPTIONS+=" --exclude-in-pull-requests"
+    fi
+
+    run_with_xvfb $SYSTEM_TEST_EXECUTABLE $WINDOWS_TEST_OPTIONS $SYSTEM_TEST_OPTIONS
 fi

@@ -88,6 +88,7 @@ set(GDB_DEFINITIONS
 if [ -n \"\$1\" ] && [ \"\$1\" = \"--debug\" ]; then
     shift
     GDB=\"gdb --args\"
+    SINGLEPROCESS=\"--single-process\"
 fi"
 )
 
@@ -102,7 +103,7 @@ set(LOCAL_PYPATH "${CMAKE_CURRENT_BINARY_DIR}/bin/")
 
 # used by mantidworkbench
 if(ENABLE_WORKBENCH)
-  set(MANTIDWORKBENCH_EXEC "${CMAKE_CURRENT_BINARY_DIR}/bin/workbench") # what the actual thing is called
+  set(MANTIDWORKBENCH_EXEC "-m workbench") # what the actual thing is called
   configure_file(
     ${CMAKE_MODULE_PATH}/Packaging/launch_mantidworkbench.sh.in
     ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidworkbench.sh @ONLY
@@ -128,13 +129,13 @@ if(ENABLE_WORKBENCH)
       set(LOCAL_PYPATH "\${CONDA_PREFIX}/bin:\${CONDA_PREFIX}/lib:\${CONDA_PREFIX}/plugins")
       set(PYTHON_EXEC_LOCAL "\${CONDA_PREFIX}/bin/python")
       set(PREAMBLE "${CONDA_PREAMBLE_TEXT}")
-      set(MANTIDWORKBENCH_EXEC "\${CONDA_PREFIX}/bin/workbench") # what the actual thing is called
+      set(MANTIDWORKBENCH_EXEC "-m workbench") # what the actual thing is called
       set(DEST_FILENAME_SUFFIX "")
     elseif(${install_type} STREQUAL "standalone")
       set(LOCAL_PYPATH "\${INSTALLDIR}/bin:\${INSTALLDIR}/lib:\${INSTALLDIR}/plugins")
       set(PYTHON_EXEC_LOCAL "\${INSTALLDIR}/bin/python")
       set(PREAMBLE "${SYS_PREAMBLE_TEXT}")
-      set(MANTIDWORKBENCH_EXEC "\${INSTALLDIR}/bin/workbench")
+      set(MANTIDWORKBENCH_EXEC "-m workbench")
       set(DEST_FILENAME_SUFFIX ".standalone")
     else()
       message(FATAL_ERROR "Unknown installation type '${install_type}' for workbench startup scripts")

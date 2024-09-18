@@ -298,7 +298,7 @@ double cuboidSolidAngle(const V3D &observer, const std::vector<V3D> &vectors) {
  * @returns The solid angle value
  */
 double cylinderSolidAngle(const V3D &observer, const V3D &centre, const V3D &axis, const double radius,
-                          const double height) {
+                          const double height, const int numberOfSlices) {
   // The cylinder is triangulated along its axis EXCLUDING the end caps so that
   // stacked cylinders give the correct value of solid angle (i.e shadowing is
   // loosely taken into account by this method) Any triangle that has a normal
@@ -311,7 +311,7 @@ double cylinderSolidAngle(const V3D &observer, const V3D &centre, const V3D &axi
   const Quat transform(initial_axis, axis);
 
   // Do the base cap which is a point at the centre and nslices points around it
-  constexpr double angle_step = 2 * M_PI / static_cast<double>(Cylinder::g_NSLICES);
+  const double angle_step = 2 * M_PI / static_cast<double>(numberOfSlices);
 
   const double z_step = height / Cylinder::g_NSTACKS;
   double z0(0.0), z1(z_step);
@@ -320,12 +320,12 @@ double cylinderSolidAngle(const V3D &observer, const V3D &centre, const V3D &axi
     if (st == Cylinder::g_NSTACKS)
       z1 = height;
 
-    for (int sl = 0; sl < Cylinder::g_NSLICES; ++sl) {
+    for (int sl = 0; sl < numberOfSlices; ++sl) {
       double x = radius * std::cos(angle_step * sl);
       double y = radius * std::sin(angle_step * sl);
       V3D pt1 = V3D(x, y, z0);
       V3D pt2 = V3D(x, y, z1);
-      int vertex = (sl + 1) % Cylinder::g_NSLICES;
+      int vertex = (sl + 1) % numberOfSlices;
       x = radius * std::cos(angle_step * vertex);
       y = radius * std::sin(angle_step * vertex);
       V3D pt3 = V3D(x, y, z0);
@@ -1208,26 +1208,26 @@ TrackDirection CSGObject::calcValidTypeBy3Points(const Kernel::V3D &prePt, const
  * This interface routine calls either getTriangleSolidAngle or
  * getRayTraceSolidAngle.
  * Choice made on number of triangles in the discrete surface representation.
- * @param observer :: point to measure solid angle from
+ * @param params :: point to measure solid angle from, and number of cylinder slices
  * @return :: estimate of solid angle of object. Accuracy depends on object
  * shape.
  */
-double CSGObject::solidAngle(const Kernel::V3D &observer) const {
+double CSGObject::solidAngle(const SolidAngleParams &params) const {
   if (this->numberOfTriangles() > 30000)
-    return rayTraceSolidAngle(observer);
-  return triangulatedSolidAngle(observer);
+    return rayTraceSolidAngle(params.observer());
+  return triangulatedSolidAngle(params);
 }
 
 /**
  * Find solid angle of object wrt the observer with a scaleFactor for the
  * object.
- * @param observer :: point to measure solid angle from
+ * @param params :: point to measure solid angle from, and number of cylinder slices
  * @param scaleFactor :: V3D giving scaling of the object
  * @return :: estimate of solid angle of object. Accuracy depends on
  * triangulation quality.
  */
-double CSGObject::solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const {
-  return triangulatedSolidAngle(observer, scaleFactor);
+double CSGObject::solidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const {
+  return triangulatedSolidAngle(params, scaleFactor);
 }
 
 /**
@@ -1350,15 +1350,16 @@ double CSGObject::rayTraceSolidAngle(const Kernel::V3D &observer) const {
  * Find solid angle of object from point "observer" using the
  * OC triangulation of the object, if it exists
  *
- * @param observer :: Point from which solid angle is required
+ * @param params :: Point from which solid angle is required, and number of cylinder slices
  * @return the solid angle
  */
-double CSGObject::triangulatedSolidAngle(const V3D &observer) const {
+double CSGObject::triangulatedSolidAngle(const SolidAngleParams &params) const {
   //
   // Because the triangles from OC are not consistently ordered wrt their
   // outward normal internal points give incorrect solid angle. Surface
   // points are difficult to get right with the triangle based method.
   // Hence catch these two (unlikely) cases.
+  const auto &observer = params.observer();
   const BoundingBox &boundingBox = this->getBoundingBox();
   if (boundingBox.isNonNull() && boundingBox.isPointInside(observer)) {
     if (isValid(observer)) {
@@ -1377,6 +1378,7 @@ double CSGObject::triangulatedSolidAngle(const V3D &observer) const {
   geometry_vectors.reserve(4);
   this->GetObjectGeom(type, geometry_vectors, innerRadius, radius, height);
   auto nTri = this->numberOfTriangles();
+
   // Cylinders are by far the most frequently used
   switch (type) {
   case detail::ShapeInfo::GeometryShape::CUBOID:
@@ -1386,7 +1388,8 @@ double CSGObject::triangulatedSolidAngle(const V3D &observer) const {
     return sphereSolidAngle(observer, geometry_vectors, radius);
     break;
   case detail::ShapeInfo::GeometryShape::CYLINDER:
-    return cylinderSolidAngle(observer, geometry_vectors[0], geometry_vectors[1], radius, height);
+    return cylinderSolidAngle(observer, geometry_vectors[0], geometry_vectors[1], radius, height,
+                              params.cylinderSlices());
     break;
   case detail::ShapeInfo::GeometryShape::CONE:
     return coneSolidAngle(observer, geometry_vectors[0], geometry_vectors[1], radius, height);
@@ -1432,17 +1435,18 @@ double CSGObject::triangulatedSolidAngle(const V3D &observer) const {
  * OC triangulation of the object, if it exists. This method expects a
  * scaling vector scaleFactor that scales the three axes.
  *
- * @param observer :: Point from which solid angle is required.
+ * @param params :: Point from which solid angle is required, and number of cylinder slices
  * @param scaleFactor :: V3D each component giving the scaling of the object
  *only (not observer)
  * @return the solid angle
  */
-double CSGObject::triangulatedSolidAngle(const V3D &observer, const V3D &scaleFactor) const {
+double CSGObject::triangulatedSolidAngle(const SolidAngleParams &params, const V3D &scaleFactor) const {
   //
   // Because the triangles from OC are not consistently ordered wrt their
   // outward normal internal points give incorrect solid angle. Surface
   // points are difficult to get right with the triangle based method.
   // Hence catch these two (unlikely) cases.
+  const auto &observer = params.observer();
   const BoundingBox &boundingBox = this->getBoundingBox();
   double sx = scaleFactor[0], sy = scaleFactor[1], sz = scaleFactor[2];
   const V3D sObserver = observer;
@@ -1997,9 +2001,9 @@ int CSGObject::getPointInObject(Kernel::V3D &point) const {
  * @param maxAttempts The maximum number of attempts at generating a point
  * @return whether a point was generated in the object or not
  */
-boost::optional<Kernel::V3D> CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
-                                                              const size_t maxAttempts) const {
-  boost::optional<V3D> point{boost::none};
+std::optional<Kernel::V3D> CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
+                                                            const size_t maxAttempts) const {
+  std::optional<V3D> point{std::nullopt};
   // If the shape fills its bounding box well enough then the most efficient
   // way to get the point is just brute force. We'll try that first with
   // just a few attempts.
@@ -2008,7 +2012,7 @@ boost::optional<Kernel::V3D> CSGObject::generatePointInObject(PseudoRandomNumber
   // within the box. So there is a sweet spot which depends on the actual
   // shape, its dimension and orientation.
   const size_t bruteForceAttempts{std::min(static_cast<size_t>(5), maxAttempts)};
-  boost::optional<V3D> maybePoint{RandomPoint::inGenericShape(*this, rng, bruteForceAttempts)};
+  std::optional<V3D> maybePoint{RandomPoint::inGenericShape(*this, rng, bruteForceAttempts)};
   if (maybePoint) {
     point = maybePoint;
   } else {
@@ -2043,10 +2047,10 @@ boost::optional<Kernel::V3D> CSGObject::generatePointInObject(PseudoRandomNumber
  * @param maxAttempts The maximum number of attempts at generating a point
  * @return whether a point was generated in the object or not
  */
-boost::optional<Kernel::V3D> CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                              const BoundingBox &activeRegion,
-                                                              const size_t maxAttempts) const {
-  boost::optional<V3D> point{boost::none};
+std::optional<Kernel::V3D> CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                            const BoundingBox &activeRegion,
+                                                            const size_t maxAttempts) const {
+  std::optional<V3D> point{std::nullopt};
   // We'll first try brute force. If the shape fills its bounding box
   // well enough, this should be the fastest method.
   // Increasing the brute force attemps speeds up the shapes that fill

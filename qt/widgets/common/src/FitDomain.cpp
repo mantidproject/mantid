@@ -44,7 +44,7 @@ std::vector<std::string> getFunctionNamesInString(std::string const &functionStr
 
 bool isValueWithinConstraint(std::string const &constraint, double value) {
   auto const limits = splitConstraintString(constraint).second;
-  return limits.first.toDouble() <= value && value <= limits.second.toDouble();
+  return std::atof(limits.first.c_str()) <= value && value <= std::atof(limits.second.c_str());
 }
 
 } // namespace

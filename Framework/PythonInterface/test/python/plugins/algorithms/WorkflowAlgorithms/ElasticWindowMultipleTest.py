@@ -116,6 +116,19 @@ class ElasticWindowMultipleTest(unittest.TestCase):
         self.assertEqual(elf_y.unitID(), "MomentumTransfer")
         self.assertEqual(str(elf_y.symbol()), "Angstrom^-1")
 
+    def test_ElasticWindowMultiple_returns_integration_sample_logs(self):
+        run_q = self.q.getRun()
+        run_q2 = self.q2.getRun()
+        run_elf = self.elf.getRun()
+
+        self.assertEqual(run_q.getLogData("integration_range_start").value, -0.1)
+        self.assertEqual(run_q2.getLogData("integration_range_start").value, -0.1)
+        self.assertEqual(run_elf.getLogData("integration_range_start").value, -0.1)
+
+        self.assertEqual(run_q.getLogData("integration_range_end").value, 0.1)
+        self.assertEqual(run_q2.getLogData("integration_range_end").value, 0.1)
+        self.assertEqual(run_elf.getLogData("integration_range_end").value, 0.1)
+
 
 if __name__ == "__main__":
     unittest.main()

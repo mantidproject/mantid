@@ -72,14 +72,16 @@ A usual Workspace consists of a number of spectra, each cut into blocks called b
    for i in range(number_of_bins):
        bin_centres[i] = (bin_edges[i+1] + bin_edges[i])/2
 
-   plt.hist(neutrons_detected_at, bins=bin_edges, align='mid', color='b', edgecolor='black',density = False, label='Bins')
-   plt.plot(bin_centres,counts_per_bin,color='red', label = 'Line')
+   fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+
+   ax.hist(neutrons_detected_at, bins=bin_edges, align='mid', color='b', edgecolor='black',density = False, label='Bins')
+   ax.plot(bin_centres,counts_per_bin,color='red', label = 'Line')
 
 
    # Add axis labels
-   plt.xlabel("X data      eg. Time ($\mu s$)")
-   plt.ylabel("Y data      eg. Counts ($\mu s$)$^{-1}$")
-   plt.title("Bins and Line Plots")
-   plt.xticks(bin_edges)
-   plt.legend()
-   plt.show()
+   ax.set_xlabel("X data      eg. Time ($\mu s$)")
+   ax.set_ylabel("Y data      eg. Counts ($\mu s$)$^{-1}$")
+   ax.set_title("Bins and Line Plots")
+   ax.set_xticks(bin_edges)
+   ax.legend()
+   fig.show()

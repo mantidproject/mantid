@@ -43,7 +43,7 @@ If all the requirements have been met and documented approve the PR using `GitHu
 Gatekeeper
 ==========
 
-The ``@mantidproject/gatekeepers`` group is who is meant to merge pull requests into master. This is done by social contract. A gatekeeper can ``merge`` code if:
+The ``@mantidproject/gatekeepers`` group is who is meant to merge pull requests into ``main``. This is done by social contract. A gatekeeper can ``merge`` code if:
 
 * Green tick on the last build indicating all automated testing has succeeded
 * Adequate tests, both success and failure cases have been performed

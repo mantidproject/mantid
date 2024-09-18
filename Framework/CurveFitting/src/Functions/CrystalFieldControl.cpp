@@ -284,8 +284,7 @@ API::IFunction_sptr CrystalFieldControl::buildSingleSiteMultiSpectrum() {
 API::IFunction_sptr CrystalFieldControl::buildMultiSiteSingleSpectrum() {
   auto source = CompositeFunction_sptr(new CompositeFunction);
   auto nSites = m_ions.size();
-  auto temperatures = getAttribute("Temperatures").asVector();
-  auto temperature = temperatures[0];
+  auto temperature = getAttribute("Temperatures").asVector()[0];
   for (size_t i = 0; i < nSites; ++i) {
     auto peakSource = IFunction_sptr(new CrystalFieldPeaks);
     source->addFunction(peakSource);

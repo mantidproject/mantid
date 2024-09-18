@@ -11,5 +11,5 @@ add_subdirectory(General)
 add_subdirectory(Direct)
 add_subdirectory(Muon)
 add_subdirectory(ISISReflectometry)
+add_subdirectory(Inelastic) # Inelastic is a dependency of Indirect, so must come first
 add_subdirectory(Indirect)
-add_subdirectory(Inelastic)

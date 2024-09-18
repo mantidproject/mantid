@@ -5,13 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransferValidator.h"
-
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 #include <filesystem>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 
 namespace {
 IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &outputName) {
@@ -21,11 +22,6 @@ IAlgorithm_sptr loadAlgorithm(std::string const &filename, std::string const &ou
   loader->setProperty("OutputWorkspace", outputName);
   return loader;
 }
-
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
-}
-
 } // namespace
 
 namespace MantidQt {
@@ -70,7 +66,7 @@ std::vector<std::string> IETDataValidator::validateBackgroundData(IETBackgroundD
         errors.push_back("Background Start must be less than Background End");
       }
 
-      auto tempWs = getADSMatrixWorkspace(name);
+      auto tempWs = getADSWorkspace(name);
 
       const double minBack = tempWs->x(0).front();
       const double maxBack = tempWs->x(0).back();
@@ -95,56 +91,6 @@ std::string IETDataValidator::validateAnalysisData(IETAnalysisData analysisData)
     }
   }
   return "";
-}
-
-std::string IETDataValidator::validateDetectorGrouping(IETGroupingData groupingData,
-                                                       std::size_t const &defaultSepctraMin,
-                                                       std::size_t const &defaultSpectraMax) {
-  std::string groupingType = groupingData.getGroupingType();
-  if (groupingType == "File") {
-    if (groupingData.getGroupingMapFile().empty())
-      return "Mapping file is invalid.";
-  } else if (groupingType == "Custom") {
-    const std::string customString = groupingData.getCustomGroups();
-    if (customString.empty())
-      return "Please supply a custom grouping for detectors.";
-    else
-      return checkCustomGroupingNumbersInRange(getCustomGroupingNumbers(customString), defaultSepctraMin,
-                                               defaultSpectraMax);
-  }
-  return "";
-}
-
-std::vector<std::size_t> IETDataValidator::getCustomGroupingNumbers(std::string const &customString) {
-  std::vector<std::string> customGroupingStrings;
-  std::vector<std::size_t> customGroupingNumbers;
-  // Get the numbers from customString and store them in customGroupingStrings
-  boost::split(customGroupingStrings, customString, boost::is_any_of(" ,-+:"));
-  for (const auto &string : customGroupingStrings)
-    if (!string.empty())
-      customGroupingNumbers.emplace_back(std::stoull(string));
-  return customGroupingNumbers;
-}
-
-std::string IETDataValidator::checkCustomGroupingNumbersInRange(std::vector<std::size_t> const &customGroupingNumbers,
-                                                                std::size_t const &spectraMin,
-                                                                std::size_t const &spectraMax) const {
-  if (std::any_of(customGroupingNumbers.cbegin(), customGroupingNumbers.cend(),
-                  [this, spectraMin, spectraMax](auto number) {
-                    return !this->numberInCorrectRange(number, spectraMin, spectraMax);
-                  })) {
-    return "Please supply a custom grouping within the correct range";
-  } else {
-    return "";
-  }
-}
-
-bool IETDataValidator::numberInCorrectRange(std::size_t const &spectraNumber, std::size_t const &spectraMin,
-                                            std::size_t const &spectraMax) const {
-  if (spectraMin != 0 && spectraMax != 0) {
-    return spectraNumber >= spectraMin && spectraNumber <= spectraMax;
-  }
-  return false;
 }
 
 } // namespace CustomInterfaces

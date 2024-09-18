@@ -3,7 +3,7 @@ name: MERLIN
 
 chopper_system:
   name: MERLIN chopper system
-  chop_sam: 1.925                # Distance (x1) from final chopper to sample (m)
+  chop_sam: 1.925               # Distance (x1) from final chopper to sample (m)
   sam_det: 2.5                  # Distance (x2) from sample to detector (m)
   aperture_width: 0.06667       # Width of aperture at moderator face (m)
   aperture_height: 0.06667      # Height of aperture at moderator face (m)
@@ -11,21 +11,23 @@ chopper_system:
     -                           # Each entry must have a dash on an otherwise empty line!
       name: MERLIN Disk
       distance: 9.3             # Distance from moderator to this chopper in metres
-      slot_width: 950           # Slot width in mm
+      slot_width: 68            # Slot width in mm
       guide_width: 64           # Width of guide after chopper in mm
-      nslot: 1                  # Number of slots. If slot_ang_pos is specified can omit this entry
+      nslot: 10                 # Number of slots. If slot_ang_pos is specified can omit this entry
                                 # Next line has the angular position of the slots in degrees
                                 #   Must be monotonically increasing. Can omit if nslot is specified,
                                 #   in which case it will be assumed that the slits are equally spaced.
-      radius: 250               # Disk radius
+      slot_ang_pos: [-45.5, -32.5, -19.5, -6.5, 6.5, 19.5, 32.5, 45.5, 50, 150]
+      radius: 300               # Disk radius
       isDouble: False           # Is this a double disk system?
       isPhaseIndependent: True  # Is this disk to be phased independently?
-      defaultPhase: 1500        # What is the default phase for this disk (either a time in microseconds
+      defaultPhase: 12800       # What is the default phase for this disk (either a time in microseconds
                                 #   or a slot index [as a string] for the desired rep to go through)
+      phaseOffset: 11300        # Offset introduced after disk chopper controller update
       phaseName: 'Disk chopper phase delay time'
     -
       name: MERLIN Fermi
-      distance: 9.995            # Distance from moderator to this chopper in metres
+      distance: 9.995           # Distance from moderator to this chopper in metres
       aperture_distance: 7.19   # Distance from aperture (moderator face) to this chopper (only for Fermi)
       packages:                 # A hash of chopper packages
         G:
@@ -37,6 +39,7 @@ chopper_system:
           tjit: 0.0             # Jitter time (us)
           fluxcorr: 3.          # (Empirical/Fudge) factor to scale calculated flux by
           isPi: True            # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
+          ei_limits: [0, 181]   # Limits on ei for this chopper (setting Ei outside this will give error)
         S:
           name: MERLIN S (Sloppy)
           pslit: 2.280          # Neutron transparent slit width (mm)

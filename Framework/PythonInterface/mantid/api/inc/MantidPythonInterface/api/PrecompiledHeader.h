@@ -13,7 +13,6 @@
 // Boost
 #include <boost/mpl/and.hpp>
 #include <boost/mpl/if.hpp>
-#include <boost/optional.hpp>
 #include <boost/python/call_method.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -28,3 +27,4 @@
 #include <boost/python/return_value_policy.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/python/wrapper.hpp>
+#include <optional>

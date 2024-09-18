@@ -129,6 +129,7 @@ def getBasename(filename):
 
 class SNSPowderReduction(DataProcessorAlgorithm):
     COMPRESS_TOL_TOF = 0.01
+    _compressBinningMode = None
     _resampleX = None
     _binning = None
     _bin_in_dspace = None
@@ -325,6 +326,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
         self.declareProperty("CompressTOFTolerance", 0.01, "Tolerance to compress events in TOF.")
+        self.copyProperties("AlignAndFocusPowderFromFiles", ["CompressBinningMode"])
 
         # reduce logs being loaded
         self.declareProperty(
@@ -455,10 +457,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         self._normalisebycurrent = self.getProperty("NormalizeByCurrent").value
 
-        # Tolerance for compress TOF event.  If given a negative value, then use default 0.01
+        # Tolerance for compress TOF event.
         self.COMPRESS_TOL_TOF = float(self.getProperty("CompressTOFTolerance").value)
-        if self.COMPRESS_TOL_TOF < -0.0:
-            self.COMPRESS_TOL_TOF = 0.01
+        self._compressBinningMode = self.getProperty("CompressBinningMode").value
 
         # Clean the cache directory if so requested
         if self._clean_cache:
@@ -637,8 +638,13 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     api.Scale(InputWorkspace=can_run_ws_name, OutputWorkspace=can_run_ws_name, Factor=self._containerScaleFactor)
                 api.Minus(LHSWorkspace=sam_ws_name, RHSWorkspace=can_run_ws_name, OutputWorkspace=sam_ws_name)
                 # compress event if the sample run workspace is EventWorkspace
-                if is_event_workspace(sam_ws_name) and self.COMPRESS_TOL_TOF > 0.0:
-                    api.CompressEvents(InputWorkspace=sam_ws_name, OutputWorkspace=sam_ws_name, Tolerance=self.COMPRESS_TOL_TOF)  # 10ns
+                if is_event_workspace(sam_ws_name) and self.COMPRESS_TOL_TOF != 0.0:
+                    api.CompressEvents(
+                        InputWorkspace=sam_ws_name,
+                        OutputWorkspace=sam_ws_name,
+                        Tolerance=self.COMPRESS_TOL_TOF,
+                        BinningMode=self._compressBinningMode,
+                    )  # 10ns
                 # canRun = str(canRun)
 
             if van_run_ws_name is not None:
@@ -659,8 +665,13 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 normalized = False
 
             # Compress the event again
-            if is_event_workspace(sam_ws_name) and self.COMPRESS_TOL_TOF > 0.0:
-                api.CompressEvents(InputWorkspace=sam_ws_name, OutputWorkspace=sam_ws_name, Tolerance=self.COMPRESS_TOL_TOF)  # 5ns/
+            if is_event_workspace(sam_ws_name) and self.COMPRESS_TOL_TOF != 0.0:
+                api.CompressEvents(
+                    InputWorkspace=sam_ws_name,
+                    OutputWorkspace=sam_ws_name,
+                    Tolerance=self.COMPRESS_TOL_TOF,
+                    BinningMode=self._compressBinningMode,
+                )  # 5ns
 
             if self._scaleFactor != 1.0:
                 api.Scale(sam_ws_name, Factor=self._scaleFactor, OutputWorkspace=sam_ws_name)
@@ -905,6 +916,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             PreserveEvents=preserveEvents,
             RemovePromptPulseWidth=self._removePromptPulseWidth,
             CompressTolerance=self.COMPRESS_TOL_TOF,
+            CompressBinningMode=self._compressBinningMode,
             LorentzCorrection=self._lorentz,
             UnwrapRef=self._LRef,
             LowResRef=self._DIFCref,
@@ -1019,6 +1031,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     PreserveEvents=preserveEvents,
                     RemovePromptPulseWidth=self._removePromptPulseWidth,
                     CompressTolerance=self.COMPRESS_TOL_TOF,
+                    CompressBinningMode=self._compressBinningMode,
                     LorentzCorrection=self._lorentz,
                     UnwrapRef=self._LRef,
                     LowResRef=self._DIFCref,
@@ -1081,11 +1094,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # Compress events
         for split_index in range(num_out_wksp):
-            if is_event_workspace(output_wksp_list[split_index]) and self.COMPRESS_TOL_TOF > 0.0:
+            if is_event_workspace(output_wksp_list[split_index]) and self.COMPRESS_TOL_TOF != 0.0:
                 api.CompressEvents(
                     InputWorkspace=output_wksp_list[split_index],
                     OutputWorkspace=output_wksp_list[split_index],
                     Tolerance=self.COMPRESS_TOL_TOF,
+                    BinningMode=self._compressBinningMode,
                 )  # 100ns
             try:
                 if self._normalisebycurrent is True:
@@ -1580,9 +1594,12 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                         )
 
                     # compress events
-                    if is_event_workspace(van_run_ws_name) and self.COMPRESS_TOL_TOF > 0.0:
+                    if is_event_workspace(van_run_ws_name) and self.COMPRESS_TOL_TOF != 0.0:
                         api.CompressEvents(
-                            InputWorkspace=van_run_ws_name, OutputWorkspace=van_run_ws_name, Tolerance=self.COMPRESS_TOL_TOF
+                            InputWorkspace=van_run_ws_name,
+                            OutputWorkspace=van_run_ws_name,
+                            Tolerance=self.COMPRESS_TOL_TOF,
+                            BinningMode=self._compressBinningMode,
                         )  # 10ns
                 except RuntimeError as e:
                     self.log().warning("Failed to process vanadium background. Skipping: {}".format(e))

@@ -34,9 +34,10 @@ class WorkspaceSaver(object):
         if workspaces_to_save is None:
             return
 
-        for workspace_name in workspaces_to_save:
+        workspaces = ADS.retrieveWorkspaces(workspaces_to_save)
+
+        for workspace, workspace_name in zip(workspaces, workspaces_to_save):
             # Get the workspace from the ADS
-            workspace = ADS.retrieve(workspace_name)
             place_to_save_workspace = os.path.join(self.directory, workspace_name)
 
             from mantid.simpleapi import SaveMD, SaveNexusProcessed
@@ -44,14 +45,14 @@ class WorkspaceSaver(object):
             try:
                 if isinstance(workspace, MDHistoWorkspace) or isinstance(workspace, IMDEventWorkspace):
                     # Save normally using SaveMD
-                    SaveMD(InputWorkspace=workspace_name, Filename=place_to_save_workspace + ".nxs")
+                    SaveMD(InputWorkspace=workspace, Filename=place_to_save_workspace + ".nxs")
                 elif isinstance(workspace, GroupingWorkspace):
                     # catch this rather than leave SaveNexusProcessed to raise error to avoid message of type error
                     # being logged
                     raise RuntimeError("Grouping Workspaces not supported by SaveNexusProcessed")
                 else:
                     # Save normally using SaveNexusProcessed
-                    SaveNexusProcessed(InputWorkspace=workspace_name, Filename=place_to_save_workspace + ".nxs")
+                    SaveNexusProcessed(InputWorkspace=workspace, Filename=place_to_save_workspace + ".nxs")
                 self.output_list.append(workspace_name)
             except Exception as exc:
                 logger.warning("Couldn't save workspace in project: \"" + workspace_name + '" because ' + str(exc))

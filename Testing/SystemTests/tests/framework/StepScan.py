@@ -25,4 +25,5 @@ class StepScanWorkflowAlgorithm(systemtesting.MantidSystemTest):
         )
 
     def validate(self):
+        self.tolerance = 1e-7
         return "StepScan", "StepScan.nxs"

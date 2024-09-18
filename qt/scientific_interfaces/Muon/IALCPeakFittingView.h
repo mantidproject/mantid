@@ -13,7 +13,7 @@
 #include "DllConfig.h"
 
 #include <QObject>
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -25,10 +25,10 @@ class MANTIDQT_MUONINTERFACE_DLL IALCPeakFittingView : public QObject {
 
 public:
   /// @return If index empty - total function, otherwise - function at index
-  virtual Mantid::API::IFunction_const_sptr function(QString index) const = 0;
+  virtual Mantid::API::IFunction_const_sptr function(std::string const &index) const = 0;
 
   /// @return Index of the function currently seleted in the Function Browser
-  virtual boost::optional<QString> currentFunctionIndex() const = 0;
+  virtual std::optional<std::string> currentFunctionIndex() const = 0;
 
   /// @return A peak currently represented by the peak picker
   virtual Mantid::API::IPeakFunction_const_sptr peakPicker() const = 0;
@@ -62,7 +62,7 @@ public slots:
   /// @param funcIndex :: Index of the function where to update parameter
   /// @param paramName :: Name of the parameter to udpate
   /// @param value :: New parameter value
-  virtual void setParameter(const QString &funcIndex, const QString &paramName, double value) = 0;
+  virtual void setParameter(std::string const &funcIndex, std::string const &paramName, double value) = 0;
 
   /// Enabled/disable PeakPicker on the plot
   /// @param enabled :: New enabled status
@@ -100,7 +100,7 @@ signals:
 
   /// Parameter value is changed in the Function Browser _either by user or
   /// programmatically_
-  void parameterChanged(const QString &funcIndex, const QString &paramName);
+  void parameterChanged(std::string const &funcIndex, std::string const &paramName);
 
   /// Request to plot guess
   void plotGuessClicked();

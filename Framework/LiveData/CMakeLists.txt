@@ -16,8 +16,6 @@ set(SRC_FILES
     src/StartLiveData.cpp
 )
 
-set(SRC_UNITY_IGNORE_FILES src/ISIS/DAE/idc.cpp src/ISIS/DAE/isisds_command.cpp)
-
 set(INC_FILES
     inc/MantidLiveData/ADARA/ADARA.h
     inc/MantidLiveData/ADARA/ADARAPackets.h
@@ -97,11 +95,6 @@ if(COVERAGE)
     set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(LiveData SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
 
 # Use a precompiled header where they are supported
 enable_precompiled_headers(inc/MantidLiveData/PrecompiledHeader.h SRC_FILES)

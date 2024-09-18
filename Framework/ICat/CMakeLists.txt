@@ -17,8 +17,6 @@ set(SRC_FILES
     src/ICat4/ICat4Catalog.cpp
 )
 
-set(SRC_UNITY_IGNORE_FILES)
-
 set(INC_FILES
     inc/MantidICat/CatalogPublish.h
     inc/MantidICat/CatalogAlgorithmHelper.h
@@ -59,11 +57,6 @@ if(COVERAGE)
     set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
   endforeach(loop_var)
 endif()
-
-if(UNITY_BUILD)
-  include(UnityBuild)
-  enable_unity_build(ICat SRC_FILES SRC_UNITY_IGNORE_FILES 10)
-endif(UNITY_BUILD)
 
 # Add ssl dependency
 add_definitions(-DWITH_OPENSSL -DWITH_NONAMESPACES)

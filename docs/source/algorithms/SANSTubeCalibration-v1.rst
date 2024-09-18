@@ -50,9 +50,12 @@ Correcting the Detector Pixel Locations
 Once the corrected pixel positions have been calculated for all tubes, :ref:`ApplyCalibration <algm-ApplyCalibration>` is called to move all the detector pixels in the workspace to their correct positions.
 On completion of the calibration, there will be a workspace in the ADS called ``result`` that contains these corrected detector positions.
 If a value has been provided for the ``OutputFile`` property, then this workspace is automatically saved out as a Nexus file to the specified location.
+
 A workspace called ``cvalues`` gives the average resolution of the fit parameter for each tube, giving an indication of the quality of the calibration.
 When the algorithm completes, a notice will be printed in the messages pane for any tube with an average resolution greater than the value specified in the ``CValueThreshold`` property. These tubes are considered to have a poor quality calibration.
-If ``SkipTubesOnError`` was set to ``True``, then warnings will also be printed when the algorithm completes detailing any tubes that were not calibrated and stating the reasons why.
+This list can be written out to a text file by passing a filepath to the ``CValueOutputFile`` property.
+
+If ``SkipTubesOnError`` was set to ``True``, then warnings will be printed when the algorithm completes detailing any tubes that were not calibrated and stating the reasons why.
 
 A number of other diagnostic workspaces are output to the ADS during the calibration. These allow closer inspection of the results from the fitting and other calibration steps for each tube.
 They provide the following information:

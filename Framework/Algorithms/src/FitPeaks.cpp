@@ -81,7 +81,7 @@ const std::string OUTPUT_WKSP_PARAMS("OutputPeakParametersWorkspace");
 const std::string OUTPUT_WKSP_PARAM_ERRS("OutputParameterFitErrorsWorkspace");
 const std::string RAW_PARAMS("RawPeakParameters");
 const std::string PEAK_MIN_SIGNAL_TO_NOISE_RATIO("MinimumSignalToNoiseRatio");
-
+const std::string PEAK_MIN_TOTAL_COUNT("MinimumPeakTotalCount");
 } // namespace PropertyNames
 } // namespace
 
@@ -257,8 +257,8 @@ std::string PeakFitPreCheckResult::getReport() const {
 
 //----------------------------------------------------------------------------------------------
 FitPeaks::FitPeaks()
-    : m_fitPeaksFromRight(true), m_fitIterations(50), m_numPeaksToFit(0), m_minPeakHeight(20.),
-      m_minSignalToNoiseRatio(0.), m_peakPosTolCase234(false) {}
+    : m_fitPeaksFromRight(true), m_fitIterations(50), m_numPeaksToFit(0), m_minPeakHeight(0.),
+      m_minSignalToNoiseRatio(0.), m_minPeakTotalCount(0.), m_peakPosTolCase234(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** initialize the properties
@@ -284,11 +284,9 @@ void FitPeaks::init() {
   auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::START_WKSP_INDEX, 0, mustBePositive, "Starting workspace index for fit");
-  declareProperty(PropertyNames::STOP_WKSP_INDEX, EMPTY_INT(),
-                  "Last workspace index to fit (which is included). "
-                  "If a value larger than the workspace index of last spectrum, "
-                  "then the workspace index of last spectrum is used.");
-
+  declareProperty(
+      PropertyNames::STOP_WKSP_INDEX, EMPTY_INT(),
+      "Last workspace index for fit is the smaller of this value and the workspace index of last spectrum.");
   // properties about peak positions to fit
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::PEAK_CENTERS),
                   "List of peak centers to use as initial guess for fit.");
@@ -384,19 +382,15 @@ void FitPeaks::init() {
   declareProperty(PropertyNames::BACKGROUND_Z_SCORE, EMPTY_DBL(), os.str());
 
   declareProperty(PropertyNames::HIGH_BACKGROUND, true,
-                  "Flag whether the data has high background comparing to "
-                  "peaks' intensities. "
-                  "For example, vanadium peaks usually have high background.");
+                  "Flag whether the input data has high background compared to peak heights.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::POSITION_TOL),
                   "List of tolerance on fitted peak positions against given peak positions."
                   "If there is only one value given, then ");
 
   declareProperty(PropertyNames::PEAK_MIN_HEIGHT, 0.,
-                  "Minimum peak height such that all the fitted peaks with "
-                  "height under this value will be excluded. The same property is used "
-                  "for pre-checking peaks before fitting, such that all the peaks with the total Y-count "
-                  "under this value will be excluded.");
+                  "Used for validating peaks before and after fitting. If a peak's observed/estimated or "
+                  "fitted height is under this value, the peak will be marked as error.");
 
   declareProperty(PropertyNames::CONSTRAIN_PEAK_POS, true,
                   "If true peak position will be constrained by estimated positions "
@@ -428,10 +422,14 @@ void FitPeaks::init() {
                   "parameters. true generates a table with peak function "
                   "parameters");
 
-  declareProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_NOISE_RATIO, 0.,
-                  "Minimum signal-to-noise ratio such that all the peaks with "
-                  "signal-to-noise ratio under this value will be excluded."
-                  "Note, the algorithm will not exclude a peak for which the noise cannot be estimated.");
+  declareProperty(
+      PropertyNames::PEAK_MIN_SIGNAL_TO_NOISE_RATIO, 0.,
+      "Used for validating peaks before fitting. If the signal-to-noise ratio is under this value, "
+      "the peak will be marked as error. This does not apply to peaks for which the noise cannot be estimated.");
+
+  declareProperty(PropertyNames::PEAK_MIN_TOTAL_COUNT, EMPTY_DBL(),
+                  "Used for validating peaks before fitting. If the total peak window Y-value count "
+                  "is under this value, the peak will be excluded from fitting and calibration.");
 
   const std::string addoutgrp("Analysis");
   setPropertyGroup(PropertyNames::OUTPUT_WKSP_PARAMS, addoutgrp);
@@ -447,7 +445,7 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
   map<std::string, std::string> issues;
 
   // check that min/max spectra indices make sense - only matters if both are specified
-  if (!(isDefault(PropertyNames::START_WKSP_INDEX) && isDefault(PropertyNames::START_WKSP_INDEX))) {
+  if (!(isDefault(PropertyNames::START_WKSP_INDEX) && isDefault(PropertyNames::STOP_WKSP_INDEX))) {
     const int startIndex = getProperty(PropertyNames::START_WKSP_INDEX);
     const int stopIndex = getProperty(PropertyNames::STOP_WKSP_INDEX);
     if (startIndex > stopIndex) {
@@ -498,14 +496,11 @@ std::map<std::string, std::string> FitPeaks::validateInputs() {
       functionParameterNames.emplace_back(m_peakFunction->parameterName(i));
     // check that the supplied names are in the function
     // it is acceptable to be missing parameters
-    bool failed = false;
-    for (const auto &name : suppliedParameterNames) {
-      if (std::find(functionParameterNames.begin(), functionParameterNames.end(), name) ==
-          functionParameterNames.end()) {
-        failed = true;
-        break;
-      }
-    }
+    const bool failed = std::any_of(suppliedParameterNames.cbegin(), suppliedParameterNames.cend(),
+                                    [&functionParameterNames](const auto &parName) {
+                                      return std::find(functionParameterNames.begin(), functionParameterNames.end(),
+                                                       parName) == functionParameterNames.end();
+                                    });
     if (failed) {
       std::string msg = "Specified invalid parameter for peak function";
       if (haveCommonPeakParameters)
@@ -760,6 +755,7 @@ void FitPeaks::processInputFitRanges() {
         double left_w_bound = peakWindowX[ipeak * 2];
         double right_w_bound = peakWindowX[ipeak * 2 + 1];
         double center = peakCenterX[ipeak];
+
         if (!(left_w_bound < center && center < right_w_bound)) {
           std::stringstream errss;
           errss << "Workspace index " << wi << " has incompatible peak window "
@@ -907,12 +903,23 @@ void FitPeaks::processInputPeakTolerance() {
                              "peaks to fit are inconsistent.");
   }
 
-  // minimum peak height: set default to zero
+  // set the minimum peak height to 0 (default value) if not specified or invalid
   m_minPeakHeight = getProperty(PropertyNames::PEAK_MIN_HEIGHT);
   if (isEmpty(m_minPeakHeight) || m_minPeakHeight < 0.)
     m_minPeakHeight = 0.;
 
-  // if the signal-to-noise threshold is not specified, set it to zero so it has no effect
+  // PEAK_MIN_HEIGHT used to function as both "peak height" and "total count" checker.
+  // Now the "total count" is checked by PEAK_MIN_TOTAL_COUNT, so set it accordingly.
+  m_minPeakTotalCount = getProperty(PropertyNames::PEAK_MIN_TOTAL_COUNT);
+  if (m_minPeakHeight > 0 && isEmpty(m_minPeakTotalCount))
+    m_minPeakTotalCount = m_minPeakHeight;
+  else {
+    // set the minimum peak total count to 0 if not specified or invalid
+    if (isEmpty(m_minPeakTotalCount) || m_minPeakTotalCount < 0.)
+      m_minPeakTotalCount = 0.;
+  }
+
+  // set the signal-to-noise threshold to zero (default value) if not specified or invalid
   m_minSignalToNoiseRatio = getProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_NOISE_RATIO);
   if (isEmpty(m_minSignalToNoiseRatio) || m_minSignalToNoiseRatio < 0.)
     m_minSignalToNoiseRatio = 0.;
@@ -1123,14 +1130,12 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
                                 const std::shared_ptr<FitPeaksAlgorithm::PeakFitPreCheckResult> &pre_check_result) {
   assert(fit_result->getNumberPeaks() == m_numPeaksToFit);
   pre_check_result->setNumberOfSubmittedSpectrumPeaks(m_numPeaksToFit);
-  if (m_minPeakHeight >= 0.) {
-    // if spectrum contains a very weak signal, do not proceed and return
-    if (numberCounts(wi) <= m_minPeakHeight) {
-      for (size_t i = 0; i < m_numPeaksToFit; ++i)
-        fit_result->setBadRecord(i, -1.);
-      pre_check_result->setNumberOfSpectrumPeaksWithLowCount(m_numPeaksToFit);
-      return; // don't do anything
-    }
+  // if the whole spectrum has low count, do not fit any peaks for that spectrum
+  if (m_minPeakTotalCount >= 0. && numberCounts(wi) <= m_minPeakTotalCount) {
+    for (size_t i = 0; i < m_numPeaksToFit; ++i)
+      fit_result->setBadRecord(i, -1.);
+    pre_check_result->setNumberOfSpectrumPeaksWithLowCount(m_numPeaksToFit);
+    return;
   }
 
   // Set up sub algorithm Fit for peak and background
@@ -1466,7 +1471,7 @@ bool FitPeaks::processSinglePeakFitResult(size_t wsindex, size_t peakindex, cons
  * fitted parameter
  * table
  */
-void FitPeaks::calculateFittedPeaks(std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> fit_results) {
+void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>> &fit_results) {
   // check
   if (!m_fittedParamTable)
     throw std::runtime_error("No parameters");
@@ -1644,7 +1649,7 @@ double FitPeaks::fitIndividualPeak(size_t wi, const API::IAlgorithm_sptr &fitter
   }
 
   // check the number of counts in the peak window
-  if (m_minPeakHeight >= 0.0 && numberCounts(wi, fitwindow) <= m_minPeakHeight) {
+  if (m_minPeakTotalCount >= 0.0 && numberCounts(wi, fitwindow) <= m_minPeakTotalCount) {
     pre_check_result->setNumberOfIndividualPeaksWithLowCount(1);
     return cost;
   }
@@ -1709,6 +1714,7 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
   peak_function->setCentre(expected_peak_center); // set expected position first
   int result = estimatePeakParameters(histogram, peak_index_window, peak_function, bkgd_function, estimate_peak_width,
                                       m_peakWidthEstimateApproach, m_peakWidthPercentage, m_minPeakHeight);
+
   if (result != GOOD) {
     peak_function->setCentre(expected_peak_center);
     if (result == NOSIGNAL || result == LOWPEAK) {
@@ -1738,8 +1744,6 @@ double FitPeaks::fitFunctionSD(const IAlgorithm_sptr &fit, const API::IPeakFunct
     std::stringstream peak_center_constraint;
     peak_center_constraint << (peak_center - 0.5 * peak_width) << " < f0." << peak_function->getCentreParameterName()
                            << " < " << (peak_center + 0.5 * peak_width);
-
-    // set up a constraint on peak height
     fit->setProperty("Constraints", peak_center_constraint.str());
   }
 
@@ -2312,14 +2316,14 @@ std::string FitPeaks::getPeakHeightParameterName(const API::IPeakFunction_const_
   std::string height_name("");
 
   std::vector<std::string> peak_parameters = peak_function->getParameterNames();
-  for (const auto &name : peak_parameters) {
-    if (name == "Height") {
+  for (const auto &parName : peak_parameters) {
+    if (parName == "Height") {
       height_name = "Height";
       break;
-    } else if (name == "I") {
+    } else if (parName == "I") {
       height_name = "I";
       break;
-    } else if (name == "Intensity") {
+    } else if (parName == "Intensity") {
       height_name = "Intensity";
       break;
     }

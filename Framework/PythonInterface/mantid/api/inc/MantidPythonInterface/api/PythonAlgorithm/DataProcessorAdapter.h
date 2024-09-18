@@ -63,8 +63,8 @@ public:
       throw std::invalid_argument("Failed to specify algorithm name");
     }
 
-    std::vector<std::string> names;
     if (!Mantid::PythonInterface::isNone(propNames)) {
+      std::vector<std::string> names;
       boost::python::extract<std::string> extractor(propNames);
       if (extractor.check()) {
         names = std::vector<std::string>(1, extractor());

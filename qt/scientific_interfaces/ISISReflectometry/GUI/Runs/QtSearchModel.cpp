@@ -227,8 +227,6 @@ std::string QtSearchModel::makeSearchResultsCSV(SearchResults const &results) co
   }
   std::string csv = makeSearchResultsCSVHeaders();
   for (SearchResult const &result : results) {
-    // Should be suppressed until C++20. std::accumulate is less efficient as it makes needless copies.
-    // cppcheck-suppress useStlAlgorithm
     csv += result.runNumber() + "," + result.title() + "," + result.excludeReason() + "," + result.comment() + "\n";
   }
   return csv;

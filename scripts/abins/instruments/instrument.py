@@ -5,16 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # noinspection PyPep8Naming
-import logging
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional
 
-import mantid.kernel
 import numpy as np
 
 from abins.constants import FLOAT_TYPE
+from abins.logging import get_logger, Logger
 import abins.parameters
-
-Logger = Union[logging.Logger, mantid.kernel.Logger]
 
 
 class Instrument:
@@ -170,7 +167,7 @@ class Instrument:
     def get_name(self):
         return self._name
 
-    def _check_setting(self, setting: str, logger: Logger = None) -> str:
+    def _check_setting(self, setting: str, logger: Optional[Logger] = None) -> str:
         """Sanity-check that setting is appropriate for selected instrument
 
         Return an appropriate value for setting: for example, '' may be set
@@ -195,9 +192,7 @@ class Instrument:
         """
         import abins.parameters
 
-        if logger is None:
-            mantid_logger: mantid.kernel.Logger = mantid.kernel.logger
-            logger = mantid_logger
+        logger = get_logger(logger=logger)
 
         if self.get_name() not in abins.parameters.instruments:
             # If an instrument lacks an entry in abins.parameters, we cannot

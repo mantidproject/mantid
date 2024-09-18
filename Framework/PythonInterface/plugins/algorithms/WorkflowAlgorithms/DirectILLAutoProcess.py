@@ -591,7 +591,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             existing_masks.append(tube_mask_ws)
 
         mask_angles = self.getProperty("MaskedAngles").value
-        if mask_angles != list():
+        if mask_angles.any():
             masked_angles_ws = "{}_masked_angles".format(self.instrument)
             LoadEmptyInstrument(InstrumentName=self.instrument, OutputWorkspace=masked_angles_ws)
             MaskAngle(Workspace=masked_angles_ws, MinAngle=mask_angles[0], MaxAngle=mask_angles[1])

@@ -22,6 +22,7 @@ namespace Kernel {
 class SplittingInterval;
 template <typename T> class TimeSeriesProperty;
 class TimeROI;
+class LogFilter;
 
 /**
  Property manager helper class.
@@ -55,7 +56,7 @@ public:
   PropertyManager &operator=(const PropertyManager &);
   PropertyManager &operator+=(const PropertyManager &rhs);
 
-  void filterByProperty(const TimeSeriesProperty<bool> &filter,
+  void filterByProperty(Mantid::Kernel::LogFilter *logFilter,
                         const std::vector<std::string> &excludedFromFiltering = std::vector<std::string>()) override;
 
   // Create a new PropertyManager with a partial copy of its time series properties according to TimeROI

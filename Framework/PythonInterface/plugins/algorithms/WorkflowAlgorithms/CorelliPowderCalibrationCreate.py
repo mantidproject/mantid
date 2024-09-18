@@ -95,7 +95,6 @@ def insert_bank_numbers(input_workspace: Union[str, Workspace2D], grouping_works
 
 
 class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
-
     peak_shapes = ["Gaussian"]
     bank_count = 92
     _banks = [f"bank{i}/sixteenpack" for i in range(1, bank_count)]
@@ -231,6 +230,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
             PeakPositions=self.getProperty("PeakPositions").value,
             CalibrationParameters="DIFC",
             OutputCalibrationTable=difc_table,
+            MaskWorkspace=difc_table + "_mask",
             DiagnosticWorkspaces=diagnostics_workspaces,
         )
         PDCalibration(**kwargs)

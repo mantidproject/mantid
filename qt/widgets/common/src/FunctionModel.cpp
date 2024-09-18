@@ -9,6 +9,7 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
@@ -43,6 +44,11 @@ void FunctionModel::setFunction(IFunction_sptr fun) {
   }
 }
 
+IFunction_sptr FunctionModel::getFullFunction() const {
+  // It is important that this does not return a copy/clone of the function
+  return m_function;
+}
+
 IFunction_sptr FunctionModel::getFitFunction() const {
   if (!m_function)
     return m_function;
@@ -70,13 +76,13 @@ IFunction_sptr FunctionModel::getFitFunctionWithGlobals(std::size_t const &index
 
   auto const singleFun = m_function->getFunction(index);
   for (auto paramIter = m_globalParameterNames.begin(); paramIter != m_globalParameterNames.end();) {
-    if (singleFun->hasParameter(paramIter->toStdString())) {
+    if (singleFun->hasParameter(*paramIter)) {
       QStringList ties;
       for (auto i = 0u; i < m_function->nFunctions(); ++i)
         if (i != index)
-          ties << "f" + QString::number(i) + "." + *paramIter;
+          ties << "f" + QString::number(i) + "." + QString::fromStdString(*paramIter);
 
-      ties << "f" + QString::number(index) + "." + *paramIter;
+      ties << "f" + QString::number(index) + "." + QString::fromStdString(*paramIter);
       function->addTies(ties.join("=").toStdString());
       ++paramIter;
     } else {
@@ -92,12 +98,12 @@ bool FunctionModel::hasFunction() const {
   return true;
 }
 
-void FunctionModel::addFunction(const QString &prefix, const QString &funStr) {
+void FunctionModel::addFunction(std::string const &prefix, std::string const &funStr) {
   if (!hasFunction()) {
     setFunctionString(funStr);
     return;
   }
-  auto newFun = FunctionFactory::Instance().createInitialized(funStr.toStdString());
+  auto newFun = FunctionFactory::Instance().createInitialized(funStr);
   auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
   for (int i = 0; i < nf; ++i) {
     auto fun = getSingleFunction(i);
@@ -105,22 +111,22 @@ void FunctionModel::addFunction(const QString &prefix, const QString &funStr) {
     auto cf = std::dynamic_pointer_cast<CompositeFunction>(parentFun);
     if (cf) {
       cf->addFunction(newFun->clone());
-    } else if (i == 0 && prefix.isEmpty()) {
+    } else if (i == 0 && prefix.empty()) {
       setFunctionString(getFunctionString() + ";" + funStr);
       break;
     } else {
-      throw std::runtime_error("Function at " + prefix.toStdString() + " is not composite.");
+      throw std::runtime_error("Function at " + prefix + " is not composite.");
     }
   }
   m_function->checkFunction();
   updateGlobals();
 }
 
-void FunctionModel::removeFunction(const QString &functionIndex) {
-  QString prefix;
+void FunctionModel::removeFunction(std::string const &functionIndex) {
+  std::string prefix;
   int index;
   std::tie(prefix, index) = splitFunctionPrefix(functionIndex);
-  if (prefix.isEmpty() && index == -1) {
+  if (prefix.empty() && index == -1) {
     clear();
     return;
   }
@@ -130,10 +136,10 @@ void FunctionModel::removeFunction(const QString &functionIndex) {
     auto parentFun = getFunctionWithPrefix(prefix, fun);
     auto cf = std::dynamic_pointer_cast<CompositeFunction>(parentFun);
     if (!cf) {
-      throw std::runtime_error("Function at " + prefix.toStdString() + " is not composite.");
+      throw std::runtime_error("Function at " + prefix + " is not composite.");
     }
     cf->removeFunction(index);
-    if (cf->nFunctions() == 1 && prefix.isEmpty() && cf->name() == "CompositeFunction") {
+    if (cf->nFunctions() == 1 && prefix.empty() && cf->name() == "CompositeFunction") {
       m_function->replaceFunction(i, cf->getFunction(0));
       m_function->checkFunction();
     } else {
@@ -144,89 +150,80 @@ void FunctionModel::removeFunction(const QString &functionIndex) {
   updateGlobals();
 }
 
-void FunctionModel::setParameter(const QString &paramName, double value) {
-  if (isGlobal(paramName))
-    setGlobalParameterValue(paramName, value);
+void FunctionModel::setParameter(std::string const &parameterName, double value) {
+  if (isGlobal(parameterName))
+    setGlobalParameterValue(parameterName, value);
   else
-    setLocalParameterValue(paramName, static_cast<int>(m_currentDomainIndex), value);
+    setLocalParameterValue(parameterName, static_cast<int>(m_currentDomainIndex), value);
 }
 
-void FunctionModel::setAttribute(const QString &attrName, const IFunction::Attribute &value) {
+void FunctionModel::setAttribute(std::string const &attrName, const IFunction::Attribute &value) {
   auto fun = getCurrentFunction();
   if (!fun) {
     throw std::logic_error("Function is undefined.");
   }
-  if (fun->hasAttribute(attrName.toStdString())) {
-    fun->setAttribute(attrName.toStdString(), value);
+  if (fun->hasAttribute(attrName)) {
+    fun->setAttribute(attrName, value);
   }
 }
 
-void FunctionModel::setParameterError(const QString &paramName, double value) {
+void FunctionModel::setParameterError(std::string const &parameterName, double value) {
   auto fun = getCurrentFunction();
-  auto const index = fun->parameterIndex(paramName.toStdString());
+  auto const index = fun->parameterIndex(parameterName);
   fun->setError(index, value);
 }
 
-double FunctionModel::getParameter(const QString &paramName) const {
-  return getCurrentFunction()->getParameter(paramName.toStdString());
+double FunctionModel::getParameter(std::string const &parameterName) const {
+  auto const fun = getCurrentFunction();
+  return fun && fun->hasParameter(parameterName) ? fun->getParameter(parameterName) : 0.0;
 }
 
-IFunction::Attribute FunctionModel::getAttribute(const QString &attrName) const {
-  return getCurrentFunction()->getAttribute(attrName.toStdString());
+IFunction::Attribute FunctionModel::getAttribute(std::string const &attrName) const {
+  auto const fun = getCurrentFunction();
+  return fun && fun->hasAttribute(attrName) ? fun->getAttribute(attrName) : IFunction::Attribute();
 }
 
-double FunctionModel::getParameterError(const QString &paramName) const {
+double FunctionModel::getParameterError(std::string const &parameterName) const {
   auto fun = getCurrentFunction();
-  auto const index = fun->parameterIndex(paramName.toStdString());
-  return fun->getError(index);
+  return fun && fun->hasParameter(parameterName) ? fun->getError(fun->parameterIndex(parameterName)) : 0.0;
 }
 
-QString FunctionModel::getParameterDescription(const QString &paramName) const {
+std::string FunctionModel::getParameterDescription(std::string const &parameterName) const {
   auto fun = getCurrentFunction();
-  auto const index = fun->parameterIndex(paramName.toStdString());
-  return QString::fromStdString(fun->parameterDescription(index));
+  return fun && fun->hasParameter(parameterName) ? fun->parameterDescription(fun->parameterIndex(parameterName)) : "";
 }
 
-bool FunctionModel::isParameterFixed(const QString &parName) const {
-  return isLocalParameterFixed(parName, static_cast<int>(m_currentDomainIndex));
+bool FunctionModel::isParameterFixed(std::string const &parameterName) const {
+  return isLocalParameterFixed(parameterName, static_cast<int>(m_currentDomainIndex));
 }
 
-QString FunctionModel::getParameterTie(const QString &parName) const {
-  return getLocalParameterTie(parName, static_cast<int>(m_currentDomainIndex));
+std::string FunctionModel::getParameterTie(std::string const &parameterName) const {
+  return getLocalParameterTie(parameterName, static_cast<int>(m_currentDomainIndex));
 }
 
-void FunctionModel::setParameterFixed(const QString &parName, bool fixed) {
-  setLocalParameterFixed(parName, static_cast<int>(m_currentDomainIndex), fixed);
+void FunctionModel::setParameterFixed(std::string const &parameterName, bool fixed) {
+  setLocalParameterFixed(parameterName, static_cast<int>(m_currentDomainIndex), fixed);
 }
 
-void FunctionModel::setParameterTie(const QString &parName, const QString &tie) {
-  setLocalParameterTie(parName, static_cast<int>(m_currentDomainIndex), tie);
+void FunctionModel::setParameterTie(std::string const &parameterName, std::string const &tie) {
+  setLocalParameterTie(parameterName, static_cast<int>(m_currentDomainIndex), tie);
 }
 
-QStringList FunctionModel::getParameterNames() const {
-  QStringList names;
+std::vector<std::string> FunctionModel::getParameterNames() const {
   if (hasFunction()) {
-    const auto paramNames = getCurrentFunction()->getParameterNames();
-    for (auto const &name : paramNames) {
-      names << QString::fromStdString(name);
-    }
+    return getCurrentFunction()->getParameterNames();
   }
-  return names;
+  return std::vector<std::string>{};
 }
-QStringList FunctionModel::getAttributeNames() const {
-  QStringList names;
+std::vector<std::string> FunctionModel::getAttributeNames() const {
   if (hasFunction()) {
-    const auto attributeNames = getCurrentFunction()->getAttributeNames();
-    for (auto const &name : attributeNames) {
-      names << QString::fromStdString(name);
-    }
+    return getCurrentFunction()->getAttributeNames();
   }
-  return names;
+  return std::vector<std::string>{};
 }
 
 IFunction_sptr FunctionModel::getSingleFunction(int index) const {
-  checkIndex(index);
-  if (!hasFunction()) {
+  if (!checkIndex(index) || !hasFunction()) {
     return IFunction_sptr();
   }
   return m_function->getFunction(index);
@@ -276,7 +273,7 @@ void FunctionModel::setNumberDomains(int nDomains) {
 /// Sets the datasets based on their workspace names. This assumes there is only
 /// a single spectrum in the workspaces being fitted.
 /// @param datasetNames :: Names of the workspaces to be fitted.
-void FunctionModel::setDatasets(const QStringList &datasetNames) {
+void FunctionModel::setDatasets(const std::vector<std::string> &datasetNames) {
   QList<FunctionModelDataset> datasets;
   for (const auto &datasetName : datasetNames)
     datasets.append(FunctionModelDataset(datasetName, FunctionModelSpectra("0")));
@@ -296,7 +293,7 @@ void FunctionModel::setDatasets(const QList<FunctionModelDataset> &datasets) {
 /// Adds datasets based on their workspace names. This assumes there is only
 /// a single spectrum in the added workspaces.
 /// @param datasetNames :: Names of the workspaces to be added.
-void FunctionModel::addDatasets(const QStringList &datasetNames) {
+void FunctionModel::addDatasets(const std::vector<std::string> &datasetNames) {
   for (const auto &datasetName : datasetNames)
     m_datasets.append(FunctionModelDataset(datasetName, FunctionModelSpectra("0")));
 
@@ -327,24 +324,26 @@ void FunctionModel::removeDatasets(QList<int> &indices) {
 /// Returns the workspace names of the datasets. If a dataset has N spectra,
 /// then the workspace name is multiplied by N. This is required for
 /// EditLocalParameterDialog.
-QStringList FunctionModel::getDatasetNames() const {
-  QStringList datasetNames;
+std::vector<std::string> FunctionModel::getDatasetNames() const {
+  std::vector<std::string> allDatasetNames;
   for (const auto &dataset : m_datasets)
     for (auto i = 0u; i < dataset.numberOfSpectra(); ++i) {
       UNUSED_ARG(i);
-      datasetNames << dataset.datasetName();
+      allDatasetNames.emplace_back(dataset.datasetName());
     }
-  return datasetNames;
+  return allDatasetNames;
 }
 
 /// Returns names for the domains of each dataset. If a dataset has multiple
 /// spectra, then a domain name will include the spectrum number of a domain in
 /// a workspace. This is required for EditLocalParameterDialog.
-QStringList FunctionModel::getDatasetDomainNames() const {
-  QStringList domainNames;
-  for (const auto &dataset : m_datasets)
-    domainNames << dataset.domainNames();
-  return domainNames;
+std::vector<std::string> FunctionModel::getDatasetDomainNames() const {
+  std::vector<std::string> allDomainNames;
+  for (const auto &dataset : m_datasets) {
+    auto const domainNames = dataset.domainNames();
+    allDomainNames.insert(allDomainNames.end(), domainNames.cbegin(), domainNames.cend());
+  }
+  return allDomainNames;
 }
 
 int FunctionModel::getNumberDomains() const { return static_cast<int>(m_numberDomains); }
@@ -352,55 +351,56 @@ int FunctionModel::getNumberDomains() const { return static_cast<int>(m_numberDo
 int FunctionModel::currentDomainIndex() const { return static_cast<int>(m_currentDomainIndex); }
 
 void FunctionModel::setCurrentDomainIndex(int index) {
-  checkIndex(index);
-  m_currentDomainIndex = static_cast<size_t>(index);
+  if (checkIndex(index)) {
+    m_currentDomainIndex = static_cast<size_t>(index);
+  }
 }
 
-double FunctionModel::getLocalParameterValue(const QString &parName, int i) const {
-  return getSingleFunction(i)->getParameter(parName.toStdString());
+double FunctionModel::getLocalParameterValue(std::string const &parameterName, int i) const {
+  return getSingleFunction(i)->getParameter(parameterName);
 }
 
-bool FunctionModel::isLocalParameterFixed(const QString &parName, int i) const {
+bool FunctionModel::isLocalParameterFixed(std::string const &parameterName, int i) const {
   auto fun = getSingleFunction(i);
-  auto const parIndex = fun->parameterIndex(parName.toStdString());
+  auto const parIndex = fun->parameterIndex(parameterName);
   return fun->isFixed(parIndex);
 }
 
-QString FunctionModel::getLocalParameterTie(const QString &parName, int i) const {
+std::string FunctionModel::getLocalParameterTie(std::string const &parameterName, int i) const {
   auto fun = getSingleFunction(i);
-  auto const parIndex = fun->parameterIndex(parName.toStdString());
+  auto const parIndex = fun->parameterIndex(parameterName);
   auto const tie = fun->getTie(parIndex);
   if (!tie)
     return "";
   auto const tieStr = QString::fromStdString(tie->asString());
   auto const j = tieStr.indexOf('=');
-  return tieStr.mid(j + 1);
+  return tieStr.mid(j + 1).toStdString();
 }
 
-QString FunctionModel::getLocalParameterConstraint(const QString &parName, int i) const {
+std::string FunctionModel::getLocalParameterConstraint(std::string const &parameterName, int i) const {
   auto fun = getSingleFunction(i);
-  auto const parIndex = fun->parameterIndex(parName.toStdString());
+  auto const parIndex = fun->parameterIndex(parameterName);
   auto const constraint = fun->getConstraint(parIndex);
-  auto const out = (!constraint) ? "" : QString::fromStdString(constraint->asString());
+  auto const out = (!constraint) ? "" : constraint->asString();
   return out;
 }
 
-void FunctionModel::setLocalParameterValue(const QString &parName, int i, double value) {
+void FunctionModel::setLocalParameterValue(std::string const &parameterName, int i, double value) {
   auto function = getSingleFunction(i);
-  if (function && function->hasParameter(parName.toStdString()))
-    function->setParameter(parName.toStdString(), value);
+  if (function && function->hasParameter(parameterName))
+    function->setParameter(parameterName, value);
 }
 
-void FunctionModel::setLocalParameterValue(const QString &parName, int i, double value, double error) {
+void FunctionModel::setLocalParameterValue(std::string const &parameterName, int i, double value, double error) {
   auto fun = getSingleFunction(i);
-  auto const parIndex = fun->parameterIndex(parName.toStdString());
+  auto const parIndex = fun->parameterIndex(parameterName);
   fun->setParameter(parIndex, value);
   fun->setError(parIndex, error);
 }
 
-void FunctionModel::setLocalParameterFixed(const QString &parName, int i, bool fixed) {
+void FunctionModel::setLocalParameterFixed(std::string const &parameterName, int i, bool fixed) {
   auto fun = getSingleFunction(i);
-  auto const parIndex = fun->parameterIndex(parName.toStdString());
+  auto const parIndex = fun->parameterIndex(parameterName);
   if (fixed) {
     fun->fix(parIndex);
   } else if (fun->isFixed(parIndex)) {
@@ -408,18 +408,18 @@ void FunctionModel::setLocalParameterFixed(const QString &parName, int i, bool f
   }
 }
 
-void FunctionModel::setLocalParameterTie(const QString &parName, int i, const QString &tie) {
-  auto logError = [&parName](const std::string &msg) {
-    g_log.error() << "Tie " << parName.toStdString() << ": " << msg << '\n';
+void FunctionModel::setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie) {
+  auto logError = [&parameterName](const std::string &msg) {
+    g_log.error() << "Tie " << parameterName << ": " << msg << '\n';
   };
   auto fun = getSingleFunction(i);
-  auto const name = parName.toStdString();
-  if (tie.isEmpty()) {
+  auto const name = parameterName;
+  if (tie.empty()) {
     fun->removeTie(fun->parameterIndex(name));
   } else {
-    auto const j = tie.indexOf('=');
+    auto const j = QString::fromStdString(tie).indexOf('=');
     try {
-      fun->tie(name, tie.mid(j + 1).toStdString());
+      fun->tie(name, QString::fromStdString(tie).mid(j + 1).toStdString());
     } catch (const std::invalid_argument &e) {
       logError(e.what());
     } catch (const std::runtime_error &e) {
@@ -428,57 +428,71 @@ void FunctionModel::setLocalParameterTie(const QString &parName, int i, const QS
   }
 }
 
-void FunctionModel::setLocalParameterConstraint(const QString &parName, int i, const QString &constraint) {
+void FunctionModel::setLocalParameterConstraint(std::string const &parameterName, int i,
+                                                std::string const &constraint) {
   auto const parts = splitConstraintString(constraint);
   if (constraint != "" && parts.second.first == "" && parts.second.second == "") {
-    g_log.error("Constraint " + parName.toStdString() + ": " + constraint.toStdString() + " is not a valid constraint");
+    g_log.error("Constraint " + parameterName + ": " + constraint + " is not a valid constraint");
     return;
   }
-  QString prefix, name;
-  std::tie(prefix, name) = splitParameterName(parName);
+  std::string prefix, name;
+  std::tie(prefix, name) = splitParameterName(parameterName);
   auto fun = getFunctionWithPrefix(prefix, getSingleFunction(i));
-  if (constraint.isEmpty()) {
-    fun->removeConstraint(name.toStdString());
+  if (constraint.empty()) {
+    fun->removeConstraint(name);
   } else {
-    auto newConstraint(constraint);
-    newConstraint.replace(parts.first, name);
+    auto newConstraint(QString::fromStdString(constraint));
+    newConstraint.replace(QString::fromStdString(parts.first), QString::fromStdString(name));
     fun->addConstraints(newConstraint.toStdString());
   }
 }
 
-void FunctionModel::setGlobalParameterValue(const QString &paramName, double value) {
-  if (isGlobal(paramName))
+void FunctionModel::setGlobalParameterValue(std::string const &parameterName, double value) {
+  if (isGlobal(parameterName))
     for (auto i = 0; i < getNumberDomains(); ++i)
-      setLocalParameterValue(paramName, i, value);
+      setLocalParameterValue(parameterName, i, value);
 }
 
-void FunctionModel::changeTie(const QString &parName, const QString &tie) {
+void FunctionModel::changeTie(std::string const &parameterName, std::string const &tie) {
   try {
-    setLocalParameterTie(parName, static_cast<int>(m_currentDomainIndex), tie);
+    setLocalParameterTie(parameterName, static_cast<int>(m_currentDomainIndex), tie);
   } catch (std::exception &) {
     // the tie is probably being edited
   }
 }
 
-void FunctionModel::addConstraint(const QString &functionIndex, const QString &constraint) {
+void FunctionModel::addConstraint(std::string const &functionIndex, std::string const &constraint) {
   auto fun = getFunctionWithPrefix(functionIndex, getCurrentFunction());
-  fun->addConstraints(constraint.toStdString());
+  fun->addConstraints(constraint);
 }
 
-void FunctionModel::removeConstraint(const QString &paramName) {
-  getCurrentFunction()->removeConstraint(paramName.toStdString());
+void FunctionModel::removeConstraint(std::string const &parameterName) {
+  getCurrentFunction()->removeConstraint(parameterName);
 }
 
-QStringList FunctionModel::getGlobalParameters() const { return m_globalParameterNames; }
+std::vector<std::string> FunctionModel::getGlobalParameters() const { return m_globalParameterNames; }
 
-void FunctionModel::setGlobalParameters(const QStringList &globals) { m_globalParameterNames = globals; }
-
-QStringList FunctionModel::getLocalParameters() const {
-  QStringList locals;
-  for (auto const &name : getParameterNames()) {
-    if (!m_globalParameterNames.contains(name))
-      locals << name;
+void FunctionModel::setGlobal(std::string const &parameterName, bool on) {
+  if (parameterName.empty())
+    return;
+  if (!on) {
+    auto newEnd = std::remove(m_globalParameterNames.begin(), m_globalParameterNames.end(), parameterName);
+    if (newEnd != m_globalParameterNames.end()) {
+      m_globalParameterNames.erase(newEnd, m_globalParameterNames.end());
+    }
+  } else if (std::find(m_globalParameterNames.cbegin(), m_globalParameterNames.cend(), parameterName) ==
+             m_globalParameterNames.cend()) {
+    m_globalParameterNames.emplace_back(parameterName);
   }
+}
+
+void FunctionModel::setGlobalParameters(const std::vector<std::string> &globals) { m_globalParameterNames = globals; }
+
+std::vector<std::string> FunctionModel::getLocalParameters() const {
+  auto const parameterNames = getParameterNames();
+  std::vector<std::string> locals;
+  std::copy_if(parameterNames.cbegin(), parameterNames.cend(), std::back_inserter(locals),
+               [&](const std::string &parameterName) { return !isGlobal(parameterName); });
   return locals;
 }
 
@@ -487,7 +501,7 @@ void FunctionModel::checkDatasets() {
   if (numberOfDomains(m_datasets) != static_cast<int>(m_numberDomains)) {
     m_datasets.clear();
     for (auto i = 0u; i < m_numberDomains; ++i)
-      m_datasets.append(FunctionModelDataset(QString::number(i), FunctionModelSpectra("0")));
+      m_datasets.append(FunctionModelDataset(std::to_string(i), FunctionModelSpectra("0")));
   }
 }
 
@@ -504,14 +518,13 @@ int FunctionModel::numberOfDomains(const QList<FunctionModelDataset> &datasets) 
   });
 }
 
-/// Check a domain/function index to be in range.
-void FunctionModel::checkIndex(int index) const {
-  if (index == 0)
-    return;
-  if (index < 0 || index >= getNumberDomains()) {
-    throw std::runtime_error("Domain index is out of range: " + std::to_string(index) + " out of " +
-                             std::to_string(getNumberDomains()));
-  }
+bool FunctionModel::checkIndex(int const index) const {
+  auto const indexInRange = index == 0 || (index > 0 && index < getNumberDomains());
+  // If the domain index is out of range, this indicates a problem in the logic of our code.
+  // We want the index to be ignored in Release mode (i.e. for a user), but we want an exception
+  // when in Debug mode (i.e. to alert a dev of the logic issue).
+  assert(indexInRange);
+  return indexInRange;
 }
 
 void FunctionModel::updateMultiDatasetParameters(const IFunction &fun) {
@@ -519,6 +532,34 @@ void FunctionModel::updateMultiDatasetParameters(const IFunction &fun) {
     return;
   copyParametersAndErrors(fun, *m_function);
   updateMultiDatasetAttributes(fun);
+}
+
+void FunctionModel::updateMultiDatasetParameters(const ITableWorkspace &paramTable) {
+  auto const nRows = paramTable.rowCount();
+  if (nRows == 0)
+    return;
+
+  auto const globalParameterNames = getGlobalParameters();
+  for (auto &&name : globalParameterNames) {
+    auto valueColumn = paramTable.getColumn(name);
+    auto errorColumn = paramTable.getColumn(name + "_Err");
+    setParameter(name, valueColumn->toDouble(0));
+    setParameterError(name, errorColumn->toDouble(0));
+  }
+
+  auto const localParameterNames = getLocalParameters();
+  for (auto &&name : localParameterNames) {
+    auto valueColumn = paramTable.getColumn(name);
+    auto errorColumn = paramTable.getColumn(name + "_Err");
+    if (nRows > 1) {
+      for (size_t i = 0; i < nRows; ++i) {
+        setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(i), errorColumn->toDouble(i));
+      }
+    } else {
+      auto const i = currentDomainIndex();
+      setLocalParameterValue(name, static_cast<int>(i), valueColumn->toDouble(0), errorColumn->toDouble(0));
+    }
+  }
 }
 
 void FunctionModel::updateMultiDatasetAttributes(const IFunction &fun) {
@@ -541,7 +582,7 @@ void FunctionModel::updateParameters(const IFunction &fun) {
 void FunctionModel::updateGlobals() {
   auto const fun = getCurrentFunction();
   for (auto it = m_globalParameterNames.begin(); it != m_globalParameterNames.end();) {
-    if (!fun->hasParameter(it->toStdString())) {
+    if (!fun->hasParameter(*it)) {
       it = m_globalParameterNames.erase(it);
     } else {
       ++it;
@@ -582,18 +623,19 @@ void FunctionModel::setResolutionFromWorkspace(const IFunction_sptr &fun, const 
   }
 }
 
-bool FunctionModel::isGlobal(const QString &parName) const { return m_globalParameterNames.contains(parName); }
+bool FunctionModel::isGlobal(std::string const &parameterName) const {
+  auto const findIter = std::find(m_globalParameterNames.cbegin(), m_globalParameterNames.cend(), parameterName);
+  return findIter != m_globalParameterNames.cend();
+}
 
-QString FunctionModel::setBackgroundA0(double value) {
+std::string FunctionModel::setBackgroundA0(double value) {
   std::string foundName;
   auto const fun = getCurrentFunction();
-  auto getA0 = [](IFunction const &f) -> std::string {
-    return (dynamic_cast<IBackgroundFunction const *>(&f) && f.hasParameter("A0")) ? "A0" : "";
-  };
+  auto getA0 = [](IFunction const &f) -> std::string { return f.hasParameter("A0") ? "A0" : ""; };
   auto const cf = std::dynamic_pointer_cast<CompositeFunction>(fun);
   if (cf) {
     if (fun->name() != "CompositeFunction")
-      return QString();
+      return "";
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
       foundName = getA0(*cf->getFunction(i));
       if (!foundName.empty()) {
@@ -607,7 +649,13 @@ QString FunctionModel::setBackgroundA0(double value) {
   if (!foundName.empty()) {
     fun->setParameter(foundName, value);
   }
-  return QString::fromStdString(foundName);
+  return foundName;
 }
+
+void FunctionModel::setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
+  (void)fitResolutions;
+}
+
+void FunctionModel::setQValues(const std::vector<double> &qValues) { (void)qValues; }
 
 } // namespace MantidQt::MantidWidgets

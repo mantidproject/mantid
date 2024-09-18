@@ -35,6 +35,9 @@ from mantid.simpleapi import (
     SaveMD,
     AddSampleLog,
     SetMDFrame,
+    CreatePeaksWorkspace,
+    CopySample,
+    AddPeakHKL,
 )
 from mantid.api import AnalysisDataService
 from mantidqt.utils.qt.testing import get_application
@@ -682,6 +685,35 @@ class SliceViewerTestCreateMDHisto(systemtesting.MantidSystemTest, HelperTesting
         pres = SliceViewer(binned_ws)
         self.assertListEqual(pres.get_proj_matrix().tolist(), [[0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [1.0, 0.0, 0.0]])
         pres.view.close()
+
+
+class SliceViewerTestPeakOutsideOfDataRange(systemtesting.MantidSystemTest, HelperTestingClass):
+    def runTest(self):
+        HelperTestingClass.__init__(self)
+        ws_4D = CreateMDWorkspace(
+            Dimensions=4,
+            Extents=[-1, 1, -1, 1, -1, 1, -1, 1],
+            Names="H,K,L,E",
+            Frames="HKL,HKL,HKL,General Frame",
+            Units="r.l.u.,r.l.u.,r.l.u.,meV",
+        )
+        FakeMDEventData(ws_4D, UniformParams=1e6)
+        expt_info_4D = CreateSampleWorkspace()
+        ws_4D.addExperimentInfo(expt_info_4D)
+        SetUB(ws_4D, 1, 1, 2, 90, 90, 120)
+        CreatePeaksWorkspace(InstrumentWorkspace="ws_4D", NumberOfPeaks=0, OutputWorkspace="peaks")
+        CopySample(
+            InputWorkspace="ws_4D", OutputWorkspace="peaks", CopyName=False, CopyMaterial=False, CopyEnvironment=False, CopyShape=False
+        )
+        AddPeakHKL(Workspace="peaks", HKL="1,2,3")
+        sv = SliceViewer(ws_4D)
+        sv._create_peaks_presenter_if_necessary().overlay_peaksworkspaces(["peaks"])
+        sv.set_slicepoint([None, None, 3.0, 0.0])
+        l_spinbox = sv.get_dimensions().dims[2].spinbox
+        self.assertEqual(l_spinbox.value(), 3.0)
+        self.assertEqual(l_spinbox.minimum(), -0.99)
+        self.assertEqual(l_spinbox.maximum(), 3.0)
+        sv.view.close()
 
 
 # private helper functions

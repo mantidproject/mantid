@@ -23,7 +23,7 @@ Action Buttons
 --------------
 
 Settings
-  Opens the :ref:`Settings <interface-indirect-settings>` GUI which allows you to
+  Opens the :ref:`Settings <inelastic-interface-settings>` GUI which allows you to
   customize the settings for the Indirect interfaces.
 
 ?
@@ -65,14 +65,18 @@ Spectra Min & Spectra Max
   options will be disabled when using OSIRIS in diffonly mode, in which case the
   entire spectra range will be used.
 
+Detector Grouping
+  Specify the method to be used for grouping the detectors when performing the reduction.
+  The options include 'All', 'File', 'Groups' and 'Custom'.
+
 Run
   Runs the processing configured on the current tab.
 
 Plot Spectra
   If enabled, it will plot the selected workspace indices in the selected output workspace.
 
-Plot Contour
-  If enabled, it will plot the selected output workspace as a contour plot.
+Open Slice Viewer
+  If enabled, it will open the slice viewer for the selected output workspace.
 
 Save Formats
   Select a range of save formats to save the reduced data as, in all cases the
@@ -103,9 +107,6 @@ order of files should not be problematic either.
 
 Multiple data files with the same dRanges will be "averaged" together.
 
-.. interface:: Diffraction
-  :widget: pageCalibration
-
 IRIS, OSIRIS diffspec, TOSCA & VESUVIO
 --------------------------------------
 
@@ -114,7 +115,7 @@ All other instruments are supported through the
 algorithm and share the same set of options:
 
 .. interface:: Diffraction
-  :widget: pageDSpaceRebin
+  :widget: gbDspaceRebinCalibOnly
 
 Sum Files
   If selected the raw files will be summed after they are loaded and the

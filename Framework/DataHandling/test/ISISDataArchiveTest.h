@@ -105,7 +105,7 @@ public:
     std::set<std::string> filenames = {"", "", "", "hrpd273"};
 
     MockOutRequests arch;
-    const std::string actualPath = arch.getArchivePath(filenames, exts);
+    const std::string actualPath = arch.getArchivePath(filenames, exts).result();
 #ifdef __APPLE__
     std::string expectedPath = "/Volumes/inst$/default/path";
 #else
@@ -126,7 +126,7 @@ public:
 
     MockOutRequests arch;
     arch.setFileExists(false);
-    const std::string actualPath = arch.getArchivePath(filenames, exts);
+    const std::string actualPath = arch.getArchivePath(filenames, exts).result();
     TS_ASSERT_EQUALS(actualPath, "");
   }
 

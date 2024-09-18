@@ -20,11 +20,11 @@
 #include "MantidAPI/ICostFunction.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
@@ -193,8 +193,8 @@ void FitPropertyBrowser::init() {
   m_intManager->setValue(m_peakRadius, settings.value("Peak Radius", 0).toInt());
 
   m_plotDiff = m_boolManager->addProperty("Plot Difference");
-  bool plotDiff = settings.value("Plot Difference", QVariant(true)).toBool();
-  m_boolManager->setValue(m_plotDiff, plotDiff);
+  bool plotDiffSetting = settings.value("Plot Difference", QVariant(true)).toBool();
+  m_boolManager->setValue(m_plotDiff, plotDiffSetting);
 
   m_excludeRange = m_stringManager->addProperty("Exclude Range");
   m_excludeRange->setToolTip("A list of pairs of real numbers which define the region to exclude");
@@ -388,8 +388,12 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   m_setupActionCustomSetup = new QAction("Custom Setup", this);
   QAction *setupActionManageSetup = new QAction("Manage Setup", this);
   setupActionManageSetup->setObjectName("action_ManageSetup");
+  QAction *setupActionPeakFindingAlgs = new QAction("Peak Finding Algorithms", this);
+  setupActionPeakFindingAlgs->setObjectName("action_PeakFindingAlgs");
   QAction *setupActionFindPeaks = new QAction("Find Peaks", this);
   setupActionFindPeaks->setObjectName("action_FindPeaks");
+  QAction *setupActionFindPeaksConvolve = new QAction("Find Peaks Convolve", this);
+  setupActionFindPeaksConvolve->setObjectName("action_FindPeaksConvolve");
   QAction *setupActionClearFit = new QAction("Clear Model", this);
   setupActionClearFit->setObjectName("action_ClearModel");
 
@@ -429,17 +433,28 @@ void FitPropertyBrowser::initBasicLayout(QWidget *w) {
   // empty menu for now, so set it disabled to avoid confusing users
   m_setupActionRemove->setEnabled(false);
 
+  QSignalMapper *PeakFindingAlgMapper = new QSignalMapper(this);
+  PeakFindingAlgMapper->setMapping(setupActionFindPeaks, "FindPeaks");
+  PeakFindingAlgMapper->setMapping(setupActionFindPeaksConvolve, "FindPeaksConvolve");
+  connect(setupActionFindPeaks, SIGNAL(triggered()), PeakFindingAlgMapper, SLOT(map()));
+  connect(setupActionFindPeaksConvolve, SIGNAL(triggered()), PeakFindingAlgMapper, SLOT(map()));
+  connect(PeakFindingAlgMapper, SIGNAL(mapped(const QString &)), this,
+          SLOT(executePeakFindingAlgMenu(const QString &)));
+
   QSignalMapper *setupMapper = new QSignalMapper(this);
   setupMapper->setMapping(setupActionClearFit, "ClearFit");
-  setupMapper->setMapping(setupActionFindPeaks, "FindPeaks");
   connect(setupActionClearFit, SIGNAL(triggered()), setupMapper, SLOT(map()));
-  connect(setupActionFindPeaks, SIGNAL(triggered()), setupMapper, SLOT(map()));
   connect(setupMapper, SIGNAL(mapped(const QString &)), this, SLOT(executeSetupMenu(const QString &)));
+
+  QMenu *setupSubMenuPeakFindingAgls = new QMenu(this);
+  setupSubMenuPeakFindingAgls->addAction(setupActionFindPeaks);
+  setupSubMenuPeakFindingAgls->addAction(setupActionFindPeaksConvolve);
+  setupActionPeakFindingAlgs->setMenu(setupSubMenuPeakFindingAgls);
 
   setupMenu->addAction(m_setupActionCustomSetup);
   setupMenu->addAction(setupActionManageSetup);
   setupMenu->addSeparator();
-  setupMenu->addAction(setupActionFindPeaks);
+  setupMenu->addAction(setupActionPeakFindingAlgs);
   setupMenu->addSeparator();
   setupMenu->addAction(setupActionClearFit);
   btnSetup->setMenu(setupMenu);
@@ -516,8 +531,8 @@ void FitPropertyBrowser::addFitResultWorkspacesToTableWidget() {
 
   auto noOfItems = m_wsListWidget->count();
   if (noOfItems != 0 && !m_hideWsListWidget) {
-    auto height = m_wsListWidget->sizeHintForRow(0) * (noOfItems + 1) + 2 * m_wsListWidget->frameWidth();
-    m_wsListWidget->setMaximumHeight(height);
+    auto widgetHeight = m_wsListWidget->sizeHintForRow(0) * (noOfItems + 1) + 2 * m_wsListWidget->frameWidth();
+    m_wsListWidget->setMaximumHeight(widgetHeight);
     m_workspaceLabel->show();
     m_wsListWidget->show();
   }
@@ -642,11 +657,16 @@ void FitPropertyBrowser::executeDisplayMenu(const QString &item) {
   }
 }
 
+void FitPropertyBrowser::executePeakFindingAlgMenu(const QString &item) {
+  if (item == "FindPeaks")
+    findPeaks(std::make_unique<FindPeakDefaultStrategy>());
+  if (item == "FindPeaksConvolve")
+    findPeaks(std::make_unique<FindPeakConvolveStrategy>());
+}
+
 void FitPropertyBrowser::executeSetupMenu(const QString &item) {
   if (item == "ClearFit")
     clear();
-  if (item == "FindPeaks")
-    findPeaks();
 }
 
 void FitPropertyBrowser::executeSetupManageMenu(const QString &item) {
@@ -924,16 +944,11 @@ void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
       menu->addAction(action);
     } else if (count() > 0 && isParameter) {
       bool hasTies;
+      bool hasFixes;
       bool hasBounds;
-      hasConstraints(ci->property(), hasTies, hasBounds);
+      hasConstraints(ci->property(), hasTies, hasFixes, hasBounds);
 
-      if (!hasTies && !hasBounds) {
-        action = new QAction("Fix", this);
-        connect(action, SIGNAL(triggered()), this, SLOT(addFixTie()));
-        menu->addAction(action);
-      }
-
-      if (!hasTies) {
+      if (!hasTies && !hasFixes) {
         QMenu *constraintMenu = menu->addMenu("Constraint");
 
         QMenu *detailMenu = constraintMenu->addMenu("Lower Bound");
@@ -983,7 +998,11 @@ void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
         menu->addAction(action);
       }
 
-      if (!hasTies && !hasBounds) {
+      if (!hasTies && !hasFixes && !hasBounds) {
+        action = new QAction("Fix", this);
+        connect(action, SIGNAL(triggered()), this, SLOT(addFixTie()));
+        menu->addAction(action);
+
         if (count() == 1) {
           action = new QAction("Tie", this);
           connect(action, SIGNAL(triggered()), this, SLOT(addTie()));
@@ -1003,6 +1022,10 @@ void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
         action = new QAction("Remove tie", this);
         connect(action, SIGNAL(triggered()), this, SLOT(deleteTie()));
         menu->addAction(action);
+      } else if (hasFixes) {
+        action = new QAction("Remove fix", this);
+        connect(action, SIGNAL(triggered()), this, SLOT(deleteTie()));
+        menu->addAction(action);
       }
     }
   }
@@ -1013,7 +1036,7 @@ void FitPropertyBrowser::popupMenu(const QPoint & /*unused*/) {
 /** Slot. Called to remove a function
  */
 void FitPropertyBrowser::deleteFunction() {
-  QtBrowserItem *ci = m_browser->currentItem();
+  const QtBrowserItem *const ci = m_browser->currentItem();
   PropertyHandler *h = getHandler()->findHandler(ci->property());
   removeFunction(h);
 }
@@ -1124,7 +1147,7 @@ std::string FitPropertyBrowser::minimizer(bool withProperties) const {
   QString minimStr = m_minimizers[i];
   // append minimizer properties as name=value pairs
   if (withProperties) {
-    foreach (QtProperty *prop, m_minimizerProperties) {
+    foreach (const QtProperty *const prop, m_minimizerProperties) {
       if (prop->propertyManager() == m_stringManager) {
         QString value = m_stringManager->value(prop);
         if (!value.isEmpty()) {
@@ -1425,11 +1448,11 @@ void FitPropertyBrowser::stringChanged(QtProperty *prop) {
     if (!h)
       return;
 
-    QtProperty *parProp = h->getParameterProperty(prop);
+    const QtProperty *const parProp = h->getParameterProperty(prop);
     if (!parProp)
       return;
 
-    QString parName = h->functionPrefix() + "." + parProp->propertyName();
+    const QString parName = h->functionPrefix() + "." + parProp->propertyName();
 
     const auto oldExp = getOldExpressionAsString(parName);
     const auto exp = m_stringManager->value(prop);
@@ -1636,10 +1659,10 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     observeFinish(alg);
     Poco::ActiveResult<bool> result(alg->executeAsync());
-    m_fitAlgParameters = alg->toString();
     while (!result.available()) {
       QCoreApplication::processEvents();
     }
+    m_fitAlgParameters = alg->toString();
     if (!result.error().empty()) {
       emit algorithmFailed();
     }
@@ -1692,9 +1715,9 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   // update Quality string
   if (m_displayActionQuality->isChecked()) {
     double quality = alg->getProperty("OutputChi2overDoF");
-    std::string costFunction = alg->getProperty("CostFunction");
+    std::string costFunctionStr = alg->getProperty("CostFunction");
     std::shared_ptr<Mantid::API::ICostFunction> costfun =
-        Mantid::API::CostFunctionFactory::Instance().create(costFunction);
+        Mantid::API::CostFunctionFactory::Instance().create(costFunctionStr);
     status = (status == "success") ? "success" : "failed";
     emit changeWindowTitle(QString("Fit Function (") + costfun->shortName().c_str() + " = " + QString::number(quality) +
                            ", " + status + ")");
@@ -2163,7 +2186,7 @@ void FitPropertyBrowser::addTieToFunction() {
   int iPar = -1;
   for (size_t i = 0; i < m_compositeFunction->nParams(); i++) {
     Mantid::API::ParameterReference ref(m_compositeFunction.get(), i);
-    Mantid::API::IFunction *fun = ref.getLocalFunction();
+    const Mantid::API::IFunction *const fun = ref.getLocalFunction();
 
     // Pick out parameters with the same name as the one we're tying from
     if (fun->parameterName(static_cast<int>(ref.getLocalIndex())) == parName) {
@@ -2231,8 +2254,8 @@ void FitPropertyBrowser::deleteTie() {
     // ithParameter = -1 => not found
     int ithParameter = -1;
     for (size_t i = 0; i < m_compositeFunction->nParams(); i++) {
-      Mantid::API::ParameterReference parameterRef(m_compositeFunction.get(), i);
-      Mantid::API::IFunction *function = parameterRef.getLocalFunction();
+      const Mantid::API::ParameterReference parameterRef(m_compositeFunction.get(), i);
+      const Mantid::API::IFunction *const function = parameterRef.getLocalFunction();
       // Pick out parameters with the same name as the one we're tying from
       if (function->parameterName(static_cast<int>(parameterRef.getLocalIndex())) == parName) {
         if (ithParameter == -1 && function == h->function().get()) // If this is the 'tied from'
@@ -2256,23 +2279,26 @@ void FitPropertyBrowser::deleteTie() {
   }
 }
 
-/** Does a parameter have a tie
+/** Does a parameter have a tie, is fixed, or has bounds
  * @param parProp :: The property for a function parameter
  * @param hasTie :: Parameter has a tie
+ * @param hasFix :: Parameter is fixed
  * @param hasBounds :: Parameter has bounds
  */
-void FitPropertyBrowser::hasConstraints(QtProperty *parProp, bool &hasTie, bool &hasBounds) const {
+void FitPropertyBrowser::hasConstraints(QtProperty *parProp, bool &hasTie, bool &hasFix, bool &hasBounds) const {
   hasTie = false;
+  hasFix = false;
   hasBounds = false;
   QList<QtProperty *> subs = parProp->subProperties();
-  for (auto &sub : subs) {
-    if (sub->propertyName() == "Tie") {
+  for (const auto *sub : subs) {
+    const auto propName = sub->propertyName();
+    if (propName == "Tie") {
       hasTie = true;
-    }
-    if (sub->propertyName() == "LowerBound") {
+    } else if (propName == "Fix") {
+      hasFix = true;
+    } else if (propName == "LowerBound") {
       hasBounds = true;
-    }
-    if (sub->propertyName() == "UpperBound") {
+    } else if (propName == "UpperBound") {
       hasBounds = true;
     }
   }
@@ -2283,10 +2309,10 @@ void FitPropertyBrowser::hasConstraints(QtProperty *parProp, bool &hasTie, bool 
  */
 QtProperty *FitPropertyBrowser::getTieProperty(QtProperty *parProp) const {
   QList<QtProperty *> subs = parProp->subProperties();
-  for (auto &sub : subs) {
-    if (sub->propertyName() == "Tie") {
-      return sub;
-    }
+  if (auto sub =
+          std::find_if(std::cbegin(subs), std::cend(subs), [](const auto x) { return (*x).propertyName() == "Tie"; });
+      sub != std::cend(subs)) {
+    return *sub;
   }
   return nullptr;
 }
@@ -2482,7 +2508,7 @@ void FitPropertyBrowser::setStringPropertyValue(QtProperty *prop, const QString 
 }
 
 QString FitPropertyBrowser::getStringPropertyValue(QtProperty *prop) const {
-  auto *manager = dynamic_cast<QtStringPropertyManager *>(prop->propertyManager());
+  const auto *const manager = dynamic_cast<QtStringPropertyManager *>(prop->propertyManager());
   if (manager)
     return manager->value(prop);
   else
@@ -2708,31 +2734,20 @@ void FitPropertyBrowser::sequentialFit() {
   }
 }
 
-void FitPropertyBrowser::findPeaks() {
-  std::string wsName = workspaceName();
+void FitPropertyBrowser::findPeaks(const std::unique_ptr<FindPeakStrategyGeneric> findPeakStrategy) {
+  std::string wsName{workspaceName()};
   if (wsName.empty()) {
     QMessageBox::critical(this, "Mantid - Error", "Workspace name is not set");
     return;
   }
 
   std::string peakListName = wsName + "_PeakList_tmp";
-
-  int FWHM, Tolerance;
   QString setting =
       QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksFWHM"));
-  FWHM = setting.isEmpty() ? 7 : setting.toInt();
+  int FWHM{setting.isEmpty() ? 7 : setting.toInt()};
 
-  setting =
-      QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("curvefitting.findPeaksTolerance"));
-  Tolerance = setting.isEmpty() ? 4 : setting.toInt();
-
-  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("FindPeaks");
-  alg->initialize();
-  alg->setPropertyValue("InputWorkspace", wsName);
-  alg->setProperty("WorkspaceIndex", workspaceIndex());
-  alg->setPropertyValue("PeaksList", peakListName);
-  alg->setProperty("FWHM", FWHM);
-  alg->setProperty("Tolerance", Tolerance);
+  AlgorithmFinishObserver obs;
+  findPeakStrategy->initialise(wsName, workspaceIndex(), peakListName, FWHM, &obs);
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -2740,26 +2755,15 @@ void FitPropertyBrowser::findPeaks() {
       Mantid::API::AnalysisDataService::Instance().retrieve(workspaceName()));
 
   try {
-    alg->execute();
-    Mantid::API::ITableWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(peakListName));
-
+    findPeakStrategy->execute();
     clear();
-    Mantid::API::ColumnVector<double> centre = ws->getVector("centre");
-    Mantid::API::ColumnVector<double> width = ws->getVector("width");
-    Mantid::API::ColumnVector<double> height = ws->getVector("height");
-    for (size_t i = 0; i < centre.size(); ++i) {
-      if (centre[i] < startX() || centre[i] > endX())
+    for (size_t i = 0; i < findPeakStrategy->peakNumber(); ++i) {
+      if (findPeakStrategy->getPeakCentre(i) < startX() || findPeakStrategy->getPeakCentre(i) > endX()) {
         continue;
-      auto f = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
-          Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType()));
-      if (!f)
+      }
+      if (!createAndAddFunction(inputWS, i, findPeakStrategy)) {
         break;
-      f->setMatrixWorkspace(inputWS, workspaceIndex(), startX(), endX());
-      f->setCentre(centre[i]);
-      f->setFwhm(width[i]);
-      f->setHeight(height[i]);
-      addFunction(f->asString());
+      }
     }
   } catch (...) {
     QApplication::restoreOverrideCursor();
@@ -2956,7 +2960,7 @@ void FitPropertyBrowser::setWorkspaceProperties() {
   // Settings group.
   // If not, there is no Custom Settings group and it goes in the regular
   // Settings group.
-  auto *settings = m_customSettingsGroup ? m_customSettingsGroup : m_settingsGroup;
+  const auto *const settings = m_customSettingsGroup ? m_customSettingsGroup : m_settingsGroup;
 
   if (settings->property()->subProperties().contains(m_evaluationType)) {
     settings->property()->removeSubProperty(m_evaluationType);
@@ -3008,21 +3012,17 @@ void FitPropertyBrowser::setWorkspaceProperties() {
     if (!xName.isEmpty()) {
       m_columnManager->setValue(m_xColumn, columns.indexOf(xName));
     } else {
-      foreach (QString name, columns) {
-        if (name != yName) {
-          m_columnManager->setValue(m_xColumn, columns.indexOf(name));
-          break;
-        }
+      if (auto name = std::find_if(std::cbegin(columns), std::cend(columns), [&](const auto x) { return x != yName; });
+          name != std::cend(columns)) {
+        m_columnManager->setValue(m_xColumn, columns.indexOf(*name));
       }
     }
     if (!yName.isEmpty()) {
       m_columnManager->setValue(m_yColumn, columns.indexOf(yName));
     } else {
-      foreach (QString name, columns) {
-        if (name != xName) {
-          m_columnManager->setValue(m_yColumn, columns.indexOf(name));
-          break;
-        }
+      if (auto name = std::find_if(std::cbegin(columns), std::cend(columns), [&](const auto x) { return x != xName; });
+          name != std::cend(columns)) {
+        m_columnManager->setValue(m_yColumn, columns.indexOf(*name));
       }
     }
     columns.prepend("");
@@ -3047,10 +3047,7 @@ void FitPropertyBrowser::addWorkspaceIndexToBrowser() {
 /**
  * Do the fit.
  */
-void FitPropertyBrowser::fit() {
-  int maxIterations = m_intManager->value(m_maxIterations);
-  doFit(maxIterations);
-}
+void FitPropertyBrowser::fit() { doFit(m_intManager->value(m_maxIterations)); }
 
 /**
  * Function to toggle the visibility of the settings browser
@@ -3095,10 +3092,10 @@ void FitPropertyBrowser::columnChanged(QtProperty *prop) {
       if (i < 0 || i >= static_cast<int>(tws->rowCount()) || tws->rowCount() == 0)
         return;
       auto col = tws->getColumn(static_cast<size_t>(i));
-      const double startX = col->toDouble(0);
-      const double endX = col->toDouble(tws->rowCount() - 1);
-      m_doubleManager->setValue(m_startX, startX);
-      m_doubleManager->setValue(m_endX, endX);
+      const double startXVal = col->toDouble(0);
+      const double endXVal = col->toDouble(tws->rowCount() - 1);
+      m_doubleManager->setValue(m_startX, startXVal);
+      m_doubleManager->setValue(m_endX, endXVal);
     } catch (...) {
       // do nothing
     }
@@ -3118,23 +3115,23 @@ void FitPropertyBrowser::minimizerChanged() {
   for (auto property : properties) {
     QString propName = QString::fromStdString((*property).name());
     QtProperty *prop = nullptr;
-    if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property)) {
+    if (const auto prp = dynamic_cast<const Mantid::Kernel::PropertyWithValue<bool> *const>(property)) {
       prop = m_boolManager->addProperty(propName);
       bool val = *prp;
       m_boolManager->setValue(prop, val);
-    } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(property)) {
+    } else if (const auto prp = dynamic_cast<const Mantid::Kernel::PropertyWithValue<double> *const>(property)) {
       prop = this->addDoubleProperty(propName);
       double val = *prp;
       m_doubleManager->setValue(prop, val);
-    } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(property)) {
+    } else if (const auto prp = dynamic_cast<const Mantid::Kernel::PropertyWithValue<int> *const>(property)) {
       prop = m_intManager->addProperty(propName);
       int val = *prp;
       m_intManager->setValue(prop, val);
-    } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<size_t> *>(property)) {
+    } else if (const auto prp = dynamic_cast<const Mantid::Kernel::PropertyWithValue<size_t> *const>(property)) {
       prop = m_intManager->addProperty(propName);
       size_t val = *prp;
       m_intManager->setValue(prop, static_cast<int>(val));
-    } else if (auto prp = dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(property)) {
+    } else if (const auto prp = dynamic_cast<const Mantid::Kernel::PropertyWithValue<std::string> *const>(property)) {
       prop = m_stringManager->addProperty(propName);
       QString val = QString::fromStdString(prp->value());
       m_stringManager->setValue(prop, val);
@@ -3200,7 +3197,7 @@ std::string FitPropertyBrowser::getFitAlgorithmOutputStatus() const { return m_f
  * Show online function help
  */
 void FitPropertyBrowser::functionHelp() {
-  PropertyHandler *handler = currentHandler();
+  const PropertyHandler *const handler = currentHandler();
   if (handler) {
     MantidQt::API::HelpWindow::showFitFunction(handler->ifun()->name());
   }
@@ -3293,6 +3290,22 @@ QString FitPropertyBrowser::addFunction(const QString &fnName) {
   return addFunction(fnName.toStdString())->functionPrefix();
 }
 
+bool FitPropertyBrowser::createAndAddFunction(const Mantid::API::MatrixWorkspace_sptr inputWS, const size_t peakIndex,
+                                              const std::unique_ptr<FindPeakStrategyGeneric> &findPeakStrategy) {
+  bool validFn = false;
+  auto f = std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(
+      Mantid::API::FunctionFactory::Instance().createFunction(defaultPeakType()));
+  if (f) {
+    validFn = true;
+    f->setMatrixWorkspace(inputWS, workspaceIndex(), startX(), endX());
+    f->setCentre(findPeakStrategy->getPeakCentre(peakIndex));
+    f->setFwhm(findPeakStrategy->getPeakWidth(peakIndex));
+    f->setHeight(findPeakStrategy->getPeakHeight(peakIndex));
+    addFunction(f->asString());
+  }
+  return validFn;
+}
+
 PropertyHandler *FitPropertyBrowser::getPeakHandler(const QString &prefix) {
   if (prefix.isEmpty())
     throw std::runtime_error("Peak function prefix cannot be empty");
@@ -3313,7 +3326,7 @@ void FitPropertyBrowser::setPeakCentreOf(const QString &prefix, double value) {
 }
 
 double FitPropertyBrowser::getPeakCentreOf(const QString &prefix) {
-  auto handler = getPeakHandler(prefix);
+  const auto *handler = getPeakHandler(prefix);
   return handler->centre();
 }
 
@@ -3324,7 +3337,7 @@ void FitPropertyBrowser::setPeakHeightOf(const QString &prefix, double value) {
 }
 
 double FitPropertyBrowser::getPeakHeightOf(const QString &prefix) {
-  auto handler = getPeakHandler(prefix);
+  const auto *handler = getPeakHandler(prefix);
   return handler->height();
 }
 
@@ -3335,31 +3348,31 @@ void FitPropertyBrowser::setPeakFwhmOf(const QString &prefix, double value) {
 }
 
 double FitPropertyBrowser::getPeakFwhmOf(const QString &prefix) {
-  auto handler = getPeakHandler(prefix);
+  const auto *handler = getPeakHandler(prefix);
   return handler->fwhm();
 }
 
 std::string FitPropertyBrowser::getWidthParameterNameOf(const QString &prefix) {
-  auto handler = getPeakHandler(prefix);
+  const auto *handler = getPeakHandler(prefix);
   return handler->getWidthParameterName();
 }
 
 std::string FitPropertyBrowser::getCentreParameterNameOf(const QString &prefix) {
-  auto handler = getPeakHandler(prefix);
+  const auto *handler = getPeakHandler(prefix);
   return handler->getCentreParameterName();
 }
 
 bool FitPropertyBrowser::isParameterExplicitlySetOf(const QString &prefix, const std::string &param) {
-  auto handler = getPeakHandler(prefix);
+  const auto *handler = getPeakHandler(prefix);
   return handler->isParameterExplicitlySet(param);
 }
 
 QStringList FitPropertyBrowser::getPeakPrefixes() const {
   QStringList peaks;
-  auto parentHandler = getHandler();
-  auto nFunctions = parentHandler->cfun()->nFunctions();
+  const auto *parentHandler = getHandler();
+  const auto nFunctions = parentHandler->cfun()->nFunctions();
   for (size_t i = 0; i < nFunctions; ++i) {
-    auto handler = parentHandler->getHandler(i);
+    const auto *handler = parentHandler->getHandler(i);
     if (handler->pfun()) {
       peaks << handler->functionPrefix();
     }

@@ -206,10 +206,13 @@ class AsyncTaskFailure(AsyncTaskResult):
     def __str__(self):
         error_name = type(self.exc_value).__name__
         filename, lineno, _, _ = extract_tb(self.stack)[-1]
+        return f"{error_name} on line {lineno} of '{filename}': {self.exception_msg()}"
+
+    def exception_msg(self):
         msg = self.exc_value.args
         if msg and isinstance(msg, tuple):
             msg = msg[0]
-        return f"{error_name} on line {lineno} of '{filename}': {msg}"
+        return msg
 
     @property
     def success(self):

@@ -191,10 +191,10 @@ Shape2D *Shape2D::loadFromProject(const std::string &lines) {
   if (!tsv.selectLine("Type"))
     return nullptr;
 
-  std::string type;
-  tsv >> type;
+  std::string shapeType;
+  tsv >> shapeType;
 
-  Shape2D *shape = loadShape2DFromType(type, lines);
+  Shape2D *shape = loadShape2DFromType(shapeType, lines);
   if (!shape)
     return nullptr;
 

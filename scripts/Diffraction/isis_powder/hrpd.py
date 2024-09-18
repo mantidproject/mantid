@@ -73,6 +73,9 @@ class HRPD(AbstractInst):
     def should_subtract_empty_inst(self):
         return self._inst_settings.subtract_empty_inst
 
+    def should_subtract_empty_inst_from_vanadium(self):
+        return self.should_subtract_empty_inst()  # HRPD want to treat vanadium same as sample
+
     def create_solid_angle_corrections(self, vanadium, run_details):
         """
         Creates the solid angle corrections from a vanadium run, only applicable on HRPD otherwise return None
@@ -132,12 +135,7 @@ class HRPD(AbstractInst):
                 multiple_scattering=self._inst_settings.multiple_scattering,
                 msevents=self._inst_settings.mayers_mult_scat_events,
             )
-        elif self._sample_details is None:
-            raise RuntimeError(
-                "Absorption corrections cannot be run without sample details."
-                " Please set sample details using set_sample before running absorption corrections."
-            )
-        elif self._sample_details.shape_type() == "slab":
+        elif self._check_sample_details() and self._sample_details.shape_type() == "slab":
             return hrpd_algs.calculate_slab_absorb_corrections(ws_to_correct=ws_to_correct, sample_details_obj=self._sample_details)
         else:
             return absorb_corrections.run_cylinder_absorb_corrections(

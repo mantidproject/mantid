@@ -301,7 +301,7 @@ void IFunction::addTie(std::unique_ptr<ParameterTie> tie) {
       const auto oldExp = oldTieStr.substr(oldTieStr.find("=") + 1);
       *it = std::make_unique<ParameterTie>(this, parameterName(iPar), oldExp);
     } else {
-      removeTie(m_ties.size() - 1);
+      removeTie(iPar);
     }
     throw;
   }
@@ -417,11 +417,10 @@ IConstraint *IFunction::getConstraint(size_t i) const {
  */
 void IFunction::removeConstraint(const std::string &parName) {
   size_t iPar = parameterIndex(parName);
-  for (auto it = m_constraints.begin(); it != m_constraints.end(); ++it) {
-    if (iPar == (**it).getLocalIndex()) {
-      m_constraints.erase(it);
-      break;
-    }
+  const auto it = std::find_if(m_constraints.cbegin(), m_constraints.cend(),
+                               [&iPar](const auto &constraint) { return iPar == constraint->getLocalIndex(); });
+  if (it != m_constraints.cend()) {
+    m_constraints.erase(it);
   }
 }
 
@@ -456,7 +455,7 @@ void IFunction::setUpForFit() {
 std::string IFunction::writeConstraints() const {
   std::ostringstream stream;
   bool first = true;
-  for (auto &constrint : m_constraints) {
+  for (const auto &constrint : m_constraints) {
     if (constrint->isDefault())
       continue;
     if (!first) {
@@ -730,7 +729,7 @@ std::string IFunction::Attribute::asUnquotedString() const {
   if (*(attr.begin()) == '\"')
     unquoted = std::string(attr.begin() + 1, attr.end() - 1);
   if (*(unquoted.end() - 1) == '\"')
-    unquoted = std::string(unquoted.begin(), unquoted.end() - 1);
+    unquoted.resize(unquoted.size() - 1);
 
   return unquoted;
 }
@@ -860,8 +859,8 @@ void IFunction::Attribute::setVector(const std::vector<double> &v) {
   evaluateValidator(v);
 
   try {
-    auto &value = boost::get<std::vector<double>>(m_data);
-    value.assign(v.begin(), v.end());
+    auto &data = boost::get<std::vector<double>>(m_data);
+    data.assign(v.begin(), v.end());
   } catch (...) {
     throw std::runtime_error("Trying to access a " + type() +
                              " attribute "
@@ -1335,8 +1334,8 @@ void IFunction::convertValue(std::vector<double> &values, Kernel::Unit_sptr &out
 
     Kernel::UnitParametersMap pmap{};
     spectrumInfo.getDetectorValues(*wsUnit, *outUnit, emode, false, wsIndex, pmap);
-    std::vector<double> emptyVec;
     try {
+      std::vector<double> emptyVec;
       wsUnit->toTOF(values, emptyVec, l1, emode, pmap);
       outUnit->fromTOF(values, emptyVec, l1, emode, pmap);
     } catch (std::exception &) {
@@ -1674,7 +1673,8 @@ IPropertyManager::getValue<std::shared_ptr<Mantid::API::IFunction>>(const std::s
 template <>
 MANTID_API_DLL std::shared_ptr<const Mantid::API::IFunction>
 IPropertyManager::getValue<std::shared_ptr<const Mantid::API::IFunction>>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<std::shared_ptr<Mantid::API::IFunction>> *>(getPointerToProperty(name));
+  const auto *prop =
+      dynamic_cast<PropertyWithValue<std::shared_ptr<Mantid::API::IFunction>> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

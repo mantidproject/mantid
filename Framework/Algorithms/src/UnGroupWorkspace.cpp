@@ -22,12 +22,12 @@ void UnGroupWorkspace::init() {
   auto workspaceList = data_store.getObjectNames();
   std::unordered_set<std::string> groupWorkspaceList;
   // Not iterate over, removing all those which are not group workspaces
-  for (const auto &name : workspaceList) {
-    WorkspaceGroup_const_sptr group = std::dynamic_pointer_cast<const WorkspaceGroup>(data_store.retrieve(name));
+  for (const auto &wsName : workspaceList) {
+    WorkspaceGroup_const_sptr group = std::dynamic_pointer_cast<const WorkspaceGroup>(data_store.retrieve(wsName));
     // RNT: VC returns bad pointer after erase
     // if ( !group ) workspaceList.erase(it);
     if (group) {
-      groupWorkspaceList.insert(name);
+      groupWorkspaceList.insert(wsName);
     }
   }
   // Declare a text property with the list of group workspaces as its allowed

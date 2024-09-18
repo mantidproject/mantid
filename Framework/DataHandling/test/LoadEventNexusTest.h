@@ -85,8 +85,8 @@ class LoadEventNexusTest : public CxxTest::TestSuite {
 private:
   void do_test_filtering_start_and_end_filtered_loading(const bool metadataonly) {
     const std::string wsName = "test_filtering";
-    const double filterStart = 1;
-    const double filterEnd = 1000;
+    constexpr double filterStart = 1;
+    constexpr double filterEnd = 1000;
 
     LoadEventNexus ld;
     ld.initialize();
@@ -95,6 +95,7 @@ private:
     ld.setProperty("FilterByTimeStart", filterStart);
     ld.setProperty("FilterByTimeStop", filterEnd);
     ld.setProperty("MetaDataOnly", metadataonly);
+    ld.setProperty("NumberOfBins", 1); // only one bin to make validation easier
 
     TS_ASSERT(ld.execute());
 
@@ -110,6 +111,48 @@ private:
     auto filteredLogEndTime = sampleTemps->nthTime(sampleTemps->size() - 1);
     TS_ASSERT_EQUALS("2010-Mar-25 16:09:27.620000000", filteredLogStartTime.toSimpleString());
     TS_ASSERT_EQUALS("2010-Mar-25 16:11:51.558003540", filteredLogEndTime.toSimpleString());
+
+    // check the events themselves
+    const auto NUM_HIST = outWs->getNumberHistograms();
+    TS_ASSERT_EQUALS(NUM_HIST, 51200); // observed value
+    if (metadataonly) {
+      // check that no events were created
+      TS_ASSERT_EQUALS(outWs->getNumberEvents(), 0);
+    } else {
+      // total number of events
+      TS_ASSERT_EQUALS(outWs->getNumberEvents(), 110969); // observed value
+
+      // check some particular spectra - observed values
+      TS_ASSERT_EQUALS(outWs->getSpectrum(0).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(2).getNumberEvents(), 1);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(3).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(5).getNumberEvents(), 4);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(7).getNumberEvents(), 2);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(11).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(13).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(17).getNumberEvents(), 2);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(29).getNumberEvents(), 1);
+      constexpr size_t bank2offset = 128 * 12; // half way into bank2
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 0).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 2).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 3).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 5).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 7).getNumberEvents(), 1);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 11).getNumberEvents(), 2);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 13).getNumberEvents(), 1);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 17).getNumberEvents(), 1);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank2offset + 29).getNumberEvents(), 1);
+      constexpr size_t bank4offset = 128 * 8 * 4 + 128 * 4; // half way into bank4
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 0).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 2).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 3).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 5).getNumberEvents(), 2);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 7).getNumberEvents(), 1);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 11).getNumberEvents(), 0);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 13).getNumberEvents(), 2);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 17).getNumberEvents(), 1);
+      TS_ASSERT_EQUALS(outWs->getSpectrum(bank4offset + 29).getNumberEvents(), 3);
+    }
   }
 
   void validate_pulse_time_sorting(EventWorkspace_sptr eventWS) {
@@ -123,6 +166,34 @@ private:
         TS_ASSERT(std::is_sorted(pulsetimes.cbegin(), pulsetimes.cend()));
       }
     }
+  }
+
+  /*
+   * Verify that the compressed and uncompressed workspaces have the same number of counts per pixel and reasonable
+   * number of events.
+   */
+  void validateUncompressedCompressed(EventWorkspace_sptr ws_uncompressed, EventWorkspace_sptr ws_compressed,
+                                      const std::size_t NUM_HIST, const EventType uncompressed_type = EventType::TOF) {
+    TS_ASSERT_EQUALS(ws_uncompressed->getNumberHistograms(), NUM_HIST);
+    TS_ASSERT_EQUALS(ws_compressed->getNumberHistograms(), NUM_HIST);
+
+    // Compressed should no more events than the uncompressed
+    TS_ASSERT_LESS_THAN_EQUALS(ws_compressed->getNumberEvents(), ws_uncompressed->getNumberEvents());
+
+    for (size_t wi = 0; wi < NUM_HIST; wi++) {
+      // total counts in uncompressed and compressed should be equal
+      TS_ASSERT_EQUALS(ws_compressed->readY(wi), ws_uncompressed->readY(wi));
+
+      // all uncompressed spectra should be raw events
+      TS_ASSERT_EQUALS(ws_uncompressed->getSpectrum(wi).getEventType(), uncompressed_type);
+
+      // pixels with at least one event will have switched to weighted
+      if (ws_compressed->getSpectrum(wi).getNumberEvents() > 0)
+        TS_ASSERT_EQUALS(ws_compressed->getSpectrum(wi).getEventType(), EventType::WEIGHTED_NOTIME);
+    }
+
+    // std::cout << "Uncompressed " << ws_uncompressed->getMemorySizeAsStr() << " vs Compressed "
+    //           << ws_compressed->getMemorySizeAsStr() << "\n";
   }
 
 public:
@@ -312,6 +383,138 @@ public:
     TS_ASSERT_DELTA(duration, 7200.012, 0.01);
   }
 
+  void test_wallclock_filtering() {
+    const std::string wsName("test_wallclock_filtering");
+    const std::string filename("EQSANS_89157.nxs.h5");
+    constexpr double filterStart{200}; // seconds
+    constexpr double filterEnd{5000};  // seconds
+    constexpr size_t NUM_HIST{49152};  // observed value
+
+    // number of events - all are observed
+    constexpr size_t NUM_EVENTS_FULL{14553};
+    constexpr size_t NUM_EVENTS_BEGIN{366};
+    constexpr size_t NUM_EVENTS_END{4353};
+
+    { // first time is unfiltered
+      LoadEventNexus alg;
+      alg.initialize();
+      alg.setRethrows(true);
+      alg.setPropertyValue("Filename", filename);
+      alg.setPropertyValue("OutputWorkspace", wsName);
+      alg.setProperty("NumberOfBins", 1); // only one bin to make validation easier
+      TS_ASSERT(alg.execute());
+
+      // get the workspace
+      auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+      TS_ASSERT(outWS);
+
+      TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+      TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS_FULL);
+    }
+
+    { // filter only the beginning
+      LoadEventNexus alg;
+      alg.initialize();
+      alg.setRethrows(true);
+      alg.setPropertyValue("Filename", filename);
+      alg.setPropertyValue("OutputWorkspace", wsName);
+      alg.setProperty("FilterByTimeStart", filterStart);
+      TS_ASSERT(alg.execute());
+
+      // get the workspace
+      auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+      TS_ASSERT(outWS);
+
+      TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+      TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS_FULL - NUM_EVENTS_BEGIN);
+    }
+
+    { // filter only the end
+      LoadEventNexus alg;
+      alg.initialize();
+      alg.setRethrows(true);
+      alg.setPropertyValue("Filename", filename);
+      alg.setPropertyValue("OutputWorkspace", wsName);
+      alg.setProperty("FilterByTimeStop", filterEnd);
+      alg.setProperty("NumberOfBins", 1); // only one bin to make validation easier
+      TS_ASSERT(alg.execute());
+
+      // get the workspace
+      auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+      TS_ASSERT(outWS);
+
+      TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+      TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS_FULL - NUM_EVENTS_END);
+    }
+
+    { // filter both
+      LoadEventNexus alg;
+      alg.initialize();
+      alg.setRethrows(true);
+      alg.setPropertyValue("Filename", filename);
+      alg.setPropertyValue("OutputWorkspace", wsName);
+      alg.setProperty("FilterByTimeStart", filterStart);
+      alg.setProperty("FilterByTimeStop", filterEnd);
+      alg.setProperty("NumberOfBins", 1); // only one bin to make validation easier
+      TS_ASSERT(alg.execute());
+
+      // get the workspace
+      auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+      TS_ASSERT(outWS);
+
+      TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+      TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS_FULL - NUM_EVENTS_BEGIN - NUM_EVENTS_END);
+    }
+
+    // cleanup assumes the the last one of these worked
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+  // FilteredLoadvsLoadThenFilter system test and algorithm usage example
+  void test_CNCS_7860_filtering() {
+    const std::string filename("CNCS_7860_event.nxs");
+    const std::string wsName("CNCS_7860");
+    constexpr double filterStart{60};
+    constexpr double filterEnd{120};
+    constexpr size_t NUM_HIST{8 * 128 * 50};
+    constexpr size_t NUM_EVENTS{29753};
+
+    LoadEventNexus alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", filename);
+    alg.setPropertyValue("OutputWorkspace", wsName);
+    alg.setProperty("FilterByTimeStart", filterStart);
+    alg.setProperty("FilterByTimeStop", filterEnd);
+    alg.setProperty("NumberOfBins", 1); // only one bin to make validation easier
+    TS_ASSERT(alg.execute());
+
+    // get the workspace
+    auto outWS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(wsName);
+    TS_ASSERT(outWS);
+
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), NUM_HIST);
+    TS_ASSERT_EQUALS(outWS->getNumberEvents(), NUM_EVENTS);
+
+    // number of empty spectra should match
+    size_t numEmpty{0};
+    for (std::size_t wi = 0; wi < outWS->getNumberHistograms(); ++wi)
+      if (outWS->getSpectrum(wi).empty())
+        numEmpty++;
+    TS_ASSERT_EQUALS(numEmpty, 31411); // observed from running LoadEventNexus + FilterByTime
+
+    // these are pixels that were showing the wrong behavior during testing
+    // should have one event [4325, 20673, 27475, 30675, 46869]
+    // near the magic pulse-time of missing events is 2010-Mar-25 16:10:36.997398376 when stoptime is 16:10:37
+    TS_ASSERT_EQUALS(outWS->getSpectrum(4325).getNumberEvents(), 1);
+    TS_ASSERT_EQUALS(outWS->getSpectrum(20673).getNumberEvents(), 1);
+    TS_ASSERT_EQUALS(outWS->getSpectrum(27475).getNumberEvents(), 1);
+    TS_ASSERT_EQUALS(outWS->getSpectrum(30675).getNumberEvents(), 1);
+    TS_ASSERT_EQUALS(outWS->getSpectrum(46869).getNumberEvents(), 1);
+
+    // cleanup assumes this worked
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
   void test_Normal_vs_Precount() {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
@@ -335,7 +538,7 @@ public:
     TS_ASSERT_EQUALS(WS->getNumberEvents(), 112266);
     // TOF limits found. There is a pad of +-1 given around the actual TOF
     // founds.
-    TS_ASSERT_DELTA((*WS->refX(0))[0], 44162.6, 0.05);
+    TS_ASSERT_DELTA((*WS->refX(0))[0], 44163.6, 0.05);
     TS_ASSERT_DELTA((*WS->refX(0))[1], 60830.2, 0.05);
     // Valid spectrum info
     TS_ASSERT_EQUALS(WS->getSpectrum(0).getSpectrumNo(), 1);
@@ -409,10 +612,10 @@ public:
         it2++;
       }
 
-      int pixelID = 2000;
+      constexpr std::size_t pixelID = 2000;
 
-      std::vector<TofEvent> events1 = WS->getSpectrum(pixelID).getEvents();
-      std::vector<TofEvent> events2 = WS2->getSpectrum(pixelID).getEvents();
+      const std::vector<TofEvent> events1 = WS->getSpectrum(pixelID).getEvents();
+      const std::vector<TofEvent> events2 = WS2->getSpectrum(pixelID).getEvents();
 
       // std::cout << events1.size() << '\n';
       TS_ASSERT_EQUALS(events1.size(), events2.size());
@@ -630,34 +833,57 @@ public:
   }
 
   void test_Load_And_CompressEvents() {
-    Mantid::API::FrameworkManager::Instance();
-    LoadEventNexus ld;
-    std::string outws_name = "cncs_compressed";
-    ld.initialize();
-    ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
-    ld.setPropertyValue("OutputWorkspace", outws_name);
-    ld.setPropertyValue("Precount", "0");
-    ld.setPropertyValue("CompressTolerance", "0.05");
-    ld.setProperty<bool>("LoadMonitors",
-                         true);              // For the next test, saving a load
-    ld.setProperty<bool>("LoadLogs", false); // Time-saver
-    ld.execute();
-    TS_ASSERT(ld.isExecuted());
+    constexpr std::size_t NUM_HIST{51200};
+    const std::string filename{"CNCS_7860_event.nxs"};
 
-    EventWorkspace_sptr WS;
-    TS_ASSERT_THROWS_NOTHING(WS = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws_name));
-    // Valid WS and it is an EventWorkspace
-    TS_ASSERT(WS);
-    // Pixels have to be padded
-    TS_ASSERT_EQUALS(WS->getNumberHistograms(), 51200);
-    // Events
-    TS_ASSERT_EQUALS(WS->getNumberEvents(),
-                     111274); // There are (slightly) fewer events
-    for (size_t wi = 0; wi < WS->getNumberHistograms(); wi++) {
-      // Pixels with at least one event will have switched
-      if (WS->getSpectrum(wi).getNumberEvents() > 0)
-        TS_ASSERT_EQUALS(WS->getSpectrum(wi).getEventType(), WEIGHTED_NOTIME)
+    Mantid::API::FrameworkManager::Instance();
+
+    // create uncompressed - first so turning off compression isn't needed
+    std::string uncompressed_name = "cncs_uncompressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", uncompressed_name);
+      ld.setProperty<bool>("Precount", false);
+      ld.setProperty<bool>("LoadMonitors", true); // For the next test, saving a load
+      ld.setProperty<bool>("LoadLogs", false);    // Time-saver
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
     }
+    // get a reference to the uncompressed workspace
+    EventWorkspace_sptr ws_uncompressed;
+    TS_ASSERT_THROWS_NOTHING(ws_uncompressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(uncompressed_name));
+    TS_ASSERT(ws_uncompressed); // it is an EventWorkspace
+
+    // create compressed
+    std::string compressed_name = "cncs_compressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", compressed_name);
+      ld.setProperty<bool>("Precount", false);
+      ld.setProperty<bool>("LoadMonitors", true); // For the next test, saving a load
+      ld.setProperty<bool>("LoadLogs", false);    // Time-saver
+      ld.setPropertyValue("CompressTolerance", "0.05");
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+    // get a reference to the uncompressed workspace
+    EventWorkspace_sptr ws_compressed;
+    TS_ASSERT_THROWS_NOTHING(ws_compressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(compressed_name));
+    TS_ASSERT(ws_compressed); // it is an EventWorkspace
+
+    // validate the compressed workspace makes sense compared to uncompressed
+    validateUncompressedCompressed(ws_uncompressed, ws_compressed, NUM_HIST);
+
+    // cleanup - intentionally leave compressed workspace behind for test_Monitors
+    AnalysisDataService::Instance().remove(uncompressed_name);
   }
 
   void test_Monitors() {
@@ -687,6 +913,395 @@ public:
 
     // Check monitor workspace pointer held in main workspace
     TS_ASSERT_EQUALS(WS, ads.retrieveWS<MatrixWorkspace>("cncs_compressed")->monitorWorkspace());
+  }
+
+  void test_Load_And_Filter_Everything() {
+    // This test set the FilterByTimeStart value so that everything should be filtered
+    // So we should end up with 0 events
+    const std::string filename{"ARCS_sim_event.nxs"};
+    std::string ws_name = "arcs_filtered0";
+    LoadEventNexus ld;
+    ld.initialize();
+    ld.setPropertyValue("Filename", filename);
+    ld.setPropertyValue("OutputWorkspace", ws_name);
+    ld.setPropertyValue("FilterByTimeStart", "1000");
+    ld.setProperty("NumberOfBins", 1);
+    ld.execute();
+    TS_ASSERT(ld.isExecuted());
+
+    EventWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(ws_name));
+    TS_ASSERT(ws); // it is an EventWorkspace
+
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 0);
+  }
+
+  void test_Load_And_CompressEvents_weighted() {
+    constexpr std::size_t NUM_HIST{117760};
+    const std::string filename{"ARCS_sim_event.nxs"};
+
+    Mantid::API::FrameworkManager::Instance();
+
+    // create uncompressed - first so turning off compression isn't needed
+    std::string uncompressed_name = "arcs_uncompressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", uncompressed_name);
+      ld.setProperty<bool>("Precount", false);
+      ld.setProperty<bool>("LoadLogs", false); // Time-saver
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+    // get a reference to the uncompressed workspace
+    EventWorkspace_sptr ws_uncompressed;
+    TS_ASSERT_THROWS_NOTHING(ws_uncompressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(uncompressed_name));
+    TS_ASSERT(ws_uncompressed); // it is an EventWorkspace
+
+    // create compressed
+    std::string compressed_name = "arcs_compressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", compressed_name);
+      ld.setProperty<bool>("Precount", false);
+      ld.setProperty<bool>("LoadLogs", false); // Time-saver
+      ld.setPropertyValue("CompressTolerance", "0.05");
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+    // get a reference to the uncompressed workspace
+    EventWorkspace_sptr ws_compressed;
+    TS_ASSERT_THROWS_NOTHING(ws_compressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(compressed_name));
+    TS_ASSERT(ws_compressed); // it is an EventWorkspace
+
+    // validate the compressed workspace makes sense compared to uncompressed
+    validateUncompressedCompressed(ws_uncompressed, ws_compressed, NUM_HIST, EventType::WEIGHTED);
+
+    // cleanup
+    AnalysisDataService::Instance().remove(uncompressed_name);
+    AnalysisDataService::Instance().remove(compressed_name);
+  }
+
+  void test_Load_And_CompressEvents_with_nperiod_data() {
+    constexpr std::size_t NUM_HIST{40960};
+    const std::string filename{"LARMOR00003368.nxs"};
+
+    Mantid::API::FrameworkManager::Instance();
+
+    // create uncompressed - first so turning off compression isn't needed
+    std::string uncompressed_name = "larmor_uncompressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", uncompressed_name);
+      ld.setProperty<bool>("Precount", false);
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+    // get a reference to the uncompressed workspace, first workspace only
+    EventWorkspace_sptr ws_uncompressed;
+    TS_ASSERT_THROWS_NOTHING(ws_uncompressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(uncompressed_name + "_1"));
+    TS_ASSERT(ws_uncompressed); // it is an EventWorkspace
+
+    // create compressed
+    std::string compressed_name = "larmor_compressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", compressed_name);
+      ld.setProperty<bool>("Precount", false);
+      ld.setPropertyValue("CompressTolerance", "0.05");
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+    // get a reference to the uncompressed workspace, first workspace only
+    EventWorkspace_sptr ws_compressed;
+    TS_ASSERT_THROWS_NOTHING(ws_compressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(compressed_name + "_1"));
+    TS_ASSERT(ws_compressed); // it is an EventWorkspace
+
+    // validate the compressed workspace makes sense compared to uncompressed
+    validateUncompressedCompressed(ws_uncompressed, ws_compressed, NUM_HIST);
+
+    // cleanup
+    AnalysisDataService::Instance().remove(uncompressed_name);
+    AnalysisDataService::Instance().remove(compressed_name);
+  }
+
+  void test_Load_And_CompressEvents_tolerance_0() {
+    // the is to verify that the compresssion works when the CompressTolerance=0
+    // create compressed
+    const std::string filename{"CNCS_7860_event.nxs"};
+
+    std::string compressed_name = "cncs_compressed0";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", compressed_name);
+      ld.setProperty<bool>("Precount", false);
+      ld.setProperty<bool>("LoadLogs", false); // Time-saver
+      ld.setPropertyValue("CompressTolerance", "0");
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+    // get a reference to the compressed workspace
+    EventWorkspace_sptr ws_compressed;
+    TS_ASSERT_THROWS_NOTHING(ws_compressed =
+                                 AnalysisDataService::Instance().retrieveWS<EventWorkspace>(compressed_name));
+    TS_ASSERT(ws_compressed); // it is an EventWorkspace
+
+    /// CNCS_7860_event.nxs has 112266 so we expect slightly fewer events when compressed
+    TS_ASSERT_EQUALS(ws_compressed->getNumberEvents(), 111274)
+    // cleanup
+    AnalysisDataService::Instance().remove(compressed_name);
+  }
+
+  void test_Load_And_FilterBadPulses() {
+    // This will use ProcessBankData
+    const std::string filename{"CNCS_7860_event.nxs"};
+
+    Mantid::API::FrameworkManager::Instance();
+
+    // create expected output workspace by doing FilterBadPulses after loading
+    std::string post_filtered_name = "cncs_post_filtered";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", post_filtered_name);
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+
+      auto filter_bad = AlgorithmManager::Instance().create("FilterBadPulses", 1);
+      filter_bad->setPropertyValue("InputWorkspace", post_filtered_name);
+      filter_bad->setPropertyValue("OutputWorkspace", post_filtered_name);
+      filter_bad->execute();
+      TS_ASSERT(filter_bad->isExecuted());
+    }
+
+    // create filtered during load
+    std::string filtered_name = "cncs_filtered";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", filtered_name);
+      ld.setProperty("NumberOfBins", 1);
+      ld.setProperty("FilterBadPulsesLowerCutoff", 95.);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+
+    // validate the resulting workspace is the same for post filtered and filtering during loading
+    auto checkAlg = AlgorithmManager::Instance().create("CompareWorkspaces");
+    checkAlg->setProperty("Workspace1", filtered_name);
+    checkAlg->setProperty("Workspace2", post_filtered_name);
+    checkAlg->setProperty("CheckSample", true); // this will check that the logs get filtered correctly
+    checkAlg->execute();
+    TS_ASSERT(checkAlg->getProperty("Result"));
+
+    // cleanup
+    AnalysisDataService::Instance().remove(post_filtered_name);
+    AnalysisDataService::Instance().remove(filtered_name);
+  }
+
+  void test_Load_And_FilterBadPulses_with_start_time_filter() {
+    // This will use ProcessBankData
+    // make sure the combination of bad pulse filter and start time filter work together
+    const std::string filename{"CNCS_7860_event.nxs"};
+
+    Mantid::API::FrameworkManager::Instance();
+
+    // create expected output workspace by doing FilterBadPulses after loading
+    std::string post_filtered_name = "cncs_post_filtered";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", post_filtered_name);
+      ld.setProperty("NumberOfBins", 1);
+      ld.setProperty("FilterByTimeStart", 20.);
+      ld.setProperty("FilterByTimeStop", 50.);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+
+      auto filter_bad = AlgorithmManager::Instance().create("FilterBadPulses", 1);
+      filter_bad->setPropertyValue("InputWorkspace", post_filtered_name);
+      filter_bad->setPropertyValue("OutputWorkspace", post_filtered_name);
+      filter_bad->execute();
+      TS_ASSERT(filter_bad->isExecuted());
+    }
+
+    // create filtered during load
+    std::string filtered_name = "cncs_filtered";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", filtered_name);
+      ld.setProperty("NumberOfBins", 1);
+      ld.setProperty("FilterByTimeStart", 20.);
+      ld.setProperty("FilterByTimeStop", 50.);
+      ld.setProperty("FilterBadPulsesLowerCutoff", 95.);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+    }
+
+    // validate the resulting workspace is the same for post filtered and filtering during loading
+    auto checkAlg = AlgorithmManager::Instance().create("CompareWorkspaces");
+    checkAlg->setProperty("Workspace1", filtered_name);
+    checkAlg->setProperty("Workspace2", post_filtered_name);
+    checkAlg->setProperty("CheckSample", true); // this will check that the logs get filtered correctly
+    checkAlg->execute();
+    TS_ASSERT(checkAlg->getProperty("Result"));
+
+    // cleanup
+    AnalysisDataService::Instance().remove(post_filtered_name);
+    AnalysisDataService::Instance().remove(filtered_name);
+  }
+
+  void test_Load_And_FilterBadPulses_and_compress() {
+    // This will use ProcessBankCompressed
+    const std::string filename{"CNCS_7860_event.nxs"};
+
+    Mantid::API::FrameworkManager::Instance();
+
+    // create expected output workspace by doing FilterBadPulses and CompressEvents after loading
+    std::string post_filtered_name = "cncs_post_filtered_compressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", post_filtered_name);
+      ld.setProperty("NumberOfBins", 1);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+
+      auto filter_bad = AlgorithmManager::Instance().create("FilterBadPulses", 1);
+      filter_bad->setPropertyValue("InputWorkspace", post_filtered_name);
+      filter_bad->setPropertyValue("OutputWorkspace", post_filtered_name);
+      filter_bad->execute();
+      TS_ASSERT(filter_bad->isExecuted());
+
+      auto compress = AlgorithmManager::Instance().create("CompressEvents", 1);
+      compress->setPropertyValue("InputWorkspace", post_filtered_name);
+      compress->setPropertyValue("OutputWorkspace", post_filtered_name);
+      compress->setProperty("Tolerance", 0.05);
+      compress->execute();
+      TS_ASSERT(compress->isExecuted());
+    }
+
+    // create filtered and compressed during load
+    std::string filtered_name = "cncs_filtered_compressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", filtered_name);
+      ld.setProperty("NumberOfBins", 1);
+      ld.setProperty("FilterBadPulsesLowerCutoff", 95.);
+      ld.setProperty("CompressTolerance", 0.05);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+
+      // need to sort events so we can directly compare to expected with CompareWorkspaces
+      auto sort = AlgorithmManager::Instance().create("SortEvents", 1);
+      sort->setPropertyValue("InputWorkspace", filtered_name);
+      sort->execute();
+      TS_ASSERT(sort->isExecuted());
+    }
+
+    // validate the resulting workspace is the same for post filtered/compressed and filtering/compressed during loading
+    auto checkAlg = AlgorithmManager::Instance().create("CompareWorkspaces");
+    checkAlg->setProperty("Workspace1", filtered_name);
+    checkAlg->setProperty("Workspace2", post_filtered_name);
+    checkAlg->setProperty("CheckSample", true); // this will check that the logs get filtered correctly
+    checkAlg->execute();
+    TS_ASSERT(checkAlg->getProperty("Result"));
+
+    // cleanup
+    AnalysisDataService::Instance().remove(post_filtered_name);
+    AnalysisDataService::Instance().remove(filtered_name);
+  }
+
+  void test_Load_And_FilterBadPulses_and_compress_and_start_time_filter() {
+    // This will use ProcessBankCompressed
+    const std::string filename{"CNCS_7860_event.nxs"};
+
+    Mantid::API::FrameworkManager::Instance();
+
+    // create expected output workspace by doing FilterBadPulses and CompressEvents after loading
+    std::string post_filtered_name = "cncs_post_filtered_compressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", post_filtered_name);
+      ld.setProperty("NumberOfBins", 1);
+      ld.setProperty("FilterByTimeStart", 10.);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+
+      auto filter_bad = AlgorithmManager::Instance().create("FilterBadPulses", 1);
+      filter_bad->setPropertyValue("InputWorkspace", post_filtered_name);
+      filter_bad->setPropertyValue("OutputWorkspace", post_filtered_name);
+      filter_bad->execute();
+      TS_ASSERT(filter_bad->isExecuted());
+      auto compress = AlgorithmManager::Instance().create("CompressEvents", 1);
+      compress->setPropertyValue("InputWorkspace", post_filtered_name);
+      compress->setPropertyValue("OutputWorkspace", post_filtered_name);
+      compress->setProperty("Tolerance", 0.05);
+      compress->execute();
+      TS_ASSERT(compress->isExecuted());
+    }
+
+    // create filtered during load
+    std::string filtered_name = "cncs_filtered_compressed";
+    {
+      LoadEventNexus ld;
+      ld.initialize();
+      ld.setPropertyValue("Filename", filename);
+      ld.setPropertyValue("OutputWorkspace", filtered_name);
+      ld.setProperty("NumberOfBins", 1);
+      ld.setProperty("FilterBadPulsesLowerCutoff", 95.);
+      ld.setProperty("CompressTolerance", 0.05);
+      ld.setProperty("FilterByTimeStart", 10.);
+      ld.execute();
+      TS_ASSERT(ld.isExecuted());
+
+      // need to sort events so we can directly compare to expected with CompareWorkspaces
+      auto sort = AlgorithmManager::Instance().create("SortEvents", 1);
+      sort->setPropertyValue("InputWorkspace", filtered_name);
+      sort->execute();
+      TS_ASSERT(sort->isExecuted());
+    }
+
+    // validate the resulting workspace is the same for post filtered/compressed and filtering/compressed during loading
+    auto checkAlg = AlgorithmManager::Instance().create("CompareWorkspaces");
+    checkAlg->setProperty("Workspace1", filtered_name);
+    checkAlg->setProperty("Workspace2", post_filtered_name);
+    checkAlg->setProperty("CheckSample", true); // this will check that the logs get filtered correctly
+    checkAlg->execute();
+    TS_ASSERT(checkAlg->getProperty("Result"));
+
+    // cleanup
+    AnalysisDataService::Instance().remove(post_filtered_name);
+    AnalysisDataService::Instance().remove(filtered_name);
   }
 
   void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount, const std::string &BankName = "bank36",
@@ -936,6 +1551,20 @@ public:
     }
   }
 
+  void test_load_file_with_empty_periods() {
+    // The file LARMOR00062766.nxs has the number of periods specified as 2, but actually
+    // only one period has any data in it. It should load, but only one workspace instead
+    // of two.
+    // See https://github.com/mantidproject/mantid/issues/33729 for details
+    LoadEventNexus loader;
+    loader.initialize();
+    loader.setPropertyValue("OutputWorkspace", "dummy");
+    loader.setPropertyValue("Filename", "LARMOR00062766.nxs");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    auto ws = AnalysisDataService::Instance().retrieve("dummy");
+    TS_ASSERT(!ws->isGroup());
+  }
+
   void test_load_CG3_bad_event_id() {
     // The test file CG3_13118.nxs.h5 being loaded has:
     // bank1: all correct data, only events in this file should end up loaded (6052 events)
@@ -1041,6 +1670,71 @@ public:
     TS_ASSERT(eventWS);
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 203);
     TS_ASSERT_EQUALS(eventWS->detectorInfo().size(), 921)
+  }
+
+  void test_monotonically_increasing_tofs() {
+    const std::string file = "CG2_monotonically_increasing_pulse_times.nxs.h5";
+    const std::string wsName = "dummy_for_child";
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", wsName);
+    alg.setProperty("NumberOfBins", 1);
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+    constexpr int expectedNumberEvents = 32494;
+    TS_ASSERT_EQUALS(eventWS->getNumberEvents(), expectedNumberEvents);
+    double sum = 0.0;
+    for (size_t i = 0; i < eventWS->getNumberHistograms(); ++i) {
+      TS_ASSERT_EQUALS(eventWS->readX(i).size(), 2)
+      sum += eventWS->readY(i)[0];
+    }
+    TS_ASSERT_DELTA(sum, expectedNumberEvents, 1e-6)
+    AnalysisDataService::Instance().remove(wsName);
+  }
+
+  void test_no_events() {
+    // this test was created for the strange case of an event file having no events anywhere
+    // originally it was only an empty monitor but the test file was expanded
+
+    const std::string filename = "CG3_22446_empty.nxs.h5";
+    const std::string wsname = "CG3_empty";
+
+    // run the algorithm
+    LoadEventNexus loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", filename);
+    loader.setPropertyValue("OutputWorkspace", wsname);
+    //    loader.setProperty("LoadAllLogs", false);
+    loader.setProperty("LoadMonitors", true);
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    auto &ads = AnalysisDataService::Instance();
+
+    // validate the event workspace
+    {
+      MatrixWorkspace_sptr wksp = ads.retrieveWS<MatrixWorkspace>(wsname);
+      TS_ASSERT(wksp);
+      auto event_wksp = std::dynamic_pointer_cast<EventWorkspace>(wksp);
+      TS_ASSERT(event_wksp);
+      TS_ASSERT_EQUALS(event_wksp->getNumberEvents(), 0.);
+    }
+
+    // validate the monitor workspace
+    {
+      MatrixWorkspace_sptr wksp_mon = ads.retrieveWS<MatrixWorkspace>(wsname + "_monitors");
+      TS_ASSERT(wksp_mon);
+      auto event_wksp = std::dynamic_pointer_cast<EventWorkspace>(wksp_mon);
+      TS_ASSERT(event_wksp);
+      TS_ASSERT_EQUALS(event_wksp->getNumberEvents(), 0.);
+    }
+
+    // cleanup
+    AnalysisDataService::Instance().remove(wsname);
   }
 
 private:

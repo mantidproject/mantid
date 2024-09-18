@@ -291,10 +291,9 @@ std::set<Mantid::detid_t> getAllDetectorIDsFromWorkspace(const Mantid::API::Work
 std::set<Mantid::detid_t> getAllDetectorIDsFromMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) {
 
   std::set<Mantid::detid_t> detectorIDs;
-  std::set<Mantid::detid_t> spectrumIDs;
   auto numSpectra = ws->getNumberHistograms();
   for (size_t i = 0; i < numSpectra; i++) {
-    spectrumIDs = ws->getSpectrum(i).getDetectorIDs();
+    std::set<Mantid::detid_t> spectrumIDs = ws->getSpectrum(i).getDetectorIDs();
     detectorIDs.insert(spectrumIDs.begin(), spectrumIDs.end());
   }
   return detectorIDs;
@@ -306,14 +305,11 @@ std::set<Mantid::detid_t> getAllDetectorIDsFromMatrixWorkspace(const Mantid::API
 std::set<Mantid::detid_t> getAllDetectorIDsFromGroupWorkspace(const Mantid::API::WorkspaceGroup_sptr &ws) {
 
   std::set<Mantid::detid_t> detectorIDs;
-  std::set<Mantid::detid_t> detectorIDsSingleWorkspace;
-
-  MatrixWorkspace_sptr matrixWS;
 
   std::vector<Workspace_sptr> workspaces = ws->getAllItems();
   for (const auto &workspace : workspaces) {
-    matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
-    detectorIDsSingleWorkspace = getAllDetectorIDsFromMatrixWorkspace(matrixWS);
+    MatrixWorkspace_sptr matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    std::set<Mantid::detid_t> detectorIDsSingleWorkspace = getAllDetectorIDsFromMatrixWorkspace(matrixWS);
     detectorIDs.insert(detectorIDsSingleWorkspace.begin(), detectorIDsSingleWorkspace.end());
   }
   return detectorIDs;
@@ -343,12 +339,7 @@ bool checkGroupDetectorsInWorkspace(const Grouping &grouping, const Workspace_sp
 // Checks that all of the entries of a vector are contained in a set, returns
 // true/false
 bool checkItemsInSet(const std::vector<int> &items, const std::set<int> &set) {
-  for (const auto item : items) {
-    if (set.find(item) == set.end()) {
-      return false;
-    }
-  }
-  return true;
+  return std::all_of(items.cbegin(), items.cend(), [&set](const auto item) { return set.find(item) != set.cend(); });
 }
 
 /**
@@ -413,6 +404,7 @@ void parseRunLabel(const std::string &label, std::string &instrument, std::vecto
   const size_t instPos = label.find_first_of("0123456789");
   instrument = label.substr(0, instPos);
   const size_t numPos = label.find_first_not_of('0', instPos);
+  runNumbers.clear();
   if (numPos != std::string::npos) {
     std::string runString = label.substr(numPos, label.size());
     // sets of continuous ranges
@@ -444,7 +436,7 @@ void parseRunLabel(const std::string &label, std::string &instrument, std::vecto
     }
   } else {
     // The string was "INST000" or similar...
-    runNumbers = {0};
+    runNumbers.emplace_back(0);
   }
 }
 

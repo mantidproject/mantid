@@ -27,10 +27,14 @@ public:
   void project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const override {
     PanelsSurface::project(detIndex, u, v, uscale, vscale);
   }
+  void project(const Mantid::Kernel::V3D &position, double &u, double &v, double &uscale,
+               double &vscale) const override {
+    PanelsSurface::project(position, u, v, uscale, vscale);
+  }
   Mantid::Kernel::Quat calcBankRotation(const Mantid::Kernel::V3D &detPos, Mantid::Kernel::V3D normal) {
     return PanelsSurface::calcBankRotation(detPos, normal);
   }
-  boost::optional<size_t> processTubes(size_t rootIndex) { return PanelsSurface::processTubes(rootIndex); }
+  std::optional<size_t> processTubes(size_t rootIndex) { return PanelsSurface::processTubes(rootIndex); }
   std::vector<UnwrappedDetector> getUnwrappedDetectors() { return m_unwrappedDetectors; };
   void addFlatBank(const Mantid::Kernel::Quat &rotation, const Mantid::Kernel::V3D &refPos) {
     auto *info = new FlatBankInfo(this);

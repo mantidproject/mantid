@@ -597,7 +597,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl, const DblMatrix &ori
 
     // The exit point is the vector to the place that we hit a detector
     const auto magnitude = track.back().exitPoint.norm();
-    peak = std::make_unique<Peak>(m_inst, q, boost::optional<double>(magnitude));
+    peak = std::make_unique<Peak>(m_inst, q, std::optional<double>(magnitude));
   }
 
   if (m_edge > 0 && edgePixel(m_inst, peak->getBankName(), peak->getCol(), peak->getRow(), m_edge))

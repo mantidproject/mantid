@@ -14,7 +14,7 @@ class UsageReportingVerificationView(QDialog):
         super(UsageReportingVerificationView, self).__init__(parent)
         self.presenter = presenter
 
-        self.setWindowTitle("Mantid: Report Usage Data ")
+        self.setWindowTitle("Mantid: Disable Usage Data Reporting")
         parentLayout = QHBoxLayout()
 
         # left side
@@ -46,11 +46,10 @@ class UsageReportingVerificationView(QDialog):
         labelInformation = QLabel(self)
         labelInformation.setText(
             "All usage data is anonymous and untraceable.\n"
-            + "We use the usage data to inform the future development of Mantid.\n"
-            + 'If you click "Yes" aspects you need risk being deprecated in \n'
-            + "future versions if we think they are not used.\n\n"
-            + "Are you sure you still want to disable reporting usage data?\n"
-            + 'Please click "No".'
+            "We use the usage data to inform the future development of Mantid.\n\n"
+            "Disabling usage reporting means features you need risk being deprecated in\n"
+            "future versions if we think they are not used.\n\n"
+            "Error reporting will also be disabled."
         )
         textLayout.addWidget(labelInformation)
 

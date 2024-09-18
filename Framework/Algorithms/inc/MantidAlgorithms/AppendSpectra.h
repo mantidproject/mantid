@@ -40,6 +40,8 @@ private:
   void fixSpectrumNumbers(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2,
                           API::MatrixWorkspace &output) override;
   void combineLogs(const API::Run &lhs, const API::Run &rhs, API::Run &ans);
+  void appendYAxisLabels(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2,
+                         API::MatrixWorkspace &output);
 };
 
 } // namespace Algorithms

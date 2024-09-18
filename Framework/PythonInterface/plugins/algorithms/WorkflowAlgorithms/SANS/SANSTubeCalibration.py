@@ -8,8 +8,10 @@
 import copy
 import itertools
 import os.path
+from pathlib import Path
 import sys
 from enum import Enum
+from typing import Tuple
 
 import numpy as np
 
@@ -70,6 +72,7 @@ class Prop:
     BACKGROUND = "Background"
     VERTICAL_OFFSET = "VerticalOffset"
     CVALUE_THRESHOLD = "CValueThreshold"
+    CVALUE_FILE = "CValueOutputFile"
     OUTPUT_FILE = "OutputFile"
     SAVE_INPUT_WS = "SaveIntegratedWorkspaces"
 
@@ -78,7 +81,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
     _SAVED_INPUT_DATA_PREFIX = "tubeCalibSaved_"
     _TUBE_PLOT_WS = "__TubePlot"
     _FIT_DATA_WS = "__FittedData"
-    _C_VALUES_WS = "cvalues"
+    _C_VALUES_WS_PREFIX = "cvalues_"
     _SCALED_WS_SUFFIX = "_scaled"
     _CAL_TABLE_ID_COL = "Detector ID"
     _CAL_TABLE_POS_COL = "Detector Position"
@@ -91,6 +94,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
     _REAR_DET_Z_LOG = "Rear_Det_Z"
     _FRONT_DET_Z_LOG = "Front_Det_Z"
     _BEAM_STOPPER_STRIP_POSITION = 260
+    _CVALUES_FILE_EXT = ".txt"
 
     def category(self):
         return "SANS\\Calibration"
@@ -172,15 +176,19 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             "this threshold when the calibration has completed.",
         )
         self.declareProperty(
+            FileProperty(name=Prop.CVALUE_FILE, defaultValue="", action=FileAction.OptionalSave, extensions=["txt"]),
+            doc=f"The location for saving a {self._CVALUES_FILE_EXT} file with the details of tubes that have a cvalue above "
+            "the threshold. If no filepath is provided, or if all tubes are within the threshold, then no file is created.",
+        )
+        self.declareProperty(
             FileProperty(name=Prop.OUTPUT_FILE, defaultValue="", action=FileAction.OptionalSave, extensions=["nxs"]),
             doc="The location to save the calibration result out to as a Nexus file.",
         )
         self.declareProperty(
-            Prop.SAVE_INPUT_WS,
-            True,
-            direction=Direction.Input,
-            doc="Save input workspaces after loading and integrating."
-            "The files will be saved to the default save location specified in your Mantid user directories.",
+            FileProperty(name=Prop.SAVE_INPUT_WS, defaultValue="", action=FileAction.OptionalDirectory),
+            doc="If specified, the input workspaces will be saved to this directory after loading and integrating."
+            "This location will also be searched, along with your Mantid user directories, to find previously "
+            "saved input workspace when loading.",
         )
 
     def validateInputs(self):
@@ -199,6 +207,17 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             issues[Prop.END_PIXEL] = "The ending pixel must have a greater index than the starting pixel."
         if self.getProperty(Prop.END_PIXEL).value > DetectorInfo.NUM_PIXELS_IN_TUBE:
             issues[Prop.END_PIXEL] = f"The ending pixel must be less than or equal to {DetectorInfo.NUM_PIXELS_IN_TUBE}"
+
+        cvalues_filepath = self.getProperty(Prop.CVALUE_FILE).value
+        if cvalues_filepath:
+            cvalues_filepath = self._set_filepath_extension(cvalues_filepath, self._CVALUES_FILE_EXT)
+            if Path(cvalues_filepath).is_file():
+                issues[Prop.CVALUE_FILE] = "The CValues file already exists"
+
+        input_ws_save_dir = self.getProperty(Prop.SAVE_INPUT_WS).value
+        if input_ws_save_dir:
+            if not Path(input_ws_save_dir).is_dir():
+                issues[Prop.SAVE_INPUT_WS] = "The directory for saving the integrated input workspaces does not exist."
 
         return issues
 
@@ -287,7 +306,9 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             meanCvalue.append(meanC)
 
         self._apply_calibration(result, caltable)
-        cvalues = self._create_workspace(data_x=list(diagnostic_output.keys()), data_y=meanCvalue, output_ws_name=self._C_VALUES_WS)
+        cvalues = self._create_workspace(
+            data_x=list(diagnostic_output.keys()), data_y=meanCvalue, output_ws_name=f"{self._C_VALUES_WS_PREFIX}{self._detector_name}"
+        )
 
         self._save_calibrated_ws_as_nexus(result)
 
@@ -433,6 +454,13 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         tube_side_num = tube_id // 2  # Round down to get integer name for tube
         return self._detector_name + "-detector/" + side + str(tube_side_num)
 
+    @staticmethod
+    def _get_tube_module_and_number(tube_id: int) -> Tuple[int, int]:
+        """Get the tube module and number based on the id given"""
+        module = int(tube_id / DetectorInfo.NUM_TUBES_PER_MODULE) + 1
+        tube_num = tube_id % DetectorInfo.NUM_TUBES_PER_MODULE
+        return module, tube_num
+
     def _get_tube_data(self, tube_id, ws):
         """Return an array of all counts for the given tube"""
         tube_name = self._get_tube_name(tube_id)
@@ -510,10 +538,17 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             pass
 
         saved_file_name = self._SAVED_INPUT_DATA_PREFIX + data_file
+        save_input_directory = self.getProperty(Prop.SAVE_INPUT_WS).value
+        if save_input_directory:
+            save_filepath = Path(save_input_directory).joinpath(self._set_filepath_extension(saved_file_name, self._NEXUS_SUFFIX))
+        else:
+            save_filepath = None
+
+        file_to_load = str(save_filepath) if save_filepath and save_filepath.is_file() else saved_file_name
         try:
-            alg = self._create_child_alg("Load", True, Filename=saved_file_name, OutputWorkspace=ws_name)
+            alg = self._create_child_alg("Load", True, Filename=file_to_load, OutputWorkspace=ws_name)
             alg.execute()
-            self.log().notice(f"Loaded saved file from {saved_file_name}.")
+            self.log().notice(f"Loaded saved file from {file_to_load}.")
             return mtd[ws_name]
         except (ValueError, RuntimeError):
             pass
@@ -532,8 +567,8 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         rebin_alg.execute()
         ws = mtd[ws_name]
 
-        if self.getProperty(Prop.SAVE_INPUT_WS).value:
-            self._save_as_nexus(ws, saved_file_name)
+        if save_filepath:
+            self._save_as_nexus(ws, str(save_filepath))
 
         return ws
 
@@ -962,8 +997,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         diagnostic_workspaces = []
 
         first_pixel_pos = TubeSide.get_first_pixel_position(tube_id)
-        module = int(tube_id / DetectorInfo.NUM_TUBES_PER_MODULE) + 1
-        tube_num = tube_id % DetectorInfo.NUM_TUBES_PER_MODULE
+        module, tube_num = self._get_tube_module_and_number(tube_id)
         ws_suffix = f"{tube_id}_{module}_{tube_num}"
 
         diagnostic_workspaces.append(self._rename_workspace(self._FIT_DATA_WS, f"Fit{ws_suffix}"))
@@ -997,19 +1031,34 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
     def _save_calibrated_ws_as_nexus(self, calibrated_ws):
         output_file = self.getProperty(Prop.OUTPUT_FILE).value
         if output_file:
-            save_filepath = output_file if output_file.endswith(self._NEXUS_SUFFIX) else f"{output_file}{self._NEXUS_SUFFIX}"
+            save_filepath = self._set_filepath_extension(output_file, self._NEXUS_SUFFIX)
             self._save_as_nexus(calibrated_ws, save_filepath)
 
     def _notify_tube_cvalue_status(self, cvalues):
-        all_cvalues_ok = True
         threshold = self.getProperty(Prop.CVALUE_THRESHOLD).value
+        # Find the tubes with cvalues above the threshold
+        cvalues_above_threshold = []
         for i in range(len(cvalues.dataY(0))):
             cvalue = cvalues.dataY(0)[i]
             if cvalue > threshold:
-                all_cvalues_ok = False
-                self.log().notice(f"Tube {cvalues.dataX(0)[i]} has cvalue {cvalue}")
+                module, tube_num = self._get_tube_module_and_number(int(cvalues.dataX(0)[i]))
+                msg = f"Module {module}, tube {tube_num} has cvalue {cvalue}"
+                cvalues_above_threshold.append(msg + "\n")
+                self.log().notice(msg)
 
-        if all_cvalues_ok:
+        # If a cvalues filepath has been provided and there is information to output then save out a file
+        save_filepath = self.getProperty(Prop.CVALUE_FILE).value
+        if save_filepath and cvalues_above_threshold:
+            save_filepath = self._set_filepath_extension(save_filepath, self._CVALUES_FILE_EXT)
+            try:
+                with open(save_filepath, "w") as file:
+                    file.writelines(cvalues_above_threshold)
+                self.log().notice("Cvalue information for tubes exceeding the threshold has been saved to file")
+            except OSError as e:
+                self.log().error(f"Error saving cvalues file - check for invalid characters in the filepath:{e}")
+
+        # If no tubes have been found that exceed the threshold then log this to confirm
+        if not cvalues_above_threshold:
             self.log().notice(f"CValues for all tubes were below threshold {threshold}")
 
     def _log_tube_calibration_issues(self):
@@ -1072,6 +1121,9 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
         if store_in_ADS:
             alg.setAlwaysStoreInADS(True)
         return alg
+
+    def _set_filepath_extension(self, filepath, ext):
+        return filepath if filepath.endswith(ext) else f"{filepath}{ext}"
 
 
 # Register algorithm with Mantid

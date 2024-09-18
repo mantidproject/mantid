@@ -32,7 +32,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
     _instruments_defaults = {}
 
     default_calculator_kwargs = dict(
-        temperature=_temperature, instrument=_instrument, sample_form=_sample_form, quantum_order_num=_order_event, autoconvolution=False
+        temperature=_temperature, instrument=_instrument, sample_form=_sample_form, quantum_order_num=_order_event, autoconvolution_max=0
     )
 
     def setUp(self):
@@ -113,7 +113,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
         self._good_case(test_name=self._si2 + "_1d_o2", abinsdata_name=self._si2, quantum_order_num=2)
 
     def test_1d_order10(self):
-        self._good_case(test_name=self._si2 + "_1d_o10", abinsdata_name=self._si2, quantum_order_num=2, autoconvolution=True)
+        self._good_case(test_name=self._si2 + "_1d_o10", abinsdata_name=self._si2, quantum_order_num=2, autoconvolution_max=10)
 
     def test_2d_order1_mari(self):
         abins.parameters.instruments["MARI"].update({"q_size": 10, "n_energy_bins": 100})

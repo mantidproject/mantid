@@ -110,9 +110,10 @@ IFunction_sptr ALFAnalysisModel::calculateEstimateImpl(MatrixWorkspace_sptr cons
   auto const xData = workspace->readX(0);
   auto const yData = workspace->readY(0);
 
-  auto const background = std::accumulate(yData.begin(), yData.end(), 0.0) / static_cast<double>(yData.size());
+  auto const backgroundHeight = std::accumulate(yData.begin(), yData.end(), 0.0) / static_cast<double>(yData.size());
 
-  return createCompositeFunction(createFlatBackground(background), createGaussian(xData, yData, background));
+  return createCompositeFunction(createFlatBackground(backgroundHeight),
+                                 createGaussian(xData, yData, backgroundHeight));
 }
 
 void ALFAnalysisModel::exportWorkspaceCopyToADS() const {

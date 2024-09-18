@@ -35,7 +35,7 @@ void DeltaFunction::functionDeriv1D(Jacobian *out, const double *xValues, const 
   UNUSED_ARG(out);
   UNUSED_ARG(xValues);
   UNUSED_ARG(nData);
-  std::runtime_error("Cannot compute derivative of a delta function");
+  throw std::runtime_error("Cannot compute derivative of a delta function");
 }
 
 } // namespace Mantid::CurveFitting::Functions

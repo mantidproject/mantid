@@ -42,8 +42,11 @@ class DMOL3Loader(AbInitioLoader):
         :param input_ab_initio_filename: name of file with vibrational data (foo.outmol)
         """
         super().__init__(input_ab_initio_filename=input_ab_initio_filename)
-        self._ab_initio_program = "DMOL3"
         self._norm = 0
+
+    @property
+    def _ab_initio_program(self) -> str:
+        return "DMOL3"
 
     def read_vibrational_or_phonon_data(self):
         """

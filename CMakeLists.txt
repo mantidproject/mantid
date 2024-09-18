@@ -1,5 +1,5 @@
 # CMake version check.
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.21)
 
 # Define the project name.
 project(Mantid)
@@ -162,11 +162,6 @@ set(CORE_MANTIDLIBS
     Mantid::API
     Mantid::Types
 )
-
-if(UNIX)
-  # Experimental feature. Unix only at this point.
-  option(UNITY_BUILD "Switch for utilising unity builds. Faster builds for selected components.")
-endif(UNIX)
 
 add_custom_target(AllTests)
 

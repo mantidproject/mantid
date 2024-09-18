@@ -487,12 +487,13 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
   import matplotlib.pyplot as plt
   import numpy as np
   from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+  from matplotlib import colormaps
 
   Cmap_Name = 'Beach' # Colormap name
-  Loaded_Cmap = np.loadtxt("C:\Path\to\File\Filename.txt")
+  Loaded_Cmap = np.loadtxt("/Path/to/file/Filename.txt")
   # Register the Loaded Colormap
   Listed_CustomCmap = ListedColormap(Loaded_Cmap, name=Cmap_Name)
-  plt.register_cmap(name=Cmap_Name, cmap= Listed_CustomCmap)
+  colormaps.register(name=Cmap_Name, cmap= Listed_CustomCmap)
 
   # Create and register the reverse colormap
   Res = len(Loaded_Cmap)
@@ -502,7 +503,7 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
         Reverse[i][j] = Loaded_Cmap[Res-(i+1)][j]
 
   Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
-  plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
+  colormaps.register(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
 
 - If you have a Colormap file in a Mantid format (N by 3) with all values between 0 and 255, firstly **rename the file extension from .map to .txt**, then use:
 
@@ -513,6 +514,7 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
   import matplotlib.pyplot as plt
   import numpy as np
   from matplotlib.colors import ListedColormap, LinearSegmentedColormap
+  from matplotlib import colormaps
 
   Cmap_Name = 'Beach'
   Loaded_Cmap = np.loadtxt("/Path/to/file/Beach.txt")
@@ -539,7 +541,7 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
 
   # Register the Loaded Colormap
   Listed_CustomCmap = ListedColormap(Cmap, name=Cmap_Name)
-  plt.register_cmap(name=Cmap_Name, cmap= Listed_CustomCmap)
+  colormaps.register(name=Cmap_Name, cmap= Listed_CustomCmap)
 
   # Create and register the reverse colormap
   Reverse = np.zeros((Res,4))
@@ -548,7 +550,7 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
         Reverse[i][j] = Cmap[Res-(i+1)][j]
 
   Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
-  plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
+  colormaps.register(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
 
 - To Create a Colormap from scratch, use:
 
@@ -559,6 +561,7 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
   import matplotlib.pyplot as plt
   from matplotlib.colors import ListedColormap, LinearSegmentedColormap
   import numpy as np
+  from matplotlib import colormaps
 
   Cmap_Name = 'Beach' # Colormap name
   Res = 500 # Resolution of your Colormap (number of steps in colormap)
@@ -585,7 +588,7 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
   #np.savetxt("C:\Path\to\File\Filename.txt",Cmap) #uncomment to save to file
 
   Listed_CustomCmap = ListedColormap(Cmap, name = Cmap_Name)
-  plt.register_cmap(name = Cmap_Name, cmap = Listed_CustomCmap)
+  colormaps.register(name = Cmap_Name, cmap = Listed_CustomCmap)
 
   # Create and register the reverse colormap
   Reverse = np.zeros((Res,4))
@@ -594,7 +597,7 @@ The following methods show how to Load, Convert from MantidPlot format, Create f
         Reverse[i][j] = Cmap[Res-(i+1)][j]
 
   Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
-  plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
+  colormaps.register(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
 
 Now the Custom Colormap has been registered, right-click on a workspace and produce a colorfill plot. In Figure Options (Gear Icon in Plot Figure), under the Images Tab, you can use the drop down-menu to select the new Colormap, and use the check-box to select its Reverse!
 
@@ -625,6 +628,7 @@ Now the Custom Colormap has been registered, right-click on a workspace and prod
   import matplotlib.pyplot as plt
   from matplotlib.colors import ListedColormap, LinearSegmentedColormap
   import numpy as np
+  from matplotlib import colormaps
 
   Cmap_Name = 'Beach' # Colormap name
   Res = 500 # Resolution of your Colormap (number of steps in colormap)
@@ -651,7 +655,7 @@ Now the Custom Colormap has been registered, right-click on a workspace and prod
   #np.savetxt("C:\Path\to\File\Filename.txt",Cmap) #uncomment to save to file
 
   Listed_CustomCmap = ListedColormap(Cmap, name = Cmap_Name)
-  plt.register_cmap(name = Cmap_Name, cmap = Listed_CustomCmap)
+  colormaps.register(name = Cmap_Name, cmap = Listed_CustomCmap)
 
   # Create and register the reverse colormap
   Reverse = np.zeros((Res,4))
@@ -660,7 +664,7 @@ Now the Custom Colormap has been registered, right-click on a workspace and prod
         Reverse[i][j] = Cmap[Res-(i+1)][j]
 
   Listed_CustomCmap_r = ListedColormap(Reverse, name=(Cmap_Name + '_r') )
-  plt.register_cmap(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
+  colormaps.register(name=(Cmap_Name + '_r'), cmap= Listed_CustomCmap_r)
 
   from mantid.simpleapi import Load, ConvertToMD, BinMD, ConvertUnits, Rebin
   from mantid import plots

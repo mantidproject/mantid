@@ -353,10 +353,6 @@ public:
   /// The argument is the property name. Default - do nothing.
   void afterPropertySet(const std::string &) override;
 
-  void filterByProperty(const Kernel::TimeSeriesProperty<bool> & /*filter*/, const std::vector<std::string> &
-                        /* excludedFromFiltering */) override {
-    throw(std::runtime_error("Not yet implmented"));
-  }
   Kernel::Property *getPointerToProperty(const std::string &name) const override;
   Kernel::Property *getPointerToPropertyOrdinal(const int &index) const override;
 

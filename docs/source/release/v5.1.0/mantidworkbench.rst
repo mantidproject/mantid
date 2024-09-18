@@ -92,7 +92,8 @@ Plotting
     ax3d[0].set_title("Surface")
     ax3d[1].set_title("Wireframe")
 
-    #plt.show()# uncomment to show the plots
+    #figC.show()# uncomment to show the plots
+    #fig3d.show()
 
 - The Advanced Plotting menu is now in Workbench. This enables creating surface and contour plots of three or more workspaces, and choosing which log value to plot against.
 

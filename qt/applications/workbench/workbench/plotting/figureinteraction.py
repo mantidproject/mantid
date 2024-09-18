@@ -101,6 +101,7 @@ class FigureInteraction(object):
         self._cids.append(canvas.mpl_connect("resize_event", self.mpl_redraw_annotations))
         self._cids.append(canvas.mpl_connect("figure_leave_event", self.on_leave))
         self._cids.append(canvas.mpl_connect("scroll_event", self.on_scroll))
+        self._cids.append(canvas.mpl_connect("key_press_event", self.on_key_press))
 
         self.canvas = canvas
         self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
@@ -111,6 +112,8 @@ class FigureInteraction(object):
         self.valid_lines = VALID_LINE_STYLE
         self.valid_colors = VALID_COLORS
         self.default_marker_name = "marker"
+        self.double_click_event = None
+        self.marker_selected_in_double_click_event = None
 
     @property
     def nevents(self):
@@ -134,6 +137,9 @@ class FigureInteraction(object):
             and len(event.inaxes.lines) == 0
         ):
             return
+
+        self._correct_for_scroll_event_on_legend(event)
+
         zoom_factor = 1.05 + abs(event.step) / 6
         if event.button == "up":  # zoom in
             zoom(event.inaxes, event.xdata, event.ydata, factor=zoom_factor)
@@ -141,6 +147,33 @@ class FigureInteraction(object):
             zoom(event.inaxes, event.xdata, event.ydata, factor=1 / zoom_factor)
         self.redraw_annotations()
         event.canvas.draw()
+
+    def on_key_press(self, event):
+        ax = event.inaxes
+        if ax is None or isinstance(ax, Axes3D) or len(ax.get_images()) == 0 and len(ax.get_lines()) == 0:
+            return
+
+        if event.key == "k":
+            current_xscale = ax.get_xscale()
+            next_xscale = self._get_next_axis_scale(current_xscale)
+            self._quick_change_axes((next_xscale, ax.get_yscale()), ax)
+
+        if event.key == "l":
+            current_yscale = ax.get_yscale()
+            next_yscale = self._get_next_axis_scale(current_yscale)
+            self._quick_change_axes((ax.get_xscale(), next_yscale), ax)
+
+    def _get_next_axis_scale(self, current_scale):
+        if current_scale == "linear":
+            return "log"
+        return "linear"
+
+    def _correct_for_scroll_event_on_legend(self, event):
+        # Corrects default behaviour in Matplotlib where legend is picked up by scroll event
+        legend = event.inaxes.axes.get_legend()
+        if legend.get_draggable() and legend.contains(event):
+            legend_set_draggable(legend, False)
+            legend_set_draggable(legend, True)
 
     def on_mouse_button_press(self, event):
         """Respond to a MouseEvent where a button was pressed"""
@@ -169,13 +202,13 @@ class FigureInteraction(object):
             else:
                 self._show_markers_menu(marker_selected, event)
         elif event.dblclick and event.button == canvas.buttond.get(Qt.LeftButton):
-            if not marker_selected:
-                if not self._show_axis_editor(event):
-                    # Don't run inside 3D+ plots, as there is already matplotlib behaviour here.
-                    if not hasattr(event.inaxes, "zaxis"):
-                        self._show_plot_options(event)
-            elif len(marker_selected) == 1:
-                self._edit_marker(marker_selected[0])
+            # Double-clicking will open a dialog depending on where the mouse event is located. However, if the dialog
+            # is opened here, mpl will not process the mouse release event after the dialog closes, and will not end any
+            # panning/zooming/rotating drag events that are in progress. Therefore, we store the event data to use in
+            # the mouse release callback.
+            self.double_click_event = event
+            self.marker_selected_in_double_click_event = marker_selected
+
         elif event.button == canvas.buttond.get(Qt.MiddleButton):
             if self.toolbar_manager.is_zoom_active():
                 self.toolbar_manager.emit_sig_home_clicked()
@@ -215,6 +248,12 @@ class FigureInteraction(object):
 
             self.stop_markers(x_pos, y_pos)
 
+        # If the mouse is released after a double click event, check whether we need to open a settings dialog.
+        if self.double_click_event:
+            self._open_double_click_dialog(self.double_click_event, self.marker_selected_in_double_click_event)
+            self.marker_selected_in_double_click_event = None
+            self.double_click_event = None
+
     def on_leave(self, event):
         """
         When leaving the axis or canvas, restore cursor to default one
@@ -240,6 +279,19 @@ class FigureInteraction(object):
                 marker.set_move_cursor(None, x_pos, y_pos)
                 marker.add_all_annotations()
             marker.mouse_move_stop()
+
+    def _open_double_click_dialog(self, event, marker_selected=None):
+        """
+        Opens a settings dialog based on the event location.
+        @param event: the object representing the double click event
+        """
+        if not marker_selected:
+            if not self._show_axis_editor(event):
+                # Don't run inside 3D+ plots, as there is already matplotlib behaviour here.
+                if not hasattr(event.inaxes, "zaxis"):
+                    self._show_plot_options(event)
+        elif len(marker_selected) == 1:
+            self._edit_marker(marker_selected[0])
 
     def _show_axis_editor(self, event):
         """
@@ -271,7 +323,7 @@ class FigureInteraction(object):
             elif ax.xaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in ax.get_xticklabels()):
                 move_and_show(XAxisEditor(canvas, ax))
             elif ax.yaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in ax.get_yticklabels()):
-                if type(ax) == Axes:
+                if type(ax) is Axes:
                     move_and_show(ColorbarAxisEditor(canvas, ax))
                 else:
                     move_and_show(YAxisEditor(canvas, ax))
@@ -281,7 +333,7 @@ class FigureInteraction(object):
                 elif ax.zaxis.contains(event)[0] or any(tick.contains(event)[0] for tick in ax.get_zticklabels()):
                     move_and_show(ZAxisEditor(canvas, ax))
             elif ax.get_legend() is not None and ax.get_legend().contains(event)[0]:
-                # We have to set the legend as non draggable else we hold onto the legend
+                # We have to set the legend as non-draggable else we hold onto the legend
                 # until the mouse button is clicked again
                 legend_set_draggable(ax.get_legend(), False)
                 legend_texts = ax.get_legend().get_texts()
@@ -303,6 +355,10 @@ class FigureInteraction(object):
         return action_taken
 
     def _show_plot_options(self, event):
+        """
+        Opens the plot settings dialog and switches to the curves tab.
+        @param event: the object representing the mouse event
+        """
         if not event.inaxes:
             return
 
@@ -436,7 +492,7 @@ class FigureInteraction(object):
         images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
         for label, scale_type in COLORBAR_SCALE_MENU_OPTS.items():
             action = axes_menu.addAction(label, partial(self._change_colorbar_axes, scale_type))
-            if type(images[0].norm) == scale_type:
+            if type(images[0].norm) is scale_type:
                 action.setCheckable(True)
                 action.setChecked(True)
             axes_actions.addAction(action)

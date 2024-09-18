@@ -1,6 +1,8 @@
 # mantid.dataobjects tests
 
-set(TEST_PY_FILES EventListTest.py GroupingWorkspaceTest.py SpecialWorkspace2DTest.py Workspace2DPickleTest.py)
+set(TEST_PY_FILES EventListTest.py GroupingWorkspaceTest.py SpecialWorkspace2DTest.py Workspace2DPickleTest.py
+                  PeakShapes.py
+)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 

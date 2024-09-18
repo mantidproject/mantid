@@ -159,6 +159,13 @@ class MantidAxes(Axes):
         ax.remove()
         return mantid_axes
 
+    def set_title(self, label, fontdict=None, *args, **kwargs):
+        if not fontdict:
+            font_props = self.title.get_fontproperties()
+            fontdict = {"fontsize": font_props.get_size(), "fontweight": font_props.get_weight(), "color": self.title.get_color()}
+
+        super().set_title(label, fontdict=fontdict, *args, **kwargs)
+
     @staticmethod
     def is_axis_of_type(axis_type, kwargs):
         if kwargs.get("axis", None) is not None:
@@ -1335,6 +1342,10 @@ class MantidAxes3D(Axes3D):
     def __init__(self, *args, **kwargs):
         kwargs["auto_add_to_figure"] = False
         super().__init__(*args, **kwargs)
+        # By default, when right click is held the plot will zoom in and out.
+        # For Mantid plots right click will open a context menu instead
+        # Unassigning the zoom button avoids zoom becoming toggled after leaving the context menu
+        self.mouse_init(zoom_btn=None)
 
     def set_title(self, *args, **kwargs):
         # The set_title function in Axes3D also moves the title downwards for some reason so the Axes function is called

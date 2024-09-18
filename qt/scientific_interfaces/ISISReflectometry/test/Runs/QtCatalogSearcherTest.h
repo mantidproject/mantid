@@ -12,12 +12,16 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/MockAlgorithmRunner.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidQtWidgets/Common/MockQtAlgorithmRunner.h"
 
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
+#include <fstream>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using Mantid::Kernel::ConfigService;
 using testing::_;
 using testing::AtLeast;
 using testing::Mock;
@@ -25,14 +29,15 @@ using testing::NiceMock;
 using testing::ReturnRef;
 
 namespace {
-static constexpr const char *RUN1_NAME = "run1";
-static constexpr const char *RUN1_FILE = "INTER00012345.raw";
-static constexpr const char *RUN1_NUMBER = "12345";
-static constexpr const char *RUN1_TITLE = "run 1 title";
-static constexpr const char *RUN2_NAME = "run2";
-static constexpr const char *RUN2_FILE = "INTER00022345.raw";
-static constexpr const char *RUN2_NUMBER = "22345";
-static constexpr const char *RUN2_TITLE = "run 2 title";
+static auto constexpr INSTRUMENT = "INTER";
+static auto constexpr RUN1_NAME = "run1";
+static auto constexpr RUN1_FILE = "INTER00012345.raw";
+static auto constexpr RUN1_NUMBER = "12345";
+static auto constexpr RUN1_TITLE = "run 1 title";
+static auto constexpr RUN2_NAME = "run2";
+static auto constexpr RUN2_FILE = "INTER00022345.raw";
+static auto constexpr RUN2_NUMBER = "22345";
+static auto constexpr RUN2_TITLE = "run 2 title";
 } // namespace
 
 class MockSearchAlgorithm : public Algorithm {
@@ -141,11 +146,17 @@ public:
 
   QtCatalogSearcherTest() : m_view(), m_notifyee(), m_searchAlg(std::make_shared<MockSearchAlgorithm>()) {}
 
+  void tearDown() override {
+    // Verifying and clearing of expectations happens when mock variables are destroyed.
+    // Some of our mocks are created as member variables and will exist until all tests have run, so we need to
+    // explicitly verify and clear them after each test.
+    verifyAndClear();
+  }
+
   void test_constructor_subscribes_to_view() {
     EXPECT_CALL(m_view, subscribeSearch(_)).Times(1);
     auto searcher = makeCatalogSearcher();
     searcher.subscribe(&m_notifyee);
-    verifyAndClear();
   }
 
   void test_journal_search() {
@@ -175,7 +186,6 @@ public:
     expectGetAlgorithmRunner();
     auto success = startAsyncJournalSearch(searcher);
     TS_ASSERT_EQUALS(success, true);
-    verifyAndClear();
   }
 
   void test_async_catalog_search_returns_success_if_has_active_session() {
@@ -184,7 +194,6 @@ public:
     expectGetAlgorithmRunner();
     auto success = startAsyncCatalogSearch(searcher);
     TS_ASSERT_EQUALS(success, true);
-    verifyAndClear();
   }
 
   void test_async_journal_search_sets_in_progress_flag() {
@@ -193,7 +202,6 @@ public:
     expectGetAlgorithmRunner();
     startAsyncJournalSearch(searcher);
     TS_ASSERT_EQUALS(searcher.searchInProgress(), true);
-    verifyAndClear();
   }
 
   void test_async_catalog_search_sets_in_progress_flag() {
@@ -202,7 +210,6 @@ public:
     expectGetAlgorithmRunner();
     startAsyncCatalogSearch(searcher);
     TS_ASSERT_EQUALS(searcher.searchInProgress(), true);
-    verifyAndClear();
   }
 
   void test_async_journal_search_starts_algorithm_runner() {
@@ -211,7 +218,6 @@ public:
     auto algRunner = expectGetAlgorithmRunner();
     expectAlgorithmStarted(m_searchAlg, algRunner);
     startAsyncJournalSearch(searcher);
-    verifyAndClear();
   }
 
   void test_async_catalog_search_starts_algorithm_runner() {
@@ -220,7 +226,6 @@ public:
     auto algRunner = expectGetAlgorithmRunner();
     expectAlgorithmStarted(m_searchAlg, algRunner);
     startAsyncCatalogSearch(searcher);
-    verifyAndClear();
   }
 
   void test_async_catalog_search_returns_success_when_not_logged_in() {
@@ -243,7 +248,6 @@ public:
     EXPECT_CALL(m_view, getAlgorithmRunner()).Times(0);
     auto success = startAsyncCatalogSearch(searcher);
     TS_ASSERT_EQUALS(success, true);
-    verifyAndClear();
   }
 
   void test_finish_handle_starts_async_search_if_active_session() {
@@ -252,7 +256,6 @@ public:
     auto algRunner = expectGetAlgorithmRunner();
     expectAlgorithmStarted(m_searchAlg, algRunner);
     searcher.finishHandle(m_searchAlg.get());
-    verifyAndClear();
   }
 
   void test_finish_does_not_notify_failure_if_active_session() {
@@ -261,7 +264,6 @@ public:
     expectGetAlgorithmRunner();
     expectNotNotifiedSearchFailed();
     searcher.finishHandle(m_searchAlg.get());
-    verifyAndClear();
   }
 
   void test_finish_handle_notifies_failure_if_no_active_session() {
@@ -269,7 +271,6 @@ public:
     searcher.subscribe(&m_notifyee);
     expectNotifySearchFailed();
     searcher.finishHandle(m_searchAlg.get());
-    verifyAndClear();
   }
 
   void test_error_handle_notifies_failure_if_no_active_session() {
@@ -277,7 +278,6 @@ public:
     searcher.subscribe(&m_notifyee);
     expectNotifySearchFailed();
     searcher.errorHandle(m_searchAlg.get(), "test error message");
-    verifyAndClear();
   }
 
   void test_error_handle_does_not_notify_failure_if_active_session() {
@@ -285,28 +285,52 @@ public:
     searcher.subscribe(&m_notifyee);
     expectNotNotifiedSearchFailed();
     searcher.errorHandle(m_searchAlg.get(), "test error message");
-    verifyAndClear();
   }
 
   void test_set_saved_flag() {
     auto searcher = makeCatalogSearcher(true);
     EXPECT_CALL(m_searchResults, setSaved()).Times(1);
     searcher.setSaved();
-    verifyAndClear();
   }
 
   void test_notify_search_results_changed_sets_unsaved_flag() {
     auto searcher = makeCatalogSearcher(true);
     EXPECT_CALL(m_searchResults, setUnsaved()).Times(1);
     searcher.notifySearchResultsChanged();
-    verifyAndClear();
   }
 
   void test_search_results_collection_passed_to_results() {
     auto searcher = makeCatalogSearcher(true);
     EXPECT_CALL(m_searchResults, getSearchResultsCSV()).Times(1);
     searcher.getSearchResultsCSV();
-    verifyAndClear();
+  }
+
+  void test_search_results_in_data_cache() {
+    auto const &defaultArchiveSetting = ConfigService::Instance().getString("datasearch.searcharchive");
+    auto const &defaultSaveDirectory = ConfigService::Instance().getString("datacachesearch.directory");
+    setupFakeDataCache();
+    ConfigService::Instance().setString("datasearch.searcharchive", "off");
+
+    auto searcher = makeCatalogSearcher();
+    searcher.subscribe(&m_notifyee);
+    auto results = doJournalSearch(searcher);
+    checkFilteredSearchResults(results);
+    ConfigService::Instance().setString("datacachesearch.directory", defaultSaveDirectory);
+    ConfigService::Instance().setString("datasearch.searcharchive", defaultArchiveSetting);
+  }
+
+  void test_search_with_archive_on_and_cache_set() {
+    auto const &defaultArchiveSetting = ConfigService::Instance().getString("datasearch.searcharchive");
+    auto const &defaultSaveDirectory = ConfigService::Instance().getString("datacachesearch.directory");
+    setupFakeDataCache();
+    ConfigService::Instance().setString("datasearch.searcharchive", "On");
+
+    auto searcher = makeCatalogSearcher();
+    searcher.subscribe(&m_notifyee);
+    auto results = doJournalSearch(searcher);
+    checkSearchResults(results);
+    ConfigService::Instance().setString("datacachesearch.directory", defaultSaveDirectory);
+    ConfigService::Instance().setString("datasearch.searcharchive", defaultArchiveSetting);
   }
 
 private:
@@ -328,20 +352,40 @@ private:
     }
   }
 
+  void setupFakeDataCache() {
+    auto const tempCache = std::filesystem::temp_directory_path() /= "fakeCache";
+    std::filesystem::create_directories(tempCache / INSTRUMENT);
+    std::ofstream indexFile(tempCache / INSTRUMENT / (std::string(INSTRUMENT) + "_index.json"));
+    indexFile << "{\n"
+              << "\t\"22345\": \"fake/path/to/file\"\n"
+              << "}\n";
+    indexFile.close();
+
+    ConfigService::Instance().setString("datacachesearch.directory", tempCache.string());
+  }
+
+  void checkFilteredSearchResults(SearchResults const &actual) {
+    auto const expected = SearchResults{SearchResult(RUN2_NUMBER, RUN2_TITLE)};
+    TS_ASSERT_EQUALS(actual.size(), expected.size());
+    for (size_t i = 0; i < actual.size(); ++i) {
+      TS_ASSERT_EQUALS(actual[i], expected[i]);
+    }
+  }
+
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_notifyee));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_searchResults));
   }
 
-  std::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
+  std::shared_ptr<NiceMock<MockQtAlgorithmRunner>> expectGetAlgorithmRunner() {
     // Get the algorithm runner
-    auto algRunner = std::make_shared<NiceMock<MockAlgorithmRunner>>();
+    auto algRunner = std::make_shared<NiceMock<MockQtAlgorithmRunner>>();
     EXPECT_CALL(m_view, getAlgorithmRunner()).Times(AtLeast(1)).WillRepeatedly(Return(algRunner));
     return algRunner;
   }
 
-  void expectAlgorithmStarted(IAlgorithm_sptr searchAlg, std::shared_ptr<NiceMock<MockAlgorithmRunner>> algRunner) {
+  void expectAlgorithmStarted(IAlgorithm_sptr searchAlg, std::shared_ptr<NiceMock<MockQtAlgorithmRunner>> algRunner) {
     EXPECT_CALL(*algRunner, startAlgorithmImpl(searchAlg)).Times(1);
   }
 

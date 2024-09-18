@@ -9,14 +9,23 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
+#include "MantidAPI/ISISInstrumentDataCache.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
-#include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
+#include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 
+#include <algorithm>
 #include <boost/regex.hpp>
+#include <vector>
 
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
+
+namespace {
+Mantid::Kernel::Logger g_log("Reflectometry Catalog Searcher");
+} // namespace
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
@@ -74,10 +83,27 @@ ITableWorkspace_sptr QtCatalogSearcher::getSearchAlgorithmResultsTable(IAlgorith
 }
 
 SearchResults QtCatalogSearcher::convertResultsTableToSearchResults(const ITableWorkspace_sptr &resultsTable) {
-  if (requiresICat())
-    return convertICatResultsTableToSearchResults(resultsTable);
-  else
-    return convertJournalResultsTableToSearchResults(resultsTable);
+  auto searchResults = requiresICat() ? convertICatResultsTableToSearchResults(resultsTable)
+                                      : convertJournalResultsTableToSearchResults(resultsTable);
+  // If the archive is switched on, just return the whole set of results.
+  auto const &archiveSetting = ConfigService::Instance().getString("datasearch.searcharchive");
+  if (archiveSetting != "off") {
+    return searchResults;
+  }
+  // Check if we're on IDAaaS with the Data Cache available.
+  auto const &dataCache = ISISInstrumentDataCache(ConfigService::Instance().getString("datacachesearch.directory"));
+  if (!dataCache.isIndexFileAvailable(searchCriteria().instrument)) {
+    return searchResults;
+  }
+  // If so, only show the runs available in the instrument data cache.
+  auto const &runNumbers = dataCache.getRunNumbersInCache(searchCriteria().instrument);
+  searchResults.erase(std::remove_if(searchResults.begin(), searchResults.end(),
+                                     [&](auto const &result) {
+                                       return std::find(runNumbers.cbegin(), runNumbers.cend(), result.runNumber()) ==
+                                              std::end(runNumbers);
+                                     }),
+                      searchResults.end());
+  return searchResults;
 }
 
 SearchResults QtCatalogSearcher::convertICatResultsTableToSearchResults(const ITableWorkspace_sptr &tableWorkspace) {

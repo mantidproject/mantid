@@ -61,7 +61,7 @@ Usage
     coilcurrents = join(mypath, 'currents.txt')
 
     # filter the data files in the given directory
-    p = re.compile('^dz(\d{8})vana.d_dat$')
+    p = re.compile(r'^dz(\d{8})vana.d_dat$')
 
     # we choose only the runs with 'x' polarisation
     filelist = [str(i*6 + 29100501) for i in range(10)]

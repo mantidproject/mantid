@@ -63,15 +63,19 @@ SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser, QObject
   connect(fitBrowser, SIGNAL(functionChanged()), this, SLOT(functionChanged()));
 
   // When a fit is completed finishHandle is called which emits needShowPlot
-  connect(this, SIGNAL(needShowPlot(Ui::SequentialFitDialog *, MantidQt::MantidWidgets::FitPropertyBrowser *)),
-          mantidui, SLOT(showSequentialPlot(Ui::SequentialFitDialog *, MantidQt::MantidWidgets::FitPropertyBrowser *)));
+  if (mantidui != nullptr) {
+    connect(this, SIGNAL(needShowPlot(Ui::SequentialFitDialog *, MantidQt::MantidWidgets::FitPropertyBrowser *)),
+            mantidui,
+            SLOT(showSequentialPlot(Ui::SequentialFitDialog *, MantidQt::MantidWidgets::FitPropertyBrowser *)));
+  }
   connect(ui.tWorkspaces, SIGNAL(cellChanged(int, int)), this, SLOT(spectraChanged(int, int)));
   connect(ui.tWorkspaces, SIGNAL(itemSelectionChanged()), this, SLOT(selectionChanged()));
   selectionChanged();
 } // namespace MantidWidgets
 
 void SequentialFitDialog::addWorkspace() {
-  SelectWorkspacesDialog *dlg = new SelectWorkspacesDialog(this, "MatrixWorkspace");
+  SelectWorkspacesDialog *dlg =
+      new SelectWorkspacesDialog(this, "MatrixWorkspace", "", QAbstractItemView::ExtendedSelection);
   if (dlg->exec() == QDialog::Accepted) {
     addWorkspaces(dlg->getSelectedNames());
   }
@@ -84,11 +88,11 @@ bool SequentialFitDialog::addWorkspaces(const QStringList &wsNames) {
   ui.tWorkspaces->model()->insertRows(row, wsNames.size());
   int wi = m_fitBrowser->workspaceIndex();
   QAbstractItemModel *model = ui.tWorkspaces->model();
-  foreach (QString name, wsNames) {
-    model->setData(model->index(row, 0, QModelIndex()), name);
+  foreach (QString wsName, wsNames) {
+    model->setData(model->index(row, 0, QModelIndex()), wsName);
 
     if (row == 0) {
-      ui.ckbLogPlot->setChecked(validateLogs(name));
+      ui.ckbLogPlot->setChecked(validateLogs(wsName));
     }
 
     // disable the period cell
@@ -102,7 +106,7 @@ bool SequentialFitDialog::addWorkspaces(const QStringList &wsNames) {
     if (ui.ckbLogPlot->isChecked()) {
       // set spectrum number corresponding to the workspace index
       Mantid::API::MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          Mantid::API::AnalysisDataService::Instance().retrieve(name.toStdString()));
+          Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
       int spec = -1;
       if (ws) {
         Mantid::API::Axis *y = ws->getAxis(1);
@@ -149,8 +153,8 @@ void SequentialFitDialog::addFile() {
     ui.tWorkspaces->model()->insertRows(row, fileNames.size());
     // int wi = m_fitBrowser->workspaceIndex();
     QAbstractItemModel *model = ui.tWorkspaces->model();
-    foreach (QString name, fileNames) {
-      model->setData(model->index(row, 0, QModelIndex()), name); // file name
+    foreach (QString fileName, fileNames) {
+      model->setData(model->index(row, 0, QModelIndex()), fileName); // file name
       model->setData(model->index(row, 1, QModelIndex()),
                      ui.sbPeriod->value()); // period
       model->setData(model->index(row, 2, QModelIndex()),
@@ -202,13 +206,13 @@ bool SequentialFitDialog::validateLogs(const QString &wsName) {
              // and logNames
       QStringList namesToRemove;
       for (int i = 0; i < n; ++i) {
-        QString name = ui.cbLogValue->itemText(i);
-        if (!logNames.contains(name)) {
-          namesToRemove << name;
+        QString logName = ui.cbLogValue->itemText(i);
+        if (!logNames.contains(logName)) {
+          namesToRemove << logName;
         }
       }
-      foreach (QString name, namesToRemove) {
-        int i = ui.cbLogValue->findText(name);
+      foreach (QString logName, namesToRemove) {
+        int i = ui.cbLogValue->findText(logName);
         if (i >= 0) {
           ui.cbLogValue->removeItem(i);
         }
@@ -272,8 +276,8 @@ QString SequentialFitDialog::getIndex(int row) const {
 void SequentialFitDialog::accept() {
   QStringList inputStr;
   for (int i = 0; i < ui.tWorkspaces->rowCount(); ++i) {
-    QString name = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(i, 0)).toString();
-    QString parStr = name + "," + getIndex(i);
+    QString wsName = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(i, 0)).toString();
+    QString parStr = wsName + "," + getIndex(i);
     if (isFile(i)) { // add the period
       parStr += QString(",") + ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(i, 1)).toString();
     }
@@ -395,13 +399,13 @@ void SequentialFitDialog::getFitResults() {
   for (size_t col = 1; col < columnNames.size() - 1; col += 2) {
     auto value = row.Double(col);
     auto error = row.Double(col + 1);
-    auto name = columnNames[col];
+    auto paramName = columnNames[col];
     // In case of a single function Fit doesn't create a CompositeFunction
     if (m_fitBrowser->count() == 1) {
-      name.insert(0, "f0.");
+      paramName.insert(0, "f0.");
     }
-    if (m_fitBrowser->compositeFunction()->hasParameter(name)) {
-      size_t paramIndex = m_fitBrowser->compositeFunction()->parameterIndex(name);
+    if (m_fitBrowser->compositeFunction()->hasParameter(paramName)) {
+      size_t paramIndex = m_fitBrowser->compositeFunction()->parameterIndex(paramName);
 
       m_fitBrowser->compositeFunction()->setParameter(paramIndex, value);
       m_fitBrowser->compositeFunction()->setError(paramIndex, error);
@@ -427,11 +431,11 @@ void SequentialFitDialog::spectraChanged(int row, int col) {
   if (!item)
     return;
   if ((col == 2 || col == 3) && item->flags().testFlag(Qt::ItemIsEnabled) == true) { // it's a workspace
-    QString name = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 0)).toString();
+    QString wsName = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row, 0)).toString();
     Mantid::API::MatrixWorkspace_sptr ws;
     try {
       ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-          Mantid::API::AnalysisDataService::Instance().retrieve(name.toStdString()));
+          Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     } catch (...) { //
       return;
     }

@@ -80,7 +80,7 @@ private:
   /// The list of managed algorithms
   std::deque<IAlgorithm_sptr> m_managed_algs; ///<  pointers to managed algorithms [policy???]
   /// Mutex for modifying/accessing the m_managed_algs member.
-  mutable std::mutex m_managedMutex;
+  mutable std::recursive_mutex m_managedMutex;
 };
 
 using AlgorithmManager = Mantid::Kernel::SingletonHolder<AlgorithmManagerImpl>;

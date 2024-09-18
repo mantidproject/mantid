@@ -138,6 +138,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         # Lists of input and output workspaces
         q_workspaces = list()
         q2_workspaces = list()
+        elf_workspace = None  # initializing for logs
+        elt_workspace = None
         run_numbers = list()
         sample_param = list()
 
@@ -236,7 +238,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             _normalize_by_index(elt_workspace, 0)
 
             self.setProperty("OutputELT", elt_workspace)
-
+        # Add sample logs
+        self._add_sample_logs_to_output_workspaces([q_workspace, q2_workspace, elf_workspace, elt_workspace])
         # Set the output workspace
         self.setProperty("OutputInQ", q_workspace)
         self.setProperty("OutputInQSquared", q2_workspace)
@@ -286,6 +289,21 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             unit = ""
 
         return sample, unit
+
+    def _add_sample_logs_to_output_workspaces(self, out_ws):
+        names = ["integration_range_start", "integration_range_end"]
+        values = [self._integration_range_start, self._integration_range_end]
+        for ws in out_ws:
+            if ws is not None:
+                self._add_sample_log(ws, names, values)
+
+    def _add_sample_log(self, workspace, names, values):
+        add_log = self.createChildAlgorithm("AddSampleLogMultiple", enableLogging=False)
+        add_log.setProperty("Workspace", workspace)
+        add_log.setProperty("LogNames", names)
+        add_log.setProperty("LogValues", values)
+        add_log.setProperty("ParseType", True)
+        add_log.execute()
 
 
 def _extract_temperature_from_log(workspace, sample_log_name, log_filename, run_name):

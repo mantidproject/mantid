@@ -178,7 +178,7 @@ public:
   void fit();
 
   // update workspace property when workspaces added to or removed from ADS
-  void updateWorkspaces(QStringList oldWorkspaces);
+  void updateWorkspaces(const QStringList &oldWorkspaces);
   // set workspace in workspace property to the function
   void setFunctionWorkspace();
 

@@ -1,1 +1,0 @@
-- Small bug fixes and usability improvements to the Sample Transmission Calculator. Axes are now labelled and error feedback is improved.

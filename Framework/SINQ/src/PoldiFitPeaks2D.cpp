@@ -1238,9 +1238,8 @@ void PoldiFitPeaks2D::exec() {
   if (isPawleyFit) {
     Poldi2DFunction_sptr poldi2DFunction = std::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
 
-    std::vector<ITableWorkspace_sptr> cells;
-
     if (poldi2DFunction) {
+      std::vector<ITableWorkspace_sptr> cells;
       for (size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
         try {
           ITableWorkspace_sptr cell = getRefinedCellParameters(poldi2DFunction->getFunction(i));

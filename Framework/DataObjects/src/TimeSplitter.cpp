@@ -204,10 +204,9 @@ std::string TimeSplitter::getWorkspaceIndexName(const int workspaceIndex, const 
 
   std::string target_name = m_index_name_map[workspaceIndex];
 
-  // If numericalShift > 0, the caller will get back a shifted index.
-  // This is needed for supporting FilterEvents property OutputWorkspaceIndexedFrom1.
-  assert(numericalShift >= 0);
-  if (numericalShift > 0) {
+  // If numericalShift is not zero, the "_index" suffix of the name will be shifted.
+  // This is needed to support FilterEvents property OutputWorkspaceIndexedFrom1.
+  if (numericalShift != 0) {
     // If this TimeSplitter was built from a TableWorkspace, targets could be non-numeric, in which case a numeric
     // shift wouldn't make sense.
     int target_index;
@@ -352,13 +351,11 @@ void TimeSplitter::rebuildCachedPartialTimeROIs() const {
     return;
 
   // Loop over m_roi_map and build all partial TimeROIs
-  int target{NO_TARGET};
-  DateAndTime intervalStart, intervalStop;
   auto it = m_roi_map.cbegin();
   for (; it != std::prev(m_roi_map.cend()); it++) {
-    intervalStart = it->first;
-    intervalStop = std::next(it)->first;
-    target = it->second;
+    DateAndTime intervalStart = it->first;
+    DateAndTime intervalStop = std::next(it)->first;
+    int target = it->second;
 
     if (m_cachedPartialTimeROIs.count(target) > 0) {
       m_cachedPartialTimeROIs[target].appendROIFast(intervalStart, intervalStop);

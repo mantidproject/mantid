@@ -144,7 +144,6 @@ void CalculateDynamicRange::exec() {
       return;
     }
     for (const auto &compName : componentNames) {
-      std::vector<detid_t> detIDs;
       std::vector<IDetector_const_sptr> dets;
       instrument->getDetectorsInBank(dets, compName);
       if (dets.empty()) {
@@ -157,6 +156,7 @@ void CalculateDynamicRange::exec() {
         dets.emplace_back(det);
       }
       if (!dets.empty()) {
+        std::vector<detid_t> detIDs;
         detIDs.reserve(dets.size());
         std::transform(dets.begin(), dets.end(), std::back_inserter(detIDs),
                        [](const auto &det) { return det->getID(); });

@@ -233,22 +233,21 @@ void SaveHKL::exec() {
   }
 
   if (correctPeaks) {
-    std::vector<double> spec(11);
-    std::string STRING;
     std::ifstream infile;
     std::string spectraFile = getPropertyValue("SpectraFile");
     infile.open(spectraFile.c_str());
     if (infile.is_open()) {
+      std::string ignoreLine;
       size_t a = 1;
       for (int wi = 0; wi < 8; wi++)
-        getline(infile, STRING); // Saves the line in STRING.
-      while (!infile.eof())      // To get you all the lines.
-      {
+        getline(infile, ignoreLine);
+      while (!infile.eof()) {
         time.resize(a + 1);
         spectra.resize(a + 1);
-        getline(infile, STRING); // Saves the line in STRING.
-        std::stringstream ss(STRING);
-        if (STRING.find("Bank") == std::string::npos) {
+        std::string line;
+        getline(infile, line);
+        std::stringstream ss(line);
+        if (line.find("Bank") == std::string::npos) {
           double time0, spectra0;
           ss >> time0 >> spectra0;
           time[a].emplace_back(time0);

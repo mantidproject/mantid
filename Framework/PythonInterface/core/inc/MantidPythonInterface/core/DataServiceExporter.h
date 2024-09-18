@@ -64,7 +64,8 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
                  "Retrieve the named object. Raises an exception if the name "
                  "does not exist")
             .def("remove", &DataServiceExporter::removeItem, (arg("self"), arg("name")), "Remove a named object")
-            .def("clear", &DataServiceExporter::clearItems, arg("self"), "Removes all objects managed by the service.")
+            .def("clear", &DataServiceExporter::clearItems, (arg("self"), arg("silent") = false),
+                 "Removes all objects managed by the service.")
             .def("size", &SvcType::size, arg("self"), "Returns the number of objects within the service")
             .def("getObjectNames", &DataServiceExporter::getObjectNamesAsList, (arg("self"), arg("contain") = ""),
                  "Return the list of names currently known to the ADS")
@@ -115,8 +116,14 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
   /**
    * Remove an item from the service
    * @param self A reference to the calling object
+   * @param silent A flag to silence the warning message
    */
-  static void clearItems(SvcType &self) {
+  static void clearItems(SvcType &self, const bool silent) {
+    if (self.size() > 0 && !silent) {
+      PyErr_Warn(PyExc_Warning, "Running ADS.clear() also removes all hidden workspaces.\n"
+                                "Mantid interfaces might still need some of these, for instance, MSlice.");
+    }
+
     ReleaseGlobalInterpreterLock releaseGIL;
     self.clear();
   }

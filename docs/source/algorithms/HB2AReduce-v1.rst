@@ -100,7 +100,7 @@ Usage
        ax.plot(ws, specNum=num)
    plt.legend()
    #fig.savefig('HB2AReduce_1.png')
-   plt.show()
+   fig.show()
 
 .. figure:: /images/HB2AReduce_1.png
 
@@ -117,7 +117,7 @@ Usage
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    ax.plot(ws)
    #fig.savefig('HB2AReduce_2.png')
-   plt.show()
+   fig.show()
 
 .. figure:: /images/HB2AReduce_2.png
 
@@ -134,7 +134,7 @@ Usage
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    ax.plot(ws)
    #fig.savefig('HB2AReduce_3.png')
-   plt.show()
+   fig.show()
 
 .. figure:: /images/HB2AReduce_3.png
 
@@ -151,7 +151,7 @@ Usage
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    ax.plot(ws)
    #fig.savefig('HB2AReduce_4.png')
-   plt.show()
+   fig.show()
 
 .. figure:: /images/HB2AReduce_4.png
 
@@ -168,7 +168,7 @@ Usage
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    ax.plot(ws)
    #fig.savefig('HB2AReduce_5.png')
-   plt.show()
+   fig.show()
 
 .. figure:: /images/HB2AReduce_5.png
 
@@ -191,7 +191,7 @@ single anode *vs* temperature.
    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})
    ax.plot(ws, specNum=8) # anode8
    #fig.savefig('HB2AReduce_6.png')
-   plt.show()
+   fig.show()
 
 .. figure:: /images/HB2AReduce_6.png
 

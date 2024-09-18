@@ -214,7 +214,7 @@ class Dimension(QWidget):
 
         self.spinbox = QDoubleSpinBox()
         self.spinbox.setDecimals(3)
-        self.spinbox.setRange(self.get_bin_center(0), self.get_bin_center(self.nbins - 1))
+        self.spinbox.setRange(self.spinbox_default_min(), self.spinbox_default_max())
         self.spinbox.setSingleStep(self.width)
         value = 0 if self.spinbox.minimum() < 0 and self.spinbox.maximum() > 0 else self.spinbox.minimum()
         self.set_value(value)
@@ -268,6 +268,12 @@ class Dimension(QWidget):
             self.spinbox.setDisabled(True)
             self.units.show()
 
+    def spinbox_default_min(self) -> float:
+        return self.get_bin_center(0)
+
+    def spinbox_default_max(self) -> float:
+        return self.get_bin_center(self.nbins - 1)
+
     def get_state(self):
         return self.state
 
@@ -302,6 +308,12 @@ class Dimension(QWidget):
         self.slider.setValue(int(min(max(i, 0), self.nbins - 1)))
 
     def update_spinbox(self):
+        if self.spinbox_default_min() <= self.value <= self.spinbox_default_max():
+            self.spinbox.setRange(self.spinbox_default_min(), self.spinbox_default_max())
+        else:
+            spin_min = min(self.value, self.spinbox.minimum())
+            spin_max = max(self.value, self.spinbox.maximum())
+            self.spinbox.setRange(spin_min, spin_max)
         self.spinbox.setValue(self.value)
 
     def set_value(self, value):

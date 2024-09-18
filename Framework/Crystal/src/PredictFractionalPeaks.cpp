@@ -327,21 +327,22 @@ void PredictFractionalPeaks::init() {
 
   // enable range properties if required
   using Kernel::EnabledWhenProperty;
-  for (const auto &name : {PropertyNames::HMIN, PropertyNames::HMAX, PropertyNames::KMIN, PropertyNames::KMAX,
-                           PropertyNames::LMIN, PropertyNames::LMAX}) {
+  for (const auto &propertyName : {PropertyNames::HMIN, PropertyNames::HMAX, PropertyNames::KMIN, PropertyNames::KMAX,
+                                   PropertyNames::LMIN, PropertyNames::LMAX}) {
     EnabledWhenProperty includeInRangeEqOne{PropertyNames::INCLUDEPEAKSINRANGE, Kernel::IS_EQUAL_TO, "1"};
     EnabledWhenProperty reflConditionNotEmpty{PropertyNames::REFLECTION_COND, Kernel::IS_NOT_EQUAL_TO, ""};
-    setPropertySettings(name, std::make_unique<Kernel::EnabledWhenProperty>(
-                                  std::move(includeInRangeEqOne), std::move(reflConditionNotEmpty), Kernel::OR));
+    setPropertySettings(propertyName,
+                        std::make_unique<Kernel::EnabledWhenProperty>(std::move(includeInRangeEqOne),
+                                                                      std::move(reflConditionNotEmpty), Kernel::OR));
   }
   // group offset/modulations options together
-  for (const auto &name : {PropertyNames::HOFFSET, PropertyNames::KOFFSET, PropertyNames::LOFFSET}) {
-    setPropertyGroup(name, "Separate Offsets");
+  for (const auto &propertyName : {PropertyNames::HOFFSET, PropertyNames::KOFFSET, PropertyNames::LOFFSET}) {
+    setPropertyGroup(propertyName, "Separate Offsets");
   }
-  for (const auto &name :
+  for (const auto &propertyName :
        {ModulationProperties::ModVector1, ModulationProperties::ModVector2, ModulationProperties::ModVector3,
         ModulationProperties::MaxOrder, ModulationProperties::CrossTerms}) {
-    setPropertyGroup(name, "Modulation Vectors");
+    setPropertyGroup(propertyName, "Modulation Vectors");
   }
   // enable/disable offsets & modulation vectors appropriately
   for (const auto &offsetName : {PropertyNames::HOFFSET, PropertyNames::KOFFSET, PropertyNames::LOFFSET}) {

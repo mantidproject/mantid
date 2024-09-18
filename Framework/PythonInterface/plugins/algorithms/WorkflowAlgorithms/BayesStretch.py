@@ -104,9 +104,6 @@ class BayesStretch(PythonAlgorithm):
 
     # pylint: disable=too-many-locals
     def PyExec(self):
-        if not package_installed("quasielasticbayes", show_warning=True):
-            raise RuntimeError("Please install 'quasielasticbayes' missing dependency")
-
         from quasielasticbayes import Quest as Que
 
         from IndirectBayes import CalcErange, GetXYE

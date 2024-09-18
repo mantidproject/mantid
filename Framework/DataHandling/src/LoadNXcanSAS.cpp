@@ -53,8 +53,7 @@ DataSpaceInformation getDataSpaceInfo(H5::DataSet &dataSet) {
   auto dataSpace = dataSet.getSpace();
   const auto rank = dataSpace.getSimpleExtentNdims();
   if (rank > 2) {
-    std::invalid_argument("LoadNXcanSAS: Cannot load a data set "
-                          "with more than 2 dimensions.");
+    throw std::invalid_argument("LoadNXcanSAS: Cannot load a data set with more than 2 dimensions.");
   }
 
   hsize_t dims[2] = {0, 0};

@@ -175,5 +175,7 @@ void export_Property() {
       .add_static_property("EMPTY_LONG", emptyLong)
 
       .def("setAutoTrim", &Property::setAutoTrim, (arg("setting")), "Setting automatic trimming of whitespaces.")
-      .def("getAutoTrim", &Property::autoTrim, "Gets the setting of automatic trimming of whitespaces.");
+      .def("getAutoTrim", &Property::autoTrim, "Gets the setting of automatic trimming of whitespaces.")
+      .def("setDisableReplaceWSButton", &Property::setDisableReplaceWSButton, (arg("disable")),
+           "Disable the creation of the Replace Workspace button.");
 }

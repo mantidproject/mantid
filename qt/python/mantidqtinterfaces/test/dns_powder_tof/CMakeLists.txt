@@ -32,7 +32,7 @@ set(TEST_PY_FILES
     plot/tof_powder_plot_model_test.py
     plot/tof_powder_plot_presenter_test.py
     plot/tof_powder_plot_widget_test.py
-    scripts/dnstof_test.py
+    scripts/md_powder_tof_test.py
     script_generator/common_script_generator_model_test.py
     script_generator/common_script_generator_presenter_test.py
     script_generator/tof_powder_script_generator_model_test.py

@@ -37,6 +37,7 @@ void SaveDetectorsGrouping::init() {
       "GroupingWorkspace to output to XML file (GroupingWorkspace)");
   declareProperty(std::make_unique<FileProperty>("OutputFile", "", FileProperty::Save, ".xml"),
                   "File to save the detectors mask in XML format");
+  declareProperty("SaveUngroupedDetectors", true, "Whether to write out group number 0, the ungrouped group.");
 }
 
 /// Main body to execute algorithm
@@ -65,10 +66,15 @@ void SaveDetectorsGrouping::exec() {
  */
 void SaveDetectorsGrouping::createGroupDetectorIDMap(std::map<int, std::vector<detid_t>> &groupwkspmap) {
 
+  const bool excludeZero = !getProperty("SaveUngroupedDetectors");
+
   // 1. Create map
   for (size_t iws = 0; iws < mGroupWS->getNumberHistograms(); iws++) {
     // a) Group ID
     auto groupid = static_cast<int>(mGroupWS->y(iws)[0]);
+
+    if (excludeZero && groupid == 0)
+      continue;
 
     // b) Exist? Yes --> get handler on vector.  No --> create vector and
     auto it = groupwkspmap.find(groupid);
@@ -140,14 +146,14 @@ void SaveDetectorsGrouping::printToXML(const std::map<int, std::vector<detid_t>>
 
   // 1. Get Instrument information
   const auto &instrument = mGroupWS->getInstrument();
-  const std::string name = instrument->getName();
-  g_log.debug() << "Instrument " << name << '\n';
+  const std::string instrumentName = instrument->getName();
+  g_log.debug() << "Instrument " << instrumentName << '\n';
 
   // 2. Start document (XML)
   AutoPtr<Document> pDoc = new Document;
   AutoPtr<Element> pRoot = pDoc->createElement("detector-grouping");
   pDoc->appendChild(pRoot);
-  pRoot->setAttribute("instrument", name);
+  pRoot->setAttribute("instrument", instrumentName);
   pRoot->setAttribute("idf-date", instrument->getValidFromDate().toISO8601String());
 
   // Set description if was specified by user

@@ -10,7 +10,6 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/Task.h"
-#include "MantidKernel/Timer.h"
 
 #include <memory>
 
@@ -42,7 +41,7 @@ public:
    * @param min_event_id ;: minimum detector ID to load
    * @param max_event_id :: maximum detector ID to load
    */ // API::IFileLoader<Kernel::NexusDescriptor>
-  ProcessBankData(DefaultEventLoader &loader, std::string entry_name, API::Progress *prog,
+  ProcessBankData(DefaultEventLoader &loader, const std::string &entry_name, API::Progress *prog,
                   std::shared_ptr<std::vector<uint32_t>> event_id,
                   std::shared_ptr<std::vector<float>> event_time_of_flight, size_t numEvents, size_t startAt,
                   std::shared_ptr<std::vector<uint64_t>> event_index,
@@ -53,8 +52,6 @@ public:
 
 private:
   size_t getWorkspaceIndexFromPixelID(const detid_t pixID);
-  size_t getFirstEventIndex(const size_t pulseIndex) const;
-  size_t getLastEventIndex(const size_t pulseIndex, const size_t numPulses) const;
   void preCountAndReserveMem();
 
   /// Algorithm being run
@@ -69,7 +66,7 @@ private:
   /// Progress reporting
   API::Progress *prog;
   /// event pixel ID array
-  const std::shared_ptr<std::vector<uint32_t>> event_id;
+  const std::shared_ptr<std::vector<uint32_t>> event_detid;
   /// event TOF array
   const std::shared_ptr<std::vector<float>> event_time_of_flight;
   /// # of events in arrays
@@ -84,12 +81,10 @@ private:
   bool have_weight;
   /// event weights array
   const std::shared_ptr<std::vector<float>> event_weight;
-  /// Minimum pixel id
-  detid_t m_min_id;
-  /// Maximum pixel id
-  detid_t m_max_id;
-  /// timer for performance
-  Mantid::Kernel::Timer m_timer;
+  /// Minimum pixel id (inclusive)
+  detid_t m_min_detid;
+  /// Maximum pixel id (inclusive)
+  detid_t m_max_detid;
 }; // ENDDEF-CLASS ProcessBankData
 } // namespace DataHandling
 } // namespace Mantid

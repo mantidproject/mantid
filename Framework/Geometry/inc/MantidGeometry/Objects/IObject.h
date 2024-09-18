@@ -7,10 +7,11 @@
 #pragma once
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Instrument/SolidAngleParams.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
-#include <boost/optional.hpp>
 #include <map>
 #include <memory>
+#include <optional>
 #include <vector>
 
 namespace Mantid {
@@ -54,9 +55,9 @@ public:
   virtual int interceptSurface(Geometry::Track &) const = 0;
   virtual double distance(const Geometry::Track &) const = 0;
   // Solid angle
-  virtual double solidAngle(const Kernel::V3D &observer) const = 0;
+  virtual double solidAngle(const SolidAngleParams &params) const = 0;
   // Solid angle with a scaling of the object
-  virtual double solidAngle(const Kernel::V3D &observer, const Kernel::V3D &scaleFactor) const = 0;
+  virtual double solidAngle(const SolidAngleParams &params, const Kernel::V3D &scaleFactor) const = 0;
   /// Return cached value of axis-aligned bounding box
   virtual const BoundingBox &getBoundingBox() const = 0;
   /// Calculate (or return cached value of) Axis Aligned Bounding box
@@ -67,10 +68,10 @@ public:
 
   virtual int getPointInObject(Kernel::V3D &point) const = 0;
 
-  virtual boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                             const size_t) const = 0;
-  virtual boost::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                                             const BoundingBox &activeRegion, const size_t) const = 0;
+  virtual std::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                           const size_t) const = 0;
+  virtual std::optional<Kernel::V3D> generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                                           const BoundingBox &activeRegion, const size_t) const = 0;
 
   virtual detail::ShapeInfo::GeometryShape shape() const = 0;
   virtual const detail::ShapeInfo &shapeInfo() const = 0;

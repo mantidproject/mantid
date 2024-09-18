@@ -147,8 +147,11 @@ def create_dataset(data, path):
     for entry in data:
         datatype = get_datatype_from_sample_name(entry["sample_name"])
         field = field_dict.get(entry["field"], entry["field"])
-        proposal = get_proposal_from_filename(entry["filename"], entry["file_number"])
-        data_path = os.path.join(path, proposal)
+        data_path = os.path.join(path, entry["filename"])
+        file_number_string = str(entry["file_number"])
+        file_number_string_length = len(file_number_string)
+        star_pattern = "*" * file_number_string_length
+        data_path_modified = data_path.replace(file_number_string, star_pattern)
         if datatype in dataset:
             if field in dataset[datatype].keys():
                 dataset[datatype][field].append(entry["file_number"])
@@ -157,7 +160,7 @@ def create_dataset(data, path):
         else:
             dataset[datatype] = {}
             dataset[datatype][field] = [entry["file_number"]]
-            dataset[datatype]["path"] = data_path
+            dataset[datatype]["path"] = data_path_modified
     return dataset
 
 

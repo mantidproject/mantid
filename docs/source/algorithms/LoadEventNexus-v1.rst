@@ -67,6 +67,20 @@ The pre-counting step takes some time but that is normally compensated
 by the speed-up in avoid re-allocating, so the net result is smaller
 memory footprint and approximately the same loading time.
 
+Event Compression
+#################
+
+When ``CompressTolerance`` is set, the data loaded will be compressed while creating the individual weighted events.
+The compression will accumulate events to create a weighted event with no time and cannot be further filtered afterwards.
+This parameter is interpreted to be linear tolerance when positive, and logorithmic tolerance when negative.
+When ``CompressBinningMode`` is specified, the ``CompressTolerance`` is modified be linear or logarithmic.
+This mode does take longer than running ``LoadEventNexus`` without compression,
+but reduces the overall memory used during algorithm execution, and memory used by the resulting workspace.
+For files that do not have many events, this does not necessarily have an effect other than slowing down loading.
+
+.. note:: The workspace created by ``LoadEventNexus`` with compression are different from those created by ``LoadEventNexus`` without compression then ``CompressedEvents``. The histogram representation will be near identical if the tolerence is selected appropriately.
+
+
 Veto Pulses
 ###########
 

@@ -105,7 +105,7 @@ def _do_binary_operation(op, self, rhs, lhs_vars, inplace, reverse):
                 del ads[name]
         _workspace_op_tmps = []
     else:
-        if type(resultws) == WorkspaceGroup:
+        if type(resultws) is WorkspaceGroup:
             # Ensure the members are removed aswell
             members = resultws.getNames()
             for member in members:

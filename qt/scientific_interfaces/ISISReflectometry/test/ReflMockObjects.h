@@ -28,7 +28,7 @@
 #include "GUI/Runs/ISearchModel.h"
 #include "GUI/Runs/ISearcher.h"
 #include "GUI/Runs/SearchCriteria.h"
-#include "GUI/Save/IAsciiSaver.h"
+#include "GUI/Save/IFileSaver.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidFrameworkTestHelpers/FallbackBoostOptionalIO.h"
@@ -192,7 +192,7 @@ public:
 class MockSavePresenter : public ISavePresenter {
 public:
   MOCK_METHOD1(acceptMainPresenter, void(IBatchPresenter *));
-  MOCK_METHOD1(saveWorkspaces, void(std::vector<std::string> const &));
+  MOCK_METHOD2(saveWorkspaces, void(std::vector<std::string> const &, bool const));
   MOCK_CONST_METHOD0(shouldAutosave, bool());
   MOCK_CONST_METHOD0(shouldAutosaveGroupRows, bool());
   MOCK_METHOD0(notifyReductionPaused, void());
@@ -329,12 +329,12 @@ public:
 };
 
 /**** Saver ****/
-class MockAsciiSaver : public IAsciiSaver {
+class MockFileSaver : public IFileSaver {
 public:
   MOCK_CONST_METHOD1(isValidSaveDirectory, bool(std::string const &));
   MOCK_CONST_METHOD4(save, void(std::string const &, std::vector<std::string> const &, std::vector<std::string> const &,
                                 FileFormatOptions const &));
-  virtual ~MockAsciiSaver() = default;
+  virtual ~MockFileSaver() = default;
 };
 
 /**** Job runner ****/
@@ -370,6 +370,7 @@ public:
   MockBatchJobAlgorithm() {}
   MOCK_CONST_METHOD0(algorithm, Mantid::API::IAlgorithm_sptr());
   MOCK_METHOD((const Mantid::API::IAlgorithmRuntimeProps &), getAlgorithmRuntimeProps, (), (const, override, noexcept));
+  MOCK_METHOD((bool), validatePropsPreExec, (), (const, override, noexcept));
   MOCK_METHOD0(item, Item *());
   MOCK_METHOD0(updateItem, void());
   MOCK_CONST_METHOD0(outputWorkspaceNames, std::vector<std::string>());

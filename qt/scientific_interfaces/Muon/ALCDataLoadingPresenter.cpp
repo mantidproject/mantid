@@ -386,7 +386,7 @@ void ALCDataLoadingPresenter::setData(const MatrixWorkspace_sptr &data) {
     m_view->setDataCurve(m_loadedData);
 
   } else {
-    std::invalid_argument("Cannot load an empty workspace");
+    throw std::invalid_argument("Cannot load an empty workspace");
   }
 }
 

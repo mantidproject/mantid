@@ -52,13 +52,13 @@ def add_histograms(data_filenames, project, instruments, number_regions):
 
 
 def add_pawley_reflections(pawley_reflections, project, d_min):
-    for loop_gsas_phase in project.phases():
-        loop_gsas_phase.data["General"]["doPawley"] = True
+    for iphase, phase in enumerate(project.phases()):
+        phase.data["General"]["doPawley"] = True
         gsas_reflections = []
-        for reflection in pawley_reflections:
+        for reflection in pawley_reflections[iphase]:
             [h, k, l], d, multiplicity = reflection
             gsas_reflections.append([int(h), int(k), int(l), int(multiplicity), float(d), True, 100.0, d_min])
-        loop_gsas_phase.data["Pawley ref"] = gsas_reflections
+        phase.data["Pawley ref"] = gsas_reflections
 
 
 def set_max_number_cycles(number_cycles):
@@ -81,11 +81,11 @@ def enable_histogram_scale_factor(refine, project):
 
 
 def enable_unit_cell(refine, override_unit_cell_lengths, project):
-    for loop_phase in project.phases():
+    for iphase, phase in enumerate(project.phases()):
         if refine:
-            loop_phase.set_refinements({"Cell": True})
+            phase.set_refinements({"Cell": True})
         if override_unit_cell_lengths:
-            loop_phase.data["General"]["Cell"][1:4] = tuple(override_unit_cell_lengths)
+            phase.data["General"]["Cell"][1:7] = tuple(override_unit_cell_lengths[iphase])
 
 
 def enable_limits(x_limits, project):
@@ -177,7 +177,6 @@ limits = inputs_dict["limits"]
 mantid_pawley_reflections = inputs_dict["mantid_pawley_reflections"]
 d_spacing_min = inputs_dict["d_spacing_min"]
 number_of_regions = inputs_dict["number_of_regions"]
-
 
 """Call GSASIIscriptable"""
 import_path = None

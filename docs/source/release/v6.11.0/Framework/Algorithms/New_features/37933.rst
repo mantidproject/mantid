@@ -1,0 +1,1 @@
+- add flag "CheckUncertainty" to :ref:`CompareWorkspaces <algm-CompareWorkspaces>` to turn off comparing the y-value uncertainties.

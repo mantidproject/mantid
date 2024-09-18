@@ -10,7 +10,7 @@
 Description
 -----------
 
-This algorithm masks bins according to the criteria specified as a `muparser <http://beltoforion.de/article.php?a=muparser>`_ expression.
+This algorithm masks bins according to the criteria specified as a `muparser <https://beltoforion.de/en/muparser/index.php#idStart>`_ expression.
 The variables entering the criteria are reserved as follows:
 
 - y : count in a bin (arbitrary units)

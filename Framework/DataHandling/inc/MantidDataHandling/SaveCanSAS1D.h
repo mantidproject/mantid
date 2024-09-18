@@ -83,7 +83,9 @@ class MANTID_DATAHANDLING_DLL SaveCanSAS1D : public API::Algorithm {
 public:
   virtual ~SaveCanSAS1D() = default;
   const std::string name() const override { return "SaveCanSAS1D"; }
-  const std::string summary() const override { return "Save a MatrixWorkspace to a file in the canSAS 1-D format"; }
+  const std::string summary() const override {
+    return "Save a MatrixWorkspace to a file in the CanSAS1D XML format (for 1D data).";
+  }
   int version() const override { return 1; }
   const std::string category() const override { return "DataHandling\\XML;SANS\\DataHandling"; }
 

@@ -15,6 +15,7 @@
 #include <QComboBox>
 #include <QDesktopWidget>
 #include <QFileInfo>
+#include <QScreen>
 #include <QUrl>
 
 // Mantid
@@ -284,11 +285,13 @@ void LoadDialog::createDynamicLayout() {
   m_form.propertyLayout->setEnabled(true);
   m_form.propertyLayout->activate();
 
-  const int screenHeight = QApplication::desktop()->height();
-  // If the thing won't end up too big compared to the screen height,
-  // resize the scroll area so we don't get a scroll bar
-  if (dialogHeight < 0.8 * screenHeight)
-    this->resize(this->width(), dialogHeight + 20);
+  const auto screenSize = screen()->availableSize();
+  const auto screenGeometry = screen()->availableGeometry();
+  dialogHeight = std::min(dialogHeight, static_cast<int>(screenSize.height() * 0.65));
+  this->resize(this->width(), dialogHeight);
+  const auto xPos = screenGeometry.x() + (screenSize.width() - this->width()) / 2;
+  const auto yPos = screenGeometry.y() + (screenSize.height() - this->height()) / 2;
+  this->move(xPos, yPos);
 
   // Make sure the OutputWorkspace value has been stored so that the validator
   // is cleared appropriately

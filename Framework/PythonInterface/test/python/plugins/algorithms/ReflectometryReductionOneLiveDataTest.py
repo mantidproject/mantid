@@ -147,22 +147,22 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def test_basic_reduction_works(self):
         workspace = self._run_algorithm_with_defaults()
         self.assertEqual(workspace.dataX(0).size, 55)
-        self._assert_delta(workspace.dataX(0)[0], 0.006462)
-        self._assert_delta(workspace.dataX(0)[33], 0.027376)
-        self._assert_delta(workspace.dataX(0)[54], 0.066421)
-        self._assert_delta(workspace.dataY(0)[4], 0.043630)
-        self._assert_delta(workspace.dataY(0)[33], 0.000029)
+        self._assert_delta(workspace.dataX(0)[0], 0.000523)
+        self._assert_delta(workspace.dataX(0)[33], 0.002217)
+        self._assert_delta(workspace.dataX(0)[54], 0.005379)
+        self._assert_delta(workspace.dataY(0)[4], 0.039447)
+        self._assert_delta(workspace.dataY(0)[33], 0.00003)
         self._assert_delta(workspace.dataY(0)[53], 0.0)
 
     def test_basic_reduction_history(self):
         workspace = self._run_algorithm_with_defaults()
         expected = [
             "CloneWorkspace",
-            "LoadInstrument",
             "GetFakeLiveInstrumentValue",
             "GetFakeLiveInstrumentValue",
             "GetFakeLiveInstrumentValue",
             "AddSampleLogMultiple",
+            "LoadInstrument",
             "SetInstrumentParameter",
             "SetInstrumentParameter",
             "ReflectometryISISLoadAndProcess",
@@ -170,7 +170,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self._check_history(workspace, expected)
 
     def test_missing_inputs(self):
-        self.assertRaises(RuntimeError, ReflectometryReductionOneLiveData)
+        self.assertRaises(TypeError, ReflectometryReductionOneLiveData)
 
     def test_invalid_input_workspace(self):
         self.assertRaises(ValueError, ReflectometryReductionOneLiveData, InputWorkspace="bad")
@@ -180,7 +180,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
 
     def test_invalid_property(self):
         self.assertRaises(
-            RuntimeError,
+            TypeError,
             ReflectometryReductionOneLiveData,
             InputWorkspace=self.__class__._input_ws,
             OutputWorkspace="output",
@@ -195,7 +195,6 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         child_alg = create_algorithm("ReflectometryISISLoadAndProcess")
         excluded = [
             "InputRunList",
-            "ROIDetectorIDs",
             "ThetaIn",
             "ThetaLogName",
             "HideInputWorkspaces",
@@ -270,11 +269,11 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         workspace = self._run_algorithm_with_zero_theta()
         expected = [
             "CloneWorkspace",
-            "LoadInstrument",
             "GetFakeLiveInstrumentValuesWithZeroTheta",
             "GetFakeLiveInstrumentValuesWithZeroTheta",
             "GetFakeLiveInstrumentValuesWithZeroTheta",
             "AddSampleLogMultiple",
+            "LoadInstrument",
             "SetInstrumentParameter",
             "SetInstrumentParameter",
             "ReflectometryISISLoadAndProcess",

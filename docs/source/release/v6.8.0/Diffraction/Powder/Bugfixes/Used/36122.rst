@@ -1,1 +1,0 @@
-- Fixed bug in `PDCalibration` which was not using the user-input peak windows unless they were pre-sorted.  No longer necessary to pre-sort peak centers and windows.

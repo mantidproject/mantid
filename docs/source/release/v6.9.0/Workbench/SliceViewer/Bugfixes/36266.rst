@@ -1,1 +1,0 @@
-- Fixed error in Slice Viewer when trying to click on the 2D plot after the `Add Peak` option is selected, but the peaks workspace has already been deleted.

@@ -87,24 +87,13 @@ these now represent counts (not counts per :math:`x`-bin-width).
 Fractional Rebinning
 ####################
 
-Some algorithms, such as :ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>`
-or :ref:`ConvertToReflectometryQ <algm-ConvertToReflectometryQ>`, create a special type of
-:ref:`Workspace2D <Workspace2D>` called a ``RebinnedOutput`` workspace in which
-each bin contains both a value and the fractional overlap area of the this bin over
-that of the original data. There is more discussion of this in the
-:ref:`SofQWNormalisedPolygon <algm-SofQWNormalisedPolygon>` documentation.
+Some algorithms create a special type of :ref:`Workspace2D <Workspace2D>` called a ``RebinnedOutput`` workspace,
+in which each bin contains both a value and the fractional overlap area of this bin over
+that of the original data. There is more discussion of this in the :ref:`FractionalRebinning <FractionalRebinning>`
+concepts page.
 
-This algorithm calculates the integrated counts per spectra of a ``RebinnedOutput``
-workspace as follows:
-
-.. math::
-   I = \left. \sum_i Y_i F_i \middle/ \left(\frac{1}{n} \sum_i F_i \right) \right.
-
-where :math:`Y_i` and :math:`F_i` are the values and fractions for the :math:`i^{\mathrm{th}}`
-bin and the sum runs from ``RangeLower`` to ``RangeUpper``. :math:`n` is the number
-of bins (or fractional bins if ``IncludePartialBins=True``) in the range which is not ``NaN``.
-The :math:`1/n` factor is needed so that the integral is correctly normalised compared to
-the case when there is no fractional bins, where all :math:`F_i = 1`.
+The Integration algorithm differs for **RebinnedOutput** workspaces, please consult the
+page :ref:`FractionalRebinning <FractionalRebinning>` for more information.
 
 
 Usage

@@ -232,14 +232,12 @@ std::size_t Instrument::getNumberDetectors(bool skipMonitors) const {
     std::size_t monitors(0);
     if (m_map) {
       const auto &in_dets = m_instr->m_detectorCache;
-      for (const auto &in_det : in_dets)
-        if (std::get<2>(in_det))
-          monitors += 1;
+      monitors =
+          std::count_if(in_dets.cbegin(), in_dets.cend(), [](const auto &in_det) { return std::get<2>(in_det); });
     } else {
       const auto &in_dets = m_detectorCache;
-      for (const auto &in_det : in_dets)
-        if (std::get<2>(in_det))
-          monitors += 1;
+      monitors =
+          std::count_if(in_dets.cbegin(), in_dets.cend(), [](const auto &in_det) { return std::get<2>(in_det); });
     }
     return (numDetIDs - monitors);
   } else {
@@ -300,7 +298,7 @@ void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, con
 void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets, const std::string &bankName) const {
   std::shared_ptr<const IComponent> comp = this->getComponentByName(bankName);
   if (!comp) {
-    throw Kernel::Exception::NotFoundError("Could not find component", bankName);
+    throw Kernel::Exception::NotFoundError("Instrument: Could not find component", bankName);
   }
   getDetectorsInBank(dets, *comp);
 }
@@ -755,7 +753,7 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
       m_cachedBoundingBox = new BoundingBox();
       ComponentID sourceID = getSource()->getComponentID();
       // Loop over the children and define a box large enough for all of them
-      for (auto component : m_children) {
+      for (const auto component : m_children) {
         BoundingBox compBox;
         if (component && component->getComponentID() != sourceID) {
           component->getBoundingBox(compBox);
@@ -795,7 +793,7 @@ std::shared_ptr<const std::vector<IObjComponent_const_sptr>> Instrument::getPlot
 void Instrument::appendPlottable(const CompAssembly &ca, std::vector<IObjComponent_const_sptr> &lst) const {
   for (int i = 0; i < ca.nelements(); i++) {
     IComponent *c = ca[i].get();
-    auto *a = dynamic_cast<CompAssembly *>(c);
+    const auto *a = dynamic_cast<CompAssembly *>(c);
     if (a)
       appendPlottable(*a, lst);
     else {
@@ -912,9 +910,9 @@ void Instrument::saveNexus(::NeXus::File *file, const std::string &group) const 
   }
 
   // Add physical detector and monitor data
-  auto detectorIDs = getDetectorIDs(true);
   auto detmonIDs = getDetectorIDs(false);
   if (!detmonIDs.empty()) {
+    auto detectorIDs = getDetectorIDs(true);
     // Add detectors group
     file->makeGroup("physical_detectors", "NXdetector", true);
     file->writeData("number_of_detectors", uint64_t(detectorIDs.size()));
@@ -1193,7 +1191,7 @@ std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
   constexpr double safety_factor = 2.0;
   const double imag_norm_max = sin(d_max / (2.0 * L * safety_factor));
 
-  Eigen::Affine3d transformation;
+  auto transformation = Eigen::Affine3d::Identity();
   int64_t oldParentIndex = -1;
 
   const auto &componentInfo = getParameterMap()->componentInfo();

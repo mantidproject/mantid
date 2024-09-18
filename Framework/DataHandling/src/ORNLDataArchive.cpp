@@ -96,10 +96,10 @@ DECLARE_ARCHIVESEARCH(ORNLDataArchive, SNSDataSearch)
  * @return The first matching location of an archived raw datafile, else an
  *     empty string.
  */
-std::string ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
-                                            const std::vector<std::string> &suffixes) const {
+const API::Result<std::string> ORNLDataArchive::getArchivePath(const std::set<std::string> &basenames,
+                                                               const std::vector<std::string> &suffixes) const {
   if (basenames.size() == 0) {
-    return NOT_FOUND;
+    return API::Result<std::string>(NOT_FOUND, "Not found.");
   }
 
   // Mimic previous functionality by only using the first basename.
@@ -109,7 +109,8 @@ std::string ORNLDataArchive::getArchivePath(const std::set<std::string> &basenam
   boost::smatch result;
   if (!boost::regex_match(basename, result, FILE_REGEX)) {
     g_log.debug() << "Unexpected input passed to getArchivePath():" << std::endl << basename << std::endl;
-    return NOT_FOUND;
+    return API::Result<std::string>(NOT_FOUND, "Not found.");
+    ;
   }
 
   assert(result.size() == 3);
@@ -122,11 +123,11 @@ std::string ORNLDataArchive::getArchivePath(const std::set<std::string> &basenam
     facility = config.getInstrument(instrument).facility().name();
 
     if (facility != "HFIR" && facility != "SNS") {
-      return NOT_FOUND;
+      return API::Result<std::string>(NOT_FOUND, "Not found.");
     }
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     g_log.debug() << "\"" << instrument << "\" is not an instrument known to Mantid." << std::endl;
-    return NOT_FOUND;
+    return API::Result<std::string>(NOT_FOUND, "Not found.");
   }
 
   // Note that we will only be asking for raw files with the given instrument
@@ -162,7 +163,7 @@ std::string ORNLDataArchive::getArchivePath(const std::set<std::string> &basenam
   if (datafiles.size() == 0) {
     g_log.debug() << "ONCat does not know the location of run \"" << run << "\" for \"" << instrument << "\"."
                   << std::endl;
-    return NOT_FOUND;
+    return API::Result<std::string>(NOT_FOUND, "Not found.");
   }
 
   g_log.debug() << "All datafiles returned from ONCat:" << std::endl;
@@ -184,15 +185,15 @@ std::string ORNLDataArchive::getArchivePath(const std::set<std::string> &basenam
   for (const auto &suffix : suffixes) {
     const std::string fullSuffix = basename + suffix;
     if (ends_with(toUpperCase(location), toUpperCase(fullSuffix))) {
-      return location;
+      return API::Result<std::string>(location);
     }
   }
 
   if (ends_with(toUpperCase(location), toUpperCase(basename))) {
-    return location;
+    return API::Result<std::string>(location);
   }
 
-  return NOT_FOUND;
+  return API::Result<std::string>(NOT_FOUND, "Not found.");
 }
 
 void ORNLDataArchive::setONCat(ONCat_uptr oncat) { m_oncat = std::move(oncat); }

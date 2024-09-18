@@ -59,11 +59,6 @@ class ResNorm(PythonAlgorithm):
         self.declareProperty(name="Save", defaultValue=False, doc="Switch Save result to nxs file Off/On")
 
     def PyExec(self):
-        from mantid.utils.pip import package_installed
-
-        if not package_installed("quasielasticbayes", show_warning=True):
-            raise RuntimeError("Please install 'quasielasticbayes' missing dependency")
-
         import IndirectBayes as Main
 
         self.log().information("ResNorm input")

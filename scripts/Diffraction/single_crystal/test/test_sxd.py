@@ -14,6 +14,8 @@ from mantid.simpleapi import (
     SetUB,
     ClearUB,
     HasUB,
+    ClearCache,
+    SetSample,
 )
 from Diffraction.single_crystal.sxd import SXD
 from Diffraction.single_crystal.base_sx import PEAK_TYPE, INTEGRATION_TYPE
@@ -24,6 +26,7 @@ sxd_path = "Diffraction.single_crystal.sxd"
 class SXDTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        ClearCache(InstrumentCache=True)
         cls.ws = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="empty")
         axis = cls.ws.getAxis(0)
         axis.setUnit("TOF")
@@ -37,6 +40,9 @@ class SXDTest(unittest.TestCase):
 
     def setUp(self):
         self.sxd = SXD()
+
+    def tearDown(self):
+        ClearCache(InstrumentCache=True)
 
     # --- test BaseSX methods (parent class with abstract methods) that require class instantiation ---
 
@@ -216,6 +222,26 @@ class SXDTest(unittest.TestCase):
 
         self.assertFalse("Material" in self.sxd.sample_dict)
 
+    def test_calc_absorption_weighted_path_lengths(self):
+        # make workspace with sample
+        ws_with_sample = CloneWorkspace(self.ws)
+        SetSample(
+            ws_with_sample,
+            Geometry={"Shape": "CSG", "Value": self.sxd.sphere_shape},
+            Material={"ChemicalFormula": "C2 H4", "SampleNumberDensity": 0.02, "NumberDensityUnit": "Formula Units"},
+        )
+        # make peaks workspace and set intensity to 1
+        peaks_to_correct = CloneWorkspace(self.peaks)
+        peaks_to_correct.getPeak(0).setIntensity(1.0)
+        # store in class
+        runno = 1234
+        self.sxd.set_ws(runno, ws_with_sample)
+        self.sxd.set_peaks(runno, peaks_to_correct, PEAK_TYPE.FOUND)
+
+        self.sxd.calc_absorption_weighted_path_lengths(PEAK_TYPE.FOUND)
+
+        self.assertAlmostEqual(peaks_to_correct.getPeak(0).getIntensity(), 8.7690, delta=1e-4)
+
     #  --- methods specific to SXD class ---
 
     @patch("Diffraction.single_crystal.base_sx.mantid.SetGoniometer")
@@ -295,6 +321,18 @@ class SXDTest(unittest.TestCase):
         for ws in [ws_clone1, ws_clone2, peaks2]:
             # check bank1 moved in all workspaces
             self.assertAlmostEqual(0.0, ws.getInstrument().getComponentByName("bank1").getPos()[0], delta=1e-10)
+
+    def test_undo_calibration_xml(self):
+        # clone workspaces
+        ws3 = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="SXD_undo_cal_test")
+        # move bank1 component to (0,0,0)
+        MoveInstrumentComponent(Workspace=ws3, ComponentName="bank1", RelativePosition=False, EnableLogging=False)
+        peaks3 = CreatePeaksWorkspace(InstrumentWorkspace=ws3, NumberOfPeaks=0, OutputWorkspace="peaks3")
+
+        SXD.undo_calibration(ws3, peaks_ws=peaks3)
+        for ws in [ws3, peaks3]:
+            # check bank1 is no longer at 0 (back at original position)
+            self.assertAlmostEqual(0.13, ws.getInstrument().getComponentByName("bank1").getPos()[0], delta=1e-2)
 
     # --- helper funcs ---
 

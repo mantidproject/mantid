@@ -22,8 +22,8 @@ void MaskBinsData::addXRange(double start, double end, const std::vector<size_t>
 /// Mask a given workspace according to the stored ranges.
 /// @param wsName :: A workspace to mask.
 void MaskBinsData::mask(std::shared_ptr<Mantid::API::MatrixWorkspace> &workspace) const {
-  for (const auto &mask : m_masks) {
-    auto &spectra = mask.spectra;
+  for (const auto &binMask : m_masks) {
+    auto &spectra = binMask.spectra;
     std::vector<int64_t> spectraList(spectra.size());
     std::transform(spectra.cbegin(), spectra.cend(), spectraList.begin(),
                    [](const size_t spec) -> int { return static_cast<int>(spec); });
@@ -32,8 +32,8 @@ void MaskBinsData::mask(std::shared_ptr<Mantid::API::MatrixWorkspace> &workspace
     alg->getPointerToProperty("OutputWorkspace")->createTemporaryValue();
     alg->setProperty("OutputWorkspace", workspace);
     alg->setProperty("InputWorkspaceIndexSet", spectraList);
-    alg->setProperty("XMin", mask.start);
-    alg->setProperty("XMax", mask.end);
+    alg->setProperty("XMin", binMask.start);
+    alg->setProperty("XMax", binMask.end);
     alg->execute();
   }
 }
@@ -49,10 +49,10 @@ bool MaskBinsData::isEmpty() const { return m_masks.isEmpty(); }
 ///   integrals from workspace for all its spectra.
 void MaskBinsData::subtractIntegratedSpectra(const Mantid::API::MatrixWorkspace &workspace,
                                              std::vector<double> &spectraIntgrs) const {
-  for (const auto &mask : m_masks) {
+  for (const auto &binMask : m_masks) {
     std::vector<double> subtract;
-    workspace.getIntegratedSpectra(subtract, mask.start, mask.end, false);
-    auto &spectra = mask.spectra;
+    workspace.getIntegratedSpectra(subtract, binMask.start, binMask.end, false);
+    auto &spectra = binMask.spectra;
     for (const auto &ispec : spectra) {
       auto counts = spectraIntgrs[ispec] - subtract[ispec];
       spectraIntgrs[ispec] = counts >= 0.0 ? counts : 0.0;

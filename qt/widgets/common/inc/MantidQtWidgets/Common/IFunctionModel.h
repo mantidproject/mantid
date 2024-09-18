@@ -10,6 +10,7 @@
 
 #include "FunctionModelDataset.h"
 #include "MantidAPI/IFunction_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 #include <QList>
 #include <QPair>
@@ -24,51 +25,56 @@ using namespace Mantid::API;
 class EXPORT_OPT_MANTIDQT_COMMON IFunctionModel {
 public:
   virtual ~IFunctionModel() = default;
-  void setFunctionString(const QString &funStr);
-  QString getFunctionString() const;
-  QString getFitFunctionString() const;
+  void setFunctionString(std::string const &funStr);
+  std::string getFunctionString() const;
+  std::string getFitFunctionString() const;
   void clear();
   int getNumberLocalFunctions() const;
   virtual void setFunction(IFunction_sptr fun) = 0;
+  virtual IFunction_sptr getFullFunction() const = 0;
   virtual IFunction_sptr getFitFunction() const = 0;
   virtual bool hasFunction() const = 0;
-  virtual void addFunction(const QString &prefix, const QString &funStr) = 0;
-  virtual void removeFunction(const QString &functionIndex) = 0;
-  virtual void setParameter(const QString &paramName, double value) = 0;
-  virtual void setParameterError(const QString &paramName, double value) = 0;
-  virtual double getParameter(const QString &paramName) const = 0;
-  virtual double getParameterError(const QString &paramName) const = 0;
-  virtual QString getParameterDescription(const QString &paramName) const = 0;
-  virtual QStringList getParameterNames() const = 0;
+  virtual void addFunction(std::string const &prefix, std::string const &funStr) = 0;
+  virtual void removeFunction(std::string const &functionIndex) = 0;
+  virtual void setParameter(std::string const &parameterName, double value) = 0;
+  virtual void setParameterError(std::string const &parameterName, double value) = 0;
+  virtual double getParameter(std::string const &parameterName) const = 0;
+  virtual double getParameterError(std::string const &parameterName) const = 0;
+  virtual std::string getParameterDescription(std::string const &parameterName) const = 0;
+  virtual std::vector<std::string> getParameterNames() const = 0;
   virtual IFunction_sptr getSingleFunction(int index) const = 0;
   virtual IFunction_sptr getCurrentFunction() const = 0;
   virtual void setNumberDomains(int) = 0;
   virtual void setDatasets(const QList<FunctionModelDataset> &datasets) = 0;
-  virtual QStringList getDatasetNames() const = 0;
-  virtual QStringList getDatasetDomainNames() const = 0;
+  virtual std::vector<std::string> getDatasetNames() const = 0;
+  virtual std::vector<std::string> getDatasetDomainNames() const = 0;
   virtual int getNumberDomains() const = 0;
   virtual int currentDomainIndex() const = 0;
   virtual void setCurrentDomainIndex(int) = 0;
-  virtual void changeTie(const QString &paramName, const QString &tie) = 0;
-  virtual void addConstraint(const QString &functionIndex, const QString &constraint) = 0;
-  virtual void removeConstraint(const QString &paramName) = 0;
-  virtual QStringList getGlobalParameters() const = 0;
-  virtual void setGlobalParameters(const QStringList &globals) = 0;
-  virtual bool isGlobal(const QString &parName) const = 0;
-  virtual QStringList getLocalParameters() const = 0;
+  virtual void changeTie(std::string const &parameterName, std::string const &tie) = 0;
+  virtual void addConstraint(std::string const &functionIndex, std::string const &constraint) = 0;
+  virtual void removeConstraint(std::string const &parameterName) = 0;
+  virtual std::vector<std::string> getGlobalParameters() const = 0;
+  virtual void setGlobal(std::string const &parameterName, bool on) = 0;
+  virtual void setGlobalParameters(const std::vector<std::string> &globals) = 0;
+  virtual bool isGlobal(std::string const &parameterName) const = 0;
+  virtual std::vector<std::string> getLocalParameters() const = 0;
   virtual void updateMultiDatasetParameters(const IFunction &fun) = 0;
+  virtual void updateMultiDatasetParameters(const ITableWorkspace &paramTable) = 0;
   virtual void updateParameters(const IFunction &fun) = 0;
-  virtual double getLocalParameterValue(const QString &parName, int i) const = 0;
-  virtual bool isLocalParameterFixed(const QString &parName, int i) const = 0;
-  virtual QString getLocalParameterTie(const QString &parName, int i) const = 0;
-  virtual QString getLocalParameterConstraint(const QString &parName, int i) const = 0;
-  virtual void setLocalParameterValue(const QString &parName, int i, double value) = 0;
-  virtual void setLocalParameterValue(const QString &parName, int i, double value, double error) = 0;
-  virtual void setLocalParameterFixed(const QString &parName, int i, bool fixed) = 0;
-  virtual void setLocalParameterTie(const QString &parName, int i, const QString &tie) = 0;
-  virtual void setLocalParameterConstraint(const QString &parName, int i, const QString &constraint) = 0;
-  virtual void setGlobalParameterValue(const QString &paramName, double value) = 0;
-  virtual QString setBackgroundA0(double value) = 0;
+  virtual double getLocalParameterValue(std::string const &parameterName, int i) const = 0;
+  virtual bool isLocalParameterFixed(std::string const &parameterName, int i) const = 0;
+  virtual std::string getLocalParameterTie(std::string const &parameterName, int i) const = 0;
+  virtual std::string getLocalParameterConstraint(std::string const &parameterName, int i) const = 0;
+  virtual void setLocalParameterValue(std::string const &parameterName, int i, double value) = 0;
+  virtual void setLocalParameterValue(std::string const &parameterName, int i, double value, double error) = 0;
+  virtual void setLocalParameterFixed(std::string const &parameterName, int i, bool fixed) = 0;
+  virtual void setLocalParameterTie(std::string const &parameterName, int i, std::string const &tie) = 0;
+  virtual void setLocalParameterConstraint(std::string const &parameterName, int i, std::string const &constraint) = 0;
+  virtual void setGlobalParameterValue(std::string const &parameterName, double value) = 0;
+  virtual std::string setBackgroundA0(double value) = 0;
+  virtual void setResolution(const std::vector<std::pair<std::string, size_t>> &fitResolutions) = 0;
+  virtual void setQValues(const std::vector<double> &qValues) = 0;
 
 protected:
   static void copyParametersAndErrors(const IFunction &funFrom, IFunction &funTo);

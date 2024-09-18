@@ -275,7 +275,6 @@ font: {self.rescale_w(12)}px;
         personal_setup_form_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
         personal_setup_form_layout.setHorizontalSpacing(self.rescale_w(5))
         personal_setup_form_layout.setVerticalSpacing(self.rescale_h(5))
-        personal_setup_form_layout.setLabelAlignment(Qt.AlignRight)
         # default Facility
         lbl_default_facilty = QLabel()
         lbl_default_facilty.setText("Default Facility")
@@ -291,7 +290,10 @@ font: {self.rescale_w(12)}px;
         personal_setup_form_layout.addRow(lbl_mud, self.pb_manage_user_directories)
         # Usage data
         lbl_allow_usage_data = QLabel()
-        lbl_allow_usage_data.setText("Report Usage Data")
+        lbl_allow_usage_data.setText(
+            f"<span style='text-align: right; font-size:{self.rescale_h(12)}px;'>Report Usage Data</span><br/>"
+            f"<span style='text-align: right; font-size:{self.rescale_h(8)}px;'>Required to use the Error Reporter</span>"
+        )
         usagelayout = QHBoxLayout()
         usagelayout.setContentsMargins(0, 0, 0, 0)
         self.chk_allow_usage_data.setChecked(True)

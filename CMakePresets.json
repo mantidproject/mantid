@@ -31,7 +31,7 @@
       "description": "Inherited by all Unix-like presets for debugging. Overrides Conda CXX flags for debugging",
       "hidden": true,
       "cacheVariables": {
-        "CMAKE_CXX_FLAGS_DEBUG": "-g -O0",
+        "CMAKE_CXX_FLAGS_DEBUG": "-g -Og",
         "CMAKE_BUILD_TYPE": "Debug"
       }
     },

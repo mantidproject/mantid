@@ -5,7 +5,7 @@ if(CXXTEST_FOUND)
 
   cxxtest_add_test(KernelTest ${TEST_FILES})
   target_include_directories(KernelTest SYSTEM PRIVATE ${CXXTEST_INCLUDE_DIR})
-  target_link_libraries(KernelTest PRIVATE Mantid::Types Mantid::Kernel Mantid::Json gmock Boost::filesystem)
+  target_link_libraries(KernelTest PRIVATE Mantid::Types Mantid::Kernel Mantid::Json gmock)
   add_framework_test_helpers(KernelTest)
   add_dependencies(FrameworkTests KernelTest)
   # Test data

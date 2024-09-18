@@ -1277,9 +1277,9 @@ QVariant QtVariantPropertyManager::attributeValue(const QtProperty *property, co
   if (it == d_ptr->m_typeToAttributeToAttributeType.constEnd())
     return QVariant();
 
-  QMap<QString, int> attributes = it.value();
-  QMap<QString, int>::ConstIterator itAttr = attributes.find(attribute);
-  if (itAttr == attributes.constEnd())
+  QMap<QString, int> propertyAttributes = it.value();
+  QMap<QString, int>::ConstIterator itAttr = propertyAttributes.find(attribute);
+  if (itAttr == propertyAttributes.constEnd())
     return QVariant();
 
   QtProperty *internProp = propertyToWrappedProperty()->value(property, 0);
@@ -1387,9 +1387,9 @@ int QtVariantPropertyManager::attributeType(int propertyType, const QString &att
   if (it == d_ptr->m_typeToAttributeToAttributeType.constEnd())
     return 0;
 
-  QMap<QString, int> attributes = it.value();
-  QMap<QString, int>::ConstIterator itAttr = attributes.find(attribute);
-  if (itAttr == attributes.constEnd())
+  QMap<QString, int> propertyTypeAttributes = it.value();
+  QMap<QString, int>::ConstIterator itAttr = propertyTypeAttributes.find(attribute);
+  if (itAttr == propertyTypeAttributes.constEnd())
     return 0;
   return itAttr.value();
 }

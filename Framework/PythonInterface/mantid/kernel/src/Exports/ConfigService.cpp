@@ -10,6 +10,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/core/GetPointer.h"
+#include "MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h"
 #include "MantidPythonInterface/core/StlExportDefinitions.h"
 #include <boost/python/class.hpp>
 #include <boost/python/copy_const_reference.hpp>
@@ -21,6 +22,7 @@ using Mantid::Kernel::ConfigService;
 using Mantid::Kernel::ConfigServiceImpl;
 using Mantid::Kernel::FacilityInfo;
 using Mantid::Kernel::InstrumentInfo;
+using Mantid::PythonInterface::ReleaseGlobalInterpreterLock;
 using Mantid::PythonInterface::Converters::PySequenceToVector;
 
 using namespace boost::python;
@@ -42,6 +44,7 @@ void setDataSearchDirs(ConfigServiceImpl &self, const object &paths) {
 
 /// Forward call from __getitem__ to getString with use_cache_true
 std::string getStringUsingCache(ConfigServiceImpl const *const self, const std::string &key) {
+  ReleaseGlobalInterpreterLock releaseGIL;
   return self->getString(key, true);
 }
 
@@ -55,6 +58,7 @@ const InstrumentInfo &getInstrument(ConfigServiceImpl const *const self, const o
 /// duck typing emulating dict.get method
 std::string getStringUsingCacheElseDefault(ConfigServiceImpl const *const self, const std::string &key,
                                            const std::string &defaultValue) {
+  ReleaseGlobalInterpreterLock releaseGIL;
   if (self->hasProperty(key))
     return self->getString(key, true);
   else
@@ -100,6 +104,9 @@ void export_ConfigService() {
            "definitions")
       .def("getFacilityNames", &ConfigServiceImpl::getFacilityNames, arg("self"), "Returns the default facility")
       .def("getFacilities", &ConfigServiceImpl::getFacilities, arg("self"), "Returns the default facility")
+      .def("configureLogging", &ConfigServiceImpl::configureLogging, arg("self"),
+           "Configure and start the logging framework")
+      .def("remove", &ConfigServiceImpl::remove, (arg("self"), arg("rootName")), "Remove the indicated key.")
       .def("getFacility", (const FacilityInfo &(ConfigServiceImpl::*)() const) & ConfigServiceImpl::getFacility,
            arg("self"), return_value_policy<reference_existing_object>(), "Returns the default facility")
       .def("getFacility",
@@ -139,10 +146,12 @@ void export_ConfigService() {
       .def("saveConfig", &ConfigServiceImpl::saveConfig, (arg("self"), arg("filename")),
            "Saves the keys that have changed from their default to the given "
            "filename")
+      .def("getLogLevel", &ConfigServiceImpl::getLogLevel, arg("self"),
+           "Return the string value for the log representation")
       .def("setLogLevel", (void (ConfigServiceImpl::*)(int, bool)) & ConfigServiceImpl::setLogLevel,
            (arg("self"), arg("logLevel"), arg("quiet") = false),
            "Sets the log level priority for all the log channels, logLevel 1 = Fatal, 6 = information, 7 = Debug")
-      .def("setLogLevel", (void (ConfigServiceImpl::*)(std::string, bool)) & ConfigServiceImpl::setLogLevel,
+      .def("setLogLevel", (void (ConfigServiceImpl::*)(std::string const &, bool)) & ConfigServiceImpl::setLogLevel,
            (arg("self"), arg("logLevel"), arg("quiet") = false),
            "Sets the log level priority for all the log channels. Allowed values are fatal, critical, error, warning, "
            "notice, information, debug, and trace.")

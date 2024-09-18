@@ -111,6 +111,29 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
 
             self.assertEqual(reduced_workspace.getItem(0).getNumberHistograms(), expected_size)
 
+    def test_ISISIndirectEnergyTransfer_with_different_number_of_groups(self):
+        # Non-divisible numbers will have an extra group with the remaining detectors
+        results = {5: 5, 10: 10, 4: 5, 12: 13}
+        spectra_min, spectra_max = 3, 52
+
+        for number_of_groups, expected_size in results.items():
+            reduced_workspace = ISISIndirectEnergyTransfer(
+                InputFiles=["IRS26176.RAW"],
+                Instrument="IRIS",
+                Analyser="graphite",
+                Reflection="002",
+                SpectraRange=[spectra_min, spectra_max],
+                GroupingMethod="Groups",
+                NGroups=number_of_groups,
+            )
+
+            workspace = reduced_workspace.getItem(0)
+            self.assertEqual(expected_size, workspace.getNumberHistograms())
+
+            n_detectors_per_group = (spectra_max - spectra_min + 1) // number_of_groups
+            for spec_i in range(number_of_groups):
+                self.assertEqual(n_detectors_per_group, len(workspace.getSpectrum(spec_i).getDetectorIDs()))
+
     def test_reduction_with_background_subtraction(self):
         """
         Tests running a reduction with a background subtraction.
@@ -183,7 +206,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
             Reflection="002",
             SpectraRange=[963, 1004],
             GroupingMethod="File",
-            MapFile="osi_002_14Groups.map",
+            GroupingFile="osi_002_14Groups.map",
         )
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
@@ -264,11 +287,11 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
 
         self.assertTrue(isinstance(wks, WorkspaceGroup), "Result workspace should be a workspace group.")
         self.assertEqual(len(wks), 1)
-        self.assertEqual(wks.getNames()[0], "iris26176_multi_graphite002_red")
+        self.assertEqual(wks.getNames()[0], "iris26173-26176_multi_graphite002_red")
 
         red_ws = wks[0]
-        self.assertTrue("multi_run_numbers" in red_ws.getRun())
-        self.assertEqual(red_ws.getRun().get("multi_run_numbers").value, "26176,26173")
+        self.assertTrue("multi_run_reduction" in red_ws.getRun())
+        self.assertEqual(red_ws.getRun().get("run_number").value, "26176,26173")
 
     def test_instrument_validation_failure(self):
         """

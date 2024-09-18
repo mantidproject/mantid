@@ -80,6 +80,8 @@ public:
   const AlgorithmHistories &getChildHistories() const { return m_childHistories; }
   /// Retrieve a child algorithm history by index
   AlgorithmHistory_sptr getChildAlgorithmHistory(const size_t index) const;
+  /// get storeInADS
+  const bool &getStoreInADS() const { return m_storeInADS; }
   /// Add operator[] access
   AlgorithmHistory_sptr operator[](const size_t index) const;
   /// Retrieve the number of child algorithms
@@ -128,6 +130,8 @@ private:
   AlgorithmHistories m_childHistories;
   /// UUID for this algorithm history
   std::string m_uuid;
+  /// If algorithm was set to store workspaces in the ADS
+  bool m_storeInADS{true};
 };
 
 MANTID_API_DLL std::ostream &operator<<(std::ostream &, const AlgorithmHistory &);

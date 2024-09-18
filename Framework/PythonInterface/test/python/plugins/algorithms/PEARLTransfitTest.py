@@ -17,6 +17,16 @@ class PEARLTransfitTest(unittest.TestCase):
         PEARLTransfit(Files="PEARL00112777", Calibration=True)
         self.assertIn("S_fit_Parameters", mtd)
         self.assertIn("S_fit_Workspace", mtd)
+        # assert fit converged by checking cost function value at minimum
+        self.assertAlmostEqual(mtd["S_fit_Parameters"].column("Value")[-1], 0.16, delta=0.01)
+
+    def test_calibration_run_single_run_backgorund_params_provided(self):
+        # Provide very bad background params and show fit doesn't converge (would do if parameters estimated)
+        PEARLTransfit(Files="PEARL00112777", Calibration=True, EstimateBackground=False, Bg0guessFraction=0.0, Bg1guess=-1.0, Bg2guess=1.0)
+        self.assertIn("S_fit_Parameters", mtd)
+        self.assertIn("S_fit_Workspace", mtd)
+        # assert fit not converged by checking cost function value at minimum
+        self.assertGreater(mtd["S_fit_Parameters"].column("Value")[-1], 1)
 
     def test_calibration_run_multi_run(self):
         # Test that the calibration run produces the correct workspaces for multiple runs
@@ -45,6 +55,12 @@ class PEARLTransfitTest(unittest.TestCase):
         self.assertNotIn("T_fit_Workspace", mtd)
         self.assertNotIn("S_fit_Parameters", mtd)
         self.assertNotIn("S_fit_Workspace", mtd)
+
+    def test_calibration_run_single_run_with_nexus_file(self):
+        # Test that the calibration run produces the correct workspaces for a single run
+        PEARLTransfit(Files="PEARL00112777.nxs", Calibration=True)
+        self.assertIn("S_fit_Parameters", mtd)
+        self.assertIn("S_fit_Workspace", mtd)
 
 
 if __name__ == "__main__":

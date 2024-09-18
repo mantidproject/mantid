@@ -98,6 +98,24 @@ public:
   virtual void project(const size_t detIndex, double &u, double &v, double &uscale, double &vscale) const = 0;
   //@}
 
+  /*
+   * Project a point in the 3D space onto the surface. The method returns the u-
+   *and v- coordinates of the projection
+   * as well as the scaling factors along the u and v axes. The scaling factors
+   *help to draw an approximate projection
+   * of a 3D object on the surface which is an orthographic projection of the
+   *object onto the tagent plane to the
+   * surface at point (uv) and scaled along u and v by the corresponding factor.
+   *
+   * @param position :: The position of a detector
+   * @param u (output) :: u-coordinate of the projection.
+   * @param v (output) :: v-coordinate of the projection.
+   * @param uscale (output) :: The scaling factor along the u-coordinate.
+   * @param vscale (output) :: The scaling factor along the v-coordinate.
+   */
+  virtual void project(const Mantid::Kernel::V3D &position, double &u, double &v, double &uscale,
+                       double &vscale) const = 0;
+
   /** @name Public methods */
   //@{
   /// Toggle between the normal view and the "filpped" view (from behind)

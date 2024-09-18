@@ -478,7 +478,8 @@ def CutMD(*args, **kwargs):  # noqa: C901
     # Now check that all the kwargs we've got are correct
     for key in kwargs.keys():
         if key not in algm:
-            raise RuntimeError("Unknown property: {0}".format(key))
+            msg = f"'{key}' is an invalid keyword argument for {algm.name()}-v{algm.version()}"
+            raise TypeError(msg)
 
     # We're now going to build to_process, which is the list of workspaces we want to process.
     to_process = list()
@@ -655,7 +656,8 @@ def _get_mandatory_args(func_name, required_args, *args, **kwargs):
             val = dict_containing_key[key]
             return val
         except KeyError:
-            raise RuntimeError("%s argument not supplied to %s function" % (str(key), func_name))
+            # raise TypeError similar to python
+            raise TypeError(f"{func_name} missing required argument: '{key}'")
 
     nrequired = len(required_args)
     npositional = len(args)
@@ -702,10 +704,16 @@ def _check_mandatory_args(algorithm, _algm_object, error, *args, **kwargs):
         if len(valid_str) > 0 and p not in kwargs.keys():
             missing_arg_list.append(p)
     if len(missing_arg_list) != 0:
-        raise RuntimeError("%s argument(s) not supplied to %s" % (missing_arg_list, algorithm))
+        # raise TypeError similar to python
+        missing_arg_list = [f"'{arg}'" for arg in missing_arg_list]
+        raise TypeError(f"{algorithm} missing required arguments: " + ", ".join(missing_arg_list))
     # If the error was not caused by missing property the algorithm specific error should suffice
     else:
-        raise RuntimeError(str(error))
+        msg = f"in running {algorithm}: {str(error)}"
+        if "Some invalid Properties found" in str(error):
+            raise TypeError(msg)
+        else:
+            raise RuntimeError(msg)
 
 
 # ------------------------ General simple function calls ----------------------
@@ -722,7 +730,7 @@ def _is_workspace_property(prop):
     """
     if isinstance(prop, _api.IWorkspaceProperty):
         return True
-    if type(prop) == _kernel.Property and "Workspace" in prop.name:
+    if type(prop) is _kernel.Property and "Workspace" in prop.name:
         return True
     else:
         # Doesn't look like a workspace property
@@ -935,8 +943,14 @@ def set_properties(alg_object, *args, **kwargs):
             else:
                 alg_object.setProperty(key, new_value)
         except (RuntimeError, TypeError, ValueError) as e:
-            msg = 'Problem setting "{}" in {}-v{}: {}'.format(name, alg_object.name(), alg_object.version(), str(e))
-            raise e.__class__(msg) from e
+            if str(e).startswith("Unknown property search object") or "is an invalid keyword argument for" in str(e):
+                # raise TypeError similar to python
+                msg = f"'{name}' is an invalid keyword argument for {alg_object.name()}-v{alg_object.version()}"
+                raise TypeError(msg)
+            else:
+                # re-raise the error with clearer message
+                msg = 'Problem setting "{}" in {}-v{}: {}'.format(name, alg_object.name(), alg_object.version(), str(e))
+                raise e.__class__(msg) from e
 
     # end
     if len(args) > 0:

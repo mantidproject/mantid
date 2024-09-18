@@ -19,6 +19,7 @@ from qtpy.QtWidgets import (
     QStatusBar,
     QToolButton,
     QSizePolicy,
+    QDoubleSpinBox,
 )
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot, GridHelperCurveLinear
@@ -48,7 +49,9 @@ class SliceViewerCanvas(ScrollZoomMixin, MantidFigureCanvas):
 class SliceViewerDataView(QWidget):
     """The view for the data portion of the sliceviewer"""
 
-    def __init__(self, presenter: IDataViewSubscriber, dims_info, can_normalise, parent=None, conf=None, image_info_widget=None):
+    def __init__(
+        self, presenter: IDataViewSubscriber, dims_info, can_normalise, parent=None, conf=None, image_info_widget=None, add_extents=True
+    ):
         super().__init__(parent)
 
         self.presenter = presenter
@@ -153,14 +156,24 @@ class SliceViewerDataView(QWidget):
         self.status_bar.addWidget(self.help_button)
         self.status_bar.addWidget(self.status_bar_label)
 
+        # min/max extents
+        self.extents = self.create_extents_layout() if add_extents else None
+
         # layout
         layout = QGridLayout(self)
         layout.setSpacing(1)
+        if self.extents:
+            colorbar_rowspan = 4
+            status_bar_row = 4
+            layout.addLayout(self.extents, 3, 0, 1, 1)
+        else:
+            colorbar_rowspan = 3
+            status_bar_row = 3
         layout.addLayout(self.dimensions_layout, 0, 0, 1, 2)
         layout.addLayout(self.toolbar_layout, 1, 0, 1, 1)
-        layout.addLayout(self.colorbar_layout, 1, 1, 3, 1)
+        layout.addLayout(self.colorbar_layout, 1, 1, colorbar_rowspan, 1)
         layout.addWidget(self.canvas, 2, 0, 1, 1)
-        layout.addWidget(self.status_bar, 3, 0, 1, 1)
+        layout.addWidget(self.status_bar, status_bar_row, 0, 1, 1)
         layout.setRowStretch(2, 1)
 
     def create_dimensions(self, dims_info, custom_image_info=False):
@@ -200,6 +213,10 @@ class SliceViewerDataView(QWidget):
         self.plot_MDH = self.plot_MDH_orthogonal
         self.set_integer_axes_ticks()
 
+        if self.extents:
+            self.ax.callbacks.connect("xlim_changed", self.xlim_changed)
+            self.ax.callbacks.connect("ylim_changed", self.ylim_changed)
+
         self.canvas.draw_idle()
 
     def grid_helper(self, transform):
@@ -230,6 +247,10 @@ class SliceViewerDataView(QWidget):
         self.set_grid_on()
         self.fig.add_subplot(self.ax)
         self.plot_MDH = self.plot_MDH_nonorthogonal
+
+        if self.extents:
+            self.ax.callbacks.connect("xlim_changed", self.xlim_changed)
+            self.ax.callbacks.connect("ylim_changed", self.ylim_changed)
 
         self.canvas.draw_idle()
 
@@ -520,6 +541,87 @@ class SliceViewerDataView(QWidget):
         """
         self.ax.set_xlim(xlim)
         self.ax.set_ylim(ylim)
+
+    def xlim_changed(self, ax):
+        x_min, x_max = ax.get_xlim()
+        self.x_min.blockSignals(True)
+        self.x_min.setValue(x_min)
+        self.x_min.blockSignals(False)
+        self.x_max.blockSignals(True)
+        self.x_max.setValue(x_max)
+        self.x_max.blockSignals(False)
+
+    def update_xlim(self, _):
+        self.ax.set_xlim(self.x_min.value(), self.x_max.value(), emit=False)
+        self.on_data_limits_changed()
+
+    def ylim_changed(self, ax):
+        y_min, y_max = ax.get_ylim()
+        if self.nonorthogonal_mode:
+            y_min = self.nonortho_transform.inv_tr(0, y_min)[1]
+            y_max = self.nonortho_transform.inv_tr(0, y_max)[1]
+        self.y_min.blockSignals(True)
+        self.y_min.setValue(y_min)
+        self.y_min.blockSignals(False)
+        self.y_max.blockSignals(True)
+        self.y_max.setValue(y_max)
+        self.y_max.blockSignals(False)
+
+    def update_ylim(self, _):
+        y_min = self.y_min.value()
+        y_max = self.y_max.value()
+        if self.nonorthogonal_mode:
+            y_min = self.nonortho_transform.tr(0, y_min)[1]
+            y_max = self.nonortho_transform.tr(0, y_max)[1]
+        self.ax.set_ylim(y_min, y_max, emit=False)
+        self.on_data_limits_changed()
+
+    def create_extents_layout(self):
+        self.x_min = QDoubleSpinBox()
+        self.x_min.setRange(-DBLMAX, DBLMAX)
+        self.x_min.setMaximumWidth(100)
+        self.x_min.valueChanged.connect(self.update_xlim)
+
+        self.x_max = QDoubleSpinBox()
+        self.x_max.setRange(-DBLMAX, DBLMAX)
+        self.x_max.setMaximumWidth(100)
+        self.x_max.valueChanged.connect(self.update_xlim)
+
+        self.y_min = QDoubleSpinBox()
+        self.y_min.setRange(-DBLMAX, DBLMAX)
+        self.y_min.setMaximumWidth(100)
+        self.y_min.valueChanged.connect(self.update_ylim)
+
+        self.y_max = QDoubleSpinBox()
+        self.y_max.setRange(-DBLMAX, DBLMAX)
+        self.y_max.setMaximumWidth(100)
+        self.y_max.valueChanged.connect(self.update_ylim)
+
+        extents = QHBoxLayout()
+        extents.addStretch(1)
+        extents.addWidget(QLabel("X min:"))
+        extents.addWidget(self.x_min)
+        extents.addSpacing(10)
+        extents.addWidget(QLabel("X max:"))
+        extents.addWidget(self.x_max)
+        extents.addSpacing(30)
+        extents.addWidget(QLabel("Y min:"))
+        extents.addWidget(self.y_min)
+        extents.addSpacing(10)
+        extents.addWidget(QLabel("Y max:"))
+        extents.addWidget(self.y_max)
+        extents.addStretch(1)
+
+        return extents
+
+    def extents_set_enabled(self, state):
+        if self.extents is None:
+            return
+
+        self.x_min.setEnabled(state)
+        self.x_max.setEnabled(state)
+        self.y_min.setEnabled(state)
+        self.y_max.setEnabled(state)
 
     def set_integer_axes_ticks(self):
         """

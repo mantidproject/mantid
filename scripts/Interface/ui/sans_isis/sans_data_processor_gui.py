@@ -682,6 +682,12 @@ class SANSDataProcessorGui(QMainWindow, Ui_SansDataProcessorWindow):
         self.nx_can_sas_checkbox.setEnabled(True)
         self.rkh_checkbox.setEnabled(True)
 
+    def disable_can_sas_1D_button(self):
+        self.can_sas_checkbox.setEnabled(False)
+
+    def enable_can_sas_1D_button(self):
+        self.can_sas_checkbox.setEnabled(True)
+
     def disable_process_buttons(self):
         self.process_selected_button.setEnabled(False)
         self.process_all_button.setEnabled(False)
