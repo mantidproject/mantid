@@ -9,7 +9,6 @@ from plot_presenter import PlotPresenter
 
 
 class MainPresenter:
-
     def __init__(self, view, model):
         self._view = view
         self._model = model

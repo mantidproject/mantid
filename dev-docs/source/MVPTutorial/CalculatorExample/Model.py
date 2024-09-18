@@ -7,7 +7,6 @@
 
 
 class Model:
-
     def __init__(self):
         self._result: float = 0.0
         self._print_to_screen: bool = True

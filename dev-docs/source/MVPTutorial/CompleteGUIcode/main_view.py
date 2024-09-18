@@ -12,7 +12,6 @@ from plot_view import PlotView
 
 
 class MainView(QWidget):
-
     def __init__(self, parent: Union[QWidget, None] = None):
         super().__init__(parent)
 

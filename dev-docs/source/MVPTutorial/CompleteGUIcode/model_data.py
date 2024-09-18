@@ -9,7 +9,6 @@ from typing import List
 
 
 class PlotModel:
-
     def __init__(self):
         self._x_data = linspace(0.0, 10.0, 100)
         self._y_data = []

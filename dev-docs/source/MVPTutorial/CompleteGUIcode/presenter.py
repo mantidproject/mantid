@@ -8,7 +8,6 @@ from typing import List, Tuple
 
 
 class Presenter:
-
     def __init__(self, view, colours: List[str]):
         self._view = view
         self._view.set_colours(colours)
