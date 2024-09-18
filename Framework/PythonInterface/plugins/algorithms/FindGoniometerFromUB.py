@@ -193,7 +193,7 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
             tmpWS = self.exec_child_alg("CreateSampleWorkspace")
             if dataPath[-4:] == ".raw":
                 # assume log is kept separately in a .log file with same path
-                self.exec_child_alg("CreateSampleWorkspace", Workspace=tmpWS, Filename="".join(dataPath[:-4] + ".log"))
+                self.exec_child_alg("LoadLog", Workspace=tmpWS, Filename="".join(dataPath[:-4] + ".log"))
             elif dataPath[-4:] == ".nxs":
                 # logs are kept with data in nexus file
                 self.exec_child_alg("LoadNexusLogs", Workspace=tmpWS, Filename=dataPath)
@@ -259,7 +259,7 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
         """
         :return: Empty table workspace with columns Run, Chi, Phi and GonioAxis (unit vector)
         """
-        gonioTable = self.exec_child_alg(" CreateEmptyTableWorkspace")
+        gonioTable = self.exec_child_alg("CreateEmptyTableWorkspace")
         # Add some columns, Recognized types are: int,float,double,bool,str,V3D,long64
         gonioTable.addColumn(type="str", name="Run")
         gonioTable.addColumn(type="float", name="Chi")
