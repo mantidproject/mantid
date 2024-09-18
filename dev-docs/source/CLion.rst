@@ -119,23 +119,35 @@ Debugging with CLion
 
 To debug workbench, you'll need to edit the ``workbench`` CMake Application configuration.
 
-#. Set the executable to be the ``python.exe`` in your conda installation
+#. Set the executable to be the ``python`` executable in your conda installation:
 
    .. hlist::
       :columns: 1
 
-      - On Linux: ``/path/to/mambaforge/envs/mantid-developer/bin/python.exe``
+      - On Linux & macOS: ``/path/to/mambaforge/envs/mantid-developer/bin/python``
       - On Windows: ``/path/to/mambaforge/envs/mantid-developer/python.exe``
 
-#. Set the program arguments
+#. Set the program arguments:
 
    .. hlist::
       :columns: 1
 
-      - On Linux: ``workbench --single-process``
+      - On Linux & macOS: ``workbench --single-process``
       - On Windows: ``workbench-script.pyw --single-process``
 
-#. Set the working directory to be the full path to your ``build/bin`` directory
+#. Set the working directory:
+
+   .. hlist::
+      :columns: 1
+
+      - All OS: ``/full/path/to/build/bin/``
+
+#. Set any relevant environment variables:
+
+   .. hlist::
+      :columns: 1
+
+      - On macOS: ``PYTHONPATH=${PYTHONPATH}:/full/path/to/build/bin/``
 
 The ``--single-process`` flag is necessary for debugging. See the :ref:`Running Workbench <RunningWorkbench>` documentation for more information.
 
