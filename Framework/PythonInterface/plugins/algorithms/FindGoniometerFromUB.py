@@ -6,16 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import config
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, Progress, FileFinder, MultipleFileProperty, ITableWorkspaceProperty
-from mantid.simpleapi import (
-    CreateEmptyTableWorkspace,
-    CreateSampleWorkspace,
-    LoadLog,
-    LoadNexusLogs,
-    LoadIsawUB,
-    SetUB,
-    SaveIsawUB,
-    DeleteWorkspace,
-)
 from mantid.kernel import Direction, FloatBoundedValidator, IntListValidator, StringMandatoryValidator, V3D
 import numpy as np
 from os import path
@@ -200,22 +190,21 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
             # these rotation matrices are defined in right-handed coordinate system (i.e. omegaHand = 1 etc.)
             _, fname = path.split(ubFiles[irun])
             dataPath = FileFinder.findRuns(fname.split(".mat")[0])[0]
-            tmpWS = CreateSampleWorkspace(StoreInADS=False)
+            tmpWS = self.exec_child_alg("CreateSampleWorkspace")
             if dataPath[-4:] == ".raw":
                 # assume log is kept separately in a .log file with same path
-                LoadLog(Workspace=tmpWS, Filename="".join(dataPath[:-4] + ".log"))
+                self.exec_child_alg("CreateSampleWorkspace", Workspace=tmpWS, Filename="".join(dataPath[:-4] + ".log"))
             elif dataPath[-4:] == ".nxs":
                 # logs are kept with data in nexus file
-                LoadNexusLogs(Workspace=tmpWS, Filename=dataPath)
+                self.exec_child_alg("LoadNexusLogs", Workspace=tmpWS, Filename=dataPath)
             # read omega and phi (in RH coords)
             omega[irun] = omegaHand * tmpWS.getRun().getLogData(omegaLogName).value[0]
             phiRef[irun] = phiHand * tmpWS.getRun().getLogData(phiLogName).value[0]
             # load UB
-            LoadIsawUB(InputWorkspace=tmpWS, Filename=ubFiles[irun], CheckUMatrix=True)
+            self.exec_child_alg("LoadIsawUB", InputWorkspace=tmpWS, Filename=ubFiles[irun], CheckUMatrix=True)
             tmpUB = tmpWS.sample().getOrientedLattice().getUB()
             # permute axes to use IPNS convention (as in saved .mat file)
             matUB += [tmpUB[[2, 0, 1], :]]
-        DeleteWorkspace(tmpWS)
         return matUB, omega, phiRef
 
     def findConsistentUB(
@@ -224,7 +213,7 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
         # calculate the rotation matrix that maps the UB of the first run onto subsequent UBs
         # get save directory
         saveDir = config["defaultsave.directory"]
-        tmpWS = CreateSampleWorkspace()
+        tmpWS = self.exec_child_alg("CreateSampleWorkspace")
         for irun in range(1, len(omega)):
             chi, phi, u = self.getGonioAngles(matUB[irun], zeroUB, omega[irun])
             # phi relative to first run in RH/LH convention of user
@@ -252,8 +241,8 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
                 _, nameUB = path.split(ubFiles[irun])
                 newUBPath = path.join(saveDir, nameUB[:-4] + "_consistent" + nameUB[-4:])
                 # set as UB (converting back to non-IPNS convention)
-                SetUB(tmpWS, UB=matUB[irun][[1, 2, 0], :])
-                SaveIsawUB(tmpWS, newUBPath)
+                self.exec_child_alg("SetUB", Workspace=tmpWS, UB=matUB[irun][[1, 2, 0], :])
+                self.exec_child_alg("SaveIsawUB", InputWorkspace=tmpWS, Filename=newUBPath)
                 # populate row of table
                 phi2print = phiHand * (phi + phiRef[0])
                 phi2print = phi2print + np.ceil(-phi2print / 360) * 360
@@ -265,13 +254,12 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
                     "Check the goniometer angles and handedness supplied "
                     "and the accuracy of reference UB.".format(ubFiles[irun])
                 )
-        DeleteWorkspace(tmpWS)
 
     def createGoniometerTable(self):
         """
         :return: Empty table workspace with columns Run, Chi, Phi and GonioAxis (unit vector)
         """
-        gonioTable = CreateEmptyTableWorkspace(StoreInADS=False)
+        gonioTable = self.exec_child_alg(" CreateEmptyTableWorkspace")
         # Add some columns, Recognized types are: int,float,double,bool,str,V3D,long64
         gonioTable.addColumn(type="str", name="Run")
         gonioTable.addColumn(type="float", name="Chi")
@@ -317,6 +305,15 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
         # force phi to be in range [0,360)
         phi = phi + np.ceil(-phi / 360) * 360
         return chi, phi, u
+
+    def exec_child_alg(self, alg_name: str, **kwargs):
+        alg = self.createChildAlgorithm(alg_name, enableLogging=False)
+        alg.setAlwaysStoreInADS(False)
+        alg.initialize()
+        alg.setProperties(kwargs)
+        alg.execute()
+        out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
+        return out_props[0] if len(out_props) == 1 else out_props
 
 
 # register algorithm with mantid
