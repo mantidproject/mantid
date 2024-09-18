@@ -1384,7 +1384,7 @@ std::tuple<std::vector<double>, std::vector<double>> DiscusMultipleScatteringCor
         weightsM2[i] += deltas[i] * (weights[i] - weightsMeans[i]);
         // calculate sample SD (M2/n-1)
         // will give NaN for m_events=1, but that's correct
-        weightsErrors[i] = sqrt(weightsM2[i] / static_cast<double>(ie + 1));
+        weightsErrors[i] = sqrt(weightsM2[i] / static_cast<double>(ie));
       }
 
     } else
