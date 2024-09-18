@@ -397,20 +397,6 @@ class IO(BaseModel):
         end = reversed_path.find("/")
         return reversed_path[:end]
 
-    @staticmethod
-    def _encode_utf8_if_text(item):
-        """
-        Convert atom element from unicode to str
-        but only in Python 2 where unicode handling is a mess
-
-        :param item: item to convert to unicode str if Python 2 str
-        :returns: laundered item
-        """
-        if isinstance(item, str):
-            return item.encode("utf-8")
-        else:
-            return item
-
     @validate_call(config=ConfigDict(arbitrary_types_allowed=True))
     def _load_dataset(self, *, hdf_file: h5py.File, name: str, group: h5py.Group):
         """

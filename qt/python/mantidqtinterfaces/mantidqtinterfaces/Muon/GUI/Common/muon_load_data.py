@@ -48,9 +48,6 @@ class MuonLoadData:
         else:
             raise StopIteration
 
-    # for Python 2/3 compatibility
-    next = __next__
-
     # Getters
 
     def num_items(self):
