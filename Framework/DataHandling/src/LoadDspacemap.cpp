@@ -28,7 +28,7 @@ namespace Mantid::DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadDspacemap)
 
-LoadDspacemap::LoadDspacemap() { this->deprecatedDate("2024-9-17"); }
+LoadDspacemap::LoadDspacemap() { this->deprecatedDate("2024-09-17"); }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
