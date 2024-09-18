@@ -13,26 +13,30 @@ import traceback
 mantidpath = "@CMAKE_RUNTIME_OUTPUT_DIRECTORY@"
 
 # get a list of all *.egg-link files
-eggfiles = [os.path.join(mantidpath, item)
-            for item in os.listdir(mantidpath)
-            # skip mantidplot looking files
-            if item.endswith('.egg-link') and 'plot' not in item.lower()]
+eggfiles = [
+    os.path.join(mantidpath, item)
+    for item in os.listdir(mantidpath)
+    # skip mantidplot looking files
+    if item.endswith(".egg-link") and "plot" not in item.lower()
+]
 # directories to add are what are in those files
 pathdirs = []
 for filename in eggfiles:
     with open(filename) as handle:
         for line in handle.readlines():
             line = line.strip()
-            if (not line) or (line == '.'):  # don't add current directory
+            if (not line) or (line == "."):  # don't add current directory
                 continue
             pathdirs.append(line)
 pathdirs = list(set(pathdirs))  # get unique directories
+
 
 def die(msg=None):
     if msg:
         print(msg)
     traceback.print_exc()
     exit(1)
+
 
 # modify the running path and check mantid can be loaded in this python
 pathdirs.insert(0, mantidpath)
@@ -42,40 +46,19 @@ for directory in pathdirs:
 try:
     import mantid  # noqa
 except ImportError as e:
-    # check for an error that appears to be python2 only
-    if 'No module named DLFCN' == str(e):
-        print('Looks like "/usr/lib64/python2.7/plat-####/" is missing from sys.path')
-        # can find platform path by comparing to (in vanilla python)
-        # python -c "import sys, pprint; pprint.pprint(sys.path)"
-        found_dlfcn = False
-        for platform_path in ['/usr/lib64/python2.7/plat-linux2/',
-                              '/usr/lib/python2.7/plat-x86_64-linux-gnu']:
-            if os.path.exists(platform_path):
-                print('found "{}" ... adding to system path'.format(platform_path))
-                sys.path.append(platform_path)
-                try:
-                    import DLFCN  # noqa
-                except ImportError:
-                    die('Did not fix import error')
-                print('       {}  ... adding to mantid.pth'.format(' ' * len(platform_path)))
-                pathdirs.append(platform_path)
-                found_dlfcn = True
-        if not found_dlfcn:  # missing path wasn't found
-            die()
-    else:
-        die("Can't import mantid: {}".format(e))
+    die("Can't import mantid: {}".format(e))
 
 # where path file should go
-pathfile = os.path.join(sc.get_python_lib(plat_specific=True), 'mantid.pth')
+pathfile = os.path.join(sc.get_python_lib(plat_specific=True), "mantid.pth")
 
 if os.path.exists(pathfile):
-    print('over-writing', pathfile, 'with', pathdirs)
+    print("over-writing", pathfile, "with", pathdirs)
 else:
-    print('writing', pathdirs, 'to', pathfile)
-with open(pathfile, 'w') as f:
+    print("writing", pathdirs, "to", pathfile)
+with open(pathfile, "w") as f:
     for directory in pathdirs:
         # check that trailing `/` is there
         if not directory.endswith(os.sep):
             directory += os.sep
         f.write(directory)
-        f.write('\n')
+        f.write("\n")

@@ -172,10 +172,7 @@ class CRYSTALLoader(AbInitioLoader):
             coord_lines += [line.strip(b"\n")]
 
         for line in coord_lines:
-            # convert from unicode to str in case of Python 2
-            temp = str(line.strip(b"\n"))
-
-            logger.debug(temp)
+            logger.debug(line)
 
         return coord_lines
 

@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-# This __future__ import is for Python 2/3 compatibility
+
 from mantid.api import *
 from mantid.kernel import *
 

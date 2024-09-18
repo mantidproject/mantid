@@ -69,7 +69,7 @@ Renaming a C++ algorithm can be achieved via the following steps:
 
   .. code-block:: bash
 
-    python2.7 move_class.py DataHandling OldAlgName DataHandling NewAlgName
+    python move_class.py DataHandling OldAlgName DataHandling NewAlgName
 
 
 Rename Python Algorithm

@@ -237,7 +237,6 @@ class BASISDiffraction(DataProcessorAlgorithm):
         self._lambda_range = np.array(self.getProperty("LambdaRange").value)
         self._momentum_range = np.sort(2 * np.pi / self._lambda_range)
 
-        # implement with ContextDecorator after python2 is deprecated)
         with pyexec_setup(config_new_options) as self._temps:
             # Load the mask to a workspace
             self._t_mask = LoadMask(Instrument="BASIS", InputFile=self.getProperty("MaskFile").value, OutputWorkspace="_t_mask")

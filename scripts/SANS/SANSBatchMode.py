@@ -305,11 +305,9 @@ def BatchReduce(  # noqa: C901
             continue
         except ValueError as reason:
             issueWarning("Cannot load file :" + str(reason))
-            # when we are all up to Python 2.5 replace the duplicated code below with one finally:
-            delete_workspaces(raw_workspaces)
             raise
-
-        delete_workspaces(raw_workspaces)
+        finally:
+            delete_workspaces(raw_workspaces)
 
         if verbose:
             sanslog.notice(createColetteScript(run, format, reduced, centreit, plotresults, filename))

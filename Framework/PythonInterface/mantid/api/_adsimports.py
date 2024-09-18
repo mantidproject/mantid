@@ -85,7 +85,8 @@ def is_valid_identifier(name):
     """
     if _keyword.iskeyword(name):
         return False
-    # If the regex matches it is a valid identifier in Python 2.x
+    # If the regex matches it is a valid identifier
+    # Rules can be found here https://www.w3schools.com/python/gloss_python_variable_names.asp
     return IDENT_REGEX.match(name) is not None
 
 
