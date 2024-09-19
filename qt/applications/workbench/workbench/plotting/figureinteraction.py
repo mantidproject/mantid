@@ -171,7 +171,7 @@ class FigureInteraction(object):
     def _correct_for_scroll_event_on_legend(self, event):
         # Corrects default behaviour in Matplotlib where legend is picked up by scroll event
         legend = event.inaxes.axes.get_legend()
-        if legend.get_draggable() and legend.contains(event):
+        if legend is not None and legend.get_draggable() and legend.contains(event):
             legend_set_draggable(legend, False)
             legend_set_draggable(legend, True)
 
