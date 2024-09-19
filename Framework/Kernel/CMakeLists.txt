@@ -26,6 +26,7 @@ set(SRC_FILES
     src/DiskBuffer.cpp
     src/DllOpen.cpp
     src/EnabledWhenProperty.cpp
+    src/EnumStringProperty.cpp
     src/EnvironmentHistory.cpp
     src/EqualBinsChecker.cpp
     src/ErrorReporter.cpp
@@ -169,6 +170,7 @@ set(INC_FILES
     inc/MantidKernel/EigenConversionHelpers.h
     inc/MantidKernel/EmptyValues.h
     inc/MantidKernel/EnabledWhenProperty.h
+    inc/MantidKernel/EnumStringProperty.h
     inc/MantidKernel/EnumeratedString.h
     inc/MantidKernel/EnvironmentHistory.h
     inc/MantidKernel/EqualBinsChecker.h
@@ -338,6 +340,7 @@ set(TEST_FILES
     DynamicFactoryTest.h
     EigenConversionHelpersTest.h
     EnabledWhenPropertyTest.h
+    EnumStringPropertyTest.h
     EnumeratedStringTest.h
     EnvironmentHistoryTest.h
     EqualBinsCheckerTest.h
