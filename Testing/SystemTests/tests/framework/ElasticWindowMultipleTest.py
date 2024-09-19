@@ -32,3 +32,28 @@ class ElasticWindowMultipleISISTest(MantidSystemTest):
             "irs26176_graphite002_red_elwin_elf",
             "irs26176_graphite002_red_elwin_elf.nxs",
         )
+
+
+class ElasticWindowMultipleILLTest(MantidSystemTest):
+    def runTest(self):
+        Load(Filename="243489-243506ElwinHeat_H2O-HSA-stw.nxs", OutputWorkspace="243489-243506ElwinHeat_H2O-HSA-stw", LoadHistory=False)
+        GroupWorkspaces(InputWorkspaces="243489-243506ElwinHeat_H2O-HSA-stw", OutputWorkspace="Elwin_Input")
+        ElasticWindowMultiple(
+            InputWorkspaces="Elwin_Input",
+            IntegrationRangeStart=-4.9999900000000004,
+            IntegrationRangeEnd=2.4999899999999999,
+            OutputInQ="243489-243506ElwinHeat_H2O-HSA-stw_elwin_eq",
+            OutputInQSquared="243489-243506ElwinHeat_H2O-HSA-stw_elwin_eq2",
+            OutputELF="243489-243506ElwinHeat_H2O-HSA-stw_elwin_elf",
+        )
+
+    def validate(self):
+        self.tolerance = 1e-10
+        return (
+            "243489-243506ElwinHeat_H2O-HSA-stw_elwin_eq",
+            "243489-243506ElwinHeat_H2O-HSA-stw_elwin_eq.nxs",
+            "243489-243506ElwinHeat_H2O-HSA-stw_elwin_eq2",
+            "243489-243506ElwinHeat_H2O-HSA-stw_elwin_eq2.nxs",
+            "243489-243506ElwinHeat_H2O-HSA-stw_elwin_elf",
+            "243489-243506ElwinHeat_H2O-HSA-stw_elwin_elf.nxs",
+        )
