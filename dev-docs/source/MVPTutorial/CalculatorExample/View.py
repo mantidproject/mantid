@@ -1,97 +1,82 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import PyQt5.QtCore as QtCore
-import PyQt5.QtWidgets as QtWidgets
+from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QComboBox, QGridLayout, QPushButton, QTableWidget, QTableWidgetItem, QWidget
+from typing import List, Union
 
 
-class View(QtWidgets.QDialog):
-    # In PyQt signals are the first thing to be defined in a class:
-    displaySignal = QtCore.pyqtSignal()
-    btnSignal = QtCore.pyqtSignal()
-
-    def __init__(self, parent=None):
-        # Call QDialog's constructor
+class View(QWidget):
+    def __init__(self, parent: Union[QWidget, None] = None):
         super(View, self).__init__(parent)
 
-        # Initialise the widgets for the view (this can also be done from Qt Creator
-        self.table = QtWidgets.QTableWidget()
-        self.table.setWindowTitle("MVP Demo")
-        self.table.resize(400, 250)
-        self.table.setRowCount(5)
-        self.table.setColumnCount(2)
-        self.table.setHorizontalHeaderLabels("name;value;".split(";"))
+        self._presenter = None
+
+        self._table = QTableWidget()
+        self._table.setWindowTitle("MVP Demo")
+        self._table.resize(400, 250)
+        self._table.setRowCount(5)
+        self._table.setColumnCount(2)
+        self._table.setHorizontalHeaderLabels("name;value;".split(";"))
 
         # Set display values in the widgets
         keys = ["value 1", "operation", "value 2", "display", "result"]
-        self.combo = {}
-        self.create_combo_table(1, 1, "operations")
-        self.create_combo_table(3, 1, "display")
+        self._combo = {}
+        self._create_combo_table(1, 1, "operations")
+        self._create_combo_table(3, 1, "display")
         for row in range(len(keys)):
-            self.set_names(keys[row], row)
+            self._set_names(keys[row], row)
 
-        # Initialise layout of the widget and add child widgets to it
-        grid = QtWidgets.QGridLayout()
-        grid.addWidget(self.table)
+        grid = QGridLayout()
+        grid.addWidget(self._table)
 
-        self.button = QtWidgets.QPushButton("Calculate", self)
-        self.button.setStyleSheet("background-color:lightgrey")
-        grid.addWidget(self.button)
+        self._button = QPushButton("Calculate", self)
+        self._button.setStyleSheet("background-color:lightgrey")
+        grid.addWidget(self._button)
 
-        # Connect button click handler method to the button's 'clicked' signal
-        self.button.clicked.connect(self.btn_click)
-        # connect method to handle combo box selection changing to the corresponding signal
-        self.combo["display"].currentIndexChanged.connect(self.display_changed)
+        self._button.clicked.connect(self._button_clicked)
+        self._combo["display"].currentIndexChanged.connect(self._display_changed)
 
-        # Set the layout for the view widget
         self.setLayout(grid)
 
-    # The next two methods handle the signals connected to in the presenter
-    # They emit custom signals that can be caught by a presenter
-    def btn_click(self):
-        self.btnSignal.emit()
+    def subscribe_presenter(self, presenter) -> None:
+        self._presenter = presenter
 
-    def display_changed(self):
-        self.displaySignal.emit()
+    def _button_clicked(self) -> None:
+        self._presenter.handle_button_clicked()
 
-    # Populate view
-    def create_combo_table(self, row, col, key):
-        self.combo[key] = QtWidgets.QComboBox()
+    def _display_changed(self) -> None:
+        self._presenter.handle_display_changed()
+
+    def _create_combo_table(self, row: int, col: int, key: str) -> None:
+        self._combo[key] = QComboBox()
         options = ["test"]
-        self.combo[key].addItems(options)
-        self.table.setCellWidget(row, col, self.combo[key])
+        self._combo[key].addItems(options)
+        self._table.setCellWidget(row, col, self._combo[key])
 
-    # The next 5 methods update the appearance of the view.
+    def _set_names(self, name: str, row: int) -> None:
+        text = QTableWidgetItem(name)
+        text.setFlags(Qt.ItemIsEnabled)
+        self._table.setItem(row, 0, text)
 
-    def set_options(self, key, options):
-        self.combo[key].clear()
-        self.combo[key].addItems(options)
+    def set_options(self, key: str, options: List[str]) -> None:
+        self._combo[key].clear()
+        self._combo[key].addItems(options)
 
-    def set_names(self, name, row):
-        text = QtWidgets.QTableWidgetItem(name)
-        text.setFlags(QtCore.Qt.ItemIsEnabled)
-        self.table.setItem(row, 0, text)
+    def set_result(self, value: float) -> None:
+        self._table.setItem(4, 1, QTableWidgetItem(str(value)))
 
-    # Update the view with the result of a calculation
-    def setResult(self, value):
-        self.table.setItem(4, 1, QtWidgets.QTableWidgetItem(str(value)))
+    def show_display(self, show: bool) -> None:
+        self._table.setRowHidden(4, not show)
 
-    def hide_display(self):
-        self.table.setRowHidden(4, True)
+    def get_value(self, row: int) -> float:
+        return float(self._table.item(row, 1).text())
 
-    def show_display(self):
-        self.table.setRowHidden(4, False)
+    def get_operation(self) -> str:
+        return self._combo["operations"].currentText()
 
-    # Finally, we have the get methods to allow the presenter to read the user's input
-
-    def get_value(self, row):
-        return float(self.table.item(row, 1).text())
-
-    def get_operation(self):
-        return self.combo["operations"].currentText()
-
-    def get_display(self):
-        return self.combo["display"].currentText()
+    def get_display(self) -> str:
+        return self._combo["display"].currentText()

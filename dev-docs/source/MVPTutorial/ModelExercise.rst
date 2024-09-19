@@ -9,11 +9,10 @@ presenter to only show the line colours allowed in the model. To
 achieve this you will need to add:
 
 #. A function to the model containing a list of allowed
-   line colours and returning them when called. Does not need to be
-   a method of the class
+   line colours and returning them when called.
 #. A method in the view to update the ComboBox values to match some
    input values.
-#. In the initialisation of the presenter get the allowed colours from
+#. In the constructor of the presenter get the allowed colours from
    the model and pass them to the view.
 
 See :ref:`here <ModelExerciseSolution>` for the solution.

@@ -1,28 +1,31 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets
-import matplotlib.pyplot as plt
+from numpy import ndarray
+from qtpy.QtWidgets import QVBoxLayout, QWidget
+from typing import Union
 
+import matplotlib.pyplot as plt
+from matplotlib.axes import Axes
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 
-class PlotView(QtWidgets.QWidget):
-    def __init__(self, parent=None):
+class PlotView(QWidget):
+    def __init__(self, parent: Union[QWidget, None] = None):
         super().__init__(parent)
 
-        self.figure = plt.figure()
-        grid = QtWidgets.QVBoxLayout(self)
+        self._figure = plt.figure()
+        grid = QVBoxLayout(self)
         self.draw()
-        self.canvas = self.getWidget()
-        grid.addWidget(self.canvas)
+        self._canvas = FigureCanvas(self._figure)
+        grid.addWidget(self._canvas)
         self.setLayout(grid)
 
-    def draw(self):
-        ax = self.figure.add_subplot(111)
+    def draw(self) -> Axes:
+        ax = self._figure.add_subplot(111)
         ax.clear()
         ax.set_xlim([0.0, 10.5])
         ax.set_ylim([-1.05, 1.05])
@@ -30,11 +33,8 @@ class PlotView(QtWidgets.QWidget):
         ax.set_ylabel("$f(t)$")
         return ax
 
-    def getWidget(self):
-        return FigureCanvas(self.figure)
-
-    def addData(self, xvalues, yvalues, grid_lines, colour, marker):
+    def plot_data(self, xvalues: ndarray, yvalues: ndarray, visible: bool, colour: str, marker: str) -> None:
         ax = self.draw()
-        ax.grid(grid_lines)
+        ax.grid(visible)
         ax.plot(xvalues, yvalues, color=colour, marker=marker, linestyle="--")
-        self.canvas.draw()
+        self._canvas.draw()
