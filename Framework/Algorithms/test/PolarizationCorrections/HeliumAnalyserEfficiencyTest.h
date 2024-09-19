@@ -71,11 +71,7 @@ public:
     // The units of the input workspace should be wavelength
     MantidVec e;
     auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "TOF");
-    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
-    heliumAnalyserEfficiency->initialize();
-
-    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp);
-    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
+    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "out");
 
     TS_ASSERT_THROWS_EQUALS(
         heliumAnalyserEfficiency->execute(), std::runtime_error const &e, std::string(e.what()),
@@ -85,15 +81,29 @@ public:
   void testInputWorkspaceNotSingleSpectrumThrowsError() {
     MantidVec e;
     auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength", 10, 0.2, 2);
-    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
-    heliumAnalyserEfficiency->initialize();
-
-    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp);
-    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
+    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "out");
 
     TS_ASSERT_THROWS_EQUALS(
         heliumAnalyserEfficiency->execute(), std::runtime_error const &e, std::string(e.what()),
         "Some invalid Properties found: \n InputWorkspace: All input workspaces must contain a single histogram.");
+  }
+
+  void testInputWorkspaceNotHistogramDataThrowsError() {
+    MantidVec e;
+    auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength");
+
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGrp->getItem(0));
+    auto convert = AlgorithmManager::Instance().create("ConvertToPointData");
+    convert->initialize();
+    convert->setProperty("InputWorkspace", ws);
+    convert->setProperty("OutputWorkspace", ws->getName());
+    convert->execute();
+
+    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "out");
+
+    TS_ASSERT_THROWS_EQUALS(
+        heliumAnalyserEfficiency->execute(), std::runtime_error const &e, std::string(e.what()),
+        "Some invalid Properties found: \n InputWorkspace: All input workspaces must be histogram data.");
   }
 
   void testZeroPdError() {

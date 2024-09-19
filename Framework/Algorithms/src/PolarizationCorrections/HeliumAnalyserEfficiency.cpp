@@ -113,6 +113,11 @@ void validateInputWorkspace(MatrixWorkspace_sptr const &workspace, std::map<std:
 
   if (workspace->getNumberHistograms() != 1) {
     errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must contain a single histogram.";
+    return;
+  }
+
+  if (!workspace->isHistogramData()) {
+    errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be histogram data.";
   }
 }
 /**
