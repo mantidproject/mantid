@@ -667,11 +667,11 @@ class BayesQuasi(PythonAlgorithm):
 
             # interlace amplitudes and widths of the peaks
             y.extend(height_data)
-            y.extend(np.hstack((amplitude_data, width_data, eisf_data)).flatten("F"))
+            y.extend(np.hstack((amplitude_data, width_data, eisf_data)).flatten())
 
             # interlace amplitude and width errors of the peaks
             e.extend(height_error)
-            e.extend(np.hstack((amplitude_error, width_error, eisf_error)).flatten("F"))
+            e.extend(np.hstack((amplitude_error, width_error, eisf_error)).flatten())
 
             # create x data and axis names for each function
             axis_names.append("f" + str(nl) + ".f0." + "Height")
