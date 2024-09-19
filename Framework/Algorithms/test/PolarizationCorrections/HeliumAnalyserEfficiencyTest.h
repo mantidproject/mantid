@@ -82,6 +82,20 @@ public:
         "Some invalid Properties found: \n InputWorkspace: All input workspaces must be in units of Wavelength.");
   }
 
+  void testInputWorkspaceNotSingleSpectrumThrowsError() {
+    MantidVec e;
+    auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength", 10, 0.2, 2);
+    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
+    heliumAnalyserEfficiency->initialize();
+
+    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp);
+    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
+
+    TS_ASSERT_THROWS_EQUALS(
+        heliumAnalyserEfficiency->execute(), std::runtime_error const &e, std::string(e.what()),
+        "Some invalid Properties found: \n InputWorkspace: All input workspaces must contain a single histogram.");
+  }
+
   void testZeroPdError() {
     compareOutputValues(0, {0.4845053416, 0.6550113464, 0.6525155755, 0.5478694489, 0.4142358259});
   }
@@ -183,7 +197,7 @@ private:
 
   WorkspaceGroup_sptr createExampleGroupWorkspace(const std::string &name, MantidVec &expectedEfficiency,
                                                   const std::string &xUnit = "Wavelength", const size_t numBins = 5,
-                                                  const double examplePHe = 0.2) {
+                                                  const double examplePHe = 0.2, const int nSpec = 1) {
     std::vector<double> x(numBins);
     std::vector<double> yNsf(numBins);
     std::vector<double> ySf(numBins);
@@ -193,10 +207,10 @@ private:
       ySf[i] = 0.9 * std::exp(-0.0733 * x[i] * 12 * (1 + examplePHe));
     }
     std::vector<MatrixWorkspace_sptr> wsVec(4);
-    wsVec[0] = generateWorkspace("ws0", x, yNsf, xUnit);
-    wsVec[1] = generateWorkspace("ws1", x, ySf, xUnit);
-    wsVec[2] = generateWorkspace("ws2", x, ySf, xUnit);
-    wsVec[3] = generateWorkspace("ws3", x, yNsf, xUnit);
+    wsVec[0] = generateWorkspace("ws0", x, yNsf, xUnit, nSpec);
+    wsVec[1] = generateWorkspace("ws1", x, ySf, xUnit, nSpec);
+    wsVec[2] = generateWorkspace("ws2", x, ySf, xUnit, nSpec);
+    wsVec[3] = generateWorkspace("ws3", x, yNsf, xUnit, nSpec);
 
     const auto histPoints = wsVec[0]->histogram(0).points();
     const auto &wavelengthPoints = histPoints.rawData();
@@ -211,12 +225,14 @@ private:
   }
 
   MatrixWorkspace_sptr generateWorkspace(const std::string &name, const std::vector<double> &x,
-                                         const std::vector<double> &y, const std::string &xUnit = "Wavelength") {
+                                         const std::vector<double> &y, const std::string &xUnit = "Wavelength",
+                                         const int nSpec = 1) {
     auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
     createWorkspace->initialize();
     createWorkspace->setProperty("DataX", x);
     createWorkspace->setProperty("DataY", y);
     createWorkspace->setProperty("UnitX", xUnit);
+    createWorkspace->setProperty("NSpec", nSpec);
     createWorkspace->setProperty("OutputWorkspace", name);
     createWorkspace->execute();
 
