@@ -107,7 +107,7 @@ We can do a better fit by using simultaneous fitting
 - Tick the ``Simultaneous over`` option
 - In the fitting function, set ``Sigma`` and ``Frequency`` to global
 - Press fit
-- Inspect the flat background by using the arrorws next to ``Display Parameters For``, all but one should be non-zero
+- Inspect the flat background by using the arrows next to ``Display Parameters For``, all but one should be non-zero
 - Remove the flat background
 - Change the ``Fitting type`` from "Normal" to "TF Asymmetry"
 - Press Fit
