@@ -48,6 +48,10 @@ auto constexpr GROUP_FIT_OPTIONS{"Fit Options"};
 auto constexpr GROUP_OUTPUTS{"Outputs"};
 } // namespace PropertyNames
 
+namespace {
+constexpr size_t NUM_FIT_PARAMS = 1;
+} // unnamed namespace
+
 void HeliumAnalyserEfficiency::init() {
   // Declare required input parameters for algorithm and do some validation here
   declareProperty(
@@ -236,18 +240,18 @@ void HeliumAnalyserEfficiency::convertToTheoreticalEfficiency(MatrixWorkspace_sp
 }
 
 double HeliumAnalyserEfficiency::calculateTCrit(const size_t numberOfBins) {
-  // Create a t distribution with dof given by the number of data points minus
-  // the number of params (2)
+  // Create a t distribution with degrees of freedom given by the number of data points minus
+  // the number of parameters that were fitted for
   double tPpf = 1;
-  if (numberOfBins > 2) {
-    const boost::math::students_t dist(static_cast<double>(numberOfBins) - 2.0);
+  if (numberOfBins > NUM_FIT_PARAMS) {
+    const boost::math::students_t dist(static_cast<double>(numberOfBins) - static_cast<double>(NUM_FIT_PARAMS));
     // Critical value corresponding to 1-sigma
     const double alpha = (1 + std::erf(1.0 / sqrt(2))) / 2;
     // Scale factor for the error calculations
     tPpf = boost::math::quantile(dist, alpha);
   } else {
-    g_log.warning(
-        "The number of histogram bins must be greater than 2 in order to provide an accurate error calculation");
+    g_log.warning("The number of histogram bins must be greater than " + std::to_string(NUM_FIT_PARAMS) +
+                  " in order to provide an accurate error calculation");
   }
   return tPpf;
 }
