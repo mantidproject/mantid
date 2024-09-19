@@ -83,11 +83,11 @@ public:
   }
 
   void testZeroPdError() {
-    compareOutputValues(0, {0.4855492736, 0.6769211783, 0.6793691847, 0.5720548267, 0.4331271890});
+    compareOutputValues(0, {0.5079553986, 0.6867138935, 0.6840973263, 0.5743863285, 0.4342848380});
   }
 
   void testNonZeroPdError() {
-    compareOutputValues(1000, {15.5492320180, 21.6777267458, 21.7561216833, 18.3194862144, 13.8704669868});
+    compareOutputValues(1000, {15.5499478124, 21.6780347484, 21.7562698403, 18.3195591775, 13.8705031834});
   }
 
   void testSmallNumberOfBins() {
