@@ -24,20 +24,19 @@ std::string ISISInstrumentDataCache::getFileParentDirectoryPath(const std::strin
   g_log.debug() << "ISISInstrumentDataCache::getFileParentDirectoryPath(" << fileName << ")" << std::endl;
 
   auto [instrumentInfo, runNumber] = validateInstrumentAndNumber(fileName);
-  std::string instrName = instrumentInfo.name();
 
   auto const [jsonPath, json] = openCacheJsonFile(instrumentInfo);
 
   std::string relativePath = json[runNumber].asString();
 
   if (relativePath.empty()) {
-    throw std::invalid_argument("Run number " + runNumber + " not found for instrument " + instrName + ".");
+    throw std::invalid_argument("Run number " + runNumber + " not found in index file " + jsonPath.filename().string() +
+                                ".");
   }
 
-  std::string dirPath = m_dataCachePath + "/" + instrName + "/" + relativePath;
+  std::string dirPath = jsonPath.parent_path().string() + "/" + relativePath;
 
-  g_log.debug() << "Opened instrument index file: " << jsonPath << ". Found path to search: " << dirPath << "."
-                << std::endl;
+  g_log.debug() << "Found path to search: " << dirPath << std::endl;
   return dirPath;
 }
 
@@ -57,7 +56,8 @@ std::vector<std::string> ISISInstrumentDataCache::getRunNumbersInCache(const std
  * @return A pair containing the path and the contents of the json file.
  * @throws std::invalid_argument if the file could not be found.
  */
-std::pair<std::string, Json::Value> ISISInstrumentDataCache::openCacheJsonFile(const InstrumentInfo &instrument) const {
+std::pair<std::filesystem::path, Json::Value>
+ISISInstrumentDataCache::openCacheJsonFile(const InstrumentInfo &instrument) const {
   // Open index json file
   std::filesystem::path jsonPath = makeIndexFilePath(instrument.name());
   std::ifstream ifstrm{jsonPath};
@@ -71,7 +71,8 @@ std::pair<std::string, Json::Value> ISISInstrumentDataCache::openCacheJsonFile(c
   // Read directory path from json file
   Json::Value json;
   ifstrm >> json;
-  return {jsonPath.string(), json};
+  g_log.debug() << "Opened instrument index file: " << jsonPath << std::endl;
+  return {jsonPath, json};
 }
 
 std::pair<InstrumentInfo, std::string>

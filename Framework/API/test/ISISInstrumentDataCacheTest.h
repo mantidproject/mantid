@@ -31,12 +31,12 @@ public:
     std::string sansJson = R"({"101115": "2018/RB1800009-2"})";
     std::string pg3Json = R"({"11111": "mock/path"})";
     std::string wishJson = R"({"12345": "subdir1/subdir2"})";
+    std::string enginxJson = R"({"55555": "subdir1/subdir2"})";
 
-    // Create test JSON file
     std::filesystem::create_directory(m_dataCacheDir);
 
     std::unordered_map<std::string, std::string> instrFiles = {
-        {"MARI", marJson}, {"SANS2D", sansJson}, {"POWGEN", pg3Json}, {"WISH", wishJson}};
+        {"MARI", marJson}, {"SANS2D", sansJson}, {"POWGEN", pg3Json}, {"WISH", wishJson}, {"ENGINX", enginxJson}};
     for (const auto &[instrName, instrIndex] : instrFiles) {
 
       std::filesystem::create_directory(m_dataCacheDir + "/" + instrName);
@@ -78,6 +78,13 @@ public:
     TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/POWGEN/mock/path");
   }
 
+  void testShortNameIsTried() {
+    // Name ENGIN-X is tried first and if it fails it tries ENGINX
+    ISISInstrumentDataCache dc(m_dataCacheDir);
+    std::string actualPath = dc.getFileParentDirectoryPath("ENGINX55555");
+    TS_ASSERT_EQUALS(actualPath, m_dataCacheDir + "/ENGINX/subdir1/subdir2");
+  }
+
   void testInstrWithSuffix() {
     ISISInstrumentDataCache dc(m_dataCacheDir);
     TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirectoryPath("LOQ11111-add"), const std::invalid_argument &e,
@@ -106,7 +113,7 @@ public:
   void testRunNumberNotFound() {
     ISISInstrumentDataCache dc(m_dataCacheDir);
     TS_ASSERT_THROWS_EQUALS(dc.getFileParentDirectoryPath("SANS2D1234"), const std::invalid_argument &e,
-                            std::string(e.what()), "Run number 1234 not found for instrument SANS2D.");
+                            std::string(e.what()), "Run number 1234 not found in index file SANS2D_index.json.");
   }
 
   void testIndexFileExistsWhenExists() {
