@@ -207,27 +207,31 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, const Matr
 void HeliumAnalyserEfficiency::convertToTheoreticalEfficiency(MatrixWorkspace_sptr &eff, const double pHe,
                                                               const double pHeError, const double mu) {
   const auto &pointData = eff->histogram(0).points();
-  const auto &wavelengthPoints = pointData.rawData();
+  const auto &binPoints = pointData.rawData();
+  const auto &binBoundaries = eff->x(0);
 
   auto &theoreticalEff = eff->mutableY(0);
   auto &efficiencyErrors = eff->mutableE(0);
 
   // The value tCrit is used to give us the correct error bounds
   const double tCrit = calculateTCrit(eff->blocksize());
-  const double pdError = getProperty(PropertyNames::PD_ERROR);
+  const double muError = ABSORPTION_CROSS_SECTION_CONSTANT * static_cast<double>(getProperty(PropertyNames::PD_ERROR));
 
-  for (size_t i = 0; i < wavelengthPoints.size(); ++i) {
-    const double wav = wavelengthPoints[i];
+  for (size_t i = 0; i < binPoints.size(); ++i) {
+    const double lambda = binPoints[i];
+    const double lambdaError = binBoundaries[i + 1] - binBoundaries[i];
 
-    theoreticalEff[i] = (1 + std::tanh(mu * pHe * wav)) / 2.0;
+    theoreticalEff[i] = (1 + std::tanh(mu * pHe * lambda)) / 2.0;
 
-    // Calculate the errors for the efficiency using the error on pHe
-    const auto commonTerm = 0.5 * wav / std::pow(std::cosh(mu * wav * pHe), 2);
-    const double de_dpHe = mu * commonTerm;
-    const double de_dpd = ABSORPTION_CROSS_SECTION_CONSTANT * pHe * commonTerm;
-    // Covariance between p_He and pd is zero
+    // Calculate the errors for the efficiency
+    const auto commonTerm = 0.5 / std::pow(std::cosh(mu * lambda * pHe), 2);
+    const double de_dpHe = mu * commonTerm * lambda;
+    const double de_dmu = pHe * commonTerm * lambda;
+    const double de_dlambda = mu * pHe * commonTerm;
+    // Covariance between p_He and mu is zero
     efficiencyErrors[i] =
-        tCrit * std::sqrt(de_dpHe * de_dpHe * pHeError * pHeError + de_dpd * de_dpd * pdError * pdError);
+        tCrit * std::sqrt(de_dpHe * de_dpHe * pHeError * pHeError + de_dmu * de_dmu * muError * muError +
+                          de_dlambda * de_dlambda * lambdaError * lambdaError);
   }
 }
 
