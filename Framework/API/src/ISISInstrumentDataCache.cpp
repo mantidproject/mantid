@@ -34,10 +34,11 @@ std::string ISISInstrumentDataCache::getFileParentDirectoryPath(const std::strin
                                 ".");
   }
 
-  std::string dirPath = jsonPath.parent_path().string() + "/" + relativePath;
+  std::filesystem::path dirPath = jsonPath.parent_path() / relativePath;
+  std::string dirPathString = dirPath.make_preferred().string();
 
-  g_log.debug() << "Found path to search: " << dirPath << std::endl;
-  return dirPath;
+  g_log.debug() << "Found path to search: " << dirPathString << std::endl;
+  return dirPathString;
 }
 
 /**
