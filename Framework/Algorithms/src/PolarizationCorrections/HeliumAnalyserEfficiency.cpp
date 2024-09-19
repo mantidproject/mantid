@@ -108,6 +108,11 @@ void validateInputWorkspace(MatrixWorkspace_sptr const &workspace, std::map<std:
   Kernel::Unit_const_sptr unit = workspace->getAxis(0)->unit();
   if (unit->unitID() != "Wavelength") {
     errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be in units of Wavelength.";
+    return;
+  }
+
+  if (workspace->getNumberHistograms() != 1) {
+    errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must contain a single histogram.";
   }
 }
 /**
