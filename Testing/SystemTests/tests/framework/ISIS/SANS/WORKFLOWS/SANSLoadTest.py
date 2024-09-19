@@ -14,17 +14,17 @@ from mantid.dataobjects import Workspace2D, EventWorkspace
 from mantid.api import AnalysisDataService, AlgorithmManager
 
 from sans.algorithm_detail.load_data import SANSLoadDataFactory
-from sans.common.log_tagger import has_tag
-from sans.common.constants import CALIBRATION_WORKSPACE_TAG, SANS_FILE_TAG
+from SANS.sans.common.log_tagger import has_tag
+from SANS.sans.common.constants import CALIBRATION_WORKSPACE_TAG, SANS_FILE_TAG
 
 # Not clear why the names in the module are not found by Pylint, but it seems to get confused. Hence this check
 # needs to be disabled here.
 # pylint: disable=no-name-in-module
 from sans.state.Serializer import Serializer
 from sans.test_helper.test_director import TestDirector
-from sans.common.enums import SANSFacility, SANSInstrument
+from SANS.sans.common.enums import SANSFacility, SANSInstrument
 from sans.state.StateObjects.StateData import get_data_builder
-from sans.common.file_information import SANSFileInformationFactory
+from SANS.sans.common.file_information import SANSFileInformationFactory
 
 
 def remove_all_workspaces_from_ads():

@@ -7,7 +7,7 @@
 import os
 import unittest
 
-from sans.common.enums import ReductionMode, DetectorType, RangeStepType, FitType
+from SANS.sans.common.enums import ReductionMode, DetectorType, RangeStepType, FitType
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
 from sans.user_file.settings_tags import (
     DetectorId,

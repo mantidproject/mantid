@@ -14,7 +14,7 @@ from ISISCommandInterface import *
 from SANSBatchMode import *
 import os.path
 
-from sans.common.enums import SANSInstrument
+from SANS.sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)

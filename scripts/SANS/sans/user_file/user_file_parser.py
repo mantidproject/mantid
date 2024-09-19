@@ -11,7 +11,7 @@ import re
 from math import copysign
 
 
-from sans.common.enums import ReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument
+from SANS.sans.common.enums import ReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument
 from sans.user_file.settings_tags import (
     DetectorId,
     BackId,

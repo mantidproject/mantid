@@ -13,11 +13,11 @@ from mantid.kernel import Quat, V3D
 from mantid.simpleapi import AddSampleLog, LoadEmptyInstrument
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
 from sans.algorithm_detail.move_workspaces import create_mover, SANSMoveLOQ, SANSMoveSANS2D, SANSMoveLARMORNewStyle, SANSMoveZOOM
-from sans.common.enums import SANSFacility, DetectorType, SANSInstrument
-from sans.state.AllStates import AllStates
-from sans.state.StateObjects.StateData import get_data_builder
-from sans.state.StateObjects.StateMoveDetectors import get_move_builder
-from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
+from SANS.sans.common.enums import SANSFacility, DetectorType, SANSInstrument
+from SANS.sans.state.AllStates import AllStates
+from SANS.sans.state.StateObjects.StateData import get_data_builder
+from SANS.sans.state.StateObjects.StateMoveDetectors import get_move_builder
+from SANS.sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

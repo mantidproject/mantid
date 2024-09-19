@@ -11,11 +11,11 @@
 from os.path import basename, splitext, isfile
 from mantid.api import AnalysisDataService
 
-from sans.common.file_information import find_full_file_path
-from sans.common.constants import EMPTY_NAME, CALIBRATION_WORKSPACE_TAG
-from sans.common.log_tagger import has_tag, get_tag, set_tag
-from sans.common.general_functions import create_child_algorithm, sanitise_instrument_name
-from sans.common.enums import SANSDataType
+from SANS.sans.common.file_information import find_full_file_path
+from SANS.sans.common.constants import EMPTY_NAME, CALIBRATION_WORKSPACE_TAG
+from SANS.sans.common.log_tagger import has_tag, get_tag, set_tag
+from SANS.sans.common.general_functions import create_child_algorithm, sanitise_instrument_name
+from SANS.sans.common.enums import SANSDataType
 
 
 # ---------------------------------

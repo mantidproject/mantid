@@ -9,8 +9,8 @@ import unittest
 from mantid.api import AnalysisDataService, FrameworkManager
 from mantid.kernel import V3D, Quat
 from unittest import mock
-from sans.common.constants import SANS2D, LOQ, LARMOR
-from sans.common.enums import (
+from SANS.sans.common.constants import SANS2D, LOQ, LARMOR
+from SANS.sans.common.enums import (
     ReductionMode,
     ReductionDimensionality,
     OutputParts,
@@ -20,7 +20,7 @@ from sans.common.enums import (
     SANSFacility,
     DataType,
 )
-from sans.common.general_functions import (
+from SANS.sans.common.general_functions import (
     quaternion_to_angle_and_axis,
     create_managed_non_child_algorithm,
     create_unmanaged_algorithm,
@@ -40,7 +40,7 @@ from sans.common.general_functions import (
     wav_range_to_str,
     wav_ranges_to_str,
 )
-from sans.state.StateObjects.StateData import StateData
+from SANS.sans.state.StateObjects.StateData import StateData
 from sans.test_helper.test_director import TestDirector
 
 
@@ -585,7 +585,7 @@ class SANSFunctionsTest(unittest.TestCase):
         self.assertEqual(output_name, "12345_rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37")
         self.assertEqual(group_output_name, "12345_rear_1DPhi12.0_56.0")
 
-    @mock.patch("sans.common.general_functions.AlgorithmManager")
+    @mock.patch("SANS.sans.common.general_functions.AlgorithmManager")
     def test_that_can_create_versioned_managed_non_child_algorithms(self, alg_manager_mock):
         create_managed_non_child_algorithm("TestAlg", version=2, **{"test_val": 5})
         alg_manager_mock.create.assert_called_once_with("TestAlg", 2)

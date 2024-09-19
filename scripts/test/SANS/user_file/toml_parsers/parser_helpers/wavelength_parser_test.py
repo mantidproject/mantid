@@ -7,7 +7,7 @@
 import unittest
 from unittest import mock
 
-from sans.common.enums import RangeStepType
+from SANS.sans.common.enums import RangeStepType
 from sans.user_file.parser_helpers.wavelength_parser import parse_range_wavelength, DuplicateWavelengthStates, WavelengthTomlParser
 
 

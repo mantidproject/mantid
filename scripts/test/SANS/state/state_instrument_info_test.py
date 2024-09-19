@@ -7,9 +7,9 @@
 import unittest
 from unittest import mock
 
-from sans.common.enums import SANSInstrument, DetectorType
-from sans.state.StateObjects import state_instrument_info
-from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
+from SANS.sans.common.enums import SANSInstrument, DetectorType
+from SANS.sans.state.StateObjects import state_instrument_info
+from SANS.sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 
 
 class StateInstrumentInfoTest(unittest.TestCase):

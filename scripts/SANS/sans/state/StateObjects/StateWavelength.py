@@ -9,11 +9,11 @@
 import json
 import copy
 
-from sans.state.JsonSerializable import JsonSerializable
-from sans.common.enums import RangeStepType, SANSFacility
-from sans.state.StateObjects.wavelength_interval import WavelengthInterval
-from sans.state.automatic_setters import automatic_setters
-from sans.state.state_functions import one_is_none, validation_message
+from SANS.sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.common.enums import RangeStepType, SANSFacility
+from SANS.sans.state.StateObjects.wavelength_interval import WavelengthInterval
+from SANS.sans.state.automatic_setters import automatic_setters
+from SANS.sans.state.state_functions import one_is_none, validation_message
 
 
 class StateWavelength(metaclass=JsonSerializable):

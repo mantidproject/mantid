@@ -15,14 +15,14 @@ import systemtesting
 import mantid
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
-from sans.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
+from mantidqtinterfaces.sans_isis.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from sans.state.StateObjects.StateData import get_data_builder
-from sans.common.enums import DetectorType, SANSFacility, IntegralEnum, SANSInstrument
+from SANS.sans.common.enums import DetectorType, SANSFacility, IntegralEnum, SANSInstrument
 
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.gui_logic.models.async_workers.diagnostic_async import DiagnosticsAsync
-from sans.common.file_information import SANSFileInformationFactory
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.general_functions import create_unmanaged_algorithm
+from mantidqtinterfaces.sans_isis.gui_logic.models.async_workers.diagnostic_async import DiagnosticsAsync
+from SANS.sans.common.file_information import SANSFileInformationFactory
 
 
 # -----------------------------------------------

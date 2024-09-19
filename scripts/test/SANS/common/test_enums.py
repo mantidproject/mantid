@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import ReductionMode
+from SANS.sans.common.enums import ReductionMode
 
 
 class TestSANSEnums(unittest.TestCase):

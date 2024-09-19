@@ -8,7 +8,7 @@ import unittest
 from typing import List, Dict
 from unittest import mock
 
-from sans.common.enums import (
+from SANS.sans.common.enums import (
     SANSInstrument,
     SANSFacility,
     DetectorType,
@@ -19,8 +19,8 @@ from sans.common.enums import (
     FitType,
     RebinType,
 )
-from sans.state.StateObjects.StateData import get_data_builder
-from sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors, StateMask
+from SANS.sans.state.StateObjects.StateData import get_data_builder
+from SANS.sans.state.StateObjects.StateMaskDetectors import StateMaskDetectors, StateMask
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 from sans.user_file.parser_helpers.toml_parser_impl_base import MissingMandatoryParam
 from sans.user_file.toml_parsers.toml_v1_parser import TomlV1Parser

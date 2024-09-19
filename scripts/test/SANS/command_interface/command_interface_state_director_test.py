@@ -14,7 +14,7 @@ from sans.command_interface.command_interface_state_director import (
     DataCommandId,
     FitData,
 )
-from sans.common.enums import (
+from SANS.sans.common.enums import (
     SANSFacility,
     RebinType,
     DetectorType,

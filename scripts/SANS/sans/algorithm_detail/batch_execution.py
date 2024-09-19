@@ -9,7 +9,7 @@ from copy import deepcopy
 
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.dataobjects import Workspace2D
-from sans.common.general_functions import (
+from SANS.sans.common.general_functions import (
     create_managed_non_child_algorithm,
     create_unmanaged_algorithm,
     get_output_name,
@@ -17,8 +17,8 @@ from sans.common.general_functions import (
     get_transmission_output_name,
     get_wav_range_from_ws,
 )
-from sans.common.enums import SANSDataType, SaveType, OutputMode, ReductionMode, DataType
-from sans.common.constants import (
+from SANS.sans.common.enums import SANSDataType, SaveType, OutputMode, ReductionMode, DataType
+from SANS.sans.common.constants import (
     TRANS_SUFFIX,
     SANS_SUFFIX,
     ALL_PERIODS,
@@ -35,10 +35,10 @@ from sans.common.constants import (
     CAN_AND_SAMPLE_WORKSPACE,
     SCALED_BGSUB_SUFFIX,
 )
-from sans.common.file_information import get_extension_for_file_type, SANSFileInformationFactory
-from sans.gui_logic.plotting import get_plotting_module
-from sans.state.Serializer import Serializer
-from sans.state.StateObjects.StateData import StateData
+from SANS.sans.common.file_information import get_extension_for_file_type, SANSFileInformationFactory
+from SANS.sans.common.plotting import get_plotting_module
+from SANS.sans.state.Serializer import Serializer
+from SANS.sans.state.StateObjects.StateData import StateData
 
 
 # ----------------------------------------------------------------------------------------------------------------------

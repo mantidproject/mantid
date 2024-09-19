@@ -8,10 +8,10 @@
 
 import json
 
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
-from sans.state.StateObjects.StateWavelength import StateWavelength
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.general_functions import create_unmanaged_algorithm
+from SANS.sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
+from SANS.sans.state.StateObjects.StateWavelength import StateWavelength
 
 
 def normalize_to_monitor(

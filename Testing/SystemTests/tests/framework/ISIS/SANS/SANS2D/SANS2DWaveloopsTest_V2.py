@@ -19,7 +19,7 @@ from sans.command_interface.ISISCommandInterface import (
     CompWavRanges,
     UseCompatibilityMode,
 )
-from sans.common.enums import SANSInstrument
+from SANS.sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

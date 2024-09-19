@@ -9,9 +9,9 @@ import unittest
 
 from mantid.simpleapi import CreateSampleWorkspace
 from sans.algorithm_detail.scale_sans_workspace import scale_workspace, _divide_by_sample_volume, _multiply_by_abs_scale
-from sans.common.enums import SANSFacility, SampleShape, SANSInstrument
-from sans.state.StateObjects.StateData import get_data_builder
-from sans.state.StateObjects.StateScale import get_scale_builder
+from SANS.sans.common.enums import SANSFacility, SampleShape, SANSInstrument
+from SANS.sans.state.StateObjects.StateData import get_data_builder
+from SANS.sans.state.StateObjects.StateScale import get_scale_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 from sans.test_helper.test_director import TestDirector
 

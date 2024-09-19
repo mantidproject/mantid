@@ -11,11 +11,11 @@
 import json
 import copy
 
-from sans.state.JsonSerializable import JsonSerializable
-from sans.common.enums import SANSFacility, SANSInstrument
-import sans.common.constants
-from sans.state.automatic_setters import automatic_setters
-from sans.state.state_functions import is_pure_none_or_not_none, validation_message
+from SANS.sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.common.enums import SANSFacility, SANSInstrument
+import SANS.sans.common.constants
+from SANS.sans.state.automatic_setters import automatic_setters
+from SANS.sans.state.state_functions import is_pure_none_or_not_none, validation_message
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ from sans.state.state_functions import is_pure_none_or_not_none, validation_mess
 
 
 class StateData(metaclass=JsonSerializable):
-    ALL_PERIODS = sans.common.constants.ALL_PERIODS
+    ALL_PERIODS = SANS.sans.common.constants.ALL_PERIODS
 
     def __init__(self):
         super(StateData, self).__init__()

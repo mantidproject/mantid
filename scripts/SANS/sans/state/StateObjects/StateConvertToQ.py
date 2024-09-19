@@ -11,10 +11,10 @@
 import json
 import copy
 
-from sans.state.JsonSerializable import JsonSerializable
-from sans.common.enums import ReductionDimensionality, SANSFacility
-from sans.state.automatic_setters import automatic_setters
-from sans.state.state_functions import is_pure_none_or_not_none, is_not_none_and_first_larger_than_second, validation_message
+from SANS.sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.common.enums import ReductionDimensionality, SANSFacility
+from SANS.sans.state.automatic_setters import automatic_setters
+from SANS.sans.state.state_functions import is_pure_none_or_not_none, is_not_none_and_first_larger_than_second, validation_message
 
 
 # ----------------------------------------------------------------------------------------------------------------------

@@ -8,11 +8,11 @@ import unittest
 
 import mantid.simpleapi
 from sans.algorithm_detail.move_workspaces import SANSMoveZOOM, SANSMoveSANS2D
-from sans.common.enums import SANSFacility, SANSInstrument, DetectorType
-from sans.state.AllStates import AllStates
-from sans.state.StateObjects.StateData import get_data_builder
-from sans.state.StateObjects.StateMoveDetectors import get_move_builder
-from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
+from SANS.sans.common.enums import SANSFacility, SANSInstrument, DetectorType
+from SANS.sans.state.AllStates import AllStates
+from SANS.sans.state.StateObjects.StateData import get_data_builder
+from SANS.sans.state.StateObjects.StateMoveDetectors import get_move_builder
+from SANS.sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

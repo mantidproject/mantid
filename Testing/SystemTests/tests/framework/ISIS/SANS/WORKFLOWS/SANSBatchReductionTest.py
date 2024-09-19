@@ -14,10 +14,10 @@ from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantid import config
 from mantid.api import AnalysisDataService
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import SANSFacility, ReductionMode, OutputMode, SANSInstrument
-from sans.common.file_information import SANSFileInformationFactory
-from sans.common.general_functions import create_unmanaged_algorithm
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.enums import SANSFacility, ReductionMode, OutputMode, SANSInstrument
+from SANS.sans.common.file_information import SANSFileInformationFactory
+from SANS.sans.common.general_functions import create_unmanaged_algorithm
 from sans.sans_batch import SANSBatchReduction
 from sans.state.StateObjects.StateData import get_data_builder
 

@@ -11,9 +11,9 @@
 import copy
 from typing import Dict
 
-from sans.common.enums import CanonicalCoordinates, SANSInstrument, DetectorType
-from sans.state.JsonSerializable import JsonSerializable
-from sans.state.automatic_setters import automatic_setters
+from SANS.sans.common.enums import CanonicalCoordinates, SANSInstrument, DetectorType
+from SANS.sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.state.automatic_setters import automatic_setters
 
 
 # ----------------------------------------------------------------------------------------------------------------------

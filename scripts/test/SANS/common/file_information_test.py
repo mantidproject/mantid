@@ -8,8 +8,8 @@ import unittest
 
 from mantid.kernel import DateAndTime
 from unittest import mock
-from sans.common.enums import SampleShape
-from sans.common.file_information import (
+from SANS.sans.common.enums import SampleShape
+from SANS.sans.common.file_information import (
     SANSFileInformationFactory,
     FileType,
     SANSInstrument,

@@ -8,7 +8,7 @@ import json
 from enum import Enum
 
 
-from sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.state.JsonSerializable import JsonSerializable
 
 
 class Serializer(object):

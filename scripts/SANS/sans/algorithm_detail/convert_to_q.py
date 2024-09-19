@@ -8,9 +8,9 @@
 
 from math import sqrt
 
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import ReductionDimensionality
-from sans.common.general_functions import create_unmanaged_algorithm, append_to_sans_file_tag
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.enums import ReductionDimensionality
+from SANS.sans.common.general_functions import create_unmanaged_algorithm, append_to_sans_file_tag
 
 
 def convert_workspace(

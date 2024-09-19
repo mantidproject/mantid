@@ -11,7 +11,7 @@ from ISISCommandInterface import *
 from mantid.simpleapi import LoadRaw, MoveInstrumentComponent
 import unittest
 
-from sans.common.enums import SANSInstrument
+from SANS.sans.common.enums import SANSInstrument
 
 """
 Allowing the reduction to use already loaded workspace will make it easier to

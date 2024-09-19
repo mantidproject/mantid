@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from sans.algorithm_detail.mask_workspace import create_masker
-from sans.common.enums import DetectorType
-from sans.common.general_functions import append_to_sans_file_tag
-from sans.state.AllStates import AllStates
+from SANS.sans.common.enums import DetectorType
+from SANS.sans.common.general_functions import append_to_sans_file_tag
+from SANS.sans.state.AllStates import AllStates
 
 
 def mask_workspace(state: AllStates, component_as_string, workspace):

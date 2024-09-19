@@ -15,8 +15,8 @@ from enum import Enum
 # Test the typed parameters
 # ----------------------------------------------------------------------------------------------------------------------
 # ----------------------------------------------------------------------------------------------------------------------
-from sans.state.JsonSerializable import JsonSerializable, json_serializable
-from sans.state.Serializer import Serializer
+from SANS.sans.state.JsonSerializable import JsonSerializable, json_serializable
+from SANS.sans.state.Serializer import Serializer
 
 
 class TestClass(metaclass=JsonSerializable):

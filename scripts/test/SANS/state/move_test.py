@@ -7,9 +7,9 @@
 import unittest
 from unittest import mock
 
-from sans.common.enums import CanonicalCoordinates, SANSFacility, DetectorType, SANSInstrument
-from sans.state.StateObjects.StateData import get_data_builder
-from sans.state.StateObjects.StateMoveDetectors import (
+from SANS.sans.common.enums import CanonicalCoordinates, SANSFacility, DetectorType, SANSInstrument
+from SANS.sans.state.StateObjects.StateData import get_data_builder
+from SANS.sans.state.StateObjects.StateMoveDetectors import (
     StateMoveLOQ,
     StateMoveSANS2D,
     StateMoveLARMOR,

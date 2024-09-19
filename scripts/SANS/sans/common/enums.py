@@ -7,7 +7,7 @@
 """The elements of this module define typed enums which are used in the SANS reduction framework."""
 
 from enum import Enum
-from sans.state.JsonSerializable import json_serializable
+from SANS.sans.state.JsonSerializable import json_serializable
 
 
 @json_serializable

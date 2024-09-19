@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from SANSUtility import _clean_logs
 from mantid.dataobjects import Workspace2D
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import append_to_sans_file_tag, get_charge_and_time, create_unmanaged_algorithm
-from sans.common.enums import DataType
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.general_functions import append_to_sans_file_tag, get_charge_and_time, create_unmanaged_algorithm
+from SANS.sans.common.enums import DataType
 
 
 def slice_sans_event(state_slice, input_ws, input_ws_monitor, data_type_str="Sample"):

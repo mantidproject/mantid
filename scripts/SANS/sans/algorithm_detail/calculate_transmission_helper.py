@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import ExperimentInfo
-from sans.common.general_functions import create_unmanaged_algorithm, sanitise_instrument_name
-from sans.common.constants import EMPTY_NAME
+from SANS.sans.common.general_functions import create_unmanaged_algorithm, sanitise_instrument_name
+from SANS.sans.common.constants import EMPTY_NAME
 
 
 def apply_flat_background_correction_to_detectors(workspace, flat_background_correction_start, flat_background_correction_stop):

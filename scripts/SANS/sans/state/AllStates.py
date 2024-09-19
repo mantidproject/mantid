@@ -9,25 +9,25 @@
 import copy
 import json
 
-from sans.common.enums import SANSFacility
-from sans.state.JsonSerializable import JsonSerializable
-from sans.state.StateObjects.StateAdjustment import StateAdjustment
-from sans.state.StateObjects.StateCompatibility import get_compatibility_builder, StateCompatibility
+from SANS.sans.common.enums import SANSFacility
+from SANS.sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.state.StateObjects.StateAdjustment import StateAdjustment
+from SANS.sans.state.StateObjects.StateCompatibility import get_compatibility_builder, StateCompatibility
 
 # Note that the compatibility state is not part of the new reduction chain, but allows us to accurately compare
 # results obtained via the old and new reduction chain
-from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
-from sans.state.StateObjects.StateData import StateData
-from sans.state.StateObjects.StateMaskDetectors import StateMask
-from sans.state.StateObjects.StateMoveDetectors import StateMove
-from sans.state.StateObjects.StateReductionMode import StateReductionMode
-from sans.state.StateObjects.StateSave import StateSave
-from sans.state.StateObjects.StateScale import StateScale
-from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
-from sans.state.StateObjects.StateWavelength import StateWavelength
-from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
-from sans.state.StateObjects.StateBackgroundSubtraction import StateBackgroundSubtraction
-from sans.state.automatic_setters import automatic_setters
+from SANS.sans.state.StateObjects.StateConvertToQ import StateConvertToQ
+from SANS.sans.state.StateObjects.StateData import StateData
+from SANS.sans.state.StateObjects.StateMaskDetectors import StateMask
+from SANS.sans.state.StateObjects.StateMoveDetectors import StateMove
+from SANS.sans.state.StateObjects.StateReductionMode import StateReductionMode
+from SANS.sans.state.StateObjects.StateSave import StateSave
+from SANS.sans.state.StateObjects.StateScale import StateScale
+from SANS.sans.state.StateObjects.StateSliceEvent import StateSliceEvent
+from SANS.sans.state.StateObjects.StateWavelength import StateWavelength
+from SANS.sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
+from SANS.sans.state.StateObjects.StateBackgroundSubtraction import StateBackgroundSubtraction
+from SANS.sans.state.automatic_setters import automatic_setters
 
 
 # ----------------------------------------------------------------------------------------------------------------------

@@ -14,7 +14,7 @@ from mantid.kernel import config
 from mantid.api import FileFinder
 from mantid.simpleapi import LoadNexus, Plus
 from sans.command_interface.ISISCommandInterface import LOQ, Detector, Set1D, MaskFile, Gravity, BatchReduce, UseCompatibilityMode
-from sans.common.enums import SANSInstrument
+from SANS.sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)

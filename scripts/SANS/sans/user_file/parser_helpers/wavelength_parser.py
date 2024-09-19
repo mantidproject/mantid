@@ -7,12 +7,12 @@
 from typing import Tuple
 
 from mantid.py36compat import dataclass
-from sans.common.enums import RangeStepType
-from sans.common.general_functions import get_ranges_from_event_slice_setting
-from sans.state.StateObjects.StateCalculateTransmission import StateCalculateTransmission
-from sans.state.StateObjects.StateWavelength import StateWavelength
-from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
-from sans.state.StateObjects.wavelength_interval import WavRangePairs, WavRange
+from SANS.sans.common.enums import RangeStepType
+from SANS.sans.common.general_functions import get_ranges_from_event_slice_setting
+from SANS.sans.state.StateObjects.StateCalculateTransmission import StateCalculateTransmission
+from SANS.sans.state.StateObjects.StateWavelength import StateWavelength
+from SANS.sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
+from SANS.sans.state.StateObjects.wavelength_interval import WavRangePairs, WavRange
 from sans.user_file.parser_helpers.toml_parser_impl_base import TomlParserImplBase
 
 

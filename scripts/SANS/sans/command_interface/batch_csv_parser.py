@@ -9,9 +9,9 @@ import re
 from csv import reader
 from enum import Enum
 
-from sans.common.constants import ALL_PERIODS
-from sans.common.file_information import find_full_file_path
-from sans.gui_logic.models.RowEntries import RowEntries
+from SANS.sans.common.constants import ALL_PERIODS
+from SANS.sans.common.file_information import find_full_file_path
+from SANS.sans.common.RowEntries import RowEntries
 
 
 class BatchFileKeywords(Enum):

@@ -23,7 +23,7 @@ from sans.command_interface.ISISCommandInterface import (
 )
 
 # Test is giving odd results on Linux, but only this 2D one.
-from sans.common.enums import SANSInstrument
+from SANS.sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)

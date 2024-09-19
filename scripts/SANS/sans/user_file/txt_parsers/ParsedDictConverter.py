@@ -6,23 +6,23 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import abc
 
-from sans.common.enums import DetectorType, RangeStepType, RebinType, FitType, DataType, FitModeForMerge
-from sans.common.general_functions import get_ranges_from_event_slice_setting, get_ranges_for_rebin_setting, get_ranges_for_rebin_array
-from sans.state.AllStates import AllStates
-from sans.state.IStateParser import IStateParser
-from sans.state.StateObjects.StateAdjustment import StateAdjustment
-from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
-from sans.state.StateObjects.StateCompatibility import StateCompatibility
-from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
-from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
-from sans.state.StateObjects.StateMoveDetectors import get_move_builder
-from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
-from sans.state.StateObjects.StateReductionMode import StateReductionMode
-from sans.state.StateObjects.StateSave import StateSave
-from sans.state.StateObjects.StateScale import StateScale
-from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
-from sans.state.StateObjects.StateWavelength import StateWavelength
-from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
+from SANS.sans.common.enums import DetectorType, RangeStepType, RebinType, FitType, DataType, FitModeForMerge
+from SANS.sans.common.general_functions import get_ranges_from_event_slice_setting, get_ranges_for_rebin_setting, get_ranges_for_rebin_array
+from SANS.sans.state.AllStates import AllStates
+from SANS.sans.state.IStateParser import IStateParser
+from SANS.sans.state.StateObjects.StateAdjustment import StateAdjustment
+from SANS.sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
+from SANS.sans.state.StateObjects.StateCompatibility import StateCompatibility
+from SANS.sans.state.StateObjects.StateConvertToQ import StateConvertToQ
+from SANS.sans.state.StateObjects.StateMaskDetectors import get_mask_builder
+from SANS.sans.state.StateObjects.StateMoveDetectors import get_move_builder
+from SANS.sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
+from SANS.sans.state.StateObjects.StateReductionMode import StateReductionMode
+from SANS.sans.state.StateObjects.StateSave import StateSave
+from SANS.sans.state.StateObjects.StateScale import StateScale
+from SANS.sans.state.StateObjects.StateSliceEvent import StateSliceEvent
+from SANS.sans.state.StateObjects.StateWavelength import StateWavelength
+from SANS.sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
 from sans.user_file.parser_helpers.wavelength_parser import parse_range_wavelength
 from sans.user_file.settings_tags import (
     TubeCalibrationFileId,

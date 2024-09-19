@@ -8,7 +8,7 @@ import unittest
 
 from mantid.simpleapi import CreateSampleWorkspace, CloneWorkspace, Load, Rebin
 from sans.algorithm_detail.CreateSANSAdjustmentWorkspaces import CreateSANSAdjustmentWorkspaces
-from sans.common.enums import DetectorType, DataType
+from SANS.sans.common.enums import DetectorType, DataType
 from sans.test_helper.test_director import TestDirector
 
 

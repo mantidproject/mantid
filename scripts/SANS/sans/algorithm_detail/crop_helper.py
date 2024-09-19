@@ -8,8 +8,8 @@
 
 """Helpers for CropToComponent for SANS."""
 
-from sans.common.general_functions import convert_instrument_and_detector_type_to_bank_name
-from sans.common.enums import SANSInstrument
+from SANS.sans.common.general_functions import convert_instrument_and_detector_type_to_bank_name
+from SANS.sans.common.enums import SANSInstrument
 
 # TODO move this into common and move to instrument 2.0
 

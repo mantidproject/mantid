@@ -10,8 +10,8 @@ from abc import ABCMeta, abstractmethod
 
 import mantid.simpleapi as mantid_api
 from sans.algorithm_detail.bundles import MergeBundle
-from sans.common.enums import SANSFacility, DataType
-from sans.common.general_functions import create_child_algorithm
+from SANS.sans.common.enums import SANSFacility, DataType
+from SANS.sans.common.general_functions import create_child_algorithm
 
 
 class Merger(metaclass=ABCMeta):

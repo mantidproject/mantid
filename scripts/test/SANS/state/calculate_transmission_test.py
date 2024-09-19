@@ -6,13 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import RebinType, RangeStepType, FitType, DataType, SANSFacility, SANSInstrument
-from sans.state.StateObjects.StateCalculateTransmission import (
+from SANS.sans.common.enums import RebinType, RangeStepType, FitType, DataType, SANSFacility, SANSInstrument
+from SANS.sans.state.StateObjects.StateCalculateTransmission import (
     StateCalculateTransmission,
     StateCalculateTransmissionLOQ,
     get_calculate_transmission,
 )
-from sans.state.StateObjects.StateData import get_data_builder
+from SANS.sans.state.StateObjects.StateData import get_data_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

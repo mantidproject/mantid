@@ -8,9 +8,9 @@ import unittest
 
 from mantid.api import FileFinder
 from sans.algorithm_detail.crop_helper import get_component_name
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import DetectorType
-from sans.common.general_functions import create_unmanaged_algorithm
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.enums import DetectorType
+from SANS.sans.common.general_functions import create_unmanaged_algorithm
 
 
 class CropHelperTest(unittest.TestCase):

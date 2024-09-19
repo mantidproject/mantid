@@ -42,7 +42,7 @@
 # This builder has a variety of different possible usages, so bear with me.
 #
 # env.CxxTest('target')
-# The simplest of them all, it models the Program call. This sees if target.t.h
+# The simplest of them all, it model_tests the Program call. This sees if target.t.h
 # is around and passes it through the cxxtestgen and compiles it. Might only
 # work on unix though, because target can't have a suffix right now.
 #

@@ -18,7 +18,7 @@ from sans.command_interface.ISISCommandInterface import (
     WavRangeReduction,
     Set2D,
 )
-from sans.common.enums import SANSInstrument
+from SANS.sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

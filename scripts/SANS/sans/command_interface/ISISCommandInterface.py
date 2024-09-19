@@ -23,8 +23,8 @@ from sans.command_interface.command_interface_state_director import (
     NParameterCommandId,
     FitData,
 )
-from sans.common.constants import ALL_PERIODS
-from sans.common.enums import (
+from SANS.sans.common.constants import ALL_PERIODS
+from SANS.sans.common.enums import (
     DetectorType,
     FitType,
     RangeStepType,
@@ -35,14 +35,14 @@ from sans.common.enums import (
     OutputMode,
     FindDirectionEnum,
 )
-from sans.common.file_information import find_sans_file, find_full_file_path
-from sans.common.general_functions import (
+from SANS.sans.common.file_information import find_sans_file, find_full_file_path
+from SANS.sans.common.general_functions import (
     convert_bank_name_to_detector_type_isis,
     get_output_name,
     is_part_of_reduced_output_workspace_group,
 )
-from sans.gui_logic.models.RowEntries import RowEntries
-from sans.sans_batch import SANSBatchReduction, SANSCentreFinder
+from SANS.sans.common.RowEntries import RowEntries
+from SANS.sans.sans_batch import SANSBatchReduction, SANSCentreFinder
 
 
 # ----------------------------------------------------------------------------------------------------------------------

@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from math import isinf, isnan
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_child_algorithm
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.general_functions import create_child_algorithm
 
 
 def strip_end_nans(workspace, parent_alg=None):

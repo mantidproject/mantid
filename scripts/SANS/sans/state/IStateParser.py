@@ -6,23 +6,23 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from abc import ABCMeta, abstractmethod
 
-from sans.common.enums import SANSFacility
-from sans.state.AllStates import AllStates
-from sans.state.StateObjects.StateAdjustment import StateAdjustment
-from sans.state.StateObjects.StateCalculateTransmission import StateCalculateTransmission
-from sans.state.StateObjects.StateCompatibility import StateCompatibility
-from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
-from sans.state.StateObjects.StateData import StateData, get_data_builder
-from sans.state.StateObjects.StateMaskDetectors import StateMask
-from sans.state.StateObjects.StateMoveDetectors import StateMove
-from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
-from sans.state.StateObjects.StateReductionMode import StateReductionMode
-from sans.state.StateObjects.StateSave import StateSave
-from sans.state.StateObjects.StateScale import StateScale
-from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
-from sans.state.StateObjects.StateWavelength import StateWavelength
-from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
-from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
+from SANS.sans.common.enums import SANSFacility
+from SANS.sans.state.AllStates import AllStates
+from SANS.sans.state.StateObjects.StateAdjustment import StateAdjustment
+from SANS.sans.state.StateObjects.StateCalculateTransmission import StateCalculateTransmission
+from SANS.sans.state.StateObjects.StateCompatibility import StateCompatibility
+from SANS.sans.state.StateObjects.StateConvertToQ import StateConvertToQ
+from SANS.sans.state.StateObjects.StateData import StateData, get_data_builder
+from SANS.sans.state.StateObjects.StateMaskDetectors import StateMask
+from SANS.sans.state.StateObjects.StateMoveDetectors import StateMove
+from SANS.sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
+from SANS.sans.state.StateObjects.StateReductionMode import StateReductionMode
+from SANS.sans.state.StateObjects.StateSave import StateSave
+from SANS.sans.state.StateObjects.StateScale import StateScale
+from SANS.sans.state.StateObjects.StateSliceEvent import StateSliceEvent
+from SANS.sans.state.StateObjects.StateWavelength import StateWavelength
+from SANS.sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
+from SANS.sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 
 
 class IStateParser(metaclass=ABCMeta):

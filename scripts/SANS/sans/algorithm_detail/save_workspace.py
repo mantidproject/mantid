@@ -7,9 +7,9 @@
 from collections import namedtuple
 from mantid.api import MatrixWorkspace
 from mantid.dataobjects import EventWorkspace
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import SaveType
+from SANS.sans.common.general_functions import create_unmanaged_algorithm
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.enums import SaveType
 
 # from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 

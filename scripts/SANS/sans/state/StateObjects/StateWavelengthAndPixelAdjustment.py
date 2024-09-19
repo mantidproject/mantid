@@ -11,11 +11,11 @@
 import copy
 import json
 
-from sans.common.enums import RangeStepType, DetectorType
-from sans.state.JsonSerializable import JsonSerializable
-from sans.state.StateObjects.wavelength_interval import WavelengthInterval
-from sans.state.automatic_setters import automatic_setters
-from sans.state.state_functions import one_is_none, validation_message
+from SANS.sans.common.enums import RangeStepType, DetectorType
+from SANS.sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.state.StateObjects.wavelength_interval import WavelengthInterval
+from SANS.sans.state.automatic_setters import automatic_setters
+from SANS.sans.state.state_functions import one_is_none, validation_message
 
 
 class StateAdjustmentFiles(metaclass=JsonSerializable):

@@ -8,11 +8,11 @@
 
 import math
 
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import SampleShape, SANSInstrument
-from sans.common.file_information import convert_to_flag
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.enums import SampleShape, SANSInstrument
+from SANS.sans.common.file_information import convert_to_flag
 
-from sans.common.general_functions import append_to_sans_file_tag, create_unmanaged_algorithm
+from SANS.sans.common.general_functions import append_to_sans_file_tag, create_unmanaged_algorithm
 
 DEFAULT_SCALING = 100.0
 

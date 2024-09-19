@@ -11,11 +11,16 @@
 import json
 from typing import Dict
 
-from sans.common.configurations import Configurations
-from sans.common.enums import RebinType, RangeStepType, FitType, DataType, SANSInstrument
-from sans.state.JsonSerializable import JsonSerializable
-from sans.state.StateObjects.wavelength_interval import WavelengthInterval
-from sans.state.state_functions import is_pure_none_or_not_none, validation_message, is_not_none_and_first_larger_than_second, one_is_none
+from SANS.sans.common.configurations import Configurations
+from SANS.sans.common.enums import RebinType, RangeStepType, FitType, DataType, SANSInstrument
+from SANS.sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.state.StateObjects.wavelength_interval import WavelengthInterval
+from SANS.sans.state.state_functions import (
+    is_pure_none_or_not_none,
+    validation_message,
+    is_not_none_and_first_larger_than_second,
+    one_is_none,
+)
 
 
 class StateTransmissionFit(metaclass=JsonSerializable):

@@ -23,9 +23,9 @@ from mantid.api import (
 )
 from mantid.dataobjects import EventWorkspace
 from mantid.kernel import Direction, StringListValidator, Property
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import RebinType, RangeStepType
-from sans.common.general_functions import (
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.enums import RebinType, RangeStepType
+from SANS.sans.common.general_functions import (
     create_unmanaged_algorithm,
     append_to_sans_file_tag,
     get_input_workspace_as_copy_if_not_same_as_output_workspace,

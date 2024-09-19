@@ -53,8 +53,8 @@ from abc import ABCMeta, abstractmethod
 import os
 from mantid.kernel import config
 from mantid.api import AnalysisDataService
-from sans.common.file_information import SANSFileInformationFactory, FileType, get_extension_for_file_type, find_full_file_path
-from sans.common.constants import (
+from SANS.sans.common.file_information import SANSFileInformationFactory, FileType, get_extension_for_file_type, find_full_file_path
+from SANS.sans.common.constants import (
     EMPTY_NAME,
     SANS_SUFFIX,
     TRANS_SUFFIX,
@@ -65,10 +65,10 @@ from sans.common.constants import (
     OUTPUT_MONITOR_WORKSPACE,
     OUTPUT_MONITOR_WORKSPACE_GROUP,
 )
-from sans.common.enums import SANSFacility, SANSDataType, SANSInstrument
-from sans.common.general_functions import create_child_algorithm
-from sans.common.log_tagger import set_tag, has_tag, get_tag
-from sans.state.StateObjects.StateData import StateData
+from SANS.sans.common.enums import SANSFacility, SANSDataType, SANSInstrument
+from SANS.sans.common.general_functions import create_child_algorithm
+from SANS.sans.common.log_tagger import set_tag, has_tag, get_tag
+from SANS.sans.state.StateObjects.StateData import StateData
 from sans.algorithm_detail.calibration import apply_calibration
 
 

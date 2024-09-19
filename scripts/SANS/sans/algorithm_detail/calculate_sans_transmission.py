@@ -13,10 +13,10 @@ from sans.algorithm_detail.calculate_transmission_helper import (
     apply_flat_background_correction_to_detectors,
     get_region_of_interest,
 )
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import RangeStepType, FitType, DataType
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.state.StateObjects.wavelength_interval import WavRange
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.enums import RangeStepType, FitType, DataType
+from SANS.sans.common.general_functions import create_unmanaged_algorithm
+from SANS.sans.state.StateObjects.wavelength_interval import WavRange
 
 
 def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculate_transmission, data_type_str, wav_range):

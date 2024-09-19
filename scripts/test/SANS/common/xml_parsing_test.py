@@ -7,8 +7,12 @@
 import unittest
 
 from mantid.kernel import DateAndTime
-from sans.common.file_information import SANSFileInformationFactory, get_instrument_paths_for_sans_file
-from sans.common.xml_parsing import get_named_elements_from_ipf_file, get_monitor_names_from_idf_file, get_valid_to_time_from_idf_string
+from SANS.sans.common.file_information import SANSFileInformationFactory, get_instrument_paths_for_sans_file
+from SANS.sans.common.xml_parsing import (
+    get_named_elements_from_ipf_file,
+    get_monitor_names_from_idf_file,
+    get_valid_to_time_from_idf_string,
+)
 
 
 class XMLParsingTest(unittest.TestCase):

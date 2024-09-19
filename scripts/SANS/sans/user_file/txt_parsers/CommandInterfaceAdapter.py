@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from sans.state.AllStates import AllStates
+from SANS.sans.state.AllStates import AllStates
 from sans.user_file.txt_parsers.ParsedDictConverter import ParsedDictConverter
 
 

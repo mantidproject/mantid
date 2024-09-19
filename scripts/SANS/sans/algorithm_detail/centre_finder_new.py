@@ -6,13 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CreateEmptyTableWorkspace
 from sans.algorithm_detail.batch_execution import provide_loaded_data, get_reduction_packages
-from sans.common.enums import SANSDataType, DetectorType
-from sans.common.general_functions import create_managed_non_child_algorithm
+from SANS.sans.common.enums import SANSDataType, DetectorType
+from SANS.sans.common.general_functions import create_managed_non_child_algorithm
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions for the execution of a single batch iteration
 # ----------------------------------------------------------------------------------------------------------------------
-from sans.state.Serializer import Serializer
+from SANS.sans.state.Serializer import Serializer
 
 
 def centre_finder_new(state, r_min, r_max, iterations, position_1_start, position_2_start, tolerance, find_direction, verbose, component):

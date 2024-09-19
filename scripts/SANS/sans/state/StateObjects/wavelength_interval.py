@@ -7,7 +7,7 @@
 from typing import Tuple, List
 
 from mantid.py36compat import dataclass, field
-from sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.state.JsonSerializable import JsonSerializable
 
 
 WavRange = Tuple[float, float]

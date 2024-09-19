@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from sans.common.constants import LARMOR, LOQ, SANS2D, ZOOM
-from sans.common.enums import SANSInstrument
+from SANS.sans.common.constants import LARMOR, LOQ, SANS2D, ZOOM
+from SANS.sans.common.enums import SANSInstrument
 
 # ----------------------------------------------------------------------------------------------------------------------
 # SANSInstrument

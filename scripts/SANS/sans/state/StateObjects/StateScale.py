@@ -8,14 +8,14 @@
 
 import copy
 
-from sans.state.JsonSerializable import JsonSerializable
-from sans.common.enums import SampleShape, SANSFacility
+from SANS.sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.common.enums import SampleShape, SANSFacility
 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  State
 # ----------------------------------------------------------------------------------------------------------------------
-from sans.state.automatic_setters import automatic_setters
+from SANS.sans.state.automatic_setters import automatic_setters
 
 
 class StateScale(metaclass=JsonSerializable):

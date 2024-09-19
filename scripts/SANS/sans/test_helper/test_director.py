@@ -6,22 +6,22 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """A Test director"""
 
-from sans.state.StateObjects.StateData import get_data_builder
-from sans.state.StateObjects.StateMoveDetectors import get_move_builder
-from sans.state.StateObjects.StateReductionMode import StateReductionMode
-from sans.state.StateObjects.StateSliceEvent import get_slice_event_builder
-from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
-from sans.state.AllStates import get_all_states_builder
-from sans.state.StateObjects.StateWavelength import get_wavelength_builder, StateWavelength
-from sans.state.StateObjects.StateSave import get_save_builder
-from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
-from sans.state.StateObjects.StateScale import get_scale_builder
-from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
-from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavelength_and_pixel_adjustment_builder
-from sans.state.StateObjects.StateAdjustment import get_adjustment_builder
-from sans.state.StateObjects.StateConvertToQ import get_convert_to_q_builder
+from SANS.sans.state.StateObjects.StateData import get_data_builder
+from SANS.sans.state.StateObjects.StateMoveDetectors import get_move_builder
+from SANS.sans.state.StateObjects.StateReductionMode import StateReductionMode
+from SANS.sans.state.StateObjects.StateSliceEvent import get_slice_event_builder
+from SANS.sans.state.StateObjects.StateMaskDetectors import get_mask_builder
+from SANS.sans.state.AllStates import get_all_states_builder
+from SANS.sans.state.StateObjects.StateWavelength import get_wavelength_builder, StateWavelength
+from SANS.sans.state.StateObjects.StateSave import get_save_builder
+from SANS.sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
+from SANS.sans.state.StateObjects.StateScale import get_scale_builder
+from SANS.sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
+from SANS.sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavelength_and_pixel_adjustment_builder
+from SANS.sans.state.StateObjects.StateAdjustment import get_adjustment_builder
+from SANS.sans.state.StateObjects.StateConvertToQ import get_convert_to_q_builder
 
-from sans.common.enums import (
+from SANS.sans.common.enums import (
     SANSFacility,
     ReductionMode,
     ReductionDimensionality,
@@ -33,7 +33,7 @@ from sans.common.enums import (
     SampleShape,
     SANSInstrument,
 )
-from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
+from SANS.sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

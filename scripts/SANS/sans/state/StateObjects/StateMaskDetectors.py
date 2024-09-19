@@ -12,13 +12,13 @@ import json
 import copy
 from typing import List
 
-from sans.state.JsonSerializable import JsonSerializable
-from sans.state.automatic_setters import automatic_setters
-from sans.state.state_functions import is_pure_none_or_not_none, validation_message
+from SANS.sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.state.automatic_setters import automatic_setters
+from SANS.sans.state.state_functions import is_pure_none_or_not_none, validation_message
 
-from sans.common.file_information import find_full_file_path
-from sans.common.enums import DetectorType, SANSInstrument
-from sans.common.general_functions import get_bank_for_spectrum_number
+from SANS.sans.common.file_information import find_full_file_path
+from SANS.sans.common.enums import DetectorType, SANSInstrument
+from SANS.sans.common.general_functions import get_bank_for_spectrum_number
 
 
 # ----------------------------------------------------------------------------------------------------------------------

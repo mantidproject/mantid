@@ -7,9 +7,9 @@
 from enum import Enum
 
 from sans.algorithm_detail.move_workspaces import create_mover
-from sans.common.enums import DetectorType
-from sans.state.AllStates import AllStates
-from sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
+from SANS.sans.common.enums import DetectorType
+from SANS.sans.state.AllStates import AllStates
+from SANS.sans.state.StateObjects.state_instrument_info import StateInstrumentInfo
 
 
 class MoveTypes(Enum):

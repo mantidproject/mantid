@@ -11,10 +11,10 @@ Script used to start the Test Interface from MantidPlot
 
 import sys
 from qtpy import QtCore
-from sans.common.enums import SANSFacility
-from sans.gui_logic.models.run_tab_model import RunTabModel
-from sans.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from ui.sans_isis import sans_data_processor_gui
+from SANS.sans.common.enums import SANSFacility
+from mantidqtinterfaces.sans_isis.gui_logic.models.run_tab_model import RunTabModel
+from mantidqtinterfaces.sans_isis.gui_logic.presenter.run_tab_presenter import RunTabPresenter
+from mantidqtinterfaces.sans_isis.views import sans_data_processor_gui
 
 if "workbench" in sys.modules:
     from workbench.config import get_window_config

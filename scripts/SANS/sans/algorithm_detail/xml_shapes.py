@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from math import pi, cos, sin
-from sans.common.enums import MaskingQuadrant
+from SANS.sans.common.enums import MaskingQuadrant
 
 
 def add_xml_shape(xml, complete_xml_element):

@@ -15,10 +15,14 @@ import json
 from typing import Tuple, Optional, List
 
 from mantid.api import AlgorithmManager, AnalysisDataService, isSameWorkspaceObject
-from sans.common.constant_containers import SANSInstrument_enum_list, SANSInstrument_string_list, SANSInstrument_string_as_key_NoInstrument
-from sans.common.constants import SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME, REDUCED_CAN_TAG
-from sans.common.log_tagger import get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash
-from sans.common.enums import (
+from SANS.sans.common.constant_containers import (
+    SANSInstrument_enum_list,
+    SANSInstrument_string_list,
+    SANSInstrument_string_as_key_NoInstrument,
+)
+from SANS.sans.common.constants import SANS_FILE_TAG, ALL_PERIODS, SANS2D, EMPTY_NAME, REDUCED_CAN_TAG
+from SANS.sans.common.log_tagger import get_tag, has_tag, set_tag, has_hash, get_hash_value, set_hash
+from SANS.sans.common.enums import (
     DetectorType,
     RangeStepType,
     ReductionDimensionality,
@@ -34,7 +38,7 @@ from sans.common.enums import (
 # -------------------------------------------
 # Constants
 # -------------------------------------------
-from sans.state.Serializer import Serializer
+from SANS.sans.state.Serializer import Serializer
 
 ALTERNATIVE_SANS2D_NAME = "SAN"
 

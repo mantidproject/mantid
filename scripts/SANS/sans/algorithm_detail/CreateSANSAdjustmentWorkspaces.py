@@ -11,10 +11,10 @@ wavelength adjustment and pixel-and-wavelength adjustment workspaces.
 from sans.algorithm_detail.calculate_sans_transmission import calculate_transmission
 from sans.algorithm_detail.CreateSANSWavelengthPixelAdjustment import CreateSANSWavelengthPixelAdjustment
 from sans.algorithm_detail.normalize_to_sans_monitor import normalize_to_monitor
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.state.AllStates import AllStates
-from sans.state.StateObjects.wavelength_interval import WavRange
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.general_functions import create_unmanaged_algorithm
+from SANS.sans.state.AllStates import AllStates
+from SANS.sans.state.StateObjects.wavelength_interval import WavRange
 
 
 class CreateSANSAdjustmentWorkspaces(object):

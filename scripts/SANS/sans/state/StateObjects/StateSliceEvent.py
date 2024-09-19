@@ -9,10 +9,10 @@
 import json
 import copy
 
-from sans.state.JsonSerializable import JsonSerializable
-from sans.state.automatic_setters import automatic_setters
-from sans.state.state_functions import is_pure_none_or_not_none, validation_message
-from sans.common.enums import SANSFacility
+from SANS.sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.state.automatic_setters import automatic_setters
+from SANS.sans.state.state_functions import is_pure_none_or_not_none, validation_message
+from SANS.sans.common.enums import SANSFacility
 
 
 # ----------------------------------------------------------------------------------------------------------------------

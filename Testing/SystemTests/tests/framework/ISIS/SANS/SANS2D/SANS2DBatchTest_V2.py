@@ -24,7 +24,7 @@ from sans.command_interface.ISISCommandInterface import (
 )
 import os.path
 
-from sans.common.enums import SANSInstrument
+from SANS.sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

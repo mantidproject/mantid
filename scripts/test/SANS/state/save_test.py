@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import SANSFacility, SaveType, SANSInstrument
-from sans.state.StateObjects.StateData import get_data_builder
-from sans.state.StateObjects.StateSave import get_save_builder
+from SANS.sans.common.enums import SANSFacility, SaveType, SANSInstrument
+from SANS.sans.state.StateObjects.StateData import get_data_builder
+from SANS.sans.state.StateObjects.StateSave import get_save_builder
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 

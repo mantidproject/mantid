@@ -7,9 +7,9 @@
 # pylint: disable=invalid-name
 """SANBatchReduction algorithm is the starting point for any new type reduction, event single reduction"""
 
-from sans.state.AllStates import AllStates
+from SANS.sans.state.AllStates import AllStates
 from sans.algorithm_detail.batch_execution import single_reduction_for_batch
-from sans.common.enums import OutputMode, FindDirectionEnum, DetectorType
+from SANS.sans.common.enums import OutputMode, FindDirectionEnum, DetectorType
 from sans.algorithm_detail.centre_finder_new import centre_finder_new, centre_finder_mass
 
 

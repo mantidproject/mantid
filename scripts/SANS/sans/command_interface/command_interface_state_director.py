@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from enum import Enum
-from sans.common.enums import DataType
-from sans.common.file_information import SANSFileInformationFactory
-from sans.state.AllStates import AllStates
-from sans.state.StateObjects.StateData import get_data_builder
+from SANS.sans.common.enums import DataType
+from SANS.sans.common.file_information import SANSFileInformationFactory
+from SANS.sans.state.AllStates import AllStates
+from SANS.sans.state.StateObjects.StateData import get_data_builder
 from sans.user_file.settings_tags import (
     MonId,
     monitor_spectrum,

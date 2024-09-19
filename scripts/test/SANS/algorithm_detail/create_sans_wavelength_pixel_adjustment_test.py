@@ -11,8 +11,8 @@ import unittest
 from mantid.kernel import config
 from mantid.simpleapi import CreateSampleWorkspace
 from sans.algorithm_detail.CreateSANSWavelengthPixelAdjustment import CreateSANSWavelengthPixelAdjustment
-from sans.common.enums import RangeStepType, DetectorType
-from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavelength_and_pixel_adjustment_builder
+from SANS.sans.common.enums import RangeStepType, DetectorType
+from SANS.sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavelength_and_pixel_adjustment_builder
 from sans.test_helper.test_director import TestDirector
 
 

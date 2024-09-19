@@ -15,8 +15,8 @@ from abc import ABCMeta, abstractmethod
 from mantid.api import FileFinder
 from mantid.kernel import DateAndTime, ConfigService, Logger
 from mantid.api import AlgorithmManager, ExperimentInfo
-from sans.common.enums import SANSInstrument, FileType, SampleShape
-from sans.common.general_functions import get_instrument, instrument_name_correction, get_facility
+from SANS.sans.common.enums import SANSInstrument, FileType, SampleShape
+from SANS.sans.common.general_functions import get_instrument, instrument_name_correction, get_facility
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Constants

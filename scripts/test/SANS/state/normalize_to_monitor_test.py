@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import RebinType, RangeStepType, SANSFacility, SANSInstrument
-from sans.state.StateObjects.StateData import get_data_builder
-from sans.state.StateObjects.StateNormalizeToMonitor import (
+from SANS.sans.common.enums import RebinType, RangeStepType, SANSFacility, SANSInstrument
+from SANS.sans.state.StateObjects.StateData import get_data_builder
+from SANS.sans.state.StateObjects.StateNormalizeToMonitor import (
     StateNormalizeToMonitor,
     StateNormalizeToMonitorLOQ,
     get_normalize_to_monitor_builder,

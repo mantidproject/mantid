@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import ReductionMode, ReductionDimensionality, FitModeForMerge
-from sans.state.StateObjects.StateReductionMode import StateReductionMode
+from SANS.sans.common.enums import ReductionMode, ReductionDimensionality, FitModeForMerge
+from SANS.sans.state.StateObjects.StateReductionMode import StateReductionMode
 
 
 # ----------------------------------------------------------------------------------------------------------------------

@@ -4,8 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-from sans.state.AllStates import AllStates
-from sans.state.IStateParser import IStateParser
+from SANS.sans.state.AllStates import AllStates
+from SANS.sans.state.IStateParser import IStateParser
 from sans.user_file.toml_parsers.toml_reader import TomlReader
 from sans.user_file.toml_parsers.toml_v1_parser import TomlV1Parser
 

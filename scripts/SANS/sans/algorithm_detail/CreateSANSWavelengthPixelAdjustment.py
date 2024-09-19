@@ -9,11 +9,11 @@ and wavelength adjustment.
 """
 
 from sans.algorithm_detail.crop_helper import get_component_name
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import DetectorType
-from sans.common.enums import RangeStepType
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.state.StateObjects.wavelength_interval import WavRange
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.enums import DetectorType
+from SANS.sans.common.enums import RangeStepType
+from SANS.sans.common.general_functions import create_unmanaged_algorithm
+from SANS.sans.state.StateObjects.wavelength_interval import WavRange
 
 
 class CreateSANSWavelengthPixelAdjustment(object):

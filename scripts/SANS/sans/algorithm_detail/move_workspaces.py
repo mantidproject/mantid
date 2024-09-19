@@ -10,10 +10,10 @@ import math
 from mantid.api import MatrixWorkspace
 from abc import ABCMeta, abstractmethod
 
-from sans.state.AllStates import AllStates
-from sans.state.StateObjects.StateMoveDetectors import StateMoveLARMOR, StateMoveLOQ, StateMove, StateMoveSANS2D, StateMoveZOOM
-from sans.common.enums import CanonicalCoordinates, DetectorType, SANSInstrument
-from sans.common.general_functions import (
+from SANS.sans.state.AllStates import AllStates
+from SANS.sans.state.StateObjects.StateMoveDetectors import StateMoveLARMOR, StateMoveLOQ, StateMove, StateMoveSANS2D, StateMoveZOOM
+from SANS.sans.common.enums import CanonicalCoordinates, DetectorType, SANSInstrument
+from SANS.sans.common.general_functions import (
     create_unmanaged_algorithm,
     get_single_valued_logs_from_workspace,
     sanitise_instrument_name,

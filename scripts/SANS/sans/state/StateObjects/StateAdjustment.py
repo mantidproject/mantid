@@ -10,12 +10,12 @@
 
 import copy
 
-from sans.common.enums import SANSFacility
-from sans.state.JsonSerializable import JsonSerializable
-from sans.state.StateObjects.StateCalculateTransmission import StateCalculateTransmission
-from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
-from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
-from sans.state.automatic_setters import automatic_setters
+from SANS.sans.common.enums import SANSFacility
+from SANS.sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.state.StateObjects.StateCalculateTransmission import StateCalculateTransmission
+from SANS.sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
+from SANS.sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
+from SANS.sans.state.automatic_setters import automatic_setters
 
 
 class StateAdjustment(metaclass=JsonSerializable):

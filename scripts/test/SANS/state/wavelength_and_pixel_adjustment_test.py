@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import RangeStepType, DetectorType, SANSFacility, SANSInstrument
-from sans.state.StateObjects.StateData import get_data_builder
-from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import (
+from SANS.sans.common.enums import RangeStepType, DetectorType, SANSFacility, SANSInstrument
+from SANS.sans.state.StateObjects.StateData import get_data_builder
+from SANS.sans.state.StateObjects.StateWavelengthAndPixelAdjustment import (
     StateWavelengthAndPixelAdjustment,
     get_wavelength_and_pixel_adjustment_builder,
 )

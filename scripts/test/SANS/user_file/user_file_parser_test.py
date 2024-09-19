@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import ReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument
+from SANS.sans.common.enums import ReductionMode, DetectorType, RangeStepType, FitType, DataType, SANSInstrument
 from sans.user_file.settings_tags import (
     DetectorId,
     BackId,

@@ -20,9 +20,9 @@ from sans.algorithm_detail.bundles import (
 )
 from sans.algorithm_detail.merge_reductions import MergeFactory
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import DetectorType, ReductionMode, OutputParts, TransmissionType, DataType
-from sans.common.general_functions import (
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.enums import DetectorType, ReductionMode, OutputParts, TransmissionType, DataType
+from SANS.sans.common.general_functions import (
     create_child_algorithm,
     get_reduced_can_workspace_from_ads,
     get_transmission_workspaces_from_ads,
@@ -30,7 +30,7 @@ from sans.common.general_functions import (
     wav_range_to_str,
 )
 from sans.data_objects.sans_workflow_algorithm_outputs import SANSWorkflowAlgorithmOutputs
-from sans.state.Serializer import Serializer
+from SANS.sans.state.Serializer import Serializer
 
 
 def run_initial_event_slice_reduction(reduction_alg, reduction_setting_bundle):

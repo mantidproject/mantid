@@ -21,7 +21,7 @@ from collections import namedtuple
 from typing import List
 
 from mantid.py36compat import dataclass
-from sans.state.StateObjects.wavelength_interval import WavRange
+from SANS.sans.state.StateObjects.wavelength_interval import WavRange
 
 ReductionSettingBundle = namedtuple(
     "ReductionSettingBundle",

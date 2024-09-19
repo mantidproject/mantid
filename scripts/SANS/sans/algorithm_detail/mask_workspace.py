@@ -10,10 +10,10 @@ from mantid.kernel import Logger
 
 from sans.algorithm_detail.mask_functions import SpectraBlock
 from sans.algorithm_detail.xml_shapes import add_cylinder, add_outside_cylinder, create_phi_mask, create_line_mask
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import SANSInstrument
-from sans.common.file_information import find_full_file_path, get_instrument_paths_for_sans_file
-from sans.common.general_functions import create_unmanaged_algorithm
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.enums import SANSInstrument
+from SANS.sans.common.file_information import find_full_file_path, get_instrument_paths_for_sans_file
+from SANS.sans.common.general_functions import create_unmanaged_algorithm
 
 
 # ------------------------------------------------------------------

@@ -23,8 +23,8 @@ from sans.algorithm_detail.batch_execution import (
     group_bgsub_if_required,
     save_to_file,
 )
-from sans.common.enums import SaveType, ReductionMode
-from sans.common.constants import SCALED_BGSUB_SUFFIX
+from SANS.sans.common.enums import SaveType, ReductionMode
+from SANS.sans.common.constants import SCALED_BGSUB_SUFFIX
 
 
 class ADSMock(object):

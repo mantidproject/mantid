@@ -9,11 +9,11 @@ from unittest import mock
 
 from sans.algorithm_detail.bundles import OutputPartsBundle, ReducedSlice
 from sans.algorithm_detail.merge_reductions import MergeFactory, ISIS1DMerger
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import DataType, ReductionMode
-from sans.common.enums import ReductionDimensionality, FitModeForMerge
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.state.StateObjects.StateReductionMode import StateReductionMode
+from SANS.sans.common.constants import EMPTY_NAME
+from SANS.sans.common.enums import DataType, ReductionMode
+from SANS.sans.common.enums import ReductionDimensionality, FitModeForMerge
+from SANS.sans.common.general_functions import create_unmanaged_algorithm
+from SANS.sans.state.StateObjects.StateReductionMode import StateReductionMode
 from sans.test_helper.test_director import TestDirector
 
 

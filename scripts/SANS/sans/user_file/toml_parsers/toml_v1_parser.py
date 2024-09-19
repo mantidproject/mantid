@@ -5,23 +5,23 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from sans.common.enums import SANSInstrument, ReductionMode, DetectorType, RangeStepType, FitModeForMerge, DataType, FitType, RebinType
-from sans.common.general_functions import get_bank_for_spectrum_number, get_detector_types_from_instrument
-from sans.state.IStateParser import IStateParser
-from sans.state.StateObjects.StateAdjustment import StateAdjustment
-from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
-from sans.state.StateObjects.StateCompatibility import StateCompatibility
-from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
-from sans.state.StateObjects.StateData import StateData
-from sans.state.StateObjects.StateMaskDetectors import get_mask_builder, StateMaskDetectors
-from sans.state.StateObjects.StateMoveDetectors import get_move_builder
-from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
-from sans.state.StateObjects.StateReductionMode import StateReductionMode
-from sans.state.StateObjects.StateSave import StateSave
-from sans.state.StateObjects.StateScale import StateScale
-from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
-from sans.state.StateObjects.StateWavelength import StateWavelength
-from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavelength_and_pixel_adjustment_builder
+from SANS.sans.common.enums import SANSInstrument, ReductionMode, DetectorType, RangeStepType, FitModeForMerge, DataType, FitType, RebinType
+from SANS.sans.common.general_functions import get_bank_for_spectrum_number, get_detector_types_from_instrument
+from SANS.sans.state.IStateParser import IStateParser
+from SANS.sans.state.StateObjects.StateAdjustment import StateAdjustment
+from SANS.sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
+from SANS.sans.state.StateObjects.StateCompatibility import StateCompatibility
+from SANS.sans.state.StateObjects.StateConvertToQ import StateConvertToQ
+from SANS.sans.state.StateObjects.StateData import StateData
+from SANS.sans.state.StateObjects.StateMaskDetectors import get_mask_builder, StateMaskDetectors
+from SANS.sans.state.StateObjects.StateMoveDetectors import get_move_builder
+from SANS.sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
+from SANS.sans.state.StateObjects.StateReductionMode import StateReductionMode
+from SANS.sans.state.StateObjects.StateSave import StateSave
+from SANS.sans.state.StateObjects.StateScale import StateScale
+from SANS.sans.state.StateObjects.StateSliceEvent import StateSliceEvent
+from SANS.sans.state.StateObjects.StateWavelength import StateWavelength
+from SANS.sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavelength_and_pixel_adjustment_builder
 from sans.user_file.parser_helpers.toml_parser_impl_base import TomlParserImplBase
 from sans.user_file.parser_helpers.wavelength_parser import DuplicateWavelengthStates, WavelengthTomlParser
 from sans.user_file.toml_parsers.toml_v1_schema import TomlSchemaV1Validator

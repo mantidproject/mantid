@@ -8,9 +8,9 @@ import os
 import unittest
 from unittest import mock
 
-from sans.common.configurations import Configurations
-from sans.common.enums import DetectorType, SANSInstrument, ReductionMode, RangeStepType, RebinType, DataType, FitType
-from sans.state.StateObjects.StateMoveDetectors import StateMoveZOOM
+from SANS.sans.common.configurations import Configurations
+from SANS.sans.common.enums import DetectorType, SANSInstrument, ReductionMode, RangeStepType, RebinType, DataType, FitType
+from SANS.sans.state.StateObjects.StateMoveDetectors import StateMoveZOOM
 from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
 from sans.user_file.settings_tags import DetectorId, TransId
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter

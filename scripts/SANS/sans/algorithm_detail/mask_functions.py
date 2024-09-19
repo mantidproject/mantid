@@ -8,8 +8,8 @@ from collections import namedtuple
 from collections.abc import Sequence
 
 from enum import Enum
-from sans.common.enums import DetectorType, SANSInstrument
-from sans.common.xml_parsing import get_named_elements_from_ipf_file
+from SANS.sans.common.enums import DetectorType, SANSInstrument
+from SANS.sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
 detector_shape_bundle = namedtuple("detector_shape_bundle", "rectangular_shape, width, height, " "number_of_pixels_override")

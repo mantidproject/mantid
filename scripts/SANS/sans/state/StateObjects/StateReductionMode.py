@@ -8,8 +8,8 @@
 
 import json
 
-from sans.common.enums import ReductionMode, ReductionDimensionality, FitModeForMerge
-from sans.state.JsonSerializable import JsonSerializable
+from SANS.sans.common.enums import ReductionMode, ReductionDimensionality, FitModeForMerge
+from SANS.sans.state.JsonSerializable import JsonSerializable
 
 
 class StateReductionMode(metaclass=JsonSerializable):
