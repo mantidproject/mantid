@@ -28,19 +28,19 @@ The error in the calculation can then be determined thus:
 
 
 .. math::
-    \sigma_{\epsilon_{SM}} = \sqrt{|\frac{\delta \epsilon_{SM}}{\delta T_{00}}|^2 * \sigma^2_{T_{00}} + |\frac{\delta \epsilon_{SM}}{\delta T_{01}}|^2 * \sigma^2_{T_{01}} + |\frac{\delta \epsilon_{SM}}{\delta \epsilon_{cell}}|^2 * \sigma^2_{\epsilon_{cell}}}
+    \sigma_{\epsilon_{SM}} = \sqrt{|\frac{\partial \epsilon_{SM}}{\partial T_{00}}|^2 * \sigma^2_{T_{00}} + |\frac{\partial \epsilon_{SM}}{\partial T_{01}}|^2 * \sigma^2_{T_{01}} + |\frac{\partial \epsilon_{SM}}{\partial \epsilon_{cell}}|^2 * \sigma^2_{\epsilon_{cell}}}
 
 
 where:
 
 .. math::
-    \frac{\delta \epsilon_{SM}}{\delta T_{00}} = \frac{T_{01}}{(2\epsilon_{cell} - 1)(T_{00} + T_{01})^2}
+    \frac{\partial \epsilon_{SM}}{\partial T_{00}} = \frac{T_{01}}{(2\epsilon_{cell} - 1)(T_{00} + T_{01})^2}
 
 .. math::
-    \frac{\delta \epsilon_{SM}}{\delta T_{01}} = \frac{-T_{00}}{(2\epsilon_{cell} - 1)(T_{00} + T_{01})^2}
+    \frac{\partial \epsilon_{SM}}{\partial T_{01}} = \frac{-T_{00}}{(2\epsilon_{cell} - 1)(T_{00} + T_{01})^2}
 
 .. math::
-    \frac{\delta \epsilon_{SM}}{\delta \epsilon_{cell}} = \frac{T_{01} - T_{00}}{(2\epsilon_{cell} - 1)^2(T_{00} + T_{01})}
+    \frac{\partial \epsilon_{SM}}{\partial \epsilon_{cell}} = \frac{T_{01} - T_{00}}{(2\epsilon_{cell} - 1)^2(T_{00} + T_{01})}
 
 Usage
 -----
