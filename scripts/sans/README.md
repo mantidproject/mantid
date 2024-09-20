@@ -5,7 +5,8 @@ which can be found in the `WorkflowAlgorithm` section of Mantid's `PythonInterfa
 
 ## `algorithm_detail`
 
-This package contains implementation details of some SANS-specific algorithms which are defined in mantid/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/SANS
+This package contains implementation details of some SANS-specific algorithms which are defined in
+`mantid/Framework/PythonInterface/plugins/algorithms/WorkflowAlgorithms/SANS`
 
 
 ## `common`
@@ -18,8 +19,8 @@ The elements in the `state` package contain the definition of the reduction conf
 
 ## `test_helper`
 
-This elements of this package are used for testing the SANS reduction framework.
+These elements of this package are used for testing the SANS reduction framework.
 
 ## `user_file`
 
-The elements of this package are used to parse a SANS user file and to setup a state object from the specified settings.
+The elements of this package are used to parse a SANS user file and to set up a state object from the specified settings.
