@@ -23,7 +23,8 @@ public:
   MOCK_METHOD3(checkFieldIsValid, bool(const QString &errorMessage, QLineEdit *field, QLabel *errorLabel));
   MOCK_METHOD2(checkWorkspaceSelectorIsNotEmpty, bool(const QString &name, WorkspaceSelector *workspaceSelector));
   MOCK_METHOD2(checkFileFinderWidgetIsValid, bool(const QString &name, const FileFinderWidget *widget));
-  MOCK_METHOD3(checkDataSelectorIsValid, bool(const QString &name, DataSelector *widget, bool silent));
+  MOCK_METHOD4(checkDataSelectorIsValid,
+               bool(const QString &name, DataSelector *widget, bool const silent, bool const autoLoad));
   MOCK_METHOD3(checkWorkspaceGroupIsValid, bool(QString const &groupName, QString const &inputType, bool silent));
   MOCK_METHOD2(checkWorkspaceExists, bool(QString const &workspaceName, bool silent));
   MOCK_METHOD2(checkValidRange, bool(QString const &name, std::pair<double, double> range));
