@@ -102,7 +102,7 @@ bool WorkspaceMultiSelector::isValid() const {
   return (item != nullptr);
 }
 
-QStringList WorkspaceMultiSelector::getWSSuffixes() { return m_suffix; }
+const QStringList &WorkspaceMultiSelector::getWSSuffixes() const { return m_suffix; }
 
 void WorkspaceMultiSelector::setWSSuffixes(const QStringList &suffix) {
   if (suffix != m_suffix)
