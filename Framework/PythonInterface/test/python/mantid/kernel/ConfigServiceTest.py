@@ -5,6 +5,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import inspect
 import os
 import sys
 import testhelpers
@@ -141,7 +142,7 @@ class ConfigServiceTest(unittest.TestCase):
 
     def test_properties_documented(self):
         # location of the rst file relative to this file this will break if either moves
-        doc_filename = os.path.split(__file__)[0]
+        doc_filename = os.path.split(inspect.getfile(self.__class__))[0]
         doc_filename = os.path.join(doc_filename, "../../../../../../docs/source/concepts/PropertiesFile.rst")
         doc_filename = os.path.abspath(doc_filename)
 

@@ -11,7 +11,6 @@ once qtpy is universally used.
 It is intended to be used as a launcher script for a given unit test file.
 The reports are output to the current working directory.
 """
-import importlib.util
 from importlib.machinery import SourceFileLoader
 import os
 import sys
@@ -34,12 +33,7 @@ def main(argv):
 
     # Load the test and copy over any module variables so that we have
     # the same environment defined here
-
-    test_module_name = module_name(pathname)
-    test_loader = SourceFileLoader(test_module_name, pathname)
-    test_spec = importlib.util.spec_from_loader(test_module_name, test_loader)
-    test_module = importlib.util.module_from_spec(test_spec)
-    test_loader.exec_module(test_module)
+    test_module = SourceFileLoader(module_name(pathname), pathname).load_module()
     test_module_globals = dir(test_module)
     this_globals = globals()
     for key in test_module_globals:
