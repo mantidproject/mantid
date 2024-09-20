@@ -263,16 +263,15 @@ void DataSelector::setLoadProperty(std::string const &propertyName, bool const v
  * @param error :: Whether loading completed without error
  */
 void DataSelector::handleAutoLoadComplete(bool error) {
-  if (!error) {
-    if (m_alwaysLoadAsGroup) {
-      makeGroup(getWsNameFromFiles().toStdString());
-    }
+  m_uiForm.rfFileInput->setFileProblem(error ? "Could not load file. See log for details." : "");
 
-    // emit that we got a valid workspace/file to work with
-    emit dataReady(getWsNameFromFiles());
-  } else {
-    m_uiForm.rfFileInput->setFileProblem("Could not load file. See log for details.");
+  if (error) {
+    return;
   }
+  if (m_alwaysLoadAsGroup) {
+    makeGroup(getWsNameFromFiles().toStdString());
+  }
+  emit dataReady(getWsNameFromFiles());
 }
 
 /**
