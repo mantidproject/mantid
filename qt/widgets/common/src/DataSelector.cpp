@@ -23,10 +23,7 @@
 using namespace Mantid::API;
 
 namespace {
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
+auto &ads = AnalysisDataService::Instance();
 
 std::string cutLastOf(const std::string &str, const std::string &delimiter) {
   const auto cutIndex = str.rfind(delimiter);
@@ -50,7 +47,6 @@ std::string loadAlgName(const std::string &filePath) {
 }
 
 void makeGroup(std::string const &workspaceName) {
-  auto const &ads = AnalysisDataService::Instance();
   if (!ads.retrieveWS<WorkspaceGroup>(workspaceName)) {
     const auto groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     groupAlg->initialize();
@@ -167,14 +163,14 @@ bool DataSelector::isValid() {
       auto const wsName = getCurrentDataName().toStdString();
 
       isValid = !wsName.empty();
-      if (isValid && !doesExistInADS(wsName)) {
+      if (isValid && !ads.doesExist(wsName)) {
         // attempt to reload if we can
         // don't use algorithm runner because we need to know instantly.
         auto const filepath = m_uiForm.rfFileInput->getUserInput().toString().toStdString();
         if (!filepath.empty())
           executeLoadAlgorithm(filepath, wsName);
 
-        isValid = doesExistInADS(wsName);
+        isValid = ads.doesExist(wsName);
 
         if (!isValid) {
           m_uiForm.rfFileInput->setFileProblem("The specified workspace is "
@@ -182,7 +178,6 @@ bool DataSelector::isValid() {
                                                "service");
         }
       } else {
-        auto &ads = AnalysisDataService::Instance();
         if (!ads.doesExist(wsName)) {
           return isValid;
         }
@@ -457,7 +452,7 @@ void DataSelector::dropEvent(QDropEvent *de) {
 
   auto const dragData = mimeData->text().toStdString();
 
-  if (de->mimeData() && doesExistInADS(dragData)) {
+  if (de->mimeData() && ads.doesExist(dragData)) {
     m_uiForm.wsWorkspaceInput->dropEvent(de);
     if (de->dropAction() == before_action) {
       setWorkspaceSelectorIndex(mimeData->text());
@@ -473,7 +468,7 @@ void DataSelector::dropEvent(QDropEvent *de) {
   }
 
   auto const filepath = m_uiForm.rfFileInput->getText().toStdString();
-  if (de->mimeData() && !doesExistInADS(dragData) && !filepath.empty()) {
+  if (de->mimeData() && !ads.doesExist(dragData) && !filepath.empty()) {
     auto const file = extractLastOf(filepath, "/");
     if (fileFound(file)) {
       auto const workspaceName = cutLastOf(file, ".");

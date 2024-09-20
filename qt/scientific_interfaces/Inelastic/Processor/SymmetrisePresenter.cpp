@@ -18,6 +18,8 @@ using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("SymmetrisePresenter");
+
+auto &ads = Mantid::API::AnalysisDataService::Instance();
 } // namespace
 
 namespace MantidQt {
@@ -29,8 +31,7 @@ namespace CustomInterfaces {
 SymmetrisePresenter::SymmetrisePresenter(QWidget *parent,
                                          std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
                                          ISymmetriseView *view, std::unique_ptr<ISymmetriseModel> model)
-    : DataProcessor(parent, std::move(algorithmRunner)), m_adsInstance(Mantid::API::AnalysisDataService::Instance()),
-      m_view(view), m_model(std::move(model)), m_isPreview(false) {
+    : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)), m_isPreview(false) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
@@ -57,7 +58,7 @@ void SymmetrisePresenter::handleRun() {
 
   // Return if no data has been loaded
   auto const dataWorkspaceName = m_view->getDataName();
-  if (dataWorkspaceName.empty())
+  if (!ads.doesExist(dataWorkspaceName))
     return;
   // Return if E range is incorrect
   if (!m_view->verifyERange(dataWorkspaceName))
