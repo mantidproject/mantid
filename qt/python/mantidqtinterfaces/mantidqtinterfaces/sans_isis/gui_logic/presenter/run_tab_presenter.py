@@ -238,7 +238,7 @@ class RunTabPresenter(PresenterCommon):
 
     def _setup_sub_presenters(self):
         # Holds a list of sub presenters which uses the CommonPresenter class to set views
-        # model_tests and call update methods applicable to all presenters
+        # models and call update methods applicable to all presenters
         # N.B. although this class implements the methods don't add it, as set_view will recurse
         self._common_sub_presenters = []
 
@@ -372,7 +372,7 @@ class RunTabPresenter(PresenterCommon):
 
     def on_user_file_load(self):
         """
-        Loads the user file. Populates the model_tests and the view.
+        Loads the user file. Populates the models and the view.
         """
         error_msg = "Loading of the user file failed"
         # 1. Get the user file path from the view

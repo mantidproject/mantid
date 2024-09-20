@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """The state gui model contains all the reduction information which is not explicitly available in the data table.
 
-This is one of the two model_tests which is used for the data reduction. It contains generally all the settings which
+This is one of the two models which is used for the data reduction. It contains generally all the settings which
 are not available in the model associated with the data table.
 """
 
