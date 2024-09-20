@@ -17,69 +17,6 @@ import inspect
 import dis
 
 
-def replace_signature(func, signature):
-    """
-    Replace the signature of the given function object with that given by
-    varnames
-    :param func: Function whose signature is to be replaced
-    :param signature: A tuple of names of arguments and local variables in Python 2
-                      or a Signature object in Python 3
-    """
-    if hasattr(signature, "parameters"):
-        # A new Signature object
-        setattr(func, "__signature__", signature)
-    else:
-        # Drop this code when we dro Python 2 support
-        # Code object is different in Python 3
-        if hasattr(func, "func_code"):
-            # Version 2
-            code_attr = "func_code"
-            f = func.func_code
-            c = f.__new__(
-                f.__class__,
-                f.co_argcount,
-                f.co_nlocals,
-                f.co_stacksize,
-                f.co_flags,
-                f.co_code,
-                f.co_consts,
-                f.co_names,
-                signature,
-                f.co_filename,
-                f.co_name,
-                f.co_firstlineno,
-                f.co_lnotab,
-                f.co_freevars,
-            )
-        else:
-            code_attr = "__code__"
-            f = func.__code__
-            new_args = [
-                f.__class__,
-                f.co_argcount,
-                f.co_kwonlyargcount,
-                f.co_nlocals,
-                f.co_stacksize,
-                f.co_flags,
-                f.co_code,
-                f.co_consts,
-                f.co_names,
-                signature,
-                f.co_filename,
-                f.co_name,
-                f.co_firstlineno,
-                f.co_lnotab,
-                f.co_freevars,
-            ]
-            # Python 3.8 supports positional-only arguments and has an extra
-            # keyword in the constructor
-            if hasattr(f, "co_posonlyargcount"):
-                new_args.insert(2, f.co_posonlyargcount)
-            c = f.__new__(*new_args)
-        # endif
-        setattr(func, code_attr, c)
-
-
 def customise_func(func, name, signature, docstring):
     """
     Takes the definition of the algorithm function and replaces
@@ -87,8 +24,7 @@ def customise_func(func, name, signature, docstring):
     function definition
     :param func: A function object holding the definition
     :param name: The name of the algorithm
-    :param signature: A new signature for the function. Expecting a 2-tuple
-                      of arguments and local variables. See _replace_signature
+    :param signature: A new signature for the function
     :param docstring: A string containing the function documentation
     """
     func.__name__ = str(name)
@@ -106,7 +42,7 @@ class LazyFunctionSignature(inspect.Signature):
     to reduce the time spent initialising algorithms.
     """
 
-    __slots__ = ("_alg_name", "__sig")
+    __slots__ = ("_alg_name", "__sig", "_include_self")
 
     def __init__(self, *args, **kwargs):
         if "alg_name" not in kwargs:
@@ -115,6 +51,11 @@ class LazyFunctionSignature(inspect.Signature):
         else:
             self._alg_name = kwargs.pop("alg_name")
             self.__sig = None
+
+        if "include_self" in kwargs:
+            self._include_self = kwargs.pop("include_self")
+        else:
+            self._include_self = True
 
     @property
     def _signature(self):
@@ -157,8 +98,9 @@ class LazyFunctionSignature(inspect.Signature):
                 # None is not quite accurate here, but we are reproducing the
                 # behavior found in the C++ code for SimpleAPI.
                 parameters.append(Parameter(name, pos_or_keyword, default=None))
-        # Add a self parameter since these are called from a class.
-        parameters.insert(0, Parameter("self", Parameter.POSITIONAL_ONLY))
+        if self._include_self:
+            # Add a self parameter since these are called from a class.
+            parameters.insert(0, Parameter("self", Parameter.POSITIONAL_ONLY))
         return parameters
 
 

@@ -41,11 +41,9 @@ import mantid
 from mantid import api as _api, kernel as _kernel
 from mantid import apiVersion  # noqa: F401
 from mantid.kernel import plugins as _plugin_helper
-from mantid.kernel import ConfigService, logger
 from mantid.kernel.funcinspect import (
     customise_func as _customise_func,
     lhs_info as _lhs_info,
-    replace_signature as _replace_signature,
     LazyFunctionSignature,
 )
 
@@ -321,7 +319,7 @@ def fitting_algorithm(inout=False):
 
         # end
         function_name = f.__name__
-        signature = ("\bFunction, InputWorkspace", "**kwargs")
+        signature = LazyFunctionSignature(alg_name=function_name, include_self=False)
         fwrapper = _customise_func(wrapper, function_name, signature, f.__doc__)
         if function_name not in __SPECIALIZED_FUNCTIONS__:
             __SPECIALIZED_FUNCTIONS__.append(function_name)
@@ -527,7 +525,7 @@ def CutMD(*args, **kwargs):  # noqa: C901
         return out_names[0]
 
 
-_replace_signature(CutMD, ("\bInputWorkspace", "**kwargs"))
+CutMD.__signature__ = LazyFunctionSignature(alg_name="CutMD", include_self=False)
 
 
 def RenameWorkspace(*args, **kwargs):
@@ -572,7 +570,7 @@ def RenameWorkspace(*args, **kwargs):
     return _gather_returns("RenameWorkspace", lhs, algm)
 
 
-_replace_signature(RenameWorkspace, ("\bInputWorkspace,[OutputWorkspace],[True||False]", "**kwargs"))
+RenameWorkspace.__signature__ = LazyFunctionSignature(alg_name="RenameWorkspace", include_self=False)
 
 
 def _get_function_spec(func):
@@ -1177,23 +1175,6 @@ def _find_parent_pythonalgorithm(frame):
 
 
 # ----------------------------------------------------------------------------------------------------------------------
-
-
-def _create_fake_function(name):
-    """Create fake functions for the given name"""
-
-    # ------------------------------------------------------------------------------------------------
-    def fake_function(*args, **kwargs):
-        raise RuntimeError(
-            "Mantid import error. The mock simple API functions have not been replaced!"
-            " This is an error in the core setup logic of the mantid module, "
-            "please contact the development team."
-        )
-
-    # ------------------------------------------------------------------------------------------------
-    fake_function.__name__ = name
-    _replace_signature(fake_function, ("", ""))
-    globals()[name] = fake_function
 
 
 def _mockup(plugins):
