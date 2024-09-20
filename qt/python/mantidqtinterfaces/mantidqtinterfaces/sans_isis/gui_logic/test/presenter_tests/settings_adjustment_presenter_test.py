@@ -7,7 +7,7 @@
 import unittest
 
 from unittest.mock import Mock
-from SANS.sans.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.settings_adjustment_presenter import SettingsAdjustmentPresenter
 
 

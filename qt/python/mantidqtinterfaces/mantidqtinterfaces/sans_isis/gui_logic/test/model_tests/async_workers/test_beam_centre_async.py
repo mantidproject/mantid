@@ -9,7 +9,7 @@ from unittest import mock
 
 from unittest.mock import call
 
-from SANS.sans.common.enums import DetectorType
+from sans.common.enums import DetectorType
 from mantidqtinterfaces.sans_isis.gui_logic.models.async_workers.beam_centre_async import BeamCentreAsync
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 

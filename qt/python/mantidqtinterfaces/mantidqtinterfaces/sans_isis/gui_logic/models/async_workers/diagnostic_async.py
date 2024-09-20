@@ -9,15 +9,15 @@ from mantid.api import AlgorithmPropertyWithValue
 from mantid.simpleapi import SumSpectra, ConvertAxesToRealSpace
 from mantidqt.utils.async_qt_adaptor import IQtAsync, qt_async_task
 from mantidqt.utils.asynchronous import AsyncTaskSuccess
-from SANS.sans.algorithm_detail.batch_execution import provide_loaded_data, create_unmanaged_algorithm, add_to_group
-from SANS.sans.algorithm_detail.crop_helper import get_component_name
-from SANS.sans.algorithm_detail.mask_sans_workspace import mask_workspace
-from SANS.sans.common.constants import EMPTY_NAME
-from SANS.sans.common.enums import IntegralEnum, DetectorType, SANSDataType
-from SANS.sans.common.file_information import get_instrument_paths_for_sans_file
-from SANS.sans.common.general_functions import parse_diagnostic_settings
-from SANS.sans.common.xml_parsing import get_named_elements_from_ipf_file
-from SANS.sans.common.plotting import get_plotting_module
+from sans.algorithm_detail.batch_execution import provide_loaded_data, create_unmanaged_algorithm, add_to_group
+from sans.algorithm_detail.crop_helper import get_component_name
+from sans.algorithm_detail.mask_sans_workspace import mask_workspace
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import IntegralEnum, DetectorType, SANSDataType
+from sans.common.file_information import get_instrument_paths_for_sans_file
+from sans.common.general_functions import parse_diagnostic_settings
+from sans.common.xml_parsing import get_named_elements_from_ipf_file
+from sans.common.plotting import get_plotting_module
 
 from typing import TYPE_CHECKING
 

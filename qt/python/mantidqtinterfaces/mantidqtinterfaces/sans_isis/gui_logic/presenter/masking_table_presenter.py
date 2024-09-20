@@ -13,7 +13,7 @@ from mantidqtinterfaces.sans_isis.views.masking_table import MaskingTable
 
 from mantid.api import AnalysisDataService
 from mantid.kernel import Logger
-from SANS.sans.common.enums import DetectorType
+from sans.common.enums import DetectorType
 from mantidqtinterfaces.sans_isis.gui_logic.models.async_workers.masking_table_async import MaskingTableAsync
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
 

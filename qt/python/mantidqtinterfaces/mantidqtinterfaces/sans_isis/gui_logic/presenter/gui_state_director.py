@@ -14,11 +14,11 @@ import copy
 import os
 
 from mantid import FileFinder
-from SANS.sans.common.file_information import SANSFileInformationBlank
-from SANS.sans.common.RowEntries import RowEntries
+from sans.common.file_information import SANSFileInformationBlank
+from sans.common.RowEntries import RowEntries
 from mantidqtinterfaces.sans_isis.gui_logic.models.file_loading import FileLoading
 from mantidqtinterfaces.sans_isis.gui_logic.models.state_gui_model import StateGuiModel
-from SANS.sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateData import get_data_builder
 
 
 class GuiStateDirector(object):

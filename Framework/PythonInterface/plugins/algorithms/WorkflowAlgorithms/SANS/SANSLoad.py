@@ -12,7 +12,7 @@ from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, Algorith
 from mantid.kernel import Direction, FloatArrayProperty
 from sans.algorithm_detail.load_data import SANSLoadDataFactory
 from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
-from SANS.sans.common.enums import SANSDataType
+from sans.common.enums import SANSDataType
 
 from sans.state.Serializer import Serializer
 

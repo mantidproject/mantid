@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from isis_sans_system_test import ISISSansSystemTest
 from sans.command_interface.ISISCommandInterface import UseCompatibilityMode, ZOOM, MaskFile, Set1D, AssignSample, WavRangeReduction
-from SANS.sans.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 from systemtesting import MantidSystemTest
 
 

@@ -18,11 +18,11 @@ from sans.algorithm_detail.beamcentrefinder_plotting import can_plot_beamcentref
 from sans.algorithm_detail.crop_helper import get_component_name
 from sans.algorithm_detail.single_execution import perform_can_subtraction
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
-from SANS.sans.common.constants import EMPTY_NAME
-from SANS.sans.common.enums import DetectorType, MaskingQuadrant, FindDirectionEnum
-from SANS.sans.common.file_information import get_instrument_paths_for_sans_file
-from SANS.sans.common.general_functions import create_child_algorithm
-from SANS.sans.common.xml_parsing import get_named_elements_from_ipf_file
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import DetectorType, MaskingQuadrant, FindDirectionEnum
+from sans.common.file_information import get_instrument_paths_for_sans_file
+from sans.common.general_functions import create_child_algorithm
+from sans.common.xml_parsing import get_named_elements_from_ipf_file
 from sans.state.Serializer import Serializer
 
 

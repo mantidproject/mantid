@@ -14,7 +14,7 @@ import isis_reduction_steps
 import SANS2DReductionGUI as sansgui
 
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from SANS.sans.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

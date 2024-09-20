@@ -16,11 +16,11 @@ from mantid.api import AlgorithmManager
 from sans.state.Serializer import Serializer
 
 from sans.state.StateObjects.StateData import get_data_builder
-from SANS.sans.common.enums import DetectorType, DataType, SANSFacility, SANSInstrument
+from sans.common.enums import DetectorType, DataType, SANSFacility, SANSInstrument
 
-from SANS.sans.common.constants import EMPTY_NAME
-from SANS.sans.common.general_functions import create_unmanaged_algorithm
-from SANS.sans.common.file_information import SANSFileInformationFactory
+from sans.common.constants import EMPTY_NAME
+from sans.common.general_functions import create_unmanaged_algorithm
+from sans.common.file_information import SANSFileInformationFactory
 
 
 # -----------------------------------------------

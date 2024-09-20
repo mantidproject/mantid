@@ -19,7 +19,7 @@ from mantid.simpleapi import Load
 
 import unittest
 
-from SANS.sans.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 DIFF_PLACES = 8
 

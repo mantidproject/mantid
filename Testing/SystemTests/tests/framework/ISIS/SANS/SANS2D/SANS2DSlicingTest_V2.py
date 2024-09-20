@@ -22,7 +22,7 @@ from sans.command_interface.ISISCommandInterface import (
     WavRangeReduction,
 )
 from mantid.simpleapi import RenameWorkspace
-from SANS.sans.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

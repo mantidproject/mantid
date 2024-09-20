@@ -22,8 +22,8 @@ from sans.algorithm_detail.single_execution import (
     get_reduction_mode_vs_output_bundles,
     run_optimized_for_can,
 )
-from SANS.sans.common.enums import DataType, ReductionMode, FitType
-from SANS.sans.common.general_functions import (
+from sans.common.enums import DataType, ReductionMode, FitType
+from sans.common.general_functions import (
     create_child_algorithm,
     does_can_workspace_exist_on_ads,
     get_transmission_output_name,

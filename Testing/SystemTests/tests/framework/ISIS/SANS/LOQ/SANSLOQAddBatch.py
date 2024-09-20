@@ -16,7 +16,7 @@ import SANSadd2 as sansadd
 
 import os
 
-from SANS.sans.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)

@@ -12,10 +12,10 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from mantid.kernel import Logger
 from mantidqt.utils.async_qt_adaptor import qt_async_task, IQtAsync
 from mantidqt.utils.asynchronous import AsyncTaskSuccess, AsyncTaskFailure
-from SANS.sans.algorithm_detail.batch_execution import load_workspaces_from_states
-from SANS.sans.common.enums import ReductionMode, RowState
-from SANS.sans.common.RowEntries import RowEntries
-from SANS.sans.sans_batch import SANSBatchReduction
+from sans.algorithm_detail.batch_execution import load_workspaces_from_states
+from sans.common.enums import ReductionMode, RowState
+from sans.common.RowEntries import RowEntries
+from sans.sans_batch import SANSBatchReduction
 
 
 class SignalNotifyProgress(QObject):

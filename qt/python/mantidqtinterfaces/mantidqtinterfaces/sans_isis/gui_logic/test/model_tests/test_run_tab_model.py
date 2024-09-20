@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from SANS.sans.common.enums import ReductionDimensionality
+from sans.common.enums import ReductionDimensionality
 from mantidqtinterfaces.sans_isis.gui_logic.models.POD.save_options import SaveOptions
 from mantidqtinterfaces.sans_isis.gui_logic.models.run_tab_model import RunTabModel
 

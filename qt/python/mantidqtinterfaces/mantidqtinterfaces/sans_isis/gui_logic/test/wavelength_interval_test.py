@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from SANS.sans.state.StateObjects.wavelength_interval import WavelengthInterval
+from sans.state.StateObjects.wavelength_interval import WavelengthInterval
 
 
 class WavelengthIntervalTest(unittest.TestCase):

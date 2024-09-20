@@ -14,8 +14,8 @@ from mantid.api import AlgorithmFactory, PropertyMode, WorkspaceGroup, Workspace
 from mantid.kernel import Direction, Property
 from mantid.simpleapi import CloneWorkspace
 from sans.algorithm_detail.single_execution import run_core_reduction, run_optimized_for_can
-from SANS.sans.common.enums import DataType, ReductionMode
-from SANS.sans.common.general_functions import does_can_workspace_exist_on_ads
+from sans.common.enums import DataType, ReductionMode
+from sans.common.general_functions import does_can_workspace_exist_on_ads
 from sans.data_objects.sans_workflow_algorithm_outputs import SANSWorkflowAlgorithmOutputs
 
 

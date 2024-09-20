@@ -9,7 +9,7 @@ from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import DeleteWorkspace, mtd
 import ISISCommandInterface as i
 import systemtesting
-from SANS.sans.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

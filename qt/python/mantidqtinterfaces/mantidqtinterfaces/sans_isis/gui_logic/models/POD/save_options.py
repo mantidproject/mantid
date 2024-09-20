@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.py36compat import dataclass
-from SANS.sans.common.enums import SaveType
+from sans.common.enums import SaveType
 
 
 @dataclass

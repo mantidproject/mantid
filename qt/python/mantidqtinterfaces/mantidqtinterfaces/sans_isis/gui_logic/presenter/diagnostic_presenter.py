@@ -8,7 +8,7 @@ from mantid.kernel import Logger
 from mantid import UsageService
 from mantid.kernel import FeatureType
 from mantidqtinterfaces.sans_isis.views.diagnostics_page import DiagnosticsPage
-from SANS.sans.common.enums import IntegralEnum
+from sans.common.enums import IntegralEnum
 from mantidqtinterfaces.sans_isis.gui_logic.gui_common import get_detector_strings_for_diagnostic_page, get_detector_from_gui_selection
 from mantidqtinterfaces.sans_isis.gui_logic.models.async_workers.diagnostic_async import DiagnosticsAsync
 from mantidqtinterfaces.sans_isis.gui_logic.models.diagnostics_model import DiagnosticsModel

@@ -12,7 +12,7 @@ from SANSReductionCoreBase import SANSReductionCoreBase
 
 from mantid.api import AlgorithmFactory, Progress
 from sans.algorithm_detail.mask_workspace import mask_bins
-from SANS.sans.common.enums import DetectorType
+from sans.common.enums import DetectorType
 
 
 class SANSReductionCore(SANSReductionCoreBase):

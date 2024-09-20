@@ -7,7 +7,7 @@
 import unittest
 from unittest import mock
 
-from SANS.sans.common.enums import SANSInstrument, DetectorType
+from sans.common.enums import SANSInstrument, DetectorType
 from mantidqtinterfaces.sans_isis.gui_logic.models.beam_centre_model import BeamCentreModel
 
 

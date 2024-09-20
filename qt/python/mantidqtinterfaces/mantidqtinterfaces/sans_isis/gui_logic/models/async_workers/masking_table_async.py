@@ -10,12 +10,12 @@ from typing import TYPE_CHECKING
 from mantid.api import AnalysisDataService
 from mantidqt.utils.async_qt_adaptor import IQtAsync, qt_async_task
 from mantidqt.utils.asynchronous import AsyncTaskSuccess, AsyncTaskFailure
-from SANS.sans.algorithm_detail.mask_sans_workspace import mask_workspace
-from SANS.sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
-from SANS.sans.state.Serializer import Serializer
-from SANS.sans.common.enums import DetectorType
-from SANS.sans.common.constants import EMPTY_NAME
-from SANS.sans.common.general_functions import create_unmanaged_algorithm
+from sans.algorithm_detail.mask_sans_workspace import mask_workspace
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
+from sans.state.Serializer import Serializer
+from sans.common.enums import DetectorType
+from sans.common.constants import EMPTY_NAME
+from sans.common.general_functions import create_unmanaged_algorithm
 
 if TYPE_CHECKING:
     from mantidqtinterfaces.sans_isis.gui_logic.presenter.masking_table_presenter import MaskingTablePresenter

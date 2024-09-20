@@ -12,17 +12,17 @@ are not available in the model associated with the data table.
 
 from typing import Union
 
-from SANS.sans.common.enums import ReductionDimensionality, ReductionMode, RangeStepType, SaveType, DetectorType, FitModeForMerge
-from SANS.sans.common.general_functions import get_ranges_from_event_slice_setting, wav_ranges_to_str
+from sans.common.enums import ReductionDimensionality, ReductionMode, RangeStepType, SaveType, DetectorType, FitModeForMerge
+from sans.common.general_functions import get_ranges_from_event_slice_setting, wav_ranges_to_str
 from mantidqtinterfaces.sans_isis.gui_logic.models.model_common import ModelCommon
-from SANS.sans.state.AllStates import AllStates
+from sans.state.AllStates import AllStates
 from mantidqtinterfaces.sans_isis.gui_logic.gui_common import (
     meter_2_millimeter,
     millimeter_2_meter,
     apply_selective_view_scaling,
     undo_selective_view_scaling,
 )
-from SANS.sans.user_file.parser_helpers.wavelength_parser import parse_range_wavelength
+from sans.user_file.parser_helpers.wavelength_parser import parse_range_wavelength
 
 
 class StateGuiModel(ModelCommon):

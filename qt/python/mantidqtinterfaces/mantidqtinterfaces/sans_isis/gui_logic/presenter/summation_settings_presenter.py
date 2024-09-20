@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from SANS.sans.common.enums import BinningType
+from sans.common.enums import BinningType
 
 
 class SummationSettingsPresenter(object):

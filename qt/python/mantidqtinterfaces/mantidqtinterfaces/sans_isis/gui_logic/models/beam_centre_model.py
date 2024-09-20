@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Logger
-from SANS.sans.common.enums import FindDirectionEnum, DetectorType, SANSInstrument
+from sans.common.enums import FindDirectionEnum, DetectorType, SANSInstrument
 from mantidqtinterfaces.sans_isis.gui_logic.gui_common import (
     meter_2_millimeter,
     millimeter_2_meter,

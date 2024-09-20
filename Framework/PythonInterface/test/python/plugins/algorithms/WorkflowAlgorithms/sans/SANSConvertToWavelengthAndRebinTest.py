@@ -11,9 +11,9 @@ import numpy
 
 from mantid.api import FrameworkManager, WorkspaceGroup
 from mantid.dataobjects import EventWorkspace
-from SANS.sans.common.general_functions import create_unmanaged_algorithm
-from SANS.sans.common.constants import EMPTY_NAME
-from SANS.sans.common.enums import RangeStepType
+from sans.common.general_functions import create_unmanaged_algorithm
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import RangeStepType
 
 
 def provide_workspace(is_event=True):

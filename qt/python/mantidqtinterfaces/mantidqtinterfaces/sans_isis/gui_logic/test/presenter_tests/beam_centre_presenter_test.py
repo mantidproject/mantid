@@ -8,7 +8,7 @@ import unittest
 import random
 from unittest import mock
 
-from SANS.sans.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.beam_centre_presenter import BeamCentrePresenter
 from mantidqtinterfaces.sans_isis.gui_logic.test.mock_objects import create_mock_beam_centre_tab
 from mantidqtinterfaces.sans_isis.gui_logic.test.mock_objects import create_run_tab_presenter_mock

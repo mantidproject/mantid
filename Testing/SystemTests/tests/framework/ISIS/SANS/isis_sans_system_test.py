@@ -7,7 +7,7 @@
 import pathlib
 
 from mantid import config
-from SANS.sans.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 
 # Decorator to fix-up path to files

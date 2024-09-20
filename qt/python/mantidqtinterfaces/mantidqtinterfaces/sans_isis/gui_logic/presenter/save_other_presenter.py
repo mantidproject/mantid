@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid import ConfigService
 from mantid import AnalysisDataService
-from SANS.sans.algorithm_detail.batch_execution import save_workspace_to_file
+from sans.algorithm_detail.batch_execution import save_workspace_to_file
 import os
 from mantid.api import WorkspaceGroup
 from mantid.kernel import logger

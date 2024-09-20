@@ -7,10 +7,10 @@
 import unittest
 from unittest import mock
 
-from SANS.sans.common.enums import SANSInstrument, FitType
+from sans.common.enums import SANSInstrument, FitType
 from mantidqtinterfaces.sans_isis.gui_logic.models.settings_adjustment_model import SettingsAdjustmentModel
-from SANS.sans.user_file.settings_tags import DetectorId
-from SANS.sans.user_file.txt_parsers.CommandInterfaceAdapter import CommandInterfaceAdapter
+from sans.user_file.settings_tags import DetectorId
+from sans.user_file.txt_parsers.CommandInterfaceAdapter import CommandInterfaceAdapter
 
 
 class SettingsTransmissionModelTest(unittest.TestCase):

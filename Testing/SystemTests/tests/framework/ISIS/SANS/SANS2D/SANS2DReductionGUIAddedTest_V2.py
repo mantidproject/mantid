@@ -33,7 +33,7 @@ from sans.command_interface.ISISCommandInterface import (
     WavRangeReduction,
     UseCompatibilityMode,
 )
-from SANS.sans.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

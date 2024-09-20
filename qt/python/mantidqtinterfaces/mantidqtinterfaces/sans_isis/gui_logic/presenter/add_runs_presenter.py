@@ -8,8 +8,8 @@ import os
 
 from mantid.kernel import ConfigService
 from enum import Enum
-from SANS.sans.common.enums import BinningType
-from SANS.sans.common.file_information import SANSFileInformationFactory
+from sans.common.enums import BinningType
+from sans.common.file_information import SANSFileInformationFactory
 from mantidqtinterfaces.sans_isis.gui_logic.gui_common import SANSGuiPropertiesHandler
 from mantidqtinterfaces.sans_isis.gui_logic.models.RunSelectionModel import RunSelectionModel
 from mantidqtinterfaces.sans_isis.gui_logic.models.SummationSettingsModel import SummationSettingsModel
