@@ -10,7 +10,7 @@ import mantid.simpleapi as mantid
 from mantid.kernel import logger
 from Diffraction.single_crystal.base_sx import BaseSX, PEAK_TYPE, INTEGRATION_TYPE
 from mantid.api import AnalysisDataService as ADS
-from FindGoniometerFromUB import getR
+from plugins.algorithms.FindGoniometerFromUB import getR
 from os import path
 
 tof_min = 700

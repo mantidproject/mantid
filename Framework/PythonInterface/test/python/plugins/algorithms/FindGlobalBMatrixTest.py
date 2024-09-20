@@ -11,7 +11,7 @@ from mantid.simpleapi import (
     TransformHKL,
 )
 import numpy as np
-from FindGoniometerFromUB import getR
+from plugins.algorithms.FindGoniometerFromUB import getR
 
 
 def add_peaksHKL(ws_list, Hs, Ks, L):
