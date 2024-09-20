@@ -229,7 +229,7 @@ Project Recovery test
 - Force a crash by executing the `Segfault` algorithm
 - Restart MantidWorkbench
 - You should be presented with the Project Recovery dialog
-- Choose ``Only open in script editor``
+- Choose ``Just open in script editor``
 - Mantid should open the script editor, with a script named `ordered_recovery.py`
 - Run this script, it should repopulate the workspaces dialog, but not open any figures
 
@@ -260,14 +260,14 @@ Project Recovery test
   RenameWorkspace(InputWorkspace='NewWorkspace', OutputWorkspace='Rename2')
 
 - Save the workspace as a `.nxs` file, by highlighting the ``Rename2`` workspace and selecting
-  ``Save > Nexus`` at the top of the Workspaces toolbox.
+  ``Save Nexus`` at the top of the Workspaces toolbox.
 - Close Mantid normally
 - Restart MantidWorkbench
 - Re-open the workspace from the saved `.nxs` file
 - Wait for saving
 - Force a crash by executing the `Segfault` algorithm
 - Restart MantidWorkbench
-- Choose ``Only open in script editor``
+- Choose ``Just open in script editor``
 - Mantid should open a script named ``ordered_recovery.py`` in the script editor
 - This should contain only the ``Load`` command and no previous history (to see full history, run the script, right-click on the
   workspace and select ``Show History``)
