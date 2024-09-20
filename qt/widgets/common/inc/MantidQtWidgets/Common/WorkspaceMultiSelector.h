@@ -54,7 +54,7 @@ public:
 
   StringPairVec retrieveSelectedNameIndexPairs();
 
-  QStringList getWSSuffixes() const;
+  QStringList getWSSuffixes();
   void setWSSuffixes(const QStringList &suffix);
 
   bool isValid() const;
