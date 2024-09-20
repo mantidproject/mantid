@@ -61,8 +61,8 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockDataSelector : public DataSelector {
 public:
   /// Public Methods
-  MOCK_CONST_METHOD0(getCurrentDataName, QString());
-  MOCK_METHOD0(isValid, bool());
+  MOCK_CONST_METHOD1(getCurrentDataName, QString(bool const));
+  MOCK_METHOD1(isValid, bool(bool const));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -193,54 +193,54 @@ public:
 
 private:
   template <typename Functor> void assertTheDataIsCheckedOneTime(Functor const &functor, DataType const &primaryType) {
-    ON_CALL(*m_dataSelector, getCurrentDataName()).WillByDefault(Return(QString::fromStdString(WORKSPACE_NAME)));
-    ON_CALL(*m_dataSelector, isValid()).WillByDefault(Return(true));
+    ON_CALL(*m_dataSelector, getCurrentDataName(true)).WillByDefault(Return(QString::fromStdString(WORKSPACE_NAME)));
+    ON_CALL(*m_dataSelector, isValid(true)).WillByDefault(Return(true));
 
-    EXPECT_CALL(*m_dataSelector, getCurrentDataName()).Times(1);
-    EXPECT_CALL(*m_dataSelector, isValid()).Times(1);
+    EXPECT_CALL(*m_dataSelector, getCurrentDataName(true)).Times(1);
+    EXPECT_CALL(*m_dataSelector, isValid(true)).Times(1);
 
-    (void)functor(m_uiv.get(), m_dataSelector.get(), ERROR_LABEL, primaryType, false);
+    (void)functor(m_uiv.get(), m_dataSelector.get(), ERROR_LABEL, primaryType, false, true);
   }
 
   template <typename Functor>
   void assertTheDataIsCheckedNTimes(Functor const &functor, int nTimes, DataType const &primaryType,
                                     std::vector<DataType> const &otherTypes) {
-    ON_CALL(*m_dataSelector, getCurrentDataName()).WillByDefault(Return(QString::fromStdString(WORKSPACE_NAME)));
-    ON_CALL(*m_dataSelector, isValid()).WillByDefault(Return(true));
+    ON_CALL(*m_dataSelector, getCurrentDataName(true)).WillByDefault(Return(QString::fromStdString(WORKSPACE_NAME)));
+    ON_CALL(*m_dataSelector, isValid(true)).WillByDefault(Return(true));
 
-    EXPECT_CALL(*m_dataSelector, getCurrentDataName()).Times(nTimes);
-    EXPECT_CALL(*m_dataSelector, isValid()).Times(nTimes);
+    EXPECT_CALL(*m_dataSelector, getCurrentDataName(true)).Times(nTimes);
+    EXPECT_CALL(*m_dataSelector, isValid(true)).Times(nTimes);
 
-    (void)functor(m_uiv.get(), m_dataSelector.get(), ERROR_LABEL, primaryType, otherTypes, false);
+    (void)functor(m_uiv.get(), m_dataSelector.get(), ERROR_LABEL, primaryType, otherTypes, false, true);
   }
 
   template <typename Functor>
   void assertThatTheDataIsValid(std::string const &workspaceName, std::string const &errorLabel,
                                 Functor const &functor) {
-    ON_CALL(*m_dataSelector, getCurrentDataName()).WillByDefault(Return(QString::fromStdString(workspaceName)));
-    ON_CALL(*m_dataSelector, isValid()).WillByDefault(Return(true));
+    ON_CALL(*m_dataSelector, getCurrentDataName(true)).WillByDefault(Return(QString::fromStdString(workspaceName)));
+    ON_CALL(*m_dataSelector, isValid(true)).WillByDefault(Return(true));
 
-    TS_ASSERT(functor(m_uiv.get(), m_dataSelector.get(), errorLabel, false));
+    TS_ASSERT(functor(m_uiv.get(), m_dataSelector.get(), errorLabel, false, true));
     TS_ASSERT(m_uiv->generateErrorMessage().empty());
   }
 
   template <typename Functor>
   void assertThatTheDataIsInvalid(std::string const &workspaceName, std::string const &errorLabel,
                                   Functor const &functor) {
-    ON_CALL(*m_dataSelector, getCurrentDataName()).WillByDefault(Return(QString::fromStdString(workspaceName)));
-    ON_CALL(*m_dataSelector, isValid()).WillByDefault(Return(true));
+    ON_CALL(*m_dataSelector, getCurrentDataName(true)).WillByDefault(Return(QString::fromStdString(workspaceName)));
+    ON_CALL(*m_dataSelector, isValid(true)).WillByDefault(Return(true));
 
-    TS_ASSERT(!functor(m_uiv.get(), m_dataSelector.get(), errorLabel, false));
+    TS_ASSERT(!functor(m_uiv.get(), m_dataSelector.get(), errorLabel, false, true));
     TS_ASSERT(!m_uiv->generateErrorMessage().empty());
   }
 
   template <typename Functor>
   void assertErrorMessage(std::string const &workspaceName, std::string const &errorLabel, Functor const &functor,
                           std::string const &errorMessage) {
-    ON_CALL(*m_dataSelector, getCurrentDataName()).WillByDefault(Return(QString::fromStdString(workspaceName)));
-    ON_CALL(*m_dataSelector, isValid()).WillByDefault(Return(true));
+    ON_CALL(*m_dataSelector, getCurrentDataName(true)).WillByDefault(Return(QString::fromStdString(workspaceName)));
+    ON_CALL(*m_dataSelector, isValid(true)).WillByDefault(Return(true));
 
-    (void)functor(m_uiv.get(), m_dataSelector.get(), errorLabel, false);
+    (void)functor(m_uiv.get(), m_dataSelector.get(), errorLabel, false, true);
 
     TS_ASSERT_EQUALS(m_uiv->generateErrorMessage(), errorMessage);
   }
