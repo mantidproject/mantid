@@ -61,8 +61,7 @@ void makeGroup(std::string const &workspaceName) {
 namespace MantidQt::MantidWidgets {
 
 DataSelector::DataSelector(QWidget *parent)
-    : API::MantidWidget(parent), m_loadProperties(), m_algRunner(), m_autoLoad(true), m_showLoad(true),
-      m_alwaysLoadAsGroup(false) {
+    : API::MantidWidget(parent), m_loadProperties(), m_algRunner(), m_showLoad(true), m_alwaysLoadAsGroup(false) {
   m_uiForm.setupUi(this);
   connect(m_uiForm.cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
   connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SIGNAL(loadClicked()));
@@ -106,14 +105,8 @@ void DataSelector::handleFileInput() {
     return;
   }
 
-  // attempt to load the file
-  if (m_autoLoad) {
-    emit filesAutoLoaded();
-    autoLoadFile(filename);
-  } else {
-    // files were found
-    emit filesFound();
-  }
+  emit filesAutoLoaded();
+  autoLoadFile(filename);
 }
 
 /**
@@ -148,10 +141,10 @@ bool DataSelector::isWorkspaceSelectorVisible() const { return !isFileSelectorVi
  *
  * Checks using the relvant widgets isValid method depending
  * on what view is currently being shown
- *
+ * @param autoLoad :: Whether to automatically load the data if it is not found in the ADS.
  * @return :: If the data selector is valid
  */
-bool DataSelector::isValid() {
+bool DataSelector::isValid(bool const autoLoad) {
   bool isValid = false;
 
   if (isFileSelectorVisible()) {
@@ -159,7 +152,7 @@ bool DataSelector::isValid() {
 
     // check to make sure the user hasn't deleted the auto-loaded file
     // since choosing it.
-    if (isValid && m_autoLoad) {
+    if (isValid && autoLoad) {
       auto const wsName = getCurrentDataName().toStdString();
 
       isValid = !wsName.empty();
@@ -344,10 +337,10 @@ QString DataSelector::getWsNameFromFiles() const {
  * If multiple files are allowed, and auto-loading is off, it will return the
  * full user input.
  * If there is no valid input the method returns an empty string.
- *
+ * @param autoLoad :: Whether or not autoload is turned on.
  * @return The name of the current data item
  */
-QString DataSelector::getCurrentDataName() const {
+QString DataSelector::getCurrentDataName(bool const autoLoad) const {
   QString filename("");
 
   int index = m_uiForm.stackedDataSelect->currentIndex();
@@ -356,7 +349,7 @@ QString DataSelector::getCurrentDataName() const {
   case 0:
     // the file selector is visible
     if (m_uiForm.rfFileInput->isValid()) {
-      if (m_uiForm.rfFileInput->allowMultipleFiles() && !m_autoLoad) {
+      if (m_uiForm.rfFileInput->allowMultipleFiles() && !autoLoad) {
         // if multiple files are allowed, auto-loading is not on, return the
         // full user input
         filename = getFullFilePath();
@@ -373,20 +366,6 @@ QString DataSelector::getCurrentDataName() const {
 
   return filename;
 }
-
-/**
- * Gets whether the widget will attempt to auto load files
- *
- * @return Whether the widget will auto load
- */
-bool DataSelector::willAutoLoad() const { return m_autoLoad; }
-
-/**
- * Sets whether the widget will attempt to auto load files.
- *
- * @param load :: Whether the widget will auto load
- */
-void DataSelector::setAutoLoad(bool load) { m_autoLoad = load; }
 
 /**
  * Gets the text displayed on the load button
