@@ -141,8 +141,9 @@ bool UserInputValidator::checkFileFinderWidgetIsValid(const QString &name, const
  * @param silent True if an error should not be added to the validator.
  * @returns True if the input was valid
  */
-bool UserInputValidator::checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent) {
-  if (!widget->isValid()) {
+bool UserInputValidator::checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool const silent,
+                                                  bool const autoLoad) {
+  if (!widget->isValid(autoLoad)) {
     addErrorMessage(name.toStdString() + " error: " + widget->getProblem().toStdString(), silent);
     return false;
   }

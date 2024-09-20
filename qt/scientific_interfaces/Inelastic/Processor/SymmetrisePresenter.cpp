@@ -44,7 +44,7 @@ SymmetrisePresenter::SymmetrisePresenter(QWidget *parent,
 SymmetrisePresenter::~SymmetrisePresenter() { m_propTrees["SymmPropTree"]->unsetFactoryForManager(m_dblManager); }
 
 void SymmetrisePresenter::handleValidation(IUserInputValidator *validator) const {
-  validateDataIsOfType(validator, m_view->getDataSelector(), "Sample", DataType::Red);
+  validateDataIsOfType(validator, m_view->getDataSelector(), "Sample", DataType::Red, false, false);
 }
 
 void SymmetrisePresenter::handleRun() {
