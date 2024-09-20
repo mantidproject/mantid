@@ -1,0 +1,2 @@
+- GUI elements that rely on ``Qt`` have been removed from the ``sans`` framework package, reducing the risk of import
+  errors.
