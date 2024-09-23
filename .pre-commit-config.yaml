@@ -24,13 +24,13 @@ repos:
         exclude: conda/recipes/mantid/meta.yaml|conda/recipes/mantid-developer/meta.yaml|conda/recipes/mantidqt/meta.yaml|conda/recipes/mantiddocs/meta.yaml|conda/recipes/mantidworkbench/meta.yaml
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v11.1.0 # updating to a new version should wait until maintenance
+    rev: v18.1.8 # updating to a new version should wait until maintenance
     hooks:
     - id: clang-format
       exclude: Testing/Tools/cxxtest|tools
 
   - repo: https://github.com/mantidproject/pre-commit-hooks.git
-    rev: 2f8a4f22629d0d23332f621df9de93751331161b
+    rev: 17c2842277953a4afcbca26bf84e8956f729e765
     hooks:
       - id: cmake-missing-pytest-files
         # Exclude sphinx / template file
@@ -59,7 +59,7 @@ repos:
           )$
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.6.4
+    rev: v0.6.7
     # ruff must appear before black in the list of hooks
     hooks:
       - id: ruff
