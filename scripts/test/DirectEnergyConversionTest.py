@@ -5,13 +5,31 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import os
 
 import Direct.dgreduce as dgreduce
 from Direct.DirectEnergyConversion import DirectEnergyConversion
 from Direct.PropertyManager import PropertyManager
 
-from mantid import api
-from mantid.simpleapi import *
+from mantid import api, FileFinder, mtd
+from mantid.simpleapi import (
+    AddSampleLog,
+    CloneWorkspace,
+    ConvertUnits,
+    CompareWorkspaces,
+    CreateSampleWorkspace,
+    CreateWorkspace,
+    ExtractSingleSpectrum,
+    GetEi,
+    Load,
+    LoadInstrument,
+    MoveInstrumentComponent,
+    NormaliseByCurrent,
+    Rebin,
+    RenameWorkspace,
+    ScaleX,
+    SetInstrumentParameter,
+)
 
 
 # -----------------------------------------------------------------------------------------------------------------------------------------

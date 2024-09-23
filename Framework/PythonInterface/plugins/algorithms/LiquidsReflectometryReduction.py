@@ -17,9 +17,45 @@ It was written in an attempt to:
 import time
 import math
 import os
-from mantid.api import *
-from mantid.simpleapi import *
-from mantid.kernel import *
+from mantid.api import (
+    mtd,
+    AlgorithmFactory,
+    AnalysisDataService,
+    FileFinder,
+    MatrixWorkspaceProperty,
+    PropertyMode,
+    PythonAlgorithm,
+    WorkspaceProperty,
+)
+from mantid.kernel import (
+    logger,
+    Direction,
+    FloatArrayLengthValidator,
+    FloatArrayProperty,
+    IntArrayLengthValidator,
+    IntArrayProperty,
+    StringArrayProperty,
+)
+from mantid.simpleapi import (
+    AddSampleLog,
+    ConvertToPointData,
+    CreateSingleValuedWorkspace,
+    CropWorkspace,
+    Divide,
+    ExtractSingleSpectrum,
+    Load,
+    LoadEventNexus,
+    LRPrimaryFraction,
+    LRSubtractAverageBackground,
+    Multiply,
+    NormaliseByCurrent,
+    Rebin,
+    RebinToWorkspace,
+    RefRoi,
+    ReplaceSpecialValues,
+    SortXAxis,
+    SumSpectra,
+)
 from functools import reduce  # pylint: disable=redefined-builtin
 
 

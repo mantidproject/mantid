@@ -10,10 +10,12 @@ from tempfile import TemporaryDirectory
 import unittest
 import importlib as imp
 
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import PropertyManager
+from mantid.simpleapi import AddSampleLog, CreateSampleWorkspace
 from mantid import api, config
 
-from Direct.ReductionWrapper import *
+from Direct.ReductionWrapper import iliad, ReductionWrapper
 import MariReduction as mr
 
 

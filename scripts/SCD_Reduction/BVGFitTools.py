@@ -7,7 +7,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import ICCFitTools as ICCFT
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import CreateWorkspace, Fit, Polynomial
+from mantid.kernel import logger
 from scipy.interpolate import interp1d
 from scipy.ndimage.filters import convolve
 import ICConvoluted as ICC
@@ -334,9 +336,9 @@ def getXTOF(box, peak):
     QX, QY, QZ = ICCFT.getQXQYQZ(box)
     origQS = peak.getQSampleFrame()
     tList = np.zeros_like(QX)
-    for i in xrange(QX.shape[0]):
-        for j in xrange(QX.shape[1]):
-            for k in xrange(QX.shape[2]):
+    for i in np.xrange(QX.shape[0]):
+        for j in np.xrange(QX.shape[1]):
+            for k in np.xrange(QX.shape[2]):
                 newQ = V3D(QX[i, j, k], QY[i, j, k], QZ[i, j, k])
                 peak.setQSampleFrame(newQ)
                 flightPath = peak.getL1() + peak.getL2()
@@ -747,5 +749,5 @@ def bvg(A, mu, sigma, x, y, bg):
         )
         return A * f + bg
     else:
-        system.information("   BVGFT:bvg:not PSD Matrix")
+        logger.information("   BVGFT:bvg:not PSD Matrix")
         return 0.0 * np.ones_like(x)
