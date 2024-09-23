@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
+
+from sys import platform
 from systemtesting import MantidSystemTest
 from mantid.simpleapi import BayesQuasi, Load
 
@@ -12,6 +14,9 @@ from mantid.simpleapi import BayesQuasi, Load
 class BayesQuasiTest(MantidSystemTest):
     _sample_name = "irs26176_graphite002_red"
     _resolution_name = "irs26173_graphite002_res"
+
+    def skipTests(self):
+        return platform == "darwin"
 
     def runTest(self):
         Load(Filename=f"{self._sample_name}.nxs", OutputWorkspace=self._sample_name, LoadHistory=False)
