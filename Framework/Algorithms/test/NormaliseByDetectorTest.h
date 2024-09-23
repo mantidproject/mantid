@@ -552,7 +552,8 @@ public:
 
       // Create a parameter file, with a root equation that will apply to all
       // detectors.
-      const std::string parameterFileContents = boost::str(boost::format("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
+      const std::string parameterFileContents = boost::str(boost::format(
+                                                               "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
         <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
         <component-link name=\"%1%\">\n\
         <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
