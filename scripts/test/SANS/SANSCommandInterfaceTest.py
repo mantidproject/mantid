@@ -13,7 +13,7 @@ from reducer_singleton import ReductionSingleton
 import ISISCommandInterface as command_iface
 import isis_reduction_steps as reduction_steps
 from mantid.kernel import DateAndTime
-from mantid.simpleapi import *
+from mantid.simpleapi import AddTimeSeriesLog, CreateSampleWorkspace, DeleteWorkspace, SaveNexus
 
 
 class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):
