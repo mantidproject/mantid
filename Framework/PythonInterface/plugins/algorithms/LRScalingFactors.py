@@ -7,9 +7,21 @@
 # pylint: disable=invalid-name, no-init
 import os
 import re
-from mantid.api import *
-from mantid.simpleapi import *
-from mantid.kernel import *
+from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm
+from mantid.kernel import logger, Direction, FloatArrayProperty, FloatArrayLengthValidator, IntArrayProperty, Property
+from mantid.simpleapi import (
+    CreateWorkspace,
+    CropWorkspace,
+    Divide,
+    Fit,
+    LoadEventNexus,
+    LRSubtractAverageBackground,
+    Multiply,
+    NormaliseByCurrent,
+    Rebin,
+    ReplaceSpecialValues,
+    SumSpectra,
+)
 
 
 class LRScalingFactors(PythonAlgorithm):

@@ -20,6 +20,8 @@
 #include "MantidFrameworkTestHelpers/ScopedFileHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
+#include <sstream>
+
 using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -552,23 +554,24 @@ public:
 
       // Create a parameter file, with a root equation that will apply to all
       // detectors.
-      const std::string parameterFileContents = boost::str(boost::format(
-                                                               "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n\
-        <parameter-file instrument = \"%1%\" date = \"2012-01-31T00:00:00\">\n\
-        <component-link name=\"%1%\">\n\
-        <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n\
-        <formula eq=\"1\" result-unit=\"Wavelength\"/>\n\
-        <fixed />\n\
-        </parameter>\n\
-        <parameter name=\"LinearBackground:A1\" type=\"fitting\">\n\
-        <formula eq=\"2\" result-unit=\"Wavelength\"/>\n\
-        <fixed />\n\
-        </parameter>\n\
-        </component-link>\n\
-        </parameter-file>\n") % instrumentName);
+      std::ostringstream parameterFileStream;
+      parameterFileStream << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
+                          << "<parameter-file instrument = \"" << instrumentName
+                          << "\" date = \"2012-01-31T00:00:00\">\n"
+                          << "  <component-link name=\"" << instrumentName << "\">\n"
+                          << "    <parameter name=\"LinearBackground:A0\" type=\"fitting\">\n"
+                          << "      <formula eq=\"1\" result-unit=\"Wavelength\"/>\n"
+                          << "      <fixed />\n"
+                          << "    </parameter>\n"
+                          << "    <parameter name=\"LinearBackground:A1\" type=\"fitting\">\n"
+                          << "      <formula eq=\"2\" result-unit=\"Wavelength\"/>\n"
+                          << "      <fixed />\n"
+                          << "    </parameter>\n"
+                          << "  </component-link>\n"
+                          << "</parameter-file>\n";
 
       // Create a temporary Instrument Parameter file.
-      ScopedFile file(parameterFileContents, instrumentName + "_Parameters.xml");
+      ScopedFile file(parameterFileStream.str(), instrumentName + "_Parameters.xml");
 
       // Apply parameter file to workspace.
       apply_instrument_parameter_file_to_workspace(ws, file);
