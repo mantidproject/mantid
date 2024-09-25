@@ -91,20 +91,13 @@ Config file (`config.json`)
             "jenkins_job_name": "pull_requests-cppcheck",
             "context": "cppcheck",
             "downstream": true,
-            "downstream_builds": ["Pylint"]
+            "downstream_builds": ["RHEL6", "Windows", "OSX", "Doxygen", "Ubuntu + Documentation Tests", "RHEL7 + System Tests"]
         },
         {
             "github_repo": "mantidproject/mantid",
             "jenkins_job_name": "pull_requests-doxygen",
             "context": "Doxygen",
             "downstream": true
-        },
-        {
-            "github_repo": "mantidproject/mantid",
-            "jenkins_job_name": "pull_requests-pylint",
-            "context": "Pylint",
-            "downstream": true,
-            "downstream_builds": ["RHEL6", "Windows", "OSX", "Doxygen", "Ubuntu + Documentation Tests", "RHEL7 + System Tests"]
         },
         {
             "github_repo": "mantidproject/mantid",
