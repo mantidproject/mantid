@@ -786,7 +786,7 @@ public:
     if (m_compressStartTime != "0")
       align_and_focus.setProperty("CompressStartTime", m_compressStartTime);
 
-    // Remove prompt pulse; will cutoff the first peak
+    // Remove prompt pulse; will cutoff the first peak from 6 long-TOF peaks (freq is 200 Hz)
     if (m_removePromptPulse)
       align_and_focus.setProperty("RemovePromptPulseWidth", 2200.0);
 
