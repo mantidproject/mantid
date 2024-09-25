@@ -6,11 +6,24 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/EnumStringProperty.h"
+#include "MantidKernel/EnumeratedString.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/EnumStringProperty.h"
+using namespace Mantid::Kernel;
 
-using Mantid::Kernel::EnumStringProperty;
+namespace {
+enum class CoolGuys : char { Fred, Joe, Bill, enum_count };
+const std::vector<std::string> coolGuyNames{"Frederic", "Joseph", "William"};
+enum class Cakes : char { Lemon, Devil, Angel, Bundt, Pound, enum_count };
+const std::vector<std::string> cakeNames{"Lemon Cake", "Devil's Food Cake", "Angel Food Fake", "Bundt Cake",
+                                         "Pound Cake"};
+typedef EnumeratedString<CoolGuys, &coolGuyNames> COOLGUY;
+typedef EnumeratedString<Cakes, &cakeNames> CAKE;
+
+typedef EnumStringProperty<EnumeratedString<CoolGuys, &coolGuyNames>> COOLGUY_PROPERTY;
+typedef EnumStringProperty<EnumeratedString<Cakes, &cakeNames>> CAKE_PROPERTY;
+} // namespace
 
 class EnumStringPropertyTest : public CxxTest::TestSuite {
 public:
