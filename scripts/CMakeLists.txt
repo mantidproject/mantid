@@ -15,7 +15,7 @@ set(_pth_dirs
     Inelastic
     Interface
     Reflectometry
-    SANS
+    sans
     SCD_Reduction
     TemporaryREF_MScripts
 )
