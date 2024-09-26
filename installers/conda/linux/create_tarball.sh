@@ -129,11 +129,11 @@ fi
 # Create base directory.
 mkdir -p "$bundle_contents"
 
-# Create conda environment internally. --copy ensures no symlinks are used
+# Create conda environment internally. --always-copy ensures no symlinks are used
 bundle_conda_prefix="$bundle_contents"
 
 echo "Creating Conda environment in '$bundle_conda_prefix'"
-"$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy \
+"$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --always-copy \
   --channel "$conda_channel" --channel conda-forge --yes \
   mantidworkbench \
   jq  # used for processing the version string
