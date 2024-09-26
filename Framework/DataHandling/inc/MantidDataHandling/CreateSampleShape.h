@@ -27,7 +27,7 @@ namespace DataHandling {
 */
 class MANTID_DATAHANDLING_DLL CreateSampleShape final : public API::Algorithm {
 public:
-  static void setSampleShape(API::ExperimentInfo &expt, const std::string &shapeXML, bool addTypeTag = true);
+  static void setSampleShape(API::ExperimentInfo &expt, const std::string &shapeXML);
 
 public:
   const std::string name() const override { return "CreateSampleShape"; }

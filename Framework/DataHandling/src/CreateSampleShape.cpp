@@ -28,10 +28,10 @@ using namespace Mantid::API;
  * @param shapeXML XML defining the object's shape
  * @param addTypeTag true to wrap a \<type\> tag around the XML supplied(default)
  */
-void CreateSampleShape::setSampleShape(API::ExperimentInfo &expt, const std::string &shapeXML, bool addTypeTag) {
+void CreateSampleShape::setSampleShape(API::ExperimentInfo &expt, const std::string &shapeXML) {
   Geometry::ShapeFactory sFactory;
   // Create the object
-  auto shape = sFactory.createShape(shapeXML, addTypeTag);
+  auto shape = sFactory.createShape(shapeXML);
   // Check it's valid and attach it to the workspace sample but preserve any
   // material
   if (shape->hasValidShape()) {
