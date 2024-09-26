@@ -11,7 +11,7 @@ from sans.common.enums import BinningType
 from mantidqtinterfaces.sans_isis.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from mantidqtinterfaces.sans_isis.summation_settings_widget import SummationSettingsWidget
-from fake_signal import FakeSignal
+from mantidqtinterfaces.sans_isis.gui_logic.test.fake_signal import FakeSignal
 
 
 class SummationSettingsPresenterTest(unittest.TestCase):

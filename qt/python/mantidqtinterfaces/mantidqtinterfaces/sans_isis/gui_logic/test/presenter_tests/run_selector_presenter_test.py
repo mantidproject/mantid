@@ -12,7 +12,7 @@ from mantidqtinterfaces.sans_isis.gui_logic.models.run_file import SummableRunFi
 from mantidqtinterfaces.sans_isis.gui_logic.models.run_finder import SummableRunFinder
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.RunSelectorPresenter import RunSelectorPresenter
 from mantidqtinterfaces.sans_isis.views.run_selector_widget import RunSelectorWidget
-from fake_signal import FakeSignal
+from mantidqtinterfaces.sans_isis.gui_logic.test.fake_signal import FakeSignal
 
 
 class RunSelectorPresenterTest(unittest.TestCase):
