@@ -62,7 +62,7 @@ done
 # function so that we install conda-build into the base environment
 # (it's recommended to not install it outside of the base env).
 setup_mamba $WORKSPACE/mambaforge
-mamba install --yes conda-build
+mamba install --yes conda-build mamba=1.5
 
 # Build packages
 # Setup a local conda channel to find our locally built packages package. It is
