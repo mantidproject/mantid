@@ -104,6 +104,9 @@ use 8, 9, 10, 12, 14, 16, 20, 21, 22.
 Compatibility Mode
 """"""""""""""""""
 
+*As of version 6.11 of Mantid, this feature is no longer enabled by default.
+It should be considered deprecated and will be removed in a future release.*
+
 The previous SANS GUI converted event-mode data to histogram-mode early into
 processing. This used the time-of-flight binning parameters specified by the
 user or copied the monitor binning.

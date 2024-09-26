@@ -35,9 +35,9 @@ class StateGuiModelTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     # Compatibility Mode
     # ------------------------------------------------------------------------------------------------------------------
-    def test_that_default_compatibility_mode_is_true(self):
+    def test_that_default_compatibility_mode_is_false(self):
         state_gui_model = StateGuiModel(AllStates())
-        self.assertTrue(state_gui_model.compatibility_mode)
+        self.assertFalse(state_gui_model.compatibility_mode)
 
     def test_that_can_set_compatibility_mode(self):
         state_gui_model = StateGuiModel(AllStates())
