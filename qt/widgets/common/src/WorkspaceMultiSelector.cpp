@@ -105,8 +105,7 @@ bool WorkspaceMultiSelector::isValid() const {
 const QStringList &WorkspaceMultiSelector::getWSSuffixes() const { return m_suffix; }
 
 void WorkspaceMultiSelector::setWSSuffixes(const QStringList &suffix) {
-  if (suffix != m_suffix)
-    m_suffix = suffix;
+  m_suffix = suffix;
   refresh();
 }
 
