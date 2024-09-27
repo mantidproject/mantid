@@ -131,6 +131,8 @@ mkdir -p "$bundle_contents"
 
 # Create conda environment internally. --always-copy ensures no symlinks are used
 bundle_conda_prefix="$bundle_contents"
+# Make sure the directory doesn't exist before we create the conda environment otherwise it will fail
+rm -rf "$bundle_conda_prefix"
 
 echo "Creating Conda environment in '$bundle_conda_prefix'"
 "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --always-copy \

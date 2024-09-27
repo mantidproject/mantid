@@ -194,12 +194,15 @@ elif [ -e "$BUILD_DIR" ]; then
 fi
 
 # Create basic directory structure.
-mkdir -p "$bundle_contents"/{Resources,MacOS}
+mkdir -p "$bundle_contents"/MacOS
 
 # Create conda environment internally.
 # --always-copy ensures no symlinks are used
 # --platform osx-64 is required to allow ARM-based systems to install the osx-64 mantid packages.
 bundle_conda_prefix="$bundle_contents"/Resources
+
+# Make sure the directory doesn't exist before we create the conda environment otherwise it will fail
+rm -rf "$bundle_conda_prefix"
 
 echo "Creating Conda environment in '$bundle_conda_prefix'"
 "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --always-copy --platform osx-64 \
