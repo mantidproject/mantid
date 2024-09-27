@@ -23,10 +23,7 @@
 using namespace Mantid::API;
 
 namespace {
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
+auto &ads = AnalysisDataService::Instance();
 
 std::string cutLastOf(const std::string &str, const std::string &delimiter) {
   const auto cutIndex = str.rfind(delimiter);
@@ -50,7 +47,6 @@ std::string loadAlgName(const std::string &filePath) {
 }
 
 void makeGroup(std::string const &workspaceName) {
-  auto const &ads = AnalysisDataService::Instance();
   if (!ads.retrieveWS<WorkspaceGroup>(workspaceName)) {
     const auto groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     groupAlg->initialize();
@@ -65,8 +61,7 @@ void makeGroup(std::string const &workspaceName) {
 namespace MantidQt::MantidWidgets {
 
 DataSelector::DataSelector(QWidget *parent)
-    : API::MantidWidget(parent), m_loadProperties(), m_algRunner(), m_autoLoad(true), m_showLoad(true),
-      m_alwaysLoadAsGroup(false) {
+    : API::MantidWidget(parent), m_loadProperties(), m_algRunner(), m_showLoad(true), m_alwaysLoadAsGroup(false) {
   m_uiForm.setupUi(this);
   connect(m_uiForm.cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(handleViewChanged(int)));
   connect(m_uiForm.pbLoadFile, SIGNAL(clicked()), this, SIGNAL(loadClicked()));
@@ -110,14 +105,8 @@ void DataSelector::handleFileInput() {
     return;
   }
 
-  // attempt to load the file
-  if (m_autoLoad) {
-    emit filesAutoLoaded();
-    autoLoadFile(filename);
-  } else {
-    // files were found
-    emit filesFound();
-  }
+  emit filesAutoLoaded();
+  autoLoadFile(filename);
 }
 
 /**
@@ -152,10 +141,10 @@ bool DataSelector::isWorkspaceSelectorVisible() const { return !isFileSelectorVi
  *
  * Checks using the relvant widgets isValid method depending
  * on what view is currently being shown
- *
+ * @param autoLoad :: Whether to automatically load the data if it is not found in the ADS.
  * @return :: If the data selector is valid
  */
-bool DataSelector::isValid() {
+bool DataSelector::isValid(bool const autoLoad) {
   bool isValid = false;
 
   if (isFileSelectorVisible()) {
@@ -163,18 +152,18 @@ bool DataSelector::isValid() {
 
     // check to make sure the user hasn't deleted the auto-loaded file
     // since choosing it.
-    if (isValid && m_autoLoad) {
+    if (isValid && autoLoad) {
       auto const wsName = getCurrentDataName().toStdString();
 
       isValid = !wsName.empty();
-      if (isValid && !doesExistInADS(wsName)) {
+      if (isValid && !ads.doesExist(wsName)) {
         // attempt to reload if we can
         // don't use algorithm runner because we need to know instantly.
         auto const filepath = m_uiForm.rfFileInput->getUserInput().toString().toStdString();
         if (!filepath.empty())
           executeLoadAlgorithm(filepath, wsName);
 
-        isValid = doesExistInADS(wsName);
+        isValid = ads.doesExist(wsName);
 
         if (!isValid) {
           m_uiForm.rfFileInput->setFileProblem("The specified workspace is "
@@ -182,7 +171,6 @@ bool DataSelector::isValid() {
                                                "service");
         }
       } else {
-        auto &ads = AnalysisDataService::Instance();
         if (!ads.doesExist(wsName)) {
           return isValid;
         }
@@ -268,16 +256,15 @@ void DataSelector::setLoadProperty(std::string const &propertyName, bool const v
  * @param error :: Whether loading completed without error
  */
 void DataSelector::handleAutoLoadComplete(bool error) {
-  if (!error) {
-    if (m_alwaysLoadAsGroup) {
-      makeGroup(getWsNameFromFiles().toStdString());
-    }
+  m_uiForm.rfFileInput->setFileProblem(error ? "Could not load file. See log for details." : "");
 
-    // emit that we got a valid workspace/file to work with
-    emit dataReady(getWsNameFromFiles());
-  } else {
-    m_uiForm.rfFileInput->setFileProblem("Could not load file. See log for details.");
+  if (error) {
+    return;
   }
+  if (m_alwaysLoadAsGroup) {
+    makeGroup(getWsNameFromFiles().toStdString());
+  }
+  emit dataReady(getWsNameFromFiles());
 }
 
 /**
@@ -350,10 +337,10 @@ QString DataSelector::getWsNameFromFiles() const {
  * If multiple files are allowed, and auto-loading is off, it will return the
  * full user input.
  * If there is no valid input the method returns an empty string.
- *
+ * @param autoLoad :: Whether or not autoload is turned on.
  * @return The name of the current data item
  */
-QString DataSelector::getCurrentDataName() const {
+QString DataSelector::getCurrentDataName(bool const autoLoad) const {
   QString filename("");
 
   int index = m_uiForm.stackedDataSelect->currentIndex();
@@ -362,7 +349,7 @@ QString DataSelector::getCurrentDataName() const {
   case 0:
     // the file selector is visible
     if (m_uiForm.rfFileInput->isValid()) {
-      if (m_uiForm.rfFileInput->allowMultipleFiles() && !m_autoLoad) {
+      if (m_uiForm.rfFileInput->allowMultipleFiles() && !autoLoad) {
         // if multiple files are allowed, auto-loading is not on, return the
         // full user input
         filename = getFullFilePath();
@@ -379,20 +366,6 @@ QString DataSelector::getCurrentDataName() const {
 
   return filename;
 }
-
-/**
- * Gets whether the widget will attempt to auto load files
- *
- * @return Whether the widget will auto load
- */
-bool DataSelector::willAutoLoad() const { return m_autoLoad; }
-
-/**
- * Sets whether the widget will attempt to auto load files.
- *
- * @param load :: Whether the widget will auto load
- */
-void DataSelector::setAutoLoad(bool load) { m_autoLoad = load; }
 
 /**
  * Gets the text displayed on the load button
@@ -457,7 +430,7 @@ void DataSelector::dropEvent(QDropEvent *de) {
 
   auto const dragData = mimeData->text().toStdString();
 
-  if (de->mimeData() && doesExistInADS(dragData)) {
+  if (de->mimeData() && ads.doesExist(dragData)) {
     m_uiForm.wsWorkspaceInput->dropEvent(de);
     if (de->dropAction() == before_action) {
       setWorkspaceSelectorIndex(mimeData->text());
@@ -473,7 +446,7 @@ void DataSelector::dropEvent(QDropEvent *de) {
   }
 
   auto const filepath = m_uiForm.rfFileInput->getText().toStdString();
-  if (de->mimeData() && !doesExistInADS(dragData) && !filepath.empty()) {
+  if (de->mimeData() && !ads.doesExist(dragData) && !filepath.empty()) {
     auto const file = extractLastOf(filepath, "/");
     if (fileFound(file)) {
       auto const workspaceName = cutLastOf(file, ".");

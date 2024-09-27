@@ -61,7 +61,6 @@ class EXPORT_OPT_MANTIDQT_COMMON DataSelector : public API::MantidWidget {
 
   // These are global properties of data selector
   Q_PROPERTY(bool optional READ isOptional WRITE isOptional)
-  Q_PROPERTY(bool autoLoad READ willAutoLoad WRITE setAutoLoad)
   Q_PROPERTY(QString loadLabelText READ getLoadBtnText WRITE setLoadBtnText)
 
 public:
@@ -73,7 +72,7 @@ public:
   /// Get the workspace name from the list of files
   QString getWsNameFromFiles() const;
   /// Get the currently available file or workspace name
-  virtual QString getCurrentDataName() const;
+  virtual QString getCurrentDataName(bool const autoLoad = true) const;
   /// Sets which selector (file or workspace) is visible
   void setSelectorIndex(int index);
   /// Sets if the option to choose selector is visible
@@ -85,7 +84,7 @@ public:
   /// Get whether the workspace selector is currently being shown
   bool isWorkspaceSelectorVisible() const;
   /// Checks if widget is in a valid state
-  virtual bool isValid();
+  virtual bool isValid(bool const autoLoad = true);
   /// Get file problem, empty string means no error.
   QString getProblem() const;
   /// Read settings from the given group
@@ -96,10 +95,6 @@ public:
   bool isOptional() const;
   /// Sets if optional
   void isOptional(bool /*optional*/);
-  /// Gets will auto load
-  bool willAutoLoad() const;
-  /// Sets will auto load
-  void setAutoLoad(bool /*load*/);
   /// Check if the widget will show the load button
   bool willShowLoad();
   /// Set if the load button should be shown
@@ -376,8 +371,6 @@ private:
   Mantid::API::AlgorithmRuntimeProps m_loadProperties;
   /// Algorithm Runner used to run the load algorithm
   MantidQt::API::QtAlgorithmRunner m_algRunner;
-  /// Flag to enable auto loading. By default this is set to true.
-  bool m_autoLoad;
   /// Flag to show or hide the load button. By default this is set to true.
   bool m_showLoad;
   /// Flag if optional
