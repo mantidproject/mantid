@@ -64,7 +64,7 @@ class BeamCentreAsync(IQtAsync):
         centre_finder = SANSCentreFinder()
         if not settings.find_direction:
             self._logger.error("Have chosen no find direction exiting early")
-            return
+            raise ValueError("Unable to run beam centre finder as no direction settings have been provided.")
 
         pos_1 = settings.lab_pos_1 if settings.component is DetectorType.LAB else settings.hab_pos_1
         pos_2 = settings.lab_pos_2 if settings.component is DetectorType.LAB else settings.hab_pos_2
