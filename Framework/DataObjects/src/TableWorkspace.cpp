@@ -47,7 +47,7 @@ TableWorkspace::TableWorkspace(const TableWorkspace &other)
 
 size_t TableWorkspace::getMemorySize() const {
   size_t data_size = std::accumulate(m_columns.cbegin(), m_columns.cend(), static_cast<size_t>(0),
-                                     [](size_t sum, const auto &column) { return sum = column->sizeOfData(); });
+                                     [](size_t sum, const auto &column) { return sum + column->sizeOfData(); });
   data_size += m_LogManager->getMemorySize();
   return data_size;
 }
