@@ -78,7 +78,6 @@ private:
   void setFileExtensionsByName(bool filter) override;
   void setLoadHistory(bool doLoadHistory) override;
 
-  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
   ISymmetriseView *m_view;
   std::unique_ptr<ISymmetriseModel> m_model;
   // wether batch algorunner is running preview or run buttons
