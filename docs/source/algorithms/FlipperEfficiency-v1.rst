@@ -31,25 +31,25 @@ The errors are calculated as follows:
 
 .. math::
 
-   \sigma_{\epsilon_{F}} = \sqrt{| \frac{\delta \epsilon_{F}}{\delta T_{11}}|^2 * \sigma^2_{T_{11}} + | \frac{\delta \epsilon_{F}}{\delta T_{00}}|^2 * \sigma^2_{T_{00}} + | \frac{\delta \epsilon_{F}}{\delta T_{10}}|^2 * \sigma^2_{T_{10}} + | \frac{\delta \epsilon_{F}}{\delta T_{01}}|^2 * \sigma^2_{T_{01}}}
+   \sigma_{\epsilon_{F}} = \sqrt{| \frac{\partial \epsilon_{F}}{\partial T_{11}}|^2 * \sigma^2_{T_{11}} + | \frac{\partial \epsilon_{F}}{\partial T_{00}}|^2 * \sigma^2_{T_{00}} + | \frac{\partial \epsilon_{F}}{\partial T_{10}}|^2 * \sigma^2_{T_{10}} + | \frac{\partial \epsilon_{F}}{\partial T_{01}}|^2 * \sigma^2_{T_{01}}}
 
 Where:
 
 .. math::
 
-   \frac{\delta \epsilon_{F}}{\delta T_{11}} = \frac{T_{10} * (T_{00} + T_{01})}{(T_{11} + T_{10})^2 * (T_{00} - T_{01})}
+   \frac{\partial \epsilon_{F}}{\partial T_{11}} = \frac{T_{10} * (T_{00} + T_{01})}{(T_{11} + T_{10})^2 * (T_{00} - T_{01})}
 
 .. math::
 
-   \frac{\delta \epsilon_{F}}{\delta T_{00}} = \frac{T_{01} * (T_{10} - T_{11})}{(T_{11} + T_{10}) * (T_{00} - T_{01})^2}
+   \frac{\partial \epsilon_{F}}{\partial T_{00}} = \frac{T_{01} * (T_{10} - T_{11})}{(T_{11} + T_{10}) * (T_{00} - T_{01})^2}
 
 .. math::
 
-   \frac{\delta \epsilon_{F}}{\delta T_{10}} = \frac{-T_{11} * (T_{00} + T_{01})}{(T_{11} + T_{10})^2 * (T_{00} - T_{01})}
+   \frac{\partial \epsilon_{F}}{\partial T_{10}} = \frac{-T_{11} * (T_{00} + T_{01})}{(T_{11} + T_{10})^2 * (T_{00} - T_{01})}
 
 .. math::
 
-   \frac{\delta \epsilon_{F}}{\delta T_{01}} = \frac{T_{00} * (T_{11} - T_{10})}{(T_{11} + T_{10}) * (T_{00} - T_{01})^2}
+   \frac{\partial \epsilon_{F}}{\partial T_{01}} = \frac{T_{00} * (T_{11} - T_{10})}{(T_{11} + T_{10}) * (T_{00} - T_{01})^2}
 
 Outputs
 =======

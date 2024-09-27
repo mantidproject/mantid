@@ -39,16 +39,16 @@ private:
   // Implement abstract Algorithm methods
   void init() override;
   void exec() override;
-  void validateGroupInput();
-  void calculateAnalyserEfficiency();
-  MatrixWorkspace_sptr addTwoWorkspaces(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr otherWs);
-  MatrixWorkspace_sptr createWorkspace(const std::string &name, const std::string &title, const MantidVec &xData,
-                                       const MantidVec &yData, const MantidVec &eData);
-  MatrixWorkspace_sptr divideWorkspace(MatrixWorkspace_sptr numerator, MatrixWorkspace_sptr denominator);
-  void fitAnalyserEfficiency(const double mu, MatrixWorkspace_sptr e, const MantidVec &wavelengthValues, double &pHe,
-                             double &pHeError, MantidVec &eCalc);
-  MatrixWorkspace_sptr calculateEfficiencyWorkspace(const MantidVec &wavelengthValues, const MantidVec &eValues,
-                                                    const double pHe, const double pHeError, const double mu);
+  /// Calculate the efficiency of the helium analyser from the measured transmission data
+  MatrixWorkspace_sptr calculateAnalyserEfficiency();
+  /// Fit the measured efficiency to the known theoretical relationship of efficiency=(1 + tanh(mu * pHe *
+  /// wavelength))/2 to find pHe and pHeError
+  void fitAnalyserEfficiency(const double mu, const MatrixWorkspace_sptr eff, double &pHe, double &pHeError);
+  /// Use the relationship efficiency=(1 + tanh(mu * pHe * wavelength))/2 to calculate the theoretical efficiencies for
+  /// the wavelength bins in the given MatrixWorkspace.
+  void convertToTheoreticalEfficiency(MatrixWorkspace_sptr &eff, const double pHe, const double pHeError,
+                                      const double mu);
+  /// Calculates the tCrit value to give us correct error bounds
   double calculateTCrit(const size_t numberOfBins);
 
   static const double ABSORPTION_CROSS_SECTION_CONSTANT;

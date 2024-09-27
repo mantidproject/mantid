@@ -48,6 +48,10 @@ auto constexpr GROUP_FIT_OPTIONS{"Fit Options"};
 auto constexpr GROUP_OUTPUTS{"Outputs"};
 } // namespace PropertyNames
 
+namespace {
+constexpr size_t NUM_FIT_PARAMS = 1;
+} // unnamed namespace
+
 void HeliumAnalyserEfficiency::init() {
   // Declare required input parameters for algorithm and do some validation here
   declareProperty(
@@ -104,6 +108,16 @@ void validateInputWorkspace(MatrixWorkspace_sptr const &workspace, std::map<std:
   Kernel::Unit_const_sptr unit = workspace->getAxis(0)->unit();
   if (unit->unitID() != "Wavelength") {
     errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be in units of Wavelength.";
+    return;
+  }
+
+  if (workspace->getNumberHistograms() != 1) {
+    errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must contain a single histogram.";
+    return;
+  }
+
+  if (!workspace->isHistogramData()) {
+    errorList[PropertyNames::INPUT_WORKSPACE] = "All input workspaces must be histogram data.";
   }
 }
 /**
@@ -129,9 +143,25 @@ std::map<std::string, std::string> HeliumAnalyserEfficiency::validateInputs() {
   return errorList;
 }
 
-void HeliumAnalyserEfficiency::exec() { calculateAnalyserEfficiency(); }
+void HeliumAnalyserEfficiency::exec() {
+  MatrixWorkspace_sptr eff = calculateAnalyserEfficiency();
 
-void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
+  // Theoretically, the analyser efficiency is given by (1 + tanh(mu * phe * wavelength))/2.
+  // Using the analyser efficiency value that we calculated from the data,
+  // we fit this function to find pHe, the helium atom polarization in the analyser.
+  const double mu = ABSORPTION_CROSS_SECTION_CONSTANT * static_cast<double>(getProperty(PropertyNames::PD));
+
+  double pHe, pHeError;
+  fitAnalyserEfficiency(mu, eff, pHe, pHeError);
+
+  // Now re-calculate the efficiency values in the workspace using the theoretical relationship with the fit result for
+  // pHe. We do this because the efficiency calculated from the data will include inherent noise and structure coming
+  // from the statistical noise, whereas the one calculated from the theory will give the expected smooth result.
+  convertToTheoreticalEfficiency(eff, pHe, pHeError, mu);
+  setProperty(PropertyNames::OUTPUT_WORKSPACE, eff);
+}
+
+MatrixWorkspace_sptr HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
   // First we extract the individual workspaces corresponding to each spin configuration from the group workspace
   const WorkspaceGroup_sptr groupWorkspace = getProperty(PropertyNames::INPUT_WORKSPACE);
   const std::string spinConfigurationInput = getProperty(PropertyNames::SPIN_STATES);
@@ -146,38 +176,21 @@ void HeliumAnalyserEfficiency::calculateAnalyserEfficiency() {
                                                                            FlipperConfigurations::OFF_OFF);
 
   // T_NSF = T11 + T00 (NSF = not spin flipped)
-  MatrixWorkspace_sptr tnsfWs = addTwoWorkspaces(t11Ws, t00Ws);
+  MatrixWorkspace_sptr tnsfWs = t11Ws + t00Ws;
 
   // T_SF = T01 + T10 (SF = spin flipped)
-  MatrixWorkspace_sptr tsfWs = addTwoWorkspaces(t01Ws, t10Ws);
+  MatrixWorkspace_sptr tsfWs = t01Ws + t10Ws;
 
-  // e = (1 + tanh(mu * phe))/2 where e is the efficiency of the analyser.
-  // We're going to calculate e from the data, e = T_NSF / (T_NSF + T_SF),
-  // then fit (1 + tanh(mu * phe))/2 to it in order to calculate phe, the
-  // helium atom polarization in the analyser.
-  MatrixWorkspace_sptr denom = addTwoWorkspaces(tnsfWs, std::move(tsfWs));
-  MatrixWorkspace_sptr e = divideWorkspace(std::move(tnsfWs), std::move(denom));
-
-  // Now we fit (1 + tanh(mu*pHe*x))/2 to P to give us pHe
-
-  const double pd = getProperty(PropertyNames::PD);
-  const double mu = ABSORPTION_CROSS_SECTION_CONSTANT * pd;
-
-  const MantidVec wavelengthValues = e->dataX(0);
-  double pHe, pHeError;
-  MantidVec eCalc;
-  fitAnalyserEfficiency(mu, std::move(e), wavelengthValues, pHe, pHeError, eCalc);
-  auto efficiency = calculateEfficiencyWorkspace(wavelengthValues, eCalc, pHe, pHeError, mu);
-  setProperty(PropertyNames::OUTPUT_WORKSPACE, efficiency);
+  // Calculate the analyser efficiency from the data, eff = T_NSF / (T_NSF + T_SF)
+  return tnsfWs / (tnsfWs + tsfWs);
 }
 
-void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, MatrixWorkspace_sptr e,
-                                                     const MantidVec &wavelengthValues, double &pHe, double &pHeError,
-                                                     MantidVec &eCalc) {
+void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, const MatrixWorkspace_sptr eff, double &pHe,
+                                                     double &pHeError) {
   auto fit = createChildAlgorithm("Fit");
   fit->initialize();
   fit->setProperty("Function", "name=UserFunction,Formula=(1 + tanh(" + std::to_string(mu) + "*phe*x))/2,phe=0.1");
-  fit->setProperty("InputWorkspace", e);
+  fit->setProperty("InputWorkspace", eff);
   const double startLambda = getProperty(PropertyNames::START_LAMBDA);
   fit->setProperty("StartX", startLambda);
   const double endLambda = getProperty(PropertyNames::END_LAMBDA);
@@ -191,100 +204,65 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, MatrixWork
     throw std::runtime_error("Failed to fit to data in the calculation of p_He: " + status);
   }
 
-  ITableWorkspace_sptr fitParameters = fit->getProperty("OutputParameters");
-  MatrixWorkspace_sptr fitWorkspace = fit->getProperty("OutputWorkspace");
+  const ITableWorkspace_sptr fitParameters = fit->getProperty("OutputParameters");
 
   if (!getPropertyValue(PropertyNames::OUTPUT_FIT_PARAMS).empty()) {
     setProperty(PropertyNames::OUTPUT_FIT_PARAMS, fitParameters);
   }
   if (!API::Algorithm::getPropertyValue(PropertyNames::OUTPUT_FIT_CURVES).empty()) {
+    const MatrixWorkspace_sptr fitWorkspace = fit->getProperty("OutputWorkspace");
     setProperty(PropertyNames::OUTPUT_FIT_CURVES, fitWorkspace);
   }
 
   pHe = fitParameters->getRef<double>("Value", 0);
   pHeError = fitParameters->getRef<double>("Error", 0);
-  eCalc = MantidVec(wavelengthValues.size());
-  for (size_t i = 0; i < eCalc.size(); ++i) {
-    eCalc[i] = (1 + std::tanh(mu * pHe * wavelengthValues[i])) / 2.0;
-  }
 }
 
-MatrixWorkspace_sptr HeliumAnalyserEfficiency::calculateEfficiencyWorkspace(const MantidVec &wavelengthValues,
-                                                                            const MantidVec &eValues, const double pHe,
-                                                                            const double pHeError, const double mu) {
-  // This value is used to give us the correct error bounds
-  const double tCrit = calculateTCrit(wavelengthValues.size());
-  const double pdError = getProperty(PropertyNames::PD_ERROR);
+void HeliumAnalyserEfficiency::convertToTheoreticalEfficiency(MatrixWorkspace_sptr &eff, const double pHe,
+                                                              const double pHeError, const double mu) {
+  const auto &pointData = eff->histogram(0).points();
+  const auto &binPoints = pointData.rawData();
+  const auto &binBoundaries = eff->x(0);
 
-  // This is the error calculation for the efficiency using the error on pHe and
-  // the supplied covariance matrix (if there is one).
+  auto &theoreticalEff = eff->mutableY(0);
+  auto &efficiencyErrors = eff->mutableE(0);
 
-  auto efficiencyErrors = MantidVec(eValues.size());
+  // The value tCrit is used to give us the correct error bounds
+  const double tCrit = calculateTCrit(eff->blocksize());
+  const double muError = ABSORPTION_CROSS_SECTION_CONSTANT * static_cast<double>(getProperty(PropertyNames::PD_ERROR));
 
-  for (size_t i = 0; i < eValues.size(); ++i) {
-    const double w = wavelengthValues[i];
-    const auto commonTerm = 0.5 * w / std::pow(std::cosh(mu * w * pHe), 2);
-    const double de_dpHe = mu * commonTerm;
-    const double de_dpd = ABSORPTION_CROSS_SECTION_CONSTANT * pHe * commonTerm;
-    // Covariance between p_He and pd is zero
+  for (size_t i = 0; i < binPoints.size(); ++i) {
+    const double lambda = binPoints[i];
+    const double lambdaError = binBoundaries[i + 1] - binBoundaries[i];
+
+    theoreticalEff[i] = (1 + std::tanh(mu * pHe * lambda)) / 2.0;
+
+    // Calculate the errors for the efficiency
+    const auto commonTerm = 0.5 / std::pow(std::cosh(mu * lambda * pHe), 2);
+    const double de_dpHe = mu * commonTerm * lambda;
+    const double de_dmu = pHe * commonTerm * lambda;
+    const double de_dlambda = mu * pHe * commonTerm;
+    // Covariance between p_He and mu is zero
     efficiencyErrors[i] =
-        tCrit * std::sqrt(de_dpHe * de_dpHe * pHeError * pHeError + de_dpd * de_dpd * pdError * pdError);
+        tCrit * std::sqrt(de_dpHe * de_dpHe * pHeError * pHeError + de_dmu * de_dmu * muError * muError +
+                          de_dlambda * de_dlambda * lambdaError * lambdaError);
   }
-
-  return createWorkspace(getPropertyValue(PropertyNames::OUTPUT_WORKSPACE), "Analyser Efficiency", wavelengthValues,
-                         eValues, efficiencyErrors);
 }
 
 double HeliumAnalyserEfficiency::calculateTCrit(const size_t numberOfBins) {
-  // Create a t distribution with dof given by the number of data points minus
-  // the number of params (2)
+  // Create a t distribution with degrees of freedom given by the number of data points minus
+  // the number of parameters that were fitted for
   double tPpf = 1;
-  if (numberOfBins > 2) {
-    const boost::math::students_t dist(static_cast<double>(numberOfBins) - 2.0);
+  if (numberOfBins > NUM_FIT_PARAMS) {
+    const boost::math::students_t dist(static_cast<double>(numberOfBins) - static_cast<double>(NUM_FIT_PARAMS));
     // Critical value corresponding to 1-sigma
     const double alpha = (1 + std::erf(1.0 / sqrt(2))) / 2;
     // Scale factor for the error calculations
     tPpf = boost::math::quantile(dist, alpha);
   } else {
-    g_log.warning(
-        "The number of histogram bins must be greater than 2 in order to provide an accurate error calculation");
+    g_log.warning("The number of histogram bins must be greater than " + std::to_string(NUM_FIT_PARAMS) +
+                  " in order to provide an accurate error calculation");
   }
   return tPpf;
-}
-
-MatrixWorkspace_sptr HeliumAnalyserEfficiency::addTwoWorkspaces(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr otherWs) {
-  auto plus = createChildAlgorithm("Plus");
-  plus->initialize();
-  plus->setProperty("LHSWorkspace", ws);
-  plus->setProperty("RHSWorkspace", otherWs);
-  plus->execute();
-  return plus->getProperty("OutputWorkspace");
-}
-
-MatrixWorkspace_sptr HeliumAnalyserEfficiency::createWorkspace(const std::string &name, const std::string &title,
-                                                               const MantidVec &xData, const MantidVec &yData,
-                                                               const MantidVec &eData) {
-  auto createWorkspace = createChildAlgorithm("CreateWorkspace");
-  createWorkspace->initialize();
-  createWorkspace->setProperty("OutputWorkspace", name);
-  createWorkspace->setProperty("DataX", xData);
-  createWorkspace->setProperty("DataY", yData);
-  createWorkspace->setProperty("DataE", eData);
-  createWorkspace->setProperty("UnitX", "Wavelength");
-  createWorkspace->setProperty("WorkspaceTitle", title);
-  createWorkspace->execute();
-  MatrixWorkspace_sptr ws = createWorkspace->getProperty("OutputWorkspace");
-  return ws;
-}
-
-MatrixWorkspace_sptr HeliumAnalyserEfficiency::divideWorkspace(MatrixWorkspace_sptr numerator,
-                                                               MatrixWorkspace_sptr denominator) {
-  auto divide = createChildAlgorithm("Divide");
-  divide->initialize();
-  divide->setProperty("LHSWorkspace", numerator);
-  divide->setProperty("RHSWorkspace", denominator);
-  divide->setProperty("OutputWorkspace", "p");
-  divide->execute();
-  return divide->getProperty("OutputWorkspace");
 }
 } // namespace Mantid::Algorithms
