@@ -826,7 +826,8 @@ const API::Result<std::string> FileFinderImpl::getPath(const std::vector<IArchiv
     errors += cacheFilePath.errors();
 
   } else {
-    errors += "Could not find data cache directory: " + cachePathToSearch.string();
+    g_log.debug() << "Data cache directory not found, proceeding with the search." << std::endl;
+    errors += "Could not find data cache directory: " + cachePathToSearch.string() + '\n';
   }
 
   // Search the archive
