@@ -13,20 +13,20 @@ import systemtesting
 import mantid
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.api import AlgorithmManager
-from sans.state.Serializer import Serializer
+from sans_core.state.Serializer import Serializer
 
-from sans.state.StateObjects.StateData import get_data_builder
-from sans.common.enums import DetectorType, DataType, SANSFacility, SANSInstrument
+from sans_core.state.StateObjects.StateData import get_data_builder
+from sans_core.common.enums import DetectorType, DataType, SANSFacility, SANSInstrument
 
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.common.file_information import SANSFileInformationFactory
+from sans_core.common.constants import EMPTY_NAME
+from sans_core.common.general_functions import create_unmanaged_algorithm
+from sans_core.common.file_information import SANSFileInformationFactory
 
 
 # -----------------------------------------------
 # Tests for the SANSReductionCore algorithm
 # -----------------------------------------------
-from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
+from sans_core.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

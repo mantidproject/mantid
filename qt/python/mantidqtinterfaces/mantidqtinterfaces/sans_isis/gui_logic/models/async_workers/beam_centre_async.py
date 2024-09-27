@@ -10,9 +10,9 @@ from mantid.py36compat import dataclass
 from mantidqt.utils.async_qt_adaptor import qt_async_task, IQtAsync
 from mantid.kernel import Logger
 from mantidqt.utils.asynchronous import AsyncTaskFailure, AsyncTaskSuccess
-from sans.common.enums import DetectorType, FindDirectionEnum
-from sans.sans_batch import SANSCentreFinder
-from sans.state.AllStates import AllStates
+from sans_core.common.enums import DetectorType, FindDirectionEnum
+from sans_core.sans_batch import SANSCentreFinder
+from sans_core.state.AllStates import AllStates
 
 if TYPE_CHECKING:
     # Avoid circular dependencies at runtime

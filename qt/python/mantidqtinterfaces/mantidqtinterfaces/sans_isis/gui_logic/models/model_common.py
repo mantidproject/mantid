@@ -7,8 +7,8 @@
 """The settings diagnostic tab which visualizes the SANS state object."""
 
 from abc import ABCMeta
-from sans.common.enums import SANSInstrument
-from sans.state.AllStates import AllStates
+from sans_core.common.enums import SANSInstrument
+from sans_core.state.AllStates import AllStates
 
 
 class ModelCommon(metaclass=ABCMeta):

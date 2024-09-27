@@ -13,7 +13,7 @@ from SANSReductionCoreBase import SANSReductionCoreBase
 
 from mantid.api import MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress
 from mantid.kernel import Direction, StringListValidator
-from sans.common.enums import DetectorType, DataType
+from sans_core.common.enums import DetectorType, DataType
 
 
 class SANSReductionCoreEventSlice(SANSReductionCoreBase):

@@ -8,8 +8,8 @@
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import config
-from sans.command_interface.ISISCommandInterface import UseCompatibilityMode, LOQ, MaskFile, BatchReduce
-from sans.common.enums import SANSInstrument
+from sans_core.command_interface.ISISCommandInterface import UseCompatibilityMode, LOQ, MaskFile, BatchReduce
+from sans_core.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)

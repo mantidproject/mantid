@@ -9,21 +9,21 @@ from unittest import mock
 
 from mantid.kernel import PropertyManagerDataService
 from mantid.kernel import config
-from sans.command_interface.batch_csv_parser import BatchCsvParser
-from sans.common.enums import SANSFacility, ReductionDimensionality, SaveType, RowState, OutputMode
-from sans.common.enums import SANSInstrument
-from sans.common.RowEntries import RowEntries
+from sans_core.command_interface.batch_csv_parser import BatchCsvParser
+from sans_core.common.enums import SANSFacility, ReductionDimensionality, SaveType, RowState, OutputMode
+from sans_core.common.enums import SANSInstrument
+from sans_core.common.RowEntries import RowEntries
 from mantidqtinterfaces.sans_isis.gui_logic.models.file_loading import UserFileLoadException
 from mantidqtinterfaces.sans_isis.gui_logic.models.run_tab_model import RunTabModel
 from mantidqtinterfaces.sans_isis.gui_logic.models.state_gui_model import StateGuiModel
 from mantidqtinterfaces.sans_isis.gui_logic.models.table_model import TableModel
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.run_tab_presenter import RunTabPresenter
-from sans.state.AllStates import AllStates
-from sans.test_helper.common import remove_file
+from sans_core.state.AllStates import AllStates
+from sans_core.test_helper.common import remove_file
 from mantidqtinterfaces.sans_isis.gui_logic.test.mock_objects import create_mock_view
-from sans.test_helper.user_file_test_helper import create_user_file, sample_user_file
+from sans_core.test_helper.user_file_test_helper import create_user_file, sample_user_file
 from mantidqtinterfaces.sans_isis.views.sans_gui_observable import SansGuiObservable
-from sans.user_file.toml_parsers.toml_v1_schema import TomlValidationError
+from sans_core.user_file.toml_parsers.toml_v1_schema import TomlValidationError
 
 BATCH_FILE_TEST_CONTENT_1 = [
     RowEntries(sample_scatter=1, sample_transmission=2, sample_direct=3, output_name="test_file", user_file="user_test_file"),

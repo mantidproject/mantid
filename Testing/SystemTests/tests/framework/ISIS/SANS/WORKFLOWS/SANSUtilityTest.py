@@ -14,7 +14,7 @@ import SANSadd2 as add
 
 import os
 
-from sans.common.enums import SANSInstrument
+from sans_core.common.enums import SANSInstrument
 
 
 def unixLikePathFromWorkspace(ws):

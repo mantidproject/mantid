@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans.common.enums import SaveType
+from sans_core.common.enums import SaveType
 from mantidqtinterfaces.sans_isis.gui_logic.models.POD.save_options import SaveOptions
 
 

@@ -10,7 +10,7 @@ from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantid.simpleapi import mtd, RenameWorkspace, FileFinder
 import ISISCommandInterface as i
-from sans.common.enums import SANSInstrument
+from sans_core.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

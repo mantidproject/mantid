@@ -8,7 +8,7 @@ from qtpy import QtWidgets
 from qtpy.QtCore import Signal
 
 from mantidqt.utils.qt import load_ui
-from sans.common.enums import BinningType
+from sans_core.common.enums import BinningType
 
 Ui_SummationSettingsWidget, _ = load_ui(__file__, "summation_settings_widget.ui")
 

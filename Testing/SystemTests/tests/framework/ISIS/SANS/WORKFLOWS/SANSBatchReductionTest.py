@@ -14,18 +14,18 @@ from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantid import config
 from mantid.api import AnalysisDataService
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import SANSFacility, ReductionMode, OutputMode, SANSInstrument
-from sans.common.file_information import SANSFileInformationFactory
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.sans_batch import SANSBatchReduction
-from sans.state.StateObjects.StateData import get_data_builder
+from sans_core.common.constants import EMPTY_NAME
+from sans_core.common.enums import SANSFacility, ReductionMode, OutputMode, SANSInstrument
+from sans_core.common.file_information import SANSFileInformationFactory
+from sans_core.common.general_functions import create_unmanaged_algorithm
+from sans_core.sans_batch import SANSBatchReduction
+from sans_core.state.StateObjects.StateData import get_data_builder
 
 
 # -----------------------------------------------
 # Tests for the SANSBatchReduction algorithm
 # -----------------------------------------------
-from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
+from sans_core.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

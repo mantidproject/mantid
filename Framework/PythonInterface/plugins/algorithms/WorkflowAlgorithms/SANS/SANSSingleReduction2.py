@@ -15,15 +15,15 @@ from SANSSingleReductionBase import SANSSingleReductionBase
 from mantid.api import AlgorithmFactory, AnalysisDataService, MatrixWorkspaceProperty, PropertyMode, WorkspaceGroup, WorkspaceGroupProperty
 from mantid.kernel import Direction
 from mantid.simpleapi import CloneWorkspace
-from sans.algorithm_detail.bundles import EventSliceSettingBundle
-from sans.algorithm_detail.single_execution import (
+from sans_core.algorithm_detail.bundles import EventSliceSettingBundle
+from sans_core.algorithm_detail.single_execution import (
     run_initial_event_slice_reduction,
     run_core_event_slice_reduction,
     get_reduction_mode_vs_output_bundles,
     run_optimized_for_can,
 )
-from sans.common.enums import DataType, ReductionMode, FitType
-from sans.common.general_functions import (
+from sans_core.common.enums import DataType, ReductionMode, FitType
+from sans_core.common.general_functions import (
     create_child_algorithm,
     does_can_workspace_exist_on_ads,
     get_transmission_output_name,

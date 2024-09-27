@@ -11,7 +11,7 @@ import ISISCommandInterface as i
 import copy
 import SANS2DReductionGUI as sansgui
 
-from sans.common.enums import SANSInstrument
+from sans_core.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

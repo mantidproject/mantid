@@ -7,11 +7,11 @@
 import unittest
 
 from unittest import mock
-from sans.common.enums import SANSFacility
-from sans.common.RowEntries import RowEntries
+from sans_core.common.enums import SANSFacility
+from sans_core.common.RowEntries import RowEntries
 from mantidqtinterfaces.sans_isis.gui_logic.models.create_state import create_states
 from mantidqtinterfaces.sans_isis.gui_logic.models.state_gui_model import StateGuiModel
-from sans.state.AllStates import AllStates
+from sans_core.state.AllStates import AllStates
 
 
 class GuiCommonTest(unittest.TestCase):
@@ -22,7 +22,7 @@ class GuiCommonTest(unittest.TestCase):
 
         self.gui_state_director_instance = mock.MagicMock()
         self.gui_state_director_instance.create_state.return_value = self.state_gui_model
-        self.patcher = mock.patch("sans.test.model_tests.create_state.GuiStateDirector")
+        self.patcher = mock.patch("mantidqtinterfaces.sans_isis.gui_logic.test.model_tests.create_state.GuiStateDirector")
         self.addCleanup(self.patcher.stop)
         self.gui_state_director = self.patcher.start()
         self.gui_state_director.return_value = self.gui_state_director_instance

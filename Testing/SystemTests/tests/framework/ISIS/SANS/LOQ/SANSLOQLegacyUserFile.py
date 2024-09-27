@@ -6,10 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
 from mantid import FileFinder
-from sans.common.enums import SANSInstrument
+from sans_core.common.enums import SANSInstrument
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
-from sans.command_interface.ISISCommandInterface import LOQ, UseCompatibilityMode, BatchReduce
+from sans_core.command_interface.ISISCommandInterface import LOQ, UseCompatibilityMode, BatchReduce
 from mantid.simpleapi import GroupWorkspaces
 
 

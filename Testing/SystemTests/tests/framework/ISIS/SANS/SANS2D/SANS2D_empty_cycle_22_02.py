@@ -8,7 +8,7 @@
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
-from sans.command_interface.ISISCommandInterface import (
+from sans_core.command_interface.ISISCommandInterface import (
     SANS2D,
     Set1D,
     MaskFile,
@@ -17,7 +17,7 @@ from sans.command_interface.ISISCommandInterface import (
     TransmissionSample,
     WavRangeReduction,
 )
-from sans.common.enums import SANSInstrument
+from sans_core.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

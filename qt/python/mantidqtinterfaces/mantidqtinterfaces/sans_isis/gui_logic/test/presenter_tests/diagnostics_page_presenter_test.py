@@ -7,7 +7,7 @@
 import unittest
 
 from unittest import mock
-from sans.common.enums import SANSInstrument, DetectorType, IntegralEnum, SANSFacility
+from sans_core.common.enums import SANSInstrument, DetectorType, IntegralEnum, SANSFacility
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
 from mantidqtinterfaces.sans_isis.gui_logic.test.mock_objects import create_mock_diagnostics_tab
 from mantidqtinterfaces.sans_isis.gui_logic.test.mock_objects import create_run_tab_presenter_mock

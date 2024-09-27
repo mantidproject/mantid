@@ -10,7 +10,7 @@ from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import DeleteWorkspace
 
 from ISISCommandInterface import *
-from sans.common.enums import SANSInstrument
+from sans_core.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.LARMOR)

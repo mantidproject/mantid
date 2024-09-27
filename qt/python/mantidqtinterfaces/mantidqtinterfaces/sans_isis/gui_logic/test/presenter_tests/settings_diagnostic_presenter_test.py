@@ -10,7 +10,7 @@ import unittest
 from unittest import mock
 
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
-from sans.state.Serializer import Serializer
+from sans_core.state.Serializer import Serializer
 from mantidqtinterfaces.sans_isis.gui_logic.test.mock_objects import (
     create_run_tab_presenter_mock,
     FakeState,

@@ -7,7 +7,7 @@
 import copy
 from typing import Dict
 
-from sans.common.enums import DetectorType
+from sans_core.common.enums import DetectorType
 from mantid import UsageService
 from mantid.kernel import FeatureType
 from mantid.kernel import Logger

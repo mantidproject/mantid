@@ -10,11 +10,11 @@
 
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress, WorkspaceProperty
 from mantid.kernel import Direction, FloatArrayProperty
-from sans.algorithm_detail.load_data import SANSLoadDataFactory
-from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
-from sans.common.enums import SANSDataType
+from sans_core.algorithm_detail.load_data import SANSLoadDataFactory
+from sans_core.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
+from sans_core.common.enums import SANSDataType
 
-from sans.state.Serializer import Serializer
+from sans_core.state.Serializer import Serializer
 
 
 class SANSLoad(DataProcessorAlgorithm):

@@ -7,8 +7,8 @@
 import copy
 import unittest
 
-from sans.common.enums import RowState
-from sans.common.RowEntries import RowEntries, _UserEntries
+from sans_core.common.enums import RowState
+from sans_core.common.RowEntries import RowEntries, _UserEntries
 
 
 class RowEntriesTest(unittest.TestCase):

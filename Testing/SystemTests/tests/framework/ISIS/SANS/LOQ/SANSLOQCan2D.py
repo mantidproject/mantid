@@ -12,7 +12,7 @@ from mantid.simpleapi import *
 from ISISCommandInterface import *
 
 # Test is giving odd results on Linux, but only this 2D one.
-from sans.common.enums import SANSInstrument
+from sans_core.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)

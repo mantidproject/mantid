@@ -15,8 +15,8 @@ from mantid.kernel import Logger
 from mantid import UsageService
 from mantid.kernel import FeatureType
 from mantidqtinterfaces.sans_isis.gui_logic.gui_common import JSON_SUFFIX
-from sans.state.AllStates import AllStates
-from sans.state.Serializer import Serializer
+from sans_core.state.AllStates import AllStates
+from sans_core.state.Serializer import Serializer
 
 
 class SettingsDiagnosticPresenter(object):

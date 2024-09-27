@@ -11,7 +11,7 @@ from mantid.simpleapi import CloneWorkspace, LoadNexus, MoveInstrumentComponent
 from ISISCommandInterface import *
 import unittest
 
-from sans.common.enums import SANSInstrument
+from sans_core.common.enums import SANSInstrument
 
 """
 Allowing the reduction to use already loaded workspace will make it easier to

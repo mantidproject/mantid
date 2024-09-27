@@ -19,7 +19,7 @@ from mantid.api import AnalysisDataService
 from mantid.kernel import config
 from mantid.simpleapi import DeleteWorkspace
 import SANSadd2
-from sans.command_interface.ISISCommandInterface import (
+from sans_core.command_interface.ISISCommandInterface import (
     SANS2DTUBES,
     MaskFile,
     SetDetectorOffsets,
@@ -33,7 +33,7 @@ from sans.command_interface.ISISCommandInterface import (
     WavRangeReduction,
     UseCompatibilityMode,
 )
-from sans.common.enums import SANSInstrument
+from sans_core.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

@@ -10,13 +10,13 @@
 
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, Progress, PropertyMode
 from mantid.kernel import Direction
-from sans.algorithm_detail.bundles import ReductionSettingBundle, CompletedSlices
-from sans.algorithm_detail.single_execution import get_final_output_workspaces, get_merge_bundle_for_merge_request
-from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
-from sans.common.enums import DataType, ReductionMode
-from sans.common.general_functions import create_child_algorithm
-from sans.data_objects.sans_workflow_algorithm_outputs import SANSWorkflowAlgorithmOutputs
-from sans.state.Serializer import Serializer
+from sans_core.algorithm_detail.bundles import ReductionSettingBundle, CompletedSlices
+from sans_core.algorithm_detail.single_execution import get_final_output_workspaces, get_merge_bundle_for_merge_request
+from sans_core.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
+from sans_core.common.enums import DataType, ReductionMode
+from sans_core.common.general_functions import create_child_algorithm
+from sans_core.data_objects.sans_workflow_algorithm_outputs import SANSWorkflowAlgorithmOutputs
+from sans_core.state.Serializer import Serializer
 
 
 class SANSSingleReductionBase(DataProcessorAlgorithm):

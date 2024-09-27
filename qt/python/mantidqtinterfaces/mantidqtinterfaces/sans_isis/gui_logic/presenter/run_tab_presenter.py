@@ -18,15 +18,15 @@ from functools import wraps
 from typing import Optional
 
 from mantidqt.utils.observer_pattern import GenericObserver
-from sans.user_file.toml_parsers.toml_v1_schema import TomlValidationError
+from sans_core.user_file.toml_parsers.toml_v1_schema import TomlValidationError
 from mantidqtinterfaces.sans_isis.views import SANSSaveOtherWindow
 from mantidqtinterfaces.sans_isis.views.sans_data_processor_gui import SANSDataProcessorGui
 from mantidqtinterfaces.sans_isis.views.sans_gui_observable import SansGuiObservable
 
 from mantid.api import FileFinder
 from mantid.kernel import Logger, ConfigService, ConfigPropertyObserver
-from sans.command_interface.batch_csv_parser import BatchCsvParser
-from sans.common.enums import (
+from sans_core.command_interface.batch_csv_parser import BatchCsvParser
+from sans_core.common.enums import (
     ReductionMode,
     RangeStepType,
     RowState,
@@ -43,7 +43,7 @@ from mantidqtinterfaces.sans_isis.gui_logic.gui_common import (
     get_string_for_gui_from_instrument,
     SANSGuiPropertiesHandler,
 )
-from sans.common.RowEntries import RowEntries
+from sans_core.common.RowEntries import RowEntries
 from mantidqtinterfaces.sans_isis.gui_logic.models.async_workers.sans_run_tab_async import SansRunTabAsync
 from mantidqtinterfaces.sans_isis.gui_logic.models.create_state import create_states
 from mantidqtinterfaces.sans_isis.gui_logic.models.file_loading import FileLoading, UserFileLoadException
@@ -59,7 +59,7 @@ from mantidqtinterfaces.sans_isis.gui_logic.presenter.presenter_common import Pr
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.save_other_presenter import SaveOtherPresenter
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.settings_adjustment_presenter import SettingsAdjustmentPresenter
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.settings_diagnostic_presenter import SettingsDiagnosticPresenter
-from sans.state.AllStates import AllStates
+from sans_core.state.AllStates import AllStates
 from mantid.plots.plotfunctions import get_plot_fig
 
 row_state_to_colour_mapping = {RowState.UNPROCESSED: "#FFFFFF", RowState.PROCESSED: "#d0f4d0", RowState.ERROR: "#accbff"}

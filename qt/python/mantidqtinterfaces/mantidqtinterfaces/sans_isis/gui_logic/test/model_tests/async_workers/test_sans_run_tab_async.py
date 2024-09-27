@@ -9,7 +9,7 @@ import unittest
 from unittest.mock import call
 
 from unittest import mock
-from sans.common.enums import OutputMode, RowState
+from sans_core.common.enums import OutputMode, RowState
 from mantidqtinterfaces.sans_isis.gui_logic.models.async_workers.sans_run_tab_async import SansRunTabAsync
 
 

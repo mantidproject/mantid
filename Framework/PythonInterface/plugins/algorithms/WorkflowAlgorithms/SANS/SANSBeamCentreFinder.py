@@ -14,16 +14,16 @@ from mantid import AnalysisDataService
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, AlgorithmFactory, PropertyMode, Progress
 from mantid.kernel import Direction, StringListValidator, Logger
 from mantid.simpleapi import CloneWorkspace, GroupWorkspaces
-from sans.algorithm_detail.beamcentrefinder_plotting import can_plot_beamcentrefinder, plot_workspace_quartiles
-from sans.algorithm_detail.crop_helper import get_component_name
-from sans.algorithm_detail.single_execution import perform_can_subtraction
-from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import DetectorType, MaskingQuadrant, FindDirectionEnum
-from sans.common.file_information import get_instrument_paths_for_sans_file
-from sans.common.general_functions import create_child_algorithm
-from sans.common.xml_parsing import get_named_elements_from_ipf_file
-from sans.state.Serializer import Serializer
+from sans_core.algorithm_detail.beamcentrefinder_plotting import can_plot_beamcentrefinder, plot_workspace_quartiles
+from sans_core.algorithm_detail.crop_helper import get_component_name
+from sans_core.algorithm_detail.single_execution import perform_can_subtraction
+from sans_core.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
+from sans_core.common.constants import EMPTY_NAME
+from sans_core.common.enums import DetectorType, MaskingQuadrant, FindDirectionEnum
+from sans_core.common.file_information import get_instrument_paths_for_sans_file
+from sans_core.common.general_functions import create_child_algorithm
+from sans_core.common.xml_parsing import get_named_elements_from_ipf_file
+from sans_core.state.Serializer import Serializer
 
 
 class SANSBeamCentreFinder(DataProcessorAlgorithm):

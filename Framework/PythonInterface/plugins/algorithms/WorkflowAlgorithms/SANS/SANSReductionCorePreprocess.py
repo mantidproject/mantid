@@ -13,8 +13,8 @@ from SANSReductionCoreBase import SANSReductionCoreBase
 
 from mantid.api import MatrixWorkspaceProperty, AlgorithmFactory, Progress
 from mantid.kernel import Direction
-from sans.algorithm_detail.mask_workspace import mask_bins
-from sans.common.enums import DetectorType
+from sans_core.algorithm_detail.mask_workspace import mask_bins
+from sans_core.common.enums import DetectorType
 
 
 class SANSReductionCorePreprocess(SANSReductionCoreBase):

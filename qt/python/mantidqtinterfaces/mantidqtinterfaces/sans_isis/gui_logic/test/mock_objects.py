@@ -7,9 +7,9 @@
 from functools import partial
 
 from unittest import mock
-from sans.common.enums import RangeStepType, OutputMode, SANSFacility, SANSInstrument
-from sans.state.JsonSerializable import JsonSerializable
-from sans.test_helper.test_director import TestDirector
+from sans_core.common.enums import RangeStepType, OutputMode, SANSFacility, SANSInstrument
+from sans_core.state.JsonSerializable import JsonSerializable
+from sans_core.test_helper.test_director import TestDirector
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.run_tab_presenter import RunTabPresenter
 from mantidqtinterfaces.sans_isis.views.sans_data_processor_gui import SANSDataProcessorGui
 from mantidqtinterfaces.sans_isis.views.settings_diagnostic_tab import SettingsDiagnosticTab

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """The settings diagnostic tab which visualizes the SANS state object."""
 
-from sans.common.enums import FitType
+from sans_core.common.enums import FitType
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.presenter_common import PresenterCommon
 
 
