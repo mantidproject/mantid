@@ -16,27 +16,32 @@ enum DataType { Red, Sqw, Calib, Corrections };
 MANTID_SPECTROSCOPY_DLL bool validateDataIsOneOf(MantidQt::CustomInterfaces::IUserInputValidator *uiv,
                                                  MantidQt::MantidWidgets::DataSelector *dataSelector,
                                                  std::string const &inputType, DataType const &primaryType,
-                                                 std::vector<DataType> const &otherTypes, bool silent = false);
+                                                 std::vector<DataType> const &otherTypes, bool const silent = false,
+                                                 bool const autoLoad = true);
 
 MANTID_SPECTROSCOPY_DLL bool validateDataIsOfType(MantidQt::CustomInterfaces::IUserInputValidator *uiv,
                                                   MantidQt::MantidWidgets::DataSelector *dataSelector,
                                                   std::string const &inputType, DataType const &type,
-                                                  bool silent = false);
+                                                  bool const silent = false, bool const autoLoad = true);
 
 MANTID_SPECTROSCOPY_DLL bool validateDataIsAReducedFile(MantidQt::CustomInterfaces::IUserInputValidator *uiv,
                                                         MantidQt::MantidWidgets::DataSelector *dataSelector,
-                                                        std::string const &inputType, bool silent = false);
+                                                        std::string const &inputType, bool const silent = false,
+                                                        bool const autoLoad = true);
 
 MANTID_SPECTROSCOPY_DLL bool validateDataIsASqwFile(MantidQt::CustomInterfaces::IUserInputValidator *uiv,
                                                     MantidQt::MantidWidgets::DataSelector *dataSelector,
-                                                    std::string const &inputType, bool silent = false);
+                                                    std::string const &inputType, bool const silent = false,
+                                                    bool const autoLoad = true);
 
 MANTID_SPECTROSCOPY_DLL bool validateDataIsACalibrationFile(MantidQt::CustomInterfaces::IUserInputValidator *uiv,
                                                             MantidQt::MantidWidgets::DataSelector *dataSelector,
-                                                            std::string const &inputType, bool silent = false);
+                                                            std::string const &inputType, bool const silent = false,
+                                                            bool const autoLoad = true);
 
 MANTID_SPECTROSCOPY_DLL bool validateDataIsACorrectionsFile(MantidQt::CustomInterfaces::IUserInputValidator *uiv,
                                                             MantidQt::MantidWidgets::DataSelector *dataSelector,
-                                                            std::string const &inputType, bool silent = false);
+                                                            std::string const &inputType, bool const silent = false,
+                                                            bool const autoLoad = true);
 
 } // namespace DataValidationHelper

@@ -139,10 +139,12 @@ bool UserInputValidator::checkFileFinderWidgetIsValid(const QString &name, const
  * @param name   :: the "name" of the widget so as to be recognised by the user.
  * @param widget :: the widget to check
  * @param silent True if an error should not be added to the validator.
+ * @param autoLoad True if the data should be reloaded if it is not in the ADS.
  * @returns True if the input was valid
  */
-bool UserInputValidator::checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent) {
-  if (!widget->isValid()) {
+bool UserInputValidator::checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool const silent,
+                                                  bool const autoLoad) {
+  if (!widget->isValid(autoLoad)) {
     addErrorMessage(name.toStdString() + " error: " + widget->getProblem().toStdString(), silent);
     return false;
   }
