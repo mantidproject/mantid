@@ -586,8 +586,14 @@ double LoadILLReflectometry::reflectometryPeak() {
   // generate Gaussian
   auto func = API::FunctionFactory::Instance().createFunction("CompositeFunction");
   auto sum = std::dynamic_pointer_cast<API::CompositeFunction>(func);
+  if (sum == nullptr) {
+    throw std::runtime_error("Unexpected function type, expected a CompositeFunction");
+  }
   func = API::FunctionFactory::Instance().createFunction("Gaussian");
   auto gaussian = std::dynamic_pointer_cast<API::IPeakFunction>(func);
+  if (gaussian == nullptr) {
+    throw std::runtime_error("Unexpected function type, expected an IPeakFunction");
+  }
   gaussian->setHeight(height);
   gaussian->setCentre(centreByMax);
   gaussian->setFwhm(fwhm);

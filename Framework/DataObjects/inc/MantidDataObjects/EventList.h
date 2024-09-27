@@ -202,7 +202,7 @@ public:
 
   void compressEvents(double tolerance, EventList *destination);
   void compressEvents(double tolerance, EventList *destination,
-                      std::shared_ptr<std::vector<double>> histogram_bin_edges);
+                      const std::shared_ptr<std::vector<double>> histogram_bin_edges);
   void compressFatEvents(const double tolerance, const Types::Core::DateAndTime &timeStart, const double seconds,
                          EventList *destination);
   // get EventType declaration

@@ -89,6 +89,9 @@ void StepScan::exec() {
 
   Workspace_sptr outputWS = sumEvents->getProperty("OutputWorkspace");
   auto table = std::dynamic_pointer_cast<ITableWorkspace>(outputWS);
+  if (table == nullptr) {
+    throw std::invalid_argument("Unexpected workspace type, expected an ITableWorkspace");
+  }
   // Remove the scan_index=0 entry from the resulting table (unless it's the
   // only one)
   if (table->rowCount() > 1 && table->Int(0, 0) == 0) {

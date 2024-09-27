@@ -177,8 +177,14 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   g_log.debug() << "Initial fwhm (full width at half maximum): " << fwhm << '\n';
   auto func = API::FunctionFactory::Instance().createFunction("CompositeFunction");
   auto sum = std::dynamic_pointer_cast<API::CompositeFunction>(func);
+  if (sum == nullptr) {
+    throw std::runtime_error("The function is not a CompositeFunction");
+  }
   func = API::FunctionFactory::Instance().createFunction("Gaussian");
   auto gaussian = std::dynamic_pointer_cast<API::IPeakFunction>(func);
+  if (gaussian == nullptr) {
+    throw std::runtime_error("The function should be an IPeakFunction");
+  }
   gaussian->setHeight(height);
   gaussian->setCentre(centreIndex);
   gaussian->setFwhm(fwhm);
