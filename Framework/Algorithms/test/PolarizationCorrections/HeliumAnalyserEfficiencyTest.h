@@ -71,25 +71,47 @@ public:
     // The units of the input workspace should be wavelength
     MantidVec e;
     auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "TOF");
-    auto heliumAnalyserEfficiency = AlgorithmManager::Instance().create("HeliumAnalyserEfficiency");
-    heliumAnalyserEfficiency->initialize();
-
-    heliumAnalyserEfficiency->setProperty("InputWorkspace", wsGrp);
-    heliumAnalyserEfficiency->setProperty("OutputWorkspace", "P");
+    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "out");
 
     TS_ASSERT_THROWS_EQUALS(
         heliumAnalyserEfficiency->execute(), std::runtime_error const &e, std::string(e.what()),
         "Some invalid Properties found: \n InputWorkspace: All input workspaces must be in units of Wavelength.");
   }
 
+  void testInputWorkspaceNotSingleSpectrumThrowsError() {
+    MantidVec e;
+    auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength", 10, 0.2, 2);
+    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "out");
+
+    TS_ASSERT_THROWS_EQUALS(
+        heliumAnalyserEfficiency->execute(), std::runtime_error const &e, std::string(e.what()),
+        "Some invalid Properties found: \n InputWorkspace: All input workspaces must contain a single histogram.");
+  }
+
+  void testInputWorkspaceNotHistogramDataThrowsError() {
+    MantidVec e;
+    auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength");
+
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(wsGrp->getItem(0));
+    auto convert = AlgorithmManager::Instance().create("ConvertToPointData");
+    convert->initialize();
+    convert->setProperty("InputWorkspace", ws);
+    convert->setProperty("OutputWorkspace", ws->getName());
+    convert->execute();
+
+    auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "out");
+
+    TS_ASSERT_THROWS_EQUALS(
+        heliumAnalyserEfficiency->execute(), std::runtime_error const &e, std::string(e.what()),
+        "Some invalid Properties found: \n InputWorkspace: All input workspaces must be histogram data.");
+  }
+
   void testZeroPdError() {
-    compareOutputValues(0, {0.30014653230974014, 0.57963318214497705, 0.66538755300925145, 0.60459494095906063,
-                            0.47973863354145241, 0.34991554915720857});
+    compareOutputValues(0, {0.4845053416, 0.6550113464, 0.6525155755, 0.5478694489, 0.4142358259});
   }
 
   void testNonZeroPdError() {
-    compareOutputValues(1000, {9.6118938419182438, 18.562175518594128, 21.308373860067174, 19.361550990241895,
-                               15.363152064368265, 11.205697051548009});
+    compareOutputValues(1000, {14.8320754089, 20.6772556357, 20.7518789689, 17.4738260412, 13.2301633100});
   }
 
   void testSmallNumberOfBins() {
@@ -113,10 +135,8 @@ public:
     TS_ASSERT(heliumAnalyserEfficiency->isExecuted());
     MatrixWorkspace_sptr eff = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("E");
     MatrixWorkspace_sptr firstWs = std::dynamic_pointer_cast<MatrixWorkspace>(wsGrp->getItem(0));
-    const auto originalXPoints = firstWs->dataX(0);
-    const auto xPoints = eff->dataE(0);
-    // The output wavelength range should match those from the input, not the fitting range.
-    TS_ASSERT_EQUALS(originalXPoints.size(), xPoints.size());
+    // The output number of wavelength bins should match those from the input.
+    TS_ASSERT_EQUALS(firstWs->blocksize(), eff->blocksize());
   }
 
   void testFitCurvesOutputWhenOptionalPropertySet() {
@@ -187,7 +207,7 @@ private:
 
   WorkspaceGroup_sptr createExampleGroupWorkspace(const std::string &name, MantidVec &expectedEfficiency,
                                                   const std::string &xUnit = "Wavelength", const size_t numBins = 5,
-                                                  const double examplePHe = 0.2) {
+                                                  const double examplePHe = 0.2, const int nSpec = 1) {
     std::vector<double> x(numBins);
     std::vector<double> yNsf(numBins);
     std::vector<double> ySf(numBins);
@@ -197,18 +217,17 @@ private:
       ySf[i] = 0.9 * std::exp(-0.0733 * x[i] * 12 * (1 + examplePHe));
     }
     std::vector<MatrixWorkspace_sptr> wsVec(4);
-    wsVec[0] = generateWorkspace("ws0", x, yNsf, xUnit);
-    wsVec[1] = generateWorkspace("ws1", x, ySf, xUnit);
-    wsVec[2] = generateWorkspace("ws2", x, ySf, xUnit);
-    wsVec[3] = generateWorkspace("ws3", x, yNsf, xUnit);
+    wsVec[0] = generateWorkspace("ws0", x, yNsf, xUnit, nSpec);
+    wsVec[1] = generateWorkspace("ws1", x, ySf, xUnit, nSpec);
+    wsVec[2] = generateWorkspace("ws2", x, ySf, xUnit, nSpec);
+    wsVec[3] = generateWorkspace("ws3", x, yNsf, xUnit, nSpec);
 
-    const auto histBins = wsVec[0]->dataX(0);
-    yNsf.resize(histBins.size());
-    ySf.resize(histBins.size());
-    expectedEfficiency.resize(histBins.size());
-    for (size_t i = 0; i < histBins.size(); ++i) {
-      yNsf[i] = 0.9 * std::exp(-0.0733 * histBins[i] * 12 * (1 - examplePHe));
-      ySf[i] = 0.9 * std::exp(-0.0733 * histBins[i] * 12 * (1 + examplePHe));
+    const auto histPoints = wsVec[0]->histogram(0).points();
+    const auto &wavelengthPoints = histPoints.rawData();
+    expectedEfficiency.resize(wavelengthPoints.size());
+    for (size_t i = 0; i < wavelengthPoints.size(); ++i) {
+      yNsf[i] = 0.9 * std::exp(-0.0733 * wavelengthPoints[i] * 12 * (1 - examplePHe));
+      ySf[i] = 0.9 * std::exp(-0.0733 * wavelengthPoints[i] * 12 * (1 + examplePHe));
       expectedEfficiency[i] = yNsf[i] / (yNsf[i] + ySf[i]);
     }
 
@@ -216,12 +235,14 @@ private:
   }
 
   MatrixWorkspace_sptr generateWorkspace(const std::string &name, const std::vector<double> &x,
-                                         const std::vector<double> &y, const std::string &xUnit = "Wavelength") {
+                                         const std::vector<double> &y, const std::string &xUnit = "Wavelength",
+                                         const int nSpec = 1) {
     auto createWorkspace = AlgorithmManager::Instance().create("CreateWorkspace");
     createWorkspace->initialize();
     createWorkspace->setProperty("DataX", x);
     createWorkspace->setProperty("DataY", y);
     createWorkspace->setProperty("UnitX", xUnit);
+    createWorkspace->setProperty("NSpec", nSpec);
     createWorkspace->setProperty("OutputWorkspace", name);
     createWorkspace->execute();
 
