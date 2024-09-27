@@ -288,12 +288,12 @@ def errorbar(axes, workspace, *args, **kwargs):
     kwargs.pop("normalize_by_bin_width", None)
 
     if dy is not None and min(dy) < 0:
-        dy = abs(dy)
-        logger.warning("Negative values found in y error when plotting error bars. Converting to positive and continuing.")
+        dy = None
+        logger.warning("Negative values found in y error when plotting error bars. Continuing without y error bars.")
 
     if dx is not None and min(dx) < 0:
-        dx = abs(dx)
-        logger.warning("Negative values found in x error when plotting error bars. Converting to positive and continuing.")
+        dx = None
+        logger.warning("Negative values found in x error when plotting error bars. Continuing without x error bars.")
 
     return axes.errorbar(x, y, dy, dx, *args, **kwargs)
 
