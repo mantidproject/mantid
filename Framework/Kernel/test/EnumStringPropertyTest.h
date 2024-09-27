@@ -21,8 +21,8 @@ const std::vector<std::string> cakeNames{"Lemon Cake", "Devil's Food Cake", "Ang
 typedef EnumeratedString<CoolGuys, &coolGuyNames> COOLGUY;
 typedef EnumeratedString<Cakes, &cakeNames> CAKE;
 
-typedef EnumStringProperty<EnumeratedString<CoolGuys, &coolGuyNames>> COOLGUY_PROPERTY;
-typedef EnumStringProperty<EnumeratedString<Cakes, &cakeNames>> CAKE_PROPERTY;
+typedef EnumStringProperty<CoolGuys, &coolGuyNames> COOLGUY_PROPERTY;
+typedef EnumStringProperty<Cakes, &cakeNames> CAKE_PROPERTY;
 } // namespace
 
 class EnumStringPropertyTest : public CxxTest::TestSuite {
