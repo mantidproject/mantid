@@ -15,10 +15,12 @@
 namespace Mantid {
 namespace Kernel {
 
-/** EnumStringProperty : TODO: DESCRIPTION
- */
-template <template <typename, typename> class E, typename T, const std::vector<std::string> *>
-class DLLExport EnumStringProperty : public PropertyWithValue<E<T, const std::vector<std::string> *>> {
+// Define the EnumStringProperty with simpler syntax
+template <typename T, const std::vector<std::string> *Names>
+using SimpleEnumStringPropertyBase = PropertyWithValue<EnumeratedString<T, Names>>;
+
+template <typename T, const std::vector<std::string> *Names>
+class DLLExport EnumStringProperty : public SimpleEnumStringPropertyBase<T, Names> {
 
 public:
   // constructors
@@ -26,7 +28,41 @@ public:
   std::string value();
   std::string setValue(const std::string &value);
 };
-// template < typename T, const std::vector<std::string> *>
+
+// Example implementation of the constructor (usually in a source file)
+template <typename T, const std::vector<std::string> *Names> EnumStringProperty<T, Names>::EnumStringProperty() {
+  // Constructor implementation...
+}
+
+template <typename T, const std::vector<std::string> *Names> std::string EnumStringProperty<T, Names>::value() {
+  // Return value implementation...
+  return {};
+}
+
+template <typename T, const std::vector<std::string> *Names>
+std::string EnumStringProperty<T, Names>::setValue(const std::string &value) {
+  // Set value implementation...
+  return {};
+}
+/** EnumStringProperty : TODO: DESCRIPTION
+ */
+// template <template <typename, typename> class E, typename T, const std::vector<std::string> *>
+// class DLLExport EnumStringProperty : public PropertyWithValue<E<T, const std::vector<std::string> *>> {
+//
+// public:
+//  // constructors
+//  EnumStringProperty();
+//  std::string value();
+//  std::string setValue(const std::string &value);
+//};
+//
+// template <typename T, const std::vector<std::string> *Names>
+// using EnumeratedStringProperty = EnumStringProperty<EnumeratedString, T, Names>;
+
+// template <template <typename, typename> class E, typename T, const std::vector<std::string> *Names>
+// using EnumeratedStringProperty = EnumStringProperty<E, T, Names>;
+
+// template < class E, typename T, const std::vector<std::string> *>
 //  using EnumeratedStringProperty = EnumStringProperty<EnumeratedString, T, const std::vector<std::string> *names>;
 //
 // template <typename T>
