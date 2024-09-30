@@ -274,9 +274,8 @@ private:
 
 /// Template specialisation for strings for comparison
 template <>
-inline bool TableColumn<std::string>::compareVectors(const std::vector<std::string> &newVector, double tolerance,
+inline bool TableColumn<std::string>::compareVectors(const std::vector<std::string> &newVector, double,
                                                      bool const) const {
-  (void)tolerance;
   for (size_t i = 0; i < m_data.size(); i++) {
     if (m_data[i] != newVector[i]) {
       return false;
@@ -287,9 +286,8 @@ inline bool TableColumn<std::string>::compareVectors(const std::vector<std::stri
 
 /// Template specialisation for strings for comparison
 template <>
-inline bool TableColumn<API::Boolean>::compareVectors(const std::vector<API::Boolean> &newVector, double tolerance,
+inline bool TableColumn<API::Boolean>::compareVectors(const std::vector<API::Boolean> &newVector, double,
                                                       bool const) const {
-  (void)tolerance;
   for (size_t i = 0; i < m_data.size(); i++) {
     if (!(m_data[i] == newVector[i])) {
       return false;
