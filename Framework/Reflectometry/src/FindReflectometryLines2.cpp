@@ -142,7 +142,7 @@ void FindReflectometryLines2::exec() {
  *  @return fractional workspace index of the peak: Gaussian fit and position
  *  of the maximum
  */
-double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
+double FindReflectometryLines2::findPeak(const API::MatrixWorkspace_sptr &ws) {
   auto integralWS = integrate(ws);
   // integralWS may be ragged due to different integration limits for each
   // histogram. We don't really care but Transpose does.
@@ -216,7 +216,7 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
  *  @param ws a workspace to integrate
  *  @return a workspace containing the integrals
  */
-API::MatrixWorkspace_sptr FindReflectometryLines2::integrate(API::MatrixWorkspace_sptr &ws) {
+API::MatrixWorkspace_sptr FindReflectometryLines2::integrate(const API::MatrixWorkspace_sptr &ws) {
   int const startIndex = getProperty(Prop::START_INDEX);
   int const endIndex = getProperty(Prop::END_INDEX);
   double const startX = getProperty(Prop::RANGE_LOWER);
@@ -238,7 +238,7 @@ API::MatrixWorkspace_sptr FindReflectometryLines2::integrate(API::MatrixWorkspac
  *  @param ws a workspace to transpos
  *  @return a transposed workspace
  */
-API::MatrixWorkspace_sptr FindReflectometryLines2::transpose(API::MatrixWorkspace_sptr &ws) {
+API::MatrixWorkspace_sptr FindReflectometryLines2::transpose(const API::MatrixWorkspace_sptr &ws) {
   auto transpose = createChildAlgorithm("Transpose");
   transpose->initialize();
   transpose->setProperty("InputWorkspace", ws);
