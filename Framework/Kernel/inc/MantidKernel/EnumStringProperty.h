@@ -25,75 +25,24 @@ class DLLExport EnumStringProperty : public SimpleEnumStringPropertyBase<T, Name
 public:
   // constructors
   EnumStringProperty();
-  std::string value();
-  std::string setValue(const std::string &value);
+  /*EnumStringProperty(const std::string &name, std::vector<T> vec,
+                const unsigned int direction = Direction::Input);
+  EnumStringProperty(const std::string &name,
+                const unsigned int direction = Direction::Input);
+  EnumStringProperty(const std::string &name, const unsigned int direction = Direction::Input);
+  EnumStringProperty(const std::string &name, const std::string &values,
+                const IValidator_sptr &validator = IValidator_sptr(new NullValidator),
+                const unsigned int direction = Direction::Input);
+
+  ArrayProperty(const ArrayProperty &);
+
+  ArrayProperty<T> *clone() const override;*/
+  std::string value() override;
+
+  std::string setValue(const std::string &value) override;
 };
 
-// Example implementation of the constructor (usually in a source file)
-template <typename T, const std::vector<std::string> *Names> EnumStringProperty<T, Names>::EnumStringProperty() {
-  // Constructor implementation...
-}
-
-template <typename T, const std::vector<std::string> *Names> std::string EnumStringProperty<T, Names>::value() {
-  // Return value implementation...
-  return {};
-}
-
-template <typename T, const std::vector<std::string> *Names>
-std::string EnumStringProperty<T, Names>::setValue(const std::string &value) {
-  // Set value implementation...
-  return {};
-}
 /** EnumStringProperty : TODO: DESCRIPTION
  */
-// template <template <typename, typename> class E, typename T, const std::vector<std::string> *>
-// class DLLExport EnumStringProperty : public PropertyWithValue<E<T, const std::vector<std::string> *>> {
-//
-// public:
-//  // constructors
-//  EnumStringProperty();
-//  std::string value();
-//  std::string setValue(const std::string &value);
-//};
-//
-// template <typename T, const std::vector<std::string> *Names>
-// using EnumeratedStringProperty = EnumStringProperty<EnumeratedString, T, Names>;
-
-// template <template <typename, typename> class E, typename T, const std::vector<std::string> *Names>
-// using EnumeratedStringProperty = EnumStringProperty<E, T, Names>;
-
-// template < class E, typename T, const std::vector<std::string> *>
-//  using EnumeratedStringProperty = EnumStringProperty<EnumeratedString, T, const std::vector<std::string> *names>;
-//
-// template <typename T>
-// class DLLExport EnumStringProperty : public PropertyWithValue<EnumeratedString<T>> {
-// public:
-//  //constructors
-//  EnumStringProperty();
-//
-//  std::string value() const; // Make this method const
-//  std::string setValue(const std::string &value); // Ensure the return type fits your design
-//};
-// template <class E, const std::vector<std::string>& names>
-// class DLLExport EnumStringProperty : public PropertyWithValue<EnumeratedString<E, names>> {
-// public:
-//  // Constructor definitions
-//  EnumStringProperty() : PropertyWithValue<EnumeratedString<E, names>>() {}
-//
-//  // Member function definitions
-//  std::string value();
-//  std::string setValue(const std::string &value);
-//};
-//
-//// Definitions of the member functions
-// template <class E, const std::vector<std::string>& names>
-// std::string EnumStringProperty<E, names>::value() {
-//  // Define this method
-//}
-//
-// template <class E, const std::vector<std::string>& names>
-// std::string EnumStringProperty<E, names>::setValue(const std::string &value) {
-//  // Define this method
-//}
 } // namespace Kernel
 } // namespace Mantid

@@ -18,8 +18,6 @@ const std::vector<std::string> coolGuyNames{"Frederic", "Joseph", "William"};
 enum class Cakes : char { Lemon, Devil, Angel, Bundt, Pound, enum_count };
 const std::vector<std::string> cakeNames{"Lemon Cake", "Devil's Food Cake", "Angel Food Fake", "Bundt Cake",
                                          "Pound Cake"};
-typedef EnumeratedString<CoolGuys, &coolGuyNames> COOLGUY;
-typedef EnumeratedString<Cakes, &cakeNames> CAKE;
 
 typedef EnumStringProperty<CoolGuys, &coolGuyNames> COOLGUY_PROPERTY;
 typedef EnumStringProperty<Cakes, &cakeNames> CAKE_PROPERTY;
