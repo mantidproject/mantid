@@ -143,27 +143,40 @@ public:
     EventList eventList;
     eventList.setHistogram(BinEdges{0.0, 2.0});
     eventList += TofEvent(1.0, 2);
+    constexpr std::size_t NUM_EVENTS{1};
+    TS_ASSERT_EQUALS(eventList.getNumberEvents(), NUM_EVENTS);
+
     EventList target;
 
+    eventList.switchTo(EventType::TOF);
+    TS_ASSERT_EQUALS(eventList.getNumberEvents(), NUM_EVENTS);
     target.copyDataFrom(eventList);
+    TS_ASSERT_EQUALS(eventList.getNumberEvents(), NUM_EVENTS);
     TS_ASSERT_EQUALS(target.getEventType(), EventType::TOF)
     TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
+    TS_ASSERT_EQUALS(target.getNumberEvents(), 1);
     TS_ASSERT_EQUALS(target.getEvents(), eventList.getEvents());
     TS_ASSERT_THROWS(target.getWeightedEvents(), const std::runtime_error &);
     TS_ASSERT_THROWS(target.getWeightedEventsNoTime(), const std::runtime_error &);
 
     eventList.switchTo(EventType::WEIGHTED);
+    TS_ASSERT_EQUALS(eventList.getNumberEvents(), NUM_EVENTS);
     target.copyDataFrom(eventList);
+    TS_ASSERT_EQUALS(eventList.getNumberEvents(), NUM_EVENTS);
     TS_ASSERT_EQUALS(target.getEventType(), EventType::WEIGHTED)
     TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
+    TS_ASSERT_EQUALS(target.getNumberEvents(), NUM_EVENTS);
     TS_ASSERT_THROWS(target.getEvents(), const std::runtime_error &);
     TS_ASSERT_EQUALS(target.getWeightedEvents(), eventList.getWeightedEvents());
     TS_ASSERT_THROWS(target.getWeightedEventsNoTime(), const std::runtime_error &);
 
     eventList.switchTo(EventType::WEIGHTED_NOTIME);
+    TS_ASSERT_EQUALS(eventList.getNumberEvents(), NUM_EVENTS);
     target.copyDataFrom(eventList);
+    TS_ASSERT_EQUALS(eventList.getNumberEvents(), NUM_EVENTS);
     TS_ASSERT_EQUALS(target.getEventType(), EventType::WEIGHTED_NOTIME)
     TS_ASSERT_EQUALS(target.getSortType(), eventList.getSortType());
+    TS_ASSERT_EQUALS(target.getNumberEvents(), 1);
     TS_ASSERT_THROWS(target.getEvents(), const std::runtime_error &);
     TS_ASSERT_THROWS(target.getWeightedEvents(), const std::runtime_error &);
     TS_ASSERT_EQUALS(target.getWeightedEventsNoTime(), eventList.getWeightedEventsNoTime());
@@ -1414,11 +1427,6 @@ public:
     TS_ASSERT_EQUALS(dates[5], "2023-Jan-01 12:01:40");
   }
 
-  /**
-   *
-   * @param factor
-   * @param shift
-   */
   void test_getPulseTOFTimesAtSample() {
     const DateAndTime startTime{"2023-01-01T12:00:00"};
     const double pulsePeriod{60.0}; // in seconds
