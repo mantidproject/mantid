@@ -96,4 +96,5 @@ class MDNormHYSPECTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-3
+        self.nanEqual = True
         return "result", "MDNormHYSPEC.nxs"

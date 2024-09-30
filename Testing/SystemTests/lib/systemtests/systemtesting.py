@@ -92,6 +92,8 @@ class MantidSystemTest(unittest.TestCase):
         self.tolerance = 0.00000001
         # Whether or not to check the instrument/parameter map in CompareWorkspaces
         self.checkInstrument = True
+        # Whether or not to consider NaNs equal
+        self.nanEqual = False
 
         # Store the resident memory of the system (in MB) before starting the test
         FrameworkManager.clear()
@@ -355,6 +357,7 @@ class MantidSystemTest(unittest.TestCase):
             checker.setProperty("ToleranceRelErr", True)
         for d in self.disableChecking:
             checker.setProperty("Check" + d, False)
+        checker.setProperty("NaNsEqual", self.nanEqual)
         checker.execute()
         if not checker.getProperty("Result").value:
             print(self.__class__.__name__)

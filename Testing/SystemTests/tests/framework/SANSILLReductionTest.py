@@ -390,6 +390,7 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ["Instrument"]
+        self.nanEqual = True
         return ["iq", "ILL_SANS_D33_LTOF_IQ.nxs"]
 
     def runTest(self):

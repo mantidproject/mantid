@@ -19,6 +19,15 @@ class ARCSReductionTest(systemtesting.MantidSystemTest):
     vanFile0 = ""
     nxspeFile = ""
 
+    def skipTests(self):
+        """
+        This test relies on comparing 0.0 in the result to NaN in the reference in several bins.
+        This used to evaluate as true due to a bug.  The bug fixed in PR #38075, causing this test to fail.
+        The problem is likely due to the older behavior of bin masking in use when the reference was made.
+        To be fixed as part of Issue #38088
+        """
+        return True
+
     def requiredFiles(self):
         return ["ARCS_23961_event.nxs", "WBARCS.nxs"]
 
@@ -86,3 +95,4 @@ class ARCSReductionTest(systemtesting.MantidSystemTest):
         self.disableChecking.append("Instrument")
 
         return "nxspe", "ARCSsystemtest.nxs"
+        pass

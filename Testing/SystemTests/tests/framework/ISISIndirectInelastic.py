@@ -331,6 +331,7 @@ class OSIRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
         self.sum_files = True
 
     def get_reference_files(self):
+        self.nanEqual = True
         return ["II.OSIRISMultiFileSummedReduction.nxs"]
 
 

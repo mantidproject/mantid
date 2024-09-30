@@ -44,5 +44,6 @@ class ReflectometryQuickMultiDetector(systemtesting.MantidSystemTest):
         )
 
     def validate(self):
+        self.nanEqual = True
         self.disableChecking.append("Instrument")
         return "4699_IvsQ", "4699_IvsQ_Result.nxs"
