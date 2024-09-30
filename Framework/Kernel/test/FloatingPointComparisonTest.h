@@ -16,14 +16,61 @@ public:
   void test_Same_Value_Compare_Equal() { TS_ASSERT(Mantid::Kernel::equals(2.5, 2.5)); }
 
   void test_Difference_By_Machine_Eps_Compare_Equal() {
-    TS_ASSERT(Mantid::Kernel::equals(2.5, 2.5 + std::numeric_limits<double>::epsilon()));
+    double const a = 0x1.4p1; // i.e. 2.5
+    // increase by the machine precision
+    double const diff = std::ldexp(std::numeric_limits<double>::epsilon(), std::ilogb(a));
+    TS_ASSERT_DIFFERS(a, a + diff);
+    TS_ASSERT(Mantid::Kernel::equals(a, a + diff));
   }
 
   void test_Difference_By_Machine_Eps_Plus_Small_Does_Not_Compare_Equal() {
-    TS_ASSERT_EQUALS(Mantid::Kernel::equals(2.5, 2.5 + 1.1 * std::numeric_limits<double>::epsilon()), false);
+    double const a = 0x1.4p1; // i.e. 2.5
+    // as above, but increase by twice the machine precision
+    double const diff = std::ldexp(std::numeric_limits<double>::epsilon(), std::ilogb(a) + 1);
+    TS_ASSERT_DIFFERS(a, a + diff);
+    TS_ASSERT(!Mantid::Kernel::equals(a, a + diff));
+  }
+
+  void test_Similar_Small_Numbers_Compare_Equal() {
+    double const a = 0x1p-100;
+    // increase by the machine precision
+    double const diff = std::ldexp(std::numeric_limits<double>::epsilon(), std::ilogb(a));
+    TS_ASSERT_DIFFERS(a, a + diff);
+    TS_ASSERT(Mantid::Kernel::equals(a, a + diff));
+  }
+
+  void test_Different_Small_Numbers_Do_Not_Compare_Equal() {
+    // two small but machine-distinguishable numbers
+    double const a = 0x1.0p-100; // 1.0 * 2^{-100}
+    double const b = 0x1.8p-100; // 1.5 * 2^{-100}
+    double const diff = std::abs(a - b);
+    // the difference is less than machine epsilon (when scaled to 1)
+    TS_ASSERT_LESS_THAN(diff, std::numeric_limits<double>::epsilon());
+    // ne'ertheless, the numbers compare different
+    TS_ASSERT(!Mantid::Kernel::equals(a, b))
   }
 
   void test_Same_Large_Numbers_Compare_Equal() { TS_ASSERT(Mantid::Kernel::equals(DBL_MAX, DBL_MAX)); }
+
+  void test_Similar_Large_Numbers_Compare_Equal() {
+    double const a = DBL_MAX / 2;
+    double const diff = std::ldexp(std::numeric_limits<double>::epsilon(), std::ilogb(a));
+    // the difference is a sizeable number and not by itself insignificant
+    TS_ASSERT_LESS_THAN(0x1.p50, diff);
+    // the numbers are technicaly different
+    TS_ASSERT_DIFFERS(a, a + diff);
+    // but they compare different
+    TS_ASSERT(Mantid::Kernel::equals(a, a + diff));
+  }
+
+  void test_Different_Large_Numbers_Do_Not_Compare_Equal() {
+    double const a = DBL_MAX / 2;
+    // as above, but increase by twice the machine precision
+    double const diff = std::ldexp(std::numeric_limits<double>::epsilon(), std::ilogb(a) + 1);
+    TS_ASSERT_LESS_THAN(0x1.p50, diff);
+    TS_ASSERT_DIFFERS(a, a + diff);
+    TS_ASSERT(Mantid::Kernel::equals(a, a + diff));
+  }
 
   void test_Numbers_Outside_Custom_Tolerance_Are_Not_Equal() {
     const double tol(1e-08);
