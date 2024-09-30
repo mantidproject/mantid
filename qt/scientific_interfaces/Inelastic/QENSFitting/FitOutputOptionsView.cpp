@@ -17,12 +17,13 @@ FitOutputOptionsView::FitOutputOptionsView(QWidget *parent)
       m_presenter() {
   m_outputOptions->setupUi(this);
 
-  connect(m_outputOptions->cbGroupWorkspace, SIGNAL(currentIndexChanged(QString const &)), this,
-          SLOT(notifyGroupWorkspaceChanged(QString const &)));
-
-  connect(m_outputOptions->pbPlot, SIGNAL(clicked()), this, SLOT(notifyPlotClicked()));
-  connect(m_outputOptions->pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
-  connect(m_outputOptions->pbEditResult, SIGNAL(clicked()), this, SLOT(handleEditResultClicked()));
+  connect(m_outputOptions->cbGroupWorkspace,
+          static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged), this,
+          &FitOutputOptionsView::notifyGroupWorkspaceChanged);
+  connect(m_outputOptions->pbPlot, &QPushButton::clicked, this, &FitOutputOptionsView::notifyPlotClicked);
+  connect(m_outputOptions->pbPlot, &QPushButton::clicked, this, &FitOutputOptionsView::notifyPlotClicked);
+  connect(m_outputOptions->pbSave, &QPushButton::clicked, this, &FitOutputOptionsView::notifySaveClicked);
+  connect(m_outputOptions->pbEditResult, &QPushButton::clicked, this, &FitOutputOptionsView::handleEditResultClicked);
 }
 
 void FitOutputOptionsView::subscribePresenter(IFitOutputOptionsPresenter *presenter) { m_presenter = presenter; }
@@ -113,7 +114,8 @@ void FitOutputOptionsView::handleEditResultClicked() {
   m_editResultsDialog->setAttribute(Qt::WA_DeleteOnClose);
   m_editResultsDialog->setWorkspaceSelectorSuffices({"_Result"});
   m_editResultsDialog->show();
-  connect(m_editResultsDialog, SIGNAL(replaceSingleFitResult()), this, SLOT(notifyReplaceSingleFitResult()));
+  connect(m_editResultsDialog, &EditResultsDialog::replaceSingleFitResult, this,
+          &FitOutputOptionsView::notifyReplaceSingleFitResult);
 }
 
 void FitOutputOptionsView::displayWarning(std::string const &message) {

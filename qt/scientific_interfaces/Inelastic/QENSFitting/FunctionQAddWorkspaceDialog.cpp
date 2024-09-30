@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FunctionQAddWorkspaceDialog.h"
 
+#include "FitTabConstants.h"
+
 #include <optional>
 
 #include <QSignalBlocker>
@@ -15,12 +17,14 @@ namespace MantidQt::CustomInterfaces::Inelastic {
 FunctionQAddWorkspaceDialog::FunctionQAddWorkspaceDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.setupUi(this);
 
-  connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(emitWorkspaceChanged(const QString &)));
-  connect(m_uiForm.dsWorkspace, SIGNAL(filesAutoLoaded()), this, SLOT(handleAutoLoaded()));
-  connect(m_uiForm.cbParameterType, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(emitParameterTypeChanged(const QString &)));
-  connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SLOT(emitAddData()));
-  connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
+  connect(m_uiForm.dsWorkspace, &MantidWidgets::DataSelector::dataReady, this,
+          &FunctionQAddWorkspaceDialog::emitWorkspaceChanged);
+  connect(m_uiForm.dsWorkspace, &MantidWidgets::DataSelector::filesAutoLoaded, this,
+          &FunctionQAddWorkspaceDialog::handleAutoLoaded);
+  connect(m_uiForm.cbParameterType, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
+          this, &FunctionQAddWorkspaceDialog::emitParameterTypeChanged);
+  connect(m_uiForm.pbAdd, &QPushButton::clicked, this, &FunctionQAddWorkspaceDialog::emitAddData);
+  connect(m_uiForm.pbClose, &QPushButton::clicked, this, &FunctionQAddWorkspaceDialog::close);
 }
 
 std::string FunctionQAddWorkspaceDialog::workspaceName() const {
