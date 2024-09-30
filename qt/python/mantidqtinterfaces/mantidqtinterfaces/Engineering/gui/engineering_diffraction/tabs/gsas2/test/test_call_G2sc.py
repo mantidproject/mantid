@@ -7,7 +7,7 @@
 import unittest
 from unittest import mock
 
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.call_G2sc import add_histograms
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.call_G2sc import add_histograms, add_pawley_reflections
 
 
 class GSAS2ViewTest(unittest.TestCase):
@@ -88,3 +88,20 @@ class GSAS2ViewTest(unittest.TestCase):
         number_of_regions = 2
         with self.assertRaises(ValueError):
             add_histograms(data_filenames, project, instruments, number_of_regions)
+
+    def test_add_pawley_reflections(self):
+        project = mock.Mock()
+
+        class Phase:
+            def __init__(self):
+                self.data = {"General": {"doPawley": False}}
+
+        phase_1 = Phase()
+        phase_2 = Phase()
+        project.phases.return_value = [phase_1, phase_2]
+        pawley_reflections = [[([1, 2, 3], 4.1, 5), ([6, 7, 8], 9.1, 10)], [([1, 2, 3], 4.1, 5)]]
+        add_pawley_reflections(pawley_reflections, project, 5.5)
+        self.assertEqual(phase_1.data["General"]["doPawley"], True)
+        self.assertEqual(phase_1.data["Pawley ref"], [[1, 2, 3, 5, 4.1, True, 100.0, 5.5], [6, 7, 8, 10, 9.1, True, 100.0, 5.5]])
+        self.assertEqual(phase_2.data["General"]["doPawley"], True)
+        self.assertEqual(phase_2.data["Pawley ref"], [[1, 2, 3, 5, 4.1, True, 100.0, 5.5]])
