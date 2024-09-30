@@ -56,9 +56,10 @@ public:
   void setWorkspaces(std::vector<std::string> const &workspaces);
   void clearWorkspaces();
 
+  void watchADS(bool on);
+
 private:
   void setupPresenter(PlotWidget const &plotType, std::string const &fixedIndices);
-  void watchADS(bool on);
 
   void setPlotting(bool plotting);
   void setOptionsEnabled(bool enable);
