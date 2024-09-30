@@ -286,6 +286,8 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         return hasattr(ax, "_colorbar")
 
     def set_up_color_selector_toolbar_button(self, fig):
+        global current_ax_colour
+
         # check if the action is already in the toolbar
         if self._actions.get("line_colour"):
             return
