@@ -502,6 +502,48 @@ public:
     TS_ASSERT(!column.equals(*ws.getColumn("col2"), 1));
   }
 
+  void test_equals_nan_and_double_fail() {
+    const size_t n = 1;
+    TableWorkspace ws(n);
+    ws.addColumn("double", "col1");
+    ws.addColumn("double", "col2");
+    auto column = static_cast<TableColumn<double> &>(*ws.getColumn("col1"));
+    auto column2 = static_cast<TableColumn<double> &>(*ws.getColumn("col2"));
+    auto &data = column.data();
+    data[0] = 5.0;
+    auto &data2 = column2.data();
+    data2[0] = std::numeric_limits<double>::quiet_NaN();
+    TS_ASSERT(!column.equals(*ws.getColumn("col2"), 1));
+  }
+
+  void test_equals_two_nans_fail() {
+    const size_t n = 1;
+    TableWorkspace ws(n);
+    ws.addColumn("double", "col1");
+    ws.addColumn("double", "col2");
+    auto column = static_cast<TableColumn<double> &>(*ws.getColumn("col1"));
+    auto column2 = static_cast<TableColumn<double> &>(*ws.getColumn("col2"));
+    auto &data = column.data();
+    data[0] = std::numeric_limits<double>::quiet_NaN();
+    auto &data2 = column2.data();
+    data2[0] = std::numeric_limits<double>::quiet_NaN();
+    TS_ASSERT(!column.equals(*ws.getColumn("col2"), 1));
+  }
+
+  void test_equals_two_nans_pass_with_flag() {
+    const size_t n = 1;
+    TableWorkspace ws(n);
+    ws.addColumn("double", "col1");
+    ws.addColumn("double", "col2");
+    auto column = static_cast<TableColumn<double> &>(*ws.getColumn("col1"));
+    auto column2 = static_cast<TableColumn<double> &>(*ws.getColumn("col2"));
+    auto &data = column.data();
+    data[0] = std::numeric_limits<double>::quiet_NaN();
+    auto &data2 = column2.data();
+    data2[0] = std::numeric_limits<double>::quiet_NaN();
+    TS_ASSERT(!column.equals(*ws.getColumn("col2"), 1, true));
+  }
+
 private:
   std::vector<size_t> makeIndexVector(size_t n) {
     std::vector<size_t> vec(n);
