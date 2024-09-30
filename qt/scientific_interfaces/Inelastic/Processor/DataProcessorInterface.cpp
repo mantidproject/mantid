@@ -68,13 +68,13 @@ void DataProcessorInterface::initLayout() {
   addMVPTab<ElwinPresenter, ElwinView, ElwinModel>("Elwin");
   addMVPTab<IqtPresenter, IqtView, IqtModel>("Iqt");
 
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
+  connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &DataProcessorInterface::settings);
   // Connect "?" (Help) Button
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
+  connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &DataProcessorInterface::help);
   // Connect the Python export button
-  connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this, SLOT(exportTabPython()));
+  connect(m_uiForm.pbPythonExport, &QPushButton::clicked, this, &DataProcessorInterface::exportTabPython);
   // Connect the "Manage User Directories" Button
-  connect(m_uiForm.pbManageDirectories, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
+  connect(m_uiForm.pbManageDirectories, &QPushButton::clicked, this, &DataProcessorInterface::manageUserDirectories);
 
   InelasticInterface::initLayout();
 }

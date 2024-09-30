@@ -38,15 +38,21 @@ SqwView::SqwView(QWidget *parent) : QWidget(parent), m_presenter() {
 
   m_uiForm.rqwPlot2D->setCanvasColour(QColor(240, 240, 240));
 
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SLOT(notifyDataReady(QString const &)));
-  connect(m_uiForm.spQLow, SIGNAL(valueChanged(double)), this, SLOT(notifyQLowChanged(double)));
-  connect(m_uiForm.spQWidth, SIGNAL(valueChanged(double)), this, SLOT(notifyQWidthChanged(double)));
-  connect(m_uiForm.spQHigh, SIGNAL(valueChanged(double)), this, SLOT(notifyQHighChanged(double)));
-  connect(m_uiForm.spELow, SIGNAL(valueChanged(double)), this, SLOT(notifyELowChanged(double)));
-  connect(m_uiForm.spEWidth, SIGNAL(valueChanged(double)), this, SLOT(notifyEWidthChanged(double)));
-  connect(m_uiForm.spEHigh, SIGNAL(valueChanged(double)), this, SLOT(notifyEHighChanged(double)));
-  connect(m_uiForm.ckRebinInEnergy, SIGNAL(stateChanged(int)), this, SLOT(notifyRebinEChanged(int)));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
+  connect(m_uiForm.dsInput, &DataSelector::dataReady, this, &SqwView::notifyDataReady);
+  connect(m_uiForm.spQLow, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &SqwView::notifyQLowChanged);
+  connect(m_uiForm.spQWidth, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &SqwView::notifyQWidthChanged);
+  connect(m_uiForm.spQHigh, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &SqwView::notifyQHighChanged);
+  connect(m_uiForm.spELow, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &SqwView::notifyELowChanged);
+  connect(m_uiForm.spEWidth, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &SqwView::notifyEWidthChanged);
+  connect(m_uiForm.spEHigh, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &SqwView::notifyEHighChanged);
+  connect(m_uiForm.ckRebinInEnergy, &QCheckBox::stateChanged, this, &SqwView::notifyRebinEChanged);
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &SqwView::notifySaveClicked);
   // Allows empty workspace selector when initially selected
   m_uiForm.dsInput->isOptional(true);
 

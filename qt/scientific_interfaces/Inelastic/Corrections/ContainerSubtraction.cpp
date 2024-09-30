@@ -32,13 +32,16 @@ ContainerSubtraction::ContainerSubtraction(QWidget *parent) : CorrectionsTab(par
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface));
 
-  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(newSample(const QString &)));
-  connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this, SLOT(newContainer(const QString &)));
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotPreview(int)));
-  connect(m_uiForm.spCanScale, SIGNAL(valueChanged(double)), this, SLOT(updateCan()));
-  connect(m_uiForm.spShift, SIGNAL(valueChanged(double)), this, SLOT(updateCan()));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
+  connect(m_uiForm.dsSample, &DataSelector::dataReady, this, &ContainerSubtraction::newSample);
+  connect(m_uiForm.dsContainer, &DataSelector::dataReady, this, &ContainerSubtraction::newContainer);
+  connect(m_uiForm.spPreviewSpec, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+          &ContainerSubtraction::plotPreview);
+  connect(m_uiForm.spCanScale, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &ContainerSubtraction::updateCan);
+  connect(m_uiForm.spShift, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &ContainerSubtraction::updateCan);
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &ContainerSubtraction::saveClicked);
+  connect(m_uiForm.pbPlotPreview, &QPushButton::clicked, this, &ContainerSubtraction::plotCurrentPreview);
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSample->isOptional(true);
