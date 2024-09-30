@@ -166,6 +166,7 @@ void ISISDiagnostics::handleRun() {
   }
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+  m_plotOptionsPresenter->watchADS(false);
   runAlgorithm(sliceAlg);
 }
 
@@ -202,6 +203,7 @@ void ISISDiagnostics::handleValidation(IUserInputValidator *validator) const {
  * @param error If the algorithm failed
  */
 void ISISDiagnostics::algorithmComplete(bool error) {
+  m_plotOptionsPresenter->watchADS(true);
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   m_runPresenter->setRunEnabled(true);
   m_uiForm.pbSave->setEnabled(!error);
