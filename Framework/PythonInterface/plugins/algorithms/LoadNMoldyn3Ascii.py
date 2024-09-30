@@ -9,6 +9,8 @@ from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorit
 from mantid.kernel import logger, Direction, StringArrayProperty
 from mantid.simpleapi import config, CreateWorkspace, GroupWorkspaces, LoadInstrument, LoadParameterFile, UpdateInstrumentFromFile
 
+from IndirectCommon import get_efixed
+
 import ast
 import re
 import math
@@ -327,7 +329,6 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         Import 3D ASCII data (e.g. I(Q, t)).
         """
         logger.notice("Loading ASCII data")
-        from IndirectCommon import get_efixed
 
         # Read file
         data = []
