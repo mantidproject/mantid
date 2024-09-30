@@ -200,8 +200,8 @@ To generate files for a Python widget with name "Example", run:
   python tools/MVP/template.py --name Example --language python --include-setup --output-dir $PWD/..
 
 
-This command will generate four python files including `example_model.py`, `example_view.py`
-and `example_presenter.py`. These files will be saved in the provided output directory,
+This command will generate five python files including `example_model.py`, `example_view.py`,
+,`example_presenter.py` and `example_guiwidget.ui`. These files will be saved in the provided output directory,
 as specified by `$PWD/..`. An additional file named `launch.py` will be generated if the
 ``--include-setup`` flag is provided to the script. This can be used to open the widget as
 follows:
@@ -219,8 +219,9 @@ To generate files for a C++ widget with name "Example", run:
 
   python tools/MVP/template.py --name Example --language c++ --include-setup --output-dir $PWD/..
 
-This command will generate eight files including `ExampleModel.cpp`, `ExampleModel.h`,
-`ExampleView.cpp`, `ExampleView.h`, `ExamplePresenter.cpp` and `ExamplePresenter.h`.
+This command will generate nine files including `ExampleModel.cpp`, `ExampleModel.h`,
+`ExampleView.cpp`, `ExampleView.h`, `ExamplePresenter.cpp`, `ExamplePresenter.h` and
+`ExampleGUIWidget.ui`.
 An additional file named `main.cpp` and a `CMakeLists.txt` will be generated if the
 ``--include-setup`` flag is provided to the script. These files can be used to build
 the widget as follows:
