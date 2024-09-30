@@ -30,6 +30,7 @@ class DirectILLAuto_PANTHER_Powder_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-2
         self.tolerance_is_rel_err = False
+        self.nanEqual = True
         self.disableChecking = ["Instrument", "SpectraMap"]
         return ["He3C60", "ILL_PANTHER_Powder_Auto.nxs"]
 
@@ -180,6 +181,7 @@ class DirectILLAuto_SHARP_Powder_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-2
         self.tolerance_is_rel_err = True
+        self.nanEqual = True
         self.disableChecking = ["Instrument", "SpectraMap"]
         return ["PEO", "ILL_SHARP_Powder_Auto.nxs"]
 

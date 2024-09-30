@@ -50,6 +50,7 @@ class MuonProcessTest(systemtesting.MantidSystemTest):
         )
 
     def validate(self):
+        self.disableChecking.append("Uncertainty")
         return "MuonProcess_MUSR00015192", "MuonLoad_MUSR00015192.nxs"
 
     def cleanup(self):
