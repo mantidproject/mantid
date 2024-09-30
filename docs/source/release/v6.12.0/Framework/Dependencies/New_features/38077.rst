@@ -1,0 +1,1 @@
+- Updated Matplotlib from version 3.7 to version 3.8.
