@@ -22,7 +22,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QLabel" name="lbNumberInc">
+    <widget class="QLabel" name="lbCount">
      <property name="text">
       <string>0</string>
      </property>

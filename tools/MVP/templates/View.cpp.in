@@ -28,5 +28,5 @@ void View::notifyButtonClicked() {
 }
 
 void View::setLabel(std::string const &text) {
-  m_uiForm.lbNumberInc->setText(QString::fromStdString(text));
+  m_uiForm.lbCount->setText(QString::fromStdString(text));
 }

@@ -17,6 +17,7 @@ class View(QWidget):
         # Load gui from ui file.
         # Mantid has a custom function to do the same: load_ui(fullpath, "ui_filename.ui")
         # from mantidqt.utils.qt import load_ui
+        # Note that this assumes that the .ui file is in the same directory as the view.py
         ui_path = path.dirname(path.realpath(__file__))
         uic.loadUi(path.join(ui_path, "GUIWidget.ui"), self)
 
@@ -30,4 +31,4 @@ class View(QWidget):
         self._presenter.handle_button_clicked()
 
     def set_label(self, text: str) -> None:
-        self.lbNumberInc.setText(text)
+        self.lbCount.setText(text)
