@@ -45,6 +45,12 @@ class PlotFunctionsTest(unittest.TestCase):
             VerticalAxisValues=[4, 6, 8],
             OutputWorkspace="ws2d_histo",
         )
+        cls.ws2d_histo_negative_errors = CreateWorkspace(
+            DataX=[1, 2, 3, 4],
+            DataY=[10, 20, 30, 40],
+            DataE=[1, -2, 3, -4],
+            OutputWorkspace="ws2d_histo_negative_errors"
+        )
         cls.ws2d_histo_non_dist = CreateWorkspace(
             DataX=[10, 20, 30, 10, 20, 30],
             DataY=[2, 3, 4, 5],
@@ -150,6 +156,10 @@ class PlotFunctionsTest(unittest.TestCase):
         funcs.errorbar(ax, self.ws2d_histo, "rs", specNum=1)
         funcs.errorbar(ax, self.ws2d_histo, specNum=2, linewidth=6)
         funcs.errorbar(ax, self.ws_MD_1d, "bo")
+
+    def test_1d_errorbars_with_negative_errors(self):
+        _, ax = plt.subplots()
+        funcs.errorbar(ax, self.ws2d_histo_negative_errors, specNum=1)
 
     def test_1d_scatter(self):
         fig, ax = plt.subplots()
