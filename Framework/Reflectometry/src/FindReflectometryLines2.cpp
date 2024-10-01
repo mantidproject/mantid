@@ -13,6 +13,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidKernel/Statistics.h"
 
 namespace {
@@ -176,15 +177,11 @@ double FindReflectometryLines2::findPeak(const API::MatrixWorkspace_sptr &ws) {
   auto const fwhm = static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
   g_log.debug() << "Initial fwhm (full width at half maximum): " << fwhm << '\n';
   auto func = API::FunctionFactory::Instance().createFunction("CompositeFunction");
-  auto sum = std::dynamic_pointer_cast<API::CompositeFunction>(func);
-  if (sum == nullptr) {
-    throw std::runtime_error("The function is not a CompositeFunction");
-  }
+  auto sum =
+      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::CompositeFunction, API::IFunction>(func);
   func = API::FunctionFactory::Instance().createFunction("Gaussian");
-  auto gaussian = std::dynamic_pointer_cast<API::IPeakFunction>(func);
-  if (gaussian == nullptr) {
-    throw std::runtime_error("The function should be an IPeakFunction");
-  }
+  auto gaussian =
+      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::IPeakFunction, API::IFunction>(func);
   gaussian->setHeight(height);
   gaussian->setCentre(centreIndex);
   gaussian->setFwhm(fwhm);

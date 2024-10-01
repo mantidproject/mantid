@@ -23,6 +23,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -193,10 +194,8 @@ void ConvertFitFunctionForMuonTFAsymmetry::setOutput(const Mantid::API::IFunctio
   const std::vector<std::string> wsNames = getProperty("WorkspaceList");
   if (wsNames.size() == 1) {
     // if single domain func, strip off multi domain
-    auto TFFunc = std::dynamic_pointer_cast<CompositeFunction>(function);
-    if (TFFunc == nullptr) {
-      throw std::invalid_argument("Function must be a CompositeFunction");
-    }
+    auto TFFunc =
+        Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<CompositeFunction, API::IFunction>(function);
     outputFitFunction = TFFunc->getFunction(0);
   }
   setProperty("OutputFunction", outputFitFunction);
@@ -214,10 +213,8 @@ ConvertFitFunctionForMuonTFAsymmetry::extractFromTFAsymmFitFunction(const Mantid
   IFunction_sptr tmp = original;
 
   size_t numDomains = original->getNumberDomains();
-  auto TFFunc = std::dynamic_pointer_cast<CompositeFunction>(original);
-  if (TFFunc == nullptr) {
-    throw std::invalid_argument("Expected a CompositeFunction");
-  }
+  auto TFFunc =
+      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<CompositeFunction, API::IFunction>(original);
   for (size_t j = 0; j < numDomains; j++) {
     if (numDomains > 1) {
       // get correct domain

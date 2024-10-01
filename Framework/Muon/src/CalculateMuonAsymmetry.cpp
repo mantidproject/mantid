@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 
 #include "MantidMuon/CalculateMuonAsymmetry.h"
+#include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidMuon/MuonAsymmetryHelper.h"
 
 #include "MantidAPI/ADSValidator.h"
@@ -357,22 +358,18 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(const std::vector<s
 
   if (wsNames.size() == 1) {
     // N(1+g) + exp
-    auto TFFunc = std::dynamic_pointer_cast<API::CompositeFunction>(tmp);
-    if (TFFunc == nullptr) {
-      throw std::invalid_argument(wrongFunctionFormError);
-    }
+    auto TFFunc = Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::CompositeFunction, API::IFunction>(
+        tmp, wrongFunctionFormError);
     norms.emplace_back(getNormValue(TFFunc));
   } else {
-    auto result = std::dynamic_pointer_cast<API::MultiDomainFunction>(tmp);
-    if (result == nullptr) {
-      throw std::invalid_argument(wrongFunctionFormError);
-    }
+    auto result =
+        Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::MultiDomainFunction, API::IFunction>(
+            tmp, wrongFunctionFormError);
     for (size_t j = 0; j < wsNames.size(); j++) {
       // get domain
-      auto TFFunc = std::dynamic_pointer_cast<API::CompositeFunction>(result->getFunction(j));
-      if (TFFunc == nullptr) {
-        throw std::invalid_argument(wrongFunctionFormError);
-      }
+      auto TFFunc =
+          Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::CompositeFunction, API::IFunction>(
+              result->getFunction(j), wrongFunctionFormError);
       // N(1+g) + exp
       norms.emplace_back(getNormValue(TFFunc));
     }

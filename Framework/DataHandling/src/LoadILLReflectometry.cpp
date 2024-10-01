@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLReflectometry.h"
-
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileProperty.h"
@@ -23,6 +22,7 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/Quat.h"
@@ -585,15 +585,11 @@ double LoadILLReflectometry::reflectometryPeak() {
   const auto fwhm = static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
   // generate Gaussian
   auto func = API::FunctionFactory::Instance().createFunction("CompositeFunction");
-  auto sum = std::dynamic_pointer_cast<API::CompositeFunction>(func);
-  if (sum == nullptr) {
-    throw std::runtime_error("Unexpected function type, expected a CompositeFunction");
-  }
+  auto sum =
+      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::CompositeFunction, API::IFunction>(func);
   func = API::FunctionFactory::Instance().createFunction("Gaussian");
-  auto gaussian = std::dynamic_pointer_cast<API::IPeakFunction>(func);
-  if (gaussian == nullptr) {
-    throw std::runtime_error("Unexpected function type, expected an IPeakFunction");
-  }
+  auto gaussian =
+      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::IPeakFunction, API::IFunction>(func);
   gaussian->setHeight(height);
   gaussian->setCentre(centreByMax);
   gaussian->setFwhm(fwhm);

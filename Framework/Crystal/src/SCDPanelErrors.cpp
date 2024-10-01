@@ -17,6 +17,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidKernel/FileValidator.h"
 #include <algorithm>
 #include <boost/math/special_functions/round.hpp>
@@ -76,10 +77,9 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx, dou
   if (detname.compare("none") == 0.0)
     return;
   // CORELLI has sixteenpack under bank
-  DataObjects::PeaksWorkspace_sptr inputP = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(inputW);
-  if (inputP == nullptr) {
-    throw std::runtime_error("Input workspace is not a PeaksWorkspace");
-  }
+  DataObjects::PeaksWorkspace_sptr inputP =
+      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<DataObjects::PeaksWorkspace, API::Workspace>(
+          inputW);
   Geometry::Instrument_sptr inst = std::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
   if (inst->getName().compare("CORELLI") == 0.0 && detname != "moderator")
     detname.append("/sixteenpack");
