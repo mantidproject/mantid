@@ -61,10 +61,10 @@ void Corrections::initLayout() {
   }
 
   m_uiForm.pbSettings->setIcon(Settings::icon());
-  connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this, SLOT(exportTabPython()));
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
+  connect(m_uiForm.pbPythonExport, &QPushButton::clicked, this, &Corrections::exportTabPython);
+  connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &Corrections::settings);
+  connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &Corrections::help);
+  connect(m_uiForm.pbManageDirs, &QPushButton::clicked, this, &Corrections::manageUserDirectories);
 
   InelasticInterface::initLayout();
 }

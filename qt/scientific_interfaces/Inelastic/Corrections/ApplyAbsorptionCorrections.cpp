@@ -19,6 +19,7 @@
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include <QStringList>
+#include <gmock/internal/gmock-internal-utils.h>
 #include <utility>
 
 using namespace DataValidationHelper;
@@ -39,17 +40,20 @@ ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : Correc
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface));
 
-  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(newSample(const QString &)));
-  connect(m_uiForm.dsContainer, SIGNAL(dataReady(const QString &)), this, SLOT(newContainer(const QString &)));
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotPreview(int)));
-  connect(m_uiForm.spCanScale, SIGNAL(valueChanged(double)), this, SLOT(updateContainer()));
-  connect(m_uiForm.spCanShift, SIGNAL(valueChanged(double)), this, SLOT(updateContainer()));
-  connect(m_uiForm.ckShiftCan, SIGNAL(toggled(bool)), this, SLOT(updateContainer()));
-  connect(m_uiForm.ckScaleCan, SIGNAL(toggled(bool)), this, SLOT(updateContainer()));
-  connect(m_uiForm.ckRebinContainer, SIGNAL(toggled(bool)), this, SLOT(updateContainer()));
-  connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this, SLOT(updateContainer()));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
+  connect(m_uiForm.dsSample, &DataSelector::dataReady, this, &ApplyAbsorptionCorrections::newSample);
+  connect(m_uiForm.dsContainer, &DataSelector::dataReady, this, &ApplyAbsorptionCorrections::newContainer);
+  connect(m_uiForm.spPreviewSpec, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+          &ApplyAbsorptionCorrections::plotPreview);
+  connect(m_uiForm.spCanScale, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &ApplyAbsorptionCorrections::updateContainer);
+  connect(m_uiForm.spCanShift, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &ApplyAbsorptionCorrections::updateContainer);
+  connect(m_uiForm.ckShiftCan, &QCheckBox::toggled, this, &ApplyAbsorptionCorrections::updateContainer);
+  connect(m_uiForm.ckScaleCan, &QCheckBox::toggled, this, &ApplyAbsorptionCorrections::updateContainer);
+  connect(m_uiForm.ckRebinContainer, &QCheckBox::toggled, this, &ApplyAbsorptionCorrections::updateContainer);
+  connect(m_uiForm.ckUseCan, &QCheckBox::toggled, this, &ApplyAbsorptionCorrections::updateContainer);
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &ApplyAbsorptionCorrections::saveClicked);
+  connect(m_uiForm.pbPlotPreview, &QPushButton::clicked, this, &ApplyAbsorptionCorrections::plotCurrentPreview);
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSample->isOptional(true);
@@ -365,7 +369,8 @@ void ApplyAbsorptionCorrections::handleRun() {
   m_batchAlgoRunner->addAlgorithm(applyCorrAlg, std::move(absCorProps));
 
   // Run algorithm queue
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
+  connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this,
+          &ApplyAbsorptionCorrections::absCorComplete);
   m_batchAlgoRunner->executeBatchAsync();
 
   // Set the result workspace for Python script export
@@ -401,7 +406,8 @@ void ApplyAbsorptionCorrections::addInterpolationStep(const MatrixWorkspace_sptr
  * @param error True if algorithm failed.
  */
 void ApplyAbsorptionCorrections::absCorComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
+  disconnect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this,
+             &ApplyAbsorptionCorrections::absCorComplete);
   m_runPresenter->setRunEnabled(true);
   setSaveResultEnabled(!error);
 
@@ -419,7 +425,9 @@ void ApplyAbsorptionCorrections::absCorComplete(bool error) {
       }
     }
     // Run algorithm queue
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(postProcessComplete(bool)));
+    connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this,
+            &ApplyAbsorptionCorrections::postProcessComplete);
+
     m_batchAlgoRunner->executeBatchAsync();
 
     setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
@@ -434,7 +442,8 @@ void ApplyAbsorptionCorrections::absCorComplete(bool error) {
  * @param error True if algorithm failed.
  */
 void ApplyAbsorptionCorrections::postProcessComplete(bool error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(postProcessComplete(bool)));
+  disconnect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this,
+             &ApplyAbsorptionCorrections::postProcessComplete);
   m_runPresenter->setRunEnabled(true);
   setSaveResultEnabled(!error);
 
