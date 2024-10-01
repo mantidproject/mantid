@@ -8,7 +8,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidDataHandling/CreateSampleShape.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
@@ -91,7 +90,34 @@ void RotateSampleShape::exec() {
     meshShape->rotate(newSampleShapeRot);
   } else {
     shapeXML = Geometry::ShapeFactory().addGoniometerTag(newSampleShapeRot, shapeXML);
-    Mantid::DataHandling::CreateSampleShape::setSampleShape(*ei, shapeXML, false);
+    setSampleShape(*ei, shapeXML, false);
+  }
+}
+
+/**
+ * @brief Set the shape via an XML string on the given experiment
+ * @param expt A reference to the experiment holding the sample object
+ * @param shapeXML XML defining the object's shape
+ * @param addTypeTag true to wrap a \<type\> tag around the XML supplied(default)
+ */
+void RotateSampleShape::setSampleShape(API::ExperimentInfo &expt, const std::string &shapeXML, bool addTypeTag) {
+  Geometry::ShapeFactory sFactory;
+  // Create the object
+  auto shape = sFactory.createShape(shapeXML, addTypeTag);
+  // Check it's valid and attach it to the workspace sample but preserve any
+  // material
+  if (shape->hasValidShape()) {
+    const auto mat = expt.sample().getMaterial();
+    shape->setMaterial(mat);
+    expt.mutableSample().setShape(shape);
+  } else {
+    std::ostringstream msg;
+    msg << "Object has invalid shape.";
+    if (auto csgShape = dynamic_cast<Geometry::CSGObject *>(shape.get())) {
+      msg << " TopRule = " << csgShape->topRule() << ", number of surfaces = " << csgShape->getSurfacePtr().size()
+          << "\n";
+    }
+    throw std::runtime_error(msg.str());
   }
 }
 
