@@ -72,7 +72,6 @@ set(SRC_FILES
     src/SortPeaksWorkspace.cpp
     src/StatisticsOfPeaksWorkspace.cpp
     src/TransformHKL.cpp
-    src/RotateSampleShape.cpp
 )
 
 set(INC_FILES
@@ -152,7 +151,6 @@ set(INC_FILES
     inc/MantidCrystal/SortPeaksWorkspace.h
     inc/MantidCrystal/StatisticsOfPeaksWorkspace.h
     inc/MantidCrystal/TransformHKL.h
-    inc/MantidCrystal/RotateSampleShape.h
 )
 
 set(TEST_FILES
@@ -225,7 +223,6 @@ set(TEST_FILES
     SortPeaksWorkspaceTest.h
     StatisticsOfPeaksWorkspaceTest.h
     TransformHKLTest.h
-    RotateSampleShapeTest.h
 )
 
 if(COVERAGE)
