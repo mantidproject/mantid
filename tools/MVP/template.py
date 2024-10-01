@@ -43,7 +43,11 @@ def _generate_setup_file(name: str, filename: Callable, setup_filename: str, ext
 
 def _generate_mvp_file(name: str, filename: Callable, file_type: str, extension: str, output_directory: str) -> None:
     """Generates a file using the corresponding template in the template directory."""
-    template_filepath = join(TEMPLATE_DIRECTORY, f"{filename(file_type)}.{extension}.in")
+    template_filepath = (
+        join(TEMPLATE_DIRECTORY, f"{filename(file_type)}.{extension}.in")
+        if (extension != "ui")
+        else join(TEMPLATE_DIRECTORY, f"{file_type}.{extension}.in")
+    )
     with open(template_filepath, mode="r") as file:
         content = file.read()
 
