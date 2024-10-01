@@ -27,10 +27,10 @@ using namespace Mantid::API;
  * @param expt A reference to the experiment holding the sample object
  * @param shapeXML XML defining the object's shape
  */
-void CreateSampleShape::setSampleShape(API::ExperimentInfo &expt, const std::string &shapeXML) {
+void CreateSampleShape::setSampleShape(API::ExperimentInfo &expt, const std::string &shapeXML, bool addTypeTag) {
   Geometry::ShapeFactory sFactory;
   // Create the object
-  auto shape = sFactory.createShape(shapeXML);
+  auto shape = sFactory.createShape(shapeXML, addTypeTag);
   // Check it's valid and attach it to the workspace sample but preserve any
   // material
   if (shape->hasValidShape()) {
