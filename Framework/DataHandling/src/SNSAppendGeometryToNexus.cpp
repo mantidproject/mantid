@@ -18,9 +18,9 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
+#include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <Poco/Exception.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
