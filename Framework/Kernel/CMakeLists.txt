@@ -337,6 +337,7 @@ set(TEST_FILES
     DiskBufferTest.h
     DllOpenTest.h
     DynamicFactoryTest.h
+    DynamicPointerCastHelperTest.h
     EigenConversionHelpersTest.h
     EnabledWhenPropertyTest.h
     EnumeratedStringTest.h
