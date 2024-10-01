@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from os.path import abspath, dirname, join
 from typing import Callable, Union
+from itertools import product
 
 TEMPLATE_DIRECTORY = join(dirname(abspath(__file__)), "templates")
 
@@ -29,6 +30,7 @@ def _generate_setup_file(name: str, filename: Callable, setup_filename: str, ext
     content = content.replace("Model", f"{name}Model")
     content = content.replace("View", f"{name}View")
     content = content.replace("Presenter", f"{name}Presenter")
+    content = content.replace("GUIWidget", f"{name}GUIWidget")
     # Only required for python launch file
     content = content.replace("from model", "from " + filename("Model", name))
     content = content.replace("from view", "from " + filename("View", name))
@@ -41,12 +43,21 @@ def _generate_setup_file(name: str, filename: Callable, setup_filename: str, ext
 
 def _generate_mvp_file(name: str, filename: Callable, file_type: str, extension: str, output_directory: str) -> None:
     """Generates a file using the corresponding template in the template directory."""
-    template_filepath = join(TEMPLATE_DIRECTORY, f"{filename(file_type)}.{extension}.in")
+    template_filepath = (
+        join(TEMPLATE_DIRECTORY, f"{filename(file_type)}.{extension}.in")
+        if (extension != "ui")
+        else join(TEMPLATE_DIRECTORY, f"{file_type}.{extension}.in")
+    )
     with open(template_filepath, mode="r") as file:
         content = file.read()
 
     for mvp_type in ["Model", "View", "Presenter"]:
         content = content.replace(mvp_type, f"{name}{mvp_type}")
+
+    # For adding the ui file
+    content = (
+        content.replace("GUIWidget", f"{name}GUIWidget") if extension == "h" else content.replace("GUIWidget", filename("GUIWidget", name))
+    )
 
     output_filepath = join(output_directory, f"{filename(file_type, name)}.{extension}")
     with open(output_filepath, mode="w") as file:
@@ -56,10 +67,10 @@ def _generate_mvp_file(name: str, filename: Callable, file_type: str, extension:
 def _generate_python_files(name: str, include_setup: bool, output_directory: str) -> None:
     """Generate MVP files for a Python use case."""
     print("Generating Python files with an MVP pattern...")
+    for file_type in ["View", "Presenter", "Model"]:
+        _generate_mvp_file(name, _python_filename, file_type, "py", output_directory)
 
-    _generate_mvp_file(name, _python_filename, "View", "py", output_directory)
-    _generate_mvp_file(name, _python_filename, "Presenter", "py", output_directory)
-    _generate_mvp_file(name, _python_filename, "Model", "py", output_directory)
+    _generate_mvp_file(name, _python_filename, "GUIWidget", "ui", output_directory)
     if include_setup:
         _generate_setup_file(name, _python_filename, "launch", "py", output_directory)
 
@@ -70,13 +81,10 @@ def _generate_python_files(name: str, include_setup: bool, output_directory: str
 def _generate_cpp_files(name: str, include_setup: bool, output_directory: str) -> None:
     """Generate MVP files for a C++ use case."""
     print("Generating C++ files with an MVP pattern...")
+    for file_type in product(["View", "Presenter", "Model"], ["cpp", "h"]):
+        _generate_mvp_file(name, _cpp_filename, file_type[0], file_type[1], output_directory)
 
-    _generate_mvp_file(name, _cpp_filename, "View", "cpp", output_directory)
-    _generate_mvp_file(name, _cpp_filename, "Presenter", "cpp", output_directory)
-    _generate_mvp_file(name, _cpp_filename, "Model", "cpp", output_directory)
-    _generate_mvp_file(name, _cpp_filename, "View", "h", output_directory)
-    _generate_mvp_file(name, _cpp_filename, "Presenter", "h", output_directory)
-    _generate_mvp_file(name, _cpp_filename, "Model", "h", output_directory)
+    _generate_mvp_file(name, _cpp_filename, "GUIWidget", "ui", output_directory)
     if include_setup:
         _generate_setup_file(name, _cpp_filename, "main", "cpp", output_directory)
         _generate_setup_file(name, _cpp_filename, "CMakeLists", "txt", output_directory)
@@ -90,7 +98,7 @@ def _generate_files(name: str, language: str, include_setup: bool, output_direct
     match language.lower():
         case "python":
             _generate_python_files(name, include_setup, output_directory)
-        case "c++":
+        case "c++" | "cpp":
             _generate_cpp_files(name, include_setup, output_directory)
         case _:
             raise ValueError(f"An unsupported language '{language}' has been provided. Choose one: [Python, C++].")
@@ -111,4 +119,4 @@ if __name__ == "__main__":
     parser.add_argument("-o", "--output-dir", required=True, help="The absolute path to output the generated files to.")
     args = parser.parse_args()
 
-    _generate_files(args.name.capitalize(), args.language, args.include_setup, args.output_dir)
+    _generate_files(args.name[:1].upper() + args.name[1:], args.language, args.include_setup, args.output_dir)

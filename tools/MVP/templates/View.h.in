@@ -7,10 +7,10 @@
 #pragma once
 
 #include <string>
+#include "ui_GUIWidget.h"
 
 #include <QObject>
 #include <QWidget>
-#include <QLabel>
 
 
 class IPresenter;
@@ -39,7 +39,7 @@ private slots:
   void notifyButtonClicked();
 
 private:
-  QLabel *m_label;
+  Ui::GUIWidget m_uiForm;
 
   IPresenter *m_presenter;
 };

@@ -4,25 +4,24 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import QLabel, QPushButton, QVBoxLayout, QWidget
+from os import path
+from qtpy.QtWidgets import QWidget
+from qtpy import uic
 
 
 class View(QWidget):
-
     def __init__(self):
         super().__init__()
         self._presenter = None
 
-        self._layout = QVBoxLayout()
-        self._button = QPushButton("Increment", self)
-        self._label = QLabel("0")
+        # Load gui from ui file.
+        # Mantid has a custom function to do the same: load_ui(fullpath, "ui_filename.ui")
+        # from mantidqt.utils.qt import load_ui
+        # Note that this assumes that the .ui file is in the same directory as the view.py
+        ui_path = path.dirname(path.realpath(__file__))
+        uic.loadUi(path.join(ui_path, "GUIWidget.ui"), self)
 
-        self._layout.addWidget(self._button)
-        self._layout.addWidget(self._label)
-
-        self.setLayout(self._layout)
-
-        self._button.clicked.connect(self.notify_button_clicked)
+        self.pbIncrement.clicked.connect(self.notify_button_clicked)
 
     def subscribe_presenter(self, presenter) -> None:
         self._presenter = presenter
@@ -32,4 +31,4 @@ class View(QWidget):
         self._presenter.handle_button_clicked()
 
     def set_label(self, text: str) -> None:
-        self._label.setText(text)
+        self.lbCount.setText(text)
