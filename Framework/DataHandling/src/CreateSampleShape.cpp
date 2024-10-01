@@ -26,7 +26,6 @@ using namespace Mantid::API;
  * @brief Set the shape via an XML string on the given experiment
  * @param expt A reference to the experiment holding the sample object
  * @param shapeXML XML defining the object's shape
- * @param addTypeTag true to wrap a \<type\> tag around the XML supplied(default)
  */
 void CreateSampleShape::setSampleShape(API::ExperimentInfo &expt, const std::string &shapeXML) {
   Geometry::ShapeFactory sFactory;
