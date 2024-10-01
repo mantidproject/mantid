@@ -7,7 +7,12 @@
 import unittest
 from unittest import mock
 
-from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.call_G2sc import add_histograms, add_pawley_reflections
+from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.call_G2sc import (
+    add_histograms,
+    add_pawley_reflections,
+    set_max_number_cycles,
+    add_phases,
+)
 
 
 class GSAS2ViewTest(unittest.TestCase):
@@ -16,6 +21,12 @@ class GSAS2ViewTest(unittest.TestCase):
 
     def tearDown(self) -> None:
         pass
+
+    def test_add_phases(self):
+        project = mock.Mock()
+        phase_files = ["file_1", "file_2"]
+        add_phases(project, phase_files)
+        project.add_phase.assert_has_calls([mock.call("file_1"), mock.call("file_2")])
 
     def test_add_histograms_with_single_datafile(self):
         project = mock.Mock()
@@ -105,3 +116,9 @@ class GSAS2ViewTest(unittest.TestCase):
         self.assertEqual(phase_1.data["Pawley ref"], [[1, 2, 3, 5, 4.1, True, 100.0, 5.5], [6, 7, 8, 10, 9.1, True, 100.0, 5.5]])
         self.assertEqual(phase_2.data["General"]["doPawley"], True)
         self.assertEqual(phase_2.data["Pawley ref"], [[1, 2, 3, 5, 4.1, True, 100.0, 5.5]])
+
+    def test_set_max_number_cycles(self):
+        project = mock.Mock()
+        project.data = {"Controls": {"data": {"max cyc": 0}}}
+        set_max_number_cycles(project, 5)
+        self.assertEqual(project.data["Controls"]["data"]["max cyc"], 5)
