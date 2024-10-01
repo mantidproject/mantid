@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
+import os
+import shutil
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.call_G2sc import (
     add_histograms,
@@ -18,15 +20,27 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.call_
     enable_limits,
     run_microstrain_refinement,
     run_parameter_refinement,
+    export_refinement_to_csv,
+    export_reflections,
+    export_refined_instrument_parameters,
+    export_lattice_parameters,
 )
+
+import numpy as np
 
 
 class GSAS2ViewTest(unittest.TestCase):
-    def setUp(self) -> None:
-        pass
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.temp_save_directory = os.path.join(os.path.dirname(__file__), "temp")
+        try:
+            os.makedirs(cls.temp_save_directory)
+        except FileExistsError:
+            pass
 
-    def tearDown(self) -> None:
-        pass
+    @classmethod
+    def tearDownClass(cls) -> None:
+        shutil.rmtree(cls.temp_save_directory)
 
     def test_add_phases(self):
         project = mock.Mock()
@@ -203,3 +217,74 @@ class GSAS2ViewTest(unittest.TestCase):
         hist_2.set_refinements.assert_called_with({"Instrument Parameters": ["instr_par_string"]})
         project.do_refinements.called_once()
         project.save.called_with("save_path")
+
+    def test_export_refinement_to_csv(self):
+        project = mock.Mock()
+        hist_1 = mock.Mock()
+        hist_2 = mock.Mock()
+        project.histograms.return_value = [hist_1, hist_2]
+        export_refinement_to_csv("temp_save_directory", "project_name", project)
+        hist_1.Export.called_with(os.path.join("temp_save_directory", "project_name_1.csv"), ".csv", "histogram CSV file")
+        hist_2.Export.called_with(os.path.join("temp_save_directory", "project_name_2.csv"), ".csv", "histogram CSV file")
+
+    def test_export_reflections(self):
+        project = mock.Mock()
+        hist_1 = mock.Mock()
+        hist_1.name = "hist 1.gss"
+        hist_2 = mock.Mock()
+        hist_2.name = "hist 2.gss"
+        project.histograms.return_value = [hist_1, hist_2]
+        hist_1.reflections.return_value = {
+            "phase_1": {"RefList": np.arange(18).reshape(3, 6)},
+            "phase_2": {"RefList": np.arange(20, 38).reshape(3, 6)},
+        }
+        hist_2.reflections.return_value = {}
+        export_reflections(self.temp_save_directory, "project", project)
+
+        with open(os.path.join(self.temp_save_directory, "project_reflections_1_phase_1.txt"), "rt", encoding="utf-8") as file:
+            str_1 = file.read()
+            self.assertEqual(str_1, "hist_1\nphase_1\n5\n11\n17\n")
+
+        with open(os.path.join(self.temp_save_directory, "project_reflections_1_phase_2.txt"), "rt", encoding="utf-8") as file:
+            str_2 = file.read()
+            self.assertEqual(str_2, "hist_1\nphase_2\n25\n31\n37\n")
+
+    def test_export_refined_instrument_parameters(self):
+        project = mock.Mock()
+        hist_1 = mock.Mock()
+        hist_1.name = "hist 1.gss"
+        hist_2 = mock.Mock()
+        hist_2.name = "hist 2.gss"
+        project.histograms.return_value = [hist_1, hist_2]
+        hist_1.getHistEntryList.return_value = [[0, 1, [{"sig-1": 5, "Y": 10}]]]
+        hist_2.getHistEntryList.return_value = [[0, 1, [{"sig-1": 15, "Y": 20}]]]
+        export_refined_instrument_parameters(self.temp_save_directory, "project", project)
+
+        with open(os.path.join(self.temp_save_directory, "project_inst_parameters_hist_1.txt"), "rt", encoding="utf-8") as file:
+            str_1 = file.read()
+            self.assertEqual(str_1, """{"Histogram name":"hist_1","Sigma-1":5,"Gamma (Y)":10}""")
+
+        with open(os.path.join(self.temp_save_directory, "project_inst_parameters_hist_2.txt"), "rt", encoding="utf-8") as file:
+            str_2 = file.read()
+            self.assertEqual(str_2, """{"Histogram name":"hist_2","Sigma-1":15,"Gamma (Y)":20}""")
+
+    def test_export_lattice_parameters(self):
+        project = mock.Mock()
+        phase_1 = mock.Mock()
+        phase_1.name = "phase_1"
+        phase_1.get_cell.return_value = {}
+        phase_1.getPhaseEntryList.return_value = [[0, 0, [0, [10]]]]
+        phase_2 = mock.Mock()
+        phase_2.name = "phase_2"
+        phase_2.get_cell.return_value = {}
+        phase_2.getPhaseEntryList.return_value = [[0, 0, [0, [10]]]]
+        project.phases.return_value = [phase_1, phase_2]
+        export_lattice_parameters(self.temp_save_directory, "project", project)
+
+        with open(os.path.join(self.temp_save_directory, "project_cell_parameters_phase_1.txt"), "rt", encoding="utf-8") as file:
+            str_1 = file.read()
+            self.assertEqual(str_1, """{"Microstrain":10}""")
+
+        with open(os.path.join(self.temp_save_directory, "project_cell_parameters_phase_2.txt"), "rt", encoding="utf-8") as file:
+            str_2 = file.read()
+            self.assertEqual(str_2, """{"Microstrain":10}""")
