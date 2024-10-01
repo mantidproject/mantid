@@ -16,6 +16,8 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.call_
     enable_histogram_scale_factor,
     enable_unit_cell,
     enable_limits,
+    run_microstrain_refinement,
+    run_parameter_refinement,
 )
 
 
@@ -173,8 +175,31 @@ class GSAS2ViewTest(unittest.TestCase):
         hist_1.set_refinements.assert_called_with({"Limits": [1, 6]})
         hist_2.set_refinements.assert_called_with({"Limits": [5, 10]})
 
+    def test_run_microstrain_refinement(self):
+        project = mock.Mock()
+        phase_1 = mock.Mock()
+        phase_2 = mock.Mock()
+        project.phases.return_value = [phase_1, phase_2]
+        project.filename = "project_filename"
+        project.histograms.return_value = []
+        run_microstrain_refinement(True, project, "save_path")
+        phase_1.set_HAP_refinements.assert_called_with({"Mustrain": {"type": "isotropic", "refine": True}})
+        phase_2.set_HAP_refinements.assert_called_with({"Mustrain": {"type": "isotropic", "refine": True}})
+        project.do_refinements.called_once()
+        project.save.called_with("save_path")
 
-# def enable_limits(x_limits, project):
-#     if x_limits:
-#         for ihist, xlim in enumerate(zip(*x_limits)):
-#             project.histograms()[ihist].set_refinements({"Limits": [min(xlim), max(xlim)]})  # ensure min <= max
+    def test_run_parameter_refinement(self):
+        project = mock.Mock()
+        hist_1 = mock.Mock()
+        hist_1.name = "hist_1"
+        hist_1.get_wR.return_value = 5
+        hist_2 = mock.Mock()
+        hist_2.name = "hist_2"
+        hist_2.get_wR.return_value = 5
+        project.histograms.return_value = [hist_1, hist_2]
+        project.filename = "project_filename"
+        run_parameter_refinement(True, "instr_par_string", project, "save_path")
+        hist_1.set_refinements.assert_called_with({"Instrument Parameters": ["instr_par_string"]})
+        hist_2.set_refinements.assert_called_with({"Instrument Parameters": ["instr_par_string"]})
+        project.do_refinements.called_once()
+        project.save.called_with("save_path")
