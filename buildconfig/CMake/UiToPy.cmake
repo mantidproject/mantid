@@ -16,7 +16,6 @@ function(UiToPy5 ui_files target_name)
     add_custom_command(
       OUTPUT ${generated_file}
       COMMAND ${PYTHON_EXECUTABLE} -m PyQt5.uic.pyuic -x ${source_file} -o ${generated_file}
-      COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/buildconfig/wrap_pyui.py ${generated_file}
       DEPENDS ${source_file}
     )
     # Record all generated files
