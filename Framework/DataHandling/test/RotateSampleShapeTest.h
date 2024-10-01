@@ -17,7 +17,7 @@
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
 
-using namespace Mantid::Crystal;
+using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::DataObjects::Workspace2D_sptr;
