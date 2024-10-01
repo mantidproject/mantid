@@ -22,6 +22,7 @@
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid::Algorithms {
@@ -71,23 +72,18 @@ int compareEventLists(Kernel::Logger &logger, const EventList &el1, const EventL
     const auto &e1 = events1[i];
     const auto &e2 = events2[i];
 
-    bool diffpulse = false;
-    bool difftof = false;
-    bool diffweight = false;
-    if (std::abs(e1.pulseTime().totalNanoseconds() - e2.pulseTime().totalNanoseconds()) > tolPulse) {
-      diffpulse = true;
-      ++numdiffpulse;
-    }
-    if (std::abs(e1.tof() - e2.tof()) > tolTof) {
-      difftof = true;
-      ++numdifftof;
-    }
+    bool diffpulse =
+        !withinAbsoluteDifference(e1.pulseTime().totalNanoseconds(), e2.pulseTime().totalNanoseconds(), tolPulse);
+    bool difftof = !withinAbsoluteDifference(e1.tof(), e2.tof(), tolTof);
+    bool diffweight = !withinAbsoluteDifference(e1.weight(), e2.weight(), tolWeight);
     if (diffpulse && difftof)
-      ++numdiffboth;
-    if (std::abs(e1.weight() - e2.weight()) > tolWeight) {
-      diffweight = true;
-      ++numdiffweight;
-    }
+      numdiffboth++;
+    if (diffpulse)
+      numdiffpulse++;
+    if (difftof)
+      numdifftof++;
+    if (diffweight)
+      numdiffweight++;
 
     bool same = (!diffpulse) && (!difftof) && (!diffweight);
     if (!same) {
@@ -148,6 +144,8 @@ void CompareWorkspaces::init() {
                   "Very often such logs are huge so making it true should be "
                   "the last option.");
 
+  declareProperty("NaNsEqual", false, "Whether NaN values should compare as equal with other NaN values.");
+
   declareProperty("NumberMismatchedSpectraToPrint", 1, "Number of mismatched spectra from lowest to be listed. ");
 
   declareProperty("DetailedPrintIndex", EMPTY_INT(), "Mismatched spectra that will be printed out in details. ");
@@ -172,13 +170,14 @@ void CompareWorkspaces::exec() {
     m_parallelComparison = false;
 
   double const tolerance = getProperty("Tolerance");
+  bool const nanEqual = getProperty("NaNsEqual");
   if (getProperty("ToleranceRelErr")) {
-    this->m_compare = [tolerance](double const x1, double const x2) -> bool {
-      return CompareWorkspaces::withinRelativeTolerance(x1, x2, tolerance);
+    this->m_compare = [tolerance, nanEqual](double const x1, double const x2) -> bool {
+      return CompareWorkspaces::withinRelativeTolerance(x1, x2, tolerance, nanEqual);
     };
   } else {
-    this->m_compare = [tolerance](double const x1, double const x2) -> bool {
-      return CompareWorkspaces::withinAbsoluteTolerance(x1, x2, tolerance);
+    this->m_compare = [tolerance, nanEqual](double const x1, double const x2) -> bool {
+      return CompareWorkspaces::withinAbsoluteTolerance(x1, x2, tolerance, nanEqual);
     };
   }
 
@@ -1049,10 +1048,11 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
   }
 
   const bool isRelErr = getProperty("ToleranceRelErr");
+  const bool checkAllData = getProperty("CheckAllData");
   for (int i = 0; i < tws1->getNumberPeaks(); i++) {
     const Peak &peak1 = tws1->getPeak(i);
     const Peak &peak2 = tws2->getPeak(i);
-    for (size_t j = 0; j < tws1->columnCount(); j++) {
+    for (std::size_t j = 0; j < tws1->columnCount(); j++) {
       std::shared_ptr<const API::Column> col = tws1->getColumn(j);
       std::string name = col->name();
       double s1 = 0.0;
@@ -1127,7 +1127,8 @@ void CompareWorkspaces::doPeaksComparison(PeaksWorkspace_sptr tws1, PeaksWorkspa
                        << "value1 = " << s1 << "\n"
                        << "value2 = " << s2 << "\n";
         recordMismatch("Data mismatch");
-        return;
+        if (!checkAllData)
+          return;
       }
     }
   }
@@ -1163,8 +1164,10 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(const LeanElasticPeaksWorks
 
   const double tolerance = getProperty("Tolerance");
   const bool isRelErr = getProperty("ToleranceRelErr");
+  const bool checkAllData = getProperty("CheckAllData");
+  const bool nanEqual = getProperty("NaNsEqual");
   for (int peakIndex = 0; peakIndex < ipws1->getNumberPeaks(); peakIndex++) {
-    for (size_t j = 0; j < ipws1->columnCount(); j++) {
+    for (std::size_t j = 0; j < ipws1->columnCount(); j++) {
       std::shared_ptr<const API::Column> col = ipws1->getColumn(j);
       const std::string name = col->name();
       double s1 = 0.0;
@@ -1229,10 +1232,10 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(const LeanElasticPeaksWorks
       //   bool mismatch = !m_compare(s1, s2)
       // can replace this if/else, and isRelErr and tolerance can be deleted
       if (isRelErr && name != "QLab" && name != "QSample") {
-        if (!withinRelativeTolerance(s1, s2, tolerance)) {
+        if (!withinRelativeTolerance(s1, s2, tolerance, nanEqual)) {
           mismatch = true;
         }
-      } else if (!withinAbsoluteTolerance(s1, s2, tolerance)) {
+      } else if (!withinAbsoluteTolerance(s1, s2, tolerance, nanEqual)) {
         mismatch = true;
       }
       if (mismatch) {
@@ -1242,7 +1245,8 @@ void CompareWorkspaces::doLeanElasticPeaksComparison(const LeanElasticPeaksWorks
                        << "value1 = " << s1 << "\n"
                        << "value2 = " << s2 << "\n";
         recordMismatch("Data mismatch");
-        return;
+        if (!checkAllData)
+          return;
       }
     }
   }
@@ -1283,19 +1287,23 @@ void CompareWorkspaces::doTableComparison(const API::ITableWorkspace_const_sptr 
 
   const bool checkAllData = getProperty("CheckAllData");
   const bool isRelErr = getProperty("ToleranceRelErr");
+  const bool nanEqual = getProperty("NaNsEqual");
   const double tolerance = getProperty("Tolerance");
   bool mismatch;
-  for (size_t i = 0; i < numCols; ++i) {
+  for (std::size_t i = 0; i < numCols; ++i) {
     const auto c1 = tws1->getColumn(i);
     const auto c2 = tws2->getColumn(i);
 
     if (isRelErr) {
-      mismatch = !c1->equalsRelErr(*c2, tolerance);
+      mismatch = !c1->equalsRelErr(*c2, tolerance, nanEqual);
     } else {
-      mismatch = !c1->equals(*c2, tolerance);
+      mismatch = !c1->equals(*c2, tolerance, nanEqual);
     }
     if (mismatch) {
       g_log.debug() << "Table data mismatch at column " << i << "\n";
+      for (std::size_t j = 0; j < c1->size(); j++) {
+        g_log.debug() << "\t" << j << " | " << c1->cell<double>(j) << ", " << c2->cell<double>(j) << "\n";
+      }
       recordMismatch("Table data mismatch");
       if (!checkAllData) {
         return;
@@ -1356,12 +1364,15 @@ this error is within the limits requested.
 @param x1    -- first value to check difference
 @param x2    -- second value to check difference
 @param atol  -- the tolerance of the comparison. Must be nonnegative
+@param nanEqual -- whether two NaNs compare as equal
 
 @returns true if absolute difference is within the tolerance; false otherwise
 */
-bool CompareWorkspaces::withinAbsoluteTolerance(double const x1, double const x2, double const atol) {
-  // NOTE !(|x1-x2| > atol) is not the same as |x1-x2| <= atol
-  return !(std::abs(x1 - x2) > atol);
+bool CompareWorkspaces::withinAbsoluteTolerance(double const x1, double const x2, double const atol,
+                                                bool const nanEqual) {
+  if (nanEqual && std::isnan(x1) && std::isnan(x2))
+    return true;
+  return Kernel::withinAbsoluteDifference(x1, x2, atol);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -1371,24 +1382,15 @@ this error is within the limits requested.
 @param x1    -- first value to check difference
 @param x2    -- second value to check difference
 @param rtol  -- the tolerance of the comparison. Must be nonnegative
+@param nanEqual -- whether two NaNs compare as equal
 
 @returns true if relative difference is within the tolerance; false otherwise
 @returns true if error or false if the relative value is within the limits requested
 */
-bool CompareWorkspaces::withinRelativeTolerance(double const x1, double const x2, double const rtol) {
-  // calculate difference
-  double const num = std::abs(x1 - x2);
-  // return early if the values are equal
-  if (num == 0.0)
+bool CompareWorkspaces::withinRelativeTolerance(double const x1, double const x2, double const rtol,
+                                                bool const nanEqual) {
+  if (nanEqual && std::isnan(x1) && std::isnan(x2))
     return true;
-  // create the average magnitude for comparison
-  double const den = 0.5 * (std::abs(x1) + std::abs(x2));
-  // return early, possibly avoids a multiplication
-  // NOTE if den<1, then divsion will only make num larger
-  // NOTE if den<1 but num<=rtol, we cannot conclude anything
-  if (den <= 1.0 && num > rtol)
-    return false;
-  // NOTE !(num > rtol*den) is not the same as (num <= rtol*den)
-  return !(num > (rtol * den));
+  return Kernel::withinRelativeDifference(x1, x2, rtol);
 }
 } // namespace Mantid::Algorithms

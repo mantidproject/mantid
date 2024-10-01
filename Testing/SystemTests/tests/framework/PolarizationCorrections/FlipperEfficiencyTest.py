@@ -39,6 +39,7 @@ class FlipperEfficiencyPolarisedTest(FlipperEfficiencyTestBase):
 
     def __init__(self):
         FlipperEfficiencyTestBase.__init__(self)
+        self.nanEqual = True
 
 
 class FlipperEfficiencyUnpolarisedTest(FlipperEfficiencyTestBase):
@@ -47,3 +48,4 @@ class FlipperEfficiencyUnpolarisedTest(FlipperEfficiencyTestBase):
 
     def __init__(self):
         FlipperEfficiencyTestBase.__init__(self)
+        self.nanEqual = True

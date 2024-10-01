@@ -70,9 +70,7 @@ public:
   /// Reference to the data.
   const std::vector<T> &data() const { return m_peaks; }
 
-  bool equals(const Column &otherColumn, double tolerance) const override {
-    (void)otherColumn;
-    (void)tolerance;
+  bool equals(const Column &, double, bool) const override {
     throw std::runtime_error("equals not implemented, to compare use CompareWorkspace");
   }
 

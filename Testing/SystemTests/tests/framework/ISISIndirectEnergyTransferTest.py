@@ -24,4 +24,5 @@ class ISISIndirectEnergyTransferTest(MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-10
+        self.nanEqual = True
         return "tosca5224-glucose", "tosca5224-glucose-ref.nxs"

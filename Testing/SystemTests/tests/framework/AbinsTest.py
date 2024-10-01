@@ -576,4 +576,5 @@ class AbinsCRYSTAL2D(systemtesting.MantidSystemTest, HelperTestingClass):
 
     def validate(self):
         self.tolerance = 1e-4
+        self.nanEqual = True
         return self._output_name, self.ref_result
