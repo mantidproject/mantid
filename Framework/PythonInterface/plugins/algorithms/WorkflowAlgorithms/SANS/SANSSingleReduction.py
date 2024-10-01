@@ -13,10 +13,10 @@ from SANSSingleReductionBase import SANSSingleReductionBase
 from mantid.api import AlgorithmFactory, PropertyMode, WorkspaceGroup, WorkspaceGroupProperty
 from mantid.kernel import Direction, Property
 from mantid.simpleapi import CloneWorkspace
-from sans_core.algorithm_detail.single_execution import run_core_reduction, run_optimized_for_can
-from sans_core.common.enums import DataType, ReductionMode
-from sans_core.common.general_functions import does_can_workspace_exist_on_ads
-from sans_core.data_objects.sans_workflow_algorithm_outputs import SANSWorkflowAlgorithmOutputs
+from sans.algorithm_detail.single_execution import run_core_reduction, run_optimized_for_can
+from sans.common.enums import DataType, ReductionMode
+from sans.common.general_functions import does_can_workspace_exist_on_ads
+from sans.data_objects.sans_workflow_algorithm_outputs import SANSWorkflowAlgorithmOutputs
 
 
 class SANSSingleReduction(SANSSingleReductionBase):

@@ -7,7 +7,7 @@
 import unittest
 
 from unittest import mock
-from sans_core.common.enums import BinningType
+from sans.common.enums import BinningType
 from mantidqtinterfaces.sans_isis.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
 from mantidqtinterfaces.sans_isis.views.summation_settings_widget import SummationSettingsWidget

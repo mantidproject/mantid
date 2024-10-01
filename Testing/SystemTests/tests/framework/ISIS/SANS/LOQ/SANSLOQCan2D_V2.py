@@ -9,7 +9,7 @@
 import systemtesting
 import mantid  # noqa
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from sans_core.command_interface.ISISCommandInterface import (
+from sans.command_interface.ISISCommandInterface import (
     LOQ,
     Set2D,
     Detector,
@@ -23,7 +23,7 @@ from sans_core.command_interface.ISISCommandInterface import (
 )
 
 # Test is giving odd results on Linux, but only this 2D one.
-from sans_core.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)

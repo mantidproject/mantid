@@ -14,17 +14,17 @@ from systemtesting import MantidSystemTest
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid import config
 from mantid.api import AlgorithmManager, WorkspaceGroup
-from sans_core.common.constants import EMPTY_NAME
-from sans_core.common.enums import SANSFacility, ReductionMode, ReductionDimensionality, FitModeForMerge, SANSInstrument
-from sans_core.common.file_information import SANSFileInformationFactory
-from sans_core.common.general_functions import create_unmanaged_algorithm
-from sans_core.state.Serializer import Serializer
-from sans_core.state.StateObjects.StateData import get_data_builder
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import SANSFacility, ReductionMode, ReductionDimensionality, FitModeForMerge, SANSInstrument
+from sans.common.file_information import SANSFileInformationFactory
+from sans.common.general_functions import create_unmanaged_algorithm
+from sans.state.Serializer import Serializer
+from sans.state.StateObjects.StateData import get_data_builder
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Base class containing useful functions for the tests
 # ----------------------------------------------------------------------------------------------------------------------
-from sans_core.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
+from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

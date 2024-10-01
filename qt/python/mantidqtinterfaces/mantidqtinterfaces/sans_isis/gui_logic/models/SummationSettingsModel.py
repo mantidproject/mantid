@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import ConfigService
-from sans_core.common.enums import BinningType
+from sans.common.enums import BinningType
 
 
 class OverlayEventWorkspaces(object):

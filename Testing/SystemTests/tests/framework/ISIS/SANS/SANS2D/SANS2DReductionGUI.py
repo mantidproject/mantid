@@ -28,7 +28,7 @@ import isis_instrument
 import isis_reduction_steps
 import copy
 
-from sans_core.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 
 def s(obj):

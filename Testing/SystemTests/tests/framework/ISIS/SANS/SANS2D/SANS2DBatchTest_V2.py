@@ -12,7 +12,7 @@ from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid import config
 from mantid.api import FileFinder
 from mantid.simpleapi import Load, DeleteWorkspace, mtd
-from sans_core.command_interface.ISISCommandInterface import (
+from sans.command_interface.ISISCommandInterface import (
     SANS2DTUBES,
     SANS2D,
     Set1D,
@@ -24,7 +24,7 @@ from sans_core.command_interface.ISISCommandInterface import (
 )
 import os.path
 
-from sans_core.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

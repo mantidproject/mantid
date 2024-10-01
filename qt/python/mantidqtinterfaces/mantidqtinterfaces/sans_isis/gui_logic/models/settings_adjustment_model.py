@@ -10,9 +10,9 @@ This is one of the two models which is used for the data reduction. It contains 
 are not available in the model associated with the data table.
 """
 
-from sans_core.common.enums import SANSInstrument, DataType, DetectorType, RebinType
+from sans.common.enums import SANSInstrument, DataType, DetectorType, RebinType
 from mantidqtinterfaces.sans_isis.gui_logic.models.model_common import ModelCommon
-from sans_core.state.StateObjects.StateCalculateTransmission import StateTransmissionFit
+from sans.state.StateObjects.StateCalculateTransmission import StateTransmissionFit
 from mantidqtinterfaces.sans_isis.gui_logic.gui_common import meter_2_millimeter, millimeter_2_meter
 
 

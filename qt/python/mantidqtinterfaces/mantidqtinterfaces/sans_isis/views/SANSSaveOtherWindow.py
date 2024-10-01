@@ -11,7 +11,7 @@ from mantidqt.widgets.workspacewidget import workspacetreewidget
 
 from mantid import UsageService
 from mantid.kernel import FeatureType
-from sans_core.common.enums import SaveType
+from sans.common.enums import SaveType
 
 
 Ui_SaveOtherDialog, _ = load_ui(__file__, "save_other_dialog.ui")

@@ -7,11 +7,11 @@
 import unittest
 
 from unittest import mock
-from sans_core.common.enums import SANSFacility
-from sans_core.common.RowEntries import RowEntries
+from sans.common.enums import SANSFacility
+from sans.common.RowEntries import RowEntries
 from mantidqtinterfaces.sans_isis.gui_logic.models.create_state import create_states
 from mantidqtinterfaces.sans_isis.gui_logic.models.state_gui_model import StateGuiModel
-from sans_core.state.AllStates import AllStates
+from sans.state.AllStates import AllStates
 
 
 class GuiCommonTest(unittest.TestCase):

@@ -7,7 +7,7 @@
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from sans_core.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import SANSTubeCalibration

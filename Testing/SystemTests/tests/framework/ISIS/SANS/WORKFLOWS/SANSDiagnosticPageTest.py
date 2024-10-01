@@ -16,19 +16,19 @@ import mantid
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.diagnostic_presenter import DiagnosticsPagePresenter
-from sans_core.state.StateObjects.StateData import get_data_builder
-from sans_core.common.enums import DetectorType, SANSFacility, IntegralEnum, SANSInstrument
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.common.enums import DetectorType, SANSFacility, IntegralEnum, SANSInstrument
 
-from sans_core.common.constants import EMPTY_NAME
-from sans_core.common.general_functions import create_unmanaged_algorithm
+from sans.common.constants import EMPTY_NAME
+from sans.common.general_functions import create_unmanaged_algorithm
 from mantidqtinterfaces.sans_isis.gui_logic.models.async_workers.diagnostic_async import DiagnosticsAsync
-from sans_core.common.file_information import SANSFileInformationFactory
+from sans.common.file_information import SANSFileInformationFactory
 
 
 # -----------------------------------------------
 # Tests for the SANSDiagnosticPage
 # -----------------------------------------------
-from sans_core.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
+from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
 class SANSDiagnosticPageTest(unittest.TestCase):

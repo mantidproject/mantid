@@ -13,8 +13,8 @@ from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import config
 from mantid.api import FileFinder
 from mantid.simpleapi import LoadNexus, Plus
-from sans_core.command_interface.ISISCommandInterface import LOQ, Detector, Set1D, MaskFile, Gravity, BatchReduce, UseCompatibilityMode
-from sans_core.common.enums import SANSInstrument
+from sans.command_interface.ISISCommandInterface import LOQ, Detector, Set1D, MaskFile, Gravity, BatchReduce, UseCompatibilityMode
+from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)

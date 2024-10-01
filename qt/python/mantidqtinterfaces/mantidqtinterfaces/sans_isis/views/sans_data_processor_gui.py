@@ -20,7 +20,7 @@ from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import load_ui
 from mantidqt.widgets import jobtreeview, manageuserdirectories
 from reduction_gui.reduction.scripter import execute_script
-from sans_core.common.enums import ReductionDimensionality, OutputMode, SANSInstrument, RangeStepType, ReductionMode, FitType
+from sans.common.enums import ReductionDimensionality, OutputMode, SANSInstrument, RangeStepType, ReductionMode, FitType
 from mantidqtinterfaces.sans_isis.gui_logic.gui_common import (
     get_reduction_mode_from_gui_selection,
     get_reduction_mode_strings_for_gui,
@@ -32,7 +32,7 @@ from mantidqtinterfaces.sans_isis.gui_logic.gui_common import (
     get_instrument_from_gui_selection,
 )
 from mantidqtinterfaces.sans_isis.gui_logic.models.POD.save_options import SaveOptions
-from sans_core.common.RowEntries import RowEntries
+from sans.common.RowEntries import RowEntries
 from mantidqtinterfaces.sans_isis.gui_logic.models.sum_runs_model import SumRunsModel
 from mantidqtinterfaces.sans_isis.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from mantidqtinterfaces.sans_isis.views.SANSSaveOtherWindow import SANSSaveOtherDialog

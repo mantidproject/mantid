@@ -11,8 +11,8 @@ import mantid
 import unittest
 import systemtesting
 
-from sans_core.common.general_functions import create_unmanaged_algorithm
-from sans_core.common.constants import EMPTY_NAME
+from sans.common.general_functions import create_unmanaged_algorithm
+from sans.common.constants import EMPTY_NAME
 
 
 # -----------------------------------------------

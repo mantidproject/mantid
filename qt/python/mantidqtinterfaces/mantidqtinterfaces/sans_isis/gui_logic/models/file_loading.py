@@ -4,8 +4,8 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from sans_core.user_file.toml_parsers.toml_parser import TomlParser
-from sans_core.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
+from sans.user_file.toml_parsers.toml_parser import TomlParser
+from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
 class UserFileLoadException(Exception):

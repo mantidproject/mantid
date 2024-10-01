@@ -8,12 +8,12 @@ import os
 from qtpy.QtCore import QSettings
 from qtpy.QtWidgets import QFileDialog
 
-from sans_core.common.constant_containers import (
+from sans.common.constant_containers import (
     SANSInstrument_enum_as_key,
     SANSInstrument_string_as_key_NoInstrument,
     SANSInstrument_string_list,
 )
-from sans_core.common.enums import ReductionMode, DetectorType, SANSInstrument
+from sans.common.enums import ReductionMode, DetectorType, SANSInstrument
 
 
 # ----------------------------------------------------------------------------------------------------------------------

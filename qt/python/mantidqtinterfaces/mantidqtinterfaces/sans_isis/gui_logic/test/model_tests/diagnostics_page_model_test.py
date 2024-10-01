@@ -6,11 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from sans_core.common.enums import SANSFacility
+from sans.common.enums import SANSFacility
 from mantidqtinterfaces.sans_isis.gui_logic.models.diagnostics_model import DiagnosticsModel
 from mantidqtinterfaces.sans_isis.gui_logic.models.state_gui_model import StateGuiModel
-from sans_core.test_helper.user_file_test_helper import sample_user_file, create_user_file
-from sans_core.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
+from sans.test_helper.user_file_test_helper import sample_user_file, create_user_file
+from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
 class DiagnosticsPageModelTest(unittest.TestCase):

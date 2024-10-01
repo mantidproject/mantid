@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqtinterfaces.sans_isis.gui_logic.models.POD.save_options import SaveOptions
 
-from sans_core.common.enums import ReductionDimensionality
+from sans.common.enums import ReductionDimensionality
 
 
 class RunTabModel:

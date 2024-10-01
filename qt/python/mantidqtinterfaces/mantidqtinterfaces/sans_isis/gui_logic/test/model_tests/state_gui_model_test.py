@@ -7,7 +7,7 @@
 import itertools
 import unittest
 
-from sans_core.common.enums import (
+from sans.common.enums import (
     ReductionDimensionality,
     ReductionMode,
     RangeStepType,
@@ -18,8 +18,8 @@ from sans_core.common.enums import (
     DetectorType,
 )
 from mantidqtinterfaces.sans_isis.gui_logic.models.state_gui_model import StateGuiModel
-from sans_core.state.AllStates import AllStates
-from sans_core.state.StateObjects.StateMoveDetectors import StateMoveDetectors
+from sans.state.AllStates import AllStates
+from sans.state.StateObjects.StateMoveDetectors import StateMoveDetectors
 
 
 class StateGuiModelTest(unittest.TestCase):

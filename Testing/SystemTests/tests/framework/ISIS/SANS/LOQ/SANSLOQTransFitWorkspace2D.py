@@ -10,7 +10,7 @@ import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 from ISISCommandInterface import *
-from sans_core.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)

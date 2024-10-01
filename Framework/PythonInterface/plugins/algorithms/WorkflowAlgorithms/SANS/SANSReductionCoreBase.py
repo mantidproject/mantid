@@ -23,18 +23,18 @@ from mantid.api import (
 )
 from mantid.kernel import Direction, StringListValidator
 from mantid.py36compat import dataclass
-from sans_core.algorithm_detail.CreateSANSAdjustmentWorkspaces import CreateSANSAdjustmentWorkspaces
-from sans_core.algorithm_detail.convert_to_q import convert_workspace
-from sans_core.algorithm_detail.crop_helper import get_component_name
-from sans_core.algorithm_detail.mask_sans_workspace import mask_workspace
-from sans_core.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
-from sans_core.algorithm_detail.scale_sans_workspace import scale_workspace
-from sans_core.algorithm_detail.slice_sans_event import slice_sans_event
-from sans_core.common.constants import EMPTY_NAME
-from sans_core.common.enums import DetectorType, DataType, RebinType
-from sans_core.common.general_functions import create_child_algorithm, append_to_sans_file_tag
-from sans_core.state.Serializer import Serializer
-from sans_core.state.StateObjects.wavelength_interval import WavRange
+from sans.algorithm_detail.CreateSANSAdjustmentWorkspaces import CreateSANSAdjustmentWorkspaces
+from sans.algorithm_detail.convert_to_q import convert_workspace
+from sans.algorithm_detail.crop_helper import get_component_name
+from sans.algorithm_detail.mask_sans_workspace import mask_workspace
+from sans.algorithm_detail.move_sans_instrument_component import move_component, MoveTypes
+from sans.algorithm_detail.scale_sans_workspace import scale_workspace
+from sans.algorithm_detail.slice_sans_event import slice_sans_event
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import DetectorType, DataType, RebinType
+from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
+from sans.state.Serializer import Serializer
+from sans.state.StateObjects.wavelength_interval import WavRange
 
 WsList = Dict[Tuple[float, float], MatrixWorkspace]
 

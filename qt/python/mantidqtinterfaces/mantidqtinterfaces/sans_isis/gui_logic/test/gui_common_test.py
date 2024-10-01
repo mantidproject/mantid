@@ -7,7 +7,7 @@
 import unittest
 
 from unittest import mock
-from sans_core.common.enums import SANSInstrument, ReductionMode
+from sans.common.enums import SANSInstrument, ReductionMode
 from mantidqtinterfaces.sans_isis.gui_logic.gui_common import (
     get_reduction_mode_strings_for_gui,
     get_reduction_selection,

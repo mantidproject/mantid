@@ -17,7 +17,7 @@ from SANSUserFileParser import DarkRunSettings
 from SANSUtility import getFileAndName
 import numpy as np
 
-from sans_core.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

@@ -9,7 +9,7 @@ import unittest
 
 from mantid.kernel import ConfigService
 from unittest import mock
-from sans_core.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 from mantidqtinterfaces.sans_isis.gui_logic.models.sum_runs_model import SumRunsModel
 from mantidqtinterfaces.sans_isis.gui_logic.models.SummationSettingsModel import SummationSettingsModel
 from mantidqtinterfaces.sans_isis.gui_logic.models.run_file import SummableRunFile

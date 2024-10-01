@@ -17,7 +17,7 @@ from mantid.simpleapi import *
 import SANSUtility as su
 import os
 from ISISCommandInterface import *
-from sans_core.common.enums import SANSInstrument
+from sans.common.enums import SANSInstrument
 
 
 def get_full_path_SANS_system_test(filename):
