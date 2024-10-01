@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/DllConfig.h"
-
 #include <memory>
 #include <string>
 
@@ -21,8 +19,7 @@ is invalid then it will throw an exception. This is useful for avoiding warnings
 potential null objects coming out of std::dynamic_pointer_cast.
 */
 template <typename T, typename U>
-std::shared_ptr<T> MANTID_KERNEL_DLL dynamicPointerCastWithCheck(std::shared_ptr<U> sharedPtr,
-                                                                 const std::string &error = "") {
+std::shared_ptr<T> dynamicPointerCastWithCheck(std::shared_ptr<U> sharedPtr, const std::string &error = "") {
   auto result = std::dynamic_pointer_cast<T>(sharedPtr);
   if (result == nullptr) {
     throw std::invalid_argument(error.empty() ? "Invalid cast" : error);
