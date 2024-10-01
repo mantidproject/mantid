@@ -17,6 +17,11 @@ def print_histogram_R_factors(project):
     print("")
 
 
+def add_phases(project, phase_files):
+    for phase_file in phase_files:
+        project.add_phase(os.path.join(phase_file))
+
+
 def add_histograms(data_filenames, project, instruments, number_regions):
     if number_regions > len(data_filenames):  # many regions in one data and one instrument file
         if len(data_filenames) != 1:
@@ -191,9 +196,7 @@ def main():
     project_path = os.path.join(temporary_save_directory, project_name + ".gpx")
     gsas_project = G2sc.G2Project(filename=project_path)
 
-    for phase_file in phase_files:
-        gsas_project.add_phase(os.path.join(phase_file))
-
+    add_phases(gsas_project, phase_files)
     add_histograms(data_files, gsas_project, instrument_files, number_of_regions)
 
     if refinement_method == "Pawley" and mantid_pawley_reflections:
