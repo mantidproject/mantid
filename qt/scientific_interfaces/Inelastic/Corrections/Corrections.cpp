@@ -57,7 +57,7 @@ void Corrections::initLayout() {
 
   // Set up all tabs
   for (auto &tab : m_tabs) {
-    connect(tab.second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
+    connect(tab.second, &CorrectionsTab::showMessageBox, this, &Corrections::showMessageBox);
   }
 
   m_uiForm.pbSettings->setIcon(Settings::icon());

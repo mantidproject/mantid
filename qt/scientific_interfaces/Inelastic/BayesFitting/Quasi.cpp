@@ -38,36 +38,33 @@ Quasi::Quasi(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
 
   // Create range selector
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("QuasiERange");
-  connect(eRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
-  connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+  connect(eRangeSelector, &MantidWidgets::RangeSelector::minValueChanged, this, &Quasi::minValueChanged);
+  connect(eRangeSelector, &MantidWidgets::RangeSelector::maxValueChanged, this, &Quasi::maxValueChanged);
 
   setupFitOptions();
   setupPropertyBrowser();
   setupPlotOptions();
 
   // Connect optional form elements with enabling checkboxes
-  connect(m_uiForm.chkFixWidth, SIGNAL(toggled(bool)), m_uiForm.mwFixWidthDat, SLOT(setEnabled(bool)));
-  connect(m_uiForm.chkUseResNorm, SIGNAL(toggled(bool)), m_uiForm.dsResNorm, SLOT(setEnabled(bool)));
-
+  connect(m_uiForm.chkFixWidth, &QCheckBox::toggled, m_uiForm.mwFixWidthDat, &FileFinderWidget::setEnabled);
+  connect(m_uiForm.chkUseResNorm, &QCheckBox::toggled, m_uiForm.dsResNorm, &DataSelector::setEnabled);
   // Connect the data selector for the sample to the mini plot
-  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(handleSampleInputReady(const QString &)));
-  connect(m_uiForm.dsSample, SIGNAL(filesAutoLoaded()), this, SLOT(enableView()));
+  connect(m_uiForm.dsSample, &DataSelector::dataReady, this, &Quasi::handleSampleInputReady);
+  connect(m_uiForm.dsSample, &DataSelector::filesAutoLoaded, [=] { this->enableView(); });
 
-  connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this,
-          SLOT(handleResolutionInputReady(const QString &)));
-  connect(m_uiForm.dsResolution, SIGNAL(filesAutoLoaded()), this, SLOT(enableView()));
+  connect(m_uiForm.dsResolution, &DataSelector::dataReady, this, &Quasi::handleResolutionInputReady);
+  connect(m_uiForm.dsResolution, &DataSelector::filesAutoLoaded, [=] { this->enableView(); });
 
   // Connect the program selector to its handler
-  connect(m_uiForm.cbProgram, SIGNAL(currentIndexChanged(int)), this, SLOT(handleProgramChange(int)));
-
+  connect(m_uiForm.cbProgram, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          &Quasi::handleProgramChange);
   // Connect preview spectrum spinner to handler
-  connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this, SLOT(previewSpecChanged(int)));
-
+  connect(m_uiForm.spPreviewSpectrum, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+          &Quasi::previewSpecChanged);
   // Plot current preview
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
-
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
+  connect(m_uiForm.pbPlotPreview, &QPushButton::clicked, this, &Quasi::plotCurrentPreview);
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &Quasi::saveClicked);
+  connect(m_uiForm.pbPlot, &QPushButton::clicked, this, &Quasi::plotClicked);
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSample->isOptional(true);
@@ -351,8 +348,7 @@ void Quasi::handleRun() {
 
   m_QuasiAlg = runAlg;
   m_batchAlgoRunner->addAlgorithm(runAlg);
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
-
+  connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &Quasi::algorithmComplete);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -496,10 +492,9 @@ void Quasi::handleResolutionInputReady(const QString &wsName) {
  * @param min :: The new value of the lower guide
  */
 void Quasi::minValueChanged(double min) {
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateProperties(QtProperty *, double)));
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &Quasi::updateProperties);
   m_dblManager->setValue(m_properties["EMin"], min);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &Quasi::updateProperties);
 }
 
 /**
@@ -508,10 +503,9 @@ void Quasi::minValueChanged(double min) {
  * @param max :: The new value of the upper guide
  */
 void Quasi::maxValueChanged(double max) {
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateProperties(QtProperty *, double)));
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &Quasi::updateProperties);
   m_dblManager->setValue(m_properties["EMax"], max);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &Quasi::updateProperties);
 }
 
 /**
@@ -523,8 +517,7 @@ void Quasi::maxValueChanged(double max) {
 void Quasi::updateProperties(QtProperty *prop, double val) {
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
 
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateProperties(QtProperty *, double)));
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &Quasi::updateProperties);
 
   if (prop == m_properties["EMin"]) {
     setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
@@ -532,7 +525,7 @@ void Quasi::updateProperties(QtProperty *prop, double val) {
     setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   }
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &Quasi::updateProperties);
 }
 
 /**
