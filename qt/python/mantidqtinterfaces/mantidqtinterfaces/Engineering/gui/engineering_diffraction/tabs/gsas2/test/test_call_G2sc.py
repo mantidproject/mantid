@@ -12,6 +12,10 @@ from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.call_
     add_pawley_reflections,
     set_max_number_cycles,
     add_phases,
+    enable_background,
+    enable_histogram_scale_factor,
+    enable_unit_cell,
+    enable_limits,
 )
 
 
@@ -102,13 +106,10 @@ class GSAS2ViewTest(unittest.TestCase):
 
     def test_add_pawley_reflections(self):
         project = mock.Mock()
-
-        class Phase:
-            def __init__(self):
-                self.data = {"General": {"doPawley": False}}
-
-        phase_1 = Phase()
-        phase_2 = Phase()
+        phase_1 = mock.Mock()
+        phase_1.data = {"General": {"doPawley": False}}
+        phase_2 = mock.Mock()
+        phase_2.data = {"General": {"doPawley": False}}
         project.phases.return_value = [phase_1, phase_2]
         pawley_reflections = [[([1, 2, 3], 4.1, 5), ([6, 7, 8], 9.1, 10)], [([1, 2, 3], 4.1, 5)]]
         add_pawley_reflections(pawley_reflections, project, 5.5)
@@ -122,3 +123,58 @@ class GSAS2ViewTest(unittest.TestCase):
         project.data = {"Controls": {"data": {"max cyc": 0}}}
         set_max_number_cycles(project, 5)
         self.assertEqual(project.data["Controls"]["data"]["max cyc"], 5)
+
+    def test_enable_background(self):
+        project = mock.Mock()
+        hist_1 = mock.Mock()
+        hist_2 = mock.Mock()
+        project.histograms.return_value = [hist_1, hist_2]
+        enable_background(True, project)
+        hist_1.set_refinements.assert_called_with({"Background": {"no. coeffs": 3, "refine": True}})
+        hist_2.set_refinements.assert_called_with({"Background": {"no. coeffs": 3, "refine": True}})
+        enable_background(False, project)
+        hist_1.set_refinements.assert_called_with({"Background": {"no. coeffs": 0, "refine": False}})
+        hist_2.set_refinements.assert_called_with({"Background": {"no. coeffs": 0, "refine": False}})
+
+    def test_enable_histogram_scale_factor(self):
+        project = mock.Mock()
+        hist_1 = mock.Mock()
+        hist_1.SampleParameters = {}
+        hist_2 = mock.Mock()
+        hist_2.SampleParameters = {}
+        project.histograms.return_value = [hist_1, hist_2]
+        enable_histogram_scale_factor(True, project)
+        self.assertEqual(hist_1.SampleParameters, {})
+        self.assertEqual(hist_2.SampleParameters, {})
+        enable_histogram_scale_factor(False, project)
+        self.assertEqual(hist_1.SampleParameters, {"Scale": [1.0, False]})
+        self.assertEqual(hist_2.SampleParameters, {"Scale": [1.0, False]})
+
+    def test_enable_unit_cell(self):
+        project = mock.Mock()
+        phase_1 = mock.Mock()
+        phase_1.data = {"General": {"Cell": [0, 0, 0, 0, 0, 0, 0, 0, 0]}}
+        phase_2 = mock.Mock()
+        phase_2.data = {"General": {"Cell": [0, 0, 0, 0, 0, 0, 0, 0, 0]}}
+        project.phases.return_value = [phase_1, phase_2]
+        enable_unit_cell(True, [[1, 1, 1, 1, 1, 1], [2, 2, 2, 2, 2, 2]], project)
+        phase_1.set_refinements.assert_called_with({"Cell": True})
+        self.assertEqual(phase_1.data["General"]["Cell"], [0, 1, 1, 1, 1, 1, 1, 0, 0])
+        phase_2.set_refinements.assert_called_with({"Cell": True})
+        self.assertEqual(phase_2.data["General"]["Cell"], [0, 2, 2, 2, 2, 2, 2, 0, 0])
+
+    def test_enable_limits(self):
+        project = mock.Mock()
+        hist_1 = mock.Mock()
+        hist_2 = mock.Mock()
+        project.histograms.return_value = [hist_1, hist_2]
+        x_limits = [(1, 5), (6, 10)]
+        enable_limits(x_limits, project)
+        hist_1.set_refinements.assert_called_with({"Limits": [1, 6]})
+        hist_2.set_refinements.assert_called_with({"Limits": [5, 10]})
+
+
+# def enable_limits(x_limits, project):
+#     if x_limits:
+#         for ihist, xlim in enumerate(zip(*x_limits)):
+#             project.histograms()[ihist].set_refinements({"Limits": [min(xlim), max(xlim)]})  # ensure min <= max
