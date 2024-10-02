@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Timer.h"
 #include <mutex>
 #include <thread>
@@ -19,9 +20,11 @@ namespace Instrumentation {
 /** AlgoTimeRegister : simple class to dump information about executed
  * algorithms
  */
-class AlgoTimeRegister {
+class AlgoTimeRegisterImpl {
 public:
-  static AlgoTimeRegister globalAlgoTimeRegister;
+  AlgoTimeRegisterImpl(const AlgoTimeRegisterImpl &) = delete;
+  AlgoTimeRegisterImpl &operator=(const AlgoTimeRegisterImpl &) = delete;
+
   struct Info {
     std::string m_name;
     std::thread::id m_threadId;
@@ -34,27 +37,31 @@ public:
   };
 
   class Dump {
-    AlgoTimeRegister &m_algoTimeRegister;
     Kernel::time_point_ns m_regStart_chrono;
-
     const std::string m_name;
 
   public:
-    Dump(AlgoTimeRegister &atr, const std::string &nm);
+    Dump(const std::string &nm);
     ~Dump();
   };
 
   void addTime(const std::string &name, const std::thread::id thread_id, const Kernel::time_point_ns &begin,
                const Kernel::time_point_ns &end);
   void addTime(const std::string &name, const Kernel::time_point_ns &begin, const Kernel::time_point_ns &end);
-  AlgoTimeRegister();
-  ~AlgoTimeRegister();
+  void test(const int a, const int b);
+  std::mutex m_mutex;
 
 private:
-  std::mutex m_mutex;
+  friend struct Mantid::Kernel::CreateUsingNew<AlgoTimeRegisterImpl>;
+
+  AlgoTimeRegisterImpl();
+  ~AlgoTimeRegisterImpl();
+
   std::vector<Info> m_info;
   Kernel::time_point_ns m_start;
 };
+
+using AlgoTimeRegister = Mantid::Kernel::SingletonHolder<AlgoTimeRegisterImpl>;
 
 } // namespace Instrumentation
 } // namespace Mantid

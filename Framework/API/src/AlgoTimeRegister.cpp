@@ -12,32 +12,36 @@
 namespace Mantid {
 namespace Instrumentation {
 
+using Kernel::ConfigService;
 using Kernel::time_point_ns;
 
-AlgoTimeRegister::Dump::Dump(AlgoTimeRegister &atr, const std::string &nm)
-    : m_algoTimeRegister(atr), m_regStart_chrono(std::chrono::high_resolution_clock::now()), m_name(nm) {}
+AlgoTimeRegisterImpl::Dump::Dump(const std::string &nm)
+    : m_regStart_chrono(std::chrono::high_resolution_clock::now()), m_name(nm) {}
 
-AlgoTimeRegister::Dump::~Dump() {
+AlgoTimeRegisterImpl::Dump::~Dump() {
   const time_point_ns regFinish = std::chrono::high_resolution_clock::now();
   {
-    std::lock_guard<std::mutex> lock(m_algoTimeRegister.m_mutex);
-    m_algoTimeRegister.addTime(m_name, std::this_thread::get_id(), m_regStart_chrono, regFinish);
+    // auto atr = ;
+    std::lock_guard<std::mutex> lock(AlgoTimeRegister::Instance().m_mutex);
+    AlgoTimeRegister::Instance().addTime(m_name, std::this_thread::get_id(), m_regStart_chrono, regFinish);
   }
 }
 
-void AlgoTimeRegister::addTime(const std::string &name, const std::thread::id thread_id,
-                               const Kernel::time_point_ns &begin, const Kernel::time_point_ns &end) {
+void AlgoTimeRegisterImpl::addTime(const std::string &name, const std::thread::id thread_id,
+                                   const Kernel::time_point_ns &begin, const Kernel::time_point_ns &end) {
   m_info.emplace_back(name, thread_id, begin, end);
 }
 
-void AlgoTimeRegister::addTime(const std::string &name, const Kernel::time_point_ns &begin,
-                               const Kernel::time_point_ns &end) {
+void AlgoTimeRegisterImpl::addTime(const std::string &name, const Kernel::time_point_ns &begin,
+                                   const Kernel::time_point_ns &end) {
   this->addTime(name, std::this_thread::get_id(), begin, end);
 }
 
-AlgoTimeRegister::AlgoTimeRegister() : m_start(std::chrono::high_resolution_clock::now()) {}
+void AlgoTimeRegisterImpl::test(const int a, const int b) { printf("a + b = %d\n", a + b); }
 
-AlgoTimeRegister::~AlgoTimeRegister() {
+AlgoTimeRegisterImpl::AlgoTimeRegisterImpl() : m_start(std::chrono::high_resolution_clock::now()) {}
+
+AlgoTimeRegisterImpl::~AlgoTimeRegisterImpl() {
   std::fstream fs;
   fs.open("./algotimeregister.out", std::ios::out);
   // c++20 has an implementation of operator<<
