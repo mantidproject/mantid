@@ -24,7 +24,7 @@ from mantid.kernel import (
 import numpy as np
 from scipy.ndimage import label, maximum_position, binary_closing, sum_labels, uniform_filter1d, uniform_filter
 from scipy.signal import convolve
-from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
+from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
 
 
 class FindSXPeaksConvolve(DataProcessorAlgorithm):
