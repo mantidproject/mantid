@@ -76,8 +76,8 @@ public:
            "testing process.";
   }
 
-  static bool withinAbsoluteTolerance(double x1, double x2, double atol);
-  static bool withinRelativeTolerance(double x1, double x2, double rtol);
+  static bool withinAbsoluteTolerance(double x1, double x2, double atol, bool const nanEqual = false);
+  static bool withinRelativeTolerance(double x1, double x2, double rtol, bool const nanEqual = false);
 
 private:
   /// Initialise algorithm
