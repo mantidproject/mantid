@@ -13,6 +13,7 @@ algorithms, fit functions etc.
 
 import os as _os
 from traceback import format_exc
+import importlib.util
 from importlib.machinery import SourceFileLoader
 from . import logger, Logger, config
 
@@ -44,7 +45,11 @@ class PluginLoader(object):
         name = _os.path.basename(pathname)  # Including extension
         name = _os.path.splitext(name)[0]
         self._logger.debug("Loading python plugin %s" % pathname)
-        return SourceFileLoader(name, pathname).load_module()
+        loader = SourceFileLoader(name, pathname)
+        spec = importlib.util.spec_from_loader(name, loader)
+        module = importlib.util.module_from_spec(spec)
+        loader.exec_module(module)
+        return module
 
 
 # ======================================================================================================================
