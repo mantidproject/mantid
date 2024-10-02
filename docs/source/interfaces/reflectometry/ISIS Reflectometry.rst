@@ -209,7 +209,9 @@ The **Batch** menu contains options for managing the Batch tabs:
 | Action           | Effect                                                   |
 +==================+==========================================================+
 | New              | Add a new Batch tab                                      |
++------------------+----------------------------------------------------------+
 | Load             | Load settings for the current Batch tab from a file      |
++------------------+----------------------------------------------------------+
 | Save             | Save settings for the current Batch to a file            |
 +------------------+----------------------------------------------------------+
 
@@ -222,6 +224,7 @@ The **Tools** menu provides access to options and utilities:
 | Action           | Effect                                                   |
 +==================+==========================================================+
 | Slit Calculator  | Tool for calculating approximate slit widths             |
++------------------+----------------------------------------------------------+
 | Options          | Tool for controlling warnings and rounding precision     |
 +------------------+----------------------------------------------------------+
 
