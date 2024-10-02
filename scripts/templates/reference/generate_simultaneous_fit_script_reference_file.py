@@ -1,4 +1,4 @@
-# A python script generated to perform a sequential or simultaneous fit
+# A python script generated to perform a simultaneous fit
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import Fit
 import matplotlib.pyplot as plt
