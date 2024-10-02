@@ -571,7 +571,7 @@ also be excluded from auto processing (see below).
 Excluding and annotating runs
 =============================
 
-You may with to exclude certain runs from reduction. This is especially useful
+You may wish to exclude certain runs from the reduction. This is especially useful
 for auto processing (see below). You can mark a run for exclusion by entering a
 reason into the `Exclude` column in the search results table. Double-click the
 cell to edit it and then press Enter or click off the cell when finished. The
@@ -603,7 +603,7 @@ searching for runs by investigation but takes out the manual steps for you. For
 more details on how searching works, see the `Search Interface` section.
 
 To start autoprocessing, specify the instrument and investigation ID, and
-optionally the cycle name. Then click `Autoprocess` to start autoproessing for
+optionally the cycle name. Then click `Autoprocess` to start autoprocessing for
 this investigation. This will:
 
 - Populate the search results list with runs that are part of the investigation.
@@ -838,7 +838,7 @@ Default transmission runs can be specified and each input can take a
 single run/workspace or a number of runs/workspaces that will be summed before
 processing. Specific spectra of interest can be specified for the input runs
 and separate spectra, if required, can be specified for the transmission runs -
-if the latter are not specified then the ``Run Spectra`` will also be used for
+if the latter are not specified then the ``ROI`` will also be used for
 the transmission runs. If both a First and Second tranmission input is
 specified, then they will be stitched using the options specified.
 
