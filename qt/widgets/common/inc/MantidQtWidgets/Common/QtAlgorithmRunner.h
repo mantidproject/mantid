@@ -36,7 +36,7 @@ public:
   explicit QtAlgorithmRunner(QObject *parent = nullptr);
   ~QtAlgorithmRunner() override;
 
-  virtual void cancelRunningAlgorithm();
+  void cancelRunningAlgorithm();
 
   virtual void startAlgorithm(Mantid::API::IAlgorithm_sptr alg);
   virtual Mantid::API::IAlgorithm_sptr getAlgorithm() const;
