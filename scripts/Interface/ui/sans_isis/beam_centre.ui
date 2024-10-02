@@ -211,7 +211,7 @@
          <item row="13" column="0" colspan="5">
           <widget class="QGroupBox" name="groupBox">
            <property name="toolTip">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls in which directions the algorithm will search for the beam centre.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Controls in which directions the algorithm will search for the beam centre. One or more options must be selected.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="title">
             <string>Direction</string>
@@ -220,7 +220,7 @@
             <item>
              <widget class="QCheckBox" name="left_right_check_box">
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string/>
               </property>
               <property name="text">
                <string>Left/Right</string>
@@ -230,7 +230,7 @@
             <item>
              <widget class="QCheckBox" name="up_down_check_box">
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string/>
               </property>
               <property name="text">
                <string>Up/Down</string>
