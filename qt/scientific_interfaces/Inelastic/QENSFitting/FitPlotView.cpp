@@ -40,9 +40,8 @@ FitPlotView::FitPlotView(QWidget *parent)
           &FitPlotView::notifySelectedFitDataChanged);
   connect(m_plotForm->spPlotSpectrum, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
           &FitPlotView::notifyDelayedPlotSpectrumChanged);
-  connect(m_plotForm->cbPlotSpectrum,
-          static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged), this,
-          static_cast<void (FitPlotView::*)(const QString &)>(&FitPlotView::notifyPlotSpectrumChanged));
+  connect(m_plotForm->cbPlotSpectrum, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { this->notifyPlotSpectrumChanged(m_plotForm->cbPlotSpectrum->itemText(index)); });
   connect(m_plotForm->ckPlotGuess, &QCheckBox::stateChanged, this, &FitPlotView::notifyPlotGuessChanged);
   connect(m_plotForm->pbPlotPreview, &QPushButton::clicked, this, &FitPlotView::notifyPlotCurrentPreview);
   connect(m_plotForm->pbFitSingle, &QPushButton::clicked, this, &FitPlotView::notifyFitSelectedSpectrum);

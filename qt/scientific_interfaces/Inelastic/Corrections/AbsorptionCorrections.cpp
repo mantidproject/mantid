@@ -133,14 +133,14 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   connect(m_uiForm.pbSave, &QPushButton::clicked, this, &AbsorptionCorrections::saveClicked);
   // Handle density units
 
-  connect(m_uiForm.cbSampleDensity, static_cast<void (QComboBox::*)(QString const &)>(&QComboBox::currentIndexChanged),
-          this, &AbsorptionCorrections::setSampleDensityUnit);
-  connect(m_uiForm.cbCanDensity, static_cast<void (QComboBox::*)(QString const &)>(&QComboBox::currentIndexChanged),
-          this, &AbsorptionCorrections::setCanDensityUnit);
-  connect(m_uiForm.cbSampleDensity, static_cast<void (QComboBox::*)(QString const &)>(&QComboBox::currentIndexChanged),
-          this, &AbsorptionCorrections::setSampleDensityValue);
-  connect(m_uiForm.cbCanDensity, static_cast<void (QComboBox::*)(QString const &)>(&QComboBox::currentIndexChanged),
-          this, &AbsorptionCorrections::setCanDensityValue);
+  connect(m_uiForm.cbSampleDensity, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { this->setSampleDensityUnit(m_uiForm.cbSampleDensity->itemText(index)); });
+  connect(m_uiForm.cbCanDensity, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { this->setCanDensityUnit(m_uiForm.cbCanDensity->itemText(index)); });
+  connect(m_uiForm.cbSampleDensity, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { this->setSampleDensityValue(m_uiForm.cbSampleDensity->itemText(index)); });
+  connect(m_uiForm.cbCanDensity, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { this->setCanDensityValue(m_uiForm.cbCanDensity->itemText(index)); });
   connect(m_uiForm.cbSampleMaterialMethod, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
           &AbsorptionCorrections::changeSampleMaterialOptions);
   connect(m_uiForm.cbCanMaterialMethod, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,

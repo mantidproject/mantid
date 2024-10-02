@@ -21,8 +21,8 @@ FunctionQAddWorkspaceDialog::FunctionQAddWorkspaceDialog(QWidget *parent) : QDia
           &FunctionQAddWorkspaceDialog::emitWorkspaceChanged);
   connect(m_uiForm.dsWorkspace, &MantidWidgets::DataSelector::filesAutoLoaded, this,
           &FunctionQAddWorkspaceDialog::handleAutoLoaded);
-  connect(m_uiForm.cbParameterType, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged),
-          this, &FunctionQAddWorkspaceDialog::emitParameterTypeChanged);
+  connect(m_uiForm.cbParameterType, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { this->emitParameterTypeChanged(m_uiForm.cbParameterType->itemText(index)); });
   connect(m_uiForm.pbAdd, &QPushButton::clicked, this, &FunctionQAddWorkspaceDialog::emitAddData);
   connect(m_uiForm.pbClose, &QPushButton::clicked, this, &FunctionQAddWorkspaceDialog::close);
 }
