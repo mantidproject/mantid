@@ -11,7 +11,7 @@ Frequency Domain Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/FDA/Bugfixes
+
 
 
 Muon Analysis
@@ -19,7 +19,7 @@ Muon Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/Muon_Analysis/Bugfixes
+
 
 
 Muon Analysis and Frequency Domain Analysis
@@ -27,7 +27,7 @@ Muon Analysis and Frequency Domain Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/MA_FDA/Bugfixes
+
 
 
 ALC
@@ -35,7 +35,7 @@ ALC
 
 Bugfixes
 ############
-.. amalgamate:: Muon/ALC/Bugfixes
+- Fixed the `Import results` option on the :ref:`Muon ALC <MuonALC-ref>` interface when the results being loaded are only partially complete.
 
 
 Elemental Analysis
@@ -43,7 +43,7 @@ Elemental Analysis
 
 Bugfixes
 ############
-.. amalgamate:: Muon/Elemental_Analysis/Bugfixes
+
 
 
 Algorithms
@@ -51,6 +51,6 @@ Algorithms
 
 Bugfixes
 ############
-.. amalgamate:: Muon/Algorithms/Bugfixes
+
 
 :ref:`Release 6.11.0 <v6.11.0>`
