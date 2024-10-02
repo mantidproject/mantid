@@ -292,8 +292,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     loadedWs = loadAlg->getProperty("OutputWorkspace");
     firstGoodData = loadAlg->getProperty("FirstGoodData");
     timeZero = loadAlg->getProperty("TimeZero");
-  }
-  catch (const std::exception &error) {
+  } catch (const std::exception &error) {
     m_view->setAvailableInfoToEmpty();
     throw std::runtime_error(error.what());
   }
