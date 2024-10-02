@@ -178,18 +178,9 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xr
   std::shared_ptr<API::Workspace> cloned = m_workspace->clone();
   moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex, scaley, m_bank, cloned);
 
-  auto inputP = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(cloned);
-  if (inputP == nullptr) {
-    throw std::runtime_error("Workspace is not a PeaksWorkspace");
-  }
-  // IAlgorithm_sptr alg =
-  //     Mantid::API::AlgorithmFactory::Instance().create("IndexPeaks", -1);
-  // alg->initialize();
-  // alg->setChild(true);
-  // alg->setLogging(false);
-  // alg->setProperty("PeaksWorkspace", inputP);
-  // alg->setProperty("Tolerance", 0.15);
-  // alg->execute();
+  auto inputP =
+      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<DataObjects::PeaksWorkspace, API::Workspace>(
+          cloned);
   auto inst = inputP->getInstrument();
   Geometry::OrientedLattice lattice = inputP->mutableSample().getOrientedLattice();
   for (int i = 0; i < inputP->getNumberPeaks(); i++) {
