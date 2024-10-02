@@ -249,12 +249,14 @@ class HRPD(AbstractInst):
                     func.fixParameter(f"f{ipulse}.f1.A0")  # fix constant background - Bragg peak can mess with bg
                     fit_kwargs["Exclude" + key_suffix] = exclude
             # check that at least one fit region has no overlapping prompt pulse
-            if len([key for key in fit_kwargs.keys() if "Exclude" in key]) < len(npulses):
+            excluded_keys = [key for key in fit_kwargs.keys() if "Exclude" in key]
+            if len(excluded_keys) < len(npulses):
                 self._add_ties_to_multidomain_prompt_pulse_func(func)
                 fit_output = mantid.Fit(Function=func, **fit_kwargs)
                 # subtract prompt pulse only from spectrum
-                success = fit_output.OutputStatus == "success" or "Changes in function value are too small" in fit_output.OutputStatus
-                if success:
+                is_success = fit_output.OutputStatus == "success"
+                is_small_change = "Changes in function value are too small" in fit_output.OutputStatus
+                if is_success or is_small_change:
                     func = fit_output.Function.function
                     self._free_ties_of_multidomain_prompt_pulse_func(func, fit_kwargs)
                     fit_output_final = mantid.Fit(Function=func, **fit_kwargs)
