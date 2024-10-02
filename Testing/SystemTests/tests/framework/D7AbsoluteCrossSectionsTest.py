@@ -268,6 +268,7 @@ class ILL_D7_TimeOfFlight_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e4
         self.tolerance_is_rel_err = True
         self.disableChecking = ["Instrument"]
+        self.nanEqual = True
         return ["h2O_reduced_norm", "ILL_D7_TOF_Z.nxs"]
 
     def runTest(self):

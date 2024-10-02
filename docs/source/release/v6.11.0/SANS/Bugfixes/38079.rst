@@ -1,0 +1,1 @@
+- Fixed a crash and improved the error message when no direction checkbox is selected on the ISIS SANS :ref:`ISIS_SANS_Beam_Centre_Tab-ref`.

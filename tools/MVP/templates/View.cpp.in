@@ -9,24 +9,13 @@
 #include "Presenter.h"
 
 #include <string>
-
-#include <QVBoxLayout>
-#include <QLabel>
-#include <QPushButton>
 #include <QString>
 
 
 View::View(QWidget *parent) : QWidget(parent), m_presenter() {
-  auto layout = new QVBoxLayout();
-  auto button = new QPushButton("Increment", this);
-  m_label = new QLabel("0", this);
+  m_uiForm.setupUi(this);
 
-  layout->addWidget(button);
-  layout->addWidget(m_label);
-
-  setLayout(layout);
-
-  connect(button, &QPushButton::clicked, this, &View::notifyButtonClicked);
+  connect(m_uiForm.pbIncrement, &QPushButton::clicked, this, &View::notifyButtonClicked);
 }
 
 void View::subscribe(IPresenter *presenter) {
@@ -39,5 +28,5 @@ void View::notifyButtonClicked() {
 }
 
 void View::setLabel(std::string const &text) {
-  m_label->setText(QString::fromStdString(text));
+  m_uiForm.lbCount->setText(QString::fromStdString(text));
 }

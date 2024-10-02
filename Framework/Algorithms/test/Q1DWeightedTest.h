@@ -29,6 +29,11 @@ using Mantid::DataHandling::LoadNexusProcessed;
 using Mantid::DataHandling::LoadSpice2D;
 using Mantid::DataHandling::MoveInstrumentComponent;
 
+namespace {
+bool const USE_NANS_EQUAL(true);
+bool const USE_NANS_NOT_EQUAL(false);
+} // namespace
+
 class Q1DWeightedTest : public CxxTest::TestSuite {
 public:
   void testName() { TS_ASSERT_EQUALS(radial_average.name(), "Q1DWeighted") }
@@ -277,6 +282,10 @@ public:
     compareWorkspaces(refWedges, outputWedges);
   }
 
+  /**
+   * The result and the expected value used in this test are two matrix
+   * workspaces with NaNs in y-values and e-values.
+   */
   void testShapeTableResultsAsymm() {
     // test the results computed by the table shape method against those from
     // the usual method when asymmetricWedges is set to true
@@ -295,7 +304,7 @@ public:
     populateAlgorithm(refWS, refWedges, false, true, 4);
     TS_ASSERT_THROWS_NOTHING(radial_average.execute())
 
-    compareWorkspaces(refWedges, outputWedges);
+    compareWorkspaces(refWedges, outputWedges, USE_NANS_EQUAL);
   }
 
   void testShapeCorrectOrder() {
@@ -509,7 +518,7 @@ private:
     }
   }
 
-  void compareWorkspaces(std::string refWS, std::string toCompare) {
+  void compareWorkspaces(std::string refWS, std::string toCompare, bool nansEqual = USE_NANS_NOT_EQUAL) {
     WorkspaceGroup_sptr result;
     TS_ASSERT_THROWS_NOTHING(
         result = std::dynamic_pointer_cast<WorkspaceGroup>(AnalysisDataService::Instance().retrieve(toCompare)))
@@ -529,6 +538,7 @@ private:
     comparison.setPropertyValue("CheckAllData", "1");
     comparison.setPropertyValue("CheckType", "1");
     comparison.setPropertyValue("ToleranceRelErr", "1");
+    comparison.setProperty("NaNsEqual", nansEqual);
     TS_ASSERT(comparison.execute())
     TS_ASSERT(comparison.isExecuted())
     TS_ASSERT_EQUALS(comparison.getPropertyValue("Result"), "1");

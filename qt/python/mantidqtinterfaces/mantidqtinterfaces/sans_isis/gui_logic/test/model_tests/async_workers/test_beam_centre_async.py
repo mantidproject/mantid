@@ -108,3 +108,4 @@ class BeamCentreAsyncTest(unittest.TestCase):
         self.worker.find_beam_centre(state, fields)
         self.assertEqual(0, mocked_alg.return_value.call_count)
         self.worker._logger.error.assert_called_once()
+        self.mocked_presenter.on_processing_error_centre_finder.assert_called_once()

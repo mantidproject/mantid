@@ -216,6 +216,44 @@ public:
     checker.resetProperties();
   }
 
+  void test_NaNsEqual_true() {
+    if (!checker.isInitialized())
+      checker.initialize();
+
+    double const anan = std::numeric_limits<double>::quiet_NaN();
+
+    // a real and NaN are never equal
+    WorkspaceSingleValue_sptr ws1 = WorkspaceCreationHelper::createWorkspaceSingleValue(1.1);
+    WorkspaceSingleValue_sptr ws2 = WorkspaceCreationHelper::createWorkspaceSingleValue(anan);
+    // is not equal if NaNsEqual set true
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("NaNsEqual", true));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_FALSE);
+    // is not equal if NaNsEqual set false
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("NaNsEqual", false));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws2));
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_FALSE);
+
+    // NaNs only compare equal if flag set
+    WorkspaceSingleValue_sptr ws3 = WorkspaceCreationHelper::createWorkspaceSingleValue(anan);
+    // is NOT equal if NaNsEqual set FALSE
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("NaNsEqual", false));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws2));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws3));
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_FALSE);
+    // ARE equal if NaNsEqual set TRUE
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("NaNsEqual", true));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace1", ws2));
+    TS_ASSERT_THROWS_NOTHING(checker.setProperty("Workspace2", ws3));
+    TS_ASSERT(checker.execute());
+    TS_ASSERT_EQUALS(checker.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+  }
+
   void testPeaks_matches() {
     if (!checker.isInitialized())
       checker.initialize();
@@ -1191,6 +1229,83 @@ public:
 
     TS_ASSERT(alg.execute());
     TS_ASSERT_EQUALS(alg.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+  }
+
+  void test_equal_tableworkspaces_match() {
+    std::string const col_type("double"), col_name("aColumn");
+    std::vector<double> col_values{1.0, 2.0, 3.0};
+    // create the table workspaces
+    Mantid::API::ITableWorkspace_sptr table1 = WorkspaceFactory::Instance().createTable();
+    table1->addColumn(col_type, col_name);
+    for (double val : col_values) {
+      TableRow newrow = table1->appendRow();
+      newrow << val;
+    }
+    Mantid::API::ITableWorkspace_sptr table2 = WorkspaceFactory::Instance().createTable();
+    table2->addColumn(col_type, col_name);
+    for (double val : col_values) {
+      TableRow newrow = table2->appendRow();
+      newrow << val;
+    }
+
+    Mantid::Algorithms::CompareWorkspaces alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", table1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", table2));
+    TS_ASSERT(alg.execute());
+    TS_ASSERT_EQUALS(alg.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+  }
+
+  void test_tableworkspace_NaNs_passes_with_flag() {
+    std::string const col_type("double"), col_name("aColumn");
+    std::vector<double> col_values{1.0, 2.0, std::numeric_limits<double>::quiet_NaN()};
+    // create the table workspaces
+    Mantid::API::ITableWorkspace_sptr table1 = WorkspaceFactory::Instance().createTable();
+    Mantid::API::ITableWorkspace_sptr table2 = WorkspaceFactory::Instance().createTable();
+    table1->addColumn(col_type, col_name);
+    table2->addColumn(col_type, col_name);
+    for (double val : col_values) {
+      TableRow newrow1 = table1->appendRow();
+      newrow1 << val;
+      TableRow newrow2 = table2->appendRow();
+      newrow2 << val;
+    }
+    Mantid::Algorithms::CompareWorkspaces alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", table1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", table2));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("NaNsEqual", true));
+    TS_ASSERT(alg.execute());
+    TS_ASSERT_EQUALS(alg.getPropertyValue("Result"), PROPERTY_VALUE_TRUE);
+  }
+
+  void test_tableworkspace_NaNs_fails() {
+    std::string const col_type("double"), col_name("aColumn");
+    std::vector<double> col_values1{1.0, 2.0, 3.0};
+    std::vector<double> col_values2{1.0, 2.0, std::numeric_limits<double>::quiet_NaN()};
+    // create the table workspaces
+    Mantid::API::ITableWorkspace_sptr table1 = WorkspaceFactory::Instance().createTable();
+    table1->addColumn(col_type, col_name);
+    for (double val : col_values1) {
+      TableRow newrow = table1->appendRow();
+      newrow << val;
+    }
+    Mantid::API::ITableWorkspace_sptr table2 = WorkspaceFactory::Instance().createTable();
+    table2->addColumn(col_type, col_name);
+    for (double val : col_values2) {
+      TableRow newrow = table2->appendRow();
+      newrow << val;
+    }
+
+    Mantid::Algorithms::CompareWorkspaces alg;
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace1", table1));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Workspace2", table2));
+    TS_ASSERT(alg.execute());
+    TS_ASSERT_EQUALS(alg.getPropertyValue("Result"), PROPERTY_VALUE_FALSE);
+
+    ITableWorkspace_sptr table = AnalysisDataService::Instance().retrieveWS<TableWorkspace>("compare_msgs");
+    TS_ASSERT_EQUALS(table->cell<std::string>(0, 0), "Table data mismatch");
   }
 
   void test_tableworkspace_different_column_names_fails() {

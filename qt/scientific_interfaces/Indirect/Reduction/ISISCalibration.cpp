@@ -287,6 +287,7 @@ void ISISCalibration::setResolutionSpectraRange(const double &minimum, const dou
  * @param error If the algorithms failed.
  */
 void ISISCalibration::algorithmComplete(bool error) {
+  m_plotOptionsPresenter->watchADS(true);
   m_runPresenter->setRunEnabled(true);
   if (!error) {
     std::vector<std::string> outputWorkspaces{m_outputCalibrationName.toStdString()};
@@ -328,6 +329,7 @@ void ISISCalibration::handleRun() {
     m_pythonExportWsName = m_outputResolutionName.toStdString();
   }
 
+  m_plotOptionsPresenter->watchADS(false);
   m_batchAlgoRunner->executeBatchAsync();
 }
 

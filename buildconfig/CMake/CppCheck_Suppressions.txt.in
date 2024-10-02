@@ -170,10 +170,6 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculateCarpenterSa
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/SpectrumAlgorithm.h:97
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/FunctionDomain1D.h:89
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/FunctionValues.h:86
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:67
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:70
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:81
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableColumn.h:84
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculatePolynomialBackground.cpp:174
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/CalculatePlaczekSelfScattering.h:22
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ChangeTimeZero.cpp:154
@@ -202,7 +198,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreatePSDBle
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreateLogPropertyTable.cpp:126
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CreateGroupingWorkspace.cpp:684
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/EnabledWhenWorkspaceIsType.h:50
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DetectorEfficiencyCor.cpp:126
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DetectorEfficiencyCorUser.cpp:176
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:348
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:364
@@ -1060,8 +1055,6 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHe
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/OffsetsWorkspace.cpp:23
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/GroupingWorkspace.cpp:42
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/Workspace2D.cpp:173
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/FindReflectometryLines2.cpp:213
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/FindReflectometryLines2.cpp:235
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/CreateTransmissionWorkspace2.cpp:176
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/CreateTransmissionWorkspace2.cpp:177
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/CreateTransmissionWorkspace2.cpp:178

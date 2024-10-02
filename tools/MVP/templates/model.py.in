@@ -7,7 +7,6 @@
 
 
 class Model:
-
     def __init__(self):
         self._count: int = 0
 
