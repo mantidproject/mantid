@@ -16,7 +16,7 @@ creates "index" pages that lists the contents of each category. The display of e
 from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version  # pylint: disable=unused-import
 from sphinx.util.osutil import relative_uri
 import os
-from pathlib import Path
+from pathlib import PurePosixPath
 
 CATEGORY_PAGE_TEMPLATE = "category.html"
 ALG_CATEGORY_PAGE_TEMPLATE = "algorithmcategories.html"
@@ -124,8 +124,8 @@ class Category(LinkItem):
           name (str): The name of the category
           docname (str): Relative path to document from root directory
         """
-        self.src_path = Path(src_path)
-        docname = Path(docname)
+        self.src_path = PurePosixPath(src_path)
+        docname = PurePosixPath(docname)
         self.section = docname.parts[0]
         dirpath = docname.parent
         html_dir = dirpath.joinpath(CATEGORIES_DIR)
@@ -379,7 +379,7 @@ def create_category_pages(app):
         # Now any additional index pages if required
         if category.name in INDEX_CATEGORIES:
             # index in categories directory
-            category_html_dir = Path(category.name.lower(), "categories")
+            category_html_dir = PurePosixPath(category.name.lower(), "categories")
             category_html_path_noext = category_html_dir.joinpath("index")
             yield (str(category_html_path_noext), context, template)
 
@@ -412,7 +412,7 @@ def create_top_algorithm_category(categories):
     # create a Top level algorithms category page
     # Initialise the lists
     all_top_categories = []
-    category_src_dir = Path("")
+    category_src_dir = PurePosixPath("")
     # If the category is a top category it will not contain "\\"
     for top_name, top_category in categories.items():
         # Add all the top level categories
@@ -440,7 +440,7 @@ def create_top_algorithm_category(categories):
 
     # create the page
     top_context = {}
-    top_category_html_path_noext = Path("algorithms", "index")
+    top_category_html_path_noext = PurePosixPath("algorithms", "index")
     top_context["outpath"] = str(top_category_html_path_noext.with_suffix(".html"))
     # set the content
     top_context["pages"] = []
@@ -448,7 +448,7 @@ def create_top_algorithm_category(categories):
     top_context["techniquecategories"] = sorted(technique_categories, key=lambda x: x.name)
     top_context["facilitycategories"] = sorted(facility_categories, key=lambda x: x.name)
     top_context["title"] = "Algorithm Contents"
-    top_html_path_noext = str(Path("algorithms", "index"))
+    top_html_path_noext = str(PurePosixPath("algorithms", "index"))
     return (top_html_path_noext, top_context, template)
 
 

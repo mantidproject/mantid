@@ -7,7 +7,7 @@
 import os
 import mantid
 from .base import AlgorithmBaseDirective
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 
 class SourceLinkError(Exception):
@@ -153,7 +153,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
             env = self.state.document.settings.env
             # assume root is two levels up
             direc = Path(env.srcdir, "..", "..").resolve()  # = C:\Mantid\Code\Mantid\docs\source
-            self.__source_root = direc  # pylint: disable=protected-access
+            self.__source_root = PurePosixPath(direc)  # pylint: disable=protected-access
 
         return self.__source_root
 
@@ -179,7 +179,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
                         self.file_lookup[base_name] = {}
                     if file_extensions not in self.file_lookup[base_name].keys():
                         self.file_lookup[base_name][file_extensions] = []
-                    self.file_lookup[base_name][file_extensions].append(Path(dir_name, fname))
+                    self.file_lookup[base_name][file_extensions].append(PurePosixPath(dir_name, fname))
 
     def output_to_page(self, file_paths, file_name, sanity_checks):
         """

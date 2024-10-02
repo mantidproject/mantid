@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantiddoc.directives.base import BaseDirective  # pylint: disable=unused-import
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 
 class InterfaceDirective(BaseDirective):
@@ -96,11 +96,11 @@ class InterfaceDirective(BaseDirective):
             # pathlib.Path.relative_to() will not work here, the method won't traverse up then down again
             rel_path = os.path.relpath(screenshots_dir, env.srcdir).replace("\\", "/")
             # stick a "/" as the first character so Sphinx computes relative location from source directory
-            path = Path("/").joinpath(rel_path).joinpath(filename)
+            path = PurePosixPath("/").joinpath(rel_path).joinpath(filename)
             caption = ""
         else:
             # use stock not found image
-            path = Path("/images/ImageNotFound.png")
+            path = PurePosixPath("/images/ImageNotFound.png")
             width = 200
             caption = "Enable screenshots using DOCS_SCREENSHOTS in CMake"
 
