@@ -59,14 +59,6 @@ class ZOOMLegacyUserFileTest_m8(MantidSystemTest):
 
 @ISISSansSystemTest(SANSInstrument.ZOOM)
 class ZOOMV1UserFileTest_m8(MantidSystemTest):
-    def skipTests(self):
-        """
-        This test relies on comparing NaN in the result to finite values in the reference file in several bins.
-        This used to evaluate as true due to a bug.  The bug fixed in PR #38075, causing this test to fail.
-        To be fixed as part of Issue #38088
-        """
-        return True
-
     def runTest(self):
         UseCompatibilityMode()
         ZOOM()
