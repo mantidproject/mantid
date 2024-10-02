@@ -583,7 +583,8 @@ the `Comments` column. This will not affect the reduction and is simply for
 user convenience.
 
 To save your annotations in the `Exclude` and `Comments` columns, save the
-whole batch via the `Batch->Save` menu.
+whole batch via the `Batch->Save` menu. You can also export the contents of the
+search results table to a CSV file by clicking the **Export** button.
 
 Note that your annotations will be preserved if you re-run the same search or
 run auto-processing. However, if you change the search settings, then the
