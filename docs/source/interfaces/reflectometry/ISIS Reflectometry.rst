@@ -360,8 +360,8 @@ The processing table contains the following columns:
 | dQ/Q                | No        | Contains the resolution used when rebinning                                     |
 |                     |           | output workspaces. If left blank, this is                                       |
 |                     |           | calculated for you using the                                                    |
-|                     |           | NRCalculateSlitResolution algorithm. This value is                              |
-|                     |           | negated so that Logarithmic binning can be                                      |
+|                     |           | :ref:`NRCalculateSlitResolution <algm-NRCalculateSlitResolution>` algorithm.    |
+|                     |           | This value is negated so that Logarithmic binning can be                        |
 |                     |           | applied for the IvsQ workspace.                                                 |
 |                     |           | If you desire linear binning then you                                           |
 |                     |           | may negate the value in the processing table                                    |
@@ -377,8 +377,8 @@ The processing table contains the following columns:
 |                     |           | Example: ``1.0``                                                                |
 +---------------------+-----------+---------------------------------------------------------------------------------+
 | Options             | No        | Contains options that allow you to override                                     |
-|                     |           | ReflectometryReductionOne's properties. To                                      |
-|                     |           | override a property, just use the property's                                    |
+|                     |           | :ref:`ReflectometryReductionOne's <algm-ReflectometryReductionOne>` properties. |
+|                     |           | To override a property, just use the property's                                 |
 |                     |           | name as a key, and the desired value as the                                     |
 |                     |           | value.                                                                          |
 |                     |           | Options are specified in ``key=value`` pairs,                                   |
