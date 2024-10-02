@@ -17,6 +17,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnumeratedString.h"
+#include "MantidKernel/EnumeratedStringProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -127,11 +128,7 @@ std::map<std::string, std::string> Rebin::validateInputs() {
   std::map<std::string, std::string> helpMessages;
 
   // determing the binning mode, if present, or use default setting
-  BINMODE binMode;
-  if (existsProperty(PropertyNames::BINMODE))
-    binMode = getPropertyValue(PropertyNames::BINMODE);
-  else
-    binMode = "Default";
+  BINMODE binMode = getPropertyValue(PropertyNames::BINMODE);
 
   // validate the rebin params, and outside default mode, reset them
   MatrixWorkspace_sptr inputWS = getProperty(PropertyNames::INPUT_WKSP);
@@ -263,8 +260,7 @@ void Rebin::init() {
                   "is linear. Power must be between 0 and 1.");
 
   declareProperty(
-      PropertyNames::BINMODE, binningModeNames[size_t(BinningMode::DEFAULT)],
-      std::make_shared<Mantid::Kernel::StringListValidator>(binningModeNames),
+      std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
       "Optional. "
       "Binning behavior can be specified in the usual way through sign of binwidth and other properties ('Default'); "
       "or can be set to one of the allowed binning modes. "
