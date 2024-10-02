@@ -1813,7 +1813,7 @@ inline void EventList::processWeightedEvents(const std::vector<T> &events, std::
 }
 
 void EventList::compressEvents(double tolerance, EventList *destination,
-                               std::shared_ptr<std::vector<double>> histogram_bin_edges) {
+                               const std::shared_ptr<std::vector<double>> histogram_bin_edges) {
   if (!this->empty()) {
     const auto NUM_BINS = histogram_bin_edges->size() - 1;
     const auto xmin = static_cast<double>(histogram_bin_edges->front());

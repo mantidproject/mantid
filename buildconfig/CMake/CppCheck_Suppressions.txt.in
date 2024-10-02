@@ -1055,8 +1055,6 @@ unreadVariable:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHe
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/OffsetsWorkspace.cpp:23
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/GroupingWorkspace.cpp:42
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/Workspace2D.cpp:173
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/FindReflectometryLines2.cpp:213
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/FindReflectometryLines2.cpp:235
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/CreateTransmissionWorkspace2.cpp:176
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/CreateTransmissionWorkspace2.cpp:177
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/CreateTransmissionWorkspace2.cpp:178

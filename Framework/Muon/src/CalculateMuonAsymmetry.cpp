@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 
 #include "MantidMuon/CalculateMuonAsymmetry.h"
+#include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidMuon/MuonAsymmetryHelper.h"
 
 #include "MantidAPI/ADSValidator.h"
@@ -115,7 +116,9 @@ std::map<std::string, std::string> CalculateMuonAsymmetry::validateInputs() {
   }
   API::IFunction_sptr tmp = getProperty("InputFunction");
   auto function = std::dynamic_pointer_cast<API::CompositeFunction>(tmp);
-  if (function->getNumberDomains() != normWS.size()) {
+  if (function == nullptr) {
+    validationOutput["InputFunction"] = "The fitting function is not the correct type";
+  } else if (function->getNumberDomains() != normWS.size()) {
     validationOutput["InputFunction"] = "The Fitting function does not have "
                                         "the same number of domains as the "
                                         "number of domains to fit.";
@@ -350,25 +353,26 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(const std::vector<s
   setProperty("OutputWorkspace", outputWorkspace);
   setProperty("OutputNormalisedCovarianceMatrix", outputNormalisedCovarianceMatrix);
 
-  try {
-    if (wsNames.size() == 1) {
+  const auto wrongFunctionFormError =
+      "The fitting function is not of the expected form. Try using ConvertFitFunctionForMuonTFAsymmetry";
+
+  if (wsNames.size() == 1) {
+    // N(1+g) + exp
+    auto TFFunc = Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::CompositeFunction, API::IFunction>(
+        tmp, wrongFunctionFormError);
+    norms.emplace_back(getNormValue(TFFunc));
+  } else {
+    auto result =
+        Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::MultiDomainFunction, API::IFunction>(
+            tmp, wrongFunctionFormError);
+    for (size_t j = 0; j < wsNames.size(); j++) {
+      // get domain
+      auto TFFunc =
+          Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::CompositeFunction, API::IFunction>(
+              result->getFunction(j), wrongFunctionFormError);
       // N(1+g) + exp
-      auto TFFunc = std::dynamic_pointer_cast<API::CompositeFunction>(tmp);
       norms.emplace_back(getNormValue(TFFunc));
-    } else {
-      auto result = std::dynamic_pointer_cast<API::MultiDomainFunction>(tmp);
-      for (size_t j = 0; j < wsNames.size(); j++) {
-        // get domain
-        auto TFFunc = std::dynamic_pointer_cast<API::CompositeFunction>(result->getFunction(j));
-        // N(1+g) + exp
-        TFFunc = std::dynamic_pointer_cast<API::CompositeFunction>(TFFunc);
-        norms.emplace_back(getNormValue(TFFunc));
-      }
     }
-  } catch (...) {
-    throw std::invalid_argument("The fitting function is not of the expected "
-                                "form. Try using "
-                                "ConvertFitFunctionForMuonTFAsymmetry");
   }
   return norms;
 }
