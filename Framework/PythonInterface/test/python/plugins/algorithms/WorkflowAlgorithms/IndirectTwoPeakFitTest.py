@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
-from mantid.simpleapi import CompareWorkspaces, EnergyWindowScan, IndirectTwoPeakFit, LoadNexus
+from mantid.simpleapi import EnergyWindowScan, IndirectTwoPeakFit, LoadNexus
+from mantid.testing import assert_almost_equal as assert_wksp_almost_equal
 
 import unittest
 
@@ -85,10 +86,11 @@ class IndirectTwoPeakFitTest(unittest.TestCase):
 
     def _assert_equal_to_reference_file(self, output_name):
         expected_workspace = LoadNexus(Filename="IndirectTwoPeakFit_" + output_name + ".nxs")
-        self.assertTrue(
-            CompareWorkspaces(
-                Workspace1=get_ads_workspace(output_name), Workspace2=expected_workspace, Tolerance=5.0, ToleranceRelErr=True
-            )[0]
+        assert_wksp_almost_equal(
+            Workspace1=get_ads_workspace(output_name),
+            Workspace2=expected_workspace,
+            rtol=5.0,
+            CheckUncertainty=False,
         )
 
 

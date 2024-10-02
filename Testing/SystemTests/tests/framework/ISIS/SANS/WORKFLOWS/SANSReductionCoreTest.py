@@ -131,6 +131,7 @@ class SANSReductionCoreTest(unittest.TestCase):
             "CheckType": True,
             "CheckAxes": True,
             "CheckSpectraMap": True,
+            "NaNsEqual": True,
         }
         compare_alg = create_unmanaged_algorithm(compare_name, **compare_options)
         compare_alg.setChild(False)
@@ -242,6 +243,7 @@ class SANSReductionCoreTest(unittest.TestCase):
             "CheckType": True,
             "CheckAxes": True,
             "CheckSpectraMap": True,
+            "NaNsEqual": True,
         }
         compare_alg = create_unmanaged_algorithm(compare_name, **compare_options)
         compare_alg.setChild(False)

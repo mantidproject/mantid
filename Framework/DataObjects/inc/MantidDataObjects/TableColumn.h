@@ -14,6 +14,7 @@
 #include <vector>
 
 #include "MantidAPI/Column.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -64,10 +65,10 @@ public:
     std::string name = std::string(typeid(Type).name());
     if ((name.find('i') != std::string::npos) || (name.find('l') != std::string::npos) ||
         (name.find('x') != std::string::npos)) {
-      if (length == 4) {
+      if (length == 4) { // cppcheck-suppress knownConditionTrueFalse
         this->m_type = "int";
       }
-      if (length == 8) {
+      if (length == 8) { // cppcheck-suppress knownConditionTrueFalse
         this->m_type = "int64";
       }
     }
@@ -78,10 +79,10 @@ public:
       this->m_type = "double";
     }
     if (name.find('u') != std::string::npos) {
-      if (length == 4) {
+      if (length == 4) { // cppcheck-suppress knownConditionTrueFalse
         this->m_type = "uint32_t";
       }
-      if (length == 8) {
+      if (length == 8) { // cppcheck-suppress knownConditionTrueFalse
         this->m_type = "uint64_t";
       }
     }
@@ -178,22 +179,22 @@ public:
   /// Re-arrange values in this column according to indices in indexVec
   void sortValues(const std::vector<size_t> &indexVec) override;
 
-  bool equals(const Column &otherColumn, double tolerance) const override {
+  bool equals(const Column &otherColumn, double tolerance, bool const nanEqual = false) const override {
     if (!possibleToCompare(otherColumn)) {
       return false;
     }
     const auto &otherColumnTyped = static_cast<const TableColumn<Type> &>(otherColumn);
     const auto &otherData = otherColumnTyped.data();
-    return compareVectors(otherData, tolerance);
+    return compareVectors(otherData, tolerance, nanEqual);
   }
 
-  bool equalsRelErr(const Column &otherColumn, double tolerance) const override {
+  bool equalsRelErr(const Column &otherColumn, double tolerance, bool const nanEqual = false) const override {
     if (!possibleToCompare(otherColumn)) {
       return false;
     }
     const auto &otherColumnTyped = static_cast<const TableColumn<Type> &>(otherColumn);
     const auto &otherData = otherColumnTyped.data();
-    return compareVectorsRelError(otherData, tolerance);
+    return compareVectorsRelError(otherData, tolerance, nanEqual);
   }
 
 protected:
@@ -219,9 +220,25 @@ private:
   friend class TableWorkspace;
 
   // helper function template for equality
-  bool compareVectors(const std::vector<Type> &newVector, double tolerance) const {
+  bool compareVectors(const std::vector<Type> &newVector, double tolerance, bool const nanEqual = false) const {
+    return compareVectors(newVector, tolerance, nanEqual, std::is_integral<Type>());
+  }
+
+  bool compareVectors(const std::vector<Type> &newVector, double tolerance, bool const, std::true_type) const {
     for (size_t i = 0; i < m_data.size(); i++) {
-      if (fabs((double)m_data[i] - (double)newVector[i]) > tolerance) {
+      if (!Kernel::withinAbsoluteDifference<Type, double>(m_data[i], newVector[i], tolerance)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool compareVectors(const std::vector<Type> &newVector, double tolerance, bool const nanEqual,
+                      std::false_type) const {
+    for (size_t i = 0; i < m_data.size(); i++) {
+      if (nanEqual && std::isnan(m_data[i]) && std::isnan(newVector[i])) {
+        continue;
+      } else if (!Kernel::withinAbsoluteDifference<Type, double>(m_data[i], newVector[i], tolerance)) {
         return false;
       }
     }
@@ -229,49 +246,36 @@ private:
   }
 
   // helper function template for equality with relative error
-  bool compareVectorsRelError(const std::vector<Type> &newVector, double tolerance) const {
+  bool compareVectorsRelError(const std::vector<Type> &newVector, double tolerance, bool const nanEqual = false) const {
+    return compareVectorsRelError(newVector, tolerance, nanEqual, std::is_integral<Type>());
+  }
+
+  bool compareVectorsRelError(const std::vector<Type> &newVector, double tolerance, bool const, std::true_type) const {
     for (size_t i = 0; i < m_data.size(); i++) {
-      double num = fabs((double)m_data[i] - (double)newVector[i]);
-      double den = (fabs((double)m_data[i]) + fabs((double)newVector[i])) / 2;
-      if (den < tolerance && num > tolerance) {
+      if (!Kernel::withinRelativeDifference<Type, double>(m_data[i], newVector[i], tolerance)) {
         return false;
-      } else if (num / den > tolerance) {
+      }
+    }
+    return true;
+  }
+
+  bool compareVectorsRelError(const std::vector<Type> &newVector, double tolerance, bool const nanEqual,
+                              std::false_type) const {
+    for (size_t i = 0; i < m_data.size(); i++) {
+      if (nanEqual && std::isnan(m_data[i]) && std::isnan(newVector[i])) {
+        continue;
+      } else if (!Kernel::withinRelativeDifference<Type, double>(m_data[i], newVector[i], tolerance)) {
         return false;
       }
     }
     return true;
   }
 };
-/// Template specialisation for long64
-template <>
-inline bool TableColumn<int64_t>::compareVectors(const std::vector<int64_t> &newVector, double tolerance) const {
-  int64_t roundedTol = llround(tolerance);
-  for (size_t i = 0; i < m_data.size(); i++) {
-    if (std::llabs(m_data[i] - newVector[i]) > roundedTol) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/// Template specialisation for unsigned long int
-template <>
-inline bool TableColumn<unsigned long>::compareVectors(const std::vector<unsigned long> &newVector,
-                                                       double tolerance) const {
-  long long roundedTol = llround(tolerance);
-  for (size_t i = 0; i < m_data.size(); i++) {
-    if (std::llabs((long long)m_data[i] - (long long)newVector[i]) > roundedTol) {
-      return false;
-    }
-  }
-  return true;
-}
 
 /// Template specialisation for strings for comparison
 template <>
-inline bool TableColumn<std::string>::compareVectors(const std::vector<std::string> &newVector,
-                                                     double tolerance) const {
-  (void)tolerance;
+inline bool TableColumn<std::string>::compareVectors(const std::vector<std::string> &newVector, double,
+                                                     bool const) const {
   for (size_t i = 0; i < m_data.size(); i++) {
     if (m_data[i] != newVector[i]) {
       return false;
@@ -282,9 +286,8 @@ inline bool TableColumn<std::string>::compareVectors(const std::vector<std::stri
 
 /// Template specialisation for strings for comparison
 template <>
-inline bool TableColumn<API::Boolean>::compareVectors(const std::vector<API::Boolean> &newVector,
-                                                      double tolerance) const {
-  (void)tolerance;
+inline bool TableColumn<API::Boolean>::compareVectors(const std::vector<API::Boolean> &newVector, double,
+                                                      bool const) const {
   for (size_t i = 0; i < m_data.size(); i++) {
     if (!(m_data[i] == newVector[i])) {
       return false;
@@ -295,8 +298,8 @@ inline bool TableColumn<API::Boolean>::compareVectors(const std::vector<API::Boo
 
 /// Template specialisation for V3D for comparison
 template <>
-inline bool TableColumn<Kernel::V3D>::compareVectors(const std::vector<Kernel::V3D> &newVector,
-                                                     double tolerance) const {
+inline bool TableColumn<Kernel::V3D>::compareVectors(const std::vector<Kernel::V3D> &newVector, double tolerance,
+                                                     bool const) const {
   for (size_t i = 0; i < m_data.size(); i++) {
     double dif_x = fabs(m_data[i].X() - newVector[i].X());
     double dif_y = fabs(m_data[i].Y() - newVector[i].Y());
@@ -308,58 +311,24 @@ inline bool TableColumn<Kernel::V3D>::compareVectors(const std::vector<Kernel::V
   return true;
 }
 
-/// Template specialisation for long64 with relative error
-template <>
-inline bool TableColumn<int64_t>::compareVectorsRelError(const std::vector<int64_t> &newVector,
-                                                         double tolerance) const {
-  int64_t roundedTol = llround(tolerance);
-  for (size_t i = 0; i < m_data.size(); i++) {
-    int64_t num = llabs(m_data[i] - newVector[i]);
-    int64_t den = (llabs(m_data[i]) + llabs(newVector[i])) / 2;
-    if (den < roundedTol && num > roundedTol) {
-      return false;
-    } else if (num / den > roundedTol) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/// Template specialisation for unsigned long int
-template <>
-inline bool TableColumn<unsigned long>::compareVectorsRelError(const std::vector<unsigned long> &newVector,
-                                                               double tolerance) const {
-  long long roundedTol = lround(tolerance);
-  for (size_t i = 0; i < m_data.size(); i++) {
-    long long num = labs((long long)m_data[i] - (long long)newVector[i]);
-    long long den = (m_data[i] + newVector[i]) / 2;
-    if (den < roundedTol && num > roundedTol) {
-      return false;
-    } else if (num / den > roundedTol) {
-      return false;
-    }
-  }
-  return true;
-}
-
 /// Template specialisation for strings for comparison
 template <>
 inline bool TableColumn<std::string>::compareVectorsRelError(const std::vector<std::string> &newVector,
-                                                             double tolerance) const {
+                                                             double tolerance, bool const) const {
   return compareVectors(newVector, tolerance);
 }
 
 /// Template specialisation for bools for comparison
 template <>
 inline bool TableColumn<API::Boolean>::compareVectorsRelError(const std::vector<API::Boolean> &newVector,
-                                                              double tolerance) const {
+                                                              double tolerance, bool const) const {
   return compareVectors(newVector, tolerance);
 }
 
 /// Template specialisation for V3D for comparison
 template <>
 inline bool TableColumn<Kernel::V3D>::compareVectorsRelError(const std::vector<Kernel::V3D> &newVector,
-                                                             double tolerance) const {
+                                                             double tolerance, bool const) const {
   for (size_t i = 0; i < m_data.size(); i++) {
     double dif_x = fabs(m_data[i].X() - newVector[i].X());
     double dif_y = fabs(m_data[i].Y() - newVector[i].Y());

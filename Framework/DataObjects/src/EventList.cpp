@@ -1927,7 +1927,7 @@ inline void EventList::processWeightedEvents(const std::vector<T> &events, std::
 }
 
 void EventList::compressEvents(double tolerance, EventList *destination,
-                               std::shared_ptr<std::vector<double>> histogram_bin_edges) {
+                               const std::shared_ptr<std::vector<double>> histogram_bin_edges) {
   if (this->empty()) {
     // allocate memory in correct vector
     if (eventType != WEIGHTED_NOTIME)

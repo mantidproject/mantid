@@ -7,6 +7,7 @@
 #include "MantidWorkflowAlgorithms/StepScan.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
+#include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -88,7 +89,7 @@ void StepScan::exec() {
   sumEvents->executeAsChildAlg();
 
   Workspace_sptr outputWS = sumEvents->getProperty("OutputWorkspace");
-  auto table = std::dynamic_pointer_cast<ITableWorkspace>(outputWS);
+  auto table = Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<ITableWorkspace, API::Workspace>(outputWS);
   // Remove the scan_index=0 entry from the resulting table (unless it's the
   // only one)
   if (table->rowCount() > 1 && table->Int(0, 0) == 0) {

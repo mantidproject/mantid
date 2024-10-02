@@ -123,7 +123,7 @@ void DetectorEfficiencyCor::exec() {
   int64_t numHists = m_inputWS->getNumberHistograms();
   auto numHists_d = static_cast<double>(numHists);
   const auto progStep = static_cast<int64_t>(ceil(numHists_d / 100.0));
-  auto &spectrumInfo = m_inputWS->spectrumInfo();
+  auto const &spectrumInfo = m_inputWS->spectrumInfo();
 
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *m_outputWS))
   for (int64_t i = 0; i < numHists; ++i) {

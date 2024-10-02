@@ -14,6 +14,16 @@ from mantid.simpleapi import Load, ConvertUnits, CropWorkspace
 class SANSPolarizationCorrectionsBase(MantidSystemTest, metaclass=ABCMeta):
     _tolerance = 1e-7
 
+    @property
+    @abstractmethod
+    def reference_basename(self):
+        """
+        This value is the string that precedes any reference workspace filenames that should be checked against the
+        output from the test.
+        :return: The prefix any reference files are preceded by for this test.
+        """
+        pass
+
     def runTest(self):
         self._run_test()
 

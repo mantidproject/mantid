@@ -314,7 +314,7 @@ void ComponentInfo::doScaleComponent(const std::pair<size_t, size_t> &index, con
     const size_t offsetIndex = compOffsetIndex(subIndex);
     Eigen::Vector3d oldPos = position({subIndex, timeIndex});
     Eigen::Vector3d newPos = scalingMatrix * oldPos + (Eigen::Matrix3d::Identity() - scalingMatrix) * compPos;
-    m_positions.access()[linearIndex({offsetIndex, timeIndex})] = newPos;
+    m_positions.access()[linearIndex({offsetIndex, timeIndex})] = std::move(newPos);
   }
 }
 

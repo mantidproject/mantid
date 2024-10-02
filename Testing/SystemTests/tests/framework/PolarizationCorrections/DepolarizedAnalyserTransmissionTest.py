@@ -10,6 +10,8 @@ from SANSPolarizationCorrectionsBase import SANSPolarizationCorrectionsBase
 
 
 class DepolarizedAnalyzerTransmissionTest(SANSPolarizationCorrectionsBase):
+    reference_basename = "Depol"
+
     def __init__(self):
         SANSPolarizationCorrectionsBase.__init__(self)
 
@@ -23,8 +25,8 @@ class DepolarizedAnalyzerTransmissionTest(SANSPolarizationCorrectionsBase):
 
     def _validate(self):
         result_curves = "curves"
-        reference_curves = "DepolCurvesReference.nxs"
+        reference_curves = f"{self.reference_basename}CurvesReference.nxs"
         result_params = "params"
-        reference_params = "DepolParamsReference.nxs"
+        reference_params = f"{self.reference_basename}ParamsReference.nxs"
 
         return result_curves, reference_curves, result_params, reference_params

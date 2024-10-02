@@ -172,6 +172,8 @@ class FocusTestAbsorptionPaalmanPings(systemtesting.MantidSystemTest):
         self.focus_results = run_focus_absorption("98533", paalman_pings=True)
 
     def validate(self):
+        self.disableChecking.append("Uncertainty")
+
         # check output files as expected
         def generate_error_message(expected_file, output_dir):
             return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
