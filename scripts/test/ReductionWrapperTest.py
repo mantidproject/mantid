@@ -11,10 +11,10 @@ import unittest
 import importlib as imp
 
 from mantid.api import mtd
-from mantid.kernel import PropertyManager
 from mantid.simpleapi import AddSampleLog, CreateSampleWorkspace
 from mantid import api, config
 
+from Direct.PropertyManager import PropertyManager
 from Direct.ReductionWrapper import iliad, ReductionWrapper
 import MariReduction as mr
 

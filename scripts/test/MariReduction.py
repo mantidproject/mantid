@@ -6,10 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """Sample MARI reduction scrip used in testing ReductionWrapper"""
 
-from mantid.api import PropertyManager
-
-from Direct import DirectEnergyConversion
 from Direct.AbsorptionShapes import Cylinder
+from Direct.DirectEnergyConversion import DirectEnergyConversion
+from Direct.PropertyManager import PropertyManager
 from Direct.ReductionWrapper import AdvancedProperties, iliad, MainProperties, ReductionWrapper
 
 from types import MethodType
