@@ -42,8 +42,8 @@
 
 #include <algorithm>
 #include <cmath>
-#include <memory>
 #include <limits>
+#include <memory>
 
 namespace Mantid::DataHandling {
 using namespace DataObjects;

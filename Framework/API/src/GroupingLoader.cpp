@@ -175,8 +175,7 @@ void GroupingLoader::loadGroupingFromXML(const std::string &filename, Grouping &
       try // ... to convert value to double
       {
         grouping.pairAlphas[ip] = boost::lexical_cast<double>(aElement->getAttribute("val"));
-      }
-      catch (boost::bad_lexical_cast &) {
+      } catch (boost::bad_lexical_cast &) {
         throw Mantid::Kernel::Exception::FileError("Pair alpha value is not a number", filename);
       }
     }
