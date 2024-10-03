@@ -67,7 +67,7 @@ InelasticTab::InelasticTab(QObject *parent)
   const double tolerance = 0.00001;
   m_valPosDbl->setBottom(tolerance);
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmFinished(bool)));
+  connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &InelasticTab::algorithmFinished);
 }
 
 void InelasticTab::setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter) {
