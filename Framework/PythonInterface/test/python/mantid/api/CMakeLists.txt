@@ -8,6 +8,7 @@ set(TEST_PY_FILES
     AlgorithmHistoryTest.py
     AlgorithmManagerTest.py
     AlgorithmPropertyTest.py
+    AlgoRegisterTest.py
     AnalysisDataServiceTest.py
     AnalysisDataServiceObserverTest.py
     AxisTest.py
