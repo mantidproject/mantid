@@ -31,6 +31,10 @@ New features
   The algorithm was modified to assign zero weight to tracks where the final scatter is not in a position that allows the final track segment to pass through the collimator toward detectors.
 - Algorithm :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>` has new version 2 that adds property ``FilterByTime``.
 - New algorithm :ref:`ScaleInstrumentComponent <algm-ScaleInstrumentComponent>` to scale all detectors in an instrument component around the component's geometrical position.
+
+  .. figure::  ../../images/6_11_release/ScaleInstrumentComponent.png
+     :width: 400px
+
 - Algorithm :ref:`GenerateGroupingSNSInelastic <algm-GenerateGroupingSNSInelastic>` has new input option :ref:`InstrumentDefinitionFile`.
   Selecting the new ``InstrumentDefinitionFile`` option in instrument drop down menu will create a new field allowing users selecting older instrument definition files.
 - Algorithm :ref:`CompareWorkspaces <algm-CompareWorkspaces>` has new property ``CheckUncertainty`` to turn off comparing the y-value uncertainties.
@@ -80,7 +84,7 @@ Python
 
 New features
 ############
-- Creates documentation for :mod:`mantid.dataobjects` python bindings.
+- Created documentation for :mod:`mantid.dataobjects` python bindings.
 - Fix python fuction ``assert_almost_equal`` to fail for non-equal workspaces.
 - The python function ``assert_almost_equal`` for testing if two modules are within a tolerance was reworked.
 
