@@ -80,7 +80,6 @@ AlgoTimeRegisterImpl::AlgoTimeRegisterImpl() : m_start(std::chrono::high_resolut
   }
 }
 
-AlgoTimeRegisterImpl::~AlgoTimeRegisterImpl() {}
 
 } // namespace Instrumentation
 } // namespace Mantid
