@@ -6,28 +6,23 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <type_traits>
+#include <vector>
+#ifndef Q_MOC_RUN
+#include <boost/algorithm/string/trim.hpp>
+#include <memory>
+#endif
 #include "MantidKernel/EnumeratedStringProperty.h"
-
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyHelper.h"
 #include "MantidKernel/PropertyWithValueJSON.h"
-#include "MantidKernel/Strings.h"
-
-#ifndef Q_MOC_RUN
-#include <boost/algorithm/string/trim.hpp>
-#include <memory>
-#endif
-
-#include <json/value.h>
-#include <nexus/NeXusFile.hpp>
-
-#include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/StringTokenizer.h"
-#include <type_traits>
-#include <vector>
+#include "MantidKernel/Strings.h"
+#include <json/value.h>
 
 namespace Mantid::Kernel {
 

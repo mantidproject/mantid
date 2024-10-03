@@ -5,13 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/Property.h"
-
 #include <vector>
 
 namespace NeXus {
