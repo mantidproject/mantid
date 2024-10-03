@@ -326,7 +326,8 @@ Mantid::API::IFunction_sptr
 ConvertFitFunctionForMuonTFAsymmetry::getTFAsymmFitFunction(const Mantid::API::IFunction_sptr &original,
                                                             const std::vector<double> &norms) {
   auto multi = std::make_shared<MultiDomainFunction>();
-  auto tmp = std::dynamic_pointer_cast<MultiDomainFunction>(original);
+  auto tmp =
+      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<MultiDomainFunction, API::IFunction>(original);
   size_t numDomains = original->getNumberDomains();
   for (size_t j = 0; j < numDomains; j++) {
     IFunction_sptr userFunc;

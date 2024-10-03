@@ -336,16 +336,19 @@ size_t FindPeaksConvolve::findPeakInRawData(const int xIndex, const TensorMap_co
     unweightedYData.maxCoeff(&maxIndex);
   } else {
     generateNormalPDF(static_cast<int>(peakExtentBinNumber));
-    const auto weightedYData = EigenMap_const(yData.data() + sliceStart, adjPeakExtentBinNumber)
-                                   .cwiseProduct(EigenMap_const(m_pdf.data() + startAdj, adjPeakExtentBinNumber));
-    weightedYData.maxCoeff(&maxIndex);
+    const auto yDataMap = EigenMap_const(yData.data() + sliceStart, adjPeakExtentBinNumber);
+    {
+      std::lock_guard<std::mutex> lock(m_mtx);
+      const auto weightedYData = yDataMap.cwiseProduct(EigenMap_const(m_pdf.data() + startAdj, adjPeakExtentBinNumber));
+      weightedYData.maxCoeff(&maxIndex);
+    }
   }
   return static_cast<size_t>(maxIndex) + sliceStart;
 }
 
 void FindPeaksConvolve::generateNormalPDF(const int peakExtentBinNumber) {
+  std::lock_guard<std::mutex> lock(m_mtx);
   if (m_pdf.size() == 0) {
-    std::lock_guard<std::mutex> lock(m_mtx);
     m_pdf.resize(peakExtentBinNumber);
     boost::math::normal_distribution<> dist(0.0,
                                             peakExtentBinNumber / 2.0); // assures 2 stddevs in the resultant vector
