@@ -5,55 +5,31 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgoTimeRegister.h"
-#include <iostream>
-//#include "MantidAPI/AlgorithmExecuteProfile.cpp"
 #include "MantidKernel/Timer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/make_constructor.hpp>
-//#include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
-//#include "MantidKernel/WarningSuppressions.h"
-//#include "MantidAPI/DllConfig.h"
+#include <iostream>
 
 // using namespace Mantid;
 using namespace Mantid::Instrumentation;
 using namespace boost::python;
 using Mantid::Kernel::time_point_ns;
 
-// namespace{
-// AlgoTimeRegister AlgoTimeRegister::;
-// AlgoTimeRegister AlgoTimeRegister::globalAlgoTimeRegister;
-
 void addTimeWrapper(const std::string &name, long int begin, long int end) {
-  // AlgoTimeRegister AlgoTimeRegister;
 
-  time_point_ns chrono_begin = std::chrono::high_resolution_clock::now();
-  time_point_ns chrono_end = std::chrono::high_resolution_clock::now();
-  std::cout << "name" << name << " begin " << begin << " end " << end << std::endl;
-  // std::cout << "self" << self << " chrono_begin" << chrono_begin << " chrono_end " << chrono_end << std::endl;
-  // Mantid::Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister.addTime(name, chrono_begin, chrono_end);
+  std::chrono::nanoseconds begin_ns(begin);
+  std::chrono::nanoseconds end_ns(end);
+  std::chrono::time_point start = Mantid::Instrumentation::AlgoTimeRegister::Instance().getStartClock();
 
-  // Mantid::Instrumentation::AlgoTimeRegister::globalAlgoTimeRegister.addTime(name, chrono_begin, chrono_end);
-  // self->addTime(name, chrono_begin, chrono_end);
-  // return;
-
-  // Create a time point representing a duration in milliseconds
-  // std::chrono::milliseconds ms(1234);
-
-  // Convert milliseconds to nanoseconds
-  std::chrono::nanoseconds begin_ns(begin); // duration_cast<std::chrono::nanoseconds>(ms);
-
-  // Create a time point from the nanoseconds duration
-  std::chrono::time_point<std::chrono::high_resolution_clock> tp_begin_ns(begin_ns);
+  // add the duration to the start time point
+  std::chrono::time_point<std::chrono::high_resolution_clock> tp_begin_ns = start + begin_ns;
 
   // Print the time point
   std::cout << "C++ Begin Time point : " << tp_begin_ns.time_since_epoch().count() << " ns" << std::endl;
 
-  // Convert milliseconds to nanoseconds
-  std::chrono::nanoseconds end_ns(end); // duration_cast<std::chrono::nanoseconds>(ms);
-
-  // Create a time point from the nanoseconds duration
-  std::chrono::time_point<std::chrono::high_resolution_clock> tp_end_ns(end_ns);
+  // add the duration to the end time point
+  std::chrono::time_point<std::chrono::high_resolution_clock> tp_end_ns = start + end_ns;
 
   // Print the time point
   std::cout << "C++ End Time point: " << tp_end_ns.time_since_epoch().count() << " ns" << std::endl;
@@ -62,6 +38,7 @@ void addTimeWrapper(const std::string &name, long int begin, long int end) {
   auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(tp_end_ns - tp_begin_ns);
 
   std::cout << "C++ Time taken: " << duration.count() << " nanoseconds\n";
+  // std::cout << "C++ Time: " << start.time_since_epoch().count() << " \n";
 
   Mantid::Instrumentation::AlgoTimeRegister::Instance().addTime(name, tp_begin_ns, tp_end_ns);
 }
