@@ -10,7 +10,7 @@ General
 
 New features
 ############
-- :ref:`SaveNXSPE <algm-SaveNXSPE-v1` now stores the run number of the input workspace in the instrument section.
+- :ref:`SaveNXSPE <algm-SaveNXSPE-v1>` now stores the run number of the input workspace in the instrument section.
 
   For Indirect instruments it also saves ``efixed`` taken from detector's crystal analyzer properties.
   If all crystal analyzers have the same energy, a single ``efixed`` is written into NXSPE_info->fixed_energy as before,

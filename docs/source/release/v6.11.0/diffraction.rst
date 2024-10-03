@@ -24,7 +24,7 @@ Bugfixes
 - Applying absorption correction with missing sample details in :ref:`powder diffraction scripts <isis-powder-diffraction-ref>` now displays a clearer error message:
 
 .. figure::  ../../images/6_11_release/improved_error_message.png
-   :width: 1000px
+   :width: 600px
 
 - Algorithm :ref:`DiffractionFocussing <algm-DiffractionFocussing-v2>` is now properly accumulating data when :ref:`CompressEvents <algm-CompressEvents-v1>` is run prior to it in ``PreserveEvents=False`` mode.
 - Algorithm :ref:`PPDCalibration <algm-PDCalibration-v1>` is once again masking input pixels with empty event lists (bug was present since 6.9.0).
@@ -73,7 +73,7 @@ New features
     are multiple domains.
 
   .. figure::  ../../images/6_11_release/FindMultipleUMatrices.png
-     :width: 500px
+     :width: 400px
 
 - Algorithm :ref:`ShowPossibleCells <algm-ShowPossibleCells>` now has a new output property, ``Cells``, that includes the cell information in a usable way.
 - New algorithm :ref:`SaveMDHistoToVTK <algm-SaveMDHistoToVTK>` that saves a :ref:`MDHistoWorkspace <MDHistoWorkspace>` as a ``VTK`` file so that it can be visualized by ``Paraview``.

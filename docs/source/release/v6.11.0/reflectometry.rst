@@ -12,7 +12,7 @@ New Features
 
 Bugfixes
 --------
-- :ref:`Stitch1DMany <Stitch1DMany-v1>` algorithm now runs successfully via the GUI.
+- :ref:`Stitch1DMany <algm-Stitch1DMany-v1>` algorithm now runs successfully via the GUI.
 - The orsopy library has been updated to version 1.2.1.
   This pulls in a bug fix where multi-dataset reduced reflectivity .ort files with different column headers for different datasets would use only the headers for the first dataset throughout the file.
 - Algorithm :ref:`algm-ReflectometryReductionOneLiveData` now applies polarization corrections correctly on ``WorkspaceGroup`` inputs.
