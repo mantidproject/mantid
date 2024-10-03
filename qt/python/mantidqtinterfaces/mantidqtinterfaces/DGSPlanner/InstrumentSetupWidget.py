@@ -309,7 +309,6 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
             self.gonfig.clear()
         self.gonfig = Axes3D(self.figure, auto_add_to_figure=False)
         self.figure.add_axes(self.gonfig)
-        self.gonfig.set_frame_on(False)
         self.gonfig.set_xlim3d(-0.6, 0.6)
         self.gonfig.set_ylim3d(-0.6, 0.6)
         self.gonfig.set_zlim3d(-1, 5)
