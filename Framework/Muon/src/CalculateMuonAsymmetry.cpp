@@ -359,12 +359,12 @@ std::vector<double> CalculateMuonAsymmetry::getNormConstants(const std::vector<s
   if (wsNames.size() == 1) {
     // N(1+g) + exp
     auto TFFunc = Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::CompositeFunction, API::IFunction>(
-        tmp, wrongFunctionFormError);
+        std::move(tmp), wrongFunctionFormError);
     norms.emplace_back(getNormValue(TFFunc));
   } else {
     auto result =
         Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::MultiDomainFunction, API::IFunction>(
-            tmp, wrongFunctionFormError);
+            std::move(tmp), wrongFunctionFormError);
     for (size_t j = 0; j < wsNames.size(); j++) {
       // get domain
       auto TFFunc =
