@@ -19,6 +19,7 @@
 #include "MantidHistogramData/LogarithmicGenerator.h"
 #include "MantidIndexing/Group.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <algorithm>
@@ -61,6 +62,9 @@ void DiffractionFocussing2::init() {
                   "input has events (default).\n"
                   "If false, then the workspace gets converted to a "
                   "Workspace2D histogram.");
+  declareProperty(std::make_unique<ArrayProperty<double>>("DMin"), "minimum x values");
+  declareProperty(std::make_unique<ArrayProperty<double>>("DMax"), "maximum x values");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Delta"), "step parameters for rebin");
 }
 
 std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
@@ -90,6 +94,58 @@ std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
     std::stringstream msg;
     msg << "UnitID " << unitid << " is not a supported spacing";
     issues["InputWorkspace"] = msg.str();
+  }
+
+  if (isDefault("DMin") && isDefault("DMax") && isDefault("Delta"))
+    return issues;
+
+  if (isDefault("DMin") || isDefault("DMax") || isDefault("Delta")) {
+    issues["DMin"] = "Must specify values for XMin, XMax and Delta or none of them";
+    issues["DMax"] = "Must specify values for XMin, XMax and Delta or none of them";
+    issues["Delta"] = "Must specify values for XMin, XMax and Delta or none of them";
+    return issues;
+  }
+
+  // check that delta is finite and non-zero, mins and maxs are finite and min is less than max
+  const std::vector<double> xmins = getProperty("DMin");
+  const std::vector<double> xmaxs = getProperty("DMax");
+  const std::vector<double> deltas = getProperty("Delta");
+
+  if (std::any_of(deltas.cbegin(), deltas.cend(), [](double d) { return !std::isfinite(d); }))
+    issues["Delta"] = "All must be finite";
+  else if (std::any_of(deltas.cbegin(), deltas.cend(), [](double d) { return d == 0; }))
+    issues["Delta"] = "All must be nonzero";
+
+  if (std::any_of(xmins.cbegin(), xmins.cend(), [](double x) { return !std::isfinite(x); }))
+    issues["DMin"] = "All must be finite";
+
+  if (std::any_of(xmaxs.cbegin(), xmaxs.cend(), [](double x) { return !std::isfinite(x); }))
+    issues["DMax"] = "All must be finite";
+
+  bool min_less_than_max = true;
+  if (xmins.size() == 1) {
+    if (xmins[0] >= *std::min_element(xmaxs.cbegin(), xmaxs.cend())) {
+      min_less_than_max = false;
+    }
+  } else if (xmaxs.size() == 1) {
+    if (xmaxs[0] < *std::max_element(xmins.cbegin(), xmins.cend())) {
+      min_less_than_max = false;
+    }
+  } else if (xmins.size() != xmaxs.size()) {
+    issues["DMin"] = "DMin is different length to DMax";
+    issues["DMax"] = "DMin is different length to DMax";
+  } else {
+    for (size_t i{0}; i < xmins.size(); i++) {
+      if (xmins[i] >= xmaxs[i]) {
+        min_less_than_max = false;
+        break;
+      }
+    }
+  }
+
+  if (!min_less_than_max) {
+    issues["DMin"] = "DMin must be less than corresponding DMax";
+    issues["DMax"] = "DMin must be less than corresponding DMax";
   }
 
   return issues;
@@ -129,6 +185,8 @@ void DiffractionFocussing2::exec() {
 
   this->getGroupingWorkspace();
 
+  const bool autoBinning = isDefault("DMin");
+
   // Fill the map
   progress(0.2, "Determine Rebin Params");
   {                              // keep variables in relatively small scope
@@ -141,7 +199,12 @@ void DiffractionFocussing2::exec() {
 
     // This finds the rebin parameters (used in both versions)
     // It also initializes the groupAtWorkspaceIndex[] array.
-    determineRebinParameters(udet2group);
+    if (autoBinning)
+      determineRebinParameters(udet2group);
+    else {
+      determineRebinParametersFromParameters(udet2group);
+      nPoints = 1; // only needed for workspace init, histogram will be replaced
+    }
   }
 
   size_t totalHistProcess = this->setupGroupToWSIndices();
@@ -179,7 +242,7 @@ void DiffractionFocussing2::exec() {
   // them once.
   // Helgrind will show a race-condition but the data is completely unused so it
   // is irrelevant
-  MantidVec weights_default(1, 1.0), emptyVec(1, 0.0), EOutDummy(nPoints);
+  MantidVec weights_default(1, 1.0), emptyVec(1, 0.0);
 
   Progress prog(this, 0.2, 1.0, static_cast<int>(totalHistProcess) + nGroups);
 
@@ -193,6 +256,12 @@ void DiffractionFocussing2::exec() {
 
     // Assign the new X axis only once (i.e when this group is encountered the
     // first time)
+    int nPoints_local(nPoints);
+    if (!autoBinning) {
+      nPoints_local = Xout.size() - 1;
+      out->resizeHistogram(outWorkspaceIndex, nPoints_local);
+    }
+
     out->setBinEdges(outWorkspaceIndex, Xout);
 
     // This is the output spectrum
@@ -206,7 +275,8 @@ void DiffractionFocussing2::exec() {
 
     // Initialize the group's weight vector here and the dummy vector used for
     // accumulating errors.
-    MantidVec groupWgt(nPoints, 0.0);
+    MantidVec EOutDummy(nPoints_local);
+    MantidVec groupWgt(nPoints_local, 0.0);
 
     // loop through the contributing histograms
     const std::vector<size_t> &indices = m_wsIndices[outWorkspaceIndex];
@@ -630,6 +700,70 @@ void DiffractionFocussing2::determineRebinParameters(const std::vector<int> &ude
     HistogramData::BinEdges xnew(xPoints, HistogramData::LogarithmicGenerator(Xmin, step));
     group2xvector[gpit->first] = xnew; // Register this vector in the map
     group2xstep[gpit->first] = -step;
+  }
+}
+
+void DiffractionFocussing2::determineRebinParametersFromParameters(const std::vector<int> &udet2group) {
+  std::set<int> groups;
+
+  // whether or not to bother checking for a mask
+  bool checkForMask = false;
+  Geometry::Instrument_const_sptr instrument = m_matrixInputW->getInstrument();
+  if (instrument != nullptr) {
+    checkForMask = ((instrument->getSource() != nullptr) && (instrument->getSample() != nullptr));
+  }
+  const auto &spectrumInfo = m_matrixInputW->spectrumInfo();
+
+  groupAtWorkspaceIndex.resize(nHist);
+  for (int wi = 0; wi < nHist; wi++) //  Iterate over all histograms to find which groups are actually used
+  {
+    const int group = validateSpectrumInGroup(udet2group, static_cast<size_t>(wi));
+    groupAtWorkspaceIndex[wi] = group;
+    if (group == -1)
+      continue;
+
+    if (checkForMask) {
+      if (spectrumInfo.isMasked(wi)) {
+        groupAtWorkspaceIndex[wi] = -1;
+        continue;
+      }
+    }
+    groups.insert(group);
+  }
+
+  nGroups = groups.size(); // Number of unique groups
+
+  // only now can we check that the length of rebin parameters are correct
+  std::vector<double> xmins = getProperty("DMin");
+  std::vector<double> xmaxs = getProperty("DMax");
+  std::vector<double> deltas = getProperty("Delta");
+
+  const auto numMin = xmins.size();
+  const auto numMax = xmaxs.size();
+  const auto numDelta = deltas.size();
+  if (numMin > 1 && numMin != nGroups)
+    throw std::runtime_error("DMin must have length 1 or equal to number of output groups which is " + nGroups);
+  if (numMax > 1 && numMax != nGroups)
+    throw std::runtime_error("DMax must have length 1 or equal to number of output groups which is " + nGroups);
+  if (numDelta > 1 && numDelta != nGroups)
+    throw std::runtime_error("Delta must have length 1 or equal to number of output groups which is " + nGroups);
+
+  // resize vectors with only one value
+  if (numMin == 1)
+    xmins.resize(nGroups, xmins[0]);
+  if (numMax == 1)
+    xmaxs.resize(nGroups, xmaxs[0]);
+  if (numDelta == 1)
+    deltas.resize(nGroups, deltas[0]);
+
+  // Iterator over all groups to create the new X vectors
+  size_t i = 0;
+  for (auto group : groups) {
+    HistogramData::BinEdges xnew(0);
+    static_cast<void>(VectorHelper::createAxisFromRebinParams({xmins[i], deltas[i], xmaxs[i]}, xnew.mutableRawData()));
+    group2xvector[group] = xnew; // Register this vector in the map
+    group2xstep[group] = deltas[i];
+    i++;
   }
 }
 
