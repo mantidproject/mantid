@@ -7,8 +7,9 @@
 #include "MantidAPI/AlgoTimeRegister.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <fstream>
+#include <iostream>
 #include <time.h>
-
+using namespace std;
 namespace Mantid {
 namespace Instrumentation {
 
