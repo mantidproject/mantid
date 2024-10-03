@@ -43,7 +43,14 @@ AlgoTimeRegisterImpl::AlgoTimeRegisterImpl() : m_start(std::chrono::high_resolut
 
 AlgoTimeRegisterImpl::~AlgoTimeRegisterImpl() {
   std::fstream fs;
-  fs.open("./algotimeregister.out", std::ios::out);
+  auto writeEnable = Kernel::ConfigService::Instance().getValue<bool>("performancelog.write").value();
+  auto filename = Kernel::ConfigService::Instance().getString("performancelog.filename");
+  if (!writeEnable || filename.empty()) {
+    g_log.information() << "performancelog.write is disabled (off/0/false) or performancelog.filename " << filename
+                        << " is an invalid filename\n";
+    return;
+  }
+  fs.open(filename, std::ios::out);
   // c++20 has an implementation of operator<<
   fs << "START_POINT: " << std::chrono::duration_cast<std::chrono::nanoseconds>(m_start.time_since_epoch()).count()
      << " MAX_THREAD: " << PARALLEL_GET_MAX_THREADS << "\n";

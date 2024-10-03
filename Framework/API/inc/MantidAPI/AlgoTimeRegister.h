@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Timer.h"
 #include <mutex>
@@ -14,13 +15,15 @@
 
 #include "MantidAPI/DllConfig.h"
 
+using Mantid::Kernel::Logger;
+
 namespace Mantid {
 namespace Instrumentation {
 
 /** AlgoTimeRegister : simple class to dump information about executed
  * algorithms
  */
-class AlgoTimeRegisterImpl {
+class MANTID_API_DLL AlgoTimeRegisterImpl {
 public:
   AlgoTimeRegisterImpl(const AlgoTimeRegisterImpl &) = delete;
   AlgoTimeRegisterImpl &operator=(const AlgoTimeRegisterImpl &) = delete;
@@ -57,6 +60,7 @@ private:
   AlgoTimeRegisterImpl();
   ~AlgoTimeRegisterImpl();
 
+  static Logger &g_log;
   std::vector<Info> m_info;
   Kernel::time_point_ns m_start;
 };
@@ -64,4 +68,11 @@ private:
 using AlgoTimeRegister = Mantid::Kernel::SingletonHolder<AlgoTimeRegisterImpl>;
 
 } // namespace Instrumentation
+} // namespace Mantid
+
+namespace Mantid {
+namespace Kernel {
+EXTERN_MANTID_API template class MANTID_API_DLL
+    Mantid::Kernel::SingletonHolder<Mantid::Instrumentation::AlgoTimeRegisterImpl>;
+} // namespace Kernel
 } // namespace Mantid
