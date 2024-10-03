@@ -1,1 +1,1 @@
-- allows for declaring the many `PropertyWithValue` types as output properties from the python API.
+- allows for declaring the many :class:`PropertyWithValue <mantid.kernel.FloatPropertyWithValue>` types as output properties from the python API.
