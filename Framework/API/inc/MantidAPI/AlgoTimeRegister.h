@@ -15,8 +15,6 @@
 
 #include "MantidAPI/DllConfig.h"
 
-using Mantid::Kernel::Logger;
-
 namespace Mantid {
 namespace Instrumentation {
 
@@ -60,7 +58,6 @@ private:
   AlgoTimeRegisterImpl();
   ~AlgoTimeRegisterImpl();
 
-  static Logger &g_log;
   std::vector<Info> m_info;
   Kernel::time_point_ns m_start;
 };
