@@ -26,8 +26,8 @@ from dataclasses import dataclass
 import numpy as np
 from scipy.ndimage import distance_transform_edt, maximum_position, label
 from scipy.signal import convolve
-from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
-from FindSXPeaksConvolve import make_kernel, get_kernel_shape
+from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
+from plugins.algorithms.FindSXPeaksConvolve import make_kernel, get_kernel_shape
 from enum import Enum
 
 

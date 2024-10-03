@@ -30,8 +30,8 @@ from mantid.kernel import (
 from mantid.fitfunctions import FunctionWrapper
 import numpy as np
 from scipy.ndimage import binary_dilation
-from IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params, PeakData
-from IntegratePeaksShoeboxTOF import get_bin_width_at_tof, set_peak_intensity
+from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params, PeakData
+from plugins.algorithms.IntegratePeaksShoeboxTOF import get_bin_width_at_tof, set_peak_intensity
 from enum import Enum
 from typing import Callable
 
