@@ -90,7 +90,6 @@ void AlgoTimeRegisterImpl::addTime(const std::string &name, const std::thread::i
 AlgoTimeRegisterImpl::AlgoTimeRegisterImpl()
     : m_start(std::chrono::high_resolution_clock::now()), m_hasWrittenToFile(false) {}
 
-AlgoTimeRegisterImpl::~AlgoTimeRegisterImpl() {}
 
 } // namespace Instrumentation
 } // namespace Mantid
