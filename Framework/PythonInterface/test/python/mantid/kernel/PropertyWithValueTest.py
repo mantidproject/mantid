@@ -222,11 +222,17 @@ class PropertyWithValueTest(unittest.TestCase):
         AlgorithmFactory.subscribe(MyAlgorithm)
         algo = MyAlgorithm()
         algo.initialize()
-        _create_algorithm_function("MyAlgorithm", 1, algo)
+        myAlgorithmName = "MyAlgorithm"
+        _create_algorithm_function(myAlgorithmName, 1, algo)
         from mantid.simpleapi import MyAlgorithm as MyAlgorithmInMantid
         # call the algorithm, ensure the output is the large integer expected
         ret = MyAlgorithmInMantid(1)
         assert ret == BIGINT
+        # clean up the the algorithm manager and verify
+        AlgorithmFactory.unsubscribe(myAlgorithmName, 1)
+        with self.assertRaises(RuntimeError) as cm:
+            MyAlgorithmInMantid(2)
+        assert f"not registered {myAlgorithmName}" in str(cm.exception)
 
 
 if __name__ == "__main__":
