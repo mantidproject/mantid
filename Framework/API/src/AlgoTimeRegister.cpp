@@ -12,6 +12,13 @@
 namespace Mantid {
 namespace Instrumentation {
 
+namespace {
+Kernel::Logger &LOGGER() {
+  static Kernel::Logger logger("AlgoTimeRegister");
+  return logger;
+}
+} // namespace
+
 using Kernel::ConfigService;
 using Kernel::time_point_ns;
 
@@ -34,7 +41,7 @@ void AlgoTimeRegisterImpl::addTime(const std::string &name, const std::thread::i
 
 void AlgoTimeRegisterImpl::addTime(const std::string &name, const Kernel::time_point_ns &begin,
                                    const Kernel::time_point_ns &end) {
-  this->addTime(name, std::this_thread::get_id(), begin, end);
+  AlgoTimeRegister::Instance().addTime(name, std::this_thread::get_id(), begin, end);
 }
 
 void AlgoTimeRegisterImpl::test(const int a, const int b) { printf("a + b = %d\n", a + b); }
@@ -46,8 +53,8 @@ AlgoTimeRegisterImpl::~AlgoTimeRegisterImpl() {
   auto writeEnable = Kernel::ConfigService::Instance().getValue<bool>("performancelog.write").value();
   auto filename = Kernel::ConfigService::Instance().getString("performancelog.filename");
   if (!writeEnable || filename.empty()) {
-    g_log.information() << "performancelog.write is disabled (off/0/false) or performancelog.filename " << filename
-                        << " is an invalid filename\n";
+    LOGGER().information() << "performancelog.write is disabled (off/0/false) or performancelog.filename " << filename
+                           << " is an invalid filename\n";
     return;
   }
   fs.open(filename, std::ios::out);
