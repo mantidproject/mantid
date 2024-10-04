@@ -441,9 +441,21 @@ pipeline {
         timestamps ()
       }
       steps {
-        // Keep this build. If it reaches this stage then it passed all other stages.
         script {
+          // Keep this build. If it reaches this stage then it passed all other stages.
           currentBuild.keepLog = true
+          // Set the keep description to a known value so we know which previous builds to discard.
+          // This will allow builds to be manually kept and preserved.
+          keepDescription = "Automatically preserving the most recent successful nightly"
+          currentBuild.setDescription(keepDescription)
+
+          build = currentBuild.getPreviousSuccessfulBuild()
+
+          while(build != null)
+          {
+            build.build().keepLog(false)
+            build = build.getPreviousSuccessfulBuild()
+          }
         }
       }
     }
