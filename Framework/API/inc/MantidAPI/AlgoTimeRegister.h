@@ -26,17 +26,6 @@ public:
   AlgoTimeRegisterImpl(const AlgoTimeRegisterImpl &) = delete;
   AlgoTimeRegisterImpl &operator=(const AlgoTimeRegisterImpl &) = delete;
 
-  struct Info {
-    std::string m_name;
-    std::thread::id m_threadId;
-    Kernel::time_point_ns m_begin;
-    Kernel::time_point_ns m_end;
-
-    Info(const std::string &nm, const std::thread::id &id, const Kernel::time_point_ns &be,
-         const Kernel::time_point_ns &en)
-        : m_name(nm), m_threadId(id), m_begin(be), m_end(en) {}
-  };
-
   class Dump {
     Kernel::time_point_ns m_regStart_chrono;
     const std::string m_name;
@@ -49,7 +38,6 @@ public:
   void addTime(const std::string &name, const std::thread::id thread_id, const Kernel::time_point_ns &begin,
                const Kernel::time_point_ns &end);
   void addTime(const std::string &name, const Kernel::time_point_ns &begin, const Kernel::time_point_ns &end);
-  void test(const int a, const int b);
   std::mutex m_mutex;
 
 private:
@@ -58,8 +46,9 @@ private:
   AlgoTimeRegisterImpl();
   ~AlgoTimeRegisterImpl();
 
-  std::vector<Info> m_info;
   Kernel::time_point_ns m_start;
+  std::string m_filename;
+  bool m_writeToFile;
 };
 
 using AlgoTimeRegister = Mantid::Kernel::SingletonHolder<AlgoTimeRegisterImpl>;
