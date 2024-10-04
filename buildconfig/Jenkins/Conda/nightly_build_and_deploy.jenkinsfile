@@ -441,9 +441,16 @@ pipeline {
         timestamps ()
       }
       steps {
-        // Keep this build. If it reaches this stage then it passed all other stages.
         script {
+          // Keep this build. If it reaches this stage then it passed all other stages.
           currentBuild.keepLog = true
+          // Remove the "keep" status for all previous successful runs.
+          build = currentBuild.getPreviousSuccessfulBuild()
+          while(build != null)
+          {
+            build.build().keepLog(false)
+            build = build.getPreviousSuccessfulBuild()
+          }
         }
       }
     }
