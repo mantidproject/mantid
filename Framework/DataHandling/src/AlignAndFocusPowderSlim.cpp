@@ -86,10 +86,10 @@ public:
     }
   }
 
-  boost::optional<size_t> findBin(const double tof) const {
+  std::optional<size_t> findBin(const double tof) const {
     // return boost::none;
     if (tof < m_xmin || tof >= m_xmax) {
-      return boost::none;
+      return std::nullopt;
     } else {
       return m_findBin(*m_binedges, tof, m_bin_divisor, m_bin_offset, true);
     }
@@ -101,7 +101,7 @@ private:
   double m_xmin;
   double m_xmax;
   const std::vector<double> *m_binedges;
-  boost::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double, const bool);
+  std::optional<size_t> (*m_findBin)(const MantidVec &, const double, const double, const double, const bool);
 };
 
 template <typename CountsType> class ProcessEventsTask {
@@ -118,7 +118,7 @@ public:
 
       const auto binnum = m_histogrammer->findBin(tof);
       if (binnum)
-        y_temp->at(binnum.get())++;
+        y_temp->at(binnum.value())++;
     }
   }
 
