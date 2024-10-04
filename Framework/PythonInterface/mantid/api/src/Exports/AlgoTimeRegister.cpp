@@ -22,7 +22,6 @@ void addTimeWrapper(const std::string &name, long int begin, long int end) {
 
   std::chrono::nanoseconds begin_ns(begin);
   std::chrono::nanoseconds end_ns(end);
-  std::chrono::time_point start = Mantid::Instrumentation::AlgoTimeRegister::Instance().getStartClock();
 
   // add the duration to the start time point
   std::chrono::time_point<std::chrono::high_resolution_clock> tp_begin_ns(begin_ns);
