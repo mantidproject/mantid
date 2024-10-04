@@ -16,6 +16,8 @@ using namespace Mantid::Instrumentation;
 using namespace boost::python;
 using Mantid::Kernel::time_point_ns;
 
+// this works only in linux
+#ifdef __linux__
 void addTimeWrapper(const std::string &name, long int begin, long int end) {
 
   std::chrono::nanoseconds begin_ns(begin);
@@ -23,13 +25,13 @@ void addTimeWrapper(const std::string &name, long int begin, long int end) {
   std::chrono::time_point start = Mantid::Instrumentation::AlgoTimeRegister::Instance().getStartClock();
 
   // add the duration to the start time point
-  std::chrono::time_point<std::chrono::high_resolution_clock> tp_begin_ns = start + begin_ns;
+  std::chrono::time_point<std::chrono::high_resolution_clock> tp_begin_ns(begin_ns);
 
   // Print the time point
   std::cout << "C++ Begin Time point : " << tp_begin_ns.time_since_epoch().count() << " ns" << std::endl;
 
   // add the duration to the end time point
-  std::chrono::time_point<std::chrono::high_resolution_clock> tp_end_ns = start + end_ns;
+  std::chrono::time_point<std::chrono::high_resolution_clock> tp_end_ns(end_ns);
 
   // Print the time point
   std::cout << "C++ End Time point: " << tp_end_ns.time_since_epoch().count() << " ns" << std::endl;
@@ -42,18 +44,13 @@ void addTimeWrapper(const std::string &name, long int begin, long int end) {
 
   Mantid::Instrumentation::AlgoTimeRegister::Instance().addTime(name, tp_begin_ns, tp_end_ns);
 }
-//}
-// This is typed on the AlgoTimeRegister class
+
 void export_AlgoTimeRegister() {
   register_ptr_to_python<std::shared_ptr<AlgoTimeRegister>>();
 
   // AlgoTimeRegister class
   class_<AlgoTimeRegister, boost::noncopyable>("AlgoTimeRegister", no_init)
-      //.def("test", &AlgoTimeRegister::test, (arg("self"), arg("name")), "Returns the name of the workspace. This could
-      // be an empty string")
       .def("addTime", &addTimeWrapper, (arg("name"), arg("begin"), arg("end")));
-  //.staticmethod("addTime");
-  //.staticmethod("addTime");
 }
 
-// thread id=-1 default check with python
+#endif
