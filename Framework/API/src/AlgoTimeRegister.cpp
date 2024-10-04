@@ -7,9 +7,8 @@
 #include "MantidAPI/AlgoTimeRegister.h"
 #include "MantidKernel/MultiThreaded.h"
 #include <fstream>
-#include <iostream>
 #include <time.h>
-using namespace std;
+
 namespace Mantid {
 namespace Instrumentation {
 
@@ -90,6 +89,7 @@ void AlgoTimeRegisterImpl::addTime(const std::string &name, const std::thread::i
 AlgoTimeRegisterImpl::AlgoTimeRegisterImpl()
     : m_start(std::chrono::high_resolution_clock::now()), m_hasWrittenToFile(false) {}
 
+AlgoTimeRegisterImpl::~AlgoTimeRegisterImpl() {}
 
 } // namespace Instrumentation
 } // namespace Mantid
