@@ -128,7 +128,7 @@ std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
       min_less_than_max = false;
     }
   } else if (xmaxs.size() == 1) {
-    if (xmaxs[0] < *std::max_element(xmins.cbegin(), xmins.cend())) {
+    if (xmaxs[0] <= *std::max_element(xmins.cbegin(), xmins.cend())) {
       min_less_than_max = false;
     }
   } else if (xmins.size() != xmaxs.size()) {
@@ -258,7 +258,7 @@ void DiffractionFocussing2::exec() {
     // first time)
     int nPoints_local(nPoints);
     if (!autoBinning) {
-      nPoints_local = Xout.size() - 1;
+      nPoints_local = static_cast<int>(Xout.size() - 1);
       out->resizeHistogram(outWorkspaceIndex, nPoints_local);
     }
 
@@ -738,9 +738,9 @@ void DiffractionFocussing2::determineRebinParametersFromParameters(const std::ve
   std::vector<double> xmaxs = getProperty("DMax");
   std::vector<double> deltas = getProperty("Delta");
 
-  const auto numMin = xmins.size();
-  const auto numMax = xmaxs.size();
-  const auto numDelta = deltas.size();
+  const int64_t numMin = xmins.size();
+  const int64_t numMax = xmaxs.size();
+  const int64_t numDelta = deltas.size();
   if (numMin > 1 && numMin != nGroups)
     throw std::runtime_error("DMin must have length 1 or equal to number of output groups which is " + nGroups);
   if (numMax > 1 && numMax != nGroups)
