@@ -435,6 +435,18 @@ pipeline {
           "${WORKSPACE}/standalone-packages/* ${WORKSPACE}/conda-packages.tar"
       }
     }
+    stage ('Keep latest successful build') {
+      agent { label 'linux-64' } // Use linux for simplicity with shell scripts
+      options {
+        timestamps ()
+      }
+      steps {
+        // Keep this build. If it reaches this stage then it passed all other stages.
+        script {
+          currentBuild.keepLog = true
+        }
+      }
+    }
   }
 }
 
