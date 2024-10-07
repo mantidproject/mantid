@@ -27,6 +27,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "ApplyAbsorptionCorrections"; }
 
 private slots:
   /// Handles a new sample being loaded
@@ -48,6 +49,7 @@ private slots:
 private:
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void addInterpolationStep(const Mantid::API::MatrixWorkspace_sptr &toInterpolate, std::string toMatch);
   void plotInPreview(const QString &curveName, Mantid::API::MatrixWorkspace_sptr &ws, const QColor &curveColor);

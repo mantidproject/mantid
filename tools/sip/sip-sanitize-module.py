@@ -9,6 +9,7 @@
 Accepts the output of sip code generation and sanitizes it ready for compilation.
 See sanitize_generated_module docs for changes that are made.
 """
+
 # system imports
 import argparse
 import re

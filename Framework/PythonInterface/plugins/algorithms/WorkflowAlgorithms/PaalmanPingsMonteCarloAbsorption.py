@@ -451,7 +451,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         self.setProperty("CorrectionsWorkspace", self._output_ws)
 
     def _set_beam(self, ws):
-
         set_beam_alg = self.createChildAlgorithm("SetBeam", enableLogging=False)
         set_beam_alg.setProperty("InputWorkspace", ws)
         set_beam_alg.setProperty("Geometry", {"Shape": "Slit", "Width": self._beam_width, "Height": self._beam_height})
@@ -563,7 +562,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         return material_dict
 
     def _setup(self):
-
         self._input_ws = self.getProperty("InputWorkspace").value
         sample_is_group = isinstance(self._input_ws, WorkspaceGroup)
 
@@ -739,7 +737,6 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         # ----- Indirect Elastic Conversions -----
 
         if self._emode == "Indirect":
-
             if x_unit == "MomentumTransfer":
                 self._transposed = True
                 return self._create_waves_indirect_elastic(self._tranpose_ws(workspace))

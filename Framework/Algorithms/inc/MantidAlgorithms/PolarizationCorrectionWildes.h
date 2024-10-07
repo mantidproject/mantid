@@ -29,6 +29,7 @@ public:
   int version() const override;
   const std::string category() const override;
   const std::string summary() const override;
+  const std::vector<std::string> seeAlso() const override;
 
 private:
   /// A convenience set of workspaces corresponding flipper configurations.
@@ -64,6 +65,9 @@ private:
   void threeInputsSolve01(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   void threeInputsSolve10(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   void twoInputsSolve01And10(WorkspaceMap &fullInputs, const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
+  void addSpinStateOutput(std::vector<std::string> &names, const std::string &spinStateOrder,
+                          const std::string &baseName, const API::MatrixWorkspace_sptr &ws,
+                          const std::string &spinState);
 };
 } // namespace Algorithms
 } // namespace Mantid

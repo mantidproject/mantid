@@ -19,7 +19,6 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockQtAlgorithmRunner : public QtAlgorithmRunner {
 public:
   MockQtAlgorithmRunner() = default;
-  MOCK_METHOD0(cancelRunningAlgorithm, void());
   MOCK_METHOD1(startAlgorithmImpl, void(Mantid::API::IAlgorithm_sptr));
   MOCK_CONST_METHOD0(getAlgorithm, Mantid::API::IAlgorithm_sptr());
 

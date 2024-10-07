@@ -45,5 +45,6 @@ attr_mapping = [
     ParamMapEntry(ext_name="window", int_name="tof_window", enum_class=HRPD_TOF_WINDOWS),
     ParamMapEntry(ext_name="keep_raw_workspace", int_name="keep_raw_workspace", optional=True),
     ParamMapEntry(ext_name="mayers_mult_scat_events", int_name="mayers_mult_scat_events", optional=True),
+    ParamMapEntry(ext_name="fit_prompt_pulse", int_name="fit_prompt_pulse", optional=True),
 ]
 attr_mapping.extend(COMMON_PARAM_MAPPING)

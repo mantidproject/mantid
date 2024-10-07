@@ -10,6 +10,7 @@
 """
 Contains the Python wrapper class for the C++ instrument widget
 """
+
 # 3rdparty imports
 from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import QVBoxLayout, QWidget

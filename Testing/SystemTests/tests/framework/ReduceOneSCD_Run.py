@@ -30,7 +30,6 @@ from mantid import config
 
 
 class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
-
     __reduced_ws_name = ""
     saved = False
     output_directory = ""

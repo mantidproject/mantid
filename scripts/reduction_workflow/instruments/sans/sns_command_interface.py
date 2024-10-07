@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,unused-import
 """
-    Command set for EQSANS reduction
+Command set for EQSANS reduction
 """
+
 # Import the specific commands that we need - some of these are used in systemtests
 from reduction_workflow.command_interface import *
 

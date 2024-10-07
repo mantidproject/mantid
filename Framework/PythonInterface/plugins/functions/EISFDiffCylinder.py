@@ -9,6 +9,7 @@
 @author Jose Borreguero, ORNL
 @date December 07, 2017
 """
+
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 from scipy.special import jv

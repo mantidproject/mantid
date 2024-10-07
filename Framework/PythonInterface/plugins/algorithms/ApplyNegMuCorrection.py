@@ -12,7 +12,6 @@ from mantid.kernel import *
 
 
 class ApplyNegMuCorrection(PythonAlgorithm):
-
     # Combining work spaces and normalising the correction.
     # _OILE and _OIHE are unused parameters for now to make PyLint happy
     def combine(self, dataDir, runno, A2000, B2000, A3000, B3000, _OILE, _OIHE, spec):
@@ -85,7 +84,6 @@ class ApplyNegMuCorrection(PythonAlgorithm):
         return "CorrectionFunctions\\SpecialCorrections;Muon"
 
     def PyExec(self):
-
         spec = 1
         dataDir = self.getProperty("DataDirectory").value
         first = self.getProperty("FirstRunNumber").value

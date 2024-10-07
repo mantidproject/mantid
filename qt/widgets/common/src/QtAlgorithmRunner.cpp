@@ -13,25 +13,12 @@ using namespace Mantid::API;
 
 namespace MantidQt::API {
 
-//----------------------------------------------------------------------------------------------
-/** Constructor
- */
 QtAlgorithmRunner::QtAlgorithmRunner(QObject *parent)
     : QObject(parent), m_finishedObserver(*this, &QtAlgorithmRunner::handleAlgorithmFinishedNotification),
       m_progressObserver(*this, &QtAlgorithmRunner::handleAlgorithmProgressNotification),
       m_errorObserver(*this, &QtAlgorithmRunner::handleAlgorithmErrorNotification), m_asyncResult(nullptr) {}
 
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-QtAlgorithmRunner::~QtAlgorithmRunner() {
-  if (m_asyncAlg) {
-    m_asyncAlg->removeObserver(m_finishedObserver);
-    m_asyncAlg->removeObserver(m_errorObserver);
-    m_asyncAlg->removeObserver(m_progressObserver);
-  }
-  delete m_asyncResult;
-}
+QtAlgorithmRunner::~QtAlgorithmRunner() { cancelRunningAlgorithm(); }
 
 //--------------------------------------------------------------------------------------
 /** If an algorithm is already running, cancel it.

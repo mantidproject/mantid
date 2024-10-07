@@ -33,6 +33,7 @@
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/trim.hpp"
@@ -82,6 +83,7 @@ const std::string OUTPUT_WKSP_PARAM_ERRS("OutputParameterFitErrorsWorkspace");
 const std::string RAW_PARAMS("RawPeakParameters");
 const std::string PEAK_MIN_SIGNAL_TO_NOISE_RATIO("MinimumSignalToNoiseRatio");
 const std::string PEAK_MIN_TOTAL_COUNT("MinimumPeakTotalCount");
+const std::string PEAK_MIN_SIGNAL_TO_SIGMA_RATIO("MinimumSignalToSigmaRatio");
 } // namespace PropertyNames
 } // namespace
 
@@ -430,6 +432,10 @@ void FitPeaks::init() {
   declareProperty(PropertyNames::PEAK_MIN_TOTAL_COUNT, EMPTY_DBL(),
                   "Used for validating peaks before fitting. If the total peak window Y-value count "
                   "is under this value, the peak will be excluded from fitting and calibration.");
+
+  declareProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_SIGMA_RATIO, 0.,
+                  "Used for validating peaks after fitting. If the signal-to-sigma ratio is under this value, "
+                  "the peak will be excluded from fitting and calibration.");
 
   const std::string addoutgrp("Analysis");
   setPropertyGroup(PropertyNames::OUTPUT_WKSP_PARAMS, addoutgrp);
@@ -923,6 +929,11 @@ void FitPeaks::processInputPeakTolerance() {
   m_minSignalToNoiseRatio = getProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_NOISE_RATIO);
   if (isEmpty(m_minSignalToNoiseRatio) || m_minSignalToNoiseRatio < 0.)
     m_minSignalToNoiseRatio = 0.;
+
+  // set the signal-to-sigma threshold to zero (default value) if not specified or invalid
+  m_minSignalToSigmaRatio = getProperty(PropertyNames::PEAK_MIN_SIGNAL_TO_SIGMA_RATIO);
+  if (isEmpty(m_minSignalToSigmaRatio) || m_minSignalToSigmaRatio < 0.)
+    m_minSignalToSigmaRatio = 0.;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1282,6 +1293,14 @@ void FitPeaks::fitSpectrumPeaks(size_t wi, const std::vector<double> &expected_p
                                bkgdfunction, peak_pre_check_result);
       if (peak_pre_check_result->isIndividualPeakRejected())
         fit_result->setBadRecord(peak_index, -1.);
+
+      if (m_minSignalToSigmaRatio > 0) {
+        if (calculateSignalToSigmaRatio(wi, peak_window_i, peakfunction) < m_minSignalToSigmaRatio) {
+          fit_result->setBadRecord(peak_index, -1.);
+          cost = DBL_MAX;
+        }
+      }
+
       *pre_check_result += *peak_pre_check_result; // keep track of the rejection count within the spectrum
     }
     pre_check_result->setNumberOfOutOfRangePeaks(number_of_out_of_range_peaks);
@@ -1531,6 +1550,30 @@ void FitPeaks::calculateFittedPeaks(const std::vector<std::shared_ptr<FitPeaksAl
 
   return;
 }
+
+double FitPeaks::calculateSignalToSigmaRatio(const size_t &iws, const std::pair<double, double> &peakWindow,
+                                             const API::IPeakFunction_sptr &peakFunction) {
+  const auto &vecX = m_inputMatrixWS->points(iws);
+  auto startX = std::lower_bound(vecX.begin(), vecX.end(), peakWindow.first);
+  auto stopX = std::lower_bound(vecX.begin(), vecX.end(), peakWindow.second);
+
+  FunctionDomain1DVector domain(startX, stopX);
+  FunctionValues values(domain);
+
+  peakFunction->function(domain, values);
+  auto peakValues = values.toVector();
+
+  const auto &errors = m_inputMatrixWS->readE(iws);
+  auto startE = errors.begin() + (startX - vecX.begin());
+  auto stopE = errors.begin() + (stopX - vecX.begin());
+  std::vector<double> peakErrors(startE, stopE);
+
+  double peakSum = std::accumulate(peakValues.cbegin(), peakValues.cend(), 0.0);
+  double sigma = sqrt(std::accumulate(peakErrors.cbegin(), peakErrors.cend(), 0.0, VectorHelper::SumSquares<double>()));
+
+  return peakSum / ((sigma == 0) ? 1 : sigma);
+}
+
 namespace {
 bool estimateBackgroundParameters(const Histogram &histogram, const std::pair<size_t, size_t> &peak_window,
                                   const API::IBackgroundFunction_sptr &bkgd_function) {

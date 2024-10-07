@@ -42,8 +42,8 @@ Usage
 
 .. testoutput::
 
-   First 5 y values: [ 0.26666667  0.11940299  0.0754717   0.05498282  0.04319654]
-   First 5 error values: [ 0.26666667  0.11940299  0.0754717   0.05498282  0.04319654]
+   First 5 y values: [0.26666667 0.11940299 0.0754717  0.05498282 0.04319654]
+   First 5 error values: [0.26666667 0.11940299 0.0754717  0.05498282 0.04319654]
 
 **Example: multiply data by a linear:**
 
@@ -63,8 +63,8 @@ Usage
 
 .. testoutput::
 
-   First 5 y values: [   4.   16.   36.   64.  100.]
-   First 5 error values: [   4.   16.   36.   64.  100.]
+   First 5 y values: [  4.  16.  36.  64. 100.]
+   First 5 error values: [  4.  16.  36.  64. 100.]
 
 .. categories::
 

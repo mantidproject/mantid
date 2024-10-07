@@ -71,7 +71,6 @@ class MantidGeom(object):
         self._root.appendChild(child)
 
     def _append_child(self, element_name, element_parent, **kwargs):
-
         element = self._document.createElement(element_name)
         for item in kwargs:
             element.setAttribute(item, str(kwargs[item]))

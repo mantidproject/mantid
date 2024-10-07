@@ -15,7 +15,6 @@ from mantid.simpleapi import GSASIIRefineFitPeaks, Load
 
 
 class _AbstractGSASIIRefineFitPeaksTest(systemtesting.MantidSystemTest):
-
     __metaclass__ = ABCMeta
 
     fitted_peaks_ws = None

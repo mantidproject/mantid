@@ -10,6 +10,7 @@ Usage unit_test_speed.py <build-log> <output-csv>
 Given a the raw output from a Jenkins build server log this script will output
 a CSV file of the speed for each unit test.
 """
+
 import sys
 
 with open(sys.argv[1], "r") as f:

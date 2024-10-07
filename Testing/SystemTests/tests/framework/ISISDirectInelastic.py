@@ -345,7 +345,6 @@ class MARIReductionMonSeparate(ISISDirectInelasticReduction):
 
 class MARIReductionSum(ISISDirectInelasticReduction):
     def __init__(self):
-
         ISISDirectInelasticReduction.__init__(self)
         from ISIS_MariReduction import MARIReductionSum
 
@@ -372,7 +371,6 @@ class MARIReductionSum(ISISDirectInelasticReduction):
 
 class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
     def __init__(self):
-
         ISISDirectInelasticReduction.__init__(self)
         from ISIS_MariReduction import MARIReductionSum
 

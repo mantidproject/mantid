@@ -25,7 +25,6 @@ class ToolItemText:
 
 
 class SliceViewerNavigationToolbar(MantidNavigationToolbar):
-
     gridClicked = Signal(bool)
     homeClicked = Signal()
     linePlotsClicked = Signal(bool)

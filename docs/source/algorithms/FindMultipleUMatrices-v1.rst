@@ -70,8 +70,8 @@ Useage
 
 .. testoutput:: exampleFindMultipleUMatrices
 
-    HKL along x-axis of QLab =  [ 4.  0.  0.]
-    HKL along x-axis of QLab =  [ 0.  5.  0.]
+    HKL along x-axis of QLab =  [4. 0. 0.]
+    HKL along x-axis of QLab =  [0. 5. 0.]
 
 
 .. categories::

@@ -64,7 +64,6 @@ class ElementalAnalysisContext(object):
 
     def update_current_data(self):
         if len(self.data_context.current_runs) > 0:
-
             if not self.group_context.groups:
                 self.group_context.reset_group_to_default(self.data_context._loaded_data)
 

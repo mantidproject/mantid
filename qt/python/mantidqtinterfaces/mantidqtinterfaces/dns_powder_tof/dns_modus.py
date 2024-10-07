@@ -25,6 +25,13 @@ from mantidqtinterfaces.dns_powder_elastic.script_generator.elastic_powder_scrip
     DNSElasticPowderScriptGeneratorWidget,
 )
 
+# single crystal elastic
+from mantidqtinterfaces.dns_single_crystal_elastic.options.elastic_single_crystal_options_widget import DNSElasticSCOptionsWidget
+from mantidqtinterfaces.dns_single_crystal_elastic.plot.elastic_single_crystal_plot_widget import DNSElasticSCPlotWidget
+from mantidqtinterfaces.dns_single_crystal_elastic.script_generator.elastic_single_crystal_script_generator_widget import (
+    DNSElasticSCScriptGeneratorWidget,
+)
+
 
 class DNSModus:
     """
@@ -48,6 +55,14 @@ class DNSModus:
                 "xml_dump",
                 "plot_elastic_powder",
             ],
+            "single_crystal_elastic": [
+                "paths",
+                "file_selector",
+                "elastic_single_crystal_options",
+                "elastic_single_crystal_script_generator",
+                "xml_dump",
+                "plot_elastic_single_crystal",
+            ],
         }
         # Yapf: disable
         self._widget_map = {
@@ -61,6 +76,10 @@ class DNSModus:
             "elastic_powder_options": DNSElasticPowderOptionsWidget,
             "elastic_powder_script_generator": DNSElasticPowderScriptGeneratorWidget,
             "plot_elastic_powder": DNSElasticPowderPlotWidget,
+            # single crystal elastic
+            "elastic_single_crystal_options": DNSElasticSCOptionsWidget,
+            "elastic_single_crystal_script_generator": DNSElasticSCScriptGeneratorWidget,
+            "plot_elastic_single_crystal": DNSElasticSCPlotWidget,
         }
         # Yapf: enable
 

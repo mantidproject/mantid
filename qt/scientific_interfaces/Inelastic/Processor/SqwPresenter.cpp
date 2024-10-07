@@ -34,8 +34,9 @@ namespace MantidQt::CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SqwPresenter::SqwPresenter(QWidget *parent, ISqwView *view, std::unique_ptr<ISqwModel> model)
-    : DataProcessor(parent), m_view(view), m_model(std::move(model)) {
+SqwPresenter::SqwPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
+                           ISqwView *view, std::unique_ptr<ISqwModel> model)
+    : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
@@ -101,20 +102,22 @@ void SqwPresenter::setFileExtensionsByName(bool filter) {
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
+void SqwPresenter::setLoadHistory(bool doLoadHistory) { m_view->setLoadHistory(doLoadHistory); }
+
 void SqwPresenter::handleRun() {
   clearOutputPlotOptionsWorkspaces();
-  m_model->setupRebinAlgorithm(m_batchAlgoRunner);
-  m_model->setupSofQWAlgorithm(m_batchAlgoRunner);
-  m_model->setupAddSampleLogAlgorithm(m_batchAlgoRunner);
+  std::deque<API::IConfiguredAlgorithm_sptr> algoQueue = {};
+  if (m_model->isRebinInEnergy())
+    algoQueue.emplace_back(m_model->setupRebinAlgorithm());
+  algoQueue.emplace_back(m_model->setupSofQWAlgorithm());
+  algoQueue.emplace_back(m_model->setupAddSampleLogAlgorithm());
   m_view->setEnableOutputOptions(false);
-
-  m_batchAlgoRunner->executeBatch();
+  m_algorithmRunner->execute(std::move(algoQueue));
 }
 
 void SqwPresenter::handleSaveClicked() {
   if (checkADSForPlotSaveWorkspace(m_model->getOutputWorkspace(), false))
-    addSaveWorkspaceToQueue(QString::fromStdString(m_model->getOutputWorkspace()));
-  m_batchAlgoRunner->executeBatch();
+    m_algorithmRunner->execute(setupSaveAlgorithm(m_model->getOutputWorkspace()));
 }
 
 void SqwPresenter::handleQLowChanged(double const value) { m_model->setQMin(value); }

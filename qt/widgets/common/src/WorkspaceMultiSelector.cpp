@@ -44,17 +44,14 @@ QStringList headerLabels = {"Workspace Name", "Ws Index"};
 namespace MantidQt {
 namespace MantidWidgets {
 
-WorkspaceMultiSelector::WorkspaceMultiSelector(QWidget *parent, bool init)
+WorkspaceMultiSelector::WorkspaceMultiSelector(QWidget *parent)
     : QTableWidget(parent), m_addObserver(*this, &WorkspaceMultiSelector::handleAddEvent),
       m_remObserver(*this, &WorkspaceMultiSelector::handleRemEvent),
       m_clearObserver(*this, &WorkspaceMultiSelector::handleClearEvent),
       m_renameObserver(*this, &WorkspaceMultiSelector::handleRenameEvent),
-      m_replaceObserver(*this, &WorkspaceMultiSelector::handleReplaceEvent), m_init(init), m_workspaceTypes(),
-      m_showGroups(false), m_suffix() {
-
-  if (init) {
-    connectObservers();
-  }
+      m_replaceObserver(*this, &WorkspaceMultiSelector::handleReplaceEvent), m_suffix(QStringList()) {
+  connectObservers();
+  refresh();
 }
 
 /**
@@ -80,51 +77,24 @@ void WorkspaceMultiSelector::setupTable() {
 /**
  * De-subscribes this object from the Poco NotificationCentre
  */
-void WorkspaceMultiSelector::disconnectObservers() {
-  if (m_init) {
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_remObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
-    Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
-    m_init = false;
-  }
+void WorkspaceMultiSelector::disconnectObservers() const {
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_addObserver);
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_remObserver);
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_clearObserver);
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_renameObserver);
+  Mantid::API::AnalysisDataService::Instance().notificationCenter.removeObserver(m_replaceObserver);
 }
 
 /**
  * Subscribes this object to the Poco NotificationCentre
  */
-void WorkspaceMultiSelector::connectObservers() {
+void WorkspaceMultiSelector::connectObservers() const {
   Mantid::API::AnalysisDataServiceImpl &ads = Mantid::API::AnalysisDataService::Instance();
   ads.notificationCenter.addObserver(m_addObserver);
   ads.notificationCenter.addObserver(m_remObserver);
   ads.notificationCenter.addObserver(m_renameObserver);
   ads.notificationCenter.addObserver(m_clearObserver);
   ads.notificationCenter.addObserver(m_replaceObserver);
-  refresh();
-  m_init = true;
-}
-
-QStringList WorkspaceMultiSelector::getWorkspaceTypes() const { return m_workspaceTypes; }
-
-void WorkspaceMultiSelector::setWorkspaceTypes(const QStringList &types) {
-  if (types != m_workspaceTypes) {
-    m_workspaceTypes = types;
-    if (m_init) {
-      refresh();
-    }
-  }
-}
-
-bool WorkspaceMultiSelector::showWorkspaceGroups() const { return m_showGroups; }
-
-void WorkspaceMultiSelector::showWorkspaceGroups(bool show) {
-  if (show != m_showGroups) {
-    m_showGroups = show;
-    if (m_init) {
-      refresh();
-    }
-  }
 }
 
 bool WorkspaceMultiSelector::isValid() const {
@@ -132,15 +102,11 @@ bool WorkspaceMultiSelector::isValid() const {
   return (item != nullptr);
 }
 
-QStringList WorkspaceMultiSelector::getWSSuffixes() const { return m_suffix; }
+const QStringList &WorkspaceMultiSelector::getWSSuffixes() const { return m_suffix; }
 
 void WorkspaceMultiSelector::setWSSuffixes(const QStringList &suffix) {
-  if (suffix != m_suffix) {
-    m_suffix = suffix;
-    if (m_init) {
-      refresh();
-    }
-  }
+  m_suffix = suffix;
+  refresh();
 }
 
 void WorkspaceMultiSelector::addItem(const std::string &name) {
@@ -167,13 +133,12 @@ void WorkspaceMultiSelector::addItems(const std::vector<std::string> &names) {
   }
 }
 
-stringPairVec WorkspaceMultiSelector::retrieveSelectedNameIndexPairs() {
+StringPairVec WorkspaceMultiSelector::retrieveSelectedNameIndexPairs() {
 
-  auto selIndexes = selectedIndexes();
-  stringPairVec nameIndexPairVec;
-  nameIndexPairVec.reserve(static_cast<std::size_t>(selIndexes.size()));
-
-  for (auto const &index : selIndexes) {
+  auto selRows = selectionModel()->selectedRows();
+  StringPairVec nameIndexPairVec;
+  nameIndexPairVec.reserve(static_cast<std::size_t>(selRows.size()));
+  for (auto const &index : selRows) {
     std::string txt = item(index.row(), namesCol)->text().toStdString();
     if (!txt.empty()) {
       std::string idx = item(index.row(), indexCol)->text().toStdString();
@@ -275,14 +240,9 @@ void WorkspaceMultiSelector::handleReplaceEvent(Mantid::API::WorkspaceAfterRepla
 }
 
 bool WorkspaceMultiSelector::checkEligibility(const std::string &name) const {
-  auto &ads = Mantid::API::AnalysisDataService::Instance();
-  auto workspace = ads.retrieve(name);
-  if ((!m_workspaceTypes.empty()) && m_workspaceTypes.indexOf(QString::fromStdString(workspace->id())) == -1)
+  auto const workspace = Mantid::API::AnalysisDataService::Instance().retrieve(name);
+  if (workspace->isGroup() || !hasValidSuffix(name))
     return false;
-  else if (!hasValidSuffix(name))
-    return false;
-  else if (!m_showGroups)
-    return std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(workspace) == nullptr;
   return true;
 }
 
@@ -297,8 +257,7 @@ bool WorkspaceMultiSelector::hasValidSuffix(const std::string &name) const {
 void WorkspaceMultiSelector::refresh() {
   const std::lock_guard<std::mutex> lock(m_adsMutex);
   this->clearContents();
-  auto &ads = Mantid::API::AnalysisDataService::Instance();
-  auto items = ads.getObjectNames();
+  auto const items = Mantid::API::AnalysisDataService::Instance().getObjectNames();
   addItems(items);
 }
 

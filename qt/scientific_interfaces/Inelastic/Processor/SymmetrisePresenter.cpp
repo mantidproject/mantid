@@ -18,6 +18,8 @@ using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
 Mantid::Kernel::Logger g_log("SymmetrisePresenter");
+
+auto &ads = Mantid::API::AnalysisDataService::Instance();
 } // namespace
 
 namespace MantidQt {
@@ -26,10 +28,10 @@ namespace CustomInterfaces {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SymmetrisePresenter::SymmetrisePresenter(QWidget *parent, ISymmetriseView *view,
-                                         std::unique_ptr<ISymmetriseModel> model)
-    : DataProcessor(parent), m_adsInstance(Mantid::API::AnalysisDataService::Instance()), m_view(view),
-      m_model(std::move(model)), m_isPreview(false) {
+SymmetrisePresenter::SymmetrisePresenter(QWidget *parent,
+                                         std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
+                                         ISymmetriseView *view, std::unique_ptr<ISymmetriseModel> model)
+    : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)), m_isPreview(false) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(
@@ -42,7 +44,7 @@ SymmetrisePresenter::SymmetrisePresenter(QWidget *parent, ISymmetriseView *view,
 SymmetrisePresenter::~SymmetrisePresenter() { m_propTrees["SymmPropTree"]->unsetFactoryForManager(m_dblManager); }
 
 void SymmetrisePresenter::handleValidation(IUserInputValidator *validator) const {
-  validateDataIsOfType(validator, m_view->getDataSelector(), "Sample", DataType::Red);
+  validateDataIsOfType(validator, m_view->getDataSelector(), "Sample", DataType::Red, false, false);
 }
 
 void SymmetrisePresenter::handleRun() {
@@ -56,26 +58,27 @@ void SymmetrisePresenter::handleRun() {
 
   // Return if no data has been loaded
   auto const dataWorkspaceName = m_view->getDataName();
-  if (dataWorkspaceName.empty())
+  if (!ads.doesExist(dataWorkspaceName))
     return;
   // Return if E range is incorrect
   if (!m_view->verifyERange(dataWorkspaceName))
     return;
-
+  API::IConfiguredAlgorithm_sptr configuredAlgorithm = {};
   if (m_isPreview) {
     int spectrumNumber = static_cast<int>(m_view->getPreviewSpec());
     std::vector<int> spectraRange(2, spectrumNumber);
 
-    m_model->setupPreviewAlgorithm(m_batchAlgoRunner, spectraRange);
+    configuredAlgorithm = m_model->setupPreviewAlgorithm(spectraRange);
   } else {
     clearOutputPlotOptionsWorkspaces();
-    auto const outputWorkspaceName = m_model->setupSymmetriseAlgorithm(m_batchAlgoRunner);
+    auto outputWorkspaceName = std::string();
+    configuredAlgorithm = m_model->setupSymmetriseAlgorithm();
     // Set the workspace name for Python script export
-    m_pythonExportWsName = outputWorkspaceName;
+    m_pythonExportWsName = configuredAlgorithm->getAlgorithmRuntimeProps().getPropertyValue("OutputWorkspace");
   }
 
   // Execute the algorithm(s) on a separated thread
-  m_batchAlgoRunner->executeBatchAsync();
+  m_algorithmRunner->execute(std::move(configuredAlgorithm));
 }
 
 /**
@@ -83,8 +86,7 @@ void SymmetrisePresenter::handleRun() {
  */
 void SymmetrisePresenter::handleSaveClicked() {
   if (checkADSForPlotSaveWorkspace(m_pythonExportWsName, false))
-    addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName), QString::fromStdString(m_pythonExportWsName));
-  m_batchAlgoRunner->executeBatch();
+    m_algorithmRunner->execute(setupSaveAlgorithm(m_pythonExportWsName, m_pythonExportWsName));
 }
 
 /**
@@ -115,6 +117,8 @@ void SymmetrisePresenter::setFileExtensionsByName(bool filter) {
   m_view->setFBSuffixes(filter ? getSampleFBSuffixes(tabName) : getExtensions(tabName));
   m_view->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
+
+void SymmetrisePresenter::setLoadHistory(bool doLoadHistory) { m_view->setLoadHistory(doLoadHistory); }
 
 void SymmetrisePresenter::handleReflectTypeChanged(int value) {
   if (m_runPresenter->validate()) {

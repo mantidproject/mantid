@@ -52,7 +52,6 @@ class test_helper(ReductionWrapper):
 
     @iliad
     def reduce(self, input_file=None, output_directory=None):
-
         self.reducer._clear_old_results()
         if input_file:
             self.reducer.prop_man.sample_run = input_file
@@ -188,7 +187,6 @@ class ReductionWrapperTest(unittest.TestCase):
 
     #
     def test_set_from_constructor(self):
-
         red = mr.ReduceMARI()
 
         main_prop = red.def_main_properties()

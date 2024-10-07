@@ -32,7 +32,8 @@ public:
   virtual bool checkFieldIsValid(const QString &errorMessage, QLineEdit *field, QLabel *errorLabel = nullptr) = 0;
   virtual bool checkWorkspaceSelectorIsNotEmpty(const QString &name, WorkspaceSelector *workspaceSelector) = 0;
   virtual bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget) = 0;
-  virtual bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false) = 0;
+  virtual bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool const silent = false,
+                                        bool const autoLoad = true) = 0;
   virtual bool checkWorkspaceGroupIsValid(QString const &groupName, QString const &inputType, bool silent = false) = 0;
   virtual bool checkWorkspaceExists(QString const &workspaceName, bool silent = false) = 0;
   virtual bool checkValidRange(const QString &name, std::pair<double, double> range) = 0;
@@ -76,7 +77,8 @@ public:
   /// Check that the given FileFinderWidget widget has valid files.
   bool checkFileFinderWidgetIsValid(const QString &name, const FileFinderWidget *widget) override;
   /// Check that the given DataSelector widget has valid input.
-  bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool silent = false) override;
+  bool checkDataSelectorIsValid(const QString &name, DataSelector *widget, bool const silent = false,
+                                bool const autoLoad = true) override;
   /// Check that the given start and end range is valid.
   bool checkValidRange(const QString &name, std::pair<double, double> range) override;
   /// Check that the given ranges dont overlap.

@@ -245,7 +245,7 @@ if package_installed("quickBayes"):
             self._alg.add_sample_logs = mock.Mock(side_effect=add_log_mock)
             self._alg.make_results = mock.Mock(return_value=results.name())
 
-        @mock.patch("BayesStretch2.GetThetaQ")
+        @mock.patch("BayesStretch2.get_two_theta_and_q")
         @mock.patch("BayesStretch2.Progress")
         def test_pyexec_QL_unique(self, prog_mock, get_Q_mock):
             progress_mock = mock.Mock()
@@ -289,7 +289,7 @@ if package_installed("quickBayes"):
             # make results
             self._alg.make_results.assert_called_once_with(beta_list=[1], FWHM_list=[2], x_data=2, x_unit="MomentumTransfer", name="out")
 
-        @mock.patch("BayesStretch2.GetThetaQ")
+        @mock.patch("BayesStretch2.get_two_theta_and_q")
         @mock.patch("BayesStretch2.Progress")
         def test_pyexec_QL_duplicate(self, prog_mock, get_Q_mock):
             progress_mock = mock.Mock()

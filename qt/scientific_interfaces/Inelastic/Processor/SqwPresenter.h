@@ -41,12 +41,14 @@ public:
 class MANTIDQT_INELASTIC_DLL SqwPresenter : public DataProcessor, public ISqwPresenter, public IRunSubscriber {
 
 public:
-  SqwPresenter(QWidget *parent, ISqwView *view, std::unique_ptr<ISqwModel> model);
+  SqwPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner, ISqwView *view,
+               std::unique_ptr<ISqwModel> model);
   ~SqwPresenter() = default;
 
   // runSubscriber
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "Sqw"; }
 
   void handleDataReady(std::string const &dataName) override;
 
@@ -67,6 +69,7 @@ protected:
 private:
   void plotRqwContour();
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   ISqwView *m_view;
   std::unique_ptr<ISqwModel> m_model;

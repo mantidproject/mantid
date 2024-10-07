@@ -11,7 +11,6 @@ from vesuvio.base import VesuvioBase
 
 
 class VesuvioResolution(VesuvioBase):
-
     _workspace_index = None
     _mass = None
 

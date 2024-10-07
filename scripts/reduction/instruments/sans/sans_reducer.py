@@ -5,10 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    SANS-specific implementation of the Reducer. The SANSReducer class implements
-    a predefined set of reduction steps to be followed. The actual ReductionStep objects
-    executed for each of those steps can be modified.
+SANS-specific implementation of the Reducer. The SANSReducer class implements
+a predefined set of reduction steps to be followed. The actual ReductionStep objects
+executed for each of those steps can be modified.
 """
+
 from reduction import Reducer
 from reduction import ReductionStep
 from reduction import validate_step

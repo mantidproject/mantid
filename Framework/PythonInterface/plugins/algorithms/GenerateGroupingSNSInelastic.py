@@ -114,7 +114,6 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         for i in range(banks):
             for j in range(0, 8, pixelsx):
                 for k in range(0, 128, pixelsy):
-
                     groupname = str(groupnum)
                     ids = spectra[i, j : j + pixelsx, k : k + pixelsy].reshape(-1)
                     detids = []

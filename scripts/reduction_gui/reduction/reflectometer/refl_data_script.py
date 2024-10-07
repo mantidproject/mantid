@@ -5,15 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Legacy class that old LR reduction options.
-    This is still in use for backward compatibility.
+Legacy class that old LR reduction options.
+This is still in use for backward compatibility.
 """
+
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement
 
 
 class DataSets(BaseScriptElement):
-
     DataPeakSelectionType = "narrow"
     DataPeakPixels = [120, 130]
     DataPeakDiscreteSelection = "N/A"

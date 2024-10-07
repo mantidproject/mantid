@@ -107,9 +107,7 @@ def get_copyright(year, comment_prefix="//"):
 {0} Copyright &copy; {1} ISIS Rutherford Appleton Laboratory UKRI,
 {0}   NScD Oak Ridge National Laboratory, European Spallation Source,
 {0}   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-{0} SPDX - License - Identifier: GPL - 3.0 +""".format(
-        comment_prefix, year
-    )
+{0} SPDX - License - Identifier: GPL - 3.0 +""".format(comment_prefix, year)
 
 
 def process_file_tree(path):

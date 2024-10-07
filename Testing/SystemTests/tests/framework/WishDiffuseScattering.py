@@ -20,7 +20,6 @@ class WishDiffuseScattering(systemtesting.MantidSystemTest):
         return 2000
 
     def runTest(self):
-
         Load(Filename="Wish_Diffuse_Scattering_C.nxs", OutputWorkspace="C", LoadLogFiles="0", LoadMonitors="Exclude")
         NormaliseByCurrent(InputWorkspace="C", OutputWorkspace="C")
         CropWorkspace(InputWorkspace="C", OutputWorkspace="C", XMin="6000", XMax="99000")

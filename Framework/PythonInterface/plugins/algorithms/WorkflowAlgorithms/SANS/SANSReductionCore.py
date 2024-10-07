@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
-""" SANSReductionCore algorithm runs the sequence of reduction steps which are necessary to reduce a data set."""
+"""SANSReductionCore algorithm runs the sequence of reduction steps which are necessary to reduce a data set."""
 
 from SANSReductionCoreBase import SANSReductionCoreBase
 

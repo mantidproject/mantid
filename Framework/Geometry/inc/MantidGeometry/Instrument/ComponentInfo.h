@@ -97,6 +97,8 @@ public:
   void setRotation(size_t componentIndex, const Kernel::Quat &newRotation);
   void setPosition(const std::pair<size_t, size_t> &index, const Kernel::V3D &newPosition);
   void setRotation(const std::pair<size_t, size_t> &index, const Kernel::Quat &newRotation);
+  void scaleComponent(const size_t componentIndex, const Kernel::V3D &newScaling);
+  void scaleComponent(const std::pair<size_t, size_t> &index, const Kernel::V3D &newScaling);
   size_t parent(const size_t componentIndex) const;
   bool hasParent(const size_t componentIndex) const;
   bool hasDetectorInfo() const;

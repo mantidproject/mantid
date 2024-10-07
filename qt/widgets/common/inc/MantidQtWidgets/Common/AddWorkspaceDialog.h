@@ -28,6 +28,7 @@ public:
 
   void setWSSuffices(const QStringList &suffices) override;
   void setFBSuffices(const QStringList &suffices) override;
+  void setLoadProperty(const std::string &propName, bool enable) override;
 
   void updateSelectedSpectra() override;
 

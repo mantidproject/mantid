@@ -10,6 +10,7 @@ Some of the sphinx warnings come from the C++ code, from the properties of the a
 This test tries to detect the most common such errors.
 It also detects if a new category is created (i.e. someone uses Utilities instead of Utility)
 """
+
 import systemtesting
 import mantid
 import re
@@ -89,7 +90,7 @@ class SphinxWarnings(systemtesting.MantidSystemTest):
 
     def runTest(self):
         algs = mantid.AlgorithmFactory.getRegisteredAlgorithms(True)
-        for (name, versions) in algs.items():
+        for name, versions in algs.items():
             for version in versions:
                 if mantid.api.DeprecatedAlgorithmChecker(name, version).isDeprecated() == "":
                     # get an instance

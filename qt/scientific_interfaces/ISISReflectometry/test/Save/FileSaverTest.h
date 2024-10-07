@@ -83,17 +83,17 @@ public:
   }
 
   void test_save_to_ORSOAscii_single_file_one_ws_group_with_multiple_child_workspaces_includes_filename_suffix() {
-    const auto workspaceGrpToSave = "ws_grp_1";
+    auto const workspaceGrpToSave = "ws_grp_1";
     std::vector<std::string> const childWorkspaces = {"ws_1", "ws_2"};
-    const auto expectedFileName = "ws_grp_1" + m_multiFileSuffix;
+    auto const expectedFileName = "ws_grp_1" + m_multiFileSuffix;
     runTestSaveToSingleORSOFileForWorkspaceGroup(NamedFormat::ORSOAscii, workspaceGrpToSave, childWorkspaces,
                                                  expectedFileName);
   }
 
   void test_save_to_ORSOAscii_single_file_one_ws_group_with_one_child_workspace_excludes_filename_suffix() {
-    const auto workspaceGrpToSave = "ws_grp_1";
+    auto const workspaceGrpToSave = "ws_grp_1";
     std::vector<std::string> const childWorkspaces = {"ws_1"};
-    const auto expectedFileName = "ws_1";
+    auto const expectedFileName = "ws_1";
     runTestSaveToSingleORSOFileForWorkspaceGroup(NamedFormat::ORSOAscii, workspaceGrpToSave, childWorkspaces,
                                                  expectedFileName);
   }
@@ -114,17 +114,17 @@ public:
   }
 
   void test_save_to_ORSONexus_single_file_one_ws_group_with_multiple_child_workspaces_includes_filename_suffix() {
-    const auto workspaceGrpToSave = "ws_grp_1";
+    auto const workspaceGrpToSave = "ws_grp_1";
     std::vector<std::string> const childWorkspaces = {"ws_1", "ws_2"};
-    const auto expectedFileName = "ws_grp_1" + m_multiFileSuffix;
+    auto const expectedFileName = "ws_grp_1" + m_multiFileSuffix;
     runTestSaveToSingleORSOFileForWorkspaceGroup(NamedFormat::ORSONexus, workspaceGrpToSave, childWorkspaces,
                                                  expectedFileName);
   }
 
   void test_save_to_ORSONexus_single_file_one_ws_group_with_one_child_workspace_excludes_filename_suffix() {
-    const auto workspaceGrpToSave = "ws_grp_1";
+    auto const workspaceGrpToSave = "ws_grp_1";
     std::vector<std::string> const childWorkspaces = {"ws_1"};
-    const auto expectedFileName = "ws_1";
+    auto const expectedFileName = "ws_1";
     runTestSaveToSingleORSOFileForWorkspaceGroup(NamedFormat::ORSONexus, workspaceGrpToSave, childWorkspaces,
                                                  expectedFileName);
   }
@@ -269,7 +269,7 @@ private:
     expectIsValidSaveDirectory(mockFileHandler);
 
     if (saveAsSingleFile) {
-      const auto filename =
+      auto const filename =
           expectMultiDatasetSuffix ? workspacesToSave.front() + m_multiFileSuffix : workspacesToSave.front();
       expectSaveOrsoAlgorithmCalled(*mockSaveAlgorithmRunner, filename, formatOptions.format());
     } else {
@@ -295,7 +295,7 @@ private:
     expectSaveOrsoAlgorithmCalled(*mockSaveAlgorithmRunner, expectedFileName, formatOptions.format());
 
     auto saver = createSaver(std::move(mockSaveAlgorithmRunner), mockFileHandler);
-    const auto saveList = {workspaceGrpToSave};
+    auto const saveList = {workspaceGrpToSave};
     saver.save(m_saveDirectory, saveList, logParams, formatOptions);
   }
 };

@@ -5,15 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    This modules provides a function, importAllFromADS, that creates a python
-    variable in the globals dict of the current frame for each
-    name in the analysis data service.
+This modules provides a function, importAllFromADS, that creates a python
+variable in the globals dict of the current frame for each
+name in the analysis data service.
 
-    If the name is not a valid variable then no variable is created.
+If the name is not a valid variable then no variable is created.
 
-    The function is also attached to the AnalysisDataService and named importAll.
+The function is also attached to the AnalysisDataService and named importAll.
 
 """
+
 from mantid.api import AnalysisDataServiceImpl
 import inspect as _inspect
 import keyword as _keyword

@@ -157,9 +157,13 @@ public:
     return vec;
   }
 
-  virtual bool equals(const Column &, double) const { throw std::runtime_error("equals not implemented"); };
+  virtual bool equals(const Column &, double, bool const = false) const {
+    throw std::runtime_error("equals not implemented");
+  };
 
-  virtual bool equalsRelErr(const Column &, double) const { throw std::runtime_error("equals not implemented"); };
+  virtual bool equalsRelErr(const Column &, double, bool const = false) const {
+    throw std::runtime_error("equals not implemented");
+  };
 
 protected:
   /// Sets the new column size.

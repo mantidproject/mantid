@@ -207,6 +207,10 @@ void IETView::setFileExtensionsByName(QStringList calibrationFbSuffixes, QString
   m_uiForm.dsCalibrationFile->setWSSuffixes(calibrationWSSuffixes);
 }
 
+void IETView::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsCalibrationFile->setLoadProperty("LoadHistory", doLoadHistory);
+}
+
 void IETView::setInstrumentSpectraRange(int specMin, int specMax) {
   m_uiForm.spSpectraMin->setRange(specMin, specMax);
   m_uiForm.spSpectraMin->setValue(specMin);

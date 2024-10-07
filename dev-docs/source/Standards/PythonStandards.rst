@@ -22,7 +22,7 @@ Formatting with black
 ---------------------
 
 To ensure that formatting matches across all developers please use the latest version of black.
-This is installed by the mantid-developer conda environment files and will eventually be enforced by a pre-commit hook.
+This is installed by the mantid-developer conda metapackage and will eventually be enforced by a pre-commit hook.
 black automatically finds the configuration in the ``pyproject.toml`` file when executed inside the Mantid source directory.
 To format a given file you may use ``python -m black path/to/file.py``.
 

@@ -241,6 +241,7 @@ bool V3D::nullVector(const double tolerance) const noexcept {
 }
 
 bool V3D::unitVector(const double tolerance) const noexcept {
+  // NOTE could be made more efficient using norm2()
   const auto l = norm();
   return std::abs(l - 1.) < tolerance;
 }
@@ -500,12 +501,12 @@ V3D V3D::directionAngles(bool inDegrees) const {
 */
 int V3D::maxCoeff() {
   int MaxOrder = 0;
-  if (abs(static_cast<int>(m_pt[0])) > MaxOrder)
-    MaxOrder = abs(static_cast<int>(m_pt[0]));
-  if (abs(static_cast<int>(m_pt[1])) > MaxOrder)
-    MaxOrder = abs(static_cast<int>(m_pt[1]));
-  if (abs(static_cast<int>(m_pt[2])) > MaxOrder)
-    MaxOrder = abs(static_cast<int>(m_pt[2]));
+  if (std::abs(static_cast<int>(m_pt[0])) > MaxOrder)
+    MaxOrder = std::abs(static_cast<int>(m_pt[0]));
+  if (std::abs(static_cast<int>(m_pt[1])) > MaxOrder)
+    MaxOrder = std::abs(static_cast<int>(m_pt[1]));
+  if (std::abs(static_cast<int>(m_pt[2])) > MaxOrder)
+    MaxOrder = std::abs(static_cast<int>(m_pt[2]));
   return MaxOrder;
 }
 
@@ -513,15 +514,16 @@ int V3D::maxCoeff() {
   Calculates the absolute value.
   @return The absolute value
 */
-V3D V3D::absoluteValue() const { return V3D(fabs(m_pt[0]), fabs(m_pt[1]), fabs(m_pt[2])); }
+V3D V3D::absoluteValue() const { return V3D(std::abs(m_pt[0]), std::abs(m_pt[1]), std::abs(m_pt[2])); }
 
 /**
   Calculates the error of the HKL to compare with tolerance
   @return The error
 */
 double V3D::hklError() const {
-  return fabs(m_pt[0] - std::round(m_pt[0])) + fabs(m_pt[1] - std::round(m_pt[1])) +
-         fabs(m_pt[2] - std::round(m_pt[2]));
+  return std::abs(m_pt[0] - std::round(m_pt[0])) + //
+         std::abs(m_pt[1] - std::round(m_pt[1])) + //
+         std::abs(m_pt[2] - std::round(m_pt[2]));
 }
 
 } // namespace Mantid::Kernel

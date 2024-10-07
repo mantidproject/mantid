@@ -18,7 +18,6 @@ import numpy as np
 
 
 class ConvertQtoHKLMDHisto(PythonAlgorithm):
-
     _lattice = None
 
     def category(self):

@@ -379,7 +379,6 @@ class PoldiDataAnalysis(PythonAlgorithm):
         plotResults = self.getProperty("PlotResult").value
 
         if plotResults:
-
             plotWindow = plotSpectrum(total, 0, type=1)
             plotWindow = plotSpectrum(spectrum1D, 0, type=0, window=plotWindow)
             plotWindow = plotSpectrum(residuals, 0, type=0, window=plotWindow)

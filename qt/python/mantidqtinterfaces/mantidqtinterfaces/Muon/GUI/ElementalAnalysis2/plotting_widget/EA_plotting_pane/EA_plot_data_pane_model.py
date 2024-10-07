@@ -104,7 +104,6 @@ class EAPlotDataPaneModel(BasePaneModel):
         return workspace_name + "_" + INVERSE_SPECTRA_INDICES[index]
 
     def _get_workspace_plot_axis(self, workspace_name: str, axes_workspace_map, index=None):
-
         if not self.context.plot_panes_context[self.name].settings.is_tiled:
             return 0
 

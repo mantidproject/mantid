@@ -47,10 +47,10 @@ Output:
 
 .. testoutput:: ExMultiplyAsAlg
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
-    The Y values are: [  0.   2.   4.   6.   8.  10.  12.  14.  16.]
-    The updated Error values are: [  0.           3.60555128   7.21110255  10.81665383  14.4222051
-      18.02775638  21.63330765  25.23885893  28.8444102 ]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
+    The Y values are: [ 0.  2.  4.  6.  8. 10. 12. 14. 16.]
+    The updated Error values are: [ 0.          3.60555128  7.21110255 10.81665383 14.4222051  18.02775638
+     21.63330765 25.23885893 28.8444102 ]
 
 **Example - Multiply as an operator**
 
@@ -77,10 +77,10 @@ Output:
 
 .. testoutput:: ExMultiplyAsOpperand
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
-    The Y values are: [  0.   2.   4.   6.   8.  10.  12.  14.  16.]
-    The updated Error values are: [  0.           3.60555128   7.21110255  10.81665383  14.4222051
-      18.02775638  21.63330765  25.23885893  28.8444102 ]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
+    The Y values are: [ 0.  2.  4.  6.  8. 10. 12. 14. 16.]
+    The updated Error values are: [ 0.          3.60555128  7.21110255 10.81665383 14.4222051  18.02775638
+     21.63330765 25.23885893 28.8444102 ]
 
 **Example - Multiply using in-place operator**
 
@@ -107,10 +107,10 @@ Output:
 
 .. testoutput:: ExMultiplyInPlace
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
-    The Y values are: [  0.   2.   4.   6.   8.  10.  12.  14.  16.]
-    The updated Error values are: [  0.           3.60555128   7.21110255  10.81665383  14.4222051
-      18.02775638  21.63330765  25.23885893  28.8444102 ]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
+    The Y values are: [ 0.  2.  4.  6.  8. 10. 12. 14. 16.]
+    The updated Error values are: [ 0.          3.60555128  7.21110255 10.81665383 14.4222051  18.02775638
+     21.63330765 25.23885893 28.8444102 ]
 
 **Example - Multiply with a Scalar**
 
@@ -133,9 +133,9 @@ Output:
 
 .. testoutput:: ExMultiplyWithSingleVal
 
-    The X values are: [ 0.  1.  2.  3.  4.  5.  6.  7.  8.  9.]
-    The Y values are: [  0.    2.5   5.    7.5  10.   12.5  15.   17.5  20. ]
-    The updated Error values are: [  0.    2.5   5.    7.5  10.   12.5  15.   17.5  20. ]
+    The X values are: [0. 1. 2. 3. 4. 5. 6. 7. 8. 9.]
+    The Y values are: [ 0.   2.5  5.   7.5 10.  12.5 15.  17.5 20. ]
+    The updated Error values are: [ 0.   2.5  5.   7.5 10.  12.5 15.  17.5 20. ]
 
 .. categories::
 

@@ -1,0 +1,1 @@
+- :ref:`LoadDspacemap <algm-LoadDspacemap>` has been deprecated.

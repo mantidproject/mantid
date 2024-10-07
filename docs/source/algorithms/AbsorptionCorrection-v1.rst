@@ -104,10 +104,9 @@ Output:
 .. testoutput:: ExSimpleSpere
 
     The created workspace has one entry for each spectra: 1
-    Original y values:  [  5.68751434   5.68751434  15.68751434   5.68751434   5.68751434
-       1.56242829]
-    Corrected y values:  [   818.39955533   2377.16206099  14230.46290595   9497.08390031
-      15787.69382575   5780.15301643]
+    Original y values:  [ 5.68751434  5.68751434 15.68751434  5.68751434  5.68751434  1.56242829]
+    Corrected y values:  [  818.39955533  2377.16206099 14230.46290595  9497.08390031
+     15787.69382575  5780.15301643]
 
 .. categories::
 

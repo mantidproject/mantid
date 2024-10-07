@@ -16,16 +16,16 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace {
-static constexpr auto MULTI_DATASET_FILE_SUFFIX = "_multi";
+static auto constexpr MULTI_DATASET_FILE_SUFFIX = "_multi";
 } // unnamed namespace
 
 namespace FileExtensions {
-static constexpr auto CUSTOM = "custom";
-static constexpr auto DAT = ".dat";
-static constexpr auto TXT = ".txt";
-static constexpr auto MFT = ".mft";
-static constexpr auto ORT = ".ort";
-static constexpr auto ORB = ".orb";
+static auto constexpr CUSTOM = "custom";
+static auto constexpr DAT = ".dat";
+static auto constexpr TXT = ".txt";
+static auto constexpr MFT = ".mft";
+static auto constexpr ORT = ".ort";
+static auto constexpr ORB = ".orb";
 } // namespace FileExtensions
 
 FileSaver::FileSaver(std::unique_ptr<ISaveAlgorithmRunner> saveAlgRunner, IFileHandler *fileHandler)
@@ -79,7 +79,7 @@ Mantid::API::Workspace_sptr FileSaver::workspace(std::string const &workspaceNam
 }
 
 void FileSaver::runSaveAsciiAlgorithm(std::string const &savePath, std::string const &extension,
-                                      const Mantid::API::Workspace_sptr &workspace,
+                                      Mantid::API::Workspace_sptr const &workspace,
                                       std::vector<std::string> const &logParameters,
                                       FileFormatOptions const &fileFormat) const {
   m_saveAlgRunner->runSaveAsciiAlgorithm(workspace, savePath, extension, logParameters,
@@ -93,13 +93,13 @@ void FileSaver::runSaveORSOAlgorithm(std::string const &savePath, std::vector<st
                                         fileFormat.shouldIncludeAdditionalColumns());
 }
 
-void FileSaver::save(const Mantid::API::Workspace_sptr &workspace, std::string const &saveDirectory,
+void FileSaver::save(Mantid::API::Workspace_sptr const &workspace, std::string const &saveDirectory,
                      std::vector<std::string> const &logParameters, FileFormatOptions const &fileFormat) const {
   auto const extension = extensionForFormat(fileFormat.format());
   auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), workspace->getName(), extension);
 
   if (fileFormat.isORSOFormat()) {
-    const std::vector<std::string> workspaceNames{workspace->getName()};
+    std::vector<std::string> const workspaceNames{workspace->getName()};
     runSaveORSOAlgorithm(savePath, workspaceNames, fileFormat);
   } else {
     runSaveAsciiAlgorithm(savePath, extension, workspace, logParameters, fileFormat);
@@ -109,7 +109,7 @@ void FileSaver::save(const Mantid::API::Workspace_sptr &workspace, std::string c
 void FileSaver::saveToSingleFile(std::vector<std::string> const &workspaceNames, std::string const &saveDirectory,
                                  FileFormatOptions const &fileFormat) const {
   auto const extension = extensionForFormat(fileFormat.format());
-  auto filename = workspaceNames.front() + MULTI_DATASET_FILE_SUFFIX;
+  auto const filename = workspaceNames.front() + MULTI_DATASET_FILE_SUFFIX;
   auto const savePath = assembleSavePath(saveDirectory, fileFormat.prefix(), filename, extension);
 
   if (fileFormat.isORSOFormat()) {
@@ -131,7 +131,7 @@ void FileSaver::save(std::string const &saveDirectory, std::vector<std::string> 
     saveToSingleFile(workspaceNames, saveDirectory, fileFormat);
   } else {
     for (auto const &name : workspaceNames) {
-      auto ws = workspace(name);
+      auto const ws = workspace(name);
       if (ws->isGroup()) {
         // Save child workspaces into separate files
         Mantid::API::WorkspaceGroup_sptr group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
@@ -156,7 +156,7 @@ bool FileSaver::shouldSaveToSingleFile(std::vector<std::string> const &workspace
   }
 
   // If there is only one workspace name in the list then we may still have multiple datasets if it is a workspace group
-  const auto ws = workspace(workspaceNames.front());
+  auto const ws = workspace(workspaceNames.front());
   if (!ws->isGroup()) {
     return false;
   }

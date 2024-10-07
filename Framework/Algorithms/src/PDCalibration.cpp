@@ -73,7 +73,7 @@ DECLARE_ALGORITHM(PDCalibration)
 
 namespace { // anonymous
 const auto isNonZero = [](const double value) { return value != 0.; };
-}
+} // namespace
 
 /// private inner class
 class PDCalibration::FittedPeaks {
@@ -315,6 +315,10 @@ void PDCalibration::init() {
                   "Used for validating peaks before fitting. If the total peak window Y-value count "
                   "is under this value, the peak will be excluded from fitting and calibration.");
 
+  declareProperty("MinimumSignalToSigmaRatio", 0.,
+                  "Used for validating peaks after fitting. If the signal-to-sigma ratio is under this value, "
+                  "the peak will be excluded from fitting and calibration.");
+
   // make group for Input properties
   std::string inputGroup("Input Options");
   setPropertyGroup("InputWorkspace", inputGroup);
@@ -336,6 +340,7 @@ void PDCalibration::init() {
   setPropertyGroup("MinimumPeakHeight", fitPeaksGroup);
   setPropertyGroup("MinimumSignalToNoiseRatio", fitPeaksGroup);
   setPropertyGroup("MinimumPeakTotalCount", fitPeaksGroup);
+  setPropertyGroup("MinimumSignalToSigmaRatio", fitPeaksGroup);
   setPropertyGroup("HighBackground", fitPeaksGroup);
   setPropertyGroup("MaxChiSq", fitPeaksGroup);
   setPropertyGroup("ConstrainPeakPositions", fitPeaksGroup);
@@ -489,6 +494,7 @@ void PDCalibration::exec() {
   const double minPeakHeight = getProperty("MinimumPeakHeight");
   const double minPeakTotalCount = getProperty("MinimumPeakTotalCount");
   const double minSignalToNoiseRatio = getProperty("MinimumSignalToNoiseRatio");
+  const double minSignalToSigmaRatio = getProperty("MinimumSignalToSigmaRatio");
   const double maxChiSquared = getProperty("MaxChiSq");
 
   const std::string calParams = getPropertyValue("CalibrationParameters");
@@ -578,6 +584,7 @@ void PDCalibration::exec() {
   algFitPeaks->setProperty("MinimumPeakHeight", minPeakHeight);
   algFitPeaks->setProperty("MinimumPeakTotalCount", minPeakTotalCount);
   algFitPeaks->setProperty("MinimumSignalToNoiseRatio", minSignalToNoiseRatio);
+  algFitPeaks->setProperty("MinimumSignalToSigmaRatio", minSignalToSigmaRatio);
   // some fitting strategy
   algFitPeaks->setProperty("FitFromRight", true);
   const bool highBackground = getProperty("HighBackground");

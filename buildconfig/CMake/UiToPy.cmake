@@ -3,8 +3,6 @@
 # ######################################################################################################################
 
 function(UiToPy5 ui_files target_name)
-  set(py_exec ${PYTHON_EXECUTABLE})
-  set(py_uic_py ${PYQT5_PYUIC}) # From FindPyQt5
   set(ui_dir ${CMAKE_CURRENT_SOURCE_DIR})
   set(_outputs "")
   foreach(ui_file ${${ui_files}})
@@ -17,8 +15,7 @@ function(UiToPy5 ui_files target_name)
     # Command to run the translation
     add_custom_command(
       OUTPUT ${generated_file}
-      COMMAND ${py_exec} ${py_uic_py} ${source_file} -o ${generated_file}
-      COMMAND ${py_exec} ${CMAKE_SOURCE_DIR}/buildconfig/wrap_pyui.py ${generated_file}
+      COMMAND ${PYTHON_EXECUTABLE} -m PyQt5.uic.pyuic -x ${source_file} -o ${generated_file}
       DEPENDS ${source_file}
     )
     # Record all generated files

@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -22,8 +23,10 @@ namespace DataHandling {
  * @author Janik Zikovsky (code from Vickie Lynch)
  * @date 2011-05-10
  */
-class MANTID_DATAHANDLING_DLL LoadDspacemap final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL LoadDspacemap final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
+  LoadDspacemap();
+
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadDspacemap"; };
   /// Summary of algorithms purpose

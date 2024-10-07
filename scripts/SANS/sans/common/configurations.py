@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" The SANSConfigurations class holds instrument-specific configs to centralize instrument-specific magic numbers"""
+"""The SANSConfigurations class holds instrument-specific configs to centralize instrument-specific magic numbers"""
+
 # pylint: disable=too-few-public-methods
 from abc import ABCMeta, abstractmethod
 

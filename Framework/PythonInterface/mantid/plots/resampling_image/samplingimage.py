@@ -29,7 +29,7 @@ class SamplingImage(MantidImage):
         filterrad=4.0,
         resample=False,
         normalize_by_bin_width=None,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(
             ax,
@@ -41,7 +41,7 @@ class SamplingImage(MantidImage):
             filternorm=filternorm,
             filterrad=filterrad,
             resample=resample,
-            **kwargs
+            **kwargs,
         )
         self.ws = workspace
         try:
@@ -243,7 +243,7 @@ def imshow_sampling(
         filterrad=filterrad,
         resample=resample,
         normalize_by_bin_width=normalize_by_bin_width,
-        **kwargs
+        **kwargs,
     )
     im._resample_image(100, 100)
 

@@ -15,6 +15,7 @@
 #include "InelasticFitPropertyBrowser.h"
 #include "MantidAPI/AnalysisDataServiceObserver.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -35,7 +36,7 @@ public:
 class MANTIDQT_INELASTIC_DLL FitDataPresenter : public IFitDataPresenter, public AnalysisDataServiceObserver {
 public:
   FitDataPresenter(IFitTab *tab, IDataModel *model, IFitDataView *view);
-  ~FitDataPresenter();
+  ~FitDataPresenter() override;
   virtual bool addWorkspaceFromDialog(MantidWidgets::IAddWorkspaceDialog const *dialog);
   void addWorkspace(const std::string &workspaceName, const FunctionModelSpectra &workspaceIndices);
   void setResolution(const std::string &name);
@@ -54,6 +55,8 @@ public:
   std::vector<double> getQValuesForData() const;
   std::vector<std::string> createDisplayNames() const;
   void validate(IUserInputValidator *validator);
+
+  virtual void updateFitFunctionList() const {};
 
   virtual void addWorkspace(const std::string &workspaceName, const std::string &paramType, const int &spectrum_index) {
     UNUSED_ARG(workspaceName);

@@ -154,7 +154,6 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
         self.checkStr(i.ReductionSingleton().instrument.detector_file("front"), "front_file")
 
     def test_flood_files(self):  # floodRearFile, floolFrontFile
-
         options = [("REAR", "rear_file"), ("FRONT", "front_file"), ("REAR", ""), ("FRONT", "")]
 
         for option in options:
@@ -162,7 +161,6 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
             self.checkStr(option[1], i.ReductionSingleton().prep_normalize.getPixelCorrFile(option[0]))
 
     def test_incident_monitors(self):  # monitor_spec, monitor_interp, trans_monitor, trans_interp
-
         options = [(2, True), (4, False), (3, True)]
 
         for option in options:

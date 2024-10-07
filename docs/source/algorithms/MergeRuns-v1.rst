@@ -156,9 +156,9 @@ Output:
 
 .. testoutput:: ExWs
 
-   a      = [  6.  15.  21.   9.]
-   b      = [  6.  15.  21.   9.]
-   merged = [ 12.  30.  42.  18.]
+   a      = [ 6. 15. 21.  9.]
+   b      = [ 6. 15. 21.  9.]
+   merged = [12. 30. 42. 18.]
 
 **Example: Merge Two GroupWorkspaces**
 
@@ -189,11 +189,11 @@ Output:
 
 .. testoutput:: ExWsGroup
 
-   group_1 = [[  6.  15.  21.   9.],
-              [  6.  15.  21.   9.]]
-   group_2 = [[  6.  15.  21.   9.],
-              [  6.  15.  21.   9.]]
-   merged   = [ 24.  60.  84.  36.]
+   group_1 = [[ 6. 15. 21.  9.],
+              [ 6. 15. 21.  9.]]
+   group_2 = [[ 6. 15. 21.  9.],
+              [ 6. 15. 21.  9.]]
+   merged   = [24. 60. 84. 36.]
 
 .. include:: ../usagedata-note.txt
 

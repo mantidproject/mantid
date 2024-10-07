@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" The elements of this module manage and add specific entries in the sample log."""
+"""The elements of this module manage and add specific entries in the sample log."""
 
 # pylint: disable=invalid-name
 

@@ -1,12 +1,13 @@
 """
-    mantiddoc.tools.screenshot
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~
+mantiddoc.tools.screenshot
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Provides functions to take a screenshot of a QWidgets.
+Provides functions to take a screenshot of a QWidgets.
 
-    :copyright: Copyright 2020
-        ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+:copyright: Copyright 2020
+    ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 """
+
 from functools import wraps
 import os
 from mantidqt.interfacemanager import InterfaceManager

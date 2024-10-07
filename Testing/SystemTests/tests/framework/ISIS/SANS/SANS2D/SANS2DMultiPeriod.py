@@ -16,11 +16,9 @@ from sans.common.enums import SANSInstrument
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMultiPeriodSingle(systemtesting.MantidSystemTest):
-
     reduced = ""
 
     def runTest(self):
-
         SANS2D()
         Set1D()
         Detector("rear-detector")
@@ -43,7 +41,6 @@ class SANS2DMultiPeriodSingle(systemtesting.MantidSystemTest):
 
 class SANS2DMultiPeriodBatch(SANS2DMultiPeriodSingle):
     def runTest(self):
-
         SANS2D()
         Set1D()
         Detector("rear-detector")

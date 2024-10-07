@@ -15,17 +15,17 @@ Getting Started
    GettingStartedCondaOSX
    GettingStartedNoneConda
 
-The Choice
-##########
+Environment Setup
+#################
 
-With the addition of Conda to our workflow we at present have two different methods of Getting Started with mantid
-development. Therefore you can choose which method to setup with (We recommend Conda as it will be the only supported
+With the addition of Conda to our workflow we at present have two different methods of Getting Started with mantid development.
+Therefore you can choose which method to setup with (We recommend Conda as it will be the only supported
 method eventually).
 
-* Conda on Windows: :ref:`GettingStartedCondaWindows`
-* Conda on Linux: :ref:`GettingStartedCondaLinux`
-* Conda on MacOS: :ref:`GettingStartedCondaOSX`
-* None Conda: :ref:`GettingStartedNoneConda`
+* :ref:`GettingStartedCondaWindows`
+* :ref:`GettingStartedCondaLinux`
+* :ref:`GettingStartedCondaOSX`
+* :ref:`GettingStartedNoneConda`
 
 Custom git setup for inside the ORNL firewall:
 ----------------------------------------------
@@ -46,7 +46,9 @@ If you need further help, ask another developer at the facility how to configure
 
 Building Mantid
 ###############
-See :ref:`BuildingWithCMake` for information about building Mantid.
+
+| From this point, you can proceed to build Mantid. See :ref:`BuildingWithCMake` for information.
+| For developers at ISIS, continue reading for information on accessing the archive.
 
 Archive access - ISIS
 #####################

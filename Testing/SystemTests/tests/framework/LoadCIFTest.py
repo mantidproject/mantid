@@ -39,7 +39,6 @@ class LoadCIFDataWithTwoSectionsTest(systemtesting.MantidSystemTest):
         return ["DyAgGe20K.cif"]
 
     def runTest(self):
-
         cif_pc_model = PointCharge("DyAgGe20K.cif")
 
         cif_pc_model.Charges = {"Ge2": -3, "Ge1": -3, "Dy": 2.3, "Ag": 0.7}

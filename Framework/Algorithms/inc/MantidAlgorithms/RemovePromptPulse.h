@@ -43,7 +43,8 @@ private:
   /// Try to get the frequency from a given name.
   double getFrequency(const API::Run &run);
   void getTofRange(const API::MatrixWorkspace_const_sptr &wksp, double &tmin, double &tmax);
-  std::vector<double> calculatePulseTimes(const double tmin, const double tmax, const double period);
+  std::vector<double> calculatePulseTimes(const double tmin, const double tmax, const double period,
+                                          const double width);
 };
 
 } // namespace Algorithms

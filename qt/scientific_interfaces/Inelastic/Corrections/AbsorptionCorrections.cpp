@@ -473,6 +473,10 @@ void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
   m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName) : noSuffixes);
 }
 
+void AbsorptionCorrections::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsSampleInput->setLoadProperty("LoadHistory", doLoadHistory);
+}
+
 void AbsorptionCorrections::processWavelengthWorkspace() {
   auto correctionsWs = getADSWorkspace<WorkspaceGroup>(m_pythonExportWsName);
   if (correctionsWs) {

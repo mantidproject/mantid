@@ -1,0 +1,1 @@
+- The CheckWorkspacesMatch algorithm was deprecated in :ref:`Release 3.9.0 <v3.9.0>` and has now been removed. Use :ref:`CompareWorkspaces<algm-compareworkspaces>` instead.

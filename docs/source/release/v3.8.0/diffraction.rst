@@ -59,13 +59,13 @@ Engineering Diffraction
 - EnggFocus: bins are now masked at the beginning of the workflow
   (when using the option MaskBinsXMins)
 
-- :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` an algorithm which saves a TableWorkspace containing
+- SaveDiffFittingAscii an algorithm which saves a TableWorkspace containing
   diffraction fitting results as an ASCII file
 
 - New *Fit All* button on the Fitting Tab will enable user to
   batch-process all the runs and banks when a range of run number
   is given. During the Fit process,
-  :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` algorithm
+  SaveDiffFittingAscii algorithm
   will be utilised to save *engggui_fitting_fitpeaks_param*
   TableWorkspace as a `csv` file.
 

@@ -17,7 +17,7 @@ build:
 requirements:
   build:
     - {{ compiler("cxx") }}
-    - ninja  # [osx or linux]
+    - ninja {{ ninja }}  # [osx or linux]
     - cmake {{ cmake }}
     - git
     - python {{ python }}                    # [build_platform != target_platform]
@@ -32,10 +32,10 @@ requirements:
   host:
     - python {{ python }}
     - setuptools
-    - sphinx
+    - sphinx {{ sphinx }}
     - sphinx_bootstrap_theme {{ sphinx_bootstrap_theme }}
     - mantidqt {{ version }}
-    - versioningit
+    - versioningit {{ versioningit }}
 
 # there are no run requirements as it's just pure html
 

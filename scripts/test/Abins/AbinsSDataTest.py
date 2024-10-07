@@ -10,6 +10,7 @@ import unittest
 
 import numpy as np
 from numpy.testing import assert_almost_equal
+from pydantic import ValidationError
 
 import abins
 from abins import SData
@@ -67,7 +68,7 @@ class AbinsSDataTest(unittest.TestCase):
             atom_keys=["atom_2", "atom_3"],
             order_keys=["order_2", "order_3"],
             temperature=101.0,
-            sample_form="etherial",
+            sample_form="Powder",
         )
         with self.assertRaises(IndexError):
             sdata[1]
@@ -78,7 +79,7 @@ class AbinsSDataTest(unittest.TestCase):
             assert_almost_equal(sdata[atom][order], np.zeros(10))
 
         assert_almost_equal(sdata.get_temperature(), 101.0)
-        self.assertEqual(sdata.get_sample_form(), "etherial")
+        self.assertEqual(sdata.get_sample_form(), "Powder")
 
     def test_s_data_update(self):
         # Case 1: add new atom
@@ -177,7 +178,6 @@ class AbinsSDataTest(unittest.TestCase):
                 },
             ),
         ]:
-
             sdata = SData(data=deepcopy(self.sample_data_two_orders), frequencies=self.frequencies)
             sdata.apply_dw(dw, min_order=min_order, max_order=max_order)
             for atom_key, atom_data in sdata.extract().items():
@@ -189,15 +189,8 @@ class AbinsSDataTest(unittest.TestCase):
     def test_sample_form(self):
         sample_form = "Polycrystalline"
 
-        s_data = SData(sample_form=sample_form, data=self.sample_data, frequencies=self.frequencies)
-        self.assertEqual(sample_form, s_data.get_sample_form())
-
-        with self.assertRaises(ValueError):
-            s_data.check_known_sample_form()
-
-        # Check should pass for 'Powder'
-        powder_data = SData(sample_form="Powder", data=self.sample_data, frequencies=self.frequencies)
-        powder_data.check_known_sample_form()
+        with self.assertRaisesRegex(ValidationError, "Input should be 'Powder'"):
+            _ = SData(sample_form=sample_form, data=self.sample_data, frequencies=self.frequencies)
 
     def test_bin_width(self):
         s_data = SData(data=self.sample_data, frequencies=self.frequencies)
@@ -258,18 +251,15 @@ class AbinsSDataTest(unittest.TestCase):
         # Good temperature should pass without issue
         good_temperature = 10.5
         s_data_good_temperature = SData(frequencies=self.frequencies, data=self.sample_data, temperature=good_temperature)
-        s_data_good_temperature.check_finite_temperature()
         self.assertAlmostEqual(good_temperature, s_data_good_temperature.get_temperature())
 
-        # Wrong type should get a TypeError at init
-        with self.assertRaises(TypeError):
-            SData(frequencies=self.frequencies, data=self.sample_data, temperature="10")
-
-        # Non-finite values should get a ValueError when explicitly checked
-        for bad_temperature in (-20.0, 0):
-            s_data_bad_temperature = SData(frequencies=self.frequencies, data=self.sample_data, temperature=bad_temperature)
-            with self.assertRaises(ValueError):
-                s_data_bad_temperature.check_finite_temperature()
+        for bad_temperature, regex in (
+            (-20.0, "Input should be greater than 0"),
+            (0, "Input should be greater than 0"),
+            ("10", "Input should be a valid number"),
+        ):
+            with self.assertRaisesRegex(ValidationError, regex):
+                _ = SData(frequencies=self.frequencies, data=self.sample_data, temperature=bad_temperature)
 
 
 class AbinsSDataByAngleTest(unittest.TestCase):
@@ -392,7 +382,7 @@ class AbinsSDataByAngleTest(unittest.TestCase):
         return SDataByAngle(data=self.init_data, angles=self.angles, frequencies=self.frequencies, **kwargs)
 
     def test_s_data_by_angle_indexing(self):
-        temperature, sample_form = (100.0, "powder")
+        temperature, sample_form = (100.0, "Powder")
 
         sdba = self.get_s_data_by_angle(temperature=temperature, sample_form=sample_form)
 
@@ -405,7 +395,7 @@ class AbinsSDataByAngleTest(unittest.TestCase):
             sdba[2]
 
     def test_s_data_by_angle_slicing(self):
-        temperature, sample_form = (101.0, "plasma")
+        temperature, sample_form = (101.0, "Powder")
 
         sdba = self.get_s_data_by_angle(temperature=temperature, sample_form=sample_form)
         sliced_data = sdba[-1:]
@@ -421,7 +411,7 @@ class AbinsSDataByAngleTest(unittest.TestCase):
         self.assertEqual(len(sdba[-1:]), 1)
 
     def test_sdba_from_sdata_series(self):
-        temperature, sample_form = (102.0, "quasicrystal")
+        temperature, sample_form = (102.0, "Powder")
         angle_0_sdata = SData(data=self.list_data[0], frequencies=self.frequencies, temperature=temperature, sample_form=sample_form)
         angle_1_sdata = SData(data=self.list_data[1], frequencies=self.frequencies, temperature=temperature, sample_form=sample_form)
 
@@ -437,17 +427,8 @@ class AbinsSDataByAngleTest(unittest.TestCase):
         bad_data = [  # Inconsistent frequencies
             {
                 "data": [
-                    SData(data=self.list_data[0], frequencies=[1, 2, 3, 4, 5, 6]),
-                    SData(data=self.list_data[1], frequencies=[2, 4, 6, 8, 10, 12]),
-                ],
-                "angles": self.angles,
-                "error": ValueError,
-            },
-            # Inconsistent sample_form
-            {
-                "data": [
-                    SData(data=self.list_data[0], frequencies=self.frequencies),
-                    SData(data=self.list_data[1], frequencies=self.frequencies, sample_form="crystal"),
+                    SData(data=self.list_data[0], frequencies=np.array([1, 2, 3, 4, 5, 6])),
+                    SData(data=self.list_data[1], frequencies=np.array([2, 4, 6, 8, 10, 12])),
                 ],
                 "angles": self.angles,
                 "error": ValueError,
@@ -471,7 +452,7 @@ class AbinsSDataByAngleTest(unittest.TestCase):
             {
                 "data": [SData(data=self.list_data[0], frequencies=self.frequencies, temperature=100.0), "SData (actually just a string)"],
                 "angles": self.angles,
-                "error": TypeError,
+                "error": ValidationError,
             },
         ]
 
@@ -480,12 +461,11 @@ class AbinsSDataByAngleTest(unittest.TestCase):
                 SDataByAngle.from_sdata_series(dataset["data"], angles=dataset["angles"])
 
     def test_s_data_sum_over_angles(self):
-        temperature, sample_form = (100.0, "crunchy powder")
+        temperature, sample_form = (100.0, "Powder")
 
         sdba = self.get_s_data_by_angle(temperature=temperature, sample_form=sample_form)
 
         for kwargs, ref_data in [({}, self.sum_data), ({"average": True}, self.avg_data), ({"weights": [2, 1]}, self.weighted_data)]:
-
             summed_data = sdba.sum_over_angles(**kwargs)
             for atom_key in ref_data:
                 self.assertTrue(np.allclose(summed_data.extract()[atom_key]["s"]["order_1"], ref_data[atom_key]["s"]["order_1"]))

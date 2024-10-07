@@ -571,9 +571,10 @@ class AbinsCRYSTAL2D(systemtesting.MantidSystemTest, HelperTestingClass):
             autoconvolution=True,
             ScaleByCrossSection=self._cross_section_factor,
             OutputWorkspace=self._output_name,
-            **params_2d
+            **params_2d,
         )
 
     def validate(self):
         self.tolerance = 1e-4
+        self.nanEqual = True
         return self._output_name, self.ref_result

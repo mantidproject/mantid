@@ -30,7 +30,7 @@
      <x>0</x>
      <y>0</y>
      <width>701</width>
-     <height>25</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFiles">
@@ -53,6 +53,7 @@
      </property>
      <addaction name="actionPowder_TOF"/>
      <addaction name="actionPowder_Elastic"/>
+     <addaction name="actionSingle_Crystal_Elastic"/>
     </widget>
     <addaction name="menuChange_Mode"/>
    </widget>
@@ -98,9 +99,9 @@
     <string>Simulation</string>
    </property>
   </action>
-  <action name="actionSingle_crystal_elastic">
+  <action name="actionSingle_Crystal_Elastic">
    <property name="text">
-    <string>Single Crystal elastic</string>
+    <string>Single Crystal Elastic</string>
    </property>
   </action>
   <action name="actionPowder_Elastic">
@@ -128,9 +129,14 @@
     <string>DNS website</string>
    </property>
   </action>
-  <action name="actionSC_elastic">
+  <action name="actionSingle_Crystal_Elastic">
    <property name="text">
-    <string>Single crystal elastic</string>
+    <string>Single Crystal Elastic</string>
+   </property>
+  </action>
+  <action name="actionSingle_Crystal_Elastic">
+   <property name="text">
+    <string>Single Crystal Elastic</string>
    </property>
   </action>
  </widget>

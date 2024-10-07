@@ -318,6 +318,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>line_style_combo_box</tabstop>
+  <tabstop>draw_style_combo_box</tabstop>
+  <tabstop>line_width_spin_box</tabstop>
+  <tabstop>apply_to_all_button</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

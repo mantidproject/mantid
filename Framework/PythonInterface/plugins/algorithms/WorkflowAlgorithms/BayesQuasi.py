@@ -8,6 +8,7 @@
 
 import os
 import numpy as np
+from typing import Tuple
 
 from mantid.api import (
     AlgorithmFactory,
@@ -22,6 +23,14 @@ from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
 from mantid import config, logger
 from IndirectCommon import *
+
+
+def _calculate_eisf(
+    height: np.ndarray, height_error: np.ndarray, amplitude: np.ndarray, amplitude_error: np.ndarray
+) -> Tuple[np.ndarray, np.ndarray]:
+    eisf = height / (height + amplitude)
+    eisf_error = (1 / (height + amplitude) ** 2) * np.sqrt((amplitude * height_error) ** 2 + (height * amplitude_error) ** 2)
+    return eisf, eisf_error
 
 
 class BayesQuasi(PythonAlgorithm):
@@ -174,7 +183,7 @@ class BayesQuasi(PythonAlgorithm):
 
         array_len = 4096  # length of array in Fortran
         setup_prog.report("Checking X Range")
-        CheckXrange(erange, "Energy")
+        check_x_range(erange, "Energy")
 
         nbin, nrbin = nbins[0], nbins[1]
 
@@ -182,12 +191,12 @@ class BayesQuasi(PythonAlgorithm):
         logger.information("Resolution is " + self._resWS)
 
         setup_prog.report("Checking Analysers")
-        CheckAnalysersOrEFixed(self._samWS, self._resWS)
+        check_analysers_or_e_fixed(self._samWS, self._resWS)
         setup_prog.report("Obtaining EFixed, theta and Q")
-        efix = getEfixed(self._samWS)
-        theta, Q = GetThetaQ(self._samWS)
+        efix = get_efixed(self._samWS)
+        theta, Q = get_two_theta_and_q(self._samWS)
 
-        nsam, ntc = CheckHistZero(self._samWS)
+        nsam, ntc = check_hist_zero(self._samWS)
 
         totalNoSam = nsam
 
@@ -195,7 +204,7 @@ class BayesQuasi(PythonAlgorithm):
         if not self._loop:
             nsam = 1
 
-        nres = CheckHistZero(self._resWS)[0]
+        nres = check_hist_zero(self._resWS)[0]
 
         setup_prog.report("Checking Histograms")
         if self._program == "QL":
@@ -203,7 +212,7 @@ class BayesQuasi(PythonAlgorithm):
                 prog = "QLr"  # res file
             else:
                 prog = "QLd"  # data file
-                CheckHistSame(self._samWS, "Sample", self._resWS, "Resolution")
+                check_dimensions_equal(self._samWS, "Sample", self._resWS, "Resolution")
         elif self._program == "QSe":
             if nres == 1:
                 prog = "QSe"  # res file
@@ -458,7 +467,7 @@ class BayesQuasi(PythonAlgorithm):
         asc = self._read_ascii_file(sname + ".qse")
         var = asc[3].split()  # split line on spaces
         nspec = var[0]
-        var = ExtractInt(asc[6])
+        var = extract_int(asc[6])
         first = 7
         Xout = []
         Yf, Yi, Yb = [], [], []
@@ -530,30 +539,30 @@ class BayesQuasi(PythonAlgorithm):
 
     def SeBlock(self, a, index):  # read Ascii block of Integers
         index += 1
-        val = ExtractFloat(a[index])  # Q,AMAX,HWHM
+        val = extract_float(a[index])  # Q,AMAX,HWHM
         Q = val[0]
         AMAX = val[1]
         HWHM = val[2]
         index += 1
-        val = ExtractFloat(a[index])  # A0
+        val = extract_float(a[index])  # A0
         int0 = [AMAX * val[0]]
         index += 1
-        val = ExtractFloat(a[index])  # AI,FWHM index peak
+        val = extract_float(a[index])  # AI,FWHM index peak
         fw = [2.0 * HWHM * val[1]]
         integer = [AMAX * val[0]]
         index += 1
-        val = ExtractFloat(a[index])  # SIG0
+        val = extract_float(a[index])  # SIG0
         int0.append(val[0])
         index += 1
-        val = ExtractFloat(a[index])  # SIG3K
+        val = extract_float(a[index])  # SIG3K
         integer.append(AMAX * math.sqrt(math.fabs(val[0]) + 1.0e-20))
         index += 1
-        val = ExtractFloat(a[index])  # SIG1K
+        val = extract_float(a[index])  # SIG1K
         fw.append(2.0 * HWHM * math.sqrt(math.fabs(val[0]) + 1.0e-20))
         index += 1
-        be = ExtractFloat(a[index])  # EXPBET
+        be = extract_float(a[index])  # EXPBET
         index += 1
-        val = ExtractFloat(a[index])  # SIG2K
+        val = extract_float(a[index])  # SIG2K
         be.append(math.sqrt(math.fabs(val[0]) + 1.0e-20))
         index += 1
         return index, Q, int0, fw, integer, be  # values as list
@@ -568,8 +577,8 @@ class BayesQuasi(PythonAlgorithm):
             for _ in range(0, ngrp):
                 dtnorm.append(1.0)
                 xscale.append(1.0)
-        dtn = PadArray(dtnorm, 51)  # pad for Fortran call
-        xsc = PadArray(xscale, 51)
+        dtn = pad_array(dtnorm, 51)  # pad for Fortran call
+        xsc = pad_array(xscale, 51)
         return dtn, xsc
 
     def _read_norm_file(self, readRes, resnormWS, nsam):  # get norm & scale values
@@ -623,8 +632,8 @@ class BayesQuasi(PythonAlgorithm):
             widthY = np.zeros(numSampleGroups)
             widthE = np.zeros(numSampleGroups)
         # pad for Fortran call
-        widthY = PadArray(widthY, 51)
-        widthE = PadArray(widthE, 51)
+        widthY = pad_array(widthY, 51)
+        widthE = pad_array(widthE, 51)
 
         return widthY, widthE
 
@@ -654,39 +663,26 @@ class BayesQuasi(PythonAlgorithm):
             height_data, height_error = np.asarray(height_data), np.asarray(height_error)
 
             # calculate EISF and EISF error
-            total = height_data + amplitude_data
-            EISF_data = height_data / total
-            total_error = height_error**2 + amplitude_error**2
-            EISF_error = EISF_data * np.sqrt((height_error**2 / height_data**2) + (total_error / total**2))
+            eisf_data, eisf_error = _calculate_eisf(height_data, height_error, amplitude_data, amplitude_error)
 
             # interlace amplitudes and widths of the peaks
-            y.append(np.asarray(height_data))
-            for amp, width, EISF in zip(amplitude_data, width_data, EISF_data):
-                y.append(amp)
-                y.append(width)
-                y.append(EISF)
+            y.extend(height_data)
+            y.extend(np.hstack((amplitude_data, width_data, eisf_data)).flatten())
 
             # interlace amplitude and width errors of the peaks
-            e.append(np.asarray(height_error))
-            for amp, width, EISF in zip(amplitude_error, width_error, EISF_error):
-                e.append(amp)
-                e.append(width)
-                e.append(EISF)
+            e.extend(height_error)
+            e.extend(np.hstack((amplitude_error, width_error, eisf_error)).flatten())
 
             # create x data and axis names for each function
             axis_names.append("f" + str(nl) + ".f0." + "Height")
-            x.append(x_data)
+            x.extend(x_data)
             for j in range(1, nl + 1):
                 axis_names.append("f" + str(nl) + ".f" + str(j) + ".Amplitude")
-                x.append(x_data)
+                x.extend(x_data)
                 axis_names.append("f" + str(nl) + ".f" + str(j) + ".FWHM")
-                x.append(x_data)
+                x.extend(x_data)
                 axis_names.append("f" + str(nl) + ".f" + str(j) + ".EISF")
-                x.append(x_data)
-
-        x = np.asarray(x).flatten()
-        y = np.asarray(y).flatten()
-        e = np.asarray(e).flatten()
+                x.extend(x_data)
 
         s_api.CreateWorkspace(
             OutputWorkspace=output_workspace,
@@ -707,7 +703,7 @@ class BayesQuasi(PythonAlgorithm):
         # yield a list of floats from a list of lines of text
         # encapsulates the iteration over a block of lines
         for line in block:
-            yield ExtractFloat(line)
+            yield extract_float(line)
 
     def _read_ql_file(self, file_name, nl):
         # offset to ignore header
@@ -716,7 +712,7 @@ class BayesQuasi(PythonAlgorithm):
 
         asc = self._read_ascii_file(file_name)
         # extract number of blocks from the file header
-        num_blocks = int(ExtractFloat(asc[3])[0])
+        num_blocks = int(extract_float(asc[3])[0])
 
         q_data = []
         amp_data, FWHM_data, height_data = [], [], []
@@ -763,12 +759,12 @@ class BayesQuasi(PythonAlgorithm):
                 # SIGIK
                 line = next(line_pointer)
                 amp = AMAX * math.sqrt(math.fabs(line[0]) + 1.0e-20)
-                block_amplitude_e.append(amp)
+                block_amplitude_e.append(abs(amp))
 
                 # SIGFK
                 line = next(line_pointer)
                 FWHM = 2.0 * HWHM * math.sqrt(math.fabs(line[0]) + 1.0e-20)
-                block_FWHM_e.append(FWHM)
+                block_FWHM_e.append(abs(FWHM))
 
             # append data from block
             amp_data.append(block_amplitude)
@@ -778,7 +774,7 @@ class BayesQuasi(PythonAlgorithm):
             # append error values from block
             amp_error.append(block_amplitude_e)
             FWHM_error.append(block_FWHM_e)
-            height_error.append(block_height_e)
+            height_error.append(abs(block_height_e))
 
         return q_data, (amp_data, FWHM_data, height_data), (amp_error, FWHM_error, height_error)
 

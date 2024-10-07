@@ -185,7 +185,7 @@ class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
             InputFiles=self.data_files,
             SumFiles=self.sum_files,
             SpectraRange=self.detector_range,
-            **kwargs
+            **kwargs,
         )
 
         self.result_names = sorted(reductions.getNames())
@@ -331,6 +331,7 @@ class OSIRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
         self.sum_files = True
 
     def get_reference_files(self):
+        self.nanEqual = True
         return ["II.OSIRISMultiFileSummedReduction.nxs"]
 
 

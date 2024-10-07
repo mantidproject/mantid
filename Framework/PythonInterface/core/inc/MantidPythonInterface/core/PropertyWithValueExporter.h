@@ -43,7 +43,8 @@ struct PropertyWithValueExporter {
     using namespace Mantid::Kernel;
 
     class_<PropertyWithValue<HeldType>, bases<Property>, boost::noncopyable>(
-        pythonClassName, init<std::string, HeldType>((arg("self"), arg("name"), arg("value"))))
+        pythonClassName, init<std::string, HeldType, unsigned int>(
+                             (arg("self"), arg("name"), arg("value"), arg("direction") = Direction::Input)))
         .add_property("value",
                       make_function(&PropertyWithValue<HeldType>::operator(), return_value_policy<ValueReturnPolicy>()))
         .def("dtype", &dtype<HeldType>, arg("self"));

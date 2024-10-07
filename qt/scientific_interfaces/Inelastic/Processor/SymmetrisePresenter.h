@@ -54,12 +54,14 @@ class MANTIDQT_INELASTIC_DLL SymmetrisePresenter : public DataProcessor,
                                                    public ISymmetrisePresenter,
                                                    public IRunSubscriber {
 public:
-  SymmetrisePresenter(QWidget *parent, ISymmetriseView *view, std::unique_ptr<ISymmetriseModel> model);
+  SymmetrisePresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
+                      ISymmetriseView *view, std::unique_ptr<ISymmetriseModel> model);
   ~SymmetrisePresenter() override;
 
   // run widget
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "Symmetrise"; }
 
   void handleReflectTypeChanged(int value) override;
   void handleDoubleValueChanged(std::string const &propname, double value) override;
@@ -74,8 +76,8 @@ protected:
 
 private:
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
-  Mantid::API::AnalysisDataServiceImpl &m_adsInstance;
   ISymmetriseView *m_view;
   std::unique_ptr<ISymmetriseModel> m_model;
   // wether batch algorunner is running preview or run buttons

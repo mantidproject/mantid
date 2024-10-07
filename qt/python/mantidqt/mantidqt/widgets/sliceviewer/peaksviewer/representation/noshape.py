@@ -24,7 +24,13 @@ class NonIntegratedPeakRepresentation:
 
     @classmethod
     def draw(
-        cls, peak_origin: Sequence, peak_shape, slice_info: SliceInfo, painter: MplPainter, fg_color: str, _  # unused PeakShape
+        cls,
+        peak_origin: Sequence,
+        peak_shape,
+        slice_info: SliceInfo,
+        painter: MplPainter,
+        fg_color: str,
+        _,  # unused PeakShape
     ) -> Painted:  # unused bg_color
         """
         Draw the representation of a slice through a peak with no shape

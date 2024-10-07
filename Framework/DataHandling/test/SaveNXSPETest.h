@@ -16,6 +16,8 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include "boost/tuple/tuple.hpp"
@@ -61,17 +63,73 @@ public:
   }
 
   void test_Saving_Workspace_Smaller_Than_Chunk_Size() {
-    // Create a small test workspace
-    const int nhist(3), nx(10);
-    MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
-    auto loadedData = saveAndReloadWorkspace(input);
+    MatrixWorkspace_sptr input = makeWorkspace();
+    auto loadedData = saveAndReloadWorkspace(input, 10);
     auto dims = loadedData.get<0>();
     auto signal = loadedData.get<1>();
     auto error = loadedData.get<2>();
 
     double tolerance(1e-08);
-    TS_ASSERT_EQUALS(nhist, dims[0]);
-    TS_ASSERT_EQUALS(nx, dims[1]);
+    TS_ASSERT_EQUALS(3, dims[0]);
+    TS_ASSERT_EQUALS(10, dims[1]);
+    // element 0,0
+    TS_ASSERT_DELTA(0.0, signal[0], tolerance);
+    TS_ASSERT_DELTA(0.0, error[0], tolerance);
+    // element 0,9
+    TS_ASSERT_DELTA(9.0, signal[9], tolerance);
+    TS_ASSERT_DELTA(18.0, error[9], tolerance);
+    // element 1,2 in 2D flat buffer
+    TS_ASSERT(std::isnan(signal[1 * dims[1] + 2]));
+    TS_ASSERT_DELTA(0.0, error[1 * dims[1] + 2], tolerance);
+    // final element
+    TS_ASSERT_DELTA(29.0, signal[dims[0] * dims[1] - 1], tolerance);
+    TS_ASSERT_DELTA(58.0, error[dims[0] * dims[1] - 1], tolerance);
+  }
+
+  void test_Ei_onProperty_superseeds_logs() {
+    MatrixWorkspace_sptr input = makeWorkspace();
+    input = makeWS_direct(input);
+
+    auto loadedData = saveAndReloadWorkspace(input, 10, true);
+    auto dims = loadedData.get<0>();
+    auto signal = loadedData.get<1>();
+    auto error = loadedData.get<2>();
+    auto Ei = loadedData.get<3>();
+
+    double tolerance(1e-08);
+    TS_ASSERT_DELTA(10.0, Ei[0], tolerance);
+    //
+    TS_ASSERT_EQUALS(3, dims[0]);
+    TS_ASSERT_EQUALS(10, dims[1]);
+    // element 0,0
+    TS_ASSERT_DELTA(0.0, signal[0], tolerance);
+    TS_ASSERT_DELTA(0.0, error[0], tolerance);
+    // element 0,9
+    TS_ASSERT_DELTA(9.0, signal[9], tolerance);
+    TS_ASSERT_DELTA(18.0, error[9], tolerance);
+    // element 1,2 in 2D flat buffer
+    TS_ASSERT(std::isnan(signal[1 * dims[1] + 2]));
+    TS_ASSERT_DELTA(0.0, error[1 * dims[1] + 2], tolerance);
+    // final element
+    TS_ASSERT_DELTA(29.0, signal[dims[0] * dims[1] - 1], tolerance);
+    TS_ASSERT_DELTA(58.0, error[dims[0] * dims[1] - 1], tolerance);
+  }
+
+  void test_Saving_Workspace_Small_EiOnLog_direct() {
+    MatrixWorkspace_sptr input = makeWorkspace();
+    input = makeWS_direct(input);
+
+    auto loadedData = saveAndReloadWorkspace(input, 10, false);
+    auto dims = loadedData.get<0>();
+    auto signal = loadedData.get<1>();
+    auto error = loadedData.get<2>();
+    auto Ei = loadedData.get<3>();
+
+    double tolerance(1e-08);
+    TS_ASSERT_DELTA(12.0, Ei[0], tolerance);
+    //
+    TS_ASSERT_EQUALS(3, dims[0]);
+    TS_ASSERT_EQUALS(10, dims[1]);
     // element 0,0
     TS_ASSERT_DELTA(0.0, signal[0], tolerance);
     TS_ASSERT_DELTA(0.0, error[0], tolerance);
@@ -87,10 +145,9 @@ public:
   }
 
   void test_Saving_Workspace_Larger_Than_Chunk_Size() {
-    // Create a test workspace
     const int nhist(5250), nx(100);
     MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
-    auto loadedData = saveAndReloadWorkspace(input);
+    auto loadedData = saveAndReloadWorkspace(input, 10);
     auto dims = loadedData.get<0>();
     auto signal = loadedData.get<1>();
     auto error = loadedData.get<2>();
@@ -134,6 +191,19 @@ public:
   }
 
 private:
+  MatrixWorkspace_sptr makeWS_direct(MatrixWorkspace_sptr inputWS, double ei = 12.0) {
+    std::unique_ptr<Mantid::Kernel::PropertyWithValue<std::string>> mode(
+        new Mantid::Kernel::PropertyWithValue<std::string>("deltaE-mode", "Direct"));
+    // pointer is owned by run, no need to delete
+    inputWS->mutableRun().addLogData(mode.release());
+
+    std::unique_ptr<Mantid::Kernel::PropertyWithValue<double>> EiLog(
+        new Mantid::Kernel::PropertyWithValue<double>("Ei", ei));
+    inputWS->mutableRun().addLogData(EiLog.release());
+
+    return inputWS;
+  }
+
   MatrixWorkspace_sptr makeWorkspace(int nhist = 3, int nx = 10) {
     auto testWS = WorkspaceCreationHelper::create2DWorkspaceBinned(nhist, nx, 1.0);
     // Fill workspace with increasing counter to properly check saving
@@ -165,9 +235,10 @@ private:
     return inputWS;
   }
 
-  using DataHolder = boost::tuple<std::vector<hsize_t>, std::vector<double>, std::vector<double>>;
+  using DataHolder = boost::tuple<std::vector<hsize_t>, std::vector<double>, std::vector<double>, std::vector<double>>;
 
-  DataHolder saveAndReloadWorkspace(const MatrixWorkspace_sptr &inputWS) {
+  DataHolder saveAndReloadWorkspace(const MatrixWorkspace_sptr &inputWS, const double efix_value,
+                                    bool set_efixed = true) {
     SaveNXSPE saver;
     saver.initialize();
     saver.setChild(true);
@@ -176,7 +247,9 @@ private:
     TS_ASSERT_THROWS_NOTHING(saver.setPropertyValue("Filename", outputFile));
     outputFile = saver.getPropertyValue("Filename"); // get absolute path
 
-    TS_ASSERT_THROWS_NOTHING(saver.setProperty("Efixed", 0.0));
+    if (set_efixed)
+      TS_ASSERT_THROWS_NOTHING(saver.setProperty("Efixed", efix_value));
+
     TS_ASSERT_THROWS_NOTHING(saver.setProperty("Psi", 0.0));
     TS_ASSERT_THROWS_NOTHING(saver.setProperty("KiOverKfScaling", true));
     TS_ASSERT_THROWS_NOTHING(saver.execute());
@@ -184,7 +257,8 @@ private:
 
     TS_ASSERT(Poco::File(outputFile).exists());
     if (!Poco::File(outputFile).exists()) {
-      return boost::make_tuple(std::vector<hsize_t>(), std::vector<double>(), std::vector<double>());
+      return boost::make_tuple(std::vector<hsize_t>(), std::vector<double>(), std::vector<double>(),
+                               std::vector<double>());
     }
 
     auto h5file = H5Fopen(outputFile.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
@@ -210,9 +284,31 @@ private:
     const char *dsetErr = "/mantid_workspace/data/error";
     status = H5LTread_dataset_double(h5file, dsetErr, error.data());
     TS_ASSERT_EQUALS(0, status);
+    //---------------------------------------------------------------
+    // check efixed
+    const char *efixed_dset = "/mantid_workspace/NXSPE_info/fixed_energy";
+    status = H5LTget_dataset_ndims(h5file, efixed_dset, &rank);
+    TS_ASSERT_EQUALS(0, status);
+    TS_ASSERT_EQUALS(1, rank);
+
+    std::vector<hsize_t> efix_dims(rank);
+    status = H5LTget_dataset_info(h5file, efixed_dset, efix_dims.data(), &classId, &typeSize);
+    TS_ASSERT_EQUALS(0, status);
+    TS_ASSERT_EQUALS(H5T_FLOAT, classId);
+    TS_ASSERT_EQUALS(8, typeSize);
+
+    size_t EnBuffer(efix_dims[0]);
+    std::vector<double> efixed(EnBuffer);
+    status = H5LTread_dataset_double(h5file, efixed_dset, efixed.data());
+    TS_ASSERT_EQUALS(0, status);
+    if (set_efixed) {
+      TS_ASSERT_EQUALS(EnBuffer, 1);
+      TS_ASSERT_DELTA(efixed[0], efix_value, 1.e-8);
+    }
+
     H5Fclose(h5file);
     // Poco::File(outputFile).remove();
 
-    return boost::make_tuple(dims, signal, error);
+    return boost::make_tuple(dims, signal, error, efixed);
   }
 };

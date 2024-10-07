@@ -17,7 +17,6 @@ import numpy as np
 
 
 def BACK(hists, datum, sigma, DETECT_e, filePHASE, mylog):
-
     (npts, ngroups) = datum.shape
     DETECT_d = np.zeros([ngroups])
     for j in range(ngroups):

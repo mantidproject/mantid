@@ -12,7 +12,6 @@ from mantidqtinterfaces.drill.model.DrillExportModel import DrillExportModel
 
 
 class DrillExportModelTest(unittest.TestCase):
-
     EXPORT_ALGORITHMS = {"a1": {("ea1", ".txt"): True, ("ea2", ".xml"): False}, "a2": {("ea2", ".xml"): True}}
 
     EXPORT_ALGO_CRITERIA = {"ea1": "%param% == 'test'", "ea2": "%param% != 'test'"}

@@ -5,130 +5,131 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Defines a handler for the Sphinx 'build-finished' event.
-    If the builder is doctest then it post-processes the
-    output file to produce an XUnit-style XML file that can be
-    more easily parse by CI servers such as Jenkins.
+Defines a handler for the Sphinx 'build-finished' event.
+If the builder is doctest then it post-processes the
+output file to produce an XUnit-style XML file that can be
+more easily parse by CI servers such as Jenkins.
 
-    Output file structure
-    ~~~~~~~~~~~~~~~~~~~~~
+Output file structure
+~~~~~~~~~~~~~~~~~~~~~
 
-    The following outcomes are possible for a given
-    document:
-     - all tests pass;
-     - all tests fail;
-     - and some test pass and some fail.
+The following outcomes are possible for a given
+document:
+ - all tests pass;
+ - all tests fail;
+ - and some test pass and some fail.
 
-    Below are examples of the output for each of the above
-    outcomes, given a document named 'FooDoc' in a
-    directory 'bar' relative to the documentation root.
+Below are examples of the output for each of the above
+outcomes, given a document named 'FooDoc' in a
+directory 'bar' relative to the documentation root.
 
-    - All Passed:
-     ============
+- All Passed:
+ ============
 
-    Document: algorithms/AllPassed
-    ------------------------------
-    2 items passed all tests:
-       1 tests in Ex 2
-       2 tests in default
-    3 tests in 2 items.
-    3 passed and 0 failed.
-    Test passed.
+Document: algorithms/AllPassed
+------------------------------
+2 items passed all tests:
+   1 tests in Ex 2
+   2 tests in default
+3 tests in 2 items.
+3 passed and 0 failed.
+Test passed.
 
-    Doctest summary
-    ===============
-    3 tests
-    0 failures in tests
-    0 failures in setup code
-    0 failures in cleanup code
+Doctest summary
+===============
+3 tests
+0 failures in tests
+0 failures in setup code
+0 failures in cleanup code
 
-    - All Failed:
-     ============
+- All Failed:
+ ============
 
-    Document: bar/FooDoc
-    --------------------
-    **********************************************************************
-    File "bar/FooDoc.rst", line 127, in Ex2[31]
-    Failed example:
-        print "Multi-line failed"
-        print "test"
-    Expected:
-        No match
-    Got:
-        Multi-line failed
-        test
-    **********************************************************************
-    File "bar/FooDoc.rst", line 111, in Ex1
-    Failed example:
-        print "Single line failed test"
-    Expected:
-        No match
-    Got:
-        Single line failed test
-    **********************************************************************
-    2 items had failures:
-       1 of   1 in Ex1
-       1 of   1 in Ex2[31]
-    2 tests in 2 items.
-    0 passed and 2 failed.
-    ***Test Failed*** 2 failures.
-    2 items passed all tests:
-       1 tests in Ex1 (cleanup code)
-       1 tests in Ex2[31] (cleanup code)
-    2 tests in 2 items.
-    2 passed and 0 failed.
-    Test passed.
+Document: bar/FooDoc
+--------------------
+**********************************************************************
+File "bar/FooDoc.rst", line 127, in Ex2[31]
+Failed example:
+    print "Multi-line failed"
+    print "test"
+Expected:
+    No match
+Got:
+    Multi-line failed
+    test
+**********************************************************************
+File "bar/FooDoc.rst", line 111, in Ex1
+Failed example:
+    print "Single line failed test"
+Expected:
+    No match
+Got:
+    Single line failed test
+**********************************************************************
+2 items had failures:
+   1 of   1 in Ex1
+   1 of   1 in Ex2[31]
+2 tests in 2 items.
+0 passed and 2 failed.
+***Test Failed*** 2 failures.
+2 items passed all tests:
+   1 tests in Ex1 (cleanup code)
+   1 tests in Ex2[31] (cleanup code)
+2 tests in 2 items.
+2 passed and 0 failed.
+Test passed.
 
-    Doctest summary
-    ===============
-    2 tests
-    2 failures in tests
-    0 failures in setup code
-    0 failures in cleanup code
+Doctest summary
+===============
+2 tests
+2 failures in tests
+0 failures in setup code
+0 failures in cleanup code
 
-    - Some pass some fail:
-      ====================
+- Some pass some fail:
+  ====================
 
-    Document: bar/FooDoc
-    --------------------
-    **********************************************************************
-    File "bar/FooDoc.rst", line 127, in default
-    Failed example:
-        print "A failed test"
-    Expected:
-        Not a success
-    Got:
-        A failed test
-    **********************************************************************
-    File "bar/FooDoc.rst", line 143, in Ex1
-    Failed example:
-        print "Second failed test"
-    Expected:
-        Not a success again
-    Got:
-        Second failed test
-    1 items passed all tests:
-        1 tests in Ex3
-    **********************************************************************
-    2 items had failures:
-       1 of   1 in Ex1
-       1 of   2 in default
-    4 tests in 3 items.
-    2 passed and 2 failed.
-    ***Test Failed*** 2 failures.
-    1 items passed all tests:
-       1 tests in Ex (cleanup code)
-    1 tests in 1 items.
-    1 passed and 0 failed.
-    Test passed.
+Document: bar/FooDoc
+--------------------
+**********************************************************************
+File "bar/FooDoc.rst", line 127, in default
+Failed example:
+    print "A failed test"
+Expected:
+    Not a success
+Got:
+    A failed test
+**********************************************************************
+File "bar/FooDoc.rst", line 143, in Ex1
+Failed example:
+    print "Second failed test"
+Expected:
+    Not a success again
+Got:
+    Second failed test
+1 items passed all tests:
+    1 tests in Ex3
+**********************************************************************
+2 items had failures:
+   1 of   1 in Ex1
+   1 of   2 in default
+4 tests in 3 items.
+2 passed and 2 failed.
+***Test Failed*** 2 failures.
+1 items passed all tests:
+   1 tests in Ex (cleanup code)
+1 tests in 1 items.
+1 passed and 0 failed.
+Test passed.
 
-    Doctest summary
-    ===============
-    4 tests
-    2 failures in tests
-    0 failures in setup code
-    0 failures in cleanup code
+Doctest summary
+===============
+4 tests
+2 failures in tests
+0 failures in setup code
+0 failures in cleanup code
 """
+
 import re
 
 try:

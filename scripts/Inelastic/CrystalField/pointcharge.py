@@ -367,9 +367,7 @@ class PointCharge(object):
         Blm[2][9] = PreFact[6][3] ** 2 * (11 * ct * ct2 - 3 * ct) * st2 * st * (cfi * cfi * cfi - 3 * cfi * sfi * sfi)
         Blm[2][10] = PreFact[6][4] ** 2 * (11 * ct2 - 1) * st2 * st2 * (cfi * cfi * cfi * cfi - 6 * cfi * cfi * sfi * sfi + pow(sfi, 4))
         Blm[2][11] = PreFact[6][5] ** 2 * ct * st * st2 * st2 * (pow(cfi, 5) - 10 * pow(cfi, 3) * sfi * sfi + 5 * cfi * pow(sfi, 4))
-        Blm[2][12] = (
-            PreFact[6][6] ** 2 * pow(st2, 3) * (pow(cfi, 6) - 15 * pow(cfi, 4) * sfi**2 + 15 * cfi**2 * pow(sfi, 4) - pow(sfi, 6))
-        )
+        Blm[2][12] = PreFact[6][6] ** 2 * pow(st2, 3) * (pow(cfi, 6) - 15 * pow(cfi, 4) * sfi**2 + 15 * cfi**2 * pow(sfi, 4) - pow(sfi, 6))
 
         Q_e = constants.physical_constants["atomic unit of charge"][0]
         eps0 = constants.physical_constants["electric constant"][0]

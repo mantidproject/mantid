@@ -51,6 +51,10 @@ void SettingsView::setPlotErrorBarsChecked(bool check) { m_uiForm->ckPlotErrorBa
 
 bool SettingsView::isPlotErrorBarsChecked() const { return m_uiForm->ckPlotErrorBars->isChecked(); }
 
+void SettingsView::setLoadHistoryChecked(bool check) { m_uiForm->ckLoadHistory->setChecked(check); }
+
+bool SettingsView::isLoadHistoryChecked() const { return m_uiForm->ckLoadHistory->isChecked(); }
+
 void SettingsView::setDeveloperFeatureFlags(QStringList const &flags) {
   m_uiForm->leDeveloperFeatureFlags->setText(flags.join(" "));
 }

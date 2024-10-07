@@ -57,7 +57,7 @@ class EAGroupingTabPresenter(object):
         """
         Generate the text for the description edit at the top of the widget.
         """
-        text = "\u03BCx: exp2k : file type .dat"
+        text = "\u03bcx: exp2k : file type .dat"
         return text
 
     def update_description_text(self, description_text=""):

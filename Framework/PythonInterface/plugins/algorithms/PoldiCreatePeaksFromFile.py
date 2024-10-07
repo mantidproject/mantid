@@ -218,7 +218,7 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
             LatticeSpacingMin=dMin,
             LatticeSpacingMax=dMax,
             OutputWorkspace=compound.getName(),
-            **compound.getCellParameters()
+            **compound.getCellParameters(),
         )
 
         return compound.getName()

@@ -27,7 +27,7 @@ public:
   /// Algorithm's version for identification
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override {
-    return {"SetUB", "FindUBUsingFFT", "FindUBUsingLatticeParameters", "FindUBUsingMinMaxD"};
+    return {"SetUB", "FindUBUsingFFT", "FindUBUsingLatticeParameters"};
   }
 
   /// Algorithm's category for identification

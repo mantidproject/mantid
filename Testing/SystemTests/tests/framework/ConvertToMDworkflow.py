@@ -16,7 +16,6 @@ class ConvertToMDworkflow(systemtesting.MantidSystemTest):
     tolerance = 1e-5
 
     def runTest(self):
-
         # let's load test event workspace, which has been already preprocessed and available in Mantid Test folder
         WS_Name = "CNCS_7860_event"
         Load(Filename=WS_Name, OutputWorkspace=WS_Name)

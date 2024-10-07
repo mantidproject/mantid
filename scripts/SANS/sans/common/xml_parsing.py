@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" The elements of this module are used to extract information from IDF and IPF files."""
+"""The elements of this module are used to extract information from IDF and IPF files."""
 
 # pylint: disable=invalid-name
 

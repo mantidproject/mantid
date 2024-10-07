@@ -25,6 +25,8 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "Stretch"; }
+
   // Slot for when settings are changed
   void applySettings(std::map<std::string, QVariant> const &settings) override;
 
@@ -53,6 +55,7 @@ private slots:
 
 private:
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   void populateContourWorkspaceComboBox();
   int displaySaveDirectoryMessage();

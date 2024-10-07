@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-""" SANBatchReduction algorithm is the starting point for any new type reduction, event single reduction"""
+"""SANBatchReduction algorithm is the starting point for any new type reduction, event single reduction"""
+
 from sans.state.AllStates import AllStates
 from sans.algorithm_detail.batch_execution import single_reduction_for_batch
 from sans.common.enums import OutputMode, FindDirectionEnum, DetectorType

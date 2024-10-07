@@ -78,6 +78,11 @@ void ResNorm::setFileExtensionsByName(bool filter) {
   m_uiForm.dsResolution->setWSSuffixes(filter ? getResolutionWSSuffixes(tabName) : noSuffixes);
 }
 
+void ResNorm::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsVanadium->setLoadProperty("LoadHistory", doLoadHistory);
+  m_uiForm.dsResolution->setLoadProperty("LoadHistory", doLoadHistory);
+}
+
 void ResNorm::handleValidation(IUserInputValidator *validator) const {
   bool const vanValid = validator->checkDataSelectorIsValid("Vanadium", m_uiForm.dsVanadium);
   bool const resValid = validator->checkDataSelectorIsValid("Resolution", m_uiForm.dsResolution);

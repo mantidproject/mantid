@@ -16,7 +16,6 @@ from sans.common.enums import SANSInstrument
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DWaveloops(systemtesting.MantidSystemTest):
     def runTest(self):
-
         SANS2D()
         MaskFile("MASKSANS2D.091A")
         Gravity(True)

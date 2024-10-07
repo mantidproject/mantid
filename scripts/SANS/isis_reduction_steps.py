@@ -7,13 +7,14 @@
 # pylint: disable=too-many-lines, too-many-branches, invalid-name, super-on-old-class, protected-access,
 # pylint: disable=too-few-public-methods,too-few-public-methods, too-many-arguments, too-many-instance-attributes
 """
-    This file defines what happens in each step in the data reduction, it's
-    the guts of the reduction. See ISISReducer for order the steps are run
-    in and the names they are given to identify them
+This file defines what happens in each step in the data reduction, it's
+the guts of the reduction. See ISISReducer for order the steps are run
+in and the names they are given to identify them
 
-    Most of this code is a copy-paste from SANSReduction.py, organized to be used with
-    ReductionStep objects. The guts needs refactoring.
+Most of this code is a copy-paste from SANSReduction.py, organized to be used with
+ReductionStep objects. The guts needs refactoring.
 """
+
 import os
 import re
 import math

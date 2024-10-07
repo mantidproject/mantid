@@ -269,7 +269,6 @@ class ISISLoadFilesLET(systemtesting.MantidSystemTest):
         self.valid = False
 
     def runTest(self):
-
         #
         propman = PropertyManager("LET")
 

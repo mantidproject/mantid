@@ -44,7 +44,7 @@ class SliceInfo:
         range: DimensionRangeCollection,
         qflags: Sequence[bool],
         axes_angles: Optional[np.ndarray] = None,
-        proj_matrix=np.eye(3)
+        proj_matrix=np.eye(3),
     ):
         assert len(point) == len(qflags)
         assert 3 >= sum(1 for i in filter(lambda x: x is True, qflags)), "A maximum of 3 spatial dimensions can be specified"

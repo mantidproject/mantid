@@ -22,7 +22,6 @@ class ExampleSaveAscii(PythonAlgorithm):
         return "Examples"
 
     def PyInit(self):
-
         # Declare properties
 
         # Declare a property for the output filename with a default of default_output.txt
@@ -36,7 +35,6 @@ class ExampleSaveAscii(PythonAlgorithm):
         )
 
     def PyExec(self):
-
         # Save the workspace to file in ascii format
 
         input_workspace = self.getProperty("InputWorkspace").value
@@ -45,7 +43,6 @@ class ExampleSaveAscii(PythonAlgorithm):
         # The 'with' statement will take care of closing the file when we are done,
         # or if an error occurs
         with open(self.getPropertyValue("OutputFilename"), "w") as file_handle:
-
             # Get the units from the workspace to use in the file header
             x_label = input_workspace.getAxis(0).getUnit().caption()
             y_label = input_workspace.getAxis(1).getUnit().caption()
@@ -55,7 +52,6 @@ class ExampleSaveAscii(PythonAlgorithm):
 
             # Loop through each spectrum histogram
             for histogram_n in range(input_workspace.getNumberHistograms()):
-
                 # Read the histogram data from the workspace
                 xdata = input_workspace.readX(histogram_n)
                 ydata = input_workspace.readY(histogram_n)
@@ -66,7 +62,6 @@ class ExampleSaveAscii(PythonAlgorithm):
 
                 # Loop through each bin
                 for bin_n in range(input_workspace.blocksize()):
-
                     # Calculate bin center from bin boundaries
                     bin_center = xdata[bin_n] + (xdata[bin_n + 1] - xdata[bin_n]) / 2.0
 

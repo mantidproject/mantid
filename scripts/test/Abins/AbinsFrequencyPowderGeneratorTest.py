@@ -25,7 +25,6 @@ class FrequencyPowderGeneratorTest(unittest.TestCase):
         abins.parameters.sampling["max_wavenumber"] = self.max_wavenumber
 
     def test_construct_freq_combinations(self):
-
         # reduce rebining parameters for this test
         # abins.parameters.bin_width = 1.0  # Doesn't seem to be used any more?
         bin_width = 1.0

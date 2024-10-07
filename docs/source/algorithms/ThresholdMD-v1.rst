@@ -73,8 +73,8 @@ Output:
 
 .. testoutput:: ExThresholdMD
 
-   selected bins before threshold greater than 4 [ 0.  5.  4.  0.]
-   same bins after threshold greater than 4 [ 0.  0.  4.  0.]
+   selected bins before threshold greater than 4 [0. 5. 4. 0.]
+   same bins after threshold greater than 4 [0. 0. 4. 0.]
 
 .. categories::
 

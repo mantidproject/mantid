@@ -29,6 +29,7 @@ public:
   void setParameterNames(const std::vector<std::string> &names);
   void setWSSuffices(const QStringList &suffices) override;
   void setFBSuffices(const QStringList &suffices) override;
+  void setLoadProperty(const std::string &propname, bool enable) override;
 
   void enableParameterSelection();
   void disableParameterSelection();

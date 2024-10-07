@@ -24,7 +24,6 @@ class EnginX:
         calfile_path: Optional[str] = None,
         spectrum_num: Optional[str] = None,
     ) -> None:
-
         # init attributes
         self.calibration = CalibrationInfo()
         self.van_run = vanadium_run

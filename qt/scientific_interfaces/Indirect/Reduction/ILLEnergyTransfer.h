@@ -25,6 +25,7 @@ public:
 
   void handleValidation(IUserInputValidator *validator) const override;
   void handleRun() override;
+  const std::string getSubscriberName() const override { return "ILLEnergyTransfer"; }
 
 private slots:
   void algorithmComplete(bool error);

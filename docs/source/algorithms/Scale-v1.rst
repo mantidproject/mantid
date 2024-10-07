@@ -41,11 +41,11 @@ Output:
 .. testoutput:: ExOffsetScale
 
     Every 10th bin value of ws
-    [  0.3   0.3   0.3   0.3   0.3  10.3   0.3   0.3   0.3   0.3]
+    [ 0.3  0.3  0.3  0.3  0.3 10.3  0.3  0.3  0.3  0.3]
     Every 10th bin value of wsOffset
-    [  2.3   2.3   2.3   2.3   2.3  12.3   2.3   2.3   2.3   2.3]
+    [ 2.3  2.3  2.3  2.3  2.3 12.3  2.3  2.3  2.3  2.3]
     Every 10th bin value of wsOffset2
-    [  2.3   2.3   2.3   2.3   2.3  12.3   2.3   2.3   2.3   2.3]
+    [ 2.3  2.3  2.3  2.3  2.3 12.3  2.3  2.3  2.3  2.3]
 
 **Example: Multiplying by a value**
 
@@ -70,11 +70,11 @@ Output:
 .. testoutput:: ExOffsetScale
 
     Every 10th bin value of ws
-    [  0.3   0.3   0.3   0.3   0.3  10.3   0.3   0.3   0.3   0.3]
+    [ 0.3  0.3  0.3  0.3  0.3 10.3  0.3  0.3  0.3  0.3]
     Every 10th bin value of wsScaled
-    [   3.    3.    3.    3.    3.  103.    3.    3.    3.    3.]
+    [  3.   3.   3.   3.   3. 103.   3.   3.   3.   3.]
     Every 10th bin value of wsScaled2
-    [   3.    3.    3.    3.    3.  103.    3.    3.    3.    3.]
+    [  3.   3.   3.   3.   3. 103.   3.   3.   3.   3.]
 
 
 

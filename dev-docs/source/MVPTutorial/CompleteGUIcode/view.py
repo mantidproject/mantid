@@ -8,7 +8,6 @@ from qtpy import QtWidgets, QtCore
 
 
 class View(QtWidgets.QWidget):
-
     plotSignal = QtCore.Signal()
 
     def __init__(self, parent=None):

@@ -19,6 +19,18 @@ class SNSPowderReductionTest(unittest.TestCase):
             RuntimeError, SNSPowderReduction, Filename="PG3_46577", OutputDirectory="/tmp/", PushDataPositive="AddMinimum", OffsetData=42.0
         )
 
+    def testValidateInputsCompressLoad(self):
+        # PushDataPositive and OffsetData cannot be specified together
+        self.assertRaises(
+            RuntimeError,
+            SNSPowderReduction,
+            Filename="PG3_46577",
+            OutputDirectory="/tmp/",
+            PushDataPositive="AddMinimum",
+            OffsetData=42.0,
+            MinSizeCompressOnLoad=1e-14,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

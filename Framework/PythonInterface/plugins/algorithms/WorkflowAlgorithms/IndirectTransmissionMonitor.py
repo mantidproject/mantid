@@ -13,7 +13,6 @@ import numpy
 
 
 class IndirectTransmissionMonitor(PythonAlgorithm):
-
     _sample_ws_in = None
     _can_ws_in = None
     _out_ws = None

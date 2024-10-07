@@ -46,7 +46,7 @@ New
   that the user has chosen and creates a background workspace out of them. It interpolates the
   points so the resulting background can be subtracted from the original data.
 
-- :ref:`SaveDiffFittingAscii <algm-SaveDiffFittingAscii>` an algorithm which saves a TableWorkspace containing
+- SaveDiffFittingAscii an algorithm which saves a TableWorkspace containing
   diffraction fitting results as an ASCII file
 
 - :ref:`UnwrapMonitorsInTOF <algm-UnwrapMonitorsInTOF>` handles the data which was collected beyond the end of a frame.

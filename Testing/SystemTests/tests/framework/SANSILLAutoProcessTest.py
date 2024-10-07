@@ -45,7 +45,6 @@ class D11_AutoProcess_Test(systemtesting.MantidSystemTest):
         return ["out", "D11_AutoProcess_Reference.nxs"]
 
     def runTest(self):
-
         beams = "2866,2867+2868,2878"
         containers = "2888+2971,2884+2960,2880+2949"
         container_tr = "2870+2954"
@@ -102,7 +101,6 @@ class D11_AutoProcess_Wedges_Test(systemtesting.MantidSystemTest):
         return ["out", "D11_AutoProcess_Wedges_Reference.nxs"]
 
     def runTest(self):
-
         beams = "2866,2867+2868,2878"
         containers = "2888+2971,2884+2960,2880+2949"
         container_tr = "2870+2954"
@@ -165,6 +163,7 @@ class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.nanEqual = True
         self.disableChecking.append("Instrument")
         return ["iqxy", "D11_AutoProcess_IQxQy_Reference.nxs"]
 
@@ -221,6 +220,7 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.nanEqual = True
         self.disableChecking.append("Instrument")
         return ["iq_mult_wavelengths", "D11_AutoProcess_Multiple_Tr_Reference.nxs"]
 
@@ -377,7 +377,6 @@ class D11_AutoProcess_CustomStitching_Test(systemtesting.MantidSystemTest):
         return ["out", "D11_AutoProcess_CustomStitch_Reference.nxs"]
 
     def runTest(self):
-
         beams = "2866,2867+2868,2878"
         containers = "2888+2971,2884+2960,2880+2949"
         container_tr = "2870+2954"
@@ -490,7 +489,6 @@ class D33_AutoProcess_Panels_Test(systemtesting.MantidSystemTest):
         return ["out", "D33_AutoProcess_Reference.nxs"]
 
     def runTest(self):
-
         absorber = "002227"
         tr_beam = "002192"
         can_tr = "002193"
@@ -548,11 +546,11 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.nanEqual = True
         self.disableChecking.append("Instrument")
         return ["iphiq_#1_d2.0m_c7.8m_w6.0A", "D33_AutoProcess_IPhiQ_Reference.nxs"]
 
     def runTest(self):
-
         absorber = "002227"
         tr_beam = "002192"
         can_tr = "002193"
@@ -746,7 +744,6 @@ class D22_AutoProcess_Single_Sensitivity(systemtesting.MantidSystemTest):
         return ["d22_single_sens", "D22_AutoProcess_Single_Sens_Reference.nxs"]
 
     def runTest(self):
-
         samples = "344411"
         masks = "D22_mask_central"
         thick = 0.1
@@ -796,7 +793,6 @@ class D22_AutoProcess_Multi_Sensitivity(systemtesting.MantidSystemTest):
         return ["sens", "D22_AutoProcess_Multi_Sens_Reference.nxs"]
 
     def runTest(self):
-
         samples = "344411,344407"
         masks = "D22_mask_central,D22_mask_offset"
         thick = 0.1

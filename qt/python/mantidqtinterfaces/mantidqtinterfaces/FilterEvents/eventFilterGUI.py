@@ -638,9 +638,7 @@ class MainWindow(QMainWindow):
         errmsg = self._plotTimeCounts(dataws)
         if errmsg is not None:
             errmsg = "Workspace {} has invalid sample logs for splitting. Loading \
-                    failure! \n{}\n".format(
-                dataws, errmsg
-            )
+                    failure! \n{}\n".format(dataws, errmsg)
             self._setErrorMsg(errmsg)
             return False
 

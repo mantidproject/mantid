@@ -1,0 +1,1 @@
+- Disabled the broken Linear/Log context menu when right clicking on the colour bar of a 3D surface plot. The menu is now only accessible by right clicking inside the plot axes, which is consistent with other types of plotting (colorfill and contour).

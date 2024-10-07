@@ -14,7 +14,6 @@ import mantid.simpleapi
 
 
 class LoadVisionInelastic(PythonAlgorithm):
-
     __forward = "bank1,bank2,bank3,bank4,bank5,bank6,bank7"
     __backward = "bank8,bank9,bank10,bank11,bank12,bank13,bank14"
 

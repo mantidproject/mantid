@@ -11,6 +11,7 @@ kernel
 Defines Python objects that wrap the C++ Kernel namespace.
 
 """
+
 ###############################################################################
 # Make modules available in this namespace
 ###############################################################################

@@ -35,6 +35,7 @@ public:
   void handleAddClicked() override;
   void handleWorkspaceChanged(FunctionQAddWorkspaceDialog *dialog, const std::string &workspace) override;
   void handleParameterTypeChanged(FunctionQAddWorkspaceDialog *dialog, const std::string &type) override;
+  void updateFitFunctionList() const override;
 
 protected:
   void addTableEntry(FitDomainIndex row) override;
@@ -44,7 +45,7 @@ private:
   void updateActiveWorkspaceID(WorkspaceID index);
   void updateParameterOptions(FunctionQAddWorkspaceDialog *dialog, const FunctionQParameters &parameters);
   void updateParameterTypes(FunctionQAddWorkspaceDialog *dialog, FunctionQParameters const &parameters);
-  std::map<std::string, std::string> chooseFunctionQFunctions(bool paramWidth) const;
+  std::map<std::string, std::string> chooseFunctionQFunctions(std::optional<bool> paramWidth) const;
   void setActiveWorkspaceIDToCurrentWorkspace(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
   std::string m_activeParameterType;

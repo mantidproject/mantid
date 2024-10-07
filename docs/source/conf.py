@@ -108,18 +108,7 @@ try:
     del unicode_literals
 except NameError:
     pass
-
-# Use legacy numpy printing. This fix is made to keep doctests functional.
-# TODO: remove this workaround once minimal required numpy is set to 1.14.0
-import numpy as np
-
-try:
-    np.set_printoptions(legacy='1.13')
-except TypeError:
-    pass
-""".format(
-    mantid_config_reset
-)
+""".format(mantid_config_reset)
 
 # Run this after each test group has executed
 doctest_global_cleanup = """
@@ -237,4 +226,11 @@ intersphinx_mapping = {
 # Suppress build warnings of the type:
 # "WARNING: document isn't included in any toctree"
 # for individual release notes files.
-exclude_patterns = ["release/templates/*.rst", "release/**/Bugfixes/*.rst", "release/**/New_features/*.rst", "release/**/Used/*.rst"]
+exclude_patterns = [
+    "release/templates/*.rst",
+    "release/**/Bugfixes/*.rst",
+    "release/**/New_features/*.rst",
+    "release/**/Used/*.rst",
+    "release/**/Removed/*.rst",
+    "release/**/Deprecated/*.rst",
+]

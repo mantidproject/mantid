@@ -39,12 +39,14 @@ public:
 class MANTIDQT_INELASTIC_DLL MomentsPresenter : public DataProcessor, public IMomentsPresenter, public IRunSubscriber {
 
 public:
-  MomentsPresenter(QWidget *parent, IMomentsView *view, std::unique_ptr<IMomentsModel> model);
+  MomentsPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner,
+                   IMomentsView *view, std::unique_ptr<IMomentsModel> model);
   ~MomentsPresenter() = default;
 
   // runWidget
   void handleRun() override;
   void handleValidation(IUserInputValidator *validator) const override;
+  const std::string getSubscriberName() const override { return "Moments"; }
 
   void handleDataReady(std::string const &dataName) override;
 
@@ -60,6 +62,7 @@ protected:
 private:
   void plotNewData(std::string const &filename);
   void setFileExtensionsByName(bool filter) override;
+  void setLoadHistory(bool doLoadHistory) override;
 
   IMomentsView *m_view;
   std::unique_ptr<IMomentsModel> m_model;

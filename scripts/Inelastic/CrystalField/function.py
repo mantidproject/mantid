@@ -702,7 +702,7 @@ class PhysicalProperties(object):
                 out += ",Temperature=%s" % (self._physpropTemperature)
             else:  # either susceptibility or M(T)
                 out += ",inverse=%s" % (1 if self._suscInverseFlag else 0)
-                out += (",Hmag=%s" % (self._hmag)) if self._typeid == self.MAGNETISATION else ""
+                out += (",Hmag=%s" % (self._hmag)) if self._typeid == self.MAGNETICMOMENT else ""
                 if self._typeid == self.SUSCEPTIBILITY and self._lambda != 0:
                     out += ",Lambda=%s" % (self._lambda)
                 if self._typeid == self.SUSCEPTIBILITY and self._chi0 != 0:
