@@ -8,11 +8,19 @@ Inelastic Changes
 New Features
 ------------
 - Indirect/Inelastic interfaces have new option `Load Workspace History` in the settings dialog.
+
+  .. figure::  ../../images/6_11_release/load_history_option.png
+     :width: 500px
+
 - :ref:`Elwin Tab <elwin>` of  :ref:`Data Processor Interface <interface-inelastic-data-processor>` now allows to access the Slice Viewer or 3D Plot from the OutputPlot widget of the output workspaces containing more than 1 histogram.
-- :ref:`Convolution <convfit>` tab of the :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>` now has option ``Tie Amplitudes`` to tie two Lorentzians in the interface.
+- :ref:`Convolution <convfit>` tab of the :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>` now has option ``Tie Peak Centres`` to tie two Lorentzians in the interface.
 - `Function (Q)` tab of the :ref:`QENS Fitting <interface-inelastic-qens-fitting>` now allows to load `A0` fit parameter data into the interface.
 - I(Q, t) tab in :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>` has new option `Output Composite Members`.
 - Renamed tabs of :ref:`QENS Fitting <interface-inelastic-qens-fitting>` from ``MSD Fit``, ``I(Q,t) Fit``, ``ConvFit`` and ``F(Q)`` to ``MSD``, ``I(Q,t)``, ``Convolution`` and ``Function(Q)`` respectively. Added tooltip.
+
+  .. figure::  ../../images/6_11_release/renamed_tabs.png
+     :width: 350px
+
 - :ref:`Container Subtraction <container-subtraction>` tab of the Corrections interface has new option not to delete subtracted workspaces when adding new data.
 
 
