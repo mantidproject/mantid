@@ -746,11 +746,14 @@ void DiffractionFocussing2::determineRebinParametersFromParameters(const std::ve
   const int64_t numMax = xmaxs.size();
   const int64_t numDelta = deltas.size();
   if (numMin > 1 && numMin != nGroups)
-    throw std::runtime_error("DMin must have length 1 or equal to number of output groups which is " + nGroups);
+    throw std::runtime_error("DMin must have length 1 or equal to number of output groups which is " +
+                             std::to_string(nGroups));
   if (numMax > 1 && numMax != nGroups)
-    throw std::runtime_error("DMax must have length 1 or equal to number of output groups which is " + nGroups);
+    throw std::runtime_error("DMax must have length 1 or equal to number of output groups which is " +
+                             std::to_string(nGroups));
   if (numDelta > 1 && numDelta != nGroups)
-    throw std::runtime_error("Delta must have length 1 or equal to number of output groups which is " + nGroups);
+    throw std::runtime_error("Delta must have length 1 or equal to number of output groups which is " +
+                             std::to_string(nGroups));
 
   // resize vectors with only one value
   if (numMin == 1)
