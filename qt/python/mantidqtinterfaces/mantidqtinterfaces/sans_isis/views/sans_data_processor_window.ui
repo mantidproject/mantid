@@ -1,0 +1,2415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SansDataProcessorWindow</class>
+ <widget class="QMainWindow" name="SansDataProcessorWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1400</width>
+    <height>845</height>
+   </rect>
+  </property>
+  <property name="acceptDrops">
+   <bool>true</bool>
+  </property>
+  <property name="windowTitle">
+   <string>ISIS SANS Reduction GUI</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">
+
+QGroupBox {
+    border: 1px solid gray;
+    border-radius: 9px;
+    margin-top: 0.5em;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    left: 10px;
+    padding: 0 3px 0 3px;
+}</string>
+  </property>
+  <widget class="QWidget" name="widgetMainRow">
+   <layout class="QGridLayout" name="gridLayout_4">
+    <item row="0" column="0">
+     <layout class="QHBoxLayout" name="main_layout" stretch="0,1">
+      <item>
+       <layout class="QVBoxLayout" name="tab_choice_layout">
+        <item>
+         <widget class="QListWidget" name="tab_choice_list">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>170</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>170</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="help_button">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>?</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QStackedWidget" name="main_stacked_widget">
+        <property name="currentIndex">
+         <number>1</number>
+        </property>
+        <widget class="QWidget" name="run_page">
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <item>
+           <layout class="QVBoxLayout" name="run_layout">
+            <item>
+             <layout class="QGridLayout" name="header">
+              <property name="verticalSpacing">
+               <number>6</number>
+              </property>
+              <item row="2" column="1">
+               <widget class="QLabel" name="batch_label">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;span style=&quot; font-weight:600;&quot;&gt;https://www.mantidproject.org/SANS_batch_file_format&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Batch File:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="4">
+               <layout class="QHBoxLayout" name="horizontalLayout_2">
+                <item>
+                 <widget class="QLabel" name="instrument_type">
+                  <property name="text">
+                   <string>NoInstrument</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item row="1" column="4">
+               <widget class="QLineEdit" name="user_file_line_edit">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;span style=&quot; font-weight:600;&quot;&gt;https://www.mantidproject.org/SANS_User_File_Commands&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="instrument_label">
+                <property name="text">
+                 <string>Instrument:</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="6">
+               <widget class="QPushButton" name="manage_directories_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Add directories to search for data, set your output directory, and manage data archive searching.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Manage Directories</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="4">
+               <widget class="QLabel" name="output_directory_location">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="4">
+               <widget class="QLineEdit" name="batch_line_edit">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;span style=&quot; font-weight:600;&quot;&gt;https://www.mantidproject.org/SANS_batch_file_format&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLabel" name="output_directory_label">
+                <property name="text">
+                 <string>Save Directory: </string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="6">
+               <widget class="QPushButton" name="process_selected_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Process selected rows only.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Process Selected</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="6">
+               <widget class="QPushButton" name="user_file_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;span style=&quot; font-weight:600;&quot;&gt;https://www.mantidproject.org/SANS_User_File_Commands&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Load User File</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="6">
+               <widget class="QPushButton" name="process_all_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Process all rows, regardless of selection.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Process All</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="QLabel" name="user_file_label">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify the user file (aka mask file) which is used to provide the bulk of the reduction settings. For a list of user file commands see &lt;span style=&quot; font-weight:600;&quot;&gt;https://www.mantidproject.org/SANS_User_File_Commands&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="frameShape">
+                 <enum>QFrame::NoFrame</enum>
+                </property>
+                <property name="text">
+                 <string>&amp;User File:</string>
+                </property>
+                <property name="buddy">
+                 <cstring>masking_table</cstring>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="6">
+               <widget class="QPushButton" name="batch_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Specify a batch file to load. For the batch file format see &lt;span style=&quot; font-weight:600;&quot;&gt;https://www.mantidproject.org/SANS_batch_file_format&lt;/span&gt;.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Load Batch File</string>
+                </property>
+               </widget>
+              </item>
+              <item row="5" column="6">
+               <widget class="QPushButton" name="load_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Load data without processing.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Load</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_11">
+              <item>
+               <widget class="QToolButton" name="insert_row_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Insert row&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="delete_row_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delete selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line_6">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="copy_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Copy selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="cut_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Cut selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="paste_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Paste rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="erase_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Erase contents of selected rows&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="Line" name="line_7">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QToolButton" name="export_table_button">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Export the current table as a csv file. This can then be re-loaded at a later date.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>...</string>
+                </property>
+                <property name="iconSize">
+                 <size>
+                  <width>24</width>
+                  <height>24</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="horizontalSpacer_3">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="multi_period_check_box">
+                <property name="text">
+                 <string>Multi-period</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="sample_geometry_checkbox">
+                <property name="text">
+                 <string>Sample Geometry</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="background_subtraction_checkbox">
+                <property name="text">
+                 <string>Scaled Background Subtraction</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="data_processor_widget_layout"/>
+            </item>
+            <item>
+             <widget class="QProgressBar" name="batch_progress_bar">
+              <property name="value">
+               <number>24</number>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_7">
+              <item row="0" column="3">
+               <widget class="QGroupBox" name="reduction_dimensionality_group_box">
+                <property name="maximumSize">
+                 <size>
+                  <width>16777215</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="title">
+                 <string>Reduction</string>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_8">
+                 <item>
+                  <widget class="QRadioButton" name="reduction_dimensionality_1D">
+                   <property name="text">
+                    <string>&amp;1D</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QRadioButton" name="reduction_dimensionality_2D">
+                   <property name="text">
+                    <string>&amp;2D</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="0" column="4" rowspan="3">
+               <widget class="QGroupBox" name="save_group_box">
+                <property name="styleSheet">
+                 <string notr="true"/>
+                </property>
+                <property name="title">
+                 <string>Save Options</string>
+                </property>
+                <property name="flat">
+                 <bool>false</bool>
+                </property>
+                <layout class="QHBoxLayout" name="horizontalLayout_4">
+                 <item>
+                  <layout class="QHBoxLayout" name="save_layout">
+                   <item>
+                    <layout class="QVBoxLayout" name="save_location_layout">
+                     <item>
+                      <widget class="QRadioButton" name="output_mode_memory_radio_button">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The save locations for the output of batch reductions are: Memory (RAM), File (Hard disk), Both (RAM and Hard disk).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Memor&amp;y</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QRadioButton" name="output_mode_file_radio_button">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The save locations for the output of batch reductions are: Memory (RAM), File (Hard disk), Both (RAM and Hard disk).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>&amp;File</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QRadioButton" name="output_mode_both_radio_button">
+                       <property name="enabled">
+                        <bool>true</bool>
+                       </property>
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The save locations for the output of batch reductions are: Memory (RAM), File (Hard disk), Both (RAM and Hard disk).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Both</string>
+                       </property>
+                       <property name="checked">
+                        <bool>false</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QCheckBox" name="save_can_checkBox">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, save the unsubtracted Can and Sam workspaces separately.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Save Can</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <widget class="Line" name="line">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <layout class="QVBoxLayout" name="save_file_format_layout">
+                     <item>
+                      <widget class="QCheckBox" name="can_sas_checkbox">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The save file formats. Note that different formats are suitable for different reduction dimensionalities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>CanSAS (1D)</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QCheckBox" name="nx_can_sas_checkbox">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The save file formats. Note that different formats are suitable for different reduction dimensionalities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>NxCanSAS (1D/2D)</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QCheckBox" name="rkh_checkbox">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The save file formats. Note that different formats are suitable for different reduction dimensionalities.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>RKH (1D/2D)</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <widget class="Line" name="line_2">
+                     <property name="orientation">
+                      <enum>Qt::Vertical</enum>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <layout class="QGridLayout" name="gridLayout">
+                     <item row="1" column="0">
+                      <widget class="QCheckBox" name="use_optimizations_checkbox">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When optimizations are turned on then data is being stored in RAM and reused. The optimizations affect the raw data files and can reductions. Most of the time you will want these optimizations enabled. Disable the optimizations if you run a very long batch reduction where there might be the danger  that your RAM will max out.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Use Optimizations</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="0">
+                      <widget class="QCheckBox" name="save_zero_error_free">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When enabled it will replace all entries with zero-valued errors with errors of magnitude 1e6. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Zero Error Free</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="0">
+                      <widget class="QCheckBox" name="plot_results_checkbox">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the 0th spectrum of each reduced workspace will be plotted as it is reduced.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Plot Results</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="1" column="3">
+               <widget class="QPushButton" name="save_other_pushButton">
+                <property name="toolTip">
+                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Save a workspace as a CanSAS, NxCanSAS, or RKH file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                </property>
+                <property name="text">
+                 <string>Save Other</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="settings_page">
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QTabWidget" name="settings_tab_widget">
+            <property name="currentIndex">
+             <number>0</number>
+            </property>
+            <widget class="QWidget" name="general_tab">
+             <attribute name="title">
+              <string>General, Scale, Event Slice, Sample</string>
+             </attribute>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <item>
+               <layout class="QHBoxLayout" name="general_tab_horizontal_layout">
+                <item>
+                 <layout class="QVBoxLayout" name="general_tab_left_layout">
+                  <item>
+                   <widget class="QFrame" name="reduction_mode_frame">
+                    <property name="frameShape">
+                     <enum>QFrame::StyledPanel</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_21">
+                     <item row="0" column="0">
+                      <layout class="QVBoxLayout" name="general_vertical_layout">
+                       <item>
+                        <layout class="QGridLayout" name="general_grid">
+                         <item row="0" column="1">
+                          <widget class="QComboBox" name="reduction_mode_combo_box">
+                           <property name="toolTip">
+                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction mode. This can be either of the banks of your instrument. In the case of two banks there is also the &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; and &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode. &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; mode stitches the reductions from two banks together. &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode reduces both banks.&lt;/p&gt;&lt;p&gt;Note that by default the entries are &lt;span style=&quot; font-style:italic;&quot;&gt;LAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;HAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt;. Once you have specified data in the batch table, the entry names will be updated to reflect the naming of your instrument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="0">
+                          <widget class="QLabel" name="reduction_mode_label">
+                           <property name="toolTip">
+                            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The reduction mode. This can be either of the banks of your instrument. In the case of two banks there is also the &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; and &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode. &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt; mode stitches the reductions from two banks together. &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt; mode reduces both banks.&lt;/p&gt;&lt;p&gt;Note that by default the entries are &lt;span style=&quot; font-style:italic;&quot;&gt;LAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;HAB&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;Merged&lt;/span&gt;, &lt;span style=&quot; font-style:italic;&quot;&gt;All&lt;/span&gt;. Once you have specified data in the batch table, the entry names will be updated to reflect the naming of your instrument.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                           </property>
+                           <property name="text">
+                            <string>Reduction Mode</string>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
+                       </item>
+                      </layout>
+                     </item>
+                     <item row="1" column="0">
+                      <widget class="QGroupBox" name="merged_settings">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings for a merged reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="title">
+                        <string>Merged Settings</string>
+                       </property>
+                       <layout class="QGridLayout" name="gridLayout_12">
+                        <item row="1" column="2">
+                         <widget class="QLineEdit" name="merged_scale_line_edit">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scale which is used when merging two workspaces.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="3" column="3">
+                         <widget class="QLabel" name="label_4">
+                          <property name="text">
+                           <string>To</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="0" column="6">
+                         <widget class="Line" name="line_3">
+                          <property name="orientation">
+                           <enum>Qt::Vertical</enum>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="2" column="0">
+                         <widget class="QLabel" name="merged_shift_label">
+                          <property name="text">
+                           <string>Shift</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="1" column="0">
+                         <widget class="QLabel" name="merged_scale_label">
+                          <property name="text">
+                           <string>Scale</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="4" column="3">
+                         <widget class="QLabel" name="label_5">
+                          <property name="text">
+                           <string>To</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="2" column="3">
+                         <widget class="QCheckBox" name="merged_shift_use_fit_check_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked then the shift will be fit during the merge operation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <property name="text">
+                           <string>Use Fit</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="3" column="0">
+                         <widget class="QLabel" name="label">
+                          <property name="text">
+                           <string>Custom q range for fit:</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="4" column="2">
+                         <widget class="QLineEdit" name="merged_min_line_edit"/>
+                        </item>
+                        <item row="3" column="2">
+                         <widget class="QLineEdit" name="merged_q_range_start_line_edit">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lower bound  of a custom q range. If none is specified, then the full range is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="4" column="11">
+                         <widget class="QCheckBox" name="merge_mask_check_box">
+                          <property name="text">
+                           <string>Use Range</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="4" column="4">
+                         <widget class="QLineEdit" name="merged_max_line_edit"/>
+                        </item>
+                        <item row="4" column="0">
+                         <widget class="QLabel" name="label_2">
+                          <property name="text">
+                           <string>Custom q range for merge:</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="3" column="4">
+                         <widget class="QLineEdit" name="merged_q_range_stop_line_edit">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Upper bound  of a custom q range. If none is specified, then the full range is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="1" column="3">
+                         <widget class="QCheckBox" name="merged_scale_use_fit_check_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked then the scale will be fit during the merge operation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <property name="text">
+                           <string>Use Fit</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="2" column="2">
+                         <widget class="QLineEdit" name="merged_shift_line_edit">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Shift which is used when merging two workspaces.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="3" column="1">
+                         <widget class="QLabel" name="label_3">
+                          <property name="text">
+                           <string>From</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="4" column="1">
+                         <widget class="QLabel" name="label_6">
+                          <property name="text">
+                           <string>From</string>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="event_settings_frame">
+                    <property name="frameShape">
+                     <enum>QFrame::StyledPanel</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_2">
+                     <item row="0" column="0">
+                      <layout class="QGridLayout" name="slice_event_grid_layout">
+                       <item row="2" column="0">
+                        <widget class="QLabel" name="slice_event_label">
+                         <property name="text">
+                          <string>Slices:</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="2">
+                        <widget class="QLineEdit" name="slice_event_line_edit">
+                         <property name="enabled">
+                          <bool>true</bool>
+                         </property>
+                         <property name="toolTip">
+                          <string>
+                         &lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;In the case of data which was measured in event-mode, it is possible to perform time-of-flight slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies time slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a time slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications using comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+                         </string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="3" column="0">
+                        <widget class="QLabel" name="event_slice_optimisation_label">
+                         <property name="toolTip">
+                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked, the reduction workflow is changed to perform most operations on event workspaces before event slicing.  This speeds up reduction by not repeating operations for each event slice.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Leaving this unchecked will perform reductions as before.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Checking this, but also checking &lt;span style=&quot; font-weight:600;&quot;&gt;Use compatibility mode&lt;/span&gt;, will perform reductions as before.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                         </property>
+                         <property name="text">
+                          <string>Optimize event slices</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="2" column="3">
+                        <spacer name="horizontalSpacer_5">
+                         <property name="orientation">
+                          <enum>Qt::Horizontal</enum>
+                         </property>
+                         <property name="sizeHint" stdset="0">
+                          <size>
+                           <width>40</width>
+                           <height>20</height>
+                          </size>
+                         </property>
+                        </spacer>
+                       </item>
+                       <item row="3" column="2">
+                        <widget class="QCheckBox" name="event_slice_optimisation_checkbox">
+                         <property name="toolTip">
+                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If checked, the reduction workflow is changed to perform most operations on event workspaces before event slicing.  This speeds up reduction by not repeating operations for each event slice.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Leaving this unchecked will perform reductions as before.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;Checking this, but also checking &lt;span style=&quot; font-weight:600;&quot;&gt;Use compatibility mode&lt;/span&gt;, will perform reductions as before.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QFrame" name="scale_frame">
+                    <property name="frameShape">
+                     <enum>QFrame::StyledPanel</enum>
+                    </property>
+                    <property name="frameShadow">
+                     <enum>QFrame::Raised</enum>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_19">
+                     <item row="0" column="0">
+                      <layout class="QGridLayout" name="gridLayout_5">
+                       <item row="0" column="0">
+                        <widget class="QLabel" name="absolute_scale_label">
+                         <property name="toolTip">
+                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The absolute (and unitless) scale factor for the data reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                         </property>
+                         <property name="text">
+                          <string>Absolute Scale</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="1">
+                        <widget class="QLineEdit" name="absolute_scale_line_edit">
+                         <property name="toolTip">
+                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The absolute (and unitless) scale factor for the data reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="1">
+                        <widget class="QLineEdit" name="z_offset_line_edit">
+                         <property name="toolTip">
+                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The z offset of the sample position.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="1" column="0">
+                        <widget class="QLabel" name="z_offset_label">
+                         <property name="toolTip">
+                          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The z offset of the sample position.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                         </property>
+                         <property name="text">
+                          <string>Z Offset [mm]</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item row="0" column="2">
+                        <spacer name="horizontalSpacer_4">
+                         <property name="orientation">
+                          <enum>Qt::Horizontal</enum>
+                         </property>
+                         <property name="sizeHint" stdset="0">
+                          <size>
+                           <width>40</width>
+                           <height>20</height>
+                          </size>
+                         </property>
+                        </spacer>
+                       </item>
+                      </layout>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <layout class="QGridLayout" name="scale_group_box"/>
+                  </item>
+                  <item>
+                   <widget class="QGroupBox" name="event_binning_group_box">
+                    <property name="enabled">
+                     <bool>true</bool>
+                    </property>
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, the data reduction will run in the compatibility mode. This means that the reduction workflow is equivalent to the legacy reduction workflow for histogram data. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="title">
+                     <string>&amp;Use compatibility mode</string>
+                    </property>
+                    <property name="checkable">
+                     <bool>true</bool>
+                    </property>
+                    <property name="checked">
+                     <bool>false</bool>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_16">
+                     <item row="0" column="0">
+                      <widget class="QLabel" name="event_binning_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rebin string for the initial time-of-flight workspace. This is only needed when using the compatibility mode (i.e. when following the old reduction model). Note that this will only have an effect on event workspaces. If left blank then event workspaces will be rebinned to match the monitor workspace.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Event binning</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="1">
+                      <widget class="QLineEdit" name="event_binning_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Rebin string for the initial time-of-flight workspace. This is only needed when using the compatibility mode (i.e. when following the old reduction model). Note that this will only have an effect on event workspaces. If left blank then event workspaces will be rebinned to match the monitor workspace.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer_3">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="general_tab_right_layout"/>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="mask_tab">
+             <attribute name="title">
+              <string>Mask</string>
+             </attribute>
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <item>
+               <widget class="MaskingTable" name="masking_table" native="true">
+                <property name="minimumSize">
+                 <size>
+                  <width>400</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <layout class="QVBoxLayout" name="mask_tab_right_layout">
+                <item>
+                 <widget class="QGroupBox" name="mask_file_input_group_box">
+                  <property name="title">
+                   <string>Mask File Input</string>
+                  </property>
+                  <layout class="QGridLayout" name="gridLayout_7">
+                   <item row="0" column="0">
+                    <widget class="QLineEdit" name="mask_file_input_line_edit"/>
+                   </item>
+                   <item row="0" column="1">
+                    <widget class="QPushButton" name="mask_file_browse_push_button">
+                     <property name="text">
+                      <string>Browse</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="1">
+                    <widget class="QPushButton" name="mask_file_add_push_button">
+                     <property name="text">
+                      <string>Add</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="verticalSpacer_4">
+                  <property name="orientation">
+                   <enum>Qt::Vertical</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>20</width>
+                    <height>40</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="adjustment_tab">
+             <attribute name="title">
+              <string>Adjustment</string>
+             </attribute>
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <item>
+               <layout class="QHBoxLayout" name="adjustment_tab_horizontal_layout">
+                <item>
+                 <layout class="QVBoxLayout" name="adjustment_tab_left_layout">
+                  <item>
+                   <widget class="QGroupBox" name="monitor_normalization_group_box">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings for the monitor normalization.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="title">
+                     <string>Scattering</string>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_8">
+                     <item row="0" column="0">
+                      <widget class="QLabel" name="monitor_normalization_monitor_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spectrum number of the incident monitor which is used for monitor normalization.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Incident monitor</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="2">
+                      <widget class="QCheckBox" name="monitor_normalization_interpolating_rebin_check_box">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selects the type of rebin which is to be used during monitor normalization. If this is checked then a interpolating rebin operation is performed, else a standard rebin operation is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Use interpolating rebin</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="1">
+                      <widget class="QLineEdit" name="monitor_normalization_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spectrum number of the incident monitor which is used for monitor normalization.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QGroupBox" name="transmission_group_box">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings for the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="title">
+                     <string>Transmission</string>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_9">
+                     <item row="5" column="1">
+                      <widget class="QLabel" name="transmission_mn_4_shift_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;An option shift of the M4 monitor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Monitor 4 Shift [mm]</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="10" column="1" colspan="3">
+                      <widget class="QGroupBox" name="fit_combo_box">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Fit options for the transmission calculation. These can be either set for both the Sample and the Can run or separately.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="title">
+                        <string>Fit</string>
+                       </property>
+                       <property name="flat">
+                        <bool>false</bool>
+                       </property>
+                       <property name="checkable">
+                        <bool>false</bool>
+                       </property>
+                       <layout class="QGridLayout" name="gridLayout_22">
+                        <item row="0" column="3">
+                         <widget class="QLabel" name="fit_fit_type_label">
+                          <property name="text">
+                           <string>Fit type</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="1" column="0">
+                         <widget class="QComboBox" name="fit_selection_combo_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selects if fit options should be the same (Both) for Sample and Can, or if the user should be able to set them separately (Separate).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <item>
+                           <property name="text">
+                            <string>Both</string>
+                           </property>
+                          </item>
+                          <item>
+                           <property name="text">
+                            <string>Separate</string>
+                           </property>
+                          </item>
+                         </widget>
+                        </item>
+                        <item row="2" column="3">
+                         <widget class="QComboBox" name="fit_can_fit_type_combo_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If fitting should be used, then this allows for the selection of the fit type.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="2" column="2">
+                         <widget class="QCheckBox" name="fit_can_use_fit_check_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If fitting should be used&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <property name="text">
+                           <string>Use fit</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="1" column="1">
+                         <widget class="QLabel" name="fit_sample_label">
+                          <property name="text">
+                           <string>Sample              </string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="2" column="1">
+                         <widget class="QLabel" name="fit_can_label">
+                          <property name="text">
+                           <string>Can</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="1" column="5">
+                         <widget class="QGroupBox" name="fit_sample_wavelength_combo_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows for setting a custom wavelength range during fitting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <property name="title">
+                           <string>&amp;Use custom wavelength range [Å]</string>
+                          </property>
+                          <property name="checkable">
+                           <bool>true</bool>
+                          </property>
+                          <property name="checked">
+                           <bool>false</bool>
+                          </property>
+                          <layout class="QGridLayout" name="gridLayout_23">
+                           <item row="0" column="1">
+                            <widget class="QLineEdit" name="fit_sample_wavelength_min_line_edit">
+                             <property name="toolTip">
+                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The beginning of the custom wavelength range.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="2">
+                            <widget class="QLabel" name="fit_sample_to_label">
+                             <property name="text">
+                              <string>to</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="0">
+                            <widget class="QLabel" name="fit_sample_from_label">
+                             <property name="text">
+                              <string>from</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="3">
+                            <widget class="QLineEdit" name="fit_sample_wavelength_max_line_edit">
+                             <property name="toolTip">
+                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The end of the custom wavelength range.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                             </property>
+                            </widget>
+                           </item>
+                          </layout>
+                         </widget>
+                        </item>
+                        <item row="2" column="5">
+                         <widget class="QGroupBox" name="fit_can_wavelength_combo_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Allows for setting a custom wavelength range during fitting.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <property name="title">
+                           <string>Use custom wavelength range [&amp;Å]</string>
+                          </property>
+                          <property name="checkable">
+                           <bool>true</bool>
+                          </property>
+                          <property name="checked">
+                           <bool>false</bool>
+                          </property>
+                          <layout class="QGridLayout" name="gridLayout_24">
+                           <item row="0" column="1">
+                            <widget class="QLineEdit" name="fit_can_wavelength_min_line_edit">
+                             <property name="toolTip">
+                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The beginning of the custom wavelength range.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="0">
+                            <widget class="QLabel" name="fit_can_from_label">
+                             <property name="text">
+                              <string>from</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="2">
+                            <widget class="QLabel" name="fit_can_to_label">
+                             <property name="text">
+                              <string>to</string>
+                             </property>
+                            </widget>
+                           </item>
+                           <item row="0" column="3">
+                            <widget class="QLineEdit" name="fit_can_wavelength_max_line_edit">
+                             <property name="toolTip">
+                              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The end of the custom wavelength range.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                             </property>
+                            </widget>
+                           </item>
+                          </layout>
+                         </widget>
+                        </item>
+                        <item row="1" column="3">
+                         <widget class="QComboBox" name="fit_sample_fit_type_combo_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If fitting should be used, then this allows for the selection of the fit type.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="1" column="4">
+                         <widget class="QSpinBox" name="fit_sample_polynomial_order_spin_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If a polynomial fit type was selected, then the polynomial order of the fit can be specified here.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <property name="minimum">
+                           <number>2</number>
+                          </property>
+                          <property name="maximum">
+                           <number>6</number>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="0" column="4">
+                         <widget class="QLabel" name="fit_polynomial_order_label">
+                          <property name="text">
+                           <string>Poly. order</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="2" column="4">
+                         <widget class="QSpinBox" name="fit_can_polynomial_order_spin_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If a polynomial fit type was selected, then the polynomial order of the fit can be specified here.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <property name="minimum">
+                           <number>2</number>
+                          </property>
+                          <property name="maximum">
+                           <number>6</number>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="1" column="2">
+                         <widget class="QCheckBox" name="fit_sample_use_fit_check_box">
+                          <property name="toolTip">
+                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If fitting should be used&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                          </property>
+                          <property name="text">
+                           <string>Use fit</string>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
+                      </widget>
+                     </item>
+                     <item row="8" column="2">
+                      <widget class="QLineEdit" name="transmission_roi_files_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A comma-separated list of ROI files which define areas on the bank which contribute to the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="1">
+                      <widget class="QLabel" name="transmission_mn_5_shift_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;An option shift of the M5 monitor.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Monitor 5 Shift [mm]</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="1">
+                      <widget class="QLabel" name="transmission_radius_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A radius that defines a circle which includes all pixels on the bank which contribute to the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Radius[mm]</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="8" column="3">
+                      <widget class="QPushButton" name="transmission_roi_files_push_button">
+                       <property name="text">
+                        <string>Browse</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="2">
+                      <widget class="QLineEdit" name="transmission_monitor_line_edit"/>
+                     </item>
+                     <item row="3" column="2">
+                      <widget class="QComboBox" name="transmission_target_combo_box">
+                       <item>
+                        <property name="text">
+                         <string>Transmission monitor</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Region of interest on bank</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                     <item row="9" column="2">
+                      <widget class="QLineEdit" name="transmission_mask_files_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A comma-separated list of MASK files which define areas on the bank which are excluded from the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="2">
+                      <widget class="QLineEdit" name="transmission_radius_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A radius that defines a circle which includes all pixels on the bank which contribute to the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="3">
+                      <widget class="QPushButton" name="transmission_mask_files_push_button">
+                       <property name="text">
+                        <string>Browse</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="3">
+                      <widget class="QCheckBox" name="transmission_interpolating_rebin_check_box">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selects the type of rebin which is to be used during transmission calculation. If this is checked then a interpolating rebin operation is performed, else a standard rebin operation is used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Use interpolating rebin</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="1">
+                      <widget class="QLabel" name="transmission_monitor_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spectrum number of the transmission monitor which is used for transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Transmission monitor</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="2">
+                      <widget class="QLineEdit" name="transmission_mn_4_shift_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Distance between beamstop monitor and detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="1">
+                      <widget class="QLabel" name="transmission_mask_files_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A comma-separated list of MASK files which define areas on the bank which are excluded from the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Mask Files</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="2">
+                      <widget class="QLineEdit" name="transmission_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spectrum number of the incident monitor which is used for transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="1">
+                      <widget class="QLabel" name="transmission_target_label">
+                       <property name="text">
+                        <string>Transmission target</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="8" column="1">
+                      <widget class="QLabel" name="transmission_roi_files_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;A comma-separated list of ROI files which define areas on the bank which contribute to the transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>ROI Files</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="2">
+                      <widget class="QLineEdit" name="transmission_mn_5_shift_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Distance between beamstop monitor and detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="1">
+                      <widget class="QLabel" name="transmission_incident_monitor_target">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Spectrum number of the incident monitor which is used for transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Incident monitor</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QGroupBox" name="pixel_adjustment_group_box">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The pixel adjustment files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="title">
+                     <string>Pixel adjustment files</string>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_10">
+                     <item row="0" column="1">
+                      <widget class="QLineEdit" name="pixel_adjustment_det_1_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The path to the pixel adjustment file for the first detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="0">
+                      <widget class="QLabel" name="pixel_adjustment_det_2_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The path to the pixel adjustment file for the first detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Det1</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="2">
+                      <widget class="QPushButton" name="pixel_adjustment_det_1_push_button">
+                       <property name="text">
+                        <string>Browse</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="2">
+                      <widget class="QPushButton" name="pixel_adjustment_det_2_push_button">
+                       <property name="text">
+                        <string>Browse</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="1">
+                      <widget class="QLineEdit" name="pixel_adjustment_det_2_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The path to the pixel adjustment file for the second detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="0">
+                      <widget class="QLabel" name="pixel_adjustement_det_1_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The path to the pixel adjustment file for the second detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Det2</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QGroupBox" name="wavelength_adjustment_group_box">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The wavelength adjustment files.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="title">
+                     <string>Wavelength efficiency files</string>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_11">
+                     <item row="0" column="1">
+                      <widget class="QLineEdit" name="wavelength_adjustment_det_1_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The path to the wavelength adjustment file for the first detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="0">
+                      <widget class="QLabel" name="wavelength_adjustment_det_1_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The path to the wavelength adjustment file for the first detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Det 1</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="0">
+                      <widget class="QLabel" name="wavelength_adjustment_det_2_label">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The path to the wavelength adjustment file for the second detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                       <property name="text">
+                        <string>Det 2</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="1">
+                      <widget class="QLineEdit" name="wavelength_adjustment_det_2_line_edit">
+                       <property name="toolTip">
+                        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The path to the wavelength adjustment file for the second detector.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="2">
+                      <widget class="QPushButton" name="wavelength_adjustment_det_1_push_button">
+                       <property name="text">
+                        <string>Browse</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="2">
+                      <widget class="QPushButton" name="wavelength_adjustment_det_2_push_button">
+                       <property name="text">
+                        <string>Browse</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer_2">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </item>
+                <item>
+                 <layout class="QVBoxLayout" name="adjustemnt_tab_right_layout"/>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="q_tab">
+             <attribute name="title">
+              <string>Q, Wavelength, Detector Limits</string>
+             </attribute>
+             <widget class="QWidget" name="layoutWidget">
+              <property name="geometry">
+               <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>661</width>
+                <height>698</height>
+               </rect>
+              </property>
+              <layout class="QVBoxLayout" name="q_tab_left_layout">
+               <item>
+                <widget class="QGroupBox" name="limits_group_box">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Disk mask which is useful for the beam stop&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="title">
+                  <string/>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayout_14">
+                  <property name="leftMargin">
+                   <number>6</number>
+                  </property>
+                  <item row="4" column="5">
+                   <widget class="QCheckBox" name="phi_limit_use_mirror_check_box">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;If the mirror sector should be used.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>use mirror sector</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="2">
+                   <widget class="QLineEdit" name="phi_limit_min_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Start angle in degree&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="0">
+                   <widget class="QLabel" name="cuts_label">
+                    <property name="text">
+                     <string>Cuts:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="4">
+                   <widget class="QLineEdit" name="phi_limit_max_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Stop angle in degree&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="4">
+                   <widget class="QLineEdit" name="w_cut_line_edit"/>
+                  </item>
+                  <item row="1" column="4">
+                   <widget class="QLineEdit" name="radius_limit_max_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Upper radius setting in mm.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="3">
+                   <widget class="QLabel" name="radius_limit_max_label">
+                    <property name="text">
+                     <string>Max [mm]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="3">
+                   <widget class="QLabel" name="phi_limit_to_label">
+                    <property name="text">
+                     <string>To</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="1">
+                   <widget class="QLabel" name="q_1d_label_2">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Momentum transfer settings for 1D reductions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>RCut [mm]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="3">
+                   <widget class="QLabel" name="q_1d_label_3">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Momentum transfer settings for 1D reductions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>WCut [Å]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="radius_limit">
+                    <property name="text">
+                     <string>Radius Limit:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="0">
+                   <widget class="QLabel" name="phi_limit">
+                    <property name="text">
+                     <string>Phi Limit:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="1">
+                   <widget class="QLabel" name="phi_limit_from_label">
+                    <property name="text">
+                     <string>From</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="2">
+                   <widget class="QLineEdit" name="radius_limit_min_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lower radius setting in mm.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QLabel" name="radius_limit_min_label">
+                    <property name="text">
+                     <string>Min [mm]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="2">
+                   <widget class="QLineEdit" name="r_cut_line_edit"/>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="Line" name="line_9">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="wavelength_group_box">
+                 <property name="title">
+                  <string>Wavelength</string>
+                 </property>
+                 <layout class="QHBoxLayout" name="horizontalLayout_9">
+                  <item>
+                   <widget class="QStackedWidget" name="wavelength_stacked_widget">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>66</height>
+                     </size>
+                    </property>
+                    <property name="lineWidth">
+                     <number>0</number>
+                    </property>
+                    <property name="currentIndex">
+                     <number>1</number>
+                    </property>
+                    <widget class="QWidget" name="page">
+                     <layout class="QGridLayout" name="gridLayout_3">
+                      <item row="1" column="0">
+                       <widget class="QLabel" name="wavelength_min_label">
+                        <property name="text">
+                         <string>Min [Å]</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="1" column="1">
+                       <widget class="QLabel" name="wavelength_max_label">
+                        <property name="text">
+                         <string>Max  [Å]</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="1">
+                       <widget class="QLineEdit" name="wavelength_max_line_edit"/>
+                      </item>
+                      <item row="2" column="0">
+                       <widget class="QLineEdit" name="wavelength_min_line_edit"/>
+                      </item>
+                     </layout>
+                    </widget>
+                    <widget class="QWidget" name="page_2">
+                     <layout class="QGridLayout" name="gridLayout_6">
+                      <item row="2" column="0">
+                       <widget class="QLineEdit" name="wavelength_slices_line_edit">
+                        <property name="toolTip">
+                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;It is possible to perform wavelength slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies wavelength slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a wavelength slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications using comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A reduction will always be done between the maximum and minimum wavelengths of a given set.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="1" column="0">
+                       <widget class="QLabel" name="label_7">
+                        <property name="toolTip">
+                         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;It is possible to perform wavelength slices of the data and reduce these separately.&lt;/p&gt;&lt;p&gt;Input can be:&lt;/p&gt;&lt;p&gt;-&lt;span style=&quot; font-style:italic;&quot;&gt; start:step:stop&lt;/span&gt; specifies wavelength slices from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value in steps of &lt;span style=&quot; font-style:italic;&quot;&gt;step&lt;/span&gt;&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;start-stop &lt;/span&gt;which specifies a wavelength slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start&lt;/span&gt; value to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop&lt;/span&gt; value&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;gt;start&lt;/span&gt; specifies a slice from the &lt;span style=&quot; font-style:italic;&quot;&gt;start &lt;/span&gt;value to the end of the data set&lt;/p&gt;&lt;p&gt;- &lt;span style=&quot; font-style:italic;&quot;&gt;&amp;lt;stop&lt;/span&gt; specifes a slice from the start of the data set to the &lt;span style=&quot; font-style:italic;&quot;&gt;stop &lt;/span&gt;value&lt;/p&gt;&lt;p&gt;In addition it is possible to concatenate these specifications using comma-separation. An example is:&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;5-10,12:2:16,20-30&lt;/span&gt;&lt;/p&gt;&lt;p&gt;A reduction will always be done between the maximum and minimum wavelengths of a given set.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                        </property>
+                        <property name="text">
+                         <string>Ranges  [Å]  (e.g: 5-10,12:2:16,20-30)</string>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </widget>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QWidget" name="wavelength_widget" native="true">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>16777215</width>
+                      <height>66</height>
+                     </size>
+                    </property>
+                    <layout class="QGridLayout" name="gridLayout_18">
+                     <item row="1" column="1">
+                      <widget class="QComboBox" name="wavelength_step_type_combo_box"/>
+                     </item>
+                     <item row="0" column="1">
+                      <widget class="QLabel" name="wavelength_step_type_label">
+                       <property name="text">
+                        <string>Step Type</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="0">
+                      <widget class="QLineEdit" name="wavelength_step_line_edit"/>
+                     </item>
+                     <item row="0" column="0">
+                      <widget class="QLabel" name="wavelength_step_label">
+                       <property name="text">
+                        <string>Step  [Å]</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="q_limits_group_box">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings for the momentum transfer limits.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="title">
+                  <string>Q limits</string>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayout_15">
+                  <item row="3" column="4">
+                   <widget class="QLineEdit" name="q_xy_step_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="4">
+                   <widget class="QLabel" name="q_xy_step_label">
+                    <property name="text">
+                     <string>Step [Å^-1]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="2">
+                   <widget class="QLabel" name="q_min_label">
+                    <property name="text">
+                     <string>Min [Å^-1]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="3">
+                   <widget class="QLabel" name="q_xy_max_label">
+                    <property name="text">
+                     <string>Max [Å^-1]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="2">
+                   <widget class="QLineEdit" name="q_1d_min_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The lower bound of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="3">
+                   <widget class="QLineEdit" name="q_1d_max_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="5">
+                   <widget class="QComboBox" name="q_1d_step_type_combo_box">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step type of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="3">
+                   <widget class="QLineEdit" name="q_xy_max_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The upper bound of the momentum transfer for a 2D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="5">
+                   <widget class="QLabel" name="q_step_type_label">
+                    <property name="text">
+                     <string>Step type</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="4">
+                   <widget class="QLineEdit" name="q_1d_step_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The step of the momentum transfer for a 1D reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="3">
+                   <widget class="QLabel" name="q_max_label">
+                    <property name="text">
+                     <string>Max [Å^-1]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="4">
+                   <widget class="QLabel" name="q_step_label">
+                    <property name="text">
+                     <string>Step [Å^-1]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QLabel" name="q_xy_label">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Momentum transfer settings for 2D reductions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>Qxy</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="q_1d_label">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Momentum transfer settings for 1D reductions.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>Q1D</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="gravity_group_box">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Gravity settings. If checked then gravity will be accounted for in the reduction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="title">
+                  <string>Account &amp;for gravity</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayout_17">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="gravity_extra_length_label">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Extra length for the gravity correction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>Extra length [m]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QLineEdit" name="gravity_extra_length_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Extra length for the gravity correction.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QGroupBox" name="q_resolution_group_box">
+                 <property name="toolTip">
+                  <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Settings for Q resolution. If checked, then the Q resolution is used, else not.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                 </property>
+                 <property name="title">
+                  <string>Q resolution</string>
+                 </property>
+                 <property name="checkable">
+                  <bool>true</bool>
+                 </property>
+                 <property name="checked">
+                  <bool>false</bool>
+                 </property>
+                 <layout class="QGridLayout" name="gridLayout_13">
+                  <item row="0" column="0" colspan="2">
+                   <widget class="QComboBox" name="q_resolution_shape_combo_box">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Selection of the aperture. This can be either a rectangular or a circular aperture&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <item>
+                     <property name="text">
+                      <string>Pinhole</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Slit</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QLabel" name="q_resolution_source_a_label">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Diameter of a circular source aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>A1 [mm]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="2">
+                   <widget class="QLabel" name="q_resolution_sample_a_label">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Diameter of a circular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>A2 [mm]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QLineEdit" name="q_resolution_source_h_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Height of a rectangular source aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="2">
+                   <widget class="QLabel" name="q_resolution_sample_w_label">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>W2 [mm]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="3">
+                   <widget class="QLineEdit" name="q_resolution_sample_w_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="0">
+                   <widget class="QLabel" name="q_resolution_collimation_length_label">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The collimation length.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>Collimation length [m]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="2">
+                   <widget class="QLabel" name="q_resolution_delta_r_label">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delta r.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>Delta r [mm]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="1" colspan="2">
+                   <widget class="QLineEdit" name="q_resolution_moderator_file_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Path to the moderator file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="3">
+                   <widget class="QPushButton" name="q_resolution_moderator_file_push_button">
+                    <property name="text">
+                     <string>Browse</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="0">
+                   <widget class="QLabel" name="q_resolution_moderator_file_label">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Path to the moderator file.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>Moderator file</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="1">
+                   <widget class="QLineEdit" name="q_resolution_collimation_length_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The collimation length.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="3">
+                   <widget class="QLineEdit" name="q_resolution_delta_r_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Delta r.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="3">
+                   <widget class="QLineEdit" name="q_resolution_sample_a_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Diameter of a circular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QLineEdit" name="q_resolution_source_a_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Diameter of a circular source aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QLineEdit" name="q_resolution_source_w_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of a rectangular source aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="q_resolution_source_h_label">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Height of a rectangular source aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>H1 [mm]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="3">
+                   <widget class="QLineEdit" name="q_resolution_sample_h_line_edit">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Height of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="q_resolution_source_w_label">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of a rectangular source aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>W1 [mm]</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="2">
+                   <widget class="QLabel" name="q_resolution_sample_h_label">
+                    <property name="toolTip">
+                     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Height of a rectangular sample aperature.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                    </property>
+                    <property name="text">
+                     <string>H2 [mm]</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </widget>
+            <widget class="SettingsDiagnosticTab" name="settings_diagnostic_tab">
+             <attribute name="title">
+              <string>State Diagnostic</string>
+             </attribute>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="BeamCentre" name="beam_centre"/>
+        <widget class="AddRunsPage" name="add_runs_page"/>
+        <widget class="DiagnosticsPage" name="diagnostic_page"/>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>SettingsDiagnosticTab</class>
+   <extends>QWidget</extends>
+   <header>mantidqtinterfaces.sans_isis.views.settings_diagnostic_tab</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MaskingTable</class>
+   <extends>QWidget</extends>
+   <header>mantidqtinterfaces.sans_isis.views.masking_table</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>AddRunsPage</class>
+   <extends>QWidget</extends>
+   <header>mantidqtinterfaces.sans_isis.views.add_runs_page</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>BeamCentre</class>
+   <extends>QWidget</extends>
+   <header>mantidqtinterfaces.sans_isis.views.beam_centre</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DiagnosticsPage</class>
+   <extends>QWidget</extends>
+   <header>mantidqtinterfaces.sans_isis.views.diagnostics_page.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <tabstops>
+  <tabstop>manage_directories_button</tabstop>
+  <tabstop>user_file_button</tabstop>
+  <tabstop>batch_button</tabstop>
+  <tabstop>reduction_dimensionality_1D</tabstop>
+  <tabstop>reduction_dimensionality_2D</tabstop>
+  <tabstop>output_mode_memory_radio_button</tabstop>
+  <tabstop>output_mode_file_radio_button</tabstop>
+  <tabstop>output_mode_both_radio_button</tabstop>
+  <tabstop>can_sas_checkbox</tabstop>
+  <tabstop>nx_can_sas_checkbox</tabstop>
+  <tabstop>rkh_checkbox</tabstop>
+  <tabstop>save_zero_error_free</tabstop>
+  <tabstop>use_optimizations_checkbox</tabstop>
+  <tabstop>plot_results_checkbox</tabstop>
+  <tabstop>help_button</tabstop>
+  <tabstop>event_binning_line_edit</tabstop>
+  <tabstop>mask_file_input_line_edit</tabstop>
+  <tabstop>mask_file_browse_push_button</tabstop>
+  <tabstop>mask_file_add_push_button</tabstop>
+  <tabstop>monitor_normalization_line_edit</tabstop>
+  <tabstop>monitor_normalization_interpolating_rebin_check_box</tabstop>
+  <tabstop>transmission_line_edit</tabstop>
+  <tabstop>transmission_interpolating_rebin_check_box</tabstop>
+  <tabstop>transmission_target_combo_box</tabstop>
+  <tabstop>transmission_monitor_line_edit</tabstop>
+  <tabstop>transmission_mn_4_shift_line_edit</tabstop>
+  <tabstop>transmission_radius_line_edit</tabstop>
+  <tabstop>transmission_roi_files_line_edit</tabstop>
+  <tabstop>transmission_mask_files_line_edit</tabstop>
+  <tabstop>transmission_roi_files_push_button</tabstop>
+  <tabstop>transmission_mask_files_push_button</tabstop>
+  <tabstop>fit_selection_combo_box</tabstop>
+  <tabstop>fit_sample_use_fit_check_box</tabstop>
+  <tabstop>fit_sample_fit_type_combo_box</tabstop>
+  <tabstop>fit_sample_polynomial_order_spin_box</tabstop>
+  <tabstop>fit_sample_wavelength_combo_box</tabstop>
+  <tabstop>fit_sample_wavelength_min_line_edit</tabstop>
+  <tabstop>fit_sample_wavelength_max_line_edit</tabstop>
+  <tabstop>fit_can_use_fit_check_box</tabstop>
+  <tabstop>fit_can_fit_type_combo_box</tabstop>
+  <tabstop>fit_can_polynomial_order_spin_box</tabstop>
+  <tabstop>fit_can_wavelength_combo_box</tabstop>
+  <tabstop>fit_can_wavelength_min_line_edit</tabstop>
+  <tabstop>fit_can_wavelength_max_line_edit</tabstop>
+  <tabstop>pixel_adjustment_det_1_line_edit</tabstop>
+  <tabstop>pixel_adjustment_det_1_push_button</tabstop>
+  <tabstop>pixel_adjustment_det_2_line_edit</tabstop>
+  <tabstop>pixel_adjustment_det_2_push_button</tabstop>
+  <tabstop>wavelength_adjustment_det_1_line_edit</tabstop>
+  <tabstop>wavelength_adjustment_det_1_push_button</tabstop>
+  <tabstop>wavelength_adjustment_det_2_line_edit</tabstop>
+  <tabstop>wavelength_adjustment_det_2_push_button</tabstop>
+  <tabstop>q_1d_min_line_edit</tabstop>
+  <tabstop>q_1d_max_line_edit</tabstop>
+  <tabstop>q_1d_step_line_edit</tabstop>
+  <tabstop>q_1d_step_type_combo_box</tabstop>
+  <tabstop>q_xy_max_line_edit</tabstop>
+  <tabstop>q_xy_step_line_edit</tabstop>
+  <tabstop>gravity_group_box</tabstop>
+  <tabstop>gravity_extra_length_line_edit</tabstop>
+  <tabstop>q_resolution_group_box</tabstop>
+  <tabstop>q_resolution_shape_combo_box</tabstop>
+  <tabstop>q_resolution_source_h_line_edit</tabstop>
+  <tabstop>q_resolution_source_w_line_edit</tabstop>
+  <tabstop>q_resolution_source_a_line_edit</tabstop>
+  <tabstop>q_resolution_sample_h_line_edit</tabstop>
+  <tabstop>q_resolution_sample_w_line_edit</tabstop>
+  <tabstop>q_resolution_sample_a_line_edit</tabstop>
+  <tabstop>q_resolution_collimation_length_line_edit</tabstop>
+  <tabstop>q_resolution_delta_r_line_edit</tabstop>
+  <tabstop>q_resolution_moderator_file_line_edit</tabstop>
+  <tabstop>q_resolution_moderator_file_push_button</tabstop>
+  <tabstop>user_file_line_edit</tabstop>
+  <tabstop>tab_choice_list</tabstop>
+  <tabstop>batch_line_edit</tabstop>
+ </tabstops>
+ <resources/>
+ <connections/>
+</ui>

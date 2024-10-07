@@ -34,4 +34,5 @@ endif()
 
 add_subdirectory(test)
 add_subdirectory(mantidqtinterfaces/Engineering/gui)
+add_subdirectory(mantidqtinterfaces/sans_isis/gui_logic/test)
 add_subdirectory(mantidqtinterfaces/drill)
