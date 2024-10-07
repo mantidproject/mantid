@@ -13,11 +13,4 @@ Bugfixes
 - :ref:`interface-indirect-simulation` interface no longer crashes after clicking "Run" without loading data.
 
 
-Algorithms
-----------
-
-Bugfixes
-############
-- Fix :ref:`CompareWorkspaces <algm-CompareWorkspaces-v1>` for relative differences of small values.
-
 :ref:`Release 6.11.0 <v6.11.0>`

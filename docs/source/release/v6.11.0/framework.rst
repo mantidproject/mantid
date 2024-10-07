@@ -42,6 +42,7 @@ New features
 
 Bugfixes
 ############
+- Algorithm :ref:`CompareWorkspaces <algm-CompareWorkspaces-v1>` is now fixed for relative differences of small values.
 - Algorithm :ref:`LoadEventNexus <algm-LoadEventNexus>` now has minimum histogram bin edge equal to the lowest time-of-flight event rather than one less.
   The effect is that there is no longer negative bin edges unless there is actually a negative time-of-flight in the data.
 - Isotope densities have been updated, see https://pypi.org/project/periodictable/1.6.1/#history for notes about the updates from NIST.
