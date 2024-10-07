@@ -10,6 +10,10 @@ New Features
 - New algorithm :ref:`algm-PolarizationEfficienciesWildes` has been added for calculating the efficiencies of the polarizing components of an instrument with two flippers.
   This algorithm implements the approach from the A. R. Wildes 2006 paper.
 
+  .. figure::  ../../images/6_11_release/PolarizationEfficienciesWildes.png
+     :width: 500px
+
+
 Bugfixes
 --------
 - :ref:`Stitch1DMany <algm-Stitch1DMany-v1>` algorithm now runs successfully via the GUI.
