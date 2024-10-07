@@ -18,6 +18,7 @@ from mantid.api import (
     FrameworkManagerImpl,
     FunctionFactoryImpl,
     WorkspaceFactoryImpl,
+    AlgoTimeRegisterImpl,
 )
 from mantid.kernel._aliases import lazy_instance_access
 
@@ -41,6 +42,7 @@ FrameworkManager = lazy_instance_access(FrameworkManagerImpl)
 FunctionFactory = lazy_instance_access(FunctionFactoryImpl)
 WorkspaceFactory = lazy_instance_access(WorkspaceFactoryImpl)
 CatalogManager = lazy_instance_access(CatalogManagerImpl)
+AlgoTimeRegister = lazy_instance_access(AlgoTimeRegisterImpl)
 
 # backwards-compatible
 mtd = AnalysisDataService
