@@ -8,7 +8,10 @@
 #include "MantidKernel/Timer.h"
 #include <boost/python/class.hpp>
 #include <boost/python/make_constructor.hpp>
+#include <boost/python/reference_existing_object.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_value_policy.hpp>
+
 #include <iostream>
 
 // using namespace Mantid;
@@ -44,12 +47,22 @@ void addTimeWrapper(const std::string &name, long int begin, long int end) {
   Mantid::Instrumentation::AlgoTimeRegister::Instance().addTime(name, tp_begin_ns, tp_end_ns);
 }
 
-void export_AlgoTimeRegister() {
-  register_ptr_to_python<std::shared_ptr<AlgoTimeRegister>>();
-
-  // AlgoTimeRegister class
-  class_<AlgoTimeRegister, boost::noncopyable>("AlgoTimeRegister", no_init)
-      .def("addTime", &addTimeWrapper, (arg("name"), arg("begin"), arg("end")));
+AlgoTimeRegisterImpl &start() {
+  auto &svc = AlgoTimeRegister::Instance();
+  return svc;
 }
 
+void export_AlgoTimeRegister() {
+
+  // AlgoTimeRegister class
+  class_<AlgoTimeRegisterImpl, boost::noncopyable>("AlgoTimeRegisterImpl", no_init)
+      .def("addTime", &addTimeWrapper, (arg("name"), arg("begin"), arg("end")))
+      .staticmethod("addTime")
+      .def("start", start, return_value_policy<reference_existing_object>(),
+           "Returns a reference to the AlgoTimeRegister")
+      .staticmethod("start")
+      .def("Instance", &AlgoTimeRegister::Instance, return_value_policy<reference_existing_object>(),
+           "Returns a reference to the AlgoTimeRegister")
+      .staticmethod("Instance");
+}
 #endif
