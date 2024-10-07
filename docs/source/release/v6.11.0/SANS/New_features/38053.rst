@@ -1,1 +1,0 @@
-- The :ref:`compatibility_mode` feature in the ISIS SANS GUI is no longer selected by default. This feature should be considered deprecated and will be removed completely in a future release.
