@@ -202,8 +202,8 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DetectorEffici
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:348
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:364
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EditInstrumentGeometry.cpp:273
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:89
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:685
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:97
+containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:823
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ExportTimeSeriesLog.cpp:134
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ExportTimeSeriesLog.cpp:330
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionEventCalibrateDetectors.cpp:54
