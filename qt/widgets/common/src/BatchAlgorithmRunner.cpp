@@ -55,7 +55,9 @@ BatchAlgorithmRunner::BatchAlgorithmRunner(QObject *parent)
       m_executeAsync(this, &BatchAlgorithmRunner::executeBatchAsyncImpl) {}
 
 BatchAlgorithmRunner::~BatchAlgorithmRunner() {
-  cancelBatch();
+  Poco::ActiveResult<bool> result = m_executeAsync(Poco::Void());
+  result.wait();
+
   removeAllObservers();
 }
 
