@@ -16,7 +16,11 @@ New Features
 - Text and QComboBoxes are now more readable on OSX dark mode.
 - There is a new :ref:`Deprecation Policy <deprecation_policy>` for Mantid.
 - ``Run`` and ``Abort`` buttons now display tooltips explaining their functionality and shortcut keys.
-  Tooltips are displayed when hovering over the relevant buttons.
+  Tooltips are displayed when hovering over the relevant buttons:
+
+  .. figure::  ../../images/6_11_release/run_abort_tooltip.gif
+     :width: 450px
+
 - Sequential Fit Dialog has a new selection method to `ExtendedSelection <https://doc.qt.io/qt-5/qabstractitemview.html#SelectionMode-enum>`_ when adding workspaces.
 
 
@@ -51,10 +55,6 @@ Bugfixes
 
 SliceViewer
 -----------
-
-New features
-############
-
 
 Bugfixes
 ############
