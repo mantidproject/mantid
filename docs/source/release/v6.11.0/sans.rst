@@ -9,6 +9,10 @@ New Features
 ------------
 - The :ref:`compatibility_mode` feature in the :ref:`ISIS SANS GUI <ISIS_Sans_interface_contents>` is no longer selected by default.
   This feature should be considered deprecated and will be removed completely in a future release.
+
+  .. figure::  ../../images/6_11_release/disabled_compatibility_mode.png
+     :width: 600px
+
 - New algorithm :ref:`PolarizerEfficiency <algm-PolarizerEfficiency-v1>` for calculating the efficiency of a polariser.
 
 Bugfixes
