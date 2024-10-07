@@ -62,9 +62,13 @@ void DiffractionFocussing2::init() {
                   "input has events (default).\n"
                   "If false, then the workspace gets converted to a "
                   "Workspace2D histogram.");
-  declareProperty(std::make_unique<ArrayProperty<double>>("DMin"), "minimum x values");
-  declareProperty(std::make_unique<ArrayProperty<double>>("DMax"), "maximum x values");
-  declareProperty(std::make_unique<ArrayProperty<double>>("Delta"), "step parameters for rebin");
+  declareProperty(std::make_unique<ArrayProperty<double>>("DMin"),
+                  "Minimum x values, one value for each output specta or single value which is common to all");
+  declareProperty(std::make_unique<ArrayProperty<double>>("DMax"),
+                  "Maximum x values, one value for each output specta or single value which is common to all");
+  declareProperty(std::make_unique<ArrayProperty<double>>("Delta"),
+                  "Step parameters for rebin, positive values are constant step-size, negative are logorithmic. One "
+                  "value for each output specta or single value which is common to all");
 }
 
 std::map<std::string, std::string> DiffractionFocussing2::validateInputs() {
