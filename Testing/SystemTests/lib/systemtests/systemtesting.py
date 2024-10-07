@@ -1153,18 +1153,14 @@ class TestManager(object):
         modname = modname.split(".py")[0]
         tests = []
         try:
-            spec = importlib.util.spec_from_file_location("", filename)
+            spec = importlib.util.spec_from_file_location(modname, filename)
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
 
-            mod_attrs = dir(mod)
-            for key in mod_attrs:
-                value = getattr(mod, key)
-                if key == "MantidSystemTest" or not inspect.isclass(value):
-                    continue
-                if self.isValidTestClass(value):
-                    test_name = key
-                    tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
+            module_classes = dict(inspect.getmembers(mod, inspect.isclass))
+            module_classes = [x for x in module_classes if self.isValidTestClass(module_classes[x]) and x != "MantidSystemTest"]
+            for test_name in module_classes:
+                tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
             module_loaded = True
         except Exception:
             print("Error importing module '{}':".format(modname))
