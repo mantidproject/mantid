@@ -4,9 +4,9 @@
 Mantid 6.11.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure::  ../../images/6_11_release/single-crystal-peak-background-edited.png
+   :width: 500px
    :class: screenshot
-   :width: 385px
    :align: right
 
 .. contents:: Table of Contents
@@ -16,7 +16,23 @@ Mantid 6.11.0 Release Notes
 
 We are proud to announce version 6.11.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+In this release we gave extra attention to fixing bugs and improving algorithms (for example by making them run faster or use less memory).
+We also added several new algorithms. These are the highlights for this release:
+
+- For single crystal diffraction, we added a new algorithm :ref:`FindMultipleUMatrices <algm-FindMultipleUMatrices>`
+  to find multiple UB matrices when given lattice parameters for sample with multiple domains or spurious peaks.
+- Also for single crystal diffraction,  :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` is better at determining background bins by minimising third-moment (skew).
+  This is achieved by forcing skew > 0 (minimum skew we would expect in background).
+  This change stops peak mask of :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` including too many pixels due to small diffuse scattering (seen in the figure above).
+- For powder diffraction, the algorithms
+  :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`,
+  :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>`,
+  :ref:`SNSPowderReduction <algm-SNSPowderReduction>` and
+  :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>`
+  were updated to use logarithmic compression, which uses less memory.
+- For reflectometry, we added a new algorithm :ref:`algm-PolarizationEfficienciesWildes` has been added for calculating the efficiencies of the polarizing components of an instrument with two flippers.
+  This algorithm implements the approach from the A. R. Wildes 2006 paper.
+- For SANS, we added new algorithm :ref:`PolarizerEfficiency <algm-PolarizerEfficiency-v1>` for calculating the efficiency of a polariser.
 
 **TODO: Add a note about new mantid-developer metapackage**
 
