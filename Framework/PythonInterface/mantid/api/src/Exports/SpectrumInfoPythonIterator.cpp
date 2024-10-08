@@ -9,6 +9,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/iterator.hpp>
 #include <boost/python/module.hpp>
+#include <boost/python/reference_existing_object.hpp>
 
 using Mantid::PythonInterface::SpectrumInfoPythonIterator;
 using namespace boost::python;
