@@ -23,6 +23,8 @@ class WishSX(BaseSX):
                                <centre x="0.0"  y="0.0" z="0.0" />
                                <radius val="0.0025"/>
                                </sphere>"""  # sphere radius 2.5mm  - used for vanadium and NaCl
+        self.beam_width = 0.2  # cm
+        self.beam_height = 0.4  # cm
 
     def process_data(self, runs: Sequence[str], *args):
         """
