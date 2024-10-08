@@ -1280,9 +1280,9 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(Geometry::ICompAssembly
     m_neutronicPos[detector] = pLocElem->getChildElement("neutronic");
   }
 
-  // mark-as is a depricated attribute used before is="monitor" was introduced
+  // mark-as is a deprecated attribute used before is="monitor" was introduced
   if (pCompElem->hasAttribute("mark-as") || pLocElem->hasAttribute("mark-as")) {
-    g_log.warning() << "Attribute 'mark-as' is a depricated attribute in "
+    g_log.warning() << "Attribute 'mark-as' is a deprecated attribute in "
                        "Instrument Definition File."
                     << " Please see the deprecated section of "
                        "docs.mantidproject.org/concepts/InstrumentDefinitionFile for how to remove this "
