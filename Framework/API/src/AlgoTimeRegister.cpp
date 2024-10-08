@@ -35,10 +35,44 @@ void AlgoTimeRegisterImpl::addTime(const std::string &name, const Kernel::time_p
   AlgoTimeRegister::Instance().addTime(name, std::this_thread::get_id(), begin, end);
 }
 
+bool AlgoTimeRegisterImpl::writeToFile() {
+  auto writeEnable = Kernel::ConfigService::Instance().getValue<bool>("performancelog.write").value();
+  if (!writeEnable) {
+    LOGGER().information() << "performancelog.write is disabled (off/0/false)\n";
+    return false;
+  }
+  auto filename = Kernel::ConfigService::Instance().getString("performancelog.filename");
+  if (filename.empty()) {
+    LOGGER().information() << "performancelog.filename is empty, please provide valid filename\n";
+    return false;
+  }
+  if (m_filename == filename && m_hasWrittenToFile) {
+    return true;
+  }
+
+  m_filename = filename;
+
+  LOGGER().information() << "Performance log file: " << m_filename << '\n';
+
+  std::fstream fs;
+
+  fs.open(m_filename, std::ios::out);
+  if (fs.is_open()) {
+    fs << "START_POINT: " << std::chrono::duration_cast<std::chrono::nanoseconds>(m_start.time_since_epoch()).count()
+       << " MAX_THREAD: " << PARALLEL_GET_MAX_THREADS << "\n";
+    fs.close();
+    m_hasWrittenToFile = true;
+  } else {
+    LOGGER().notice() << "Failed to open the file, timing will not write to file.\n";
+    return false;
+  }
+  return true;
+}
+
 void AlgoTimeRegisterImpl::addTime(const std::string &name, const std::thread::id thread_id,
                                    const Kernel::time_point_ns &begin, const Kernel::time_point_ns &end) {
-  if (m_writeToFile) {
-    std::lock_guard<std::mutex> lock(AlgoTimeRegister::Instance().m_mutex);
+  std::lock_guard<std::mutex> lock(AlgoTimeRegister::Instance().m_mutex);
+  if (writeToFile()) {
     std::fstream fs;
     fs.open(m_filename, std::ios::out | std::ios::app);
     if (fs.is_open()) {
@@ -52,32 +86,8 @@ void AlgoTimeRegisterImpl::addTime(const std::string &name, const std::thread::i
   }
 }
 
-AlgoTimeRegisterImpl::AlgoTimeRegisterImpl() : m_start(std::chrono::high_resolution_clock::now()) {
-  auto writeEnable = Kernel::ConfigService::Instance().getValue<bool>("performancelog.write").value();
-  if (!writeEnable) {
-    LOGGER().information() << "performancelog.write is disabled (off/0/false)\n";
-  }
-  auto filename = Kernel::ConfigService::Instance().getString("performancelog.filename");
-  if (filename.empty()) {
-    LOGGER().information() << "performancelog.filename is empty, please provide valid filename\n";
-  }
-  m_filename = filename;
-  m_writeToFile = true;
-  LOGGER().information() << "Performance log file: " << m_filename << '\n';
-  std::fstream fs;
-
-  // Open the file in truncation mode (ios::trunc)
-  fs.open(m_filename, std::ios::out);
-
-  if (fs.is_open()) {
-    fs << "START_POINT: " << std::chrono::duration_cast<std::chrono::nanoseconds>(m_start.time_since_epoch()).count()
-       << " MAX_THREAD: " << PARALLEL_GET_MAX_THREADS << "\n";
-    fs.close();
-  } else {
-    LOGGER().notice() << "Failed to open the file, timing will not write to file.\n";
-    m_writeToFile = false;
-  }
-}
+AlgoTimeRegisterImpl::AlgoTimeRegisterImpl()
+    : m_start(std::chrono::high_resolution_clock::now()), m_hasWrittenToFile(false) {}
 
 AlgoTimeRegisterImpl::~AlgoTimeRegisterImpl() {}
 

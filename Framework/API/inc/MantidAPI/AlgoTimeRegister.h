@@ -38,6 +38,7 @@ public:
   void addTime(const std::string &name, const std::thread::id thread_id, const Kernel::time_point_ns &begin,
                const Kernel::time_point_ns &end);
   void addTime(const std::string &name, const Kernel::time_point_ns &begin, const Kernel::time_point_ns &end);
+
   std::mutex m_mutex;
 
 private:
@@ -46,9 +47,11 @@ private:
   AlgoTimeRegisterImpl();
   ~AlgoTimeRegisterImpl();
 
+  bool writeToFile();
+
   Kernel::time_point_ns m_start;
   std::string m_filename;
-  bool m_writeToFile;
+  bool m_hasWrittenToFile;
 };
 
 using AlgoTimeRegister = Mantid::Kernel::SingletonHolder<AlgoTimeRegisterImpl>;

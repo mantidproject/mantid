@@ -381,6 +381,7 @@ set(TEST_FILES
     AlgorithmPropertyTest.h
     AlgorithmRuntimePropsTest.h
     AlgorithmTest.h
+    AlgoTimeRegisterTest.h
     AnalysisDataServiceObserverTest.h
     AnalysisDataServiceTest.h
     AsynchronousTest.h
