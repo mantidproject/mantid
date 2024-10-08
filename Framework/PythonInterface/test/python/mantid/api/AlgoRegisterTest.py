@@ -43,7 +43,7 @@ class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
     def setUp(self):
         performance_config = {"performancelog.write": "On", "performancelog.filename": self.PER_FILE.name}
         with amend_config(**performance_config):
-            AlgoTimeRegister.start()
+            AlgoTimeRegister.Instance()
             with open(self.PER_FILE.name, "r") as f:
                 # based on the format `START_POINT: <start point number> MAX_THREAD: <thread number>`
                 timeentry = f.readlines()[0].split(" ")
@@ -81,7 +81,7 @@ class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
         duration = end_time-start_time
 
         # it should ignore this
-        AlgoTimeRegister.start()
+        AlgoTimeRegister.Instance()
 
         # add time
         AlgoTimeRegister.addTime(entry_name,start_time,end_time)
@@ -148,7 +148,7 @@ class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
         ws = CreateSampleWorkspace()
 
         # it should ignore this
-        AlgoTimeRegister.start()
+        AlgoTimeRegister.Instance()
 
         #get time data from file
         rec_start_time,rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
@@ -199,7 +199,7 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
         self.assertEqual(rec_thread_id,threading.get_ident())
 
         # it should ignore this and not restart the clock!
-        AlgoTimeRegister.start()
+        AlgoTimeRegister.Instance()
 
         entry_name = "Max"
         max_ws = Max(ws)
