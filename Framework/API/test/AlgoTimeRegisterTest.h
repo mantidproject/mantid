@@ -16,9 +16,7 @@
 #include <fstream>
 #include <sstream>
 
-#ifdef __linux__ // this works only in linux
 using Mantid::Instrumentation::AlgoTimeRegister;
-#endif
 using Mantid::Kernel::ConfigService;
 using std::filesystem::exists;
 using std::filesystem::remove_all;
@@ -41,9 +39,7 @@ public:
     }
     ConfigService::Instance().setString("performancelog.filename", m_directory + "test.log");
     ConfigService::Instance().setString("performancelog.write", "On");
-#ifdef __linux__ // this works only in linux
     AlgoTimeRegister::Instance();
-#endif
   }
 
   ~AlgoTimeRegisterTest() override {
@@ -133,7 +129,6 @@ public:
   }
 
   void test_addTime() {
-#ifdef __linux__ // this works only in linux
     // Record some dummy times
     auto startTime = std::chrono::high_resolution_clock::now();
     std::this_thread::sleep_for(std::chrono::milliseconds(40));
@@ -141,20 +136,16 @@ public:
     std::thread::id id = std::this_thread::get_id();
     std::ostringstream ss;
     ss << id;
-    std::vector<timeEntry> entries = {{ "TestAlgorithm", startTime, endTime, ss.str() }};
+    std::vector<timeEntry> entries = {{"TestAlgorithm", startTime, endTime, ss.str()}};
     // timeEntry entry = {"TestAlgorithm", startTime, endTime, ss.str()};
 
     // Add the time entry
     AlgoTimeRegister::Instance().addTime("TestAlgorithm", startTime, endTime);
     checkTimeEntry(entries);
     countLines(1);
-#else
-    TS_TRACE("This test is only available on Linux");
-#endif
   }
 
   void test_threadedWrite() {
-#ifdef __linux__ // this works only in linux
     ConfigService::Instance().setString("performancelog.filename", m_directory + "threadedWrite.log");
 
     std::vector<timeEntry> entries;
@@ -178,13 +169,9 @@ public:
 
     checkTimeEntry(entries, "threadedWrite.log");
     countLines(entryCount, "threadedWrite.log");
-#else
-    TS_TRACE("This test is only available on Linux");
-#endif
   }
 
   void test_writeDisabled() {
-#ifdef __linux__ // this works only in linux
     ConfigService::Instance().setString("performancelog.write", "Off");
     ConfigService::Instance().setString("performancelog.filename", m_directory + "noWrite.log");
 
@@ -195,14 +182,11 @@ public:
     std::thread::id id = std::this_thread::get_id();
     std::ostringstream ss;
     ss << id;
-    std::vector<timeEntry> entries = {{ "TestAlgorithm", startTime, endTime, ss.str() }};
+    std::vector<timeEntry> entries = {{"TestAlgorithm", startTime, endTime, ss.str()}};
 
     // Add the time entry
     AlgoTimeRegister::Instance().addTime("TestAlgorithm", startTime, endTime);
     TS_ASSERT(!exists(m_directory + "noWrite.log"));
-#else
-    TS_TRACE("This test is only available on Linux");
-#endif
   }
 
 private:
