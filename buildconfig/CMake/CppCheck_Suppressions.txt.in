@@ -571,9 +571,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/LatticeDomai
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/DownloadInstrument.h:26
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/MSVesuvioHelpers.cpp:369
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/MSVesuvioHelpers.cpp:370
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/H5Util.cpp:178
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/H5Util.cpp:181
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/H5Util.cpp:191
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/ISISJournal.h:35
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusClasses.h:107
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DataBlockComposite.cpp:383
@@ -936,8 +933,6 @@ syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Expo
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/VMD.cpp:100
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/IPropertyManager.cpp:46
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/IPropertyManager.cpp:102
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/NexusGeometry/src/NexusGeometryParser.cpp:722
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/NexusGeometry/src/NexusGeometryParser.cpp:724
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/TimeSeriesProperty.cpp:134
 iterateByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/ArrayProperty.cpp:52
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc/MantidPythonInterface/core/IsNone.h:26

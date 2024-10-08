@@ -18,8 +18,9 @@ namespace NexusGeometry {
  */
 class MANTID_NEXUSGEOMETRY_DLL AbstractLogger {
 public:
-  virtual void warning(const std::string &warning) = 0;
-  virtual void error(const std::string &error) = 0;
+  virtual void debug(const std::string &message) = 0;
+  virtual void warning(const std::string &message) = 0;
+  virtual void error(const std::string &message) = 0;
   virtual ~AbstractLogger() = default;
 };
 
@@ -29,6 +30,7 @@ private:
 
 public:
   LogAdapter(T *adaptee) : m_adaptee(adaptee) {}
+  virtual void debug(const std::string &message) override { m_adaptee->debug(message); }
   virtual void warning(const std::string &message) override { m_adaptee->warning(message); }
   virtual void error(const std::string &message) override { m_adaptee->error(message); }
 };
@@ -46,6 +48,7 @@ template <typename T> std::unique_ptr<AbstractLogger> makeLogger(T *adaptee) {
 
   public:
     Adapter(T *adaptee) : m_adaptee(adaptee) {}
+    virtual void debug(const std::string &message) override { m_adaptee->debug(message); }
     virtual void warning(const std::string &message) override { m_adaptee->warning(message); }
     virtual void error(const std::string &message) override { m_adaptee->error(message); }
   };

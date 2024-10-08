@@ -235,8 +235,21 @@ used.
   }
 
   void test_NXInstrument_name_is_aways_instrument() {
-    // NXInstrument group name is always written as "instrument" for legacy
-    // compatibility reasons
+    // TODO: Deprecate and "clean up" (i.e. re-integrate) the
+    //  `SaveNexusESS`, `NexusGeometrySave` and `NexusGeometryParser`
+    //   code sections.
+    // What is described by the next comment is just one example of many, where
+    //   an implementation seemed to just "stop in the middle".
+
+    // THIS TEST DOES NOT VERIFY WHAT ITS NAME ACTUALLY SUGGESTS:
+    //   in order to be backwards compatible, for the "legacy" instrument format;
+    //   YES, the NXInstrument group does need to be named "instrument".
+    // However, what this test actually verifies is that the NXinstrument group is assigned the same name
+    //   as the name of the `ComponentInfo` root.
+
+    // Since the NXinstrument group actually has a separate "name" attribute, almost certainly,
+    // for these codes, it could just be given the group name "instrument".
+    // However, fixing this was beyond the scope of the current changes.
 
     // RAII file resource for test file destination
     FileResource fileResource("check_instrument_name_test_file.nxs");
@@ -874,7 +887,7 @@ Instrument cache.
     /*
     test scenario: saveInstrument called with zero rotation, and some
     non-zero translation in source. Expected behaviour is: (dataset)
-   'depends_on' has value "/absoulute/path/to/location", and (dataset)
+   'depends_on' has value "/absolute/path/to/location", and (dataset)
    'location' has dAttribute (AKA attribute of dataset) 'depends_on' with
    value "."
     */
@@ -1035,7 +1048,7 @@ Instrument cache.
     bool sourceDependencyIsSelf = tester.dataSetHasStrValue(DEPENDS_ON, NO_DEPENDENCY, sourcePath);
     TS_ASSERT(sourceDependencyIsSelf);
 
-    // assert the group NXtransformations doesnt exist in file
+    // assert the group NXtransformations doesn't exist in the file
     TS_ASSERT_THROWS(tester.openfullH5Path(transformationsPath), H5::GroupIException &);
   }
 };

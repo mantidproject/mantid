@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/H5Util.h"
+#include "MantidFrameworkTestHelpers/FileResource.h"
 #include "MantidKernel/System.h"
 
 #include <H5Cpp.h>
@@ -196,6 +197,198 @@ public:
     removeFile(filename);
   }
 
+  void test_groupExists() {
+    FileResource testInput("groupExists_test.h5");
+    H5File h5(testInput.fullPath(), H5F_ACC_TRUNC);
+    h5.createGroup("/one");
+    h5.createGroup("/two");
+    Group g = h5.openGroup("/two");
+    g.createGroup("three");
+    g.close();
+    h5.close();
+
+    TS_ASSERT(Poco::File(testInput.fullPath()).exists());
+    H5File h5_ro(testInput.fullPath(), H5F_ACC_RDONLY);
+
+    TS_ASSERT(H5Util::groupExists(h5_ro, "/one"));
+    TS_ASSERT(H5Util::groupExists(h5_ro, "/two/three"));
+    TS_ASSERT(!H5Util::groupExists(h5_ro, "/four"));
+    TS_ASSERT(!H5Util::groupExists(h5_ro, "/two/four"));
+  }
+
+  void test_keyHasValue() {
+    constexpr auto NX_CLASS = "NX_class";
+    constexpr auto NX_ENTRY = "NXentry";
+    constexpr auto NX_INSTRUMENT = "NXinstrument";
+    constexpr auto NX_DETECTOR = "NXdetector";
+
+    FileResource testInput("keyHasValue_test.h5");
+
+    {
+      H5File h5(testInput.fullPath(), H5F_ACC_TRUNC);
+
+      // 1: Create groups with specific key: value attributes
+      Group g1 = h5.createGroup("/one");
+      _writeStringAttribute(g1, NX_CLASS, NX_ENTRY);
+      Group g2 = g1.createGroup("two");
+      _writeStringAttribute(g2, NX_CLASS, NX_INSTRUMENT);
+
+      // 2: Create a group without any attributes
+      h5.createGroup("/three");
+    }
+
+    TS_ASSERT(Poco::File(testInput.fullPath()).exists());
+    H5File h5(testInput.fullPath(), H5F_ACC_RDONLY);
+
+    Group g1 = h5.openGroup("/one");
+    Group g2 = g1.openGroup("two");
+    Group g3 = h5.openGroup("/three");
+
+    // key: value
+    TS_ASSERT(H5Util::keyHasValue(g1, NX_CLASS, NX_ENTRY));
+
+    // not (key: wrong value)
+    TS_ASSERT(!H5Util::keyHasValue(g1, NX_CLASS, NX_DETECTOR));
+
+    // not (wrong key: value)
+    TS_ASSERT(!H5Util::keyHasValue(g1, "another_key", NX_ENTRY));
+
+    // nested group, key: value
+    TS_ASSERT(H5Util::keyHasValue(g2, NX_CLASS, NX_INSTRUMENT));
+
+    // nested group, not (key: wrong value)
+    TS_ASSERT(!H5Util::keyHasValue(g2, NX_CLASS, NX_ENTRY));
+
+    // no attributes present on group, not (key: value)
+    TS_ASSERT(!H5Util::keyHasValue(g3, NX_CLASS, NX_ENTRY));
+  }
+
+  void test_copyGroup_same_file() {
+    FileResource testInput("copy_group_same_file.h5");
+    {
+      H5File input1(testInput.fullPath(), H5F_ACC_TRUNC);
+      input1.createGroup("/one");
+      Group g2 = input1.createGroup("/two");
+      g2.createGroup("three");
+    }
+    {
+      // WARNING: `H5File::reopen` doesn't work for some reason.
+      H5File input1(testInput.fullPath(), H5F_ACC_RDONLY);
+      // verify the starting structure
+      _assert_group_structure(input1,
+                              {
+                                  "/one",
+                                  "/two/three",
+                              },
+                              "copyGroup: same file: starting structure");
+      TS_ASSERT(!_groupExists(input1, "/one/two/three"));
+    }
+    {
+      H5File output1(testInput.fullPath(), H5F_ACC_RDWR);
+      H5Util::copyGroup(output1, "/one/two", output1, "/two");
+      H5Util::copyGroup(output1, "/four", output1, "/two");
+    }
+    {
+      H5File output1(testInput.fullPath(), H5F_ACC_RDONLY);
+      // verify the final structure
+      _assert_group_structure(output1, {"/one/two/three", "/two/three", "/four/three"},
+                              "copyGroup: same file: final structure");
+    }
+  }
+
+  void test_copyGroup_different_file() {
+    FileResource testInput1("copy_group_different_file1.h5");
+    FileResource testInput2("copy_group_different_file2.h5");
+    {
+      H5File input1(testInput1.fullPath(), H5F_ACC_TRUNC);
+      input1.createGroup("/one");
+      Group g2 = input1.createGroup("/two");
+      g2.createGroup("three");
+    }
+    {
+      H5File input1(testInput1.fullPath(), H5F_ACC_RDONLY);
+      // verify the starting structure
+      _assert_group_structure(input1,
+                              {
+                                  "/one",
+                                  "/two/three",
+                              },
+                              "copyGroup: different file: starting structure");
+      TS_ASSERT(!_groupExists(input1, "/one/two/three"));
+      input1.close();
+    }
+    {
+      H5File input1(testInput1.fullPath(), H5F_ACC_RDONLY);
+      H5File output1(testInput2.fullPath(), H5F_ACC_TRUNC);
+      H5Util::copyGroup(output1, "/one", input1, "/one");
+      H5Util::copyGroup(output1, "/two", input1, "/two");
+      H5Util::copyGroup(output1, "/four", input1, "/two");
+    }
+    {
+      H5File output1(testInput2.fullPath(), H5F_ACC_RDONLY);
+      // verify the final structure
+      _assert_group_structure(output1, {"/one", "/two/three", "/four/three"},
+                              "copyGroup: different file: final structure");
+    }
+  }
+
+  void test_deleteObjectLink_subgroup() {
+    FileResource testInput("delete_object_link_subgroup.h5");
+    {
+      H5File input1(testInput.fullPath(), H5F_ACC_TRUNC);
+      input1.createGroup("/one");
+      Group g2 = input1.createGroup("/two");
+      g2.createGroup("three");
+    }
+    {
+      H5File input1(testInput.fullPath(), H5F_ACC_RDWR);
+      // verify the starting structure
+      _assert_group_structure(input1,
+                              {
+                                  "/one",
+                                  "/two/three",
+                              },
+                              "deleteObjectLink: subgroup: starting structure");
+      H5Util::deleteObjectLink(input1, "/two/three");
+    }
+    {
+      H5File input1(testInput.fullPath(), H5F_ACC_RDONLY);
+      _assert_group_structure(input1,
+                              {
+                                  "/one",
+                                  "/two",
+                              },
+                              "deleteObjectLink: subgroup: final structure");
+      TS_ASSERT(!_groupExists(input1, "/two/three"));
+    }
+  }
+
+  void test_deleteObjectLink_rootgroup() {
+    FileResource testInput("delete_object_link_rootgroup.h5");
+    {
+      H5File input1(testInput.fullPath(), H5F_ACC_TRUNC);
+      input1.createGroup("/one");
+      Group g2 = input1.createGroup("/two");
+      g2.createGroup("three");
+    }
+    {
+      H5File input1(testInput.fullPath(), H5F_ACC_RDWR);
+      // verify the starting structure
+      _assert_group_structure(input1,
+                              {
+                                  "/one",
+                                  "/two/three",
+                              },
+                              "deleteObjectLink: rootgroup: starting structure");
+      H5Util::deleteObjectLink(input1, "/two");
+    }
+    {
+      H5File input1(testInput.fullPath(), H5F_ACC_RDONLY);
+      TS_ASSERT(_groupExists(input1, "/one"));
+      TS_ASSERT(!_groupExists(input1, "/two"));
+    }
+  }
+
 private:
   void do_assert_simple_string_data_set(
       const std::string &filename, const std::string &groupName, const std::string &dataName,
@@ -273,6 +466,47 @@ private:
     for (auto &attribute : floatVectorAttributes) {
       std::vector<int> value = H5Util::readNumArrayAttributeCoerce<int>(data, attribute.first);
       TSM_ASSERT_EQUALS("Should retrieve the correct attribute value", expectedCoerced, value);
+    }
+  }
+
+  // Attach a string key: value pair to a group or dataset.
+  static void _writeStringAttribute(H5::H5Object &h5, const std::string &key, const std::string &value) {
+    // for testing use: duplicates: `H5Util::writeStrAttribute`
+
+    // Fixed-length string datatype
+    H5::StrType dt(0, value.size());
+    Attribute attr = h5.createAttribute(key, dt, DataSpace(H5S_SCALAR));
+    attr.write(dt, value);
+  }
+
+  // Read the value of a string key: value pair attached to a group or dataset.
+  static std::string _readStringAttribute(H5::H5Object &h5, const std::string &key) {
+    // for testing use: duplicates: `H5Util::readAttributeAttributeAsString`
+
+    std::string value;
+    Attribute attr = h5.openAttribute(key);
+    attr.read(attr.getDataType(), value);
+    return value;
+  }
+
+  // test that a group exists in an HDF5 file
+  static bool _groupExists(H5::H5File &file, const std::string &groupPath) {
+    // for testing use: duplicates: `H5Util::groupExists`
+
+    bool status = true;
+    try {
+      file.openGroup(groupPath);
+    } catch (const H5::Exception &x) {
+      UNUSED_ARG(x);
+      status = false;
+    }
+    return status;
+  }
+
+  // test that multiple groups exist in an HDF5 file at the expected locations
+  void _assert_group_structure(H5::H5File &file, const std::vector<std::string> &paths, const std::string &msg) {
+    for (const auto &path : paths) {
+      TSM_ASSERT((msg + ": '" + path + "'").c_str(), _groupExists(file, path));
     }
   }
 };
