@@ -59,7 +59,10 @@
       "inherits": [
         "ci-default",
         "conda"
-      ]
+      ],
+      "cacheVariables": {
+        "PROFILE_ALGORITHM_LINUX": "ON"
+      }
     },
     {
       "name": "win-64-ci",

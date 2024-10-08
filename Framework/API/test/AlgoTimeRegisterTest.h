@@ -7,8 +7,6 @@
 
 #pragma once
 
-#ifdef __linux__ // This test only works on linux
-
 #include "MantidAPI/AlgoTimeRegister.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MultiThreaded.h"
@@ -18,7 +16,9 @@
 #include <fstream>
 #include <sstream>
 
+#ifdef __linux__ // this works only in linux
 using Mantid::Instrumentation::AlgoTimeRegister;
+#endif
 using Mantid::Kernel::ConfigService;
 using std::filesystem::exists;
 using std::filesystem::remove_all;
@@ -35,6 +35,7 @@ public:
     std::string threadId;
   };
 
+#ifdef __linux__ // this works only in linux
   AlgoTimeRegisterTest() {
     if (mkdir(m_directory.c_str(), 0777) == -1) {
       std::cerr << "Error :  " << strerror(errno) << std::endl;
@@ -190,9 +191,11 @@ public:
     AlgoTimeRegister::Instance().addTime("TestAlgorithm", startTime, endTime);
     TS_ASSERT(!exists(m_directory + "noWrite.log"));
   }
+#endif
+
+  void test_skipAddTime() { TS_TRACE("This test is only available on Linux"); }
 
 private:
   const std::string m_directory = "AlgoTimeRegisterTest/";
   std::mutex m_mutex;
 };
-#endif
