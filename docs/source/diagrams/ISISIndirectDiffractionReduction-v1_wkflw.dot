@@ -19,6 +19,11 @@ digraph ISISIndirectDiffractionReduction {
     RebinParam
     GroupingMethod
     OutputWorkspace
+    GroupingString
+    GroupingFile
+    GroupingWorkspace
+    NGroups
+    SpectraRange                  [label="SpectraRange"]
   }
 
   subgraph algorithms {
@@ -26,6 +31,10 @@ digraph ISISIndirectDiffractionReduction {
     ConvertUnits_unwrap_monitor   [label="ConvertUnits"]
     ConvertUnits_dSpacing         [label="ConvertUnits"]
     GroupWorkspaces
+    ApplyDiffCal
+    ApplyDiffCal1                 [label="ApplyDiffCal"]
+    ConvertUnits_calib            [label="ConvertUnits"]
+    Rebin
   }
 
   subgraph processes {
@@ -52,6 +61,7 @@ digraph ISISIndirectDiffractionReduction {
     unit_unwrap_monitor           [label="Wavelength"]
     e_mode                        [label="Elastic"]
     dspacing_unit                 [label="dSpacing"]
+    clear_calib                   [label="True"]
   }
 
   subgraph decision {
@@ -65,11 +75,16 @@ digraph ISISIndirectDiffractionReduction {
   Mode                        -> load_files
   SumFiles                    -> load_files
   load_files                  -> has_calib_file
-  has_calib_file              -> AlignDetectors                [label="Yes"]
-  CalibrationFile             -> AlignDetectors
-  AlignDetectors              -> DiffractionFocussing
-  CalibrationFile             -> DiffractionFocussing
-  DiffractionFocussing        -> get_multi_frame_rebin
+  has_calib_file              -> ApplyDiffCal                  [label="Yes"]
+  CalibrationFile             -> ApplyDiffCal
+  ApplyDiffCal                -> ConvertUnits_calib
+  dspacing_unit               -> ConvertUnits_calib                  [label="Target"]
+  e_mode                      -> ConvertUnits_calib                  [label="EMode"]
+  ConvertUnits_calib          -> ApplyDiffCal1
+  clear_calib                 -> ApplyDiffCal1                 [label="ClearCalibration"]
+  ApplyDiffCal1               -> Rebin
+  CalibrationFile             -> Rebin
+  Rebin                       -> get_multi_frame_rebin
   has_calib_file              -> get_multi_frame_rebin         [label="No"]
   RebinParam                  -> get_multi_frame_rebin
   get_multi_frame_rebin       -> multi_frame_rebin_string
@@ -94,6 +109,10 @@ digraph ISISIndirectDiffractionReduction {
   multi_frame_num_bins        -> rebin_reduction
   rebin_reduction             -> group_spectra
   GroupingMethod              -> group_spectra
+  GroupingString              -> group_spectra
+  GroupingFile                -> group_spectra
+  GroupingWorkspace           -> group_spectra
+  NGroups                     -> group_spectra
   masked_detectors            -> group_spectra
   group_spectra               -> is_multi_frame
   is_multi_frame              -> fold_chopped                   [label="Yes"]
