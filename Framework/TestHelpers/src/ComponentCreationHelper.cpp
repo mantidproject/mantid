@@ -535,8 +535,9 @@ void addRectangularBank(Instrument &testInstrument, int idStart, int pixels, dou
  * @param addMonitor :: whether to add a monitor detector to the instrument
  */
 Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels, double pixelSpacing,
-                                                double bankDistanceFromSample, bool addMonitor) {
-  auto testInst = std::make_shared<Instrument>("basic_rect");
+                                                double bankDistanceFromSample, bool addMonitor,
+                                                const std::string &instrumentName) {
+  auto testInst = std::make_shared<Instrument>(instrumentName);
 
   for (int banknum = 1; banknum <= num_banks; banknum++) {
     // Make a new bank

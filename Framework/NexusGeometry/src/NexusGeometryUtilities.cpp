@@ -28,20 +28,23 @@ std::optional<H5::DataSet> findDataset(const H5::Group &parentGroup, const H5std
   return std::optional<DataSet>{}; // Empty
 }
 
-std::optional<H5::Group> findGroupByName(const H5::Group &parentGroup, const H5std_string &name) {
+std::optional<H5::Group> findGroupByName(const H5::Group &parentGroup, const H5std_string &name,
+                                         const std::optional<H5std_string> classType) {
 
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
       H5std_string childPath = parentGroup.getObjnameByIdx(i);
       if (childPath == name) {
-        return std::optional<H5::Group>(parentGroup.openGroup(childPath));
+        H5::Group childGroup = parentGroup.openGroup(childPath);
+        if (!classType || hasNXClass(childGroup, *classType))
+          return std::optional<H5::Group>(childGroup);
       }
     }
   }
-  return std::optional<H5::Group>();
+  return std::nullopt;
 }
 
-bool hasNXAttribute(const H5::Group &group, const std::string &attributeValue) {
+bool hasNXClass(const H5::Group &group, const std::string &attributeValue) {
   bool result = false;
   for (uint32_t attribute_index = 0; attribute_index < static_cast<uint32_t>(group.getNumAttrs()); ++attribute_index) {
     // Test attribute at current index for NX_class
@@ -78,13 +81,13 @@ std::optional<H5::Group> findGroup(const H5::Group &parentGroup, const H5std_str
       // Open the sub group
       auto childGroup = parentGroup.openGroup(childPath);
       // Iterate through attributes to find NX_class
-      if (hasNXAttribute(childGroup, classType)) {
+      if (hasNXClass(childGroup, classType)) {
         return std::optional<Group>(childGroup);
       }
     }
   }
   return std::optional<Group>{}; // Empty
-} // namespace utilities
+}
 
 /// Find all groups at the same level matching same class type. Returns first
 /// item found.
@@ -97,12 +100,13 @@ std::vector<H5::Group> findGroups(const H5::Group &parentGroup, const H5std_stri
       // Open the sub group
       auto childGroup = parentGroup.openGroup(childPath);
       // Iterate through attributes to find NX_class
-      if (hasNXAttribute(childGroup, classType))
+      if (hasNXClass(childGroup, classType))
         groups.emplace_back(childGroup);
     }
   }
-  return groups; // Empty
+  return groups;
 }
+
 H5::Group findGroupOrThrow(const H5::Group &parentGroup, const H5std_string &classType) {
   auto found = findGroup(parentGroup, classType);
   if (!found) {

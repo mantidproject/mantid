@@ -10,13 +10,13 @@
 Description
 -----------
 
-Saves a processed nexus file similar to :ref:`algm-SaveNexusProcessed`, but provides nexus geometry which is an accurate snapshot of the calibrated/transformed instrument geometry in-memory. One current major difference between the two algorithms is that SaveNexusESS does not support the generation of a single processed file based on a :ref:`GroupWorkspace <WorkspaceGroup>` input.
+Saves a processed nexus file similar to :ref:`algm-SaveNexusProcessed`, but provides nexus geometry which is an accurate snapshot of the calibrated/transformed instrument geometry in-memory.
 
 The algorithm writes out spectra-detector mappings and can handle detector groupings.
 
 This algorithm may be deprecated in future in favour of a master :ref:`algm-SaveNexusProcessed` algorithm.
 
-This algorithm currently provides not shape information for component geometry.
+This algorithm currently does not support shape information for component geometry.
 
 Usage
 -----

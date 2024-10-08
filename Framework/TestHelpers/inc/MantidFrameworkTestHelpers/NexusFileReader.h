@@ -102,7 +102,7 @@ public:
             // Get the NX_class type
             H5std_string classType;
             attribute.read(dataType, classType);
-            // If group of correct type, return the childGroup
+            // If group is of the correct type, include the group in the count
             if (classType == nxClass) {
               counter++;
             }
@@ -113,7 +113,7 @@ public:
     return counter;
   }
 
-  // read a multidimensional dataset and returns vector containing the data
+  // read a multidimensional dataset and return a vector containing the data
   template <typename T>
   std::vector<T> readDataSetMultidimensional(FullNXPath &pathToGroup, const std::string &dataSetName) {
 

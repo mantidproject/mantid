@@ -176,14 +176,17 @@ void LoadNexusProcessed2::extractMappingInfoNew(const Mantid::NeXus::NXEntry &mt
  * @param filename : filename to load from.
  * @return true if successful
  */
-bool LoadNexusProcessed2::loadNexusGeometry(API::Workspace &ws, const int nWorkspaceEntries, Kernel::Logger &logger,
-                                            const std::string &filename) {
-  if (m_instrumentLayout == InstrumentLayout::NexusFormat && nWorkspaceEntries == 1) {
+bool LoadNexusProcessed2::loadNexusGeometry(API::Workspace &ws, size_t entryNumber, Kernel::Logger &logger,
+                                            const std::string &filePath) {
+  if (m_instrumentLayout == InstrumentLayout::NexusFormat) {
     if (auto *matrixWs = dynamic_cast<API::MatrixWorkspace *>(&ws)) {
       try {
         using namespace Mantid::NexusGeometry;
-        auto instrument =
-            NexusGeometry::NexusGeometryParser::createInstrument(filename, NexusGeometry::makeLogger(&logger));
+
+        std::ostringstream parentGroupName;
+        parentGroupName << "mantid_workspace_" << entryNumber;
+        auto instrument = NexusGeometry::NexusGeometryParser::createInstrument(filePath, parentGroupName.str(),
+                                                                               NexusGeometry::makeLogger(&logger));
         matrixWs->setInstrument(Geometry::Instrument_const_sptr(std::move(instrument)));
 
         auto &detInfo = matrixWs->detectorInfo();

@@ -189,7 +189,8 @@ void addRectangularBank(Mantid::Geometry::Instrument &testInstrument, int idStar
 Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
                                                                   double pixelSpacing = 0.008,
                                                                   double bankDistanceFromSample = 5.0,
-                                                                  bool addMonitor = false);
+                                                                  bool addMonitor = false,
+                                                                  const std::string &instrumentName = "basic_rect");
 
 Mantid::Geometry::Instrument_sptr createTestInstrumentRectangular2(int num_banks, int pixels,
                                                                    double pixelSpacing = 0.008);

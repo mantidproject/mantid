@@ -20,6 +20,7 @@ class DSetCreatPropList;
 class DataType;
 class Group;
 class H5File;
+class H5Object;
 } // namespace H5
 
 namespace Mantid {
@@ -93,6 +94,22 @@ std::vector<NumT> readNumArrayAttributeCoerce(LocationType &location, const std:
 template <typename NumT> std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name);
 
 template <typename NumT> std::vector<NumT> readArray1DCoerce(H5::DataSet &dataset);
+
+/// Test if a group already exists within an HDF5 file or parent group.
+MANTID_DATAHANDLING_DLL bool groupExists(H5::H5Object &h5, const std::string &groupPath);
+
+/// Test if an attribute is present and has a specific string value for an HDF5 group or dataset.
+MANTID_DATAHANDLING_DLL bool keyHasValue(H5::H5Object &h5, const std::string &key, const std::string &value);
+
+/// Copy a group and all of its contents, between the same or different HDF5 files or groups.
+MANTID_DATAHANDLING_DLL void copyGroup(H5::H5Object &dest, const std::string &destGroupPath, H5::H5Object &src,
+                                       const std::string &srcGroupPath);
+
+/**
+ * Delete a target link for a group or dataset from a parent group.
+ * If this is the last link to the target in the HDF5 graph, then it will be removed from the file.
+ */
+MANTID_DATAHANDLING_DLL void deleteObjectLink(H5::H5Object &h5, const std::string &target);
 
 } // namespace H5Util
 } // namespace DataHandling

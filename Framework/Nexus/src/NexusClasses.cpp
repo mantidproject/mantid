@@ -198,7 +198,7 @@ void NXClass::open() {
 }
 
 /** It is fast, but the parent of this class must be open at
- * the time of calling. openNXClass uses open() (the slow one). To open calss
+ * the time of calling. openNXClass uses open() (the slow one). To open class
  * using openLocal() do:
  *    NXTheClass class(parent,name);
  *    class.openLocal();

@@ -435,8 +435,10 @@ Workspace2D_sptr create2DWorkspaceWithGeographicalDetectors(const int nlat, cons
  * @return The Workspace2D
  */
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels,
-                                                                                 int numBins) {
-  Instrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(numBanks, numPixels);
+                                                                                 int numBins,
+                                                                                 const std::string &instrumentName) {
+  Instrument_sptr inst =
+      ComponentCreationHelper::createTestInstrumentRectangular(numBanks, numPixels, 0.008, 5.0, false, instrumentName);
   Workspace2D_sptr ws = create2DWorkspaceBinned(numBanks * numPixels * numPixels, numBins);
   ws->setInstrument(inst);
   ws->getAxis(0)->setUnit("dSpacing");

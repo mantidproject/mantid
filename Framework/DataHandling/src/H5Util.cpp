@@ -12,6 +12,8 @@
 #include <algorithm>
 #include <array>
 #include <boost/numeric/conversion/cast.hpp>
+#include <stdexcept>
+#include <string>
 
 using namespace H5;
 
@@ -393,6 +395,64 @@ template <typename NumT> std::vector<NumT> readArray1DCoerce(DataSet &dataset) {
 
   // not a supported type
   throw DataTypeIException();
+}
+
+/// Test if a group exists in an HDF5 file or parent group.
+bool groupExists(H5::H5Object &h5, const std::string &groupPath) {
+  bool status = true;
+  // Unfortunately, this is actually the approach recommended by the HDF Group.
+  try {
+    h5.openGroup(groupPath);
+  } catch (const H5::Exception &x) {
+    status = false;
+  }
+  return status;
+}
+
+/// Test if an attribute is present on an HDF5 group or dataset and has a specific string value.
+bool keyHasValue(H5::H5Object &h5, const std::string &key, const std::string &value) {
+  bool status = true;
+  try {
+    Attribute attr = h5.openAttribute(key);
+    std::string value_;
+    attr.read(attr.getDataType(), value_);
+    if (value_ != value)
+      status = false;
+  } catch (const H5::Exception &x) {
+    status = false;
+  }
+  return status;
+}
+
+void copyGroup(H5::H5Object &dest, const std::string &destGroupPath, H5::H5Object &src,
+               const std::string &srcGroupPath) {
+  // Source group must exist, and destination group must not exist.
+  if (!groupExists(src, srcGroupPath) || groupExists(dest, destGroupPath))
+    throw std::invalid_argument(std::string("H5Util::copyGroup: source group '") + srcGroupPath + "' must exist and " +
+                                "destination group '" + destGroupPath + "' must not exist.");
+
+  // TODO: check that source file must have at least read access and destination file must have write access.
+
+  // Note that in the HDF5 API:
+  //   C++ API support for these HDF5 methods does not yet exist.
+
+  // Create intermediate groups, if necessary
+  hid_t lcpl = H5Pcreate(H5P_LINK_CREATE);
+  if (H5Pset_create_intermediate_group(lcpl, 1) < 0)
+    throw std::runtime_error("H5Util::copyGroup: 'H5Pset_create_intermediate_group' error return.");
+
+  if (H5Ocopy(src.getId(), srcGroupPath.c_str(), dest.getId(), destGroupPath.c_str(), H5P_DEFAULT, lcpl) < 0)
+    throw std::runtime_error("H5Util::copyGroup: 'H5Ocopy' error return.");
+  H5Pclose(lcpl);
+}
+
+void deleteObjectLink(H5::H5Object &h5, const std::string &target) {
+  // Note that in the HDF5 API:
+  //   C++ API support for this HDF5 method does not yet exist.
+
+  // Target object must exist
+  if (H5Ldelete(h5.getId(), target.c_str(), H5P_DEFAULT) < 0)
+    throw std::runtime_error("H5Util::deleteObjectLink: 'H5Ldelete' error return.");
 }
 
 // -------------------------------------------------------------------

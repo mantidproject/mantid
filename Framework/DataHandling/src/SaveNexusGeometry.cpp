@@ -78,14 +78,15 @@ void SaveNexusGeometry::init() {
 void SaveNexusGeometry::exec() {
   API::MatrixWorkspace_const_sptr workspace = getProperty("InputWorkspace");
   std::string destinationFile = getPropertyValue("FileName");
-  std::string rootFileName = getPropertyValue("EntryName");
+  std::string parentEntryName = getPropertyValue("EntryName");
 
   auto ws = workspace.get();
   const auto &compInfo = ws->componentInfo();
   const auto &detInfo = ws->detectorInfo();
 
   NexusGeometry::LogAdapter<Kernel::Logger> adapter(&g_log);
-  Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(compInfo, detInfo, destinationFile, rootFileName, adapter);
+  Mantid::NexusGeometry::NexusGeometrySave::saveInstrument(compInfo, detInfo, destinationFile, parentEntryName,
+                                                           adapter);
 }
 
 } // namespace Mantid::DataHandling

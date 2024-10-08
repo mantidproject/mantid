@@ -38,7 +38,7 @@ public:
 
     FileResource fileResource("algorithm_test_file.hdf5");
     auto destinationFile = fileResource.fullPath();
-    // Create test input if necessary
+    // Create test input
     Mantid::API::IEventWorkspace_sptr inputWS = WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument2(1, 5);
 
     TS_ASSERT_THROWS_NOTHING(Mantid::API::AnalysisDataService::Instance().addOrReplace("testWS", inputWS));
@@ -56,7 +56,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(Mantid::API::AnalysisDataService::Instance().remove("testWS"));
   }
 
-  void test_execution_succesful_when_no_h5_root_provided_and_default_root_is_used() {
+  void test_execution_successful_when_no_h5_root_provided_and_default_root_is_used() {
 
     FileResource fileResource("algorithm_no_h5_root_file.hdf5");
     auto destinationFile = fileResource.fullPath();
@@ -80,7 +80,7 @@ public:
   void test_invalid_workspace_throws() {
 
     /*
-    test runtime error is thrown when a workspae without an Instrument is passed
+    test that runtime error is thrown when a workspace without an Instrument is passed
     into the Input workspace property.
     */
 

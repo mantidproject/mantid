@@ -41,13 +41,17 @@ public:
 
 private:
   void readSpectraToDetectorMapping(Mantid::NeXus::NXEntry &mtd_entry, Mantid::API::MatrixWorkspace &ws) override;
-  bool loadNexusGeometry(Mantid::API::Workspace &ws, const int nWorkspaceEntries, Kernel::Logger &logger,
-                         const std::string &filename) override;
+
+  /// Load nexus geometry and apply to workspace
+  bool loadNexusGeometry(Mantid::API::Workspace &ws, size_t entryNumber, Kernel::Logger &logger,
+                         const std::string &filePath) override;
+
   /// Extract mapping information where it is build across NXDetectors
   void extractMappingInfoNew(const Mantid::NeXus::NXEntry &mtd_entry);
-  /// Load nexus geometry and apply to workspace
-  /// Local caches
+
   InstrumentLayout m_instrumentLayout = InstrumentLayout::Mantid;
+
+  /// Local caches
   std::vector<Indexing::SpectrumNumber> m_spectrumNumbers;
   std::vector<Mantid::detid_t> m_detectorIds;
   std::vector<int> m_detectorCounts;

@@ -20,6 +20,7 @@ public:
 class MockLogger : public Mantid::NexusGeometry::AbstractLogger {
 public:
   GNU_DIAG_OFF_SUGGEST_OVERRIDE
+  MOCK_METHOD1(debug, void(const std::string &));
   MOCK_METHOD1(warning, void(const std::string &));
   MOCK_METHOD1(error, void(const std::string &));
   GNU_DIAG_ON_SUGGEST_OVERRIDE
