@@ -38,12 +38,12 @@ void AlgoTimeRegisterImpl::addTime(const std::string &name, const Kernel::time_p
 bool AlgoTimeRegisterImpl::writeToFile() {
   auto writeEnable = Kernel::ConfigService::Instance().getValue<bool>("performancelog.write").value();
   if (!writeEnable) {
-    LOGGER().information() << "performancelog.write is disabled (off/0/false)\n";
+    LOGGER().debug() << "performancelog.write is disabled (off/0/false)\n";
     return false;
   }
   auto filename = Kernel::ConfigService::Instance().getString("performancelog.filename");
   if (filename.empty()) {
-    LOGGER().information() << "performancelog.filename is empty, please provide valid filename\n";
+    LOGGER().debug() << "performancelog.filename is empty, please provide valid filename\n";
     return false;
   }
   if (m_filename == filename && m_hasWrittenToFile) {
@@ -52,7 +52,7 @@ bool AlgoTimeRegisterImpl::writeToFile() {
 
   m_filename = filename;
 
-  LOGGER().information() << "Performance log file: " << m_filename << '\n';
+  LOGGER().debug() << "Performance log file: " << m_filename << '\n';
 
   std::fstream fs;
 
