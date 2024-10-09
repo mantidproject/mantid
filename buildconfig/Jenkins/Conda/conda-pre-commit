@@ -27,7 +27,7 @@ JOB_TYPE=$3
 
 # Mamba
 setup_mamba $SOURCE_DIR/mambaforge "pre-commit"
-mamba install --yes pre-commit
+mamba install --yes pre-commit python=3.12
 
 # Run
 $SCRIPT_DIR/pre-commit ${SOURCE_DIR} ${GIT_SHA} ${JOB_TYPE}
