@@ -27,6 +27,7 @@ JOB_TYPE=$3
 
 # Mamba
 setup_mamba $SOURCE_DIR/mambaforge "pre-commit"
+# rstcheck fails with exit code -11 with Python 3.13
 mamba install --yes pre-commit python=3.12
 
 # Run
