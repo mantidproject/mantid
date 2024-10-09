@@ -209,6 +209,216 @@ public:
 
   void test_EventWorkspace_OneGroup_dontPreserveEvents() { dotestEventWorkspace(false, 1, false); }
 
+  void test_rebin_parameters_histogram() {
+    std::string inputWS("DiffractionFocussing2TestParam_ws");
+    std::string groupWS("DiffractionFocussing2TestParam_groups");
+
+    // histogram input
+    create_test_workspace_input(inputWS, groupWS);
+    run_rebin_parameters_test(inputWS, groupWS, "Workspace2D");
+  }
+
+  void test_rebin_parameters_event_preserve_events() {
+    std::string inputWS("DiffractionFocussing2TestParam_ws");
+    std::string groupWS("DiffractionFocussing2TestParam_groups");
+
+    // histogram input
+    // event input, PreserveEvent=True
+    create_test_workspace_input(inputWS, groupWS, "Event");
+    run_rebin_parameters_test(inputWS, groupWS, "EventWorkspace", true);
+  }
+
+  void test_rebin_parameters_event_dont_preserve_events() {
+    std::string inputWS("DiffractionFocussing2TestParam_ws");
+    std::string groupWS("DiffractionFocussing2TestParam_groups");
+
+    // event input, PreserveEvent=False
+    create_test_workspace_input(inputWS, groupWS, "Event");
+    run_rebin_parameters_test(inputWS, groupWS, "Workspace2D", false);
+  }
+
+  void create_test_workspace_input(std::string inputWS, std::string groupWS, std::string workspaceType = "Histogram") {
+    auto createWS = AlgorithmFactory::Instance().create("CreateSampleWorkspace", -1);
+    createWS->initialize();
+    createWS->setProperty("WorkspaceType", workspaceType);
+    createWS->setProperty("XUnit", "dSpacing");
+    createWS->setProperty("NumBanks", 2);
+    createWS->setProperty("BankPixelWidth", 2);
+    createWS->setProperty("Function", "Flat background");
+    createWS->setProperty("XMin", 200.);
+    createWS->setProperty("XMax", 600.);
+    createWS->setProperty("BinWidth", 10.);
+    createWS->setProperty("NumEvents", 40);
+    createWS->setPropertyValue("OutputWorkspace", inputWS);
+    createWS->execute();
+
+    auto createGroupWS = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", -1);
+    createGroupWS->initialize();
+    createGroupWS->setPropertyValue("InputWorkspace", inputWS);
+    createGroupWS->setPropertyValue("GroupDetectorsBy", "bank");
+    createGroupWS->setPropertyValue("OutputWorkspace", groupWS);
+    createGroupWS->execute();
+  }
+
+  void run_rebin_parameters_test(std::string inputWS, std::string groupWS, std::string outputType,
+                                 bool preserveEvents = true) {
+
+    {
+      std::vector<double> dmins = {200};
+      std::vector<double> dmaxs = {400};
+      std::vector<double> delta = {100};
+      auto output = run_DiffractionFocussing2(inputWS, groupWS, dmins, dmaxs, delta, preserveEvents);
+      if (!output)
+        return;
+
+      TS_ASSERT_EQUALS(output->id(), outputType)
+
+      TS_ASSERT_EQUALS(output->getNumberHistograms(), 2);
+      auto X0 = output->x(0);
+      TS_ASSERT_EQUALS(X0.size(), 3.);
+      TS_ASSERT_EQUALS(X0.front(), 200.);
+      TS_ASSERT_EQUALS(X0.back(), 400.);
+      auto X1 = output->x(1);
+      TS_ASSERT_EQUALS(X1.size(), 3.);
+      TS_ASSERT_EQUALS(X1.front(), 200.);
+      TS_ASSERT_EQUALS(X1.back(), 400.);
+
+      auto Y0 = output->y(0);
+      TS_ASSERT_EQUALS(Y0.size(), 2.);
+      TS_ASSERT_EQUALS(Y0[0], 40.);
+      TS_ASSERT_EQUALS(Y0[1], 40.);
+      auto Y1 = output->y(1);
+      TS_ASSERT_EQUALS(Y1.size(), 2.);
+      TS_ASSERT_EQUALS(Y1[0], 40.);
+      TS_ASSERT_EQUALS(Y1[1], 40.);
+    }
+
+    {
+      std::vector<double> dmins = {200, 300};
+      std::vector<double> dmaxs = {400};
+      std::vector<double> delta = {100};
+      auto output = run_DiffractionFocussing2(inputWS, groupWS, dmins, dmaxs, delta, preserveEvents);
+      if (!output)
+        return;
+
+      TS_ASSERT_EQUALS(output->id(), outputType)
+
+      TS_ASSERT_EQUALS(output->getNumberHistograms(), 2);
+      auto X0 = output->x(0);
+      TS_ASSERT_EQUALS(X0.size(), 3.);
+      TS_ASSERT_EQUALS(X0.front(), 200.);
+      TS_ASSERT_EQUALS(X0.back(), 400.);
+      auto X1 = output->x(1);
+      TS_ASSERT_EQUALS(X1.size(), 2.);
+      TS_ASSERT_EQUALS(X1.front(), 300.);
+      TS_ASSERT_EQUALS(X1.back(), 400.);
+    }
+
+    {
+      std::vector<double> dmins = {200};
+      std::vector<double> dmaxs = {400};
+      std::vector<double> delta = {100, 200};
+      auto output = run_DiffractionFocussing2(inputWS, groupWS, dmins, dmaxs, delta, preserveEvents);
+      if (!output)
+        return;
+
+      TS_ASSERT_EQUALS(output->id(), outputType)
+
+      TS_ASSERT_EQUALS(output->getNumberHistograms(), 2);
+      auto X0 = output->x(0);
+      TS_ASSERT_EQUALS(X0.size(), 3.);
+      TS_ASSERT_EQUALS(X0.front(), 200.);
+      TS_ASSERT_EQUALS(X0.back(), 400.);
+      auto X1 = output->x(1);
+      TS_ASSERT_EQUALS(X1.size(), 2.);
+      TS_ASSERT_EQUALS(X1.front(), 200.);
+      TS_ASSERT_EQUALS(X1.back(), 400.);
+    }
+
+    {
+      std::vector<double> dmins = {300, 200};
+      std::vector<double> dmaxs = {500, 600};
+      std::vector<double> delta = {100, 200};
+      auto output = run_DiffractionFocussing2(inputWS, groupWS, dmins, dmaxs, delta, preserveEvents);
+      if (!output)
+        return;
+
+      TS_ASSERT_EQUALS(output->id(), outputType)
+
+      TS_ASSERT_EQUALS(output->getNumberHistograms(), 2);
+      auto X0 = output->x(0);
+      TS_ASSERT_EQUALS(X0.size(), 3.);
+      TS_ASSERT_EQUALS(X0.front(), 300.);
+      TS_ASSERT_EQUALS(X0.back(), 500.);
+      auto X1 = output->x(1);
+      TS_ASSERT_EQUALS(X1.size(), 3.);
+      TS_ASSERT_EQUALS(X1.front(), 200.);
+      TS_ASSERT_EQUALS(X1.back(), 600.);
+    }
+
+    // failure cases
+
+    // NaN or delta=0
+    run_DiffractionFocussing2(inputWS, groupWS, {std::numeric_limits<double>::quiet_NaN()}, {400}, {100},
+                              preserveEvents, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {std::numeric_limits<double>::quiet_NaN()}, {100},
+                              preserveEvents, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {400}, {std::numeric_limits<double>::quiet_NaN()},
+                              preserveEvents, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {400}, {0}, preserveEvents, true);
+
+    // must define all or none binning params
+    run_DiffractionFocussing2(inputWS, groupWS, {}, {400}, {100}, preserveEvents, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {}, {100}, preserveEvents, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {400}, {}, preserveEvents, true);
+
+    // dmax is not larger than dmin
+    run_DiffractionFocussing2(inputWS, groupWS, {200, 400}, {400}, {100}, preserveEvents, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {200, 400}, {100}, preserveEvents, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200, 400}, {300, 400}, {100}, preserveEvents, true);
+
+    // too many parameters
+    run_DiffractionFocussing2(inputWS, groupWS, {200, 200, 200}, {400}, {100}, preserveEvents, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {400, 400, 400}, {100}, preserveEvents, true);
+    run_DiffractionFocussing2(inputWS, groupWS, {200}, {400}, {100, 100, 100}, preserveEvents, true);
+
+    // cleanup workspaces
+    AnalysisDataService::Instance().remove(inputWS);
+    AnalysisDataService::Instance().remove(groupWS);
+  }
+
+  MatrixWorkspace_const_sptr run_DiffractionFocussing2(std::string inputWS, std::string groupWS,
+                                                       const std::vector<double> dmins, const std::vector<double> dmaxs,
+                                                       const std::vector<double> delta, bool preserveEvents,
+                                                       bool expectFailure = false) {
+    std::string outputWS = inputWS + "_focussed";
+    MatrixWorkspace_const_sptr output;
+
+    DiffractionFocussing2 focus;
+    focus.initialize();
+    TS_ASSERT_THROWS_NOTHING(focus.setPropertyValue("InputWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(focus.setPropertyValue("OutputWorkspace", outputWS));
+    TS_ASSERT_THROWS_NOTHING(focus.setPropertyValue("GroupingWorkspace", groupWS));
+    TS_ASSERT_THROWS_NOTHING(focus.setProperty("PreserveEvents", preserveEvents));
+    TS_ASSERT_THROWS_NOTHING(focus.setProperty("DMin", dmins));
+    TS_ASSERT_THROWS_NOTHING(focus.setProperty("DMax", dmaxs));
+    TS_ASSERT_THROWS_NOTHING(focus.setProperty("Delta", delta));
+
+    if (expectFailure) {
+      try {
+        focus.execute();
+      } catch (std::runtime_error &) {
+      }
+      TS_ASSERT(!focus.isExecuted());
+    } else {
+      TS_ASSERT_THROWS_NOTHING(focus.execute(););
+      TS_ASSERT(focus.isExecuted());
+      TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(outputWS));
+      TS_ASSERT(output);
+    }
+    return output;
+  }
+
   void test_tof_deprecation_error_thrown() {
     // Simple test to be removed when TOF support is removed
     std::string nxsWSname("DiffractionFocussing2Test_ws");
