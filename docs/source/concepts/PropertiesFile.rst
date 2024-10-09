@@ -396,7 +396,7 @@ Algorithm Profiling Settings
 
 .. _Algorithm_Profiling:
 
-See :doc:`algorithm profiling <mantid-dev:AlgorithmProfiler>` for more details.
+See :doc:`algorithm profiling <mantid-dev:AlgorithmProfiler>` for more details on using mantid profiler.
 
 +---------------------------------+------------------------------------------------------------------+---------------------------+
 |Property                         |Description                                                       |Example value              |

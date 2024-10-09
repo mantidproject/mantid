@@ -16,7 +16,9 @@ Summary
 Due to the need of investigation of algorithms performance issues, the proper method is introduced.
 It consists two to parts: special mantid build and analytical tool.
 
-.. note:: Available for Linux only.
+.. note::
+   Available for Linux only.
+
 
 Mantid build
 ^^^^^^^^^^^^
