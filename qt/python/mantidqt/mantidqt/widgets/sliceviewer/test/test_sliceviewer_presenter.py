@@ -787,6 +787,24 @@ class SliceViewerTest(unittest.TestCase):
 
         presenter.dimensions_changed.assert_called_once()
 
+    def test_slicepoint_changed_on_non_orthogonal_mode(self):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        presenter.show_all_data_clicked = mock.MagicMock()
+        presenter.view.data_view.nonorthogonal_mode = True
+
+        presenter.slicepoint_changed()
+
+        presenter.show_all_data_clicked.assert_called_once()
+
+    def test_slicepoint_changed_on_orthogonal_mode(self):
+        presenter = SliceViewer(None, model=self.model, view=self.view)
+        presenter.show_all_data_clicked = mock.MagicMock()
+        presenter.view.data_view.nonorthogonal_mode = False
+
+        presenter.slicepoint_changed()
+
+        presenter.show_all_data_clicked.assert_not_called()
+
 
 if __name__ == "__main__":
     unittest.main()
