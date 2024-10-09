@@ -193,7 +193,7 @@ double FindReflectometryLines2::findPeak(const API::MatrixWorkspace_sptr &ws) {
   // call Fit child algorithm
   auto fit = createChildAlgorithm("Fit");
   fit->initialize();
-  fit->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(sum));
+  fit->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(std::move(sum)));
   fit->setProperty("InputWorkspace", transposedWS);
   fit->setProperty("StartX", centreIndex - 3 * fwhm);
   fit->setProperty("EndX", centreIndex + 3 * fwhm);
