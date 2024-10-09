@@ -26,7 +26,7 @@ Adding more detailed information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 More detailed information can be added to individual function calls in C++ with the help of ``std::chrono``.
-At the top of the fuction create a "start time"
+At the top of the function create a "start time"
 
 .. code-block:: c++
 
