@@ -188,7 +188,7 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
         # time entry
         entry_name = "CreateSampleWorkspace"
 
-        # call algorithm
+        # call algorithm, internally it calls AlgoTimeRegister.addTime
         ws =  CreateSampleWorkspace(Function='Multiple Peaks')
 
         #get time data from file
