@@ -1595,7 +1595,7 @@ bool ScriptRepositoryImpl::isEntryValid(const std::string &path) {
   if (path == ".local.json")
     return false;
   // hide everything under system folder
-  if (path == "system" || path.find("system/") == 0)
+  if (path == "system" || path.starts_with("system/"))
     return false;
 
   try {
