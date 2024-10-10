@@ -6,6 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <iomanip>
+#include <iostream>
+#include <sstream>
 #include <type_traits>
 #include <vector>
 #ifndef Q_MOC_RUN
@@ -308,7 +311,10 @@ EnumeratedStringProperty<E, names>::operator=(EnumeratedString<E, names> const &
  */
 template <class E, std::vector<std::string> const *const names>
 EnumeratedStringProperty<E, names> &EnumeratedStringProperty<E, names>::operator+=(Property const *right) {
-  throw std::invalid_argument("Cannot add EnumeratedStringProperty, addition not implemented.\n");
+  std::ostringstream oss;
+  oss << "Cannot add EnumeratedStringProperty " << std::hex << std::showbase << reinterpret_cast<uintptr_t>(&right)
+      << ", addition not implemented." << std::endl;
+  throw std::invalid_argument(oss.str());
 }
 
 template <class E, std::vector<std::string> const *const names>
