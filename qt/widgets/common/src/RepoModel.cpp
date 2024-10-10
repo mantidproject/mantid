@@ -48,7 +48,7 @@ const char *nofile_flag = "nofile";
 /// Executes the download from ScriptRepository. This function will be executed
 /// in a separate thread
 static QString download_thread(Mantid::API::ScriptRepository_sptr &pt, const std::string &path) {
-  QString result;
+  QString result("");
   try {
     pt->download(path);
   } catch (Mantid::API::ScriptRepoException &ex) {

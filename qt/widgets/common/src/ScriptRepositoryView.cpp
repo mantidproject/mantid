@@ -179,7 +179,7 @@ bool ScriptRepositoryView::chooseLocationAndInstall(Mantid::API::ScriptRepositor
       throw NOTWANTED;
     }
     // get the directory to install the script repository
-    ConfigServiceImpl &config = ConfigService::Instance();
+    const ConfigServiceImpl &config = ConfigService::Instance();
     QString loc = QString::fromStdString(config.getString("ScriptLocalRepository"));
 
     bool sureAboutDir = false;
