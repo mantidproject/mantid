@@ -26,6 +26,8 @@ class SXD(BaseSX):
                                <centre x="0.0"  y="0.0" z="0.0" />
                                <radius val="0.003"/>
                                </sphere>"""  # sphere radius 3mm  - used for vanadium and NaCl
+        self.beam_width = 0.6  # cm
+        self.beam_height = 0.6  # cm
 
     def process_data(self, runs: Sequence[str], *args):
         """

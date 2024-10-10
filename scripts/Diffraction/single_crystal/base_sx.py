@@ -284,6 +284,7 @@ class BaseSX(ABC):
         default_kwargs = {"ApplyCorrection": self.scale_integrated, "EventsPerPoint": 1500, "MaxScatterPtAttempts": 7500}
         kwargs = {**default_kwargs, **kwargs}
         ws = self.get_ws(run)
+        mantid.SetBeam(ws, Geometry={"Shape": "Slit", "Width": self.beam_width, "Height": self.beam_height})
         peaks = self.get_peaks(run, peak_type, int_type)
         mantid.CopySample(InputWorkspace=ws, OutputWorkspace=peaks, CopyEnvironment=False)
         mantid.AddAbsorptionWeightedPathLengths(InputWorkspace=peaks, **kwargs)
