@@ -25,6 +25,9 @@ from mantidqt.plotting.figuretype import figure_type, FigureType
 
 
 class FigureTypeTest(TestCase):
+    def tearDown(self):
+        plt.close("all")
+
     def test_figure_type_empty_figure_returns_empty(self):
         self.assertEqual(FigureType.Empty, figure_type(plt.figure()))
 
