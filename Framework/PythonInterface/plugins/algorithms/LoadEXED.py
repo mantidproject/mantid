@@ -22,13 +22,6 @@ from mantid.simpleapi import RotateInstrumentComponent
 import struct
 import numpy as np
 import copy
-import types
-
-# Unicode type for both python2 and 3
-try:
-    UnicodeType = types.UnicodeType
-except AttributeError:
-    UnicodeType = str
 
 
 class LoadEXED(PythonAlgorithm):
@@ -121,7 +114,7 @@ class LoadEXED(PythonAlgorithm):
             ws.getSpectrum(i).setDetectorID(det_udet[i])
         # Sample_logs the header values are written into the sample logs
         log_names = [str(sl.encode("ascii", "ignore").decode()) for sl in parms_dict.keys()]
-        log_values = [str(sl.encode("ascii", "ignore").decode()) if isinstance(sl, UnicodeType) else str(sl) for sl in parms_dict.values()]
+        log_values = [str(sl.encode("ascii", "ignore").decode()) if isinstance(sl, str) else str(sl) for sl in parms_dict.values()]
         for i in range(len(log_values)):
             if ("nan" in log_values[i]) or ("NaN" in log_values[i]):
                 log_values[i] = "-1.0"

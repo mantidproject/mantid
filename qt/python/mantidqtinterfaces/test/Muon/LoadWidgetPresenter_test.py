@@ -32,12 +32,7 @@ class LoadPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter._current_run, None)
 
     def test_equalise_last_loaded_run_data(self):
-        # need to add each in tern for Python 2
-        runs = OrderedDict()
-        runs[1] = []
-        runs[2] = []
-        runs[5] = []
-        runs[3] = []
+        runs = OrderedDict({1: [], 2: [], 5: [], 3: []})
         self.presenter.co_model.loaded_runs = runs
         self.presenter.load_model.loaded_runs = runs
         self.presenter.equalise_last_loaded_run(runs)

@@ -354,9 +354,6 @@ the first two hours"""
     def PyExec(self):
         # Facility and database configuration
         config_new_options = {"default.facility": "SNS", "default.instrument": "BASIS", "datasearch.searcharchive": "On"}
-        #
-        # implement with ContextDecorator after python2 is deprecated)
-        #
         remove_temp = self.getProperty("RemoveTemporaryWorkspaces").value
         with pyexec_setup(remove_temp, config_new_options) as self._temps:
             self._PyExec()

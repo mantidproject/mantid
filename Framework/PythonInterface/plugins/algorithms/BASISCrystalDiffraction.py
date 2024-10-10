@@ -274,7 +274,6 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         # Facility and database configuration
         config_new_options = {"default.facility": "SNS", "default.instrument": "BASIS", "datasearch.searcharchive": "On"}
 
-        # implement with ContextDecorator after python2 is deprecated)
         with pyexec_setup(config_new_options) as self._temps:
             # Load the mask to a temporary workspace
             self._t_mask = LoadMask(Instrument="BASIS", InputFile=self.getProperty("MaskFile").value, OutputWorkspace="_t_mask")

@@ -986,12 +986,12 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(range[0], 9.5)
         self.assertAlmostEqual(range[1], 10.5)
 
-        PropertyManager.incident_energy.next()
+        next(PropertyManager.incident_energy)
         range = propman.mon2_norm_energy_range
         self.assertAlmostEqual(range[0], 2 * 9.5)
         self.assertAlmostEqual(range[1], 2 * 10.5)
 
-        PropertyManager.incident_energy.next()
+        next(PropertyManager.incident_energy)
         range = propman.mon2_norm_energy_range
         self.assertAlmostEqual(range[0], 3 * 9.5)
         self.assertAlmostEqual(range[1], 3 * 10.5)
@@ -1027,7 +1027,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         PropertyManager.mono_correction_factor.set_val_to_cash(propman, 100)
         self.assertAlmostEqual(PropertyManager.mono_correction_factor.get_val_from_cash(propman), 100)
 
-        PropertyManager.incident_energy.next()
+        next(PropertyManager.incident_energy)
         self.assertEqual(PropertyManager.mono_correction_factor.get_val_from_cash(propman), None)
         PropertyManager.mono_correction_factor.set_val_to_cash(propman, 50)
         self.assertAlmostEqual(PropertyManager.mono_correction_factor.get_val_from_cash(propman), 50)
