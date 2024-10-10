@@ -8,7 +8,8 @@ import unittest
 
 from isis_reflectometry import quick
 
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, LoadISISNexus
 from mantid.kernel import ConfigService
 
 

@@ -11,7 +11,7 @@ Command set for Direct Geometry reduction
 
 # Import the specific commands that we need
 from mantid.api import AlgorithmManager
-from reduction.command_interface import *
+from reduction.command_interface import Clear, ReductionSingleton
 from inelastic_reducer import InelasticReducer
 
 

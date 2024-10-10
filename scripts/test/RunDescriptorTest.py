@@ -7,10 +7,24 @@
 import unittest
 
 from Direct.PropertyManager import PropertyManager
-from Direct.RunDescriptor import *
+from Direct.RunDescriptor import RunDescriptor
 
+import os
 from mantid import api
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import (
+    config,
+    AddSampleLog,
+    CloneWorkspace,
+    CompareWorkspaces,
+    ConvertToEventWorkspace,
+    CreateSampleWorkspace,
+    DeleteWorkspace,
+    ExtractMonitors,
+    LoadEmptyInstrument,
+    Rebin,
+    RenameWorkspace,
+)
 
 
 # -----------------------------------------------------------------------------------------------------------------------------------------

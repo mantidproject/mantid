@@ -8,9 +8,17 @@ import numpy as np
 import math
 from Muon.MaxentTools.multimaxalpha import MULTIMAX
 from Muon.MaxentTools.dead_detector_handler import removeDeadDetectors
-from mantid.api import *
-from mantid.kernel import *
-from mantid.simpleapi import *
+from mantid.api import (
+    AlgorithmFactory,
+    ITableWorkspaceProperty,
+    Progress,
+    PropertyMode,
+    PythonAlgorithm,
+    RawCountValidator,
+    WorkspaceFactory,
+    WorkspaceProperty,
+)
+from mantid.kernel import Direction, IntListValidator
 
 
 """

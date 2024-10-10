@@ -6,8 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import math
 
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import (
+    AlgorithmFactory,
+    FileAction,
+    FileProperty,
+    ITableWorkspaceProperty,
+    MatrixWorkspaceProperty,
+    Progress,
+    PropertyMode,
+    PythonAlgorithm,
+)
+from mantid.kernel import Direction, FloatArrayProperty, StringListValidator, V3D
 from mantid.simpleapi import SaveAscii, logger
 import EnggUtils
 

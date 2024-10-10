@@ -9,8 +9,9 @@ import numpy as np
 import sys
 from scipy.special import factorial
 from scipy.optimize import curve_fit
-from mantid.simpleapi import *
-from mantid.kernel import V3D
+from mantid.api import mtd
+from mantid.simpleapi import BinMD, ConvertToMD, CreateWorkspace, Fit, FunctionWrapper, Load, LoadIsawDetCal, Polynomial
+from mantid.kernel import logger, V3D
 import ICConvoluted as ICC
 import itertools
 from functools import reduce

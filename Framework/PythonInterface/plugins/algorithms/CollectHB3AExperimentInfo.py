@@ -7,8 +7,7 @@
 # pylint: disable=no-init,invalid-name,too-many-instance-attributes
 import mantid
 import mantid.simpleapi as api
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm
 import os
 
 

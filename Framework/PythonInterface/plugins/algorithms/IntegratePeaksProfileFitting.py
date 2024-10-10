@@ -10,9 +10,9 @@ This is a Python algorithm, with profile
 fitting for integrating peaks.
 """
 
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, Progress, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import logger, Direction, FloatBoundedValidator, V3D
+from mantid.simpleapi import CreateEmptyTableWorkspace, CreateWorkspace, Fit
 import numpy as np
 import warnings
 

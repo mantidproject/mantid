@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name,redefined-builtin
 import os
 import mantid.api as api
-from mantid.simpleapi import *
+from mantid.kernel import logger
 
 
 def find_file(filename=None, startswith=None, data_dir=None):
@@ -80,7 +80,7 @@ def find_data(file, instrument="", allow_multiple=False):
         n_files = len(toks)
 
     instrument = str(instrument)
-    file_path = FileFinder.getFullPath(file)
+    file_path = api.FileFinder.getFullPath(file)
     if os.path.isfile(file_path):
         return file_path
 

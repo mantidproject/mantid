@@ -7,9 +7,9 @@
 # pylint: disable=no-init,invalid-name
 import numpy
 
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import mtd, AlgorithmFactory, PythonAlgorithm, MatrixWorkspace, MatrixWorkspaceProperty
+from mantid.kernel import Direction, StringMandatoryValidator
+from mantid.simpleapi import CloneWorkspace
 
 
 class Mean(PythonAlgorithm):

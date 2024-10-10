@@ -25,7 +25,18 @@ from mantid.kernel import (
 )
 
 # Need to import mantid before we import SANSUtility
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    config,
+    AddTimeSeriesLog,
+    CloneWorkspace,
+    CreateSampleWorkspace,
+    CreateWorkspace,
+    DeleteWorkspace,
+    GroupWorkspaces,
+    Load,
+    MaskDetectors,
+    SaveNexusProcessed,
+)
 
 TEST_STRING_DATA = "SANS2D0003434-add" + su.ADDED_EVENT_DATA_TAG
 TEST_STRING_MON = "SANS2D0003434-add_monitors" + su.ADDED_EVENT_DATA_TAG
