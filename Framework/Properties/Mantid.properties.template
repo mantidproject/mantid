@@ -325,3 +325,9 @@ plots.images.Colormap = viridis
 
 # Default colorbar scale for image plots
 plots.images.ColorBarScale = Linear
+
+# Profiler Default Filename
+performancelog.filename = algorithmregister.out
+
+# Algorithm Profiler Default Status
+performancelog.write = Off
