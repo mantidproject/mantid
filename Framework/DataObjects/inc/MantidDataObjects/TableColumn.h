@@ -299,12 +299,10 @@ inline bool TableColumn<API::Boolean>::compareVectors(const std::vector<API::Boo
 /// Template specialisation for V3D for comparison
 template <>
 inline bool TableColumn<Kernel::V3D>::compareVectors(const std::vector<Kernel::V3D> &newVector, double tolerance,
-                                                     bool const nanEqual) const {
+                                                     bool const) const {
   // must specify for it to use pass-by-references
-  for (size_t i = 0; i < m_data.size(); i++) {
-    if (nanEqual && std::isnan(m_data[i]) && std::isnan(newVector[i])) {
-      continue;
-    } else if (!Kernel::withinAbsoluteDifference<Kernel::V3D const &, double>(m_data[i], newVector[i], tolerance)) {
+  for (std::size_t i = 0; i < m_data.size(); i++) {
+    if (!Kernel::withinAbsoluteDifference<Kernel::V3D const &, double>(m_data[i], newVector[i], tolerance)) {
       return false;
     }
   }
@@ -328,12 +326,10 @@ inline bool TableColumn<API::Boolean>::compareVectorsRelError(const std::vector<
 /// Template specialisation for V3D for comparison
 template <>
 inline bool TableColumn<Kernel::V3D>::compareVectorsRelError(const std::vector<Kernel::V3D> &newVector,
-                                                             double tolerance, bool const nanEqual) const {
+                                                             double tolerance, bool const) const {
   // must specify for it to use pass-by-references
   for (size_t i = 0; i < m_data.size(); i++) {
-    if (nanEqual && std::isnan(m_data[i]) && std::isnan(newVector[i])) {
-      continue;
-    } else if (!Kernel::withinRelativeDifference<Kernel::V3D const &, double>(m_data[i], newVector[i], tolerance)) {
+    if (!Kernel::withinRelativeDifference<Kernel::V3D const &, double>(m_data[i], newVector[i], tolerance)) {
       return false;
     }
   }
