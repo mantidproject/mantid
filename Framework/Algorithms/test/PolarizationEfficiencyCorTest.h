@@ -325,6 +325,36 @@ public:
     WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
     TS_ASSERT_EQUALS(out->size(), 4);
   }
+  void test_polarization_analysis_pa_with_spinstates() {
+    PolarizationEfficiencyCor alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("OutputWorkspace", "out");
+    alg.setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
+    alg.setProperty("CorrectionMethod", "Fredrikze");
+    alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
+    alg.setProperty("PolarizationAnalysis", "PA");
+    alg.setProperty("SpinStatesInFredrikze", "pp,pa,ap,aa");
+    alg.setProperty("SpinStatesOutFredrikze", "pa,pp,ap,aa");
+    alg.execute();
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    TS_ASSERT_EQUALS(out->size(), 4);
+  }
+  void test_polarization_analysis_pnr_with_spinstates() {
+    PolarizationEfficiencyCor alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("OutputWorkspace", "out");
+    alg.setProperty("InputWorkspaceGroup", createWorkspaceGroup(2));
+    alg.setProperty("CorrectionMethod", "Fredrikze");
+    alg.setProperty("Efficiencies", createEfficiencies("Fredrikze"));
+    alg.setProperty("PolarizationAnalysis", "PNR");
+    alg.setProperty("SpinStatesInFredrikze", "p, a");
+    alg.setProperty("SpinStatesOutFredrikze", "a, p");
+    alg.execute();
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    TS_ASSERT_EQUALS(out->size(), 2);
+  }
   void test_polarization_analysis_wrong_group_size() {
     PolarizationEfficiencyCor alg;
     alg.setRethrows(true);
