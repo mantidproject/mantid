@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <filesystem>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -16,11 +17,6 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/LibraryWrapper.h"
 #include "MantidKernel/SingletonHolder.h"
-
-namespace Poco {
-class File;
-class Path;
-} // namespace Poco
 
 namespace Mantid {
 namespace Kernel {
@@ -48,7 +44,7 @@ private:
 
   /// Load libraries from the given Poco::File path
   /// Private so Poco::File doesn't leak to the public interface
-  int openLibraries(const Poco::File &libpath, LoadLibraries loadingBehaviour,
+  int openLibraries(const std::filesystem::path &libpath, LoadLibraries loadingBehaviour,
                     const std::vector<std::string> &excludes);
   /// Check if the library should be loaded
   bool shouldBeLoaded(const std::string &filename, const std::vector<std::string> &excludes) const;
@@ -57,7 +53,7 @@ private:
   /// Returns true if the library has been requested to be excluded
   bool isExcluded(const std::string &filename, const std::vector<std::string> &excludes) const;
   /// Load a given library
-  int openLibrary(const Poco::File &filepath, const std::string &cacheKey);
+  int openLibrary(const std::filesystem::path &filepath, const std::string &cacheKey);
 
   /// Storage for the LibraryWrappers.
   std::unordered_map<std::string, LibraryWrapper> m_openedLibs;

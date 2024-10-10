@@ -10,10 +10,7 @@
 #include "MantidKernel/LibraryWrapper.h"
 #include "MantidKernel/Logger.h"
 
-#include <Poco/DirectoryIterator.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <boost/algorithm/string.hpp>
+#include <filesystem>
 
 namespace Mantid::Kernel {
 namespace {
@@ -37,7 +34,7 @@ int LibraryManagerImpl::openLibraries(const std::string &filepath, LoadLibraries
                                       const std::vector<std::string> &excludes) {
   g_log.debug("Opening all libraries in " + filepath + "\n");
   try {
-    return openLibraries(Poco::File(filepath), loadingBehaviour, excludes);
+    return openLibraries(std::filesystem::path(filepath), loadingBehaviour, excludes);
   } catch (std::exception &exc) {
     g_log.debug() << "Error occurred while opening libraries: " << exc.what() << "\n";
     return 0;
@@ -52,7 +49,7 @@ int LibraryManagerImpl::openLibraries(const std::string &filepath, LoadLibraries
 //-------------------------------------------------------------------------
 /**
  * Opens suitable DLLs on a given path.
- *  @param libpath A Poco::File object pointing to a directory where the
+ *  @param libpath An std::filesystem::path object pointing to a directory where the
  * libraries are.
  *  @param loadingBehaviour Control how libraries are searched for
  *  @param excludes If not empty then each string is considered as a substring
@@ -60,26 +57,26 @@ int LibraryManagerImpl::openLibraries(const std::string &filepath, LoadLibraries
  * the library is not opened.
  *  @return The number of libraries opened.
  */
-int LibraryManagerImpl::openLibraries(const Poco::File &libpath, LibraryManagerImpl::LoadLibraries loadingBehaviour,
+int LibraryManagerImpl::openLibraries(const std::filesystem::path &libpath,
+                                      LibraryManagerImpl::LoadLibraries loadingBehaviour,
                                       const std::vector<std::string> &excludes) {
   int libCount(0);
-  if (libpath.exists() && libpath.isDirectory()) {
+  if (std::filesystem::exists(libpath) && std::filesystem::is_directory(libpath)) {
     // Iterate over the available files
-    Poco::DirectoryIterator end_itr;
-    for (Poco::DirectoryIterator itr(libpath); itr != end_itr; ++itr) {
-      const Poco::File &item = *itr;
-      if (item.isFile()) {
-        if (shouldBeLoaded(itr.path().getFileName(), excludes))
-          libCount += openLibrary(itr.path(), itr.path().getFileName());
+    for (const auto &file : std::filesystem::directory_iterator(libpath)) {
+      const auto &path = file.path();
+      if (std::filesystem::is_regular_file(path)) {
+        if (shouldBeLoaded(path.filename().string(), excludes))
+          libCount += openLibrary(path.string(), path.filename().string());
         else
           continue;
       } else if (loadingBehaviour == LoadLibraries::Recursive) {
         // it must be a directory
-        libCount += openLibraries(item, LoadLibraries::Recursive, excludes);
+        libCount += openLibraries(path, LoadLibraries::Recursive, excludes);
       }
     }
   } else {
-    g_log.error("In OpenAllLibraries: " + libpath.path() + " must be a directory.");
+    g_log.error("In OpenAllLibraries: " + libpath.string() + " must be a directory.");
   }
   return libCount;
 }
@@ -122,18 +119,18 @@ bool LibraryManagerImpl::isExcluded(const std::string &filename, const std::vect
 
 /**
  * Load a library
- * @param filepath :: A Poco::File The full path to a library as a string
+ * @param filepath :: An std::filesystem::path The full path to a library as a string
  * @param cacheKey :: An identifier for the cache if loading is successful
  * @return 1 if the file loaded successfully, 0 otherwise
  */
-int LibraryManagerImpl::openLibrary(const Poco::File &filepath, const std::string &cacheKey) {
+int LibraryManagerImpl::openLibrary(const std::filesystem::path &filepath, const std::string &cacheKey) {
   // Try to open the library. The wrapper will unload the library when it
   // is deleted
   LibraryWrapper dlwrap;
-  if (dlwrap.openLibrary(filepath.path())) {
+  if (dlwrap.openLibrary(filepath.string())) {
     // Successfully opened, so add to map
     if (g_log.is(Poco::Message::PRIO_DEBUG)) {
-      g_log.debug("Opened library: " + filepath.path() + ".\n");
+      g_log.debug("Opened library: " + filepath.string() + ".\n");
     }
     m_openedLibs.emplace(cacheKey, std::move(dlwrap));
     return 1;
