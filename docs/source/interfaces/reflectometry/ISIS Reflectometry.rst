@@ -209,7 +209,9 @@ The **Batch** menu contains options for managing the Batch tabs:
 | Action           | Effect                                                   |
 +==================+==========================================================+
 | New              | Add a new Batch tab                                      |
++------------------+----------------------------------------------------------+
 | Load             | Load settings for the current Batch tab from a file      |
++------------------+----------------------------------------------------------+
 | Save             | Save settings for the current Batch to a file            |
 +------------------+----------------------------------------------------------+
 
@@ -222,6 +224,7 @@ The **Tools** menu provides access to options and utilities:
 | Action           | Effect                                                   |
 +==================+==========================================================+
 | Slit Calculator  | Tool for calculating approximate slit widths             |
++------------------+----------------------------------------------------------+
 | Options          | Tool for controlling warnings and rounding precision     |
 +------------------+----------------------------------------------------------+
 
@@ -357,8 +360,8 @@ The processing table contains the following columns:
 | dQ/Q                | No        | Contains the resolution used when rebinning                                     |
 |                     |           | output workspaces. If left blank, this is                                       |
 |                     |           | calculated for you using the                                                    |
-|                     |           | NRCalculateSlitResolution algorithm. This value is                              |
-|                     |           | negated so that Logarithmic binning can be                                      |
+|                     |           | :ref:`NRCalculateSlitResolution <algm-NRCalculateSlitResolution>` algorithm.    |
+|                     |           | This value is negated so that Logarithmic binning can be                        |
 |                     |           | applied for the IvsQ workspace.                                                 |
 |                     |           | If you desire linear binning then you                                           |
 |                     |           | may negate the value in the processing table                                    |
@@ -374,8 +377,8 @@ The processing table contains the following columns:
 |                     |           | Example: ``1.0``                                                                |
 +---------------------+-----------+---------------------------------------------------------------------------------+
 | Options             | No        | Contains options that allow you to override                                     |
-|                     |           | ReflectometryReductionOne's properties. To                                      |
-|                     |           | override a property, just use the property's                                    |
+|                     |           | :ref:`ReflectometryReductionOne's <algm-ReflectometryReductionOne>` properties. |
+|                     |           | To override a property, just use the property's                                 |
 |                     |           | name as a key, and the desired value as the                                     |
 |                     |           | value.                                                                          |
 |                     |           | Options are specified in ``key=value`` pairs,                                   |
@@ -568,7 +571,7 @@ also be excluded from auto processing (see below).
 Excluding and annotating runs
 =============================
 
-You may with to exclude certain runs from reduction. This is especially useful
+You may wish to exclude certain runs from the reduction. This is especially useful
 for auto processing (see below). You can mark a run for exclusion by entering a
 reason into the `Exclude` column in the search results table. Double-click the
 cell to edit it and then press Enter or click off the cell when finished. The
@@ -580,7 +583,8 @@ the `Comments` column. This will not affect the reduction and is simply for
 user convenience.
 
 To save your annotations in the `Exclude` and `Comments` columns, save the
-whole batch via the `Batch->Save` menu.
+whole batch via the `Batch->Save` menu. You can also export the contents of the
+search results table to a CSV file by clicking the **Export** button.
 
 Note that your annotations will be preserved if you re-run the same search or
 run auto-processing. However, if you change the search settings, then the
@@ -600,7 +604,7 @@ searching for runs by investigation but takes out the manual steps for you. For
 more details on how searching works, see the `Search Interface` section.
 
 To start autoprocessing, specify the instrument and investigation ID, and
-optionally the cycle name. Then click `Autoprocess` to start autoproessing for
+optionally the cycle name. Then click `Autoprocess` to start autoprocessing for
 this investigation. This will:
 
 - Populate the search results list with runs that are part of the investigation.
@@ -835,7 +839,7 @@ Default transmission runs can be specified and each input can take a
 single run/workspace or a number of runs/workspaces that will be summed before
 processing. Specific spectra of interest can be specified for the input runs
 and separate spectra, if required, can be specified for the transmission runs -
-if the latter are not specified then the ``Run Spectra`` will also be used for
+if the latter are not specified then the ``ROI`` will also be used for
 the transmission runs. If both a First and Second tranmission input is
 specified, then they will be stitched using the options specified.
 
