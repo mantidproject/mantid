@@ -37,7 +37,9 @@ void export_AlgoTimeRegister() {
 
   // AlgoTimeRegister class
   class_<AlgoTimeRegisterImpl, boost::noncopyable>("AlgoTimeRegisterImpl", no_init)
-      .def("addTime", &addTimeWrapper, (arg("name"), arg("begin"), arg("end")))
+      .def("addTime", &addTimeWrapper, (arg("name"), arg("begin"), arg("end")),
+           "Adds a time entry in the file for a function with <name> that starts at <begin> time_ns and ends at <end> "
+           "time_ns relative to the <START_POINT> clock")
       .staticmethod("addTime")
       .def("Instance", &AlgoTimeRegister::Instance, return_value_policy<reference_existing_object>(),
            "Returns a reference to the AlgoTimeRegister")
