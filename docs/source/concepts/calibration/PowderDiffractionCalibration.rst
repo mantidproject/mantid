@@ -34,10 +34,7 @@ the rest of the instrument to. The main algorithm that does this is
 1. :ref:`Load <algm-Load>` the calibration data
 2. Convert the X-Units to d-spacing using :ref:`ConvertUnits
    <algm-ConvertUnits>`. The "offsets" calculated are relative
-   reference spectrum's geometry so using :ref:`AlignDetectors
-   <algm-AlignDetectors>` will violate the assumptions for other
-   algorithms used with time-of-flight powder diffraction and give the
-   wrong results for focused data.
+   reference spectrum's geometry.
 3. Run :ref:`Rebin <algm-Rebin>` to set a common d-spacing bin
    structure across all of the spectra, you will need fine enough bins
    to allow fitting of your peak.  Whatever you choose, make a note of
@@ -597,7 +594,7 @@ The easiest way to do this is to apply the calibration to your
 calibration data and check that the bragg peaks align as expected.
 
 1. Load the calibration data using :ref:`Load <algm-Load>`
-2. Run :ref:`AlignDetectors <algm-AlignDetectors>`, this will convert the data to d-spacing and apply the calibration.  You can provide the calibration using the ``CalibrationFile``, the ``CalibrationWorkspace``, or ``OffsetsWorkspace``.
+2. Run :ref:`ConvertUnits <algm-ConvertUnits>`, this will convert the data to d-spacing and apply the calibration.  You can provide the calibration using the ``CalibrationFile``, the ``CalibrationWorkspace``, or ``OffsetsWorkspace``.
 3. Plot the workspace as a Color Fill plot, in the spectrum view, or a few spectra in a line plot.
 
 Further insight can be gained by comparing the grouped (after aligning

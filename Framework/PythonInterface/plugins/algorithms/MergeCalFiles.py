@@ -18,7 +18,6 @@ class MergeCalFiles(PythonAlgorithm):
             "ReadGroupsFromFile",
             "CreateDummyCalFile",
             "CreateCalFileByNames",
-            "AlignDetectors",
             "DiffractionFocussing",
             "LoadCalFile",
             "SaveCalFile",
