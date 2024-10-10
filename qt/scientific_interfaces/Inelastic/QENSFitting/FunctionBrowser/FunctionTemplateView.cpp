@@ -25,6 +25,7 @@
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
+#include <MantidKernel/UsageService.h>
 #include <QMessageBox>
 #include <QSettings>
 #include <QVBoxLayout>
@@ -73,19 +74,18 @@ void FunctionTemplateView::createBrowser() {
   m_browser->setFactoryForManager(m_enumManager, comboBoxFactory);
   m_browser->setFactoryForManager(m_parameterManager, doubleDialogFactory);
 
-  connect(m_intManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(intChanged(QtProperty *)));
-  connect(m_boolManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(boolChanged(QtProperty *)));
-  connect(m_enumManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(enumChanged(QtProperty *)));
-  connect(m_parameterManager, SIGNAL(propertyChanged(QtProperty *)), this, SLOT(parameterChanged(QtProperty *)));
-
-  connect(doubleDialogFactory, SIGNAL(buttonClicked(QtProperty *)), this, SLOT(parameterButtonClicked(QtProperty *)));
-  connect(doubleDialogFactory, SIGNAL(closeEditor()), m_browser, SLOT(closeEditor()));
+  connect(m_intManager, &QtIntPropertyManager::propertyChanged, this, &FunctionTemplateView::intChanged);
+  connect(m_boolManager, &QtBoolPropertyManager::propertyChanged, this, &FunctionTemplateView::boolChanged);
+  connect(m_enumManager, &QtEnumPropertyManager::propertyChanged, this, &FunctionTemplateView::enumChanged);
+  connect(m_parameterManager, &ParameterPropertyManager::propertyChanged, this,
+          &FunctionTemplateView::parameterChanged);
+  connect(doubleDialogFactory, &DoubleDialogEditorFactory::buttonClicked, this,
+          &FunctionTemplateView::parameterButtonClicked);
+  connect(doubleDialogFactory, &DoubleDialogEditorFactory::closeEditor, m_browser, &QtTreePropertyBrowser::closeEditor);
 
   m_browser->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_browser, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(popupMenu(const QPoint &)));
-
-  connect(m_browser, SIGNAL(optionChanged(QtProperty *, const QString &, bool)), this,
-          SLOT(globalChanged(QtProperty *, const QString &, bool)));
+  connect(m_browser, &QtTreePropertyBrowser::customContextMenuRequested, this, &FunctionTemplateView::popupMenu);
+  connect(m_browser, &QtTreePropertyBrowser::optionChanged, this, &FunctionTemplateView::globalChanged);
 }
 
 void FunctionTemplateView::init() {
@@ -171,8 +171,7 @@ void FunctionTemplateView::openEditLocalParameterDialog(std::string const &param
                                                         QStringList const &ties, QStringList const &constraints) {
   auto dialog =
       new EditLocalParameterDialog(this, parameterName, datasetNames, domainNames, values, fixes, ties, constraints);
-  connect(dialog, SIGNAL(dialogFinished(int, EditLocalParameterDialog *)), this,
-          SLOT(editLocalParameterFinished(int, EditLocalParameterDialog *)));
+  connect(dialog, &EditLocalParameterDialog::dialogFinished, this, &FunctionTemplateView::editLocalParameterFinished);
   dialog->open();
 }
 

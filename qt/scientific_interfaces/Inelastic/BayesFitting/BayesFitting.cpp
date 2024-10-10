@@ -33,14 +33,14 @@ void BayesFitting::initLayout() {
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, BayesFittingTab *>::iterator iter;
   for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter) {
-    connect(iter->second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
+    connect(iter->second, &BayesFittingTab::showMessageBox, this, &BayesFitting::showMessageBox);
   }
 
   loadSettings();
 
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
+  connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &BayesFitting::settings);
+  connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &BayesFitting::help);
+  connect(m_uiForm.pbManageDirs, &QPushButton::clicked, this, &BayesFitting::manageUserDirectories);
 
   InelasticInterface::initLayout();
 }
