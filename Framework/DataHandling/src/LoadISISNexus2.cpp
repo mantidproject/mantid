@@ -604,7 +604,7 @@ below have to be processed rather then spectra list
 intervals
 **/
 void LoadISISNexus2::buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList,
-                                                   DataBlockComposite &dataBlockComposite) {
+                                                   DataBlockComposite const &dataBlockComposite) {
 
   if (range_supplied || hasSpectraList || true) {
     auto generator = dataBlockComposite.getGenerator();
@@ -734,19 +734,25 @@ void LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry, DataObjects:
       const int64_t fullblocks = rangesize / blocksize;
       int64_t spectra_no = spectraBlock.first;
 
-      // For this to work correctly, we assume that the spectrum list increases
-      // monotonically
+      auto const nDetectorBlockChannels = m_detBlockInfo.getNumberOfChannels();
+      auto const binEdges = BinEdges(m_tof_data);
+
+      // For this to work correctly, we assume that the spectrum list increases monotonically
       int64_t filestart = std::lower_bound(spec_begin, m_spec_end, spectra_no) - spec_begin;
-      if (fullblocks > 0) {
-        for (int64_t i = 0; i < fullblocks; ++i) {
-          loadBlock(data, blocksize, period_index, filestart, hist_index, spectra_no, local_workspace);
-          filestart += blocksize;
-        }
-      }
       int64_t finalblock = rangesize - (fullblocks * blocksize);
-      if (finalblock > 0) {
-        loadBlock(data, finalblock, period_index, filestart, hist_index, spectra_no, local_workspace);
+
+      data.load(static_cast<int>(blocksize * fullblocks + finalblock), static_cast<int>(period_index),
+                static_cast<int>(filestart));
+      auto const totalHistograms = fullblocks * blocksize + finalblock;
+
+      PARALLEL_FOR_IF(Kernel::threadSafe(*local_workspace))
+      for (int64_t i = 0; i < totalHistograms; ++i) {
+        auto const blockIndex = i / blocksize;
+        auto const withinBlockIndex = i % blocksize;
+        loadHistogram(data, blockIndex * blocksize + withinBlockIndex, hist_index + i, local_workspace,
+                      nDetectorBlockChannels, binEdges);
       }
+      hist_index += totalHistograms;
     }
   }
 
@@ -778,39 +784,32 @@ void LoadISISNexus2::createPeriodLogs(int64_t period, DataObjects::Workspace2D_s
 }
 
 /**
- * Perform a call to nxgetslab, via the NexusClasses wrapped methods for a given
- * block-size
+ * Load a histogram given by the offset index for data in a NXDataSetTyped
  * @param data :: The NXDataSet object
- * @param blocksize :: The block-size to use
- * @param period :: The period number
- * @param start :: The index within the file to start reading from (zero based)
- * @param hist :: The workspace index to start reading into
- * @param spec_num :: The spectrum number that matches the hist variable
- * @param local_workspace :: The workspace to fill the data with
+ * @param offsetIndex :: The offset index at which to start reading data from.
+ * @param histIndex :: The index of the histogram to be loaded.
+ * @param localWorkspace :: The workspace to fill the data with.
+ * @param nDetectorBlockChannels :: The number of data elements per histogram.
+ * @param binEdges :: The bin edges to use for the histogram.
  */
-void LoadISISNexus2::loadBlock(NXDataSetTyped<int> &data, int64_t blocksize, int64_t period, int64_t start,
-                               int64_t &hist, int64_t &spec_num, DataObjects::Workspace2D_sptr &local_workspace) {
-  data.load(static_cast<int>(blocksize), static_cast<int>(period),
-            static_cast<int>(start)); // TODO this is just wrong
-  int *data_start = data();
-  int *data_end = data_start + m_loadBlockInfo.getNumberOfChannels();
-  int64_t final(hist + blocksize);
-  while (hist < final) {
-    m_progress->report("Loading data");
-    local_workspace->setHistogram(hist, BinEdges(m_tof_data), Counts(data_start, data_end));
-    data_start += m_detBlockInfo.getNumberOfChannels();
-    data_end += m_detBlockInfo.getNumberOfChannels();
-    if (m_load_selected_spectra) {
-      auto &spec = local_workspace->getSpectrum(hist);
-      specnum_t specNum = m_wsInd2specNum_map.at(hist);
+void LoadISISNexus2::loadHistogram(NXDataSetTyped<int> &data, int64_t offsetIndex, int64_t histIndex,
+                                   DataObjects::Workspace2D_sptr &localWorkspace,
+                                   std::size_t const nDetectorBlockChannels, BinEdges const &binEdges) {
+  int *data_start = data() + offsetIndex * nDetectorBlockChannels;
+  int *data_end = data_start + nDetectorBlockChannels;
+
+  localWorkspace->setHistogram(histIndex, binEdges, Counts(data_start, data_end));
+  data_start += nDetectorBlockChannels;
+  data_end += nDetectorBlockChannels;
+  if (m_load_selected_spectra) {
+    PARALLEL_CRITICAL(setDetectors) {
+      auto &spec = localWorkspace->getSpectrum(histIndex);
+      specnum_t specNum = m_wsInd2specNum_map.at(histIndex);
       // set detectors corresponding to spectra Number
       spec.setDetectorIDs(m_spec2det_map.getDetectorIDsForSpectrumNo(specNum));
       // set correct spectra Number
       spec.setSpectrumNo(specNum);
     }
-
-    ++hist;
-    ++spec_num;
   }
 }
 
@@ -943,9 +942,10 @@ double LoadISISNexus2::dblSqrt(double in) { return sqrt(in); }
  *                               (contain different number of time channels)
  *
  */
-bool LoadISISNexus2::findSpectraDetRangeInFile(NXEntry &entry, std::vector<specnum_t> &spectrum_index, int64_t ndets,
-                                               int64_t n_vms_compat_spectra, std::map<specnum_t, std::string> &monitors,
-                                               bool excludeMonitors, bool separateMonitors) {
+bool LoadISISNexus2::findSpectraDetRangeInFile(NXEntry const &entry, std::vector<specnum_t> &spectrum_index,
+                                               int64_t ndets, int64_t n_vms_compat_spectra,
+                                               std::map<specnum_t, std::string> const &monitors, bool excludeMonitors,
+                                               bool separateMonitors) {
   size_t nmons = monitors.size();
 
   if (nmons > 0) {
