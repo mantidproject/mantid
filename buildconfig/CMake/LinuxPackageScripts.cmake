@@ -92,6 +92,15 @@ if [ -n \"\$1\" ] && [ \"\$1\" = \"--debug\" ]; then
 fi"
 )
 
+# Without specifying these schema files, the standalone can fail to launch on Linux. Inside a conda environment this
+# environment variable is set by something else.
+set(GSETTINGS_SCHEMA_DEFINITIONS
+    "# Specify path to schema files
+if [ -z \"\${GSETTINGS_SCHEMA_DIR}\" ]; then
+    GSETTINGS_MANTID_PATH=\${INSTALLDIR}/share/glib-2.0/schemas
+fi"
+)
+
 set(ERROR_CMD "-m mantidqt.dialogs.errorreports.main --exitcode=\$?")
 
 # Local dev version
