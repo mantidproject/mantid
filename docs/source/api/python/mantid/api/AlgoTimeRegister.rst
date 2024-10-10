@@ -17,9 +17,9 @@ This is a Python binding to the C++ class Mantid::Instrumentation::AlgoTimeRegis
 Usage
 ------
 
-The idea is to initialize :py:obj:`~mantid.api.AlgoTimeRegister` and start the clock (START_POINT) in the beggining of the script.
+in the beggining of the script, initialize :py:obj:`~mantid.api.AlgoTimeRegister` to start the clock (START_POINT).
 Then use python `time` (time.time_ns()) to measure time (start_time and end_time in nanoseconds) and a function (name).
-Afterwars, call :py:obj:`~mantid.api.AlgoTimeRegister.addTime()` to store
+Afterwards, call :py:obj:`~mantid.api.AlgoTimeRegister.addTime()` to store
 them in the `performancelog.filename` log file when `performancelog.write` is activated (defined at `Mantid.user.properties` file)
 in the following format:
 
