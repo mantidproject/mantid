@@ -8,22 +8,19 @@ digraph OSIRISDiffractionReduction {
     OutputWorkspace
     SampleRuns
     VanadiumRuns
-    VanadiumWorkspaces
-    SampleWorkspaces
-    SampleWorkspaces1       [label="SampleWorkspaces"]
-    SampleWorkspace
     ContainerFiles
     ContainerWorkspaces
     ContainerScaleFactor
-    SampleWorkspaceMap
-    SampleWorkspaceMap1     [label="SampleWorkspaceMap"]
-    SampleWorkspaceMap2     [label="SampleWorkspaceMap"]
-    SampleWorkspaceMap3     [label="SampleWorkspaceMap"]
-    VanadiumWorkspaceMap
     SpecMin
     SpecMin1                [label="SpecMin"]
+    SpecMin2                [label="SpecMin"]
     SpecMax
     SpecMax1                [label="SpecMax"]
+    SpecMax2                [label="SpecMax"]
+    GroupingMethod
+    GroupingString
+    GroupingFile
+    NGroups
   }
 
   subgraph algorithms {
@@ -31,10 +28,13 @@ digraph OSIRISDiffractionReduction {
     Load
     Load1                   [label="Load"]
     Scale
+    Rebin
+    Rebin1                  [label="Rebin"]
     Minus
     NormaliseByCurrent
-    AlignDetectors
-    DiffractionFocussing
+    ApplyDiffCal
+    ApplyDiffCal1           [label="ApplyDiffCal"]
+    ConvertUnits
     CropWorkspace
     Divide
     ReplaceSpecialValues
@@ -55,16 +55,31 @@ digraph OSIRISDiffractionReduction {
     averageWorkspaces   [label="Average together any workspaces that have the same DRange"]
     getIntersection     [label="Create scalar data for where merge has combined overlapping data."]
     appendResults       [label="Add the scalar data to the result workspace."]
+    group_spectra       [label="group_spectra\nGroups spectra based\non the GroupingMethod."]
+  }
 
+  subgraph values {
+    SampleWorkspaceMap
+    SampleWorkspaceMap1           [label="SampleWorkspaceMap"]
+    SampleWorkspaceMap2           [label="SampleWorkspaceMap"]
+    SampleWorkspaceMap3           [label="SampleWorkspaceMap"]
+    SampleWorkspaceMap4           [label="SampleWorkspaceMap"]
+    SampleWorkspaceMap5           [label="SampleWorkspaceMap"]
+    VanadiumWorkspaceMap
+    VanadiumWorkspaceMap1         [label="VanadiumWorkspaceMap"]
+    SampleWorkspace
+    e_mode                        [label="Elastic"]
+    dspacing_unit                 [label="dSpacing"]
+    clear_calib                   [label="True"]
   }
 
   SampleRuns            -> Load
   VanadiumRuns          -> Load
   SpecMin               -> Load
   SpecMax               -> Load
-  Load                  -> VanadiumWorkspaces
-  Load                  -> SampleWorkspaces
-  SampleWorkspaces      -> useContainer
+  Load                  -> VanadiumWorkspaceMap
+  Load                  -> SampleWorkspaceMap
+  SampleWorkspaceMap    -> useContainer
   useContainer          -> ContainerFiles                   [label="Yes"]
     ContainerFiles          -> Load1
     SpecMin1                -> Load1
@@ -74,37 +89,50 @@ digraph OSIRISDiffractionReduction {
         ContainerScaleFactor    -> Scale
         Scale                   -> ContainerWorkspaces
     scaleContainer          -> ContainerWorkspaces          [label="No"]
-    ContainerWorkspaces     -> Minus
-    SampleWorkspaces1       -> Minus
-    Minus                   -> SampleWorkspaceMap
-  useContainer          -> SampleWorkspaceMap               [label="No: Add SampleWorkspaces to WorkspaceMap"]
-  VanadiumWorkspaces    -> VanadiumWorkspaceMap
+    ContainerWorkspaces     -> Rebin
+    SampleWorkspaceMap1     -> Rebin
+    Rebin                   -> Minus
+    SampleWorkspaceMap1     -> Minus
+    Minus                   -> SampleWorkspaceMap2
+  useContainer          -> SampleWorkspaceMap2              [label="No"]
   VanadiumWorkspaceMap  -> averageWorkspaces
-  SampleWorkspaceMap    -> averageWorkspaces
+  SampleWorkspaceMap2   -> averageWorkspaces
   averageWorkspaces     -> CurrentWorkspace                 [label="Extract next workspace from either the vanadium or sample map"]
   CurrentWorkspace      -> NormaliseByCurrent
-  NormaliseByCurrent    -> AlignDetectors
-  CalibrationFile       -> AlignDetectors
-  AlignDetectors        -> DiffractionFocussing
-  CalibrationFile       -> DiffractionFocussing
-  DiffractionFocussing  -> CropWorkspace
-  CropWorkspace         -> SampleWorkspaceMap1
-  SampleWorkspaceMap1   -> dRange                           [label="Extract dRange from map"]
-  dRange                -> SampleWorkspaceMap2
+  NormaliseByCurrent    -> ApplyDiffCal
+  CalibrationFile       -> ApplyDiffCal
+  ApplyDiffCal          -> ConvertUnits
+  dspacing_unit         -> ConvertUnits                     [label="Target"]
+  e_mode                -> ConvertUnits                     [label="EMode"]
+  ConvertUnits          -> ApplyDiffCal1
+  clear_calib           -> ApplyDiffCal1                    [label="ClearCalibration"]
+  ApplyDiffCal1         -> Rebin1
+  CalibrationFile       -> Rebin1
+  Rebin1                -> group_spectra
+  GroupingMethod        -> group_spectra
+  GroupingString        -> group_spectra
+  GroupingFile          -> group_spectra
+  NGroups               -> group_spectra
+  SpecMin2              -> group_spectra
+  SpecMax2              -> group_spectra
+  group_spectra         -> CropWorkspace
+  CropWorkspace         -> SampleWorkspaceMap3
+  SampleWorkspaceMap3   -> dRange                           [label="Extract dRange from map"]
+  dRange                -> SampleWorkspaceMap4
   dRange                -> VanadiumWorkspaceMap1
-  SampleWorkspaceMap2   -> SampleWorkspace
+  SampleWorkspaceMap4   -> SampleWorkspace
   VanadiumWorkspaceMap1 -> VanadiumWorkspace
   SampleWorkspace       -> Divide
   VanadiumWorkspace     -> Divide
   Divide                -> ReplaceSpecialValues
   ReplaceSpecialValues  -> processedWks
-  processedWks          -> SampleWorkspaceMap2              [label="No"]
+  processedWks          -> SampleWorkspaceMap4              [label="No"]
   processedWks          -> runNumbers                       [label="Yes"]
   runNumbers            -> MergeRuns                        [label="More than 1"]
   runNumbers            -> RenameWorkspace                  [label="Less than 1"]
   MergeRuns             -> ResultWorkspace
   RenameWorkspace       -> ResultWorkspace
-  SampleWorkspaceMap3   -> getIntersection
+  SampleWorkspaceMap5   -> getIntersection
   getIntersection       -> appendResults
   ResultWorkspace       -> appendResults
   appendResults         -> OutputWorkspace
