@@ -16,6 +16,7 @@
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -491,10 +492,10 @@ void Stitch1D::exec() {
     const double xMin = params.front();
     const double xMax = params.back();
 
-    if (std::abs(xMin - startOverlap) < 1E-6)
+    if (Kernel::withinAbsoluteDifference(xMin, startOverlap, 1E-6))
       startOverlap = xMin;
 
-    if (std::abs(xMax - endOverlap) < 1E-6)
+    if (Kernel::withinAbsoluteDifference(xMax, endOverlap, 1E-6))
       endOverlap = xMax;
 
     if (startOverlap < xMin) {
