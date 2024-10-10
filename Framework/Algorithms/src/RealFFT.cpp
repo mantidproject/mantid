@@ -79,6 +79,8 @@ void RealFFT::exec() {
   double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
   if (!IgnoreXBins) {
     for (size_t i = 0; i < X.size() - 2; i++)
+      // note this cannot be replaced with Kernel::withinRelativeDifference,
+      // or fails to detect some errors
       if (std::abs(dx - X[i + 1] + X[i]) / dx > 1e-7)
         throw std::invalid_argument("X axis must be linear (all bins have same "
                                     "width). This can be ignored if "

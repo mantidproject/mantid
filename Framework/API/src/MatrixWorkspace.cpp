@@ -22,6 +22,7 @@
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
@@ -913,7 +914,8 @@ bool MatrixWorkspace::isCommonLogBins() const {
   // ignore final bin, since it may be a different size
   for (size_t i = 1; i < x0.size() - 2; ++i) {
     if (std::isfinite(x0[i + 1]) && std::isfinite(x0[i])) {
-      if (std::abs(x0[i + 1] / x0[i] - diff) > EPSILON) {
+      // if (std::abs(x0[i + 1] / x0[i] - diff) > EPSILON) {
+      if (!Kernel::withinRelativeDifference(x0[i + 1] / x0[i], diff, EPSILON)) {
         return false;
       }
     } else {
@@ -1072,7 +1074,8 @@ bool MatrixWorkspace::isCommonBins() const {
         const double b = xi[j];
         // Check for NaN and infinity before comparing for equality
         if (std::isfinite(a) && std::isfinite(b)) {
-          if (std::abs(a - b) > EPSILON) {
+          // if (std::abs(a - b) > EPSILON) {
+          if (!Kernel::withinAbsoluteDifference(a, b, EPSILON)) {
             m_isCommonBinsFlag = false;
             break;
           }
@@ -1369,7 +1372,8 @@ std::size_t MatrixWorkspace::binIndexOfValue(HistogramData::HistogramX const &xV
 std::size_t MatrixWorkspace::xIndexOfValue(const HistogramData::HistogramX &xValues, const double xValue,
                                            const double tolerance) const {
   auto const iter = std::find_if(xValues.cbegin(), xValues.cend(), [&xValue, &tolerance](double const &value) {
-    return std::abs(xValue - value) <= tolerance;
+    // return std::abs(xValue - value) <= tolerance;
+    return Kernel::withinAbsoluteDifference(xValue, value, tolerance);
   });
   if (iter != xValues.cend())
     return std::distance(xValues.cbegin(), iter);
@@ -1951,7 +1955,7 @@ std::pair<size_t, double> MatrixWorkspace::getXIndex(size_t i, double x, bool is
       auto index = static_cast<size_t>(std::distance(X.begin(), ix));
       if (isLeft)
         --index;
-      return std::make_pair(index, fabs((X[index] - x) / (*ix - *(ix - 1))));
+      return std::make_pair(index, std::abs((X[index] - x) / (*ix - *(ix - 1))));
     }
   }
   // I don't think we can ever get here

@@ -15,6 +15,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/Material.h"
 
 #include <stdexcept>
@@ -128,12 +129,11 @@ void CalculateCarpenterSampleCorrection::exec() {
   const Material &sampleMaterial = inputWksp->sample().getMaterial();
   if (sampleMaterial.totalScatterXSection() != 0.0) {
     g_log.information() << "Using material \"" << sampleMaterial.name() << "\" from workspace\n";
-    if (std::abs(coeff1 - 2.8) < std::numeric_limits<double>::epsilon())
+    if (Kernel::equals(coeff1, 2.8))
       coeff1 = sampleMaterial.absorbXSection(LAMBDA_REF) / LAMBDA_REF;
-    if ((std::abs(coeff2 - 0.0721) < std::numeric_limits<double>::epsilon()) &&
-        (!isEmpty(sampleMaterial.numberDensity())))
+    if (Kernel::equals(coeff2, 0.0721) && !isEmpty(sampleMaterial.numberDensity()))
       coeff2 = sampleMaterial.numberDensity();
-    if (std::abs(coeff3 - 5.1) < std::numeric_limits<double>::epsilon())
+    if (Kernel::equals(coeff3, 5.1))
       coeff3 = sampleMaterial.totalScatterXSection();
   } else // Save input in Sample with wrong atomic number and name
   {
