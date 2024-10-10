@@ -31,7 +31,7 @@ def get_mantid_executables_for_platform(platform):
 def start_and_wait_for_completion(args_list):
     process = subprocess.Popen(args_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     exitcode = process.wait(timeout=SUBPROCESS_TIMEOUT_SECS)
-    return exitcode
+    return exitcode, process.stderr.read().decode()
 
 
 def write_test_script(test_script, test_file):
@@ -65,10 +65,17 @@ class WorkbenchStartupTest(systemtesting.MantidSystemTest):
         directory = ConfigService.getPropertiesDir().replace("\\", "/")
         for executable in self._executables:
             file_path = os.path.join(directory, executable)
-            executable = file_path if os.path.exists(file_path) else executable
-            exitcode = start_and_wait_for_completion([executable, "--execute", self._test_script, "--quit"])
+            executable, module = (file_path, False) if os.path.exists(file_path) else (executable, True)
+            arg_list = [executable, "--execute", self._test_script, "--quit"]
+            if module:
+                arg_list = ["python", "-m"] + arg_list
+
+            exitcode, stderr = start_and_wait_for_completion(arg_list)
             # Was the process successful
             self.assertEqual(0, exitcode)
+            # Check for no warnings or errors on startup
+            error_warning_lines = [line for line in stderr.split("\n") if "[Error]" in line or "[Warning]" in line]
+            self.assertEqual([], error_warning_lines, f"stderr was warning / error output: {error_warning_lines}")
             # Assert that the test script runs successfully by writing to a .txt file
             with open(self._test_file, "r") as file:
                 self.assertEqual(TEST_MESSAGE, file.readline())
