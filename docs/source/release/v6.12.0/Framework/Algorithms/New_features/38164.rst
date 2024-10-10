@@ -1,0 +1,1 @@
+- On Linux the algorithm profiler is now built by default but to enable profiling, the :ref:`properties <mantd:Algorithm_Profiling>` must be set.
