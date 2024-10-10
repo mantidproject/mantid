@@ -31,13 +31,14 @@ InstrumentConfig::InstrumentConfig(QWidget *parent)
   m_uiForm.loInstrument->addWidget(m_instrumentSelector);
 
   // Use this signal to filter the instrument list for disabled instruments
-  connect(m_instrumentSelector, SIGNAL(instrumentListUpdated()), this, SLOT(filterDisabledInstruments()));
-
-  connect(m_instrumentSelector, SIGNAL(instrumentSelectionChanged(const QString)), this,
-          SLOT(updateInstrumentConfigurations(const QString)));
-  connect(m_uiForm.cbAnalyser, SIGNAL(currentIndexChanged(int)), this, SLOT(updateReflectionsList(int)));
-  connect(m_uiForm.cbReflection, SIGNAL(currentIndexChanged(int)), this, SLOT(newInstrumentConfiguration()));
-
+  connect(m_instrumentSelector, &InstrumentSelector::instrumentListUpdated, this,
+          &InstrumentConfig::filterDisabledInstruments);
+  connect(m_instrumentSelector, &InstrumentSelector::instrumentSelectionChanged, this,
+          &InstrumentConfig::updateInstrumentConfigurations);
+  connect(m_uiForm.cbAnalyser, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          &InstrumentConfig::updateReflectionsList);
+  connect(m_uiForm.cbReflection, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          &InstrumentConfig::newInstrumentConfiguration);
   m_instrumentSelector->fillWithInstrumentsFromFacility();
 }
 
