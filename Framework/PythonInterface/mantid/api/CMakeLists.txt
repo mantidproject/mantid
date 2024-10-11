@@ -90,7 +90,6 @@ set(EXPORT_FILES
     src/Exports/RegionSelectorObserver.cpp
 )
 
-option(PROFILE_ALGORITHM_LINUX "Profile algorithm execution on Linux" OFF)
 if(PROFILE_ALGORITHM_LINUX)
   set(EXPORT_FILES "${EXPORT_FILES}" "src/Exports/AlgoTimeRegister.cpp")
 endif()

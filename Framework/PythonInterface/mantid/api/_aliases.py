@@ -20,7 +20,6 @@ from mantid.api import (
     FrameworkManagerImpl,
     FunctionFactoryImpl,
     WorkspaceFactoryImpl,
-    AlgoTimeRegisterImpl,
 )
 from mantid.kernel._aliases import lazy_instance_access
 
@@ -45,6 +44,8 @@ FunctionFactory = lazy_instance_access(FunctionFactoryImpl)
 WorkspaceFactory = lazy_instance_access(WorkspaceFactoryImpl)
 CatalogManager = lazy_instance_access(CatalogManagerImpl)
 if sys.platform.startswith("linux"):
+    from mantid.api import AlgoTimeRegisterImpl
+
     AlgoTimeRegister = lazy_instance_access(AlgoTimeRegisterImpl)
 
 # backwards-compatible
