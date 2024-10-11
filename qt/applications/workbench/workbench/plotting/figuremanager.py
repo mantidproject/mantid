@@ -611,8 +611,8 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         axes = self.canvas.figure.gca()
 
         # create a crosshair made from horizontal and verticle lines.
-        self.horizontal_line = axes.axhline(color="r", lw=1.0, ls="--")
-        self.vertical_line = axes.axvline(color="r", lw=1.0, ls="--")
+        self.horizontal_line = axes.axhline(color="r", lw=1.0, ls="-")
+        self.vertical_line = axes.axvline(color="r", lw=1.0, ls="-")
 
         def set_cross_hair_visible(visible):
             need_redraw = self.horizontal_line.get_visible() != visible
