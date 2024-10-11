@@ -24,18 +24,17 @@ namespace MantidQt::CustomInterfaces {
 IETView::IETView(QWidget *parent) {
   m_uiForm.setupUi(parent);
 
-  connect(m_uiForm.pbPlotTime, SIGNAL(clicked()), this, SLOT(plotRawClicked()));
-  connect(m_uiForm.dsRunFiles, SIGNAL(findingFiles()), this, SLOT(pbRunFinding()));
-  connect(m_uiForm.dsRunFiles, SIGNAL(fileFindingFinished()), this, SLOT(pbRunFinished()));
-  connect(m_uiForm.dsCalibrationFile, SIGNAL(dataReady(QString const &)), this, SLOT(handleDataReady()));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbPlotTime, &QPushButton::clicked, this, &IETView::plotRawClicked);
+  connect(m_uiForm.dsRunFiles, &FileFinderWidget::findingFiles, this, &IETView::pbRunFinding);
+  connect(m_uiForm.dsRunFiles, &FileFinderWidget::fileFindingFinished, this, &IETView::pbRunFinished);
+  connect(m_uiForm.dsCalibrationFile, &DataSelector::dataReady, this, &IETView::handleDataReady);
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &IETView::saveClicked);
 
   m_uiForm.dsCalibrationFile->isOptional(true);
 
   m_groupingWidget = new DetectorGroupingOptions(m_uiForm.fDetectorGrouping);
   m_uiForm.fDetectorGrouping->layout()->addWidget(m_groupingWidget);
-  connect(m_groupingWidget, SIGNAL(saveCustomGrouping(std::string const &)), this,
-          SLOT(saveCustomGroupingClicked(std::string const &)));
+  connect(m_groupingWidget, &DetectorGroupingOptions::saveCustomGrouping, this, &IETView::saveCustomGroupingClicked);
 }
 
 void IETView::subscribePresenter(IIETPresenter *presenter) { m_presenter = presenter; }

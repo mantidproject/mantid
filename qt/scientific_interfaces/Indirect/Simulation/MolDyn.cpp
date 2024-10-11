@@ -23,14 +23,14 @@ MolDyn::MolDyn(QWidget *parent) : SimulationTab(parent) {
   setOutputPlotOptionsPresenter(
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface, "0"));
 
-  connect(m_uiForm.ckCropEnergy, SIGNAL(toggled(bool)), m_uiForm.dspMaxEnergy, SLOT(setEnabled(bool)));
-  connect(m_uiForm.ckResolution, SIGNAL(toggled(bool)), m_uiForm.dsResolution, SLOT(setEnabled(bool)));
-  connect(m_uiForm.cbVersion, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(versionSelected(const QString &)));
+  connect(m_uiForm.ckCropEnergy, &QCheckBox::toggled, m_uiForm.dspMaxEnergy, &QDoubleSpinBox::setEnabled);
+  connect(m_uiForm.ckResolution, &QCheckBox::toggled, m_uiForm.dsResolution, &DataSelector::setEnabled);
+  connect(m_uiForm.cbVersion, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { this->versionSelected(m_uiForm.cbVersion->itemText(index)); });
 
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &MolDyn::saveClicked);
 
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+  connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &MolDyn::algorithmComplete);
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsResolution->isOptional(true);
