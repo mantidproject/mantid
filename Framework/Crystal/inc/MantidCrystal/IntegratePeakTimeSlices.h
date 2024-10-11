@@ -204,7 +204,7 @@ private:
   }
 };
 
-class MANTID_CRYSTAL_DLL IntegratePeakTimeSlices : public Mantid::API::Algorithm, API::DeprecatedAlgorithm {
+class MANTID_CRYSTAL_DLL IntegratePeakTimeSlices : public Mantid::API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Default constructor
   IntegratePeakTimeSlices();
