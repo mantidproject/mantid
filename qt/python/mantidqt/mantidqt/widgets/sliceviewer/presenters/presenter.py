@@ -225,14 +225,14 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         else:
             self.new_plot()
         self._call_cutviewer_presenter_if_created("on_dimension_changed")
+        if self.view.data_view.nonorthogonal_mode:
+            self.show_all_data_clicked()
 
     def slicepoint_changed(self):
         """Indicates the slicepoint has been updated"""
         self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.SlicePointChanged)
         self._call_cutviewer_presenter_if_created("on_slicepoint_changed")
         self.update_plot_data()
-        if self.view.data_view.nonorthogonal_mode:
-            self.show_all_data_clicked()
 
     def export_roi(self, limits):
         """Notify that an roi has been selected for export to a workspace
