@@ -63,8 +63,14 @@ EnumeratedStringProperty<E, names> *EnumeratedStringProperty<E, names>::clone() 
   return new EnumeratedStringProperty<E, names>(*this);
 }
 
-/// Copy assignment operator assigns only the value and the validator not the
-/// name, default (initial) value, etc.
+/** Assignment operator.
+ *  Copy assignment operator assigns only the value and the validator not the
+ *  name, default (initial) value, etc.
+ *  Allows assignment of a new value to the property by writing,
+ *  e.g., myProperty = 3;
+ *  @param right :: The new value to assign to the property
+ *  @return the reference to itself
+ */
 template <class E, std::vector<std::string> const *const names>
 EnumeratedStringProperty<E, names> &
 EnumeratedStringProperty<E, names>::operator=(EnumeratedStringProperty const &right) {
