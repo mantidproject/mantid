@@ -26,7 +26,7 @@ in the following format:
 ThreadID=<thread_id>, AlgorithmName=<name>, StartTime=<start_time>, EndTime=<end_time>
 
 **Example 1 - Use AlgoTimeRegister to measure time - default case:**
-This example shows the initialization process and
+This example shows the initialization process and adding a time entry
 
 .. testcode:: AlgoTimeRegisterStartAddDefault
 
@@ -58,8 +58,8 @@ Example Output at `Mantid.user.properties.performance.filename` file:
     ThreadID=124522639565888, AlgorithmName=demo_function, StartTime=144539, EndTime=1346405816
 
 **Example 2 - Use AlgoTimeRegister to measure time - overwrite the performance.log file:**
-The performance configuration can be overwritten in the script, to define
-the a custom `performancelog.filename`.
+The performance configuration can be overwritten in the script, by defining a custom `performancelog.filename`
+and calling evertyhing within the `amend_config` with block.
 
 .. testcode:: AlgoTimeRegisterStartOverWriteFile
 
