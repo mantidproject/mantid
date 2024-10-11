@@ -34,7 +34,7 @@ We also added several new algorithms. These are the highlights for this release:
   This algorithm implements the approach from the A. R. Wildes 2006 paper.
 - For SANS, we added new algorithm :ref:`PolarizerEfficiency <algm-PolarizerEfficiency-v1>` for calculating the efficiency of a polariser.
 
-**TODO: Add a note about new mantid-developer metapackage**
+- Mantid developer environments are now created using a new ``mantid-developer`` Conda meta-package, hosted on our Conda channel.
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
