@@ -28,7 +28,7 @@ ThreadID=<thread_id>, AlgorithmName=<name>, StartTime=<start_time>, EndTime=<end
 **Example 1 - Use AlgoTimeRegister to measure time - default case:**
 This example shows the initialization process and adding a time entry
 
-.. testcode:: AlgoTimeRegisterStartAddDefault
+.. code:: python
 
     # use python time module to measure time in nanoseconds
     import time
@@ -52,7 +52,7 @@ This example shows the initialization process and adding a time entry
 
 Example Output at `Mantid.user.properties.performance.filename` file:
 
-.. testoutput:: AlgoTimeRegisterStartAddDefault
+.. code::
 
     START_POINT: 1728507408768867137 MAX_THREAD: 12
     ThreadID=124522639565888, AlgorithmName=demo_function, StartTime=144539, EndTime=1346405816
@@ -61,7 +61,7 @@ Example Output at `Mantid.user.properties.performance.filename` file:
 The performance configuration can be overwritten in the script, by defining a custom `performancelog.filename`
 and calling evertyhing within the `amend_config` with block.
 
-.. testcode:: AlgoTimeRegisterStartOverWriteFile
+.. code:: python
 
     #define `performancelog.filenamer` filepath for ta particular script
     performance_config = {"performancelog.write": "On", "performancelog.filename": <custom filepath>}
@@ -88,7 +88,7 @@ and calling evertyhing within the `amend_config` with block.
 
 Example Output at `performance_config.performance.filename` file:
 
-.. testoutput:: AlgoTimeRegisterStartOverWriteFile
+.. code::
 
     START_POINT: 1728507555711066754 MAX_THREAD: 12
     ThreadID=139238466401344, AlgorithmName=demo_function, StartTime=144981, EndTime=4115162290
@@ -98,7 +98,7 @@ The :py:obj:`~mantid.api.AlgoTimeRegister` initialization can be omitted,
 if a Mantid algorithm is the first command in the script and the time before this is not needed.
 In any other case, initialization should be specified very eary on, in the script.
 
-.. testcode:: AlgoTimeRegisterStartWorkspace
+.. code:: python
 
     # use python time module to measure time in nanoseconds
     import time
@@ -122,7 +122,7 @@ In any other case, initialization should be specified very eary on, in the scrip
 
 Example Output at `Mantid.user.properties.performance.filename` file:
 
-.. testoutput:: AlgoTimeRegisterStartWorkspace
+.. code::
 
     START_POINT: 1728507650978221781 MAX_THREAD: 12
     ThreadID=138583991714880, AlgorithmName=CreateSampleWorkspace, StartTime=154046, EndTime=1818067
