@@ -7,7 +7,6 @@ Mantid Workbench Changes
 
 New Features
 ------------
-- Updated compiler on macOS from clang version 15 to 16, which should result in performance improvements.
 - Clarified ``Report Usage Data`` checkbox on the Workbench About page to explain that usage reporting is required to use the Error Reporter.
 - Exposed :class:`ConfigService::remove() <mantid.kernel.ConfigServiceImpl.remove>` to python API.
 - Exposed :class:`ConfigService::configureLogging() <mantid.kernel.ConfigServiceImpl.configureLogging>` to python API.

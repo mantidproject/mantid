@@ -95,6 +95,7 @@ Dependencies
 New features
 ############
 - Linux compiler has been updated to gcc version 12, which should improve performance in some circumstances.
+- Updated compiler on macOS from clang version 15 to 16, which should result in performance improvements.
 
 Bugfixes
 ############
