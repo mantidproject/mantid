@@ -30,8 +30,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidKernel/EnumeratedString.h"
-#include "MantidKernel/EnumeratedStringProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
@@ -75,17 +73,6 @@ DECLARE_ALGORITHM(PDCalibration)
 
 namespace { // anonymous
 const auto isNonZero = [](const double value) { return value != 0.; };
-
-// properties about peak positions to fit
-const std::vector<std::string> peakTypesNames{"BackToBackExponential", "Gaussian", "Lorentzian", "PseudoVoigt",
-                                              "IkedaCarpenterPV"};
-enum class PeakMode { BackToBackExponential, Gaussian, Lorentzian, PseudoVoigt, IkedaCarpenterPV, enum_count };
-typedef Mantid::Kernel::EnumeratedString<PeakMode, &peakTypesNames> PEAKMODE;
-
-const vector<std::string> backgroundTypesNames{"Flat", "Linear", "Quadratic"};
-enum class BackgroundMode { FLAT, LINEAR, QUADRATIC, enum_count };
-typedef Mantid::Kernel::EnumeratedString<BackgroundMode, &backgroundTypesNames> BACKGROUND_MODE;
-
 } // namespace
 
 /// private inner class
@@ -231,13 +218,13 @@ void PDCalibration::init() {
                   "This property has precedence over PreviousCalibrationFile.");
 
   // properties about peak positions to fit
-  declareProperty(std::make_unique<Mantid::Kernel::EnumeratedStringProperty<PeakMode, &peakTypesNames>>("PeakFunction"),
+  std::vector<std::string> peaktypes{"BackToBackExponential", "Gaussian", "Lorentzian", "PseudoVoigt",
+                                     "IkedaCarpenterPV"};
+  declareProperty("PeakFunction", "Gaussian", std::make_shared<StringListValidator>(peaktypes),
                   "Function to fit input peaks.");
-  setProperty("PeakFunction", "Gaussian");
-  declareProperty(std::make_unique<Mantid::Kernel::EnumeratedStringProperty<BackgroundMode, &backgroundTypesNames>>(
-                      "BackgroundType"),
+  vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
+  declareProperty("BackgroundType", "Linear", std::make_shared<StringListValidator>(bkgdtypes),
                   "Function to fit input peaks background.");
-  setProperty("BackgroundType", "Linear");
 
   auto peaksValidator = std::make_shared<CompositeValidator>();
   auto mustBePosArr = std::make_shared<Kernel::ArrayBoundedValidator<double>>();
