@@ -271,25 +271,18 @@ def link_walker(path):
     while targets:
         target_dir = targets.pop(0)
         actual_dir = resolve_symlinks(target_dir)
-        # print "target dir: %s  (%s)" % (target_dir, actual_dir)
         master_name, master_base, visited = aliases.master_path(actual_dir)
         if visited:
-            # print "  ...root already visited as %s" % master_name
             aliases.add_alias(target_dir, master_name)
             continue
         if master_name != target_dir:
             aliases.set_preferred(master_name, target_dir)
             aliases.add_alias(target_dir, master_name)
         aliases.add_master_target(master_name)
-        # print "  ...master name = %s" % master_name
-        # print "  ...walking %s" % target_dir
         for root, dirs, files in os.walk(target_dir, topdown=True):
-            # print "    ...reading %s" % root
             for d in dirs:
                 tmp = os.path.abspath(os.path.join(root, d))
-                # print "    ...checking %s" % tmp
                 if os.path.islink(tmp):
-                    # print "      ...buffering link %s" % tmp
                     targets.append(tmp)
             yield root, dirs, files
 
@@ -379,7 +372,6 @@ def process_gcov_data(file, covdata, options):  # noqa: C901
     uncovered = set()
     covered = {}
     branches = {}
-    # first_record=True
     lineno = 0
     for line in INPUT:
         segments = line.split(":", 2)
@@ -413,15 +405,6 @@ def process_gcov_data(file, covdata, options):  # noqa: C901
             pass
         elif tmp[0] == "f":
             pass
-            # if first_record:
-            # first_record=False
-            # uncovered.add(prev)
-            # if prev in uncovered:
-            # tokens=re.split('[ \t]+',tmp)
-            # if tokens[3] != "0":
-            # uncovered.remove(prev)
-            # prev = int(segments[1].strip())
-            # first_record=True
         else:
             sys.stderr.write(
                 "(WARNING) Unrecognized GCOV output: '%s'\n"
@@ -473,7 +456,6 @@ def process_datafile(filename, covdata, options):  # noqa: C901
     #
     abs_filename = os.path.abspath(filename)
     (dirname, fname) = os.path.split(abs_filename)
-    # (name,ext) = os.path.splitext(base)
 
     potential_wd = []
     starting_dir = os.getcwd()
@@ -515,8 +497,6 @@ def process_datafile(filename, covdata, options):  # noqa: C901
             potential_wd = [testdir for testdir in tmp if os.path.isdir(testdir)]
             if len(potential_wd) == 0:
                 errors.append("ERROR: cannot identify the location where GCC " "was run using --object-directory=%s\n" % options.objdir)
-            # Revert to the normal
-            # sys.exit(1)
 
     # no objdir was specified (or it was a parent dir); walk up the dir tree
     if len(potential_wd) == 0:
@@ -538,10 +518,6 @@ def process_datafile(filename, covdata, options):  # noqa: C901
         # paths, so we don't have to chdir(starting_dir) at every
         # iteration.
         os.chdir(potential_wd.pop(0))
-
-        # if options.objdir:
-        #    cmd.extend(["--object-directory", Template(options.objdir).substitute(filename=filename, head=dirname,
-        # tail=base, root=name, ext=ext)])
 
         if options.verbose:
             sys.stdout.write("Running gcov: '%s' in '%s'\n" % (" ".join(cmd), os.getcwd()))
