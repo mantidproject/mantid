@@ -391,6 +391,25 @@ ISIS SANS Interface GUI Settings
 |``sans.isis_sans.plotResults``   |Whether to show or hide plot results checkbox                     | ``On``, ``Off``     |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 
+Algorithm Profiling Settings
+****************************
+
+.. _Algorithm_Profiling:
+
+See :doc:`algorithm profiling <mantid-dev:AlgorithmProfiler>` for more details on using mantid profiler.
+
++---------------------------------+------------------------------------------------------------------+---------------------------+
+|Property                         |Description                                                       |Example value              |
++=================================+==================================================================+===========================+
+|``performancelog.filename``      |The filename for saving the log file. This can be the absolute    | ``algorithmregister.out`` |
+|                                 |or relative path. This file is overwritten each session. Default  |                           |
+|                                 |is ``algorithmregister.out``                                      |                           |
++---------------------------------+------------------------------------------------------------------+---------------------------+
+|``performancelog.write``         |Enable or disable writing the performance log. Write is disabled  | ``On``, ``True``, ``1``,  |
+|                                 |by default.                                                       | ``Off``, ``False``, ``0`` |
++---------------------------------+------------------------------------------------------------------+---------------------------+
+
+
 Getting access to Mantid properties
 ***********************************
 
