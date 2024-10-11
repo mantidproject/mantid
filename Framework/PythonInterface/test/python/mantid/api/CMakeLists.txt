@@ -8,7 +8,6 @@ set(TEST_PY_FILES
     AlgorithmHistoryTest.py
     AlgorithmManagerTest.py
     AlgorithmPropertyTest.py
-    AlgoRegisterTest.py
     AnalysisDataServiceTest.py
     AnalysisDataServiceObserverTest.py
     AxisTest.py
@@ -56,6 +55,11 @@ set(TEST_PY_FILES
     WorkspaceUnaryOpsTest.py
     WorkspaceValidatorsTest.py
 )
+
+option(PROFILE_ALGORITHM_LINUX "Profile algorithm execution on Linux" OFF)
+if(PROFILE_ALGORITHM_LINUX)
+  set(TEST_PY_FILES "${TEST_PY_FILES}" "AlgoRegisterTest.py")
+endif()
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
