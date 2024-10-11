@@ -8,6 +8,8 @@
 Defines a set of aliases to make accessing certain objects easier
 """
 
+import sys
+
 from mantid.api import (
     AlgorithmFactoryImpl,
     AlgorithmManagerImpl,
@@ -42,7 +44,8 @@ FrameworkManager = lazy_instance_access(FrameworkManagerImpl)
 FunctionFactory = lazy_instance_access(FunctionFactoryImpl)
 WorkspaceFactory = lazy_instance_access(WorkspaceFactoryImpl)
 CatalogManager = lazy_instance_access(CatalogManagerImpl)
-AlgoTimeRegister = lazy_instance_access(AlgoTimeRegisterImpl)
+if sys.platform.startswith("linux"):
+    AlgoTimeRegister = lazy_instance_access(AlgoTimeRegisterImpl)
 
 # backwards-compatible
 mtd = AnalysisDataService

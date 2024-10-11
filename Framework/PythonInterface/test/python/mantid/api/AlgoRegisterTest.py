@@ -11,10 +11,11 @@ import time
 import os
 
 from mantid.kernel import amend_config
-from mantid.api import AlgoTimeRegister
 from mantid.simpleapi import CreateSampleWorkspace, Max
 import threading
 
+if sys.platform.startswith("linux"):
+    from mantid.api import AlgoTimeRegister
 
 def get_recorded_timedata(filename):
     with open(filename, "r") as f:
