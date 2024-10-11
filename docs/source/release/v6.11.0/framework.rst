@@ -14,39 +14,38 @@ New features
 - Algorithm :ref:`algm-Load` will now give a warning if the extension specified on the filename, eg. `MUSR15189.txt`, is not found.
   Loading files from interfaces or other algorithms should also give this warning.
   The algorithm will still load the file by looking for other extensions, as was the case before.
-- Algorithm :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` now has a newer version 2 that will save the grouping file with groups starting at 1 instead of 0 to make them consisted with ``GroupingWorkspace``.
+- A new version of :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` (version 2) that will save the grouping file with groups starting at 1 instead of 0 to make them consisted with ``GroupingWorkspace``.
   The ``FileFormat`` parameter has also been removed as it will now be determined from the extension of ``GroupingFilename``.
 - Algorithm :ref:`LoadEventNexus <algm-LoadEventNexus>` now has a new ``FilterBadPulsesLowerCutoff`` parameter that implements the functionality of :ref:`FilterBadPulses <algm-FilterBadPulses>`.
-- Algorithm :ref:`algm-PolarizationCorrectionWildes` and :ref:`algm-PolarizationEfficiencyCor` have new property ``SpinStates`` to allow the order of the workspaces in the output Workspace Group to be set.
-- Algoritm :ref:`algm-CombineDiffCal` has improved time-scaling performance and new extra validations.
+- Algorithm :ref:`algm-PolarizationCorrectionWildes` and :ref:`algm-PolarizationEfficiencyCor` have a new ``SpinStates`` property to allow the order of the workspaces in the output workspace group to be set.
+- Algorithm :ref:`algm-CombineDiffCal` has improved time-scaling performance and new extra validations.
 - Algorithm :ref:`CompareWorkspaces <algm-CompareWorkspaces>` now supports :ref:`Ragged Workspaces <Ragged_Workspace>`.
 - Binary operations :ref:`Plus <algm-Plus>`, :ref:`Minus <algm-Minus>`, :ref:`Divide <algm-Divide>` and :ref:`Multiply <algm-Multiply>` now support :ref:`Ragged Workspaces <Ragged_Workspace>`.
-- Algorithm :ref:`CompressEvents <algm-CompressEvents>` now has new property ``SortFirst`` that controls whether sorting first happens for compress events.
-  If ``SortFirst=False`` then a different method, that will not sort events first, will be used to compress events which is faster when you have a large number of events per compress tolerance.
-- Algorithm :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` has new property ``OutputSuffix`` that will append a suffix to the end of output workspace names.
+- Algorithm :ref:`CompressEvents <algm-CompressEvents>` a new ``SortFirst`` property that controls whether sorting happens before compressing events.
+  If ``SortFirst=False`` then a different method is used to compress events that will not sort first. This is faster when you have a large number of events per compress tolerance.
+- Algorithm :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` has the new property ``OutputSuffix`` that will append a suffix to the end of output workspace names.
 - Algorithms :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` and ref: :ref:`SNSPowderReduction <algm-SNSPowderReduction>` have new property ``MinSizeCompressOnLoad`` for specifying load compression.
-- Algorithm `<algm-NMoldyn4Interpolation>` now uses `scipy.interpolate.RectBivariateSpline` instead of `scipy.interpolate.interp2d`, since `interp2d` has been removed in version 1.14 of `scipy`.
+- Algorithm :ref:`NMoldyn4Interpolation <algm-NMoldyn4Interpolation>` now uses ``scipy.interpolate.RectBivariateSpline`` instead of ``scipy.interpolate.interp2d``, since ``interp2d`` has been removed in version 1.14 of ``scipy``.
   See reference documentation here (https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp2d.html).
 - Algorithm :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection-v1>` now supports a radial collimator that restricts scatter points within a small region within the larger sample volume.
   The algorithm was modified to assign zero weight to tracks where the final scatter is not in a position that allows the final track segment to pass through the collimator toward detectors.
-- Algorithm :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>` has new version 2 that adds property ``FilterByTime``.
+- Version 2 of the algorithm :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>` that adds the property ``FilterByTime``.
 - New algorithm :ref:`ScaleInstrumentComponent <algm-ScaleInstrumentComponent>` to scale all detectors in an instrument component around the component's geometrical position.
 
   .. figure::  ../../images/6_11_release/ScaleInstrumentComponent.png
      :width: 400px
 
-- Algorithm :ref:`GenerateGroupingSNSInelastic <algm-GenerateGroupingSNSInelastic>` has new input option :ref:`InstrumentDefinitionFile`.
-  Selecting the new ``InstrumentDefinitionFile`` option in instrument drop down menu will create a new field allowing users selecting older instrument definition files.
-- Algorithm :ref:`CompareWorkspaces <algm-CompareWorkspaces>` has new property ``CheckUncertainty`` to turn off comparing the y-value uncertainties.
+- Algorithm :ref:`GenerateGroupingSNSInelastic <algm-GenerateGroupingSNSInelastic>` has the new input option :ref:`InstrumentDefinitionFile`.
+  Selecting the new ``InstrumentDefinitionFile`` option in the instrument drop down menu will create a new field allowing users to select older instrument definition files.
+- Algorithm :ref:`CompareWorkspaces <algm-CompareWorkspaces>` has a new ``CheckUncertainty`` property to turn off comparing the y-value uncertainties.
 - Algorithm :ref:`ScaleX <algm-ScaleX>` is now 95% faster when using the ``InstrumentParameter`` property.
 
 Bugfixes
 ############
 - Algorithm :ref:`CompareWorkspaces <algm-CompareWorkspaces-v1>` is now fixed for relative differences of small values.
-- Algorithm :ref:`LoadEventNexus <algm-LoadEventNexus>` now has minimum histogram bin edge equal to the lowest time-of-flight event rather than one less.
-  The effect is that there is no longer negative bin edges unless there is actually a negative time-of-flight in the data.
+- Algorithm :ref:`LoadEventNexus <algm-LoadEventNexus>` now has the minimum histogram bin edge equal to the lowest time-of-flight event rather than one less.
+  There are no longer negative bin edges unless there is actually a negative time-of-flight in the data.
 - Isotope densities have been updated, see https://pypi.org/project/periodictable/1.6.1/#history for notes about the updates from NIST.
-- Algorithm `IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile-v1>` no longer references `numpy.distutils`, since as of NumPy 1.23.0 it is deprecated.
 - All sample times are now allowed to be before 01/01/1991.
 - Algorithm :ref:`ExtractFFTSpectrum <algm-ExtractFFTSpectrum>` no longer causes an unreliable segmentation fault.
 - Algorithm :ref:`LoadIsawUB <algm-LoadIsawUB>` now correctly adds the UB to the first experiment info when the input workspace has more than one.
