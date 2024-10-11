@@ -24,7 +24,7 @@ New features
 - Algorithm :ref:`CompressEvents <algm-CompressEvents>` a new ``SortFirst`` property that controls whether sorting happens before compressing events.
   If ``SortFirst=False`` then a different method is used to compress events that will not sort first. This is faster when you have a large number of events per compress tolerance.
 - Algorithm :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` has the new property ``OutputSuffix`` that will append a suffix to the end of output workspace names.
-- Algorithms :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` and ref: :ref:`SNSPowderReduction <algm-SNSPowderReduction>` have new property ``MinSizeCompressOnLoad`` for specifying load compression.
+- Algorithms :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` and ref: :ref:`SNSPowderReduction <algm-SNSPowderReduction>` have new a property called ``MinSizeCompressOnLoad`` for specifying load compression.
 - Algorithm :ref:`NMoldyn4Interpolation <algm-NMoldyn4Interpolation>` now uses ``scipy.interpolate.RectBivariateSpline`` instead of ``scipy.interpolate.interp2d``, since ``interp2d`` has been removed in version 1.14 of ``scipy``.
   See reference documentation here (https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp2d.html).
 - Algorithm :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection-v1>` now supports a radial collimator that restricts scatter points within a small region within the larger sample volume.
@@ -53,21 +53,21 @@ Bugfixes
 
 Removed
 #######
-- Algorithm SaveDiffFittingAscii was deprecated in :ref:`Release 3.13.0 <v3.13.0>` and has now been removed. Use :ref:`EnggSaveSinglePeakFitResultsToHDF5 <algm-EnggSaveSinglePeakFitResultsToHDF5>` instead.
-- Algorithm AddNote was deprecated in :ref:`Release 3.6.0 <v3.6.0>` and has now been removed. Please use :ref:`Comment <algm-Comment>` instead.
-- Algorithm FilterEventsByLogValuePreNexus was deprecated in 2014 and has now been removed.
-- Algorithm FindUBUsingMinMaxD was deprecated in 2013 and has now been removed. Use :ref:`FindUBUsingFFT<algm-FindUBUsingFFT>` instead.
-- Algorithm ConvertEmptyToTof was deprecated in :ref:`Release 3.9.0 <v3.9.0>` and has now been removed.
-- Algorithm RecordPythonScript was deprecated in :ref:`Release 5.1.0 <v5.1.0>` and has now been removed. Use :ref:`GeneratePythonScript<algm-generatepythonscript>` instead.
-- Algorithm CheckWorkspacesMatch was deprecated in :ref:`Release 3.9.0 <v3.9.0>` and has now been removed. Use :ref:`CompareWorkspaces<algm-compareworkspaces>` instead.
+- Algorithm ``SaveDiffFittingAscii`` was deprecated in :ref:`Release 3.13.0 <v3.13.0>` and has now been removed. Use :ref:`EnggSaveSinglePeakFitResultsToHDF5 <algm-EnggSaveSinglePeakFitResultsToHDF5>` instead.
+- Algorithm ``AddNote`` was deprecated in :ref:`Release 3.6.0 <v3.6.0>` and has now been removed. Please use :ref:`Comment <algm-Comment>` instead.
+- Algorithm ``FilterEventsByLogValuePreNexus`` was deprecated in 2014 and has now been removed.
+- Algorithm ``FindUBUsingMinMaxD`` was deprecated in 2013 and has now been removed. Use :ref:`FindUBUsingFFT<algm-FindUBUsingFFT>` instead.
+- Algorithm ``ConvertEmptyToTof`` was deprecated in :ref:`Release 3.9.0 <v3.9.0>` and has now been removed.
+- Algorithm ``RecordPythonScript`` was deprecated in :ref:`Release 5.1.0 <v5.1.0>` and has now been removed. Use :ref:`GeneratePythonScript<algm-generatepythonscript>` instead.
+- Algorithm ``CheckWorkspacesMatch`` was deprecated in :ref:`Release 3.9.0 <v3.9.0>` and has now been removed. Use :ref:`CompareWorkspaces<algm-compareworkspaces>` instead.
 
 Fit Functions
 -------------
 
 New features
 ############
-- Function :ref:`PearsonIV <func-PearsonIV>` now available to fit model prompt pulses.
-- Function :ref:`SpinDiffusion <func-SpinDiffusion>` now available in the Muon category.
+- Fit function :ref:`PearsonIV <func-PearsonIV>` now available to fit model prompt pulses.
+- Fit function :ref:`SpinDiffusion <func-SpinDiffusion>` now available in the Muon category.
 
 
 Data Objects
@@ -95,7 +95,6 @@ Dependencies
 New features
 ############
 - Linux compiler has been updated to gcc version 12, which should improve performance in some circumstances.
-- Usage of ``Poco::File`` was changed to ``std::filesystem`` in the Kernel module. There will be no noticeable effect to the users.
 
 Bugfixes
 ############
