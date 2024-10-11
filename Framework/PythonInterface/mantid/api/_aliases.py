@@ -44,9 +44,11 @@ FunctionFactory = lazy_instance_access(FunctionFactoryImpl)
 WorkspaceFactory = lazy_instance_access(WorkspaceFactoryImpl)
 CatalogManager = lazy_instance_access(CatalogManagerImpl)
 if sys.platform.startswith("linux"):
-    from mantid.api import AlgoTimeRegisterImpl
+    try:
+        from mantid.api import AlgoTimeRegisterImpl
 
-    AlgoTimeRegister = lazy_instance_access(AlgoTimeRegisterImpl)
-
+        AlgoTimeRegister = lazy_instance_access(AlgoTimeRegisterImpl)
+    except:
+        AlgoTimeRegister = None
 # backwards-compatible
 mtd = AnalysisDataService

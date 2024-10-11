@@ -16,9 +16,6 @@ using namespace Mantid::Instrumentation;
 using namespace boost::python;
 using Mantid::Kernel::time_point_ns;
 
-// this works only in linux
-#ifdef __linux__
-
 void addTimeWrapper(const std::string &name, long int begin, long int end) {
 
   std::chrono::nanoseconds begin_ns(begin);
@@ -45,5 +42,3 @@ void export_AlgoTimeRegister() {
            "Returns a reference to the AlgoTimeRegister")
       .staticmethod("Instance");
 }
-
-#endif

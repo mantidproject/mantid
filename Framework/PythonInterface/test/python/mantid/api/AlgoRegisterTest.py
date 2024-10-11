@@ -310,4 +310,6 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
             self.assertEqual(rec_thread_id,threading.get_ident())
 
 if __name__ == "__main__":
-    unittest.main()
+    if AlgoTimeRegister != None:
+        #only run test if AlgoTimeRegister exists
+        unittest.main()
