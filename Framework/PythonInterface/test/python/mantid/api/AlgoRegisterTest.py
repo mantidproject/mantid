@@ -17,7 +17,8 @@ import threading
 
 def get_recorded_timedata(filename):
     with open(filename, "r") as f:
-        timeentry = f.readlines()[-1].replace("\n","").split(",")
+        lines = f.readlines()
+        timeentry = lines[-1].replace("\n","").split(",")
         recorded_start_time = recorded_end_time = -1
         entry_name = ""
         for value in timeentry:
@@ -39,131 +40,141 @@ class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
     PER_FILE = tempfile.NamedTemporaryFile()
     #start clock
     start_point = -1
+    # performance configuration
+    performance_config = {"performancelog.write": "On", "performancelog.filename": PER_FILE.name}
 
     def setUp(self):
-        performance_config = {"performancelog.write": "On", "performancelog.filename": self.PER_FILE.name}
-        with amend_config(**performance_config):
+        with amend_config(**self.performance_config):
             AlgoTimeRegister.Instance()
+            # add 1st time to read the start clock from the file
+            AlgoTimeRegister.addTime("1st entry",time.time_ns(),time.time_ns())
             with open(self.PER_FILE.name, "r") as f:
                 # based on the format `START_POINT: <start point number> MAX_THREAD: <thread number>`
-                timeentry = f.readlines()[0].split(" ")
+                lines = f.readlines()
+                timeentry = lines[0].split(" ")
                 self.start_point = int(timeentry[1])
 
     def test_addTime_timeentry1(self):
-        # time entry
-        entry_name = "test_addTime_timeentry1"
-        start_time = time.time_ns()
-        time.sleep(3.009)
-        end_time = time.time_ns()
-        duration = end_time-start_time
+        with amend_config(**self.performance_config):
+            # time entry
+            entry_name = "test_addTime_timeentry1"
+            start_time = time.time_ns()
+            time.sleep(3.009)
+            end_time = time.time_ns()
+            duration = end_time-start_time
 
-        # add time
-        AlgoTimeRegister.addTime(entry_name,start_time,end_time)
+            # add time
+            AlgoTimeRegister.addTime(entry_name,start_time,end_time)
 
-        #get time data from file
-        rec_start_time,rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
-        rec_duration = rec_end_time - rec_start_time
+            #get time data from file
+            rec_start_time,rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_duration = rec_end_time - rec_start_time
 
-        #check the values
-        self.assertEqual(start_time, self.start_point+rec_start_time)
-        self.assertEqual(end_time, self.start_point+rec_end_time)
-        self.assertEqual(duration, rec_duration)
-        self.assertEqual(entry_name, rec_entry_name)
-        self.assertEqual(rec_thread_id,threading.get_ident())
+            #check the values
+            self.assertEqual(start_time, self.start_point+rec_start_time)
+            self.assertEqual(end_time, self.start_point+rec_end_time)
+            self.assertEqual(duration, rec_duration)
+            self.assertEqual(entry_name, rec_entry_name)
+            self.assertEqual(rec_thread_id,threading.get_ident())
 
     def test_addTime_timeentry2(self):
 
-        # time entry
-        entry_name = "test_addTime_timeentry2"
-        start_time = time.time_ns()
-        time.sleep(1.345)
-        end_time = time.time_ns()
-        duration = end_time-start_time
+        with amend_config(**self.performance_config):
 
-        # it should ignore this
-        AlgoTimeRegister.Instance()
+            # time entry
+            entry_name = "test_addTime_timeentry2"
+            start_time = time.time_ns()
+            time.sleep(1.345)
+            end_time = time.time_ns()
+            duration = end_time-start_time
 
-        # add time
-        AlgoTimeRegister.addTime(entry_name,start_time,end_time)
+            # it should ignore this
+            AlgoTimeRegister.Instance()
 
-        #get time data from file
-        rec_start_time,rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
-        rec_duration = rec_end_time - rec_start_time
+            # add time
+            AlgoTimeRegister.addTime(entry_name,start_time,end_time)
 
-        #check the values
-        self.assertEqual(start_time, self.start_point+rec_start_time)
-        self.assertEqual(end_time, self.start_point+rec_end_time)
-        self.assertEqual(duration, rec_duration)
-        self.assertEqual(entry_name, rec_entry_name)
-        self.assertEqual(rec_thread_id,threading.get_ident())
+            #get time data from file
+            rec_start_time,rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_duration = rec_end_time - rec_start_time
+
+            #check the values
+            self.assertEqual(start_time, self.start_point+rec_start_time)
+            self.assertEqual(end_time, self.start_point+rec_end_time)
+            self.assertEqual(duration, rec_duration)
+            self.assertEqual(entry_name, rec_entry_name)
+            self.assertEqual(rec_thread_id,threading.get_ident())
 
     def test_addTime_timeentry3(self):
-        # time entry
-        entry_name = "test_addTime_timeentry3"
-        start_time = time.time_ns()
-        time.sleep(2.543)
-        end_time = time.time_ns()
-        duration = end_time-start_time
+        with amend_config(**self.performance_config):
+            # time entry
+            entry_name = "test_addTime_timeentry3"
+            start_time = time.time_ns()
+            time.sleep(2.543)
+            end_time = time.time_ns()
+            duration = end_time-start_time
 
-        # add time
-        AlgoTimeRegister.addTime(entry_name,start_time,end_time)
+            # add time
+            AlgoTimeRegister.addTime(entry_name,start_time,end_time)
 
-        #get time data from file
-        rec_start_time,rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
-        rec_duration = rec_end_time - rec_start_time
+            #get time data from file
+            rec_start_time,rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_duration = rec_end_time - rec_start_time
 
-        #check the values
-        self.assertEqual(start_time, self.start_point+rec_start_time)
-        self.assertEqual(end_time, self.start_point+rec_end_time)
-        self.assertEqual(duration, rec_duration)
-        self.assertEqual(entry_name, rec_entry_name)
-        self.assertEqual(rec_thread_id,threading.get_ident())
+            #check the values
+            self.assertEqual(start_time, self.start_point+rec_start_time)
+            self.assertEqual(end_time, self.start_point+rec_end_time)
+            self.assertEqual(duration, rec_duration)
+            self.assertEqual(entry_name, rec_entry_name)
+            self.assertEqual(rec_thread_id,threading.get_ident())
 
     def test_addTime_timeentry4(self):
-        # time entry
-        start_time = time.time_ns()
-        entry_name = "test_addTime_timeentry4"
-        time.sleep(4.11100)
-        end_time = time.time_ns()
-        duration = end_time-start_time
+        with amend_config(**self.performance_config):
+            # time entry
+            start_time = time.time_ns()
+            entry_name = "test_addTime_timeentry4"
+            time.sleep(4.11100)
+            end_time = time.time_ns()
+            duration = end_time-start_time
 
-        #add time
-        AlgoTimeRegister.addTime(entry_name,start_time,end_time)
+            #add time
+            AlgoTimeRegister.addTime(entry_name,start_time,end_time)
 
-        #get time data from file
-        rec_start_time,rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
-        rec_duration = rec_end_time - rec_start_time
+            #get time data from file
+            rec_start_time,rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_duration = rec_end_time - rec_start_time
 
-        #check the values
-        self.assertEqual(start_time, self.start_point+rec_start_time)
-        self.assertEqual(end_time, self.start_point+rec_end_time)
-        self.assertEqual(duration, rec_duration)
-        self.assertEqual(entry_name, rec_entry_name)
-        self.assertEqual(rec_thread_id,threading.get_ident())
+            #check the values
+            self.assertEqual(start_time, self.start_point+rec_start_time)
+            self.assertEqual(end_time, self.start_point+rec_end_time)
+            self.assertEqual(duration, rec_duration)
+            self.assertEqual(entry_name, rec_entry_name)
+            self.assertEqual(rec_thread_id,threading.get_ident())
 
     def test_addTime_algo(self):
-        # time entry
-        entry_name = "CreateSampleWorkspace"
-        # call algorithm
-        ws = CreateSampleWorkspace()
+        with amend_config(**self.performance_config):
+            # time entry
+            entry_name = "CreateSampleWorkspace"
+            # call algorithm
+            ws = CreateSampleWorkspace()
 
-        # it should ignore this
-        AlgoTimeRegister.Instance()
+            # it should ignore this
+            AlgoTimeRegister.Instance()
 
-        #get time data from file
-        rec_start_time,rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            #get time data from file
+            rec_start_time,rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
 
-        #check the values
-        self.assertEqual(entry_name, rec_entry_name)
-        self.assertEqual(rec_thread_id,threading.get_ident())
+            #check the values
+            self.assertEqual(entry_name, rec_entry_name)
+            self.assertEqual(rec_thread_id,threading.get_ident())
 
     def test_addTime_threading(self):
-
-        # time entry
-        # call the above algorithm from another thread to verfy the thread entry is correct
-        x = threading.Thread(target=self.test_addTime_algo)
-        x.start()
-        x.join()
+        with amend_config(**self.performance_config):
+            # time entry
+            # call the above algorithm from another thread to verfy the thread entry is correct
+            x = threading.Thread(target=self.test_addTime_algo)
+            x.start()
+            x.join()
 
 
 
@@ -172,11 +183,12 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
     PER_FILE = tempfile.NamedTemporaryFile()
     #start clock
     start_point = -1
+    # performance configuration
+    performance_config = {"performancelog.write": "On", "performancelog.filename": PER_FILE.name}
 
     def setUp(self):
         # do not initialize algotimeregister explicit
-        performance_config = {"performancelog.write": "On", "performancelog.filename": self.PER_FILE.name}
-        with amend_config(**performance_config):
+        with amend_config(**self.performance_config):
             #clock start here
             ws =  CreateSampleWorkspace(Function='Multiple Peaks')
             with open(self.PER_FILE.name, "r") as f:
@@ -185,100 +197,106 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
                 self.start_point = int(timeentry[1])
 
     def test_starttime_workspace(self):
-        # time entry
-        entry_name = "CreateSampleWorkspace"
+        with amend_config(**self.performance_config):
 
-        # call algorithm, internally it calls AlgoTimeRegister.addTime
-        ws =  CreateSampleWorkspace(Function='Multiple Peaks')
+            # time entry
+            entry_name = "CreateSampleWorkspace"
 
-        #get time data from file
-        rec_sample_start_time,rec_sample_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            # call algorithm, internally it calls AlgoTimeRegister.addTime
+            ws =  CreateSampleWorkspace(Function='Multiple Peaks')
 
-        #check values
-        self.assertEqual(entry_name, rec_entry_name)
-        self.assertEqual(rec_thread_id,threading.get_ident())
+            #get time data from file
+            rec_sample_start_time,rec_sample_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
 
-        # it should ignore this and not restart the clock!
-        AlgoTimeRegister.Instance()
+            #check values
+            self.assertEqual(entry_name, rec_entry_name)
+            self.assertEqual(rec_thread_id,threading.get_ident())
 
-        entry_name = "Max"
-        max_ws = Max(ws)
+            # it should ignore this and not restart the clock!
+            AlgoTimeRegister.Instance()
 
-        #get time data from file
-        rec_max_start_time,rec_max_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            entry_name = "Max"
+            max_ws = Max(ws)
 
-        #check the values
-        self.assertEqual(entry_name, rec_entry_name)
-        self.assertEqual(rec_thread_id,threading.get_ident())
+            #get time data from file
+            rec_max_start_time,rec_max_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
 
-        self.assertLess(rec_sample_start_time,rec_max_start_time)
+            #check the values
+            self.assertEqual(entry_name, rec_entry_name)
+            self.assertEqual(rec_thread_id,threading.get_ident())
+
+            self.assertLess(rec_sample_start_time,rec_max_start_time)
         self.assertLess(rec_sample_end_time,rec_max_end_time)
 
 
     def test_multiple_workspaces_times(self):
-        # time entry
-        entry_name = "CreateSampleWorkspace"
+        with amend_config(**self.performance_config):
 
-        # call the algorithm
-        ws =  CreateSampleWorkspace(Function='Multiple Peaks')
+            # time entry
+            entry_name = "CreateSampleWorkspace"
 
-        #get time data from file
-        rec_sample_start_time,rec_sample_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            # call the algorithm
+            ws =  CreateSampleWorkspace(Function='Multiple Peaks')
 
-        #check the values
-        self.assertEqual(entry_name, rec_entry_name)
-        self.assertEqual(rec_thread_id,threading.get_ident())
+            #get time data from file
+            rec_sample_start_time,rec_sample_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
 
-        entry_name = "Max"
+            #check the values
+            self.assertEqual(entry_name, rec_entry_name)
+            self.assertEqual(rec_thread_id,threading.get_ident())
 
-        # call the algorithm
-        max_ws = Max(ws)
+            entry_name = "Max"
 
-        #get time data from file
-        rec_max_start_time,rec_max_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            # call the algorithm
+            max_ws = Max(ws)
 
-        #check the values
-        self.assertEqual(entry_name, rec_entry_name)
-        self.assertEqual(rec_thread_id,threading.get_ident())
+            #get time data from file
+            rec_max_start_time,rec_max_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
 
-        self.assertLess(rec_sample_start_time,rec_max_start_time)
-        self.assertLess(rec_sample_end_time,rec_max_end_time)
+            #check the values
+            self.assertEqual(entry_name, rec_entry_name)
+            self.assertEqual(rec_thread_id,threading.get_ident())
+
+            self.assertLess(rec_sample_start_time,rec_max_start_time)
+            self.assertLess(rec_sample_end_time,rec_max_end_time)
 
 
     def test_addtime_workspaces(self):
-        # time entry
-        entry_name = "CreateSampleWorkspace"
+        with amend_config(**self.performance_config):
 
-        # call the algorithm
-        ws =  CreateSampleWorkspace(Function='Multiple Peaks')
+            # time entry
+            entry_name = "CreateSampleWorkspace"
 
-        #get time data from file
-        rec_sample_start_time,rec_sample_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            # call the algorithm
+            ws =  CreateSampleWorkspace(Function='Multiple Peaks')
 
-        #check the values
-        self.assertEqual(entry_name, rec_entry_name)
-        self.assertEqual(rec_thread_id,threading.get_ident())
+            #get time data from file
+            rec_sample_start_time,rec_sample_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
 
-        # time entry
-        entry_name = "test_addtime_workspaces"
-        start_time = time.time_ns()
-        time.sleep(2.01)
-        end_time = time.time_ns()
-        duration = end_time-start_time
+            #check the values
+            self.assertEqual(entry_name, rec_entry_name)
+            self.assertEqual(rec_thread_id,threading.get_ident())
 
-        #add time
-        AlgoTimeRegister.addTime(entry_name,start_time,end_time)
+            # time entry
+            entry_name = "test_addtime_workspaces"
+            start_time = time.time_ns()
+            time.sleep(2.01)
+            end_time = time.time_ns()
+            duration = end_time-start_time
 
-        #get time data from file
-        rec_start_time,rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
-        rec_duration = rec_end_time - rec_start_time
+            #add time
+            AlgoTimeRegister.addTime(entry_name,start_time,end_time)
 
-        #check the values
-        self.assertEqual(start_time, self.start_point+rec_start_time)
-        self.assertEqual(end_time, self.start_point+rec_end_time)
-        self.assertEqual(duration, rec_duration)
-        self.assertEqual(entry_name, rec_entry_name)
-        self.assertEqual(rec_thread_id,threading.get_ident())
+            #get time data from file
+            rec_start_time,rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_duration = rec_end_time - rec_start_time
+
+            #check the values
+            self.assertEqual(start_time, self.start_point+rec_start_time)
+            self.assertEqual(end_time, self.start_point+rec_end_time)
+            self.assertEqual(duration, rec_duration)
+            self.assertEqual(entry_name, rec_entry_name)
+            self.assertEqual(rec_thread_id,threading.get_ident())
 
 if __name__ == "__main__":
     unittest.main()
