@@ -10,6 +10,7 @@
 #include "MantidAlgorithms/ElasticWindow.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -108,54 +109,83 @@ void ElasticWindow::exec() {
   startProgress += stepProgress;
   endProgress += stepProgress;
 
-  if (!axisIsSpectrumNumber) {
-    auto spectraAxis = std::make_unique<SpectraAxis>(integWS.get());
-    integWS->replaceAxis(1, std::move(spectraAxis));
+  auto const detectorCount = integWS->spectrumInfo().detectorCount();
+  if (axisIsSpectrumNumber || detectorCount > 0) {
+    if (!axisIsSpectrumNumber) {
+      auto spectraAxis = std::make_unique<SpectraAxis>(integWS.get());
+      integWS->replaceAxis(1, std::move(spectraAxis));
+    }
+
+    // Use ConvertSpectrumAxis v2 for correct result
+    const int convertSpectrumAxisVersion = 2;
+
+    // ... ConvertSpectrumAxis (Q) ...
+    auto csaQ = createChildAlgorithm("ConvertSpectrumAxis", startProgress, endProgress, childAlgLogging,
+                                     convertSpectrumAxisVersion);
+    csaQ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
+    csaQ->setPropertyValue("Target", "ElasticQ");
+    csaQ->setPropertyValue("EMode", "Indirect");
+    csaQ->setPropertyValue("OutputWorkspace", "csaQ");
+    csaQ->execute();
+    MatrixWorkspace_sptr csaQws = csaQ->getProperty("OutputWorkspace");
+    startProgress += stepProgress;
+    endProgress += stepProgress;
+
+    // ... ConvertSpectrumAxis (Q2) ...
+    auto csaQ2 = createChildAlgorithm("ConvertSpectrumAxis", startProgress, endProgress, childAlgLogging,
+                                      convertSpectrumAxisVersion);
+    csaQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
+    csaQ2->setPropertyValue("Target", "ElasticQSquared");
+    csaQ2->setPropertyValue("EMode", "Indirect");
+    csaQ2->setPropertyValue("OutputWorkspace", "csaQ2");
+    csaQ2->execute();
+    MatrixWorkspace_sptr csaQ2ws = csaQ2->getProperty("OutputWorkspace");
+    startProgress += stepProgress;
+    endProgress += stepProgress;
+
+    // ... Transpose (Q) ...
+    auto tranQ = createChildAlgorithm("Transpose", startProgress, endProgress, childAlgLogging);
+    tranQ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", csaQws);
+    tranQ->setPropertyValue("OutputWorkspace", "outQ");
+    tranQ->execute();
+    outputQ = tranQ->getProperty("OutputWorkspace");
+    startProgress += stepProgress;
+    endProgress += stepProgress;
+
+    // ... Transpose (Q2) ...
+    auto tranQ2 = createChildAlgorithm("Transpose", startProgress, endProgress, childAlgLogging);
+    tranQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", csaQ2ws);
+    tranQ2->setPropertyValue("OutputWorkspace", "outQSquared");
+    tranQ2->execute();
+    outputQSquared = tranQ2->getProperty("OutputWorkspace");
+  } else {
+    // ... Transpose (Q) ...
+    auto tranQ = createChildAlgorithm("Transpose", startProgress, endProgress, childAlgLogging);
+    tranQ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
+    tranQ->setPropertyValue("OutputWorkspace", "outQ");
+    tranQ->execute();
+    outputQ = tranQ->getProperty("OutputWorkspace");
+    startProgress += stepProgress;
+    endProgress += stepProgress;
+
+    // ... Convert to Histogram (Q2) ...
+    auto histQ2 = createChildAlgorithm("ConvertToHistogram", startProgress, endProgress, childAlgLogging);
+    histQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputQ);
+    histQ2->setPropertyValue("OutputWorkspace", "outQ");
+    histQ2->execute();
+    MatrixWorkspace_sptr qHistWS = histQ2->getProperty("OutputWorkspace");
+    startProgress += stepProgress;
+    endProgress += stepProgress;
+
+    // ... Convert Units (Q2) ...
+    auto convUnitQ2 = createChildAlgorithm("ConvertUnits", startProgress, endProgress, childAlgLogging);
+    convUnitQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", qHistWS);
+    convUnitQ2->setPropertyValue("Target", "QSquared");
+    convUnitQ2->setPropertyValue("EMode", "Indirect");
+    convUnitQ2->setPropertyValue("OutputWorkspace", "outQSquared");
+    convUnitQ2->execute();
+    outputQSquared = convUnitQ2->getProperty("OutputWorkspace");
   }
-
-  // Use ConvertSpectrumAxis v2 for correct result
-  const int convertSpectrumAxisVersion = 2;
-
-  // ... ConvertSpectrumAxis (Q) ...
-  auto csaQ = createChildAlgorithm("ConvertSpectrumAxis", startProgress, endProgress, childAlgLogging,
-                                   convertSpectrumAxisVersion);
-  csaQ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
-  csaQ->setPropertyValue("Target", "ElasticQ");
-  csaQ->setPropertyValue("EMode", "Indirect");
-  csaQ->setPropertyValue("OutputWorkspace", "csaQ");
-  csaQ->execute();
-  MatrixWorkspace_sptr csaQws = csaQ->getProperty("OutputWorkspace");
-  startProgress += stepProgress;
-  endProgress += stepProgress;
-
-  // ... ConvertSpectrumAxis (Q2) ...
-  auto csaQ2 = createChildAlgorithm("ConvertSpectrumAxis", startProgress, endProgress, childAlgLogging,
-                                    convertSpectrumAxisVersion);
-  csaQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", integWS);
-  csaQ2->setPropertyValue("Target", "ElasticQSquared");
-  csaQ2->setPropertyValue("EMode", "Indirect");
-  csaQ2->setPropertyValue("OutputWorkspace", "csaQ2");
-  csaQ2->execute();
-  MatrixWorkspace_sptr csaQ2ws = csaQ2->getProperty("OutputWorkspace");
-  startProgress += stepProgress;
-  endProgress += stepProgress;
-
-  // ... Transpose (Q) ...
-  auto tranQ = createChildAlgorithm("Transpose", startProgress, endProgress, childAlgLogging);
-  tranQ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", csaQws);
-  tranQ->setPropertyValue("OutputWorkspace", "outQ");
-  tranQ->execute();
-  outputQ = tranQ->getProperty("OutputWorkspace");
-  startProgress += stepProgress;
-  endProgress += stepProgress;
-
-  // ... Transpose (Q2) ...
-  auto tranQ2 = createChildAlgorithm("Transpose", startProgress, endProgress, childAlgLogging);
-  tranQ2->setProperty<MatrixWorkspace_sptr>("InputWorkspace", csaQ2ws);
-  tranQ2->setPropertyValue("OutputWorkspace", "outQSquared");
-  tranQ2->execute();
-  outputQSquared = tranQ2->getProperty("OutputWorkspace");
-
   auto yLabel = outputQSquared->YUnitLabel();
   outputQSquared->setYUnitLabel("ln(" + yLabel + ")");
 
