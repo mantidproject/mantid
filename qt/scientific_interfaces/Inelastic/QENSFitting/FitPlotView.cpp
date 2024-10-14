@@ -15,7 +15,6 @@
 #include <QSignalBlocker>
 #include <QTimer>
 
-#include <gtest/gtest-param-test.h>
 #include <limits>
 
 namespace {

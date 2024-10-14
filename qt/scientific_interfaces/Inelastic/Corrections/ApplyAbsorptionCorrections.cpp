@@ -19,7 +19,6 @@
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include <QStringList>
-#include <gmock/internal/gmock-internal-utils.h>
 #include <utility>
 
 using namespace DataValidationHelper;
