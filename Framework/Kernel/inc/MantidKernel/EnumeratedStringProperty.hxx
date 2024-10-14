@@ -49,15 +49,16 @@ EnumeratedStringProperty<E, names>::EnumeratedStringProperty(std::string const &
     : Property(std::move(name), typeid(ENUMSTRING), direction), m_value(defaultValue),
       m_initialValue(std::move(defaultValue)) {}
 
-/**Copy constructor
- *  Note the default value of the copied object is the initial value of original
+/** Copy Constructor
+ *  @param right :: a copy
  */
 template <class E, std::vector<std::string> const *const names>
 EnumeratedStringProperty<E, names>::EnumeratedStringProperty(EnumeratedStringProperty const &right)
     : Property(right), m_value(right.m_value), m_initialValue(right.m_initialValue) {
 } // the default is the initial value of the original object
 
-/// 'Virtual copy constructor'
+/** Virtual copy constructor
+ */
 template <class E, std::vector<std::string> const *const names>
 EnumeratedStringProperty<E, names> *EnumeratedStringProperty<E, names>::clone() const {
   return new EnumeratedStringProperty<E, names>(*this);
