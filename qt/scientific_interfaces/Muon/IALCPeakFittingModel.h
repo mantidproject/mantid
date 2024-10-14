@@ -12,15 +12,14 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-#include <QObject>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IALCPeakFittingModelSubscriber;
+
 /** IALCPeakFittingModel : ALC peak fitting step model interface.
  */
-class MANTIDQT_MUONINTERFACE_DLL IALCPeakFittingModel : public QObject {
-  Q_OBJECT
+class MANTIDQT_MUONINTERFACE_DLL IALCPeakFittingModel {
 
 public:
   /**
@@ -47,6 +46,8 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr guessData(Mantid::API::IFunction_const_sptr function,
                                                       const std::vector<double> &xValues) = 0;
 
+  virtual void subscribe(std::weak_ptr<IALCPeakFittingModelSubscriber> subscriber) = 0;
+
 signals:
 
   /// Signal to inform that the fitting was done and fitted peaks were updated
@@ -56,7 +57,7 @@ signals:
   void dataChanged();
 
   /// Signal to inform presenter of an error with fitting
-  void errorInModel(const QString &message);
+  void errorInModel(const std::string &message);
 };
 
 } // namespace CustomInterfaces
