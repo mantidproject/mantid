@@ -48,6 +48,7 @@ set(INC_FILES
     IALCDataLoadingPresenter.h
     IALCPeakFittingModel.h
     IALCPeakFittingView.h
+    IALCPeakFittingModelSubscriber.h
 )
 
 set(UI_FILES ALCBaselineModellingView.ui ALCDataLoadingView.ui ALCInterface.ui ALCPeakFittingView.ui)
