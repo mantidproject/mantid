@@ -11,8 +11,8 @@ to write a workspace to file in ascii format.
 Note that the SaveAscii algorithm should be used instead in most cases.
 """
 
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import Direction
 
 
 class ExampleSaveAscii(PythonAlgorithm):

@@ -17,6 +17,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MultiFileNameParser.h"
 
+#include <MantidAPI/FileFinder.h>
 #include <QSignalBlocker>
 
 using namespace Mantid::API;
@@ -61,25 +62,23 @@ void DiffractionReduction::initLayout() {
   m_groupingWidget->removeGroupingMethod("IPF");
   m_groupingWidget->setGroupingMethod("All");
 
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
+  connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &DiffractionReduction::settings);
+  connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &DiffractionReduction::help);
+  connect(m_uiForm.pbManageDirs, &QPushButton::clicked, this, &DiffractionReduction::manageUserDirectories);
+  connect(m_uiForm.iicInstrumentConfiguration, &MantidWidgets::InstrumentConfig::instrumentConfigurationUpdated, this,
+          &DiffractionReduction::instrumentSelected);
 
-  connect(m_uiForm.iicInstrumentConfiguration,
-          SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)), this,
-          SLOT(instrumentSelected(const QString &, const QString &, const QString &)));
-
-  connect(m_uiForm.spSpecMin, SIGNAL(valueChanged(int)), this, SLOT(validateSpectrumMin(int)));
-  connect(m_uiForm.spSpecMax, SIGNAL(valueChanged(int)), this, SLOT(validateSpectrumMax(int)));
-
+  connect(m_uiForm.spSpecMin, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+          &DiffractionReduction::validateSpectrumMin);
+  connect(m_uiForm.spSpecMax, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+          &DiffractionReduction::validateSpectrumMax);
   // Update run button based on state of raw files field
   connectRunButtonValidation(m_uiForm.rfSampleFiles);
   connectRunButtonValidation(m_uiForm.rfCanFiles);
   connectRunButtonValidation(m_uiForm.rfCalFile);
 
-  connect(m_uiForm.ckUseVanadium, SIGNAL(stateChanged(int)), this, SLOT(useVanadiumStateChanged(int)));
-  connect(m_uiForm.ckUseCalib, SIGNAL(stateChanged(int)), this, SLOT(useCalibStateChanged(int)));
-
+  connect(m_uiForm.ckUseVanadium, &QCheckBox::stateChanged, this, &DiffractionReduction::useVanadiumStateChanged);
+  connect(m_uiForm.ckUseCalib, &QCheckBox::stateChanged, this, &DiffractionReduction::useCalibStateChanged);
   m_valDbl = new QDoubleValidator(this);
 
   m_uiForm.leRebinStart->setValidator(m_valDbl);
@@ -87,7 +86,7 @@ void DiffractionReduction::initLayout() {
   m_uiForm.leRebinEnd->setValidator(m_valDbl);
 
   // Handle saving
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveReductions()));
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &DiffractionReduction::saveReductions);
 
   loadSettings();
 
@@ -103,9 +102,9 @@ void DiffractionReduction::initLayout() {
  * Make file finding status display on the run button and enable/disable it
  */
 void DiffractionReduction::connectRunButtonValidation(const MantidQt::API::FileFinderWidget *file_field) {
-  connect(file_field, SIGNAL(fileTextChanged(const QString &)), this, SLOT(runFilesChanged()));
-  connect(file_field, SIGNAL(findingFiles()), this, SLOT(runFilesFinding()));
-  connect(file_field, SIGNAL(fileFindingFinished()), this, SLOT(runFilesFound()));
+  connect(file_field, &FileFinderWidget::fileTextChanged, this, &DiffractionReduction::runFilesChanged);
+  connect(file_field, &FileFinderWidget::findingFiles, this, &DiffractionReduction::runFilesFinding);
+  connect(file_field, &FileFinderWidget::fileFindingFinished, this, &DiffractionReduction::runFilesFound);
 }
 
 void DiffractionReduction::handleValidation(IUserInputValidator *validator) const {
@@ -160,7 +159,7 @@ void DiffractionReduction::handleRun() {
  */
 void DiffractionReduction::algorithmComplete(bool error) {
   // Handles completion of the diffraction algorithm chain
-  disconnect(m_batchAlgoRunner, nullptr, this, SLOT(algorithmComplete(bool)));
+  disconnect(m_batchAlgoRunner, &BatchAlgorithmRunner::batchComplete, this, &DiffractionReduction::algorithmComplete);
 
   m_runPresenter->setRunEnabled(true);
   setSaveEnabled(!error);
@@ -368,8 +367,7 @@ void DiffractionReduction::runGenericReduction(const QString &instName, const QS
   m_batchAlgoRunner->addAlgorithm(msgDiffReduction, std::move(groupingProps));
 
   // Handles completion of the diffraction algorithm chain
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
-
+  connect(m_batchAlgoRunner, &BatchAlgorithmRunner::batchComplete, this, &DiffractionReduction::algorithmComplete);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -445,8 +443,7 @@ void DiffractionReduction::runOSIRISdiffonlyReduction() {
   m_plotWorkspaces.emplace_back(qWsName.toStdString());
 
   // Handles completion of the diffraction algorithm chain
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
-
+  connect(m_batchAlgoRunner, &BatchAlgorithmRunner::batchComplete, this, &DiffractionReduction::algorithmComplete);
   m_batchAlgoRunner->executeBatchAsync();
 }
 

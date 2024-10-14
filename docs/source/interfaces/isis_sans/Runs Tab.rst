@@ -157,12 +157,23 @@ is set to "All". This is because there is no way to determine if the workspace g
 for the HAB or LAB, and so uses the value from the User File, therefore assuming that both reductions have used the same
 one.
 
-**Using scaled background subtraction with time slicing:**
+**Using scaled background subtraction when time slicing a sample:**
 
-The specified ``Background Workspace`` will be scaled and subtracted from all sample slices. When time slicing,
-specifying the ``Background Workspace`` using an Output Name (from another row in the runs table) will only work if the
-workspace has been time sliced to match the sample workspace. In this case, specifying by Output Name will result in the
-first time slice from the ``Background Workspace`` being used for all subtractions.
+*Background workspace not time sliced*
+
+The specified ``Background Workspace`` will be scaled and subtracted from all sample slices.
+You must specify the exact name of the ``Background Workspace``.
+It is currently not supported to specify the ``Background Workspace`` using an Output Name (from another row in the runs table), although we plan to support this in a future version of Mantid.
+
+*Background workspace has been time sliced*
+
+A single ``Background Workspace`` slice will be scaled and subtracted from all sample slices.
+You can specify the ``Background Workspace`` slice using its full workspace name.
+Alternatively, if the background has been time sliced to match the sample workspace then you can specify the ``Background Workspace`` using an Output Name (from another row in the runs table).
+This will result in the first background slice being scaled and subtracted from each sample slice
+(i.e. for slicing t0_t600, t600_t1200, t1200_t1800, the background slice t0_t600 will be subtracted from each sample slice).
+
+It is **not** possible to perform a scaled background subtraction where each ``Background Workspace`` slice is subtracted from its corresponding sample slice.
 
 Save Options
 ------------

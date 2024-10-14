@@ -163,6 +163,7 @@ class D11_AutoProcess_IQxQy_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.nanEqual = True
         self.disableChecking.append("Instrument")
         return ["iqxy", "D11_AutoProcess_IQxQy_Reference.nxs"]
 
@@ -219,6 +220,7 @@ class D11_AutoProcess_Multiple_Transmissions_Test(systemtesting.MantidSystemTest
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.nanEqual = True
         self.disableChecking.append("Instrument")
         return ["iq_mult_wavelengths", "D11_AutoProcess_Multiple_Tr_Reference.nxs"]
 
@@ -544,6 +546,7 @@ class D33_AutoProcess_IPhiQ_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
+        self.nanEqual = True
         self.disableChecking.append("Instrument")
         return ["iphiq_#1_d2.0m_c7.8m_w6.0A", "D33_AutoProcess_IPhiQ_Reference.nxs"]
 

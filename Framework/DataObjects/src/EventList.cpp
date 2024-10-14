@@ -164,7 +164,27 @@ struct FindBin {
 // EventWorkspace is always histogram data and so is thus EventList
 EventList::EventList(const EventType event_type)
     : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts),
-      eventType(event_type), order(UNSORTED), mru(nullptr) {}
+      eventType(event_type), order(UNSORTED), mru(nullptr) {
+  switch (eventType) {
+  case TOF:
+    this->events = std::make_unique<std::vector<Mantid::Types::Event::TofEvent>>();
+    this->weightedEvents = nullptr;
+    this->weightedEventsNoTime = nullptr;
+    break;
+
+  case WEIGHTED:
+    this->events = nullptr;
+    this->weightedEvents = std::make_unique<std::vector<WeightedEvent>>();
+    this->weightedEventsNoTime = nullptr;
+    break;
+
+  case WEIGHTED_NOTIME:
+    this->events = nullptr;
+    this->weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>();
+    this->weightedEventsNoTime = nullptr;
+    break;
+  }
+}
 
 /** Constructor with a MRU list
  * @param mru :: pointer to the MRU of the parent EventWorkspace
@@ -172,8 +192,10 @@ EventList::EventList(const EventType event_type)
  */
 EventList::EventList(EventWorkspaceMRU *mru, specnum_t specNo)
     : IEventList(specNo),
-      m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts), eventType(TOF),
-      order(UNSORTED), mru(mru) {}
+      m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts),
+      weightedEvents(nullptr), weightedEventsNoTime(nullptr), eventType(TOF), order(UNSORTED), mru(mru) {
+  this->events = std::make_unique<std::vector<Mantid::Types::Event::TofEvent>>();
+}
 
 /** Constructor copying from an existing event list
  * @param rhs :: EventList object to copy*/
@@ -186,9 +208,9 @@ EventList::EventList(const EventList &rhs) : IEventList(rhs), m_histogram(rhs.m_
 /** Constructor, taking a vector of events.
  * @param events :: Vector of TofEvent's */
 EventList::EventList(const std::vector<Types::Event::TofEvent> &events)
-    : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts), eventType(TOF),
-      mru(nullptr) {
-  this->events.assign(events.cbegin(), events.cend());
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts),
+      weightedEvents(nullptr), weightedEventsNoTime(nullptr), eventType(TOF), mru(nullptr) {
+  this->events = std::make_unique<std::vector<Mantid::Types::Event::TofEvent>>(events.cbegin(), events.cend());
   this->eventType = TOF;
   this->order = UNSORTED;
 }
@@ -196,8 +218,9 @@ EventList::EventList(const std::vector<Types::Event::TofEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEvent's */
 EventList::EventList(const std::vector<WeightedEvent> &events)
-    : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts), mru(nullptr) {
-  this->weightedEvents.assign(events.cbegin(), events.cend());
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts), events(nullptr),
+      weightedEventsNoTime(nullptr), mru(nullptr) {
+  this->weightedEvents = std::make_unique<std::vector<WeightedEvent>>(events.cbegin(), events.cend());
   this->eventType = WEIGHTED;
   this->order = UNSORTED;
 }
@@ -205,22 +228,28 @@ EventList::EventList(const std::vector<WeightedEvent> &events)
 /** Constructor, taking a vector of events.
  * @param events :: Vector of WeightedEventNoTime's */
 EventList::EventList(const std::vector<WeightedEventNoTime> &events)
-    : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts), mru(nullptr) {
-  this->weightedEventsNoTime.assign(events.cbegin(), events.cend());
+    : m_histogram(HistogramData::Histogram::XMode::BinEdges, HistogramData::Histogram::YMode::Counts), events(nullptr),
+      weightedEvents(nullptr), mru(nullptr) {
+  this->weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>(events.cbegin(), events.cend());
   this->eventType = WEIGHTED_NOTIME;
   this->order = UNSORTED;
 }
 
 /// Destructor
 EventList::~EventList() {
-  // Note: These two lines do not seem to have an effect on releasing memory
-  //  at least on Linux. (Memory usage seems to increase event after deleting
-  //  EventWorkspaces.
-  //  Therefore, for performance, they are kept commented:
-  clear();
+  // clear this out of the MRU (copy of code from EventList::clear()
+  if (mru) {
+    try {
+      mru->deleteIndex(this);
+    } catch (const std::runtime_error &) {
+      // this is an ignorable error
+    }
+  }
 
-  // this->events.clear();
-  // std::vector<TofEvent>().swap(events); //Trick to release the vector memory.
+  // set all member vectors to nullptr
+  this->events.reset();
+  this->weightedEvents.reset();
+  this->weightedEventsNoTime.reset();
 }
 
 /// Copy data from another EventList, via ISpectrum reference.
@@ -229,9 +258,21 @@ void EventList::copyDataFrom(const ISpectrum &source) { source.copyDataInto(*thi
 /// Used by copyDataFrom for dynamic dispatch for its `source`.
 void EventList::copyDataInto(EventList &sink) const {
   sink.m_histogram = m_histogram;
-  sink.events = events;
-  sink.weightedEvents = weightedEvents;
-  sink.weightedEventsNoTime = weightedEventsNoTime;
+  if (events)
+    sink.events = std::make_unique<std::vector<Types::Event::TofEvent>>(events->cbegin(), events->cend());
+  else if (sink.events)
+    sink.events = std::make_unique<std::vector<Types::Event::TofEvent>>();
+  if (weightedEvents)
+    sink.weightedEvents =
+        std::make_unique<std::vector<WeightedEvent>>(weightedEvents->cbegin(), weightedEvents->cend());
+  else if (sink.weightedEvents)
+    sink.weightedEvents = std::make_unique<std::vector<WeightedEvent>>();
+  if (weightedEventsNoTime)
+    sink.weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>(weightedEventsNoTime->cbegin(),
+                                                                                   weightedEventsNoTime->cend());
+  else if (sink.weightedEventsNoTime)
+    sink.weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>();
+
   sink.eventType = eventType;
   sink.order = order;
 }
@@ -268,7 +309,7 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
   // We need weights but have no way to set the time. So use weighted, no time
   this->switchTo(WEIGHTED_NOTIME);
   if (GenerateZeros)
-    this->weightedEventsNoTime.reserve(Y.size());
+    this->weightedEventsNoTime->reserve(Y.size());
 
   for (size_t i = 0; i < X.size() - 1; i++) {
     double weight = Y[i];
@@ -299,7 +340,7 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
             double tof = X[i] + tofStep * (0.5 + double(j));
             // Create and add the event
             // TODO: try emplace_back() here.
-            weightedEventsNoTime.emplace_back(tof, weight, errorSquared);
+            weightedEventsNoTime->emplace_back(tof, weight, errorSquared);
           }
         } else {
           // --------- Single event per bin ----------
@@ -309,7 +350,7 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
           double errorSquared = E[i];
           errorSquared *= errorSquared;
           // Create and add the event
-          weightedEventsNoTime.emplace_back(tof, weight, errorSquared);
+          weightedEventsNoTime->emplace_back(tof, weight, errorSquared);
         }
       } // error is nont NAN or infinite
     }   // weight is non-zero, not NAN, and non-infinite
@@ -336,11 +377,7 @@ EventList &EventList::operator=(const EventList &rhs) {
   // the EventWorkspace that possesses the EventList has already configured the mru
   IEventList::operator=(rhs);
   m_histogram = rhs.m_histogram;
-  events = rhs.events;
-  weightedEvents = rhs.weightedEvents;
-  weightedEventsNoTime = rhs.weightedEventsNoTime;
-  eventType = rhs.eventType;
-  order = rhs.order;
+  rhs.copyDataInto(*this);
   return *this;
 }
 
@@ -354,15 +391,15 @@ EventList &EventList::operator+=(const Types::Event::TofEvent &event) {
   switch (this->eventType) {
   case TOF:
     // Simply push the events
-    this->events.emplace_back(event);
+    this->events->emplace_back(event);
     break;
 
   case WEIGHTED:
-    this->weightedEvents.emplace_back(event);
+    this->weightedEvents->emplace_back(event);
     break;
 
   case WEIGHTED_NOTIME:
-    this->weightedEventsNoTime.emplace_back(event);
+    this->weightedEventsNoTime->emplace_back(event);
     break;
   }
 
@@ -381,23 +418,22 @@ EventList &EventList::operator+=(const std::vector<Types::Event::TofEvent> &more
   switch (this->eventType) {
   case TOF:
     // Simply push the events
-    this->events.insert(this->events.end(), more_events.cbegin(), more_events.cend());
+    this->events->reserve(this->events->size() + more_events.size());
+    this->events->insert(this->events->end(), more_events.cbegin(), more_events.cend());
     break;
 
   case WEIGHTED:
     // Add default weights to all the un-weighted incoming events from the list.
     // and append to the list
-    this->weightedEvents.reserve(this->weightedEvents.size() + more_events.size());
-    std::transform(std::cbegin(more_events), std::cend(more_events), std::back_inserter(this->weightedEvents),
-                   [](const TofEvent &event) { return WeightedEvent(event); });
+    this->weightedEvents->reserve(this->weightedEvents->size() + more_events.size());
+    std::copy(more_events.cbegin(), more_events.cend(), std::back_inserter(*this->weightedEvents));
     break;
 
   case WEIGHTED_NOTIME:
     // Add default weights to all the un-weighted incoming events from the list.
     // and append to the list
-    this->weightedEventsNoTime.reserve(this->weightedEventsNoTime.size() + more_events.size());
-    std::transform(std::cbegin(more_events), std::cend(more_events), std::back_inserter(this->weightedEventsNoTime),
-                   [](const TofEvent &event) { return WeightedEventNoTime(event); });
+    this->weightedEventsNoTime->reserve(this->weightedEventsNoTime->size() + more_events.size());
+    std::copy(more_events.cbegin(), more_events.cend(), std::back_inserter(*this->weightedEventsNoTime));
     break;
   }
 
@@ -415,7 +451,7 @@ EventList &EventList::operator+=(const std::vector<Types::Event::TofEvent> &more
  * */
 EventList &EventList::operator+=(const WeightedEvent &event) {
   this->switchTo(WEIGHTED);
-  this->weightedEvents.emplace_back(event);
+  this->weightedEvents->emplace_back(event);
   this->order = UNSORTED;
   return *this;
 }
@@ -437,15 +473,15 @@ EventList &EventList::operator+=(const std::vector<WeightedEvent> &more_events) 
 
   case WEIGHTED:
     // Append the two lists
-    this->weightedEvents.insert(weightedEvents.end(), more_events.cbegin(), more_events.cend());
+    this->weightedEvents->reserve(this->weightedEvents->size() + more_events.size());
+    this->weightedEvents->insert(weightedEvents->end(), more_events.cbegin(), more_events.cend());
     break;
 
   case WEIGHTED_NOTIME:
     // Add default weights to all the un-weighted incoming events from the list.
     // and append to the list
-    this->weightedEventsNoTime.reserve(this->weightedEventsNoTime.size() + more_events.size());
-    std::transform(std::cbegin(more_events), std::cend(more_events), std::back_inserter(this->weightedEventsNoTime),
-                   [](const WeightedEvent &event) { return WeightedEventNoTime(event); });
+    this->weightedEventsNoTime->reserve(this->weightedEventsNoTime->size() + more_events.size());
+    std::copy(more_events.cbegin(), more_events.cend(), std::back_inserter(*this->weightedEventsNoTime));
     break;
   }
 
@@ -471,7 +507,8 @@ EventList &EventList::operator+=(const std::vector<WeightedEventNoTime> &more_ev
 
   case WEIGHTED_NOTIME:
     // Simple appending of the two lists
-    this->weightedEventsNoTime.insert(weightedEventsNoTime.end(), more_events.cbegin(), more_events.cend());
+    this->weightedEventsNoTime->reserve(this->weightedEventsNoTime->size() + more_events.size());
+    this->weightedEventsNoTime->insert(weightedEventsNoTime->end(), more_events.cbegin(), more_events.cend());
     break;
   }
 
@@ -493,15 +530,15 @@ EventList &EventList::operator+=(const EventList &more_events) {
     // We'll let the += operator for the given vector of event lists handle it
     switch (more_events.getEventType()) {
     case TOF:
-      this->operator+=(more_events.events);
+      this->operator+=(*more_events.events);
       break;
 
     case WEIGHTED:
-      this->operator+=(more_events.weightedEvents);
+      this->operator+=(*more_events.weightedEvents);
       break;
 
     case WEIGHTED_NOTIME:
-      this->operator+=(more_events.weightedEventsNoTime);
+      this->operator+=(*more_events.weightedEventsNoTime);
       break;
     }
 
@@ -536,8 +573,7 @@ template <class T1, class T2> void EventList::minusHelper(std::vector<T1> &event
    * Using it caused a segault, Ticket #2306.
    * So we cache the end (this speeds up too).
    */
-  // We call the constructor for T1. In the case of WeightedEventNoTime, the
-  // pulse time will just be ignored.
+  // We call the constructor for T1. In the case of WeightedEventNoTime, the pulse time will just be ignored.
   std::transform(more_events.cbegin(), more_events.cend(), std::back_inserter(events),
                  [](const auto &ev) { return T1(ev.tof(), ev.pulseTime(), ev.weight() * (-1.0), ev.errorSquared()); });
 }
@@ -568,14 +604,14 @@ EventList &EventList::operator-=(const EventList &more_events) {
   case WEIGHTED:
     switch (more_events.getEventType()) {
     case TOF:
-      minusHelper(this->weightedEvents, more_events.events);
+      minusHelper(*this->weightedEvents, *more_events.events);
       break;
     case WEIGHTED:
-      minusHelper(this->weightedEvents, more_events.weightedEvents);
+      minusHelper(*this->weightedEvents, *more_events.weightedEvents);
       break;
     case WEIGHTED_NOTIME:
       // TODO: Should this throw?
-      minusHelper(this->weightedEvents, more_events.weightedEventsNoTime);
+      minusHelper(*this->weightedEvents, *more_events.weightedEventsNoTime);
       break;
     }
     break;
@@ -583,13 +619,13 @@ EventList &EventList::operator-=(const EventList &more_events) {
   case WEIGHTED_NOTIME:
     switch (more_events.getEventType()) {
     case TOF:
-      minusHelper(this->weightedEventsNoTime, more_events.events);
+      minusHelper(*this->weightedEventsNoTime, *more_events.events);
       break;
     case WEIGHTED:
-      minusHelper(this->weightedEventsNoTime, more_events.weightedEvents);
+      minusHelper(*this->weightedEventsNoTime, *more_events.weightedEvents);
       break;
     case WEIGHTED_NOTIME:
-      minusHelper(this->weightedEventsNoTime, more_events.weightedEventsNoTime);
+      minusHelper(*this->weightedEventsNoTime, *more_events.weightedEventsNoTime);
       break;
     }
     break;
@@ -602,6 +638,22 @@ EventList &EventList::operator-=(const EventList &more_events) {
   return *this;
 }
 
+namespace {
+/*
+ * Both can be nullptr, or the values can be equal, but do not have one nullptr
+ */
+template <typename T>
+bool vectorPtrEquals(const std::unique_ptr<std::vector<T>> &left, const std::unique_ptr<std::vector<T>> &right) {
+  if (left && right) {
+    return (*left == *right);
+    ;
+  } else if ((left && !right) || (right && !left)) {
+    return false;
+  }
+  return true;
+}
+} // anonymous namespace
+
 // --------------------------------------------------------------------------
 /** Equality operator between EventList's
  * @param rhs :: other EventList to compare
@@ -612,13 +664,17 @@ bool EventList::operator==(const EventList &rhs) const {
     return false;
   if (this->eventType != rhs.eventType)
     return false;
+  if (this->empty())
+    return true;
   // Check all event lists; The empty ones will compare equal
-  if (events != rhs.events)
+  if (!vectorPtrEquals(events, rhs.events))
     return false;
-  if (weightedEvents != rhs.weightedEvents)
+  if (!vectorPtrEquals(weightedEvents, rhs.weightedEvents))
     return false;
-  if (weightedEventsNoTime != rhs.weightedEventsNoTime)
+  if (!vectorPtrEquals(weightedEventsNoTime, rhs.weightedEventsNoTime))
     return false;
+
+  // nothing wasn't equal, so they are equal
   return true;
 }
 
@@ -635,28 +691,47 @@ bool EventList::equals(const EventList &rhs, const double tolTof, const double t
     return false;
   if (this->eventType != rhs.eventType)
     return false;
+  if (this->empty())
+    return true;
 
   // loop over the events
-  size_t numEvents = this->getNumberEvents();
   switch (this->eventType) {
-  case TOF:
-    for (size_t i = 0; i < numEvents; ++i) {
-      if (!this->events[i].equals(rhs.events[i], tolTof, tolPulse))
+  case TOF: {
+    auto leftIter = this->events->cbegin();
+    auto leftEnd = this->events->cend();
+    auto rightIter = rhs.events->cbegin();
+    while (leftIter != leftEnd) {
+      if (!leftIter->equals(*rightIter, tolTof, tolPulse))
         return false;
+      leftIter = std::next(leftIter);
+      rightIter = std::next(rightIter);
     }
     break;
-  case WEIGHTED:
-    for (size_t i = 0; i < numEvents; ++i) {
-      if (!this->weightedEvents[i].equals(rhs.weightedEvents[i], tolTof, tolWeight, tolPulse))
+  }
+  case WEIGHTED: {
+    auto leftIter = this->weightedEvents->cbegin();
+    auto leftEnd = this->weightedEvents->cend();
+    auto rightIter = rhs.weightedEvents->cbegin();
+    while (leftIter != leftEnd) {
+      if (!leftIter->equals(*rightIter, tolTof, tolWeight, tolPulse))
         return false;
+      leftIter = std::next(leftIter);
+      rightIter = std::next(rightIter);
     }
     break;
-  case WEIGHTED_NOTIME:
-    for (size_t i = 0; i < numEvents; ++i) {
-      if (!this->weightedEventsNoTime[i].equals(rhs.weightedEventsNoTime[i], tolTof, tolWeight))
+  }
+  case WEIGHTED_NOTIME: {
+    auto leftIter = this->weightedEventsNoTime->cbegin();
+    auto leftEnd = this->weightedEventsNoTime->cend();
+    auto rightIter = rhs.weightedEventsNoTime->cbegin();
+    while (leftIter != leftEnd) {
+      if (!leftIter->equals(*rightIter, tolTof, tolWeight))
         return false;
+      leftIter = std::next(leftIter);
+      rightIter = std::next(rightIter);
     }
     break;
+  }
   default:
     break;
   }
@@ -679,10 +754,8 @@ void EventList::switchTo(EventType newType) {
   switch (newType) {
   case TOF:
     if (eventType != TOF)
-      throw std::runtime_error("EventList::switchTo() called on an EventList "
-                               "with weights to go down to TofEvent's. This "
-                               "would remove weight information and therefore "
-                               "is not possible.");
+      throw std::runtime_error("EventList::switchTo() called on an EventList with weights to go down to TofEvent's. "
+                               "This would remove weight information and therefore is not possible.");
     break;
 
   case WEIGHTED:
@@ -708,18 +781,19 @@ void EventList::switchToWeightedEvents() {
     return;
 
   case WEIGHTED_NOTIME:
-    throw std::runtime_error("EventList::switchToWeightedEvents() called on an "
-                             "EventList with WeightedEventNoTime's. It has "
-                             "lost the pulse time information and can't go "
-                             "back to WeightedEvent's.");
+    throw std::runtime_error("EventList::switchToWeightedEvents() called on an EventList with WeightedEventNoTime's. "
+                             "It has lost the pulse time information and can't go back to WeightedEvent's.");
     break;
 
   case TOF:
-    weightedEventsNoTime.clear();
-    // Convert and copy all TofEvents to the weightedEvents list.
-    this->weightedEvents.assign(events.cbegin(), events.cend());
-    // Get rid of the old events
-    events.clear();
+    if (events && !events->empty()) {
+      // Convert and copy all TofEvents to the weightedEvents list.
+      weightedEvents = std::make_unique<std::vector<WeightedEvent>>(events->cbegin(), events->cend());
+      // Get rid of the old events
+      events.reset();
+    } else {
+      weightedEvents = std::make_unique<std::vector<WeightedEvent>>();
+    }
     eventType = WEIGHTED;
     break;
   }
@@ -736,23 +810,31 @@ void EventList::switchToWeightedEventsNoTime() {
     return;
 
   case TOF: {
-    // Convert and copy all TofEvents to the weightedEvents list.
-    this->weightedEventsNoTime.assign(events.cbegin(), events.cend());
-    // Get rid of the old events
-    events.clear();
-    weightedEvents.clear();
-    eventType = WEIGHTED_NOTIME;
-  } break;
+    if (events && !events->empty()) {
+      // Convert and copy all TofEvents to the weightedEvents list.
+      this->weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>(events->cbegin(), events->cend());
+      // Get rid of the old events
+      events.reset();
+    } else {
+      this->weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>();
+    }
+    break;
+  }
 
   case WEIGHTED: {
     // Convert and copy all TofEvents to the weightedEvents list.
-    this->weightedEventsNoTime.assign(weightedEvents.cbegin(), weightedEvents.cend());
-    // Get rid of the old events
-    events.clear();
-    weightedEvents.clear();
-    eventType = WEIGHTED_NOTIME;
-  } break;
+    if (weightedEvents && !weightedEvents->empty()) {
+      this->weightedEventsNoTime =
+          std::make_unique<std::vector<WeightedEventNoTime>>(weightedEvents->cbegin(), weightedEvents->cend());
+      // Get rid of the old events
+      weightedEvents.reset();
+    } else {
+      this->weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>();
+    }
+    break;
   }
+  }
+  eventType = WEIGHTED_NOTIME;
 }
 
 // ==============================================================================================
@@ -769,12 +851,13 @@ void EventList::switchToWeightedEventsNoTime() {
 WeightedEvent EventList::getEvent(size_t event_number) {
   switch (eventType) {
   case TOF:
-    return WeightedEvent(events[event_number]);
+    return WeightedEvent(events->at(event_number));
   case WEIGHTED:
-    return weightedEvents[event_number];
-  case WEIGHTED_NOTIME:
-    return WeightedEvent(weightedEventsNoTime[event_number].tof(), 0, weightedEventsNoTime[event_number].weight(),
-                         weightedEventsNoTime[event_number].errorSquared());
+    return weightedEvents->at(event_number);
+  case WEIGHTED_NOTIME: {
+    const auto event = weightedEventsNoTime->at(event_number);
+    return WeightedEvent(event.tof(), 0, event.weight(), event.errorSquared());
+  }
   }
   throw std::runtime_error("EventList: invalid event type value was found.");
 }
@@ -793,25 +876,28 @@ WeightedEvent EventList::getEvent(size_t event_number) {
  * */
 const std::vector<TofEvent> &EventList::getEvents() const {
   if (eventType != TOF)
-    throw std::runtime_error("EventList::getEvents() called for an EventList "
-                             "that has weights. Use getWeightedEvents() or "
-                             "getWeightedEventsNoTime().");
-  return this->events;
+    throw std::runtime_error("EventList::getEvents() called for an EventList that has weights. Use getWeightedEvents() "
+                             "or getWeightedEventsNoTime().");
+  if (this->events)
+    return *this->events;
+  else
+    throw std::runtime_error("unweighted event vector is not initialized");
 }
 
 /** Return the list of TofEvents contained.
- * NOTE! This should be used for testing purposes only, as much as possible. The
- *EventList
+ * NOTE! This should be used for testing purposes only, as much as possible. The EventList
  * may contain weighted events, requiring use of getWeightedEvents() instead.
  *
  * @return a reference to the list of non-weighted events
  * */
 std::vector<TofEvent> &EventList::getEvents() {
   if (eventType != TOF)
-    throw std::runtime_error("EventList::getEvents() called for an EventList "
-                             "that has weights. Use getWeightedEvents() or "
-                             "getWeightedEventsNoTime().");
-  return this->events;
+    throw std::runtime_error("EventList::getEvents() called for an EventList that has weights. Use getWeightedEvents() "
+                             "or getWeightedEventsNoTime().");
+  if (this->events)
+    return *this->events;
+  else
+    throw std::runtime_error("unweighted event vector is not initialized");
 }
 
 /** Return the list of WeightedEvent contained.
@@ -823,10 +909,12 @@ std::vector<TofEvent> &EventList::getEvents() {
  * */
 std::vector<WeightedEvent> &EventList::getWeightedEvents() {
   if (eventType != WEIGHTED)
-    throw std::runtime_error("EventList::getWeightedEvents() called for an "
-                             "EventList not of type WeightedEvent. Use "
+    throw std::runtime_error("EventList::getWeightedEvents() called for an EventList not of type WeightedEvent. Use "
                              "getEvents() or getWeightedEventsNoTime().");
-  return this->weightedEvents;
+  if (this->weightedEvents)
+    return *this->weightedEvents;
+  else
+    throw std::runtime_error("weighted event vector is not initialized");
 }
 
 /** Return the list of WeightedEvent contained.
@@ -838,10 +926,12 @@ std::vector<WeightedEvent> &EventList::getWeightedEvents() {
  * */
 const std::vector<WeightedEvent> &EventList::getWeightedEvents() const {
   if (eventType != WEIGHTED)
-    throw std::runtime_error("EventList::getWeightedEvents() called for an "
-                             "EventList not of type WeightedEvent. Use "
+    throw std::runtime_error("EventList::getWeightedEvents() called for an EventList not of type WeightedEvent. Use "
                              "getEvents() or getWeightedEventsNoTime().");
-  return this->weightedEvents;
+  if (this->weightedEvents)
+    return *this->weightedEvents;
+  else
+    throw std::runtime_error("weighted event vector is not initialed");
 }
 
 /** Return the list of WeightedEvent contained.
@@ -851,10 +941,12 @@ const std::vector<WeightedEvent> &EventList::getWeightedEvents() const {
  * */
 std::vector<WeightedEventNoTime> &EventList::getWeightedEventsNoTime() {
   if (eventType != WEIGHTED_NOTIME)
-    throw std::runtime_error("EventList::getWeightedEventsNoTime() called for an "
-                             "EventList not of type WeightedEventNoTime. Use "
-                             "getEvents() or getWeightedEvents().");
-  return this->weightedEventsNoTime;
+    throw std::runtime_error("EventList::getWeightedEventsNoTime() called for an EventList not of type "
+                             "WeightedEventNoTime. Use getEvents() or getWeightedEvents().");
+  if (this->weightedEventsNoTime)
+    return *this->weightedEventsNoTime;
+  else
+    throw std::runtime_error("weighted event no time vector is not initialed");
 }
 
 /** Return the list of WeightedEventNoTime contained.
@@ -864,10 +956,12 @@ std::vector<WeightedEventNoTime> &EventList::getWeightedEventsNoTime() {
  * */
 const std::vector<WeightedEventNoTime> &EventList::getWeightedEventsNoTime() const {
   if (eventType != WEIGHTED_NOTIME)
-    throw std::runtime_error("EventList::getWeightedEventsNoTime() called for "
-                             "an EventList not of type WeightedEventNoTime. "
-                             "Use getEvents() or getWeightedEvents().");
-  return this->weightedEventsNoTime;
+    throw std::runtime_error("EventList::getWeightedEventsNoTime() called for an EventList not of type "
+                             "WeightedEventNoTime. Use getEvents() or getWeightedEvents().");
+  if (this->weightedEventsNoTime)
+    return *this->weightedEventsNoTime;
+  else
+    throw std::runtime_error("weighted event no time vector is not initialed");
 }
 
 /** Clear the list of events and any
@@ -881,18 +975,23 @@ void EventList::clear(const bool removeDetIDs) {
       // this is an ignorable error
     }
   }
+  // clear representations that aren't for the current type
+  this->clearUnused();
+
+  // release unused memory or allocate new vector
+  // rather than creating a new object, reset existing pointer
   if (!this->empty()) {
-    if (!this->events.empty()) {
-      this->events.clear();
-      std::vector<TofEvent>().swap(this->events); // STL Trick to release memory
+    if (this->events && eventType == TOF) {
+      this->events->clear();
+      std::vector<TofEvent>().swap(*this->events); // STL Trick to release memory
     }
-    if (!this->weightedEvents.empty()) {
-      this->weightedEvents.clear();
-      std::vector<WeightedEvent>().swap(this->weightedEvents); // STL Trick to release memory
+    if (this->weightedEvents && eventType == WEIGHTED) {
+      this->weightedEvents->clear();
+      std::vector<WeightedEvent>().swap(*this->weightedEvents); // STL Trick to release memory
     }
-    if (!this->weightedEventsNoTime.empty()) {
-      this->weightedEventsNoTime.clear();
-      std::vector<WeightedEventNoTime>().swap(this->weightedEventsNoTime); // STL Trick to release memory
+    if (this->weightedEventsNoTime && eventType == WEIGHTED_NOTIME) {
+      this->weightedEventsNoTime->clear();
+      std::vector<WeightedEventNoTime>().swap(*this->weightedEventsNoTime); // STL Trick to release memory
     }
   }
   if (removeDetIDs)
@@ -904,17 +1003,14 @@ void EventList::clear(const bool removeDetIDs) {
  * Memory is freed.
  * */
 void EventList::clearUnused() {
-  if (eventType != TOF && (!this->events.empty())) {
-    this->events.clear();
-    std::vector<TofEvent>().swap(this->events); // STL Trick to release memory
+  if (eventType != TOF && (this->events)) {
+    this->events.reset();
   }
-  if (eventType != WEIGHTED && (!this->weightedEvents.empty())) {
-    this->weightedEvents.clear();
-    std::vector<WeightedEvent>().swap(this->weightedEvents); // STL Trick to release memory
+  if (eventType != WEIGHTED && (this->weightedEvents)) {
+    this->weightedEvents.reset();
   }
-  if (eventType != WEIGHTED_NOTIME && (!this->weightedEventsNoTime.empty())) {
-    this->weightedEventsNoTime.clear();
-    std::vector<WeightedEventNoTime>().swap(this->weightedEventsNoTime); // STL Trick to release memory
+  if (eventType != WEIGHTED_NOTIME && (this->weightedEventsNoTime)) {
+    this->weightedEventsNoTime.reset();
   }
 }
 
@@ -937,13 +1033,13 @@ void EventList::setMRU(EventWorkspaceMRU *newMRU) { mru = newMRU; }
 void EventList::reserve(size_t num) {
   switch (this->eventType) {
   case TOF:
-    this->events.reserve(num);
+    this->events->reserve(num);
     break;
   case WEIGHTED:
-    this->weightedEvents.reserve(num);
+    this->weightedEvents->reserve(num);
     break;
   case WEIGHTED_NOTIME:
-    this->weightedEventsNoTime.reserve(num);
+    this->weightedEventsNoTime->reserve(num);
     break;
   }
 }
@@ -1017,18 +1113,18 @@ void EventList::sortTof() const {
   // Avoid sorting from multiple threads
   std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
-  if (this->order == TOF_SORT)
+  if (this->order == TOF_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
     return;
 
   switch (eventType) {
   case TOF:
-    switchable_sort(events.begin(), events.end());
+    switchable_sort(events->begin(), events->end());
     break;
   case WEIGHTED:
-    switchable_sort(weightedEvents.begin(), weightedEvents.end());
+    switchable_sort(weightedEvents->begin(), weightedEvents->end());
     break;
   case WEIGHTED_NOTIME:
-    switchable_sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end());
+    switchable_sort(weightedEventsNoTime->begin(), weightedEventsNoTime->end());
     break;
   }
   // Save the order to avoid unnecessary re-sorting.
@@ -1059,15 +1155,15 @@ void EventList::sortTimeAtSample(const double &tofFactor, const double &tofShift
   switch (eventType) {
   case TOF: {
     CompareTimeAtSample<TofEvent> comparitor(tofFactor, tofShift);
-    switchable_sort(events.begin(), events.end(), comparitor);
+    switchable_sort(events->begin(), events->end(), comparitor);
   } break;
   case WEIGHTED: {
     CompareTimeAtSample<WeightedEvent> comparitor(tofFactor, tofShift);
-    switchable_sort(weightedEvents.begin(), weightedEvents.end(), comparitor);
+    switchable_sort(weightedEvents->begin(), weightedEvents->end(), comparitor);
   } break;
   case WEIGHTED_NOTIME: {
     CompareTimeAtSample<WeightedEventNoTime> comparitor(tofFactor, tofShift);
-    switchable_sort(weightedEventsNoTime.begin(), weightedEventsNoTime.end(), comparitor);
+    switchable_sort(weightedEventsNoTime->begin(), weightedEventsNoTime->end(), comparitor);
   } break;
   }
   // Save the order to avoid unnecessary re-sorting.
@@ -1089,10 +1185,10 @@ void EventList::sortPulseTime() const {
   // Perform sort.
   switch (eventType) {
   case TOF:
-    switchable_sort(events.begin(), events.end(), compareEventPulseTime);
+    switchable_sort(events->begin(), events->end(), compareEventPulseTime);
     break;
   case WEIGHTED:
-    switchable_sort(weightedEvents.begin(), weightedEvents.end(), compareEventPulseTime);
+    switchable_sort(weightedEvents->begin(), weightedEvents->end(), compareEventPulseTime);
     break;
   case WEIGHTED_NOTIME:
     // Do nothing; there is no time to sort
@@ -1113,15 +1209,15 @@ void EventList::sortPulseTimeTOF() const {
   // Avoid sorting from multiple threads
   std::lock_guard<std::mutex> _lock(m_sortMutex);
   // If the list was sorted while waiting for the lock, return.
-  if (this->order == PULSETIMETOF_SORT)
+  if (this->order == PULSETIMETOF_SORT) // cppcheck-suppress identicalConditionAfterEarlyExit
     return;
 
   switch (eventType) {
   case TOF:
-    switchable_sort(events.begin(), events.end(), compareEventPulseTimeTOF);
+    switchable_sort(events->begin(), events->end(), compareEventPulseTimeTOF);
     break;
   case WEIGHTED:
-    switchable_sort(weightedEvents.begin(), weightedEvents.end(), compareEventPulseTimeTOF);
+    switchable_sort(weightedEvents->begin(), weightedEvents->end(), compareEventPulseTimeTOF);
     break;
   case WEIGHTED_NOTIME:
     // Do nothing; there is no time to sort
@@ -1147,10 +1243,10 @@ void EventList::sortPulseTimeTOFDelta(const Types::Core::DateAndTime &start, con
 
   switch (eventType) {
   case TOF:
-    switchable_sort(events.begin(), events.end(), std::move(comparator));
+    switchable_sort(events->begin(), events->end(), std::move(comparator));
     break;
   case WEIGHTED:
-    switchable_sort(weightedEvents.begin(), weightedEvents.end(), std::move(comparator));
+    switchable_sort(weightedEvents->begin(), weightedEvents->end(), std::move(comparator));
     break;
   case WEIGHTED_NOTIME:
     // Do nothing; there is no time to sort
@@ -1183,13 +1279,13 @@ void EventList::reverse() {
   if (this->isSortedByTof()) {
     switch (eventType) {
     case TOF:
-      std::reverse(this->events.begin(), this->events.end());
+      std::reverse(this->events->begin(), this->events->end());
       break;
     case WEIGHTED:
-      std::reverse(this->weightedEvents.begin(), this->weightedEvents.end());
+      std::reverse(this->weightedEvents->begin(), this->weightedEvents->end());
       break;
     case WEIGHTED_NOTIME:
-      std::reverse(this->weightedEventsNoTime.begin(), this->weightedEventsNoTime.end());
+      std::reverse(this->weightedEventsNoTime->begin(), this->weightedEventsNoTime->end());
       break;
     }
     // And we are still sorted! :)
@@ -1208,11 +1304,11 @@ void EventList::reverse() {
 size_t EventList::getNumberEvents() const {
   switch (eventType) {
   case TOF:
-    return this->events.size();
+    return (this->events) ? this->events->size() : 0;
   case WEIGHTED:
-    return this->weightedEvents.size();
+    return (this->weightedEvents) ? this->weightedEvents->size() : 0;
   case WEIGHTED_NOTIME:
-    return this->weightedEventsNoTime.size();
+    return (this->weightedEventsNoTime) ? this->weightedEventsNoTime->size() : 0;
   }
   throw std::runtime_error("EventList: invalid event type value was found.");
 }
@@ -1223,11 +1319,20 @@ size_t EventList::getNumberEvents() const {
 bool EventList::empty() const {
   switch (eventType) {
   case TOF:
-    return this->events.empty();
+    if (this->events)
+      return this->events->empty();
+    else
+      throw std::runtime_error("TOF events is nullptr");
   case WEIGHTED:
-    return this->weightedEvents.empty();
+    if (this->weightedEvents)
+      return this->weightedEvents->empty();
+    else
+      throw std::runtime_error("WEIGHTED events is nullptr");
   case WEIGHTED_NOTIME:
-    return this->weightedEventsNoTime.empty();
+    if (this->weightedEventsNoTime)
+      return this->weightedEventsNoTime->empty();
+    else
+      throw std::runtime_error("WEIGHTED_NOTIME events is nullptr");
   }
   throw std::runtime_error("EventList: invalid event type value was found.");
 }
@@ -1242,11 +1347,11 @@ bool EventList::empty() const {
 size_t EventList::getMemorySize() const {
   switch (eventType) {
   case TOF:
-    return this->events.capacity() * sizeof(TofEvent) + sizeof(EventList);
+    return this->events->capacity() * sizeof(TofEvent) + sizeof(EventList);
   case WEIGHTED:
-    return this->weightedEvents.capacity() * sizeof(WeightedEvent) + sizeof(EventList);
+    return this->weightedEvents->capacity() * sizeof(WeightedEvent) + sizeof(EventList);
   case WEIGHTED_NOTIME:
-    return this->weightedEventsNoTime.capacity() * sizeof(WeightedEventNoTime) + sizeof(EventList);
+    return this->weightedEventsNoTime->capacity() * sizeof(WeightedEventNoTime) + sizeof(EventList);
   }
   throw std::runtime_error("EventList: invalid event type value was found.");
 }
@@ -1373,14 +1478,14 @@ const HistogramData::HistogramE &EventList::e() const {
 }
 Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
   // This is the thread number from which this function was called.
-  int thread = PARALLEL_THREAD_NUMBER;
+  const int thread = PARALLEL_THREAD_NUMBER;
 
   Kernel::cow_ptr<HistogramData::HistogramY> yData(nullptr);
 
   // Is the data in the mrulist?
   if (mru) {
-    mru->ensureEnoughBuffersY(thread);
-    yData = mru->findY(thread, this);
+    mru->ensureEnoughBuffersY(static_cast<size_t>(thread));
+    yData = mru->findY(static_cast<size_t>(thread), this);
   }
 
   if (!yData) {
@@ -1403,7 +1508,7 @@ Kernel::cow_ptr<HistogramData::HistogramY> EventList::sharedY() const {
 }
 Kernel::cow_ptr<HistogramData::HistogramE> EventList::sharedE() const {
   // This is the thread number from which this function was called.
-  int thread = PARALLEL_THREAD_NUMBER;
+  const auto thread = static_cast<size_t>(PARALLEL_THREAD_NUMBER);
 
   Kernel::cow_ptr<HistogramData::HistogramE> eData(nullptr);
 
@@ -1597,15 +1702,17 @@ inline void EventList::compressFatEventsHelper(const std::vector<T> &events, std
   double errorSquared = 0.;
   double tofNormalization = 0.;
 
-  // Move up to first event that has a large enough pulsetime. This is just in
-  // case someone starts from after the starttime of the run. It is expected
-  // that users will normally use the default which means this will only check
-  // the first event.
+  // Move up to first event that has a large enough pulsetime. This is just in case someone starts from after the
+  // starttime of the run. It is expected that users will normally use the default which means this will only check the
+  // first event.
   auto it = events.cbegin();
   for (; it != events.cend(); ++it) {
     if (it->m_pulsetime >= timeStart)
       break;
   }
+
+  if (it == events.cend())
+    throw std::runtime_error("failed to find first pulse time in the events");
 
   // bin if the pulses are histogrammed
   int64_t lastPulseBin = (it->m_pulsetime.totalNanoseconds() - pulsetimeStart) / pulsetimeDelta;
@@ -1724,7 +1831,11 @@ inline void EventList::compressFatEventsHelper(const std::vector<T> &events, std
  *be == this.
  */
 void EventList::compressEvents(double tolerance, EventList *destination) {
-  if (!this->empty()) {
+  if (this->empty()) {
+    // allocate memory in correct vector
+    if (eventType != WEIGHTED_NOTIME)
+      destination->weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>();
+  } else {
     this->sortTof();
     switch (eventType) {
     case TOF:
@@ -1732,7 +1843,8 @@ void EventList::compressEvents(double tolerance, EventList *destination) {
       //        compressEventsParallelHelper(this->events,
       //        destination->weightedEventsNoTime, tolerance);
       //      else
-      compressEventsHelper(this->events, destination->weightedEventsNoTime, tolerance);
+      destination->weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>();
+      compressEventsHelper(*this->events, *destination->weightedEventsNoTime, tolerance);
       break;
 
     case WEIGHTED:
@@ -1740,20 +1852,21 @@ void EventList::compressEvents(double tolerance, EventList *destination) {
       //        compressEventsParallelHelper(this->weightedEvents,
       //        destination->weightedEventsNoTime, tolerance);
       //      else
-      compressEventsHelper(this->weightedEvents, destination->weightedEventsNoTime, tolerance);
+      destination->weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>();
+      compressEventsHelper(*this->weightedEvents, *destination->weightedEventsNoTime, tolerance);
 
       break;
 
     case WEIGHTED_NOTIME:
       if (destination == this) {
         // Put results in a temp output
-        std::vector<WeightedEventNoTime> out;
+        auto out = std::make_unique<std::vector<WeightedEventNoTime>>();
         //        if (parallel)
         //          compressEventsParallelHelper(this->weightedEventsNoTime,
         //          out,
         //          tolerance);
         //        else
-        compressEventsHelper(this->weightedEventsNoTime, out, tolerance);
+        compressEventsHelper(*this->weightedEventsNoTime, *out, tolerance);
         // Put it back
         this->weightedEventsNoTime.swap(out);
       } else {
@@ -1761,7 +1874,8 @@ void EventList::compressEvents(double tolerance, EventList *destination) {
         //          compressEventsParallelHelper(this->weightedEventsNoTime,
         //          destination->weightedEventsNoTime, tolerance);
         //        else
-        compressEventsHelper(this->weightedEventsNoTime, destination->weightedEventsNoTime, tolerance);
+        destination->weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>();
+        compressEventsHelper(*this->weightedEventsNoTime, *destination->weightedEventsNoTime, tolerance);
       }
       break;
     }
@@ -1813,8 +1927,12 @@ inline void EventList::processWeightedEvents(const std::vector<T> &events, std::
 }
 
 void EventList::compressEvents(double tolerance, EventList *destination,
-                               std::shared_ptr<std::vector<double>> histogram_bin_edges) {
-  if (!this->empty()) {
+                               const std::shared_ptr<std::vector<double>> histogram_bin_edges) {
+  if (this->empty()) {
+    // allocate memory in correct vector
+    if (eventType != WEIGHTED_NOTIME)
+      destination->weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>();
+  } else {
     const auto NUM_BINS = histogram_bin_edges->size() - 1;
     const auto xmin = static_cast<double>(histogram_bin_edges->front());
 
@@ -1824,7 +1942,7 @@ void EventList::compressEvents(double tolerance, EventList *destination,
     case TOF: {
       std::vector<double> tof(NUM_BINS, 0);
       std::vector<uint32_t> count(NUM_BINS, 0);
-      for (const auto &ev : this->events) {
+      for (const auto &ev : *this->events) {
         const auto &bin_optional = findBin(*histogram_bin_edges.get(), ev.m_tof, false);
         if (bin_optional) {
           const auto bin = bin_optional.value();
@@ -1836,16 +1954,28 @@ void EventList::compressEvents(double tolerance, EventList *destination,
       // average TOFs
       std::transform(tof.begin(), tof.end(), count.begin(), tof.begin(), std::divides<double>());
 
-      createWeightedEvents(destination->weightedEventsNoTime, tof, count, count);
-    } break;
-
-    case WEIGHTED:
-      processWeightedEvents(this->weightedEvents, destination->weightedEventsNoTime, histogram_bin_edges, findBin);
+      destination->weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>();
+      createWeightedEvents(*destination->weightedEventsNoTime, tof, count, count);
       break;
+    }
 
+    case WEIGHTED: {
+      destination->weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>();
+      processWeightedEvents(*this->weightedEvents, *destination->weightedEventsNoTime, histogram_bin_edges, findBin);
+      break;
+    }
     case WEIGHTED_NOTIME:
-      processWeightedEvents(this->weightedEventsNoTime, destination->weightedEventsNoTime, histogram_bin_edges,
-                            findBin);
+      if (destination == this) {
+        // Put results in a temp output
+        auto out = std::make_unique<std::vector<WeightedEventNoTime>>();
+        processWeightedEvents(*this->weightedEventsNoTime, *out, histogram_bin_edges, findBin);
+        // Put it back
+        this->weightedEventsNoTime.swap(out);
+      } else {
+        destination->weightedEventsNoTime = std::make_unique<std::vector<WeightedEventNoTime>>();
+        processWeightedEvents(*this->weightedEventsNoTime, *destination->weightedEventsNoTime, histogram_bin_edges,
+                              findBin);
+      }
       break;
     }
   }
@@ -1860,26 +1990,30 @@ void EventList::compressEvents(double tolerance, EventList *destination,
 
 void EventList::compressFatEvents(const double tolerance, const Mantid::Types::Core::DateAndTime &timeStart,
                                   const double seconds, EventList *destination) {
-
-  // only worry about non-empty EventLists
-  if (!this->empty()) {
+  if (this->empty()) {
+    // allocate memory in correct vector
+    if (eventType != WEIGHTED)
+      destination->weightedEvents = std::make_unique<std::vector<WeightedEvent>>();
+  } else {
     switch (eventType) {
     case WEIGHTED_NOTIME:
       throw std::invalid_argument("Cannot compress events that do not have pulsetime");
     case TOF:
       this->sortPulseTimeTOFDelta(timeStart, seconds);
-      compressFatEventsHelper(this->events, destination->weightedEvents, tolerance, timeStart, seconds);
+      destination->weightedEvents = std::make_unique<std::vector<WeightedEvent>>();
+      compressFatEventsHelper(*this->events, *destination->weightedEvents, tolerance, timeStart, seconds);
       break;
     case WEIGHTED:
       this->sortPulseTimeTOFDelta(timeStart, seconds);
       if (destination == this) {
         // Put results in a temp output
-        std::vector<WeightedEvent> out;
-        compressFatEventsHelper(this->weightedEvents, out, tolerance, timeStart, seconds);
+        auto out = std::make_unique<std::vector<WeightedEvent>>();
+        compressFatEventsHelper(*this->weightedEvents, *out, tolerance, timeStart, seconds);
         // Put it back
         this->weightedEvents.swap(out);
       } else {
-        compressFatEventsHelper(this->weightedEvents, destination->weightedEvents, tolerance, timeStart, seconds);
+        destination->weightedEvents = std::make_unique<std::vector<WeightedEvent>>();
+        compressFatEventsHelper(*this->weightedEvents, *destination->weightedEvents, tolerance, timeStart, seconds);
       }
       break;
     }
@@ -2214,11 +2348,11 @@ void EventList::generateHistogram(const MantidVec &X, MantidVec &Y, MantidVec &E
     break;
 
   case WEIGHTED:
-    histogramForWeightsHelper(this->weightedEvents, X, Y, E);
+    histogramForWeightsHelper(*this->weightedEvents, X, Y, E);
     break;
 
   case WEIGHTED_NOTIME:
-    histogramForWeightsHelper(this->weightedEventsNoTime, X, Y, E);
+    histogramForWeightsHelper(*this->weightedEventsNoTime, X, Y, E);
     break;
   }
 }
@@ -2252,11 +2386,11 @@ void EventList::generateHistogram(const double step, const MantidVec &X, MantidV
     break;
 
   case WEIGHTED:
-    histogramForWeightsHelper(this->weightedEvents, step, X, Y, E);
+    histogramForWeightsHelper(*this->weightedEvents, step, X, Y, E);
     break;
 
   case WEIGHTED_NOTIME:
-    histogramForWeightsHelper(this->weightedEventsNoTime, step, X, Y, E);
+    histogramForWeightsHelper(*this->weightedEventsNoTime, step, X, Y, E);
     break;
   }
 }
@@ -2286,10 +2420,10 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X, MantidVec &
   //---------------------- Histogram without weights
   //---------------------------------
 
-  if (!this->events.empty()) {
+  if (!this->events->empty()) {
     // Iterate through all events (sorted by pulse time)
-    auto itev = findFirstPulseEvent(this->events, X[0]);
-    auto itev_end = events.cend(); // cache for speed
+    auto itev = findFirstPulseEvent(*this->events, X[0]);
+    auto itev_end = events->cend(); // cache for speed
     // The above can still take you to end() if no events above X[0], so check
     // again.
     if (itev == itev_end)
@@ -2345,7 +2479,7 @@ void EventList::generateCountsHistogramPulseTime(const MantidVec &X, MantidVec &
 void EventList::generateCountsHistogramPulseTime(const double &xMin, const double &xMax, MantidVec &Y,
                                                  const double TOF_min, const double TOF_max) const {
 
-  if (this->events.empty())
+  if (this->events->empty())
     return;
 
   size_t nBins = Y.size();
@@ -2355,7 +2489,7 @@ void EventList::generateCountsHistogramPulseTime(const double &xMin, const doubl
 
   double step = (xMax - xMin) / static_cast<double>(nBins);
 
-  for (const TofEvent &ev : this->events) {
+  for (const TofEvent &ev : *this->events) {
     double pulsetime = static_cast<double>(ev.pulseTime().totalNanoseconds());
     if (pulsetime < xMin || pulsetime >= xMax)
       continue;
@@ -2395,10 +2529,10 @@ void EventList::generateCountsHistogramTimeAtSample(const MantidVec &X, MantidVe
   //---------------------- Histogram without weights
   //---------------------------------
 
-  if (!this->events.empty()) {
+  if (!this->events->empty()) {
     // Iterate through all events (sorted by pulse time)
-    auto itev = findFirstTimeAtSampleEvent(this->events, X[0], tofFactor, tofOffset);
-    std::vector<TofEvent>::const_iterator itev_end = events.end(); // cache for speed
+    auto itev = findFirstTimeAtSampleEvent(*this->events, X[0], tofFactor, tofOffset);
+    std::vector<TofEvent>::const_iterator itev_end = events->end(); // cache for speed
     // The above can still take you to end() if no events above X[0], so check
     // again.
     if (itev == itev_end)
@@ -2460,18 +2594,19 @@ void EventList::generateCountsHistogram(const MantidVec &X, MantidVec &Y) const 
   //---------------------------------
 
   // Do we even have any events to do?
-  if (!this->events.empty()) {
+  if (!this->events->empty()) {
     // Iterate through all events (sorted by tof) placing them in the correct
     // bin.
-    auto itev = findFirstEvent(this->events, TofEvent(X[0]));
+    auto itev = findFirstEvent(*this->events, TofEvent(X[0]));
+    const auto itend = this->events->end();
     // Go through all the events,
-    for (auto itx = X.cbegin(); itev != events.end(); ++itev) {
-      double tof = itev->tof();
+    for (auto itx = X.cbegin(); itev != itend; ++itev) {
+      const double tof = itev->tof();
       itx = std::find_if(itx, X.cend(), [tof](const double x) { return tof < x; });
       if (itx == X.cend()) {
         break;
       }
-      auto bin = std::max(std::distance(X.cbegin(), itx) - 1, std::ptrdiff_t{0});
+      const auto bin = static_cast<size_t>(std::max(std::distance(X.cbegin(), itx) - 1, std::ptrdiff_t{0}));
       ++Y[bin];
     }
   } // end if (there are any events to histogram)
@@ -2572,7 +2707,7 @@ void EventList::generateCountsHistogram(const double step, const MantidVec &X, M
     std::fill(Y.begin(), Y.end(), 0.0);
 
   // Do we even have any events to do?
-  if (this->events.empty())
+  if (this->events->empty())
     return;
 
   const auto xmin = X.front();
@@ -2580,7 +2715,7 @@ void EventList::generateCountsHistogram(const double step, const MantidVec &X, M
 
   auto findBin = FindBin(step, xmin);
 
-  for (const TofEvent &ev : this->events) {
+  for (const TofEvent &ev : *this->events) {
     const double tof = ev.tof();
     if (tof < xmin || tof >= xmax)
       continue;
@@ -2691,13 +2826,13 @@ void EventList::integrate(const double minX, const double maxX, const bool entir
   // Convert the list
   switch (eventType) {
   case TOF:
-    integrateHelper(this->events, minX, maxX, entireRange, sum, error);
+    integrateHelper(*this->events, minX, maxX, entireRange, sum, error);
     break;
   case WEIGHTED:
-    integrateHelper(this->weightedEvents, minX, maxX, entireRange, sum, error);
+    integrateHelper(*this->weightedEvents, minX, maxX, entireRange, sum, error);
     break;
   case WEIGHTED_NOTIME:
-    integrateHelper(this->weightedEventsNoTime, minX, maxX, entireRange, sum, error);
+    integrateHelper(*this->weightedEventsNoTime, minX, maxX, entireRange, sum, error);
     break;
   default:
     throw std::runtime_error("EventList: invalid event type value was found.");
@@ -2733,13 +2868,13 @@ void EventList::convertTof(std::function<double(double)> func, const int sorting
   // Convert the list
   switch (eventType) {
   case TOF:
-    this->convertTofHelper(this->events, func);
+    this->convertTofHelper(*this->events, func);
     break;
   case WEIGHTED:
-    this->convertTofHelper(this->weightedEvents, func);
+    this->convertTofHelper(*this->weightedEvents, func);
     break;
   case WEIGHTED_NOTIME:
-    this->convertTofHelper(this->weightedEventsNoTime, func);
+    this->convertTofHelper(*this->weightedEventsNoTime, func);
     break;
   }
 }
@@ -2775,13 +2910,13 @@ void EventList::convertTof(const double factor, const double offset) {
   // Convert the list
   switch (eventType) {
   case TOF:
-    this->convertTofHelper(this->events, factor, offset);
+    this->convertTofHelper(*this->events, factor, offset);
     break;
   case WEIGHTED:
-    this->convertTofHelper(this->weightedEvents, factor, offset);
+    this->convertTofHelper(*this->weightedEvents, factor, offset);
     break;
   case WEIGHTED_NOTIME:
-    this->convertTofHelper(this->weightedEventsNoTime, factor, offset);
+    this->convertTofHelper(*this->weightedEventsNoTime, factor, offset);
     break;
   }
 }
@@ -2857,10 +2992,10 @@ void EventList::addPulsetime(const double seconds) {
   // Convert the list
   switch (eventType) {
   case TOF:
-    this->addPulsetimeHelper(this->events, seconds);
+    this->addPulsetimeHelper(*this->events, seconds);
     break;
   case WEIGHTED:
-    this->addPulsetimeHelper(this->weightedEvents, seconds);
+    this->addPulsetimeHelper(*this->weightedEvents, seconds);
     break;
   case WEIGHTED_NOTIME:
     throw std::runtime_error("EventList::addPulsetime() called on an event "
@@ -2885,10 +3020,10 @@ void EventList::addPulsetimes(const std::vector<double> &seconds) {
   // Convert the list
   switch (eventType) {
   case TOF:
-    this->addPulsetimesHelper(this->events, seconds);
+    this->addPulsetimesHelper(*this->events, seconds);
     break;
   case WEIGHTED:
-    this->addPulsetimesHelper(this->weightedEvents, seconds);
+    this->addPulsetimesHelper(*this->weightedEvents, seconds);
     break;
   case WEIGHTED_NOTIME:
     throw std::runtime_error("EventList::addPulsetime() called on an event "
@@ -2959,16 +3094,16 @@ void EventList::maskTof(const double tofMin, const double tofMax) {
   size_t numDel = 0;
   switch (eventType) {
   case TOF:
-    numOrig = this->events.size();
-    numDel = this->maskTofHelper(this->events, tofMin, tofMax);
+    numOrig = this->events->size();
+    numDel = this->maskTofHelper(*this->events, tofMin, tofMax);
     break;
   case WEIGHTED:
-    numOrig = this->weightedEvents.size();
-    numDel = this->maskTofHelper(this->weightedEvents, tofMin, tofMax);
+    numOrig = this->weightedEvents->size();
+    numDel = this->maskTofHelper(*this->weightedEvents, tofMin, tofMax);
     break;
   case WEIGHTED_NOTIME:
-    numOrig = this->weightedEventsNoTime.size();
-    numDel = this->maskTofHelper(this->weightedEventsNoTime, tofMin, tofMax);
+    numOrig = this->weightedEventsNoTime->size();
+    numDel = this->maskTofHelper(*this->weightedEventsNoTime, tofMin, tofMax);
     break;
   }
 
@@ -2998,7 +3133,7 @@ template <class T> std::size_t EventList::maskConditionHelper(std::vector<T> &ev
     }
   }
 
-  auto n = events.end() - first;
+  const auto n = static_cast<size_t>(events.end() - first);
   if (n != 0)
     events.erase(first, events.end());
 
@@ -3026,16 +3161,16 @@ void EventList::maskCondition(const std::vector<bool> &mask) {
   size_t numDel = 0;
   switch (eventType) {
   case TOF:
-    numOrig = this->events.size();
-    numDel = this->maskConditionHelper(this->events, mask);
+    numOrig = this->events->size();
+    numDel = this->maskConditionHelper(*this->events, mask);
     break;
   case WEIGHTED:
-    numOrig = this->weightedEvents.size();
-    numDel = this->maskConditionHelper(this->weightedEvents, mask);
+    numOrig = this->weightedEvents->size();
+    numDel = this->maskConditionHelper(*this->weightedEvents, mask);
     break;
   case WEIGHTED_NOTIME:
-    numOrig = this->weightedEventsNoTime.size();
-    numDel = this->maskConditionHelper(this->weightedEventsNoTime, mask);
+    numOrig = this->weightedEventsNoTime->size();
+    numDel = this->maskConditionHelper(*this->weightedEventsNoTime, mask);
     break;
   }
 
@@ -3065,13 +3200,13 @@ void EventList::getTofs(std::vector<double> &tofs) const {
   // Convert the list
   switch (eventType) {
   case TOF:
-    this->getTofsHelper(this->events, tofs);
+    this->getTofsHelper(*this->events, tofs);
     break;
   case WEIGHTED:
-    this->getTofsHelper(this->weightedEvents, tofs);
+    this->getTofsHelper(*this->weightedEvents, tofs);
     break;
   case WEIGHTED_NOTIME:
-    this->getTofsHelper(this->weightedEventsNoTime, tofs);
+    this->getTofsHelper(*this->weightedEventsNoTime, tofs);
     break;
   }
 }
@@ -3109,10 +3244,10 @@ void EventList::getWeights(std::vector<double> &weights) const {
   // Convert the list
   switch (eventType) {
   case WEIGHTED:
-    this->getWeightsHelper(this->weightedEvents, weights);
+    this->getWeightsHelper(*this->weightedEvents, weights);
     break;
   case WEIGHTED_NOTIME:
-    this->getWeightsHelper(this->weightedEventsNoTime, weights);
+    this->getWeightsHelper(*this->weightedEventsNoTime, weights);
     break;
   default:
     // not a weighted event type, return 1.0 for all.
@@ -3155,10 +3290,10 @@ void EventList::getWeightErrors(std::vector<double> &weightErrors) const {
   // Convert the list
   switch (eventType) {
   case WEIGHTED:
-    this->getWeightErrorsHelper(this->weightedEvents, weightErrors);
+    this->getWeightErrorsHelper(*this->weightedEvents, weightErrors);
     break;
   case WEIGHTED_NOTIME:
-    this->getWeightErrorsHelper(this->weightedEventsNoTime, weightErrors);
+    this->getWeightErrorsHelper(*this->weightedEventsNoTime, weightErrors);
     break;
   default:
     // not a weighted event type, return 1.0 for all.
@@ -3187,16 +3322,16 @@ std::vector<DateAndTime> EventList::eventTimesCalculator(const UnaryOperation &t
   std::vector<DateAndTime> times;
   switch (eventType) {
   case TOF:
-    times.reserve(events.size());
-    std::transform(events.cbegin(), events.cend(), std::back_inserter(times), timesCalc);
+    times.reserve(events->size());
+    std::transform(events->cbegin(), events->cend(), std::back_inserter(times), timesCalc);
     break;
   case WEIGHTED:
-    times.reserve(weightedEvents.size());
-    std::transform(weightedEvents.cbegin(), weightedEvents.cend(), std::back_inserter(times), timesCalc);
+    times.reserve(weightedEvents->size());
+    std::transform(weightedEvents->cbegin(), weightedEvents->cend(), std::back_inserter(times), timesCalc);
     break;
   case WEIGHTED_NOTIME:
-    times.reserve(weightedEventsNoTime.size());
-    std::transform(weightedEventsNoTime.cbegin(), weightedEventsNoTime.cend(), std::back_inserter(times), timesCalc);
+    times.reserve(weightedEventsNoTime->size());
+    std::transform(weightedEventsNoTime->cbegin(), weightedEventsNoTime->cend(), std::back_inserter(times), timesCalc);
     break;
   }
   return times;
@@ -3257,26 +3392,26 @@ double EventList::getTofMin() const {
   if (this->order == TOF_SORT) {
     switch (eventType) {
     case TOF:
-      return this->events.begin()->tof();
+      return this->events->front().tof();
     case WEIGHTED:
-      return this->weightedEvents.begin()->tof();
+      return this->weightedEvents->front().tof();
     case WEIGHTED_NOTIME:
-      return this->weightedEventsNoTime.begin()->tof();
+      return this->weightedEventsNoTime->front().tof();
     }
   }
 
   // now we are stuck with a linear search
   switch (eventType) {
   case TOF: {
-    tMin = getTofMinimumHelper(this->events);
+    tMin = getTofMinimumHelper(*this->events);
     break;
   }
   case WEIGHTED: {
-    tMin = getTofMinimumHelper(this->weightedEvents);
+    tMin = getTofMinimumHelper(*this->weightedEvents);
     break;
   }
   case WEIGHTED_NOTIME: {
-    tMin = getTofMinimumHelper(this->weightedEventsNoTime);
+    tMin = getTofMinimumHelper(*this->weightedEventsNoTime);
     break;
   }
   }
@@ -3299,26 +3434,26 @@ double EventList::getTofMax() const {
   if (this->order == TOF_SORT) {
     switch (eventType) {
     case TOF:
-      return this->events.rbegin()->tof();
+      return this->events->back().tof();
     case WEIGHTED:
-      return this->weightedEvents.rbegin()->tof();
+      return this->weightedEvents->back().tof();
     case WEIGHTED_NOTIME:
-      return this->weightedEventsNoTime.rbegin()->tof();
+      return this->weightedEventsNoTime->back().tof();
     }
   }
 
   // now we are stuck with a linear search
   switch (eventType) {
   case TOF: {
-    tMax = getTofMaximumHelper(this->events);
+    tMax = getTofMaximumHelper(*this->events);
     break;
   }
   case WEIGHTED: {
-    tMax = getTofMaximumHelper(this->weightedEvents);
+    tMax = getTofMaximumHelper(*this->weightedEvents);
     break;
   }
   case WEIGHTED_NOTIME: {
-    tMax = getTofMaximumHelper(this->weightedEventsNoTime);
+    tMax = getTofMaximumHelper(*this->weightedEventsNoTime);
     break;
   }
   }
@@ -3327,92 +3462,86 @@ double EventList::getTofMax() const {
 }
 
 // --------------------------------------------------------------------------
+namespace { // anonymous namespace
+template <class T> DateAndTime getPulseMinimumHelper(const std::vector<T> &events) {
+  const auto result = std::min_element(events.cbegin(), events.cend(), [](const auto &left, const auto &right) {
+    return left.pulseTime() < right.pulseTime();
+  });
+  return result->pulseTime();
+}
+
+template <class T> DateAndTime getPulseMaximumHelper(const std::vector<T> &events) {
+  const auto result = std::max_element(events.cbegin(), events.cend(), [](const auto &left, const auto &right) {
+    return left.pulseTime() < right.pulseTime();
+  });
+  return result->pulseTime();
+}
+} // anonymous namespace
+
 /**
  * @return The minimum tof value for the list of the events.
  */
 DateAndTime EventList::getPulseTimeMin() const {
-  // set up as the maximum available date time.
-  DateAndTime tMin = DateAndTime::maximum();
-
   // no events is a soft error
   if (this->empty())
-    return tMin;
+    return DateAndTime::maximum();
 
   // when events are ordered by pulse time just need the first value
   if (this->order == PULSETIME_SORT) {
     switch (eventType) {
     case TOF:
-      return this->events.begin()->pulseTime();
+      return this->events->front().pulseTime();
     case WEIGHTED:
-      return this->weightedEvents.begin()->pulseTime();
+      return this->weightedEvents->front().pulseTime();
     case WEIGHTED_NOTIME:
-      return this->weightedEventsNoTime.begin()->pulseTime();
+      return this->weightedEventsNoTime->front().pulseTime();
     }
   }
 
   // now we are stuck with a linear search
-  DateAndTime temp = tMin; // start with the largest possible value
-  size_t numEvents = this->getNumberEvents();
-  for (size_t i = 0; i < numEvents; i++) {
-    switch (eventType) {
-    case TOF:
-      temp = this->events[i].pulseTime();
-      break;
-    case WEIGHTED:
-      temp = this->weightedEvents[i].pulseTime();
-      break;
-    case WEIGHTED_NOTIME:
-      temp = this->weightedEventsNoTime[i].pulseTime();
-      break;
-    }
-    if (temp < tMin)
-      tMin = temp;
+  switch (eventType) {
+  case TOF:
+    return getPulseMinimumHelper(*this->events);
+  case WEIGHTED:
+    return getPulseMinimumHelper(*this->weightedEvents);
+  case WEIGHTED_NOTIME:
+    return getPulseMinimumHelper(*this->weightedEventsNoTime);
   }
-  return tMin;
+
+  return DateAndTime::maximum();
 }
 
 /**
  * @return The maximum tof value for the list of events.
  */
 DateAndTime EventList::getPulseTimeMax() const {
-  // set up as the minimum available date time.
-  DateAndTime tMax = DateAndTime::minimum();
-
   // no events is a soft error
   if (this->empty())
-    return tMax;
+    return DateAndTime::minimum();
 
   // when events are ordered by pulse time just need the first value
   if (this->order == PULSETIME_SORT) {
     switch (eventType) {
     case TOF:
-      return this->events.rbegin()->pulseTime();
+      return this->events->back().pulseTime();
     case WEIGHTED:
-      return this->weightedEvents.rbegin()->pulseTime();
+      return this->weightedEvents->back().pulseTime();
     case WEIGHTED_NOTIME:
-      return this->weightedEventsNoTime.rbegin()->pulseTime();
+      return this->weightedEventsNoTime->back().pulseTime();
     }
   }
 
   // now we are stuck with a linear search
-  size_t numEvents = this->getNumberEvents();
-  DateAndTime temp = tMax; // start with the smallest possible value
-  for (size_t i = 0; i < numEvents; i++) {
-    switch (eventType) {
-    case TOF:
-      temp = this->events[i].pulseTime();
-      break;
-    case WEIGHTED:
-      temp = this->weightedEvents[i].pulseTime();
-      break;
-    case WEIGHTED_NOTIME:
-      temp = this->weightedEventsNoTime[i].pulseTime();
-      break;
-    }
-    if (temp > tMax)
-      tMax = temp;
+  switch (eventType) {
+  case TOF:
+    return getPulseMaximumHelper(*this->events);
+  case WEIGHTED:
+    return getPulseMaximumHelper(*this->weightedEvents);
+  case WEIGHTED_NOTIME:
+    return getPulseMaximumHelper(*this->weightedEventsNoTime);
   }
-  return tMax;
+
+  return DateAndTime::minimum();
 }
 
 void EventList::getPulseTimeMinMax(Mantid::Types::Core::DateAndTime &tMin,
@@ -3429,33 +3558,34 @@ void EventList::getPulseTimeMinMax(Mantid::Types::Core::DateAndTime &tMin,
   if (this->order == PULSETIME_SORT) {
     switch (eventType) {
     case TOF:
-      tMin = this->events.begin()->pulseTime();
-      tMax = this->events.rbegin()->pulseTime();
+      tMin = this->events->front().pulseTime();
+      tMax = this->events->back().pulseTime();
       return;
     case WEIGHTED:
-      tMin = this->weightedEvents.begin()->pulseTime();
-      tMax = this->weightedEvents.rbegin()->pulseTime();
+      tMin = this->weightedEvents->front().pulseTime();
+      tMax = this->weightedEvents->back().pulseTime();
       return;
     case WEIGHTED_NOTIME:
-      tMin = this->weightedEventsNoTime.begin()->pulseTime();
-      tMax = this->weightedEventsNoTime.rbegin()->pulseTime();
+      tMin = this->weightedEventsNoTime->front().pulseTime();
+      tMax = this->weightedEventsNoTime->back().pulseTime();
       return;
     }
   }
 
   // now we are stuck with a linear search
+  // could this be done more efficiently than using ->at?
   size_t numEvents = this->getNumberEvents();
   DateAndTime temp = tMax; // start with the smallest possible value
   for (size_t i = 0; i < numEvents; i++) {
     switch (eventType) {
     case TOF:
-      temp = this->events[i].pulseTime();
+      temp = this->events->at(i).pulseTime();
       break;
     case WEIGHTED:
-      temp = this->weightedEvents[i].pulseTime();
+      temp = this->weightedEvents->at(i).pulseTime();
       break;
     case WEIGHTED_NOTIME:
-      temp = this->weightedEventsNoTime[i].pulseTime();
+      temp = this->weightedEventsNoTime->at(i).pulseTime();
       break;
     }
     if (temp > tMax)
@@ -3477,11 +3607,11 @@ DateAndTime EventList::getTimeAtSampleMax(const double &tofFactor, const double 
   if (this->order == TIMEATSAMPLE_SORT) {
     switch (eventType) {
     case TOF:
-      return calculateCorrectedFullTime(*(this->events.rbegin()), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(this->events->back(), tofFactor, tofOffset);
     case WEIGHTED:
-      return calculateCorrectedFullTime(*(this->weightedEvents.rbegin()), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(this->weightedEvents->back(), tofFactor, tofOffset);
     case WEIGHTED_NOTIME:
-      return calculateCorrectedFullTime(*(this->weightedEventsNoTime.rbegin()), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(this->weightedEventsNoTime->back(), tofFactor, tofOffset);
     }
   }
 
@@ -3491,13 +3621,13 @@ DateAndTime EventList::getTimeAtSampleMax(const double &tofFactor, const double 
   for (size_t i = 0; i < numEvents; i++) {
     switch (eventType) {
     case TOF:
-      temp = calculateCorrectedFullTime(this->events[i], tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->events->at(i), tofFactor, tofOffset);
       break;
     case WEIGHTED:
-      temp = calculateCorrectedFullTime(this->weightedEvents[i], tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->weightedEvents->at(i), tofFactor, tofOffset);
       break;
     case WEIGHTED_NOTIME:
-      temp = calculateCorrectedFullTime(this->weightedEventsNoTime[i], tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->weightedEventsNoTime->at(i), tofFactor, tofOffset);
       break;
     }
     if (temp > tMax)
@@ -3518,11 +3648,11 @@ DateAndTime EventList::getTimeAtSampleMin(const double &tofFactor, const double 
   if (this->order == TIMEATSAMPLE_SORT) {
     switch (eventType) {
     case TOF:
-      return calculateCorrectedFullTime(*(this->events.begin()), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(this->events->front(), tofFactor, tofOffset);
     case WEIGHTED:
-      return calculateCorrectedFullTime(*(this->weightedEvents.begin()), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(this->weightedEvents->front(), tofFactor, tofOffset);
     case WEIGHTED_NOTIME:
-      return calculateCorrectedFullTime(*(this->weightedEventsNoTime.begin()), tofFactor, tofOffset);
+      return calculateCorrectedFullTime(this->weightedEventsNoTime->front(), tofFactor, tofOffset);
     }
   }
 
@@ -3532,13 +3662,13 @@ DateAndTime EventList::getTimeAtSampleMin(const double &tofFactor, const double 
   for (size_t i = 0; i < numEvents; i++) {
     switch (eventType) {
     case TOF:
-      temp = calculateCorrectedFullTime(this->events[i], tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->events->at(i), tofFactor, tofOffset);
       break;
     case WEIGHTED:
-      temp = calculateCorrectedFullTime(this->weightedEvents[i], tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->weightedEvents->at(i), tofFactor, tofOffset);
       break;
     case WEIGHTED_NOTIME:
-      temp = calculateCorrectedFullTime(this->weightedEventsNoTime[i], tofFactor, tofOffset);
+      temp = calculateCorrectedFullTime(this->weightedEventsNoTime->at(i), tofFactor, tofOffset);
       break;
     }
     if (temp < tMin)
@@ -3577,13 +3707,13 @@ void EventList::setTofs(const MantidVec &tofs) {
   // Convert the list
   switch (eventType) {
   case TOF:
-    this->setTofsHelper(this->events, tofs);
+    this->setTofsHelper(*this->events, tofs);
     break;
   case WEIGHTED:
-    this->setTofsHelper(this->weightedEvents, tofs);
+    this->setTofsHelper(*this->weightedEvents, tofs);
     break;
   case WEIGHTED_NOTIME:
-    this->setTofsHelper(this->weightedEventsNoTime, tofs);
+    this->setTofsHelper(*this->weightedEventsNoTime, tofs);
     break;
   }
 }
@@ -3681,11 +3811,11 @@ void EventList::multiply(const double value, const double error) {
     // Fall through
 
   case WEIGHTED:
-    multiplyHelper(this->weightedEvents, value, error);
+    multiplyHelper(*this->weightedEvents, value, error);
     break;
 
   case WEIGHTED_NOTIME:
-    multiplyHelper(this->weightedEventsNoTime, value, error);
+    multiplyHelper(*this->weightedEventsNoTime, value, error);
     break;
   }
 }
@@ -3804,13 +3934,13 @@ void EventList::multiply(const MantidVec &X, const MantidVec &Y, const MantidVec
   case WEIGHTED:
     // Sorting by tof is necessary for the algorithm
     this->sortTof();
-    multiplyHistogramHelper(this->weightedEvents, X, Y, E);
+    multiplyHistogramHelper(*this->weightedEvents, X, Y, E);
     break;
 
   case WEIGHTED_NOTIME:
     // Sorting by tof is necessary for the algorithm
     this->sortTof();
-    multiplyHistogramHelper(this->weightedEventsNoTime, X, Y, E);
+    multiplyHistogramHelper(*this->weightedEventsNoTime, X, Y, E);
     break;
   }
 }
@@ -3941,13 +4071,13 @@ void EventList::divide(const MantidVec &X, const MantidVec &Y, const MantidVec &
   case WEIGHTED:
     // Sorting by tof is necessary for the algorithm
     this->sortTof();
-    divideHistogramHelper(this->weightedEvents, X, Y, E);
+    divideHistogramHelper(*this->weightedEvents, X, Y, E);
     break;
 
   case WEIGHTED_NOTIME:
     // Sorting by tof is necessary for the algorithm
     this->sortTof();
-    divideHistogramHelper(this->weightedEventsNoTime, X, Y, E);
+    divideHistogramHelper(*this->weightedEventsNoTime, X, Y, E);
     break;
   }
 }
@@ -4025,10 +4155,10 @@ void EventList::filterByPulseTime(Types::Core::DateAndTime start, Types::Core::D
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
   case TOF:
-    filterByPulseTimeHelper(this->events, start, stop, output.events);
+    filterByPulseTimeHelper(*this->events, start, stop, *output.events);
     break;
   case WEIGHTED:
-    filterByPulseTimeHelper(this->weightedEvents, start, stop, output.weightedEvents);
+    filterByPulseTimeHelper(*this->weightedEvents, start, stop, *output.weightedEvents);
     break;
   case WEIGHTED_NOTIME:
     throw std::runtime_error("EventList::filterByPulseTime() called on an "
@@ -4069,10 +4199,10 @@ void EventList::filterByPulseTime(Kernel::TimeROI const *timeRoi, EventList *out
 
   switch (eventType) {
   case TOF:
-    filterByTimeROIHelper(this->events, intervals, output);
+    filterByTimeROIHelper(*this->events, intervals, output);
     break;
   case WEIGHTED:
-    filterByTimeROIHelper(this->weightedEvents, intervals, output);
+    filterByTimeROIHelper(*this->weightedEvents, intervals, output);
     break;
   case WEIGHTED_NOTIME:
     throw std::runtime_error("EventList::filterByPulseTime() called on an "
@@ -4158,10 +4288,10 @@ void EventList::filterInPlace(Kernel::TimeROI const *timeRoi) {
   // Iterate through all events (sorted by pulse time)
   switch (eventType) {
   case TOF:
-    filterInPlaceHelper(timeRoi, this->events);
+    filterInPlaceHelper(timeRoi, *this->events);
     break;
   case WEIGHTED:
-    filterInPlaceHelper(timeRoi, this->weightedEvents);
+    filterInPlaceHelper(timeRoi, *this->weightedEvents);
     break;
   case WEIGHTED_NOTIME:
     throw std::runtime_error("EventList::filterInPlace() called on an "
@@ -4353,13 +4483,13 @@ void EventList::convertUnitsViaTof(Mantid::Kernel::Unit const *fromUnit, Mantid:
 
   switch (eventType) {
   case TOF:
-    convertUnitsViaTofHelper(this->events, fromUnit, toUnit);
+    convertUnitsViaTofHelper(*this->events, fromUnit, toUnit);
     break;
   case WEIGHTED:
-    convertUnitsViaTofHelper(this->weightedEvents, fromUnit, toUnit);
+    convertUnitsViaTofHelper(*this->weightedEvents, fromUnit, toUnit);
     break;
   case WEIGHTED_NOTIME:
-    convertUnitsViaTofHelper(this->weightedEventsNoTime, fromUnit, toUnit);
+    convertUnitsViaTofHelper(*this->weightedEventsNoTime, fromUnit, toUnit);
     break;
   }
 }
@@ -4388,13 +4518,13 @@ void EventList::convertUnitsQuicklyHelper(typename std::vector<T> &events, const
 void EventList::convertUnitsQuickly(const double &factor, const double &power) {
   switch (eventType) {
   case TOF:
-    convertUnitsQuicklyHelper(this->events, factor, power);
+    convertUnitsQuicklyHelper(*this->events, factor, power);
     break;
   case WEIGHTED:
-    convertUnitsQuicklyHelper(this->weightedEvents, factor, power);
+    convertUnitsQuicklyHelper(*this->weightedEvents, factor, power);
     break;
   case WEIGHTED_NOTIME:
-    convertUnitsQuicklyHelper(this->weightedEventsNoTime, factor, power);
+    convertUnitsQuicklyHelper(*this->weightedEventsNoTime, factor, power);
     break;
   }
 }

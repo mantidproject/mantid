@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Sample.h"
-#include "MantidCrystal/RotateSampleShape.h"
+#include "MantidDataHandling/RotateSampleShape.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
@@ -17,7 +17,7 @@
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
 
-using namespace Mantid::Crystal;
+using namespace Mantid::DataHandling;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using Mantid::DataObjects::Workspace2D_sptr;

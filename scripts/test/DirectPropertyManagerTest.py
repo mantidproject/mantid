@@ -7,13 +7,24 @@
 import unittest
 from sys import platform
 import numpy as np
-from Direct.AbsorptionShapes import *
+import os
+from Direct.AbsorptionShapes import Cylinder
 from Direct.PropertyManager import PropertyManager
 from Direct.RunDescriptor import RunDescriptor
 
 
 from mantid import api
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import (
+    config,
+    AddSampleLog,
+    AddTimeSeriesLog,
+    CloneWorkspace,
+    ConvertUnits,
+    CreateSampleWorkspace,
+    LoadEmptyInstrument,
+    SetInstrumentParameter,
+)
 
 
 # -----------------------------------------------------------------------------------------------------------------------------------------

@@ -97,6 +97,7 @@ private:
   /// (Xmin,Xmax,step) for each group.
   /// The result is stored in group2params
   void determineRebinParameters(const std::vector<int> &udet2group);
+  void determineRebinParametersFromParameters(const std::vector<int> &udet2group);
   int validateSpectrumInGroup(const std::vector<int> &udet2group, size_t wi);
 
   /// Shared pointer to the input workspace

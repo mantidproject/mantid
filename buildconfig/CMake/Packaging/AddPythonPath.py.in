@@ -48,6 +48,7 @@ try:
 except ImportError as e:
     die("Can't import mantid: {}".format(e))
 
+
 # where path file should go
 pathfile = os.path.join(sc.get_python_lib(plat_specific=True), "mantid.pth")
 

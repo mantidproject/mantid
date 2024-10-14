@@ -8,7 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
-#include "MantidCrystal/DllConfig.h"
+#include "MantidDataHandling/DllConfig.h"
 
 namespace Mantid {
 namespace Geometry {
@@ -17,14 +17,14 @@ class Goniometer;
 } // namespace Mantid
 
 namespace Mantid {
-namespace Crystal {
+namespace DataHandling {
 
 using Mantid::Geometry::Goniometer;
 
 /** Define the initial orientation of the sample with respect to the beam and instrument by giving the axes and
  *directions of rotations.
  */
-class MANTID_CRYSTAL_DLL RotateSampleShape final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL RotateSampleShape final : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "RotateSampleShape"; };
@@ -38,7 +38,7 @@ public:
   int version() const override { return 1; };
   const std::vector<std::string> seeAlso() const override { return {"SetGoniometer"}; }
   /// Algorithm's category for identification
-  const std::string category() const override { return "Crystal\\Goniometer"; }
+  const std::string category() const override { return "DataHandling\\Instrument"; }
 
 private:
   /// Initialise the properties
@@ -49,5 +49,5 @@ private:
   bool checkIsValidShape(const API::ExperimentInfo_sptr &ei, std::string &shapeXML, bool &isMeshShape);
 };
 
-} // namespace Crystal
+} // namespace DataHandling
 } // namespace Mantid

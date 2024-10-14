@@ -201,6 +201,39 @@ class PropertyWithValueTest(unittest.TestCase):
     def test_set_property_of_vector_int_succeeds_with_numpy_array_of_int_type(self):
         self._do_vector_int_numpy_test("WorkspaceIndexList")
 
+    def test_property_as_output(self):
+        """
+        Test that PropertyWithValue can be declared as an output property of an algorithm,
+        and that it will be returned as the output when called using the python API function approach
+        """
+        from mantid.api import AlgorithmFactory, PythonAlgorithm
+        from mantid.kernel import Direction, IntPropertyWithValue, ULongLongPropertyWithValue
+        from mantid.simpleapi import _create_algorithm_function
+        # a large number than cannot fit in a C++ int, requiring u_int64
+        BIGINT: int = 125824461545280
+        # create an algorithm that returns a ULongLongPropertyWithValue as the output
+        # then register it so that it can be called as a function
+        class MyAlgorithm(PythonAlgorithm):
+            def PyInit(self):
+                self.declareProperty(IntPropertyWithValue("InputInt", 0))
+                self.declareProperty(ULongLongPropertyWithValue("MyProperty", 0, direction=Direction.Output))
+            def PyExec(self):
+                self.setProperty("MyProperty", BIGINT)
+        AlgorithmFactory.subscribe(MyAlgorithm)
+        algo = MyAlgorithm()
+        algo.initialize()
+        myAlgorithmName = "MyAlgorithm"
+        _create_algorithm_function(myAlgorithmName, 1, algo)
+        from mantid.simpleapi import MyAlgorithm as MyAlgorithmInMantid
+        # call the algorithm, ensure the output is the large integer expected
+        ret = MyAlgorithmInMantid(1)
+        assert ret == BIGINT
+        # clean up the the algorithm manager and verify
+        AlgorithmFactory.unsubscribe(myAlgorithmName, 1)
+        with self.assertRaises(RuntimeError) as cm:
+            MyAlgorithmInMantid(2)
+        assert f"not registered {myAlgorithmName}" in str(cm.exception)
+
 
 if __name__ == "__main__":
     unittest.main()

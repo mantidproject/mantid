@@ -6,9 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import math
 
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import (
+    AlgorithmFactory,
+    FileAction,
+    FileProperty,
+    FunctionFactory,
+    ITableWorkspaceProperty,
+    MatrixWorkspaceProperty,
+    Progress,
+    PythonAlgorithm,
+)
+from mantid.kernel import Direction, FloatArrayProperty
+from mantid.simpleapi import ConvertUnits, CreateEmptyTableWorkspace, CreateWorkspace, FindPeaks, Fit
 
 
 class EnggFitPeaks(PythonAlgorithm):
@@ -536,7 +545,7 @@ class EnggFitPeaks(PythonAlgorithm):
             return fitted_params["X0"]
         else:
             raise ValueError(
-                "Inconsistency found. I do not know how to deal with centers of peaks " "of types other than {0}".format(PEAK_TYPE)
+                "Inconsistency found. I do not know how to deal with centers of peaks " "of types other than {0}".format(self.PEAK_TYPE)
             )
 
     def _find_peak_intensity_in_params(self, fitted_params):
@@ -550,7 +559,7 @@ class EnggFitPeaks(PythonAlgorithm):
             return fitted_params["I"]
         else:
             raise ValueError(
-                "Inconsistency found. I do not know how to deal with intensities of " "peaks of types other than {0}".format(PEAK_TYPE)
+                "Inconsistency found. I do not know how to deal with intensities of " "peaks of types other than {0}".format(self.PEAK_TYPE)
             )
 
     def _b2bexp_is_acceptable(self, fitted_params):

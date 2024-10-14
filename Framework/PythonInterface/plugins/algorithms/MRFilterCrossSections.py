@@ -7,8 +7,16 @@
 # pylint: disable=no-init,invalid-name
 import os
 from operator import itemgetter
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import (
+    AnalysisDataService,
+    FileAction,
+    FileProperty,
+    PropertyMode,
+    PythonAlgorithm,
+    WorkspaceGroupProperty,
+    WorkspaceProperty,
+)
+from mantid.kernel import Direction
 import mantid.simpleapi as api
 
 
