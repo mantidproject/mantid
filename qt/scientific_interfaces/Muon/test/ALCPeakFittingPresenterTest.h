@@ -38,43 +38,38 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCPeakFittingView : public IALCPeakFittingView {
 public:
-  void requestFit() { emit fitRequested(); }
-  void changeCurrentFunction() { emit currentFunctionChanged(); }
-  void changePeakPicker() { emit peakPickerChanged(); }
-  void changeParameter(std::string const &funcIndex, std::string const &paramName) {
-    emit parameterChanged(funcIndex, paramName);
-  }
-  void plotGuess() override { emit plotGuessClicked(); }
+  MOCK_METHOD(IFunction_const_sptr, function, (std::string const &), (const, override));
+  MOCK_METHOD(std::optional<std::string>, currentFunctionIndex, (), (const, override));
+  MOCK_METHOD(IPeakFunction_const_sptr, peakPicker, (), (const, override));
 
-  MOCK_CONST_METHOD1(function, IFunction_const_sptr(std::string const &));
-  MOCK_CONST_METHOD0(currentFunctionIndex, std::optional<std::string>());
-  MOCK_CONST_METHOD0(peakPicker, IPeakFunction_const_sptr());
+  MOCK_METHOD(void, initialize, (), (override));
+  MOCK_METHOD(void, setDataCurve, (MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex), (override));
+  MOCK_METHOD(void, setFittedCurve, (MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex), (override));
+  MOCK_METHOD(void, setGuessCurve, (MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex), (override));
+  MOCK_METHOD(void, setPeakPickerEnabled, (bool), (override));
+  MOCK_METHOD(void, setPeakPicker, (const IPeakFunction_const_sptr &), (override));
+  MOCK_METHOD(void, setFunction, (const IFunction_const_sptr &), (override));
+  MOCK_METHOD(void, setParameter, (std::string const &, std::string const &, double), (override));
+  MOCK_METHOD(void, help, (), (override));
+  MOCK_METHOD(void, changePlotGuessState, (bool), (override));
 
-  MOCK_METHOD0(initialize, void());
-  MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
-  MOCK_METHOD2(setFittedCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
-  MOCK_METHOD2(setGuessCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
-  MOCK_METHOD1(setPeakPickerEnabled, void(bool));
-  MOCK_METHOD1(setPeakPicker, void(const IPeakFunction_const_sptr &));
-  MOCK_METHOD1(setFunction, void(const IFunction_const_sptr &));
-  MOCK_METHOD3(setParameter, void(std::string const &, std::string const &, double));
-  MOCK_METHOD1(displayError, void(const QString &));
-  MOCK_METHOD0(help, void());
-  MOCK_METHOD1(changePlotGuessState, void(bool));
-
-  MOCK_METHOD1(removePlot, void(const QString &plotName));
+  MOCK_METHOD(void, removePlot, (const std::string &plotName), (override));
+  MOCK_METHOD(void, displayError, (std::string const &), (override));
+  MOCK_METHOD(void, plotGuess, (), (override));
+  MOCK_METHOD(void, subscribe, (IALCPeakFittingViewSubscriber *), (override));
+  MOCK_METHOD(void, onParameterChanged, (std::string const &, std::string const &), (override));
+  MOCK_METHOD(void, fitRequested, (), (override));
 };
 
 class MockALCPeakFittingModel : public IALCPeakFittingModel {
 public:
-  void changeFittedPeaks() { emit fittedPeaksChanged(); }
-  void changeData() { emit dataChanged(); }
-  void setError(const QString &message) { emit errorInModel(message); }
-
-  MOCK_CONST_METHOD0(fittedPeaks, IFunction_const_sptr());
-  MOCK_CONST_METHOD0(data, MatrixWorkspace_sptr());
-  MOCK_METHOD1(fitPeaks, void(IFunction_const_sptr));
-  MOCK_METHOD2(guessData, MatrixWorkspace_sptr(IFunction_const_sptr function, const std::vector<double> &xValues));
+  virtual ~MockALCPeakFittingModel() = default;
+  MOCK_METHOD(IFunction_const_sptr, fittedPeaks, (), (const, override));
+  MOCK_METHOD(MatrixWorkspace_sptr, data, (), (const, override));
+  MOCK_METHOD(void, fitPeaks, (IFunction_const_sptr), (override));
+  MOCK_METHOD(MatrixWorkspace_sptr, guessData, (IFunction_const_sptr function, const std::vector<double> &xValues),
+              (override));
+  MOCK_METHOD(void, subscribe, (IALCPeakFittingModelSubscriber *), (override));
 };
 
 // DoubleNear matcher was introduced in gmock 1.7 only
@@ -134,9 +129,9 @@ public:
     auto ws = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
     ON_CALL(*m_view, function(std::string(""))).WillByDefault(Return(IFunction_const_sptr()));
-    EXPECT_CALL(*m_view, displayError(QString("Couldn't fit with empty function/data"))).Times(1);
+    EXPECT_CALL(*m_view, displayError(std::string("Couldn't fit with empty function/data"))).Times(1);
 
-    m_view->requestFit();
+    m_presenter->onFitRequested();
   }
 
   void test_fit() {
@@ -150,7 +145,7 @@ public:
     EXPECT_CALL(*m_model,
                 fitPeaks(Property(&IFunction_const_sptr::get, Property(&IFunction::asString, peaks->asString()))));
 
-    m_view->requestFit();
+    m_presenter->onFitRequested();
   }
 
   void test_onDataChanged() {
@@ -160,10 +155,10 @@ public:
     ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
 
     EXPECT_CALL(*m_view, setDataCurve(dataWorkspace, 0));
-    m_model->changeData();
+    m_presenter->dataChanged();
   }
 
-  void test_onFittedPeaksChanged() {
+  void test_fittedPeaksChanged() {
     IFunction_const_sptr fitFunction = createGaussian(1, 2, 3);
     auto dataWorkspace =
         std::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::create2DWorkspace123(1, 3));
@@ -175,19 +170,19 @@ public:
     EXPECT_CALL(*m_view, setFittedCurve(dataWorkspace, 1));
     EXPECT_CALL(*m_view, setFunction(fitFunction));
 
-    m_model->changeFittedPeaks();
+    m_presenter->fittedPeaksChanged();
   }
 
-  void test_onFittedPeaksChanged_toEmpty() {
+  void test_fittedPeaksChanged_toEmpty() {
     const auto dataWorkspace = WorkspaceCreationHelper::create2DWorkspace123(1, 3);
 
     ON_CALL(*m_model, fittedPeaks()).WillByDefault(Return(IFunction_const_sptr()));
     ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
 
-    EXPECT_CALL(*m_view, removePlot(QString("Fit")));
+    EXPECT_CALL(*m_view, removePlot(std::string("Fit")));
     EXPECT_CALL(*m_view, setFunction(IFunction_const_sptr()));
 
-    m_model->changeFittedPeaks();
+    m_presenter->fittedPeaksChanged();
   }
 
   void test_onCurrentFunctionChanged_nothing() {
@@ -195,7 +190,7 @@ public:
 
     EXPECT_CALL(*m_view, setPeakPickerEnabled(false));
 
-    m_view->changeCurrentFunction();
+    m_presenter->onCurrentFunctionChanged();
   }
 
   void test_onCurrentFunctionChanged_peak() {
@@ -208,7 +203,7 @@ public:
                                        AllOf(Property(&IPeakFunction::centre, 1), Property(&IPeakFunction::fwhm, 2),
                                              Property(&IPeakFunction::height, 3)))));
 
-    m_view->changeCurrentFunction();
+    m_presenter->onCurrentFunctionChanged();
   }
 
   void test_onCurrentFunctionChanged_nonPeak() {
@@ -218,7 +213,7 @@ public:
 
     EXPECT_CALL(*m_view, setPeakPickerEnabled(false));
 
-    m_view->changeCurrentFunction();
+    m_presenter->onCurrentFunctionChanged();
   }
 
   void test_onPeakPickerChanged() {
@@ -229,7 +224,7 @@ public:
     EXPECT_CALL(*m_view, setParameter(std::string("f1"), std::string("Sigma"), DoubleDelta(2.123, 1E-3)));
     EXPECT_CALL(*m_view, setParameter(std::string("f1"), std::string("Height"), 6));
 
-    m_view->changePeakPicker();
+    m_presenter->onPeakPickerChanged();
   }
 
   void test_onParameterChanged_peak() {
@@ -242,7 +237,7 @@ public:
                                        AllOf(Property(&IPeakFunction::centre, 4), Property(&IPeakFunction::fwhm, 2),
                                              Property(&IPeakFunction::height, 6)))));
 
-    m_view->changeParameter("f1", "Sigma");
+    m_presenter->onParameterChanged("f1", "Sigma");
   }
 
   // parameterChanged signal is thrown in many scenarios - we want to update the
@@ -254,7 +249,7 @@ public:
 
     EXPECT_CALL(*m_view, setPeakPicker(_)).Times(0);
 
-    m_view->changeParameter("f1", "Sigma");
+    m_presenter->onParameterChanged("f1", "Sigma");
   }
 
   void test_onParameterChanged_nonPeak() {
@@ -264,7 +259,7 @@ public:
 
     EXPECT_CALL(*m_view, setPeakPicker(_)).Times(0);
 
-    m_view->changeParameter("f1", "A0");
+    m_presenter->onParameterChanged("f1", "A0");
   }
 
   void test_helpPage() {
@@ -281,8 +276,8 @@ public:
     ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
     ON_CALL(*m_view, function(std::string(""))).WillByDefault(Return(IFunction_const_sptr()));
 
-    EXPECT_CALL(*m_view, removePlot(QString("Guess")));
-    m_view->plotGuess();
+    EXPECT_CALL(*m_view, removePlot(std::string("Guess")));
+    m_presenter->onPlotGuessClicked();
   }
 
   /**
@@ -295,9 +290,9 @@ public:
     ON_CALL(*m_model, data()).WillByDefault(Return(nullptr));
     ON_CALL(*m_view, function(std::string(""))).WillByDefault(Return(peaks));
 
-    EXPECT_CALL(*m_view, removePlot(QString("Guess")));
+    EXPECT_CALL(*m_view, removePlot(std::string("Guess")));
 
-    TS_ASSERT_THROWS_NOTHING(m_view->plotGuess());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->onPlotGuessClicked());
   }
 
   /**
@@ -317,7 +312,7 @@ public:
 
     EXPECT_CALL(*m_view, setGuessCurve(guessWorkspace, 0));
 
-    m_view->plotGuess();
+    m_presenter->onPlotGuessClicked();
   }
 
   /**
@@ -325,16 +320,16 @@ public:
    */
   void test_plotGuessAndThenClear() {
     test_plotGuess();
-    EXPECT_CALL(*m_view, removePlot(QString("Guess")));
-    m_view->plotGuess(); // click again i.e. "Remove guess"
+    EXPECT_CALL(*m_view, removePlot(std::string("Guess")));
+    m_presenter->onPlotGuessClicked(); // click again i.e. "Remove guess"
   }
 
   /**
    * Test that errors coming from the model are displayed in the view
    */
   void test_displayError() {
-    EXPECT_CALL(*m_view, displayError(QString("Test error")));
-    m_model->setError("Test error");
+    EXPECT_CALL(*m_view, displayError(std::string("Test error")));
+    m_presenter->errorInModel("Test error");
   }
 };
 GNU_DIAG_ON_SUGGEST_OVERRIDE

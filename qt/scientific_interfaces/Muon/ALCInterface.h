@@ -15,6 +15,8 @@
 
 #include "ALCBaselineModellingPresenter.h"
 #include "ALCDataLoadingPresenter.h"
+#include "ALCPeakFittingPresenter.h"
+#include "IALCBaselineModellingPresenterSubscriber.h"
 
 #include "ui_ALCInterface.h"
 
@@ -27,17 +29,18 @@ class ALCBaselineModellingView;
 class ALCBaselineModellingModel;
 
 class ALCPeakFittingView;
-class ALCPeakFittingPresenter;
 class ALCPeakFittingModel;
 
 /** ALCInterface : Custom interface for Avoided Level Crossing analysis
  */
-class MANTIDQT_MUONINTERFACE_DLL ALCInterface : public API::UserSubWindow {
+class MANTIDQT_MUONINTERFACE_DLL ALCInterface : public API::UserSubWindow,
+                                                public IALCBaselineModellingPresenterSubscriber {
   Q_OBJECT
 
 public:
   ALCInterface(QWidget *parent = nullptr);
 
+  void correctedDataChanged() override;
   void closeEvent(QCloseEvent *event) override;
   static std::string name() { return "ALC"; }
   static QString categoryInfo() { return "Muon"; }
@@ -81,10 +84,10 @@ private:
   // Step presenters
   std::unique_ptr<ALCDataLoadingPresenter> m_dataLoading;
   std::unique_ptr<ALCBaselineModellingPresenter> m_baselineModelling;
-  ALCPeakFittingPresenter *m_peakFitting;
+  std::unique_ptr<ALCPeakFittingPresenter> m_peakFitting;
 
   // Models
-  ALCPeakFittingModel *m_peakFittingModel;
+  std::shared_ptr<ALCPeakFittingModel> m_peakFittingModel;
 
   /// Name for every step for labels
   static const QStringList STEP_NAMES;

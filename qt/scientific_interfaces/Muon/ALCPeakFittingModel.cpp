@@ -7,15 +7,13 @@
 #include "ALCPeakFittingModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AlgorithmRuntimeProps.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-
-#include <Poco/ActiveResult.h>
-#include <QApplication>
 #include <utility>
 
 using namespace Mantid::API;
@@ -50,9 +48,16 @@ MatrixWorkspace_sptr evaluateFunction(const IFunction_const_sptr &function,
 
 namespace MantidQt::CustomInterfaces {
 
+ALCPeakFittingModel::ALCPeakFittingModel(std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner)
+    : m_algorithmRunner(std::move(algorithmRunner)) {
+  m_algorithmRunner->subscribe(this);
+}
+
+void ALCPeakFittingModel::subscribe(IALCPeakFittingModelSubscriber *subscriber) { m_subscriber = subscriber; }
+
 void ALCPeakFittingModel::setData(MatrixWorkspace_sptr newData) {
   m_data = std::move(newData);
-  emit dataChanged();
+  m_subscriber->dataChanged();
 }
 
 MatrixWorkspace_sptr ALCPeakFittingModel::exportWorkspace() {
@@ -75,30 +80,36 @@ ITableWorkspace_sptr ALCPeakFittingModel::exportFittedPeaks() {
 
 void ALCPeakFittingModel::setFittedPeaks(IFunction_const_sptr fittedPeaks) {
   m_fittedPeaks = std::move(fittedPeaks);
-  emit fittedPeaksChanged();
+  m_subscriber->fittedPeaksChanged();
 }
 
 void ALCPeakFittingModel::fitPeaks(IFunction_const_sptr peaks) {
   IAlgorithm_sptr fit = AlgorithmManager::Instance().create("Fit");
   fit->setAlwaysStoreInADS(false);
+  fit->setRethrows(true);
   fit->setProperty("Function", peaks->asString());
   fit->setProperty("InputWorkspace", std::const_pointer_cast<MatrixWorkspace>(m_data));
   fit->setProperty("CreateOutput", true);
   fit->setProperty("OutputCompositeMembers", true);
+  auto runtimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  MantidQt::API::IConfiguredAlgorithm_sptr fitAlg =
+      std::make_shared<MantidQt::API::ConfiguredAlgorithm>(fit, std::move(runtimeProps));
 
-  // Execute async so we can show progress bar
-  Poco::ActiveResult<bool> result(fit->executeAsync());
-  while (!result.available()) {
-    QCoreApplication::processEvents();
-  }
-  if (!result.error().empty()) {
-    QString msg = "Fit algorithm failed.\n\n" + QString(result.error().c_str()) + "\n";
-    emit errorInModel(msg);
-  }
+  m_algorithmRunner->execute(std::move(fitAlg));
+}
 
-  m_data = fit->getProperty("OutputWorkspace");
-  m_parameterTable = fit->getProperty("OutputParameters");
-  setFittedPeaks(static_cast<IFunction_sptr>(fit->getProperty("Function")));
+void ALCPeakFittingModel::notifyBatchComplete(MantidQt::API::IConfiguredAlgorithm_sptr &confAlgorithm,
+                                              bool /*unused*/) {
+  auto const &alg = confAlgorithm->algorithm();
+  m_data = alg->getProperty("OutputWorkspace");
+  m_parameterTable = alg->getProperty("OutputParameters");
+  setFittedPeaks(static_cast<IFunction_sptr>(alg->getProperty("Function")));
+}
+
+void ALCPeakFittingModel::notifyAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr &algorithm,
+                                               const std::string &message) {
+  std::string msg = algorithm->algorithm()->name() + " Algorithm failed.\n\n" + std::string(message) + "\n";
+  m_subscriber->errorInModel(msg);
 }
 
 MatrixWorkspace_sptr ALCPeakFittingModel::guessData(IFunction_const_sptr function, const std::vector<double> &xValues) {
