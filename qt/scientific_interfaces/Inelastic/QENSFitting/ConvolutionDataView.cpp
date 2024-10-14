@@ -38,8 +38,7 @@ ConvolutionDataView::ConvolutionDataView(const QStringList &headers, QWidget *pa
 
 void ConvolutionDataView::showAddWorkspaceDialog() {
   auto dialog = new ConvolutionAddWorkspaceDialog(parentWidget());
-  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
-          SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
+  connect(dialog, &ConvolutionAddWorkspaceDialog::addData, this, &ConvolutionDataView::notifyAddData);
 
   auto tabName = m_presenter->tabName();
   dialog->setAttribute(Qt::WA_DeleteOnClose);

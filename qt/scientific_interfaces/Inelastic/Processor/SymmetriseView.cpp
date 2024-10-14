@@ -119,19 +119,19 @@ SymmetriseView::SymmetriseView(QWidget *parent) : QWidget(parent), m_presenter()
 
   // SIGNAL/SLOT CONNECTIONS
   // Validate the E range when it is changed
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyDoubleValueChanged(QtProperty *, double)));
-  connect(m_enumManager, SIGNAL(valueChanged(QtProperty *, int)), this,
-          SLOT(notifyReflectTypeChanged(QtProperty *, int)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &SymmetriseView::notifyDoubleValueChanged);
+  connect(m_enumManager, &QtEnumPropertyManager::valueChanged, this, &SymmetriseView::notifyReflectTypeChanged);
   // Plot miniplot when file has finished loading
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SLOT(notifyDataReady(QString const &)));
+  connect(m_uiForm.dsInput, &DataSelector::dataReady, this, &SymmetriseView::notifyDataReady);
   // Preview symmetrise
-  connect(m_uiForm.pbPreview, SIGNAL(clicked()), this, SLOT(notifyPreviewClicked()));
+  connect(m_uiForm.pbPreview, &QPushButton::clicked, this, &SymmetriseView::notifyPreviewClicked);
   // X range selectors
-  connect(rangeESelector, SIGNAL(minValueChanged(double)), this, SLOT(notifyXrangeLowChanged(double)));
-  connect(rangeESelector, SIGNAL(maxValueChanged(double)), this, SLOT(notifyXrangeHighChanged(double)));
+  connect(rangeESelector, &MantidWidgets::RangeSelector::minValueChanged, this,
+          &SymmetriseView::notifyXrangeLowChanged);
+  connect(rangeESelector, &MantidWidgets::RangeSelector::maxValueChanged, this,
+          &SymmetriseView::notifyXrangeHighChanged);
   // Handle running, plotting and saving
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &SymmetriseView::notifySaveClicked);
 }
 
 //----------------------------------------------------------------------------------------------
