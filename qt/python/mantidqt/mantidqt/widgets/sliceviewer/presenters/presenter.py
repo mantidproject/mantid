@@ -20,6 +20,8 @@ from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE
 from mantidqt.widgets.sliceviewer.models.sliceinfo import SliceInfo
 from mantidqt.widgets.sliceviewer.models.workspaceinfo import WorkspaceInfo
 from mantidqt.widgets.sliceviewer.cutviewer.presenter import CutViewerPresenter
+from mantidqt.widgets.sliceviewer.cutviewer.view import CutViewerView
+from mantidqt.widgets.sliceviewer.cutviewer.model import CutViewerModel
 from mantidqt.widgets.sliceviewer.peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
 from mantidqt.widgets.sliceviewer.presenters.base_presenter import SliceViewerBasePresenter
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
@@ -360,7 +362,9 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         data_view = self._data_view
         if state:
             if self._cutviewer_presenter is None:
-                self._cutviewer_presenter = CutViewerPresenter(self, data_view.canvas)
+                cutviewer_view = CutViewerView(data_view.canvas, self.get_frame())
+                cutviewer_model = CutViewerModel(self.get_proj_matrix())
+                self._cutviewer_presenter = CutViewerPresenter(self, cutviewer_model, cutviewer_view)
                 self.view.add_widget_to_splitter(self._cutviewer_presenter.get_view())
             self._cutviewer_presenter.show_view()
             data_view.deactivate_tool(ToolItemText.ZOOM)
