@@ -70,8 +70,8 @@ public:
   std::string setValueFromJson(const Json::Value &value) override;
   std::string setDataItem(const std::shared_ptr<DataItem> &data) override;
   EnumeratedStringProperty const &operator=(E const value);
-  EnumeratedStringProperty const &operator=(std::string const &right);
-  EnumeratedStringProperty const &operator=(ENUMSTRING const &right);
+  EnumeratedStringProperty const &operator=(std::string const &value);
+  EnumeratedStringProperty const &operator=(ENUMSTRING const &value);
 
   // MUTATORS AND SUNDRY
   EnumeratedStringProperty &operator+=(Property const *right) override;
