@@ -5,9 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceProperty
+from mantid.kernel import logger, Direction, FloatArrayProperty, StringListValidator
+from mantid.simpleapi import (
+    AppendSpectra,
+    CropWorkspace,
+    DeleteWorkspace,
+    FindPeaks,
+    GroupDetectors,
+    RebinToWorkspace,
+    ScaleX,
+    SortTableWorkspace,
+)
 
 
 class TOSCABankCorrection(DataProcessorAlgorithm):

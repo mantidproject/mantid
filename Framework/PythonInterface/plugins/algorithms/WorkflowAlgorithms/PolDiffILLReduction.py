@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import (
+    mtd,
     AlgorithmFactory,
     FileAction,
     FileProperty,
@@ -30,7 +31,47 @@ from mantid.kernel import (
     RebinParamsValidator,
     StringListValidator,
 )
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    AppendSpectra,
+    ApplyPaalmanPingsCorrection,
+    BinWidthAtX,
+    ConjoinXRuns,
+    CloneWorkspace,
+    ConvertAxisByFormula,
+    ConvertSpectrumAxis,
+    ConvertToHistogram,
+    ConvertToPointData,
+    ConvertUnits,
+    CreateSingleValuedWorkspace,
+    CreateWorkspace,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    DetectorEfficiencyCorUser,
+    Divide,
+    EditInstrumentGeometry,
+    ExtractMonitors,
+    ExtractSpectra,
+    FindEPP,
+    GroupWorkspaces,
+    Integration,
+    LoadAndMerge,
+    MaskDetectors,
+    MergeRuns,
+    Minus,
+    Multiply,
+    PaalmanPingsAbsorptionCorrection,
+    PaalmanPingsMonteCarloAbsorption,
+    Plus,
+    Rebin,
+    RemoveBins,
+    RenameWorkspace,
+    ReplaceSpecialValues,
+    SetSample,
+    SortXAxis,
+    SplineInterpolation,
+    SumOverlappingTubes,
+    Transpose,
+)
 
 from scipy.constants import physical_constants
 import numpy as np

@@ -6,8 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # Pylint: disable=no-init,invalid-name
 import os
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import (
+    AlgorithmFactory,
+    AlgorithmManager,
+    AnalysisDataService,
+    FileAction,
+    FileProperty,
+    MatrixWorkspaceProperty,
+    PropertyMode,
+    PythonAlgorithm,
+)
+from mantid.kernel import Direction, Logger, PropertyManagerDataService, StringMandatoryValidator
 
 
 class EQSANSDirectBeamTransmission(PythonAlgorithm):
