@@ -5,9 +5,24 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import mtd, AlgorithmFactory, Progress, PropertyMode, PythonAlgorithm, WorkspaceGroupProperty, WorkspaceProperty
+from mantid.kernel import (
+    logger,
+    CalculateFlatBackground,
+    CropWorkspace,
+    DeleteWorkspace,
+    Direction,
+    Divide,
+    GroupWorkspaces,
+    Integration,
+    FloatArrayProperty,
+    IntArrayProperty,
+    StringArrayProperty,
+    Transpose,
+)
+from mantid.simpleapi import Load
+
+from IndirectCommon import check_hist_zero
 
 import os
 
@@ -221,8 +236,6 @@ class TimeSlice(PythonAlgorithm):
 
         @param raw_file Name of file to process
         """
-        from IndirectCommon import check_hist_zero
-
         # Crop the raw file to use the desired number of spectra
         # less one because CropWorkspace is zero based
         CropWorkspace(

@@ -15,6 +15,8 @@ from mantid.kernel import (
     FloatBoundedValidator,
 )
 from mantid.api import (
+    mtd,
+    AlgorithmFactory,
     PythonAlgorithm,
     MultipleFileProperty,
     FileProperty,
@@ -24,7 +26,25 @@ from mantid.api import (
     NumericAxis,
     WorkspaceGroup,
 )
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    AppendSpectra,
+    ConjoinXRuns,
+    ConvertSpectrumAxis,
+    CropWorkspace,
+    DeleteWorkspace,
+    Divide,
+    ExtractMonitors,
+    ExtractUnmaskedSpectra,
+    LoadAndMerge,
+    LoadNexusProcessed,
+    MaskDetectors,
+    Multiply,
+    RenameWorkspace,
+    Scale,
+    SortXAxis,
+    SumSpectra,
+    Transpose,
+)
 
 
 class PowderILLParameterScan(PythonAlgorithm):

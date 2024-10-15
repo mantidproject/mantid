@@ -4,10 +4,34 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
-from mantid import config
+from mantid.api import (
+    mtd,
+    AlgorithmFactory,
+    AnalysisDataService,
+    DataProcessorAlgorithm,
+    FileAction,
+    FileProperty,
+    Progress,
+    WorkspaceGroup,
+    WorkspaceGroupProperty,
+)
+from mantid.kernel import config, logger, Direction, IntArrayProperty, StringArrayProperty, StringListValidator
+from mantid.simpleapi import ConvertUnits, DeleteWorkspace, GroupWorkspaces
+
+from IndirectReductionCommon import (
+    load_files,
+    get_multi_frame_rebin,
+    identify_bad_detectors,
+    unwrap_monitor,
+    process_monitor_efficiency,
+    scale_monitor,
+    scale_detectors,
+    rebin_reduction,
+    group_spectra,
+    fold_chopped,
+    rename_reduction,
+    mask_detectors,
+)
 
 import os
 import warnings
@@ -84,22 +108,6 @@ class VesuvioDiffractionReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         warnings.warn("This algorithm is depreciated (April-2017). Please use ISISIndirectDiffractionReduction")
-
-        from IndirectReductionCommon import (
-            load_files,
-            get_multi_frame_rebin,
-            identify_bad_detectors,
-            unwrap_monitor,
-            process_monitor_efficiency,
-            scale_monitor,
-            scale_detectors,
-            rebin_reduction,
-            group_spectra,
-            fold_chopped,
-            rename_reduction,
-            mask_detectors,
-        )
-
         self._setup()
 
         load_opts = dict()

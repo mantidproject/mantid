@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (
+    mtd,
+    AlgorithmFactory,
     PythonAlgorithm,
     MatrixWorkspaceProperty,
     WorkspaceGroupProperty,
@@ -26,9 +28,19 @@ from mantid.kernel import (
     FloatArrayLengthValidator,
     CompositeValidator,
 )
-from mantid.simpleapi import *
-from MildnerCarpenter import *
-from DirectBeamResolution import *
+from mantid.simpleapi import (
+    CalculateDynamicRange,
+    ConjoinSpectra,
+    CropToComponent,
+    CropWorkspaceRagged,
+    DeleteWorkspace,
+    GroupWorkspaces,
+    ReplaceSpecialValues,
+    Q1DWeighted,
+    Qxy,
+)
+from MildnerCarpenter import MonochromaticScalarQCartesian, MonochromaticScalarQCylindric
+from DirectBeamResolution import DirectBeamResolution
 import numpy as np
 
 
