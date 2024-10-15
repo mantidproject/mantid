@@ -4,17 +4,29 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=no-init,invalid-name
-from mantid.api import *
-import mantid.simpleapi as api
-from mantid.kernel import *
+# pylint: disable=no-init,invalid-name,too-many-instance-attributes
+from mantid.api import (
+    mtd,
+    AlgorithmFactory,
+    AnalysisDataService,
+    FileAction,
+    FileProperty,
+    ITableWorkspaceProperty,
+    PythonAlgorithm,
+    PropertyMode,
+    MatrixWorkspaceProperty,
+)
+from mantid.kernel import Direction, StringArrayProperty, StringListValidator
+from mantid.simpleapi import (
+    CreateEmptyTableWorkspace,
+    GroupWorkspaces,
+    LeBailFit,
+    LoadNexusProcessed,
+    SaveNexusProcessed,
+    UpdatePeakParameterTableValue,
+)
 
 
-# from Calibration_ImportInformation import *
-
-
-# --------------------------------------------------------------------------------
-# pylint: disable=too-many-instance-attributes
 class RefinePowderDiffProfileSeq(PythonAlgorithm):
     """Refine powder diffractometer profile by Le Bail algorithm sequentially"""
 
@@ -327,7 +339,7 @@ class SeqRefineProfile(object):
         self._recordPostRefineInfo(runner)
 
         # Group the newly generated workspace and do some record
-        api.GroupWorkspaces(
+        GroupWorkspaces(
             InputWorkspaces="%s, %s, %s, %s" % (outwsname, self._profileWS, self._braggpeakws, self._bkgdparws),
             OutputWorkspace=self._wsgroupName,
         )
@@ -347,7 +359,7 @@ class SeqRefineProfile(object):
     def loadProject(self, projectfilename):
         """Load the project from a saved project file"""
         # Load workspace group
-        api.LoadNexusProcessed(Filename=projectfilename, OutputWorkspace=self._wsgroupName)
+        LoadNexusProcessed(Filename=projectfilename, OutputWorkspace=self._wsgroupName)
         self._wsgroup = AnalysisDataService.retrieve(self._wsgroupName)
 
         if self._wsgroup.__class__.__name__ != "WorkspaceGroup":
@@ -418,18 +430,18 @@ class SeqRefineProfile(object):
 
         # Group newly generated workspaces and add name to reposiotry
         if self._wsgroupCreated is True:
-            api.GroupWorkspaces(
+            GroupWorkspaces(
                 InputWorkspaces="%s, %s, %s" % (outwsname, outprofilewsname, outbraggpeakwsname), OutputWorkspace=self._wsgroupName
             )
         else:
             wsgroup = AnalysisDataService.retrieve(self._wsgroupName)
             hasbkgd = list(wsgroup.getNames()).count(bkgdparamwsname)
             if hasbkgd == 1:
-                api.GroupWorkspaces(
+                GroupWorkspaces(
                     InputWorkspaces="%s, %s, %s" % (outwsname, outprofilewsname, outbraggpeakwsname), OutputWorkspace=self._wsgroupName
                 )
             elif hasbkgd == 0:
-                api.GroupWorkspaces(
+                GroupWorkspaces(
                     InputWorkspaces="%s, %s, %s, %s" % (outwsname, outprofilewsname, outbraggpeakwsname, bkgdparamwsname),
                     OutputWorkspace=self._wsgroupName,
                 )
@@ -461,20 +473,20 @@ class SeqRefineProfile(object):
             except OSError:
                 shutil.rmtree(projectfname)
 
-        api.SaveNexusProcessed(InputWorkspace=self._wsgroupName, Filename=projectfname, Append=False)
+        SaveNexusProcessed(InputWorkspace=self._wsgroupName, Filename=projectfname, Append=False)
 
         # Add data workspace, tracking record table  to workspaces
         # api.GroupWorkspaces(InputWorkspaces="%s, %s, %s" % (datawsname, self._recordwsname, self._wsgroupName),
         #         OutputWorkspace=self._wsgroupName)
         self.glog.notice("Append record workspace %s" % (self._recordwsname))
-        api.SaveNexusProcessed(InputWorkspace=self._recordwsname, Filename=projectfname, Append=True)
+        SaveNexusProcessed(InputWorkspace=self._recordwsname, Filename=projectfname, Append=True)
 
         self.glog.notice("Append data workspace %s" % (datawsname))
-        api.SaveNexusProcessed(InputWorkspace=datawsname, Filename=projectfname, Append=True)
+        SaveNexusProcessed(InputWorkspace=datawsname, Filename=projectfname, Append=True)
 
         # Create a new README table workspace for some other information
         readmewsname = "READ_%s" % (self._ID)
-        readmews = api.CreateEmptyTableWorkspace(OutputWorkspace=readmewsname)
+        readmews = CreateEmptyTableWorkspace(OutputWorkspace=readmewsname)
         readmews.addColumn("str", "Function")
         readmews.addColumn("str", "Type")
 
@@ -485,13 +497,13 @@ class SeqRefineProfile(object):
         readmews.addRow(["Data", str(datawsname)])
         readmews.addRow(["Spectrum", str(wsindex)])
 
-        api.SaveNexusProcessed(InputWorkspace=readmewsname, Filename=projectfname, Append=True)
+        SaveNexusProcessed(InputWorkspace=readmewsname, Filename=projectfname, Append=True)
 
         return
 
     def _genRecordTable(self):
         """Generate record table"""
-        tablews = api.CreateEmptyTableWorkspace(OutputWorkspace=self._recordwsname)
+        tablews = CreateEmptyTableWorkspace(OutputWorkspace=self._recordwsname)
 
         tablews.addColumn("int", "Step")
         tablews.addColumn("str", "OutProfile")
@@ -660,7 +672,7 @@ class SeqRefineProfile(object):
 
 def generateMCSetupTableProf9(wsname):
     """Generate a Le Bail fit Monte Carlo random walk setup table"""
-    tablews = api.CreateEmptyTableWorkspace(OutputWorkspace=str(wsname))
+    tablews = CreateEmptyTableWorkspace(OutputWorkspace=str(wsname))
 
     tablews.addColumn("str", "Name")
     tablews.addColumn("double", "A0")
@@ -697,7 +709,7 @@ def generateMCSetupTableProf9(wsname):
 def generateMCSetupTableProf10(wsname):
     """Generate a Le Bail fit Monte Carlo random walk setup table"""
 
-    tablews = api.CreateEmptyTableWorkspace(OutputWorkspace=str(wsname))
+    tablews = CreateEmptyTableWorkspace(OutputWorkspace=str(wsname))
 
     tablews.addColumn("str", "Name")
     tablews.addColumn("double", "A0")
@@ -850,7 +862,7 @@ class RefineProfileParameters(object):
         self.glog.information("**** Fit range: %f, %f" % (startx, endx))
         self.glog.information("**** Profile workspace = %s, Reflection workspace = %s" % (self.inprofilewsname, self.inreflectionwsname))
 
-        api.LeBailFit(
+        LeBailFit(
             Function="Calculation",
             InputWorkspace=self.datawsname,
             OutputWorkspace=self.outwsname,
@@ -885,8 +897,8 @@ class RefineProfileParameters(object):
             #         UpdatePeakParameterTableValue().  It is not a real new table workspace, but a link
             #         to the 'inprofilewsname'
             #         There must be something wrong in AnalysisDataService.
-            api.UpdatePeakParameterTableValue(InputWorkspace=self.inprofilewsname, Column="FitOrTie", NewStringValue="tie")
-            api.UpdatePeakParameterTableValue(
+            UpdatePeakParameterTableValue(InputWorkspace=self.inprofilewsname, Column="FitOrTie", NewStringValue="tie")
+            UpdatePeakParameterTableValue(
                 InputWorkspace=self.inprofilewsname, Column="FitOrTie", ParameterNames=parameternames, NewStringValue="fit"
             )
 
@@ -910,7 +922,7 @@ class RefineProfileParameters(object):
             else:
                 raise NotImplementedError("Peak type %s is not supported to set up MC table." % (self.peaktype))
 
-            api.LeBailFit(
+            LeBailFit(
                 InputWorkspace=self.datawsname,
                 OutputWorkspace=self.outwsname,
                 InputParameterWorkspace=self.inprofilewsname,

@@ -4,10 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory
+from mantid.kernel import Direction, FloatArrayBoundedValidator, FloatArrayProperty, FloatBoundedValidator, StringListValidator
 from vesuvio.base import VesuvioBase
-from mantid.simpleapi import *
 import scipy.constants
 
 import math

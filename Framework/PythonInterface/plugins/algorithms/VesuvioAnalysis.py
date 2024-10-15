@@ -24,11 +24,35 @@ EXPERT VESUVIO INSTRUMENT SCIENTIST.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import (
+    mtd,
+    AlgorithmFactory,
+    FileAction,
+    FileProperty,
+    ITableWorkspaceProperty,
+    PropertyMode,
+    PythonAlgorithm,
+)
+from mantid.dataobjects import TableWorkspace
+from mantid.kernel import logger, FloatArrayProperty, IntArrayProperty
+from mantid.simpleapi import CloneWorkspace, Fit, LoadVesuvio, MaskDetectors, Minus, Rebin, RenameWorkspace, Scale, SumSpectra
 from mantid.kernel import StringListValidator, IntListValidator, FloatBoundedValidator, Direction
-from Inelastic.vesuvio.analysisHelpers import *
+from Inelastic.vesuvio.analysisHelpers import (
+    block_fit_ncp,
+    final_fit,
+    calculate_mantid_resolutions,
+    calculate_mean_widths_and_intensities,
+    calculate_sample_properties,
+    cleanNames,
+    convert_to_y_space_and_symmetrise,
+    correct_for_gamma_background,
+    correct_for_multiple_scattering,
+    create_slab_geometry,
+    generate_elements,
+    generate_constraints,
+    prepare_fit_arguments,
+    subtract_other_masses,
+)
 
 
 ################################################################################################
