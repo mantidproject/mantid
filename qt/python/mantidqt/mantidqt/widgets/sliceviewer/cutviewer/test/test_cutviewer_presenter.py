@@ -28,8 +28,10 @@ class TestCutViewerModel(unittest.TestCase):
         self.presenter.on_cut_done("wsname")
         self.presenter.view.plot_cut_ws.assert_called_once_with("wsname")
 
+    @mock.patch("mantidqt.widgets.sliceviewer.cutviewer.presenter.CutViewerPresenter.get_cut_representation_parameters")
     @mock.patch("mantidqt.widgets.sliceviewer.cutviewer.presenter.CutViewerPresenter.update_cut")
-    def test_show_view(self, mock_update_cut):
+    def test_show_view(self, mock_update_cut, mock_get_cut_rep):
+        mock_get_cut_rep.return_value = 6 * [None]
         self.presenter.model.get_default_bin_params.return_value = 3 * [None]  # vecs, extents, nbins
 
         self.presenter.show_view()
@@ -37,12 +39,15 @@ class TestCutViewerModel(unittest.TestCase):
         self.presenter.view.show.assert_called_once()
         self.presenter.view.set_bin_params.assert_called_once()
         mock_update_cut.assert_called_once()
+        mock_get_cut_rep.assert_called_once()
 
     def test_update_cut_with_valid_bin_params(self):
         in_vecs = eye(3)
         in_extents = tile(c_[[0.0, 1.0]], (1, 3))
         in_nbins = array([10, 1, 1])
-        self.presenter.view.get_bin_params.return_value = (in_vecs, in_extents, in_nbins)
+        self.presenter.view.get_vector.side_effect = lambda irow: in_vecs[irow, :]
+        self.presenter.view.get_extents.side_effect = lambda irow: in_extents[:, irow]
+        self.presenter.view.get_nbin.side_effect = lambda irow: in_nbins[irow]
         self.presenter.model.valid_bin_params.return_value = True
 
         self.presenter.update_cut()
@@ -52,8 +57,9 @@ class TestCutViewerModel(unittest.TestCase):
         self.assertTrue(array_equal(in_extents.flatten(order="F"), out_extents))
         self.assertTrue(array_equal(in_nbins, out_nbins))
 
-    def test_update_cut_with_invalid_bin_params(self):
-        self.presenter.view.get_bin_params.return_value = 3 * [None]
+    @mock.patch("mantidqt.widgets.sliceviewer.cutviewer.presenter.CutViewerPresenter.get_bin_params_from_view")
+    def test_update_cut_with_invalid_bin_params(self, mock_get_bin_params):
+        mock_get_bin_params.return_value = 3 * [None]
         self.presenter.model.valid_bin_params.return_value = False
 
         self.presenter.update_cut()
@@ -64,7 +70,10 @@ class TestCutViewerModel(unittest.TestCase):
     def test_update_bin_params_from_cut_representation(self, mock_update_cut):
         xmin, xmax, ymin, ymax, thickness = 0, 1, 0, 1, 0.1
         self.presenter.model.calc_bin_params_from_cut_representation.return_value = 3 * [None]  # vecs, extents, nbins
-        self.presenter.view.get_bin_params.return_value = (eye(3), "ignored", "ignored")  # vecs, extents, nbins
+        in_vecs = eye(3)
+        self.presenter.view.get_vector.side_effect = lambda irow: in_vecs[irow, :]
+        self.presenter.view.get_extents.return_value = 2 * [None]  # ignored
+        self.presenter.view.get_nbin.return_value = None  # ignored
 
         self.presenter.update_bin_params_from_cut_representation(xmin, xmax, ymin, ymax, thickness)
 
