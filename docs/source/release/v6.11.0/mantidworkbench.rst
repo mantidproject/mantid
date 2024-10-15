@@ -17,8 +17,8 @@ New Features
 - ``Run`` and ``Abort`` buttons now display tooltips explaining their functionality and shortcut keys.
   Tooltips are displayed when hovering over the relevant buttons:
 
-  .. figure::  ../../images/6_11_release/run_abort_tooltip.gif
-     :width: 450px
+.. figure::  ../../images/6_11_release/run_abort_tooltip.gif
+   :width: 450px
 
 - The Sequential Fit Dialog has a new selection method to `ExtendedSelection <https://doc.qt.io/qt-5/qabstractitemview.html#SelectionMode-enum>`_ when adding workspaces.
 

@@ -32,8 +32,8 @@ New features
 - Version 2 of the algorithm :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>` that adds the property ``FilterByTime``.
 - New algorithm :ref:`ScaleInstrumentComponent <algm-ScaleInstrumentComponent>` to scale all detectors in an instrument component around the component's geometrical position.
 
-  .. figure::  ../../images/6_11_release/ScaleInstrumentComponent.png
-     :width: 400px
+.. figure::  ../../images/6_11_release/ScaleInstrumentComponent.png
+   :width: 400px
 
 - Algorithm :ref:`GenerateGroupingSNSInelastic <algm-GenerateGroupingSNSInelastic>` has the new input option :ref:`InstrumentDefinitionFile`.
   Selecting the new ``InstrumentDefinitionFile`` option in the instrument drop down menu will create a new field allowing users to select older instrument definition files.

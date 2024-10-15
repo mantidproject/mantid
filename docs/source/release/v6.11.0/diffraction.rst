@@ -72,8 +72,8 @@ New features
     The algorithm is useful for finding a single UB in the presence of spurious peaks, or finding multiple UBs when there
     are multiple domains.
 
-  .. figure::  ../../images/6_11_release/FindMultipleUMatrices.png
-     :width: 400px
+.. figure::  ../../images/6_11_release/FindMultipleUMatrices.png
+   :width: 400px
 
 - Algorithm :ref:`ShowPossibleCells <algm-ShowPossibleCells>` now has a new output property, ``Cells``, that includes the cell information in a usable way.
 - New algorithm :ref:`SaveMDHistoToVTK <algm-SaveMDHistoToVTK>` that saves a :ref:`MDHistoWorkspace <MDHistoWorkspace>` as a ``VTK`` file so that it can be visualized by ``Paraview``.
