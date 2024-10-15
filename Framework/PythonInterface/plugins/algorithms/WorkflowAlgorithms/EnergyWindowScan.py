@@ -4,30 +4,25 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, Progress, PropertyMode, WorkspaceProperty
+from mantid.kernel import (
+    logger,
+    Direction,
+    FloatArrayProperty,
+    IntArrayMandatoryValidator,
+    IntArrayProperty,
+    Property,
+    StringArrayProperty,
+    StringListValidator,
+)
 from mantid import config
 
 import os
 
 
-def _str_or_none(s):
-    if s != "":
-        return s
-    else:
-        return None
-
-
 def _ws_or_none(s):
     if s != "":
         return mtd[s]
-    else:
-        return None
-
-
-def _elems_or_none(l):
-    if len(l) != 0:
-        return l
     else:
         return None
 

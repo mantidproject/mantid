@@ -4,15 +4,19 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+# pylint: disable=too-few-public-methods
 import itertools
 
 from IndirectReductionCommon import calibrate, group_spectra, load_files, rebin_logarithmic
 
-from mantid.kernel import *
-from mantid.api import *
+from mantid import FileFinder
+from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, MatrixWorkspaceProperty, PythonAlgorithm
+from mantid.kernel import logger, Direction, IntBoundedValidator, StringArrayProperty, StringListValidator
 from mantid.simpleapi import (
     AddSampleLog,
     CloneWorkspace,
+    ConjoinSpectra,
+    CreateWorkspace,
     CropWorkspace,
     DeleteWorkspace,
     Divide,
@@ -20,12 +24,8 @@ from mantid.simpleapi import (
     NormaliseByCurrent,
     RebinToWorkspace,
     ReplaceSpecialValues,
-    ConjoinSpectra,
-    CreateWorkspace,
 )
 import numpy as np
-
-# pylint: disable=too-few-public-methods
 
 
 def _str_or_none(string):

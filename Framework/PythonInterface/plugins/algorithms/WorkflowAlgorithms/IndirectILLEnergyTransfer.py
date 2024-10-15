@@ -18,6 +18,7 @@ from mantid.kernel import (
     IntBoundedValidator,
 )
 from mantid.api import (
+    AlgorithmFactory,
     PythonAlgorithm,
     MultipleFileProperty,
     FileProperty,
@@ -27,7 +28,34 @@ from mantid.api import (
     WorkspaceProperty,
     PropertyMode,
 )
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    AddSampleLog,
+    AddSampleLogMultiple,
+    ConvertAxisByFormula,
+    ConvertSpectrumAxis,
+    ConvertUnits,
+    CropWorkspace,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    Divide,
+    ExtractMonitors,
+    ExtractSingleSpectrum,
+    ExtractSpectra,
+    FindEPP,
+    GroupDetectors,
+    GroupWorkspaces,
+    Integration,
+    LoadAndMerge,
+    LoadParameterFile,
+    MaskBins,
+    MoveInstrumentComponent,
+    Plus,
+    RebinToWorkspace,
+    RenameWorkspace,
+    ReplaceSpecialValues,
+    Scale,
+    ScaleX,
+)
 
 N_TUBES = 16
 N_PIXELS_PER_TUBE = 128

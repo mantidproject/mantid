@@ -5,9 +5,20 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import (
+    mtd,
+    AlgorithmFactory,
+    DataProcessorAlgorithm,
+    ITableWorkspaceProperty,
+    MatrixWorkspace,
+    MatrixWorkspaceProperty,
+    NumericAxis,
+    Progress,
+    PropertyMode,
+    WorkspaceGroupProperty,
+)
+from mantid.kernel import logger, Direction, StringListValidator
+from mantid.simpleapi import PlotPeakByLogValue
 
 
 class MSDFit(DataProcessorAlgorithm):

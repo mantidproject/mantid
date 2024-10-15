@@ -8,8 +8,22 @@ import os
 import numpy
 from mantid import mtd
 from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator, FloatArrayMandatoryValidator, IntBoundedValidator
-from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, FileAction, WorkspaceGroupProperty, Progress
-from mantid.simpleapi import *
+from mantid.api import AlgorithmFactory, PythonAlgorithm, MultipleFileProperty, FileProperty, FileAction, WorkspaceGroupProperty, Progress
+from mantid.simpleapi import (
+    CloneWorkspace,
+    DeleteWorkspace,
+    Divide,
+    GroupWorkspaces,
+    IndirectILLEnergyTransfer,
+    Integration,
+    MaskBins,
+    MatchPeaks,
+    Minus,
+    Plus,
+    RenameWorkspace,
+    Scale,
+    SelectNexusFilesByMetadata,
+)
 
 
 class IndirectILLReductionQENS(PythonAlgorithm):
