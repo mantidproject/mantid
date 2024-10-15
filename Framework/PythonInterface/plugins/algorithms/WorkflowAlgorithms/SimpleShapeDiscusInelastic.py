@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, PropertyMode, Sample
 from mantid.kernel import (
+    logger,
     VisibleWhenProperty,
     Property,
     PropertyCriterion,
@@ -15,7 +16,7 @@ from mantid.kernel import (
     FloatBoundedValidator,
     Direction,
 )
-from mantid.simpleapi import *
+from mantid.simpleapi import DiscusMultipleScatteringCorrection, SetSample
 
 
 class SimpleShapeDiscusInelastic(PythonAlgorithm):

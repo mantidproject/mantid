@@ -7,6 +7,7 @@
 
 import DirectILL_common as common
 from mantid.api import (
+    mtd,
     AlgorithmFactory,
     DataProcessorAlgorithm,
     FileAction,
@@ -26,7 +27,42 @@ from mantid.kernel import (
     RebinParamsValidator,
     StringListValidator,
 )
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    ApplyPaalmanPingsCorrection,
+    ConvertUnits,
+    CorrectKiKf,
+    CreateSingleValuedWorkspace,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    DetectorEfficiencyCorUser,
+    DirectILLCollectData,
+    DirectILLDiagnostics,
+    DirectILLReduction,
+    DirectILLIntegrateVanadium,
+    Divide,
+    GroupDetectors,
+    GroupWorkspaces,
+    Load,
+    LoadEmptyInstrument,
+    LoadMask,
+    LoadNexus,
+    MaskAngle,
+    MaskBinsIf,
+    MaskBTP,
+    MaskDetectors,
+    MergeRuns,
+    Minus,
+    PaalmanPingsAbsorptionCorrection,
+    PaalmanPingsMonteCarloAbsorption,
+    Rebin,
+    RebinToWorkspace,
+    RenameWorkspace,
+    SaveMask,
+    SaveNexus,
+    SaveNXSPE,
+    Scale,
+    SetSample,
+)
 
 from os import path
 
