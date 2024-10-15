@@ -5,10 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import Direction, FloatArrayProperty, StringListValidator
-import mantid
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, PropertyMode, MatrixWorkspaceProperty
+from mantid.kernel import ConfigService, Direction, FloatArrayProperty, StringListValidator
+from mantid.simpleapi import (
+    AlignAndFocusPowder,
+    LoadDetectorsGroupingFile,
+    LoadEventAndCompress,
+    NormaliseByCurrent,
+    PDDetermineCharacterizations,
+    PDLoadCharacterizations,
+    SaveNexusPD,
+    SetUncertainties,
+)
 
 COMPRESS_TOL_TOF = 0.01
 EVENT_WORKSPACE_ID = "EventWorkspace"
@@ -161,7 +169,7 @@ class PDToGUDRUN(DataProcessorAlgorithm):
         groupingFile = self.getProperty("GroupingFile").value
         if len(groupingFile) > 0:
             instrumentName = wksp.getInstrument().getName()
-            instrumentName = mantid.ConfigService.getInstrument(instrumentName).shortName()
+            instrumentName = ConfigService.getInstrument(instrumentName).shortName()
             LoadDetectorsGroupingFile(InputFile=groupingFile, OutputWorkspace=instrumentName + "_group")
 
         wksp = AlignAndFocusPowder(
