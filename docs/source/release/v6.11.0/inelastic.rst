@@ -50,7 +50,7 @@ Algorithms
 
 New features
 ############
-- :ref:`Abins <algm-Abins>`/:ref:`Abins2D <algm-Abins2D>`algorithms now support "high-precision" eigenvectors from GAUSSIAN.
+- :ref:`Abins <algm-Abins>`/:ref:`Abins2D <algm-Abins2D>` algorithms now support "high-precision" eigenvectors from GAUSSIAN.
   These are activated in GAUSSIAN with the ``freq(HPModes)`` parameter.
   In previous Mantid versions the Abins parser would fail to read the resulting files; now the high-precision values will be used.
 
