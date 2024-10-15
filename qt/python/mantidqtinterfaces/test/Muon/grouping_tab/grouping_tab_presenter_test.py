@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import os
 import unittest
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
@@ -393,10 +394,41 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.assertEqual(1, self.presenter.period_info_widget.show.call_count)
 
     def test_check_and_get_filename_empty_filename(self):
-        # self.view.show_question_dialog = mock.MagicMock(return_value=True)
         filename = self.presenter._check_and_get_filename("")
-
         self.assertEqual(filename, "")
+
+    def test_check_and_get_filename_with_xml_extension(self):
+        expected_filename = "file.xml"
+        filename = self.presenter._check_and_get_filename(expected_filename)
+        self.assertEqual(filename, expected_filename)
+
+    def test_check_and_get_filename_without_xml_extension_if_xml_file_exists(self):
+        # Pretend file already exists.
+        os.path.isfile = mock.MagicMock(return_value=True)
+        # User selects "yes" to replace existing file
+        self.view.show_question_dialog = mock.MagicMock(return_value=True)
+        expected_filename = "file.xml"
+        given_filename = "file.txt"
+        filename = self.presenter._check_and_get_filename(given_filename)
+        self.assertEqual(filename, expected_filename)
+
+    def test_check_and_get_filename_without_xml_extension_if_xml_file_exists_no_overwrite(self):
+        # Pretend file already exists.
+        os.path.isfile = mock.MagicMock(return_value=True)
+        # User selects "no" to replace existing file
+        self.view.show_question_dialog = mock.MagicMock(return_value=False)
+        expected_filename = ""
+        given_filename = "file.txt"
+        filename = self.presenter._check_and_get_filename(given_filename)
+        self.assertEqual(filename, expected_filename)
+
+    def test_check_and_get_filename_without_xml_extension_if_xml_file_not_exists(self):
+        # Pretend file does not already exist.
+        os.path.isfile = mock.MagicMock(return_value=False)
+        expected_filename = "file.xml"
+        given_filename = "file.txt"
+        filename = self.presenter._check_and_get_filename(given_filename)
+        self.assertEqual(filename, expected_filename)
 
 
 if __name__ == "__main__":
