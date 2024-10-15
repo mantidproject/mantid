@@ -14,6 +14,7 @@ from qtpy.QtWidgets import QApplication
 from qtpy import QtCore
 from mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_presenter import PhaseTablePresenter
 from mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_view import PhaseTableView
+from mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_model import PhaseTableModel
 from mantidqtinterfaces.Muon.GUI.Common.muon_group import MuonGroup
 from mantidqtinterfaces.Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
@@ -25,7 +26,8 @@ def phase_table_name_side_effect():
 
 @start_qapplication
 class PhaseTablePresenterTest(unittest.TestCase):
-    def wait_for_thread(self, thread_model):
+    @staticmethod
+    def wait_for_thread(thread_model):
         if thread_model and thread_model.worker:
             while thread_model.worker.is_alive():
                 time.sleep(0.1)
@@ -33,16 +35,17 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
     def setUp(self):
         self.view = PhaseTableView()
-        self.context = setup_context()
-        self.context.data_context.instrument = "MUSR"
+        context = setup_context()
+        context.data_context.instrument = "MUSR"
+        self.model = PhaseTableModel(context)
 
-        self.presenter = PhaseTablePresenter(self.view, self.context)
+        self.presenter = PhaseTablePresenter(self.view, self.model)
 
         forward_group = MuonGroup(group_name="fwd", detector_ids=[1, 3, 5, 7, 9])
         backward_group = MuonGroup(group_name="bwd", detector_ids=[2, 4, 6, 8, 10])
 
-        self.context.group_pair_context.add_group(forward_group)
-        self.context.group_pair_context.add_group(backward_group)
+        self.model.group_pair_context.add_group(forward_group)
+        self.model.group_pair_context.add_group(backward_group)
         self.presenter.update_current_groups_list()
 
         self.view.warning_popup = mock.MagicMock()
@@ -52,7 +55,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
     def test_update_view_from_model_updates_view_to_have_correct_values(self):
         self.presenter.update_view_from_model()
 
-        for key, item in self.context.phase_context.options_dict.items():
+        for key, item in self.model.phase_context.options_dict.items():
             self.assertEqual(getattr(self.view, key), item)
 
     def test_update_model_from_view_updates_model_to_have_correct_values_if_view_changed(self):
@@ -62,13 +65,14 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         self.presenter.update_model_from_view()
 
-        self.assertEqual(self.context.phase_context.options_dict["input_workspace"], workspace_name)
+        self.assertEqual(self.model.phase_context.options_dict["input_workspace"], workspace_name)
 
     def test_create_parameters_for_cal_muon_phase_returns_correct_parameter_dict(self):
+        # TODO: Move to new model test
         workspace_name = "input_workspace_name_raw_data"
-        self.context.phase_context.options_dict["input_workspace"] = workspace_name
+        self.model.phase_context.options_dict["input_workspace"] = workspace_name
 
-        result = self.presenter.create_parameters_for_cal_muon_phase_algorithm()
+        result = self.model.create_parameters_for_cal_muon_phase_algorithm()
 
         self.assertEqual(
             result,
@@ -84,7 +88,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
     def test_correctly_retrieves_workspace_names_associsated_to_current_runs(self):
         self.view.set_input_combo_box = mock.MagicMock()
-        self.context.getGroupedWorkspaceNames = mock.MagicMock(return_value=["MUSR22222", "MUSR44444"])
+        self.model.get_grouped_workspace_names = mock.MagicMock(return_value=["MUSR22222", "MUSR44444"])
 
         self.presenter.update_current_run_list()
 
@@ -97,46 +101,47 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         self.view.set_group_combo_boxes.assert_called_once_with(["fwd", "bwd"])
 
-    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_presenter.MuonWorkspaceWrapper")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_model.MuonWorkspaceWrapper")
     def test_that_phase_table_added_to_ADS_with_correct_name_and_group(self, mock_workspace_wrapper):
+        # TODO: Move to new model test
         workspace_wrapper = mock.MagicMock()
         mock_workspace_wrapper.return_value = workspace_wrapper
 
-        self.presenter.add_phase_table_to_ADS("MUSR22222_period_1; PhaseTable")
+        self.model.add_phase_table_to_ads("MUSR22222_period_1; PhaseTable")
 
         mock_workspace_wrapper.assert_called_once_with("MUSR22222 MA/MUSR22222_period_1; PhaseTable")
         workspace_wrapper.show.assert_called_once_with()
 
-    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_CalMuonDetectorPhases")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_model.run_CalMuonDetectorPhases")
     def test_handle_calculate_phase_table_clicked_behaves_correctly_for_succesful_calculation(self, run_algorithm_mock):
         detector_table_mock = mock.MagicMock()
         self.view.set_input_combo_box(["MUSR22222_raw_data_period_1"])
-        self.context.getGroupedWorkspaceNames = mock.MagicMock(return_value=["MUSR22222_raw_data_period_1"])
-        self.context.phase_context.options_dict["input_workspace"] = "MUSR22222_raw_data_period_1"
+        self.model.get_grouped_workspace_names = mock.MagicMock(return_value=["MUSR22222_raw_data_period_1"])
+        self.model.phase_context.options_dict["input_workspace"] = "MUSR22222_raw_data_period_1"
         self.presenter.update_view_from_model()
         run_algorithm_mock.return_value = (detector_table_mock, mock.MagicMock())
-        self.presenter.add_phase_table_to_ADS = mock.MagicMock()
+        self.model.add_phase_table_to_ads = mock.MagicMock()
 
         self.presenter.update_current_run_list()
         self.presenter.handle_calculate_phase_table_clicked()
-        self.wait_for_thread(self.presenter.calculation_thread)
+        self.wait_for_thread(self.model.calculation_thread)
 
-        self.presenter.add_phase_table_to_ADS.assert_called_once_with(detector_table_mock)
+        self.model.add_phase_table_to_ads.assert_called_once_with(detector_table_mock)
         self.assertTrue(self.view.isEnabled())
 
-    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_CalMuonDetectorPhases")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_model.run_CalMuonDetectorPhases")
     def test_handle_calculate_phase_table_clicked_behaves_correctly_for_error_in_calculation(self, run_algorithm_mock):
-        self.context.getGroupedWorkspaceNames = mock.MagicMock(return_value=["MUSR22222_raw_data_period_1"])
-        self.context.phase_context.options_dict["input_workspace"] = "MUSR22222_raw_data_period_1"
+        self.model.get_grouped_workspace_names = mock.MagicMock(return_value=["MUSR22222_raw_data_period_1"])
+        self.model.phase_context.options_dict["input_workspace"] = "MUSR22222_raw_data_period_1"
         self.presenter.update_view_from_model()
         runtime_error = RuntimeError("CalMuonDetectorPhases has failed")
         run_algorithm_mock.side_effect = runtime_error
-        self.presenter.add_phase_table_to_ADS = mock.MagicMock()
+        self.model.add_phase_table_to_ads = mock.MagicMock()
         self.presenter.calculate_base_name_and_group = mock.MagicMock(return_value=("MUSR22222_raw_data_period_1", "MUSR22222 PhaseTable"))
 
         self.presenter.update_current_run_list()
         self.presenter.handle_calculate_phase_table_clicked()
-        self.wait_for_thread(self.presenter.calculation_thread)
+        self.wait_for_thread(self.model.calculation_thread)
 
         self.assertTrue(self.view.isEnabled())
         self.view.warning_popup.assert_called_once_with(runtime_error)
@@ -145,7 +150,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.view.set_phase_table_combo_box = mock.MagicMock()
         workspace_wrapper = mock.MagicMock()
         workspace_wrapper.workspace_name = "MUSR22222_phase_table"
-        self.context.phase_context.add_phase_table(workspace_wrapper)
+        self.model.phase_context.add_phase_table(workspace_wrapper)
 
         self.presenter.update_current_phase_tables()
 
@@ -158,24 +163,24 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.presenter.calculate_phase_table = mock.MagicMock()
 
         self.presenter.handle_calculate_phase_table_clicked()
-        self.wait_for_thread(self.presenter.calculation_thread)
+        self.wait_for_thread(self.model.calculation_thread)
 
         self.presenter.handle_phase_table_calculation_started.assert_called_once_with()
         self.presenter.handle_phase_table_calculation_success.assert_called_once_with()
         self.presenter.handle_phase_table_calculation_error.assert_not_called()
         self.presenter.calculate_phase_table.assert_called_once_with()
 
-    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_presenter.MuonWorkspaceWrapper")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_model.MuonWorkspaceWrapper")
     def test_add_fitting_info_to_ADS_does_nothing_if_output_fitting_info_is_false(self, workspace_wrapper_mock):
-        self.presenter.add_fitting_info_to_ADS_if_required("MUSR22222_PhaseTable", mock.MagicMock())
+        self.presenter.add_fitting_info_to_ADS_if_required(mock.MagicMock())
 
         workspace_wrapper_mock.assert_not_called()
 
-    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_presenter.MuonWorkspaceWrapper")
+    @mock.patch("mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_model.MuonWorkspaceWrapper")
     def test_add_fitting_info_to_ADS_adds_fitting_info_to_ADS_if_option_selected(self, workspace_wrapper_mock):
         self.view.output_fit_info_box.setCheckState(QtCore.Qt.Checked)
 
-        self.presenter.add_fitting_info_to_ADS_if_required("MUSR22222_PhaseTable", "MUSR22222_PhaseTable; fit_information")
+        self.presenter.add_fitting_info_to_ADS_if_required("MUSR22222_PhaseTable; fit_information")
 
         workspace_wrapper_mock.assert_called_once_with("MUSR22222_PhaseTable; fit_information")
         workspace_wrapper_mock.return_value.show.assert_called_once_with()
@@ -238,63 +243,63 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.create_phasequad_calculation_thread.call_count, 1)
 
     def test_phasequad_success(self):
-        self.context.group_pair_context.add_pair_to_selected_pairs = mock.Mock()
+        self.model.group_pair_context.add_pair_to_selected_pairs = mock.Mock()
         self.presenter.selected_phasequad_changed_notifier = mock.Mock()
         self.presenter.calculation_finished_notifier = mock.Mock()
         self.presenter.handle_thread_calculation_success = mock.Mock()
 
-        self.context.group_pair_context.add_pair_to_selected_pairs = mock.Mock()
+        self.model.group_pair_context.add_pair_to_selected_pairs = mock.Mock()
         self.presenter.selected_phasequad_changed_notifier.notify_subscribers = mock.Mock()
-        self.presenter._phasequad_obj = MuonPhasequad("test", "table")
+        self.model.phasequad = MuonPhasequad("test", "table")
         self.presenter.handle_phasequad_calculation_success()
 
-        self.context.group_pair_context.add_pair_to_selected_pairs.assert_any_call("test_Re_")
-        self.context.group_pair_context.add_pair_to_selected_pairs.assert_any_call("test_Im_")
+        self.model.group_pair_context.add_pair_to_selected_pairs.assert_any_call("test_Re_")
+        self.model.group_pair_context.add_pair_to_selected_pairs.assert_any_call("test_Im_")
         self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_not_called()
         self.presenter.calculation_finished_notifier.notify_subscribers.assert_called_once_with()
         self.presenter.handle_thread_calculation_success.assert_called_once_with()
 
     def test_handle_first_good_data_too_small(self):
         self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
-        self.context.data_context.instrument = "MUSR"
+        self.model.instrument = "MUSR"
         self.view.first_good_time = 0.0
-        self.context.first_good_data = mock.Mock(return_value=0.102)
+        self.model.context.first_good_data = mock.Mock(return_value=0.102)
         self.presenter.handle_first_good_data_changed()
 
         self.view.warning_popup.assert_called_once_with("First Good Data cannot be smaller than 0.102")
 
     def test_handle_first_good_data_too_big(self):
         self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
-        self.context.data_context.instrument = "MUSR"
+        self.model.instrument = "MUSR"
         self.view.first_good_time = 40.0
         self.view.last_good_time = 41.0
-        self.context.last_good_data = mock.Mock(return_value=32.29)
+        self.model.context.last_good_data = mock.Mock(return_value=32.29)
         self.presenter.handle_first_good_data_changed()
 
         self.view.warning_popup.assert_called_once_with("First Good Data cannot be greater than 32.29")
 
     def test_handle_last_good_data_too_small(self):
         self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
-        self.context.data_context.instrument = "MUSR"
+        self.model.instrument = "MUSR"
         self.view.first_good_time = -1.0
         self.view.last_good_time = 0.0
-        self.context.first_good_data = mock.Mock(return_value=0.102)
+        self.model.context.first_good_data = mock.Mock(return_value=0.102)
         self.presenter.handle_last_good_data_changed()
 
         self.view.warning_popup.assert_called_once_with("Last Good Data cannot be smaller than 0.102")
 
     def test_handle_last_good_data_too_big(self):
         self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
-        self.context.data_context.instrument = "MUSR"
+        self.model.instrument = "MUSR"
         self.view.last_good_time = 41.0
-        self.context.last_good_data = mock.Mock(return_value=32.29)
+        self.model.context.last_good_data = mock.Mock(return_value=32.29)
         self.presenter.handle_last_good_data_changed()
 
         self.view.warning_popup.assert_called_once_with("Last Good Data cannot be greater than 32.29")
 
     def test_handle_first_good_greater_than_last_good(self):
         self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
-        self.context.data_context.instrument = "MUSR"
+        self.model.instrument = "MUSR"
         self.view.first_good_time = 20.0
         self.view.last_good_time = 10.0
         self.presenter.handle_first_good_data_changed()
@@ -303,7 +308,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
     def test_handle_last_good_less_than_first_good(self):
         self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
-        self.context.data_context.instrument = "MUSR"
+        self.model.instrument = "MUSR"
         self.view.first_good_time = 20.0
         self.view.last_good_time = 10.0
         self.presenter.handle_last_good_data_changed()
@@ -312,9 +317,9 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
     def test_handle_first_good_and_last_good_pass_validation(self):
         self.view.input_workspace_combo_box.currentText = mock.Mock(return_value="MUSR62260_raw_data MA")
-        self.context.data_context.instrument = "MUSR"
-        self.context.first_good_data = mock.Mock(return_value=0.102)
-        self.context.last_good_data = mock.Mock(return_value=32.29)
+        self.model.instrument = "MUSR"
+        self.model.context.first_good_data = mock.Mock(return_value=0.102)
+        self.model.context.last_good_data = mock.Mock(return_value=32.29)
         self.view.first_good_time = 10.0
         self.view.last_good_time = 20.0
         self.presenter.handle_first_good_data_changed()
@@ -331,10 +336,10 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.view.remove_last_row = mock.Mock()
         self.presenter.add_phasequad_to_analysis = mock.Mock()
         self.presenter.calculation_finished_notifier = mock.Mock()
-        self.presenter.context.group_pair_context._phasequad = [phasequad]
+        self.presenter.model.group_pair_context._phasequad = [phasequad]
         self.presenter.handle_remove_phasequad_button_clicked()
 
-        self.assertEqual(0, len(self.presenter.context.group_pair_context.phasequads))
+        self.assertEqual(0, len(self.presenter.model.group_phasequads))
         self.presenter.add_phasequad_to_analysis.assert_called_once_with(False, False, phasequad)
         self.presenter.calculation_finished_notifier.notify_subscribers.assert_called_once_with()
 
@@ -348,10 +353,10 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.view.remove_phasequad_by_index = mock.Mock()
         self.presenter.add_phasequad_to_analysis = mock.Mock()
         self.presenter.calculation_finished_notifier = mock.Mock()
-        self.presenter.context.group_pair_context._phasequad = [phasequad_1, phasequad_2, phasequad_3]
+        self.presenter.model.group_pair_context._phasequad = [phasequad_1, phasequad_2, phasequad_3]
         self.presenter.handle_remove_phasequad_button_clicked()
 
-        self.assertEqual(1, len(self.presenter.context.group_pair_context.phasequads))
+        self.assertEqual(1, len(self.presenter.model.group_phasequads))
         self.view.remove_phasequad_by_index.assert_any_call(0)
         self.view.remove_phasequad_by_index.assert_any_call(1)
         self.presenter.add_phasequad_to_analysis.assert_any_call(False, False, phasequad_1)
@@ -361,29 +366,29 @@ class PhaseTablePresenterTest(unittest.TestCase):
     def test_calculate_phasequad(self):
         self.presenter.phasequad_calculation_complete_notifier = mock.Mock()
         self.presenter.phasequad_calculation_complete_notifier.notify_subscribers = mock.Mock()
-        self.context.group_pair_context.add_phasequad = mock.Mock()
-        self.context.calculate_phasequads = mock.Mock()
+        self.model.group_pair_context.add_phasequad = mock.Mock()
+        self.model.context.calculate_phasequads = mock.Mock()
         phasequad = MuonPhasequad("test", "table")
-        self.presenter._phasequad_obj = phasequad
+        self.model.phasequad = phasequad
 
         self.presenter.calculate_phasequad()
-        self.context.group_pair_context.add_phasequad.assert_called_once_with(phasequad)
-        self.context.calculate_phasequads.assert_called_once_with(phasequad)
+        self.model.group_pair_context.add_phasequad.assert_called_once_with(phasequad)
+        self.model.context.calculate_phasequads.assert_called_once_with(phasequad)
         self.presenter.phasequad_calculation_complete_notifier.notify_subscribers.assert_any_call(phasequad.Re.name)
         self.presenter.phasequad_calculation_complete_notifier.notify_subscribers.assert_any_call(phasequad.Im.name)
         self.assertEqual(self.presenter.phasequad_calculation_complete_notifier.notify_subscribers.call_count, 2)
 
     def test_handle_phase_table_changed_to_new_table(self):
-        self.context.phase_context.options_dict["phase_table_for_phase_quad"] = "MUSR22222_raw_data_period_1"
+        self.model.phase_context.options_dict["phase_table_for_phase_quad"] = "MUSR22222_raw_data_period_1"
         self.view.get_phase_table = mock.Mock(return_value="MUSR33333_raw_data_period_2")
-        self.context.group_pair_context.update_phase_tables = mock.Mock()
-        self.context.update_phasequads = mock.Mock()
+        self.model.group_pair_context.update_phase_tables = mock.Mock()
+        self.model.context.update_phasequads = mock.Mock()
 
         self.presenter.handle_phase_table_changed()
 
-        self.assertEqual(self.context.phase_context.options_dict["phase_table_for_phase_quad"], "MUSR33333_raw_data_period_2")
-        self.context.group_pair_context.update_phase_tables.assert_called_once_with("MUSR33333_raw_data_period_2")
-        self.assertEqual(1, self.context.update_phasequads.call_count)
+        self.assertEqual(self.model.phase_context.options_dict["phase_table_for_phase_quad"], "MUSR33333_raw_data_period_2")
+        self.model.group_pair_context.update_phase_tables.assert_called_once_with("MUSR33333_raw_data_period_2")
+        self.assertEqual(1, self.model.context.update_phasequads.call_count)
 
 
 if __name__ == "__main__":
