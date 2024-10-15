@@ -62,8 +62,7 @@ class CutViewerView(QWidget):
     # signals
 
     def on_cell_changed(self, irow, icol):
-        self.set_bin_params(*self.presenter.validate_bin_params(irow, icol))
-        self.presenter.update_cut()
+        self.presenter.handle_cell_changed(irow, icol)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)

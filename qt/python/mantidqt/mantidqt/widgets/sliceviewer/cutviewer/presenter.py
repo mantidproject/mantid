@@ -88,3 +88,7 @@ class CutViewerPresenter:
 
     def on_cut_done(self, wsname):
         self.view.plot_cut_ws(wsname)
+
+    def handle_cell_changed(self, irow: int, icol: int):
+        self.view.set_bin_params(*self.validate_bin_params(irow, icol))
+        self.update_cut()
