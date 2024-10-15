@@ -25,10 +25,11 @@ public:
     ExtractMask maskExtractor;
     maskExtractor.initialize();
     std::vector<Property *> properties = maskExtractor.getProperties();
-    TS_ASSERT_EQUALS(properties.size(), 3);
-    if (properties.size() == 3) {
+    TS_ASSERT_EQUALS(properties.size(), 4);
+    if (properties.size() == 4) {
       TS_ASSERT_EQUALS(properties[0]->name(), "InputWorkspace");
-      TS_ASSERT_EQUALS(properties[1]->name(), "OutputWorkspace");
+      TS_ASSERT_EQUALS(properties[1]->name(), "InstrumentDonor");
+      TS_ASSERT_EQUALS(properties[2]->name(), "OutputWorkspace");
     }
   }
 
