@@ -757,23 +757,31 @@ void AlignAndFocusPowder::exec() {
     setProperty("UnfocussedWorkspace", std::move(wkspCopy));
   }
 
-  // Diffraction focus
-  m_outputW = diffractionFocus(m_outputW);
-  if (m_processLowResTOF)
-    m_lowResW = diffractionFocus(m_lowResW);
-  m_progress->report();
+  if (binInDspace && m_resampleX == 0 && !m_delta_ragged.empty() && !m_dmins.empty() && !m_dmaxs.empty()) {
+    // Special case where we can do ragged rebin within diffraction focus
+    m_outputW = diffractionFocusRaggedRebinInDspace(m_outputW);
+    if (m_processLowResTOF)
+      m_lowResW = diffractionFocusRaggedRebinInDspace(m_lowResW);
+    m_progress->report();
+  } else {
+    // Diffraction focus
+    m_outputW = diffractionFocus(m_outputW);
+    if (m_processLowResTOF)
+      m_lowResW = diffractionFocus(m_lowResW);
+    m_progress->report();
 
-  // this next call should probably be in for rebin as well
-  // but it changes the system tests
-  if (binInDspace) {
-    if (m_resampleX != 0.) {
-      m_outputW = rebin(m_outputW);
-      if (m_processLowResTOF)
-        m_lowResW = rebin(m_lowResW);
-    } else if (!m_delta_ragged.empty()) {
-      m_outputW = rebinRagged(m_outputW, true);
-      if (m_processLowResTOF)
-        m_lowResW = rebinRagged(m_lowResW, true);
+    // this next call should probably be in for rebin as well
+    // but it changes the system tests
+    if (binInDspace) {
+      if (m_resampleX != 0.) {
+        m_outputW = rebin(m_outputW);
+        if (m_processLowResTOF)
+          m_lowResW = rebin(m_lowResW);
+      } else if (!m_delta_ragged.empty()) {
+        m_outputW = rebinRagged(m_outputW, true);
+        if (m_processLowResTOF)
+          m_lowResW = rebinRagged(m_lowResW, true);
+      }
     }
   }
   m_progress->report();
@@ -881,6 +889,35 @@ API::MatrixWorkspace_sptr AlignAndFocusPowder::diffractionFocus(API::MatrixWorks
   return ws;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Call diffraction focus to a matrix workspace with ragged rebin parameters
+ */
+API::MatrixWorkspace_sptr AlignAndFocusPowder::diffractionFocusRaggedRebinInDspace(API::MatrixWorkspace_sptr ws) {
+  if (!m_groupWS) {
+    g_log.information() << "not focussing data\n";
+    return ws;
+  }
+
+  API::IAlgorithm_sptr focusAlg = createChildAlgorithm("DiffractionFocussing");
+  focusAlg->setProperty("InputWorkspace", ws);
+  focusAlg->setProperty("OutputWorkspace", ws);
+  focusAlg->setProperty("GroupingWorkspace", m_groupWS);
+  focusAlg->setProperty("PreserveEvents", m_preserveEvents);
+  focusAlg->setProperty("DMin", m_dmins);
+  focusAlg->setProperty("DMax", m_dmaxs);
+  focusAlg->setProperty("Delta", m_delta_ragged);
+
+  g_log.information() << "running DiffractionFocussing(PreserveEvents=" << m_preserveEvents;
+  g_log.information() << " XMin=" << focusAlg->getPropertyValue("DMin");
+  g_log.information() << " XMax=" << focusAlg->getPropertyValue("DMax");
+  g_log.information() << " Delta=" << focusAlg->getPropertyValue("Delta");
+  g_log.information() << ") started at " << Types::Core::DateAndTime::getCurrentTime() << "\n";
+
+  focusAlg->executeAsChildAlg();
+  ws = focusAlg->getProperty("OutputWorkspace");
+
+  return ws;
+}
 //----------------------------------------------------------------------------------------------
 /** Convert units
  */

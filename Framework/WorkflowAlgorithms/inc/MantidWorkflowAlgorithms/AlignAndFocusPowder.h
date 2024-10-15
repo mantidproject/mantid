@@ -60,6 +60,9 @@ private:
   /// Call diffraction focus to a matrix workspace.
   API::MatrixWorkspace_sptr diffractionFocus(API::MatrixWorkspace_sptr ws);
 
+  /// Call diffraction focus to a matrix workspace with ragged rebin parameters
+  API::MatrixWorkspace_sptr diffractionFocusRaggedRebinInDspace(API::MatrixWorkspace_sptr ws);
+
   /// Convert units
   API::MatrixWorkspace_sptr convertUnits(API::MatrixWorkspace_sptr matrixws, const std::string &target);
 
