@@ -46,7 +46,7 @@ Bugfixes
 - Algorithm :ref:`LoadEventNexus <algm-LoadEventNexus>` now has the minimum histogram bin edge equal to the lowest time-of-flight event rather than one less.
   There are no longer negative bin edges unless there is actually a negative time-of-flight in the data.
 - Isotope densities have been updated, see https://pypi.org/project/periodictable/1.6.1/#history for notes about the updates from NIST.
-- All sample times are now allowed to be before 01/01/1991.
+- Files where all sample times are before 01/01/1991 will no longer generate an error.
 - Algorithm :ref:`ExtractFFTSpectrum <algm-ExtractFFTSpectrum>` no longer causes an unreliable segmentation fault.
 - Algorithm :ref:`LoadIsawUB <algm-LoadIsawUB>` now correctly adds the UB to the first experiment info when the input workspace has more than one.
 - Algorithms :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` have been fixed to correctly work with :ref:`Ragged Workspaces <Ragged_Workspace>`.
