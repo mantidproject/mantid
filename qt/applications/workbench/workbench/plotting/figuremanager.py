@@ -237,8 +237,6 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
             tbs_height = self.toolbar.sizeHint().height()
         else:
             tbs_height = 0
-        # canvas.mpl_connect("motion_notify_event", self.crosshair)
-        # self.crosshair_toggle(False)
 
         # resize the main window so it will display the canvas with the
         # requested size:
