@@ -22,7 +22,6 @@ namespace Mantid {
 namespace Kernel {
 
 // --------------------- convert values to strings
-namespace {
 /// Convert values to strings.
 template <typename T> std::string toString(const T &value) { return boost::lexical_cast<std::string>(value); }
 
@@ -123,9 +122,9 @@ GNU_DIAG_OFF("unused-function")
  */
 
 template <>
-std::string toPrettyString(const std::vector<bool> &value, size_t maxLength, bool collapseLists,
-                           const std::string &delimiter, const std::string &unusedDelimiter,
-                           typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
+inline std::string toPrettyString(const std::vector<bool> &value, size_t maxLength, bool collapseLists,
+                                  const std::string &delimiter, const std::string &unusedDelimiter,
+                                  typename std::enable_if<std::is_same<bool, bool>::value>::type *) {
   UNUSED_ARG(unusedDelimiter);
   UNUSED_ARG(collapseLists);
   return Strings::shorten(Strings::join(value.begin(), value.end(), delimiter), maxLength);
@@ -327,7 +326,6 @@ template <> inline std::vector<std::string> determineAllowedValues(const Optiona
                  [](const std::pair<OptionalBool::Value, std::string> &str) { return str.second; });
   return values;
 }
-} // namespace
 
 } // namespace Kernel
 } // namespace Mantid

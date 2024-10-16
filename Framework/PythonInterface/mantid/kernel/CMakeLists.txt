@@ -49,6 +49,7 @@ set(EXPORT_FILES
     src/Exports/PropertyManager.cpp
     src/Exports/PropertyManagerDataService.cpp
     src/Exports/PropertyManagerProperty.cpp
+    src/Exports/PythonObjectProperty.cpp
     src/Exports/PropertyHistory.cpp
     src/Exports/Memory.cpp
     src/Exports/ProgressBase.cpp
@@ -73,7 +74,8 @@ create_module(${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES})
 
 set(SRC_FILES
     src/Registry/MappingTypeHandler.cpp src/Registry/PropertyManagerFactory.cpp
-    src/Registry/PropertyWithValueFactory.cpp src/Registry/SequenceTypeHandler.cpp src/Registry/TypeRegistry.cpp
+    src/Registry/PropertyWithValueFactory.cpp src/Registry/PythonObjectTypeHandler.cpp
+    src/Registry/SequenceTypeHandler.cpp src/Registry/TypeRegistry.cpp
 )
 
 set(INC_FILES
