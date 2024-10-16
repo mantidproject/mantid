@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.simpleapi import PolarizerEfficiency
+from mantid.simpleapi import PolarizerEfficiency, Load
 from SANSPolarizationCorrectionsBase import SANSPolarizationCorrectionsBase
 from abc import abstractmethod, ABCMeta
 
@@ -34,8 +34,8 @@ class PolarizerEfficiencyTestBase(SANSPolarizationCorrectionsBase, metaclass=ABC
 
     def _run_test(self):
         pre_processed = self._prepare_workspace(self.input_filename)
-        eff = f"{self.input_efficiency_filename}EfficiencyReference.nxs"
-
+        eff_name = f"{self.input_efficiency_filename}EfficiencyReference.nxs"
+        eff = Load(eff_name)
         PolarizerEfficiency(pre_processed, eff, "00,10,11,01", OutputWorkspace="result")
 
     def _validate(self):
