@@ -8,19 +8,21 @@
 from mantid.api import mtd, AlgorithmFactory, Progress, PropertyMode, PythonAlgorithm, WorkspaceGroupProperty, WorkspaceProperty
 from mantid.kernel import (
     logger,
-    CalculateFlatBackground,
-    CropWorkspace,
-    DeleteWorkspace,
     Direction,
-    Divide,
-    GroupWorkspaces,
-    Integration,
     FloatArrayProperty,
     IntArrayProperty,
     StringArrayProperty,
+)
+from mantid.simpleapi import (
+    CalculateFlatBackground,
+    CropWorkspace,
+    DeleteWorkspace,
+    Divide,
+    GroupWorkspaces,
+    Integration,
+    Load,
     Transpose,
 )
-from mantid.simpleapi import Load
 
 from IndirectCommon import check_hist_zero
 

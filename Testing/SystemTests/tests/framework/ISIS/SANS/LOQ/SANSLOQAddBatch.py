@@ -7,7 +7,7 @@
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
+from mantid.simpleapi import Load
 from mantid.api import FileFinder
 from mantid import config
 import ISISCommandInterface as ici

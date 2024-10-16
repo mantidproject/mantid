@@ -10,7 +10,8 @@ These system tests are to verify that the IDF and parameter files for POLREF, CR
 """
 
 import systemtesting
-from mantid.simpleapi import *
+from mantid.kernel import config
+from mantid.simpleapi import LoadEmptyInstrument
 import os
 from abc import ABCMeta, abstractmethod
 

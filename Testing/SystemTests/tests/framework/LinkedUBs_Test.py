@@ -7,7 +7,8 @@
 # pylint: disable=invalid-name,no-init
 # System test that loads short SXD numors and runs LinkedUBs.
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import FindSXPeaks, LinkedUBs, LoadRaw, PredictPeaks, SetGoniometer, SetUB
 import numpy as np
 
 

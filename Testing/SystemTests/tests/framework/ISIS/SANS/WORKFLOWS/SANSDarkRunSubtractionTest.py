@@ -11,11 +11,13 @@
 import unittest
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
+from mantid.api import AlgorithmManager
+from mantid.kernel import config
 from isis_reduction_steps import DarkRunSubtraction
 from SANSUserFileParser import DarkRunSettings
 from SANSUtility import getFileAndName
 import numpy as np
+import os
 
 from sans.common.enums import SANSInstrument
 

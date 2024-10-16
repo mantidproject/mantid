@@ -7,8 +7,21 @@
 # pylint: disable=no-init
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
-from ISISCommandInterface import *
+from ISISCommandInterface import (
+    AssignCan,
+    AssignSample,
+    DefaultTrans,
+    Detector,
+    FindBeamCentre,
+    Gravity,
+    LOQ,
+    MaskFile,
+    Set1D,
+    SetCentre,
+    TransmissionCan,
+    TransmissionSample,
+    WavRangeReduction,
+)
 from sans.common.enums import SANSInstrument
 
 

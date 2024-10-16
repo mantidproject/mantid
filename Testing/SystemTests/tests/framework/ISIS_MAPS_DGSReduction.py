@@ -7,7 +7,10 @@
 # pylint: disable=invalid-name
 """Sample MAPS reduction scrip"""
 
-from Direct.ReductionWrapper import *
+from Direct.AbsorptionShapes import Cylinder
+from Direct.DirectEnergyConversion import DirectEnergyConversion
+from Direct.ReductionWrapper import AdvancedProperties, iliad, MainProperties, MethodType, ReductionWrapper
+from mantid.kernel import config, PropertyManager
 
 try:
     import reduce_vars as web_var

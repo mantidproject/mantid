@@ -8,7 +8,8 @@
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
+from mantid.api import FileFinder
+from mantid.kernel import config
 import ISISCommandInterface as i
 from sans.common.enums import SANSInstrument
 

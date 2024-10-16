@@ -34,7 +34,7 @@ from mantid.api import (
     PythonAlgorithm,
 )
 from mantid.dataobjects import TableWorkspace
-from mantid.kernel import logger, FloatArrayProperty, IntArrayProperty
+from mantid.kernel import FloatArrayProperty, IntArrayProperty
 from mantid.simpleapi import CloneWorkspace, Fit, LoadVesuvio, MaskDetectors, Minus, Rebin, RenameWorkspace, Scale, SumSpectra
 from mantid.kernel import StringListValidator, IntListValidator, FloatBoundedValidator, Direction
 from Inelastic.vesuvio.analysisHelpers import (
@@ -230,7 +230,7 @@ class VesuvioAnalysis(PythonAlgorithm):
 
     def PyExec(self):
         IPFile = self.getProperty("IPFile").value
-        g_log = logger(self.log())
+        g_log = self.log()
         analysisMode = self.getProperty("AnalysisMode").value
         # This is the number of iterations for the reduction analysis in time-of-flight.
         number_of_iterations = self.getProperty("NumberOfIterations").value

@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid import *
-from mantid.simpleapi import *
+from mantid.api import mtd, FileFinder
+from mantid.kernel import logger
+from mantid.simpleapi import CreateSingleValuedWorkspace, Divide, LoadEventNexus, LiquidsReflectometryReduction, LRPrimaryFraction
 
 
 class LRPrimaryFractionTest(systemtesting.MantidSystemTest):

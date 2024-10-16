@@ -6,9 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid import *
-
-from mantid.simpleapi import *
+from mantid.api import FileFinder
+from mantid.simpleapi import LiquidsReflectometryReduction
 
 
 class ApplyScalingFactorTest(systemtesting.MantidSystemTest):
