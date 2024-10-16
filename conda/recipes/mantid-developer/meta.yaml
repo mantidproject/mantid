@@ -12,6 +12,7 @@ requirements:
     - doxygen {{ doxygen }}
     - eigen {{ eigen }}
     - euphonic {{ euphonic }}
+    - freeimage {{ freeimage }} # This is not a primary dependency, but we need to pin it to avoid failures.
     - graphviz {{ graphviz }}
     - gsl {{ gsl }}
     - h5py

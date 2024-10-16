@@ -33,6 +33,7 @@ requirements:
 
   host:
     - eigen {{ eigen }}
+    - freeimage {{ freeimage }} # This is not a primary dependency, but we need to pin it to avoid failures.
     - gsl {{ gsl }}
     - h5py
     - hdf5 {{ hdf5 }}
@@ -55,6 +56,7 @@ requirements:
     - versioningit {{ versioningit }}
     - libglu {{ libglu }}  # [linux]
   run:
+    - freeimage {{ freeimage }} # This is not a primary dependency, but we need to pin it to avoid failures.
     - {{ pin_compatible("gsl", max_pin="x.x") }}
     - h5py
     - {{ pin_compatible("hdf5", max_pin="x.x") }}
