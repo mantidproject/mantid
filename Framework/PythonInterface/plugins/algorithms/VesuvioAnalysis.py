@@ -34,9 +34,8 @@ from mantid.api import (
     PythonAlgorithm,
 )
 from mantid.dataobjects import TableWorkspace
-from mantid.kernel import logger, FloatArrayProperty, IntArrayProperty
+from mantid.kernel import Direction, FloatArrayProperty, FloatBoundedValidator, IntArrayProperty, IntListValidator, StringListValidator
 from mantid.simpleapi import CloneWorkspace, Fit, LoadVesuvio, MaskDetectors, Minus, Rebin, RenameWorkspace, Scale, SumSpectra
-from mantid.kernel import StringListValidator, IntListValidator, FloatBoundedValidator, Direction
 from Inelastic.vesuvio.analysisHelpers import (
     block_fit_ncp,
     final_fit,
@@ -50,6 +49,7 @@ from Inelastic.vesuvio.analysisHelpers import (
     create_slab_geometry,
     generate_elements,
     generate_constraints,
+    logger,
     prepare_fit_arguments,
     subtract_other_masses,
 )

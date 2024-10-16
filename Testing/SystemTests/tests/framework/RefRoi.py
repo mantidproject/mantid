@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 import systemtesting
-from mantid import *
-from mantid.simpleapi import *
+from mantid.simpleapi import Integration, Load, RefRoi, Transpose
 
 
 class RefRoiTest(systemtesting.MantidSystemTest):

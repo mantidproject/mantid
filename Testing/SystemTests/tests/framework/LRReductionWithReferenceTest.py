@@ -8,9 +8,8 @@
 import json
 
 import systemtesting
-from mantid import *
-
-from mantid.simpleapi import *
+from mantid.api import FileFinder
+from mantid.simpleapi import LRReductionWithReference
 
 
 class LRReductionWithRefrenceTest(systemtesting.MantidSystemTest):

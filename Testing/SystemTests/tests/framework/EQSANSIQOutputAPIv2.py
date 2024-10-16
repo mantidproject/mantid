@@ -8,10 +8,25 @@
 import systemtesting
 import math
 import os
-from mantid.simpleapi import *
-from reduction_workflow.instruments.sans.sns_command_interface import *
-from reduction_workflow.instruments.sans.hfir_command_interface import *
-from mantid.api import *
+from reduction_workflow.instruments.sans.sns_command_interface import (
+    AppendDataFile,
+    BeamMonitorNormalization,
+    EQSANS,
+    NoSolidAngle,
+    Reduce1D,
+    Resolution,
+    SetBeamCenter,
+    TotalChargeNormalization,
+    UseConfig,
+    UseConfigMask,
+    UseConfigTOFTailsCutoff,
+)
+from reduction_workflow.instruments.sans.hfir_command_interface import Background, SetTransmission
+
+from mantid.api import mtd, FileFinder
+from mantid.kernel import ConfigService
+from mantid.simpleapi import Scale
+
 from functools import reduce
 
 

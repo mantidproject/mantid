@@ -12,10 +12,10 @@ and that mantid can be imported
 import systemtesting
 import numpy as np
 
-from mantid.api import WorkspaceGroup, MatrixWorkspace
-from mantid.simpleapi import *
+from mantid.api import mtd, WorkspaceGroup, MatrixWorkspace
+from mantid.simpleapi import CropWorkspace, LoadVesuvio, Rebin
 from vesuvio.commands import fit_tof
-from vesuvio.instrument import *
+from vesuvio.instrument import VESUVIO
 
 
 # =====================================Helper Function=================================

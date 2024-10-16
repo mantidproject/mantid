@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.simpleapi import CompareWorkspaces, CreateEmptyTableWorkspace, CropWorkspace, FFT, Load, PhaseQuad, ScaleX
 from math import pi
 
 

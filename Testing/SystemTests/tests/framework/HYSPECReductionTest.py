@@ -9,7 +9,23 @@
 System test for HYSPEC reduction
 """
 
-from mantid.simpleapi import *
+from mantid.kernel import config
+from mantid.simpleapi import (
+    BinMD,
+    CompressEvents,
+    ConvertMDHistoToMatrixWorkspace,
+    ConvertToMD,
+    DeleteWorkspace,
+    DgsReduction,
+    FilterByLogValue,
+    FilterEvents,
+    GenerateEventsFilter,
+    GenerateGroupingSNSInelastic,
+    Load,
+    MergeMD,
+    SetGoniometer,
+    SetUB,
+)
 import os
 import systemtesting
 

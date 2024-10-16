@@ -9,7 +9,8 @@
 System test for distributing proton charge using FilterEvents and FilterByTime
 """
 
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import ChangeLogTime, DeleteWorkspace, FilterByTime, FilterEvents, GenerateEventsFilter, LoadEventNexus
 import systemtesting
 import numpy as np
 import mantid.kernel as mk

@@ -6,7 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,no-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace, SaveNexusProcessed
 from SANSUtility import can_load_as_event_workspace
 import os
 

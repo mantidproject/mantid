@@ -12,7 +12,23 @@ If this breaks for whatever reason, there is a good chance that unregistered scr
 """
 
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import (
+    AddSampleLog,
+    BinMD,
+    ConvertToDiffractionMDWorkspace,
+    CropWorkspace,
+    Divide,
+    Load,
+    LoadIsawUB,
+    Minus,
+    NormaliseByCurrent,
+    Rebin,
+    ReplaceSpecialValues,
+    SetGoniometer,
+    SmoothData,
+    SmoothNeighbours,
+)
 
 
 class WishDiffuseScattering(systemtesting.MantidSystemTest):

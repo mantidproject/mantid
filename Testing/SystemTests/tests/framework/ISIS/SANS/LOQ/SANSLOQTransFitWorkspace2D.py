@@ -8,8 +8,22 @@
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
-from ISISCommandInterface import *
+from mantid.simpleapi import DeleteWorkspace, RenameWorkspace
+from ISISCommandInterface import (
+    AssignCan,
+    AssignSample,
+    Detector,
+    Gravity,
+    LimitsWav,
+    LOQ,
+    MaskFile,
+    Set2D,
+    TransFit,
+    TransmissionCan,
+    TransmissionSample,
+    TransWorkspace,
+    WavRangeReduction,
+)
 from sans.common.enums import SANSInstrument
 
 

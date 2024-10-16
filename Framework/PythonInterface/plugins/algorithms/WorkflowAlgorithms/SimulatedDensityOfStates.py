@@ -13,8 +13,8 @@ from collections import OrderedDict
 
 import scipy.constants
 
-from mantid.api import AlgorithmFactory, Progress, PythonAlgorithm, WorkspaceProperty
-from mantid.kernel import logger, Direction, FileAction, FileProperty, StringArrayProperty, StringListValidator
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, Progress, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import logger, Direction, StringArrayProperty, StringListValidator
 import mantid.simpleapi as s_api
 
 
