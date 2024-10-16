@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
+from mantid.api import mtd, WorkspaceGroup
+from mantid.simpleapi import CreateWorkspace
 from testhelpers import assertRaisesNothing, create_algorithm
 
 
@@ -158,7 +159,7 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
         self._assert_run_algorithm_throws(args)
 
     def test_validateInputs(self):
-        group = mantid.api.WorkspaceGroup()
+        group = WorkspaceGroup()
         mtd["group"] = group
         args = {"InputWorkspace": "group", "BackgroundCalculationMethod": "PerDetectorAverage", "OutputWorkspace": "output"}
         alg = create_algorithm("ReflectometryBackgroundSubtraction", **args)
