@@ -49,14 +49,7 @@ void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
   m_view->subscribePresenter(this);
 
-  connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
-  connect(m_view, SIGNAL(instrumentChangedSignal(std::string)), SLOT(handleInstrumentChanged(std::string)));
-  connect(m_view, SIGNAL(runsEditingSignal()), SLOT(handleRunsEditing()));
-  connect(m_view, SIGNAL(runsEditingFinishedSignal()), SLOT(handleRunsEditingFinished()));
-  connect(m_view, SIGNAL(manageDirectoriesClicked()), SLOT(handleManageDirectories()));
-  connect(m_view, SIGNAL(runsFoundSignal()), SLOT(handleRunsFound()));
   connect(m_view, SIGNAL(autoAddToggledSignal(bool)), SLOT(startWatching(bool)));
-  connect(m_view, SIGNAL(periodInfoClicked()), SLOT(handlePeriodInfoClicked()));
   connect(&m_watcher, SIGNAL(directoryChanged(const QString &)), SLOT(updateDirectoryChangedFlag(const QString &)));
 
   m_view->setFileExtensions(ADDITIONAL_EXTENSIONS);
