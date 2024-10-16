@@ -8,6 +8,7 @@
 
 #include "MantidKernel/System.h"
 
+#include "ALCDataLoadingPresenter.h"
 #include "DllConfig.h"
 #include "IALCDataLoadingView.h"
 
@@ -33,6 +34,7 @@ public:
 
   // -- IALCDataLoadingView interface
   // ------------------------------------------------------------
+  void subscribePresenter(ALCDataLoadingPresenter *presenter);
 
   void initialize() override;
 
@@ -100,6 +102,7 @@ private:
 
   QString m_selectedLog;
   size_t m_numPeriods;
+  ALCDataLoadingPresenter *m_presenter;
 };
 
 } // namespace CustomInterfaces

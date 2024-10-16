@@ -47,6 +47,7 @@ ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
+  m_view->subscribePresenter(this);
 
   connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
   connect(m_view, SIGNAL(instrumentChangedSignal(std::string)), SLOT(handleInstrumentChanged(std::string)));
