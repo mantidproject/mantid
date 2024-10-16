@@ -44,7 +44,7 @@ public:
   // Cancels current loading algorithm
   void cancelLoading() const;
 
-private slots:
+public slots:
   /// Check file range and call method to load new data
   void handleLoadRequested();
 

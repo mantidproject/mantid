@@ -176,6 +176,21 @@ public slots:
   /// Sets text and ensure runs are not searched for
   virtual void setRunsTextWithoutSearch(const std::string &text) = 0;
 
+  /// Slots for notifying presenter that view was changed
+  virtual void notifyLoadClicked() = 0;
+
+  virtual void notifyInstrumentChanged(const QString &instrument) = 0;
+
+  virtual void notifyRunsEditingChanged() = 0;
+
+  virtual void notifyRunsEditingFinished() = 0;
+
+  virtual void notifyRunsFoundFinished() = 0;
+
+  virtual void notifyManageDirectoriesClicked() = 0;
+
+  virtual void notifyPeriodInfoClicked() = 0;
+
 signals:
   /// Request to load data
   void loadRequested();

@@ -33,6 +33,7 @@ public:
 
   // -- IALCDataLoadingView interface
   // ------------------------------------------------------------
+  void subscribePresenter(ALCDataLoadingPresenter *presenter) override;
 
   void initialize() override;
 
@@ -85,6 +86,15 @@ public:
   void setFileExtensions(const std::vector<std::string> &extensions) override;
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
+
+  // Slots
+  void notifyLoadClicked() override;
+  void notifyInstrumentChanged(const QString &instrument) override;
+  void notifyRunsEditingChanged() override;
+  void notifyRunsEditingFinished() override;
+  void notifyRunsFoundFinished() override;
+  void notifyManageDirectoriesClicked() override;
+  void notifyPeriodInfoClicked() override;
 
 private:
   /// Common function to set available items in a combo box
