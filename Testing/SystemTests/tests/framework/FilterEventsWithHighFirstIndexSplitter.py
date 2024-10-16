@@ -10,7 +10,8 @@ System test for GenerateEventsFilter followed by FilterEvents. GenerateEventsFil
 with a high first target index. FilterEvents then shifts all target indexes down so that the output workspace names start from "_1".
 """
 
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import DeleteWorkspace, FilterEvents, GenerateEventsFilter, LoadEventNexus
 import systemtesting
 
 

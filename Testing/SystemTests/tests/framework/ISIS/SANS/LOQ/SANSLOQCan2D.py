@@ -8,8 +8,7 @@
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
-from ISISCommandInterface import *
+from ISISCommandInterface import AssignCan, AssignSample, Detector, Gravity, LOQ, MaskFile, Set2D, SetDetectorOffsets, WavRangeReduction
 
 # Test is giving odd results on Linux, but only this 2D one.
 from sans.common.enums import SANSInstrument

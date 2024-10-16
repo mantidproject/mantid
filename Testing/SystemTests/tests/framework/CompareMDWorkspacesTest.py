@@ -10,7 +10,8 @@ System test for ARCS reduction
 """
 
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import ChangeBinOffset, CompareMDWorkspaces, ConvertToMD, CreateSampleWorkspace, MergeMD
 
 
 class CompareMDWorkspacesTest(systemtesting.MantidSystemTest):

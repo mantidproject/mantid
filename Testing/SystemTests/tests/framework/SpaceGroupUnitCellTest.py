@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 import systemtesting
-from mantid.geometry import *
+from mantid.geometry import PointGroup, SpaceGroupFactory, UnitCell
 
 
 class SpaceGroupUnitCellTest(systemtesting.MantidSystemTest):

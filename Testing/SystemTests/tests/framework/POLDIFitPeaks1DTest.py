@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import DeleteTableRows, Load, PoldiFitPeaks1D, PoldiPeakSearch
 import numpy as np
 
 

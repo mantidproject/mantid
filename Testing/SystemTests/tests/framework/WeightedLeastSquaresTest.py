@@ -25,8 +25,9 @@
 #
 
 import systemtesting
-from mantid.simpleapi import *
-from mantid.api import MatrixWorkspace
+from mantid.api import mtd, MatrixWorkspace
+from mantid.kernel import logger
+from mantid.simpleapi import Fit, LoadAscii
 
 import unittest
 

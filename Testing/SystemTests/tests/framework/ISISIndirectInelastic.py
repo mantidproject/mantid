@@ -73,12 +73,31 @@ systemtesting.MantidSystemTest
      |
 """
 
+import os
 from abc import ABCMeta, abstractmethod
 
-from mantid.simpleapi import *
+from mantid.api import mtd, FileFinder
+from mantid.kernel import config
+from mantid.simpleapi import (
+    ConvolutionFitSequential,
+    DeleteWorkspace,
+    ElasticWindowMultiple,
+    GroupWorkspaces,
+    IndirectCalibration,
+    IndirectResolution,
+    IndirectTransmissionMonitor,
+    ISISIndirectEnergyTransfer,
+    IqtFitMultiple,
+    IqtFitSequential,
+    Load,
+    LoadNexus,
+    MSDFit,
+    SaveNexusProcessed,
+    SofQWMoments,
+    TimeSlice,
+    TransformToIqt,
+)
 
-# For debugging only.
-from mantid.api import FileFinder
 from systemtesting import MantidSystemTest, using_gsl_v1
 
 

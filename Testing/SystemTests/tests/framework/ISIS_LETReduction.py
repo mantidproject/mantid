@@ -7,7 +7,12 @@
 # pylint: disable=invalid-name
 """Sample LET reduction script"""
 
-from Direct.ReductionWrapper import *
+from Direct.AbsorptionShapes import Cylinder
+from Direct.DirectEnergyConversion import DirectEnergyConversion
+from Direct.ReductionWrapper import AdvancedProperties, iliad, MainProperties, MethodType, ReductionWrapper
+from mantid.api import mtd
+from mantid.kernel import config, PropertyManager
+from mantid.simpleapi import ConjoinWorkspaces, LoadEventNexus, LoadRaw, Rebin, RenameWorkspace
 
 try:
     import reduce_vars as web_var

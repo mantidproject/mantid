@@ -61,7 +61,7 @@
 # the 1st argument to the function. This will result in the end executable
 # called that. Normal Program builder rules apply.
 #
-
+# ruff: noqa: F403   # Allow wild imports
 from SCons.Script import *
 from SCons.Builder import Builder
 import os

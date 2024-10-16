@@ -8,7 +8,9 @@
 import os
 import sys
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd, FileFinder
+from mantid.kernel import config
+from mantid.simpleapi import DeleteWorkspace, GetAllEi, Load
 from mantid.api import Workspace, IEventWorkspace
 
 from Direct.PropertyManager import PropertyManager

@@ -7,8 +7,21 @@
 from abc import ABCMeta, abstractmethod
 import os
 import systemtesting
-from mantid.simpleapi import *
-from mantid import config
+from mantid.api import mtd, AnalysisDataService
+from mantid.kernel import config
+from mantid.simpleapi import (
+    CompareWorkspaces,
+    CreateGroupingWorkspace,
+    CreateSampleWorkspace,
+    CreateWorkspace,
+    ExtractMask,
+    ExtractSingleSpectrum,
+    LoadInstrument,
+    LoadNexusProcessed,
+    MaskBins,
+    MaskDetectors,
+    SaveNexusProcessed,
+)
 from mantid.dataobjects import MaskWorkspace
 
 
@@ -54,7 +67,7 @@ class SaveLoadNexusProcessedTestBase(systemtesting.MantidSystemTest, metaclass=A
                 os.remove(self.filename)
             except OSError as ex:
                 # can't really do much
-                print("Error removing {}: {}".format(str(ex), filename))
+                print("Error removing {}: {}".format(str(ex), self.filename))
 
 
 class SaveLoadNexusProcessedBasicTest(SaveLoadNexusProcessedTestBase):
