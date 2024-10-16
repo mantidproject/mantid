@@ -10,7 +10,8 @@ System test for Magnetism Reflectometer cross-sections algorithm utilizing Filte
 on a big data set comprising ~1.2*10^6 events being split by ~15*10^6 time boundaries
 """
 
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import DeleteWorkspace, MRFilterCrossSections
 import systemtesting
 
 

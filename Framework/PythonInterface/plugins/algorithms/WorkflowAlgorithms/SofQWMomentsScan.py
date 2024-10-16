@@ -15,12 +15,10 @@ from mantid.kernel import (
     IntArrayMandatoryValidator,
     IntArrayProperty,
     Property,
-    SofQWMoments,
     StringArrayProperty,
     StringListValidator,
-    Rebin,
 )
-from mantid.simpleapi import Fit, LoadLog
+from mantid.simpleapi import Fit, LoadLog, Rebin, SofQWMoments
 
 import os
 import numpy as np

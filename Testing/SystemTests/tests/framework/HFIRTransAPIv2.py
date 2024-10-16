@@ -6,9 +6,22 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid.simpleapi import *
-from reduction_workflow.instruments.sans.hfir_command_interface import *
-from reduction_workflow.command_interface import AppendDataFile, Reduce1D
+from reduction_workflow.instruments.sans.hfir_command_interface import (
+    AzimuthalAverage,
+    BeamSpreaderTransmission,
+    DirectBeamCenter,
+    DirectBeamTransmission,
+    GPSANS,
+    SetSampleDetectorDistance,
+    SetTransmission,
+    SetTransmissionBeamCenter,
+    TimeNormalization,
+    TransmissionDarkCurrent,
+    TransmissionDirectBeamCenter,
+)
+from reduction_workflow.command_interface import AppendDataFile, DataPath, Reduce1D
+
+from mantid.kernel import ConfigService
 
 
 class HFIRTrans1(systemtesting.MantidSystemTest):

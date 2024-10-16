@@ -4,8 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import numpy as np
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import CompareWorkspaces, ConvertToHistogram, GroupWorkspaces, LoadNexusProcessed, SANSILLReduction, Scale
 
 
 class D11_AbsoluteScale_Test(systemtesting.MantidSystemTest):

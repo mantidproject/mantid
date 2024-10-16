@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.simpleapi import FilterByTime, LoadEventNexus, RebinToWorkspace
 
 
 class FilteredLoadvsLoadThenFilter(systemtesting.MantidSystemTest):

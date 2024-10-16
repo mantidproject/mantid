@@ -9,9 +9,10 @@
 # test batch mode with sans2d and selecting a period in batch mode
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from ISISCommandInterface import *
-from SANSBatchMode import *
+from ISISCommandInterface import AssignSample, Detector, Gravity, MaskFile, SANS2D, Set1D, WavRangeReduction
+from SANSBatchMode import BatchReduce
 from sans.common.enums import SANSInstrument
+from mantid.api import mtd, FileFinder
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

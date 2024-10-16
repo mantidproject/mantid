@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import CompressEvents, Integration, LoadEventNexus, SumSpectra
 
 
 class CompressEventsTesting(systemtesting.MantidSystemTest):

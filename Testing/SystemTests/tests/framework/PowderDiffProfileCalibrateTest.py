@@ -15,8 +15,16 @@
 #
 ########################################################################
 import systemtesting
-import mantid.simpleapi as api
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import (
+    CreateEmptyTableWorkspace,
+    CreateLeBailFitInput,
+    ExaminePowderDiffProfile,
+    Load,
+    LoadAscii,
+    LoadNexusProcessed,
+    RefinePowderDiffProfileSeq,
+)
 
 
 class VulcanExamineProfile(systemtesting.MantidSystemTest):
@@ -96,7 +104,7 @@ class VulcanSeqRefineProfileFromScratch(systemtesting.MantidSystemTest):
         paramnames = ["Bkpos", "A0", "A1", "A2", "A3", "A4", "A5"]
         paramvalues = [11000.000, 0.034, 0.027, -0.129, 0.161, -0.083, 0.015]
         bkgdtablewsname = "VULCAN_22946_Bkgd_Parameter"
-        api.CreateEmptyTableWorkspace(OutputWorkspace=bkgdtablewsname)
+        CreateEmptyTableWorkspace(OutputWorkspace=bkgdtablewsname)
         ws = mtd[bkgdtablewsname]
         ws.addColumn("str", "Name")
         ws.addColumn("double", "Value")
@@ -121,7 +129,7 @@ class VulcanSeqRefineProfileFromScratch(systemtesting.MantidSystemTest):
         )
 
         # Set up sequential refinement
-        api.RefinePowderDiffProfileSeq(
+        RefinePowderDiffProfileSeq(
             InputWorkspace="VULCAN_22946_NOM",
             SeqControlInfoWorkspace="",
             InputProfileWorkspace="Vulcan_B270_Profile",
@@ -139,7 +147,7 @@ class VulcanSeqRefineProfileFromScratch(systemtesting.MantidSystemTest):
         )
 
         # Refine step 1
-        api.RefinePowderDiffProfileSeq(
+        RefinePowderDiffProfileSeq(
             InputWorkspace="VULCAN_22946_NOM",
             SeqControlInfoWorkspace="RecordIDx890Table",
             InputProfileWorkspace="Vulcan_B270_Profile",
@@ -157,7 +165,7 @@ class VulcanSeqRefineProfileFromScratch(systemtesting.MantidSystemTest):
         )
 
         # Refine step 2
-        api.RefinePowderDiffProfileSeq(
+        RefinePowderDiffProfileSeq(
             InputWorkspace="VULCAN_22946_NOM",
             SeqControlInfoWorkspace="RecordIDx890Table",
             # InputProfileWorkspace = "Vulcan_B270_Profile",
@@ -175,7 +183,7 @@ class VulcanSeqRefineProfileFromScratch(systemtesting.MantidSystemTest):
         )
 
         # Refine step 3 (not from previous cycle)
-        api.RefinePowderDiffProfileSeq(
+        RefinePowderDiffProfileSeq(
             InputWorkspace="VULCAN_22946_NOM",
             SeqControlInfoWorkspace="RecordIDx890Table",
             StartX=7000.0,
@@ -189,7 +197,7 @@ class VulcanSeqRefineProfileFromScratch(systemtesting.MantidSystemTest):
         )
 
         # Save
-        api.RefinePowderDiffProfileSeq(
+        RefinePowderDiffProfileSeq(
             InputWorkspace="VULCAN_22946_NOM",
             SeqControlInfoWorkspace="RecordIDx890Table",
             FunctionOption="Save",
@@ -220,10 +228,10 @@ class VulcanSeqRefineProfileLoadPlus(systemtesting.MantidSystemTest):
 
     def runTest(self):
         # Load
-        api.RefinePowderDiffProfileSeq(FunctionOption="Load", InputProjectFilename=self.seqfile, ProjectID="IDx890")
+        RefinePowderDiffProfileSeq(FunctionOption="Load", InputProjectFilename=self.seqfile, ProjectID="IDx890")
 
         # Refine step 4
-        api.RefinePowderDiffProfileSeq(
+        RefinePowderDiffProfileSeq(
             InputWorkspace="VULCAN_22946_NOM",
             SeqControlInfoWorkspace="RecordIDx890Table",
             startx=7000.0,

@@ -6,7 +6,20 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    CalculateFlatBackground,
+    ConvertUnits,
+    CreateSingleValuedWorkspace,
+    CropWorkspace,
+    DeleteWorkspace,
+    Divide,
+    ExponentialCorrection,
+    LoadRaw,
+    OneMinusExponentialCor,
+    Plus,
+    PolynomialCorrection,
+    RebinToWorkspace,
+)
 
 
 class PolrefExample(systemtesting.MantidSystemTest):

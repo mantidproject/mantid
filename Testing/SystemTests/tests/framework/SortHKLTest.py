@@ -7,7 +7,8 @@
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
 import json
-from mantid.simpleapi import *
+from mantid.api import FileFinder
+from mantid.simpleapi import CreatePeaksWorkspace, CreateSimulationWorkspace, LoadHKL, SetUB, SortHKL
 from mantid.geometry import PointGroupFactory
 
 

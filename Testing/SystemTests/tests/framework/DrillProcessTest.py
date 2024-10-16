@@ -11,14 +11,14 @@ from unittest import mock
 import sys
 import time
 
-from qtpy.QtWidgets import QApplication, QFormLayout, QLineEdit, QComboBox
+from qtpy.QtWidgets import QApplication, QFormLayout, QLineEdit, QCheckBox, QComboBox
 from qtpy.QtTest import QTest
 from qtpy.QtCore import Qt, QPoint
 
 from mantid.kernel import config
 from mantid.simpleapi import mtd, GroupWorkspaces
-from mantidqtinterfaces.drill.view.DrillView import *
-from mantidqtinterfaces.drill.view.DrillSettingsDialog import *
+from mantidqtinterfaces.drill.view.DrillView import DrillView
+from mantidqtinterfaces.drill.view.DrillSettingsDialog import DrillSettingsDialog
 
 
 app = QApplication(sys.argv)

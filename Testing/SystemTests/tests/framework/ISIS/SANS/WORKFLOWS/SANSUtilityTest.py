@@ -8,7 +8,8 @@
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
+from mantid.kernel import logger
+from mantid.simpleapi import Load
 import SANSUtility as su
 import SANSadd2 as add
 

@@ -7,8 +7,8 @@
 # pylint: disable=no-init,invalid-name
 
 import systemtesting
-from mantid.simpleapi import *
-from isis_reflectometry.l2q import *
+from mantid.simpleapi import ConvertUnits, Load
+from isis_reflectometry.l2q import l2q
 
 
 class L2QScriptTest(systemtesting.MantidSystemTest):
