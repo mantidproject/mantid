@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/Common/MuonPeriodInfo.h"
 #include <QFileSystemWatcher>
 #include <QObject>
+#include <QTimer>
 #include <atomic>
 
 namespace MantidQt {
@@ -21,8 +22,7 @@ namespace CustomInterfaces {
 
 /** ALCDataLoadingPresenter : Presenter for ALC Data Loading step
  */
-class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingPresenter : public QObject {
-  Q_OBJECT
+class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingPresenter {
 
 public:
   ALCDataLoadingPresenter(IALCDataLoadingView *view);
@@ -67,7 +67,7 @@ public slots:
   void handleRunsFound();
 
   /// When directory contents change, set flag
-  void updateDirectoryChangedFlag(const QString &path);
+  void updateDirectoryChangedFlag();
 
   /// Begin/Stop watching path
   void handleStartWatching(bool watch);
@@ -81,7 +81,7 @@ signals:
 
 protected:
   /// Signal emitted when timer event occurs
-  void timerEvent(QTimerEvent *timeup) override;
+  void timerEvent();
 
 private:
   /// Load new data and update the view accordingly
@@ -126,8 +126,8 @@ private:
   /// Flag for changes in watched directory
   std::atomic_bool m_directoryChanged;
 
-  /// Timer ID of running timer
-  int m_timerID;
+  /// Timer of running timer
+  QTimer *m_timer;
 
   /// Last run loaded by auto
   int m_lastRunLoadedAuto;
