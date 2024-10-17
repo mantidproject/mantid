@@ -5,8 +5,25 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init, too-many-instance-attributes
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import (
+    AlgorithmFactory,
+    AlgorithmManager,
+    ITableWorkspaceProperty,
+    MatrixWorkspaceProperty,
+    PropertyMode,
+    WorkspaceGroupProperty,
+)
+from mantid.kernel import (
+    logger,
+    Direction,
+    FloatArrayLengthValidator,
+    FloatArrayProperty,
+    MaterialBuilder,
+    PropertyCriterion,
+    PropertyManagerProperty,
+    StringMandatoryValidator,
+    VisibleWhenProperty,
+)
 from vesuvio.base import VesuvioBase, TableWorkspaceDictionaryFacade
 from vesuvio.fitting import parse_fit_options
 from vesuvio.instrument import VESUVIO

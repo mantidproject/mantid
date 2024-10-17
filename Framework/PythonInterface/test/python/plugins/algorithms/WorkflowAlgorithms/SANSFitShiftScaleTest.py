@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.api import AlgorithmManager
+from mantid.api import AlgorithmManager, FrameworkManager
 import numpy as np
 from SANSFitShiftScale import ErrorTransferFromModelToData
 
@@ -293,4 +293,5 @@ class TestErrorTransferFromModelToData(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    FrameworkManager.Instance()
     unittest.main()

@@ -4,8 +4,16 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from SANSILLCommon import *
+from SANSILLCommon import (
+    AcqMode,
+    add_correction_numors,
+    create_name,
+    needs_loading,
+    needs_processing,
+)
 from mantid.api import (
+    mtd,
+    AlgorithmFactory,
     DataProcessorAlgorithm,
     WorkspaceGroupProperty,
     MultipleFileProperty,
@@ -24,7 +32,20 @@ from mantid.kernel import (
     IntBoundedValidator,
     StringListValidator,
 )
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    CalculateDynamicRange,
+    CalculateEfficiency,
+    ConvertToPointData,
+    GroupWorkspaces,
+    LoadNexusProcessed,
+    MaskDetectorsIf,
+    RenameWorkspace,
+    SANSILLIntegration,
+    SANSILLReduction,
+    Stitch,
+    Transpose,
+    UnGroupWorkspace,
+)
 
 
 N_DISTANCES = 5  # maximum number of distinct distance configurations

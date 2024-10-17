@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-few-public-methods,unused-import
+# ruff: noqa: F403   # Allow wild imports
 from mantid.kernel import *
 from mantid.simpleapi import *
 from mantid.api import *

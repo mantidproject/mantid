@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (
+    mtd,
+    AlgorithmFactory,
     DataProcessorAlgorithm,
     MatrixWorkspaceProperty,
     MultipleFileProperty,
@@ -14,8 +16,57 @@ from mantid.api import (
     WorkspaceProperty,
     FileAction,
 )
-from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, StringListValidator
-from mantid.simpleapi import *
+from mantid.kernel import (
+    config,
+    logger,
+    Direction,
+    EnabledWhenProperty,
+    FloatBoundedValidator,
+    LogicOperator,
+    PropertyCriterion,
+    StringListValidator,
+)
+from mantid.simpleapi import (
+    AddSampleLog,
+    ApplyTransmissionCorrection,
+    CalculateDynamicRange,
+    CalculateEfficiency,
+    CalculateFlux,
+    CalculateTransmission,
+    CloneWorkspace,
+    ConvertSpectrumAxis,
+    ConvertToHistogram,
+    CreateWorkspace,
+    CropToComponent,
+    CropWorkspace,
+    DeadTimeCorrection,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    Divide,
+    ExtractSpectra,
+    FindDetectorsInShape,
+    FindCenterOfMassPosition,
+    Fit,
+    GroupDetectors,
+    GroupWorkspaces,
+    LoadAndMerge,
+    MaskAngle,
+    MaskDetectors,
+    MaskDetectorsIf,
+    MergeRuns,
+    Minus,
+    MoveInstrumentComponent,
+    NormaliseByThickness,
+    ParallaxCorrection,
+    Rebin,
+    RebinToWorkspace,
+    RenameWorkspace,
+    ReplaceSpecialValues,
+    RotateInstrumentComponent,
+    Scale,
+    SolidAngle,
+    Transpose,
+)
 import SANSILLCommon as common
 from math import fabs
 import numpy as np

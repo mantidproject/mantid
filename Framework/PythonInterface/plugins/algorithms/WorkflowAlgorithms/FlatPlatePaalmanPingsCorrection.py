@@ -9,8 +9,9 @@
 import math
 
 import numpy as np
-from mantid.simpleapi import *
+from mantid.simpleapi import AddSampleLog, CreateWorkspace, DeleteWorkspace, ExtractSingleSpectrum, GroupWorkspaces, SplineInterpolation
 from mantid.api import (
+    mtd,
     PythonAlgorithm,
     AlgorithmFactory,
     PropertyMode,

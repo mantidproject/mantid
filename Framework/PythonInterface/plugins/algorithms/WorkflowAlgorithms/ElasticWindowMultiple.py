@@ -4,9 +4,19 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from mantid import FileFinder
+from mantid.api import (
+    AlgorithmFactory,
+    DataProcessorAlgorithm,
+    NumericAxis,
+    Progress,
+    PropertyMode,
+    WorkspaceGroupProperty,
+    WorkspaceProperty,
+)
+from mantid.kernel import config, logger, Direction, Property, StringListValidator
 from mantid.simpleapi import AppendSpectra, CloneWorkspace, ElasticWindow, LoadLog, Logarithm, SortXAxis, Transpose
-from mantid.kernel import *
-from mantid.api import *
+from IndirectCommon import get_instrument_and_run
 
 import numpy as np
 
@@ -130,8 +140,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self._background_range_end = self.getProperty("BackgroundRangeEnd").value
 
     def PyExec(self):
-        from IndirectCommon import get_instrument_and_run
-
         # Do setup
         self._setup()
 
@@ -251,8 +259,6 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         @param workspace The workspace
         @returns sample in given units or None if not found
         """
-        from IndirectCommon import get_instrument_and_run
-
         instr, run_number = get_instrument_and_run(workspace.name())
 
         pad_num = config.getInstrument(instr).zeroPadding(int(run_number))

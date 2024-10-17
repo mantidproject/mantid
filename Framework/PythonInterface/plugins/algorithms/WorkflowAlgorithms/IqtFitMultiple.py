@@ -4,10 +4,20 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid import logger, AlgorithmFactory
-from mantid.api import *
-from mantid.kernel import *
-import mantid.simpleapi as ms
+from mantid.api import (
+    mtd,
+    AlgorithmFactory,
+    FunctionProperty,
+    ITableWorkspaceProperty,
+    MatrixWorkspaceProperty,
+    Progress,
+    PythonAlgorithm,
+    WorkspaceGroupProperty,
+)
+from mantid.kernel import logger, Direction, FloatBoundedValidator, IntBoundedValidator
+from mantid.simpleapi import Fit, ExtractQENSMembers
+
+from IndirectCommon import convert_to_elastic_q, transpose_fit_parameters_table
 
 
 class IqtFitMultiple(PythonAlgorithm):
@@ -128,8 +138,6 @@ class IqtFitMultiple(PythonAlgorithm):
         self._fit_group_name = self.getPropertyValue("OutputWorkspaceGroup")
 
     def PyExec(self):
-        from IndirectCommon import convert_to_elastic_q, transpose_fit_parameters_table
-
         setup_prog = Progress(self, start=0.0, end=0.1, nreports=4)
         setup_prog.report("generating output name")
         output_workspace = self._fit_group_name
@@ -176,7 +184,7 @@ class IqtFitMultiple(PythonAlgorithm):
         fit_prog = Progress(self, start=0.1, end=0.8, nreports=2)
         multi_domain_func, kwargs = _create_multi_domain_func(self._function, tmp_fit_workspace)
         fit_prog.report("Fitting...")
-        ms.Fit(
+        Fit(
             Function=multi_domain_func,
             InputWorkspace=tmp_fit_workspace,
             WorkspaceIndex=0,
@@ -261,7 +269,7 @@ class IqtFitMultiple(PythonAlgorithm):
         delete_alg.execute()
 
         if self._do_extract_members:
-            ms.ExtractQENSMembers(
+            ExtractQENSMembers(
                 InputWorkspace=self._input_ws,
                 ResultWorkspace=self._fit_group_name,
                 OutputWorkspace=self._fit_group_name.rsplit("_", 1)[0] + "_Members",

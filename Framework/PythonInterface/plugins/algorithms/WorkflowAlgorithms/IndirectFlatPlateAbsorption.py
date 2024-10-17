@@ -5,9 +5,21 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-instance-attributes,too-many-branches
-from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress, WorkspaceGroupProperty
 from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoundedValidator, MaterialBuilder, StringListValidator
+from mantid.simpleapi import (
+    AddSampleLogMultiple,
+    ConvertUnits,
+    DeleteWorkspace,
+    Divide,
+    FlatPlateAbsorption,
+    GroupWorkspaces,
+    Minus,
+    Scale,
+    SetSampleMaterial,
+)
+
+from IndirectCommon import get_efixed
 
 
 class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
@@ -93,8 +105,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-        from IndirectCommon import get_efixed
-
         self._setup()
 
         # Set up progress reporting

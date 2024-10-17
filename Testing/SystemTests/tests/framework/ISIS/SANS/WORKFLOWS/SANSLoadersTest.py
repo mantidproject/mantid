@@ -11,10 +11,12 @@ take considerable time because it involves loading data. Besides, it uses data t
 currently available inside the systemtests.
 """
 
+import os
 import unittest
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
+from mantid.kernel import config
+from mantid.simpleapi import Load
 import isis_reduction_steps as steps
 import ISISCommandInterface as ici
 from sans.common.enums import SANSInstrument

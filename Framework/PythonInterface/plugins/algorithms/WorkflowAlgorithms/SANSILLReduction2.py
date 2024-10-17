@@ -4,9 +4,24 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from SANSILLCommon import *
-import SANSILLCommon as common
+from SANSILLCommon import (
+    AcqMode,
+    add_correction_information,
+    blank_monitor_ws_neg_index,
+    check_axis_match,
+    check_distances_match,
+    check_processed_flag,
+    check_wavelengths_match,
+    EMPTY_TOKEN,
+    get_vertical_grouping_pattern,
+    main_detector_distance,
+    monitor_id,
+    real_monitor_ws_neg_index,
+    return_numors_from_path,
+)
 from mantid.api import (
+    mtd,
+    AlgorithmFactory,
     DataProcessorAlgorithm,
     FileAction,
     MatrixWorkspace,
@@ -18,8 +33,50 @@ from mantid.api import (
     WorkspaceProperty,
 )
 from mantid.dataobjects import SpecialWorkspace2D
-from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, LogicOperator, PropertyCriterion, StringListValidator
-from mantid.simpleapi import *
+from mantid.kernel import (
+    config,
+    Direction,
+    EnabledWhenProperty,
+    FloatBoundedValidator,
+    LogicOperator,
+    PropertyCriterion,
+    StringListValidator,
+)
+from mantid.simpleapi import (
+    AddSampleLog,
+    AppendSpectra,
+    ApplyTransmissionCorrection,
+    CalculateEfficiency,
+    CalculateFlux,
+    CloneWorkspace,
+    ConjoinXRuns,
+    ConvertSpectrumAxis,
+    ConvertToPointData,
+    CreateWorkspace,
+    DeadTimeCorrection,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    Divide,
+    ExtractSpectra,
+    FindCenterOfMassPosition,
+    Fit,
+    GroupDetectors,
+    GroupWorkspaces,
+    LoadAndMerge,
+    MaskAngle,
+    MaskDetectors,
+    Minus,
+    MoveInstrumentComponent,
+    ParallaxCorrection,
+    RebinToWorkspace,
+    RenameWorkspace,
+    RotateInstrumentComponent,
+    Scale,
+    SolidAngle,
+    SortXAxis,
+    Transpose,
+)
+import os
 import numpy as np
 
 
@@ -275,16 +332,16 @@ class SANSILLReduction(DataProcessorAlgorithm):
         """
         # first, let's create the dictionary containing all parameters that should be added to the metadata
         parameters = dict()
-        parameters["numor_list"] = common.return_numors_from_path(self.getPropertyValue("Runs"))
-        parameters["sample_transmission_ws"] = common.return_numors_from_path(self.getPropertyValue("TransmissionWorkspace"))
-        parameters["container_ws"] = common.return_numors_from_path(self.getPropertyValue("EmptyContainerWorkspace"))
-        parameters["absorber_ws"] = common.return_numors_from_path(self.getPropertyValue("DarkCurrentWorkspace"))
-        parameters["beam_ws"] = common.return_numors_from_path(self.getPropertyValue("EmptyBeamWorkspace"))
-        parameters["flux_ws"] = common.return_numors_from_path(self.getPropertyValue("FluxWorkspace"))
-        parameters["sensitivity_ws"] = common.return_numors_from_path(self.getPropertyValue("SensitivityWorkspace"))
-        parameters["mask_ws"] = common.return_numors_from_path(self.getPropertyValue("MaskWorkspace"))
+        parameters["numor_list"] = return_numors_from_path(self.getPropertyValue("Runs"))
+        parameters["sample_transmission_ws"] = return_numors_from_path(self.getPropertyValue("TransmissionWorkspace"))
+        parameters["container_ws"] = return_numors_from_path(self.getPropertyValue("EmptyContainerWorkspace"))
+        parameters["absorber_ws"] = return_numors_from_path(self.getPropertyValue("DarkCurrentWorkspace"))
+        parameters["beam_ws"] = return_numors_from_path(self.getPropertyValue("EmptyBeamWorkspace"))
+        parameters["flux_ws"] = return_numors_from_path(self.getPropertyValue("FluxWorkspace"))
+        parameters["sensitivity_ws"] = return_numors_from_path(self.getPropertyValue("SensitivityWorkspace"))
+        parameters["mask_ws"] = return_numors_from_path(self.getPropertyValue("MaskWorkspace"))
         # when all is set, a common function can set them all
-        common.add_correction_information(ws, parameters)
+        add_correction_information(ws, parameters)
 
     def reset(self):
         """Resets the class member variables"""

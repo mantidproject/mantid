@@ -5,12 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
+import os
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantid import config
-from ISISCommandInterface import *
+from ISISCommandInterface import AssignSample, DefaultTrans, Detector, Gravity, MaskFile, SANS2D, Set1D, WavRangeReduction
 from sans.common.enums import SANSInstrument
+from SANSadd2 import add_runs
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
