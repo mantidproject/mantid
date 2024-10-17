@@ -19,7 +19,7 @@ Embedding Figures
 Matplotlib is designed such that figures can be embedded within other Qt widgets and not just created as separate
 figure windows.
 An example of how this can be achieved is described in the matplotlib
-`examples <https://matplotlib.org/gallery/user_interfaces/embedding_in_qt_sgskip.html>`_ section for a pure-Python
+`examples <https://matplotlib.org/stable/gallery/user_interfaces/embedding_in_qt_sgskip.html>`_ section for a pure-Python
 based implementation.
 
 Many of our scientific interfaces are written in C++ and require the ability to embed a matplotlib figure within them.
