@@ -67,7 +67,6 @@ public:
   void disableAll() override;
   void enableAll() override;
   void setAvailableInfoToEmpty() override;
-  void instrumentChanged(QString instrument) override;
   void enableLoad(bool enable) override;
   void setPath(const std::string &path) override;
   void enableRunsAutoAdd(bool enable) override;
@@ -89,8 +88,8 @@ public:
   // -----------------------------------------------------
 
   // Slots
+  void instrumentChanged(QString instrument) override;
   void notifyLoadClicked() override;
-  void notifyInstrumentChanged(const QString &instrument) override;
   void notifyRunsEditingChanged() override;
   void notifyRunsEditingFinished() override;
   void notifyRunsFoundFinished() override;

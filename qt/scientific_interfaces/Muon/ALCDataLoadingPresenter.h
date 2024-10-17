@@ -44,7 +44,6 @@ public:
   // Cancels current loading algorithm
   void cancelLoading() const;
 
-public slots:
   /// Check file range and call method to load new data
   void handleLoadRequested();
 
@@ -75,12 +74,8 @@ public slots:
   /// Handle a user requests to see the period info widget
   void handlePeriodInfoClicked();
 
-signals:
-  /// Signal emitted when data get changed
-  void dataChanged();
-
 protected:
-  /// Signal emitted when timer event occurs
+  /// Runs every time a timer event occurs
   void timerEvent();
 
 private:
