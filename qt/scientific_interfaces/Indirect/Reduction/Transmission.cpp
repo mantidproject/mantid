@@ -35,9 +35,9 @@ Transmission::Transmission(IDataReduction *idrUI, QWidget *parent) : DataReducti
       std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra, "0-2"));
 
   // Update the preview plot when the algorithm is complete
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(transAlgDone(bool)));
+  connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &Transmission::transAlgDone);
 
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &Transmission::saveClicked);
 
   m_uiForm.ppPlot->setCanvasColour(QColor(240, 240, 240));
 

@@ -80,7 +80,7 @@ In addition, some instruments also use:
 Reduction
 =========
 
-The main reduction algorithm is :ref:`algm-ReflectometryReductionOneAuto`, which can be used from a python script or via the :ref:`ISIS Reflectometry Interface <interface-isis-refl>`. It currently only deals with specular reflection, but off-specular analysis is planned. It also currently only deals with point detectors or linear detectors, but 2D detectors are planned.
+The main reduction algorithm is :ref:`algm-ReflectometryReductionOneAuto`, which can be used from a python script or via the :ref:`ISIS Reflectometry Interface <interface-isis-refl>`. It currently only deals with specular reflection, but off-specular analysis is planned. It supports point detectors, linear detectors and 2D detectors.
 
 Specular Reflection
 -------------------
@@ -95,7 +95,7 @@ The resulting one-dimensional plot of :math:`I` against :math:`Q` is typically r
 
 A standard measurement will involve sample under certain conditions (temperature, magnetic field, etc) being measured at two or three different incident angles, :math:`\theta_i`. This means that we typically end up with two or three :math:`TOF` workspaces that are combined (stitched) and processed to give a single plot covering a larger range of :math:`Q`. The stitching is achieved using the :ref:`algm-Stitch1D` and :ref:`algm-Stitch1DMany` algorithms.
 
-The actual reduction is relatively simple and produces a simple one dimensional plot which can be saved as an ASCII file. However, there can be many files to deal with and we need to make sure that we process the correct runs together and with the correct parameters, transmission runs etc.
+The actual reduction is relatively simple and produces a simple one dimensional plot which can be saved as either an ORSO or an ASCII file. However, there can be many files to deal with and we need to make sure that we process the correct runs together and with the correct parameters, transmission runs etc.
 
 Divergent Beam
 ##############
@@ -194,7 +194,7 @@ Algorithms
 
 The main reduction algorithm is :ref:`algm-ReflectometryReductionOneAuto`. This sets a lot of the input properties from defaults in the instrument parameter file. It must also populate some input properties so that they can be updated in the GUI (this has to work both for single period datasets and multi period datasets). This algorithm is a wrapper around :ref:`algm-ReflectometryReductionOne`, which actually does the work. This arrangement seems to be unusual in Mantid.
 
-:ref:`algm-SpecularReflectionPositionCorrect` can be used to correct detector positions if they are not at the correct position when loaded. It can shift them vertically or rotate then around the sample position. This algorithm is called as a child by :ref:`algm-ReflectometryReductionOneAuto`.
+:ref:`algm-SpecularReflectionPositionCorrect` can be used to correct detector positions if they are not at the correct position when loaded. It can shift them vertically or rotate them around the sample position. This algorithm is called as a child by :ref:`algm-ReflectometryReductionOneAuto`.
 
 Related to :ref:`algm-ReflectometryReductionOne` and :ref:`algm-ReflectometryReductionOneAuto` we also have :ref:`algm-CreateTransmissionWorkspace` and :ref:`algm-CreateTransmissionWorkspaceAuto`, which converts transmission run(s) to wavelength and stitches transmission runs together when two are provided.
 
@@ -210,7 +210,7 @@ The :ref:`ISIS Reflectometry Interface <interface-isis-refl>` provides a graphic
 * apply default settings, which can be overridden on a per-run basis;
 * process data in histogram or event modes;
 * output processing steps to an IPython notebook; and
-* output reduced data to ASCII files.
+* output reduced data to ORSO or ASCII files.
 
 See the :ref:`full documentation <interface-isis-refl>` for more information.
 

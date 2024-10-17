@@ -16,7 +16,7 @@ creates "index" pages that lists the contents of each category. The display of e
 from mantiddoc.directives.base import AlgorithmBaseDirective, algorithm_name_and_version  # pylint: disable=unused-import
 from sphinx.util.osutil import relative_uri
 import os
-import posixpath
+from pathlib import PurePosixPath
 
 CATEGORY_PAGE_TEMPLATE = "category.html"
 ALG_CATEGORY_PAGE_TEMPLATE = "algorithmcategories.html"
@@ -77,7 +77,7 @@ class LinkItem(object):
         Returns:
           str: A string containing the link to reach this item
         """
-        link = relative_uri(base=to_unix_style_path(base), to=self.location)
+        link = relative_uri(str(base), to=str(self.location))
         if not link.endswith(ext):
             link += ext
         return link
@@ -124,12 +124,15 @@ class Category(LinkItem):
           name (str): The name of the category
           docname (str): Relative path to document from root directory
         """
-        self.src_path = to_unix_style_path(src_path)
-        docname = to_unix_style_path(docname)
-        self.section = docname.lower().split("/")[0]
-        dirpath, filename = posixpath.split(docname)
-        html_dir = dirpath + "/" + CATEGORIES_DIR
-        self.html_path = html_dir + "/" + to_unix_style_path(name) + ".html"
+        self.src_path = PurePosixPath(src_path)
+        docname = PurePosixPath(docname)
+        self.section = docname.parts[0]
+        dirpath = docname.parent
+        html_dir = dirpath.joinpath(CATEGORIES_DIR)
+        # name can arrive with a format like "MyAlgorithmCategory\\NameOfAlgorithm", so we
+        # have to sort those slashes out
+        name_with_slashes_fixed = name.replace("\\", "/").replace("//", "/")
+        self.html_path = html_dir.joinpath(name_with_slashes_fixed + ".html")
         super(Category, self).__init__(name, self.html_path)
         self.pages = set([])
         self.subcategories = set([])
@@ -312,20 +315,6 @@ class CategoriesDirective(AlgorithmBaseDirective):
 # ---------------------------------------------------------------------------------
 
 
-def to_unix_style_path(path):
-    """
-    Replaces any backslashes in the given string with forward slashes
-    and replace consecutive forward slashes with a single forward slash.
-
-    Arguments:
-      path: A string possibly containing backslashes
-    """
-    return path.replace("\\", "/").replace("//", "/")
-
-
-# ---------------------------------------------------------------------------------
-
-
 def html_collect_pages(app):
     """
     Callback for the 'html-collect-pages' Sphinx event. Adds category
@@ -384,21 +373,21 @@ def create_category_pages(app):
         context["outpath"] = category.html_path
 
         # jinja appends .html to output name
-        category_html_path_noext = posixpath.splitext(category.html_path)[0]
-        yield (category_html_path_noext, context, template)
+        category_html_path_noext = category.html_path.with_suffix("")
+        yield (str(category_html_path_noext), context, template)
 
         # Now any additional index pages if required
         if category.name in INDEX_CATEGORIES:
             # index in categories directory
-            category_html_dir = posixpath.join(category.name.lower(), "categories")
-            category_html_path_noext = posixpath.join(category_html_dir, "index")
-            yield (category_html_path_noext, context, template)
+            category_html_dir = PurePosixPath(category.name.lower(), "categories")
+            category_html_path_noext = category_html_dir.joinpath("index")
+            yield (str(category_html_path_noext), context, template)
 
             # index in document directory
-            document_dir = posixpath.dirname(category_html_dir)
-            category_html_path_noext = posixpath.join(document_dir, "index")
-            context["outpath"] = category_html_path_noext + ".html"
-            yield (category_html_path_noext, context, template)
+            document_dir = category_html_dir.parent
+            category_html_path_noext = document_dir.joinpath("index")
+            context["outpath"] = str(category_html_path_noext.with_suffix(".html"))
+            yield (str(category_html_path_noext), context, template)
 
     # create the top level algorithm category
     yield create_top_algorithm_category(categories)
@@ -423,16 +412,16 @@ def create_top_algorithm_category(categories):
     # create a Top level algorithms category page
     # Initialise the lists
     all_top_categories = []
-    category_src_dir = ""
+    category_src_dir = PurePosixPath("")
     # If the category is a top category it will not contain "\\"
     for top_name, top_category in categories.items():
         # Add all the top level categories
         if "\\" not in top_name and top_category.section == "algorithms":
             # get additional text for each category
             # if is exists it is in src_path/caterories/name.txt
-            alg_src_dir = posixpath.dirname(top_category.src_path)
-            category_src_dir = posixpath.join(alg_src_dir, "categories")
-            category_text_path = posixpath.join(category_src_dir, top_name) + ".txt"
+            alg_src_dir = top_category.src_path.parent
+            category_src_dir = alg_src_dir.joinpath("categories")
+            category_text_path = category_src_dir.joinpath(top_name).with_suffix(".txt")
             if os.path.isfile(category_text_path):
                 with open(category_text_path) as f:
                     top_category.additional_text = f.read()
@@ -442,20 +431,24 @@ def create_top_algorithm_category(categories):
 
     # split the full list into subsections
     general_categories = all_top_categories
-    technique_categories = extract_matching_categories(general_categories, posixpath.join(category_src_dir, "techniquecategories") + ".txt")
-    facility_categories = extract_matching_categories(general_categories, posixpath.join(category_src_dir, "facilitycategories") + ".txt")
+    technique_categories = extract_matching_categories(
+        general_categories, category_src_dir.joinpath("techniquecategories").with_suffix(".txt")
+    )
+    facility_categories = extract_matching_categories(
+        general_categories, category_src_dir.joinpath("facilitycategories").with_suffix(".txt")
+    )
 
     # create the page
     top_context = {}
-    top_category_html_path_noext = posixpath.join("algorithms", "index")
-    top_context["outpath"] = top_category_html_path_noext + ".html"
+    top_category_html_path_noext = PurePosixPath("algorithms", "index")
+    top_context["outpath"] = str(top_category_html_path_noext.with_suffix(".html"))
     # set the content
     top_context["pages"] = []
     top_context["generalcategories"] = sorted(general_categories, key=lambda x: x.name)
     top_context["techniquecategories"] = sorted(technique_categories, key=lambda x: x.name)
     top_context["facilitycategories"] = sorted(facility_categories, key=lambda x: x.name)
     top_context["title"] = "Algorithm Contents"
-    top_html_path_noext = posixpath.join("algorithms", "index")
+    top_html_path_noext = str(PurePosixPath("algorithms", "index"))
     return (top_html_path_noext, top_context, template)
 
 

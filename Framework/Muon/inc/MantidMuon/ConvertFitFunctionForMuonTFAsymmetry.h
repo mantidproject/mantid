@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
@@ -64,6 +65,8 @@ private:
   Mantid::API::IFunction_sptr extractUserFunction(const Mantid::API::IFunction_sptr &TFFunc);
   void setOutput(const Mantid::API::IFunction_sptr &function);
   std::vector<double> getNorms();
+  void configureMultiDomainFunction(std::shared_ptr<Mantid::API::MultiDomainFunction> multiDomainFunction,
+                                    const Mantid::API::IFunction_sptr &userFunc, const double normValue);
 };
 
 } // namespace Muon

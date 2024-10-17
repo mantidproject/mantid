@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantiddoc.directives.base import BaseDirective  # pylint: disable=unused-import
 import os
+from pathlib import Path, PurePosixPath
 
 
 class InterfaceDirective(BaseDirective):
@@ -83,22 +84,23 @@ class InterfaceDirective(BaseDirective):
         # conf.py file and a relative path is relative to the directory where the current rst file
         # is located.
         if picture:
-            screenshots_dir, filename = os.path.split(picture.imgpath)
+            picture_imgpath = Path(picture.imgpath)
+            screenshots_dir = picture_imgpath.parent
+            filename = picture_imgpath.name
 
             if width is None:
                 # No width provided, use screenshot width
                 width = picture.width
 
             # relative path to image
-            rel_path = os.path.relpath(screenshots_dir, env.srcdir)
-            # This is a href link so is expected to be in unix style
-            rel_path = rel_path.replace("\\", "/")
+            # pathlib.Path.relative_to() will not work here, the method won't traverse up then down again
+            rel_path = os.path.relpath(screenshots_dir, env.srcdir).replace("\\", "/")
             # stick a "/" as the first character so Sphinx computes relative location from source directory
-            path = "/" + rel_path + "/" + filename
+            path = PurePosixPath("/").joinpath(rel_path).joinpath(filename)
             caption = ""
         else:
             # use stock not found image
-            path = "/images/ImageNotFound.png"
+            path = PurePosixPath("/images/ImageNotFound.png")
             width = 200
             caption = "Enable screenshots using DOCS_SCREENSHOTS in CMake"
 

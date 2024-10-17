@@ -76,18 +76,16 @@ void DataReduction::initLayout() {
   addTab<Transmission>("Transmission");
   addTab<ILLEnergyTransfer>("ILL Energy Transfer");
 
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
+  connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &DataReduction::settings);
   // Connect "?" (Help) Button
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
+  connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &DataReduction::help);
   // Connect the Python export buton
-  connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this, SLOT(exportTabPython()));
+  connect(m_uiForm.pbPythonExport, &QPushButton::clicked, this, &DataReduction::exportTabPython);
   // Connect the "Manage User Directories" Button
-  connect(m_uiForm.pbManageDirectories, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
-
+  connect(m_uiForm.pbManageDirectories, &QPushButton::clicked, this, &DataReduction::manageUserDirectories);
   // Handle instrument configuration changes
-  connect(m_uiForm.iicInstrumentConfiguration,
-          SIGNAL(instrumentConfigurationUpdated(const QString &, const QString &, const QString &)), this,
-          SLOT(instrumentSetupChanged(const QString &, const QString &, const QString &)));
+  connect(m_uiForm.iicInstrumentConfiguration, &MantidWidgets::InstrumentConfig::instrumentConfigurationUpdated, this,
+          &DataReduction::instrumentSetupChanged);
 
   auto const &facility = Mantid::Kernel::ConfigService::Instance().getFacility();
   filterUiForFacility(QString::fromStdString(facility.name()));
@@ -436,8 +434,8 @@ void DataReduction::filterUiForFacility(const QString &facility) {
   while (m_uiForm.twIDRTabs->count() > 0) {
     // Disconnect the instrument changed signal
     auto const &tabName = m_uiForm.twIDRTabs->tabText(0).toStdString();
-    disconnect(this, SIGNAL(newInstrumentConfiguration()), m_tabs[tabName].second,
-               SIGNAL(newInstrumentConfiguration()));
+    disconnect(this, &DataReduction::newInstrumentConfiguration, m_tabs[tabName].second,
+               &DataReductionTab::newInstrumentConfiguration);
 
     // Remove the tab
     m_uiForm.twIDRTabs->removeTab(0);
@@ -448,8 +446,8 @@ void DataReduction::filterUiForFacility(const QString &facility) {
   // Add the required tabs
   for (auto &enabledTab : enabledTabs) {
     // Connect the insturment changed signal
-    connect(this, SIGNAL(newInstrumentConfiguration()), m_tabs[enabledTab].second,
-            SIGNAL(newInstrumentConfiguration()));
+    connect(this, &DataReduction::newInstrumentConfiguration, m_tabs[enabledTab].second,
+            &DataReductionTab::newInstrumentConfiguration);
 
     // Add the tab
     m_uiForm.twIDRTabs->addTab(m_tabs[enabledTab].first, QString::fromStdString(enabledTab));

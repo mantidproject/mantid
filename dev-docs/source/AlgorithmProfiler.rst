@@ -1,3 +1,5 @@
+.. _AlgorithmProfiler:
+
 ==============================
 Work flows algorithm profiling
 ==============================
@@ -13,20 +15,22 @@ Summary
 
 Due to the need of investigation of algorithms performance issues, the proper method is introduced.
 It consists two to parts: special mantid build and analytical tool.
-Available for Linux only.
+
+.. note::
+   Available for Linux only.
+
 
 Mantid build
 ^^^^^^^^^^^^
 
-To build mantid version with profiling functionality enabled run ``cmake`` with the additional option ``-DPROFILE_ALGORITHM_LINUX=ON``.
-Built in such a way mantid creates a dump file ``algotimeregister.out`` in the running directory.
-This file contains the time stamps for start and finish of executed algorithms with ~nanosecond precision in a very simple text format.
+On linux the profiler is built by default but to enable profiling, the :ref:`properties <mantd:Algorithm_Profiling>` must be set.
+Enabling the profiler will create a file that contains the time stamps for start and finish of executed algorithms with ~nanosecond precision in a very simple text format.
 
 Adding more detailed information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 More detailed information can be added to individual function calls in C++ with the help of ``std::chrono``.
-At the top of the fuction create a "start time"
+At the top of the function create a "start time"
 
 .. code-block:: c++
 

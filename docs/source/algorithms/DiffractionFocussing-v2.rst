@@ -50,6 +50,20 @@ means that you can rebin the resulting spectra to finer bins with no
 loss of data. In fact, it is unnecessary to bin your incoming data at
 all; binning can be performed as the very last step.
 
+Rebin parameters
+################
+
+By default ``DiffractionFocussing`` will use the min and max of each
+spectra and the number of bins in the input workspace to automatically
+determine the output binning. An alternative is to provide the min,
+max and delta for each output spectra similar to
+:ref:`algm-RebinRagged`. The minimum and maximum values that are
+specified are interpreted as one value per spectrum. If there is only
+one value overall, it is used for all of the spectra. The ``Delta``
+parameter is required and can either be a single number which is
+common to all, or one number per spectra. Positive values are
+interpreted as constant step-size. Negative are logarithmic.
+
 Usage
 -----
 
@@ -98,6 +112,29 @@ Output:
 
    Number of focussed spectra: 2
    What type is the workspace after focussing: Workspace2D
+
+**Example - Defining binning parameters:**
+
+.. testcode:: ExHRPDFocussing2
+
+   # Load HRP dataset
+   ws = Load("HRP39180.RAW")
+
+   # specify groupping file, here using CalFile format
+   cal_file = "hrpd_new_072_01_corr.cal"
+
+   # For HRPD data, perform a unit conversion TOF->d-spacing, taking into account detector position offsets
+   ws = AlignDetectors(InputWorkspace='ws',CalibrationFile=cal_file)
+   # Focus the data with defined binning parameters
+   ws = DiffractionFocussing(InputWorkspace='ws',GroupingFileName=cal_file, DMin=[0.6,1.0,2.2], DMax=[1.0,1.5,4.0], Delta=0.1)
+
+   print(f"Output has {ws.getNumberHistograms()} spectra with number of bins {len(ws.readY(0))}, {len(ws.readY(1))} and {len(ws.readY(2))}")
+
+Output:
+
+.. testoutput:: ExHRPDFocussing2
+
+   Output has 3 spectra with number of bins 4, 5 and 18
 
 Previous Versions
 -----------------

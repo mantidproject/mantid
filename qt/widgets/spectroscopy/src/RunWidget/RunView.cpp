@@ -22,7 +22,7 @@ namespace CustomInterfaces {
 RunView::RunView(QWidget *parent) : QWidget(parent), m_presenter() {
   m_uiForm.setupUi(this);
 
-  connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(notifyRunClicked()));
+  connect(m_uiForm.pbRun, &QPushButton::clicked, this, &RunView::notifyRunClicked);
 }
 
 void RunView::subscribePresenter(IRunPresenter *presenter) { m_presenter = presenter; }

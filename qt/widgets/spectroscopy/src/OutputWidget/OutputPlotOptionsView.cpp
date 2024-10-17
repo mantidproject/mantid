@@ -73,18 +73,18 @@ OutputPlotOptionsView::OutputPlotOptionsView(QWidget *parent)
 }
 
 void OutputPlotOptionsView::setupView() {
-  connect(m_plotOptions->cbWorkspace, SIGNAL(currentTextChanged(QString const &)), this,
-          SLOT(notifySelectedWorkspaceChanged(QString const &)));
+  connect(m_plotOptions->cbWorkspace, &QComboBox::currentTextChanged, this,
+          &OutputPlotOptionsView::notifySelectedWorkspaceChanged);
+  connect(m_plotOptions->cbPlotUnit, &QComboBox::currentTextChanged, this,
+          &OutputPlotOptionsView::notifySelectedUnitChanged);
 
-  connect(m_plotOptions->cbPlotUnit, SIGNAL(currentTextChanged(QString const &)), this,
-          SLOT(notifySelectedUnitChanged(QString const &)));
+  connect(m_plotOptions->leIndices, &QLineEdit::editingFinished, this,
+          static_cast<void (OutputPlotOptionsView::*)()>(&OutputPlotOptionsView::notifySelectedIndicesChanged));
+  connect(m_plotOptions->leIndices, &QLineEdit::textEdited, this,
+          static_cast<void (OutputPlotOptionsView::*)(QString const &)>(
+              &OutputPlotOptionsView::notifySelectedIndicesChanged));
 
-  connect(m_plotOptions->leIndices, SIGNAL(editingFinished()), this, SLOT(notifySelectedIndicesChanged()));
-  connect(m_plotOptions->leIndices, SIGNAL(textEdited(QString const &)), this,
-          SLOT(notifySelectedIndicesChanged(QString const &)));
-
-  connect(m_plotOptions->pbPlotSpectra, SIGNAL(clicked()), this, SLOT(notifyPlotSpectraClicked()));
-
+  connect(m_plotOptions->pbPlotSpectra, &QPushButton::clicked, this, &OutputPlotOptionsView::notifyPlotSpectraClicked);
   setIndicesErrorLabelVisible(false);
 
   // Setup the spectra auto-completer
@@ -155,11 +155,11 @@ void OutputPlotOptionsView::setPlotType(PlotWidget const &plotType,
   auto plot3DAction = new QAction(getAction(availableActions, "Plot 3D Surface"), this);
   plot3DAction->setIcon(plot3DIcon());
 
-  connect(plotSpectraAction, SIGNAL(triggered()), this, SLOT(notifyPlotSpectraClicked()));
-  connect(plotBinAction, SIGNAL(triggered()), this, SLOT(notifyPlotBinsClicked()));
-  connect(showSliceViewerAction, SIGNAL(triggered()), this, SLOT(notifyShowSliceViewerClicked()));
-  connect(plotTiledAction, SIGNAL(triggered()), this, SLOT(notifyPlotTiledClicked()));
-  connect(plot3DAction, SIGNAL(triggered()), this, SLOT(notifyPlot3DClicked()));
+  connect(plotSpectraAction, &QAction::triggered, this, &OutputPlotOptionsView::notifyPlotSpectraClicked);
+  connect(plotBinAction, &QAction::triggered, this, &OutputPlotOptionsView::notifyPlotBinsClicked);
+  connect(showSliceViewerAction, &QAction::triggered, this, &OutputPlotOptionsView::notifyShowSliceViewerClicked);
+  connect(plotTiledAction, &QAction::triggered, this, &OutputPlotOptionsView::notifyPlotTiledClicked);
+  connect(plot3DAction, &QAction::triggered, this, &OutputPlotOptionsView::notifyPlot3DClicked);
 
   m_plotOptions->tbPlot->setVisible(true);
   m_plotOptions->pbPlotSpectra->setVisible(true);

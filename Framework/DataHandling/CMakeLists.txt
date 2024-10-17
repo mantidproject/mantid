@@ -218,6 +218,7 @@ set(SRC_FILES
     src/StartAndEndTimeFromNexusFileExtractor.cpp
     src/UpdateInstrumentFromFile.cpp
     src/XmlHandler.cpp
+    src/RotateSampleShape.cpp
 )
 
 set(INC_FILES
@@ -444,6 +445,7 @@ set(INC_FILES
     src/LoadRaw/isisraw2.h
     src/LoadRaw/item_struct.h
     src/LoadRaw/vms_convert.h
+    inc/MantidDataHandling/RotateSampleShape.h
 )
 
 set(TEST_FILES
@@ -642,6 +644,7 @@ set(TEST_FILES
     StartAndEndTimeFromNexusFileExtractorTest.h
     UpdateInstrumentFromFileTest.h
     XMLInstrumentParameterTest.h
+    RotateSampleShapeTest.h
 )
 
 if(COVERAGE)

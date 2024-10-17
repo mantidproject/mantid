@@ -38,7 +38,7 @@ Symmetrise tab
    The axis data range must go from -0.3 to 0.3.
 #. Click on the ``Run`` button.
 #. A Workspace named ``irs26176_graphite002_sym_np_red`` should be created on the ADS.
-#. On the ADS, select ``irs26176_graphite002_sym_np_red`` and right-click to select ``Plot -> Spectrum``. On ``Workspace Indices`` select 5.
+#. On the ADS, select ``irs26176_graphite002_sym_np_red`` and right-click to select ``Plot -> Spectrum...``. On ``Spectrum Numbers`` select 5.
    Check that the spectrum is the same as the one in the ``Preview`` plot of the symmetrise interface.
 
 .. _symmetrise_inelastic_test:

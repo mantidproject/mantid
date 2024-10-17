@@ -29,7 +29,7 @@ where :math:`\nu_mu` is muon neutrino.
 Controlling implantation depth of muons
 ---------------------------------------
 The implantation depth depends on the density of the target material and is proportional to the momentum of the incident muons.
-At ISIS, the momentum of the muons can be tuned from :math:`17 \textit{MeV/c}` to :math:`120 \textit{MeV/c}` [#MAT]_.
+At ISIS [#HIL3]_, the momentum of the muons can be tuned from :math:`17 \textit{MeV/c}` to :math:`120 \textit{MeV/c}` [#MAT]_.
 The maximum penetration depth is a few metres for most gases depending on the pressure.
 For most metals the maximum penetration depth is a few centimetres, with a resolution of few :math:`10's` to :math:`100's` of microns.
 
@@ -48,7 +48,7 @@ References
 .. [#HIL1] Hillier, A.D. et al (in press). Depth Dependent Bulk Elemental Analysis using Negative Muons, D’Amico ,S. , Venuti ,V.,
 			Handbook of cultural heritage , Springer.
 .. [#MEA] Measday, D. F. (2001). The nuclear physics of muon capture. Physics Reports, 354(4-5), 243-409.
+.. [#HIL3] Hillier , A.D. et al (2019).Muons at ISIS., Philos. Trans. R. Soc A Math. Phys. Eng. Sci., Vol. 377, pp. 1-7.
 .. [#MAT] Matsuzaki, T. et al (2001). The RIKEN-RAL pulsed muon facility. Nuclear Instruments and Methods in Physics Research
 			Section A: Accelerators, Spectrometers, Detectors and Associated Equipment, 465(2-3), 365-383.
-.. [#HIL3] Hillier , A.D. et al (2019).Muons at ISIS., Philos. Trans. R. Soc A Math. Phys. Eng. Sci., Vol. 377, pp. 1-7.
 
