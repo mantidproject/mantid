@@ -15,6 +15,8 @@ from qtpy.QtWidgets import QProgressDialog
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_view import DNSView
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem import TreeItemEnum
 
+TREEVIEW_MAX_NUMBER_COLUMNS = 10
+
 
 class DNSFileSelectorView(DNSView):
     """
@@ -111,11 +113,17 @@ class DNSFileSelectorView(DNSView):
         self.sig_check_last.emit(sender_name)
 
     def _un_expand_all(self):
+        self._treeview.blockSignals(True)
         self._treeview.collapseAll()
+        self._treeview.blockSignals(False)
+        self.adjust_treeview_columns_width(TREEVIEW_MAX_NUMBER_COLUMNS)
 
     # public can be called from presenter
     def expand_all(self):
+        self._treeview.blockSignals(True)
         self._treeview.expandAll()
+        self._treeview.blockSignals(False)
+        self.adjust_treeview_columns_width(TREEVIEW_MAX_NUMBER_COLUMNS)
 
     def _filter_scans_checked(self):
         self.sig_filters_clicked.emit()
