@@ -82,8 +82,7 @@ class PhaseTablePresenter(object):
 
     def cancel_current_alg(self):
         """Cancels the current algorithm if executing"""
-        if self.model.current_alg is not None:
-            self.model.current_alg.cancel()
+        self.model.cancel_current_alg()
 
     def handle_thread_calculation_started(self):
         """Generic handling of starting calculation threads"""
@@ -93,13 +92,13 @@ class PhaseTablePresenter(object):
         """Generic handling of success from calculation threads"""
         self.enable_editing_notifier.notify_subscribers()
         self.view.enable_widget()
-        self.model.current_alg = None
+        self.model.clear_current_alg()
 
     def handle_thread_calculation_error(self, error):
         """Generic handling of error from calculation threads"""
         self.enable_editing_notifier.notify_subscribers()
         self.view.warning_popup(error.exc_value)
-        self.model.current_alg = None
+        self.model.clear_current_alg()
 
     """=============== Phase table methods ==============="""
 
@@ -225,7 +224,7 @@ class PhaseTablePresenter(object):
             for phasequad in self.model.group_phasequads:
                 if phasequad.name == name:
                     self.add_phasequad_to_analysis(False, False, phasequad)
-                    self.model.group_pair_context.remove_phasequad(phasequad)
+                    self.model.remove_phasequad(phasequad)
                     self.calculation_finished_notifier.notify_subscribers()
 
     def remove_selected_rows(self, phasequad_names):
@@ -234,7 +233,7 @@ class PhaseTablePresenter(object):
             for phasequad in self.model.group_phasequads:
                 if phasequad.name == name:
                     self.add_phasequad_to_analysis(False, False, phasequad)
-                    self.model.group_pair_context.remove_phasequad(phasequad)
+                    self.model.remove_phasequad(phasequad)
                     self.calculation_finished_notifier.notify_subscribers()
 
     def handle_phasequad_calculation_started(self):

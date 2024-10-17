@@ -36,14 +36,6 @@ class PhaseTableModel:
         return self._context.group_pair_context
 
     @property
-    def current_alg(self):
-        return self._current_alg
-
-    @current_alg.setter
-    def current_alg(self, value):
-        self._current_alg = value
-
-    @property
     def phasequad(self):
         return self._phasequad
 
@@ -69,11 +61,11 @@ class PhaseTableModel:
 
     @property
     def phasequad_calculation_thread(self):
-        return self._calculation_thread
+        return self._phasequad_calculation_thread
 
     @phasequad_calculation_thread.setter
     def phasequad_calculation_thread(self, value):
-        self._calculation_thread = value
+        self._phasequad_calculation_thread = value
 
     @property
     def group_pair_names(self):
@@ -94,6 +86,13 @@ class PhaseTableModel:
     @instrument.setter
     def instrument(self, value):
         self._context.data_context.instrument = value
+
+    def cancel_current_alg(self):
+        if self._current_alg is not None:
+            self._current_alg.cancel()
+
+    def clear_current_alg(self):
+        self._current_alg = None
 
     def get_grouped_workspace_names(self):
         return self._context.getGroupedWorkspaceNames()
@@ -130,3 +129,6 @@ class PhaseTableModel:
         self.current_alg = None
 
         return detector_table, fitting_information
+
+    def remove_phasequad(self, phasequad):
+        self.group_pair_context.remove_phasequad(phasequad)
