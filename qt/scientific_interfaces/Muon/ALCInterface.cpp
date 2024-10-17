@@ -103,7 +103,6 @@ void ALCInterface::initLayout() {
 
   m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
   m_dataLoading->initialize();
-  m_dataLoading->setParent(this);
 
   auto baselineModellingModel = std::make_unique<ALCBaselineModellingModel>();
   ALCBaselineModellingView *baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
