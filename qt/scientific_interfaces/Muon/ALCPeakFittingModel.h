@@ -39,13 +39,15 @@ public:
 
   // -- IAlgorithmRunnerSubscriber interface
   // -----------------------------------------------------------
-  void notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) override;
+  void notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) override;
   void notifyAlgorithmError(MantidQt::API::IConfiguredAlgorithm_sptr &algorithm, const std::string &message) override;
 
   // -- End of IAlgorithmRunnerSubscriber interface
   // ----------------------------------------------------
 
   ALCPeakFittingModel(std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner);
+
+  ALCPeakFittingModel();
 
   /// Update the data
   void setData(Mantid::API::MatrixWorkspace_sptr newData);
@@ -56,11 +58,11 @@ public:
   /// Export fitted peaks as a table workspace
   Mantid::API::ITableWorkspace_sptr exportFittedPeaks();
 
-  void subscribe(std::weak_ptr<IALCPeakFittingModelSubscriber> subscriber) override;
+  void subscribe(IALCPeakFittingModelSubscriber *subscriber) override;
 
 private:
   /// The subscriber to the model.
-  std::weak_ptr<IALCPeakFittingModelSubscriber> m_subscriber;
+  IALCPeakFittingModelSubscriber *m_subscriber;
 
   /// The Algorithm runner for async processing.
   std::unique_ptr<MantidQt::API::IAlgorithmRunner> m_algorithmRunner;

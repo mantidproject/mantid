@@ -46,18 +46,7 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr guessData(Mantid::API::IFunction_const_sptr function,
                                                       const std::vector<double> &xValues) = 0;
 
-  virtual void subscribe(std::weak_ptr<IALCPeakFittingModelSubscriber> subscriber) = 0;
-
-signals:
-
-  /// Signal to inform that the fitting was done and fitted peaks were updated
-  void fittedPeaksChanged();
-
-  /// Signal to inform that data was set
-  void dataChanged();
-
-  /// Signal to inform presenter of an error with fitting
-  void errorInModel(const std::string &message);
+  virtual void subscribe(IALCPeakFittingModelSubscriber *subscriber) = 0;
 };
 
 } // namespace CustomInterfaces
