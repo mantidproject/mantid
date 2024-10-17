@@ -394,39 +394,29 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.assertEqual(1, self.presenter.period_info_widget.show.call_count)
 
     def test_check_and_get_filename_empty_filename(self):
-        filename = self.presenter._check_and_get_filename("")
-        self.assertEqual(filename, "")
+        self._test_check_and_get_filename(given_filename="", expected_filename="")
 
     def test_check_and_get_filename_with_xml_extension(self):
-        expected_filename = "file.xml"
-        filename = self.presenter._check_and_get_filename(expected_filename)
-        self.assertEqual(filename, expected_filename)
+        self._test_check_and_get_filename(given_filename="file.xml", expected_filename="file.xml")
 
-    def test_check_and_get_filename_without_xml_extension_if_xml_file_exists(self):
-        # Pretend file already exists.
-        os.path.isfile = mock.MagicMock(return_value=True)
-        # User selects "yes" to replace existing file
-        self.view.show_question_dialog = mock.MagicMock(return_value=True)
-        expected_filename = "file.xml"
-        given_filename = "file.txt"
-        filename = self.presenter._check_and_get_filename(given_filename)
-        self.assertEqual(filename, expected_filename)
+    def test_check_and_get_filename_without_xml_extension_if_xml_file_exists_yes_overwrite(self):
+        self._test_check_and_get_filename(
+            given_filename="file.txt", expected_filename="file.xml", xml_file_exists=True, overwrite_existing=True
+        )
 
     def test_check_and_get_filename_without_xml_extension_if_xml_file_exists_no_overwrite(self):
-        # Pretend file already exists.
-        os.path.isfile = mock.MagicMock(return_value=True)
-        # User selects "no" to replace existing file
-        self.view.show_question_dialog = mock.MagicMock(return_value=False)
-        expected_filename = ""
-        given_filename = "file.txt"
-        filename = self.presenter._check_and_get_filename(given_filename)
-        self.assertEqual(filename, expected_filename)
+        self._test_check_and_get_filename(given_filename="file.txt", expected_filename="", xml_file_exists=True, overwrite_existing=False)
 
     def test_check_and_get_filename_without_xml_extension_if_xml_file_not_exists(self):
-        # Pretend file does not already exist.
-        os.path.isfile = mock.MagicMock(return_value=False)
-        expected_filename = "file.xml"
-        given_filename = "file.txt"
+        self._test_check_and_get_filename(given_filename="file.txt", expected_filename="file.xml", xml_file_exists=False)
+
+    def _test_check_and_get_filename(self, given_filename, expected_filename, xml_file_exists=None, overwrite_existing=None):
+        # Mock whether the file exists already.
+        if xml_file_exists is not None:
+            os.path.isfile = mock.MagicMock(return_value=xml_file_exists)
+        # Mock the return value of the dialog that asks is the file should be overwritten.
+        if overwrite_existing is not None:
+            self.view.show_question_dialog = mock.MagicMock(return_value=overwrite_existing)
         filename = self.presenter._check_and_get_filename(given_filename)
         self.assertEqual(filename, expected_filename)
 
