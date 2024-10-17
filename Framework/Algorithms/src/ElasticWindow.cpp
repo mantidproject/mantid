@@ -9,6 +9,8 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/ElasticWindow.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -107,7 +109,13 @@ void ElasticWindow::exec() {
   startProgress += stepProgress;
   endProgress += stepProgress;
 
-  if (axisIsSpectrumNumber) {
+  auto const detectorCount = integWS->spectrumInfo().detectorCount();
+  if (axisIsSpectrumNumber || detectorCount > 0) {
+    if (!axisIsSpectrumNumber) {
+      auto spectraAxis = std::make_unique<SpectraAxis>(integWS.get());
+      integWS->replaceAxis(1, std::move(spectraAxis));
+    }
+
     // Use ConvertSpectrumAxis v2 for correct result
     const int convertSpectrumAxisVersion = 2;
 
