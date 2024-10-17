@@ -4,9 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqtinterfaces.Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
-from mantidqtinterfaces.Muon.GUI.Common import thread_model
-from mantidqtinterfaces.Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_view import REAL_PART, IMAGINARY_PART
 from mantidqt.utils.observer_pattern import Observable, GenericObserver, GenericObservable
 import re
@@ -167,10 +164,6 @@ class PhaseTablePresenter(object):
         self.view.disable_phase_table_cancel()
         self.handle_thread_calculation_error(error)
 
-    def create_phase_table_calculation_thread(self):
-        calculation_model = ThreadModelWrapper(self.calculate_phase_table)
-        return thread_model.ThreadModel(calculation_model)
-
     def handle_calculate_phase_table_clicked(self):
         self.update_model_from_view()
         self.disable_editing_notifier.notify_subscribers()
@@ -182,14 +175,12 @@ class PhaseTablePresenter(object):
             return
         self.model.new_table_name = name
 
-        # Calculate the new table in a separate thread
-        self.model.calculation_thread = self.create_phase_table_calculation_thread()
-        self.model.calculation_thread.threadWrapperSetUp(
+        self.model.calculate_phase_table_on_thread(
+            self.calculate_phase_table,
             self.handle_phase_table_calculation_started,
             self.handle_phase_table_calculation_success,
             self.handle_phase_table_calculation_error,
         )
-        self.model.calculation_thread.start()
 
     def handle_phase_table_changed(self):
         """Handles when phase table is changed, recalculates any existing phasequads"""
@@ -254,10 +245,6 @@ class PhaseTablePresenter(object):
         """Specific handling when calculate phase table errors"""
         self.handle_thread_calculation_error(error)
 
-    def create_phasequad_calculation_thread(self):
-        phasequad_calculation_model = ThreadModelWrapper(self.calculate_phasequad)
-        return thread_model.ThreadModel(phasequad_calculation_model)
-
     def handle_add_phasequad_button_clicked(self):
         """When the + button is pressed, calculate a new phasequad from the currently selected table"""
         if self.view.number_of_phase_tables < 1:
@@ -271,15 +258,13 @@ class PhaseTablePresenter(object):
             return
 
         elif self.validate_phasequad_name(name):
-            table = self.model.phase_context.options_dict["phase_table_for_phase_quad"]
-            self.model.phasequad = MuonPhasequad(str(name), table)
-            self.model.phasequad_calculation_thread = self.create_phasequad_calculation_thread()
-            self.model.phasequad_calculation_thread.threadWrapperSetUp(
+            self.model.calculate_phasequad_on_thread(
+                name,
+                self.calculate_phasequad,
                 self.handle_phasequad_calculation_started,
                 self.handle_phasequad_calculation_success,
                 self.handle_phasequad_calculation_error,
             )
-            self.model.phasequad_calculation_thread.start()
 
     def handle_remove_phasequad_button_clicked(self):
         phasequads = self.view.get_selected_phasequad_names_and_indexes()

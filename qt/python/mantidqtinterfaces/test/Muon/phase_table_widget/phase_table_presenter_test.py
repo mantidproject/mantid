@@ -207,10 +207,10 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.view.set_phase_table_combo_box(["Table"])
         self.presenter.validate_phasequad_name = mock.Mock(return_value=True)
         self.view.enter_phasequad_name = mock.Mock(return_value="test")
-        self.presenter.create_phasequad_calculation_thread = mock.MagicMock()
+        self.model.calculate_phasequad_on_thread = mock.MagicMock()
 
         self.presenter.handle_add_phasequad_button_clicked()
-        self.assertEqual(self.presenter.create_phasequad_calculation_thread.call_count, 1)
+        self.assertEqual(self.model.calculate_phasequad_on_thread.call_count, 1)
 
     def test_phasequad_success(self):
         self.model.group_pair_context.add_pair_to_selected_pairs = mock.Mock()

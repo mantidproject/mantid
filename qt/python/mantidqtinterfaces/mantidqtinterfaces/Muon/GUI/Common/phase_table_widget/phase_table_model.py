@@ -12,6 +12,9 @@ from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
 from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases
 from mantid import AlgorithmManager
+from mantidqtinterfaces.Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
+from mantidqtinterfaces.Muon.GUI.Common import thread_model
+from mantidqtinterfaces.Muon.GUI.Common.muon_phasequad import MuonPhasequad
 
 
 class PhaseTableModel:
@@ -54,18 +57,6 @@ class PhaseTableModel:
     @property
     def calculation_thread(self):
         return self._calculation_thread
-
-    @calculation_thread.setter
-    def calculation_thread(self, value):
-        self._calculation_thread = value
-
-    @property
-    def phasequad_calculation_thread(self):
-        return self._phasequad_calculation_thread
-
-    @phasequad_calculation_thread.setter
-    def phasequad_calculation_thread(self, value):
-        self._phasequad_calculation_thread = value
 
     @property
     def group_pair_names(self):
@@ -132,3 +123,30 @@ class PhaseTableModel:
 
     def remove_phasequad(self, phasequad):
         self.group_pair_context.remove_phasequad(phasequad)
+
+    def calculate_phase_table_on_thread(self, calculation_func, started_callback, success_callback, error_callback):
+        # Calculate the new table in a separate thread
+        self._calculation_thread = self._create_calculation_thread(calculation_func)
+        self._calculation_thread.threadWrapperSetUp(
+            started_callback,
+            success_callback,
+            error_callback,
+        )
+        self._calculation_thread.start()
+
+    def calculate_phasequad_on_thread(self, name, calculation_func, started_callback, success_callback, error_callback):
+        # Calculate the phasequad in a separate thread
+        table = self._context.phase_context.options_dict["phase_table_for_phase_quad"]
+        self._phasequad = MuonPhasequad(str(name), table)
+        self._phasequad_calculation_thread = self._create_calculation_thread(calculation_func)
+        self._phasequad_calculation_thread.threadWrapperSetUp(
+            started_callback,
+            success_callback,
+            error_callback,
+        )
+        self._phasequad_calculation_thread.start()
+
+    @staticmethod
+    def _create_calculation_thread(calculation_func):
+        calculation_model = ThreadModelWrapper(calculation_func)
+        return thread_model.ThreadModel(calculation_model)
