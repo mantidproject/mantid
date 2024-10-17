@@ -8,7 +8,7 @@
 #
 import unittest
 from unittest import mock
-from numpy import eye, c_, array, tile, array_equal
+from numpy import eye, c_, array, tile, array_equal, arange
 
 from mantidqt.widgets.sliceviewer.cutviewer.presenter import CutViewerPresenter
 from mantidqt.widgets.sliceviewer.cutviewer.view import CutViewerView
@@ -31,15 +31,22 @@ class TestCutViewerModel(unittest.TestCase):
     @mock.patch("mantidqt.widgets.sliceviewer.cutviewer.presenter.CutViewerPresenter.get_cut_representation_parameters")
     @mock.patch("mantidqt.widgets.sliceviewer.cutviewer.presenter.CutViewerPresenter.update_cut")
     def test_show_view(self, mock_update_cut, mock_get_cut_rep):
-        mock_get_cut_rep.return_value = 6 * [None]
-        self.presenter.model.get_default_bin_params.return_value = 3 * [None]  # vecs, extents, nbins
+        mock_get_cut_rep.return_value = 6 * [None]  # xmin, xmax, ymin, ymax, thickness, axes_transform
+        in_vecs = eye(3)
+        in_extents = arange(6).reshape(2, 3)
+        in_nbins = array([10, 1, 1])
+        self.presenter.model.get_default_bin_params.return_value = in_vecs, in_extents, in_nbins  # vecs, extents, nbins
 
         self.presenter.show_view()
 
         self.presenter.view.show.assert_called_once()
-        self.presenter.view.set_bin_params.assert_called_once()
+        self.presenter.view.set_bin_params.assert_called_once_with(in_vecs, in_extents, in_nbins)
         mock_update_cut.assert_called_once()
         mock_get_cut_rep.assert_called_once()
+        args = mock_get_cut_rep.call_args[0]  # for some reason assert_called_once_with struggles wth np arrays here
+        self.assertTrue(array_equal(in_vecs[:-1, :], args[0]))  # only has 2D slice
+        self.assertTrue(array_equal(in_extents[:, :-1], args[1]))
+        self.assertTrue(array_equal(in_nbins[:-1], args[2]))
 
     def test_update_cut_with_valid_bin_params(self):
         in_vecs = eye(3)
@@ -70,10 +77,11 @@ class TestCutViewerModel(unittest.TestCase):
     def test_update_bin_params_from_cut_representation(self, mock_update_cut):
         xmin, xmax, ymin, ymax, thickness = 0, 1, 0, 1, 0.1
         self.presenter.model.calc_bin_params_from_cut_representation.return_value = 3 * [None]  # vecs, extents, nbins
+        self.presenter.model.calc_cut_representation_parameters.return_value = xmin, xmax, ymin, ymax, thickness
         in_vecs = eye(3)
         self.presenter.view.get_vector.side_effect = lambda irow: in_vecs[irow, :]
-        self.presenter.view.get_extents.return_value = 2 * [None]  # ignored
-        self.presenter.view.get_nbin.return_value = None  # ignored
+        self.presenter.view.get_extents.return_value = [-1, 1]  # ignored
+        self.presenter.view.get_nbin.return_value = 2  # ignored
 
         self.presenter.update_bin_params_from_cut_representation(xmin, xmax, ymin, ymax, thickness)
 
