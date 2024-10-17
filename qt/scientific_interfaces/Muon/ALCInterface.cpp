@@ -153,7 +153,7 @@ void ALCInterface::updatePeakData() {
     if (m_peakFittingView->function("")) {
 
       // Fit the data
-      m_peakFittingView->emitFitRequested();
+      m_peakFittingView->fitRequested();
     }
   }
 }
