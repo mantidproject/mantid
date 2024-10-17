@@ -10,7 +10,6 @@
 #include "ALCDataLoadingView.h"
 #include "ALCPeakFittingView.h"
 
-#include "ALCBaselineModellingPresenter.h"
 #include "ALCDataLoadingPresenter.h"
 #include "ALCPeakFittingPresenter.h"
 
@@ -106,7 +105,8 @@ void ALCInterface::initLayout() {
 
   auto baselineModellingModel = std::make_unique<ALCBaselineModellingModel>();
   ALCBaselineModellingView *baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
-  m_baselineModelling = new ALCBaselineModellingPresenter(baselineModellingView, std::move(baselineModellingModel));
+  m_baselineModelling =
+      std::make_unique<ALCBaselineModellingPresenter>(baselineModellingView, std::move(baselineModellingModel));
   m_baselineModelling->initialize();
 
   m_peakFittingView = new ALCPeakFittingView(m_ui.peakFittingView);

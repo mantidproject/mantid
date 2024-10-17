@@ -13,6 +13,8 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
+#include "ALCBaselineModellingPresenter.h"
+
 #include "ui_ALCInterface.h"
 
 namespace MantidQt {
@@ -21,7 +23,6 @@ namespace CustomInterfaces {
 class ALCDataLoadingPresenter;
 
 class ALCBaselineModellingView;
-class ALCBaselineModellingPresenter;
 class ALCBaselineModellingModel;
 
 class ALCPeakFittingView;
@@ -78,7 +79,7 @@ private:
 
   // Step presenters
   ALCDataLoadingPresenter *m_dataLoading;
-  ALCBaselineModellingPresenter *m_baselineModelling;
+  std::unique_ptr<ALCBaselineModellingPresenter> m_baselineModelling;
   ALCPeakFittingPresenter *m_peakFitting;
 
   // Models
