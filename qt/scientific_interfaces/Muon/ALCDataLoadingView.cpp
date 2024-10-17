@@ -72,7 +72,7 @@ void ALCDataLoadingView::initialize() {
   // Set up connections
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_ui.load, SIGNAL(clicked()), this, SLOT(notifyLoadClicked()));
-  connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this, SLOT(notifyInstrumentChanged(QString)));
+  connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this, SLOT(instrumentChanged(QString)));
   connect(m_ui.runs, SIGNAL(fileTextChanged(const QString &)), this, SLOT(notifyRunsEditingChanged()));
   connect(m_ui.runs, SIGNAL(findingFiles()), this, SLOT(notifyRunsEditingFinished()));
   connect(m_ui.runs, SIGNAL(fileFindingFinished()), this, SLOT(notifyRunsFoundFinished()));
@@ -323,7 +323,7 @@ void ALCDataLoadingView::enableAll() {
 }
 
 void ALCDataLoadingView::instrumentChanged(QString instrument) {
-  emit instrumentChangedSignal(instrument.toStdString());
+  m_presenter->handleInstrumentChanged(instrument.toStdString());
   if (!m_ui.runs->getText().isEmpty()) {
     m_ui.runs->findFiles(); // Re-search for files with new instrument
   }
@@ -429,10 +429,6 @@ void ALCDataLoadingView::showAlphaMessage(const bool alpha) { m_ui.alphaMessage-
 // Slots for calling presenter to handle different events
 
 void ALCDataLoadingView::notifyLoadClicked() { m_presenter->handleLoadRequested(); }
-
-void ALCDataLoadingView::notifyInstrumentChanged(const QString &instrument) {
-  m_presenter->handleInstrumentChanged(instrument.toStdString());
-}
 
 void ALCDataLoadingView::notifyRunsEditingChanged() { m_presenter->handleRunsEditing(); }
 
