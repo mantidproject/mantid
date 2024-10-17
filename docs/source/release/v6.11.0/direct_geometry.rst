@@ -44,7 +44,7 @@ CrystalField
 
 Bugfixes
 ############
-- The method `cf.getMagneticMoment()` no longer ignores the `Hmag` field, which is now
+- The method ``cf.getMagneticMoment()`` no longer ignores the ``Hmag`` field, which is now
   correctly considered in the calculations of the magnetic moment.
 
 

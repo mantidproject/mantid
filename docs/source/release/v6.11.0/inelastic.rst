@@ -12,10 +12,10 @@ New Features
 .. figure::  ../../images/6_11_release/load_history_option.png
    :width: 500px
 
-- The :ref:`Elwin Tab <elwin>` of  :ref:`Data Processor Interface <interface-inelastic-data-processor>` now includes access the Slice Viewer or 3D Plot from the ``OutputPlot`` widget of the output workspaces containing more than 1 histogram.
+- The :ref:`Elwin Tab <elwin>` of  :ref:`Data Processor Interface <interface-inelastic-data-processor>` now includes access to the Slice Viewer or 3D Plot from the ``OutputPlot`` widget of the output workspaces containing more than 1 histogram.
 - The :ref:`Convolution <convfit>` tab of the :ref:`Inelastic QENS Fitting Interface <interface-inelastic-qens-fitting>` now has option ``Tie Peak Centres`` to tie two Lorentzians in the interface.
-- The ``Function (Q)`` tab of the :ref:`QENS Fitting Interface <interface-inelastic-qens-fitting>` now allows to load `A0` fit parameter data into the interface.
-- The ``I(Q, t)`` tab in :ref:`Inelastic QENS Fitting Interface <interface-inelastic-qens-fitting>` has new option `Output Composite Members`.
+- :ref:`QENS Fitting Interface <interface-inelastic-qens-fitting>` now allows loading a ``_Result`` workspace from the ``I(Q, t)`` fitting tab into the ``Function (Q)`` fitting tab if one of the fit parameters is A0.
+- The ``I(Q, t)`` tab in :ref:`Inelastic QENS Fitting Interface <interface-inelastic-qens-fitting>` has new option ``Output Composite Members``.
 - Renamed tabs of :ref:`QENS Fitting <interface-inelastic-qens-fitting>` from ``MSD Fit``, ``I(Q,t) Fit``, ``ConvFit`` and ``F(Q)`` to ``MSD``, ``I(Q,t)``, ``Convolution`` and ``Function(Q)`` respectively. Added tooltip.
 
 .. figure::  ../../images/6_11_release/renamed_tabs.png
@@ -32,7 +32,8 @@ Bugfixes
 - When the ADS is cleared of workspaces that are used to run fits on an open :ref:`QENS Fitting interface <interface-inelastic-qens-fitting>`, a warning message now pops up when clicking on the `Run` button.
 - Fixed a bug in the Monte Carlo error calculation on the I(Q, t) tab of the :ref:`Data Processor Interface <interface-inelastic-data-processor>` where the first bin had an error of zero.
 - The :ref:`Elwin Tab <elwin>` of the :ref:`Data Processor Interface <interface-inelastic-data-processor>` now supports loading data unrestricted by suffix if the option is selected from ``Settings``.
-- The :ref:`Elwin interface <elwin>` now allows to see the Spectrum number 0 on the widget plot of the selected preview workspace.
+- On :ref:`Elwin interface <elwin>`, it is now possible to see the spectrum number 0 on the widget plot of the selected preview workspace.
+  Changing the preview spectrum above the plot widget combo box now plots the correct spectrum for the selected index.
 - The :ref:`Elwin interface <elwin>` now plots the correct spectrum for the selected index when changing the preview spectrum above the plot widget combo box.
 - The :ref:`Moments<inelastic-moments>` tab of the :ref:`Data Processor <interface-inelastic-data-processor>` interface now have responsive sliders to changes in ``Emin`` and ``EMax`` properties when changed from the property browser.
 - The :ref:`Inelastic Bayes fitting <interface-inelastic-bayes-fitting>` interface now correctly calculates EISF errors on the Quasi tab.

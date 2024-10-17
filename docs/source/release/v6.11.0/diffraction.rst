@@ -76,15 +76,15 @@ New features
 .. figure::  ../../images/6_11_release/FindMultipleUMatrices.png
    :width: 400px
 
-- Algorithm :ref:`ShowPossibleCells <algm-ShowPossibleCells>` now has a new output property, ``Cells``, that includes the cell information in a usable way.
+- Algorithm :ref:`ShowPossibleCells <algm-ShowPossibleCells>` now has a new output property, ``Cells``, that includes the cell information.
 - New algorithm :ref:`SaveMDHistoToVTK <algm-SaveMDHistoToVTK>` that saves a :ref:`MDHistoWorkspace <MDHistoWorkspace>` as a ``VTK`` file so that it can be visualized by ``Paraview``.
 - :ref:`IntegratePeaksShoeboxTOF <algm-IntegratePeaksShoeboxTOF>` has improved optimisation for shoebox position - would previously be centred on nearby stronger peaks if present.
-- Execution time of :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` has been sped up by an order of magnitude.
+- Execution time of :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` is at least 10 times faster.
 
 
 Bugfixes
 ############
-- :ref:`LoadWANDSCD <algm-LoadWANDSCD>` now keeps the sgl/sgu angles set by the goniometer.
+- :ref:`LoadWANDSCD <algm-LoadWANDSCD>` now keeps the ``sgl`` and ``sgu`` angles set by the goniometer.
 - :ref:`ConverWANDSCDToQ <algm-ConvertWANDSCDToQ>` simplifies the underlying code by using histograms directly.
 
 :ref:`Release 6.11.0 <v6.11.0>`
