@@ -25,12 +25,15 @@ const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI", "M
 namespace MantidQt::CustomInterfaces {
 
 ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
-    : m_widget(widget), m_selectedLog(DEFAULT_LOG), m_numPeriods(0) {}
+    : m_widget(widget), m_selectedLog(DEFAULT_LOG), m_numPeriods(0), m_presenter() {}
 
 ALCDataLoadingView::~ALCDataLoadingView() = default;
 
+void ALCDataLoadingView::subscribePresenter(ALCDataLoadingPresenter *presenter) { m_presenter = presenter; }
+
 void ALCDataLoadingView::initialize() {
   m_ui.setupUi(m_widget);
+
   initInstruments();
   m_ui.logValueSelector->setCheckboxShown(false);
   m_ui.logValueSelector->setVisible(true);
@@ -39,15 +42,6 @@ void ALCDataLoadingView::initialize() {
   enableRunsAutoAdd(false);
   enableAlpha(false);
   showAlphaMessage(false);
-  connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
-  connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this, SLOT(instrumentChanged(QString)));
-  connect(m_ui.runs, SIGNAL(fileTextChanged(const QString &)), SIGNAL(runsEditingSignal()));
-  connect(m_ui.runs, SIGNAL(findingFiles()), SIGNAL(runsEditingFinishedSignal()));
-  connect(m_ui.runs, SIGNAL(fileFindingFinished()), SIGNAL(runsFoundSignal()));
-  connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()), SIGNAL(manageDirectoriesClicked()));
-  connect(m_ui.runsAutoAdd, SIGNAL(toggled(bool)), this, SLOT(runsAutoAddToggled(bool)));
-  connect(m_ui.periodInfo, SIGNAL(clicked()), SIGNAL(periodInfoClicked()));
 
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 
@@ -76,6 +70,17 @@ void ALCDataLoadingView::initialize() {
   m_ui.alpha->setValidator(new QDoubleValidator(0, 99999, 10, this));
 
   m_ui.runs->doButtonOpt(MantidQt::API::FileFinderWidget::ButtonOpts::None);
+
+  // Set up connections
+  connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
+  connect(m_ui.load, SIGNAL(clicked()), this, SLOT(notifyLoadClicked()));
+  connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this, SLOT(notifyInstrumentChanged(QString)));
+  connect(m_ui.runs, SIGNAL(fileTextChanged(const QString &)), this, SLOT(notifyRunsEditingChanged()));
+  connect(m_ui.runs, SIGNAL(findingFiles()), this, SLOT(notifyRunsEditingFinished()));
+  connect(m_ui.runs, SIGNAL(fileFindingFinished()), this, SLOT(notifyRunsFoundFinished()));
+  connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()), this, SLOT(notifyManageDirectoriesClicked()));
+  connect(m_ui.periodInfo, SIGNAL(clicked()), this, SLOT(notifyPeriodInfoClicked()));
+  connect(m_ui.runsAutoAdd, SIGNAL(toggled(bool)), this, SLOT(runsAutoAddToggled(bool)));
 }
 
 /**
@@ -173,6 +178,8 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_
     m_ui.dataPlot->tickLabelFormat("x", "sci", true);
 
   m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black, kwargs);
+
+  emit dataChanged();
 }
 
 void ALCDataLoadingView::displayError(const std::string &error) {
@@ -373,12 +380,12 @@ void ALCDataLoadingView::runsAutoAddToggled(bool on) {
     m_ui.runs->setReadOnly(true);
     m_ui.load->setEnabled(false);
     setLoadStatus("Auto Add", "orange");
-    emit autoAddToggledSignal(true);
+    m_presenter->handleStartWatching(true);
   } else {
     m_ui.runs->setReadOnly(false);
     m_ui.load->setEnabled(true);
     setLoadStatus("Waiting", "orange");
-    emit autoAddToggledSignal(false);
+    m_presenter->handleStartWatching(false);
   }
 }
 
@@ -420,5 +427,23 @@ std::string ALCDataLoadingView::getAlphaValue() const {
 }
 
 void ALCDataLoadingView::showAlphaMessage(const bool alpha) { m_ui.alphaMessage->setVisible(alpha); }
+
+// Slots for calling presenter to handle different events
+
+void ALCDataLoadingView::notifyLoadClicked() { m_presenter->handleLoadRequested(); }
+
+void ALCDataLoadingView::notifyInstrumentChanged(const QString &instrument) {
+  m_presenter->handleInstrumentChanged(instrument.toStdString());
+}
+
+void ALCDataLoadingView::notifyRunsEditingChanged() { m_presenter->handleRunsEditing(); }
+
+void ALCDataLoadingView::notifyRunsEditingFinished() { m_presenter->handleRunsEditingFinished(); }
+
+void ALCDataLoadingView::notifyRunsFoundFinished() { m_presenter->handleRunsFound(); }
+
+void ALCDataLoadingView::notifyManageDirectoriesClicked() { m_presenter->handleManageDirectories(); }
+
+void ALCDataLoadingView::notifyPeriodInfoClicked() { m_presenter->handlePeriodInfoClicked(); }
 
 } // namespace MantidQt::CustomInterfaces

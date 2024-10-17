@@ -16,7 +16,6 @@ set(SRC_FILES
 set(MOC_FILES
     ALCBaselineModellingPresenter.h
     ALCBaselineModellingView.h
-    ALCDataLoadingPresenter.h
     ALCInterface.h
     ALCPeakFittingPresenter.h
     IALCBaselineModellingView.h
