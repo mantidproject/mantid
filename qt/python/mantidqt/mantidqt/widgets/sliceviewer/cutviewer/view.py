@@ -15,7 +15,11 @@ from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 import matplotlib.text as text
 from mantid.simpleapi import AnalysisDataService as ADS
 from mantid.kernel import SpecialCoordinateSystem
-from numpy import zeros
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mantidqt.widgets.sliceviewer.cutviewer.presenter import CutViewerPresenter  # noqa: F401
+    from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas  # noqa: F401
 
 # local imports
 from .representation.cut_representation import CutRepresentation
@@ -26,14 +30,14 @@ class CutViewerView(QWidget):
     to interact with the peaks.
     """
 
-    def __init__(self, presenter, canvas, frame, parent=None):
+    def __init__(self, canvas: "SliceViewerCanvas", frame: SpecialCoordinateSystem):
         """
         :param painter: An object responsible for drawing the representation of the cut
         :param sliceinfo_provider: An object responsible for providing access to current slice information
         :param parent: An optional parent widget
         """
-        super().__init__(parent)
-        self.presenter = presenter
+        super().__init__()
+        self.presenter = None
         self.layout = None
         self.figure_layout = None
         self.table = None
@@ -45,6 +49,9 @@ class CutViewerView(QWidget):
         self._init_slice_table()
         self.table.cellChanged.connect(self.on_cell_changed)
 
+    def subscribe_presenter(self, presenter: "CutViewPresenter"):
+        self.presenter = presenter
+
     def hide(self):
         super().hide()
         if self.cut_rep is not None:
@@ -54,8 +61,7 @@ class CutViewerView(QWidget):
     # signals
 
     def on_cell_changed(self, irow, icol):
-        self.set_bin_params(*self.presenter.validate_bin_params(irow, icol))
-        self.presenter.update_cut()
+        self.presenter.handle_cell_changed(irow, icol)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -65,18 +71,6 @@ class CutViewerView(QWidget):
 
     def get_step(self, irow):
         return float(self.table.item(irow, 6).text())
-
-    def get_bin_params(self):
-        vectors = zeros((3, 3), dtype=float)
-        extents = zeros((2, 3), dtype=float)
-        nbins = zeros(3, dtype=int)
-        for ivec in range(vectors.shape[0]):
-            for icol in range(vectors.shape[0]):
-                vectors[ivec, icol] = float(self.table.item(ivec, icol).text())
-            extents[0, ivec] = float(self.table.item(ivec, 3).text())  # start
-            extents[1, ivec] = float(self.table.item(ivec, 4).text())  # stop
-            nbins[ivec] = int(self.table.item(ivec, 5).text())
-        return vectors, extents, nbins
 
     # setters
 
@@ -93,13 +87,22 @@ class CutViewerView(QWidget):
     def set_step(self, irow, step):
         self.table.item(irow, 6).setData(Qt.EditRole, float(step))
 
-    def update_step(self, irow):
-        _, extents, nbins = self.get_bin_params()
-        self.set_step(irow, (extents[1, irow] - extents[0, irow]) / nbins[irow])
+    def update_step(self, irow, nbin):
+        extents = self.get_extents(irow)
+        self.set_step(irow, (extents[1] - extents[0]) / nbin)
+
+    def get_nbin(self, irow):
+        return int(self.table.item(irow, 5).text())
+
+    def get_extents(self, irow):
+        return [float(self.table.item(irow, icol).text()) for icol in (3, 4)]  # start, stop
+
+    def get_vector(self, irow):
+        return [float(self.table.item(irow, icol).text()) for icol in range(3)]
 
     def set_nbin(self, irow, nbin):
         self.table.item(irow, 5).setData(Qt.EditRole, int(nbin))
-        self.update_step(irow)
+        self.update_step(irow, nbin)
 
     def set_bin_params(self, vectors, extents, nbins):
         self.table.blockSignals(True)
@@ -108,8 +111,6 @@ class CutViewerView(QWidget):
             self.set_extent(irow, *extents[:, irow])
             self.set_nbin(irow, nbins[irow])  # do this last as step automatically updated given extents
         self.table.blockSignals(False)
-        self.plot_cut_representation()
-        return vectors, extents, nbins
 
     def set_slicepoint(self, slicept, width):
         self.table.blockSignals(True)
@@ -125,12 +126,13 @@ class CutViewerView(QWidget):
         self._format_cut_figure()
         self.figure.canvas.draw()
 
-    def plot_cut_representation(self):
+    def plot_cut_representation(self, xmin, xmax, ymin, ymax, thickness, axes_transform):
         if self.cut_rep is not None:
             self.cut_rep.remove()
-        self.cut_rep = CutRepresentation(
-            self.canvas, self.presenter.update_bin_params_from_cut_representation, *self.presenter.get_cut_representation_parameters()
-        )
+        self.cut_rep = CutRepresentation(self.canvas, self.on_representation_changed, xmin, xmax, ymin, ymax, thickness, axes_transform)
+
+    def on_representation_changed(self, xmin, xmax, ymin, ymax, thickness):
+        self.presenter.update_bin_params_from_cut_representation(xmin, xmax, ymin, ymax, thickness)
 
     # private api
     def _setup_ui(self):

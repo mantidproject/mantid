@@ -328,14 +328,16 @@ class SliceViewerTest(unittest.TestCase):
 
         self.view.data_view.disable_tool_button.assert_has_calls([mock.call(ToolItemText.NONAXISALIGNEDCUTS)])
 
-    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.CutViewerPresenter")
-    def test_cut_view_toggled_on(self, mock_cv_pres):
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.CutViewerPresenter", autospec=True)
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.CutViewerView", autospec=True)
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.CutViewerModel", autospec=True)
+    def test_cut_view_toggled_on(self, mock_cv_model, mock_cv_view, mock_cv_pres):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         self.view.data_view.track_cursor = mock.MagicMock()
 
         presenter.non_axis_aligned_cut(True)
 
-        mock_cv_pres.assert_called_once_with(presenter, self.view.data_view.canvas)
+        self.assertTrue(presenter._cutviewer_presenter is not None)
         # test correct buttons disabled
         self.view.data_view.deactivate_and_disable_tool.assert_has_calls(
             [mock.call(tool) for tool in (ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS)]
