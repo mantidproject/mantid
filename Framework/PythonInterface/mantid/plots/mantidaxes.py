@@ -12,6 +12,7 @@ from functools import wraps
 import numpy as np
 import re
 
+from cycler import cycler
 from matplotlib.axes import Axes
 from matplotlib.cbook import safe_masked_invalid
 from matplotlib.collections import Collection, PolyCollection
@@ -22,6 +23,7 @@ from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
 from matplotlib.table import Table
 from matplotlib.ticker import NullLocator
+import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 from mantid import logger
@@ -145,7 +147,9 @@ class MantidAxes(Axes):
         """
         if not ignore_artists:
             ignore_artists = []
-        prop_cycler = ax._get_lines.prop_cycler  # tracks line color cycle
+
+        default_cycle_colours = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+        number_of_mpl_lines = len(ax.get_lines())
         artists = ax.get_children()
         mantid_axes = ax.figure.add_subplot(111, projection="mantid", label="mantid")
         for artist in artists:
@@ -155,7 +159,14 @@ class MantidAxes(Axes):
                 except NotImplementedError:
                     pass
         mantid_axes.set_title(ax.get_title())
-        mantid_axes._get_lines.prop_cycler = prop_cycler
+
+        if number_of_mpl_lines > 0:
+            used_colors = default_cycle_colours[: (number_of_mpl_lines % len(default_cycle_colours)) + 1]
+            remaining_colors = default_cycle_colours[(number_of_mpl_lines % len(default_cycle_colours)) + 1 :]
+            default_cycle_colours = remaining_colors + used_colors
+
+        mantid_axes.set_prop_cycle(cycler(color=default_cycle_colours))
+
         ax.remove()
         return mantid_axes
 
