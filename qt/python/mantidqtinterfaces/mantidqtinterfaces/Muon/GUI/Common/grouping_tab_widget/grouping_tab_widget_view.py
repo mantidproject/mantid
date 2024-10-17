@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets
 from mantidqtinterfaces.Muon.GUI.Common.message_box import warning, question
-from mantidqtinterfaces.Muon.GUI.Common.utilities.muon_file_utils import show_file_browser_and_return_selection
-
-import os
+from mantidqtinterfaces.Muon.GUI.Common.utilities.muon_file_utils import (
+    show_file_browser_and_return_selection,
+)
 
 
 class GroupingTabView(QtWidgets.QWidget):
@@ -134,24 +134,16 @@ class GroupingTabView(QtWidgets.QWidget):
     def show_file_browser_and_return_selection(self, file_filter, search_directories):
         return show_file_browser_and_return_selection(self, file_filter, search_directories)[0]
 
-    def show_file_save_browser_and_return_selection(self):
+    def get_save_filename(self):
         chosen_file, _filter = QtWidgets.QFileDialog.getSaveFileName(self, "Select file", "", "XML files (*.xml)")
-        chosen_file = str(chosen_file)
-        if chosen_file == "":
-            return chosen_file
 
-        path_extension = os.path.splitext(chosen_file)
+        return str(chosen_file)
 
-        if path_extension[1] == ".xml":
-            return chosen_file
-        else:
-            updated_file = path_extension[0] + ".xml"
-            if os.path.isfile(updated_file):
-                if question("File {} already exists do you want to overwrite it?".format(updated_file), parent=self):
-                    return path_extension[0] + ".xml"
-                else:
-                    return ""
-            return path_extension[0] + ".xml"
+    def show_question_dialog(self, updated_file):
+        return question(
+            "File {} already exists do you want to overwrite it?".format(updated_file),
+            parent=self,
+        )
 
     def display_warning_box(self, message):
         warning(message, self)
