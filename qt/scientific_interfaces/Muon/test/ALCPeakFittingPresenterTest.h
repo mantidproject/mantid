@@ -38,36 +38,37 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCPeakFittingView : public IALCPeakFittingView {
 public:
-  MOCK_CONST_METHOD1(function, IFunction_const_sptr(std::string const &));
-  MOCK_CONST_METHOD0(currentFunctionIndex, std::optional<std::string>());
-  MOCK_CONST_METHOD0(peakPicker, IPeakFunction_const_sptr());
+  MOCK_METHOD(IFunction_const_sptr, function, (std::string const &), (const, override));
+  MOCK_METHOD(std::optional<std::string>, currentFunctionIndex, (), (const, override));
+  MOCK_METHOD(IPeakFunction_const_sptr, peakPicker, (), (const, override));
 
-  MOCK_METHOD0(initialize, void());
-  MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
-  MOCK_METHOD2(setFittedCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
-  MOCK_METHOD2(setGuessCurve, void(MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex));
-  MOCK_METHOD1(setPeakPickerEnabled, void(bool));
-  MOCK_METHOD1(setPeakPicker, void(const IPeakFunction_const_sptr &));
-  MOCK_METHOD1(setFunction, void(const IFunction_const_sptr &));
-  MOCK_METHOD3(setParameter, void(std::string const &, std::string const &, double));
-  MOCK_METHOD0(help, void());
-  MOCK_METHOD1(changePlotGuessState, void(bool));
+  MOCK_METHOD(void, initialize, (), (override));
+  MOCK_METHOD(void, setDataCurve, (MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex), (override));
+  MOCK_METHOD(void, setFittedCurve, (MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex), (override));
+  MOCK_METHOD(void, setGuessCurve, (MatrixWorkspace_sptr workspace, const std::size_t &workspaceIndex), (override));
+  MOCK_METHOD(void, setPeakPickerEnabled, (bool), (override));
+  MOCK_METHOD(void, setPeakPicker, (const IPeakFunction_const_sptr &), (override));
+  MOCK_METHOD(void, setFunction, (const IFunction_const_sptr &), (override));
+  MOCK_METHOD(void, setParameter, (std::string const &, std::string const &, double), (override));
+  MOCK_METHOD(void, help, (), (override));
+  MOCK_METHOD(void, changePlotGuessState, (bool), (override));
 
-  MOCK_METHOD1(removePlot, void(const std::string &plotName));
-  MOCK_METHOD(void, displayError, (std::string const &));
-  MOCK_METHOD(void, plotGuess, ());
-  MOCK_METHOD(void, subscribe, (IALCPeakFittingViewSubscriber *));
-  MOCK_METHOD(void, onParameterChanged, (std::string const &, std::string const &));
-  MOCK_METHOD(void, fitRequested, ());
+  MOCK_METHOD(void, removePlot, (const std::string &plotName), (override));
+  MOCK_METHOD(void, displayError, (std::string const &), (override));
+  MOCK_METHOD(void, plotGuess, (), (override));
+  MOCK_METHOD(void, subscribe, (IALCPeakFittingViewSubscriber *), (override));
+  MOCK_METHOD(void, onParameterChanged, (std::string const &, std::string const &), (override));
+  MOCK_METHOD(void, fitRequested, (), (override));
 };
 
 class MockALCPeakFittingModel : public IALCPeakFittingModel {
 public:
-  MOCK_CONST_METHOD0(fittedPeaks, IFunction_const_sptr());
-  MOCK_CONST_METHOD0(data, MatrixWorkspace_sptr());
-  MOCK_METHOD1(fitPeaks, void(IFunction_const_sptr));
-  MOCK_METHOD2(guessData, MatrixWorkspace_sptr(IFunction_const_sptr function, const std::vector<double> &xValues));
-  MOCK_METHOD(void, subscribe, (IALCPeakFittingModelSubscriber *));
+  MOCK_METHOD(IFunction_const_sptr, fittedPeaks, (), (const, override));
+  MOCK_METHOD(MatrixWorkspace_sptr, data, (), (const, override));
+  MOCK_METHOD(void, fitPeaks, (IFunction_const_sptr), (override));
+  MOCK_METHOD(MatrixWorkspace_sptr, guessData, (IFunction_const_sptr function, const std::vector<double> &xValues),
+              (override));
+  MOCK_METHOD(void, subscribe, (IALCPeakFittingModelSubscriber *), (override));
 };
 
 // DoubleNear matcher was introduced in gmock 1.7 only
