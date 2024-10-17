@@ -107,7 +107,8 @@ void ALCPeakFittingModel::fitPeaks(IFunction_const_sptr peaks) {
   m_algorithmRunner->execute(std::move(fitAlg));
 }
 
-void ALCPeakFittingModel::notifyBatchComplete(MantidQt::API::IConfiguredAlgorithm_sptr &confAlgorithm, bool _) {
+void ALCPeakFittingModel::notifyBatchComplete(MantidQt::API::IConfiguredAlgorithm_sptr &confAlgorithm,
+                                              bool /*unused*/) {
   auto const &alg = confAlgorithm->algorithm();
   m_data = alg->getProperty("OutputWorkspace");
   m_parameterTable = alg->getProperty("OutputParameters");

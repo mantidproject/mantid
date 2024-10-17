@@ -7,6 +7,7 @@
 
 #pragma once
 #include "DllConfig.h"
+#include <string>
 
 namespace MantidQt::CustomInterfaces {
 
