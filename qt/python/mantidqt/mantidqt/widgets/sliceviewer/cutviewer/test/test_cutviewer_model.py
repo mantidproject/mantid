@@ -77,7 +77,7 @@ class TestCutViewerModel(unittest.TestCase):
 
     def test_calc_cut_representation_parameters(self):
         xmin, xmax, ymin, ymax, thick = self.model.calc_cut_representation_parameters(
-            eye(3), tile(c_[[0.0, 1.0]], (1, 3)), array([10, 1, 1]), [0, 1, None]
+            eye(3)[:-1, :], tile(c_[[0.0, 1.0]], (1, 2)), array([10, 1]), [0, 1, None]
         )
 
         self.assertTrue(array_equal(self.model.xvec, array([1, 0, 0])))

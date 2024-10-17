@@ -39,14 +39,13 @@ class CutViewerPresenter:
         return self.view
 
     def reset_view_table(self):
-        self.view.set_bin_params(
-            *self.model.get_default_bin_params(
-                self._sliceview_presenter.get_dimensions(),
-                self._sliceview_presenter.get_data_limits_to_fill_current_axes(),
-                self._sliceview_presenter.get_sliceinfo().z_value,
-            )
+        vectors, extents, nbins = self.model.get_default_bin_params(
+            self._sliceview_presenter.get_dimensions(),
+            self._sliceview_presenter.get_data_limits_to_fill_current_axes(),
+            self._sliceview_presenter.get_sliceinfo().z_value,
         )
-        self.view.plot_cut_representation(*self.get_cut_representation_parameters())
+        self.view.set_bin_params(vectors, extents, nbins)
+        self.view.plot_cut_representation(*self.get_cut_representation_parameters(vectors[:-1, :], extents[:, :-1], nbins[:-1]))
 
     def validate_bin_params(self, irow, icol):
         iunchanged = int(not bool(irow))  # index of u1 or u2 - which ever not changed (3rd row not editable)
@@ -76,17 +75,20 @@ class CutViewerPresenter:
         if self.model.valid_bin_params(vectors, extents, nbins):
             self._sliceview_presenter.perform_non_axis_aligned_cut(vectors, extents.flatten(order="F"), nbins)
 
-    def get_cut_representation_parameters(self):
+    def get_cut_representation_parameters(self, vectors_in_plane, extents_in_plane, nbins_in_plane):
         xmin, xmax, ymin, ymax, thickness = self.model.calc_cut_representation_parameters(
-            *self.get_bin_params_from_view(), self._sliceview_presenter.get_dimensions().get_states()
+            vectors_in_plane, extents_in_plane, nbins_in_plane, self._sliceview_presenter.get_dimensions().get_states()
         )
         axes_transform = self._sliceview_presenter.get_sliceinfo().get_northogonal_transform()
         return xmin, xmax, ymin, ymax, thickness, axes_transform
 
     def update_bin_params_from_cut_representation(self, xmin, xmax, ymin, ymax, thickness):
         out_plane_vector = self.view.get_vector(2)  # integrated dimension (last row in table)
-        self.view.set_bin_params(*self.model.calc_bin_params_from_cut_representation(xmin, xmax, ymin, ymax, thickness, out_plane_vector))
-        self.view.plot_cut_representation(*self.get_cut_representation_parameters())
+        vectors_in_plane, extents_in_plane, nbins_in_plane = self.model.calc_bin_params_from_cut_representation(
+            xmin, xmax, ymin, ymax, thickness, out_plane_vector
+        )
+        self.view.set_bin_params(vectors_in_plane, extents_in_plane, nbins_in_plane)
+        self.view.plot_cut_representation(*self.get_cut_representation_parameters(vectors_in_plane, extents_in_plane, nbins_in_plane))
         self.update_cut()
 
     # signals
@@ -104,6 +106,7 @@ class CutViewerPresenter:
         self.view.plot_cut_ws(wsname)
 
     def handle_cell_changed(self, irow: int, icol: int):
-        self.view.set_bin_params(*self.validate_bin_params(irow, icol))
+        vectors, extents, nbins = self.validate_bin_params(irow, icol)
+        self.view.set_bin_params(vectors, extents, nbins)
         self.update_cut()
-        self.view.plot_cut_representation(*self.get_cut_representation_parameters())
+        self.view.plot_cut_representation(*self.get_cut_representation_parameters(vectors[:-1, :], extents[:, :-1], nbins[:-1]))
