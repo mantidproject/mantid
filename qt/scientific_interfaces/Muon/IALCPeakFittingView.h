@@ -80,12 +80,6 @@ public slots:
   /// @param peak :: A new peak to represent
   virtual void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) = 0;
 
-  //  /**
-  //   * Pops-up an error box
-  //   * @param message :: Error message to display
-  //   */
-  //  virtual void displayError(const QString &message) = 0;
-
   /// Opens the Mantid Wiki web page
   virtual void help() = 0;
 
