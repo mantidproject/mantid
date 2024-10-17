@@ -39,6 +39,7 @@ Bugfixes
 - Cropping a workspace after using the ``Plot All`` button no longer causes an error.
 - Plot legends are no longer accidentally picked up by scrolling the mouse wheel.
 - Fixed bug where the TOF converter window was not displaying properly on high resolution screens.
+- The standalone Mantid package is now correctly launching on Linux, with special attention to IDAaaS.
 
 
 InstrumentViewer

@@ -43,6 +43,7 @@ Bugfixes
 - Fixed a crash on the Quasi tab of the :ref:`Inelastic Bayes Fitting <interface-inelastic-bayes-fitting>` interface caused by attempting to load a WorkspaceGroup rather than the expected Workspace2D.
 - Prevented a crash on the Quasi tab of the :ref:`Inelastic Bayes Fitting <interface-inelastic-bayes-fitting>` interface caused by clicking ``Run`` before data has finished loading.
 - Available fit functions in the ``Function (Q)`` tab of the :ref:`QENS Fitting <interface-inelastic-qens-fitting>` interface are now updated according to the type of data (``EISF``, ``A0`` or ``Width``) loaded in the table.
+- :ref:`Inelastic Bayes Fitting <interface-inelastic-bayes-fitting>` no longer crashes when closing the interface while it is loading data.
 
 
 Algorithms

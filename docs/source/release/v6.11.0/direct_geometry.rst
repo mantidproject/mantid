@@ -21,8 +21,23 @@ New features
 Bugfixes
 ############
 - :ref:`ALFView <ALFView-ref>` no longer crashs when moving the cursor over the Instrument View while loading data.
+- :ref:`ALF View <ALFView-ref>` no longer crashes when closing the interface while it is loading data.
 - :ref:`PyChop` no longer uses random phase values on Merlin when instrument scientist mode disabled.
+- Fix for incorrect incident energies for ``MERLIN`` in :ref:`PyChop` when not in instrument scientist mode.
 
+
+MSlice
+------
+
+New features
+############
+- ``None`` is now a new line style option. With this feature, it is possible to plot error bars without including a line.
+- The spectrum ID is no longer printed when saving a 2D workspace as an ASCII file.
+
+Bugfixes
+########
+- The ``Intensity`` menu on slice plots is now disabled in interactive mode to prevent crashes.
+- Bug fix implemented to save cut data in a 3-column file instead of a single line.
 
 CrystalField
 -------------

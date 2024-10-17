@@ -45,6 +45,7 @@ Single Crystal Diffraction
 
 New features
 ############
+- New algorithm :ref:`RotateSampleShape <algm-rotatesampleshape>` that defines the initial orientation of a sample with respect to the beam and instrument.
 - :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` is better at determining background bins by minimising third-moment (skew).
   This is achieved by forcing skew > 0 (minimum skew we would expect in background).
   This change stops peak mask of :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` including too many pixels due to small diffuse scattering:
