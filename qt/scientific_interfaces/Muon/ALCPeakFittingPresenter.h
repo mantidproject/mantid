@@ -41,24 +41,6 @@ public:
   void onPlotGuessClicked() override;
 
 private:
-  //  /// Fit the data using the peaks from the view, and update them
-  //  void fit();
-  //
-  //  /// Executed when user selects a function in a Function Browser
-  //  void onCurrentFunctionChanged();
-  //
-  //  /// Executed when Peak Picker if moved/resized
-  //  void onPeakPickerChanged();
-  //
-  //  /// Executed when user changes parameter in Function Browser
-  //  void onParameterChanged(std::string const &funcIndex);
-
-  //  void onFittedPeaksChanged();
-  //  void onDataChanged();
-
-  //  /// Executed when user clicks "Plot guess"
-  //  void onPlotGuessClicked();
-
   /// Plot guess on graph
   bool plotGuessOnGraph();
 
