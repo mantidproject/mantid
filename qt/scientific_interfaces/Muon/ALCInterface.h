@@ -74,7 +74,6 @@ private:
   Ui::ALCInterface m_ui;
 
   // Step views
-  ALCBaselineModellingView *m_baselineModellingView;
   ALCPeakFittingView *m_peakFittingView;
 
   // Step presenters
@@ -83,7 +82,6 @@ private:
   ALCPeakFittingPresenter *m_peakFitting;
 
   // Models
-  ALCBaselineModellingModel *m_baselineModellingModel;
   ALCPeakFittingModel *m_peakFittingModel;
 
   /// Name for every step for labels

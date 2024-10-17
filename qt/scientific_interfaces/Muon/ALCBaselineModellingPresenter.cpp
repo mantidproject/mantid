@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCBaselineModellingPresenter.h"
 
+#include "IALCBaselineModellingView.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -14,26 +15,12 @@ using namespace Mantid::API;
 namespace MantidQt::CustomInterfaces {
 
 ALCBaselineModellingPresenter::ALCBaselineModellingPresenter(IALCBaselineModellingView *view,
-                                                             IALCBaselineModellingModel *model)
-    : m_view(view), m_model(model) {}
+                                                             std::unique_ptr<IALCBaselineModellingModel> model)
+    : m_view(view), m_model(std::move(model)) {}
 
 void ALCBaselineModellingPresenter::initialize() {
   m_view->initialize();
-
-  // View actions
-  connect(m_view, SIGNAL(fitRequested()), SLOT(fit()));
-  connect(m_view, SIGNAL(addSectionRequested()), SLOT(addSection()));
-  connect(m_view, SIGNAL(removeSectionRequested(int)), SLOT(removeSection(int)));
-
-  // View events (sync)
-  connect(m_view, SIGNAL(sectionRowModified(int)), SLOT(onSectionRowModified(int)));
-  connect(m_view, SIGNAL(sectionSelectorModified(int)), SLOT(onSectionSelectorModified(int)));
-
-  // Model updates
-  connect(m_model, SIGNAL(dataChanged()), SLOT(updateDataCurve()));
-  connect(m_model, SIGNAL(correctedDataChanged()), SLOT(updateCorrectedCurve()));
-  connect(m_model, SIGNAL(fittedFunctionChanged()), SLOT(updateFunction()));
-  connect(m_model, SIGNAL(fittedFunctionChanged()), SLOT(updateBaselineCurve()));
+  m_view->subscribePresenter(this);
 }
 
 /**
@@ -187,5 +174,29 @@ void ALCBaselineModellingPresenter::updateFunction() {
     m_view->setFunction(IFunction_const_sptr());
   }
 }
+
+Mantid::API::MatrixWorkspace_sptr ALCBaselineModellingPresenter::exportWorkspace() {
+  return m_model->exportWorkspace();
+}
+
+Mantid::API::ITableWorkspace_sptr ALCBaselineModellingPresenter::exportSections() { return m_model->exportSections(); }
+
+Mantid::API::ITableWorkspace_sptr ALCBaselineModellingPresenter::exportModel() { return m_model->exportModel(); }
+
+Mantid::API::MatrixWorkspace_sptr ALCBaselineModellingPresenter::correctedData() { return m_model->correctedData(); }
+
+void ALCBaselineModellingPresenter::setData(Mantid::API::MatrixWorkspace_sptr data) {
+  m_model->setData(data);
+  updateDataCurve();
+}
+
+void ALCBaselineModellingPresenter::setCorrectedData(Mantid::API::MatrixWorkspace_sptr data) {
+  m_model->setCorrectedData(data);
+  updateCorrectedCurve();
+}
+
+std::string ALCBaselineModellingPresenter::function() const { return m_view->function(); }
+
+int ALCBaselineModellingPresenter::noOfSectionRows() const { return m_view->noOfSectionRows(); }
 
 } // namespace MantidQt::CustomInterfaces

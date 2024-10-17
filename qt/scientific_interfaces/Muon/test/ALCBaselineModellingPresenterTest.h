@@ -19,6 +19,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "../Muon/ALCBaselineModellingPresenter.h"
+#include "../Muon/IALCBaselineModellingView.h"
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
@@ -33,13 +34,10 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCBaselineModellingView : public IALCBaselineModellingView {
 public:
-  void requestFit() { emit fitRequested(); }
-  void requestAddSection() { emit addSectionRequested(); }
-  void requestRemoveSection(int row) { emit removeSectionRequested(row); }
-  void modifySectionRow(int row) { emit sectionRowModified(row); }
-  void modifySectionSelector(int index) { emit sectionSelectorModified(index); }
+  MOCK_METHOD1(subscribePresenter, void(ALCBaselineModellingPresenter *));
 
   MOCK_METHOD0(initialize, void());
+  MOCK_CONST_METHOD0(initConnections, void());
 
   MOCK_CONST_METHOD0(function, std::string());
   MOCK_CONST_METHOD1(sectionRow, SectionRow(int));
@@ -66,14 +64,16 @@ public:
   MOCK_METHOD1(displayError, void(const QString &));
 
   MOCK_METHOD0(help, void());
+
+  MOCK_CONST_METHOD0(handleFitRequested, void());
+  MOCK_CONST_METHOD0(handleAddSectionRequested, void());
+  MOCK_CONST_METHOD1(handleRemoveSectionRequested, void(int));
+  MOCK_CONST_METHOD1(handleSectionRowModified, void(int));
+  MOCK_CONST_METHOD1(handleSectionSelectorModified, void(int));
 };
 
 class MockALCBaselineModellingModel : public IALCBaselineModellingModel {
 public:
-  void changeData() { emit dataChanged(); }
-  void changeFittedFunction() { emit fittedFunctionChanged(); }
-  void changeCorrectedData() { emit correctedDataChanged(); }
-
   MOCK_CONST_METHOD0(fittedFunction, IFunction_const_sptr());
   MOCK_CONST_METHOD0(correctedData, MatrixWorkspace_sptr());
   MOCK_CONST_METHOD2(baselineData,
@@ -81,6 +81,12 @@ public:
   MOCK_CONST_METHOD0(data, MatrixWorkspace_sptr());
 
   MOCK_METHOD2(fit, void(IFunction_const_sptr, const std::vector<Section> &));
+
+  MOCK_METHOD0(exportWorkspace, Mantid::API::MatrixWorkspace_sptr());
+  MOCK_METHOD1(setData, void(Mantid::API::MatrixWorkspace_sptr));
+  MOCK_METHOD1(setCorrectedData, void(Mantid::API::MatrixWorkspace_sptr));
+  MOCK_METHOD0(exportSections, Mantid::API::ITableWorkspace_sptr());
+  MOCK_METHOD0(exportModel, Mantid::API::ITableWorkspace_sptr());
 };
 
 MATCHER_P(FunctionName, name, "") { return arg->name() == name; }
@@ -90,9 +96,9 @@ MATCHER_P3(FunctionParameter, param, value, delta, "") { return fabs(arg->getPar
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class ALCBaselineModellingPresenterTest : public CxxTest::TestSuite {
-  MockALCBaselineModellingView *m_view;
+  std::unique_ptr<MockALCBaselineModellingView> m_view;
   MockALCBaselineModellingModel *m_model;
-  ALCBaselineModellingPresenter *m_presenter;
+  std::unique_ptr<ALCBaselineModellingPresenter> m_presenter;
 
   // To save myself some typing
   IALCBaselineModellingView::SectionRow sectionRow(double min, double max) {
@@ -110,19 +116,16 @@ public:
   }
 
   void setUp() override {
-    m_view = new NiceMock<MockALCBaselineModellingView>();
-    m_model = new NiceMock<MockALCBaselineModellingModel>();
-    m_presenter = new ALCBaselineModellingPresenter(m_view, m_model);
+    m_view = std::make_unique<NiceMock<MockALCBaselineModellingView>>();
+    auto model = std::make_unique<NiceMock<MockALCBaselineModellingModel>>();
+    m_model = model.get();
+    m_presenter = std::make_unique<ALCBaselineModellingPresenter>(m_view.get(), std::move(model));
     m_presenter->initialize();
   }
 
   void tearDown() override {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
-
-    delete m_presenter;
-    delete m_model;
-    delete m_view;
   }
 
   // Creates a workspace with x = [1,2,3...size], y = x + deltaY and e = 1
@@ -135,17 +138,7 @@ public:
     return ws;
   }
 
-  void test_initialize() {
-    // Not using m_view and m_present, because they are already initialized
-    // after setUp()
-    MockALCBaselineModellingView view;
-    MockALCBaselineModellingModel model;
-    ALCBaselineModellingPresenter presenter(&view, &model);
-    EXPECT_CALL(view, initialize()).Times(1);
-    presenter.initialize();
-  }
-
-  void test_dataChanged() {
+  void test_updateDataCurve() {
     const auto dataWorkspace = createTestWs(3, 1);
 
     ON_CALL(*m_view, noOfSectionRows()).WillByDefault(Return(3));
@@ -153,24 +146,24 @@ public:
 
     EXPECT_CALL(*m_view, setDataCurve(dataWorkspace, 0)).Times(1);
 
-    m_model->changeData();
+    m_presenter->updateDataCurve();
   }
 
-  void test_correctedChanged() {
+  void test_updateCorrectedCurve() {
     const auto correctedWorkspace = createTestWs(3, 2);
     ON_CALL(*m_model, correctedData()).WillByDefault(Return(correctedWorkspace));
 
     EXPECT_CALL(*m_view, setCorrectedCurve(correctedWorkspace, 0)).Times(1);
 
-    m_model->changeCorrectedData();
+    m_presenter->updateCorrectedCurve();
   }
 
-  void test_correctedChanged_toEmpty() {
+  void test_updateCorrectedCurve_toEmpty() {
     ON_CALL(*m_model, correctedData()).WillByDefault(Return(MatrixWorkspace_sptr()));
 
     EXPECT_CALL(*m_view, removePlot(QString("Corrected"))).Times(1);
 
-    m_model->changeCorrectedData();
+    m_presenter->updateCorrectedCurve();
   }
 
   void test_fittedFunctionChanged() {
@@ -185,7 +178,8 @@ public:
 
     EXPECT_CALL(*m_view, setBaselineCurve(baselineWorkspace, 0)).Times(1);
 
-    m_model->changeFittedFunction();
+    m_presenter->updateFunction();
+    m_presenter->updateBaselineCurve();
   }
 
   void test_fittedFunctionChanged_toEmpty() {
@@ -194,7 +188,8 @@ public:
     EXPECT_CALL(*m_view, setFunction(IFunction_const_sptr()));
     EXPECT_CALL(*m_view, removePlot(QString("Baseline")));
 
-    m_model->changeFittedFunction();
+    m_presenter->updateFunction();
+    m_presenter->updateBaselineCurve();
   }
 
   void test_addSection() {
@@ -207,7 +202,7 @@ public:
 
     EXPECT_CALL(*m_view, addSectionSelector(1, Pair(1, 10)));
 
-    m_view->requestAddSection();
+    m_presenter->addSection();
   }
 
   void test_addSection_toEmptyWS() {
@@ -218,7 +213,7 @@ public:
     EXPECT_CALL(*m_view, addSectionSelector(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(_)).Times(1);
 
-    m_view->requestAddSection();
+    m_presenter->addSection();
   }
 
   void test_removeSection() {
@@ -241,7 +236,7 @@ public:
     EXPECT_CALL(*m_view, addSectionSelector(0, Pair(1, 2))).After(selectorsCleared);
     EXPECT_CALL(*m_view, addSectionSelector(1, Pair(5, 6))).After(selectorsCleared);
 
-    m_view->requestRemoveSection(1);
+    m_presenter->removeSection(1);
   }
 
   void test_onSectionSelectorModified() {
@@ -249,7 +244,7 @@ public:
 
     EXPECT_CALL(*m_view, setSectionRow(5, Pair(QString("1"), QString("2"))));
 
-    m_view->modifySectionSelector(5);
+    m_presenter->onSectionSelectorModified(5);
   }
 
   void test_onSectionRowModified() {
@@ -257,7 +252,7 @@ public:
     ON_CALL(*m_view, sectionRow(4)).WillByDefault(Return(row));
 
     EXPECT_CALL(*m_view, updateSectionSelector(4, Pair(3, 4)));
-    m_view->modifySectionRow(4);
+    m_presenter->onSectionRowModified(4);
   }
 
   void test_fit() {
@@ -270,7 +265,7 @@ public:
     EXPECT_CALL(*m_model, fit(AllOf(FunctionName("FlatBackground"), FunctionParameter("A0", 3, 1E-8)),
                               ElementsAre(Pair(10, 20), Pair(40, 55))));
 
-    m_view->requestFit();
+    m_presenter->fit();
   }
 
   void test_fit_exception() {
@@ -286,7 +281,7 @@ public:
     ON_CALL(*m_model, fit(_, _)).WillByDefault(Throw(std::runtime_error(errorMsg)));
     EXPECT_CALL(*m_view, displayError(QString::fromStdString(errorMsg)));
 
-    m_view->requestFit();
+    m_presenter->fit();
   }
 
   void test_fit_badFunction() {
@@ -300,7 +295,7 @@ public:
     EXPECT_CALL(*m_model, fit(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(_));
 
-    m_view->requestFit();
+    m_presenter->fit();
   }
 
   void test_fit_emptyFunction() {
@@ -314,7 +309,7 @@ public:
     EXPECT_CALL(*m_model, fit(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(_));
 
-    m_view->requestFit();
+    m_presenter->fit();
   }
 
   void test_fit_noSections() {
@@ -327,7 +322,7 @@ public:
     EXPECT_CALL(*m_model, fit(_, _)).Times(0);
     EXPECT_CALL(*m_view, displayError(_));
 
-    m_view->requestFit();
+    m_presenter->fit();
   }
 
   void test_helpPage() {

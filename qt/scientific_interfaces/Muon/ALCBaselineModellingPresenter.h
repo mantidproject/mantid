@@ -6,28 +6,26 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "IALCBaselineModellingModel.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 
 #include "DllConfig.h"
-#include "IALCBaselineModellingModel.h"
-#include "IALCBaselineModellingView.h"
-
-#include <QObject>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class IALCBaselineModellingView;
+
 /** ALCBaselineModellingPresenter : Presenter for ALC Baseline Modelling step
  */
-class MANTIDQT_MUONINTERFACE_DLL ALCBaselineModellingPresenter : public QObject {
-  Q_OBJECT
+class MANTIDQT_MUONINTERFACE_DLL ALCBaselineModellingPresenter {
 
 public:
-  ALCBaselineModellingPresenter(IALCBaselineModellingView *view, IALCBaselineModellingModel *model);
+  ALCBaselineModellingPresenter(IALCBaselineModellingView *view, std::unique_ptr<IALCBaselineModellingModel> model);
 
   void initialize();
 
-private slots:
   /// Perform a fit
   void fit();
 
@@ -55,12 +53,28 @@ private slots:
   /// Updates function in the view from the model
   void updateFunction();
 
+  Mantid::API::MatrixWorkspace_sptr exportWorkspace();
+
+  Mantid::API::ITableWorkspace_sptr exportSections();
+
+  Mantid::API::ITableWorkspace_sptr exportModel();
+
+  Mantid::API::MatrixWorkspace_sptr correctedData();
+
+  void setData(Mantid::API::MatrixWorkspace_sptr data);
+
+  void setCorrectedData(Mantid::API::MatrixWorkspace_sptr data);
+
+  std::string function() const;
+
+  int noOfSectionRows() const;
+
 private:
   /// Associated view
   IALCBaselineModellingView *const m_view;
 
   /// Associated model
-  IALCBaselineModellingModel *const m_model;
+  std::unique_ptr<IALCBaselineModellingModel> const m_model;
 };
 
 } // namespace CustomInterfaces

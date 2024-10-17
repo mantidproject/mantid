@@ -13,15 +13,12 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
-#include <QObject>
-
 namespace MantidQt {
 namespace CustomInterfaces {
 
 /** IALCBaselineModellingModel : Model interface for ALC BaselineModelling step
  */
-class MANTIDQT_MUONINTERFACE_DLL IALCBaselineModellingModel : public QObject {
-  Q_OBJECT
+class MANTIDQT_MUONINTERFACE_DLL IALCBaselineModellingModel {
 
 public:
   using Section = std::pair<double, double>;
@@ -58,12 +55,20 @@ public:
    */
   virtual void fit(Mantid::API::IFunction_const_sptr function, const std::vector<Section> &sections) = 0;
 
-signals:
+  /// Export data + baseline + corrected data as a single workspace
+  virtual Mantid::API::MatrixWorkspace_sptr exportWorkspace() = 0;
 
-  // Signals emitted when various properties get changed
-  void dataChanged();
-  void fittedFunctionChanged();
-  void correctedDataChanged();
+  /// Set the data we should fit baseline for
+  virtual void setData(Mantid::API::MatrixWorkspace_sptr data) = 0;
+
+  /// Set the corrected data resulting from fit
+  virtual void setCorrectedData(Mantid::API::MatrixWorkspace_sptr data) = 0;
+
+  /// Export sections used for the last fit as a table workspace
+  virtual Mantid::API::ITableWorkspace_sptr exportSections() = 0;
+
+  /// Exports baseline model as a table workspace
+  virtual Mantid::API::ITableWorkspace_sptr exportModel() = 0;
 };
 
 } // namespace CustomInterfaces

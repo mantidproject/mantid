@@ -91,10 +91,7 @@ void ALCBaselineModellingModel::fit(IFunction_const_sptr function, const std::ve
   m_sections = sections;
 }
 
-void ALCBaselineModellingModel::setData(MatrixWorkspace_sptr data) {
-  m_data = std::move(data);
-  emit dataChanged();
-}
+void ALCBaselineModellingModel::setData(MatrixWorkspace_sptr data) { m_data = std::move(data); }
 
 /**
  * Disable points in the workpsace in the way that points which are not included
@@ -192,14 +189,10 @@ ITableWorkspace_sptr ALCBaselineModellingModel::exportModel() {
   }
 }
 
-void ALCBaselineModellingModel::setCorrectedData(MatrixWorkspace_sptr data) {
-  m_data = std::move(data);
-  emit correctedDataChanged();
-}
+void ALCBaselineModellingModel::setCorrectedData(MatrixWorkspace_sptr data) { m_data = std::move(data); }
 
 void ALCBaselineModellingModel::setFittedFunction(IFunction_const_sptr function) {
   m_fittedFunction = std::move(function);
-  emit fittedFunctionChanged();
 }
 
 MatrixWorkspace_sptr ALCBaselineModellingModel::data() const {
