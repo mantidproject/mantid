@@ -252,8 +252,6 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
     // red - green (if subtract is checked)
     m_view->setDataCurve(m_loadedData);
 
-    emit dataChanged();
-
   } catch (const std::invalid_argument &e) {
     throw std::runtime_error(e.what()); // Caught in handle load request
   } catch (std::exception &e) {

@@ -99,6 +99,8 @@ void ALCInterface::initLayout() {
   connect(m_ui.externalPlotButton, SIGNAL(clicked()), SLOT(externalPlotRequested()));
 
   auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
+  connect(dataLoadingView, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
+
   m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
   m_dataLoading->initialize();
   m_dataLoading->setParent(this);
@@ -112,8 +114,6 @@ void ALCInterface::initLayout() {
   m_peakFittingView = new ALCPeakFittingView(m_ui.peakFittingView);
   m_peakFitting = new ALCPeakFittingPresenter(m_peakFittingView, m_peakFittingModel);
   m_peakFitting->initialize();
-
-  connect(m_dataLoading, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
 
   assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
 
