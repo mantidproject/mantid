@@ -107,8 +107,9 @@ private:
   void loadPeriodData(int64_t period, Mantid::NeXus::NXEntry &entry, DataObjects::Workspace2D_sptr &local_workspace,
                       bool update_spectra2det_mapping = false);
   // Load a data block
-  void loadBlock(Mantid::NeXus::NXDataSetTyped<int> &data, int64_t blocksize, int64_t period, int64_t start,
-                 int64_t &hist, int64_t &spec_num, DataObjects::Workspace2D_sptr &local_workspace);
+  void loadHistogram(Mantid::NeXus::NXDataSetTyped<int> &data, int64_t offsetIndex, int64_t histIndex,
+                     DataObjects::Workspace2D_sptr &localWorkspace, std::size_t const nDetectorBlockChannels,
+                     HistogramData::BinEdges const &binEdges);
 
   // Create period logs
   void createPeriodLogs(int64_t period, DataObjects::Workspace2D_sptr &local_workspace);
@@ -116,7 +117,8 @@ private:
   void validateMultiPeriodLogs(const Mantid::API::MatrixWorkspace_sptr &);
 
   // build the list of spectra numbers to load and include in the spectra list
-  void buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList, DataBlockComposite &dataBlockComposite);
+  void buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList,
+                                     DataBlockComposite const &dataBlockComposite);
 
   /// Check if any of the spectra block ranges overlap
   void checkOverlappingSpectraRange();
@@ -143,7 +145,7 @@ private:
   // Is there a VMS block
   bool m_hasVMSBlock;
   /// if true, a spectra list or range of spectra is supplied
-  bool m_load_selected_spectra;
+  std::atomic<bool> m_load_selected_spectra;
   /// map of workspace Index to spectra Number (spectraID)
   std::map<int64_t, specnum_t> m_wsInd2specNum_map;
   /// spectra Number to detector ID (multi)map
@@ -171,8 +173,8 @@ private:
   boost::scoped_ptr< ::NeXus::File> m_nexusFile;
   // clang-format on
 
-  bool findSpectraDetRangeInFile(NeXus::NXEntry &entry, std::vector<specnum_t> &spectrum_index, int64_t ndets,
-                                 int64_t n_vms_compat_spectra, std::map<specnum_t, std::string> &monitors,
+  bool findSpectraDetRangeInFile(NeXus::NXEntry const &entry, std::vector<specnum_t> &spectrum_index, int64_t ndets,
+                                 int64_t n_vms_compat_spectra, std::map<specnum_t, std::string> const &monitors,
                                  bool excludeMonitors, bool separateMonitors);
 
   /// Check if is the file is a multiple time regime file
