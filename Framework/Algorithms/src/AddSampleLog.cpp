@@ -11,6 +11,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/EnumeratedString.h"
+#include "MantidKernel/EnumeratedStringProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -22,13 +24,15 @@
 
 namespace {
 
-static const std::string intTypeOption = "Int";
-static const std::string doubleTypeOption = "Double";
-static const std::string autoTypeOption = "AutoDetect";
+const std::string NumberType("NumberType");
+const std::vector<std::string> typeOptions{"Int", "Double", "AutoDetect"};
+enum class TypeMode { INT, DOUBLE, AUTO_DETECT, enum_count };
+typedef Mantid::Kernel::EnumeratedString<TypeMode, &typeOptions> TYPEMODE;
 
-static const std::string stringLogOption = "String";
-static const std::string numberLogOption = "Number";
-static const std::string numberSeriesLogOption = "Number Series";
+const std::string LogType("LogType");
+const std::vector<std::string> propOptions{"String", "Number", "Number Series"};
+enum class LogMode { STRING_LOG, NUMBER_LOG, NUMBER_SERIES_LOG, enum_count };
+typedef Mantid::Kernel::EnumeratedString<LogMode, &propOptions> LOGMODE;
 } // namespace
 
 namespace Mantid::Algorithms {
@@ -48,21 +52,14 @@ void AddSampleLog::init() {
 
   declareProperty("LogText", "", "The content of the log");
 
-  std::vector<std::string> propOptions;
-  propOptions.emplace_back(stringLogOption);
-  propOptions.emplace_back(numberLogOption);
-  propOptions.emplace_back(numberSeriesLogOption);
-  declareProperty("LogType", stringLogOption, std::make_shared<StringListValidator>(propOptions),
+  declareProperty(std::make_unique<EnumeratedStringProperty<LogMode, &propOptions>>(LogType),
                   "The type that the log data will be.");
   declareProperty("LogUnit", "", "The units of the log");
 
-  std::vector<std::string> typeOptions;
-  typeOptions.emplace_back(intTypeOption);
-  typeOptions.emplace_back(doubleTypeOption);
-  typeOptions.emplace_back(autoTypeOption);
-  declareProperty("NumberType", autoTypeOption, std::make_shared<StringListValidator>(typeOptions),
+  declareProperty(std::make_unique<EnumeratedStringProperty<TypeMode, &typeOptions>>(NumberType),
                   "Force LogText to be interpreted as a number of type 'int' "
                   "or 'double'.");
+  setPropertyValue(NumberType, typeOptions[2]);
 
   // add optional workspace which contains the data of the TimeSeriesProperty
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("TimeSeriesWorkspace", "", Direction::Input,
@@ -112,11 +109,11 @@ void AddSampleLog::exec() {
   std::string propName = getProperty("LogName");
   std::string propValue = getProperty("LogText");
   std::string propUnit = getProperty("LogUnit");
-  std::string propType = getPropertyValue("LogType");
-  std::string propNumberType = getPropertyValue("NumberType");
+  LOGMODE propType = getPropertyValue(LogType);
+  TYPEMODE propNumberType = getPropertyValue("NumberType");
 
   // check inputs
-  if ((propNumberType != autoTypeOption) && ((propType != numberLogOption) && (propType != numberSeriesLogOption))) {
+  if ((propNumberType != TypeMode::AUTO_DETECT) && (propType == LogMode::STRING_LOG)) {
     throw std::invalid_argument("You may only use NumberType 'Int' or 'Double' options if "
                                 "LogType is 'Number' or 'Number Series'");
   }
@@ -127,10 +124,10 @@ void AddSampleLog::exec() {
   }
 
   // add sample log!
-  if (propType == stringLogOption) {
+  if (propType == LogMode::STRING_LOG) {
     // add string log value and return
     addStringLog(theRun, propName, propValue, propUnit);
-  } else if (propType == numberSeriesLogOption) {
+  } else if (propType == LogMode::NUMBER_SERIES_LOG) {
     // add a TimeSeriesProperty
     // TODO: Need to re-define the behavior on the default propNumberType for
     // Series.
@@ -161,8 +158,9 @@ void AddSampleLog::addSingleValueProperty(Run &theRun, const std::string &propNa
                                           const std::string &propUnit, const std::string &propNumberType) {
   // add a single value property, integer or double
   bool value_is_int(false);
-  if (propNumberType != autoTypeOption) {
-    value_is_int = (propNumberType == intTypeOption);
+  TYPEMODE propType = propNumberType;
+  if (propType != TypeMode::AUTO_DETECT) {
+    value_is_int = (propType == TypeMode::INT);
   } else {
     int intVal;
     if (Strings::convert(propValue, intVal)) {
@@ -225,10 +223,11 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj, const std::string &prop_n
                                          const std::string &prop_unit, const std::string &prop_number_type) {
   // set up the number type right
   bool is_int_series(false);
-  if (prop_number_type == intTypeOption) {
+  TYPEMODE propType = prop_number_type;
+  if (propType == TypeMode::INT) {
     // integer type
     is_int_series = true;
-  } else if (prop_number_type == autoTypeOption) {
+  } else if (propType == TypeMode::AUTO_DETECT) {
     // auto type. by default
     if (prop_value.empty())
       g_log.warning("For sample log in TimeSeriesProperty and values are given "
@@ -241,7 +240,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj, const std::string &prop_n
         is_int_series = true;
       }
     }
-  } else if (prop_number_type != doubleTypeOption) {
+  } else if (propType != TypeMode::DOUBLE) {
     // unsupported type: anything but double, integer or auto
     g_log.error() << "TimeSeriesProperty with data type " << prop_number_type << " is not supported.\n";
     throw std::runtime_error("Unsupported TimeSeriesProperty type.");

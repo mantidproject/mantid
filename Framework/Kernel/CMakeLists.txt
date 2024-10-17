@@ -340,6 +340,7 @@ set(TEST_FILES
     DynamicPointerCastHelperTest.h
     EigenConversionHelpersTest.h
     EnabledWhenPropertyTest.h
+    EnumeratedStringPropertyTest.h
     EnumeratedStringTest.h
     EnvironmentHistoryTest.h
     EqualBinsCheckerTest.h
