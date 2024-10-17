@@ -151,8 +151,8 @@ void ALCBaselineModellingPresenter::updateDataCurve() {
 }
 
 void ALCBaselineModellingPresenter::updateCorrectedCurve() {
-  if (auto correctedData = m_model->correctedData())
-    m_view->setCorrectedCurve(correctedData);
+  if (auto correctedDataWs = m_model->correctedData())
+    m_view->setCorrectedCurve(correctedDataWs);
   else
     m_view->removePlot("Corrected");
 }
