@@ -255,10 +255,10 @@ class GroupingTabPresenterTest(unittest.TestCase):
 
     def test_that_save_grouping_triggers_the_correct_function(self):
         # Save functionality is tested elsewhere
-        self.view.show_file_save_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
+        self.view.get_save_filename = mock.Mock(return_value="grouping.xml")
 
         with mock.patch(
-            "mantidqtinterfaces.Muon.GUI.Common.grouping_tab_widget." "grouping_tab_widget_presenter.xml_utils.save_grouping_to_XML"
+            "mantidqtinterfaces.Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.save_grouping_to_XML"
         ) as mock_save:
             self.view.save_grouping_button.clicked.emit(True)
 
