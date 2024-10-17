@@ -6,20 +6,25 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-from mantidqt.widgets.sliceviewer.cutviewer.view import CutViewerView
-from mantidqt.widgets.sliceviewer.cutviewer.model import CutViewerModel
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mantidqt.widgets.sliceviewer.cutviewer.view import CutViewerView
+    from mantidqt.widgets.sliceviewer.cutviewer.model import CutViewerModel
+    from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 
 
 class CutViewerPresenter:
-    def __init__(self, sliceviewer_presenter, canvas):
+    def __init__(self, sliceviewer_presenter: "SliceViewer", model: "CutViewerModel", view: "CutViewerView"):
         """
         :param painter: An object responsible for drawing the representation of the cut
         :param sliceinfo_provider: An object responsible for providing access to current slice information
         :param parent: An optional parent widget
         """
-        self.view = CutViewerView(self, canvas, sliceviewer_presenter.get_frame())
-        self.model = CutViewerModel(sliceviewer_presenter.get_proj_matrix())
+        self.view = view
+        self.model = model
         self._sliceview_presenter = sliceviewer_presenter
+        self.view.subscribe_presenter(self)
 
     def show_view(self):
         self.view.show()
