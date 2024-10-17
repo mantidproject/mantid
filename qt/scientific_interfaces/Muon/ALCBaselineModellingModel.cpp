@@ -150,14 +150,14 @@ void ALCBaselineModellingModel::enableDisabledPoints(const MatrixWorkspace_sptr 
  */
 void ALCBaselineModellingModel::setErrorsAfterFit(const MatrixWorkspace_sptr &data) { data->mutableE(2) = data->e(0); }
 
-MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace() {
+MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace() const {
   if (m_data) {
     return std::const_pointer_cast<MatrixWorkspace>(m_data);
   }
   return nullptr;
 }
 
-ITableWorkspace_sptr ALCBaselineModellingModel::exportSections() {
+ITableWorkspace_sptr ALCBaselineModellingModel::exportSections() const {
   if (!m_sections.empty()) {
 
     ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
@@ -178,7 +178,7 @@ ITableWorkspace_sptr ALCBaselineModellingModel::exportSections() {
   }
 }
 
-ITableWorkspace_sptr ALCBaselineModellingModel::exportModel() {
+ITableWorkspace_sptr ALCBaselineModellingModel::exportModel() const {
   if (m_parameterTable) {
 
     return m_parameterTable;

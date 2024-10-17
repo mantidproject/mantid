@@ -34,15 +34,15 @@ public:
 
   const std::vector<Section> &sections() const { return m_sections; }
 
-  Mantid::API::MatrixWorkspace_sptr exportWorkspace() override;
+  Mantid::API::MatrixWorkspace_sptr exportWorkspace() const override;
 
   void setData(Mantid::API::MatrixWorkspace_sptr data) override;
 
   void setCorrectedData(Mantid::API::MatrixWorkspace_sptr data) override;
 
-  Mantid::API::ITableWorkspace_sptr exportSections() override;
+  Mantid::API::ITableWorkspace_sptr exportSections() const override;
 
-  Mantid::API::ITableWorkspace_sptr exportModel() override;
+  Mantid::API::ITableWorkspace_sptr exportModel() const override;
 
 private:
   /// Data used for fitting

@@ -82,11 +82,11 @@ public:
 
   MOCK_METHOD2(fit, void(IFunction_const_sptr, const std::vector<Section> &));
 
-  MOCK_METHOD0(exportWorkspace, Mantid::API::MatrixWorkspace_sptr());
+  MOCK_CONST_METHOD0(exportWorkspace, Mantid::API::MatrixWorkspace_sptr());
   MOCK_METHOD1(setData, void(Mantid::API::MatrixWorkspace_sptr));
   MOCK_METHOD1(setCorrectedData, void(Mantid::API::MatrixWorkspace_sptr));
-  MOCK_METHOD0(exportSections, Mantid::API::ITableWorkspace_sptr());
-  MOCK_METHOD0(exportModel, Mantid::API::ITableWorkspace_sptr());
+  MOCK_CONST_METHOD0(exportSections, Mantid::API::ITableWorkspace_sptr());
+  MOCK_CONST_METHOD0(exportModel, Mantid::API::ITableWorkspace_sptr());
 };
 
 MATCHER_P(FunctionName, name, "") { return arg->name() == name; }

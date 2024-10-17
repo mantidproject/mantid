@@ -56,7 +56,7 @@ public:
   virtual void fit(Mantid::API::IFunction_const_sptr function, const std::vector<Section> &sections) = 0;
 
   /// Export data + baseline + corrected data as a single workspace
-  virtual Mantid::API::MatrixWorkspace_sptr exportWorkspace() = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr exportWorkspace() const = 0;
 
   /// Set the data we should fit baseline for
   virtual void setData(Mantid::API::MatrixWorkspace_sptr data) = 0;
@@ -65,10 +65,10 @@ public:
   virtual void setCorrectedData(Mantid::API::MatrixWorkspace_sptr data) = 0;
 
   /// Export sections used for the last fit as a table workspace
-  virtual Mantid::API::ITableWorkspace_sptr exportSections() = 0;
+  virtual Mantid::API::ITableWorkspace_sptr exportSections() const = 0;
 
   /// Exports baseline model as a table workspace
-  virtual Mantid::API::ITableWorkspace_sptr exportModel() = 0;
+  virtual Mantid::API::ITableWorkspace_sptr exportModel() const = 0;
 };
 
 } // namespace CustomInterfaces
