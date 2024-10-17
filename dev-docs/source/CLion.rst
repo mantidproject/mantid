@@ -140,7 +140,7 @@ To debug workbench, you'll need to edit the ``workbench`` CMake Application conf
    .. hlist::
       :columns: 1
 
-      - All OS: ``/full/path/to/build/bin/``
+      - All OS: ``path/to/mambaforge/envs/md/bin/``
 
 #. Set any relevant environment variables:
 
