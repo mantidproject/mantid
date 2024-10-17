@@ -198,10 +198,9 @@ class PyChopGui(QMainWindow):
         # Special case for MERLIN - only enable multirep for 'G' chopper
         self._merlin_chopper()
 
-    def _get_phase(self, key, widget):
-        idx = int(key[7])
+    def _get_phase(self, choppernumber, widget):
         phase = widget["Edit"].text()
-        if isinstance(self.engine.chopper_system.defaultPhase[idx], str):
+        if isinstance(self.engine.chopper_system.defaultPhase[choppernumber], str):
             phase = str(phase)
         else:
             try:
@@ -224,11 +223,11 @@ class PyChopGui(QMainWindow):
         # Special case for MERLIN
         # sets the default phase for Chopper0Phase if not in "Instrument Scientist Mode"
         if "MERLIN" in str(self.engine.instname) and not self.widgets["Chopper0Phase"]["Label"].isVisible():
-            phases.append(self._get_phase("Chopper0Phase", self.widgets["Chopper0Phase"]))
+            phases.append(self._get_phase(0, self.widgets["Chopper0Phase"]))
         else:
             for key, widget in self.widgets.items():
                 if key.endswith("Phase") and not widget["Label"].isHidden():
-                    phases.append(self._get_phase(key, widget))
+                    phases.append(self._get_phase(int(key[7]), widget))
         if phases:
             self.engine.setFrequency(freq_in, phase=phases)
         else:
