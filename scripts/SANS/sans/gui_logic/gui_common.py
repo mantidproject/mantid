@@ -201,10 +201,9 @@ def get_reduction_mode_from_gui_selection(gui_selection: str):
 
 
 def get_detector_from_gui_selection(gui_selection):
-    # TODO when we hit only Python 3 this should use casefold rather than lower
-    case_folded_selection = gui_selection.lower()
+    case_folded_selection = gui_selection.casefold()
 
-    if any(case_folded_selection == hab.lower() for hab in HAB_STRINGS.values()):
+    if any(case_folded_selection == hab.casefold() for hab in HAB_STRINGS.values()):
         return DetectorType.HAB
     else:
         return DetectorType.LAB
