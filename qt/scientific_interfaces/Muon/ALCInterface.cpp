@@ -113,7 +113,7 @@ void ALCInterface::initLayout() {
   m_peakFitting = new ALCPeakFittingPresenter(m_peakFittingView, m_peakFittingModel);
   m_peakFitting->initialize();
 
-  connect(m_dataLoading, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
+  connect(dataLoadingView, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
   connect(m_baselineModellingModel, SIGNAL(correctedDataChanged()), SLOT(updatePeakData()));
 
   assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
