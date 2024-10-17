@@ -70,7 +70,7 @@ public slots:
   void updateDirectoryChangedFlag(const QString &path);
 
   /// Begin/Stop watching path
-  void startWatching(bool watch);
+  void handleStartWatching(bool watch);
 
   /// Handle a user requests to see the period info widget
   void handlePeriodInfoClicked();

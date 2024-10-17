@@ -378,12 +378,12 @@ void ALCDataLoadingView::runsAutoAddToggled(bool on) {
     m_ui.runs->setReadOnly(true);
     m_ui.load->setEnabled(false);
     setLoadStatus("Auto Add", "orange");
-    emit autoAddToggledSignal(true);
+    m_presenter->handleStartWatching(true);
   } else {
     m_ui.runs->setReadOnly(false);
     m_ui.load->setEnabled(true);
     setLoadStatus("Waiting", "orange");
-    emit autoAddToggledSignal(false);
+    m_presenter->handleStartWatching(false);
   }
 }
 

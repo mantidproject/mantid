@@ -49,7 +49,6 @@ void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
   m_view->subscribePresenter(this);
 
-  connect(m_view, SIGNAL(autoAddToggledSignal(bool)), SLOT(startWatching(bool)));
   connect(&m_watcher, SIGNAL(directoryChanged(const QString &)), SLOT(updateDirectoryChangedFlag(const QString &)));
 
   m_view->setFileExtensions(ADDITIONAL_EXTENSIONS);
@@ -459,7 +458,7 @@ void ALCDataLoadingPresenter::updateDirectoryChangedFlag(const QString &path) {
   m_directoryChanged = true;
 }
 
-void ALCDataLoadingPresenter::startWatching(bool watch) {
+void ALCDataLoadingPresenter::handleStartWatching(bool watch) {
   if (watch) {
     // Get path to watch and add to watcher
     const auto path = m_view->getPath();
