@@ -1,0 +1,2 @@
+- ‘None’ is now a new line style option. With this feature, it is possible to plot error bars without including a line.
+- The spectrum ID is no longer printed when saving a 2D workspace as an ASCII file.
