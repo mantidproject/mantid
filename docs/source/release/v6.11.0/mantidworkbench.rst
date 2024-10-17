@@ -11,7 +11,7 @@ New Features
 - Exposed :class:`ConfigService::remove() <mantid.kernel.ConfigServiceImpl.remove>` to python API.
 - Exposed :class:`ConfigService::configureLogging() <mantid.kernel.ConfigServiceImpl.configureLogging>` to python API.
 - Exposed :class:`ConfigService::getLogLevel() <mantid.kernel.ConfigServiceImpl.getLogLevel>` to python API.
-- Fixed handling of removed propertyies in :class:`ConfigService::saveConfig() <mantid.kernel.ConfigServiceImpl.saveConfig>`.
+- Fixed handling of removed properties in :class:`ConfigService::saveConfig() <mantid.kernel.ConfigServiceImpl.saveConfig>`.
 - All text on the Workbench About screen is now readable when using OSX dark mode.
 - There is a new :ref:`Deprecation Policy <deprecation_policy>` for Mantid.
 - ``Run`` and ``Abort`` buttons now display tooltips explaining their functionality and shortcut keys.
@@ -39,10 +39,11 @@ Bugfixes
 - Cropping a workspace after using the ``Plot All`` button no longer causes an error.
 - Plot legends are no longer accidentally picked up by scrolling the mouse wheel.
 - Fixed bug where the TOF converter window was not displaying properly on high resolution screens.
+- The standalone Mantid package is now correctly launching on Linux, with special attention to IDAaaS.
 
 
-InstrumentViewer
-----------------
+Instrument View
+---------------
 
 Bugfixes
 ############

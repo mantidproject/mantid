@@ -14,14 +14,14 @@ New features
 - Algorithm :ref:`algm-Load` will now give a warning if the extension specified on the filename, eg. `MUSR15189.txt`, is not found.
   Loading files from interfaces or other algorithms should also give this warning.
   The algorithm will still load the file by looking for other extensions, as was the case before.
-- A new version of :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` (version 2) that will save the grouping file with groups starting at 1 instead of 0 to make them consisted with ``GroupingWorkspace``.
+- A new version of :ref:`GenerateGroupingPowder <algm-GenerateGroupingPowder>` (version 2) that will save the grouping file with groups starting at 1 instead of 0 to make them consistent with ``GroupingWorkspace``.
   The ``FileFormat`` parameter has also been removed as it will now be determined from the extension of ``GroupingFilename``.
 - Algorithm :ref:`LoadEventNexus <algm-LoadEventNexus>` now has a new ``FilterBadPulsesLowerCutoff`` parameter that implements the functionality of :ref:`FilterBadPulses <algm-FilterBadPulses>`.
 - Algorithm :ref:`algm-PolarizationCorrectionWildes` and :ref:`algm-PolarizationEfficiencyCor` have a new ``SpinStates`` property to allow the order of the workspaces in the output workspace group to be set.
 - Algorithm :ref:`algm-CombineDiffCal` has improved time-scaling performance and new extra validations.
 - Algorithm :ref:`CompareWorkspaces <algm-CompareWorkspaces>` now supports :ref:`Ragged Workspaces <Ragged_Workspace>`.
 - Binary operations :ref:`Plus <algm-Plus>`, :ref:`Minus <algm-Minus>`, :ref:`Divide <algm-Divide>` and :ref:`Multiply <algm-Multiply>` now support :ref:`Ragged Workspaces <Ragged_Workspace>`.
-- Algorithm :ref:`CompressEvents <algm-CompressEvents>` a new ``SortFirst`` property that controls whether sorting happens before compressing events.
+- Algorithm :ref:`CompressEvents <algm-CompressEvents>` has the new property ``SortFirst`` that controls whether sorting happens before compressing events.
   If ``SortFirst=False`` then a different method is used to compress events that will not sort first. This is faster when you have a large number of events per compress tolerance.
 - Algorithm :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` has the new property ``OutputSuffix`` that will append a suffix to the end of output workspace names.
 - Algorithms :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` and ref: :ref:`SNSPowderReduction <algm-SNSPowderReduction>` have new a property called ``MinSizeCompressOnLoad`` for specifying load compression.
@@ -29,7 +29,8 @@ New features
   See reference documentation here (https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp2d.html).
 - Algorithm :ref:`DiscusMultipleScatteringCorrection <algm-DiscusMultipleScatteringCorrection-v1>` now supports a radial collimator that restricts scatter points within a small region within the larger sample volume.
   The algorithm was modified to assign zero weight to tracks where the final scatter is not in a position that allows the final track segment to pass through the collimator toward detectors.
-- Version 2 of the algorithm :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>` that adds the property ``FilterByTime``.
+- Algorithm :ref:`LoadEventAsWorkspace2D <algm-LoadEventAsWorkspace2D>` has been updated to version 2.
+  This update adds the new property ``FilterByTime``.
 - New algorithm :ref:`ScaleInstrumentComponent <algm-ScaleInstrumentComponent>` to scale all detectors in an instrument component around the component's geometrical position.
 
 .. figure::  ../../images/6_11_release/ScaleInstrumentComponent.png
@@ -75,7 +76,7 @@ Data Objects
 
 Bugfixes
 ############
-- Added a `+ 1` to `EventWorkspace::sortAll` to prevent grainsize from being 0.
+- Added a ``+ 1`` to ``EventWorkspace::sortAll`` to prevent grainsize from being 0.
 - Loading ``ENGIN-X`` data on IDAaaS from the instrument data cache no longer throws a ``path not found`` error.
 
 
@@ -88,6 +89,9 @@ New features
 - Fix python fuction ``assert_almost_equal`` to fail for non-equal workspaces.
 - The python function ``assert_almost_equal`` for testing if two modules are within a tolerance was reworked.
 
+Bugfixes
+############
+- Fixed error in the log about `load_module()` being deprecated in Python 3.12.
 
 Dependencies
 ------------------
@@ -101,7 +105,7 @@ Bugfixes
 ############
 - Introduced a run constraint to the mantid package to constrain the optional matplotlib dependency to v3.7.
   Previously it was possible to install any version of matplotlib alongside mantid in a conda environment, but we cannot guarantee compatibility for any version other than 3.7.
-- Versions of `pycifrw` are now allowed to be greater than 4.4.1.
+- Versions of ``pycifrw`` are now allowed to be greater than 4.4.1.
 
 
 MantidWorkbench
