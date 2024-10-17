@@ -18,6 +18,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <cmath>
@@ -68,7 +69,7 @@ public:
   bool operator()(const double &left, const double &right) const {
     // soft equal, if the diff left-right is below a numerical error
     // (uncertainty) threshold, we cannot say
-    return (left < right) && (std::abs(left - right) > 1 * std::numeric_limits<double>::epsilon());
+    return (left < right) && !Kernel::equals(left, right);
   }
 };
 
