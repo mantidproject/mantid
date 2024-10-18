@@ -340,7 +340,7 @@ void AddSampleLog::setTimeSeriesData(Run &run_obj, const std::string &property_n
  */
 std::vector<Types::Core::DateAndTime> AddSampleLog::getTimes(const API::MatrixWorkspace_const_sptr &dataws,
                                                              int workspace_index, bool is_epoch, bool is_second,
-                                                             API::Run &run_obj) {
+                                                             const API::Run &run_obj) {
   // get run start time
   int64_t timeshift(0);
   if (!is_epoch) {

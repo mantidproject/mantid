@@ -76,7 +76,7 @@ private:
 
   /// get the vector of times of the TimeSeriesProperty entries
   std::vector<Types::Core::DateAndTime> getTimes(const API::MatrixWorkspace_const_sptr &dataws, int workspace_index,
-                                                 bool is_epoch, bool is_second, API::Run &run_obj);
+                                                 bool is_epoch, bool is_second, const API::Run &run_obj);
 
   /// get meta data from input workspace or user input
   void getMetaData(const API::MatrixWorkspace_const_sptr &dataws, bool &epochtime, std::string &timeunit);
