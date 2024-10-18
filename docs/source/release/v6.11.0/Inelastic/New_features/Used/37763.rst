@@ -1,1 +1,0 @@
-- Add option to not delete subtracted workspaces when adding new data in the :ref:`Container Subtraction <container-subtraction>` tab of the Corrections interface.

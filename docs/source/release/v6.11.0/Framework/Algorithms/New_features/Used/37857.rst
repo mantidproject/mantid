@@ -1,3 +1,0 @@
-- :ref:`algm-Load` will now give a warning if the extension specified on the filename, eg. `MUSR15189.txt`, is not found.
-  Loading files from interfaces or other algorithms should also give this warning.
-  The algorithm will still load the file by looking for other extensions, as was the case before.
