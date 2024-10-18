@@ -7,7 +7,6 @@ Mantid Workbench Changes
 
 New Features
 ------------
-- There is a new :ref:`Deprecation Policy <deprecation_policy>` for Mantid.
 - Clarified ``Report Usage Data`` checkbox on the Workbench About page to explain that usage reporting is required to use the Error Reporter.
 - Exposed :class:`ConfigService::remove() <mantid.kernel.ConfigServiceImpl.remove>` to python API.
 - Exposed :class:`ConfigService::configureLogging() <mantid.kernel.ConfigServiceImpl.configureLogging>` to python API.

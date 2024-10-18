@@ -10,6 +10,7 @@ Algorithms
 
 New features
 ############
+- There is a new :ref:`Deprecation Policy <deprecation_policy>` for Mantid.
 - Errors due to H5 file exceptions are now caught with improved error reporting.
 - Algorithm :ref:`algm-Load` will now give a warning if the extension specified on the filename, eg. `MUSR15189.txt`, is not found.
   Loading files from interfaces or other algorithms should also give this warning.
