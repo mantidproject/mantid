@@ -1,1 +1,0 @@
-- Fix bug in POLARIS (ISIS) routine ``create_total_scattering_pdf`` causing unhandled error when calculating cross-sections of multi-atom unit cells for pdf normalisation.

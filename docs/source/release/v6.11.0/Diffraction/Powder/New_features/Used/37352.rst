@@ -1,1 +1,0 @@
-- Added option to :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` to support logarithmic compression

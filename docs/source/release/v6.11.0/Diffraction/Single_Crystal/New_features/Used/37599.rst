@@ -1,2 +1,0 @@
-- Add method ``find_consistent_ub`` to ISIS single-crystal reduction classes to find a UB that preserves indexing given a reference workspace (at different goniometer angle(s))
-- Add method ``optimize_goniometer_axis`` to ISIS single-crystal reduction classes to optimise the goniometer axes and angles given a sequence of workspaces at different goniometer angle with consistent UBs

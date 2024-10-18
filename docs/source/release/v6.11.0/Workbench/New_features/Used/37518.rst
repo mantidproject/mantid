@@ -1,1 +1,0 @@
-- Updated compiler on macOS from clang version 15 to 16, which should result in performance improvements.

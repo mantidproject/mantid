@@ -1,1 +1,0 @@
-- Fix bug in :ref:`DiffractionFocussing <algm-DiffractionFocussing-v2>` not properly accumulating data when :ref:`CompressEvents <algm-CompressEvents-v1>` prior to it in ``PreserveEvents=False`` mode

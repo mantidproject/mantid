@@ -1,1 +1,0 @@
-- Random phase values are no longer used on Merlin when using :ref:`PyChop` with instrument scientist mode disabled.
