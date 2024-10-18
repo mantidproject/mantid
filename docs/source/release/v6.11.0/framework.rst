@@ -91,7 +91,7 @@ New features
 
 Bugfixes
 ############
-- Fixed error in the log about `load_module()` being deprecated in Python 3.12.
+- Fixed error in the log about ``load_module()`` being deprecated in Python 3.12.
 
 Dependencies
 ------------------

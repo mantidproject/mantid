@@ -21,7 +21,7 @@ New features
 Bugfixes
 ############
 - :ref:`ALFView <ALFView-ref>` no longer crashs when moving the cursor over the Instrument View while loading data.
-- :ref:`ALF View <ALFView-ref>` no longer crashes when closing the interface while it is loading data.
+- :ref:`ALFView <ALFView-ref>` no longer crashes when closing the interface while it is loading data.
 - :ref:`PyChop` no longer uses random phase values on Merlin when instrument scientist mode disabled.
 - Fix for incorrect incident energies for ``MERLIN`` in :ref:`PyChop` when not in instrument scientist mode.
 

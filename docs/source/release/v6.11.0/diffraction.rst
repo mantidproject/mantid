@@ -79,7 +79,7 @@ New features
 - Algorithm :ref:`ShowPossibleCells <algm-ShowPossibleCells>` now has a new output property, ``Cells``, that includes the cell information.
 - New algorithm :ref:`SaveMDHistoToVTK <algm-SaveMDHistoToVTK>` that saves a :ref:`MDHistoWorkspace <MDHistoWorkspace>` as a ``VTK`` file so that it can be visualized by ``Paraview``.
 - :ref:`IntegratePeaksShoeboxTOF <algm-IntegratePeaksShoeboxTOF>` has improved optimisation for shoebox position - would previously be centred on nearby stronger peaks if present.
-- Execution time of :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` is at least 10 times faster.
+- Execution time of :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` has improved by a factor of ten.
 
 
 Bugfixes
