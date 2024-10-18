@@ -116,6 +116,26 @@ class PairingTableView(QtWidgets.QWidget):
         self.pairing_table.horizontalHeaderItem(4).setToolTip("Whether to include this pair in the analysis")
         self.pairing_table.horizontalHeaderItem(5).setToolTip("Replace the current value of Alpha with one estimated" " from the data.")
 
+    @property
+    def get_pairing_table(self):
+        return self.pairing_table
+
+    @property
+    def is_updating(self):
+        return self._updating
+
+    @property
+    def validate_alpha(self):
+        return self._validate_alpha
+
+    @property
+    def is_disabled(self):
+        return self._disabled
+
+    @property
+    def validate_pair_name_entry(self):
+        return self._validate_pair_name_entry
+
     def insert_row_in_table(self):
         row_position = self.pairing_table.rowCount()
         self.pairing_table.insertRow(row_position)
@@ -158,14 +178,16 @@ class PairingTableView(QtWidgets.QWidget):
     def get_default_item_flags(self):
         return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
 
-    def _group_selection_cell_widget(self):
+    @property
+    def group_selection_cell_widget(self):
         # The widget for the group selection columns
         selector = QtWidgets.QComboBox(self)
         selector.setToolTip("Select a group from the grouping table")
         selector.addItems(self._group_selections)
         return selector
 
-    def _guess_alpha_button(self):
+    @property
+    def guess_alpha_button(self):
         # The widget for the guess alpha column
         guess_alpha = QtWidgets.QPushButton(self)
         guess_alpha.setToolTip("Estimate the alpha value for this pair")
@@ -253,9 +275,6 @@ class PairingTableView(QtWidgets.QWidget):
     def cursor_position(self):
         return QtGui.QCursor.pos()
 
-    def _get_selected_row_indices(self):
-        return list(set(index.row() for index in self.pairing_table.selectedIndexes()))
-
     # ------------------------------------------------------------------------------------------------------------------
     # Adding / Removing pairs
     # ------------------------------------------------------------------------------------------------------------------
@@ -280,11 +299,11 @@ class PairingTableView(QtWidgets.QWidget):
         if ok:
             return new_pair_name
 
-    def _enable_all_buttons(self):
+    def enable_all_buttons(self):
         self.add_pair_button.setEnabled(True)
         self.remove_pair_button.setEnabled(True)
 
-    def _disable_all_buttons(self):
+    def disable_all_buttons(self):
         self.add_pair_button.setEnabled(False)
         self.remove_pair_button.setEnabled(False)
 

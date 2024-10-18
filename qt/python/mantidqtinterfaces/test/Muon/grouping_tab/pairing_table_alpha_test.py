@@ -80,19 +80,19 @@ class AlphaTest(unittest.TestCase):
     def test_that_alpha_defaults_to_1(self):
         self.presenter.handle_add_pair_button_clicked()
 
-        self.assertEqual(self.view.get_table_item_text(0, 4), "1.0")
+        self.assertEqual(self.presenter.get_table_item_text(0, 4), "1.0")
 
     def test_that_table_reverts_to_previous_value_when_adding_values_which_arent_numbers_to_alpha_column(self):
         self.presenter.handle_add_pair_button_clicked()
 
         non_numeric_alphas = ["", "a", "long", "!", "_", "1+2"]
 
-        default_value = self.view.get_table_item_text(0, 4)
+        default_value = self.presenter.get_table_item_text(0, 4)
         for invalid_alpha in non_numeric_alphas:
             self.view.pairing_table.setCurrentCell(0, 4)
             self.view.pairing_table.item(0, 4).setText(invalid_alpha)
 
-            self.assertEqual(self.view.get_table_item_text(0, 4), default_value)
+            self.assertEqual(self.presenter.get_table_item_text(0, 4), default_value)
 
     def test_that_warning_displayed_when_adding_invalid_alpha_values(self):
         self.presenter.handle_add_pair_button_clicked()
@@ -114,7 +114,7 @@ class AlphaTest(unittest.TestCase):
         # test that rounds correctly
         self.view.pairing_table.item(0, 4).setText("1.1234567890")
 
-        self.assertEqual(self.view.get_table_item_text(0, 4), "1.123457")
+        self.assertEqual(self.presenter.get_table_item_text(0, 4), "1.123457")
 
     def test_that_alpha_values_stored_to_correct_decimal_places_when_rounding_down(self):
         self.presenter.handle_add_pair_button_clicked()
@@ -123,7 +123,7 @@ class AlphaTest(unittest.TestCase):
         # test that rounds correctly
         self.view.pairing_table.item(0, 4).setText("1.12345617890")
 
-        self.assertEqual(self.view.get_table_item_text(0, 4), "1.123456")
+        self.assertEqual(self.presenter.get_table_item_text(0, 4), "1.123456")
 
     def test_that_valid_alpha_values_are_added_correctly(self):
         self.presenter.handle_add_pair_button_clicked()
@@ -136,16 +136,16 @@ class AlphaTest(unittest.TestCase):
             self.view.pairing_table.item(0, 4).setText(valid_alpha)
             # make presenter update
             self.presenter.handle_data_change(0, 4)
-            self.assertEqual(float(self.view.get_table_item_text(0, 4)), expected_alpha)
+            self.assertEqual(float(self.presenter.get_table_item_text(0, 4)), expected_alpha)
 
     def test_that_negative_alpha_is_not_allowed(self):
         self.presenter.handle_add_pair_button_clicked()
 
         self.view.pairing_table.setCurrentCell(0, 4)
-        default_value = self.view.get_table_item_text(0, 4)
+        default_value = self.presenter.get_table_item_text(0, 4)
         self.view.pairing_table.item(0, 4).setText("-1.0")
 
-        self.assertEqual(self.view.get_table_item_text(0, 4), default_value)
+        self.assertEqual(self.presenter.get_table_item_text(0, 4), default_value)
         self.assertEqual(self.view.warning_popup.call_count, 1)
 
     def test_that_clicking_guess_alpha_triggers_correct_slot_with_correct_row_supplied(self):

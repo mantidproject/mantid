@@ -50,15 +50,15 @@ class PairingTablePresenter(object):
 
     def disable_editing(self):
         self.disable_updates()
-        self._view_disabled = True
-        self._view._disable_all_buttons()
+        self._view.is_disabled = True
+        self._view.disable_all_buttons()
         self._disable_all_table_items()
         self.enable_updates()
 
     def enable_editing(self):
         self.disable_updates()
-        self._view._disabled = False
-        self._view._enable_all_buttons()
+        self._view.is_disabled = False
+        self._view.enable_all_buttons()
         self._enable_all_table_items()
         self.enable_updates()
 
@@ -71,27 +71,30 @@ class PairingTablePresenter(object):
         self._view._updating = True
 
     def num_rows(self):
-        return self._view.pairing_table.rowCount()
+        return self._view.get_pairing_table.rowCount()
 
     def num_cols(self):
-        return self._view.pairing_table.columnCount()
+        return self._view.get_pairing_table.columnCount()
 
     def remove_pair_by_index(self, index):
-        self._view.pairing_table.removeRow(index)
+        self._view.get_pairing_table.removeRow(index)
 
     def remove_last_row(self):
-        last_row = self._view.pairing_table.rowCount() - 1
+        last_row = self._view.get_pairing_table.rowCount() - 1
         if last_row >= 0:
-            self._view.pairing_table.removeRow(last_row)
+            self._view.get_pairing_table.removeRow(last_row)
 
     def clear(self):
         # Go backwards to preserve indices
         for row in reversed(range(self.num_rows())):
-            self._view.pairing_table.removeRow(row)
+            self._view.get_pairing_table.removeRow(row)
+
+    def get_selected_row_indices(self):
+        return list(set(index.row() for index in self._view.get_pairing_table.selectedIndexes()))
 
     def get_selected_pair_names_and_indexes(self):
-        indexes = self._view._get_selected_row_indices()
-        return [[str(self._view.pairing_table.item(i, 0).text()), i] for i in indexes]
+        indexes = self.get_selected_row_indices()
+        return [[str(self._view.get_pairing_table.item(i, 0).text()), i] for i in indexes]
 
     def handle_guess_alpha_clicked(self, row):
         table_row = self.get_table_contents()[row]
@@ -285,7 +288,7 @@ class PairingTablePresenter(object):
             return self._view.get_item_text(row, col)
 
     def get_table_contents(self):
-        if self._view._updating:
+        if self._view.is_updating:
             return []
 
         ret = [[None for _ in range(self.num_cols())] for _ in range(self.num_rows())]
@@ -327,7 +330,7 @@ class PairingTablePresenter(object):
 
     def add_entry_to_table(self, row_entries, color=(255, 255, 255), tooltip=""):
         """Add an entry to the table based on row entries."""
-        assert len(row_entries) == self._view.pairing_table.columnCount() - 1
+        assert len(row_entries) == self._view.get_pairing_table.columnCount() - 1
 
         row_position = self._view.insert_row_in_table()
         for i, entry in enumerate(row_entries):
@@ -351,13 +354,13 @@ class PairingTablePresenter(object):
 
     def _add_pair_name_entry(self, row, col, entry):
         """Add a validated pair name entry."""
-        pair_name_widget = table_utils.ValidatedTableItem(self._view._validate_pair_name_entry)
+        pair_name_widget = table_utils.ValidatedTableItem(self._view.validate_pair_name_entry)
         pair_name_widget.setText(entry)
         self._view.set_item_in_table(row, col, pair_name_widget, flags=self._view.get_default_item_flags)
 
     def _add_group_selector_entry(self, row, col, entry, group):
         """Add a group selector widget for group_1 or group_2."""
-        group_selector_widget = self._view._group_selection_cell_widget()
+        group_selector_widget = self._view.group_selection_cell_widget
 
         if group == "group_1":
             group_selector_widget.currentIndexChanged.connect(lambda: self._view.on_cell_changed(row, 2))
@@ -369,7 +372,7 @@ class PairingTablePresenter(object):
 
     def _add_alpha_entry(self, row, col, entry):
         """Add an alpha entry to the table."""
-        alpha_widget = table_utils.ValidatedTableItem(self._view._validate_alpha)
+        alpha_widget = table_utils.ValidatedTableItem(self._view.validate_alpha)
         alpha_widget.setText(entry)
         self._view.set_item_in_table(row, col, alpha_widget)
 
@@ -379,7 +382,7 @@ class PairingTablePresenter(object):
 
     def _add_guess_alpha_button(self, row):
         """Add the 'Guess Alpha' button to the last column."""
-        guess_alpha_widget = self._view._guess_alpha_button()
+        guess_alpha_widget = self._view.guess_alpha_button
         guess_alpha_widget.clicked.connect(self._view.guess_alpha_clicked_from_row)
         self._view.set_widget_in_table(row, 5, guess_alpha_widget)
 
@@ -393,7 +396,7 @@ class PairingTablePresenter(object):
         add_pair_action = self._context_menu_add_pair_action(self._view.add_pair_button.clicked.emit)
         remove_pair_action = self._context_menu_remove_pair_action(self._view.remove_pair_button.clicked.emit)
 
-        if self._view._disabled:
+        if self._view.is_disabled:
             self._view.add_pair_action.setEnabled(False)
             self._view.remove_pair_action.setEnabled(False)
         # set-up the menu
@@ -404,18 +407,18 @@ class PairingTablePresenter(object):
     def _context_menu_add_pair_action(self, slot):
         add_pair_action = self._view.get_add_pair_action
         add_pair_action.setCheckable(False)
-        if len(self._view._get_selected_row_indices()) > 0:
+        if len(self.get_selected_row_indices()) > 0:
             add_pair_action.setEnabled(False)
         add_pair_action.triggered.connect(slot)
         return add_pair_action
 
     def _context_menu_remove_pair_action(self, slot):
-        if len(self._view._get_selected_row_indices()) > 1:
+        if len(self.get_selected_row_indices()) > 1:
             # use plural if >1 item selected
             remove_pair_action = self._view.get_remove_pair_action(True)
         else:
             remove_pair_action = self._view.get_remove_pair_action()
-        if self._view.pairing_table.rowCount() == 0:
+        if self._view.get_pairing_table.rowCount() == 0:
             remove_pair_action.setEnabled(False)
         remove_pair_action.triggered.connect(slot)
         return remove_pair_action
@@ -425,7 +428,7 @@ class PairingTablePresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def _is_edited_name_duplicated(self, new_name):
-        is_name_column_being_edited = self._view.pairing_table.currentColumn() == 0
+        is_name_column_being_edited = self._view.get_pairing_table.currentColumn() == 0
         is_name_unique = sum([new_name == name for name in self._model.group_and_pair_names]) == 0
         return is_name_column_being_edited and not is_name_unique
 
