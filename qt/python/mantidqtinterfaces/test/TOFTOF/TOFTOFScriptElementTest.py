@@ -142,14 +142,10 @@ class TOFTOFScriptElementTest(unittest.TestCase):
             if not name.startswith("__") and not hasattr(getattr(self.scriptElement, name), "__call__"):
                 self.assertEqual(getattr(self.scriptElement, name), getattr(scriptElement2, name))
 
-    # due to an issue with 'exec()' in functtions with nested functions in python 2.7 (2.7.8 and earlier),
-    # this function has to stay outside of 'test_that_script_is_executable_in_mantid()'.
-    # see https://bugs.python.org/issue21591
-    # cannot be a @staticmethod for the same reasons
-    def execScript(self, script):
-        exec(script, dict(), dict())
-
     def test_that_script_is_executable_in_mantid(self):
+        def exec_script(script):
+            exec(script, dict(), dict())
+
         # data files are here
         self.scriptElement.dataDir = ""
 
@@ -177,9 +173,7 @@ class TOFTOFScriptElementTest(unittest.TestCase):
         self.scriptElement.createDiff = True
         self.scriptElement.keepSteps = True
 
-        testhelpers.assertRaisesNothing(
-            self, self.execScript, self.scriptElement.to_script().replace("import matplotlib.pyplot as plt", "")
-        )
+        testhelpers.assertRaisesNothing(self, exec_script, self.scriptElement.to_script().replace("import matplotlib.pyplot as plt", ""))
 
     def test_that_script_has_correct_syntax(self):
         self.scriptElement.binEon = False

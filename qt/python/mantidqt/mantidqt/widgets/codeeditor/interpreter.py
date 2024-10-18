@@ -389,13 +389,8 @@ class PythonFileInterpreterPresenter(QObject):
             try:
                 if exc_stack[0].lineno is not None:
                     lineno = exc_stack[0].lineno + self._code_start_offset
-            except (AttributeError, IndexError):
-                # Python 2 fallback
-                try:
-                    if exc_stack[-1][1] is not None:  # Ensure the last stack trace entry has a valid lineno
-                        lineno = exc_stack[-1][1] + self._code_start_offset
-                except IndexError:
-                    pass
+            except IndexError:
+                pass
 
         sys.stderr.write(self._error_formatter.format(exc_type, exc_value, exc_stack) + os.linesep)
         self.view.editor.updateProgressMarker(lineno, True)
