@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "IALCDataLoadingPresenter.h"
 #include "IALCDataLoadingView.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -22,57 +23,57 @@ namespace CustomInterfaces {
 
 /** ALCDataLoadingPresenter : Presenter for ALC Data Loading step
  */
-class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingPresenter {
+class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingPresenter : IALCDataLoadingPresenter {
 
 public:
   ALCDataLoadingPresenter(IALCDataLoadingView *view);
 
-  void initialize();
+  void initialize() override;
 
   /// @return Last loaded data workspace
-  Mantid::API::MatrixWorkspace_sptr loadedData() const { return m_loadedData; }
+  Mantid::API::MatrixWorkspace_sptr loadedData() const override { return m_loadedData; }
 
   /// @return Loaded data as MatrixWorkspace_sptr
-  Mantid::API::MatrixWorkspace_sptr exportWorkspace();
+  Mantid::API::MatrixWorkspace_sptr exportWorkspace() override;
 
   /// Sets some data
-  void setData(const Mantid::API::MatrixWorkspace_sptr &data);
+  void setData(const Mantid::API::MatrixWorkspace_sptr &data) override;
 
   // Returns a boolean stating whether data is currently being loading
-  bool isLoading() const;
+  bool isLoading() const override;
 
   // Cancels current loading algorithm
-  void cancelLoading() const;
+  void cancelLoading() const override;
 
   /// Check file range and call method to load new data
-  void handleLoadRequested();
+  void handleLoadRequested() override;
 
   /// Updates the list of logs and number of periods
-  void updateAvailableInfo();
+  void updateAvailableInfo() override;
 
   /// Handle for when runs editing starts
-  void handleRunsEditing();
+  void handleRunsEditing() override;
 
   /// Handle for when runs editing finishes
-  void handleRunsEditingFinished();
+  void handleRunsEditingFinished() override;
 
   /// Handle for when instrument changed
-  void handleInstrumentChanged(const std::string &instrument);
+  void handleInstrumentChanged(const std::string &instrument) override;
 
   /// Handle for when manage user directories clicked
-  void handleManageDirectories();
+  void handleManageDirectories() override;
 
   /// Handle for when runs have been searched for
-  void handleRunsFound();
+  void handleRunsFound() override;
 
   /// When directory contents change, set flag
-  void updateDirectoryChangedFlag();
+  void updateDirectoryChangedFlag() override;
 
   /// Begin/Stop watching path
-  void handleStartWatching(bool watch);
+  void handleStartWatching(bool watch) override;
 
   /// Handle a user requests to see the period info widget
-  void handlePeriodInfoClicked();
+  void handlePeriodInfoClicked() override;
 
 protected:
   /// Runs every time a timer event occurs
