@@ -9,10 +9,18 @@
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/EnumeratedString.h"
+#include "MantidKernel/EnumeratedStringProperty.h"
 #include "MantidKernel/ListValidator.h"
 
 namespace Mantid {
-
+namespace PropertyNames {
+const std::string INPUT_WKSP("InputWorkspace");
+const std::string OUTPUT_WKSP("OutputWorkspace");
+const std::string CALIB_WKSP("CalibrationWorkspace");
+const std::string OFFSTS_WKSP("OffsetsWorkspace");
+const std::string OFFSET_MODE("OffsetMode");
+const std::string BINWIDTH("BinWidth");
+} // namespace PropertyNames
 namespace {
 
 enum class OffsetMode { RELATIVE_OFFSET, ABSOLUTE_OFFSET, SIGNED_OFFSET, enum_count };
@@ -57,15 +65,6 @@ void calculateFromOffset(API::Progress &progress, DataObjects::SpecialWorkspace2
     progress.report("Calculate DIFC");
   }
 }
-
-namespace PropertyNames {
-const std::string INPUT_WKSP("InputWorkspace");
-const std::string OUTPUT_WKSP("OutputWorkspace");
-const std::string CALIB_WKSP("CalibrationWorkspace");
-const std::string OFFSTS_WKSP("OffsetsWorkspace");
-const std::string OFFSET_MODE("OffsetMode");
-const std::string BINWIDTH("BinWidth");
-} // namespace PropertyNames
 
 // look through the columns of detid and difc and copy them into the
 // SpecialWorkspace2D
@@ -125,8 +124,8 @@ void CalculateDIFC::init() {
                   "which will be copied. This property cannot be set in "
                   "conjunction with property OffsetsWorkspace.");
 
-  declareProperty(PropertyNames::OFFSET_MODE, offsetModeNames[size_t(OffsetMode::RELATIVE_OFFSET)],
-                  std::make_shared<Mantid::Kernel::StringListValidator>(offsetModeNames),
+  declareProperty(std::make_unique<Mantid::Kernel::EnumeratedStringProperty<OffsetMode, &offsetModeNames>>(
+                      PropertyNames::OFFSET_MODE),
                   "Optional: Whether to calculate a relative, absolute, or signed offset.  Default relative");
 
   declareProperty(PropertyNames::BINWIDTH, EMPTY_DBL(),
