@@ -161,7 +161,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AnnularRing
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/FileProperty.h:90
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/BinaryOperation.h:59
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/EnumeratedString.h:62
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AddSampleLog.cpp:344
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AbsorptionCorrection.cpp:423
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AbsorptionCorrection.cpp:445
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculateEfficiency.cpp:158

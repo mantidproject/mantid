@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidKernel/EnumeratedString.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/NullValidator.h"
 #include "MantidKernel/Property.h"
 #include <vector>
@@ -81,7 +79,6 @@ protected:
   /// The value of the property
   ENUMSTRING m_value;
   /// the property's default value which is also its initial value
-  // const TYPE m_initialValue;
   ENUMSTRING m_initialValue;
 
 private:
@@ -90,12 +87,6 @@ private:
   template <typename U> std::string setTypedValue(U const &value, std::true_type const &);
 
   template <typename U> std::string setTypedValue(U const &value, std::false_type const &);
-
-  /// Static reference to the logger class
-  static Logger g_logger;
-
-  /// Private default constructor
-  EnumeratedStringProperty() = default;
 };
 
 // template <typename TYPE> Logger PropertyWithValue<TYPE>::g_logger("PropertyWithValue");

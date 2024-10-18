@@ -25,8 +25,8 @@
 namespace {
 
 const std::string NumberType("NumberType");
-const std::vector<std::string> typeOptions{"Int", "Double", "AutoDetect"};
-enum class TypeMode { INT, DOUBLE, AUTO_DETECT, enum_count };
+const std::vector<std::string> typeOptions{"AutoDetect", "Int", "Double"};
+enum class TypeMode { AUTO_DETECT, INT, DOUBLE, enum_count };
 typedef Mantid::Kernel::EnumeratedString<TypeMode, &typeOptions> TYPEMODE;
 
 const std::string LogType("LogType");
@@ -59,7 +59,6 @@ void AddSampleLog::init() {
   declareProperty(std::make_unique<EnumeratedStringProperty<TypeMode, &typeOptions>>(NumberType),
                   "Force LogText to be interpreted as a number of type 'int' "
                   "or 'double'.");
-  setPropertyValue(NumberType, typeOptions[2]);
 
   // add optional workspace which contains the data of the TimeSeriesProperty
   declareProperty(std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>("TimeSeriesWorkspace", "", Direction::Input,
