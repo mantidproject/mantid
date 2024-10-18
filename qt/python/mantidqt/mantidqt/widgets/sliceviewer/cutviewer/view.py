@@ -72,6 +72,15 @@ class CutViewerView(QWidget):
     def get_step(self, irow):
         return float(self.table.item(irow, 6).text())
 
+    def get_nbin(self, irow):
+        return int(self.table.item(irow, 5).text())
+
+    def get_extents(self, irow):
+        return [float(self.table.item(irow, icol).text()) for icol in (3, 4)]  # start, stop
+
+    def get_vector(self, irow):
+        return [float(self.table.item(irow, icol).text()) for icol in range(3)]
+
     # setters
 
     def set_vector(self, irow, vector):
@@ -90,15 +99,6 @@ class CutViewerView(QWidget):
     def update_step(self, irow, nbin):
         extents = self.get_extents(irow)
         self.set_step(irow, (extents[1] - extents[0]) / nbin)
-
-    def get_nbin(self, irow):
-        return int(self.table.item(irow, 5).text())
-
-    def get_extents(self, irow):
-        return [float(self.table.item(irow, icol).text()) for icol in (3, 4)]  # start, stop
-
-    def get_vector(self, irow):
-        return [float(self.table.item(irow, icol).text()) for icol in range(3)]
 
     def set_nbin(self, irow, nbin):
         self.table.item(irow, 5).setData(Qt.EditRole, int(nbin))
@@ -132,7 +132,7 @@ class CutViewerView(QWidget):
         self.cut_rep = CutRepresentation(self.canvas, self.on_representation_changed, xmin, xmax, ymin, ymax, thickness, axes_transform)
 
     def on_representation_changed(self, xmin, xmax, ymin, ymax, thickness):
-        self.presenter.update_bin_params_from_cut_representation(xmin, xmax, ymin, ymax, thickness)
+        self.presenter.handle_cut_representation_changed(xmin, xmax, ymin, ymax, thickness)
 
     # private api
     def _setup_ui(self):
