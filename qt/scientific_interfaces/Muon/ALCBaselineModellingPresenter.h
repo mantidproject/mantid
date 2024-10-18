@@ -7,6 +7,7 @@
 #pragma once
 
 #include "IALCBaselineModellingModel.h"
+#include "IALCBaselineModellingPresenter.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 
@@ -19,27 +20,27 @@ class IALCBaselineModellingView;
 
 /** ALCBaselineModellingPresenter : Presenter for ALC Baseline Modelling step
  */
-class MANTIDQT_MUONINTERFACE_DLL ALCBaselineModellingPresenter {
+class MANTIDQT_MUONINTERFACE_DLL ALCBaselineModellingPresenter : IALCBaselineModellingPresenter {
 
 public:
   ALCBaselineModellingPresenter(IALCBaselineModellingView *view, std::unique_ptr<IALCBaselineModellingModel> model);
 
-  void initialize();
+  void initialize() override;
 
   /// Perform a fit
-  void fit();
+  void fit() override;
 
   /// Add a new section
-  void addSection();
+  void addSection() override;
 
   /// Remove existing section
-  void removeSection(int row);
+  void removeSection(int row) override;
 
   /// Called when one of sections is modified
-  void onSectionRowModified(int row);
+  void onSectionRowModified(int row) override;
 
   /// Called when on of section selectors is modified
-  void onSectionSelectorModified(int index);
+  void onSectionSelectorModified(int index) override;
 
   /// Updates data curve from the model
   void updateDataCurve();
@@ -53,21 +54,21 @@ public:
   /// Updates function in the view from the model
   void updateFunction();
 
-  Mantid::API::MatrixWorkspace_sptr exportWorkspace();
+  Mantid::API::MatrixWorkspace_sptr exportWorkspace() const override;
 
-  Mantid::API::ITableWorkspace_sptr exportSections();
+  Mantid::API::ITableWorkspace_sptr exportSections() const override;
 
-  Mantid::API::ITableWorkspace_sptr exportModel();
+  Mantid::API::ITableWorkspace_sptr exportModel() const override;
 
-  Mantid::API::MatrixWorkspace_sptr correctedData();
+  Mantid::API::MatrixWorkspace_sptr correctedData() const override;
 
-  void setData(Mantid::API::MatrixWorkspace_sptr data);
+  void setData(Mantid::API::MatrixWorkspace_sptr data) override;
 
-  void setCorrectedData(Mantid::API::MatrixWorkspace_sptr data);
+  void setCorrectedData(Mantid::API::MatrixWorkspace_sptr data) override;
 
-  std::string function() const;
+  std::string function() const override;
 
-  int noOfSectionRows() const;
+  int noOfSectionRows() const override;
 
 private:
   void updateAfterFit();

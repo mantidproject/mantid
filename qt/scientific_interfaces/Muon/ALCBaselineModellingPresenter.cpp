@@ -182,15 +182,19 @@ void ALCBaselineModellingPresenter::updateAfterFit() {
   updateBaselineCurve();
 }
 
-Mantid::API::MatrixWorkspace_sptr ALCBaselineModellingPresenter::exportWorkspace() {
+Mantid::API::MatrixWorkspace_sptr ALCBaselineModellingPresenter::exportWorkspace() const {
   return m_model->exportWorkspace();
 }
 
-Mantid::API::ITableWorkspace_sptr ALCBaselineModellingPresenter::exportSections() { return m_model->exportSections(); }
+Mantid::API::ITableWorkspace_sptr ALCBaselineModellingPresenter::exportSections() const {
+  return m_model->exportSections();
+}
 
-Mantid::API::ITableWorkspace_sptr ALCBaselineModellingPresenter::exportModel() { return m_model->exportModel(); }
+Mantid::API::ITableWorkspace_sptr ALCBaselineModellingPresenter::exportModel() const { return m_model->exportModel(); }
 
-Mantid::API::MatrixWorkspace_sptr ALCBaselineModellingPresenter::correctedData() { return m_model->correctedData(); }
+Mantid::API::MatrixWorkspace_sptr ALCBaselineModellingPresenter::correctedData() const {
+  return m_model->correctedData();
+}
 
 void ALCBaselineModellingPresenter::setData(Mantid::API::MatrixWorkspace_sptr data) {
   m_model->setData(data);
