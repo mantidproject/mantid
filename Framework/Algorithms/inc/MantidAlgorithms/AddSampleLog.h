@@ -63,7 +63,7 @@ private:
 
   /// set the time series property's entries to the newly added
   /// TimeSeriesProperty
-  void setTimeSeriesData(API::Run &run_obj, const std::string &property_name, bool value_is_int);
+  void setTimeSeriesData(const API::Run &run_obj, const std::string &property_name, bool value_is_int);
 
   /// get run start time
   Types::Core::DateAndTime getRunStart(const API::Run &run_obj);

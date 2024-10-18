@@ -298,7 +298,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj, const std::string &prop_n
  * @param property_name
  * @param value_is_int
  */
-void AddSampleLog::setTimeSeriesData(Run &run_obj, const std::string &property_name, bool value_is_int) {
+void AddSampleLog::setTimeSeriesData(const Run &run_obj, const std::string &property_name, bool value_is_int) {
   // get input and
   MatrixWorkspace_sptr data_ws = getProperty("TimeSeriesWorkspace");
   int ws_index = getProperty("WorkspaceIndex");
