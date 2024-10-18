@@ -29,6 +29,8 @@ ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
 
 ALCDataLoadingView::~ALCDataLoadingView() = default;
 
+void ALCDataLoadingView::subscribePresenter(IALCDataLoadingPresenter *presenter) { m_presenter = presenter; }
+
 void ALCDataLoadingView::initialize() {
   m_ui.setupUi(m_widget);
 

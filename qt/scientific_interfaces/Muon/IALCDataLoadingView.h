@@ -19,10 +19,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 /** IALCDataLoadingView : View interface for ALC Data Loading step
  */
+class IALCDataLoadingPresenter;
+
 class MANTIDQT_MUONINTERFACE_DLL IALCDataLoadingView : public QObject {
   Q_OBJECT
 
 public:
+  virtual void subscribePresenter(IALCDataLoadingPresenter *presenter) = 0;
   /// Init instrument combo box
   virtual void initInstruments() = 0;
 

@@ -42,6 +42,7 @@ set(INC_FILES
     IALCBaselineModellingView.h
     IALCBaselineModellingPresenter.h
     IALCDataLoadingView.h
+    IALCDataLoadingPresenter.h
     IALCPeakFittingModel.h
     IALCPeakFittingView.h
 )
