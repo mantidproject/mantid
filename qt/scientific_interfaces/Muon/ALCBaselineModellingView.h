@@ -19,6 +19,8 @@ class QSignalMapper;
 namespace MantidQt {
 namespace CustomInterfaces {
 
+class ALCBaselineModellingPresenter;
+
 /** ALCBaselineModellingView : Widget-based implementation of the ALC Baseline
   Modelling step
                                interface.
@@ -30,11 +32,11 @@ public:
   ALCBaselineModellingView(QWidget *widget);
   ~ALCBaselineModellingView() override;
 
+  void subscribePresenter(ALCBaselineModellingPresenter *presenter) override { m_presenter = presenter; }
   std::string function() const override;
   SectionRow sectionRow(int row) const override;
   SectionSelector sectionSelector(int index) const override;
   int noOfSectionRows() const override;
-  void emitFitRequested();
 
   void removePlot(QString const &plotName) override;
 
@@ -51,6 +53,11 @@ public slots:
   void updateSectionSelector(int index, SectionSelector values) override;
   void displayError(const QString &message) override;
   void help() override;
+  void handleFitRequested() const override;
+  void handleAddSectionRequested() const override;
+  void handleRemoveSectionRequested(int row) const override;
+  void handleSectionRowModified(int row) const override;
+  void handleSectionSelectorModified(int index) const override;
   // -- End of IALCBaselineModellingView interface
   // -------------------------------------------------
 
@@ -59,6 +66,9 @@ private slots:
   void sectionsContextMenu(const QPoint &widgetPoint);
 
 private:
+  ALCBaselineModellingPresenter *m_presenter;
+  void initConnections() const override;
+
   /// Helper to set range selector values
   void setSelectorValues(MantidWidgets::RangeSelector *selector, SectionSelector values);
   QHash<QString, QVariant> getPlotKwargs(MantidWidgets::PreviewPlot *plot, const QString &curveName);
