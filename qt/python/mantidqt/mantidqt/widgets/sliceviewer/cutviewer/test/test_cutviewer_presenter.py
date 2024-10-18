@@ -74,7 +74,7 @@ class TestCutViewerModel(unittest.TestCase):
         self.mock_sv_presenter.perform_non_axis_aligned_cut.assert_not_called()
 
     @mock.patch("mantidqt.widgets.sliceviewer.cutviewer.presenter.CutViewerPresenter.update_cut")
-    def test_update_bin_params_from_cut_representation(self, mock_update_cut):
+    def test_handle_cut_representation_changed(self, mock_update_cut):
         xmin, xmax, ymin, ymax, thickness = 0, 1, 0, 1, 0.1
         self.presenter.model.calc_bin_params_from_cut_representation.return_value = 3 * [None]  # vecs, extents, nbins
         self.presenter.model.calc_cut_representation_parameters.return_value = xmin, xmax, ymin, ymax, thickness
@@ -83,7 +83,7 @@ class TestCutViewerModel(unittest.TestCase):
         self.presenter.view.get_extents.return_value = [-1, 1]  # ignored
         self.presenter.view.get_nbin.return_value = 2  # ignored
 
-        self.presenter.update_bin_params_from_cut_representation(xmin, xmax, ymin, ymax, thickness)
+        self.presenter.handle_cut_representation_changed(xmin, xmax, ymin, ymax, thickness)
 
         mock_update_cut.assert_called_once()
         # check last vector passed as out of plane vector

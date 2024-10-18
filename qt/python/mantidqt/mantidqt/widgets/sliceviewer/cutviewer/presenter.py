@@ -82,7 +82,7 @@ class CutViewerPresenter:
         axes_transform = self._sliceview_presenter.get_sliceinfo().get_northogonal_transform()
         return xmin, xmax, ymin, ymax, thickness, axes_transform
 
-    def update_bin_params_from_cut_representation(self, xmin, xmax, ymin, ymax, thickness):
+    def handle_cut_representation_changed(self, xmin, xmax, ymin, ymax, thickness):
         out_plane_vector = self.view.get_vector(2)  # integrated dimension (last row in table)
         vectors_in_plane, extents_in_plane, nbins_in_plane = self.model.calc_bin_params_from_cut_representation(
             xmin, xmax, ymin, ymax, thickness, out_plane_vector
