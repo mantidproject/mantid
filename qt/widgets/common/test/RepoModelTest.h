@@ -8,6 +8,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include <cxxtest/TestSuite.h>
+#include <filesystem>
 #include <gmock/gmock.h>
 
 #include "MantidAPI/ScriptRepositoryFactory.h"
@@ -187,6 +188,15 @@ public:
         TS_ASSERT_EQUALS(expectedPath, path)
       }
     }
+  }
+
+  void test_repo_ptr_invalidated_on_install_dir_move() {
+    auto repoPath = Mantid::Kernel::ConfigService::Instance().getString("ScriptLocalRepository");
+    auto *model = new RepoModel();
+    const auto differentLocation = std::filesystem::path(repoPath).parent_path() / "tempScriptRepo";
+    std::filesystem::rename(repoPath, differentLocation);
+    EXPECT_CALL(scriptRepoMock, setValid(false)).Times(2);
+    std::filesystem::rename(differentLocation, repoPath);
   }
 
 private:
