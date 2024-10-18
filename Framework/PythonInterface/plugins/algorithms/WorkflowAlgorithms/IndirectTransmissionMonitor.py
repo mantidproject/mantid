@@ -5,10 +5,21 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
-from mantid import logger
+from mantid.api import mtd, AlgorithmFactory, Progress, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import logger, Direction
+from mantid.simpleapi import (
+    AddSampleLog,
+    ConvertUnits,
+    CropWorkspace,
+    DeleteWorkspace,
+    Divide,
+    FFTSmooth,
+    GroupWorkspaces,
+    RebinToWorkspace,
+    RemoveBins,
+    RenameWorkspace,
+    UnwrapMonitor,
+)
 import numpy
 
 

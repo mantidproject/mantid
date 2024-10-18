@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.api import AlgorithmManager, MatrixWorkspace
+from mantid.api import AlgorithmManager, FrameworkManager, MatrixWorkspace
 import numpy as np
 
 from SANSStitch import QErrorCorrectionForMergedWorkspaces
@@ -890,4 +890,5 @@ class TestQErrorCorrectionForMergedWorkspaces(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    FrameworkManager.Instance()
     unittest.main()

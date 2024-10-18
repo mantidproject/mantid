@@ -6,7 +6,25 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    AlignDetectors,
+    ConvertFromDistribution,
+    ConvertToDistribution,
+    ConvertUnits,
+    CropWorkspace,
+    DeleteWorkspace,
+    DiffractionFocussing,
+    Divide,
+    LoadNexusProcessed,
+    LoadRaw,
+    MaskBins,
+    Minus,
+    NormaliseToMonitor,
+    SmoothData,
+    SplineBackground,
+    RebinToWorkspace,
+    ReplaceSpecialValues,
+)
 
 
 class WishAnalysis(systemtesting.MantidSystemTest):

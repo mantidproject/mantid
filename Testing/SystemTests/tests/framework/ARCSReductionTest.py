@@ -11,7 +11,9 @@ System test for ARCS reduction
 
 import os
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import DeleteWorkspace, DgsReduction, ExtractMask, Load, LoadNXSPE, SaveNXSPE
 
 
 class ARCSReductionTest(systemtesting.MantidSystemTest):

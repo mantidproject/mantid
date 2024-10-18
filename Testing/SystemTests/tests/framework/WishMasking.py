@@ -12,7 +12,9 @@ Tests masking functionality specific to WISH. Working masking behaviour is criti
 
 import systemtesting
 import os
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import ExtractMask, MaskDetectors, MaskWorkspaceToCalFile, MergeCalFiles, Load, SaveMask
 
 
 class WishMasking(systemtesting.MantidSystemTest):

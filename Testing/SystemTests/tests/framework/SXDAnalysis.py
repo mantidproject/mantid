@@ -9,8 +9,20 @@ import systemtesting
 import tempfile
 import shutil
 import os
+import numpy as np
 from mantid.api import AnalysisDataService as ADS
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    AddPeak,
+    CalculateUMatrix,
+    CreatePeaksWorkspace,
+    FindUBUsingFFT,
+    IndexPeaks,
+    Load,
+    LoadEmptyInstrument,
+    LoadNexus,
+    OptimizeLatticeForCellType,
+    SelectCellOfType,
+)
 from Diffraction.single_crystal.sxd import SXD
 from Diffraction.single_crystal.base_sx import PEAK_TYPE, INTEGRATION_TYPE
 

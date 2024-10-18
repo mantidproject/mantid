@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.simpleapi import CropWorkspace, GroupWorkspaces, Load, MaxEnt, Rebin, RemoveExpDecay
 
 
 class MaxEntTest(systemtesting.MantidSystemTest):

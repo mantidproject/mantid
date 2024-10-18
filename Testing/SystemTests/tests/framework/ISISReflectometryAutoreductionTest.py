@@ -9,13 +9,21 @@ System Test for ISIS Reflectometry autoreduction
 Adapted from scripts provided by Max Skoda.
 """
 
-from ISISReflectometryWorkflowBase import *
+from ISISReflectometryWorkflowBase import (
+    ISISReflectometryWorkflowBase,
+    setupInstrument,
+    stitchedTransmissionWorkspaceName,
+    stitchTransmissionWorkspaces,
+    transmissionWorkspaceName,
+)
 import re
 import itertools
 import math
 import systemtesting
 from operator import itemgetter
-from mantid.simpleapi import *
+from mantid.api import mtd, AnalysisDataService
+from mantid.kernel import logger
+from mantid.simpleapi import CreateTransmissionWorkspaceAuto, NRCalculateSlitResolution, SaveNexus, ReflectometryISISLoadAndProcess
 from isis_reflectometry.combineMulti import combineDataMulti, getWorkspace
 
 
@@ -280,5 +288,5 @@ def SortRuns(tupsort):
 
 
 def CreateTransmissionWorkspaces(run1, run2, scale=False):
-    CreateTransmissionWorkspaceAuto(run1, OutputWorkspace=TransmissionWorkspaceName(run1), StartOverlap=10, EndOverlap=12)
-    CreateTransmissionWorkspaceAuto(run2, OutputWorkspace=TransmissionWorkspaceName(run2), StartOverlap=10, EndOverlap=12)
+    CreateTransmissionWorkspaceAuto(run1, OutputWorkspace=transmissionWorkspaceName(run1), StartOverlap=10, EndOverlap=12)
+    CreateTransmissionWorkspaceAuto(run2, OutputWorkspace=transmissionWorkspaceName(run2), StartOverlap=10, EndOverlap=12)

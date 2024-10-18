@@ -6,9 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import DeleteWorkspace, RenameWorkspace
 import ISISCommandInterface as i
 import copy
+import os
 import SANS2DReductionGUI as sansgui
 
 from sans.common.enums import SANSInstrument

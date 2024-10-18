@@ -10,7 +10,8 @@
 # least square systems that can be found here:
 # http://www.itl.nist.gov/div898/strd/nls/nls_main.shtml
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import CreateWorkspace, Fit
 
 
 def runFit(x, y, fn):

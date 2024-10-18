@@ -8,8 +8,7 @@
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
-from ISISCommandInterface import *
+from ISISCommandInterface import AssignSample, MaskFile, SANS2D, WavRangeReduction
 from sans.common.enums import SANSInstrument
 
 

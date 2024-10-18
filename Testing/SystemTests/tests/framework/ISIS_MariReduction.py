@@ -9,8 +9,11 @@
 
 import os
 
-#
-from Direct.ReductionWrapper import *
+from Direct.AbsorptionShapes import Cylinder
+from Direct.DirectEnergyConversion import DirectEnergyConversion
+from Direct.ReductionWrapper import AdvancedProperties, iliad, MainProperties, MethodType, ReductionWrapper
+from mantid.kernel import PropertyManager
+from mantid.simpleapi import AddTimeSeriesLog, Load
 
 try:
     import reduce_vars as web_var

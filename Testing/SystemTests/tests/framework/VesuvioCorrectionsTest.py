@@ -16,9 +16,8 @@ are configured to find the Vesuvio data
 import systemtesting
 import numpy as np
 
-from mantid.api import *
+from mantid.api import mtd, AlgorithmManager, ITableWorkspace, MatrixWorkspace, WorkspaceGroup
 import mantid.simpleapi as ms
-from mantid import *
 
 # ====================================Helper Functions=======================================
 

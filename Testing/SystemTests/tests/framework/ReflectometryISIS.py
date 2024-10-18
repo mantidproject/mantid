@@ -10,7 +10,19 @@ These system tests are to verify the behaviour of the ISIS reflectometry reducti
 """
 
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import (
+    BinMD,
+    CompareMDWorkspaces,
+    ConvertSpectrumAxis,
+    ConvertToReflectometryQ,
+    ConvertUnits,
+    CropWorkspace,
+    Divide,
+    Load,
+    LoadMD,
+    MoveInstrumentComponent,
+)
 
 from abc import ABCMeta, abstractmethod
 

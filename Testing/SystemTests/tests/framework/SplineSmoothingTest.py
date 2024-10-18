@@ -7,8 +7,8 @@
 # pylint: disable=no-init,attribute-defined-outside-init,too-many-public-methods
 
 import systemtesting
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import mtd, AnalysisDataService
+from mantid.simpleapi import Load, SplineSmoothing
 import unittest
 
 DIFF_PLACES = 7

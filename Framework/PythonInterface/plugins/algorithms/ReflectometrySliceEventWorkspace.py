@@ -4,9 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import *
-from mantid.kernel import *
-from mantid.simpleapi import *
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, WorkspaceGroupProperty
+from mantid.kernel import DateAndTime, Direction
+from mantid.simpleapi import AddSampleLog
 
 
 class ReflectometrySliceEventWorkspace(DataProcessorAlgorithm):

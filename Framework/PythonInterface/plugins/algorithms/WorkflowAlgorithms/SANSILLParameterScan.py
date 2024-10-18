@@ -5,9 +5,19 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import DataProcessorAlgorithm, FileAction, FileProperty, Progress, PropertyMode, WorkspaceProperty
-from mantid.kernel import IntBoundedValidator, Direction
-from mantid.simpleapi import *
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, Progress, PropertyMode, WorkspaceProperty
+from mantid.kernel import logger, IntBoundedValidator, Direction
+from mantid.simpleapi import (
+    ConvertAxisByFormula,
+    ConvertSpectrumAxis,
+    DeleteWorkspace,
+    GroupDetectors,
+    Load,
+    LoadNexusProcessed,
+    SANSILLReduction,
+    SortXAxis,
+    Transpose,
+)
 from SANSILLAutoProcess import needs_loading, needs_processing
 
 
