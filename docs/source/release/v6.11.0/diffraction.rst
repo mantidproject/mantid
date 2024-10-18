@@ -10,13 +10,13 @@ Powder Diffraction
 
 New features
 ############
-- Algorithm :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` now supports logarithmic compression.
-- Algorithm :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now takes advantage of a new compression technique in :ref:`LoadEventNexus <algm-LoadEventNexus>` and :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
-- Algorithm :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now takes advantage of a new compression technique in :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` and :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
-- Algorithm :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>` now takes advantage of a new compression technique in :ref:`LoadEventNexus <algm-LoadEventNexus>`.
-- Algorithms :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>` now do a check after the fit for the minimum signal-to-sigma ratio, where peaks with a signal below the provided threshold will be rejected.
 - :ref:`HRPD reduction scripts <isis-powder-diffraction-hrpd-ref>` now support the boolean option ``fit_prompt_pulse`` to fit and subtract prompt pulse (as opposed to the default method of masking of prompt pulse in TOF).
   You can either specify this option in the configuration file or with ``hrpd.HRPD(fit_prompt_pulse=True)``.
+- Algorithm :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` now supports logarithmic compression.
+- Algorithm :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now takes advantage of a new logarithmic compression technique in :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` and :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
+- Algorithm :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now takes advantage of a new compression technique in :ref:`LoadEventNexus <algm-LoadEventNexus>` and :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
+- Algorithm :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>` now takes advantage of a new compression technique in :ref:`LoadEventNexus <algm-LoadEventNexus>`.
+- Algorithms :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>` now do a check after the fit for the minimum signal-to-sigma ratio, where peaks with a signal below the provided threshold will be rejected.
 
 Bugfixes
 ############
@@ -45,6 +45,7 @@ Single Crystal Diffraction
 
 New features
 ############
+- New algorithm :ref:`RotateSampleShape <algm-rotatesampleshape>` that defines the initial orientation of a sample with respect to the beam and instrument.
 - :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` is better at determining background bins by minimising third-moment (skew).
   This is achieved by forcing skew > 0 (minimum skew we would expect in background).
   This change stops peak mask of :ref:`IntegratePeaksSkew <algm-IntegratePeaksSkew>` including too many pixels due to small diffuse scattering:
@@ -75,15 +76,15 @@ New features
 .. figure::  ../../images/6_11_release/FindMultipleUMatrices.png
    :width: 400px
 
-- Algorithm :ref:`ShowPossibleCells <algm-ShowPossibleCells>` now has a new output property, ``Cells``, that includes the cell information in a usable way.
+- Algorithm :ref:`ShowPossibleCells <algm-ShowPossibleCells>` now has a new output property, ``Cells``, that includes the cell information.
 - New algorithm :ref:`SaveMDHistoToVTK <algm-SaveMDHistoToVTK>` that saves a :ref:`MDHistoWorkspace <MDHistoWorkspace>` as a ``VTK`` file so that it can be visualized by ``Paraview``.
 - :ref:`IntegratePeaksShoeboxTOF <algm-IntegratePeaksShoeboxTOF>` has improved optimisation for shoebox position - would previously be centred on nearby stronger peaks if present.
-- Execution time of :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` has been sped up by an order of magnitude.
+- Execution time of :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` has improved by a factor of ten.
 
 
 Bugfixes
 ############
-- :ref:`LoadWANDSCD <algm-LoadWANDSCD>` now keeps the sgl/sgu angles set by the goniometer.
+- :ref:`LoadWANDSCD <algm-LoadWANDSCD>` now keeps the ``sgl`` and ``sgu`` angles set by the goniometer.
 - :ref:`ConverWANDSCDToQ <algm-ConvertWANDSCDToQ>` simplifies the underlying code by using histograms directly.
 
 :ref:`Release 6.11.0 <v6.11.0>`

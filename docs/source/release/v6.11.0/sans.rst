@@ -26,5 +26,7 @@ Bugfixes
 - The ``Optimize Event Slices`` checkbox has been removed from the ``General, Scale, Event Slice, Sample`` settings on
   the ISIS SANS :ref:`ISIS_SANS_Settings_Tab-ref` menu to avoid an issue with the ``SANSSingleReduction2`` algorithm
   not working.
+- The ISIS SANS :ref:`ISIS_SANS_Beam_Centre_Tab-ref` no longer crashes when no direction checkbox is selected.
+  Also improved the error message when this happens.
 
 :ref:`Release 6.11.0 <v6.11.0>`
