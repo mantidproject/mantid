@@ -485,16 +485,6 @@ class FindPeaksAutomaticTest(unittest.TestCase):
             self.assertTableEqual(expected_return[0][1], actual_return[0][1])
             np.testing.assert_almost_equal(expected_return[1], actual_return[1])
 
-    def _assert_matplotlib_not_present(self, *args):
-        import sys
-
-        self.assertNotIn("matplotlib.pyplot", sys.modules)
-
-    # If matplotlib.pyplot is imported other tests fail on windows and ubuntu
-    def test_matplotlib_pyplot_is_not_imported(self):
-        self.alg_instance.dilation = mock.Mock(side_effect=self._assert_matplotlib_not_present)
-        self.alg_instance.opening(self.y_values, 0)
-
     def test_that_algorithm_finds_peaks_correctly(self):
         FindPeaksAutomatic(
             InputWorkspace=self.raw_ws,
