@@ -11,16 +11,18 @@ from unittest import mock
 from numpy import eye, c_, array, tile, array_equal
 
 from mantidqt.widgets.sliceviewer.cutviewer.presenter import CutViewerPresenter
+from mantidqt.widgets.sliceviewer.cutviewer.view import CutViewerView
+from mantidqt.widgets.sliceviewer.cutviewer.model import CutViewerModel
 from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 
 
 class TestCutViewerModel(unittest.TestCase):
-    @mock.patch("mantidqt.widgets.sliceviewer.cutviewer.presenter.CutViewerModel", autospec=True)
-    @mock.patch("mantidqt.widgets.sliceviewer.cutviewer.presenter.CutViewerView", autospec=True)
-    def setUp(self, mock_view, mock_model):
+    def setUp(self):
         # load empty instrument so can create a peak table
+        mock_view = mock.create_autospec(CutViewerView)
+        mock_model = mock.create_autospec(CutViewerModel)
         self.mock_sv_presenter = mock.create_autospec(SliceViewer)
-        self.presenter = CutViewerPresenter(self.mock_sv_presenter, canvas=mock.MagicMock())
+        self.presenter = CutViewerPresenter(self.mock_sv_presenter, mock_model, mock_view)
 
     def test_on_cut_done(self):
         self.presenter.on_cut_done("wsname")
