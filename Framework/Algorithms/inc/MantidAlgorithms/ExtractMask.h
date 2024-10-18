@@ -44,6 +44,7 @@ public:
   const std::vector<std::string> seeAlso() const override { return {"ExtractMaskToTable"}; }
   /// Algorithm's category for identification
   const std::string category() const override { return "Transforms\\Masking"; }
+  std::map<std::string, std::string> validateInputs() override;
 
 private:
   /// Initialisation code

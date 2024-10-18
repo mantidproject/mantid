@@ -1,0 +1,1 @@
+- A new property ``InstrumentDonor`` was added to :ref:`ExtractMask <algm-ExtractMask>` allowing you to specify which instrument is used when creating the ``MaskWorkspace``.
