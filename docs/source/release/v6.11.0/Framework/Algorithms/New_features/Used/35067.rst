@@ -1,2 +1,0 @@
-- A new ``SpinStates`` property has been added to :ref:`algm-PolarizationCorrectionWildes` and
-  :ref:`algm-PolarizationEfficiencyCor` to allow the order of the workspaces in the output Workspace Group to be set.

@@ -1,1 +1,0 @@
-- Fix for incorrect incident energies for MERLIN in PyChop when not in instrument scientist mode.

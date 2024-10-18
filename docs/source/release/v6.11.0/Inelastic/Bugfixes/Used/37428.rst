@@ -1,1 +1,0 @@
-- Fix a bug in which sliders didn't respond to changes in `Emin` and `EMax` properties when changed from the property browser in the :ref:`Moments<inelastic-moments>` tab of the :ref:`Data Processor <interface-inelastic-data-processor>` interface.

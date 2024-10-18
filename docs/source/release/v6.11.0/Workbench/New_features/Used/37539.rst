@@ -1,1 +1,0 @@
-- Updated selection method  to `ExtendedSelection <https://doc.qt.io/qt-5/qabstractitemview.html#SelectionMode-enum>`_ when adding workspaces to the sequential fit dialog.

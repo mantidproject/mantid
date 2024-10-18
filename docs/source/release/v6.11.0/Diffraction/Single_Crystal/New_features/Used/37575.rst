@@ -1,1 +1,0 @@
-- Add method `calc_absorption_weighted_path_lengths` to ISIS single-crystal reduction classes that calculate tbar for each peak (saved in a column of the table) and optionally apply an attenuation correction to the integrated intensity of each peak. By default the correction will be applied if class has property scale_integrated = True)

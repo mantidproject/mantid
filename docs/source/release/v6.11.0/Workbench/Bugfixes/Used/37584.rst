@@ -1,1 +1,0 @@
-- Fixed bug where the TOF converter window was not displaying properly on high resolution screens.
