@@ -10,13 +10,13 @@ Powder Diffraction
 
 New features
 ############
-- Algorithm :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` now supports logarithmic compression.
-- Algorithm :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now takes advantage of a new compression technique in :ref:`LoadEventNexus <algm-LoadEventNexus>` and :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
-- Algorithm :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now takes advantage of a new compression technique in :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` and :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
-- Algorithm :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>` now takes advantage of a new compression technique in :ref:`LoadEventNexus <algm-LoadEventNexus>`.
-- Algorithms :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>` now do a check after the fit for the minimum signal-to-sigma ratio, where peaks with a signal below the provided threshold will be rejected.
 - :ref:`HRPD reduction scripts <isis-powder-diffraction-hrpd-ref>` now support the boolean option ``fit_prompt_pulse`` to fit and subtract prompt pulse (as opposed to the default method of masking of prompt pulse in TOF).
   You can either specify this option in the configuration file or with ``hrpd.HRPD(fit_prompt_pulse=True)``.
+- Algorithm :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>` now supports logarithmic compression.
+- Algorithm :ref:`SNSPowderReduction <algm-SNSPowderReduction>` now takes advantage of a new logarithmic compression technique in :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` and :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
+- Algorithm :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` now takes advantage of a new compression technique in :ref:`LoadEventNexus <algm-LoadEventNexus>` and :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder>`.
+- Algorithm :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>` now takes advantage of a new compression technique in :ref:`LoadEventNexus <algm-LoadEventNexus>`.
+- Algorithms :ref:`FitPeaks <algm-FitPeaks>` and :ref:`PDCalibration <algm-PDCalibration>` now do a check after the fit for the minimum signal-to-sigma ratio, where peaks with a signal below the provided threshold will be rejected.
 
 Bugfixes
 ############

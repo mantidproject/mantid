@@ -12,8 +12,6 @@ Mantid 6.11.0 Release Notes
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 6.11.0 of Mantid.
 
 In this release we gave extra attention to fixing bugs and improving algorithms (for example by making them run faster or use less memory).
@@ -35,9 +33,11 @@ We also added several new algorithms. These are the highlights for this release:
 - For reflectometry, we added a new algorithm :ref:`algm-PolarizationEfficienciesWildes` for calculating the efficiencies of the polarizing components of an instrument with two flippers.
   This algorithm implements the approach from the A. R. Wildes 2006 paper `doi: 10.1080/10448630600668738 <https://doi.org/10.1080/10448630600668738>`_.
 - For SANS, we added new algorithm :ref:`PolarizerEfficiency <algm-PolarizerEfficiency-v1>` for calculating the efficiency of a polariser.
-
-- Mantid developer environments are now created using a new ``mantid-developer`` Conda meta-package, hosted on our Conda channel.
-  This change does not affect users but greatly simplifies our development process, as package dependencies are now automatically sorted by the conda environment.
+- For Inelastic, renamed tabs of :ref:`QENS Fitting <interface-inelastic-qens-fitting>` from ``MSD Fit``, ``I(Q,t) Fit``, ``ConvFit`` and ``F(Q)`` to ``MSD``, ``I(Q,t)``, ``Convolution`` and ``Function(Q)`` respectively.
+- For Inelastic, the :ref:`Elwin Tab <elwin>` of  :ref:`Data Processor Interface <interface-inelastic-data-processor>` now includes access to the Slice Viewer or 3D Plot from the output plot widget of the output workspaces containing more than 1 histogram.
+- Again for Inelastic, :ref:`QENS Fitting Interface <interface-inelastic-qens-fitting>` now allows loading a ``_Result`` workspace from the ``I(Q, t)`` fitting tab into the ``Function (Q)`` fitting tab if one of the fit parameters is A0.
+- Finally, for developers, the Mantid developer environments are now created using a new ``mantid-developer`` Conda meta-package, hosted on our Conda channel.
+  This change does not affect users but greatly simplifies our development process, as package dependencies are now automatically sorted on different operating systems.
 
 These are just some of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the

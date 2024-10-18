@@ -17,7 +17,7 @@ New Features
 Bugfixes
 --------
 - :ref:`Stitch1DMany <algm-Stitch1DMany-v1>` algorithm now runs without errors via the dialog for executing algorithms.
-- The orsopy library has been updated to version 1.2.1.
+- The ``orsopy`` library has been updated to version 1.2.1.
   This pulls in a bug fix where multi-dataset reduced reflectivity ``.ort`` files with different column headers for different datasets would use only the headers for the first dataset throughout the file.
 - Algorithm :ref:`algm-ReflectometryReductionOneLiveData` now applies polarization corrections correctly on ``WorkspaceGroup`` inputs.
 - When on IDAaaS, only runs that are available in the ISIS Instrument Data Cache will now appear in the ``Search Runs``

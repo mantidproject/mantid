@@ -7,13 +7,13 @@ Mantid Workbench Changes
 
 New Features
 ------------
+- There is a new :ref:`Deprecation Policy <deprecation_policy>` for Mantid.
 - Clarified ``Report Usage Data`` checkbox on the Workbench About page to explain that usage reporting is required to use the Error Reporter.
 - Exposed :class:`ConfigService::remove() <mantid.kernel.ConfigServiceImpl.remove>` to python API.
 - Exposed :class:`ConfigService::configureLogging() <mantid.kernel.ConfigServiceImpl.configureLogging>` to python API.
 - Exposed :class:`ConfigService::getLogLevel() <mantid.kernel.ConfigServiceImpl.getLogLevel>` to python API.
 - Fixed handling of removed properties in :class:`ConfigService::saveConfig() <mantid.kernel.ConfigServiceImpl.saveConfig>`.
 - All text on the Workbench About screen is now readable when using OSX dark mode.
-- There is a new :ref:`Deprecation Policy <deprecation_policy>` for Mantid.
 - ``Run`` and ``Abort`` buttons now display tooltips explaining their functionality and shortcut keys.
   Tooltips are displayed when hovering over the relevant buttons:
 
@@ -25,10 +25,11 @@ New Features
 
 Bugfixes
 --------
+- The standalone Mantid package is now correctly launching on Linux, with special attention to IDAaaS.
 - Code editor no longer crashes when parsing malformed XML code.
 - Right-clicking on a 3D plot to change the colour bar scale no longer triggers the zoom tool.
 - Dragging arbitary text onto a plot now displays a warning indicating that the workspace name is invalid, rather than causing a crash.
-- Creating a script from a workspace's history, where that history includes algorithms using `StoreInADS=False`, should now create a functioning script.
+- Creating a script from a workspace's history, where that history includes algorithms using ``StoreInADS=False``, should now create a functioning script.
 - Editing the y-axis of plots generated in a python script within Workbench no longer causes an error.
 - Editing plot settings no longer reorders the legend entries.
 - Plotting a histogram of live data for frequent updates is now functioning.
@@ -39,7 +40,6 @@ Bugfixes
 - Cropping a workspace after using the ``Plot All`` button no longer causes an error.
 - Plot legends are no longer accidentally picked up by scrolling the mouse wheel.
 - Fixed bug where the TOF converter window was not displaying properly on high resolution screens.
-- The standalone Mantid package is now correctly launching on Linux, with special attention to IDAaaS.
 
 
 Instrument View
