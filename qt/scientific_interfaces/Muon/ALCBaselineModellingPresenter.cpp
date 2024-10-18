@@ -50,6 +50,7 @@ void ALCBaselineModellingPresenter::fit() {
     try {
       IFunction_sptr funcToFit = FunctionFactory::Instance().createInitialized(funcStr);
       m_model->fit(funcToFit, parsedSections);
+      updateAfterFit();
     } catch (std::exception &e) {
       m_view->displayError(QString::fromStdString(e.what()));
     }
@@ -173,6 +174,12 @@ void ALCBaselineModellingPresenter::updateFunction() {
   } else {
     m_view->setFunction(IFunction_const_sptr());
   }
+}
+
+void ALCBaselineModellingPresenter::updateAfterFit() {
+  updateCorrectedCurve();
+  updateFunction();
+  updateBaselineCurve();
 }
 
 Mantid::API::MatrixWorkspace_sptr ALCBaselineModellingPresenter::exportWorkspace() {

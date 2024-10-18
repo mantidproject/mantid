@@ -70,6 +70,8 @@ public:
   int noOfSectionRows() const;
 
 private:
+  void updateAfterFit();
+
   /// Associated view
   IALCBaselineModellingView *const m_view;
 
