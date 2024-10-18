@@ -19,7 +19,7 @@ class QSignalMapper;
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ALCBaselineModellingPresenter;
+class IALCBaselineModellingPresenter;
 
 /** ALCBaselineModellingView : Widget-based implementation of the ALC Baseline
   Modelling step
@@ -32,7 +32,7 @@ public:
   ALCBaselineModellingView(QWidget *widget);
   ~ALCBaselineModellingView() override;
 
-  void subscribePresenter(ALCBaselineModellingPresenter *presenter) override { m_presenter = presenter; }
+  void subscribePresenter(IALCBaselineModellingPresenter *presenter) override { m_presenter = presenter; }
   std::string function() const override;
   SectionRow sectionRow(int row) const override;
   SectionSelector sectionSelector(int index) const override;
@@ -66,7 +66,7 @@ private slots:
   void sectionsContextMenu(const QPoint &widgetPoint);
 
 private:
-  ALCBaselineModellingPresenter *m_presenter;
+  IALCBaselineModellingPresenter *m_presenter;
   void initConnections() const override;
 
   /// Helper to set range selector values

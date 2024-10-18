@@ -34,7 +34,7 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCBaselineModellingView : public IALCBaselineModellingView {
 public:
-  MOCK_METHOD1(subscribePresenter, void(ALCBaselineModellingPresenter *));
+  MOCK_METHOD1(subscribePresenter, void(IALCBaselineModellingPresenter *));
 
   MOCK_METHOD0(initialize, void());
   MOCK_CONST_METHOD0(initConnections, void());

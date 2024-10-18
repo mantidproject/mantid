@@ -17,7 +17,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 
-class ALCBaselineModellingPresenter;
+class IALCBaselineModellingPresenter;
 
 /** IALCBaselineModellingView : Interface for ALC Baseline Modelling view step
  */
@@ -28,7 +28,7 @@ public:
   using SectionRow = std::pair<QString, QString>;
   using SectionSelector = std::pair<double, double>;
 
-  virtual void subscribePresenter(ALCBaselineModellingPresenter *presenter) = 0;
+  virtual void subscribePresenter(IALCBaselineModellingPresenter *presenter) = 0;
 
   /// Function chosen to fit the data to
   /// @return Function string, or empty string if nothing chosen
