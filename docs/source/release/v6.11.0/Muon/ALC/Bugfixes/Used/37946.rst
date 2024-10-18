@@ -1,1 +1,0 @@
-- Fixed the `Import results` option on the :ref:`Muon ALC <MuonALC-ref>` interface when the results being loaded are only partially complete.

@@ -1,1 +1,0 @@
-- :ref:`LoadEventAndCompress <algm-LoadEventAndCompress>` has been updated to take advantage of new capability in LoadEventNexus

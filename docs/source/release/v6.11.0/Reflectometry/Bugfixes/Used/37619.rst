@@ -1,1 +1,0 @@
-- Fix an issue that prevented the StitchIDMany algorithm from running successfully via the GUI.

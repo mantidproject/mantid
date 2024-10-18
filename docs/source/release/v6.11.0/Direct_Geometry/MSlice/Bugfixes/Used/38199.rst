@@ -1,2 +1,0 @@
-- The ‘Intensity’ menu on slice plots is now disabled in interactive mode to prevent crashes.
-- Bug fix implemented to save cut data in a 3-column file instead of a single line.
