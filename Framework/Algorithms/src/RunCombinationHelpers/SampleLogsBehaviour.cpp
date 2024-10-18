@@ -10,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
@@ -531,7 +532,7 @@ void SampleLogsBehaviour::checkErrorProperty(const MatrixWorkspace &addeeWS, Pro
 bool SampleLogsBehaviour::isWithinTolerance(const SampleLogBehaviour &behaviour, const double addeeWSNumericValue,
                                             const double outWSNumericValue) {
   if (behaviour.isNumeric && behaviour.tolerance > 0.0) {
-    return std::abs(addeeWSNumericValue - outWSNumericValue) < behaviour.tolerance;
+    return Kernel::withinAbsoluteDifference(addeeWSNumericValue, outWSNumericValue, behaviour.tolerance);
   }
 
   return false;

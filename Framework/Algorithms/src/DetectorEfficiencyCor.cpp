@@ -19,6 +19,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -301,7 +302,7 @@ void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det, 
   if (it == m_shapeCache.end()) {
     double xDist = distToSurface(V3D(DIST_TO_UNIVERSE_EDGE, 0, 0), shape_sptr.get());
     double zDist = distToSurface(V3D(0, 0, DIST_TO_UNIVERSE_EDGE), shape_sptr.get());
-    if (std::abs(zDist - xDist) < 1e-8) {
+    if (withinAbsoluteDifference(zDist, xDist, 1e-6)) {
       detRadius = zDist / 2.0;
       detAxis = V3D(0, 1, 0);
       // assume radi in z and x and the axis is in the y
@@ -311,7 +312,7 @@ void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det, 
       return;
     }
     double yDist = distToSurface(V3D(0, DIST_TO_UNIVERSE_EDGE, 0), shape_sptr.get());
-    if (std::abs(yDist - zDist) < 1e-8) {
+    if (withinAbsoluteDifference(yDist, zDist, 1e-8)) {
       detRadius = yDist / 2.0;
       detAxis = V3D(1, 0, 0);
       // assume that y and z are radi of the cylinder's circular cross-section
@@ -322,7 +323,7 @@ void DetectorEfficiencyCor::getDetectorGeometry(const Geometry::IDetector &det, 
       return;
     }
 
-    if (std::abs(xDist - yDist) < 1e-8) {
+    if (withinAbsoluteDifference(xDist, yDist, 1e-8)) {
       detRadius = xDist / 2.0;
       detAxis = V3D(0, 0, 1);
       PARALLEL_CRITICAL(deteff_shapecachec) {
