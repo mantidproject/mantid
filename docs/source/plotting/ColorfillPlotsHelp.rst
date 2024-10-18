@@ -66,7 +66,7 @@ Click Menus
 Scripting
 ---------
 
-Click the generate a script button |GenerateAScript.png| on a `Colorfill Plot <https://matplotlib.org/3.2.1/api/_as_gen/matplotlib.pyplot.imshow.html>`_:
+Click the generate a script button |GenerateAScript.png| on a `Colorfill Plot <https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html>`_:
 
 .. plot::
    :include-source:
@@ -155,7 +155,7 @@ Click Menus
 Scripting
 ---------
 
-Basic example of plotting a `Contour Plot <https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.contour.html>`_:
+Basic example of plotting a `Contour Plot <https://matplotlib.org/stable/api/_as_gen/matplotlib.axes.Axes.contour.html>`_:
 
 .. plot::
    :include-source:
@@ -224,7 +224,7 @@ File > Settings
 **Other Plotting Documentation**
 
 * :ref:`plotting`
-* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
+* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/stable/users/explain/figure/interactive.html#navigation-keyboard-shortcuts>`_
 
 .. |O| image:: /images/FigureOptionsGear.png
    :width: 150px
