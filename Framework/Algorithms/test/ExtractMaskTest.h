@@ -29,7 +29,7 @@ public:
     TS_ASSERT_EQUALS(properties.size(), 4);
     if (properties.size() == 4) {
       TS_ASSERT_EQUALS(properties[0]->name(), "InputWorkspace");
-      TS_ASSERT_EQUALS(properties[1]->name(), "InstrumentDonor");
+      TS_ASSERT_EQUALS(properties[1]->name(), "UngroupDetectors");
       TS_ASSERT_EQUALS(properties[2]->name(), "OutputWorkspace");
     }
   }
@@ -119,7 +119,7 @@ public:
     AnalysisDataService::Instance().remove(inputName);
   }
 
-  void test_donor_instrument() {
+  void test_ungroup_detectors() {
     // Create a simple test workspace with grouped detectors
     const std::string inputName("inputWS");
     auto createWS = AlgorithmFactory::Instance().create("CreateSampleWorkspace", -1);
@@ -128,11 +128,6 @@ public:
     createWS->setProperty("BankPixelWidth", 2);
     createWS->setPropertyValue("OutputWorkspace", inputName);
     createWS->execute();
-
-    auto inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputName);
-    Workspace_sptr donorWS = inputWS->clone();
-    const std::string donorName("donorWS");
-    AnalysisDataService::Instance().add(donorName, donorWS);
 
     const std::string groupName("groupWS");
     auto createGroupWS = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", -1);
@@ -156,11 +151,11 @@ public:
     mask->setPropertyValue("WorkspaceIndexList", "0,2");
     mask->execute();
 
-    inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputName);
+    auto inputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(inputName);
     TS_ASSERT_EQUALS(inputWS->getNumberHistograms(), 4);
 
     MaskWorkspace_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(outputWS = runExtractMask(inputName, donorName));
+    TS_ASSERT_THROWS_NOTHING(outputWS = runExtractMask(inputName, true));
     TS_ASSERT(outputWS);
     if (outputWS) {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 16);
@@ -176,20 +171,17 @@ public:
     }
 
     AnalysisDataService::Instance().remove(inputName);
-    AnalysisDataService::Instance().remove(donorName);
     AnalysisDataService::Instance().remove(groupName);
     AnalysisDataService::Instance().remove(outputWS->getName());
   }
 
 private:
   // The input workspace should be in the analysis data service
-  MaskWorkspace_sptr runExtractMask(const std::string &inputName, const std::string &donorName = "") {
+  MaskWorkspace_sptr runExtractMask(const std::string &inputName, const bool ungroupDetectors = false) {
     ExtractMask maskExtractor;
     maskExtractor.initialize();
     maskExtractor.setPropertyValue("InputWorkspace", inputName);
-    if (!donorName.empty()) {
-      maskExtractor.setPropertyValue("InstrumentDonor", donorName);
-    }
+    maskExtractor.setProperty("UngroupDetectors", ungroupDetectors);
     const std::string outputName("masking");
     maskExtractor.setPropertyValue("OutputWorkspace", outputName);
     maskExtractor.setRethrows(true);

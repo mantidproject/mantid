@@ -21,12 +21,10 @@ link is preserved so that the instrument view functions correctly.
 A list of masked detector IDs is also output. Note this contains the detector IDs which
 are masked rather than the index or spectrum number.
 
-Using Instrument donor
-----------------------
+Ungroup Detectors
+-----------------
 
-The ``InstrumentDonor`` parameter can be used to specify a workspace from which the ``MaskWorkspace`` creation instrument is based on. The masking will still be copied from the ``InputWorkspace`` but will be applied by matching the detector IDs from the ``InstrumentDonor`` workspace.
-
-You can specify the ``InstrumentDonor`` without the ``InputWorkspace``. In this case, the output ``MaskWorkspace`` will have all spectra unmasked.
+If ``UngroupDetectors`` is set to True, the detector IDs are ungrouped. This means that if the input workspace has a grouped detector, the output workspace will have a single spectra for each detector.
 
 Usage
 -----

@@ -26,12 +26,9 @@ using namespace Kernel;
  * Declare the algorithm properties
  */
 void ExtractMask::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input,
-                                                                       PropertyMode::Optional),
+  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "A workspace whose masking is to be extracted");
-  declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InstrumentDonor", "", Direction::Input,
-                                                                       PropertyMode::Optional),
-                  "Optional: A workspace whose instrument will be used for the output instead of the InputWorkspace");
+  declareProperty("UngroupDetectors", false, "If true, the spectra will be ungrouped and masked individually.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "A workspace containing the masked spectra as zeroes and ones.");
 
@@ -41,21 +38,11 @@ void ExtractMask::init() {
       "detector ID's");
 }
 
-std::map<std::string, std::string> ExtractMask::validateInputs() {
-  std::map<std::string, std::string> errors;
-  if (isDefault("InputWorkspace") && isDefault("InstrumentDonor")) {
-    errors["InputWorkspace"] = "Either InputWorkspace or InstrumentDonor is required";
-    errors["InstrumentDonor"] = "Either InputWorkspace or InstrumentDonor is required";
-  }
-  return errors;
-}
-
 /**
  * Execute the algorithm
  */
 void ExtractMask::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  MatrixWorkspace_const_sptr donorWS = getProperty("InstrumentDonor");
 
   // convert input to a mask workspace
   auto inputMaskWS = std::dynamic_pointer_cast<const DataObjects::MaskWorkspace>(inputWS);
@@ -66,34 +53,31 @@ void ExtractMask::exec() {
 
   // List masked of detector IDs
   std::vector<detid_t> detectorList;
-  if (inputWS) {
-    const auto &detInfo = inputWS->detectorInfo();
-    const auto &detIds = detInfo.detectorIDs();
-    for (size_t i = 0; i < detInfo.size(); ++i) {
-      if ((inputWSIsSpecial && inputMaskWS->isMasked(detIds[i])) || detInfo.isMasked(i)) {
-        detectorList.emplace_back(detIds[i]);
-      }
+  const auto &detInfo = inputWS->detectorInfo();
+  const auto &detIds = detInfo.detectorIDs();
+  for (size_t i = 0; i < detInfo.size(); ++i) {
+    if ((inputWSIsSpecial && inputMaskWS->isMasked(detIds[i])) || detInfo.isMasked(i)) {
+      detectorList.emplace_back(detIds[i]);
     }
   }
+
   // Create a new workspace for the results, copy from the input to ensure
   // that we copy over the instrument and current masking
   std::shared_ptr<DataObjects::MaskWorkspace> maskWS;
-  if (donorWS) {
-    maskWS = std::make_shared<DataObjects::MaskWorkspace>(donorWS->getInstrument());
-    maskWS->setTitle(donorWS->getTitle());
-  } else {
+  if (getProperty("UngroupDetectors"))
+    maskWS = std::make_shared<DataObjects::MaskWorkspace>(inputWS->getInstrument());
+  else
     maskWS = std::make_shared<DataObjects::MaskWorkspace>(inputWS);
-    maskWS->setTitle(inputWS->getTitle());
-  }
+
+  maskWS->setTitle(inputWS->getTitle());
 
   // set mask from from detectorList
-  for (auto detectorID : detectorList) {
+  for (auto detectorID : detectorList)
     try {
       maskWS->setMasked(detectorID);
     } catch (std::invalid_argument const &) {
-      g_log.warning() << "Detector ID = " << detectorID << " is masked but does not exist in any output spectra\n";
+      g_log.warning() << "Detector ID = " << detectorID << " is masked but does not exist in any output spectra\n ";
     }
-  }
 
   g_log.information() << maskWS->getNumberMasked() << " spectra are masked\n";
   g_log.information() << detectorList.size() << " detectors are masked\n";
