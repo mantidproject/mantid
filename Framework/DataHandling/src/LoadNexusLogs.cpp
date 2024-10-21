@@ -236,8 +236,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
     }
     // The string may contain non-printable (i.e. control) characters, replace
     // these
-    std::replace_if(
-        values.begin(), values.end(), [&](const char &c) { return isControlValue(c, propName, log); }, ' ');
+    std::replace_if(values.begin(), values.end(), [&](const char &c) { return isControlValue(c, propName, log); }, ' ');
     auto tsp = std::make_unique<TimeSeriesProperty<std::string>>(propName);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);

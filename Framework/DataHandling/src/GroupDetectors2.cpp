@@ -551,7 +551,7 @@ void GroupDetectors2::processXMLFile(const std::string &fname, const API::Matrix
         g_log.warning() << "Detector with ID " << detid << " is not found in instrument \n";
       }
     } // for index
-  }   // for group
+  } // for group
 
   // 5. Spectrum Nos
   for (const auto &pit : mGroupSpectraMap) {
@@ -574,7 +574,7 @@ void GroupDetectors2::processXMLFile(const std::string &fname, const API::Matrix
         g_log.warning() << "Spectrum with ID " << specNum << " is not found in instrument \n";
       }
     } // for index
-  }   // for group
+  } // for group
 }
 
 /** Get groupings from groupingworkspace

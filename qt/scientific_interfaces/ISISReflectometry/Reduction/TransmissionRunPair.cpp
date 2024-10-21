@@ -14,8 +14,8 @@ TransmissionRunPair::TransmissionRunPair() : m_firstTransmissionRunNumbers(), m_
 TransmissionRunPair::TransmissionRunPair(std::string firstTransmissionRun,
 
                                          std::string secondTransmissionRun)
-    : m_firstTransmissionRunNumbers{std::move(firstTransmissionRun)}, m_secondTransmissionRunNumbers{
-                                                                          std::move(secondTransmissionRun)} {}
+    : m_firstTransmissionRunNumbers{std::move(firstTransmissionRun)},
+      m_secondTransmissionRunNumbers{std::move(secondTransmissionRun)} {}
 
 TransmissionRunPair::TransmissionRunPair(
 

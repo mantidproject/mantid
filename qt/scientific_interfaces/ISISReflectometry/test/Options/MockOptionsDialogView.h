@@ -22,7 +22,7 @@ public:
   MOCK_METHOD1(subscribe, void(OptionsDialogViewSubscriber *notifyee));
   MOCK_METHOD0(show, void());
 
-  ~MockOptionsDialogView() override{};
+  ~MockOptionsDialogView() override {};
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
 } // namespace ISISReflectometry

@@ -246,8 +246,8 @@ public:
     boost::function<void(ParameterMap *, const IComponent *, const std::string &, double, const std::string *const,
                          const std::string &)>
         faddDouble;
-    faddDouble = (void (ParameterMap::*)(const IComponent *, const std::string &, double, const std::string *const,
-                                         const std::string &)) &
+    faddDouble = (void(ParameterMap::*)(const IComponent *, const std::string &, double, const std::string *const,
+                                        const std::string &)) &
                  ParameterMap::addDouble;
     doCopyAndUpdateTestUsingAddHelpers(faddDouble, "name", 5.0, 4.0);
 
@@ -255,8 +255,8 @@ public:
     boost::function<void(ParameterMap *, const IComponent *, const std::string &, int, const std::string *const,
                          const std::string &)>
         faddInt;
-    faddInt = (void (ParameterMap::*)(const IComponent *, const std::string &, int, const std::string *const,
-                                      const std::string &)) &
+    faddInt = (void(ParameterMap::*)(const IComponent *, const std::string &, int, const std::string *const,
+                                     const std::string &)) &
               ParameterMap::addInt;
     doCopyAndUpdateTestUsingAddHelpers(faddInt, "name", 3, 5);
 
@@ -264,8 +264,8 @@ public:
     boost::function<void(ParameterMap *, const IComponent *, const std::string &, bool, const std::string *const,
                          const std::string &)>
         faddBool;
-    faddBool = (void (ParameterMap::*)(const IComponent *, const std::string &, bool, const std::string *const,
-                                       const std::string &)) &
+    faddBool = (void(ParameterMap::*)(const IComponent *, const std::string &, bool, const std::string *const,
+                                      const std::string &)) &
                ParameterMap::addBool;
     doCopyAndUpdateTestUsingAddHelpers(faddBool, "name", true, false);
 
@@ -273,8 +273,8 @@ public:
     boost::function<void(ParameterMap *, const IComponent *, const std::string &, const std::string &,
                          const std::string *const, const std::string &)>
         faddStr;
-    faddStr = (void (ParameterMap::*)(const IComponent *, const std::string &, const std::string &,
-                                      const std::string *const, const std::string &)) &
+    faddStr = (void(ParameterMap::*)(const IComponent *, const std::string &, const std::string &,
+                                     const std::string *const, const std::string &)) &
               ParameterMap::addString;
     doCopyAndUpdateTestUsingAddHelpers(faddStr, "name", std::string("first"), std::string("second"));
 
@@ -282,7 +282,7 @@ public:
     boost::function<void(ParameterMap *, const IComponent *, const std::string &, const V3D &,
                          const std::string *const)>
         faddV3D;
-    faddV3D = (void (ParameterMap::*)(const IComponent *, const std::string &, const V3D &, const std::string *const)) &
+    faddV3D = (void(ParameterMap::*)(const IComponent *, const std::string &, const V3D &, const std::string *const)) &
               ParameterMap::addV3D;
     doCopyAndUpdateTestUsingAddHelpersPositions(faddV3D, "V3D", V3D(1, 2, 3), V3D(4, 5, 6));
 
@@ -291,7 +291,7 @@ public:
                          const std::string *const)>
         faddQuat;
     faddQuat =
-        (void (ParameterMap::*)(const IComponent *, const std::string &, const Quat &, const std::string *const)) &
+        (void(ParameterMap::*)(const IComponent *, const std::string &, const Quat &, const std::string *const)) &
         ParameterMap::addQuat;
     doCopyAndUpdateTestUsingAddHelpersPositions(faddQuat, "Quat", Quat(), Quat(45.0, V3D(0, 0, 1)));
   }
@@ -304,22 +304,22 @@ public:
 
     // double
     AddFuncHelper faddDouble;
-    faddDouble = (void (ParameterMap::*)(const IComponent *, const std::string &, const std::string &,
-                                         const std::string *const, const std::string &)) &
+    faddDouble = (void(ParameterMap::*)(const IComponent *, const std::string &, const std::string &,
+                                        const std::string *const, const std::string &)) &
                  ParameterMap::addDouble;
     doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, double>(faddDouble, "name", 5.0, 4.0);
 
     // int
     AddFuncHelper faddInt;
-    faddInt = (void (ParameterMap::*)(const IComponent *, const std::string &, const std::string &,
-                                      const std::string *const, const std::string &)) &
+    faddInt = (void(ParameterMap::*)(const IComponent *, const std::string &, const std::string &,
+                                     const std::string *const, const std::string &)) &
               ParameterMap::addInt;
     doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, int>(faddInt, "name", 3, 5);
 
     // bool
     AddFuncHelper faddBool;
-    faddBool = (void (ParameterMap::*)(const IComponent *, const std::string &, const std::string &,
-                                       const std::string *const, const std::string &)) &
+    faddBool = (void(ParameterMap::*)(const IComponent *, const std::string &, const std::string &,
+                                      const std::string *const, const std::string &)) &
                ParameterMap::addBool;
     doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, bool>(faddBool, "name", true, false);
   }

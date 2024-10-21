@@ -23,7 +23,7 @@ class MANTIDQT_INELASTIC_DLL DockWidgetArea : public QMainWindow {
 
 public:
   DockWidgetArea(QWidget *parent = nullptr);
-  virtual ~DockWidgetArea(){};
+  virtual ~DockWidgetArea() {};
   void setFitDataView(FitDataView *fitDataView);
   InelasticFitPropertyBrowser *m_fitPropertyBrowser;
   FitDataView *m_fitDataView;

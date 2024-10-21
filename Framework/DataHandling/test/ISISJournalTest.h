@@ -69,7 +69,7 @@ static constexpr const char *journalFile = "\
 class MockInternetHelper : public InternetHelper {
 public:
   // The constructor specifies the string that we want sendRequest to return
-  MockInternetHelper(std::string const &returnString) : m_returnString(returnString){};
+  MockInternetHelper(std::string const &returnString) : m_returnString(returnString) {};
 
   MOCK_METHOD2(sendRequestProxy, InternetHelper::HTTPStatus(std::string const &, std::ostream &));
 

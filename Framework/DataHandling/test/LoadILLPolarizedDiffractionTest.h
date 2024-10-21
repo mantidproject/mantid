@@ -698,7 +698,9 @@ public:
         TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 1)
         TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->unitID(), "Wavelength")
       } else if (measurementMode == "TOF") {
-        { TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 512) }
+        {
+          TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 512)
+        }
       }
     }
   }

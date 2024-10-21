@@ -23,7 +23,7 @@ public:
   /// Constructor
   PeriodicTableWidget(QWidget *parent = nullptr);
   /// Destructor
-  ~PeriodicTableWidget() override{};
+  ~PeriodicTableWidget() override {};
   /// Vectors to Hold the QPushButtons of Elements in corresponding Groups
   QVector<QPushButton *> OtherNonMetals;
   QVector<QPushButton *> AlkaliMetals;

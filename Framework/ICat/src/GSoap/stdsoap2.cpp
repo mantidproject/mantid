@@ -449,8 +449,7 @@ static const struct soap_code_map h_http_error_codes[] = {{200, "OK"},
 
 #ifdef WITH_OPENSSL
 static const struct soap_code_map h_ssl_error_codes[] = {
-#define _SSL_ERROR(e)                                                                                                  \
-  { e, #e }
+#define _SSL_ERROR(e) {e, #e}
     _SSL_ERROR(SSL_ERROR_SSL),          _SSL_ERROR(SSL_ERROR_ZERO_RETURN),
     _SSL_ERROR(SSL_ERROR_WANT_READ),    _SSL_ERROR(SSL_ERROR_WANT_WRITE),
     _SSL_ERROR(SSL_ERROR_WANT_CONNECT), _SSL_ERROR(SSL_ERROR_WANT_X509_LOOKUP),

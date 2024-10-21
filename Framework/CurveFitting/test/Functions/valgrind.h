@@ -313,7 +313,7 @@ static __inline uintptr_t valgrind_do_client_request_expr(uintptr_t _zzq_default
     volatile unsigned int __addr;                                                                                      \
     __asm { __SPECIAL_INSTRUCTION_PREAMBLE /* %EAX = guest_NRADDR */                             \
             __asm xchg ecx,ecx                                    \
-            __asm mov __addr, eax}                                                                                  \
+            __asm mov __addr, eax}                                                                                      \
     _zzq_orig->nraddr = __addr;                                                                                        \
   }
 
@@ -3798,8 +3798,8 @@ typedef struct {
 
 /* These macros are used by tools -- they must be public, but don't
    embed them into other programs. */
-#define VG_USERREQ_TOOL_BASE(a, b) ((unsigned int)(((a)&0xff) << 24 | ((b)&0xff) << 16))
-#define VG_IS_TOOL_USERREQ(a, b, v) (VG_USERREQ_TOOL_BASE(a, b) == ((v)&0xffff0000))
+#define VG_USERREQ_TOOL_BASE(a, b) ((unsigned int)(((a) & 0xff) << 24 | ((b) & 0xff) << 16))
+#define VG_IS_TOOL_USERREQ(a, b, v) (VG_USERREQ_TOOL_BASE(a, b) == ((v) & 0xffff0000))
 
 /* !! ABIWARNING !! ABIWARNING !! ABIWARNING !! ABIWARNING !!
    This enum comprises an ABI exported by Valgrind to programs

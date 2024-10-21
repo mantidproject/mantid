@@ -215,8 +215,8 @@ std::map<std::string, std::string> Rebin::validateInputs() {
           helpMessages[PropertyNames::POWER] = "This binning is expected to give more than 10000 bins.";
         }
       } // end else
-    }   // end else if
-  }     // end if property power exists
+    } // end else if
+  } // end if property power exists
   return helpMessages;
 }
 

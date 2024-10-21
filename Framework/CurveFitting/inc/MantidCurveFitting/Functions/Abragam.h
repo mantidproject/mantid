@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
-//#include "MantidAPI/IPeakFunction.h"
+// #include "MantidAPI/IPeakFunction.h"
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IFunctionMW.h"

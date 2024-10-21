@@ -154,8 +154,7 @@ public:
   void centerpointBin(MDBin<MDE, nd> &bin, bool *fullyContained) const override;
   void generalBin(MDBin<MDE, nd> &bin, Mantid::Geometry::MDImplicitFunction &function) const override;
   void
-  splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) override { /* Do nothing with a box default. */
-  }
+  splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) override { /* Do nothing with a box default. */ }
 
   //---------------------------------------------------------------------------------------------------------------------------------
   /** Recalculate signal and various averages dependent on signal and the signal

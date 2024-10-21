@@ -41,7 +41,7 @@ using API::WorkspaceProperty;
 class JacobianImpl : public Jacobian {
 public:
   /// Default constructor
-  JacobianImpl() : Jacobian(), m_J(nullptr){};
+  JacobianImpl() : Jacobian(), m_J(nullptr) {};
 
   /// The index map
   std::map<int, int> m_map;

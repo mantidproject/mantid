@@ -301,7 +301,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fit(const API::MatrixWorkspace_
 
     // Now fit this to a straight line
     output = fitData(output, grad, offset);
-  }                                 // logFit true
+  } // logFit true
   else if (fitMethod == "Linear") { // Linear fit
     g_log.debug("Fitting directly to the data (i.e. linearly)");
     output = fitData(output, grad, offset);

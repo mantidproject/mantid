@@ -28,10 +28,10 @@ void export_TimeROI() {
   register_ptr_to_python<TimeROI *>();
 
   class_<TimeROI>("TimeROI", no_init)
-      .def("durationInSeconds", (double (TimeROI::*)() const) & TimeROI::durationInSeconds, arg("self"),
+      .def("durationInSeconds", (double(TimeROI::*)() const) & TimeROI::durationInSeconds, arg("self"),
            "Duration of the whole TimeROI")
       .def("durationInSeconds",
-           (double (TimeROI::*)(const DateAndTime &, const DateAndTime &) const) & TimeROI::durationInSeconds,
+           (double(TimeROI::*)(const DateAndTime &, const DateAndTime &) const) & TimeROI::durationInSeconds,
            (arg("self"), arg("startTime"), arg("stopTime")), "Duration of the TimeROI between startTime and stopTime")
       .def("update_union", &TimeROI::update_union, (arg("self"), arg("other")),
            return_value_policy<copy_const_reference>(),

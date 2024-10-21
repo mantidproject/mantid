@@ -23,7 +23,7 @@ class HintingLineEditFactory : public QStyledItemDelegate {
 public:
   HintingLineEditFactory(QAbstractItemDelegate *cellPainterDelegate, std::unique_ptr<HintStrategy> hintStrategy,
                          QObject *parent = nullptr)
-      : QStyledItemDelegate(parent), m_strategy(std::move(hintStrategy)), m_cellPainterDelegate(cellPainterDelegate){};
+      : QStyledItemDelegate(parent), m_strategy(std::move(hintStrategy)), m_cellPainterDelegate(cellPainterDelegate) {};
 
   QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override {
     Q_UNUSED(option);

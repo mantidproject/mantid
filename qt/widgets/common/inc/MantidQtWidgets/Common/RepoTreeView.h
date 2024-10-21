@@ -20,9 +20,9 @@ class EXPORT_OPT_MANTIDQT_COMMON RepoTreeView : public QTreeView {
 
 public:
   // constuctor
-  RepoTreeView(QWidget *parent = nullptr) : QTreeView(parent){};
+  RepoTreeView(QWidget *parent = nullptr) : QTreeView(parent) {};
   // destructor - not virtual, because this is not intended to be base
-  ~RepoTreeView() override{};
+  ~RepoTreeView() override {};
 
 signals:
   void currentCell(const QModelIndex & /*_t1*/);

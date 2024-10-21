@@ -17,7 +17,7 @@ class Material;
 
 class MANTID_KERNEL_DLL AttenuationProfile {
 public:
-  AttenuationProfile(){};
+  AttenuationProfile() {};
   AttenuationProfile(const std::string &inputFileName, const std::string &searchPath,
                      Material *extrapolationMaterial = nullptr, double extrapolationMaxX = 100);
   double getAttenuationCoefficient(const double x) const;
