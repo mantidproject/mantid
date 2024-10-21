@@ -16,6 +16,11 @@ import matplotlib.text as text
 from mantid.simpleapi import AnalysisDataService as ADS
 from mantid.kernel import SpecialCoordinateSystem
 from numpy import zeros
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from mantidqt.widgets.sliceviewer.cutviewer.presenter import CutViewerPresenter  # noqa: F401
+    from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas  # noqa: F401
 
 # local imports
 from .representation.cut_representation import CutRepresentation
@@ -26,14 +31,14 @@ class CutViewerView(QWidget):
     to interact with the peaks.
     """
 
-    def __init__(self, presenter, canvas, frame, parent=None):
+    def __init__(self, canvas: "SliceViewerCanvas", frame: SpecialCoordinateSystem):
         """
         :param painter: An object responsible for drawing the representation of the cut
         :param sliceinfo_provider: An object responsible for providing access to current slice information
         :param parent: An optional parent widget
         """
-        super().__init__(parent)
-        self.presenter = presenter
+        super().__init__()
+        self.presenter = None
         self.layout = None
         self.figure_layout = None
         self.table = None
@@ -44,6 +49,9 @@ class CutViewerView(QWidget):
         self._setup_ui()
         self._init_slice_table()
         self.table.cellChanged.connect(self.on_cell_changed)
+
+    def subscribe_presenter(self, presenter: "CutViewPresenter"):
+        self.presenter = presenter
 
     def hide(self):
         super().hide()
