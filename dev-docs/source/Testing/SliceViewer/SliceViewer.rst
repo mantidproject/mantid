@@ -157,11 +157,19 @@ Test the :ref:`Nonorthogonal view<mantid:sliceviewer_nonortho>`
 
     - Confirm the autoscaling of the colorbar works in non-orthogonal view
 
-3. Change one of the viewing axes to be `L` (e.g. click `X` button next to L in top left of window)
+3. Note the range of data in `X` and `Y` axes to be `0 to 2` for `H` and `-1 to +1` for `K` respectively. Swap the viewing axes by clicking `Y` button next to `H` in the top left of the window
+
+    - `X` and `Y` axes should now display data for `K` and `H` respectively preserving their original ranges.
+
+4. Click on `X` button next to the `H` button to swap the axes again
+
+    - Now `X` and `Y` axes should display data for `H` and `K` respectively preserving their original ranges.
+
+5. Change one of the viewing axes to be `L` (e.g. click `X` button next to L in top left of window)
 
     - Gridlines should now appear to be orthogonal
 
-4. For ``md_4D`` only change one of the viewing axes to be `E` (e.g. click `Y` button next to `E` in top left of window)
+6. For ``md_4D`` only change one of the viewing axes to be `E` (e.g. click `Y` button next to `E` in top left of window)
 
     - Nonorthogonal view should be disabled (only enabled for momentum axes)
     - Line plots and ROI should be enabled
