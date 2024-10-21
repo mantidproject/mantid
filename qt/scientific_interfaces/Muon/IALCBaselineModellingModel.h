@@ -21,6 +21,8 @@ namespace CustomInterfaces {
 class MANTIDQT_MUONINTERFACE_DLL IALCBaselineModellingModel {
 
 public:
+  virtual ~IALCBaselineModellingModel() = default;
+
   using Section = std::pair<double, double>;
 
   /**

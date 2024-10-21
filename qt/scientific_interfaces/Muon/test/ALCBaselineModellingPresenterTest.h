@@ -34,6 +34,8 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockALCBaselineModellingView : public IALCBaselineModellingView {
 public:
+  virtual ~MockALCBaselineModellingView() = default;
+
   MOCK_METHOD1(subscribePresenter, void(IALCBaselineModellingPresenter *));
 
   MOCK_METHOD0(initialize, void());
@@ -74,6 +76,8 @@ public:
 
 class MockALCBaselineModellingModel : public IALCBaselineModellingModel {
 public:
+  virtual ~MockALCBaselineModellingModel() = default;
+
   MOCK_CONST_METHOD0(fittedFunction, IFunction_const_sptr());
   MOCK_CONST_METHOD0(correctedData, MatrixWorkspace_sptr());
   MOCK_CONST_METHOD2(baselineData,

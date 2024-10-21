@@ -25,6 +25,8 @@ class MANTIDQT_MUONINTERFACE_DLL IALCBaselineModellingView : public QObject {
   Q_OBJECT
 
 public:
+  virtual ~IALCBaselineModellingView() = default;
+
   using SectionRow = std::pair<QString, QString>;
   using SectionSelector = std::pair<double, double>;
 

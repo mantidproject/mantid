@@ -22,6 +22,8 @@ namespace CustomInterfaces {
 class MANTIDQT_MUONINTERFACE_DLL IALCBaselineModellingPresenter {
 
 public:
+  virtual ~IALCBaselineModellingPresenter() = default;
+
   virtual void initialize() = 0;
 
   /// Perform a fit
