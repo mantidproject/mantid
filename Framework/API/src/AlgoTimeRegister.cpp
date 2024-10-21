@@ -27,7 +27,9 @@ AlgoTimeRegisterImpl::Dump::Dump(const std::string &nm)
 
 AlgoTimeRegisterImpl::Dump::~Dump() {
   const time_point_ns regFinish = std::chrono::high_resolution_clock::now();
-  { AlgoTimeRegister::Instance().addTime(m_name, std::this_thread::get_id(), m_regStart_chrono, regFinish); }
+  {
+    AlgoTimeRegister::Instance().addTime(m_name, std::this_thread::get_id(), m_regStart_chrono, regFinish);
+  }
 }
 
 void AlgoTimeRegisterImpl::addTime(const std::string &name, const Kernel::time_point_ns &begin,

@@ -53,7 +53,9 @@ class FunctionHandler;
  * double attribute*
  * It functions by inheriting the () operator defined in each lambda
  */
-template <class... Ts> struct AttributeLambdaVisitor : Ts... { using Ts::operator()...; };
+template <class... Ts> struct AttributeLambdaVisitor : Ts... {
+  using Ts::operator()...;
+};
 template <class... Ts> AttributeLambdaVisitor(Ts...) -> AttributeLambdaVisitor<Ts...>;
 
 /** This is an interface to a fitting function - a semi-abstarct class.
@@ -177,7 +179,7 @@ public:
    */
   struct ValidatorEvaluator {
   public:
-    ValidatorEvaluator(){}; // default constructor
+    ValidatorEvaluator() {}; // default constructor
     template <typename T1> static void evaluate(T1 &inputData, Mantid::Kernel::IValidator_sptr validator) {
       std::string error;
 

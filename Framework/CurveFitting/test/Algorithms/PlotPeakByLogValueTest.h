@@ -65,7 +65,7 @@ DECLARE_FUNCTION(PLOTPEAKBYLOGVALUETEST_Fun)
 
 class PropertyNameIs {
 public:
-  PropertyNameIs(std::string name) : m_name(std::move(name)){};
+  PropertyNameIs(std::string name) : m_name(std::move(name)) {};
 
   bool operator()(const Mantid::Kernel::PropertyHistory_sptr &p) { return p->name() == m_name; }
 

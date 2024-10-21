@@ -20,8 +20,7 @@ void export_IPeakFunction() {
 
   class_<IPeakFunction, bases<IFunction1D>, std::shared_ptr<IPeakFunctionAdapter>, boost::noncopyable>(
       "IPeakFunction", "Base class for peak Fit functions")
-      .def("functionLocal",
-           (object(IPeakFunctionAdapter::*)(const object &) const) & IPeakFunctionAdapter::functionLocal,
+      .def("functionLocal", (object(IPeakFunctionAdapter::*)(const object &) const)&IPeakFunctionAdapter::functionLocal,
            (arg("self"), arg("vec_x")),
            "Calculate the values of the function for the given x values. The "
            "output should be stored in the out array")

@@ -29,7 +29,7 @@ using namespace Mantid::CurveFitting::Algorithms;
 namespace {
 // Functor to generate spline values
 struct NormGaussianFunc1 {
-  NormGaussianFunc1(double centre = 0.) : m_centre(centre){};
+  NormGaussianFunc1(double centre = 0.) : m_centre(centre) {};
   double operator()(double x, int) {
     double sig = 0.1;
     return exp(-pow(x - m_centre, 2) / (2 * pow(sig, 2))) / (sqrt(2 * M_PI) * sig);

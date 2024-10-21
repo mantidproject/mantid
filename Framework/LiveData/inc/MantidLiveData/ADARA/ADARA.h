@@ -50,7 +50,7 @@ const std::string TAG_NAME = "XXX_TAG_NAME_XXX";
 
 #define ADARA_BASE_PKT_TYPE(_type) ((_type) >> 8)
 
-#define ADARA_PKT_VERSION(_type) ((_type)&0xff)
+#define ADARA_PKT_VERSION(_type) ((_type) & 0xff)
 namespace PacketType {
 enum Type {
   RAW_EVENT_TYPE = 0x0000,

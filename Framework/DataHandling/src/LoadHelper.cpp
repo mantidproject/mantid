@@ -338,7 +338,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
             }
 
           } // if NXgetinfo OK
-        }   // if (parent_class == "NXData" || parent_class == "NXMonitor") else
+        } // if (parent_class == "NXData" || parent_class == "NXMonitor") else
 
         NXclosedata(nxfileID);
       }

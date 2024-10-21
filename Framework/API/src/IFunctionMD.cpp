@@ -126,10 +126,10 @@ void IFunctionMD::useAllDimensions(IMDWorkspace_const_sptr workspace) {
 
 } // namespace Mantid::API
 
-//#include "MantidAPI/ParamFunction.h"
-//#include "MantidKernel/VMD.h"
+// #include "MantidAPI/ParamFunction.h"
+// #include "MantidKernel/VMD.h"
 //
-// using Mantid::Kernel::VMD;
+//  using Mantid::Kernel::VMD;
 
 // namespace Mantid
 //{

@@ -113,8 +113,8 @@ void PeakIntegration::exec() {
         badPeaks.emplace_back(i);
     } else // This is for appending peak workspaces when running
            // SNSSingleCrystalReduction one bank at at time
-        if (i + 1 > MinPeaks)
-      MinPeaks = i + 1;
+      if (i + 1 > MinPeaks)
+        MinPeaks = i + 1;
   }
   peaksW->removePeaks(std::move(badPeaks));
   NumberPeaks = peaksW->getNumberPeaks();

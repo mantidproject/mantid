@@ -121,9 +121,9 @@ private:
    * error
    */
   template <typename T> std::string runCheck(const T &value, const std::true_type &) const {
-    return runCheckWithDataItemPtr(value, std::integral_constant < bool,
-                                   std::is_convertible<T, DataItem_sptr>::value &&
-                                       !std::is_same<T, decltype(nullptr)>::value > ());
+    return runCheckWithDataItemPtr(value,
+                                   std::integral_constant<bool, std::is_convertible<T, DataItem_sptr>::value &&
+                                                                    !std::is_same<T, decltype(nullptr)>::value>());
   }
   /** Calls the validator for a pointer type that is NOT convertible to
    * DataItem_sptr

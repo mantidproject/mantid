@@ -318,7 +318,7 @@ void SaveWorkspaces::saveSel() {
         return;
       }
     } // end if save in this format
-  }   // end loop over formats
+  } // end loop over formats
 
   saveCommands += "print('success')";
   QString status(runPythonCode(saveCommands).trimmed());

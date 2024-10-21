@@ -39,7 +39,7 @@ public:
   virtual void renameOutputWorkspace(std::string const &oldName, std::string const &newName) = 0;
 
   virtual void setOutputNames(std::vector<std::string> const &outputNames) = 0;
-  virtual void resetOutputs(){};
+  virtual void resetOutputs() {};
 
   virtual int totalItems() const = 0;
   virtual int completedItems() const = 0;

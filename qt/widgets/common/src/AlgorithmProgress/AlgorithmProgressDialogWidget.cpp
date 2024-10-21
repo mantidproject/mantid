@@ -18,8 +18,8 @@
 namespace MantidQt::MantidWidgets {
 
 AlgorithmProgressDialogWidget::AlgorithmProgressDialogWidget(QWidget *parent, AlgorithmProgressModel &model)
-    : QDialog(parent), m_tree{new QTreeWidget(this)}, m_presenter{std::make_unique<AlgorithmProgressDialogPresenter>(
-                                                          parent, this, model)} {
+    : QDialog(parent), m_tree{new QTreeWidget(this)},
+      m_presenter{std::make_unique<AlgorithmProgressDialogPresenter>(parent, this, model)} {
 
   m_tree->setColumnCount(3);
   m_tree->setSelectionMode(QTreeWidget::NoSelection);

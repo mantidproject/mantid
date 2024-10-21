@@ -65,8 +65,7 @@ FrameworkManagerImpl &instance() {
     // We need to release the GIL here to prevent a deadlock when using Python log channels
     ReleaseGlobalInterpreterLock releaseGIL;
     return FrameworkManager::Instance();
-  }
-  ();
+  }();
   std::call_once(INIT_FLAG, []() {
     INSTANCE_CALLED = true;
     declareCPPAlgorithms();

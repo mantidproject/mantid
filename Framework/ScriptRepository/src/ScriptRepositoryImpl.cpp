@@ -643,10 +643,10 @@ void ScriptRepositoryImpl::download_directory(const std::string &directory_path)
       entry.second.downloaded_pubdate = entry.second.pub_date;
       updateLocalJson(entry.first, entry.second);
 
-    }                                     // end downloading directory
-                                          // update the status
+    } // end downloading directory
+      // update the status
     entry.second.status = BOTH_UNCHANGED; // update this entry
-  }                                       // end interaction with all entries
+  } // end interaction with all entries
 }
 
 /**

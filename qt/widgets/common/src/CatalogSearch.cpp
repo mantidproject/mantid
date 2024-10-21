@@ -678,7 +678,9 @@ void CatalogSearch::hideErrorLabels() {
  */
 void CatalogSearch::onReset() {
   // Clear the QLineEdit boxes.
-  foreach (QLineEdit *widget, this->findChildren<QLineEdit *>()) { widget->clear(); }
+  foreach (QLineEdit *widget, this->findChildren<QLineEdit *>()) {
+    widget->clear();
+  }
   // Clear all other elements.
   m_icatUiForm.Instrument->setCurrentIndex(0);
   m_icatUiForm.InvestigationType->setCurrentIndex(0);

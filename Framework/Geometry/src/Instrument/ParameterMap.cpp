@@ -819,8 +819,8 @@ Parameter_sptr ParameterMap::getByType(const IComponent *comp, const std::string
           break;
         }
       } // found->firdst
-    }   // it_found != m_map.end()
-  }     //! m_map.empty()
+    } // it_found != m_map.end()
+  } //! m_map.empty()
   return result;
 }
 

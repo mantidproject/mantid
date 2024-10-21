@@ -300,7 +300,7 @@ void LoadMLZ::loadRunDetails(NXEntry &entry) {
   // Calculate number of full time channels - use to crop workspace - S. Busch's
   // method
   double full_channels =
-      floor(30. * m_chopper_ratio / (m_chopper_speed)*1.e6 / m_channelWidth); // channelWidth in microsec.
+      floor(30. * m_chopper_ratio / (m_chopper_speed) * 1.e6 / m_channelWidth); // channelWidth in microsec.
   runDetails.addProperty("full_channels", full_channels);
 
   // Proposal title

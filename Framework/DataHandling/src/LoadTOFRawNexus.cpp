@@ -159,7 +159,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename, const std::s
                   file.closeData();
                   break;
                 } // Data has a 'signal' attribute
-              }   // Yes, it is a data field
+              } // Yes, it is a data field
               file.closeData();
             } // each entry in the group
           }

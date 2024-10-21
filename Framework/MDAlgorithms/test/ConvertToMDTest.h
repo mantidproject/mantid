@@ -55,7 +55,7 @@ Mantid::API::MatrixWorkspace_sptr createTestWorkspaces() {
 
 class Convert2AnyTestHelper : public ConvertToMD {
 public:
-  Convert2AnyTestHelper(){};
+  Convert2AnyTestHelper() {};
   TableWorkspace_const_sptr preprocessDetectorsPositions(const Mantid::API::MatrixWorkspace_const_sptr &InWS2D,
                                                          const std::string &dEModeRequested = "Direct",
                                                          bool updateMasks = false) {

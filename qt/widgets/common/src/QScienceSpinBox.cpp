@@ -7,7 +7,7 @@
 #include "MantidQtWidgets/Common/QScienceSpinBox.h"
 #include <limits>
 
-//#define QSPINBOX_QSBDEBUG
+// #define QSPINBOX_QSBDEBUG
 #ifdef QSPINBOX_QSBDEBUG
 #define QSBDEBUG qDebug
 #else
@@ -360,7 +360,7 @@ QVariant QScienceSpinBox::validateAndInterpret(QString &input, int &pos, QValida
       if (dec + 1 < copy.size() && copy.at(dec + 1) == delimiter && pos == dec + 1) {
         copy.remove(dec + 1,
                     1); // typing a delimiter when you are on the delimiter
-      }                 // should be treated as typing right arrow
+      } // should be treated as typing right arrow
       // too many decimal points
       if (copy.size() - dec > QDoubleSpinBox::decimals() + 1) {
         QSBDEBUG() << __FILE__ << __LINE__ << "state is set to Invalid";
@@ -441,7 +441,7 @@ QVariant QScienceSpinBox::validateAndInterpret(QString &input, int &pos, QValida
           goto end;
         }
         notAcceptable = true; // -> state = Intermediate
-      }                       // endif: (thousand.isPrint())
+      } // endif: (thousand.isPrint())
     }
 
     // no thousand sign, but still invalid for unknown reason

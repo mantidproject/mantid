@@ -275,7 +275,7 @@ void LoadGSASInstrumentFile::scanBanks(const std::vector<std::string> &lines, st
         bankStartIndex.emplace_back(i);
       }
     } // INS
-  }   // for(i)
+  } // for(i)
 }
 
 //----------------------------------------------------------------------------------------------
@@ -434,7 +434,7 @@ TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(map<size_t, map<st
       }
 
     } // END(j)
-  }   // END(i)
+  } // END(i)
 
   return tablews;
 }

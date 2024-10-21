@@ -208,7 +208,7 @@ public:
   virtual void copyDataInto(SpectrumTester &) const;
 
 protected:
-  virtual void checkAndSanitizeHistogram(HistogramData::Histogram &){};
+  virtual void checkAndSanitizeHistogram(HistogramData::Histogram &) {};
   virtual void checkWorksWithPoints() const {}
   virtual void checkIsYAndEWritable() const {}
 

@@ -184,7 +184,7 @@ void ProcessBankData::run() {
         } // valid time-of-flight
 
       } // valid detector IDs
-    }   // for events in pulse
+    } // for events in pulse
     // check if cancelled after each 100s of pulses (assumes 60Hz)
     if ((pulseIter.pulseIndex % 6000 == 0) && alg->getCancel())
       return;

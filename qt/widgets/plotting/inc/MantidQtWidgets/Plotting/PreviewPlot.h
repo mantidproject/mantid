@@ -149,7 +149,7 @@ private:
 
     PlotCurveConfiguration(Mantid::API::MatrixWorkspace_sptr ws, QString lineName, size_t wsIndex, QColor lineColour,
                            QHash<QString, QVariant> plotKwargs)
-        : ws(ws), lineName(lineName), wsIndex(wsIndex), lineColour(lineColour), plotKwargs(plotKwargs){};
+        : ws(ws), lineName(lineName), wsIndex(wsIndex), lineColour(lineColour), plotKwargs(plotKwargs) {};
   };
 
   // Canvas objects

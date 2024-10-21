@@ -18,7 +18,7 @@ HintingLineEdit.
 */
 class EXPORT_OPT_MANTIDQT_COMMON HintStrategy {
 public:
-  HintStrategy(){};
+  HintStrategy() {};
   virtual ~HintStrategy() = default;
 
   /** Create a list of hints for auto completion.

@@ -25,8 +25,7 @@ public:
       setMaterial.atomicNumber = 0;
       setMaterial.massNumber = 0;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -39,8 +38,7 @@ public:
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -54,8 +52,7 @@ public:
       setMaterial.atomicNumber = 1;
       setMaterial.massNumber = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -72,8 +69,7 @@ public:
       setMaterial.scatteringXSection = 1.;
       setMaterial.numberDensity = 1.;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
@@ -92,8 +88,7 @@ public:
       setMaterial.scatteringXSection = 1.;
       setMaterial.numberDensity = 1.;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
@@ -111,8 +106,7 @@ public:
       setMaterial.scatteringXSection = 1.;
       setMaterial.numberDensity = 1.;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
@@ -130,8 +124,7 @@ public:
       setMaterial.attenuationXSection = 1.;
       setMaterial.numberDensity = 1.;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
@@ -149,8 +142,7 @@ public:
       setMaterial.attenuationXSection = 1.;
       setMaterial.scatteringXSection = 1.;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
@@ -166,8 +158,7 @@ public:
       setMaterial.massNumber = 1;
       setMaterial.numberDensity = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -182,8 +173,7 @@ public:
       setMaterial.zParameter = 1;
       setMaterial.unitCellVolume = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -197,8 +187,7 @@ public:
       setMaterial.massNumber = 1;
       setMaterial.massDensity = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -214,8 +203,7 @@ public:
       setMaterial.zParameter = 1;
       setMaterial.unitCellVolume = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -230,8 +218,7 @@ public:
       setMaterial.numberDensityEffective = 1;
       setMaterial.packingFraction = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -248,8 +235,7 @@ public:
       setMaterial.massDensity = 1;
       setMaterial.numberDensityEffective = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -267,8 +253,7 @@ public:
       setMaterial.zParameter = 1;
       setMaterial.unitCellVolume = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -284,8 +269,7 @@ public:
       setMaterial.zParameter = 1;
       setMaterial.unitCellVolume = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -298,8 +282,7 @@ public:
       setMaterial.atomicNumber = 1;
       setMaterial.packingFraction = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -315,8 +298,7 @@ public:
       setMaterial.massDensity = 1;
       setMaterial.packingFraction = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -336,8 +318,7 @@ public:
       setMaterial.attenuationXSection = 1.;
       setMaterial.scatteringXSection = 1.;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -355,8 +336,7 @@ public:
       setMaterial.unitCellVolume = 1;
       setMaterial.massDensity = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -370,8 +350,7 @@ public:
       setMaterial.massNumber = 1;
       setMaterial.zParameter = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -386,8 +365,7 @@ public:
       setMaterial.numberDensity = 1;
       setMaterial.massDensity = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     auto result = ReadMaterial::validateInputs(params);
 
@@ -405,8 +383,7 @@ public:
       setMaterial.attenuationXSection = 3;
       setMaterial.scatteringXSection = 4;
       return setMaterial;
-    }
-    ();
+    }();
 
     ReadMaterial reader;
     reader.setMaterialParameters(params);
@@ -430,8 +407,7 @@ public:
       setMaterial.chemicalSymbol = FORMULA;
       setMaterial.numberDensity = 1;
       return setMaterial;
-    }
-    ();
+    }();
 
     ReadMaterial reader;
     reader.setMaterialParameters(params);
@@ -455,8 +431,7 @@ public:
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = FORMULA;
       return setMaterial;
-    }
-    ();
+    }();
 
     {
       ReadMaterial reader;
@@ -472,8 +447,7 @@ public:
       setMaterial.chemicalSymbol = FORMULA;
       setMaterial.massDensity = MASS_DENSITY;
       return setMaterial;
-    }
-    ();
+    }();
 
     {
       ReadMaterial reader;
@@ -489,8 +463,7 @@ public:
       setMaterial.mass = 5.; // grams
       setMaterial.volume = setMaterial.mass / MASS_DENSITY;
       return setMaterial;
-    }
-    ();
+    }();
 
     {
       ReadMaterial reader;
@@ -511,8 +484,7 @@ public:
       setMaterial.unitCellVolume = EMPTY_DOUBLE_VAL;
       setMaterial.massDensity = EMPTY_DOUBLE_VAL;
       return setMaterial;
-    }
-    ();
+    }();
 
     ReadMaterial reader;
     reader.setMaterialParameters(params);

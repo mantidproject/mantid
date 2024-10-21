@@ -31,7 +31,7 @@ class MANTID_GEOMETRY_DLL ICompAssembly : public virtual IComponent {
 public:
   // Default constructor;
   // Fixes warning C4436 on Windows.
-  ICompAssembly(){};
+  ICompAssembly() {};
   /// String description of the type of component
   std::string type() const override { return "ICompAssembly"; }
   /// Make a clone of the present component

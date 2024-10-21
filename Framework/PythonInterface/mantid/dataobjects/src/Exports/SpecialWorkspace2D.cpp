@@ -45,10 +45,10 @@ void export_SpecialWorkspace2D() {
   class_<SpecialWorkspace2D, bases<Workspace2D>, boost::noncopyable>("SpecialWorkspace2D")
       .def("__init__", make_constructor(&createSWS2DWithWS, default_call_policies(), (arg("workspace"))))
       .def("getValue",
-           (double (SpecialWorkspace2D::*)(const detid_t, const double) const) & SpecialWorkspace2D::getValue,
+           (double(SpecialWorkspace2D::*)(const detid_t, const double) const) & SpecialWorkspace2D::getValue,
            SpecialWorkspace2D_getValue((arg("self"), arg("detectorID"))))
       .def("setValue",
-           (void (SpecialWorkspace2D::*)(const detid_t, const double, const double)) & SpecialWorkspace2D::setValue,
+           (void(SpecialWorkspace2D::*)(const detid_t, const double, const double)) & SpecialWorkspace2D::setValue,
            SpecialWorkspace2D_setValue((arg("self"), arg("detectorID"), arg("value"), arg("error")),
                                        "Set the value of the data for a given detector ID"))
       .def("getDetectorIDs", &SpecialWorkspace2D::getDetectorIDs, (arg("self,"), arg("workspaceIndex")));

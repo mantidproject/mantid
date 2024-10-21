@@ -56,7 +56,9 @@ MANTID_KERNEL_DLL ::Json::Value encodeAsJson(const OptionalBool &);
 
 namespace pwvjdetail {
 
-template <> struct ToCpp<OptionalBool> { bool operator()(const Json::Value &value); };
+template <> struct ToCpp<OptionalBool> {
+  bool operator()(const Json::Value &value);
+};
 
 } // namespace pwvjdetail
 

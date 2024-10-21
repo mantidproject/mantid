@@ -76,7 +76,7 @@ BinFinder::BinFinder(const std::vector<double> &binParams) {
       if (i == 0)
         logBoundaries.emplace_back(0);
       logBoundaries.emplace_back(0);
-      //# of linear bins
+      // # of linear bins
       numBins = static_cast<int>(ceil((max - min) / step));
 
       // Check that the last bin is at least .25 x the previous step

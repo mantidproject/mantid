@@ -1507,7 +1507,7 @@ void IntegratePeakTimeSlices::SetUpData1(API::MatrixWorkspace_sptr &Data,
       } // if not bad edge
 
     } // peak within radius
-  }   // for each neighbor
+  } // for each neighbor
 
   m_AttributeValues->EdgeY =
       max<double>(0.0, max<double>(-m_ROW + minRow + Radius / m_cellHeight, -maxRow + m_ROW + Radius / m_cellHeight));

@@ -353,8 +353,8 @@ void EventList::createFromHistogram(const ISpectrum *inSpec, bool GenerateZeros,
           weightedEventsNoTime->emplace_back(tof, weight, errorSquared);
         }
       } // error is nont NAN or infinite
-    }   // weight is non-zero, not NAN, and non-infinite
-  }     // (each bin)
+    } // weight is non-zero, not NAN, and non-infinite
+  } // (each bin)
 
   // Set the X binning parameters
   this->setX(inSpec->ptrX());

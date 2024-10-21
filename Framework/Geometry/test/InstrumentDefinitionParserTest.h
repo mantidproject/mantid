@@ -53,7 +53,7 @@ private:
   struct IDFEnvironment {
     IDFEnvironment(const ScopedFile &idf, const ScopedFile &vtp, const std::string &xmlText,
                    const std::string &instName)
-        : _idf(idf), _vtp(vtp), _xmlText(xmlText), _instName(instName){};
+        : _idf(idf), _vtp(vtp), _xmlText(xmlText), _instName(instName) {};
 
     ScopedFile _idf;
     ScopedFile _vtp;

@@ -349,7 +349,7 @@ void ResampleX::exec() {
         }
         PARALLEL_CHECK_INTERRUPT_REGION
       }
-    }    // end if (m_preserveEvents)
+    } // end if (m_preserveEvents)
     else // event workspace -> matrix workspace
     {
       //--------- Different output, OR you're inplace but not preserving Events

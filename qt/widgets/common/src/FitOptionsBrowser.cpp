@@ -388,8 +388,12 @@ void FitOptionsBrowser::switchFitType() {
  * Show normal Fit properties and hide the others.
  */
 void FitOptionsBrowser::displayNormalFitProperties() {
-  foreach (QtProperty *prop, m_simultaneousProperties) { m_browser->addProperty(prop); }
-  foreach (QtProperty *prop, m_sequentialProperties) { m_browser->removeProperty(prop); }
+  foreach (QtProperty *prop, m_simultaneousProperties) {
+    m_browser->addProperty(prop);
+  }
+  foreach (QtProperty *prop, m_sequentialProperties) {
+    m_browser->removeProperty(prop);
+  }
   emit changedToSimultaneousFitting();
 }
 
@@ -798,8 +802,12 @@ bool FitOptionsBrowser::addPropertyToBlacklist(const QString &name) {
  * Show sequential fit (PlotPeakByLogValue) properties and hide the others.
  */
 void FitOptionsBrowser::displaySequentialFitProperties() {
-  foreach (QtProperty *prop, m_sequentialProperties) { m_browser->addProperty(prop); }
-  foreach (QtProperty *prop, m_simultaneousProperties) { m_browser->removeProperty(prop); }
+  foreach (QtProperty *prop, m_sequentialProperties) {
+    m_browser->addProperty(prop);
+  }
+  foreach (QtProperty *prop, m_simultaneousProperties) {
+    m_browser->removeProperty(prop);
+  }
   emit changedToSequentialFitting();
 }
 

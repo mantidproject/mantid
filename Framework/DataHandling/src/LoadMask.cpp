@@ -504,7 +504,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask, std::vector<int32_t> &mask
         // Finally set the masking;
         m_maskWS->mutableY(wsindex)[0] = (mask) ? 1.0 : 0.0;
       } // IF-ELSE: ws index out of range
-    }   // IF-ELSE: spectrum No has an entry
+    } // IF-ELSE: spectrum No has an entry
 
     if (spec2mask > prev_masks + 1) {
       g_log.debug() << "Masked Spectrum " << spec0 << "  To " << prev_masks << '\n';

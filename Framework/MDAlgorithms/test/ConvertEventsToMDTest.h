@@ -22,7 +22,7 @@ using namespace Mantid::MDAlgorithms;
 
 class ConvertEvents2MDEvTestHelper : public ConvertToMD {
 public:
-  ConvertEvents2MDEvTestHelper(){};
+  ConvertEvents2MDEvTestHelper() {};
 };
 
 //

@@ -1460,7 +1460,7 @@ bool Algorithm::processGroups() {
                                  "inherit from Property.");
         }
       } // not an empty (i.e. optional) input
-    }   // for each InputWorkspace property
+    } // for each InputWorkspace property
 
     std::vector<std::string> outputWSNames(m_pureOutputWorkspaceProps.size());
     // ---------- Set all the output workspaces ----------------------------
