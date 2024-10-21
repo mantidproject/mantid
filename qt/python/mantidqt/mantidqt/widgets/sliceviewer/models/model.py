@@ -10,7 +10,7 @@ from typing import List, Sequence, Tuple, Optional
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.kernel import SpecialCoordinateSystem
-from mantid.plots.datafunctions import get_indices
+from mantid.plots.datafunctions import get_indices, get_normalization, get_md_data2d_bin_bounds
 from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, TransposeMD
 
 from .base_model import SliceViewerBaseModel
@@ -181,10 +181,9 @@ class SliceViewerModel(SliceViewerBaseModel):
 
     def get_data_MDH(self, slicepoint, transpose=False):
         indices, _ = get_indices(self.get_ws(), slicepoint=slicepoint)
-        if transpose:
-            return np.ma.masked_invalid(self.get_ws().getSignalArray()[indices]).T
-        else:
-            return np.ma.masked_invalid(self.get_ws().getSignalArray()[indices])
+        mdh_normalization, _ = get_normalization(self.get_ws())
+        _, _, z = get_md_data2d_bin_bounds(self.get_ws(), mdh_normalization, indices, not (transpose))
+        return z
 
     def get_data_MDE(self, slicepoint, bin_params, dimension_indices, limits=None, transpose=False):
         """
@@ -196,10 +195,10 @@ class SliceViewerModel(SliceViewerBaseModel):
                        should be provided in the order of the workspace not the display
         :param transpose: If true then transpose the data before returning
         """
-        if transpose:
-            return np.ma.masked_invalid(self.get_ws_MDE(slicepoint, bin_params, limits, dimension_indices).getSignalArray().squeeze()).T
-        else:
-            return np.ma.masked_invalid(self.get_ws_MDE(slicepoint, bin_params, limits, dimension_indices).getSignalArray().squeeze())
+        mdh = self.get_ws_MDE(slicepoint, bin_params, limits, dimension_indices)
+        mdh_normalization, _ = get_normalization(mdh)
+        _, _, z = get_md_data2d_bin_bounds(mdh, mdh_normalization, transpose=not (transpose))
+        return z
 
     def get_properties(self):
         """
