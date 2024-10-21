@@ -12,6 +12,8 @@ namespace CustomInterfaces {
 class MANTIDQT_MUONINTERFACE_DLL IALCDataLoadingPresenter {
 
 public:
+  virtual ~IALCDataLoadingPresenter() = default;
+
   virtual void initialize() = 0;
 
   /// @return Last loaded data workspace
