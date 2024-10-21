@@ -60,9 +60,6 @@ public:
   /// Handle for when instrument changed
   void handleInstrumentChanged(const std::string &instrument) override;
 
-  /// Handle for when manage user directories clicked
-  void handleManageDirectories() override;
-
   /// Handle for when runs have been searched for
   void handleRunsFound() override;
 
