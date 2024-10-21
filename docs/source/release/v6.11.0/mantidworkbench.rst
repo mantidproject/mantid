@@ -60,6 +60,7 @@ Bugfixes
 - Changing normalisation with the ``gist_rainbow`` colourmap no longer causes an error.
 - A warning will now be displayed if a workspace with unordered spectrum numbers is opened in the :ref:`Slice Viewer <sliceviewer>`.
   These workspaces can fail to display correctly and may result in errors.
+- Fixed a bug where the workspace normalization is not preserved when one has more than two dimensions and one uses the slider to change the slice point.
 
 
 :ref:`Release 6.11.0 <v6.11.0>`
