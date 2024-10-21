@@ -43,6 +43,7 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
     def _double_spinbox_textChanged(self, text):
         if "," in text:
             text = text.replace(",", ".")
+            text = text.replace("..", ".")
             oldState = self.sender().blockSignals(True)
             self.sender().setValue(float(text))
             self.sender().blockSignals(oldState)
