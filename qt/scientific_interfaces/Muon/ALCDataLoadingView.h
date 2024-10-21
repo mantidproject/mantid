@@ -93,7 +93,7 @@ public:
   void notifyRunsEditingChanged() override;
   void notifyRunsEditingFinished() override;
   void notifyRunsFoundFinished() override;
-  void notifyManageDirectoriesClicked() override;
+  void openManageDirectories() override;
   void notifyPeriodInfoClicked() override;
 
 private:

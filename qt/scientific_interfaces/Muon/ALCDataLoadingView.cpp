@@ -78,7 +78,7 @@ void ALCDataLoadingView::initialize() {
   connect(m_ui.runs, SIGNAL(fileTextChanged(const QString &)), this, SLOT(notifyRunsEditingChanged()));
   connect(m_ui.runs, SIGNAL(findingFiles()), this, SLOT(notifyRunsEditingFinished()));
   connect(m_ui.runs, SIGNAL(fileFindingFinished()), this, SLOT(notifyRunsFoundFinished()));
-  connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()), this, SLOT(notifyManageDirectoriesClicked()));
+  connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()), this, SLOT(openManageDirectories()));
   connect(m_ui.periodInfo, SIGNAL(clicked()), this, SLOT(notifyPeriodInfoClicked()));
   connect(m_ui.runsAutoAdd, SIGNAL(toggled(bool)), this, SLOT(runsAutoAddToggled(bool)));
 }
@@ -438,7 +438,7 @@ void ALCDataLoadingView::notifyRunsEditingFinished() { m_presenter->handleRunsEd
 
 void ALCDataLoadingView::notifyRunsFoundFinished() { m_presenter->handleRunsFound(); }
 
-void ALCDataLoadingView::notifyManageDirectoriesClicked() { m_presenter->handleManageDirectories(); }
+void ALCDataLoadingView::openManageDirectories() { MantidQt::API::ManageUserDirectories::openManageUserDirectories(); }
 
 void ALCDataLoadingView::notifyPeriodInfoClicked() { m_presenter->handlePeriodInfoClicked(); }
 

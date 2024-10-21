@@ -442,10 +442,6 @@ void ALCDataLoadingPresenter::handleInstrumentChanged(const std::string &instrum
   m_view->toggleRunsAutoAdd(false);
 }
 
-void ALCDataLoadingPresenter::handleManageDirectories() {
-  MantidQt::API::ManageUserDirectories::openManageUserDirectories();
-}
-
 /**
  * The watched directory has been changed - update flag.
  * @param path :: [input] Path to directory modified (not used)

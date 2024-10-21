@@ -187,7 +187,7 @@ public slots:
 
   virtual void notifyRunsFoundFinished() = 0;
 
-  virtual void notifyManageDirectoriesClicked() = 0;
+  virtual void openManageDirectories() = 0;
 
   virtual void notifyPeriodInfoClicked() = 0;
 

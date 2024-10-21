@@ -46,9 +46,6 @@ public:
   /// Handle for when instrument changed
   virtual void handleInstrumentChanged(const std::string &instrument) = 0;
 
-  /// Handle for when manage user directories clicked
-  virtual void handleManageDirectories() = 0;
-
   /// Handle for when runs have been searched for
   virtual void handleRunsFound() = 0;
 
