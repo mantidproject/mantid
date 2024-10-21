@@ -90,7 +90,7 @@ private:
     tabScrollArea->setWidget(tabContent);
     tabScrollArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>();
+    auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
     auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
 
     std::unique_ptr<TabModel> tabModel = std::make_unique<TabModel>();
