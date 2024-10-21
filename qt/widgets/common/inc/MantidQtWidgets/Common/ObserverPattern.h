@@ -18,7 +18,7 @@ class Observable;
 
 class Observer {
 public:
-  virtual ~Observer(){};
+  virtual ~Observer() {};
   virtual void update() = 0;
 };
 
@@ -55,8 +55,8 @@ public:
  **/
 class VoidObserver : public Observer {
 public:
-  VoidObserver() : m_slot(nullptr){};
-  ~VoidObserver(){};
+  VoidObserver() : m_slot(nullptr) {};
+  ~VoidObserver() {};
   /**
    * Sets the function/slot for the oberver
    * @param func:: the void function we want to call when the observer

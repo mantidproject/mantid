@@ -108,7 +108,9 @@ void UserFunctionDialog::updateCategories() {
   QString currentCategory = getCurrentCategory();
   m_uiForm.lstCategory->clear();
   QSet<QString> cats = categoryNames();
-  foreach (QString cat, cats) { m_uiForm.lstCategory->addItem(cat); }
+  foreach (QString cat, cats) {
+    m_uiForm.lstCategory->addItem(cat);
+  }
   // try to restore current item selection
   auto items = m_uiForm.lstCategory->findItems(currentCategory, Qt::MatchExactly);
   if (!items.isEmpty()) {

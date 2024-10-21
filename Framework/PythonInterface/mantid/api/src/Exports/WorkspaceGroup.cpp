@@ -92,7 +92,7 @@ void export_WorkspaceGroup() {
       .def("getNumberOfEntries", &WorkspaceGroup::getNumberOfEntries, arg("self"),
            "Returns the number of entries in the group")
       .def("getNames", &WorkspaceGroup::getNames, arg("self"), "Returns the names of the entries in the group")
-      .def("contains", (bool (WorkspaceGroup::*)(const std::string &wsName) const) & WorkspaceGroup::contains,
+      .def("contains", (bool(WorkspaceGroup::*)(const std::string &wsName) const) & WorkspaceGroup::contains,
            (arg("self"), arg("workspace")), "Returns true if the given name is in the group")
       .def("sortByName", &WorkspaceGroup::sortByName, (arg("self")), "Sort members by name")
       .def("add", addItem, (arg("self"), arg("workspace_name")), "Add a name to the group")
@@ -105,7 +105,7 @@ void export_WorkspaceGroup() {
       // ------------ Operators --------------------------------
       .def("__len__", &WorkspaceGroup::getNumberOfEntries, arg("self"),
            "Gets the number of entries in the workspace group")
-      .def("__contains__", (bool (WorkspaceGroup::*)(const std::string &wsName) const) & WorkspaceGroup::contains,
+      .def("__contains__", (bool(WorkspaceGroup::*)(const std::string &wsName) const) & WorkspaceGroup::contains,
            (arg("self"), arg("workspace name")), "Does this group contain the named workspace?")
       .def("__getitem__", getItem, (arg("self"), arg("index")))
       .def("__iter__", range<return_value_policy<copy_non_const_reference>>(&group_begin, &group_end));

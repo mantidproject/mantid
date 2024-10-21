@@ -271,8 +271,8 @@ Raster calculateCylinder(const V3D &beamDirection, const IObject &shape, const s
         // TODO should be customized for cylinder
         result.l1.emplace_back(calcDistanceInShapeNoCheck(beamDirection, shape, position));
       } // loop over k
-    }   // loop over j
-  }     // loop over i
+    } // loop over j
+  } // loop over i
 
   return result;
 }
@@ -358,8 +358,8 @@ Raster calculateHollowCylinder(const V3D &beamDirection, const IObject &shape, c
         // TODO should be customized for hollow cylinder
         result.l1.emplace_back(calcDistanceInShapeNoCheck(beamDirection, shape, position));
       } // loop over k
-    }   // loop over j
-  }     // loop over i
+    } // loop over j
+  } // loop over i
 
   return result;
 }

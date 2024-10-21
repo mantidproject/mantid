@@ -107,7 +107,7 @@ IDetector_const_sptr InstrumentRayTracer::getDetectorResult() const {
         return det;
       }
     } // (is a detector)
-  }   // each ray tracer result
+  } // each ray tracer result
   return IDetector_const_sptr();
 }
 

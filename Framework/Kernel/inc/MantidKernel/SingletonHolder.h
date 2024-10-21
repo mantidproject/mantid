@@ -84,7 +84,7 @@ template <typename T>
 #if defined(_MSC_VER)
 __declspec(noinline)
 #endif
-    T &
+T &
 #if defined(__GNUC__) // covers clang too
     __attribute__((noinline))
 #endif

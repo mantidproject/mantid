@@ -210,7 +210,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidWSIndexWidget : public QWidget {
     /// label.
     explicit QLineEditWithErrorMark(QWidget *parent = nullptr);
     /// virtual destructor to allow Qt to deallocate all objects
-    ~QLineEditWithErrorMark() override{};
+    ~QLineEditWithErrorMark() override {};
     /// provide acess to the QLineEdit
     QLineEdit *lineEdit() { return _lineEdit; };
     /// if Error is not empty, it will make the * label visible and set the

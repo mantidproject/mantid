@@ -46,7 +46,7 @@ public:
   MOCK_CONST_METHOD0(instrumentName, std::string());
   MOCK_CONST_METHOD1(discardChanges, bool(std::string const &));
 
-  ~MockMainWindowPresenter() override{};
+  ~MockMainWindowPresenter() override {};
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

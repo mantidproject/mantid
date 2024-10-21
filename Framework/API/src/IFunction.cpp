@@ -1234,7 +1234,7 @@ void IFunction::setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> w
                                   << ". Muparser error message is: " << e.GetMsg() << '\n';
                   }
                 } // end if
-              }   // end trying to convert result-unit from formula or y-unit for
+              } // end trying to convert result-unit from formula or y-unit for
               // lookuptable
 
               setParameter(i, paramValue);

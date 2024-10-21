@@ -98,8 +98,8 @@ private:
 
 class GoodTable : public TableWorkspaceTester {
 public:
-  GoodTable(){};
-  ~GoodTable() override{};
+  GoodTable() {};
+  ~GoodTable() override {};
 
   size_t columnCount() const override { return 4; }
   size_t rowCount() const override { return 3; }

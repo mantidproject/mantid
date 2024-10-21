@@ -17,7 +17,8 @@ using Mantid::Kernel::EqualBinsChecker;
  */
 class TestEqualBinsChecker : public EqualBinsChecker {
 public:
-  TestEqualBinsChecker(const Mantid::MantidVec &xData, const double errorLevel) : EqualBinsChecker(xData, errorLevel){};
+  TestEqualBinsChecker(const Mantid::MantidVec &xData, const double errorLevel)
+      : EqualBinsChecker(xData, errorLevel) {};
   double wrapGetReferenceDx() const { return this->getReferenceDx(); }
   double wrapGetDifference(const size_t bin, const double dx) const { return this->getDifference(bin, dx); }
 };

@@ -11,7 +11,7 @@
  * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
  */
-//#define Parser Parser
+// #define Parser Parser
 #define DECLARE_IMPLICIT_FUNCTION_PARAMETER_PARSER(classname)                                                          \
   namespace {                                                                                                          \
   Mantid::Kernel::RegistrationHelper register_alg_##classname(                                                         \
@@ -51,10 +51,9 @@ namespace API {
 /*
  * Deletion policy for unique pointers.
  */
-template <typename T> class DLLExport DeleterPolicy {
-public:
-  void operator()(T *pParser) { delete pParser; }
-};
+template <typename T> class DLLExport DeleterPolicy{public : void operator()(T *pParser){delete pParser;
+} // namespace API
+}; // namespace Mantid
 
 /*
  * ImplicitFunctionParameterParser definition. Used to parse implicit function

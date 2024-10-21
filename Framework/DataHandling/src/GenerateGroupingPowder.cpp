@@ -40,8 +40,8 @@ protected:
 public:
   Labelor(double t_step, double a_step = 0.0, double a_start = 0.0)
       : tt_step(t_step * Mantid::Geometry::deg2rad), aa_step(a_step * Mantid::Geometry::deg2rad),
-        aa_start(a_start * Mantid::Geometry::deg2rad){};
-  virtual ~Labelor(){};
+        aa_start(a_start * Mantid::Geometry::deg2rad) {};
+  virtual ~Labelor() {};
   virtual size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) = 0;
 };
 
@@ -56,7 +56,7 @@ class CircularSectorLabelor : public Labelor {
   const double inv_tt_step;
 
 public:
-  CircularSectorLabelor(double t_step) : Labelor(t_step), inv_tt_step(1.0 / tt_step){};
+  CircularSectorLabelor(double t_step) : Labelor(t_step), inv_tt_step(1.0 / tt_step) {};
   size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) override {
     return static_cast<size_t>(spectrumInfo.twoTheta(i) * inv_tt_step) + 1;
   };
@@ -77,7 +77,7 @@ class SphericalSectorLabelor : public Labelor {
 public:
   SphericalSectorLabelor(double t_step, double a_step, double a_start)
       : Labelor(t_step, a_step, a_start), inv_tt_step(1.0 / tt_step), inv_aa_step(1.0 / aa_step),
-        num_aa_step(int(std::ceil(360.0 / a_step))){};
+        num_aa_step(int(std::ceil(360.0 / a_step))) {};
   size_t operator()(SpectrumInfo const &spectrumInfo, size_t i) override {
     return static_cast<size_t>(spectrumInfo.twoTheta(i) * inv_tt_step) * num_aa_step +
            static_cast<size_t>(std::floor((spectrumInfo.azimuthal(i) - aa_start) * inv_aa_step)) % num_aa_step + 1;

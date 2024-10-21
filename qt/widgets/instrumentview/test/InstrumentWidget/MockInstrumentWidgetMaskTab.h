@@ -12,7 +12,7 @@ namespace MantidQt::MantidWidgets {
 
 class MockInstrumentWidgetMaskTab final : public InstrumentWidgetMaskTab {
 public:
-  explicit MockInstrumentWidgetMaskTab(InstrumentWidget *instrWidget) : InstrumentWidgetMaskTab(instrWidget){};
+  explicit MockInstrumentWidgetMaskTab(InstrumentWidget *instrWidget) : InstrumentWidgetMaskTab(instrWidget) {};
 
   MOCK_METHOD(void, showMessageBox, (const QString &), (override));
 };

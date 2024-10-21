@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-//#include "MantidDataObjects/MDTransfDEHelper.h"
+// #include "MantidDataObjects/MDTransfDEHelper.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidKernel/V3D.h"
 #include "MantidMDAlgorithms/DllConfig.h"

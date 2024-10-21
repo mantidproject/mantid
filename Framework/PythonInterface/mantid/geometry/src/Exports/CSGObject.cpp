@@ -46,7 +46,7 @@ boost::python::object wrapMeshWithNDArray(const CSGObject *self) {
     for (size_t xyz = 0; xyz < 3; xyz++) {
       meshCoords[3 * corner_index + xyz] = vertices[3 * triangles[corner_index] + xyz];
     } // for each coordinate of that corner
-  }   // for each corner of the triangle
+  } // for each corner of the triangle
 
   PyObject *ndarray = Impl::wrapWithNDArray(meshCoords, 3, dims, NumpyWrapMode::ReadWrite, OwnershipMode::Python);
   return object(handle<>(ndarray));

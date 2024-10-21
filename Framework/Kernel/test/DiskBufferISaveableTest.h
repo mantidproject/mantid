@@ -49,7 +49,7 @@ public:
   void load() override { this->setLoaded(true); };
 
   /// Method to flush the data to disk and ensure it is written.
-  void flushData() const override{};
+  void flushData() const override {};
   /// remove objects data from memory
   void clearDataFromMemory() override { this->setLoaded(false); };
 

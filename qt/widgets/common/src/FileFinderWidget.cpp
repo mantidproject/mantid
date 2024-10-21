@@ -422,7 +422,9 @@ void FileFinderWidget::saveSettings(const QString &group) {
  */
 void FileFinderWidget::setNumberOfEntries(const int number) {
   const QString total = number > 0 ? QString::number(number) : "?";
-  { m_uiForm.numEntries->setText("/" + total); }
+  {
+    m_uiForm.numEntries->setText("/" + total);
+  }
 }
 
 /** Inform the widget of a running instance of MonitorLiveData to be used in
