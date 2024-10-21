@@ -93,6 +93,17 @@ To set up CMake:
 #. Set the build directory to the ``build`` directory if it is not the default (you'll need to use the full path if its outside the source directory)
 #. The configurations drop-down at the top should show all of the build targets. If not, the CMake project is probably not loaded. Go to ``File > Reload CMake Project``. The configurations should be populated
 
+Additional Build Configuration
+------------------------------
+This (optional) additional configuration allows one to start Clion from the JetBrains Toolbox or
+from a terminal without having to activate the conda environment in the terminal.
+This is useful when you're working on both Mantid and other projects in CLion simultaneously.
+
+#. Navigate to ``File > Settings > Build, Execution, Deployment > CMake``
+#. Under ``environment``, add new environment variable ``CONDA_PREFIX`` with value ``/path/to/mambaforge/envs/mantid-developer``.
+#. Navigate to ``File > Settings > Build, Execution, Deployment > Python Interpreter > Add Interpreter > Add Local Interpreter > Conda Environment > Use existing environment``, then select ``mantid-developer``.
+
+
 Building with CLion
 ###################
 
