@@ -11,7 +11,7 @@
 #include <string>
 
 namespace {
-QString addUnderscoreIf(QString const &label) { return label.isEmpty() ? "" : "_" + label; }
+QString addLabelUnderscore(QString const &label) { return label.isEmpty() ? "" : "_" + label; }
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
@@ -52,10 +52,13 @@ void OutputName::generateLabelWarning() const {
 }
 
 std::string OutputName::getCurrentLabel() const { return m_uiForm.lbName->text().toStdString(); }
+
 std::string OutputName::generateOutputLabel() {
   auto outputName = m_currBasename;
-  return outputName.insert(findInsertIndexLabel(outputName), addUnderscoreIf(m_uiForm.leLabel->text())).toStdString();
+  return outputName.insert(findInsertIndexLabel(outputName), addLabelUnderscore(m_uiForm.leLabel->text()))
+      .toStdString();
 }
+
 void OutputName::updateOutputLabel() {
   auto labelName = m_currBasename;
   if (!m_uiForm.leLabel->text().isEmpty())
