@@ -304,7 +304,7 @@ QSet<QString> UserFunctionDialog::functionNames(const QString &cat) const {
  */
 QString UserFunctionDialog::getCurrentCategory() const {
   QString cur_category;
-  QListWidgetItem *currentCategoryItem = m_uiForm.lstCategory->currentItem();
+  QListWidgetItem const *currentCategoryItem = m_uiForm.lstCategory->currentItem();
   if (currentCategoryItem) {
     cur_category = m_uiForm.lstCategory->currentItem()->text();
   }
@@ -492,7 +492,7 @@ void UserFunctionDialog::helpClicked() { HelpWindow::showPage(QUrl("workbench/us
 InputFunctionNameDialog::InputFunctionNameDialog(QWidget *parent, const QString &category) : QDialog(parent) {
   auto *layout = new QVBoxLayout();
   layout->addWidget(new QLabel("Enter new or select a category"));
-  QStringList cats = ((UserFunctionDialog *)parent)->categories();
+  QStringList cats = (static_cast<UserFunctionDialog *>(parent))->categories();
   cats.removeOne("Base");
   cats.removeOne("Built-in");
   m_category = new QComboBox();

@@ -583,7 +583,7 @@ void LoadNexusLogs::execLoader() {
     file.openPath("/" + entry_name);
     if (!event_frame_number.empty()) // ISIS indirection - see above comments
     {
-      Kernel::TimeSeriesProperty<double> *plog =
+      Kernel::TimeSeriesProperty<double> const *plog =
           dynamic_cast<Kernel::TimeSeriesProperty<double> *>(workspace->mutableRun().getProperty("proton_log"));
       if (!plog)
         throw std::runtime_error("Could not cast (interpret) proton_log as a time "
