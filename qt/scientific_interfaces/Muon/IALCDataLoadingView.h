@@ -19,10 +19,13 @@ namespace MantidQt {
 namespace CustomInterfaces {
 /** IALCDataLoadingView : View interface for ALC Data Loading step
  */
+class IALCDataLoadingPresenter;
+
 class MANTIDQT_MUONINTERFACE_DLL IALCDataLoadingView : public QObject {
   Q_OBJECT
 
 public:
+  virtual void subscribePresenter(IALCDataLoadingPresenter *presenter) = 0;
   /// Init instrument combo box
   virtual void initInstruments() = 0;
 
@@ -143,9 +146,6 @@ public slots:
   /// Enables all the widgets
   virtual void enableAll() = 0;
 
-  /// Instrument Changed
-  virtual void instrumentChanged(QString instrument) = 0;
-
   /// Enables/Disables the load button when ready
   virtual void enableLoad(bool enable) = 0;
 
@@ -176,33 +176,24 @@ public slots:
   /// Sets text and ensure runs are not searched for
   virtual void setRunsTextWithoutSearch(const std::string &text) = 0;
 
+  /// Slots for notifying presenter that view was changed
+  virtual void instrumentChanged(QString instrument) = 0;
+
+  virtual void notifyLoadClicked() = 0;
+
+  virtual void notifyRunsEditingChanged() = 0;
+
+  virtual void notifyRunsEditingFinished() = 0;
+
+  virtual void notifyRunsFoundFinished() = 0;
+
+  virtual void notifyManageDirectoriesClicked() = 0;
+
+  virtual void notifyPeriodInfoClicked() = 0;
+
 signals:
-  /// Request to load data
-  void loadRequested();
-
-  /// User has started editing the runs
-  void runsEditingSignal();
-
-  /// User has finished editing the runs
-  void runsEditingFinishedSignal();
-
   /// New data has been loaded
   void dataChanged();
-
-  /// Instrument has been changed
-  void instrumentChangedSignal(std::string);
-
-  // Manage user directories has been clicked
-  void manageDirectoriesClicked();
-
-  /// Searching finished
-  void runsFoundSignal();
-
-  /// Runs Auto Add state changed
-  void autoAddToggledSignal(bool);
-
-  /// Period Info Button Clicked
-  void periodInfoClicked();
 };
 
 } // namespace CustomInterfaces

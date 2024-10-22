@@ -9,6 +9,7 @@
 #include "MantidKernel/System.h"
 
 #include "DllConfig.h"
+#include "IALCDataLoadingPresenter.h"
 #include "IALCDataLoadingView.h"
 
 #include "ui_ALCDataLoadingView.h"
@@ -33,6 +34,7 @@ public:
 
   // -- IALCDataLoadingView interface
   // ------------------------------------------------------------
+  void subscribePresenter(IALCDataLoadingPresenter *presenter) override;
 
   void initialize() override;
 
@@ -65,7 +67,6 @@ public:
   void disableAll() override;
   void enableAll() override;
   void setAvailableInfoToEmpty() override;
-  void instrumentChanged(QString instrument) override;
   void enableLoad(bool enable) override;
   void setPath(const std::string &path) override;
   void enableRunsAutoAdd(bool enable) override;
@@ -86,6 +87,15 @@ public:
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
 
+  // Slots
+  void instrumentChanged(QString instrument) override;
+  void notifyLoadClicked() override;
+  void notifyRunsEditingChanged() override;
+  void notifyRunsEditingFinished() override;
+  void notifyRunsFoundFinished() override;
+  void notifyManageDirectoriesClicked() override;
+  void notifyPeriodInfoClicked() override;
+
 private:
   /// Common function to set available items in a combo box
   void setAvailableItems(QComboBox *comboBox, const std::vector<std::string> &items);
@@ -100,6 +110,7 @@ private:
 
   QString m_selectedLog;
   size_t m_numPeriods;
+  IALCDataLoadingPresenter *m_presenter;
 };
 
 } // namespace CustomInterfaces
