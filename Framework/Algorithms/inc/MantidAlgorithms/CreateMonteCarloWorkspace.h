@@ -24,6 +24,9 @@ public:
 private:
   void init() override;
   void exec() override;
+
+  double calculateMean(const std::vector<int> &numbers);
+  double calculateVariance(const std::vector<int> &numbers);
 };
 
 } // namespace Algorithms

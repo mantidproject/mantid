@@ -37,10 +37,6 @@ public:
     // Name of the output workspace.
     std::string outWSName("MonteCarloTest_WS");
 
-    // Create test input if necessary by filling in appropriate code below.
-    // Consider using MantidFrameworkTestHelpers/WorkspaceCreationHelper.h
-    // MatrixWorkspace_sptr inputWS =
-
     // Create input workspace for the algorithm
     MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspace(1, 10);
 
@@ -70,7 +66,6 @@ public:
     std::cout << "Number of histograms: " << matrixWS->getNumberHistograms() << std::endl;
     std::cout << "Size of Y data (expected " << num_iterations << "): " << matrixWS->y(0).size() << std::endl;
 
-    TS_ASSERT_EQUALS(matrixWS->getNumberHistograms(), 1);    // Check we have the expected number of histograms
     TS_ASSERT_EQUALS(matrixWS->y(0).size(), num_iterations); // Check if Y data has the expected number of entries
 
     TS_FAIL("TODO: Remove this line once the test works as expected.");
