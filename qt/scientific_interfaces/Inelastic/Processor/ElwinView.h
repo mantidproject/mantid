@@ -33,7 +33,7 @@ public:
 
   IRunView *getRunView() const override;
   IOutputPlotOptionsView *getPlotOptions() const override;
-  IOutputName *getOutputName() const override;
+  IOutputNameView *getOutputName() const override;
 
   void setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) override;
   void setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,

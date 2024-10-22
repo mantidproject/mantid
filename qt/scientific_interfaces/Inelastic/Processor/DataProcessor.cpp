@@ -24,12 +24,16 @@ Mantid::Kernel::Logger g_log("DataProcessor");
 namespace MantidQt::CustomInterfaces {
 
 DataProcessor::DataProcessor(QObject *parent, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner)
-    : InelasticTab(parent), m_algorithmRunner(std::move(algorithmRunner)) {
+    : InelasticTab(parent), m_algorithmRunner(std::move(algorithmRunner)), m_outputNamePresenter() {
   m_algorithmRunner->subscribe(this);
 }
 
 void DataProcessor::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
   m_plotOptionsPresenter = std::move(presenter);
+}
+
+void DataProcessor::setOutputNamePresenter(std::unique_ptr<IOutputNamePresenter> presenter) {
+  m_outputNamePresenter = std::move(presenter);
 }
 
 void DataProcessor::notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) {
