@@ -77,6 +77,8 @@ Moments tab
 
 --------------
 
+1. Indirect data
+################
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``Data Processor``
 #. Go to the ``Moments`` tab
@@ -87,8 +89,19 @@ Moments tab
 #. Change the limits by moving the sliders to be at -0.2 and 0.2, respectively. On the property browser, ``EMin`` and ``EMax`` should be updated with the new limits.
 #. Click the ``Run`` button.
 #. The Preview plot should be updated with a representation of the first three moments with respect to Q. A workspace with the suffix `_Moments` should be generated on the ADS.
-#. On the Output edit, the name of the output workspace should be greyed out, write on the text edit right from the output name the spectras to plot, `0-4`, and click on the ``Plot Spectra`` button.
-   A plot window should be generated with all the calculated moments (up to order 4).
+#. On the Output edit, the name of the output workspace should be greyed out. The spectra numbers box should also be disabled, and should read `0,2,4`. Click on the ``Plot Spectra`` button.
+   A plot window should be generated with three of the calculated moments.
+
+2. Invalid data
+###############
+
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Processor``
+#. Go to the ``Moments`` tab
+#. On the File Input, click on ``Browse``, a dialog window should prompt.
+#. Find the file ``MAR27698_red.nxs`` from the ISIS Sample Data and Load it.
+#. Click the ``Run`` button.
+#. There should be a red error message in the logger. No data should be plotted in the bottom embedded plot.
+
 
 .. _moments_inelastic_test:
 
