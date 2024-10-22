@@ -34,23 +34,15 @@ public:
 
   const std::vector<Section> &sections() const { return m_sections; }
 
-  // -- End of IALCBaselineModellingModel interface
-  // ----------------------------------------------
+  Mantid::API::MatrixWorkspace_sptr exportWorkspace() const override;
 
-  /// Set the data we should fit baseline for
-  void setData(Mantid::API::MatrixWorkspace_sptr data);
+  void setData(Mantid::API::MatrixWorkspace_sptr data) override;
 
-  /// Set the corrected data resulting from fit
-  void setCorrectedData(Mantid::API::MatrixWorkspace_sptr data);
+  void setCorrectedData(Mantid::API::MatrixWorkspace_sptr data) override;
 
-  /// Export data + baseline + corrected data as a single workspace
-  Mantid::API::MatrixWorkspace_sptr exportWorkspace();
+  Mantid::API::ITableWorkspace_sptr exportSections() const override;
 
-  /// Export sections used for the last fit as a table workspace
-  Mantid::API::ITableWorkspace_sptr exportSections();
-
-  /// Exports baseline model as a table workspace
-  Mantid::API::ITableWorkspace_sptr exportModel();
+  Mantid::API::ITableWorkspace_sptr exportModel() const override;
 
 private:
   /// Data used for fitting
