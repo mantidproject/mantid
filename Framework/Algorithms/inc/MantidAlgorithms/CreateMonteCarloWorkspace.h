@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <vector>
+
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
@@ -26,7 +28,8 @@ private:
   void exec() override;
 
   double calculateMean(const std::vector<int> &numbers);
-  double calculateVariance(const std::vector<int> &numbers);
+  double calculateVariance(const std::vector<int> &numbers, double mean);
+  std::vector<double> pdf(const std::vector<int> &num, double mean, double variance) const;
 };
 
 } // namespace Algorithms
