@@ -11,6 +11,8 @@
 #include "DllConfig.h"
 #include "IALCDataLoadingPresenter.h"
 #include "IALCDataLoadingView.h"
+#include <QFileSystemWatcher>
+#include <QTimer>
 
 #include "ui_ALCDataLoadingView.h"
 
@@ -88,6 +90,8 @@ public:
   // -----------------------------------------------------
 
   // Slots
+  void handleStartWatching(bool watch) override;
+  void handleTimerEvent() override;
   void instrumentChanged(QString instrument) override;
   void notifyLoadClicked() override;
   void notifyRunsEditingChanged() override;
@@ -107,6 +111,12 @@ private:
 
   /// The widget used
   QWidget *const m_widget;
+
+  /// Watches the path for changes
+  QFileSystemWatcher m_watcher;
+
+  /// Timer of running timer
+  QTimer m_timer;
 
   QString m_selectedLog;
   size_t m_numPeriods;

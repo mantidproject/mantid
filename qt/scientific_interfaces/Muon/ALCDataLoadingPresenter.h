@@ -13,9 +13,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/Common/MuonPeriodInfo.h"
-#include <QFileSystemWatcher>
-#include <QObject>
-#include <QTimer>
 #include <atomic>
 
 namespace MantidQt {
@@ -66,15 +63,13 @@ public:
   /// When directory contents change, set flag
   void updateDirectoryChangedFlag() override;
 
-  /// Begin/Stop watching path
-  void handleStartWatching(bool watch) override;
-
   /// Handle a user requests to see the period info widget
   void handlePeriodInfoClicked() override;
 
-protected:
-  /// Runs every time a timer event occurs
-  void timerEvent();
+  /// Handle timer event that checks directory for new files added
+  void handleTimerEvent() override;
+
+  void resetLatestAutoRunAndWasAutoRange() override;
 
 private:
   /// Load new data and update the view accordingly
@@ -113,14 +108,8 @@ private:
   // Loading algorithm
   Mantid::API::IAlgorithm_sptr m_LoadingAlg;
 
-  /// Watches the path for changes
-  QFileSystemWatcher m_watcher;
-
   /// Flag for changes in watched directory
   std::atomic_bool m_directoryChanged;
-
-  /// Timer of running timer
-  QTimer *m_timer;
 
   /// Last run loaded by auto
   int m_lastRunLoadedAuto;
