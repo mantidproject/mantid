@@ -13,16 +13,11 @@
 #include "MantidKernel/Strings.h"
 
 #include "ALCLatestFileFinder.h"
-#include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
-#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MuonAnalysisHelper.h"
 
 #include "Poco/File.h"
 #include <Poco/ActiveResult.h>
 #include <Poco/Path.h>
-#include <QApplication>
-#include <QDir>
-#include <QFileInfo>
 #include <algorithm>
 #include <sstream>
 
@@ -36,21 +31,17 @@ bool is_decimal(const char character) { return character == '.'; }
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt::CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
     : m_view(view), m_periodInfo(std::make_unique<MuonPeriodInfo>()), m_numDetectors(0), m_loadingData(false),
-      m_directoryChanged(false), m_timer(nullptr), m_lastRunLoadedAuto(-2), m_filesLoaded(), m_wasLastAutoRange(false),
+      m_directoryChanged(false), m_lastRunLoadedAuto(-2), m_filesLoaded(), m_wasLastAutoRange(false),
       m_previousFirstRun("") {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
   m_view->subscribePresenter(this);
-
-  QObject::connect(&m_watcher, &QFileSystemWatcher::directoryChanged, [this]() { this->updateDirectoryChangedFlag(); });
-
   m_view->setFileExtensions(ADDITIONAL_EXTENSIONS);
 }
 
@@ -445,34 +436,12 @@ void ALCDataLoadingPresenter::handleInstrumentChanged(const std::string &instrum
 
 /**
  * The watched directory has been changed - update flag.
- * @param path :: [input] Path to directory modified (not used)
  */
 void ALCDataLoadingPresenter::updateDirectoryChangedFlag() { m_directoryChanged = true; }
 
-void ALCDataLoadingPresenter::handleStartWatching(bool watch) {
-  if (watch) {
-    // Get path to watch and add to watcher
-    const auto path = m_view->getPath();
-    m_watcher.addPath(QString::fromStdString(path));
-
-    // start a timer that executes every second
-    m_timer = new QTimer();
-    QObject::connect(m_timer, &QTimer::timeout, [this]() { this->timerEvent(); });
-    m_timer->start(1000);
-  } else {
-    // Check if watcher has a directory, then remove all
-    if (!m_watcher.directories().empty()) {
-      m_watcher.removePaths(m_watcher.directories());
-    }
-
-    // Stop timer
-    m_timer->stop();
-    delete m_timer;
-
-    // Reset latest auto run number and was range
-    m_lastRunLoadedAuto = -2; // Ensures negative if +1 to not be valid
-    m_wasLastAutoRange = false;
-  }
+void ALCDataLoadingPresenter::resetLatestAutoRunAndWasAutoRange() {
+  m_lastRunLoadedAuto = -2; // Ensures negative if +1 to not be valid
+  m_wasLastAutoRange = false;
 }
 
 /**
@@ -480,7 +449,7 @@ void ALCDataLoadingPresenter::handleStartWatching(bool watch) {
  * If any changes have occurred in the meantime, reload.
  * @param timeup :: [input] Qt timer event (not used)
  */
-void ALCDataLoadingPresenter::timerEvent() {
+void ALCDataLoadingPresenter::handleTimerEvent() {
 
   // Check if there are changes to watched directory
   if (m_directoryChanged.load()) {

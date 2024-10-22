@@ -52,11 +52,13 @@ public:
   /// When directory contents change, set flag
   virtual void updateDirectoryChangedFlag() = 0;
 
-  /// Begin/Stop watching path
-  virtual void handleStartWatching(bool watch) = 0;
-
   /// Handle a user requests to see the period info widget
   virtual void handlePeriodInfoClicked() = 0;
+
+  /// Handle timer event that checks directory for new files added
+  virtual void handleTimerEvent() = 0;
+
+  virtual void resetLatestAutoRunAndWasAutoRange() = 0;
 };
 
 } // namespace CustomInterfaces

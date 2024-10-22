@@ -176,6 +176,11 @@ public slots:
   /// Sets text and ensure runs are not searched for
   virtual void setRunsTextWithoutSearch(const std::string &text) = 0;
 
+  /// Private Slots
+  virtual void handleStartWatching(bool watch) = 0;
+
+  virtual void handleTimerEvent() = 0;
+
   /// Slots for notifying presenter that view was changed
   virtual void instrumentChanged(QString instrument) = 0;
 
