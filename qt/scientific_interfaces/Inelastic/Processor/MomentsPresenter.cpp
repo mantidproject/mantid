@@ -21,6 +21,10 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
+namespace {
+auto &ads = AnalysisDataService::Instance();
+}
+
 namespace MantidQt::CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
@@ -98,16 +102,17 @@ void MomentsPresenter::handleValueChanged(std::string const &propName, double va
 void MomentsPresenter::runComplete(bool error) {
   if (error)
     return;
-  MatrixWorkspace_sptr outputWorkspace =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_model->getOutputWorkspace());
+  auto const outputName = m_model->getOutputWorkspace();
+  if (!ads.doesExist(outputName))
+    return;
 
+  auto const outputWorkspace = ads.retrieveWS<MatrixWorkspace>(outputName);
   if (outputWorkspace->getNumberHistograms() < 5)
     return;
 
-  setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
+  setOutputPlotOptionsWorkspaces({outputName});
 
-  m_view->plotOutput(m_model->getOutputWorkspace());
-  m_view->getPlotOptions()->setIndicesLineEditEnabled(true);
+  m_view->plotOutput(outputName);
 }
 
 void MomentsPresenter::setFileExtensionsByName(bool filter) {
