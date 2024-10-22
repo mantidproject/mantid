@@ -435,7 +435,7 @@ public:
   MOCK_METHOD0(setup, void());
   MOCK_CONST_METHOD0(getRunView, IRunView *());
   MOCK_CONST_METHOD0(getPlotOptions, IOutputPlotOptionsView *());
-  MOCK_CONST_METHOD0(getOutputName, IOutputName *());
+  MOCK_CONST_METHOD0(getOutputName, IOutputNameView *());
 
   MOCK_METHOD2(setAvailableSpectra,
                void(MantidQt::MantidWidgets::WorkspaceIndex minimum, MantidQt::MantidWidgets::WorkspaceIndex maximum));
