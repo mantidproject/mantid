@@ -16,6 +16,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -67,9 +68,7 @@ double fixErrorValue(const double value) {
 }
 
 bool isEqual(const double left, const double right) {
-  if (left == right)
-    return true;
-  return (2. * std::fabs(left - right) <= std::fabs(m_TOLERANCE * (right + left)));
+  return Kernel::withinRelativeDifference(left, right, m_TOLERANCE);
 }
 
 bool isConstantDelta(const HistogramData::BinEdges &xAxis) {

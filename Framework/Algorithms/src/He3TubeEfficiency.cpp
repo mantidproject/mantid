@@ -20,6 +20,7 @@
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/FloatingPointComparison.h"
 
 #include <cmath>
 #include <stdexcept>
@@ -216,7 +217,7 @@ double He3TubeEfficiency::calculateExponential(std::size_t spectraIndex, const G
   double sinTheta = std::sqrt(1.0 - cosTheta * cosTheta);
 
   const double straight_path = detDiameter - twiceTubeThickness;
-  if (std::fabs(straight_path - 0.0) < TOL) {
+  if (Kernel::withinAbsoluteDifference(straight_path, 0.0, TOL)) {
     throw std::out_of_range("Twice tube thickness cannot be greater than "
                             "or equal to the tube diameter");
   }
@@ -245,7 +246,7 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det, doub
   if (it == m_shapeCache.end()) {
     double xDist = distToSurface(Kernel::V3D(DIST_TO_UNIVERSE_EDGE, 0, 0), shape_sptr.get());
     double zDist = distToSurface(Kernel::V3D(0, 0, DIST_TO_UNIVERSE_EDGE), shape_sptr.get());
-    if (std::abs(zDist - xDist) < 1e-8) {
+    if (Kernel::withinAbsoluteDifference(zDist, xDist, 1e-8)) {
       detRadius = zDist / 2.0;
       detAxis = Kernel::V3D(0, 1, 0);
       // assume radii in z and x and the axis is in the y
@@ -253,7 +254,7 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det, doub
       return;
     }
     double yDist = distToSurface(Kernel::V3D(0, DIST_TO_UNIVERSE_EDGE, 0), shape_sptr.get());
-    if (std::abs(yDist - zDist) < 1e-8) {
+    if (Kernel::withinAbsoluteDifference(yDist, zDist, 1e-8)) {
       detRadius = yDist / 2.0;
       detAxis = Kernel::V3D(1, 0, 0);
       // assume that y and z are radii of the cylinder's circular cross-section
@@ -262,7 +263,7 @@ void He3TubeEfficiency::getDetectorGeometry(const Geometry::IDetector &det, doub
       return;
     }
 
-    if (std::abs(xDist - yDist) < 1e-8) {
+    if (Kernel::withinAbsoluteDifference(xDist, yDist, 1e-8)) {
       detRadius = xDist / 2.0;
       detAxis = Kernel::V3D(0, 0, 1);
       PARALLEL_CRITICAL(deteff_shapecachec) { m_shapeCache.insert({shape_sptr.get(), {detRadius, detAxis}}); }
