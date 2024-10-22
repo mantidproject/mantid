@@ -37,7 +37,7 @@ public:
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockElwinView>>();
     m_outputPlotView = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
-    m_outputName = std::make_unique<NiceMock<MockOutputNameWidget>>();
+    m_outputName = std::make_unique<NiceMock<MockOutputNameView>>();
     m_runView = std::make_unique<NiceMock<MockRunView>>();
 
     auto algorithmRunner = std::make_unique<NiceMock<MockAlgorithmRunner>>();
@@ -150,7 +150,7 @@ private:
   NiceMock<MockElwinModel> *m_model;
   NiceMock<MockAlgorithmRunner> *m_algorithmRunner;
   std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputPlotView;
-  std::unique_ptr<NiceMock<MockOutputNameWidget>> m_outputName;
+  std::unique_ptr<NiceMock<MockOutputNameView>> m_outputName;
   std::unique_ptr<NiceMock<MockRunView>> m_runView;
   std::unique_ptr<NiceMock<MockElwinView>> m_view;
   std::unique_ptr<ElwinPresenter> m_presenter;

@@ -2,6 +2,7 @@ set(TEST_FILES
     DataValidationHelperTest.h
     DataModelTest.h
     FitDataTest.h
+    OutputWidget/OutputNamePresenterTest.h
     OutputWidget/OutputPlotOptionsModelTest.h
     OutputWidget/OutputPlotOptionsPresenterTest.h
     RunWidget/RunPresenterTest.h

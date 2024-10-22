@@ -30,10 +30,8 @@ void OutputNamePresenter::setOutputWsBasename(std::string const &outputBasename,
 
 int OutputNamePresenter::findInsertIndexLabel(std::string const &outputBasename) {
   std::vector<int> suffixPos;
-  std::transform(m_suffixes.begin(), m_suffixes.end(), std::back_inserter(suffixPos), [&](auto const &suffix) {
-    auto posSuffix = outputBasename.rfind(suffix);
-    return posSuffix != std::string::npos ? posSuffix : -1;
-  });
+  std::transform(m_suffixes.begin(), m_suffixes.end(), std::back_inserter(suffixPos),
+                 [&](auto const &suffix) { return outputBasename.rfind(suffix); });
   auto max_index = (*std::max_element(suffixPos.cbegin(), suffixPos.cend()));
   return (suffixPos.empty() || (max_index == -1)) ? static_cast<int>(outputBasename.length()) : max_index;
 }
@@ -49,9 +47,8 @@ void OutputNamePresenter::generateLabelWarning() const {
 }
 
 std::string OutputNamePresenter::generateOutputLabel() {
-  auto OutputNamePresenter = m_currBasename;
-  return OutputNamePresenter.insert(findInsertIndexLabel(OutputNamePresenter),
-                                    addLabelUnderscore(m_view->getCurrentLabel()));
+  auto outputName = m_currBasename;
+  return outputName.insert(findInsertIndexLabel(outputName), addLabelUnderscore(m_view->getCurrentLabel()));
 }
 
 void OutputNamePresenter::handleUpdateOutputLabel() {
