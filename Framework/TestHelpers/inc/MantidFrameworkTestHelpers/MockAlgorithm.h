@@ -18,6 +18,8 @@
 using namespace Mantid::API;
 using namespace testing;
 
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
+
 class MockAlgorithm : public IAlgorithm {
 public:
   MOCK_CONST_METHOD0(name, const std::string());
@@ -111,3 +113,5 @@ public:
     EXPECT_CALL(*this, getProperty(propertyName)).WillOnce(Return(TypedValue(*this, propertyName)));
   }
 };
+
+GNU_DIAG_ON_SUGGEST_OVERRIDE

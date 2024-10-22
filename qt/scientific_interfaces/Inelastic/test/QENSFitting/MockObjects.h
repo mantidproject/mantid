@@ -534,7 +534,7 @@ public:
 
   MOCK_METHOD1(plotNewData, void(std::string const &filename));
   MOCK_METHOD0(replot, void());
-  MOCK_METHOD1(plotOutput, void(std::string const &outputWorkspace));
+  MOCK_METHOD1(plotOutput, void(Mantid::API::MatrixWorkspace_sptr outputWorkspace));
 };
 
 class MockMomentsModel : public IMomentsModel {
