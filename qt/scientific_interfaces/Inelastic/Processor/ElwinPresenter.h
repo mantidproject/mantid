@@ -89,7 +89,7 @@ public:
   void clearHandle() override;
 
 protected:
-  void runComplete(bool error) override;
+  void runComplete(Mantid::API::IAlgorithm_sptr algorithm, bool error) override;
   void addDataToModel(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
 private:

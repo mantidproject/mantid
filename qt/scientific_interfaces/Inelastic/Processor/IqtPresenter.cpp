@@ -120,7 +120,8 @@ void IqtPresenter::handlePreviewSpectrumChanged(int spectra) {
  *
  * @param error If the algorithm failed
  */
-void IqtPresenter::runComplete(bool error) {
+void IqtPresenter::runComplete(Mantid::API::IAlgorithm_sptr algorithm, bool error) {
+  (void)algorithm;
   m_view->setWatchADS(true);
   m_view->setSaveResultEnabled(!error);
   if (!error)

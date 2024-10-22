@@ -53,7 +53,7 @@ public:
 
   virtual void plotNewData(std::string const &filename) = 0;
   virtual void replot() = 0;
-  virtual void plotOutput(std::string const &outputWorkspace) = 0;
+  virtual void plotOutput(Mantid::API::MatrixWorkspace_sptr outputWorkspace) = 0;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

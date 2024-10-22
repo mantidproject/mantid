@@ -64,7 +64,7 @@ public:
   void handleSaveClicked() override;
 
 protected:
-  void runComplete(bool error) override;
+  void runComplete(Mantid::API::IAlgorithm_sptr algorithm, bool error) override;
 
 private:
   void plotRqwContour();

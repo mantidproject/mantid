@@ -35,7 +35,7 @@ void DataProcessor::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOpti
 void DataProcessor::notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) {
   if (algorithm->algorithm()->name() != "SaveNexusProcessed") {
     m_runPresenter->setRunEnabled(true);
-    runComplete(error);
+    runComplete(algorithm->algorithm(), error);
   }
 }
 

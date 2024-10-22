@@ -69,7 +69,8 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::I
 /**
  * Ungroups the output after the execution of the algorithm
  */
-void ElwinPresenter::runComplete(bool error) {
+void ElwinPresenter::runComplete(Mantid::API::IAlgorithm_sptr algorithm, bool error) {
+  (void)algorithm;
   m_view->setRunIsRunning(false);
 
   if (!error) {

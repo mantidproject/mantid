@@ -72,7 +72,7 @@ public:
   void setIsPreview(bool preview) override;
 
 protected:
-  void runComplete(bool error) override;
+  void runComplete(Mantid::API::IAlgorithm_sptr algorithm, bool error) override;
 
 private:
   void setFileExtensionsByName(bool filter) override;

@@ -99,20 +99,20 @@ void MomentsPresenter::handleValueChanged(std::string const &propName, double va
  *
  * @param error True if the algorithm exited due to error, false otherwise
  */
-void MomentsPresenter::runComplete(bool error) {
+void MomentsPresenter::runComplete(Mantid::API::IAlgorithm_sptr algorithm, bool error) {
   if (error)
     return;
-  auto const outputName = m_model->getOutputWorkspace();
-  if (!ads.doesExist(outputName))
-    return;
 
-  auto const outputWorkspace = ads.retrieveWS<MatrixWorkspace>(outputName);
+  // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
+  MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
   if (outputWorkspace->getNumberHistograms() < 5)
     return;
 
-  setOutputPlotOptionsWorkspaces({outputName});
+  m_view->plotOutput(outputWorkspace);
 
-  m_view->plotOutput(outputName);
+  auto const outputName = m_model->getOutputWorkspace();
+  ads.addOrReplace(outputName, outputWorkspace);
+  setOutputPlotOptionsWorkspaces({outputName});
 }
 
 void MomentsPresenter::setFileExtensionsByName(bool filter) {
