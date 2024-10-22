@@ -25,6 +25,7 @@
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/ListValidator.h"
 
 #include <fstream>
@@ -201,7 +202,7 @@ void PredictPeaks::exec() {
     // Get all goniometer matrices
     DblMatrix lastGoniometerMatrix = Matrix<double>(3, 3, false);
     for (int i = 0; i < static_cast<int>(peaksWS->getNumberPeaks()); ++i) {
-      IPeak &p = peaksWS->getPeak(i);
+      IPeak const &p = peaksWS->getPeak(i);
       DblMatrix currentGoniometerMatrix = p.getGoniometerMatrix();
       if (!(currentGoniometerMatrix == lastGoniometerMatrix)) {
         gonioVec.emplace_back(currentGoniometerMatrix);
@@ -289,7 +290,7 @@ void PredictPeaks::exec() {
     m_detectorCacheSearch = std::make_unique<DetectorSearcher>(m_inst, m_pw->detectorInfo());
 
   if (!usingInstrument) {
-    for (auto &possibleHKL : possibleHKLs) {
+    for (auto const &possibleHKL : possibleHKLs) {
       calculateQAndAddToOutputLeanElastic(possibleHKL, ub);
     }
   } else if (getProperty("CalculateGoniometerForCW")) {
@@ -329,7 +330,7 @@ void PredictPeaks::exec() {
       if (!std::isfinite(angle) || angle < angleMin || angle > angleMax)
         continue;
 
-      if (std::abs(wavelength - lambda) < 0.01) {
+      if (Kernel::withinAbsoluteDifference(wavelength, lambda, 0.01)) {
         g_log.information() << "Found goniometer rotation to be in YZY convention [" << angles[0] << ", " << angles[1]
                             << ". " << angles[2] << "] degrees for Q sample = " << q_sample << "\n";
         calculateQAndAddToOutput(possibleHKL, orientedUB, goniometer.getR());
@@ -341,7 +342,7 @@ void PredictPeaks::exec() {
     logNumberOfPeaksFound(allowedPeakCount);
 
   } else {
-    for (auto &goniometerMatrix : gonioVec) {
+    for (auto const &goniometerMatrix : gonioVec) {
       // Final transformation matrix (HKL to Q in lab frame)
       DblMatrix orientedUB = goniometerMatrix * ub;
 
@@ -357,7 +358,7 @@ void PredictPeaks::exec() {
                            "no extended detector space has been defined\n";
       }
 
-      for (auto &possibleHKL : possibleHKLs) {
+      for (auto const &possibleHKL : possibleHKLs) {
         if (lambdaFilter.isAllowed(possibleHKL)) {
           calculateQAndAddToOutput(possibleHKL, orientedUB, goniometerMatrix);
           ++allowedPeakCount;
@@ -503,7 +504,7 @@ void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(const IPeaksWorkspace_spt
   double peaks_q_convention_factor = qConventionFactor(peaksWorkspace->getConvention());
 
   for (int i = 0; i < static_cast<int>(peaksWorkspace->getNumberPeaks()); ++i) {
-    IPeak &p = peaksWorkspace->getPeak(i);
+    IPeak const &p = peaksWorkspace->getPeak(i);
     // Get HKL from that peak
     V3D hkl = p.getHKL() * peaks_q_convention_factor;
 

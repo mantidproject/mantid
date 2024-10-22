@@ -68,6 +68,7 @@ public:
   bool operator()(const double &left, const double &right) const {
     // soft equal, if the diff left-right is below a numerical error
     // (uncertainty) threshold, we cannot say
+    // NOTE this could perhaps use FloatingPointComparison::equal operation
     return (left < right) && (std::abs(left - right) > 1 * std::numeric_limits<double>::epsilon());
   }
 };
