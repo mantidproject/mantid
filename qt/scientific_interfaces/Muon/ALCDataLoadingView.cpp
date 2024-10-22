@@ -26,8 +26,8 @@ const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI", "M
 namespace MantidQt::CustomInterfaces {
 
 ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
-    : m_widget(widget), m_periodInfo(std::make_unique<MuonPeriodInfo>()), m_selectedLog(DEFAULT_LOG), m_numPeriods(0),
-      m_presenter() {}
+    : m_widget(widget), m_watcher(new QFileSystemWatcher()), m_timer(new QTimer()),
+      m_periodInfo(std::make_shared<MuonPeriodInfo>()), m_selectedLog(DEFAULT_LOG), m_numPeriods(0), m_presenter() {}
 
 ALCDataLoadingView::~ALCDataLoadingView() = default;
 
@@ -86,10 +86,10 @@ void ALCDataLoadingView::initialize() {
 
   // Watcher to check if directory to load data from changes
   // Need to connect using function pointers because directoryChanged() is somehow not recognised as a signal
-  connect(&m_watcher, &QFileSystemWatcher::directoryChanged, [this]() { m_presenter->updateDirectoryChangedFlag(); });
+  connect(m_watcher, &QFileSystemWatcher::directoryChanged, [this]() { m_presenter->updateDirectoryChangedFlag(); });
 
   // Timer to send timeout() signal intermitently
-  connect(&m_timer, SIGNAL(timeout()), this, SLOT(handleTimerEvent()));
+  connect(m_timer, SIGNAL(timeout()), this, SLOT(notifyTimerEvent()));
 }
 
 /**
@@ -389,34 +389,16 @@ void ALCDataLoadingView::runsAutoAddToggled(bool on) {
     m_ui.runs->setReadOnly(true);
     m_ui.load->setEnabled(false);
     setLoadStatus("Auto Add", "orange");
-    handleStartWatching(true);
+    m_presenter->handleStartWatching(true);
   } else {
     m_ui.runs->setReadOnly(false);
     m_ui.load->setEnabled(true);
     setLoadStatus("Waiting", "orange");
-    handleStartWatching(false);
+    m_presenter->handleStartWatching(false);
   }
 }
 
-void ALCDataLoadingView::handleStartWatching(bool watch) {
-  if (watch) {
-    // Get path to watch and add to watcher
-    const auto path = getPath();
-    m_watcher.addPath(QString::fromStdString(path));
-    // start a timer that executes every second
-    m_timer.start(1000);
-  } else {
-    // Check if watcher has a directory, then remove all
-    if (!m_watcher.directories().empty()) {
-      m_watcher.removePaths(m_watcher.directories());
-    }
-    // Stop timer
-    m_timer.stop();
-    m_presenter->resetLatestAutoRunAndWasAutoRange();
-  }
-}
-
-void ALCDataLoadingView::handleTimerEvent() { m_presenter->handleTimerEvent(); }
+void ALCDataLoadingView::notifyTimerEvent() { m_presenter->handleTimerEvent(); }
 
 void ALCDataLoadingView::setRunsTextWithoutSearch(const std::string &text) {
   m_ui.runs->setFileTextWithoutSearch(QString::fromStdString(text));
@@ -458,6 +440,10 @@ std::string ALCDataLoadingView::getAlphaValue() const {
 void ALCDataLoadingView::showAlphaMessage(const bool alpha) { m_ui.alphaMessage->setVisible(alpha); }
 
 std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> ALCDataLoadingView::getPeriodInfo() { return m_periodInfo; }
+
+QFileSystemWatcher *ALCDataLoadingView::getFileSystemWatcher() { return m_watcher; }
+
+QTimer *ALCDataLoadingView::getTimer() { return m_timer; }
 
 // Slots for calling presenter to handle different events
 

@@ -88,13 +88,13 @@ public:
   void showAlphaMessage(const bool alpha) override;
   void setFileExtensions(const std::vector<std::string> &extensions) override;
   std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> getPeriodInfo() override;
+  QFileSystemWatcher *getFileSystemWatcher() override;
+  QTimer *getTimer() override;
 
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
 
   // Slots
-  void handleStartWatching(bool watch) override;
-  void handleTimerEvent() override;
   void instrumentChanged(QString instrument) override;
   void notifyLoadClicked() override;
   void notifyRunsEditingChanged() override;
@@ -102,6 +102,7 @@ public:
   void notifyRunsFoundFinished() override;
   void openManageDirectories() override;
   void notifyPeriodInfoClicked() override;
+  void notifyTimerEvent() override;
 
 private:
   /// Common function to set available items in a combo box
@@ -116,10 +117,10 @@ private:
   QWidget *const m_widget;
 
   /// Watches the path for changes
-  QFileSystemWatcher m_watcher;
+  QFileSystemWatcher *const m_watcher;
 
   /// Timer of running timer
-  QTimer m_timer;
+  QTimer *m_timer;
 
   /// Period Info Widget displayed from the view
   std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> m_periodInfo;

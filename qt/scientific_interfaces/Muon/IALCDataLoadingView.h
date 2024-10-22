@@ -8,6 +8,8 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/MuonPeriodInfo.h"
+#include <QFileSystemWatcher>
+#include <QTimer>
 
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -105,6 +107,10 @@ public:
   /// Period Info Widget displayed from the view
   virtual std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> getPeriodInfo() = 0;
 
+  virtual QFileSystemWatcher *getFileSystemWatcher() = 0;
+
+  virtual QTimer *getTimer() = 0;
+
 public slots:
   /// Performs any necessary initialization
   virtual void initialize() = 0;
@@ -180,11 +186,6 @@ public slots:
   /// Sets text and ensure runs are not searched for
   virtual void setRunsTextWithoutSearch(const std::string &text) = 0;
 
-  /// Private Slots
-  virtual void handleStartWatching(bool watch) = 0;
-
-  virtual void handleTimerEvent() = 0;
-
   /// Slots for notifying presenter that view was changed
   virtual void instrumentChanged(QString instrument) = 0;
 
@@ -199,6 +200,8 @@ public slots:
   virtual void openManageDirectories() = 0;
 
   virtual void notifyPeriodInfoClicked() = 0;
+
+  virtual void notifyTimerEvent() = 0;
 
 signals:
   /// New data has been loaded
