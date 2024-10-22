@@ -52,6 +52,7 @@ Bugfixes
 - Algorithm :ref:`ExtractFFTSpectrum <algm-ExtractFFTSpectrum>` no longer causes an unreliable segmentation fault.
 - Algorithm :ref:`LoadIsawUB <algm-LoadIsawUB>` now correctly adds the UB to the first experiment info when the input workspace has more than one.
 - Algorithms :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` have been fixed to correctly work with :ref:`Ragged Workspaces <Ragged_Workspace>`.
+- Algorithms :ref:`CatalogLogin <algm-CatalogLogin>` and :ref:`CatalogGetDataFiles <algm-CatalogGetDataFiles>` now use the correct new URL for ICAT for the ISIS facility.
 
 Removed
 #######
