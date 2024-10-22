@@ -28,7 +28,6 @@ class Prop:
 
 
 class ReflectometryISISCreateTransmission(DataProcessorAlgorithm):
-
     _LOAD_ALG = "LoadNexus"
     _FLOOD_ALG = "ApplyFloodWorkspace"
     _BACK_SUB_ALG = "ReflectometryBackgroundSubtraction"
@@ -120,7 +119,13 @@ class ReflectometryISISCreateTransmission(DataProcessorAlgorithm):
             "ProcessingInstructions": self.getPropertyValue(Prop.BACK_SUB_ROI),
             "BackgroundCalculationMethod": "PerDetectorAverage",
         }
-        return self._run_algorithm(workspace, self._BACK_SUB_ALG, "InputWorkspace", args)
+
+        try:
+            return self._run_algorithm(workspace, self._BACK_SUB_ALG, "InputWorkspace", args)
+        except Exception as ex:
+            # The error that's printed can be confusing if we don't mention the background subtraction algorithm
+            self.log().error(f"Error running {self._BACK_SUB_ALG}")
+            raise RuntimeError(ex)
 
     def _create_transmission_ws(self, workspace):
         """Create the transmission workspace"""
