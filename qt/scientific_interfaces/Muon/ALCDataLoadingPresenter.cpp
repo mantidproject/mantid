@@ -437,9 +437,23 @@ void ALCDataLoadingPresenter::handleInstrumentChanged(const std::string &instrum
  */
 void ALCDataLoadingPresenter::updateDirectoryChangedFlag() { m_directoryChanged = true; }
 
-void ALCDataLoadingPresenter::resetLatestAutoRunAndWasAutoRange() {
-  m_lastRunLoadedAuto = -2; // Ensures negative if +1 to not be valid
-  m_wasLastAutoRange = false;
+void ALCDataLoadingPresenter::handleStartWatching(bool watch) {
+  if (watch) {
+    // Get path to watch and add to watcher
+    const auto path = m_view->getPath();
+    m_view->getFileSystemWatcher()->addPath(QString::fromStdString(path));
+    // start a timer that executes every second
+    m_view->getTimer()->start(1000);
+  } else {
+    // Check if watcher has a directory, then remove all
+    if (!m_view->getFileSystemWatcher()->directories().empty()) {
+      m_view->getFileSystemWatcher()->removePaths(m_view->getFileSystemWatcher()->directories());
+    }
+    // Stop timer
+    m_view->getTimer()->stop();
+    m_lastRunLoadedAuto = -2; // Ensures negative if +1 to not be valid
+    m_wasLastAutoRange = false;
+  }
 }
 
 /**

@@ -58,7 +58,7 @@ public:
   /// Handle timer event that checks directory for new files added
   virtual void handleTimerEvent() = 0;
 
-  virtual void resetLatestAutoRunAndWasAutoRange() = 0;
+  virtual void handleStartWatching(bool watch) = 0;
 };
 
 } // namespace CustomInterfaces

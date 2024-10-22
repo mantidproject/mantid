@@ -68,7 +68,7 @@ public:
   /// Handle timer event that checks directory for new files added
   void handleTimerEvent() override;
 
-  void resetLatestAutoRunAndWasAutoRange() override;
+  void handleStartWatching(bool watch) override;
 
 private:
   /// Load new data and update the view accordingly
