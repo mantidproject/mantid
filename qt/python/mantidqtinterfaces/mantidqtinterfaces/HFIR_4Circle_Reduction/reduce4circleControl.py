@@ -31,7 +31,28 @@ import random
 import os
 import numpy
 
-from mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility import *
+from mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility import (
+    check_list,
+    generate_mask_file,
+    get_det_xml_file_name,
+    get_det_xml_file_url,
+    get_hb3a_wavelength,
+    get_integrated_peak_ws_name,
+    get_log_data,
+    get_mask_ws_name,
+    get_mask_xml_temp,
+    get_merged_hkl_md_name,
+    get_merged_md_name,
+    get_merge_pt_info_ws_name,
+    get_peak_ws_name,
+    get_spice_file_name,
+    get_spice_file_url,
+    get_spice_table_name,
+    get_step_motor_parameters,
+    get_raw_data_workspace_name,
+    get_wave_length,
+    load_hb3a_md_data,
+)
 import mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility as fourcircle_utility
 from mantidqtinterfaces.HFIR_4Circle_Reduction.peakprocesshelper import PeakProcessRecord
 from mantidqtinterfaces.HFIR_4Circle_Reduction.peakprocesshelper import SinglePointPeakIntegration
@@ -46,7 +67,6 @@ import mantid
 import mantid.simpleapi as mantidsimple
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
-from numpy import *
 
 
 DebugMode = True

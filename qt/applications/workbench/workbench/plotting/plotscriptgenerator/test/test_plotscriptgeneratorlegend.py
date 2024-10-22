@@ -14,7 +14,15 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from mantid.simpleapi import CreateWorkspace
-from workbench.plotting.plotscriptgenerator.legend import *
+from workbench.plotting.plotscriptgenerator.legend import (
+    convert_to_point_size,
+    generate_label_font_commands,
+    generate_title_font_commands,
+    generate_visible_command,
+    get_legend_command_kwargs,
+    get_mpl_kwargs,
+    mpl_default_kwargs,
+)
 
 DEFAULT_TITLE_FONT_KWARGS = {
     "font": mpl_default_kwargs["title_font"],

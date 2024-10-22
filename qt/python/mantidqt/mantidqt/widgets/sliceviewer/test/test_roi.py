@@ -1,6 +1,7 @@
 import unittest
+import numpy as np
 from mantidqt.widgets.sliceviewer.models.roi import _adjust_xmin_xmax_for_event_workspace
-from mantid.simpleapi import *
+from mantid.simpleapi import CreateSampleWorkspace
 
 
 class TestROIDefs(unittest.TestCase):
