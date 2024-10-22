@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 #
 #
-from mantid.py36compat import dataclass
+from dataclasses import dataclass
 import os
 import psutil
 from psutil import virtual_memory
