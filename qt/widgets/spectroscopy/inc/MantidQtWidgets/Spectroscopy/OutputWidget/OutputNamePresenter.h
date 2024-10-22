@@ -8,47 +8,42 @@
 
 #include "../DllConfig.h"
 #include "MantidKernel/System.h"
-#include "ui_OutputName.h"
-#include <QRegExpValidator>
-#include <QWidget>
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputNameView.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
-class MANTID_SPECTROSCOPY_DLL IOutputName {
-public:
-  ~IOutputName() = default;
 
-  virtual int findInsertIndexLabel(QString const &basename) = 0;
-  virtual std::string getCurrentLabel() const = 0;
+class MANTID_SPECTROSCOPY_DLL IOutputNamePresenter {
+public:
+  virtual ~IOutputNamePresenter() = default;
+
+  virtual int findInsertIndexLabel(std::string const &basename) = 0;
   virtual std::string generateOutputLabel() = 0;
   virtual void generateLabelWarning() const = 0;
+  virtual void handleUpdateOutputLabel() = 0;
+  virtual void setWsSuffixes(std::vector<std::string> const &suffixes) = 0;
 
-  virtual void setWsSuffixes(QStringList const &suffixes) = 0;
   virtual void setOutputWsBasename(std::string const &outputBasename, std::string const &outputSuffix = "") = 0;
 };
 
-class MANTID_SPECTROSCOPY_DLL OutputName final : public QWidget, public IOutputName {
-  Q_OBJECT
+class MANTID_SPECTROSCOPY_DLL OutputNamePresenter final : public IOutputNamePresenter {
 public:
-  OutputName(QWidget *parent = nullptr);
-  ~OutputName() override = default;
+  OutputNamePresenter(IOutputNameView *view);
+  ~OutputNamePresenter() override = default;
 
-  int findInsertIndexLabel(QString const &outputBasename) override;
-  std::string getCurrentLabel() const override;
+  int findInsertIndexLabel(std::string const &outputBasename) override;
   std::string generateOutputLabel() override;
   void generateLabelWarning() const override;
+  void handleUpdateOutputLabel() override;
 
   void setOutputWsBasename(std::string const &outputBasename, std::string const &outputSuffix = "") override;
-  void setWsSuffixes(QStringList const &suffixes) override;
-
-private slots:
-  void updateOutputLabel();
+  void setWsSuffixes(std::vector<std::string> const &suffixes) override;
 
 private:
-  Ui::OutputName m_uiForm;
-  QStringList m_suffixes;
-  QString m_currBasename;
-  QString m_currOutputSuffix;
+  IOutputNameView *m_view;
+  std::vector<std::string> m_suffixes;
+  std::string m_currBasename;
+  std::string m_currOutputSuffix;
 };
 
 } // namespace CustomInterfaces
