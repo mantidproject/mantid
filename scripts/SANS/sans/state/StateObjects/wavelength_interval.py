@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Tuple, List
+from dataclasses import dataclass, field
 
-from mantid.py36compat import dataclass, field
 from sans.state.JsonSerializable import JsonSerializable
 
 
@@ -14,7 +14,7 @@ WavRange = Tuple[float, float]
 WavRangePairs = List[WavRange]
 
 
-@dataclass()
+@dataclass
 class WavelengthInterval(metaclass=JsonSerializable):
     wavelength_step: float = 0.0
     user_wavelength_input: str = ""
