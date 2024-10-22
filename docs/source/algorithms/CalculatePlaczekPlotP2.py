@@ -1,6 +1,5 @@
-from __future__ import absolute_import, division, print_function
-
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import CalculatePlaczek, ConvertUnits, CropWorkspace, Load, SetSampleMaterial
 import matplotlib.pyplot as plt
 import numpy as np
 
