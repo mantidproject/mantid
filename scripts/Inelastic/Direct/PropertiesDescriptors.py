@@ -19,7 +19,7 @@ import mantid.simpleapi as mantid
 from mantid import api
 
 import Direct.ReductionHelpers as prop_helpers
-from Direct.AbsorptionShapes import *
+from Direct.AbsorptionShapes import anAbsorptionShape
 
 
 # -----------------------------------------------------------------------------------------
@@ -328,12 +328,12 @@ class IncidentEnergy(PropDescriptor):
         self._autoEiCalculated = False
         if ei_mon_spec is None:
             ei_mon_spec = instance.ei_mon_spectra
-        guess_ei_ws = GetAllEi(Workspace=monitor_ws, Monitor1SpecID=ei_mon_spec[0], Monitor2SpecID=ei_mon_spec[1])
+        guess_ei_ws = mantid.GetAllEi(Workspace=monitor_ws, Monitor1SpecID=ei_mon_spec[0], Monitor2SpecID=ei_mon_spec[1])
         guessEi = guess_ei_ws.readX(0)
         fin_ei = []
         for ei in guessEi:
             try:
-                ei_ref, _, _, _ = GetEi(
+                ei_ref, _, _, _ = mantid.GetEi(
                     InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1], EnergyEstimate=ei
                 )
                 fin_ei.append(ei_ref)
@@ -349,7 +349,7 @@ class IncidentEnergy(PropDescriptor):
         self._num_energies = len(fin_ei)
         self._cur_iter_en = 0
         # Clear dataservice from unnecessary workspace
-        DeleteWorkspace(guess_ei_ws)
+        mantid.DeleteWorkspace(guess_ei_ws)
 
     def validate(self, instance, owner=None):
         #

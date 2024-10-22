@@ -5,7 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import StartLiveData
 
 
 def get_live_data(instrument_name, frequency=60, accumulation="Add", output_name="live"):

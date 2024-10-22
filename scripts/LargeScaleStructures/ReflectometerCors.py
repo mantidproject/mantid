@@ -5,7 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import (
+    ConvertUnits,
+    CreateSingleValuedWorkspace,
+    ExponentialCorrection,
+    LoadRawDialog,
+    OneMinusExponentialCor,
+    Plus,
+    PolynomialCorrection,
+)
 
 
 def heliumDetectorEff(workspace):

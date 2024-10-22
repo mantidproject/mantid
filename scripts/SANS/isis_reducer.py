@@ -17,10 +17,9 @@ from reducer_singleton import Reducer
 import isis_reduction_steps
 import isis_instrument
 from reduction_settings import get_settings_object
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
-from mantid.api import IEventWorkspace
+from mantid.api import mtd, ExperimentInfo, IEventWorkspace, Workspace, WorkspaceGroup
+from mantid.kernel import Logger
+from mantid.simpleapi import AddSampleLog, CloneWorkspace, DeleteWorkspace, ExtractSingleSpectrum
 import SANSUtility as su
 import os
 import copy

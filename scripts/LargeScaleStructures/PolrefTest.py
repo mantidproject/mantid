@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from .ReflectometerCors import *
+from mantid.simpleapi import CalculateFlatBackground, ConvertUnits, CropWorkspace, Divide, LoadRaw, RebinToWorkspace
+from .ReflectometerCors import heliumDetectorEff, monitor2Eff
 
 
 def quick(run):

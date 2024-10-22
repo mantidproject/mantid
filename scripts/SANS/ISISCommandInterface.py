@@ -12,14 +12,15 @@ be run
 
 import isis_instrument
 from reducer_singleton import ReductionSingleton
-from mantid.kernel import Logger
 import isis_reduction_steps
 import isis_reducer
-from centre_finder import *
-from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, ExperimentInfo
+from centre_finder import is_workspace_which_requires_angle, BeamCenterLogger, CentreFinder, CentrePositioner, FindDirectionEnum
+from mantid.api import mtd, AnalysisDataService, ExperimentInfo, WorkspaceGroup
+from mantid.kernel import config, Logger
+from mantid.simpleapi import AddSampleLog, CloneWorkspace, DeleteWorkspace, GroupWorkspaces, RenameWorkspace, Scale
 import copy
-from SANSadd2 import *
+import os
+from SANSadd2 import add_runs
 import SANSUtility as su
 from SANSUtility import deprecated
 import SANSUserFileParser as UserFileParser
