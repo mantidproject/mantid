@@ -407,4 +407,14 @@ void ElwinPresenter::renameHandle(std::string const &wsName, std::string const &
   updateInterface();
 }
 
+/**
+ * Overriding function called when changing file extensions in indirect settings:
+ * For Elwin Presenter, this function is reimplemented just to update the suffices in the
+ * output label widget.
+ */
+void ElwinPresenter::setFileExtensionsByName(bool filter) {
+  (void)filter;
+  m_outputName->setWsSuffixes(InterfaceUtils::getSampleWSSuffixes("Elwin"));
+}
+
 } // namespace MantidQt::CustomInterfaces

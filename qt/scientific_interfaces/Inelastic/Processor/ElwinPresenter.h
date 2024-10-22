@@ -93,6 +93,7 @@ protected:
   void addDataToModel(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
 private:
+  void setFileExtensionsByName(bool filter) override;
   void updateInterface();
   void updateTableFromModel();
   void updateIntegrationRange();
