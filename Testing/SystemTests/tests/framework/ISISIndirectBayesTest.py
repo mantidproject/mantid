@@ -9,7 +9,9 @@ from abc import ABCMeta, abstractmethod
 import os
 import warnings
 
-from mantid.simpleapi import *
+from mantid.api import AnalysisDataService
+from mantid.kernel import config
+from mantid.simpleapi import BayesStretch, BayesQuasi, ExtractSingleSpectrum, Fit, LoadNexusProcessed, Scale
 from sys import platform
 import systemtesting
 

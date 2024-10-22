@@ -5,10 +5,61 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import (
+    mtd,
+    AlgorithmFactory,
+    AnalysisDataService,
+    DataProcessorAlgorithm,
+    FileAction,
+    FileProperty,
+    Progress,
+    PropertyMode,
+    WorkspaceGroup,
+    WorkspaceGroupProperty,
+    WorkspaceProperty,
+)
+from mantid.kernel import (
+    logger,
+    Direction,
+    FloatArrayProperty,
+    FloatBoundedValidator,
+    IntArrayMandatoryValidator,
+    IntArrayProperty,
+    IntBoundedValidator,
+    Property,
+    StringArrayProperty,
+    StringListValidator,
+)
+from mantid.simpleapi import (
+    CorrectKiKf,
+    ConvertUnits,
+    DeleteWorkspace,
+    Divide,
+    ExponentialCorrection,
+    GroupWorkspaces,
+    Scale,
+    SetInstrumentParameter,
+    CalculateFlatBackground,
+    ConvertFromDistribution,
+    ConvertToDistribution,
+    CropWorkspace,
+)
 from mantid import config
+
+from IndirectReductionCommon import (
+    load_files,
+    get_multi_frame_rebin,
+    get_detectors_to_mask,
+    unwrap_monitor,
+    process_monitor_efficiency,
+    scale_monitor,
+    scale_detectors,
+    rebin_reduction,
+    group_spectra,
+    fold_chopped,
+    rename_reduction,
+    mask_detectors,
+)
 
 import os
 
@@ -164,21 +215,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
     # pylint: disable=too-many-locals
     def PyExec(self):
-        from IndirectReductionCommon import (
-            load_files,
-            get_multi_frame_rebin,
-            get_detectors_to_mask,
-            unwrap_monitor,
-            process_monitor_efficiency,
-            scale_monitor,
-            scale_detectors,
-            rebin_reduction,
-            group_spectra,
-            fold_chopped,
-            rename_reduction,
-            mask_detectors,
-        )
-
         self._setup()
         load_prog = Progress(self, start=0.0, end=0.10, nreports=2)
         load_prog.report("loading files")

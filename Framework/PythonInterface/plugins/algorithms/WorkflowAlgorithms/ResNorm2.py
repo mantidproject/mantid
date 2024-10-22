@@ -6,17 +6,26 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 from mantid.api import (
-    PythonAlgorithm,
+    mtd,
     AlgorithmFactory,
-    MatrixWorkspaceProperty,
-    WorkspaceGroup,
-    WorkspaceGroupProperty,
     ITableWorkspaceProperty,
     Progress,
     PropertyMode,
+    PythonAlgorithm,
+    MatrixWorkspaceProperty,
+    WorkspaceGroup,
+    WorkspaceGroupProperty,
 )
 from mantid.kernel import Direction
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    AppendSpectra,
+    CloneWorkspace,
+    ConvertSpectrumAxis,
+    CreateWorkspace,
+    DeleteWorkspace,
+    GroupWorkspaces,
+    NormaliseToUnity,
+)
 
 
 class ResNorm(PythonAlgorithm):

@@ -11,7 +11,9 @@ System test for CNCS reduction
 
 import os
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import CNCSSuggestTIB, DeleteWorkspace, DgsReduction, GenerateGroupingPowder, Load, LoadNXSPE, SaveNXSPE
 
 
 class CNCSReductionTest(systemtesting.MantidSystemTest):

@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-from mantid.kernel import *
-from mantid.api import *
-import mantid.simpleapi
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, MatrixWorkspaceProperty
+from mantid.kernel import Direction
+from mantid.simpleapi import LoadAscii
 import math
 
 
@@ -39,7 +39,7 @@ class PearlMCAbsorption(PythonAlgorithm):
 
         wkspace_name = self.getPropertyValue("OutputWorkspace")
         # Load the file
-        ascii_wkspace = mantid.simpleapi.LoadAscii(Filename=filename, OutputWorkspace=wkspace_name, Separator="Space", Unit=x_unit)
+        ascii_wkspace = LoadAscii(Filename=filename, OutputWorkspace=wkspace_name, Separator="Space", Unit=x_unit)
         if thickness is None:
             coeffs = ascii_wkspace
         else:

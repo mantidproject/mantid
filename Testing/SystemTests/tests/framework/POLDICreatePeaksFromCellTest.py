@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-locals,too-few-public-methods
 import systemtesting
-from mantid.simpleapi import *
+from mantid.simpleapi import PoldiCreatePeaksFromCell
 
 # These tests check the correctness of the structure factor calculation for some common crystal structures.
 # All structure factors for comparison have been calculated using VESTA 3.2.1, which is described in the following

@@ -7,8 +7,8 @@
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
 import os
-from mantid import *
-from mantid.simpleapi import *
+from mantid.kernel import config, logger
+from mantid.simpleapi import LRScalingFactors
 
 
 class LRPrimaryFractionTest(systemtesting.MantidSystemTest):

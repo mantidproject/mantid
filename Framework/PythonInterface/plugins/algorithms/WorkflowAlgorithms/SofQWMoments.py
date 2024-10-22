@@ -5,10 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # Algorithm to start Bayes programs
-from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, NumericAxis, Progress
-from mantid.kernel import Direction
-from mantid import logger
+from mantid.api import mtd, DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, NumericAxis, Progress
+from mantid.kernel import logger, Direction
 
 import numpy as np
 

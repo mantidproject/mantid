@@ -7,6 +7,7 @@
 # pylint: disable=invalid-name,too-many-instance-attributes,too-many-branches,no-init,redefined-builtin
 
 import os
+import math
 import numpy as np
 from typing import Tuple
 
@@ -22,7 +23,18 @@ from mantid.api import (
 from mantid.kernel import StringListValidator, Direction
 import mantid.simpleapi as s_api
 from mantid import config, logger
-from IndirectCommon import *
+from IndirectCommon import (
+    check_analysers_or_e_fixed,
+    check_dimensions_equal,
+    check_hist_zero,
+    check_x_range,
+    extract_float,
+    extract_int,
+    get_efixed,
+    get_two_theta_and_q,
+    identify_non_zero_bin_range,
+    pad_array,
+)
 
 
 def _calculate_eisf(
