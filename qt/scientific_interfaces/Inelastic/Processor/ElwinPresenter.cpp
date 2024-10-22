@@ -209,8 +209,8 @@ void ElwinPresenter::handleRun() {
   }
   // Group input workspaces
   algQueue.emplace_back(m_model->setupGroupAlgorithm(inputWorkspacesString, inputGroupWsName));
-  algQueue.emplace_back(m_model->setupElasticWindowMultiple(inputGroupWsName, m_view->getLogName(),
-                                                            m_view->getLogValue()));
+  algQueue.emplace_back(
+      m_model->setupElasticWindowMultiple(inputGroupWsName, m_view->getLogName(), m_view->getLogValue()));
   m_algorithmRunner->execute(std::move(algQueue));
 
   // Set the result workspace for Python script export
@@ -242,6 +242,7 @@ void ElwinPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dia
     updateTableFromModel();
     m_view->updatePreviewWorkspaceNames(m_dataModel->getWorkspaceNames());
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
+    m_outputName->setOutputWsBasename(WorkspaceUtils::parseRunNumbers(m_dataModel->getWorkspaceNames()), "_elwin_eq");
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
   }
