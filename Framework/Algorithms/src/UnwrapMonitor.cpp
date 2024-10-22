@@ -16,6 +16,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -204,7 +205,7 @@ const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX, const i
       const double wavelength = m_conversionConstant / velocity;
       newX.emplace_back(wavelength);
       // Remove the duplicate boundary bin
-      if (tof == m_Tmax && std::abs(wavelength - tempX_L.front()) < 1.0e-5)
+      if (tof == m_Tmax && Kernel::withinAbsoluteDifference(wavelength, tempX_L.front(), 1.0e-5))
         newX.pop_back();
       // Record the bins that fall in this range for copying over the data &
       // errors
@@ -223,7 +224,7 @@ const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX, const i
 
   // Record the point at which the unwrapped sections are joined, first time
   // through only
-  Property *join = getProperty("JoinWavelength");
+  Property const *join = getProperty("JoinWavelength");
   if (join->isDefault()) {
     g_log.information() << "Joining wavelength: " << tempX_L.front() << " Angstrom\n";
     setProperty("JoinWavelength", tempX_L.front());

@@ -23,6 +23,7 @@ private:
   Mantid::Kernel::V3D a, b, c, d;
 
 public:
+  void testSize() { TS_ASSERT_EQUALS(a.size(), 3); }
   void testEmptyConstructor() {
     // very important as a MD geometry rely on it later
     TS_ASSERT_EQUALS(a.X(), 0.0);
