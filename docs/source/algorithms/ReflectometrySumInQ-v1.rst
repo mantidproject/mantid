@@ -130,4 +130,3 @@ References
 .. categories::
 
 .. sourcelink::
-

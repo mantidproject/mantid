@@ -113,4 +113,3 @@ To install these plugins, run eclipse, Select Help>Eclipse Marketplace and insta
 Eclox: Eclipse plugin for Doxygen.
 
 cppStyle: ClangFormat tool as a code formatter.
-

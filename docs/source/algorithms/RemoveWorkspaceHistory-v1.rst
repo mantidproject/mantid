@@ -60,6 +60,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-
-
-

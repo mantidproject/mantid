@@ -106,4 +106,3 @@ Exercise 3
    :width: 300px
 .. |AddBackgroundOption.png| image:: /images/AddBackgroundOption.png
    :width: 500px
-

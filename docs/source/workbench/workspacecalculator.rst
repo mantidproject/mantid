@@ -32,4 +32,3 @@ and non-group workspace types.
 The output of the operation, if successful, is placed in the ADS with the chosen
 name, specified through the final `WorkspaceSelector`. Should no name be provided,
 a default one, `output`, is used instead.
-

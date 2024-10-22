@@ -32,4 +32,3 @@ And so the use of Plotting your Data!
 * :ref:`05_plotting_advanced`
 * :ref:`06_formatting_plots`
 * :ref:`07_exercises`
-

@@ -13,4 +13,3 @@ This is a Python binding to the C++ class Mantid::API::WorkspaceHistory.
     :members:
     :undoc-members:
     :inherited-members:
-

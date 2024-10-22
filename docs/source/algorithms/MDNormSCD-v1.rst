@@ -105,4 +105,3 @@ The source for how this calculation is done is
 .. categories::
 
 .. sourcelink::
-

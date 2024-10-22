@@ -79,4 +79,3 @@ Usage
 .. categories::
 
 .. sourcelink::
-

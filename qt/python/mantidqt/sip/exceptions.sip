@@ -43,4 +43,3 @@
     SIP_UNBLOCK_THREADS
 %End
 };
-

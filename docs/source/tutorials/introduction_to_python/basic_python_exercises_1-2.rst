@@ -26,4 +26,3 @@ Exercise 2
 
    -  Extend the program to also print the ratio of successive numbers
       of the sequence.
-

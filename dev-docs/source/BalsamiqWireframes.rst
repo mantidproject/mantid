@@ -40,4 +40,3 @@ Invite collaborators to provide feedback or even edit the wireframes of your pro
 
 Projects can be downloaded as a BMPR file. Regularly backing up projects by downloading its BMPR file from the projects homepage is recommended. It is also possible to upload existing BMPR files.
 Wireframes in a project can be exported to a variety of formats, for instance PDF or PNG.
-

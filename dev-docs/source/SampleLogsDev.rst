@@ -145,4 +145,3 @@ This log is therefore a combination of the `period n` and `running logs` defined
 periods during data collection. However, rather than recording a single value describing when
 the data collection for that period started, the `framelog` data contains a discrete number of time recordings
 corresponding to the period that each "bit" of neutron data was collected in.
-

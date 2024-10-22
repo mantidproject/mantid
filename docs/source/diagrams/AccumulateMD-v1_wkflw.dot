@@ -50,4 +50,3 @@ digraph AccumulateMD {
   mergeMD   -> OutputWorkspace
 
 }
-

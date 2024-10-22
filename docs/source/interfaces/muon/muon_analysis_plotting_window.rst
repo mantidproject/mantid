@@ -21,4 +21,3 @@ In the sequential fitting tab, the user can select the data to plot by highlight
 
 :ref:`Muon Analysis <Muon_Analysis-ref>`,
 :ref:`Muon Analysis Plotting <Muon_Analysis_plotting-ref>`
-

@@ -30,7 +30,3 @@ The values in the vector parameters must be separated by spaces, for example:
 .. categories::
 
 .. sourcelink::
-
-
-
-

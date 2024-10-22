@@ -81,4 +81,3 @@ Usage
 .. categories::
 
 .. sourcelink::
-

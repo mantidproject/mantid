@@ -121,4 +121,3 @@ References
 .. categories::
 
 .. sourcelink::
-

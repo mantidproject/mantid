@@ -117,4 +117,3 @@ The editor window's status bar gives the current state of the Python
 interpreter. It will tell you if there is a script currently running, or if the
 interpreter is idle. It will also inform you of when the last script was
 executed and whether it was executed successfully or if there were errors.
-

@@ -54,4 +54,3 @@ Usage
 .. categories::
 
 .. sourcelink::
-

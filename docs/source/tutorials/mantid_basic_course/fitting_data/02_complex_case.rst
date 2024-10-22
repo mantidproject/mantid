@@ -192,4 +192,3 @@ You can even show error bars to compare how good your fit is to the errors. To d
 .. |ArrowRight.png| image:: /images/ArrowRight.png
 .. |SaveSetupDialog.png| image:: /images/SaveSetupDialog.png
 .. |PeakFitToolbar.png| image:: /images/PeakFitToolbar.png
-

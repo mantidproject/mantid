@@ -54,4 +54,3 @@ cropWav            -> outputWorkspaceWav
 {rank=same; wavMin; wavMax}
 
 }
-
