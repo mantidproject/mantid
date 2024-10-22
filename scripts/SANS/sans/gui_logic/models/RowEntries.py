@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.py36compat import dataclass
+from dataclasses import dataclass
+
 from sans.common.enums import RowState, SampleShape
 from sans.common.file_information import SANSFileInformationFactory
 from sans.gui_logic.models.RowOptionsModel import RowOptionsModel
@@ -68,7 +69,7 @@ class _UserEntries(object):
                 self.can_direct_period,
                 self.can_scatter_period,
                 self.can_transmission_period,
-                self.sample_direct,
+                self.sample_direct_period,
                 self.sample_scatter_period,
                 self.sample_transmission_period,
             ) == (
@@ -89,7 +90,7 @@ class _UserEntries(object):
                 other.can_direct_period,
                 other.can_scatter_period,
                 other.can_transmission_period,
-                other.sample_direct,
+                other.sample_direct_period,
                 other.sample_scatter_period,
                 other.sample_transmission_period,
             )

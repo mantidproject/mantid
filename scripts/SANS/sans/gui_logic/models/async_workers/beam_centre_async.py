@@ -5,8 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import TYPE_CHECKING, Optional, Dict
+from dataclasses import dataclass
 
-from mantid.py36compat import dataclass
 from mantidqt.utils.async_qt_adaptor import qt_async_task, IQtAsync
 from mantid.kernel import Logger
 from mantidqt.utils.asynchronous import AsyncTaskFailure, AsyncTaskSuccess
