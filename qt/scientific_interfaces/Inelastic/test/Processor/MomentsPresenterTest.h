@@ -19,6 +19,8 @@
 #include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
+#include "MantidFrameworkTestHelpers/MockAlgorithm.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #include <MantidQtWidgets/Common/MockAlgorithmRunner.h>
@@ -51,6 +53,8 @@ public:
 
     m_workspace = createWorkspace(5);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("workspace_test", m_workspace);
+
+    m_algorithm = std::make_shared<MockAlgorithm>();
   }
 
   void tearDown() override {
@@ -61,6 +65,7 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_algorithmRunner));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_outputPlotView.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_runView.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_algorithm.get()));
 
     m_presenter.reset();
     m_view.reset();
@@ -90,6 +95,43 @@ public:
     m_presenter->handleValueChanged("EMax", value);
   }
 
+  void test_runComplete_when_error_is_false() {
+    m_model->setInputWorkspace("workspace_name");
+
+    MatrixWorkspace_sptr workspace = WorkspaceCreationHelper::create2DWorkspace(5, 4);
+    auto const workspaceProperty =
+        std::make_unique<PropertyWithValue<MatrixWorkspace_sptr>>("OutputWorkspace", workspace);
+
+    m_algorithm->expectGetProperty("OutputWorkspace", workspaceProperty.get());
+
+    EXPECT_CALL(*m_view, plotOutput(workspace)).Times(1);
+    EXPECT_CALL(*m_model, getOutputWorkspace()).WillOnce(Return("workspace_name_Moments"));
+
+    m_presenter->runComplete(m_algorithm, false);
+  }
+
+  void test_runComplete_when_error_is_true() {
+    // Assert these are never called
+    EXPECT_CALL(*m_view, plotOutput(_)).Times(0);
+    EXPECT_CALL(*m_model, getOutputWorkspace()).Times(0);
+
+    m_presenter->runComplete(m_algorithm, true);
+  }
+
+  void test_runComplete_when_error_is_false_and_the_workspace_has_fewer_than_five_histograms() {
+    MatrixWorkspace_sptr workspace = WorkspaceCreationHelper::create2DWorkspace(4, 4);
+    auto const workspaceProperty =
+        std::make_unique<PropertyWithValue<MatrixWorkspace_sptr>>("OutputWorkspace", workspace);
+
+    m_algorithm->expectGetProperty("OutputWorkspace", workspaceProperty.get());
+
+    // Assert these are never called
+    EXPECT_CALL(*m_view, plotOutput(workspace)).Times(0);
+    EXPECT_CALL(*m_model, getOutputWorkspace()).Times(0);
+
+    m_presenter->runComplete(m_algorithm, false);
+  }
+
 private:
   NiceMock<MockMomentsModel> *m_model;
   NiceMock<MockAlgorithmRunner> *m_algorithmRunner;
@@ -100,4 +142,5 @@ private:
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
+  std::shared_ptr<MockAlgorithm> m_algorithm;
 };

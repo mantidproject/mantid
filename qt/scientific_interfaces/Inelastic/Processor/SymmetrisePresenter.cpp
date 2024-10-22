@@ -94,7 +94,8 @@ void SymmetrisePresenter::handleSaveClicked() {
  *
  * @param error If the algorithm failed
  */
-void SymmetrisePresenter::runComplete(bool error) {
+void SymmetrisePresenter::runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) {
+  (void)algorithm;
   if (error) {
     setIsPreview(false);
     return;

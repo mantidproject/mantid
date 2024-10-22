@@ -8,6 +8,7 @@
 
 #include "DllConfig.h"
 #include "IMomentsView.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
@@ -49,7 +50,7 @@ public:
   void setSaveResultEnabled(bool enable) override;
   void plotNewData(std::string const &filename) override;
   void replot() override;
-  void plotOutput(std::string const &outputWorkspace) override;
+  void plotOutput(Mantid::API::MatrixWorkspace_sptr outputWorkspace) override;
   void showMessageBox(const std::string &message) const override;
 
 private slots:

@@ -26,17 +26,12 @@ MomentsModel::MomentsModel() : m_inputWorkspace(), m_outputWorkspaceName(), m_eM
 API::IConfiguredAlgorithm_sptr MomentsModel::setupMomentsAlgorithm() const {
   auto momentsAlg = AlgorithmManager::Instance().create("SofQWMoments", -1);
   momentsAlg->initialize();
+  momentsAlg->setAlwaysStoreInADS(false);
   auto properties = std::make_unique<AlgorithmRuntimeProps>();
   properties->setProperty("InputWorkspace", m_inputWorkspace);
   properties->setProperty("EnergyMin", m_eMin);
   properties->setProperty("EnergyMax", m_eMax);
-  properties->setProperty("OutputWorkspace", m_outputWorkspaceName);
-
-  if (m_scale) {
-    properties->setProperty("Scale", m_scaleValue);
-  } else {
-    properties->setProperty("Scale", 1.0);
-  }
+  properties->setProperty("Scale", m_scale ? m_scaleValue : 1.0);
 
   MantidQt::API::IConfiguredAlgorithm_sptr confAlg =
       std::make_shared<API::ConfiguredAlgorithm>(momentsAlg, std::move(properties));

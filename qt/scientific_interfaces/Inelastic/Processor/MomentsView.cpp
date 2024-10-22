@@ -203,12 +203,12 @@ void MomentsView::replot() { m_uiForm.ppRawPlot->replot(); }
 
 MantidWidgets::RangeSelector *MomentsView::getRangeSelector() { return m_uiForm.ppRawPlot->getRangeSelector("XRange"); }
 
-void MomentsView::plotOutput(std::string const &outputWorkspace) {
+void MomentsView::plotOutput(MatrixWorkspace_sptr outputWorkspace) {
   // Plot each spectrum
   m_uiForm.ppMomentsPreview->clear();
-  m_uiForm.ppMomentsPreview->addSpectrum("M0", QString(outputWorkspace.data()), 0, Qt::green);
-  m_uiForm.ppMomentsPreview->addSpectrum("M1", QString(outputWorkspace.data()), 1, Qt::black);
-  m_uiForm.ppMomentsPreview->addSpectrum("M2", QString(outputWorkspace.data()), 2, Qt::red);
+  m_uiForm.ppMomentsPreview->addSpectrum("M0", outputWorkspace, 0, Qt::green);
+  m_uiForm.ppMomentsPreview->addSpectrum("M1", outputWorkspace, 1, Qt::black);
+  m_uiForm.ppMomentsPreview->addSpectrum("M2", outputWorkspace, 2, Qt::red);
   m_uiForm.ppMomentsPreview->resizeX();
 
   // Enable plot and save buttons
