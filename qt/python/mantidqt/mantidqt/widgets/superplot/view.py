@@ -8,7 +8,7 @@
 
 from qtpy.QtWidgets import QDockWidget, QHeaderView, QTreeWidgetItem, QToolButton
 from qtpy.QtGui import QColor
-from qtpy.QtCore import *
+from qtpy.QtCore import Signal, QObject, QSize, Qt
 from qtpy import uic
 
 import os

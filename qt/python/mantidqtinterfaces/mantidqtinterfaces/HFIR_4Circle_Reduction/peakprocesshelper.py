@@ -8,7 +8,14 @@
 import numpy
 import time
 import random
-from mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility import *
+from mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility import (
+    check_float,
+    check_dictionary,
+    check_integer,
+    check_list,
+    check_string,
+    get_spice_table_name,
+)
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
 

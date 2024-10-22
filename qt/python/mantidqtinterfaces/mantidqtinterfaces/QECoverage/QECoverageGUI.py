@@ -12,7 +12,7 @@ from mantid.kernel import logger
 from qtpy import QtWidgets, QtCore
 from qtpy.QtGui import QDoubleValidator, QRegExpValidator
 from qtpy.QtCore import QRegExp
-from mantidqt.MPLwidgets import *
+from mantidqt.MPLwidgets import FigureCanvas, NavigationToolbar2QT
 from matplotlib.figure import Figure
 from scipy import constants
 

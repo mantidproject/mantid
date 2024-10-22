@@ -10,7 +10,7 @@ import os
 import sys
 
 import numpy
-from mantidqt.MPLwidgets import *
+from mantidqt.MPLwidgets import FigureCanvas
 from mantidqt.gui_helper import show_interface_help
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 from matplotlib.figure import Figure

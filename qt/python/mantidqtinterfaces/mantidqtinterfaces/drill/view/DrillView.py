@@ -8,7 +8,7 @@
 import os
 
 from qtpy.QtWidgets import QMainWindow, QMessageBox, QDialog, QMenu, QAction
-from qtpy.QtCore import *
+from qtpy.QtCore import Signal, QProcess, Qt
 from qtpy import uic
 
 from mantidqt.widgets import manageuserdirectories, instrumentselector

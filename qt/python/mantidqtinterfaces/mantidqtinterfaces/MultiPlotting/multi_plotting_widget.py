@@ -8,7 +8,7 @@ from qtpy import QtWidgets, QtCore
 from copy import deepcopy
 from mantidqtinterfaces.MultiPlotting.subplot.subplot import subplot
 from mantidqtinterfaces.MultiPlotting.QuickEdit.quickEdit_widget import QuickEditWidget
-from mantidqtinterfaces.MultiPlotting.multi_plotting_context import *
+from mantidqtinterfaces.MultiPlotting.multi_plotting_context import PlottingContext
 
 
 class MultiPlotWindow(QtWidgets.QMainWindow):
