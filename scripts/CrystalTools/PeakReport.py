@@ -14,7 +14,7 @@ import mantid.api
 from mantidplot import plotSlice
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import *
+from reportlab.platypus import Image, Paragraph, SimpleDocTemplate, Spacer, Table
 
 
 class PeakReport(object):
@@ -104,7 +104,7 @@ class PeakReport(object):
         if not isinstance(md_workspace, mantid.api.IMDWorkspace):
             raise ValueError("A MD Workspace has not been provided.")
         if not isinstance(peaks_workspace, mantid.api.IPeaksWorkspace):
-            raise VaueError("A Peaks Worksapce has not been provided.")
+            raise ValueError("A Peaks Worksapce has not been provided.")
         if not pdf_name:
             pdf_name = md_workspace.name() + "IntegrationReport.pdf"
 
