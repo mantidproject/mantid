@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/MuonPeriodInfo.h"
 
 #include "DllConfig.h"
 #include "IALCDataLoadingPresenter.h"
@@ -86,6 +87,8 @@ public:
   std::string getAlphaValue() const override;
   void showAlphaMessage(const bool alpha) override;
   void setFileExtensions(const std::vector<std::string> &extensions) override;
+  std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> getPeriodInfo() override;
+
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
 
@@ -117,6 +120,9 @@ private:
 
   /// Timer of running timer
   QTimer m_timer;
+
+  /// Period Info Widget displayed from the view
+  std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> m_periodInfo;
 
   QString m_selectedLog;
   size_t m_numPeriods;

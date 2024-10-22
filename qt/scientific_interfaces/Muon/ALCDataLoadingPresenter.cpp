@@ -31,13 +31,11 @@ bool is_decimal(const char character) { return character == '.'; }
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace MantidQt::MantidWidgets;
 
 namespace MantidQt::CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view), m_periodInfo(std::make_unique<MuonPeriodInfo>()), m_numDetectors(0), m_loadingData(false),
-      m_directoryChanged(false), m_lastRunLoadedAuto(-2), m_filesLoaded(), m_wasLastAutoRange(false),
-      m_previousFirstRun("") {}
+    : m_view(view), m_numDetectors(0), m_loadingData(false), m_directoryChanged(false), m_lastRunLoadedAuto(-2),
+      m_filesLoaded(), m_wasLastAutoRange(false), m_previousFirstRun("") {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
@@ -83,7 +81,7 @@ void ALCDataLoadingPresenter::handleRunsFound() {
   } catch (const std::runtime_error &errorUpdateInfo) {
     m_view->setLoadStatus("Error", "red");
     m_view->displayError(errorUpdateInfo.what());
-    m_periodInfo->clear();
+    m_view->getPeriodInfo()->clear();
   }
 }
 
@@ -519,8 +517,8 @@ void ALCDataLoadingPresenter::handleTimerEvent() {
  * Shows the widget, if the widget is already on show raise to the top
  */
 void ALCDataLoadingPresenter::handlePeriodInfoClicked() {
-  m_periodInfo->show();
-  m_periodInfo->raise();
+  m_view->getPeriodInfo()->show();
+  m_view->getPeriodInfo()->raise();
 }
 
 /**
@@ -528,13 +526,10 @@ void ALCDataLoadingPresenter::handlePeriodInfoClicked() {
  * @param ws :: The workspace to read the period info from
  */
 void ALCDataLoadingPresenter::updateAvailablePeriodInfo(const MatrixWorkspace_sptr &ws) {
-
   // Clear any current information
-  m_periodInfo->clear();
-
+  m_view->getPeriodInfo()->clear();
   // Read in all logs and add to widget
-  m_periodInfo->addInfo(ws);
-  m_periodInfo->setWidgetTitleRuns(m_view->getInstrument() + m_view->getRunsText());
+  m_view->getPeriodInfo()->addInfo(ws);
+  m_view->getPeriodInfo()->setWidgetTitleRuns(m_view->getInstrument() + m_view->getRunsText());
 }
-
 } // namespace MantidQt::CustomInterfaces

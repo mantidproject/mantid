@@ -7,6 +7,7 @@
 #pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/MuonPeriodInfo.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -100,6 +101,9 @@ public:
   virtual void showAlphaMessage(const bool alpha) = 0;
 
   virtual void setFileExtensions(const std::vector<std::string> &extensions) = 0;
+
+  /// Period Info Widget displayed from the view
+  virtual std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> getPeriodInfo() = 0;
 
 public slots:
   /// Performs any necessary initialization
