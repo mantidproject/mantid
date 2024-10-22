@@ -2673,7 +2673,7 @@ void FitPropertyBrowser::addAutoBackground() {
     return;
   if (!m_autoBgAttributes.isEmpty()) { // set attributes
     QStringList attList = m_autoBgAttributes.split(' ');
-    foreach (QString att, attList) {
+    foreach (const QString &att, attList) {
       QStringList name_value = att.split('=');
       if (name_value.size() == 2) {
         QString name = name_value[0].trimmed();
@@ -2902,7 +2902,7 @@ void FitPropertyBrowser::processMultiBGResults() {
   // other colomns - the parameters
   Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   table->addColumn("int", "Index");
-  foreach (QString par, parNames) {
+  foreach (const QString &par, parNames) {
     table->addColumn("double", par.toStdString());
   }
   // Create WorkspaceGroup with the fit results
@@ -3119,7 +3119,7 @@ void FitPropertyBrowser::minimizerChanged() {
 
   // add new minimizer properties
   auto minzer = Mantid::API::FuncMinimizerFactory::Instance().createMinimizer(this->minimizer());
-  auto &properties = minzer->getProperties();
+  const auto &properties = minzer->getProperties();
   for (auto property : properties) {
     QString propName = QString::fromStdString((*property).name());
     QtProperty *prop = nullptr;

@@ -502,7 +502,7 @@ QString FitOptionsBrowser::getMinimizer(QtProperty * /*unused*/) const {
 
   auto subProperties = m_minimizerGroup->subProperties();
   if (subProperties.size() > 1) {
-    foreach (QtProperty *prop, subProperties) {
+    foreach (const QtProperty *prop, subProperties) {
       if (prop == m_minimizer)
         continue;
       if (prop->propertyManager() == m_stringManager) {
