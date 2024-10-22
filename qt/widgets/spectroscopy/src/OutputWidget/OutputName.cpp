@@ -43,9 +43,9 @@ int OutputName::findInsertIndexLabel(QString const &outputBasename) {
 void OutputName::generateLabelWarning() const {
   auto textColor = QString("color: darkRed");
   if (MantidWidgets::WorkspaceUtils::doesExistInADS(m_uiForm.lblName->text().toStdString())) {
-    m_uiForm.lblWarning->setText("Output Name does exist in ADS, workspace will be overriden.");
+    m_uiForm.lblWarning->setText("Output Name is in use, workspace will be overriden.");
   } else {
-    m_uiForm.lblWarning->setText("Unused name on ADS, new workspace will be created.");
+    m_uiForm.lblWarning->setText("Unused name, new workspace will be created.");
     textColor = QString("color: darkGreen");
   }
   m_uiForm.lblWarning->setStyleSheet(textColor);
