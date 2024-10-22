@@ -12,7 +12,6 @@
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/MuonPeriodInfo.h"
 #include <atomic>
 
 namespace MantidQt {
@@ -92,9 +91,6 @@ private:
 
   /// View which the object works with
   IALCDataLoadingView *const m_view;
-
-  /// Period Info Widget displayed from the view
-  std::unique_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> m_periodInfo;
 
   /// Last loaded data workspace
   Mantid::API::MatrixWorkspace_sptr m_loadedData;

@@ -18,6 +18,7 @@
 #include <algorithm>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 const QString DEFAULT_LOG("run_number");
 const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI", "MUSR"};
@@ -25,7 +26,8 @@ const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI", "M
 namespace MantidQt::CustomInterfaces {
 
 ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
-    : m_widget(widget), m_selectedLog(DEFAULT_LOG), m_numPeriods(0), m_presenter() {}
+    : m_widget(widget), m_periodInfo(std::make_unique<MuonPeriodInfo>()), m_selectedLog(DEFAULT_LOG), m_numPeriods(0),
+      m_presenter() {}
 
 ALCDataLoadingView::~ALCDataLoadingView() = default;
 
@@ -454,6 +456,8 @@ std::string ALCDataLoadingView::getAlphaValue() const {
 }
 
 void ALCDataLoadingView::showAlphaMessage(const bool alpha) { m_ui.alphaMessage->setVisible(alpha); }
+
+std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> ALCDataLoadingView::getPeriodInfo() { return m_periodInfo; }
 
 // Slots for calling presenter to handle different events
 
