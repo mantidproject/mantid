@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAlgorithms/CreateSampleWorkspace.h"
 #include "MantidAlgorithms/CreateMonteCarloWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -36,9 +37,8 @@ public:
     // Name of the output workspace.
     std::string outWSName("MonteCarloTest_WS");
 
-    // Create test input if necessary by filling in appropriate code below.
-    // Consider using MantidFrameworkTestHelpers/WorkspaceCreationHelper.h
-    // MatrixWorkspace_sptr inputWS =
+    // Create input workspace for the algorithm
+    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::create2DWorkspace(1, 10);
 
     CreateMonteCarloWorkspace alg;
     // Don't put output in ADS by default
@@ -46,21 +46,29 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
 
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Iterations", 1000));
+    const int num_iterations = 1000;
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InstrumentWorkspace", inputWS));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Iterations", num_iterations));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Seed", 32));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", outWSName));
 
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
-    // Retrieve the workspace from the algorithm. The type here will probably need to change. It should
-    // be the type using in declareProperty for the "OutputWorkspace" type.
-    // We can't use auto as it's an implicit conversion.
+    // Retrieve the output workspace
     Workspace_sptr outputWS = alg.getProperty("OutputWorkspace");
-    TS_ASSERT_EQUALS(NumOfSim, Iterations);
     TS_ASSERT(outputWS);
-    TS_FAIL("TODO: Check the results and remove this line");
+
+    // Cast to the correct type (not sure if needed)
+    auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+    TS_ASSERT(matrixWS);
+
+    std::cout << "Number of histograms: " << matrixWS->getNumberHistograms() << std::endl;
+    std::cout << "Size of Y data (expected " << num_iterations << "): " << matrixWS->y(0).size() << std::endl;
+
+    TS_ASSERT_EQUALS(matrixWS->y(0).size(), num_iterations); // Check if Y data has the expected number of entries
+
+    TS_FAIL("TODO: Remove this line once the test works as expected.");
   }
 
-  void test_Something() { TS_FAIL("You forgot to write a test!"); }
 };
