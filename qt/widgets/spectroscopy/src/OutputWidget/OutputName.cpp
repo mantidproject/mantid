@@ -19,7 +19,7 @@ OutputName::OutputName(QWidget *parent) : QWidget(parent), m_suffixes(), m_currB
   m_uiForm.setupUi(this);
   auto const validator = new QRegExpValidator(QRegExp("[a-zA-Z-_0-9]*"));
   m_uiForm.leLabel->setValidator(validator);
-  connect(m_uiForm.leLabel, SIGNAL(editingFinished()), this, SLOT(updateOutputLabel()));
+  connect(m_uiForm.leLabel, &QLineEdit::editingFinished, this, &OutputName::updateOutputLabel);
 }
 
 void OutputName::setWsSuffixes(QStringList const &suffixes) { m_suffixes = suffixes; }
@@ -42,16 +42,16 @@ int OutputName::findInsertIndexLabel(QString const &outputBasename) {
 
 void OutputName::generateLabelWarning() const {
   auto textColor = QString("color: darkRed");
-  if (MantidWidgets::WorkspaceUtils::doesExistInADS(m_uiForm.lblName->text().toStdString())) {
-    m_uiForm.lblWarning->setText("Output Name is in use, workspace will be overriden.");
+  if (MantidWidgets::WorkspaceUtils::doesExistInADS(m_uiForm.lbName->text().toStdString())) {
+    m_uiForm.lbWarning->setText("Output Name is in use, workspace will be overriden.");
   } else {
-    m_uiForm.lblWarning->setText("Unused name, new workspace will be created.");
+    m_uiForm.lbWarning->setText("Unused name, new workspace will be created.");
     textColor = QString("color: darkGreen");
   }
-  m_uiForm.lblWarning->setStyleSheet(textColor);
+  m_uiForm.lbWarning->setStyleSheet(textColor);
 }
 
-std::string OutputName::getCurrentLabel() const { return m_uiForm.lblName->text().toStdString(); }
+std::string OutputName::getCurrentLabel() const { return m_uiForm.lbName->text().toStdString(); }
 std::string OutputName::generateOutputLabel() {
   auto outputName = m_currBasename;
   return outputName.insert(findInsertIndexLabel(outputName), addUnderscoreIf(m_uiForm.leLabel->text())).toStdString();
@@ -61,8 +61,8 @@ void OutputName::updateOutputLabel() {
   if (!m_uiForm.leLabel->text().isEmpty())
     labelName.insert(findInsertIndexLabel(labelName), "_" + m_uiForm.leLabel->text());
   labelName += m_currOutputSuffix;
-  m_uiForm.lblName->setText(labelName);
-  m_uiForm.lblName->setToolTip(labelName);
+  m_uiForm.lbName->setText(labelName);
+  m_uiForm.lbName->setToolTip(labelName);
   generateLabelWarning();
 }
 } // namespace MantidQt::CustomInterfaces
