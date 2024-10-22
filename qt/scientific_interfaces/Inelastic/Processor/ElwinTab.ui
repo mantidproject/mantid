@@ -339,7 +339,7 @@
     </widget>
    </item>
    <item>
-    <widget class="MantidQt::CustomInterfaces::OutputName" name="outNameWidget" native="true"/>
+    <widget class="MantidQt::CustomInterfaces::OutputNameView" name="outNameWidget" native="true"/>
    </item>
    <item>
     <widget class="QGroupBox" name="gbOutput">
@@ -404,9 +404,9 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MantidQt::CustomInterfaces::OutputName</class>
+   <class>MantidQt::CustomInterfaces::OutputNameView</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputName.h</header>
+   <header>MantidQtWidgets/Spectroscopy/OutputWidget/OutputNameView.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
