@@ -21,7 +21,12 @@ public:
   ALCDataLoadingModel();
   ~ALCDataLoadingModel() = default;
   void load(const std::vector<std::string> &files, const IALCDataLoadingView *view);
+  void cancelLoading() const;
   void setLoadingData(bool isLoading);
+  bool getLoadingData();
+  void setLoadedData(const Mantid::API::MatrixWorkspace_sptr &data);
+  Mantid::API::MatrixWorkspace_sptr getLoadedData();
+  Mantid::API::MatrixWorkspace_sptr exportWorkspace();
 
 private:
   /// Last loaded data workspace

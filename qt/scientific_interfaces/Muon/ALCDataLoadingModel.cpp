@@ -25,6 +25,17 @@ ALCDataLoadingModel::ALCDataLoadingModel()
       m_wasLastAutoRange(false), m_previousFirstRun("") {}
 
 void ALCDataLoadingModel::setLoadingData(bool isLoading) { m_loadingData = isLoading; }
+bool ALCDataLoadingModel::getLoadingData() { return m_loadingData; }
+
+void ALCDataLoadingModel::setLoadedData(const MatrixWorkspace_sptr &data) { m_loadedData = data; }
+MatrixWorkspace_sptr ALCDataLoadingModel::getLoadedData() { return m_loadedData; }
+
+MatrixWorkspace_sptr ALCDataLoadingModel::exportWorkspace() {
+  if (m_loadedData)
+    return std::const_pointer_cast<MatrixWorkspace>(m_loadedData);
+  return MatrixWorkspace_sptr();
+}
+
 /**
  * Load new data and update the view accordingly
  * @param files :: [input] range of files (user-specified or auto generated)
@@ -105,5 +116,7 @@ void ALCDataLoadingModel::load(const std::vector<std::string> &files, const IALC
     assert(m_loadedData->getNumberHistograms() == 4);
   }
 }
+
+void ALCDataLoadingModel::cancelLoading() const { m_LoadingAlg->cancel(); }
 
 } // namespace MantidQt::CustomInterfaces

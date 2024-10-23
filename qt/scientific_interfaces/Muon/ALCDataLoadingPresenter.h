@@ -28,7 +28,7 @@ public:
   void initialize() override;
 
   /// @return Last loaded data workspace
-  Mantid::API::MatrixWorkspace_sptr loadedData() const override { return m_loadedData; }
+  Mantid::API::MatrixWorkspace_sptr loadedData() const override { return m_model->getLoadedData(); }
 
   /// @return Loaded data as MatrixWorkspace_sptr
   Mantid::API::MatrixWorkspace_sptr exportWorkspace() override;
@@ -96,17 +96,8 @@ private:
   // Model
   std::unique_ptr<ALCDataLoadingModel> const m_model;
 
-  /// Last loaded data workspace
-  Mantid::API::MatrixWorkspace_sptr m_loadedData;
-
   /// Number of detectors for current first run
   size_t m_numDetectors;
-
-  // bool to state whether loading data
-  std::atomic_bool m_loadingData;
-
-  // Loading algorithm
-  Mantid::API::IAlgorithm_sptr m_LoadingAlg;
 
   /// Flag for changes in watched directory
   std::atomic_bool m_directoryChanged;

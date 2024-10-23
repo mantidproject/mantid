@@ -34,8 +34,8 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view, std::unique_ptr<ALCDataLoadingModel> model)
-    : m_view(view), m_model(std::move(model)), m_numDetectors(0), m_loadingData(false), m_directoryChanged(false),
-      m_lastRunLoadedAuto(-2), m_filesLoaded(), m_wasLastAutoRange(false), m_previousFirstRun("") {}
+    : m_view(view), m_model(std::move(model)), m_numDetectors(0), m_directoryChanged(false), m_lastRunLoadedAuto(-2),
+      m_filesLoaded(), m_wasLastAutoRange(false), m_previousFirstRun("") {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
@@ -124,7 +124,7 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
     m_view->displayError(errorLoadFiles.what());
     m_view->enableRunsAutoAdd(false);
     m_view->enableAll();
-    m_loadingData = false;
+    m_model->setLoadingData(false);
   }
 }
 
@@ -166,10 +166,9 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
 
   try {
     m_model->load(files, m_view);
-
     // Plot spectrum 0. It is either red period (if subtract is unchecked) or
     // red - green (if subtract is checked)
-    m_view->setDataCurve(m_loadedData);
+    m_view->setDataCurve(m_model->getLoadedData());
 
   } catch (const std::invalid_argument &e) {
     throw std::runtime_error(e.what()); // Caught in handle load request
@@ -279,20 +278,12 @@ std::string ALCDataLoadingPresenter::getPathFromFiles() const {
   return sameDirectory ? firstDirectory : "Multiple Directories";
 }
 
-MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() {
-  if (m_loadedData)
-    return std::const_pointer_cast<MatrixWorkspace>(m_loadedData);
-  return MatrixWorkspace_sptr();
-}
+MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() { return m_model->exportWorkspace(); }
 
 void ALCDataLoadingPresenter::setData(const MatrixWorkspace_sptr &data) {
-
   if (data) {
-    // Set the data
-    m_loadedData = data;
-    // Plot the data
-    m_view->setDataCurve(m_loadedData);
-
+    m_model->setLoadedData(data);
+    m_view->setDataCurve(data);
   } else {
     throw std::invalid_argument("Cannot load an empty workspace");
   }
@@ -340,11 +331,11 @@ std::string ALCDataLoadingPresenter::isCustomGroupingValid(const std::string &gr
  * If currently loading data
  * @returns :: True if currently in load() method
  */
-bool ALCDataLoadingPresenter::isLoading() const { return m_loadingData; }
+bool ALCDataLoadingPresenter::isLoading() const { return m_model->getLoadingData(); }
 /**
  * Cancels current loading algorithm
  */
-void ALCDataLoadingPresenter::cancelLoading() const { m_LoadingAlg->cancel(); }
+void ALCDataLoadingPresenter::cancelLoading() const { m_model->cancelLoading(); }
 
 void ALCDataLoadingPresenter::handleInstrumentChanged(const std::string &instrument) {
   // Clear path as instrument has changed
@@ -441,7 +432,7 @@ void ALCDataLoadingPresenter::handleTimerEvent() {
           // Stop watching and display error
           m_directoryChanged = false;
           m_view->enableAll();
-          m_loadingData = false;
+          m_model->setLoadingData(false);
           m_wasLastAutoRange = false;
           m_lastRunLoadedAuto = -2;
           m_view->displayError(loadError.what());
