@@ -19,8 +19,6 @@ using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
 
-namespace {} // namespace
-
 class OutputNamePresenterTest : public CxxTest::TestSuite {
 public:
   static OutputNamePresenterTest *createSuite() { return new OutputNamePresenterTest(); }
