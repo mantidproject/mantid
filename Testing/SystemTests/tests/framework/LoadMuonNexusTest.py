@@ -25,3 +25,20 @@ class LoadEMUWithFloatResolution(MantidSystemTest):
 
         first_good_data = output[3]
         self.assertDelta(0.416, first_good_data, 0.0001)
+
+
+class LoadHDF4NexusFromMUSR(MantidSystemTest):
+    """
+    MUSR00032900 is an old data file which uses the HDF4 format. It was generated in
+    cycle 11_1, which was back when Muon scientists only generated data in HDF4 format.
+    """
+
+    def runTest(self):
+        output = Load(Filename="MUSR00032900.nxs", StoreInADS=False)
+
+        workspace = output[0]
+        history = workspace.getHistory().getAlgorithmHistories()
+        self.assertEquals("LoadMuonNexus", history[0].getPropertyValue("LoaderName"))
+
+        first_good_data = output[3]
+        self.assertDelta(0.656, first_good_data, 0.0001)
