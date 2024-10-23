@@ -1,24 +1,27 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-import systemtesting
-from mantid.api import mtd
-from mantid.simpleapi import LoadMuonNexus
+from systemtesting import MantidSystemTest
+from mantid.simpleapi import Load
 
 
-class LoadMuonNexusTest(systemtesting.MantidSystemTest):
+class LoadEMUWithFloatResolution(MantidSystemTest):
+    """
+    EMU03087 is an old data file produced by CONVERT_NEXUS from MCS binary files.
+    Checked specifically because stores resolution (used to calculate FirstGoodData)
+    as NX_FLOAT32 opposed to NX_INT32 in other Muon files.
+    """
+
     def runTest(self):
-        # EMU03087 is an old data file produced by CONVERT_NEXUS from MCS binary files.
-        # Checked specifically because stores resolution (used to calculate FirstGoodData)
-        # as NX_FLOAT32 opposed to NX_INT32 in other Muon files.
-        loadResult = LoadMuonNexus(Filename="EMU03087.nxs", OutputWorkspace="EMU03087")
+        output = Load(Filename="EMU03087.nxs", StoreInADS=False)
 
-        firstGoodData = loadResult[3]
-        self.assertDelta(firstGoodData, 0.416, 0.0001)
+        workspace = output[0]
+        history = workspace.getHistory().getAlgorithmHistories()
+        self.assertEquals("LoadMuonNexus", history[0].getPropertyValue("LoaderName"))
 
-    def cleanup(self):
-        mtd.remove("EMU03087")
+        first_good_data = output[3]
+        self.assertDelta(0.416, first_good_data, 0.0001)
