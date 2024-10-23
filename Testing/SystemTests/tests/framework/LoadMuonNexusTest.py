@@ -6,7 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 from systemtesting import MantidSystemTest
-from mantid.simpleapi import Load
+from mantid.dataobjects import Workspace2D
+from mantid.simpleapi import CompareWorkspaces, Load
+
+
+def get_loader_name(workspace: Workspace2D) -> str:
+    history = workspace.getHistory().getAlgorithmHistories()
+    return history[0].getPropertyValue("LoaderName")
 
 
 class LoadEMUWithFloatResolution(MantidSystemTest):
@@ -20,8 +26,7 @@ class LoadEMUWithFloatResolution(MantidSystemTest):
         output = Load(Filename="EMU03087.nxs", StoreInADS=False)
 
         workspace = output[0]
-        history = workspace.getHistory().getAlgorithmHistories()
-        self.assertEquals("LoadMuonNexus", history[0].getPropertyValue("LoaderName"))
+        self.assertEquals("LoadMuonNexus", get_loader_name(workspace))
 
         first_good_data = output[3]
         self.assertDelta(0.416, first_good_data, 0.0001)
@@ -37,8 +42,35 @@ class LoadHDF4NexusFromMUSR(MantidSystemTest):
         output = Load(Filename="MUSR00032900.nxs", StoreInADS=False)
 
         workspace = output[0]
-        history = workspace.getHistory().getAlgorithmHistories()
-        self.assertEquals("LoadMuonNexus", history[0].getPropertyValue("LoaderName"))
+        self.assertEquals("LoadMuonNexus", get_loader_name(workspace))
 
         first_good_data = output[3]
         self.assertDelta(0.656, first_good_data, 0.0001)
+
+
+class LoadHDF4AndHDF5NexusFromMUSR(MantidSystemTest):
+    """
+    In cycle 22_4, a HDF4 format file for each run was generated and named 'MUSR00087008.nxs',
+    and a HDF5 format file was generated and named 'MUSR00087008.nxs_v2' (i.e. the HDF5 file
+    was suffixed with _v2). The HDF4 file would be loaded by default when specifying a run
+    number. This test checks that both these files can be loaded, and that the loaded workspaces
+    are equivalent. Note that I have changed the position of '_v2' in this test so it is possible
+    to load the HDF5 file.
+    """
+
+    def runTest(self):
+        output_hdf4 = Load(Filename="MUSR00087008.nxs", StoreInADS=False)
+        output_hdf5 = Load(Filename="MUSR00087008_v2.nxs", StoreInADS=False)
+
+        workspace_hdf4 = output_hdf4[0]
+        self.assertEquals("LoadMuonNexus", get_loader_name(workspace_hdf4))
+        workspace_hdf5 = output_hdf5[0]
+        self.assertEquals("LoadMuonNexusV2", get_loader_name(workspace_hdf5))
+
+        first_good_data_hdf4 = output_hdf4[3]
+        self.assertDelta(0.56, first_good_data_hdf4, 0.0001)
+        first_good_data_hdf5 = output_hdf5[3]
+        self.assertDelta(0.56, first_good_data_hdf5, 0.0001)
+
+        result, _ = CompareWorkspaces(Workspace1=workspace_hdf4, Workspace2=workspace_hdf5, Tolerance=1e-5)
+        self.assertTrue(result)
