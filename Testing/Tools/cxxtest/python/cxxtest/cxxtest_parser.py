@@ -1,4 +1,5 @@
 import re
+import sys
 from .cxxtest_misc import abort
 
 # Global variables

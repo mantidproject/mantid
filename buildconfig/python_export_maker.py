@@ -116,9 +116,8 @@ void export_%(class)s()
 }
 
 """
-    cppfile = file(exportfile, "w")
-    cppfile.write(cppcode % {"header": include, "namespace": namespace, "class": classname})
-    cppfile.close()
+    with open(exportfile, "w") as cppfile:
+        cppfile.write(cppcode % {"header": include, "namespace": namespace, "class": classname})
 
     print('Generated export file "%s"' % os.path.basename(exportfile))
     print("")
