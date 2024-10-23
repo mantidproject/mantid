@@ -15,8 +15,8 @@ import numpy as np
 import math
 import re
 from collections.abc import Iterable, Callable
-import mantid.simpleapi as mantid
-from mantid import api
+from mantid.api import mtd, FileFinder, Workspace
+from mantid.simpleapi import DeleteWorkspace, GetAllEi, GetEi
 
 import Direct.ReductionHelpers as prop_helpers
 from Direct.AbsorptionShapes import anAbsorptionShape
@@ -192,7 +192,7 @@ class IncidentEnergy(PropDescriptor):
                 if value.lower() == "auto":
                     self._use_autoEi = True
                     currentRun = instance.sample_run
-                    if isinstance(currentRun, api.Workspace):
+                    if isinstance(currentRun, Workspace):
                         currentRun = currentRun.getRunNumber()
                     if currentRun != self._autoEiRunNumber or currentRun is None:
                         self._autoEiRunNumber = currentRun
@@ -328,12 +328,12 @@ class IncidentEnergy(PropDescriptor):
         self._autoEiCalculated = False
         if ei_mon_spec is None:
             ei_mon_spec = instance.ei_mon_spectra
-        guess_ei_ws = mantid.GetAllEi(Workspace=monitor_ws, Monitor1SpecID=ei_mon_spec[0], Monitor2SpecID=ei_mon_spec[1])
+        guess_ei_ws = GetAllEi(Workspace=monitor_ws, Monitor1SpecID=ei_mon_spec[0], Monitor2SpecID=ei_mon_spec[1])
         guessEi = guess_ei_ws.readX(0)
         fin_ei = []
         for ei in guessEi:
             try:
-                ei_ref, _, _, _ = mantid.GetEi(
+                ei_ref, _, _, _ = GetEi(
                     InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spec[0], Monitor2Spec=ei_mon_spec[1], EnergyEstimate=ei
                 )
                 fin_ei.append(ei_ref)
@@ -349,7 +349,7 @@ class IncidentEnergy(PropDescriptor):
         self._num_energies = len(fin_ei)
         self._cur_iter_en = 0
         # Clear dataservice from unnecessary workspace
-        mantid.DeleteWorkspace(guess_ei_ws)
+        DeleteWorkspace(guess_ei_ws)
 
     def validate(self, instance, owner=None):
         #
@@ -763,17 +763,17 @@ class DetCalFile(PropDescriptor):
     def __set__(self, instance, val):
         """set detector calibration file using various formats"""
 
-        if val is None or isinstance(val, api.Workspace):
+        if val is None or isinstance(val, Workspace):
             # nothing provided or workspace provided or filename probably provided
-            if str(val) in mantid.mtd:
+            if str(val) in mtd:
                 # workspace name provided
-                val = mantid.mtd[str(val)]
+                val = mtd[str(val)]
             self._det_cal_file = val
             self._calibrated_by_run = False
             return
         if isinstance(val, str):
-            if val in mantid.mtd:
-                val = mantid.mtd[val]
+            if val in mtd:
+                val = mtd[val]
                 self._det_cal_file = val
                 self._calibrated_by_run = False
                 return
@@ -819,7 +819,7 @@ class DetCalFile(PropDescriptor):
             # nothing to look for
             return (True, "No Detector calibration file defined")
 
-        if isinstance(self._det_cal_file, api.Workspace):
+        if isinstance(self._det_cal_file, Workspace):
             # nothing to do.  Workspace used for calibration
             return (True, "Workspace {0} used for detectors calibration".format(self._det_cal_file.name()))
 
@@ -836,7 +836,7 @@ class DetCalFile(PropDescriptor):
             zero_padding = fac.instrument(inst_short_name).zeroPadding(dcf_val)
             file_hint = inst_short_name + str(dcf_val).zfill(zero_padding)
             try:
-                file_name = mantid.FileFinder.findRuns(file_hint)[0]
+                file_name = FileFinder.findRuns(file_hint)[0]
             # pylint: disable=bare-except
             except:
                 return (False, "Can not find run file corresponding to run N: {0}".format(file_hint))
@@ -847,7 +847,7 @@ class DetCalFile(PropDescriptor):
         file_name = prop_helpers.findFile(self._det_cal_file)
         if len(file_name) == 0:  # it still can be a run number as string
             try:
-                file_name = mantid.FileFinder.findRuns(self._det_cal_file)[0]
+                file_name = FileFinder.findRuns(self._det_cal_file)[0]
             # pylint: disable=bare-except
             except:
                 return (False, "Can not find file or run file corresponding to name : {0}".format(self._det_cal_file))
@@ -1643,13 +1643,13 @@ class RotationAngle(PropDescriptor):
 
     def __set__(self, instance, value):
         if isinstance(value, str):
-            if value in mantid.mtd:  ## its workspace
+            if value in mtd:  ## its workspace
                 self._log_ws_name = value
                 self._own_psi_value = None
             else:  # it is string representation of psi.  Should be
                 # convertible to number.
                 self._own_psi_value = float(value)
-        elif isinstance(value, api.Workspace):
+        elif isinstance(value, Workspace):
             self._log_ws_name = value.name()
             self._own_psi_value = None
         elif value is None:  # clear all
@@ -1663,12 +1663,12 @@ class RotationAngle(PropDescriptor):
         """
         working_ws = external_ws
         if working_ws is None:
-            working_ws = mantid.mtd[self._log_ws_name]
+            working_ws = mtd[self._log_ws_name]
         if working_ws is None:
             raise RuntimeError("No workspace provided. Can not read logs to identify psi")
         else:
             if isinstance(external_ws, str):
-                working_ws = mantid.mtd[external_ws]
+                working_ws = mtd[external_ws]
 
         value = None
         # pylint: disable=protected-access
