@@ -94,5 +94,5 @@ Maxent calculates the frequency spectra and then converts using an FFT to compar
 - It will contain several workspaces
 - The workspace that ends with ``phase_convergence`` will show a plot that tends to a single y value as x gets larger (just check a spectrum or two)
 - The table that ends with ``dead_times`` will have two columns: spectrum number and dead time
-- The table taht ends with ``phase_table`` will have three columns: spectrum number, asymmetry, and phase
+- The table that ends with ``phase_table`` will have three columns: spectrum number, asymmetry, and phase
 - The workspace that ends with ``reconstructed_spectra`` will look like the original data
