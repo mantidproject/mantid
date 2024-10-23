@@ -101,7 +101,7 @@ void ALCInterface::initLayout() {
   connect(m_ui.externalPlotButton, SIGNAL(clicked()), SLOT(externalPlotRequested()));
 
   auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
-  m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
+  m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView, std::make_unique<ALCDataLoadingModel>());
   m_dataLoading->initialize();
 
   m_baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
