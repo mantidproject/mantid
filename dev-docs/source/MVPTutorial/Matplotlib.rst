@@ -9,7 +9,7 @@ manipulate a sine wave plot, is to produce the plot itself.
 
 For the purposes of this tutorial it is assumed that the user is
 familiar with Matplotlib, if not see `Matplotlib documentation
-<https://matplotlib.org/users/pyplot_tutorial.html>`_.
+<https://matplotlib.org/stable/tutorials/pyplot.html>`_.
 
 The Matplotlib functions could be considered to be a model or a view
 and there is no correct answer to which. It could be a model as it
