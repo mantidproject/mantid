@@ -15,13 +15,28 @@
 """
 
 # these need to be moved into one NR folder or so
-# from ReflectometerCors import *
-from isis_reflectometry.l2q import *
-from isis_reflectometry.combineMulti import *
-from mantid.simpleapi import *  # New API
+from isis_reflectometry.l2q import l2q
+from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
+from mantid.kernel import config, logger
+from mantid.simpleapi import (
+    plotSpectrum,
+    CloneWorkspace,
+    ConvertUnits,
+    CropWorkspace,
+    DeleteWorkspace,
+    Divide,
+    ExponentialCorrection,
+    GroupWorkspaces,
+    Integration,
+    PolynomialCorrection,
+    RebinToWorkspace,
+    ReplaceSpecialValues,
+    RenameWorkspace,
+    Scale,
+    Stitch1D,
+    SumSpectra,
+)
 
-from mantid.api import WorkspaceGroup, MatrixWorkspace
-from mantid.kernel import logger
 from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 import math
 import re

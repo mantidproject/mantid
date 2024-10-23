@@ -36,12 +36,22 @@
 # The save directory must currently be specified in the Mantid.user.properties file
 
 # Make the reduction module available
-from ISISCommandInterface import *
+from ISISCommandInterface import (
+    createColetteScript,
+    isis_reducer,
+    issueWarning,
+    FindBeamCentre,
+    PlotResult,
+    ReductionSingleton,
+    WavRangeReduction,
+)
+from ISISCommandInterface import AssignCan, AssignSample, TransmissionCan, TransmissionSample  # noqa: F401
 import SANSUtility as su
-from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup
+from mantid.api import mtd, FileFinder, WorkspaceGroup
 from mantid.kernel import Logger
+from mantid.simpleapi import DeleteWorkspace, RenameWorkspace, SaveCanSAS1D, SaveNXcanSAS, SaveRKH
 import copy
+import os
 import re
 from reduction_settings import REDUCTION_SETTINGS_OBJ_NAME
 from isis_reduction_steps import UserFile
@@ -406,7 +416,7 @@ def BatchReduce(  # noqa: C901
                     elif algor == "SaveRKH":
                         SaveRKH(save_names_dict[workspace_name], workspace_name + ext, Append=False)
                     else:
-                        exec(algor + "('" + save_names_dict[workspace_name] + "', workspace_name+ext)")
+                        exec("from mantid.simpleapi import *; " + algor + "('" + save_names_dict[workspace_name] + "', workspace_name+ext)")
             # If we performed a zero-error correction, then we should get rid of the cloned workspaces
             if save_as_zero_error_free:
                 delete_cloned_workspaces(save_names_dict)

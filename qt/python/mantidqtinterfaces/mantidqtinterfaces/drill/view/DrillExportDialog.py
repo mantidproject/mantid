@@ -8,7 +8,7 @@
 import os
 
 from qtpy.QtWidgets import QDialog, QCheckBox, QToolButton
-from qtpy.QtCore import *
+from qtpy.QtCore import Qt
 from qtpy import uic
 
 from mantidqt import icons

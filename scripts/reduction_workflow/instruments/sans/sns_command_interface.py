@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,unused-import
+# ruff: noqa: F403   # Allow wild imports
 """
 Command set for EQSANS reduction
 """

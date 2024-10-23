@@ -6,7 +6,25 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import *
+from mantidqtinterfaces.Muon.GUI.Common.ADSHandler.workspace_naming import (
+    add_phasequad_extensions,
+    add_rebin_to_name,
+    check_phasequad_name,
+    create_covariance_matrix_name,
+    create_fitted_workspace_name,
+    create_model_fitting_parameter_combination_name,
+    create_model_fitting_parameters_group_name,
+    create_multi_domain_fitted_workspace_name,
+    create_parameter_table_name,
+    get_first_run_from_run_string,
+    get_group_or_pair_from_name,
+    get_pair_phasequad_name,
+    get_period_from_raw_name,
+    get_raw_data_workspace_name,
+    get_run_number_from_raw_name,
+    get_run_numbers_as_string_from_workspace_name,
+    remove_rebin_from_name,
+)
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context
 from mantid.api import AnalysisDataService, FileFinder
 from mantid import ConfigService

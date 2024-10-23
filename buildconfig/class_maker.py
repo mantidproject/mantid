@@ -9,7 +9,8 @@
 
 import argparse
 import datetime
-from cmakelists_utils import *
+import os
+from cmakelists_utils import add_to_cmake, find_basedir
 
 VERSION = "1.0"
 
