@@ -416,7 +416,7 @@ def BatchReduce(  # noqa: C901
                     elif algor == "SaveRKH":
                         SaveRKH(save_names_dict[workspace_name], workspace_name + ext, Append=False)
                     else:
-                        exec(algor + "('" + save_names_dict[workspace_name] + "', workspace_name+ext)")
+                        exec("from mantid.simpleapi import *; " + algor + "('" + save_names_dict[workspace_name] + "', workspace_name+ext)")
             # If we performed a zero-error correction, then we should get rid of the cloned workspaces
             if save_as_zero_error_free:
                 delete_cloned_workspaces(save_names_dict)
