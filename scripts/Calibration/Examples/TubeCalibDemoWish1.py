@@ -13,6 +13,7 @@
 #
 
 import tube
+from importlib import reload
 
 reload(tube)
 from tube_spec import TubeSpec
