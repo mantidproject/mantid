@@ -79,7 +79,7 @@ public:
   void exportPythonDialog() override;
 
 protected:
-  virtual void runComplete(Mantid::API::IAlgorithm_sptr algorithm, bool error) {
+  virtual void runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) {
     (void)algorithm;
     (void)error;
   };

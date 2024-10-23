@@ -56,7 +56,7 @@ public:
 
   void handleSaveClicked() override;
 
-  void runComplete(Mantid::API::IAlgorithm_sptr algorithm, bool error) override;
+  void runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) override;
 
 private:
   void plotNewData(std::string const &filename);

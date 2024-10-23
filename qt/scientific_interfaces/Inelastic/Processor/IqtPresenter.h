@@ -54,7 +54,7 @@ public:
   void handlePreviewSpectrumChanged(int spectra) override;
 
 protected:
-  void runComplete(Mantid::API::IAlgorithm_sptr algorithm, bool error) override;
+  void runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) override;
 
 private:
   void setFileExtensionsByName(bool filter) override;

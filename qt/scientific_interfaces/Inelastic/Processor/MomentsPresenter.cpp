@@ -99,7 +99,7 @@ void MomentsPresenter::handleValueChanged(std::string const &propName, double va
  *
  * @param error True if the algorithm exited due to error, false otherwise
  */
-void MomentsPresenter::runComplete(Mantid::API::IAlgorithm_sptr algorithm, bool error) {
+void MomentsPresenter::runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) {
   if (error)
     return;
 

@@ -72,7 +72,7 @@ void SqwPresenter::handleValidation(IUserInputValidator *validator) const {
  *
  * @param error If the algorithm chain failed
  */
-void SqwPresenter::runComplete(Mantid::API::IAlgorithm_sptr algorithm, bool error) {
+void SqwPresenter::runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) {
   (void)algorithm;
   if (!error) {
     setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
