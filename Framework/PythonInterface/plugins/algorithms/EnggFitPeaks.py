@@ -167,12 +167,13 @@ class EnggFitPeaks(PythonAlgorithm):
         # seemed to have good effects overall, but that can lead to fitting the wrong
         # (neighbor) peaks.
         MIN_RANGE_WIDTH = 1
+        MIN_WIDTH = 175
 
         startx = center - (width * COEF_LEFT)
         endx = center + (width * COEF_RIGHT)
         x_diff = endx - startx
         if x_diff < MIN_RANGE_WIDTH:
-            inc = (min_width - x_diff) / 5
+            inc = (MIN_WIDTH - x_diff) / 5
             endx = endx + 3 * inc
             startx = startx - 2 * inc
 

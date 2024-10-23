@@ -33,7 +33,7 @@ from scipy.ndimage import binary_dilation
 from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params, PeakData
 from plugins.algorithms.IntegratePeaksShoeboxTOF import get_bin_width_at_tof, set_peak_intensity
 from enum import Enum
-from typing import Callable
+from typing import Callable, Sequence
 
 MIN_TOF_WIDTH = 1e-3
 
@@ -428,7 +428,7 @@ class PeakFitter:
         self.sigma_sq_sum: float = 0
         self.peak_func_name: str = peak_func_name
         self.bg_func_name: str = bg_func_name
-        self.peak_params_to_fix: Seqence[str] = peak_params_to_fix
+        self.peak_params_to_fix: Sequence[str] = peak_params_to_fix
         self.exec_fit: Callable = exec_fit
         self.fit_kwargs: dict = None
         self.error_strategy: str = error_strategy

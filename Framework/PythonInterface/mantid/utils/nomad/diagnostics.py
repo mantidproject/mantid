@@ -17,6 +17,8 @@ import random
 import string
 from typing import List, NamedTuple
 
+from mantid.api import MatrixWorkspace
+
 
 class CollimationLevel(enum.Enum):
     r"""Collimation state of an eight-pack"""
@@ -284,7 +286,7 @@ class _NOMADMedianDetectorTest:
             pass
         return pixel_mask_states
 
-    def _get_intensities(self, intensities_workspace: "mantid.api.MatrixWorkspace") -> np.ma.core.MaskedArray:  # F821
+    def _get_intensities(self, intensities_workspace: MatrixWorkspace) -> np.ma.core.MaskedArray:  # F821
         r"""
         Integrated intensity of each pixel for pixels in use. Pixels of unused eightpacks are masked
 

@@ -194,7 +194,7 @@ class MuonMaxent(PythonAlgorithm):
                 RUNDATA_frames = 1000000
         return SENSE_taud, RUNDATA_frames
 
-    def getPhase(self, FLAGS_fixphase, POINTS_ngroups, POINTS_nhists, mylog):
+    def getPhase(self, FLAGS_fixphase, POINTS_ngroups, POINTS_nhists, GROUPING_group, mylog):
         filePHASE = None
         if self.getProperty("InputPhaseTable").isDefault:
             if FLAGS_fixphase and POINTS_ngroups > 2:
@@ -364,7 +364,7 @@ class MuonMaxent(PythonAlgorithm):
         # load Phase Table (previously done in BACK.for)
         # default being to distribute phases uniformly over 2pi, will work for
         # 2 groups F,B
-        filePHASE = self.getPhase(FLAGS_fixphase, POINTS_ngroups, POINTS_nhists, mylog)
+        filePHASE = self.getPhase(FLAGS_fixphase, POINTS_ngroups, POINTS_nhists, GROUPING_group, mylog)
         #
         # debugging
         phaseconvWS = self.phaseConvergenceTable(POINTS_ngroups, deadDetectors, OuterIter, filePHASE)
