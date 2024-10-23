@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from dataclasses import dataclass
 import functools
 import inspect
 import sys
@@ -11,8 +12,6 @@ from typing import Any, Callable, Optional, Sequence
 
 from qtpy.QtCore import Qt, QMetaObject, QObject, QThread, Slot
 from qtpy.QtWidgets import QApplication
-
-from mantid.py36compat import dataclass
 
 
 class QAppThreadCall(QObject):

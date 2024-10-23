@@ -1,1 +1,0 @@
-- The :ref:`ScaleX <algm-ScaleX>` algorithm has had a 95% speedup when using the "InstrumentParameter" property.

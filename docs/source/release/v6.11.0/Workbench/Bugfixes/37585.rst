@@ -1,1 +1,0 @@
-- Fixed a bug where right-clicking a 3D plot to change the colour bar scale could toggle the zoom tool.

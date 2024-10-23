@@ -1,1 +1,0 @@
-- Fixed a bug where the spectra numbering for reduced files from the :ref:`Indirect Data Reduction <interface-indirect-data-reduction>` interface was not consistent for a summed file reduction compared to individual file reduction.

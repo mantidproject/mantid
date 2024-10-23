@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/format.hpp>
@@ -22,12 +23,17 @@ Mantid::Kernel::Logger g_log("NumericAxis");
 class EqualWithinTolerance {
 public:
   explicit EqualWithinTolerance(double tolerance) : m_tolerance(tolerance){};
+  /**
+   * This handles NaNs and infs differently than the FloatingPointComparison operations.
+   * If this is not necessary, then this entire class may be replaced with
+   * Mantid::Kernel::withinAbsoluteDifference
+   */
   bool operator()(double a, double b) {
     if (std::isnan(a) && std::isnan(b))
       return true;
     if (std::isinf(a) && std::isinf(b))
       return true;
-    return std::abs(a - b) <= m_tolerance;
+    return Mantid::Kernel::withinAbsoluteDifference(a, b, m_tolerance);
   }
 
 private:

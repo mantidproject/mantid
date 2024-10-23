@@ -1,1 +1,0 @@
-- Added an option to "Tie Amplitudes" for two Lorentzians in the Convolution tab of the :ref:`Inelastic QENS Fitting <interface-inelastic-qens-fitting>` interface.

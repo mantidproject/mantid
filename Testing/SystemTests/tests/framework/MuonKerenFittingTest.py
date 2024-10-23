@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init,too-few-public-methods
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import Fit, LoadMuonNexus, MuonProcess
 
 
 class MuonKerenFittingTest(systemtesting.MantidSystemTest):

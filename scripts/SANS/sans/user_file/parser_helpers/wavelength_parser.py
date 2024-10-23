@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Tuple
+from dataclasses import dataclass
 
-from mantid.py36compat import dataclass
 from sans.common.enums import RangeStepType
 from sans.common.general_functions import get_ranges_from_event_slice_setting
 from sans.state.StateObjects.StateCalculateTransmission import StateCalculateTransmission
@@ -16,7 +16,7 @@ from sans.state.StateObjects.wavelength_interval import WavRangePairs, WavRange
 from sans.user_file.parser_helpers.toml_parser_impl_base import TomlParserImplBase
 
 
-@dataclass(init=True)
+@dataclass
 class DuplicateWavelengthStates:
     """
     These classes contain duplicated attributes, so this POD

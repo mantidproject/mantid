@@ -1,1 +1,0 @@
-- Add OutputSuffix parameter to :ref:`ISISIndirectEnergyTransfer <algm-ISISIndirectEnergyTransfer>` algorithm that will append a suffix to the end of output workspace names.

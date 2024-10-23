@@ -1,1 +1,0 @@
-- Added a `+ 1` to `EventWorkspace::sortAll` to prevent grainsize from being 0.

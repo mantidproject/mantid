@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-locals,too-few-public-methods
 import systemtesting
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import AnalysisDataService, WorkspaceGroup
+from mantid.simpleapi import DeleteTableRows, PoldiCreatePeaksFromCell, PoldiDataAnalysis, PoldiLoadRuns
 import numpy as np
 
 

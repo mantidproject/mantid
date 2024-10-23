@@ -5,11 +5,17 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-many-locals,too-many-branches
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, AlgorithmManager, MatrixWorkspaceProperty, PythonAlgorithm
+from mantid.kernel import (
+    logger,
+    Direction,
+    FloatArrayProperty,
+    IntBoundedValidator,
+    Logger,
+    PropertyManagerDataService,
+    StringMandatoryValidator,
+)
 import math
-
-from mantid.kernel import logger
 
 
 class SANSAzimuthalAverage1D(PythonAlgorithm):

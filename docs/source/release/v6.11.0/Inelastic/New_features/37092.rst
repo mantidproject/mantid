@@ -1,1 +1,0 @@
-- It is possible to access the Slice Viewer or 3D Plot from the OutputPlot widget of the in :ref:`Elwin Tab <elwin>` of  :ref:`Data Processor Interface <interface-inelastic-data-processor>` for output workspaces containing more than 1 histogram.

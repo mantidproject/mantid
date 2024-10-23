@@ -6,9 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """Sample MARI reduction scrip used in testing ReductionWrapper"""
 
-from Direct.AbsorptionShapes import *
+from Direct.AbsorptionShapes import Cylinder
+from Direct.DirectEnergyConversion import DirectEnergyConversion
+from Direct.PropertyManager import PropertyManager
+from Direct.ReductionWrapper import AdvancedProperties, iliad, MainProperties, ReductionWrapper
 
-from Direct.ReductionWrapper import *
+from types import MethodType
 
 try:
     import reduce_vars as web_var

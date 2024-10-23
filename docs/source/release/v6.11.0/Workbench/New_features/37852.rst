@@ -1,1 +1,0 @@
-- expose :class:`ConfigService::remove() <mantid.kernel.ConfigServiceImpl.remove>` to python API

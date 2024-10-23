@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init,too-many-instance-attributes,too-few-public-methods
 import systemtesting
-from mantid.simpleapi import *
+from mantid.simpleapi import CloneWorkspace, CropWorkspace, GroupDetectors, GroupWorkspaces, LoadMuonNexus, Logarithm, RemoveExpDecay
 
 from abc import ABCMeta, abstractmethod
 

@@ -1,1 +1,0 @@
-- The FindUBUsingMinMaxD algorithm was deprecated in 2013 and has now been removed. Use :ref:`FindUBUsingFFT<algm-FindUBUsingFFT>` instead.

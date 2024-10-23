@@ -20,7 +20,16 @@ from numpy import matrix
 import math
 import random
 import mantid
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import (
+    CopySample,
+    CreatePeaksWorkspace,
+    CreateSingleValuedWorkspace,
+    FindUBUsingFFT,
+    IndexPeaks,
+    LoadInstrument,
+    SelectCellWithForm,
+)
 
 
 # from mantid.simpleapi import *

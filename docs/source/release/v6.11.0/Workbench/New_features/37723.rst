@@ -1,1 +1,0 @@
-- Handled error where parsing malformed XML code in the code editor caused mantid to crash.

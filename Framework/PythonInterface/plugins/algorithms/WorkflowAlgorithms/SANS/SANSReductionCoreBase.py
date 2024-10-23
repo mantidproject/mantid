@@ -11,6 +11,7 @@
 import json
 import os
 from typing import Tuple, Dict
+from dataclasses import dataclass
 
 from mantid.api import (
     DataProcessorAlgorithm,
@@ -22,7 +23,6 @@ from mantid.api import (
     WorkspaceGroupProperty,
 )
 from mantid.kernel import Direction, StringListValidator
-from mantid.py36compat import dataclass
 from sans.algorithm_detail.CreateSANSAdjustmentWorkspaces import CreateSANSAdjustmentWorkspaces
 from sans.algorithm_detail.convert_to_q import convert_workspace
 from sans.algorithm_detail.crop_helper import get_component_name

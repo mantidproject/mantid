@@ -16,7 +16,19 @@ repository & required to be accessible from any machine that wishes to run the t
 
 import systemtesting
 import os
-from mantid.simpleapi import *
+from mantid.kernel import config, logger
+from mantid.simpleapi import (
+    CompareMDWorkspaces,
+    ConvertToMD,
+    DeleteWorkspace,
+    LoadMD,
+    LoadNXSPE,
+    LoadSQW,
+    MergeMDFiles,
+    SaveMD,
+    SetGoniometer,
+    SetUB,
+)
 
 # allow for multiple locations
 FILE_LOCATIONS = ["/isis/mantid/localtestdata/"]  # ,"d:/Data/MantidSystemTests/BigData/Dropbox/LoadSQW"]
@@ -109,7 +121,7 @@ class BuildSQWTest(systemtesting.MantidSystemTest):
             try:
                 os.remove(filename)
             except OSError:
-                mantid.logger.warning("Unable to remove created file '%s'" % filename)
+                logger.warning("Unable to remove created file '%s'" % filename)
 
 
 class LoadSQW_FileBasedTest(BuildSQWTest):

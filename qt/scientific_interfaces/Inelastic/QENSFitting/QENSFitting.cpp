@@ -31,13 +31,13 @@ QENSFitting::QENSFitting(QWidget *parent)
 void QENSFitting::initLayout() {
   // Set up all tabs
   for (auto &tab : m_tabs) {
-    connect(tab.second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
+    connect(tab.second, &FitTab::showMessageBox, this, &QENSFitting::showMessageBox);
   }
 
-  connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this, SLOT(exportTabPython()));
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
+  connect(m_uiForm.pbPythonExport, &QPushButton::clicked, this, &QENSFitting::exportTabPython);
+  connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &QENSFitting::settings);
+  connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &QENSFitting::help);
+  connect(m_uiForm.pbManageDirs, &QPushButton::clicked, this, &QENSFitting::manageUserDirectories);
 
   InelasticInterface::initLayout();
 }

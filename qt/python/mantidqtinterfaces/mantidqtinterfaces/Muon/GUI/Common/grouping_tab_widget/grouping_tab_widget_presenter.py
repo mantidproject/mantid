@@ -4,7 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.utils.observer_pattern import Observer, Observable, GenericObservable, GenericObserver
+from mantidqt.utils.observer_pattern import (
+    Observer,
+    Observable,
+    GenericObservable,
+    GenericObserver,
+)
 from mantidqt.widgets.muonperiodinfo import MuonPeriodInfo
 import mantidqtinterfaces.Muon.GUI.Common.utilities.muon_file_utils as file_utils
 from mantidqtinterfaces.Muon.GUI.Common.utilities.general_utils import round_value
@@ -13,7 +18,11 @@ import mantidqtinterfaces.Muon.GUI.Common.utilities.algorithm_utils as algorithm
 from mantidqtinterfaces.Muon.GUI.Common import thread_model
 from mantidqtinterfaces.Muon.GUI.Common.run_selection_dialog import RunSelectionDialog
 from mantidqtinterfaces.Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
-from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
+from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import (
+    run_string_to_list,
+)
+
+import os
 
 
 class GroupingTabPresenter(object):
@@ -26,7 +35,15 @@ class GroupingTabPresenter(object):
     def string_to_list(text):
         return run_string_to_list(text)
 
-    def __init__(self, view, model, grouping_table_widget=None, pairing_table_widget=None, diff_table=None, parent=None):
+    def __init__(
+        self,
+        view,
+        model,
+        grouping_table_widget=None,
+        pairing_table_widget=None,
+        diff_table=None,
+        parent=None,
+    ):
         self._view = view
         self._model = model
 
@@ -125,7 +142,10 @@ class GroupingTabPresenter(object):
 
         new_alpha = algorithm_utils.run_AlphaCalc({"InputWorkspace": ws, "ForwardSpectra": [0], "BackwardSpectra": [1]})
 
-        self._model.update_pair_alpha(pair_name, round_value(new_alpha, self._model._context.group_pair_context.alpha_precision))
+        self._model.update_pair_alpha(
+            pair_name,
+            round_value(new_alpha, self._model._context.group_pair_context.alpha_precision),
+        )
         self.pairing_table_widget.update_view_from_model()
 
         self.handle_update_all_clicked()
@@ -257,11 +277,34 @@ class GroupingTabPresenter(object):
         else:
             self.on_clear_requested()
 
+    def _check_and_get_filename(self, chosen_file):
+        if chosen_file == "":
+            return chosen_file
+
+        path_extension = os.path.splitext(chosen_file)
+
+        if path_extension[1] == ".xml":
+            return chosen_file
+        else:
+            updated_file = path_extension[0] + ".xml"
+            if os.path.isfile(updated_file):
+                if self._view.show_question_dialog(updated_file):
+                    return path_extension[0] + ".xml"
+                else:
+                    return ""
+            return path_extension[0] + ".xml"
+
     def handle_save_grouping_file(self):
-        filename = self._view.show_file_save_browser_and_return_selection()
+        chosen_file = self._view.get_save_filename()
+        filename = self._check_and_get_filename(chosen_file)
+
         if filename != "":
             xml_utils.save_grouping_to_XML(
-                self._model.groups, self._model.pairs, self._model.diffs, filename, description=self._view.get_description_text()
+                self._model.groups,
+                self._model.pairs,
+                self._model.diffs,
+                filename,
+                description=self._view.get_description_text(),
             )
 
     def create_update_thread(self):

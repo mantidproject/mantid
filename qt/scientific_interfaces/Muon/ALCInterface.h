@@ -13,6 +13,8 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
+#include "ALCBaselineModellingPresenter.h"
+
 #include "ui_ALCInterface.h"
 
 namespace MantidQt {
@@ -21,7 +23,6 @@ namespace CustomInterfaces {
 class ALCDataLoadingPresenter;
 
 class ALCBaselineModellingView;
-class ALCBaselineModellingPresenter;
 class ALCBaselineModellingModel;
 
 class ALCPeakFittingView;
@@ -74,16 +75,14 @@ private:
   Ui::ALCInterface m_ui;
 
   // Step views
-  ALCBaselineModellingView *m_baselineModellingView;
   ALCPeakFittingView *m_peakFittingView;
 
   // Step presenters
   ALCDataLoadingPresenter *m_dataLoading;
-  ALCBaselineModellingPresenter *m_baselineModelling;
+  std::unique_ptr<ALCBaselineModellingPresenter> m_baselineModelling;
   ALCPeakFittingPresenter *m_peakFitting;
 
   // Models
-  ALCBaselineModellingModel *m_baselineModellingModel;
   ALCPeakFittingModel *m_peakFittingModel;
 
   /// Name for every step for labels

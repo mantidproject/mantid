@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCBaselineModellingView.h"
 
+#include "ALCBaselineModellingPresenter.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 
 #include <QMenu>
@@ -23,7 +24,7 @@ ALCBaselineModellingView::~ALCBaselineModellingView() = default;
 
 void ALCBaselineModellingView::initialize() {
   m_ui.setupUi(m_widget);
-  connect(m_ui.fit, SIGNAL(clicked()), SIGNAL(fitRequested()));
+  connect(m_ui.fit, SIGNAL(clicked()), SLOT(handleFitRequested()));
 
   m_ui.dataPlot->setCanvasColour(Qt::white);
   m_ui.correctedPlot->setCanvasColour(Qt::white);
@@ -46,6 +47,19 @@ void ALCBaselineModellingView::initialize() {
   connect(m_selectorModifiedMapper, SIGNAL(mapped(int)), SIGNAL(sectionSelectorModified(int)));
 
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
+
+  initConnections();
+}
+
+void ALCBaselineModellingView::initConnections() const {
+  // View actions
+  connect(this, SIGNAL(fitRequested()), SLOT(handleFitRequested()));
+  connect(this, SIGNAL(addSectionRequested()), SLOT(handleAddSectionRequested()));
+  connect(this, SIGNAL(removeSectionRequested(int)), SLOT(handleRemoveSectionRequested(int)));
+
+  // View events (sync)
+  connect(this, SIGNAL(sectionRowModified(int)), SLOT(handleSectionRowModified(int)));
+  connect(this, SIGNAL(sectionSelectorModified(int)), SLOT(handleSectionSelectorModified(int)));
 }
 
 std::string ALCBaselineModellingView::function() const { return m_ui.function->getFunctionString(); }
@@ -202,6 +216,16 @@ void ALCBaselineModellingView::help() {
   MantidQt::API::HelpWindow::showCustomInterface(QString("Muon ALC"), QString("muon"));
 }
 
-void ALCBaselineModellingView::emitFitRequested() { emit fitRequested(); }
+void ALCBaselineModellingView::handleFitRequested() const { m_presenter->fit(); }
+
+void ALCBaselineModellingView::handleAddSectionRequested() const { m_presenter->addSection(); }
+
+void ALCBaselineModellingView::handleRemoveSectionRequested(int row) const { m_presenter->removeSection(row); }
+
+void ALCBaselineModellingView::handleSectionRowModified(int row) const { m_presenter->onSectionRowModified(row); }
+
+void ALCBaselineModellingView::handleSectionSelectorModified(int index) const {
+  m_presenter->onSectionSelectorModified(index);
+}
 
 } // namespace MantidQt::CustomInterfaces

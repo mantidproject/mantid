@@ -8,9 +8,8 @@
 
 import math
 import numpy as np
-from mantid.api import *
-from mantid.simpleapi import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import logger, Direction, IntArrayProperty
 
 
 class PeakFinderDerivation(object):

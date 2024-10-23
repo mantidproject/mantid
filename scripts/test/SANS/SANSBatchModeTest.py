@@ -4,8 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import copy
 import unittest
-from ISISCommandInterface import *
+import os
+from mantid import config
+from ISISCommandInterface import Clean, LOQ, ReductionSingleton
 from isis_reduction_steps import UserFile
 import SANSBatchMode as bm
 

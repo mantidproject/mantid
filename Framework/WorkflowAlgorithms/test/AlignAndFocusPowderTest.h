@@ -239,6 +239,59 @@ public:
     AnalysisDataService::Instance().remove(m_outputWS);
   }
 
+  void testEventWksp_preserveEvents_ragged() {
+    // Setup the event workspace
+    m_numBanks = 2;
+    setUp_EventWorkspace("EventWksp_preserveEvents_ragged");
+    m_numBanks = 1;
+
+    groupAllBanks(m_inputWS, "bank"); // should result in 2 output histograms
+
+    for (bool preserveEvents : {true, false}) {
+
+      AlignAndFocusPowder align_and_focus;
+      align_and_focus.initialize();
+      align_and_focus.setPropertyValue("InputWorkspace", m_inputWS);
+      align_and_focus.setPropertyValue("OutputWorkspace", m_outputWS);
+      align_and_focus.setProperty("GroupingWorkspace", m_groupWS);
+      align_and_focus.setProperty("DMin", std::vector<double>{0.2, 0.3});
+      align_and_focus.setProperty("DMax", std::vector<double>{1.5, 2.0});
+      align_and_focus.setProperty("DeltaRagged", std::vector<double>{-2., -1.});
+      align_and_focus.setProperty("Dspacing", true);
+      align_and_focus.setProperty("PreserveEvents", preserveEvents);
+      TS_ASSERT_THROWS_NOTHING(align_and_focus.execute());
+      TS_ASSERT(align_and_focus.isExecuted());
+
+      m_outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_outputWS);
+
+      // test the output
+      if (preserveEvents)
+        TS_ASSERT_EQUALS(m_outWS->id(), "EventWorkspace")
+      else
+        TS_ASSERT_EQUALS(m_outWS->id(), "Workspace2D")
+
+      TS_ASSERT_EQUALS(m_outWS->getAxis(0)->unit()->unitID(), "TOF");
+      TS_ASSERT_EQUALS(m_outWS->getNumberHistograms(), 2);
+
+      TS_ASSERT_EQUALS(m_outWS->x(0).size(), 3);
+      TS_ASSERT_EQUALS(m_outWS->x(1).size(), 4);
+      TS_ASSERT_EQUALS(m_outWS->y(0).size(), 2);
+      TS_ASSERT_EQUALS(m_outWS->y(1).size(), 3);
+      TS_ASSERT_DELTA(m_outWS->x(0)[0], 1066.4818329, 0.0001);
+      TS_ASSERT_DELTA(m_outWS->x(0)[1], 3199.4454987, 0.0001);
+      TS_ASSERT_DELTA(m_outWS->x(1)[0], 1599.7227493, 0.0001);
+      TS_ASSERT_DELTA(m_outWS->x(1)[1], 3199.4454987, 0.0001);
+      TS_ASSERT_DELTA(m_outWS->y(0)[0], 13968, 0.0001);
+      TS_ASSERT_DELTA(m_outWS->y(0)[1], 113472, 0.0001);
+      TS_ASSERT_DELTA(m_outWS->y(1)[0], 13968, 0.0001);
+      TS_ASSERT_DELTA(m_outWS->y(1)[1], 82512, 0.0001);
+
+      AnalysisDataService::Instance().remove(m_outputWS);
+    }
+    AnalysisDataService::Instance().remove(m_inputWS);
+    AnalysisDataService::Instance().remove(m_groupWS);
+  }
+
   void testEventWksp_preserveEvents_tmin_tmax() {
     // Setup the event workspace
     setUp_EventWorkspace("EventWksp_preserveEvents_tmin_tmax");
@@ -859,11 +912,11 @@ public:
     loadDiffAlg.execute();
   }
 
-  void groupAllBanks(const std::string &m_inputWS) {
+  void groupAllBanks(const std::string &m_inputWS, std::string group_by = "All") {
     CreateGroupingWorkspace groupAlg;
     groupAlg.initialize();
     groupAlg.setPropertyValue("InputWorkspace", m_inputWS);
-    groupAlg.setPropertyValue("GroupDetectorsBy", "All");
+    groupAlg.setPropertyValue("GroupDetectorsBy", group_by);
     groupAlg.setPropertyValue("OutputWorkspace", m_groupWS);
     groupAlg.execute();
   }

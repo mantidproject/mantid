@@ -25,7 +25,7 @@ using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Points;
 
 class ALCBaselineModellingModelTest : public CxxTest::TestSuite {
-  ALCBaselineModellingModel *m_model;
+  std::unique_ptr<ALCBaselineModellingModel> m_model;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -37,19 +37,14 @@ public:
     FrameworkManager::Instance(); // To make sure everything is initialized
   }
 
-  void setUp() override { m_model = new ALCBaselineModellingModel(); }
-
-  void tearDown() override { delete m_model; }
+  void setUp() override { m_model = std::make_unique<ALCBaselineModellingModel>(); }
 
   void test_setData() {
 
     MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 9, 9);
     data->setHistogram(0, Points{1, 2, 3, 4, 5, 6, 7, 8, 9}, Counts{100, 1, 2, 100, 100, 3, 4, 5, 100});
-    QSignalSpy spy(m_model, SIGNAL(dataChanged()));
 
     TS_ASSERT_THROWS_NOTHING(m_model->setData(data));
-
-    TS_ASSERT_EQUALS(spy.count(), 1);
 
     MatrixWorkspace_const_sptr modelData = m_model->data();
 

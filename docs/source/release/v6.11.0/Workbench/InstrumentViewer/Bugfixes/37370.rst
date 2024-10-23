@@ -1,1 +1,0 @@
-- Fixed drawing artifacts appearing (in some cases) when zooming in on the Instrument View with a 2D projection

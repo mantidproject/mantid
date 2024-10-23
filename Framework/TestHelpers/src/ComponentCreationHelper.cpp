@@ -30,6 +30,7 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/UnitFactory.h"
@@ -426,11 +427,7 @@ createCylInstrumentWithVerticalOffsetsSpecified(size_t nTubes, std::vector<doubl
  */
 bool double_cmprsn(double x1, double x2) {
   const double TOL(1.e-4);
-  if (std::fabs(x1 + x2) < TOL) {
-    return (std::fabs(x1 - x2) < TOL);
-  } else {
-    return (std::fabs((x1 - x2) / (x1 + x2)) < TOL / 2);
-  }
+  return Mantid::Kernel::withinRelativeDifference(x1, x2, TOL);
 }
 Mantid::Geometry::Instrument_sptr createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
                                                                              const std::vector<double> &polar,

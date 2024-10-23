@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,no-init,attribute-defined-outside-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import CropWorkspace, Fit, LoadVesuvio, ScaleX
 
 import platform
 

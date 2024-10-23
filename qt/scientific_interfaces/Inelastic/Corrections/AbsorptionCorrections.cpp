@@ -121,28 +121,34 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
   m_uiForm.leCanChemicalFormula->setValidator(formulaValidator);
 
   // Change of input
-  connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString &)), this,
-          SLOT(getParameterDefaults(const QString &)));
-  connect(m_uiForm.cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(handlePresetShapeChanges(int)));
-  // Handle algorithm completion
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
-  // Handle running, plotting and saving
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  // Handle density units
-  connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(QString const &)), this,
-          SLOT(setSampleDensityUnit(QString const &)));
-  connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(QString const &)), this,
-          SLOT(setCanDensityUnit(QString const &)));
-  connect(m_uiForm.cbSampleDensity, SIGNAL(currentIndexChanged(QString const &)), this,
-          SLOT(setSampleDensityValue(QString const &)));
-  connect(m_uiForm.cbCanDensity, SIGNAL(currentIndexChanged(QString const &)), this,
-          SLOT(setCanDensityValue(QString const &)));
 
-  connect(m_uiForm.cbSampleMaterialMethod, SIGNAL(currentIndexChanged(int)), this,
-          SLOT(changeSampleMaterialOptions(int)));
-  connect(m_uiForm.cbCanMaterialMethod, SIGNAL(currentIndexChanged(int)), this, SLOT(changeCanMaterialOptions(int)));
-  connect(m_uiForm.spSampleDensity, SIGNAL(valueChanged(double)), this, SLOT(setSampleDensity(double)));
-  connect(m_uiForm.spCanDensity, SIGNAL(valueChanged(double)), this, SLOT(setCanDensity(double)));
+  connect(m_uiForm.dsSampleInput, &DataSelector::dataReady, this,
+          static_cast<void (AbsorptionCorrections::*)(const QString &)>(&AbsorptionCorrections::getParameterDefaults));
+  connect(m_uiForm.cbShape, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          &AbsorptionCorrections::handlePresetShapeChanges);
+  // Handle algorithm completion
+  connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this,
+          &AbsorptionCorrections::algorithmComplete);
+  // Handle running, plotting and saving
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &AbsorptionCorrections::saveClicked);
+  // Handle density units
+
+  connect(m_uiForm.cbSampleDensity, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { this->setSampleDensityUnit(m_uiForm.cbSampleDensity->itemText(index)); });
+  connect(m_uiForm.cbCanDensity, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { this->setCanDensityUnit(m_uiForm.cbCanDensity->itemText(index)); });
+  connect(m_uiForm.cbSampleDensity, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { this->setSampleDensityValue(m_uiForm.cbSampleDensity->itemText(index)); });
+  connect(m_uiForm.cbCanDensity, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { this->setCanDensityValue(m_uiForm.cbCanDensity->itemText(index)); });
+  connect(m_uiForm.cbSampleMaterialMethod, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          &AbsorptionCorrections::changeSampleMaterialOptions);
+  connect(m_uiForm.cbCanMaterialMethod, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          &AbsorptionCorrections::changeCanMaterialOptions);
+  connect(m_uiForm.spSampleDensity, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &AbsorptionCorrections::setSampleDensity);
+  connect(m_uiForm.spCanDensity, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &AbsorptionCorrections::setCanDensity);
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSampleInput->isOptional(true);

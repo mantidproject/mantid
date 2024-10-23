@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import AlgorithmFactory, NumericAxis, PropertyMode, Progress, PythonAlgorithm, WorkspaceGroupProperty, WorkspaceGroup
+from mantid.api import mtd, AlgorithmFactory, NumericAxis, PropertyMode, Progress, PythonAlgorithm, WorkspaceGroupProperty, WorkspaceGroup
 from mantid.kernel import (
     Direction,
     EnabledWhenProperty,
@@ -16,8 +16,27 @@ from mantid.kernel import (
     RebinParamsValidator,
     StringListValidator,
 )
-
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    AppendSpectra,
+    ConvertAxisByFormula,
+    ConvertSpectrumAxis,
+    CloneWorkspace,
+    CreateSingleValuedWorkspace,
+    CreateWorkspace,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    Divide,
+    GroupWorkspaces,
+    Minus,
+    Multiply,
+    RenameWorkspace,
+    ReplaceSpecialValues,
+    SofQWNormalisedPolygon,
+    SumOverlappingTubes,
+    Transpose,
+    UnGroupWorkspace,
+    WeightedMean,
+)
 
 from scipy.constants import physical_constants
 import numpy as np

@@ -5,13 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_view import PhaseTableView
+from mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_model import PhaseTableModel
 from mantidqtinterfaces.Muon.GUI.Common.phase_table_widget.phase_table_presenter import PhaseTablePresenter
 
 
 class PhaseTabWidget(object):
     def __init__(self, context, parent):
         self.phase_table_view = PhaseTableView(parent)
-        self.phase_table_presenter = PhaseTablePresenter(self.phase_table_view, context)
+        self.phase_table_model = PhaseTableModel(context)
+        self.phase_table_presenter = PhaseTablePresenter(self.phase_table_view, self.phase_table_model)
 
         # Phase table actions
         self.phase_table_view.set_calculate_phase_table_action(self.phase_table_presenter.handle_calculate_phase_table_clicked)

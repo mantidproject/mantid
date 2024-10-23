@@ -1,1 +1,0 @@
-- Add support for "high-precision" eigenvectors from GAUSSIAN in Abins/Abins2D algorithms. These are activated in GAUSSIAN with the ``freq(HPModes)`` parameter. In previous Mantid versions the Abins parser would fail to read the resulting files; now the high-precision values will be used.

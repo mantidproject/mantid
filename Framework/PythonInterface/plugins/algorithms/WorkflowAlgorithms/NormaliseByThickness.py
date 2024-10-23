@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-import mantid.simpleapi as api
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, MatrixWorkspaceProperty, PythonAlgorithm
+from mantid.kernel import Direction, Logger
+from mantid.simpleapi import Scale
 
 
 class NormaliseByThickness(PythonAlgorithm):
@@ -52,7 +52,7 @@ class NormaliseByThickness(PythonAlgorithm):
                 return
 
         output_ws_name = self.getPropertyValue("OutputWorkspace")
-        api.Scale(InputWorkspace=input_ws, OutputWorkspace=output_ws_name, Factor=1.0 / thickness, Operation="Multiply")
+        Scale(InputWorkspace=input_ws, OutputWorkspace=output_ws_name, Factor=1.0 / thickness, Operation="Multiply")
 
         self.setProperty("OutputWorkspace", output_ws_name)
         self.setProperty("OutputMessage", "Normalised by thickness [%g cm]" % thickness)

@@ -7,8 +7,30 @@
 # pylint: disable=invalid-name,no-init
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from ISISCommandInterface import *
-from mantid.simpleapi import LoadRaw, MoveInstrumentComponent
+from ISISCommandInterface import (
+    AssignCan,
+    AssignSample,
+    DefaultTrans,
+    Detector,
+    FindBeamCentre,
+    Gravity,
+    LimitsWav,
+    LOQ,
+    MaskFile,
+    Reduce,
+    ReductionSingleton,
+    Set1D,
+    Set2D,
+    SetCentre,
+    SetDetectorOffsets,
+    TransFit,
+    TransmissionCan,
+    TransmissionSample,
+    WavRangeReduction,
+)
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import Load, LoadRaw, MoveInstrumentComponent, RenameWorkspace
 import unittest
 
 from sans.common.enums import SANSInstrument

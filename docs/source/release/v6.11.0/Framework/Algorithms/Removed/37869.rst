@@ -1,1 +1,0 @@
-- The RecordPythonScript algorithm was deprecated in :ref:`Release 5.1.0 <v5.1.0>` and has now been removed. Use :ref:`GeneratePythonScript<algm-generatepythonscript>` instead.

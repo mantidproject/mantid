@@ -1,1 +1,0 @@
-- A warning will now be displayed if a workspace with unordered spectrum numbers is opened in the :ref:sliceviewer. These workspaces can fail to display correctly and may result in errors.

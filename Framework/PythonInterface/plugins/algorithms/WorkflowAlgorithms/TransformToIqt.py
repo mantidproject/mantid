@@ -5,9 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-instance-attributes
-from mantid.simpleapi import *
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, ITableWorkspaceProperty, PropertyMode, Progress
+from mantid.api import mtd, AlgorithmFactory, ITableWorkspaceProperty, MatrixWorkspaceProperty, PropertyMode, Progress, PythonAlgorithm
 from mantid.kernel import Direction, logger, IntBoundedValidator
+from mantid.simpleapi import CreateEmptyTableWorkspace, CropWorkspace
+
+from IndirectCommon import check_analysers_or_e_fixed, check_dimensions_equal, check_hist_zero, get_efixed, get_workspace_name_prefix
 
 DEFAULT_ITERATIONS = 50
 DEFAULT_SEED = 89631139
@@ -106,9 +108,6 @@ class TransformToIqt(PythonAlgorithm):
         """
         Gets algorithm properties.
         """
-
-        from IndirectCommon import get_workspace_name_prefix
-
         self._sample = self.getPropertyValue("SampleWorkspace")
         self._resolution = self.getPropertyValue("ResolutionWorkspace")
 
@@ -152,8 +151,6 @@ class TransformToIqt(PythonAlgorithm):
         """
         Calculates the TransformToIqt parameters and saves in a table workspace.
         """
-        from IndirectCommon import get_efixed
-
         end_prog = 0.3 if self._calculate_errors else 0.9
         workflow_prog = Progress(self, start=0.0, end=end_prog, nreports=8)
         workflow_prog.report("Cropping Workspace")
@@ -239,8 +236,6 @@ class TransformToIqt(PythonAlgorithm):
         """
         Run TransformToIqt.
         """
-        from IndirectCommon import check_hist_zero, check_dimensions_equal
-
         # Process resolution data
         res_number_of_histograms = check_hist_zero(self._resolution)[0]
         sample_number_of_histograms = check_hist_zero(self._sample)[0]
@@ -273,8 +268,6 @@ class TransformToIqt(PythonAlgorithm):
         return iqt
 
     def _check_analysers_and_reflection(self):
-        from IndirectCommon import check_analysers_or_e_fixed
-
         try:
             check_analysers_or_e_fixed(self._sample, self._resolution)
         except ValueError:

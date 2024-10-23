@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.kernel import config
+from mantid.simpleapi import LoadISISNexus
 from isis_reflectometry import quick
 
 

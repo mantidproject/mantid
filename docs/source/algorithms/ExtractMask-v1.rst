@@ -21,6 +21,11 @@ link is preserved so that the instrument view functions correctly.
 A list of masked detector IDs is also output. Note this contains the detector IDs which
 are masked rather than the index or spectrum number.
 
+Ungroup Detectors
+-----------------
+
+If ``UngroupDetectors`` is set to True, the detector IDs are ungrouped. This means that if the input workspace has a grouped detector, the output workspace will have a single spectra for each detector.
+
 Usage
 -----
 

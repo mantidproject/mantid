@@ -8,8 +8,25 @@
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
-from ISISCommandInterface import *
+from ISISCommandInterface import (
+    set_q_resolution_a1,
+    set_q_resolution_a2,
+    set_q_resolution_collimation_length,
+    set_q_resolution_delta_r,
+    set_q_resolution_h1,
+    set_q_resolution_h2,
+    set_q_resolution_moderator,
+    set_q_resolution_use,
+    set_q_resolution_w1,
+    set_q_resolution_w2,
+    AssignSample,
+    Gravity,
+    MaskFile,
+    SANS2D,
+    Set1D,
+    SetDetectorOffsets,
+    WavRangeReduction,
+)
 from sans.common.enums import SANSInstrument
 
 

@@ -218,12 +218,15 @@ std::size_t GeneratePythonFitScript::getNumberOfDomainsInFunction(IFunction_sptr
 
 std::string GeneratePythonFitScript::generateFitScript(std::string const &fittingType) const {
   std::string generatedScript;
-  generatedScript += generateVariableSetupCode();
-  generatedScript += "\n";
-  if (fittingType == "Sequential")
+  if (fittingType == "Sequential") {
+    generatedScript += generateVariableSetupCode("GeneratePythonFitScript_SequentialVariableSetup.py.in");
+    generatedScript += "\n";
     generatedScript += getFileContents("GeneratePythonFitScript_SequentialFit.py.in");
-  else if (fittingType == "Simultaneous")
+  } else if (fittingType == "Simultaneous") {
+    generatedScript += generateVariableSetupCode("GeneratePythonFitScript_SimultaneousVariableSetup.py.in");
+    generatedScript += "\n";
     generatedScript += generateSimultaneousFitCode();
+  }
 
   bool plotOutput = getProperty("PlotOutput");
   if (plotOutput) {
@@ -239,8 +242,8 @@ std::string GeneratePythonFitScript::generateFitScript(std::string const &fittin
   return generatedScript;
 }
 
-std::string GeneratePythonFitScript::generateVariableSetupCode() const {
-  std::string code = getFileContents("GeneratePythonFitScript_VariableSetup.py.in");
+std::string GeneratePythonFitScript::generateVariableSetupCode(std::string const &filename) const {
+  std::string code = getFileContents(filename);
 
   std::vector<std::string> const inputWorkspaces = getProperty("InputWorkspaces");
   std::vector<std::size_t> const workspaceIndices = getProperty("WorkspaceIndices");

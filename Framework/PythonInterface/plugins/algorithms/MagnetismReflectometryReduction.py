@@ -12,9 +12,44 @@ Magnetism reflectometry reduction
 import sys
 import math
 import numpy as np
-from mantid.api import *
-from mantid.simpleapi import *
-from mantid.kernel import *
+from mantid.api import (
+    mtd,
+    AlgorithmFactory,
+    AnalysisDataService,
+    PropertyMode,
+    PythonAlgorithm,
+    WorkspaceGroup,
+    WorkspaceProperty,
+)
+from mantid.kernel import (
+    logger,
+    Direction,
+    FloatArrayLengthValidator,
+    FloatArrayProperty,
+    IntArrayLengthValidator,
+    IntArrayProperty,
+    Property,
+)
+from mantid.simpleapi import (
+    AddSampleLog,
+    ConvertToPointData,
+    ConvertUnits,
+    CreateWorkspace,
+    CropWorkspace,
+    Divide,
+    GroupWorkspaces,
+    LoadEventNexus,
+    Minus,
+    MRGetTheta,
+    NormaliseByCurrent,
+    Rebin,
+    RebinToWorkspace,
+    RefRoi,
+    RenameWorkspace,
+    ReplaceSpecialValues,
+    SortXAxis,
+    SumSpectra,
+)
 
 INSTRUMENT_NAME = "REF_M"
 

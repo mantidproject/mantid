@@ -3,8 +3,9 @@
 # Copyright &copy; 2022 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-from mantid.py36compat import dataclass, field
+from dataclasses import dataclass, field
 from typing import List
+
 from mantid.dataobjects import Workspace2D
 
 

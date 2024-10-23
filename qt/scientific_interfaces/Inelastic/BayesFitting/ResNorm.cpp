@@ -31,9 +31,8 @@ ResNorm::ResNorm(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
 
   // Create range selector
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("ResNormERange");
-  connect(eRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
-  connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
-
+  connect(eRangeSelector, &MantidWidgets::RangeSelector::minValueChanged, this, &ResNorm::minValueChanged);
+  connect(eRangeSelector, &MantidWidgets::RangeSelector::maxValueChanged, this, &ResNorm::maxValueChanged);
   // Add the properties browser to the ui form
   m_uiForm.treeSpace->addWidget(m_propTree);
 
@@ -49,20 +48,17 @@ ResNorm::ResNorm(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
   formatTreeWidget(m_propTree, m_properties);
 
   // Connect data selector to handler method
-  connect(m_uiForm.dsVanadium, SIGNAL(dataReady(const QString &)), this,
-          SLOT(handleVanadiumInputReady(const QString &)));
-  connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this,
-          SLOT(handleResolutionInputReady(const QString &)));
+  connect(m_uiForm.dsVanadium, &DataSelector::dataReady, this, &ResNorm::handleVanadiumInputReady);
+  connect(m_uiForm.dsResolution, &DataSelector::dataReady, this, &ResNorm::handleResolutionInputReady);
 
   // Connect the preview spectrum selector
-  connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this, SLOT(previewSpecChanged(int)));
-
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(handleAlgorithmComplete(bool)));
-
+  connect(m_uiForm.spPreviewSpectrum, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+          &ResNorm::previewSpecChanged);
+  connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &ResNorm::handleAlgorithmComplete);
   // Post Plot and Save
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveClicked()));
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotClicked()));
-  connect(m_uiForm.pbPlotCurrent, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &ResNorm::saveClicked);
+  connect(m_uiForm.pbPlot, &QPushButton::clicked, this, &ResNorm::plotClicked);
+  connect(m_uiForm.pbPlotCurrent, &QPushButton::clicked, this, &ResNorm::plotCurrentPreview);
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsVanadium->isOptional(true);
@@ -308,10 +304,9 @@ void ResNorm::handleResolutionInputReady(const QString &filename) {
  * @param min :: The new value of the lower guide
  */
 void ResNorm::minValueChanged(double min) {
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateProperties(QtProperty *, double)));
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ResNorm::updateProperties);
   m_dblManager->setValue(m_properties["EMin"], min);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ResNorm::updateProperties);
 }
 
 /**
@@ -320,10 +315,9 @@ void ResNorm::minValueChanged(double min) {
  * @param max :: The new value of the upper guide
  */
 void ResNorm::maxValueChanged(double max) {
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateProperties(QtProperty *, double)));
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ResNorm::updateProperties);
   m_dblManager->setValue(m_properties["EMax"], max);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ResNorm::updateProperties);
 }
 
 /**
@@ -335,16 +329,14 @@ void ResNorm::maxValueChanged(double max) {
 void ResNorm::updateProperties(QtProperty *prop, double val) {
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
 
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateProperties(QtProperty *, double)));
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ResNorm::updateProperties);
 
   if (prop == m_properties["EMin"]) {
     setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   } else if (prop == m_properties["EMax"]) {
     setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   }
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ResNorm::updateProperties);
 }
 
 /**

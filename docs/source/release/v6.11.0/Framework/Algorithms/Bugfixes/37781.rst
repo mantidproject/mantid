@@ -1,1 +1,0 @@
-- The :ref:`LoadIsawUB <algm-LoadIsawUB>` algorithm now correctly adds the UB to the first experiment info when the input workspace has more than one.

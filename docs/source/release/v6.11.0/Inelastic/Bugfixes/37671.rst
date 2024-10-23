@@ -1,1 +1,0 @@
-- Available fit functions in the `Function (Q)` tab of the :ref:`QENS Fitting <interface-inelastic-qens-fitting>` interface are updated according to the type of data (`EISF`, `A0` or `Width`) loaded on the table.

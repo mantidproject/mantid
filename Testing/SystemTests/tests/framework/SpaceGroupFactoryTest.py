@@ -7,8 +7,8 @@
 # pylint: disable=no-init
 import systemtesting
 import re
-from mantid.simpleapi import *
-from mantid.geometry import *
+from mantid.api import FileFinder
+from mantid.geometry import Group, SpaceGroupFactory, SymmetryOperationFactory
 
 
 class SpaceGroupFactoryTest(systemtesting.MantidSystemTest):

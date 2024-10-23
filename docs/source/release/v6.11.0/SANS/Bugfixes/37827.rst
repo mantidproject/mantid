@@ -1,1 +1,0 @@
-- Event binning tooltips have been improved to clarify :ref:`compatibility_mode` and the effect of leaving the text entry blank.

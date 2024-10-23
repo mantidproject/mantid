@@ -7,8 +7,16 @@
 # pylint: disable=no-init,too-many-locals,too-many-instance-attributes,too-many-arguments,invalid-name
 import math
 import numpy as np
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    AddSampleLogMultiple,
+    CreateWorkspace,
+    DeleteWorkspace,
+    ExtractSingleSpectrum,
+    GroupWorkspaces,
+    SplineInterpolation,
+)
 from mantid.api import (
+    mtd,
     PythonAlgorithm,
     AlgorithmFactory,
     PropertyMode,

@@ -4,9 +4,24 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, Progress
+from mantid.api import mtd, AlgorithmFactory, PythonAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, Progress
 from mantid.kernel import Direction, IntBoundedValidator
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    ConjoinXRuns,
+    ConvertSpectrumAxis,
+    ConvertToPointData,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    Divide,
+    ExtractMonitors,
+    ExtractUnmaskedSpectra,
+    Integration,
+    LoadAndMerge,
+    MaskDetectors,
+    RenameWorkspace,
+    Scale,
+    Transpose,
+)
 
 
 class IndirectILLReductionDIFF(PythonAlgorithm):

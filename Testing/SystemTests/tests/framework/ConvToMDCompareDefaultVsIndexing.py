@@ -7,7 +7,8 @@
 # pylint: disable=no-init
 import sys
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import BinMD, CompareMDWorkspaces, ConvertToMD, CreateSampleWorkspace
 
 
 class ConvToMDCompareDefaultVsIndexing(systemtesting.MantidSystemTest):

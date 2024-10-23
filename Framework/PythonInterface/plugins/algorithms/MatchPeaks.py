@@ -5,9 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-branches
-from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, ITableWorkspaceProperty, PropertyMode, MatrixWorkspace
-from mantid.simpleapi import *
-from mantid.kernel import Direction
+from mantid.api import (
+    mtd,
+    AlgorithmFactory,
+    PythonAlgorithm,
+    MatrixWorkspaceProperty,
+    ITableWorkspace,
+    ITableWorkspaceProperty,
+    PropertyMode,
+    MatrixWorkspace,
+)
+from mantid.kernel import logger, Direction
+from mantid.simpleapi import CloneWorkspace, CreateEmptyTableWorkspace, DeleteWorkspace, FindEPP, MaskBins, ReplaceSpecialValues
 import numpy as np
 
 

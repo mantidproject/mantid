@@ -5,11 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import Dict
+from dataclasses import dataclass
 
 from sans.common.enums import SANSInstrument, DetectorType
 from sans.common.xml_parsing import get_monitor_names_from_idf_file, get_named_elements_from_ipf_file
 from sans.state.JsonSerializable import JsonSerializable
-from mantid.py36compat import dataclass
 from sans.state.StateObjects.StateData import StateData
 
 

@@ -9,7 +9,8 @@ import unittest
 import Direct.ReductionHelpers as helpers
 
 from mantid import api
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import LoadEmptyInstrument
 
 
 class SomeDescriptor(object):

@@ -1,1 +1,0 @@
-- New algorithm :ref:`SaveMDHistoToVTK <algm-SaveMDHistoToVTK>` that saves a MDHistoWorkspace as a VTK file so that it can be visualized by Paraview.

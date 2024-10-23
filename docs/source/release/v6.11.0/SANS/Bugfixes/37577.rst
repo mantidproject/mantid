@@ -1,1 +1,0 @@
-- The plot results checkbox is now hidden by default to prevent issues when both scaling and plot results are enabled. You can enable it via your properties file if needed. This change will help us decide whether to keep it hidden or fix the underlying issue.

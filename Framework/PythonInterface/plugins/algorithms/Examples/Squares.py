@@ -5,15 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-# This __future__ import is for Python 2/3 compatibility
-from mantid.api import *
-from mantid.kernel import *
-
-#
-# The following points are recommendations for writing Python algorithms:
-#  - The class name should match the file name;
-#  - Each file should contain exactly one algorithm.
-#
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, MatrixWorkspaceProperty, Progress, PythonAlgorithm, WorkspaceFactory
+from mantid.kernel import Direction, IntBoundedValidator, StringMandatoryValidator
 
 
 class Squares(PythonAlgorithm):
@@ -64,9 +57,6 @@ class Squares(PythonAlgorithm):
             sumfile = open(filename, "w")
             sumfile.write("The sum of the squares of numbers up to " + str(endrange) + " is: " + str(summed) + "\n")
             sumfile.close()
-
-
-#############################################################################################
 
 
 AlgorithmFactory.subscribe(Squares)

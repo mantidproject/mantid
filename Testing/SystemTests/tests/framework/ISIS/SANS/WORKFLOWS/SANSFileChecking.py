@@ -13,10 +13,21 @@ Check that file manipulation works fine
 import unittest
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
+from mantid.api import ExperimentInfo
+from mantid.kernel import config
 import SANSUtility as su
 import os
-from ISISCommandInterface import *
+from ISISCommandInterface import (
+    AssignSample,
+    Clean,
+    LARMOR,
+    LOQ,
+    MaskFile,
+    ReductionSingleton,
+    SANS2D,
+    SANS2DTUBES,
+    Set1D,
+)
 from sans.common.enums import SANSInstrument
 
 

@@ -1,1 +1,0 @@
-- Add a new method to :ref:`CompressEvents <algm-CompressEvents>` that will compress events without sorting first. This will be faster when there is a large density of events.

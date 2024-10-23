@@ -1,1 +1,0 @@
-- fix comparison operation in ``ISISIndirectInelastic.OSIRISIqtAndIqtFitMulti`` system test by turning off uncertainty check, using absolute comparison, and adjusting the tolerance.

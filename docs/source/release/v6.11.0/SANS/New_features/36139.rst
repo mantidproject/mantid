@@ -1,1 +1,0 @@
-- Added algorithm for calculating the efficiency of a polariser.

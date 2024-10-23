@@ -1,0 +1,17 @@
+# A python script generated to perform a sequential fit
+from mantid.api import AnalysisDataService
+from mantid.simpleapi import Fit, GroupWorkspaces
+import matplotlib.pyplot as plt
+
+# List of tuples [ (workspace_name, workspace_index, start_x, end_x) ]
+input_data = {{input_list}}
+
+# Fit function as a string
+function = {{function_string}}
+
+# Fitting options
+max_iterations = {{max_iterations}}
+minimizer = "{{minimizer}}"
+cost_function = "{{cost_function}}"
+evaluation_type = "{{evaluation_type}}"
+output_base_name = "{{output_base_name}}"

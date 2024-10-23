@@ -6,9 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid import config
-from mantid.api import AlgorithmFactory, FileAction, FileProperty, ITableWorkspaceProperty, Progress, PythonAlgorithm
+from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, ITableWorkspaceProperty, Progress, PythonAlgorithm
 from mantid.kernel import Direction, IntArrayBoundedValidator, StringListValidator, StringMandatoryValidator
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    CreateEmptyTableWorkspace,
+    CreateSingleValuedWorkspace,
+    DeleteWorkspace,
+    LoadEmptyInstrument,
+    LoadParameterFile,
+    SaveAscii,
+)
 
 import fnmatch
 import h5py

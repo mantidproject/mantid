@@ -30,7 +30,7 @@ QStringList functionQHeaders() {
 namespace MantidQt::CustomInterfaces::Inelastic {
 
 FunctionQDataView::FunctionQDataView(QWidget *parent) : FunctionQDataView(functionQHeaders(), parent) {
-  connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SLOT(notifyAddClicked()));
+  connect(m_uiForm->pbAdd, &QPushButton::clicked, this, &FunctionQDataView::notifyAddClicked);
 }
 
 FunctionQDataView::FunctionQDataView(const QStringList &headers, QWidget *parent) : FitDataView(headers, parent) {
@@ -40,12 +40,11 @@ FunctionQDataView::FunctionQDataView(const QStringList &headers, QWidget *parent
 
 void FunctionQDataView::showAddWorkspaceDialog() {
   auto dialog = new FunctionQAddWorkspaceDialog(parentWidget());
-  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
-          SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
-  connect(dialog, SIGNAL(workspaceChanged(FunctionQAddWorkspaceDialog *, const std::string &)), this,
-          SLOT(notifyWorkspaceChanged(FunctionQAddWorkspaceDialog *, const std::string &)));
-  connect(dialog, SIGNAL(parameterTypeChanged(FunctionQAddWorkspaceDialog *, const std::string &)), this,
-          SLOT(notifyParameterTypeChanged(FunctionQAddWorkspaceDialog *, const std::string &)));
+
+  connect(dialog, &FunctionQAddWorkspaceDialog::addData, this, &FunctionQDataView::notifyAddData);
+  connect(dialog, &FunctionQAddWorkspaceDialog::workspaceChanged, this, &FunctionQDataView::notifyWorkspaceChanged);
+  connect(dialog, &FunctionQAddWorkspaceDialog::parameterTypeChanged, this,
+          &FunctionQDataView::notifyParameterTypeChanged);
 
   auto tabName = m_presenter->tabName();
   dialog->setAttribute(Qt::WA_DeleteOnClose);

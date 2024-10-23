@@ -1,1 +1,0 @@
-- The dialog window for adding data in the  :ref:`Elwin Tab <elwin>` of the :ref:`Data Processor Interface <interface-inelastic-data-processor>` no longer freezes when adding data.

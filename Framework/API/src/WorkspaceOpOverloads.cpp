@@ -13,6 +13,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/Property.h"
 
 #include <numeric>
@@ -376,10 +377,10 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace &ws1, const MatrixWork
   const double secondWS = std::accumulate(ws2.x(0).begin(), ws2.x(0).end(), 0.);
   if (std::abs(firstWS) < 1.0E-7 && std::abs(secondWS) < 1.0E-7) {
     for (size_t i = 0; i < ws1.x(0).size(); i++) {
-      if (std::abs(ws1.x(0)[i] - ws2.x(0)[i]) > 1.0E-7)
+      if (!Kernel::withinAbsoluteDifference(ws1.x(0)[i], ws2.x(0)[i], 1.0E-7))
         return false;
     }
-  } else if (std::abs(firstWS - secondWS) / std::max<double>(std::abs(firstWS), std::abs(secondWS)) > 1.0E-7)
+  } else if (!Kernel::withinRelativeDifference(firstWS, secondWS, 1.0E-7))
     return false;
 
   // If we were only asked to check the first spectrum, return now
@@ -409,11 +410,10 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace &ws1, const MatrixWork
     const double secondWSLoop = std::accumulate(ws2.x(i).begin(), ws2.x(i).end(), 0.);
     if (std::abs(firstWSLoop) < 1.0E-7 && std::abs(secondWSLoop) < 1.0E-7) {
       for (size_t j = 0; j < ws1.x(i).size(); j++) {
-        if (std::abs(ws1.x(i)[j] - ws2.x(i)[j]) > 1.0E-7)
+        if (!Kernel::withinAbsoluteDifference(ws1.x(i)[j], ws2.x(i)[j], 1.0E-7))
           return false;
       }
-    } else if (std::abs(firstWSLoop - secondWSLoop) / std::max<double>(std::abs(firstWSLoop), std::abs(secondWSLoop)) >
-               1.0E-7)
+    } else if (!Kernel::withinRelativeDifference(firstWSLoop, secondWSLoop, 1.0E-7))
       return false;
   }
 

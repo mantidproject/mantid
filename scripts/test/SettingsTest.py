@@ -8,8 +8,6 @@ import unittest
 
 from isis_reflectometry import settings
 
-from mantid.simpleapi import *
-
 """
 RAII Test helper class. Equivalent to the ScopedFileHelper.
 

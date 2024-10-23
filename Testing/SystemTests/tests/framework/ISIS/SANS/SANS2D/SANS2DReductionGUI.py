@@ -21,7 +21,9 @@ Test was first created to apply to Mantid Release 3.0.
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
+from mantid.api import FileFinder
+from mantid.kernel import config
+from mantid.simpleapi import RenameWorkspace
 import isis_reducer
 import ISISCommandInterface as i
 import isis_instrument

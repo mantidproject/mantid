@@ -11,7 +11,7 @@ namespace MantidQt::CustomInterfaces {
 BayesFittingTab::BayesFittingTab(QWidget *parent) : InelasticTab(parent), m_propTree(new QtTreePropertyBrowser()) {
   m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &BayesFittingTab::updateProperties);
 }
 
 BayesFittingTab::~BayesFittingTab() { m_propTree->unsetFactoryForManager(m_dblManager); }

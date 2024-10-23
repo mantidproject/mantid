@@ -1,1 +1,0 @@
-- Fixed a crash on ALFView when moving the cursor over the Instrument View while loading data.

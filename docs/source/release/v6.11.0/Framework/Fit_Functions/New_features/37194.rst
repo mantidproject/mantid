@@ -1,1 +1,0 @@
-- Added the :ref:`SpinDiffusion <func-SpinDiffusion>` fit function in the Muon category.

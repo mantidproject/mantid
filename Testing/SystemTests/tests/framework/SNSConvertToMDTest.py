@@ -6,7 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,no-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd, AlgorithmManager
+from mantid.kernel import config
+from mantid.simpleapi import ConvertToMD, DeleteWorkspace, DgsReduction, Load, LoadMD, SaveMD, SetGoniometer, SetUB
 
 ######################################################################
 # Common configuration

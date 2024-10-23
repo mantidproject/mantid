@@ -1,1 +1,0 @@
-- Add a run constraint to the mantid package to constrain the optional matplotlib dependency to v3.7. Previously it was possible to install any version of matplotlib alongside mantid in a conda environment, but we cannot guarantee compatibility for any version other than 3.7.

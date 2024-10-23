@@ -28,6 +28,7 @@ using namespace Kernel;
 void ExtractMask::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "A workspace whose masking is to be extracted");
+  declareProperty("UngroupDetectors", false, "If true, the spectra will be ungrouped and masked individually.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "A workspace containing the masked spectra as zeroes and ones.");
 
@@ -62,26 +63,21 @@ void ExtractMask::exec() {
 
   // Create a new workspace for the results, copy from the input to ensure
   // that we copy over the instrument and current masking
-  auto maskWS = std::make_shared<DataObjects::MaskWorkspace>(inputWS);
+  std::shared_ptr<DataObjects::MaskWorkspace> maskWS;
+  if (getProperty("UngroupDetectors"))
+    maskWS = std::make_shared<DataObjects::MaskWorkspace>(inputWS->getInstrument());
+  else
+    maskWS = std::make_shared<DataObjects::MaskWorkspace>(inputWS);
+
   maskWS->setTitle(inputWS->getTitle());
 
-  const auto &spectrumInfo = inputWS->spectrumInfo();
-  const auto nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
-  Progress prog(this, 0.0, 1.0, nHist);
-
-  PARALLEL_FOR_IF(Kernel::threadSafe(*inputWS, *maskWS))
-  for (int64_t i = 0; i < nHist; ++i) {
-    PARALLEL_START_INTERRUPT_REGION
-    bool inputIsMasked(false);
-    if (spectrumInfo.hasDetectors(i)) {
-      // special workspaces can mysteriously have the mask bit set
-      inputIsMasked = (inputWSIsSpecial && inputMaskWS->isMaskedIndex(i)) || spectrumInfo.isMasked(i);
+  // set mask from from detectorList
+  for (auto detectorID : detectorList)
+    try {
+      maskWS->setMasked(detectorID);
+    } catch (std::invalid_argument const &) {
+      g_log.warning() << "Detector ID = " << detectorID << " is masked but does not exist in any output spectra\n ";
     }
-    maskWS->setMaskedIndex(i, inputIsMasked);
-    prog.report();
-    PARALLEL_END_INTERRUPT_REGION
-  }
-  PARALLEL_CHECK_INTERRUPT_REGION
 
   g_log.information() << maskWS->getNumberMasked() << " spectra are masked\n";
   g_log.information() << detectorList.size() << " detectors are masked\n";

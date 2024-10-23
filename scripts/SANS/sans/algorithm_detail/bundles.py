@@ -20,7 +20,7 @@ from collections import namedtuple
 # 8. A handle to the direct workspace (sample or can)
 from typing import List
 
-from mantid.py36compat import dataclass
+from dataclasses import dataclass
 from sans.state.StateObjects.wavelength_interval import WavRange
 
 ReductionSettingBundle = namedtuple(

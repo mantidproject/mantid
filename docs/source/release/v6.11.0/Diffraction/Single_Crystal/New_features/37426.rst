@@ -1,1 +1,0 @@
-- A new output property, ``Cells``, has been added to :ref:`ShowPossibleCells <algm-ShowPossibleCells>` that includes the cell information in a usable way

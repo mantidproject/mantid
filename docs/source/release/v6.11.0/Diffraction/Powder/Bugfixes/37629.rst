@@ -1,1 +1,0 @@
-- Fix bug where compression isn't run when logarithmic is selected in :ref:`AlignAndFocusPowder <algm-AlignAndFocusPowder-v1>`

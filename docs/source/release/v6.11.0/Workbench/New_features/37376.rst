@@ -1,1 +1,0 @@
-- Force Style for QComboBoxes and text, in order to make text visible on OSX dark mode

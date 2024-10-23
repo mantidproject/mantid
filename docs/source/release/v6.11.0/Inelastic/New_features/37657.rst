@@ -1,1 +1,0 @@
-- Added the ability to load `A0` fit parameter data into the `Function (Q)` tab of the :ref:`QENS Fitting <interface-inelastic-qens-fitting>` interface.

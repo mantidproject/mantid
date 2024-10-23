@@ -1,1 +1,0 @@
-- Add support for :ref:`Ragged Workspaces <Ragged_Workspace>` to :ref:`CompareWorkspaces <algm-CompareWorkspaces>`.

@@ -1,1 +1,0 @@
-- Fixed a crash in :ref:`Fitting tab <ui engineering fitting>` of :ref:`Engineering Diffraction interface<Engineering_Diffraction-ref>` when a fit is re-run for a function like PseudoVoigt that contains FWHM parameter as the peak function.

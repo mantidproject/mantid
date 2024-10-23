@@ -8,7 +8,7 @@ import numpy as np
 from scipy import constants
 from mantid.kernel import CompositeValidator, Direction, FloatBoundedValidator
 from mantid.api import AlgorithmFactory, CommonBinsValidator, HistogramValidator, MatrixWorkspaceProperty, PythonAlgorithm
-from mantid.simpleapi import *
+from mantid.simpleapi import CloneWorkspace, Rebin, Rebin2D, ScaleX, Transpose
 
 
 class UnitError(ValueError):

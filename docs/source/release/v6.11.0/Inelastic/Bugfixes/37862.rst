@@ -1,1 +1,0 @@
-- Fix a cutoff issue with "Symmetric Energy Range" label in :ref:`Iqt<iqt>` tab of the :ref:`Data Processor <interface-inelastic-data-processor>` interface.

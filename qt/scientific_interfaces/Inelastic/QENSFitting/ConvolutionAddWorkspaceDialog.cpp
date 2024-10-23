@@ -6,11 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvolutionAddWorkspaceDialog.h"
 
+#include "FitTabConstants.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/TableWidgetValidators.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include <qcheckbox.h>
 #include <utility>
 
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
@@ -24,10 +26,10 @@ ConvolutionAddWorkspaceDialog::ConvolutionAddWorkspaceDialog(QWidget *parent) : 
   m_uiForm.leWorkspaceIndices->setValidator(new QRegExpValidator(QRegExp(validatorString), this));
   setAllSpectraSelectionEnabled(false);
 
-  connect(m_uiForm.dsWorkspace, SIGNAL(dataReady(const QString &)), this, SLOT(workspaceChanged(const QString &)));
-  connect(m_uiForm.ckAllSpectra, SIGNAL(stateChanged(int)), this, SLOT(selectAllSpectra(int)));
-  connect(m_uiForm.pbAdd, SIGNAL(clicked()), this, SLOT(emitAddData()));
-  connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
+  connect(m_uiForm.dsWorkspace, &DataSelector::dataReady, this, &ConvolutionAddWorkspaceDialog::workspaceChanged);
+  connect(m_uiForm.ckAllSpectra, &QCheckBox::stateChanged, this, &ConvolutionAddWorkspaceDialog::selectAllSpectra);
+  connect(m_uiForm.pbAdd, &QPushButton::clicked, this, &ConvolutionAddWorkspaceDialog::emitAddData);
+  connect(m_uiForm.pbClose, &QPushButton::clicked, this, &ConvolutionAddWorkspaceDialog::close);
 }
 
 std::string ConvolutionAddWorkspaceDialog::workspaceName() const {

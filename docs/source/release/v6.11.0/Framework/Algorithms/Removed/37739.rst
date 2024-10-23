@@ -1,1 +1,0 @@
-- The AddNote algorithm was deprecated in :ref:`Release 3.6.0 <v3.6.0>` and has now been removed. Please use :ref:`Comment <algm-Comment>` instead.
