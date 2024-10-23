@@ -57,8 +57,7 @@ class ISISReflectometryAutoreductionTest(systemtesting.MantidSystemTest, ISISRef
 
         self.finaliseResults()
 
-    @staticmethod
-    def regenerateReferenceFileByReducing():
+    def regenerateReferenceFileByReducing(self):
         setupInstrument()
         test = ISISReflectometryAutoreductionTest()
         test.runTest()
