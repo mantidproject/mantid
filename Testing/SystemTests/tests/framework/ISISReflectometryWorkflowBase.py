@@ -67,15 +67,15 @@ class ISISReflectometryWorkflowBase:
         GroupWorkspaces(InputWorkspaces=AnalysisDataService.Instance().getObjectNames(), OutputWorkspace=self.result_workspace_name)
         mtd[self.result_workspace_name].sortByName()
 
-    def regenerateRunsFile():
+    def regenerateRunsFile(self):
         setupInstrument()
         regenerateRunsFile(self.first_transmission_runs + self.second_transmission_runs, self.run_numbers, self.input_run_file)
 
-    def regenerateReferenceFileFromDirectory(reference_file_directory):
+    def regenerateReferenceFileFromDirectory(self, reference_file_directory):
         setupInstrument()
         regenerateReferenceFile(reference_file_directory, self.reference_file)
 
-    def regenerateRunTitles():
+    def regenerateRunTitles(self):
         RegenerateRunTitles(self.investigation_id)
 
 
@@ -155,7 +155,7 @@ def regenerateReferenceFile(reference_file_directory, output_filename):
     files = os.listdir(reference_file_directory)
     workspace_names = []
     for file in files:
-        workspace_name = WorkspaceName(file)
+        workspace_name = workspaceName(file)
         Load(file, OutputWorkspace=workspace_name)
         workspace_names.append(workspace_name)
 
@@ -171,7 +171,7 @@ def regenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers, i
     for run in transmission_run_names:
         Load("{}.raw".format(run), OutputWorkspace=run)
     # Load raw run files
-    run_names = [str(run_number) for run_number in run_range]
+    run_names = [str(run_number) for run_number in run_numbers]
     file_names = ["{}.raw".format(run_name) for run_name in run_names]
 
     for run_name, file_name in zip(run_names, file_names):
@@ -190,17 +190,6 @@ def RegenerateRunTitles(investigation_id):
     """Uses the old reflectometry gui python modules to generate the runs table from ICAT.
     A local copy of the table generated is stored in run_titles below.
     You may be able to use this script to update it."""
-    # self.listMain.clear()
-
-    # Use ICAT for a journal search based on the RB number
-
-    active_session_id = None
-    if CatalogManager.numberActiveSessions() == 0:
-        # Execute the CatalogLoginDialog
-        login_alg = CatalogLoginDialog()
-        session_object = login_alg.getProperty("KeepAlive").value
-        active_session_id = session_object.getPropertyValue("Session")
-
     # Fetch out an existing session id
     # This might be another catalog session, but at present there is
     # no way to tell.
