@@ -5,6 +5,7 @@ set(SRC_FILES
     ALCBaselineModellingView.cpp
     ALCDataLoadingPresenter.cpp
     ALCDataLoadingView.cpp
+    ALCDataLoadingModel.cpp
     ALCInterface.cpp
     ALCLatestFileFinder.cpp
     ALCPeakFittingModel.cpp
@@ -31,6 +32,7 @@ set(INC_FILES
     ALCBaselineModellingPresenter.h
     ALCBaselineModellingView.h
     ALCDataLoadingPresenter.h
+    ALCDataLoadingModel.h
     ALCDataLoadingView.h
     ALCInterface.h
     ALCLatestFileFinder.h

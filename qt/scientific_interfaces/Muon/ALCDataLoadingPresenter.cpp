@@ -33,9 +33,9 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
-ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view), m_numDetectors(0), m_loadingData(false), m_directoryChanged(false), m_lastRunLoadedAuto(-2),
-      m_filesLoaded(), m_wasLastAutoRange(false), m_previousFirstRun("") {}
+ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view, std::unique_ptr<ALCDataLoadingModel> model)
+    : m_view(view), m_model(std::move(model)), m_numDetectors(0), m_loadingData(false), m_directoryChanged(false),
+      m_lastRunLoadedAuto(-2), m_filesLoaded(), m_wasLastAutoRange(false), m_previousFirstRun("") {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
@@ -155,7 +155,7 @@ int ALCDataLoadingPresenter::extractRunNumber(const std::string &file) {
  * @param files :: [input] range of files (user-specified or auto generated)
  */
 void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
-  m_loadingData = true;
+  m_model->setLoadingData(true);
   m_view->disableAll();
 
   // Before loading, check custom grouping (if used) is sensible
@@ -165,79 +165,8 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
   }
 
   try {
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
-    alg->setAlwaysStoreInADS(false); // Don't want workspaces in the ADS
+    m_model->load(files, m_view);
 
-    // Change first last run to WorkspaceNames
-    alg->setProperty("WorkspaceNames", files);
-    alg->setProperty("LogValue", m_view->log());
-    alg->setProperty("Function", m_view->function());
-    alg->setProperty("Type", m_view->calculationType());
-    alg->setProperty("DeadTimeCorrType", m_view->deadTimeType());
-    alg->setProperty("Red", m_view->redPeriod());
-
-    // If time limiting requested, set min/max times
-    if (auto timeRange = m_view->timeRange()) {
-      double timeMin = (*timeRange).first;
-      double timeMax = (*timeRange).second;
-      if (timeMin >= timeMax) {
-        throw std::invalid_argument("Invalid time limits");
-      }
-      alg->setProperty("TimeMin", timeMin);
-      alg->setProperty("TimeMax", timeMax);
-    }
-
-    // If corrections from custom file requested, set file property
-    if (m_view->deadTimeType() == "FromSpecifiedFile") {
-      alg->setProperty("DeadTimeCorrFile", m_view->deadTimeFile());
-    }
-
-    // If custom grouping requested, set forward/backward groupings
-    if (m_view->detectorGroupingType() == "Custom") {
-      alg->setProperty("ForwardSpectra", m_view->getForwardGrouping());
-      alg->setProperty("BackwardSpectra", m_view->getBackwardGrouping());
-    }
-
-    // Set alpha for balance parameter
-    alg->setProperty("Alpha", m_view->getAlphaValue());
-
-    // If Subtract checkbox is selected, set green period
-    if (m_view->subtractIsChecked()) {
-      alg->setProperty("Green", m_view->greenPeriod());
-    }
-
-    alg->setPropertyValue("OutputWorkspace", "__NotUsed");
-
-    // Set loading alg equal to alg
-    this->m_LoadingAlg = alg;
-    // Execute async so we can show progress bar
-    Poco::ActiveResult<bool> result(alg->executeAsync());
-    while (!result.available()) {
-      QCoreApplication::processEvents();
-    }
-    if (!result.error().empty()) {
-      throw std::runtime_error(result.error());
-    }
-
-    MatrixWorkspace_sptr tmp = alg->getProperty("OutputWorkspace");
-    IAlgorithm_sptr sortAlg = AlgorithmManager::Instance().create("SortXAxis");
-    sortAlg->setAlwaysStoreInADS(false); // Don't want workspaces in the ADS
-    sortAlg->setProperty("InputWorkspace", tmp);
-    sortAlg->setProperty("Ordering", "Ascending");
-    sortAlg->setProperty("OutputWorkspace", "__NotUsed__");
-    sortAlg->execute();
-
-    m_loadedData = sortAlg->getProperty("OutputWorkspace");
-
-    // If errors are properly caught, shouldn't happen
-    assert(m_loadedData);
-    // If subtract is not checked, only one spectrum,
-    // else four spectra
-    if (!m_view->subtractIsChecked()) {
-      assert(m_loadedData->getNumberHistograms() == 1);
-    } else {
-      assert(m_loadedData->getNumberHistograms() == 4);
-    }
     // Plot spectrum 0. It is either red period (if subtract is unchecked) or
     // red - green (if subtract is checked)
     m_view->setDataCurve(m_loadedData);
@@ -248,7 +177,7 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
     throw std::runtime_error(e.what()); // Caught in handle load request
   }
   m_view->enableAll();
-  m_loadingData = false;
+  m_model->setLoadingData(false);
 }
 
 void ALCDataLoadingPresenter::updateAvailableInfo() {
@@ -459,7 +388,6 @@ void ALCDataLoadingPresenter::handleStartWatching(bool watch) {
 /**
  * This timer runs every second when we are watching a directory.
  * If any changes have occurred in the meantime, reload.
- * @param timeup :: [input] Qt timer event (not used)
  */
 void ALCDataLoadingPresenter::handleTimerEvent() {
 

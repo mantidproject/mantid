@@ -101,7 +101,7 @@ void ALCInterface::initLayout() {
   auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
   connect(dataLoadingView, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
 
-  m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
+  m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView, std::make_unique<ALCDataLoadingModel>());
   m_dataLoading->initialize();
 
   auto baselineModellingModel = std::make_unique<ALCBaselineModellingModel>();
