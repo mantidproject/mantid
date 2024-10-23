@@ -61,18 +61,19 @@
 # the 1st argument to the function. This will result in the end executable
 # called that. Normal Program builder rules apply.
 #
-# ruff: noqa: F403   # Allow wild imports
-from SCons.Script import *
+from SCons.Script import Dir, File, Flatten, Split
 from SCons.Builder import Builder
+from SCons.Warnings import enableWarningClass, warn, Warning
 import os
+import sys
 
 
 # A warning class to notify users of problems
-class ToolCxxTestWarning(SCons.Warnings.Warning):
+class ToolCxxTestWarning(Warning):
     pass
 
 
-SCons.Warnings.enableWarningClass(ToolCxxTestWarning)
+enableWarningClass(ToolCxxTestWarning)
 
 
 def accumulateEnvVar(dicts, name, default = []):
@@ -138,8 +139,7 @@ def isValidScriptPath(cxxtestgen):
     if cxxtestgen and os.path.exists(cxxtestgen):
         return True
     else:
-        SCons.Warnings.warn(ToolCxxTestWarning,
-                            "Invalid CXXTEST environment variable specified!")
+        warn(ToolCxxTestWarning, "Invalid CXXTEST environment variable specified!")
         return False
 
 
@@ -159,7 +159,7 @@ def findCxxTestGen(env):
 
     # check for common passing errors and provide diagnostics.
     if isinstance(cxxtest, (list, tuple, dict)):
-        SCons.Warnings.warn(
+        warn(
                 ToolCxxTestWarning,
                 "The CXXTEST variable was specified as a list."
                 " This is not supported. Please pass a string."
@@ -193,7 +193,7 @@ def findCxxTestGen(env):
         return cxxtest
     else:
         # If we weren't able to locate the cxxtestgen script, complain...
-        SCons.Warnings.warn(
+        warn(
                 ToolCxxTestWarning,
                 "Unable to locate cxxtestgen in environment, path or"
                 " project!\n"
@@ -271,7 +271,7 @@ def generate(env, **kwargs):
     env.SetDefault( CXXTEST_CXXTESTGEN_SCRIPT_NAME = 'cxxtestgen' )
 
     #Here's where keyword arguments are applied
-    apply(env.Replace, (), kwargs)
+    env.Replace(**kwargs)
 
     #If the user specified the path to CXXTEST, make sure it is correct
     #otherwise, search for and set the default toolpath.
