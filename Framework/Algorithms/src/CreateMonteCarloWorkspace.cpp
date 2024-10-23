@@ -55,10 +55,27 @@ void CreateMonteCarloWorkspace::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                     "Input Workspace containing data to be fitted");
-  declareProperty("Iterations", 100, mustBePositive, "The number of times the simulation will run.");
+  declareProperty("Iterations", 1000, mustBePositive, "The number of times the simulation will run.");
   declareProperty("Seed", 32, mustBePositive, "Integer that initializes a random-number generator");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of output workspace.");
+}
+
+void CreateMonteCarloWorkspace::afterPropertySet(const std::string &name) {
+    if (name == "InputWorkspace") {
+         g_log.notice() << "Name:" << name << endl;
+        MatrixWorkspace_sptr instWs = getProperty("InputWorkspace");
+        if (instWs) {
+          // Get the number of data points (y-values) in the input workspace
+          const Mantid::HistogramData::Histogram &hist = instWs->histogram(0);
+          const auto &yData = hist.y();
+          int numDataPoints = static_cast<int>(yData.size());
+
+          setProperty("Iterations", numDataPoints);
+          g_log.notice() << "Iterations:" << numDataPoints << endl;
+        }
+
+  }
 }
 
 //----------------------------------------------------------------------------------------------
@@ -70,9 +87,11 @@ double CreateMonteCarloWorkspace::calculateMean(const vector<int> &numbers) {
   if (numbers.empty()) {
     return 0.0; // Avoid division by zero
   }
-  int sum = accumulate(numbers.begin(), numbers.end(), 0);
+  int sum = accumulate(numbers.cbegin(), numbers.cend(), 0);
   return static_cast<double>(sum) / numbers.size(); // Cast to double for the mean
 }
+
+//----------------------------------------------------------------------------------------------
 
 // Calculate the variance of a vector of integers
 double CreateMonteCarloWorkspace::calculateVariance(const vector<int> &numbers, double mean) {
@@ -81,32 +100,34 @@ double CreateMonteCarloWorkspace::calculateVariance(const vector<int> &numbers, 
   }
 
   // Step 1: Calculate the squared differences from the mean
-  double variance_sum = 0.0;
-  for (int num : numbers) {
-    variance_sum += (num - mean) * (num - mean); // (x_i - mean)^2
-  }
+  double variance_sum = accumulate(numbers.cbegin(), numbers.cend(), 0.0,
+                                   [&mean](double total, const double number) {
+                                     return total + pow((number - mean), 2);
+                                   });
 
   // Step 2: Divide by the number of elements
   return variance_sum / numbers.size();
 }
 
+//----------------------------------------------------------------------------------------------
+
 // Probability Density Function
-vector<double> CreateMonteCarloWorkspace::pdf(const vector<int> &num, double mean, double variance) const{
+vector<double> CreateMonteCarloWorkspace::pdf(const vector<int> &numbers, double mean, double variance) const{
   double base = 1.0 / (sqrt(variance) * sqrt(2 * numbers::pi));
   double exponent = 0.0;
 
   vector<double> result;
-  result.reserve(num.size());
 
-    for (int i : num) {
-        exponent = exp(-((i - mean) * (i - mean)) / (2 * variance));
-        double pdf_value = base * exponent;  // PDF for the current value
-        result.push_back(pdf_value);
+  for (int number : numbers) {
+    exponent = exp(-((number - mean) * (number - mean)) / (2 * variance));
+    double pdf_value = base * exponent;  // PDF for the current value
+    result.push_back(pdf_value);
   }
 
   return result;
-
 }
+
+//----------------------------------------------------------------------------------------------
 
 
 void CreateMonteCarloWorkspace::exec() {
@@ -119,10 +140,10 @@ void CreateMonteCarloWorkspace::exec() {
   outputWs = WorkspaceFactory::Instance().create(instWs, 1, num_iterations + 1, num_iterations);
   const Mantid::HistogramData::Histogram &hist = instWs->histogram(0);
   const auto &yData = hist.y();
+  // int num_iterations = static_cast<int>(yData.size());
 
   // Used to store the random numbers picked
   std::vector<int> randomNumList;
-  randomNumList.reserve(num_iterations);
 
   auto min = static_cast<int>(*std::min_element(yData.begin(), yData.end()));
   auto max = static_cast<int>(*std::max_element(yData.begin(), yData.end()));
