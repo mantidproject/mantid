@@ -74,7 +74,7 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::I
 void ElwinPresenter::runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) {
   (void)algorithm;
   m_view->setRunIsRunning(false);
-  m_outputNamePresenter->generateLabelWarning();
+  m_outputNamePresenter->generateWarningLabel();
   if (!error) {
     if (!m_view->isGroupInput()) {
       m_model->ungroupAlgorithm("Elwin_Input");

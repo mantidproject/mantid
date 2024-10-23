@@ -46,7 +46,7 @@ public:
 
     ON_CALL(*m_view, getCurrentOutputName()).WillByDefault(Return("test_red"));
     EXPECT_CALL(*m_view, setWarningLabel(text, textColor)).Times(1);
-    m_presenter->generateLabelWarning();
+    m_presenter->generateWarningLabel();
   }
 
   void test_label_warning_message_if_workspace_does_not_exists_on_ads() {
@@ -55,17 +55,17 @@ public:
 
     ON_CALL(*m_view, getCurrentOutputName()).WillByDefault(Return("workspace_red"));
     EXPECT_CALL(*m_view, setWarningLabel(text, textColor)).Times(1);
-    m_presenter->generateLabelWarning();
+    m_presenter->generateWarningLabel();
   }
 
   void test_index_label_position_is_correct() {
     std::vector<std::string> test_suffices({"_red", "_sqw"});
     m_presenter->setWsSuffixes(test_suffices);
-    auto pos = m_presenter->findInsertIndexLabel("test_red");
+    auto pos = m_presenter->findIndexToInsertLabel("test_red");
     TS_ASSERT_EQUALS(pos, 4);
-    pos = m_presenter->findInsertIndexLabel("test");
+    pos = m_presenter->findIndexToInsertLabel("test");
     TS_ASSERT_EQUALS(pos, 4);
-    pos = m_presenter->findInsertIndexLabel("test_red_sqw");
+    pos = m_presenter->findIndexToInsertLabel("test_red_sqw");
     TS_ASSERT_EQUALS(pos, 8);
   }
 

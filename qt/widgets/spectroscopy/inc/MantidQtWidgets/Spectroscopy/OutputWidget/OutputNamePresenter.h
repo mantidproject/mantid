@@ -17,9 +17,9 @@ class MANTID_SPECTROSCOPY_DLL IOutputNamePresenter {
 public:
   virtual ~IOutputNamePresenter() = default;
 
-  virtual int findInsertIndexLabel(std::string const &basename) = 0;
+  virtual int findIndexToInsertLabel(std::string const &basename) = 0;
   virtual std::string generateOutputLabel() = 0;
-  virtual void generateLabelWarning() const = 0;
+  virtual void generateWarningLabel() const = 0;
   virtual void handleUpdateOutputLabel() = 0;
   virtual void setWsSuffixes(std::vector<std::string> const &suffixes) = 0;
 
@@ -31,9 +31,9 @@ public:
   OutputNamePresenter(IOutputNameView *view);
   ~OutputNamePresenter() override = default;
 
-  int findInsertIndexLabel(std::string const &outputBasename) override;
+  int findIndexToInsertLabel(std::string const &outputBasename) override;
   std::string generateOutputLabel() override;
-  void generateLabelWarning() const override;
+  void generateWarningLabel() const override;
   void handleUpdateOutputLabel() override;
 
   void setOutputWsBasename(std::string const &outputBasename, std::string const &outputSuffix = "") override;
