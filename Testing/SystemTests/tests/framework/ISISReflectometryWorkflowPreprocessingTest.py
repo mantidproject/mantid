@@ -47,8 +47,7 @@ class ISISReflectometryWorkflowPreprocessingTest(systemtesting.MantidSystemTest,
         )
         self.finaliseResults()
 
-    @staticmethod
-    def regenerateReferenceFileByReducing():
+    def regenerateReferenceFileByReducing(self):
         setupInstrument()
         test = ISISReflectometryWorkflowPreprocessingTest()
         test.runTest()

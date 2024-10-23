@@ -23,6 +23,14 @@ except:
     mpl = None
 
 
+def reduced_filename(runs, ei, is_sum, prefix=None):
+    runs = [runs] if not isinstance(runs, list) else runs
+    is_sum = is_sum if len(runs) > 1 else False
+    if not prefix:
+        prefix = f"MAR{runs[0]}to{runs[-1]}sum" if is_sum else f"MAR{runs[0]}"
+    return f"{prefix}_Ei{ei:<3.2f}meV"
+
+
 class ReduceMARI(ReductionWrapper):
     # -------------------------------------------------------------------------------------------------#
     @MainProperties

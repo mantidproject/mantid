@@ -241,7 +241,7 @@ class ModelFittingModel(BasicFittingModel):
         x_lower, _ = self.x_limits_of_workspace(workspace_name)
         return x_lower
 
-    def number_of_result_tables() -> int:
+    def number_of_result_tables(self) -> int:
         """Returns the number of results tables stored by the fitting context."""
         return self.fitting_context.number_of_result_tables()
 

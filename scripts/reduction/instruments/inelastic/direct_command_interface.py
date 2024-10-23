@@ -47,12 +47,6 @@ def SEQUOIA():
     Clear(InelasticReducer)
 
 
-def DefaultLoader():
-    step = InelasticLoader()
-    step.initialize()
-    ReductionSingleton().set_loader(step)
-
-
 def FixEi(ei):
     alg = AlgorithmManager.create("InelasticFixEi")
     alg.setProperty("Ei", ei)
