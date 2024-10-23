@@ -28,15 +28,16 @@ void OutputNamePresenter::setOutputWsBasename(std::string const &outputBasename,
   handleUpdateOutputLabel();
 }
 
-int OutputNamePresenter::findInsertIndexLabel(std::string const &outputBasename) {
-  std::vector<int> suffixPos;
-  std::transform(m_suffixes.begin(), m_suffixes.end(), std::back_inserter(suffixPos),
-                 [&](auto const &suffix) { return outputBasename.rfind(suffix); });
-  auto max_index = (*std::max_element(suffixPos.cbegin(), suffixPos.cend()));
-  return (suffixPos.empty() || (max_index == -1)) ? static_cast<int>(outputBasename.length()) : max_index;
+int OutputNamePresenter::findIndexToInsertLabel(std::string const &outputBasename) {
+  int maxPos = -1;
+  for (auto const &suffix : m_suffixes) {
+    int pos = outputBasename.rfind(suffix);
+    maxPos = pos >= maxPos ? pos : maxPos;
+  }
+  return (m_suffixes.empty() || (maxPos == -1)) ? static_cast<int>(outputBasename.length()) : maxPos;
 }
 
-void OutputNamePresenter::generateLabelWarning() const {
+void OutputNamePresenter::generateWarningLabel() const {
   auto textColor = "color: darkGreen";
   auto text = "Unused name, new workspace will be created";
   if (MantidWidgets::WorkspaceUtils::doesExistInADS(m_view->getCurrentOutputName())) {
@@ -48,16 +49,16 @@ void OutputNamePresenter::generateLabelWarning() const {
 
 std::string OutputNamePresenter::generateOutputLabel() {
   auto outputName = m_currBasename;
-  return outputName.insert(findInsertIndexLabel(outputName), addLabelUnderscore(m_view->getCurrentLabel()));
+  return outputName.insert(findIndexToInsertLabel(outputName), addLabelUnderscore(m_view->getCurrentLabel()));
 }
 
 void OutputNamePresenter::handleUpdateOutputLabel() {
   auto labelName = m_currBasename;
   if (!m_view->getCurrentLabel().empty())
-    labelName.insert(findInsertIndexLabel(labelName), "_" + m_view->getCurrentLabel());
+    labelName.insert(findIndexToInsertLabel(labelName), "_" + m_view->getCurrentLabel());
   labelName += m_currOutputSuffix;
   m_view->setOutputNameLabel(labelName);
-  generateLabelWarning();
+  generateWarningLabel();
 }
 
 } // namespace MantidQt::CustomInterfaces
