@@ -4,127 +4,19 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=invalid-name,no-init
+# pylint: disable=invalid-name,no-init,too-few-public-methods
 from mantid.api import mtd, PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.simpleapi import (
-    CloneWorkspace,
     CreateEmptyTableWorkspace,
     CreateLogPropertyTable,
     DeleteWorkspace,
     Load,
     LoadRaw,
-    RenameWorkspace,
 )
 from mantid.kernel import StringMandatoryValidator, Direction
 from mantid import config, FileFinder
 import os
 from itertools import filterfalse
-
-
-class Intervals(object):
-    # Having "*intervals" as a parameter instead of "intervals" allows us
-    # to type "Intervals( (0,3), (6, 8) )" instead of "Intervals( ( (0,3), (6, 8) ) )"
-    def __init__(self, *intervals):
-        # Convert into a list, then back into intervals, to make
-        # sure we have no overlapping intervals (which would result in
-        # duplicate values.
-        values = _intervalsToList(intervals)
-        self._intervals = _listToIntervals(values)
-
-    # Factory.
-    @classmethod
-    def fromString(cls, mystring):
-        # Tokenise on commas.
-        intervalTokens = mystring.split(",")
-
-        # Call parseRange on each tokenised range.
-        numbers = [_parseIntervalToken(intervalToken) for intervalToken in intervalTokens]
-
-        # Chain the result (a list of lists) together to make one single list of unique values.
-        result = list(set(itertools.chain.from_iterable(numbers)))
-
-        # Construct a new Intervals object, populate its intervals, and return.
-        newObj = cls()
-        newObj._intervals = _listToIntervals(result)
-        return newObj
-
-    # Factory.
-    @classmethod
-    def fromList(cls, values):
-        result = list(set(values))
-
-        # Construct a new Intervals object, populate its intervals, and return.
-        newObj = cls()
-        newObj._intervals = _listToIntervals(result)
-        return newObj
-
-    # Returns an array of all the values represented by this "Intervals" instance.
-    def getValues(self):
-        return [value for interval in self._intervals for value in range(interval[0], interval[1] + 1)]
-
-    # Returns the raw intervals.
-    def getIntervals(self):
-        return self._intervals
-
-    # So that "2 in Intervals( (0, 3) )" returns True.
-    def __contains__(self, ids):
-        for interval in self._intervals:
-            if interval[0] <= ids <= interval[1]:
-                return True
-        return False
-
-    # So that we can type "groups = Intervals( (0, 3) ) + Intervals( (6, 10) )"
-    def __add__(self, other):
-        newObj = Intervals()
-        newObj._intervals = self._intervals + other._intervals
-        return newObj
-
-    # TODO: At the moment this is just a generator.  Implement a proper iterator.
-    # So that we can type "for i in Intervals( (0, 2), (4, 5) ):"
-    def __iter__(self):
-        for interval in self._intervals:
-            for value in range(interval[0], interval[1] + 1):
-                yield value
-
-    # So we can type "interval = Intervals( (3, 5), (10, 12) )" and then "interval[3]" returns 10.
-    def __getitem__(self, index):
-        return self.getValues()[index]
-
-    # Mainly for debugging.
-    def __str__(self):
-        strings = ["(" + str(interval[0]) + ", " + str(interval[1]) + ")" for interval in self._intervals]
-        return ", ".join(strings)
-
-    def __len__(self):
-        return len(self.getValues())
-
-
-# Given a list of workspaces, will sum them together into a single new workspace, with the given name.
-# If no name is given, then one is constructed from the names of the given workspaces.
-
-
-def sumWsList(wsList, summedWsName=None):
-    if len(wsList) == 1:
-        if summedWsName is not None:
-            CloneWorkspace(InputWorkspace=wsList[0].name(), OutputWorkspace=summedWsName)
-            return mtd[summedWsName]
-        return wsList[0]
-
-    sumws = wsList[0] + wsList[1]
-
-    if len(wsList) > 2:
-        for i in range(2, len(wsList) - 1):
-            sumws += wsList[i]
-
-    if summedWsName is None:
-        summedWsName = "_PLUS_".join([ws.name() for ws in wsList])
-
-    RenameWorkspace(InputWorkspace=sumws.name(), OutputWorkspace=summedWsName)
-
-    return mtd[summedWsName]
-
-
-# pylint: disable=too-few-public-methods
 
 
 class FileBackedWsIterator(object):
