@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputNamePresenter.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
@@ -40,6 +41,7 @@ class MANTIDQT_INELASTIC_DLL IDataProcessor {
 public:
   virtual ~IDataProcessor() = default;
   virtual void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter>) = 0;
+  virtual void setOutputNamePresenter(std::unique_ptr<IOutputNamePresenter>) = 0;
   virtual void clearOutputPlotOptionsWorkspaces() = 0;
   virtual void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) = 0;
   virtual void filterInputData(bool filter) = 0;
@@ -62,6 +64,8 @@ public:
   ~DataProcessor() override = default;
   /// Set the presenter for the output plotting options
   void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) override;
+  /// Set the presenter for the output name widget
+  void setOutputNamePresenter(std::unique_ptr<IOutputNamePresenter> presenter) override;
   /// Overridden from IAlgorithmRunnerSubscriber: Notifies when a batch of algorithms is completed
   void notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) override;
 
@@ -84,6 +88,7 @@ protected:
     (void)error;
   };
   std::unique_ptr<MantidQt::API::IAlgorithmRunner> m_algorithmRunner;
+  std::unique_ptr<IOutputNamePresenter> m_outputNamePresenter;
 
 private:
   virtual void setFileExtensionsByName(bool filter) { (void)filter; };

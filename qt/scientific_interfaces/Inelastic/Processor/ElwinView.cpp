@@ -182,6 +182,8 @@ IRunView *ElwinView::getRunView() const { return m_uiForm.runWidget; }
 
 IOutputPlotOptionsView *ElwinView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
 
+IOutputNameView *ElwinView::getOutputName() const { return m_uiForm.outNameWidget; }
+
 void ElwinView::setHorizontalHeaders() {
   QStringList headers;
   headers << "Workspace"
