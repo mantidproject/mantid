@@ -7,31 +7,33 @@
 #pragma once
 
 #include <vector>
+#include <random>
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 
+
 namespace Mantid {
 namespace Algorithms {
+using namespace std;
 
 /** CreateMonteCarloWorkspace : TODO: DESCRIPTION
  */
 class MANTID_ALGORITHMS_DLL CreateMonteCarloWorkspace : public API::Algorithm {
 public:
-  const std::string name() const override;
+  const string name() const override;
   int version() const override;
-  const std::string category() const override;
-  const std::string summary() const override;
+  const string category() const override;
+  const string summary() const override;
 
-  void afterPropertySet(const std::string &name) override;
+  Mantid::HistogramData::HistogramY fillHistogramWithRandomData(const std::vector<double> &cdf, int numIterations,
+                                                                std::mt19937 &gen);
+  std::vector<double> computeNormalizedCDF(const Mantid::HistogramData::HistogramY &yData);
+  int computeNumberOfIterations(const Mantid::HistogramData::HistogramY &yData);
 
 private:
   void init() override;
   void exec() override;
-
-  double calculateMean(const std::vector<int> &numbers);
-  double calculateVariance(const std::vector<int> &numbers, double mean);
-  std::vector<double> pdf(const std::vector<int> &num, double mean, double variance) const;
 };
 
 } // namespace Algorithms
