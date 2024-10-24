@@ -11,4 +11,3 @@ This is a Python binding to the C++ class Mantid::Kernel::std_vector_size_t.
     :members:
     :undoc-members:
     :inherited-members:
-

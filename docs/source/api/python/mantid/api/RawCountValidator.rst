@@ -14,4 +14,3 @@ This is a Python binding to the C++ class Mantid::API::RawCountValidator.
     :members:
     :undoc-members:
     :inherited-members:
-

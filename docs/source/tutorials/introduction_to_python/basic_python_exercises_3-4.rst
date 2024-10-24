@@ -22,4 +22,3 @@ Exercise 4
       the first being the key and the second the value
    -  Update the dictionary with another 5 name/values and reprint the
       table, making sure you understand the ordering within the map
-

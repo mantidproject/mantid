@@ -37,4 +37,3 @@ New features
 Bugfixes
 ############
 .. amalgamate:: Workbench/SliceViewer/Bugfixes
-

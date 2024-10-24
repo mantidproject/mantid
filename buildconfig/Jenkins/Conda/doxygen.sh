@@ -39,4 +39,3 @@ cmake --preset=doxygen-ci ..
 
 # Build doxygen target
 cmake --build . --target doxygen
-

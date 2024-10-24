@@ -16,4 +16,3 @@ Improvements
 - The detectors positions in the INTER IDF were changed from theta to two theta.
 
 :ref:`Release 6.2.0 <v6.2.0>`
-

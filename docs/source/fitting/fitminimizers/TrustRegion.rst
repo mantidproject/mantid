@@ -17,4 +17,3 @@ Reference
 * A higher order method for solving nonlinear least-squares problems, N.I.M. Gould, T.Rees, and J.A. Scott, RAL-P-2017-010
 
 .. categories:: FitMinimizers
-

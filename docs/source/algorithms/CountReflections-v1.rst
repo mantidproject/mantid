@@ -86,4 +86,3 @@ better to remove the zero intensity peaks from the workspace prior to running th
 .. categories::
 
 .. sourcelink::
-

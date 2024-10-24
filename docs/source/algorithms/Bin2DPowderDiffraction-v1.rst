@@ -134,4 +134,3 @@ More details on the multidimensional TOF powder diffraction data reduction can b
 .. categories::
 
 .. sourcelink::
-

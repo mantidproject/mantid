@@ -38,4 +38,3 @@ Usage
 .. categories::
 
 .. sourcelink::
-

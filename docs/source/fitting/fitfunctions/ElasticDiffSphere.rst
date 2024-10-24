@@ -30,4 +30,3 @@ is expressed in terms of the :math:`j_l(z)`
 .. categories::
 
 .. sourcelink::
-

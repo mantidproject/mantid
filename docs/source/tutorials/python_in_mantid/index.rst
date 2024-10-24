@@ -26,7 +26,3 @@ The following tutorial introduces how to interact with Mantid through Python. So
 * :ref:`pim_plotting`
 * :ref:`pim_further_alg_ws`
 * :ref:`pim_solutions`
-
-
-
-

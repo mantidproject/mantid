@@ -51,4 +51,3 @@ References
 .. [#HIL3] Hillier , A.D. et al (2019).Muons at ISIS., Philos. Trans. R. Soc A Math. Phys. Eng. Sci., Vol. 377, pp. 1-7.
 .. [#MAT] Matsuzaki, T. et al (2001). The RIKEN-RAL pulsed muon facility. Nuclear Instruments and Methods in Physics Research
 			Section A: Accelerators, Spectrometers, Detectors and Associated Equipment, 465(2-3), 365-383.
-

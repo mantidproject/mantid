@@ -46,4 +46,3 @@ A useful feature of tables is that they can contain a widget within
 one of the cells. The last five lines of the above code adds a
 ComboBox and spin box to the table. It is important to note that the
 widgets will now only appear within the table.
-

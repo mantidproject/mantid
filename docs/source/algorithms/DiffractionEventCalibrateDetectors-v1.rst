@@ -49,4 +49,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-

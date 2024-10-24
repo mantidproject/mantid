@@ -204,9 +204,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-
-
-
-
-
-

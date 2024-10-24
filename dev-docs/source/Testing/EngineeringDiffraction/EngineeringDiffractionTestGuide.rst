@@ -315,5 +315,3 @@ Please test this on IDAaaS: an ENGINX instance should have MantidWorkbenchNightl
 11. Set the ``Override Unit Cell Length`` to ``3.65`` and click ``Refine in GSAS II``, the fit should be better.
 
 12. Tick all the checkboxes: ``Microstrain``, ``Sigma-1`` and ``Gamma (Y)``. An asterisk should appear with an advice tooltip.
-
-

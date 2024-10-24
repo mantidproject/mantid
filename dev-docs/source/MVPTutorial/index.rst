@@ -37,4 +37,3 @@ Duration: 6 hours as a hands-on course with exercises.
    FinalExercise
    CompleteGUI
    CalculatorExample/index
-

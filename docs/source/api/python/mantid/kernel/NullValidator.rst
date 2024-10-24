@@ -12,4 +12,3 @@ This is a Python binding to the C++ class Mantid::Kernel::NullValidator.
     :members:
     :undoc-members:
     :inherited-members:
-

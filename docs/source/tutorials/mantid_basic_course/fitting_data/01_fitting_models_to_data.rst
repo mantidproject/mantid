@@ -107,5 +107,3 @@ C. **Output workspaces** will be created and available via the main Mantid Works
    :width: 500px
 .. |ChooseExpDecay.png| image:: /images/ChooseExpDecay.png
 .. |MUSRDataSetFittingResults.png| image:: /images/MUSRDataSetFittingResults.png
-
-

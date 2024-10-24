@@ -44,5 +44,3 @@ References
 .. categories::
 
 .. sourcelink::
-
-
