@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidAlgorithms/PolarizationEfficiencyCor.h"
 
 #include "MantidAPI/AlgorithmManager.h"
@@ -29,6 +30,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
+using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
 using namespace Mantid::DataObjects;
 using namespace Mantid::HistogramData;
 using namespace WorkspaceCreationHelper;
@@ -445,7 +447,13 @@ public:
     }
   }
 
+  void test_spin_state_log_not_added_by_default_Wildes() { runSpinStateLogTest(WILDES_METHOD, false); }
+
+  void test_spin_state_log_added_when_requested_Wildes() { runSpinStateLogTest(WILDES_METHOD, true); }
+
 private:
+  const std::string WILDES_METHOD{"Wildes"};
+
   std::vector<MatrixWorkspace_sptr> createWorkspaces(int n) {
     std::vector<MatrixWorkspace_sptr> workspaces;
     for (int i = 0; i < n; ++i) {
@@ -567,5 +575,26 @@ private:
     auto retVal = std::make_shared<Workspace2D>();
     retVal->initialize(1, Histogram(xVals, yVals));
     return retVal;
+  }
+
+  void runSpinStateLogTest(const std::string &correctionMethod, const bool expectLog) {
+    PolarizationEfficiencyCor alg;
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("OutputWorkspace", "out");
+    alg.setProperty("InputWorkspaces", createWorkspacesInADS(4));
+    alg.setProperty("CorrectionMethod", correctionMethod);
+    alg.setProperty("Efficiencies", createEfficiencies(correctionMethod));
+    if (expectLog) {
+      alg.setProperty("AddSpinStateToLog", true);
+    }
+    alg.execute();
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    TS_ASSERT_EQUALS(out->size(), 4);
+    for (size_t i = 0; i != 4; ++i) {
+      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i));
+      TS_ASSERT(ws)
+      TS_ASSERT_EQUALS(ws->run().hasProperty(SpinStatesORSO::LOG_NAME), expectLog)
+    }
   }
 };
