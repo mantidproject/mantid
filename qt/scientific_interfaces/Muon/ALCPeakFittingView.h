@@ -10,6 +10,7 @@
 
 #include "DllConfig.h"
 #include "IALCPeakFittingView.h"
+#include "IALCPeakFittingViewSubscriber.h"
 #include "MantidQtWidgets/Plotting/PeakPicker.h"
 
 #include "ui_ALCPeakFittingView.h"
@@ -30,7 +31,10 @@ public:
   Mantid::API::IFunction_const_sptr function(std::string const &index) const override;
   std::optional<std::string> currentFunctionIndex() const override;
   Mantid::API::IPeakFunction_const_sptr peakPicker() const override;
-  void emitFitRequested();
+
+  void displayError(const std::string &message) override;
+
+  void subscribe(IALCPeakFittingViewSubscriber *subscriber) override;
 
 public slots:
 
@@ -38,15 +42,18 @@ public slots:
   void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) override;
   void setFittedCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) override;
   void setGuessCurve(Mantid::API::MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex = 0) override;
-  void removePlot(QString const &plotName) override;
+  void removePlot(std::string const &plotName) override;
   void setFunction(const Mantid::API::IFunction_const_sptr &newFunction) override;
   void setParameter(std::string const &funcIndex, std::string const &paramName, double value) override;
   void setPeakPickerEnabled(bool enabled) override;
   void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) override;
-  void displayError(const QString &message) override;
   void help() override;
   void plotGuess() override;
   void changePlotGuessState(bool plotted) override;
+
+  // Subscriber notifiers.
+  void fitRequested() override;
+  void onParameterChanged(std::string const &function, std::string const &parameter) override;
 
 private:
   /// The widget used
@@ -54,6 +61,9 @@ private:
 
   /// UI form
   Ui::ALCPeakFittingView m_ui;
+
+  /// Subscriber (the presenter, usually) to be notified of inputs.
+  IALCPeakFittingViewSubscriber *m_subscriber;
 
   /// Peak picker tool - only one on the plot at any given moment
   MantidWidgets::PeakPicker *m_peakPicker;
