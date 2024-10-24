@@ -52,7 +52,10 @@ public:
   ~DataReductionTab() override;
 
   /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
+  void setOutputPlotOptionsPresenter(
+      IOutputPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
+      std::string const &fixedIndices = "",
+      std::optional<std::map<std::string, std::string>> const &availableActions = std::nullopt);
   /// Set the active workspaces used in the plotting options
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
 
