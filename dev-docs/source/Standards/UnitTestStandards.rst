@@ -22,4 +22,3 @@ in :ref:`CppCodingStandards` with the following differences.
 - Code headers are not required if the above standards are met as the
   use of the class will be obvious from the class name and method
   names.
-

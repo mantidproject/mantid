@@ -69,4 +69,3 @@ References
 .. categories::
 
 .. sourcelink::
-

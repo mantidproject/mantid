@@ -34,4 +34,3 @@ Velocity: :math:`\frac{h}{m_{N}\lambda}` and
 Temperature: :math:`\frac{m_{N} v_{p}^2}{2k_{b}}`.
 
 .. categories:: Interfaces
-

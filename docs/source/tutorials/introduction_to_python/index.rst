@@ -49,4 +49,3 @@ Prentice-Hall 2008; `"Learning Python", M. Lutz, O'Reilly, 2007;
 * :ref:`pattern_matching_with_regular_expressions`
 * :ref:`basic_python_exercises_5`
 * :ref:`solutions_to_exercises`
-

@@ -13,4 +13,3 @@ on this class follow naming conventions for parameters as defined in the
     :members:
     :undoc-members:
     :inherited-members:
-

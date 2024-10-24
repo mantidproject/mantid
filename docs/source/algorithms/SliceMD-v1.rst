@@ -130,7 +130,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-
-
-
-

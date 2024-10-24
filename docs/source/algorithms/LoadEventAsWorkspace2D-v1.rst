@@ -39,4 +39,3 @@ Usage
 .. categories::
 
 .. sourcelink::
-

@@ -292,4 +292,3 @@ information from both chunks.
 .. categories::
 
 .. sourcelink::
-

@@ -39,4 +39,3 @@ New features
 Bugfixes
 ############
 .. amalgamate:: Direct_Geometry/MSlice/Bugfixes
-

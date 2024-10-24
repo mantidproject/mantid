@@ -90,6 +90,3 @@ digraph Sample {
   ConvertToSofQW -> SOfQWNormalisedPolygon
   SOfQWNormalisedPolygon -> OutputWorkspace
 }
-
-
-

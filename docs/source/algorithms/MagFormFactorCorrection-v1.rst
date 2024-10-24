@@ -67,4 +67,3 @@ of the build system where the above datafiles do not exist.
     ws_corr = MagFormFactorCorrection(ws, IonName='Fe3', FormFactorWorkspace='Fe3FF')
 
 .. categories::
-

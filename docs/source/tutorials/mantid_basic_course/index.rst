@@ -27,4 +27,3 @@ You will learn how to load, process, visualise and analyse data using Mantid.
 * :ref:`connecting_data_to_instruments`
 * :ref:`fitting_data`
 * :ref:`useful`
-

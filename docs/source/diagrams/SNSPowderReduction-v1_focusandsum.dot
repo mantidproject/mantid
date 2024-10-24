@@ -47,4 +47,3 @@ digraph FocusAndSum {
   isLastRunNumber     -> getRunNumber [label="No"]
 
 }
-

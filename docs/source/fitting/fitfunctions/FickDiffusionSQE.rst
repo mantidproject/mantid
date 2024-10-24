@@ -37,5 +37,3 @@ References
 .. categories::
 
 .. sourcelink::
-
-

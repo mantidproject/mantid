@@ -12,4 +12,3 @@ Select a part in the tree widget and the display will show only that component.
    :alt: InstrumentTree.png
    :align: center
    :width: 700px
-

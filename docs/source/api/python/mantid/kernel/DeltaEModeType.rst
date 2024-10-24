@@ -10,4 +10,3 @@ This is a Python binding to the C++ class Mantid::Kernel::DeltaEMode.
 .. autoclass:: mantid.kernel.DeltaEModeType
     :members:
     :undoc-members:
-

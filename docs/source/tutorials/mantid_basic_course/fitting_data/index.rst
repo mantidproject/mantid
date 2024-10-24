@@ -24,4 +24,3 @@ Regression analysis was developed throughout the 18th Century, leading to the fi
 * :ref:`03_fit_model_choices`
 * :ref:`04_intelligent_fitting`
 * :ref:`05_fitting_exercises`
-
