@@ -13,6 +13,7 @@
 
 namespace Mantid {
 namespace Algorithms {
+using namespace std;
 
 /** CreateMonteCarloWorkspace : TODO: DESCRIPTION
  */
@@ -30,8 +31,10 @@ private:
   void exec() override;
 
   double calculateMean(const std::vector<int> &numbers);
-  double calculateVariance(const std::vector<int> &numbers, double mean);
-  std::vector<double> pdf(const std::vector<int> &num, double mean, double variance) const;
+  double calculateStandardDeviation(const std::vector<int> &numbers, double mean);
+  vector<double> pdf(const std::vector<int> &num, double mean, double variance) const;
+  vector<double> kde(const vector<int> &numbers, double bandwidth) const;
+  double calculateBandwidth(const vector<int> &numbers);
 };
 
 } // namespace Algorithms

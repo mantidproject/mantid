@@ -4,21 +4,20 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include <iostream>
-#include <cmath>
-#include <random>
-#include <numeric> // For std::accumulate
-#include <vector>
-#include <numbers>
 #include <algorithm>
+#include <cmath>
+#include <iostream>
+#include <numbers>
+#include <numeric> // For std::accumulate
+#include <random>
+#include <vector>
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/CreateMonteCarloWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Logger.h"
-#include "MantidAPI/WorkspaceFactory.h"
-
 
 namespace {
 Mantid::Kernel::Logger g_log("CreateMonteCarloWorkspace");
@@ -54,7 +53,7 @@ void CreateMonteCarloWorkspace::init() {
   mustBePositive->setLower(0);
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
-                    "Input Workspace containing data to be fitted");
+                  "Input Workspace containing data to be fitted");
   declareProperty("Iterations", 1000, mustBePositive, "The number of times the simulation will run.");
   declareProperty("Seed", 32, mustBePositive, "Integer that initializes a random-number generator");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
@@ -62,25 +61,22 @@ void CreateMonteCarloWorkspace::init() {
 }
 
 void CreateMonteCarloWorkspace::afterPropertySet(const std::string &name) {
-    if (name == "InputWorkspace") {
-         g_log.notice() << "Name:" << name << endl;
-        MatrixWorkspace_sptr instWs = getProperty("InputWorkspace");
-        if (instWs) {
-          // Get the number of data points (y-values) in the input workspace
-          const Mantid::HistogramData::Histogram &hist = instWs->histogram(0);
-          const auto &yData = hist.y();
-          int numDataPoints = static_cast<int>(yData.size());
+  if (name == "InputWorkspace") {
+    g_log.notice() << "Name:" << name << endl;
+    MatrixWorkspace_sptr instWs = getProperty("InputWorkspace");
+    if (instWs) {
+      // Get the number of data points (y-values) in the input workspace
+      const Mantid::HistogramData::Histogram &hist = instWs->histogram(0);
+      const auto &yData = hist.y();
+      int numDataPoints = static_cast<int>(yData.size());
 
-          setProperty("Iterations", numDataPoints);
-          g_log.notice() << "Iterations:" << numDataPoints << endl;
-        }
-
+      setProperty("Iterations", numDataPoints);
+      g_log.notice() << "Iterations:" << numDataPoints << endl;
+    }
   }
 }
 
 //----------------------------------------------------------------------------------------------
-/** Execute the algorithm.
- */
 
 // Calculate the mean of a vector of integers
 double CreateMonteCarloWorkspace::calculateMean(const vector<int> &numbers) {
@@ -94,25 +90,24 @@ double CreateMonteCarloWorkspace::calculateMean(const vector<int> &numbers) {
 //----------------------------------------------------------------------------------------------
 
 // Calculate the variance of a vector of integers
-double CreateMonteCarloWorkspace::calculateVariance(const vector<int> &numbers, double mean) {
+double CreateMonteCarloWorkspace::calculateStandardDeviation(const vector<int> &numbers, double mean) {
   if (numbers.size() < 2) {
-    return 0.0; // Variance is zero for a single number or an empty list
+    return 0.0; // Standard Deviation is zero for a single number or an empty list
   }
 
   // Step 1: Calculate the squared differences from the mean
-  double variance_sum = accumulate(numbers.cbegin(), numbers.cend(), 0.0,
-                                   [&mean](double total, const double number) {
-                                     return total + pow((number - mean), 2);
-                                   });
+  double StandardDeviation_sum =
+      accumulate(numbers.cbegin(), numbers.cend(), 0.0,
+                 [&mean](double total, const double number) { return total + pow((number - mean), 2); });
 
   // Step 2: Divide by the number of elements
-  return variance_sum / numbers.size();
+  return sqrt(StandardDeviation_sum / numbers.size() - 1);
 }
 
 //----------------------------------------------------------------------------------------------
 
 // Probability Density Function
-vector<double> CreateMonteCarloWorkspace::pdf(const vector<int> &numbers, double mean, double variance) const{
+vector<double> CreateMonteCarloWorkspace::pdf(const vector<int> &numbers, double mean, double variance) const {
   double base = 1.0 / (sqrt(variance) * sqrt(2 * numbers::pi));
   double exponent = 0.0;
 
@@ -120,7 +115,7 @@ vector<double> CreateMonteCarloWorkspace::pdf(const vector<int> &numbers, double
 
   for (int number : numbers) {
     exponent = exp(-((number - mean) * (number - mean)) / (2 * variance));
-    double pdf_value = base * exponent;  // PDF for the current value
+    double pdf_value = base * exponent; // PDF for the current value
     result.push_back(pdf_value);
   }
 
@@ -129,71 +124,80 @@ vector<double> CreateMonteCarloWorkspace::pdf(const vector<int> &numbers, double
 
 //----------------------------------------------------------------------------------------------
 
+// Kernel Density Estimation function
+vector<double> CreateMonteCarloWorkspace::kde(const vector<int> &numbers, double bandwidth) const {
+  vector<double> result(numbers.size(), 0.0);
+  size_t n = numbers.size();
 
+  for (size_t i = 0; i < n; ++i) {
+    double sum = 0.0;
+    for (size_t j = 0; j < n; ++j) {
+      double u = (numbers[i] - numbers[j]) / bandwidth;
+      sum += exp(-0.5 * u * u) / (sqrt(2 * std::numbers::pi));
+    }
+    result[i] = sum / (n * bandwidth);
+  }
+
+  return result;
+}
+
+//----------------------------------------------------------------------------------------------
+
+double CreateMonteCarloWorkspace::calculateBandwidth(const vector<int> &numbers) {
+  double std_dev = calculateStandardDeviation(numbers, calculateMean(numbers));
+  size_t n = numbers.size();
+  return 1.06 * std_dev * pow(n, -0.2); // Silverman's Rule
+}
+
+//----------------------------------------------------------------------------------------------
+/** Execute the algorithm.
+ */
+
+// Using Cumulative Distribution Function
 void CreateMonteCarloWorkspace::exec() {
   MatrixWorkspace_sptr instWs = getProperty("InputWorkspace");
   int seed_input = getProperty("Seed");
-  int num_iterations = getProperty("Iterations");
-  MatrixWorkspace_sptr outputWs;
 
-  // Create an output workspace with one histogram and 'num_iterations' bins
-  outputWs = WorkspaceFactory::Instance().create(instWs, 1, num_iterations + 1, num_iterations);
   const Mantid::HistogramData::Histogram &hist = instWs->histogram(0);
-  const auto &yData = hist.y();
-  // int num_iterations = static_cast<int>(yData.size());
+  const auto &xData = hist.x(); // Bin boundaries
+  const auto &yData = hist.y(); // Data in each bin
 
-  // Used to store the random numbers picked
-  std::vector<int> randomNumList;
+  double total_counts = std::accumulate(yData.begin(), yData.end(), 0.0);
 
-  auto min = static_cast<int>(*std::min_element(yData.begin(), yData.end()));
-  auto max = static_cast<int>(*std::max_element(yData.begin(), yData.end()));
+  int numIterations = static_cast<int>(std::round(total_counts));
+
+  std::vector<double> cdf(yData.size());
+  std::partial_sum(yData.begin(), yData.end(), cdf.begin());
+
+  // Normalize the CDF
+  std::transform(cdf.begin(), cdf.end(), cdf.begin(), [total_counts](double val) { return val / total_counts; });
+
+  MatrixWorkspace_sptr outputWs = WorkspaceFactory::Instance().create(instWs);
+
+  // Copy the bin boundaries from the input to the output
+  outputWs->setSharedX(0, hist.sharedX());
+
+  auto &outputY = outputWs->mutableY(0);
+  outputY.assign(outputY.size(), 0.0);
 
   std::mt19937 gen(seed_input);
-  std::uniform_int_distribution<> dis(min, max);
+  std::uniform_real_distribution<> dis(0.0, 1.0);
 
-  // Repeat based on number of iterations given
-  for (int i = 0; i < num_iterations; ++i) {
-    int random_number = dis(gen); // Generate random number in range [min, max]
-    randomNumList.push_back(random_number);
-    g_log.notice() << "Random number " << i + 1 << ": " << random_number << std::endl;
-  }
+  for (int i = 0; i < numIterations; ++i) {
+    double randomNumList = dis(gen);
 
-  double avg = calculateMean(randomNumList);
-  g_log.notice() << "Average: " << avg << std::endl;
+    // Find the bin corresponding to the random number in the CDF
+    auto it = std::lower_bound(cdf.begin(), cdf.end(), randomNumList);
+    size_t index = std::distance(cdf.begin(), it);
 
-  double variance = calculateVariance(randomNumList, avg);
-  g_log.notice() << "Variance: " << variance << std::endl;
-
-  // Calculate the PDF points based on the random numbers, mean, and variance
-  std::vector<double> pdfResults = pdf(randomNumList, avg, variance);
-
-
-  // TODO: (plot expected_val - fitted_value) / fit_error
-
-  for (int i = 0; i < num_iterations; ++i) {
-    outputWs->mutableX(0)[i] = static_cast<double>(i); // iteration number
-    outputWs->mutableY(0)[i] = pdfResults[i];          // PDF value at this iteration
-  }
-
-  // Set the final X point to the last iteration (for histogram purposes)
-  if (num_iterations < outputWs->mutableX(0).size()) {
-    outputWs->mutableX(0)[num_iterations] = static_cast<double>(num_iterations);
-  } else {
-    g_log.error() << "Index out of bounds in setting X axis." << std::endl;
+    // Ensure the index is within bounds
+    if (index < outputY.size()) {
+      outputY[index] += 1.0;
+    }
   }
 
   setProperty("OutputWorkspace", outputWs);
-
-
-  // check which bin random_number belongs to
-  // place random_number it in respective bin
-
-  // TODO Auto-generated execute stub
 }
 
 } // namespace Algorithms
 } // namespace Mantid
-
-
-
-
