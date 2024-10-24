@@ -68,7 +68,7 @@ class SCRIPT_DLL_EXPORT ScriptRepositoryImpl : public ScriptRepository {
         : remote(false), local(false), directory(false), current_date(Types::Core::DateAndTime::defaultTime()),
           downloaded_date(Types::Core::DateAndTime::defaultTime()), pub_date(Types::Core::DateAndTime::defaultTime()),
           description(""), downloaded_pubdate(Types::Core::DateAndTime::defaultTime()), auto_update(false), author(""),
-          status(BOTH_UNCHANGED){};
+          status(BOTH_UNCHANGED) {};
   };
 
   using Repository = std::map<std::string, RepositoryEntry>;

@@ -776,7 +776,7 @@ void LeBailFunction::groupPeaks(vector<vector<pair<double, IPowderDiffPeakFuncti
         peakgroupvec.emplace_back(peakgroup);
       }
     } // FIRST out of boundary
-  }   // ENDWHILE
+  } // ENDWHILE
 
   while (ipk < m_numPeaks) {
     // Group peaks out of uppper boundary to a separate vector of peaks

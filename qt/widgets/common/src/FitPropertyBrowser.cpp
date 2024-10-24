@@ -2092,7 +2092,9 @@ void FitPropertyBrowser::clear() {
 
 void FitPropertyBrowser::clearBrowser() {
   QList<QtProperty *> props = m_functionsGroup->property()->subProperties();
-  foreach (QtProperty *prop, props) { m_functionsGroup->property()->removeSubProperty(prop); }
+  foreach (QtProperty *prop, props) {
+    m_functionsGroup->property()->removeSubProperty(prop);
+  }
 }
 
 /// Set the parameters to the fit outcome
@@ -2671,7 +2673,7 @@ void FitPropertyBrowser::addAutoBackground() {
     return;
   if (!m_autoBgAttributes.isEmpty()) { // set attributes
     QStringList attList = m_autoBgAttributes.split(' ');
-    foreach (QString att, attList) {
+    foreach (const QString &att, attList) {
       QStringList name_value = att.split('=');
       if (name_value.size() == 2) {
         QString name = name_value[0].trimmed();
@@ -2788,7 +2790,9 @@ void FitPropertyBrowser::updateDecimals() {
     m_decimals = settings.value("decimals", 6).toInt();
   }
   QSet<QtProperty *> props = m_doubleManager->properties();
-  foreach (QtProperty *prop, props) { m_doubleManager->setDecimals(prop, m_decimals); }
+  foreach (QtProperty *prop, props) {
+    m_doubleManager->setDecimals(prop, m_decimals);
+  }
 }
 
 void FitPropertyBrowser::setDecimals(int d) {
@@ -2898,7 +2902,9 @@ void FitPropertyBrowser::processMultiBGResults() {
   // other colomns - the parameters
   Mantid::API::ITableWorkspace_sptr table = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
   table->addColumn("int", "Index");
-  foreach (QString par, parNames) { table->addColumn("double", par.toStdString()); }
+  foreach (const QString &par, parNames) {
+    table->addColumn("double", par.toStdString());
+  }
   // Create WorkspaceGroup with the fit results
   std::vector<std::string> worspaceNames(compositeFunction()->nFunctions());
   for (size_t i = 0; i < compositeFunction()->nFunctions(); ++i) {
@@ -3107,11 +3113,13 @@ void FitPropertyBrowser::columnChanged(QtProperty *prop) {
  */
 void FitPropertyBrowser::minimizerChanged() {
   // delete old minimizer properties
-  foreach (QtProperty *prop, m_minimizerProperties) { m_settingsGroup->property()->removeSubProperty(prop); }
+  foreach (QtProperty *prop, m_minimizerProperties) {
+    m_settingsGroup->property()->removeSubProperty(prop);
+  }
 
   // add new minimizer properties
   auto minzer = Mantid::API::FuncMinimizerFactory::Instance().createMinimizer(this->minimizer());
-  auto &properties = minzer->getProperties();
+  const auto &properties = minzer->getProperties();
   for (auto property : properties) {
     QString propName = QString::fromStdString((*property).name());
     QtProperty *prop = nullptr;

@@ -53,12 +53,10 @@ protected:
 
   /// A virtual function in which additional properties of an algorithm should
   /// be declared. Called by init().
-  virtual void defineProperties() { /*Empty in base class*/
-  }
+  virtual void defineProperties() { /*Empty in base class*/ }
   /// A virtual function in which additional properties should be retrieved into
   /// member variables. Called by exec().
-  virtual void retrieveProperties() { /*Empty in base class*/
-  }
+  virtual void retrieveProperties() { /*Empty in base class*/ }
 
   /** Carries out the Unary operation on the current 'cell'
    *  @param XIn :: The X value. This will be the bin centre for histogram

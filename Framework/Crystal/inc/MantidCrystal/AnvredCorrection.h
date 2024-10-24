@@ -99,12 +99,10 @@ protected:
    * be declared.
    *  Called by init().
    */
-  virtual void defineProperties() { /*Empty in base class*/
-  }
+  virtual void defineProperties() { /*Empty in base class*/ }
   /// A virtual function in which additional properties should be retrieved into
   /// member variables.
-  virtual void retrieveProperties() { /*Empty in base class*/
-  }
+  virtual void retrieveProperties() { /*Empty in base class*/ }
 
   API::MatrixWorkspace_sptr m_inputWS; ///< A pointer to the input workspace
   /// Shared pointer to the event workspace

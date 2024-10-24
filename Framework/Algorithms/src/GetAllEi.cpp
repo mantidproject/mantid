@@ -721,7 +721,7 @@ bool refineEGuess(const HistogramX &eBins, const HistogramY &signal, double &eGu
 struct peakKeeper2 {
   double left_rng;
   double right_rng;
-  peakKeeper2() : left_rng(.0), right_rng(.0){};
+  peakKeeper2() : left_rng(.0), right_rng(.0) {};
   peakKeeper2(double left, double right) : left_rng(left), right_rng(right) {}
 };
 } // namespace

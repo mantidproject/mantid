@@ -176,7 +176,7 @@ void EQSANSMonitorTOF::exec() {
 
 double EQSANSMonitorTOF::getTofOffset(const MatrixWorkspace_const_sptr &inputWS, bool frame_skipping,
                                       double source_to_monitor) {
-  //# Storage for chopper information read from the logs
+  // # Storage for chopper information read from the logs
   double chopper_set_phase[4] = {0, 0, 0, 0};
   double chopper_speed[4] = {0, 0, 0, 0};
   double chopper_actual_phase[4] = {0, 0, 0, 0};

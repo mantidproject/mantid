@@ -45,7 +45,7 @@ private:
   public:
     RebinParams(const double qMin, const bool qMinIsDefault, const double qMax, const bool qMaxIsDefault,
                 const std::optional<double> &qStep)
-        : m_qMin(qMin), m_qMinIsDefault(qMinIsDefault), m_qMax(qMax), m_qMaxIsDefault(qMaxIsDefault), m_qStep(qStep){};
+        : m_qMin(qMin), m_qMinIsDefault(qMinIsDefault), m_qMax(qMax), m_qMaxIsDefault(qMaxIsDefault), m_qStep(qStep) {};
 
     double qMin() const { return m_qMin; };
     bool qMinIsDefault() const { return m_qMinIsDefault; }

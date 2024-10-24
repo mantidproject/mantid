@@ -48,19 +48,33 @@ using Morton96 = uint96_t;
  * size is number_of_dimensions * sizeof(coordinate_type)
  * @tparam SZ :: the size of accesible memory.
  */
-template <size_t SZ> struct MortonIndex { using type = uint256_t; };
+template <size_t SZ> struct MortonIndex {
+  using type = uint256_t;
+};
 
-template <> struct MortonIndex<1> { using type = uint8_t; };
+template <> struct MortonIndex<1> {
+  using type = uint8_t;
+};
 
-template <> struct MortonIndex<2> { using type = uint16_t; };
+template <> struct MortonIndex<2> {
+  using type = uint16_t;
+};
 
-template <> struct MortonIndex<4> { using type = uint32_t; };
+template <> struct MortonIndex<4> {
+  using type = uint32_t;
+};
 
-template <> struct MortonIndex<8> { using type = uint64_t; };
+template <> struct MortonIndex<8> {
+  using type = uint64_t;
+};
 
-template <> struct MortonIndex<12> { using type = Morton96; };
+template <> struct MortonIndex<12> {
+  using type = Morton96;
+};
 
-template <> struct MortonIndex<16> { using type = uint128_t; };
+template <> struct MortonIndex<16> {
+  using type = uint128_t;
+};
 
 /**
  * This structure binds floating point types to
@@ -69,9 +83,13 @@ template <> struct MortonIndex<16> { using type = uint128_t; };
  */
 template <typename FP> struct UnderlyingInt {};
 
-template <> struct UnderlyingInt<float> { using type = uint32_t; };
+template <> struct UnderlyingInt<float> {
+  using type = uint32_t;
+};
 
-template <> struct UnderlyingInt<double> { using type = uint64_t; };
+template <> struct UnderlyingInt<double> {
+  using type = uint64_t;
+};
 
 /**
  * This structure determines Morton index type and

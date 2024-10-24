@@ -44,7 +44,7 @@ struct SelectedAlgorithm {
   /// implicit conversion to QString
   operator QString() { return name; }
   /// constructor
-  SelectedAlgorithm(const QString &nameIn, const int versionIn) : name(nameIn), version(versionIn){};
+  SelectedAlgorithm(const QString &nameIn, const int versionIn) : name(nameIn), version(versionIn) {};
 };
 
 //============================================================================

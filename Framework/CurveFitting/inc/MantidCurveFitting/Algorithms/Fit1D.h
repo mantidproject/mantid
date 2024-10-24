@@ -75,9 +75,9 @@ protected:
   }
 
   /// Declare additional properties other than fitting parameters
-  virtual void declareAdditionalProperties(){};
+  virtual void declareAdditionalProperties() {};
   /// Called in the beginning of exec(). Custom initialization
-  virtual void prepare(){};
+  virtual void prepare() {};
 
   /** Called after the data ranged has been determined but before the fitting
    *starts.

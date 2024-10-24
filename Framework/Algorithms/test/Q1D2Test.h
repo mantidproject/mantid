@@ -156,7 +156,7 @@ public:
                              Q1D.setProperty("WavelengthAdj", m_wavNorm); Q1D.setProperty("PixelAdj", m_pixel);
                              Q1D.setPropertyValue("OutputWorkspace", m_noGrav);
                              Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");)
-    //#default is don't correct for gravity
+    // #default is don't correct for gravity
     TS_ASSERT_THROWS_NOTHING(Q1D.execute())
     TS_ASSERT(Q1D.isExecuted())
 
@@ -266,7 +266,7 @@ public:
                              Q1D.setPropertyValue("OutputWorkspace", outputWS);
                              Q1D.setPropertyValue("OutputBinning", "0.1,-0.02,0.5");
                              Q1D.setProperty("RadiusCut", 220.0); Q1D.setProperty("WaveCut", 8.0);)
-    //#default is don't correct for gravity
+    // #default is don't correct for gravity
     TS_ASSERT_THROWS_NOTHING(Q1D.execute())
     TS_ASSERT(Q1D.isExecuted())
 

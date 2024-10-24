@@ -1571,7 +1571,7 @@ public:
         TofEvent tofevent = fakeevlist.getEvent(ievent);
         elist.addEventQuickly(tofevent);
       } // FOR each pulse
-    }   // For each bank
+    } // For each bank
 
     eventWS->mutableRun().integrateProtonCharge();
 
@@ -1624,7 +1624,7 @@ public:
         TofEvent tofevent = fakeevlist.getEvent(ievent);
         elist.addEventQuickly(tofevent);
       } // FOR each pulse
-    }   // For each bank
+    } // For each bank
 
     return eventWS;
   }
@@ -1658,7 +1658,7 @@ public:
         TofEvent tofevent = fakeevlist.getEvent(ievent);
         elist.addEventQuickly(tofevent);
       } // FOR each pulse
-    }   // For each bank
+    } // For each bank
 
     return eventWS;
   }

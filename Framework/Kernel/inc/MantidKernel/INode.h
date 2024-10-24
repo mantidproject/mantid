@@ -17,7 +17,7 @@ namespace Kernel {
  */
 class DLLExport INode {
 public:
-  virtual ~INode(){};
+  virtual ~INode() {};
 };
 } // namespace Kernel
 } // namespace Mantid

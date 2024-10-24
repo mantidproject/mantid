@@ -30,7 +30,7 @@ class MANTID_HISTOGRAMDATA_DLL HistogramIterator
     : public boost::iterator_facade<HistogramIterator, const HistogramItem &, boost::bidirectional_traversal_tag> {
 
 public:
-  HistogramIterator(const Histogram &histogram, const size_t index) : m_item(histogram, index){};
+  HistogramIterator(const Histogram &histogram, const size_t index) : m_item(histogram, index) {};
 
 private:
   friend class boost::iterator_core_access;

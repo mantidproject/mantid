@@ -1993,7 +1993,7 @@ public:
         if (!inplace)
           delete el_out;
       } // inplace
-    }   // starting event type
+    } // starting event type
   }
 
   void test_compressFatEvents() {

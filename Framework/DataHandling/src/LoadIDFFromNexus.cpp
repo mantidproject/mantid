@@ -153,8 +153,8 @@ std::string LoadIDFFromNexus::getParameterCorrectionFile(const std::string &inst
       if (ipFile.exists() && ipFile.isFile()) {
         return ipFile.path(); // Return first found
       }
-    }        // Directory
-  }          // Loop
+    } // Directory
+  } // Loop
   return ""; // No file found
 }
 

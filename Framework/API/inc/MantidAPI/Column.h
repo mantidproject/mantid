@@ -34,7 +34,7 @@ namespace API {
 */
 class MANTID_API_DLL Column {
 public:
-  Column() : m_type("int"), m_plotType(-1000), m_isReadOnly(false){};
+  Column() : m_type("int"), m_plotType(-1000), m_isReadOnly(false) {};
 
   /// Virtual destructor
   virtual ~Column() = default;

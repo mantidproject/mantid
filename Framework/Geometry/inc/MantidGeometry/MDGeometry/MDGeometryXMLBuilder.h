@@ -109,20 +109,18 @@ private:
  @date May 2011
  @version 1.0
 */
-struct MANTID_GEOMETRY_DLL StrictDimensionPolicy {
-public:
-  StrictDimensionPolicy() {}
-  void operator()(const IMDDimension &item) {
-    if (true == item.getIsIntegrated()) {
-      std::string message = "StrictDimensionPolicy bans the use of integrated "
-                            "IMDDimensions mapped to x, y, z or t in a "
-                            "IMDWorkspace."
-                            "Attempted to do so with IMDDimension: " +
-                            item.getDimensionId();
-      throw std::invalid_argument(message);
-    }
-  }
-};
+struct MANTID_GEOMETRY_DLL
+StrictDimensionPolicy{public : StrictDimensionPolicy(){} void operator()(const IMDDimension &item){
+    if (true == item.getIsIntegrated()){std::string message = "StrictDimensionPolicy bans the use of integrated "
+                                                              "IMDDimensions mapped to x, y, z or t in a "
+                                                              "IMDWorkspace."
+                                                              "Attempted to do so with IMDDimension: " +
+                                                              item.getDimensionId();
+throw std::invalid_argument(message);
+} // namespace Geometry
+} // namespace Mantid
+}
+;
 
 /*
  @class NoDimensionPolicy
@@ -131,8 +129,9 @@ public:
  @date May 2011
 */
 struct MANTID_GEOMETRY_DLL NoDimensionPolicy {
-  void operator()(const IMDDimension &) {
-    // Do nothing.
+  void
+  operator()(const IMDDimension &){
+      // Do nothing.
   }
 };
 } // namespace Geometry

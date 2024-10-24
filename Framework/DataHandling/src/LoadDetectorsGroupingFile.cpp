@@ -238,7 +238,7 @@ void LoadDetectorsGroupingFile::setByComponents() {
         } // ENDIF Detector
 
       } // ENDFOR (children of component)
-    }   // ENDFOR (component)
+    } // ENDFOR (component)
 
   } // ENDFOR GroupID
 }
@@ -277,7 +277,7 @@ void LoadDetectorsGroupingFile::setByDetectors() {
         g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located\n";
       }
     } // ENDFOR detid (in range)
-  }   // ENDFOR each group ID
+  } // ENDFOR each group ID
 }
 
 /*
@@ -308,9 +308,9 @@ void LoadDetectorsGroupingFile::setBySpectrumNos() {
           // Finally set the group workspace
           m_groupWS->mutableY(wsindex)[0] = groupid;
         } // IF-ELSE: ws index out of range
-      }   // IF-ELSE: spectrum No has an entry
-    }     // FOR: each spectrum No
-  }       // FOR: each group ID
+      } // IF-ELSE: spectrum No has an entry
+    } // FOR: each spectrum No
+  } // FOR: each group ID
 }
 
 /* Initialize a GroupingWorkspace

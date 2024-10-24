@@ -718,7 +718,7 @@ void NormaliseToMonitor::normaliseBinByBin(const MatrixWorkspace_sptr &inputWork
           // Now store the result
           YOut[k] = newY;
         } // end Workspace2D case
-      }   // end loop over current spectrum
+      } // end loop over current spectrum
 
       PARALLEL_END_INTERRUPT_REGION
     } // end loop over spectra

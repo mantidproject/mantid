@@ -36,7 +36,7 @@ public:
   static DetectorInfoIteratorTest *createSuite() { return new DetectorInfoIteratorTest(); }
   static void destroySuite(DetectorInfoIteratorTest *suite) { delete suite; }
 
-  DetectorInfoIteratorTest(){};
+  DetectorInfoIteratorTest() {};
 
   std::unique_ptr<Mantid::Geometry::DetectorInfo> create_detector_info_object() {
 

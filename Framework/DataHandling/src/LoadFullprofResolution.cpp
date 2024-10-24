@@ -679,7 +679,7 @@ TableWorkspace_sptr LoadFullprofResolution::genTableWorkspace(map<int, map<strin
       }
 
     } // END(j)
-  }   // END(i)
+  } // END(i)
 
   return tablews;
 }

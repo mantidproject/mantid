@@ -114,8 +114,12 @@ template <>
 MANTID_DATAOBJECTS_DLL void fixDistributionFlag(API::MatrixWorkspace &workspace,
                                                 const HistogramData::Histogram &histArg);
 
-template <class T> struct IsIndexInfo { using type = std::false_type; };
-template <> struct IsIndexInfo<Indexing::IndexInfo> { using type = std::true_type; };
+template <class T> struct IsIndexInfo {
+  using type = std::false_type;
+};
+template <> struct IsIndexInfo<Indexing::IndexInfo> {
+  using type = std::true_type;
+};
 template <class UseIndexInfo>
 void initializeFromParent(const API::MatrixWorkspace &parent, API::MatrixWorkspace &workspace);
 } // namespace detail

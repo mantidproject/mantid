@@ -35,7 +35,7 @@ public:
 
 protected:
   /// overwrite IFunction base class method, which declare function parameters
-  void init() override{};
+  void init() override {};
 };
 
 } // namespace Functions

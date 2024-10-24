@@ -315,7 +315,7 @@ protected:
                                       StreamingContext context);
 
 public:
-  [
+[
     System::Diagnostics::DebuggerNonUserCodeAttribute,
     System::CodeDom::Compiler::GeneratedCodeAttribute(
         L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
@@ -500,7 +500,7 @@ public:
   }
 
 public:
-  [
+[
     System::Diagnostics::DebuggerNonUserCodeAttribute,
     System::CodeDom::Compiler::GeneratedCodeAttribute(
         L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0"),
@@ -747,7 +747,7 @@ public: /// <summary>
                                                StreamingContext context);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -796,14 +796,15 @@ public: /// <summary>
               L"4.0.0.0")
         ] property NewDataSet::FunctionRow ^
         default [::System::Int32] {
-          NewDataSet::FunctionRow ^ get(::System::Int32 index);
-        }
+      NewDataSet::FunctionRow ^ get(::System::Int32 index);
+    }
 
-        public : [System::Diagnostics::DebuggerNonUserCodeAttribute]
-                     [System::CodeDom::Compiler::GeneratedCodeAttribute(
-                         L"System.Data.Design.TypedDataSetGenerator",
-                         L"4.0.0.0")] ::System::Void
-                         AddFunctionRow(NewDataSet::FunctionRow ^ row);
+  public:
+    [System::Diagnostics::DebuggerNonUserCodeAttribute]
+        [System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator",
+            L"4.0.0.0")] ::System::Void AddFunctionRow(NewDataSet::FunctionRow ^
+                                                       row);
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -983,7 +984,7 @@ public: /// <summary>
                                                             context);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -1014,15 +1015,15 @@ public: /// <summary>
               L"4.0.0.0")
         ] property NewDataSet::ParameterListRow ^
         default [::System::Int32] {
-          NewDataSet::ParameterListRow ^ get(::System::Int32 index);
-        }
+      NewDataSet::ParameterListRow ^ get(::System::Int32 index);
+    }
 
-        public :
-        [System::Diagnostics::DebuggerNonUserCodeAttribute]
-            [System::CodeDom::Compiler::GeneratedCodeAttribute(
-                L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] ::System::Void
-                AddParameterListRow(NewDataSet::ParameterListRow ^ row);
+  public:
+    [System::Diagnostics::DebuggerNonUserCodeAttribute]
+        [System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator",
+            L"4.0.0.0")] ::System::Void
+            AddParameterListRow(NewDataSet::ParameterListRow ^ row);
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -1200,7 +1201,7 @@ public: /// <summary>
                                                 StreamingContext context);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -1249,14 +1250,15 @@ public: /// <summary>
               L"4.0.0.0")
         ] property NewDataSet::ParameterRow ^
         default [::System::Int32] {
-          NewDataSet::ParameterRow ^ get(::System::Int32 index);
-        }
+      NewDataSet::ParameterRow ^ get(::System::Int32 index);
+    }
 
-        public : [System::Diagnostics::DebuggerNonUserCodeAttribute]
-                     [System::CodeDom::Compiler::GeneratedCodeAttribute(
-                         L"System.Data.Design.TypedDataSetGenerator",
-                         L"4.0.0.0")] ::System::Void
-                         AddParameterRow(NewDataSet::ParameterRow ^ row);
+  public:
+    [System::Diagnostics::DebuggerNonUserCodeAttribute]
+        [System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator",
+            L"4.0.0.0")] ::System::Void
+            AddParameterRow(NewDataSet::ParameterRow ^ row);
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -1442,7 +1444,7 @@ public: /// <summary>
                                                 StreamingContext context);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -1509,14 +1511,15 @@ public: /// <summary>
               L"4.0.0.0")
         ] property NewDataSet::DimensionRow ^
         default [::System::Int32] {
-          NewDataSet::DimensionRow ^ get(::System::Int32 index);
-        }
+      NewDataSet::DimensionRow ^ get(::System::Int32 index);
+    }
 
-        public : [System::Diagnostics::DebuggerNonUserCodeAttribute]
-                     [System::CodeDom::Compiler::GeneratedCodeAttribute(
-                         L"System.Data.Design.TypedDataSetGenerator",
-                         L"4.0.0.0")] ::System::Void
-                         AddDimensionRow(NewDataSet::DimensionRow ^ row);
+  public:
+    [System::Diagnostics::DebuggerNonUserCodeAttribute]
+        [System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator",
+            L"4.0.0.0")] ::System::Void
+            AddDimensionRow(NewDataSet::DimensionRow ^ row);
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -1693,7 +1696,7 @@ public: /// <summary>
                                                  StreamingContext context);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -1733,14 +1736,15 @@ public: /// <summary>
               L"4.0.0.0")
         ] property NewDataSet::IntegratedRow ^
         default [::System::Int32] {
-          NewDataSet::IntegratedRow ^ get(::System::Int32 index);
-        }
+      NewDataSet::IntegratedRow ^ get(::System::Int32 index);
+    }
 
-        public : [System::Diagnostics::DebuggerNonUserCodeAttribute]
-                     [System::CodeDom::Compiler::GeneratedCodeAttribute(
-                         L"System.Data.Design.TypedDataSetGenerator",
-                         L"4.0.0.0")] ::System::Void
-                         AddIntegratedRow(NewDataSet::IntegratedRow ^ row);
+  public:
+    [System::Diagnostics::DebuggerNonUserCodeAttribute]
+        [System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator",
+            L"4.0.0.0")] ::System::Void
+            AddIntegratedRow(NewDataSet::IntegratedRow ^ row);
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -1922,7 +1926,7 @@ public: /// <summary>
                                                                    context);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -1962,16 +1966,16 @@ public: /// <summary>
               L"4.0.0.0")
         ] property NewDataSet::CompositeInstructionRow ^
         default [::System::Int32] {
-          NewDataSet::CompositeInstructionRow ^ get(::System::Int32 index);
-        }
+      NewDataSet::CompositeInstructionRow ^ get(::System::Int32 index);
+    }
 
-        public :
-        [System::Diagnostics::DebuggerNonUserCodeAttribute]
-            [System::CodeDom::Compiler::GeneratedCodeAttribute(
-                L"System.Data.Design.TypedDataSetGenerator",
-                L"4.0.0.0")] ::System::Void
-                AddCompositeInstructionRow(NewDataSet::CompositeInstructionRow ^
-                                           row);
+  public:
+    [System::Diagnostics::DebuggerNonUserCodeAttribute]
+        [System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator",
+            L"4.0.0.0")] ::System::Void
+            AddCompositeInstructionRow(NewDataSet::CompositeInstructionRow ^
+                                       row);
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -2144,7 +2148,7 @@ public: /// <summary>
                                                StreamingContext context);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -2175,14 +2179,15 @@ public: /// <summary>
               L"4.0.0.0")
         ] property NewDataSet::GeometryRow ^
         default [::System::Int32] {
-          NewDataSet::GeometryRow ^ get(::System::Int32 index);
-        }
+      NewDataSet::GeometryRow ^ get(::System::Int32 index);
+    }
 
-        public : [System::Diagnostics::DebuggerNonUserCodeAttribute]
-                     [System::CodeDom::Compiler::GeneratedCodeAttribute(
-                         L"System.Data.Design.TypedDataSetGenerator",
-                         L"4.0.0.0")] ::System::Void
-                         AddGeometryRow(NewDataSet::GeometryRow ^ row);
+  public:
+    [System::Diagnostics::DebuggerNonUserCodeAttribute]
+        [System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator",
+            L"4.0.0.0")] ::System::Void AddGeometryRow(NewDataSet::GeometryRow ^
+                                                       row);
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -2355,7 +2360,7 @@ public: /// <summary>
                                                  StreamingContext context);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -2386,14 +2391,15 @@ public: /// <summary>
               L"4.0.0.0")
         ] property NewDataSet::XDimensionRow ^
         default [::System::Int32] {
-          NewDataSet::XDimensionRow ^ get(::System::Int32 index);
-        }
+      NewDataSet::XDimensionRow ^ get(::System::Int32 index);
+    }
 
-        public : [System::Diagnostics::DebuggerNonUserCodeAttribute]
-                     [System::CodeDom::Compiler::GeneratedCodeAttribute(
-                         L"System.Data.Design.TypedDataSetGenerator",
-                         L"4.0.0.0")] ::System::Void
-                         AddXDimensionRow(NewDataSet::XDimensionRow ^ row);
+  public:
+    [System::Diagnostics::DebuggerNonUserCodeAttribute]
+        [System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator",
+            L"4.0.0.0")] ::System::Void
+            AddXDimensionRow(NewDataSet::XDimensionRow ^ row);
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -2566,7 +2572,7 @@ public: /// <summary>
                                                  StreamingContext context);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -2597,14 +2603,15 @@ public: /// <summary>
               L"4.0.0.0")
         ] property NewDataSet::YDimensionRow ^
         default [::System::Int32] {
-          NewDataSet::YDimensionRow ^ get(::System::Int32 index);
-        }
+      NewDataSet::YDimensionRow ^ get(::System::Int32 index);
+    }
 
-        public : [System::Diagnostics::DebuggerNonUserCodeAttribute]
-                     [System::CodeDom::Compiler::GeneratedCodeAttribute(
-                         L"System.Data.Design.TypedDataSetGenerator",
-                         L"4.0.0.0")] ::System::Void
-                         AddYDimensionRow(NewDataSet::YDimensionRow ^ row);
+  public:
+    [System::Diagnostics::DebuggerNonUserCodeAttribute]
+        [System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator",
+            L"4.0.0.0")] ::System::Void
+            AddYDimensionRow(NewDataSet::YDimensionRow ^ row);
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -2777,7 +2784,7 @@ public: /// <summary>
                                                  StreamingContext context);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -2808,14 +2815,15 @@ public: /// <summary>
               L"4.0.0.0")
         ] property NewDataSet::ZDimensionRow ^
         default [::System::Int32] {
-          NewDataSet::ZDimensionRow ^ get(::System::Int32 index);
-        }
+      NewDataSet::ZDimensionRow ^ get(::System::Int32 index);
+    }
 
-        public : [System::Diagnostics::DebuggerNonUserCodeAttribute]
-                     [System::CodeDom::Compiler::GeneratedCodeAttribute(
-                         L"System.Data.Design.TypedDataSetGenerator",
-                         L"4.0.0.0")] ::System::Void
-                         AddZDimensionRow(NewDataSet::ZDimensionRow ^ row);
+  public:
+    [System::Diagnostics::DebuggerNonUserCodeAttribute]
+        [System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator",
+            L"4.0.0.0")] ::System::Void
+            AddZDimensionRow(NewDataSet::ZDimensionRow ^ row);
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -2988,7 +2996,7 @@ public: /// <summary>
                                                  StreamingContext context);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -3019,14 +3027,15 @@ public: /// <summary>
               L"4.0.0.0")
         ] property NewDataSet::TDimensionRow ^
         default [::System::Int32] {
-          NewDataSet::TDimensionRow ^ get(::System::Int32 index);
-        }
+      NewDataSet::TDimensionRow ^ get(::System::Int32 index);
+    }
 
-        public : [System::Diagnostics::DebuggerNonUserCodeAttribute]
-                     [System::CodeDom::Compiler::GeneratedCodeAttribute(
-                         L"System.Data.Design.TypedDataSetGenerator",
-                         L"4.0.0.0")] ::System::Void
-                         AddTDimensionRow(NewDataSet::TDimensionRow ^ row);
+  public:
+    [System::Diagnostics::DebuggerNonUserCodeAttribute]
+        [System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator",
+            L"4.0.0.0")] ::System::Void
+            AddTDimensionRow(NewDataSet::TDimensionRow ^ row);
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -3199,7 +3208,7 @@ public: /// <summary>
                                                 StreamingContext context);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -3230,14 +3239,15 @@ public: /// <summary>
               L"4.0.0.0")
         ] property NewDataSet::OperationRow ^
         default [::System::Int32] {
-          NewDataSet::OperationRow ^ get(::System::Int32 index);
-        }
+      NewDataSet::OperationRow ^ get(::System::Int32 index);
+    }
 
-        public : [System::Diagnostics::DebuggerNonUserCodeAttribute]
-                     [System::CodeDom::Compiler::GeneratedCodeAttribute(
-                         L"System.Data.Design.TypedDataSetGenerator",
-                         L"4.0.0.0")] ::System::Void
-                         AddOperationRow(NewDataSet::OperationRow ^ row);
+  public:
+    [System::Diagnostics::DebuggerNonUserCodeAttribute]
+        [System::CodeDom::Compiler::GeneratedCodeAttribute(
+            L"System.Data.Design.TypedDataSetGenerator",
+            L"4.0.0.0")] ::System::Void
+            AddOperationRow(NewDataSet::OperationRow ^ row);
 
   public:
     [System::Diagnostics::DebuggerNonUserCodeAttribute]
@@ -3364,7 +3374,7 @@ public: /// <summary>
                   L"4.0.0.0")] FunctionRow(::System::Data::DataRowBuilder ^ rb);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -3483,7 +3493,7 @@ public: /// <summary>
                                                 rb);
 
   public:
-    [System::Diagnostics::DebuggerNonUserCodeAttribute,
+  [System::Diagnostics::DebuggerNonUserCodeAttribute,
      System::CodeDom::Compiler::GeneratedCodeAttribute(
          L"System.Data.Design.TypedDataSetGenerator",
          L"4.0.0.0")] property System::Int32 ParameterList_Id {
@@ -3549,7 +3559,7 @@ public: /// <summary>
                                             rb);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -3634,7 +3644,7 @@ public: /// <summary>
                                             rb);
 
   public:
-    [System::Diagnostics::DebuggerNonUserCodeAttribute,
+  [System::Diagnostics::DebuggerNonUserCodeAttribute,
      System::CodeDom::Compiler::GeneratedCodeAttribute(
          L"System.Data.Design.TypedDataSetGenerator",
          L"4.0.0.0")] property System::Int64 ID {
@@ -3739,7 +3749,7 @@ public: /// <summary>
                                              rb);
 
   public:
-    [System::Diagnostics::DebuggerNonUserCodeAttribute,
+  [System::Diagnostics::DebuggerNonUserCodeAttribute,
      System::CodeDom::Compiler::GeneratedCodeAttribute(
          L"System.Data.Design.TypedDataSetGenerator",
          L"4.0.0.0")] property System::Int64 UpperLimit {
@@ -3807,7 +3817,7 @@ public: /// <summary>
                                                             rb);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -3874,7 +3884,7 @@ public: /// <summary>
                   L"4.0.0.0")] GeometryRow(::System::Data::DataRowBuilder ^ rb);
 
   public:
-    [System::Diagnostics::DebuggerNonUserCodeAttribute,
+  [System::Diagnostics::DebuggerNonUserCodeAttribute,
      System::CodeDom::Compiler::GeneratedCodeAttribute(
          L"System.Data.Design.TypedDataSetGenerator",
          L"4.0.0.0")] property System::Int32 Geometry_Id {
@@ -3968,7 +3978,7 @@ public: /// <summary>
                                              rb);
 
   public:
-    [System::Diagnostics::DebuggerNonUserCodeAttribute,
+  [System::Diagnostics::DebuggerNonUserCodeAttribute,
      System::CodeDom::Compiler::GeneratedCodeAttribute(
          L"System.Data.Design.TypedDataSetGenerator",
          L"4.0.0.0")] property System::Int64 RefDimensionId {
@@ -4041,7 +4051,7 @@ public: /// <summary>
                                              rb);
 
   public:
-    [System::Diagnostics::DebuggerNonUserCodeAttribute,
+  [System::Diagnostics::DebuggerNonUserCodeAttribute,
      System::CodeDom::Compiler::GeneratedCodeAttribute(
          L"System.Data.Design.TypedDataSetGenerator",
          L"4.0.0.0")] property System::Int64 RefDimensionId {
@@ -4114,7 +4124,7 @@ public: /// <summary>
                                              rb);
 
   public:
-    [System::Diagnostics::DebuggerNonUserCodeAttribute,
+  [System::Diagnostics::DebuggerNonUserCodeAttribute,
      System::CodeDom::Compiler::GeneratedCodeAttribute(
          L"System.Data.Design.TypedDataSetGenerator",
          L"4.0.0.0")] property System::Int64 RefDimensionId {
@@ -4187,7 +4197,7 @@ public: /// <summary>
                                              rb);
 
   public:
-    [System::Diagnostics::DebuggerNonUserCodeAttribute,
+  [System::Diagnostics::DebuggerNonUserCodeAttribute,
      System::CodeDom::Compiler::GeneratedCodeAttribute(
          L"System.Data.Design.TypedDataSetGenerator",
          L"4.0.0.0")] property System::Int64 RefDimensionId {
@@ -4260,7 +4270,7 @@ public: /// <summary>
                                             rb);
 
   public:
-    [
+  [
       System::Diagnostics::DebuggerNonUserCodeAttribute,
       System::CodeDom::Compiler::GeneratedCodeAttribute(
           L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
@@ -4328,20 +4338,19 @@ public: /// <summary>
                                                     action);
 
   public:
-    [
-      System::Diagnostics::DebuggerNonUserCodeAttribute,
-      System::CodeDom::Compiler::GeneratedCodeAttribute(
-          L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
-    ] property NewDataSet::FunctionRow ^
-        Row { NewDataSet::FunctionRow ^ get(); }
+  [
+    System::Diagnostics::DebuggerNonUserCodeAttribute,
+    System::CodeDom::Compiler::GeneratedCodeAttribute(
+        L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
+  ] property NewDataSet::FunctionRow ^
+      Row { NewDataSet::FunctionRow ^ get(); }
 
-        public
-        : [System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")] property::System::Data::DataRowAction Action {
-          ::System::Data::DataRowAction get();
-        }
+      public : [System::Diagnostics::DebuggerNonUserCodeAttribute,
+                System::CodeDom::Compiler::GeneratedCodeAttribute(
+                    L"System.Data.Design.TypedDataSetGenerator",
+                    L"4.0.0.0")] property::System::Data::DataRowAction Action {
+        ::System::Data::DataRowAction get();
+      }
   };
 
 public: /// <summary>
@@ -4369,20 +4378,19 @@ public: /// <summary>
                                                          DataRowAction action);
 
   public:
-    [
-      System::Diagnostics::DebuggerNonUserCodeAttribute,
-      System::CodeDom::Compiler::GeneratedCodeAttribute(
-          L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
-    ] property NewDataSet::ParameterListRow ^
-        Row { NewDataSet::ParameterListRow ^ get(); }
+  [
+    System::Diagnostics::DebuggerNonUserCodeAttribute,
+    System::CodeDom::Compiler::GeneratedCodeAttribute(
+        L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
+  ] property NewDataSet::ParameterListRow ^
+      Row { NewDataSet::ParameterListRow ^ get(); }
 
-        public
-        : [System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")] property::System::Data::DataRowAction Action {
-          ::System::Data::DataRowAction get();
-        }
+      public : [System::Diagnostics::DebuggerNonUserCodeAttribute,
+                System::CodeDom::Compiler::GeneratedCodeAttribute(
+                    L"System.Data.Design.TypedDataSetGenerator",
+                    L"4.0.0.0")] property::System::Data::DataRowAction Action {
+        ::System::Data::DataRowAction get();
+      }
   };
 
 public: /// <summary>
@@ -4408,20 +4416,19 @@ public: /// <summary>
                                                      action);
 
   public:
-    [
-      System::Diagnostics::DebuggerNonUserCodeAttribute,
-      System::CodeDom::Compiler::GeneratedCodeAttribute(
-          L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
-    ] property NewDataSet::ParameterRow ^
-        Row { NewDataSet::ParameterRow ^ get(); }
+  [
+    System::Diagnostics::DebuggerNonUserCodeAttribute,
+    System::CodeDom::Compiler::GeneratedCodeAttribute(
+        L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
+  ] property NewDataSet::ParameterRow ^
+      Row { NewDataSet::ParameterRow ^ get(); }
 
-        public
-        : [System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")] property::System::Data::DataRowAction Action {
-          ::System::Data::DataRowAction get();
-        }
+      public : [System::Diagnostics::DebuggerNonUserCodeAttribute,
+                System::CodeDom::Compiler::GeneratedCodeAttribute(
+                    L"System.Data.Design.TypedDataSetGenerator",
+                    L"4.0.0.0")] property::System::Data::DataRowAction Action {
+        ::System::Data::DataRowAction get();
+      }
   };
 
 public: /// <summary>
@@ -4447,20 +4454,19 @@ public: /// <summary>
                                                      action);
 
   public:
-    [
-      System::Diagnostics::DebuggerNonUserCodeAttribute,
-      System::CodeDom::Compiler::GeneratedCodeAttribute(
-          L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
-    ] property NewDataSet::DimensionRow ^
-        Row { NewDataSet::DimensionRow ^ get(); }
+  [
+    System::Diagnostics::DebuggerNonUserCodeAttribute,
+    System::CodeDom::Compiler::GeneratedCodeAttribute(
+        L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
+  ] property NewDataSet::DimensionRow ^
+      Row { NewDataSet::DimensionRow ^ get(); }
 
-        public
-        : [System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")] property::System::Data::DataRowAction Action {
-          ::System::Data::DataRowAction get();
-        }
+      public : [System::Diagnostics::DebuggerNonUserCodeAttribute,
+                System::CodeDom::Compiler::GeneratedCodeAttribute(
+                    L"System.Data.Design.TypedDataSetGenerator",
+                    L"4.0.0.0")] property::System::Data::DataRowAction Action {
+        ::System::Data::DataRowAction get();
+      }
   };
 
 public: /// <summary>
@@ -4487,20 +4493,19 @@ public: /// <summary>
                                                       action);
 
   public:
-    [
-      System::Diagnostics::DebuggerNonUserCodeAttribute,
-      System::CodeDom::Compiler::GeneratedCodeAttribute(
-          L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
-    ] property NewDataSet::IntegratedRow ^
-        Row { NewDataSet::IntegratedRow ^ get(); }
+  [
+    System::Diagnostics::DebuggerNonUserCodeAttribute,
+    System::CodeDom::Compiler::GeneratedCodeAttribute(
+        L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
+  ] property NewDataSet::IntegratedRow ^
+      Row { NewDataSet::IntegratedRow ^ get(); }
 
-        public
-        : [System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")] property::System::Data::DataRowAction Action {
-          ::System::Data::DataRowAction get();
-        }
+      public : [System::Diagnostics::DebuggerNonUserCodeAttribute,
+                System::CodeDom::Compiler::GeneratedCodeAttribute(
+                    L"System.Data.Design.TypedDataSetGenerator",
+                    L"4.0.0.0")] property::System::Data::DataRowAction Action {
+        ::System::Data::DataRowAction get();
+      }
   };
 
 public: /// <summary>
@@ -4529,20 +4534,19 @@ public: /// <summary>
                                                                     action);
 
   public:
-    [
-      System::Diagnostics::DebuggerNonUserCodeAttribute,
-      System::CodeDom::Compiler::GeneratedCodeAttribute(
-          L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
-    ] property NewDataSet::CompositeInstructionRow ^
-        Row { NewDataSet::CompositeInstructionRow ^ get(); }
+  [
+    System::Diagnostics::DebuggerNonUserCodeAttribute,
+    System::CodeDom::Compiler::GeneratedCodeAttribute(
+        L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
+  ] property NewDataSet::CompositeInstructionRow ^
+      Row { NewDataSet::CompositeInstructionRow ^ get(); }
 
-        public
-        : [System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")] property::System::Data::DataRowAction Action {
-          ::System::Data::DataRowAction get();
-        }
+      public : [System::Diagnostics::DebuggerNonUserCodeAttribute,
+                System::CodeDom::Compiler::GeneratedCodeAttribute(
+                    L"System.Data.Design.TypedDataSetGenerator",
+                    L"4.0.0.0")] property::System::Data::DataRowAction Action {
+        ::System::Data::DataRowAction get();
+      }
   };
 
 public: /// <summary>
@@ -4568,20 +4572,19 @@ public: /// <summary>
                                                     action);
 
   public:
-    [
-      System::Diagnostics::DebuggerNonUserCodeAttribute,
-      System::CodeDom::Compiler::GeneratedCodeAttribute(
-          L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
-    ] property NewDataSet::GeometryRow ^
-        Row { NewDataSet::GeometryRow ^ get(); }
+  [
+    System::Diagnostics::DebuggerNonUserCodeAttribute,
+    System::CodeDom::Compiler::GeneratedCodeAttribute(
+        L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
+  ] property NewDataSet::GeometryRow ^
+      Row { NewDataSet::GeometryRow ^ get(); }
 
-        public
-        : [System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")] property::System::Data::DataRowAction Action {
-          ::System::Data::DataRowAction get();
-        }
+      public : [System::Diagnostics::DebuggerNonUserCodeAttribute,
+                System::CodeDom::Compiler::GeneratedCodeAttribute(
+                    L"System.Data.Design.TypedDataSetGenerator",
+                    L"4.0.0.0")] property::System::Data::DataRowAction Action {
+        ::System::Data::DataRowAction get();
+      }
   };
 
 public: /// <summary>
@@ -4608,20 +4611,19 @@ public: /// <summary>
                                                       action);
 
   public:
-    [
-      System::Diagnostics::DebuggerNonUserCodeAttribute,
-      System::CodeDom::Compiler::GeneratedCodeAttribute(
-          L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
-    ] property NewDataSet::XDimensionRow ^
-        Row { NewDataSet::XDimensionRow ^ get(); }
+  [
+    System::Diagnostics::DebuggerNonUserCodeAttribute,
+    System::CodeDom::Compiler::GeneratedCodeAttribute(
+        L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
+  ] property NewDataSet::XDimensionRow ^
+      Row { NewDataSet::XDimensionRow ^ get(); }
 
-        public
-        : [System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")] property::System::Data::DataRowAction Action {
-          ::System::Data::DataRowAction get();
-        }
+      public : [System::Diagnostics::DebuggerNonUserCodeAttribute,
+                System::CodeDom::Compiler::GeneratedCodeAttribute(
+                    L"System.Data.Design.TypedDataSetGenerator",
+                    L"4.0.0.0")] property::System::Data::DataRowAction Action {
+        ::System::Data::DataRowAction get();
+      }
   };
 
 public: /// <summary>
@@ -4648,20 +4650,19 @@ public: /// <summary>
                                                       action);
 
   public:
-    [
-      System::Diagnostics::DebuggerNonUserCodeAttribute,
-      System::CodeDom::Compiler::GeneratedCodeAttribute(
-          L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
-    ] property NewDataSet::YDimensionRow ^
-        Row { NewDataSet::YDimensionRow ^ get(); }
+  [
+    System::Diagnostics::DebuggerNonUserCodeAttribute,
+    System::CodeDom::Compiler::GeneratedCodeAttribute(
+        L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
+  ] property NewDataSet::YDimensionRow ^
+      Row { NewDataSet::YDimensionRow ^ get(); }
 
-        public
-        : [System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")] property::System::Data::DataRowAction Action {
-          ::System::Data::DataRowAction get();
-        }
+      public : [System::Diagnostics::DebuggerNonUserCodeAttribute,
+                System::CodeDom::Compiler::GeneratedCodeAttribute(
+                    L"System.Data.Design.TypedDataSetGenerator",
+                    L"4.0.0.0")] property::System::Data::DataRowAction Action {
+        ::System::Data::DataRowAction get();
+      }
   };
 
 public: /// <summary>
@@ -4688,20 +4689,19 @@ public: /// <summary>
                                                       action);
 
   public:
-    [
-      System::Diagnostics::DebuggerNonUserCodeAttribute,
-      System::CodeDom::Compiler::GeneratedCodeAttribute(
-          L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
-    ] property NewDataSet::ZDimensionRow ^
-        Row { NewDataSet::ZDimensionRow ^ get(); }
+  [
+    System::Diagnostics::DebuggerNonUserCodeAttribute,
+    System::CodeDom::Compiler::GeneratedCodeAttribute(
+        L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
+  ] property NewDataSet::ZDimensionRow ^
+      Row { NewDataSet::ZDimensionRow ^ get(); }
 
-        public
-        : [System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")] property::System::Data::DataRowAction Action {
-          ::System::Data::DataRowAction get();
-        }
+      public : [System::Diagnostics::DebuggerNonUserCodeAttribute,
+                System::CodeDom::Compiler::GeneratedCodeAttribute(
+                    L"System.Data.Design.TypedDataSetGenerator",
+                    L"4.0.0.0")] property::System::Data::DataRowAction Action {
+        ::System::Data::DataRowAction get();
+      }
   };
 
 public: /// <summary>
@@ -4728,20 +4728,19 @@ public: /// <summary>
                                                       action);
 
   public:
-    [
-      System::Diagnostics::DebuggerNonUserCodeAttribute,
-      System::CodeDom::Compiler::GeneratedCodeAttribute(
-          L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
-    ] property NewDataSet::TDimensionRow ^
-        Row { NewDataSet::TDimensionRow ^ get(); }
+  [
+    System::Diagnostics::DebuggerNonUserCodeAttribute,
+    System::CodeDom::Compiler::GeneratedCodeAttribute(
+        L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
+  ] property NewDataSet::TDimensionRow ^
+      Row { NewDataSet::TDimensionRow ^ get(); }
 
-        public
-        : [System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")] property::System::Data::DataRowAction Action {
-          ::System::Data::DataRowAction get();
-        }
+      public : [System::Diagnostics::DebuggerNonUserCodeAttribute,
+                System::CodeDom::Compiler::GeneratedCodeAttribute(
+                    L"System.Data.Design.TypedDataSetGenerator",
+                    L"4.0.0.0")] property::System::Data::DataRowAction Action {
+        ::System::Data::DataRowAction get();
+      }
   };
 
 public: /// <summary>
@@ -4767,20 +4766,19 @@ public: /// <summary>
                                                      action);
 
   public:
-    [
-      System::Diagnostics::DebuggerNonUserCodeAttribute,
-      System::CodeDom::Compiler::GeneratedCodeAttribute(
-          L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
-    ] property NewDataSet::OperationRow ^
-        Row { NewDataSet::OperationRow ^ get(); }
+  [
+    System::Diagnostics::DebuggerNonUserCodeAttribute,
+    System::CodeDom::Compiler::GeneratedCodeAttribute(
+        L"System.Data.Design.TypedDataSetGenerator", L"4.0.0.0")
+  ] property NewDataSet::OperationRow ^
+      Row { NewDataSet::OperationRow ^ get(); }
 
-        public
-        : [System::Diagnostics::DebuggerNonUserCodeAttribute,
-           System::CodeDom::Compiler::GeneratedCodeAttribute(
-               L"System.Data.Design.TypedDataSetGenerator",
-               L"4.0.0.0")] property::System::Data::DataRowAction Action {
-          ::System::Data::DataRowAction get();
-        }
+      public : [System::Diagnostics::DebuggerNonUserCodeAttribute,
+                System::CodeDom::Compiler::GeneratedCodeAttribute(
+                    L"System.Data.Design.TypedDataSetGenerator",
+                    L"4.0.0.0")] property::System::Data::DataRowAction Action {
+        ::System::Data::DataRowAction get();
+      }
   };
 };
 

@@ -32,7 +32,9 @@ void MantidTreeModel::deleteWorkspaces(const QStringList &wsNames) {
       alg->setLogging(false);
       std::vector<std::string> vecWsNames;
       vecWsNames.reserve(wsNames.size());
-      foreach (auto wsName, wsNames) { vecWsNames.emplace_back(wsName.toStdString()); }
+      foreach (auto wsName, wsNames) {
+        vecWsNames.emplace_back(wsName.toStdString());
+      }
       alg->setProperty("WorkspaceList", vecWsNames);
       executeAlgorithmAsync(alg);
     }
@@ -183,11 +185,8 @@ Workspace_const_sptr MantidTreeModel::getWorkspace(const QString &workspaceName)
 void MantidTreeModel::updateRecentFilesList(const QString &fname) { /*Not require until tool bar is created*/
   Q_UNUSED(fname);
 }
-void MantidTreeModel::enableSaveNexus(const QString &wsName) { /*handled by widget*/
-  Q_UNUSED(wsName);
-}
-void MantidTreeModel::disableSaveNexus() { /* handled by widget*/
-}
+void MantidTreeModel::enableSaveNexus(const QString &wsName) { /*handled by widget*/ Q_UNUSED(wsName); }
+void MantidTreeModel::disableSaveNexus() { /* handled by widget*/ }
 
 void MantidTreeModel::showSpectrumViewer() {}
 void MantidTreeModel::showSliceViewer() {}

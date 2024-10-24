@@ -14,17 +14,17 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 struct RowNotFoundException : public std::out_of_range {
 public:
-  RowNotFoundException(std::string s) : std::out_of_range(std::move(s)){};
+  RowNotFoundException(std::string s) : std::out_of_range(std::move(s)) {};
 };
 
 struct MultipleRowsFoundException : public std::length_error {
 public:
-  MultipleRowsFoundException(std::string s) : std::length_error(std::move(s)){};
+  MultipleRowsFoundException(std::string s) : std::length_error(std::move(s)) {};
 };
 
 struct InvalidTableException : public std::runtime_error {
 public:
-  InvalidTableException(std::string s) : std::runtime_error(std::move(s)){};
+  InvalidTableException(std::string s) : std::runtime_error(std::move(s)) {};
 };
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

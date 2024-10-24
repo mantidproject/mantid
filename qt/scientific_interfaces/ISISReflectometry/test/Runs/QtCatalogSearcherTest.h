@@ -47,8 +47,8 @@ public:
   const std::string summary() const override { return "A mock search algorithm"; };
 
 private:
-  void init() override{};
-  void exec() override{};
+  void init() override {};
+  void exec() override {};
   bool isInitialized() const override { return true; }
 };
 
@@ -60,8 +60,8 @@ class MockQtCatalogSearcher : public QtCatalogSearcher {
 public:
   MockQtCatalogSearcher(IRunsView *view, IAlgorithm_sptr searchAlg = std::make_shared<MockSearchAlgorithm>(),
                         bool const hasActiveSession = true)
-      : QtCatalogSearcher(view), m_searchAlg(searchAlg),
-        m_hasActiveCatalogSession(hasActiveSession), m_logInWasCalled{false} {}
+      : QtCatalogSearcher(view), m_searchAlg(searchAlg), m_hasActiveCatalogSession(hasActiveSession),
+        m_logInWasCalled{false} {}
 
   bool logInWasCalled() const { return m_logInWasCalled; }
 

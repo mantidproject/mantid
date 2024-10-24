@@ -41400,7 +41400,7 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_default_std__vectorTemplateOfLONG64(struct soap 
   p->clear();
 }
 
-SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfLONG64(struct soap *soap, const std::vector<LONG64> *a){
+SOAP_FMAC3 void SOAP_FMAC4 soap_serialize_std__vectorTemplateOfLONG64(struct soap *soap, const std::vector<LONG64> *a) {
 #ifndef WITH_NOIDREF
 #endif
 }

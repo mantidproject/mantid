@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/CrystalFieldEnergies.h"
-//#include "MantidKernel/ArrayLengthValidator.h"
+// #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 

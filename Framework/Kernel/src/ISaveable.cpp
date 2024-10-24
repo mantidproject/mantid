@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ISaveable.h"
-//#include "MantidKernel/INode.h"
+// #include "MantidKernel/INode.h"
 
 namespace Mantid::Kernel {
 

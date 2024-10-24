@@ -18,9 +18,9 @@ using namespace Mantid::API;
 class CommutativeBinaryOpHelper : public Mantid::Algorithms::CommutativeBinaryOperation {
 public:
   /// Default constructor
-  CommutativeBinaryOpHelper() : CommutativeBinaryOperation(){};
+  CommutativeBinaryOpHelper() : CommutativeBinaryOperation() {};
   /// Destructor
-  ~CommutativeBinaryOpHelper() override{};
+  ~CommutativeBinaryOpHelper() override {};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "CommutativeBinaryOperationHelper"; }
   /// Algorithm's version for identification overriding a virtual method

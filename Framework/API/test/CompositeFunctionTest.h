@@ -72,7 +72,7 @@ public:
   void init(const HistogramData::Histogram &) override {}
   void generateHistogram(const std::size_t, const MantidVec &, MantidVec &, MantidVec &, bool) const override {}
 
-  void clearFileBacked(bool) override{};
+  void clearFileBacked(bool) override {};
   ITableWorkspace_sptr makeBoxTable(size_t /* start*/, size_t /*num*/) override { return ITableWorkspace_sptr(); }
 
 private:

@@ -17,12 +17,12 @@ namespace Kernel {
  * the comma operator can be used to make a call to the factories' subscribe
  * method in the first part.
  */
-class MANTID_KERNEL_DLL RegistrationHelper {
-public:
-  /** Constructor. Does nothing.
-   * @param i :: Takes an int and does nothing with it
-   */
-  inline RegistrationHelper(int i) { UNUSED_ARG(i); }
-};
+class MANTID_KERNEL_DLL RegistrationHelper{public :
+                                               /** Constructor. Does nothing.
+                                                * @param i :: Takes an int and does nothing with it
+                                                */
+                                               inline RegistrationHelper(int i){UNUSED_ARG(i);
+} // namespace Kernel
+}; // namespace Mantid
 } // namespace Kernel
 } // namespace Mantid

@@ -50,9 +50,15 @@ int64_t scaleFromUnit(const std::string &unit,
 
 /// Convert any int or float type to corresponding 64 bit type needed for
 /// passing into DateAndTime.
-template <class T> struct IntOrFloat64Bit { using type = int64_t; };
-template <> struct IntOrFloat64Bit<float> { using type = double; };
-template <> struct IntOrFloat64Bit<double> { using type = double; };
+template <class T> struct IntOrFloat64Bit {
+  using type = int64_t;
+};
+template <> struct IntOrFloat64Bit<float> {
+  using type = double;
+};
+template <> struct IntOrFloat64Bit<double> {
+  using type = double;
+};
 } // namespace detail
 
 template <class IndexType, class TimeZeroType> class PulseTimeGenerator {

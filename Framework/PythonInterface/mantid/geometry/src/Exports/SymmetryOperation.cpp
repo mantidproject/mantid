@@ -29,7 +29,7 @@ Mantid::Kernel::V3D applyToVector(const SymmetryOperation &self, const object &h
 }
 
 Mantid::Kernel::V3D applyToCoordinates(const SymmetryOperation &self, const object &coordinates) {
-  return self.operator*<Mantid::Kernel::V3D>(Converters::PyObjectToV3D(coordinates)());
+  return self.operator* <Mantid::Kernel::V3D>(Converters::PyObjectToV3D(coordinates)());
 }
 } // namespace
 

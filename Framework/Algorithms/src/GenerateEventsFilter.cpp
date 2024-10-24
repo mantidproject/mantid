@@ -520,7 +520,7 @@ void GenerateEventsFilter::setFilterByTimeOnly() {
         if (breaklater)
           break;
       } // END-FOR
-    }   // END-WHILE
+    } // END-WHILE
   }
 } // namespace Algorithms
 

@@ -43,10 +43,8 @@ private:
  */
 class FakeAlgorithm : public Algorithm {
 public:
-  void exec() override { /*Do nothing*/
-  }
-  void init() override { /*Do nothing*/
-  }
+  void exec() override { /*Do nothing*/ }
+  void init() override { /*Do nothing*/ }
   const std::string name() const override { return "FakeAlgorithm"; }
   int version() const override { return 1; }
   const std::string summary() const override { return ""; }

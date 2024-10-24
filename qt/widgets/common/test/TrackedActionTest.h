@@ -17,10 +17,10 @@ class TrackedActionTest : public CxxTest::TestSuite {
   // inner class
   class TestableTrackedAction : public TrackedAction {
   public:
-    TestableTrackedAction(QObject *parent) : TrackedAction(parent), m_lastName(){};
-    TestableTrackedAction(const QString &text, QObject *parent) : TrackedAction(text, parent), m_lastName(){};
+    TestableTrackedAction(QObject *parent) : TrackedAction(parent), m_lastName() {};
+    TestableTrackedAction(const QString &text, QObject *parent) : TrackedAction(text, parent), m_lastName() {};
     TestableTrackedAction(const QIcon &icon, const QString &text, QObject *parent)
-        : TrackedAction(icon, text, parent), m_lastName(){};
+        : TrackedAction(icon, text, parent), m_lastName() {};
 
     std::vector<std::string> getLastUsedName() const { return m_lastName; };
 

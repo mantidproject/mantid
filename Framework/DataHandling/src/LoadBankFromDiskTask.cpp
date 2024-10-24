@@ -405,7 +405,7 @@ void LoadBankFromDiskTask::run() {
       }
 
     } // no error
-  }   // try block
+  } // try block
   catch (std::exception &e) {
     m_loader.alg->getLogger().error() << "Error while loading bank " << entry_name << ":\n";
     m_loader.alg->getLogger().error() << e.what() << '\n';

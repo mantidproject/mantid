@@ -2051,8 +2051,8 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp, const Poc
 
   } else // so if no facing element associated with location element apply
          // default facing if set
-      if (m_haveDefaultFacing)
-    makeXYplaneFaceComponent(comp, m_defaultFacing);
+    if (m_haveDefaultFacing)
+      makeXYplaneFaceComponent(comp, m_defaultFacing);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------

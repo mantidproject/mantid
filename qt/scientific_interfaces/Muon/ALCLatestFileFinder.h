@@ -17,7 +17,7 @@ namespace CustomInterfaces {
 class MANTIDQT_MUONINTERFACE_DLL ALCLatestFileFinder {
 public:
   /// Constructor - takes filename of first run
-  explicit ALCLatestFileFinder(const std::string &firstRunFile) : m_firstRunFileName(firstRunFile){};
+  explicit ALCLatestFileFinder(const std::string &firstRunFile) : m_firstRunFileName(firstRunFile) {};
 
   /// Find most recent file in same directory as first run
   std::string getMostRecentFile() const;

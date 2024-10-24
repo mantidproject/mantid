@@ -26,7 +26,7 @@ template <typename ParamType> class DLLExport LambdaValidator : public TypedVali
 public:
   LambdaValidator()
       : m_validatorFunction([](GNU_UNUSED ParamType x) { return "Error: validator function is not initialized"; }) {}
-  LambdaValidator(const ValidatorFunction &validatorFunction) : m_validatorFunction(validatorFunction){};
+  LambdaValidator(const ValidatorFunction &validatorFunction) : m_validatorFunction(validatorFunction) {};
 
   IValidator_sptr clone() const override { return std::make_shared<LambdaValidator>(*this); }
 

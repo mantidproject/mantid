@@ -1069,7 +1069,9 @@ Mantid::API::IFunction_sptr PropertyHandler::changeType(QtProperty *prop) {
     }
 
     QList<QtProperty *> subs = m_item->property()->subProperties();
-    foreach (QtProperty *sub, subs) { m_item->property()->removeSubProperty(sub); }
+    foreach (QtProperty *sub, subs) {
+      m_item->property()->removeSubProperty(sub);
+    }
 
     m_browser->m_changeSlotsEnabled = true;
 
@@ -1612,7 +1614,9 @@ void PropertyHandler::updateWorkspaces(const QStringList &oldWorkspaces) {
       wsName = oldWorkspaces[index];
     }
     QStringList names("All");
-    foreach (const QString &name, m_browser->m_workspaceNames) { names.append(name); }
+    foreach (const QString &name, m_browser->m_workspaceNames) {
+      names.append(name);
+    }
     m_browser->m_enumManager->setEnumNames(m_workspace, names);
     if (m_browser->m_workspaceNames.contains(wsName)) {
       m_browser->m_enumManager->setValue(m_workspace, m_browser->m_workspaceNames.indexOf(wsName) + 1);

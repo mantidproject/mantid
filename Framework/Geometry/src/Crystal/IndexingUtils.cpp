@@ -1606,7 +1606,7 @@ double IndexingUtils::GetMagFFT(const std::vector<V3D> &q_vectors, const V3D &cu
       projections[index] += 1;
     else
       projections[N - 1] += 1; // This should not happen, but trap it in
-  }                            // case of rounding errors.
+  } // case of rounding errors.
 
   // get the |FFT|
   gsl_fft_real_radix2_transform(projections, 1, N);
@@ -1958,15 +1958,15 @@ void IndexingUtils::DiscardDuplicates(std::vector<V3D> &new_list, std::vector<V3
             if ((angle < ang_tol) || (angle > (180.0 - ang_tol))) {
               temp.emplace_back(next_dir);
               directions[check_index] = zero_vec; // mark off this direction
-            }                                     // since it was duplicate
+            } // since it was duplicate
 
             check_index++; // keep checking all vectors with
-          }                // essentially the same length
+          } // essentially the same length
           else
             new_dir = true; // we only know we have a new
                             // direction if the length is
                             // different, since list is
-        }                   // sorted by length !
+        } // sorted by length !
         else
           check_index++; // just move on
       }

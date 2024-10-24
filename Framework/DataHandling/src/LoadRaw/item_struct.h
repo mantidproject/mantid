@@ -24,7 +24,7 @@ public:
     item_t(const T *v, bool da, const int *d0, const int *d1) : value(v), det_average(da), dim0(d0), dim1(d1) {}
   };
 
-  item_struct() : m_items(), m_spec_array(nullptr), m_ndet(0){};
+  item_struct() : m_items(), m_spec_array(nullptr), m_ndet(0) {};
 
 private:
   using items_map_t = std::map<std::string,

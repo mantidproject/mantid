@@ -17,7 +17,7 @@
  ***************************************************************************/
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
-//#include <MyParser.h>
+// #include <MyParser.h>
 #include <QCloseEvent>
 #include <QHBoxLayout>
 #include <QLineEdit>

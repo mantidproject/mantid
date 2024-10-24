@@ -33,9 +33,9 @@ namespace Mantid::Kernel {
 // Now the PropertyWithValue class itself
 //------------------------------------------------------------------------------------------------
 
-//######################################################//
-//    CONSTRUCTORS
-//######################################################//
+// ######################################################//
+//     CONSTRUCTORS
+// ######################################################//
 
 /** Constructor
  *  @param name :: The name to assign to the property
@@ -81,9 +81,9 @@ EnumeratedStringProperty<E, names>::operator=(EnumeratedStringProperty const &ri
   return *this;
 }
 
-//######################################################//
-//    GETTERS
-//######################################################//
+// ######################################################//
+//     GETTERS
+// ######################################################//
 
 /** Get the value of the property as a string
  *  @return The property's value as a string
@@ -196,9 +196,9 @@ bool EnumeratedStringProperty<E, names>::isMultipleSelectionAllowed() {
   return true;
 }
 
-//######################################################//
-//    SETTERS
-//######################################################//
+// ######################################################//
+//     SETTERS
+// ######################################################//
 
 /** Set the value of the property from a string representation.
  *  @param value :: The value to assign to the property
@@ -307,9 +307,9 @@ EnumeratedStringProperty<E, names>::operator=(EnumeratedString<E, names> const &
   return *this;
 }
 
-//######################################################//
-//    MUTATORS AND SUNDRY
-//######################################################//
+// ######################################################//
+//     MUTATORS AND SUNDRY
+// ######################################################//
 
 //--------------------------------------------------------------------------------------
 /** Add the value of another property
@@ -333,9 +333,9 @@ void EnumeratedStringProperty<E, names>::saveProperty(::NeXus::File * /*file*/) 
                               typeid(ENUMSTRING).name() + " not implemented.");
 }
 
-//######################################################//
-//    PRIVATE METHODS
-//######################################################//
+// ######################################################//
+//     PRIVATE METHODS
+// ######################################################//
 
 /**
  * Set the value of the property via a reference to another property.

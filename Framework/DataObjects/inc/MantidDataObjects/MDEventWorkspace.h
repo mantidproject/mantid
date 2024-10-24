@@ -9,7 +9,7 @@
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/ProgressBase.h"
-//#include "MantidDataObjects/BoxCtrlChangesList.h"
+// #include "MantidDataObjects/BoxCtrlChangesList.h"
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"

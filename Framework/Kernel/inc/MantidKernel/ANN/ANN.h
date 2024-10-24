@@ -350,7 +350,7 @@ const ANNbool ANN_ALLOW_SELF_MATCH = ANNfalse;
 // ROOT(x)
 //= x^(1/p)
 //				#				= +
-//#
+// #
 //= +
 //				DIFF(x,y)		= y - x
 // DIFF(x,y)		= y - x
@@ -651,7 +651,7 @@ enum ANNsplitRule {
   ANN_KD_SL_MIDPT = 3, // sliding midpoint splitting method
   ANN_KD_SL_FAIR = 4,  // sliding fair split method
   ANN_KD_SUGGEST = 5
-};                               // the authors' suggestion for best
+}; // the authors' suggestion for best
 const int ANN_N_SPLIT_RULES = 6; // number of split rules
 
 enum ANNshrinkRule {
@@ -659,7 +659,7 @@ enum ANNshrinkRule {
   ANN_BD_SIMPLE = 1,   // simple splitting
   ANN_BD_CENTROID = 2, // centroid splitting
   ANN_BD_SUGGEST = 3
-};                                // the authors' suggested choice
+}; // the authors' suggested choice
 const int ANN_N_SHRINK_RULES = 4; // number of shrink rules
 
 //----------------------------------------------------------------------

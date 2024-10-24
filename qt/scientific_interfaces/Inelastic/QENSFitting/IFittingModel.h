@@ -30,7 +30,7 @@ extern std::unordered_map<FittingMode, std::string> fitModeToName;
 */
 class MANTIDQT_INELASTIC_DLL IFittingModel {
 public:
-  virtual ~IFittingModel(){};
+  virtual ~IFittingModel() {};
   virtual bool isPreviouslyFit(WorkspaceID workspaceID, WorkspaceIndex spectrum) const = 0;
   virtual std::optional<std::string> isInvalidFunction() const = 0;
   virtual std::vector<std::string> getFitParameterNames() const = 0;
