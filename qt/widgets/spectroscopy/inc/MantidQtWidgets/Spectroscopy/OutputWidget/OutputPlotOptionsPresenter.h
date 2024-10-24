@@ -34,12 +34,9 @@ class MANTID_SPECTROSCOPY_DLL OutputPlotOptionsPresenter final : public IOutputP
                                                                  public AnalysisDataServiceObserver {
 
 public:
-  OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
-                             std::string const &fixedIndices = "",
-                             std::optional<std::map<std::string, std::string>> const &availableActions = std::nullopt);
-  /// Used by the unit tests so that the view and model can be mocked
-  OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, std::unique_ptr<IOutputPlotOptionsModel> model,
-                             PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");
+  explicit OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, std::unique_ptr<IOutputPlotOptionsModel> model,
+                                      PlotWidget const &plotType = PlotWidget::Spectra,
+                                      std::string const &fixedIndices = "");
   ~OutputPlotOptionsPresenter() = default;
 
   void handleWorkspaceChanged(std::string const &workspaceName) override;
