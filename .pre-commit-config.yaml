@@ -27,7 +27,7 @@ repos:
     rev: v19.1.2 # updating to a new version should wait until maintenance
     hooks:
     - id: clang-format
-      exclude: Testing/Tools/cxxtest|tools
+      exclude: Testing/Tools/cxxtest|tools|qt/icons/resources/
 
   - repo: https://github.com/mantidproject/pre-commit-hooks.git
     rev: 17c2842277953a4afcbca26bf84e8956f729e765
