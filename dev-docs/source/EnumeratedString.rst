@@ -21,7 +21,7 @@ However, this is not allowed under C++.
 
 The ``EnumeratedString`` objects allow for binding an ``enum`` or ``enum class`` to a vector of strings, allowing for much
 of the same behavior.  This allows for easy-to-read ``if`` and ``switch`` statements, as well as easy conversions and assignments
-with strings from the allowed set.  This further adds an additional layer of validation for string properties, in additon to the
+with strings from the allowed set.  This further adds an additional layer of validation for string properties, in addition to the
 ``StringListValidator`` used in the property declaration.
 
 How to use the EnumeratedString
