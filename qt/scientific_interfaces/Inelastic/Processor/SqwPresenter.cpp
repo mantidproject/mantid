@@ -39,8 +39,7 @@ SqwPresenter::SqwPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgo
     : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
-  setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
+  setOutputPlotOptionsPresenter(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface);
 }
 
 /**
