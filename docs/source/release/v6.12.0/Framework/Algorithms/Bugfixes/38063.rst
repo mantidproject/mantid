@@ -1,0 +1,1 @@
+- Fixed a bug in :ref:`sample_transmission_calculator` (Interfaces > General > Sample Transmission Calculator) interface to restrict entering commas mixed with decimal point in the double spin boxes for Low, Width and High fields
