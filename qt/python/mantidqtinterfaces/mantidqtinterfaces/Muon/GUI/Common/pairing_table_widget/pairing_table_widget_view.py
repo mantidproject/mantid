@@ -9,6 +9,7 @@ from qtpy.QtCore import Signal
 
 from mantidqtinterfaces.Muon.GUI.Common import message_box
 from mantidqtinterfaces.Muon.GUI.Common.pairing_table_widget.pairing_table_constants import inverse_pair_columns
+from mantidqtinterfaces.Muon.GUI.Common.utilities import table_utils
 
 
 class PairingTableView(QtWidgets.QWidget):
@@ -20,6 +21,8 @@ class PairingTableView(QtWidgets.QWidget):
 
     def __init__(self, parent=None):
         super(PairingTableView, self).__init__(parent)
+
+        self._presenter = None
 
         self.pairing_table = QtWidgets.QTableWidget(self)
         self.set_up_table()
@@ -116,6 +119,18 @@ class PairingTableView(QtWidgets.QWidget):
         self.pairing_table.horizontalHeaderItem(4).setToolTip("Whether to include this pair in the analysis")
         self.pairing_table.horizontalHeaderItem(5).setToolTip("Replace the current value of Alpha with one estimated" " from the data.")
 
+    def subscribe(self, presenter):
+        self._presenter = presenter
+
+    def notify(self):
+        self.on_add_pair_button_clicked(self._presenter.handle_add_pair_button_checked_state)
+        self.on_remove_pair_button_clicked(self._presenter.handle_remove_pair_button_clicked)
+
+        self.on_user_changes_pair_name(self._presenter.validate_pair_name)
+        self.on_user_changes_alpha(self._presenter.validate_alpha)
+        self.on_guess_alpha_clicked(self._presenter.handle_guess_alpha_clicked)
+        self.on_table_data_changed(self._presenter.handle_data_change)
+
     @property
     def get_pairing_table(self):
         return self.pairing_table
@@ -124,6 +139,9 @@ class PairingTableView(QtWidgets.QWidget):
     def is_updating(self):
         return self._updating
 
+    def set_is_updating(self, value):
+        self._updating = value
+
     @property
     def validate_alpha(self):
         return self._validate_alpha
@@ -131,6 +149,9 @@ class PairingTableView(QtWidgets.QWidget):
     @property
     def is_disabled(self):
         return self._disabled
+
+    def set_is_disabled(self, value):
+        self._disabled = value
 
     @property
     def validate_pair_name_entry(self):
@@ -173,6 +194,40 @@ class PairingTableView(QtWidgets.QWidget):
     def set_combo_box_index(self, widget, text):
         index = widget.findText(text)
         widget.setCurrentIndex(index)
+
+    def add_pair_name_entry(self, row, col, entry):
+        """Add a validated pair name entry."""
+        pair_name_widget = table_utils.ValidatedTableItem(self.validate_pair_name_entry)
+        pair_name_widget.setText(entry)
+        self.set_item_in_table(row, col, pair_name_widget, flags=self.get_default_item_flags)
+
+    def add_group_selector_entry(self, row, col, entry, group):
+        """Add a group selector widget for group_1 or group_2."""
+        group_selector_widget = self.group_selection_cell_widget
+
+        if group == "group_1":
+            group_selector_widget.currentIndexChanged.connect(lambda: self.on_cell_changed(row, 2))
+        elif group == "group_2":
+            group_selector_widget.currentIndexChanged.connect(lambda: self.on_cell_changed(row, 3))
+
+        self.set_combo_box_index(group_selector_widget, entry)
+        self.set_widget_in_table(row, col, group_selector_widget)
+
+    def add_alpha_entry(self, row, col, entry):
+        """Add an alpha entry to the table."""
+        alpha_widget = table_utils.ValidatedTableItem(self.validate_alpha)
+        alpha_widget.setText(entry)
+        self.set_item_in_table(row, col, alpha_widget)
+
+    def add_to_analyse_checkbox(self, item, entry):
+        """Set the 'to_analyse' checkbox state."""
+        self.set_checkbox_in_table(item, checked=bool(entry))
+
+    def add_guess_alpha_button(self, row):
+        """Add the 'Guess Alpha' button to the last column."""
+        guess_alpha_widget = self.guess_alpha_button
+        guess_alpha_widget.clicked.connect(self.guess_alpha_clicked_from_row)
+        self.set_widget_in_table(row, 5, guess_alpha_widget)
 
     @property
     def get_default_item_flags(self):
@@ -274,6 +329,43 @@ class PairingTableView(QtWidgets.QWidget):
     @property
     def cursor_position(self):
         return QtGui.QCursor.pos()
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Context Menu
+    # ------------------------------------------------------------------------------------------------------------------
+    def _context_menu_event(self, _event):
+        """Overridden method for dealing with the right-click context menu"""
+        menu = self.create_context_menu
+
+        add_pair_action = self._context_menu_add_pair_action(self.add_pair_button.clicked.emit)
+        remove_pair_action = self._context_menu_remove_pair_action(self.remove_pair_button.clicked.emit)
+
+        if self.is_disabled:
+            self.add_pair_action.setEnabled(False)
+            self.remove_pair_action.setEnabled(False)
+        # set-up the menu
+        menu.addAction(add_pair_action)
+        menu.addAction(remove_pair_action)
+        menu.popup(self.cursor_position)
+
+    def _context_menu_add_pair_action(self, slot):
+        add_pair_action = self.get_add_pair_action
+        add_pair_action.setCheckable(False)
+        if len(self._presenter.get_selected_row_indices()) > 0:
+            add_pair_action.setEnabled(False)
+        add_pair_action.triggered.connect(slot)
+        return add_pair_action
+
+    def _context_menu_remove_pair_action(self, slot):
+        if len(self._presenter.get_selected_row_indices()) > 1:
+            # use plural if >1 item selected
+            remove_pair_action = self.get_remove_pair_action(True)
+        else:
+            remove_pair_action = self.get_remove_pair_action()
+        if self.get_pairing_table.rowCount() == 0:
+            remove_pair_action.setEnabled(False)
+        remove_pair_action.triggered.connect(slot)
+        return remove_pair_action
 
     # ------------------------------------------------------------------------------------------------------------------
     # Adding / Removing pairs

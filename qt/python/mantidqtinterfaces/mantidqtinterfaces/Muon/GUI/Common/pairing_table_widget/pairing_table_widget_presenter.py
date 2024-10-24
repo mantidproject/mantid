@@ -14,7 +14,6 @@ from mantidqtinterfaces.Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_
 from mantidqtinterfaces.Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import row_colors, row_tooltips
 
 from mantidqtinterfaces.Muon.GUI.Common.pairing_table_widget.pairing_table_constants import get_pair_columns, pair_columns
-from mantidqtinterfaces.Muon.GUI.Common.utilities import table_utils
 
 
 class PairingTablePresenter(object):
@@ -22,13 +21,8 @@ class PairingTablePresenter(object):
         self._view = view
         self._model = model
 
-        self._view.on_add_pair_button_clicked(self.handle_add_pair_button_checked_state)
-        self._view.on_remove_pair_button_clicked(self.handle_remove_pair_button_clicked)
-
-        self._view.on_user_changes_pair_name(self.validate_pair_name)
-        self._view.on_user_changes_alpha(self.validate_alpha)
-        self._view.on_guess_alpha_clicked(self.handle_guess_alpha_clicked)
-        self._view.on_table_data_changed(self.handle_data_change)
+        self._view.subscribe(self)
+        self._view.notify()
 
         self.selected_pair_changed_notifier = GenericObservable()
 
@@ -50,25 +44,25 @@ class PairingTablePresenter(object):
 
     def disable_editing(self):
         self.disable_updates()
-        self._view.is_disabled = True
+        self._view.set_is_disabled(True)
         self._view.disable_all_buttons()
         self._disable_all_table_items()
         self.enable_updates()
 
     def enable_editing(self):
         self.disable_updates()
-        self._view.is_disabled = False
+        self._view.set_is_disabled(False)
         self._view.enable_all_buttons()
         self._enable_all_table_items()
         self.enable_updates()
 
     def enable_updates(self):
         """Allow update signals to be sent."""
-        self._view._updating = False
+        self._view.set_is_updating(False)
 
     def disable_updates(self):
         """Prevent update signals being sent."""
-        self._view._updating = True
+        self._view.set_is_updating(True)
 
     def num_rows(self):
         return self._view.get_pairing_table.rowCount()
@@ -338,90 +332,19 @@ class PairingTablePresenter(object):
             column_name = pair_columns[i]
 
             if column_name == "pair_name":
-                self._add_pair_name_entry(row_position, i, entry)
+                self._view.add_pair_name_entry(row_position, i, entry)
             if column_name == "group_1":
-                self._add_group_selector_entry(row_position, i, entry, group="group_1")
+                self._view.add_group_selector_entry(row_position, i, entry, group="group_1")
             if column_name == "group_2":
-                self._add_group_selector_entry(row_position, i, entry, group="group_2")
+                self._view.add_group_selector_entry(row_position, i, entry, group="group_2")
             elif column_name == "alpha":
-                self._add_alpha_entry(row_position, i, entry)
+                self._view.add_alpha_entry(row_position, i, entry)
             if column_name == "to_analyse":
-                self._add_to_analyse_checkbox(item, entry)
+                self._view.add_to_analyse_checkbox(item, entry)
             self._view.set_item_in_table(row_position, i, item)
 
         # "Guess Alpha" button in the last column
-        self._add_guess_alpha_button(row_position)
-
-    def _add_pair_name_entry(self, row, col, entry):
-        """Add a validated pair name entry."""
-        pair_name_widget = table_utils.ValidatedTableItem(self._view.validate_pair_name_entry)
-        pair_name_widget.setText(entry)
-        self._view.set_item_in_table(row, col, pair_name_widget, flags=self._view.get_default_item_flags)
-
-    def _add_group_selector_entry(self, row, col, entry, group):
-        """Add a group selector widget for group_1 or group_2."""
-        group_selector_widget = self._view.group_selection_cell_widget
-
-        if group == "group_1":
-            group_selector_widget.currentIndexChanged.connect(lambda: self._view.on_cell_changed(row, 2))
-        elif group == "group_2":
-            group_selector_widget.currentIndexChanged.connect(lambda: self._view.on_cell_changed(row, 3))
-
-        self._view.set_combo_box_index(group_selector_widget, entry)
-        self._view.set_widget_in_table(row, col, group_selector_widget)
-
-    def _add_alpha_entry(self, row, col, entry):
-        """Add an alpha entry to the table."""
-        alpha_widget = table_utils.ValidatedTableItem(self._view.validate_alpha)
-        alpha_widget.setText(entry)
-        self._view.set_item_in_table(row, col, alpha_widget)
-
-    def _add_to_analyse_checkbox(self, item, entry):
-        """Set the 'to_analyse' checkbox state."""
-        self._view.set_checkbox_in_table(item, checked=bool(entry))
-
-    def _add_guess_alpha_button(self, row):
-        """Add the 'Guess Alpha' button to the last column."""
-        guess_alpha_widget = self._view.guess_alpha_button
-        guess_alpha_widget.clicked.connect(self._view.guess_alpha_clicked_from_row)
-        self._view.set_widget_in_table(row, 5, guess_alpha_widget)
-
-    # ------------------------------------------------------------------------------------------------------------------
-    # Context Menu
-    # ------------------------------------------------------------------------------------------------------------------
-    def _context_menu_event(self, _event):
-        """Overridden method for dealing with the right-click context menu"""
-        menu = self._view.create_context_menu
-
-        add_pair_action = self._context_menu_add_pair_action(self._view.add_pair_button.clicked.emit)
-        remove_pair_action = self._context_menu_remove_pair_action(self._view.remove_pair_button.clicked.emit)
-
-        if self._view.is_disabled:
-            self._view.add_pair_action.setEnabled(False)
-            self._view.remove_pair_action.setEnabled(False)
-        # set-up the menu
-        menu.addAction(add_pair_action)
-        menu.addAction(remove_pair_action)
-        menu.popup(self._view.cursor_position)
-
-    def _context_menu_add_pair_action(self, slot):
-        add_pair_action = self._view.get_add_pair_action
-        add_pair_action.setCheckable(False)
-        if len(self.get_selected_row_indices()) > 0:
-            add_pair_action.setEnabled(False)
-        add_pair_action.triggered.connect(slot)
-        return add_pair_action
-
-    def _context_menu_remove_pair_action(self, slot):
-        if len(self.get_selected_row_indices()) > 1:
-            # use plural if >1 item selected
-            remove_pair_action = self._view.get_remove_pair_action(True)
-        else:
-            remove_pair_action = self._view.get_remove_pair_action()
-        if self._view.get_pairing_table.rowCount() == 0:
-            remove_pair_action.setEnabled(False)
-        remove_pair_action.triggered.connect(slot)
-        return remove_pair_action
+        self._view.add_guess_alpha_button(row_position)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Table entry validation
