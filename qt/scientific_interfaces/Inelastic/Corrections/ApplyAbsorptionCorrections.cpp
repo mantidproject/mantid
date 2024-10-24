@@ -36,8 +36,7 @@ namespace MantidQt::CustomInterfaces {
 ApplyAbsorptionCorrections::ApplyAbsorptionCorrections(QWidget *parent) : CorrectionsTab(parent), m_spectra(0u) {
   m_uiForm.setupUi(parent);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
-  setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface));
+  setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface);
 
   connect(m_uiForm.dsSample, &DataSelector::dataReady, this, &ApplyAbsorptionCorrections::newSample);
   connect(m_uiForm.dsContainer, &DataSelector::dataReady, this, &ApplyAbsorptionCorrections::newContainer);

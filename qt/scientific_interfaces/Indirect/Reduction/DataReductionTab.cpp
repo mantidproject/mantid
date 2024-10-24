@@ -36,8 +36,13 @@ DataReductionTab::DataReductionTab(IDataReduction *idrUI, std::unique_ptr<API::I
 
 DataReductionTab::~DataReductionTab() = default;
 
-void DataReductionTab::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
-  m_plotOptionsPresenter = std::move(presenter);
+void DataReductionTab::setOutputPlotOptionsPresenter(
+    IOutputPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
+    std::optional<std::map<std::string, std::string>> const &availableActions) {
+  auto OutputOptionsModel =
+      std::make_unique<OutputPlotOptionsModel>(std::make_unique<ExternalPlotter>(), availableActions);
+  m_plotOptionsPresenter =
+      std::make_unique<OutputPlotOptionsPresenter>(view, std::move(OutputOptionsModel), plotType, fixedIndices);
 }
 
 void DataReductionTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {

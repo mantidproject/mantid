@@ -34,8 +34,7 @@ SymmetrisePresenter::SymmetrisePresenter(QWidget *parent,
     : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)), m_isPreview(false) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
-  setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::Spectra));
+  setOutputPlotOptionsPresenter(m_view->getPlotOptions(), PlotWidget::Spectra);
 
   m_model->setIsPositiveReflect(true);
   m_view->setDefaults();

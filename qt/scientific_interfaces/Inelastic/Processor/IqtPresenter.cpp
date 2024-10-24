@@ -34,8 +34,7 @@ IqtPresenter::IqtPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgo
       m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
-  setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraTiled));
+  setOutputPlotOptionsPresenter(m_view->getPlotOptions(), PlotWidget::SpectraTiled);
   m_view->setup();
 }
 
