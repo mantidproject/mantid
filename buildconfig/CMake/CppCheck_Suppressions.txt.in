@@ -200,7 +200,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/EnabledWhen
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DetectorEfficiencyCorUser.cpp:176
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:348
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DirectILLTubeBackground.cpp:364
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EditInstrumentGeometry.cpp:273
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:97
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/DiffractionFocussing2.cpp:826
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ExportTimeSeriesLog.cpp:134
