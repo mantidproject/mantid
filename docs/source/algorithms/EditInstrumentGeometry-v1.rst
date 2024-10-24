@@ -11,9 +11,9 @@ Description
 
 This algorithm can:
 
-#. Add an Instrument to a Workspace without any real instrument associated with, or
-#. Replace a Workspace's Instrument with a new Instrument, or
-#. Edit all detectors' parameters of the instrument associated with a Workspace (partial instrument editing is not supported).
+#. Add an Instrument to a Workspace without any real instrument associated with it, or
+#. Replace a Workspace's Instrument with a new Instrument, or
+#. Edit all detector parameters of the instrument associated with a Workspace.  (Partial instrument editing is not supported.)
 
 Requirements on input properties
 --------------------------------
