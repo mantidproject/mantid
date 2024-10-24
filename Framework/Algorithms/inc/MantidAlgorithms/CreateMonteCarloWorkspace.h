@@ -24,17 +24,15 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
 
-  void afterPropertySet(const std::string &name) override;
 
 private:
   void init() override;
   void exec() override;
 
-  double calculateMean(const std::vector<int> &numbers);
-  double calculateStandardDeviation(const std::vector<int> &numbers, double mean);
-  vector<double> pdf(const std::vector<int> &num, double mean, double variance) const;
-  vector<double> kde(const vector<int> &numbers, double bandwidth) const;
-  double calculateBandwidth(const vector<int> &numbers);
+  void fillHistogramWithRandomData(auto &outputY, const std::vector<double> &cdf, int numIterations, std::mt19937 &gen);
+  vector<double> computeNormalizedCDF(const auto &yData);
+  int computeNumberOfIterations(const auto &yData);
+
 };
 
 } // namespace Algorithms
