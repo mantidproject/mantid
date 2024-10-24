@@ -206,7 +206,8 @@ epub_uid = "Mantid Reference: " + version
 
 # -- Options for selected builder output ---------------------------------------
 # Default is to use standard HTML theme unless the qthelp tag is specified
-html_theme_cfg = "conf-qthelp.py" if "qthelp" in [k.strip() for k in tags] else "conf-html.py"
+# 'tags' is a special object available in config files, which exposes the project tags
+html_theme_cfg = "conf-qthelp.py" if "qthelp" in [k.strip() for k in tags] else "conf-html.py"  # noqa: F821
 # Python 3 removed execfile...
 exec(compile(open(html_theme_cfg).read(), html_theme_cfg, "exec"))
 
