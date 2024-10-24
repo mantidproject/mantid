@@ -237,7 +237,7 @@ void FitOneSinglePeak::setupGuessedFWHM(double usrwidth, int minfwhm, int maxfwh
 void FitOneSinglePeak::setFitPeakCriteria(bool usepeakpostol, double peakpostol) {
   m_usePeakPositionTolerance = usepeakpostol;
   if (usepeakpostol) {
-    m_peakPositionTolerance = fabs(peakpostol);
+    m_peakPositionTolerance = std::abs(peakpostol);
     if (peakpostol < 1.0E-13)
       g_log.warning("Peak position tolerance is very tight. ");
   }
@@ -931,7 +931,7 @@ void FitOneSinglePeak::processNStoreFitResult(double rwp, bool storebkgd) {
     double f_centre = m_peakFunc->centre();
     if (m_usePeakPositionTolerance) {
       // Peak position criteria is on position tolerance
-      if (fabs(f_centre - m_userPeakCentre) > m_peakPositionTolerance) {
+      if (!Kernel::withinAbsoluteDifference(f_centre, m_userPeakCentre, m_peakPositionTolerance)) {
         rwp = DBL_MAX;
         failreason = "Peak centre out of tolerance. ";
         fitsuccess = false;

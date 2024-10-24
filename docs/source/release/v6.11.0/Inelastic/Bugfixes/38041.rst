@@ -1,1 +1,0 @@
-- Data unrestricted by suffix can be loaded on   :ref:`Elwin Tab <elwin>` of the :ref:`Data Processor Interface <interface-inelastic-data-processor>` if the option is selected from Settings.

@@ -13,6 +13,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -203,7 +204,7 @@ private:
   }
 };
 
-class MANTID_CRYSTAL_DLL IntegratePeakTimeSlices : public Mantid::API::Algorithm {
+class MANTID_CRYSTAL_DLL IntegratePeakTimeSlices : public Mantid::API::Algorithm, public API::DeprecatedAlgorithm {
 public:
   /// Default constructor
   IntegratePeakTimeSlices();

@@ -1,1 +1,0 @@
-- Fixed a crash on the :ref:`Inelastic Bayes Fitting <interface-inelastic-bayes-fitting>` when closing the interface while it is loading data.

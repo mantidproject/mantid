@@ -1,1 +1,0 @@
-- :ref:`SaveNexusProcessed <algm-SaveNexusProcessed>` and :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` has been fixed to correctly work with :ref:`Ragged Workspaces <Ragged_Workspace>`.

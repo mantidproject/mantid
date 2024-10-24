@@ -8,6 +8,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
@@ -118,11 +119,11 @@ Object comparision
 @param tolerance : tolerance
 */
 bool SXPeak::compare(const SXPeak &rhs, double tolerance) const {
-  if (std::abs(m_tof / m_nPixels - rhs.m_tof / rhs.m_nPixels) > tolerance * m_tof / m_nPixels)
+  if (!Kernel::withinRelativeDifference(m_tof / m_nPixels, rhs.m_tof / rhs.m_nPixels, tolerance))
     return false;
-  if (std::abs(m_phi / m_nPixels - rhs.m_phi / rhs.m_nPixels) > tolerance * m_phi / m_nPixels)
+  if (!Kernel::withinRelativeDifference(m_phi / m_nPixels, rhs.m_phi / rhs.m_nPixels, tolerance))
     return false;
-  if (std::abs(m_twoTheta / m_nPixels - rhs.m_twoTheta / rhs.m_nPixels) > tolerance * m_twoTheta / m_nPixels)
+  if (!Kernel::withinRelativeDifference(m_twoTheta / m_nPixels, rhs.m_twoTheta / rhs.m_nPixels, tolerance))
     return false;
   return true;
 }

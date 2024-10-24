@@ -1,3 +1,0 @@
-- :ref:`LoadWANDSCD <algm-LoadWANDSCD>` now keeps the sgl/sgu angles set by the goniometer
-- :ref:`ConverWANDSCDToQ <algm-ConvertWANDSCDToQ>` simplifies the underlying code by using histograms directly
-

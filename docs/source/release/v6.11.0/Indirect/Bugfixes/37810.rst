@@ -1,1 +1,0 @@
-- Fixed a bug on the Energy Transfer tab of the :ref:`Indirect Data Reduction <interface-indirect-data-reduction>` interface where the first raw file would be loaded into the ADS but never deleted.

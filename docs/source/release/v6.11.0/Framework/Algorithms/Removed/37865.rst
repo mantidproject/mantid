@@ -1,1 +1,0 @@
-- The FilterEventsByLogValuePreNexus algorithm was deprecated in 2014 and has now been removed.

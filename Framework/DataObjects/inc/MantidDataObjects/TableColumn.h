@@ -299,13 +299,14 @@ inline bool TableColumn<API::Boolean>::compareVectors(const std::vector<API::Boo
 /// Template specialisation for V3D for comparison
 template <>
 inline bool TableColumn<Kernel::V3D>::compareVectors(const std::vector<Kernel::V3D> &newVector, double tolerance,
-                                                     bool const) const {
+                                                     bool const nanEqual) const {
   for (size_t i = 0; i < m_data.size(); i++) {
-    double dif_x = fabs(m_data[i].X() - newVector[i].X());
-    double dif_y = fabs(m_data[i].Y() - newVector[i].Y());
-    double dif_z = fabs(m_data[i].Z() - newVector[i].Z());
-    if (dif_x > tolerance || dif_y > tolerance || dif_z > tolerance) {
-      return false;
+    for (std::size_t xyz = 0; xyz < m_data[i].size(); xyz++) {
+      double left = m_data[i][xyz], right = newVector[i][xyz];
+      if (nanEqual && std::isnan(left) && isnan(right))
+        continue;
+      else if (!Kernel::withinAbsoluteDifference(left, right, tolerance))
+        return false;
     }
   }
   return true;
@@ -328,22 +329,14 @@ inline bool TableColumn<API::Boolean>::compareVectorsRelError(const std::vector<
 /// Template specialisation for V3D for comparison
 template <>
 inline bool TableColumn<Kernel::V3D>::compareVectorsRelError(const std::vector<Kernel::V3D> &newVector,
-                                                             double tolerance, bool const) const {
+                                                             double tolerance, bool const nanEqual) const {
   for (size_t i = 0; i < m_data.size(); i++) {
-    double dif_x = fabs(m_data[i].X() - newVector[i].X());
-    double dif_y = fabs(m_data[i].Y() - newVector[i].Y());
-    double dif_z = fabs(m_data[i].Z() - newVector[i].Z());
-    double den_x = 0.5 * (fabs(m_data[i].X()) + fabs(newVector[i].X()));
-    double den_y = 0.5 * (fabs(m_data[i].X()) + fabs(newVector[i].X()));
-    double den_z = 0.5 * (fabs(m_data[i].X()) + fabs(newVector[i].X()));
-    if (den_x > tolerance || den_y > tolerance || den_z > tolerance) {
-      if (dif_x / den_x > tolerance || dif_y / den_y > tolerance || dif_z / den_z > tolerance) {
+    for (std::size_t xyz = 0; xyz < m_data[i].size(); xyz++) {
+      double left = m_data[i][xyz], right = newVector[i][xyz];
+      if (nanEqual && std::isnan(left) && isnan(right))
+        continue;
+      else if (!Kernel::withinRelativeDifference(m_data[i][xyz], newVector[i][xyz], tolerance))
         return false;
-      }
-    } else {
-      if (dif_x > tolerance || dif_y > tolerance || dif_z > tolerance) {
-        return false;
-      }
     }
   }
   return true;
