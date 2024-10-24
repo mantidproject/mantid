@@ -183,4 +183,3 @@ This requires one to supply an authentication token when pushing or re-type thei
 .. code-block:: sh
 
     git clone https://github.com/mantidproject/mantid.git
-

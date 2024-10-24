@@ -48,4 +48,3 @@ Review Articles / Applications
   Rev. Mod. Physics, 72, 769 (2000)
 * E. Roduner, THE POSITIVE MUON AS A PROBE IN FREE RADICAL CHEMISTRY,
   Lecture Notes in Chemistry No. 49 (Springer Verlag, Berlin 1988)
-

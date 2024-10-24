@@ -90,6 +90,3 @@ digraph Sample {
   SumOverlappingTubes -> OutputWorkspace
   Plus -> OutputWorkspace
 }
-
-
-

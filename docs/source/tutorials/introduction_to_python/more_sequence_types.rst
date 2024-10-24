@@ -177,4 +177,3 @@ Gives the output:
     6
     True
     True
-

@@ -170,4 +170,3 @@ Click on function in flat view to get more detail on the right.
 Displays details about the selected function call plus details about all
 child calls it made. The *call graph* tab at the bottom gives a nice
 graphical overview of the relative function cost.
-

@@ -154,6 +154,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-
-
-

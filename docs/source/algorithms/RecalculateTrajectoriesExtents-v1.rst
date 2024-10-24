@@ -92,4 +92,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-

@@ -11,5 +11,3 @@ This is a Python binding to the C++ class Mantid::PhysicalConstants::Atom.
     :members:
     :undoc-members:
     :inherited-members:
-
-

@@ -159,4 +159,3 @@ Further modern C++:
 -  `Lambdas <https://github.com/AnthonyCalandra/modern-cpp-features/blob/master/CPP11.md#lambda-expressions>`__
 -  `Type Aliases <https://github.com/AnthonyCalandra/modern-cpp-features/blob/master/CPP11.md#type-aliases>`__
 -  `Move Semantics/R-Value References <https://github.com/AnthonyCalandra/modern-cpp-features/blob/master/CPP11.md#move-semantics>`__
-

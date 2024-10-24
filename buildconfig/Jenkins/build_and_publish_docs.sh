@@ -57,4 +57,3 @@ git config user.email ${GIT_USER_EMAIL}
 git add .
 git commit -m "Publish nightly documentation" || exit 0
 git push https://${GITHUB_ACCESS_TOKEN}@github.com/mantidproject/docs-nightly main
-

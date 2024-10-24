@@ -12,4 +12,3 @@ This is a Python binding to the C++ class Mantid::DataObjects::OffsetsWorkspace.
     :members:
     :undoc-members:
     :inherited-members:
-
