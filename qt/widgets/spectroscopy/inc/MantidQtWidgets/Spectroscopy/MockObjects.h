@@ -223,7 +223,6 @@ public:
   MOCK_CONST_METHOD0(getSubscriberName, const std::string());
 };
 
-
 class MockOutputNameView : public IOutputNameView {
 public:
   virtual ~MockOutputNameView() = default;
