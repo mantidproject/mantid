@@ -26,10 +26,6 @@ CorrectionsTab::CorrectionsTab(QWidget *parent) : InelasticTab(parent), m_dblEdF
   m_blnEdFac = new QtCheckBoxFactory(this);
 }
 
-void CorrectionsTab::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
-  m_plotOptionsPresenter = std::move(presenter);
-}
-
 void CorrectionsTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }

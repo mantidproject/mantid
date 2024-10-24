@@ -27,8 +27,7 @@ enum class DensityOfStates::InputFormat : int { Unsupported = 0, Phonon, Castep,
 DensityOfStates::DensityOfStates(QWidget *parent) : SimulationTab(parent) {
   m_uiForm.setupUi(parent);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
-  setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra));
+  setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::Spectra);
 
   connect(m_uiForm.mwInputFile, SIGNAL(filesFound()), this, SLOT(handleFileChange()));
 

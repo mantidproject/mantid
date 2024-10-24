@@ -39,7 +39,6 @@ class DataReduction;
 class MANTIDQT_INELASTIC_DLL IDataProcessor {
 public:
   virtual ~IDataProcessor() = default;
-  virtual void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter>) = 0;
   virtual void clearOutputPlotOptionsWorkspaces() = 0;
   virtual void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) = 0;
   virtual void filterInputData(bool filter) = 0;
@@ -60,8 +59,6 @@ class MANTIDQT_INELASTIC_DLL DataProcessor : public IDataProcessor,
 public:
   DataProcessor(QObject *parent = nullptr, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner = nullptr);
   ~DataProcessor() override = default;
-  /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) override;
   /// Overridden from IAlgorithmRunnerSubscriber: Notifies when a batch of algorithms is completed
   void notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) override;
 
@@ -88,7 +85,6 @@ protected:
 private:
   virtual void setFileExtensionsByName(bool filter) { (void)filter; };
   virtual void setLoadHistory(bool doLoadHistory) { (void)doLoadHistory; }
-  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

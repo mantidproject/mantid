@@ -51,8 +51,6 @@ public:
   DataReductionTab(IDataReduction *idrUI, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner);
   ~DataReductionTab() override;
 
-  /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
   /// Set the active workspaces used in the plotting options
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
 
@@ -86,7 +84,6 @@ protected:
 protected:
   IDataReduction *m_idrUI;
   std::unique_ptr<API::IAlgorithmRunner> m_algorithmRunner;
-  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 
 private slots:
   void handleNewInstrumentConfiguration();
