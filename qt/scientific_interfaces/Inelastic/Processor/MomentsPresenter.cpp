@@ -21,6 +21,10 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
+namespace {
+auto &ads = AnalysisDataService::Instance();
+}
+
 namespace MantidQt::CustomInterfaces {
 
 //----------------------------------------------------------------------------------------------
@@ -95,19 +99,20 @@ void MomentsPresenter::handleValueChanged(std::string const &propName, double va
  *
  * @param error True if the algorithm exited due to error, false otherwise
  */
-void MomentsPresenter::runComplete(bool error) {
+void MomentsPresenter::runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) {
   if (error)
     return;
-  MatrixWorkspace_sptr outputWorkspace =
-      AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_model->getOutputWorkspace());
 
+  // Explicitly provide return type. Return type must be the same as the input property type to allow type casting
+  MatrixWorkspace_sptr outputWorkspace = algorithm->getProperty("OutputWorkspace");
   if (outputWorkspace->getNumberHistograms() < 5)
     return;
 
-  setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
+  m_view->plotOutput(outputWorkspace);
 
-  m_view->plotOutput(m_model->getOutputWorkspace());
-  m_view->getPlotOptions()->setIndicesLineEditEnabled(true);
+  auto const outputName = m_model->getOutputWorkspace();
+  ads.addOrReplace(outputName, outputWorkspace);
+  setOutputPlotOptionsWorkspaces({outputName});
 }
 
 void MomentsPresenter::setFileExtensionsByName(bool filter) {
