@@ -314,9 +314,6 @@ class BASISPowderDiffraction(DataProcessorAlgorithm):
         # Find desired Q-binning
         #
         self._qbins = np.array(self.getProperty("MomentumTransferBins").value)
-        #
-        # implement with ContextDecorator after python2 is deprecated)
-        #
         remove_temp = self.getProperty("RemoveTemporaryWorkspaces").value
         with pyexec_setup(remove_temp, config_new_options) as self._temps:
             #

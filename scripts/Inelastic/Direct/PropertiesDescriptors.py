@@ -285,11 +285,7 @@ class IncidentEnergy(PropDescriptor):
 
     #
 
-    # Python 3 compatibility
     def __next__(self):
-        return self.next()
-
-    def next(self):
         if isinstance(self._incident_energy, list):
             self._cur_iter_en += 1
             if self._cur_iter_en >= len(self._incident_energy):

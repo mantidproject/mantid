@@ -8,7 +8,6 @@ import math
 import os
 import re
 from collections import defaultdict
-from string import Formatter
 
 from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, WorkspaceGroupProperty
 from mantid.kernel import logger, Direction, IntArrayProperty
@@ -115,9 +114,7 @@ class SaveGEMMAUDParamFile(PythonAlgorithm):
         output_params["bank_ids"] = "\n".join("Bank{}".format(i + 1) for i in range(num_banks))
 
         with open(self.getProperty(self.PROP_OUTPUT_FILE).value, "w") as output_file:
-            # Note, once we've got rid of Python 2 support this can be simplified to
-            # template.format_map(**defaultdict(create_empty_param_list, output_params))
-            output_file.write(Formatter().vformat(template, (), defaultdict(create_empty_param_list, output_params)))
+            output_file.write(template.format_map(defaultdict(create_empty_param_list, output_params)))
 
     def validateInputs(self):
         issues = {}

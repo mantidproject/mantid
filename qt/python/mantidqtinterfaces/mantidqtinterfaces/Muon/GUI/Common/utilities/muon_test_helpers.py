@@ -29,6 +29,3 @@ class IteratorWithException:
         else:
             self.n += 1
             return next(self.iterable)
-
-    # python 3 compatibility
-    next = __next__
