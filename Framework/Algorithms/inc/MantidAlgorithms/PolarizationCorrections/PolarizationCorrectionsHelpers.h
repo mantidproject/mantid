@@ -49,4 +49,14 @@ auto constexpr MINUS = "-";
 auto constexpr PLUS = "+";
 } // namespace SpinStateConfigurationsWildes
 
+namespace SpinStatesORSO {
+// Values used by the Reflectometry ORSO file format to refer to polarization spin states
+auto constexpr PP = "pp";
+auto constexpr PM = "pm";
+auto constexpr MP = "mp";
+auto constexpr MM = "mm";
+auto constexpr PO = "po";
+auto constexpr MO = "mo";
+} // namespace SpinStatesORSO
+
 } // namespace Mantid::Algorithms
