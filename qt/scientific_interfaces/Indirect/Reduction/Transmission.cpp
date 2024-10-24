@@ -31,8 +31,7 @@ namespace MantidQt::CustomInterfaces {
 Transmission::Transmission(IDataReduction *idrUI, QWidget *parent) : DataReductionTab(idrUI, parent) {
   m_uiForm.setupUi(parent);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
-  setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::Spectra, "0-2"));
+  setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::Spectra, "0-2");
 
   // Update the preview plot when the algorithm is complete
   connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &Transmission::transAlgDone);
