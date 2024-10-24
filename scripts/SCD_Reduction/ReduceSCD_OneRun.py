@@ -367,9 +367,6 @@ elif use_cylindrical_integration:
         IntegrateIfOnEdge=integrate_if_edge_peak,
         Cylinder=use_cylindrical_integration,
         CylinderLength=cylinder_length,
-        PercentBackground=cylinder_percent_bkg,
-        IntegrationOption=cylinder_int_option,
-        ProfileFunction=cylinder_profile_fit,
     )
 
 elif use_fit_peaks_integration:

@@ -329,7 +329,7 @@ def correct_tube_to_ideal_tube(
     # Check the arguments
     if len(tube_points) != len(ideal_tube_points):
         print("Number of points in tube {0} must equal number of points in ideal tube {1}".format(len(tube_points), len(ideal_tube_points)))
-        return x_result
+        return numpy.empty(n_detectors)
 
     # Filter out rogue slit points
     used_tube_points = []

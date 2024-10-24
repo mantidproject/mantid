@@ -2328,6 +2328,7 @@ def ConvertToSpecList(maskstring, firstspec, dimension, orientation):
             elif "v" in bigPieces[0] and "h" in bigPieces[1]:
                 xdim = abs(upp - low) + 1
                 ydim = abs(upp2 - low2) + 1
+                nstrips = abs(upp - low) + 1
                 speclist += spectrumBlock(firstspec, low2, low, nstrips, dimension, dimension, orientation) + ","
             else:
                 print("error in mask, ignored:  " + x)

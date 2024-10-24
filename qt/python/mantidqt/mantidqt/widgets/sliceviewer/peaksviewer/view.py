@@ -16,7 +16,11 @@ from .representation.painter import MplPainter
 from .actions import PeakActionsView
 
 # standard
-from typing import Optional
+from typing import Annotated, Optional, TypeAlias
+
+# Forward declarations
+PeaksViewerPresenter: TypeAlias = Annotated[type, "PeaksViewerPresenter"]
+SliceViewer: TypeAlias = Annotated[type, "SliceViewer"]
 
 
 class _LessThanOperatorSortFilterModel(QSortFilterProxyModel):
@@ -88,7 +92,7 @@ class PeaksViewerView(QWidget):
 
     TITLE_PREFIX = "Workspace: "
 
-    def __init__(self, painter: MplPainter, sliceinfo_provider: "SliceViewer", parent=None):
+    def __init__(self, painter: MplPainter, sliceinfo_provider: SliceViewer, parent=None):
         """
         :param painter: An object responsible for draw the peaks representations
         :param sliceinfo_provider: An object responsible for providing access to current slice information
@@ -96,9 +100,9 @@ class PeaksViewerView(QWidget):
         """
         super().__init__(parent)
         self._painter: MplPainter = painter
-        self._sliceinfo_provider: "SliceViewer" = sliceinfo_provider
+        self._sliceinfo_provider: SliceViewer = sliceinfo_provider
         self._group_box: Optional[QGroupBox] = None
-        self._presenter: Optional["PeaksViewerPresenter"] = None  # handle to its presenter
+        self._presenter: Optional[PeaksViewerPresenter] = None  # handle to its presenter
         self._table_view: Optional[_PeaksWorkspaceTableView] = None
         self._concise_check_box: Optional[QCheckBox] = None
         self._setup_ui()

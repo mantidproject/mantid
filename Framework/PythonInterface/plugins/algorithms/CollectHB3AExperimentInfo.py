@@ -352,7 +352,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
         numrows = spicetablews.rowCount()
         for irow in range(numrows):
-            pt = spicetablews.cell(irow, iColPt)
+            pt = spicetablews.cell(irow, 1)
             ptlist.append(pt)
 
         return ptlist

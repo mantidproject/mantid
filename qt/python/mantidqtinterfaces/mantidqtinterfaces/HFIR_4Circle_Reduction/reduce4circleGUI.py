@@ -55,8 +55,6 @@ except ImportError:
     from mantidplot import load_ui
 from qtpy.QtWidgets import QVBoxLayout
 
-SCROLL_AVAILABLE = False
-
 unicode = str
 
 # define constants
@@ -95,11 +93,6 @@ class MainWindow(QMainWindow):
         self._dataDownloadDialog = None
         self._single_pt_peak_integration_window = None
         self._general_1d_plot_window = None
-
-        # Make UI scrollable
-        if SCROLL_AVAILABLE:
-            self._scrollbars = MantidQt.API.WidgetScrollbarDecorator(self)
-            self._scrollbars.setEnabled(True)  # Must follow after setupUi(self)!
 
         self._init_widgets()
 

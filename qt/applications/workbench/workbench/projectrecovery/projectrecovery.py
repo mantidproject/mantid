@@ -257,10 +257,9 @@ class ProjectRecovery(object):
                 return True
         return False
 
-    @staticmethod
-    def _has_child_workbench_process(proc):
+    def _has_child_workbench_process(self, proc):
         for child in proc.children(recursive=True):
-            if _is_mantid_workbench_process(child.cmdline()):
+            if self._is_mantid_workbench_process(child.cmdline()):
                 return True
         return False
 

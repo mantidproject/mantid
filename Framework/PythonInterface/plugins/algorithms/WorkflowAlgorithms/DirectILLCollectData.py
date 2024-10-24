@@ -45,7 +45,6 @@ from mantid.simpleapi import (
     GetEiMonDet,
     GroupDetectors,
     LoadAndMerge,
-    LoadEmptyInstrument,
     Minus,
     mtd,
     NormaliseToMonitor,
@@ -198,32 +197,6 @@ def _monitorCounts(ws):
         return logs.getProperty("monitor1.monsum").value
     else:
         return logs.getProperty("monitor.monsum").value
-
-
-def _get_instrument_structure(ws):
-    """Returns the number of detectors and the number of detectors per tube in the currently processed
-    instrument."""
-    instrument = ws.getInstrument().getName()
-    if instrument in ["IN4", "IN6"]:
-        self.log().warning("Grouping pattern cannot be provided for IN4 and IN6.")
-        return ""
-    tmp_inst = "{}_tmp".format(instrument)
-    LoadEmptyInstrument(InstrumentName=instrument, OutputWorkspace=tmp_inst)
-    tmp_mon_inst = "mon_{}".format(tmp_inst)
-    ExtractMonitors(InputWorkspace=tmp_inst, DetectorWorkspace=tmp_inst, MonitorWorkspace=tmp_mon_inst)
-    n_monitors = mtd[tmp_mon_inst].getNumberHistograms()
-    n_tubes = 0
-    for comp in mtd[tmp_inst].componentInfo():
-        if len(comp.detectorsInSubtree) > 1 and comp.hasParent:
-            n_tubes += 1
-    n_tubes -= n_monitors
-    if instrument == "IN5":  # there is an extra bank that contains all of the tubes
-        n_tubes -= 1
-    n_pixels = mtd[tmp_inst].getNumberHistograms()
-    n_pixels_per_tube = int(n_pixels / n_tubes)
-    DeleteWorkspace(Workspace=tmp_inst)
-    DeleteWorkspace(Workspace=tmp_mon_inst)
-    return n_pixels, n_pixels_per_tube
 
 
 def _normalizeToMonitor(ws, monWS, monIndex, integrationBegin, integrationEnd, wsNames, wsCleanup, algorithmLogging):

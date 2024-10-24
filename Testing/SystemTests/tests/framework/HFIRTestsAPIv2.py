@@ -1276,34 +1276,6 @@ class HFIRTestsAPIv2(systemtesting.MantidSystemTest):
         delta = reduce(_add, deltas) / len(deltas)
         self.assertLess(math.fabs(delta), 0.00001)
 
-    def test_SampleGeometry_functions(self):
-        print("SKIPPING test_SampleGeometry_functions()")
-        return
-        # pylint: disable=unreachable
-        GPSANS()
-        SetSampleDetectorDistance(6000)
-        DataPath(self._work_dir)
-        AppendDataFile("BioSANS_test_data.xml")
-        SampleGeometry("cuboid")
-        SampleThickness(2.0)
-        SampleHeight(3.0)
-        SampleWidth(5.0)
-
-        # we don't need to do a full reduction for this test, do a partial
-        # reduction
-        ReductionSingleton().pre_process()
-        ReductionSingleton()._reduction_steps[0].execute(ReductionSingleton(), "BioSANS_test_data")
-        ReductionSingleton().geometry_correcter.execute(ReductionSingleton(), "BioSANS_test_data")
-
-        ws = AnalysisDataService.retrieve("BioSANS_test_data")
-        data = [ws.dataY(0)[0], ws.dataY(1)[0], ws.dataY(2)[0], ws.dataY(3)[0], ws.dataY(4)[0], ws.dataY(5)[0]]
-
-        check = [500091.0, 60.0, 40.8333, 13.6333, 13.4667, 13.6667]
-        # Check that I(q) is the same for both data sets
-        deltas = list(map(_diff_iq, data, check))
-        delta = reduce(_add, deltas) / len(deltas)
-        self.assertLess(math.fabs(delta), 0.1)
-
     def test_noDC_eff_with_DC(self):
         ref = [
             28.06525,

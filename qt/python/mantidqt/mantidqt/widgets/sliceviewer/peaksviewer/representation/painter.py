@@ -11,11 +11,15 @@ from matplotlib.path import Path
 from matplotlib.patches import Circle, Ellipse, Patch, PathPatch, Wedge
 from matplotlib.transforms import Affine2D, IdentityTransform
 import numpy as np
+from typing import Annotated, TypeAlias
 
 # Pad the zoom view by this extra fraction of the view width
 ZOOM_PAD_FRAC = 0.2
 # Minimum padding in case the view width is very small. This is quite arbitrary.
 MIN_PAD = 0.05
+
+# Forward declarations
+SliceViewerDataView: TypeAlias = Annotated[type, "SliceViewerDataView"]
 
 
 class EllipticalShell(Patch):
@@ -86,7 +90,7 @@ class MplPainter:
     Implementation of a PeakPainter that uses matplotlib to draw
     """
 
-    def __init__(self, view: "SliceViewerDataView"):
+    def __init__(self, view: SliceViewerDataView):
         """
         :param view: An object defining an axes property.
         """
