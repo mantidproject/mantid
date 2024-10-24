@@ -98,4 +98,3 @@ Note that when a data file is loaded using the GUI, the default option for the M
 What has happened? (reloading the data file might be needed to observe the changes.)
 
 4. Try creating a pair called `sample_long` as described in :ref:`the_tabs_grouping` and using `Guess Alpha` with this group highlighted rather than `long`. Consider the changes that can be observed.
-

@@ -92,4 +92,3 @@ Other fixes
    `Re#15182 <https://github.com/mantidproject/mantid/issues/15182>`_
 
 `Full list of changes on github <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.6%22+is%3Amerged+label%3A%22Component%3A+Direct+Inelastic%22>`_
-

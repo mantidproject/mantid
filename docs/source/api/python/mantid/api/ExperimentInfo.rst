@@ -11,4 +11,3 @@ This is a Python binding to the C++ class Mantid::API::ExperimentInfo.
     :members:
     :undoc-members:
     :inherited-members:
-

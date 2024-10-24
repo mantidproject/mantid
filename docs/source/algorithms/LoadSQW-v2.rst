@@ -173,4 +173,3 @@ The following assumptions are made about data contained within the file.
 .. categories::
 
 .. sourcelink::
-

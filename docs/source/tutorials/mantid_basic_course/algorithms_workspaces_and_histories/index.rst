@@ -26,4 +26,3 @@ The word Algorithm comes from the Latinised name of a Persian mathematician name
 * :ref:`04_algorithm_histories`
 * :ref:`05_interfaces`
 * :ref:`06_exercises_a`
-

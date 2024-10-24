@@ -16,7 +16,3 @@ Muon Training
    the_tabs_results
    data_fitting
    references
-
-
-
-

@@ -8,4 +8,3 @@
 
 .. automodule:: mantid.kernel.AmendConfig
    :members:
-

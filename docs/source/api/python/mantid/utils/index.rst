@@ -69,5 +69,3 @@ can be called from different algorithms.
         element_size=2,      # integration element cube in mm
         cache_dir="/tmp",    # cache diretory for speeding up repeated calculation
         )
-
-

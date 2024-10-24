@@ -14,4 +14,3 @@ This is a Python binding to the C++ class Mantid::Kernel::IntListValidator.
     :members:
     :undoc-members:
     :inherited-members:
-

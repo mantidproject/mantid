@@ -70,5 +70,3 @@ MantidWorkbench allows a cancellation request to be sent to a running
 algorithm. An algorithm must be coded to stop itself if a request has been
 made. This comes for **free** if you implement progress reporting as each
 report call checks whether it should be be cancelled and stops if it should.
-
-

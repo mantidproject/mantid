@@ -206,4 +206,3 @@ Save Options
 |                          | `sans.isis_sans.plotResults=On` in your mantid.user.properties, see                     |
 |                          | :ref:`Properties File` for more information                                             |
 +--------------------------+-----------------------------------------------------------------------------------------+
-

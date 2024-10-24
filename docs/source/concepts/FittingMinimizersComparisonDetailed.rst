@@ -110,4 +110,3 @@ Run time for individual Neutron Data problems
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. include:: minimizers_comparison/v3.8.0/comparison_unweighted_v3.8_runtime_neutron_data.txt
-

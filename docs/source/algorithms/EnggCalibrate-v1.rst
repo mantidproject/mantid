@@ -90,4 +90,3 @@ Output:
 .. testoutput:: ExampleCalib
 
    The output table has 1 row(s)
-
