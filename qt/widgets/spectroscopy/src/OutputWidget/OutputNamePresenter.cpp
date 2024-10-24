@@ -8,6 +8,8 @@
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputNamePresenter.h"
 
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
+
+#include <iostream>
 #include <string>
 
 namespace {
@@ -31,7 +33,7 @@ void OutputNamePresenter::setOutputWsBasename(std::string const &outputBasename,
 int OutputNamePresenter::findIndexToInsertLabel(std::string const &outputBasename) {
   int maxPos = -1;
   for (auto const &suffix : m_suffixes) {
-    int pos = outputBasename.rfind(suffix);
+    auto pos = static_cast<int>(outputBasename.rfind(suffix));
     maxPos = pos >= maxPos ? pos : maxPos;
   }
   return (m_suffixes.empty() || (maxPos == -1)) ? static_cast<int>(outputBasename.length()) : maxPos;
