@@ -50,7 +50,7 @@ public:
   virtual void handleRunsFound() = 0;
 
   /// When directory contents change, set flag
-  virtual void updateDirectoryChangedFlag() = 0;
+  virtual void setDirectoryChanged(bool hasDirectoryChanged) = 0;
 
   /// Handle a user requests to see the period info widget
   virtual void handlePeriodInfoClicked() = 0;
@@ -58,7 +58,7 @@ public:
   /// Handle timer event that checks directory for new files added
   virtual void handleTimerEvent() = 0;
 
-  virtual void handleStartWatching(bool watch) = 0;
+  virtual void handleWatcherStopped() = 0;
 };
 
 } // namespace CustomInterfaces

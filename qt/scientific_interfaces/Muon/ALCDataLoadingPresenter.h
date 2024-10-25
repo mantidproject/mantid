@@ -61,7 +61,7 @@ public:
   void handleRunsFound() override;
 
   /// When directory contents change, set flag
-  void updateDirectoryChangedFlag() override;
+  void setDirectoryChanged(bool hasDirectoryChanged) override;
 
   /// Handle a user requests to see the period info widget
   void handlePeriodInfoClicked() override;
@@ -69,7 +69,7 @@ public:
   /// Handle timer event that checks directory for new files added
   void handleTimerEvent() override;
 
-  void handleStartWatching(bool watch) override;
+  void handleWatcherStopped() override;
 
 private:
   /// Load new data and update the view accordingly
@@ -83,21 +83,6 @@ private:
 
   // Model
   std::unique_ptr<ALCDataLoadingModel> const m_model;
-
-  /// Flag for changes in watched directory
-  std::atomic_bool m_directoryChanged;
-
-  /// Last run loaded by auto
-  int m_lastRunLoadedAuto;
-
-  /// Files that are loaded
-  std::vector<std::string> m_filesLoaded;
-
-  /// Last run added by auto was addes as range
-  std::atomic_bool m_wasLastAutoRange;
-
-  /// Previous first run number (INSTNAMERUNNUMBER)
-  std::string m_previousFirstRun;
 };
 
 } // namespace CustomInterfaces

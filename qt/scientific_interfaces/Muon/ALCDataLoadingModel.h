@@ -37,6 +37,11 @@ public:
   int extractRunNumber(const std::string &file);
   std::string getPathFromFiles(std::vector<std::string> files) const;
   bool checkCustomGrouping(std::string detGroupingType, std::string forwardGrouping, std::string backwardGrouping);
+  void updateAutoLoadCancelled();
+  bool loadFilesFromWatchingDirectory(std::string firstFile, std::vector<std::string> files, std::string runsText);
+  void setDirectoryChanged(bool hasDirectoryChanged);
+  std::string getRunsText();
+  std::vector<std::string> getFilesLoaded();
 
 private:
   std::string isCustomGroupingValid(const std::string &group, bool &isValid);
@@ -65,13 +70,11 @@ private:
   /// Last run added by auto was addes as range
   std::atomic_bool m_wasLastAutoRange;
 
-  /// Previous first run number (INSTNAMERUNNUMBER)
-  std::string m_previousFirstRun;
-
   /// Variables using to update available info
   Mantid::API::MatrixWorkspace_sptr m_wsForInfo;
   std::vector<std::string> m_periods;
   std::vector<std::string> m_logs;
   double m_minTime;
+  std::string m_runsText;
 };
 } // namespace MantidQt::CustomInterfaces

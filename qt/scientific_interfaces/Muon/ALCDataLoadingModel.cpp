@@ -6,19 +6,17 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "ALCDataLoadingModel.h"
+#include "ALCLatestFileFinder.h"
 #include "IALCDataLoadingView.h"
+#include "MuonAnalysisHelper.h"
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Strings.h"
-#include "MuonAnalysisHelper.h"
-#include <algorithm>
-// #include "MantidGeometry/Instrument.h"
-// #include "MantidKernel/InstrumentInfo.h"
-// #include "MantidKernel/Strings.h"
 
 #include <Poco/ActiveResult.h>
+#include <algorithm>
 
 namespace {
 bool is_decimal(const char character) { return character == '.'; }
@@ -30,7 +28,7 @@ namespace MantidQt::CustomInterfaces {
 
 ALCDataLoadingModel::ALCDataLoadingModel()
     : m_numDetectors(0), m_loadingData(false), m_directoryChanged(false), m_lastRunLoadedAuto(-2), m_filesLoaded(),
-      m_wasLastAutoRange(false), m_previousFirstRun("") {}
+      m_wasLastAutoRange(false) {}
 
 void ALCDataLoadingModel::setLoadingData(bool isLoading) { m_loadingData = isLoading; }
 bool ALCDataLoadingModel::getLoadingData() { return m_loadingData; }
@@ -123,6 +121,7 @@ void ALCDataLoadingModel::load(const std::vector<std::string> &files, const IALC
   } else {
     assert(m_loadedData->getNumberHistograms() == 4);
   }
+  m_filesLoaded = files;
 }
 
 void ALCDataLoadingModel::cancelLoading() const { m_LoadingAlg->cancel(); }
@@ -269,4 +268,75 @@ std::string ALCDataLoadingModel::isCustomGroupingValid(const std::string &group,
   }
   return group;
 }
+
+void ALCDataLoadingModel::updateAutoLoadCancelled() {
+  m_lastRunLoadedAuto = -2; // Ensures negative if +1 to not be valid
+  m_wasLastAutoRange = false;
+}
+
+std::string ALCDataLoadingModel::getRunsText() { return m_runsText; }
+
+void ALCDataLoadingModel::setDirectoryChanged(bool hasDirectoryChanged) { m_directoryChanged = hasDirectoryChanged; }
+
+std::vector<std::string> ALCDataLoadingModel::getFilesLoaded() { return m_filesLoaded; }
+
+/**
+ * This timer runs every second when we are watching a directory.
+ * If any changes have occurred in the meantime, reload.
+ */
+bool ALCDataLoadingModel::loadFilesFromWatchingDirectory(std::string firstFile, std::vector<std::string> files,
+                                                         std::string runsText) {
+
+  // Check if there are changes to watched directory
+  if (m_directoryChanged.load()) {
+    // Need to add most recent file to add to list
+    ALCLatestFileFinder finder(firstFile);
+    const auto latestFile = finder.getMostRecentFile();
+
+    // Check if file found
+    if (latestFile.empty()) {
+      // Could not find file this time, but don't reset directory changed flag
+      return false;
+    }
+    // If not currently loading load new files
+    if (!m_loadingData) {
+      // add to list set text with search
+      const auto oldRuns = files;
+      if (std::find(oldRuns.begin(), oldRuns.end(), latestFile) == oldRuns.end()) {
+        // Get old text
+        auto newText = runsText;
+
+        // Extract run number from latest file
+        auto runNumber = extractRunNumber(latestFile);
+
+        // If new run number is less then error
+        if (runNumber <= m_lastRunLoadedAuto) {
+          // Is error but continue to watch
+          return false;
+        } else if (m_lastRunLoadedAuto + 1 == runNumber) {
+          // Add as range
+          // Check if last added was a range
+          if (m_wasLastAutoRange.load()) {
+            // Remove last run number from text
+            newText = newText.substr(0, newText.find_last_of('-'));
+          }
+          newText += "-" + std::to_string(runNumber);
+          m_wasLastAutoRange = true;
+        } else {
+          // Add as comma
+          newText += "," + std::to_string(runNumber);
+          m_wasLastAutoRange = false;
+        }
+        m_filesLoaded.push_back(latestFile);
+        m_lastRunLoadedAuto = runNumber;
+        m_runsText = newText;
+        m_directoryChanged = false;
+        return true;
+      }
+      m_directoryChanged = false;
+    }
+  }
+  return false;
+}
+
 } // namespace MantidQt::CustomInterfaces

@@ -86,7 +86,7 @@ void ALCDataLoadingView::initialize() {
 
   // Watcher to check if directory to load data from changes
   // Need to connect using function pointers because directoryChanged() is somehow not recognised as a signal
-  connect(m_watcher, &QFileSystemWatcher::directoryChanged, [this]() { m_presenter->updateDirectoryChangedFlag(); });
+  connect(m_watcher, &QFileSystemWatcher::directoryChanged, [this]() { m_presenter->setDirectoryChanged(true); });
 
   // Timer to send timeout() signal intermitently
   connect(m_timer, SIGNAL(timeout()), this, SLOT(notifyTimerEvent()));
@@ -389,12 +389,12 @@ void ALCDataLoadingView::runsAutoAddToggled(bool on) {
     m_ui.runs->setReadOnly(true);
     m_ui.load->setEnabled(false);
     setLoadStatus("Auto Add", "orange");
-    m_presenter->handleStartWatching(true);
+    handleStartWatching(true);
   } else {
     m_ui.runs->setReadOnly(false);
     m_ui.load->setEnabled(true);
     setLoadStatus("Waiting", "orange");
-    m_presenter->handleStartWatching(false);
+    handleStartWatching(false);
   }
 }
 
@@ -445,6 +445,24 @@ QFileSystemWatcher *ALCDataLoadingView::getFileSystemWatcher() { return m_watche
 
 QTimer *ALCDataLoadingView::getTimer() { return m_timer; }
 
+void ALCDataLoadingView::handleStartWatching(bool watch) {
+  if (watch) {
+    // Get path to watch and add to watcher
+    const auto path = getPath();
+    m_watcher->addPath(QString::fromStdString(path));
+    // start a timer that executes every second
+    getTimer()->start(1000);
+  } else {
+    // Check if watcher has a directory, then remove all
+    if (!m_watcher->directories().empty()) {
+      m_watcher->removePaths(m_watcher->directories());
+    }
+    // Stop timer
+    getTimer()->stop();
+
+    m_presenter->handleWatcherStopped();
+  }
+}
 // Slots for calling presenter to handle different events
 
 void ALCDataLoadingView::notifyLoadClicked() { m_presenter->handleLoadRequested(); }
