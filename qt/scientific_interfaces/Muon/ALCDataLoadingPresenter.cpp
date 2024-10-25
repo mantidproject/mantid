@@ -7,22 +7,18 @@
 #include "ALCDataLoadingPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/Strings.h"
 
 #include "ALCLatestFileFinder.h"
 
 #include "Poco/File.h"
 #include <Poco/ActiveResult.h>
 #include <Poco/Path.h>
-#include <algorithm>
 #include <sstream>
 
 namespace {
 const int RUNS_WARNING_LIMIT = 200;
 // must include the "."
 const std::vector<std::string> ADDITIONAL_EXTENSIONS{".nxs", ".nxs_v2", ".bin"};
-
-bool is_decimal(const char character) { return character == '.'; }
 } // namespace
 
 using namespace Mantid::Kernel;
@@ -130,7 +126,8 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
   m_view->disableAll();
 
   // Before loading, check custom grouping (if used) is sensible
-  const bool groupingOK = checkCustomGrouping();
+  const bool groupingOK = m_model->checkCustomGrouping(m_view->detectorGroupingType(), m_view->getForwardGrouping(),
+                                                       m_view->getBackwardGrouping());
   if (!groupingOK) {
     throw std::runtime_error("Custom grouping not valid (bad format or detector numbers)");
   }
@@ -194,44 +191,6 @@ void ALCDataLoadingPresenter::setData(const MatrixWorkspace_sptr &data) {
   }
 }
 
-/**
- * If custom grouping is supplied, check all detector numbers are valid
- * @returns :: True if grouping OK, false if bad
- */
-bool ALCDataLoadingPresenter::checkCustomGrouping() {
-  bool groupingOK = true;
-  if (m_view->detectorGroupingType() == "Custom") {
-    auto detectors =
-        Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(m_view->getForwardGrouping(), groupingOK));
-    const auto backward =
-        Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(m_view->getBackwardGrouping(), groupingOK));
-    if (!groupingOK) {
-      return false;
-    }
-    detectors.insert(detectors.end(), backward.begin(), backward.end());
-    if (std::any_of(detectors.cbegin(), detectors.cend(),
-                    [this](const auto det) { return det < 0 || det > static_cast<int>(m_model->getNumDetectors()); })) {
-      groupingOK = false;
-    }
-  }
-  return groupingOK;
-}
-/**
- * Check basic group string is valid
- * i.e. does not contain letters or start with , or -
- * @param group :: the string of the grouping
- * @param isValid :: bool to say if the string is valid
- * @returns :: True if grouping OK, false if bad
- */
-std::string ALCDataLoadingPresenter::isCustomGroupingValid(const std::string &group, bool &isValid) {
-  if (!std::isdigit(static_cast<unsigned char>(group[0])) ||
-      std::any_of(std::begin(group), std::end(group), ::isalpha) ||
-      std::any_of(std::begin(group), std::end(group), is_decimal)) {
-    isValid = false;
-    return "";
-  }
-  return group;
-}
 /**
  * If currently loading data
  * @returns :: True if currently in load() method
