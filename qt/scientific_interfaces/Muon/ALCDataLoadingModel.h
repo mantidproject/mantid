@@ -25,8 +25,16 @@ public:
   void setLoadingData(bool isLoading);
   bool getLoadingData();
   void setLoadedData(const Mantid::API::MatrixWorkspace_sptr &data);
+  size_t getNumDetectors() const;
   Mantid::API::MatrixWorkspace_sptr getLoadedData();
   Mantid::API::MatrixWorkspace_sptr exportWorkspace();
+  void setWsForMuonInfo(const std::string &filename);
+  void setLogs(Mantid::API::MatrixWorkspace_sptr);
+  void setPeriods(Mantid::API::Workspace_sptr);
+  std::vector<std::string> getLogs();
+  std::vector<std::string> getPeriods();
+  Mantid::API::MatrixWorkspace_sptr getWsForMuonInfo();
+  double getMinTime();
 
 private:
   /// Last loaded data workspace
@@ -55,5 +63,11 @@ private:
 
   /// Previous first run number (INSTNAMERUNNUMBER)
   std::string m_previousFirstRun;
+
+  /// Variables using to update available info
+  Mantid::API::MatrixWorkspace_sptr m_wsForInfo;
+  std::vector<std::string> m_periods;
+  std::vector<std::string> m_logs;
+  double m_minTime;
 };
 } // namespace MantidQt::CustomInterfaces
