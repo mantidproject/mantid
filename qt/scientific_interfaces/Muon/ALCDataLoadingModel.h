@@ -35,6 +35,7 @@ public:
   std::vector<std::string> getPeriods();
   Mantid::API::MatrixWorkspace_sptr getWsForMuonInfo();
   double getMinTime();
+  int extractRunNumber(const std::string &file);
 
 private:
   /// Last loaded data workspace

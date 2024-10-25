@@ -193,4 +193,26 @@ void ALCDataLoadingModel::setPeriods(Workspace_sptr loadedWs) {
   }
   m_periods = periods;
 }
+
+/**
+ * Remove the run number from a full file path
+ * @param file :: [input] full path which contains a run number
+ * @return An integer representation of the run number
+ */
+int ALCDataLoadingModel::extractRunNumber(const std::string &file) {
+  if (file.empty())
+    return -1;
+
+  auto returnVal = file;
+  // Strip beginning of path to just the run (e.g. MUSR00015189.nxs)
+  std::size_t found = returnVal.find_last_of("/\\");
+  returnVal = returnVal.substr(found + 1);
+
+  // Remove all non-digits
+  returnVal.erase(std::remove_if(returnVal.begin(), returnVal.end(), [](unsigned char c) { return !std::isdigit(c); }),
+                  returnVal.end());
+
+  // Return run number as int (removes leading 0's)
+  return std::stoi(returnVal);
+}
 } // namespace MantidQt::CustomInterfaces

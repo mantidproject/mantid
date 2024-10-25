@@ -125,28 +125,6 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
 }
 
 /**
- * Remove the run number from a full file path
- * @param file :: [input] full path which contains a run number
- * @return An integer representation of the run number
- */
-int ALCDataLoadingPresenter::extractRunNumber(const std::string &file) {
-  if (file.empty())
-    return -1;
-
-  auto returnVal = file;
-  // Strip beginning of path to just the run (e.g. MUSR00015189.nxs)
-  std::size_t found = returnVal.find_last_of("/\\");
-  returnVal = returnVal.substr(found + 1);
-
-  // Remove all non-digits
-  returnVal.erase(std::remove_if(returnVal.begin(), returnVal.end(), [](unsigned char c) { return !std::isdigit(c); }),
-                  returnVal.end());
-
-  // Return run number as int (removes leading 0's)
-  return std::stoi(returnVal);
-}
-
-/**
  * Load new data and update the view accordingly
  * @param files :: [input] range of files (user-specified or auto generated)
  */
@@ -345,7 +323,7 @@ void ALCDataLoadingPresenter::handleTimerEvent() {
         auto newText = m_view->getRunsText();
 
         // Extract run number from latest file
-        auto runNumber = extractRunNumber(latestFile);
+        auto runNumber = m_model->extractRunNumber(latestFile);
 
         // If new run number is less then error
         if (runNumber <= m_lastRunLoadedAuto) {
