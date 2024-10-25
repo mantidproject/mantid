@@ -147,6 +147,9 @@ void export_Property() {
                     "The units attached to this property as a encoded bytes object. It "
                     "is assumed the caller knows the correct endcoding used.")
 
+      .add_property("value", &Property::value, &Property::setValue,
+                    "The value of the property. For a generic property, equivalent to valueAsStr.")
+
       .add_property("valueAsStr", &Property::value, &Property::setValue,
                     "The value of the property as a string. "
                     "For some property types, e.g. Workspaces, it is useful to "

@@ -273,6 +273,7 @@ Component Overviews
 
    BatchWidget/index
    EnumeratedString
+   EnumeratedStringProperty
    EventWorkspaceDev
    HandlingXML
    IndexProperty
