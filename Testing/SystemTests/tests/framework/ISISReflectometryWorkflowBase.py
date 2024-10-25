@@ -69,7 +69,7 @@ class ISISReflectometryWorkflowBase:
 
     def regenerateRunsFile(self):
         setupInstrument()
-        regenerateRunsFile(self.first_transmission_runs + self.second_transmission_runs, self.run_numbers, self.input_run_file)
+        regenerateRunsFileFromRange(self.first_transmission_runs + self.second_transmission_runs, self.run_numbers, self.input_run_file)
 
     def regenerateReferenceFileFromDirectory(self, reference_file_directory):
         setupInstrument()
@@ -165,7 +165,7 @@ def regenerateReferenceFile(reference_file_directory, output_filename):
     SaveNexus(InputWorkspace=output_workspace_name, Filename=output_filename)
 
 
-def regenerateRunsFile(transmission_run_names, run_numbers, event_run_numbers, input_workspaces_file):
+def regenerateRunsFileFromRange(transmission_run_names, run_numbers, event_run_numbers, input_workspaces_file):
     """Generate the test input file from a range of run numbers and transmission runs."""
     # Load transmission runs
     for run in transmission_run_names:
