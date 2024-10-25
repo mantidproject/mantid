@@ -116,7 +116,7 @@ fi
 cd $RECIPES_DIR
 
 # Add the '--debug' option to EXTRA_BUILD_OPTIONS if you want conda build to provide verbose debug info
-EXTRA_BUILD_OPTIONS="--debug"
+EXTRA_BUILD_OPTIONS="--debug "
 
 if [[ $OSTYPE == "msys" ]]; then
     # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
