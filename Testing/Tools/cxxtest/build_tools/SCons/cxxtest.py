@@ -318,17 +318,17 @@ def generate(env, **kwargs):
         sources = Flatten(Split(source))
         headers = []
         linkins = []
-        for l in sources:
+        for source in sources:
             # check whether this is a file object or a string path
             try:
-                s = l.abspath
+                s = source.abspath
             except AttributeError:
-                s = l
+                s = source
 
             if s.endswith(multiget([kwargs, env, os.environ], 'CXXTEST_SUFFIX', None)):
-                headers.append(l)
+                headers.append(source)
             else:
-                linkins.append(l)
+                linkins.append(source)
 
         deps = []
         if len(headers) == 0:
