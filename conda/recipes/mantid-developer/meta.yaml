@@ -57,6 +57,7 @@ requirements:
     - versioningit {{ versioningit }}
     - joblib
     - orsopy {{ orsopy }}
+    - mslice
 
     # Not Windows, OpenGL implementation:
     - mesa-libgl-devel-cos7-x86_64>=18.3.4 # [linux]

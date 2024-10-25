@@ -482,9 +482,6 @@ have been fixed. Then:
 * Check the release notes and verify that the "Under Construction" paragraph on the main
   index page has been removed. Remove the paragraph if it still exists.
 * Ensure that all changes, including release notes, have been merged into the ``release-next`` branch.
-* On the ``release-next`` branch, check whether the `git SHA
-  <https://github.com/mantidproject/mantid/blob/release-next/scripts/ExternalInterfaces/CMakeLists.txt>`__
-  for MSlice is up to date. If not, create a PR to update it and ask a gatekeeper to merge it.
 * Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually run the `GitHub workflow
   <https://github.com/mantidproject/mantid/actions/workflows/automerge.yml/>`__ using the ``release-next`` branch to
   merge the changes.
