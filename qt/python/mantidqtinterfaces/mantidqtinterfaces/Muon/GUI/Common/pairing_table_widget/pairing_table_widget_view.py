@@ -343,6 +343,7 @@ class PairingTableView(QtWidgets.QWidget):
         if self.is_disabled:
             self.add_pair_action.setEnabled(False)
             self.remove_pair_action.setEnabled(False)
+
         # set-up the menu
         menu.addAction(add_pair_action)
         menu.addAction(remove_pair_action)
