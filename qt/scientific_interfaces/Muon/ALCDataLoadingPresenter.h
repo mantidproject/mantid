@@ -96,9 +96,6 @@ private:
   // Model
   std::unique_ptr<ALCDataLoadingModel> const m_model;
 
-  /// Number of detectors for current first run
-  size_t m_numDetectors;
-
   /// Flag for changes in watched directory
   std::atomic_bool m_directoryChanged;
 

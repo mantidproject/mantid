@@ -9,7 +9,9 @@
 #include "IALCDataLoadingView.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-// #include "MantidAPI/Run.h"
+#include "MantidAPI/Run.h"
+#include "MantidGeometry/Instrument.h"
+#include "MuonAnalysisHelper.h"
 // #include "MantidGeometry/Instrument.h"
 // #include "MantidKernel/InstrumentInfo.h"
 // #include "MantidKernel/Strings.h"
@@ -29,6 +31,8 @@ bool ALCDataLoadingModel::getLoadingData() { return m_loadingData; }
 
 void ALCDataLoadingModel::setLoadedData(const MatrixWorkspace_sptr &data) { m_loadedData = data; }
 MatrixWorkspace_sptr ALCDataLoadingModel::getLoadedData() { return m_loadedData; }
+
+std::size_t ALCDataLoadingModel::getNumDetectors() const { return m_numDetectors; }
 
 MatrixWorkspace_sptr ALCDataLoadingModel::exportWorkspace() {
   if (m_loadedData)
@@ -119,4 +123,74 @@ void ALCDataLoadingModel::load(const std::vector<std::string> &files, const IALC
 
 void ALCDataLoadingModel::cancelLoading() const { m_LoadingAlg->cancel(); }
 
+void ALCDataLoadingModel::setWsForMuonInfo(const std::string &filename) {
+
+  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
+  loadAlg->setChild(true); // Don't want workspaces in the ADS
+
+  // We need logs only but we have to use Load
+  // (can't use LoadMuonLogs as not all the logs would be
+  // loaded), so we load the minimum amount of data, i.e., one spectrum
+  loadAlg->setProperty("Filename", filename);
+  loadAlg->setPropertyValue("SpectrumMin", "1");
+  loadAlg->setPropertyValue("SpectrumMax", "1");
+  loadAlg->setPropertyValue("OutputWorkspace", "__NotUsed");
+  loadAlg->execute();
+
+  Workspace_sptr loadedWs = loadAlg->getProperty("OutputWorkspace");
+  setPeriods(loadedWs);
+
+  double firstGoodData = loadAlg->getProperty("FirstGoodData");
+  double timeZero = loadAlg->getProperty("TimeZero");
+  m_minTime = firstGoodData - timeZero;
+
+  m_wsForInfo = MuonAnalysisHelper::firstPeriod(loadedWs);
+
+  setLogs(m_wsForInfo);
+  // Update number of detectors for this new first run
+  m_numDetectors = m_wsForInfo->getInstrument()->getNumberDetectors();
+}
+
+Mantid::API::MatrixWorkspace_sptr ALCDataLoadingModel::getWsForMuonInfo() { return m_wsForInfo; }
+
+double ALCDataLoadingModel::getMinTime() { return m_minTime; }
+
+std::vector<std::string> ALCDataLoadingModel::getLogs() { return m_logs; }
+
+void ALCDataLoadingModel::setLogs(MatrixWorkspace_sptr ws) {
+
+  std::vector<std::string> logs;
+
+  const auto &properties = ws->run().getProperties();
+  std::transform(properties.cbegin(), properties.cend(), std::back_inserter(logs),
+                 [](const auto &property) { return property->name(); });
+
+  // sort alphabetically
+  // cannot use standard sort alone as some logs are capitalised and some are
+  // not
+  std::sort(logs.begin(), logs.end(), [](const auto &log1, const auto &log2) {
+    // compare logs char by char and return pair of non-equal elements
+    const auto result =
+        std::mismatch(log1.cbegin(), log1.cend(), log2.cbegin(), log2.cend(),
+                      [](const auto &lhs, const auto &rhs) { return std::tolower(lhs) == std::tolower(rhs); });
+    // compare the two elements to decide which log should go first
+    return result.second != log2.cend() &&
+           (result.first == log1.cend() || std::tolower(*result.first) < std::tolower(*result.second));
+  });
+  m_logs = logs;
+}
+
+std::vector<std::string> ALCDataLoadingModel::getPeriods() { return m_periods; }
+
+void ALCDataLoadingModel::setPeriods(Workspace_sptr loadedWs) {
+
+  size_t numPeriods = MuonAnalysisHelper::numPeriods(loadedWs);
+  std::vector<std::string> periods;
+  for (size_t i = 0; i < numPeriods; i++) {
+    std::stringstream buffer;
+    buffer << i + 1;
+    periods.emplace_back(buffer.str());
+  }
+  m_periods = periods;
+}
 } // namespace MantidQt::CustomInterfaces

@@ -7,13 +7,9 @@
 #include "ALCDataLoadingPresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/Run.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Strings.h"
 
 #include "ALCLatestFileFinder.h"
-#include "MuonAnalysisHelper.h"
 
 #include "Poco/File.h"
 #include <Poco/ActiveResult.h>
@@ -34,8 +30,8 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view, std::unique_ptr<ALCDataLoadingModel> model)
-    : m_view(view), m_model(std::move(model)), m_numDetectors(0), m_directoryChanged(false), m_lastRunLoadedAuto(-2),
-      m_filesLoaded(), m_wasLastAutoRange(false), m_previousFirstRun("") {}
+    : m_view(view), m_model(std::move(model)), m_directoryChanged(false), m_lastRunLoadedAuto(-2), m_filesLoaded(),
+      m_wasLastAutoRange(false), m_previousFirstRun("") {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
@@ -181,68 +177,19 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
 
 void ALCDataLoadingPresenter::updateAvailableInfo() {
   Workspace_sptr loadedWs;
-  double firstGoodData = 0, timeZero = 0;
 
-  try //... to load the first run
-  {
-    IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
-    loadAlg->setChild(true); // Don't want workspaces in the ADS
-
-    // We need logs only but we have to use Load
-    // (can't use LoadMuonLogs as not all the logs would be
-    // loaded), so we load the minimum amount of data, i.e., one spectrum
-    loadAlg->setProperty("Filename", m_view->getFirstFile());
-    loadAlg->setPropertyValue("SpectrumMin", "1");
-    loadAlg->setPropertyValue("SpectrumMax", "1");
-    loadAlg->setPropertyValue("OutputWorkspace", "__NotUsed");
-    loadAlg->execute();
-
-    loadedWs = loadAlg->getProperty("OutputWorkspace");
-    firstGoodData = loadAlg->getProperty("FirstGoodData");
-    timeZero = loadAlg->getProperty("TimeZero");
+  try {
+    m_model->setWsForMuonInfo(m_view->getFirstFile());
   } catch (const std::exception &error) {
     m_view->setAvailableInfoToEmpty();
     throw std::runtime_error(error.what());
   }
-
-  // Set path
   m_view->setPath(getPathFromFiles());
-
-  // Set logs
-  const MatrixWorkspace_sptr ws = MuonAnalysisHelper::firstPeriod(loadedWs);
-  std::vector<std::string> logs;
-
-  const auto &properties = ws->run().getProperties();
-  std::transform(properties.cbegin(), properties.cend(), std::back_inserter(logs),
-                 [](const auto &property) { return property->name(); });
-
-  // sort alphabetically
-  // cannot use standard sort alone as some logs are capitalised and some are
-  // not
-  std::sort(logs.begin(), logs.end(), [](const auto &log1, const auto &log2) {
-    // compare logs char by char and return pair of non-equal elements
-    const auto result =
-        std::mismatch(log1.cbegin(), log1.cend(), log2.cbegin(), log2.cend(),
-                      [](const auto &lhs, const auto &rhs) { return std::tolower(lhs) == std::tolower(rhs); });
-    // compare the two elements to decide which log should go first
-    return result.second != log2.cend() &&
-           (result.first == log1.cend() || std::tolower(*result.first) < std::tolower(*result.second));
-  });
-
-  m_view->setAvailableLogs(logs);
-
-  // Set periods
-  size_t numPeriods = MuonAnalysisHelper::numPeriods(loadedWs);
-  std::vector<std::string> periods;
-  for (size_t i = 0; i < numPeriods; i++) {
-    std::stringstream buffer;
-    buffer << i + 1;
-    periods.emplace_back(buffer.str());
-  }
-  m_view->setAvailablePeriods(periods);
+  m_view->setAvailableLogs(m_model->getLogs());
+  m_view->setAvailablePeriods(m_model->getPeriods());
 
   // If single period, enable alpha, otherwise disable
-  if (numPeriods == 1) {
+  if (m_model->getPeriods().size() == 1) {
     m_view->enableAlpha(true);
     m_view->setAlphaValue("1.0");
     m_view->showAlphaMessage(false);
@@ -251,18 +198,14 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     m_view->showAlphaMessage(true);
   }
 
-  // Update available period info
-  updateAvailablePeriodInfo(ws);
+  updateAvailablePeriodInfo(m_model->getWsForMuonInfo());
 
   // Set time limits if this is the first data loaded (will both be zero)
   if (auto timeLimits = m_view->timeRange()) {
     if (std::abs(timeLimits->first) < 0.0001 && std::abs(timeLimits->second) < 0.0001) {
-      m_view->setTimeLimits(firstGoodData - timeZero, ws->x(0).back());
+      m_view->setTimeLimits(m_model->getMinTime(), m_model->getWsForMuonInfo()->x(0).back());
     }
   }
-
-  // Update number of detectors for this new first run
-  m_numDetectors = ws->getInstrument()->getNumberDetectors();
 }
 
 std::string ALCDataLoadingPresenter::getPathFromFiles() const {
@@ -305,7 +248,7 @@ bool ALCDataLoadingPresenter::checkCustomGrouping() {
     }
     detectors.insert(detectors.end(), backward.begin(), backward.end());
     if (std::any_of(detectors.cbegin(), detectors.cend(),
-                    [this](const auto det) { return det < 0 || det > static_cast<int>(m_numDetectors); })) {
+                    [this](const auto det) { return det < 0 || det > static_cast<int>(m_model->getNumDetectors()); })) {
       groupingOK = false;
     }
   }
