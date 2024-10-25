@@ -77,7 +77,6 @@ requirements:
     - orsopy {{ orsopy }}
     - quasielasticbayes
     - pydantic
-    - mslice
 
   run_constrained:
     - matplotlib {{ matplotlib }}
