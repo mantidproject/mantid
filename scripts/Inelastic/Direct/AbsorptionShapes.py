@@ -6,7 +6,19 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.kernel import funcinspect
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    AbsorptionCorrection,
+    ConvertUnits,
+    CreateSampleWorkspace,
+    CreateSampleShape,
+    DeleteWorkspace,
+    FlatPlateAbsorption,
+    MonteCarloAbsorption,
+    RenameWorkspace,
+    SetSample,
+    SetSampleMaterial,
+    SphericalAbsorption,
+)
 
 import random
 import types

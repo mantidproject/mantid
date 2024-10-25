@@ -5,10 +5,22 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from Direct.PropertiesDescriptors import *
+from Direct.PropertiesDescriptors import (
+    prop_helpers,
+    AvrgAccuracy,
+    EnergyBins,
+    IncidentEnergy,
+    InstrumentDependentProp,
+    SaveFileName,
+    VanadiumRMM,
+)
 from Direct.RunDescriptor import RunDescriptor, RunDescriptorDependent
-from mantid.simpleapi import *
+from mantid.api import mtd, ExperimentInfo
+from mantid.kernel import config, logger
+from mantid.simpleapi import LoadEmptyInstrument
 from mantid import geometry
+
+import os
 from sys import platform
 
 
@@ -305,7 +317,7 @@ class NonIDF_Properties(object):
             elif isinstance(Instrument, str):  # instrument name defined
                 new_name, full_name, facility_ = prop_helpers.check_instrument_name(None, Instrument)
                 # idf_dir = config.getString('instrumentDefinitgeton.directory')
-                idf_file = api.ExperimentInfo.getInstrumentFilename(full_name)
+                idf_file = ExperimentInfo.getInstrumentFilename(full_name)
                 tmp_ws_name = "__empty_" + full_name
                 if not mtd.doesExist(tmp_ws_name):
                     LoadEmptyInstrument(Filename=idf_file, OutputWorkspace=tmp_ws_name)

@@ -8,7 +8,7 @@
 import systemtesting
 import re
 import mantid
-from mantid.simpleapi import *
+from mantid.api import AlgorithmFactory
 
 MAX_ALG_LEN = 40  # TODO convention says 20 is the maximum
 

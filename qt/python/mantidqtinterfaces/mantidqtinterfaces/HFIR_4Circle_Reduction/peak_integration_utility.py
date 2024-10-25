@@ -12,7 +12,7 @@ import csv
 from scipy.optimize import curve_fit
 import mantid.simpleapi as mantidsimple
 from mantid.api import AnalysisDataService
-from mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility import *
+from mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility import check_string
 
 
 def apply_lorentz_correction(peak_intensity, q, wavelength, step_omega):

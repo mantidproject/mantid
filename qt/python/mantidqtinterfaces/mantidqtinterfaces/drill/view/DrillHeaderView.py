@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from qtpy.QtWidgets import QHeaderView, QStyle, QStyleOptionToolButton, QAbstractItemView
-from qtpy.QtCore import *
+from qtpy.QtCore import QPoint, QRect, Qt
 
 
 class DrillHeaderView(QHeaderView):

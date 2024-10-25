@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 import systemtesting
-from mantid.simpleapi import *
-from reduction_workflow.instruments.sans.sns_command_interface import *
-from mantid.api import *
+from mantid.simpleapi import EQSANSLoad, EQSANSNormalise, SumSpectra
+from mantid.api import mtd
+from mantid.kernel import ConfigService
 import os
 
 

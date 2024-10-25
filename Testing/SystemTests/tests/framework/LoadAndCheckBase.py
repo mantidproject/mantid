@@ -10,8 +10,8 @@ These system tests are to verify the behaviour of the ISIS reflectometry reducti
 """
 
 import systemtesting
-from mantid.simpleapi import *
-import mantid.api
+from mantid.api import mtd, WorkspaceGroup
+from mantid.simpleapi import Integration, Load
 
 from abc import ABCMeta, abstractmethod
 
@@ -69,8 +69,7 @@ class LoadAndCheckBase(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
         self.assertTrue(isinstance(a, type(b)))
 
-        # raise NotImplementedError()
-        if isinstance(a, mantid.api.WorkspaceGroup):
+        if isinstance(a, WorkspaceGroup):
             self.assertEqual(a.size(), b.size())
             self.assertEqual(a.size(), n_periods)
             # Loop through each workspace in the group and apply some simple comaprison checks.

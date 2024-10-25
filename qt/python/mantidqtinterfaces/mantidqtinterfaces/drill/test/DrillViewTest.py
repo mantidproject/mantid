@@ -11,8 +11,8 @@ import sys
 
 from qtpy.QtWidgets import QApplication
 from qtpy.QtGui import QCloseEvent
-from qtpy.QtCore import *
-from qtpy.QtTest import *
+from qtpy.QtCore import Qt
+from qtpy.QtTest import QTest
 
 from mantidqtinterfaces.drill.view.DrillView import DrillView
 

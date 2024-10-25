@@ -21,15 +21,6 @@ except ImportError:
     Logger("SampleSetupWidget").information("Using legacy ui importer")
     from mantidplot import load_ui
 
-IS_IN_MANTIDPLOT = False
-try:
-    from mantid.api import *
-    from mantid.kernel import *
-
-    IS_IN_MANTIDPLOT = True
-except:
-    pass
-
 
 def generateRegExpValidator(widget, expression):
     rx = QRegExp(expression)

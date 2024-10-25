@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import *
+from mantid.simpleapi import ConvertToPointData, CreateSimulationWorkspace, CropWorkspace, SetInstrumentParameter
 import numpy as np
 
 

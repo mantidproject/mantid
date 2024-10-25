@@ -12,7 +12,7 @@
 # This line has to be first for some reason.
 # from enthought.mayavi import mlab
 
-from pylab import *
+from pylab import figure, legend, plot, title, savefig, show, xlabel, ylabel
 import pickle
 from scipy import stats
 

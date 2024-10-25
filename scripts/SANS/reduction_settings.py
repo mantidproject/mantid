@@ -68,9 +68,7 @@ between reduction steps.  The benefits to this new method are as follows:
    passing settings to each other via PropertyManager objects.
 """
 
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
+from mantid.kernel import logger, PropertyManager, PropertyManagerDataService
 
 REDUCTION_SETTINGS_OBJ_NAME = "ISISSANSReductionSettings"
 

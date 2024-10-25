@@ -11,7 +11,7 @@ from mantidqtinterfaces.Muon.GUI.Common.dummy.dummy_widget import DummyWidget
 from mantidqtinterfaces.Muon.GUI.Common.dummy_label.dummy_label_widget import DummyLabelWidget
 from mantidqtinterfaces.Muon.GUI.Common.dock.dock_view import DockView
 
-from mantidqtinterfaces.Muon.GUI.Common.muon_context.muon_context import *
+from mantidqtinterfaces.Muon.GUI.Common.muon_context.muon_context import Tab2Text
 
 
 class DockWidget(QtWidgets.QWidget):

@@ -18,7 +18,22 @@ This workspace can be summed with other masked workspaces to accumulate
 masking and also passed to MaskDetectors to match masking there.
 """
 
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import logger
+from mantid.simpleapi import (
+    AddSampleLog,
+    CloneWorkspace,
+    ConvertToMatrixWorkspace,
+    CreatePSDBleedMask,
+    DeleteWorkspace,
+    DetectorEfficiencyVariation,
+    Divide,
+    ExtractMask,
+    FindDetectorsOutsideLimits,
+    LoadMask,
+    MaskDetectors,
+    MedianDetectorTest,
+)
 from mantid.kernel.funcinspect import lhs_info
 import os
 import Direct.RunDescriptor as RunDescriptor

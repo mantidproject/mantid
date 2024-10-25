@@ -16,7 +16,7 @@ from reduction.instruments.example.ExampleRedStep import ExampleRedStep
 # It also does minimal type checking to ensure that the object that is passed is valid
 from reduction import validate_step, validate_loader
 import mantid
-from mantid.simpleapi import *
+from mantid.simpleapi import LoadAscii
 
 
 class ExampleReducer(Reducer):

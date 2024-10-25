@@ -9,10 +9,33 @@
 # pylint: disable=attribute-defined-outside-init
 """File contains Descriptors used describe run for direct inelastic reduction"""
 
-from mantid.simpleapi import *
-from mantid.dataobjects import *
+from mantid.api import mtd, FileFinder, MatrixWorkspace, Workspace
+from mantid.dataobjects import EventWorkspace
 from mantid.kernel import funcinspect
-from Direct.PropertiesDescriptors import *
+from mantid.simpleapi import (
+    AddSampleLog,
+    CloneWorkspace,
+    ConjoinWorkspaces,
+    CopyInstrumentParameters,
+    CreateSingleValuedWorkspace,
+    CreateWorkspace,
+    CropWorkspace,
+    DeleteWorkspace,
+    ExtractMask,
+    ExtractMonitors,
+    ExtractSingleSpectrum,
+    Load,
+    LoadDetectorInfo,
+    Minus,
+    Multiply,
+    NormaliseByCurrent,
+    Plus,
+    Rebin,
+    RebinToWorkspace,
+    RenameWorkspace,
+)
+from Direct.PropertiesDescriptors import prop_helpers, PropDescriptor
+import os
 import re
 import collections.abc
 
@@ -461,7 +484,7 @@ class RunDescriptor(PropDescriptor):
         if value is None:  # clear current run number
             self._clear_all()
             return
-        if isinstance(value, api.Workspace):
+        if isinstance(value, Workspace):
             if self._ws_name:
                 if self._ws_name != value.name():
                     self._clear_all()
@@ -1210,7 +1233,7 @@ class RunDescriptor(PropDescriptor):
 
         if not calibration or use_ws_calibration:
             return
-        if not isinstance(loaded_ws, api.Workspace):
+        if not isinstance(loaded_ws, Workspace):
             raise RuntimeError(" Calibration can be applied to a workspace only and got object of type {0}".format(type(loaded_ws)))
 
         if loaded_ws.run().hasProperty("calibrated"):
@@ -1246,7 +1269,7 @@ class RunDescriptor(PropDescriptor):
             # Pull in pressures, thicknesses & update from cal file
             LoadDetectorInfo(Workspace=loaded_ws, DataFilename=ws_calibration, RelocateDets=True)
             AddSampleLog(Workspace=loaded_ws, LogName="calibrated", LogText=str(ws_calibration))
-        elif isinstance(ws_calibration, api.Workspace):
+        elif isinstance(ws_calibration, Workspace):
             RunDescriptor._logger("load_data: Copying detectors positions from workspace {0}: ".format(ws_calibration.name()), "debug")
             CopyInstrumentParameters(InputWorkspace=ws_calibration, OutputWorkspace=loaded_ws)
             AddSampleLog(Workspace=loaded_ws, LogName="calibrated", LogText=str(ws_calibration))
@@ -1265,7 +1288,7 @@ class RunDescriptor(PropDescriptor):
         """
         source_ws = self.get_workspace()
 
-        if isinstance(other_workspace, api.MatrixWorkspace):
+        if isinstance(other_workspace, MatrixWorkspace):
             targ_ws = other_workspace
         else:
             targ_ws = mtd[other_workspace]

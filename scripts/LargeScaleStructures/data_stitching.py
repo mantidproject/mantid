@@ -11,8 +11,9 @@ Data stitching for SANS and reflectometry
 
 import os
 import sys
-from mantid.simpleapi import *
+from mantid.api import mtd
 from mantid.kernel import Logger
+from mantid.simpleapi import ConvertToPointData, CreateWorkspace, Load, SaveAscii, SaveCanSAS1D, Scale
 from functools import cmp_to_key
 from qtpy.QtCore import QObject
 

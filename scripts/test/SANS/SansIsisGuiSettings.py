@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
+from mantid.simpleapi import config
 import ISISCommandInterface as i
 
 MASKFILE = "MaskSANS2D.txt"

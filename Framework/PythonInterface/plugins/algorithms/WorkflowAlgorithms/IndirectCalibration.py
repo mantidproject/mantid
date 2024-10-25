@@ -5,10 +5,28 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-instance-attributes
-from mantid.kernel import *
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, Progress, WorkspaceProperty
+from mantid.kernel import (
+    logger,
+    Direction,
+    FloatArrayMandatoryValidator,
+    FloatArrayProperty,
+    IntArrayMandatoryValidator,
+    IntArrayProperty,
+    StringArrayProperty,
+)
+from mantid.simpleapi import (
+    CalculateFlatBackground,
+    DeleteWorkspace,
+    FindDetectorsOutsideLimits,
+    Integration,
+    Load,
+    MergeRuns,
+    Scale,
+    SumSpectra,
+)
 
+from IndirectCommon import get_run_number
 
 import os.path
 
@@ -87,8 +105,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
         return None
 
     def PyExec(self):
-        from IndirectCommon import get_run_number
-
         self._setup()
         runs = []
         self._run_numbers = []

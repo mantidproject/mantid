@@ -6,8 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 import mantid.simpleapi as api
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import (
+    Algorithm,
+    AlgorithmFactory,
+    AlgorithmManager,
+    AnalysisDataService,
+    FileAction,
+    FileProperty,
+    MatrixWorkspaceProperty,
+    PythonAlgorithm,
+)
+from mantid.kernel import Direction, Logger, PropertyManagerDataService, StringMandatoryValidator
 import os
 from reduction_workflow.find_data import find_data
 

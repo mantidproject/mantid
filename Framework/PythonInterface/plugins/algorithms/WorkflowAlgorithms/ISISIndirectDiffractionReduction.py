@@ -7,11 +7,38 @@
 # pylint: disable=no-init,too-many-instance-attributes
 import os
 
-from IndirectReductionCommon import calibrate, load_files, load_file_ranges, rebin_logarithmic
+from IndirectReductionCommon import (
+    calibrate,
+    fold_chopped,
+    get_multi_frame_rebin,
+    group_spectra,
+    load_files,
+    load_file_ranges,
+    identify_bad_detectors,
+    mask_detectors,
+    process_monitor_efficiency,
+    scale_monitor,
+    scale_detectors,
+    rebin_logarithmic,
+    rebin_reduction,
+    rename_reduction,
+    unwrap_monitor,
+)
 
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import (
+    mtd,
+    AlgorithmFactory,
+    AnalysisDataService,
+    DataProcessorAlgorithm,
+    FileAction,
+    FileProperty,
+    PropertyMode,
+    WorkspaceGroup,
+    WorkspaceGroupProperty,
+    WorkspaceProperty,
+)
+from mantid.kernel import logger, Direction, IntArrayProperty, IntBoundedValidator, StringArrayProperty, StringListValidator
+from mantid.simpleapi import ConvertUnits, DeleteWorkspace, Divide, GroupWorkspaces, Minus, RebinToWorkspace, ReplaceSpecialValues, Scale
 from mantid import config
 
 
@@ -233,20 +260,6 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
     # ------------------------------------------------------------------------------
 
     def PyExec(self):
-        from IndirectReductionCommon import (
-            get_multi_frame_rebin,
-            identify_bad_detectors,
-            unwrap_monitor,
-            process_monitor_efficiency,
-            scale_monitor,
-            scale_detectors,
-            rebin_reduction,
-            group_spectra,
-            fold_chopped,
-            rename_reduction,
-            mask_detectors,
-        )
-
         self._setup()
 
         load_opts = dict()

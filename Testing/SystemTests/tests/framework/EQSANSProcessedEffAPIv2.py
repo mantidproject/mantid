@@ -6,10 +6,21 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid.simpleapi import *
-from reduction_workflow.instruments.sans.sns_command_interface import *
+from reduction_workflow.instruments.sans.sns_command_interface import (
+    AppendDataFile,
+    EQSANS,
+    Reduce1D,
+    SetBeamCenter,
+    SolidAngle,
+    TotalChargeNormalization,
+    UseConfig,
+    UseConfigMask,
+    UseConfigTOFTailsCutoff,
+)
 from reduction_workflow.instruments.sans.hfir_command_interface import SensitivityCorrection, SetTransmission
 from mantid.api import FileFinder
+from mantid.kernel import ConfigService
+from mantid.simpleapi import Scale
 
 import os
 

@@ -10,8 +10,7 @@
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.api import AnalysisDataService
-from ISISCommandInterface import *
-from SANSBatchMode import *
+from ISISCommandInterface import AssignSample, Detector, LARMOR, MaskFile, Set1D
 from sans.common.enums import SANSInstrument
 
 

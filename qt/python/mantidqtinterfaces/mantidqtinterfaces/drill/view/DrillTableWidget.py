@@ -7,7 +7,7 @@
 
 from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAbstractItemView, QMessageBox
 from qtpy.QtGui import QBrush, QColor
-from qtpy.QtCore import *
+from qtpy.QtCore import Qt
 
 from .DrillHeaderView import DrillHeaderView
 from .DrillItemDelegate import DrillItemDelegate

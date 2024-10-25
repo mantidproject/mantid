@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
-from reduction_settings import *
+from mantid.kernel import PropertyManagerDataService
+from reduction_settings import get_settings_object
 
 
 class BasicSettingsObjectUsageTest(unittest.TestCase):

@@ -7,8 +7,38 @@
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import numpy as np
 import systemtesting
-from mantid.simpleapi import *
-from mantid.api import FileFinder
+from mantid.api import mtd, FileFinder
+from mantid.kernel import config
+from mantid.simpleapi import (
+    AlignAndFocusPowderFromFiles,
+    ApplyDiffCal,
+    CompressEvents,
+    ConjoinFiles,
+    ConvertUnits,
+    CropWorkspace,
+    DiffractionFocussing,
+    Divide,
+    EditInstrumentGeometry,
+    FilterBadPulses,
+    Integration,
+    LoadCalFile,
+    LoadEventNexus,
+    LoadGSS,
+    LoadNexus,
+    MaskDetectors,
+    PDLoadCharacterizations,
+    PDToPDFgetN,
+    Power,
+    Rebin,
+    RemoveLowResTOF,
+    RemovePromptPulse,
+    SaveGSS,
+    SNSPowderReduction,
+    SortEvents,
+    StripVanadiumPeaks,
+    Subtract,
+    UnwrapSNS,
+)
 
 import os
 

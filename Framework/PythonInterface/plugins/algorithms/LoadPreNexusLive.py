@@ -7,7 +7,7 @@
 from mantid import mtd
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, WorkspaceProperty
 from mantid.kernel import Direction, EnabledWhenProperty, IntBoundedValidator, Property, PropertyCriterion, StringListValidator
-from mantid.simpleapi import *
+from mantid.simpleapi import FilterByXValue, GetIPTS, LoadEventPreNexus, LoadInstrument, LoadNexusLogs, NormaliseByCurrent
 import os
 
 
