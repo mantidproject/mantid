@@ -25,7 +25,6 @@ public:
   void setLoadingData(bool isLoading);
   bool getLoadingData();
   void setLoadedData(const Mantid::API::MatrixWorkspace_sptr &data);
-  size_t getNumDetectors() const;
   Mantid::API::MatrixWorkspace_sptr getLoadedData();
   Mantid::API::MatrixWorkspace_sptr exportWorkspace();
   void setWsForMuonInfo(const std::string &filename);
@@ -37,8 +36,11 @@ public:
   double getMinTime();
   int extractRunNumber(const std::string &file);
   std::string getPathFromFiles(std::vector<std::string> files) const;
+  bool checkCustomGrouping(std::string detGroupingType, std::string forwardGrouping, std::string backwardGrouping);
 
 private:
+  std::string isCustomGroupingValid(const std::string &group, bool &isValid);
+
   /// Last loaded data workspace
   Mantid::API::MatrixWorkspace_sptr m_loadedData;
 

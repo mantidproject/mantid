@@ -11,12 +11,18 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidKernel/Strings.h"
 #include "MuonAnalysisHelper.h"
+#include <algorithm>
 // #include "MantidGeometry/Instrument.h"
 // #include "MantidKernel/InstrumentInfo.h"
 // #include "MantidKernel/Strings.h"
 
 #include <Poco/ActiveResult.h>
+
+namespace {
+bool is_decimal(const char character) { return character == '.'; }
+} // namespace
 
 using namespace Mantid::API;
 
@@ -31,8 +37,6 @@ bool ALCDataLoadingModel::getLoadingData() { return m_loadingData; }
 
 void ALCDataLoadingModel::setLoadedData(const MatrixWorkspace_sptr &data) { m_loadedData = data; }
 MatrixWorkspace_sptr ALCDataLoadingModel::getLoadedData() { return m_loadedData; }
-
-std::size_t ALCDataLoadingModel::getNumDetectors() const { return m_numDetectors; }
 
 MatrixWorkspace_sptr ALCDataLoadingModel::exportWorkspace() {
   if (m_loadedData)
@@ -226,5 +230,43 @@ std::string ALCDataLoadingModel::getPathFromFiles(std::vector<std::string> files
   };
   const auto sameDirectory = std::all_of(files.cbegin(), files.cend(), hasSameDirectory);
   return sameDirectory ? firstDirectory : "Multiple Directories";
+}
+
+/**
+ * If custom grouping is supplied, check all detector numbers are valid
+ * @returns :: True if grouping OK, false if bad
+ */
+bool ALCDataLoadingModel::checkCustomGrouping(std::string detGroupingType, std::string forwardGrouping,
+                                              std::string backwardGrouping) {
+  bool groupingOK = true;
+  if (detGroupingType == "Custom") {
+    auto detectors = Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(forwardGrouping, groupingOK));
+    const auto backward = Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(backwardGrouping, groupingOK));
+    if (!groupingOK) {
+      return false;
+    }
+    detectors.insert(detectors.end(), backward.begin(), backward.end());
+    if (std::any_of(detectors.cbegin(), detectors.cend(),
+                    [this](const auto det) { return det < 0 || det > static_cast<int>(m_numDetectors); })) {
+      groupingOK = false;
+    }
+  }
+  return groupingOK;
+}
+/**
+ * Check basic group string is valid
+ * i.e. does not contain letters or start with , or -
+ * @param group :: the string of the grouping
+ * @param isValid :: bool to say if the string is valid
+ * @returns :: True if grouping OK, false if bad
+ */
+std::string ALCDataLoadingModel::isCustomGroupingValid(const std::string &group, bool &isValid) {
+  if (!std::isdigit(static_cast<unsigned char>(group[0])) ||
+      std::any_of(std::begin(group), std::end(group), ::isalpha) ||
+      std::any_of(std::begin(group), std::end(group), is_decimal)) {
+    isValid = false;
+    return "";
+  }
+  return group;
 }
 } // namespace MantidQt::CustomInterfaces
