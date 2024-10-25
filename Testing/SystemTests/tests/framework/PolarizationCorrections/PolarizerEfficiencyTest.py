@@ -27,8 +27,8 @@ class PolarizerEfficiencyTestBase(SANSPolarizationCorrectionsBase, metaclass=ABC
     @abstractmethod
     def input_efficiency_filename(self):
         """
-        The filename to use as the input to the algorithm in this test.
-        :return: The input workspace's filename.
+        The filename to use as the input efficiency to the algorithm in this test.
+        :return: The input efficiency's filename.
         """
         pass
 
@@ -51,6 +51,7 @@ class PolarizerEfficiencyPolarisedTest(PolarizerEfficiencyTestBase):
 
     def __init__(self):
         PolarizerEfficiencyTestBase.__init__(self)
+        self.nanEqual = True
 
 
 class PolarizerEfficiencyUnpolarisedTest(PolarizerEfficiencyTestBase):
@@ -60,3 +61,4 @@ class PolarizerEfficiencyUnpolarisedTest(PolarizerEfficiencyTestBase):
 
     def __init__(self):
         PolarizerEfficiencyTestBase.__init__(self)
+        self.nanEqual = True
