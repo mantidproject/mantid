@@ -22,10 +22,10 @@ namespace Geometry {
  @date 16/12/2010*/
 
 class MANTID_GEOMETRY_DLL
-MDGeometryXMLDefinitions{public :
-                             // XML schema tag definitions for generating xml.
-                             static const std::string workspaceNameXMLTagStart(){return "<MDWorkspaceName>";
-} // namespace Geometry
+MDGeometryXMLDefinitions{// clang-format off
+public :
+// XML schema tag definitions for generating xml.
+static const std::string workspaceNameXMLTagStart(){ return "<MDWorkspaceName>"; }
 static const std::string workspaceNameXMLTagEnd() { return "</MDWorkspaceName>"; }
 static const std::string workspaceLocationXMLTagStart() { return "<MDWorkspaceLocation>"; }
 static const std::string workspaceLocationXMLTagEnd() { return "</MDWorkspaceLocation>"; }
@@ -48,6 +48,8 @@ static const std::string functionNodeName() { return "functionNodeName"; }
 static const std::string geometryOperatorInfo() { return "geometryOperatorInfo"; }
 static const std::string functionOperatorInfo() { return "functionOperatorInfo"; }
 static const std::string RebinnedWSName() { return "RebinnedWS"; }
-}; // namespace Mantid
+};
+// clang-format on
+
 } // namespace Geometry
 } // namespace Mantid

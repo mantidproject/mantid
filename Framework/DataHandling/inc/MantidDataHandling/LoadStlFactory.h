@@ -13,17 +13,24 @@
 namespace Mantid {
 namespace DataHandling {
 
-class MANTID_DATAHANDLING_DLL LoadStlFactory{public : static std::unique_ptr<LoadStl> createReader(
-    const std::string &filename, ScaleUnits scaleType){std::unique_ptr<LoadStl> reader = nullptr;
-if (LoadBinaryStl::isBinarySTL(filename)) {
-  reader = std::make_unique<LoadBinaryStl>(filename, scaleType);
-} else if (LoadAsciiStl::isAsciiSTL(filename)) {
-  reader = std::make_unique<LoadAsciiStl>(filename, scaleType);
-} else {
-  throw Kernel::Exception::ParseError("Could not read file, did not match either STL Format", filename, 0);
+class MANTID_DATAHANDLING_DLL LoadStlFactory{
+
+  // clang-format off
+public :
+static std::unique_ptr<LoadStl> createReader(const std::string &filename, ScaleUnits scaleType) {
+
+  std::unique_ptr<LoadStl> reader = nullptr;
+  if (LoadBinaryStl::isBinarySTL(filename)) {
+    reader = std::make_unique<LoadBinaryStl>(filename, scaleType);
+  } else if (LoadAsciiStl::isAsciiSTL(filename)) {
+    reader = std::make_unique<LoadAsciiStl>(filename, scaleType);
+  } else {
+    throw Kernel::Exception::ParseError("Could not read file, did not match either STL Format", filename, 0);
+  }
+  return reader;
 }
-return reader;
-} // namespace DataHandling
+// clang-format on
+
 }; // namespace Mantid
 
 } // namespace DataHandling
