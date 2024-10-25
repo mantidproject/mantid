@@ -24,7 +24,8 @@ namespace Converters {
  * contains a static member create.
  */
 template <typename ElementType, typename ConversionPolicy>
-struct DLLExport MatrixToNDArray{/**
+struct DLLExport MatrixToNDArray{//clang-format off
+                                 /**
                                   * Operator to convert a matrix to a numpy array
                                   * @param cmatrix :: A reference to matrix
                                   * @returns A new PyObject* that points to a numpy array
@@ -36,6 +37,7 @@ using policy = typename ConversionPolicy::template apply<ElementType>;
 return policy::createFromArray(&(cmatrix[0][0]), 2, dims);
 } // namespace Converters
 }; // namespace PythonInterface
+//clang-format on
 } // namespace Mantid
 } // namespace PythonInterface
 } // namespace Mantid
