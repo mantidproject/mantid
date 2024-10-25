@@ -33,7 +33,6 @@ std::string const WORKSPACE_INDICES = "(" + NATURAL_OR_RANGE + "(" + COMMA + NAT
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-/// Used by the unit tests so that m_plotter can be mocked
 OutputPlotOptionsPresenter::OutputPlotOptionsPresenter(IOutputPlotOptionsView *view,
                                                        std::unique_ptr<IOutputPlotOptionsModel> model,
                                                        PlotWidget const &plotType, std::string const &fixedIndices)

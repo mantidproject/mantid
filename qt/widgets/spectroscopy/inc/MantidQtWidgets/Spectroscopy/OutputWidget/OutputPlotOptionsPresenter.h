@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
-#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsModel.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h"
 

@@ -35,10 +35,6 @@ public:
   SimulationTab(QWidget *parent = nullptr);
   ~SimulationTab() override;
 
-  void setOutputPlotOptionsPresenter(
-      IOutputPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
-      std::string const &fixedIndices = "",
-      std::optional<std::map<std::string, std::string>> const &availableActions = std::nullopt);
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
   void clearOutputPlotOptionsWorkspaces();
 
@@ -47,7 +43,6 @@ public:
 
 private:
   virtual void setLoadHistory(bool doLoadHistory) { UNUSED_ARG(doLoadHistory); }
-  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
