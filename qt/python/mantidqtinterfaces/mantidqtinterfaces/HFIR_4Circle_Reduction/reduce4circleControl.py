@@ -2138,10 +2138,10 @@ class CWSCDReductionControl(object):
                 pt = int(row[2])
                 h = float(row[3])
                 k = float(row[4])
-                l = float(row[5])
+                L = float(row[5])
                 q_range = float(row[6])
                 # append
-                row_list.append([counts, scan, pt, h, k, l, q_range])
+                row_list.append([counts, scan, pt, h, k, L, q_range])
             # END-FOR
         # END-WITH
 

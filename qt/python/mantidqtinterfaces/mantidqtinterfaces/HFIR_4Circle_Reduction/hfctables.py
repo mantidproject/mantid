@@ -2016,15 +2016,15 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         return
 
-    def update_hkl(self, i_row, h, k, l):
+    def update_hkl(self, i_row, h, k, L):
         """Update HKL value
         :param i_row: index of the row to have HKL updated
         :param h:
         :param k:
-        :param l:
+        :param L:
         """
         assert isinstance(i_row, int), "row number {0} must be an integer but not a {1}." "".format(i_row, type(i_row))
 
-        self.update_cell_value(i_row, self._colIndexCalculatedHKL, self.format_array([h, k, l]))
+        self.update_cell_value(i_row, self._colIndexCalculatedHKL, self.format_array([h, k, L]))
 
         return

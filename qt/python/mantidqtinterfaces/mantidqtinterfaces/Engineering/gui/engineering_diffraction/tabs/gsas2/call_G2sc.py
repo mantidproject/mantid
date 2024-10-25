@@ -56,8 +56,8 @@ def add_pawley_reflections(pawley_reflections, project, d_min):
         phase.data["General"]["doPawley"] = True
         gsas_reflections = []
         for reflection in pawley_reflections[iphase]:
-            [h, k, l], d, multiplicity = reflection
-            gsas_reflections.append([int(h), int(k), int(l), int(multiplicity), float(d), True, 100.0, d_min])
+            [h, k, L], d, multiplicity = reflection
+            gsas_reflections.append([int(h), int(k), int(L), int(multiplicity), float(d), True, 100.0, d_min])
         phase.data["Pawley ref"] = gsas_reflections
 
 
