@@ -54,8 +54,8 @@ def m3mEquiv(hkl_input, tog):
     hkl = hkl_input
     h = float(hkl[0])
     k = float(hkl[1])
-    l = float(hkl[2])
-    all_equivs = np.asarray(list(plusAndMinusPermutations([h, k, l])))
+    L = float(hkl[2])
+    all_equivs = np.asarray(list(plusAndMinusPermutations([h, k, L])))
     # print all_equivs
 
     # Remove non-unique equivalents

@@ -167,10 +167,10 @@ class MantidGeom(object):
             comp = self._append_child("component", root, type=type_name, idlist=idlist)
         else:
             comp = self._append_child("component", root, type=type_name)
-        l = comp
+        location = comp
         if blank_location:
-            l = self._append_child("location", comp)
-        return l
+            location = self._append_child("location", comp)
+        return location
 
     def makeTypeElement(self, name):
         """

@@ -53,7 +53,7 @@ def dlmread(filename):
     return np.array(content)
 
 
-def calcDspacing(a, b, c, alp, bet, gam, h, k, l):
+def calcDspacing(a, b, c, alp, bet, gam, h, k, L):
     """
     %CALCDSPACING for general unit cell: a,b,c,alp,bet,gam returns d-spacing for
     %reflection h,k,l
@@ -69,9 +69,9 @@ def calcDspacing(a, b, c, alp, bet, gam, h, k, l):
     oneoverdsq = (1.0 - ca**2 - cb**2 - cg**2 + 2 * ca * cb * cg) ** (-1) * (
         (h * sa / a) ** 2
         + (k * sb / b) ** 2
-        + (l * sg / c) ** 2
-        + (2 * k * l / (b * c)) * (cb * cg - ca)
-        + (2 * l * h / (c * a)) * (cg * ca - cb)
+        + (L * sg / c) ** 2
+        + (2 * k * L / (b * c)) * (cb * cg - ca)
+        + (2 * L * h / (c * a)) * (cg * ca - cb)
         + (2 * h * k / (a * b)) * (ca * cb - cg)
     )
 
@@ -92,15 +92,15 @@ def genhkl(hmin, hmax, kmin, kmax, lmin, lmax):
     nk = len(kvals)
     nl = len(lvals)
 
-    l = 0
+    L = 0
     hkl = np.zeros(shape=(nh * nl * nk, 3))
     for i in range(nh):
         for j in range(nk):
             for k in range(nl):
-                hkl[l][0] = hvals[i]
-                hkl[l][1] = kvals[j]
-                hkl[l][2] = lvals[k]
-                l += 1
+                hkl[L][0] = hvals[i]
+                hkl[L][1] = kvals[j]
+                hkl[L][2] = lvals[k]
+                L += 1
     return hkl
 
 
@@ -108,16 +108,16 @@ def mod(a, b):
     return a % b
 
 
-def forbidden(h, k, l):
+def forbidden(h, k, L):
     """
     %returns logical positive if this hkl is fobidden according to
     %   diamond reflections conditions....
     """
     ah = abs(h)
     ak = abs(k)
-    al = abs(l)
+    al = abs(L)
 
-    if (h == 0) and (k == 0) and (l == 0):
+    if (h == 0) and (k == 0) and (L == 0):
         result = 1
         boolresult = bool(result)
         return boolresult
@@ -132,10 +132,10 @@ def forbidden(h, k, l):
         result = 0
 
     # condition 1
-    if (h != 0) and (k != 0) and (l != 0):  # general hkl
+    if (h != 0) and (k != 0) and (L != 0):  # general hkl
         term1 = h + k
-        term2 = h + l  # all have to be even
-        term3 = k + l
+        term2 = h + L  # all have to be even
+        term3 = k + L
         if not ((term1 % 2) == 0 and (term2 % 2) == 0 and (term3 % 2) == 0):
             result = 1
             boolresult = bool(result)
@@ -144,10 +144,10 @@ def forbidden(h, k, l):
             result = 0
 
     # % condition 2
-    if (h == 0) and (k != 0) and (l != 0):  # 0kl reflections
-        term1 = k + l
+    if (h == 0) and (k != 0) and (L != 0):  # 0kl reflections
+        term1 = k + L
         mod4 = mod(term1, 4)
-        if not (mod4 == 0 and mod(k, 2) == 0 and mod(l, 2) == 0):
+        if not (mod4 == 0 and mod(k, 2) == 0 and mod(L, 2) == 0):
             result = 1
             boolresult = bool(result)
             return boolresult
@@ -156,7 +156,7 @@ def forbidden(h, k, l):
 
     # condition 3
     if h == k:  # hhl reflections
-        if not (mod(h + l, 2) == 0):
+        if not (mod(h + L, 2) == 0):
             result = 1
             boolresult = bool(result)
             return boolresult
@@ -164,8 +164,8 @@ def forbidden(h, k, l):
             result = 0
 
     # condition 4
-    if (h == 0) and (k == 0) and (l != 0):  # 00l reflections not including 000
-        mod4 = mod(l, 4)
+    if (h == 0) and (k == 0) and (L != 0):  # 00l reflections not including 000
+        mod4 = mod(L, 4)
         if not (mod4 == 0):
             result = 1
             boolresult = bool(result)
@@ -193,8 +193,8 @@ def allowedDiamRefs(hmin, hmax, kmin, kmax, lmin, lmax):
     for i in range(n):
         h = allhkl[i][0]
         k = allhkl[i][1]
-        l = allhkl[i][2]
-        if forbidden(h, k, l) or forbidden(l, h, k) or forbidden(k, l, h):
+        L = allhkl[i][2]
+        if forbidden(h, k, L) or forbidden(L, h, k) or forbidden(k, L, h):
             allhkl[i] = 0  # set equal to zero
 
     k = 0

@@ -257,9 +257,9 @@ class BaseSXTest(unittest.TestCase):
             hs = range(3)
         for h in hs:
             for k in ks:
-                for l in ls:
+                for L in ls:
                     try:
-                        peaks.addPeak(peaks.createPeakHKL([h, k, l]))
+                        peaks.addPeak(peaks.createPeakHKL([h, k, L]))
                     except ValueError:
                         pass
 

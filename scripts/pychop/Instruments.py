@@ -650,7 +650,7 @@ class Moderator(object):
         """Interpolates flux from a table of measured flux"""
         if not hasattr(self, "flux_interp"):
             raise AttributeError("This instrument does not have a table of measured flux")
-        wavelength = [min(max(l, self.fmn), self.fmx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, "__len__") else [Ei]))]
+        wavelength = [min(max(value, self.fmn), self.fmx) for value in np.sqrt(E2L / np.array(Ei if hasattr(Ei, "__len__") else [Ei]))]
         return self.flux_interp(wavelength[0])
 
     @property
