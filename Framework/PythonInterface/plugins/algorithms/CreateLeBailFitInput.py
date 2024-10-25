@@ -172,14 +172,14 @@ class CreateLeBailFitInput(PythonAlgorithm):
         hkldict = {}
         for h in range(0, max_m):
             for k in range(h, max_m):
-                for l in range(k, max_m):
-                    dsq = h * h + k * k + l * l
+                for L in range(k, max_m):
+                    dsq = h * h + k * k + L * L
                     if dsq <= max_hkl_sq:
                         if (dsq in hkldict) is False:
                             hkldict[dsq] = []
-                        hkldict[dsq].append([h, k, l])
+                        hkldict[dsq].append([h, k, L])
                     # ENDIF
-                # ENDFOR (l)
+                # ENDFOR (L)
             # ENDFOR (k)
         # ENDFOR (h)
 

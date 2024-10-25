@@ -195,8 +195,8 @@ class AngularAutoCorrelationsTwoAxes(PythonAlgorithm):
             sum_position_species_two = np.zeros((n_timesteps, n_dimensions))
             for k in species_one:
                 sum_position_species_one += cartesian_configuration[k]
-            for l in species_two:
-                sum_position_species_two += cartesian_configuration[l]
+            for L in species_two:
+                sum_position_species_two += cartesian_configuration[L]
             avg_position_species_one = 1.0 * sum_position_species_one / float(len(species_one))
             avg_position_species_two = 1.0 * sum_position_species_two / float(len(species_two))
             # Choose the 1st element of species_three to build the 2nd vector

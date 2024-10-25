@@ -324,8 +324,8 @@ class LinkedUBs(DataProcessorAlgorithm):
                         and qz_pred - qtol_var <= qz_obs <= qz_pred + qtol_var
                         and d_pred - self._dtol <= d_obs <= d_pred + self._dtol
                     ):
-                        h, k, l = HKL_ordered[j]
-                        p_obs.setHKL(h, k, l)
+                        h, k, L = HKL_ordered[j]
+                        p_obs.setHKL(h, k, L)
                         p_obs.setIntHKL(p_obs.getHKL())
                         linked_peaks.addPeak(p_obs)
 

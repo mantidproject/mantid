@@ -285,8 +285,8 @@ class LRReflectivityOutput(PythonAlgorithm):
             if len(meta_data.strip()) > 0:
                 content += "#\n"
                 lines = meta_data.strip().split("\n")
-                for l in lines:
-                    content += "# %s\n" % l
+                for line in lines:
+                    content += f"# {line}\n"
                 content += "#\n"
         except:
             logger.error("Could not write meta-data to reflectivity file.")

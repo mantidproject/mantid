@@ -261,12 +261,12 @@ class DeltaPDF3D(PythonAlgorithm):
         if cut_shape == "cube":
             for h in range(int(np.ceil(Xmin)), int(Xmax) + 1):
                 for k in range(int(np.ceil(Ymin)), int(Ymax) + 1):
-                    for l in range(int(np.ceil(Zmin)), int(Zmax) + 1):
-                        if not check_space_group or sg.isAllowedReflection([h, k, l]):
+                    for L in range(int(np.ceil(Zmin)), int(Zmax) + 1):
+                        if not check_space_group or sg.isAllowedReflection([h, k, L]):
                             signal[
                                 int((h - size[0] - Xmin) / Xwidth + 1) : int((h + size[0] - Xmin) / Xwidth),
                                 int((k - size[1] - Ymin) / Ywidth + 1) : int((k + size[1] - Ymin) / Ywidth),
-                                int((l - size[2] - Zmin) / Zwidth + 1) : int((l + size[2] - Zmin) / Zwidth),
+                                int((L - size[2] - Zmin) / Zwidth + 1) : int((L + size[2] - Zmin) / Zwidth),
                             ] = np.nan
         else:  # sphere
             mask = (X - np.round(X)) ** 2 / size[0] ** 2 + (Y - np.round(Y)) ** 2 / size[1] ** 2 + (Z - np.round(Z)) ** 2 / size[2] ** 2 < 1
@@ -275,12 +275,12 @@ class DeltaPDF3D(PythonAlgorithm):
             if check_space_group:
                 for h in range(int(np.ceil(Xmin)), int(Xmax) + 1):
                     for k in range(int(np.ceil(Ymin)), int(Ymax) + 1):
-                        for l in range(int(np.ceil(Zmin)), int(Zmax) + 1):
-                            if not sg.isAllowedReflection([h, k, l]):
+                        for L in range(int(np.ceil(Zmin)), int(Zmax) + 1):
+                            if not sg.isAllowedReflection([h, k, L]):
                                 mask[
                                     int((h - 0.5 - Xmin) / Xwidth + 1) : int((h + 0.5 - Xmin) / Xwidth),
                                     int((k - 0.5 - Ymin) / Ywidth + 1) : int((k + 0.5 - Ymin) / Ywidth),
-                                    int((l - 0.5 - Zmin) / Zwidth + 1) : int((l + 0.5 - Zmin) / Zwidth),
+                                    int((L - 0.5 - Zmin) / Zwidth + 1) : int((L + 0.5 - Zmin) / Zwidth),
                                 ] = False
 
             signal[mask] = np.nan

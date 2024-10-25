@@ -188,8 +188,8 @@ class AngularAutoCorrelationsSingleAxis(PythonAlgorithm):
 
             for k in species_one:
                 sum_position_species_one += cartesian_configuration[k]
-            for l in species_two:
-                sum_position_species_two += cartesian_configuration[l]
+            for L in species_two:
+                sum_position_species_two += cartesian_configuration[L]
             avg_position_species_one = 1.0 * sum_position_species_one / len(species_one)
             avg_position_species_two = 1.0 * sum_position_species_two / len(species_two)
 

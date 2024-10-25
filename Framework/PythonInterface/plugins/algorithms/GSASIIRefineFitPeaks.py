@@ -294,11 +294,11 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         reflections = numpy.array(GSASIIlattice.GenHLaue(d_min, space_group, A))
 
         peaks = []
-        for h, k, l, d in reflections:
-            forbidden_by_symmetry, multiplicity = GSASIIspc.GenHKLf([h, k, l], space_group)[:2]
+        for h, k, L, d in reflections:
+            forbidden_by_symmetry, multiplicity = GSASIIspc.GenHKLf([h, k, L], space_group)[:2]
             if not forbidden_by_symmetry:
                 multiplicity *= 2
-                peaks.append([h, k, l, multiplicity, d, True, 100.0, 1.0])
+                peaks.append([h, k, L, multiplicity, d, True, 100.0, 1.0])
         GSASIImath.sortArray(peaks, 4, reverse=True)
         return peaks
 

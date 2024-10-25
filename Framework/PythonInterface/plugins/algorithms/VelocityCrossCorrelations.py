@@ -155,16 +155,16 @@ class VelocityCrossCorrelations(PythonAlgorithm):
                 # Retrieve particle indices from the 'particles' dictionary and
                 # determine the relevant position in the 'correlations' matrices
                 k = elements.index(atoms_to_species[i])
-                l = elements.index(atoms_to_species[j])
+                L = elements.index(atoms_to_species[j])
                 # Check for the order of elements (ensures upper triangular matrix form & consistent order of operations)
-                if k <= l:
+                if k <= L:
                     correlation_temp = self.cross_correlation(velocities[i], velocities[j])
-                    correlations[k, l] += correlation_temp
-                    correlation_count[k, l] += 1
+                    correlations[k, L] += correlation_temp
+                    correlation_count[k, L] += 1
                 else:
                     correlation_temp = self.cross_correlation(velocities[j], velocities[i])
-                    correlations[l, k] += correlation_temp
-                    correlation_count[l, k] += 1
+                    correlations[L, k] += correlation_temp
+                    correlation_count[L, k] += 1
 
         logger.information(str(time.time() - start_time) + " s")
 
