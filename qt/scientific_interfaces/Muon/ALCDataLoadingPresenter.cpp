@@ -60,14 +60,12 @@ void ALCDataLoadingPresenter::handleRunsFound() {
     m_view->setLoadStatus("Waiting", "orange");
     return;
   }
-
   // Check for errors
   if (!m_view->getRunsError().empty()) {
     m_view->setLoadStatus("Error", "red");
     m_view->displayError(m_view->getRunsError());
     return;
   }
-
   // Try update info and enable load
   try {
     updateAvailableInfo();
@@ -96,7 +94,6 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
     m_view->enableRunsAutoAdd(false);
     return;
   }
-
   // Warning message if trying to load excessive number of files
   if (files.size() > RUNS_WARNING_LIMIT) {
     auto continueLoad = m_view->displayWarning("You are attempting to load " + std::to_string(files.size()) +
@@ -162,7 +159,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     m_view->setAvailableInfoToEmpty();
     throw std::runtime_error(error.what());
   }
-  m_view->setPath(getPathFromFiles());
+  m_view->setPath(m_model->getPathFromFiles(m_view->getFiles()));
   m_view->setAvailableLogs(m_model->getLogs());
   m_view->setAvailablePeriods(m_model->getPeriods());
 
@@ -184,19 +181,6 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
       m_view->setTimeLimits(m_model->getMinTime(), m_model->getWsForMuonInfo()->x(0).back());
     }
   }
-}
-
-std::string ALCDataLoadingPresenter::getPathFromFiles() const {
-  const auto files = m_view->getFiles();
-  if (files.empty())
-    return "";
-  const auto firstDirectory = files[0u].substr(0u, files[0u].find_last_of("/\\"));
-  // Lambda to compare directories from a path
-  const auto hasSameDirectory = [&firstDirectory](const auto &path) {
-    return path.substr(0u, path.find_last_of("/\\")) == firstDirectory;
-  };
-  const auto sameDirectory = std::all_of(files.cbegin(), files.cend(), hasSameDirectory);
-  return sameDirectory ? firstDirectory : "Multiple Directories";
 }
 
 MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() { return m_model->exportWorkspace(); }

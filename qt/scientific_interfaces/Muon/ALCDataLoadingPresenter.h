@@ -81,9 +81,6 @@ private:
   /// Check the group is valid
   std::string isCustomGroupingValid(const std::string &group, bool &isValid);
 
-  /// Get path from files
-  std::string getPathFromFiles() const;
-
   /// Update info on MuonPeriodInfo widget using sample logs from ws
   void updateAvailablePeriodInfo(const Mantid::API::MatrixWorkspace_sptr &ws);
 
