@@ -286,7 +286,7 @@ class _NOMADMedianDetectorTest:
             pass
         return pixel_mask_states
 
-    def _get_intensities(self, intensities_workspace: MatrixWorkspace) -> np.ma.core.MaskedArray:  # F821
+    def _get_intensities(self, intensities_workspace: MatrixWorkspace) -> np.ma.core.MaskedArray:
         r"""
         Integrated intensity of each pixel for pixels in use. Pixels of unused eightpacks are masked
 
