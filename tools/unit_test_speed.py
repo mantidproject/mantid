@@ -17,8 +17,8 @@ with open(sys.argv[1], "r") as f:
     lines = f.readlines()
 
 lines = filter(lambda x: "....   Passed" in x, lines)
-names = [l.split(":")[1].split("....")[0] for l in lines]
-times = [l.split("Passed")[-1].split("sec")[0] for l in lines]
+names = [line.split(":")[1].split("....")[0] for line in lines]
+times = [line.split("Passed")[-1].split("sec")[0] for line in lines]
 
 with open(sys.argv[2], "w") as f:
     f.write("name, time\n")

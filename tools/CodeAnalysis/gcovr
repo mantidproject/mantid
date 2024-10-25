@@ -705,20 +705,20 @@ def print_xml_report(covdata):  # noqa: C901
             class_lines += 1
             if hits > 0:
                 class_hits += 1
-            l = doc.createElement("line")
-            l.setAttribute("number", str(line))
-            l.setAttribute("hits", str(hits))
+            line = doc.createElement("line")
+            line.setAttribute("number", str(line))
+            line.setAttribute("hits", str(hits))
             branches = data.branches.get(line)
             if branches is None:
-                l.setAttribute("branch", "false")
+                line.setAttribute("branch", "false")
             else:
                 b_hits = 0
                 for v in branches.values():
                     if v > 0:
                         b_hits += 1
                 coverage = 100 * b_hits / len(branches)
-                l.setAttribute("branch", "true")
-                l.setAttribute("condition-coverage", "%i%% (%i/%i)" % (coverage, b_hits, len(branches)))
+                line.setAttribute("branch", "true")
+                line.setAttribute("condition-coverage", "%i%% (%i/%i)" % (coverage, b_hits, len(branches)))
                 cond = doc.createElement("condition")
                 cond.setAttribute("number", "0")
                 cond.setAttribute("type", "jump")
@@ -727,9 +727,9 @@ def print_xml_report(covdata):  # noqa: C901
                 class_branches += float(len(branches))
                 conditions = doc.createElement("conditions")
                 conditions.appendChild(cond)
-                l.appendChild(conditions)
+                line.appendChild(conditions)
 
-            lines.appendChild(l)
+            lines.appendChild(line)
 
         className = fname.replace(".", "_")
         c.setAttribute("name", className)
