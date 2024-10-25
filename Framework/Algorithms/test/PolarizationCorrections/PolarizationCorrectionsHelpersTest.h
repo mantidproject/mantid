@@ -47,7 +47,43 @@ public:
     TS_ASSERT(ws == nullptr);
   }
 
+  void testGetORSONotationForSpinStateForWildes() { runTestGetORSONotationForSpinStates(WILDES_SPIN_STATES); }
+
+  void testGetORSONotationForSpinStateForFredrikze() { runTestGetORSONotationForSpinStates(FREDRIKZE_SPIN_STATES); }
+
+  void testGetORSONotationForSpinStateForInvalidSpinStateThrowsError() {
+    TS_ASSERT_THROWS(SpinStatesORSO::getORSONotationForSpinState("invalidSpinState"), std::invalid_argument &);
+  }
+
+  void testAddORSOLogForSpinStateForWildes() {
+    auto ws = createWorkspace("testWs");
+    runTestAddORSOLogForSpinStates(ws, WILDES_SPIN_STATES);
+  }
+
+  void testAddORSOLogForSpinStateForFredrikze() {
+    auto ws = createWorkspace("testWs");
+    runTestAddORSOLogForSpinStates(ws, FREDRIKZE_SPIN_STATES);
+  }
+
+  void testAddORSOLogForSpinStateForInvalidSpinStateThrowsError() {
+    auto ws = createWorkspace("testWs");
+    TS_ASSERT_THROWS(SpinStatesORSO::addORSOLogForSpinState(ws, "invalidSpinState"), std::invalid_argument &);
+  }
+
 private:
+  const std::vector<std::string> WILDES_SPIN_STATES{
+      SpinStateConfigurationsWildes::PLUS_PLUS,  SpinStateConfigurationsWildes::PLUS_MINUS,
+      SpinStateConfigurationsWildes::MINUS_PLUS, SpinStateConfigurationsWildes::MINUS_MINUS,
+      SpinStateConfigurationsWildes::PLUS,       SpinStateConfigurationsWildes::MINUS};
+
+  const std::vector<std::string> FREDRIKZE_SPIN_STATES{
+      SpinStateConfigurationsFredrikze::PARA_PARA, SpinStateConfigurationsFredrikze::PARA_ANTI,
+      SpinStateConfigurationsFredrikze::ANTI_PARA, SpinStateConfigurationsFredrikze::ANTI_ANTI,
+      SpinStateConfigurationsFredrikze::PARA,      SpinStateConfigurationsFredrikze::ANTI};
+
+  const std::vector<std::string> ORSO_SPIN_STATES{SpinStatesORSO::PP, SpinStatesORSO::PM, SpinStatesORSO::MP,
+                                                  SpinStatesORSO::MM, SpinStatesORSO::PO, SpinStatesORSO::MO};
+
   WorkspaceGroup_sptr createGroupWorkspaceToMatchSpinStates(const std::vector<std::string> &spinStateOrder) {
     WorkspaceGroup_sptr grp = std::make_shared<WorkspaceGroup>();
     for (size_t i = 0; i < spinStateOrder.size(); ++i) {
@@ -85,5 +121,22 @@ private:
     auto trimmedInput = input;
     boost::trim(trimmedInput);
     return trimmedInput;
+  }
+
+  void runTestGetORSONotationForSpinStates(const std::vector<std::string> &spinStates) {
+    for (size_t i = 0; i < spinStates.size(); i++) {
+      const auto spinStateORSO = SpinStatesORSO::getORSONotationForSpinState(spinStates[i]);
+      TS_ASSERT_EQUALS(spinStateORSO, ORSO_SPIN_STATES[i]);
+    }
+  }
+
+  void runTestAddORSOLogForSpinStates(const MatrixWorkspace_sptr &ws, const std::vector<std::string> &spinStates) {
+    // Looping through the spin states in this test also checks that we can overwrite any existing ORSO spin state log
+    for (size_t i = 0; i < spinStates.size(); i++) {
+      SpinStatesORSO::addORSOLogForSpinState(ws, spinStates[i]);
+      const auto &run = ws->run();
+      TS_ASSERT(run.hasProperty(SpinStatesORSO::LOG_NAME));
+      TS_ASSERT_EQUALS(run.getPropertyValueAsType<std::string>(SpinStatesORSO::LOG_NAME), ORSO_SPIN_STATES[i]);
+    }
   }
 };

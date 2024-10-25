@@ -50,13 +50,20 @@ auto constexpr PLUS = "+";
 } // namespace SpinStateConfigurationsWildes
 
 namespace SpinStatesORSO {
-// Values used by the Reflectometry ORSO file format to refer to polarization spin states
+/*
+ * Polarization constants and helper methods to support the Reflectometry ORSO file format
+ */
 auto constexpr PP = "pp";
 auto constexpr PM = "pm";
 auto constexpr MP = "mp";
 auto constexpr MM = "mm";
 auto constexpr PO = "po";
 auto constexpr MO = "mo";
-} // namespace SpinStatesORSO
 
+auto constexpr LOG_NAME = "spin_state_ORSO";
+
+MANTID_ALGORITHMS_DLL const std::string getORSONotationForSpinState(const std::string &spinState);
+MANTID_ALGORITHMS_DLL void addORSOLogForSpinState(const Mantid::API::MatrixWorkspace_sptr &ws,
+                                                  const std::string &spinState);
+} // namespace SpinStatesORSO
 } // namespace Mantid::Algorithms
