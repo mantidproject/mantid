@@ -116,7 +116,7 @@ fi
 cd $RECIPES_DIR
 
 # Add the '--debug' option to EXTRA_BUILD_OPTIONS if you want conda build to provide verbose debug info
-EXTRA_BUILD_OPTIONS="--debug -c mantid"
+EXTRA_BUILD_OPTIONS="--debug"
 
 if [[ $OSTYPE == "msys" ]]; then
     # Do not use build id as it makes the path too long (>260 chars) for CMake (Legacy Windows API issue)
@@ -127,7 +127,7 @@ fi
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS
+    conda mambabuild ./mantid-developer/ "-c mantid" $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
     conda mambabuild ./mantid/ $EXTRA_BUILD_OPTIONS
@@ -142,7 +142,7 @@ if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     if [[ $BUILD_WORKBENCH_WITH_DOCS == false ]]; then
 	export INCLUDE_MANTIDDOCS=False
     fi
-    conda mambabuild ./mantidworkbench/ $EXTRA_BUILD_OPTIONS
+    conda mambabuild ./mantidworkbench/ "-c mantid" $EXTRA_BUILD_OPTIONS
 fi
 
 # elapsed time with second resolution
