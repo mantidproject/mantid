@@ -171,6 +171,7 @@ set(INC_FILES
     inc/MantidKernel/EmptyValues.h
     inc/MantidKernel/EnabledWhenProperty.h
     inc/MantidKernel/EnumeratedString.h
+    inc/MantidKernel/EnumeratedStringProperty.h
     inc/MantidKernel/EnvironmentHistory.h
     inc/MantidKernel/EqualBinsChecker.h
     inc/MantidKernel/ErrorReporter.h
