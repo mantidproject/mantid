@@ -36,6 +36,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr getWsForMuonInfo();
   double getMinTime();
   int extractRunNumber(const std::string &file);
+  std::string getPathFromFiles(std::vector<std::string> files) const;
 
 private:
   /// Last loaded data workspace

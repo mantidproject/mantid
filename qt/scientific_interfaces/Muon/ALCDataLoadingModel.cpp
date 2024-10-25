@@ -215,4 +215,16 @@ int ALCDataLoadingModel::extractRunNumber(const std::string &file) {
   // Return run number as int (removes leading 0's)
   return std::stoi(returnVal);
 }
+
+std::string ALCDataLoadingModel::getPathFromFiles(std::vector<std::string> files) const {
+  if (files.empty())
+    return "";
+  const auto firstDirectory = files[0u].substr(0u, files[0u].find_last_of("/\\"));
+  // Lambda to compare directories from a path
+  const auto hasSameDirectory = [&firstDirectory](const auto &path) {
+    return path.substr(0u, path.find_last_of("/\\")) == firstDirectory;
+  };
+  const auto sameDirectory = std::all_of(files.cbegin(), files.cend(), hasSameDirectory);
+  return sameDirectory ? firstDirectory : "Multiple Directories";
+}
 } // namespace MantidQt::CustomInterfaces
