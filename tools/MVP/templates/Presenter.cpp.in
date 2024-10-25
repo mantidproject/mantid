@@ -1,0 +1,22 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#include "Presenter.h"
+
+#include "Model.h"
+#include "View.h"
+
+
+Presenter::Presenter(std::unique_ptr<IModel> model, IView *view) : m_model(std::move(model)), m_view(view) {
+  // Use a subscriber to avoid Qt connections in the presenter
+  m_view->subscribe(this);
+}
+
+void Presenter::handleButtonClicked() {
+  // An example method to handle a view event
+  m_model->setCount(m_model->count() + 1u);
+  m_view->setLabel(std::to_string(m_model->count()));
+}

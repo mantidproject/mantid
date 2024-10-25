@@ -4,6 +4,7 @@ set(TEST_FILES
     ElwinModelTest.h
     ElwinPresenterTest.h
     IqtModelTest.h
+    IqtPresenterTest.h
     MomentsModelTest.h
     MomentsPresenterTest.h
     SqwModelTest.h

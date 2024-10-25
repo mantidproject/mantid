@@ -166,6 +166,7 @@ set(INC_FILES
     inc/MantidKernel/DllOpen.h
     inc/MantidKernel/DocumentationHeader.h
     inc/MantidKernel/DynamicFactory.h
+    inc/MantidKernel/DynamicPointerCastHelper.h
     inc/MantidKernel/EigenConversionHelpers.h
     inc/MantidKernel/EmptyValues.h
     inc/MantidKernel/EnabledWhenProperty.h
@@ -336,8 +337,10 @@ set(TEST_FILES
     DiskBufferTest.h
     DllOpenTest.h
     DynamicFactoryTest.h
+    DynamicPointerCastHelperTest.h
     EigenConversionHelpersTest.h
     EnabledWhenPropertyTest.h
+    EnumeratedStringPropertyTest.h
     EnumeratedStringTest.h
     EnvironmentHistoryTest.h
     EqualBinsCheckerTest.h

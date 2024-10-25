@@ -1,0 +1,34 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+from os import path
+from qtpy.QtWidgets import QWidget
+from qtpy import uic
+
+
+class View(QWidget):
+    def __init__(self):
+        super().__init__()
+        self._presenter = None
+
+        # Load gui from ui file.
+        # Mantid has a custom function to do the same: load_ui(fullpath, "ui_filename.ui")
+        # from mantidqt.utils.qt import load_ui
+        # Note that this assumes that the .ui file is in the same directory as the view.py
+        ui_path = path.dirname(path.realpath(__file__))
+        uic.loadUi(path.join(ui_path, "GUIWidget.ui"), self)
+
+        self.pbIncrement.clicked.connect(self.notify_button_clicked)
+
+    def subscribe_presenter(self, presenter) -> None:
+        self._presenter = presenter
+
+    def notify_button_clicked(self) -> None:
+        # An example event slot which notifies the presenter
+        self._presenter.handle_button_clicked()
+
+    def set_label(self, text: str) -> None:
+        self.lbCount.setText(text)

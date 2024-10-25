@@ -22,7 +22,7 @@ Duration: 6 hours as a hands-on course with exercises.
    Tables
    ViewExercise1
    ViewExercise1Solution
-   ReceivingSignalFromView
+   Presenter
    ExtractInfoFromView
    PresenterExercise
    PresenterExerciseSolution

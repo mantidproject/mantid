@@ -88,8 +88,12 @@ void FindPeaksConvolve::exec() {
   }
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputDataWS))
   for (int i = 0; i < static_cast<int>(m_specCount); i++) {
+    PARALLEL_START_INTERRUPT_REGION
     performConvolution(i);
+    PARALLEL_END_INTERRUPT_REGION
   }
+  PARALLEL_CHECK_INTERRUPT_REGION
+
   outputResults();
 }
 
@@ -186,7 +190,6 @@ void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
                 " exceeds the range of the x axis. Please reduce the peak extent.");
   } else {
     const Tensor1D kernel{createKernel(static_cast<int>(kernelBinCount.first))};
-
     const auto binCount{m_inputDataWS->getNumberBins(specNum)};
     // Edge handling is performed by padding the input data with 0 values. Each convolution requires a padding of kernel
     // size + 1. The 1st conv is performed with a kernel of size n, the second size n/2. The resultant pad is split
@@ -198,20 +201,16 @@ void FindPeaksConvolve::performConvolution(const size_t dataIndex) {
     const auto yData_padded{yData.pad(paddings)};
     const Eigen::array<ptrdiff_t, 1> dims({0});
     const Tensor1D yConvOutput{yData_padded.convolve(kernel, dims)};
-
     const auto eData{TensorMap_const{&m_inputDataWS->e(specNum).front(), binCount}.pad(paddings)};
     const Tensor1D eConvOutput{eData.square().convolve(kernel.square(), dims).sqrt()};
-
     const Tensor1D smoothKernel{
         createSmoothKernel(static_cast<size_t>(std::ceil(static_cast<double>(kernelBinCount.first) / 2.0)))};
     Tensor1D iOverSig{(yConvOutput / eConvOutput).unaryExpr([](double val) { return std::isfinite(val) ? val : 0.0; })};
     const Tensor1D iOverSigConvOutput{iOverSig.convolve(smoothKernel, dims)};
-
     extractPeaks(dataIndex, iOverSigConvOutput, xData, yData, kernelBinCount.first / 2);
-
     if (m_createIntermediateWorkspaces) {
       auto wsNames = createIntermediateWorkspaces(dataIndex, kernel, iOverSigConvOutput, xData);
-      std::lock_guard<std::mutex> lock(mtx);
+      std::lock_guard<std::mutex> lock(m_mtx);
       m_intermediateWsNames.insert(m_intermediateWsNames.end(), wsNames.cbegin(), wsNames.cend());
     }
   }
@@ -310,6 +309,7 @@ void FindPeaksConvolve::storePeakResults(const size_t dataIndex,
     if (peakCount > m_maxPeakCount) {
       m_maxPeakCount = peakCount;
     }
+    std::lock_guard<std::mutex> lock(m_mtx);
     m_peakResults[dataIndex] = std::move(peakCentres);
   }
 }
@@ -345,6 +345,7 @@ size_t FindPeaksConvolve::findPeakInRawData(const int xIndex, const TensorMap_co
 
 void FindPeaksConvolve::generateNormalPDF(const int peakExtentBinNumber) {
   if (m_pdf.size() == 0) {
+    std::lock_guard<std::mutex> lock(m_mtx);
     m_pdf.resize(peakExtentBinNumber);
     boost::math::normal_distribution<> dist(0.0,
                                             peakExtentBinNumber / 2.0); // assures 2 stddevs in the resultant vector
@@ -455,7 +456,7 @@ std::string FindPeaksConvolve::populateOutputWorkspaces(
         row << m_specNums[i];
         for (size_t peak_i{0}; peak_i < m_maxPeakCount; peak_i++) {
           if (peak_i < spec.size()) {
-            auto peak = spec[peak_i];
+            const auto &peak = spec[peak_i];
             row << peak.getAttribute(outputTblName);
           } else {
             row << std::nan("");

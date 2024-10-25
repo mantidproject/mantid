@@ -17,23 +17,25 @@ previous section into a single view. To achieve this we will create a
 
 .. code-block:: python
 
-    from qtpy import QtWidgets, QtCore, QtGui
+    from qtpy.QtWidgets import QVBoxLayout, QWidget
+    from typing import Union
 
     import numpy as np
-    import plot_view
-    import view
+    from plot_view import PlotView
+    from view import View
 
-    class MainView(QtWidgets.QWidget):
+    class MainView(QWidget):
 
-        def __init__(self, parent=None):
+        def __init__(self, parent: Union[QWidget, None]=None):
             super().__init__(parent)
+            self.setWindowTitle("view tutorial")
 
-            grid = QtWidgets.QVBoxLayout(self)
-            self.plot_view = plot_view.PlotView(parent=self)
-            self.options_view = view.View(parent=self)
+            grid = QVBoxLayout(self)
+            self._plot_view = PlotView(parent=self)
+            self._options_view = View(parent=self)
 
-            grid.addWidget(self.plot_view)
-            grid.addWidget(self.options_view)
+            grid.addWidget(self._plot_view)
+            grid.addWidget(self._options_view)
             self.setLayout(grid)
 
 The important thing to note here is that when the PlotView and View
@@ -43,16 +45,24 @@ The main only needs to import the main_view:
 
 .. code-block:: python
 
-    class Demo(QtWidgets.QMainWindow):
-        def __init__(self, parent=None):
-            super().__init__(parent)
+    import sys
 
-            self.window = QtWidgets.QMainWindow()
-            my_view = main_view.MainView()
+    from qtpy.QtWidgets import QApplication
 
-            # set the view for the main window
-            self.setCentralWidget(my_view)
-            self.setWindowTitle("view tutorial")
+    from main_view import MainView
+
+
+    def _get_qapplication_instance() -> QApplication:
+        if app := QApplication.instance():
+            return app
+        return QApplication(sys.argv)
+
+
+    if __name__ == "__main__" :
+        app = _get_qapplication_instance()
+        view = MainView()
+        view.show()
+        app.exec_()
 
 You may notice that this main does not incorporate the presenter.
 Now that we have embedded our two views into MainView, Presenter

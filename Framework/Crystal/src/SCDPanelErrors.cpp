@@ -17,6 +17,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidKernel/FileValidator.h"
 #include <algorithm>
 #include <boost/math/special_functions/round.hpp>
@@ -76,7 +77,9 @@ void SCDPanelErrors::moveDetector(double x, double y, double z, double rotx, dou
   if (detname.compare("none") == 0.0)
     return;
   // CORELLI has sixteenpack under bank
-  DataObjects::PeaksWorkspace_sptr inputP = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(inputW);
+  DataObjects::PeaksWorkspace_sptr inputP =
+      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<DataObjects::PeaksWorkspace, API::Workspace>(
+          inputW);
   Geometry::Instrument_sptr inst = std::const_pointer_cast<Geometry::Instrument>(inputP->getInstrument());
   if (inst->getName().compare("CORELLI") == 0.0 && detname != "moderator")
     detname.append("/sixteenpack");
@@ -175,15 +178,9 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xr
   std::shared_ptr<API::Workspace> cloned = m_workspace->clone();
   moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex, scaley, m_bank, cloned);
 
-  auto inputP = std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(cloned);
-  // IAlgorithm_sptr alg =
-  //     Mantid::API::AlgorithmFactory::Instance().create("IndexPeaks", -1);
-  // alg->initialize();
-  // alg->setChild(true);
-  // alg->setLogging(false);
-  // alg->setProperty("PeaksWorkspace", inputP);
-  // alg->setProperty("Tolerance", 0.15);
-  // alg->execute();
+  auto inputP =
+      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<DataObjects::PeaksWorkspace, API::Workspace>(
+          cloned);
   auto inst = inputP->getInstrument();
   Geometry::OrientedLattice lattice = inputP->mutableSample().getOrientedLattice();
   for (int i = 0; i < inputP->getNumberPeaks(); i++) {

@@ -10,6 +10,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/FindPeaksConvolve.h"
@@ -69,11 +70,13 @@ public:
   static FindPeaksConvolveTest *createSuite() { return new FindPeaksConvolveTest(); }
   static void destroySuite(FindPeaksConvolveTest *suite) { delete suite; }
 
+  FindPeaksConvolveTest() { Mantid::API::FrameworkManager::Instance(); }
+
   void setUp() override {
     // Load data file into ADS once
-    loadNexusProcessed("ENGINX_277208_focused_bank_2.nxs", INPUT_TEST_WS_NAME);
-    loadNexusProcessed("VesuvioCalibSpec177.nxs", INPUT_TEST_WS_NAME + "_noisy");
-    loadNexusProcessed("focussed.nxs", INPUT_TEST_WS_NAME + "_focussed");
+    TS_ASSERT_THROWS_NOTHING(loadNexusProcessed("ENGINX_277208_focused_bank_2.nxs", INPUT_TEST_WS_NAME));
+    TS_ASSERT_THROWS_NOTHING(loadNexusProcessed("VesuvioCalibSpec177.nxs", INPUT_TEST_WS_NAME + "_noisy"));
+    TS_ASSERT_THROWS_NOTHING(loadNexusProcessed("focussed.nxs", INPUT_TEST_WS_NAME + "_focussed"));
   }
 
   void test_exec() {

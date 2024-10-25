@@ -6,7 +6,7 @@ MVP Calculator GUI Example
 
 See the following files for the calculator GUI described in :ref:`MVPDesignIntro`.
 
-- :download:`Main module <Calculator.py>`
-- :download:`Model.py <Model.py>`
-- :download:`Presenter.py <Presenter.py>`
-- :download:`View.py <View.py>`
+- :download:`Main module <calculator.py>`
+- :download:`model.py <model.py>`
+- :download:`presenter.py <presenter.py>`
+- :download:`view.py <view.py>`

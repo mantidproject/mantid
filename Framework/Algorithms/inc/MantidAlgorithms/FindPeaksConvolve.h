@@ -66,7 +66,7 @@ private:
   bool m_centreBins;
   Eigen::VectorXd m_pdf;
   std::vector<std::string> m_intermediateWsNames;
-  std::mutex mtx;
+  std::mutex m_mtx;
 
   void init() override;
   void exec() override;

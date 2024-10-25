@@ -6,34 +6,35 @@ In the previous task a label was added to the view. However, the label
 appeared below the button. It would be sensible to place the label
 next to the button. This is possible by using **layouts**.
 
-So far we have used the vertical layout (``QtWidgets.QVBoxLayout``) and we
+So far we have used a grid layout (``QtWidgets.QGridLayout``) and we
 will now use the horizontal layout. It is possible to add sub-layouts
-to a layout, which we will do here by adding a horizontal layout to
-the vertical one. The order in which widgets are added to the layout
-will determine their location.
+to a layout, which we will do here by adding a horizontal layout
+(``QtWidgets.QHBoxLayout``) to the grid one. The order in which
+widgets are added to the layout will determine their location. We will
+also use a vertical layout (``QtWidgets.QVBoxLayout``) in this example.
 
 In the view we will replace the ``__init__`` with the following:
 
 .. code-block:: python
 
-    def __init__(self, parent=None):
+    def __init__(self, parent: Union[QWidget, None]=None):
         super().__init__(parent)
 
-        self.button = QtWidgets.QPushButton('Hi', self)
-        self.button.setStyleSheet("background-color:lightgrey")
+        self._button = QPushButton("Hi", self)
+        self._button.setStyleSheet("background-color:lightgrey")
 
         # connect button to signal
-        self.button.clicked.connect(self.btn_click)
-        self.label = QtWidgets.QLabel()
-        self.label.setText("Button")
+        self._button.clicked.connect(self._button_clicked)
+        self._label = QLabel()
+        self._label.setText("Button")
 
         # add widgets to layout
-        self.sub_layout = QtWidgets.QHBoxLayout()
-        self.sub_layout.addWidget(self.label)
-        self.sub_layout.addWidget(self.button)
+        self._sub_layout = QHBoxLayout()
+        self._sub_layout.addWidget(self._label)
+        self._sub_layout.addWidget(self._button)
 
-        grid = QtWidgets.QVBoxLayout(self)
-        grid.addLayout(self.sub_layout)
+        grid = QVBoxLayout(self)
+        grid.addLayout(self._sub_layout)
 
         # set the layout for the view widget
         self.setLayout(grid)

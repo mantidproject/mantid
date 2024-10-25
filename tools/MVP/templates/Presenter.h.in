@@ -1,0 +1,35 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
+
+#include "Model.h"
+
+#include <string>
+#include <memory>
+
+
+class IView;
+
+class IPresenter {
+public:
+  virtual ~IPresenter() = default;
+
+  virtual void handleButtonClicked() = 0;
+};
+
+class Presenter final : public IPresenter {
+
+public:
+  Presenter(std::unique_ptr<IModel> model, IView *view);
+  ~Presenter() override = default;
+
+  void handleButtonClicked() override;
+
+private:
+  std::unique_ptr<IModel> m_model;
+  IView *m_view;
+};

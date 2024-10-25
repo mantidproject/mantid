@@ -9,56 +9,62 @@ be used.
 
 .. code-block:: python
 
-    from qtpy import QtWidgets, QtCore, QtGui
+    from qtpy.QtWidgets import QHBoxLayout, QLabel, QLineEdit, QPushButton, QVBoxLayout, QWidget
+    from typing import Union
 
 
-    class View(QtWidgets.QWidget):
+    class View(QWidget):
 
-        doSomethingSignal = QtCore.Signal()
-
-        def __init__(self, parent=None):
+        def __init__(self, parent: Union[QWidget, None]=None):
             super().__init__(parent)
+            self.setWindowTitle("view tutorial")
 
-            self.button = QtWidgets.QPushButton('Hi', self)
-            self.button.setStyleSheet("background-color:lightgrey")
+            # A presenter will be subscribed to the view later
+            self._presenter = None
+
+            self._button = QPushButton("Hi", self)
+            self._button.setStyleSheet("background-color:lightgrey")
             # connect button to signal
-            self.button.clicked.connect(self.btn_click)
+            self._button.clicked.connect(self._button_clicked)
 
-            self.label = QtWidgets.QLabel()
-            self.label.setText("Button")
+            self._label = QLabel()
+            self._label.setText("Button")
 
             # add widgets to layout
-            self.sub_layout = QtWidgets.QHBoxLayout()
-            self.sub_layout.addWidget(self.label)
-            self.sub_layout.addWidget(self.button)
+            self._sub_layout = QHBoxLayout()
+            self._sub_layout.addWidget(self._label)
+            self._sub_layout.addWidget(self._button)
 
-            grid = QtWidgets.QVBoxLayout(self)
+            grid = QVBoxLayout(self)
             grid.addLayout(self.sub_layout)
 
-            self.value = QtWidgets.QLineEdit()
-            grid.addWidget(self.value)
-
+            self._value = QLineEdit()
+            grid.addWidget(self._value)
 
             # set the layout for the view widget
             self.setLayout(grid)
 
-        #send signals
-        def btn_click(self):
-            print ("hellow from view")
-            self.doSomethingSignal.emit()
+        def subscribe_presenter(self, presenter) -> None:
+            # Subscribe the presenter to the view so we do not need to
+            # make a Qt connection between the presenter and view
+            self._presenter = presenter
 
-        def getValue(self):
-            return float(self.value.text())
+        def _button_clicked(self) -> None:
+            print("hello from view")
+            self._presenter.handle_button_clicked()
 
-The last function ``getValue`` returns the value of the line
+        def get_value(self) -> float:
+            return float(self._value.text())
+
+The last function ``get_value`` returns the value of the line
 edit. Since ``text()`` returns a string the output is type cast into a
 float.
 
-The presenter has the following code added to the ``handleButton`` method:
+The presenter has the following code added to the ``handle_button_clicked`` method:
 
 .. code-block:: python
 
-    value = self.view.getValue()
-    print("Value is "+str(value))
+    value = self._view.get_value()
+    print(f"Value is {value}")
 
 which gets the value from the view and then prints it to the screen.
