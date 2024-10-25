@@ -66,6 +66,7 @@ Instrument_const_sptr fetchInstrument(WorkspaceGroup const *const groupWS) {
   if (groupWS->size() == 0) {
     throw std::invalid_argument("Input group workspace has no children.");
   }
+
   Workspace_sptr firstWS = groupWS->getItem(0);
   MatrixWorkspace_sptr matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(firstWS);
   return matrixWS->getInstrument();
