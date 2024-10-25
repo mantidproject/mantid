@@ -18,6 +18,7 @@ namespace CustomInterfaces {
 
 class MANTID_SPECTROSCOPY_DLL IOutputPlotOptionsPresenter {
 public:
+  virtual ~IOutputPlotOptionsPresenter() = default;
   virtual void handleWorkspaceChanged(std::string const &workspaceName) = 0;
   virtual void handleSelectedUnitChanged(std::string const &unit) = 0;
   virtual void handleSelectedIndicesChanged(std::string const &indices) = 0;
@@ -35,7 +36,7 @@ public:
   explicit OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, std::unique_ptr<IOutputPlotOptionsModel> model,
                                       PlotWidget const &plotType = PlotWidget::Spectra,
                                       std::string const &fixedIndices = "");
-  ~OutputPlotOptionsPresenter() = default;
+  ~OutputPlotOptionsPresenter() override = default;
 
   void handleWorkspaceChanged(std::string const &workspaceName) override;
   void handleSelectedUnitChanged(std::string const &unit) override;
