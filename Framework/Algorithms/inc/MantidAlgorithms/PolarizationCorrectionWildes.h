@@ -60,7 +60,7 @@ private:
   WorkspaceMap twoInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   WorkspaceMap threeInputCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   WorkspaceMap fullCorrections(const WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
-  API::WorkspaceGroup_sptr groupOutput(const WorkspaceMap &outputs);
+  API::WorkspaceGroup_sptr groupOutput(const WorkspaceMap &outputs, const bool hasAnalyser);
   WorkspaceMap mapInputsToDirections(const std::vector<std::string> &flippers);
   void threeInputsSolve01(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);
   void threeInputsSolve10(WorkspaceMap &inputs, const EfficiencyMap &efficiencies);

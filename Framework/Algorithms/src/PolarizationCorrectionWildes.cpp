@@ -29,6 +29,7 @@ static const std::string SPIN_STATES{"SpinStates"};
 static const std::string EFFICIENCIES{"Efficiencies"};
 static const std::string INPUT_WS{"InputWorkspaces"};
 static const std::string OUTPUT_WS{"OutputWorkspace"};
+static const std::string ADD_SPIN_STATE_LOG{"AddSpinStateToLog"};
 } // namespace Prop
 
 /**
@@ -340,6 +341,9 @@ void PolarizationCorrectionWildes::init() {
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
       "A workspace containing the efficiency factors P1, P2, F1 and F2 as "
       "histograms");
+  declareProperty(
+      Prop::ADD_SPIN_STATE_LOG, false,
+      "Whether to add the final spin state into the sample log of each child workspace in the output group.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -348,6 +352,8 @@ void PolarizationCorrectionWildes::init() {
 void PolarizationCorrectionWildes::exec() {
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
   const auto flippers = PolarizationCorrectionsHelpers::splitSpinStateString(flipperProperty);
+  // Check if the input flipper configuration includes an analyser
+  const bool hasAnalyser = flippers.front().size() > 1;
   const auto inputs = mapInputsToDirections(flippers);
   checkConsistentNumberHistograms(inputs);
   const EfficiencyMap efficiencies = efficiencyFactors();
@@ -358,8 +364,7 @@ void PolarizationCorrectionWildes::exec() {
     outputs = directBeamCorrections(inputs, efficiencies);
     break;
   case 2:
-    // Check if the input flipper configuration includes an analyser
-    if (flippers.front().size() > 1) {
+    if (hasAnalyser) {
       outputs = twoInputCorrections(inputs, efficiencies);
     } else {
       outputs = analyzerlessCorrections(inputs, efficiencies);
@@ -371,7 +376,7 @@ void PolarizationCorrectionWildes::exec() {
   case 4:
     outputs = fullCorrections(inputs, efficiencies);
   }
-  setProperty(Prop::OUTPUT_WS, groupOutput(outputs));
+  setProperty(Prop::OUTPUT_WS, groupOutput(outputs, hasAnalyser));
 }
 
 /**
@@ -513,26 +518,46 @@ void PolarizationCorrectionWildes::checkConsistentX(const WorkspaceMap &inputs, 
  * The workspaces will be published in the ADS, their names appended by
  * appropriate suffices.
  * @param outputs a set of workspaces to group
+ * @param hasAnalyser whether the flipper configuration included an analyser.
  * @return a group workspace
  */
-API::WorkspaceGroup_sptr PolarizationCorrectionWildes::groupOutput(const WorkspaceMap &outputs) {
+API::WorkspaceGroup_sptr PolarizationCorrectionWildes::groupOutput(const WorkspaceMap &outputs,
+                                                                   const bool hasAnalyser) {
   const auto &outWSName = getPropertyValue(Prop::OUTPUT_WS);
   auto spinStateOrder = getPropertyValue(Prop::SPIN_STATES);
+  const bool addSpinStateLog = getProperty(Prop::ADD_SPIN_STATE_LOG);
+
   std::vector<std::string> names;
   if (!spinStateOrder.empty()) {
     names.resize(PolarizationCorrectionsHelpers::splitSpinStateString(spinStateOrder).size());
   }
 
   if (outputs.ppWS) {
+    if (addSpinStateLog) {
+      const auto logSpinState =
+          hasAnalyser ? SpinStateConfigurationsWildes::PLUS_PLUS : SpinStateConfigurationsWildes::PLUS;
+      SpinStatesORSO::addORSOLogForSpinState(outputs.ppWS, logSpinState);
+    }
     addSpinStateOutput(names, spinStateOrder, outWSName, outputs.ppWS, SpinStateConfigurationsWildes::PLUS_PLUS);
   }
   if (outputs.pmWS) {
+    if (addSpinStateLog) {
+      SpinStatesORSO::addORSOLogForSpinState(outputs.pmWS, SpinStateConfigurationsWildes::PLUS_MINUS);
+    }
     addSpinStateOutput(names, spinStateOrder, outWSName, outputs.pmWS, SpinStateConfigurationsWildes::PLUS_MINUS);
   }
   if (outputs.mpWS) {
+    if (addSpinStateLog) {
+      SpinStatesORSO::addORSOLogForSpinState(outputs.mpWS, SpinStateConfigurationsWildes::MINUS_PLUS);
+    }
     addSpinStateOutput(names, spinStateOrder, outWSName, outputs.mpWS, SpinStateConfigurationsWildes::MINUS_PLUS);
   }
   if (outputs.mmWS) {
+    if (addSpinStateLog) {
+      const auto logSpinState =
+          hasAnalyser ? SpinStateConfigurationsWildes::MINUS_MINUS : SpinStateConfigurationsWildes::MINUS;
+      SpinStatesORSO::addORSOLogForSpinState(outputs.mmWS, logSpinState);
+    }
     addSpinStateOutput(names, spinStateOrder, outWSName, outputs.mmWS, SpinStateConfigurationsWildes::MINUS_MINUS);
   }
 

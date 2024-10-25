@@ -457,6 +457,38 @@ public:
     }
   }
 
+  void test_SpinStateAddedToSampleLogWhenRequestedNoAnalyser() {
+    constexpr size_t nHist{2};
+    constexpr size_t nBins{3};
+    BinEdges edges{0.3, 0.6, 0.9, 1.2};
+    const double yVal = 2.3;
+    Counts counts{yVal, yVal, yVal};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    MatrixWorkspace_sptr ws11 = ws00->clone();
+    const std::vector<std::string> wsNames{std::initializer_list<std::string>{"ws00", "ws11"}};
+    const std::array<MatrixWorkspace_sptr, 2> wsList{{ws00, ws11}};
+    for (size_t i = 0; i != 2; ++i) {
+      for (size_t j = 0; j != nHist; ++j) {
+        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
+      }
+      AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
+    }
+    const auto effWS = efficiencies(edges);
+    auto alg = createWildesAlg(wsNames, effWS, "0, 1");
+    alg->setProperty("AddSpinStateToLog", true);
+    const auto outputWS = runAlg(std::move(alg));
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 2)
+    const std::array<std::string, 2> EXPECTED_LOG_VALUES{{SpinStatesORSO::PO, SpinStatesORSO::MO}};
+    for (size_t i = 0; i != 2; ++i) {
+      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(i));
+      TS_ASSERT(ws)
+      const auto &run = ws->run();
+      TS_ASSERT(run.hasProperty(SPIN_STATE_LOG))
+      TS_ASSERT_EQUALS(run.getPropertyValueAsType<std::string>(SPIN_STATE_LOG), EXPECTED_LOG_VALUES[i])
+    }
+  }
+
   void test_SpinStateNotAddedToSampleLogByDefault() {
     constexpr size_t nHist{2};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
