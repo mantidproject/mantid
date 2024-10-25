@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,relative-import,W0611,R0921,R0902,R0904,R0921,C0302,R0912
+# ruff: noqa: E741  # Ambiguous variable name
 ################################################################################
 #
 # MainWindow application for reducing HFIR 4-circle

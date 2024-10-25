@@ -386,15 +386,15 @@ class CRYSTALLoader(AbInitioLoader):
         data.update({"atoms": dict()})
 
         for i, line in enumerate(coord_lines):
-            l = line.split()
-            symbol = str(l[2].decode("utf-8").capitalize())
+            elements = line.split()
+            symbol = str(elements[2].decode("utf-8").capitalize())
 
             atom = Atom(symbol=symbol)
             data["atoms"]["atom_{}".format(i)] = {
                 "symbol": symbol,
                 "mass": atom.mass,
                 "sort": i,
-                "coord": np.asarray(l[3:6]).astype(dtype=FLOAT_TYPE),
+                "coord": np.asarray(elements[3:6]).astype(dtype=FLOAT_TYPE),
             }
 
         self.check_isotopes_substitution(atoms=data["atoms"], masses=atoms_masses, approximate=True)

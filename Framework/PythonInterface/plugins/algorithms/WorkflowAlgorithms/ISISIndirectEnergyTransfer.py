@@ -72,8 +72,8 @@ def _ws_or_none(s):
     return mtd[s] if s != "" else None
 
 
-def _elems_or_none(l):
-    return l if len(l) != 0 else None
+def _elems_or_none(iterable):
+    return iterable if len(iterable) != 0 else None
 
 
 def add_missing_elements(from_list, to_list):

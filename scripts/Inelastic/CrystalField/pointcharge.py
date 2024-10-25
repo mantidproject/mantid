@@ -333,7 +333,7 @@ class PointCharge(object):
             sfi = y / np.sqrt(xy)
             cfi = x / np.sqrt(xy)
 
-        Blm = [[0 for _ in range(4 * l + 5)] for l in range(3)]
+        Blm = [[0 for _ in range(4 * i + 5)] for i in range(3)]
 
         # These are the tesseral harmonics
         #  - see e.g. https://en.wikipedia.org/wiki/Table_of_spherical_harmonics#Real_spherical_harmonics
@@ -384,10 +384,10 @@ class PointCharge(object):
         #
         # where the term in the square brackets is the electric potential due to the point charge neighbour.
 
-        for l in range(3):
-            rl = pow(r, 2 * l + 2) / pow(a0, 2 * l + 2)
-            for m in range(4 * (l + 1) + 1):
-                Blm[l][m] *= -(4.0 * np.pi / (l * 4 + 5)) * q / (r * 1.0e-10) / rl * rn[l] * thetak[l] * energyfactor
+        for i in range(3):
+            rl = pow(r, 2 * i + 2) / pow(a0, 2 * i + 2)
+            for m in range(4 * (i + 1) + 1):
+                Blm[i][m] *= -(4.0 * np.pi / (i * 4 + 5)) * q / (r * 1.0e-10) / rl * rn[i] * thetak[i] * energyfactor
 
         return Blm
 
@@ -476,9 +476,9 @@ class PointCharge(object):
             z = ligands[n][3]
             r = np.sqrt(x * x + y * y + z * z)
             nBlm = self._getBlm(q, x, y, z, r, self.Zlm, self.rns[ion], self.theta[ion])
-            for l in range(3):
-                for m in range(4 * (l + 1) + 1):
-                    Blm[Blms[l][m]] += nBlm[l][m]
+            for i in range(3):
+                for m in range(4 * (i + 1) + 1):
+                    Blm[Blms[i][m]] += nBlm[i][m]
         # Removes parameters which are zero
         for lm in [key for key in Blm.keys() if np.abs(Blm[key]) < 1.0e-10]:
             del Blm[lm]

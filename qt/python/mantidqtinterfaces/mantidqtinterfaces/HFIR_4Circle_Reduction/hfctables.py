@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=W0403,C0103,R0901,R0904,R0913,C0302
+# ruff: noqa: E741  # Ambiguous variable name
 import numpy
 import sys
 from mantidqtinterfaces.HFIR_4Circle_Reduction import fourcircle_utility
