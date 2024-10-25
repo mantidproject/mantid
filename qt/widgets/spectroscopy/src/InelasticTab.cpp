@@ -18,6 +18,7 @@
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h"
 
 #include <MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h>
 #include <QDomDocument>
@@ -52,10 +53,11 @@ void setPropertyIf(const Algorithm_sptr &algorithm, std::string const &propName,
 namespace MantidQt::CustomInterfaces {
 
 InelasticTab::InelasticTab(QObject *parent)
-    : QObject(parent), m_runPresenter(), m_properties(), m_dblManager(new QtDoublePropertyManager()),
-      m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
-      m_dblEdFac(new DoubleEditorFactory()), m_tabStartTime(DateAndTime::getCurrentTime()),
-      m_tabEndTime(DateAndTime::maximum()), m_plotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()),
+    : QObject(parent), m_runPresenter(), m_plotOptionsPresenter(), m_properties(),
+      m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()),
+      m_grpManager(new QtGroupPropertyManager()), m_dblEdFac(new DoubleEditorFactory()),
+      m_tabStartTime(DateAndTime::getCurrentTime()), m_tabEndTime(DateAndTime::maximum()),
+      m_plotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {
   m_parentWidget = dynamic_cast<QWidget *>(parent);
 
@@ -72,6 +74,15 @@ InelasticTab::InelasticTab(QObject *parent)
 
 void InelasticTab::setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter) {
   m_runPresenter = std::move(presenter);
+}
+
+void InelasticTab::setOutputPlotOptionsPresenter(
+    IOutputPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
+    std::optional<std::map<std::string, std::string>> const &availableActions) {
+  auto outputPlotOptionsModel =
+      std::make_unique<OutputPlotOptionsModel>(std::make_unique<ExternalPlotter>(), availableActions);
+  m_plotOptionsPresenter =
+      std::make_unique<OutputPlotOptionsPresenter>(view, std::move(outputPlotOptionsModel), plotType, fixedIndices);
 }
 
 /**

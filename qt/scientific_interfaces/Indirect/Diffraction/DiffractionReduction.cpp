@@ -52,8 +52,9 @@ void DiffractionReduction::initLayout() {
   m_uiForm.pbSettings->setIcon(Settings::icon());
 
   m_runPresenter = std::make_unique<RunPresenter>(this, m_uiForm.runWidget);
-  m_plotOptionsPresenter =
-      std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraUnit, "0");
+  auto outputPlotOptionsModel = std::make_unique<OutputPlotOptionsModel>(std::make_unique<ExternalPlotter>());
+  m_plotOptionsPresenter = std::make_unique<OutputPlotOptionsPresenter>(
+      m_uiForm.ipoPlotOptions, std::move(outputPlotOptionsModel), PlotWidget::SpectraUnit, "0");
 
   m_groupingWidget = new DetectorGroupingOptions(m_uiForm.fDetectorGrouping);
   m_uiForm.fDetectorGrouping->layout()->addWidget(m_groupingWidget);

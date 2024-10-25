@@ -28,10 +28,6 @@ DataProcessor::DataProcessor(QObject *parent, std::unique_ptr<MantidQt::API::IAl
   m_algorithmRunner->subscribe(this);
 }
 
-void DataProcessor::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
-  m_plotOptionsPresenter = std::move(presenter);
-}
-
 void DataProcessor::notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) {
   if (algorithm->algorithm()->name() != "SaveNexusProcessed") {
     m_runPresenter->setRunEnabled(true);

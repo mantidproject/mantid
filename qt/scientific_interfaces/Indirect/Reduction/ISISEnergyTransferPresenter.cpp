@@ -55,8 +55,7 @@ IETPresenter::IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_pt
   m_view->subscribePresenter(this);
   m_algorithmRunner->subscribe(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
-  setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptionsView(), PlotWidget::SpectraSliceSurface));
+  setOutputPlotOptionsPresenter(m_view->getPlotOptionsView(), PlotWidget::SpectraSliceSurface);
 }
 
 void IETPresenter::validateInstrumentDetails(IUserInputValidator *validator) const {

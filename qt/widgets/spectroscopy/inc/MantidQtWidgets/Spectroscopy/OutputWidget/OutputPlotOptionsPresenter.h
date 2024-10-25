@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
-#include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsModel.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h"
 
@@ -20,6 +18,7 @@ namespace CustomInterfaces {
 
 class MANTID_SPECTROSCOPY_DLL IOutputPlotOptionsPresenter {
 public:
+  virtual ~IOutputPlotOptionsPresenter() = default;
   virtual void handleWorkspaceChanged(std::string const &workspaceName) = 0;
   virtual void handleSelectedUnitChanged(std::string const &unit) = 0;
   virtual void handleSelectedIndicesChanged(std::string const &indices) = 0;
@@ -34,13 +33,10 @@ class MANTID_SPECTROSCOPY_DLL OutputPlotOptionsPresenter final : public IOutputP
                                                                  public AnalysisDataServiceObserver {
 
 public:
-  OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
-                             std::string const &fixedIndices = "",
-                             std::optional<std::map<std::string, std::string>> const &availableActions = std::nullopt);
-  /// Used by the unit tests so that the view and model can be mocked
-  OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, std::unique_ptr<IOutputPlotOptionsModel> model,
-                             PlotWidget const &plotType = PlotWidget::Spectra, std::string const &fixedIndices = "");
-  ~OutputPlotOptionsPresenter() = default;
+  explicit OutputPlotOptionsPresenter(IOutputPlotOptionsView *view, std::unique_ptr<IOutputPlotOptionsModel> model,
+                                      PlotWidget const &plotType = PlotWidget::Spectra,
+                                      std::string const &fixedIndices = "");
+  ~OutputPlotOptionsPresenter() override = default;
 
   void handleWorkspaceChanged(std::string const &workspaceName) override;
   void handleSelectedUnitChanged(std::string const &unit) override;

@@ -67,9 +67,6 @@ class MANTIDQT_INELASTIC_DLL CorrectionsTab : public InelasticTab {
 public:
   /// Constructor
   CorrectionsTab(QWidget *parent = nullptr);
-
-  /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
   /// Set the active workspaces used in the plotting options
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
   /// Used to clear the workspaces held by the output plotting widget
@@ -102,8 +99,6 @@ private:
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
   virtual void setLoadHistory(bool doLoadHistory) { (void)doLoadHistory; };
-
-  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
