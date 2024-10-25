@@ -1,1 +1,1 @@
-- ``EnumeratedStringProperty`` which uses ``EnumeratedString`` can be used in C++ bases algorithms
+- ``EnumeratedStringProperty`` which uses ``EnumeratedString`` can be used in C++ based algorithms
