@@ -6,15 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCDataLoadingPresenter.h"
 
-#include "MantidAPI/AlgorithmManager.h"
-
-#include "ALCLatestFileFinder.h"
-
-#include "Poco/File.h"
-#include <Poco/ActiveResult.h>
-#include <Poco/Path.h>
-#include <sstream>
-
 namespace {
 const int RUNS_WARNING_LIMIT = 200;
 // must include the "."
@@ -26,8 +17,7 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view, std::unique_ptr<ALCDataLoadingModel> model)
-    : m_view(view), m_model(std::move(model)), m_directoryChanged(false), m_lastRunLoadedAuto(-2), m_filesLoaded(),
-      m_wasLastAutoRange(false), m_previousFirstRun("") {}
+    : m_view(view), m_model(std::move(model)) {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
@@ -67,7 +57,6 @@ void ALCDataLoadingPresenter::handleRunsFound() {
     updateAvailableInfo();
     m_view->enableLoad(true);
     m_view->setLoadStatus("Successfully found " + m_view->getInstrument() + m_view->getRunsText(), "green");
-    m_previousFirstRun = m_view->getInstrument() + m_view->getRunsFirstRunText();
   } catch (const std::runtime_error &errorUpdateInfo) {
     m_view->setLoadStatus("Error", "red");
     m_view->displayError(errorUpdateInfo.what());
@@ -101,7 +90,6 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
   m_view->setLoadStatus("Loading " + m_view->getInstrument() + m_view->getRunsText(), "orange");
   try {
     load(files);
-    m_filesLoaded = files;
     m_view->setLoadStatus("Successfully loaded " + m_view->getInstrument() + m_view->getRunsText(), "green");
     m_view->enableRunsAutoAdd(true);
 
@@ -219,26 +207,11 @@ void ALCDataLoadingPresenter::handleInstrumentChanged(const std::string &instrum
 /**
  * The watched directory has been changed - update flag.
  */
-void ALCDataLoadingPresenter::updateDirectoryChangedFlag() { m_directoryChanged = true; }
-
-void ALCDataLoadingPresenter::handleStartWatching(bool watch) {
-  if (watch) {
-    // Get path to watch and add to watcher
-    const auto path = m_view->getPath();
-    m_view->getFileSystemWatcher()->addPath(QString::fromStdString(path));
-    // start a timer that executes every second
-    m_view->getTimer()->start(1000);
-  } else {
-    // Check if watcher has a directory, then remove all
-    if (!m_view->getFileSystemWatcher()->directories().empty()) {
-      m_view->getFileSystemWatcher()->removePaths(m_view->getFileSystemWatcher()->directories());
-    }
-    // Stop timer
-    m_view->getTimer()->stop();
-    m_lastRunLoadedAuto = -2; // Ensures negative if +1 to not be valid
-    m_wasLastAutoRange = false;
-  }
+void ALCDataLoadingPresenter::setDirectoryChanged(bool hasDirectoryChanged) {
+  m_model->setDirectoryChanged(hasDirectoryChanged);
 }
+
+void ALCDataLoadingPresenter::handleWatcherStopped() { m_model->updateAutoLoadCancelled(); }
 
 /**
  * This timer runs every second when we are watching a directory.
@@ -246,65 +219,23 @@ void ALCDataLoadingPresenter::handleStartWatching(bool watch) {
  */
 void ALCDataLoadingPresenter::handleTimerEvent() {
 
-  // Check if there are changes to watched directory
-  if (m_directoryChanged.load()) {
-    // Need to add most recent file to add to list
-    ALCLatestFileFinder finder(m_view->getFirstFile());
-    const auto latestFile = finder.getMostRecentFile();
+  bool filesLoadedIntoModel =
+      m_model->loadFilesFromWatchingDirectory(m_view->getFirstFile(), m_view->getFiles(), m_view->getRunsText());
 
-    // Check if file found
-    if (latestFile.empty()) {
-      // Could not find file this time, but don't reset directory changed flag
-      return;
-    }
-    // If not currently loading load new files
-    if (!isLoading()) {
-      // add to list set text with search
-      const auto oldRuns = m_view->getFiles();
-      if (std::find(oldRuns.begin(), oldRuns.end(), latestFile) == oldRuns.end()) {
-        // Get old text
-        auto newText = m_view->getRunsText();
+  if (filesLoadedIntoModel) {
+    // Set text without search, call manual load
+    m_view->setRunsTextWithoutSearch(m_model->getRunsText());
+    try {
+      load(m_model->getFilesLoaded());
 
-        // Extract run number from latest file
-        auto runNumber = m_model->extractRunNumber(latestFile);
-
-        // If new run number is less then error
-        if (runNumber <= m_lastRunLoadedAuto) {
-          // Is error but continue to watch
-          return;
-        } else if (m_lastRunLoadedAuto + 1 == runNumber) {
-          // Add as range
-          // Check if last added was a range
-          if (m_wasLastAutoRange.load()) {
-            // Remove last run number from text
-            newText = newText.substr(0, newText.find_last_of('-'));
-          }
-          newText += "-" + std::to_string(runNumber);
-          m_wasLastAutoRange = true;
-        } else {
-          // Add as comma
-          newText += "," + std::to_string(runNumber);
-          m_wasLastAutoRange = false;
-        }
-        m_filesLoaded.push_back(latestFile);
-        m_lastRunLoadedAuto = runNumber;
-        // Set text without search, call manual load
-        m_view->setRunsTextWithoutSearch(newText);
-        try {
-          load(m_filesLoaded);
-        } catch (const std::runtime_error &loadError) {
-          // Stop watching and display error
-          m_directoryChanged = false;
-          m_view->enableAll();
-          m_model->setLoadingData(false);
-          m_wasLastAutoRange = false;
-          m_lastRunLoadedAuto = -2;
-          m_view->displayError(loadError.what());
-          m_view->toggleRunsAutoAdd(false);
-        }
-      }
-
-      m_directoryChanged = false;
+    } catch (const std::runtime_error &loadError) {
+      // Stop watching and display error
+      m_model->setDirectoryChanged(false);
+      m_view->enableAll();
+      m_model->setLoadingData(false);
+      m_model->updateAutoLoadCancelled();
+      m_view->displayError(loadError.what());
+      m_view->toggleRunsAutoAdd(false);
     }
   }
 }

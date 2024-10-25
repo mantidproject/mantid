@@ -110,6 +110,8 @@ private:
 
   bool setCurrentLog(const QString &log);
 
+  void handleStartWatching(bool watch);
+
   /// UI form
   Ui::ALCDataLoadingView m_ui;
 
