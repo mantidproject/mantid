@@ -4,7 +4,7 @@ line-length = 140
 lint.select = ["C90", "E", "F", "RUF100", "W"]
 lint.ignore = ["E402", # module level import not at top of file
                "E722", # bare except
-               "E741", "E743", # ambiguous function name, generally 'l'
+               "E741", # ambiguous variable name, generally 'l'
 ]
 exclude = [
    "Framework/PythonInterface/test",
