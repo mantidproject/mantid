@@ -70,8 +70,6 @@ public:
 private:
   /// Overwrites Algorithm method
   void exec() override;
-  /// Execute this version of the algorithm
-  void doExec();
 
   HistogramData::Histogram loadData(const Mantid::HistogramData::BinEdges &edges, const Mantid::NeXus::NXInt &counts,
                                     int period, int spec);

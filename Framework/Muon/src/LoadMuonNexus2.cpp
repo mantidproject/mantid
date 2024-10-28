@@ -64,50 +64,6 @@ LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus() {}
  *values
  */
 void LoadMuonNexus2::exec() {
-  LoadMuonNexus1 load1;
-  LoadMuonNexusV2 loadV2;
-  load1.initialize();
-  loadV2.initialize();
-
-  std::string filePath = getPropertyValue("Filename");
-  Kernel::NexusDescriptor descriptor(filePath);
-  int confidence1 = load1.confidence(descriptor);
-  int confidence2 = this->confidence(descriptor);
-  int confidenceV2 = 0;
-  // If the file is hdf5 then we can possibly use LoadMuonNexusV2
-  // To check this we'll have to create an HDF5 descriptor for the file.
-  if (Kernel::NexusDescriptor::isReadable(filePath, Kernel::NexusDescriptor::Version5)) {
-    Kernel::NexusHDF5Descriptor descriptorHDF5(filePath);
-    confidenceV2 = loadV2.confidence(descriptorHDF5);
-  };
-
-  // if none can load the file throw
-  if (confidence1 < 80 && confidence2 < 80 && confidenceV2 < 80) {
-    throw Kernel::Exception::FileError("Cannot open the file ", filePath);
-  }
-  // Now pick the correct alg
-  if (confidence2 > std::max(confidence1, confidenceV2)) {
-    // Use this loader
-    doExec();
-  } else {
-    // Version 1 or V2
-    auto childAlg = createChildAlgorithm(getLoadAlgName(confidence1, confidenceV2), 0, 1, true, 1);
-    auto loader = std::dynamic_pointer_cast<API::Algorithm>(childAlg);
-    loader->copyPropertiesFrom(*this);
-    loader->executeAsChildAlg();
-    this->copyPropertiesFrom(*loader);
-    API::Workspace_sptr outWS = loader->getProperty("OutputWorkspace");
-    setProperty("OutputWorkspace", outWS);
-  }
-}
-
-/** Read in a muon nexus file of the version 2.
- *
- *  @throw Exception::FileError If the Nexus file cannot be found/opened
- *  @throw std::invalid_argument If the optional properties are set to invalid
- *values
- */
-void LoadMuonNexus2::doExec() {
   // Create the root Nexus class
   NXRoot root(getPropertyValue("Filename"));
 
