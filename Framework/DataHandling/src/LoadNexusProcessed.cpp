@@ -40,6 +40,7 @@
 #include <boost/regex.hpp>
 #include <nexus/NeXusException.hpp>
 
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <string>
@@ -373,28 +374,28 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(NXRoot &root
 void LoadNexusProcessed::execLoader() {
 
   API::Workspace_sptr tempWS;
-  int nWorkspaceEntries = 0;
+  size_t nWorkspaceEntries = 0;
   // Start scoped block
   {
     progress(0, "Opening file...");
 
-    // Throws an approriate exception if there is a problem with file access
+    // Throws an appropriate exception if there is a problem with file access
     const std::string filename = getPropertyValue("Filename");
     NXRoot root(filename);
 
     // "Open" the same file but with the C++ interface
     m_nexusFile = std::make_unique<::NeXus::File>(root.m_fileID);
 
-    // Find out how many first level entries there are
-    // Cast down to int as another property later on is an int
-    nWorkspaceEntries = static_cast<int>((root.groups().size()));
+    // Find out how many NXentry groups there are in the file.
+    nWorkspaceEntries = std::count_if(root.groups().cbegin(), root.groups().cend(),
+                                      [](const auto &g) { return g.nxclass == "NXentry"; });
 
     // Check for an entry number property
     int entrynumber = getProperty("EntryNumber");
     Property const *const entryNumberProperty = this->getProperty("EntryNumber");
     bool bDefaultEntryNumber = entryNumberProperty->isDefault();
 
-    if (!bDefaultEntryNumber && entrynumber > nWorkspaceEntries) {
+    if (!bDefaultEntryNumber && entrynumber > static_cast<int>(nWorkspaceEntries)) {
       g_log.error() << "Invalid entry number specified. File only contains " << nWorkspaceEntries << " entries.\n";
       throw std::invalid_argument("Invalid entry number specified.");
     }
@@ -421,7 +422,7 @@ void LoadNexusProcessed::execLoader() {
       // We already know that this is a group workspace. Is it a true
       // multiperiod workspace.
       const bool bFastMultiPeriod = this->getProperty("FastMultiPeriod");
-      const bool bIsMultiPeriod = isMultiPeriodFile(nWorkspaceEntries, tempWS, g_log);
+      const bool bIsMultiPeriod = isMultiPeriodFile(static_cast<int>(nWorkspaceEntries), tempWS, g_log);
       const Property *specListProp = this->getProperty("SpectrumList");
       m_list = !specListProp->isDefault();
 
@@ -433,7 +434,7 @@ void LoadNexusProcessed::execLoader() {
 
       // load names of each of the workspaces. Note that if we have duplicate
       // names then we don't select them
-      auto names = extractWorkspaceNames(root, static_cast<size_t>(nWorkspaceEntries));
+      auto names = extractWorkspaceNames(root, nWorkspaceEntries);
 
       // remove existing workspace and replace with the one being loaded
       bool wsExists = AnalysisDataService::Instance().doesExist(base_name);
@@ -465,7 +466,7 @@ void LoadNexusProcessed::execLoader() {
         g_log.information("Individual group loading");
       }
 
-      for (int p = 1; p <= nWorkspaceEntries; ++p) {
+      for (size_t p = 1; p <= nWorkspaceEntries; ++p) {
         const auto indexStr = std::to_string(p);
 
         // decide what the workspace should be called
@@ -503,7 +504,7 @@ void LoadNexusProcessed::execLoader() {
     root.close();
   } // All file resources should be scoped to here. All previous file handles
   // must be cleared to release locks
-  loadNexusGeometry(*tempWS, nWorkspaceEntries, g_log, std::string(getProperty("Filename")));
+  loadNexusGeometry(*tempWS, static_cast<int>(nWorkspaceEntries), g_log, std::string(getProperty("Filename")));
 
   m_axis1vals.clear();
 } // namespace DataHandling
@@ -919,7 +920,7 @@ void LoadNexusProcessed::loadV3DColumn(Mantid::NeXus::NXDouble &data, const API:
     data.load();
 
     for (int i = 0; i < rowCount; ++i) {
-      auto &cell = col[i];
+      auto &cell = col[i]; // cppcheck-suppress constVariableReference
       cell(data(i, 0), data(i, 1), data(i, 2));
     }
   }
