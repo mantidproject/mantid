@@ -7,33 +7,13 @@
 #  This file is part of the mantid workbench
 #
 #
-from mantid.kernel import ConfigService
 from mantidqt.widgets import instrumentselector
-from workbench.config import CONF, SAVE_STATE_VERSION
+from workbench.config import SAVE_STATE_VERSION
 from workbench.widgets.settings.general.view import GeneralSettingsView
+from workbench.widgets.settings.general.general_settings_model import GeneralSettingsModel
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QFontDatabase
-from enum import Enum
-
-
-class GeneralProperties(Enum):
-    CRYSTALLOGRAPY_CONV = "Q.convention"
-    FONT = "MainWindow/font"
-    FACILITY = "default.facility"
-    INSTRUMENT = "default.instrument"
-    OPENGL = "MantidOptions.InstrumentView.UseOpenGL"
-    SHOW_INVISIBLE_WORKSPACES = "MantidOptions.InvisibleWorkspaces"
-    PR_NUMBER_OF_CHECKPOINTS = "projectRecovery.numberOfCheckpoints"
-    PR_TIME_BETWEEN_RECOVERY = "projectRecovery.secondsBetween"
-    PR_RECOVERY_ENABLED = "projectRecovery.enabled"
-    PROMPT_ON_DELETING_WORKSPACE = "project/prompt_on_deleting_workspace"
-    PROMPT_SAVE_EDITOR_MODIFIED = "project/prompt_save_editor_modified"
-    PROMPT_SAVE_ON_CLOSE = "project/prompt_save_on_close"
-    USE_NOTIFICATIONS = "Notifications.Enabled"
-    USER_LAYOUT = "MainWindow/user_layouts"
-    WINDOW_BEHAVIOUR = "AdditionalWindows/behaviour"
-    COMPLETION_ENABLED = "Editors/completion_enabled"
 
 
 class GeneralSettings(object):
@@ -47,10 +27,11 @@ class GeneralSettings(object):
 
     WINDOW_BEHAVIOUR = ["On top", "Floating"]
 
-    def __init__(self, parent, view=None, settings_presenter=None):
+    def __init__(self, parent, view=None, settings_presenter=None, model=None):
         self.view = view if view else GeneralSettingsView(parent, self)
         self.parent = parent
         self.settings_presenter = settings_presenter
+        self.model = model if model else GeneralSettingsModel()
         self.load_current_setting_values()
 
         self.setup_facilities_group()
@@ -60,7 +41,7 @@ class GeneralSettings(object):
         self.setup_confirmations()
 
     def setup_facilities_group(self):
-        facilities = sorted(ConfigService.getFacilityNames())
+        facilities = sorted(self.model.get_facility_names())
         if not facilities:
             return
         self.view.facility.addItems(facilities)
@@ -69,7 +50,7 @@ class GeneralSettings(object):
         self.view.instrument_dummy.setVisible(False)
 
         try:
-            default_facility = ConfigService.getFacility().name()
+            default_facility = self.model.get_facility()
         except RuntimeError:
             default_facility = facilities[0]
         self.view.facility.setCurrentIndex(self.view.facility.findText(default_facility))
@@ -77,14 +58,14 @@ class GeneralSettings(object):
         self.view.facility.currentTextChanged.connect(self.action_facility_changed)
 
         try:
-            default_instrument = ConfigService.getInstrument().name()
+            default_instrument = self.model.get_instrument()
         except RuntimeError:
             default_instrument = self.view.instrument.itemText(0)
         self.action_instrument_changed(default_instrument)
         self.view.instrument.currentTextChanged.connect(self.action_instrument_changed)
 
     def update_facilities_group(self):
-        default_facility = ConfigService.getFacility().name()
+        default_facility = self.model.get_facility()
         if not self.view.facility.findText(default_facility) == -1:
             self.view.instrument.blockSignals(True)
             self.view.facility.setCurrentIndex(self.view.facility.findText(default_facility))
@@ -93,7 +74,7 @@ class GeneralSettings(object):
 
     def setup_general_group(self):
         self.view.window_behaviour.addItems(self.WINDOW_BEHAVIOUR)
-        window_behaviour = CONF.get(GeneralProperties.WINDOW_BEHAVIOUR.value, type=str)
+        window_behaviour = self.model.get_window_behaviour()
         if window_behaviour in self.WINDOW_BEHAVIOUR:
             self.view.window_behaviour.setCurrentIndex(self.view.window_behaviour.findText(window_behaviour))
 
@@ -103,27 +84,28 @@ class GeneralSettings(object):
 
     def action_main_font_button_clicked(self):
         font = None
-        if CONF.has(GeneralProperties.FONT.value):
-            font_string = CONF.get(GeneralProperties.FONT.value, type=str).split(",")
+        font_string = self.model.get_font()
+        if font_string is not None:
+            font_string = self.model.get_font().split(",")
             if len(font_string) > 2:
                 font = QFontDatabase().font(font_string[0], font_string[-1], int(font_string[1]))
         font_dialog = self.view.create_font_dialog(self.view, font)
         font_dialog.fontSelected.connect(self.action_font_selected)
 
     def action_font_selected(self, font):
-        font_string = ""
-        if CONF.has(GeneralProperties.FONT.value):
-            font_string = CONF.get(GeneralProperties.FONT.value, type=str)
+        font_string = self.model.get_font()
+        if font_string is None:
+            font_string = ""
         if font_string != font.toString():
-            CONF.set(GeneralProperties.FONT.value, font.toString())
+            self.model.set_font(font.toString())
             if self.settings_presenter is not None:
-                self.settings_presenter.register_change_needs_restart("Main Font Selection")
+                self.model.register_apply_callback(lambda: self.settings_presenter.register_change_needs_restart("Main Font Selection"))
 
     def action_window_behaviour_changed(self, text):
-        CONF.set(GeneralProperties.WINDOW_BEHAVIOUR.value, text)
+        self.model.set_window_behaviour(text)
 
     def action_completion_enabled_modified(self, state):
-        CONF.set(GeneralProperties.COMPLETION_ENABLED.value, bool(state))
+        self.model.set_completion_enabled(bool(state))
 
     def setup_checkbox_signals(self):
         self.view.show_invisible_workspaces.stateChanged.connect(self.action_show_invisible_workspaces)
@@ -138,9 +120,9 @@ class GeneralSettings(object):
         When the facility is changed, refreshes all available instruments that can be selected in the dropdown.
         :param new_facility: The name of the new facility that was selected
         """
-        current_value = ConfigService.getFacility().name()
+        current_value = self.model.get_facility()
         if new_facility != current_value:
-            ConfigService.setFacility(new_facility)
+            self.model.set_facility(new_facility)
         # refresh the instrument selection to contain instruments about the selected facility only
         self.view.instrument.facility = new_facility
         if new_facility != current_value:
@@ -153,34 +135,36 @@ class GeneralSettings(object):
         self.view.use_notifications.stateChanged.connect(self.action_use_notifications_modified)
 
     def action_prompt_save_on_close(self, state):
-        CONF.set(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, bool(state))
+        self.model.set_prompt_save_on_close(bool(state))
 
     def action_prompt_save_editor_modified(self, state):
-        CONF.set(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, bool(state))
+        self.model.set_prompt_on_save_editor_modified(bool(state))
 
     def action_prompt_deleting_workspace(self, state):
-        CONF.set(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, bool(state))
+        self.model.set_prompt_on_deleting_workspace(bool(state))
         if self.settings_presenter is not None:
-            self.settings_presenter.register_change_needs_restart("Prompt when deleting workspaces")
+            self.model.register_apply_callback(
+                lambda: self.settings_presenter.register_change_needs_restart("Prompt when deleting workspaces")
+            )
 
     def action_use_notifications_modified(self, state):
-        ConfigService.setString(GeneralProperties.USE_NOTIFICATIONS.value, "On" if bool(state) else "Off")
+        self.model.set_use_notifications("On" if bool(state) else "Off")
 
     def load_current_setting_values(self):
-        self.view.prompt_save_on_close.setChecked(CONF.get(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, type=bool))
-        self.view.prompt_save_editor_modified.setChecked(CONF.get(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, type=bool))
-        self.view.prompt_deleting_workspaces.setChecked(CONF.get(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, type=bool))
+        self.view.prompt_save_on_close.setChecked(self.model.get_prompt_save_on_close())
+        self.view.prompt_save_editor_modified.setChecked(self.model.get_prompt_on_save_editor_modified())
+        self.view.prompt_deleting_workspaces.setChecked(self.model.get_prompt_on_deleting_workspace())
 
         # compare lower-case, because MantidPlot will save it as lower case,
         # but Python will have the bool's first letter capitalised
-        pr_enabled = "true" == ConfigService.getString(GeneralProperties.PR_RECOVERY_ENABLED.value).lower()
-        pr_time_between_recovery = int(ConfigService.getString(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value))
-        pr_number_checkpoints = int(ConfigService.getString(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value))
-        use_notifications_setting = "on" == ConfigService.getString(GeneralProperties.USE_NOTIFICATIONS.value).lower()
-        crystallography_convention = "Crystallography" == ConfigService.getString(GeneralProperties.CRYSTALLOGRAPY_CONV.value)
-        use_open_gl = "on" == ConfigService.getString(GeneralProperties.OPENGL.value).lower()
-        invisible_workspaces = "true" == ConfigService.getString(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value).lower()
-        completion_enabled = CONF.get(GeneralProperties.COMPLETION_ENABLED.value, type=bool)
+        pr_enabled = "true" == self.model.get_project_recovery_enabled().lower()
+        pr_time_between_recovery = int(self.model.get_project_recovery_time_between_recoveries())
+        pr_number_checkpoints = int(self.model.get_project_recovery_number_of_checkpoints())
+        use_notifications_setting = "on" == self.model.get_use_notifications().lower()
+        crystallography_convention = "Crystallography" == self.model.get_crystallography_convention()
+        use_open_gl = "on" == self.model.get_use_opengl().lower()
+        invisible_workspaces = "true" == self.model.get_show_invisible_workspaces().lower()
+        completion_enabled = self.model.get_completion_enabled()
 
         self.view.project_recovery_enabled.setChecked(pr_enabled)
         self.view.time_between_recovery.setValue(pr_time_between_recovery)
@@ -192,27 +176,27 @@ class GeneralSettings(object):
         self.view.completion_enabled.setChecked(completion_enabled)
 
     def action_project_recovery_enabled(self, state):
-        ConfigService.setString(GeneralProperties.PR_RECOVERY_ENABLED.value, str(bool(state)))
+        self.model.set_project_recovery_enabled(str(bool(state)))
 
     def action_time_between_recovery(self, value):
-        ConfigService.setString(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value, str(value))
+        self.model.set_project_recovery_time_between_recoveries(str(value))
 
     def action_total_number_checkpoints(self, value):
-        ConfigService.setString(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value, str(value))
+        self.model.set_project_recovery_number_of_checkpoints(str(value))
 
     def action_crystallography_convention(self, state):
-        ConfigService.setString(GeneralProperties.CRYSTALLOGRAPY_CONV.value, "Crystallography" if state == Qt.Checked else "Inelastic")
+        self.model.set_crystallography_convention("Crystallography" if state == Qt.Checked else "Inelastic")
 
     def action_instrument_changed(self, new_instrument):
-        current_value = ConfigService.getString(GeneralProperties.INSTRUMENT.value)
+        current_value = self.model.get_instrument()
         if new_instrument != current_value:
-            ConfigService.setString(GeneralProperties.INSTRUMENT.value, new_instrument)
+            self.model.set_instrument(new_instrument)
 
     def action_show_invisible_workspaces(self, state):
-        ConfigService.setString(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value, str(bool(state)))
+        self.model.set_show_invisible_workspaces(str(bool(state)))
 
     def action_use_open_gl(self, state):
-        ConfigService.setString(GeneralProperties.OPENGL.value, "On" if bool(state) else "Off")
+        self.model.set_use_opengl("On" if bool(state) else "Off")
 
     def setup_layout_options(self):
         self.fill_layout_display()
@@ -229,7 +213,7 @@ class GeneralSettings(object):
 
     def get_layout_dict(self):
         try:
-            layout_list = CONF.get(GeneralProperties.USER_LAYOUT.value, type=dict)
+            layout_list = self.model.get_user_layout(get_potential_update=True)
         except (KeyError, TypeError):
             layout_list = {}
         return layout_list
@@ -239,7 +223,7 @@ class GeneralSettings(object):
         if filename != "":
             layout_dict = self.get_layout_dict()
             layout_dict[filename] = self.parent.saveState(SAVE_STATE_VERSION)
-            CONF.set(GeneralProperties.USER_LAYOUT.value, layout_dict)
+            self.model.set_user_layout(layout_dict)
             self.view.new_layout_name.clear()
             self.fill_layout_display()
             self.parent.populate_layout_menu()
@@ -257,7 +241,7 @@ class GeneralSettings(object):
             layout = item.text()
             layout_dict = self.get_layout_dict()
             layout_dict.pop(layout, None)
-            CONF.set(GeneralProperties.USER_LAYOUT.value, layout_dict)
+            self.model.set_user_layout(layout_dict)
             self.fill_layout_display()
             self.parent.populate_layout_menu()
 

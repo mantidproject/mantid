@@ -13,7 +13,8 @@ from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import ensure_widget_is_on_screen
 from workbench.widgets.settings.categories.presenter import CategoriesSettings, CategoryProperties
 from workbench.widgets.settings.fitting.presenter import FittingSettings, FittingProperties
-from workbench.widgets.settings.general.presenter import GeneralSettings, GeneralProperties
+from workbench.widgets.settings.general.presenter import GeneralSettings
+from workbench.widgets.settings.general.general_settings_model import GeneralProperties, GeneralUserConfigProperties
 from workbench.widgets.settings.plots.presenter import PlotSettings, PlotProperties
 from workbench.widgets.settings.view import SettingsView
 from workbench.widgets.settings.model import SettingsModel
@@ -35,6 +36,7 @@ class SettingsPresenter(object):
     def __init__(
         self, parent, view=None, model=None, general_settings=None, categories_settings=None, plot_settings=None, fitting_settings=None
     ):
+        # TODO: construct all the models to give to the main model and one to each presenter
         self.view = view if view else SettingsView(parent, self)
         self.model = model if model else SettingsModel()
         self.general_settings = general_settings if general_settings else GeneralSettings(parent, None, self)
@@ -43,7 +45,7 @@ class SettingsPresenter(object):
         self.fitting_settings = fitting_settings if fitting_settings else FittingSettings(parent)
         self.parent = parent
         self.all_properties = []
-        for properties in [CategoryProperties, FittingProperties, GeneralProperties, PlotProperties]:
+        for properties in [CategoryProperties, FittingProperties, GeneralProperties, GeneralUserConfigProperties, PlotProperties]:
             self.all_properties += [prop.value for prop in properties]
 
         self.view.sections.addItems(list(self.SETTINGS_TABS.values()))
