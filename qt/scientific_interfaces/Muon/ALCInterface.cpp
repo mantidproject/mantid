@@ -25,6 +25,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/QtJobRunner.h"
 
 #include <algorithm>
 
@@ -88,8 +89,7 @@ void ALCInterface::closeEvent(QCloseEvent *event) {
 // namespace CustomInterfaces
 ALCInterface::ALCInterface(QWidget *parent)
     : UserSubWindow(parent), m_ui(), m_peakFittingView(nullptr), m_dataLoading(nullptr), m_baselineModelling(nullptr),
-      m_peakFitting(nullptr), m_peakFittingModel(new ALCPeakFittingModel()),
-      m_externalPlotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()) {}
+      m_peakFitting(nullptr), m_externalPlotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()) {}
 
 void ALCInterface::initLayout() {
   m_ui.setupUi(this);
@@ -115,7 +115,10 @@ void ALCInterface::initLayout() {
   m_baselineModelling->initialize();
 
   m_peakFittingView = new ALCPeakFittingView(m_ui.peakFittingView);
-  m_peakFitting = new ALCPeakFittingPresenter(m_peakFittingView, m_peakFittingModel);
+  auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
+  auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
+  m_peakFittingModel = std::make_shared<ALCPeakFittingModel>(std::move(algorithmRunner));
+  m_peakFitting = new ALCPeakFittingPresenter(m_peakFittingView, m_peakFittingModel.get());
   m_peakFitting->initialize();
 
   assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps

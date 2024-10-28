@@ -14,8 +14,6 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/QtJobRunner.h"
-
 #include <Poco/ActiveResult.h>
 #include <utility>
 
@@ -53,12 +51,6 @@ namespace MantidQt::CustomInterfaces {
 
 ALCPeakFittingModel::ALCPeakFittingModel(std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner)
     : m_algorithmRunner(std::move(algorithmRunner)) {
-  m_algorithmRunner->subscribe(this);
-}
-
-ALCPeakFittingModel::ALCPeakFittingModel() {
-  auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
-  m_algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
   m_algorithmRunner->subscribe(this);
 }
 

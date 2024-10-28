@@ -84,7 +84,7 @@ private:
   ALCPeakFittingPresenter *m_peakFitting;
 
   // Models
-  ALCPeakFittingModel *m_peakFittingModel;
+  std::shared_ptr<ALCPeakFittingModel> m_peakFittingModel;
 
   /// Name for every step for labels
   static const QStringList STEP_NAMES;

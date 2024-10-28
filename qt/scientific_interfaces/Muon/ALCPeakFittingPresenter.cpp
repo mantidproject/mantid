@@ -70,7 +70,7 @@ void ALCPeakFittingPresenter::onPeakPickerChanged() {
   }
 }
 
-void ALCPeakFittingPresenter::onParameterChanged(std::string const &funcIndex, std::string const &_) {
+void ALCPeakFittingPresenter::onParameterChanged(std::string const &funcIndex, std::string const & /*unused*/) {
   auto currentIndex = m_view->currentFunctionIndex();
 
   // We are interested in parameter changed of the currently selected function

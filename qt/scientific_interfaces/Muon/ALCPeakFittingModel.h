@@ -47,8 +47,6 @@ public:
 
   ALCPeakFittingModel(std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner);
 
-  ALCPeakFittingModel();
-
   /// Update the data
   void setData(Mantid::API::MatrixWorkspace_sptr newData);
 
