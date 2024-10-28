@@ -73,7 +73,7 @@ public:
 
 private:
   /// Load new data and update the view accordingly
-  void load(const std::vector<std::string> &files);
+  void load();
 
   /// Update info on MuonPeriodInfo widget using sample logs from ws
   void updateAvailablePeriodInfo(const Mantid::API::MatrixWorkspace_sptr &ws);

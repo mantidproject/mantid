@@ -27,7 +27,7 @@ using namespace Mantid::API;
 namespace MantidQt::CustomInterfaces {
 
 ALCDataLoadingModel::ALCDataLoadingModel()
-    : m_numDetectors(0), m_loadingData(false), m_directoryChanged(false), m_lastRunLoadedAuto(-2), m_filesLoaded(),
+    : m_numDetectors(0), m_loadingData(false), m_directoryChanged(false), m_lastRunLoadedAuto(-2), m_filesToLoad(),
       m_wasLastAutoRange(false) {}
 
 void ALCDataLoadingModel::setLoadingData(bool isLoading) { m_loadingData = isLoading; }
@@ -46,13 +46,13 @@ MatrixWorkspace_sptr ALCDataLoadingModel::exportWorkspace() {
  * Load new data and update the view accordingly
  * @param files :: [input] range of files (user-specified or auto generated)
  */
-void ALCDataLoadingModel::load(const std::vector<std::string> &files, const IALCDataLoadingView *view) {
+void ALCDataLoadingModel::load(const IALCDataLoadingView *view) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
   alg->setAlwaysStoreInADS(false); // Don't want workspaces in the ADS
 
   // Change first last run to WorkspaceNames
-  alg->setProperty("WorkspaceNames", files);
+  alg->setProperty("WorkspaceNames", m_filesToLoad);
   alg->setProperty("LogValue", view->log());
   alg->setProperty("Function", view->function());
   alg->setProperty("Type", view->calculationType());
@@ -91,8 +91,6 @@ void ALCDataLoadingModel::load(const std::vector<std::string> &files, const IALC
 
   alg->setPropertyValue("OutputWorkspace", "__NotUsed");
 
-  // Set loading alg equal to alg
-  this->m_LoadingAlg = alg;
   // Execute async so we can show progress bar
   Poco::ActiveResult<bool> result(alg->executeAsync());
   while (!result.available()) {
@@ -101,6 +99,9 @@ void ALCDataLoadingModel::load(const std::vector<std::string> &files, const IALC
   if (!result.error().empty()) {
     throw std::runtime_error(result.error());
   }
+
+  // Set loading alg equal to alg
+  this->m_LoadingAlg = alg;
 
   MatrixWorkspace_sptr tmp = alg->getProperty("OutputWorkspace");
   IAlgorithm_sptr sortAlg = AlgorithmManager::Instance().create("SortXAxis");
@@ -121,10 +122,9 @@ void ALCDataLoadingModel::load(const std::vector<std::string> &files, const IALC
   } else {
     assert(m_loadedData->getNumberHistograms() == 4);
   }
-  m_filesLoaded = files;
 }
 
-void ALCDataLoadingModel::cancelLoading() const { m_LoadingAlg->cancel(); }
+void ALCDataLoadingModel::cancelLoading() const { this->m_LoadingAlg->cancel(); }
 
 void ALCDataLoadingModel::setWsForMuonInfo(const std::string &filename) {
 
@@ -278,8 +278,7 @@ std::string ALCDataLoadingModel::getRunsText() { return m_runsText; }
 
 void ALCDataLoadingModel::setDirectoryChanged(bool hasDirectoryChanged) { m_directoryChanged = hasDirectoryChanged; }
 
-std::vector<std::string> ALCDataLoadingModel::getFilesLoaded() { return m_filesLoaded; }
-
+void ALCDataLoadingModel::setFilesToLoad(const std::vector<std::string> &files) { m_filesToLoad = files; }
 /**
  * This timer runs every second when we are watching a directory.
  * If any changes have occurred in the meantime, reload.
@@ -296,6 +295,7 @@ bool ALCDataLoadingModel::loadFilesFromWatchingDirectory(std::string firstFile, 
     // Check if file found
     if (latestFile.empty()) {
       // Could not find file this time, but don't reset directory changed flag
+      m_directoryChanged = false;
       return false;
     }
     // If not currently loading load new files
@@ -312,6 +312,7 @@ bool ALCDataLoadingModel::loadFilesFromWatchingDirectory(std::string firstFile, 
         // If new run number is less then error
         if (runNumber <= m_lastRunLoadedAuto) {
           // Is error but continue to watch
+          m_directoryChanged = false;
           return false;
         } else if (m_lastRunLoadedAuto + 1 == runNumber) {
           // Add as range
@@ -327,7 +328,7 @@ bool ALCDataLoadingModel::loadFilesFromWatchingDirectory(std::string firstFile, 
           newText += "," + std::to_string(runNumber);
           m_wasLastAutoRange = false;
         }
-        m_filesLoaded.push_back(latestFile);
+        m_filesToLoad.push_back(latestFile);
         m_lastRunLoadedAuto = runNumber;
         m_runsText = newText;
         m_directoryChanged = false;

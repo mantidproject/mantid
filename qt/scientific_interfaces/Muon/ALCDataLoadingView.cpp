@@ -452,6 +452,7 @@ void ALCDataLoadingView::handleStartWatching(bool watch) {
     m_watcher->addPath(QString::fromStdString(path));
     // start a timer that executes every second
     getTimer()->start(1000);
+
   } else {
     // Check if watcher has a directory, then remove all
     if (!m_watcher->directories().empty()) {

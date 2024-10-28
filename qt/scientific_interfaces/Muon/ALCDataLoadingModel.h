@@ -20,7 +20,7 @@ class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingModel {
 public:
   ALCDataLoadingModel();
   ~ALCDataLoadingModel() = default;
-  void load(const std::vector<std::string> &files, const IALCDataLoadingView *view);
+  void load(const IALCDataLoadingView *view);
   void cancelLoading() const;
   void setLoadingData(bool isLoading);
   bool getLoadingData();
@@ -41,7 +41,7 @@ public:
   bool loadFilesFromWatchingDirectory(std::string firstFile, std::vector<std::string> files, std::string runsText);
   void setDirectoryChanged(bool hasDirectoryChanged);
   std::string getRunsText();
-  std::vector<std::string> getFilesLoaded();
+  void setFilesToLoad(const std::vector<std::string> &files);
 
 private:
   std::string isCustomGroupingValid(const std::string &group, bool &isValid);
@@ -65,7 +65,7 @@ private:
   int m_lastRunLoadedAuto;
 
   /// Files that are loaded
-  std::vector<std::string> m_filesLoaded;
+  std::vector<std::string> m_filesToLoad;
 
   /// Last run added by auto was addes as range
   std::atomic_bool m_wasLastAutoRange;

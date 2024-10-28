@@ -88,8 +88,9 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
   }
 
   m_view->setLoadStatus("Loading " + m_view->getInstrument() + m_view->getRunsText(), "orange");
+  m_model->setFilesToLoad(files);
   try {
-    load(files);
+    load();
     m_view->setLoadStatus("Successfully loaded " + m_view->getInstrument() + m_view->getRunsText(), "green");
     m_view->enableRunsAutoAdd(true);
 
@@ -109,7 +110,7 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
  * Load new data and update the view accordingly
  * @param files :: [input] range of files (user-specified or auto generated)
  */
-void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
+void ALCDataLoadingPresenter::load() {
   m_model->setLoadingData(true);
   m_view->disableAll();
 
@@ -121,7 +122,7 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
   }
 
   try {
-    m_model->load(files, m_view);
+    m_model->load(m_view);
     // Plot spectrum 0. It is either red period (if subtract is unchecked) or
     // red - green (if subtract is checked)
     m_view->setDataCurve(m_model->getLoadedData());
@@ -226,7 +227,7 @@ void ALCDataLoadingPresenter::handleTimerEvent() {
     // Set text without search, call manual load
     m_view->setRunsTextWithoutSearch(m_model->getRunsText());
     try {
-      load(m_model->getFilesLoaded());
+      load();
 
     } catch (const std::runtime_error &loadError) {
       // Stop watching and display error
