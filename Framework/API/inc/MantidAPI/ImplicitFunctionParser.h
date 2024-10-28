@@ -11,7 +11,6 @@
  * is used in the call to its constructor to effect a call to the factory's
  * subscribe method.
  */
-// #define Parser Parser
 #define DECLARE_IMPLICIT_FUNCTION_PARSER(classname)                                                                    \
   namespace {                                                                                                          \
   Mantid::Kernel::RegistrationHelper register_alg_##classname(                                                         \

@@ -7,18 +7,14 @@
 #include "MantidDataHandling/XmlHandler.h"
 
 #include <Poco/DOM/DOMParser.h>
-#include <boost/algorithm/string/trim.hpp>
-// #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NamedNodeMap.h>
-// #include <Poco/DOM/Node.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
-// #include <Poco/DOM/Text.h>
 #include <Poco/SAX/InputSource.h>
+#include <boost/algorithm/string/trim.hpp>
 
 #include <fstream>
-// #include <iterator>
 
 namespace Mantid::DataHandling {
 

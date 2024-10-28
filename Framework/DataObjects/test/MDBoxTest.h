@@ -553,11 +553,6 @@ public:
     b.calculateCentroid(centroid);
     TS_ASSERT_DELTA(centroid[0], 0.000, 0.001);
     TS_ASSERT_DELTA(centroid[1], 0.000, 0.001);
-    // #ifdef MDBOX_TRACK_CENTROID
-    //       b.refreshCentroid();
-    //     TS_ASSERT_DELTA( b.getCentroid(0), 0.000, 0.001);
-    //     TS_ASSERT_DELTA( b.getCentroid(1), 0.000, 0.001);
-    // #endif
   }
 
   //-----------------------------------------------------------------------------------------
