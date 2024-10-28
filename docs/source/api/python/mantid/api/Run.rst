@@ -13,4 +13,3 @@ This is a Python binding to the C++ class Mantid::API::Run.
     :members:
     :undoc-members:
     :inherited-members:
-

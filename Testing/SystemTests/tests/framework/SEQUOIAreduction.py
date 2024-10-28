@@ -15,7 +15,32 @@ import shutil
 import glob
 import numpy as np
 import mantid
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import (
+    ChangeBinOffset,
+    ConvertToDistribution,
+    ConvertUnits,
+    CorrectKiKf,
+    DeleteWorkspace,
+    Divide,
+    FilterBadPulses,
+    GetEi,
+    GroupDetectors,
+    He3TubeEfficiency,
+    LoadEventNexus,
+    LoadNexus,
+    LoadNexusMonitors,
+    MaskDetectors,
+    MedianDetectorTest,
+    NormaliseByCurrent,
+    Plus,
+    SaveNexus,
+    SaveNXSPE,
+    SavePHX,
+    SaveSPE,
+    SolidAngle,
+    Rebin,
+)
 
 
 class DirectInelaticSNSTest(systemtesting.MantidSystemTest):

@@ -1,1 +1,0 @@
-- Fixed issue causing unhandled exception when changing normalisation with the "gist_rainbow" colourmap.

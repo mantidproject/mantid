@@ -7,7 +7,7 @@
 
 import json
 
-from mantid.kernel import *
+from mantid.kernel import logger, PropertyManager
 
 from .configurations import RundexSettings
 

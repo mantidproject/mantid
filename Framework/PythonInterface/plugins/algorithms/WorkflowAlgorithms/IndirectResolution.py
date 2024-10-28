@@ -4,12 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=no-init
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
-
-# pylint: disable=too-many-instance-attributes
+# pylint: disable=no-init,too-many-instance-attributes
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, Progress, WorkspaceProperty
+from mantid.kernel import Direction, FloatArrayProperty, IntArrayProperty, StringArrayProperty, StringListValidator
+from mantid.simpleapi import CalculateFlatBackground, Rebin, Scale
 
 
 class IndirectResolution(DataProcessorAlgorithm):

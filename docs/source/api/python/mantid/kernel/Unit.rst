@@ -11,4 +11,3 @@ This is a Python binding to the C++ class Mantid::Kernel::Unit.
     :members:
     :undoc-members:
     :inherited-members:
-

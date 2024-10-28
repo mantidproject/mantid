@@ -71,6 +71,3 @@ digraph Sample {
   SaveOutput -> OutputWorkspace
   Save -> OutputWorkspace
 }
-
-
-

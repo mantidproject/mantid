@@ -13,4 +13,3 @@ git config user.email "mantid-buildserver@mantidproject.org"
 
 git merge origin/release-next
 git push origin main
-

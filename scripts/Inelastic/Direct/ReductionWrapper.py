@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from mantid.simpleapi import *
-from mantid import config, api
-from mantid.kernel import funcinspect
+from mantid.api import mtd, FileFinder, Workspace
+from mantid.kernel import config, funcinspect
+from mantid.simpleapi import CompareWorkspaces, ExtractSpectra, Load, Pause, RenameWorkspace, SaveNexus
 
 from Direct.PropertyManager import PropertyManager
 
@@ -227,7 +227,7 @@ class ReductionWrapper(object):
         if PropertyManager.save_file_name._file_name is not None:
             # pylint: disable=protected-access
             file_name = PropertyManager.save_file_name._file_name
-            if isinstance(file_name, api.Workspace):
+            if isinstance(file_name, Workspace):
                 return file_name
         else:
             instr = self.reducer.prop_man.instr_name
@@ -343,7 +343,7 @@ class ReductionWrapper(object):
                         build_validation = True
                 else:
                     build_validation = True
-        elif isinstance(validation_file, api.Workspace):
+        elif isinstance(validation_file, Workspace):
             # its workspace:
             reference_ws = validation_file
             build_validation = False

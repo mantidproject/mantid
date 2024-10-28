@@ -10,9 +10,37 @@
 # This module contains utility functions common to the
 # SANS data reduction scripts
 ########################################################
-from mantid.simpleapi import *
-from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry, FileFinder
-from mantid.kernel import DateAndTime
+from mantid.api import mtd, AlgorithmManager, IEventWorkspace, MatrixWorkspace, WorkspaceGroup, FileLoaderRegistry, FileFinder
+from mantid.kernel import config, DateAndTime, Logger
+from mantid.simpleapi import (
+    CalculateFlatBackground,
+    ChangeTimeZero,
+    CloneWorkspace,
+    ConjoinWorkspaces,
+    ConvertUnits,
+    CopyInstrumentParameters,
+    CropWorkspace,
+    DeleteWorkspace,
+    ExtractSpectra,
+    FilterByTime,
+    GroupWorkspaces,
+    InterpolatingRebin,
+    Load,
+    LoadMask,
+    LoadNexusMonitors,
+    MaskBins,
+    MaskDetectors,
+    MaskDetectorsInShape,
+    Plus,
+    RawFileInfo,
+    Rebin,
+    RebinToWorkspace,
+    RemoveBins,
+    RenameWorkspace,
+    SaveNexusProcessed,
+    UnGroupWorkspace,
+)
+
 import inspect
 import math
 import os

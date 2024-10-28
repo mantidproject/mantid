@@ -9,7 +9,8 @@ System Test for ISIS Reflectometry autoreduction
 Adapted from scripts provided by Max Skoda.
 """
 
-from ISISReflectometryWorkflowBase import *
+from ISISReflectometryWorkflowBase import reduceRun, setupInstrument, ISISReflectometryWorkflowBase
+from mantid.simpleapi import SaveNexus
 import systemtesting
 
 

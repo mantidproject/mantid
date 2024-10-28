@@ -1,1 +1,0 @@
-- Mantid no longer crashes when trying to plot a preview of the selected workspace on the :ref:`Elwin tab <elwin>` after that workspace has been deleted from the ADS.

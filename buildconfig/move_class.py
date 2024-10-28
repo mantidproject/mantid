@@ -8,8 +8,8 @@
 """Utility for moving a class file to a different project."""
 
 import argparse
-
-from cmakelists_utils import *
+import os
+from cmakelists_utils import add_to_cmake, find_basedir, remove_from_cmake
 
 
 def move_one(subproject, classname, newproject, newclassname, oldfilename, newfilename, args):

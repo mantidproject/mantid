@@ -1184,5 +1184,3 @@ public:
   }
 
 }; // end of class @PLUSMINUSTEST_CLASS@Performance
-
-

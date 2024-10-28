@@ -7,14 +7,15 @@
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
 from math import pi
-from mantid.simpleapi import *
+from mantid.api import AnalysisDataService
+from mantid.simpleapi import CreateEmptyTableWorkspace, GroupWorkspaces, Load, MuonMaxent
 
 
 class MuonMaxEntTest(systemtesting.MantidSystemTest):
     """Tests the MaxEnt algorithm on a MUSR workspace"""
 
     def fixPhasesTest(self, phases0):
-        MuonMaxEnt(
+        MuonMaxent(
             InputWorkspace="MUSR00022725",
             InputPhaseTable="tab",
             Npts="16384",

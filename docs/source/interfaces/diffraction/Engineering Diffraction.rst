@@ -253,4 +253,3 @@ Refine Gamma
     :width: 600px
 
 .. categories:: Interfaces Diffraction
-

@@ -18,6 +18,7 @@ Users should not need to directly call any other function other than :func:`getC
 
 # Standard and third-party
 import copy
+import math
 import numpy
 import os
 import re
@@ -27,7 +28,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from mantid.api import AnalysisDataService as ADS
 from mantid.dataobjects import EventWorkspace, TableWorkspace, Workspace2D
 from mantid.simpleapi import CloneWorkspace, CreateWorkspace, DeleteWorkspace, Fit, GroupWorkspaces, RenameWorkspace
-from mantid.kernel import *
+from mantid.kernel import config
 
 # Calibration
 from ideal_tube import IdealTube

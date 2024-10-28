@@ -95,5 +95,3 @@ digraph HB3AReduction {
   viewRawData		-> OutputWorkspace
 
 }
-
-

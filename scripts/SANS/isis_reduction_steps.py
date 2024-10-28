@@ -19,10 +19,41 @@ import os
 import re
 import math
 from collections import namedtuple
-from mantid.kernel import Logger
 
-from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
-from mantid.simpleapi import *
+from mantid.api import mtd, AlgorithmManager, FileFinder, IEventWorkspace, Workspace, WorkspaceGroup
+from mantid.kernel import logger, Logger
+from mantid.simpleapi import (
+    CalculateFlatBackground,
+    CloneWorkspace,
+    ConvertToHistogram,
+    ConvertUnits,
+    CropWorkspace,
+    DeleteWorkspace,
+    ExtractMask,
+    FindDeadDetectors,
+    GroupWorkspaces,
+    InterpolatingRebin,
+    Load,
+    LoadMask,
+    LoadNexusMonitors,
+    LoadRKH,
+    LoadSampleDetailsFromRaw,
+    MaskDetectors,
+    MaskDetectorsInShape,
+    Minus,
+    Multiply,
+    Rebin,
+    RebinToWorkspace,
+    RemoveBins,
+    RenameWorkspace,
+    ReplaceSpecialValues,
+    SANSWideAngleCorrection,
+    SumSpectra,
+    TOFSANSResolutionByPixel,
+    UnwrapMonitorsInTOF,
+    Qxy,
+    Q1D,
+)
 from SANSUtility import (
     GetInstrumentDetails,
     MaskByBinRange,

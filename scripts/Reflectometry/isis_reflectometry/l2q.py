@@ -7,7 +7,9 @@
 # pylint: disable=invalid-name
 
 import math
-from mantid.simpleapi import *  # New API
+from mantid.api import WorkspaceGroup
+from mantid.kernel import logger
+from mantid.simpleapi import ConvertUnits, MoveInstrumentComponent
 
 
 def l2q(ws, whichDet, theta, sample_component_name):
@@ -30,10 +32,7 @@ def l2q(ws, whichDet, theta, sample_component_name):
 
 
     """
-
     # pick up the sample to detector distance
-    from mantid.api import WorkspaceGroup
-
     if isinstance(ws, WorkspaceGroup):
         inst = ws[0].getInstrument()
     else:

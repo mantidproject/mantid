@@ -49,7 +49,22 @@ import ReduceDictionary
 sys.path.append("/opt/mantidnightly/bin")
 # sys.path.append("/opt/Mantid/bin")
 
-from mantid.simpleapi import *
+from mantid import apiVersion, FileFinder
+from mantid.simpleapi import (
+    CombinePeaksWorkspaces,
+    CreatePeaksWorkspace,
+    FindUBUsingFFT,
+    FindUBUsingLatticeParameters,
+    IndexPeaks,
+    Load,
+    LoadEventNexus,
+    LoadIsawPeaks,
+    LoadIsawUB,
+    SaveNexus,
+    SaveIsawPeaks,
+    SaveIsawUB,
+    SelectCellOfType,
+)
 
 print("API Version")
 print(apiVersion())

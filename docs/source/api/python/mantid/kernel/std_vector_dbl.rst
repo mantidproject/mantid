@@ -11,4 +11,3 @@ This is a Python binding to the C++ class Mantid::Kernel::std_vector_dbl.
     :members:
     :undoc-members:
     :inherited-members:
-

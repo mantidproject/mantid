@@ -7,7 +7,8 @@
 import platform
 import systemtesting
 import numpy as np
-from mantid.simpleapi import *
+from mantid.api import AlgorithmManager
+from mantid.simpleapi import ConvertHFIRSCDtoMDE, FindPeaksMD, HFIRCalculateGoniometer, IndexPeaks, Load, LoadMD, SaveMD, SetGoniometer
 
 
 def _skip_test():

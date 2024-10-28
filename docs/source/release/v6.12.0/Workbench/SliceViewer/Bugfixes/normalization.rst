@@ -1,0 +1,1 @@
+- Fixed a bug where the workspace normalization is not preserved when one has more than two dimensions and one uses the slider to change the slice point.

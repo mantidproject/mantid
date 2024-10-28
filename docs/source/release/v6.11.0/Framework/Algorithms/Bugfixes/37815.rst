@@ -1,1 +1,0 @@
-- Modify :ref:`LoadEventNexus <algm-LoadEventNexus>` so the minimum histogram bin edge is equal to the lowest time-of-flight event rather than one less. The effect is that there is no longer negative bin edges unless there is actually a negative time-of-flight in the data.

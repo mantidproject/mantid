@@ -11,7 +11,8 @@ ISIS reflectometry instruments signed theta value
 """
 
 import os
-from mantid.simpleapi import *
+from mantid.kernel import config
+from mantid.simpleapi import ConvertSpectrumAxis, LoadEmptyInstrument, MoveInstrumentComponent
 import systemtesting
 
 

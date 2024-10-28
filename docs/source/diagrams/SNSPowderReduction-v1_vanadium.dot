@@ -78,4 +78,3 @@ digraph ProcessVanadium {
   fftSmooth		      -> setUncertainties
   setUncertainties	      -> ProcessedVanadiumWorkspace
 }
-

@@ -73,12 +73,31 @@ systemtesting.MantidSystemTest
      |
 """
 
+import os
 from abc import ABCMeta, abstractmethod
 
-from mantid.simpleapi import *
+from mantid.api import mtd, FileFinder
+from mantid.kernel import config
+from mantid.simpleapi import (
+    ConvolutionFitSequential,
+    DeleteWorkspace,
+    ElasticWindowMultiple,
+    GroupWorkspaces,
+    IndirectCalibration,
+    IndirectResolution,
+    IndirectTransmissionMonitor,
+    ISISIndirectEnergyTransfer,
+    IqtFitMultiple,
+    IqtFitSequential,
+    Load,
+    LoadNexus,
+    MSDFit,
+    SaveNexusProcessed,
+    SofQWMoments,
+    TimeSlice,
+    TransformToIqt,
+)
 
-# For debugging only.
-from mantid.api import FileFinder
 from systemtesting import MantidSystemTest, using_gsl_v1
 
 
@@ -871,10 +890,11 @@ class OSIRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.118877
 
     def get_reference_files(self):
-        # Relative tolerance is used because the calculation of Monte Carlo errors means the Iqt errors are randomized
-        # within a set amount. Also, gsl v2 gives a slightly different result than v1 for II.OSIRISFuryFitSeq.
+        # The calculation of Monte Carlo errors means the Iqt errors are randomized within a set amount. We therefore
+        # turn off checking the uncertainties in the resulting workspace.
         self.tolerance = 5.0
         self.tolerance_is_rel_err = True
+        self.disableChecking = ["Uncertainty"]
         return ["II.OSIRISFury.nxs", "II.OSIRISFuryFitSeq.nxs"]
 
 
@@ -1003,13 +1023,9 @@ class OSIRISIqtAndIqtFitMulti(ISISIndirectInelasticIqtAndIqtFitMulti):
         self.spec_min = 0
         self.spec_max = 41
 
-    def skipTests(self):
-        # This test was once giving issues.  It seems the failures were caused by the large fluctuations in the
-        # uncertainties (i.e. delta delta y) due to the Monte Carlo calculation.  Turning off the check of uncertainity
-        # should fix this test, combined with a reasonable absolute tolerance of 0.05.
-        return False
-
     def get_reference_files(self):
+        # The calculation of Monte Carlo errors means the Iqt errors are randomized within a set amount. We therefore
+        # turn off checking the uncertainties in the resulting workspace.
         self.tolerance = 0.05
         self.tolerance_is_rel_err = False
         self.disableChecking = ["Uncertainty"]

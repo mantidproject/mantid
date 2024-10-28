@@ -36,4 +36,3 @@ Now add the IkedaCarpenterPV function, check you still have a LinearBackground a
 .. figure:: /images/GEMIkedaCarpenterFit.png
    :alt: GEMIkedaCarpenterFit.png
    :align: center
-

@@ -231,4 +231,3 @@ References
 .. categories::
 
 .. sourcelink::
-

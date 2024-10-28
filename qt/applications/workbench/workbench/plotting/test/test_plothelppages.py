@@ -11,7 +11,7 @@ from matplotlib import use as mpl_use
 
 mpl_use("Agg")
 import numpy as np
-from workbench.plotting.plothelppages import *
+from workbench.plotting.plothelppages import BASE_PATH, COLORFILL_PAGE, INDEX_PAGE, PLOT1D_PAGE, PLOT3D_PAGE, WATERFALL_PAGE, PlotHelpPages
 from matplotlib.pyplot import figure
 
 

@@ -5,4 +5,3 @@
 .. module:`mantid`
 
 .. autofunction:: mantid.apiVersion
-

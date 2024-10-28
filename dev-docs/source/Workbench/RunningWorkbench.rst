@@ -31,4 +31,3 @@ For a developer environment you might also want to specify the ``PYTHONPATH`` wh
 .. code-block:: sh
 
   PYTHONPATH=/path/to/build/bin/<config> workbench --single-process
-

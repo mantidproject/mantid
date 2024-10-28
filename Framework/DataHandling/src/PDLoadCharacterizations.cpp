@@ -11,6 +11,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
@@ -419,16 +420,7 @@ void PDLoadCharacterizations::readVersion0(const std::string &filename, API::ITa
 }
 
 namespace {
-bool closeEnough(const double left, const double right) {
-  // the same value
-  const double diff = fabs(left - right);
-  if (diff == 0.)
-    return true;
-
-  // same within 5%
-  const double relativeDiff = diff * 2 / (left + right);
-  return relativeDiff < .05;
-}
+bool closeEnough(const double left, const double right) { return Kernel::withinRelativeDifference(left, right, 0.05); }
 
 int findRow(API::ITableWorkspace_sptr &wksp, const std::vector<std::string> &values) {
   // don't have a good way to mark error location in these casts

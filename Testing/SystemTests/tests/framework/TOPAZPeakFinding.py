@@ -13,7 +13,8 @@ them.
 
 import systemtesting
 import numpy
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import BinMD, ConvertToDiffractionMDWorkspace, CopySample, FindPeaksMD, FindUBUsingFFT, IndexPeaks, LoadEventNexus
 from mantid.dataobjects import PeaksWorkspace, LeanElasticPeaksWorkspace
 from mantid.geometry import UnitCell
 

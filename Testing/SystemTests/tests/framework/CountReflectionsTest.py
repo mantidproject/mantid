@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
-from mantid.simpleapi import *
+from mantid.simpleapi import CountReflections
 from SortHKLTest import HKLStatisticsTestMixin
 
 

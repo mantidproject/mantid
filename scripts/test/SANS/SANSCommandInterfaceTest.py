@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import math
+import os
 import random
 import unittest
 
@@ -12,8 +13,8 @@ from reducer_singleton import ReductionSingleton
 
 import ISISCommandInterface as command_iface
 import isis_reduction_steps as reduction_steps
-from mantid.kernel import DateAndTime
-from mantid.simpleapi import *
+from mantid.kernel import config, DateAndTime
+from mantid.simpleapi import AddTimeSeriesLog, CreateSampleWorkspace, DeleteWorkspace, SaveNexus
 
 
 class SANSCommandInterfaceGetAndSetTransmissionSettings(unittest.TestCase):

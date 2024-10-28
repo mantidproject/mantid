@@ -91,4 +91,3 @@ Output:
 
 .. sourcelink::
         :filename: ConvolutionFit
-

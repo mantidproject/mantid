@@ -75,4 +75,3 @@ B. Right-click the Workspace from the Workspace list and Select "Plot > Overplot
 
 * In both cases, if the Workspace contains more than one spectra you will
   be asked which spectra you wish to add to the plot.
-

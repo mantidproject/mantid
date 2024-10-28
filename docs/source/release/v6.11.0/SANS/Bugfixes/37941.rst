@@ -1,1 +1,0 @@
-- Fix the calculation in algorithm :ref:`algm-HeliumAnalyserEfficiency` to calculate the efficiency using the mid-point of the wavelength bins. The error calculation now also propagates the uncertainty in the wavelength.

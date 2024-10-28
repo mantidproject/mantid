@@ -10,7 +10,8 @@ from reducer_singleton import ReductionSingleton
 
 import ISISCommandInterface as command_iface
 import centre_finder as cf
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import AddSampleLog, CreateSampleWorkspace
 
 
 class SANSBeamCentrePositionUpdater(unittest.TestCase):

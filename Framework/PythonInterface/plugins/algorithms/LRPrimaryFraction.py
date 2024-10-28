@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 import math
-from mantid.api import *
-from mantid.simpleapi import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import logger, Direction, FloatArrayProperty, IntArrayProperty, IntArrayLengthValidator
+from mantid.simpleapi import Integration, RefRoi, Transpose
 
 
 class LRPrimaryFraction(PythonAlgorithm):

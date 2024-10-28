@@ -1,7 +1,18 @@
-from __future__ import absolute_import, division, print_function
-
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import (
+    AbsorptionCorrection,
+    CalculateCarpenterSampleCorrection,
+    CarpenterSampleCorrection,
+    ConvertUnits,
+    CreateSampleWorkspace,
+    CreateWorkspace,
+    DiscusMultipleScatteringCorrection,
+    Divide,
+    MayersSampleCorrection,
+    MonteCarloAbsorption,
+    MultipleScatteringCorrection,
+    SetSample,
+)
 import matplotlib.pyplot as plt
 
 LINE_COLORS = ("blue", "orange", "green", "red", "purple")

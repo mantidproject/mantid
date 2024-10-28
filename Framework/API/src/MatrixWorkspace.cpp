@@ -1951,7 +1951,7 @@ std::pair<size_t, double> MatrixWorkspace::getXIndex(size_t i, double x, bool is
       auto index = static_cast<size_t>(std::distance(X.begin(), ix));
       if (isLeft)
         --index;
-      return std::make_pair(index, fabs((X[index] - x) / (*ix - *(ix - 1))));
+      return std::make_pair(index, std::abs((X[index] - x) / (*ix - *(ix - 1))));
     }
   }
   // I don't think we can ever get here

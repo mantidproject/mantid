@@ -127,6 +127,3 @@ Transmission
 #. A workspace with suffix `_transmission`, and a workspace group with suffix `_transmission_group` should be generated on the ADS. The `_transmission_group` workspace
    should contain three workspaces with suffices `_Sam`, `_Can` and `_Trans`
 #. Clicking the ``Plot Spectra`` button, a plot window should prompt, displaying the same lines as in the preview plot
-
-
-

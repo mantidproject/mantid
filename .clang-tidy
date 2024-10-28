@@ -25,4 +25,3 @@ Checks: >
 # -modernize-use-trailing-return-type           We use the old style throughout
 
 # -readability-implicit-bool-conversion         Allow if(!ptr) rather than (ptr==nullptr)
-

@@ -1,1 +1,0 @@
-- Rename tabs of :ref:`QENS Fitting <interface-inelastic-qens-fitting>` from MSD Fit, I(Q,t) Fit, ConvFit and F(Q) to MSD, I(Q,t), Convolution and Function(Q) respectively. Add tooltip.

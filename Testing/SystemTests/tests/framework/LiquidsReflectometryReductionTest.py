@@ -8,8 +8,8 @@
 import os
 import systemtesting
 import numpy as np
-from mantid import *
-from mantid.simpleapi import *
+from mantid.api import mtd, AlgorithmManager, FileFinder
+from mantid.simpleapi import LiquidsReflectometryReduction, Load, LRAutoReduction, LRReflectivityOutput
 
 
 def get_file_path(filename):

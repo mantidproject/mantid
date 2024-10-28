@@ -4,4 +4,3 @@ They are not part of Mantid itself, but are required to parse the live stream fr
 The original versions of the classes are stored in the ADARA git repo.  This can be retrieved with the command:
 
 git clone git+ssh://trac.sns.gov/var/repos/ADARA
-

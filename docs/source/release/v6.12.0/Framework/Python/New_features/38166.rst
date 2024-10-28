@@ -1,0 +1,1 @@
+- Added a new testing function :ref:`assert_not_equal <mantid.testing.assert_not_equal>` to make testing inequality between workspaces more convenient.

@@ -13,9 +13,8 @@ Input : the Python list is padded to Fortrans length using procedure pad_array
 Output : the Fortran numpy array is sliced to Python length using dataY = yout[:ny]
 """
 
-from mantid.simpleapi import *
-from mantid import mtd
-from IndirectCommon import *
+from mantid.api import mtd
+from IndirectCommon import pad_array
 import numpy as np
 
 

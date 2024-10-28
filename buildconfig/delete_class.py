@@ -8,7 +8,8 @@
 """Utility for deleting a class file"""
 
 import argparse
-from cmakelists_utils import *
+import os
+from cmakelists_utils import remove_from_cmake
 
 
 def delete_one(oldfilename):

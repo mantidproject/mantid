@@ -7,7 +7,11 @@
 import unittest
 
 from unittest import mock
-from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_utils import *
+from mantidqtinterfaces.Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_utils import (
+    convert_index_to_row_and_col,
+    get_num_row_and_col,
+    get_y_min_max_between_x_range,
+)
 
 
 class PlottingCanvasUtilsTest(unittest.TestCase):

@@ -13,4 +13,3 @@ This is a Python binding to the C++ class Mantid::API::Sample.
     :members:
     :undoc-members:
     :inherited-members:
-

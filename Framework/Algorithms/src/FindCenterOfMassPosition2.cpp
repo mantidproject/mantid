@@ -18,6 +18,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
+#include "MantidKernel/FloatingPointComparison.h"
 #include "MantidKernel/PhysicalConstants.h"
 namespace Mantid::Algorithms {
 
@@ -28,11 +29,6 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
-
-namespace { // anonymous namespace
-/// Equal within machine tolerance
-bool almost_equals(const double a, const double b) { return fabs(a - b) < std::numeric_limits<double>::min(); }
-} // anonymous namespace
 
 void FindCenterOfMassPosition2::init() {
   const auto wsValidator = std::make_shared<CompositeValidator>();
@@ -113,7 +109,7 @@ void FindCenterOfMassPosition2::findCenterOfMass(const API::MatrixWorkspace_sptr
 
     // Check to see if we have the same result
     // as the previous iteration
-    if (almost_equals(distanceFromPrevious, distanceFromPreviousPrevious)) {
+    if (Kernel::equals(distanceFromPrevious, distanceFromPreviousPrevious)) {
       totalLocalMinima++;
     } else {
       totalLocalMinima = 0;
