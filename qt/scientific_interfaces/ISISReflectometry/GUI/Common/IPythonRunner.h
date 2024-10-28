@@ -19,7 +19,7 @@ IPythonRunner is an interface for running python code
 */
 class IPythonRunner {
 public:
-  virtual ~IPythonRunner(){};
+  virtual ~IPythonRunner() {};
   virtual std::string runPythonAlgorithm(const std::string &pythonCode) = 0;
 };
 } // namespace ISISReflectometry

@@ -34,7 +34,7 @@ public:
   void enableParameterSelection();
   void disableParameterSelection();
 
-  void updateSelectedSpectra() override{};
+  void updateSelectedSpectra() override {};
 
 signals:
   void addData(MantidWidgets::IAddWorkspaceDialog *dialog);

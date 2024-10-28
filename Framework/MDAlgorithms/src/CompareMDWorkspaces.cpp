@@ -459,7 +459,7 @@ void CompareMDWorkspaces::compare2Boxes(API::IMDNode *box1, API::IMDNode *box2, 
       mdbox1->releaseEvents();
       mdbox2->releaseEvents();
     } // if check events
-  }   // if-else for MDGridBox or MDBox
+  } // if-else for MDGridBox or MDBox
 }
 
 //----------------------------------------------------------------------------------------------

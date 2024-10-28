@@ -18,9 +18,9 @@ using namespace Mantid::Kernel;
 class UnaryOpHelper : public Mantid::Algorithms::UnaryOperation {
 public:
   /// Default constructor
-  UnaryOpHelper() : UnaryOperation(){};
+  UnaryOpHelper() : UnaryOperation() {};
   /// Destructor
-  ~UnaryOpHelper() override{};
+  ~UnaryOpHelper() override {};
 
   const std::string name() const override { return "None"; }
   int version() const override { return 0; }

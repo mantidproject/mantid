@@ -149,7 +149,7 @@ public:
           mdbox1->releaseEvents();
           mdbox2->releaseEvents();
         } // Don't compare if BoxStructureOnly
-      }   // is mdbox1
+      } // is mdbox1
     }
 
     TS_ASSERT_EQUALS(ws1->getNumExperimentInfo(), ws2->getNumExperimentInfo());

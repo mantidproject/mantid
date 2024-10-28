@@ -299,7 +299,7 @@ void AlgorithmDialog::showValidators() {
         validator->setVisible(error.length() != 0);
       }
     } // widget is tied
-  }   // for each property
+  } // for each property
 }
 
 //-------------------------------------------------------------------------------------------------

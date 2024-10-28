@@ -23,7 +23,7 @@ public:
   MOCK_METHOD0(showView, void());
   MOCK_METHOD1(subscribe, void(OptionsDialogPresenterSubscriber *));
 
-  ~MockOptionsDialogPresenter() override{};
+  ~MockOptionsDialogPresenter() override {};
 };
 
 class MockOptionsDialogPresenterSubscriber : public OptionsDialogPresenterSubscriber {

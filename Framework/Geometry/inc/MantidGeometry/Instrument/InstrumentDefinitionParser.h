@@ -111,7 +111,7 @@ private:
     std::string idname;
 
     /// Constructor
-    IdList() : counted(0){};
+    IdList() : counted(0) {};
 
     /// return true if empty
     bool empty() { return vec.empty(); };

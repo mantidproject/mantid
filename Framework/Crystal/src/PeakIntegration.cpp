@@ -111,10 +111,11 @@ void PeakIntegration::exec() {
       size_t wi = wiEntry->second;
       if ((matchRun && peak.getRunNumber() != inputW->getRunNumber()) || wi >= Numberwi)
         badPeaks.emplace_back(i);
-    } else // This is for appending peak workspaces when running
-           // SNSSingleCrystalReduction one bank at at time
-        if (i + 1 > MinPeaks)
+    } else if (i + 1 > MinPeaks) {
+      // This is for appending peak workspaces when running
+      // SNSSingleCrystalReduction one bank at at time
       MinPeaks = i + 1;
+    }
   }
   peaksW->removePeaks(std::move(badPeaks));
   NumberPeaks = peaksW->getNumberPeaks();

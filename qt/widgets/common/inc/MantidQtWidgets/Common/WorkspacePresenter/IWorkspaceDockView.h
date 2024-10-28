@@ -31,7 +31,7 @@ public:
   enum class SortCriteria { ByName, ByLastModified, ByMemorySize };
   enum class SaveFileType { Nexus, ASCII };
 
-  virtual ~IWorkspaceDockView(){};
+  virtual ~IWorkspaceDockView() {};
 
   virtual WorkspacePresenterWN_wptr getPresenterWeakPtr() = 0;
 

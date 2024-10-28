@@ -536,11 +536,11 @@ public:
     TS_ASSERT_DELTA(centroid[1], 3.666, 0.001);
 
     //    b.refreshCentroid();
-    //#ifdef MDBOX_TRACK_CENTROID
+    // #ifdef MDBOX_TRACK_CENTROID
     //    // This should be the weighted centroid
     //    TS_ASSERT_DELTA( b.getCentroid(0), 3.333, 0.001);
     //    TS_ASSERT_DELTA( b.getCentroid(1), 3.666, 0.001);
-    //#endif
+    // #endif
   }
 
   /** Centroid of an empty MDBox is 0.0 */
@@ -553,11 +553,6 @@ public:
     b.calculateCentroid(centroid);
     TS_ASSERT_DELTA(centroid[0], 0.000, 0.001);
     TS_ASSERT_DELTA(centroid[1], 0.000, 0.001);
-    //#ifdef MDBOX_TRACK_CENTROID
-    //      b.refreshCentroid();
-    //    TS_ASSERT_DELTA( b.getCentroid(0), 0.000, 0.001);
-    //    TS_ASSERT_DELTA( b.getCentroid(1), 0.000, 0.001);
-    //#endif
   }
 
   //-----------------------------------------------------------------------------------------
