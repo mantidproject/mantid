@@ -35,12 +35,15 @@ namespace PropertyNames {
 const std::string FILENAME("Filename");
 const std::string CAL_FILE("CalFileName");
 const std::string LOAD_IDF_FROM_NXS("LoadNexusInstrumentXML");
+const std::string FILTER_TIMESTART("FilterByTimeStart");
+const std::string FILTER_TIMESTOP("FilterByTimeStop");
 const std::string OUTPUT_WKSP("OutputWorkspace");
 } // namespace PropertyNames
 
 namespace NxsFieldNames {
 const std::string TIME_OF_FLIGHT("event_time_offset");
 const std::string DETID("event_id");
+const std::string INDEX_ID("event_index");
 } // namespace NxsFieldNames
 
 // this is used for unit conversion to correct units
@@ -185,6 +188,15 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(
       std::make_unique<Kernel::PropertyWithValue<bool>>(PropertyNames::LOAD_IDF_FROM_NXS, true, Direction::Input),
       "Reads the embedded Instrument XML from the NeXus file");
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::FILTER_TIMESTART, EMPTY_DBL(),
+                                                                      Direction::Input),
+                  "Optional: To only include events after the provided start "
+                  "time, in seconds (relative to the start of the run).");
+
+  declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(PropertyNames::FILTER_TIMESTOP, EMPTY_DBL(),
+                                                                      Direction::Input),
+                  "Optional: To only include events before the provided stop "
+                  "time, in seconds (relative to the start of the run).");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "An output workspace.");
@@ -198,6 +210,11 @@ void AlignAndFocusPowderSlim::exec() {
   constexpr size_t numHist{6};
   constexpr double xmin{6463};
   constexpr double xmax{39950};
+
+  // These give the limits in each file as to which events we actually load
+  // (when filtering by time).
+  loadStart.resize(1, 0);
+  loadSize.resize(1, 0);
 
   HistogramData::BinEdges XValues_new(0);
   const double binWidth{10.};
@@ -249,6 +266,42 @@ void AlignAndFocusPowderSlim::exec() {
   h5file.openPath("/");
   h5file.openGroup(ENTRY_TOP_LEVEL, "NXentry"); // TODO should this allow other entries?
 
+  // filter by time
+  double filter_time_start_sec = getProperty("FilterByTimeStart");
+  double filter_time_stop_sec = getProperty("FilterByTimeStop");
+
+  if (filter_time_start_sec != EMPTY_DBL() || filter_time_stop_sec != EMPTY_DBL()) {
+    is_time_filtered = true;
+    g_log.information() << "Filtering pulses from " << filter_time_start_sec << " to " << filter_time_stop_sec << "s\n";
+    std::unique_ptr<std::vector<double>> pulse_times = std::make_unique<std::vector<double>>();
+    loadPulseTimes(pulse_times, h5file);
+    g_log.information() << "Pulse times from " << pulse_times->front() << " to " << pulse_times->back()
+                        << " with length " << pulse_times->size() << '\n';
+    if (!std::is_sorted(pulse_times->cbegin(), pulse_times->cend())) {
+      g_log.warning() << "Pulse times are not sorted, pulse time filtering will not be accurate\n";
+    }
+
+    if (filter_time_start_sec != EMPTY_DBL()) {
+      const double filter_time_start = pulse_times->front() + filter_time_start_sec;
+      const auto itStart = std::lower_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_start);
+      pulse_start_index = std::distance(pulse_times->cbegin(), itStart);
+    }
+
+    if (filter_time_stop_sec != EMPTY_DBL()) {
+      const double filter_time_stop = pulse_times->front() + filter_time_stop_sec;
+      const auto itStop = std::upper_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_stop);
+      if (itStop == pulse_times->cend())
+        pulse_stop_index = pulse_times->size() - 1; // This isn't correct, FIXME
+      else
+        pulse_stop_index = std::distance(pulse_times->cbegin(), itStop);
+    }
+
+    if (pulse_start_index >= pulse_stop_index)
+      throw std::invalid_argument("Invalid pulse time filtering");
+
+    g_log.information() << "Filtering pulses from " << pulse_start_index << " to " << pulse_stop_index << '\n';
+  }
+
   // Now we want to go through all the bankN_event entries
   const std::map<std::string, std::set<std::string>> &allEntries = descriptor.getAllEntries();
   auto itClassEntries = allEntries.find("NXevent_data");
@@ -260,12 +313,6 @@ void AlignAndFocusPowderSlim::exec() {
     const std::regex classRegex("(/entry/)([^/]*)");
     std::smatch groups;
 
-    // TODO should re-use vectors to save malloc/free calls
-    std::unique_ptr<std::vector<uint32_t>> event_detid = std::make_unique<std::vector<uint32_t>>();
-    std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
-    // TODO std::unique_ptr<std::vector<float>> event_weight; some other time
-    // std::unique_ptr<std::vector<uint64_t>> event_index; matching pulse-times with events
-
     size_t specnum = 0;
     for (const std::string &classEntry : classEntries) {
       if (std::regex_match(classEntry, groups, classRegex)) {
@@ -276,8 +323,25 @@ void AlignAndFocusPowderSlim::exec() {
         if (entry_name == "bank_error_events" || entry_name == "bank_unmapped_events")
           continue;
 
+        // TODO should re-use vectors to save malloc/free calls
+        std::unique_ptr<std::vector<uint32_t>> event_detid = std::make_unique<std::vector<uint32_t>>();
+        std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
+        // TODO std::unique_ptr<std::vector<float>> event_weight; some other time
+        std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
         g_log.information() << "Loading bank " << entry_name << '\n';
         h5file.openGroup(entry_name, "NXevent_data");
+
+        if (is_time_filtered) {
+          const auto startTime = std::chrono::high_resolution_clock::now();
+          loadEventIndex(event_index, h5file);
+          addTimer("loadEventIndex" + entry_name, startTime, std::chrono::high_resolution_clock::now());
+          const auto start_event = event_index->at(pulse_start_index);
+          const auto stop_event = event_index->at(pulse_stop_index);
+          // These are the arguments to getSlab()
+          loadStart[0] = start_event;
+          loadSize[0] = stop_event - start_event;
+          g_log.debug() << "Loading events from " << start_event << " to " << stop_event << '\n';
+        }
 
         {
           const auto startTime = std::chrono::high_resolution_clock::now();
@@ -288,6 +352,12 @@ void AlignAndFocusPowderSlim::exec() {
           const auto startTime = std::chrono::high_resolution_clock::now();
           loadDetid(event_detid, h5file);
           addTimer("readDetID" + entry_name, startTime, std::chrono::high_resolution_clock::now());
+        }
+
+        if (event_time_of_flight->empty() || event_detid->empty()) {
+          g_log.warning() << "No data for bank " << entry_name << '\n';
+          h5file.closeGroup();
+          continue;
         }
 
         const auto startTimeSetup = std::chrono::high_resolution_clock::now();
@@ -322,7 +392,7 @@ void AlignAndFocusPowderSlim::exec() {
 
   // TODO load logs
 
-  setProperty("OutputWorkspace", std::move(wksp));
+  setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
 }
 
 void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr &wksp) {
@@ -344,9 +414,15 @@ void AlignAndFocusPowderSlim::loadTOF(std::unique_ptr<std::vector<float>> &data,
   // This is the data size
   ::NeXus::Info id_info = h5file.getInfo();
   const auto dim0 = static_cast<size_t>(LoadBankFromDiskTask::recalculateDataSize(id_info.dims[0]));
-  data->resize(dim0);
 
-  Mantid::NeXus::NeXusIOHelper::readNexusVector<float>(*data, h5file, NxsFieldNames::TIME_OF_FLIGHT);
+  if (is_time_filtered) {
+    data->resize(loadSize[0]);
+    Mantid::NeXus::NeXusIOHelper::readNexusSlab<float, Mantid::NeXus::NeXusIOHelper::PreventNarrowing>(
+        *data, h5file, NxsFieldNames::TIME_OF_FLIGHT, loadStart, loadSize);
+  } else {
+    data->resize(dim0);
+    Mantid::NeXus::NeXusIOHelper::readNexusVector<float>(*data, h5file, NxsFieldNames::TIME_OF_FLIGHT);
+  }
 
   // get the units
   std::string tof_unit;
@@ -367,9 +443,49 @@ void AlignAndFocusPowderSlim::loadDetid(std::unique_ptr<std::vector<uint32_t>> &
   // This is the data size
   ::NeXus::Info id_info = h5file.getInfo();
   const auto dim0 = static_cast<size_t>(LoadBankFromDiskTask::recalculateDataSize(id_info.dims[0]));
+
+  if (is_time_filtered) {
+    data->resize(loadSize[0]);
+    Mantid::NeXus::NeXusIOHelper::readNexusSlab<uint32_t, Mantid::NeXus::NeXusIOHelper::PreventNarrowing>(
+        *data, h5file, NxsFieldNames::DETID, loadStart, loadSize);
+  } else {
+    data->resize(dim0);
+    Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(*data, h5file, NxsFieldNames::DETID);
+  }
+
+  // close the sds
+  h5file.closeData();
+}
+
+void AlignAndFocusPowderSlim::loadPulseTimes(std::unique_ptr<std::vector<double>> &data, ::NeXus::File &h5file) {
+  // /entry/DASlogs/frequency/time
+  h5file.openGroup("DASlogs", "NXcollection");
+  h5file.openGroup("frequency", "NXlog");
+  h5file.openData("time");
+
+  // This is the data size
+  ::NeXus::Info id_info = h5file.getInfo();
+  const auto dim0 = static_cast<size_t>(LoadBankFromDiskTask::recalculateDataSize(id_info.dims[0]));
   data->resize(dim0);
 
-  Mantid::NeXus::NeXusIOHelper::readNexusVector<uint32_t>(*data, h5file, NxsFieldNames::DETID);
+  Mantid::NeXus::NeXusIOHelper::readNexusVector<double>(*data, h5file, "time");
+
+  // close the sds
+  h5file.closeData();
+  h5file.closeGroup();
+  h5file.closeGroup();
+}
+
+void AlignAndFocusPowderSlim::loadEventIndex(std::unique_ptr<std::vector<uint64_t>> &data, ::NeXus::File &h5file) {
+  g_log.information(NxsFieldNames::INDEX_ID);
+  h5file.openData(NxsFieldNames::INDEX_ID);
+
+  // This is the data size
+  ::NeXus::Info id_info = h5file.getInfo();
+  const auto dim0 = static_cast<size_t>(LoadBankFromDiskTask::recalculateDataSize(id_info.dims[0]));
+  data->resize(dim0);
+
+  Mantid::NeXus::NeXusIOHelper::readNexusVector<uint64_t>(*data, h5file, NxsFieldNames::INDEX_ID);
 
   // close the sds
   h5file.closeData();
