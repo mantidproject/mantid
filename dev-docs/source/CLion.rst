@@ -144,7 +144,7 @@ To debug workbench, you'll need to edit the ``workbench`` CMake Application conf
       :columns: 1
 
       - On Linux & macOS: ``workbench --single-process``
-      - On Windows: ``workbench-script.pyw --single-process``
+      - On Windows: ``workbench --single-process``
 
 #. Set the working directory:
 
