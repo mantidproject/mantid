@@ -39,8 +39,8 @@ boost::python::object wrapMeshWithNDArray(MeshObject &self) {
       for (size_t xyz = 0; xyz < 3; xyz++) {
         meshCoords[iTriangle * 3 * 3 + corner * 3 + xyz] = coords[xyz];
       } // for each coordinate of that corner
-    }   // for each corner of the triangle
-  }     // for each triangle
+    } // for each corner of the triangle
+  } // for each triangle
   PyObject *ndarray = Impl::wrapWithNDArray(meshCoords, 3, dims, NumpyWrapMode::ReadWrite, OwnershipMode::Python);
 
   return boost::python::object(handle<>(ndarray));

@@ -341,7 +341,7 @@ public:
 
 class MockBatchJobManager : public IBatchJobManager {
 public:
-  MockBatchJobManager(){};
+  MockBatchJobManager() {};
   MOCK_CONST_METHOD0(isProcessing, bool());
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(percentComplete, int());

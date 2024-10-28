@@ -27,7 +27,7 @@ dealing with grouping files in the interface.
 class MANTIDQT_MUONINTERFACE_DLL MuonGroupingHelper {
 public:
   /// Constructor
-  MuonGroupingHelper(Ui::MuonAnalysis &uiForm) : m_uiForm(uiForm){};
+  MuonGroupingHelper(Ui::MuonAnalysis &uiForm) : m_uiForm(uiForm) {};
 
   /// Saves grouping to the XML file specified
   static void saveGroupingToXML(const Mantid::API::Grouping &grouping, const std::string &filename);

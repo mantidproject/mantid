@@ -84,12 +84,10 @@ protected:
    * be declared.
    *  Called by init().
    */
-  virtual void defineProperties() { /*Empty in base class*/
-  }
+  virtual void defineProperties() { /*Empty in base class*/ }
   /// A virtual function in which additional properties should be retrieved into
   /// member variables.
-  virtual void retrieveProperties() { /*Empty in base class*/
-  }
+  virtual void retrieveProperties() { /*Empty in base class*/ }
   /// Returns the XML string describing the sample, which can be used by the
   /// ShapeFactory
   virtual std::string sampleXML() = 0;

@@ -236,8 +236,7 @@ std::unique_ptr<Kernel::Property> createTimeSeries(::NeXus::File &file, const st
     }
     // The string may contain non-printable (i.e. control) characters, replace
     // these
-    std::replace_if(
-        values.begin(), values.end(), [&](const char &c) { return isControlValue(c, propName, log); }, ' ');
+    std::replace_if(values.begin(), values.end(), [&](const char &c) { return isControlValue(c, propName, log); }, ' ');
     auto tsp = std::make_unique<TimeSeriesProperty<std::string>>(propName);
     std::vector<DateAndTime> times;
     DateAndTime::createVector(start_time, time_double, times);
@@ -584,7 +583,7 @@ void LoadNexusLogs::execLoader() {
     file.openPath("/" + entry_name);
     if (!event_frame_number.empty()) // ISIS indirection - see above comments
     {
-      Kernel::TimeSeriesProperty<double> *plog =
+      Kernel::TimeSeriesProperty<double> const *plog =
           dynamic_cast<Kernel::TimeSeriesProperty<double> *>(workspace->mutableRun().getProperty("proton_log"));
       if (!plog)
         throw std::runtime_error("Could not cast (interpret) proton_log as a time "

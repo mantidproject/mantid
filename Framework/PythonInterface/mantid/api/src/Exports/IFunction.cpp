@@ -213,13 +213,13 @@ void export_IFunction() {
       .def("isExplicitlySet", &IFunction::isExplicitlySet, (arg("self"), arg("i")),
            "Return whether the ith parameter needs to be explicitely set")
 
-      .def("getParameterValue", (double (IFunction::*)(size_t) const) & IFunction::getParameter,
-           (arg("self"), arg("i")), "Get the value of the ith parameter")
+      .def("getParameterValue", (double(IFunction::*)(size_t) const) & IFunction::getParameter, (arg("self"), arg("i")),
+           "Get the value of the ith parameter")
 
-      .def("getParameterValue", (double (IFunction::*)(const std::string &) const) & IFunction::getParameter,
+      .def("getParameterValue", (double(IFunction::*)(const std::string &) const) & IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
 
-      .def("__getitem__", (double (IFunction::*)(const std::string &) const) & IFunction::getParameter,
+      .def("__getitem__", (double(IFunction::*)(const std::string &) const) & IFunction::getParameter,
            (arg("self"), arg("name")), "Get the value of the named parameter")
 
       .def("setParameter", (setParameterType1)&IFunction::setParameter,
@@ -296,10 +296,10 @@ void export_IFunction() {
       .def("addTies", &IFunction::addTies,
            addTies_Overloads((arg("self"), arg("ties"), arg("isDefault")), "Add several ties to an IFunction."))
 
-      .def("removeTie", (bool (IFunction::*)(size_t)) & IFunction::removeTie, (arg("self"), arg("i")),
+      .def("removeTie", (bool(IFunction::*)(size_t)) & IFunction::removeTie, (arg("self"), arg("i")),
            "Remove the tie of the ith parameter")
 
-      .def("removeTie", (void (IFunction::*)(const std::string &)) & IFunction::removeTie, (arg("self"), arg("name")),
+      .def("removeTie", (void(IFunction::*)(const std::string &)) & IFunction::removeTie, (arg("self"), arg("name")),
            "Remove the tie of the named parameter")
 
       .def("getTies", &IFunction::writeTies, arg("self"), "Returns the list of current ties as a string")
@@ -343,7 +343,7 @@ void export_IFunction() {
            "Return a description of the ith parameter")
       .def("getParamExplicit", &IFunction::isExplicitlySet, (arg("self"), arg("i")),
            "Return whether the ith parameter needs to be explicitely set")
-      .def("getParamValue", (double (IFunction::*)(std::size_t) const) & IFunction::getParameter,
+      .def("getParamValue", (double(IFunction::*)(std::size_t) const) & IFunction::getParameter,
            (arg("self"), arg("i")), "Get the value of the ith parameter")
       .def("getParameterIndex", &IFunction::parameterIndex, (arg("self"), arg("name")),
            "Returns the index of the provided parameter.")

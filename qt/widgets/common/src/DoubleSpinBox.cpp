@@ -4,20 +4,8 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-/***************************************************************************
- File                 : DoubleSpinBox.cpp
- Project              : QtiPlot
- --------------------------------------------------------------------
- *                                                                         *
- *   You should have received a copy of the GNU General Public License     *
- *   along with this program; if not, write to the Free Software           *
- *   Foundation, Inc., 51 Franklin Street, Fifth Floor,                    *
- *   Boston, MA  02110-1301  USA                                           *
- *                                                                         *
- ***************************************************************************/
 #include "MantidQtWidgets/Common/DoubleSpinBox.h"
 
-//#include <MyParser.h>
 #include <QCloseEvent>
 #include <QHBoxLayout>
 #include <QLineEdit>

@@ -14,7 +14,7 @@ namespace MantidQt::MantidWidgets {
 
 class MockPlotPresenter : public PlotPresenter {
 public:
-  MockPlotPresenter() : PlotPresenter(nullptr){};
+  MockPlotPresenter() : PlotPresenter(nullptr) {};
 
   MOCK_METHOD(void, clearModel, (), (override));
   MOCK_METHOD(void, setSpectrum, (const Mantid::API::MatrixWorkspace_sptr &, const size_t), (override));

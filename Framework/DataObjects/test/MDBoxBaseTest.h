@@ -35,14 +35,14 @@ public:
   //-----------------------------------------------------------------------------------------------
   Kernel::ISaveable *getISaveable() override { return nullptr; }
   Kernel::ISaveable *getISaveable() const override { return nullptr; }
-  void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/, const bool /*markSaved*/) override{};
-  void clearFileBacked(bool /* loadData*/) override{/**does nothing*/};
-  void setFileBacked() override{};
-  void saveAt(API::IBoxControllerIO *const, uint64_t /*position*/) const override{/*Not saveable */};
+  void setFileBacked(const uint64_t /*fileLocation*/, const size_t /*fileSize*/, const bool /*markSaved*/) override {};
+  void clearFileBacked(bool /* loadData*/) override { /**does nothing*/ };
+  void setFileBacked() override {};
+  void saveAt(API::IBoxControllerIO *const, uint64_t /*position*/) const override { /*Not saveable */ };
   void loadAndAddFrom(API::IBoxControllerIO *const /*saver */, uint64_t /*position*/, size_t /* Size */,
-                      std::vector<coord_t> & /*mem*/) override{};
-  void loadAndAddFrom(API::IBoxControllerIO *const, uint64_t /*position*/, size_t /* Size */) override{};
-  void reserveMemoryForLoad(uint64_t /* Size */) override{};
+                      std::vector<coord_t> & /*mem*/) override {};
+  void loadAndAddFrom(API::IBoxControllerIO *const, uint64_t /*position*/, size_t /* Size */) override {};
+  void reserveMemoryForLoad(uint64_t /* Size */) override {};
   // regardless of what is actually instantiated, base tester would call itself
   // gridbox
   bool isBox() const override { return false; }
@@ -95,36 +95,36 @@ public:
     return 0;
   }
   void buildAndAddEvent(const Mantid::signal_t, const Mantid::signal_t, const std::vector<coord_t> &, uint16_t,
-                        uint16_t, uint32_t) override{};
+                        uint16_t, uint32_t) override {};
   virtual void buildAndTraceEvent(const Mantid::signal_t, const Mantid::signal_t, const std::vector<coord_t> &,
-                                  uint16_t, uint16_t, uint32_t, size_t){};
+                                  uint16_t, uint16_t, uint32_t, size_t) {};
   void buildAndAddEventUnsafe(const Mantid::signal_t, const Mantid::signal_t, const std::vector<coord_t> &, uint16_t,
-                              uint16_t, uint32_t) override{};
+                              uint16_t, uint32_t) override {};
 
   /** Perform centerpoint binning of events
    * @param bin :: MDBin object giving the limits of events to accept.
    */
   void centerpointBin(MDBin<MDE, nd> & /*bin*/, bool *) const override {}
-  void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) override{};
-  void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) override{};
+  void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = nullptr) override {};
+  void refreshCache(Kernel::ThreadScheduler * /*ts*/ = nullptr) override {};
   // virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL){};
-  void calculateCentroid(coord_t * /*centroid*/) const override{};
-  void calculateCentroid(coord_t * /*centroid*/, const int /*expInfoIndex*/) const override{};
+  void calculateCentroid(coord_t * /*centroid*/) const override {};
+  void calculateCentroid(coord_t * /*centroid*/, const int /*expInfoIndex*/) const override {};
   coord_t *getCentroid() const override { return nullptr; };
   void integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/,
                        signal_t & /*signal*/, signal_t & /*errorSquared*/, const coord_t /*innerRadiusSquared*/,
-                       const bool /*useOnePercentBackgroundCorrection*/) const override{};
+                       const bool /*useOnePercentBackgroundCorrection*/) const override {};
   void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, coord_t *,
-                      signal_t &) const override{};
+                      signal_t &) const override {};
   void integrateCylinder(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radius*/,
                          const coord_t /*length*/, signal_t & /*signal*/, signal_t & /*errorSquared*/,
-                         std::vector<signal_t> & /*signal_fit*/) const override{};
-  void getBoxes(std::vector<API::IMDNode *> & /*boxes*/, size_t /*maxDepth*/, bool) override{};
+                         std::vector<signal_t> & /*signal_fit*/) const override {};
+  void getBoxes(std::vector<API::IMDNode *> & /*boxes*/, size_t /*maxDepth*/, bool) override {};
   void getBoxes(std::vector<API::IMDNode *> & /*boxes*/, size_t /*maxDepth*/, bool,
-                Mantid::Geometry::MDImplicitFunction *) override{};
+                Mantid::Geometry::MDImplicitFunction *) override {};
 
   void generalBin(MDBin<MDE, nd> & /*bin*/, Mantid::Geometry::MDImplicitFunction & /*function*/) const override {}
-  void clearDataFromMemory() override{};
+  void clearDataFromMemory() override {};
 
   bool getIsMasked() const override { throw std::runtime_error("MDBoxBaseTester does not implement getIsMasked"); }
 

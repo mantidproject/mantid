@@ -567,7 +567,7 @@ ConvertSpiceDataToRealSpace::createDataMDWorkspace(const std::vector<MatrixWorks
       data[2] = static_cast<float>(detPos.Z());
       inserter.insertMDEvent(signal, error * error, runnumber, 0, detid, data);
     } // ENDFOR(spectrum)
-  }   // ENDFOR (workspace)
+  } // ENDFOR (workspace)
 
   return outWs;
 }
@@ -639,7 +639,7 @@ ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(const std::vector<MatrixWo
       data[2] = static_cast<float>(detPos.Z());
       inserter.insertMDEvent(signal, error * error, runnumber, 0, detid, data);
     } // ENDFOR(spectrum)
-  }   // ENDFOR (workspace)
+  } // ENDFOR (workspace)
 
   return outWs;
 }
