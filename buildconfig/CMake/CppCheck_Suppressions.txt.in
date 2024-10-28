@@ -733,7 +733,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveFullpr
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:579
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:580
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:158
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusProcessed.cpp:922
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:607
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveLauenorm.cpp:164
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveLauenorm.cpp:234
