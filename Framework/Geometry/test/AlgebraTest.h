@@ -12,7 +12,6 @@
 #include <ostream>
 #include <vector>
 
-// #include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Math/Algebra.h"
 
 using namespace Mantid::Geometry;

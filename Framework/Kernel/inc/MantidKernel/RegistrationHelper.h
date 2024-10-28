@@ -23,7 +23,7 @@ public:
    * @param i :: Takes an int and does nothing with it
    */
   inline RegistrationHelper(int i) { UNUSED_ARG(i); }
+};
 // clang-format on
-}; // namespace Mantid
 } // namespace Kernel
 } // namespace Mantid

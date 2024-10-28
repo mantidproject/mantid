@@ -1069,11 +1069,10 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
   }
 
   if (specify_size) {
-    r1 = peak_radius / max_sigma;       // scale specified sizes by 1/max_sigma
-    r2 = back_inner_radius / max_sigma; // so when multiplied by the individual
-    r3 = back_outer_radius / max_sigma; // sigmas in different directions, the
-  } // major axis has the specified size
-  else {
+    r1 = peak_radius / max_sigma;       // scale specified sizes by 1/max_sigma so when multiplied by
+    r2 = back_inner_radius / max_sigma; // the individual sigmas in different directions, the major
+    r3 = back_outer_radius / max_sigma; // axis has the specified size
+  } else {
     r1 = 3;
     r2 = 3;
     r3 = r2 * 1.25992105; // A factor of 2 ^ (1/3) will make the background

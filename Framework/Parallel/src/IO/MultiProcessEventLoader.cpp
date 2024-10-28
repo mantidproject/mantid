@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
-// #include <boost/process/child.hpp>
 #include <Poco/Process.h>
 #include <algorithm>
 #include <chrono>
@@ -18,8 +17,6 @@
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
 #include "MantidParallel/IO/NXEventDataLoader.h"
 #include "MantidTypes/Event/TofEvent.h"
-
-// namespace bp = boost::process;
 
 namespace Mantid::Parallel::IO {
 
