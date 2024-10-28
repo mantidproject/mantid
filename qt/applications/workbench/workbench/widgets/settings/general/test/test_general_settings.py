@@ -10,7 +10,7 @@ import unittest
 from unittest.mock import call, patch, MagicMock, Mock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
-from workbench.widgets.settings.general.presenter import GeneralSettings, GeneralProperties
+from workbench.widgets.settings.general.presenter import GeneralSettings
 from workbench.config import SAVE_STATE_VERSION
 from qtpy.QtCore import Qt
 
@@ -27,39 +27,65 @@ class MockFacility(object):
         self.instruments = StrictMock(return_value=self.all_instruments)
 
 
-class MockConfigService(object):
-    all_facilities = ["facility1", "facility2"]
-
+class MockGeneralSettingsModel:
     def __init__(self):
-        self.mock_facility = MockFacility(self.all_facilities[0])
-        self.mock_instrument = self.mock_facility.all_instruments[0]
-        self.getFacilityNames = StrictMock(return_value=self.all_facilities)
-        self.getFacility = StrictMock(return_value=self.mock_facility)
-        self.getInstrument = StrictMock(return_value=self.mock_instrument)
-        self.getString = StrictMock(return_value="1")
-        self.setFacility = StrictMock()
-        self.setString = StrictMock()
+        self.register_apply_callback = MagicMock()
+        self.get_crystallography_convention = MagicMock()
+        self.get_facility = MagicMock()
+        self.get_font = MagicMock()
+        self.get_facility_names = MagicMock()
+        self.get_instrument = MagicMock()
+        self.get_use_opengl = MagicMock()
+        self.get_show_invisible_workspaces = MagicMock()
+        self.get_project_recovery_number_of_checkpoints = MagicMock()
+        self.get_project_recovery_time_between_recoveries = MagicMock()
+        self.get_project_recovery_enabled = MagicMock()
+        self.get_prompt_on_deleting_workspace = MagicMock()
+        self.get_prompt_on_save_editor_modified = MagicMock()
+        self.get_prompt_save_on_close = MagicMock()
+        self.get_use_notifications = MagicMock()
+        self.get_user_layout = MagicMock()
+        self.get_window_behaviour = MagicMock()
+        self.get_completion_enabled = MagicMock()
+        self.set_crystallography_convention = MagicMock()
+        self.set_facility = MagicMock()
+        self.set_font = MagicMock()
+        self.set_window_behaviour = MagicMock()
+        self.set_completion_enabled = MagicMock()
+        self.set_prompt_save_on_close = MagicMock()
+        self.set_prompt_on_save_editor_modified = MagicMock()
+        self.set_prompt_on_deleting_workspace = MagicMock()
+        self.set_use_notifications = MagicMock()
+        self.set_project_recovery_enabled = MagicMock()
+        self.set_project_recovery_time_between_recoveries = MagicMock()
+        self.set_project_recovery_number_of_checkpoints = MagicMock()
+        self.set_instrument = MagicMock()
+        self.set_show_invisible_workspaces = MagicMock()
+        self.set_use_opengl = MagicMock()
+        self.set_user_layout = MagicMock()
 
 
 @start_qapplication
 class GeneralSettingsTest(unittest.TestCase):
-    CONFIG_SERVICE_CLASSPATH = "workbench.widgets.settings.general.presenter.ConfigService"
-    WORKBENCH_CONF_CLASSPATH = "workbench.widgets.settings.general.presenter.CONF"
+    def setUp(self) -> None:
+        self.mock_model = MockGeneralSettingsModel()
 
     def assert_connected_once(self, owner, signal):
         self.assertEqual(1, owner.receivers(signal))
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_setup_facilities_with_valid_combination(self, mock_ConfigService):
-        self.assertEqual(0, mock_ConfigService.mock_instrument.name.call_count)
-        presenter = GeneralSettings(None)
-        self.assertEqual(0, mock_ConfigService.setFacility.call_count)
-        self.assertEqual(2, mock_ConfigService.getFacility.call_count)
-        self.assertEqual(2, mock_ConfigService.mock_facility.name.call_count)
+    def test_setup_facilities_with_valid_combination(self):
+        mock_facility = MockFacility("facility1")
+        self.mock_model.get_facility.return_value = mock_facility.name()
+        mock_instrument = mock_facility.all_instruments[0]
+        self.mock_model.get_instrument.return_value = mock_instrument.name()
+        self.mock_model.get_facility_names.return_value = ["facility1", "facility2"]
+
+        presenter = GeneralSettings(None, model=self.mock_model)
+        self.assertEqual(0, self.mock_model.set_facility.call_count)
+        self.assertEqual(2, self.mock_model.get_facility.call_count)
         self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
 
-        mock_ConfigService.getInstrument.assert_called_once_with()
-        self.assertEqual(1, mock_ConfigService.mock_instrument.name.call_count)
+        self.assertEqual(2, self.mock_model.get_instrument.call_count)
         self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
 
     def test_setup_checkbox_signals(self):
@@ -80,7 +106,7 @@ class GeneralSettingsTest(unittest.TestCase):
         self.assert_connected_once(presenter.view.completion_enabled, presenter.view.completion_enabled.stateChanged)
 
     def test_font_dialog_signals(self):
-        presenter = GeneralSettings(None)
+        presenter = GeneralSettings(None, model=self.mock_model)
         with patch.object(presenter.view, "create_font_dialog", MagicMock()) as font_dialog:
             presenter.action_main_font_button_clicked()
             self.assertEqual(1, font_dialog().fontSelected.connect.call_count)
@@ -91,17 +117,18 @@ class GeneralSettingsTest(unittest.TestCase):
         self.assert_connected_once(presenter.view.main_font, presenter.view.main_font.clicked)
         self.assert_connected_once(presenter.view.window_behaviour, presenter.view.window_behaviour.currentTextChanged)
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_facility_changed(self, mock_ConfigService):
-        presenter = GeneralSettings(None)
-        mock_ConfigService.setFacility.reset_mock()
+    def test_action_facility_changed(self):
+        self.mock_model.get_facility_names.return_value = ["facility1", "facility2"]
+        self.mock_model.get_facility.return_value = "facility1"
+        presenter = GeneralSettings(None, model=self.mock_model)
+        self.mock_model.set_facility.reset_mock()
 
         new_facility = "TEST_LIVE"
         presenter.action_facility_changed(new_facility)
 
-        mock_ConfigService.setFacility.assert_called_once_with(new_facility)
+        self.mock_model.set_facility.assert_called_once_with(new_facility)
 
-        self.assertEqual(1, presenter.view.instrument.count())
+        self.assertEqual(presenter.view.instrument.facility, "TEST_LIVE")
 
     def test_setup_confirmations(self):
         presenter = GeneralSettings(None)
@@ -109,221 +136,173 @@ class GeneralSettingsTest(unittest.TestCase):
         # check that the signals are connected to something
         self.assert_connected_once(presenter.view.prompt_save_on_close, presenter.view.prompt_save_on_close.stateChanged)
 
-        self.assert_connected_once(presenter.view.prompt_save_editor_modified, presenter.view.prompt_save_editor_modified.stateChanged)
-
-    @patch(WORKBENCH_CONF_CLASSPATH)
-    def test_action_prompt_save_on_close(self, mock_conf):
-        presenter = GeneralSettings(None)
+    def test_action_prompt_save_on_close(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_prompt_save_on_close(True)
 
-        mock_conf.set.assert_called_once_with(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, True)
-        mock_conf.set.reset_mock()
+        self.mock_model.set_prompt_save_on_close.assert_called_once_with(True)
+        self.mock_model.set_prompt_save_on_close.reset_mock()
 
         presenter.action_prompt_save_on_close(False)
 
-        mock_conf.set.assert_called_once_with(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, False)
+        self.mock_model.set_prompt_save_on_close.assert_called_once_with(False)
 
-    @patch(WORKBENCH_CONF_CLASSPATH)
-    def test_action_window_behaviour_changed(self, mock_conf):
-        presenter = GeneralSettings(None)
+    def test_action_window_behaviour_changed(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
         values = presenter.WINDOW_BEHAVIOUR
         presenter.action_window_behaviour_changed(values[0])
 
-        mock_conf.set.assert_called_once_with(GeneralProperties.WINDOW_BEHAVIOUR.value, values[0])
-        mock_conf.set.reset_mock()
+        self.mock_model.set_window_behaviour.assert_called_once_with(values[0])
+        self.mock_model.set_window_behaviour.reset_mock()
 
         presenter.action_window_behaviour_changed(values[1])
 
-        mock_conf.set.assert_called_once_with(GeneralProperties.WINDOW_BEHAVIOUR.value, values[1])
+        self.mock_model.set_window_behaviour.assert_called_once_with(values[1])
 
-    @patch(WORKBENCH_CONF_CLASSPATH)
-    def test_action_prompt_save_editor_modified(self, mock_CONF):
-        presenter = GeneralSettings(None)
+    def test_action_prompt_save_editor_modified(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_prompt_save_editor_modified(True)
 
-        mock_CONF.set.assert_called_once_with(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, True)
-        mock_CONF.set.reset_mock()
+        self.mock_model.set_prompt_on_save_editor_modified.assert_called_once_with(True)
+        self.mock_model.set_prompt_on_save_editor_modified.reset_mock()
 
         presenter.action_prompt_save_editor_modified(False)
 
-        mock_CONF.set.assert_called_once_with(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, False)
+        self.mock_model.set_prompt_on_save_editor_modified.assert_called_once_with(False)
 
-    @patch(WORKBENCH_CONF_CLASSPATH)
-    def test_action_prompt_deleting_workspace(self, mock_CONF):
-        presenter = GeneralSettings(None)
+    def test_action_prompt_deleting_workspace(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
         presenter.settings_presenter = MagicMock()
 
         presenter.action_prompt_deleting_workspace(True)
 
-        mock_CONF.set.assert_called_once_with(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, True)
-        presenter.settings_presenter.register_change_needs_restart.assert_called_once()
-        mock_CONF.set.reset_mock()
-        presenter.settings_presenter.reset_mock()
+        self.mock_model.set_prompt_on_deleting_workspace.assert_called_once_with(True)
+        self.mock_model.register_apply_callback.assert_called_once()
+        self.mock_model.set_prompt_on_deleting_workspace.reset_mock()
+        self.mock_model.register_apply_callback.reset_mock()
 
         presenter.action_prompt_deleting_workspace(False)
 
-        mock_CONF.set.assert_called_once_with(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, False)
-        presenter.settings_presenter.register_change_needs_restart.assert_called_once()
+        self.mock_model.set_prompt_on_deleting_workspace.assert_called_once_with(False)
+        self.mock_model.register_apply_callback.assert_called_once()
 
-    @patch(WORKBENCH_CONF_CLASSPATH)
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_load_current_setting_values(self, mock_ConfigService, mock_CONF):
+    def test_load_current_setting_values(self):
         # load current setting is called automatically in the constructor
-        GeneralSettings(None)
+        GeneralSettings(None, model=self.mock_model)
 
-        # 'any_order' is used to avoid having to assert call().__index__ is called due to 'get' returning a mock object
-        mock_CONF.get.assert_has_calls(
-            [
-                call(GeneralProperties.PROMPT_SAVE_ON_CLOSE.value, type=bool),
-                call(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, type=bool),
-                call(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, type=bool),
-                call(GeneralProperties.COMPLETION_ENABLED.value, type=bool),
-            ],
-            any_order=True,
-        )
+        self.mock_model.get_prompt_save_on_close.assert_called_once()
+        self.mock_model.get_prompt_on_save_editor_modified.assert_called_once()
+        self.mock_model.get_prompt_on_deleting_workspace.assert_called_once()
+        self.mock_model.get_project_recovery_enabled.assert_called_once()
+        self.mock_model.get_project_recovery_time_between_recoveries.assert_called_once()
+        self.mock_model.get_project_recovery_number_of_checkpoints.assert_called_once()
+        self.mock_model.get_use_notifications.assert_called_once()
+        self.mock_model.get_crystallography_convention.assert_called_once()
+        self.mock_model.get_use_opengl.assert_called_once()
+        self.mock_model.get_show_invisible_workspaces.assert_called_once()
+        self.mock_model.get_completion_enabled.assert_called_once()
 
-        mock_ConfigService.getString.assert_has_calls(
-            [
-                call(GeneralProperties.PR_RECOVERY_ENABLED.value),
-                call(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value),
-                call(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value),
-                call(GeneralProperties.USE_NOTIFICATIONS.value),
-                call(GeneralProperties.CRYSTALLOGRAPY_CONV.value),
-                call(GeneralProperties.OPENGL.value),
-            ]
-        )
-
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_project_recovery_enabled(self, mock_ConfigService):
-        presenter = GeneralSettings(None)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
+    def test_action_project_recovery_enabled(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_project_recovery_enabled(True)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_RECOVERY_ENABLED.value, "True")
+        self.mock_model.set_project_recovery_enabled.assert_called_once_with("True")
 
-        mock_ConfigService.setString.reset_mock()
+        self.mock_model.set_project_recovery_enabled.reset_mock()
 
         presenter.action_project_recovery_enabled(False)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_RECOVERY_ENABLED.value, "False")
+        self.mock_model.set_project_recovery_enabled.assert_called_once_with("False")
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_time_between_recovery(self, mock_ConfigService):
-        presenter = GeneralSettings(None)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
+    def test_action_time_between_recovery(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
 
         time = "6000"
         presenter.action_time_between_recovery(time)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_TIME_BETWEEN_RECOVERY.value, time)
+        self.mock_model.set_project_recovery_time_between_recoveries.assert_called_once_with(time)
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_total_number_checkpoints(self, mock_ConfigService):
-        presenter = GeneralSettings(None)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
+    def test_action_total_number_checkpoints(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
 
         num_checkpoints = "532532"
         presenter.action_total_number_checkpoints(num_checkpoints)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.PR_NUMBER_OF_CHECKPOINTS.value, num_checkpoints)
+        self.mock_model.set_project_recovery_number_of_checkpoints.assert_called_once_with(num_checkpoints)
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_instrument_changed(self, mock_ConfigService):
-        presenter = GeneralSettings(None)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
+    def test_action_instrument_changed(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
 
         new_instr = "apples"
         presenter.action_instrument_changed(new_instr)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.INSTRUMENT.value, new_instr)
+        self.mock_model.set_instrument(new_instr)
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_crystallography_convention(self, mock_ConfigService):
-        presenter = GeneralSettings(None)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
+    def test_action_crystallography_convention(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_crystallography_convention(Qt.Checked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.CRYSTALLOGRAPY_CONV.value, "Crystallography")
+        self.mock_model.set_crystallography_convention.assert_called_once_with("Crystallography")
 
-        mock_ConfigService.setString.reset_mock()
+        self.mock_model.set_crystallography_convention.reset_mock()
 
         presenter.action_crystallography_convention(Qt.Unchecked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.CRYSTALLOGRAPY_CONV.value, "Inelastic")
+        self.mock_model.set_crystallography_convention.assert_called_once_with("Inelastic")
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_use_open_gl(self, mock_ConfigService):
-        presenter = GeneralSettings(None, view=Mock())
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
+    def test_action_use_open_gl(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_use_open_gl(Qt.Checked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.OPENGL.value, "On")
+        self.mock_model.set_use_opengl.assert_called_once_with("On")
 
-        mock_ConfigService.setString.reset_mock()
+        self.mock_model.set_use_opengl.reset_mock()
 
         presenter.action_use_open_gl(Qt.Unchecked)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.OPENGL.value, "Off")
+        self.mock_model.set_use_opengl.assert_called_once_with("Off")
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_use_notifications_modified(self, mock_ConfigService):
-        presenter = GeneralSettings(None)
-        mock_ConfigService.setString.reset_mock()
+    def test_action_use_notifications_modified(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_use_notifications_modified(Qt.Checked)
 
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.USE_NOTIFICATIONS.value, "On")
-        mock_ConfigService.setString.reset_mock()
+        self.mock_model.set_use_notifications.assert_called_once_with("On")
+        self.mock_model.set_use_notifications.reset_mock()
 
         presenter.action_use_notifications_modified(Qt.Unchecked)
 
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.USE_NOTIFICATIONS.value, "Off")
+        self.mock_model.set_use_notifications.assert_called_once_with("Off")
 
-    @patch(WORKBENCH_CONF_CLASSPATH)
-    def test_action_font_selected(self, mock_conf):
-        presenter = GeneralSettings(None)
-        # reset any effects from the constructor
-        mock_conf.set.reset_mock()
+    def test_action_font_selected(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
         mock_font = Mock()
         mock_font.toString.return_value = "Serif"
         presenter.action_font_selected(mock_font)
-        mock_conf.set.assert_called_once_with(GeneralProperties.FONT.value, "Serif")
+        self.mock_model.set_font.assert_called_once_with("Serif")
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_action_show_invisible_workspaces(self, mock_ConfigService):
-        presenter = GeneralSettings(None)
-        # reset any effects from the constructor
-        mock_ConfigService.setString.reset_mock()
+    def test_action_show_invisible_workspaces(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_show_invisible_workspaces(True)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value, "True")
+        self.mock_model.set_show_invisible_workspaces.assert_called_once_with("True")
 
-        mock_ConfigService.setString.reset_mock()
+        self.mock_model.set_show_invisible_workspaces.reset_mock()
 
         presenter.action_show_invisible_workspaces(False)
-        mock_ConfigService.setString.assert_called_once_with(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value, "False")
+        self.mock_model.set_show_invisible_workspaces.assert_called_once_with("False")
 
-    @patch(WORKBENCH_CONF_CLASSPATH)
-    def test_action_completion_enabled_modified(self, mock_CONF):
-        presenter = GeneralSettings(None)
-        # reset any effects from the constructor
-        mock_CONF.setString.reset_mock()
+    def test_action_completion_enabled_modified(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
 
         presenter.action_completion_enabled_modified(True)
-        mock_CONF.set.assert_called_once_with(GeneralProperties.COMPLETION_ENABLED.value, True)
-        mock_CONF.set.reset_mock()
+        self.mock_model.set_completion_enabled.assert_called_once_with(True)
+        self.mock_model.set_completion_enabled.reset_mock()
 
         presenter.action_completion_enabled_modified(False)
-        mock_CONF.set.assert_called_once_with(GeneralProperties.COMPLETION_ENABLED.value, False)
+        self.mock_model.set_completion_enabled.assert_called_once_with(False)
 
-    @patch(WORKBENCH_CONF_CLASSPATH)
-    def test_fill_layout_display(self, mock_CONF):
-        presenter = GeneralSettings(None, view=Mock())
-        # setup CONF.get returns dictionary
+    def test_fill_layout_display(self):
+        presenter = GeneralSettings(None, view=Mock(), model=self.mock_model)
+
         test_dict = {"a": 1, "b": 2, "c": 3}
-        mock_CONF.get.return_value = test_dict
+        self.mock_model.get_user_layout.return_value = test_dict
         # setup mock commands
         presenter.view.layout_display.addItem = Mock()
 
@@ -332,47 +311,45 @@ class GeneralSettingsTest(unittest.TestCase):
         calls = [call("a"), call("b"), call("c")]
         presenter.view.layout_display.addItem.assert_has_calls(calls)
 
-    @patch(WORKBENCH_CONF_CLASSPATH)
-    def test_get_layout_dict(self, mock_CONF):
-        presenter = GeneralSettings(None, view=Mock())
-        # setup CONF.get returns dictionary
+    def test_get_layout_dict(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
+
         test_dict = {"a": 1}
-        mock_CONF.get.return_value = test_dict
+        self.mock_model.get_user_layout.return_value = test_dict
 
         self.assertEqual(test_dict, presenter.get_layout_dict())
 
-    @patch(WORKBENCH_CONF_CLASSPATH)
-    def test_get_layout_dict_key_error(self, mock_CONF):
-        presenter = GeneralSettings(None, view=Mock())
-        # setup CONF.get to return KeyError
-        mock_CONF.get.side_effect = KeyError()
+    def test_get_layout_dict_key_error(self):
+        presenter = GeneralSettings(None, model=self.mock_model)
+
+        self.mock_model.get_user_layout.side_effect = KeyError()
 
         self.assertEqual({}, presenter.get_layout_dict())
 
-    @patch(WORKBENCH_CONF_CLASSPATH)
-    def test_save_layout(self, mock_CONF):
-        presenter = GeneralSettings(None, view=Mock())
+    def test_save_layout(self):
+        presenter = GeneralSettings(None, view=Mock(), model=self.mock_model)
         # setup parent
         mock_parent = Mock()
         mock_parent.saveState.return_value = "value"
         presenter.parent = mock_parent
-        # setup CONF.get returns dictionary
+
         test_dict = {"a": 1}
-        mock_CONF.get = Mock(return_value=test_dict)
+        self.mock_model.get_user_layout.return_value = test_dict
         # setup mock commands
         presenter.view.new_layout_name.text = Mock(return_value="key")
         presenter.view.new_layout_name.clear = Mock()
 
         presenter.save_layout()
 
-        calls = [call(GeneralProperties.USER_LAYOUT.value, type=dict), call(GeneralProperties.USER_LAYOUT.value, type=dict)]
-        mock_CONF.get.assert_has_calls(calls)
+        calls = [call(get_potential_update=True), call(get_potential_update=True)]
+        self.mock_model.get_user_layout.assert_has_calls(calls)
+        self.mock_model.set_user_layout.assert_called_once_with({"a": 1, "key": "value"})
         mock_parent.saveState.assert_called_once_with(SAVE_STATE_VERSION)
         mock_parent.populate_layout_menu.assert_called_once_with()
 
-    @patch(WORKBENCH_CONF_CLASSPATH)
-    def test_load_layout(self, mock_CONF):
-        presenter = GeneralSettings(None, view=Mock())
+    def test_load_layout(self):
+        presenter = GeneralSettings(None, view=Mock(), model=self.mock_model)
+        self.mock_model.get_user_layout.reset_mock()
         # setup parent
         mock_parent = Mock()
         presenter.parent = mock_parent
@@ -380,18 +357,17 @@ class GeneralSettingsTest(unittest.TestCase):
         list_item = Mock()
         list_item.text.return_value = "a"
         presenter.view.layout_display.currentItem = Mock(return_value=list_item)
-        # setup CONF.get returns dictionary
+
         test_dict = {"a": 1}
-        mock_CONF.get = Mock(return_value=test_dict)
+        self.mock_model.get_user_layout.return_value = test_dict
 
         presenter.load_layout()
 
-        mock_CONF.get.assert_called_once_with(GeneralProperties.USER_LAYOUT.value, type=dict)
+        self.mock_model.get_user_layout.assert_called_once()
         mock_parent.restoreState.assert_called_once_with(test_dict["a"], SAVE_STATE_VERSION)
 
-    @patch(WORKBENCH_CONF_CLASSPATH)
-    def test_delete_layout(self, mock_CONF):
-        presenter = GeneralSettings(None, view=Mock())
+    def test_delete_layout(self):
+        presenter = GeneralSettings(None, view=Mock(), model=self.mock_model)
         # setup parent
         mock_parent = Mock()
         presenter.parent = mock_parent
@@ -399,13 +375,13 @@ class GeneralSettingsTest(unittest.TestCase):
         list_item = Mock()
         list_item.text.return_value = "a"
         presenter.view.layout_display.currentItem = Mock(return_value=list_item)
-        # setup CONF.get returns dictionary
+
         test_dict = {"a": 1}
-        mock_CONF.get = Mock(return_value=test_dict)
+        self.mock_model.get_user_layout.return_value = test_dict
 
         presenter.delete_layout()
 
-        calls = [call(GeneralProperties.USER_LAYOUT.value, type=dict), call(GeneralProperties.USER_LAYOUT.value, type=dict)]
-        mock_CONF.get.assert_has_calls(calls)
-        mock_CONF.set.assert_called_once_with(GeneralProperties.USER_LAYOUT.value, {})
+        calls = [call(get_potential_update=True), call(get_potential_update=True)]
+        self.mock_model.get_user_layout.assert_has_calls(calls)
+        self.mock_model.set_user_layout.assert_called_once_with({})
         mock_parent.populate_layout_menu.assert_called_once_with()
