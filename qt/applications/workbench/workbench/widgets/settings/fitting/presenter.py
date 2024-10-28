@@ -5,41 +5,30 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
-#
-#
-from mantid.api import FunctionFactory
-from mantid.kernel import ConfigService
 from workbench.widgets.settings.fitting.view import FittingSettingsView
+from workbench.widgets.settings.fitting.fitting_settings_model import FittingSettingsModel
 
 from qtpy.QtCore import Qt
-from enum import Enum
-
-
-class FittingProperties(Enum):
-    AUTO_BACKGROUND = "curvefitting.autoBackground"
-    DEFAULT_PEAK = "curvefitting.defaultPeak"
-    FWHM = "curvefitting.findPeaksFWHM"
-    TOLERANCE = "curvefitting.findPeaksTolerance"
 
 
 class FittingSettings(object):
-    def __init__(self, parent, view=None):
+    def __init__(self, parent, view=None, model=None):
         self.view = view if view else FittingSettingsView(parent, self)
         self.parent = parent
+        self.model = model if model else FittingSettingsModel()
         self.add_items_to_combo_boxes()
         self.load_current_setting_values()
         self.setup_signals()
 
     def add_items_to_combo_boxes(self):
-        fun_factory = FunctionFactory.Instance()
         self.view.auto_bkg.addItem("None")
-        for name in fun_factory.getBackgroundFunctionNames():
+        for name in self.model.get_background_function_names():
             self.view.auto_bkg.addItem(name)
-        for name in fun_factory.getPeakFunctionNames():
+        for name in self.model.get_peak_function_names():
             self.view.default_peak.addItem(name)
 
     def load_current_setting_values(self):
-        background = ConfigService.getString(FittingProperties.AUTO_BACKGROUND.value).split(" ", 1)
+        background = self.model.get_auto_background().split(" ", 1)
         if not background[0]:
             background[0] = "None"
         if self.view.auto_bkg.findText(background[0], Qt.MatchExactly) != -1:
@@ -51,19 +40,19 @@ class FittingSettings(object):
         else:
             self.view.background_args.clear()
 
-        default_peak = ConfigService.getString(FittingProperties.DEFAULT_PEAK.value)
+        default_peak = self.model.get_current_peak()
         if self.view.default_peak.findText(default_peak, Qt.MatchExactly) != -1:
             self.view.default_peak.setCurrentText(default_peak)
         else:
             self.view.auto_bkg.setCurrentText("Gaussian")
 
-        fwhm = ConfigService.getString(FittingProperties.FWHM.value)
+        fwhm = self.model.get_fwhm()
         if fwhm == "":
             self.view.findpeaks_fwhm.setValue(7)
         else:
             self.view.findpeaks_fwhm.setValue(int(fwhm))
 
-        tolerance = ConfigService.getString(FittingProperties.TOLERANCE.value)
+        tolerance = self.model.get_tolerance()
         if tolerance == "":
             self.view.findpeaks_tol.setValue(4)
         else:
@@ -78,26 +67,26 @@ class FittingSettings(object):
 
     def action_auto_background_changed(self, item_name):
         if item_name == "None":
-            ConfigService.setString(FittingProperties.AUTO_BACKGROUND.value, "")
+            self.model.set_auto_background("")
             return
         background_string = item_name + " " + self.view.background_args.text()
-        ConfigService.setString(FittingProperties.AUTO_BACKGROUND.value, background_string)
+        self.model.set_auto_background(background_string)
 
     def action_background_args_changed(self):
         if self.view.auto_bkg.currentText() == "None":
-            ConfigService.setString(FittingProperties.AUTO_BACKGROUND.value, "")
+            self.model.set_auto_background("")
         else:
             background_string = self.view.auto_bkg.currentText() + " " + self.view.background_args.text()
-            ConfigService.setString(FittingProperties.AUTO_BACKGROUND.value, background_string)
+            self.model.set_auto_background(background_string)
 
     def action_default_peak_changed(self, item_name):
-        ConfigService.setString(FittingProperties.DEFAULT_PEAK.value, item_name)
+        self.model.set_default_peak(item_name)
 
     def action_find_peaks_fwhm_changed(self, value):
-        ConfigService.setString(FittingProperties.FWHM.value, str(value))
+        self.model.set_fwhm(str(value))
 
     def action_find_peaks_tolerance_changed(self, value):
-        ConfigService.setString(FittingProperties.TOLERANCE.value, str(value))
+        self.model.set_tolerance(str(value))
 
     def update_properties(self):
         self.load_current_setting_values()

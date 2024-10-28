@@ -12,7 +12,8 @@ from mantid import ConfigService
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import ensure_widget_is_on_screen
 from workbench.widgets.settings.categories.presenter import CategoriesSettings, CategoryProperties
-from workbench.widgets.settings.fitting.presenter import FittingSettings, FittingProperties
+from workbench.widgets.settings.fitting.presenter import FittingSettings
+from workbench.widgets.settings.fitting.fitting_settings_model import FittingProperties
 from workbench.widgets.settings.general.presenter import GeneralSettings
 from workbench.widgets.settings.general.general_settings_model import GeneralProperties, GeneralUserConfigProperties
 from workbench.widgets.settings.plots.presenter import PlotSettings, PlotProperties
