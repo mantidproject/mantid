@@ -35,17 +35,3 @@ jobs:
           target_branch: main
           message: Merge ornl-next into main
           github_token: ${{ secrets.MANTID_BUILDER_TOKEN }}
-
-  merge-release-into-ornl:
-    runs-on: ubuntu-latest
-    if: ${{ github.ref_name == 'release-next' }}
-    steps:
-      - uses: actions/checkout@master
-
-      - name: Merge release-next into ornl-next
-        uses: devmasx/merge-branch@master
-        with:
-          type: now
-          target_branch: ornl-next
-          message: Merge release-next into ornl-next
-          github_token: ${{ secrets.MANTID_BUILDER_TOKEN }}
