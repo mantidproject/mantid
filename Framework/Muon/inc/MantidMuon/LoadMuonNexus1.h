@@ -9,9 +9,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidMuon/DllConfig.h"
+#include "MantidMuon/LoadMuonNexus.h"
 
 // Forward declaration (here, because is not in Mantid namespace)
 class MuonNexusReader;
@@ -24,7 +25,7 @@ namespace NeXus {
 class NXRoot;
 }
 
-namespace DataHandling {
+namespace Algorithms {
 /** @class LoadMuonNexus LoadMuonNexus.h DataHandling/LoadMuonNexus.h
 
 Loads an file in Nexus Muon format version 1 and stores it in a 2D workspace
@@ -52,7 +53,7 @@ multiperiod file)
 together based on the groupings in the NeXus file. </LI>
 </UL>
 */
-class MANTID_DATAHANDLING_DLL LoadMuonNexus1 : public LoadMuonNexus {
+class MANTID_MUON_DLL LoadMuonNexus1 : public LoadMuonNexus {
 public:
   /// Default constructor
   LoadMuonNexus1();
@@ -101,5 +102,5 @@ private:
   DataObjects::TableWorkspace_sptr createDetectorGroupingTable(std::vector<int> specToLoad, std::vector<int> grouping);
 };
 
-} // namespace DataHandling
+} // namespace Algorithms
 } // namespace Mantid

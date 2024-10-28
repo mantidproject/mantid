@@ -4,13 +4,14 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/LoadMuonNexus1.h"
+#include "MantidMuon/LoadMuonNexus1.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -45,7 +46,8 @@
 #include <limits>
 #include <memory>
 
-namespace Mantid::DataHandling {
+namespace Mantid::Algorithms {
+using namespace DataHandling;
 using namespace DataObjects;
 
 // Register the algorithm into the algorithm factory
@@ -917,4 +919,4 @@ int LoadMuonNexus1::confidence(Kernel::NexusDescriptor &descriptor) const {
   return 0;
 }
 
-} // namespace Mantid::DataHandling
+} // namespace Mantid::Algorithms

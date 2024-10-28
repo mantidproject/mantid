@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidMuon/LoadMuonNexus2.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
@@ -12,8 +12,6 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/LoadMuonNexus1.h"
-#include "MantidDataHandling/LoadMuonNexusV2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -23,6 +21,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
+#include "MantidMuon/LoadMuonNexus1.h"
 #include "MantidNexus/NexusClasses.h"
 #include <Poco/Path.h>
 #include <memory>
@@ -36,7 +35,7 @@
 
 using Mantid::Types::Core::DateAndTime;
 
-namespace Mantid::DataHandling {
+namespace Mantid::Algorithms {
 // Register the algorithm into the algorithm factory
 DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2)
 
@@ -530,4 +529,4 @@ std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::N
   return mapping;
 }
 
-} // namespace Mantid::DataHandling
+} // namespace Mantid::Algorithms
