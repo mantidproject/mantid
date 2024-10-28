@@ -26,7 +26,7 @@ const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI", "M
 namespace MantidQt::CustomInterfaces {
 
 ALCDataLoadingView::ALCDataLoadingView(QWidget *widget)
-    : m_widget(widget), m_watcher(new QFileSystemWatcher()), m_timer(new QTimer()),
+    : m_widget(widget), m_watcher(new QFileSystemWatcher(widget)), m_timer(new QTimer(widget)),
       m_periodInfo(std::make_shared<MuonPeriodInfo>()), m_selectedLog(DEFAULT_LOG), m_numPeriods(0), m_presenter() {}
 
 ALCDataLoadingView::~ALCDataLoadingView() = default;
