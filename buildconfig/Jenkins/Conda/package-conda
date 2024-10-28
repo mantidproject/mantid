@@ -84,8 +84,7 @@ done
 # Mamba
 setup_mamba $WORKSPACE/mambaforge "package-conda" true
 mamba install --yes boa conda-verify versioningit
-conda config --add channels mantid
-conda config --add channels conda-forge
+conda config --append channels mantid/label/separate_mslice_test
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
