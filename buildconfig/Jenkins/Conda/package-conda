@@ -83,7 +83,8 @@ done
 
 # Mamba
 setup_mamba $WORKSPACE/mambaforge "package-conda" true
-mamba install --yes boa conda-verify versioningit conda-libmamba-solver --solver=classic
+mamba install --yes boa conda-verify versioningit
+conda config --add channels mantid
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
@@ -127,7 +128,7 @@ fi
 
 # Run conda build.
 if [[ $ENABLE_BUILD_MANTID_DEVELOPER == true ]]; then
-    conda mambabuild ./mantid-developer/ -c mantid $EXTRA_BUILD_OPTIONS
+    conda mambabuild ./mantid-developer/ $EXTRA_BUILD_OPTIONS
 fi
 if [[ $ENABLE_BUILD_MANTID == true ]]; then
     conda mambabuild ./mantid/ $EXTRA_BUILD_OPTIONS
@@ -142,7 +143,7 @@ if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     if [[ $BUILD_WORKBENCH_WITH_DOCS == false ]]; then
 	export INCLUDE_MANTIDDOCS=False
     fi
-    conda mambabuild ./mantidworkbench/ -c mantid $EXTRA_BUILD_OPTIONS
+    conda mambabuild ./mantidworkbench/ $EXTRA_BUILD_OPTIONS
 fi
 
 # elapsed time with second resolution
