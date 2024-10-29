@@ -71,7 +71,7 @@ namespace SpinStatesORSO {
  * @return The ORSO notation that represents the given polarization spin state.
  * @throw std::invalid_argument if no corresponding ORSO notation can be found.
  */
-const std::string getORSONotationForSpinState(const std::string &spinState) {
+const std::string &getORSONotationForSpinState(const std::string &spinState) {
   if (spinState == SpinStateConfigurationsWildes::PLUS_PLUS ||
       spinState == SpinStateConfigurationsFredrikze::PARA_PARA) {
     return SpinStatesORSO::PP;
@@ -110,7 +110,7 @@ const std::string getORSONotationForSpinState(const std::string &spinState) {
  * @throw std::invalid_argument if no corresponding ORSO spin state notation can be found.
  */
 void addORSOLogForSpinState(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &spinState) {
-  const auto logValue = getORSONotationForSpinState(spinState);
+  const auto &logValue = getORSONotationForSpinState(spinState);
   ws->mutableRun().addProperty(SpinStatesORSO::LOG_NAME, logValue, true);
 }
 } // namespace SpinStatesORSO
