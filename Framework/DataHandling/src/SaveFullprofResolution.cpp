@@ -12,7 +12,6 @@
 #include "MantidKernel/ListValidator.h"
 
 #include "Poco/File.h"
-#include "boost/algorithm/string.hpp"
 #include "boost/math/special_functions/round.hpp"
 
 #include <fstream>
@@ -175,7 +174,7 @@ void SaveFullprofResolution::parseTableWorkspace() {
     // If there is NO 'BANK', locate first (from left) column starting with
     // 'Value'
     for (size_t i = 1; i < numcols; ++i) {
-      if (boost::starts_with(colnames[i], "Value")) {
+      if (colnames[i].starts_with("Value")) {
         colindex = static_cast<int>(i);
         break;
       }
@@ -184,7 +183,7 @@ void SaveFullprofResolution::parseTableWorkspace() {
     // If there is BANK, Locate first (from left) column starting with 'Value'
     // and BANK matches
     for (size_t i = 1; i < numcols; ++i) {
-      if (boost::starts_with(colnames[i], "Value")) {
+      if (colnames[i].starts_with("Value")) {
         int bankid = boost::math::iround(m_profileTableWS->cell<double>(rowbankindex, i));
         if (bankid == m_bankID) {
           colindex = static_cast<int>(i);

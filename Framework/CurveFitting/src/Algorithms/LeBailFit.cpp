@@ -19,7 +19,6 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>
 
 #include <cctype>
 #include <fstream>
@@ -1050,7 +1049,7 @@ void LeBailFit::parseBackgroundTableWorkspace(const TableWorkspace_sptr &bkgdpar
     g_log.error(errss.str());
     throw runtime_error(errss.str());
   } else {
-    if (!(boost::starts_with(colnames[0], "Name") && boost::starts_with(colnames[1], "Value"))) {
+    if (!(colnames[0].starts_with("Name") && colnames[1].starts_with("Value"))) {
       // Column 0 and 1 must be Name and Value (at least started with)
       stringstream errss;
       errss << "Input parameter table workspace have wrong column definition. "

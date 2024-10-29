@@ -18,7 +18,6 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/python/extract.hpp>
 
 namespace Mantid::PythonInterface::Registry {
@@ -49,7 +48,7 @@ void SequenceTypeHandler<ContainerType>::set(Kernel::IPropertyManager *alg, cons
   using DestElementType = typename ContainerType::value_type;
 
   // Current workaround for things that still pass back wrapped vectors...
-  if (boost::starts_with(value.ptr()->ob_type->tp_name, "std_vector")) {
+  if (value.ptr()->ob_type->tp_name.starts_with("std_vector")) {
     alg->setProperty(name, StdVectorExtractor<DestElementType>::extract(value));
   }
   // numpy arrays requires special handling to extract their types. Hand-off to
@@ -87,7 +86,7 @@ SequenceTypeHandler<ContainerType>::create(const std::string &name, const boost:
 
   ContainerType valueInC;
   // Current workaround for things that still pass back wrapped vectors...
-  if (boost::starts_with(defaultValue.ptr()->ob_type->tp_name, "std_vector")) {
+  if (defaultValue.ptr()->ob_type->tp_name.starts_with("std_vector")) {
     valueInC = StdVectorExtractor<DestElementType>::extract(defaultValue);
   } else if (PySequence_Check(defaultValue.ptr())) {
     valueInC = Converters::PySequenceToVector<DestElementType>(defaultValue)();

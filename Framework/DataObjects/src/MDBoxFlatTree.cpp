@@ -25,7 +25,7 @@ namespace {
 Kernel::Logger g_log("MDBoxFlatTree");
 
 void EmplaceExperimentBlockNum(const std::string &name, std::list<uint16_t> &experimentBlockNum) {
-  if (boost::starts_with(name, "experiment")) {
+  if (name.starts_with("experiment")) {
     try {
       auto num = boost::lexical_cast<uint16_t>(name.substr(10, name.size() - 10));
       if (num < std::numeric_limits<uint16_t>::max() - 1) {
@@ -426,7 +426,7 @@ void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::st
     if (std::count(entry.begin(), entry.end(), '/') != 2) {
       continue;
     }
-    if (!boost::starts_with(entry, "/" + currentGroup + "/experiment")) {
+    if (!entry.starts_with("/" + currentGroup + "/experiment")) {
       continue;
     }
 

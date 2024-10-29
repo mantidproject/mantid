@@ -16,8 +16,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/algorithm/string/predicate.hpp>
-
 namespace {
 /// An array containing the supported instrument names
 const std::array<std::string, 5> SUPPORTED_INSTRUMENTS = {{"IN4", "IN5", "IN6", "PANTHER", "SHARP"}};
@@ -125,7 +123,7 @@ std::vector<std::string> LoadILLTOF2::getMonitorInfo(const NeXus::NXEntry &first
   } else {
     for (std::vector<NXClassInfo>::const_iterator it = firstEntry.groups().begin(); it != firstEntry.groups().end();
          ++it) {
-      if (it->nxclass == "NXmonitor" || boost::starts_with(it->nxname, "monitor")) {
+      if (it->nxclass == "NXmonitor" || it->nxname.starts_with("monitor")) {
         monitorList.push_back(it->nxname + "/data");
       }
     }

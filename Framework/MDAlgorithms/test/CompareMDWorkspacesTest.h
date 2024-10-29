@@ -47,7 +47,7 @@ public:
 
     std::string result = alg.getPropertyValue("Result");
     std::cout << result << '\n';
-    TSM_ASSERT(result.c_str(), boost::starts_with(result, resultExpected));
+    TSM_ASSERT(result.c_str(), result.starts_with(resultExpected));
   }
 
   void test_histo() {
