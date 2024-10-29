@@ -100,7 +100,7 @@ void LoadMuonNexus2::exec() {
 
   std::string detectorName;
   // Only the first NXdata found
-  for (auto &group : entry.groups()) {
+  for (auto const &group : entry.groups()) {
     std::string className = group.nxclass;
     if (className == "NXdata") {
       detectorName = group.nxname;
@@ -438,7 +438,7 @@ std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::N
   NXEntry entry = root.openEntry(m_entry_name);
   const std::string detectorName = [&entry]() {
     // Only the first NXdata found
-    for (auto &group : entry.groups()) {
+    for (auto const &group : entry.groups()) {
       std::string className = group.nxclass;
       if (className == "NXdata") {
         return group.nxname;

@@ -55,22 +55,7 @@ together based on the groupings in the NeXus file. </LI>
 */
 class MANTID_MUON_DLL LoadMuonNexus1 : public LoadMuonNexus {
 public:
-  /// Default constructor
   LoadMuonNexus1();
-  /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "LoadMuonNexus"; }
-  /// Summary of algorithms purpose
-  const std::string summary() const override {
-    return "The LoadMuonNexus algorithm will read the given NeXus Muon data "
-           "file Version 1 and use the results to populate the named "
-           "workspace. LoadMuonNexus may be invoked by LoadNexus if it is "
-           "given a NeXus file of this type.";
-  }
-
-  /// Algorithm's version for identification overriding a virtual method
-  int version() const override { return 1; }
-  /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override { return "DataHandling\\Nexus;Muon\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
@@ -80,7 +65,7 @@ protected:
   void exec() override;
 
 private:
-  void loadData(size_t hist, specnum_t &i, specnum_t specNo, MuonNexusReader &nxload, const int64_t lengthIn,
+  void loadData(size_t hist, specnum_t const &i, specnum_t specNo, MuonNexusReader &nxload, const int64_t lengthIn,
                 const DataObjects::Workspace2D_sptr &localWorkspace);
   void runLoadMappingTable(DataObjects::Workspace2D_sptr);
   void runLoadLog(const DataObjects::Workspace2D_sptr &);
@@ -92,14 +77,16 @@ private:
   void loadDeadTimes(Mantid::NeXus::NXRoot &root);
 
   /// Creates Dead Time Table using all the data between begin and end
-  DataObjects::TableWorkspace_sptr createDeadTimeTable(std::vector<int> specToLoad, std::vector<double> deadTimes);
+  DataObjects::TableWorkspace_sptr createDeadTimeTable(std::vector<int> const &specToLoad,
+                                                       std::vector<double> const &deadTimes);
 
   /// Loads detector grouping information
   API::Workspace_sptr loadDetectorGrouping(Mantid::NeXus::NXRoot &root,
                                            const Mantid::Geometry::Instrument_const_sptr &inst);
 
   /// Creates Detector Grouping Table using all the data from the range
-  DataObjects::TableWorkspace_sptr createDetectorGroupingTable(std::vector<int> specToLoad, std::vector<int> grouping);
+  DataObjects::TableWorkspace_sptr createDetectorGroupingTable(std::vector<int> const &specToLoad,
+                                                               std::vector<int> const &grouping);
 };
 
 } // namespace Algorithms
