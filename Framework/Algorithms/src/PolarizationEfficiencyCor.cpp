@@ -36,7 +36,7 @@ static const std::string OUTPUT_WORKSPACES{"OutputWorkspace"};
 static const std::string CORRECTION_METHOD{"CorrectionMethod"};
 static const std::string INPUT_FRED_SPIN_STATES{"SpinStatesInFredrikze"};
 static const std::string OUTPUT_FRED_SPIN_STATES{"SpinStatesOutFredrikze"};
-
+static const std::string ADD_SPIN_STATE_LOG{"AddSpinStateToLog"};
 } // namespace Prop
 
 namespace CorrectionMethod {
@@ -136,6 +136,10 @@ void PolarizationEfficiencyCor::init() {
       std::make_unique<WorkspaceProperty<WorkspaceGroup>>(Prop::OUTPUT_WORKSPACES, "", Kernel::Direction::Output),
       "A group of polarization efficiency corrected workspaces.");
 
+  declareProperty(Prop::ADD_SPIN_STATE_LOG, false,
+                  "Whether to add the final spin state into the sample log of each child workspace in the output "
+                  "group. (Wildes method only).");
+
   setPropertySettings(
       Prop::OUTPUT_WILDES_SPIN_STATES,
       std::make_unique<EnabledWhenProperty>(Prop::CORRECTION_METHOD, Kernel::IS_EQUAL_TO, CorrectionMethod::WILDES));
@@ -180,6 +184,9 @@ void PolarizationEfficiencyCor::execWildes() {
   alg->setProperty("Efficiencies", efficiencies);
   if (!isDefault(Prop::FLIPPERS)) {
     alg->setPropertyValue("Flippers", getPropertyValue(Prop::FLIPPERS));
+  }
+  if (!isDefault(Prop::ADD_SPIN_STATE_LOG)) {
+    alg->setPropertyValue("AddSpinStateToLog", getPropertyValue(Prop::ADD_SPIN_STATE_LOG));
   }
   if (!isDefault(Prop::OUTPUT_WILDES_SPIN_STATES)) {
     alg->setPropertyValue("SpinStates", getPropertyValue(Prop::OUTPUT_WILDES_SPIN_STATES));
