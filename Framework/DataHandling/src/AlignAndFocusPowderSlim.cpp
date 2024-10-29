@@ -267,8 +267,8 @@ void AlignAndFocusPowderSlim::exec() {
   h5file.openGroup(ENTRY_TOP_LEVEL, "NXentry"); // TODO should this allow other entries?
 
   // filter by time
-  double filter_time_start_sec = getProperty("FilterByTimeStart");
-  double filter_time_stop_sec = getProperty("FilterByTimeStop");
+  double filter_time_start_sec = getProperty(PropertyNames::FILTER_TIMESTART);
+  double filter_time_stop_sec = getProperty(PropertyNames::FILTER_TIMESTOP);
 
   if (filter_time_start_sec != EMPTY_DBL() || filter_time_stop_sec != EMPTY_DBL()) {
     is_time_filtered = true;
@@ -284,6 +284,9 @@ void AlignAndFocusPowderSlim::exec() {
     if (filter_time_start_sec != EMPTY_DBL()) {
       const double filter_time_start = pulse_times->front() + filter_time_start_sec;
       const auto itStart = std::lower_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_start);
+      if (itStart == pulse_times->cend())
+        throw std::invalid_argument("Invalid pulse time filtering, start time will filter all pulses");
+
       pulse_start_index = std::distance(pulse_times->cbegin(), itStart);
     }
 
@@ -291,7 +294,7 @@ void AlignAndFocusPowderSlim::exec() {
       const double filter_time_stop = pulse_times->front() + filter_time_stop_sec;
       const auto itStop = std::upper_bound(pulse_times->cbegin(), pulse_times->cend(), filter_time_stop);
       if (itStop == pulse_times->cend())
-        pulse_stop_index = pulse_times->size() - 1; // This isn't correct, FIXME
+        pulse_stop_index = std::numeric_limits<size_t>::max();
       else
         pulse_stop_index = std::distance(pulse_times->cbegin(), itStop);
     }
@@ -335,11 +338,9 @@ void AlignAndFocusPowderSlim::exec() {
           const auto startTime = std::chrono::high_resolution_clock::now();
           loadEventIndex(event_index, h5file);
           addTimer("loadEventIndex" + entry_name, startTime, std::chrono::high_resolution_clock::now());
-          const auto start_event = event_index->at(pulse_start_index);
-          const auto stop_event = event_index->at(pulse_stop_index);
-          // These are the arguments to getSlab()
-          loadStart[0] = start_event;
-          loadSize[0] = stop_event - start_event;
+          start_event = event_index->at(pulse_start_index);
+          if (pulse_stop_index != std::numeric_limits<size_t>::max())
+            stop_event = event_index->at(pulse_stop_index);
           g_log.debug() << "Loading events from " << start_event << " to " << stop_event << '\n';
         }
 
@@ -416,6 +417,12 @@ void AlignAndFocusPowderSlim::loadTOF(std::unique_ptr<std::vector<float>> &data,
   const auto dim0 = static_cast<size_t>(LoadBankFromDiskTask::recalculateDataSize(id_info.dims[0]));
 
   if (is_time_filtered) {
+    // These are the arguments to getSlab()
+    loadStart[0] = start_event;
+    if (stop_event == std::numeric_limits<size_t>::max())
+      loadSize[0] = dim0 - start_event;
+    else
+      loadSize[0] = stop_event - start_event;
     data->resize(loadSize[0]);
     Mantid::NeXus::NeXusIOHelper::readNexusSlab<float, Mantid::NeXus::NeXusIOHelper::PreventNarrowing>(
         *data, h5file, NxsFieldNames::TIME_OF_FLIGHT, loadStart, loadSize);
@@ -445,6 +452,12 @@ void AlignAndFocusPowderSlim::loadDetid(std::unique_ptr<std::vector<uint32_t>> &
   const auto dim0 = static_cast<size_t>(LoadBankFromDiskTask::recalculateDataSize(id_info.dims[0]));
 
   if (is_time_filtered) {
+    // These are the arguments to getSlab()
+    loadStart[0] = start_event;
+    if (stop_event == std::numeric_limits<size_t>::max())
+      loadSize[0] = dim0 - start_event;
+    else
+      loadSize[0] = stop_event - start_event;
     data->resize(loadSize[0]);
     Mantid::NeXus::NeXusIOHelper::readNexusSlab<uint32_t, Mantid::NeXus::NeXusIOHelper::PreventNarrowing>(
         *data, h5file, NxsFieldNames::DETID, loadStart, loadSize);
