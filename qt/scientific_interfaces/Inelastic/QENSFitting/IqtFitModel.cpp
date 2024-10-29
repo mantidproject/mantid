@@ -11,7 +11,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <utility>
 
 using namespace Mantid::API;
@@ -44,9 +43,7 @@ std::vector<std::string> getParameters(const IFunction_sptr &function, const std
 
   std::vector<std::string> parameters;
   std::copy_if(parameterNames.cbegin(), parameterNames.cend(), std::back_inserter(parameters),
-               [&shortParameterName](std::string const &longName) {
-                 return boost::algorithm::ends_with(longName, shortParameterName);
-               });
+               [&shortParameterName](std::string const &longName) { return longName.ends_with(shortParameterName); });
   return parameters;
 }
 

@@ -19,7 +19,6 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/split.hpp>
 
 #include <cctype>
 #include <fstream>
@@ -1050,7 +1049,7 @@ void LeBailFit::parseBackgroundTableWorkspace(const TableWorkspace_sptr &bkgdpar
     g_log.error(errss.str());
     throw runtime_error(errss.str());
   } else {
-    if (!(boost::starts_with(colnames[0], "Name") && boost::starts_with(colnames[1], "Value"))) {
+    if (!(colnames[0].starts_with("Name") && colnames[1].starts_with("Value"))) {
       // Column 0 and 1 must be Name and Value (at least started with)
       stringstream errss;
       errss << "Input parameter table workspace have wrong column definition. "
@@ -1165,7 +1164,7 @@ void LeBailFit::exportBraggPeakParameterToTable() {
  * @param parammap : map of Parameters whose values are written to
  * TableWorkspace
  */
-void LeBailFit::exportInstrumentParameterToTable(std::map<std::string, Parameter> parammap) {
+void LeBailFit::exportInstrumentParameterToTable(const std::map<std::string, Parameter> &parammap) {
   // 1. Create table workspace
   DataObjects::TableWorkspace *tablews;
 
@@ -1183,7 +1182,7 @@ void LeBailFit::exportInstrumentParameterToTable(std::map<std::string, Parameter
   tablews->addColumn("double", "Diff");
 
   // 2. Add profile parameter value
-  std::map<std::string, Parameter>::iterator paramiter;
+  std::map<std::string, Parameter>::const_iterator paramiter;
   std::map<std::string, double>::iterator opiter;
   for (paramiter = parammap.begin(); paramiter != parammap.end(); ++paramiter) {
     std::string parname = paramiter->first;
@@ -1450,7 +1449,7 @@ void LeBailFit::doMarkovChain(const map<string, Parameter> &parammap, const Mant
   for (size_t icycle = 1; icycle <= maxcycles; ++icycle) {
     // Refine parameters (for all parameters in turn) to data with background
     // removed
-    for (auto &MCGroup : m_MCGroups) {
+    for (const auto &MCGroup : m_MCGroups) {
       // Propose new value for ONE AND ONLY ONE Monte Carlo parameter group
       /*
       int igroup = giter->first; // group id
@@ -1575,7 +1574,7 @@ void LeBailFit::doMarkovChain(const map<string, Parameter> &parammap, const Mant
 
   map<string, Parameter>::iterator mapiter;
   for (mapiter = mapCurrParameter.begin(); mapiter != mapCurrParameter.end(); ++mapiter) {
-    Parameter &param = mapiter->second;
+    const Parameter &param = mapiter->second;
     if (param.fit) {
       g_log.notice() << setw(10) << param.name << "\t: Average Stepsize = " << setw(10) << setprecision(5)
                      << param.sumstepsize / double(maxcycles) << ", Max Step Size = " << setw(10) << setprecision(5)
@@ -1666,7 +1665,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   m_MCGroups.emplace(0, geomparams);
 
   dboutss << "Geometry parameters: ";
-  for (auto &geomparam : geomparams)
+  for (const auto &geomparam : geomparams)
     dboutss << geomparam << "\t\t";
   dboutss << "\n";
 
@@ -1679,7 +1678,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   m_MCGroups.emplace(1, alphs);
 
   dboutss << "Alpha parameters";
-  for (auto &alph : alphs)
+  for (const auto &alph : alphs)
     dboutss << alph << "\t\t";
   dboutss << "\n";
 
@@ -1692,7 +1691,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   m_MCGroups.emplace(2, betas);
 
   dboutss << "Beta parameters";
-  for (auto &beta : betas)
+  for (const auto &beta : betas)
     dboutss << beta << "\t\t";
   dboutss << "\n";
 
@@ -1704,7 +1703,7 @@ void LeBailFit::setupBuiltInRandomWalkStrategy() {
   m_MCGroups.emplace(3, sigs);
 
   dboutss << "Sig parameters";
-  for (auto &sig : sigs)
+  for (const auto &sig : sigs)
     dboutss << sig << "\t\t";
   dboutss << "\n";
 
@@ -2148,8 +2147,8 @@ bool LeBailFit::acceptOrDeny(Rfactor currR, Rfactor newR) {
  * @param rfactor :: R-factor (Rwp and Rp)
  * @param istep:     current MC step to be recorded
  */
-void LeBailFit::bookKeepBestMCResult(map<string, Parameter> parammap, const vector<double> &bkgddata, Rfactor rfactor,
-                                     size_t istep) {
+void LeBailFit::bookKeepBestMCResult(const map<string, Parameter> &parammap, const vector<double> &bkgddata,
+                                     Rfactor rfactor, size_t istep) {
   // TODO : [RPRWP] Here is a metric of goodness of it.
   double goodness = rfactor.Rwp;
   bool better = goodness < m_bestRwp;
@@ -2186,8 +2185,8 @@ void LeBailFit::bookKeepBestMCResult(map<string, Parameter> parammap, const vect
  * @param tgtparammap:  map of Parameters whose values to be copied from
  * others;
  */
-void LeBailFit::applyParameterValues(map<string, Parameter> &srcparammap, map<string, Parameter> &tgtparammap) {
-  map<string, Parameter>::iterator srcmapiter;
+void LeBailFit::applyParameterValues(const map<string, Parameter> &srcparammap, map<string, Parameter> &tgtparammap) {
+  map<string, Parameter>::const_iterator srcmapiter;
   map<string, Parameter>::iterator tgtmapiter;
   for (srcmapiter = srcparammap.begin(); srcmapiter != srcparammap.end(); ++srcmapiter) {
     string parname = srcmapiter->first;
@@ -2222,7 +2221,7 @@ std::map<std::string, double> LeBailFit::convertToDoubleMap(std::map<std::string
 
 /** Write a set of (XY) data to a column file
  */
-void writeRfactorsToFile(vector<double> vecX, vector<Rfactor> vecR, const string &filename) {
+void writeRfactorsToFile(const vector<double> &vecX, const vector<Rfactor> &vecR, const string &filename) {
   ofstream ofile;
   ofile.open(filename.c_str());
 

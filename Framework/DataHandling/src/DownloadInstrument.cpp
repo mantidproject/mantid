@@ -9,9 +9,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/GitHubApiHelper.h"
 
-// boost
-#include <boost/algorithm/string/predicate.hpp>
-
 // Poco
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
@@ -121,7 +118,7 @@ void DownloadInstrument::exec() {
 
   for (auto &itMap : fileMap) {
     // download a file
-    if (boost::algorithm::ends_with(itMap.second, "Facilities.xml")) {
+    if (itMap.second.ends_with("Facilities.xml")) {
       g_log.notice("A new Facilities.xml file has been downloaded, this will "
                    "take effect next time Mantid is started.");
     } else {

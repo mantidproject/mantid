@@ -19,8 +19,6 @@
 
 #include <nexus/napi.h>
 
-#include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
-
 namespace Mantid {
 
 namespace {
@@ -234,7 +232,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
 
                 if (type == NX_CHAR) {
                   std::string property_value(reinterpret_cast<const char *>(dataBuffer));
-                  if (boost::algorithm::ends_with(property_name, "_time")) {
+                  if (property_name.ends_with("_time")) {
                     // That's a time value! Convert to Mantid standard
                     property_value = dateTimeInIsoFormat(property_value);
                     if (runDetails.hasProperty(property_name))

@@ -124,7 +124,7 @@ private:
   void exportBraggPeakParameterToTable();
 
   /// Output parameters (fitted or tied)
-  void exportInstrumentParameterToTable(std::map<std::string, Parameter> parammap);
+  void exportInstrumentParameterToTable(const std::map<std::string, Parameter> &parammap);
 
   /// Create output data workspace
   void createOutputDataWorkspace();
@@ -164,11 +164,11 @@ private:
   double limitProposedValueInBound(const Parameter &param, double newvalue, double direction, int choice);
 
   /// Book keep the (sopposed) best MC result
-  void bookKeepBestMCResult(std::map<std::string, Parameter> parammap, const std::vector<double> &bkgddata,
+  void bookKeepBestMCResult(const std::map<std::string, Parameter> &parammap, const std::vector<double> &bkgddata,
                             Kernel::Rfactor rfactor, size_t istep);
 
   /// Apply the value of parameters in the source to target
-  void applyParameterValues(std::map<std::string, Parameter> &srcparammap,
+  void applyParameterValues(const std::map<std::string, Parameter> &srcparammap,
                             std::map<std::string, Parameter> &tgtparammap);
 
   /// Store/buffer current background parameters
@@ -286,7 +286,8 @@ private:
 };
 
 /// Write a set of (XY) data to a column file
-void writeRfactorsToFile(std::vector<double> vecX, std::vector<Kernel::Rfactor> vecR, const std::string &filename);
+void writeRfactorsToFile(const std::vector<double> &vecX, const std::vector<Kernel::Rfactor> &vecR,
+                         const std::string &filename);
 
 } // namespace Algorithms
 } // namespace CurveFitting

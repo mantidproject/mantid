@@ -19,6 +19,9 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/math/special_functions/round.hpp>
 
 using namespace Mantid::DataObjects;
@@ -66,11 +69,11 @@ void PeakHKLErrors::setUpOptRuns() {
     OptRunstemp = OptRunstemp.substr(1, OptRunstemp.size() - 1);
 
   if (!OptRunstemp.empty() && OptRunstemp.at(OptRunstemp.size() - 1) == '/')
-    OptRunstemp = OptRunstemp.substr(0, OptRunstemp.size() - 1);
+    OptRunstemp.pop_back();
 
   boost::split(OptRunNums, OptRunstemp, boost::is_any_of("/"));
 
-  for (auto &OptRunNum : OptRunNums) {
+  for (const auto &OptRunNum : OptRunNums) {
     declareParameter("phi" + OptRunNum, 0.0, "Phi sample orientation value");
     declareParameter("chi" + OptRunNum, 0.0, "Chi sample orientation value");
     declareParameter("omega" + OptRunNum, 0.0, "Omega sample orientation value");
@@ -229,7 +232,7 @@ void PeakHKLErrors::getRun2MatMap(PeaksWorkspace_sptr &Peaks, const std::string 
                                   std::map<int, Mantid::Kernel::Matrix<double>> &Res) const {
 
   for (int i = 0; i < Peaks->getNumberPeaks(); ++i) {
-    Geometry::IPeak &peak_old = Peaks->getPeak(i);
+    const Geometry::IPeak &peak_old = Peaks->getPeak(i);
 
     int runNum = peak_old.getRunNumber();
     std::string runNumStr = std::to_string(runNum);
@@ -350,7 +353,7 @@ void PeakHKLErrors::function1D(double *out, const double *xValues, const size_t 
   double ChiSqTot = 0.0;
   for (size_t i = 0; i < nData; i += 3) {
     int peakNum = boost::math::iround(xValues[i]);
-    Peak &peak_old = peaksWs->getPeak(peakNum);
+    const Peak &peak_old = peaksWs->getPeak(peakNum);
 
     int runNum = peak_old.getRunNumber();
     std::string runNumStr = std::to_string(runNum);
@@ -429,19 +432,20 @@ void PeakHKLErrors::functionDeriv1D(Jacobian *out, const double *xValues, const 
   g_log.debug() << "----------------------------Derivative------------------------\n";
 
   V3D samplePosition = instNew->getSample()->getPos();
-  IPeak &ppeak = peaksWs->getPeak(0);
+  const IPeak &ppeak = peaksWs->getPeak(0);
   double L0 = ppeak.getL1();
   double velocity = (L0 + ppeak.getL2()) / ppeak.getTOF();
 
   double K = 2 * M_PI / ppeak.getWavelength() / velocity; // 2pi/lambda = K* velocity
   V3D beamDir = instNew->getBeamDirection();
 
-  size_t paramNums[] = {parameterIndex(std::string("SampleXOffset")), parameterIndex(std::string("SampleYOffset")),
-                        parameterIndex(std::string("SampleZOffset"))};
+  const size_t paramNums[] = {parameterIndex(std::string("SampleXOffset")),
+                              parameterIndex(std::string("SampleYOffset")),
+                              parameterIndex(std::string("SampleZOffset"))};
 
   for (size_t i = 0; i < nData; i += 3) {
     int peakNum = boost::math::iround(xValues[i]);
-    Peak &peak_old = peaksWs->getPeak(peakNum);
+    const Peak &peak_old = peaksWs->getPeak(peakNum);
     Peak peak = createNewPeak(peak_old, instNew, 0, peak_old.getL1());
 
     int runNum = peak_old.getRunNumber();

@@ -15,6 +15,9 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerProperty.h"
 
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 

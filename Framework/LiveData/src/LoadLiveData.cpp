@@ -14,7 +14,6 @@
 #include "MantidKernel/WriteLock.h"
 #include "MantidLiveData/Exception.h"
 
-#include <boost/algorithm/string.hpp>
 #include <utility>
 
 #include <Poco/Thread.h>
@@ -138,7 +137,7 @@ Mantid::API::Workspace_sptr LoadLiveData::runProcessing(Mantid::API::Workspace_s
       g_log.debug() << "Processing algorithm (" << alg->name() << ") has " << proplist.size() << " properties.\n";
       for (auto prop : proplist) {
         if ((prop->direction() == Direction::Input || prop->direction() == Direction::InOut)) {
-          if (boost::ends_with(prop->type(), "Workspace")) {
+          if (prop->type().ends_with("Workspace")) {
             g_log.information() << "Using " << prop->name() << " as the input property.\n";
             algoInputWSName = prop->name();
             alg->setPropertyValue(algoInputWSName, inputName);

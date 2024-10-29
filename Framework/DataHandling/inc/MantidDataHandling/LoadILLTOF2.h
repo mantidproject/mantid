@@ -46,16 +46,16 @@ private:
   void addFacility();
   void addPulseInterval();
 
-  void fillStaticWorkspace(NeXus::NXEntry &entry, const std::vector<std::string> &monitorList, bool convertToTOF);
-  void fillScanWorkspace(NeXus::NXEntry &entry, const std::vector<std::string> &monitorList);
+  void fillStaticWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList, bool convertToTOF);
+  void fillScanWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList);
 
   std::vector<std::string> getMonitorInfo(const NeXus::NXEntry &firstEntry);
-  void initWorkspace(NeXus::NXEntry &entry);
+  void initWorkspace(const NeXus::NXEntry &entry);
 
   void loadInstrumentDetails(const NeXus::NXEntry &);
   void loadTimeDetails(const NeXus::NXEntry &entry);
 
-  std::vector<double> prepareAxis(NeXus::NXEntry &entry, bool convertToTOF);
+  std::vector<double> prepareAxis(const NeXus::NXEntry &entry, bool convertToTOF);
 
   API::MatrixWorkspace_sptr m_localWorkspace;
 
