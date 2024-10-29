@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/AlignAndFocusPowderSlim.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -404,7 +405,8 @@ void AlignAndFocusPowderSlim::exec() {
   h5file.close();
 
   // TODO load logs
-
+  wksp->setYUnit("Counts");
+  wksp->getAxis(0)->setUnit("DSpacing");
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
 }
 
