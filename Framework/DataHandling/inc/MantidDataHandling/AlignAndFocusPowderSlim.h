@@ -53,6 +53,8 @@ private:
   bool is_time_filtered{false};
   size_t pulse_start_index{0};
   size_t pulse_stop_index{std::numeric_limits<size_t>::max()};
+  size_t start_event{0};
+  size_t stop_event{std::numeric_limits<size_t>::max()};
   /// Index to load start at in the file
   std::vector<int64_t> loadStart;
   /// How much to load in the file
