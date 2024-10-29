@@ -84,7 +84,6 @@ done
 # Mamba
 setup_mamba $WORKSPACE/mambaforge "package-conda" true
 mamba install --yes boa conda-verify versioningit
-conda config --append channels mantid/label/separate_mslice_test
 
 # Clean up any legacy conda-recipes git clones
 cd $WORKSPACE
@@ -143,7 +142,7 @@ if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     if [[ $BUILD_WORKBENCH_WITH_DOCS == false ]]; then
 	export INCLUDE_MANTIDDOCS=False
     fi
-    conda mambabuild ./mantidworkbench/ $EXTRA_BUILD_OPTIONS
+    conda mambabuild ./mantidworkbench/ -c mantid/label/separate_mslice_test $EXTRA_BUILD_OPTIONS
 fi
 
 # elapsed time with second resolution

@@ -41,10 +41,10 @@ requirements:
     - psutil {{ psutil }}
     - {{ pin_compatible("python", max_pin="x.x") }}
     - matplotlib {{ matplotlib }}
+    - mslice {{ mslice }}
     - python.app  # [osx]
     - qtconsole {{ qtconsole }}
     - {{ pin_compatible("setuptools", max_pin="x.x") }}
-    - mslice
     {% if environ.get('INCLUDE_MANTIDDOCS', 'True') != 'False' %}
     - mantiddocs {{ version }}
     {% endif %}
