@@ -63,6 +63,7 @@ public:
 
 class MockALCPeakFittingModel : public IALCPeakFittingModel {
 public:
+  virtual ~MockALCPeakFittingModel() = default;
   MOCK_METHOD(IFunction_const_sptr, fittedPeaks, (), (const, override));
   MOCK_METHOD(MatrixWorkspace_sptr, data, (), (const, override));
   MOCK_METHOD(void, fitPeaks, (IFunction_const_sptr), (override));
