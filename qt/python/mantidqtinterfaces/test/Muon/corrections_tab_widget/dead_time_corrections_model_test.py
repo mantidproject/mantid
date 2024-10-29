@@ -8,7 +8,7 @@ import unittest
 from unittest import mock
 
 from mantid.api import AnalysisDataService, FrameworkManager
-from mantid.simpleapi import LoadMuonNexus
+from mantid.simpleapi import Load
 
 from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.corrections_model import CorrectionsModel
 from mantidqtinterfaces.Muon.GUI.Common.corrections_tab_widget.dead_time_corrections_model import DeadTimeCorrectionsModel
@@ -73,7 +73,7 @@ class DeadTimeCorrectionsModelTest(unittest.TestCase):
 
     def test_that_dead_times_average_will_return_the_expected_dead_time_average_and_range(self):
         dead_time_table_name = "dead_time_table"
-        LoadMuonNexus(Filename="MUSR00022725.nxs", OutputWorkspace="output_ws", DeadTimeTable=dead_time_table_name)
+        Load(Filename="MUSR00022725.nxs", OutputWorkspace="output_ws", DeadTimeTable=dead_time_table_name)
 
         self.model.set_dead_time_source_to_from_ads(dead_time_table_name)
 
@@ -87,7 +87,7 @@ class DeadTimeCorrectionsModelTest(unittest.TestCase):
         self.model._data_context.current_workspace.getNumberHistograms = mock.Mock(return_value=64)
 
         dead_time_table_name = "dead_time_table"
-        LoadMuonNexus(Filename="MUSR00022725.nxs", OutputWorkspace="output_ws", DeadTimeTable=dead_time_table_name)
+        Load(Filename="MUSR00022725.nxs", OutputWorkspace="output_ws", DeadTimeTable=dead_time_table_name)
 
         self.assertEqual(self.model.validate_selected_dead_time_workspace(dead_time_table_name), "")
 
@@ -95,7 +95,7 @@ class DeadTimeCorrectionsModelTest(unittest.TestCase):
         self.model._data_context.current_workspace.getNumberHistograms = mock.Mock(return_value=62)
 
         dead_time_table_name = "dead_time_table"
-        LoadMuonNexus(Filename="MUSR00022725.nxs", OutputWorkspace="output_ws", DeadTimeTable=dead_time_table_name)
+        Load(Filename="MUSR00022725.nxs", OutputWorkspace="output_ws", DeadTimeTable=dead_time_table_name)
 
         self.assertEqual(
             self.model.validate_selected_dead_time_workspace(dead_time_table_name),

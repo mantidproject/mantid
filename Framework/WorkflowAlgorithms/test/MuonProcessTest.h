@@ -8,14 +8,14 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidMuon/LoadMuonNexus2.h"
 
 #include "MantidWorkflowAlgorithms/MuonProcess.h"
 
-using Mantid::Algorithms::LoadMuonNexus2;
 using Mantid::WorkflowAlgorithms::MuonProcess;
 
 using namespace Mantid::Kernel;
@@ -555,11 +555,10 @@ private:
    */
   std::unique_ptr<LoadedData> loadData(const std::string &filename) {
     auto data = std::make_unique<LoadedData>();
-    LoadMuonNexus2 load;
+    Mantid::DataHandling::Load load;
     load.initialize();
     load.setChild(true);
     load.setPropertyValue("Filename", filename);
-    load.setPropertyValue("OutputWorkspace", "__notused");
     load.setPropertyValue("DetectorGroupingTable", "__notused");
     load.execute();
     data->workspace = load.getProperty("OutputWorkspace");

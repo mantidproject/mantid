@@ -14,10 +14,10 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/GroupDetectors.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidMuon/AsymmetryCalc.h"
-#include "MantidMuon/LoadMuonNexus2.h"
 #include <algorithm>
 #include <stdexcept>
 
@@ -58,15 +58,12 @@ public:
   }
 
   void testExecuteOnDataFile() {
-    MatrixWorkspace_sptr data;
-    TS_ASSERT_THROWS_NOTHING(data = loadDataFile());
-    TS_ASSERT(data);
+    auto const workspace = loadFile("emu00006473.nxs");
     AsymmetryCalc asymCalc;
     try {
       asymCalc.initialize();
       asymCalc.setChild(true);
-      asymCalc.setProperty("InputWorkspace", data);
-      asymCalc.setPropertyValue("OutputWorkspace", "__Unused");
+      asymCalc.setProperty("InputWorkspace", workspace);
       asymCalc.setPropertyValue("Alpha", "1.0");
       asymCalc.setPropertyValue("ForwardSpectra", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16");
       asymCalc.setPropertyValue("BackwardSpectra", "17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32");
@@ -166,24 +163,19 @@ public:
   }
 
 private:
-  /// Load data from file
-  MatrixWorkspace_sptr loadDataFile() {
-    Mantid::Algorithms::LoadMuonNexus2 loader;
+  MatrixWorkspace_sptr loadFile(std::string const &filename) {
+    Mantid::DataHandling::Load loader;
     loader.initialize();
     loader.setChild(true);
-    loader.setPropertyValue("Filename", "emu00006473.nxs");
-    loader.setPropertyValue("OutputWorkspace", "__Unused");
-    loader.execute();
-    if (loader.isExecuted()) {
-      Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
-      auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(outWS);
-      if (matrixWS) {
-        return matrixWS;
-      } else {
-        throw std::runtime_error("Failed to cast loaded workspace");
-      }
-    } else {
-      throw std::runtime_error("Failed to load test data file");
-    }
+    loader.setPropertyValue("Filename", filename);
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT_EQUALS(loader.isExecuted(), true);
+
+    TS_ASSERT_EQUALS("LoadMuonNexus", loader.getPropertyValue("LoaderName"));
+    TS_ASSERT_EQUALS("1", loader.getPropertyValue("LoaderVersion"));
+
+    Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
+    return std::dynamic_pointer_cast<MatrixWorkspace>(outWS);
   }
 };
