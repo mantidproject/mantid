@@ -12,6 +12,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataHandling/GroupDetectors.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -33,15 +34,9 @@ public:
   }
 
   void testCalAlphaManySpectra() {
-    // system("pause");
-    // Load the muon nexus file
-    loader.initialize();
-    loader.setPropertyValue("Filename", "emu00006473.nxs");
-    loader.setPropertyValue("OutputWorkspace", "EMU6473");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    TS_ASSERT_EQUALS(loader.isExecuted(), true);
+    auto const workspace = loadFile("emu00006473.nxs");
 
-    alphaCalc.setPropertyValue("InputWorkspace", "EMU6473");
+    alphaCalc.setProperty("InputWorkspace", workspace);
     alphaCalc.setPropertyValue("ForwardSpectra", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16");
     alphaCalc.setPropertyValue("BackwardSpectra", "17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32");
     alphaCalc.setPropertyValue("FirstGoodValue", "0.3");
@@ -56,14 +51,9 @@ public:
   }
 
   void testCalAlphaTwoSpectra() {
-    // Load the muon nexus file
-    loader.initialize();
-    loader.setPropertyValue("Filename", "emu00006473.nxs");
-    loader.setPropertyValue("OutputWorkspace", "EMU6473");
-    TS_ASSERT_THROWS_NOTHING(loader.execute());
-    TS_ASSERT_EQUALS(loader.isExecuted(), true);
+    auto const workspace = loadFile("emu00006473.nxs");
 
-    alphaCalc.setPropertyValue("InputWorkspace", "EMU6473");
+    alphaCalc.setProperty("InputWorkspace", workspace);
     alphaCalc.setPropertyValue("ForwardSpectra", "1");
     alphaCalc.setPropertyValue("BackwardSpectra", "17");
     alphaCalc.setPropertyValue("FirstGoodValue", "0.3");
@@ -92,6 +82,21 @@ public:
   void test_incorrect_spectra_numbers() {}
 
 private:
+  MatrixWorkspace_sptr loadFile(std::string const &filename) {
+    Mantid::DataHandling::Load loader;
+    loader.initialize();
+    loader.setChild(true);
+    loader.setPropertyValue("Filename", filename);
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    TS_ASSERT_EQUALS(loader.isExecuted(), true);
+
+    TS_ASSERT_EQUALS("LoadMuonNexus", loader.getPropertyValue("LoaderName"));
+    TS_ASSERT_EQUALS("1", loader.getPropertyValue("LoaderVersion"));
+
+    Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
+    return std::dynamic_pointer_cast<MatrixWorkspace>(outWS);
+  }
+
   AlphaCalc alphaCalc;
-  Mantid::DataHandling::LoadMuonNexus2 loader;
 };
