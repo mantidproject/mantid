@@ -21,7 +21,6 @@ from mantid.simpleapi import (
     CorrectToFile,
     CreateSingleValuedWorkspace,
     CropWorkspace,
-    DeleteWorkspace,
     Divide,
     ExtractMask,
     MaskDetectors,
@@ -174,11 +173,8 @@ class Normalize(ReductionStep):
             Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=1.0 / norm_count, Operation="Multiply")
             return "Normalization by time: %6.2g sec" % norm_count
         else:
-            logger.notice("Normalization step did not get a valid normalization option: skipping")
+            sanslog.notice("Normalization step did not get a valid normalization option: skipping")
             return "Normalization step did not get a valid normalization option: skipping"
-
-    def clean(self):
-        DeleteWorkspace(Workspace=norm_ws)
 
 
 class Mask(ReductionStep):
