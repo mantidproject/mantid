@@ -30,17 +30,19 @@ public:
   void setWsForMuonInfo(const std::string &filename);
   void setLogs(Mantid::API::MatrixWorkspace_sptr);
   void setPeriods(Mantid::API::Workspace_sptr);
-  std::vector<std::string> getLogs();
-  std::vector<std::string> getPeriods();
+  std::vector<std::string> &getLogs();
+  std::vector<std::string> &getPeriods();
   Mantid::API::MatrixWorkspace_sptr getWsForMuonInfo();
   double getMinTime();
   int extractRunNumber(const std::string &file);
   std::string getPathFromFiles(std::vector<std::string> files) const;
-  bool checkCustomGrouping(std::string detGroupingType, std::string forwardGrouping, std::string backwardGrouping);
+  bool checkCustomGrouping(const std::string &detGroupingType, const std::string &forwardGrouping,
+                           const std::string &backwardGrouping);
   void updateAutoLoadCancelled();
-  bool loadFilesFromWatchingDirectory(std::string firstFile, std::vector<std::string> files, std::string runsText);
+  bool loadFilesFromWatchingDirectory(const std::string &firstFile, const std::vector<std::string> &files,
+                                      const std::string &runsText);
   void setDirectoryChanged(bool hasDirectoryChanged);
-  std::string getRunsText();
+  std::string &getRunsText();
   void setFilesToLoad(const std::vector<std::string> &files);
 
 private:

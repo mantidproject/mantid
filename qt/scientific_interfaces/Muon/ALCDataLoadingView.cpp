@@ -362,7 +362,7 @@ std::vector<std::string> ALCDataLoadingView::getFiles() {
 
 void ALCDataLoadingView::setFileExtensions(const std::vector<std::string> &extensions) {
   QStringList exts;
-  for (std::string value : extensions) {
+  for (const std::string &value : extensions) {
     exts << QString::fromStdString(value);
   }
   m_ui.runs->setFileExtensions(exts);

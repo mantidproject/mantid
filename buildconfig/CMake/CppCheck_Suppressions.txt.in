@@ -1500,7 +1500,6 @@ unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/FitDialog.h:186
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/FitDialog.cpp:202
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/FitDialog.cpp:413
-iterateByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingView.cpp:349
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/IReflMessageHandler.h:21
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Instrument/QtInstrumentView.cpp:79
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Instrument/QtInstrumentView.cpp:83

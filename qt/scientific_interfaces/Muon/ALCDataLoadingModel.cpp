@@ -158,7 +158,7 @@ Mantid::API::MatrixWorkspace_sptr ALCDataLoadingModel::getWsForMuonInfo() { retu
 
 double ALCDataLoadingModel::getMinTime() { return m_minTime; }
 
-std::vector<std::string> ALCDataLoadingModel::getLogs() { return m_logs; }
+std::vector<std::string> &ALCDataLoadingModel::getLogs() { return m_logs; }
 
 void ALCDataLoadingModel::setLogs(MatrixWorkspace_sptr ws) {
 
@@ -183,7 +183,7 @@ void ALCDataLoadingModel::setLogs(MatrixWorkspace_sptr ws) {
   m_logs = logs;
 }
 
-std::vector<std::string> ALCDataLoadingModel::getPeriods() { return m_periods; }
+std::vector<std::string> &ALCDataLoadingModel::getPeriods() { return m_periods; }
 
 void ALCDataLoadingModel::setPeriods(Workspace_sptr loadedWs) {
 
@@ -235,8 +235,8 @@ std::string ALCDataLoadingModel::getPathFromFiles(std::vector<std::string> files
  * If custom grouping is supplied, check all detector numbers are valid
  * @returns :: True if grouping OK, false if bad
  */
-bool ALCDataLoadingModel::checkCustomGrouping(std::string detGroupingType, std::string forwardGrouping,
-                                              std::string backwardGrouping) {
+bool ALCDataLoadingModel::checkCustomGrouping(const std::string &detGroupingType, const std::string &forwardGrouping,
+                                              const std::string &backwardGrouping) {
   bool groupingOK = true;
   if (detGroupingType == "Custom") {
     auto detectors = Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(forwardGrouping, groupingOK));
@@ -274,7 +274,7 @@ void ALCDataLoadingModel::updateAutoLoadCancelled() {
   m_wasLastAutoRange = false;
 }
 
-std::string ALCDataLoadingModel::getRunsText() { return m_runsText; }
+std::string &ALCDataLoadingModel::getRunsText() const { return m_runsText; }
 
 void ALCDataLoadingModel::setDirectoryChanged(bool hasDirectoryChanged) { m_directoryChanged = hasDirectoryChanged; }
 
@@ -283,8 +283,9 @@ void ALCDataLoadingModel::setFilesToLoad(const std::vector<std::string> &files) 
  * This timer runs every second when we are watching a directory.
  * If any changes have occurred in the meantime, reload.
  */
-bool ALCDataLoadingModel::loadFilesFromWatchingDirectory(std::string firstFile, std::vector<std::string> files,
-                                                         std::string runsText) {
+bool ALCDataLoadingModel::loadFilesFromWatchingDirectory(const std::string &firstFile,
+                                                         const std::vector<std::string> &files,
+                                                         const std::string &runsText) {
 
   // Check if there are changes to watched directory
   if (m_directoryChanged.load()) {

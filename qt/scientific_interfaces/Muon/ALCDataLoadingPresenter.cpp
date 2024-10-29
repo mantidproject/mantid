@@ -137,8 +137,6 @@ void ALCDataLoadingPresenter::load() {
 }
 
 void ALCDataLoadingPresenter::updateAvailableInfo() {
-  Workspace_sptr loadedWs;
-
   try {
     m_model->setWsForMuonInfo(m_view->getFirstFile());
   } catch (const std::exception &error) {

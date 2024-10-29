@@ -12,6 +12,7 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include "../Muon/ALCDataLoadingModel.h"
 #include "../Muon/ALCDataLoadingPresenter.h"
 #include "../Muon/IALCDataLoadingView.h"
 
