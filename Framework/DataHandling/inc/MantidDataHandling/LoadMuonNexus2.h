@@ -46,11 +46,8 @@ together based on the groupings in the NeXus file. </LI>
 */
 class MANTID_DATAHANDLING_DLL LoadMuonNexus2 : public LoadMuonNexus {
 public:
-  /// Default constructor
   LoadMuonNexus2();
-  /// Algorithm's name for identification overriding a virtual method
-  const std::string name() const override { return "LoadMuonNexus"; }
-  /// Summary of algorithms purpose
+
   const std::string summary() const override {
     return "The LoadMuonNexus algorithm will read the given NeXus Muon data "
            "file Version 2 and use the results to populate the named "
@@ -58,17 +55,13 @@ public:
            "given a NeXus file of this type.";
   }
 
-  /// Algorithm's version for identification overriding a virtual method
   int version() const override { return 2; }
   const std::vector<std::string> seeAlso() const override { return {"LoadNexus"}; }
-  /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override { return "DataHandling\\Nexus;Muon\\DataHandling"; }
 
   /// Returns a confidence value that this algorithm can load a file
   int confidence(Kernel::NexusDescriptor &descriptor) const override;
 
 private:
-  /// Overwrites Algorithm method
   void exec() override;
 
   HistogramData::Histogram loadData(const Mantid::HistogramData::BinEdges &edges, const Mantid::NeXus::NXInt &counts,
