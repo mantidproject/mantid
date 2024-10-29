@@ -17,7 +17,6 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
-#include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidDataHandling/MaskDetectors.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -27,6 +26,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidMuon/LoadMuonNexus1.h"
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <Poco/Path.h>
@@ -405,7 +405,7 @@ public:
   }
 
   void testReadingFromXML() {
-    Mantid::DataHandling::LoadMuonNexus1 nxLoad;
+    Mantid::Algorithms::LoadMuonNexus1 nxLoad;
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
@@ -444,7 +444,7 @@ public:
   }
 
   void testReadingFromXMLCheckDuplicateIndex() {
-    Mantid::DataHandling::LoadMuonNexus1 nxLoad;
+    Mantid::Algorithms::LoadMuonNexus1 nxLoad;
     nxLoad.initialize();
 
     // Now set required filename and output workspace name
@@ -483,7 +483,7 @@ public:
   }
 
   void testReadingFromXMLCheckDublicateIndex2() {
-    Mantid::DataHandling::LoadMuonNexus1 nxLoad;
+    Mantid::Algorithms::LoadMuonNexus1 nxLoad;
     nxLoad.initialize();
 
     // Now set required filename and output workspace name

@@ -18,7 +18,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/SaveNexus.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"

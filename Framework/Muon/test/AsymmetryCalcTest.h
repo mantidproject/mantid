@@ -15,9 +15,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidMuon/AsymmetryCalc.h"
+#include "MantidMuon/LoadMuonNexus2.h"
 #include <algorithm>
 #include <stdexcept>
 
@@ -168,7 +168,7 @@ public:
 private:
   /// Load data from file
   MatrixWorkspace_sptr loadDataFile() {
-    Mantid::DataHandling::LoadMuonNexus2 loader;
+    Mantid::Algorithms::LoadMuonNexus2 loader;
     loader.initialize();
     loader.setChild(true);
     loader.setPropertyValue("Filename", "emu00006473.nxs");

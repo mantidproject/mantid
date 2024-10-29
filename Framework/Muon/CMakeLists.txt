@@ -67,6 +67,8 @@ set(TEST_FILES
     CalMuonDetectorPhasesTest.h
     ConvertFitFunctionForMuonTFAsymmetryTest.h
     LoadAndApplyMuonDetectorGroupingTest.h
+    LoadMuonNexus1Test.h
+    LoadMuonNexus2Test.h
     MuonAlgorithmHelperTest.h
     EstimateMuonAsymmetryFromCountsTest.h
     MuonGroupDetectorsTest.h

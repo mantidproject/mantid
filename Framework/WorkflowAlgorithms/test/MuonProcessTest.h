@@ -10,12 +10,12 @@
 
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidMuon/LoadMuonNexus2.h"
 
 #include "MantidWorkflowAlgorithms/MuonProcess.h"
 
-using Mantid::DataHandling::LoadMuonNexus2;
+using Mantid::Algorithms::LoadMuonNexus2;
 using Mantid::WorkflowAlgorithms::MuonProcess;
 
 using namespace Mantid::Kernel;

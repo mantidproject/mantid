@@ -526,8 +526,6 @@ set(TEST_FILES
     LoadMcStasNexusTest.h
     LoadMcStasTest.h
     LoadMuonLogTest.h
-    LoadMuonNexus1Test.h
-    LoadMuonNexus2Test.h
     LoadMuonNexusV2Test.h
     LoadNGEMTest.h
     LoadNXSPETest.h

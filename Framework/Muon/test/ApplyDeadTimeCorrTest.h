@@ -12,11 +12,11 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidMuon/ApplyDeadTimeCorr.h"
+#include "MantidMuon/LoadMuonNexus2.h"
 
 #include <stdexcept>
 
@@ -212,7 +212,7 @@ private:
    * @returns :: Workspace with loaded data
    */
   MatrixWorkspace_sptr loadDataFromFile() {
-    Mantid::DataHandling::LoadMuonNexus2 loader;
+    Mantid::Algorithms::LoadMuonNexus2 loader;
     loader.initialize();
     loader.setChild(true);
     loader.setPropertyValue("Filename", "emu00006473.nxs");

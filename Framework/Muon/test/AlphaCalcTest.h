@@ -13,9 +13,9 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidMuon/AlphaCalc.h"
+#include "MantidMuon/LoadMuonNexus2.h"
 #include <stdexcept>
 
 using namespace Mantid::Algorithms;
@@ -93,5 +93,5 @@ public:
 
 private:
   AlphaCalc alphaCalc;
-  Mantid::DataHandling::LoadMuonNexus2 loader;
+  Mantid::Algorithms::LoadMuonNexus2 loader;
 };

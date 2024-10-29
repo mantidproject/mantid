@@ -13,10 +13,10 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidDataHandling/LoadMuonNexus1.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidMuon/CalMuonDeadTime.h"
+#include "MantidMuon/LoadMuonNexus1.h"
 #include <stdexcept>
 
 using namespace Mantid::Algorithms;
@@ -93,7 +93,7 @@ public:
 private:
   // Load the muon nexus file
   MatrixWorkspace_sptr loadData() {
-    Mantid::DataHandling::LoadMuonNexus1 loader;
+    Mantid::Algorithms::LoadMuonNexus1 loader;
     loader.initialize();
     loader.setChild(true);
     loader.setPropertyValue("Filename", "emu00006473.nxs");

@@ -9,7 +9,6 @@
 // These includes seem to make the difference between initialization of the
 // workspace names (workspace2D/1D etc), instrument classes and not for this
 // test case.
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
 #include <cxxtest/TestSuite.h>
@@ -19,14 +18,14 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Run.h"
-#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
+#include "MantidMuon/LoadMuonNexus2.h"
 
 using namespace Mantid::API;
+using namespace Mantid::Algorithms;
 using namespace Mantid::Kernel;
-using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using Mantid::detid_t;
 using Mantid::Types::Core::DateAndTime;
