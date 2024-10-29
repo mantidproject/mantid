@@ -10,8 +10,8 @@ source:
 build:
   number: 0
   entry_points:
-    - workbench = workbench.app.workbench_launch_wrapper:launch
-    - mantidworkbench = workbench.app.workbench_launch_wrapper:launch
+    - workbench = workbench.app.mantidworkbench_launch_wrapper:launch
+    - mantidworkbench = workbench.app.mantidworkbench_launch_wrapper:launch
   osx_is_app: true
   ignore_run_exports_from:
       - {{ compiler('cxx') }}
