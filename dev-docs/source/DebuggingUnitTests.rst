@@ -26,7 +26,7 @@ below.
 If the issue is with a python unit test, the call is slightly more
 complicated::
 
-    $  env PYTHONPATH=$PWD/bin gdb --args python2 /full/path/to/mantid/Framework/PythonInterface/test/python/mantid/kernel/TimeSeriesPropertyTest.py
+    $  env PYTHONPATH=$PWD/bin gdb --args python /full/path/to/mantid/Framework/PythonInterface/test/python/mantid/kernel/TimeSeriesPropertyTest.py
     (gdb) run
 
 Within Eclipse

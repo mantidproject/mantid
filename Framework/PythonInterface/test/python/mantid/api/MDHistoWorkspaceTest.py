@@ -10,13 +10,6 @@ from mantid import mtd
 
 import numpy
 
-try:
-    long
-except NameError:
-    # Defined for backwards compatability with Python 2
-    def long(x):
-        return x
-
 
 class MDHistoWorkspaceTest(unittest.TestCase):
     """
@@ -321,7 +314,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         )
         BH = mtd["BH"]
         signal = BH.getSignalArray()
-        expected = (long(20), long(1), long(30))
+        expected = (20, 1, 30)
         shape = signal.shape
         self.assertEqual(shape, expected)
         mtd.remove("BH")
@@ -339,7 +332,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         )
         BH = mtd["BH"]
         signal = BH.getSignalArray()
-        expected = (long(20), long(1))
+        expected = (20, 1)
         shape = signal.shape
         self.assertEqual(shape, expected)
         mtd.remove("BH")
@@ -375,7 +368,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
         nEvents = BH.getNEvents()
         self.assertEqual(nEvents, 1000)
         signal = BH.getSignalArray()
-        expected = (long(20), long(5), long(40))
+        expected = (20, 5, 40)
         shape = signal.shape
         self.assertEqual(shape, expected)
 

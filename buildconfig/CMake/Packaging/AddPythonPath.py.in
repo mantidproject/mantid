@@ -46,27 +46,8 @@ for directory in pathdirs:
 try:
     import mantid  # noqa
 except ImportError as e:
-    # check for an error that appears to be python2 only
-    if "No module named DLFCN" == str(e):
-        print('Looks like "/usr/lib64/python2.7/plat-####/" is missing from sys.path')
-        # can find platform path by comparing to (in vanilla python)
-        # python -c "import sys, pprint; pprint.pprint(sys.path)"
-        found_dlfcn = False
-        for platform_path in ["/usr/lib64/python2.7/plat-linux2/", "/usr/lib/python2.7/plat-x86_64-linux-gnu"]:
-            if os.path.exists(platform_path):
-                print('found "{}" ... adding to system path'.format(platform_path))
-                sys.path.append(platform_path)
-                try:
-                    import DLFCN  # noqa
-                except ImportError:
-                    die("Did not fix import error")
-                print("       {}  ... adding to mantid.pth".format(" " * len(platform_path)))
-                pathdirs.append(platform_path)
-                found_dlfcn = True
-        if not found_dlfcn:  # missing path wasn't found
-            die()
-    else:
-        die("Can't import mantid: {}".format(e))
+    die(f"Can't import mantid: {e}")
+
 
 # where path file should go
 pathfile = os.path.join(sc.get_python_lib(plat_specific=True), "mantid.pth")
