@@ -274,7 +274,7 @@ void ALCDataLoadingModel::updateAutoLoadCancelled() {
   m_wasLastAutoRange = false;
 }
 
-std::string &ALCDataLoadingModel::getRunsText() const { return m_runsText; }
+std::string &ALCDataLoadingModel::getRunsText() { return m_runsText; }
 
 void ALCDataLoadingModel::setDirectoryChanged(bool hasDirectoryChanged) { m_directoryChanged = hasDirectoryChanged; }
 
