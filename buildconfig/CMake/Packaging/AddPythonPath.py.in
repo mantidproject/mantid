@@ -46,7 +46,7 @@ for directory in pathdirs:
 try:
     import mantid  # noqa
 except ImportError as e:
-    die("Can't import mantid: {}".format(e))
+    die(f"Can't import mantid: {e}")
 
 
 # where path file should go
