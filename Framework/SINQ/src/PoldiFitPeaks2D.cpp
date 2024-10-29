@@ -625,7 +625,7 @@ std::string PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn)
         std::vector<std::string> matchedParameters;
 
         for (auto &parameter : parameters) {
-          if (boost::algorithm::ends_with(parameter, tieParameter)) {
+          if (parameter.ends_with(tieParameter)) {
             matchedParameters.emplace_back(parameter);
           }
         }
@@ -678,7 +678,7 @@ std::string PoldiFitPeaks2D::getUserSpecifiedBounds(const IFunction_sptr &poldiF
         std::vector<std::string> matchedParameters;
 
         for (auto &parameter : parameters) {
-          if (boost::algorithm::ends_with(parameter, boundedParameter)) {
+          if (parameter.ends_with(boundedParameter)) {
             matchedParameters.emplace_back(parameter);
           }
         }

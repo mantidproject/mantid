@@ -18,7 +18,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <utility>
 
 namespace {
@@ -148,7 +147,7 @@ struct EndsWithOneOf {
 
   bool operator()(std::string const &value) const {
     for (auto &&str : m_strings) {
-      if (boost::algorithm::ends_with(value, str))
+      if (value.ends_with(str))
         return true;
     }
     return false;

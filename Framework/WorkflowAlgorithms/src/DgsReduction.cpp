@@ -471,7 +471,7 @@ MatrixWorkspace_sptr DgsReduction::loadHardMask() {
   } else {
     IAlgorithm_sptr loadMask;
     bool castWorkspace = false;
-    if (boost::ends_with(hardMask, ".nxs")) {
+    if (hardMask.ends_with(".nxs")) {
       loadMask = this->createChildAlgorithm("Load");
       loadMask->setProperty("Filename", hardMask);
     } else {
@@ -571,7 +571,7 @@ void DgsReduction::exec() {
   const bool showIntermedWS = this->getProperty("ShowIntermediateWorkspaces");
 
   std::string outputWsName = this->getPropertyValue("OutputWorkspace");
-  if (boost::ends_with(outputWsName, "_spe")) {
+  if (outputWsName.ends_with("_spe")) {
     boost::erase_all(outputWsName, "_spe");
   }
 

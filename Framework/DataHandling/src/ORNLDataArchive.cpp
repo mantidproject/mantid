@@ -17,11 +17,7 @@
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/Logger.h"
 
-#include <boost/algorithm/string.hpp>
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/regex.hpp>
-
-using boost::algorithm::ends_with;
 
 using Mantid::Catalog::Exception::CatalogError;
 using Mantid::Catalog::ONCat::ONCat;
@@ -184,12 +180,12 @@ const API::Result<std::string> ORNLDataArchive::getArchivePath(const std::set<st
   // suffixes into account.
   for (const auto &suffix : suffixes) {
     const std::string fullSuffix = basename + suffix;
-    if (ends_with(toUpperCase(location), toUpperCase(fullSuffix))) {
+    if (toUpperCase(location).ends_with(toUpperCase(fullSuffix))) {
       return API::Result<std::string>(location);
     }
   }
 
-  if (ends_with(toUpperCase(location), toUpperCase(basename))) {
+  if (toUpperCase(location).ends_with(toUpperCase(basename))) {
     return API::Result<std::string>(location);
   }
 

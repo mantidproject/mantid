@@ -17,7 +17,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 
@@ -70,7 +69,7 @@ void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, con
   if (inst->getName().compare("CORELLI") == 0 && m_cmpt != "moderator")
     // the second check is just to ensure that no accidental passing in
     // a bank name with sixteenpack already appended
-    if (!boost::algorithm::ends_with(m_cmpt, "/sixteenpack"))
+    if (!m_cmpt.ends_with("/sixteenpack"))
       m_cmpt.append("/sixteenpack");
 
   // Get the experimentally measured TOFs

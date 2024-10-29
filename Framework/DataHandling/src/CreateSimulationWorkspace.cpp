@@ -29,8 +29,6 @@
 
 #include <Poco/File.h>
 
-#include <boost/algorithm/string/predicate.hpp>
-
 namespace {
 
 struct StartAndEndTime {
@@ -149,7 +147,7 @@ void CreateSimulationWorkspace::createInstrument() {
 
   loadInstrument->setProperty("Workspace", tempWS);
   const std::string instrProp = getProperty("Instrument");
-  if (boost::algorithm::ends_with(instrProp, ".xml")) {
+  if (instrProp.ends_with(".xml")) {
     loadInstrument->setPropertyValue("Filename", instrProp);
   } else {
     loadInstrument->setPropertyValue("InstrumentName", instrProp);
@@ -194,8 +192,8 @@ void CreateSimulationWorkspace::createOutputWorkspace() {
 
   // Update the instrument from the file if necessary
   const std::string detTableFile = getProperty("DetectorTableFilename");
-  if (boost::algorithm::ends_with(detTableFile, ".raw") || boost::algorithm::ends_with(detTableFile, ".RAW") ||
-      boost::algorithm::ends_with(detTableFile, ".nxs") || boost::algorithm::ends_with(detTableFile, ".NXS")) {
+  if (detTableFile.ends_with(".raw") || detTableFile.ends_with(".RAW") || detTableFile.ends_with(".nxs") ||
+      detTableFile.ends_with(".NXS")) {
     adjustInstrument(detTableFile);
   }
 }
@@ -235,9 +233,9 @@ void CreateSimulationWorkspace::createOneToOneMapping() {
  * @param filename :: The name of the file to pull the UDET/SPEC tables from
  */
 void CreateSimulationWorkspace::loadMappingFromFile(const std::string &filename) {
-  if (boost::algorithm::ends_with(filename, ".raw") || boost::algorithm::ends_with(filename, ".RAW")) {
+  if (filename.ends_with(".raw") || filename.ends_with(".RAW")) {
     loadMappingFromRAW(filename);
-  } else if (boost::algorithm::ends_with(filename, ".nxs") || boost::algorithm::ends_with(filename, ".NXS")) {
+  } else if (filename.ends_with(".nxs") || filename.ends_with(".NXS")) {
     loadMappingFromISISNXS(filename);
   }
 }
@@ -398,11 +396,11 @@ void CreateSimulationWorkspace::setStartDate(const API::MatrixWorkspace_sptr &wo
   }
 
   if (hasDetTableFile) {
-    if (boost::algorithm::ends_with(detTableFile, ".raw") || boost::algorithm::ends_with(detTableFile, ".RAW")) {
+    if (detTableFile.ends_with(".raw") || detTableFile.ends_with(".RAW")) {
       auto startAndEndTime = getStartAndEndTimesFromRawFile(detTableFile);
       startTime = startAndEndTime.startTime;
       endTime = startAndEndTime.endTime;
-    } else if (boost::algorithm::ends_with(detTableFile, ".nxs") || boost::algorithm::ends_with(detTableFile, ".NXS")) {
+    } else if (detTableFile.ends_with(".nxs") || detTableFile.ends_with(".NXS")) {
       auto startAndEndTime = getStartAndEndTimesFromNexusFile(detTableFile, startTime, endTime);
       startTime = startAndEndTime.startTime;
       endTime = startAndEndTime.endTime;
