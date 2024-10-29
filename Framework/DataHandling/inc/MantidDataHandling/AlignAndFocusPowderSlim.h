@@ -49,7 +49,9 @@ private:
   void loadPulseTimes(std::unique_ptr<std::vector<double>> &data, ::NeXus::File &h5file);
   void loadEventIndex(std::unique_ptr<std::vector<uint64_t>> &data, ::NeXus::File &h5file);
 
-  std::map<detid_t, double> m_calibration;
+  void loadCalFile(const Mantid::API::Workspace_sptr &inputWS, const std::string &filename);
+
+  std::map<detid_t, double> m_calibration; // detid: 1/difc
   bool is_time_filtered{false};
   size_t pulse_start_index{0};
   size_t pulse_stop_index{std::numeric_limits<size_t>::max()};

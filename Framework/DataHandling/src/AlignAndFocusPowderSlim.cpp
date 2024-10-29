@@ -13,6 +13,7 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VectorHelper.h"
@@ -25,6 +26,7 @@
 
 namespace Mantid::DataHandling {
 using Mantid::API::FileProperty;
+using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceProperty;
@@ -197,6 +199,10 @@ void AlignAndFocusPowderSlim::init() {
                                                                       Direction::Input),
                   "Optional: To only include events before the provided stop "
                   "time, in seconds (relative to the start of the run).");
+  const std::vector<std::string> cal_exts{".h5", ".hd5", ".hdf", ".cal"};
+  declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
+                  "Optional: The .cal file containing the position correction factors. "
+                  "Either this or OffsetsWorkspace needs to be specified.");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "An output workspace.");
@@ -208,8 +214,8 @@ void AlignAndFocusPowderSlim::init() {
 void AlignAndFocusPowderSlim::exec() {
   // create a histogram workspace
   constexpr size_t numHist{6};
-  constexpr double xmin{6463};
-  constexpr double xmax{39950};
+  constexpr double xmin{0.25};
+  constexpr double xmax{2.25};
 
   // These give the limits in each file as to which events we actually load
   // (when filtering by time).
@@ -217,7 +223,7 @@ void AlignAndFocusPowderSlim::exec() {
   loadSize.resize(1, 0);
 
   HistogramData::BinEdges XValues_new(0);
-  const double binWidth{10.};
+  const double binWidth{1.6e-3}; // to get 1250 bins total
   const bool linearBins = bool(binWidth > 0.);
   UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams({xmin, binWidth, xmax}, XValues_new.mutableRawData(), true,
                                                              false, xmin, xmax));
@@ -236,7 +242,13 @@ void AlignAndFocusPowderSlim::exec() {
   // prog->doReport("Loading instrument"); TODO add progress bar stuff
   // LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, "entry", this, &descriptor);
   LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, ENTRY_TOP_LEVEL, this, &descriptor);
-  this->initCalibrationConstants(wksp);
+
+  const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
+  if (!cal_filename.empty()) {
+    loadCalFile(wksp, cal_filename);
+  } else {
+    this->initCalibrationConstants(wksp);
+  }
 
   /*
   // load run metadata
@@ -398,12 +410,10 @@ void AlignAndFocusPowderSlim::exec() {
 
 void AlignAndFocusPowderSlim::initCalibrationConstants(API::MatrixWorkspace_sptr &wksp) {
   const auto detInfo = wksp->detectorInfo();
-  // TODO currently arbitrary
-  const auto difCFocus = 1. / Kernel::Units::tofToDSpacingFactor(detInfo.l1(), 1., 0.5 * M_PI, 0.);
 
   for (auto iter = detInfo.cbegin(); iter != detInfo.cend(); ++iter) {
     if (!iter->isMonitor()) {
-      m_calibration.emplace(iter->detid(), difCFocus / detInfo.difcUncalibrated(iter->index()));
+      m_calibration.emplace(iter->detid(), 1. / detInfo.difcUncalibrated(iter->index()));
     }
   }
 }
@@ -502,6 +512,24 @@ void AlignAndFocusPowderSlim::loadEventIndex(std::unique_ptr<std::vector<uint64_
 
   // close the sds
   h5file.closeData();
+}
+
+void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inputWS, const std::string &filename) {
+  auto alg = createChildAlgorithm("LoadDiffCal");
+  alg->setProperty("InputWorkspace", inputWS);
+  alg->setPropertyValue("Filename", filename);
+  alg->setProperty<bool>("MakeCalWorkspace", true);
+  alg->setProperty<bool>("MakeGroupingWorkspace", false);
+  alg->setProperty<bool>("MakeMaskWorkspace", false);
+  alg->setPropertyValue("WorkspaceName", "temp");
+  alg->executeAsChildAlg();
+
+  const ITableWorkspace_sptr calibrationWS = alg->getProperty("OutputCalWorkspace");
+  for (size_t row = 0; row < calibrationWS->rowCount(); ++row) {
+    const detid_t detid = calibrationWS->cell<int>(row, 0);
+    const double detc = calibrationWS->cell<double>(row, 1);
+    m_calibration.emplace(detid, 1. / detc);
+  }
 }
 
 // ------------------------ BankCalibration object
