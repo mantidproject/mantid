@@ -452,8 +452,8 @@ public:
       MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(i));
       TS_ASSERT(ws)
       const auto &run = ws->run();
-      TS_ASSERT(run.hasProperty(SPIN_STATE_LOG))
-      TS_ASSERT_EQUALS(run.getPropertyValueAsType<std::string>(SPIN_STATE_LOG), EXPECTED_LOG_VALUES[i])
+      TS_ASSERT(run.hasProperty(SpinStatesORSO::LOG_NAME))
+      TS_ASSERT_EQUALS(run.getPropertyValueAsType<std::string>(SpinStatesORSO::LOG_NAME), EXPECTED_LOG_VALUES[i])
     }
   }
 
@@ -484,8 +484,8 @@ public:
       MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(i));
       TS_ASSERT(ws)
       const auto &run = ws->run();
-      TS_ASSERT(run.hasProperty(SPIN_STATE_LOG))
-      TS_ASSERT_EQUALS(run.getPropertyValueAsType<std::string>(SPIN_STATE_LOG), EXPECTED_LOG_VALUES[i])
+      TS_ASSERT(run.hasProperty(SpinStatesORSO::LOG_NAME))
+      TS_ASSERT_EQUALS(run.getPropertyValueAsType<std::string>(SpinStatesORSO::LOG_NAME), EXPECTED_LOG_VALUES[i])
     }
   }
 
@@ -513,13 +513,12 @@ public:
     for (size_t i = 0; i != 4; ++i) {
       MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(i));
       TS_ASSERT(ws)
-      TS_ASSERT(!ws->run().hasProperty(SPIN_STATE_LOG))
+      TS_ASSERT(!ws->run().hasProperty(SpinStatesORSO::LOG_NAME))
     }
   }
 
 private:
   const std::string m_outputWSName{"output"};
-  static constexpr auto SPIN_STATE_LOG = "spin_state_ORSO";
 
   void setupWorkspaceData(std::vector<std::string> &wsNames,
                           const std::vector<Mantid::API::MatrixWorkspace_sptr> &wsList, const size_t nHist) {
