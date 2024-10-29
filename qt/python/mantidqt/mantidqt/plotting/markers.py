@@ -19,8 +19,6 @@ class HorizontalMarker(QObject):
     An interactive marker displayed as a horizontal line.
     """
 
-    y_moved = Signal(float)
-
     def __init__(self, canvas, color, y, x0=None, x1=None, line_width=1.0, picker_width=5, line_style="-", move_cursor=None, axis=None):
         """
         Init the marker.
@@ -118,7 +116,6 @@ class HorizontalMarker(QObject):
         :param y: An y axis coordinate.
         """
         self.y = y
-        self.y_moved.emit(y)
 
     def get_y_in_pixels(self):
         """
@@ -204,8 +201,6 @@ class VerticalMarker(QObject):
     """
     An interactive marker displayed as a vertical line.
     """
-
-    x_moved = Signal(float)
 
     def __init__(self, canvas, color, x, y0=None, y1=None, line_width=1.0, picker_width=5, line_style="-", move_cursor=None, axis=None):
         """
@@ -301,7 +296,6 @@ class VerticalMarker(QObject):
         :param x: An x axis coordinate.
         """
         self.x = x
-        self.x_moved.emit(x)
 
     def get_x_in_pixels(self):
         """
