@@ -64,8 +64,10 @@ public:
 
   void test_handleButtonClicked_will_update_model_count_and_set_the_view_label() {
     ON_CALL(*m_model, count).WillByDefault(Return(1));
+
     EXPECT_CALL(*m_model, setCount(2)).Times(Exactly(1));
     EXPECT_CALL(*m_view, setLabel("1")).Times(Exactly(1));
+
     m_presenter->handleButtonClicked();
   }
 

@@ -20,6 +20,7 @@ class TestModel(unittest.TestCase):
     def test_model_updates_counter_correctly(self):
         self.model.count = 3
         self.assertEqual(self.model.count, 3)
+
         self.model.count = 5
         self.assertEqual(self.model.count, 5)
 

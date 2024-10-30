@@ -37,6 +37,7 @@ public:
   void test_count_member_is_updated_correctly()  {
     m_model->setCount(3);
     TS_ASSERT_EQUALS(m_model->count(), 3);
+
     m_model->setCount(5);
     TS_ASSERT_EQUALS(m_model->count(), 5);
   }
