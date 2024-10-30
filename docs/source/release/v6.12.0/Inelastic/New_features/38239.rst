@@ -1,1 +1,0 @@
-- Add the option ``--add-test`` for the MVP template tool to generate tests for the presenter and model classes.
