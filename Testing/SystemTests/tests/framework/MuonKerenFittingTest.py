@@ -7,7 +7,7 @@
 # pylint: disable=no-init,attribute-defined-outside-init,too-few-public-methods
 import systemtesting
 from mantid.api import mtd
-from mantid.simpleapi import Fit, LoadMuonNexus, MuonProcess
+from mantid.simpleapi import Fit, Load, MuonProcess
 
 
 class MuonKerenFittingTest(systemtesting.MantidSystemTest):
@@ -15,7 +15,7 @@ class MuonKerenFittingTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         # Load dataset
-        LoadMuonNexus(Filename="MUT00053591.nxs", DetectorGroupingTable="gp", OutputWorkspace="MUT53591")
+        Load(Filename="MUT00053591.nxs", DetectorGroupingTable="gp", OutputWorkspace="MUT53591")
 
         # Process like MuonAnalysis interface would
         MuonProcess(
