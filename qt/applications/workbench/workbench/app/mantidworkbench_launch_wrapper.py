@@ -13,7 +13,7 @@ from workbench.app.main import main
 
 def launch():
     if sys.platform.startswith("linux"):
-        command = ["workbench_launcher_jemalloc"] + sys.argv[1:]
+        command = ["launch_mantidworkbench"] + sys.argv[1:]
         subprocess.run(command)
     else:
         main()
