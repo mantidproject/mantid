@@ -154,7 +154,7 @@ class SXDTest(unittest.TestCase):
         fmt = "SHELX"
         mock_retrieve.side_effect = lambda name: make_mock_ws_with_name(name)
 
-        self.sxd.save_peak_table(runno, pk_type, int_type, self._test_dir, fmt)
+        self.sxd.save_peak_table(runno, pk_type, int_type, self._test_dir, fmt, SplitFiles=False)
 
         fpath = path.join(self._test_dir, "peaks_" + fmt)
         mock_save_nxs.assert_called_once_with(InputWorkspace=self.peaks.name(), Filename=fpath + ".nxs")
@@ -171,12 +171,12 @@ class SXDTest(unittest.TestCase):
         pk_type, int_type = PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS
         fmt = "SHELX"
 
-        self.sxd.save_all_peaks(pk_type, int_type, self._test_dir, fmt)
+        self.sxd.save_all_peaks(pk_type, int_type, self._test_dir, fmt, MinIntensOverSigma=3)
 
         all_peaks_name = "1234-1235_found_int_MD_opt"
         fpath = path.join(self._test_dir, f"{all_peaks_name}_{fmt}")
         mock_save_nxs.assert_called_once_with(InputWorkspace=all_peaks_name, Filename=fpath + ".nxs")
-        mock_save_ref.assert_called_once_with(InputWorkspace=all_peaks_name, Filename=fpath + ".int", Format=fmt, SplitFiles=False)
+        mock_save_ref.assert_called_once_with(InputWorkspace=all_peaks_name, Filename=fpath + ".int", Format=fmt, MinIntensOverSigma=3)
         self.assertTrue(HasUB(Workspace=all_peaks_name))
         ClearUB(Workspace=self.peaks)
 
