@@ -17,6 +17,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
 
 #include "Poco/DirectoryIterator.h"

@@ -16,10 +16,13 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "Poco/NumberParser.h"
 
-#include <boost/lexical_cast.hpp>
-#include <boost/regex.hpp>
 #include <memory>
 #include <utility>
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 
 namespace Mantid::WorkflowAlgorithms::HFIRInstrument {
 /**

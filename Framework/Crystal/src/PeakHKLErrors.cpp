@@ -19,6 +19,9 @@
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/math/special_functions/round.hpp>
 
 using namespace Mantid::DataObjects;

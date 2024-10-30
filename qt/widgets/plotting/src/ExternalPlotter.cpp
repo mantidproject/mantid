@@ -11,6 +11,8 @@
 #include "MantidQtWidgets/MplCpp/Plot.h"
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
+#include <boost/algorithm/string.hpp>
+
 #include <QHash>
 #include <QString>
 #include <QStringList>

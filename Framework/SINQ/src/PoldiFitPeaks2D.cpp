@@ -31,7 +31,9 @@
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h"
 
-#include "boost/make_shared.hpp"
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 namespace Mantid::Poldi {
 // Register the algorithm into the AlgorithmFactory

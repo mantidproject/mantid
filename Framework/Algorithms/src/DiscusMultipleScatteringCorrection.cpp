@@ -34,6 +34,8 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 
+#include <boost/algorithm/string.hpp>
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using Mantid::DataObjects::Workspace2D;

@@ -20,6 +20,8 @@
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "Poco/NumberFormatter.h"
 
+#include <boost/algorithm/string/predicate.hpp>
+
 namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
