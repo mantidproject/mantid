@@ -156,7 +156,7 @@ if(ENABLE_WORKBENCH)
     install(
       PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidworkbench.sh.install${DEST_FILENAME_SUFFIX}
       DESTINATION ${BIN_DIR}
-      RENAME workbench_launcher_jemalloc${DEST_FILENAME_SUFFIX}
+      RENAME launch_mantidworkbench${DEST_FILENAME_SUFFIX}
     )
   endforeach()
 endif()
