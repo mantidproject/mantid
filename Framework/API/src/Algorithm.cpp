@@ -186,7 +186,7 @@ void Algorithm::setAlwaysStoreInADS(const bool doStore) {
   // Set OutputWorkspace as an optional property in the case where alwaysStoreInADS is false. In
   // this case, the output workspace name is not always required.
   if (!m_alwaysStoreInADS && m_properties.existsProperty("OutputWorkspace")) {
-    Property *property = m_properties.getPointerToProperty(2.1);
+    Property *property = m_properties.getPointerToProperty("OutputWorkspace");
     setPropertyModeForWorkspaceProperty(property, PropertyMode::Type::Optional);
   }
 }
