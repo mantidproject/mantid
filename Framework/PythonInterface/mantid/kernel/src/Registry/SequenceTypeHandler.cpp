@@ -48,7 +48,8 @@ void SequenceTypeHandler<ContainerType>::set(Kernel::IPropertyManager *alg, cons
   using DestElementType = typename ContainerType::value_type;
 
   // Current workaround for things that still pass back wrapped vectors...
-  if (value.ptr()->ob_type->tp_name.starts_with("std_vector")) {
+  std::string tpName = value.ptr()->ob_type->tp_name;
+  if (tpName.starts_with("std_vector")) {
     alg->setProperty(name, StdVectorExtractor<DestElementType>::extract(value));
   }
   // numpy arrays requires special handling to extract their types. Hand-off to
@@ -86,7 +87,8 @@ SequenceTypeHandler<ContainerType>::create(const std::string &name, const boost:
 
   ContainerType valueInC;
   // Current workaround for things that still pass back wrapped vectors...
-  if (defaultValue.ptr()->ob_type->tp_name.starts_with("std_vector")) {
+  std::string tpName = defaultValue.ptr()->ob_type->tp_name;
+  if (tpName.starts_with("std_vector")) {
     valueInC = StdVectorExtractor<DestElementType>::extract(defaultValue);
   } else if (PySequence_Check(defaultValue.ptr())) {
     valueInC = Converters::PySequenceToVector<DestElementType>(defaultValue)();
