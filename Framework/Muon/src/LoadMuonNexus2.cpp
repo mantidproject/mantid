@@ -49,12 +49,6 @@ using Mantid::HistogramData::Histogram;
 using namespace Mantid::NeXus;
 using Mantid::Types::Core::DateAndTime;
 
-namespace {
-inline std::string getLoadAlgName(int confidence1, int confidenceV2) {
-  return confidence1 > confidenceV2 ? "LoadMuonNexus" : "LoadMuonNexusV2";
-}
-} // namespace
-
 /// Empty default constructor
 LoadMuonNexus2::LoadMuonNexus2() : LoadMuonNexus() {}
 
