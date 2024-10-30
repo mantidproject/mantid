@@ -20,8 +20,8 @@ import numpy as np
 # ==============================================================================
 
 
-def _find_starts(data, c, l1):
-    for i in range(l1, len(data)):
+def _find_starts(data, c, start_i):
+    for i in range(start_i, len(data)):
         char = data[i]
         if char.startswith(c):
             line = i
@@ -32,8 +32,8 @@ def _find_starts(data, c, l1):
 # ==============================================================================
 
 
-def _find_tab_starts(data, c, l1):
-    for i in range(l1, len(data)):
+def _find_tab_starts(data, c, start_i):
+    for i in range(start_i, len(data)):
         char = data[i][1:]
         if char.startswith(c):
             line = i
@@ -44,8 +44,8 @@ def _find_tab_starts(data, c, l1):
 # ==============================================================================
 
 
-def _find_ends(data, c, l1):
-    for i in range(l1, len(data)):
+def _find_ends(data, c, start_i):
+    for i in range(start_i, len(data)):
         char = data[i]
         if char.endswith(c):
             line = i
@@ -56,9 +56,9 @@ def _find_ends(data, c, l1):
 # ==============================================================================
 
 
-def _make_list(a, l1, l2):
+def _make_list(a, start_i, end_i):
     data = ""
-    for m in range(l1, l2 + 1):
+    for m in range(start_i, end_i + 1):
         data += a[m]
         alist = data.split(",")
     return alist

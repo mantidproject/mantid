@@ -790,10 +790,11 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                         LIS.append(LISN - LIST)
                     #
                     # CALCULATE DISTANCE SCATTERED NEUTRON PASSES THROUGH EACH ANNULUS
+                    omega_scattered = omega + theta_deg
                     LSS = []
                     for j in range(0, nan):
-                        LSST = self._distance(r, self._radii[j], omega + theta_deg)
-                        LSSN = self._distance(r, self._radii[j + 1], omega + theta_deg)
+                        LSST = self._distance(r, self._radii[j], omega_scattered)
+                        LSSN = self._distance(r, self._radii[j + 1], omega_scattered)
                         LSS.append(LSSN - LSST)
                     #
                     # CALCULATE ABSORPTION FOR PATH THROUGH ALL ANNULI,AND THROUGH INNER ANNULI

@@ -139,16 +139,16 @@ class DrillPresenter:
             if ":" in value:
                 substrings = value.split(":")
                 try:
-                    values = [int(e) for e in substrings]
+                    runs = [int(e) for e in substrings]
                 except:
                     return value
-                if len(values) == 2:
+                if len(runs) == 2:
                     if i > 0:
-                        return str(values[1] + i) + ":" + str(values[1] + (values[1] - values[0]) + i)
+                        return str(runs[1] + i) + ":" + str(runs[1] + (runs[1] - runs[0]) + i)
                     else:
-                        return str(values[0] - (values[1] - values[0]) + i) + ":" + str(values[0] + i)
-                if len(values) == 3:
-                    return inc(str(values[0]) + ":" + str(values[1]), i) + ":" + str(values[2])
+                        return str(runs[0] - (runs[1] - runs[0]) + i) + ":" + str(runs[0] + i)
+                if len(runs) == 3:
+                    return inc(str(runs[0]) + ":" + str(runs[1]), i) + ":" + str(runs[2])
                 else:
                     return value
 
