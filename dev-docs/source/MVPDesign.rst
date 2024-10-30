@@ -204,7 +204,7 @@ This command will generate five python files including `example_model.py`, `exam
 ,`example_presenter.py` and `example_guiwidget.ui`. These files will be saved in the provided output directory,
 as specified by `$PWD/..`.
 
-Aditionally, if the flag ``add-tests`` is provided, the
+Additionally, if the flag ``include-tests`` is provided, the
 script will generate two extra files, `test_example_presenter.py` and `test_example_model.py`, providing basic
 examples of a testing environment using Mocks in Python's `unittest.mock
 <https://docs.python.org/3/library/unittest.mock.html>`_ library that you can extend for development of more
@@ -231,7 +231,7 @@ This command will generate nine files including `ExampleModel.cpp`, `ExampleMode
 `ExampleView.cpp`, `ExampleView.h`, `ExamplePresenter.cpp`, `ExamplePresenter.h` and
 `ExampleGUIWidget.ui`.
 
-Additionally, if the flag ``add-tests`` is provided, the
+Additionally, if the flag ``--include-tests`` is provided, the
 script will generate two extra files, `ExamplePresenterTest.h` and `ExampleModelTest.h`, providing
 basic examples of a testing environment using `GMock
 <https://github.com/google/googletest/tree/main/googlemock>`_ and the `CxxTests <https://github.com/CxxTest/cxxtest>`_ framework that you can extend for development of more
