@@ -9,12 +9,13 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadBankFromDiskTask.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -31,8 +32,8 @@ namespace Mantid::DataHandling {
 using Mantid::API::FileProperty;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceProperty;
+using Mantid::DataObjects::Workspace2D;
 using Mantid::Kernel::ArrayLengthValidator;
 using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::Direction;
@@ -234,11 +235,7 @@ void AlignAndFocusPowderSlim::exec() {
   const double binWidth = params[1];
   const bool linearBins = bool(binWidth > 0.);
   UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), true, false));
-  const size_t numBins = XValues_new.size() - 1;
-  MatrixWorkspace_sptr wksp = WorkspaceFactory::Instance().create("Workspace2D", numHist, numBins + 1, numBins);
-  for (size_t i = 0; i < numHist; ++i) {
-    wksp->setBinEdges(i, XValues_new);
-  }
+  MatrixWorkspace_sptr wksp = Mantid::DataObjects::create<Workspace2D>(numHist, XValues_new);
 
   const std::string filename = getPropertyValue(PropertyNames::FILENAME);
   const Kernel::NexusHDF5Descriptor descriptor(filename);
