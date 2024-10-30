@@ -8,6 +8,7 @@
 #
 #
 from matplotlib.collections import LineCollection, PathCollection
+from matplotlib.contour import ContourSet
 from qtpy import QtCore, QtGui, QtPrintSupport, QtWidgets
 
 from mantid.plots import MantidAxes
@@ -286,7 +287,7 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
         return hasattr(ax, "_colorbar")
 
     def set_up_color_selector_toolbar_button(self, fig):
-        global current_ax_colour
+        current_ax_colour = None
 
         # check if the action is already in the toolbar
         if self._actions.get("line_colour"):
@@ -307,6 +308,12 @@ class WorkbenchNavigationToolbar(MantidNavigationToolbar):
             elif isinstance(col, PathCollection):
                 current_ax_colour = col.get_edgecolor()
                 break
+            elif isinstance(col, ContourSet):
+                current_ax_colour = col.get_edgecolor()
+                current_ax_colour = current_ax_colour[0]
+                break
+
+        # Current_ax_colour remains None and breaks the code
 
         # initial QColorDialog colour
         colour_dialog = QtWidgets.QColorDialog(QtGui.QColor(convert_color_to_hex(current_ax_colour)))

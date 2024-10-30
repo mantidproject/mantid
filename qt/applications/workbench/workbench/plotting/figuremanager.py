@@ -18,7 +18,7 @@ from functools import wraps
 import matplotlib
 from matplotlib.axes import Axes
 from matplotlib.backend_bases import FigureManagerBase
-from matplotlib.collections import PathCollection, LineCollection
+from matplotlib.collections import LineCollection
 from mpl_toolkits.mplot3d.axes3d import Axes3D
 from qtpy.QtCore import QObject, Qt
 from qtpy.QtGui import QImage
@@ -581,15 +581,15 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
 
     def change_line_collection_colour(self, colour):
         if figure_type(self.canvas.figure) == FigureType.Contour:
-            path_cols = self.canvas.figure.findobj(PathCollection)
-            for path in path_cols:
-                path.set_edgecolor(colour.name())
+            path_col = self.canvas.figure.get_axes()[0].collections[0]
+            path_col.set_edgecolor(colour.name())
 
         if figure_type(self.canvas.figure) == FigureType.Wireframe:
             line_cols = self.canvas.figure.findobj(LineCollection)
             for line in line_cols:
                 line.set_color(colour.name())
-        self.canvas.draw()
+
+        self.canvas.draw_idle()
 
     @staticmethod
     def _reverse_axis_lines(ax):
