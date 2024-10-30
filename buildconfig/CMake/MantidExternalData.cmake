@@ -39,7 +39,7 @@ file:///var/bigharddrive/%(algo)/%(hash)"
 mark_as_advanced(ExternalData_URL_TEMPLATES)
 list(APPEND ExternalData_URL_TEMPLATES "file:///home/builder/MantidExternalData-readonly/%(algo)/%(hash)")
 list(APPEND ExternalData_URL_TEMPLATES "file:///Users/builder/MantidExternalData-readonly/%(algo)/%(hash)")
-list(APPEND ExternalData_URL_TEMPLATES "http://ndw1598.isis.cclrc.ac.uk/externaldata/%(algo)/%(hash)")
+list(APPEND ExternalData_URL_TEMPLATES "http://130.246.80.136/external-data/%(algo)/%(hash)")
 # This should always be last as it's the main read/write cache
 list(APPEND ExternalData_URL_TEMPLATES "https://testdata.mantidproject.org/ftp/external-data/%(algo)/%(hash)")
 
