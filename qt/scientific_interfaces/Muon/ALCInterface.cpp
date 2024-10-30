@@ -8,12 +8,14 @@
 
 #include "ALCBaselineModellingView.h"
 #include "ALCDataLoadingView.h"
+
 #include "ALCPeakFittingView.h"
 
 #include "ALCDataLoadingPresenter.h"
 #include "ALCPeakFittingPresenter.h"
 
 #include "ALCBaselineModellingModel.h"
+#include "ALCDataLoadingModel.h"
 #include "ALCPeakFittingModel.h"
 
 #include "QInputDialog"
@@ -98,14 +100,16 @@ void ALCInterface::initLayout() {
   connect(m_ui.importResults, SIGNAL(clicked()), SLOT(importResults()));
   connect(m_ui.externalPlotButton, SIGNAL(clicked()), SLOT(externalPlotRequested()));
 
+  auto dataLoadingModel = std::make_unique<ALCDataLoadingModel>();
   auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
   connect(dataLoadingView, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
 
-  m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView, std::make_unique<ALCDataLoadingModel>());
+  m_dataLoading = std::make_unique<ALCDataLoadingPresenter>(dataLoadingView, std::move(dataLoadingModel));
   m_dataLoading->initialize();
 
   auto baselineModellingModel = std::make_unique<ALCBaselineModellingModel>();
-  ALCBaselineModellingView *baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
+  auto *baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
+
   m_baselineModelling =
       std::make_unique<ALCBaselineModellingPresenter>(baselineModellingView, std::move(baselineModellingModel));
   m_baselineModelling->initialize();

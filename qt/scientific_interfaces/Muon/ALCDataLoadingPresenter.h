@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ALCDataLoadingModel.h"
 #include "DllConfig.h"
+#include "IALCDataLoadingModel.h"
 #include "IALCDataLoadingPresenter.h"
 #include "IALCDataLoadingView.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
@@ -20,10 +20,10 @@ namespace CustomInterfaces {
 
 /** ALCDataLoadingPresenter : Presenter for ALC Data Loading step
  */
-class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingPresenter : IALCDataLoadingPresenter {
+class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingPresenter : public IALCDataLoadingPresenter {
 
 public:
-  ALCDataLoadingPresenter(IALCDataLoadingView *view, std::unique_ptr<ALCDataLoadingModel> model);
+  ALCDataLoadingPresenter(IALCDataLoadingView *view, std::unique_ptr<IALCDataLoadingModel> model);
 
   void initialize() override;
 
@@ -79,10 +79,10 @@ private:
   void updateAvailablePeriodInfo(const Mantid::API::MatrixWorkspace_sptr &ws);
 
   /// View which the object works with
-  IALCDataLoadingView *const m_view;
+  IALCDataLoadingView *m_view;
 
   // Model
-  std::unique_ptr<ALCDataLoadingModel> const m_model;
+  std::unique_ptr<IALCDataLoadingModel> m_model;
 };
 
 } // namespace CustomInterfaces

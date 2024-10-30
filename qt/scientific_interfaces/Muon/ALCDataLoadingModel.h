@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "IALCDataLoadingModel.h"
 #include "IALCDataLoadingView.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,38 +16,38 @@
 
 namespace MantidQt::CustomInterfaces {
 
-class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingModel {
+class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingModel : public IALCDataLoadingModel {
 
 public:
   ALCDataLoadingModel();
   ~ALCDataLoadingModel() = default;
-  void load(const IALCDataLoadingView *view);
-  void cancelLoading() const;
-  Mantid::API::MatrixWorkspace_sptr exportWorkspace();
+  void load(const IALCDataLoadingView *view) override;
+  void cancelLoading() const override;
+  Mantid::API::MatrixWorkspace_sptr exportWorkspace() override;
   bool checkCustomGrouping(const std::string &detGroupingType, const std::string &forwardGrouping,
-                           const std::string &backwardGrouping);
-  void updateAutoLoadCancelled();
+                           const std::string &backwardGrouping) override;
+  void updateAutoLoadCancelled() override;
   bool loadFilesFromWatchingDirectory(const std::string &firstFile, const std::vector<std::string> &files,
-                                      const std::string &runsText);
-  static std::string getPathFromFiles(std::vector<std::string> files);
+                                      const std::string &runsText) override;
+  std::string getPathFromFiles(std::vector<std::string> files) override;
 
   // Getters
-  bool getLoadingData();
-  Mantid::API::MatrixWorkspace_sptr getLoadedData();
-  std::vector<std::string> &getLogs();
-  std::vector<std::string> &getPeriods();
-  Mantid::API::MatrixWorkspace_sptr getWsForMuonInfo();
-  double getMinTime() const;
-  std::string &getRunsText();
+  bool getLoadingData() override;
+  Mantid::API::MatrixWorkspace_sptr getLoadedData() override;
+  std::vector<std::string> &getLogs() override;
+  std::vector<std::string> &getPeriods() override;
+  Mantid::API::MatrixWorkspace_sptr getWsForMuonInfo() override;
+  double getMinTime() const override;
+  std::string &getRunsText() override;
 
   // Setters
-  void setLoadingData(bool isLoading);
-  void setLoadedData(const Mantid::API::MatrixWorkspace_sptr &data);
-  void setLogs(const Mantid::API::MatrixWorkspace_sptr &ws);
-  void setPeriods(const Mantid::API::Workspace_sptr &ws);
-  void setWsForMuonInfo(const std::string &filename);
-  void setDirectoryChanged(bool hasDirectoryChanged);
-  void setFilesToLoad(const std::vector<std::string> &files);
+  void setLoadingData(bool isLoading) override;
+  void setLoadedData(const Mantid::API::MatrixWorkspace_sptr &data) override;
+  void setLogs(const Mantid::API::MatrixWorkspace_sptr &ws) override;
+  void setPeriods(const Mantid::API::Workspace_sptr &ws) override;
+  void setWsForMuonInfo(const std::string &filename) override;
+  void setDirectoryChanged(bool hasDirectoryChanged) override;
+  void setFilesToLoad(const std::vector<std::string> &files) override;
 
 private:
   static std::string isCustomGroupingValid(const std::string &group, bool &isValid);

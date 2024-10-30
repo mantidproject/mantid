@@ -16,7 +16,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
-ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view, std::unique_ptr<ALCDataLoadingModel> model)
+ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view, std::unique_ptr<IALCDataLoadingModel> model)
     : m_view(view), m_model(std::move(model)) {}
 
 void ALCDataLoadingPresenter::initialize() {
