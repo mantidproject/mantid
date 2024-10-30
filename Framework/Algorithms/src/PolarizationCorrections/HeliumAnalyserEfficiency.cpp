@@ -37,10 +37,10 @@ auto constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
 auto constexpr OUTPUT_FIT_CURVES{"OutputFitCurves"};
 auto constexpr OUTPUT_FIT_PARAMS{"OutputFitParameters"};
 auto constexpr SPIN_STATES{"SpinStates"};
-auto constexpr PD{"GasPressureTimesCellLength"};
-auto constexpr PD_ERROR{"GasPressureTimesCellLengthError"};
-auto constexpr START_LAMBDA{"StartLambda"};
-auto constexpr END_LAMBDA{"EndLambda"};
+auto constexpr PXD{"PXD"};
+auto constexpr PXD_Error{"PXDError"};
+auto constexpr StartX{"StartX"};
+auto constexpr EndX{"EndX"};
 auto constexpr IGNORE_FIT_QUALITY_ERROR{"IgnoreFitQualityError"};
 
 auto constexpr GROUP_INPUTS{"Inputs"};
@@ -64,12 +64,10 @@ void HeliumAnalyserEfficiency::init() {
 
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
-  declareProperty(PropertyNames::PD, 12.0, mustBePositive, "Gas pressure in bar multiplied by cell length in metres");
-  declareProperty(PropertyNames::PD_ERROR, 0.0, mustBePositive, "Error in gas pressure multiplied by cell length");
-  declareProperty(PropertyNames::START_LAMBDA, 1.75, mustBePositive,
-                  "Lower boundary of wavelength range to use for fitting");
-  declareProperty(PropertyNames::END_LAMBDA, 8.0, mustBePositive,
-                  "Upper boundary of wavelength range to use for fitting");
+  declareProperty(PropertyNames::PXD, 12.0, mustBePositive, "Gas pressure in bar multiplied by cell length in metres");
+  declareProperty(PropertyNames::PXD_Error, 0.0, mustBePositive, "Error in gas pressure multiplied by cell length");
+  declareProperty(PropertyNames::StartX, 1.75, mustBePositive, "Lower boundary of wavelength range to use for fitting");
+  declareProperty(PropertyNames::EndX, 8.0, mustBePositive, "Upper boundary of wavelength range to use for fitting");
   declareProperty(PropertyNames::IGNORE_FIT_QUALITY_ERROR, false,
                   "Whether the algorithm should ignore a poor chi-squared (fit cost value) of greater than 1 and "
                   "therefore not throw an error",
@@ -87,11 +85,11 @@ void HeliumAnalyserEfficiency::init() {
                   "The name of the table workspace containing the fit parameter results.");
 
   setPropertyGroup(PropertyNames::SPIN_STATES, PropertyNames::GROUP_INPUTS);
-  setPropertyGroup(PropertyNames::PD, PropertyNames::GROUP_INPUTS);
-  setPropertyGroup(PropertyNames::PD_ERROR, PropertyNames::GROUP_INPUTS);
+  setPropertyGroup(PropertyNames::PXD, PropertyNames::GROUP_INPUTS);
+  setPropertyGroup(PropertyNames::PXD_Error, PropertyNames::GROUP_INPUTS);
 
-  setPropertyGroup(PropertyNames::START_LAMBDA, PropertyNames::GROUP_FIT_OPTIONS);
-  setPropertyGroup(PropertyNames::END_LAMBDA, PropertyNames::GROUP_FIT_OPTIONS);
+  setPropertyGroup(PropertyNames::StartX, PropertyNames::GROUP_FIT_OPTIONS);
+  setPropertyGroup(PropertyNames::EndX, PropertyNames::GROUP_FIT_OPTIONS);
   setPropertyGroup(PropertyNames::IGNORE_FIT_QUALITY_ERROR, PropertyNames::GROUP_FIT_OPTIONS);
 
   setPropertyGroup(PropertyNames::OUTPUT_WORKSPACE, PropertyNames::GROUP_OUTPUTS);
@@ -149,7 +147,7 @@ void HeliumAnalyserEfficiency::exec() {
   // Theoretically, the analyser efficiency is given by (1 + tanh(mu * phe * wavelength))/2.
   // Using the analyser efficiency value that we calculated from the data,
   // we fit this function to find pHe, the helium atom polarization in the analyser.
-  const double mu = ABSORPTION_CROSS_SECTION_CONSTANT * static_cast<double>(getProperty(PropertyNames::PD));
+  const double mu = ABSORPTION_CROSS_SECTION_CONSTANT * static_cast<double>(getProperty(PropertyNames::PXD));
 
   double pHe, pHeError;
   fitAnalyserEfficiency(mu, eff, pHe, pHeError);
@@ -191,9 +189,9 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, const Matr
   fit->initialize();
   fit->setProperty("Function", "name=UserFunction,Formula=(1 + tanh(" + std::to_string(mu) + "*phe*x))/2,phe=0.1");
   fit->setProperty("InputWorkspace", eff);
-  const double startLambda = getProperty(PropertyNames::START_LAMBDA);
+  const double startLambda = getProperty(PropertyNames::StartX);
   fit->setProperty("StartX", startLambda);
-  const double endLambda = getProperty(PropertyNames::END_LAMBDA);
+  const double endLambda = getProperty(PropertyNames::EndX);
   fit->setProperty("EndX", endLambda);
   fit->setProperty("CreateOutput", true);
   fit->execute();
@@ -229,7 +227,7 @@ void HeliumAnalyserEfficiency::convertToTheoreticalEfficiency(MatrixWorkspace_sp
 
   // The value tCrit is used to give us the correct error bounds
   const double tCrit = calculateTCrit(eff->blocksize());
-  const double muError = ABSORPTION_CROSS_SECTION_CONSTANT * static_cast<double>(getProperty(PropertyNames::PD_ERROR));
+  const double muError = ABSORPTION_CROSS_SECTION_CONSTANT * static_cast<double>(getProperty(PropertyNames::PXD_Error));
 
   for (size_t i = 0; i < binPoints.size(); ++i) {
     const double lambda = binPoints[i];

@@ -128,8 +128,8 @@ public:
     MantidVec e;
     auto wsGrp = createExampleGroupWorkspace("wsGrp", e, "Wavelength");
     auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "E");
-    heliumAnalyserEfficiency->setProperty("StartLambda", 4.0);
-    heliumAnalyserEfficiency->setProperty("EndLambda", 6.0);
+    heliumAnalyserEfficiency->setProperty("StartX", 4.0);
+    heliumAnalyserEfficiency->setProperty("EndX", 6.0);
     heliumAnalyserEfficiency->setProperty("IgnoreFitQualityError", true);
     heliumAnalyserEfficiency->execute();
     TS_ASSERT(heliumAnalyserEfficiency->isExecuted());
@@ -290,7 +290,7 @@ private:
     MantidVec expectedEfficiencies;
     auto wsGrp = createExampleGroupWorkspace("wsGrp", expectedEfficiencies);
     auto heliumAnalyserEfficiency = createHeliumAnalyserEfficiencyAlgorithm(wsGrp, "E");
-    heliumAnalyserEfficiency->setProperty("GasPressureTimesCellLengthError", pdError);
+    heliumAnalyserEfficiency->setProperty("PXDError", pdError);
     heliumAnalyserEfficiency->execute();
 
     TS_ASSERT(heliumAnalyserEfficiency->isExecuted());
