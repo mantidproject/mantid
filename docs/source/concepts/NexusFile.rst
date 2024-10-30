@@ -27,7 +27,7 @@ Hence there are two principal types of NEXUS files loaded by Mantid
 ISIS uses two versions of Nexus files for muon histogram data:
 
  - Muon Nexus file v1, which is loaded by :ref:`LoadMuonNexus v1<algm-LoadMuonNexus-v1>` and
- - Muon Nexus file v2, which is loaded by :ref:`LoadEventNexus v2<algm-LoadMuonNexus-v2>`.
+ - Muon Nexus file v2, which is loaded by :ref:`LoadMuonNexus v2<algm-LoadMuonNexus-v2>`.
 
 
 As well as Nexus files loaded by Mantid, there is a kind of Nexus file,

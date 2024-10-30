@@ -32,7 +32,7 @@ Usage
 .. testcode:: ExGroupMUSR
 
    # Load first period of a MUSR data file
-   ws = LoadMuonNexus('MUSR00015189.nxs', EntryNumber=1)
+   ws = Load('MUSR00015189.nxs', EntryNumber=1)
 
    # Create a table with some custom grouping
    grouping = CreateEmptyTableWorkspace()
@@ -65,10 +65,10 @@ Output:
 .. testcode:: ExGroupingFromNexus
 
    # Load MUSR grouping from the Nexus file
-   __unused_ws = LoadMuonNexus('MUSR00015189.nxs', DetectorGroupingTable='grouping')
+   __unused_ws = Load('MUSR00015189.nxs', DetectorGroupingTable='grouping')
 
    # Load data from a different MUSR file
-   ws = LoadMuonNexus('MUSR00015190.nxs')
+   ws = Load('MUSR00015190.nxs')
 
    # Use grouping from one file to group data from different file
    grouped = MuonGroupDetectors('ws', 'grouping')

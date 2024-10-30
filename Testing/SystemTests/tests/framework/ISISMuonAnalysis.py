@@ -8,7 +8,7 @@
 import math
 import systemtesting
 from mantid.api import mtd
-from mantid.simpleapi import AsymmetryCalc, CloneWorkspace, CropWorkspace, GroupDetectors, GroupWorkspaces, LoadMuonNexus, Rebin
+from mantid.simpleapi import AsymmetryCalc, CloneWorkspace, CropWorkspace, GroupDetectors, GroupWorkspaces, Load, Rebin
 
 from abc import ABCMeta, abstractmethod
 
@@ -51,7 +51,7 @@ class ISISMuonAnalysis(systemtesting.MantidSystemTest, metaclass=ABCMeta):
         outputWS = self.instr_name + str(self.sample_run)
 
         # Load
-        LoadMuonNexus(Filename=self.file_name, OutputWorkspace="MuonAnalysis")
+        Load(Filename=self.file_name, OutputWorkspace="MuonAnalysis")
 
         # Group, Crop, Clone
         if self.period_data:
