@@ -102,7 +102,7 @@ double getSourceToSampleDistance(const API::MatrixWorkspace_sptr &dataWS) {
   std::vector<double> parsDouble = dataWS->getInstrument()->getNumberParameter("Header_source_distance");
   if (!parsDouble.empty()) {
     // First let's try to get source_distance first:
-    sourceToSampleDistance = parsDouble[0] *= 1000; // convert to mm
+    sourceToSampleDistance = parsDouble[0] * 1000; // convert to mm
   } else {
     const auto nGuides = dataWS->run().getPropertyValueAsType<int>("Motor_Positions_nguides");
     // aperture-distances: array from the instrument parameters

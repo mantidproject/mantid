@@ -254,8 +254,8 @@ void CreateSimulationWorkspace::loadMappingFromRAW(const std::string &filename) 
   isisRaw.ioRAW(rawFile, fromFile, readData);
 
   int ndet = isisRaw.i_det;
-  int *specTable = isisRaw.spec;
-  int *udetTable = isisRaw.udet;
+  const int *specTable = isisRaw.spec;
+  const int *udetTable = isisRaw.udet;
   createGroupingsFromTables(specTable, udetTable, ndet);
 
   fclose(rawFile);

@@ -627,7 +627,7 @@ auto ReflectometryReductionOneAuto3::getRebinParams(const MatrixWorkspace_sptr &
  */
 std::optional<double> ReflectometryReductionOneAuto3::getQStep(const MatrixWorkspace_sptr &inputWS,
                                                                const double theta) {
-  Property *qStepProp = getProperty("MomentumTransferStep");
+  Property const *qStepProp = getProperty("MomentumTransferStep");
   double qstep;
   if (!qStepProp->isDefault()) {
     qstep = getProperty("MomentumTransferStep");
@@ -680,7 +680,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::rebin(const MatrixWorkspace
  * unchanged input workspace otherwise.
  */
 MatrixWorkspace_sptr ReflectometryReductionOneAuto3::scale(MatrixWorkspace_sptr inputWS) {
-  Property *scaleProp = getProperty("ScaleFactor");
+  Property const *scaleProp = getProperty("ScaleFactor");
   if (scaleProp->isDefault())
     return inputWS;
 
@@ -729,7 +729,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto3::cropQ(MatrixWorkspace_sptr 
  */
 double ReflectometryReductionOneAuto3::getPropertyOrDefault(const std::string &propertyName, const double defaultValue,
                                                             bool &isDefault) {
-  Property *property = getProperty(propertyName);
+  Property const *property = getProperty(propertyName);
   isDefault = property->isDefault();
   if (isDefault)
     return defaultValue;
@@ -801,7 +801,7 @@ Algorithm_sptr ReflectometryReductionOneAuto3::createAlgorithmForGroupMember(std
   const std::vector<Property *> props = getProperties();
   for (const auto &prop : props) {
     if (prop) {
-      IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+      IWorkspaceProperty const *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (!wsProp)
         alg->setPropertyValue(prop->name(), prop->value());
     }

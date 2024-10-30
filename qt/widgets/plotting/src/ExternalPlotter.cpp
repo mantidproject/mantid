@@ -66,7 +66,7 @@ template <typename T> void addToIndicesVector(std::vector<T> &indicesVec, std::s
 
 template <typename T> std::vector<T> createIndicesVector(std::string const &indices) {
   std::vector<T> indicesVec;
-  for (auto subString : splitStringBy(indices, ","))
+  for (auto const &subString : splitStringBy(indices, ","))
     addToIndicesVector<T>(indicesVec, subString);
   return indicesVec;
 }

@@ -63,7 +63,7 @@ std::map<std::string, std::string> PoldiFitPeaks2D::validateInputs() {
   bool isPawleyFit = getProperty("PawleyFit");
 
   if (isPawleyFit) {
-    Property *refinedCellParameters = getPointerToProperty("RefinedCellParameters");
+    const Property *refinedCellParameters = getPointerToProperty("RefinedCellParameters");
     if (refinedCellParameters->isDefault()) {
       errorMap["RefinedCellParameters"] = "Workspace name for refined cell "
                                           "parameters must be supplied for "
@@ -622,7 +622,7 @@ std::string PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn)
     std::vector<std::string> parameters = poldiFn->getParameterNames();
 
     std::vector<std::string> tieComponents;
-    for (auto &tieParameter : tieParameters) {
+    for (const auto &tieParameter : tieParameters) {
       if (!tieParameter.empty()) {
         std::vector<std::string> matchedParameters;
 
@@ -675,7 +675,7 @@ std::string PoldiFitPeaks2D::getUserSpecifiedBounds(const IFunction_sptr &poldiF
     std::vector<std::string> parameters = poldiFn->getParameterNames();
 
     std::vector<std::string> boundedComponents;
-    for (auto &boundedParameter : boundedParameters) {
+    for (const auto &boundedParameter : boundedParameters) {
       if (!boundedParameter.empty()) {
         std::vector<std::string> matchedParameters;
 
@@ -786,7 +786,8 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(const IF
 }
 
 /// Assign Miller indices from one peak collection to another.
-void PoldiFitPeaks2D::assignMillerIndices(const PoldiPeakCollection_sptr &from, PoldiPeakCollection_sptr &to) const {
+void PoldiFitPeaks2D::assignMillerIndices(const PoldiPeakCollection_sptr &from,
+                                          const PoldiPeakCollection_sptr &to) const {
   if (!from || !to) {
     throw std::invalid_argument("Cannot process invalid peak collections.");
   }
@@ -1193,7 +1194,7 @@ void PoldiFitPeaks2D::exec() {
   setTimeTransformerFromInstrument(m_poldiInstrument);
 
   // If a profile function is selected, set it on the peak collections.
-  Property *profileFunctionProperty = getPointerToProperty("PeakProfileFunction");
+  const Property *profileFunctionProperty = getPointerToProperty("PeakProfileFunction");
   if (!profileFunctionProperty->isDefault()) {
     for (auto &peakCollection : peakCollections) {
       peakCollection->setProfileFunctionName(profileFunctionProperty->value());
@@ -1269,7 +1270,7 @@ void PoldiFitPeaks2D::exec() {
   }
 
   // Optionally output the raw fitting parameters.
-  Property *rawFitParameters = getPointerToProperty("RawFitParameters");
+  const Property *rawFitParameters = getPointerToProperty("RawFitParameters");
   if (!rawFitParameters->isDefault()) {
     ITableWorkspace_sptr parameters = fitAlgorithm->getProperty("OutputParameters");
     setProperty("RawFitParameters", parameters);

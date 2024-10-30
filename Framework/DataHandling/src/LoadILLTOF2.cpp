@@ -172,7 +172,7 @@ void LoadILLTOF2::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
  *
  * @param entry The NeXus entry
  */
-void LoadILLTOF2::initWorkspace(NeXus::NXEntry &entry) {
+void LoadILLTOF2::initWorkspace(const NeXus::NXEntry &entry) {
 
   // read in the data
   const std::string dataName = m_isScan ? "data_scan/detector_data/data" : "data";
@@ -331,7 +331,7 @@ void LoadILLTOF2::addPulseInterval() {
  * @param convertToTOF Should the bin edges be converted to time of flight or keep the channel indices
  * @return Vector of doubles containing bin edges or point centres positions
  */
-std::vector<double> LoadILLTOF2::prepareAxis(NeXus::NXEntry &entry, bool convertToTOF) {
+std::vector<double> LoadILLTOF2::prepareAxis(const NeXus::NXEntry &entry, bool convertToTOF) {
 
   std::vector<double> xAxis(m_localWorkspace->readX(0).size());
   if (m_isScan) {
@@ -380,7 +380,7 @@ std::vector<double> LoadILLTOF2::prepareAxis(NeXus::NXEntry &entry, bool convert
  * @param convertToTOF Should the bin edges be converted to time of flight or
  * keep the channel indexes
  */
-void LoadILLTOF2::fillStaticWorkspace(NeXus::NXEntry &entry, const std::vector<std::string> &monitorList,
+void LoadILLTOF2::fillStaticWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList,
                                       bool convertToTOF) {
 
   g_log.debug() << "Loading data into the workspace...\n";
@@ -423,7 +423,7 @@ void LoadILLTOF2::fillStaticWorkspace(NeXus::NXEntry &entry, const std::vector<s
  * @param entry The Nexus entry to load the data from
  * @param monitorList Vector containing paths to monitor data
  */
-void LoadILLTOF2::fillScanWorkspace(NeXus::NXEntry &entry, const std::vector<std::string> &monitorList) {
+void LoadILLTOF2::fillScanWorkspace(const NeXus::NXEntry &entry, const std::vector<std::string> &monitorList) {
   // Prepare X-axis array
   auto xAxis = prepareAxis(entry, false);
   auto data = LoadHelper::getIntDataset(entry, "data_scan/detector_data/data");

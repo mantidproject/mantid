@@ -55,7 +55,7 @@ std::vector<std::string> workspaceNamesInGroup(std::string const &groupName) {
 
 std::string vectorToString(std::vector<std::string> const &vec) {
   std::string result;
-  for (auto item : vec) {
+  for (auto const &item : vec) {
     if (!result.empty())
       result += ",";
     result += item;
@@ -614,7 +614,7 @@ auto ReflectometryReductionOneAuto2::getRebinParams(const MatrixWorkspace_sptr &
  */
 std::optional<double> ReflectometryReductionOneAuto2::getQStep(const MatrixWorkspace_sptr &inputWS,
                                                                const double theta) {
-  Property *qStepProp = getProperty("MomentumTransferStep");
+  Property const *qStepProp = getProperty("MomentumTransferStep");
   double qstep;
   if (!qStepProp->isDefault()) {
     qstep = getProperty("MomentumTransferStep");
@@ -660,7 +660,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::rebinAndScale(const MatrixW
   MatrixWorkspace_sptr IvsQ = algRebin->getProperty("OutputWorkspace");
 
   // Scale (optional)
-  Property *scaleProp = getProperty("ScaleFactor");
+  Property const *scaleProp = getProperty("ScaleFactor");
   if (!scaleProp->isDefault()) {
     double scaleFactor = getProperty("ScaleFactor");
     auto algScale = createChildAlgorithm("Scale");
@@ -699,7 +699,7 @@ MatrixWorkspace_sptr ReflectometryReductionOneAuto2::cropQ(const MatrixWorkspace
  */
 double ReflectometryReductionOneAuto2::getPropertyOrDefault(const std::string &propertyName, const double defaultValue,
                                                             bool &isDefault) {
-  Property *property = getProperty(propertyName);
+  Property const *property = getProperty(propertyName);
   isDefault = property->isDefault();
   if (isDefault)
     return defaultValue;
@@ -777,7 +777,7 @@ bool ReflectometryReductionOneAuto2::processGroups() {
   const std::vector<Property *> props = getProperties();
   for (auto &prop : props) {
     if (prop) {
-      auto *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+      auto const *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
       if (!wsProp)
         alg->setPropertyValue(prop->name(), prop->value());
     }

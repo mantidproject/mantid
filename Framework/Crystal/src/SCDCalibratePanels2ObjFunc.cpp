@@ -282,7 +282,7 @@ SCDCalibratePanels2ObjFunc::scaleRectagularDetectorSize(const double &scalex, co
       std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
   if (rectDet) {
     // get instrument parameter map and find out whether the
-    Geometry::ParameterMap &pmap = pws->instrumentParameters();
+    const Geometry::ParameterMap &pmap = pws->instrumentParameters();
     auto oldscalex = pmap.getDouble(rectDet->getName(), "scalex");
     auto oldscaley = pmap.getDouble(rectDet->getName(), "scaley");
     double relscalex{scalex}, relscaley{scaley};

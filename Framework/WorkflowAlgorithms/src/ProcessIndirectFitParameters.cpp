@@ -146,11 +146,8 @@ struct EndsWithOneOf {
   explicit EndsWithOneOf(std::vector<std::string> &&strings) : m_strings(std::move(strings)) {}
 
   bool operator()(std::string const &value) const {
-    for (auto &&str : m_strings) {
-      if (value.ends_with(str))
-        return true;
-    }
-    return false;
+    return std::any_of(m_strings.cbegin(), m_strings.cend(),
+                       [&value](const auto &str) { return value.ends_with(str); });
   }
 
 private:

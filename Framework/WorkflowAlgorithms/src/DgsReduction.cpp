@@ -437,8 +437,8 @@ Workspace_sptr DgsReduction::loadInputData(const std::string &prop, const bool m
     this->setLoadAlg("Load");
     if ("ISIS" == facility) {
       std::string detCalFileFromAlg = this->getProperty("DetCalFilename");
-      std::string detCalFileProperty = prop + "DetCalFilename";
       if (!detCalFileFromAlg.empty()) {
+        std::string detCalFileProperty = prop + "DetCalFilename";
         this->reductionManager->declareProperty(
             std::make_unique<PropertyWithValue<std::string>>(detCalFileProperty, detCalFileFromAlg));
       }
@@ -608,8 +608,6 @@ void DgsReduction::exec() {
   IAlgorithm_sptr detVan;
   Workspace_sptr idetVanWS;
   if (detVanWS && !isProcessedDetVan) {
-    std::string detVanMaskName = outputWsName + "_diagmask";
-
     auto diag = createChildAlgorithm("DgsDiagnose");
     diag->setProperty("DetVanWorkspace", detVanWS);
     diag->setProperty("DetVanMonitorWorkspace", detVanMonWS);
@@ -623,6 +621,7 @@ void DgsReduction::exec() {
     maskWS = diag->getProperty("OutputWorkspace");
 
     if (showIntermedWS) {
+      std::string detVanMaskName = outputWsName + "_diagmask";
       this->declareProperty(
           std::make_unique<WorkspaceProperty<>>("SampleDetVanDiagMask", detVanMaskName, Direction::Output));
       this->setProperty("SampleDetVanDiagMask", maskWS);
@@ -632,13 +631,13 @@ void DgsReduction::exec() {
     detVan->setProperty("InputWorkspace", detVanWS);
     detVan->setProperty("InputMonitorWorkspace", detVanMonWS);
     detVan->setProperty("MaskWorkspace", maskWS);
-    std::string idetVanName = outputWsName + "_idetvan";
     detVan->setProperty("ReductionProperties", getPropertyValue("ReductionProperties"));
     detVan->executeAsChildAlg();
     MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
     idetVanWS = std::dynamic_pointer_cast<Workspace>(oWS);
 
     if (showIntermedWS) {
+      std::string idetVanName = outputWsName + "_idetvan";
       this->declareProperty(
           std::make_unique<WorkspaceProperty<>>("IntegratedNormWorkspace", idetVanName, Direction::Output));
       this->setProperty("IntegratedNormWorkspace", idetVanWS);
@@ -680,8 +679,6 @@ void DgsReduction::exec() {
 
   // Perform absolute normalisation if necessary
   if (absSampleWS) {
-    std::string absWsName = outputWsName + "_absunits";
-
     // Collect the other workspaces first.
     MatrixWorkspace_sptr absSampleMonWS = this->getProperty("AbsUnitsSampleInputMonitorWorkspace");
     Workspace_sptr absDetVanWS = this->loadInputData("AbsUnitsDetectorVanadium", false);
@@ -713,6 +710,7 @@ void DgsReduction::exec() {
     outputWS = divide(outputWS, absUnitsWS);
 
     if (showIntermedWS) {
+      std::string absWsName = outputWsName + "_absunits";
       this->declareProperty(std::make_unique<WorkspaceProperty<>>("AbsUnitsWorkspace", absWsName, Direction::Output));
       this->setProperty("AbsUnitsWorkspace", absUnitsWS);
       this->declareProperty(std::make_unique<WorkspaceProperty<>>(

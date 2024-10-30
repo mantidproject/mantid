@@ -295,7 +295,6 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines, const bool u
 
       // Start the new pair
       startindex = static_cast<int>(i);
-      endindex = -1;
 
       // Get bank ID
       if (useFileBankIDs) { // Get bank ID from line
@@ -320,7 +319,7 @@ void LoadFullprofResolution::scanBanks(const vector<string> &lines, const bool u
 
   g_log.debug() << "[DB1112] Number of bank IDs = " << banks.size() << ", "
                 << "Number of ranges = " << bankstartindexmap.size() << '\n';
-  for (auto &bank : banks) {
+  for (const auto &bank : banks) {
     g_log.debug() << "Bank " << bank << " From line " << bankstartindexmap[bank] << " to " << bankendindexmap[bank]
                   << '\n';
   }
