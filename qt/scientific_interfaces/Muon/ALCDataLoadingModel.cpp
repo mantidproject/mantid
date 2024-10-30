@@ -27,8 +27,8 @@ using namespace Mantid::API;
 namespace MantidQt::CustomInterfaces {
 
 ALCDataLoadingModel::ALCDataLoadingModel()
-    : m_numDetectors(0), m_loadingData(false), m_directoryChanged(false), m_lastRunLoadedAuto(-2), m_filesToLoad(),
-      m_wasLastAutoRange(false) {}
+    : m_numDetectors(0), m_loadingData(false), m_directoryChanged(false), m_lastRunLoadedAuto(-2),
+      m_wasLastAutoRange(false), m_minTime(0) {}
 
 void ALCDataLoadingModel::setLoadingData(bool isLoading) { m_loadingData = isLoading; }
 bool ALCDataLoadingModel::getLoadingData() { return m_loadingData; }
@@ -39,7 +39,7 @@ MatrixWorkspace_sptr ALCDataLoadingModel::getLoadedData() { return m_loadedData;
 MatrixWorkspace_sptr ALCDataLoadingModel::exportWorkspace() {
   if (m_loadedData)
     return std::const_pointer_cast<MatrixWorkspace>(m_loadedData);
-  return MatrixWorkspace_sptr();
+  return MatrixWorkspace_sptr{};
 }
 
 /**
@@ -156,11 +156,11 @@ void ALCDataLoadingModel::setWsForMuonInfo(const std::string &filename) {
 
 Mantid::API::MatrixWorkspace_sptr ALCDataLoadingModel::getWsForMuonInfo() { return m_wsForInfo; }
 
-double ALCDataLoadingModel::getMinTime() { return m_minTime; }
+double ALCDataLoadingModel::getMinTime() const { return m_minTime; }
 
 std::vector<std::string> &ALCDataLoadingModel::getLogs() { return m_logs; }
 
-void ALCDataLoadingModel::setLogs(MatrixWorkspace_sptr ws) {
+void ALCDataLoadingModel::setLogs(const MatrixWorkspace_sptr &ws) {
 
   std::vector<std::string> logs;
 
@@ -185,7 +185,7 @@ void ALCDataLoadingModel::setLogs(MatrixWorkspace_sptr ws) {
 
 std::vector<std::string> &ALCDataLoadingModel::getPeriods() { return m_periods; }
 
-void ALCDataLoadingModel::setPeriods(Workspace_sptr loadedWs) {
+void ALCDataLoadingModel::setPeriods(const Workspace_sptr &loadedWs) {
 
   size_t numPeriods = MuonAnalysisHelper::numPeriods(loadedWs);
   std::vector<std::string> periods;
@@ -219,7 +219,7 @@ int ALCDataLoadingModel::extractRunNumber(const std::string &file) {
   return std::stoi(returnVal);
 }
 
-std::string ALCDataLoadingModel::getPathFromFiles(std::vector<std::string> files) const {
+std::string ALCDataLoadingModel::getPathFromFiles(std::vector<std::string> files) {
   if (files.empty())
     return "";
   const auto firstDirectory = files[0u].substr(0u, files[0u].find_last_of("/\\"));
@@ -302,8 +302,7 @@ bool ALCDataLoadingModel::loadFilesFromWatchingDirectory(const std::string &firs
     // If not currently loading load new files
     if (!m_loadingData) {
       // add to list set text with search
-      const auto oldRuns = files;
-      if (std::find(oldRuns.begin(), oldRuns.end(), latestFile) == oldRuns.end()) {
+      if (std::find(files.begin(), files.end(), latestFile) == files.end()) {
         // Get old text
         auto newText = runsText;
 
@@ -315,7 +314,9 @@ bool ALCDataLoadingModel::loadFilesFromWatchingDirectory(const std::string &firs
           // Is error but continue to watch
           m_directoryChanged = false;
           return false;
-        } else if (m_lastRunLoadedAuto + 1 == runNumber) {
+        }
+
+        if (m_lastRunLoadedAuto + 1 == runNumber) {
           // Add as range
           // Check if last added was a range
           if (m_wasLastAutoRange.load()) {
@@ -324,6 +325,7 @@ bool ALCDataLoadingModel::loadFilesFromWatchingDirectory(const std::string &firs
           }
           newText += "-" + std::to_string(runNumber);
           m_wasLastAutoRange = true;
+
         } else {
           // Add as comma
           newText += "," + std::to_string(runNumber);

@@ -22,31 +22,35 @@ public:
   ~ALCDataLoadingModel() = default;
   void load(const IALCDataLoadingView *view);
   void cancelLoading() const;
-  void setLoadingData(bool isLoading);
-  bool getLoadingData();
-  void setLoadedData(const Mantid::API::MatrixWorkspace_sptr &data);
-  Mantid::API::MatrixWorkspace_sptr getLoadedData();
   Mantid::API::MatrixWorkspace_sptr exportWorkspace();
-  void setWsForMuonInfo(const std::string &filename);
-  void setLogs(Mantid::API::MatrixWorkspace_sptr);
-  void setPeriods(Mantid::API::Workspace_sptr);
-  std::vector<std::string> &getLogs();
-  std::vector<std::string> &getPeriods();
-  Mantid::API::MatrixWorkspace_sptr getWsForMuonInfo();
-  double getMinTime();
-  int extractRunNumber(const std::string &file);
-  std::string getPathFromFiles(std::vector<std::string> files) const;
   bool checkCustomGrouping(const std::string &detGroupingType, const std::string &forwardGrouping,
                            const std::string &backwardGrouping);
   void updateAutoLoadCancelled();
   bool loadFilesFromWatchingDirectory(const std::string &firstFile, const std::vector<std::string> &files,
                                       const std::string &runsText);
-  void setDirectoryChanged(bool hasDirectoryChanged);
+  static std::string getPathFromFiles(std::vector<std::string> files);
+
+  // Getters
+  bool getLoadingData();
+  Mantid::API::MatrixWorkspace_sptr getLoadedData();
+  std::vector<std::string> &getLogs();
+  std::vector<std::string> &getPeriods();
+  Mantid::API::MatrixWorkspace_sptr getWsForMuonInfo();
+  double getMinTime() const;
   std::string &getRunsText();
+
+  // Setters
+  void setLoadingData(bool isLoading);
+  void setLoadedData(const Mantid::API::MatrixWorkspace_sptr &data);
+  void setLogs(const Mantid::API::MatrixWorkspace_sptr &ws);
+  void setPeriods(const Mantid::API::Workspace_sptr &ws);
+  void setWsForMuonInfo(const std::string &filename);
+  void setDirectoryChanged(bool hasDirectoryChanged);
   void setFilesToLoad(const std::vector<std::string> &files);
 
 private:
-  std::string isCustomGroupingValid(const std::string &group, bool &isValid);
+  static std::string isCustomGroupingValid(const std::string &group, bool &isValid);
+  static int extractRunNumber(const std::string &file);
 
   /// Last loaded data workspace
   Mantid::API::MatrixWorkspace_sptr m_loadedData;
@@ -72,7 +76,7 @@ private:
   /// Last run added by auto was addes as range
   std::atomic_bool m_wasLastAutoRange;
 
-  /// Variables using to update available info
+  /// Variables used to update available muon info
   Mantid::API::MatrixWorkspace_sptr m_wsForInfo;
   std::vector<std::string> m_periods;
   std::vector<std::string> m_logs;
