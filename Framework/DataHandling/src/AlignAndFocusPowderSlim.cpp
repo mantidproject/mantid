@@ -16,6 +16,8 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
+#include "MantidKernel/ArrayLengthValidator.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/NexusIOHelper.h"
@@ -31,6 +33,8 @@ using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceFactory;
 using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::ArrayLengthValidator;
+using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::Direction;
 
 namespace { // anonymous namespace
@@ -40,6 +44,7 @@ const std::string CAL_FILE("CalFileName");
 const std::string LOAD_IDF_FROM_NXS("LoadNexusInstrumentXML");
 const std::string FILTER_TIMESTART("FilterByTimeStart");
 const std::string FILTER_TIMESTOP("FilterByTimeStop");
+const std::string PARAMS("Params");
 const std::string OUTPUT_WKSP("OutputWorkspace");
 } // namespace PropertyNames
 
@@ -204,6 +209,9 @@ void AlignAndFocusPowderSlim::init() {
   declareProperty(std::make_unique<FileProperty>(PropertyNames::CAL_FILE, "", FileProperty::OptionalLoad, cal_exts),
                   "Optional: The .cal file containing the position correction factors. "
                   "Either this or OffsetsWorkspace needs to be specified.");
+  auto mustBeLengthThree = std::make_shared<ArrayLengthValidator<double>>(3);
+  declareProperty(std::make_unique<ArrayProperty<double>>(PropertyNames::PARAMS, "0.25,0.0016,2.25", mustBeLengthThree),
+                  "A comma separated list of first bin boundary, width, last bin boundary. ");
   declareProperty(
       std::make_unique<WorkspaceProperty<API::MatrixWorkspace>>(PropertyNames::OUTPUT_WKSP, "", Direction::Output),
       "An output workspace.");
@@ -215,8 +223,7 @@ void AlignAndFocusPowderSlim::init() {
 void AlignAndFocusPowderSlim::exec() {
   // create a histogram workspace
   constexpr size_t numHist{6};
-  constexpr double xmin{0.25};
-  constexpr double xmax{2.25};
+  const std::vector<double> params = getProperty(PropertyNames::PARAMS);
 
   // These give the limits in each file as to which events we actually load
   // (when filtering by time).
@@ -224,10 +231,9 @@ void AlignAndFocusPowderSlim::exec() {
   loadSize.resize(1, 0);
 
   HistogramData::BinEdges XValues_new(0);
-  const double binWidth{1.6e-3}; // to get 1250 bins total
+  const double binWidth = params[1];
   const bool linearBins = bool(binWidth > 0.);
-  UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams({xmin, binWidth, xmax}, XValues_new.mutableRawData(), true,
-                                                             false, xmin, xmax));
+  UNUSED_ARG(Kernel::VectorHelper::createAxisFromRebinParams(params, XValues_new.mutableRawData(), true, false));
   const size_t numBins = XValues_new.size() - 1;
   MatrixWorkspace_sptr wksp = WorkspaceFactory::Instance().create("Workspace2D", numHist, numBins + 1, numBins);
   for (size_t i = 0; i < numHist; ++i) {
