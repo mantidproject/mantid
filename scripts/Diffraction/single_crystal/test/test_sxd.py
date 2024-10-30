@@ -148,16 +148,22 @@ class SXDTest(unittest.TestCase):
     @patch(sxd_path + ".mantid.SaveReflections")
     @patch(sxd_path + ".mantid.SaveNexus")
     def test_save_peak_table(self, mock_save_nxs, mock_save_ref, mock_retrieve):
-        runno = 1234
-        self.sxd.runs = {str(runno): {"ws": self.ws.name(), "found_int_MD_opt": self.peaks.name()}}
-        pk_type, int_type = PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS
         fmt = "SHELX"
-        mock_retrieve.side_effect = lambda name: make_mock_ws_with_name(name)
-
-        self.sxd.save_peak_table(runno, pk_type, int_type, self._test_dir, fmt, SplitFiles=False)
+        self._call_save_peak_table(mock_retrieve, save_format=fmt, SplitFiles=False)
 
         fpath = path.join(self._test_dir, "peaks_" + fmt)
         mock_save_nxs.assert_called_once_with(InputWorkspace=self.peaks.name(), Filename=fpath + ".nxs")
+        mock_save_ref.assert_called_once_with(InputWorkspace=self.peaks.name(), Filename=fpath + ".int", Format=fmt, SplitFiles=False)
+
+    @patch(sxd_path + ".BaseSX.retrieve")
+    @patch(sxd_path + ".mantid.SaveReflections")
+    @patch(sxd_path + ".mantid.SaveNexus")
+    def test_save_peak_table_save_nxs_False(self, mock_save_nxs, mock_save_ref, mock_retrieve):
+        fmt = "SHELX"
+        self._call_save_peak_table(mock_retrieve, save_format=fmt, save_nxs=False, SplitFiles=False)
+
+        fpath = path.join(self._test_dir, "peaks_" + fmt)
+        mock_save_nxs.assert_not_called()
         mock_save_ref.assert_called_once_with(InputWorkspace=self.peaks.name(), Filename=fpath + ".int", Format=fmt, SplitFiles=False)
 
     @patch(sxd_path + ".mantid.SaveReflections")
@@ -343,6 +349,13 @@ class SXDTest(unittest.TestCase):
         for idet, detid in enumerate(detids):
             AddPeak(PeaksWorkspace=peaks, RunWorkspace=self.ws, DetectorID=detid, TOF=tofs[idet], EnableLogging=False)
         return peaks
+
+    def _call_save_peak_table(self, mock_retrieve, **kwargs):
+        runno = 1234
+        self.sxd.runs = {str(runno): {"ws": self.ws.name(), "found_int_MD_opt": self.peaks.name()}}
+        mock_retrieve.side_effect = lambda name: make_mock_ws_with_name(name)
+
+        self.sxd.save_peak_table(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.MD_OPTIMAL_RADIUS, self._test_dir, **kwargs)
 
 
 def make_mock_ws_with_name(name):
