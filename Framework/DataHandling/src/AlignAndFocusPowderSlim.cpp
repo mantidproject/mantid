@@ -13,6 +13,7 @@
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -33,6 +34,7 @@ using Mantid::API::FileProperty;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::WorkspaceProperty;
+using Mantid::DataObjects::MaskWorkspace_sptr;
 using Mantid::DataObjects::Workspace2D;
 using Mantid::Kernel::ArrayLengthValidator;
 using Mantid::Kernel::ArrayProperty;
@@ -120,12 +122,15 @@ template <typename CountsType> class ProcessEventsTask {
 public:
   ProcessEventsTask(const Histogrammer *histogrammer, const std::vector<uint32_t> *detids,
                     const std::vector<float> *tofs, const AlignAndFocusPowderSlim::BankCalibration *calibration,
-                    std::vector<CountsType> *y_temp)
-      : m_histogrammer(histogrammer), m_detids(detids), m_tofs(tofs), m_calibration(calibration), y_temp(y_temp) {}
+                    std::vector<CountsType> *y_temp, const std::set<detid_t> *masked)
+      : m_histogrammer(histogrammer), m_detids(detids), m_tofs(tofs), m_calibration(calibration), y_temp(y_temp),
+        masked(masked) {}
 
   void operator()(const tbb::blocked_range<size_t> &range) const {
     for (size_t i = range.begin(); i < range.end(); ++i) {
       const auto detid = static_cast<detid_t>(m_detids->at(i));
+      if (masked->contains(detid))
+        continue;
       const auto tof = static_cast<double>(m_tofs->at(i)) * m_calibration->value(detid);
 
       const auto binnum = m_histogrammer->findBin(tof);
@@ -140,6 +145,7 @@ private:
   const std::vector<float> *m_tofs;
   const AlignAndFocusPowderSlim::BankCalibration *m_calibration;
   std::vector<CountsType> *y_temp;
+  const std::set<detid_t> *masked;
 };
 
 template <typename Type> class MinMax {
@@ -390,7 +396,8 @@ void AlignAndFocusPowderSlim::exec() {
         addTimer("setup" + entry_name, startTimeSetup, std::chrono::high_resolution_clock::now());
 
         const auto startTimeProcess = std::chrono::high_resolution_clock::now();
-        ProcessEventsTask task(&histogrammer, event_detid.get(), event_time_of_flight.get(), &calibration, &y_temp);
+        ProcessEventsTask task(&histogrammer, event_detid.get(), event_time_of_flight.get(), &calibration, &y_temp,
+                               &m_masked);
         tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent), task);
         auto &y_values = spectrum.dataY();
         std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
@@ -525,7 +532,7 @@ void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inp
   alg->setPropertyValue("Filename", filename);
   alg->setProperty<bool>("MakeCalWorkspace", true);
   alg->setProperty<bool>("MakeGroupingWorkspace", false);
-  alg->setProperty<bool>("MakeMaskWorkspace", false);
+  alg->setProperty<bool>("MakeMaskWorkspace", true);
   alg->setPropertyValue("WorkspaceName", "temp");
   alg->executeAsChildAlg();
 
@@ -535,6 +542,10 @@ void AlignAndFocusPowderSlim::loadCalFile(const Mantid::API::Workspace_sptr &inp
     const double detc = calibrationWS->cell<double>(row, 1);
     m_calibration.emplace(detid, 1. / detc);
   }
+
+  const MaskWorkspace_sptr maskWS = alg->getProperty("OutputMaskWorkspace");
+  m_masked = maskWS->getMaskedDetectors();
+  g_log.debug() << "Masked detectors: " << m_masked.size() << '\n';
 }
 
 // ------------------------ BankCalibration object
