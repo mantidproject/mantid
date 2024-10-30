@@ -211,6 +211,9 @@ class BaseSX(ABC):
 
     @default_apply_to_all_runs
     def load_isaw_ub(self, isaw_file: str, run=None, tol=0.15):
+        if not path.exists(isaw_file):
+            logger.error(f"Invalid path {isaw_file} to ISAW UB file")
+            return
         ws = self.get_ws_name(run)
         try:
             mantid.LoadIsawUB(InputWorkspace=ws, Filename=isaw_file)
@@ -219,7 +222,9 @@ class BaseSX(ABC):
                 mantid.LoadIsawUB(InputWorkspace=peaks, Filename=isaw_file)
                 mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
         except:
-            print(f"LoadIsawUB failed for run {run}")
+            logger.error(
+                f"LoadIsawUB failed for run {run} - check file contains valid ISAW format UB and the U matrix is a proper rotation matrix."
+            )
 
     def find_ub_using_lattice_params(self, global_B, tol=0.15, **kwargs):
         if global_B:
