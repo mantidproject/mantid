@@ -6,10 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore, QtGui
 from qtpy.QtCore import Signal
-
 from mantidqtinterfaces.Muon.GUI.Common import message_box
-from mantidqtinterfaces.Muon.GUI.Common.pairing_table_widget.pairing_table_constants import inverse_pair_columns
 from mantidqtinterfaces.Muon.GUI.Common.utilities import table_utils
+from typing import List
+
+
+def get_pair_columns() -> List[str]:
+    return list(pair_columns.values())
+
+
+pair_columns = {0: "pair_name", 1: "to_analyse", 2: "group_1", 3: "group_2", 4: "alpha", 5: "guess_alpha"}
+inverse_pair_columns = {"pair_name": 0, "to_analyse": 1, "group_1": 2, "group_2": 3, "alpha": 4, "guess_alpha": 5}
 
 
 class PairingTableView(QtWidgets.QWidget):
@@ -122,7 +129,7 @@ class PairingTableView(QtWidgets.QWidget):
     def subscribe(self, presenter):
         self._presenter = presenter
 
-    def notify(self):
+    def subscribe_notifiers_to_presenter(self):
         self.on_add_pair_button_clicked(self._presenter.handle_add_pair_button_checked_state)
         self.on_remove_pair_button_clicked(self._presenter.handle_remove_pair_button_clicked)
 
@@ -265,7 +272,7 @@ class PairingTableView(QtWidgets.QWidget):
 
     def set_item_selectable_and_enabled(self, row, col):
         item = self.get_table_item(row, col)
-        item.setFlags(self.get_default_item_flags())
+        item.setFlags(self.get_default_item_flags)
 
     def set_item_editable_and_enabled(self, row, col):
         item = self.get_table_item(row, col)

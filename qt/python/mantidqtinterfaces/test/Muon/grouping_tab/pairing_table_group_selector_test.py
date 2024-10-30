@@ -15,7 +15,7 @@ from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
 from mantidqtinterfaces.Muon.GUI.Common.pairing_table_widget.pairing_table_widget_presenter import PairingTablePresenter
 from mantidqtinterfaces.Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import PairingTableView
 from mantidqtinterfaces.Muon.GUI.Common.test_helpers.context_setup import setup_context_for_tests
-from mantidqtinterfaces.Muon.GUI.Common.pairing_table_widget.pairing_table_constants import get_index_of_text
+from mantidqtinterfaces.Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view import EAGroupingTableView
 
 
 def pair_name():
@@ -94,14 +94,14 @@ class GroupSelectorTest(unittest.TestCase):
     def test_that_get_index_of_text_returns_correct_index_if_text_exists(self):
         self.presenter.handle_add_pair_button_clicked()
 
-        index = get_index_of_text(self.get_group_1_selector_from_pair(0), "my_group_1")
+        index = EAGroupingTableView.get_index_of_text(self.get_group_1_selector_from_pair(0), "my_group_1")
 
         self.assertEqual(index, 1)
 
     def test_that_get_index_of_text_returns_0_if_text_does_not_exists(self):
         self.presenter.handle_add_pair_button_clicked()
 
-        index = get_index_of_text(self.get_group_1_selector_from_pair(0), "random string")
+        index = EAGroupingTableView.get_index_of_text(self.get_group_1_selector_from_pair(0), "random string")
 
         self.assertEqual(index, 0)
 

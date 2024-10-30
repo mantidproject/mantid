@@ -12,8 +12,7 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities.general_utils import round_val
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantidqtinterfaces.Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import RowValid
 from mantidqtinterfaces.Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import row_colors, row_tooltips
-
-from mantidqtinterfaces.Muon.GUI.Common.pairing_table_widget.pairing_table_constants import get_pair_columns, pair_columns
+from mantidqtinterfaces.Muon.GUI.Common.pairing_table_widget.pairing_table_widget_view import get_pair_columns, pair_columns
 
 
 class PairingTablePresenter(object):
@@ -22,13 +21,11 @@ class PairingTablePresenter(object):
         self._model = model
 
         self._view.subscribe(self)
-        self._view.notify()
+        self._view.subscribe_notifiers_to_presenter()
 
         self.selected_pair_changed_notifier = GenericObservable()
 
         self._dataChangedNotifier = lambda: 0
-        self._on_alpha_clicked = lambda: 0
-        self._on_guess_alpha_requested = lambda pair_name, group1, group2: 0
 
         # notify if Guess Alpha clicked for any table entries
         self.guessAlphaNotifier = GenericObservable()
@@ -115,7 +112,7 @@ class PairingTablePresenter(object):
             if not self.validate_alpha(changed_item_text):
                 update_model = False
             else:
-                rounded_item = round_value(changed_item_text, self._model._context.group_pair_context.alpha_precision)
+                rounded_item = round_value(changed_item_text, self._model.get_context.group_pair_context.alpha_precision)
                 table[row][col] = rounded_item
         if get_pair_columns()[col] == "to_analyse":
             update_model = False
@@ -150,8 +147,8 @@ class PairingTablePresenter(object):
         for pair in self._model.pairs:
             if isinstance(pair, MuonPair):
                 to_analyse = True if pair.name in self._model.selected_pairs else False
-                forward_group_periods = self._model._context.group_pair_context[pair.forward_group].periods
-                backward_group_periods = self._model._context.group_pair_context[pair.backward_group].periods
+                forward_group_periods = self._model.get_context.group_pair_context[pair.forward_group].periods
+                backward_group_periods = self._model.get_context.group_pair_context[pair.backward_group].periods
                 forward_period_warning = self._model.validate_periods_list(forward_group_periods)
                 backward_period_warning = self._model.validate_periods_list(backward_group_periods)
                 if forward_period_warning == RowValid.invalid_for_all_runs or backward_period_warning == RowValid.invalid_for_all_runs:
