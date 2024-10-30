@@ -459,7 +459,6 @@ public:
 
   void test_SpinStateAddedToSampleLogWhenRequestedNoAnalyser() {
     constexpr size_t nHist{2};
-    constexpr size_t nBins{3};
     BinEdges edges{0.3, 0.6, 0.9, 1.2};
     const double yVal = 2.3;
     Counts counts{yVal, yVal, yVal};
