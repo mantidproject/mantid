@@ -14,6 +14,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidSINQ/PoldiIndexKnownCompounds.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
 using namespace Mantid::Poldi;

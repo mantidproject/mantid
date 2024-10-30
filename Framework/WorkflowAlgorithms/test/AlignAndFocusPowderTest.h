@@ -28,6 +28,8 @@
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidWorkflowAlgorithms/AlignAndFocusPowder.h"
 
+#include <boost/algorithm/string/join.hpp>
+
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataHandling;

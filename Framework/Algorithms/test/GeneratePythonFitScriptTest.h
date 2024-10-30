@@ -12,9 +12,13 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include <Poco/File.h>
 
 #include <fstream>
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+
+#include <Poco/File.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
