@@ -33,17 +33,18 @@ Set up
 Automatic Save Selection
 ########################
 
-#. Select ``File`` or ``Both`` from the ``Save Options``.
-#. Switch between ``1D`` and ``2D`` ``Reduction`` modes at the bottom of the screen.
+#. Select ``File`` or ``Both`` from the ``Save Options`` at the bottom right of the screen.
+#. In the ``Reduction`` section to the left of the ``Save Options``, switch between the ``1D``` and ``2D``` radio buttons..
 
    * When 1D is selected, ``CanSAS (1D)`` and ``NxCanSAS (1D/2D)`` should be checked.
    * When 2D is selected, only ``NxCanSAS (1D/2D)`` should be checked.
 
 #. Check ``RKH (1D/2D)``.
-#. Change the reduction mode.
+#. Change the selected ``Reduction`` radio button.
 #. The options should revert to the defaults above (with ``RKH (1D/2D)`` unchecked).
 #. Select ``Memory``. The ``CanSAS (1D)``, ``NxCanSAS (1D/2D)``, and ``RKH (1D/2D)`` checkboxes should be disabled.
 #. Swap between ``Memory`` and ``File`` with a ``2D`` reduction mode. ``CanSAS (1D)`` should always stay disabled.
+#. Set the ``Save Option``` back to ``Memory`` to continue with the rest of the tests.
 
 Runs table editing
 ##################
@@ -114,6 +115,7 @@ Processing
 
 *1D reduction*
 
+#. Clear all workspaces in your workspaces list if they are not empty.
 #. In ``General, Scale, Event Slice, Sample`` sub-tab, ensure the ``Reduction
    Mode`` is ``All``.
 #. In the ``Runs`` tab, under ``Save Options``, select ``Both``, and tick
@@ -138,10 +140,11 @@ Processing
 
 *2D reduction*
 
+#. Clear all workspaces in your workspaces list if they are not empty.
+#. In ``General, Scale, Event Slice, Sample`` sub-tab, ensure the ``Reduction
+   Mode`` is ``All``.
 #. Switch to the 2D ``Reduction Mode``.
-#. Tick the ``Plot Results`` box.
 #. Click ``Process All``.
-#. A plot window will open; initially empty, then with a line.
 #. You should get four 2D workspaces instead of the previous 1D workspaces
    (they will have 100 spectra instead of 1). Double-click them and check you
    can do a colourfill plot.
@@ -150,8 +153,7 @@ Processing
 #. Clear the newly created files and workspaces to make future tests easier
 #. Change ``Reduction`` back to 1D.
 #. Click ``Process All``.
-#. A new plot window should open and you should end up with multiple lines plotted.
-#. Check the ``Multi-period`` box - six additional columns should appear in the table.
+#. When it completes, Check the ``Multi-period`` box - six additional columns should appear in the table.
 #. Delete all rows and re-load the batch file.
 
 *Merged reduction*
@@ -159,10 +161,9 @@ Processing
 #. In the ``Settings`` tab, ``General, Scale, Event Slice, Sample`` sub-tab,
    set ``Reduction Mode`` to ``Merged``.
 #. Return to the ``Runs`` tab.
-#. Ensure ``Plot results`` is ticked and that save outputs ``CanSAS (1D)`` and
+#. Ensure save outputs ``CanSAS (1D)`` and
    ``NXcanSAS (1D/2D)`` are ticked.
 #. Click ``Process All``.
-#. This should result in a plot with six lines.
 #. The workspaces list should now contain a group named
    ``LAB_and_HAB_workspaces_from_merged_reduction`` that contains the ``main``
    and ``HAB`` workspaces, which were previously ungrouped for a non-merged
@@ -176,7 +177,8 @@ Processing
 *Scaled Background Subtracted Reduction*
 
 #. Create a new copy of the User File in your file browser.
-#. In this new copy, change the the ``Reduction Mode`` to ``Merged`` using a text editor.
+#. Using a text editor. Open this new copy in a text editor and find the ``[detector.configuration]`` section.
+#. Under this section, make sure setting selected_detector is set to ``Merged``.
 #. Back in the ISIS SANS interface, change the user file to this new file.
 #. Click over to the ``Runs`` tab.
 #. Set the ``Save Options`` to ``Memory``.
@@ -187,7 +189,7 @@ Processing
 #. Check the ``Scaled Background Subtraction`` checkbox.
 #. In the ``BackgroundWorkspace`` column, enter the name of the merged workspace you took note of before.
 #. In the ``ScaleFactor`` column, enter ``0.9``.
-#. Ensure that save outputs ``CanSAS (1D)`` and ``NXcanSAS (1D/2D)`` are ticked.
+#. Set the ``Save Options``` to Both and ensure that save outputs ``CanSAS (1D)`` and ``NXcanSAS (1D/2D)`` are ticked
 #. Select this new row and click ``Process Selected``.
 #. When it completes, two output files should have been created with ``bgsub_test`` in the name. One, which is the
    normal output data. Another with the scaled subtraction, which should have ``_bgsub`` appended to the name.
@@ -261,8 +263,7 @@ Display
 
 #. In the ``Runs`` tab, check that all table, process, and load buttons have
    clear tooltips by hovering over them.
-#. Check that ``Zero Error Free``, ``Use Optimizations``, and ``Plot Results``
-   have clear tooltips.
+#. Check that ``Zero Error Free`` and ``Use Optimizations`` have clear tooltips.
 #. In the settings, hover over a random selection of buttons and text boxes to check tooltips are still there.
    Users rely on the tooltips a lot and really do notice each missing one.
    *Note: The* ``Wavelength`` *section of the settings is missing its tooltips. We and the users are aware of this so an
