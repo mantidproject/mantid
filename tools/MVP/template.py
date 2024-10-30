@@ -134,7 +134,7 @@ if __name__ == "__main__":
     )
     parser.add_argument("-o", "--output-dir", required=True, help="The absolute path to output the generated files to.")
     parser.add_argument(
-        "-t", "--add-tests", action=BooleanOptionalAction, help="Whether to include basic test files for the presenters and models"
+        "-t", "--include-tests", action=BooleanOptionalAction, help="Whether to include basic test files for the presenters and models"
     )
     args = parser.parse_args()
 
