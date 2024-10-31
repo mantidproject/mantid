@@ -248,6 +248,36 @@ class SXDTest(unittest.TestCase):
 
         self.assertAlmostEqual(peaks_to_correct.getPeak(0).getIntensity(), 8.7690, delta=1e-4)
 
+    @patch(sxd_path + ".path.exists")
+    @patch(sxd_path + ".mantid.LoadIsawUB")
+    @patch(sxd_path + ".mantid.IndexPeaks")
+    def test_load_isaw_ub(self, mock_index, mock_load_ub, mock_path_exists):
+        runno = 1234
+        self.sxd.set_ws(runno, self.ws)
+        self.sxd.set_peaks(runno, self.peaks, PEAK_TYPE.FOUND)
+        mock_path_exists.return_value = True
+        fname = "UB.mat"
+
+        self.sxd.load_isaw_ub(fname)
+
+        self.assertEqual(mock_load_ub.call_count, 2)
+        mock_load_ub.assert_any_call(InputWorkspace=self.ws, Filename=fname)
+        mock_load_ub.assert_any_call(InputWorkspace=self.peaks, Filename=fname)
+        mock_index.assert_called_once()
+
+    @patch(sxd_path + ".path.exists")
+    @patch(sxd_path + ".mantid.LoadIsawUB")
+    @patch(sxd_path + ".mantid.IndexPeaks")
+    def test_load_isaw_ub_invalid_path(self, mock_index, mock_load_ub, mock_path_exists):
+        runno = 1234
+        self.sxd.set_ws(runno, self.ws)
+        mock_path_exists.return_value = False
+
+        self.sxd.load_isaw_ub("UB.mat")
+
+        mock_load_ub.assert_not_called()
+        mock_index.assert_not_called()
+
     #  --- methods specific to SXD class ---
 
     @patch("Diffraction.single_crystal.base_sx.mantid.SetGoniometer")
