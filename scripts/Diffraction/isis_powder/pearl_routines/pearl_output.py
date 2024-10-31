@@ -25,12 +25,13 @@ def generate_and_save_focus_output(instrument, processed_spectra, run_details, a
     elif focus_mode == "groups":
         processed_nexus_files = _focus_mode_groups(output_file_paths=output_file_paths, calibrated_spectra=processed_spectra)
     elif "trans" in focus_mode:
-        imods = instrument.get_trans_module_indices() if focus_mode == "trans_subset" else range(9)
+        imods, suffix = instrument.get_trans_module_indices()
         processed_nexus_files = _focus_mode_trans(
             output_file_paths=output_file_paths,
             calibrated_spectra=processed_spectra,
             attenuation_filepath=attenuation_filepath,
             imods=imods,
+            suffix=suffix,
         )
     elif focus_mode == "mods":
         processed_nexus_files = _focus_mode_mods(output_file_paths=output_file_paths, calibrated_spectra=processed_spectra)
@@ -147,7 +148,7 @@ def _focus_mode_mods(output_file_paths, calibrated_spectra):
     return output_list
 
 
-def _focus_mode_trans(output_file_paths, attenuation_filepath, calibrated_spectra, imods=range(9)):
+def _focus_mode_trans(output_file_paths, attenuation_filepath, calibrated_spectra, imods, suffix):
     summed_ws = mantid.MergeRuns(InputWorkspaces=calibrated_spectra[imods])
     xList = summed_ws.readX(0)
 
@@ -167,7 +168,6 @@ def _focus_mode_trans(output_file_paths, attenuation_filepath, calibrated_spectr
     summed_ws = mantid.ConvertUnits(InputWorkspace=summed_ws, Target="dSpacing")
 
     # Rename to user friendly name:
-    suffix = "+".join([str(imod) for imod in imods]) if len(imods) < 9 else "1-9"
     summed_ws_name = output_file_paths["output_name"] + "_mods" + suffix
     summed_ws = mantid.RenameWorkspace(InputWorkspace=summed_ws, OutputWorkspace=summed_ws_name)
     mantid.SaveFocusedXYE(
