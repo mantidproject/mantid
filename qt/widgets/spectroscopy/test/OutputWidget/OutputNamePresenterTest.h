@@ -13,8 +13,6 @@
 #include "MantidQtWidgets/Spectroscopy/MockObjects.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputNamePresenter.h"
 
-#include "MantidKernel/WarningSuppressions.h"
-
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
@@ -27,8 +25,10 @@ public:
 
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockOutputNameView>>();
+    auto model = std::make_unique<NiceMock<MockOutputNameModel>>();
+    m_model = model.get();
 
-    m_presenter = std::make_unique<OutputNamePresenter>(m_view.get());
+    m_presenter = std::make_unique<OutputNamePresenter>(std::move(model), m_view.get());
     m_workspace = createWorkspace(2);
     m_ads = std::make_unique<SetUpADSWithWorkspace>("test_red", m_workspace);
   }
@@ -36,6 +36,7 @@ public:
   void tearDown() override {
     AnalysisDataService::Instance().clear();
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_model));
     m_presenter.reset();
     m_view.reset();
   }
@@ -58,35 +59,40 @@ public:
     m_presenter->generateWarningLabel();
   }
 
-  void test_index_label_position_is_correct() {
-    std::vector<std::string> test_suffices({"_red", "_sqw"});
-    m_presenter->setWsSuffixes(test_suffices);
-    auto pos = m_presenter->findIndexToInsertLabel("test_red");
-    TS_ASSERT_EQUALS(pos, 4);
-    pos = m_presenter->findIndexToInsertLabel("test");
-    TS_ASSERT_EQUALS(pos, 4);
-    pos = m_presenter->findIndexToInsertLabel("test_red_sqw");
-    TS_ASSERT_EQUALS(pos, 8);
-  }
-
   void test_output_basename_set_adds_label_at_end_if_no_ws_suffix() {
+    std::string const basename = "workspace_test";
+    std::string const predictedOutput = basename + "_label";
+
     EXPECT_CALL(*m_view, enableLabelEditor()).Times(1);
+    EXPECT_CALL(*m_model, setOutputBasename(basename)).Times(1);
+    EXPECT_CALL(*m_view, setOutputNameLabel(predictedOutput)).Times(1);
+
+    ON_CALL(*m_model, outputBasename()).WillByDefault(Return(basename));
+    ON_CALL(*m_model, findIndexToInsertLabel(basename)).WillByDefault(Return(14));
     ON_CALL(*m_view, getCurrentLabel()).WillByDefault(Return("label"));
-    EXPECT_CALL(*m_view, setOutputNameLabel("workspace_test_label")).Times(1);
-    m_presenter->setOutputWsBasename("workspace_test");
+
+    m_presenter->setOutputWsBasename(basename);
   }
 
   void test_output_basename_set_adds_label_at_before_ws_suffix() {
     std::vector<std::string> test_suffices({"_red", "_sqw"});
-    m_presenter->setWsSuffixes(test_suffices);
+    std::string const basename = "workspace_test_red";
+    std::string const predictedOutput = "workspace_test_label_red";
+
     EXPECT_CALL(*m_view, enableLabelEditor()).Times(1);
+    EXPECT_CALL(*m_model, setOutputBasename(basename)).Times(1);
+    EXPECT_CALL(*m_view, setOutputNameLabel(predictedOutput)).Times(1);
+
+    ON_CALL(*m_model, outputBasename()).WillByDefault(Return(basename));
+    ON_CALL(*m_model, findIndexToInsertLabel(basename)).WillByDefault(Return(14));
     ON_CALL(*m_view, getCurrentLabel()).WillByDefault(Return("label"));
-    EXPECT_CALL(*m_view, setOutputNameLabel("workspace_test_label_red_elwin")).Times(1);
-    m_presenter->setOutputWsBasename("workspace_test_red", "_elwin");
+
+    m_presenter->setOutputWsBasename(basename, "_elwin");
   }
 
 private:
   std::unique_ptr<NiceMock<MockOutputNameView>> m_view;
+  NiceMock<MockOutputNameModel> *m_model;
   std::unique_ptr<OutputNamePresenter> m_presenter;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
   MatrixWorkspace_sptr m_workspace;

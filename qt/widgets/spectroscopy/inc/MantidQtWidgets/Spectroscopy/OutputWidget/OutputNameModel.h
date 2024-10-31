@@ -7,7 +7,6 @@
 #pragma once
 
 #include "../DllConfig.h"
-#include "MantidKernel/System.h"
 #include <string>
 #include <vector>
 namespace MantidQt::CustomInterfaces {
@@ -32,7 +31,7 @@ public:
   OutputNameModel();
   ~OutputNameModel() override = default;
 
-  int findIndexToInsertLabel(std::string const &outputBasename) override;
+  int findIndexToInsertLabel(std::string const &basename) override;
 
   void setSuffixes(std::vector<std::string> const &suffixes) override;
   void setOutputSuffix(std::string const &outputSuffix) override;

@@ -23,12 +23,12 @@ void OutputNameModel::setOutputSuffix(std::string const &outputSuffix) { m_currO
 
 std::string OutputNameModel::outputSuffix() const { return m_currOutputSuffix; }
 
-int OutputNameModel::findIndexToInsertLabel(std::string const &outputBasename) {
+int OutputNameModel::findIndexToInsertLabel(std::string const &basename) {
   int maxPos = -1;
   for (auto const &suffix : m_suffixes) {
-    auto pos = static_cast<int>(outputBasename.rfind(suffix));
+    auto pos = static_cast<int>(basename.rfind(suffix));
     maxPos = pos >= maxPos ? pos : maxPos;
   }
-  return (m_suffixes.empty() || (maxPos == -1)) ? static_cast<int>(outputBasename.length()) : maxPos;
+  return (m_suffixes.empty() || (maxPos == -1)) ? static_cast<int>(basename.length()) : maxPos;
 }
 } // namespace MantidQt::CustomInterfaces

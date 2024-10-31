@@ -21,7 +21,7 @@ public:
   virtual void handleUpdateOutputLabel() = 0;
 
   virtual void setWsSuffixes(std::vector<std::string> const &suffixes) = 0;
-  virtual void setOutputWsBasename(std::string const &outputBasename, std::string const &outputSuffix = "") = 0;
+  virtual void setOutputWsBasename(std::string const &outputName, std::string const &outputSuffix = "") = 0;
 };
 
 class MANTID_SPECTROSCOPY_DLL OutputNamePresenter final : public IOutputNamePresenter {
