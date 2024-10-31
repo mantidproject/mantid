@@ -17,22 +17,23 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 import matplotlib
 
+# Must be called before anything tries to use matplotlib
 matplotlib.use("Agg")
 # Mock out simpleapi to import expensive import of something we don't use anyway
 sys.modules["mantid.simpleapi"] = mock.MagicMock()
 
-from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE
-from mantidqt.widgets.sliceviewer.presenters.presenter import (
+from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE  # noqa: E402
+from mantidqt.widgets.sliceviewer.presenters.presenter import (  # noqa: E402
     DBLMAX,
     PeaksViewerCollectionPresenter,
     SliceViewer,
     SliceViewXAxisEditor,
     SliceViewYAxisEditor,
 )
-from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform
-from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
-from mantidqt.widgets.sliceviewer.views.view import SliceViewerView
-from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
+from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform  # noqa: E402
+from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText  # noqa: E402
+from mantidqt.widgets.sliceviewer.views.view import SliceViewerView  # noqa: E402
+from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView  # noqa: E402
 
 
 def _create_presenter(model: SliceViewerModel, view, mock_sliceinfo_cls, enable_nonortho_axes, supports_nonortho):
