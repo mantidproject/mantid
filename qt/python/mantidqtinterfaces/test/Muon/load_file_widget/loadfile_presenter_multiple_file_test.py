@@ -40,8 +40,6 @@ class IteratorWithException:
             self.n += 1
             return next(self.iterable)
 
-    next = __next__
-
 
 @start_qapplication
 class LoadFileWidgetPresenterMultipleFileModeTest(unittest.TestCase):

@@ -41,8 +41,7 @@ class ISISReflectometryWorkflowSlicingTest(systemtesting.MantidSystemTest, ISISR
         DeleteWorkspace("TRANS_LAM_45227")
         self.finaliseResults()
 
-    @staticmethod
-    def regenerateReferenceFileByReducing():
+    def regenerateReferenceFileByReducing(self):
         setupInstrument()
         test = ISISReflectometryWorkflowSlicingTest()
         test.runTest()
