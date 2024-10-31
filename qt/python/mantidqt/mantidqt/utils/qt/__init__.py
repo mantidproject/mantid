@@ -16,13 +16,15 @@ from contextlib import contextmanager
 from importlib import import_module
 import warnings
 
+# 3rd-party modules
+from qtpy import QT_VERSION
+from qtpy.QtCore import QPoint
+from qtpy.QtGui import QKeySequence
+from qtpy.QtWidgets import QAction, QMenu, QDesktopWidget
+
+# Must be called before trying to import module with a deprecation warning
 warnings.filterwarnings(action="ignore", category=DeprecationWarning, module=".*uic.*")
 
-# 3rd-party modules
-from qtpy import QT_VERSION  # noqa: E402
-from qtpy.QtCore import QPoint  # noqa: E402
-from qtpy.QtGui import QKeySequence  # noqa: E402
-from qtpy.QtWidgets import QAction, QMenu, QDesktopWidget  # noqa: E402
 from qtpy.uic import loadUi, loadUiType  # noqa: E402
 
 LIB_SUFFIX = "qt" + QT_VERSION[0]

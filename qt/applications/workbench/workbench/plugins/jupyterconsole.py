@@ -4,24 +4,21 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#    This file is part of the mantid workbench.
-#
-#
+from qtpy.QtWidgets import QVBoxLayout
+
+# local package imports
+from ..config.fonts import text_font
+from ..plugins.base import PluginWidget
+
 # system imports
 import warnings
 
+# Must be called before trying to import module with a deprecation warning
 warnings.filterwarnings(action="ignore", category=DeprecationWarning, module="ipykernel")
 warnings.filterwarnings(action="ignore", category=DeprecationWarning, module=".*jupyter.*")
 
-# third-party library imports
 from mantidqt.widgets.jupyterconsole import InProcessJupyterConsole  # noqa: E402
-from qtpy.QtWidgets import QVBoxLayout  # noqa: E402
 
-# local package imports
-from ..config.fonts import text_font  # noqa: E402
-from ..plugins.base import PluginWidget  # noqa: E402
-
-# from mantidqt.utils.qt import toQSettings when readSettings/writeSettings are implemented
 
 # should we share this with plugins.editor?
 STARTUP_CODE = """
