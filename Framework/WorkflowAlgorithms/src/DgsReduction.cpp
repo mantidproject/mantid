@@ -438,7 +438,7 @@ Workspace_sptr DgsReduction::loadInputData(const std::string &prop, const bool m
     if ("ISIS" == facility) {
       std::string detCalFileFromAlg = this->getProperty("DetCalFilename");
       if (!detCalFileFromAlg.empty()) {
-        std::string detCalFileProperty = prop + "DetCalFilename";
+        const std::string detCalFileProperty = prop + "DetCalFilename";
         this->reductionManager->declareProperty(
             std::make_unique<PropertyWithValue<std::string>>(detCalFileProperty, detCalFileFromAlg));
       }
@@ -621,7 +621,7 @@ void DgsReduction::exec() {
     maskWS = diag->getProperty("OutputWorkspace");
 
     if (showIntermedWS) {
-      std::string detVanMaskName = outputWsName + "_diagmask";
+      const std::string detVanMaskName = outputWsName + "_diagmask";
       this->declareProperty(
           std::make_unique<WorkspaceProperty<>>("SampleDetVanDiagMask", detVanMaskName, Direction::Output));
       this->setProperty("SampleDetVanDiagMask", maskWS);
@@ -637,7 +637,7 @@ void DgsReduction::exec() {
     idetVanWS = std::dynamic_pointer_cast<Workspace>(oWS);
 
     if (showIntermedWS) {
-      std::string idetVanName = outputWsName + "_idetvan";
+      const std::string idetVanName = outputWsName + "_idetvan";
       this->declareProperty(
           std::make_unique<WorkspaceProperty<>>("IntegratedNormWorkspace", idetVanName, Direction::Output));
       this->setProperty("IntegratedNormWorkspace", idetVanWS);
@@ -710,7 +710,7 @@ void DgsReduction::exec() {
     outputWS = divide(outputWS, absUnitsWS);
 
     if (showIntermedWS) {
-      std::string absWsName = outputWsName + "_absunits";
+      const std::string absWsName = outputWsName + "_absunits";
       this->declareProperty(std::make_unique<WorkspaceProperty<>>("AbsUnitsWorkspace", absWsName, Direction::Output));
       this->setProperty("AbsUnitsWorkspace", absUnitsWS);
       this->declareProperty(std::make_unique<WorkspaceProperty<>>(
