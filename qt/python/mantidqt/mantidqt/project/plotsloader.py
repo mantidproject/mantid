@@ -305,7 +305,8 @@ class PlotsLoader(object):
         if properties["bounds"]:
             ax.set_position(properties["bounds"])
         ax.set_navigate(properties["dynamic"])
-        ax.axison = properties["axisOn"]
+        ax.axisOn = properties["axisOn"]
+        ax.set_frame_on(properties["frameOn"])
         ax.set_visible(properties["visible"])
 
         ax.set_xscale(properties["xAxisScale"])
