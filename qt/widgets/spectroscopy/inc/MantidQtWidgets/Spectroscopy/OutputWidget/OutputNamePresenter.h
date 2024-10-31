@@ -8,30 +8,27 @@
 
 #include "../DllConfig.h"
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputNameModel.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputNameView.h"
 
-namespace MantidQt {
-namespace CustomInterfaces {
-
+namespace MantidQt::CustomInterfaces {
 class MANTID_SPECTROSCOPY_DLL IOutputNamePresenter {
 public:
   virtual ~IOutputNamePresenter() = default;
 
-  virtual int findIndexToInsertLabel(std::string const &basename) = 0;
   virtual std::string generateOutputLabel() = 0;
   virtual void generateWarningLabel() const = 0;
   virtual void handleUpdateOutputLabel() = 0;
-  virtual void setWsSuffixes(std::vector<std::string> const &suffixes) = 0;
 
+  virtual void setWsSuffixes(std::vector<std::string> const &suffixes) = 0;
   virtual void setOutputWsBasename(std::string const &outputBasename, std::string const &outputSuffix = "") = 0;
 };
 
 class MANTID_SPECTROSCOPY_DLL OutputNamePresenter final : public IOutputNamePresenter {
 public:
-  OutputNamePresenter(IOutputNameView *view);
+  OutputNamePresenter(std::unique_ptr<IOutputNameModel> model, IOutputNameView *view);
   ~OutputNamePresenter() override = default;
 
-  int findIndexToInsertLabel(std::string const &outputBasename) override;
   std::string generateOutputLabel() override;
   void generateWarningLabel() const override;
   void handleUpdateOutputLabel() override;
@@ -40,11 +37,7 @@ public:
   void setWsSuffixes(std::vector<std::string> const &suffixes) override;
 
 private:
+  std::unique_ptr<IOutputNameModel> m_model;
   IOutputNameView *m_view;
-  std::vector<std::string> m_suffixes;
-  std::string m_currBasename;
-  std::string m_currOutputSuffix;
 };
-
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces
