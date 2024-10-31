@@ -150,8 +150,14 @@ if [[ $ENABLE_DOCS == true ]]; then
     export LC_ALL=C
 fi
 
+# Make sure a failed build command still causes the buildscript to fail after being piped.
+set -o pipefail
+
 # Run the script that handles the build
 $SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS | tee $BUILD_DIR/test_logs/build_$OSTYPE.log
+
+# Return to original behaviour.
+set +o pipefail
 
 # Run unit and system tests
 $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS

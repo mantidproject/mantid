@@ -923,10 +923,11 @@ class IRISIqtAndIqtFit(ISISIndirectInelasticIqtAndIqtFit):
         self.endx = 0.169171
 
     def get_reference_files(self):
-        # Relative tolerance is used because the calculation of Monte Carlo errors means the Iqt errors are randomized
-        # within a set amount. Also, gsl v2 gives a slightly different result than v1 for II.IRISFuryFitSeq.
+        # The calculation of Monte Carlo errors means the Iqt errors are randomized within a set amount. We therefore
+        # turn off checking the uncertainties in the resulting workspace.
         self.tolerance = 5.0
         self.tolerance_is_rel_err = True
+        self.disableChecking = ["Uncertainty"]
         return ["II.IRISFury.nxs", "II.IRISFuryFitSeq.nxs"]
 
 
