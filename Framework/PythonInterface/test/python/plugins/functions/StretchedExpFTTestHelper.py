@@ -90,12 +90,17 @@ def do_fit(tg, fString, shape):
     """
     if "Gaussian" in shape:
         E0 = planck_constant / tg["tau"]
+
         # Analytical Fourier transform of exp(-(t/tau)**2)
-        functor = lambda E: np.sqrt(np.pi) / E0 * np.exp(-((np.pi * E / E0) ** 2))
+        def functor(E):
+            return np.sqrt(np.pi) / E0 * np.exp(-((np.pi * E / E0) ** 2))
     elif "Lorentzian" in shape:
         hwhm = planck_constant / (2 * np.pi * tg["tau"])
+
         # Analytical Fourier transform of exp(-t/tau)
-        functor = lambda E: (1.0 / np.pi) * hwhm / (hwhm**2 + E**2)
+        def functor(E):
+            return (1.0 / np.pi) * hwhm / (hwhm**2 + E**2)
+
     if "Integrated" in shape:
         # when testing function PrimStretchedExpFT
         def ifunctor(E):
