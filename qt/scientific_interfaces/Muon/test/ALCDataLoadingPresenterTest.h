@@ -6,11 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
 
 #include "../Muon/ALCDataLoadingModel.h"
 #include "../Muon/ALCDataLoadingPresenter.h"
@@ -38,6 +39,7 @@ class MockALCDataLoadingView : public IALCDataLoadingView {
   using PAIR_OF_DOUBLES = std::pair<double, double>;
 
 public:
+  virtual ~MockALCDataLoadingView() = default;
   MOCK_CONST_METHOD0(getInstrument, std::string());
   MOCK_CONST_METHOD0(getPath, std::string());
   MOCK_CONST_METHOD0(log, std::string());
@@ -87,11 +89,18 @@ public:
   MOCK_METHOD1(setAlphaValue, void(const std::string &));
   MOCK_METHOD1(showAlphaMessage, void(const bool));
 
-  // Some dummy signals
-  void emitRunsEditingSignal() { emit runsEditingSignal(); }
-  void changeRuns() { emit runsEditingFinishedSignal(); }
-  void foundRuns() { emit runsFoundSignal(); }
-  void requestLoading() { emit loadRequested(); }
+  MOCK_METHOD(void, subscribePresenter, (IALCDataLoadingPresenter * presenter), (override));
+  MOCK_METHOD(void, notifyLoadClicked, (), (override));
+  MOCK_METHOD(void, notifyRunsEditingChanged, (), (override));
+  MOCK_METHOD(void, notifyRunsEditingFinished, (), (override));
+  MOCK_METHOD(void, notifyRunsFoundFinished, (), (override));
+  MOCK_METHOD(void, openManageDirectories, (), (override));
+  MOCK_METHOD(void, notifyPeriodInfoClicked, (), (override));
+  MOCK_METHOD(void, notifyTimerEvent, (), (override));
+
+  MOCK_METHOD(QTimer *, getTimer, (), (override));
+  MOCK_METHOD(QFileSystemWatcher *, getFileSystemWatcher, (), ());
+  MOCK_METHOD(std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo>, getPeriodInfo, (), (override));
 };
 
 MATCHER_P4(WorkspaceX, i, j, value, delta, "") {
@@ -114,12 +123,19 @@ MATCHER_P4(WorkspaceY, i, j, value, delta, "") {
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class ALCDataLoadingPresenterTest : public CxxTest::TestSuite {
-  MockALCDataLoadingView *m_view;
-  ALCDataLoadingPresenter *m_presenter;
+
+  std::unique_ptr<MockALCDataLoadingView> m_view;
+  std::unique_ptr<ALCDataLoadingPresenter> m_presenter;
 
   std::string loadingString = std::string("Loading MUSR15189,15191-92");
   std::string loadedString = std::string("Successfully loaded MUSR15189,15191-92");
   std::string foundString = std::string("Successfully found MUSR15189,15191-92");
+
+  // Objects used inside the view
+  // Create new ones here to mock view
+  QFileSystemWatcher *m_watcher;
+  QTimer *m_timer;
+  std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> m_periodInfo;
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -132,9 +148,14 @@ public:
   }
 
   void setUp() override {
-    m_view = new NiceMock<MockALCDataLoadingView>();
-    m_presenter = new ALCDataLoadingPresenter(m_view);
+    m_view = std::make_unique<NiceMock<MockALCDataLoadingView>>();
+    auto model = std::make_unique<ALCDataLoadingModel>();
+    m_presenter = std::make_unique<ALCDataLoadingPresenter>(m_view.get(), std::move(model));
     m_presenter->initialize();
+
+    m_watcher = new QFileSystemWatcher();
+    m_timer = new QTimer();
+    m_periodInfo = std::make_shared<MantidQt::MantidWidgets::MuonPeriodInfo>();
 
     // Set some valid default return values for the view mock object getters
     std::vector<std::string> defaultFiles = {"MUSR00015189.nxs", "MUSR00015191.nxs", "MUSR00015192.nxs"};
@@ -148,6 +169,11 @@ public:
     ON_CALL(*m_view, log()).WillByDefault(Return("sample_magn_field"));
     ON_CALL(*m_view, function()).WillByDefault(Return("Last"));
     ON_CALL(*m_view, timeRange()).WillByDefault(Return(std::make_optional(std::make_pair(-6.0, 32.0))));
+
+    ON_CALL(*m_view, getPeriodInfo()).WillByDefault(Return(m_periodInfo));
+    ON_CALL(*m_view, getTimer()).WillByDefault(Return(m_timer));
+    ON_CALL(*m_view, getFileSystemWatcher()).WillByDefault(Return(m_watcher));
+
     // Add range for integration
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("None"));
     ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Auto"));
@@ -157,24 +183,26 @@ public:
   }
 
   void tearDown() override {
-    TS_ASSERT(Mock::VerifyAndClearExpectations(m_view));
-    delete m_presenter;
-    delete m_view;
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
+    delete m_watcher;
+    delete m_timer;
   }
 
   void test_initialize() {
-    MockALCDataLoadingView view;
-    ALCDataLoadingPresenter presenter(&view);
-    EXPECT_CALL(view, initialize());
+    auto view = std::make_unique<NiceMock<MockALCDataLoadingView>>();
+    auto model = std::make_unique<ALCDataLoadingModel>();
+    auto presenter = std::make_unique<ALCDataLoadingPresenter>(view.get(), std::move(model));
+    EXPECT_CALL(*view, initialize());
     std::vector<std::string> expected{".nxs", ".nxs_v2", ".bin"};
-    EXPECT_CALL(view, setFileExtensions(expected));
-    presenter.initialize();
+    EXPECT_CALL(*view, setFileExtensions(expected));
+    presenter->initialize();
   }
 
   void test_setDataThrowsWithNullData() {
-    MockALCDataLoadingView view;
-    ALCDataLoadingPresenter presenter(&view);
-    TS_ASSERT_THROWS_EQUALS(presenter.setData(nullptr), const std::invalid_argument &e, std::string(e.what()),
+    auto view = std::make_unique<NiceMock<MockALCDataLoadingView>>();
+    auto model = std::make_unique<ALCDataLoadingModel>();
+    auto presenter = std::make_unique<ALCDataLoadingPresenter>(view.get(), std::move(model));
+    TS_ASSERT_THROWS_EQUALS(presenter->setData(nullptr), const std::invalid_argument &e, std::string(e.what()),
                             "Cannot load an empty workspace");
   }
 
@@ -191,7 +219,7 @@ public:
     EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
 
-    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleLoadRequested());
   }
 
   void test_load_differential() {
@@ -205,7 +233,7 @@ public:
                                             WorkspaceY(0, 2, 1.85123, 1E-3)),
                                       0));
 
-    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleLoadRequested());
   }
 
   void test_load_timeLimits() {
@@ -219,7 +247,7 @@ public:
                                             WorkspaceY(0, 2, 0.109, 1E-3)),
                                       0));
 
-    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleLoadRequested());
   }
 
   void test_updateAvailableInfo() {
@@ -238,7 +266,7 @@ public:
         .Times(1);
     EXPECT_CALL(*m_view, setTimeLimits(Le(0.107), Ge(31.44))).Times(1);
 
-    m_view->foundRuns();
+    m_presenter->handleRunsFound();
   }
 
   void test_updateAvailableInfo_NotFirstRun() {
@@ -257,7 +285,7 @@ public:
         .Times(1);
     EXPECT_CALL(*m_view, setTimeLimits(_, _)).Times(0); // shouldn't reset time limits
 
-    m_view->foundRuns();
+    m_presenter->handleRunsFound();
   }
 
   void test_badCustomGroupingOutofRange() {
@@ -274,8 +302,8 @@ public:
     EXPECT_CALL(*m_view, enableAll()).Times(1);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
 
-    m_view->foundRuns();
-    m_view->requestLoading();
+    m_presenter->handleRunsFound();
+    m_presenter->handleLoadRequested();
   }
 
   void test_badCustomGroupingLetter() {
@@ -291,8 +319,8 @@ public:
     EXPECT_CALL(*m_view, enableAll()).Times(1);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
 
-    m_view->foundRuns();
-    m_view->requestLoading();
+    m_presenter->handleRunsFound();
+    m_presenter->handleLoadRequested();
   }
 
   void test_badCustomGroupingDecimal() {
@@ -309,8 +337,8 @@ public:
     EXPECT_CALL(*m_view, enableAll()).Times(1);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
 
-    m_view->foundRuns();
-    m_view->requestLoading();
+    m_presenter->handleRunsFound();
+    m_presenter->handleLoadRequested();
   }
 
   void test_updateAvailableLogs_invalidFirstRun() {
@@ -320,7 +348,7 @@ public:
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
 
-    m_view->foundRuns();
+    m_presenter->handleRunsFound();
   }
 
   void test_updateAvailableLogs_unsupportedFirstRun() {
@@ -330,7 +358,7 @@ public:
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
 
-    m_view->foundRuns();
+    m_presenter->handleRunsFound();
   }
 
   void test_load_nonExistentFile() {
@@ -344,7 +372,7 @@ public:
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
 
-    m_view->requestLoading();
+    m_presenter->handleLoadRequested();
   }
 
   void test_load_empty_files() {
@@ -356,7 +384,7 @@ public:
     EXPECT_CALL(*m_view, enableRunsAutoAdd(false)).Times(1);
     EXPECT_CALL(*m_view, displayError("The list of files to load is empty")).Times(1);
 
-    m_view->requestLoading();
+    m_presenter->handleLoadRequested();
   }
 
   void test_correctionsFromDataFile() {
@@ -373,7 +401,7 @@ public:
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.151202, 1E-3), WorkspaceY(0, 1, 0.129347, 1E-3),
                                             WorkspaceY(0, 2, 0.109803, 1E-3)),
                                       0));
-    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleLoadRequested());
   }
 
   void test_correctionsFromCustomFile() {
@@ -385,7 +413,7 @@ public:
     EXPECT_CALL(*m_view, deadTimeFile()).Times(1);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
 
-    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleLoadRequested());
   }
 
   void test_customGrouping() {
@@ -408,8 +436,8 @@ public:
                                             WorkspaceY(0, 1, 0.128, 1E-3), WorkspaceY(0, 2, 0.109, 1E-3)),
                                       0));
 
-    m_view->foundRuns();
-    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+    m_presenter->handleRunsFound();
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleLoadRequested());
   }
 
   void test_customPeriods() {
@@ -429,7 +457,7 @@ public:
                                             WorkspaceX(0, 2, 1380, 1E-8), WorkspaceY(0, 0, 0.012884, 1E-6),
                                             WorkspaceY(0, 1, 0.038717, 1E-6), WorkspaceY(0, 2, 0.054546, 1E-6)),
                                       0));
-    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleLoadRequested());
   }
 
   void test_logFunction() {
@@ -445,7 +473,7 @@ public:
                                             WorkspaceY(0, 1, 0.10900, 1E-5), WorkspaceY(0, 2, 0.15004, 1E-5)),
                                       0));
 
-    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleLoadRequested());
   }
 
   void test_helpPage() {
@@ -467,7 +495,7 @@ public:
     EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
 
-    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleLoadRequested());
   }
 
   void test_warning_shows_and_press_no() {
@@ -482,7 +510,7 @@ public:
     EXPECT_CALL(*m_view, displayWarning(warningMessage)).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(0);
 
-    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleLoadRequested());
   }
 
   void test_warning_does_not_show() {
@@ -491,7 +519,7 @@ public:
     EXPECT_CALL(*m_view, displayWarning(StrNe(""))).Times(0);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
 
-    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleLoadRequested());
   }
 
   void test_alpha_multi_period_data() {
@@ -501,7 +529,7 @@ public:
     EXPECT_CALL(*m_view, enableAlpha(false)).Times(1);
     EXPECT_CALL(*m_view, showAlphaMessage(true)).Times(1);
 
-    TS_ASSERT_THROWS_NOTHING(m_view->foundRuns());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleRunsFound());
   }
 
   void test_alpha_single_period_data() {
@@ -512,7 +540,7 @@ public:
     EXPECT_CALL(*m_view, setAlphaValue(std::string{"1.0"})).Times(1);
     EXPECT_CALL(*m_view, showAlphaMessage(false)).Times(1);
 
-    TS_ASSERT_THROWS_NOTHING(m_view->foundRuns());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleRunsFound());
 
     // Reset ON_CALL for other tests
     ON_CALL(*m_view, getFirstFile()).WillByDefault(Return("MUSR00015189.nxs"));
@@ -525,34 +553,34 @@ public:
     ON_CALL(*m_view, getAlphaValue()).WillByDefault(Return(std::string{"0.9"}));
 
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 2000, 1E-3), WorkspaceY(0, 0, 0.29773, 1E-5)), 0));
-    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+    TS_ASSERT_THROWS_NOTHING(m_presenter->handleLoadRequested());
   }
 
   void test_that_the_runsEditingSignal_will_disable_the_load_button() {
     EXPECT_CALL(*m_view, enableLoad(false)).Times(1);
     EXPECT_CALL(*m_view, setPath(std::string{})).Times(1);
 
-    m_view->emitRunsEditingSignal();
+    m_presenter->handleRunsEditing();
   }
 
   void test_get_path_from_files_multiple_directories() {
     std::vector<std::string> files = {"path1/file.nxs", "path2/file.nxs"};
     ON_CALL(*m_view, getFiles()).WillByDefault(Return(files));
     EXPECT_CALL(*m_view, setPath(std::string{"Multiple Directories"})).Times(1);
-    m_view->foundRuns();
+    m_presenter->handleRunsFound();
   }
 
   void test_get_path_from_files_single_directory() {
     std::vector<std::string> files = {"path/file1.nxs", "path/file2.nxs"};
     ON_CALL(*m_view, getFiles()).WillByDefault(Return(files));
     EXPECT_CALL(*m_view, setPath(std::string{"path"})).Times(1);
-    m_view->foundRuns();
+    m_presenter->handleRunsFound();
   }
 
   void test_get_path_from_empty_files() {
     std::vector<std::string> files = {};
     ON_CALL(*m_view, getFiles()).WillByDefault(Return(files));
     EXPECT_CALL(*m_view, setPath(std::string{""})).Times(1);
-    m_view->foundRuns();
+    m_presenter->handleRunsFound();
   }
 };
