@@ -46,7 +46,7 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<API::IAlgorithmR
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface);
-  setOutputNamePresenter(std::make_unique<OutputNamePresenter>(m_view->getOutputName()));
+  setOutputNamePresenter(m_view->getOutputName());
   m_outputNamePresenter->setWsSuffixes(qStringListToStdVector(InterfaceUtils::getSampleWSSuffixes("Elwin")));
   m_view->setup();
   observeRename(true);
@@ -63,7 +63,7 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::I
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface);
-  setOutputNamePresenter(std::make_unique<OutputNamePresenter>(m_view->getOutputName()));
+  setOutputNamePresenter(m_view->getOutputName());
   m_view->setup();
   updateAvailableSpectra();
 }

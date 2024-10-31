@@ -18,6 +18,7 @@
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputNamePresenter.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
@@ -73,6 +74,9 @@ protected:
   /// Set the presenter for the run widget
   void setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter);
 
+  /// Set the presenter for the output name widget
+  void setOutputNamePresenter(IOutputNameView *view);
+
   /// Set the presenter for the output plotting options
   void setOutputPlotOptionsPresenter(
       IOutputPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
@@ -109,6 +113,8 @@ protected:
   bool checkADSForPlotSaveWorkspace(const std::string &workspaceName, const bool plotting, const bool warn = true);
 
   std::unique_ptr<RunPresenter> m_runPresenter;
+
+  std::unique_ptr<OutputNamePresenter> m_outputNamePresenter;
 
   std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 
