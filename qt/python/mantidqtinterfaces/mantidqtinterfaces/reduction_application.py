@@ -49,8 +49,8 @@ if CAN_REDUCE:
         STARTUP_WARNING = "Please contact the Mantid team with the following message:\n\n\n"
         STARTUP_WARNING += unicode(traceback.format_exc())
 
-from mantidqtinterfaces.reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT
-from mantidqtinterfaces.reduction_gui.settings.application_settings import GeneralSettings
+from mantidqtinterfaces.reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT  # noqa: E402
+from mantidqtinterfaces.reduction_gui.settings.application_settings import GeneralSettings  # noqa: E402
 
 
 class ReductionGUI(QMainWindow):

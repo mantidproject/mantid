@@ -15,12 +15,6 @@ from mantid.api import IMDHistoWorkspace
 from mantid.kernel import SpecialCoordinateSystem
 from mantidqt.utils.qt.testing import start_qapplication
 
-import matplotlib
-
-matplotlib.use("Agg")
-# Mock out simpleapi to import expensive import of something we don't use anyway
-sys.modules["mantid.simpleapi"] = mock.MagicMock()
-
 from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE
 from mantidqt.widgets.sliceviewer.presenters.presenter import (
     DBLMAX,
@@ -33,6 +27,12 @@ from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform
 from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
 from mantidqt.widgets.sliceviewer.views.view import SliceViewerView
 from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
+
+import matplotlib
+
+matplotlib.use("Agg")
+# Mock out simpleapi to import expensive import of something we don't use anyway
+sys.modules["mantid.simpleapi"] = mock.MagicMock()
 
 
 def _create_presenter(model: SliceViewerModel, view, mock_sliceinfo_cls, enable_nonortho_axes, supports_nonortho):

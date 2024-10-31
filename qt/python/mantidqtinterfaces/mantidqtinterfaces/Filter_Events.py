@@ -9,7 +9,7 @@ import sys
 from mantidqt.gui_helper import set_matplotlib_backend, get_qapplication
 
 set_matplotlib_backend()  # must be called before anything tries to use matplotlib
-from mantidqtinterfaces.FilterEvents import eventFilterGUI
+from mantidqtinterfaces.FilterEvents import eventFilterGUI  # noqa: E402
 
 app, within_mantid = get_qapplication()
 
