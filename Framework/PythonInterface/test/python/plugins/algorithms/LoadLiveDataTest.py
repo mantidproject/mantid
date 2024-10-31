@@ -7,7 +7,6 @@
 import unittest
 import os
 
-import mantid
 from mantid.simpleapi import *
 
 

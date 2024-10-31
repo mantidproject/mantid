@@ -9,7 +9,6 @@ import mantid
 import mantid.api
 import mantid.simpleapi
 import mantid.kernel
-import numpy
 from mantid.simpleapi import GenerateGroupingSNSInelastic
 from testhelpers import run_algorithm
 import os

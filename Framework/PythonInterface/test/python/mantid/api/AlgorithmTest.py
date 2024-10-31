@@ -8,7 +8,6 @@
 import unittest
 import json
 from mantid.kernel import (
-    Direction,
     FloatArrayProperty,
     IntArrayProperty,
     StringArrayProperty,

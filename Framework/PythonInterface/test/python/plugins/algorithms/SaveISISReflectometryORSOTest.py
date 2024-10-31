@@ -16,9 +16,6 @@ from mantid.simpleapi import (
     CreateSampleWorkspace,
     SaveISISReflectometryORSO,
     ConvertToPointData,
-    NRCalculateSlitResolution,
-    LoadNexus,
-    DeleteLog,
     GroupWorkspaces,
 )
 from mantid.api import AnalysisDataService

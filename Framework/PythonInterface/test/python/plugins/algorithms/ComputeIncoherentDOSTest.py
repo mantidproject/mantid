@@ -13,15 +13,12 @@ from mantid.simpleapi import (
     LoadInstrument,
     ScaleX,
     Scale,
-    SetInstrumentParameter,
     SetSampleMaterial,
     SofQW3,
     Transpose,
 )
 import numpy as np
-from numpy import testing
 from scipy import constants
-import testhelpers
 
 
 class ComputeIncoherentDOSTest(unittest.TestCase):

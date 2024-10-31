@@ -7,7 +7,7 @@
 """Defines tests for the simple property declarations types within
 Python algorithms
 """
-import sys
+
 import unittest
 import testhelpers
 
@@ -25,7 +25,6 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         """
 
         class BasicPropsAlg(PythonAlgorithm):
-
             _testdocstring = "This is a doc string"
 
             def PyInit(self):
@@ -102,7 +101,6 @@ class PythonAlgorithmPropertiesTest(unittest.TestCase):
         """
 
         class SpecializedProperties(PythonAlgorithm):
-
             _testdocstring = "This is a FileProperty"
 
             def PyInit(self):

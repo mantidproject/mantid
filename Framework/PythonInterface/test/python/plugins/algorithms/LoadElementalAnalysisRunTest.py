@@ -7,7 +7,7 @@
 
 import unittest
 from mantid.api import AnalysisDataService
-from mantid.simpleapi import AlgorithmManager, LoadElementalAnalysisData
+from mantid.simpleapi import AlgorithmManager
 
 
 class LoadElementalAnalysisRunTest(unittest.TestCase):

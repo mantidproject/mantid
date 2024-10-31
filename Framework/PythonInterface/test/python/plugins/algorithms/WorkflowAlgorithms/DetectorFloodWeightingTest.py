@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.api import AlgorithmManager
-from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace
+from mantid.simpleapi import CreateSampleWorkspace
 
 
 class DetectorFloodWeightingTest(unittest.TestCase):

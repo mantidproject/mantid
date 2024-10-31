@@ -8,7 +8,7 @@
 import unittest
 from mantid import logger
 from mantid.api import ITableWorkspace
-from mantid.simpleapi import SimulatedDensityOfStates, CompareWorkspaces, Scale, CreateEmptyTableWorkspace
+from mantid.simpleapi import SimulatedDensityOfStates, CompareWorkspaces, Scale
 
 
 def scipy_not_available():

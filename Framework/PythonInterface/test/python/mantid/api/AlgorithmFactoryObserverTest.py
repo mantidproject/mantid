@@ -7,7 +7,6 @@
 #  This file is part of the mantidqt package
 #
 import unittest
-import sys
 
 from mantid.api import AlgorithmFactory, AlgorithmFactoryObserver, PythonAlgorithm
 from unittest import mock
@@ -78,8 +77,9 @@ class AlgorithmFactoryObserverTest(unittest.TestCase):
         self._alg_factory.subscribe(ToyAlgorithm)
         self.assertTrue(
             self.fake_class.updateHandle.call_count == 0,
-            "Expected updateHandle not to be called when observeUpdate is False. "
-            "updateHandle was called {} times.".format(self.fake_class.updateHandle.call_count),
+            "Expected updateHandle not to be called when observeUpdate is False. " "updateHandle was called {} times.".format(
+                self.fake_class.updateHandle.call_count
+            ),
         )
 
 

@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import unittest, os
+import unittest
+import os
 from mantid import AnalysisDataServiceImpl, config, simpleapi
 
 try:
@@ -19,7 +20,6 @@ try:
     import matplotlib
 
     matplotlib.use("agg")
-    import matplotlib.pyplot as plt
 except:
     matplotlibissue = "Problem importing matplotlib"
 

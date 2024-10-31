@@ -5,11 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Test of fitfunctions.py and related classes
+Test of fitfunctions.py and related classes
 """
+
 import unittest
 import testhelpers
-import platform
 from mantid.simpleapi import CreateWorkspace, EvaluateFunction, Fit
 from mantid.simpleapi import (
     FunctionWrapper,
@@ -28,15 +28,12 @@ from mantid.simpleapi import (
     CompositeFunction,
     IFunction1D,
     FunctionFactory,
-    Fit,
 )
-from mantid.api import mtd, MatrixWorkspace, ITableWorkspace, FunctionDomain1DVector, FunctionDomain1DHistogram
+from mantid.api import FunctionDomain1DVector, FunctionDomain1DHistogram
 import numpy as np
-from testhelpers import run_algorithm
 
 
 class FitFunctionsTest(unittest.TestCase):
-
     _raw_ws = None
 
     def setUp(self):
@@ -249,7 +246,6 @@ class FitFunctionsTest(unittest.TestCase):
         self.assertEqual(cz_str.count("ties="), 0)
 
     def test_tie_all(self):
-
         g0 = FunctionWrapper("Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = FunctionWrapper("Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
         c = CompositeFunctionWrapper(g0, g1)

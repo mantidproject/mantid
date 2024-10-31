@@ -108,7 +108,7 @@ class ReflectometryISISCalibrationTest(unittest.TestCase):
     def test_detectors_in_calibration_file_but_not_workspace_raises_exception(self):
         ws = self._create_sample_workspace_with_missing_detectors()
         args = {"InputWorkspace": ws, "CalibrationFile": self._CALIBRATION_TEST_DATA, "OutputWorkspace": "test_calibrated"}
-        self._assert_run_algorithm_raises_exception(args, "Detector id \d+ from calibration file cannot be found in input workspace")
+        self._assert_run_algorithm_raises_exception(args, r"Detector id \d+ from calibration file cannot be found in input workspace")
 
     def test_exception_raised_if_no_calibration_file_supplied(self):
         input_ws_name = "test_1234"

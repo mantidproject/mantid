@@ -7,7 +7,7 @@
 import numpy as np
 from scipy import constants
 
-from mantid.simpleapi import Fit, CreateWorkspace, SaveNexus, SaveAscii, EvaluateFunction
+from mantid.simpleapi import Fit, CreateWorkspace
 from mantid.api import mtd, FunctionFactory
 
 planck_constant = constants.Planck / constants.e * 1e15  # meV*psec

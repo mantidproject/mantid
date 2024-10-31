@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.simpleapi import *
-from mantid.api import MatrixWorkspace, WorkspaceGroup, ITableWorkspace
+from mantid.api import WorkspaceGroup, ITableWorkspace
 
 
 class IqtFitSequentialTest(unittest.TestCase):

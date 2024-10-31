@@ -9,11 +9,9 @@ from mantid.api import AlgorithmManager, MatrixWorkspace
 from mantid.kernel import Property, FloatPropertyWithValue, StringPropertyWithValue
 from testhelpers import create_algorithm, run_algorithm
 import numpy as np
-import sys
 
 
 class PropertyWithValueTest(unittest.TestCase):
-
     # Integration algorithm handle
     _integration = None
     # MaskDetectors algorithm handle
@@ -209,22 +207,27 @@ class PropertyWithValueTest(unittest.TestCase):
         from mantid.api import AlgorithmFactory, PythonAlgorithm
         from mantid.kernel import Direction, IntPropertyWithValue, ULongLongPropertyWithValue
         from mantid.simpleapi import _create_algorithm_function
+
         # a large number than cannot fit in a C++ int, requiring u_int64
         BIGINT: int = 125824461545280
+
         # create an algorithm that returns a ULongLongPropertyWithValue as the output
         # then register it so that it can be called as a function
         class MyAlgorithm(PythonAlgorithm):
             def PyInit(self):
                 self.declareProperty(IntPropertyWithValue("InputInt", 0))
                 self.declareProperty(ULongLongPropertyWithValue("MyProperty", 0, direction=Direction.Output))
+
             def PyExec(self):
                 self.setProperty("MyProperty", BIGINT)
+
         AlgorithmFactory.subscribe(MyAlgorithm)
         algo = MyAlgorithm()
         algo.initialize()
         myAlgorithmName = "MyAlgorithm"
         _create_algorithm_function(myAlgorithmName, 1, algo)
         from mantid.simpleapi import MyAlgorithm as MyAlgorithmInMantid
+
         # call the algorithm, ensure the output is the large integer expected
         ret = MyAlgorithmInMantid(1)
         assert ret == BIGINT

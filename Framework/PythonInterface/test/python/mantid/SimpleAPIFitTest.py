@@ -5,14 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Specifically tests the Fit function in the simple API
+Specifically tests the Fit function in the simple API
 """
+
 import unittest
 import testhelpers
 import platform
 
 from mantid.simpleapi import CreateWorkspace, Fit, FunctionWrapper
-from mantid.api import mtd, MatrixWorkspace, ITableWorkspace, IFunction
+from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 
 
 import numpy as np
@@ -20,7 +21,6 @@ from testhelpers import run_algorithm
 
 
 class SimpleAPIFitTest(unittest.TestCase):
-
     _raw_ws = None
 
     def setUp(self):

@@ -5,13 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import os
 
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
-
-from testhelpers import WorkspaceCreationHelper
 
 
 class RunPythonScriptTest(unittest.TestCase):

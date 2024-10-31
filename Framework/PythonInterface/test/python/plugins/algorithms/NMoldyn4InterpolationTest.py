@@ -8,7 +8,6 @@
 # pylint disable: invalid-name
 import unittest
 
-from sys import version_info
 
 from mantid.simpleapi import *
 from mantid.api import *

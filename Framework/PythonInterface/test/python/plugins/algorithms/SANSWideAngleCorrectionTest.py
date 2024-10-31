@@ -11,13 +11,11 @@ from mantid.api import *
 from mantid.simpleapi import (
     CreateWorkspace,
     LoadInstrument,
-    MoveInstrumentComponent,
     CropWorkspace,
     SANSWideAngleCorrection,
     Min,
     Max,
     Transpose,
-    Multiply,
 )
 
 

@@ -4,10 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import mantid
 from mantid.kernel import VMD
 from mantid.geometry import IMDDimension
-from mantid.api import MDGeometry
 import numpy
 import unittest
 
@@ -15,7 +13,6 @@ from testhelpers import WorkspaceCreationHelper
 
 
 class MDGeometryTest(unittest.TestCase):
-
     _test_ndims = 4
     _test_mdws = None
 

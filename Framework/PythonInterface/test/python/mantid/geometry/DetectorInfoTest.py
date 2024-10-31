@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import mantid
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
@@ -14,7 +13,6 @@ import numpy as np
 
 
 class DetectorInfoTest(unittest.TestCase):
-
     _ws = None
 
     def setUp(self):

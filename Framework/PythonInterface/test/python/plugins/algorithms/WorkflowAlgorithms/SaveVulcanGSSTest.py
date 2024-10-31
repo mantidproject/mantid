@@ -46,7 +46,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
 
             self.assertTrue(alg_test.isExecuted())
         # check & verify
-        except Exception as ex:
+        except Exception:
             self.assertRaises(RuntimeError)
 
         return
@@ -84,7 +84,7 @@ class SaveVulcanGSSTest(unittest.TestCase):
 
             self.assertTrue(alg_test.isExecuted())
         # check & verify
-        except Exception as ex:
+        except Exception:
             self.assertRaises(RuntimeError)
 
     @staticmethod

@@ -6,11 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.simpleapi import *
-from mantid.api import MatrixWorkspace, WorkspaceGroup
+from mantid.api import MatrixWorkspace
 
 
 class SwapWidthsTest(unittest.TestCase):
-
     _input_ws = "IN16B_125878_QLd_Result"
     _swap_point = 5
 

@@ -37,7 +37,7 @@ class FindMultipleUMatricesTest(unittest.TestCase):
         cls.alatt = {"a": 4, "b": 5, "c": 10, "alpha": 90, "beta": 90, "gamma": 90}
         cls.ubs = [np.diag([1 / cls.alatt["a"], 1 / cls.alatt["b"], 1 / cls.alatt["c"]])]  # produces 7 peaks
         cls.ubs.append(rot.from_rotvec([0, 0, 90], degrees=True).as_matrix() @ cls.ubs[0])  # produces 5 peaks
-        cls.peaks = CreatePeaksWorkspace(InstrumentWorkspace=cls.ws, NumberOfPeaks=0, OutputWorkspace=f"peaks")
+        cls.peaks = CreatePeaksWorkspace(InstrumentWorkspace=cls.ws, NumberOfPeaks=0, OutputWorkspace="peaks")
         for iub, ub in enumerate(cls.ubs):
             SetUB(cls.peaks, UB=ub)
             add_peaksHKL(cls.peaks, range(1, 3), range(1, 3), range(1, 4), iub)
@@ -125,7 +125,7 @@ class FindMultipleUMatricesTest(unittest.TestCase):
         mod_vec = [0.35, 0, 0.5]
         mod_vec_kwargs = {"MaxOrder": 1, "ModVector1": ",".join([str(v) for v in mod_vec])}
         kwargs = {**self.default_kwargs, "NumberOfUBs": 1, "MinDSpacing": 1.25, "MaxDSpacing": 3.5, **mod_vec_kwargs}
-        peaks_modvec = CloneWorkspace(InputWorkspace=self.peaks, OutputWorkspace=f"peaks_modvec")
+        peaks_modvec = CloneWorkspace(InputWorkspace=self.peaks, OutputWorkspace="peaks_modvec")
         # add satellite peaks using ubs[1]
         SetUB(peaks_modvec, UB=self.ubs[1])
         for ipk in range(1, 5):

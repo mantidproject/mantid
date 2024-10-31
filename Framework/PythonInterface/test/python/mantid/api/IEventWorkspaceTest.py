@@ -6,13 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from testhelpers import run_algorithm, can_be_instantiated, WorkspaceCreationHelper
+from testhelpers import can_be_instantiated, WorkspaceCreationHelper
 
-from mantid.api import IEventWorkspace, IEventList, IWorkspaceProperty, AlgorithmManager
+from mantid.api import IEventWorkspace, IEventList
 
 
 class IEventWorkspaceTest(unittest.TestCase):
-
     _test_ws = None
     _nbins = 10
     _npixels = 5

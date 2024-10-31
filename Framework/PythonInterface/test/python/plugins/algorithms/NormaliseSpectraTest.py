@@ -5,10 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import platform
 import numpy
 from mantid.simpleapi import *
-from mantid.api import MatrixWorkspace, WorkspaceGroup
 
 
 class NormaliseSpectraTest(unittest.TestCase):

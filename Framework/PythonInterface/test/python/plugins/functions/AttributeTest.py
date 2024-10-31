@@ -7,8 +7,6 @@
 import unittest
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import Fit
-import testhelpers
 import numpy
 
 

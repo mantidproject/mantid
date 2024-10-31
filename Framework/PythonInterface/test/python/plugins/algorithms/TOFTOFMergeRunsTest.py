@@ -95,7 +95,7 @@ class TOFTOFMergeRunsTest(unittest.TestCase):
             rethrow=True,
         )
 
-        if "output_ws" is not None:
+        if "output_ws" != None:
             AnalysisDataService.remove("output_ws")
 
     def test_single_ws(self):

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import testhelpers
-from mantid.api import FrameworkManager, FrameworkManagerImpl, IAlgorithm
+from mantid.api import FrameworkManager
 
 
 class FrameworkManagerTest(unittest.TestCase):

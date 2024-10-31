@@ -11,7 +11,6 @@ from mantid.api import *
 from testhelpers import run_algorithm
 import numpy as np
 from SANSDarkRunBackgroundCorrection import DarkRunMonitorAndDetectorRemover
-from SANSDarkRunBackgroundCorrection import SANSDarkRunBackgroundCorrection
 
 
 class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
@@ -386,7 +385,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
             run_algorithm,
             "SANSDarkRunBackgroundCorrection",
             rethrow=True,
-            **kwds
+            **kwds,
         )
 
         # Clean up
@@ -436,7 +435,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
             run_algorithm,
             "SANSDarkRunBackgroundCorrection",
             rethrow=True,
-            **kwds
+            **kwds,
         )
 
         # Clean up

@@ -4,13 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-"""Test the exposed ArrayProperty
-"""
+"""Test the exposed ArrayProperty"""
+
 import unittest
 from mantid.kernel import FloatArrayProperty, StringArrayProperty, IntArrayProperty, Direction, NullValidator
 from mantid.api import PythonAlgorithm
 import numpy as np
-import sys
 
 
 class ArrayPropertyTest(unittest.TestCase):
@@ -103,7 +102,6 @@ class ArrayPropertyTest(unittest.TestCase):
         """
 
         class AlgWithFloatArrayProperty(PythonAlgorithm):
-
             _input_values = None
 
             def PyInit(self):
@@ -210,7 +208,6 @@ class ArrayPropertyTest(unittest.TestCase):
         """
 
         class AlgWithIntArrayProperty(PythonAlgorithm):
-
             _input_values = None
 
             def PyInit(self):
@@ -232,7 +229,6 @@ class ArrayPropertyTest(unittest.TestCase):
         """
 
         class AlgWithStringArrayProperty(PythonAlgorithm):
-
             _input_values = None
 
             def PyInit(self):

@@ -12,7 +12,9 @@ from mantid.kernel import *
 from mantid.api import *
 from testhelpers import run_algorithm
 
-import os, mantid, hashlib
+import os
+import mantid
+import hashlib
 
 
 class CreateCacheFilename(unittest.TestCase):

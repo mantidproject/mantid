@@ -13,7 +13,8 @@ from mantid.api import *
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 
-import os, json
+import os
+import json
 
 
 class SavePlot1DAsJsonTest(unittest.TestCase):

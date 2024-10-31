@@ -9,22 +9,14 @@ import numpy as np
 from mantid.simpleapi import (
     AnalysisDataService,
     FitIncidentSpectrum,
-    CalculateEfficiencyCorrection,
-    CloneWorkspace,
     ConvertToPointData,
-    CreateSampleWorkspace,
-    DeleteWorkspace,
-    LoadAscii,
-    Multiply,
     CreateWorkspace,
     Rebin,
-    Divide,
 )
-from testhelpers import create_algorithm, run_algorithm
+from testhelpers import run_algorithm
 
 
 class FitIncidentSpectrumTest(unittest.TestCase):
-
     incident_wksp_name = "incident_spectrum_wksp"
     phiMax = 6324
     phiEpi = 786

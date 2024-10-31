@@ -4,12 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-"""Test the exposed PropertyManagerProperty
-"""
+"""Test the exposed PropertyManagerProperty"""
+
 import unittest
 from mantid.kernel import PropertyManagerProperty, Direction, PropertyManager
 from mantid.api import Algorithm
-import numpy as np
 
 
 class FakeAlgorithm(Algorithm):
@@ -109,7 +108,6 @@ class PropertyManagerPropertyTest(unittest.TestCase):
         self.assertEqual(prop.direction, direction)
 
     def _check_values(self, prop, **kwargs):
-
         for key, value in kwargs.items():
             propValue = prop.getProperty(key).value
 

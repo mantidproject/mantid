@@ -7,7 +7,7 @@
 import matplotlib
 from matplotlib.backend_bases import MouseEvent
 
-matplotlib.use("AGG")  # noqa
+matplotlib.use("AGG")
 import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 from matplotlib.container import ErrorbarContainer

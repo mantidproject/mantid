@@ -42,7 +42,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -116,7 +116,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -177,7 +177,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -245,7 +245,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -310,7 +310,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -391,7 +391,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -515,7 +515,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -613,7 +613,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -678,7 +678,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return

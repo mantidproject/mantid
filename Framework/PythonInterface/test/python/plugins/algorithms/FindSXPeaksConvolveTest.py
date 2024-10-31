@@ -9,7 +9,6 @@ from mantid.simpleapi import (
     FindSXPeaksConvolve,
     LoadParameterFile,
     AnalysisDataService,
-    SortPeaksWorkspace,
 )
 from testhelpers import WorkspaceCreationHelper
 from numpy import array, sqrt

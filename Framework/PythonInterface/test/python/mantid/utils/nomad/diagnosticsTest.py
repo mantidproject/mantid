@@ -9,7 +9,6 @@
 from mantid.utils.nomad.diagnostics import CollimationLevel, InstrumentComponentLevel, _NOMADMedianDetectorTest
 
 # third-party imports
-import numpy
 import numpy as np
 from numpy.testing import assert_allclose
 

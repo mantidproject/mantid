@@ -4,13 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import Load, DeleteWorkspace, CalculateMonteCarloAbsorption, mtd
+from mantid.simpleapi import Load, CalculateMonteCarloAbsorption, mtd
 
 import unittest
 
 
 class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
-
     _red_ws = None
     _container_ws = None
     _indirect_elastic_ws = None
@@ -85,7 +84,6 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
             self._test_corrections_workspace(workspace, spectrum_axis)
 
     def _run_correction_and_test(self, shape, sample_ws=None, spectrum_axis=None):
-
         if sample_ws is None:
             sample_ws = self._red_ws
 
