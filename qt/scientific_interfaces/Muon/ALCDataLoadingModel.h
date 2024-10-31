@@ -20,7 +20,7 @@ class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingModel : public IALCDataLoadingMod
 
 public:
   ALCDataLoadingModel();
-  ~ALCDataLoadingModel() = default;
+  ~ALCDataLoadingModel() override = default;
   void load(const IALCDataLoadingView *view) override;
   void cancelLoading() const override;
   Mantid::API::MatrixWorkspace_sptr exportWorkspace() override;
