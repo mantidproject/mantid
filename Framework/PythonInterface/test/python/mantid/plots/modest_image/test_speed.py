@@ -70,7 +70,6 @@ def time_move(img_cls, repeat=10):
 
 def time_move_zoom(img_cls, repeat=10):
     """Move image, at high zoom setting"""
-    delta = 100
     lims = [(0, 100), (500, 600)]
     a, t = setup(img_cls)
     ax = plt.gca()

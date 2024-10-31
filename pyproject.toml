@@ -5,6 +5,7 @@ lint.select = ["C90", "E", "F", "RUF100", "W"]
 lint.ignore = ["E722", # bare except
 ]
 exclude = [
+   "Framework/PythonInterface/test",
    "qt/applications/workbench/workbench/app/resources.py",
    "qt/python/mantidqt/mantidqt/resources.py",
    "qt/python/mantidqt/mantidqt/dialogs/errorreports/resources_qt5.py",

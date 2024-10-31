@@ -268,7 +268,6 @@ class ExportExperimentLogTest(unittest.TestCase):
 
         # Rename the old one: split path from file, new name, and rename
         fileName, fileExtension = os.path.splitext(outfilename)
-        now = datetime.datetime.now()
         nowstr = time.strftime("%Y_%B_%d_%H_%M")
         oldfilename = fileName + "_" + nowstr + fileExtension
         print("Saved old file is {0}. ".format(oldfilename))

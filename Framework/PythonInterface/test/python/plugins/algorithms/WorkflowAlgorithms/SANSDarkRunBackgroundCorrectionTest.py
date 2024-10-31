@@ -38,7 +38,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
 
         # Act
         out_ws_name = "out_test"
-        alg = run_algorithm(
+        run_algorithm(
             "SANSDarkRunBackgroundCorrection",
             InputWorkspace=name_scatter,
             DarkRun=name_dark_run,
@@ -92,7 +92,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
 
         # Act
         out_ws_name = "out_test"
-        alg = run_algorithm(
+        run_algorithm(
             "SANSDarkRunBackgroundCorrection",
             InputWorkspace=name_scatter,
             DarkRun=name_dark_run,
@@ -141,7 +141,7 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
 
         # Act
         out_ws_name = "out_test"
-        alg = run_algorithm(
+        run_algorithm(
             "SANSDarkRunBackgroundCorrection",
             InputWorkspace=name_scatter,
             DarkRun=name_dark_run,
@@ -343,7 +343,6 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         normalization_ratio = 0.6
         applyToMonitors = True
         applyToDetectors = False
-        out_ws_name = "out_test"
         selected_monitor = [3]  # only has det IDs 1 and 2 as monitors
         # Act + Assert
         kwds = {
@@ -393,7 +392,6 @@ class SANSDarkRunBackgroundCorrectionTest(unittest.TestCase):
         normalization_ratio = 0.6
         applyToMonitors = False
         applyToDetectors = False
-        out_ws_name = "out_test"
         selected_monitor = []
         # Act + Assert
         kwds = {
@@ -618,7 +616,6 @@ class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
         zero_reference = ref_ws.dataY(0) * 0
 
         # Act
-        monitor_selection = []
         dark_run_corrected = remover.set_pure_detector_dark_run(ws)
 
         # Assert
@@ -691,16 +688,11 @@ class DarkRunMonitorAndDetectorRemoverTest(unittest.TestCase):
         ws = mtd[test_ws]
         remover = DarkRunMonitorAndDetectorRemover()
 
-        zero_reference = np.copy(ws.dataY(0)) * 0
-        dataY1_reference = np.copy(ws.dataY(1))
-        dataE1_reference = np.copy(ws.dataE(1))
-        number_histograms_reference = ws.getNumberHistograms()
-
         monitor_selection = [0, 2]
 
         # Act+ Assert
         args = [ws, monitor_selection]
-        dark_run_corrected = self.assertRaisesRegex(
+        self.assertRaisesRegex(
             RuntimeError, "The selected monitors are not part of the workspace.", remover.set_pure_monitor_dark_run, *args
         )
 

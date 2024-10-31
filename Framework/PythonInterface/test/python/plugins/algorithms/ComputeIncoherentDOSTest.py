@@ -31,7 +31,7 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
             RuntimeError,
             r"Input workspace must be in \(Q,E\) \[momentum and energy transfer\] or \(2theta, E\) \[scattering angle and energy transfer.\]",
         ):
-            ws_DOS = ComputeIncoherentDOS(ws)
+            ComputeIncoherentDOS(ws, ComputeIncoherentDOS="ws_DOS")
         ws = SofQW3(ws, [0, 0.05, 8], "Direct", 25)
         qq = np.arange(0, 8, 0.05) + 0.025
         for i in range(ws.getNumberHistograms()):

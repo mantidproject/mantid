@@ -26,7 +26,6 @@ class SaveVulcanGSSTest(unittest.TestCase):
         # print ('VecX: {0}'.format(data_ws.readX(0)))
 
         bin_ws_name = "SimpleBinRefTable"
-        bin_table = self._create_simple_binning_table(bin_ws_name)
 
         # Execute
         import tempfile
@@ -114,30 +113,6 @@ class SaveVulcanGSSTest(unittest.TestCase):
         api.CreateWorkspace(DataX=vec_tof, DataY=vec_y, DataE=vec_y, NSpec=1, UnitX="TOF", OutputWorkspace=bin_ws_name)
 
         return
-
-    @staticmethod
-    def _create_simple_binning_table(binning_table_name):
-        """
-        create a binning table
-        :return:
-        """
-        # TODO FIXME : more flexible!
-        """
-        tof0 = 10000.
-        delta = 0.001
-        num_pts = 200
-        """
-        # create a TableWorkspace
-        api.CreateEmptyTableWorkspace(OutputWorkspace=binning_table_name)
-
-        bin_table_ws = AnalysisDataService.retrieve(binning_table_name)
-        bin_table_ws.addColumn("str", "WorkspaceIndexes")
-        bin_table_ws.addColumn("str", "BinningParameters")
-
-        # add a row for simple case
-        bin_table_ws.addRow(["0", "10000, -0.002, 13000"])
-
-        return bin_table_ws
 
     @staticmethod
     def _create_vulcan_binning_table(binning_table_name, binning_workspace_low_res, binning_workspace_high_res):

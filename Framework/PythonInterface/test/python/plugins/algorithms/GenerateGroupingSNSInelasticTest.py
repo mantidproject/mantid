@@ -66,7 +66,7 @@ class GenerateGroupingSNSInelasticTest(unittest.TestCase):
         Catch an error to remind user to put a valid file in InstrumentDefinitionFile.
         """
 
-        with self.assertRaisesRegex(RuntimeError, "invalid") as cm:
+        with self.assertRaisesRegex(RuntimeError, "invalid"):
             GenerateGroupingSNSInelastic(
                 instrument="InstrumentDefinitionFile",
                 #  InstrumentDefinitionFile="",
@@ -81,7 +81,7 @@ class GenerateGroupingSNSInelasticTest(unittest.TestCase):
 
         with self.assertRaisesRegex(
             RuntimeError, "Select the instrument definition file from only one of ARCS, SEQUOIA, CNCS, HYSPEC"
-        ) as cm:
+        ):
             GenerateGroupingSNSInelastic(
                 instrument="InstrumentDefinitionFile",
                 InstrumentDefinitionFile=self.ALF_old_IDF,

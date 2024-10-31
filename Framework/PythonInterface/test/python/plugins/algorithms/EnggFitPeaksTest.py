@@ -17,7 +17,7 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         ws_name = "out_ws"
         peak = "name=BackToBackExponential, I=5000,A=1, B=1., X0=10000, S=150"
-        sws = CreateSampleWorkspace(
+        CreateSampleWorkspace(
             Function="User Defined",
             UserDefinedFunction=peak,
             NumBanks=1,

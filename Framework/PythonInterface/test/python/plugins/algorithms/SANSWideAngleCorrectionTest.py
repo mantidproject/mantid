@@ -30,13 +30,11 @@ class SANSWideAngleCorrectionTest(unittest.TestCase):
         yd = 10
         data = numpy.random.normal(size=xd * yd * nb) / 2.0 + 5.0
         xvalues = numpy.linspace(3500, 43500, nb + 1)
-        tv = numpy.linspace(7e-2, 6e-2, nb)
         Sample = CreateWorkspace(xvalues, data, NSpec=xd * yd)
         LoadInstrument(Sample, InstrumentName="SANS2D", RewriteSpectraMap=True)
         Sample = CropWorkspace(Sample, StartWorkspaceIndex=8)  # remove the monitors
         # create a transmission workspace
         Trans = CropWorkspace(Sample, StartWorkspaceIndex=10, EndWorkspaceIndex=10)
-        x_v = Trans.dataX(0)[:-1]
         y_v = numpy.linspace(0.743139, 0.6, nb)
         e_v = y_v / 58.0
         Trans.setY(0, y_v)

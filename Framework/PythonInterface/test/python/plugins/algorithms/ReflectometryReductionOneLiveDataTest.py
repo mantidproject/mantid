@@ -220,7 +220,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self.assertEqual(workspace.getInstrument().getName(), self._instrument_name)
 
     def test_instrument_was_not_set_on_input_workspace(self):
-        workspace = self._run_algorithm_with_defaults()
+        self._run_algorithm_with_defaults()
         # The input workspace should be unchanged
         self.assertEqual(self._input_ws.getInstrument().getName(), "")
 

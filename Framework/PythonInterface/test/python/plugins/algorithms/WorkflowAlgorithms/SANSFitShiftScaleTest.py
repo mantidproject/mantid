@@ -197,11 +197,6 @@ class SANSFitShiftScaleTest(unittest.TestCase):
         create_alg.execute()
         lab_workspace = create_alg.getProperty("OutputWorkspace").value
 
-        # FLAT NORM
-        create_alg.setProperty("DataY", [1] * 9)
-        create_alg.execute()
-        flat_norm = create_alg.getProperty("OutputWorkspace").value
-
         alg = AlgorithmManager.create("SANSFitShiftScale")
         alg.setChild(True)
         alg.initialize()

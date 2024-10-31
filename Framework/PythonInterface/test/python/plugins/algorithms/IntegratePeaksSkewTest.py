@@ -213,7 +213,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
 
     def test_print_output_file(self):
         out_file = path.join(self._test_dir, "out.pdf")
-        out = IntegratePeaksSkew(
+        IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,
             ThetaWidth=0,

@@ -173,9 +173,7 @@ class MantidAxesTest(unittest.TestCase):
 
     def test_replace_workspace_data_plot_with_fewer_spectra(self):
         plot_data = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30], DataY=[3, 4, 5, 3, 4, 5], DataE=[1, 2, 3, 4, 1, 1], NSpec=3)
-        line_ws2d_histo_spec_1 = self.ax.plot(plot_data, specNum=1, color="r")[0]
         line_ws2d_histo_spec_2 = self.ax.plot(plot_data, specNum=2, color="r")[0]
-        line_ws2d_histo_spec_3 = self.ax.plot(plot_data, specNum=3, color="r")[0]
 
         plot_data = CreateWorkspace(DataX=[20, 30, 40, 20, 30, 40], DataY=[3, 4, 3, 4], DataE=[1, 2, 1, 2], NSpec=2)
         self.ax.replace_workspace_artists(plot_data)

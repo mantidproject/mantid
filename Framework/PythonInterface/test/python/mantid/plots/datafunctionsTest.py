@@ -838,14 +838,14 @@ class DataFunctionsTest(unittest.TestCase):
         ax = fig.add_subplot(111)
         masked_errors = np.ma.masked_invalid([np.nan, 0.1])
         container = ax.errorbar([0, 1], [0, 1], xerr=masked_errors, yerr=masked_errors)
-        bounds = mantid.plots.datafunctions.get_errorbar_bounds(container)
+        mantid.plots.datafunctions.get_errorbar_bounds(container)
 
     def test_errorbar_bounds_if_all_errors_nan(self):
         fig = figure()
         ax = fig.add_subplot(111)
         masked_errors = np.ma.masked_invalid([np.nan, np.nan])
         container = ax.errorbar([0, 1], [0, 1], xerr=masked_errors, yerr=masked_errors)
-        bounds = mantid.plots.datafunctions.get_errorbar_bounds(container)
+        mantid.plots.datafunctions.get_errorbar_bounds(container)
 
 
 if __name__ == "__main__":

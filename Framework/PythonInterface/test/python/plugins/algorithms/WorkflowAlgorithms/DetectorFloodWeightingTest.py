@@ -125,7 +125,6 @@ class DetectorFloodWeightingTest(unittest.TestCase):
         alg.setChild(True)
         alg.initialize()
         alg.setProperty("SolidAngleCorrection", True)
-        signal_value = 2
         in_ws = CreateSampleWorkspace(NumBanks=1, XUnit="Wavelength")
         alg.setProperty("InputWorkspace", in_ws)
         bands = [1, 10]

@@ -22,7 +22,6 @@ class MaskWorkspaceToCalFileTest(unittest.TestCase):
             try:
                 index = int(line_contents[0].strip())
                 select = int(line_contents[3].strip())
-                group = int(line_contents[4].strip())
                 if index == requested_index:
                     return select
             except ValueError:

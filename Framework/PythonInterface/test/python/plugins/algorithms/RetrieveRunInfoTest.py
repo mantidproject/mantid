@@ -23,8 +23,6 @@ class RetrieveRunInfoTest(unittest.TestCase):
 
         # Only set up once.
         if not self.class_has_been_set_up:
-            class_has_been_set_up = True
-
             # Create a workspace that is not a table workspace.
             pre_existing_matrix_workspace_alg = run_algorithm("CreateWorkspace", OutputWorkspace="matrix_ws", DataX="0", DataY="1")
             self.__pre_existing_matrix_workspace_name = pre_existing_matrix_workspace_alg.getPropertyValue("OutputWorkspace")
