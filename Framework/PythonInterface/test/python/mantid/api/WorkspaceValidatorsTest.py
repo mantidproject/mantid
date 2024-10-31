@@ -5,11 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-   Test construction of the WorkspaceValidators
+Test construction of the WorkspaceValidators
 """
+
 import unittest
 import testhelpers
-from mantid.kernel import IValidator
 from mantid.api import (
     WorkspaceUnitValidator,
     HistogramValidator,

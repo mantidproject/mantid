@@ -8,11 +8,10 @@
 are for use in unit tests only!
 """
 
-
 from contextlib import contextmanager
 
 # Import mantid to set MANTIDPATH for any ConfigService call that may be done
-import mantid  # noqa
+import mantid
 
 # Define some pure-Python functions to add to the mix
 
@@ -44,7 +43,7 @@ def create_algorithm(name, **kwargs):
     @returns The algorithm handle
     """
     # Initialize the whole framework
-    import mantid.simpleapi  # noqa
+    import mantid.simpleapi
 
     if "Version" in kwargs:
         alg = mantid.api.AlgorithmManager.createUnmanaged(name, kwargs["Version"])

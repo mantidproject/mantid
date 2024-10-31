@@ -15,7 +15,7 @@ from unittest import mock
 
 import matplotlib
 
-matplotlib.use("AGG")  # noqa
+matplotlib.use("AGG")
 import matplotlib.pyplot as plt
 
 # local imports

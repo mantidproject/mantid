@@ -30,8 +30,9 @@ class FileFinderTest(unittest.TestCase):
         except Exception as e:
             if type(e).__name__ == "ArgumentError":
                 self.fail(
-                    "Expected findRuns to accept a list of strings and a bool as input."
-                    " {} error was raised with message {}".format(type(e).__name__, str(e))
+                    "Expected findRuns to accept a list of strings and a bool as input." " {} error was raised with message {}".format(
+                        type(e).__name__, str(e)
+                    )
                 )
         else:
             # Confirm that it works as above

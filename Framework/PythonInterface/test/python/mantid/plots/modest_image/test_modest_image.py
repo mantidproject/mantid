@@ -151,7 +151,6 @@ class ModestImageTest(unittest.TestCase):
         check("zoom_out", modest.axes, axim.axes, thresh=0.4)
 
     def test_interpolate(self):
-
         INTRP_METHODS = (
             "nearest",
             "bilinear",
@@ -314,7 +313,6 @@ class ModestImageTest(unittest.TestCase):
         np.testing.assert_array_equal(result, expected)
 
     def test_extent(self):
-
         EXTENT_OPTIONS = itertools.product(["upper", "lower"], [None, [1.0, 7.0, -1.0, 5.0]], ["", "x", "y", "xy"])
 
         for origin, extent, flip in EXTENT_OPTIONS:

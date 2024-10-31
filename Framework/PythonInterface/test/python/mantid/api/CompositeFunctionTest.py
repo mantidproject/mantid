@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.api import FrameworkManagerImpl, FunctionFactory, CompositeFunction, IFunction1D
+from mantid.api import FrameworkManagerImpl, FunctionFactory, CompositeFunction
 
 
 class CompositeFunctionTest(unittest.TestCase):

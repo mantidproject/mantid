@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods,invalid-name
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import WorkspaceGroup
+from mantid.simpleapi import VesuvioDiffractionReduction
 from mantid.kernel import config
 
 

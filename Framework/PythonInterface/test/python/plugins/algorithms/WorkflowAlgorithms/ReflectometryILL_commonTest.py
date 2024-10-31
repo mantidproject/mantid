@@ -7,7 +7,7 @@
 
 from mantid.api import FileFinder
 from mantid.simpleapi import mtd, config
-from testhelpers import assertRaisesNothing, create_algorithm, illhelpers
+from testhelpers import illhelpers
 import unittest
 import ReflectometryILL_common as common
 

@@ -26,7 +26,6 @@ class CaptureHandler(logging.Handler):
 
 class loggingTest(unittest.TestCase):
     def test_capture_logs(self):
-
         with capture_logs() as logs:
             logger.error("Error message")
             self.assertTrue("Error message" in logs.getvalue())

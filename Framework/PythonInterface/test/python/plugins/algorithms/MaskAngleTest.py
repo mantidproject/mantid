@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import AnalysisDataService
+from mantid.simpleapi import CloneWorkspace, CreateWorkspace, DeleteWorkspace, GroupWorkspaces, MaskAngle
 from testhelpers import WorkspaceCreationHelper
-from numpy import *
+from numpy import arange, array_equal
 
 
 class MaskAngleTest(unittest.TestCase):

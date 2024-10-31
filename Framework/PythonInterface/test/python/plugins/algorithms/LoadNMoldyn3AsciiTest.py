@@ -5,9 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods
+import os
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import MatrixWorkspace, WorkspaceGroup
+from mantid.kernel import config
+from mantid.simpleapi import LoadNMoldyn3Ascii
 
 
 class LoadNMoldyn3AsciiTest(unittest.TestCase):

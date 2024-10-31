@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.kernel import Direction, OptionalBool, OptionalBoolValue, OptionalBoolPropertyWithValue
+from mantid.kernel import OptionalBool, OptionalBoolValue
 
 
 class OptionalBoolTest(unittest.TestCase):

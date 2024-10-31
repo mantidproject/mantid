@@ -5,9 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import os
-import mantid
-from mantid.simpleapi import *
+from mantid.api import WorkspaceGroup
+from mantid.simpleapi import IndirectTransmissionMonitor, Load
 
 
 class IndirectTransmissionMonitorTest(unittest.TestCase):
@@ -25,7 +24,7 @@ class IndirectTransmissionMonitorTest(unittest.TestCase):
     def test_basic(self):
         trans_workspace = IndirectTransmissionMonitor(**self.kwargs)
 
-        self.assertTrue(isinstance(trans_workspace, mantid.api.WorkspaceGroup), msg="Result should be a workspace group")
+        self.assertTrue(isinstance(trans_workspace, WorkspaceGroup), msg="Result should be a workspace group")
         self.assertEqual(trans_workspace.size(), 3, msg="Transmission workspace group should have 3 workspaces: sample, can and transfer")
 
         expected_names = set()

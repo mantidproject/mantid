@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import os
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.simpleapi import LoadNexusProcessed, SetDetScale
 
 
 class SetDetScaleTest(unittest.TestCase):

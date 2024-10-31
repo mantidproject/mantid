@@ -11,7 +11,6 @@ from mantid.geometry import Instrument
 
 
 class PolDiffILLReductionTest(unittest.TestCase):
-
     _facility = None
     _instrument = None
 

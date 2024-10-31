@@ -82,11 +82,11 @@ class CorrectTOFTest(unittest.TestCase):
         wscorr = AnalysisDataService.retrieve(OutputWorkspaceName)
 
         # convert units, convert to distribution
-        alg_cu = run_algorithm(
+        run_algorithm(
             "ConvertUnits", InputWorkspace=wscorr, Target="DeltaE", EMode="Direct", EFixed=2.27, OutputWorkspace=OutputWorkspaceName + "_dE"
         )
         ws_dE = AnalysisDataService.retrieve(OutputWorkspaceName + "_dE")
-        alg_cd = run_algorithm("ConvertToDistribution", Workspace=ws_dE)
+        run_algorithm("ConvertToDistribution", Workspace=ws_dE)
 
         # create reference data for X axis
         tof1 = 2123.33867005

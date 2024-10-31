@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import CreateWorkspace, DeleteWorkspace
 import numpy
-import sys
 import testhelpers
 import unittest
 

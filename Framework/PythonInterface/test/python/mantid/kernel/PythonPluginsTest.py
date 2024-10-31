@@ -60,8 +60,8 @@ class PythonPluginsTest(unittest.TestCase):
             test_alg = AlgorithmManager.createUnmanaged(expected_name)
             self.assertEqual(expected_name, test_alg.name())
             self.assertEqual(1, test_alg.version())
-        except RuntimeError as exc:
-            self.fail("Failed to create plugin algorithm from the manager: '%s' " % s)
+        except RuntimeError as error:
+            self.fail(f"Failed to create plugin algorithm from the manager: '{error}' ")
 
 
 if __name__ == "__main__":

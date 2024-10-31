@@ -10,7 +10,6 @@ from mantid import config, mtd
 
 
 class PowderILLParameterScanTest(unittest.TestCase):
-
     _runs = "967087:967088"
 
     @classmethod

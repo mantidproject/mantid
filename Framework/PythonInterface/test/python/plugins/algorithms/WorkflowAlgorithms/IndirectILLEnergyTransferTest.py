@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import unittest
-from mantid.simpleapi import *
-from mantid.api import MatrixWorkspace, WorkspaceGroup
-from mantid import config
+from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
+from mantid.kernel import config
+from mantid.simpleapi import DeleteWorkspace, IndirectILLEnergyTransfer, LoadEmptyInstrument, LoadParameterFile
 
 
 class IndirectILLEnergyTransferTest(unittest.TestCase):

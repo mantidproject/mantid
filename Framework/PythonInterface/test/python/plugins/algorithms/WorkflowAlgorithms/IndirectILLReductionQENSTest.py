@@ -5,14 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
-from mantid.api import MatrixWorkspace, WorkspaceGroup
-from mantid import config
+from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
+from mantid.kernel import config
 from testhelpers import run_algorithm
 
 
 class IndirectILLReductionQENSTest(unittest.TestCase):
-
     _run_one_wing = "090661"
 
     _runs_two_wing_multi = "136558,136559"
@@ -35,7 +33,6 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
         config["datasearch.directories"] = self._data_dirs
 
     def test_two_wing_multi(self):
-
         args = {"Run": self._runs_two_wing_multi, "OutputWorkspace": "out"}
 
         alg_test = run_algorithm("IndirectILLReductionQENS", **args)
@@ -59,7 +56,6 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
         self._check_workspace_group(mtd["out_red"], 1, 18, 1024)
 
     def test_one_wing(self):
-
         args = {"Run": self._run_one_wing, "OutputWorkspace": "out"}
 
         alg_test = run_algorithm("IndirectILLReductionQENS", **args)
@@ -75,7 +71,6 @@ class IndirectILLReductionQENSTest(unittest.TestCase):
         self._check_workspace_group(mtd["out_red"], 1, 128 * 16 + 2 + 1, 1024)
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
-
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup), "{0} should be a group workspace".format(wsgroup.getName()))
 
         self.assertEqual(wsgroup.getNumberOfEntries(), nentries, "{0} should contain {1} workspaces".format(wsgroup.getName(), nentries))

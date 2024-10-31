@@ -7,8 +7,7 @@
 # pylint: disable=invalid-name, too-many-public-methods
 import unittest
 
-from mantid.simpleapi import Load, CreateGroupingWorkspace, CreateSampleWorkspace
-from mantid.dataobjects import GroupingWorkspace
+from mantid.simpleapi import CreateGroupingWorkspace, CreateSampleWorkspace
 import numpy as np
 
 

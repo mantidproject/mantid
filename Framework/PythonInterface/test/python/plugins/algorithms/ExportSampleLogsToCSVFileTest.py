@@ -37,7 +37,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -85,7 +85,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -136,7 +136,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile = open(headerfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             errmsg = "Unable to open header file %s. " % (headerfilename)
             self.assertEqual(errmsg, "")
             return
@@ -189,7 +189,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile = open(headerfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             errmsg = "Unable to open header file %s. " % (headerfilename)
             self.assertEqual(errmsg, "")
             return
@@ -233,7 +233,7 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -294,7 +294,6 @@ class ExportVulcanSampleLogTest(unittest.TestCase):
         """Create a workspace for testing against with more situation"""
         from mantid.simpleapi import CreateWorkspace
         from mantid.simpleapi import AddSampleLog
-        import numpy
         from numpy import datetime64, timedelta64
 
         # from time import gmtime, strftime,mktime # in debug prints

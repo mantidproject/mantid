@@ -5,16 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import mantid
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
-from mantid.simpleapi import *
+from mantid.simpleapi import CreateWorkspace
 import numpy as np
 
 
 class DetectorInfoTest(unittest.TestCase):
-
     _ws = None
 
     def setUp(self):
@@ -159,13 +157,13 @@ class DetectorInfoTest(unittest.TestCase):
         for item in info:
             self.assertFalse(item.isMonitor)
 
-    def test_iterator_for_masked(self):
+    def test_iterator_for_nothing_masked(self):
         info = self._ws.detectorInfo()
         # nothing should be masked
         for item in info:
             self.assertFalse(item.isMasked)
 
-    def test_iterator_for_masked(self):
+    def test_iterator_for_one_item_masked(self):
         info = self._ws.detectorInfo()
         it = iter(info)
         item = next(it)

@@ -13,7 +13,6 @@ from mantid.simpleapi import (
     CreateWorkspace,
     MatchAndMergeWorkspaces,
     GroupWorkspaces,
-    DeleteWorkspace,
 )
 
 

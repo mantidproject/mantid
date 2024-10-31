@@ -213,7 +213,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
 
     def test_print_output_file(self):
         out_file = path.join(self._test_dir, "out.pdf")
-        out = IntegratePeaksSkew(
+        IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,
             ThetaWidth=0,
@@ -255,7 +255,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         for ipk, pk in enumerate(out):
             self.assertEqual(pk.getIntensity(), 0)
 
-    def test_peak_mask_validation_with_ncol_max(self):
+    def test_peak_mask_validation_after_ncol_max_increase(self):
         out = IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,

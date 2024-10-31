@@ -270,7 +270,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
 
     def test_with_background(self):
         HFIRGoniometerIndependentBackground("ConvertWANDSCDtoQTest_gold", OutputWorkspace="ConvertWANDSCDtoQTest_background")
-        ConvertWANDSCDtoQTest_Bkg = ConvertWANDSCDtoQ(
+        ConvertWANDSCDtoQ(
             "ConvertWANDSCDtoQTest_gold",
             NormalisationWorkspace="ConvertWANDSCDtoQTest_norm",
             BackgroundWorkspace="ConvertWANDSCDtoQTest_background",
@@ -283,6 +283,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
             Uproj="1,1,0",
             Vproj="1,-1,0",
             Wproj="0,0,1",
+            OutputWorkspace="ConvertWANDSCDtoQTest_Bkg",
         )
 
         self.assertTrue(mtd.doesExist("ConvertWANDSCDtoQTest_Bkg_data"))

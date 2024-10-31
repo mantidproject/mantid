@@ -7,8 +7,9 @@
 # pylint: disable=too-many-public-methods,invalid-name
 import os
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import MatrixWorkspace, WorkspaceGroup
+from mantid.kernel import config
+from mantid.simpleapi import CreateSampleWorkspace, MolDyn
 
 
 class MolDynTest(unittest.TestCase):

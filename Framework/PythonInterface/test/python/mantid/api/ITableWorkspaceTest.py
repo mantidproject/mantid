@@ -6,14 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from testhelpers import run_algorithm
-from mantid.kernel import std_vector_str
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory
 from mantid.dataobjects import TableWorkspace
 import numpy
 
 
 class ITableWorkspaceTest(unittest.TestCase):
-
     _test_ws = None
 
     def setUp(self):

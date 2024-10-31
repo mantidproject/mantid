@@ -10,14 +10,12 @@ import unittest
 # This has to be tested through a workspace as it cannot be created in
 # Python
 ###############################################################################
-from testhelpers import run_algorithm, WorkspaceCreationHelper
+from testhelpers import run_algorithm
 from mantid.geometry import Instrument
 from mantid.api import Sample, Run
-from math import pi
 
 
 class ExperimentInfoTest(unittest.TestCase):
-
     _expt_ws = None
 
     def setUp(self):
