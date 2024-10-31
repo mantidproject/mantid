@@ -15,6 +15,7 @@
 #include <QFileSystemWatcher>
 #include <QTimer>
 
+#include "QObject"
 #include "ui_ALCDataLoadingView.h"
 
 namespace MantidQt {
@@ -31,6 +32,8 @@ namespace CustomInterfaces {
 */
 
 class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingView : public IALCDataLoadingView {
+  Q_OBJECT
+
 public:
   ALCDataLoadingView(QWidget *widget);
   ~ALCDataLoadingView();
@@ -66,7 +69,6 @@ public:
   void setAvailablePeriods(const std::vector<std::string> &periods) override;
   void setTimeLimits(double tMin, double tMax) override;
   void setTimeRange(double tMin, double tMax) override;
-  void help() override;
   void disableAll() override;
   void enableAll() override;
   void setAvailableInfoToEmpty() override;
@@ -78,7 +80,6 @@ public:
   std::vector<std::string> getFiles() override;
   std::string getFirstFile() override;
   void setLoadStatus(const std::string &status, const std::string &colour) override;
-  void runsAutoAddToggled(bool on) override;
   void setRunsTextWithoutSearch(const std::string &text) override;
   void toggleRunsAutoAdd(const bool autoAdd) override;
   void enableAlpha(const bool alpha) override;
@@ -94,8 +95,10 @@ public:
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
 
-  // Slots
+private slots:
+  void runsAutoAddToggled(bool on) override;
   void instrumentChanged(QString instrument) override;
+  void help() override;
   void notifyLoadClicked() override;
   void notifyRunsEditingChanged() override;
   void notifyRunsEditingFinished() override;
@@ -103,6 +106,10 @@ public:
   void openManageDirectories() override;
   void notifyPeriodInfoClicked() override;
   void notifyTimerEvent() override;
+
+signals:
+  /// New data has been loaded
+  void dataChanged();
 
 private:
   /// Common function to set available items in a combo box

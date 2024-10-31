@@ -15,7 +15,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 
-#include <QObject>
 #include <optional>
 
 namespace MantidQt {
@@ -25,7 +24,6 @@ namespace CustomInterfaces {
 class IALCDataLoadingPresenter;
 
 class MANTIDQT_MUONINTERFACE_DLL IALCDataLoadingView : public QObject {
-  Q_OBJECT
 
 public:
   virtual void subscribePresenter(IALCDataLoadingPresenter *presenter) = 0;
@@ -202,10 +200,6 @@ public slots:
   virtual void notifyPeriodInfoClicked() = 0;
 
   virtual void notifyTimerEvent() = 0;
-
-signals:
-  /// New data has been loaded
-  void dataChanged();
 };
 
 } // namespace CustomInterfaces

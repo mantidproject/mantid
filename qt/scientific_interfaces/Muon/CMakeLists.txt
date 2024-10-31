@@ -19,9 +19,9 @@ set(MOC_FILES
     ALCBaselineModellingView.h
     ALCInterface.h
     ALCPeakFittingPresenter.h
+    ALCDataLoadingView.h
     IALCBaselineModellingView.h
     IALCBaselineModellingModel.h
-    IALCDataLoadingView.h
     IALCPeakFittingView.h
     IALCPeakFittingModel.h
     MuonAnalysisHelper.h
