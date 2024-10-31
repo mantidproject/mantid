@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-branches,too-many-locals, invalid-name
+# ruff: noqa: E741  # Ambiguous variable name
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import logger, Direction
 from mantid.simpleapi import CreateWorkspace
@@ -155,16 +156,16 @@ class VelocityCrossCorrelations(PythonAlgorithm):
                 # Retrieve particle indices from the 'particles' dictionary and
                 # determine the relevant position in the 'correlations' matrices
                 k = elements.index(atoms_to_species[i])
-                L = elements.index(atoms_to_species[j])
+                l = elements.index(atoms_to_species[j])
                 # Check for the order of elements (ensures upper triangular matrix form & consistent order of operations)
-                if k <= L:
+                if k <= l:
                     correlation_temp = self.cross_correlation(velocities[i], velocities[j])
-                    correlations[k, L] += correlation_temp
-                    correlation_count[k, L] += 1
+                    correlations[k, l] += correlation_temp
+                    correlation_count[k, l] += 1
                 else:
                     correlation_temp = self.cross_correlation(velocities[j], velocities[i])
-                    correlations[L, k] += correlation_temp
-                    correlation_count[L, k] += 1
+                    correlations[l, k] += correlation_temp
+                    correlation_count[l, k] += 1
 
         logger.information(str(time.time() - start_time) + " s")
 

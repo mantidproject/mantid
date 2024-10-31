@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+# ruff: noqa: E741  # Ambiguous variable name
 """
 Generate UB matrices from measured list of reflections
 Identifies upstream and downstream diamonds and assigns matrices to them
@@ -54,8 +55,8 @@ def m3mEquiv(hkl_input, tog):
     hkl = hkl_input
     h = float(hkl[0])
     k = float(hkl[1])
-    L = float(hkl[2])
-    all_equivs = np.asarray(list(plusAndMinusPermutations([h, k, L])))
+    l = float(hkl[2])
+    all_equivs = np.asarray(list(plusAndMinusPermutations([h, k, l])))
     # print all_equivs
 
     # Remove non-unique equivalents

@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+# ruff: noqa: E741  # Ambiguous variable name
 import os
 import sys
 import json
@@ -56,8 +57,8 @@ def add_pawley_reflections(pawley_reflections, project, d_min):
         phase.data["General"]["doPawley"] = True
         gsas_reflections = []
         for reflection in pawley_reflections[iphase]:
-            [h, k, L], d, multiplicity = reflection
-            gsas_reflections.append([int(h), int(k), int(L), int(multiplicity), float(d), True, 100.0, d_min])
+            [h, k, l], d, multiplicity = reflection
+            gsas_reflections.append([int(h), int(k), int(l), int(multiplicity), float(d), True, 100.0, d_min])
         phase.data["Pawley ref"] = gsas_reflections
 
 

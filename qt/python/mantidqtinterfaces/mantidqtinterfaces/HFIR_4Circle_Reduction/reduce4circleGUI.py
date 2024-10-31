@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,relative-import,W0611,R0921,R0902,R0904,R0921,C0302,R0912
+# ruff: noqa: E741  # Ambiguous variable name
 ################################################################################
 #
 # MainWindow application for reducing HFIR 4-circle
@@ -1125,8 +1126,8 @@ class MainWindow(QMainWindow):
         assert peak_info is not None, "Unable to locate PeakProcessRecord (peak info)."
 
         if load_spice_hkl:
-            h, k, L = peak_info.get_hkl()
-            hkl = (h, k, L)
+            h, k, l = peak_info.get_hkl()
+            hkl = (h, k, l)
         else:
             hkl = ()
 
@@ -2247,8 +2248,8 @@ class MainWindow(QMainWindow):
             if pt < 0:
                 pt = None
             peak_info = self._myControl.get_peak_info(exp_number, scan, pt)
-            h, k, L = peak_info.get_hkl(user_hkl=False)
-            self.ui.tableWidget_peaksCalUB.update_hkl(i_row, h, k, L)
+            h, k, l = peak_info.get_hkl(user_hkl=False)
+            self.ui.tableWidget_peaksCalUB.update_hkl(i_row, h, k, l)
         # END-FOR
 
         # set the flag right
@@ -3719,7 +3720,7 @@ class MainWindow(QMainWindow):
 
         # Get data
         exp_number, scan_number = peak_info.get_experiment_info()
-        h, k, L = peak_info.get_hkl(user_hkl=False)
+        h, k, l = peak_info.get_hkl(user_hkl=False)
         q_x, q_y, q_z = peak_info.get_peak_centre()
         # wave length
         m1 = self._myControl.get_sample_log_value(exp_number, scan_number, 1, "_m1")
@@ -3732,7 +3733,7 @@ class MainWindow(QMainWindow):
             wave_length = user_wave_length
 
         # Set to table
-        status, err_msg = self.ui.tableWidget_peaksCalUB.add_peak(scan_number, (h, k, L), (q_x, q_y, q_z), m1, wave_length)
+        status, err_msg = self.ui.tableWidget_peaksCalUB.add_peak(scan_number, (h, k, l), (q_x, q_y, q_z), m1, wave_length)
         if status is False:
             self.pop_one_button_dialog(err_msg)
 

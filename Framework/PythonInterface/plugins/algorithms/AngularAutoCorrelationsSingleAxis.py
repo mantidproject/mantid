@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-branches,too-many-locals, invalid-name
+# ruff: noqa: E741  # Ambiguous variable name
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction
 from mantid.simpleapi import logger, CreateWorkspace
@@ -188,8 +189,8 @@ class AngularAutoCorrelationsSingleAxis(PythonAlgorithm):
 
             for k in species_one:
                 sum_position_species_one += cartesian_configuration[k]
-            for L in species_two:
-                sum_position_species_two += cartesian_configuration[L]
+            for l in species_two:
+                sum_position_species_two += cartesian_configuration[l]
             avg_position_species_one = 1.0 * sum_position_species_one / len(species_one)
             avg_position_species_two = 1.0 * sum_position_species_two / len(species_two)
 

@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-few-public-methods
+# ruff: noqa: E741  # Ambiguous variable name
 import numpy as np
 import systemtesting
 from mantid.simpleapi import (
@@ -306,23 +307,23 @@ class SatellitePeaksFakeData(systemtesting.MantidSystemTest):
 
         for h in range(0, 6):
             for k in range(0, 6):
-                for L in range(0, 11):
-                    if sg.isAllowedReflection([h, k, L]):
-                        if h == k == L == 0:
+                for l in range(0, 11):
+                    if sg.isAllowedReflection([h, k, l]):
+                        if h == k == l == 0:
                             continue
-                        q = V3D(h, k, L)
+                        q = V3D(h, k, l)
                         q_sample = ol.qFromHKL(q)
                         if not np.any(np.array(q_sample) > 5):
                             hkl.append(q)
                             FakeMDEventData(MD_Q_sample, PeakParams="1000,{},{},{},0.05".format(*q_sample))
                         # satellite peaks at 0,0,+1.5
-                        q = V3D(h, k, L + 1.5)
+                        q = V3D(h, k, l + 1.5)
                         q_sample = ol.qFromHKL(q)
                         if not np.any(np.array(q_sample) > 5):
                             sat_hkl.append(q)
                             FakeMDEventData(MD_Q_sample, PeakParams="100,{},{},{},0.02".format(*q_sample))
                         # satellite peaks at 0,0,-1.5
-                        q = V3D(h, k, L - 1.5)
+                        q = V3D(h, k, l - 1.5)
                         q_sample = ol.qFromHKL(q)
                         if not np.any(np.array(q_sample) > 5):
                             sat_hkl.append(q)

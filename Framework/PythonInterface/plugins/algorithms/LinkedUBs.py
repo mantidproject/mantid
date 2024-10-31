@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+# ruff: noqa: E741  # Ambiguous variable name
 from mantid.api import DataProcessorAlgorithm, mtd, AlgorithmFactory, WorkspaceProperty, PropertyMode, ITableWorkspaceProperty
 from mantid.simpleapi import CalculateUMatrix, PredictPeaks, FilterPeaks, DeleteWorkspace, CreatePeaksWorkspace
 from mantid.kernel import Direction, FloatBoundedValidator, IntBoundedValidator, StringMandatoryValidator, StringListValidator, V3D
@@ -324,8 +325,8 @@ class LinkedUBs(DataProcessorAlgorithm):
                         and qz_pred - qtol_var <= qz_obs <= qz_pred + qtol_var
                         and d_pred - self._dtol <= d_obs <= d_pred + self._dtol
                     ):
-                        h, k, L = HKL_ordered[j]
-                        p_obs.setHKL(h, k, L)
+                        h, k, l = HKL_ordered[j]
+                        p_obs.setHKL(h, k, l)
                         p_obs.setIntHKL(p_obs.getHKL())
                         linked_peaks.addPeak(p_obs)
 

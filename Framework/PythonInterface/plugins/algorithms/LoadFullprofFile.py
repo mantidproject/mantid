@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
+# ruff: noqa: E741  # Ambiguous variable name
 from mantid.api import (
     PythonAlgorithm,
     AlgorithmFactory,
@@ -124,7 +125,7 @@ class LoadFullprofFile(PythonAlgorithm):
 
             h = int(terms[0])
             k = int(terms[1])
-            L = int(terms[2])
+            l = int(terms[2])
             if len(terms) >= 9:
                 dsp = float(terms[3])
                 tof = float(terms[4])
@@ -146,17 +147,17 @@ class LoadFullprofFile(PythonAlgorithm):
             elif len(terms) >= 9:
                 fwhm = math.sqrt(sigma2) * 2.0
 
-            dkey = (h, k, L)
+            dkey = (h, k, l)
 
             if dkey in hkldict:
                 if _OUTPUTLEVEL == "INFORMATION":
-                    self.warning("Warning! Duplicate HKL %d, %d, %d" % (h, k, L))
+                    self.warning("Warning! Duplicate HKL %d, %d, %d" % (h, k, l))
                 continue
 
             if fwhm < 1.0e-5:
                 # Peak width is too small/annihilated peak
                 if _OUTPUTLEVEL == "INFORMATION":
-                    self.log().information("Peak (%d, %d, %d) has an unreasonable small FWHM.  Peak does not exist. " % (h, k, L))
+                    self.log().information("Peak (%d, %d, %d) has an unreasonable small FWHM.  Peak does not exist. " % (h, k, l))
                 continue
 
             hkldict[dkey] = {}

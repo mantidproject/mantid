@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=W0403,C0103,R0901,R0904,R0913,C0302
+# ruff: noqa: E741  # Ambiguous variable name
 import numpy
 import sys
 from mantidqtinterfaces.HFIR_4Circle_Reduction import fourcircle_utility
@@ -2016,15 +2017,15 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
 
         return
 
-    def update_hkl(self, i_row, h, k, L):
+    def update_hkl(self, i_row, h, k, l):
         """Update HKL value
         :param i_row: index of the row to have HKL updated
         :param h:
         :param k:
-        :param L:
+        :param l:
         """
         assert isinstance(i_row, int), "row number {0} must be an integer but not a {1}." "".format(i_row, type(i_row))
 
-        self.update_cell_value(i_row, self._colIndexCalculatedHKL, self.format_array([h, k, L]))
+        self.update_cell_value(i_row, self._colIndexCalculatedHKL, self.format_array([h, k, l]))
 
         return

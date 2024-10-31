@@ -1,3 +1,4 @@
+# ruff: noqa: E741  # Ambiguous variable name
 import unittest
 from unittest.mock import patch, call
 from numpy import allclose
@@ -257,9 +258,9 @@ class BaseSXTest(unittest.TestCase):
             hs = range(3)
         for h in hs:
             for k in ks:
-                for L in ls:
+                for l in ls:
                     try:
-                        peaks.addPeak(peaks.createPeakHKL([h, k, L]))
+                        peaks.addPeak(peaks.createPeakHKL([h, k, l]))
                     except ValueError:
                         pass
 

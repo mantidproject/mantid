@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=C0302,C0103,R0902,R0904,R0913,W0212,W0621,R0912,R0921,R0914,W0403
+# ruff: noqa: E741  # Ambiguous variable name
 ################################################################################
 #
 # Controlling class
@@ -2138,10 +2139,10 @@ class CWSCDReductionControl(object):
                 pt = int(row[2])
                 h = float(row[3])
                 k = float(row[4])
-                L = float(row[5])
+                l = float(row[5])
                 q_range = float(row[6])
                 # append
-                row_list.append([counts, scan, pt, h, k, L, q_range])
+                row_list.append([counts, scan, pt, h, k, l, q_range])
             # END-FOR
         # END-WITH
 
