@@ -105,7 +105,6 @@ class ArrayPropertyTest(unittest.TestCase):
             _input_values = None
 
             def PyInit(self):
-                name = "numbers"
                 self.declareProperty(FloatArrayProperty("Input", Direction.Input), "Float array")
 
             def PyExec(self):
@@ -124,7 +123,6 @@ class ArrayPropertyTest(unittest.TestCase):
             _input_values = None
 
             def PyInit(self):
-                name = "numbers"
                 self.declareProperty(FloatArrayProperty("Input", Direction.Input), "Float array")
 
             def PyExec(self):

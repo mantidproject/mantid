@@ -112,7 +112,7 @@ class AlgorithmTest(unittest.TestCase):
 
     def test_execute_succeeds_with_unicode_kwargs(self):
         props = json.loads('{"DryRun":true}')  # this is always unicode
-        alg = run_algorithm("Segfault", **props)
+        run_algorithm("Segfault", **props)
 
     def test_getAlgorithmID_returns_AlgorithmID_object(self):
         alg = AlgorithmManager.createUnmanaged("Load")

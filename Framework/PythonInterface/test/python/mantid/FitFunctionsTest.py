@@ -583,10 +583,10 @@ class FitFunctionsTest(unittest.TestCase):
         l0 = FunctionWrapper("LinearBackground", A0=0, A1=2)
         l1 = FunctionWrapper("LinearBackground", A0=5, A1=-1)
 
-        ws = CreateWorkspace(DataX=[0, 1, 2, 3, 4], DataY=[5, 5, 5, 5])
+        ws = CreateWorkspace(DataX=[0, 1, 2, 3, 4], DataY=[5, 5, 5, 5], StoreInADS=False)
 
         c = CompositeFunctionWrapper(l0, l1)
-        cws = EvaluateFunction(c, "ws", OutputWorkspace="out")
+        cws = EvaluateFunction(c, ws, OutputWorkspace="out")
         cvals = cws.readY(1)
         self.assertAlmostEqual(cvals[0], 5.5)
         self.assertAlmostEqual(cvals[1], 6.5)
@@ -594,7 +594,7 @@ class FitFunctionsTest(unittest.TestCase):
         self.assertAlmostEqual(cvals[3], 8.5)
 
         p = ProductFunctionWrapper(l0, l1)
-        pws = EvaluateFunction(p, "ws", OutputWorkspace="out")
+        pws = EvaluateFunction(p, ws, OutputWorkspace="out")
         pvals = pws.readY(1)
         self.assertAlmostEqual(pvals[0], 4.5)
         self.assertAlmostEqual(pvals[1], 10.5)
@@ -602,7 +602,7 @@ class FitFunctionsTest(unittest.TestCase):
         self.assertAlmostEqual(pvals[3], 10.5)
 
         sq = Polynomial(attributes={"n": 2}, A0=0, A1=0.0, A2=1.0)
-        sqws = EvaluateFunction(sq, "ws", OutputWorkspace="out")
+        sqws = EvaluateFunction(sq, ws, OutputWorkspace="out")
         sqvals = sqws.readY(1)
         self.assertAlmostEqual(sqvals[0], 0.25)
         self.assertAlmostEqual(sqvals[1], 2.25)
@@ -612,18 +612,18 @@ class FitFunctionsTest(unittest.TestCase):
         l0 = FunctionWrapper("LinearBackground", A0=0, A1=2)
         l1 = FunctionWrapper("LinearBackground", A0=5, A1=-1)
 
-        ws = CreateWorkspace(DataX=[0, 1], DataY=[5])
+        ws = CreateWorkspace(DataX=[0, 1], DataY=[5], StoreInADS=False)
 
         c = CompositeFunctionWrapper(l0, l1)
         p = ProductFunctionWrapper(l0, l1)
 
         s1 = c + p
-        s1ws = EvaluateFunction(s1, "ws", OutputWorkspace="out")
+        s1ws = EvaluateFunction(s1, ws, OutputWorkspace="out")
         s1vals = s1ws.readY(1)
         self.assertAlmostEqual(s1vals[0], 10.0)
 
         s2 = p + c
-        s2ws = EvaluateFunction(s2, "ws", OutputWorkspace="out")
+        s2ws = EvaluateFunction(s2, ws, OutputWorkspace="out")
         s2vals = s2ws.readY(1)
         self.assertAlmostEqual(s2vals[0], 10.0)
 

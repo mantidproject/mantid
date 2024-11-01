@@ -100,7 +100,7 @@ if not isinstance(input, IMDEventWorkspace): raise RuntimeError("Input workspace
 
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace="ws")
         ws = mtd["ws"]
-        self.assertAlmostEqual(300.0, mtd["ws"].readY(0)[0], 8)
+        self.assertAlmostEqual(300.0, ws.readY(0)[0], 8)
 
     # ======================== Failure cases =====================================================
     def test_syntax_error_in_code_raises_Runtime_Error(self):

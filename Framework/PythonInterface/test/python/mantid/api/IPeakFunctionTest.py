@@ -118,7 +118,6 @@ class IPeakFunctionTest(unittest.TestCase):
         ws = LoadEmptyInstrument(InstrumentName="ENGIN-X", OutputWorkspace="ws")
         LoadParameterFile(Workspace=ws, Filename="ENGIN-X_Parameters.xml")
         axis = ws.getAxis(0)
-        unit = axis.getUnit()
         axis.setUnit("TOF")
 
         func = FunctionFactory.Instance().createPeakFunction("BackToBackExponential")

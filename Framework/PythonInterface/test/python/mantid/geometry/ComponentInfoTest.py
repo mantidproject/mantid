@@ -514,7 +514,6 @@ class ComponentInfoTest(unittest.TestCase):
 
     def test_isDetector_via_iterator(self):
         comp_info = self._ws.componentInfo()
-        n_detectors = len(self._ws.detectorInfo())
         it = iter(comp_info)
         self.assertEqual(next(it).isDetector, True)
         self.assertEqual(next(it).isDetector, True)

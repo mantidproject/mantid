@@ -365,7 +365,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
     def test_complex_binary_ops_do_not_leave_temporary_workspaces_behind(self):
         run_algorithm("CreateWorkspace", OutputWorkspace="ca", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
         ads = AnalysisDataService
-        w1 = (ads["ca"] * 0.0) + 1.0
+        w1 = (ads["ca"] * 0.0) + 1.0  # noqa: F841
 
         self.assertTrue("w1" in ads)
         self.assertTrue("ca" in ads)

@@ -163,13 +163,13 @@ class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
             # time entry
             entry_name = "CreateSampleWorkspace"
             # call algorithm
-            ws = CreateSampleWorkspace()
+            CreateSampleWorkspace(OutputWorkspace="ws")
 
             # it should ignore this
             AlgoTimeRegister.Instance()
 
             # get time data from file
-            rec_start_time, rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            _, _, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
 
             # check the values
             self.assertEqual(entry_name, rec_entry_name)
@@ -198,7 +198,7 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
             # do not initialize algotimeregister explicit
             with amend_config(**self.performance_config):
                 # clock start here
-                ws = CreateSampleWorkspace(Function="Multiple Peaks")
+                CreateSampleWorkspace(Function="Multiple Peaks", OutputWorkspace="ws")
                 with open(self.PER_FILE.name, "r") as f:
                     # based on the format `START_POINT: <start point number> MAX_THREAD: <thread number>`
                     timeentry = f.readlines()[0].split(" ")
@@ -224,7 +224,7 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
             AlgoTimeRegister.Instance()
 
             entry_name = "Max"
-            max_ws = Max(ws)
+            Max(ws, OutputWorkspace="max_ws")
 
             # get time data from file
             rec_max_start_time, rec_max_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
@@ -255,7 +255,7 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
             entry_name = "Max"
 
             # call the algorithm
-            max_ws = Max(ws)
+            Max(ws, OutputWorkspace="max_ws")
 
             # get time data from file
             rec_max_start_time, rec_max_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
@@ -274,10 +274,10 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
             entry_name = "CreateSampleWorkspace"
 
             # call the algorithm
-            ws = CreateSampleWorkspace(Function="Multiple Peaks")
+            CreateSampleWorkspace(Function="Multiple Peaks", OutputWorkspace="ws")
 
             # get time data from file
-            rec_sample_start_time, rec_sample_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            _, _, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
 
             # check the values
             self.assertEqual(entry_name, rec_entry_name)

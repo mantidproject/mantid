@@ -159,8 +159,6 @@ class WorkspaceGroupTest(unittest.TestCase):
         )
         run_algorithm("GroupWorkspaces", InputWorkspaces="grouped_1,grouped_2", OutputWorkspace="grouped")
 
-        w1 = (mtd["grouped"] * 0.0) + 1.0
-
         self.assertTrue("w1" in mtd)
         self.assertTrue("grouped" in mtd)
         self.assertTrue("grouped_1" in mtd)

@@ -87,6 +87,7 @@ class SimpleAPIFitTest(unittest.TestCase):
             return
         output_name = "otherargs_fitWS"
         retvals = Fit("name=FlatBackground", self._raw_ws, MaxIterations=2, Output=output_name, EnableLogging=False)
+        self._check_returns_are_correct_type_with_workspaces(retvals)
         self.assertTrue(output_name + "_Workspace" in mtd)
 
     def _check_returns_are_correct_type_with_workspaces(self, retvals):
