@@ -93,7 +93,7 @@ class TimeSliceTest(unittest.TestCase):
             OutputWorkspace="SliceTestOut",
         )
 
-    def test_validation_peak_range_count(self):
+    def test_validation_background_range_count(self):
         """
         Tests validation of the BackgroundRange property.
         """

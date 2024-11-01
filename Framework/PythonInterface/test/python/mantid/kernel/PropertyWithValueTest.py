@@ -196,7 +196,7 @@ class PropertyWithValueTest(unittest.TestCase):
         # but I don't think it will be heavily used so we'll see
         self._do_vector_int_numpy_test("DetectorList", np.int32)
 
-    def test_set_property_of_vector_int_succeeds_with_numpy_array_of_int_type(self):
+    def test_set_property_of_vector_int_succeeds_with_numpy_array_of_none_type(self):
         self._do_vector_int_numpy_test("WorkspaceIndexList")
 
     def test_property_as_output(self):

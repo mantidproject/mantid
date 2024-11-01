@@ -84,7 +84,7 @@ class AddSampleLogMultipleTest(unittest.TestCase):
 
         self._validate_sample_logs(names, values, types)
 
-    def test_strings_and_numbers(self):
+    def test_strings_and_numbers_with_parse_type_false(self):
         """
         Tests adding multiple strings and numbers.
         """
@@ -192,7 +192,7 @@ class AddSampleLogMultipleTest(unittest.TestCase):
             LogTypes=types,
         )
 
-    def test_validation_differing_types(self):
+    def test_validation_differing_number_of_log_types(self):
         """
         Test validation for differing numbers of log names and log types.
         """

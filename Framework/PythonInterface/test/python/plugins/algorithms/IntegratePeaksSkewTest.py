@@ -255,7 +255,7 @@ class IntegratePeaksSkewTest(unittest.TestCase):
         for ipk, pk in enumerate(out):
             self.assertEqual(pk.getIntensity(), 0)
 
-    def test_peak_mask_validation_with_ncol_max(self):
+    def test_peak_mask_validation_after_ncol_max_increase(self):
         out = IntegratePeaksSkew(
             InputWorkspace=self.ws,
             PeaksWorkspace=self.peaks,

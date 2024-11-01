@@ -248,7 +248,7 @@ class IqtFitMultipleTest(unittest.TestCase):
             OutputWorkspaceGroup="fit_group",
         )
 
-    def test_minimum_spectra_more_than_maximum_spectra(self):
+    def test_minimum_x_more_than_maximum_x(self):
         self.assertRaisesRegex(
             RuntimeError,
             "EndX must be more than StartX",

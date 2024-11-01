@@ -41,7 +41,7 @@ class IEventWorkspaceTest(unittest.TestCase):
         self.assertTrue(isinstance(el, IEventList))
         self.assertEqual(el.getNumberEvents(), 200)
 
-    def test_event_list_getWeights(self):
+    def test_event_list_getTofs(self):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         TofList = el.getTofs()

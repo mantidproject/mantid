@@ -157,13 +157,13 @@ class DetectorInfoTest(unittest.TestCase):
         for item in info:
             self.assertFalse(item.isMonitor)
 
-    def test_iterator_for_masked(self):
+    def test_iterator_for_nothing_masked(self):
         info = self._ws.detectorInfo()
         # nothing should be masked
         for item in info:
             self.assertFalse(item.isMasked)
 
-    def test_iterator_for_masked(self):
+    def test_iterator_for_one_item_masked(self):
         info = self._ws.detectorInfo()
         it = iter(info)
         item = next(it)
