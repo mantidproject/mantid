@@ -32,20 +32,20 @@ using namespace API;
 constexpr double HeliumAnalyserEfficiency::ABSORPTION_CROSS_SECTION_CONSTANT = 0.0733;
 
 namespace PropertyNames {
-auto constexpr INPUT_WORKSPACE{"InputWorkspace"};
-auto constexpr OUTPUT_WORKSPACE{"OutputWorkspace"};
-auto constexpr OUTPUT_FIT_CURVES{"OutputFitCurves"};
-auto constexpr OUTPUT_FIT_PARAMS{"OutputFitParameters"};
-auto constexpr SPIN_STATES{"SpinStates"};
-auto constexpr PXD{"PXD"};
-auto constexpr PXD_Error{"PXDError"};
-auto constexpr StartX{"StartX"};
-auto constexpr EndX{"EndX"};
-auto constexpr IGNORE_FIT_QUALITY_ERROR{"IgnoreFitQualityError"};
+static const std::string INPUT_WORKSPACE{"InputWorkspace"};
+static const std::string OUTPUT_WORKSPACE{"OutputWorkspace"};
+static const std::string OUTPUT_FIT_CURVES{"OutputFitCurves"};
+static const std::string OUTPUT_FIT_PARAMS{"OutputFitParameters"};
+static const std::string SPIN_STATES{"SpinStates"};
+static const std::string PXD{"PXD"};
+static const std::string PXD_Error{"PXDError"};
+static const std::string Start_X{"StartX"};
+static const std::string End_X{"EndX"};
+static const std::string IGNORE_FIT_QUALITY_ERROR{"IgnoreFitQualityError"};
 
-auto constexpr GROUP_INPUTS{"Inputs"};
-auto constexpr GROUP_FIT_OPTIONS{"Fit Options"};
-auto constexpr GROUP_OUTPUTS{"Outputs"};
+static const std::string GROUP_INPUTS{"Inputs"};
+static const std::string GROUP_FIT_OPTIONS{"Fit Options"};
+static const std::string GROUP_OUTPUTS{"Outputs"};
 } // namespace PropertyNames
 
 namespace {
@@ -66,8 +66,9 @@ void HeliumAnalyserEfficiency::init() {
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::PXD, 12.0, mustBePositive, "Gas pressure in bar multiplied by cell length in metres");
   declareProperty(PropertyNames::PXD_Error, 0.0, mustBePositive, "Error in gas pressure multiplied by cell length");
-  declareProperty(PropertyNames::StartX, 1.75, mustBePositive, "Lower boundary of wavelength range to use for fitting");
-  declareProperty(PropertyNames::EndX, 8.0, mustBePositive, "Upper boundary of wavelength range to use for fitting");
+  declareProperty(PropertyNames::Start_X, 1.75, mustBePositive,
+                  "Lower boundary of wavelength range to use for fitting");
+  declareProperty(PropertyNames::End_X, 8.0, mustBePositive, "Upper boundary of wavelength range to use for fitting");
   declareProperty(PropertyNames::IGNORE_FIT_QUALITY_ERROR, false,
                   "Whether the algorithm should ignore a poor chi-squared (fit cost value) of greater than 1 and "
                   "therefore not throw an error",
@@ -88,8 +89,8 @@ void HeliumAnalyserEfficiency::init() {
   setPropertyGroup(PropertyNames::PXD, PropertyNames::GROUP_INPUTS);
   setPropertyGroup(PropertyNames::PXD_Error, PropertyNames::GROUP_INPUTS);
 
-  setPropertyGroup(PropertyNames::StartX, PropertyNames::GROUP_FIT_OPTIONS);
-  setPropertyGroup(PropertyNames::EndX, PropertyNames::GROUP_FIT_OPTIONS);
+  setPropertyGroup(PropertyNames::Start_X, PropertyNames::GROUP_FIT_OPTIONS);
+  setPropertyGroup(PropertyNames::End_X, PropertyNames::GROUP_FIT_OPTIONS);
   setPropertyGroup(PropertyNames::IGNORE_FIT_QUALITY_ERROR, PropertyNames::GROUP_FIT_OPTIONS);
 
   setPropertyGroup(PropertyNames::OUTPUT_WORKSPACE, PropertyNames::GROUP_OUTPUTS);
@@ -188,11 +189,11 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, const Matr
   auto fit = createChildAlgorithm("Fit");
   fit->initialize();
   fit->setProperty("Function", "name=UserFunction,Formula=(1 + tanh(" + std::to_string(mu) + "*phe*x))/2,phe=0.1");
-  fit->setProperty("InputWorkspace", eff);
-  const double startLambda = getProperty(PropertyNames::StartX);
-  fit->setProperty("StartX", startLambda);
-  const double endLambda = getProperty(PropertyNames::EndX);
-  fit->setProperty("EndX", endLambda);
+  fit->setProperty(PropertyNames::INPUT_WORKSPACE, eff);
+  const double startLambda = getProperty(PropertyNames::Start_X);
+  fit->setProperty(PropertyNames::Start_X, startLambda);
+  const double endLambda = getProperty(PropertyNames::End_X);
+  fit->setProperty(PropertyNames::End_X, endLambda);
   fit->setProperty("CreateOutput", true);
   fit->execute();
 
@@ -208,7 +209,7 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, const Matr
     setProperty(PropertyNames::OUTPUT_FIT_PARAMS, fitParameters);
   }
   if (!API::Algorithm::getPropertyValue(PropertyNames::OUTPUT_FIT_CURVES).empty()) {
-    const MatrixWorkspace_sptr fitWorkspace = fit->getProperty("OutputWorkspace");
+    const MatrixWorkspace_sptr fitWorkspace = fit->getProperty(PropertyNames::OUTPUT_WORKSPACE);
     setProperty(PropertyNames::OUTPUT_FIT_CURVES, fitWorkspace);
   }
 
