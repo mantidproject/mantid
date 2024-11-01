@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, too-many-arguments, too-many-branches, too-many-locals
-# ruff: noqa: F403,F405   # Wild imports and Undefined locals
+# ruff: noqa: F403,F405,E741   # Wild imports, undefined locals and ambiguous variable names
 from math import *
 
 try:

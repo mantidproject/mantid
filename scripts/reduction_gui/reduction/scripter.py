@@ -180,8 +180,8 @@ class BaseScriptElement(object):
         elem_list = []
         element_list = dom.getElementsByTagName(tag)
         if len(element_list) > 0:
-            for l in element_list:
-                elem_list.append(BaseScriptElement.getText(l.childNodes).strip())
+            for element in element_list:
+                elem_list.append(BaseScriptElement.getText(element.childNodes).strip())
         return elem_list
 
     @classmethod

@@ -118,26 +118,26 @@ class RangeSelector(object):
             g = plotSpectrum(ws, [0], True)
             self.canvas = g.canvas
             g.suptitle(self._graph)
-            l = g.axes[0]
+            axis = g.axes[0]
             try:
                 title = ws[0].replace("_", " ")
                 title.strip()
             except:
                 title = " "
-            l.set_title(title)
+            axis.set_title(title)
             if log_scale:
-                l.yscale("log")
-                l.xscale("linear")
+                axis.yscale("log")
+                axis.xscale("linear")
             if x_title is not None:
-                l.set_xlabel(x_title)
+                axis.set_xlabel(x_title)
             if xmin is not None and xmax is not None:
-                l.set_xlim(xmin, xmax)
+                axis.set_xlim(xmin, xmax)
 
             if range_min is None or range_max is None:
-                range_min, range_max = l.get_xlim()
+                range_min, range_max = axis.get_xlim()
                 range_min = range_min + (range_max - range_min) / 100.0
                 range_max = range_max - (range_max - range_min) / 100.0
-            self.marker = RangeMarker(l.figure.canvas, "green", range_min, range_max, line_style="--")
+            self.marker = RangeMarker(axis.figure.canvas, "green", range_min, range_max, line_style="--")
             self.marker.min_marker.set_name("Min Q")
             self.marker.max_marker.set_name("Max Q")
 

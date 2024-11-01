@@ -1,3 +1,4 @@
+# ruff: noqa: E741  # Ambiguous variable name
 import unittest
 from unittest.mock import patch, call
 from numpy import allclose
