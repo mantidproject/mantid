@@ -819,13 +819,13 @@ std::string SetSample::tryCreateXMLFromArgsOnly(const Kernel::PropertyManager &a
     result = args.getPropertyValue("Value");
   } else if (shape == ShapeArgs::FLAT_PLATE) {
     result = createFlatPlateXML(args, refFrame);
-  } else if (boost::algorithm::ends_with(shape, ShapeArgs::CYLINDER)) {
+  } else if (shape.ends_with(ShapeArgs::CYLINDER)) {
     result = createCylinderLikeXML(args, refFrame, boost::algorithm::equals(shape, ShapeArgs::HOLLOW_CYLINDER));
-  } else if (boost::algorithm::ends_with(shape, ShapeArgs::FLAT_PLATE_HOLDER)) {
+  } else if (shape.ends_with(ShapeArgs::FLAT_PLATE_HOLDER)) {
     result = createFlatPlateHolderXML(args, refFrame);
-  } else if (boost::algorithm::ends_with(shape, ShapeArgs::HOLLOW_CYLINDER_HOLDER)) {
+  } else if (shape.ends_with(ShapeArgs::HOLLOW_CYLINDER_HOLDER)) {
     result = createHollowCylinderHolderXML(args, refFrame);
-  } else if (boost::algorithm::ends_with(shape, ShapeArgs::SPHERE)) {
+  } else if (shape.ends_with(ShapeArgs::SPHERE)) {
     result = createSphereXML(args);
   } else {
     std::stringstream msg;

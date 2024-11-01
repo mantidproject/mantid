@@ -347,7 +347,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(const TableWorkspace_const_sptr 
   for (size_t icol = 0; icol < colnames.size(); ++icol) {
     const std::string &colname = colnames[icol];
 
-    if (boost::starts_with(colname, anodelogprefix)) {
+    if (colname.starts_with(anodelogprefix)) {
       // anode
       std::vector<std::string> terms;
       boost::split(terms, colname, boost::is_any_of(anodelogprefix));

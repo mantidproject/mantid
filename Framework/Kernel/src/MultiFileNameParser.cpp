@@ -329,7 +329,7 @@ void Parser::split() {
   // m_instString = instInfo.shortName(); // Make sure we're using the shortened
   // form of the isntrument name.
 
-  if (boost::starts_with(base, instInfo.delimiter())) {
+  if (base.starts_with(instInfo.delimiter())) {
     // Store the instrument delimiter, and strip it off the start of the string.
     m_underscoreString = instInfo.delimiter();
     base = base.substr(m_underscoreString.size(), base.size());

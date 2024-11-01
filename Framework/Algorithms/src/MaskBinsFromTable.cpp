@@ -13,8 +13,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
 
-#include <boost/algorithm/string/predicate.hpp>
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -150,9 +148,9 @@ void MaskBinsFromTable::processMaskBinWorkspace(const TableWorkspace_sptr &maskt
       id_xmin = i;
     else if (colname == "xmax")
       id_xmax = i;
-    else if (boost::algorithm::starts_with(colname, "spec")) {
+    else if (colname.starts_with("spec")) {
       id_spec = i;
-    } else if (boost::algorithm::starts_with(colname, "detectorid")) {
+    } else if (colname.starts_with("detectorid")) {
       id_dets = i;
     } else {
       g_log.warning() << "In TableWorkspace " << masktblws->getName() << ", column " << i << " with name " << colname

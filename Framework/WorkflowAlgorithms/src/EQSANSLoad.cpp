@@ -17,6 +17,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidWorkflowAlgorithms/EQSANSInstrument.h"
 
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
 
 #include "Poco/DirectoryIterator.h"
@@ -108,7 +109,7 @@ void EQSANSLoad::init() {
 /// @param pname :: name of the property to retrieve
 double getRunPropertyDbl(const MatrixWorkspace_sptr &inputWS, const std::string &pname) {
   Mantid::Kernel::Property *prop = inputWS->run().getProperty(pname);
-  auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+  const auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
   if (!dp)
     throw std::runtime_error("Could not cast (interpret) the property " + pname +
                              " as a floating point numeric value.");
@@ -270,8 +271,8 @@ void EQSANSLoad::getSourceSlitSize() {
 
   const std::string slit1Name = "vBeamSlit";
   Mantid::Kernel::Property *prop = dataWS->run().getProperty(slit1Name);
-  auto *dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
-  auto *ip = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(prop);
+  const auto *dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+  const auto *ip = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<int> *>(prop);
   int slit1;
   if (dp)
     slit1 = static_cast<int>(dp->getStatistics().mean);
@@ -319,7 +320,7 @@ void EQSANSLoad::getSourceSlitSize() {
   double S1 = 20.0;
   double L1 = -1.0;
   const double ssd = fabs(dataWS->getInstrument()->getSource()->getPos().Z()) * 1000.0;
-  int slits[3] = {slit1, slit2, slit3};
+  const int slits[3] = {slit1, slit2, slit3};
   for (int i = 0; i < 3; i++) {
     int m = slits[i] - 1;
     if (m >= 0 && m < 6) {
@@ -548,7 +549,7 @@ void EQSANSLoad::exec() {
 
     const std::string dzName = "detectorZ";
     Mantid::Kernel::Property *prop = dataWS->run().getProperty(dzName);
-    auto *dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+    const auto *dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
     if (!dp)
       throw std::runtime_error("Could not cast (interpret) the property " + dzName +
                                " as a time series property value.");

@@ -18,6 +18,8 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
 #include <iostream>

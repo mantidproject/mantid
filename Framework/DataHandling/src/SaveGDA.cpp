@@ -14,12 +14,14 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Unit.h"
 
-#include <optional>
-
 #include <cmath>
 #include <fstream>
 #include <iomanip>
+#include <optional>
 #include <sstream>
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 
 namespace Mantid::DataHandling {
 

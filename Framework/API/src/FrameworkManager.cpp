@@ -17,6 +17,7 @@
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/UsageService.h"
 
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
 #include <nexus/NeXusFile.hpp>

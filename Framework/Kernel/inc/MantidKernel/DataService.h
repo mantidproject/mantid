@@ -10,7 +10,6 @@
 // Includes
 //----------------------------------------------------------------------
 #ifndef Q_MOC_RUN
-#include <boost/algorithm/string.hpp>
 #include <memory>
 #endif
 #include "MantidKernel/ConfigService.h"
@@ -468,9 +467,7 @@ public:
 
   inline static std::string prefixToHide() { return "__"; }
 
-  inline static bool isHiddenDataServiceObject(const std::string &name) {
-    return boost::starts_with(name, prefixToHide());
-  }
+  inline static bool isHiddenDataServiceObject(const std::string &name) { return name.starts_with(prefixToHide()); }
 
   static bool showingHiddenObjects() {
     auto showingHiddenFlag = ConfigService::Instance().getValue<bool>("MantidOptions.InvisibleWorkspaces");

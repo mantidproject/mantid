@@ -14,7 +14,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
@@ -99,7 +98,7 @@ int LoadSESANS::confidence(Kernel::FileDescriptor &descriptor) const {
 
   // First line should be FileFormatVersion
   std::getline(file, line);
-  bool ffvFound = boost::starts_with(line, "FileFormatVersion");
+  bool ffvFound = line.starts_with("FileFormatVersion");
 
   // Next few lines should be key-value pairs
   boost::regex kvPair(R"([\w_]+\s+[\w\d\.\-]+(\s+[\w\d\.\-\$]+)*)");
@@ -159,7 +158,7 @@ void LoadSESANS::exec() {
   std::getline(infile, line);
 
   // First line must be FileFormatVersion:
-  if (!boost::starts_with(line, "FileFormatVersion"))
+  if (!line.starts_with("FileFormatVersion"))
     throwFormatError(line, "File must begin by providing FileFormatVersion", lineNum);
 
   // Read in all the header values, and make sure all the mandatory ones are
@@ -169,7 +168,7 @@ void LoadSESANS::exec() {
   checkMandatoryHeaders(attributes);
 
   // Make sure we haven't reached the end of the file without reading any data
-  if (!boost::starts_with(line, m_beginData))
+  if (!line.starts_with(m_beginData))
     throwFormatError("<EOF>", "Expected \"" + m_beginData + "\" before EOF", lineNum + 1);
 
   // Read file columns into a map - now we can get rid of the file
@@ -207,7 +206,7 @@ AttributeMap LoadSESANS::consumeHeaders(std::ifstream &infile, std::string &line
       attr = splitHeader(line, lineNum);
       attributes.insert(attr);
     }
-  } while (std::getline(infile, line) && !boost::starts_with(line, m_beginData));
+  } while (std::getline(infile, line) && !line.starts_with(m_beginData));
 
   return attributes;
 }

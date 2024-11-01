@@ -139,14 +139,13 @@ void DgsConvertToEnergyTransfer::exec() {
 
         std::string loadAlgName;
         std::string fileProp;
-        if (boost::ends_with(runFileName, "_event.nxs") || boost::ends_with(runFileName, ".nxs.h5") ||
-            boost::ends_with(runFileName, ".nxs")) {
+        if (runFileName.ends_with("_event.nxs") || runFileName.ends_with(".nxs.h5") || runFileName.ends_with(".nxs")) {
           g_log.notice() << "Loading NeXus monitors\n";
           loadAlgName = "LoadNexusMonitors";
           fileProp = "Filename";
         }
 
-        if (boost::ends_with(runFileName, "_neutron_event.dat")) {
+        if (runFileName.ends_with("_neutron_event.dat")) {
           g_log.notice() << "Loading PreNeXus monitors\n";
           loadAlgName = "LoadPreNexusMonitors";
           boost::replace_first(runFileName, "_neutron_event.dat", "_runinfo.xml");

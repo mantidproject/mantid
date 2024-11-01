@@ -714,7 +714,7 @@ void LoadRawHelper::runLoadLog(const std::string &fileName, const DataObjects::W
     loadLog->setPropertyValue("Names", extractLogName(*logPath));
 
     // Force loading two column file if it's an ISIS ICPevent log
-    if (boost::algorithm::ends_with(*logPath, "ICPevent.txt")) {
+    if (boost::algorithm::iends_with(*logPath, "ICPevent.txt")) {
       loadLog->setPropertyValue("NumberOfColumns", "2");
     }
 

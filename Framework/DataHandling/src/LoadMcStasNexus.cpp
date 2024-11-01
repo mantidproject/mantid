@@ -17,8 +17,6 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
-#include <boost/algorithm/string.hpp>
-
 namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace API;
@@ -47,7 +45,7 @@ int LoadMcStasNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   for (auto iter = entries.begin(); iter != entries.end(); ++iter) {
     const auto grouped_entries = iter->second;
     if (std::any_of(grouped_entries.cbegin(), grouped_entries.cend(),
-                    [](const auto &path) { return boost::ends_with(path, "information"); })) {
+                    [](const auto &path) { return path.ends_with("information"); })) {
       confidence = 40;
       break;
     }

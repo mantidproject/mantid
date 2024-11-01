@@ -14,7 +14,11 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 
 #include <Poco/TemporaryFile.h>
-#include <boost/algorithm/string/predicate.hpp>
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
+
 #include <cxxtest/TestSuite.h>
 
 #include <fstream>
@@ -140,14 +144,14 @@ public:
 
     // first line is header
     std::getline(file, line);
-    TS_ASSERT(boost::starts_with(line, "BANK 1"));
+    TS_ASSERT(line.starts_with("BANK 1"));
     std::vector<std::string> headerItems;
     boost::split(headerItems, line, boost::is_any_of(" "), boost::token_compress_on);
 
     int numPoints = 0;
     int numLines = 0;
     std::vector<double> TOFs;
-    while (std::getline(file, line) && !boost::starts_with(line, "BANK")) {
+    while (std::getline(file, line) && !line.starts_with("BANK")) {
       std::vector<std::string> lineItems;
       boost::trim(line);
       boost::split(lineItems, line, boost::is_any_of(" "), boost::token_compress_on);
@@ -179,7 +183,7 @@ public:
     TS_ASSERT_DELTA(expectedAverageDeltaTByT, averageDeltaTByT, 1e-3);
 
     // Just make sure there's another header after the one we just checked
-    TS_ASSERT(boost::starts_with(line, "BANK 2"));
+    TS_ASSERT(line.starts_with("BANK 2"));
   }
 
   void test_dataIsCorrect() {
@@ -203,7 +207,7 @@ public:
     std::vector<int> tof;
     std::vector<int> intensity;
     std::vector<int> error;
-    while (std::getline(file, line) && !boost::starts_with(line, "BANK")) {
+    while (std::getline(file, line) && !line.starts_with("BANK")) {
       std::vector<std::string> lineItems;
       boost::trim(line);
       boost::split(lineItems, line, boost::is_any_of(" "), boost::token_compress_on);
