@@ -5,17 +5,17 @@ c_compiler:
   - clang                    # [osx]
   - vs2019                   # [win]
 c_compiler_version:            # [unix]
-  - 16                         # [osx]
+  - 18                         # [osx]
   - 13                         # [linux]
 cxx_compiler:
   - gxx                      # [linux]
   - clangxx                  # [osx]
   - vs2019                   # [win]
 cxx_compiler_version:          # [unix]
-  - 16                         # [osx]
+  - 18                         # [osx]
   - 13                         # [linux]
 llvm_openmp:                   # [osx]
-  - 16                         # [osx]
+  - 18                         # [osx]
 
 python:
   - 3.10
