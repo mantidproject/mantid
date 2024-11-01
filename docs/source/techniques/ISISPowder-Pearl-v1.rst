@@ -405,9 +405,9 @@ Determines how the banks are grouped when using the
 :ref:`focus_pearl_isis-powder-diffraction-ref` method.
 Each mode is further described below.
 
-Accepted values are: **All**, **Groups**, **Mods** and **Trans**
+Accepted values are: **all**, **groups**, **mods**, **trans_subset** and **trans**
 
-All
+all
 ====
 In all mode banks 1-9 (inclusive) are summed into a single spectra
 then scaled down to 1/9 of their original values.
@@ -419,7 +419,7 @@ is set to **True**.
 Workspaces containing banks 10-14 are left as
 separate workspaces with appropriate names.
 
-Groups
+groups
 ======
 In groups mode banks 1+2+3, 4+5+6, 7+8+9 are summed into three (3)
 separate workspaces. Each workspace is scaled down to a 1/3 of original scale.
@@ -429,9 +429,9 @@ into a separate workspace and scaled down to 1/2 original scale.
 
 Banks 10-14 are left as separate workspaces with appropriate names.
 
-Trans
+trans
 ======
-In trans mode banks 1-9 (inclusive) are summed into a single spectra
+In trans mode banks 1-9 (inclusive) are summed into a single spectrum
 then scaled down to 1/9 original scale.
 
 The workspace is also attenuated if
@@ -441,7 +441,16 @@ is set to **True**.
 All banks are also output as individual workspaces with appropriate names
 with no additional processing applied.
 
-Mods
+trans_subset
+============
+This mode behaves the same as **trans** except the user can optionally supply which modules in the transverse banks to
+focus/sum using the input parameter e.g. *trans_mod_nums="1-3,5"* which would focus modules 1,2,3 and 5. The output
+spectrum is similarly normalised by the number of modules requested.
+
+If any module numbers are duplicated or outside the range 1-9 inclusive then all transverse modules are included -
+i.e. it defaults to the behaviour of *focus_mode="trans"* and the *trans_mod_nums* arguemnt is ignored.
+
+mods
 ====
 In mods mode every bank is left as individual workspaces with
 appropriate names. No additional processing is performed.
