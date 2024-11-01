@@ -58,6 +58,7 @@ class SettingsPresenter(object):
 
         self.view.sections.addItems(list(self.SETTINGS_TABS.values()))
         self.current = self.general_settings.view
+        self.view.sections.setCurrentRow(0)
         self.view.container.addWidget(self.general_settings.view)
         self.view.container.addWidget(self.categories_settings.view)
         self.view.container.addWidget(self.plot_settings.view)

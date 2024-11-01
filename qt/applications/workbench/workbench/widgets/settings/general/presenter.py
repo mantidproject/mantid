@@ -11,6 +11,7 @@ from mantidqt.widgets import instrumentselector
 from workbench.config import SAVE_STATE_VERSION
 from workbench.widgets.settings.general.view import GeneralSettingsView
 from workbench.widgets.settings.general.general_settings_model import GeneralSettingsModel
+from workbench.widgets.settings.view_utilities.settings_view_utilities import filter_out_mousewheel_events_from_combo_or_spin_box
 
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QFontDatabase
@@ -64,6 +65,10 @@ class GeneralSettings(object):
         self.action_instrument_changed(default_instrument)
         self.view.instrument.currentTextChanged.connect(self.action_instrument_changed)
 
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.facility)
+        self.view.instrument.setFocusPolicy(Qt.StrongFocus)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.instrument)
+
     def update_facilities_group(self):
         default_facility = self.model.get_facility()
         if not self.view.facility.findText(default_facility) == -1:
@@ -81,6 +86,7 @@ class GeneralSettings(object):
         self.view.window_behaviour.currentTextChanged.connect(self.action_window_behaviour_changed)
         self.view.main_font.clicked.connect(self.action_main_font_button_clicked)
         self.view.completion_enabled.stateChanged.connect(self.action_completion_enabled_modified)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.window_behaviour)
 
     def action_main_font_button_clicked(self):
         font = None
@@ -114,6 +120,8 @@ class GeneralSettings(object):
         self.view.total_number_checkpoints.valueChanged.connect(self.action_total_number_checkpoints)
         self.view.crystallography_convention.stateChanged.connect(self.action_crystallography_convention)
         self.view.use_open_gl.stateChanged.connect(self.action_use_open_gl)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.time_between_recovery)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.total_number_checkpoints)
 
     def action_facility_changed(self, new_facility):
         """

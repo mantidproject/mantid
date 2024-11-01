@@ -7,6 +7,7 @@
 #  This file is part of the mantid workbench
 from workbench.widgets.settings.fitting.view import FittingSettingsView
 from workbench.widgets.settings.fitting.fitting_settings_model import FittingSettingsModel
+from workbench.widgets.settings.view_utilities.settings_view_utilities import filter_out_mousewheel_events_from_combo_or_spin_box
 
 from qtpy.QtCore import Qt
 
@@ -16,9 +17,16 @@ class FittingSettings(object):
         self.view = view if view else FittingSettingsView(parent, self)
         self.parent = parent
         self.model = model if model else FittingSettingsModel()
+        self.add_filters()
         self.add_items_to_combo_boxes()
         self.load_current_setting_values()
         self.setup_signals()
+
+    def add_filters(self):
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.auto_bkg)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.default_peak)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.findpeaks_fwhm)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.findpeaks_tol)
 
     def add_items_to_combo_boxes(self):
         self.view.auto_bkg.addItem("None")

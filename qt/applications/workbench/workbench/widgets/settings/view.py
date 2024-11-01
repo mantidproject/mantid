@@ -33,7 +33,11 @@ class SettingsView(base, form):
 
     def ask_before_close(self):
         reply = QMessageBox.question(
-            self, self.presenter.ASK_BEFORE_CLOSE_TITLE, self.presenter.ASK_BEFORE_CLOSE_MESSAGE, QMessageBox.Yes, QMessageBox.No
+            self,
+            self.presenter.ASK_BEFORE_CLOSE_TITLE,
+            self.presenter.ASK_BEFORE_CLOSE_MESSAGE,
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
         )
         return True if reply == QMessageBox.Yes else False
 

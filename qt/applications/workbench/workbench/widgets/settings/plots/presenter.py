@@ -11,6 +11,7 @@ from mantid.plots.utility import get_colormap_names
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MARKER_STYLES
 from workbench.widgets.settings.plots.view import PlotsSettingsView
 from workbench.widgets.settings.plots.model import PlotsSettingsModel
+from workbench.widgets.settings.view_utilities.settings_view_utilities import filter_out_mousewheel_events_from_combo_or_spin_box
 from workbench.plotting.style import VALID_LINE_STYLE, VALID_DRAW_STYLE
 
 from qtpy.QtCore import Qt
@@ -39,6 +40,7 @@ class PlotSettings(object):
         self.view = view if view else PlotsSettingsView(parent, self)
         self.model = model if model else PlotsSettingsModel()
         self.parent = parent
+        self.add_filters()
         self.add_list_items()
         self.load_general_setting_values()
         self.setup_axes_group()
@@ -49,6 +51,35 @@ class PlotSettings(object):
         self.setup_legend_group()
         self.setup_images_group()
         self.setup_signals()
+
+    def add_filters(self):
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.plot_font)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.x_axes_scale)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.y_axes_scale)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.axes_line_width)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.x_min)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.x_max)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.y_min)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.y_max)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.major_ticks_length)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.major_ticks_width)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.major_ticks_direction)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.minor_ticks_length)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.minor_ticks_width)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.minor_ticks_direction)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.line_style)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.draw_style)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.line_width)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.marker_style)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.marker_size)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.error_width)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.capsize)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.cap_thickness)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.error_every)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.legend_font_size)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.legend_location)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.colorbar_scale)
+        filter_out_mousewheel_events_from_combo_or_spin_box(self.view.default_colormap_combo_box)
 
     def add_list_items(self):
         self.view.x_axes_scale.addItems(self.AXES_SCALE)
