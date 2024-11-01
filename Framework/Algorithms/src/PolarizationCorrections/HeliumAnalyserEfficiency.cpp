@@ -38,9 +38,9 @@ static const std::string OUTPUT_FIT_CURVES{"OutputFitCurves"};
 static const std::string OUTPUT_FIT_PARAMS{"OutputFitParameters"};
 static const std::string SPIN_STATES{"SpinStates"};
 static const std::string PXD{"PXD"};
-static const std::string PXD_Error{"PXDError"};
-static const std::string Start_X{"StartX"};
-static const std::string End_X{"EndX"};
+static const std::string PXD_ERROR{"PXDError"};
+static const std::string START_X{"StartX"};
+static const std::string END_X{"EndX"};
 static const std::string IGNORE_FIT_QUALITY_ERROR{"IgnoreFitQualityError"};
 
 static const std::string GROUP_INPUTS{"Inputs"};
@@ -65,10 +65,10 @@ void HeliumAnalyserEfficiency::init() {
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
   declareProperty(PropertyNames::PXD, 12.0, mustBePositive, "Gas pressure in bar multiplied by cell length in metres");
-  declareProperty(PropertyNames::PXD_Error, 0.0, mustBePositive, "Error in gas pressure multiplied by cell length");
-  declareProperty(PropertyNames::Start_X, 1.75, mustBePositive,
+  declareProperty(PropertyNames::PXD_ERROR, 0.0, mustBePositive, "Error in gas pressure multiplied by cell length");
+  declareProperty(PropertyNames::START_X, 1.75, mustBePositive,
                   "Lower boundary of wavelength range to use for fitting");
-  declareProperty(PropertyNames::End_X, 8.0, mustBePositive, "Upper boundary of wavelength range to use for fitting");
+  declareProperty(PropertyNames::END_X, 8.0, mustBePositive, "Upper boundary of wavelength range to use for fitting");
   declareProperty(PropertyNames::IGNORE_FIT_QUALITY_ERROR, false,
                   "Whether the algorithm should ignore a poor chi-squared (fit cost value) of greater than 1 and "
                   "therefore not throw an error",
@@ -87,10 +87,10 @@ void HeliumAnalyserEfficiency::init() {
 
   setPropertyGroup(PropertyNames::SPIN_STATES, PropertyNames::GROUP_INPUTS);
   setPropertyGroup(PropertyNames::PXD, PropertyNames::GROUP_INPUTS);
-  setPropertyGroup(PropertyNames::PXD_Error, PropertyNames::GROUP_INPUTS);
+  setPropertyGroup(PropertyNames::PXD_ERROR, PropertyNames::GROUP_INPUTS);
 
-  setPropertyGroup(PropertyNames::Start_X, PropertyNames::GROUP_FIT_OPTIONS);
-  setPropertyGroup(PropertyNames::End_X, PropertyNames::GROUP_FIT_OPTIONS);
+  setPropertyGroup(PropertyNames::START_X, PropertyNames::GROUP_FIT_OPTIONS);
+  setPropertyGroup(PropertyNames::END_X, PropertyNames::GROUP_FIT_OPTIONS);
   setPropertyGroup(PropertyNames::IGNORE_FIT_QUALITY_ERROR, PropertyNames::GROUP_FIT_OPTIONS);
 
   setPropertyGroup(PropertyNames::OUTPUT_WORKSPACE, PropertyNames::GROUP_OUTPUTS);
@@ -190,10 +190,10 @@ void HeliumAnalyserEfficiency::fitAnalyserEfficiency(const double mu, const Matr
   fit->initialize();
   fit->setProperty("Function", "name=UserFunction,Formula=(1 + tanh(" + std::to_string(mu) + "*phe*x))/2,phe=0.1");
   fit->setProperty(PropertyNames::INPUT_WORKSPACE, eff);
-  const double startLambda = getProperty(PropertyNames::Start_X);
-  fit->setProperty(PropertyNames::Start_X, startLambda);
-  const double endLambda = getProperty(PropertyNames::End_X);
-  fit->setProperty(PropertyNames::End_X, endLambda);
+  const double startLambda = getProperty(PropertyNames::START_X);
+  fit->setProperty(PropertyNames::START_X, startLambda);
+  const double endLambda = getProperty(PropertyNames::END_X);
+  fit->setProperty(PropertyNames::END_X, endLambda);
   fit->setProperty("CreateOutput", true);
   fit->execute();
 
@@ -228,7 +228,7 @@ void HeliumAnalyserEfficiency::convertToTheoreticalEfficiency(MatrixWorkspace_sp
 
   // The value tCrit is used to give us the correct error bounds
   const double tCrit = calculateTCrit(eff->blocksize());
-  const double muError = ABSORPTION_CROSS_SECTION_CONSTANT * static_cast<double>(getProperty(PropertyNames::PXD_Error));
+  const double muError = ABSORPTION_CROSS_SECTION_CONSTANT * static_cast<double>(getProperty(PropertyNames::PXD_ERROR));
 
   for (size_t i = 0; i < binPoints.size(); ++i) {
     const double lambda = binPoints[i];
