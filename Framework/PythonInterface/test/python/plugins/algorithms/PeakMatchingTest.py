@@ -54,7 +54,7 @@ class PeakMatchingTest(unittest.TestCase):
             column_data = table.column(column)
             assert len(peaks[column]) == len(column_data)
             for i in range(len(peaks[column])):
-                if type(peaks[column][i]) == float:
+                if isinstance(peaks[column][i], float):
                     self.assertAlmostEqual(peaks[column][i], column_data[i], delta=0.01)
                 else:
                     self.assertEqual(peaks[column][i], column_data[i])
@@ -117,7 +117,7 @@ class PeakMatchingTest(unittest.TestCase):
                 raise AssertionError
             for j, row in enumerate(data):
                 for column, value in row.items():
-                    if type(value) == int or type(value) == float:
+                    if isinstance(value, int) or isinstance(value, float):
                         self.assertAlmostEqual(matches[j][column], value)
                     else:
                         self.assertEqual(matches[j][column], value)
