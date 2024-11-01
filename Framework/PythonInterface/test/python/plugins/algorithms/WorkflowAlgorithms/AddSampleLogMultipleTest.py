@@ -34,7 +34,7 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         """
         logs = self._workspace.getRun().getProperties()
         matched_logs = list()
-        if units == None:
+        if units is None:
             units = [""] * len(names)
 
         for log in logs:

@@ -270,13 +270,10 @@ def _is_name_material_in_group(wks_group, name_to_find, material_to_find):
     """
 
     found_ws = _perform_group_name_search(wks_group, name_to_find)
-    if found_ws == None:
+    if found_ws is None:
         return False
 
-    if found_ws.sample().getMaterial().name() == material_to_find:
-        return True
-    else:
-        return False
+    return found_ws.sample().getMaterial().name() == material_to_find
 
 
 def _is_name_in_group(wks_group, name_to_find):
@@ -288,11 +285,7 @@ def _is_name_in_group(wks_group, name_to_find):
     """
 
     found_ws = _perform_group_name_search(wks_group, name_to_find)
-
-    if found_ws == None:
-        return False
-    else:
-        return True
+    return found_ws is not None
 
 
 def _perform_group_name_search(wks_group, name_to_find):

@@ -306,6 +306,6 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    if AlgoTimeRegister != None:
+    if AlgoTimeRegister is not None:
         # only run test if AlgoTimeRegister exists
         unittest.main()
