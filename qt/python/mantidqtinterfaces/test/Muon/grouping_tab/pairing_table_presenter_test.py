@@ -139,7 +139,7 @@ class PairingTablePresenterTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
 
     def test_context_menu_add_pairing_with_no_rows_selected_adds_pair_to_end_of_table(self):
-        self.view._context_menu_event(0)
+        self.view.contextMenuEvent(0)
         self.view.add_pair_action.triggered.emit(True)
 
         self.assertEqual(len(self.model.pairs), 1)
@@ -150,7 +150,7 @@ class PairingTablePresenterTest(unittest.TestCase):
         self.add_two_pairs_to_table()
         self.presenter.get_selected_row_indices = mock.Mock(return_value=[0])
 
-        self.view._context_menu_event(0)
+        self.view.contextMenuEvent(0)
 
         self.assertFalse(self.view.add_pair_action.isEnabled())
 
@@ -159,7 +159,7 @@ class PairingTablePresenterTest(unittest.TestCase):
             # names : pair_1, pair_2, pair_3
             self.presenter.handle_add_pair_button_clicked()
 
-        self.view._context_menu_event(0)
+        self.view.contextMenuEvent(0)
         self.view.remove_pair_action.triggered.emit(True)
 
         self.assertEqual(len(self.model.pairs), 2)
@@ -173,7 +173,7 @@ class PairingTablePresenterTest(unittest.TestCase):
             self.presenter.handle_add_pair_button_clicked()
         self.presenter.get_selected_row_indices = mock.Mock(return_value=[0, 2])
 
-        self.view._context_menu_event(0)
+        self.view.contextMenuEvent(0)
         self.view.remove_pair_action.triggered.emit(True)
 
         self.assertEqual(len(self.model.pairs), 1)
@@ -181,7 +181,7 @@ class PairingTablePresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.get_table_item_text(0, 0), "pair_2")
 
     def test_context_menu_remove_pairing_disabled_if_no_pairs_in_table(self):
-        self.view._context_menu_event(0)
+        self.view.contextMenuEvent(0)
 
         self.assertFalse(self.view.remove_pair_action.isEnabled())
 

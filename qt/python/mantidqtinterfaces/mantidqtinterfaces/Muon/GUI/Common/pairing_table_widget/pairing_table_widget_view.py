@@ -210,7 +210,7 @@ class PairingTableView(QtWidgets.QWidget):
 
     def add_group_selector_entry(self, row, col, entry, group):
         """Add a group selector widget for group_1 or group_2."""
-        group_selector_widget = self.group_selection_cell_widget
+        group_selector_widget = self.group_selection_cell_widget()
 
         if group == "group_1":
             group_selector_widget.currentIndexChanged.connect(lambda: self.on_cell_changed(row, 2))
@@ -232,7 +232,7 @@ class PairingTableView(QtWidgets.QWidget):
 
     def add_guess_alpha_button(self, row):
         """Add the 'Guess Alpha' button to the last column."""
-        guess_alpha_widget = self.guess_alpha_button
+        guess_alpha_widget = self.guess_alpha_button()
         guess_alpha_widget.clicked.connect(self.guess_alpha_clicked_from_row)
         self.set_widget_in_table(row, 5, guess_alpha_widget)
 
@@ -240,7 +240,6 @@ class PairingTableView(QtWidgets.QWidget):
     def get_default_item_flags(self):
         return QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled
 
-    @property
     def group_selection_cell_widget(self):
         # The widget for the group selection columns
         selector = QtWidgets.QComboBox(self)
@@ -248,7 +247,6 @@ class PairingTableView(QtWidgets.QWidget):
         selector.addItems(self._group_selections)
         return selector
 
-    @property
     def guess_alpha_button(self):
         # The widget for the guess alpha column
         guess_alpha = QtWidgets.QPushButton(self)
@@ -328,7 +326,6 @@ class PairingTableView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
     # Context Menu
     # ------------------------------------------------------------------------------------------------------------------
-    @property
     def create_context_menu(self):
         self.menu = QtWidgets.QMenu(self)
         return self.menu
@@ -340,9 +337,9 @@ class PairingTableView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
     # Context Menu
     # ------------------------------------------------------------------------------------------------------------------
-    def _context_menu_event(self, _event):
+    def contextMenuEvent(self, _event):
         """Overridden method for dealing with the right-click context menu"""
-        menu = self.create_context_menu
+        menu = self.create_context_menu()
 
         add_pair_action = self._context_menu_add_pair_action(self.add_pair_button.clicked.emit)
         remove_pair_action = self._context_menu_remove_pair_action(self.remove_pair_button.clicked.emit)
@@ -357,7 +354,7 @@ class PairingTableView(QtWidgets.QWidget):
         menu.popup(self.cursor_position)
 
     def _context_menu_add_pair_action(self, slot):
-        add_pair_action = self.get_add_pair_action
+        add_pair_action = self.get_add_pair_action()
         add_pair_action.setCheckable(False)
         if len(self._presenter.get_selected_row_indices()) > 0:
             add_pair_action.setEnabled(False)
@@ -378,7 +375,6 @@ class PairingTableView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
     # Adding / Removing pairs
     # ------------------------------------------------------------------------------------------------------------------
-    @property
     def get_add_pair_action(self):
         self.add_pair_action = QtWidgets.QAction("Add Pair", self)
         return self.add_pair_action
