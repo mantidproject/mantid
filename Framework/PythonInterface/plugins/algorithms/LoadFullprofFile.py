@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
+# ruff: noqa: E741  # Ambiguous variable name
 from mantid.api import (
     PythonAlgorithm,
     AlgorithmFactory,
@@ -236,8 +237,8 @@ class LoadFullprofFile(PythonAlgorithm):
 
         rawlines = pfile.readlines()
         lines = []
-        for l in rawlines:
-            line = l.strip()
+        for line in rawlines:
+            line = line.strip()
             if len(line) > 0:
                 lines.append(line)
 

@@ -51,13 +51,13 @@ class ReflectometryISIS(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
         # Perform the normaisation step
         Divide(LHSWorkspace=D, RHSWorkspace=Io, OutputWorkspace="I", AllowDifferentNumberSpectra="1", ClearRHSWorkspace="1")
-        I = mtd["I"][0]
+        result_workspace = mtd["I"][0]
 
         # Move the detector so that the detector channel matching the reflected beam is at 0,0
-        MoveInstrumentComponent(Workspace=I, ComponentName="lineardetector", X=0, Y=0, Z=-PIX * avgDB)
+        MoveInstrumentComponent(Workspace=result_workspace, ComponentName="lineardetector", X=0, Y=0, Z=-PIX * avgDB)
 
         # Should now have signed theta vs Lambda
-        ConvertSpectrumAxis(InputWorkspace=I, OutputWorkspace="SignedTheta_vs_Wavelength", Target="signed_theta")
+        ConvertSpectrumAxis(InputWorkspace=result_workspace, OutputWorkspace="SignedTheta_vs_Wavelength", Target="signed_theta")
 
         # Check that signed two theta is being calculated correctly (not normalised)
         ws1 = mtd["SignedTheta_vs_Wavelength"]

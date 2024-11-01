@@ -137,18 +137,18 @@ class DrillPresenter:
             if "+" in value:
                 return "+".join([inc(e, i) for e in value.split("+")])
             if ":" in value:
-                l = value.split(":")
+                substrings = value.split(":")
                 try:
-                    l = [int(e) for e in l]
+                    runs = [int(e) for e in substrings]
                 except:
                     return value
-                if len(l) == 2:
+                if len(runs) == 2:
                     if i > 0:
-                        return str(l[1] + i) + ":" + str(l[1] + (l[1] - l[0]) + i)
+                        return str(runs[1] + i) + ":" + str(runs[1] + (runs[1] - runs[0]) + i)
                     else:
-                        return str(l[0] - (l[1] - l[0]) + i) + ":" + str(l[0] + i)
-                if len(l) == 3:
-                    return inc(str(l[0]) + ":" + str(l[1]), i) + ":" + str(l[2])
+                        return str(runs[0] - (runs[1] - runs[0]) + i) + ":" + str(runs[0] + i)
+                if len(runs) == 3:
+                    return inc(str(runs[0]) + ":" + str(runs[1]), i) + ":" + str(runs[2])
                 else:
                     return value
 

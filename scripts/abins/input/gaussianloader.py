@@ -272,13 +272,13 @@ class GAUSSIANLoader(AbInitioLoader):
         line_size = len(sub_block_start.split()) + 2
         freq_per_line = sub_block_start.count("X")
 
-        l = file_obj.readline().split()
-        while len(l) == line_size:
+        line = file_obj.readline().split()
+        while len(line) == line_size:
             for f in range(freq_per_line):
-                disp[self._num_read_freq + f, num_atom, 0] = complex(float(l[2 + 3 * f]), 0)
-                disp[self._num_read_freq + f, num_atom, 1] = complex(float(l[3 + 3 * f]), 0)
-                disp[self._num_read_freq + f, num_atom, 2] = complex(float(l[4 + 3 * f]), 0)
-            l = file_obj.readline().split()
+                disp[self._num_read_freq + f, num_atom, 0] = complex(float(line[2 + 3 * f]), 0)
+                disp[self._num_read_freq + f, num_atom, 1] = complex(float(line[3 + 3 * f]), 0)
+                disp[self._num_read_freq + f, num_atom, 2] = complex(float(line[4 + 3 * f]), 0)
+            line = file_obj.readline().split()
             num_atom += 1
         self._num_read_freq += freq_per_line
 
