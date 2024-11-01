@@ -134,9 +134,40 @@ class FocusTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         # check output files as expected
-        def generate_error_message(expected_file, output_dir):
-            return "Unable to find {} in {}\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
+        def assert_output_file_exists(directory, filename):
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
 
+        assert_output_file_exists(user_dir, "PRL98507_tt70.nxs")
+        assert_output_file_exists(gss_outdir, "PRL98507_tt70.gsas")
+        assert_output_file_exists(xye_tof_outdir, "PRL98507_tt70_tof.xye")
+        assert_output_file_exists(xye_dSpac_outdir, "PRL98507_tt70_d.xye")
+
+        self.tolerance = 1e-8  # Required for difference in spline data between operating systems
+        return "PRL98507_tt70-d", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            config["datasearch.directories"] = self.existing_config
+            mantid.mtd.clear()
+
+
+class FocusTestFocusModeTransSubset(systemtesting.MantidSystemTest):
+    focus_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        inst_object = setup_inst_object(focus_mode="trans_subset")
+        self.focus_results = run_focus(inst_object, tt_mode="tt70", subtract_empty=True, spline_path=spline_path, trans_mod_nums="1-9")
+
+    def validate(self):
         def assert_output_file_exists(directory, filename):
             self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
 
@@ -213,9 +244,6 @@ class FocusLongThenShortTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         # check output files as expected
-        def generate_error_message(expected_file, output_dir):
-            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
-
         def assert_output_file_exists(directory, filename):
             self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
 
@@ -438,6 +466,10 @@ def setup_inst_object(**kwargs):
         **kwargs,
     )
     return inst_obj
+
+
+def generate_error_message(expected_file, output_dir):
+    return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
 
 
 def _try_delete(path):
