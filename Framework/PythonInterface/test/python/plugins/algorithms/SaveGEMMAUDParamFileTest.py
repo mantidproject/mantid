@@ -13,7 +13,6 @@ from testhelpers import run_algorithm
 
 
 class SaveGEMMAUDParamFileTest(unittest.TestCase):
-
     ALG_NAME = "SaveGEMMAUDParamFile"
     GSAS_PARAM_FILE = "GEM_PF1_PROFILE.IPF"
     INPUT_FILE_NAME = "GEM61785_texture_banks_1_to_4.nxs"

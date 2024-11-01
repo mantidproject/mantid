@@ -13,7 +13,6 @@ from mantid.simpleapi import HB3AAdjustSampleNorm, HB3AFindPeaks, HB3AIntegrateP
 
 
 class HB3AIntegratePeaksTest(unittest.TestCase):
-
     _files = "HB3A_exp0724_scan0182.nxs,HB3A_exp0724_scan0183.nxs"
 
     @classmethod

@@ -7,7 +7,16 @@
 import unittest
 import numpy as np
 from mantid.api import mtd
-from mantid.simpleapi import ApplyDetectorScanEffCorr, CreateSampleWorkspace, CreateWorkspace, ExtractMonitors, LoadILLDiffraction, LoadNexusProcessed, MaskBinsIf, Transpose
+from mantid.simpleapi import (
+    ApplyDetectorScanEffCorr,
+    CreateSampleWorkspace,
+    CreateWorkspace,
+    ExtractMonitors,
+    LoadILLDiffraction,
+    LoadNexusProcessed,
+    MaskBinsIf,
+    Transpose,
+)
 
 
 class ApplyDetectorScanEffCorrTest(unittest.TestCase):

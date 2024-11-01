@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Specifically tests the RenameWorkspace algorithm in the simple API
+Specifically tests the RenameWorkspace algorithm in the simple API
 """
+
 import unittest
 from mantid.api import mtd
 from mantid.simpleapi import CreateSampleWorkspace, RenameWorkspace

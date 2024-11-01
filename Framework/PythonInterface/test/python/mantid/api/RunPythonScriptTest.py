@@ -48,14 +48,16 @@ class RunPythonScriptTest(unittest.TestCase):
 
     def test_input_MatrixWorkspace_has_correct_python_type_when_executed(self):
         code = """from mantid.api import MatrixWorkspace
-if not isinstance(input, MatrixWorkspace): raise RuntimeError("Input workspace is not a MatrixWorkspace in Python: Type=%s" % str(type(input)))
+if not isinstance(input, MatrixWorkspace):
+    raise RuntimeError("Input workspace is not a MatrixWorkspace in Python: Type=%s" % str(type(input)))
 """
         RunPythonScript(InputWorkspace="ws", Code=code)
 
     def test_input_EventWorkspace_has_correct_python_type_when_executed(self):
         test_eventws = ConvertToEventWorkspace(InputWorkspace="ws")
         code = """from mantid.api import IEventWorkspace
-if not isinstance(input, IEventWorkspace): raise RuntimeError("Input workspace is not an IEventWorkspace in Python: Type=%s" % str(type(input)))
+if not isinstance(input, IEventWorkspace):
+    raise RuntimeError("Input workspace is not an IEventWorkspace in Python: Type=%s" % str(type(input)))
 """
         RunPythonScript(InputWorkspace=test_eventws, Code=code)
 
@@ -69,7 +71,8 @@ if not isinstance(input, IEventWorkspace): raise RuntimeError("Input workspace i
 
         # Check type
         code = """from mantid.api import IMDEventWorkspace
-if not isinstance(input, IMDEventWorkspace): raise RuntimeError("Input workspace is not an IMDHistoWorkspace in Python: Type=%s" % str(type(input)))
+if not isinstance(input, IMDEventWorkspace):
+    raise RuntimeError("Input workspace is not an IMDHistoWorkspace in Python: Type=%s" % str(type(input)))
 """
         RunPythonScript(InputWorkspace=mtd["ws"], Code=code)
 

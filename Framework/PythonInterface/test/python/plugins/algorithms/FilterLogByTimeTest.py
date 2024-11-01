@@ -10,7 +10,6 @@ from mantid.simpleapi import AddSampleLog, CreateWorkspace, DeleteWorkspace, Fil
 
 
 class FilterLogByTimeTest(unittest.TestCase):
-
     __ws = None
 
     """ Log file contents.

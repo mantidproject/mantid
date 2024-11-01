@@ -29,7 +29,8 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         LoadInstrument(ws, InstrumentName="MARI", RewriteSpectraMap=True)
         with self.assertRaisesRegex(
             RuntimeError,
-            r"Input workspace must be in \(Q,E\) \[momentum and energy transfer\] or \(2theta, E\) \[scattering angle and energy transfer.\]",
+            r"Input workspace must be in \(Q,E\) \[momentum and energy transfer\] or \(2theta, E\) "
+            r"\[scattering angle and energy transfer.\]",
         ):
             ComputeIncoherentDOS(ws, ComputeIncoherentDOS="ws_DOS")
         ws = SofQW3(ws, [0, 0.05, 8], "Direct", 25)
@@ -101,13 +102,15 @@ class ComputeIncoherentDOSTest(unittest.TestCase):
         # Will fail unless the input workspace has Q and DeltaE axes.
         with self.assertRaisesRegex(
             RuntimeError,
-            r"Input workspace must be in \(Q,E\) \[momentum and energy transfer\] or \(2theta, E\) \[scattering angle and energy transfer.\]",
+            r"Input workspace must be in \(Q,E\) \[momentum and energy transfer\] or \(2theta, E\) "
+            r"\[scattering angle and energy transfer.\]",
         ):
             ws_DOS = ComputeIncoherentDOS(ws)
         ws = CreateSampleWorkspace(XUnit="DeltaE")
         with self.assertRaisesRegex(
             RuntimeError,
-            r"Input workspace must be in \(Q,E\) \[momentum and energy transfer\] or \(2theta, E\) \[scattering angle and energy transfer.\]",
+            r"Input workspace must be in \(Q,E\) \[momentum and energy transfer\] or \(2theta, E\) "
+            r"\[scattering angle and energy transfer.\]",
         ):
             ws_DOS = ComputeIncoherentDOS(ws)
         # Creates a workspace with two optic phonon modes at +E and -E with Q^2 dependence and population correct for T=300K

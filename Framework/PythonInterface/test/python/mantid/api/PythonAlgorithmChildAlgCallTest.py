@@ -7,6 +7,7 @@
 """A test for the simple API dedicated to Python algorithms. Checks
 things like Child Algorithm calls
 """
+
 import unittest
 from testhelpers import run_algorithm
 
@@ -36,7 +37,6 @@ AlgorithmFactory.subscribe(PythonAlgorithmChildAlgCallTestAlg)
 
 
 class PythonAlgorithmChildAlgCallTest(unittest.TestCase):
-
     _alg_reg = False
     _ws_name = "test_ws"
     _ws_name2 = "test_ws_1"

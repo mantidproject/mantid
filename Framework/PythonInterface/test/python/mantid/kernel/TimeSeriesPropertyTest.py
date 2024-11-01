@@ -12,7 +12,6 @@ from testhelpers import run_algorithm
 
 
 class TimeSeriesPropertyTest(unittest.TestCase):
-
     _test_ws = None
     _ntemp = 5
     _nframes = 6

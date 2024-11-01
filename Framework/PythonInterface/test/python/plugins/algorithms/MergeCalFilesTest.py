@@ -16,7 +16,6 @@ Helper type to represent an entry in a cal file
 
 
 class CalFileLine:
-
     _number = None
     _UDET = None
     _offset = None
@@ -52,7 +51,6 @@ A helper resource managing wrapper over a new calfile object. Creates cal file a
 
 
 class DisposableCalFileObject:
-
     _fullpath = None
     _dirpath = None
 
@@ -82,7 +80,6 @@ A helper resource managing wrapper over an existing cal file for reading. Dispos
 
 
 class ReadableCalFileObject:
-
     _fullpath = None
     _dirpath = None
 
@@ -116,7 +113,6 @@ class ReadableCalFileObject:
 
 class MergeCalFilesTest(unittest.TestCase):
     def do_execute(self, masterEntry, updateEntry, mergeOffsets, mergeSelect, mergeGroups):
-
         # Create the master cal file
         masterfile = DisposableCalFileObject("master.cal")
         masterfile.writeline(masterEntry)
@@ -147,7 +143,6 @@ class MergeCalFilesTest(unittest.TestCase):
         return firstLineOutput
 
     def test_replace_nothing(self):
-
         masterEntry = CalFileLine(1, 1, 1.0, 1, 1)
         updateEntry = CalFileLine(1, 1, 2.0, 2, 2)
 
@@ -160,7 +155,6 @@ class MergeCalFilesTest(unittest.TestCase):
         self.assertEqual(masterEntry.getGroup(), firstLineOutput.getGroup())
 
     def test_replace_offset_only(self):
-
         masterEntry = CalFileLine(1, 1, 1.0, 1, 1)
         updateEntry = CalFileLine(1, 1, 2.0, 2, 2)
 
@@ -173,7 +167,6 @@ class MergeCalFilesTest(unittest.TestCase):
         self.assertEqual(masterEntry.getGroup(), firstLineOutput.getGroup())
 
     def test_replace_select_only(self):
-
         masterEntry = CalFileLine(1, 1, 1.0, 1, 1)
         updateEntry = CalFileLine(1, 1, 2.0, 2, 2)
 
@@ -187,7 +180,6 @@ class MergeCalFilesTest(unittest.TestCase):
         self.assertEqual(masterEntry.getGroup(), firstLineOutput.getGroup())
 
     def test_replace_group_only(self):
-
         masterEntry = CalFileLine(1, 1, 1.0, 1, 1)
         updateEntry = CalFileLine(1, 1, 2.0, 2, 2)
 
@@ -201,7 +193,6 @@ class MergeCalFilesTest(unittest.TestCase):
         self.assertEqual(updateEntry.getGroup(), firstLineOutput.getGroup())
 
     def test_replace_all(self):
-
         masterEntry = CalFileLine(1, 1, 1.0, 1, 1)
         updateEntry = CalFileLine(1, 1, 2.0, 2, 2)
 

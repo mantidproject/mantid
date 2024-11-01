@@ -11,7 +11,6 @@ from testhelpers import run_algorithm
 
 
 class ConjoinSpectraTest(unittest.TestCase):
-
     _aWS = None
 
     def setUp(self):

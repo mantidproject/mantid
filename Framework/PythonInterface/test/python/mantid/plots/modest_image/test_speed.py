@@ -20,7 +20,6 @@ data = np.sin(x / 10.0) * np.cos(y / 30.0)
 
 
 def setup(img_cls):
-
     plt.clf()
     plt.cla()
     ax = plt.gca()

@@ -11,7 +11,10 @@ from mantid.simpleapi import IqtFitMultiple, Load
 
 class IqtFitMultipleTest(unittest.TestCase):
     _iqt_ws = None
-    _function = r"name=LinearBackground,A0=0.027668,A1=0,ties=(A1=0);name=StretchExp,Height=0.972332,Lifetime=0.0247558,Stretching=1;ties=(f1.Height=1-f0.A0)"
+    _function = (
+        r"name=LinearBackground,A0=0.027668,A1=0,ties=(A1=0);name=StretchExp,Height=0.972332,"
+        r"Lifetime=0.0247558,Stretching=1;ties=(f1.Height=1-f0.A0)"
+    )
 
     def setUp(self):
         self._iqt_ws = Load(Filename="iris26176_graphite002_iqt.nxs", OutputWorkspace="iris26176_graphite002_iqt")

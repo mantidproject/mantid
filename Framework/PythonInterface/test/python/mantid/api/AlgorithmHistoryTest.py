@@ -30,7 +30,6 @@ class ParentAlg(DataProcessorAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("Workspace", "", Direction.InOut), doc="Name to give the input workspace.")
 
     def PyExec(self):
-
         alg = self.createChildAlgorithm("ChildAlg")
         alg.initialize()
         args = {}

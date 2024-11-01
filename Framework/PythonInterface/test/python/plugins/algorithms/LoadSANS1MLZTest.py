@@ -9,7 +9,6 @@ from plugins.algorithms.SANS1DataMLZ import SANSdata
 
 
 class LoadSANSMLZTest(unittest.TestCase):
-
     filename_001: str = "D0122881.001"
     filename_incomplete: str = "sans-incomplete.001"
 

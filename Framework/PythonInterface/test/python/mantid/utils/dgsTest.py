@@ -28,9 +28,8 @@ class DgsUtilsTest(unittest.TestCase):
         expected_out_plane_kf_angle,
         expected_omega,
         expected_error_code,
-        **pars
+        **pars,
     ):
-
         result = qangle(lattice=ol, **pars)
         good_results = where(result.error_code == ErrorCodes.CORRECT)
         assert_almost_equal(expected_Qx[good_results], result.Q_lab_x[good_results], 2)
@@ -122,7 +121,7 @@ class DgsUtilsTest(unittest.TestCase):
             expected_out_plane_kf_angle,
             expected_omega,
             expected_error_code,
-            **pars
+            **pars,
         )
 
     def test_qangle_NoGC_NoOC_Ei10(self):
@@ -198,7 +197,7 @@ class DgsUtilsTest(unittest.TestCase):
             expected_out_plane_kf_angle,
             expected_omega,
             expected_error_code,
-            **pars
+            **pars,
         )
 
     def test_qangle_NoGC_NoOC_DE0(self):
@@ -271,7 +270,7 @@ class DgsUtilsTest(unittest.TestCase):
             expected_out_plane_kf_angle,
             expected_omega,
             expected_error_code,
-            **pars
+            **pars,
         )
 
     def test_qangle_NoGC_NoOC_left(self):
@@ -340,7 +339,7 @@ class DgsUtilsTest(unittest.TestCase):
             expected_out_plane_kf_angle,
             expected_omega,
             expected_error_code,
-            **pars
+            **pars,
         )
 
     def test_qangle_NoGC_NoOC_right(self):
@@ -404,7 +403,7 @@ class DgsUtilsTest(unittest.TestCase):
             expected_out_plane_kf_angle,
             expected_omega,
             expected_error_code,
-            **pars
+            **pars,
         )
 
     def test_qangle_GC_NoOC(self):
@@ -492,7 +491,7 @@ class DgsUtilsTest(unittest.TestCase):
             expected_out_plane_kf_angle,
             expected_omega,
             expected_error_code,
-            **pars
+            **pars,
         )
 
     def test_qangle_NoGC_OC(self):
@@ -570,7 +569,7 @@ class DgsUtilsTest(unittest.TestCase):
             expected_out_plane_kf_angle,
             expected_omega,
             expected_error_code,
-            **pars
+            **pars,
         )
 
     def test_qangle_GC_OC(self):
@@ -660,7 +659,7 @@ class DgsUtilsTest(unittest.TestCase):
             expected_out_plane_kf_angle,
             expected_omega,
             expected_error_code,
-            **pars
+            **pars,
         )
 
     def test_qangle_NoGC_NoOC_newOL(self):
@@ -737,7 +736,7 @@ class DgsUtilsTest(unittest.TestCase):
             expected_out_plane_kf_angle,
             expected_omega,
             expected_error_code,
-            **pars
+            **pars,
         )
 
 
