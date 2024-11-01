@@ -117,6 +117,20 @@ QListView::item {
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="apply_button">
+            <property name="text">
+             <string>Apply</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="okay_button">
+            <property name="text">
+             <string>Okay</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="load_file_button">
             <property name="text">
              <string>Load from File</string>

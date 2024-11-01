@@ -11,12 +11,14 @@ from qtpy.QtWidgets import QFileDialog
 from mantid import ConfigService
 from mantidqt.interfacemanager import InterfaceManager
 from mantidqt.utils.qt import ensure_widget_is_on_screen
-from workbench.widgets.settings.categories.presenter import CategoriesSettings, CategoryProperties
+from workbench.widgets.settings.categories.presenter import CategoriesSettings
+from workbench.widgets.settings.categories.categories_settings_model import CategoryProperties, CategoriesSettingsModel
 from workbench.widgets.settings.fitting.presenter import FittingSettings
-from workbench.widgets.settings.fitting.fitting_settings_model import FittingProperties
+from workbench.widgets.settings.fitting.fitting_settings_model import FittingProperties, FittingSettingsModel
 from workbench.widgets.settings.general.presenter import GeneralSettings
-from workbench.widgets.settings.general.general_settings_model import GeneralProperties, GeneralUserConfigProperties
-from workbench.widgets.settings.plots.presenter import PlotSettings, PlotProperties
+from workbench.widgets.settings.general.general_settings_model import GeneralProperties, GeneralUserConfigProperties, GeneralSettingsModel
+from workbench.widgets.settings.plots.presenter import PlotSettings
+from workbench.widgets.settings.plots.model import PlotProperties, PlotsSettingsModel
 from workbench.widgets.settings.view import SettingsView
 from workbench.widgets.settings.model import SettingsModel
 
@@ -37,13 +39,18 @@ class SettingsPresenter(object):
     def __init__(
         self, parent, view=None, model=None, general_settings=None, categories_settings=None, plot_settings=None, fitting_settings=None
     ):
-        # TODO: construct all the models to give to the main model and one to each presenter
+        categories_model = CategoriesSettingsModel()
+        fitting_model = FittingSettingsModel()
+        general_model = GeneralSettingsModel()
+        plots_model = PlotsSettingsModel()
         self.view = view if view else SettingsView(parent, self)
-        self.model = model if model else SettingsModel()
-        self.general_settings = general_settings if general_settings else GeneralSettings(parent, None, self)
-        self.categories_settings = categories_settings if categories_settings else CategoriesSettings(parent)
-        self.plot_settings = plot_settings if plot_settings else PlotSettings(parent)
-        self.fitting_settings = fitting_settings if fitting_settings else FittingSettings(parent)
+        self.model = model if model else SettingsModel([categories_model, fitting_model, general_model, plots_model])
+        self.general_settings = (
+            general_settings if general_settings else GeneralSettings(parent, settings_presenter=self, model=general_model)
+        )
+        self.categories_settings = categories_settings if categories_settings else CategoriesSettings(parent, model=categories_model)
+        self.plot_settings = plot_settings if plot_settings else PlotSettings(parent, model=plots_model)
+        self.fitting_settings = fitting_settings if fitting_settings else FittingSettings(parent, model=fitting_model)
         self.parent = parent
         self.all_properties = []
         for properties in [CategoryProperties, FittingProperties, GeneralProperties, GeneralUserConfigProperties, PlotProperties]:
@@ -56,10 +63,12 @@ class SettingsPresenter(object):
         self.view.container.addWidget(self.plot_settings.view)
         self.view.container.addWidget(self.fitting_settings.view)
 
+        self.view.okay_button.clicked.connect(self.action_okay_button_pushed)
+        self.view.apply_button.clicked.connect(self.action_apply_button_pushed)
+
         self.view.save_file_button.clicked.connect(self.action_save_settings_to_file)
         self.view.load_file_button.clicked.connect(self.action_load_settings_from_file)
         self.view.help_button.clicked.connect(self.action_open_help_window)
-        self.ask_before_close = False
 
         self.changes_that_need_restart = []
 
@@ -73,6 +82,13 @@ class SettingsPresenter(object):
 
     def hide(self):
         self.view.hide()
+
+    def action_okay_button_pushed(self):
+        self.model.apply_all_settings()
+        self.view_closing()
+
+    def action_apply_button_pushed(self):
+        self.model.apply_all_settings()
 
     def action_section_changed(self, new_section_pos):
         """
@@ -101,7 +117,7 @@ class SettingsPresenter(object):
         """
         Saves the mantid settings and updates updates the parent
         """
-        if not self.ask_before_close or self.view.ask_before_close():
+        if not self.model.unsaved_changes() or self.view.ask_before_close():
             ConfigService.saveConfig(ConfigService.getUserFilename())
             self.parent.config_updated()
             self.view.close()

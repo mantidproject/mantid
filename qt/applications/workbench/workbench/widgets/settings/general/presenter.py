@@ -99,7 +99,7 @@ class GeneralSettings(object):
         if font_string != font.toString():
             self.model.set_font(font.toString())
             if self.settings_presenter is not None:
-                self.model.register_apply_callback(lambda: self.settings_presenter.register_change_needs_restart("Main Font Selection"))
+                self.settings_presenter.register_change_needs_restart("Main Font Selection")
 
     def action_window_behaviour_changed(self, text):
         self.model.set_window_behaviour(text)
@@ -143,9 +143,7 @@ class GeneralSettings(object):
     def action_prompt_deleting_workspace(self, state):
         self.model.set_prompt_on_deleting_workspace(bool(state))
         if self.settings_presenter is not None:
-            self.model.register_apply_callback(
-                lambda: self.settings_presenter.register_change_needs_restart("Prompt when deleting workspaces")
-            )
+            self.settings_presenter.register_change_needs_restart("Prompt when deleting workspaces")
 
     def action_use_notifications_modified(self, state):
         self.model.set_use_notifications("On" if bool(state) else "Off")
