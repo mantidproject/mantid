@@ -128,7 +128,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         self.mock_model.set_facility.assert_called_once_with(new_facility)
 
-        self.assertEqual(presenter.view.instrument.facility, "TEST_LIVE")
+        self.assertEqual(presenter.view.instrument.getFacility, "TEST_LIVE")
 
     def test_setup_confirmations(self):
         presenter = GeneralSettings(None)

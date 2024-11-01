@@ -124,7 +124,7 @@ class GeneralSettings(object):
         if new_facility != current_value:
             self.model.set_facility(new_facility)
         # refresh the instrument selection to contain instruments about the selected facility only
-        self.view.instrument.facility = new_facility
+        self.view.instrument.setFacility(new_facility)
         if new_facility != current_value:
             self.view.instrument.setCurrentIndex(0)
 
