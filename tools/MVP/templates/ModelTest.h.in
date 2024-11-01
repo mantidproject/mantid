@@ -1,0 +1,47 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
+
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+
+#include "Model.h"
+
+
+using namespace testing;
+
+class ModelTest : public CxxTest::TestSuite {
+public:
+  static ModelTest *createSuite() { return new ModelTest(); }
+
+  static void destroySuite(ModelTest *suite) { delete suite; }
+
+  void setUp() override {
+  m_model = std::make_unique<Model>();
+  }
+
+  void tearDown() override {m_model.reset();}
+
+  ///----------------------------------------------------------------------
+  /// Unit Tests that test the methods of the model
+  ///----------------------------------------------------------------------
+
+  void test_count_is_initialized_at_zero() {
+    TS_ASSERT_EQUALS(m_model->count(), 0);
+  }
+
+  void test_count_member_is_updated_correctly()  {
+    m_model->setCount(3);
+    TS_ASSERT_EQUALS(m_model->count(), 3);
+
+    m_model->setCount(5);
+    TS_ASSERT_EQUALS(m_model->count(), 5);
+  }
+
+private:
+std::unique_ptr<IModel> m_model;
+};

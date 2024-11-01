@@ -1,0 +1,29 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+
+import unittest
+from model import Model
+
+
+class TestModel(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self.model = Model()
+
+    def test_model_initiates_counter_to_zero(self):
+        self.assertEqual(self.model.count, 0)
+
+    def test_model_updates_counter_correctly(self):
+        self.model.count = 3
+        self.assertEqual(self.model.count, 3)
+
+        self.model.count = 5
+        self.assertEqual(self.model.count, 5)
+
+
+if __name__ == "__main__":
+    unittest.main()

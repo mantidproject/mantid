@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from os.path import abspath, dirname, join
+from os import rename
 from typing import Callable, Union
 from itertools import product
 
@@ -41,6 +42,13 @@ def _generate_setup_file(name: str, filename: Callable, setup_filename: str, ext
         file.write(content)
 
 
+def _generate_test_file(name: str, filename: Callable, file_type: str, extension: str, output_directory: str) -> None:
+    test_filename = f"test_{file_type}" if extension == "py" else f"{file_type}Test"
+    _generate_setup_file(name, filename, test_filename, extension, output_directory)
+    output_name = f"test_{filename(file_type, name)}.py" if extension == "py" else f"{filename(test_filename, name)}.h"
+    rename(join(output_directory, f"{test_filename}.{extension}"), join(output_directory, output_name))
+
+
 def _generate_mvp_file(name: str, filename: Callable, file_type: str, extension: str, output_directory: str) -> None:
     """Generates a file using the corresponding template in the template directory."""
     template_filepath = (
@@ -64,7 +72,7 @@ def _generate_mvp_file(name: str, filename: Callable, file_type: str, extension:
         file.write(content)
 
 
-def _generate_python_files(name: str, include_setup: bool, output_directory: str) -> None:
+def _generate_python_files(name: str, include_setup: bool, output_directory: str, include_tests: bool) -> None:
     """Generate MVP files for a Python use case."""
     print("Generating Python files with an MVP pattern...")
     for file_type in ["View", "Presenter", "Model"]:
@@ -74,11 +82,15 @@ def _generate_python_files(name: str, include_setup: bool, output_directory: str
     if include_setup:
         _generate_setup_file(name, _python_filename, "launch", "py", output_directory)
 
+    if include_tests:
+        _generate_test_file(name, _python_filename, "presenter", "py", output_directory)
+        _generate_test_file(name, _python_filename, "model", "py", output_directory)
+
     print(f"Output directory: {output_directory}")
     print("Done!")
 
 
-def _generate_cpp_files(name: str, include_setup: bool, output_directory: str) -> None:
+def _generate_cpp_files(name: str, include_setup: bool, output_directory: str, include_tests: bool) -> None:
     """Generate MVP files for a C++ use case."""
     print("Generating C++ files with an MVP pattern...")
     for file_type in product(["View", "Presenter", "Model"], ["cpp", "h"]):
@@ -89,17 +101,21 @@ def _generate_cpp_files(name: str, include_setup: bool, output_directory: str) -
         _generate_setup_file(name, _cpp_filename, "main", "cpp", output_directory)
         _generate_setup_file(name, _cpp_filename, "CMakeLists", "txt", output_directory)
 
+    if include_tests:
+        _generate_test_file(name, _cpp_filename, "Presenter", "h", output_directory)
+        _generate_test_file(name, _cpp_filename, "Model", "h", output_directory)
+
     print(f"Output directory: {output_directory}")
     print("Done!")
 
 
-def _generate_files(name: str, language: str, include_setup: bool, output_directory: str) -> None:
+def _generate_files(name: str, language: str, include_setup: bool, output_directory: str, include_tests: bool) -> None:
     """Generate MVP files for a specific programming language."""
     match language.lower():
         case "python":
-            _generate_python_files(name, include_setup, output_directory)
+            _generate_python_files(name, include_setup, output_directory, include_tests)
         case "c++" | "cpp":
-            _generate_cpp_files(name, include_setup, output_directory)
+            _generate_cpp_files(name, include_setup, output_directory, include_tests)
         case _:
             raise ValueError(f"An unsupported language '{language}' has been provided. Choose one: [Python, C++].")
 
@@ -117,6 +133,9 @@ if __name__ == "__main__":
         help="Whether to include setup files such as a launch script (and CMakeLists.txt for C++).",
     )
     parser.add_argument("-o", "--output-dir", required=True, help="The absolute path to output the generated files to.")
+    parser.add_argument(
+        "-t", "--include-tests", action=BooleanOptionalAction, help="Whether to include basic test files for the presenters and models"
+    )
     args = parser.parse_args()
 
-    _generate_files(args.name[:1].upper() + args.name[1:], args.language, args.include_setup, args.output_dir)
+    _generate_files(args.name[:1].upper() + args.name[1:], args.language, args.include_setup, args.output_dir, args.include_tests)
