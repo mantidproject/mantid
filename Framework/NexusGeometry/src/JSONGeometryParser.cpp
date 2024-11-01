@@ -272,7 +272,7 @@ std::string extractInstrumentName(const Json::Value &instrument) {
 std::vector<std::unique_ptr<Json::Value>> moveToUniquePtrVec(std::vector<Json::Value> &jsonVector) {
   std::vector<std::unique_ptr<Json::Value>> ret;
   std::transform(jsonVector.cbegin(), jsonVector.cend(), std::back_inserter(ret),
-                 [](const auto &val) { return std::move(std::make_unique<Json::Value>(std::move(val))); });
+                 [](const auto &val) { return std::make_unique<Json::Value>(std::move(val)); });
   return ret;
 }
 
