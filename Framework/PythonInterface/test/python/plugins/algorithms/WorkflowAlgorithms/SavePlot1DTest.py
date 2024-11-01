@@ -9,7 +9,7 @@ import os
 from mantid import AnalysisDataServiceImpl, config, simpleapi
 
 try:
-    import plotly
+    import plotly  # noqa: F401
 
     havePlotly = True
 except ImportError:

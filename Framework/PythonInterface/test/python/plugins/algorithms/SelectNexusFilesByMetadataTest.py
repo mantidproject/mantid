@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=unused-import
 import unittest
 from mantid.simpleapi import SelectNexusFilesByMetadata
 
@@ -60,10 +59,4 @@ class SelectNexusFilesByMetadataTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    # run the test if only if the required package is present
-    try:
-        import h5py
-
-        unittest.main()
-    except ImportError:
-        pass
+    unittest.main()

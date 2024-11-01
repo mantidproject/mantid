@@ -6,39 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods,invalid-name
 import unittest
-from mantid import logger
 from mantid.api import ITableWorkspace
 from mantid.simpleapi import SimulatedDensityOfStates, CompareWorkspaces, Scale
 
 
-def scipy_not_available():
-    """Check whether scipy is available on this platform"""
-    try:
-        import scipy
-
-        return False
-    except ImportError:
-        logger.warning("Skipping SimulatedDensityOfStatesTest because scipy is unavailable.")
-        return True
-
-
-def skip_if(skipping_criteria):
-    """
-    Skip all tests if the supplied functon returns true.
-    Python unittest.skipIf is not available in 2.6 (RHEL6) so we'll roll our own.
-    """
-
-    def decorate(cls):
-        if skipping_criteria():
-            for attr in cls.__dict__.keys():
-                if callable(getattr(cls, attr)) and "test" in attr:
-                    delattr(cls, attr)
-        return cls
-
-    return decorate
-
-
-@skip_if(scipy_not_available)
 class SimulatedDensityOfStatesTest(unittest.TestCase):
     def setUp(self):
         self._phonon_file = "squaricn.phonon"
