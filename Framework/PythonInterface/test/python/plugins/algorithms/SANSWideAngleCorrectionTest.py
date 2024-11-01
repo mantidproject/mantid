@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy
-from mantid.kernel import *
-from mantid.api import *
 from mantid.simpleapi import (
     CreateWorkspace,
     LoadInstrument,

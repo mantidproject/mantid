@@ -8,8 +8,6 @@ import unittest
 import math
 import numpy
 import mantid.simpleapi as api
-from mantid.kernel import *
-from mantid.api import *
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
 

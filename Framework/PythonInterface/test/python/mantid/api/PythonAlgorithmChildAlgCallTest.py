@@ -12,8 +12,6 @@ from testhelpers import run_algorithm
 
 from mantid import mtd
 import mantid.simpleapi as api
-from mantid.api import *
-from mantid.kernel import *
 
 __PARENTALG__ = """
 import mantid.simpleapi as api

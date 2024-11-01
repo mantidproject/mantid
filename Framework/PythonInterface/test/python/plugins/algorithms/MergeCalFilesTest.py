@@ -8,9 +8,6 @@ import unittest
 import os
 import tempfile
 import shutil
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
 from testhelpers import run_algorithm
 
 """
