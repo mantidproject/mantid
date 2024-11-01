@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import CreateWorkspace, NormaliseSpectra
 
 
 class NormaliseSpectraTest(unittest.TestCase):

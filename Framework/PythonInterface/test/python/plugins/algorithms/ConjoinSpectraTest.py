@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import mtd
 from testhelpers import run_algorithm
 
 

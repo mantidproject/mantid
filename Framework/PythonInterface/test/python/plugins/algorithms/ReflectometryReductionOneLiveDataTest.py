@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm
+from mantid.kernel import config, Direction, StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import CreateWorkspace, ReflectometryReductionOneLiveData, GroupWorkspaces
 from testhelpers import assertRaisesNothing, create_algorithm
 

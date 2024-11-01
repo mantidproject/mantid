@@ -10,7 +10,7 @@ from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
 from mantid.geometry import CSGObject
-from mantid.simpleapi import *
+from mantid.simpleapi import CloneWorkspace, CreateWorkspace
 
 
 class ComponentInfoTest(unittest.TestCase):

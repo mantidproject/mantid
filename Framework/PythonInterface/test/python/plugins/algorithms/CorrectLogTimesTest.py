@@ -5,10 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
-from testhelpers import *
-from numpy import *
+from mantid.simpleapi import CorrectLogTimes, CreateSingleValuedWorkspace, DeleteWorkspace, LoadNexusLogs
 
 
 class CorrectLogTimesTest(unittest.TestCase):

@@ -6,9 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import AddTimeSeriesLog, CloneWorkspace, CreateSampleWorkspace, GroupWorkspaces
 from mantid.dataobjects import Workspace2D
 from testhelpers import assertRaisesNothing, create_algorithm
 

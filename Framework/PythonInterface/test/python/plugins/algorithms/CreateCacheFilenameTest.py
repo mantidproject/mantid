@@ -8,8 +8,7 @@
 import unittest
 from pathlib import Path
 
-from mantid.kernel import *
-from mantid.api import *
+from mantid.kernel import ConfigService, PropertyManager
 from testhelpers import run_algorithm
 
 import os

@@ -10,7 +10,7 @@ import os
 import tempfile
 import unittest
 
-from mantid.kernel import *
+from mantid.kernel import BoolTimeSeriesProperty, FloatTimeSeriesProperty, Int32TimeSeriesProperty, PropertyFactory, StringTimeSeriesProperty
 import mantid.simpleapi as mantid
 from testhelpers import run_algorithm
 

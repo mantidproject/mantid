@@ -6,9 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy
-from numpy import *
-from mantid.kernel import *
-from mantid.api import *
+from numpy import arange
 import mantid.kernel as kernel
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
@@ -206,7 +204,6 @@ class ExportExperimentLogTest(unittest.TestCase):
         In this case, the original file will be renamed and a new file will
         be creatd
         """
-        import datetime
         import time
 
         # Generate the matrix workspace with some logs

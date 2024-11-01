@@ -8,10 +8,8 @@
 import unittest
 import numpy as np
 import mantid.simpleapi as api
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import AnalysisDataService, WorkspaceFactory
 from testhelpers import run_algorithm
-from mantid.api import AnalysisDataService
 
 import os
 import json

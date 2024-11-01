@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
-from mantid import AnalysisDataService
+from mantid.api import AnalysisDataService
+from mantid.simpleapi import CreateWorkspace, Load
 
 from quickBayesHelper import QuickBayesTemplate
 

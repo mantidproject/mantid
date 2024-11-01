@@ -6,9 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.api import *
-from mantid.kernel import *
-from mantid.simpleapi import *
+from mantid.api import mtd, IMDWorkspace, WorkspaceGroup
+from mantid.simpleapi import ConvertToEventWorkspace, CreateMDWorkspace, CreateWorkspace, DeleteWorkspace, GroupWorkspaces, RunPythonScript
 
 
 class RunPythonScriptTest(unittest.TestCase):

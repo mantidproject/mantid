@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=unused-import
 import unittest
-from mantid.simpleapi import *
+from mantid.simpleapi import SelectNexusFilesByMetadata
 
 
 class SelectNexusFilesByMetadataTest(unittest.TestCase):

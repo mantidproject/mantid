@@ -7,8 +7,7 @@
 import os
 import unittest
 
-from mantid.api import *
-from mantid.kernel import *
+from mantid.kernel import config
 import mantid.simpleapi as mantid
 from testhelpers import run_algorithm
 

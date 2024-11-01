@@ -8,9 +8,8 @@
 # pylint disable: invalid-name
 import unittest
 
-
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.kernel import config
+from mantid.simpleapi import CreateWorkspace, CropWorkspace, LoadEmptyInstrument, NMoldyn4Interpolation, Rebin
 
 import numpy as np
 

@@ -8,7 +8,7 @@
 import numpy as np
 import unittest
 
-from mantid.api import *
+from mantid.api import mtd
 from mantid.simpleapi import CreateWorkspace, ScaleX, Symmetrise
 
 

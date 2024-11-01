@@ -6,9 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy
-from mantid.simpleapi import *
-from mantid.kernel import *
-from mantid.api import *
+from mantid.simpleapi import AddSampleLog, CreateWorkspace, DeleteWorkspace, FilterLogByTime, LoadLog
 
 
 class FilterLogByTimeTest(unittest.TestCase):

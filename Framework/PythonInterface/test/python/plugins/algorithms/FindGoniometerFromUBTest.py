@@ -9,7 +9,7 @@
 from __future__ import absolute_import, division, print_function
 import unittest
 from testhelpers import create_algorithm
-from mantid.simpleapi import *
+from mantid.simpleapi import CreateSampleWorkspace, FindGoniometerFromUB, LoadIsawUB
 import numpy as np
 
 

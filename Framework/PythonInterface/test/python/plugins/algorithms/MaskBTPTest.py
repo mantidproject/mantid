@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import mtd, AnalysisDataService
+from mantid.kernel import config
+from mantid.simpleapi import DeleteWorkspace, LoadEmptyInstrument, MaskBTP
 from testhelpers import WorkspaceCreationHelper
 from numpy import concatenate, arange, sort, array_equal, where
 

@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.api import MatrixWorkspace, WorkspaceGroup
-from mantid.simpleapi import *
+from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
+from mantid.kernel import config
+from mantid.simpleapi import SANSILLIntegration, SANSILLReduction
 
 
 class SANSILLIntegrationTest(unittest.TestCase):

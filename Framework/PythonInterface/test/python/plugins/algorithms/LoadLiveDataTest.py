@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import os
-
-from mantid.simpleapi import *
+from mantid.api import mtd, FrameworkManager
+from mantid.kernel import ConfigService
+from mantid.simpleapi import LoadLiveData
 
 
 class LoadLiveDataTest(unittest.TestCase):

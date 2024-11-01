@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods,invalid-name
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import MatrixWorkspace
+from mantid.simpleapi import OSIRISDiffractionReduction
 
 
 class OSIRISDiffractionReductionTest(unittest.TestCase):
