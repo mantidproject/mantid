@@ -875,13 +875,12 @@ class FigureInteraction(object):
 
                         # This check is to prevent the contour lines being re-plotted using the colorfill plot args.
                         if isinstance(ws_artist._artists[0], QuadContourSet):
-                            contour_line_colour = ws_artist._artists[0].collections[0].get_edgecolor()
+                            contour_line_colour = ws_artist._artists[0].get_edgecolor()
 
                             ws_artist.replace_data(workspace, None)
 
                             # Re-apply the contour line colour
-                            for col in ws_artist._artists[0].collections:
-                                col.set_color(contour_line_colour)
+                            ws_artist._artists[0].set_color(contour_line_colour)
                         else:
                             ws_artist.replace_data(workspace, arg_set_copy)
 
