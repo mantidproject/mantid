@@ -9,6 +9,9 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
+
+GNU_DIAG_OFF("maybe-uninitialized")
 
 using Mantid::PythonInterface::std_set_exporter;
 using Mantid::PythonInterface::std_vector_exporter;

@@ -17,6 +17,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
 #include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
@@ -42,6 +43,7 @@ GET_POINTER_SPECIALIZATION(Workspace2D)
 
 class Workspace2DPickleSuite : public boost::python::pickle_suite {
 public:
+  GNU_DIAG_OFF("dangling-reference")
   static dict getstate(const Workspace2D &ws) {
     using namespace Mantid::PythonInterface::Converters;
 
@@ -97,6 +99,8 @@ public:
     state["spectrum_numbers"] = specNumList;
     return state;
   }
+
+  GNU_DIAG_ON("dangling-reference")
 
   static void setstate(Workspace2D &ws, dict state) {
     using namespace Mantid::PythonInterface::Converters;

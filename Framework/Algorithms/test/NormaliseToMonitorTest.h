@@ -20,6 +20,7 @@
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -404,6 +405,8 @@ public:
     TS_ASSERT(alg.isExecuted())
   }
 
+  GNU_DIAG_OFF("dangling-reference")
+
   void test_with_scanning_workspace_bin_by_bin() {
     auto testWS = makeTestDetectorScanWorkspace();
 
@@ -503,6 +506,8 @@ public:
       }
     }
   }
+
+  GNU_DIAG_ON("dangling-reference")
 
 private:
   MatrixWorkspace_sptr makeTestDetectorScanWorkspace() {

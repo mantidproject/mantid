@@ -1,5 +1,5 @@
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  add_compile_options(-Wno-maybe-uninitialized)
+  add_compile_options(-Wno-uninitialized)
 endif()
 
 if(CXXTEST_FOUND)

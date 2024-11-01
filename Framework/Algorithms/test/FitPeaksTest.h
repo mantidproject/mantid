@@ -20,6 +20,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using Mantid::Algorithms::FitPeaks;
 
@@ -33,6 +34,8 @@ using namespace std;
 using Mantid::HistogramData::Counts;
 using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Points;
+
+GNU_DIAG_OFF("dangling-reference")
 
 namespace {
 /// static Logger definition

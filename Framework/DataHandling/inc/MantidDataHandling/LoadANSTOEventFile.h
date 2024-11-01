@@ -155,8 +155,8 @@ void ReadEventFile(IReader &loader, IEventHandler &handler, IProgress &progress,
   // total frame duration, and this can be used to recover the absolute
   // timestamp of all events in the DAQ, if desired (e.g. for accurate timing
   // during long term kinematic experiments).
-  int32_t dt; // , t = 0 dt may be negative occasionally for some DAE types,
-              // therefore dt and t are signed ints.
+  int32_t dt = 0; // , t = 0 dt may be negative occasionally for some DAE types,
+                  // therefore dt and t are signed ints.
 
   int32_t nbits_val_oob[NVAL] = {};
 

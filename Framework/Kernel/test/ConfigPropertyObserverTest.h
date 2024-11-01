@@ -16,7 +16,7 @@ using namespace Mantid::Kernel;
 template <typename Callback> class MockObserver : ConfigPropertyObserver {
 public:
   MockObserver(const std::string &propertyName, Callback callback)
-      : ConfigPropertyObserver(std::move(propertyName)), m_callback(callback) {}
+      : ConfigPropertyObserver(propertyName), m_callback(callback) {}
 
 protected:
   void onPropertyValueChanged(const std::string &newValue, const std::string &prevValue) override {

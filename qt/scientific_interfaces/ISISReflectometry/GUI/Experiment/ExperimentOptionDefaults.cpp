@@ -111,7 +111,7 @@ Experiment getExperimentDefaults(Mantid::Geometry::Instrument_const_sptr instrum
 
   return Experiment(analysisMode, reductionType, summationType, includePartialBins, debug, backgroundSubtraction,
                     polarizationCorrections, std::move(floodCorrections), std::move(transmissionStitchOptions),
-                    std::move(stitchParameters), lookupTableValidationResult.assertValid());
+                    stitchParameters, lookupTableValidationResult.assertValid());
 }
 } // unnamed namespace
 
