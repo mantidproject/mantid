@@ -9,10 +9,26 @@
 System test that loads TOPAZ single-crystal data,
 and runs Diffraction Workflow.
 """
+
 import systemtesting
 import numpy
 import os
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import (
+    AnvredCorrection,
+    BinMD,
+    CentroidPeaksMD,
+    CopySample,
+    ConvertToDiffractionMDWorkspace,
+    FindPeaksMD,
+    FindUBUsingFFT,
+    FindUBUsingLatticeParameters,
+    IndexPeaks,
+    IntegratePeaksMD,
+    LoadEventNexus,
+    LoadHKL,
+    SaveHKL,
+)
 from mantid.api import FileFinder
 
 

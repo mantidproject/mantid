@@ -11,8 +11,7 @@
 # conda-buildscript /jenkins/workspace_dir/ linux-ci --enable-systemtests --enable-coverage --enable-docs
 #
 # Expected args:
-#   1. WORKSPACE: path to the workspace/source code that this should run inside, Windows Caveat: Only use / for
-#                 this argument do not use \\ or \ in the path.
+#   1. WORKSPACE: path to the workspace/source code that this should run inside
 #   2. CMAKE_PRESET: the CMake preset that should be run to generate the cmake files for this CI job
 #
 # Possible flags:
@@ -113,7 +112,7 @@ git clean -d -x --force --exclude=".Xauthority-*" $git_clean_excludes_extra
 
 # Mamba
 setup_mamba $WORKSPACE/mambaforge "" $CLEAN_BUILD
-create_and_activate_mantid_developer_env
+create_and_activate_mantid_developer_env $WORKSPACE
 
 # Check whether this is an incremental build that only changes rst files
 if [ -d $BUILD_DIR ]; then
@@ -142,6 +141,8 @@ fi
 rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz *.exe
 # Remove test logs from previous builds
 rm -rf  $BUILD_DIR/test_logs
+# Remake the directory for the test logs.
+mkdir $BUILD_DIR/test_logs
 
 # Set locale to avoid problems building the docs
 # See https://unix.stackexchange.com/questions/87745/what-does-lc-all-c-do
@@ -150,7 +151,7 @@ if [[ $ENABLE_DOCS == true ]]; then
 fi
 
 # Run the script that handles the build
-$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS
+$SCRIPT_DIR/build $WORKSPACE $CMAKE_PRESET $ENABLE_DOCS $ENABLE_DEV_DOCS $ENABLE_BUILD_CODE $ENABLE_UNIT_TESTS $ENABLE_SYSTEM_TESTS $ENABLE_DOC_TESTS $ENABLE_COVERITY "$EXTRA_CMAKE_FLAGS" $BUILD_THREADS | tee $BUILD_DIR/test_logs/build_$OSTYPE.log
 
 # Run unit and system tests
 $SCRIPT_DIR/run-tests $WORKSPACE $ENABLE_SYSTEM_TESTS $ENABLE_UNIT_TESTS $ENABLE_DOCS $ENABLE_DOC_TESTS $BUILD_THREADS

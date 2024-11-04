@@ -10,7 +10,7 @@ import mantid.simpleapi as mantid
 from mantid.kernel import logger
 from Diffraction.single_crystal.base_sx import BaseSX, PEAK_TYPE, INTEGRATION_TYPE
 from mantid.api import AnalysisDataService as ADS
-from FindGoniometerFromUB import getR
+from plugins.algorithms.FindGoniometerFromUB import getR
 from os import path
 
 tof_min = 700
@@ -26,6 +26,8 @@ class SXD(BaseSX):
                                <centre x="0.0"  y="0.0" z="0.0" />
                                <radius val="0.003"/>
                                </sphere>"""  # sphere radius 3mm  - used for vanadium and NaCl
+        self.beam_width = 0.6  # cm
+        self.beam_height = 0.6  # cm
 
     def process_data(self, runs: Sequence[str], *args):
         """

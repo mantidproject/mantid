@@ -5,13 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, MatrixWorkspace, MatrixWorkspaceProperty, PropertyMode, WorkspaceProperty
+from mantid.kernel import Direction
 from vesuvio.base import VesuvioBase
 
 
 class VesuvioResolution(VesuvioBase):
-
     _workspace_index = None
     _mass = None
 

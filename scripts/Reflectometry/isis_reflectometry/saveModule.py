@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from PyQt4 import QtCore
-from mantid.simpleapi import *
+from mantid.api import mtd
 import numpy as n
 
 try:

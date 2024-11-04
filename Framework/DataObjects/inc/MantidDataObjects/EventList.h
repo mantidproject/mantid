@@ -102,8 +102,9 @@ public:
    * @param event :: TofEvent to add at the end of the list.
    * */
   inline void addEventQuickly(const Types::Event::TofEvent &event) {
-    this->events.emplace_back(event);
-    this->setSortOrder(UNSORTED);
+    this->events->emplace_back(event);
+    if (this->order != UNSORTED)
+      this->setSortOrder(UNSORTED);
   }
 
   // --------------------------------------------------------------------------
@@ -112,8 +113,9 @@ public:
    * @param event :: WeightedEvent to add at the end of the list.
    * */
   inline void addEventQuickly(const WeightedEvent &event) {
-    this->weightedEvents.emplace_back(event);
-    this->setSortOrder(UNSORTED);
+    this->weightedEvents->emplace_back(event);
+    if (this->order != UNSORTED)
+      this->setSortOrder(UNSORTED);
   }
 
   // --------------------------------------------------------------------------
@@ -122,8 +124,9 @@ public:
    * @param event :: WeightedEventNoTime to add at the end of the list.
    * */
   inline void addEventQuickly(const WeightedEventNoTime &event) {
-    this->weightedEventsNoTime.emplace_back(event);
-    this->setSortOrder(UNSORTED);
+    this->weightedEventsNoTime->emplace_back(event);
+    if (this->order != UNSORTED)
+      this->setSortOrder(UNSORTED);
   }
 
   Mantid::API::EventType getEventType() const override;
@@ -326,13 +329,13 @@ private:
   HistogramData::Histogram m_histogram;
 
   /// List of TofEvent (no weights).
-  mutable std::vector<Types::Event::TofEvent> events;
+  mutable std::unique_ptr<std::vector<Types::Event::TofEvent>> events;
 
   /// List of WeightedEvent's
-  mutable std::vector<WeightedEvent> weightedEvents;
+  mutable std::unique_ptr<std::vector<WeightedEvent>> weightedEvents;
 
   /// List of WeightedEvent's
-  mutable std::vector<WeightedEventNoTime> weightedEventsNoTime;
+  mutable std::unique_ptr<std::vector<WeightedEventNoTime>> weightedEventsNoTime;
 
   /// What type of event is in our list.
   Mantid::API::EventType eventType;

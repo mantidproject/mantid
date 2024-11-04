@@ -1,3 +1,0 @@
-- expose :class:`ConfigService::configureLogging() <mantid.kernel.ConfigServiceImpl.configureLogging>` to python API
-- expose :class:`ConfigService::getLogLevel() <mantid.kernel.ConfigServiceImpl.getLogLevel>` to python API
-- fix handling of removed propertyies in :class:`ConfigService::saveConfig() <mantid.kernel.ConfigServiceImpl.saveConfig>`

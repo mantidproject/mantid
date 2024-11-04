@@ -9,8 +9,20 @@ import systemtesting
 import tempfile
 import shutil
 import os
+import numpy as np
 from mantid.api import AnalysisDataService as ADS
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    AddPeak,
+    CalculateUMatrix,
+    CreatePeaksWorkspace,
+    FindUBUsingFFT,
+    IndexPeaks,
+    Load,
+    LoadEmptyInstrument,
+    LoadNexus,
+    OptimizeLatticeForCellType,
+    SelectCellOfType,
+)
 from Diffraction.single_crystal.sxd import SXD
 from Diffraction.single_crystal.base_sx import PEAK_TYPE, INTEGRATION_TYPE
 
@@ -183,7 +195,7 @@ class SXDIntegrateData1DProfile(systemtesting.MantidSystemTest):
         self.integrated_peaks = sxd.get_peaks(runno, PEAK_TYPE.FOUND, INTEGRATION_TYPE.PROFILE)
 
     def validate(self):
-        intens_over_sigma = [0.0, 18.45, 17.11, 134.29, 0.0]
+        intens_over_sigma = [0.0, 14.593, 12.116, 133.96, 0.0]
         self.assertTrue(np.allclose(self.integrated_peaks.column("Intens/SigInt"), intens_over_sigma, atol=1e-2))
 
 

@@ -6,8 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 import os
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import (
+    AlgorithmFactory,
+    AlgorithmManager,
+    AnalysisDataService,
+    FileAction,
+    FileProperty,
+    MatrixWorkspaceProperty,
+    PythonAlgorithm,
+)
+from mantid.kernel import Direction, Logger, StringMandatoryValidator
 from reduction_workflow.find_data import find_file
 
 
@@ -141,7 +149,6 @@ class EQSANSNormalise(PythonAlgorithm):
 
         monitor_ws_name = input_ws_name + "_monitors"
         if AnalysisDataService.doesExist(monitor_ws_name):
-
             alg = AlgorithmManager.create("EQSANSMonitorTOF")
             alg.initialize()
             alg.setChild(True)

@@ -5,11 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-""" Sample MARI reduction scrip used in testing ReductionWrapper """
+"""Sample MARI reduction scrip used in testing ReductionWrapper"""
+
 import os
 
-#
-from Direct.ReductionWrapper import *
+from Direct.AbsorptionShapes import Cylinder
+from Direct.DirectEnergyConversion import DirectEnergyConversion
+from Direct.ReductionWrapper import AdvancedProperties, iliad, MainProperties, MethodType, ReductionWrapper
+from mantid.kernel import PropertyManager
+from mantid.simpleapi import AddTimeSeriesLog, Load
 
 try:
     import reduce_vars as web_var
@@ -765,7 +769,6 @@ class ReduceMARIAutoEi(ReductionWrapper):
 
 
 if __name__ == "__main__":
-
     data_root = r"d:\Data\MantidDevArea\Datastore\DataCopies"
     # data_dir = os.path.join(data_root,r'Testing\Data\SystemTest')
     # ref_data_dir = os.path.join(data_root,r'Testing\SystemTests\tests\analysis\reference')

@@ -5,7 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import SANSILLMultiProcess
 
 
 class ILL_SANS_D11B_MONO_MULTI_TEST(systemtesting.MantidSystemTest):
@@ -40,7 +42,6 @@ class ILL_SANS_D11B_MONO_MULTI_TEST(systemtesting.MantidSystemTest):
         return ["water", "ILL_SANS_D11B_MONO_MULTI.nxs"]
 
     def runTest(self):
-
         cadmiums = ["8551", "8566", "8581"]
         empty_beams = ["8552", "8567", "8582"]
         tr_beam = "8538"

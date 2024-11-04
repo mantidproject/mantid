@@ -109,6 +109,8 @@ void FunctionTemplatePresenter::handleEditLocalParameterFinished(std::string con
     if (!ties[i].isEmpty()) {
       setLocalParameterTie(parameterName, i, ties[i].toStdString());
     } else if (fixes[i]) {
+      // Removing the tie first because a tied parameter can't be fixed
+      setLocalParameterTie(parameterName, i, "");
       setLocalParameterFixed(parameterName, i, fixes[i]);
     } else {
       setLocalParameterTie(parameterName, i, "");

@@ -7,7 +7,7 @@
 from mantidqtinterfaces.Muon.GUI.Common import group_object
 from mantidqtinterfaces.Muon.GUI.Common import pair_object
 
-from mantidqtinterfaces.Muon.GUI.Common.muon_context.muon_context import *
+from mantidqtinterfaces.Muon.GUI.Common.muon_context.muon_context import Groups, Pairs
 
 
 class ContextExampleModel(object):

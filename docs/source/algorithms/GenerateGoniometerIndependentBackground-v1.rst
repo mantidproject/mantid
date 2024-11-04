@@ -51,15 +51,14 @@ Output:
 
 .. testoutput:: GenerateGoniometerIndependentBackgroundExample
 
-  Input workspace w1 intensity =  [ 500.  500.]
-  Input workspace w2 intensity =  [ 1000.  1000.]
-  Input workspace w3 intensity =  [ 1500.  1500.]
-  Input workspace w4 intensity =  [ 2000.  2000.]
-  Background intensity, lowest 25% = [ 500.  500.]
-  Background intensity, highest 25% = [ 2000.  2000.]
-  Background intensity, middle 50% = [ 1250.  1250.]
+  Input workspace w1 intensity =  [500. 500.]
+  Input workspace w2 intensity =  [1000. 1000.]
+  Input workspace w3 intensity =  [1500. 1500.]
+  Input workspace w4 intensity =  [2000. 2000.]
+  Background intensity, lowest 25% = [500. 500.]
+  Background intensity, highest 25% = [2000. 2000.]
+  Background intensity, middle 50% = [1250. 1250.]
 
 .. categories::
 
 .. sourcelink::
-

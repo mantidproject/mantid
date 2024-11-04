@@ -5,9 +5,30 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import DataProcessorAlgorithm, MultipleFileProperty, FileAction, MatrixWorkspaceProperty, FileProperty
+from mantid.api import (
+    mtd,
+    AlgorithmFactory,
+    DataProcessorAlgorithm,
+    MultipleFileProperty,
+    FileAction,
+    MatrixWorkspaceProperty,
+    FileProperty,
+)
 from mantid.kernel import Direction, StringListValidator
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    CloneWorkspace,
+    ConvertUnits,
+    CreateWorkspace,
+    DeleteWorkspace,
+    Divide,
+    ExtractMonitors,
+    GroupWorkspaces,
+    LoadAndMerge,
+    Multiply,
+    SortXAxis,
+    SplineInterpolation,
+    Subtract,
+)
 
 import numpy as np
 from typing import List, Tuple
@@ -212,23 +233,25 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
                         else:
                             energy_col = self.ENERGY_COL_DEFAULT
                             self.log().warning(
-                                "Could not find energy column in file {}. " "Defaulting to column {}".format(file, self.ENERGY_COL_DEFAULT)
+                                "Could not find energy column in file {}. Defaulting to column {}".format(file, self.ENERGY_COL_DEFAULT)
                             )
                         if "CNTS" in next_line:
                             detector_counts_col = next_line.index("CNTS")
                         else:
                             detector_counts_col = self.DETECTOR_COUNT_COL_DEFAULT
                             self.log().warning(
-                                "Could not find detector counts column in file {}. "
-                                "Defaulting to column {}".format(file, self.DETECTOR_COUNT_COL_DEFAULT)
+                                "Could not find detector counts column in file {}. Defaulting to column {}".format(
+                                    file, self.DETECTOR_COUNT_COL_DEFAULT
+                                )
                             )
                         if "M1" in next_line:
                             monitor_counts_col = next_line.index("M1")
                         else:
                             monitor_counts_col = self.MONITOR_COUNT_COL_DEFAULT
                             self.log().warning(
-                                "Could not find monitor counts column in file {}. "
-                                "Defaulting to column {}".format(file, self.MONITOR_COUNT_COL_DEFAULT)
+                                "Could not find monitor counts column in file {}. Defaulting to column {}".format(
+                                    file, self.MONITOR_COUNT_COL_DEFAULT
+                                )
                             )
                         if "TIME" in next_line:
                             time_col = next_line.index("TIME")
@@ -242,9 +265,7 @@ class LagrangeILLReduction(DataProcessorAlgorithm):
                 f.close()
 
             if header_index < 0:
-                self.log().warning(
-                    "Could not determine header length in file {}. " "Defaulting to {}".format(file, self.HEADER_SIZE_DEFAULT)
-                )
+                self.log().warning("Could not determine header length in file {}. Defaulting to {}".format(file, self.HEADER_SIZE_DEFAULT))
                 header_index = self.HEADER_SIZE_DEFAULT
                 energy_col = self.ENERGY_COL_DEFAULT
                 detector_counts_col = self.DETECTOR_COUNT_COL_DEFAULT

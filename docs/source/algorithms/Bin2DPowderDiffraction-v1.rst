@@ -111,10 +111,10 @@ Output:
    :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
     Y values without normalization:
-    [[ ... ...]
-     [  ... ...]]
+    [[... ...]
+     [ ... ...]]
     Y values with normalization by bin area:
-    [[ ... ...]
+    [[... ...]
      [ ... ...]]
 
 
@@ -134,4 +134,3 @@ More details on the multidimensional TOF powder diffraction data reduction can b
 .. categories::
 
 .. sourcelink::
-

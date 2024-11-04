@@ -8,10 +8,10 @@
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
-from mantid import config
-from ISISCommandInterface import *
-from SANSBatchMode import *
+from mantid.simpleapi import LoadNexus, Plus
+from mantid import config, FileFinder
+from ISISCommandInterface import Detector, Gravity, LOQ, MaskFile, Set1D
+from SANSBatchMode import BatchReduce
 import os.path
 
 from sans.common.enums import SANSInstrument

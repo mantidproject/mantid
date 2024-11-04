@@ -5,8 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Defines a set of aliases to make accessing certain objects easier
+Defines a set of aliases to make accessing certain objects easier
 """
+
+import sys
+
 from mantid.api import (
     AlgorithmFactoryImpl,
     AlgorithmManagerImpl,
@@ -40,6 +43,12 @@ FrameworkManager = lazy_instance_access(FrameworkManagerImpl)
 FunctionFactory = lazy_instance_access(FunctionFactoryImpl)
 WorkspaceFactory = lazy_instance_access(WorkspaceFactoryImpl)
 CatalogManager = lazy_instance_access(CatalogManagerImpl)
+if sys.platform.startswith("linux"):
+    try:
+        from mantid.api import AlgoTimeRegisterImpl
 
+        AlgoTimeRegister = lazy_instance_access(AlgoTimeRegisterImpl)
+    except:
+        AlgoTimeRegister = None
 # backwards-compatible
 mtd = AnalysisDataService

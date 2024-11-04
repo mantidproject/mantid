@@ -5,8 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import AlgorithmFactory, ITableWorkspaceProperty, MatrixWorkspaceProperty
+from mantid.kernel import (
+    logger,
+    Direction,
+    FloatArrayLengthValidator,
+    FloatArrayProperty,
+    IntBoundedValidator,
+    StringListValidator,
+    StringMandatoryValidator,
+)
 
 from vesuvio.base import VesuvioBase, TableWorkspaceDictionaryFacade
 from vesuvio.fitting import parse_fit_options
@@ -143,7 +151,6 @@ class VesuvioTOFFit(VesuvioBase):
 
     # pylint: disable=too-many-arguments
     def _do_fit(self, function_str, data_ws, index, constraints, ties, max_iter):
-
         # The tof data is required to be in seconds for the fitting
         # in order to re-use the standard Mantid Polynomial function. This polynomial simply
         # accepts the data "as is" in the workspace so if it is in microseconds then the

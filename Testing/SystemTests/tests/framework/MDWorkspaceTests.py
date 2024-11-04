@@ -12,15 +12,27 @@ file-backed MDWorkspaces.
 
 import systemtesting
 import os
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import mtd, AlgorithmManager
+from mantid.kernel import ConfigService, Logger
+from mantid.simpleapi import (
+    AddSampleLog,
+    BinMD,
+    ConvertToDiffractionMDWorkspace,
+    CreateMDWorkspace,
+    DeleteWorkspace,
+    EqualToMD,
+    LoadEventNexus,
+    LoadMD,
+    MergeMDFiles,
+    PlusMD,
+    SaveMD,
+    SetGoniometer,
+)
 
 ###############################################################################
 
 
 class PlusMDTest(systemtesting.MantidSystemTest):
-
     _saved_filename = None
     original_binned = None
 
@@ -153,7 +165,6 @@ class PlusMDTest(systemtesting.MantidSystemTest):
 
 
 class MergeMDTest(systemtesting.MantidSystemTest):
-
     _saved_filenames = []
 
     def make_files_to_merge_string(self):

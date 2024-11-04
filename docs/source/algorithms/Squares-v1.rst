@@ -42,11 +42,9 @@ Output:
 .. testoutput:: SquaresEx
 
     The first five values are:
-    [  1.   4.   9.  16.  25.]
+    [ 1.  4.  9. 16. 25.]
 
 
 .. categories::
 
 .. sourcelink::
-
-

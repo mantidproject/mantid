@@ -51,7 +51,7 @@ Output:
 
 .. testoutput:: LoadSESANSRoundTrip
 
-   Y values of loaded workspace = [ 0.796338  0.        0.179365  0.130324]
+   Y values of loaded workspace = [0.796338 0.       0.179365 0.130324]
 
 .. categories::
 

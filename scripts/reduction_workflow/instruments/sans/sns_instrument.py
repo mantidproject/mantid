@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    Instrument-specific utility functions for EQSANS
+Instrument-specific utility functions for EQSANS
 """
+
 from .hfir_instrument import _get_pixel_info
 
 

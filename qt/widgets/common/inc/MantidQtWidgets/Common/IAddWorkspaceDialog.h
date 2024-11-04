@@ -20,6 +20,7 @@ public:
   virtual std::string workspaceName() const = 0;
   virtual void setWSSuffices(const QStringList &suffices) = 0;
   virtual void setFBSuffices(const QStringList &suffices) = 0;
+  virtual void setLoadProperty(const std::string &propname, bool enable) = 0;
 
   virtual void updateSelectedSpectra() = 0;
 };

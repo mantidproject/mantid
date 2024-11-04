@@ -12,6 +12,7 @@
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 
+#include <MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h>
 #include <QFileInfo>
 
 using namespace Mantid::API;
@@ -165,6 +166,7 @@ void ISISDiagnostics::handleRun() {
   }
 
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+  m_plotOptionsPresenter->watchADS(false);
   runAlgorithm(sliceAlg);
 }
 
@@ -201,6 +203,7 @@ void ISISDiagnostics::handleValidation(IUserInputValidator *validator) const {
  * @param error If the algorithm failed
  */
 void ISISDiagnostics::algorithmComplete(bool error) {
+  m_plotOptionsPresenter->watchADS(true);
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   m_runPresenter->setRunEnabled(true);
   m_uiForm.pbSave->setEnabled(!error);
@@ -261,7 +264,7 @@ void ISISDiagnostics::handleNewFile() {
   int specMin = static_cast<int>(m_dblManager->value(m_properties["SpecMin"]));
   int specMax = static_cast<int>(m_dblManager->value(m_properties["SpecMax"]));
 
-  if (!loadFile(filename.toStdString(), wsname.toStdString(), specMin, specMax)) {
+  if (!loadFile(filename.toStdString(), wsname.toStdString(), specMin, specMax, SettingsHelper::loadHistory())) {
     emit showMessageBox("Unable to load file.\nCheck whether your file exists "
                         "and matches the selected instrument in the "
                         "EnergyTransfer tab.");
@@ -430,6 +433,10 @@ void ISISDiagnostics::setFileExtensionsByName(bool filter) {
   auto const tabName("ISISDiagnostics");
   m_uiForm.dsCalibration->setFBSuffixes(filter ? getCalibrationFBSuffixes(tabName) : getCalibrationExtensions(tabName));
   m_uiForm.dsCalibration->setWSSuffixes(filter ? getCalibrationWSSuffixes(tabName) : noSuffices);
+}
+
+void ISISDiagnostics::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsCalibration->setLoadProperty("LoadHistory", doLoadHistory);
 }
 
 /**

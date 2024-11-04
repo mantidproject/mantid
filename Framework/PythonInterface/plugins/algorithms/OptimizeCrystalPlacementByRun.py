@@ -5,13 +5,18 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
-
-from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
-from mantid.kernel import Direction
-from mantid.simpleapi import *
-from mantid import mtd
-
-# Create an empty table workspace to be populated by a python script.
+from mantid.api import mtd, AnalysisDataService, PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
+from mantid.kernel import logger, Direction
+from mantid.simpleapi import (
+    CombinePeaksWorkspaces,
+    FilterPeaks,
+    FindUBUsingIndexedPeaks,
+    GroupWorkspaces,
+    IndexPeaks,
+    OptimizeCrystalPlacement,
+    StatisticsOfTableWorkspace,
+    RenameWorkspace,
+)
 
 
 class OptimizeCrystalPlacementByRun(PythonAlgorithm):

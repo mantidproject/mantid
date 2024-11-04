@@ -8,14 +8,13 @@
 
 from qtpy.QtWidgets import QDockWidget, QHeaderView, QTreeWidgetItem, QToolButton
 from qtpy.QtGui import QColor
-from qtpy.QtCore import *
+from qtpy.QtCore import Signal, QObject, QSize, Qt
 from qtpy import uic
 
 import os
 
 
 class WorkspaceItemSignals(QObject):
-
     """
     Thrown when the delete button is pressed.
     """
@@ -27,7 +26,6 @@ class WorkspaceItemSignals(QObject):
 
 
 class WorkspaceItem(QTreeWidgetItem):
-
     """
     Name of the workspace represented by this item.
     """
@@ -68,7 +66,6 @@ class WorkspaceItem(QTreeWidgetItem):
 
 
 class SpectrumItemSignals(QObject):
-
     """
     Thrown when the delete button is pressed.
     Args:
@@ -83,7 +80,6 @@ class SpectrumItemSignals(QObject):
 
 
 class SpectrumItem(QTreeWidgetItem):
-
     """
     Index of the spectrum represented by this item.
     """
@@ -130,7 +126,6 @@ class SpectrumItem(QTreeWidgetItem):
 
 
 class SuperplotViewSide(QDockWidget):
-
     UI = "side_dock_widget.ui"
 
     """
@@ -182,7 +177,6 @@ class SuperplotViewSide(QDockWidget):
 
 
 class SuperplotViewBottom(QDockWidget):
-
     UI = "bottom_dock_widget.ui"
 
     """
@@ -220,7 +214,6 @@ class SuperplotViewBottom(QDockWidget):
 
 
 class SuperplotView:
-
     _presenter = None
     _side_view = None
     _bottom_view = None

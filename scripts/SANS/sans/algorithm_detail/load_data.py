@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods, invalid-name, fixme, unused-argument
 # pylint: disable=R0922e
-""" Implementation for the SANSLoad algorithm
+"""Implementation for the SANSLoad algorithm
 
 This module contains the loading strategies for the currently supported files. Data can be loaded as the
 SCATTER ENTRY of the reduction or the TRANSMISSION/DIRECT ENTRY of the reduction
@@ -48,6 +48,7 @@ Adding to the cache(ADS) is supported for the TubeCalibration file.
 Reading from the cache is supported for all files. This avoids data reloads if the correct file is already in the
 cache.
 """
+
 from abc import ABCMeta, abstractmethod
 import os
 from mantid.kernel import config
@@ -330,7 +331,7 @@ def tag_workspaces_with_file_names(workspaces, file_information, is_transmission
 
     file_tags = get_expected_file_tags(file_information, is_transmission, period)
     if len(file_tags) != len(workspaces):
-        raise RuntimeError("Issue while tagging the loaded data. The number of tags does not match the number " "of workspaces.")
+        raise RuntimeError("Issue while tagging the loaded data. The number of tags does not match the number of workspaces.")
     for file_tag, workspace in zip(file_tags, workspaces):
         if not has_tag(SANS_FILE_TAG, workspace):
             if is_monitor:
@@ -341,6 +342,7 @@ def tag_workspaces_with_file_names(workspaces, file_information, is_transmission
 # ----------------------------------------------------------------------------------------------------------------------
 # Loading strategies
 # ----------------------------------------------------------------------------------------------------------------------
+
 
 # -----------------
 # Added data loader
@@ -707,8 +709,9 @@ class SANSLoadData(metaclass=ABCMeta):
     def _validate(data_info):
         if not isinstance(data_info, StateData):
             raise ValueError(
-                "SANSLoad: The provided state information is of the wrong type. It must be"
-                " of type StateData,but was {0}".format(str(type(data_info)))
+                "SANSLoad: The provided state information is of the wrong type. It must be of type StateData,but was {0}".format(
+                    str(type(data_info))
+                )
             )
         data_info.validate()
 

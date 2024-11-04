@@ -81,7 +81,6 @@ DUMMY CONTENT
         self.assertEqual(list(range(len(atoms))), [atom["sort"] for _, atom in atoms.items()])
 
     def test_read_masses(self):
-
         # usual case: break on Molecular Mass:
         file_with_masses = BytesIO(
             b"""

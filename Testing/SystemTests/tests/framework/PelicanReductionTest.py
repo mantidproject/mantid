@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import systemtesting
-from mantid.simpleapi import *
-from mantid.api import IEventWorkspace
+from mantid.api import mtd, IEventWorkspace
 from mantid.simpleapi import PelicanReduction
 
 

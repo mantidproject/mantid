@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+# ruff: noqa: F403,F405   # Wild imports and Undefined locals
 """
 This module defines a function-style API for running Mantid
 algorithms. Each algorithm within Mantid is mapped to a Python
@@ -26,6 +27,7 @@ and assign it to the rebinned variable.
 
 Importing this module starts the FrameworkManager instance.
 """
+
 # std libs
 from collections import OrderedDict, namedtuple
 from contextlib import contextmanager

@@ -5,10 +5,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" Utility for generating a class file, header, and test file """
+"""Utility for generating a class file, header, and test file"""
+
 import argparse
 import datetime
-from cmakelists_utils import *
+import os
+from cmakelists_utils import add_to_cmake, find_basedir
 
 VERSION = "1.0"
 
@@ -91,9 +93,7 @@ using Mantid::Kernel::Direction;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM({})
-""".format(
-        classname
-    )
+""".format(classname)
     algorithm_source = """
 //----------------------------------------------------------------------------------------------
 
@@ -125,9 +125,7 @@ void {algname}::init() {{
 void {algname}::exec() {{
   // TODO Auto-generated execute stub
 }}
-""".format(
-        algname=classname
-    )
+""".format(algname=classname)
 
     if not args.alg:
         algorithm_top = ""
@@ -194,9 +192,7 @@ def write_test(subproject, classname, filename, args):
     TS_ASSERT(outputWS);
     TS_FAIL("TODO: Check the results and remove this line");
   }}
-""".format(
-        algname=classname
-    )
+""".format(algname=classname)
 
     if not args.alg:
         algorithm_test = ""
@@ -224,9 +220,7 @@ public:
 {algorithm_test}
   void test_Something() {{ TS_FAIL("You forgot to write a test!"); }}
 }};
-""".format(
-        year=get_year(), subproject=subproject, subfolder=args.subfolder, classname=classname, algorithm_test=algorithm_test
-    )
+""".format(year=get_year(), subproject=subproject, subfolder=args.subfolder, classname=classname, algorithm_test=algorithm_test)
     f.write(s)
     f.close()
 
@@ -282,9 +276,7 @@ Output:
 
 .. sourcelink::
 
-""".format(
-        algname=classname
-    )
+""".format(algname=classname)
 
     f.write(s)
     f.close()

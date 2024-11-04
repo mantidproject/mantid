@@ -42,10 +42,8 @@ Output:
 .. testoutput:: ExConvertTabletoMatrix
 
     ws is a Workspace2D and the Y values are:
-    [ 2.  4.  6.]
+    [2. 4. 6.]
 
 .. categories::
 
 .. sourcelink::
-
-

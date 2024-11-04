@@ -10,7 +10,21 @@
 System test for MDNorm
 """
 
-from mantid.simpleapi import *
+from mantid.kernel import config
+from mantid.simpleapi import (
+    ConvertMDHistoToMatrixWorkspace,
+    ConvertToMD,
+    CropWorkspaceForMDNorm,
+    DeleteWorkspace,
+    DgsReduction,
+    FilterEvents,
+    GenerateEventsFilter,
+    Load,
+    MDNorm,
+    MergeMD,
+    SetGoniometer,
+    SetUB,
+)
 import systemtesting
 
 
@@ -96,4 +110,5 @@ class MDNormHYSPECTest(systemtesting.MantidSystemTest):
 
     def validate(self):
         self.tolerance = 1e-3
+        self.nanEqual = True
         return "result", "MDNormHYSPEC.nxs"

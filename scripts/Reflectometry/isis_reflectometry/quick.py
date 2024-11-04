@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, too-many-branches, too-few-public-methods, too-many-arguments, too-many-locals
-""" SVN Info:      The variables below will only get subsituted at svn checkout if
+"""SVN Info:      The variables below will only get subsituted at svn checkout if
         the repository is configured for variable substitution.
 
     $Id$
@@ -13,14 +13,30 @@
 |=============================================================================|=======|
 1                                                                            80   <tab>
 """
-# these need to be moved into one NR folder or so
-# from ReflectometerCors import *
-from isis_reflectometry.l2q import *
-from isis_reflectometry.combineMulti import *
-from mantid.simpleapi import *  # New API
 
-from mantid.api import WorkspaceGroup, MatrixWorkspace
-from mantid.kernel import logger
+# these need to be moved into one NR folder or so
+from isis_reflectometry.l2q import l2q
+from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
+from mantid.kernel import config, logger
+from mantid.simpleapi import (
+    plotSpectrum,
+    CloneWorkspace,
+    ConvertUnits,
+    CropWorkspace,
+    DeleteWorkspace,
+    Divide,
+    ExponentialCorrection,
+    GroupWorkspaces,
+    Integration,
+    PolynomialCorrection,
+    RebinToWorkspace,
+    ReplaceSpecialValues,
+    RenameWorkspace,
+    Scale,
+    Stitch1D,
+    SumSpectra,
+)
+
 from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 import math
 import re
@@ -408,7 +424,6 @@ def make_trans_corr(
 
         transWS = RenameWorkspace(InputWorkspace=transWS, OutputWorkspace="TRANS_" + slam + "_" + llam)
     else:
-
         to_lam = ConvertToWavelength(transrun)
         _monitor_ws_trans, _detector_ws_trans = to_lam.convert(
             wavelength_min=lambda_min,

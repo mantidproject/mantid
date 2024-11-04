@@ -57,9 +57,8 @@ Output:
     :options: +NORMALIZE_WHITESPACE
 
     outputWorkspace is a Workspace2D and the Y values are:
-	[ 2.  6.  0.  0.]
+    [2. 6. 0. 0.]
 
 .. categories::
 
 .. sourcelink::
-

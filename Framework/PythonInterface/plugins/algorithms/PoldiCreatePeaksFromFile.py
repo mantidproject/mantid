@@ -5,12 +5,37 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,too-few-public-methods,unused-import
-from mantid.kernel import *
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.geometry import *
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, WorkspaceProperty
+from mantid.geometry import SpaceGroupFactory
+from mantid.kernel import logger, Direction
+from mantid.simpleapi import GroupWorkspaces, PoldiCreatePeaksFromCell
 
 import os
+
+PYPARSING_AVAILABLE = True
+try:
+    from pyparsing import (
+        alphas,
+        alphanums,
+        delimitedList,
+        lineEnd,
+        nums,
+        restOfLine,
+        stringEnd,
+        CaselessLiteral,
+        Combine,
+        Each,
+        Group,
+        Literal,
+        OneOrMore,
+        Optional,
+        ParseException,
+        Suppress,
+        White,
+        Word,
+    )
+except ImportError:
+    PYPARSING_AVAILABLE = False
 
 
 class PoldiCompound(object):
@@ -218,17 +243,15 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
             LatticeSpacingMin=dMin,
             LatticeSpacingMax=dMax,
             OutputWorkspace=compound.getName(),
-            **compound.getCellParameters()
+            **compound.getCellParameters(),
         )
 
         return compound.getName()
 
 
-try:
-    from pyparsing import *
-
+if PYPARSING_AVAILABLE:
     AlgorithmFactory.subscribe(PoldiCreatePeaksFromFile)
-except ImportError:
+else:
     logger.debug(
         "Failed to subscribe algorithm PoldiCreatePeaksFromFile; Python package pyparsing"
         "may be missing (https://pypi.python.org/pypi/pyparsing)"

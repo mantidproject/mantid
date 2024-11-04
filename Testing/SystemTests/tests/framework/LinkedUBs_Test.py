@@ -7,13 +7,13 @@
 # pylint: disable=invalid-name,no-init
 # System test that loads short SXD numors and runs LinkedUBs.
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import FindSXPeaks, LinkedUBs, LoadRaw, PredictPeaks, SetGoniometer, SetUB
 import numpy as np
 
 
 class LinkedUBs_Test(systemtesting.MantidSystemTest):
     def runTest(self):
-
         ws1 = LoadRaw(Filename="SXD30904.raw.md5", OutputWorkspace="SXD30904")
 
         ws2 = LoadRaw(Filename="SXD30905.raw.md5", OutputWorkspace="SXD30905")

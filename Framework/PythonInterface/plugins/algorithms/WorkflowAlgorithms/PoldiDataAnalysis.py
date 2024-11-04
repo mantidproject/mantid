@@ -5,11 +5,26 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-instance-attributes
-from mantid.simpleapi import *
-from mantid.api import *
-
-# the mantid.kernel import is required for Direction.Input and Direction.Output calls
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, AnalysisDataService, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import (
+    Direction,
+    StringListValidator,
+)
+from mantid.simpleapi import (
+    plotSpectrum,
+    DeleteWorkspace,
+    Integration,
+    GroupWorkspaces,
+    Plus,
+    PoldiAnalyseResiduals,
+    PoldiFitPeaks1D,
+    PoldiFitPeaks2D,
+    PoldiIndexKnownCompounds,
+    PoldiPeakSearch,
+    PoldiAutoCorrelation,
+    RenameWorkspace,
+    SumSpectra,
+)
 
 
 class PoldiDataAnalysis(PythonAlgorithm):
@@ -379,7 +394,6 @@ class PoldiDataAnalysis(PythonAlgorithm):
         plotResults = self.getProperty("PlotResult").value
 
         if plotResults:
-
             plotWindow = plotSpectrum(total, 0, type=1)
             plotWindow = plotSpectrum(spectrum1D, 0, type=0, window=plotWindow)
             plotWindow = plotSpectrum(residuals, 0, type=0, window=plotWindow)

@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 import math
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, AlgorithmManager, AnalysisDataService, MatrixWorkspaceProperty, PythonAlgorithm
+from mantid.kernel import Direction, IntBoundedValidator, Logger, PropertyManagerDataService, StringMandatoryValidator
 
 
 class EQSANSAzimuthalAverage1D(PythonAlgorithm):

@@ -21,7 +21,6 @@ set(SRC_FILES
     src/EventWorkspaceCollection.cpp
     src/ExtractMonitorWorkspace.cpp
     src/ExtractPolarizationEfficiencies.cpp
-    src/FilterEventsByLogValuePreNexus.cpp
     src/FindDetectorsInShape.cpp
     src/FindDetectorsPar.cpp
     src/GenerateGroupingPowder.cpp
@@ -176,7 +175,6 @@ set(SRC_FILES
     src/SaveDaveGrp.cpp
     src/SaveDetectorsGrouping.cpp
     src/SaveDiffCal.cpp
-    src/SaveDiffFittingAscii.cpp
     src/SaveDspacemap.cpp
     src/SaveFITS.cpp
     src/SaveFocusedXYE.cpp
@@ -210,6 +208,7 @@ set(SRC_FILES
     src/SaveTBL.cpp
     src/SaveToSNSHistogramNexus.cpp
     src/SaveVTK.cpp
+    src/ScaleInstrumentComponent.cpp
     src/SetBeam.cpp
     src/SetSample.cpp
     src/SetSampleMaterial.cpp
@@ -219,6 +218,7 @@ set(SRC_FILES
     src/StartAndEndTimeFromNexusFileExtractor.cpp
     src/UpdateInstrumentFromFile.cpp
     src/XmlHandler.cpp
+    src/RotateSampleShape.cpp
 )
 
 set(INC_FILES
@@ -245,7 +245,6 @@ set(INC_FILES
     inc/MantidDataHandling/EventWorkspaceCollection.h
     inc/MantidDataHandling/ExtractMonitorWorkspace.h
     inc/MantidDataHandling/ExtractPolarizationEfficiencies.h
-    inc/MantidDataHandling/FilterEventsByLogValuePreNexus.h
     inc/MantidDataHandling/FindDetectorsInShape.h
     inc/MantidDataHandling/FindDetectorsPar.h
     inc/MantidDataHandling/GenerateGroupingPowder.h
@@ -398,7 +397,6 @@ set(INC_FILES
     inc/MantidDataHandling/SaveDaveGrp.h
     inc/MantidDataHandling/SaveDetectorsGrouping.h
     inc/MantidDataHandling/SaveDiffCal.h
-    inc/MantidDataHandling/SaveDiffFittingAscii.h
     inc/MantidDataHandling/SaveDspacemap.h
     inc/MantidDataHandling/SaveFITS.h
     inc/MantidDataHandling/SaveFocusedXYE.h
@@ -432,6 +430,7 @@ set(INC_FILES
     inc/MantidDataHandling/SaveTBL.h
     inc/MantidDataHandling/SaveToSNSHistogramNexus.h
     inc/MantidDataHandling/SaveVTK.h
+    inc/MantidDataHandling/ScaleInstrumentComponent.h
     inc/MantidDataHandling/SetBeam.h
     inc/MantidDataHandling/SetSample.h
     inc/MantidDataHandling/SetSampleMaterial.h
@@ -446,6 +445,7 @@ set(INC_FILES
     src/LoadRaw/isisraw2.h
     src/LoadRaw/item_struct.h
     src/LoadRaw/vms_convert.h
+    inc/MantidDataHandling/RotateSampleShape.h
 )
 
 set(TEST_FILES
@@ -469,7 +469,6 @@ set(TEST_FILES
     EventWorkspaceCollectionTest.h
     ExtractMonitorWorkspaceTest.h
     ExtractPolarizationEfficienciesTest.h
-    FilterEventsByLogValuePreNexusTest.h
     FindDetectorsInShapeTest.h
     FindDetectorsParTest.h
     GenerateGroupingPowderTest.h
@@ -636,6 +635,7 @@ set(TEST_FILES
     SaveStlTest.h
     SaveTBLTest.h
     SaveToSNSHistogramNexusTest.h
+    ScaleInstrumentComponentTest.h
     SetBeamTest.h
     SetSampleMaterialTest.h
     SetSampleTest.h
@@ -644,6 +644,7 @@ set(TEST_FILES
     StartAndEndTimeFromNexusFileExtractorTest.h
     UpdateInstrumentFromFileTest.h
     XMLInstrumentParameterTest.h
+    RotateSampleShapeTest.h
 )
 
 if(COVERAGE)
@@ -698,7 +699,7 @@ target_link_libraries(
          Mantid::Kernel
          Mantid::Indexing
          Mantid::Parallel
-  PRIVATE Mantid::Json Mantid::NexusGeometry
+  PRIVATE Mantid::Json Boost::filesystem Mantid::NexusGeometry
 )
 
 # Lib3mf is technically a public dependency as it is in our public headers. We are assuming here that it won't be used.

@@ -64,9 +64,7 @@ public:
 
   /// Algorithm's version for identification. @see Algorithm::version
   int version() const override { return 1; }
-  const std::vector<std::string> seeAlso() const override {
-    return {"CheckWorkspacesMatch", "CompareSampleLogs", "CloneWorkspace"};
-  }
+  const std::vector<std::string> seeAlso() const override { return {"CompareSampleLogs", "CloneWorkspace"}; }
 
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string category() const override { return "Utility\\Workspaces"; }
@@ -78,8 +76,8 @@ public:
            "testing process.";
   }
 
-  static bool withinAbsoluteTolerance(double x1, double x2, double atol);
-  static bool withinRelativeTolerance(double x1, double x2, double rtol);
+  static bool withinAbsoluteTolerance(double x1, double x2, double atol, bool const nanEqual = false);
+  static bool withinRelativeTolerance(double x1, double x2, double rtol, bool const nanEqual = false);
 
 private:
   /// Initialise algorithm

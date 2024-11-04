@@ -130,7 +130,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-
         # Set up progress reporting
         n_prog_reports = 2
         if self._can_ws_name is not None:

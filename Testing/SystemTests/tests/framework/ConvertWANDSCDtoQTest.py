@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
 import numpy as np
-from mantid.simpleapi import *
+from mantid.api import AlgorithmManager
+from mantid.simpleapi import ConvertWANDSCDtoQ, FindPeaksMD, IndexPeaks, Load, LoadMD, SaveMD, SetGoniometer, SetUB
 
 
 class ConvertWANDSCDtoQTest(systemtesting.MantidSystemTest):

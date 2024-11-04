@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-"""Test suite for the PyChop package
-"""
+"""Test suite for the PyChop package"""
+
 import unittest
 from unittest import mock
 from unittest.mock import patch

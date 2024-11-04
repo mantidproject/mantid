@@ -5,8 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import TYPE_CHECKING, Optional, Dict
+from dataclasses import dataclass
 
-from mantid.py36compat import dataclass
 from mantidqt.utils.async_qt_adaptor import qt_async_task, IQtAsync
 from mantid.kernel import Logger
 from mantidqt.utils.asynchronous import AsyncTaskFailure, AsyncTaskSuccess
@@ -63,8 +63,8 @@ class BeamCentreAsync(IQtAsync):
         """
         centre_finder = SANSCentreFinder()
         if not settings.find_direction:
-            self._logger.error("Have chosen no find direction exiting early")
-            return
+            self._logger.error("No direction has been selected - please select either one or both of the Direction checkboxes.")
+            raise ValueError("Unable to run beam centre finder as no direction settings have been provided.")
 
         pos_1 = settings.lab_pos_1 if settings.component is DetectorType.LAB else settings.hab_pos_1
         pos_2 = settings.lab_pos_2 if settings.component is DetectorType.LAB else settings.hab_pos_2

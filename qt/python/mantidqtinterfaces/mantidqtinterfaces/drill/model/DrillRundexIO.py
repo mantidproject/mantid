@@ -7,13 +7,12 @@
 
 import json
 
-from mantid.kernel import *
+from mantid.kernel import logger, PropertyManager
 
 from .configurations import RundexSettings
 
 
 class DrillRundexIO:
-
     """
     Name of the file where the data will be read or saved.
     """

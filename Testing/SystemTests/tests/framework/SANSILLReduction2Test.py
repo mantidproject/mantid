@@ -5,7 +5,24 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import (
+    AddSampleLog,
+    CalculateDynamicRange,
+    CalculateEfficiency,
+    CreateSingleValuedWorkspace,
+    CropToComponent,
+    GroupWorkspaces,
+    Load,
+    LoadNexusProcessed,
+    MaskBTP,
+    Plus,
+    SANSILLIntegration,
+    SANSILLReduction,
+    RenameWorkspace,
+    Q1DWeighted,
+)
 
 
 class ILL_SANS_D11_MONO_TEST(systemtesting.MantidSystemTest):
@@ -399,7 +416,6 @@ class ILL_SANS_D11B_MONO_TEST(systemtesting.MantidSystemTest):
         return ["out", "ILL_SANS_D11B_MONO.nxs"]
 
     def runTest(self):
-
         cadmiums = ["8551", "8566", "8581"]
         empty_beams = ["8552", "8567", "8582"]
         tr_beam = "8538"
@@ -615,7 +631,6 @@ class ILL_SANS_D33_MONO_TEST(systemtesting.MantidSystemTest):
         return ["iq", "ILL_SANS_D33_MONO.nxs"]
 
     def runTest(self):
-
         # Load the mask
         LoadNexusProcessed(Filename="D33_mask.nxs", OutputWorkspace="mask")
 

@@ -10,6 +10,7 @@
 """
 Defines the QMainWindow of the application and the main() entry point.
 """
+
 import builtins
 import os
 

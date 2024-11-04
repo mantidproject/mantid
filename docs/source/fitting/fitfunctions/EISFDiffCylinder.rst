@@ -58,4 +58,3 @@ Output:
 .. categories::
 
 .. sourcelink::
-

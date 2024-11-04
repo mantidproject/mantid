@@ -88,8 +88,8 @@ def plot_tof_vs_d_from_calibration(diag_ws, ws_foc, dspacing, calibration):
             ncols = ncols_per_fig if not nspec - ispec < ncols_per_fig else nspec % ncols_per_fig
             fig, ax = subplots(2, ncols, sharex=True, sharey="row", subplot_kw={"projection": "mantid"})
             ax = reshape(ax, (-1, 1)) if ax.ndim == 1 else ax  # to ensure is 2D matrix even if ncols==1
-            ax[0, 0].set_ylabel("Fitted TOF (\u03BCs)")
-            ax[1, 0].set_ylabel("Residuals (\u03BCs)")
+            ax[0, 0].set_ylabel("Fitted TOF (\u03bcs)")
+            ax[1, 0].set_ylabel("Residuals (\u03bcs)")
             figs.append(fig)
             icol = 0
         # plot TOF vs d

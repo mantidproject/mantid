@@ -163,6 +163,43 @@ public:
     }
   }
 
+  void test_output_workspaces_with_collimator() {
+    const double THICKNESS = 0.001; // metres
+    auto inputWorkspace = SetupFlatPlateWorkspace(46, 1, 1.0, 1, 0.5, 1.0, 10 * THICKNESS, 10 * THICKNESS, THICKNESS);
+    auto &pmap = inputWorkspace->instrumentParameters();
+    Instrument_const_sptr instrument = inputWorkspace->getInstrument();
+    pmap.addDouble(instrument.get(), "col-radius", 0.5);
+    pmap.addDouble(instrument.get(), "col-angular-extent", 0.034);
+    pmap.addDouble(instrument.get(), "col-plate-height", 0.2);
+    pmap.addString(instrument.get(), "col-axis", "0,1,0");
+
+    auto alg = createAlgorithm();
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspace", inputWorkspace));
+    const int NSCATTERINGS = 3;
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NumberScatterings", NSCATTERINGS));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsSingle", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("NeutronPathsMultiple", 10));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty("RadialCollimator", true));
+    TS_ASSERT_THROWS_NOTHING(alg->execute(););
+    TS_ASSERT(alg->isExecuted());
+    if (alg->isExecuted()) {
+      auto output =
+          Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::WorkspaceGroup>("MuscatResults");
+      std::vector<std::string> wsNames = {"MuscatResults_Scatter_1_NoAbs",      "MuscatResults_Scatter_1",
+                                          "MuscatResults_Scatter_1_Integrated", "MuscatResults_Scatter_2",
+                                          "MuscatResults_Scatter_2_Integrated", "MuscatResults_Scatter_3",
+                                          "MuscatResults_Scatter_3_Integrated", "MuscatResults_Scatter_2_3_Summed",
+                                          "MuscatResults_Scatter_1_3_Summed",   "MuscatResults_Ratio_Single_To_All"};
+      for (auto &name : wsNames) {
+        Mantid::API::Workspace_sptr wsPtr;
+        TS_ASSERT_THROWS_NOTHING(wsPtr = output->getItem(name));
+        auto matrixWsPtr = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(wsPtr);
+        TS_ASSERT(matrixWsPtr);
+      }
+      Mantid::API::AnalysisDataService::Instance().deepRemoveGroup("MuscatResults");
+    }
+  }
+
   void test_flat_plate_sample_single_scatter() {
     // generate a result corresponding to Figure 4 in the Mancinelli paper (flat
     // plate sample for once scattered neutrons) where there's an analytical solution

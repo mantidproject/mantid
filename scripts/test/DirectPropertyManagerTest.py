@@ -7,13 +7,24 @@
 import unittest
 from sys import platform
 import numpy as np
-from Direct.AbsorptionShapes import *
+import os
+from Direct.AbsorptionShapes import Cylinder
 from Direct.PropertyManager import PropertyManager
 from Direct.RunDescriptor import RunDescriptor
 
 
 from mantid import api
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import (
+    config,
+    AddSampleLog,
+    AddTimeSeriesLog,
+    CloneWorkspace,
+    ConvertUnits,
+    CreateSampleWorkspace,
+    LoadEmptyInstrument,
+    SetInstrumentParameter,
+)
 
 
 # -----------------------------------------------------------------------------------------------------------------------------------------
@@ -1307,6 +1318,24 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         propman.empty_bg_run = 1024
         self.assertEqual(p1.run_number(), 1024)
+
+    #
+    def test_set_psi_directly_works(self):
+        propman = self.prop_man
+
+        propman.psi = 10
+        self.assertEqual(propman.psi, 10)
+
+    def test_default_psi_is_nan(self):
+        propman = self.prop_man
+
+        self.assertTrue(np.isnan(propman.psi))
+
+    def test_psi_set_to0_works(self):
+        propman = self.prop_man
+
+        propman.psi = 0
+        self.assertEqual(propman.psi, 0)
 
 
 if __name__ == "__main__":

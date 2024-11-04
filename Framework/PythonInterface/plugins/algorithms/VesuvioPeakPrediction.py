@@ -4,10 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory
+from mantid.kernel import Direction, FloatArrayBoundedValidator, FloatArrayProperty, FloatBoundedValidator, StringListValidator
 from vesuvio.base import VesuvioBase
-from mantid.simpleapi import *
 import scipy.constants
 
 import math
@@ -33,7 +32,6 @@ class VesuvioPeakPrediction(VesuvioBase):
         return "Inelastic\\Indirect\\Vesuvio"
 
     def PyInit(self):
-
         self.declareProperty(
             name="Model",
             defaultValue="Einstein",
@@ -59,7 +57,6 @@ class VesuvioPeakPrediction(VesuvioBase):
         )
 
     def setup(self):
-
         self._model = self.getPropertyValue("Model")
         self._temperature = self.getProperty("Temperature").value
         self._atomic_mass = self.getProperty("AtomicMass").value
@@ -67,7 +64,6 @@ class VesuvioPeakPrediction(VesuvioBase):
         self._debye_temp = self.getProperty("DebyeTemperature").value
 
     def PyExec(self):
-
         self.setup()
 
         vesuvio_params = WorkspaceFactory.Instance().createTable()
@@ -103,7 +99,6 @@ class VesuvioPeakPrediction(VesuvioBase):
             vesuvio_params.addColumn("float", "RMS Displacement(A)")
 
             for temp in self._temperature:
-
                 if temp == 0:
                     temp = MIN_TEMPERATURE
 

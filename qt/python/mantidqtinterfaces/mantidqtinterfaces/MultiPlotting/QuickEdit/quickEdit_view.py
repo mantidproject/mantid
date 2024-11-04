@@ -71,7 +71,6 @@ class QuickEditView(QtWidgets.QWidget):
         self.plot_selector.blockSignals(False)
 
     def rm_subplot(self, index):
-
         self.plot_selector.removeItem(index)
 
     def clear_subplots(self):

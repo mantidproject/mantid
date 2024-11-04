@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" This module contains bundle definitions for passing reduction settings between functions."""
+"""This module contains bundle definitions for passing reduction settings between functions."""
+
 from collections import namedtuple
 
 # The ReductionSettingBundle contains the information and data for starting a SANSReductionCore reduction.
@@ -19,7 +20,7 @@ from collections import namedtuple
 # 8. A handle to the direct workspace (sample or can)
 from typing import List
 
-from mantid.py36compat import dataclass
+from dataclasses import dataclass
 from sans.state.StateObjects.wavelength_interval import WavRange
 
 ReductionSettingBundle = namedtuple(

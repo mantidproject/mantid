@@ -88,4 +88,3 @@ As well as the filtering algorithms, there are plenty of other Sample Log operat
 - :ref:`algm-AddSampleLog`
 - :ref:`algm-ExportExperimentLog`
 - :ref:`algm-CheckForSampleLogs`
-

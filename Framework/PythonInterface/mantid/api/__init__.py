@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+# ruff: noqa: F403   # Allow wild imports
 """
 api
 ===
@@ -11,6 +12,7 @@ api
 Defines Python objects that wrap the C++ API namespace.
 
 """
+
 ###############################################################################
 # Load the C++ library
 ###############################################################################

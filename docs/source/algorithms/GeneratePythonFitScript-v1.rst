@@ -39,8 +39,9 @@ Output:
 .. testoutput:: ExGeneratePythonSequentialFitScript
    :options: +ELLIPSIS
 
-   # A python script generated to perform a sequential or simultaneous fit
-   from mantid.simpleapi import *
+   # A python script generated to perform a sequential fit
+   from mantid.api import AnalysisDataService
+   from mantid.simpleapi import Fit, GroupWorkspaces
    import matplotlib.pyplot as plt
 
    # List of tuples [ (workspace_name, workspace_index, start_x, end_x) ]
@@ -136,8 +137,9 @@ Output:
 .. testoutput:: ExGeneratePythonSimultaneousFitScript
    :options: +ELLIPSIS
 
-   # A python script generated to perform a sequential or simultaneous fit
-   from mantid.simpleapi import *
+   # A python script generated to perform a simultaneous fit
+   from mantid.api import AnalysisDataService
+   from mantid.simpleapi import Fit
    import matplotlib.pyplot as plt
 
    # List of tuples [ (workspace_name, workspace_index, start_x, end_x) ]

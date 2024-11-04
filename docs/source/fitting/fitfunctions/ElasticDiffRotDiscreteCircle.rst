@@ -37,4 +37,3 @@ This function makes up the elastic part of :ref:`DiffRotDiscreteCircle <func-Dif
 .. categories::
 
 .. sourcelink::
-

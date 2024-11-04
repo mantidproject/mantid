@@ -164,12 +164,7 @@ class PyChopGui(QMainWindow):
                     self.widgets[f"Chopper{idx}Phase"]["Label"].show()
                 self.widgets[f"Chopper{idx}Phase"]["Edit"].setText(str(self.engine.chopper_system.defaultPhase[idx]))
                 self.widgets[f"Chopper{idx}Phase"]["Label"].setText(self.engine.chopper_system.phaseNames[idx])
-            # Special case for MERLIN - hide phase control from normal users
-            if "MERLIN" in str(instname) and not self.instSciAct.isChecked():
-                self.widgets["Chopper0Phase"]["Edit"].hide()
-                self.widgets["Chopper0Phase"]["Label"].hide()
-        self.engine.setChopper(str(self.widgets["ChopperCombo"]["Combo"].currentText()))
-        self.engine.setFrequency(float(self.widgets["FrequencyCombo"]["Combo"].currentText()))
+        self.setChopper(str(self.widgets["ChopperCombo"]["Combo"].currentText()))
         val = self.flxslder.val * self.maxE[self.engine.instname] / 100
         self.flxedt.setText("%3.2f" % (val))
         nframe = self.engine.moderator.n_frame if hasattr(self.engine.moderator, "n_frame") else 1
@@ -192,6 +187,7 @@ class PyChopGui(QMainWindow):
         else:
             self.widgets["S2Edit"]["Edit"].hide()
             self.widgets["S2Edit"]["Label"].hide()
+        self.setFreq()
 
     def setChopper(self, choppername):
         """
@@ -201,6 +197,17 @@ class PyChopGui(QMainWindow):
         self.engine.setFrequency(float(self.widgets["FrequencyCombo"]["Combo"].currentText()))
         # Special case for MERLIN - only enable multirep for 'G' chopper
         self._merlin_chopper()
+
+    def _get_phase(self, choppernumber, widget):
+        phase = widget["Edit"].text()
+        if isinstance(self.engine.chopper_system.defaultPhase[choppernumber], str):
+            phase = str(phase)
+        else:
+            try:
+                phase = float(phase) % (1e6 / self.engine.moderator.source_rep)
+            except ValueError:
+                raise ValueError(f'Incorrect phase value "{phase}" for {widget["Label"].text()}')
+        return phase
 
     def setFreq(self, freqtext=None, **kwargs):
         """
@@ -213,18 +220,14 @@ class PyChopGui(QMainWindow):
             freq_in = [freq_in, freqpr]
         # Checks for independent phases
         phases = []
-        for key, widget in self.widgets.items():
-            if key.endswith("Phase") and not widget["Label"].isHidden():
-                idx = int(key[7])
-                phase = widget["Edit"].text()
-                if isinstance(self.engine.chopper_system.defaultPhase[idx], str):
-                    phase = str(phase)
-                else:
-                    try:
-                        phase = float(phase) % (1e6 / self.engine.moderator.source_rep)
-                    except ValueError:
-                        raise ValueError(f'Incorrect phase value "{phase}" for {widget["Label"].text()}')
-                phases.append(phase)
+        # Special case for MERLIN
+        # sets the default phase for Chopper0Phase if not in "Instrument Scientist Mode"
+        if "MERLIN" in str(self.engine.instname) and not self.widgets["Chopper0Phase"]["Label"].isVisible():
+            phases.append(self._get_phase(0, self.widgets["Chopper0Phase"]))
+        else:
+            for key, widget in self.widgets.items():
+                if key.endswith("Phase") and not widget["Label"].isHidden():
+                    phases.append(self._get_phase(int(key[7]), widget))
         if phases:
             self.engine.setFrequency(freq_in, phase=phases)
         else:
@@ -237,14 +240,22 @@ class PyChopGui(QMainWindow):
 
     def _merlin_chopper(self):
         if "MERLIN" in self.engine.instname:
+            try:
+                if self.engine.getChopper() is None:
+                    self.setChopper(self.widgets["ChopperCombo"]["Combo"].currentText())
+            except ValueError as err:
+                self.errormessage(err)
             if "G" in self.engine.getChopper():
                 self.widgets["MultiRepCheck"].setEnabled(True)
                 self.tabs.setTabEnabled(self.tdtabID, True)
+                self.widgets["Chopper0Phase"]["Edit"].setText("12400")
+                self.widgets["Chopper0Phase"]["Label"].setText("Disk chopper phase delay time")
                 if self.instSciAct.isChecked():
-                    self.widgets["Chopper0Phase"]["Edit"].setText("12400")
-                    self.widgets["Chopper0Phase"]["Label"].setText("Disk chopper phase delay time")
                     self.widgets["Chopper0Phase"]["Edit"].show()
                     self.widgets["Chopper0Phase"]["Label"].show()
+                else:
+                    self.widgets["Chopper0Phase"]["Edit"].hide()
+                    self.widgets["Chopper0Phase"]["Label"].hide()
             else:
                 self.widgets["MultiRepCheck"].setEnabled(False)
                 self.widgets["MultiRepCheck"].setChecked(False)
@@ -642,9 +653,9 @@ class PyChopGui(QMainWindow):
         txt += "# Ei = %8.2f meV\n" % (ei)
         txt += "# Flux = %8.2f n/cm2/s\n" % (flux)
         txt += "# Elastic resolution = %6.2f meV\n" % (res[0])
-        txt += "# Time width at sample = %6.2f us, of which:\n" % (1e6 * np.sqrt(tsqvan))
+        txt += "# Time width at sample = %6.2f us, of which:\n" % (1e6 * np.sqrt(tsqvan[0]))
         for ky, val in list(tsqdic.items()):
-            txt += "#     %20s : %6.2f us\n" % (ky, 1e6 * np.sqrt(val))
+            txt += "#     %20s : %6.2f us\n" % (ky, 1e6 * np.sqrt(val[0]))
         txt += "# %s distances:\n" % (obj.instname)
         txt += "#     x0 = %6.2f m (%s to Fermi)\n" % (x0, first_component)
         txt += "#     x1 = %6.2f m (Fermi to sample)\n" % (x1)

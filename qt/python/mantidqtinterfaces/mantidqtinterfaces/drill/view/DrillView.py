@@ -8,7 +8,7 @@
 import os
 
 from qtpy.QtWidgets import QMainWindow, QMessageBox, QDialog, QMenu, QAction
-from qtpy.QtCore import *
+from qtpy.QtCore import Signal, QProcess, Qt
 from qtpy import uic
 
 from mantidqt.widgets import manageuserdirectories, instrumentselector
@@ -21,7 +21,6 @@ from .DrillContextMenu import DrillContextMenu
 
 
 class DrillView(QMainWindow):
-
     ###########################################################################
     # Signals                                                                 #
     ###########################################################################
@@ -31,6 +30,7 @@ class DrillView(QMainWindow):
     Args:
         str: instrument name
     """
+
     instrumentChanged = Signal(str)
 
     """
@@ -351,7 +351,7 @@ class DrillView(QMainWindow):
         Erase the contents of the selected cells.
         """
         indexes = self.table.getSelectedCells()
-        for (r, c) in indexes:
+        for r, c in indexes:
             self.table.eraseCell(r, c)
 
     def addRowAfter(self):

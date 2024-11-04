@@ -10,7 +10,6 @@ from mantid import config, mtd
 
 
 class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
-
     # cache default instrument and datadirs
     facility = config["default.facility"]
     instrument = config["default.instrument"]
@@ -33,7 +32,6 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
         config["datasearch.directories"] = self.datadirs
 
     def test_unmirror_0_1_2_3(self):
-
         args = {"Run": "136553.nxs", "UnmirrorOption": 0, "OutputWorkspace": "zero"}
 
         IndirectILLReductionQENS(**args)
@@ -71,7 +69,6 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
         self.assertTrue(result[0], "Unmirror 0 should be the group of 2 and 3")
 
     def test_unmirror_4_5(self):
-
         args = {"Run": "136553.nxs", "UnmirrorOption": 4, "OutputWorkspace": "vana4"}
 
         IndirectILLReductionQENS(**args)
@@ -89,7 +86,6 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
         self.assertTrue(result[0], "Unmirror 4 should be the same as 5 if " "the same run is also defined as alignment run")
 
     def test_unmirror_6_7(self):
-
         args = {"Run": "136553.nxs", "UnmirrorOption": 6, "OutputWorkspace": "vana6"}
 
         IndirectILLReductionQENS(**args)
@@ -107,7 +103,6 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
         self.assertTrue(result[0], "Unmirror 6 should be the same as 7 if " "the same run is also defined as alignment run")
 
     def test_unmirror_7_same_reference(self):
-
         # there was a bug in MatchPeaks with InputWorkspace2 and center peaks ON
         # in the case where the fitting was failing because of a too narrow peak
         # this tests the fix with the data where there are too narrow peaks to fit
@@ -129,7 +124,6 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
             self.assertEqual(m1[i], m2[i])
 
     def runTest(self):
-
         self.test_unmirror_0_1_2_3()
 
         self.test_unmirror_4_5()
@@ -157,7 +151,6 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
         self.tearDown()
 
     def runTestBackgroundCalibration(self):
-
         IndirectILLReductionQENS(
             Run="136558",
             CalibrationRun="136553",
@@ -171,7 +164,6 @@ class ILLIndirectReductionQENSTest(systemtesting.MantidSystemTest):
         self.assertDelta(mtd["out_calib_bg_red"].getItem(0).readY(0)[1024 - 580], 0.0035, 0.0001)
 
     def runTestDifferentZeroMonitorChannels(self):
-
         out_croped_mon = IndirectILLReductionQENS(Run="140721-140722", CropDeadMonitorChannels=True)
 
         self.assertEqual(out_croped_mon.getItem(0).getNumberHistograms(), 18)

@@ -8,12 +8,12 @@
 #
 #
 """Provides a widget to wrap common behaviour for all plugins"""
+
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QDockWidget, QMainWindow, QWidget
 
 
 class PluginWidget(QWidget):
-
     ALLOWED_AREAS = Qt.AllDockWidgetAreas
     LOCATION = Qt.LeftDockWidgetArea
     FEATURES = QDockWidget.DockWidgetClosable | QDockWidget.DockWidgetFloatable | QDockWidget.DockWidgetMovable

@@ -6,12 +6,22 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, bare-except, too-many-instance-attributes
 import math
+import os
 import re
+import sys
 
-from mantid.simpleapi import *
-from mantid.api import WorkspaceGroup, Workspace
-from mantid.kernel import Logger
-from mantid.kernel import V3D
+from mantid.api import mtd, AnalysisDataService, Workspace, WorkspaceGroup
+from mantid.kernel import config, logger, ConfigService, Logger, V3D
+from mantid.simpleapi import (
+    CopyInstrumentParameters,
+    CropWorkspace,
+    LoadEmptyInstrument,
+    LoadInstrument,
+    MoveInstrumentComponent,
+    RotateInstrumentComponent,
+    SetInstrumentParameter,
+)
+
 import SANSUtility as su
 from math import copysign
 

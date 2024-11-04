@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init, too-many-instance-attributes
 
-from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress, WorkspaceGroupProperty
 from mantid.kernel import (
     StringMandatoryValidator,
@@ -17,6 +16,21 @@ from mantid.kernel import (
     StringListValidator,
     MaterialBuilder,
 )
+from mantid.simpleapi import (
+    AddSampleLogMultiple,
+    AnnularRingAbsorption,
+    CloneWorkspace,
+    ConvertUnits,
+    DeleteWorkspace,
+    Divide,
+    GroupWorkspaces,
+    Minus,
+    Multiply,
+    Scale,
+    SetSampleMaterial,
+)
+
+from IndirectCommon import get_efixed
 
 
 class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
@@ -102,8 +116,6 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
 
     # pylint: disable=too-many-branches
     def PyExec(self):
-        from IndirectCommon import getEfixed
-
         self._setup()
 
         # Set up progress reporting
@@ -112,7 +124,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
             n_prog_reports += 1
         prog = Progress(self, 0.0, 1.0, n_prog_reports)
 
-        efixed = getEfixed(self._sample_ws_name)
+        efixed = get_efixed(self._sample_ws_name)
 
         sample_wave_ws = "__sam_wave"
         ConvertUnits(

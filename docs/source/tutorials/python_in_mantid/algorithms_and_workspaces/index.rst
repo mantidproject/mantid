@@ -51,4 +51,3 @@ will result in the following error: `NameError on line 1: "name 'x' is not defin
 * :ref:`05_group_ws_py`
 * :ref:`06_alg_help`
 * :ref:`07_pim_ex_1`
-

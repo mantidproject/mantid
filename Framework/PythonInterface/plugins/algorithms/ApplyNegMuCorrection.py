@@ -4,15 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import *  # PythonAlgorithm, registerAlgorithm, WorkspaceProperty
-from mantid.simpleapi import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm
+from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, Plus, Rebin, RenameWorkspaces, Load
 
 # pylint: disable=no-init, too-many-arguments
 
 
 class ApplyNegMuCorrection(PythonAlgorithm):
-
     # Combining work spaces and normalising the correction.
     # _OILE and _OIHE are unused parameters for now to make PyLint happy
     def combine(self, dataDir, runno, A2000, B2000, A3000, B3000, _OILE, _OIHE, spec):
@@ -85,7 +83,6 @@ class ApplyNegMuCorrection(PythonAlgorithm):
         return "CorrectionFunctions\\SpecialCorrections;Muon"
 
     def PyExec(self):
-
         spec = 1
         dataDir = self.getProperty("DataDirectory").value
         first = self.getProperty("FirstRunNumber").value

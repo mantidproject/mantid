@@ -25,8 +25,9 @@
 #
 
 import systemtesting
-from mantid.simpleapi import *
-from mantid.api import MatrixWorkspace
+from mantid.api import mtd, MatrixWorkspace
+from mantid.kernel import logger
+from mantid.simpleapi import Fit, LoadAscii
 
 import unittest
 
@@ -126,7 +127,6 @@ class TwoGaussPeaksEVSData(unittest.TestCase):
     # Using this workaround as we still support Python 2.6 on rhel6, where setUpClass()
     # is not available
     def setUp(self):
-
         if not self.__class__.workspace:
             self.__class__.workspace = load_fitting_test_file_ascii(self.filename)
 
@@ -318,7 +318,6 @@ class VanadiumPatternFromENGINXSmoothing(unittest.TestCase):
 
 
 class WeightedLeastSquaresTest(systemtesting.MantidSystemTest):
-
     _success = False
 
     def runTest(self):

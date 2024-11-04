@@ -8,24 +8,25 @@
 
 # W0121 = Use raise ErrorClass(args) instead of raise ErrorClass, args.
 """
-    Base reduction class. Hold a list of data and a list of reduction steps to apply to them.
+Base reduction class. Hold a list of data and a list of reduction steps to apply to them.
 
-    Pseudo code example:
+Pseudo code example:
 
-    r = Reducer()
-    r.set_instrument( SANSInstrument() )
-    r.append_step( ReductionStep() )
-    r.reduce()
+r = Reducer()
+r.set_instrument( SANSInstrument() )
+r.append_step( ReductionStep() )
+r.reduce()
 
-    The ReductionStep object is initialized before being passed to the Reducer.
-    The Reducer will call ReductionStep.execute() when Reducer.reduce() is called.
+The ReductionStep object is initialized before being passed to the Reducer.
+The Reducer will call ReductionStep.execute() when Reducer.reduce() is called.
 
-    The ReductionStep.execute() method takes two arguments, a reference to the
-    Reducer itself and the name of the workspace to apply the step to (usually a data set).
-    The Reducer object reference is passed so that the reduction step can access
-    instrument settings.
+The ReductionStep.execute() method takes two arguments, a reference to the
+Reducer itself and the name of the workspace to apply the step to (usually a data set).
+The Reducer object reference is passed so that the reduction step can access
+instrument settings.
 
 """
+
 import os
 import sys
 import time

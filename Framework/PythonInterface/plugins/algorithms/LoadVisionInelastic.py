@@ -5,16 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-# from mantid.api import AlgorithmFactory
-# from mantid.simpleapi import PythonAlgorithm, WorkspaceProperty
-# from mantid.kernel import Direction
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import Direction
 import mantid.simpleapi
 
 
 class LoadVisionInelastic(PythonAlgorithm):
-
     __forward = "bank1,bank2,bank3,bank4,bank5,bank6,bank7"
     __backward = "bank8,bank9,bank10,bank11,bank12,bank13,bank14"
 

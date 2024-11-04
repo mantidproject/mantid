@@ -1,0 +1,2 @@
+- fixes bug in :ref:`CompareWorkspaces <algm-CompareWorkspaces>` that evaluated ``NaN`` values as equal to any floating point (including ``inf`` and finite values).
+- adds new flag NaNsEqual to :ref:`CompareWorkspaces <algm-CompareWorkspaces>` to control how ``NaN`` compares to other ``NaN`` s.

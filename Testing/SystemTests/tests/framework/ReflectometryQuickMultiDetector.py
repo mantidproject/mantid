@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 import systemtesting
-from mantid.simpleapi import *
+from mantid.simpleapi import Load
 from isis_reflectometry import quick
 
 
@@ -44,5 +44,6 @@ class ReflectometryQuickMultiDetector(systemtesting.MantidSystemTest):
         )
 
     def validate(self):
+        self.nanEqual = True
         self.disableChecking.append("Instrument")
         return "4699_IvsQ", "4699_IvsQ_Result.nxs"

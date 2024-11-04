@@ -7,7 +7,8 @@
 import unittest
 
 import isis_instrument as instruments
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace, SetInstrumentParameter
 
 
 class SANSIsisInstrumentTest(unittest.TestCase):

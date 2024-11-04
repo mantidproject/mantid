@@ -6,9 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    This class holds all the necessary information to create a reduction script.
-    This is a fake version of the Reducer for testing purposes.
+This class holds all the necessary information to create a reduction script.
+This is a fake version of the Reducer for testing purposes.
 """
+
 import time
 import os
 from reduction_gui.reduction.scripter import BaseReductionScripter

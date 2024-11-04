@@ -4,12 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-# pylint: disable=no-init
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
-
-# pylint: disable=too-many-instance-attributes
+# pylint: disable=no-init,too-many-instance-attributes
+from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, Progress, WorkspaceProperty
+from mantid.kernel import Direction, FloatArrayProperty, IntArrayProperty, StringArrayProperty, StringListValidator
+from mantid.simpleapi import CalculateFlatBackground, Rebin, Scale
 
 
 class IndirectResolution(DataProcessorAlgorithm):
@@ -47,7 +45,7 @@ class IndirectResolution(DataProcessorAlgorithm):
         )
 
         self.declareProperty(
-            IntArrayProperty(name="DetectorRange", values=[0, 1]), doc="Range of detetcors to use in resolution calculation."
+            IntArrayProperty(name="DetectorRange", values=[0, 1]), doc="Range of detectors to use in resolution calculation."
         )
         self.declareProperty(FloatArrayProperty(name="BackgroundRange", values=[0.0, 0.0]), doc="Energy range to use as background.")
 

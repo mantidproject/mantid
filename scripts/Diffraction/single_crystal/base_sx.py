@@ -10,7 +10,7 @@ from enum import Enum
 import mantid.simpleapi as mantid
 from mantid.api import FunctionFactory, AnalysisDataService as ADS, IMDEventWorkspace, IPeaksWorkspace, IPeak
 from mantid.kernel import logger, SpecialCoordinateSystem
-from FindGoniometerFromUB import getSignMaxAbsValInCol
+from plugins.algorithms.FindGoniometerFromUB import getSignMaxAbsValInCol
 from mantid.geometry import CrystalStructure, SpaceGroupFactory, ReflectionGenerator, ReflectionConditionFilter, PeakShape
 from os import path
 from json import loads as json_loads
@@ -284,6 +284,7 @@ class BaseSX(ABC):
         default_kwargs = {"ApplyCorrection": self.scale_integrated, "EventsPerPoint": 1500, "MaxScatterPtAttempts": 7500}
         kwargs = {**default_kwargs, **kwargs}
         ws = self.get_ws(run)
+        mantid.SetBeam(ws, Geometry={"Shape": "Slit", "Width": self.beam_width, "Height": self.beam_height})
         peaks = self.get_peaks(run, peak_type, int_type)
         mantid.CopySample(InputWorkspace=ws, OutputWorkspace=peaks, CopyEnvironment=False)
         mantid.AddAbsorptionWeightedPathLengths(InputWorkspace=peaks, **kwargs)

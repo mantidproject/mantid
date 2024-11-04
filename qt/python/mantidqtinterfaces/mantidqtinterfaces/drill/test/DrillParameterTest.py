@@ -15,7 +15,6 @@ from mantidqtinterfaces.drill.model.DrillParameter import DrillParameter
 
 
 class DrillParameterTest(unittest.TestCase):
-
     NAME = "name"
 
     def setUp(self):

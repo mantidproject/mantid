@@ -22,7 +22,9 @@ class MANTID_ALGORITHMS_DLL PolarizationEfficiencyCor final : public API::Algori
 public:
   const std::string name() const override;
   int version() const override;
-  const std::vector<std::string> seeAlso() const override { return {"PolarizationCorrectionFredrikze"}; }
+  const std::vector<std::string> seeAlso() const override {
+    return {"PolarizationCorrectionWildes", "PolarizationCorrectionFredrikze"};
+  }
   const std::string category() const override;
   const std::string summary() const override;
 

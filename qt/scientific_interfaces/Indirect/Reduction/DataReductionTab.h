@@ -58,6 +58,7 @@ public:
 
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
+  void enableLoadHistoryProperty(bool doLoadHistory);
 
 public slots:
 
@@ -85,15 +86,15 @@ protected:
 protected:
   IDataReduction *m_idrUI;
   std::unique_ptr<API::IAlgorithmRunner> m_algorithmRunner;
+  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 
 private slots:
   void handleNewInstrumentConfiguration();
 
 private:
   virtual void setFileExtensionsByName(bool filter) { UNUSED_ARG(filter); };
+  virtual void setLoadHistory(bool doLoadHistory) { (void)doLoadHistory; }
   virtual void updateInstrumentConfiguration() = 0;
-
-  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

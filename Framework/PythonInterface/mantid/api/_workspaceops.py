@@ -5,12 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    This module adds functions to  the Workspace classes
-    so that Python operators, i.e +-*/,  can be used on them
+This module adds functions to  the Workspace classes
+so that Python operators, i.e +-*/,  can be used on them
 
-    It is intended for internal use.
+It is intended for internal use.
 """
-
 
 import inspect as _inspect
 

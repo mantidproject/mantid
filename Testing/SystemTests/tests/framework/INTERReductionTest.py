@@ -8,7 +8,29 @@
 System Test for ISIS Reflectometry reduction
 Adapted from scripts provided by Max Skoda.
 """
-from ISISReflectometryWorkflowBase import *
+
+from ISISReflectometryWorkflowBase import (
+    ISISReflectometryWorkflowBase,
+    removeWorkspaces,
+    setupInstrument,
+    stitchTransmissionWorkspaces,
+    stitchedWorkspaceName,
+)
+from mantid.api import mtd
+from mantid.kernel import logger
+from mantid.simpleapi import (
+    AppendSpectra,
+    CloneWorkspace,
+    DeleteWorkspace,
+    FilterByTime,
+    Fit,
+    NRCalculateSlitResolution,
+    SaveNexus,
+    Scale,
+    Stitch1DMany,
+    Rebin,
+    ReflectometryISISLoadAndProcess,
+)
 import systemtesting
 
 

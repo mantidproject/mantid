@@ -260,6 +260,13 @@ class WorkspaceWidget(PluginWidget):
         parent, flags = get_window_config()
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
+                y = ws.getYDimension()
+                if y.getName() == "sample":
+                    spec_xvals = [ws.getYDimension().getX(ispec) for ispec in range(ws.getNumberHistograms())]
+                    # Check if the q values are sorted, if not display error
+                    if sorted(spec_xvals) != spec_xvals:
+                        logger.warning("Warning: Invalid Data Format. Consider sorting by sample number and try again")
+
                 presenter = SliceViewer(ws=ws, conf=CONF, parent=parent, window_flags=flags)
                 presenter.view.show()
             except Exception as exception:
@@ -302,9 +309,7 @@ class WorkspaceWidget(PluginWidget):
                     presenter.show_view()
                 except ValueError:
                     logger.error(
-                        "Could not open workspace: {0} with neither "
-                        "MatrixWorkspaceDisplay nor TableWorkspaceDisplay."
-                        "".format(ws.name())
+                        "Could not open workspace: {0} with neither " "MatrixWorkspaceDisplay nor TableWorkspaceDisplay.".format(ws.name())
                     )
 
     def _do_show_algorithm_history(self, names):

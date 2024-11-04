@@ -8,7 +8,7 @@
 import systemtesting
 import re
 import mantid
-from mantid.simpleapi import *
+from mantid.api import AlgorithmFactory
 
 MAX_ALG_LEN = 40  # TODO convention says 20 is the maximum
 
@@ -254,7 +254,6 @@ class FitFunctions(systemtesting.MantidSystemTest):
         return name in FUNC_BAD_PARAMS[func]
 
     def verifyParameter(self, alg_descr, name):
-
         if not self.paramRegExp.match(name):
             if not self.checkAllowed(alg_descr, name):
                 print(alg_descr + " property (" + name + ") violates conventions")

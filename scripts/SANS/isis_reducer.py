@@ -6,20 +6,20 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, property-on-old-class, redefined-builtin, protected-access
 """
-    ISIS-specific implementation of the SANS Reducer.
+ISIS-specific implementation of the SANS Reducer.
 
-    WARNING: I'm still playing around with the ISIS reduction to try to
-    understand what's happening and how best to fit it in the Reducer design.
+WARNING: I'm still playing around with the ISIS reduction to try to
+understand what's happening and how best to fit it in the Reducer design.
 
 """
+
 from reducer_singleton import Reducer
 import isis_reduction_steps
 import isis_instrument
 from reduction_settings import get_settings_object
-from mantid.simpleapi import *
-from mantid.api import *
-from mantid.kernel import *
-from mantid.api import IEventWorkspace
+from mantid.api import mtd, ExperimentInfo, IEventWorkspace, Workspace, WorkspaceGroup
+from mantid.kernel import Logger
+from mantid.simpleapi import AddSampleLog, CloneWorkspace, DeleteWorkspace, ExtractSingleSpectrum
 import SANSUtility as su
 import os
 import copy
@@ -232,6 +232,7 @@ class ISISReducer(Reducer):
     TODO: need documentation for all the data member
     TODO: need to see whether all those data members really belong here
     """
+
     ## Beam center finder ReductionStep object
     _beam_finder = None
     _front_beam_finder = None

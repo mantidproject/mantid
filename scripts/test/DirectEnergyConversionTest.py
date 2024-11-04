@@ -5,13 +5,31 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import os
 
 import Direct.dgreduce as dgreduce
 from Direct.DirectEnergyConversion import DirectEnergyConversion
 from Direct.PropertyManager import PropertyManager
 
-from mantid import api
-from mantid.simpleapi import *
+from mantid import api, FileFinder, mtd
+from mantid.simpleapi import (
+    AddSampleLog,
+    CloneWorkspace,
+    ConvertUnits,
+    CompareWorkspaces,
+    CreateSampleWorkspace,
+    CreateWorkspace,
+    ExtractSingleSpectrum,
+    GetEi,
+    Load,
+    LoadInstrument,
+    MoveInstrumentComponent,
+    NormaliseByCurrent,
+    Rebin,
+    RenameWorkspace,
+    ScaleX,
+    SetInstrumentParameter,
+)
 
 
 # -----------------------------------------------------------------------------------------------------------------------------------------
@@ -230,7 +248,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     ##    tReducet.di
     def test_energy_to_TOF_range(self):
-
         ws = Load(Filename="MAR11001.raw", LoadMonitors="Include")
 
         en_range = [0.8 * 13, 13, 1.2 * 13]
@@ -319,11 +336,10 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #
         mono_ref = tReducer.mono_sample(ref_ws, ei_guess, wb_clone)
 
-        rez = CompareWorkspaces(mono_s, mono_ref)
+        rez = CompareWorkspaces(mono_s, mono_ref, NaNsEqual=True)
         self.assertTrue(rez[0])
 
     def test_tof_range(self):
-
         run = CreateSampleWorkspace(
             Function="Multiple Peaks", NumBanks=6, BankPixelWidth=1, NumEvents=10, XUnit="Energy", XMin=5, XMax=75, BinWidth=0.2
         )
@@ -429,9 +445,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #
         result2 = tReducer.convert_to_energy(None, run2, [67.0, 122.0], [-2, 0.02, 0.8])
 
-        rez = CompareWorkspaces(result[0], result2[0])
+        rez = CompareWorkspaces(result[0], result2[0], NaNsEqual=True)
         self.assertTrue(rez[0])
-        rez = CompareWorkspaces(result[1], result2[1])
+        rez = CompareWorkspaces(result[1], result2[1], NaNsEqual=True)
         self.assertTrue(rez[0])
 
     def test_multirep_abs_units_mode(self):
@@ -502,9 +518,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #
         result2 = tReducer.convert_to_energy(None, run2)
 
-        rez = CompareWorkspaces(result[0], result2[0])
+        rez = CompareWorkspaces(result[0], result2[0], NaNsEqual=True)
         self.assertTrue(rez[0])
-        rez = CompareWorkspaces(result[1], result2[1])
+        rez = CompareWorkspaces(result[1], result2[1], NansEqual=True)
         self.assertTrue(rez[0])
 
     def test_abs_multirep_with_bkg_and_bleed(self):
@@ -584,9 +600,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         AddSampleLog(run2, LogName="goodfrm", LogText="1", LogType="Number")
         result2 = tReducer.convert_to_energy(None, run2)
 
-        rez = CompareWorkspaces(result[0], result2[0])
+        rez = CompareWorkspaces(result[0], result2[0], NaNsEqual=True)
         self.assertTrue(rez[0])
-        rez = CompareWorkspaces(result[1], result2[1])
+        rez = CompareWorkspaces(result[1], result2[1], NaNsEqual=True)
         self.assertTrue(rez[0])
 
     def test_sum_monitors(self):
@@ -674,7 +690,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertTrue(ws.run().hasProperty("empty_bg_removed"))
 
         resWs = 0.9 * wksp
-        difr = CompareWorkspaces(resWs, ws)
+        difr = CompareWorkspaces(resWs, ws, NaNsEqual=True)
         self.assertTrue(difr.Result)
 
     def test_remove_empty_bg_with_normalisation(self):

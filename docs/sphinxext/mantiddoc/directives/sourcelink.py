@@ -43,7 +43,7 @@ class SourceLinkDirective(AlgorithmBaseDirective):
 
     suppressing a specific file type (None is case insensitive):
     .. sourcelink::
-      :filename: FilterEventsByLogValuePreNexus
+      :filename: FindEPP
       :py: None
     """
 

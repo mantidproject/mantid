@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+# ruff: noqa: F403   # Allow wild imports
 """
 Mantid
 ======
@@ -22,7 +23,6 @@ algorithms and data objects that are:
       Implementing Algorithms, Virtual Instrument Geometry.
 
 """
-
 
 import os
 import sys

@@ -24,7 +24,7 @@ This algorithm is SNS specific in its use.
 
 .. testcode:: Ex
 
-    ws = LoadDspacemap(InstrumentName="VULCAN", Filename="pid_offset_vulcan_new.dat",
+    ws = LoadDspacemap(InstrumentFilename="VULCAN_Definition_2006-01-31.xml", Filename="pid_offset_vulcan_new.dat",
                        FileType="VULCAN-ASCII")
     print("Workspace type = {}".format(ws.id()))
 

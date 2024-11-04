@@ -10,10 +10,12 @@ from tempfile import TemporaryDirectory
 import unittest
 import importlib as imp
 
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import AddSampleLog, CreateSampleWorkspace
 from mantid import api, config
 
-from Direct.ReductionWrapper import *
+from Direct.PropertyManager import PropertyManager
+from Direct.ReductionWrapper import iliad, ReductionWrapper
 import MariReduction as mr
 
 
@@ -52,7 +54,6 @@ class test_helper(ReductionWrapper):
 
     @iliad
     def reduce(self, input_file=None, output_directory=None):
-
         self.reducer._clear_old_results()
         if input_file:
             self.reducer.prop_man.sample_run = input_file
@@ -188,7 +189,6 @@ class ReductionWrapperTest(unittest.TestCase):
 
     #
     def test_set_from_constructor(self):
-
         red = mr.ReduceMARI()
 
         main_prop = red.def_main_properties()

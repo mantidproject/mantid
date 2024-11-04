@@ -11,4 +11,3 @@ This is a Python binding to the C++ class Mantid::API::IFunction.
     :members:
     :undoc-members:
     :inherited-members:
-

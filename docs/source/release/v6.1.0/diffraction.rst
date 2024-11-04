@@ -130,7 +130,7 @@ LeanElasticPeak
    - :ref:`algm-FindUBUsingFFT`
    - :ref:`algm-FindUBUsingIndexedPeaks`
    - :ref:`algm-FindUBUsingLatticeParameters`
-   - :ref:`algm-FindUBUsingMinMaxD`
+   - FindUBUsingMinMaxD
    - :ref:`algm-IndexPeaks`
    - :ref:`algm-IntegratePeaksMD`
    - :ref:`algm-LoadNexusProcessed`

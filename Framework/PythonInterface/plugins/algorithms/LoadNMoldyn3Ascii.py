@@ -5,10 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,no-init,too-many-locals,too-many-branches
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import logger, Direction, StringArrayProperty
+from mantid.simpleapi import config, CreateWorkspace, GroupWorkspaces, LoadInstrument, LoadParameterFile, UpdateInstrumentFromFile
 
-from mantid.simpleapi import *
-from mantid.kernel import *
-from mantid.api import *
+from IndirectCommon import get_efixed
 
 import ast
 import re
@@ -95,7 +96,6 @@ def _cdl_find_dimensions(data):
 
 
 class LoadNMoldyn3Ascii(PythonAlgorithm):
-
     _file_name = None
     _file_type = None
     _functions = None
@@ -329,8 +329,6 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         Import 3D ASCII data (e.g. I(Q, t)).
         """
         logger.notice("Loading ASCII data")
-        from IndirectCommon import getEfixed
-        from IndirectNeutron import ChangeAngles, InstrParas
 
         # Read file
         data = []
@@ -375,17 +373,38 @@ class LoadNMoldyn3Ascii(PythonAlgorithm):
         q_max = v_axis_values[-1]
         instrument = "MolDyn"
         reflection = "2" if q_max <= 2.0 else "4"
-        InstrParas(wks.name(), instrument, "simul", reflection)
+        self._load_instrument_and_parameter_file(wks.name(), instrument, "simul", reflection)
 
         # Process angles
-        efixed = getEfixed(wks.name())
+        efixed = get_efixed(wks.name())
         logger.information("Qmax={0}, Efixed={1}".format(q_max, efixed))
         wave = 1.8 * math.sqrt(25.2429 / efixed)
         qw = wave * v_axis_values / (4.0 * math.pi)
         theta = 2.0 * np.degrees(np.arcsin(qw))
-        ChangeAngles(wks.name(), instrument, theta)
+        self._update_instrument_theta(wks.name(), instrument, theta)
 
         return wks
+
+    @staticmethod
+    def _load_instrument_and_parameter_file(workspace_name: str, instrument_name: str, analyser: str, reflection: str) -> None:
+        idf_directory = config["instrumentDefinition.directory"]
+        idf_filepath = f"{idf_directory}{instrument_name}_Definition.xml"
+        LoadInstrument(Workspace=workspace_name, Filename=idf_filepath, RewriteSpectraMap=True)
+        ipf_filepath = f"{idf_directory}{instrument_name}_{analyser}_{reflection}_Parameters.xml"
+        LoadParameterFile(Workspace=workspace_name, Filename=ipf_filepath)
+
+    @staticmethod
+    def _update_instrument_theta(workspace_name: str, instrument_name: str, theta: np.ndarray[float]) -> None:
+        work_directory = config["defaultsave.directory"]
+        filename = f"{instrument_name}_angles.txt"
+        path = os.path.join(work_directory, filename)
+        handle = open(path, "w")
+        head = "spectrum,theta"
+        handle.write(f"{head} \n")
+        for n in range(0, len(theta)):
+            handle.write(f"{n + 1}   {str(theta[n])}\n")
+        handle.close()
+        UpdateInstrumentFromFile(Workspace=workspace_name, Filename=path, MoveMonitors=False, IgnorePhi=False, AsciiHeader=head)
 
     # -------------------------------------------------------------------------------
 

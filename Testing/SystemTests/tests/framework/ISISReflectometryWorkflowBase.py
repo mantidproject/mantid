@@ -8,8 +8,21 @@
 System Test for ISIS Reflectometry reduction
 Adapted from scripts provided by Max Skoda.
 """
-from mantid.simpleapi import *
-from mantid import ConfigService
+
+import os
+import re
+
+from mantid.api import mtd, AlgorithmManager, AnalysisDataService, CatalogManager
+from mantid.kernel import ConfigService
+from mantid.simpleapi import (
+    CreateTransmissionWorkspaceAuto,
+    DeleteWorkspace,
+    GroupWorkspaces,
+    Load,
+    LoadEventNexus,
+    ReflectometryISISLoadAndProcess,
+    SaveNexus,
+)
 
 
 class ISISReflectometryWorkflowBase:

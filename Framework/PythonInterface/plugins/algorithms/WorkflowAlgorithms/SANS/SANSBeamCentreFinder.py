@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
-""" Finds the beam centre for SANS"""
+"""Finds the beam centre for SANS"""
 
 import numpy as np
 
@@ -340,7 +340,6 @@ class SANSBeamCentreFinder(DataProcessorAlgorithm):
     def _run_quartile_reduction(
         self, scatter_workspace, transmission_workspace, direct_workspace, data_type, scatter_monitor_workspace, centre1, centre2
     ):
-
         serialized_state = self.getProperty("SANSState").value
 
         algorithm_name = "SANSBeamCentreFinderCore"

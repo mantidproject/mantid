@@ -10,9 +10,9 @@ import math
 import numpy as np
 import scipy as sc
 
-from mantid.simpleapi import *
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import mtd, AlgorithmFactory, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import Direction, FloatMandatoryValidator
+from mantid.simpleapi import CreateWorkspace
 
 
 class NMoldyn4Interpolation(PythonAlgorithm):
@@ -23,7 +23,6 @@ class NMoldyn4Interpolation(PythonAlgorithm):
         return "Maps NMoldyn simulated s(q,e) data onto OSIRIS' Q and E values"
 
     def PyInit(self):
-
         self.declareProperty(
             WorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input), doc="Simulated workspace"
         )

@@ -5,13 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=eval-used
-from mantid.simpleapi import *
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import AlgorithmFactory, MultipleFileProperty, PythonAlgorithm
+from mantid.kernel import Direction
 
 
 class SelectNexusFilesByMetadata(PythonAlgorithm):
-
     _criteria_splitted = []
 
     def category(self):
@@ -61,7 +59,6 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
         )
 
     def PyExec(self):
-
         # run only if h5py is present
         try:
             import h5py
@@ -71,11 +68,9 @@ class SelectNexusFilesByMetadata(PythonAlgorithm):
         outputfiles = ""
         # first split by ,
         for runs in self.getPropertyValue("FileList").split(","):
-
             filestosum = ""
             # then split each by +
             for run in runs.split("+"):
-
                 with h5py.File(run, "r") as nexusfile:
                     if self.checkCriteria(run, nexusfile):
                         filestosum += run + "+"

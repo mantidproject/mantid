@@ -71,10 +71,8 @@ Output:
 .. testoutput:: UnwrapMonitorsInTOFExample
 
   The number of bins is 20 and is expected to be 20.
-  The monitor 4 entries are: [ 0.  0.  0.  0.  0.  0.  0.  0.  5.  4.  3.  2.  1.  0.  0.  0.  0.  0.
-    0.  0.].
+  The monitor 4 entries are: [0. 0. 0. 0. 0. 0. 0. 0. 5. 4. 3. 2. 1. 0. 0. 0. 0. 0. 0. 0.].
 
 .. categories::
 
 .. sourcelink::
-

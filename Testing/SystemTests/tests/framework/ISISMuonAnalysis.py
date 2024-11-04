@@ -7,7 +7,8 @@
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-instance-attributes,too-few-public-methods
 import math
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import AsymmetryCalc, CloneWorkspace, CropWorkspace, GroupDetectors, GroupWorkspaces, LoadMuonNexus, Rebin
 
 from abc import ABCMeta, abstractmethod
 
@@ -62,7 +63,6 @@ class ISISMuonAnalysis(systemtesting.MantidSystemTest, metaclass=ABCMeta):
 
         # Rebin then...
         if self.rebin:
-
             ws = mtd[outputWS]
             binSize = ws.dataX(0)[1] - ws.dataX(0)[0]
             firstX = ws.dataX(0)[0]

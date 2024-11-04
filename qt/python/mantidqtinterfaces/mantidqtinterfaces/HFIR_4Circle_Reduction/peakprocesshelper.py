@@ -8,7 +8,14 @@
 import numpy
 import time
 import random
-from mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility import *
+from mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility import (
+    check_float,
+    check_dictionary,
+    check_integer,
+    check_list,
+    check_string,
+    get_spice_table_name,
+)
 from mantid.api import AnalysisDataService
 from mantid.kernel import V3D
 
@@ -27,11 +34,11 @@ class PeakProcessRecord(object):
         """
         # check
         assert isinstance(exp_number, int) and isinstance(scan_number, int)
-        assert isinstance(peak_ws_name, str), "Peak workspace name %s must be a string." "but not %s." % (
+        assert isinstance(peak_ws_name, str), "Peak workspace name %s must be a string. but not %s." % (
             str(peak_ws_name),
             str(type(peak_ws_name)),
         )
-        assert AnalysisDataService.doesExist(peak_ws_name), "Peak workspace %s does not" "exist." % peak_ws_name
+        assert AnalysisDataService.doesExist(peak_ws_name), "Peak workspace %s does not exist." % peak_ws_name
 
         # set
         self._myExpNumber = exp_number
@@ -229,8 +236,9 @@ class PeakProcessRecord(object):
         # check
         if self._integrationDict is None and self._myIntensity is None:
             raise RuntimeError(
-                "PeakInfo of Exp {0} Scan {1} ({2} | {3}) has not integrated setup."
-                "".format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
+                "PeakInfo of Exp {0} Scan {1} ({2} | {3}) has not integrated setup.".format(
+                    self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self))
+                )
             )
         elif self._myIntensity is not None:
             # return ZERO intensity due to previously found error
@@ -252,7 +260,7 @@ class PeakProcessRecord(object):
             else:
                 raise RuntimeError("Type {0} not supported yet.")
         except KeyError as key_err:
-            err_msg = "Some key(s) does not exist in dictionary with keys {0}. FYI: {1}" "".format(self._integrationDict.keys(), key_err)
+            err_msg = "Some key(s) does not exist in dictionary with keys {0}. FYI: {1}".format(self._integrationDict.keys(), key_err)
             raise RuntimeError(err_msg)
 
         if intensity is None:
@@ -398,8 +406,9 @@ class PeakProcessRecord(object):
         """
         if self._lorenzFactor is None:
             raise RuntimeError(
-                "Lorentz factor has not been calculated for Exp {0} Scan {1} ({2} | {3})."
-                "".format(self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self)))
+                "Lorentz factor has not been calculated for Exp {0} Scan {1} ({2} | {3}).".format(
+                    self._myExpNumber, self._myScanNumber, self._fingerPrint, hex(id(self))
+                )
             )
         return self._lorenzFactor
 
@@ -438,7 +447,7 @@ class PeakProcessRecord(object):
         """
         # get SPICE table
         spice_table_name = get_spice_table_name(self._myExpNumber, self._myScanNumber)
-        assert AnalysisDataService.doesExist(spice_table_name), "Spice table for Exp %d Scan %d cannot be found." "" % (
+        assert AnalysisDataService.doesExist(spice_table_name), "Spice table for Exp %d Scan %d cannot be found." % (
             self._myExpNumber,
             self._myScanNumber,
         )
@@ -501,10 +510,10 @@ class PeakProcessRecord(object):
         :return:
         """
         # check inputs
-        assert isinstance(intensity, float), "Intensity {0} must be a float but not a {1}" "".format(intensity, type(intensity))
-        assert isinstance(fwhm, float), "Peak FWHM {0} must be a float but not a {1}" "".format(fwhm, type(fwhm))
-        assert isinstance(position, float), "Peak center {0} must be a float but not a {1}" "".format(position, type(position))
-        assert isinstance(background, list), "Background {0} must be given as a list, i.e., [A0, A1, ...]" "".format(background)
+        assert isinstance(intensity, float), "Intensity {0} must be a float but not a {1}".format(intensity, type(intensity))
+        assert isinstance(fwhm, float), "Peak FWHM {0} must be a float but not a {1}".format(fwhm, type(fwhm))
+        assert isinstance(position, float), "Peak center {0} must be a float but not a {1}".format(position, type(position))
+        assert isinstance(background, list), "Background {0} must be given as a list, i.e., [A0, A1, ...]".format(background)
 
         # set value
         self._gaussIntensity = intensity
@@ -571,8 +580,8 @@ class PeakProcessRecord(object):
         :param motor_std_dev:
         :return:
         """
-        assert isinstance(motor_name, str), "Motor name {0} must be a string but not {1}." "".format(motor_name, type(motor_name))
-        assert isinstance(motor_step, float), "Motor float {0} must be a string but not {1}." "".format(motor_step, type(motor_step))
+        assert isinstance(motor_name, str), "Motor name {0} must be a string but not {1}.".format(motor_name, type(motor_name))
+        assert isinstance(motor_step, float), "Motor float {0} must be a string but not {1}.".format(motor_step, type(motor_step))
         assert isinstance(motor_std_dev, float), "Standard deviation type must be float"
 
         self._movingMotorTuple = (motor_name, motor_step, motor_std_dev)
@@ -587,7 +596,7 @@ class PeakProcessRecord(object):
         """
         assert isinstance(
             peak_integration_dict, dict
-        ), "Integrated peak information {0} must be given by a dictionary but not a {1}." "".format(
+        ), "Integrated peak information {0} must be given by a dictionary but not a {1}.".format(
             peak_integration_dict, type(peak_integration_dict)
         )
 
@@ -706,8 +715,9 @@ class SinglePointPeakIntegration(object):
         # check
         if self._pt_intensity is None:
             raise RuntimeError(
-                "SinglePtPeakInfo of Exp {0} Scan {1} ({2} | {3}) has not integrated setup."
-                "".format(self._exp_number, self._scan_number, self._roi_name, hex(id(self)))
+                "SinglePtPeakInfo of Exp {0} Scan {1} ({2} | {3}) has not integrated setup.".format(
+                    self._exp_number, self._scan_number, self._roi_name, hex(id(self))
+                )
             )
 
         # get intensity
@@ -744,7 +754,7 @@ class SinglePointPeakIntegration(object):
         """
         # get SPICE table
         spice_table_name = get_spice_table_name(self._exp_number, self._scan_number)
-        assert AnalysisDataService.doesExist(spice_table_name), "Spice table for Exp %d Scan %d cannot be found." "" % (
+        assert AnalysisDataService.doesExist(spice_table_name), "Spice table for Exp %d Scan %d cannot be found." % (
             self._exp_number,
             self._scan_number,
         )
@@ -782,10 +792,11 @@ class SinglePointPeakIntegration(object):
         #  check input
         assert isinstance(vec_x, numpy.ndarray), "X vector must be a numpy array"
         assert isinstance(vec_y, numpy.ndarray), "Y vector must be a numpy array"
-        assert integral_direction in ["vertical", "horizontal"], (
-            "Peak integration direction {} must be a string "
-            "(now a {}) being either vertical or horizontal"
-            "".format(integral_direction, type(integral_direction))
+        assert integral_direction in [
+            "vertical",
+            "horizontal",
+        ], "Peak integration direction {} must be a string (now a {}) being either vertical or horizontal".format(
+            integral_direction, type(integral_direction)
         )
 
         # set
@@ -942,7 +953,7 @@ class SinglePtScansIntegrationOperation(object):
 
         if spectrum_number not in self._spectrum_scan_map:
             raise RuntimeError(
-                "Spectrum  number {} of type {} cannot be found in spectrum-scan map" "".format(spectrum_number, type(spectrum_number))
+                "Spectrum  number {} of type {} cannot be found in spectrum-scan map".format(spectrum_number, type(spectrum_number))
             )
 
         return self._spectrum_scan_map[spectrum_number]
@@ -955,7 +966,7 @@ class SinglePtScansIntegrationOperation(object):
         :return:
         """
         if scan_number not in self._scan_spectrum_map:
-            raise RuntimeError("Scan  number {} of type {} cannot be found in spectrum-scan map" "".format(scan_number, type(scan_number)))
+            raise RuntimeError("Scan  number {} of type {} cannot be found in spectrum-scan map".format(scan_number, type(scan_number)))
 
         spectrum_number = self._scan_spectrum_map[scan_number]
 

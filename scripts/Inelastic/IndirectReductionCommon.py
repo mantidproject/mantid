@@ -286,7 +286,6 @@ def crop_workspaces(workspace_names, spec_min, spec_max, extract_monitors=True, 
     from mantid.simpleapi import ExtractSingleSpectrum, CropWorkspace
 
     for workspace_name in workspace_names:
-
         if extract_monitors:
             # Get the monitor spectrum
             monitor_ws_name = workspace_name + "_mon"
@@ -429,9 +428,35 @@ def add_run_numbers(workspace_names):
 # ---------------------------------------------------------------------------------
 
 
-def get_ipf_parameters_from_run(run_number, instrument, analyser, reflection, parameters):
-    from IndirectCommon import getInstrumentParameter
+def get_instrument_parameter(workspace_name: str, param_name: str):
+    """Get an named instrument parameter from a workspace.
 
+    Args:
+      @param ws The workspace to get the instrument from.
+      @param param_name The name of the parameter to look up.
+    """
+    instrument = AnalysisDataService.retrieve(workspace_name).getInstrument()
+
+    # Create a map of type parameters to functions. This is so we avoid writing lots of
+    # if statements because there's no way to dynamically get the type.
+    func_map = {
+        "double": instrument.getNumberParameter,
+        "string": instrument.getStringParameter,
+        "int": instrument.getIntParameter,
+        "bool": instrument.getBoolParameter,
+    }
+
+    if not instrument.hasParameter(param_name):
+        raise ValueError(f"Unable to retrieve {param_name} from Instrument Parameter file.")
+
+    param_type = instrument.getParameterType(param_name)
+    if param_type == "":
+        raise ValueError(f"Unable to retrieve {param_name} from Instrument Parameter file.")
+
+    return func_map[param_type](param_name)[0]
+
+
+def get_ipf_parameters_from_run(run_number, instrument, analyser, reflection, parameters):
     ipf_filename = os.path.join(
         config["instrumentDefinition.directory"], instrument + "_" + analyser + "_" + reflection + "_Parameters.xml"
     )
@@ -442,7 +467,7 @@ def get_ipf_parameters_from_run(run_number, instrument, analyser, reflection, pa
         do_load(instrument + str(run_number), run_workspace, ipf_filename, False, {})
 
         for parameter in parameters:
-            results[parameter] = getInstrumentParameter(run_workspace, parameter)
+            results[parameter] = get_instrument_parameter(run_workspace, parameter)
 
         DeleteWorkspace(run_workspace)
     except ValueError or RuntimeError:
@@ -764,7 +789,9 @@ def group_spectra_of(
     logger.information("Grouping method for workspace %s is %s" % (workspace.name(), grouping_method))
 
     if grouping_method == "Individual":
-        # Nothing to do here
+        # Ensure the spectra numbers begin at zero
+        for i in range(workspace.getNumberHistograms()):
+            workspace.getSpectrum(i).setSpectrumNo(i)
         return workspace
 
     elif grouping_method == "All":
@@ -911,7 +938,7 @@ def fold_chopped(workspace_name):
 # -------------------------------------------------------------------------------
 
 
-def rename_reduction(workspace_name, multiple_files):
+def rename_reduction(workspace_name, multiple_files, suffix=None):
     """
     Renames a workspace according to the naming policy in the Workflow.NamingConvention parameter.
 
@@ -965,7 +992,10 @@ def rename_reduction(workspace_name, multiple_files):
     elif convention == "AnalyserReflection":
         analyser = instrument.getStringParameter("analyser")[0]
         reflection = instrument.getStringParameter("reflection")[0]
-        new_name = "%s%s%s_%s%s_red" % (inst_name.lower(), run_number, multi_run_marker, analyser, reflection)
+        if not suffix:
+            new_name = "%s%s%s_%s%s_red" % (inst_name.lower(), run_number, multi_run_marker, analyser, reflection)
+        else:
+            new_name = "%s%s%s_%s%s_%s_red" % (inst_name.lower(), run_number, multi_run_marker, analyser, reflection, suffix)
 
     else:
         raise RuntimeError("No valid naming convention for workspace %s" % workspace_name)

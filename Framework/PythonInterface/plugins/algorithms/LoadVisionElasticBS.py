@@ -5,17 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-# from mantid.api import AlgorithmFactory
-# from mantid.simpleapi import PythonAlgorithm, WorkspaceProperty
-# from mantid.kernel import Direction
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, ExperimentInfo, FileAction, FileProperty, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import config, Direction
 import mantid.simpleapi
 import os
 
 
 class LoadVisionElasticBS(PythonAlgorithm):
-
     __backscattering = "bank15,bank16,bank17,bank18,bank19,bank20,bank21,bank22,bank23,bank24"
 
     def category(self):

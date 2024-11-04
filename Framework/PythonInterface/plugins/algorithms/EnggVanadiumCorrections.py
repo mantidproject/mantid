@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import mtd, AlgorithmFactory, ITableWorkspaceProperty, MatrixWorkspaceProperty, Progress, PropertyMode, PythonAlgorithm
+from mantid.kernel import Direction, IntBoundedValidator
 import mantid.simpleapi as mantid
 
 import numpy as np
@@ -222,7 +222,6 @@ class EnggVanadiumCorrections(PythonAlgorithm):
 
         vanadium_integration_ws = mantid.Integration(InputWorkspace=vanadium_ws, StoreInADS=False)
         if 1 != vanadium_integration_ws.blocksize() or vanadium_integration_ws.getNumberHistograms() < vanadium_ws.getNumberHistograms():
-
             raise RuntimeError(
                 "Error while integrating vanadium workspace, the Integration algorithm "
                 "produced a workspace with %d bins and %d spectra. The workspace "

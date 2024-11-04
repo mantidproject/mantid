@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    Simple Reducer example
+Simple Reducer example
 """
+
 from reduction import Reducer
 from reduction.instruments.example.ExampleRedStep import ExampleRedStep
 
@@ -15,11 +16,10 @@ from reduction.instruments.example.ExampleRedStep import ExampleRedStep
 # It also does minimal type checking to ensure that the object that is passed is valid
 from reduction import validate_step, validate_loader
 import mantid
-from mantid.simpleapi import *
+from mantid.simpleapi import LoadAscii
 
 
 class ExampleReducer(Reducer):
-
     # Place holders for the reduction steps
     _first_step = None
     _second_step = None
@@ -87,7 +87,6 @@ class ExampleReducer(Reducer):
 
 
 if __name__ == "__main__":
-
     # Instantiate the Reducer object
     r = ExampleReducer()
 

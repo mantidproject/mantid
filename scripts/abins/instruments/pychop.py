@@ -18,7 +18,6 @@ class PyChopInstrument(DirectInstrument):
     """
 
     def __init__(self, name: str = "MAPS", setting: str = "", chopper_frequency: Optional[int] = None) -> None:
-
         super().__init__(name=name, setting=setting)
 
         self._chopper = setting
@@ -32,7 +31,6 @@ class PyChopInstrument(DirectInstrument):
         self._tthlims = self._pychop_instrument.detector.tthlims
 
     def _check_chopper_frequency(self, chopper_frequency: Union[int, None], logger: Optional[Logger] = None) -> int:
-
         if chopper_frequency is None:
             chopper_frequency = self.get_parameter("chopper_frequency_default")
 

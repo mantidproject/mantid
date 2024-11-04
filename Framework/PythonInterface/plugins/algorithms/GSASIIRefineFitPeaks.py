@@ -10,8 +10,17 @@ import os
 import sys
 import tempfile
 
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import (
+    AlgorithmFactory,
+    FileAction,
+    FileProperty,
+    ITableWorkspaceProperty,
+    MultipleFileProperty,
+    Progress,
+    PythonAlgorithm,
+    WorkspaceProperty,
+)
+from mantid.kernel import logger, Direction, StringListValidator
 import mantid.simpleapi as mantid
 
 

@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    Script used to start the DGS reduction GUI from MantidPlot
+Script used to start the DGS reduction GUI from MantidPlot
 """
+
 import os
 import sys
 
@@ -21,7 +22,6 @@ else:
     parent, flags = None, None
 reducer = ReductionGUI(parent, flags, instrument_list=["PG3", "NOM", "VULCAN"])
 if reducer.setup_layout(load_last=True):
-
     # Set up reduction configuration from previous usage
     try:
         # Find home dir

@@ -5,12 +5,29 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-# from mantid.api import AlgorithmFactory
-# from mantid.simpleapi import PythonAlgorithm, WorkspaceProperty
-# from mantid.kernel import Direction
-from mantid.api import *
-from mantid.kernel import *
-from mantid.simpleapi import *
+from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import logger, Direction
+from mantid.simpleapi import (
+    AppendSpectra,
+    ConvertUnits,
+    CorrectKiKf,
+    CropWorkspace,
+    DeleteWorkspace,
+    Divide,
+    GroupDetectors,
+    InterpolatingRebin,
+    LoadEventNexus,
+    LoadInstrument,
+    LoadNexusProcessed,
+    MaskDetectors,
+    NormaliseByCurrent,
+    Plus,
+    Rebin,
+    RemoveLogs,
+    RemoveWorkspaceHistory,
+    Scale,
+    ScaleX,
+)
 import csv
 import os
 from string import ascii_letters, digits  # pylint: disable=deprecated-module
@@ -21,7 +38,6 @@ from string import ascii_letters, digits  # pylint: disable=deprecated-module
 
 
 def RemoveArtifact(WS, Xmin, Xmax, Xa, Delta):
-
     CropWorkspace(InputWorkspace=WS, OutputWorkspace="__aux0", XMin=str(Xmin), XMax=str(Xa))
     CropWorkspace(InputWorkspace=WS, OutputWorkspace="__aux3", XMin=str(Xa + Delta), XMax=str(Xmax))
     CropWorkspace(InputWorkspace=WS, OutputWorkspace="__aux1", XMin=str(Xa - Delta), XMax=str(Xa))
@@ -38,7 +54,6 @@ def RemoveArtifact(WS, Xmin, Xmax, Xa, Delta):
 
 
 class VisionReduction(PythonAlgorithm):
-
     __CalFile = "/SNS/VIS/shared/autoreduce/VIS_CalTab-03-03-2014.csv"
     __MonFile = "/SNS/VIS/shared/autoreduce/VIS_5447-5450_MonitorL-corrected-hist.nxs"
     # Pixels to be reduced

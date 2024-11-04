@@ -12,7 +12,6 @@ from scipy.special import spherical_jn
 
 
 class TeixeiraWaterIqt(IFunction1D):
-
     def category(self):
         return "QuasiElastic"
 

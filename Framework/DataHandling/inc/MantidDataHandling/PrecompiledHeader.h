@@ -20,7 +20,7 @@
 // clang-format on
 
 // Poco
+#include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/NodeList.h>

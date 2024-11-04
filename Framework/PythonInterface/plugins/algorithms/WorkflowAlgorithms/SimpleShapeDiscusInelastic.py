@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, PropertyMode, Sample
 from mantid.kernel import (
+    logger,
     VisibleWhenProperty,
     Property,
     PropertyCriterion,
@@ -15,7 +16,7 @@ from mantid.kernel import (
     FloatBoundedValidator,
     Direction,
 )
-from mantid.simpleapi import *
+from mantid.simpleapi import DiscusMultipleScatteringCorrection, SetSample
 
 
 class SimpleShapeDiscusInelastic(PythonAlgorithm):
@@ -158,7 +159,6 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         self.declareProperty(name="NormalizeStructureFactors", defaultValue=False, doc="Enable normalisation of structure factor")
 
     def PyExec(self):
-
         reduced_ws = self.getProperty("ReducedWorkspace").value
         sqw_ws = self.getProperty("SqwWorkspace").value
 
@@ -301,7 +301,6 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         self.setProperty("OutputWorkspace", results_group_ws)
 
     def _setup(self):
-
         self._sam_chemical_formula = self.getPropertyValue("SampleChemicalFormula")
         self._sam_mass_density = self.getProperty("SampleMassDensity").value
         self._can_chemical_formula = self.getPropertyValue("ContainerChemicalFormula")
@@ -339,7 +338,6 @@ class SimpleShapeDiscusInelastic(PythonAlgorithm):
         self._output_ws = self.getPropertyValue("OutputWorkspace")
 
     def validateInputs(self):  # noqa: C901
-
         self._setup()
         issues = dict()
 

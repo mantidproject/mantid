@@ -10,6 +10,7 @@
 """
 Provides facilities to check plot types
 """
+
 # third party
 from enum import Enum
 from matplotlib.axes import Axes

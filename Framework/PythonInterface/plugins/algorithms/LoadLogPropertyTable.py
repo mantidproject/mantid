@@ -10,9 +10,8 @@ import datetime
 import numbers
 import bisect
 import numpy
-from mantid.api import *  # PythonAlgorithm, AlgorithmFactory, WorkspaceProperty
-from mantid.kernel import *  # StringArrayProperty
-from mantid.simpleapi import *  # needed for Load
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, WorkspaceFactory, WorkspaceProperty
+from mantid.kernel import Direction, StringArrayProperty
 
 
 class LoadLogPropertyTable(PythonAlgorithm):
@@ -82,7 +81,6 @@ class LoadLogPropertyTable(PythonAlgorithm):
 
     # pylint: disable=too-many-branches
     def PyExec(self):
-
         firstFileName = self.getProperty("FirstFile").value
         lastFileName = self.getProperty("LastFile").value
 

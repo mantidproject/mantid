@@ -6,17 +6,27 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init, invalid-name, no-self-use, attribute-defined-outside-init
 """
-    Top-level auto-reduction algorithm for the SNS Liquids Reflectometer
+Top-level auto-reduction algorithm for the SNS Liquids Reflectometer
 """
+
 import sys
 import math
 import re
 import platform
+import os
 import time
 import mantid
-from mantid.api import *
-from mantid.simpleapi import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, AnalysisDataService, FileAction, FileProperty, PropertyMode, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import logger, Direction, IntArrayProperty
+from mantid.simpleapi import (
+    LiquidsReflectometryReduction,
+    LoadEventNexus,
+    LoadNexus,
+    LRDirectBeamSort,
+    LRReductionWithReference,
+    LRReflectivityOutput,
+    SaveNexus,
+)
 from reduction_gui.reduction.reflectometer.refl_data_series import DataSeries
 
 

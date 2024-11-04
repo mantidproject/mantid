@@ -8,15 +8,23 @@
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
-from ISISCommandInterface import *
+from ISISCommandInterface import (
+    AssignCan,
+    AssignSample,
+    CompWavRanges,
+    Gravity,
+    MaskFile,
+    SANS2D,
+    Set1D,
+    TransmissionCan,
+    TransmissionSample,
+)
 from sans.common.enums import SANSInstrument
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DWaveloops(systemtesting.MantidSystemTest):
     def runTest(self):
-
         SANS2D()
         MaskFile("MASKSANS2D.091A")
         Gravity(True)

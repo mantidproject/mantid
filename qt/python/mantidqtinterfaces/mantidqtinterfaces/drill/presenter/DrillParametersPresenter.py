@@ -7,11 +7,10 @@
 
 from qtpy.QtWidgets import QMessageBox
 from qtpy.QtGui import QBrush, QColor
-from qtpy.QtCore import *
+from qtpy.QtCore import Qt
 
 
 class DrillParametersPresenter:
-
     """
     Reference to the table model (QTableWidget).
     """

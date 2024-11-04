@@ -8,6 +8,7 @@
 #
 #
 """Provides the QMainWindow subclass for a plotting window"""
+
 # std imports
 from typing import List
 import weakref

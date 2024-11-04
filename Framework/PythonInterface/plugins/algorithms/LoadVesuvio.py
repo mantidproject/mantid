@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, WorkspaceFactory, WorkspaceProperty
+from mantid.kernel import config, logger, Direction, IntArrayProperty, StringListValidator, StringMandatoryValidator
 import mantid.simpleapi as ms
 
 from LoadEmptyVesuvio import LoadEmptyVesuvio
@@ -43,7 +43,6 @@ _LOGGING_ = False
 
 
 class LoadVesuvio(LoadEmptyVesuvio):
-
     _ws_index = None
     _spectrum_no = None
     foil_map = None

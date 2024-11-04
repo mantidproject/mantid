@@ -25,13 +25,12 @@ Install `Mambaforge <https://github.com/conda-forge/miniforge/releases>`_
 
 Setup the mantid conda environment
 ----------------------------------
-* With your restarted terminal.
-* Create the mantid conda environment by navigating to your mantid source code directory in your terminal and running ``conda env create -f mantid-developer-osx.yml``
+.. include:: ./MantidDeveloperSetup.rst
 
 Configure CMake and generate build files
 ----------------------------------------
 * Still using the terminal.
-* Run ``conda activate mantid-developer`` to activate your conda environment.
+* If not already activated in the previous step, run ``conda activate mantid-developer`` to activate your conda environment.
 * Navigate back to your mantid source directory using ``cd mantid`` if you used the default name during cloning from git.
 * Inside of your mantid source directory run ``cmake --preset=osx``
 

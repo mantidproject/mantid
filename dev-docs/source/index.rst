@@ -31,7 +31,7 @@ Guides
 :doc:`DeveloperAccounts`
    Details of the accounts required for developers.
 
-:doc:`GettingStarted <GettingStarted/GettingStarted>`
+:doc:`Getting Started <GettingStarted/GettingStarted>`
    Describes the process of obtaining and building the mantid code base.
 
 :doc:`Packaging`
@@ -273,6 +273,7 @@ Component Overviews
 
    BatchWidget/index
    EnumeratedString
+   EnumeratedStringProperty
    EventWorkspaceDev
    HandlingXML
    IndexProperty

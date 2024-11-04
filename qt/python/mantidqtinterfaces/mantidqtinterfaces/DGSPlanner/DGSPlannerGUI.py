@@ -10,7 +10,7 @@ import os
 import sys
 
 import numpy
-from mantidqt.MPLwidgets import *
+from mantidqt.MPLwidgets import FigureCanvas
 from mantidqt.gui_helper import show_interface_help
 from mantidqt.plotting.mantid_navigation_toolbar import MantidNavigationToolbar
 from matplotlib.figure import Figure
@@ -156,7 +156,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             self.dimensionWidget.set_editMax4(upperBound)
 
     def instrumentUpdateEvent(self):
-        changeToElastic = self.masterDict["instrument"] in ["DEMAND", "WAND\u00B2"]
+        changeToElastic = self.masterDict["instrument"] in ["DEMAND", "WAND\u00b2"]
         if changeToElastic != self.instrumentElastic:
             self.instrumentElastic = changeToElastic
             self.dimensionWidget.toggleDeltaE(not changeToElastic)
@@ -247,7 +247,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
             instrumentName = self.masterDict["instrument"]
             if instrumentName == "DEMAND":
                 instrumentName = "HB3A"
-            elif instrumentName == "WAND\u00B2":
+            elif instrumentName == "WAND\u00b2":
                 instrumentName = "WAND"
 
             mantid.simpleapi.LoadEmptyInstrument(
@@ -302,7 +302,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                         return
             if self.masterDict["makeFast"]:
                 sp = numpy.arange(mantid.mtd["__temp_instrument"].getNumberHistograms())
-                if self.masterDict["instrument"] in ["DEMAND", "WAND\u00B2"]:
+                if self.masterDict["instrument"] in ["DEMAND", "WAND\u00b2"]:
                     sp = sp.reshape(-1, 512)
                     tomask = (
                         sp[:, 1::4].ravel().tolist()
@@ -342,7 +342,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         progressDialog.setRange(0, self.iterations)
         progressDialog.setWindowTitle("DGSPlanner progress")
 
-        if self.masterDict["instrument"] in ["DEMAND", "WAND\u00B2"]:
+        if self.masterDict["instrument"] in ["DEMAND", "WAND\u00b2"]:
             params = UnitParametersMap()
             ei = UnitConversion.run("Wavelength", "Energy", self.masterDict["Ei"], 0, Elastic, params)
         else:

@@ -5,19 +5,15 @@ Packaging
 .. contents::
   :local:
 
-This page gives an overview of the different packaging mechansims used to deliver
+This page gives an overview of the different packaging mechanisms used to deliver
 Mantid to users.
 
 Conda
 -----
 
 Mantid provides packages to be consumed by the `Conda <conda_>`_ package manager.
-This is separate to the ``mantid-developer`` environment files that setup a local
-development environment. See :ref:`GettingStarted` for more detail on how to setup a development environment.
-The packages described here are those deployed for users to install.
-
-Even though it is a single codebase the repository is split across 4 conda
-packages:
+Even though it is a single codebase the repository is split across four conda
+packages for users, and a metapackage used to create a development environment:
 
 - ``mantid``: Provides Python access to the non-GUI elements of mantid and allows
   users to import mantid as a Python library for use in other programs.
@@ -29,6 +25,9 @@ packages:
   workbench.
 - ``mantidworkbench``: The graphical application produced by the Mantid project that
   brings together all of the above packages.
+- ``mantid-developer``: The metapackage used to create a development environment. It contains
+  all the required packages for building and testing our software. See :ref:`GettingStarted`
+  for more detail on how to setup a development environment.
 
 Each package is built separately for ``x64`` Windows, Linux and macOS with the
 exception of ``mantiddocs`` where a single, ``noarch`` package is created for all

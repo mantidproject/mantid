@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 
-""" SANSSingleReduction version 2 algorithm performs a single reduction on event sliced data."""
+"""SANSSingleReduction version 2 algorithm performs a single reduction on event sliced data."""
 
 from copy import deepcopy
 
@@ -305,8 +305,9 @@ class SANSSingleReduction(SANSSingleReductionBase):
                     workspace_group_hab.addWorkspace(output_workspace)
                 else:
                     raise RuntimeError(
-                        "SANSSingleReduction: Cannot set the output workspace. "
-                        "The selected reduction mode {0} is unknown.".format(reduction_mode)
+                        "SANSSingleReduction: Cannot set the output workspace. The selected reduction mode {0} is unknown.".format(
+                            reduction_mode
+                        )
                     )
         if workspace_group_merged.size() > 0:
             self.setProperty("OutputWorkspaceMerged", workspace_group_merged)
@@ -394,8 +395,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
                             workspace_group_hab_can_norm.addWorkspace(output_workspace_norm)
                         else:
                             raise RuntimeError(
-                                "SANSSingleReduction: The reduction mode {0} should not"
-                                " be set with a partial can.".format(reduction_mode)
+                                "SANSSingleReduction: The reduction mode {0} should not be set with a partial can.".format(reduction_mode)
                             )
         if workspace_group_lab_can_count.size() > 0:
             self.setProperty("OutputWorkspaceLABCanCount", workspace_group_lab_can_count)

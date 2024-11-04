@@ -620,7 +620,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
             expected_y_data,
             label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y_name),
             yerr=expected_y_err_data,
-            **extra_errorbar_assert_kwargs
+            **extra_errorbar_assert_kwargs,
         )
         twd.plot.mock_fig.show.assert_called_once_with()
         twd.plot.mock_ax.legend.assert_called_once_with()
@@ -710,14 +710,14 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
                     expected_y1_data,
                     label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y1_name),
                     yerr=expected_y1_err_data,
-                    **extra_errorbar_assert_kwargs
+                    **extra_errorbar_assert_kwargs,
                 ),
                 call(
                     expected_x_data,
                     expected_y2_data,
                     label=TableWorkspaceDisplay.COLUMN_DISPLAY_LABEL.format(col_y2_name),
                     yerr=expected_y2_err_data,
-                    **extra_errorbar_assert_kwargs
+                    **extra_errorbar_assert_kwargs,
                 ),
             ]
         )

@@ -9,7 +9,20 @@
 """
 System test for MDNorm
 """
-from mantid.simpleapi import *
+
+from mantid.simpleapi import (
+    ConvertToMD,
+    ConvertToMDMinMaxGlobal,
+    ConvertUnits,
+    CropWorkspaceForMDNorm,
+    DeleteWorkspace,
+    Load,
+    LoadIsawUB,
+    MaskDetectors,
+    MDNorm,
+    RecalculateTrajectoriesExtents,
+    SetGoniometer,
+)
 import systemtesting
 
 
@@ -67,7 +80,7 @@ class MDNormCORELLITest(systemtesting.MantidSystemTest):
         # Check that we test these problematic cases
         self.assertRaises(
             ValueError,
-            mantid.simpleapi.MDNorm,
+            MDNorm,
             InputWorkspace="md",
             SolidAngleWorkspace="SolidAngle",
             FluxWorkspace="Flux",
@@ -89,7 +102,7 @@ class MDNormCORELLITest(systemtesting.MantidSystemTest):
         )
         self.assertRaises(
             ValueError,
-            mantid.simpleapi.MDNorm,
+            MDNorm,
             InputWorkspace="md",
             SolidAngleWorkspace="SolidAngle",
             FluxWorkspace="Flux",
@@ -111,7 +124,7 @@ class MDNormCORELLITest(systemtesting.MantidSystemTest):
         )
         self.assertRaises(
             RuntimeError,
-            mantid.simpleapi.MDNorm,
+            MDNorm,
             InputWorkspace="md",
             SolidAngleWorkspace="SolidAngle",
             FluxWorkspace="Flux",
@@ -133,7 +146,7 @@ class MDNormCORELLITest(systemtesting.MantidSystemTest):
         )
         self.assertRaises(
             ValueError,
-            mantid.simpleapi.MDNorm,
+            MDNorm,
             InputWorkspace="md",
             SolidAngleWorkspace="SolidAngle",
             FluxWorkspace="Flux",

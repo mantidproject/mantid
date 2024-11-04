@@ -31,4 +31,3 @@ Duration: 7.5 hours as a hands-on course with exercises
 * :ref:`emwp_py_fit_funcs`
 * :ref:`emwp_adv_fit_behaviours`
 * :ref:`emwp_solutions`
-

@@ -24,13 +24,31 @@ import time
 import systemtesting
 
 import os
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import mtd, AnalysisDataService
+from mantid.simpleapi import (
+    ConvertToDiffractionMDWorkspace,
+    ConvertToMD,
+    CreateSingleValuedWorkspace,
+    FindPeaksMD,
+    FindUBUsingFFT,
+    IndexPeaks,
+    IntegratePeaksMD,
+    Integration,
+    LoadEventNexus,
+    LoadIsawDetCal,
+    LoadIsawUB,
+    LoadNexus,
+    LoadNexusMonitors,
+    PeakIntegration,
+    PredictPeaks,
+    SaveIsawUB,
+    SelectCellOfType,
+    Rebin,
+)
 from mantid import config
 
 
 class ReduceOneSCD_Run(systemtesting.MantidSystemTest):
-
     __reduced_ws_name = ""
     saved = False
     output_directory = ""

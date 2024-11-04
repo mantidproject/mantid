@@ -499,7 +499,7 @@ private:
   /// Flag indicating if the common bins flag is in a valid state
   mutable std::atomic<bool> m_isCommonBinsFlagValid{false};
   /// Flag indicating whether the data has common bins
-  mutable bool m_isCommonBinsFlag{false};
+  mutable std::atomic<bool> m_isCommonBinsFlag{false};
   /// A mutex protecting the update of m_isCommonBinsFlag.
   mutable std::mutex m_isCommonBinsMutex;
 

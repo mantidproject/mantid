@@ -11,8 +11,7 @@ import sys
 from qtpy.QtCore import QObject, Signal, QThread
 
 import mantid.simpleapi as sapi
-from mantid.kernel import *
-from mantid.api import *
+from mantid.kernel import config, logger, ConfigService
 
 from .configurations import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
@@ -26,7 +25,6 @@ from .DrillSampleGroup import DrillSampleGroup
 
 
 class DrillModel(QObject):
-
     """
     Data directory on Linux.
     """
@@ -439,7 +437,7 @@ class DrillModel(QObject):
 
         params.update(sample.getParameterValues())
         # remove empty params
-        for (k, v) in list(params.items()):
+        for k, v in list(params.items()):
             if v is None or v == "DEFAULT" or v == "":
                 del params[k]
         # add the output workspace param

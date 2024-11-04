@@ -16,7 +16,7 @@
 #include <Poco/AutoPtr.h>
 #include <Poco/NObserver.h>
 
-typedef std::vector<std::pair<std::string, std::string>> stringPairVec;
+typedef std::vector<std::pair<std::string, std::string>> StringPairVec;
 namespace MantidQt {
 namespace MantidWidgets {
 /**
@@ -34,16 +34,14 @@ double underscore at the start of the
           workspace name
  * By providing a suffix that the workspace name must have
 */
-class EXPORT_OPT_MANTIDQT_COMMON WorkspaceMultiSelector : public QTableWidget {
+class EXPORT_OPT_MANTIDQT_COMMON WorkspaceMultiSelector final : public QTableWidget {
   Q_OBJECT
 
-  Q_PROPERTY(QStringList WorkspaceTypes READ getWorkspaceTypes WRITE setWorkspaceTypes)
-  Q_PROPERTY(bool ShowGroups READ showWorkspaceGroups WRITE showWorkspaceGroups)
   Q_PROPERTY(QStringList Suffix READ getWSSuffixes WRITE setWSSuffixes)
 
 public:
   /// Default Constructor
-  explicit WorkspaceMultiSelector(QWidget *parent = 0, bool init = true);
+  explicit WorkspaceMultiSelector(QWidget *parent = nullptr);
 
   /// Destructor
   ~WorkspaceMultiSelector() override;
@@ -54,19 +52,15 @@ public:
   void resetIndexRangeToDefault();
   void unifyRange();
 
-  bool showWorkspaceGroups() const;
-  void showWorkspaceGroups(bool show);
-  stringPairVec retrieveSelectedNameIndexPairs();
+  StringPairVec retrieveSelectedNameIndexPairs();
 
-  QStringList getWorkspaceTypes() const;
-  QStringList getWSSuffixes() const;
-  void setWorkspaceTypes(const QStringList &types);
+  const QStringList &getWSSuffixes() const;
   void setWSSuffixes(const QStringList &suffix);
 
   bool isValid() const;
 
-  void connectObservers();
-  void disconnectObservers();
+  void connectObservers() const;
+  void disconnectObservers() const;
 
 signals:
   void emptied();
@@ -98,14 +92,7 @@ private:
   Poco::NObserver<WorkspaceMultiSelector, Mantid::API::WorkspaceRenameNotification> m_renameObserver;
   Poco::NObserver<WorkspaceMultiSelector, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
 
-  bool m_init;
-
-  /// A list of workspace types that should be shown in the QtableWidget
-  QStringList m_workspaceTypes;
-  // show/hide workspace groups
-  bool m_showGroups;
   QStringList m_suffix;
-
   // Mutex for synchronized event handling
   std::mutex m_adsMutex;
 };

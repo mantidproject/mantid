@@ -111,6 +111,7 @@ void FitTab::handleDataRemoved() {
   updateDataReferences();
   m_plotPresenter->updateDataSelection(m_dataPresenter->createDisplayNames());
   updateParameterEstimationData();
+  m_dataPresenter->updateFitFunctionList();
 }
 
 void FitTab::handlePlotSpectrumChanged() {

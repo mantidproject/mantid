@@ -25,7 +25,7 @@ cd $WORKSPACE
 
 # Setup Mamba. Create and activate environment
 setup_mamba $WORKSPACE/mambaforge "" true
-create_and_activate_mantid_developer_env
+create_and_activate_mantid_developer_env $WORKSPACE
 
 # Create the build directory if it doesn't exist
 [ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
@@ -39,4 +39,3 @@ cmake --preset=doxygen-ci ..
 
 # Build doxygen target
 cmake --build . --target doxygen
-

@@ -12,7 +12,6 @@ import re
 
 
 class ConvertToWavelength(object):
-
     # List of workspaces to process.
     __ws_list = []
 

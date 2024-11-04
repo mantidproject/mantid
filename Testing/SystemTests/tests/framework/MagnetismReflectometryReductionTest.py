@@ -6,8 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid import *
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import (
+    AddSampleLog,
+    LoadEventNexus,
+    LoadNexusProcessed,
+    MagnetismReflectometryReduction,
+    MRFilterCrossSections,
+    MRGetTheta,
+    MRInspectData,
+)
 import math
 import numpy as np
 

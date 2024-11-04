@@ -114,10 +114,11 @@ MatrixWorkspace::MatrixWorkspace()
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
     : IMDWorkspace(other), ExperimentInfo(other), m_indexInfo(std::make_unique<Indexing::IndexInfo>(other.indexInfo())),
       m_isInitialized(other.m_isInitialized), m_YUnit(other.m_YUnit), m_YUnitLabel(other.m_YUnitLabel),
-      m_isCommonBinsFlag(other.m_isCommonBinsFlag), m_masks(other.m_masks), m_indexInfoNeedsUpdate(false) {
+      m_masks(other.m_masks), m_indexInfoNeedsUpdate(false) {
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
     m_axes[i] = std::unique_ptr<Axis>(other.m_axes[i]->clone(this));
+  m_isCommonBinsFlag.store(other.m_isCommonBinsFlag.load());
   m_isCommonBinsFlagValid.store(other.m_isCommonBinsFlagValid.load());
   // TODO: Do we need to init m_monitorWorkspace?
 }
@@ -380,7 +381,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors, const sp
  *    VALUE is the Workspace Index
  */
 spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
-  auto *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
+  auto const *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -402,7 +403,7 @@ spec2index_map MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const {
  *vector.
  */
 std::vector<size_t> MatrixWorkspace::getSpectrumToWorkspaceIndexVector(specnum_t &offset) const {
-  auto *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
+  auto const *ax = dynamic_cast<SpectraAxis *>(this->m_axes[1].get());
   if (!ax)
     throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: "
                              "axis[1] is not a SpectraAxis, so I cannot "
@@ -1055,19 +1056,20 @@ bool MatrixWorkspace::isCommonBins() const {
   for (size_t i = 1; i < numHist; ++i) {
     if (x(i).size() != numBins) {
       m_isCommonBinsFlag = false;
-      break;
+      return m_isCommonBinsFlag;
     }
   }
 
+  const auto &x0 = x(0);
   // Check that the values of each histogram are identical.
-  if (m_isCommonBinsFlag) {
-    const size_t lastSpec = numHist - 1;
-    for (size_t i = 0; i < lastSpec; ++i) {
-      const auto &xi = x(i);
-      const auto &xip1 = x(i + 1);
+  PARALLEL_FOR_IF(this->threadSafe())
+  for (int i = 1; i < static_cast<int>(numHist); ++i) {
+    if (m_isCommonBinsFlag) {
+      const auto specIndex = static_cast<std::size_t>(i);
+      const auto &xi = x(specIndex);
       for (size_t j = 0; j < numBins; ++j) {
-        const double a = xi[j];
-        const double b = xip1[j];
+        const double a = x0[j];
+        const double b = xi[j];
         // Check for NaN and infinity before comparing for equality
         if (std::isfinite(a) && std::isfinite(b)) {
           if (std::abs(a - b) > EPSILON) {
@@ -1632,13 +1634,11 @@ signal_t MatrixWorkspace::getSignalAtCoord(const coord_t *coords,
                                 "Workspace can only have 2 axes, found " +
                                 std::to_string(this->axes()));
 
-  coord_t xCoord = coords[0];
-  coord_t yCoord = coords[1];
   // First, find the workspace index
-  Axis *ax1 = this->getAxis(1);
+  Axis const *ax1 = this->getAxis(1);
   size_t wi(-1);
   try {
-    wi = ax1->indexOfValue(yCoord);
+    wi = ax1->indexOfValue(coords[1]);
   } catch (std::out_of_range &) {
     return std::numeric_limits<double>::quiet_NaN();
   }
@@ -1661,6 +1661,7 @@ signal_t MatrixWorkspace::getSignalAtCoord(const coord_t *coords,
     const auto &xVals = x(wi);
     size_t i;
     try {
+      coord_t xCoord = coords[0];
       if (isHistogramData())
         i = Kernel::VectorHelper::indexOfValueFromEdges(xVals.rawData(), xCoord);
       else
@@ -1950,7 +1951,7 @@ std::pair<size_t, double> MatrixWorkspace::getXIndex(size_t i, double x, bool is
       auto index = static_cast<size_t>(std::distance(X.begin(), ix));
       if (isLeft)
         --index;
-      return std::make_pair(index, fabs((X[index] - x) / (*ix - *(ix - 1))));
+      return std::make_pair(index, std::abs((X[index] - x) / (*ix - *(ix - 1))));
     }
   }
   // I don't think we can ever get here
@@ -2123,7 +2124,7 @@ IPropertyManager::getValue<Mantid::API::MatrixWorkspace_sptr>(const std::string 
 template <>
 MANTID_API_DLL Mantid::API::MatrixWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::API::MatrixWorkspace_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(getPointerToProperty(name));
+  auto const *prop = dynamic_cast<PropertyWithValue<Mantid::API::MatrixWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

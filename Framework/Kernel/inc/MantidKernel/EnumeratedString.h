@@ -60,7 +60,8 @@ public:
   // treat the object as either the enum, or a string
   operator E() const { return value; }
   operator std::string() const { return name; }
-
+  // explicitly define copy assignment operator to avoid deprecation warnings
+  EnumeratedString &operator=(const EnumeratedString &other) = default;
   // assign the object either by the enum, or by string
   EnumeratedString &operator=(E e) {
     if (int(e) >= 0 && size_t(e) < names->size()) {

@@ -39,6 +39,7 @@ EXPORT_OPT_MANTIDQT_COMMON std::optional<std::size_t> maximumIndex(const Mantid:
 EXPORT_OPT_MANTIDQT_COMMON std::string getIndexString(const std::string &workspaceName);
 
 EXPORT_OPT_MANTIDQT_COMMON bool doesExistInADS(std::string const &workspaceName);
+EXPORT_OPT_MANTIDQT_COMMON bool doAllWsExistInADS(std::vector<std::string> const &workspaceNames);
 
 template <typename T = Mantid::API::MatrixWorkspace>
 std::shared_ptr<T> getADSWorkspace(std::string const &workspaceName) {

@@ -92,6 +92,7 @@ template <typename TYPE> std::vector<double> getZscore(const vector<TYPE> &data)
   }
   for (auto it = data.cbegin(); it != data.cend(); ++it) {
     auto tmp = static_cast<double>(*it);
+    // unclear why Zscore is non-negative, was first implemented in #5316
     Zscore.emplace_back(fabs((stats.mean - tmp) / stats.standard_deviation));
   }
   return Zscore;

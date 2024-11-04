@@ -12,7 +12,6 @@ import tempfile
 
 
 class ReflectometryCreateFloodWorkspaceNoExclude(systemtesting.MantidSystemTest):
-
     flood_ws_name = "flood"
 
     def runTest(self):
@@ -24,7 +23,6 @@ class ReflectometryCreateFloodWorkspaceNoExclude(systemtesting.MantidSystemTest)
 
 
 class ReflectometryCreateFloodWorkspaceExclude(systemtesting.MantidSystemTest):
-
     flood_ws_name = "flood"
 
     def runTest(self):
@@ -42,7 +40,6 @@ class ReflectometryCreateFloodWorkspaceExclude(systemtesting.MantidSystemTest):
 
 
 class ReflectometryCreateFloodWorkspaceQuadratic(systemtesting.MantidSystemTest):
-
     flood_ws_name = "flood"
 
     def runTest(self):
@@ -60,7 +57,6 @@ class ReflectometryCreateFloodWorkspaceQuadratic(systemtesting.MantidSystemTest)
 
 
 class ReflectometryCreateFloodWorkspaceNegativeBackground(systemtesting.MantidSystemTest):
-
     flood_ws_name = "flood"
 
     def runTest(self):
@@ -76,7 +72,6 @@ class ReflectometryCreateFloodWorkspaceNegativeBackground(systemtesting.MantidSy
 
 
 class ReflectometryApplyFloodWorkspace(systemtesting.MantidSystemTest):
-
     out_ws_name = "out"
 
     def runTest(self):
@@ -96,7 +91,6 @@ class ReflectometryApplyFloodWorkspace(systemtesting.MantidSystemTest):
 
 
 class ReflectometryApplyFloodWorkspaceRebinned(systemtesting.MantidSystemTest):
-
     out_ws_name = "out"
 
     def runTest(self):
@@ -117,7 +111,6 @@ class ReflectometryApplyFloodWorkspaceRebinned(systemtesting.MantidSystemTest):
 
 
 class ReflectometryApplyFloodWorkspaceUnits(systemtesting.MantidSystemTest):
-
     out_ws_name = "out"
 
     def runTest(self):
@@ -139,7 +132,6 @@ class ReflectometryApplyFloodWorkspaceUnits(systemtesting.MantidSystemTest):
 
 
 class ReflectometryCreateFloodWorkspaceCentralPixel(systemtesting.MantidSystemTest):
-
     flood_ws_name = "flood"
 
     def runTest(self):
@@ -162,7 +154,6 @@ class ReflectometryCreateFloodWorkspaceCentralPixel(systemtesting.MantidSystemTe
 
 
 class ReflectometryCreateFloodWorkspaceIntegrationRange(systemtesting.MantidSystemTest):
-
     flood_ws_name = "flood"
 
     def runTest(self):
@@ -185,7 +176,6 @@ class ReflectometryCreateFloodWorkspaceIntegrationRange(systemtesting.MantidSyst
 
 
 class ReflectometryCreateFloodWorkspaceDivisionByZero(systemtesting.MantidSystemTest):
-
     flood_ws_name = "flood"
 
     def runTest(self):
@@ -209,7 +199,6 @@ class ReflectometryCreateFloodWorkspaceDivisionByZero(systemtesting.MantidSystem
 
 
 class ReflectometryCreateFloodWorkspaceCentralPixelExclude(systemtesting.MantidSystemTest):
-
     flood_ws_name = "flood"
 
     def runTest(self):
@@ -232,7 +221,6 @@ class ReflectometryCreateFloodWorkspaceCentralPixelExclude(systemtesting.MantidS
 
 
 class ReflectometryCreateFloodWorkspaceCentralPixelRange(systemtesting.MantidSystemTest):
-
     flood_ws_name = "flood"
 
     def runTest(self):

@@ -10,8 +10,8 @@ import re
 from collections import defaultdict
 from string import Formatter
 
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import mtd, AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, WorkspaceGroupProperty
+from mantid.kernel import logger, Direction, IntArrayProperty
 import isis_powder.gem_routines
 
 _MAUD_TEMPLATE_PATH = None
@@ -25,7 +25,6 @@ def _maud_template_path():
 
 
 class SaveGEMMAUDParamFile(PythonAlgorithm):
-
     PROP_INPUT_WS = "InputWorkspace"
     PROP_TEMPLATE_FILE = "TemplateFilename"
     PROP_GROUPING_SCHEME = "GroupingScheme"

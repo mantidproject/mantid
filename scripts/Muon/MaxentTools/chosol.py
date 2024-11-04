@@ -15,7 +15,6 @@ import math
 
 
 def CHOSOL_old(a, b, n):
-
     assert n == 3
     assert a.shape == (3, 3)
     assert b.shape == (3,)

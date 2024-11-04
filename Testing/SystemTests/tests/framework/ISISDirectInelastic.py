@@ -6,7 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import FileFinder
+from mantid.kernel import config
+from mantid.simpleapi import RenameWorkspace
 from mantid.api import Workspace
 import os
 import shutil
@@ -345,7 +347,6 @@ class MARIReductionMonSeparate(ISISDirectInelasticReduction):
 
 class MARIReductionSum(ISISDirectInelasticReduction):
     def __init__(self):
-
         ISISDirectInelasticReduction.__init__(self)
         from ISIS_MariReduction import MARIReductionSum
 
@@ -372,7 +373,6 @@ class MARIReductionSum(ISISDirectInelasticReduction):
 
 class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
     def __init__(self):
-
         ISISDirectInelasticReduction.__init__(self)
         from ISIS_MariReduction import MARIReductionSum
 

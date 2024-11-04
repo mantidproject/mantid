@@ -84,6 +84,7 @@ class IN4(systemtesting.MantidSystemTest):
         self.disableChecking = ["Instrument", "Sample"]
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-4
+        self.nanEqual = True
         return ["cropped", "ILL_IN4_SofQW.nxs"]
 
 
@@ -182,6 +183,7 @@ class IN5_Tube_Background(systemtesting.MantidSystemTest):
 class IN5_Mask_Non_Overlapping_Bins(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-7
+        self.nanEqual = True
         self.tolerance_is_rel_err = True
         self.disableChecking = ["Instrument", "Sample"]
         return ["red", "ILL_IN5_Tweak_sqw.nxs"]
@@ -196,7 +198,6 @@ class IN5_Mask_Non_Overlapping_Bins(systemtesting.MantidSystemTest):
             ws.setY(i, y_prime[i])
 
     def runTest(self):
-
         run = "ILL/IN5/176053.nxs"
 
         DirectILLCollectData(

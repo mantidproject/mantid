@@ -6,10 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 """
-    Simple local data catalog for Mantid
-    Gets main information from data files in a directory and stores
-    that information in a database in the user home area.
+Simple local data catalog for Mantid
+Gets main information from data files in a directory and stores
+that information in a database in the user home area.
 """
+
 import os
 import sqlite3
 import sys

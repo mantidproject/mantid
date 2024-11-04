@@ -7,13 +7,12 @@
 # pylint: disable=no-init,invalid-name,too-many-branches
 import os
 import mantid.simpleapi as api
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import Algorithm, AlgorithmFactory, AlgorithmManager, AnalysisDataService, PythonAlgorithm
+from mantid.kernel import Direction, Logger, PropertyManagerDataService, StringMandatoryValidator
 from reduction_workflow.find_data import find_data
 
 
 class HFIRSANSReduction(PythonAlgorithm):
-
     default_output_dir = None
 
     def category(self):

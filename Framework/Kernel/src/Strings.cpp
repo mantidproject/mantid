@@ -127,6 +127,15 @@ MANTID_KERNEL_DLL std::string toUpper(const std::string &input) {
   return output;
 }
 
+/** Checks if string ends with a suffix
+ */
+MANTID_KERNEL_DLL bool endsWith(std::string const &str, std::string const &suffix) {
+  if (str.size() >= suffix.size()) {
+    return str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
+  }
+  return false;
+}
+
 //------------------------------------------------------------------------------------------------
 /**
  * Function to convert a number into hex

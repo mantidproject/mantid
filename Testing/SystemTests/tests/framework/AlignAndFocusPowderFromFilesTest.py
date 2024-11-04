@@ -6,8 +6,27 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import systemtesting
-from mantid.simpleapi import *
-from mantid.api import WorkspaceFactory
+from mantid.api import mtd, AnalysisDataService, WorkspaceFactory
+from mantid.kernel import PropertyManagerDataService
+from mantid.simpleapi import (
+    AlignAndFocusPowder,
+    AlignAndFocusPowderFromFiles,
+    ConvertUnits,
+    CreateGroupingWorkspace,
+    CylinderAbsorption,
+    DeleteWorkspace,
+    Divide,
+    FilterBadPulses,
+    LoadDiffCal,
+    LoadEventAndCompress,
+    LoadEventNexus,
+    NormaliseByCurrent,
+    PDDetermineCharacterizations,
+    PDLoadCharacterizations,
+    RebinRagged,
+    SetSample,
+    SortEvents,
+)
 import numpy as np
 import os
 import time
@@ -418,7 +437,7 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
         for i in range(absorptionWS.getNumberHistograms()):
             absorptionWS.setX(i, xaxis)
         absorptionWS.getAxis(0).setUnit("Wavelength")
-        mantid.api.AnalysisDataService.addOrReplace("V_abs", absorptionWS)
+        AnalysisDataService.addOrReplace("V_abs", absorptionWS)
         SetSample(
             InputWorkspace="V_abs",
             Material={"ChemicalFormula": "V", "SampleNumberDensity": 0.0721},

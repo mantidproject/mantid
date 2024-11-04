@@ -5,8 +5,21 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-few-public-methods
+import os
 import systemtesting
-from mantid.simpleapi import *
+from mantid.kernel import config
+from mantid.simpleapi import (
+    CompareWorkspaces,
+    CreateSimulationWorkspace,
+    FilterPeaks,
+    HB3AAdjustSampleNorm,
+    HFIRCalculateGoniometer,
+    IntegratePeaksMD,
+    LoadNexus,
+    PredictPeaks,
+    SetGoniometer,
+    SetUB,
+)
 from mantid.geometry import CrystalStructure, Goniometer
 
 

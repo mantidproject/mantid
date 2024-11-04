@@ -6,10 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init, too-many-instance-attributes
 import mantid.simpleapi as api
-from mantid.api import *
-from mantid.kernel import *
-
-_OUTPUTLEVEL = "NOOUTPUT"
+from mantid.api import (
+    AlgorithmFactory,
+    FileAction,
+    FileProperty,
+    ITableWorkspaceProperty,
+    MatrixWorkspaceProperty,
+    PropertyMode,
+    PythonAlgorithm,
+)
+from mantid.kernel import Direction, FloatArrayBoundedValidator, FloatArrayProperty, StringListValidator
 
 
 class ExaminePowderDiffProfile(PythonAlgorithm):

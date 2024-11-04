@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" Defines the state of the event slices which should be reduced."""
+"""Defines the state of the event slices which should be reduced."""
 
 import json
 import copy
@@ -71,7 +71,7 @@ class StateSliceEvent(metaclass=JsonSerializable):
                 is_invalid.update(entry)
 
         if is_invalid:
-            raise ValueError("StateSliceEvent: The provided inputs are illegal. " "Please see: {}".format(json.dumps(is_invalid)))
+            raise ValueError("StateSliceEvent: The provided inputs are illegal. Please see: {}".format(json.dumps(is_invalid)))
 
 
 def monotonically_increasing(to_check):
@@ -106,6 +106,5 @@ def get_slice_event_builder(data_info):
         return StateSliceEventBuilder()
     else:
         raise NotImplementedError(
-            "StateSliceEventBuilder: Could not find any valid slice builder for the "
-            "specified StateData object {0}".format(str(data_info))
+            f"StateSliceEventBuilder: Could not find any valid slice builder for the specified StateData object {str(data_info)}"
         )

@@ -9,4 +9,3 @@ calibration_config_path : 'C:\gem\calibration\cal_map.yaml'
 
 # Or we could set it to always perform vanadium normalisation by default:
 vanadium_normalisation : True
-

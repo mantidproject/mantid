@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 import systemtesting
-from mantid.simpleapi import *
-from mantid.geometry import *
+from mantid.simpleapi import PoldiCreatePeaksFromCell
+from mantid.geometry import SpaceGroupFactory
 
 
 class SpaceGroupReflectionConditionsTest(systemtesting.MantidSystemTest):

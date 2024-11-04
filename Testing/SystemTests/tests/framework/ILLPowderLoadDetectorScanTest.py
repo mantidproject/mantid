@@ -18,11 +18,9 @@ class ILLPowderLoadDetectorScanTest(systemtesting.MantidSystemTest):
         self.setUp()
 
     def requiredFiles(self):
-
         return ["967076.nxs"]
 
     def setUp(self):
-
         config["default.facility"] = "ILL"
         config["default.instrument"] = "D20"
         config.appendDataSearchSubDir("ILL/D20/")
@@ -46,5 +44,4 @@ class ILLPowderLoadDetectorScanTest(systemtesting.MantidSystemTest):
         self.assertDelta(ws.readE(1754682)[0], 63.9296, 0.0001)
 
     def runTest(self):
-
         self.d20_detector_scan_test()

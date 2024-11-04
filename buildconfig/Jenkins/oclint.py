@@ -44,7 +44,6 @@ def split_json(all_json_objects):
 
 
 def lint_jsonfiles(oclint, jsonfiles, config):
-
     i = 0
     result_files = []
     for file_name in jsonfiles:

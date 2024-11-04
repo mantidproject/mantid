@@ -110,7 +110,6 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-
         # Set up progress reporting
         n_prog_reports = 2
         if self._can_ws_name is not None:
@@ -196,7 +195,6 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
             logger.information("Container thickness: %f & %f" % (can_thickness_1, can_thickness_2))
 
             if self._use_can_corrections:
-
                 prog.report("Calculating container corrections")
                 divide_alg.setProperty("LHSWorkspace", sample_wave_ws)
                 divide_alg.setProperty("RHSWorkspace", self._ass_ws)

@@ -65,7 +65,7 @@ Usage
 
 .. testoutput:: exampleIntegratePeaks1DProfile
 
-    I/sigma = 100.46
+    I/sigma = 92.97
 
 References
 ----------

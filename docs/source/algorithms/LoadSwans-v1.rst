@@ -19,4 +19,3 @@ The documentation will be updated when a definitive file format will be availabl
 .. categories::
 
 .. sourcelink::
-

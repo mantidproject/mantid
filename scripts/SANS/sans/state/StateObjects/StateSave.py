@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-few-public-methods
 
-""" Defines the state of saving."""
+"""Defines the state of saving."""
 
 import copy
 

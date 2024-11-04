@@ -76,7 +76,7 @@ Improved
 Deprecated
 ##########
 
--  :ref:`AddNote <algm-AddNote>` v1 is deprecated in favour of :ref:`Comment <algm-Comment>` v1.
+-  AddNote v1 is deprecated in favour of :ref:`Comment <algm-Comment>` v1.
 -  :ref:`LoadAscii <algm-LoadAscii>` v1 is deprecated in favour of v2.
 -  :ref:`LoadEventPreNexus <algm-LoadEventPreNexus>` v1 is deprecated in favour of v2.
 
@@ -176,4 +176,3 @@ Full list of
 and
 `Python <http://github.com/mantidproject/mantid/pulls?q=is%3Apr+milestone%3A%22Release+3.6%22+is%3Amerged+label%3A%22Component%3A+Python%22>`_
 changes on GitHub
-

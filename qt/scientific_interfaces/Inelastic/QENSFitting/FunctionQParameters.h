@@ -16,6 +16,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace Inelastic {
 
+typedef std::pair<std::string, std::size_t> PairNameSpectra;
+
 class MANTIDQT_INELASTIC_DLL FunctionQParameters {
 public:
   FunctionQParameters();
@@ -30,9 +32,9 @@ public:
   operator bool() const { return !m_widths.empty() || !m_eisfs.empty() || !m_a0s.empty(); }
 
 private:
-  std::vector<std::pair<std::string, std::size_t>> m_widths;
-  std::vector<std::pair<std::string, std::size_t>> m_eisfs;
-  std::vector<std::pair<std::string, std::size_t>> m_a0s;
+  std::vector<PairNameSpectra> m_widths;
+  std::vector<PairNameSpectra> m_eisfs;
+  std::vector<PairNameSpectra> m_a0s;
 };
 
 } // namespace Inelastic

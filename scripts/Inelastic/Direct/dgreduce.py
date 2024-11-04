@@ -5,11 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-""" Empty class temporary left for compatibility with previous interfaces """
+"""Empty class temporary left for compatibility with previous interfaces"""
+
 import Direct.DirectEnergyConversion as DRC
-from mantid.simpleapi import *
-from mantid.kernel import funcinspect
-from mantid import api
+from mantid.api import mtd, MatrixWorkspace
+from mantid.kernel import config, funcinspect
+from mantid.simpleapi import RenameWorkspace
 
 # the class which is responsible for data reduction
 global Reducer
@@ -168,7 +169,7 @@ def runs_are_equal(ws1, ws2):
     def get_run_num(name_or_ws):
         err = None
 
-        if isinstance(name_or_ws, api.MatrixWorkspace):
+        if isinstance(name_or_ws, MatrixWorkspace):
             run_num = name_or_ws.getRunNumber()
         elif name_or_ws in mtd:  # this is also throw Boost.Python.ArgumentError error if mtd not accepts it
             ws = mtd[name_or_ws]
@@ -202,7 +203,7 @@ def abs_units(
     rebin,
     map_file="default",
     monovan_mapfile="default",
-    **kwargs
+    **kwargs,
 ):
     """
     dgreduce.abs_units(wb_run          Whitebeam run number or file name or workspace

@@ -18,6 +18,7 @@ from mantid.kernel import (
     IntBoundedValidator,
 )
 from mantid.api import (
+    AlgorithmFactory,
     PythonAlgorithm,
     MultipleFileProperty,
     FileProperty,
@@ -27,7 +28,34 @@ from mantid.api import (
     WorkspaceProperty,
     PropertyMode,
 )
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    AddSampleLog,
+    AddSampleLogMultiple,
+    ConvertAxisByFormula,
+    ConvertSpectrumAxis,
+    ConvertUnits,
+    CropWorkspace,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    Divide,
+    ExtractMonitors,
+    ExtractSingleSpectrum,
+    ExtractSpectra,
+    FindEPP,
+    GroupDetectors,
+    GroupWorkspaces,
+    Integration,
+    LoadAndMerge,
+    LoadParameterFile,
+    MaskBins,
+    MoveInstrumentComponent,
+    Plus,
+    RebinToWorkspace,
+    RenameWorkspace,
+    ReplaceSpecialValues,
+    Scale,
+    ScaleX,
+)
 
 N_TUBES = 16
 N_PIXELS_PER_TUBE = 128
@@ -97,7 +125,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         return "IndirectILLEnergyTransfer"
 
     def PyInit(self):
-
         self.declareProperty(MultipleFileProperty("Run", extensions=["nxs"]), doc="File path of run (s).")
 
         self.declareProperty(
@@ -211,7 +238,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self.setPropertyGroup("DeleteMonitorWorkspace", bats_options)
 
     def validateInputs(self):
-
         issues = dict()
 
         self._psd_int_range = self.getProperty("ManualPSDIntegrationRange").value
@@ -386,7 +412,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 self._reduction_type = "BATS"
 
     def PyExec(self):
-
         self.setUp()
 
         self._progress = Progress(self, start=0.0, end=1.0, nreports=self._run_file.count("+"))
@@ -416,7 +441,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             self._reduce_bats(self._ws)
         else:
             if self._mirror_sense == 14:  # two wings, extract left and right
-
                 size = mtd[self._ws].blocksize()
                 left = self._ws + "_left"
                 right = self._ws + "_right"
@@ -428,7 +452,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 GroupWorkspaces(InputWorkspaces=[left, right], OutputWorkspace=self._red_ws)
 
             elif self._mirror_sense == 16:  # one wing
-
                 self._reduce_one_wing_doppler(self._ws)
                 GroupWorkspaces(InputWorkspaces=[self._ws], OutputWorkspace=self._red_ws)
 
@@ -554,7 +577,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             )
 
         for pixel in range(1, N_PIXELS_PER_TUBE * N_TUBES + N_MONITOR):
-
             group = (pixel - 1) // self._group_by
             if self._fit_option == "FitAllPixelGroups" and epp_ws.cell("FitStatus", group) == "success":
                 l2 = detector_info.l2(pixel)

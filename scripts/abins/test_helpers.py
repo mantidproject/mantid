@@ -6,11 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 from pathlib import Path
-from typing import Any, Dict, Mapping
+from typing import Any, Dict, List, Mapping
 from unittest import TestCase
 
 import numpy as np
 from numpy.testing import assert_allclose
+from pydantic import validate_call
 
 from abins.atomsdata import _AtomData
 from abins.kpointsdata import KpointData
@@ -39,7 +40,8 @@ def find_file(filename: str, try_upcase_suffix: bool = True) -> str:
         raise ValueError(f"Could not find file '{filename}'")
 
 
-def remove_output_files(list_of_names=None):
+@validate_call
+def remove_output_files(list_of_names: List[str]) -> None:
     """Removes output files created during a test."""
 
     # import ConfigService here to avoid:
@@ -47,11 +49,6 @@ def remove_output_files(list_of_names=None):
     # instances is not enabled (http://www.boost.org/libs/python/doc/v2/pickle.html)
 
     from mantid.kernel import ConfigService
-
-    if not isinstance(list_of_names, list):
-        raise ValueError("List of names is expected.")
-    if not all(isinstance(i, str) for i in list_of_names):
-        raise ValueError("Each name should be a string.")
 
     save_dir_path = ConfigService.getString("defaultsave.directory")
     if save_dir_path != "":  # default save directory set

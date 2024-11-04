@@ -10,12 +10,10 @@ from qtpy.QtCore import QObject, Signal, Qt
 
 
 class DrillTableItemSignals(QObject):
-
     dataChanged = Signal()
 
 
 class DrillTableItem(QTableWidgetItem):
-
     """
     Reference to the item presenter.
     """

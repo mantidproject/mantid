@@ -56,11 +56,9 @@ Output:
 .. testoutput:: Example
 
     New bin width: 1.7
-    Bin widths before rebinning: [  0.1   0.1   0.1   1.7   1.7   1.7   1.7  10. ]
-    Bin widths after rebinning: [ 1.7  1.7  1.7  1.7  1.7  1.7  1.7  1.7  1.7  1.7]
+    Bin widths before rebinning: [ 0.1  0.1  0.1  1.7  1.7  1.7  1.7 10. ]
+    Bin widths after rebinning: [1.7 1.7 1.7 1.7 1.7 1.7 1.7 1.7 1.7 1.7]
 
 .. categories::
 
 .. sourcelink::
-
-

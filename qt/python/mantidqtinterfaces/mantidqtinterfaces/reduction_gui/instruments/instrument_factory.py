@@ -5,10 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Instrument interface factory.
-    This module is responsible for the association between an instrument name
-    and its corresponding interface class.
+Instrument interface factory.
+This module is responsible for the association between an instrument name
+and its corresponding interface class.
 """
+
 from mantidqtinterfaces.reduction_gui.instruments.hfir_interface_dev import HFIRInterface
 from mantidqtinterfaces.reduction_gui.instruments.eqsans_interface_dev import EQSANSInterface
 from mantidqtinterfaces.reduction_gui.instruments.dgs_interface_dev import DgsInterface

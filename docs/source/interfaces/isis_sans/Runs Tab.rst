@@ -171,6 +171,7 @@ Save Options
    :align: center
    :width: 500px
 
+
 +--------------------------+-----------------------------------------------------------------------------------------+
 | **Save Other**           | Opens up the save a dialog box :ref:`Save Other <save-other>` which allows users        |
 |                          | to manually save processed data                                                         |
@@ -190,4 +191,7 @@ Save Options
 |                          | for each run in the table, speeding up processing considerably.                         |
 +--------------------------+-----------------------------------------------------------------------------------------+
 | **Plot results**         | If enabled, data is automatically plotted on a graph as it is processed.                |
+|                          | The check box is hidden by default, and can be enabled by adding                        |
+|                          | `sans.isis_sans.plotResults=On` in your mantid.user.properties, see                     |
+|                          | :ref:`Properties File` for more information                                             |
 +--------------------------+-----------------------------------------------------------------------------------------+

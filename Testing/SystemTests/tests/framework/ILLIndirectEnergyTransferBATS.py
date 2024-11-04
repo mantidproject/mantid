@@ -39,7 +39,6 @@ class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
         config["datasearch.directories"] = self.datadirs
 
     def runTest(self):
-
         center, epp = IndirectILLEnergyTransfer(Run="215962", PulseChopper="34", GroupDetectors=False)
 
         offset_p100 = IndirectILLEnergyTransfer(Run="215967", InputElasticChannelWorkspace=epp, PulseChopper="34", GroupDetectors=False)
@@ -49,7 +48,6 @@ class ILLIndirectEnergyTransferBATSTest(systemtesting.MantidSystemTest):
         GroupWorkspaces(InputWorkspaces=[center, offset_p100, offset_m275], OutputWorkspace="group")
 
     def validate(self):
-
         return ["group", "ILLIN16B_BATS.nxs"]
 
 

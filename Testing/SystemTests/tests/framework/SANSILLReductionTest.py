@@ -5,7 +5,21 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import (
+    AddSampleLog,
+    CalculateEfficiency,
+    CreateSingleValuedWorkspace,
+    CreateWorkspace,
+    GroupWorkspaces,
+    LoadNexusProcessed,
+    MaskBTP,
+    Plus,
+    SANSILLIntegration,
+    SANSILLReduction,
+    RenameWorkspace,
+)
 
 
 class ILL_D11_Test(systemtesting.MantidSystemTest):
@@ -390,6 +404,7 @@ class ILL_D33_LTOF_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e-3
         self.tolerance_is_rel_err = True
         self.disableChecking = ["Instrument"]
+        self.nanEqual = True
         return ["iq", "ILL_SANS_D33_LTOF_IQ.nxs"]
 
     def runTest(self):

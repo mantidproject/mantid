@@ -7,8 +7,38 @@
 # pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import numpy as np
 import systemtesting
-from mantid.simpleapi import *
-from mantid.api import FileFinder
+from mantid.api import mtd, FileFinder
+from mantid.kernel import config
+from mantid.simpleapi import (
+    AlignAndFocusPowderFromFiles,
+    ApplyDiffCal,
+    CompressEvents,
+    ConjoinFiles,
+    ConvertUnits,
+    CropWorkspace,
+    DiffractionFocussing,
+    Divide,
+    EditInstrumentGeometry,
+    FilterBadPulses,
+    Integration,
+    LoadCalFile,
+    LoadEventNexus,
+    LoadGSS,
+    LoadNexus,
+    MaskDetectors,
+    PDLoadCharacterizations,
+    PDToPDFgetN,
+    Power,
+    Rebin,
+    RemoveLowResTOF,
+    RemovePromptPulse,
+    SaveGSS,
+    SNSPowderReduction,
+    SortEvents,
+    StripVanadiumPeaks,
+    Subtract,
+    UnwrapSNS,
+)
 
 import os
 
@@ -211,7 +241,9 @@ class PG3StripPeaks(systemtesting.MantidSystemTest):
         CropWorkspace(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", XMax=16666.669999999998)
         LoadCalFile(InputWorkspace="PG3_4866", CalFilename=self.cal_file, WorkspaceName="PG3")
         MaskDetectors(Workspace="PG3_4866", MaskedWorkspace="PG3_mask")
-        AlignDetectors(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", OffsetsWorkspace="PG3_offsets")
+        ApplyDiffCal(InstrumentWorkspace="PG3_4866", OffsetsWorkspace="PG3_offsets")
+        ConvertUnits(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Target="dSpacing")
+        ApplyDiffCal(InstrumentWorkspace="PG3_4866", ClearCalibration=True)
         ConvertUnits(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", Target="TOF")
         UnwrapSNS(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", LRef=62)
         RemoveLowResTOF(InputWorkspace="PG3_4866", OutputWorkspace="PG3_4866", ReferenceDIFC=1500)

@@ -8,6 +8,7 @@
 #include "MantidQtWidgets/MplCpp/Colormap.h"
 
 #include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/NDArray.h"
@@ -118,31 +119,22 @@ QRgb ScalarMappable::toRGBA(double x, double alpha) const {
  * @return An array of QRgb values corresponding to the data points
  */
 std::vector<QRgb> ScalarMappable::toRGBA(const std::vector<double> &x, double alpha) const {
-  std::vector<QRgb> rgbaVector(x.size());
   GlobalInterpreterLock lock;
   auto ndarrayView = Python::NewRef(VectorToNDArray<double, WrapReadOnly>()(x));
   // The final argument (bytes=true) forces the return value to be 0->255
   NDArray bytes{pyobj().attr("to_rgba")(ndarrayView, alpha, true)};
-  // sanity check
-  auto shape = bytes.get_shape();
-  if (bytes.get_typecode() == 'B' && bytes.get_nd() == 2 && static_cast<size_t>(shape[0]) == x.size() &&
-      shape[1] == 4) {
-    // The returned array is of shape (x.size(), 4)
-    auto bytesRaw = reinterpret_cast<std::uint8_t *>(bytes.get_data());
-    size_t bytesIndex{0};
-    for (auto &rgb : rgbaVector) {
-      rgb = qRgba(bytesRaw[bytesIndex], bytesRaw[bytesIndex + 1], bytesRaw[bytesIndex + 2], bytesRaw[bytesIndex + 3]);
-      bytesIndex += 4;
-    }
-  } else {
-    QString msg = QString("Unexpected return type from "
-                          "ScalarMappable.to_rgba. Expected "
-                          "np.array(dtype=B) with shape (%1, 4) "
-                          "but found np.array(dtype=%2) with shape (%3, %4). "
-                          "Cannot continue. Please contact development team.")
-                      .arg(QString::number(x.size()), QString::number(bytes.get_typecode()), QString::number(shape[0]),
-                           QString::number(shape[1]));
-    throw std::runtime_error(msg.toLatin1().constData());
+  const auto rgbInts = Mantid::PythonInterface::Converters::NDArrayToVector<int>(bytes)();
+  if (rgbInts.size() % 4 != 0) {
+    throw std::runtime_error("Should be four values for each colour");
+  }
+  const auto numColours = rgbInts.size() / 4;
+  if (numColours != x.size()) {
+    throw std::runtime_error("Number of colours specified is incompatible with data");
+  }
+
+  std::vector<QRgb> rgbaVector(numColours);
+  for (size_t i = 0; i < numColours; i++) {
+    rgbaVector[i] = qRgba(rgbInts[i * 4], rgbInts[i * 4 + 1], rgbInts[i * 4 + 2], rgbInts[i * 4 + 3]);
   }
   return rgbaVector;
 }

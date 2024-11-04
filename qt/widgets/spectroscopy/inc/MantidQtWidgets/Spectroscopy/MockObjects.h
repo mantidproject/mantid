@@ -116,6 +116,9 @@ public:
   MOCK_METHOD1(setPlotErrorBarsChecked, void(bool check));
   MOCK_CONST_METHOD0(isPlotErrorBarsChecked, bool());
 
+  MOCK_METHOD1(setLoadHistoryChecked, void(bool check));
+  MOCK_CONST_METHOD0(isLoadHistoryChecked, bool());
+
   MOCK_METHOD1(setDeveloperFeatureFlags, void(QStringList const &flags));
   MOCK_CONST_METHOD0(developerFeatureFlags, QStringList());
 
@@ -216,6 +219,7 @@ public:
 
   MOCK_CONST_METHOD1(handleValidation, void(IUserInputValidator *validator));
   MOCK_METHOD0(handleRun, void());
+  MOCK_CONST_METHOD0(getSubscriberName, const std::string());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

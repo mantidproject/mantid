@@ -41,7 +41,6 @@ from corelli.calibration.bank import calibrate_banks
 
 
 class TestCorelliDatabase(unittest.TestCase):
-
     test_dir = tempfile.TemporaryDirectory("_data_corelli")
 
     @classmethod
@@ -117,7 +116,6 @@ class TestCorelliDatabase(unittest.TestCase):
         assert isinstance(corelli_table, TableWorkspace)
 
     def test_has_valid_columns(self):
-
         corelli_table = init_corelli_table()
         self.assertEqual(has_valid_columns(corelli_table), True)
 
@@ -126,7 +124,6 @@ class TestCorelliDatabase(unittest.TestCase):
         self.assertEqual(has_valid_columns(table_incomplete), False)
 
     def test_filename_bank_table(self):
-
         abs_subdir: str = self.database_path + "/bank001/"
         date: str = datetime.now().strftime("%Y%m%d")  # format YYYYMMDD
 
@@ -152,7 +149,6 @@ class TestCorelliDatabase(unittest.TestCase):
         self.assertEqual("wrong is not a valid table type" in str(ar.exception), True)
 
     def test_combine_spatial_banks(self):
-
         # test with name
         combined_table = combine_spatial_banks(self.ws_group, name="calibrated_banks")
         self.assertTrue(combined_table.getName() == "calibrated_banks")
@@ -206,7 +202,6 @@ class TestCorelliDatabase(unittest.TestCase):
             self.assertAlmostEqual(expected_array, combined_dict["Detector Y Coordinate"][i])
 
     def test_save_manifest_file(self):
-
         date: str = datetime.now().strftime("%Y%m%d")  # format YYYYMMDD
         filename = self.database_path + "/manifest_corelli_" + date + ".csv"
 
@@ -275,7 +270,6 @@ class TestCorelliDatabase(unittest.TestCase):
         database.cleanup()
 
     def test_verify_date_format(self) -> None:
-
         # success
         date: str = datetime.now().strftime("%Y%m%d")  # format YYYYMMDD
         verify_date_format("test_verify_date_format", date)
@@ -293,7 +287,6 @@ class TestCorelliDatabase(unittest.TestCase):
         self.assertEqual("date in function test_verify_date_format" in str(ar.exception), True)
 
     def test_combine_temporal_banks(self) -> None:
-
         date: str = datetime.now().strftime("%Y%m%d")  # format YYYYMMDD
         group_ws, bank_stamps = combine_temporal_banks(self.database_path, date)
         self.assertEqual([bs[0] for bs in bank_stamps], [10, 20, 30, 40])  # bank numbers
@@ -318,7 +311,6 @@ class TestCorelliDatabase(unittest.TestCase):
         )
 
         for b, ws in enumerate(group_ws):
-
             table_dict = ws.toDict()
             self.assertEqual(expected[b]["Detector ID"], table_dict["Detector ID"])
 

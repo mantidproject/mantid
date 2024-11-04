@@ -8,22 +8,52 @@
 # disable=invalid-name,no-init,bad-builtin,attribute-defined-outside-init,protected-access,too-many-arguments
 
 """
-    System tests for HFIR SANS reduction.
+System tests for HFIR SANS reduction.
 
-    The following tests were converted from the unittest framework
-    that is part of python to the systemtesting framework used in Mantid.
+The following tests were converted from the unittest framework
+that is part of python to the systemtesting framework used in Mantid.
 """
 
 from functools import reduce
 import math
 from pathlib import PurePath
+import sys
 import traceback
 import types
 
 import systemtesting
-from mantid.simpleapi import *
-from reduction_workflow.instruments.sans.hfir_command_interface import *
-from reduction_workflow.command_interface import AppendDataFile, Reduce, Reduce1D
+from reduction_workflow.instruments.sans.hfir_command_interface import (
+    AzimuthalAverage,
+    Background,
+    BckDirectBeamTransmission,
+    BckThetaDependentTransmission,
+    BckTransmissionDirectBeamCenter,
+    BeamSpreaderTransmission,
+    BIOSANS,
+    DarkCurrent,
+    DirectBeamCenter,
+    DirectBeamTransmission,
+    DivideByThickness,
+    GPSANS,
+    IQxQy,
+    MonitorNormalization,
+    NoSolidAngle,
+    SensitivityCorrection,
+    SetBckTransmission,
+    SetBckTransmissionBeamCenter,
+    SetBeamCenter,
+    SetSampleDetectorDistance,
+    SetSampleDetectorOffset,
+    SetTransmission,
+    SetTransmissionBeamCenter,
+    SetWavelength,
+    ThetaDependentTransmission,
+    TimeNormalization,
+)
+from reduction_workflow.command_interface import AppendDataFile, DataPath, Reduce, Reduce1D, ReductionSingleton
+
+from mantid.api import mtd, AnalysisDataService, FileFinder
+from mantid.kernel import PropertyManagerDataService
 
 
 def _diff_iq(x, y):

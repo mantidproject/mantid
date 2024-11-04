@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd, WorkspaceFactory
+from mantid.simpleapi import LoadMuonNexus, MuonProcess
 
 
 class MuonProcessTest(systemtesting.MantidSystemTest):
@@ -50,6 +51,7 @@ class MuonProcessTest(systemtesting.MantidSystemTest):
         )
 
     def validate(self):
+        self.disableChecking.append("Uncertainty")
         return "MuonProcess_MUSR00015192", "MuonLoad_MUSR00015192.nxs"
 
     def cleanup(self):

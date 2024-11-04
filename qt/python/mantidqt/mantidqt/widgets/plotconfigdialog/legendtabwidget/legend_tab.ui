@@ -313,6 +313,19 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>hide_legend_check_box</tabstop>
+  <tabstop>hide_box_check_box</tabstop>
+  <tabstop>transparency_slider</tabstop>
+  <tabstop>transparency_spin_box</tabstop>
+  <tabstop>title_line_edit</tabstop>
+  <tabstop>title_font_combo_box</tabstop>
+  <tabstop>title_size_spin_box</tabstop>
+  <tabstop>entries_font_combo_box</tabstop>
+  <tabstop>entries_size_spin_box</tabstop>
+  <tabstop>marker_size_spin_box</tabstop>
+  <tabstop>advanced_options_push_button</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

@@ -7,21 +7,53 @@
 # pylint: disable=too-many-lines, too-many-branches, invalid-name, super-on-old-class, protected-access,
 # pylint: disable=too-few-public-methods,too-few-public-methods, too-many-arguments, too-many-instance-attributes
 """
-    This file defines what happens in each step in the data reduction, it's
-    the guts of the reduction. See ISISReducer for order the steps are run
-    in and the names they are given to identify them
+This file defines what happens in each step in the data reduction, it's
+the guts of the reduction. See ISISReducer for order the steps are run
+in and the names they are given to identify them
 
-    Most of this code is a copy-paste from SANSReduction.py, organized to be used with
-    ReductionStep objects. The guts needs refactoring.
+Most of this code is a copy-paste from SANSReduction.py, organized to be used with
+ReductionStep objects. The guts needs refactoring.
 """
+
 import os
 import re
 import math
 from collections import namedtuple
-from mantid.kernel import Logger
 
-from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
-from mantid.simpleapi import *
+from mantid.api import mtd, AlgorithmManager, FileFinder, IEventWorkspace, Workspace, WorkspaceGroup
+from mantid.kernel import logger, Logger
+from mantid.simpleapi import (
+    CalculateFlatBackground,
+    CloneWorkspace,
+    ConvertToHistogram,
+    ConvertUnits,
+    CropWorkspace,
+    DeleteWorkspace,
+    ExtractMask,
+    FindDeadDetectors,
+    GroupWorkspaces,
+    InterpolatingRebin,
+    Load,
+    LoadMask,
+    LoadNexusMonitors,
+    LoadRKH,
+    LoadSampleDetailsFromRaw,
+    MaskDetectors,
+    MaskDetectorsInShape,
+    Minus,
+    Multiply,
+    Rebin,
+    RebinToWorkspace,
+    RemoveBins,
+    RenameWorkspace,
+    ReplaceSpecialValues,
+    SANSWideAngleCorrection,
+    SumSpectra,
+    TOFSANSResolutionByPixel,
+    UnwrapMonitorsInTOF,
+    Qxy,
+    Q1D,
+)
 from SANSUtility import (
     GetInstrumentDetails,
     MaskByBinRange,

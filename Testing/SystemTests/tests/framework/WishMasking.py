@@ -12,11 +12,12 @@ Tests masking functionality specific to WISH. Working masking behaviour is criti
 
 import systemtesting
 import os
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import ExtractMask, MaskDetectors, MaskWorkspaceToCalFile, MergeCalFiles, Load, SaveMask
 
 
 class WishMasking(systemtesting.MantidSystemTest):
-
     # Utility function will return the masking corresponding to a workspace index from a cal file.
     def get_masking_for_index(self, cal_file, requested_index):
         while True:
@@ -39,7 +40,6 @@ class WishMasking(systemtesting.MantidSystemTest):
     # 3) Use the known masking boundaries to determine whether the cal file has been created propertly according to the function inputs.
     # pylint: disable=too-many-arguments
     def do_test_cal_file(self, masked_workspace, should_invert, expected_masking_identifier, expected_not_masking_identifier, masking_edge):
-
         cal_filename = "wish_masking_system_test_temp.cal"
         cal_file_full_path = os.path.join(config["defaultsave.directory"], cal_filename)
         MaskWorkspaceToCalFile(InputWorkspace=masked_workspace, OutputFile=cal_file_full_path, Invert=should_invert)

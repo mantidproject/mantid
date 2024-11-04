@@ -15,7 +15,6 @@ from vesuvio.profiles import create_from_str, GaussianMassProfile, MultivariateG
 
 
 class GaussianMassProfileTest(unittest.TestCase):
-
     # ---------------- Success cases ---------------------------
 
     def test_string_with_fixed_width_produces_valid_object(self):
@@ -101,7 +100,6 @@ class GaussianMassProfileTest(unittest.TestCase):
 
 
 class MultivariateGaussianMassProfileTest(unittest.TestCase):
-
     # ---------------- Success cases ---------------------------
 
     def test_function_string_has_expected_form_with_no_defaults(self):

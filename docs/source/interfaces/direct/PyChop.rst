@@ -66,6 +66,8 @@ If the *Instrument scientist mode* option is selected, a similar option is
 enabled for MERLIN if the G chopper is used. In this case, the phase (time
 delay) of the thick disk chopper can be adjusted. The time delay is the time-of-
 flight at which the chopper slit first opens (sweeps across the beam profile).
+In the event that this mode is then deselected, the time delay entered previously
+will be utilised for subsequent calculations instead of the default value.
 
 The Matplotlib axes showing the calculated data have the standard toolbars.
 

@@ -5,12 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
+import numpy as np
 
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.hrpd_routines import hrpd_advanced_config, hrpd_algs, hrpd_param_mapping
 
 import mantid.simpleapi as mantid
+from mantid.api import MultiDomainFunction, FunctionFactory
+from mantid.fitfunctions import FunctionWrapper
+from mantid.kernel import UnitConversion, DeltaEModeType
 
 # A bug on the instrument when recording historic NeXus files (< 2015) caused
 # corrupted data. Use raw files for now until sufficient time has past and old
@@ -61,14 +65,16 @@ class HRPD(AbstractInst):
         sample_details_obj = common.dictionary_key_helper(
             dictionary=kwargs,
             key=kwarg_name,
-            exception_msg="The argument containing sample details was not found. Please"
-            " set the following argument: {}".format(kwarg_name),
+            exception_msg="The argument containing sample details was not found. Please set the following argument: {}".format(kwarg_name),
         )
         self._sample_details = sample_details_obj
 
     def mask_prompt_pulses_if_necessary(self, ws_list):
         for ws in ws_list:
-            self._mask_prompt_pulses(ws)
+            if self._inst_settings.fit_prompt_pulse:
+                self._subtract_prompt_pulses(ws)
+            else:
+                self._mask_prompt_pulses(ws)
 
     def should_subtract_empty_inst(self):
         return self._inst_settings.subtract_empty_inst
@@ -169,26 +175,214 @@ class HRPD(AbstractInst):
 
         return self._cached_run_details[run_number_string_key]
 
-    def _mask_prompt_pulses(self, ws):
+    def _mask_prompt_pulses(self, ws, ispecs=None):
         """
         HRPD has a long flight path from the moderator resulting
         in sharp peaks from the proton pulse that maintain their
         sharp resolution. Here we mask these pulses out that occur
         at 20ms intervals.
 
-        :param ws: The workspace containing the pulses. It is
-        masked in place.
+        :param ws: The workspace containing the pulses. It is masked in place.
+        :param ispecs: list of spectra to mask
         """
         # The number of pulse can vary depending on the data range
         # Compute number of pulses that occur at each 20ms interval.
         x_data = ws.readX(0)
         pulse_min = int(round(x_data[0]) / PROMPT_PULSE_INTERVAL) + 1
         pulse_max = int(round(x_data[-1]) / PROMPT_PULSE_INTERVAL) + 1
+
+        mask_kwargs = {"InputWorkspaceIndexSet": ispecs} if ispecs is not None else {}
         for i in range(pulse_min, pulse_max):
             centre = PROMPT_PULSE_INTERVAL * float(i)
             mantid.MaskBins(
-                InputWorkspace=ws, OutputWorkspace=ws, XMin=centre - PROMPT_PULSE_LEFT_WIDTH, XMax=centre + PROMPT_PULSE_RIGHT_WIDTH
+                InputWorkspace=ws,
+                OutputWorkspace=ws,
+                XMin=centre - PROMPT_PULSE_LEFT_WIDTH,
+                XMax=centre + PROMPT_PULSE_RIGHT_WIDTH,
+                **mask_kwargs,
             )
+
+    def _subtract_prompt_pulses(self, ws, tof_res=0.002):
+        """
+        HRPD has a long flight path from the moderator resulting
+        in sharp peaks from the proton pulse that maintain their
+        sharp resolution. Here we fit these peaks and subtract
+        them from the backscattering bank spectra. For the other
+        banks (and spectra for which the fit failed) the peaks
+         are masked in TOF instead.
+
+        :param ws: The workspace containing the pulses. It is masked in place.
+        :param tof_res: fractional dTOF/TOF resolution used to mask Bragg peaks that overlap prompt pulses
+        """
+        mantid.ConvertToDistribution(Workspace=ws, EnableLogging=False)  # so all pulses can be described by same profile
+        ispec_max = 60  # last spectrum index in backscattering detector bank
+        dpks_bragg, npulses = self._find_bragg_peak_dspacings_and_prompt_pulses(ws, ispec_end=ispec_max)
+        fit_kwargs = {
+            "CostFunction": "Unweighted least squares",
+            "Minimizer": "Simplex",
+            "MaxIterations": 6000,
+            "IgnoreInvalidData": True,
+            "CreateOutput": False,
+            "EnableLogging": False,
+            "StoreInADS": False,
+        }
+        # for now only attempt backscattering detectors
+        ispec_failed = list(range(ispec_max + 1, ws.getNumberHistograms()))
+        si = ws.spectrumInfo()
+        for ispec in range(0, ispec_max + 1):
+            func = MultiDomainFunction()
+            for ipulse, npulse in enumerate(npulses):
+                cen = npulse * PROMPT_PULSE_INTERVAL
+                xlo = cen - PROMPT_PULSE_LEFT_WIDTH - 10  # add extra to ensure get background on both sides of peak
+                xhi = cen + PROMPT_PULSE_RIGHT_WIDTH + 10
+                comp_func = FunctionFactory.createInitialized(
+                    f"name=PearsonIV, Centre={8}, Intensity=1,Sigma=8.5, Exponent=1.5, Skew=-5,"
+                    f"constraints=(0.2<Sigma,1.5<Exponent);name=FlatBackground, A0=0,constraints=(0<A0)"
+                )
+                comp_func[0].setAttributeValue("CentreShift", cen)
+                comp_func[0].setHeight(ws.readY(ispec)[ws.yIndexOfX(cen)])
+                comp_func[0].addConstraints(f"{-15}<Centre<{15}")
+                comp_func[0].addConstraints(f"{0}<Intensity")
+                comp_func[1]["A0"] = min(ws.readY(ispec)[ws.yIndexOfX(xlo)], ws.readY(ispec)[ws.yIndexOfX(xhi)])
+                func.add(comp_func)
+                func.setDomainIndex(ipulse, ipulse)
+                key_suffix = f"_{ipulse}" if ipulse > 0 else ""
+                fit_kwargs["InputWorkspace" + key_suffix] = ws.name()
+                fit_kwargs["StartX" + key_suffix] = xlo
+                fit_kwargs["EndX" + key_suffix] = xhi
+                fit_kwargs["WorkspaceIndex" + key_suffix] = ispec
+                # work out how to exclude
+                exclude = []
+                diff_consts = si.diffractometerConstants(ispec)
+                for dpk in dpks_bragg:
+                    tof_pk = UnitConversion.run("dSpacing", "TOF", dpk, 0, DeltaEModeType.Elastic, diff_consts)
+                    tof_pk_lo = tof_pk * (1 - tof_res)
+                    tof_pk_hi = tof_pk * (1 + tof_res)
+                    if xlo < tof_pk_lo < xhi or xlo < tof_pk_hi < xhi or (tof_pk_lo < xlo and tof_pk_hi > xhi):
+                        exclude.extend([tof_pk_lo, tof_pk_hi])
+                if exclude:
+                    func.fixParameter(f"f{ipulse}.f1.A0")  # fix constant background - Bragg peak can mess with bg
+                    fit_kwargs["Exclude" + key_suffix] = exclude
+            # check that at least one fit region has no overlapping prompt pulse
+            if len([key for key in fit_kwargs.keys() if "Exclude" in key]) < len(npulses):
+                # tie peak parameters to be common for all prompt pulses
+                for idomain in range(len(npulses) - 1):
+                    for param_name in ["Intensity", "Sigma", "Exponent", "Skew", "Centre"]:
+                        func.tie(f"f{idomain}.f0.{param_name}", f"f{len(npulses) - 1}.f0.{param_name}")  # tie to first
+                # fix some peak parameters
+                for param_name in ["Sigma", "Exponent", "Skew"]:
+                    func.fixParameter(f"f{len(npulses) - 1}.f0.{param_name}")
+                fit_output = mantid.Fit(Function=func, **fit_kwargs)
+                # subtract prompt pulse only from spectrum
+                success = fit_output.OutputStatus == "success" or "Changes in function value are too small" in fit_output.OutputStatus
+                if success:
+                    func = fit_output.Function.function
+                    for ipulse in range(fit_output.Function.nDomains):
+                        func.removeTie(f"f{ipulse}.f0.Centre")
+                        key_suffix = f"_{ipulse}" if ipulse > 0 else ""
+                        if "Exclude" + key_suffix in fit_kwargs:
+                            func.fixParameter(f"f{ipulse}.f0.Centre")  # fix centre as can't fit independently with bragg
+                        else:
+                            fitted_cen = func[ipulse][0]["Centre"]
+                            func[ipulse][0].addConstraints(
+                                f"{fitted_cen - 5}<Centre<{fitted_cen + 5}"
+                            )  # free centre but stricter constraint
+                    fit_output_final = mantid.Fit(Function=func, **fit_kwargs)
+                    success_final = (
+                        fit_output_final.OutputStatus == "success"
+                        or "Changes in function value are too small" in fit_output_final.OutputStatus
+                    )
+                    if success_final:
+                        fit_output = fit_output_final
+                    # accumulate peak functions
+                    pk_func = FunctionWrapper(fit_output.Function.function[0][0])
+                    for ifunc in range(1, fit_output.Function.nDomains):
+                        pk_func = pk_func + FunctionWrapper(fit_output.Function.function[ifunc][0])
+                    ws_eval = mantid.EvaluateFunction(InputWorkspace=ws, Function=pk_func, EnableLogging=False, StoreInADS=False)
+                    y_nopulse = ws.readY(ispec) - ws_eval.readY(1)
+                    y_nopulse[y_nopulse < 0] = 0  # can't have negative counts
+                    ws.setY(ispec, y_nopulse)
+                else:
+                    ispec_failed.append(ispec)
+            else:
+                ispec_failed.append(ispec)
+        mantid.ConvertFromDistribution(Workspace=ws, EnableLogging=False)
+        # Mask other banks and spectra for which fit failed
+        self._mask_prompt_pulses(ws, ispec_failed)
+
+    @staticmethod
+    def _find_bragg_peak_dspacings_and_prompt_pulses(ws, ispec_start=0, ispec_end=60, dspac_res=0.001):
+        """
+        Find d-spacing of Bragg peaks present in workspace
+        :param ws: workspace in which to find bragg peaks
+        :param ispec_start: start workspace index to look for peaks
+        :param ispec_end: stop workspace index to look for peaks (only includes backscattering bank by default)
+        :param dspac_res: delta(d)/d resolution to determine whether peaks are equivalent in different spectra
+        :return: dpks_bragg: array of avg. d-spacing of Bragg peaks
+        :return: npulses: array of prompt pulses observed
+        """
+
+        out = mantid.FindPeaksConvolve(
+            InputWorkspace=ws,
+            StartWorkspaceIndex=ispec_start,
+            EndWorkspaceIndex=ispec_end,
+            EstimatedPeakExtentNBins=30,
+            IOverSigmaThreshold=3.5,
+            MergeNearbyPeaks=False,
+            FindHighestDataPointInPeak=False,
+            CreateIntermediateWorkspaces=False,
+            EnableLogging=False,
+        )  # note StoreInADS=False still stores individual ws in group in ADS
+        peak_cens = out[0]  # table workspace with row per spectrum and col per peak
+
+        npulse_min = int(np.ceil(ws.getXDimension().getMinimum()) // PROMPT_PULSE_INTERVAL)
+        npulse_max = int(np.ceil(ws.getXDimension().getMaximum()) // PROMPT_PULSE_INTERVAL)
+
+        si = ws.spectrumInfo()
+        dpks = []
+        npulses = []
+        for ispec in range(out[0].rowCount()):
+            diff_consts = si.diffractometerConstants(ispec)
+            for icol in range(1, peak_cens.columnCount()):
+                tof_pk = peak_cens.cell(ispec, icol)
+                # check not NaN (happens if not all spectra have same number of peaks)
+                if np.isfinite(tof_pk):
+                    overlaps_npulse = [
+                        abs(tof_pk - npulse * PROMPT_PULSE_INTERVAL) < PROMPT_PULSE_LEFT_WIDTH
+                        for npulse in range(npulse_min, npulse_max + 1)
+                    ]  # incl. npulse_max
+                    if np.any(overlaps_npulse):
+                        npulses.append(npulse_min + np.flatnonzero(overlaps_npulse))
+                    else:
+                        # Bragg peak found
+                        dpks.append(UnitConversion.run("TOF", "dSpacing", tof_pk, 0, DeltaEModeType.Elastic, diff_consts))
+
+        # find top 4 prompt pulses observed
+        npulses, nobserved = np.unique(npulses, return_counts=True)
+        npulses = np.sort(npulses[np.argsort(-nobserved)[:4]])  # get 4 most likely prompt pulses
+
+        # categorise found Bragg peaks as the same within resolution
+        dpks_bragg = []
+        if len(dpks) > 0:
+            dpk_prev = dpks[0]
+            dpk_avg = dpks[0]
+            npks_in_cluster = 1
+            for dpk in dpks[1:]:
+                if abs(dpk - dpk_prev) < dspac_res * dpk_prev:
+                    dpk_avg += dpk
+                    npks_in_cluster += 1
+                else:
+                    # end of peak - take avg and start new one
+                    dpk_avg /= npks_in_cluster
+                    dpks_bragg.append(dpk_avg)
+                    dpk_avg = dpk
+                    npks_in_cluster = 1
+                dpk_prev = dpk
+            # end last peak
+            dpk_avg /= npks_in_cluster
+            dpks_bragg.append(dpk_avg)
+        mantid.DeleteWorkspace(out, EnableLogging=False)
+        return dpks_bragg, npulses
 
     def _switch_tof_window_inst_settings(self, tof_window):
         self._inst_settings.update_attributes(advanced_config=hrpd_advanced_config.get_tof_window_dict(tof_window=tof_window))

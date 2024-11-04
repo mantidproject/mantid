@@ -8,6 +8,7 @@
 """
 GetEiT0atSNS
 """
+
 from systemtesting import MantidSystemTest
 import mantid.simpleapi as sm
 

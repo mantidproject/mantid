@@ -17,7 +17,6 @@ from mantidqt.utils.qt import load_ui, block_signals
 
 
 class CurvesTabWidgetView(QWidget):
-
     delete_key_pressed = Signal()
 
     def __init__(self, parent=None):

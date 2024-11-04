@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" View for the masking table.
+"""View for the masking table.
 
 The view for the masking table displays all available masks for a SANS reduction. It also allows to display the moved
 and masked SANS workspace.

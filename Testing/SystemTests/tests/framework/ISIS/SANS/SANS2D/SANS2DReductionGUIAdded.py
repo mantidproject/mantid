@@ -6,9 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import DeleteWorkspace, RenameWorkspace
 import ISISCommandInterface as i
 import copy
+import os
 import SANS2DReductionGUI as sansgui
 
 from sans.common.enums import SANSInstrument
@@ -60,7 +63,6 @@ class SANS2DReductionGUIAddedFiles(sansgui.SANS2DGUIReduction):
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
     def runTest(self):
-
         i.SANS2DTUBES()
         i.MaskFile("USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt")
         i.SetDetectorOffsets("REAR", -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
@@ -104,7 +106,6 @@ class SANS2DAddedEventFilesWithOverlay(sansgui.SANS2DGUIReduction):
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithOverlayAndTimeShift(sansgui.SANS2DGUIReduction):
     def runTest(self):
-
         i.SANS2DTUBES()
         i.MaskFile("USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt")
         i.SetDetectorOffsets("REAR", -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
@@ -165,7 +166,6 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShift(sansgui.SANS2DGUIReduction):
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
     def runTest(self):
-
         i.SANS2DTUBES()
         i.MaskFile("USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt")
         i.SetDetectorOffsets("REAR", -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
@@ -211,7 +211,6 @@ class SANS2DAddedEventFilesWithoutOverlay(sansgui.SANS2DGUIReduction):
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithoutOverlayWithISISCommandInterface(sansgui.SANS2DGUIReduction):
     def runTest(self):
-
         i.SANS2DTUBES()
         i.MaskFile("USER_SANS2D_143ZC_2p4_4m_M4_Knowles_12mm.txt")
         i.SetDetectorOffsets("REAR", -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)

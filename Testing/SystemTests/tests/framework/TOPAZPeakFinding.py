@@ -10,9 +10,11 @@ System test that loads TOPAZ single-crystal data,
 converts to Q space, finds peaks and indexes
 them.
 """
+
 import systemtesting
 import numpy
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import BinMD, ConvertToDiffractionMDWorkspace, CopySample, FindPeaksMD, FindUBUsingFFT, IndexPeaks, LoadEventNexus
 from mantid.dataobjects import PeaksWorkspace, LeanElasticPeaksWorkspace
 from mantid.geometry import UnitCell
 

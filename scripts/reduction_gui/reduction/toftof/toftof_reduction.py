@@ -11,6 +11,7 @@
 """
 TOFTOF reduction workflow gui.
 """
+
 from itertools import repeat, compress
 import xml.dom.minidom
 from reduction_gui.reduction.scripter import BaseScriptElement, BaseReductionScripter
@@ -45,7 +46,6 @@ class OptionalFloat(object):
 
 
 class TOFTOFScriptElement(BaseScriptElement):
-
     # normalisation
     NORM_NONE = 0
     NORM_MONITOR = 1
@@ -157,7 +157,7 @@ class TOFTOFScriptElement(BaseScriptElement):
         put("ec_temp", self.ecTemp)
         put("ec_factor", self.ecFactor)
 
-        for (runs, cmnt, temp) in self.dataRuns:
+        for runs, cmnt, temp in self.dataRuns:
             put("data_runs", runs)
             put("data_comment", cmnt)
             put("data_temperature", temp)

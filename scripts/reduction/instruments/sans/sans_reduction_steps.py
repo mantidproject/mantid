@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, arguments-differ, unused-variable
 """
-    Implementation of reduction steps for SANS
+Implementation of reduction steps for SANS
 """
+
 import math
 import pickle
 from reduction import ReductionStep
@@ -15,12 +16,26 @@ from reduction import validate_step
 
 # Mantid imports
 import mantid
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    ApplyTransmissionCorrection,
+    CorrectToFile,
+    CreateSingleValuedWorkspace,
+    CropWorkspace,
+    DeleteWorkspace,
+    Divide,
+    ExtractMask,
+    MaskDetectors,
+    ReplaceSpecialValues,
+    SANSBeamFinder,
+    Scale,
+    Q1D,
+    Qxy,
+)
 
 # Define a SANS specific logger
 from mantid.kernel import Logger
 import mantid.simpleapi as api
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService, mtd
 
 sanslog = Logger("SANS")
 
@@ -352,7 +367,6 @@ class Mask(ReductionStep):
         self._ignore_run_properties = ignore
 
     def execute(self, reducer, workspace):
-
         # Check whether the workspace has mask information
         run = mtd[workspace].run()
         if not self._ignore_run_properties and run.hasProperty("rectangular_masks"):
@@ -978,4 +992,4 @@ class StripEndNans(ReductionStep):
         startX = x_vals[start]
         # Make sure we're inside the bin that we want to crop
         endX = 1.001 * x_vals[stop + 1]
-        api.CropWorkspace(InputWorkspace=workspace, OutputWorkspace=workspace, XMin=startX, XMax=endX)
+        CropWorkspace(InputWorkspace=workspace, OutputWorkspace=workspace, XMin=startX, XMax=endX)

@@ -5,8 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-""" Sample MERLIN reduction scrip """
-from Direct.ReductionWrapper import *
+"""Sample MERLIN reduction scrip"""
+
+from Direct.AbsorptionShapes import Cylinder
+from Direct.DirectEnergyConversion import DirectEnergyConversion
+from Direct.ReductionWrapper import AdvancedProperties, iliad, MainProperties, MethodType, ReductionWrapper
+from mantid.kernel import PropertyManager
 
 try:
     import reduce_vars as web_var

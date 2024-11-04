@@ -43,4 +43,3 @@ Usage
 .. categories::
 
 .. sourcelink::
-

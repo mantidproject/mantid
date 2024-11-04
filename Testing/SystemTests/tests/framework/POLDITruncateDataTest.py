@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import CropWorkspace, LoadInstrument, LoadSINQFile, PoldiTruncateData
 
 
 class POLDITruncateDataTest(systemtesting.MantidSystemTest):

@@ -22,9 +22,53 @@ from mantid.kernel import (
     StringListValidator,
     VisibleWhenProperty,
 )
-from mantid.api import FileAction, FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, Progress, PropertyMode, PythonAlgorithm
+from mantid.api import (
+    mtd,
+    AlgorithmFactory,
+    FileAction,
+    FileProperty,
+    MatrixWorkspaceProperty,
+    MultipleFileProperty,
+    Progress,
+    PropertyMode,
+    PythonAlgorithm,
+)
 
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    ApplyDetectorScanEffCorr,
+    CloneWorkspace,
+    ConjoinXRuns,
+    ConvertToHistogram,
+    ConvertSpectrumAxis,
+    ConvertToPointData,
+    CopyLogs,
+    CreateWorkspace,
+    CropWorkspace,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    Divide,
+    ExtractMonitors,
+    ExtractSingleSpectrum,
+    ExtractSpectra,
+    GroupWorkspaces,
+    LoadAndMerge,
+    LoadILLDiffraction,
+    LoadNexusProcessed,
+    MaskBins,
+    MaskBinsIf,
+    MostLikelyMean,
+    Multiply,
+    NormaliseToMonitor,
+    Plus,
+    Scale,
+    RenameWorkspace,
+    ReplaceSpecialValues,
+    SplineInterpolation,
+    SortXAxis,
+    SumOverlappingTubes,
+    Transpose,
+    WeightedMean,
+)
 
 
 def _crop_bins(ws, bin_min, bin_max, out):
@@ -60,7 +104,6 @@ def _plus_friendly(ws1, ws2, out):
 
 
 class PowderILLEfficiency(PythonAlgorithm):
-
     _out_name = None  # the name of the output workspace
     _input_files = None  # input files (numor), must be detector scans (to list for D2B, to merge for D20)
     _calib_file = None  # file containing previously derived calibration constants

@@ -17,7 +17,8 @@ class PowderReduceP2DTest(systemtesting.MantidSystemTest):
         self.setUp()
 
     def skipTests(self):
-        # Windows produces different outputs. Disable there for further investigation
+        # Now working on macOS but producing different outputs on windows.
+        # Skipped while investigation continues.
         return sys.platform.startswith("win")
 
     def setUp(self):

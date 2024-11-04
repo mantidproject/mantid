@@ -12,7 +12,6 @@ from mantidqtinterfaces.drill.model.DrillSample import DrillSample
 
 
 class DrillSampleTest(unittest.TestCase):
-
     INDEX = 99
 
     def setUp(self):

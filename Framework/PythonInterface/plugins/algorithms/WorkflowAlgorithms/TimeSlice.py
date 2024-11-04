@@ -5,9 +5,26 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import mtd, AlgorithmFactory, Progress, PropertyMode, PythonAlgorithm, WorkspaceGroupProperty, WorkspaceProperty
+from mantid.kernel import (
+    logger,
+    Direction,
+    FloatArrayProperty,
+    IntArrayProperty,
+    StringArrayProperty,
+)
+from mantid.simpleapi import (
+    CalculateFlatBackground,
+    CropWorkspace,
+    DeleteWorkspace,
+    Divide,
+    GroupWorkspaces,
+    Integration,
+    Load,
+    Transpose,
+)
+
+from IndirectCommon import check_hist_zero
 
 import os
 
@@ -50,7 +67,6 @@ def _count_monitors(raw_file):
 
 
 class TimeSlice(PythonAlgorithm):
-
     _raw_files = None
     _spectra_range = None
     _peak_range = None
@@ -120,11 +136,8 @@ class TimeSlice(PythonAlgorithm):
         return issues
 
     def PyExec(self):
-        # from IndirectCommon import CheckXrange
-
         self._setup()
 
-        # CheckXrange(xRange, 'Time')
         out_ws_list = []
         i = 0
         workflow_prog = Progress(self, start=0.0, end=0.96, nreports=len(self._raw_files) * 3)
@@ -225,8 +238,6 @@ class TimeSlice(PythonAlgorithm):
 
         @param raw_file Name of file to process
         """
-        from IndirectCommon import CheckHistZero
-
         # Crop the raw file to use the desired number of spectra
         # less one because CropWorkspace is zero based
         CropWorkspace(
@@ -236,7 +247,7 @@ class TimeSlice(PythonAlgorithm):
             EndWorkspaceIndex=int(self._spectra_range[1]) - 1,
         )
 
-        num_hist = CheckHistZero(raw_file)[0]
+        num_hist = check_hist_zero(raw_file)[0]
 
         # Use calibration file if desired
         if self._calib_ws is not None:

@@ -10,7 +10,7 @@ from typing import List, Sequence, Tuple, Optional
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos
 from mantid.kernel import SpecialCoordinateSystem
-from mantid.plots.datafunctions import get_indices
+from mantid.plots.datafunctions import get_indices, get_normalization, get_md_data2d_bin_bounds
 from mantid.simpleapi import BinMD, IntegrateMDHistoWorkspace, TransposeMD
 
 from .base_model import SliceViewerBaseModel
@@ -181,10 +181,9 @@ class SliceViewerModel(SliceViewerBaseModel):
 
     def get_data_MDH(self, slicepoint, transpose=False):
         indices, _ = get_indices(self.get_ws(), slicepoint=slicepoint)
-        if transpose:
-            return np.ma.masked_invalid(self.get_ws().getSignalArray()[indices]).T
-        else:
-            return np.ma.masked_invalid(self.get_ws().getSignalArray()[indices])
+        mdh_normalization, _ = get_normalization(self.get_ws())
+        _, _, z = get_md_data2d_bin_bounds(self.get_ws(), mdh_normalization, indices, not (transpose))
+        return z
 
     def get_data_MDE(self, slicepoint, bin_params, dimension_indices, limits=None, transpose=False):
         """
@@ -196,10 +195,10 @@ class SliceViewerModel(SliceViewerBaseModel):
                        should be provided in the order of the workspace not the display
         :param transpose: If true then transpose the data before returning
         """
-        if transpose:
-            return np.ma.masked_invalid(self.get_ws_MDE(slicepoint, bin_params, limits, dimension_indices).getSignalArray().squeeze()).T
-        else:
-            return np.ma.masked_invalid(self.get_ws_MDE(slicepoint, bin_params, limits, dimension_indices).getSignalArray().squeeze())
+        mdh = self.get_ws_MDE(slicepoint, bin_params, limits, dimension_indices)
+        mdh_normalization, _ = get_normalization(mdh)
+        _, _, z = get_md_data2d_bin_bounds(mdh, mdh_normalization, transpose=not (transpose))
+        return z
 
     def get_properties(self):
         """
@@ -676,12 +675,16 @@ def _dimension_limits(
     :param limits: An optional Sequence of length 2 containing limits for plotting dimensions. If
                     not provided the full extent of each dimension is used.
     """
-    dim_limits = [(dim.getMinimum(), dim.getMaximum()) for dim in [workspace.getDimension(i) for i in range(workspace.getNumDims())]]
-    for idim, (dim_min, dim_max) in enumerate(dim_limits):
+    dim_limits = []
+
+    for idim in range(workspace.getNumDims()):
+        dim = workspace.getDimension(idim)
+        dim_min = dim.getMinimum()
+        dim_max = dim.getMaximum()
         slice_pt = slicepoint[idim]
         if slice_pt is not None:
             # replace extents with integration limits (calc from bin width in bin_params)
-            half_bin_width = bin_params[idim] / 2
+            half_bin_width = bin_params[idim] / 2 if bin_params is not None else dim.getBinWidth() / 2
             dim_min, dim_max = (slice_pt - half_bin_width, slice_pt + half_bin_width)
         elif limits is not None and dimension_indices[idim] is not None:
             # replace min/max of non-integrated dims with limits from ROI if specified
@@ -690,7 +693,8 @@ def _dimension_limits(
         # check all limits are over minimum width
         if dim_max - dim_min < MIN_WIDTH:
             dim_max = dim_min + MIN_WIDTH
-        dim_limits[idim] = (dim_min, dim_max)
+        dim_limits.append((dim_min, dim_max))
+
     return dim_limits
 
 

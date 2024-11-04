@@ -5,14 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Data set options for EQSANS reduction
+Data set options for EQSANS reduction
 """
+
 from reduction_gui.reduction.sans.eqsans_sample_script import SampleData as BaseSampleData
 from reduction_gui.reduction.sans.eqsans_background_script import Background
 
 
 class DataSets(BaseSampleData):
-
     background = Background()
 
     def __init__(self):

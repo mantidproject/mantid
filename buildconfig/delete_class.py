@@ -5,9 +5,11 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
-""" Utility for deleting a class file """
+"""Utility for deleting a class file"""
+
 import argparse
-from cmakelists_utils import *
+import os
+from cmakelists_utils import remove_from_cmake
 
 
 def delete_one(oldfilename):
@@ -17,7 +19,6 @@ def delete_one(oldfilename):
 
 
 def delete_all(subproject, classname, args):
-
     # Directory at base of subproject
     basedir = os.path.join(os.path.curdir, "Framework/" + subproject)
 

@@ -5,7 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import DirectILLAutoProcess, GroupWorkspaces, Load
 
 
 class DirectILLAuto_PANTHER_Powder_Test(systemtesting.MantidSystemTest):
@@ -30,11 +32,11 @@ class DirectILLAuto_PANTHER_Powder_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-2
         self.tolerance_is_rel_err = False
+        self.nanEqual = True
         self.disableChecking = ["Instrument", "SpectraMap"]
         return ["He3C60", "ILL_PANTHER_Powder_Auto.nxs"]
 
     def runTest(self):
-
         EmptyRuns = "9777"
         VanaRuns = "9406"
         SampleRuns = "9738, 9740, 9744"
@@ -133,7 +135,6 @@ class DirectILLAuto_PANTHER_SingleCrystal_Test(systemtesting.MantidSystemTest):
         return ["panther_236", "ILL_PANTHER_SingleCrystal_Auto.nxs"]
 
     def runTest(self):
-
         ei = 19.03
         elp = 104
         Load(Filename="Vnorm012315.nxs", OutputWorkspace="Norm")
@@ -182,11 +183,11 @@ class DirectILLAuto_SHARP_Powder_Test(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 1e-2
         self.tolerance_is_rel_err = True
+        self.nanEqual = True
         self.disableChecking = ["Instrument", "SpectraMap"]
         return ["PEO", "ILL_SHARP_Powder_Auto.nxs"]
 
     def runTest(self):
-
         ebins = "-5, 0.01, 2"
         vana_runs = "3861-3862"
 

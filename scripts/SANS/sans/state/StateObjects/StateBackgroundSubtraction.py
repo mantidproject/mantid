@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-""" Defines the state of the background which should be subtracted after the main reduction."""
+"""Defines the state of the background which should be subtracted after the main reduction."""
 
 import json
 import copy

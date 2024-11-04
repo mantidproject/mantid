@@ -7,7 +7,8 @@
 # pylint: disable=invalid-name,no-init
 import os
 from systemtesting import MantidSystemTest
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import pmds, DgsDiagnose, Load, MaskDetectors
 from mantid.kernel import PropertyManager
 from mantid import config
 
@@ -23,7 +24,6 @@ def getNamedParameter(ws, name):
 
 
 class DirectInelasticDiagnostic2(MantidSystemTest):
-
     saved_diag_file = ""
 
     def requiredMemoryMB(self):

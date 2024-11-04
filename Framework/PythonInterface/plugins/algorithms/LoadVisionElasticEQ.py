@@ -5,17 +5,13 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
-# from mantid.api import AlgorithmFactory
-# from mantid.simpleapi import PythonAlgorithm, WorkspaceProperty
-# from mantid.kernel import Direction
-from mantid.api import *
-from mantid.kernel import *
+from mantid.api import AlgorithmFactory, ExperimentInfo, FileAction, FileProperty, PythonAlgorithm, WorkspaceProperty
+from mantid.kernel import config, Direction
 import mantid.simpleapi
 import os
 
 
 class LoadVisionElasticEQ(PythonAlgorithm):
-
     __equatorial = "bank25,bank26,bank27,bank28,bank29,bank30"
 
     def category(self):

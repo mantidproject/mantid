@@ -43,6 +43,12 @@ public:
   operator std::vector<double>() const { return std::vector<double>(m_pt.cbegin(), m_pt.cend()); }
 
   /**
+    Number of components in V3D
+     @return 3
+  */
+  std::size_t size() const noexcept { return m_pt.size(); }
+
+  /**
     Addtion operator
      @param v :: Vector to add
      @return *this+v;

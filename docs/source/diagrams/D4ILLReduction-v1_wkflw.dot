@@ -60,6 +60,3 @@ digraph Sample {
   OutputWorkspace -> ExportAscii
   ExportAscii -> SaveAscii
 }
-
-
-

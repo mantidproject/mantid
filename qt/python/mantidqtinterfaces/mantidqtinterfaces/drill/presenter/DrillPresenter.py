@@ -21,7 +21,6 @@ from .DrillSettingsPresenter import DrillSettingsPresenter
 
 
 class DrillPresenter:
-
     """
     Set of custom options. Used to keep an history of the previous values.
     """

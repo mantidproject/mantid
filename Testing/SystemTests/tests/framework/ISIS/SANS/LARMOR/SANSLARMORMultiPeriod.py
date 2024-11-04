@@ -10,8 +10,7 @@
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.api import AnalysisDataService
-from ISISCommandInterface import *
-from SANSBatchMode import *
+from ISISCommandInterface import AssignSample, Detector, LARMOR, MaskFile, Set1D
 from sans.common.enums import SANSInstrument
 
 
@@ -42,7 +41,6 @@ class LARMORMultiPeriodEventModeLoading(systemtesting.MantidSystemTest):
         AnalysisDataService.remove("80tubeCalibration_18-04-2016_r9330-9335")
 
     def _check_if_all_multi_period_workspaces_have_the_same_position(self, base_name, number_of_workspaces):
-
         reference_name = base_name + str(1)
         reference_workspace = AnalysisDataService.retrieve(reference_name)
         reference_position, reference_rotation = self._get_position_and_rotation(reference_workspace)

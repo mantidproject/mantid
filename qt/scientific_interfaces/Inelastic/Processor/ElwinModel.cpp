@@ -14,6 +14,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
+#include <MantidAPI/AlgorithmProperties.h>
+#include <MantidQtWidgets/Common/ConfiguredAlgorithm.h>
 #include <QDoubleValidator>
 #include <QFileInfo>
 
@@ -27,57 +29,63 @@ ElwinModel::ElwinModel()
     : m_integrationStart(), m_integrationEnd(), m_backgroundStart(), m_backgroundEnd(), m_backgroundSubtraction(),
       m_normalise(), m_outputWorkspaceNames() {}
 
-void ElwinModel::setupLoadAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner, std::string const &filepath,
-                                    std::string const &outputName) {
+API::IConfiguredAlgorithm_sptr ElwinModel::setupLoadAlgorithm(std::string const &filepath,
+                                                              std::string const &outputName) const {
   auto loadAlg = AlgorithmManager::Instance().create("LoadNexus");
   loadAlg->initialize();
   loadAlg->setProperty("Filename", filepath);
   loadAlg->setProperty("OutputWorkspace", outputName);
-  batchAlgoRunner->addAlgorithm(loadAlg);
+  auto runtimeProps = std::make_unique<AlgorithmRuntimeProps>();
+  API::IConfiguredAlgorithm_sptr loadAlgo =
+      std::make_shared<API::ConfiguredAlgorithm>(loadAlg, std::move(runtimeProps));
+  return loadAlgo;
 }
 
-void ElwinModel::setupGroupAlgorithm(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                     std::string const &inputWorkspacesString, std::string const &inputGroupWsName) {
+API::IConfiguredAlgorithm_sptr ElwinModel::setupGroupAlgorithm(std::string const &inputWorkspacesString,
+                                                               std::string const &inputGroupWsName) const {
   auto groupWsAlg = AlgorithmManager::Instance().create("GroupWorkspaces");
-  groupWsAlg->initialize();
   auto runtimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
   runtimeProps->setPropertyValue("InputWorkspaces", inputWorkspacesString);
-  groupWsAlg->setProperty("OutputWorkspace", inputGroupWsName);
-  batchAlgoRunner->addAlgorithm(groupWsAlg, std::move(runtimeProps));
+  runtimeProps->setPropertyValue("OutputWorkspace", inputGroupWsName);
+  MantidQt::API::IConfiguredAlgorithm_sptr groupAlg =
+      std::make_shared<API::ConfiguredAlgorithm>(groupWsAlg, std::move(runtimeProps));
+  return groupAlg;
 }
 
-void ElwinModel::setupElasticWindowMultiple(MantidQt::API::BatchAlgorithmRunner *batchAlgoRunner,
-                                            std::string const &workspaceBaseName, std::string const &inputGroupWsName,
-                                            std::string const &sampleEnvironmentLogName,
-                                            std::string const &sampleEnvironmentLogValue) {
+API::IConfiguredAlgorithm_sptr ElwinModel::setupElasticWindowMultiple(std::string const &workspaceBaseName,
+                                                                      std::string const &inputGroupWsName,
+                                                                      std::string const &sampleEnvironmentLogName,
+                                                                      std::string const &sampleEnvironmentLogValue) {
 
   setOutputWorkspaceNames(workspaceBaseName);
 
   // Configure ElasticWindowMultiple algorithm
   auto elwinMultAlg = AlgorithmManager::Instance().create("ElasticWindowMultiple");
   elwinMultAlg->initialize();
+  auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  properties->setProperty("OutputInQ", m_outputWorkspaceNames["qWorkspace"]);
+  properties->setProperty("OutputInQSquared", m_outputWorkspaceNames["qSquaredWorkspace"]);
+  properties->setProperty("OutputELF", m_outputWorkspaceNames["elfWorkspace"]);
 
-  elwinMultAlg->setProperty("OutputInQ", m_outputWorkspaceNames["qWorkspace"]);
-  elwinMultAlg->setProperty("OutputInQSquared", m_outputWorkspaceNames["qSquaredWorkspace"]);
-  elwinMultAlg->setProperty("OutputELF", m_outputWorkspaceNames["elfWorkspace"]);
+  properties->setProperty("SampleEnvironmentLogName", sampleEnvironmentLogName);
+  properties->setProperty("SampleEnvironmentLogValue", sampleEnvironmentLogValue);
 
-  elwinMultAlg->setProperty("SampleEnvironmentLogName", sampleEnvironmentLogName);
-  elwinMultAlg->setProperty("SampleEnvironmentLogValue", sampleEnvironmentLogValue);
-
-  elwinMultAlg->setProperty("IntegrationRangeStart", m_integrationStart);
-  elwinMultAlg->setProperty("IntegrationRangeEnd", m_integrationEnd);
+  properties->setProperty("IntegrationRangeStart", m_integrationStart);
+  properties->setProperty("IntegrationRangeEnd", m_integrationEnd);
 
   if (m_backgroundSubtraction) {
-    elwinMultAlg->setProperty("BackgroundRangeStart", m_backgroundStart);
-    elwinMultAlg->setProperty("BackgroundRangeEnd", m_backgroundEnd);
+    properties->setProperty("BackgroundRangeStart", m_backgroundStart);
+    properties->setProperty("BackgroundRangeEnd", m_backgroundEnd);
   }
 
   if (m_normalise) {
-    elwinMultAlg->setProperty("OutputELT", m_outputWorkspaceNames["eltWorkspace"]);
+    properties->setProperty("OutputELT", m_outputWorkspaceNames["eltWorkspace"]);
   }
-  auto runtimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
-  runtimeProps->setPropertyValue("InputWorkspaces", inputGroupWsName);
-  batchAlgoRunner->addAlgorithm(elwinMultAlg, std::move(runtimeProps));
+
+  properties->setProperty("InputWorkspaces", inputGroupWsName);
+  MantidQt::API::IConfiguredAlgorithm_sptr elwinAlg =
+      std::make_shared<API::ConfiguredAlgorithm>(elwinMultAlg, std::move(properties));
+  return elwinAlg;
 }
 
 void ElwinModel::ungroupAlgorithm(std::string const &inputWorkspace) const {
@@ -95,28 +103,23 @@ void ElwinModel::groupAlgorithm(std::string const &inputWorkspaces, std::string 
   groupAlg->execute();
 }
 
-std::string ElwinModel::createGroupedWorkspaces(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra) {
-  auto extractSpectra = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-  extractSpectra->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
-  extractSpectra->setProperty("OutputWorkspace", workspace->getName() + "_extracted_spectra");
-  extractSpectra->setProperty("WorkspaceIndex", std::to_string(spectra[0].value));
-  extractSpectra->execute();
-
-  for (size_t j = 1; j < spectra.size().value; j++) {
-    extractSpectra->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
-    extractSpectra->setProperty("OutputWorkspace", "specWSnext");
-    extractSpectra->setProperty("WorkspaceIndex", std::to_string(spectra[j].value));
-    extractSpectra->execute();
-    auto appendSpectra = AlgorithmManager::Instance().create("AppendSpectra");
-    appendSpectra->setProperty("InputWorkspace1", workspace->getName() + "_extracted_spectra");
-    appendSpectra->setProperty("InputWorkspace2", "specWSnext");
-    appendSpectra->setProperty("AppendYAxisLabels", true);
-    appendSpectra->setProperty("OutputWorkspace", workspace->getName() + "_extracted_spectra");
-    appendSpectra->execute();
+API::IConfiguredAlgorithm_sptr ElwinModel::setupExtractSpectra(MatrixWorkspace_sptr workspace,
+                                                               FunctionModelSpectra const &spectra,
+                                                               std::string const &outputName) const {
+  std::string workspaceIndexList = "";
+  for (auto const &spec : spectra) {
+    workspaceIndexList += std::to_string(spec.value) + ",";
   }
-  AnalysisDataService::Instance().remove("specWSnext");
-  return workspace->getName() + "_extracted_spectra";
+
+  auto extractSpectra = AlgorithmManager::Instance().create("ExtractSpectra");
+  auto runtimeProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
+  runtimeProps->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
+  runtimeProps->setProperty("WorkspaceIndexList", workspaceIndexList);
+  runtimeProps->setProperty("OutputWorkspace", outputName);
+
+  return std::make_shared<API::ConfiguredAlgorithm>(extractSpectra, std::move(runtimeProps));
 }
+
 void ElwinModel::setOutputWorkspaceNames(std::string const &workspaceBaseName) {
   auto elwinSuffix = "_elwin_";
   m_outputWorkspaceNames["qWorkspace"] = workspaceBaseName + elwinSuffix + "eq";

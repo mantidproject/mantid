@@ -8,11 +8,37 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 
 # pylint: disable=invalid-name
-from Direct.NonIDF_Properties import *
+from Direct.NonIDF_Properties import NonIDF_Properties
+from Direct.PropertiesDescriptors import (
+    mon2NormalizationEnergyRange,
+    prop_helpers,
+    AbsCorrInfo,
+    AbsorptionShapesContainer,
+    BackbgroundTestRange,
+    DetCalFile,
+    DiagSpectra,
+    EiMonSpectra,
+    HardMaskOnly,
+    HardMaskPlus,
+    MapMaskFile,
+    MonoCorrectionFactor,
+    MonovanIntegrationRange,
+    MotorLogName,
+    MotorOffset,
+    MultirepTOFSpectraList,
+    PropertyFromRange,
+    RotationAngle,
+    SaveFormat,
+    SpectraToMonitorsList,
+    SumRuns,
+)
 
 from collections import OrderedDict
 from collections.abc import Iterable
-from mantid.kernel import funcinspect
+from mantid.api import Workspace
+from mantid.kernel import config, funcinspect
+
+import os
 
 
 class PropertyManager(NonIDF_Properties):
@@ -396,8 +422,9 @@ class PropertyManager(NonIDF_Properties):
                 result[key] = getattr(self, key)
             except KeyError:
                 self.log(
-                    "--- Diagnostics property {0} is not found in instrument properties."
-                    "Default value: {1} is used instead \n".format(key, val),
+                    "--- Diagnostics property {0} is not found in instrument properties. Default value: {1} is used instead \n".format(
+                        key, val
+                    ),
                     "warning",
                 )
 
@@ -561,7 +588,7 @@ class PropertyManager(NonIDF_Properties):
         return old_changes
 
     def perform_simplfied_ws_comparison(self, new_val, cur_val):
-        if isinstance(new_val, api.Workspace) and isinstance(cur_val, api.Workspace):
+        if isinstance(new_val, Workspace) and isinstance(cur_val, Workspace):
             # do simplified workspace comparison which is appropriate here
             if (
                 new_val.name() == cur_val.name()
@@ -646,7 +673,7 @@ class PropertyManager(NonIDF_Properties):
         # other files to check:
         for prop_name in map_mask_prop:
             val = getattr(self, prop_name)
-            if not (val is None or isinstance(val, api.Workspace)):
+            if not (val is None or isinstance(val, Workspace)):
                 files_to_check.append(prop_name)
         # Absolute units files (only one?)
         if abs_units:

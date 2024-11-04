@@ -20,6 +20,7 @@ from typing import List, NamedTuple
 
 class CollimationLevel(enum.Enum):
     r"""Collimation state of an eight-pack"""
+
     Empty = 0
     Half = 1
     Full = 2

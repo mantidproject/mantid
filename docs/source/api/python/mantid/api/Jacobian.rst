@@ -11,4 +11,3 @@ This is a Python binding to the C++ class Mantid::API::Jacobian.
     :members:
     :undoc-members:
     :inherited-members:
-

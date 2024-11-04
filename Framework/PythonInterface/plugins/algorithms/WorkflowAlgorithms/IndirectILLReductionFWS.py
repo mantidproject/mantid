@@ -5,11 +5,30 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import numpy as np
+import os
 import time
 from mantid import mtd
 from mantid.kernel import StringListValidator, Direction, FloatBoundedValidator
-from mantid.api import PythonAlgorithm, MultipleFileProperty, FileProperty, FileAction, WorkspaceGroupProperty, Progress
-from mantid.simpleapi import *
+from mantid.api import AlgorithmFactory, PythonAlgorithm, MultipleFileProperty, FileProperty, FileAction, WorkspaceGroupProperty, Progress
+from mantid.simpleapi import (
+    AddSampleLog,
+    AddSampleLogMultiple,
+    ConjoinXRuns,
+    ConvertToPointData,
+    DeleteWorkspace,
+    Divide,
+    GroupWorkspaces,
+    IndirectILLEnergyTransfer,
+    Integration,
+    Minus,
+    Plus,
+    Rebin,
+    RenameWorkspace,
+    Scale,
+    SelectNexusFilesByMetadata,
+    SortXAxis,
+    SplineInterpolation,
+)
 
 
 class IndirectILLReductionFWS(PythonAlgorithm):
@@ -320,8 +339,7 @@ class IndirectILLReductionFWS(PythonAlgorithm):
                 Scale(InputWorkspace=right, OutputWorkspace=right, Factor=right_factor)
             else:
                 self.log().notice(
-                    "Zero monitor integral has been found in one (or both) wings;"
-                    " left: {0}, right: {1}".format(left_monitor, right_monitor)
+                    "Zero monitor integral has been found in one (or both) wings; left: {0}, right: {1}".format(left_monitor, right_monitor)
                 )
 
             Plus(LHSWorkspace=left, RHSWorkspace=right, OutputWorkspace=left_right_sum)

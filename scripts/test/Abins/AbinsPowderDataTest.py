@@ -5,7 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+
+from pydantic import ValidationError
 import numpy as np
+
 from abins import PowderData
 
 
@@ -42,14 +45,14 @@ class AbinsPowderDataTest(unittest.TestCase):
         # wrong items: array instead of dict
         bad_items = self.good_items.copy()
         bad_items["a_tensors"] = bad_items["a_tensors"][0]
-        with self.assertRaises(TypeError):
+        with self.assertRaisesRegex(ValidationError, "Input should be a valid dictionary"):
             PowderData(**bad_items, num_atoms=2)
 
         # list instead of np array
         bad_items = self.good_items.copy()
         for key, value in bad_items.items():
             bad_items[key][0] = value[0].tolist()
-        with self.assertRaises(TypeError):
+        with self.assertRaisesRegex(ValidationError, "Input should be an instance of ndarray"):
             PowderData(**bad_items, num_atoms=2)
 
         # wrong size of items: data only for one atom ; should be for two atoms

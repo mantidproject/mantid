@@ -5,13 +5,24 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-many-instance-attributes,too-many-branches
-from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress, WorkspaceGroupProperty
 from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoundedValidator, MaterialBuilder, StringListValidator
+from mantid.simpleapi import (
+    AddSampleLogMultiple,
+    ConvertUnits,
+    DeleteWorkspace,
+    Divide,
+    FlatPlateAbsorption,
+    GroupWorkspaces,
+    Minus,
+    Scale,
+    SetSampleMaterial,
+)
+
+from IndirectCommon import get_efixed
 
 
 class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
-
     # Sample variables
     _sample_ws = None
     _sample_chemical_formula = None
@@ -94,8 +105,6 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-        from IndirectCommon import getEfixed
-
         self._setup()
 
         # Set up progress reporting
@@ -104,7 +113,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
             n_prog_reports += 1
         prog = Progress(self, 0.0, 1.0, n_prog_reports)
 
-        efixed = getEfixed(self._sample_ws)
+        efixed = get_efixed(self._sample_ws)
 
         sample_wave_ws = "__sam_wave"
         ConvertUnits(

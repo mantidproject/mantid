@@ -13,7 +13,7 @@ import numpy
 
 sys.path.append("..")
 # the following matplotlib imports cannot be placed before the setting of the backend, so we ignore flake8 warnings
-from mantidqt.MPLwidgets import *
+from mantidqt.MPLwidgets import FigureCanvasQTAgg
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot  # noqa
@@ -187,7 +187,7 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
             "MARI",
             "MERLIN",
             "SEQUOIA",
-            "WAND\u00B2",
+            "WAND\u00b2",
         ]
         self.combo = QtWidgets.QComboBox(self)
         for inst in self.instrumentList:
@@ -368,14 +368,14 @@ class InstrumentSetupWidget(QtWidgets.QWidget):
         d = dict()
         self.instrument = text
         d["instrument"] = str(self.instrument)
-        if self.instrument in ["HYSPEC", "EXED", "DEMAND", "WAND\u00B2"]:
+        if self.instrument in ["HYSPEC", "EXED", "DEMAND", "WAND\u00b2"]:
             self.labelS2.show()
             self.editS2.show()
         else:
             self.labelS2.hide()
             self.editS2.hide()
 
-        if self.instrument in ["DEMAND", "WAND\u00B2"]:
+        if self.instrument in ["DEMAND", "WAND\u00b2"]:
             self.labelDetZ.show()
             self.editDetZ.show()
             self.setLabelEi("Wavelength")

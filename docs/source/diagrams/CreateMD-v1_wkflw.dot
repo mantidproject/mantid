@@ -58,4 +58,3 @@ digraph CreateMD {
   convertToMD               ->  OutputWorkspace
 
 }
-

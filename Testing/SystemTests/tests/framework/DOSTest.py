@@ -6,9 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,attribute-defined-outside-init
 import systemtesting
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.simpleapi import SimulatedDensityOfStates
 
 # ------------------------------------------------------------------------------------
 
@@ -133,7 +131,6 @@ class DOSPartialSummedContributionsTest(systemtesting.MantidSystemTest):
     """
 
     def runTest(self):
-
         file_name = "squaricn.phonon"
         spec_type = "DOS"
         self.ouput_ws_name = "squaricn"
@@ -183,7 +180,6 @@ class DOSPartialSummedContributionsCrossSectionScaleTest(systemtesting.MantidSys
     """
 
     def runTest(self):
-
         file_name = "squaricn.phonon"
         spec_type = "DOS"
         self.ouput_ws_name = "squaricn"

@@ -63,8 +63,8 @@ Output:
 
 .. testoutput:: ExSimple
 
-   Y values (asymmetry): [ 0.14500665  0.136374    0.11987909]
-   X values (sample magn. field): [ 1350.  1360.  1370.]
+   Y values (asymmetry): [0.14500665 0.136374   0.11987909]
+   X values (sample magn. field): [1350. 1360. 1370.]
 
 **Example - Calculating asymmetry for a series of MUSR runs using a range:**
 
@@ -113,10 +113,10 @@ Output:
 .. testoutput:: ExRedGreen
 
    Y values (difference): [-0.01593431 -0.02579926 -0.04337762]
-   Y values (red): [ 0.14500665  0.136374    0.11987909]
-   Y values (green): [ 0.16056898  0.16160068  0.16239291]
-   Y values (sum): [ 0.30557563  0.29797468  0.282272  ]
-   X values (sample magn. field): [ 1350.  1360.  1370.]
+   Y values (red): [0.14500665 0.136374   0.11987909]
+   Y values (green): [0.16056898 0.16160068 0.16239291]
+   Y values (sum): [0.30557563 0.29797468 0.282272  ]
+   X values (sample magn. field): [1350. 1360. 1370.]
 
 **Example - Using custom grouping to ignore a few detectors:**
 
@@ -147,8 +147,8 @@ Output:
 
    No of forward spectra used: 31
    No of backward spectra used: 30
-   Y values (asymmetry): [ 0.1628339   0.15440602  0.13743397]
-   X values (sample magn. field): [ 1350.  1360.  1370.]
+   Y values (asymmetry): [0.1628339  0.15440602 0.13743397]
+   X values (sample magn. field): [1350. 1360. 1370.]
 
 **Example - Applying dead time correction stored in the run files:**
 
@@ -168,8 +168,8 @@ Output:
 
 .. testoutput:: ExDeadTimeCorrection
 
-   Y values (asymmetry): [ 0.1458422   0.1371184   0.12047788]
-   X values (sample magn. field): [ 1350.  1360.  1370.]
+   Y values (asymmetry): [0.1458422  0.1371184  0.12047788]
+   X values (sample magn. field): [1350. 1360. 1370.]
 
 **Example - Calculating asymmetry as a function of the sample mean temperature:**
 
@@ -186,8 +186,8 @@ Output:
 
 .. testoutput:: ExLogValueFunction
 
-   Y values (asymmetry): [ 0.15004357  0.14289412  0.12837688]
-   X values (sample magn. field): [ 290.  290.  290.]
+   Y values (asymmetry): [0.15004357 0.14289412 0.12837688]
+   X values (sample magn. field): [290. 290. 290.]
 
 .. categories::
 

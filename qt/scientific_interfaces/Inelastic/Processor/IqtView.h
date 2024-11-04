@@ -44,6 +44,7 @@ public:
   void setSampleWSSuffixes(const QStringList &suffix) override;
   void setResolutionFBSuffixes(const QStringList &suffix) override;
   void setResolutionWSSuffixes(const QStringList &suffix) override;
+  void setLoadHistory(bool doLoadHistory) override;
   void setSaveResultEnabled(bool enabled) override;
   void setWatchADS(bool watch) override;
   void setup() override;

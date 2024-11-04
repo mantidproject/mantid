@@ -1,13 +1,14 @@
 """
-    mantiddoc.directive.plot_directive
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mantiddoc.directive.plot_directive
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    A thin wrapper around matplotlib.sphinxext.plot_directive
-    to be able to control execution via an environment variable
+A thin wrapper around matplotlib.sphinxext.plot_directive
+to be able to control execution via an environment variable
 
-    :copyright: Copyright 2020
-        ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+:copyright: Copyright 2020
+    ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 """
+
 import os
 import matplotlib.sphinxext.plot_directive as mpl_plot_directive_module
 

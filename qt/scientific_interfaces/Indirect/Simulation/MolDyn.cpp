@@ -108,6 +108,15 @@ void MolDyn::algorithmComplete(bool error) {
 void MolDyn::loadSettings(const QSettings &settings) { m_uiForm.mwRun->readSettings(settings.group()); }
 
 /**
+ * Selects wheter to load the history of a workspace for the resolution data selector loader
+ *
+ * @param doLoadHistory :: If true, the data selector loads the history of the added workspaces.
+ */
+void MolDyn::setLoadHistory(bool doLoadHistory) {
+  m_uiForm.dsResolution->setLoadProperty("LoadHistory", doLoadHistory);
+}
+
+/**
  * Handles the version of nMoldyn being selected.
  *
  * @param version The version as a string ("3" or "4")

@@ -70,6 +70,26 @@ Now that your Python development environment has been setup we can setup the deb
 - You can now click the green play button in the top right of the window to create a Workbench instance from pycharm.
 - Alternatively you can click the green bug next to the green play button to start a debug session.
 
+.. note::
+  On Windows, you may see the following error when launching workbench in debug mode:
+
+  .. code-block:: bash
+
+    incompatible copy of pydevd already imported:
+    C:\Program Files\JetBrains\PyCharm Community Edition 2023.1.2\plugins\python-ce\helpers\pydev\_pydev_bundle\__init__.py
+    C:\Program Files\JetBrains\PyCharm Community Edition 2023.1.2\plugins\python-ce\helpers\pydev\_pydev_bundle\_pydev_calltip_util.py
+    ...
+
+  To resolve the error, remove **only** the debugpy package from your Conda environment with
+
+  .. code-block:: bash
+
+    conda remove debugpy --force
+
+  The ``--force`` argument tells Conda to remove the single package only, ignoring the packages that depend on debugpy.
+  Note that the Mamba implementation of ``remove --force`` did not skip dependency checking until version 1.5.2 (October 2023).
+  If your version of Mamba is older than this, use the Conda command.
+
 .. include:: ./macos-opengl-version-warning.txt
 
 Debug Python in unit tests

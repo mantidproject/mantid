@@ -12,7 +12,7 @@ import csv
 from scipy.optimize import curve_fit
 import mantid.simpleapi as mantidsimple
 from mantid.api import AnalysisDataService
-from mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility import *
+from mantidqtinterfaces.HFIR_4Circle_Reduction.fourcircle_utility import check_string
 
 
 def apply_lorentz_correction(peak_intensity, q, wavelength, step_omega):
@@ -533,8 +533,9 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
         gauss_sigma = parameter_dict["s"]
     except KeyError as key_err:
         raise RuntimeError(
-            'Parameter dictionary must have "A", "s" (for sigma) but now only {0}. Error message: {1}'
-            "".format(parameter_dict.keys(), key_err)
+            'Parameter dictionary must have "A", "s" (for sigma) but now only {0}. Error message: {1}'.format(
+                parameter_dict.keys(), key_err
+            )
         )
 
     # I = A\times s\times\sqrt{2 pi}

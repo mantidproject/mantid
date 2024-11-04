@@ -92,6 +92,8 @@ class MantidSystemTest(unittest.TestCase):
         self.tolerance = 0.00000001
         # Whether or not to check the instrument/parameter map in CompareWorkspaces
         self.checkInstrument = True
+        # Whether or not to consider NaNs equal
+        self.nanEqual = False
 
         # Store the resident memory of the system (in MB) before starting the test
         FrameworkManager.clear()
@@ -355,6 +357,7 @@ class MantidSystemTest(unittest.TestCase):
             checker.setProperty("ToleranceRelErr", True)
         for d in self.disableChecking:
             checker.setProperty("Check" + d, False)
+        checker.setProperty("NaNsEqual", self.nanEqual)
         checker.execute()
         if not checker.getProperty("Result").value:
             print(self.__class__.__name__)
@@ -1153,18 +1156,14 @@ class TestManager(object):
         modname = modname.split(".py")[0]
         tests = []
         try:
-            spec = importlib.util.spec_from_file_location("", filename)
+            spec = importlib.util.spec_from_file_location(modname, filename)
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
 
-            mod_attrs = dir(mod)
-            for key in mod_attrs:
-                value = getattr(mod, key)
-                if key == "MantidSystemTest" or not inspect.isclass(value):
-                    continue
-                if self.isValidTestClass(value):
-                    test_name = key
-                    tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
+            module_classes = dict(inspect.getmembers(mod, inspect.isclass))
+            module_classes = [x for x in module_classes if self.isValidTestClass(module_classes[x]) and x != "MantidSystemTest"]
+            for test_name in module_classes:
+                tests.append(TestSuite(self._runner.getTestDir(), modname, test_name, filename))
             module_loaded = True
         except Exception:
             print("Error importing module '{}':".format(modname))

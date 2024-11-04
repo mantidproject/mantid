@@ -7,7 +7,7 @@
 #  This file is part of the mantidqt package
 #
 #
-""" A collection of Qt widgets and functionality common to many
+"""A collection of Qt widgets and functionality common to many
 Mantid-based applications/interfaces.
 """
 

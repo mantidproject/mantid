@@ -56,7 +56,6 @@ class AddModelAnalysis(AddFeature):
 
     def set_feature_observables(self, GUI):
         if TABONLY in self.feature_list or TABANDPLOT in self.feature_list:
-
             GUI.model_fitting_tab.model_fitting_tab_presenter.enable_editing_notifier.add_subscriber(GUI.enable_observer)
 
             GUI.model_fitting_tab.model_fitting_tab_presenter.disable_editing_notifier.add_subscriber(GUI.disable_observer)

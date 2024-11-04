@@ -4,15 +4,27 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
-from mantid import config
+from mantid import FileFinder
+from mantid.api import mtd, AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, Progress, PropertyMode, WorkspaceProperty
+from mantid.kernel import (
+    config,
+    logger,
+    Direction,
+    FloatArrayLengthValidator,
+    FloatArrayProperty,
+    IntArrayMandatoryValidator,
+    IntArrayProperty,
+    Property,
+    StringArrayProperty,
+    StringListValidator,
+)
+from mantid.simpleapi import Fit, LoadLog, Rebin, SofQWMoments
 
 import os
 import numpy as np
+import re
 
-from IndirectCommon import formatRuns
+from IndirectCommon import format_runs
 
 
 class SofQWMomentsScan(DataProcessorAlgorithm):
@@ -124,7 +136,7 @@ class SofQWMomentsScan(DataProcessorAlgorithm):
 
         progress.report("Energy transfer")
         scan_alg = self.createChildAlgorithm("ISISIndirectEnergyTransfer", 0.05, 0.95)
-        scan_alg.setProperty("InputFiles", formatRuns(self._data_files, self._instrument_name))
+        scan_alg.setProperty("InputFiles", format_runs(self._data_files, self._instrument_name))
         scan_alg.setProperty("SumFiles", self._sum_files)
         scan_alg.setProperty("LoadLogFiles", self._load_logs)
         scan_alg.setProperty("CalibrationWorkspace", self._calibration_ws)

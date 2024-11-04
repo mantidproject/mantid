@@ -29,19 +29,47 @@ libboost_python_devel:
 cmake:
   - '>=3.21.0'
 
+# 1.10.0 Produces a warning in Framework/Geometry/src/Crystal/HKLFilter.cpp
+doxygen:
+  - 1.9.*
+
+eigen:
+  - 3.4.*
+
 hdf5: # this is to move to libcurl>=8.4
   - '>1.14.0,<1.15'
+
+graphviz:
+  - '>=2.47.0'
 
 # this must match the version in the developer dependencies
 jemalloc:
   - 5.2.0
 
+jsoncpp:
+  - '>=1.9.4,<2'
+
+libglu:
+  - '>=9.0'
+
+# Not a primary dependency, but pinning to avoid a couple of unit test failures
+mkl:
+  - 2024.1.0
+
+muparser:
+  - '>=2.3.2'
+
+nexus:
+  - 4.4.*
 # We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
 numpy:
   - 1.24.*
 
 matplotlib:
   - 3.7.*
+
+ninja:
+  - '>=1.10.2'
 
 # Use novtk version, otherwise a lot of extra packages are installed, including qt6-main, which can cause issues when launching on Windows
 occt:
@@ -56,14 +84,29 @@ orsopy:
 poco:
   - 1.12.1|>=1.12.6
 
+psutil:
+  - '>=5.8.0'
+
+sphinx:
+  - '>=4.5.*'
+
 sphinx_bootstrap_theme:
   - 0.8.1
 
 scipy:
   - '>=1.10.0'
 
+pip:
+  - '>=21.0.1'
+
 pyqt:
-  - 5.15
+  - '>=5.15,<6'
+
+python_dateutil:
+  - '>=2.8.1'
+
+pyyaml:
+  - '>=5.4.1'
 
 # Pins qt to a specific version to avoid gui rendering problems in certain versions
 qt_main:
@@ -71,18 +114,27 @@ qt_main:
 
 # 5.4.2 crashes the jupyter console. 5.5.0 raises a TypeError when using tab completion.
 qtconsole:
-  - '>5.4.2,!=5.5.0'
+  - '>5.5.0'
 
 qscintilla2:
   - 2.13
 
+qtpy:
+  - '>=1.9.0'
+
 tbb:
   - 2021
 
+texlive_core:
+  - '>=20180414'
+
+toml:
+  - '>=0.10.2'
+# Keep gsl a specific version to reduce changes in our fitting
 gsl:
   - 2.7
 
-# v0.3.23 causes a hang on osx for some systemtests, v0.3.24 causes a unit test failure that needs investigation, v0.3.25 causes a system test failure on linux
+# v0.3.23 causes a hang on osx for some systemtests, v0.3.24 causes a unit test failure that needs investigation, v0.3.25 causes a system test failure on linux, v0.3.28 causes unit test failures on osx and system test failures on linux.
 libopenblas:
   - '!=0.3.23,!=0.3.24,!=0.3.25, !=0.3.28'
 
@@ -90,12 +142,16 @@ euphonic:
   - '>=1.2.1,<2.0'
 
 # 2.2.0 causes resolution issues in the mantidqt host environment on linux
+# TODO - check whether this is still the case
 librdkafka:
-  - <=2.1.1
+  - '>=1.6.0,<=2.1.1'
 
 # 6.8.0 causes issues in mantidqt CMake when cross compiling.
 sip:
   - <=6.7.11
+
+versioningit:
+  - '>=2.1'
 
 pin_run_as_build:
     boost:

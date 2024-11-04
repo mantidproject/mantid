@@ -115,6 +115,3 @@ C - Processing and Plotting SNS Data
     # NOTE: This script could be improved further with adding comments,
     # and extracting and logging values for filename and binning params,
     # as in Exercise 2A above.
-
-
-

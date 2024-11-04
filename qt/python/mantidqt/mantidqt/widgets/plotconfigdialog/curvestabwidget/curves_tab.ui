@@ -222,6 +222,7 @@
  </widget>
  <tabstops>
   <tabstop>select_axes_combo_box</tabstop>
+  <tabstop>select_curve_list</tabstop>
   <tabstop>remove_curve_button</tabstop>
   <tabstop>hide_curve_check_box</tabstop>
   <tabstop>curve_label_line_edit</tabstop>

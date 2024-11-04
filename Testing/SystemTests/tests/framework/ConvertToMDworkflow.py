@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import AlgorithmManager
+from mantid.simpleapi import AddSampleLog, CloneWorkspace, ConvertToMD, DeleteWorkspace, Load, SaveMD, SetGoniometer, SetUB
 
 
 # ----------------------------------------------------------------------
@@ -16,7 +17,6 @@ class ConvertToMDworkflow(systemtesting.MantidSystemTest):
     tolerance = 1e-5
 
     def runTest(self):
-
         # let's load test event workspace, which has been already preprocessed and available in Mantid Test folder
         WS_Name = "CNCS_7860_event"
         Load(Filename=WS_Name, OutputWorkspace=WS_Name)

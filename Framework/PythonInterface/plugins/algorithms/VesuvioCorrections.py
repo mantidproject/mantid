@@ -5,8 +5,25 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init, too-many-instance-attributes
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import (
+    AlgorithmFactory,
+    AlgorithmManager,
+    ITableWorkspaceProperty,
+    MatrixWorkspaceProperty,
+    PropertyMode,
+    WorkspaceGroupProperty,
+)
+from mantid.kernel import (
+    logger,
+    Direction,
+    FloatArrayLengthValidator,
+    FloatArrayProperty,
+    MaterialBuilder,
+    PropertyCriterion,
+    PropertyManagerProperty,
+    StringMandatoryValidator,
+    VisibleWhenProperty,
+)
 from vesuvio.base import VesuvioBase, TableWorkspaceDictionaryFacade
 from vesuvio.fitting import parse_fit_options
 from vesuvio.instrument import VESUVIO
@@ -67,7 +84,6 @@ class VesuvioCorrections(VesuvioBase):
 
     # pylint: disable=too-many-locals
     def PyInit(self):
-
         # -------------------------------------------------------------------------------------------
 
         # Input Property setup
@@ -475,7 +491,6 @@ class VesuvioCorrections(VesuvioBase):
         i = 0
 
         for idx, mass in enumerate(self._masses):
-
             if str(idx) in self._index_to_symbol_map:
                 symbol = self._index_to_symbol_map[str(idx)].value
             else:

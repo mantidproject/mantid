@@ -8,10 +8,11 @@
 
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
-from ISISCommandInterface import *
-from mantid import config
-from SANSBatchMode import *
+from mantid.api import mtd, FileFinder
+from mantid.kernel import config
+from mantid.simpleapi import DeleteWorkspace, Load
+from ISISCommandInterface import Detector, Gravity, MaskFile, SANS2D, SANS2DTUBES, Set1D
+from SANSBatchMode import BatchReduce
 import os.path
 
 # test batch mode with sans2d and selecting a period in batch mode
@@ -21,7 +22,6 @@ from sans.common.enums import SANSInstrument
 @ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DBatch(systemtesting.MantidSystemTest):
     def runTest(self):
-
         SANS2D()
         Set1D()
         Detector("rear-detector")

@@ -24,15 +24,9 @@ particular ordering.
 */
 class MANTID_ALGORITHMS_DLL SpinStateValidator : public Kernel::TypedValidator<std::string> {
 public:
-  SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates = false);
+  SpinStateValidator(std::unordered_set<int> allowedNumbersOfSpins, const bool acceptSingleStates = false,
+                     const char paraIndicator = '0', const char antiIndicator = '1', const bool optional = false);
   Kernel::IValidator_sptr clone() const override;
-
-  static const std::string ZERO_ONE;
-  static const std::string ONE_ZERO;
-  static const std::string ZERO_ZERO;
-  static const std::string ONE_ONE;
-  static const std::string ZERO;
-  static const std::string ONE;
 
   static bool anyOfIsInSet(const std::vector<std::string> &anyOf, const std::unordered_set<std::string> &set);
   static bool setContains(const std::unordered_set<std::string> &set, const std::string &s) {
@@ -42,6 +36,11 @@ public:
 private:
   std::string checkValidity(const std::string &input) const override;
   std::unordered_set<int> m_allowedNumbersOfSpins = {1, 2, 3, 4};
+  const std::unordered_set<std::string> getAllowedPairStates() const;
+  const std::unordered_set<std::string> getAllowedSingleStates() const;
   bool m_acceptSingleStates = false;
+  const std::string m_para;
+  const std::string m_anti;
+  bool m_optional = false;
 };
 } // namespace Mantid::Algorithms

@@ -170,6 +170,7 @@ set(INC_FILES
     inc/MantidKernel/EmptyValues.h
     inc/MantidKernel/EnabledWhenProperty.h
     inc/MantidKernel/EnumeratedString.h
+    inc/MantidKernel/EnumeratedStringProperty.h
     inc/MantidKernel/EnvironmentHistory.h
     inc/MantidKernel/EqualBinsChecker.h
     inc/MantidKernel/ErrorReporter.h
@@ -498,7 +499,7 @@ target_link_libraries(
          OpenSSL::SSL
          ${HDF5_LIBRARIES}
          ${HDF5_HL_LIBRARIES}
-  PRIVATE ${NETWORK_LIBRARIES} span
+  PRIVATE ${NETWORK_LIBRARIES}
 )
 if(WIN32)
   target_link_libraries(Kernel PRIVATE Psapi.lib) # For memory usage queries

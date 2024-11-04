@@ -10,7 +10,6 @@ from mantidqtinterfaces.Muon.GUI.Common.utilities import table_utils
 
 
 class ContextExampleView(QtWidgets.QWidget):
-
     updateSignal = QtCore.pyqtSignal()
     groupChangedSignal = QtCore.pyqtSignal(object)
 

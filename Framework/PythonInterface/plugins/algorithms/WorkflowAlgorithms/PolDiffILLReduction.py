@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import (
+    mtd,
     AlgorithmFactory,
     FileAction,
     FileProperty,
@@ -30,7 +31,47 @@ from mantid.kernel import (
     RebinParamsValidator,
     StringListValidator,
 )
-from mantid.simpleapi import *
+from mantid.simpleapi import (
+    AppendSpectra,
+    ApplyPaalmanPingsCorrection,
+    BinWidthAtX,
+    ConjoinXRuns,
+    CloneWorkspace,
+    ConvertAxisByFormula,
+    ConvertSpectrumAxis,
+    ConvertToHistogram,
+    ConvertToPointData,
+    ConvertUnits,
+    CreateSingleValuedWorkspace,
+    CreateWorkspace,
+    DeleteWorkspace,
+    DeleteWorkspaces,
+    DetectorEfficiencyCorUser,
+    Divide,
+    EditInstrumentGeometry,
+    ExtractMonitors,
+    ExtractSpectra,
+    FindEPP,
+    GroupWorkspaces,
+    Integration,
+    LoadAndMerge,
+    MaskDetectors,
+    MergeRuns,
+    Minus,
+    Multiply,
+    PaalmanPingsAbsorptionCorrection,
+    PaalmanPingsMonteCarloAbsorption,
+    Plus,
+    Rebin,
+    RemoveBins,
+    RenameWorkspace,
+    ReplaceSpecialValues,
+    SetSample,
+    SortXAxis,
+    SplineInterpolation,
+    SumOverlappingTubes,
+    Transpose,
+)
 
 from scipy.constants import physical_constants
 import numpy as np
@@ -38,7 +79,6 @@ import math
 
 
 class PolDiffILLReduction(PythonAlgorithm):
-
     _mode = "Monochromatic"
     _method_data_structure = None  # measurement method determined from the data
     _instrument = None
@@ -147,7 +187,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         return issues
 
     def PyInit(self):
-
         validRebinParams = RebinParamsValidator(AllowEmpty=True)
 
         self.declareProperty(MultipleFileProperty("Run", extensions=["nxs"]), doc="File path of run(s).")

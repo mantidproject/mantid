@@ -5,7 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import systemtesting
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import AppendSpectra, D7AbsoluteCrossSections, PolDiffILLReduction, RenameWorkspace
 import numpy as np
 
 
@@ -268,6 +270,7 @@ class ILL_D7_TimeOfFlight_Test(systemtesting.MantidSystemTest):
         self.tolerance = 1e4
         self.tolerance_is_rel_err = True
         self.disableChecking = ["Instrument"]
+        self.nanEqual = True
         return ["h2O_reduced_norm", "ILL_D7_TOF_Z.nxs"]
 
     def runTest(self):
