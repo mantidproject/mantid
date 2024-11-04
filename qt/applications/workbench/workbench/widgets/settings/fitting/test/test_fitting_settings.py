@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench
 import unittest
 
-from unittest.mock import Mock, MagicMock
+from unittest.mock import Mock, MagicMock, patch
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.widgets.settings.fitting.presenter import FittingSettings
 
@@ -35,7 +35,11 @@ class MockFittingSettingsModel:
         self.set_tolerance = MagicMock()
 
 
+MOUSEWHEEL_EVENT_FILTER_PATH = "workbench.widgets.settings.fitting.presenter.filter_out_mousewheel_events_from_combo_or_spin_box"
+
+
 @start_qapplication
+@patch(MOUSEWHEEL_EVENT_FILTER_PATH)
 class FittingSettingsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -45,7 +49,7 @@ class FittingSettingsTest(unittest.TestCase):
     def assert_connected_once(self, owner, signal):
         self.assertEqual(1, owner.receivers(signal))
 
-    def test_setup_signals(self):
+    def test_setup_signals(self, _):
         self.mock_view.auto_bkg.currentTextChanged.connect = MagicMock()
         self.mock_view.background_args.editingFinished.connect = MagicMock()
         self.mock_view.default_peak.currentTextChanged.connect = MagicMock()
@@ -60,7 +64,7 @@ class FittingSettingsTest(unittest.TestCase):
         self.mock_view.findpeaks_fwhm.valueChanged.connect.assert_called_once_with(presenter.action_find_peaks_fwhm_changed)
         self.mock_view.findpeaks_tol.valueChanged.connect.assert_called_once_with(presenter.action_find_peaks_tolerance_changed)
 
-    def test_action_auto_background_changed(self):
+    def test_action_auto_background_changed(self, _):
         self.mock_view.background_args.text = Mock(return_value="")
         presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
@@ -74,7 +78,7 @@ class FittingSettingsTest(unittest.TestCase):
         presenter.action_auto_background_changed("Polynomial")
         self.mock_model.set_auto_background.assert_called_once_with("Polynomial ")
 
-    def test_action_background_args_changed(self):
+    def test_action_background_args_changed(self, _):
         self.mock_view.auto_bkg.currentText = Mock(return_value="Polynomial")
         presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
@@ -90,7 +94,7 @@ class FittingSettingsTest(unittest.TestCase):
         presenter.action_background_args_changed()
         self.mock_model.set_auto_background.assert_called_once_with("Polynomial n=5")
 
-    def test_action_background_args_changed_with_auto_background_none(self):
+    def test_action_background_args_changed_with_auto_background_none(self, _):
         self.mock_view.auto_bkg.currentText = Mock(return_value="None")
         presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
@@ -100,7 +104,7 @@ class FittingSettingsTest(unittest.TestCase):
         presenter.action_background_args_changed()
         self.mock_model.set_auto_background.assert_called_once_with("")
 
-    def test_action_default_peak_changed(self):
+    def test_action_default_peak_changed(self, _):
         presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
         presenter.action_default_peak_changed("None")
@@ -111,7 +115,7 @@ class FittingSettingsTest(unittest.TestCase):
         presenter.action_default_peak_changed("Gaussian")
         self.mock_model.set_default_peak.assert_called_once_with("Gaussian")
 
-    def test_action_find_peaks_fwhm_changed(self):
+    def test_action_find_peaks_fwhm_changed(self, _):
         presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
         presenter.action_find_peaks_fwhm_changed(5)
@@ -122,7 +126,7 @@ class FittingSettingsTest(unittest.TestCase):
         presenter.action_find_peaks_fwhm_changed(9)
         self.mock_model.set_fwhm.assert_called_once_with("9")
 
-    def test_action_find_peaks_tolerance_changed(self):
+    def test_action_find_peaks_tolerance_changed(self, _):
         presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
 
         presenter.action_find_peaks_tolerance_changed(3)

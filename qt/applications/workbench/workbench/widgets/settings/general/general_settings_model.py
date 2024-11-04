@@ -45,7 +45,7 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
         return self.user_config_changes != {} or super().has_unsaved_changes()
 
     def apply_changes(self) -> None:
-        for property_string, value in self.user_config_changes:
+        for property_string, value in self.user_config_changes.items():
             CONF.set(property_string, value)
         self.user_config_changes.clear()
 

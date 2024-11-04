@@ -22,6 +22,7 @@ class FakeMVP(object):
 class FakeSectionsListWidget:
     def __init__(self):
         self.fake_items = []
+        self.setCurrentRow = MagicMock()
 
     def addItems(self, item):
         self.fake_items.extend(item)
@@ -45,6 +46,8 @@ class MockSettingsView(object):
         self.help_button = MockQButton()
         self.save_file_button = MockQButton()
         self.load_file_button = MockQButton()
+        self.okay_button = MockQButton()
+        self.apply_button = MockQButton()
         self.get_properties_filename = MagicMock(return_value="filename")
 
 

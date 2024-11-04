@@ -67,6 +67,8 @@ class MockGeneralSettingsModel:
 
 @start_qapplication
 class GeneralSettingsTest(unittest.TestCase):
+    MOUSEWHEEL_EVENT_FILTER_PATH = "workbench.widgets.settings.general.presenter.filter_out_mousewheel_events_from_combo_or_spin_box"
+
     def setUp(self) -> None:
         self.mock_model = MockGeneralSettingsModel()
 
@@ -128,7 +130,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         self.mock_model.set_facility.assert_called_once_with(new_facility)
 
-        self.assertEqual(presenter.view.instrument.getFacility, "TEST_LIVE")
+        self.assertEqual(presenter.view.instrument.getFacility(), "TEST_LIVE")
 
     def test_setup_confirmations(self):
         presenter = GeneralSettings(None)
@@ -179,14 +181,11 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter.action_prompt_deleting_workspace(True)
 
         self.mock_model.set_prompt_on_deleting_workspace.assert_called_once_with(True)
-        self.mock_model.register_apply_callback.assert_called_once()
         self.mock_model.set_prompt_on_deleting_workspace.reset_mock()
-        self.mock_model.register_apply_callback.reset_mock()
 
         presenter.action_prompt_deleting_workspace(False)
 
         self.mock_model.set_prompt_on_deleting_workspace.assert_called_once_with(False)
-        self.mock_model.register_apply_callback.assert_called_once()
 
     def test_load_current_setting_values(self):
         # load current setting is called automatically in the constructor
@@ -298,7 +297,8 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter.action_completion_enabled_modified(False)
         self.mock_model.set_completion_enabled.assert_called_once_with(False)
 
-    def test_fill_layout_display(self):
+    @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
+    def test_fill_layout_display(self, _):
         presenter = GeneralSettings(None, view=Mock(), model=self.mock_model)
 
         test_dict = {"a": 1, "b": 2, "c": 3}
@@ -326,7 +326,8 @@ class GeneralSettingsTest(unittest.TestCase):
 
         self.assertEqual({}, presenter.get_layout_dict())
 
-    def test_save_layout(self):
+    @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
+    def test_save_layout(self, _):
         presenter = GeneralSettings(None, view=Mock(), model=self.mock_model)
         # setup parent
         mock_parent = Mock()
@@ -347,7 +348,8 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_parent.saveState.assert_called_once_with(SAVE_STATE_VERSION)
         mock_parent.populate_layout_menu.assert_called_once_with()
 
-    def test_load_layout(self):
+    @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
+    def test_load_layout(self, _):
         presenter = GeneralSettings(None, view=Mock(), model=self.mock_model)
         self.mock_model.get_user_layout.reset_mock()
         # setup parent
@@ -366,7 +368,8 @@ class GeneralSettingsTest(unittest.TestCase):
         self.mock_model.get_user_layout.assert_called_once()
         mock_parent.restoreState.assert_called_once_with(test_dict["a"], SAVE_STATE_VERSION)
 
-    def test_delete_layout(self):
+    @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
+    def test_delete_layout(self, _):
         presenter = GeneralSettings(None, view=Mock(), model=self.mock_model)
         # setup parent
         mock_parent = Mock()
