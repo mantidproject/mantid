@@ -86,7 +86,7 @@ class ISISPowderPearlTest(unittest.TestCase):
         imods, mod_nums = inst_obj.get_trans_module_indices()
 
         self.assertListEqual(imods, [0, 1, 2, 4])
-        self.assertEqal(mod_nums, mod_nums_in)
+        self.assertEqual(mod_nums, mod_nums_in)
 
     def test_get_trans_module_indices_focus_mode_trans(self):
         inst_obj = Pearl(
@@ -99,7 +99,7 @@ class ISISPowderPearlTest(unittest.TestCase):
         imods, mod_nums = inst_obj.get_trans_module_indices()
 
         self.assertListEqual(imods, list(range(9)))
-        self.assertEqal(mod_nums, "1-9")
+        self.assertEqual(mod_nums, "1-9")
 
 
 if __name__ == "__main__":
