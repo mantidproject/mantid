@@ -24,7 +24,7 @@ class SettingsModel:
 
     def unsaved_changes(self) -> bool:
         for model in self.category_setting_models:
-            if model.changes:
+            if model.has_unsaved_changes():
                 return True
         return False
 
