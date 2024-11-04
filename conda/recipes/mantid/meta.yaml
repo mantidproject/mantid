@@ -63,7 +63,7 @@ requirements:
     - lib3mf  # [win]
     - mkl {{ mkl }} # [win]
     - nexus {{ nexus }}
-    - {{ pin_compatible("numpy", upper_bound="1.27") }}
+    - {{ pin_compatible("numpy", upper_bound="2.2") }}
     - occt {{ occt }}
     - pycifrw
     - python

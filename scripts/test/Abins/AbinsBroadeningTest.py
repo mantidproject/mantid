@@ -140,7 +140,7 @@ class BroadeningTest(unittest.TestCase):
         # Normal scheme reproduces area as well as total;
         freq_points, full_spectrum = broadening.broaden_spectrum(frequencies, bins, s_dft, sigma, scheme="normal")
         self.assertAlmostEqual(
-            np.trapz(spectrum, x=freq_points),
+            np.trapezoid(spectrum, x=freq_points),
             pre_broadening_total * (bins[1] - bins[0]),
         )
         self.assertAlmostEqual(sum(spectrum), pre_broadening_total)

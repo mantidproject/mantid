@@ -285,9 +285,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         if dist != 0.0:
             det_point_1 = ws.spectrumInfo().position(0)
             det_point_2 = ws.spectrumInfo().position(20)
-            beta = numpy.math.atan2((det_point_2[0] - det_point_1[0]), (det_point_2[2] - det_point_1[2]))
-            x_vs_y = numpy.math.sin(beta) * dist
-            mz = numpy.math.cos(beta) * dist
+            beta = numpy.atan2((det_point_2[0] - det_point_1[0]), (det_point_2[2] - det_point_1[2]))
+            x_vs_y = numpy.sin(beta) * dist
+            mz = numpy.cos(beta) * dist
             if instr == "D17":
                 mx = x_vs_y
                 my = 0.0
