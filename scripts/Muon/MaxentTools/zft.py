@@ -16,7 +16,7 @@ import numpy as np
 def ZFT(f, PULSESHAPE_convol, DETECT_e, SAVETIME_i2):
     n = f.shape[0]
     npts = DETECT_e.shape[0]
-    y = np.zeros([SAVETIME_i2], dtype=np.complex_)
+    y = np.zeros([SAVETIME_i2], dtype=np.complex128)
     y[:n] = f * PULSESHAPE_convol
     y2 = np.fft.ifft(y) * SAVETIME_i2  # SN=+1 meaning inverse FFT without the 1/N scale factor
     return np.real(y2[:npts]) * DETECT_e, np.imag(y2[:npts]) * DETECT_e
