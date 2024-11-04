@@ -34,19 +34,19 @@ def valid_data(peak_data):
         return False
     if peak_data["Primary"] is not None:
         for x_pos in peak_data["Primary"].values():
-            if not value_in_bounds(x_pos, 0.0, np.Inf):
+            if not value_in_bounds(x_pos, 0.0, np.inf):
                 return False
     if peak_data["Secondary"] is not None:
         for x_pos in peak_data["Secondary"].values():
-            if not value_in_bounds(x_pos, 0.0, np.Inf):
+            if not value_in_bounds(x_pos, 0.0, np.inf):
                 return False
     if "Gammas" in data_label and peak_data["Gammas"] is not None:
         for x_pos in peak_data["Gammas"].values():
-            if not value_in_bounds(x_pos, 0.0, np.Inf):
+            if not value_in_bounds(x_pos, 0.0, np.inf):
                 return False
     if "Electrons" in data_label and peak_data["Electrons"] is not None:
         for x_pos in peak_data["Electrons"].values():
-            if not value_in_bounds(x_pos, 0.0, np.Inf):
+            if not value_in_bounds(x_pos, 0.0, np.inf):
                 return False
 
     return True

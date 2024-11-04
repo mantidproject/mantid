@@ -1001,7 +1001,7 @@ class Instrument(object):
             try:
                 etrans = float(etrans)
             except TypeError:
-                etrans = np.asfarray(etrans)
+                etrans = np.asarray(etrans, dtype=float)
         res = obj.getResolution(etrans)
         if return_polynomial:
 

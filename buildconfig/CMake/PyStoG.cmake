@@ -1,8 +1,8 @@
 include(ExternalProject)
 
-set(_PyStoG_VERSION f184ebf9a72aae48ae0d5267fd6ab2e7df0988f6) # v0.4.7
+set(_PyStoG_VERSION 7b5492d98817024f2b62867bc2a82fc23184b777) # v0.5.0
 set(_PyStoG_download_dir ${CMAKE_CURRENT_BINARY_DIR}/../PyStoG-download)
-set(_PyStoG_source_dir ${_PyStoG_download_dir}/src/PyStoG/pystog)
+set(_PyStoG_source_dir ${_PyStoG_download_dir}/src/PyStoG/src/pystog)
 set(_PyStoG_source_test_dir ${_PyStoG_download_dir}/src/PyStoG/tests)
 set(_PyStoG_scripts_dir ${CMAKE_CURRENT_BINARY_DIR}/pystog)
 set(_PyStoG_test_root_dir ${CMAKE_CURRENT_BINARY_DIR}/test/pystog)
