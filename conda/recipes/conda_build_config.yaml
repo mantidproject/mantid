@@ -63,7 +63,7 @@ nexus:
   - 4.4.*
 # We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
 numpy:
-  - 1.24.*
+  - 2.0.*
 
 matplotlib:
   - 3.8.*
