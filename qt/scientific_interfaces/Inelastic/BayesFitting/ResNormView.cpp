@@ -234,6 +234,7 @@ std::string ResNormView::getCurrentDataName(std::string const &selectorName) con
 void ResNormView::clearPlot() const { m_uiForm.ppPlot->clear(); }
 
 DataSelector *ResNormView::getDataSelector(std::string const &selectorName) const { return m_selectors[selectorName]; }
+
 void ResNormView::setPlotResultEnabled(bool enabled) const {
   m_uiForm.pbPlot->setEnabled(enabled);
   m_uiForm.cbPlot->setEnabled(enabled);
