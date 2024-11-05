@@ -21,6 +21,10 @@
 #pragma GCC diagnostic ignored "-Woverloaded-virtual"
 #endif
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
+
+#include <MantidQtWidgets/Common/AlgorithmRunner.h>
+#include <MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h>
+
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1125
 #elif defined(__GNUC__)
@@ -52,11 +56,11 @@ struct BackgroundType {
   inline static const std::string LINEAR = "Linear";
 };
 
-class MANTIDQT_INELASTIC_DLL BayesFittingTab : public InelasticTab {
+class MANTIDQT_INELASTIC_DLL BayesFittingTab : public InelasticTab, public MantidQt::API::IAlgorithmRunnerSubscriber {
   Q_OBJECT
 
 public:
-  BayesFittingTab(QWidget *parent = nullptr);
+  BayesFittingTab(QWidget *parent = nullptr, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner = nullptr);
   ~BayesFittingTab() override;
 
   /// Base methods implemented in derived classes
@@ -66,16 +70,22 @@ public:
   void filterInputData(bool filter);
 
   virtual void applySettings(std::map<std::string, QVariant> const &settings);
+  void notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) override;
 
 protected slots:
   /// Slot to update the guides when the range properties change
   virtual void updateProperties(QtProperty *prop, double val);
 
 protected:
+  virtual void runComplete(IAlgorithm_sptr const &algorithm, bool const error) {
+    (void)algorithm;
+    (void)error;
+  };
   /// Formats the tree widget to make it easier to read
   void formatTreeWidget(QtTreePropertyBrowser *treeWidget, QMap<QString, QtProperty *> const &properties) const;
   /// Tree of the properties
   QtTreePropertyBrowser *m_propTree;
+  std::unique_ptr<MantidQt::API::IAlgorithmRunner> m_algorithmRunner;
 
 private:
   virtual void setFileExtensionsByName(bool filter);

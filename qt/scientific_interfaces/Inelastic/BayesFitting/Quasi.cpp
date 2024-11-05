@@ -31,7 +31,8 @@ struct PlotType {
 
 namespace MantidQt::CustomInterfaces {
 
-Quasi::Quasi(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0) {
+Quasi::Quasi(QWidget *parent, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner)
+    : BayesFittingTab(parent, std::move(algorithmRunner)), m_previewSpec(0) {
   m_uiForm.setupUi(parent);
 
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));

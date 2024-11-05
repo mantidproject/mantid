@@ -7,8 +7,10 @@
 #include "BayesFitting.h"
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 #include "Quasi.h"
-#include "ResNorm.h"
+#include "ResNormPresenter.h"
 #include "Stretch.h"
+
+#include <MantidQtWidgets/Common/QtJobRunner.h>
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -23,8 +25,15 @@ BayesFitting::BayesFitting(QWidget *parent)
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
+  auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
+  auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
+
   // insert each tab into the interface on creation
-  m_bayesTabs.emplace(RES_NORM, new ResNorm(m_uiForm.bayesFittingTabs->widget(RES_NORM)));
+  auto resNormModel = std::make_unique<ResNormModel>();
+  auto resNormWidget = m_uiForm.bayesFittingTabs->widget(RES_NORM);
+  m_bayesTabs.emplace(RES_NORM, new ResNormPresenter(resNormWidget, std::move(algorithmRunner), std::move(resNormModel),
+                                                     new ResNormView(resNormWidget)));
+
   m_bayesTabs.emplace(QUASI, new Quasi(m_uiForm.bayesFittingTabs->widget(QUASI)));
   m_bayesTabs.emplace(STRETCH, new Stretch(m_uiForm.bayesFittingTabs->widget(STRETCH)));
 }

@@ -28,7 +28,8 @@ struct PlotType {
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-Stretch::Stretch(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0), m_save(false) {
+Stretch::Stretch(QWidget *parent, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner)
+    : BayesFittingTab(parent, std::move(algorithmRunner)), m_previewSpec(0), m_save(false) {
   m_uiForm.setupUi(parent);
 
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
