@@ -21,15 +21,15 @@ import mantidqt.utils.qt as qtutils
 # Find Qt plugins for development builds on some platforms
 plugins.setup_library_paths()
 
-from qtpy.QtGui import QIcon, QSurfaceFormat
-from qtpy.QtWidgets import QApplication
-from qtpy.QtCore import QCoreApplication, Qt
+from qtpy.QtGui import QIcon, QSurfaceFormat  # noqa: E402
+from qtpy.QtWidgets import QApplication  # noqa: E402
+from qtpy.QtCore import QCoreApplication, Qt  # noqa: E402
 
 # Importing resources loads the data in. This must be imported before the
 # QApplication is created or paths to Qt's resources will not be set up correctly
-from workbench.app.resources import qCleanupResources
-from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION
-from workbench.widgets.about.presenter import AboutPresenter
+from workbench.app.resources import qCleanupResources  # noqa: E402
+from workbench.config import APPNAME, ORG_DOMAIN, ORGANIZATION  # noqa: E402
+from workbench.widgets.about.presenter import AboutPresenter  # noqa: E402
 
 # Constants
 SYSCHECK_INTERVAL = 50
