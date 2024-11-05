@@ -10,15 +10,15 @@ import unittest
 from unittest.mock import patch
 from numpy.testing import assert_array_almost_equal
 
-# Register Abins2 before importing mantid modules
+import abins
+import abins.io
 from abins.abins2 import Abins as Abins2
+from abins.constants import ATOM_PREFIX
 
+# Required to register Abins2 before importing any mantid modules
 Abins2.subscribe()
 
-from mantid.simpleapi import mtd, CompareWorkspaces, Abins
-import abins
-from abins.constants import ATOM_PREFIX
-import abins.io
+from mantid.simpleapi import mtd, CompareWorkspaces, Abins  # noqa: E402
 
 
 class AbinsBasicTest(unittest.TestCase):
