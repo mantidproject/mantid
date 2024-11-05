@@ -102,7 +102,7 @@
          </size>
         </property>
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adds a label to the output workspace name wich set the predicted output name on the text field next to the Current Output Name label. &lt;/p&gt;&lt;p&gt;If the predicted output is in use, a red warning text label will appear under the text, indicating the risk of overwriting the data. Otherwise, the warning label will turn green and the algorithm can be run without the risk of overwriting data. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Adds a label to the output workspace name which set the predicted output name on the text field next to the Current Output Name label. &lt;/p&gt;&lt;p&gt;If the predicted output is in use, a red warning text label will appear under the text, indicating the risk of overwriting the data. Otherwise, the warning label will turn green and the algorithm can be run without the risk of overwriting data. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="text">
          <string/>
