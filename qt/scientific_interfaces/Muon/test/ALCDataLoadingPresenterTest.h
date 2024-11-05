@@ -126,6 +126,7 @@ class ALCDataLoadingPresenterTest : public CxxTest::TestSuite {
 
   std::unique_ptr<MockALCDataLoadingView> m_view;
   std::unique_ptr<ALCDataLoadingPresenter> m_presenter;
+  ALCDataLoadingModel *m_model;
 
   std::string loadingString = std::string("Loading MUSR15189,15191-92");
   std::string loadedString = std::string("Successfully loaded MUSR15189,15191-92");
@@ -150,6 +151,7 @@ public:
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockALCDataLoadingView>>();
     auto model = std::make_unique<ALCDataLoadingModel>();
+    m_model = model.get();
     m_presenter = std::make_unique<ALCDataLoadingPresenter>(m_view.get(), std::move(model));
     m_presenter->initialize();
 
