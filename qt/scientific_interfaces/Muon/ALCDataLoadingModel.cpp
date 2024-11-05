@@ -242,20 +242,23 @@ std::string ALCDataLoadingModel::getPathFromFiles(const std::vector<std::string>
  */
 bool ALCDataLoadingModel::checkCustomGrouping(const std::string &detGroupingType, const std::string &forwardGrouping,
                                               const std::string &backwardGrouping) {
-  bool groupingOK = true;
-  if (detGroupingType == "Custom") {
-    auto detectors = Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(forwardGrouping, groupingOK));
-    const auto backward = Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(backwardGrouping, groupingOK));
-    if (!groupingOK) {
-      return false;
-    }
-    detectors.insert(detectors.end(), backward.begin(), backward.end());
-    if (std::any_of(detectors.cbegin(), detectors.cend(),
-                    [this](const auto det) { return det < 0 || det > static_cast<int>(m_numDetectors); })) {
-      groupingOK = false;
-    }
+  if (detGroupingType != "Custom") {
+    return true;
   }
-  return groupingOK;
+
+  bool groupingOK = true;
+
+  auto detectors = Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(forwardGrouping, groupingOK));
+  const auto backward = Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(backwardGrouping, groupingOK));
+
+  if (!groupingOK) {
+    return false;
+  }
+
+  detectors.insert(detectors.end(), backward.begin(), backward.end());
+  auto isOutsideDetRange = [this](const auto det) { return det < 0 || det > static_cast<int>(m_numDetectors); };
+
+  return !std::any_of(detectors.cbegin(), detectors.cend(), isOutsideDetRange);
 }
 
 /**
