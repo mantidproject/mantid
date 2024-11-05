@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
-from typing import Dict
+from typing import Dict, List
 
 from mantid.kernel import ConfigService
 
@@ -13,6 +13,9 @@ from mantid.kernel import ConfigService
 class ConfigSettingsChangesModel:
     def __init__(self):
         self.changes: Dict[str, str] = {}
+
+    def properties_to_be_changed(self) -> List[str]:
+        return list(self.changes.keys())
 
     def has_unsaved_changes(self) -> bool:
         return self.changes != {}

@@ -71,7 +71,8 @@ class SettingsPresenter(object):
         self.view.load_file_button.clicked.connect(self.action_load_settings_from_file)
         self.view.help_button.clicked.connect(self.action_open_help_window)
 
-        self.changes_that_need_restart = []
+        self.model.register_property_which_needs_a_restart(str(GeneralUserConfigProperties.FONT.value))
+        self.model.register_property_which_needs_a_restart(str(GeneralUserConfigProperties.PROMPT_ON_DELETING_WORKSPACE.value))
 
     def show(self, modal=True):
         if modal:
@@ -85,11 +86,15 @@ class SettingsPresenter(object):
         self.view.hide()
 
     def action_okay_button_pushed(self):
+        changes_that_need_restart = self.model.potential_changes_that_need_a_restart()
         self.model.apply_all_settings()
+        self.view.notify_changes_need_restart(changes_that_need_restart)
         self.view_closing()
 
     def action_apply_button_pushed(self):
+        changes_that_need_restart = self.model.potential_changes_that_need_a_restart()
         self.model.apply_all_settings()
+        self.view.notify_changes_need_restart(changes_that_need_restart)
 
     def action_section_changed(self, new_section_pos):
         """
@@ -122,8 +127,6 @@ class SettingsPresenter(object):
             ConfigService.saveConfig(ConfigService.getUserFilename())
             self.parent.config_updated()
             self.view.close()
-            if self.changes_that_need_restart:
-                self.view.notify_changes_need_restart(self.changes_that_need_restart)
             return True
         else:
             # try to stop the close action
@@ -140,9 +143,6 @@ class SettingsPresenter(object):
         if filepath:
             self.model.load_settings_from_file(filepath, self.all_properties)
             self._update_all_properties()
-
-    def register_change_needs_restart(self, change_description):
-        self.changes_that_need_restart.append(change_description)
 
     def _update_all_properties(self):
         for settings in self.SETTINGS_TABS.keys():

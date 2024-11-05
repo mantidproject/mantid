@@ -41,6 +41,9 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
         super().__init__()
         self.user_config_changes: Dict[str, Any] = {}
 
+    def properties_to_be_changed(self) -> List[str]:
+        return list(self.user_config_changes.keys()) + super().properties_to_be_changed()
+
     def has_unsaved_changes(self) -> bool:
         return self.user_config_changes != {} or super().has_unsaved_changes()
 

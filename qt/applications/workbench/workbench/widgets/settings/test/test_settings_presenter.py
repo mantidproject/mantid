@@ -124,6 +124,10 @@ class SettingsPresenterTest(TestCase):
         mock_view = MagicMock()
         mock_model = MagicMock()
         mock_parent = MagicMock()
+
+        settings_needing_restart = ["Setting one", "Setting two"]
+        mock_model.potential_changes_that_need_a_restart = MagicMock(return_value=settings_needing_restart)
+
         presenter = SettingsPresenter(
             mock_parent,
             view=mock_view,
@@ -134,8 +138,5 @@ class SettingsPresenterTest(TestCase):
             fitting_settings=mock_view.fitting_settings,
         )
 
-        settings_needing_restart = ["Setting one", "Setting two"]
-        for setting in settings_needing_restart:
-            presenter.register_change_needs_restart(setting)
-        presenter.view_closing()
+        presenter.action_apply_button_pushed()
         presenter.view.notify_changes_need_restart.assert_called_once_with(settings_needing_restart)

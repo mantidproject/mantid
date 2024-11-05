@@ -51,9 +51,10 @@ class SettingsView(base, form):
         )
 
     def notify_changes_need_restart(self, list_of_changes_that_need_restart):
-        QMessageBox.information(
-            self,
-            self.presenter.CHANGES_NEED_RESTART_TITLE,
-            self.presenter.CHANGES_NEED_RESTART_MESSAGE + "  • " + "\n  • ".join(list_of_changes_that_need_restart),
-            QMessageBox.Ok,
-        )
+        if list_of_changes_that_need_restart:
+            QMessageBox.information(
+                self,
+                self.presenter.CHANGES_NEED_RESTART_TITLE,
+                self.presenter.CHANGES_NEED_RESTART_MESSAGE + "  • " + "\n  • ".join(list_of_changes_that_need_restart),
+                QMessageBox.Ok,
+            )
