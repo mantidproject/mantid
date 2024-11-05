@@ -26,16 +26,96 @@ ALCDataLoadingModel::ALCDataLoadingModel()
     : m_numDetectors(0), m_loadingData(false), m_directoryChanged(false), m_lastRunLoadedAuto(-2),
       m_wasLastAutoRange(false), m_minTime(0) {}
 
+// Getters
+bool ALCDataLoadingModel::getLoadingData() const { return m_loadingData; }
+
+MatrixWorkspace_sptr ALCDataLoadingModel::getLoadedData() const { return m_loadedData; }
+
+Mantid::API::MatrixWorkspace_sptr ALCDataLoadingModel::getWsForMuonInfo() const { return m_wsForInfo; }
+
+double ALCDataLoadingModel::getMinTime() const { return m_minTime; }
+
+std::vector<std::string> &ALCDataLoadingModel::getLogs() { return m_logs; }
+
+std::string &ALCDataLoadingModel::getRunsText() { return m_runsText; }
+
+std::vector<std::string> &ALCDataLoadingModel::getPeriods() { return m_periods; }
+
+// Setters
 void ALCDataLoadingModel::setLoadingData(bool isLoading) { m_loadingData = isLoading; }
-bool ALCDataLoadingModel::getLoadingData() { return m_loadingData; }
 
 void ALCDataLoadingModel::setLoadedData(const MatrixWorkspace_sptr &data) { m_loadedData = data; }
-MatrixWorkspace_sptr ALCDataLoadingModel::getLoadedData() { return m_loadedData; }
 
+void ALCDataLoadingModel::setDirectoryChanged(bool hasDirectoryChanged) { m_directoryChanged = hasDirectoryChanged; }
+
+void ALCDataLoadingModel::setFilesToLoad(const std::vector<std::string> &files) { m_filesToLoad = files; }
+
+void ALCDataLoadingModel::setLogs(const MatrixWorkspace_sptr &ws) {
+
+  std::vector<std::string> logs;
+
+  const auto &properties = ws->run().getProperties();
+  std::transform(properties.cbegin(), properties.cend(), std::back_inserter(logs),
+                 [](const auto &property) { return property->name(); });
+
+  // sort alphabetically
+  // cannot use standard sort alone as some logs are capitalised and some are
+  // not
+  std::sort(logs.begin(), logs.end(), [](const auto &log1, const auto &log2) {
+    // compare logs char by char and return pair of non-equal elements
+    const auto result =
+        std::mismatch(log1.cbegin(), log1.cend(), log2.cbegin(), log2.cend(),
+                      [](const auto &lhs, const auto &rhs) { return std::tolower(lhs) == std::tolower(rhs); });
+    // compare the two elements to decide which log should go first
+    return result.second != log2.cend() &&
+           (result.first == log1.cend() || std::tolower(*result.first) < std::tolower(*result.second));
+  });
+  m_logs = logs;
+}
+
+void ALCDataLoadingModel::setPeriods(const Workspace_sptr &loadedWs) {
+
+  size_t numPeriods = MuonAnalysisHelper::numPeriods(loadedWs);
+  std::vector<std::string> periods;
+  for (size_t i = 0; i < numPeriods; i++) {
+    std::stringstream buffer;
+    buffer << i + 1;
+    periods.emplace_back(buffer.str());
+  }
+  m_periods = periods;
+}
 MatrixWorkspace_sptr ALCDataLoadingModel::exportWorkspace() {
   if (m_loadedData)
     return std::const_pointer_cast<MatrixWorkspace>(m_loadedData);
   return MatrixWorkspace_sptr{};
+}
+
+void ALCDataLoadingModel::setWsForMuonInfo(const std::string &filename) {
+
+  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
+  loadAlg->setChild(true); // Don't want workspaces in the ADS
+
+  // We need logs only but we have to use Load
+  // (can't use LoadMuonLogs as not all the logs would be
+  // loaded), so we load the minimum amount of data, i.e., one spectrum
+  loadAlg->setProperty("Filename", filename);
+  loadAlg->setPropertyValue("SpectrumMin", "1");
+  loadAlg->setPropertyValue("SpectrumMax", "1");
+  loadAlg->setPropertyValue("OutputWorkspace", "__NotUsed");
+  loadAlg->execute();
+
+  Workspace_sptr loadedWs = loadAlg->getProperty("OutputWorkspace");
+  setPeriods(loadedWs);
+
+  double firstGoodData = loadAlg->getProperty("FirstGoodData");
+  double timeZero = loadAlg->getProperty("TimeZero");
+  m_minTime = firstGoodData - timeZero;
+
+  m_wsForInfo = MuonAnalysisHelper::firstPeriod(loadedWs);
+
+  setLogs(m_wsForInfo);
+  // Update number of detectors for this new first run
+  m_numDetectors = m_wsForInfo->getInstrument()->getNumberDetectors();
 }
 
 /**
@@ -122,77 +202,6 @@ void ALCDataLoadingModel::load(const IALCDataLoadingView *view) {
 
 void ALCDataLoadingModel::cancelLoading() const { this->m_LoadingAlg->cancel(); }
 
-void ALCDataLoadingModel::setWsForMuonInfo(const std::string &filename) {
-
-  IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("Load");
-  loadAlg->setChild(true); // Don't want workspaces in the ADS
-
-  // We need logs only but we have to use Load
-  // (can't use LoadMuonLogs as not all the logs would be
-  // loaded), so we load the minimum amount of data, i.e., one spectrum
-  loadAlg->setProperty("Filename", filename);
-  loadAlg->setPropertyValue("SpectrumMin", "1");
-  loadAlg->setPropertyValue("SpectrumMax", "1");
-  loadAlg->setPropertyValue("OutputWorkspace", "__NotUsed");
-  loadAlg->execute();
-
-  Workspace_sptr loadedWs = loadAlg->getProperty("OutputWorkspace");
-  setPeriods(loadedWs);
-
-  double firstGoodData = loadAlg->getProperty("FirstGoodData");
-  double timeZero = loadAlg->getProperty("TimeZero");
-  m_minTime = firstGoodData - timeZero;
-
-  m_wsForInfo = MuonAnalysisHelper::firstPeriod(loadedWs);
-
-  setLogs(m_wsForInfo);
-  // Update number of detectors for this new first run
-  m_numDetectors = m_wsForInfo->getInstrument()->getNumberDetectors();
-}
-
-Mantid::API::MatrixWorkspace_sptr ALCDataLoadingModel::getWsForMuonInfo() { return m_wsForInfo; }
-
-double ALCDataLoadingModel::getMinTime() const { return m_minTime; }
-
-std::vector<std::string> &ALCDataLoadingModel::getLogs() { return m_logs; }
-
-void ALCDataLoadingModel::setLogs(const MatrixWorkspace_sptr &ws) {
-
-  std::vector<std::string> logs;
-
-  const auto &properties = ws->run().getProperties();
-  std::transform(properties.cbegin(), properties.cend(), std::back_inserter(logs),
-                 [](const auto &property) { return property->name(); });
-
-  // sort alphabetically
-  // cannot use standard sort alone as some logs are capitalised and some are
-  // not
-  std::sort(logs.begin(), logs.end(), [](const auto &log1, const auto &log2) {
-    // compare logs char by char and return pair of non-equal elements
-    const auto result =
-        std::mismatch(log1.cbegin(), log1.cend(), log2.cbegin(), log2.cend(),
-                      [](const auto &lhs, const auto &rhs) { return std::tolower(lhs) == std::tolower(rhs); });
-    // compare the two elements to decide which log should go first
-    return result.second != log2.cend() &&
-           (result.first == log1.cend() || std::tolower(*result.first) < std::tolower(*result.second));
-  });
-  m_logs = logs;
-}
-
-std::vector<std::string> &ALCDataLoadingModel::getPeriods() { return m_periods; }
-
-void ALCDataLoadingModel::setPeriods(const Workspace_sptr &loadedWs) {
-
-  size_t numPeriods = MuonAnalysisHelper::numPeriods(loadedWs);
-  std::vector<std::string> periods;
-  for (size_t i = 0; i < numPeriods; i++) {
-    std::stringstream buffer;
-    buffer << i + 1;
-    periods.emplace_back(buffer.str());
-  }
-  m_periods = periods;
-}
-
 /**
  * Remove the run number from a full file path
  * @param file :: [input] full path which contains a run number
@@ -215,7 +224,7 @@ int ALCDataLoadingModel::extractRunNumber(const std::string &file) {
   return std::stoi(returnVal);
 }
 
-std::string ALCDataLoadingModel::getPathFromFiles(std::vector<std::string> files) {
+std::string ALCDataLoadingModel::getPathFromFiles(const std::vector<std::string> &files) const {
   if (files.empty())
     return "";
   const auto firstDirectory = files[0u].substr(0u, files[0u].find_last_of("/\\"));
@@ -248,6 +257,7 @@ bool ALCDataLoadingModel::checkCustomGrouping(const std::string &detGroupingType
   }
   return groupingOK;
 }
+
 /**
  * Check basic group string is valid
  * i.e. does not contain letters or start with , or -
@@ -273,11 +283,6 @@ void ALCDataLoadingModel::updateAutoLoadCancelled() {
   m_wasLastAutoRange = false;
 }
 
-std::string &ALCDataLoadingModel::getRunsText() { return m_runsText; }
-
-void ALCDataLoadingModel::setDirectoryChanged(bool hasDirectoryChanged) { m_directoryChanged = hasDirectoryChanged; }
-
-void ALCDataLoadingModel::setFilesToLoad(const std::vector<std::string> &files) { m_filesToLoad = files; }
 /**
  * This timer runs every second when we are watching a directory.
  * If any changes have occurred in the meantime, reload.

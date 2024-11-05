@@ -24,15 +24,15 @@ public:
   virtual void updateAutoLoadCancelled() = 0;
   virtual bool loadFilesFromWatchingDirectory(const std::string &firstFile, const std::vector<std::string> &files,
                                               const std::string &runsText) = 0;
-  virtual std::string getPathFromFiles(std::vector<std::string> files) = 0;
+  virtual std::string getPathFromFiles(const std::vector<std::string> &files) const = 0;
 
   // Getters
-  virtual bool getLoadingData() = 0;
-  virtual Mantid::API::MatrixWorkspace_sptr getLoadedData() = 0;
+  virtual bool getLoadingData() const = 0;
+  virtual double getMinTime() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr getLoadedData() const = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr getWsForMuonInfo() const = 0;
   virtual std::vector<std::string> &getLogs() = 0;
   virtual std::vector<std::string> &getPeriods() = 0;
-  virtual Mantid::API::MatrixWorkspace_sptr getWsForMuonInfo() = 0;
-  virtual double getMinTime() const = 0;
   virtual std::string &getRunsText() = 0;
 
   // Setters

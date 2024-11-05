@@ -29,14 +29,14 @@ public:
   void updateAutoLoadCancelled() override;
   bool loadFilesFromWatchingDirectory(const std::string &firstFile, const std::vector<std::string> &files,
                                       const std::string &runsText) override;
-  std::string getPathFromFiles(std::vector<std::string> files) override;
+  std::string getPathFromFiles(const std::vector<std::string> &files) const override;
 
   // Getters
-  bool getLoadingData() override;
-  Mantid::API::MatrixWorkspace_sptr getLoadedData() override;
+  bool getLoadingData() const override;
+  Mantid::API::MatrixWorkspace_sptr getLoadedData() const override;
   std::vector<std::string> &getLogs() override;
   std::vector<std::string> &getPeriods() override;
-  Mantid::API::MatrixWorkspace_sptr getWsForMuonInfo() override;
+  Mantid::API::MatrixWorkspace_sptr getWsForMuonInfo() const override;
   double getMinTime() const override;
   std::string &getRunsText() override;
 
