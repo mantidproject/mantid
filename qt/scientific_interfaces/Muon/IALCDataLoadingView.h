@@ -23,7 +23,7 @@ namespace CustomInterfaces {
  */
 class IALCDataLoadingPresenter;
 
-class MANTIDQT_MUONINTERFACE_DLL IALCDataLoadingView : public QObject {
+class MANTIDQT_MUONINTERFACE_DLL IALCDataLoadingView {
 
 public:
   virtual void subscribePresenter(IALCDataLoadingPresenter *presenter) = 0;
@@ -109,7 +109,6 @@ public:
 
   virtual QTimer *getTimer() = 0;
 
-public slots:
   /// Performs any necessary initialization
   virtual void initialize() = 0;
 
@@ -185,6 +184,7 @@ public slots:
   virtual void setRunsTextWithoutSearch(const std::string &text) = 0;
 
   /// Slots for notifying presenter that view was changed
+
   virtual void instrumentChanged(QString instrument) = 0;
 
   virtual void notifyLoadClicked() = 0;

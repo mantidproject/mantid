@@ -15,14 +15,8 @@
 #include <QFileSystemWatcher>
 #include <QTimer>
 
-#include "QObject"
 #include "ui_ALCDataLoadingView.h"
-
-namespace MantidQt {
-namespace MantidWidgets {
-class LogValueSelector;
-} // namespace MantidWidgets
-} // namespace MantidQt
+#include <QObject>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -31,7 +25,7 @@ namespace CustomInterfaces {
   widgets
 */
 
-class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingView : public IALCDataLoadingView {
+class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingView : public QObject, public IALCDataLoadingView {
   Q_OBJECT
 
 public:

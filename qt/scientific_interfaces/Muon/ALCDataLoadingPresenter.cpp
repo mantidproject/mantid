@@ -218,7 +218,7 @@ void ALCDataLoadingPresenter::handleWatcherStopped() { m_model->updateAutoLoadCa
  */
 void ALCDataLoadingPresenter::handleTimerEvent() {
 
-  bool filesLoadedIntoModel =
+  const bool filesLoadedIntoModel =
       m_model->loadFilesFromWatchingDirectory(m_view->getFirstFile(), m_view->getFiles(), m_view->getRunsText());
 
   if (filesLoadedIntoModel) {
