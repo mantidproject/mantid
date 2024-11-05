@@ -295,59 +295,64 @@ bool ALCDataLoadingModel::loadFilesFromWatchingDirectory(const std::string &firs
                                                          const std::string &runsText) {
 
   // Check if there are changes to watched directory
-  if (m_directoryChanged.load()) {
-    // Need to add most recent file to add to list
-    ALCLatestFileFinder finder(firstFile);
-    const auto latestFile = finder.getMostRecentFile();
-
-    // Check if file found
-    if (latestFile.empty()) {
-      // Could not find file this time, but don't reset directory changed flag
-      m_directoryChanged = false;
-      return false;
-    }
-    // If not currently loading load new files
-    if (!m_loadingData) {
-      // add to list set text with search
-      if (std::find(files.begin(), files.end(), latestFile) == files.end()) {
-        // Get old text
-        auto newText = runsText;
-
-        // Extract run number from latest file
-        auto runNumber = extractRunNumber(latestFile);
-
-        // If new run number is less then error
-        if (runNumber <= m_lastRunLoadedAuto) {
-          // Is error but continue to watch
-          m_directoryChanged = false;
-          return false;
-        }
-
-        if (m_lastRunLoadedAuto + 1 == runNumber) {
-          // Add as range
-          // Check if last added was a range
-          if (m_wasLastAutoRange.load()) {
-            // Remove last run number from text
-            newText = newText.substr(0, newText.find_last_of('-'));
-          }
-          newText += "-" + std::to_string(runNumber);
-          m_wasLastAutoRange = true;
-
-        } else {
-          // Add as comma
-          newText += "," + std::to_string(runNumber);
-          m_wasLastAutoRange = false;
-        }
-        m_filesToLoad.push_back(latestFile);
-        m_lastRunLoadedAuto = runNumber;
-        m_runsText = newText;
-        m_directoryChanged = false;
-        return true;
-      }
-      m_directoryChanged = false;
-    }
+  if (!m_directoryChanged.load()) {
+    return false;
   }
-  return false;
+
+  // If currently loading load new files
+  if (m_loadingData) {
+    return false;
+  }
+
+  // Need to add most recent file to add to list
+  ALCLatestFileFinder finder(firstFile);
+  const auto latestFile = finder.getMostRecentFile();
+
+  // Check if file found
+  if (latestFile.empty()) {
+    // Could not find file this time, but don't reset directory changed flag
+    m_directoryChanged = false;
+    return false;
+  }
+
+  if (std::find(files.begin(), files.end(), latestFile) != files.end()) {
+    m_directoryChanged = false;
+    return false;
+  }
+  // File added is valid
+
+  // Get old text
+  auto newText = runsText;
+
+  // Extract run number from latest file
+  auto runNumber = extractRunNumber(latestFile);
+
+  // If new run number is less then error
+  if (runNumber <= m_lastRunLoadedAuto) {
+    // Is error but continue to watch
+    m_directoryChanged = false;
+    return false;
+  }
+
+  if (runNumber == m_lastRunLoadedAuto + 1) {
+    // Add as range
+    // Check if last added was a range
+    if (newText.find('-') != std::string::npos) {
+      // Remove last run number from text
+      newText = newText.substr(0, newText.find_last_of('-'));
+    }
+    newText += "-" + std::to_string(runNumber);
+
+  } else {
+    // Add as comma
+    newText += "," + std::to_string(runNumber);
+  }
+
+  m_filesToLoad.push_back(latestFile);
+  m_lastRunLoadedAuto = runNumber;
+  m_runsText = newText;
+  m_directoryChanged = false;
+  return true;
 }
 
 } // namespace MantidQt::CustomInterfaces
