@@ -37,7 +37,8 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         can_ws = ConvertUnits(InputWorkspace=can_ws, Target="Wavelength", EMode="Indirect", EFixed=1.845)
 
         # Load the corrections workspace
-        cls._corrections_ws = Load("irs26176_graphite002_cyl_Abs.nxs", StoreInADS=False)
+        Load("irs26176_graphite002_cyl_Abs.nxs", OutputWorkspace="corrections_ws")
+        cls._corrections_ws = mtd["corrections_ws"]
 
         # Interpolate each of the correction factor workspaces
         # Required to use corrections from the old indirect calculate
@@ -58,7 +59,7 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         Remove workspaces from ADS.
         """
 
-        DeleteWorkspaces(["sample_ws", "can_ws", "fws_corrections_ass", "fws_corrections", "fapi"])
+        DeleteWorkspaces(["sample_ws", "can_ws", "corrections_ws", "fws_corrections_ass", "fws_corrections", "fapi"])
 
     def _verify_workspace(self, ws, correction_type):
         """

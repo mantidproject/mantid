@@ -28,7 +28,9 @@ class RunPythonScriptTest(unittest.TestCase):
         RunPythonScript(Code=code)
 
     def test_simplePlus(self):
-        code = "Plus(LHSWorkspace=input, RHSWorkspace=input, OutputWorkspace=output)"
+        code = """from mantid.simpleapi import Plus
+Plus(LHSWorkspace=input, RHSWorkspace=input, OutputWorkspace=output)
+"""
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace="ws_out")
         ws_out = mtd["ws_out"]
 
@@ -77,7 +79,10 @@ if not isinstance(input, IMDEventWorkspace):
         RunPythonScript(InputWorkspace=mtd["ws"], Code=code)
 
     def test_withNoInputWorkspace(self):
-        c = RunPythonScript(Code="output = CreateSingleValuedWorkspace(DataValue='1')")
+        code = """from mantid.simpleapi import CreateSingleValuedWorkspace
+output = CreateSingleValuedWorkspace(DataValue='1')
+"""
+        c = RunPythonScript(Code=code)
         self.assertEqual(c.name(), "c")
         self.assertEqual(c.readY(0)[0], 1)
 
@@ -88,7 +93,9 @@ if not isinstance(input, IMDEventWorkspace):
         GroupWorkspaces(InputWorkspaces="ws_1,ws_2", OutputWorkspace="ws")
         self.assertEqual(3, mtd.size())
 
-        code = "Scale(input,OutputWorkspace=output,Factor=5)"
+        code = """from mantid.simpleapi import Scale
+Scale(input,OutputWorkspace=output,Factor=5)
+"""
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace="ws")
 
         self.assertEqual(3, mtd.size())
@@ -97,7 +104,9 @@ if not isinstance(input, IMDEventWorkspace):
         self.assertAlmostEqual(5.0, mtd["ws_1"].readY(0)[0], 8)
 
     def test_code_with_a_mixture_of_line_endings_succeeds(self):
-        code = "Scale(input,OutputWorkspace=output,Factor=5)\n"
+        code = """from mantid.simpleapi import Scale
+Scale(input,OutputWorkspace=output,Factor=5)\n
+"""
         code += "Scale(input,OutputWorkspace=output,Factor=10,Operation='Add')\r"
         code += "Scale(input,OutputWorkspace=output,Factor=20)\r\n"
 

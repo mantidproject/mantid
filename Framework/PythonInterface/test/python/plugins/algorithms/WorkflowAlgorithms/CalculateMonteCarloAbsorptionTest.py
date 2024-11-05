@@ -17,15 +17,19 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls._red_ws = Load("irs26176_graphite002_red.nxs", StoreInADS=False)
-        cls._container_ws = Load("irs26173_graphite002_red.nxs", StoreInADS=False)
-        cls._indirect_elastic_ws = Load("osi104367_elf.nxs", StoreInADS=False)
-        cls._indirect_fws_ws = Load("ILL_IN16B_FWS_Reduced.nxs", StoreInADS=False)
+        Load("irs26176_graphite002_red.nxs", OutputWorkspace="red_ws")
+        Load("irs26173_graphite002_red.nxs", OutputWorkspace="container_ws")
+        Load("osi104367_elf.nxs", OutputWorkspace="indirect_elastic_ws")
+        Load("ILL_IN16B_FWS_Reduced.nxs", OutputWorkspace="indirect_fws_ws")
 
     def setUp(self):
+        self._red_ws = mtd["red_ws"]
+        self._container_ws = mtd["container_ws"]
+        self._indirect_elastic_ws = mtd["indirect_elastic_ws"]
         self._expected_unit = self._red_ws.getAxis(0).getUnit().unitID()
         self._expected_hist = 10
         self._expected_blocksize = 1905
+        self._indirect_fws_ws = mtd["indirect_fws_ws"]
 
         self._arguments = {
             "SampleChemicalFormula": "H2-O",
