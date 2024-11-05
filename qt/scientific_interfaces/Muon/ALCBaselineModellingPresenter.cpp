@@ -23,6 +23,10 @@ void ALCBaselineModellingPresenter::initialize() {
   m_view->subscribePresenter(this);
 }
 
+void ALCBaselineModellingPresenter::subscribe(IALCBaselineModellingPresenterSubscriber *subscriber) {
+  m_subscriber = subscriber;
+}
+
 /**
  * Perform a fit and updates the view accordingly
  */
@@ -156,6 +160,7 @@ void ALCBaselineModellingPresenter::updateCorrectedCurve() {
     m_view->setCorrectedCurve(correctedDataWs);
   else
     m_view->removePlot("Corrected");
+  m_subscriber->correctedDataChanged();
 }
 
 void ALCBaselineModellingPresenter::updateBaselineCurve() {

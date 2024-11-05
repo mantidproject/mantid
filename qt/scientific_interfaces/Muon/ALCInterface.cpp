@@ -121,6 +121,9 @@ void ALCInterface::initLayout() {
   m_peakFitting = new ALCPeakFittingPresenter(m_peakFittingView, m_peakFittingModel.get());
   m_peakFitting->initialize();
 
+  connect(m_dataLoading, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
+  m_baselineModelling->subscribe(this);
+
   assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
 
   switchStep(0); // We always start from the first step
@@ -143,6 +146,8 @@ void ALCInterface::updateBaselineData() {
     }
   }
 }
+
+void ALCInterface::correctedDataChanged() { updatePeakData(); }
 
 void ALCInterface::updatePeakData() {
 

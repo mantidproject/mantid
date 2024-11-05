@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
 #include "ALCBaselineModellingPresenter.h"
+#include "IALCBaselineModellingPresenterSubscriber.h"
 #include "ALCDataLoadingPresenter.h"
 
 #include "ui_ALCInterface.h"
@@ -32,12 +33,14 @@ class ALCPeakFittingModel;
 
 /** ALCInterface : Custom interface for Avoided Level Crossing analysis
  */
-class MANTIDQT_MUONINTERFACE_DLL ALCInterface : public API::UserSubWindow {
+class MANTIDQT_MUONINTERFACE_DLL ALCInterface : public API::UserSubWindow,
+                                                public IALCBaselineModellingPresenterSubscriber {
   Q_OBJECT
 
 public:
   ALCInterface(QWidget *parent = nullptr);
 
+  void correctedDataChanged() override;
   void closeEvent(QCloseEvent *event) override;
   static std::string name() { return "ALC"; }
   static QString categoryInfo() { return "Muon"; }
