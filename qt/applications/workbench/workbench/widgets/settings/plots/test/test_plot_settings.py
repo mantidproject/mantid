@@ -7,9 +7,12 @@
 #  This file is part of the mantid workbench
 import unittest
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.widgets.settings.plots.presenter import PlotSettings
+from workbench.widgets.settings.test_utilities.settings_test_utilities import (
+    test_presenter_has_added_mousewheel_filter_to_all_como_and_spin_boxes,
+)
 
 from qtpy.QtCore import Qt
 
@@ -95,8 +98,16 @@ class MockPlotsSettingsModel:
 
 @start_qapplication
 class PlotsSettingsTest(unittest.TestCase):
+    MOUSEWHEEL_EVENT_FILTER_PATH = "workbench.widgets.settings.plots.presenter.filter_out_mousewheel_events_from_combo_or_spin_box"
+
     def setUp(self) -> None:
         self.mock_model = MockPlotsSettingsModel()
+
+    @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
+    def test_filters_added_to_combo_and_spin_boxes(self, mock_mousewheel_filter):
+        presenter = PlotSettings(None)
+        view = presenter.view
+        test_presenter_has_added_mousewheel_filter_to_all_como_and_spin_boxes(view, mock_mousewheel_filter)
 
     def test_load_current_setting_values(self):
         # load current setting is called automatically in the constructor

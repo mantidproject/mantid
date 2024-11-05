@@ -10,6 +10,9 @@ import unittest
 from unittest.mock import Mock, MagicMock, patch
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.widgets.settings.fitting.presenter import FittingSettings
+from workbench.widgets.settings.test_utilities.settings_test_utilities import (
+    test_presenter_has_added_mousewheel_filter_to_all_como_and_spin_boxes,
+)
 
 
 class MockSettingsView(object):
@@ -48,6 +51,12 @@ class FittingSettingsTest(unittest.TestCase):
 
     def assert_connected_once(self, owner, signal):
         self.assertEqual(1, owner.receivers(signal))
+
+    @staticmethod
+    def test_filters_added_to_combo_and_spin_boxes(_, mock_mousewheel_filter):
+        presenter = FittingSettings(None)
+        view = presenter.view
+        test_presenter_has_added_mousewheel_filter_to_all_como_and_spin_boxes(view, mock_mousewheel_filter)
 
     def test_setup_signals(self, _):
         self.mock_view.auto_bkg.currentTextChanged.connect = MagicMock()

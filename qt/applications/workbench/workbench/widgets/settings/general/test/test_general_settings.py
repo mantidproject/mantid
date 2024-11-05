@@ -75,6 +75,20 @@ class GeneralSettingsTest(unittest.TestCase):
     def assert_connected_once(self, owner, signal):
         self.assertEqual(1, owner.receivers(signal))
 
+    @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
+    def test_filters_added_to_combo_and_spin_boxes(self, mock_mousewheel_filter):
+        presenter = GeneralSettings(None)
+
+        calls = [
+            call(presenter.view.facility),
+            call(presenter.view.instrument),
+            call(presenter.view.window_behaviour),
+            call(presenter.view.time_between_recovery),
+            call(presenter.view.total_number_checkpoints),
+        ]
+
+        mock_mousewheel_filter.assert_has_calls(calls, any_order=True)
+
     def test_setup_facilities_with_valid_combination(self):
         mock_facility = MockFacility("facility1")
         self.mock_model.get_facility.return_value = mock_facility.name()
