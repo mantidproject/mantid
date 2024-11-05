@@ -23,9 +23,9 @@ struct SampleLogs {
   void setLogValues(StringVec const &logValues) { m_logValues = logValues; }
   void setLogTypes(StringVec const &logTypes) { m_logTypes = logTypes; }
 
-  StringVec logNames() const { return m_logNames; }
-  StringVec logValues() const { return m_logValues; }
-  StringVec logTypes() const { return m_logTypes; }
+  const StringVec &logNames() const { return m_logNames; }
+  const StringVec &logValues() const { return m_logValues; }
+  const StringVec &logTypes() const { return m_logTypes; }
 
 private:
   StringVec m_logNames;
