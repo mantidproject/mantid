@@ -123,11 +123,24 @@ void ResNormPresenter::loadSettings(const QSettings &settings) { m_view->loadSet
  * @param filename :: The name of the workspace to plot
  */
 void ResNormPresenter::handleVanadiumInputReady(std::string const &filename) {
-  m_previewSpec = 0;
+
+  if (!m_view->plotHasCurve("Resolution")) {
+    m_view->clearPlot();
+  }
+  m_view->updatePlot("Vanadium", m_previewSpec);
+
   auto const vanWs = getADSWorkspace(filename);
-  if (vanWs)
+  if (vanWs) {
     m_view->setMaximumSpectrum(static_cast<int>(vanWs->getNumberHistograms()) - 1);
+  }
   m_view->updateSelectorRange(filename);
+}
+
+void ResNormPresenter::handleResolutionInputReady() {
+  if (!m_view->plotHasCurve("Vanadium")) {
+    m_view->clearPlot();
+  }
+  m_view->updatePlot("Resolution", 0, "", Qt::blue);
 }
 
 /**
@@ -140,14 +153,14 @@ void ResNormPresenter::handlePreviewSpecChanged(int value) {
   m_view->clearPlot();
 
   // Update vanadium plot
-  if (m_view->getDataSelector("Vanadium")->isValid())
-    try {
-      m_view->addToPlot("Vanadium", m_view->getCurrentDataName("Vanadium"), m_previewSpec);
-      m_view->addToPlot("Resolution", m_view->getCurrentDataName("Resolution"), 0, Qt::blue);
-    } catch (std::exception const &ex) {
-      g_log.warning(ex.what());
-    }
+  if (m_view->getDataSelector("Vanadium")->isValid()) {
+    m_view->updatePlot("Vanadium", m_previewSpec);
+    m_view->updatePlot("Resolution", 0, "", Qt::blue);
+  }
+  updateFitPlot();
+}
 
+void ResNormPresenter::updateFitPlot() const {
   // Update fit plot
   std::string fitWsGroupName(m_pythonExportWsName + "_Fit_Workspaces");
   std::string fitParamsName(m_pythonExportWsName + "_Fit");
@@ -166,11 +179,7 @@ void ResNormPresenter::handlePreviewSpecChanged(int value) {
 
       fit->mutableY(0) /= scaleFactors->cell<double>(m_previewSpec);
 
-      try {
-        m_view->addToPlot("Fit", fitWsName, 0, Qt::green);
-      } catch (std::exception const &ex) {
-        g_log.warning(ex.what());
-      }
+      m_view->updatePlot("Fit", 0, fitWsName, Qt::green);
 
       AnalysisDataService::Instance().addOrReplace("__" + fitWsGroupName + "_scaled", fit);
     }

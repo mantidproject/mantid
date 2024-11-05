@@ -6,12 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ResNormView.h"
 
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunView.h"
-#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
+
 #include "ResNormPresenter.h"
 
 using namespace Mantid::API;
@@ -35,6 +33,7 @@ ResNormView::~ResNormView() { m_propTree->unsetFactoryForManager(m_dblManager); 
 void ResNormView::setup() {
   // Create QtTreePropertyBrowser object
   m_propTree = new QtTreePropertyBrowser();
+  m_propTree->setIndentation(0);
   m_uiForm.treeSpace->addWidget(m_propTree);
 
   // Create Editor Factories
@@ -60,7 +59,7 @@ void ResNormView::setup() {
 
   // Connect data selector to handler method
   connect(m_uiForm.dsVanadium, &DataSelector::dataReady, this, &ResNormView::notifyVanadiumInputReady);
-  connect(m_uiForm.dsResolution, &DataSelector::dataReady, this, &ResNormView::handleResolutionInputReady);
+  connect(m_uiForm.dsResolution, &DataSelector::dataReady, this, &ResNormView::notifyResolutionInputReady);
 
   // Connect the preview spectrum selector
   connect(m_uiForm.spPreviewSpectrum, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
@@ -93,10 +92,6 @@ void ResNormView::setLoadHistory(bool doLoadHistory) {
   m_uiForm.dsResolution->setLoadProperty("LoadHistory", doLoadHistory);
 }
 
-double ResNormView::getDoubleManagerProperty(QString const &propName) const {
-  return m_dblManager->value(m_properties[propName]);
-}
-
 /**
  * Set the data selectors to use the default save directory
  * when browsing for input files.
@@ -109,14 +104,6 @@ void ResNormView::loadSettings(const QSettings &settings) {
 }
 
 void ResNormView::notifyVanadiumInputReady(const QString &filename) {
-  try {
-    if (!m_uiForm.ppPlot->hasCurve("Resolution"))
-      m_uiForm.ppPlot->clear();
-
-    m_uiForm.ppPlot->addSpectrum("Vanadium", filename, 0);
-  } catch (std::exception const &ex) {
-    g_log.warning(ex.what());
-  }
   m_presenter->handleVanadiumInputReady(filename.toStdString());
 }
 
@@ -124,13 +111,7 @@ void ResNormView::notifyPreviewSpecChanged(int value) { m_presenter->handlePrevi
 
 void ResNormView::watchADS(bool watch) const { m_uiForm.ppPlot->watchADS(watch); }
 
-void ResNormView::addToPlot(std::string const &filename, std::string const &lineName, size_t spectraNo, QColor color) {
-  m_uiForm.ppPlot->addSpectrum(QString::fromStdString(filename), QString::fromStdString(lineName), spectraNo, color);
-}
-
 void ResNormView::setMaximumSpectrum(int maximum) const { m_uiForm.spPreviewSpectrum->setMaximum(maximum); }
-
-MantidWidgets::PreviewPlot *ResNormView::getPreviewPlot() const { return m_uiForm.ppPlot; }
 
 void ResNormView::updateSelectorRange(std::string const &filename) const {
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormViewERange");
@@ -161,12 +142,16 @@ void ResNormView::updateSelectorRange(std::string const &filename) const {
  *
  * @param filename Name of the workspace to plot
  */
-void ResNormView::handleResolutionInputReady(const QString &filename) {
-  try {
-    if (!m_uiForm.ppPlot->hasCurve("Vanadium"))
-      m_uiForm.ppPlot->clear();
+void ResNormView::notifyResolutionInputReady(const QString &filename) {
+  (void)filename;
+  m_presenter->handleResolutionInputReady();
+}
 
-    m_uiForm.ppPlot->addSpectrum("Resolution", filename, 0, Qt::blue);
+void ResNormView::updatePlot(std::string const &curveName, size_t wsIndex, std::string const &filename,
+                             QColor const &color) {
+  auto const name = (curveName == "Vanadium" || curveName == "Resolution") ? getCurrentDataName(curveName) : filename;
+  try {
+    m_uiForm.ppPlot->addSpectrum(QString::fromStdString(curveName), QString::fromStdString(name), wsIndex, color);
   } catch (std::exception const &ex) {
     g_log.warning(ex.what());
   }

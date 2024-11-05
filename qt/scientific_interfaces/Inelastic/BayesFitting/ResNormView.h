@@ -29,8 +29,6 @@ public:
   virtual void setLoadHistory(bool doLoadHistory) = 0;
   virtual void loadSettings(QSettings const &settings) = 0;
 
-  virtual double getDoubleManagerProperty(QString const &propName) const = 0;
-  virtual MantidWidgets::PreviewPlot *getPreviewPlot() const = 0;
   virtual std::string getCurrentDataName(std::string const &selectorName) const = 0;
   virtual MantidWidgets::DataSelector *getDataSelector(std::string const &selectorName) const = 0;
   virtual bool plotHasCurve(std::string const &curveName) const = 0;
@@ -38,8 +36,8 @@ public:
   virtual void setMaximumSpectrum(int maximum) const = 0;
   virtual void watchADS(bool watch) const = 0;
 
-  virtual void addToPlot(std::string const &filename, std::string const &lineName, size_t spectraNo,
-                         QColor color = QColor()) = 0;
+  virtual void updatePlot(std::string const &curveName, size_t wsIndex, std::string const &filename = "",
+                          QColor const &color = QColor()) = 0;
   virtual void clearPlot() const = 0;
 
   virtual void setPlotResultEnabled(bool enabled) const = 0;
@@ -63,8 +61,6 @@ public:
   void setLoadHistory(bool doLoadHistory) override;
   void loadSettings(QSettings const &settings) override;
 
-  double getDoubleManagerProperty(QString const &propName) const override;
-  MantidWidgets::PreviewPlot *getPreviewPlot() const override;
   std::string getCurrentDataName(std::string const &selectorName) const override;
   MantidWidgets::DataSelector *getDataSelector(std::string const &selectorName) const override;
   bool plotHasCurve(std::string const &curveName) const override;
@@ -72,8 +68,8 @@ public:
   void setMaximumSpectrum(int maximum) const override;
   void watchADS(bool watch) const override;
 
-  void addToPlot(std::string const &filename, std::string const &lineName, size_t spectraNo,
-                 QColor color = QColor()) override;
+  void updatePlot(std::string const &curveName, size_t wsIndex, std::string const &filename = "",
+                  QColor const &color = QColor()) override;
   void clearPlot() const override;
 
   void setPlotResultEnabled(bool enabled) const override;
@@ -85,7 +81,7 @@ private slots:
   /// Handle when the vanadium input is ready
   void notifyVanadiumInputReady(const QString &filename);
   /// Handle when the resolution input is ready
-  void handleResolutionInputReady(const QString &filename);
+  void notifyResolutionInputReady(const QString &filename);
   void notifyPlotCurrentPreviewClicked();
   void notifyPlotClicked();
   void notifySaveClicked();
