@@ -74,22 +74,25 @@ void ALCDataLoadingView::initialize() {
   m_ui.runs->doButtonOpt(MantidQt::API::FileFinderWidget::ButtonOpts::None);
 
   // Set up connections
-  connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_ui.load, SIGNAL(clicked()), this, SLOT(notifyLoadClicked()));
-  connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this, SLOT(instrumentChanged(QString)));
-  connect(m_ui.runs, SIGNAL(fileTextChanged(const QString &)), this, SLOT(notifyRunsEditingChanged()));
-  connect(m_ui.runs, SIGNAL(findingFiles()), this, SLOT(notifyRunsEditingFinished()));
-  connect(m_ui.runs, SIGNAL(fileFindingFinished()), this, SLOT(notifyRunsFoundFinished()));
-  connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()), this, SLOT(openManageDirectories()));
-  connect(m_ui.periodInfo, SIGNAL(clicked()), this, SLOT(notifyPeriodInfoClicked()));
-  connect(m_ui.runsAutoAdd, SIGNAL(toggled(bool)), this, SLOT(runsAutoAddToggled(bool)));
+  connect(m_ui.help, &QPushButton::clicked, this, &ALCDataLoadingView::help);
+  connect(m_ui.load, &QPushButton::clicked, this, &ALCDataLoadingView::notifyLoadClicked);
+  connect(m_ui.instrument, &QComboBox::currentTextChanged, this, &ALCDataLoadingView::instrumentChanged);
+  connect(m_ui.runs, &MantidQt::API::FileFinderWidget::fileTextChanged, this,
+          &ALCDataLoadingView::notifyRunsEditingChanged);
+  connect(m_ui.runs, &MantidQt::API::FileFinderWidget::findingFiles, this,
+          &ALCDataLoadingView::notifyRunsEditingFinished);
+  connect(m_ui.runs, &MantidQt::API::FileFinderWidget::fileFindingFinished, this,
+          &ALCDataLoadingView::notifyRunsFoundFinished);
+  connect(m_ui.manageDirectoriesButton, &QPushButton::clicked, this, &ALCDataLoadingView::openManageDirectories);
+  connect(m_ui.periodInfo, &QPushButton::clicked, this, &ALCDataLoadingView::notifyPeriodInfoClicked);
+  connect(m_ui.runsAutoAdd, &QAbstractButton::toggled, this, &ALCDataLoadingView::runsAutoAddToggled);
 
   // Watcher to check if directory to load data from changes
   // Need to connect using function pointers because directoryChanged() is somehow not recognised as a signal
   connect(m_watcher, &QFileSystemWatcher::directoryChanged, [this]() { m_presenter->setDirectoryChanged(true); });
 
   // Timer to send timeout() signal intermitently
-  connect(m_timer, SIGNAL(timeout()), this, SLOT(notifyTimerEvent()));
+  connect(m_timer, &QTimer::timeout, this, &ALCDataLoadingView::notifyTimerEvent);
 }
 
 /**
