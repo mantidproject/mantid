@@ -8,6 +8,7 @@ import unittest
 from unittest import mock
 import os
 import shutil
+import tempfile
 
 from mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.gsas2.call_G2sc import (
     add_histograms,
@@ -32,11 +33,7 @@ import numpy as np
 class GSAS2ViewTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
-        cls.temp_save_directory = os.path.join(os.path.dirname(__file__), "temp")
-        try:
-            os.makedirs(cls.temp_save_directory)
-        except FileExistsError:
-            pass
+        cls.temp_save_directory = tempfile.mkdtemp()
 
     @classmethod
     def tearDownClass(cls) -> None:
