@@ -386,7 +386,7 @@ class FitFunctionsTest(unittest.TestCase):
         g0 = FunctionWrapper("Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = FunctionWrapper("Gaussian", Height=8.5, Sigma=1.25, PeakCentre=12)
         g2 = FunctionWrapper("Gaussian", Height=9.5, Sigma=1.3, PeakCentre=14)
-        l = FunctionWrapper("Lorentzian", PeakCentre=9, Amplitude=2.4, FWHM=3)
+        lorentzian = FunctionWrapper("Lorentzian", PeakCentre=9, Amplitude=2.4, FWHM=3)
         lb = FunctionWrapper("LinearBackground")
 
         # Test already flat composite function, no change should occur
@@ -397,7 +397,7 @@ class FitFunctionsTest(unittest.TestCase):
         self.assertEqual(fc1_str, c1_str)
 
         # Test composite function of depth 1
-        c2 = CompositeFunctionWrapper(c1, l)
+        c2 = CompositeFunctionWrapper(c1, lorentzian)
         fc2 = c2.flatten()
         fc2_str = str(fc2)
         self.assertEqual(fc2_str.count("("), 0)
@@ -417,7 +417,7 @@ class FitFunctionsTest(unittest.TestCase):
 
         # Test product function of depth 1
         p1 = ProductFunctionWrapper(lb, g0, g1)
-        p2 = ProductFunctionWrapper(p1, l)
+        p2 = ProductFunctionWrapper(p1, lorentzian)
         fp2 = p2.flatten()
         self.assertTrue(isinstance(fp2, ProductFunctionWrapper))
         fp2_str = str(fp2)

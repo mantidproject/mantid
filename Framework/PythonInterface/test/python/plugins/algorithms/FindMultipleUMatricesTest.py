@@ -1,3 +1,4 @@
+# ruff: noqa: E741  # Ambiguous variable name
 import unittest
 
 from mantid.simpleapi import (
