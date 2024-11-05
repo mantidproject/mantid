@@ -18,10 +18,6 @@
 #include <Poco/ActiveResult.h>
 #include <algorithm>
 
-namespace {
-bool is_decimal(const char character) { return character == '.'; }
-} // namespace
-
 using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
@@ -260,9 +256,12 @@ bool ALCDataLoadingModel::checkCustomGrouping(const std::string &detGroupingType
  * @returns :: True if grouping OK, false if bad
  */
 std::string ALCDataLoadingModel::isCustomGroupingValid(const std::string &group, bool &isValid) {
+
+  auto isDecimal = [](const char c) { return c == '.'; };
+
   if (!std::isdigit(static_cast<unsigned char>(group[0])) ||
       std::any_of(std::begin(group), std::end(group), ::isalpha) ||
-      std::any_of(std::begin(group), std::end(group), is_decimal)) {
+      std::any_of(std::begin(group), std::end(group), isDecimal)) {
     isValid = false;
     return "";
   }
