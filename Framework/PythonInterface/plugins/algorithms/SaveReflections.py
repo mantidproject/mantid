@@ -117,6 +117,15 @@ class SaveReflections(PythonAlgorithm):
             doc="Will only save peaks with intensity/sigma ratio greater than e or equal to MinIntensOverSigma.",
         )
 
+        self.declareProperty(
+            name="SeparateBatchNumbers",
+            defaultValue=False,
+            direction=Direction.Input,
+            doc="If True all peaks from all runs will be labelled with the same batch number (in SHELX) or COD in"
+            "Jana/Fullprof - i.e. same scale factor will be used for all runs. If False then a different scale "
+            "factor will be used for each run number in the peak table.",
+        )
+
     def PyExec(self):
         """Execute the algorithm"""
         workspace = self.getProperty("InputWorkspace").value
@@ -151,10 +160,17 @@ class SaveReflections(PythonAlgorithm):
                 f"There are no peaks with Intens/Sigma >= {min_i_over_sig} in peak workspace {workspace.name()}. "
                 f"An empty file will be produced."
             )
-        # scale intensity and sigma
+        # get batch numebrs using run numbers
+        if self.getProperty("SeparateBatchNumbers").value:
+            _, batch_nums = np.unique(filtered_workspace.column("RunNumber"), return_inverse=True)
+        else:
+            batch_nums = np.ones(filtered_workspace.getNumberPeaks(), dtype=int)
+
+        # scale intensity, sigma and batch num
         for ipk, peak in enumerate(filtered_workspace):
             peak.setIntensity(peak.getIntensity() * scale)
             peak.setSigmaIntensity(peak.getSigmaIntensity() * scale)
+            peak.setRunNumber(batch_nums[ipk])
 
         FORMAT_MAP[output_format]()(file_name, filtered_workspace, split_files)
 
@@ -231,7 +247,7 @@ class FullprofFormat(object):
                 hkl.extend(iq)
             hkls = "".join(["{:>4.0f}".format(item) for item in hkl])
 
-            data = (peak.getIntensity(), peak.getSigmaIntensity(), 1, peak.getWavelength())
+            data = (peak.getIntensity(), peak.getSigmaIntensity(), peak.getRunNumber(), peak.getWavelength())
             line = "{:>12.2f}{:>12.2f}{:>5.0f}{:>10.4f}\n".format(*data)
             line = "".join([hkls, line])
 
@@ -346,13 +362,14 @@ class JanaFormat(object):
                         modulation_indices,
                         peak.getIntensity(),
                         peak.getSigmaIntensity(),
+                        peak.getRunNumber(),
                         peak.getWavelength(),
                         get_two_theta(peak.getDSpacing(), peak.getWavelength()),
                         peak.getAbsorptionWeightedPathLength(),
                     )
                 )
 
-        def create_peak_line(self, hkl, mnp, intensity, sig_int, wavelength, two_theta, t_bar):
+        def create_peak_line(self, hkl, mnp, intensity, sig_int, batch_num, wavelength, two_theta, t_bar):
             """
             Write the raw peak data to a file.
 
@@ -361,6 +378,7 @@ class JanaFormat(object):
             :param mnp: List of mnp values
             :param intensity: Intensity of the peak
             :param sig_int: Signal value
+            :param batch_num: Or ScaleID written in COD column
             :param wavelength: Wavelength in angstroms
             :param two_theta: Two theta of detector
             :param t_bar: absorption weighted path length for the detector/wavelength
@@ -374,7 +392,7 @@ class JanaFormat(object):
                 mod_indices,
                 intensity,
                 sig_int,
-                1,
+                batch_num,
                 wavelength,
                 two_theta,
                 1.0,
@@ -463,7 +481,7 @@ class SHELXFormat(object):
             hkl, _ = get_intHKLM(peak, workspace)  # no mnp as not modulated
             data = hkl + [peak.getIntensity(), peak.getSigmaIntensity()]
             if not is_CW:
-                data.extend([1, peak.getWavelength()])  # hard code scaleID=1
+                data.extend([peak.getRunNumber(), peak.getWavelength()])  # ScaleID (from run number), wavelength
             line = col_format.format(*data)
             f_handle.write(line)
         # write row of zeros to end file
