@@ -50,7 +50,7 @@ public:
     TS_ASSERT_EQUALS(sumCounts, 100); // Ensure that the total number of counts is correct
   }
 
-void test_exec() {
+  void test_exec() {
     CreateMonteCarloWorkspace alg;
     alg.initialize();
 

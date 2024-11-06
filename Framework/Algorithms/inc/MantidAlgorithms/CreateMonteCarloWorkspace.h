@@ -6,12 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <vector>
 #include <random>
+#include <vector>
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
-
 
 namespace Mantid {
 namespace Algorithms {
