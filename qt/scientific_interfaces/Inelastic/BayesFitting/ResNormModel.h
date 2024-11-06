@@ -38,8 +38,8 @@ public:
   virtual ~IResNormModel() = default;
   virtual double eMin() const = 0;
   virtual double eMax() const = 0;
-  virtual void setEMin(double value) = 0;
-  virtual void setEMax(double value) = 0;
+  virtual void setEMin(double const value) = 0;
+  virtual void setEMax(double const value) = 0;
 
   virtual API::IConfiguredAlgorithm_sptr setupResNormAlgorithm(std::string const &outputWsName,
                                                                std::string const &vanWorkspace,
@@ -61,8 +61,8 @@ public:
 
   double eMin() const override;
   double eMax() const override;
-  void setEMin(double value) override;
-  void setEMax(double value) override;
+  void setEMin(double const value) override;
+  void setEMax(double const value) override;
 
   API::IConfiguredAlgorithm_sptr setupResNormAlgorithm(std::string const &outputWsName, std::string const &vanWorkspace,
                                                        std::string const &resWorkspace) const override;

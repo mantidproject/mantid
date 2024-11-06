@@ -26,8 +26,8 @@ ResNormModel::ResNormModel() : m_eMin(0), m_eMax(0) {
 double ResNormModel::eMin() const { return m_eMin; }
 double ResNormModel::eMax() const { return m_eMax; }
 
-void ResNormModel::setEMin(double value) { m_eMin = value; }
-void ResNormModel::setEMax(double value) { m_eMax = value; }
+void ResNormModel::setEMin(double const value) { m_eMin = value; }
+void ResNormModel::setEMax(double const value) { m_eMax = value; }
 
 API::IConfiguredAlgorithm_sptr ResNormModel::setupResNormAlgorithm(std::string const &outputWsName,
                                                                    std::string const &vanWorkspace,
