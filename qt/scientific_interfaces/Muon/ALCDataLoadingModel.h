@@ -21,7 +21,11 @@ class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingModel : public IALCDataLoadingMod
 public:
   ALCDataLoadingModel();
   ~ALCDataLoadingModel() override = default;
-  void load(const IALCDataLoadingView *view) override;
+  void load(const std::string &log, const std::string &function, const std::string &calculationType,
+            const std::string &deadTimeType, const std::string &deadTimeFile, const std::string &redPeriod,
+            const std::optional<std::pair<double, double>> &timeRange, const std::string &detectorGroupingType,
+            const std::string &forwardGrouping, const std::string &backwardGrouping, const std::string &alphaValue,
+            const bool &subtractIsChecked, const std::string &greenPeriod) override;
   void cancelLoading() const override;
   Mantid::API::MatrixWorkspace_sptr exportWorkspace() override;
   bool checkCustomGrouping(const std::string &detGroupingType, const std::string &forwardGrouping,

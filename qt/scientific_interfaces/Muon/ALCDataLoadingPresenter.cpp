@@ -122,7 +122,10 @@ void ALCDataLoadingPresenter::load() {
   }
 
   try {
-    m_model->load(m_view);
+    m_model->load(m_view->log(), m_view->function(), m_view->calculationType(), m_view->deadTimeType(),
+                  m_view->deadTimeFile(), m_view->redPeriod(), m_view->timeRange(), m_view->detectorGroupingType(),
+                  m_view->getForwardGrouping(), m_view->getBackwardGrouping(), m_view->getAlphaValue(),
+                  m_view->subtractIsChecked(), m_view->greenPeriod());
     // Plot spectrum 0. It is either red period (if subtract is unchecked) or
     // red - green (if subtract is checked)
     m_view->setDataCurve(m_model->getLoadedData());

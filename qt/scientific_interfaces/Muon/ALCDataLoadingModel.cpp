@@ -122,23 +122,28 @@ void ALCDataLoadingModel::setWsForMuonInfo(const std::string &filename) {
  * Load new data and update the view accordingly
  * @param files :: [input] range of files (user-specified or auto generated)
  */
-void ALCDataLoadingModel::load(const IALCDataLoadingView *view) {
+void ALCDataLoadingModel::load(const std::string &log, const std::string &function, const std::string &calculationType,
+                               const std::string &deadTimeType, const std::string &deadTimeFile,
+                               const std::string &redPeriod, const std::optional<std::pair<double, double>> &timeRange,
+                               const std::string &detectorGroupingType, const std::string &forwardGrouping,
+                               const std::string &backwardGrouping, const std::string &alphaValue,
+                               const bool &subtractIsChecked, const std::string &greenPeriod) {
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
   alg->setAlwaysStoreInADS(false); // Don't want workspaces in the ADS
 
   // Change first last run to WorkspaceNames
   alg->setProperty("WorkspaceNames", m_filesToLoad);
-  alg->setProperty("LogValue", view->log());
-  alg->setProperty("Function", view->function());
-  alg->setProperty("Type", view->calculationType());
-  alg->setProperty("DeadTimeCorrType", view->deadTimeType());
-  alg->setProperty("Red", view->redPeriod());
+  alg->setProperty("LogValue", log);
+  alg->setProperty("Function", function);
+  alg->setProperty("Type", calculationType);
+  alg->setProperty("DeadTimeCorrType", deadTimeType);
+  alg->setProperty("Red", redPeriod);
 
   // If time limiting requested, set min/max times
-  if (auto timeRange = view->timeRange()) {
-    double timeMin = (*timeRange).first;
-    double timeMax = (*timeRange).second;
+  if (auto tRange = timeRange) {
+    double timeMin = (*tRange).first;
+    double timeMax = (*tRange).second;
     if (timeMin >= timeMax) {
       throw std::invalid_argument("Invalid time limits");
     }
@@ -147,22 +152,22 @@ void ALCDataLoadingModel::load(const IALCDataLoadingView *view) {
   }
 
   // If corrections from custom file requested, set file property
-  if (view->deadTimeType() == "FromSpecifiedFile") {
-    alg->setProperty("DeadTimeCorrFile", view->deadTimeFile());
+  if (deadTimeType == "FromSpecifiedFile") {
+    alg->setProperty("DeadTimeCorrFile", deadTimeFile);
   }
 
   // If custom grouping requested, set forward/backward groupings
-  if (view->detectorGroupingType() == "Custom") {
-    alg->setProperty("ForwardSpectra", view->getForwardGrouping());
-    alg->setProperty("BackwardSpectra", view->getBackwardGrouping());
+  if (detectorGroupingType == "Custom") {
+    alg->setProperty("ForwardSpectra", forwardGrouping);
+    alg->setProperty("BackwardSpectra", backwardGrouping);
   }
 
   // Set alpha for balance parameter
-  alg->setProperty("Alpha", view->getAlphaValue());
+  alg->setProperty("Alpha", alphaValue);
 
   // If Subtract checkbox is selected, set green period
-  if (view->subtractIsChecked()) {
-    alg->setProperty("Green", view->greenPeriod());
+  if (subtractIsChecked) {
+    alg->setProperty("Green", greenPeriod);
   }
 
   alg->setPropertyValue("OutputWorkspace", "__NotUsed");
@@ -193,7 +198,7 @@ void ALCDataLoadingModel::load(const IALCDataLoadingView *view) {
   assert(m_loadedData);
   // If subtract is not checked, only one spectrum,
   // else four spectra
-  if (!view->subtractIsChecked()) {
+  if (!subtractIsChecked) {
     assert(m_loadedData->getNumberHistograms() == 1);
   } else {
     assert(m_loadedData->getNumberHistograms() == 4);

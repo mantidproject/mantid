@@ -16,7 +16,11 @@ class MANTIDQT_MUONINTERFACE_DLL IALCDataLoadingModel {
 
 public:
   virtual ~IALCDataLoadingModel() = default;
-  virtual void load(const IALCDataLoadingView *view) = 0;
+  virtual void load(const std::string &log, const std::string &function, const std::string &calculationType,
+                    const std::string &deadTimeType, const std::string &deadTimeFile, const std::string &redPeriod,
+                    const std::optional<std::pair<double, double>> &timeRange, const std::string &detectorGroupingType,
+                    const std::string &forwardGrouping, const std::string &backwardGrouping,
+                    const std::string &alphaValue, const bool &subtractIsChecked, const std::string &greenPeriod) = 0;
   virtual void cancelLoading() const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr exportWorkspace() = 0;
   virtual bool checkCustomGrouping(const std::string &detGroupingType, const std::string &forwardGrouping,
