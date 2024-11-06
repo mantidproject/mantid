@@ -48,7 +48,7 @@ class FittingSettings(object):
         else:
             self.view.background_args.clear()
 
-        default_peak = self.model.get_current_peak()
+        default_peak = self.model.get_default_peak()
         if self.view.default_peak.findText(default_peak, Qt.MatchExactly) != -1:
             self.view.default_peak.setCurrentText(default_peak)
         else:

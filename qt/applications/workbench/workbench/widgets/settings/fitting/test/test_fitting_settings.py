@@ -29,7 +29,7 @@ class MockFittingSettingsModel:
         self.get_background_function_names = MagicMock()
         self.get_peak_function_names = MagicMock()
         self.get_auto_background = MagicMock()
-        self.get_current_peak = MagicMock()
+        self.get_default_peak = MagicMock()
         self.get_fwhm = MagicMock()
         self.get_tolerance = MagicMock()
         self.set_auto_background = MagicMock()

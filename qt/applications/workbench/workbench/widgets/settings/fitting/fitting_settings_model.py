@@ -33,7 +33,7 @@ class FittingSettingsModel(ConfigSettingsChangesModel):
     def get_auto_background(self) -> str:
         return self.get_saved_value(FittingProperties.AUTO_BACKGROUND.value)
 
-    def get_current_peak(self) -> str:
+    def get_default_peak(self) -> str:
         return self.get_saved_value(FittingProperties.DEFAULT_PEAK.value)
 
     def get_fwhm(self) -> str:
