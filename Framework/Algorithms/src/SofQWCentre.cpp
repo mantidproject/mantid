@@ -22,6 +22,12 @@ DECLARE_ALGORITHM(SofQWCentre)
 using namespace Kernel;
 using namespace API;
 
+/// Default constructor
+SofQWCentre::SofQWCentre() {
+  useAlgorithm("SofQWNormalisedPolygon");
+  deprecatedDate("2024-11-07");
+}
+
 /**
  * Create the input properties
  */

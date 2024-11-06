@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/SofQCommon.h"
 
@@ -33,8 +34,10 @@ common bins. </LI>
 @author Russell Taylor, Tessella plc
 @date 24/02/2010
 */
-class MANTID_ALGORITHMS_DLL SofQWCentre final : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SofQWCentre final : public API::Algorithm, public API::DeprecatedAlgorithm {
 public:
+  /// Default constructor
+  SofQWCentre();
   /// Algorithm's name
   const std::string name() const override { return "SofQWCentre"; }
   /// Summary of algorithms purpose
