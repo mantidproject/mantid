@@ -218,8 +218,16 @@ std::string EnumeratedStringProperty<E, names>::setValue(E const value) {
  */
 template <class E, std::vector<std::string> const *const names>
 std::string EnumeratedStringProperty<E, names>::setValue(std::string const &value) {
-  this->m_value = static_cast<EnumeratedString<E, names>>(value);
-  return "";
+  try {
+    this->m_value = static_cast<EnumeratedString<E, names>>(value);
+  } catch (std::runtime_error &exc) {
+    const std::string msg = exc.what();
+    if (msg.empty())
+      return "value \"" + value + "\" not in allowed list";
+    else
+      return msg;
+  }
+  return ""; // everything was fine
 }
 
 /** Set the value of the property from a string representation.
