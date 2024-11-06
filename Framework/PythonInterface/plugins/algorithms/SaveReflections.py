@@ -151,8 +151,12 @@ class SaveReflections(PythonAlgorithm):
                 f"There are no peaks with Intens/Sigma >= {min_i_over_sig} in peak workspace {workspace.name()}. "
                 f"An empty file will be produced."
             )
+        # scale intensity and sigma
+        for ipk, peak in enumerate(filtered_workspace):
+            peak.setIntensity(peak.getIntensity() * scale)
+            peak.setSigmaIntensity(peak.getSigmaIntensity() * scale)
 
-        FORMAT_MAP[output_format]()(file_name, filtered_workspace, split_files, scale)
+        FORMAT_MAP[output_format]()(file_name, filtered_workspace, split_files)
 
 
 # ------------------------------------------------------------------------------------------------------
@@ -166,7 +170,7 @@ class FullprofFormat(object):
     sigma, crystal domain, and wavelength.
     """
 
-    def __call__(self, file_name, workspace, split_files, scale):
+    def __call__(self, file_name, workspace, split_files):
         """Write a PeaksWorkspace to an ASCII file using this formatter.
 
         :param file_name: the file name to output data to.
@@ -175,7 +179,7 @@ class FullprofFormat(object):
         """
         with open(file_name, "w") as f_handle:
             self.write_header(f_handle, workspace)
-            self.write_peaks(f_handle, workspace, scale)
+            self.write_peaks(f_handle, workspace)
 
     def write_header(self, f_handle, workspace):
         """Write the header of the Fullprof file format
@@ -209,7 +213,7 @@ class FullprofFormat(object):
             mod_colname = "   m"
         f_handle.write("#  h   k   l{}      Fsqr       s(Fsqr)   Cod   Lambda\n".format(mod_colname))
 
-    def write_peaks(self, f_handle, workspace, scale):
+    def write_peaks(self, f_handle, workspace):
         """Write all the peaks in the workspace to file.
 
         :param f_handle: handle to the file to write to.
@@ -227,7 +231,7 @@ class FullprofFormat(object):
                 hkl.extend(iq)
             hkls = "".join(["{:>4.0f}".format(item) for item in hkl])
 
-            data = (peak.getIntensity() * scale, peak.getSigmaIntensity() * scale, 1, peak.getWavelength())
+            data = (peak.getIntensity(), peak.getSigmaIntensity(), 1, peak.getWavelength())
             line = "{:>12.2f}{:>12.2f}{:>5.0f}{:>10.4f}\n".format(*data)
             line = "".join([hkls, line])
 
@@ -251,12 +255,11 @@ class JanaFormat(object):
     class FileBuilder(object):
         """Encapsulate information to build a single Jana file"""
 
-        def __init__(self, filepath, workspace, num_mod_vec, modulation_col_num=None, scale=1):
+        def __init__(self, filepath, workspace, num_mod_vec, modulation_col_num=None):
             self._filepath = filepath
             self._workspace = workspace
             self._num_mod_vec = num_mod_vec
             self._modulation_col_num = modulation_col_num
-            self._scale = scale
 
             self._headers = []
             self._peaks = []
@@ -369,8 +372,8 @@ class JanaFormat(object):
                 hkl[1],
                 hkl[2],
                 mod_indices,
-                intensity * self._scale,
-                sig_int * self._scale,
+                intensity,
+                sig_int,
                 1,
                 wavelength,
                 two_theta,
@@ -384,7 +387,7 @@ class JanaFormat(object):
                 handle.write("".join(self._headers))
                 handle.write("".join(self._peaks))
 
-    def __call__(self, file_name, workspace, split_files, scale):
+    def __call__(self, file_name, workspace, split_files):
         """Write a PeaksWorkspace or TableWorkspace with the appropriate columns
         to an ASCII file using this formatter.
 
@@ -395,13 +398,13 @@ class JanaFormat(object):
                             files. The suffix -mi where identifier=1,2...n
                             is appended to each file
         """
-        builders = self._create_file_builders(file_name, workspace, split_files, scale)
+        builders = self._create_file_builders(file_name, workspace, split_files)
         for builder in builders:
             builder.build_headers()
             builder.build_peaks_info()
             builder.write()
 
-    def _create_file_builders(self, file_name, workspace, split_files, scale):
+    def _create_file_builders(self, file_name, workspace, split_files):
         """Create a sequence of JanaFileBuilder to contain the information.
 
         :param file_name: Filename given by user
@@ -413,11 +416,11 @@ class JanaFormat(object):
         if split_files and num_mod_vec > 1:
             name, ext = osp.splitext(file_name)
             builders = [
-                JanaFormat.FileBuilder("{}-m{}{}".format(name, col_num, ext), workspace, num_mod_vec, col_num, scale)
+                JanaFormat.FileBuilder("{}-m{}{}".format(name, col_num, ext), workspace, num_mod_vec, col_num)
                 for col_num in range(1, num_mod_vec + 1)
             ]
         else:
-            builders = [JanaFormat.FileBuilder(file_name, workspace, num_mod_vec, None, scale)]
+            builders = [JanaFormat.FileBuilder(file_name, workspace, num_mod_vec, None)]
 
         return builders
 
@@ -433,20 +436,19 @@ class SHELXFormat(object):
     For TOF Laue there are two extra columns: scaleID and wavelength.
     """
 
-    def __call__(self, file_name, workspace, split_files, scale):
+    def __call__(self, file_name, workspace, split_files):
         """
         Write a PeaksWorkspace to an ASCII file using this formatter.
         :param file_name: the file name to output data to.
         :param workspace: the PeaksWorkspace to write to file.
-        :param scale: scale peaks to fit in column width
         """
         if has_modulated_indexing(workspace):
             raise RuntimeError("Cannot currently save modulated structures to GSAS or SHELX formats")
 
         with open(file_name, "w") as f_handle:
-            self.write_peaks(f_handle, workspace, scale)
+            self.write_peaks(f_handle, workspace)
 
-    def write_peaks(self, f_handle, workspace, scale):
+    def write_peaks(self, f_handle, workspace):
         """Write all the peaks in the workspace to file.
 
         :param f_handle: handle to the file to write to.
@@ -459,7 +461,7 @@ class SHELXFormat(object):
         col_format += "\n"
         for i, peak in enumerate(workspace):
             hkl, _ = get_intHKLM(peak, workspace)  # no mnp as not modulated
-            data = hkl + [peak.getIntensity() * scale, peak.getSigmaIntensity() * scale]
+            data = hkl + [peak.getIntensity(), peak.getSigmaIntensity()]
             if not is_CW:
                 data.extend([1, peak.getWavelength()])  # hard code scaleID=1
             line = col_format.format(*data)
@@ -479,7 +481,7 @@ class SaveHKLFormat(object):
     more information see the SaveHKL algorithm documentation.
     """
 
-    def __call__(self, file_name, workspace, _, scale):
+    def __call__(self, file_name, workspace, _):
         """Write a PeaksWorkspace to an ASCII file using this formatter.
 
         :param file_name: the file name to output data to.
@@ -498,7 +500,7 @@ class SaveHKLFormat(object):
         else:
             from mantid.simpleapi import SaveHKL
 
-            SaveHKL(Filename=file_name, InputWorkspace=workspace, ScalePeaks=scale)
+            SaveHKL(Filename=file_name, InputWorkspace=workspace)
 
 
 class ReflectionFormat(Enum):
