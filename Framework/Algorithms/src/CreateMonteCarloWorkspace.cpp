@@ -61,37 +61,38 @@ void CreateMonteCarloWorkspace::init() {
 
 //----------------------------------------------------------------------------------------------
 
-void CreateMonteCarloWorkspace::fillHistogramWithRandomData(auto &outputY, const std::vector<double> &cdf,
-                                                            int numIterations, std::mt19937 &gen) {
-    std::uniform_real_distribution<> dis(0.0, 1.0);
-    for (int i = 0; i < numIterations; ++i) {
-        double randomNum = dis(gen);
-        // Find the bin corresponding to the random number in the CDF
-        auto it = std::lower_bound(cdf.begin(), cdf.end(), randomNum);
-        size_t index = std::distance(cdf.begin(), it);
+Mantid::HistogramData::HistogramY CreateMonteCarloWorkspace::fillHistogramWithRandomData(const std::vector<double> &cdf,
+                                                                                         int numIterations,
+                                                                                         std::mt19937 &gen) {
+  Mantid::HistogramData::HistogramY outputY(cdf.size(), 0.0);
+  std::uniform_real_distribution<> dis(0.0, 1.0);
+  for (int i = 0; i < numIterations; ++i) {
+    double randomNum = dis(gen);
+    // Find the bin corresponding to the random number in the CDF
+    auto it = std::lower_bound(cdf.begin(), cdf.end(), randomNum);
+    size_t index = std::distance(cdf.begin(), it);
 
-        // Ensure the index is within bounds
-        if (index < outputY.size()) {
-            outputY[index] += 1.0;
-        }
+    // Ensure the index is within bounds
+    if (index < outputY.size()) {
+      outputY[index] += 1.0;
     }
+  }
+  return outputY;
 }
 
-vector<double> CreateMonteCarloWorkspace::computeNormalizedCDF(const auto &yData) {
-    std::vector<double> cdf(yData.size());
-    std::partial_sum(yData.begin(), yData.end(), cdf.begin());
-    double total_counts = cdf.back();
-    // Normalize the CDF
-    std::transform(cdf.begin(), cdf.end(), cdf.begin(),
-                   [total_counts](double val) { return val / total_counts; });
-    return cdf;
+std::vector<double> CreateMonteCarloWorkspace::computeNormalizedCDF(const Mantid::HistogramData::HistogramY &yData) {
+  std::vector<double> cdf(yData.size());
+  std::partial_sum(yData.begin(), yData.end(), cdf.begin());
+  double total_counts = cdf.back();
+  // Normalize the CDF
+  std::transform(cdf.begin(), cdf.end(), cdf.begin(), [total_counts](double val) { return val / total_counts; });
+  return cdf;
 }
 
-int  CreateMonteCarloWorkspace::computeNumberOfIterations(const auto &yData) {
+int CreateMonteCarloWorkspace::computeNumberOfIterations(const Mantid::HistogramData::HistogramY &yData) {
   double total_counts = std::accumulate(yData.begin(), yData.end(), 0.0);
   return static_cast<int>(std::round(total_counts));
 }
-
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
@@ -102,28 +103,24 @@ void CreateMonteCarloWorkspace::exec() {
   MatrixWorkspace_sptr instWs = getProperty("InputWorkspace");
   int seed_input = getProperty("Seed");
 
-  // Extract the histogram data from the input workspace
-  const Mantid::HistogramData::Histogram &hist = instWs->histogram(0);
-  const auto &yData = hist.y(); // Counts in each bin
+  const Mantid::HistogramData::HistogramY &yData = instWs->y(0); // Counts in each bin
 
   int numIterations = computeNumberOfIterations(yData);
-  vector<double> cdf = computeNormalizedCDF(yData);
+  std::vector<double> cdf = computeNormalizedCDF(yData);
 
   MatrixWorkspace_sptr outputWs = WorkspaceFactory::Instance().create(instWs);
 
   // Copy the bin boundaries (X-values) from the input to the output
-  outputWs->setSharedX(0, hist.sharedX());
+  outputWs->setSharedX(0, instWs->sharedX(0));
 
-  auto &outputY = outputWs->mutableY(0);
-  outputY.assign(outputY.size(), 0.0);
+  std::mt19937 gen(seed_input);
 
-  mt19937 gen(seed_input);
+  Mantid::HistogramData::HistogramY outputY = fillHistogramWithRandomData(cdf, numIterations, gen);
 
-  fillHistogramWithRandomData(outputY, cdf, numIterations, gen);
+  outputWs->mutableY(0) = outputY;
 
   setProperty("OutputWorkspace", outputWs);
 }
-
 
 } // namespace Algorithms
 } // namespace Mantid
