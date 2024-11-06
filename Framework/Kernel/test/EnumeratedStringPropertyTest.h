@@ -48,15 +48,40 @@ public:
   static EnumeratedStringPropertyTest *createSuite() { return new EnumeratedStringPropertyTest(); }
   static void destroySuite(EnumeratedStringPropertyTest *suite) { delete suite; }
 
-  void testConstructor() {
-    g_log.notice("\ntestConstructor...");
+  void testAlgorithm() {
+    g_log.notice("\ntestAlgorithm...");
+
     testalg alg;
     alg.initialize();
     alg.execute();
     TS_ASSERT_EQUALS(alg.existsProperty("testname"), true)
     TS_ASSERT_EQUALS(alg.getPropertyValue("testname"), "Frederic");
+
     TS_ASSERT_EQUALS(alg.getPropertyValue("testname"), coolGuyNames[0]);
     alg.setPropertyValue("testname", "Joseph");
     TS_ASSERT_EQUALS(alg.getPropertyValue("testname"), "Joseph");
+  }
+
+  void testAssign() {
+    g_log.notice("\ntestAssign...");
+    auto prop = EnumeratedStringProperty<CoolGuys, &coolGuyNames>("testname");
+    // by default it is fine
+    TS_ASSERT(prop.isValid().empty());
+    TS_ASSERT_EQUALS(prop.value(), "Frederic");
+    TS_ASSERT_EQUALS(prop(), CoolGuys::Fred);
+
+    // set to a good value
+    TS_ASSERT_THROWS_NOTHING(prop.setValue("Joseph"));
+    TS_ASSERT(prop.isValid().empty());
+    TS_ASSERT_EQUALS(prop.value(), "Joseph");
+    TS_ASSERT_EQUALS(prop(), CoolGuys::Joe);
+
+    // set to a bad value
+    TS_ASSERT_THROWS_NOTHING(prop.setValue("Gauss"));
+    TS_ASSERT(!prop.setValue("Gauss").empty());
+
+    // set to an empty string
+    TS_ASSERT_THROWS_NOTHING(prop.setValue(""));
+    TS_ASSERT(!prop.setValue("").empty());
   }
 };
