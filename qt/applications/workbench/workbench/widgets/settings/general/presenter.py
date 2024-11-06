@@ -126,13 +126,10 @@ class GeneralSettings(object):
         When the facility is changed, refreshes all available instruments that can be selected in the dropdown.
         :param new_facility: The name of the new facility that was selected
         """
-        current_value = self.model.get_facility()
-        if new_facility != current_value:
-            self.model.set_facility(new_facility)
+        self.model.set_facility(new_facility)
         # refresh the instrument selection to contain instruments about the selected facility only
         self.view.instrument.setFacility(new_facility)
-        if new_facility != current_value:
-            self.view.instrument.setCurrentIndex(0)
+        self.action_instrument_changed(self.view.instrument.currentText())
 
     def setup_confirmations(self):
         self.view.prompt_save_on_close.stateChanged.connect(self.action_prompt_save_on_close)
@@ -190,9 +187,7 @@ class GeneralSettings(object):
         self.model.set_crystallography_convention("Crystallography" if state == Qt.Checked else "Inelastic")
 
     def action_instrument_changed(self, new_instrument):
-        current_value = self.model.get_instrument()
-        if new_instrument != current_value:
-            self.model.set_instrument(new_instrument)
+        self.model.set_instrument(new_instrument)
 
     def action_show_invisible_workspaces(self, state):
         self.model.set_show_invisible_workspaces(str(bool(state)))

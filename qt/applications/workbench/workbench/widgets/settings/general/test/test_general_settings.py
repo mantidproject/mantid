@@ -97,11 +97,11 @@ class GeneralSettingsTest(unittest.TestCase):
         self.mock_model.get_facility_names.return_value = ["facility1", "facility2"]
 
         presenter = GeneralSettings(None, model=self.mock_model)
-        self.assertEqual(0, self.mock_model.set_facility.call_count)
-        self.assertEqual(2, self.mock_model.get_facility.call_count)
+        self.assertEqual(1, self.mock_model.set_facility.call_count)
+        self.assertEqual(1, self.mock_model.get_facility.call_count)
         self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
 
-        self.assertEqual(2, self.mock_model.get_instrument.call_count)
+        self.assertEqual(1, self.mock_model.get_instrument.call_count)
         self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
 
     def test_setup_checkbox_signals(self):
@@ -138,11 +138,14 @@ class GeneralSettingsTest(unittest.TestCase):
         self.mock_model.get_facility.return_value = "facility1"
         presenter = GeneralSettings(None, model=self.mock_model)
         self.mock_model.set_facility.reset_mock()
+        self.mock_model.set_instrument.reset_mock()
 
         new_facility = "TEST_LIVE"
+        default_test_live_instrument = "ADARA_FakeEvent"
         presenter.action_facility_changed(new_facility)
 
         self.mock_model.set_facility.assert_called_once_with(new_facility)
+        self.mock_model.set_instrument.assert_called_once_with(default_test_live_instrument)
 
         self.assertEqual(presenter.view.instrument.getFacility(), "TEST_LIVE")
 
