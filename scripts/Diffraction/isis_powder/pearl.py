@@ -106,7 +106,7 @@ class Pearl(AbstractInst):
                 # catches case where no indices in correct range as len(mod_nums) > 1 in this branch
                 logger.warning("Invalid or duplicate modules in trans_mod_nums - using all modules 1-9")
                 return default_imods, default_mod_nums_str
-            return imods, mod_nums
+            return imods, self._inst_settings.trans_mod_nums
         else:
             return default_imods, default_mod_nums_str
 
