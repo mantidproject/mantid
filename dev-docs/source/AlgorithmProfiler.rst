@@ -23,7 +23,7 @@ It consists two to parts: special mantid build and analytical tool.
 Mantid build
 ^^^^^^^^^^^^
 
-On linux the profiler is built by default but to enable profiling, the :ref:`properties <mantd:Algorithm_Profiling>` must be set.
+On linux the profiler is built by default but to enable profiling, the :ref:`properties <mantid:Algorithm_Profiling>` must be set.
 Enabling the profiler will create a file that contains the time stamps for start and finish of executed algorithms with ~nanosecond precision in a very simple text format.
 
 Adding more detailed information

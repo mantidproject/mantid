@@ -10,18 +10,19 @@ Modification of Chris Beaumont's mpl-modest-image package to allow the use of
 set_extent.
 """
 
+import numpy as np
+
 import matplotlib
 
+# Must be called before anything tries to use matplotlib
 rcParams = matplotlib.rcParams
 
-import matplotlib.image as mi
-import matplotlib.colors as mcolors
-import matplotlib.cbook as cbook
-from matplotlib.transforms import IdentityTransform, Affine2D
+import matplotlib.image as mi  # noqa: E402
+import matplotlib.colors as mcolors  # noqa: E402
+import matplotlib.cbook as cbook  # noqa: E402
+from matplotlib.transforms import IdentityTransform, Affine2D  # noqa: E402
 
-from mantid.plots.mantidimage import MantidImage
-
-import numpy as np
+from mantid.plots.mantidimage import MantidImage  # noqa: E402
 
 IDENTITY_TRANSFORM = IdentityTransform()
 

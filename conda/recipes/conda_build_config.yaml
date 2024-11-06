@@ -119,8 +119,9 @@ qtconsole:
 qscintilla2:
   - 2.13
 
+# 2.4.2 fails workbench.test_mainwindow.test_mainwindow which uses isinstance()
 qtpy:
-  - '>=1.9.0'
+  - '>=2.4,!=2.4.2'
 
 tbb:
   - 2021
