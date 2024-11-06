@@ -62,6 +62,7 @@ class SaveReflectionsTest(unittest.TestCase):
                 peak = ws.createPeak(q)
                 peak.setIntensity(100)
                 peak.setSigmaIntensity(10)
+                peak.setRunNumber(i)
                 peak.setHKL(1, 1, 1)
                 peak.setAbsorptionWeightedPathLength(1.0)
                 ws.addPeak(peak)
