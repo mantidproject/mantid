@@ -170,7 +170,7 @@ class SaveReflections(PythonAlgorithm):
         for ipk, peak in enumerate(filtered_workspace):
             peak.setIntensity(peak.getIntensity() * scale)
             peak.setSigmaIntensity(peak.getSigmaIntensity() * scale)
-            peak.setRunNumber(batch_nums[ipk])
+            peak.setRunNumber(int(batch_nums[ipk]))
 
         FORMAT_MAP[output_format]()(file_name, filtered_workspace, split_files)
 
