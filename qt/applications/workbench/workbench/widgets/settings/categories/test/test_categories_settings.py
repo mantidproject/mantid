@@ -79,8 +79,6 @@ class MockCategoriesSettingsModel:
 
 @start_qapplication
 class CategoriesSettingsTest(unittest.TestCase):
-    CONFIG_SERVICE_CLASSPATH = "workbench.widgets.settings.categories.presenter.ConfigService"
-
     def setUp(self):
         self.mock_view = MockCategoriesView()
         self.mock_model = MockCategoriesSettingsModel()
