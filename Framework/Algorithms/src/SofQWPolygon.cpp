@@ -28,7 +28,10 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 /// Default constructor
-SofQWPolygon::SofQWPolygon() : Rebin2D(), m_Qout(), m_thetaPts(), m_thetaWidth(0.0) {}
+SofQWPolygon::SofQWPolygon() : Rebin2D(), m_Qout(), m_thetaPts(), m_thetaWidth(0.0) {
+  useAlgorithm("SofQWNormalisedPolygon");
+  deprecatedDate("2024-11-07");
+}
 
 /**
  * Initialize the algorithm

@@ -8,6 +8,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAlgorithms/Rebin2D.h"
 #include "MantidAlgorithms/SofQCommon.h"
 #include <list>
@@ -38,7 +39,7 @@ common bins. </LI>
 @author Martyn Giggg
 @date 2011-07-15
  */
-class MANTID_ALGORITHMS_DLL SofQWPolygon : public Rebin2D {
+class MANTID_ALGORITHMS_DLL SofQWPolygon : public Rebin2D, public API::DeprecatedAlgorithm {
 public:
   /// Default constructor
   SofQWPolygon();
