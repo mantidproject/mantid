@@ -90,7 +90,7 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
   m_view->setLoadStatus("Loading " + m_view->getInstrument() + m_view->getRunsText(), "orange");
   m_model->setFilesToLoad(files);
   try {
-    load();
+    loadFilesCurrentlyInModel();
     m_view->setLoadStatus("Successfully loaded " + m_view->getInstrument() + m_view->getRunsText(), "green");
     m_view->enableRunsAutoAdd(true);
 
@@ -110,7 +110,7 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
  * Load new data and update the view accordingly
  * @param files :: [input] range of files (user-specified or auto generated)
  */
-void ALCDataLoadingPresenter::load() {
+void ALCDataLoadingPresenter::loadFilesCurrentlyInModel() {
   m_model->setLoadingData(true);
   m_view->disableAll();
 
@@ -228,7 +228,7 @@ void ALCDataLoadingPresenter::handleTimerEvent() {
     // Set text without search, call manual load
     m_view->setRunsTextWithoutSearch(m_model->getRunsText());
     try {
-      load();
+      loadFilesCurrentlyInModel();
 
     } catch (const std::runtime_error &loadError) {
       // Stop watching and display error
