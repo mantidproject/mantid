@@ -114,6 +114,18 @@ class SaveReflectionsTest(unittest.TestCase):
         # Assert
         self._assert_file_content_equal(reference_result, file_name)
 
+    def test_save_fullprof_format_separate_batch_numbers(self):
+        # Arrange
+        reference_result = self._get_reference_result("fullprof_format_separate_batch_nums.hkl")
+        file_name = os.path.join(self._test_dir, "test_fullprof_separate_batch_nums.hkl")
+        output_format = "Fullprof"
+
+        # Act
+        SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format, SeparateBatchNumbers=True)
+
+        # Assert
+        self._assert_file_content_equal(reference_result, file_name)
+
     def test_save_fullprof_format_scale_large_intensities(self):
         file_name = os.path.join(self._test_dir, "test_fullprof_scaled.hkl")
         lines = self._test_helper_scale_large_intensities(output_format="Fullprof", file_name=file_name)
@@ -159,6 +171,18 @@ class SaveReflectionsTest(unittest.TestCase):
 
         # Act
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
+
+        # Assert
+        self._assert_file_content_equal(reference_result, file_name)
+
+    def test_save_jana_format_separate_batch_numbers(self):
+        # Arrange
+        reference_result = self._get_reference_result("jana_format_separate_batch_nums.hkl")
+        file_name = os.path.join(self._test_dir, "test_jana_separate_batch_numbers.hkl")
+        output_format = "Jana"
+
+        # Act
+        SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format, SeparateBatchNumbers=True)
 
         # Assert
         self._assert_file_content_equal(reference_result, file_name)
@@ -240,6 +264,18 @@ class SaveReflectionsTest(unittest.TestCase):
 
         # Act
         SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format)
+
+        # Assert
+        self._assert_file_content_equal(reference_result, file_name)
+
+    def test_save_SHELX_format_separate_batch_numbers(self):
+        # Arrange
+        reference_result = self._get_reference_result("shelx_format_separate_batch_nums.hkl")
+        file_name = os.path.join(self._test_dir, "test_shelx_separate_batch_nums.hkl")
+        output_format = "SHELX"
+
+        # Act
+        SaveReflections(InputWorkspace=self._workspace, Filename=file_name, Format=output_format, SeparateBatchNumbers=True)
 
         # Assert
         self._assert_file_content_equal(reference_result, file_name)
