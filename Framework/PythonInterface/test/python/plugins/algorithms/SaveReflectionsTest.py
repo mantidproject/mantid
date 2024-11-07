@@ -52,6 +52,7 @@ class SaveReflectionsTest(unittest.TestCase):
         # Add a bunch of random peaks that happen to fall on the
         # detetor bank defined in the IDF
         center_q = np.array([-5.1302, 2.5651, 3.71809])
+        run_num = 1
         for i in np.arange(0, 1, 0.1):
             for j in np.arange(-0.5, 0, 0.1):
                 q = center_q.copy()
@@ -62,7 +63,8 @@ class SaveReflectionsTest(unittest.TestCase):
                 peak = ws.createPeak(q)
                 peak.setIntensity(100)
                 peak.setSigmaIntensity(10)
-                peak.setRunNumber(i)
+                peak.setRunNumber(run_num)
+                run_num += 1
                 peak.setHKL(1, 1, 1)
                 peak.setAbsorptionWeightedPathLength(1.0)
                 ws.addPeak(peak)

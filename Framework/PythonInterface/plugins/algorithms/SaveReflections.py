@@ -7,7 +7,7 @@
 import os.path as osp
 import numpy as np
 from mantid.api import AlgorithmFactory, FileProperty, FileAction, IPeaksWorkspaceProperty, PythonAlgorithm
-from mantid.kernel import StringListValidator, Direction, logger
+from mantid.kernel import StringListValidator, Direction, logger, EnabledWhenProperty, PropertyCriterion
 from mantid.simpleapi import FilterPeaks
 from enum import Enum
 
@@ -123,8 +123,10 @@ class SaveReflections(PythonAlgorithm):
             direction=Direction.Input,
             doc="If True all peaks from all runs will be labelled with the same batch number (in SHELX) or COD in"
             "Jana/Fullprof - i.e. same scale factor will be used for all runs. If False then a different scale "
-            "factor will be used for each run number in the peak table.",
+            "factor will be used for each run number in the peak table. This option does not apply to GSAS format.",
         )
+        not_gsas = EnabledWhenProperty("Format", PropertyCriterion.IsNotEqualTo, ReflectionFormat.GSAS.name)
+        self.setPropertySettings("SeparateBatchNumbers", not_gsas)
 
     def PyExec(self):
         """Execute the algorithm"""
@@ -161,16 +163,18 @@ class SaveReflections(PythonAlgorithm):
                 f"An empty file will be produced."
             )
         # get batch numebrs using run numbers
-        if self.getProperty("SeparateBatchNumbers").value:
-            _, batch_nums = np.unique(filtered_workspace.column("RunNumber"), return_inverse=True)
-        else:
-            batch_nums = np.ones(filtered_workspace.getNumberPeaks(), dtype=int)
+        if output_format != ReflectionFormat.GSAS:
+            if self.getProperty("SeparateBatchNumbers").value:
+                _, batch_nums = np.unique(filtered_workspace.column("RunNumber"), return_inverse=True)
+            else:
+                batch_nums = np.ones(filtered_workspace.getNumberPeaks(), dtype=int)
 
         # scale intensity, sigma and batch num
         for ipk, peak in enumerate(filtered_workspace):
             peak.setIntensity(peak.getIntensity() * scale)
             peak.setSigmaIntensity(peak.getSigmaIntensity() * scale)
-            peak.setRunNumber(int(batch_nums[ipk]))
+            if output_format != ReflectionFormat.GSAS:
+                peak.setRunNumber(int(batch_nums[ipk]))
 
         FORMAT_MAP[output_format]()(file_name, filtered_workspace, split_files)
 
