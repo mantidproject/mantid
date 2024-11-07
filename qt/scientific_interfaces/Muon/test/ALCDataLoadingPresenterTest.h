@@ -394,8 +394,8 @@ public:
     // Test results with corrections from run data
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("FromRunData"));
 
-    EXPECT_CALL(*m_view, deadTimeType()).Times(2);
-    EXPECT_CALL(*m_view, deadTimeFile()).Times(0);
+    EXPECT_CALL(*m_view, deadTimeType()).Times(1);
+    EXPECT_CALL(*m_view, deadTimeFile()).Times(1);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
@@ -411,7 +411,7 @@ public:
     // Test only expected number of calls, alg will fail as no file specified
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("FromSpecifiedFile"));
 
-    EXPECT_CALL(*m_view, deadTimeType()).Times(2);
+    EXPECT_CALL(*m_view, deadTimeType()).Times(1);
     EXPECT_CALL(*m_view, deadTimeFile()).Times(1);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
 
