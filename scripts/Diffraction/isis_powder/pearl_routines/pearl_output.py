@@ -149,7 +149,7 @@ def _focus_mode_mods(output_file_paths, calibrated_spectra):
 
 
 def _focus_mode_trans(output_file_paths, attenuation_filepath, calibrated_spectra, imods, suffix):
-    summed_ws = mantid.MergeRuns(InputWorkspaces=calibrated_spectra[imods])
+    summed_ws = mantid.MergeRuns(InputWorkspaces=[calibrated_spectra[imod] for imod in imods])
     xList = summed_ws.readX(0)
 
     summed_ws = mantid.CropWorkspace(InputWorkspace=summed_ws, XMin=xList[1], Xmax=xList[-2])

@@ -98,7 +98,7 @@ class Pearl(AbstractInst):
 
     def get_trans_module_indices(self):
         default_imods = list(range(9))  # all modules 1-9 in transverse banks (tth~90 deg)
-        default_mod_nums_str = "1-9"
+        default_mod_nums_str = ""
         if self._inst_settings.trans_mod_nums and self._inst_settings.focus_mode == "trans_subset":
             mod_nums = common.generate_run_numbers(run_number_string=self._inst_settings.trans_mod_nums)
             imods = [int(mod_num - 1) for mod_num in set(mod_nums) if 0 < mod_num < 10]  # remove invalid/duplicates
