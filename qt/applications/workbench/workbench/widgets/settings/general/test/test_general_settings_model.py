@@ -5,12 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
-from typing import Any, Callable, Sequence
-from unittest import TestCase
 from unittest.mock import MagicMock, patch, call
 
 from workbench.widgets.settings.general.general_settings_model import GeneralSettingsModel, GeneralProperties, GeneralUserConfigProperties
 from workbench.widgets.settings.test_utilities.mock_config_service import MockConfigService, BASE_CLASS_CONFIG_SERVICE_PATCH_PATH
+from workbench.widgets.settings.test_utilities.settings_model_test_base import BaseSettingsModelTest
 
 
 class MockUserConfig:
@@ -20,27 +19,13 @@ class MockUserConfig:
         self.set = MagicMock()
 
 
-class GeneralSettingsModelTest(TestCase):
+class GeneralSettingsModelTest(BaseSettingsModelTest):
     USER_CONFIG_PATCH_PATH = "workbench.widgets.settings.general.general_settings_model.CONF"
     GET_SAVED_VALUE_PATCH_PATH = "workbench.widgets.settings.general.general_settings_model.GeneralSettingsModel.get_saved_value"
     ADD_CHANGE_PATCH_PATH = "workbench.widgets.settings.general.general_settings_model.GeneralSettingsModel.add_change"
 
     def setUp(self) -> None:
         self.model = GeneralSettingsModel()
-
-    def _test_getter_with_different_values(self, mock_obj: MagicMock, getter: Callable, values: Sequence[Any], mock_called_with: call):
-        for value in values:
-            mock_obj.return_value = value
-            self.assertEqual(getter(), value)
-            mock_obj.assert_has_calls([mock_called_with])
-            mock_obj.reset_mock()
-
-    @staticmethod
-    def _test_setter_with_different_values(mock_obj: MagicMock, setter: Callable, values: Sequence[Any], property_string: str):
-        for value in values:
-            setter(value)
-            mock_obj.assert_has_calls([call(property_string, value)])
-            mock_obj.reset_mock()
 
     @patch(USER_CONFIG_PATCH_PATH, new_callable=MockUserConfig)
     @patch(BASE_CLASS_CONFIG_SERVICE_PATCH_PATH, new_callable=MockConfigService)
