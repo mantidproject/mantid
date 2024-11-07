@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "MantidKernel/EnumeratedString.h"
-#include "MantidKernel/NullValidator.h"
 #include "MantidKernel/Property.h"
 #include <vector>
 
@@ -59,7 +58,6 @@ public:
   std::string isValid() const override;
   bool isDefault() const override;
   std::vector<std::string> allowedValues() const override;
-  bool isMultipleSelectionAllowed() override;
 
   // SETTERS
   std::string setValue(E const value);
