@@ -6,25 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <type_traits>
-#include <vector>
-#ifndef Q_MOC_RUN
-#include <boost/algorithm/string/trim.hpp>
-#include <memory>
-#endif
-#include "MantidKernel/EnumeratedStringProperty.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/NullValidator.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyHelper.h"
 #include "MantidKernel/PropertyWithValueJSON.h"
-#include "MantidKernel/StringTokenizer.h"
-#include "MantidKernel/Strings.h"
 #include <json/value.h>
 
 namespace Mantid::Kernel {
@@ -186,14 +169,6 @@ bool EnumeratedStringProperty<E, names>::isDefault() const {
 template <class E, std::vector<std::string> const *const names>
 std::vector<std::string> EnumeratedStringProperty<E, names>::allowedValues() const {
   return *names;
-}
-
-/** Returns true, as multiple selection is allowed.
- *  @return true
- */
-template <class E, std::vector<std::string> const *const names>
-bool EnumeratedStringProperty<E, names>::isMultipleSelectionAllowed() {
-  return true;
 }
 
 // ######################################################//
