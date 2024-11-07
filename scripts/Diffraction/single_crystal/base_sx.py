@@ -648,12 +648,12 @@ class BaseSX(ABC):
         )
 
     @staticmethod
-    def remove_non_integrated_peaks(peaks):
+    def remove_non_integrated_peaks(peaks, min_intens_over_sigma=0):
         return mantid.FilterPeaks(
             InputWorkspace=peaks,
             OutputWorkspace=BaseSX.retrieve(peaks).name(),
             FilterVariable="Signal/Noise",
-            FilterValue=0,
+            FilterValue=min_intens_over_sigma,
             Operator=">",
             EnableLogging=False,
         )
