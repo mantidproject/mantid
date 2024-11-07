@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods,invalid-name
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
+from mantid.kernel import config
+from mantid.simpleapi import LoadNMoldyn4Ascii
 
 import os
 

@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import AlgorithmManager
+from mantid.simpleapi import CreateEmptyTableWorkspace
 
 """
 This algorithm is still in development

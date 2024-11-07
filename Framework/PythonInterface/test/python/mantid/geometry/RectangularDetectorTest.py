@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.geometry import *
+from mantid.geometry import RectangularDetector
 from testhelpers import can_be_instantiated, WorkspaceCreationHelper
 
 

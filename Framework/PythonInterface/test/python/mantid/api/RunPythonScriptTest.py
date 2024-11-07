@@ -5,13 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import os
 
-from mantid.api import *
-from mantid.kernel import *
-from mantid.simpleapi import *
-
-from testhelpers import WorkspaceCreationHelper
+from mantid.api import mtd, IMDWorkspace, WorkspaceGroup
+from mantid.simpleapi import ConvertToEventWorkspace, CreateMDWorkspace, CreateWorkspace, DeleteWorkspace, GroupWorkspaces, RunPythonScript
 
 
 class RunPythonScriptTest(unittest.TestCase):
@@ -32,7 +28,9 @@ class RunPythonScriptTest(unittest.TestCase):
         RunPythonScript(Code=code)
 
     def test_simplePlus(self):
-        code = "Plus(LHSWorkspace=input, RHSWorkspace=input, OutputWorkspace=output)"
+        code = """from mantid.simpleapi import Plus
+Plus(LHSWorkspace=input, RHSWorkspace=input, OutputWorkspace=output)
+"""
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace="ws_out")
         ws_out = mtd["ws_out"]
 
@@ -52,14 +50,16 @@ class RunPythonScriptTest(unittest.TestCase):
 
     def test_input_MatrixWorkspace_has_correct_python_type_when_executed(self):
         code = """from mantid.api import MatrixWorkspace
-if not isinstance(input, MatrixWorkspace): raise RuntimeError("Input workspace is not a MatrixWorkspace in Python: Type=%s" % str(type(input)))
+if not isinstance(input, MatrixWorkspace):
+    raise RuntimeError("Input workspace is not a MatrixWorkspace in Python: Type=%s" % str(type(input)))
 """
         RunPythonScript(InputWorkspace="ws", Code=code)
 
     def test_input_EventWorkspace_has_correct_python_type_when_executed(self):
         test_eventws = ConvertToEventWorkspace(InputWorkspace="ws")
         code = """from mantid.api import IEventWorkspace
-if not isinstance(input, IEventWorkspace): raise RuntimeError("Input workspace is not an IEventWorkspace in Python: Type=%s" % str(type(input)))
+if not isinstance(input, IEventWorkspace):
+    raise RuntimeError("Input workspace is not an IEventWorkspace in Python: Type=%s" % str(type(input)))
 """
         RunPythonScript(InputWorkspace=test_eventws, Code=code)
 
@@ -73,12 +73,16 @@ if not isinstance(input, IEventWorkspace): raise RuntimeError("Input workspace i
 
         # Check type
         code = """from mantid.api import IMDEventWorkspace
-if not isinstance(input, IMDEventWorkspace): raise RuntimeError("Input workspace is not an IMDHistoWorkspace in Python: Type=%s" % str(type(input)))
+if not isinstance(input, IMDEventWorkspace):
+    raise RuntimeError("Input workspace is not an IMDHistoWorkspace in Python: Type=%s" % str(type(input)))
 """
         RunPythonScript(InputWorkspace=mtd["ws"], Code=code)
 
     def test_withNoInputWorkspace(self):
-        c = RunPythonScript(Code="output = CreateSingleValuedWorkspace(DataValue='1')")
+        code = """from mantid.simpleapi import CreateSingleValuedWorkspace
+output = CreateSingleValuedWorkspace(DataValue='1')
+"""
+        c = RunPythonScript(Code=code)
         self.assertEqual(c.name(), "c")
         self.assertEqual(c.readY(0)[0], 1)
 
@@ -89,7 +93,9 @@ if not isinstance(input, IMDEventWorkspace): raise RuntimeError("Input workspace
         GroupWorkspaces(InputWorkspaces="ws_1,ws_2", OutputWorkspace="ws")
         self.assertEqual(3, mtd.size())
 
-        code = "Scale(input,OutputWorkspace=output,Factor=5)"
+        code = """from mantid.simpleapi import Scale
+Scale(input,OutputWorkspace=output,Factor=5)
+"""
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace="ws")
 
         self.assertEqual(3, mtd.size())
@@ -98,13 +104,15 @@ if not isinstance(input, IMDEventWorkspace): raise RuntimeError("Input workspace
         self.assertAlmostEqual(5.0, mtd["ws_1"].readY(0)[0], 8)
 
     def test_code_with_a_mixture_of_line_endings_succeeds(self):
-        code = "Scale(input,OutputWorkspace=output,Factor=5)\n"
+        code = """from mantid.simpleapi import Scale
+Scale(input,OutputWorkspace=output,Factor=5)\n
+"""
         code += "Scale(input,OutputWorkspace=output,Factor=10,Operation='Add')\r"
         code += "Scale(input,OutputWorkspace=output,Factor=20)\r\n"
 
         RunPythonScript(InputWorkspace="ws", Code=code, OutputWorkspace="ws")
         ws = mtd["ws"]
-        self.assertAlmostEqual(300.0, mtd["ws"].readY(0)[0], 8)
+        self.assertAlmostEqual(300.0, ws.readY(0)[0], 8)
 
     # ======================== Failure cases =====================================================
     def test_syntax_error_in_code_raises_Runtime_Error(self):

@@ -6,9 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import os
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import mtd
 from testhelpers import run_algorithm
 
 
@@ -22,7 +20,6 @@ class MaskWorkspaceToCalFileTest(unittest.TestCase):
             try:
                 index = int(line_contents[0].strip())
                 select = int(line_contents[3].strip())
-                group = int(line_contents[4].strip())
                 if index == requested_index:
                     return select
             except ValueError:

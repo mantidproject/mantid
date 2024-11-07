@@ -10,7 +10,6 @@ import unittest
 
 
 class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
-
     _red_ws = None
     _indirect_elastic_ws = None
     _indirect_fws_ws = None

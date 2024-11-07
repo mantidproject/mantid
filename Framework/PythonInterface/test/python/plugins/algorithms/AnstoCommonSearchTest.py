@@ -8,7 +8,6 @@
 
 import unittest
 import os
-import re
 import tempfile
 
 from mantid.simpleapi import LoadPLN

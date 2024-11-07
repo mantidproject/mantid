@@ -5,23 +5,20 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import logging
-import os
 import tempfile
 import unittest
 from unittest.mock import patch
-import numpy as np
 from numpy.testing import assert_array_almost_equal
 
-# Register Abins2 before importing mantid modules
+import abins
+import abins.io
 from abins.abins2 import Abins as Abins2
+from abins.constants import ATOM_PREFIX
 
+# Required to register Abins2 before importing any mantid modules
 Abins2.subscribe()
 
-import mantid.kernel
-from mantid.simpleapi import mtd, Scale, CompareWorkspaces, Load, DeleteWorkspace, Abins
-import abins
-from abins.constants import ATOM_PREFIX, FUNDAMENTALS
-import abins.io
+from mantid.simpleapi import mtd, CompareWorkspaces, Abins  # noqa: E402
 
 
 class AbinsBasicTest(unittest.TestCase):
@@ -86,7 +83,6 @@ class AbinsBasicTest(unittest.TestCase):
             self.assertRaisesRegex(RuntimeError, "The third line should include 'Number of branches'."),
             patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
-
             Abins(Version=2, VibrationalOrPhononFile="Si2-sc_wrong.phonon", OutputWorkspace=self._workspace_name)
 
         # wrong extension of phonon file in case of CASTEP
@@ -97,7 +93,6 @@ class AbinsBasicTest(unittest.TestCase):
             ),
             patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
-
             Abins(
                 Version=2,
                 VibrationalOrPhononFile="Si2-sc.wrong_phonon",
@@ -201,7 +196,6 @@ class AbinsBasicTest(unittest.TestCase):
             self.assertRaisesRegex(RuntimeError, r"User atom selection \(by number\) contains repeated atom."),
             patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
-
             Abins(
                 Version=2,
                 VibrationalOrPhononFile=self._squaricn + ".phonon",
@@ -218,7 +212,6 @@ class AbinsBasicTest(unittest.TestCase):
             self.assertRaisesRegex(RuntimeError, r"User defined atom selection \(by element\) 'N': not present in the system."),
             patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
-
             Abins(
                 Version=2,
                 VibrationalOrPhononFile=self._squaricn + ".phonon",
@@ -249,7 +242,7 @@ class AbinsBasicTest(unittest.TestCase):
             )
 
     def test_atom_index_invalid(self):
-        """If the atoms field includes an unmatched entry (i.e. containing the prefix but not matching the '\d+' regex,
+        r"""If the atoms field includes an unmatched entry (i.e. containing the prefix but not matching the '\d+' regex,
         Abins should terminate with a useful error message.
         """
         with patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir):

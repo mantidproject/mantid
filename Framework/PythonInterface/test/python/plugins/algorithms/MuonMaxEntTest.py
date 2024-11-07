@@ -7,8 +7,8 @@
 import numpy as np
 import math
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import AnalysisDataService
+from mantid.simpleapi import CreateSimulationWorkspace, CreateWorkspace, MuonMaxent
 
 
 def create_workspace():

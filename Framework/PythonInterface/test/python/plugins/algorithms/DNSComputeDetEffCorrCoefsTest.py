@@ -10,7 +10,7 @@ from testhelpers.mlzhelpers import create_fake_dns_workspace
 from mantid.api import AnalysisDataService, WorkspaceGroup
 import numpy as np
 import mantid.simpleapi as api
-from mantid.simpleapi import DNSComputeDetEffCorrCoefs, MaskDetectors, GroupWorkspaces, RotateInstrumentComponent
+from mantid.simpleapi import DNSComputeDetEffCorrCoefs, MaskDetectors, GroupWorkspaces
 
 
 class DNSComputeDetEffCorrCoefsTest(unittest.TestCase):

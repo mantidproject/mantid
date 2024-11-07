@@ -5,11 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.simpleapi import AddSampleLog, DeleteWorkspace, GetEiT0atSNS, Load, LoadInstrument
 from mantid.kernel import DateAndTime
-from testhelpers import *
-from numpy import *
 
 
 class GetEiT0atSNSTest(unittest.TestCase):

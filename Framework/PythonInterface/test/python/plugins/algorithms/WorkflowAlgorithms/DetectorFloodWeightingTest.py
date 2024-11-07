@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.api import AlgorithmManager
-from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace
+from mantid.simpleapi import CreateSampleWorkspace
 
 
 class DetectorFloodWeightingTest(unittest.TestCase):
@@ -125,7 +125,6 @@ class DetectorFloodWeightingTest(unittest.TestCase):
         alg.setChild(True)
         alg.initialize()
         alg.setProperty("SolidAngleCorrection", True)
-        signal_value = 2
         in_ws = CreateSampleWorkspace(NumBanks=1, XUnit="Wavelength")
         alg.setProperty("InputWorkspace", in_ws)
         bands = [1, 10]

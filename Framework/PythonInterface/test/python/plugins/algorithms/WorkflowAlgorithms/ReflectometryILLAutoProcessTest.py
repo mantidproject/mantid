@@ -13,7 +13,6 @@ import numpy
 
 
 class ReflectometryILLAutoProcessTest(unittest.TestCase):
-
     # cache the faciility, instruments and the dirs
     _def_fac = config["default.facility"]
     _def_inst = config["default.instrument"]

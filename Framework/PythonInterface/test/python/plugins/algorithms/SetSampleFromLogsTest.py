@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import Load, LoadNexusProcessed, SetSampleFromLogs, AddSampleLog
+from mantid.simpleapi import Load, SetSampleFromLogs, AddSampleLog
 from math import pi
 
 PAC06_RADIUS = 0.00295

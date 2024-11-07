@@ -5,11 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Test of fitfunctions.py and related classes
+Test of fitfunctions.py and related classes
 """
+
 import unittest
 import testhelpers
-import platform
 from mantid.simpleapi import CreateWorkspace, EvaluateFunction, Fit
 from mantid.simpleapi import (
     FunctionWrapper,
@@ -28,15 +28,12 @@ from mantid.simpleapi import (
     CompositeFunction,
     IFunction1D,
     FunctionFactory,
-    Fit,
 )
-from mantid.api import mtd, MatrixWorkspace, ITableWorkspace, FunctionDomain1DVector, FunctionDomain1DHistogram
+from mantid.api import FunctionDomain1DVector, FunctionDomain1DHistogram
 import numpy as np
-from testhelpers import run_algorithm
 
 
 class FitFunctionsTest(unittest.TestCase):
-
     _raw_ws = None
 
     def setUp(self):
@@ -249,7 +246,6 @@ class FitFunctionsTest(unittest.TestCase):
         self.assertEqual(cz_str.count("ties="), 0)
 
     def test_tie_all(self):
-
         g0 = FunctionWrapper("Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = FunctionWrapper("Gaussian", Height=8.5, Sigma=1.2, PeakCentre=11)
         c = CompositeFunctionWrapper(g0, g1)
@@ -390,7 +386,7 @@ class FitFunctionsTest(unittest.TestCase):
         g0 = FunctionWrapper("Gaussian", Height=7.5, Sigma=1.2, PeakCentre=10)
         g1 = FunctionWrapper("Gaussian", Height=8.5, Sigma=1.25, PeakCentre=12)
         g2 = FunctionWrapper("Gaussian", Height=9.5, Sigma=1.3, PeakCentre=14)
-        l = FunctionWrapper("Lorentzian", PeakCentre=9, Amplitude=2.4, FWHM=3)
+        lorentzian = FunctionWrapper("Lorentzian", PeakCentre=9, Amplitude=2.4, FWHM=3)
         lb = FunctionWrapper("LinearBackground")
 
         # Test already flat composite function, no change should occur
@@ -401,7 +397,7 @@ class FitFunctionsTest(unittest.TestCase):
         self.assertEqual(fc1_str, c1_str)
 
         # Test composite function of depth 1
-        c2 = CompositeFunctionWrapper(c1, l)
+        c2 = CompositeFunctionWrapper(c1, lorentzian)
         fc2 = c2.flatten()
         fc2_str = str(fc2)
         self.assertEqual(fc2_str.count("("), 0)
@@ -421,7 +417,7 @@ class FitFunctionsTest(unittest.TestCase):
 
         # Test product function of depth 1
         p1 = ProductFunctionWrapper(lb, g0, g1)
-        p2 = ProductFunctionWrapper(p1, l)
+        p2 = ProductFunctionWrapper(p1, lorentzian)
         fp2 = p2.flatten()
         self.assertTrue(isinstance(fp2, ProductFunctionWrapper))
         fp2_str = str(fp2)
@@ -587,10 +583,10 @@ class FitFunctionsTest(unittest.TestCase):
         l0 = FunctionWrapper("LinearBackground", A0=0, A1=2)
         l1 = FunctionWrapper("LinearBackground", A0=5, A1=-1)
 
-        ws = CreateWorkspace(DataX=[0, 1, 2, 3, 4], DataY=[5, 5, 5, 5])
+        ws = CreateWorkspace(DataX=[0, 1, 2, 3, 4], DataY=[5, 5, 5, 5], StoreInADS=False)
 
         c = CompositeFunctionWrapper(l0, l1)
-        cws = EvaluateFunction(c, "ws", OutputWorkspace="out")
+        cws = EvaluateFunction(c, ws, OutputWorkspace="out")
         cvals = cws.readY(1)
         self.assertAlmostEqual(cvals[0], 5.5)
         self.assertAlmostEqual(cvals[1], 6.5)
@@ -598,7 +594,7 @@ class FitFunctionsTest(unittest.TestCase):
         self.assertAlmostEqual(cvals[3], 8.5)
 
         p = ProductFunctionWrapper(l0, l1)
-        pws = EvaluateFunction(p, "ws", OutputWorkspace="out")
+        pws = EvaluateFunction(p, ws, OutputWorkspace="out")
         pvals = pws.readY(1)
         self.assertAlmostEqual(pvals[0], 4.5)
         self.assertAlmostEqual(pvals[1], 10.5)
@@ -606,7 +602,7 @@ class FitFunctionsTest(unittest.TestCase):
         self.assertAlmostEqual(pvals[3], 10.5)
 
         sq = Polynomial(attributes={"n": 2}, A0=0, A1=0.0, A2=1.0)
-        sqws = EvaluateFunction(sq, "ws", OutputWorkspace="out")
+        sqws = EvaluateFunction(sq, ws, OutputWorkspace="out")
         sqvals = sqws.readY(1)
         self.assertAlmostEqual(sqvals[0], 0.25)
         self.assertAlmostEqual(sqvals[1], 2.25)
@@ -616,18 +612,18 @@ class FitFunctionsTest(unittest.TestCase):
         l0 = FunctionWrapper("LinearBackground", A0=0, A1=2)
         l1 = FunctionWrapper("LinearBackground", A0=5, A1=-1)
 
-        ws = CreateWorkspace(DataX=[0, 1], DataY=[5])
+        ws = CreateWorkspace(DataX=[0, 1], DataY=[5], StoreInADS=False)
 
         c = CompositeFunctionWrapper(l0, l1)
         p = ProductFunctionWrapper(l0, l1)
 
         s1 = c + p
-        s1ws = EvaluateFunction(s1, "ws", OutputWorkspace="out")
+        s1ws = EvaluateFunction(s1, ws, OutputWorkspace="out")
         s1vals = s1ws.readY(1)
         self.assertAlmostEqual(s1vals[0], 10.0)
 
         s2 = p + c
-        s2ws = EvaluateFunction(s2, "ws", OutputWorkspace="out")
+        s2ws = EvaluateFunction(s2, ws, OutputWorkspace="out")
         s2vals = s2ws.readY(1)
         self.assertAlmostEqual(s2vals[0], 10.0)
 

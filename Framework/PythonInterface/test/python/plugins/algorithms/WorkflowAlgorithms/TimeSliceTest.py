@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import mtd
+from mantid.simpleapi import TimeSlice
 
 
 class TimeSliceTest(unittest.TestCase):
@@ -93,7 +93,7 @@ class TimeSliceTest(unittest.TestCase):
             OutputWorkspace="SliceTestOut",
         )
 
-    def test_validation_peak_range_count(self):
+    def test_validation_background_range_count(self):
         """
         Tests validation of the BackgroundRange property.
         """

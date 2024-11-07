@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.kernel import DateAndTime
 from mantid.geometry import Goniometer
 from testhelpers import can_be_instantiated
 from testhelpers import run_algorithm

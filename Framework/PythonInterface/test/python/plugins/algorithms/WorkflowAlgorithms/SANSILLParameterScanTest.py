@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.api import MatrixWorkspace, WorkspaceGroup
+from mantid.api import MatrixWorkspace
 from mantid.simpleapi import SANSILLParameterScan, config, mtd
 
 

@@ -9,7 +9,6 @@ set(TEST_PY_FILES
     InstrumentTest.py
     OrientedLatticeTest.py
     RectangularDetectorTest.py
-    ReferenceFrameTest.py
     UnitCellTest.py
     PeakShapeTest.py
     PointGroupTest.py

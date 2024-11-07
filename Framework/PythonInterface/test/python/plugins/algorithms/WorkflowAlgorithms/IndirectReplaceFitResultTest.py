@@ -11,7 +11,6 @@ from mantid.simpleapi import (
     ConvolutionFitSimultaneous,
     LoadNexus,
     IndirectReplaceFitResult,
-    RenameWorkspace,
 )
 from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.buildconfig import GSL_VERSION

@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.kernel import UnitFactory, Unit, Label, UnitLabel
-import types
 
 
 class UnitsTest(unittest.TestCase):

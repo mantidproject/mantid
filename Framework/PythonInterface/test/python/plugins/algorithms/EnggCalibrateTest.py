@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import sys
 import unittest
-from mantid.api import *
 import mantid.simpleapi as sapi
 
 

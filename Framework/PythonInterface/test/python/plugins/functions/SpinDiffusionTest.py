@@ -12,7 +12,6 @@ import unittest
 
 
 class SpinDiffusionTest(unittest.TestCase):
-
     def test_spin_diffusion_when_n_dimensions_one(self):
         x = linspace(0.01, 100.0, 1000)
         f = FunctionWrapper("SpinDiffusion", A=1.0, DParallel=1e3, DPerpendicular=1e-2, NDimensions=1)

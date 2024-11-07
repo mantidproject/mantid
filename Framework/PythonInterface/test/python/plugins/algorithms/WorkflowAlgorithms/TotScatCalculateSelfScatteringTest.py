@@ -79,8 +79,9 @@ class TotScatCalculateSelfScatteringTest(unittest.TestCase):
         mtd.addOrReplace("tot_scat_test", raw_ws)
 
         with self.assertRaisesRegex(RuntimeError, "SampleTemperature must be provided"):
-            correction_ws = TotScatCalculateSelfScattering(
+            TotScatCalculateSelfScattering(
                 InputWorkspace="tot_scat_test",
+                OutputWorkspace="correction_ws",
                 CalFileName=self.cal_file_path,
                 SampleGeometry=self.geometry,
                 SampleMaterial=self.material,

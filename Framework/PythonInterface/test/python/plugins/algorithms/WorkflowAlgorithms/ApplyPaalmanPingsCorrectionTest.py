@@ -37,12 +37,13 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         can_ws = ConvertUnits(InputWorkspace=can_ws, Target="Wavelength", EMode="Indirect", EFixed=1.845)
 
         # Load the corrections workspace
-        corrections_ws = Load("irs26176_graphite002_cyl_Abs.nxs")
+        Load("irs26176_graphite002_cyl_Abs.nxs", OutputWorkspace="corrections_ws")
+        cls._corrections_ws = mtd["corrections_ws"]
 
         # Interpolate each of the correction factor workspaces
         # Required to use corrections from the old indirect calculate
         # corrections routines
-        for factor_ws in mtd["corrections_ws"]:
+        for factor_ws in cls._corrections_ws:
             SplineInterpolation(
                 WorkspaceToMatch=sample_ws, WorkspaceToInterpolate=factor_ws, OutputWorkspace=factor_ws, OutputWorkspaceDeriv=""
             )
@@ -114,31 +115,31 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         self._verify_workspace(corr, "can_subtraction")
 
     def test_sample_corrections_only(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace="sample_ws", CorrectionsWorkspace="corrections_ws")
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace="sample_ws", CorrectionsWorkspace=self._corrections_ws)
 
         self._verify_workspace(corr, "sample_corrections_only")
 
     def test_sample_and_can_corrections(self):
-        corr = ApplyPaalmanPingsCorrection(SampleWorkspace="sample_ws", CorrectionsWorkspace="corrections_ws", CanWorkspace="can_ws")
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace="sample_ws", CorrectionsWorkspace=self._corrections_ws, CanWorkspace="can_ws")
 
         self._verify_workspace(corr, "sample_and_can_corrections")
 
     def test_sample_and_can_corrections_with_can_scale(self):
         corr = ApplyPaalmanPingsCorrection(
-            SampleWorkspace="sample_ws", CorrectionsWorkspace="corrections_ws", CanWorkspace="can_ws", CanScaleFactor=0.9
+            SampleWorkspace="sample_ws", CorrectionsWorkspace=self._corrections_ws, CanWorkspace="can_ws", CanScaleFactor=0.9
         )
 
         self._verify_workspace(corr, "sample_and_can_corrections")
 
     def test_sample_and_can_corrections_with_can_shift(self):
         corr = ApplyPaalmanPingsCorrection(
-            SampleWorkspace="sample_ws", CorrectionsWorkspace="corrections_ws", CanWorkspace="can_ws", CanShiftFactor=0.03
+            SampleWorkspace="sample_ws", CorrectionsWorkspace=self._corrections_ws, CanWorkspace="can_ws", CanShiftFactor=0.03
         )
 
         self._verify_workspace(corr, "sample_and_can_corrections")
 
     def test_two_factor_approximation(self):
-        two_corrections = self._create_group_of_factors(mtd["corrections_ws"], ["acc", "ass"])
+        two_corrections = self._create_group_of_factors(self._corrections_ws, ["acc", "ass"])
 
         corr = ApplyPaalmanPingsCorrection(
             SampleWorkspace="sample_ws", CorrectionsWorkspace=two_corrections, CanWorkspace="can_ws", CanShiftFactor=0.03

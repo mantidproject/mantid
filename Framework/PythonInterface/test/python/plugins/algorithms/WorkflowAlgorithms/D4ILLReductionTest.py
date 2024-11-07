@@ -13,7 +13,6 @@ from os import remove, path
 
 
 class D4ILLReductionTest(unittest.TestCase):
-
     _facility = None
     _instrument = None
 

@@ -5,8 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import CompareWorkspaces, CreateSampleWorkspace, Load, LoadInstrument, RenameWorkspace, ScaleX, SofQW, SofQWMoments
-from mantid import mtd
+from mantid.simpleapi import CompareWorkspaces, CreateSampleWorkspace, Load, LoadInstrument, ScaleX, SofQW, SofQWMoments
 
 
 class SofQWMomentsTest(unittest.TestCase):

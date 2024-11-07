@@ -30,7 +30,7 @@ class ExportSpectraMaskTest(unittest.TestCase):
         """ """
 
         self.masks = [1, 4, 8, 10, 199, 200]
-        if not "test_ws" in mantid.api.mtd:
+        if "test_ws" not in mantid.api.mtd:
             test_ws = mantid.simpleapi.CreateSampleWorkspace()
             test_ws.maskDetectors(self.masks)
         if not hasattr(self, "write_f"):
