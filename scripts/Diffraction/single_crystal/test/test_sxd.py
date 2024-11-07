@@ -20,7 +20,9 @@ from mantid.simpleapi import (
 from Diffraction.single_crystal.sxd import SXD
 from Diffraction.single_crystal.base_sx import PEAK_TYPE, INTEGRATION_TYPE
 
-sxd_path = "Diffraction.single_crystal.sxd"
+diffraction_path = "Diffraction.single_crystal"
+sxd_path = diffraction_path + ".sxd"
+base_sx_path = diffraction_path + ".base_sx"
 
 
 class SXDTest(unittest.TestCase):
@@ -248,9 +250,9 @@ class SXDTest(unittest.TestCase):
 
         self.assertAlmostEqual(peaks_to_correct.getPeak(0).getIntensity(), 8.7690, delta=1e-4)
 
-    @patch(sxd_path + ".path.exists")
-    @patch(sxd_path + ".mantid.LoadIsawUB")
-    @patch(sxd_path + ".mantid.IndexPeaks")
+    @patch(base_sx_path + ".path.exists")
+    @patch(base_sx_path + ".mantid.LoadIsawUB")
+    @patch(base_sx_path + ".mantid.IndexPeaks")
     def test_load_isaw_ub(self, mock_index, mock_load_ub, mock_path_exists):
         runno = 1234
         self.sxd.set_ws(runno, self.ws)
@@ -261,13 +263,13 @@ class SXDTest(unittest.TestCase):
         self.sxd.load_isaw_ub(fname)
 
         self.assertEqual(mock_load_ub.call_count, 2)
-        mock_load_ub.assert_any_call(InputWorkspace=self.ws, Filename=fname)
-        mock_load_ub.assert_any_call(InputWorkspace=self.peaks, Filename=fname)
+        mock_load_ub.assert_any_call(InputWorkspace=self.ws.name(), Filename=fname)
+        mock_load_ub.assert_any_call(InputWorkspace=self.peaks.name(), Filename=fname)
         mock_index.assert_called_once()
 
-    @patch(sxd_path + ".path.exists")
-    @patch(sxd_path + ".mantid.LoadIsawUB")
-    @patch(sxd_path + ".mantid.IndexPeaks")
+    @patch(base_sx_path + ".path.exists")
+    @patch(base_sx_path + ".mantid.LoadIsawUB")
+    @patch(base_sx_path + ".mantid.IndexPeaks")
     def test_load_isaw_ub_invalid_path(self, mock_index, mock_load_ub, mock_path_exists):
         runno = 1234
         self.sxd.set_ws(runno, self.ws)
@@ -280,7 +282,7 @@ class SXDTest(unittest.TestCase):
 
     #  --- methods specific to SXD class ---
 
-    @patch("Diffraction.single_crystal.base_sx.mantid.SetGoniometer")
+    @patch(base_sx_path + ".mantid.SetGoniometer")
     @patch(sxd_path + ".SXD.set_ws")
     @patch(sxd_path + ".SXD.load_run")
     @patch(sxd_path + ".SXD._divide_workspaces")
@@ -299,7 +301,7 @@ class SXDTest(unittest.TestCase):
         expected_calls = len(runnos) * [call(Workspace="wsname", EnableLogging=False, Axis0="log1,0,1,0,1", Axis1="log2,1,0,0,0")]
         mock_set_gonio.assert_has_calls(expected_calls)
 
-    @patch("Diffraction.single_crystal.base_sx.mantid.SetGoniometer")
+    @patch(base_sx_path + ".mantid.SetGoniometer")
     @patch(sxd_path + ".SXD.set_ws")
     @patch(sxd_path + ".SXD.load_run")
     @patch(sxd_path + ".SXD._divide_workspaces")

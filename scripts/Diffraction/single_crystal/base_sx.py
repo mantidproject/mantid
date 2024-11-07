@@ -217,7 +217,7 @@ class BaseSX(ABC):
         ws = self.get_ws_name(run)
         try:
             mantid.LoadIsawUB(InputWorkspace=ws, Filename=isaw_file)
-            peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
+            peaks = self.get_peaks_name(run, PEAK_TYPE.FOUND)
             if peaks is not None:
                 mantid.LoadIsawUB(InputWorkspace=peaks, Filename=isaw_file)
                 mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
