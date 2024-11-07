@@ -80,7 +80,7 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
     @staticmethod
     def get_font() -> str | None:
         if CONF.has(GeneralUserConfigProperties.FONT.value):
-            return CONF.get(GeneralUserConfigProperties.FONT.value)
+            return CONF.get(GeneralUserConfigProperties.FONT.value, type=str)
         return None
 
     @staticmethod

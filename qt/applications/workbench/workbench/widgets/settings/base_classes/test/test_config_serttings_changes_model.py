@@ -6,18 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
 from unittest import TestCase
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import patch, call
 
 from workbench.widgets.settings.base_classes.config_settings_changes_model import ConfigSettingsChangesModel
+from workbench.widgets.settings.test_utilities.mock_config_service import MockConfigService, BASE_CLASS_CONFIG_SERVICE_PATCH_PATH
 
 
-class MockConfigService:
-    def __init__(self):
-        self.setString = MagicMock()
-        self.getString = MagicMock()
-
-
-@patch("workbench.widgets.settings.base_classes.config_settings_changes_model.ConfigService", new_callable=MockConfigService)
+@patch(BASE_CLASS_CONFIG_SERVICE_PATCH_PATH, new_callable=MockConfigService)
 class ConfigSettingsChangesModelTest(TestCase):
     def setUp(self) -> None:
         self.model = ConfigSettingsChangesModel()
@@ -40,11 +35,11 @@ class ConfigSettingsChangesModelTest(TestCase):
         self.assertEqual(self.model.changes, {})
 
     def test_add_change_removes_change_if_already_saved(self, mock_config_service: MockConfigService):
+        mock_config_service.getString.return_value = "green"
         self.model.add_change("property.1", "blue")
 
         self.assertEqual(self.model.changes, {"property.1": "blue"})
 
-        mock_config_service.getString.return_value = "green"
         self.model.add_change("property.1", "green")
 
         self.assertEqual(self.model.changes, {})
