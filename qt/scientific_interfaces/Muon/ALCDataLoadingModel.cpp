@@ -41,6 +41,8 @@ std::string &ALCDataLoadingModel::getRunsText() { return m_runsText; }
 
 std::vector<std::string> &ALCDataLoadingModel::getPeriods() { return m_periods; }
 
+void ALCDataLoadingModel::cancelLoading() const { this->m_LoadingAlg->cancel(); }
+
 // Setters
 void ALCDataLoadingModel::setLoadingData(bool isLoading) { m_loadingData = isLoading; }
 
@@ -119,8 +121,7 @@ void ALCDataLoadingModel::setWsForMuonInfo(const std::string &filename) {
 }
 
 /**
- * Load new data and update the view accordingly
- * @param files :: [input] range of files (user-specified or auto generated)
+ * Load new data into model
  */
 void ALCDataLoadingModel::load(const std::string &log, const std::string &function, const std::string &calculationType,
                                const std::string &deadTimeType, const std::string &deadTimeFile,
@@ -204,8 +205,6 @@ void ALCDataLoadingModel::load(const std::string &log, const std::string &functi
     assert(m_loadedData->getNumberHistograms() == 4);
   }
 }
-
-void ALCDataLoadingModel::cancelLoading() const { this->m_LoadingAlg->cancel(); }
 
 /**
  * Remove the run number from a full file path
