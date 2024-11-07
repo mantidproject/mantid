@@ -53,7 +53,6 @@ class CreateWorkspaceTest(unittest.TestCase):
         AnalysisDataService.remove("wksp")
 
     def test_with_data_from_other_workspace(self):
-        wsname = "LOQ"
         x1 = np.array([1.0, 2.0, 3.0, 4.0])
         y1 = np.array([[1.0, 2.0, 3.0], [4.0, 5.0, 6.0]])
         e1 = np.sqrt(y1)

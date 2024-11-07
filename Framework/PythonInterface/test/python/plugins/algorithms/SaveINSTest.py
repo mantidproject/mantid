@@ -109,7 +109,7 @@ class SaveINSTest(unittest.TestCase):
         expected_lines = [*self.file_start, "SFAC C H N O S\n", *self.file_end]
         self._assert_file_contents(output_file, expected_lines)
 
-    def test_save_ins_natural_isotopic_abundance_true(self):
+    def test_save_ins_natural_isotopic_abundance_false(self):
         output_file = path.join(self._tmp_directory, "test3.ins")
 
         SaveINS(InputWorkspace=self.ws, Filename=output_file, Spacegroup="P 1 21/n 1", UseNaturalIsotopicAbundances=False)

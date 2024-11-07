@@ -7,8 +7,8 @@
 import numpy as np
 import unittest
 
+from mantid.api import mtd
 from mantid.simpleapi import CreateEmptyTableWorkspace, CreateWorkspace, DeleteWorkspace, FitGaussianPeaks
-from mantid.api import *
 from unittest import mock
 
 import plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks as _FitGaussianPeaks

@@ -15,8 +15,8 @@ class CrystalStructureTest(unittest.TestCase):
     crystalStructure = CrystalStructure("5.431 5.431 5.431", "F d -3 m", "Si 0 0 0 1.0 0.02")
 
     def test_create(self):
-        generator = ReflectionGenerator(self.crystalStructure)
-        generator = ReflectionGenerator(self.crystalStructure, ReflectionConditionFilter.Centering)
+        _ = ReflectionGenerator(self.crystalStructure)
+        _ = ReflectionGenerator(self.crystalStructure, ReflectionConditionFilter.Centering)
 
     def test_getHKLs(self):
         generator = ReflectionGenerator(self.crystalStructure)

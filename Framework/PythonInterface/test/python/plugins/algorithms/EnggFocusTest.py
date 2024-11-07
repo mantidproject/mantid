@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from testhelpers import assertRaisesNothing
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import MatrixWorkspace
+from mantid.simpleapi import CloneWorkspace, CreateEmptyTableWorkspace, DeleteLog, EnggFocus, LoadNexus
 
 
 class EnggFocusTest(unittest.TestCase):

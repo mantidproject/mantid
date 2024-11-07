@@ -7,7 +7,7 @@
 import matplotlib
 import unittest
 
-matplotlib.use("AGG")  # noqa
+matplotlib.use("AGG")
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -46,10 +46,7 @@ class PlotFunctionsTest(unittest.TestCase):
             OutputWorkspace="ws2d_histo",
         )
         cls.ws2d_histo_negative_errors = CreateWorkspace(
-            DataX=[1, 2, 3, 4],
-            DataY=[10, 20, 30, 40],
-            DataE=[1, -2, 3, -4],
-            OutputWorkspace="ws2d_histo_negative_errors"
+            DataX=[1, 2, 3, 4], DataY=[10, 20, 30, 40], DataE=[1, -2, 3, -4], OutputWorkspace="ws2d_histo_negative_errors"
         )
         cls.ws2d_histo_non_dist = CreateWorkspace(
             DataX=[10, 20, 30, 10, 20, 30],

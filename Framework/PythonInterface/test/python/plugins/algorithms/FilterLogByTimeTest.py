@@ -6,13 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy
-from mantid.simpleapi import *
-from mantid.kernel import *
-from mantid.api import *
+from mantid.simpleapi import AddSampleLog, CreateWorkspace, DeleteWorkspace, FilterLogByTime, LoadLog
 
 
 class FilterLogByTimeTest(unittest.TestCase):
-
     __ws = None
 
     """ Log file contents.
@@ -56,7 +53,7 @@ class FilterLogByTimeTest(unittest.TestCase):
 
     def test_startdate_after_enddate(self):
         try:
-            results = FilterLogByTime(InputWorkspace=self.__ws, LogName="height", StartTime=1, EndTime=0)
+            FilterLogByTime(InputWorkspace=self.__ws, LogName="height", StartTime=1, EndTime=0)
             self.fail("End time < Start time.")
         except RuntimeError:
             pass

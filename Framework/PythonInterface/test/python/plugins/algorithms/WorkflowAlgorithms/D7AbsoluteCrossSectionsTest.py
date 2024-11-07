@@ -10,7 +10,6 @@ from mantid.simpleapi import Load, config, mtd, D7AbsoluteCrossSections, GroupWo
 
 
 class D7AbsoluteCrossSectionsTest(unittest.TestCase):
-
     _facility = None
     _instrument = None
     _sampleProperties = None

@@ -4,13 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.simpleapi import Load, DeleteWorkspace, CalculateMonteCarloAbsorption, mtd
+from mantid.simpleapi import Load, CalculateMonteCarloAbsorption, mtd
 
 import unittest
 
 
 class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
-
     _red_ws = None
     _container_ws = None
     _indirect_elastic_ws = None
@@ -18,10 +17,10 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        red_ws = Load("irs26176_graphite002_red.nxs")
-        container_ws = Load("irs26173_graphite002_red.nxs")
-        indirect_elastic_ws = Load("osi104367_elf.nxs")
-        indirect_fws_ws = Load("ILL_IN16B_FWS_Reduced.nxs")
+        Load("irs26176_graphite002_red.nxs", OutputWorkspace="red_ws")
+        Load("irs26173_graphite002_red.nxs", OutputWorkspace="container_ws")
+        Load("osi104367_elf.nxs", OutputWorkspace="indirect_elastic_ws")
+        Load("ILL_IN16B_FWS_Reduced.nxs", OutputWorkspace="indirect_fws_ws")
 
     def setUp(self):
         self._red_ws = mtd["red_ws"]
@@ -85,7 +84,6 @@ class CalculateMonteCarloAbsorptionTest(unittest.TestCase):
             self._test_corrections_workspace(workspace, spectrum_axis)
 
     def _run_correction_and_test(self, shape, sample_ws=None, spectrum_axis=None):
-
         if sample_ws is None:
             sample_ws = self._red_ws
 

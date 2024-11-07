@@ -9,7 +9,6 @@ from mantid.simpleapi import ClearUB, HasUB, FindPeaksMD, HB3AAdjustSampleNorm, 
 
 
 class HB3AFindPeaksTest(unittest.TestCase):
-
     _files = ["HB3A_exp0724_scan0182.nxs", "HB3A_exp0724_scan0183.nxs"]
     _data_ws = None
 

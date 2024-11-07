@@ -15,7 +15,6 @@ from testhelpers import run_algorithm
 
 
 class EnggSaveGSASIIFitResultsToHDF5Test(unittest.TestCase):
-
     ALG_NAME = "EnggSaveGSASIIFitResultsToHDF5"
     FIT_RESULTS_TABLE_NAME = "FitResults"
     LATTICE_PARAMS_TABLE_NAME = "LatticeParams"

@@ -746,7 +746,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         # error, but this is sufficient to confirm that the parameter was passed through successfully
         args["PolarizationEfficiencies"] = "INTER38415"
         args["PolarizationAnalysis"] = "1"
-        self._assert_run_algorithm_throws_with_correct_msg(args, f"Efficiencies workspace is not in a supported format")
+        self._assert_run_algorithm_throws_with_correct_msg(args, "Efficiencies workspace is not in a supported format")
 
     def test_polarization_efficiency_workspace_from_ADS_is_passed_to_reduction(self):
         args = self._default_options
@@ -757,7 +757,7 @@ class ReflectometryISISLoadAndProcessTest(unittest.TestCase):
         self._create_workspace("test_corrections")
         args["PolarizationEfficiencies"] = "test_corrections"
         args["PolarizationAnalysis"] = "1"
-        self._assert_run_algorithm_throws_with_correct_msg(args, f"Efficiencies workspace is not in a supported format")
+        self._assert_run_algorithm_throws_with_correct_msg(args, "Efficiencies workspace is not in a supported format")
 
     # TODO test if no runNumber is on the WS
 

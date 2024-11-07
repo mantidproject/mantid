@@ -7,6 +7,7 @@
 """Defines tests for the traits within Python algorithms
 such as name, version etc.
 """
+
 import unittest
 import testhelpers
 
@@ -55,7 +56,6 @@ class TestPyAlgIsRunningReturnsNonBool(PythonAlgorithm):
 
 
 class CancellableAlg(PythonAlgorithm):
-
     is_running = True
 
     def PyInit(self):
@@ -75,7 +75,6 @@ class CancellableAlg(PythonAlgorithm):
 
 
 class PythonAlgorithmTest(unittest.TestCase):
-
     _registered = None
 
     def setUp(self):

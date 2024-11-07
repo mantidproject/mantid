@@ -86,7 +86,6 @@ class WANDPowderReductionTest(unittest.TestCase):
         return data, cal, bkg
 
     def test(self):
-
         data, cal, bkg = self._create_workspaces()
 
         # data normalised by monitor
@@ -403,7 +402,6 @@ class WANDPowderReductionTest(unittest.TestCase):
         )
 
         for i in pd_out:
-
             x = i.extractX()
             y = i.extractY()
 

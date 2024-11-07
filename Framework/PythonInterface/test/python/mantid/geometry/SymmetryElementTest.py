@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.geometry import SymmetryOperation, SymmetryOperationFactory
+from mantid.geometry import SymmetryOperationFactory
 from mantid.geometry import SymmetryElement, SymmetryElementFactory
 from mantid.kernel import V3D
 

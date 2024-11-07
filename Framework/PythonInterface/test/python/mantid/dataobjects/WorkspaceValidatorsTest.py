@@ -5,20 +5,20 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-   Test construction of the WorkspaceValidators
+Test construction of the WorkspaceValidators
 """
+
 import unittest
 import testhelpers
 
 from mantid.dataobjects import TableWorkspaceNotEmptyValidator
 
 from mantid.simpleapi import CreateEmptyTableWorkspace
-from mantid.api import ITableWorkspace, PythonAlgorithm, WorkspaceProperty
+from mantid.api import PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction
 
 
 class WorkspaceValidatorsTest(unittest.TestCase):
-
     def test_TableWorkspaceNotEmptyValidator_construction(self):
         """
         Test that the TableWorkspaceNotEmptyValidator can be constructed
@@ -28,7 +28,6 @@ class WorkspaceValidatorsTest(unittest.TestCase):
         testhelpers.assertRaisesNothing(self, TableWorkspaceNotEmptyValidator)
 
     def test_TableWorkspaceNotEmptyValidator_usage(self):
-
         class TestAlgorithm(PythonAlgorithm):
             """Mock an extended algorithm that uses TableWorkspaceNotEmptyValidator"""
 

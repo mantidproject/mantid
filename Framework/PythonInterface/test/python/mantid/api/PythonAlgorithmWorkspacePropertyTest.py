@@ -7,6 +7,7 @@
 """Defines tests for the WorkspaceProperty types within
 Python algorithms
 """
+
 import unittest
 from mantid.api import PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction
@@ -20,7 +21,6 @@ class PythonAlgorithmWorkspacePropertyTest(unittest.TestCase):
         """
 
         class WorkspaceProperties(PythonAlgorithm):
-
             _testdocstring = "This is a workspace property"
 
             def PyInit(self):

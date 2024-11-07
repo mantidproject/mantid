@@ -13,7 +13,6 @@ from mantid.simpleapi import (
     DeleteWorkspace,
     LoadAscii,
     Multiply,
-    ChangeBinOffset,
 )
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService

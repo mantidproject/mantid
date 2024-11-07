@@ -5,10 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import Fit
-import testhelpers
+from mantid.api import FunctionFactory, IFunction1D
 import numpy
 
 

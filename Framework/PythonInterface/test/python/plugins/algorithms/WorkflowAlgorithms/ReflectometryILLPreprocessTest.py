@@ -10,7 +10,7 @@ import unittest
 
 from mantid.kernel import config
 from mantid.api import mtd
-from testhelpers import assertRaisesNothing, create_algorithm, illhelpers
+from testhelpers import assertRaisesNothing, create_algorithm
 import ReflectometryILL_common as common
 
 

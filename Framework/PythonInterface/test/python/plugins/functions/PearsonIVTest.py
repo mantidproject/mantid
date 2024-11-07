@@ -24,7 +24,7 @@ class PearsonIVTest(unittest.TestCase):
         # assert maximum and integral
         self.assertAlmostEqual(y.max(), 0.2374, delta=1e-4)
         intensity = np.sum(y) * (x[1] - x[0])
-        self.assertAlmostEqual(np.sum(y) * (x[1] - x[0]), 0.99, delta=1e-2)
+        self.assertAlmostEqual(intensity, 0.99, delta=1e-2)
 
     def test_intensity(self):
         self.assertAlmostEqual(self.func.intensity(), 1, delta=1e-3)

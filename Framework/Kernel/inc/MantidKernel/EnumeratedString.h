@@ -81,7 +81,10 @@ public:
       name = s;
     } else {
       std::stringstream msg;
-      msg << "Invalid string " << s << " for enumerated string " << typeid(E).name();
+      msg << "Invalid string \"" << s << "\" for EnumeratedString";
+#ifdef _DEBUG
+      msg << typeid(E).name();
+#endif
       throw std::runtime_error(msg.str());
     }
     return *this;

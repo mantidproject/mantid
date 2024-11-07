@@ -144,7 +144,7 @@ class DNSMergeRunsTest(unittest.TestCase):
 
     def test_DNSTwoTheta_Groups(self):
         outputWorkspaceName = "DNSMergeRunsTest_Test3"
-        group = api.GroupWorkspaces(self.workspaces)
+        api.GroupWorkspaces(self.workspaces, OutputWorkspace="group")
         alg_test = run_algorithm("DNSMergeRuns", WorkspaceNames="group", OutputWorkspace=outputWorkspaceName, HorizontalAxis="2theta")
 
         self.assertTrue(alg_test.isExecuted())

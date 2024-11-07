@@ -103,7 +103,6 @@ class RebinRaggedTest(unittest.TestCase):
         deltas[13] = 600.0
 
         ws = api.CreateSampleWorkspace(OutputWorkspace="RebinRagged_events", WorkspaceType="Event")
-        orig_y = ws.readY(0)
 
         rebinned = api.RebinRagged(ws, XMin=xmins, XMax=xmaxs, Delta=deltas, Version=1)
 

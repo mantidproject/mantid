@@ -16,7 +16,6 @@ from mantid.api import AlgorithmManager
 import numpy as np
 import unittest
 
-import vesuvio.commands as vesuvio
 import vesuvio.testing as testing
 
 

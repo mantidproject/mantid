@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.simpleapi import VesuvioPeakPrediction
-from mantid.api import mtd, ITableWorkspace
+from mantid.api import ITableWorkspace
 
 
 class VesuvioPeakPredictionTest(unittest.TestCase):

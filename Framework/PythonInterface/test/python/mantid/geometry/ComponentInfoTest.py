@@ -5,18 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import argparse
 import numpy as np
 from testhelpers import WorkspaceCreationHelper
 from mantid.kernel import V3D
 from mantid.kernel import Quat
 from mantid.geometry import CSGObject
-from mantid.simpleapi import *
-from itertools import islice
+from mantid.simpleapi import CloneWorkspace, CreateWorkspace
 
 
 class ComponentInfoTest(unittest.TestCase):
-
     _ws = None
 
     def setUp(self):
@@ -517,7 +514,6 @@ class ComponentInfoTest(unittest.TestCase):
 
     def test_isDetector_via_iterator(self):
         comp_info = self._ws.componentInfo()
-        n_detectors = len(self._ws.detectorInfo())
         it = iter(comp_info)
         self.assertEqual(next(it).isDetector, True)
         self.assertEqual(next(it).isDetector, True)

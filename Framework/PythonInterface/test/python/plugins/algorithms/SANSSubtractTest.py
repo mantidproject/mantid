@@ -7,8 +7,8 @@
 import unittest
 import numpy
 
-from mantid.api import *
-from mantid import config
+from mantid.api import AnalysisDataService
+from mantid.kernel import config
 from testhelpers import run_algorithm
 
 

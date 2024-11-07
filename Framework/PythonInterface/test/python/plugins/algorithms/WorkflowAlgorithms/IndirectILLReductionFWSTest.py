@@ -12,7 +12,6 @@ from mantid import config
 
 
 class IndirectILLReductionFWS(unittest.TestCase):
-
     # cache the def instrument and data search dirs
     _def_fac = config["default.facility"]
     _def_inst = config["default.instrument"]
@@ -39,7 +38,6 @@ class IndirectILLReductionFWS(unittest.TestCase):
         config["datasearch.directories"] = self._data_dirs
 
     def test_two_wing(self):
-
         args = {"Run": self._run_two_wing_mixed, "OutputWorkspace": "out"}
 
         alg_test = run_algorithm("IndirectILLReductionFWS", **args)
@@ -63,7 +61,6 @@ class IndirectILLReductionFWS(unittest.TestCase):
         self._check_workspace_group(mtd["out_red"], 3, 128 * 16 + 2 + 1, 2)
 
     def test_one_wing(self):
-
         args = {"Run": self._run_one_wing_mixed, "OutputWorkspace": "out"}
 
         alg_test = run_algorithm("IndirectILLReductionFWS", **args)
@@ -73,7 +70,6 @@ class IndirectILLReductionFWS(unittest.TestCase):
         self._check_workspace_group(mtd["out_red"], 3, 18, 2)
 
     def test_omega_scan(self):
-
         args = {"Run": self._observable_omega, "Observable": "SamS_Rot.value", "OutputWorkspace": "out"}
 
         alg_test = run_algorithm("IndirectILLReductionFWS", **args)
@@ -85,7 +81,6 @@ class IndirectILLReductionFWS(unittest.TestCase):
         self.assertEqual(mtd["out_red"].getItem(0).readX(0)[0], 90)
 
     def test_ifws_monitor_peaks(self):
-
         args = {"Run": "170304", "OutputWorkspace": "out"}
 
         alg_test = run_algorithm("IndirectILLReductionFWS", **args)
@@ -103,7 +98,6 @@ class IndirectILLReductionFWS(unittest.TestCase):
         self.assertEqual(run.getLogData("MonitorRightPeak").value, 508)
 
     def test_ifws_manual_peaks(self):
-
         args = {"Run": "170304", "ManualInelasticPeakChannels": [3, 507], "OutputWorkspace": "out"}
 
         alg_test = run_algorithm("IndirectILLReductionFWS", **args)
@@ -121,7 +115,6 @@ class IndirectILLReductionFWS(unittest.TestCase):
         self.assertEqual(run.getLogData("ManualInelasticRightPeak").value, 507)
 
     def _check_workspace_group(self, wsgroup, nentries, nspectra, nbins):
-
         self.assertTrue(isinstance(wsgroup, WorkspaceGroup), "{0} should be a group workspace".format(wsgroup.getName()))
 
         self.assertEqual(wsgroup.getNumberOfEntries(), nentries, "{0} should contain {1} workspaces".format(wsgroup.getName(), nentries))
