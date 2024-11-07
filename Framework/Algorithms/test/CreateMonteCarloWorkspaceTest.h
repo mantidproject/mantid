@@ -102,7 +102,7 @@ public:
     AnalysisDataService::Instance().remove("MonteCarloTest_WS");
   }
 
-    void test_reproducibility_with_seed() {
+  void test_reproducibility_with_seed() {
     CreateMonteCarloWorkspace alg1;
     alg1.initialize();
 
