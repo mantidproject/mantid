@@ -71,7 +71,7 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
 endfunction()
 
 # PYSYSTEMTEST_ADD_TEST (public macro to add system tests) Adds a set of python tests based upon the unittest module
-# This add the named system test and reun the individually
+# This adds the named system test do they can be run individually
 
 function(PYSYSTEMTEST_ADD_TEST)
 
