@@ -31,7 +31,7 @@ using namespace API;
 using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStas)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMcStas)
 
 //----------------------------------------------------------------------------------------------
 // Algorithm's name for identification. @see Algorithm::name
@@ -71,7 +71,7 @@ void LoadMcStas::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void LoadMcStas::exec() {
+void LoadMcStas::execLoader() {
 
   std::string filename = getPropertyValue("Filename");
   g_log.debug() << "Opening file " << filename << '\n';
@@ -110,8 +110,8 @@ void LoadMcStas::exec() {
     // @long_name = data ' Intensity Position Position Neutron_ID Velocity
     // Time_Of_Flight Monitor (Square)'
     // if Neutron_ID present we have event data
-
-    auto nxdataEntries = nxFile.getEntries();
+    std::map<std::string, std::string> nxdataEntries;
+    nxFile.getEntries(nxdataEntries);
 
     for (auto &nxdataEntry : nxdataEntries) {
       if (nxdataEntry.second == "NXparameters")
@@ -566,17 +566,16 @@ std::vector<std::string> LoadMcStas::readHistogramData(const std::map<std::strin
  * @return An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMcStas::confidence(Kernel::NexusDescriptor &descriptor) const {
+int LoadMcStas::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   using namespace ::NeXus;
   // look at to see if entry1/simulation/name exist first and then
   // if its value = mccode
   int confidence(0);
-  if (descriptor.pathExists("/entry1/simulation/name")) {
+  if (descriptor.isEntry("/entry1/simulation/name")) {
     try {
       // need to look inside file to check value of entry1/simulation/name
-      ::NeXus::File file = ::NeXus::File(descriptor.filename());
-      file.openGroup(descriptor.firstEntryNameType().first, descriptor.firstEntryNameType().second);
-      file.openGroup("simulation", "NXnote");
+      ::NeXus::File file = ::NeXus::File(descriptor.getFilename());
+      file.openGroup("/entry1/simulation", "NXnote");
       std::string value;
       // check if entry1/simulation/name equals mccode
       file.readData("name", value);
