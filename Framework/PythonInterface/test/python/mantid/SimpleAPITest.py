@@ -88,11 +88,7 @@ class SimpleAPITest(unittest.TestCase):
         )
         doc = simpleapi.rebin.__doc__
         self.assertGreater(len(doc), 0)
-        # The missing part of the expected_doc string contains "BinningMode(Input) *string* " ...
-        # Due to introduction of EnumeratedStringProperty the "*string*" is replaced by some
-        # generated during build characters in the "doc" string here.
-        # Cutting them out to compare two strings
-        self.assertEqual(doc[0:1897], expected_doc[0:1897])
+        self.assertEqual(doc, expected_doc)
 
     def test_function_call_executes_correct_algorithm_when_passed_correct_args(self):
         wsname = "test_function_call_executes_correct_algorithm_when_passed_correct_args"
