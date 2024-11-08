@@ -34,7 +34,7 @@ Automatic Save Selection
 ########################
 
 #. Select ``File`` or ``Both`` from the ``Save Options`` at the bottom right of the screen.
-#. In the ``Reduction`` section to the left of the ``Save Options``, switch between the ``1D``` and ``2D``` radio buttons..
+#. In the ``Reduction`` section to the left of the ``Save Options``, switch between the ``1D`` and ``2D`` radio buttons..
 
    * When 1D is selected, ``CanSAS (1D)`` and ``NxCanSAS (1D/2D)`` should be checked.
    * When 2D is selected, only ``NxCanSAS (1D/2D)`` should be checked.
@@ -44,7 +44,7 @@ Automatic Save Selection
 #. The options should revert to the defaults above (with ``RKH (1D/2D)`` unchecked).
 #. Select ``Memory``. The ``CanSAS (1D)``, ``NxCanSAS (1D/2D)``, and ``RKH (1D/2D)`` checkboxes should be disabled.
 #. Swap between ``Memory`` and ``File`` with a ``2D`` reduction mode. ``CanSAS (1D)`` should always stay disabled.
-#. Set the ``Save Option``` back to ``Memory`` to continue with the rest of the tests.
+#. Set the ``Save Option`` back to ``Memory`` to continue with the rest of the tests.
 
 Runs table editing
 ##################
@@ -177,8 +177,8 @@ Processing
 *Scaled Background Subtracted Reduction*
 
 #. Create a new copy of the User File in your file browser.
-#. Using a text editor. Open this new copy in a text editor and find the ``[detector.configuration]`` section.
-#. Under this section, make sure setting selected_detector is set to ``Merged``.
+#. Open this new copy in a text editor and find the ``[detector.configuration]`` section.
+#. Under this section, make sure setting ``selected_detector`` is set to ``Merged``.
 #. Back in the ISIS SANS interface, change the user file to this new file.
 #. Click over to the ``Runs`` tab.
 #. Set the ``Save Options`` to ``Memory``.
@@ -189,7 +189,7 @@ Processing
 #. Check the ``Scaled Background Subtraction`` checkbox.
 #. In the ``BackgroundWorkspace`` column, enter the name of the merged workspace you took note of before.
 #. In the ``ScaleFactor`` column, enter ``0.9``.
-#. Set the ``Save Options``` to Both and ensure that save outputs ``CanSAS (1D)`` and ``NXcanSAS (1D/2D)`` are ticked
+#. Set the ``Save Options`` to ``Both`` and ensure that save outputs ``CanSAS (1D)`` and ``NXcanSAS (1D/2D)`` are ticked.
 #. Select this new row and click ``Process Selected``.
 #. When it completes, two output files should have been created with ``bgsub_test`` in the name. One, which is the
    normal output data. Another with the scaled subtraction, which should have ``_bgsub`` appended to the name.
