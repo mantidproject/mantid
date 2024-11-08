@@ -13,8 +13,8 @@
 #include "MantidKernel/System.h"
 
 #include <H5Cpp.h>
-#include <Poco/File.h>
 #include <boost/numeric/conversion/cast.hpp>
+#include <filesystem>
 #include <limits>
 
 using namespace H5;
@@ -29,8 +29,8 @@ public:
   static void destroySuite(H5UtilTest *suite) { delete suite; }
 
   void removeFile(const std::string &filename) {
-    if (Poco::File(filename).exists())
-      Poco::File(filename).remove();
+    if (std::filesystem::exists(filename))
+      std::filesystem::remove(filename);
   }
 
   void test_strings() {
@@ -49,7 +49,7 @@ public:
       file.close();
     }
 
-    TS_ASSERT(Poco::File(FILENAME).exists());
+    TS_ASSERT(std::filesystem::exists(FILENAME));
     do_assert_simple_string_data_set(FILENAME, GRP_NAME, DATA_NAME, DATA_VALUE);
 
     // cleanup
@@ -100,7 +100,7 @@ public:
     }
 
     // Assert
-    TS_ASSERT(Poco::File(FILENAME).exists());
+    TS_ASSERT(std::filesystem::exists(FILENAME));
     std::map<std::string, float> floatAttributesScalar{{ATTR_NAME_3, ATTR_VALUE_3}};
     std::map<std::string, int> intAttributesScalar{{ATTR_NAME_4, ATTR_VALUE_4}};
     std::map<std::string, std::vector<float>> floatVectorAttributesScalar{{ATTR_NAME_5, ATTR_VALUE_5}};
@@ -134,7 +134,7 @@ public:
       file.close();
     }
 
-    TS_ASSERT(Poco::File(FILENAME).exists());
+    TS_ASSERT(std::filesystem::exists(FILENAME));
 
     { // read tests
       H5File file(FILENAME, H5F_ACC_RDONLY);
@@ -178,7 +178,7 @@ public:
     file.close();
 
     // check it exists
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // open and read the vector
     H5File file_read(filename, H5F_ACC_RDONLY);
@@ -207,7 +207,7 @@ public:
     g.close();
     h5.close();
 
-    TS_ASSERT(Poco::File(testInput.fullPath()).exists());
+    TS_ASSERT(std::filesystem::exists(testInput.fullPath()));
     H5File h5_ro(testInput.fullPath(), H5F_ACC_RDONLY);
 
     TS_ASSERT(H5Util::groupExists(h5_ro, "/one"));
@@ -237,7 +237,7 @@ public:
       h5.createGroup("/three");
     }
 
-    TS_ASSERT(Poco::File(testInput.fullPath()).exists());
+    TS_ASSERT(std::filesystem::exists(testInput.fullPath()));
     H5File h5(testInput.fullPath(), H5F_ACC_RDONLY);
 
     Group g1 = h5.openGroup("/one");
@@ -399,7 +399,7 @@ private:
       const std::map<std::string, std::vector<float>> &floatVectorAttributes =
           std::map<std::string, std::vector<float>>(),
       const std::map<std::string, std::vector<int>> &intVectorAttributes = std::map<std::string, std::vector<int>>()) {
-    TS_ASSERT(Poco::File(filename).exists());
+    TS_ASSERT(std::filesystem::exists(filename));
 
     // read tests
     H5File file(filename, H5F_ACC_RDONLY);
