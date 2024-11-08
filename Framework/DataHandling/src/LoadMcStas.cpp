@@ -24,6 +24,7 @@
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>
 // clang-format on
+#include <H5Cpp.h>
 
 namespace Mantid::DataHandling {
 using namespace Kernel;
@@ -72,66 +73,58 @@ void LoadMcStas::init() {
 /** Execute the algorithm.
  */
 void LoadMcStas::execLoader() {
-
   std::string filename = getPropertyValue("Filename");
-  g_log.debug() << "Opening file " << filename << '\n';
+  H5::H5File file(filename, H5F_ACC_RDONLY);
 
-  ::NeXus::File nxFile(filename);
-  auto entries = nxFile.getEntries();
+  auto const &descriptor = getFileInfo();
+  auto const &allEntries = descriptor->getAllEntries();
 
-  // McStas Nexus only ever have one top level entry
-  auto entry = entries.begin();
-  std::string entryName = entry->first;
-  std::string type = entry->second;
-
-  // open top entry - open data entry
-  nxFile.openGroup(entryName, type);
-  nxFile.openGroup("data", "NXdetector");
-
-  auto dataEntries = nxFile.getEntries();
+  auto const iterSDS = allEntries.find("SDS");
+  if (iterSDS == allEntries.cend()) {
+    throw std::runtime_error("Could not find any entries.");
+  }
+  auto const &entries = iterSDS->second;
 
   std::map<std::string, std::string> eventEntries;
   std::map<std::string, std::string> histogramEntries;
-
-  // populate eventEntries and histogramEntries
-  for (auto &dataEntry : dataEntries) {
-    std::string dataName = dataEntry.first;
-    std::string dataType = dataEntry.second;
-    if (dataName == "content_nxs" || dataType != "NXdata")
-      continue; // can be removed if sure no Nexus files contains
-                // "content_nxs"
-    g_log.debug() << "Opening " << dataName << "   " << dataType << '\n';
-
-    // open second level entry
-    nxFile.openGroup(dataName, dataType);
-
-    // Find the Neutron_ID tag from McStas event data
-    // Each event detector has the nexus attribute:
-    // @long_name = data ' Intensity Position Position Neutron_ID Velocity
-    // Time_Of_Flight Monitor (Square)'
-    // if Neutron_ID present we have event data
-    std::map<std::string, std::string> nxdataEntries;
-    nxFile.getEntries(nxdataEntries);
-
-    for (auto &nxdataEntry : nxdataEntries) {
-      if (nxdataEntry.second == "NXparameters")
-        continue;
-      nxFile.openData(nxdataEntry.first);
-      if (nxFile.hasAttr("long_name")) {
-        std::string nameAttrValue;
-        nxFile.getAttr("long_name", nameAttrValue);
-
-        if (nameAttrValue.find("Neutron_ID") != std::string::npos) {
-          eventEntries[dataEntry.first] = dataEntry.second;
-        } else {
-          histogramEntries[dataEntry.first] = dataEntry.second;
-        }
-      }
-      nxFile.closeData();
+  for (auto &entry : entries) {
+    if (entry.find("/entry1/data") == std::string::npos) {
+      continue;
     }
-    // close second entry
-    nxFile.closeGroup();
+    size_t pos = entry.find_last_of("/");
+    std::string groupPath = entry.substr(0, pos);
+    std::string dataName = entry.substr(pos + 1);
+    auto pos2 = groupPath.find_last_of("/");
+    std::string groupName = groupPath.substr(pos2 + 1);
+    if (groupName == "content_nxs")
+      continue;
+
+    H5::Group group = file.openGroup(groupPath);
+    H5::DataSet dataset = group.openDataSet(dataName);
+    htri_t exists = H5Aexists(dataset.getId(), "long_name");
+
+    if (exists > 0) {
+      H5::Attribute attr = dataset.openAttribute("long_name");
+
+      char *rawStringData;
+      H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
+      attr.read(strType, &rawStringData);
+
+      std::string nameAttrValue(rawStringData);
+
+      if (nameAttrValue.find("Neutron_ID") != std::string::npos) {
+        eventEntries[groupName] = "NXdata";
+      } else {
+        histogramEntries[groupName] = "NXdata";
+      }
+    }
   }
+  file.close();
+
+  ::NeXus::File nxFile(filename);
+  nxFile.openGroup("entry1", "NXentry");
+  nxFile.openGroup("data", "NXdetector");
+
   std::vector<std::string> scatteringWSNames;
   std::vector<std::string> histoWSNames;
   if (!eventEntries.empty()) {
