@@ -1,0 +1,1 @@
+- Fixed the reported name of the operating system for macOS users when an error report is generated.
