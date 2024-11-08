@@ -13,17 +13,17 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidKernel/RegexStrings.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <H5Cpp.h>
 #include <boost/algorithm/string.hpp>
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
 
 namespace Mantid::DataHandling {
 using namespace Kernel;
@@ -31,7 +31,7 @@ using namespace API;
 using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStas)
+DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMcStas)
 
 //----------------------------------------------------------------------------------------------
 // Algorithm's name for identification. @see Algorithm::name
@@ -71,83 +71,65 @@ void LoadMcStas::init() {
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-void LoadMcStas::exec() {
-
+void LoadMcStas::execLoader() {
   std::string filename = getPropertyValue("Filename");
-  g_log.debug() << "Opening file " << filename << '\n';
+  H5::H5File file(filename, H5F_ACC_RDONLY);
 
-  ::NeXus::File nxFile(filename);
-  auto entries = nxFile.getEntries();
+  auto const &descriptor = getFileInfo();
+  auto const &allEntries = descriptor->getAllEntries();
 
-  // McStas Nexus only ever have one top level entry
-  auto entry = entries.begin();
-  std::string entryName = entry->first;
-  std::string type = entry->second;
+  auto const iterSDS = allEntries.find("SDS");
+  if (iterSDS == allEntries.cend()) {
+    throw std::runtime_error("Could not find any entries.");
+  }
+  auto const &entries = iterSDS->second;
 
-  // open top entry - open data entry
-  nxFile.openGroup(entryName, type);
-  nxFile.openGroup("data", "NXdetector");
-
-  auto dataEntries = nxFile.getEntries();
-
-  std::map<std::string, std::string> eventEntries;
-  std::map<std::string, std::string> histogramEntries;
-
-  // populate eventEntries and histogramEntries
-  for (auto &dataEntry : dataEntries) {
-    std::string dataName = dataEntry.first;
-    std::string dataType = dataEntry.second;
-    if (dataName == "content_nxs" || dataType != "NXdata")
-      continue; // can be removed if sure no Nexus files contains
-                // "content_nxs"
-    g_log.debug() << "Opening " << dataName << "   " << dataType << '\n';
-
-    // open second level entry
-    nxFile.openGroup(dataName, dataType);
-
-    // Find the Neutron_ID tag from McStas event data
-    // Each event detector has the nexus attribute:
-    // @long_name = data ' Intensity Position Position Neutron_ID Velocity
-    // Time_Of_Flight Monitor (Square)'
-    // if Neutron_ID present we have event data
-
-    auto nxdataEntries = nxFile.getEntries();
-
-    for (auto &nxdataEntry : nxdataEntries) {
-      if (nxdataEntry.second == "NXparameters")
-        continue;
-      nxFile.openData(nxdataEntry.first);
-      if (nxFile.hasAttr("long_name")) {
-        std::string nameAttrValue;
-        nxFile.getAttr("long_name", nameAttrValue);
-
-        if (nameAttrValue.find("Neutron_ID") != std::string::npos) {
-          eventEntries[dataEntry.first] = dataEntry.second;
-        } else {
-          histogramEntries[dataEntry.first] = dataEntry.second;
-        }
-      }
-      nxFile.closeData();
+  const char *attributeName = "long_name";
+  std::vector<std::string> eventEntries;
+  std::map<std::string, std::vector<std::string>> histogramEntries;
+  for (auto &entry : entries) {
+    if (entry.find("/entry1/data") == std::string::npos) {
+      continue;
     }
-    // close second entry
-    nxFile.closeGroup();
+
+    const auto parts = Strings::StrParts(entry, boost::regex("/"));
+    const auto groupPath = "/" + Strings::join(parts.cbegin(), parts.cend() - 1, "/");
+    const auto groupName = *(parts.cend() - 2);
+    const auto datasetName = parts.back();
+
+    if (groupName == "content_nxs")
+      continue;
+
+    const H5::Group group = file.openGroup(groupPath);
+    const H5::DataSet dataset = group.openDataSet(datasetName);
+
+    if (!H5Util::hasAttribute(dataset, attributeName)) {
+      continue;
+    }
+
+    std::string nameAttrValue;
+    H5Util::readStringAttribute(dataset, attributeName, nameAttrValue);
+    if (nameAttrValue.find("Neutron_ID") != std::string::npos) {
+      eventEntries.emplace_back(groupPath);
+    } else if (histogramEntries.find(groupPath) == histogramEntries.cend()) {
+      histogramEntries[groupPath] = {datasetName};
+    } else {
+      histogramEntries[groupPath].emplace_back(datasetName);
+    }
   }
+
   std::vector<std::string> scatteringWSNames;
-  std::vector<std::string> histoWSNames;
   if (!eventEntries.empty()) {
-    scatteringWSNames = readEventData(eventEntries, nxFile);
+    scatteringWSNames = readEventData(eventEntries, file);
   }
-  histoWSNames = readHistogramData(histogramEntries, nxFile);
+  const auto histoWSNames = readHistogramData(histogramEntries, file);
+  file.close();
 
   // join two vectors together
-  scatteringWSNames.insert(scatteringWSNames.end(), histoWSNames.begin(), histoWSNames.end());
-
-  // close top entry
-  nxFile.closeGroup(); // corresponds to nxFile.openGroup("data", "NXdetector");
-  nxFile.closeGroup();
+  scatteringWSNames.insert(scatteringWSNames.end(), histoWSNames.cbegin(), histoWSNames.cend());
 
   setProperty("OutputWorkspace", groupWorkspaces(scatteringWSNames));
-} // LoadMcStas::exec()
+}
 
 /**
  * Group workspaces
@@ -168,28 +150,17 @@ API::WorkspaceGroup_sptr LoadMcStas::groupWorkspaces(const std::vector<std::stri
 /**
  * Read Event Data
  * @param eventEntries map of the file entries that have events
- * @param nxFile Reads data from inside first top entry
+ * @param file Reads data from inside first top entry
  * @return Names of workspaces to include in the output group
  */
-std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, std::string> &eventEntries,
-                                                   ::NeXus::File &nxFile) {
+std::vector<std::string> LoadMcStas::readEventData(const std::vector<std::string> &eventEntries,
+                                                   const H5::H5File &file) {
 
   // vector to store output workspaces
   std::vector<std::string> scatteringWSNames;
 
   std::string filename = getPropertyValue("Filename");
-  auto entries = nxFile.getEntries();
   const bool errorBarsSetTo1 = getProperty("ErrorBarsSetTo1");
-
-  // will assume that each top level entry contain one mcstas
-  // generated IDF and any event data entries within this top level
-  // entry are data collected for that instrument
-  // This code for loading the instrument is for now adjusted code from
-  // ExperimentalInfo.
-
-  // Close data folder and go back to top level. Then read and close the
-  // Instrument folder.
-  nxFile.closeGroup();
 
   Geometry::Instrument_sptr instrument;
 
@@ -201,11 +172,9 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
   std::string instrumentXML;
   progInitial.report("Loading instrument");
   try {
-    nxFile.openGroup("instrument", "NXinstrument");
-    nxFile.openGroup("instrument_xml", "NXnote");
-    nxFile.readData("data", instrumentXML);
-    nxFile.closeGroup();
-    nxFile.closeGroup();
+    const H5::Group group = file.openGroup("/entry1/instrument/instrument_xml");
+    const H5::DataSet dataset = group.openDataSet("data");
+    instrumentXML = H5Util::readString(dataset);
   } catch (...) {
     g_log.warning() << "\nCould not find the instrument description in the Nexus file:" << filename
                     << " Ignore eventdata from the Nexus file\n";
@@ -239,8 +208,6 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
     return scatteringWSNames;
     ;
   }
-  // Finished reading Instrument. Then open new data folder again
-  nxFile.openGroup("data", "NXdetector");
 
   // create and prepare an event workspace ready to receive the mcstas events
   progInitial.report("Set up EventWorkspace");
@@ -264,6 +231,7 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
   }
   // the one is here for the moment for backward compatibility
   eventWS->rebuildSpectraMapping(true);
+  const auto detIDtoWSIndex = eventWS->getDetectorIDToWorkspaceIndexMap(true);
 
   bool isAnyNeutrons = false;
   // to store shortest and longest recorded TOF
@@ -279,10 +247,11 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
   const bool onlySummedEventWorkspace = getProperty("OutputOnlySummedEventWorkspace");
   if (!onlySummedEventWorkspace && numEventEntries > 1) {
     for (const auto &eventEntry : eventEntries) {
-      const std::string &dataName = eventEntry.first;
+      const auto parts = Strings::StrParts(eventEntry, boost::regex("/"));
+      const auto groupName = parts.back();
       // create container to hold partial event data
       // plus the name users will see for it
-      const auto ws_name = dataName + "_" + nameOfGroupWS;
+      const auto ws_name = groupName + "_" + nameOfGroupWS;
       allEventWS.emplace_back(eventWS->clone(), ws_name);
     }
   }
@@ -292,14 +261,12 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
   // Refer to entry in allEventWS. The first non-summed workspace index is 1
   auto eventWSIndex = 1u;
   // Loop over McStas event data components
-  for (const auto &eventEntry : eventEntries) {
-    const std::string &dataName = eventEntry.first;
-    const std::string &dataType = eventEntry.second;
+  for (const auto &groupPath : eventEntries) {
+    const H5::Group group = file.openGroup(groupPath);
+    const H5::DataSet dataset = group.openDataSet("events");
 
     // open second level entry
-    nxFile.openGroup(dataName, dataType);
     std::vector<double> data;
-    nxFile.openData("events");
     progEntries.report("read event data from nexus");
 
     // Need to take into account that the nexus readData method reads a
@@ -316,15 +283,18 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
     // column  5 : t 	time
 
     // get info about event data
-    ::NeXus::Info id_info = nxFile.getInfo();
-    if (id_info.dims.size() != 2) {
+    const H5::DataSpace dataspace = dataset.getSpace();
+    const auto rank = dataspace.getSimpleExtentNdims();
+
+    std::vector<hsize_t> dims(rank);
+    dataspace.getSimpleExtentDims(dims.data());
+    if (dims.size() != 2) {
       g_log.error() << "Event data in McStas nexus file not loaded. Expected "
                        "event data block to be two dimensional\n";
       return scatteringWSNames;
-      ;
     }
-    int64_t nNeutrons = id_info.dims[0];
-    int64_t numberOfDataColumn = id_info.dims[1];
+    hsize_t nNeutrons = dims[0];
+    hsize_t numberOfDataColumn = dims[1];
     if (nNeutrons && numberOfDataColumn != 6) {
       g_log.error() << "Event data in McStas nexus file expecting 6 columns\n";
       return scatteringWSNames;
@@ -333,16 +303,16 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
     if (!isAnyNeutrons && nNeutrons > 0)
       isAnyNeutrons = true;
 
-    std::vector<int64_t> start(2);
-    std::vector<int64_t> step(2);
+    hsize_t start[2];
+    hsize_t step[2];
 
     // read the event data in blocks. 1 million event is 1000000*6*8 doubles
     // about 50Mb
-    int64_t nNeutronsInBlock = 1000000;
-    int64_t nOfFullBlocks = nNeutrons / nNeutronsInBlock;
-    int64_t nRemainingNeutrons = nNeutrons - nOfFullBlocks * nNeutronsInBlock;
+    hsize_t nNeutronsInBlock = 1000000;
+    hsize_t nOfFullBlocks = nNeutrons / nNeutronsInBlock;
+    hsize_t nRemainingNeutrons = nNeutrons - nOfFullBlocks * nNeutronsInBlock;
     // sum over number of blocks + 1 to cover the remainder
-    for (int64_t iBlock = 0; iBlock < nOfFullBlocks + 1; iBlock++) {
+    for (hsize_t iBlock = 0; iBlock < nOfFullBlocks + 1; iBlock++) {
       if (iBlock == nOfFullBlocks) {
         // read remaining neutrons
         start[0] = nOfFullBlocks * nNeutronsInBlock;
@@ -356,22 +326,24 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
         step[0] = nNeutronsInBlock;
         step[1] = numberOfDataColumn;
       }
-      const int64_t nNeutronsForthisBlock = step[0]; // number of neutrons read for this block
+      const hsize_t nNeutronsForthisBlock = step[0]; // number of neutrons read for this block
       data.resize(nNeutronsForthisBlock * numberOfDataColumn);
 
       // Check that the type is what it is supposed to be
-      if (id_info.type == ::NeXus::FLOAT64) {
-        nxFile.getSlab(&data[0], start, step);
-      } else {
-        g_log.warning() << "Entry event field is not FLOAT64! It will be skipped.\n";
+      const H5::DataType datatype = dataset.getDataType();
+      if (datatype.getClass() != H5T_FLOAT) {
+        g_log.warning() << "Entry event field is not H5T_FLOAT! It will be skipped.\n";
         continue;
       }
 
-      // populate workspace with McStas events
-      const detid2index_map detIDtoWSindex_map = allEventWS[0].first->getDetectorIDToWorkspaceIndexMap(true);
+      H5::DataSpace memspace(rank, step);
+      dataspace.selectHyperslab(H5S_SELECT_SET, step, start);
 
+      dataset.read(data.data(), H5::PredType::NATIVE_DOUBLE, memspace, dataspace);
+
+      // populate workspace with McStas events
       progEntries.report("read event data into workspace");
-      for (int64_t in = 0; in < nNeutronsForthisBlock; in++) {
+      for (hsize_t in = 0; in < nNeutronsForthisBlock; in++) {
         const auto detectorID = static_cast<int>(data[4 + numberOfDataColumn * in]);
         const double detector_time = data[5 + numberOfDataColumn * in] * 1.0e6; // convert to microseconds
         if (in == 0 && iBlock == 0) {
@@ -384,7 +356,7 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
             longestTOF = detector_time;
         }
 
-        const size_t workspaceIndex = detIDtoWSindex_map.find(detectorID)->second;
+        const size_t workspaceIndex = detIDtoWSIndex.find(detectorID)->second;
 
         int64_t pulse_time = 0;
         WeightedEvent weightedEvent;
@@ -401,10 +373,6 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
       }
       eventWSIndex++;
     } // end reading over number of blocks of an event dataset
-
-    nxFile.closeData();
-    nxFile.closeGroup();
-
   } // end reading over number of event datasets
 
   // Create a default TOF-vector for histogramming, for now just 2 bins
@@ -428,61 +396,54 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
 /**
  * Read histogram data
  * @param histogramEntries map of the file entries that have histogram
- * @param nxFile Reads data from inside first first top entry
+ * @param file Reads data from inside first first top entry
  * @return Names of workspaces to include in output group
  */
-std::vector<std::string> LoadMcStas::readHistogramData(const std::map<std::string, std::string> &histogramEntries,
-                                                       ::NeXus::File &nxFile) {
+std::vector<std::string>
+LoadMcStas::readHistogramData(const std::map<std::string, std::vector<std::string>> &histogramEntries,
+                              const H5::H5File &file) {
 
   std::string nameAttrValueYLABEL;
   std::vector<std::string> histoWSNames;
 
-  for (const auto &histogramEntry : histogramEntries) {
-    const std::string &dataName = histogramEntry.first;
-    const std::string &dataType = histogramEntry.second;
+  for (const auto &entry : histogramEntries) {
+    const auto groupPath = entry.first;
+    const H5::Group group = file.openGroup(groupPath);
 
-    // open second level entry
-    nxFile.openGroup(dataName, dataType);
-
-    // grap title to use to e.g. create workspace name
     std::string nameAttrValueTITLE;
-    nxFile.getAttr("filename", nameAttrValueTITLE);
+    H5Util::readStringAttribute(group, "filename", nameAttrValueTITLE);
 
-    if (nxFile.hasAttr("ylabel")) {
-      nxFile.getAttr("ylabel", nameAttrValueYLABEL);
+    if (H5Util::hasAttribute(group, "ylabel")) {
+      H5Util::readStringAttribute(group, "ylabel", nameAttrValueYLABEL);
     }
 
     // Find the axis names
-    auto nxdataEntries = nxFile.getEntries();
     std::string axis1Name, axis2Name;
-    for (auto &nxdataEntry : nxdataEntries) {
-      if (nxdataEntry.second == "NXparameters")
+    for (const auto &datasetName : entry.second) {
+      if (datasetName == "ncount")
         continue;
-      if (nxdataEntry.first == "ncount")
-        continue;
-      nxFile.openData(nxdataEntry.first);
+      H5::DataSet dataset = group.openDataSet(datasetName);
 
-      if (nxFile.hasAttr("axis")) {
-        int axisNo(0);
-        nxFile.getAttr("axis", axisNo);
+      if (H5Util::hasAttribute(dataset, "axis")) {
+        const auto axisNo = H5Util::readNumAttributeCoerce<int>(dataset, "axis");
         if (axisNo == 1)
-          axis1Name = nxdataEntry.first;
+          axis1Name = datasetName;
         else if (axisNo == 2)
-          axis2Name = nxdataEntry.first;
+          axis2Name = datasetName;
         else
           throw std::invalid_argument("Unknown axis number");
       }
-      nxFile.closeData();
     }
 
     std::vector<double> axis1Values;
+    H5Util::readArray1DCoerce(group, axis1Name, axis1Values);
     std::vector<double> axis2Values;
-    nxFile.readData<double>(axis1Name, axis1Values);
+
     if (axis2Name.length() == 0) {
       axis2Name = nameAttrValueYLABEL;
       axis2Values.emplace_back(0.0);
     } else {
-      nxFile.readData<double>(axis2Name, axis2Values);
+      H5Util::readArray1DCoerce(group, axis2Name, axis2Values);
     }
 
     const size_t axis1Length = axis1Values.size();
@@ -491,18 +452,13 @@ std::vector<std::string> LoadMcStas::readHistogramData(const std::map<std::strin
 
     // Require "data" field
     std::vector<double> data;
-    nxFile.readData<double>("data", data);
+    H5Util::readArray1DCoerce(group, "data", data);
 
     // Optional errors field
     std::vector<double> errors;
-    try {
-      nxFile.readData<double>("errors", errors);
-    } catch (::NeXus::Exception &) {
-      g_log.information() << "Field " << dataName << " contains no error information.\n";
+    if (group.exists("errors")) {
+      H5Util::readArray1DCoerce(group, "errors", errors);
     }
-
-    // close second level entry
-    nxFile.closeGroup();
 
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", axis2Length, axis1Length, axis1Length);
     Axis *axis1 = ws->getAxis(0);
@@ -555,10 +511,8 @@ std::vector<std::string> LoadMcStas::readHistogramData(const std::map<std::strin
 
     histoWSNames.emplace_back(ws->getName());
   }
-  nxFile.closeGroup();
   return histoWSNames;
-
-} // finish
+}
 
 /**
  * Return the confidence with with this algorithm can load the file
@@ -566,28 +520,19 @@ std::vector<std::string> LoadMcStas::readHistogramData(const std::map<std::strin
  * @return An integer specifying the confidence level. 0 indicates it will not
  * be used
  */
-int LoadMcStas::confidence(Kernel::NexusDescriptor &descriptor) const {
-  using namespace ::NeXus;
-  // look at to see if entry1/simulation/name exist first and then
-  // if its value = mccode
-  int confidence(0);
-  if (descriptor.pathExists("/entry1/simulation/name")) {
-    try {
-      // need to look inside file to check value of entry1/simulation/name
-      ::NeXus::File file = ::NeXus::File(descriptor.filename());
-      file.openGroup(descriptor.firstEntryNameType().first, descriptor.firstEntryNameType().second);
-      file.openGroup("simulation", "NXnote");
-      std::string value;
-      // check if entry1/simulation/name equals mccode
-      file.readData("name", value);
-      if (boost::iequals(value, "mccode"))
-        confidence = 98;
-      file.closeGroup();
-      file.closeGroup();
-    } catch (::NeXus::Exception &) {
-    }
+int LoadMcStas::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
+  if (!descriptor.isEntry("/entry1/simulation/name")) {
+    return 0;
   }
-  return confidence;
+  H5::H5File file(descriptor.getFilename(), H5F_ACC_RDONLY);
+  H5::Group group = file.openGroup("/entry1/simulation");
+  H5::DataSet dataset = group.openDataSet("name");
+
+  const auto value = H5Util::readString(dataset);
+  if (boost::iequals(value, "mccode")) {
+    return 98;
+  }
+  return 0;
 }
 
 } // namespace Mantid::DataHandling

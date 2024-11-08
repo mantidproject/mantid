@@ -653,7 +653,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadIsawDe
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMask.cpp:431
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLSANS.cpp:720
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNGEM.cpp:281
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMcStas.cpp:97
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLLB.cpp:114
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLLB.cpp:156

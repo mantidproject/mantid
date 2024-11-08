@@ -9,17 +9,16 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/DllConfig.h"
-#include "MantidKernel/NexusDescriptor.h"
-
+#include "MantidAPI/NexusFileLoader.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidDataHandling/DllConfig.h"
+
+#include <H5Cpp.h>
 
 namespace Mantid {
 namespace DataHandling {
 
-/** LoadMcStas : TODO: DESCRIPTION
- */
-class MANTID_DATAHANDLING_DLL LoadMcStas : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_DATAHANDLING_DLL LoadMcStas : public API::NexusFileLoader {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -30,17 +29,17 @@ public:
   const std::string category() const override;
 
   /// Returns a confidence value that this algorithm can load a file
-  int confidence(Kernel::NexusDescriptor &descriptor) const override;
+  int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
 
 private:
   void init() override;
-  void exec() override;
+  void execLoader() override;
 
   API::WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaces) const;
 
-  std::vector<std::string> readEventData(const std::map<std::string, std::string> &eventEntries, ::NeXus::File &nxFile);
-  std::vector<std::string> readHistogramData(const std::map<std::string, std::string> &histogramEntries,
-                                             ::NeXus::File &nxFile);
+  std::vector<std::string> readEventData(const std::vector<std::string> &eventEntries, const H5::H5File &file);
+  std::vector<std::string> readHistogramData(const std::map<std::string, std::vector<std::string>> &histogramEntries,
+                                             const H5::H5File &file);
 };
 
 } // namespace DataHandling
