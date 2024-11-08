@@ -82,8 +82,9 @@ MANTID_DATAHANDLING_DLL std::string readString(H5::DataSet &dataset);
 
 MANTID_DATAHANDLING_DLL std::vector<std::string> readStringVector(H5::Group &, const std::string &);
 
-template <typename LocationType>
-std::string readAttributeAsString(LocationType &dataset, const std::string &attributeName);
+MANTID_DATAHANDLING_DLL bool hasAttribute(const H5::DataSet &dataset, const char *attributeName);
+
+template <typename T> T readAttributeAsStrType(const H5::DataSet &dataset, const std::string &attributeName);
 
 template <typename NumT, typename LocationType>
 NumT readNumAttributeCoerce(LocationType &location, const std::string &attributeName);

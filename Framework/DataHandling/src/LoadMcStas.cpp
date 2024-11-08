@@ -13,9 +13,12 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidKernel/RegexStrings.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -85,38 +88,34 @@ void LoadMcStas::execLoader() {
   }
   auto const &entries = iterSDS->second;
 
+  const char *attributeName = "long_name";
   std::map<std::string, std::string> eventEntries;
   std::map<std::string, std::string> histogramEntries;
   for (auto &entry : entries) {
     if (entry.find("/entry1/data") == std::string::npos) {
       continue;
     }
-    size_t pos = entry.find_last_of("/");
-    std::string groupPath = entry.substr(0, pos);
-    std::string dataName = entry.substr(pos + 1);
-    auto pos2 = groupPath.find_last_of("/");
-    std::string groupName = groupPath.substr(pos2 + 1);
+
+    const auto parts = Strings::StrParts(entry, boost::regex("/"));
+    const auto groupPath = "/" + Strings::join(parts.cbegin(), parts.cend() - 1, "/");
+    const auto groupName = *(parts.cend() - 2);
+    const auto datasetName = parts.back();
+
     if (groupName == "content_nxs")
       continue;
 
     H5::Group group = file.openGroup(groupPath);
-    H5::DataSet dataset = group.openDataSet(dataName);
-    htri_t exists = H5Aexists(dataset.getId(), "long_name");
+    H5::DataSet dataset = group.openDataSet(datasetName);
 
-    if (exists > 0) {
-      H5::Attribute attr = dataset.openAttribute("long_name");
+    if (!H5Util::hasAttribute(dataset, attributeName)) {
+      continue;
+    }
 
-      char *rawStringData;
-      H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
-      attr.read(strType, &rawStringData);
-
-      std::string nameAttrValue(rawStringData);
-
-      if (nameAttrValue.find("Neutron_ID") != std::string::npos) {
-        eventEntries[groupName] = "NXdata";
-      } else {
-        histogramEntries[groupName] = "NXdata";
-      }
+    const auto rawString = H5Util::readAttributeAsStrType<char *>(dataset, attributeName);
+    if (std::strstr(rawString, "Neutron_ID")) {
+      eventEntries[groupName] = "NXdata";
+    } else {
+      histogramEntries[groupName] = "NXdata";
     }
   }
   file.close();

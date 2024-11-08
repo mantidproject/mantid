@@ -240,11 +240,18 @@ std::vector<std::string> readStringVector(Group &group, const std::string &name)
   return result;
 }
 
-template <typename LocationType>
-std::string readAttributeAsString(LocationType &location, const std::string &attributeName) {
-  auto attribute = location.openAttribute(attributeName);
-  std::string value;
-  attribute.read(attribute.getDataType(), value);
+bool hasAttribute(const H5::DataSet &dataset, const char *attributeName) {
+  const htri_t exists = H5Aexists(dataset.getId(), attributeName);
+  return exists > 0;
+}
+
+template <typename T> T readAttributeAsStrType(const H5::DataSet &dataset, const std::string &attributeName) {
+  const auto attribute = dataset.openAttribute(attributeName);
+
+  H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
+
+  T value;
+  attribute.read(strType, &value);
   return value;
 }
 
@@ -523,11 +530,11 @@ template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, c
 // -------------------------------------------------------------------
 // instantiations for readAttributeAsString
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL std::string readAttributeAsString(H5::Group &location,
-                                                                   const std::string &attributeName);
 
-template MANTID_DATAHANDLING_DLL std::string readAttributeAsString(H5::DataSet &location,
-                                                                   const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL char *readAttributeAsStrType(const H5::DataSet &dataset,
+                                                              const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL std::string readAttributeAsStrType(const H5::DataSet &dataset,
+                                                                    const std::string &attributeName);
 
 // -------------------------------------------------------------------
 // instantiations for readNumAttributeCoerce
