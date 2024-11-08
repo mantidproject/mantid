@@ -383,12 +383,8 @@ class PairingTableView(QtWidgets.QWidget):
         """
         Create and return the 'Remove Pair' or 'Remove Pairs' QAction based on the plural flag.
         """
-        if plural:
-            self.remove_pair_action = QtWidgets.QAction("Remove Pairs", self)
-            return self.remove_pair_action
-        else:
-            self.remove_pair_action = QtWidgets.QAction("Remove Pair", self)
-            return self.remove_pair_action
+        self.remove_pair_action = QtWidgets.QAction("Remove Pairs", self) if plural else QtWidgets.QAction("Remove Pair", self)
+        return self.remove_pair_action
 
     def enter_pair_name(self):
         new_pair_name, ok = QtWidgets.QInputDialog.getText(self, "Pair Name", "Enter name of new pair:")

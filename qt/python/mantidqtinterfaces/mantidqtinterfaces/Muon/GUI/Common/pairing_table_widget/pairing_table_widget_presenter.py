@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
-
+from contextlib import contextmanager
 from mantidqtinterfaces.Muon.GUI.Common.muon_pair import MuonPair
 from mantidqtinterfaces.Muon.GUI.Common.utilities.run_string_utils import valid_name_regex, valid_alpha_regex
 from mantidqtinterfaces.Muon.GUI.Common.utilities.general_utils import round_value
@@ -40,26 +40,35 @@ class PairingTablePresenter(object):
         self._dataChangedNotifier()
 
     def disable_editing(self):
-        self.disable_updates()
-        self._view.set_is_disabled(True)
-        self._view.disable_all_buttons()
-        self._disable_all_table_items()
-        self.enable_updates()
+        """Disables editing mode."""
+        with self.disable_updates_context():
+            self._view.set_is_disabled(True)
+            self._view.disable_all_buttons()
+            self._disable_all_table_items()
 
     def enable_editing(self):
-        self.disable_updates()
-        self._view.set_is_disabled(False)
-        self._view.enable_all_buttons()
-        self._enable_all_table_items()
-        self.enable_updates()
+        """Enables editing mode."""
+        with self.disable_updates_context():
+            self._view.set_is_disabled(False)
+            self._view.enable_all_buttons()
+            self._enable_all_table_items()
 
-    def enable_updates(self):
-        """Allow update signals to be sent."""
-        self._view.set_is_updating(False)
+    @contextmanager
+    def disable_updates_context(self):
+        """Context manager to disable updates."""
+        self.disable_updates()
+        try:
+            yield
+        finally:
+            self.enable_updates()
 
     def disable_updates(self):
         """Prevent update signals being sent."""
         self._view.set_is_updating(True)
+
+    def enable_updates(self):
+        """Allow update signals to be sent."""
+        self._view.set_is_updating(False)
 
     def num_rows(self):
         return self._view.get_pairing_table.rowCount()
@@ -100,23 +109,26 @@ class PairingTablePresenter(object):
         changed_item_text = self.get_table_item_text(row, col)
         pair_name = self.get_table_item_text(row, 0)
         update_model = True
-        if get_pair_columns()[col] == "pair_name" and not self.validate_pair_name(changed_item_text):
-            update_model = False
-        if get_pair_columns()[col] == "group_1":
-            if changed_item_text == self.get_table_item_text(row, get_pair_columns().index("group_2")):
-                table[row][get_pair_columns().index("group_2")] = self._model.pairs[row].forward_group
-        if get_pair_columns()[col] == "group_2":
-            if changed_item_text == self.get_table_item_text(row, get_pair_columns().index("group_1")):
-                table[row][get_pair_columns().index("group_1")] = self._model.pairs[row].backward_group
-        if get_pair_columns()[col] == "alpha":
-            if not self.validate_alpha(changed_item_text):
+        match get_pair_columns()[col]:
+            case "pair_name" if not self.validate_pair_name(changed_item_text):
                 update_model = False
-            else:
-                rounded_item = round_value(changed_item_text, self._model.get_context.group_pair_context.alpha_precision)
-                table[row][col] = rounded_item
-        if get_pair_columns()[col] == "to_analyse":
-            update_model = False
-            self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, pair_name)
+            case "group_1":
+                if changed_item_text == self.get_table_item_text(row, get_pair_columns().index("group_2")):
+                    table[row][get_pair_columns().index("group_2")] = self._model.pairs[row].forward_group
+            case "group_2":
+                if changed_item_text == self.get_table_item_text(row, get_pair_columns().index("group_1")):
+                    table[row][get_pair_columns().index("group_1")] = self._model.pairs[row].backward_group
+            case "alpha":
+                if not self.validate_alpha(changed_item_text):
+                    update_model = False
+                else:
+                    rounded_item = round_value(changed_item_text, self._model.get_context.group_pair_context.alpha_precision)
+                    table[row][col] = rounded_item
+            case "to_analyse":
+                update_model = False
+                self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, pair_name)
+            case _:
+                pass
 
         if update_model:
             self.update_model_from_view(table)
@@ -271,12 +283,14 @@ class PairingTablePresenter(object):
 
     def get_table_item_text(self, row, col):
         column_name = pair_columns[col]
-        if column_name == "group_1" or column_name == "group_2":
-            return self._view.get_widget_current_text(row, col)
-        elif column_name == "guess_alpha":
-            return "Guess"
-        else:
-            return self._view.get_item_text(row, col)
+
+        match column_name:
+            case "group_1" | "group_2":
+                return self._view.get_widget_current_text(row, col)
+            case "guess_alpha":
+                return "Guess"
+            case _:
+                return self._view.get_item_text(row, col)
 
     def get_table_contents(self):
         if self._view.is_updating:
@@ -286,38 +300,47 @@ class PairingTablePresenter(object):
         for row in range(self.num_rows()):
             for col in range(self.num_cols()):
                 column_name = pair_columns[col]
-                if column_name == "group_1" or column_name == "group_2":
-                    ret[row][col] = self._view.get_widget_current_text(row, col)
-                elif column_name == "guess_alpha":
-                    ret[row][col] = "Guess"
-                else:
-                    ret[row][col] = self._view.get_item_text(row, col)
+
+                match column_name:
+                    case "group_1" | "group_2":
+                        ret[row][col] = self._view.get_widget_current_text(row, col)
+                    case "guess_alpha":
+                        ret[row][col] = "Guess"
+                    case _:
+                        ret[row][col] = self._view.get_item_text(row, col)
+
         return ret
 
     # ------------------------------------------------------------------------------------------------------------------
     # Enabling / Disabling the table
     # ------------------------------------------------------------------------------------------------------------------
-    def _disable_all_table_items(self):
+    def _set_table_items_enabled(self, enable=True):
         for row in range(self.num_rows()):
             for col in range(self.num_cols()):
                 column_name = pair_columns[col]
+
                 if column_name in ["group_1", "group_2", "guess_alpha"]:
-                    self._view.set_widget_enabled(row, col, False)
+                    self._view.set_widget_enabled(row, col, enable)
+                elif enable:
+                    # Actions for enabling items only
+                    match column_name:
+                        case "pair_name":
+                            self._view.set_item_selectable_and_enabled(row, col)
+                        case "alpha":
+                            self._view.set_item_editable_and_enabled(row, col)
+                        case "to_analyse":
+                            self._view.set_item_checkable_and_enabled(row, col)
                 else:
-                    self._view.set_item_selectable(row, col)
+                    # Actions only for disabling items
+                    match column_name:
+                        case _:
+                            self._view.set_item_selectable(row, col)
+
+    def _disable_all_table_items(self):
+        self._set_table_items_enabled(enable=False)
 
     def _enable_all_table_items(self):
-        for row in range(self.num_rows()):
-            for col in range(self.num_cols()):
-                column_name = pair_columns[col]
-                if column_name in ["group_1", "group_2", "guess_alpha"]:
-                    self._view.set_widget_enabled(row, col, True)
-                elif column_name == "pair_name":
-                    self._view.set_item_selectable_and_enabled(row, col)
-                elif column_name == "alpha":
-                    self._view.set_item_editable_and_enabled(row, col)
-                elif column_name == "to_analyse":
-                    self._view.set_item_checkable_and_enabled(row, col)
+        self._set_table_items_enabled(enable=True)
 
     def add_entry_to_table(self, row_entries, color=(255, 255, 255), tooltip=""):
         """Add an entry to the table based on row entries."""
@@ -328,16 +351,18 @@ class PairingTablePresenter(object):
             item = self._view.create_table_item(entry, color, tooltip)
             column_name = pair_columns[i]
 
-            if column_name == "pair_name":
-                self._view.add_pair_name_entry(row_position, i, entry)
-            if column_name == "group_1":
-                self._view.add_group_selector_entry(row_position, i, entry, group="group_1")
-            if column_name == "group_2":
-                self._view.add_group_selector_entry(row_position, i, entry, group="group_2")
-            elif column_name == "alpha":
-                self._view.add_alpha_entry(row_position, i, entry)
-            if column_name == "to_analyse":
-                self._view.add_to_analyse_checkbox(item, entry)
+            match column_name:
+                case "pair_name":
+                    self._view.add_pair_name_entry(row_position, i, entry)
+                case "group_1":
+                    self._view.add_group_selector_entry(row_position, i, entry, group="group_1")
+                case "group_2":
+                    self._view.add_group_selector_entry(row_position, i, entry, group="group_2")
+                case "alpha":
+                    self._view.add_alpha_entry(row_position, i, entry)
+                case "to_analyse":
+                    self._view.add_to_analyse_checkbox(item, entry)
+
             self._view.set_item_in_table(row_position, i, item)
 
         # "Guess Alpha" button in the last column
