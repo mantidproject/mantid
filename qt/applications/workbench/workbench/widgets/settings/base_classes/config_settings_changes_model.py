@@ -20,6 +20,9 @@ class ConfigSettingsChangesModel:
     def has_unsaved_changes(self) -> bool:
         return self.changes != {}
 
+    def get_changes_dict(self) -> Dict[str, str]:
+        return self.changes
+
     def apply_changes(self) -> None:
         for property_string, value in self.changes.items():
             ConfigService.setString(property_string, value)

@@ -24,11 +24,6 @@ from workbench.widgets.settings.model import SettingsModel
 
 
 class SettingsPresenter(object):
-    ASK_BEFORE_CLOSE_TITLE = "Confirm exit"
-    ASK_BEFORE_CLOSE_MESSAGE = "Are you sure you want to exit without applying the settings?"
-    CHANGES_NEED_RESTART_TITLE = "Some changes require restart"
-    CHANGES_NEED_RESTART_MESSAGE = "The following changes will be applied when the workbench is restarted:\n\n"
-
     SETTINGS_TABS = {
         "general_settings": "General",
         "categories_settings": "Categories",
@@ -123,7 +118,8 @@ class SettingsPresenter(object):
         """
         Saves the mantid settings and updates updates the parent
         """
-        if not self.model.unsaved_changes() or self.view.ask_before_close():
+        unsaved_changes = self.model.unsaved_changes()
+        if not unsaved_changes or self.view.ask_before_close(unsaved_changes):
             ConfigService.saveConfig(ConfigService.getUserFilename())
             self.parent.config_updated()
             self.view.close()

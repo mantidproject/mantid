@@ -102,6 +102,17 @@ class GeneralSettingsModelTest(BaseSettingsModelTest):
 
         self.assertFalse(self.model.has_unsaved_changes())
 
+    def test_get_changes_dict(self):
+        self.assertEqual(self.model.get_changes_dict(), {})
+
+        self.model.user_config_changes = {"user property": "user change"}
+
+        self.assertEqual(self.model.get_changes_dict(), {"user property": "user change"})
+
+        self.model.changes = {"config property": "config change"}
+
+        self.assertEqual(self.model.get_changes_dict(), {"user property": "user change", "config property": "config change"})
+
     @patch(USER_CONFIG_PATCH_PATH, new_callable=MockUserConfig)
     @patch(BASE_CLASS_CONFIG_SERVICE_PATCH_PATH, new_callable=MockConfigService)
     def test_properties_to_be_changed(self, _, __):

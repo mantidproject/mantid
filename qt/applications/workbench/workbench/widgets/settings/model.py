@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
 import ast
-from typing import List
+from typing import List, Dict, Any
 
 from mantid import ConfigService
 from workbench.config import CONF
@@ -39,11 +39,12 @@ class SettingsModel:
         for model in self.category_setting_models:
             model.apply_changes()
 
-    def unsaved_changes(self) -> bool:
+    def unsaved_changes(self) -> Dict[str, Any]:
+        changes = {}
         for model in self.category_setting_models:
-            if model.has_unsaved_changes():
-                return True
-        return False
+            changes |= model.get_changes_dict()
+
+        return changes
 
     @staticmethod
     def save_settings_to_file(filepath, settings):

@@ -47,6 +47,9 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
     def has_unsaved_changes(self) -> bool:
         return self.user_config_changes != {} or super().has_unsaved_changes()
 
+    def get_changes_dict(self) -> Dict[str, Any]:
+        return self.user_config_changes | super().get_changes_dict()
+
     def apply_changes(self) -> None:
         for property_string, value in self.user_config_changes.items():
             CONF.set(property_string, value)

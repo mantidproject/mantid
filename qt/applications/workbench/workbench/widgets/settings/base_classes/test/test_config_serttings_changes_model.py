@@ -51,6 +51,13 @@ class ConfigSettingsChangesModelTest(TestCase):
 
         self.assertTrue(self.model.has_unsaved_changes())
 
+    def test_get_changes_dict(self, _):
+        self.assertEqual(self.model.get_changes_dict(), {})
+
+        self.model.changes = {"a test": "change"}
+
+        self.assertEqual(self.model.get_changes_dict(), {"a test": "change"})
+
     def test_properties_to_be_changed(self, _):
         self.assertEqual(self.model.properties_to_be_changed(), [])
 
