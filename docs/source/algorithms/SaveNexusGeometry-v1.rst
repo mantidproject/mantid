@@ -16,8 +16,8 @@ For more information on the Nexus format, see https://www.nexusformat.org/
 
 the Instrument will be extracted from the specified workspace, and written to the specified location.
 
-The (optional) H5 root group name is the parent group in which the Instrument and sample data are stored.
-If no name is given, the root group will have a default nme of 'entry'
+The (optional) H5 root group name is the parent NXentry group in which the Instrument and sample data are stored.
+If no name is given, the root group will have a default name of 'entry'
 
 
 Usage

@@ -13,13 +13,20 @@
 
 namespace Mantid {
 namespace Geometry {
+
 class IObject;
+
 }
 } // namespace Mantid
 
 namespace NexusGeometryTestHelpers {
+
 std::shared_ptr<const Mantid::Geometry::IObject> createShape();
+
 Pixels generateCoLinearPixels();
+
 Pixels generateNonCoLinearPixels();
+
 std::vector<int> getFakeDetIDs();
+
 } // namespace NexusGeometryTestHelpers

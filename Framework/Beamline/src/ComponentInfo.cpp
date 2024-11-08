@@ -210,7 +210,7 @@ Eigen::Quaterniond ComponentInfo::rotation(const std::pair<size_t, size_t> &inde
 /**
  * Extract the position of a component relative to it's parent
  *
- * The parent rotatation is unwound prior to establishing the offset. This means
+ * The parent rotation is unwound prior to establishing the offset. This means
  *that
  * recorded relative positions are independent of changes in rotation.
  *
