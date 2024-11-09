@@ -11,7 +11,7 @@ classes have a different EPOCH. Note that
 reason, there is an additional method
 :meth:`mantid.kernel.DateAndTime.to_datetime64`.
 
-To convert an array of :class:`mantid.kernel.DateAndTime`, analgous to
+To convert an array of :class:`mantid.kernel.DateAndTime`, analogous to
 what :meth:`mantid.kernel.FloatTimeSeriesProperty.times` does
 internally, use the code:
 

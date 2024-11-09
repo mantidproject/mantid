@@ -93,10 +93,12 @@ private:
   std::string loadWorkspaceName(Mantid::NeXus::NXRoot &root, const std::string &entry_name);
 
   /// Load nexus geometry and apply to workspace
-  virtual bool loadNexusGeometry(Mantid::API::Workspace &, const int, Kernel::Logger &,
-                                 const std::string &) { /*do nothing*/
-    return false;
+  virtual bool loadNexusGeometry(Mantid::API::Workspace & /* ws */, size_t /* entryNumber */,
+                                 Kernel::Logger & /* logger */,
+                                 const std::string & /* filePath */) { /* args not used */
+    return false;                                                      /*do nothing*/
   }
+
   /// Load a single entry
   API::Workspace_sptr loadEntry(Mantid::NeXus::NXRoot &root, const std::string &entry_name, const double &progressStart,
                                 const double &progressRange);

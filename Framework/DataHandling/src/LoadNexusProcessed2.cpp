@@ -58,7 +58,7 @@ InstrumentLayout instrumentFormat(Mantid::NeXus::NXEntry &entry) {
       auto instr = entry.openNXInstrument("instrument");
       if (instr.containsGroup("detector") ||
           (instr.containsGroup("physical_detectors") && instr.containsGroup("physical_monitors"))) {
-        result = InstrumentLayout::Mantid; // 1 nxinstrument called instrument,
+        result = InstrumentLayout::Mantid; // 1 NXinstrument group called "instrument",
       }
       instr.close();
     }
@@ -88,17 +88,30 @@ void LoadNexusProcessed2::readSpectraToDetectorMapping(Mantid::NeXus::NXEntry &m
     g_log.information() << "Instrument layout not recognised. Spectra mappings not loaded.";
   }
 }
+
 void LoadNexusProcessed2::extractMappingInfoNew(const Mantid::NeXus::NXEntry &mtd_entry) {
   using namespace Mantid::NeXus;
+
+  const std::string &parent = mtd_entry.name();
   auto result = findEntriesOfType(mtd_entry, "NXinstrument");
   if (result.size() != 1) {
-    g_log.warning("We are expecting a single NXinstrument. No mappings loaded");
+    g_log.warning("We are expecting a single NXinstrument. No mappings will be loaded");
   }
   auto inst = mtd_entry.openNXInstrument(result[0].nxname);
 
-  auto &spectrumNumbers = m_spectrumNumbers;
-  auto &detectorIds = m_detectorIds;
-  auto &detectorCounts = m_detectorCounts;
+  // For workspace groups, the spectral mapping information is keyed by the name of the parent NXentry.
+  //   Normally, we would not expect this key to have already been entered into these maps.
+  // However there is a known defect (EWM#7910): in that for a workspace group, the first NXentry is loaded twice.
+  // For this reason, at the moment, `std::unordered_map<..>::emplace` should not be used in the following.
+
+  m_spectrumNumberss[parent] = std::vector<Indexing::SpectrumNumber>();
+  auto &spectrumNumbers = m_spectrumNumberss[parent];
+  m_detectorIdss[parent] = std::vector<Mantid::detid_t>();
+  auto &detectorIds = m_detectorIdss[parent];
+  m_detectorCountss[parent] = std::vector<int>();
+  auto &detectorCounts = m_detectorCountss[parent];
+
+  // Read and collate the spectrum-mapping information.
   for (const auto &group : inst.groups()) {
     if (group.nxclass == "NXdetector" || group.nxclass == "NXmonitor") {
       NXDetector detgroup = inst.openNXDetector(group.nxname);
@@ -163,47 +176,57 @@ void LoadNexusProcessed2::extractMappingInfoNew(const Mantid::NeXus::NXEntry &mt
  * Attempt to load nexus geometry. Should fail without exception if not
  * possible.
  *
- * Caveats are:
- * 1. Only works for input files where there is a single NXEntry. Does nothing
- * otherwise.
- * 2. Is only applied after attempted instrument loading in the legacy fashion
+ * Caveat is:
+ *   Is only applied after attempted instrument loading in the legacy fashion
  * that happens as part of loadEntry. So you will still get warning+error
  * messages from that even if this succeeds
  *
  * @param ws : Input workspace onto which instrument will get attached
- * @param nWorkspaceEntries : number of entries
+ * @param entryNumber: number of the NXentry for the parent group: used to construct the group's name
  * @param logger : to write to
- * @param filename : filename to load from.
+ * @param filePath : filename to load from.
  * @return true if successful
  */
-bool LoadNexusProcessed2::loadNexusGeometry(API::Workspace &ws, const int nWorkspaceEntries, Kernel::Logger &logger,
-                                            const std::string &filename) {
-  if (m_instrumentLayout == InstrumentLayout::NexusFormat && nWorkspaceEntries == 1) {
+bool LoadNexusProcessed2::loadNexusGeometry(API::Workspace &ws, size_t entryNumber, Kernel::Logger &logger,
+                                            const std::string &filePath) {
+  if (m_instrumentLayout == InstrumentLayout::NexusFormat) {
     if (auto *matrixWs = dynamic_cast<API::MatrixWorkspace *>(&ws)) {
       try {
         using namespace Mantid::NexusGeometry;
+
+        std::ostringstream parent_;
+        parent_ << "mantid_workspace_" << entryNumber;
+        const std::string &parent(parent_.str());
         auto instrument =
-            NexusGeometry::NexusGeometryParser::createInstrument(filename, NexusGeometry::makeLogger(&logger));
+            NexusGeometry::NexusGeometryParser::createInstrument(filePath, parent, NexusGeometry::makeLogger(&logger));
         matrixWs->setInstrument(Geometry::Instrument_const_sptr(std::move(instrument)));
 
-        auto &detInfo = matrixWs->detectorInfo();
-        Indexing::IndexInfo info(m_spectrumNumbers);
+        // Apply the previously-collated mapping information to the workspace.
+        const auto &detInfo = matrixWs->detectorInfo();
+        auto &spectrumNumbers = m_spectrumNumberss[parent];
+        Indexing::IndexInfo info(spectrumNumbers);
+
+        const auto &detectorIds = m_detectorIdss[parent];
+        const auto &detectorCounts = m_detectorCountss[parent];
+
         std::vector<SpectrumDefinition> definitions;
-        definitions.reserve(m_spectrumNumbers.size());
+        definitions.reserve(spectrumNumbers.size());
         size_t detCounter = 0;
-        for (size_t i = 0; i < m_spectrumNumbers.size(); ++i) {
+        for (size_t i = 0; i < spectrumNumbers.size(); ++i) {
           // counts gives number of detectors per spectrum
-          size_t counts = m_detectorCounts[i];
+          size_t counts = detectorCounts[i];
           SpectrumDefinition def;
+
           // Add the number of detectors known to be associated with this
           // spectrum
           for (size_t j = 0; j < counts; ++j, ++detCounter) {
-            def.add(detInfo.indexOf(m_detectorIds[detCounter]));
+            def.add(detInfo.indexOf(detectorIds[detCounter]));
           }
           definitions.emplace_back(def);
         }
         info.setSpectrumDefinitions(definitions);
         matrixWs->setIndexInfo(info);
+
         return true;
       } catch (std::exception &e) {
         logger.warning(e.what());

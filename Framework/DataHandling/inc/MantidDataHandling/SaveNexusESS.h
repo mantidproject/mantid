@@ -31,9 +31,13 @@ protected:
   bool processGroups() override;
 
 private:
-  void saveNexusGeometry(const Mantid::API::MatrixWorkspace &ws, const std::string &filename);
+  void saveNexusGeometry(const Mantid::API::MatrixWorkspace &ws, const std::string &filename,
+                         std::optional<size_t> entryNumber = std::optional<size_t>());
+
   virtual bool saveLegacyInstrument() override;
+
   void init() override;
+
   void exec() override;
 };
 

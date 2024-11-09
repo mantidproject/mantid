@@ -19,6 +19,7 @@
 #include "MantidNexusGeometry/AbstractLogger.h"
 #include "MantidNexusGeometry/DllConfig.h"
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -48,6 +49,11 @@ MANTID_NEXUSGEOMETRY_DLL void saveInstrument(const Geometry::ComponentInfo &comp
                                              const std::string &rootName, AbstractLogger &logger, bool append = false,
                                              Kernel::ProgressBase *reporter = nullptr);
 
+MANTID_NEXUSGEOMETRY_DLL void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &filePath,
+                                             const std::string &entryNamePrefix, std::optional<size_t> entryNumber,
+                                             AbstractLogger &logger, bool append = false,
+                                             Kernel::ProgressBase *reporter = nullptr);
+
 MANTID_NEXUSGEOMETRY_DLL void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &fullPath,
                                              const std::string &rootName, AbstractLogger &logger, bool append = false,
                                              Kernel::ProgressBase *reporter = nullptr);
@@ -56,6 +62,7 @@ MANTID_NEXUSGEOMETRY_DLL void saveInstrument(
     const std::pair<std::unique_ptr<Geometry::ComponentInfo>, std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
     const std::string &fullPath, const std::string &rootName, AbstractLogger &logger, bool append = false,
     Kernel::ProgressBase *reporter = nullptr);
+
 } // namespace NexusGeometrySave
 } // namespace NexusGeometry
 } // namespace Mantid
