@@ -39,8 +39,8 @@ private:
 
   std::vector<std::string> readEventData(const std::map<std::string, std::string> &eventEntries,
                                          const H5::H5File &file);
-  std::vector<std::string> readHistogramData(const std::map<std::string, std::string> &histogramEntries,
-                                             ::NeXus::File &nxFile);
+  std::vector<std::string> readHistogramData(const std::map<std::string, std::vector<std::string>> &histogramEntries,
+                                             const H5::H5File &file);
 };
 
 } // namespace DataHandling

@@ -90,7 +90,7 @@ void LoadMcStas::execLoader() {
 
   const char *attributeName = "long_name";
   std::map<std::string, std::string> eventEntries;
-  std::map<std::string, std::string> histogramEntries;
+  std::map<std::string, std::vector<std::string>> histogramEntries;
   for (auto &entry : entries) {
     if (entry.find("/entry1/data") == std::string::npos) {
       continue;
@@ -115,32 +115,27 @@ void LoadMcStas::execLoader() {
     if (std::strstr(rawString, "Neutron_ID")) {
       eventEntries[groupName] = "NXdata";
     } else {
-      histogramEntries[groupName] = "NXdata";
+      auto foundIt = histogramEntries.find(groupPath);
+      if (foundIt == histogramEntries.cend()) {
+        histogramEntries[groupPath] = {datasetName};
+      } else {
+        histogramEntries[groupPath].emplace_back(datasetName);
+      }
     }
   }
 
   std::vector<std::string> scatteringWSNames;
-  std::vector<std::string> histoWSNames;
   if (!eventEntries.empty()) {
     scatteringWSNames = readEventData(eventEntries, file);
   }
+  const auto histoWSNames = readHistogramData(histogramEntries, file);
   file.close();
 
-  ::NeXus::File nxFile(filename);
-  nxFile.openGroup("entry1", "NXentry");
-  nxFile.openGroup("data", "NXdetector");
-
-  histoWSNames = readHistogramData(histogramEntries, nxFile);
-
   // join two vectors together
-  scatteringWSNames.insert(scatteringWSNames.end(), histoWSNames.begin(), histoWSNames.end());
-
-  // close top entry
-  nxFile.closeGroup(); // corresponds to nxFile.openGroup("data", "NXdetector");
-  nxFile.closeGroup();
+  scatteringWSNames.insert(scatteringWSNames.end(), histoWSNames.cbegin(), histoWSNames.cend());
 
   setProperty("OutputWorkspace", groupWorkspaces(scatteringWSNames));
-} // LoadMcStas::exec()
+}
 
 /**
  * Group workspaces
@@ -410,58 +405,49 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
  * @param nxFile Reads data from inside first first top entry
  * @return Names of workspaces to include in output group
  */
-std::vector<std::string> LoadMcStas::readHistogramData(const std::map<std::string, std::string> &histogramEntries,
-                                                       ::NeXus::File &nxFile) {
+std::vector<std::string>
+LoadMcStas::readHistogramData(const std::map<std::string, std::vector<std::string>> &histogramEntries,
+                              const H5::H5File &file) {
 
   std::string nameAttrValueYLABEL;
   std::vector<std::string> histoWSNames;
 
-  for (const auto &histogramEntry : histogramEntries) {
-    const std::string &dataName = histogramEntry.first;
-    const std::string &dataType = histogramEntry.second;
+  for (const auto &entry : histogramEntries) {
+    const auto groupPath = entry.first;
+    const H5::Group group = file.openGroup(groupPath);
 
-    // open second level entry
-    nxFile.openGroup(dataName, dataType);
+    std::string nameAttrValueTITLE(H5Util::readAttributeAsStrType<char *>(group, "filename"));
 
-    // grap title to use to e.g. create workspace name
-    std::string nameAttrValueTITLE;
-    nxFile.getAttr("filename", nameAttrValueTITLE);
-
-    if (nxFile.hasAttr("ylabel")) {
-      nxFile.getAttr("ylabel", nameAttrValueYLABEL);
+    if (H5Util::hasAttribute(group, "ylabel")) {
+      nameAttrValueYLABEL = std::string(H5Util::readAttributeAsStrType<char *>(group, "ylabel"));
     }
 
     // Find the axis names
-    auto nxdataEntries = nxFile.getEntries();
     std::string axis1Name, axis2Name;
-    for (auto &nxdataEntry : nxdataEntries) {
-      if (nxdataEntry.second == "NXparameters")
+    for (const auto &datasetName : entry.second) {
+      if (datasetName == "ncount")
         continue;
-      if (nxdataEntry.first == "ncount")
-        continue;
-      nxFile.openData(nxdataEntry.first);
+      H5::DataSet dataset = group.openDataSet(datasetName);
 
-      if (nxFile.hasAttr("axis")) {
-        int axisNo(0);
-        nxFile.getAttr("axis", axisNo);
+      if (H5Util::hasAttribute(dataset, "axis")) {
+        const auto axisNo = H5Util::readNumAttributeCoerce<int>(dataset, "axis");
         if (axisNo == 1)
-          axis1Name = nxdataEntry.first;
+          axis1Name = datasetName;
         else if (axisNo == 2)
-          axis2Name = nxdataEntry.first;
+          axis2Name = datasetName;
         else
           throw std::invalid_argument("Unknown axis number");
       }
-      nxFile.closeData();
     }
 
-    std::vector<double> axis1Values;
+    std::vector<double> axis1Values = H5Util::readArray1DCoerce<double>(group, axis1Name);
     std::vector<double> axis2Values;
-    nxFile.readData<double>(axis1Name, axis1Values);
+
     if (axis2Name.length() == 0) {
       axis2Name = nameAttrValueYLABEL;
       axis2Values.emplace_back(0.0);
     } else {
-      nxFile.readData<double>(axis2Name, axis2Values);
+      axis2Values = H5Util::readArray1DCoerce<double>(group, axis2Name);
     }
 
     const size_t axis1Length = axis1Values.size();
@@ -469,19 +455,13 @@ std::vector<std::string> LoadMcStas::readHistogramData(const std::map<std::strin
     g_log.debug() << "Axis lengths=" << axis1Length << " " << axis2Length << '\n';
 
     // Require "data" field
-    std::vector<double> data;
-    nxFile.readData<double>("data", data);
+    std::vector<double> data = H5Util::readArray1DCoerce<double>(group, "data");
 
     // Optional errors field
     std::vector<double> errors;
-    try {
-      nxFile.readData<double>("errors", errors);
-    } catch (::NeXus::Exception &) {
-      g_log.information() << "Field " << dataName << " contains no error information.\n";
+    if (group.exists("errors")) {
+      errors = H5Util::readArray1DCoerce<double>(group, "errors");
     }
-
-    // close second level entry
-    nxFile.closeGroup();
 
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", axis2Length, axis1Length, axis1Length);
     Axis *axis1 = ws->getAxis(0);
@@ -534,10 +514,8 @@ std::vector<std::string> LoadMcStas::readHistogramData(const std::map<std::strin
 
     histoWSNames.emplace_back(ws->getName());
   }
-  nxFile.closeGroup();
   return histoWSNames;
-
-} // finish
+}
 
 /**
  * Return the confidence with with this algorithm can load the file

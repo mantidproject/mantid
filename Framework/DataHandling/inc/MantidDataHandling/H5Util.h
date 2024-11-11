@@ -82,9 +82,9 @@ MANTID_DATAHANDLING_DLL std::string readString(const H5::DataSet &dataset);
 
 MANTID_DATAHANDLING_DLL std::vector<std::string> readStringVector(H5::Group &, const std::string &);
 
-MANTID_DATAHANDLING_DLL bool hasAttribute(const H5::DataSet &dataset, const char *attributeName);
+MANTID_DATAHANDLING_DLL bool hasAttribute(const H5::H5Object &object, const char *attributeName);
 
-template <typename T> T readAttributeAsStrType(const H5::DataSet &dataset, const std::string &attributeName);
+template <typename T> T readAttributeAsStrType(const H5::H5Object &object, const std::string &attributeName);
 
 template <typename NumT, typename LocationType>
 NumT readNumAttributeCoerce(LocationType &location, const std::string &attributeName);
@@ -92,9 +92,9 @@ NumT readNumAttributeCoerce(LocationType &location, const std::string &attribute
 template <typename NumT, typename LocationType>
 std::vector<NumT> readNumArrayAttributeCoerce(LocationType &location, const std::string &attributeName);
 
-template <typename NumT> std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name);
+template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::Group &group, const std::string &name);
 
-template <typename NumT> std::vector<NumT> readArray1DCoerce(H5::DataSet &dataset);
+template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::DataSet &dataset);
 
 /// Test if a group already exists within an HDF5 file or parent group.
 MANTID_DATAHANDLING_DLL bool groupExists(H5::H5Object &h5, const std::string &groupPath);
