@@ -242,6 +242,7 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
   }
   // the one is here for the moment for backward compatibility
   eventWS->rebuildSpectraMapping(true);
+  const auto detIDtoWSIndex = eventWS->getDetectorIDToWorkspaceIndexMap(true);
 
   bool isAnyNeutrons = false;
   // to store shortest and longest recorded TOF
@@ -352,8 +353,6 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
       dataset.read(data.data(), H5::PredType::NATIVE_DOUBLE, memspace, dataspace);
 
       // populate workspace with McStas events
-      const detid2index_map detIDtoWSindex_map = allEventWS[0].first->getDetectorIDToWorkspaceIndexMap(true);
-
       progEntries.report("read event data into workspace");
       for (hsize_t in = 0; in < nNeutronsForthisBlock; in++) {
         const auto detectorID = static_cast<int>(data[4 + numberOfDataColumn * in]);
@@ -368,7 +367,7 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
             longestTOF = detector_time;
         }
 
-        const size_t workspaceIndex = detIDtoWSindex_map.find(detectorID)->second;
+        const size_t workspaceIndex = detIDtoWSIndex.find(detectorID)->second;
 
         int64_t pulse_time = 0;
         WeightedEvent weightedEvent;
