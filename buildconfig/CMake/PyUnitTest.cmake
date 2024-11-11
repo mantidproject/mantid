@@ -82,7 +82,9 @@ function(PYSYSTEMTEST_ADD_TEST)
     if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
       add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update.bat -R ${_test_name})
     else()
-      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update -R ${_test_name})
+      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update -R ${_test_name} -l information
+                                          --quiet --output-on-failure
+      )
     endif()
 
     set_tests_properties(${_test_name} PROPERTIES LABELS "SystemTest")
