@@ -219,10 +219,6 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
     return scatteringWSNames;
     ;
   }
-  // Finished reading Instrument. Then open new data folder again
-  ::NeXus::File nxFile(filename);
-  nxFile.openGroup("entry1", "NXentry");
-  nxFile.openGroup("data", "NXdetector");
 
   // create and prepare an event workspace ready to receive the mcstas events
   progInitial.report("Set up EventWorkspace");
@@ -276,12 +272,11 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
   // Loop over McStas event data components
   for (const auto &eventEntry : eventEntries) {
     const std::string &dataName = eventEntry.first;
-    const std::string &dataType = eventEntry.second;
+    const H5::Group group = file.openGroup("/entry1/data/" + dataName);
+    const H5::DataSet dataset = group.openDataSet("events");
 
     // open second level entry
-    nxFile.openGroup(dataName, dataType);
     std::vector<double> data;
-    nxFile.openData("events");
     progEntries.report("read event data from nexus");
 
     // Need to take into account that the nexus readData method reads a
@@ -298,15 +293,18 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
     // column  5 : t 	time
 
     // get info about event data
-    ::NeXus::Info id_info = nxFile.getInfo();
-    if (id_info.dims.size() != 2) {
+    const H5::DataSpace dataspace = dataset.getSpace();
+    const auto rank = dataspace.getSimpleExtentNdims();
+
+    std::vector<hsize_t> dims(rank);
+    dataspace.getSimpleExtentDims(dims.data());
+    if (dims.size() != 2) {
       g_log.error() << "Event data in McStas nexus file not loaded. Expected "
                        "event data block to be two dimensional\n";
       return scatteringWSNames;
-      ;
     }
-    int64_t nNeutrons = id_info.dims[0];
-    int64_t numberOfDataColumn = id_info.dims[1];
+    hsize_t nNeutrons = dims[0];
+    hsize_t numberOfDataColumn = dims[1];
     if (nNeutrons && numberOfDataColumn != 6) {
       g_log.error() << "Event data in McStas nexus file expecting 6 columns\n";
       return scatteringWSNames;
@@ -315,16 +313,16 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
     if (!isAnyNeutrons && nNeutrons > 0)
       isAnyNeutrons = true;
 
-    std::vector<int64_t> start(2);
-    std::vector<int64_t> step(2);
+    hsize_t start[2];
+    hsize_t step[2];
 
     // read the event data in blocks. 1 million event is 1000000*6*8 doubles
     // about 50Mb
-    int64_t nNeutronsInBlock = 1000000;
-    int64_t nOfFullBlocks = nNeutrons / nNeutronsInBlock;
-    int64_t nRemainingNeutrons = nNeutrons - nOfFullBlocks * nNeutronsInBlock;
+    hsize_t nNeutronsInBlock = 1000000;
+    hsize_t nOfFullBlocks = nNeutrons / nNeutronsInBlock;
+    hsize_t nRemainingNeutrons = nNeutrons - nOfFullBlocks * nNeutronsInBlock;
     // sum over number of blocks + 1 to cover the remainder
-    for (int64_t iBlock = 0; iBlock < nOfFullBlocks + 1; iBlock++) {
+    for (hsize_t iBlock = 0; iBlock < nOfFullBlocks + 1; iBlock++) {
       if (iBlock == nOfFullBlocks) {
         // read remaining neutrons
         start[0] = nOfFullBlocks * nNeutronsInBlock;
@@ -338,22 +336,26 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
         step[0] = nNeutronsInBlock;
         step[1] = numberOfDataColumn;
       }
-      const int64_t nNeutronsForthisBlock = step[0]; // number of neutrons read for this block
+      const hsize_t nNeutronsForthisBlock = step[0]; // number of neutrons read for this block
       data.resize(nNeutronsForthisBlock * numberOfDataColumn);
 
       // Check that the type is what it is supposed to be
-      if (id_info.type == ::NeXus::FLOAT64) {
-        nxFile.getSlab(&data[0], start, step);
-      } else {
-        g_log.warning() << "Entry event field is not FLOAT64! It will be skipped.\n";
+      const H5::DataType datatype = dataset.getDataType();
+      if (datatype.getClass() != H5T_FLOAT) {
+        g_log.warning() << "Entry event field is not H5T_FLOAT! It will be skipped.\n";
         continue;
       }
+
+      H5::DataSpace memspace(rank, step);
+      dataspace.selectHyperslab(H5S_SELECT_SET, step, start);
+
+      dataset.read(data.data(), H5::PredType::NATIVE_DOUBLE, memspace, dataspace);
 
       // populate workspace with McStas events
       const detid2index_map detIDtoWSindex_map = allEventWS[0].first->getDetectorIDToWorkspaceIndexMap(true);
 
       progEntries.report("read event data into workspace");
-      for (int64_t in = 0; in < nNeutronsForthisBlock; in++) {
+      for (hsize_t in = 0; in < nNeutronsForthisBlock; in++) {
         const auto detectorID = static_cast<int>(data[4 + numberOfDataColumn * in]);
         const double detector_time = data[5 + numberOfDataColumn * in] * 1.0e6; // convert to microseconds
         if (in == 0 && iBlock == 0) {
@@ -383,10 +385,6 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
       }
       eventWSIndex++;
     } // end reading over number of blocks of an event dataset
-
-    nxFile.closeData();
-    nxFile.closeGroup();
-
   } // end reading over number of event datasets
 
   // Create a default TOF-vector for histogramming, for now just 2 bins
