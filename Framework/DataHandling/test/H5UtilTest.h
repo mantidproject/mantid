@@ -437,8 +437,9 @@ private:
     TSM_ASSERT_EQUALS("There should be two attributes present.", totalNumAttributs, numAttributes);
 
     for (auto &attribute : stringAttributes) {
-      auto value = H5Util::readAttributeAsString(data, attribute.first);
-      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value", attribute.second, value);
+      std::string value;
+      H5Util::readStringAttribute(data, attribute.first, value);
+      TSM_ASSERT_EQUALS("Should retrieve the correct attribute value", attribute.second, std::string(value));
     }
 
     for (auto &attribute : floatAttributes) {

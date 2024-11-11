@@ -244,13 +244,12 @@ bool hasAttribute(const H5::H5Object &object, const char *attributeName) {
   return exists > 0;
 }
 
-template <typename StrT>
-void readStringAttribute(const H5::H5Object &object, const std::string &attributeName, StrT &output) {
+void readStringAttribute(const H5::H5Object &object, const std::string &attributeName, std::string &output) {
   const auto attribute = object.openAttribute(attributeName);
 
   H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
 
-  attribute.read(strType, &output);
+  attribute.read(strType, output);
 }
 
 // This method avoids a copy on return so should be preferred to its sibling method
@@ -353,9 +352,9 @@ template <typename NumT> NumT readNumAttributeCoerce(const H5::H5Object &object,
   return value;
 }
 
-template <typename NumT, typename LocationType>
-std::vector<NumT> readNumArrayAttributeCoerce(LocationType &location, const std::string &attributeName) {
-  auto attribute = location.openAttribute(attributeName);
+template <typename NumT>
+std::vector<NumT> readNumArrayAttributeCoerce(const H5::H5Object &object, const std::string &attributeName) {
+  auto attribute = object.openAttribute(attributeName);
   auto dataType = attribute.getDataType();
 
   std::vector<NumT> value;
@@ -404,10 +403,10 @@ template <typename NumT> void readArray1DCoerce(const DataSet &dataset, std::vec
     convertingRead<float>(dataset, dataType, output);
   } else if (PredType::NATIVE_DOUBLE == dataType) {
     convertingRead<double>(dataset, dataType, output);
+  } else {
+    // not a supported type
+    throw DataTypeIException();
   }
-
-  // not a supported type
-  throw DataTypeIException();
 }
 
 /// Test if a group exists in an HDF5 file or parent group.
@@ -501,15 +500,6 @@ template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &obje
                                                         const std::vector<uint64_t> &value);
 
 // -------------------------------------------------------------------
-// instantiations for readAttributeAsString
-// -------------------------------------------------------------------
-
-template MANTID_DATAHANDLING_DLL void readStringAttribute(const H5::H5Object &object, const std::string &attributeName,
-                                                          char *&output);
-template MANTID_DATAHANDLING_DLL void readStringAttribute(const H5::H5Object &object, const std::string &attributeName,
-                                                          std::string &output);
-
-// -------------------------------------------------------------------
 // instantiations for readNumAttributeCoerce
 // -------------------------------------------------------------------
 template MANTID_DATAHANDLING_DLL float readNumAttributeCoerce(const H5::H5Object &object,
@@ -528,29 +518,17 @@ template MANTID_DATAHANDLING_DLL uint64_t readNumAttributeCoerce(const H5::H5Obj
 // -------------------------------------------------------------------
 // instantiations for readNumArrayAttributeCoerce
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL std::vector<float> readNumArrayAttributeCoerce(H5::Group &location,
+template MANTID_DATAHANDLING_DLL std::vector<float> readNumArrayAttributeCoerce(const H5::H5Object &object,
                                                                                 const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<float> readNumArrayAttributeCoerce(H5::DataSet &location,
-                                                                                const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<double> readNumArrayAttributeCoerce(H5::Group &location,
+template MANTID_DATAHANDLING_DLL std::vector<double> readNumArrayAttributeCoerce(const H5::H5Object &object,
                                                                                  const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<double> readNumArrayAttributeCoerce(H5::DataSet &location,
-                                                                                 const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<int32_t> readNumArrayAttributeCoerce(H5::Group &location,
+template MANTID_DATAHANDLING_DLL std::vector<int32_t> readNumArrayAttributeCoerce(const H5::H5Object &object,
                                                                                   const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<int32_t> readNumArrayAttributeCoerce(H5::DataSet &location,
-                                                                                  const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<uint32_t> readNumArrayAttributeCoerce(H5::Group &location,
+template MANTID_DATAHANDLING_DLL std::vector<uint32_t> readNumArrayAttributeCoerce(const H5::H5Object &object,
                                                                                    const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<uint32_t> readNumArrayAttributeCoerce(H5::DataSet &location,
-                                                                                   const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<int64_t> readNumArrayAttributeCoerce(H5::Group &location,
+template MANTID_DATAHANDLING_DLL std::vector<int64_t> readNumArrayAttributeCoerce(const H5::H5Object &object,
                                                                                   const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<int64_t> readNumArrayAttributeCoerce(H5::DataSet &location,
-                                                                                  const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<uint64_t> readNumArrayAttributeCoerce(H5::Group &location,
-                                                                                   const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<uint64_t> readNumArrayAttributeCoerce(H5::DataSet &location,
+template MANTID_DATAHANDLING_DLL std::vector<uint64_t> readNumArrayAttributeCoerce(const H5::H5Object &object,
                                                                                    const std::string &attributeName);
 
 // -------------------------------------------------------------------
