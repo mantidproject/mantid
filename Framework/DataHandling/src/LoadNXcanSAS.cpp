@@ -265,7 +265,7 @@ WorkspaceDimensionality getWorkspaceDimensionality(H5::Group &dataGroup) {
   return dimensionality;
 }
 
-std::string getUnit(H5::DataSet &dataSet) {
+std::string getUnit(const H5::DataSet &dataSet) {
   std::string unit;
   Mantid::DataHandling::H5Util::readStringAttribute(dataSet, sasUnitAttr, unit);
   return unit;

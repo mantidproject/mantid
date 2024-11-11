@@ -111,13 +111,10 @@ void LoadMcStas::execLoader() {
     H5Util::readStringAttribute(dataset, attributeName, rawString);
     if (std::strstr(rawString, "Neutron_ID")) {
       eventEntries.emplace_back(groupPath);
+    } else if (histogramEntries.find(groupPath) == histogramEntries.cend()) {
+      histogramEntries[groupPath] = {datasetName};
     } else {
-      auto foundIt = histogramEntries.find(groupPath);
-      if (foundIt == histogramEntries.cend()) {
-        histogramEntries[groupPath] = {datasetName};
-      } else {
-        histogramEntries[groupPath].emplace_back(datasetName);
-      }
+      histogramEntries[groupPath].emplace_back(datasetName);
     }
   }
 
