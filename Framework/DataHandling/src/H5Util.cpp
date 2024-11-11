@@ -244,14 +244,13 @@ bool hasAttribute(const H5::H5Object &object, const char *attributeName) {
   return exists > 0;
 }
 
-template <typename T> T readAttributeAsStrType(const H5::H5Object &object, const std::string &attributeName) {
+template <typename StrT>
+void readStringAttribute(const H5::H5Object &object, const std::string &attributeName, StrT &output) {
   const auto attribute = object.openAttribute(attributeName);
 
   H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
 
-  T value;
-  attribute.read(strType, &value);
-  return value;
+  attribute.read(strType, &output);
 }
 
 // This method avoids a copy on return so should be preferred to its sibling method
@@ -505,10 +504,10 @@ template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &obje
 // instantiations for readAttributeAsString
 // -------------------------------------------------------------------
 
-template MANTID_DATAHANDLING_DLL char *readAttributeAsStrType(const H5::H5Object &object,
-                                                              const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::string readAttributeAsStrType(const H5::H5Object &object,
-                                                                    const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL void readStringAttribute(const H5::H5Object &object, const std::string &attributeName,
+                                                          char *&output);
+template MANTID_DATAHANDLING_DLL void readStringAttribute(const H5::H5Object &object, const std::string &attributeName,
+                                                          std::string &output);
 
 // -------------------------------------------------------------------
 // instantiations for readNumAttributeCoerce

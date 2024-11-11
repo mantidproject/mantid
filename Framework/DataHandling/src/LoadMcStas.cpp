@@ -107,7 +107,8 @@ void LoadMcStas::execLoader() {
       continue;
     }
 
-    const auto rawString = H5Util::readAttributeAsStrType<char *>(dataset, attributeName);
+    char *rawString;
+    H5Util::readStringAttribute(dataset, attributeName, rawString);
     if (std::strstr(rawString, "Neutron_ID")) {
       eventEntries.emplace_back(groupPath);
     } else {
@@ -412,10 +413,14 @@ LoadMcStas::readHistogramData(const std::map<std::string, std::vector<std::strin
     const auto groupPath = entry.first;
     const H5::Group group = file.openGroup(groupPath);
 
-    std::string nameAttrValueTITLE(H5Util::readAttributeAsStrType<char *>(group, "filename"));
+    char *rawFilename;
+    H5Util::readStringAttribute(group, "filename", rawFilename);
+    std::string nameAttrValueTITLE(rawFilename);
 
     if (H5Util::hasAttribute(group, "ylabel")) {
-      nameAttrValueYLABEL = std::string(H5Util::readAttributeAsStrType<char *>(group, "ylabel"));
+      char *rawYLabel;
+      H5Util::readStringAttribute(group, "ylabel", rawYLabel);
+      nameAttrValueYLABEL = std::string(rawYLabel);
     }
 
     // Find the axis names

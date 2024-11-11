@@ -83,7 +83,8 @@ MANTID_DATAHANDLING_DLL std::vector<std::string> readStringVector(H5::Group &, c
 
 MANTID_DATAHANDLING_DLL bool hasAttribute(const H5::H5Object &object, const char *attributeName);
 
-template <typename T> T readAttributeAsStrType(const H5::H5Object &object, const std::string &attributeName);
+template <typename StrT>
+void readStringAttribute(const H5::H5Object &object, const std::string &attributeName, StrT &output);
 
 template <typename NumT> NumT readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 
