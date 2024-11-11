@@ -62,7 +62,8 @@ function(PYUNITTEST_ADD_TEST _test_src_dir _testname_prefix)
     )
     # Set the PYTHONPATH so that the built modules can be found
     set_tests_properties(
-      ${_pyunit_separate_name} PROPERTIES ENVIRONMENT "${_test_environment}" TIMEOUT ${TESTING_TIMEOUT}
+      ${_pyunit_separate_name} PROPERTIES ENVIRONMENT "${_test_environment}" TIMEOUT ${TESTING_TIMEOUT} LABELS
+                                          "UnitTest"
     )
     if(PYUNITTEST_RUN_SERIAL)
       set_tests_properties(${_pyunit_separate_name} PROPERTIES RUN_SERIAL 1)
@@ -79,14 +80,17 @@ function(PYSYSTEMTEST_ADD_TEST)
   foreach(part ${ARGN})
     set(_test_name ${part})
     if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-      add_test(NAME SystemTest_${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update.bat -R ${_test_name})
+      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update.bat -R ${_test_name})
     else()
-      add_test(NAME SystemTest_${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update -R ${_test_name})
+      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update -R ${_test_name})
     endif()
 
+    set_tests_properties(${_test_name} PROPERTIES LABELS "SystemTest")
+
     if(PYUNITTEST_RUN_SERIAL)
-      set_tests_properties(${_pyunit_separate_name} PROPERTIES RUN_SERIAL 1)
+      set_tests_properties(${_test_name} PROPERTIES RUN_SERIAL 1)
     endif()
+
   endforeach(part ${ARGN})
 endfunction()
 
