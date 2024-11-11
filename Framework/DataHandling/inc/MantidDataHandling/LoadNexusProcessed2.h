@@ -36,7 +36,10 @@ enum class InstrumentLayout { Mantid, NexusFormat, NotRecognised };
  */
 class MANTID_DATAHANDLING_DLL LoadNexusProcessed2 : public LoadNexusProcessed {
 public:
-  const std::string name() const override;
+  // algorithm "name" is still "LoadNexusProcessed" (not "LoadNexusProcessed2"):
+  //   `cppcheck` has an issue with any "useless" override.
+  // const std::string name() const override;
+
   int version() const override;
   int confidence(Kernel::NexusHDF5Descriptor &descriptor) const override;
 

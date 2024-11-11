@@ -684,7 +684,7 @@ cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusFileIO.h:208
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusFileIO.h:211
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusFileIO.h:273
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusFileIO.h:276
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadNexusProcessed2.h:39
+uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadNexusProcessed2.h:38
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadMuonNexus1.h:60
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadMuonNexus1.h:62
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadMuonNexus1.h:70

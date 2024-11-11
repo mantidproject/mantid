@@ -69,9 +69,6 @@ InstrumentLayout instrumentFormat(Mantid::NeXus::NXEntry &entry) {
 
 } // namespace
 
-/// Algorithms name for identification. @see Algorithm::name
-const std::string LoadNexusProcessed2::name() const { return "LoadNexusProcessed"; }
-
 /// Algorithm's version for identification. @see Algorithm::version
 int LoadNexusProcessed2::version() const { return 2; }
 
