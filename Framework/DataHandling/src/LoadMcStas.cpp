@@ -22,12 +22,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 
-#include <boost/algorithm/string.hpp>
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
 #include <H5Cpp.h>
+#include <boost/algorithm/string.hpp>
 
 namespace Mantid::DataHandling {
 using namespace Kernel;
