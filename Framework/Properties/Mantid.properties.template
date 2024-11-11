@@ -327,7 +327,7 @@ plots.images.Colormap = viridis
 plots.images.ColorBarScale = Linear
 
 # Profiler Default Filename
-performancelog.filename = algorithmregister.out
+performancelog.filename = algotimeregister.out
 
 # Algorithm Profiler Default Status
 performancelog.write = Off
