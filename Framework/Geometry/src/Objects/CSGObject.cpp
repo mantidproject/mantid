@@ -38,6 +38,7 @@
 #include <deque>
 #include <random>
 #include <stack>
+#include <stdexcept>
 #include <unordered_set>
 #include <utility>
 
@@ -2118,6 +2119,47 @@ std::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() const {
   // Check if the geometry handler is upto dated with the cache, if not then
   // cache it now.
   return m_handler;
+}
+
+std::string CSGObject::getGeometryShape() const {
+  Geometry::detail::ShapeInfo::GeometryShape shape;
+  std::vector<V3D> points;
+  double radius, innerRadius, height = 0;
+  m_handler->GetObjectGeom(shape, points, innerRadius, radius, height);
+  switch (shape) {
+  case detail::ShapeInfo::GeometryShape::NOSHAPE:
+    return "NOSHAPE";
+  case detail::ShapeInfo::GeometryShape::CUBOID:
+    return "CUBOID";
+  case detail::ShapeInfo::GeometryShape::HEXAHEDRON:
+    return "HEXAHEDRON";
+  case detail::ShapeInfo::GeometryShape::SPHERE:
+    return "SPHERE";
+  case detail::ShapeInfo::GeometryShape::CYLINDER:
+    return "CYLINDER";
+  case detail::ShapeInfo::GeometryShape::CONE:
+    return "CONE";
+  case detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER:
+    return "HOLLOWCYLINDER";
+  default:
+    throw std::invalid_argument("Unknown GeometryShape");
+  }
+}
+
+const std::vector<V3D> CSGObject::getGeometryPoints() const {
+  Geometry::detail::ShapeInfo::GeometryShape shape;
+  std::vector<V3D> points;
+  double radius, innerRadius, height = 0;
+  m_handler->GetObjectGeom(shape, points, innerRadius, radius, height);
+  return points;
+}
+
+const std::vector<double> CSGObject::getGeometryDimensions() const {
+  Geometry::detail::ShapeInfo::GeometryShape shape;
+  std::vector<V3D> points;
+  double radius, innerRadius, height = 0;
+  m_handler->GetObjectGeom(shape, points, innerRadius, radius, height);
+  return {innerRadius, radius, height};
 }
 
 /**

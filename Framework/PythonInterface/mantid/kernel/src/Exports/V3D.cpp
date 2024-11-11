@@ -28,6 +28,18 @@ namespace {
  */
 V3D directionAnglesDefault(V3D &self) { return self.directionAngles(); }
 
+/** Return the vector's position in spherical coordinates
+ *  R ::     Returns the radial distance
+ *  theta :: Returns the theta angle in degrees
+ *  phi ::   Returns the phi (azimuthal) angle in degrees
+ * @return R, theta (degrees), phi (azimuthal, degrees)
+ */
+std::vector<double> getSpherical(V3D &self) {
+  double R, theta, phi = 0;
+  self.getSpherical(R, theta, phi);
+  return {R, theta, phi};
+}
+
 Py_hash_t hashV3D(V3D &self) {
   boost::python::object tmpObj(self.toString());
 
@@ -120,6 +132,7 @@ void export_V3D() {
            "Computes the cross product between this and another vector")
       .def("norm", &V3D::norm, arg("self"), "Calculates the length of the vector")
       .def("norm2", &V3D::norm2, arg("self"), "Calculates the squared length of the vector")
+      .def("getSpherical", &getSpherical, arg("self"), "Return the vector's position in spherical coordinates")
       .def("__add__", &V3D::operator+, (arg("left"), arg("right")))
       .def("__iadd__", &V3D::operator+=, return_self<>(), (arg("self"), arg("other")))
       .def("__sub__", static_cast<V3D (V3D::*)(const V3D &) const>(&V3D::operator-), (arg("left"), arg("right")))
