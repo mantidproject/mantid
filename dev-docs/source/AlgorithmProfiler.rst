@@ -59,3 +59,12 @@ The project has more detiled instructions, but in general
 
 The ``&`` puts the python process in the background.
 The ``$!`` is the process-id (PID) of the last process run and allows mantid-profiler to attach to the process.
+
+Related Documentation
+^^^^^^^^^^^^^^^^^^^^^
+
+- `mantid.api.AlgoTimeRegister <https://github.com/mantidproject/mantid/blob/main/docs/source/api/python/mantid/api/AlgoTimeRegister.rst>`_ discusses how timing is measured.
+
+- `The mantid-profiler README <https://github.com/mantidproject/mantid-profiler/blob/main/README.md>`_ provides an overview of how to tool is used.
+
+- `Relevant properties file configurations <https://github.com/mantidproject/mantid/blob/main/docs/source/concepts/PropertiesFile.rst#algorithm-profiling-settings>`_.
