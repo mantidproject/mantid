@@ -126,6 +126,11 @@ ComponentInfo::QuadrilateralComponent ComponentInfo::quadrilateralComponent(cons
   return corners;
 }
 
+std::vector<size_t> ComponentInfo::quadrilateralComponentCornerIndices(const size_t componentIndex) const {
+  const auto quadrilateral = quadrilateralComponent(componentIndex);
+  return {quadrilateral.topLeft, quadrilateral.bottomLeft, quadrilateral.bottomRight, quadrilateral.topRight};
+}
+
 size_t ComponentInfo::indexOf(Geometry::IComponent *id) const { return m_compIDToIndex->at(id); }
 
 size_t ComponentInfo::indexOfAny(const std::string &name) const { return m_componentInfo->indexOfAny(name); }
@@ -431,6 +436,10 @@ BoundingBox ComponentInfo::boundingBox(const size_t componentIndex, const Boundi
 
 Beamline::ComponentType ComponentInfo::componentType(const size_t componentIndex) const {
   return m_componentInfo->componentType(componentIndex);
+}
+
+std::string ComponentInfo::componentTypeName(const size_t componentIndex) const {
+  return Beamline::componentTypeString(componentType(componentIndex));
 }
 
 void ComponentInfo::setScanInterval(const std::pair<Types::Core::DateAndTime, Types::Core::DateAndTime> &interval) {
