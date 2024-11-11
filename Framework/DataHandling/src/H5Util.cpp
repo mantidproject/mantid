@@ -255,12 +255,26 @@ template <typename T> T readAttributeAsStrType(const H5::H5Object &object, const
   return value;
 }
 
-template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::Group &group, const std::string &name) {
-  std::vector<NumT> result;
-
+// This method avoids a copy on return so should be preferred to its sibling method
+template <typename NumT>
+void readArray1DCoerce(const H5::Group &group, const std::string &name, std::vector<NumT> &output) {
   try {
     DataSet dataset = group.openDataSet(name);
-    result = readArray1DCoerce<NumT>(dataset);
+    readArray1DCoerce(dataset, output);
+  } catch (const H5::GroupIException &e) {
+    UNUSED_ARG(e);
+    g_log.information("Failed to open dataset \"" + name + "\"\n");
+  } catch (const H5::DataTypeIException &e) {
+    UNUSED_ARG(e);
+    g_log.information("DataSet \"" + name + "\" should be double" + "\n");
+  }
+}
+
+template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::Group &group, const std::string &name) {
+  std::vector<NumT> result;
+  try {
+    DataSet dataset = group.openDataSet(name);
+    readArray1DCoerce(dataset, result);
   } catch (const H5::GroupIException &e) {
     UNUSED_ARG(e);
     g_log.information("Failed to open dataset \"" + name + "\"\n");
@@ -274,21 +288,18 @@ template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::Group &gr
 
 namespace {
 template <typename InputNumT, typename OutputNumT>
-std::vector<OutputNumT> convertingRead(const DataSet &dataset, const DataType &dataType) {
+void convertingRead(const DataSet &dataset, const DataType &dataType, std::vector<OutputNumT> &output) {
   DataSpace dataSpace = dataset.getSpace();
 
   std::vector<InputNumT> temp(dataSpace.getSelectNpoints());
   dataset.read(temp.data(), dataType, dataSpace);
 
-  std::vector<OutputNumT> result;
-  result.resize(temp.size());
+  output.resize(temp.size());
 
-  std::transform(temp.begin(), temp.end(), result.begin(),
+  std::transform(temp.begin(), temp.end(), output.begin(),
                  [](const InputNumT a) { // lambda
                    return boost::numeric_cast<OutputNumT>(a);
                  });
-
-  return result;
 }
 
 template <typename InputNumT, typename OutputNumT>
@@ -375,29 +386,27 @@ std::vector<NumT> readNumArrayAttributeCoerce(LocationType &location, const std:
   return value;
 }
 
-template <typename NumT> std::vector<NumT> readArray1DCoerce(const DataSet &dataset) {
+template <typename NumT> void readArray1DCoerce(const DataSet &dataset, std::vector<NumT> &output) {
   DataType dataType = dataset.getDataType();
 
   if (getType<NumT>() == dataType) { // no conversion necessary
-    std::vector<NumT> result;
     DataSpace dataSpace = dataset.getSpace();
-    result.resize(dataSpace.getSelectNpoints());
-    dataset.read(result.data(), dataType, dataSpace);
-    return result;
+    output.resize(dataSpace.getSelectNpoints());
+    dataset.read(output.data(), dataType, dataSpace);
   }
 
   if (PredType::NATIVE_INT32 == dataType) {
-    return convertingRead<int32_t, NumT>(dataset, dataType);
+    convertingRead<int32_t>(dataset, dataType, output);
   } else if (PredType::NATIVE_UINT32 == dataType) {
-    return convertingRead<uint32_t, NumT>(dataset, dataType);
+    convertingRead<uint32_t>(dataset, dataType, output);
   } else if (PredType::NATIVE_INT64 == dataType) {
-    return convertingRead<int64_t, NumT>(dataset, dataType);
+    convertingRead<int64_t>(dataset, dataType, output);
   } else if (PredType::NATIVE_UINT64 == dataType) {
-    return convertingRead<uint64_t, NumT>(dataset, dataType);
+    convertingRead<uint64_t>(dataset, dataType, output);
   } else if (PredType::NATIVE_FLOAT == dataType) {
-    return convertingRead<float, NumT>(dataset, dataType);
+    convertingRead<float>(dataset, dataType, output);
   } else if (PredType::NATIVE_DOUBLE == dataType) {
-    return convertingRead<double, NumT>(dataset, dataType);
+    convertingRead<double>(dataset, dataType, output);
   }
 
   // not a supported type
@@ -638,6 +647,19 @@ template MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<uint64
 // -------------------------------------------------------------------
 // instantiations for readArray1DCoerce
 // -------------------------------------------------------------------
+template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
+                                                        std::vector<float> &output);
+template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
+                                                        std::vector<double> &output);
+template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
+                                                        std::vector<int32_t> &output);
+template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
+                                                        std::vector<uint32_t> &output);
+template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
+                                                        std::vector<int64_t> &output);
+template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
+                                                        std::vector<uint64_t> &output);
+
 template MANTID_DATAHANDLING_DLL std::vector<float> readArray1DCoerce(const H5::Group &group, const std::string &name);
 template MANTID_DATAHANDLING_DLL std::vector<double> readArray1DCoerce(const H5::Group &group, const std::string &name);
 template MANTID_DATAHANDLING_DLL std::vector<int32_t> readArray1DCoerce(const H5::Group &group,
@@ -649,10 +671,10 @@ template MANTID_DATAHANDLING_DLL std::vector<int64_t> readArray1DCoerce(const H5
 template MANTID_DATAHANDLING_DLL std::vector<uint64_t> readArray1DCoerce(const H5::Group &group,
                                                                          const std::string &name);
 
-template MANTID_DATAHANDLING_DLL std::vector<float> readArray1DCoerce<float>(const DataSet &dataset);
-template MANTID_DATAHANDLING_DLL std::vector<double> readArray1DCoerce<double>(const DataSet &dataset);
-template MANTID_DATAHANDLING_DLL std::vector<int32_t> readArray1DCoerce<int32_t>(const DataSet &dataset);
-template MANTID_DATAHANDLING_DLL std::vector<uint32_t> readArray1DCoerce<uint32_t>(const DataSet &dataset);
-template MANTID_DATAHANDLING_DLL std::vector<int64_t> readArray1DCoerce<int64_t>(const DataSet &dataset);
-template MANTID_DATAHANDLING_DLL std::vector<uint64_t> readArray1DCoerce<uint64_t>(const DataSet &dataset);
+template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<float> &output);
+template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<double> &output);
+template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<int32_t> &output);
+template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint32_t> &output);
+template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<int64_t> &output);
+template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint64_t> &output);
 } // namespace Mantid::DataHandling::H5Util

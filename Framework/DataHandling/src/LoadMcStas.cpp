@@ -440,14 +440,15 @@ LoadMcStas::readHistogramData(const std::map<std::string, std::vector<std::strin
       }
     }
 
-    std::vector<double> axis1Values = H5Util::readArray1DCoerce<double>(group, axis1Name);
+    std::vector<double> axis1Values;
+    H5Util::readArray1DCoerce(group, axis1Name, axis1Values);
     std::vector<double> axis2Values;
 
     if (axis2Name.length() == 0) {
       axis2Name = nameAttrValueYLABEL;
       axis2Values.emplace_back(0.0);
     } else {
-      axis2Values = H5Util::readArray1DCoerce<double>(group, axis2Name);
+      H5Util::readArray1DCoerce(group, axis2Name, axis2Values);
     }
 
     const size_t axis1Length = axis1Values.size();
@@ -455,12 +456,13 @@ LoadMcStas::readHistogramData(const std::map<std::string, std::vector<std::strin
     g_log.debug() << "Axis lengths=" << axis1Length << " " << axis2Length << '\n';
 
     // Require "data" field
-    std::vector<double> data = H5Util::readArray1DCoerce<double>(group, "data");
+    std::vector<double> data;
+    H5Util::readArray1DCoerce(group, "data", data);
 
     // Optional errors field
     std::vector<double> errors;
     if (group.exists("errors")) {
-      errors = H5Util::readArray1DCoerce<double>(group, "errors");
+      H5Util::readArray1DCoerce(group, "errors", errors);
     }
 
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D", axis2Length, axis1Length, axis1Length);

@@ -20,6 +20,7 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
+#include "MantidHistogramData/HistogramE.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -480,7 +481,8 @@ void loadTransmissionData(H5::Group &transmission, const Mantid::API::MatrixWork
   // transmission lambda points to be saved as bin edges rather than points as
   // required by the NXcanSAS standard. We allow loading those files and convert
   // to points on the fly
-  auto lambda = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(transmission, sasTransmissionSpectrumLambda);
+  std::vector<double> lambda;
+  Mantid::DataHandling::H5Util::readArray1DCoerce(transmission, sasTransmissionSpectrumLambda, lambda);
   if (lambda.size() == workspace->blocksize())
     workspace->setPoints(0, std::move(lambda));
   else if (lambda.size() == workspace->blocksize() + 1)

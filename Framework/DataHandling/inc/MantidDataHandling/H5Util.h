@@ -92,9 +92,11 @@ NumT readNumAttributeCoerce(LocationType &location, const std::string &attribute
 template <typename NumT, typename LocationType>
 std::vector<NumT> readNumArrayAttributeCoerce(LocationType &location, const std::string &attributeName);
 
+template <typename NumT>
+void readArray1DCoerce(const H5::Group &group, const std::string &name, std::vector<NumT> &output);
 template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::Group &group, const std::string &name);
 
-template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::DataSet &dataset);
+template <typename NumT> void readArray1DCoerce(const H5::DataSet &dataset, std::vector<NumT> &output);
 
 /// Test if a group already exists within an HDF5 file or parent group.
 MANTID_DATAHANDLING_DLL bool groupExists(H5::H5Object &h5, const std::string &groupPath);
