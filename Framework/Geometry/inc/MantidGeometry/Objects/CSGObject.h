@@ -166,6 +166,9 @@ public:
   std::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Set Geometry Handler
   void setGeometryHandler(const std::shared_ptr<GeometryHandler> &h);
+  std::string getGeometryShape() const;
+  const std::vector<Kernel::V3D> getGeometryPoints() const;
+  const std::vector<double> getGeometryDimensions() const;
 
   /// set vtkGeometryCache writer
   void setVtkGeometryCacheWriter(std::shared_ptr<vtkGeometryCacheWriter>);
