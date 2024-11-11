@@ -114,37 +114,36 @@ DSetCreatPropList setCompressionAttributes(const std::size_t length, const int d
   return propList;
 }
 
-template <typename LocationType>
-void writeStrAttribute(LocationType &location, const std::string &name, const std::string &value) {
+void writeStrAttribute(const H5::H5Object &object, const std::string &name, const std::string &value) {
   StrType attrType(0, H5T_VARIABLE);
   DataSpace attrSpace(H5S_SCALAR);
-  auto attribute = location.createAttribute(name, attrType, attrSpace);
+  auto attribute = object.createAttribute(name, attrType, attrSpace);
   attribute.write(attrType, value);
 }
 
-template <typename NumT, typename LocationType>
-void writeNumAttribute(LocationType &location, const std::string &name, const NumT &value) {
+template <typename NumT>
+void writeNumAttribute(const H5::H5Object &object, const std::string &name, const NumT &value) {
   static_assert(std::is_integral<NumT>::value || std::is_floating_point<NumT>::value,
                 "The writeNumAttribute function only accepts integral or "
                 "floating point values.");
   auto attrType = getType<NumT>();
   DataSpace attrSpace(H5S_SCALAR);
 
-  auto attribute = location.createAttribute(name, attrType, attrSpace);
+  auto attribute = object.createAttribute(name, attrType, attrSpace);
   // Wrap the data set in an array
   std::array<NumT, 1> valueArray = {{value}};
   attribute.write(attrType, valueArray.data());
 }
 
-template <typename NumT, typename LocationType>
-void writeNumAttribute(LocationType &location, const std::string &name, const std::vector<NumT> &value) {
+template <typename NumT>
+void writeNumAttribute(const H5::H5Object &object, const std::string &name, const std::vector<NumT> &value) {
   static_assert(std::is_integral<NumT>::value || std::is_floating_point<NumT>::value,
                 "The writeNumAttribute function only accepts integral of "
                 "floating point values.");
   auto attrType = getType<NumT>();
   DataSpace attrSpace = getDataSpace(value);
 
-  auto attribute = location.createAttribute(name, attrType, attrSpace);
+  auto attribute = object.createAttribute(name, attrType, attrSpace);
   attribute.write(attrType, value.data());
 }
 
@@ -328,9 +327,8 @@ OutputNumT convertingRead(Attribute &attribute, const DataType &dataType) {
 
 } // namespace
 
-template <typename NumT, typename LocationType>
-NumT readNumAttributeCoerce(LocationType &location, const std::string &attributeName) {
-  auto attribute = location.openAttribute(attributeName);
+template <typename NumT> NumT readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName) {
+  auto attribute = object.openAttribute(attributeName);
   auto dataType = attribute.getDataType();
 
   NumT value;
@@ -474,66 +472,33 @@ void deleteObjectLink(H5::H5Object &h5, const std::string &target) {
 }
 
 // -------------------------------------------------------------------
-// instantiations for writeStrAttribute
-// -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL void writeStrAttribute(H5::Group &location, const std::string &name,
-                                                        const std::string &value);
-
-template MANTID_DATAHANDLING_DLL void writeStrAttribute(H5::DataSet &location, const std::string &name,
-                                                        const std::string &value);
-
-// -------------------------------------------------------------------
 // instantiations for writeNumAttribute
 // -------------------------------------------------------------------
 
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                         const float &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
-                                                        const float &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                         const double &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
-                                                        const double &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                         const int32_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
-                                                        const int32_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                         const uint32_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
-                                                        const uint32_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                         const int64_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
-                                                        const int64_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
-                                                        const uint64_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                         const uint64_t &value);
 
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                         const std::vector<float> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
-                                                        const std::vector<float> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                         const std::vector<double> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
-                                                        const std::vector<double> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                         const std::vector<int32_t> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
-                                                        const std::vector<int32_t> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                         const std::vector<uint32_t> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
-                                                        const std::vector<uint32_t> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                         const std::vector<int64_t> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
-                                                        const std::vector<int64_t> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::Group &location, const std::string &name,
-                                                        const std::vector<uint64_t> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(H5::DataSet &location, const std::string &name,
+template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
                                                         const std::vector<uint64_t> &value);
 
 // -------------------------------------------------------------------
@@ -548,21 +513,17 @@ template MANTID_DATAHANDLING_DLL std::string readAttributeAsStrType(const H5::H5
 // -------------------------------------------------------------------
 // instantiations for readNumAttributeCoerce
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL float readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL float readNumAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL double readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL double readNumAttributeCoerce(H5::DataSet &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL int32_t readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL int32_t readNumAttributeCoerce(H5::DataSet &location,
+template MANTID_DATAHANDLING_DLL float readNumAttributeCoerce(const H5::H5Object &object,
+                                                              const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL double readNumAttributeCoerce(const H5::H5Object &object,
+                                                               const std::string &attributeName);
+template MANTID_DATAHANDLING_DLL int32_t readNumAttributeCoerce(const H5::H5Object &object,
                                                                 const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL uint32_t readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL uint32_t readNumAttributeCoerce(H5::DataSet &location,
+template MANTID_DATAHANDLING_DLL uint32_t readNumAttributeCoerce(const H5::H5Object &object,
                                                                  const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL int64_t readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL int64_t readNumAttributeCoerce(H5::DataSet &location,
+template MANTID_DATAHANDLING_DLL int64_t readNumAttributeCoerce(const H5::H5Object &object,
                                                                 const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL uint64_t readNumAttributeCoerce(H5::Group &location, const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL uint64_t readNumAttributeCoerce(H5::DataSet &location,
+template MANTID_DATAHANDLING_DLL uint64_t readNumAttributeCoerce(const H5::H5Object &object,
                                                                  const std::string &attributeName);
 
 // -------------------------------------------------------------------

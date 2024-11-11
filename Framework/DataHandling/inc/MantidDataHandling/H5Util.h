@@ -57,14 +57,13 @@ MANTID_DATAHANDLING_DLL H5::Group createGroupCanSAS(H5::H5File &file, const std:
 MANTID_DATAHANDLING_DLL H5::DSetCreatPropList setCompressionAttributes(const std::size_t length,
                                                                        const int deflateLevel = 6);
 
-template <typename LocationType>
-void writeStrAttribute(LocationType &location, const std::string &name, const std::string &value);
+MANTID_DATAHANDLING_DLL void writeStrAttribute(const H5::H5Object &object, const std::string &name,
+                                               const std::string &value);
 
-template <typename NumT, typename LocationType>
-void writeNumAttribute(LocationType &location, const std::string &name, const NumT &value);
+template <typename NumT> void writeNumAttribute(const H5::H5Object &object, const std::string &name, const NumT &value);
 
-template <typename NumT, typename LocationType>
-void writeNumAttribute(LocationType &location, const std::string &name, const std::vector<NumT> &value);
+template <typename NumT>
+void writeNumAttribute(const H5::H5Object &object, const std::string &name, const std::vector<NumT> &value);
 
 MANTID_DATAHANDLING_DLL void write(H5::Group &group, const std::string &name, const std::string &value);
 
@@ -86,11 +85,10 @@ MANTID_DATAHANDLING_DLL bool hasAttribute(const H5::H5Object &object, const char
 
 template <typename T> T readAttributeAsStrType(const H5::H5Object &object, const std::string &attributeName);
 
-template <typename NumT, typename LocationType>
-NumT readNumAttributeCoerce(LocationType &location, const std::string &attributeName);
+template <typename NumT> NumT readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 
-template <typename NumT, typename LocationType>
-std::vector<NumT> readNumArrayAttributeCoerce(LocationType &location, const std::string &attributeName);
+template <typename NumT>
+std::vector<NumT> readNumArrayAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 
 template <typename NumT>
 void readArray1DCoerce(const H5::Group &group, const std::string &name, std::vector<NumT> &output);
