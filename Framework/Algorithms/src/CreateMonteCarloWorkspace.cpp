@@ -18,6 +18,7 @@
 #include "MantidAlgorithms/CreateMonteCarloWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Logger.h"
+#include "MantidAPI/Progress.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("CreateMonteCarloWorkspace");
@@ -100,24 +101,43 @@ int CreateMonteCarloWorkspace::computeNumberOfIterations(const Mantid::Histogram
 
 // Using Cumulative Distribution Function
 void CreateMonteCarloWorkspace::exec() {
+  // Progress Bar set up
+  int numSteps = 7;
+  API::Progress progress(this, 0.0, 1.0, numSteps);
+
+
   MatrixWorkspace_sptr instWs = getProperty("InputWorkspace");
   int seed_input = getProperty("Seed");
+  progress.report();
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   const Mantid::HistogramData::HistogramY &yData = instWs->y(0); // Counts in each bin
+  progress.report();
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   int numIterations = computeNumberOfIterations(yData);
   std::vector<double> cdf = computeNormalizedCDF(yData);
+  progress.report();
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   MatrixWorkspace_sptr outputWs = WorkspaceFactory::Instance().create(instWs);
+  progress.report();
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   // Copy the bin boundaries (X-values) from the input to the output
   outputWs->setSharedX(0, instWs->sharedX(0));
+  progress.report();
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   std::mt19937 gen(seed_input);
 
   Mantid::HistogramData::HistogramY outputY = fillHistogramWithRandomData(cdf, numIterations, gen);
+  progress.report();
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   outputWs->mutableY(0) = outputY;
+  progress.report();
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   setProperty("OutputWorkspace", outputWs);
 }
