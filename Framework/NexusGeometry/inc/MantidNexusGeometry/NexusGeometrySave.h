@@ -46,8 +46,8 @@ namespace NexusGeometrySave {
 
 MANTID_NEXUSGEOMETRY_DLL void saveInstrument(const Geometry::ComponentInfo &compInfo,
                                              const Geometry::DetectorInfo &detInfo, const std::string &fullPath,
-                                             const std::string &rootName, AbstractLogger &logger, bool append = false,
-                                             Kernel::ProgressBase *reporter = nullptr);
+                                             const std::string &parentGroupName, AbstractLogger &logger,
+                                             bool append = false, Kernel::ProgressBase *reporter = nullptr);
 
 MANTID_NEXUSGEOMETRY_DLL void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &filePath,
                                              const std::string &entryNamePrefix, std::optional<size_t> entryNumber,
@@ -55,12 +55,12 @@ MANTID_NEXUSGEOMETRY_DLL void saveInstrument(const Mantid::API::MatrixWorkspace 
                                              Kernel::ProgressBase *reporter = nullptr);
 
 MANTID_NEXUSGEOMETRY_DLL void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &fullPath,
-                                             const std::string &rootName, AbstractLogger &logger, bool append = false,
-                                             Kernel::ProgressBase *reporter = nullptr);
+                                             const std::string &parentGroupName, AbstractLogger &logger,
+                                             bool append = false, Kernel::ProgressBase *reporter = nullptr);
 
 MANTID_NEXUSGEOMETRY_DLL void saveInstrument(
     const std::pair<std::unique_ptr<Geometry::ComponentInfo>, std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
-    const std::string &fullPath, const std::string &rootName, AbstractLogger &logger, bool append = false,
+    const std::string &fullPath, const std::string &parentGroupName, AbstractLogger &logger, bool append = false,
     Kernel::ProgressBase *reporter = nullptr);
 
 } // namespace NexusGeometrySave

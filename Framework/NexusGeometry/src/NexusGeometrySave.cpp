@@ -954,9 +954,8 @@ private:
  * @param reporter : (optional) report to progressBase.
  */
 
-void _saveInstrument(H5::Group &parentGroup, // cppcheck-suppress constParameterReference
-                     bool append, AbstractLogger &logger, const Geometry::ComponentInfo &compInfo,
-                     const Geometry::DetectorInfo &detInfo,
+void _saveInstrument(const H5::Group &parentGroup, bool append, AbstractLogger &logger,
+                     const Geometry::ComponentInfo &compInfo, const Geometry::DetectorInfo &detInfo,
                      const std::optional<Mantid::detid2index_map> detIdToIndexMap = std::nullopt,
                      const Indexing::IndexInfo *indexInfo = nullptr, const SpectrumInfo *spectrumInfo = nullptr,
                      Kernel::ProgressBase *reporter = nullptr) {
@@ -1031,15 +1030,15 @@ void _saveInstrument(H5::Group &parentGroup, // cppcheck-suppress constParameter
  * @param compInfo : componentInfo object.
  * @param detInfo : detectorInfo object.
  * @param fullPath : save destination as full path.
- * @param rootName : name of root entry
+ * @param parentGroupName : name of root NXentry group in which to place the instrument.
  * @param logger : logging object
  * @param append : append mode, means openting and appending to existing file.
  * If false, creates new file.
  * @param reporter : (optional) report to progressBase.
  */
 void saveInstrument(const Geometry::ComponentInfo &compInfo, const Geometry::DetectorInfo &detInfo,
-                    const std::string &fullPath, const std::string &rootName, AbstractLogger &logger, bool append,
-                    Kernel::ProgressBase *reporter) {
+                    const std::string &fullPath, const std::string &parentGroupName, AbstractLogger &logger,
+                    bool append, Kernel::ProgressBase *reporter) {
 
   validateInputs(logger, fullPath, compInfo);
 
@@ -1047,10 +1046,10 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo, const Geometry::Det
   H5::H5File file;
   if (append) {
     file = H5::H5File(fullPath, H5F_ACC_RDWR); // open file
-    parentGroup = file.openGroup(rootName);
+    parentGroup = file.openGroup(parentGroupName);
   } else {
     file = H5::H5File(fullPath, H5F_ACC_TRUNC); // open file
-    parentGroup = file.createGroup(rootName);
+    parentGroup = file.createGroup(parentGroupName);
     writeStrAttribute(parentGroup, NX_CLASS, NX_ENTRY);
   }
 
@@ -1067,7 +1066,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo, const Geometry::Det
  *
  * @param instrPair : instrument 2.0  object.
  * @param fullPath : save destination as full path.
- * @param rootName : name of root entry
+ * @param parentGroupName : name of root NXentry group in which to place the instrument.
  * @param logger : logging object
  * @param append : append mode, means openting and appending to existing file.
  * If false, creates new file.
@@ -1075,13 +1074,13 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo, const Geometry::Det
  */
 void saveInstrument(
     const std::pair<std::unique_ptr<Geometry::ComponentInfo>, std::unique_ptr<Geometry::DetectorInfo>> &instrPair,
-    const std::string &fullPath, const std::string &rootName, AbstractLogger &logger, bool append,
+    const std::string &fullPath, const std::string &parentGroupName, AbstractLogger &logger, bool append,
     Kernel::ProgressBase *reporter) {
 
   const Geometry::ComponentInfo &compInfo = (*instrPair.first);
   const Geometry::DetectorInfo &detInfo = (*instrPair.second);
 
-  saveInstrument(compInfo, detInfo, fullPath, rootName, logger, append, reporter);
+  saveInstrument(compInfo, detInfo, fullPath, parentGroupName, logger, append, reporter);
 }
 
 /**
@@ -1092,13 +1091,14 @@ void saveInstrument(
  *
  * @param ws : name of a MatrixWorkspace.
  * @param fullPath : save destination as full path.
- * @param parentName : name of the parent group containing the instrument
+ * @param parentGroupName : name of root NXentry group in which to place the instrument.
  * @param logger : logging object
  * @param append : append to the file, if it exists
  * @param reporter : (optional) report to progressBase.
  */
-void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &filePath, const std::string &parentName,
-                    AbstractLogger &logger, bool append, Kernel::ProgressBase *reporter) {
+void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &filePath,
+                    const std::string &parentGroupName, AbstractLogger &logger, bool append,
+                    Kernel::ProgressBase *reporter) {
 
   const auto &detInfo = ws.detectorInfo();
   const auto &compInfo = ws.componentInfo();
@@ -1116,16 +1116,16 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws, const std::string &f
   if (Poco::File(filePath).exists() && append) {
     file = H5::H5File(filePath, H5F_ACC_RDWR); // open existing file
     H5::Group rootGroup = file.openGroup("/");
-    std::optional<H5::Group> maybeParent = utilities::findGroupByName(rootGroup, parentName, NX_ENTRY);
+    std::optional<H5::Group> maybeParent = utilities::findGroupByName(rootGroup, parentGroupName, NX_ENTRY);
     if (maybeParent)
       parentGroup = *maybeParent;
     else {
-      parentGroup = rootGroup.createGroup(parentName);
+      parentGroup = rootGroup.createGroup(parentGroupName);
       writeStrAttribute(parentGroup, NX_CLASS, NX_ENTRY);
     }
   } else {
     file = H5::H5File(filePath, H5F_ACC_TRUNC); // create a new file (or overwrite an existing one)
-    parentGroup = file.createGroup(std::string("/") + parentName);
+    parentGroup = file.createGroup(std::string("/") + parentGroupName);
     writeStrAttribute(parentGroup, NX_CLASS, NX_ENTRY);
   }
 
