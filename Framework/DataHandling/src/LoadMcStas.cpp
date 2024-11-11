@@ -522,26 +522,18 @@ LoadMcStas::readHistogramData(const std::map<std::string, std::vector<std::strin
  * be used
  */
 int LoadMcStas::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
-  using namespace ::NeXus;
-  // look at to see if entry1/simulation/name exist first and then
-  // if its value = mccode
-  int confidence(0);
-  if (descriptor.isEntry("/entry1/simulation/name")) {
-    try {
-      // need to look inside file to check value of entry1/simulation/name
-      ::NeXus::File file = ::NeXus::File(descriptor.getFilename());
-      file.openGroup("/entry1/simulation", "NXnote");
-      std::string value;
-      // check if entry1/simulation/name equals mccode
-      file.readData("name", value);
-      if (boost::iequals(value, "mccode"))
-        confidence = 98;
-      file.closeGroup();
-      file.closeGroup();
-    } catch (::NeXus::Exception &) {
-    }
+  if (!descriptor.isEntry("/entry1/simulation/name")) {
+    return 0;
   }
-  return confidence;
+  H5::H5File file(descriptor.getFilename(), H5F_ACC_RDONLY);
+  H5::Group group = file.openGroup("/entry1/simulation");
+  H5::DataSet dataset = group.openDataSet("name");
+
+  const auto value = H5Util::readString(dataset);
+  if (boost::iequals(value, "mccode")) {
+    return 98;
+  }
+  return 0;
 }
 
 } // namespace Mantid::DataHandling

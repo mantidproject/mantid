@@ -20,7 +20,6 @@
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
-#include "MantidHistogramData/HistogramE.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 
