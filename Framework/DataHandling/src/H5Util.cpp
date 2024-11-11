@@ -246,10 +246,7 @@ bool hasAttribute(const H5::H5Object &object, const char *attributeName) {
 
 void readStringAttribute(const H5::H5Object &object, const std::string &attributeName, std::string &output) {
   const auto attribute = object.openAttribute(attributeName);
-
-  H5::StrType strType(H5::PredType::C_S1, H5T_VARIABLE);
-
-  attribute.read(strType, output);
+  attribute.read(attribute.getDataType(), output);
 }
 
 // This method avoids a copy on return so should be preferred to its sibling method

@@ -396,7 +396,7 @@ std::vector<std::string> LoadMcStas::readEventData(const std::vector<std::string
 /**
  * Read histogram data
  * @param histogramEntries map of the file entries that have histogram
- * @param nxFile Reads data from inside first first top entry
+ * @param file Reads data from inside first first top entry
  * @return Names of workspaces to include in output group
  */
 std::vector<std::string>
