@@ -89,7 +89,7 @@ void LoadMcStas::execLoader() {
   auto const &entries = iterSDS->second;
 
   const char *attributeName = "long_name";
-  std::map<std::string, std::string> eventEntries;
+  std::vector<std::string> eventEntries;
   std::map<std::string, std::vector<std::string>> histogramEntries;
   for (auto &entry : entries) {
     if (entry.find("/entry1/data") == std::string::npos) {
@@ -113,7 +113,7 @@ void LoadMcStas::execLoader() {
 
     const auto rawString = H5Util::readAttributeAsStrType<char *>(dataset, attributeName);
     if (std::strstr(rawString, "Neutron_ID")) {
-      eventEntries[groupName] = "NXdata";
+      eventEntries.emplace_back(groupPath);
     } else {
       auto foundIt = histogramEntries.find(groupPath);
       if (foundIt == histogramEntries.cend()) {
@@ -159,7 +159,7 @@ API::WorkspaceGroup_sptr LoadMcStas::groupWorkspaces(const std::vector<std::stri
  * @param file Reads data from inside first top entry
  * @return Names of workspaces to include in the output group
  */
-std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, std::string> &eventEntries,
+std::vector<std::string> LoadMcStas::readEventData(const std::vector<std::string> &eventEntries,
                                                    const H5::H5File &file) {
 
   // vector to store output workspaces
@@ -253,10 +253,11 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
   const bool onlySummedEventWorkspace = getProperty("OutputOnlySummedEventWorkspace");
   if (!onlySummedEventWorkspace && numEventEntries > 1) {
     for (const auto &eventEntry : eventEntries) {
-      const std::string &dataName = eventEntry.first;
+      const auto parts = Strings::StrParts(eventEntry, boost::regex("/"));
+      const auto groupName = parts.back();
       // create container to hold partial event data
       // plus the name users will see for it
-      const auto ws_name = dataName + "_" + nameOfGroupWS;
+      const auto ws_name = groupName + "_" + nameOfGroupWS;
       allEventWS.emplace_back(eventWS->clone(), ws_name);
     }
   }
@@ -266,9 +267,8 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
   // Refer to entry in allEventWS. The first non-summed workspace index is 1
   auto eventWSIndex = 1u;
   // Loop over McStas event data components
-  for (const auto &eventEntry : eventEntries) {
-    const std::string &dataName = eventEntry.first;
-    const H5::Group group = file.openGroup("/entry1/data/" + dataName);
+  for (const auto &groupPath : eventEntries) {
+    const H5::Group group = file.openGroup(groupPath);
     const H5::DataSet dataset = group.openDataSet("events");
 
     // open second level entry

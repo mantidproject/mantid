@@ -37,8 +37,7 @@ private:
 
   API::WorkspaceGroup_sptr groupWorkspaces(const std::vector<std::string> &workspaces) const;
 
-  std::vector<std::string> readEventData(const std::map<std::string, std::string> &eventEntries,
-                                         const H5::H5File &file);
+  std::vector<std::string> readEventData(const std::vector<std::string> &eventEntries, const H5::H5File &file);
   std::vector<std::string> readHistogramData(const std::map<std::string, std::vector<std::string>> &histogramEntries,
                                              const H5::H5File &file);
 };
