@@ -432,7 +432,7 @@ Workspace2D_sptr create2DWorkspaceWithGeographicalDetectors(const int nlat, cons
  * @param numBanks :: number of rectangular banks
  * @param numPixels :: each bank will be numPixels*numPixels
  * @param numBins :: each spectrum will have this # of bins
- * @param instrumentName :: the name of the workspace's instrument
+ * @param instrumentName :: the name of the new instrument
  * @return The Workspace2D
  */
 Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithRectangularInstrument(int numBanks, int numPixels,

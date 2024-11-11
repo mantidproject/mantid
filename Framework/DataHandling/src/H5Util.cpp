@@ -403,8 +403,8 @@ bool groupExists(H5::H5Object &h5, const std::string &groupPath) {
   // Unfortunately, this is actually the approach recommended by the HDF Group.
   try {
     h5.openGroup(groupPath);
-  } catch (const H5::Exception &x) {
-    UNUSED_ARG(x);
+  } catch (const H5::Exception &e) {
+    UNUSED_ARG(e);
     status = false;
   }
   return status;
@@ -419,8 +419,8 @@ bool keyHasValue(H5::H5Object &h5, const std::string &key, const std::string &va
     attr.read(attr.getDataType(), value_);
     if (value_ != value)
       status = false;
-  } catch (const H5::Exception &x) {
-    UNUSED_ARG(x);
+  } catch (const H5::Exception &e) {
+    UNUSED_ARG(e);
     status = false;
   }
   return status;
