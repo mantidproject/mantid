@@ -104,8 +104,8 @@ void LoadMcStas::execLoader() {
     if (groupName == "content_nxs")
       continue;
 
-    H5::Group group = file.openGroup(groupPath);
-    H5::DataSet dataset = group.openDataSet(datasetName);
+    const H5::Group group = file.openGroup(groupPath);
+    const H5::DataSet dataset = group.openDataSet(datasetName);
 
     if (!H5Util::hasAttribute(dataset, attributeName)) {
       continue;
@@ -118,17 +118,18 @@ void LoadMcStas::execLoader() {
       histogramEntries[groupName] = "NXdata";
     }
   }
+
+  std::vector<std::string> scatteringWSNames;
+  std::vector<std::string> histoWSNames;
+  if (!eventEntries.empty()) {
+    scatteringWSNames = readEventData(eventEntries, file);
+  }
   file.close();
 
   ::NeXus::File nxFile(filename);
   nxFile.openGroup("entry1", "NXentry");
   nxFile.openGroup("data", "NXdetector");
 
-  std::vector<std::string> scatteringWSNames;
-  std::vector<std::string> histoWSNames;
-  if (!eventEntries.empty()) {
-    scatteringWSNames = readEventData(eventEntries, nxFile);
-  }
   histoWSNames = readHistogramData(histogramEntries, nxFile);
 
   // join two vectors together
@@ -160,28 +161,17 @@ API::WorkspaceGroup_sptr LoadMcStas::groupWorkspaces(const std::vector<std::stri
 /**
  * Read Event Data
  * @param eventEntries map of the file entries that have events
- * @param nxFile Reads data from inside first top entry
+ * @param file Reads data from inside first top entry
  * @return Names of workspaces to include in the output group
  */
 std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, std::string> &eventEntries,
-                                                   ::NeXus::File &nxFile) {
+                                                   const H5::H5File &file) {
 
   // vector to store output workspaces
   std::vector<std::string> scatteringWSNames;
 
   std::string filename = getPropertyValue("Filename");
-  auto entries = nxFile.getEntries();
   const bool errorBarsSetTo1 = getProperty("ErrorBarsSetTo1");
-
-  // will assume that each top level entry contain one mcstas
-  // generated IDF and any event data entries within this top level
-  // entry are data collected for that instrument
-  // This code for loading the instrument is for now adjusted code from
-  // ExperimentalInfo.
-
-  // Close data folder and go back to top level. Then read and close the
-  // Instrument folder.
-  nxFile.closeGroup();
 
   Geometry::Instrument_sptr instrument;
 
@@ -193,11 +183,9 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
   std::string instrumentXML;
   progInitial.report("Loading instrument");
   try {
-    nxFile.openGroup("instrument", "NXinstrument");
-    nxFile.openGroup("instrument_xml", "NXnote");
-    nxFile.readData("data", instrumentXML);
-    nxFile.closeGroup();
-    nxFile.closeGroup();
+    const H5::Group group = file.openGroup("/entry1/instrument/instrument_xml");
+    const H5::DataSet dataset = group.openDataSet("data");
+    instrumentXML = H5Util::readString(dataset);
   } catch (...) {
     g_log.warning() << "\nCould not find the instrument description in the Nexus file:" << filename
                     << " Ignore eventdata from the Nexus file\n";
@@ -232,6 +220,8 @@ std::vector<std::string> LoadMcStas::readEventData(const std::map<std::string, s
     ;
   }
   // Finished reading Instrument. Then open new data folder again
+  ::NeXus::File nxFile(filename);
+  nxFile.openGroup("entry1", "NXentry");
   nxFile.openGroup("data", "NXdetector");
 
   // create and prepare an event workspace ready to receive the mcstas events

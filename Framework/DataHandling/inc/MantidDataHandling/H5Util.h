@@ -78,7 +78,7 @@ MANTID_DATAHANDLING_DLL std::string readString(H5::H5File &file, const std::stri
 
 MANTID_DATAHANDLING_DLL std::string readString(H5::Group &group, const std::string &name);
 
-MANTID_DATAHANDLING_DLL std::string readString(H5::DataSet &dataset);
+MANTID_DATAHANDLING_DLL std::string readString(const H5::DataSet &dataset);
 
 MANTID_DATAHANDLING_DLL std::vector<std::string> readStringVector(H5::Group &, const std::string &);
 

@@ -196,7 +196,7 @@ std::string readString(H5::Group &group, const std::string &name) {
   }
 }
 
-std::string readString(H5::DataSet &dataset) {
+std::string readString(const H5::DataSet &dataset) {
   std::string value;
   dataset.read(value, dataset.getDataType(), dataset.getSpace());
 
