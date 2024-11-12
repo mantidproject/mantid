@@ -8,9 +8,15 @@
 
 namespace MantidQt::CustomInterfaces {
 
-BayesFittingTab::BayesFittingTab(QWidget *parent) : InelasticTab(parent), m_propTree(new QtTreePropertyBrowser()) {
-  m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
+BayesFittingTab::BayesFittingTab(QWidget *parent, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner)
+    : InelasticTab(parent), m_propTree(new QtTreePropertyBrowser()) {
 
+  m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
+  // Temporary until all Bayes Fitting tabs are refactored as MVP
+  if (algorithmRunner) {
+    m_algorithmRunner = std::move(algorithmRunner);
+    m_algorithmRunner->subscribe(this);
+  }
   connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &BayesFittingTab::updateProperties);
 }
 
@@ -26,6 +32,13 @@ void BayesFittingTab::filterInputData(bool filter) { setFileExtensionsByName(fil
 void BayesFittingTab::applySettings(std::map<std::string, QVariant> const &settings) {
   filterInputData(settings.at("RestrictInput").toBool());
   setLoadHistory(settings.at("LoadHistory").toBool());
+}
+
+void BayesFittingTab::notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool const error) {
+  if (algorithm->algorithm()->name() != "SaveNexusProcessed") {
+    m_runPresenter->setRunEnabled(true);
+    runComplete(algorithm->algorithm(), error);
+  }
 }
 
 void BayesFittingTab::setFileExtensionsByName(bool filter) { (void)filter; }

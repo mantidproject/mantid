@@ -12,6 +12,8 @@
 #include "MantidQtWidgets/Spectroscopy/InelasticInterface.h"
 
 #include "MantidKernel/ConfigService.h"
+
+#include <MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h>
 #include <Poco/NObserver.h>
 
 namespace MantidQt {
