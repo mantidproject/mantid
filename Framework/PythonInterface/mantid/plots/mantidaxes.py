@@ -1526,7 +1526,8 @@ class MantidAxes3D(Axes3D):
 
             # This is a bit of a hack, should be able to remove
             # when matplotlib supports plotting masked arrays
-            poly_c._A = safe_masked_invalid(poly_c._A)
+            if poly_c._A is not None:
+                poly_c._A = safe_masked_invalid(poly_c._A)
 
         # Create a copy of the original data points because data are set to nan when the axis limits are changed.
         self.original_data_surface = copy.deepcopy(poly_c._vec)
