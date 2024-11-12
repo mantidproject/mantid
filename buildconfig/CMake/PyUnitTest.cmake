@@ -79,11 +79,19 @@ function(PYSYSTEMTEST_ADD_TEST)
   # Add all of the individual tests so that they can be run in parallel
   foreach(part ${ARGN})
     set(_test_name ${part})
-    if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update.bat -R ${_test_name})
+    if(NOT PR_JOB)
+      set(_system_test_options "-l information --quiet --output-on-failure")
     else()
-      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update -R ${_test_name} -l information
-                                          --quiet --output-on-failure
+      set(_system_test_options "-l information --quiet --output-on-failure --exclude-in-pull-requests")
+    endif()
+
+    if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update.bat -R ${_test_name}
+                                          ${_system_test_options}
+      )
+    else()
+      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update -R ${_test_name}
+                                          ${_system_test_options}
       )
     endif()
 
