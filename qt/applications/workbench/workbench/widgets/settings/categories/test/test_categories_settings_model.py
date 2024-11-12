@@ -48,7 +48,7 @@ class CategoriesSettingsModelTest(BaseSettingsModelTest):
 
     def test_get_algorithm_factory_category_map(self):
         mock_alg_factory = MockAlgorithmFactory()
-        self.model.algorithm_factory = mock_alg_factory
+        self.model._algorithm_factory = mock_alg_factory
         self._test_getter_with_different_values(
             mock_alg_factory.getCategoriesandState,
             self.model.get_algorithm_factory_category_map,

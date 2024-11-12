@@ -21,7 +21,7 @@ class CategoryProperties(Enum):
 class CategoriesSettingsModel(ConfigSettingsChangesModel):
     def __init__(self):
         super().__init__()
-        self.algorithm_factory = AlgorithmFactory.Instance()
+        self._algorithm_factory = AlgorithmFactory.Instance()
 
     def set_hidden_algorithms(self, value: str) -> None:
         self.add_change(CategoryProperties.HIDDEN_ALGORITHMS.value, value)
@@ -33,4 +33,4 @@ class CategoriesSettingsModel(ConfigSettingsChangesModel):
         return self.get_saved_value(CategoryProperties.HIDDEN_INTERFACES.value)
 
     def get_algorithm_factory_category_map(self) -> Dict[str, bool]:
-        return self.algorithm_factory.getCategoriesandState()
+        return self._algorithm_factory.getCategoriesandState()
