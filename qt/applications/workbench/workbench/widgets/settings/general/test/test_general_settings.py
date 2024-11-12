@@ -11,6 +11,7 @@ from unittest.mock import call, patch, MagicMock, Mock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.testing.strict_mock import StrictMock
 from workbench.widgets.settings.general.presenter import GeneralSettings
+from workbench.widgets.settings.general.general_settings_model import GeneralSettingsModel
 from workbench.config import SAVE_STATE_VERSION
 from qtpy.QtCore import Qt
 
@@ -77,14 +78,14 @@ class GeneralSettingsTest(unittest.TestCase):
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
     def test_filters_added_to_combo_and_spin_boxes(self, mock_mousewheel_filter):
-        presenter = GeneralSettings(None)
+        presenter = GeneralSettings(None, model=GeneralSettingsModel())
 
         calls = [
-            call(presenter.view.facility),
-            call(presenter.view.instrument),
-            call(presenter.view.window_behaviour),
-            call(presenter.view.time_between_recovery),
-            call(presenter.view.total_number_checkpoints),
+            call(presenter.get_view().facility),
+            call(presenter.get_view().instrument),
+            call(presenter.get_view().window_behaviour),
+            call(presenter.get_view().time_between_recovery),
+            call(presenter.get_view().total_number_checkpoints),
         ]
 
         mock_mousewheel_filter.assert_has_calls(calls, any_order=True)
@@ -99,39 +100,47 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter = GeneralSettings(None, model=self.mock_model)
         self.assertEqual(1, self.mock_model.set_facility.call_count)
         self.assertEqual(1, self.mock_model.get_facility.call_count)
-        self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
+        self.assert_connected_once(presenter.get_view().facility, presenter.get_view().facility.currentTextChanged)
 
         self.assertEqual(1, self.mock_model.get_instrument.call_count)
-        self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
+        self.assert_connected_once(presenter.get_view().instrument, presenter.get_view().instrument.currentTextChanged)
 
     def test_setup_checkbox_signals(self):
-        presenter = GeneralSettings(None)
+        presenter = GeneralSettings(None, model=self.mock_model)
 
-        self.assert_connected_once(presenter.view.crystallography_convention, presenter.view.crystallography_convention.stateChanged)
+        self.assert_connected_once(
+            presenter.get_view().crystallography_convention, presenter.get_view().crystallography_convention.stateChanged
+        )
 
-        self.assert_connected_once(presenter.view.use_open_gl, presenter.view.use_open_gl.stateChanged)
+        self.assert_connected_once(presenter.get_view().use_open_gl, presenter.get_view().use_open_gl.stateChanged)
 
-        self.assert_connected_once(presenter.view.show_invisible_workspaces, presenter.view.show_invisible_workspaces.stateChanged)
+        self.assert_connected_once(
+            presenter.get_view().show_invisible_workspaces, presenter.get_view().show_invisible_workspaces.stateChanged
+        )
 
-        self.assert_connected_once(presenter.view.project_recovery_enabled, presenter.view.project_recovery_enabled.stateChanged)
+        self.assert_connected_once(
+            presenter.get_view().project_recovery_enabled, presenter.get_view().project_recovery_enabled.stateChanged
+        )
 
-        self.assert_connected_once(presenter.view.time_between_recovery, presenter.view.time_between_recovery.valueChanged)
+        self.assert_connected_once(presenter.get_view().time_between_recovery, presenter.get_view().time_between_recovery.valueChanged)
 
-        self.assert_connected_once(presenter.view.total_number_checkpoints, presenter.view.total_number_checkpoints.valueChanged)
+        self.assert_connected_once(
+            presenter.get_view().total_number_checkpoints, presenter.get_view().total_number_checkpoints.valueChanged
+        )
 
-        self.assert_connected_once(presenter.view.completion_enabled, presenter.view.completion_enabled.stateChanged)
+        self.assert_connected_once(presenter.get_view().completion_enabled, presenter.get_view().completion_enabled.stateChanged)
 
     def test_font_dialog_signals(self):
         presenter = GeneralSettings(None, model=self.mock_model)
-        with patch.object(presenter.view, "create_font_dialog", MagicMock()) as font_dialog:
+        with patch.object(presenter.get_view(), "create_font_dialog", MagicMock()) as font_dialog:
             presenter.action_main_font_button_clicked()
             self.assertEqual(1, font_dialog().fontSelected.connect.call_count)
 
     def test_setup_general_group_signals(self):
-        presenter = GeneralSettings(None)
+        presenter = GeneralSettings(None, model=self.mock_model)
 
-        self.assert_connected_once(presenter.view.main_font, presenter.view.main_font.clicked)
-        self.assert_connected_once(presenter.view.window_behaviour, presenter.view.window_behaviour.currentTextChanged)
+        self.assert_connected_once(presenter.get_view().main_font, presenter.get_view().main_font.clicked)
+        self.assert_connected_once(presenter.get_view().window_behaviour, presenter.get_view().window_behaviour.currentTextChanged)
 
     def test_action_facility_changed(self):
         self.mock_model.get_facility_names.return_value = ["facility1", "facility2"]
@@ -147,13 +156,13 @@ class GeneralSettingsTest(unittest.TestCase):
         self.mock_model.set_facility.assert_called_once_with(new_facility)
         self.mock_model.set_instrument.assert_called_once_with(default_test_live_instrument)
 
-        self.assertEqual(presenter.view.instrument.getFacility(), "TEST_LIVE")
+        self.assertEqual(presenter.get_view().instrument.getFacility(), "TEST_LIVE")
 
     def test_setup_confirmations(self):
-        presenter = GeneralSettings(None)
+        presenter = GeneralSettings(None, model=self.mock_model)
 
         # check that the signals are connected to something
-        self.assert_connected_once(presenter.view.prompt_save_on_close, presenter.view.prompt_save_on_close.stateChanged)
+        self.assert_connected_once(presenter.get_view().prompt_save_on_close, presenter.get_view().prompt_save_on_close.stateChanged)
 
     def test_action_prompt_save_on_close(self):
         presenter = GeneralSettings(None, model=self.mock_model)
@@ -316,17 +325,18 @@ class GeneralSettingsTest(unittest.TestCase):
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
     def test_fill_layout_display(self, _):
-        presenter = GeneralSettings(None, view=Mock(), model=self.mock_model)
+        mock_view = Mock()
+        presenter = GeneralSettings(None, view=mock_view, model=self.mock_model)
 
         test_dict = {"a": 1, "b": 2, "c": 3}
         self.mock_model.get_user_layout.return_value = test_dict
         # setup mock commands
-        presenter.view.layout_display.addItem = Mock()
+        mock_view.layout_display.addItem = Mock()
 
         presenter.fill_layout_display()
 
         calls = [call("a"), call("b"), call("c")]
-        presenter.view.layout_display.addItem.assert_has_calls(calls)
+        mock_view.layout_display.addItem.assert_has_calls(calls)
 
     def test_get_layout_dict(self):
         presenter = GeneralSettings(None, model=self.mock_model)
@@ -345,7 +355,8 @@ class GeneralSettingsTest(unittest.TestCase):
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
     def test_save_layout(self, _):
-        presenter = GeneralSettings(None, view=Mock(), model=self.mock_model)
+        mock_view = Mock()
+        presenter = GeneralSettings(None, view=mock_view, model=self.mock_model)
         # setup parent
         mock_parent = Mock()
         mock_parent.saveState.return_value = "value"
@@ -354,8 +365,8 @@ class GeneralSettingsTest(unittest.TestCase):
         test_dict = {"a": 1}
         self.mock_model.get_user_layout.return_value = test_dict
         # setup mock commands
-        presenter.view.new_layout_name.text = Mock(return_value="key")
-        presenter.view.new_layout_name.clear = Mock()
+        mock_view.new_layout_name.text = Mock(return_value="key")
+        mock_view.new_layout_name.clear = Mock()
 
         presenter.save_layout()
 
@@ -367,7 +378,8 @@ class GeneralSettingsTest(unittest.TestCase):
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
     def test_load_layout(self, _):
-        presenter = GeneralSettings(None, view=Mock(), model=self.mock_model)
+        mock_view = Mock()
+        presenter = GeneralSettings(None, view=mock_view, model=self.mock_model)
         self.mock_model.get_user_layout.reset_mock()
         # setup parent
         mock_parent = Mock()
@@ -375,7 +387,7 @@ class GeneralSettingsTest(unittest.TestCase):
         # setup item selection
         list_item = Mock()
         list_item.text.return_value = "a"
-        presenter.view.layout_display.currentItem = Mock(return_value=list_item)
+        mock_view.layout_display.currentItem = Mock(return_value=list_item)
 
         test_dict = {"a": 1}
         self.mock_model.get_user_layout.return_value = test_dict
@@ -387,14 +399,15 @@ class GeneralSettingsTest(unittest.TestCase):
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
     def test_delete_layout(self, _):
-        presenter = GeneralSettings(None, view=Mock(), model=self.mock_model)
+        mock_view = Mock()
+        presenter = GeneralSettings(None, view=mock_view, model=self.mock_model)
         # setup parent
         mock_parent = Mock()
         presenter.parent = mock_parent
         # setup item selection
         list_item = Mock()
         list_item.text.return_value = "a"
-        presenter.view.layout_display.currentItem = Mock(return_value=list_item)
+        mock_view.layout_display.currentItem = Mock(return_value=list_item)
 
         test_dict = {"a": 1}
         self.mock_model.get_user_layout.return_value = test_dict

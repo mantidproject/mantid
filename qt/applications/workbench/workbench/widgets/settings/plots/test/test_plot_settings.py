@@ -105,8 +105,8 @@ class PlotsSettingsTest(unittest.TestCase):
 
     @patch(MOUSEWHEEL_EVENT_FILTER_PATH)
     def test_filters_added_to_combo_and_spin_boxes(self, mock_mousewheel_filter):
-        presenter = PlotSettings(None)
-        view = presenter.view
+        presenter = PlotSettings(None, model=self.mock_model)
+        view = presenter.get_view()
         test_presenter_has_added_mousewheel_filter_to_all_como_and_spin_boxes(view, mock_mousewheel_filter)
 
     def test_load_current_setting_values(self):
@@ -257,64 +257,64 @@ class PlotsSettingsTest(unittest.TestCase):
 
         presenter = PlotSettings(None, model=self.mock_model)
 
-        self.assertFalse(presenter.view.x_min.isEnabled())
-        self.assertFalse(presenter.view.x_min_box.isChecked())
+        self.assertFalse(presenter.get_view().x_min.isEnabled())
+        self.assertFalse(presenter.get_view().x_min_box.isChecked())
 
     def test_x_max_box_and_check_box_disabled_if_no_value(self):
         self.mock_model.get_x_max.return_value = ""
 
         presenter = PlotSettings(None, model=self.mock_model)
 
-        self.assertFalse(presenter.view.x_max.isEnabled())
-        self.assertFalse(presenter.view.x_max_box.isChecked())
+        self.assertFalse(presenter.get_view().x_max.isEnabled())
+        self.assertFalse(presenter.get_view().x_max_box.isChecked())
 
     def test_y_min_box_and_check_box_disabled_if_no_value(self):
         self.mock_model.get_y_min.return_value = ""
 
         presenter = PlotSettings(None, model=self.mock_model)
 
-        self.assertFalse(presenter.view.y_min.isEnabled())
-        self.assertFalse(presenter.view.y_min_box.isChecked())
+        self.assertFalse(presenter.get_view().y_min.isEnabled())
+        self.assertFalse(presenter.get_view().y_min_box.isChecked())
 
     def test_y_max_box_and_check_box_disabled_if_no_value(self):
         self.mock_model.get_y_max.return_value = ""
 
         presenter = PlotSettings(None, model=self.mock_model)
 
-        self.assertFalse(presenter.view.y_max.isEnabled())
-        self.assertFalse(presenter.view.y_max_box.isChecked())
+        self.assertFalse(presenter.get_view().y_max.isEnabled())
+        self.assertFalse(presenter.get_view().y_max_box.isChecked())
 
     def test_x_min_box_and_check_box_enabled_if_value(self):
         self.mock_model.get_x_min.return_value = "50"
 
         presenter = PlotSettings(None, model=self.mock_model)
 
-        self.assertTrue(presenter.view.x_min.isEnabled())
-        self.assertTrue(presenter.view.x_min_box.isChecked())
+        self.assertTrue(presenter.get_view().x_min.isEnabled())
+        self.assertTrue(presenter.get_view().x_min_box.isChecked())
 
     def test_x_max_box_and_check_box_enabled_if_value(self):
         self.mock_model.get_x_max.return_value = "50"
 
         presenter = PlotSettings(None, model=self.mock_model)
 
-        self.assertTrue(presenter.view.x_max.isEnabled())
-        self.assertTrue(presenter.view.x_max_box.isChecked())
+        self.assertTrue(presenter.get_view().x_max.isEnabled())
+        self.assertTrue(presenter.get_view().x_max_box.isChecked())
 
     def test_y_min_box_and_check_box_enabled_if_value(self):
         self.mock_model.get_y_min.return_value = "50"
 
         presenter = PlotSettings(None, model=self.mock_model)
 
-        self.assertTrue(presenter.view.y_min.isEnabled())
-        self.assertTrue(presenter.view.y_min_box.isChecked())
+        self.assertTrue(presenter.get_view().y_min.isEnabled())
+        self.assertTrue(presenter.get_view().y_min_box.isChecked())
 
     def test_y_max_box_and_check_box_enabled_if_value(self):
         self.mock_model.get_y_max.return_value = "50"
 
         presenter = PlotSettings(None, model=self.mock_model)
 
-        self.assertTrue(presenter.view.y_max.isEnabled())
-        self.assertTrue(presenter.view.y_max_box.isChecked())
+        self.assertTrue(presenter.get_view().y_max.isEnabled())
+        self.assertTrue(presenter.get_view().y_max_box.isChecked())
 
     def test_x_min_checkbox_clears_property_when_disabled(self):
         self.mock_model.get_x_min.return_value = "50"
@@ -592,17 +592,17 @@ class PlotsSettingsTest(unittest.TestCase):
 
     def test_action_default_colormap_changed(self):
         presenter = PlotSettings(None, model=self.mock_model)
-        presenter.view.default_colormap_combo_box.setCurrentIndex(4)
-        colormap = presenter.view.default_colormap_combo_box.currentText()
+        presenter.get_view().default_colormap_combo_box.setCurrentIndex(4)
+        colormap = presenter.get_view().default_colormap_combo_box.currentText()
 
         self.mock_model.set_color_map.reset_mock()
 
         presenter.action_default_colormap_changed()
         self.mock_model.set_color_map.assert_called_once_with(colormap)
 
-        presenter.view.default_colormap_combo_box.setCurrentIndex(5)
-        colormap = presenter.view.default_colormap_combo_box.currentText()
-        presenter.view.reverse_colormap_check_box.setChecked(True)
+        presenter.get_view().default_colormap_combo_box.setCurrentIndex(5)
+        colormap = presenter.get_view().default_colormap_combo_box.currentText()
+        presenter.get_view().reverse_colormap_check_box.setChecked(True)
 
         self.mock_model.set_color_map.reset_mock()
 

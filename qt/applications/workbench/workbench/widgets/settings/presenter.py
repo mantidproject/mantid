@@ -52,12 +52,12 @@ class SettingsPresenter(object):
             self.all_properties += [prop.value for prop in properties]
 
         self.view.sections.addItems(list(self.SETTINGS_TABS.values()))
-        self.current = self.general_settings.view
+        self.current = self.general_settings.get_view()
         self.view.sections.setCurrentRow(0)
-        self.view.container.addWidget(self.general_settings.view)
-        self.view.container.addWidget(self.categories_settings.view)
-        self.view.container.addWidget(self.plot_settings.view)
-        self.view.container.addWidget(self.fitting_settings.view)
+        self.view.container.addWidget(self.general_settings.get_view())
+        self.view.container.addWidget(self.categories_settings.get_view())
+        self.view.container.addWidget(self.plot_settings.get_view())
+        self.view.container.addWidget(self.fitting_settings.get_view())
 
         self.view.okay_button.clicked.connect(self.action_okay_button_pushed)
         self.view.apply_button.clicked.connect(self.action_apply_button_pushed)
@@ -103,7 +103,7 @@ class SettingsPresenter(object):
         section_name = self.view.sections.item(new_section_pos).text()
         for settings, name in self.SETTINGS_TABS.items():
             if name == section_name:
-                new_view = getattr(self, settings).view
+                new_view = getattr(self, settings).get_view()
 
         if self.current != new_view:
             self.view.container.replaceWidget(self.current, new_view)

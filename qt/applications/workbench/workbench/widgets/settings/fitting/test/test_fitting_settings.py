@@ -53,9 +53,9 @@ class FittingSettingsTest(unittest.TestCase):
         self.assertEqual(1, owner.receivers(signal))
 
     @staticmethod
-    def test_filters_added_to_combo_and_spin_boxes(_, mock_mousewheel_filter):
-        presenter = FittingSettings(None)
-        view = presenter.view
+    def test_filters_added_to_combo_and_spin_boxes(self, mock_mousewheel_filter):
+        presenter = FittingSettings(None, view=self.mock_view, model=self.mock_model)
+        view = presenter.get_view()
         test_presenter_has_added_mousewheel_filter_to_all_como_and_spin_boxes(view, mock_mousewheel_filter)
 
     def test_setup_signals(self, _):

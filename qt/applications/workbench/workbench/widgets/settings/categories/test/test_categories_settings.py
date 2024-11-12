@@ -98,7 +98,7 @@ class CategoriesSettingsTest(unittest.TestCase):
         child_item = parent_item.child()
 
         child_item.checkState = Mock(return_value=Qt.Checked)
-        presenter = CategoriesSettings(None, view=self.mock_view)
+        presenter = CategoriesSettings(None, view=self.mock_view, model=self.mock_model)
         presenter.nested_box_clicked(child_item, 0)
         child_item.setCheckState.assert_called_once_with(0, Qt.Checked)
         parent_item.setCheckState.assert_called_once_with(0, Qt.Checked)
@@ -113,7 +113,7 @@ class CategoriesSettingsTest(unittest.TestCase):
         child_item1.checkState = Mock(return_value=Qt.Checked)
         child_item2.checkState = Mock(return_value=Qt.Unchecked)
 
-        presenter = CategoriesSettings(None, view=self.mock_view)
+        presenter = CategoriesSettings(None, view=self.mock_view, model=self.mock_model)
         presenter.nested_box_clicked(child_item1, 0)
         child_item1.setCheckState.assert_called_once_with(0, Qt.Checked)
         parent_item.setCheckState.assert_called_once_with(0, Qt.PartiallyChecked)

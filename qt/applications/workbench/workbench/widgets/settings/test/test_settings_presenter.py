@@ -15,8 +15,9 @@ from workbench.widgets.settings.presenter import SettingsPresenter
 
 class FakeMVP(object):
     def __init__(self):
-        self.view = MockQWidget()
+        self._view = MockQWidget()
         self.update_properties = MagicMock()
+        self.get_view = MagicMock(return_value=self._view)
 
 
 class FakeSectionsListWidget:
@@ -70,7 +71,7 @@ class SettingsPresenterTest(TestCase):
         )
 
     def test_default_view_shown(self):
-        expected_calls = [call(self.mock_view.general_settings.view), call(self.mock_view.categories_settings.view)]
+        expected_calls = [call(self.mock_view.general_settings.get_view()), call(self.mock_view.categories_settings.get_view())]
         self.mock_view.container.addWidget.assert_has_calls(expected_calls)
 
     def test_action_current_row_changed(self):
@@ -79,7 +80,7 @@ class SettingsPresenterTest(TestCase):
         self.presenter.action_section_changed(1)
 
         self.assertEqual(1, self.mock_view.container.replaceWidget.call_count)
-        self.assertEqual(self.mock_view.categories_settings.view, self.presenter.current)
+        self.assertEqual(self.mock_view.categories_settings.get_view(), self.presenter.current)
 
     def test_action_save_settings_to_file(self):
         self.presenter.action_save_settings_to_file()
