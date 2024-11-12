@@ -13,12 +13,12 @@
 #include <vector>
 
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/CreateMonteCarloWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Logger.h"
-#include "MantidAPI/Progress.h"
 
 namespace {
 Mantid::Kernel::Logger g_log("CreateMonteCarloWorkspace");
@@ -41,10 +41,12 @@ const std::string CreateMonteCarloWorkspace::name() const { return "CreateMonteC
 int CreateMonteCarloWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CreateMonteCarloWorkspace::category() const { return "TODO: FILL IN A CATEGORY"; }
+const std::string CreateMonteCarloWorkspace::category() const { return "Simulation"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string CreateMonteCarloWorkspace::summary() const { return "TODO: FILL IN A SUMMARY"; }
+const std::string CreateMonteCarloWorkspace::summary() const {
+  return "Creates a randomly simulated workspace by sampling from the probability distribution of input data.";
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -55,7 +57,8 @@ void CreateMonteCarloWorkspace::init() {
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
                   "Input Workspace containing data to be fitted");
-  declareProperty("Seed", 32, mustBePositive, "Integer that initializes a random-number generator");
+  declareProperty("Seed", 32, mustBePositive,
+                  "Integer that initializes a random-number generator, good for reproducibility");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of output workspace.");
 }
@@ -105,7 +108,6 @@ void CreateMonteCarloWorkspace::exec() {
   int numSteps = 7;
   API::Progress progress(this, 0.0, 1.0, numSteps);
 
-
   MatrixWorkspace_sptr instWs = getProperty("InputWorkspace");
   int seed_input = getProperty("Seed");
   progress.report();
@@ -120,7 +122,7 @@ void CreateMonteCarloWorkspace::exec() {
   progress.report();
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-  MatrixWorkspace_sptr outputWs = WorkspaceFactory::Instance().create(instWs);
+  MatrixWorkspace_sptr outputWs = WorkspaceFactory::Instance().create(instWs, 1);
   progress.report();
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
@@ -136,6 +138,9 @@ void CreateMonteCarloWorkspace::exec() {
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   outputWs->mutableY(0) = outputY;
+
+  g_log.warning("Only the first spectrum is being plotted.");
+
   progress.report();
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 

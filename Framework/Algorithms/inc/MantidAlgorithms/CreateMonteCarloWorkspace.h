@@ -16,7 +16,10 @@ namespace Mantid {
 namespace Algorithms {
 using namespace std;
 
-/** CreateMonteCarloWorkspace : TODO: DESCRIPTION
+/** CreateMonteCarloWorkspace : The algorithm generates a simulated workspace by sampling from the probability
+distribution of input data, useful for testing of fitting functions and modeling.
+By generating a simulated dataset that mirrors the probability
+distribution of existing data.
  */
 class MANTID_ALGORITHMS_DLL CreateMonteCarloWorkspace : public API::Algorithm {
 public:
