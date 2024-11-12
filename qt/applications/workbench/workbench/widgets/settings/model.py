@@ -42,7 +42,7 @@ class SettingsModel:
     def unsaved_changes(self) -> Dict[str, Any]:
         changes = {}
         for model in self.category_setting_models:
-            changes |= model.get_changes_dict()
+            changes |= model.get_changes()
 
         return changes
 

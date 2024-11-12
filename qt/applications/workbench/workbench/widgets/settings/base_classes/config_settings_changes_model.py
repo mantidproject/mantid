@@ -12,28 +12,28 @@ from mantid.kernel import ConfigService
 
 class ConfigSettingsChangesModel:
     def __init__(self):
-        self.changes: Dict[str, str] = {}
+        self._changes: Dict[str, str] = {}
 
     def properties_to_be_changed(self) -> List[str]:
-        return list(self.changes.keys())
+        return list(self._changes.keys())
 
     def has_unsaved_changes(self) -> bool:
-        return self.changes != {}
+        return self._changes != {}
 
-    def get_changes_dict(self) -> Dict[str, str]:
-        return self.changes
+    def get_changes(self) -> Dict[str, str]:
+        return self._changes
 
     def apply_changes(self) -> None:
-        for property_string, value in self.changes.items():
+        for property_string, value in self._changes.items():
             ConfigService.setString(property_string, value)
-        self.changes.clear()
+        self._changes.clear()
 
     def add_change(self, property_string: str, value: str) -> None:
         saved_value = self.get_saved_value(property_string)
         if saved_value != value:
-            self.changes[property_string] = value
-        elif property_string in self.changes.keys():
-            self.changes.pop(property_string)
+            self._changes[property_string] = value
+        elif property_string in self._changes.keys():
+            self._changes.pop(property_string)
 
     @staticmethod
     def get_saved_value(property_string: str) -> str:

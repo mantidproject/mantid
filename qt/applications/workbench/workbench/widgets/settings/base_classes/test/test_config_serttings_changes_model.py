@@ -21,28 +21,28 @@ class ConfigSettingsChangesModelTest(TestCase):
         self.model.add_change("property.1", "blue")
 
         mock_config_service.getString.assert_called_once_with("property.1")
-        self.assertEqual(self.model.changes, {"property.1": "blue"})
+        self.assertEqual(self.model.get_changes(), {"property.1": "blue"})
 
         self.model.add_change("property.2", "apple")
 
         mock_config_service.getString.assert_called_with("property.2")
-        self.assertEqual(self.model.changes, {"property.1": "blue", "property.2": "apple"})
+        self.assertEqual(self.model.get_changes(), {"property.1": "blue", "property.2": "apple"})
 
     def test_add_change_doesnt_add_change_identical_to_saved_value(self, mock_config_service: MockConfigService):
         mock_config_service.getString.return_value = "green"
         self.model.add_change("property.1", "green")
 
-        self.assertEqual(self.model.changes, {})
+        self.assertEqual(self.model.get_changes(), {})
 
     def test_add_change_removes_change_if_already_saved(self, mock_config_service: MockConfigService):
         mock_config_service.getString.return_value = "green"
         self.model.add_change("property.1", "blue")
 
-        self.assertEqual(self.model.changes, {"property.1": "blue"})
+        self.assertEqual(self.model.get_changes(), {"property.1": "blue"})
 
         self.model.add_change("property.1", "green")
 
-        self.assertEqual(self.model.changes, {})
+        self.assertEqual(self.model.get_changes(), {})
 
     def test_has_unsaved_changes(self, _):
         self.assertFalse(self.model.has_unsaved_changes())
@@ -51,12 +51,16 @@ class ConfigSettingsChangesModelTest(TestCase):
 
         self.assertTrue(self.model.has_unsaved_changes())
 
-    def test_get_changes_dict(self, _):
-        self.assertEqual(self.model.get_changes_dict(), {})
+    def test_get_changes(self, _):
+        self.assertEqual(self.model.get_changes(), {})
 
-        self.model.changes = {"a test": "change"}
+        self.model._changes = {"a test": "change"}
 
-        self.assertEqual(self.model.get_changes_dict(), {"a test": "change"})
+        self.assertEqual(self.model.get_changes(), {"a test": "change"})
+
+        self.model._changes = {"something": "else"}
+
+        self.assertEqual(self.model.get_changes(), {"something": "else"})
 
     def test_properties_to_be_changed(self, _):
         self.assertEqual(self.model.properties_to_be_changed(), [])
@@ -84,4 +88,4 @@ class ConfigSettingsChangesModelTest(TestCase):
         self.model.apply_changes()
 
         mock_config_service.setString.assert_has_calls([call("property.1", "blue"), call("property.2", "apple")])
-        self.assertEqual(self.model.changes, {})
+        self.assertEqual(self.model.get_changes(), {})

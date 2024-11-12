@@ -40,26 +40,26 @@ class GeneralSettingsModelTest(BaseSettingsModelTest):
             self.model.add_change(user_property_value, "example_value")
             expected_user_config_changes[user_property_value] = "example_value"
 
-        self.assertEqual(self.model.changes, expected_changes)
-        self.assertEqual(self.model.user_config_changes, expected_user_config_changes)
+        self.assertEqual(self.model._changes, expected_changes)
+        self.assertEqual(self.model._user_config_changes, expected_user_config_changes)
 
     @patch(USER_CONFIG_PATCH_PATH, new_callable=MockUserConfig)
     def test_add_change_doesnt_add_change_identical_to_user_config(self, mock_user_config: MockUserConfig):
         mock_user_config.get.return_value = "calibri"
         self.model.add_change(GeneralUserConfigProperties.FONT.value, "calibri")
 
-        self.assertEqual(self.model.user_config_changes, {})
+        self.assertEqual(self.model.get_changes(), {})
 
     @patch(USER_CONFIG_PATCH_PATH, new_callable=MockUserConfig)
     def test_add_change_removes_change_if_already_saved(self, mock_user_config: MockUserConfig):
         mock_user_config.get.return_value = "calibri"
         self.model.add_change(GeneralUserConfigProperties.FONT.value, "times new roman")
 
-        self.assertEqual(self.model.user_config_changes, {GeneralUserConfigProperties.FONT.value: "times new roman"})
+        self.assertEqual(self.model.get_changes(), {GeneralUserConfigProperties.FONT.value: "times new roman"})
 
         self.model.add_change(GeneralUserConfigProperties.FONT.value, "calibri")
 
-        self.assertEqual(self.model.user_config_changes, {})
+        self.assertEqual(self.model.get_changes(), {})
 
     @patch(USER_CONFIG_PATCH_PATH, new_callable=MockUserConfig)
     def test_add_change_calls_get_with_correct_type(self, mock_user_config: MockUserConfig):
@@ -77,7 +77,7 @@ class GeneralSettingsModelTest(BaseSettingsModelTest):
         self.model.add_change(GeneralUserConfigProperties.FONT.value, "times new roman")
 
         mock_user_config.get.assert_not_called()
-        self.assertEqual(self.model.user_config_changes, {GeneralUserConfigProperties.FONT.value: "times new roman"})
+        self.assertEqual(self.model.get_changes(), {GeneralUserConfigProperties.FONT.value: "times new roman"})
 
     @patch(USER_CONFIG_PATCH_PATH, new_callable=MockUserConfig)
     @patch(BASE_CLASS_CONFIG_SERVICE_PATCH_PATH, new_callable=MockConfigService)
@@ -102,16 +102,16 @@ class GeneralSettingsModelTest(BaseSettingsModelTest):
 
         self.assertFalse(self.model.has_unsaved_changes())
 
-    def test_get_changes_dict(self):
-        self.assertEqual(self.model.get_changes_dict(), {})
+    def test_get_changes(self):
+        self.assertEqual(self.model.get_changes(), {})
 
-        self.model.user_config_changes = {"user property": "user change"}
+        self.model._user_config_changes = {"user property": "user change"}
 
-        self.assertEqual(self.model.get_changes_dict(), {"user property": "user change"})
+        self.assertEqual(self.model.get_changes(), {"user property": "user change"})
 
-        self.model.changes = {"config property": "config change"}
+        self.model._changes = {"config property": "config change"}
 
-        self.assertEqual(self.model.get_changes_dict(), {"user property": "user change", "config property": "config change"})
+        self.assertEqual(self.model.get_changes(), {"user property": "user change", "config property": "config change"})
 
     @patch(USER_CONFIG_PATCH_PATH, new_callable=MockUserConfig)
     @patch(BASE_CLASS_CONFIG_SERVICE_PATCH_PATH, new_callable=MockConfigService)
@@ -136,7 +136,7 @@ class GeneralSettingsModelTest(BaseSettingsModelTest):
                 call(GeneralUserConfigProperties.PROMPT_SAVE_ON_CLOSE.value, True),
             ]
         )
-        self.assertEqual(self.model.user_config_changes, {})
+        self.assertEqual(self.model.get_changes(), {})
 
     @patch("workbench.widgets.settings.general.general_settings_model.ConfigService", new_callable=MockConfigService)
     def test_apply_changes_sets_facility_with_config_service(self, mock_config_service: MockConfigService):
@@ -146,7 +146,7 @@ class GeneralSettingsModelTest(BaseSettingsModelTest):
         self.model.apply_changes()
 
         mock_config_service.setFacility.assert_called_once_with("new_facility_123")
-        self.assertEqual(self.model.changes, {})
+        self.assertEqual(self.model.get_changes(), {})
 
     @patch(GET_SAVED_VALUE_PATCH_PATH)
     def test_get_crystallography_convention(self, get_saved_value_mock: MagicMock):
@@ -274,7 +274,7 @@ class GeneralSettingsModelTest(BaseSettingsModelTest):
         self.model.add_change(GeneralUserConfigProperties.USER_LAYOUT.value, {"my cool": "layout"})
         self.assertEqual(self.model.get_user_layout(get_potential_update=True), {"my cool": "layout"})
 
-        self.model.user_config_changes.clear()
+        self.model._user_config_changes.clear()
         mock_user_config.get.reset_mock()
         mock_user_config.get.return_value = {"saved": "value"}
         self.assertEqual(self.model.get_user_layout(get_potential_update=True), {"saved": "value"})

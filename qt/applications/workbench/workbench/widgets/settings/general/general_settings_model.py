@@ -39,24 +39,25 @@ class GeneralUserConfigProperties(Enum):
 class GeneralSettingsModel(ConfigSettingsChangesModel):
     def __init__(self):
         super().__init__()
-        self.user_config_changes: Dict[str, Any] = {}
+        self._user_config_changes: Dict[str, Any] = {}
 
     def properties_to_be_changed(self) -> List[str]:
-        return list(self.user_config_changes.keys()) + super().properties_to_be_changed()
+        return list(self._user_config_changes.keys()) + super().properties_to_be_changed()
 
     def has_unsaved_changes(self) -> bool:
-        return self.user_config_changes != {} or super().has_unsaved_changes()
+        return self._user_config_changes != {} or super().has_unsaved_changes()
 
-    def get_changes_dict(self) -> Dict[str, Any]:
-        return self.user_config_changes | super().get_changes_dict()
+    def get_changes(self) -> Dict[str, Any]:
+        return self._user_config_changes | super().get_changes()
 
     def apply_changes(self) -> None:
-        for property_string, value in self.user_config_changes.items():
+        for property_string, value in self._user_config_changes.items():
             CONF.set(property_string, value)
-        self.user_config_changes.clear()
+        self._user_config_changes.clear()
 
-        if GeneralProperties.FACILITY.value in self.changes:
-            facility_value = self.changes.pop(GeneralProperties.FACILITY.value)
+        base_changes = super().get_changes()
+        if GeneralProperties.FACILITY.value in base_changes:
+            facility_value = base_changes.pop(GeneralProperties.FACILITY.value)
             # Go through setFacility because it does some checking and updates the instrument.
             ConfigService.setFacility(facility_value)
         super().apply_changes()
@@ -68,9 +69,9 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
                 saved_value = CONF.get(property_string, type=type(value))
 
             if saved_value != value:
-                self.user_config_changes[property_string] = value
-            elif property_string in self.user_config_changes.keys():
-                self.user_config_changes.pop(property_string)
+                self._user_config_changes[property_string] = value
+            elif property_string in self._user_config_changes.keys():
+                self._user_config_changes.pop(property_string)
         else:
             super().add_change(property_string, value)
 
@@ -124,8 +125,8 @@ class GeneralSettingsModel(ConfigSettingsChangesModel):
         return self.get_saved_value(GeneralProperties.USE_NOTIFICATIONS.value)
 
     def get_user_layout(self, get_potential_update=False) -> dict:
-        if get_potential_update and GeneralUserConfigProperties.USER_LAYOUT.value in self.user_config_changes:
-            return self.user_config_changes[GeneralUserConfigProperties.USER_LAYOUT.value]
+        if get_potential_update and GeneralUserConfigProperties.USER_LAYOUT.value in self._user_config_changes:
+            return self._user_config_changes[GeneralUserConfigProperties.USER_LAYOUT.value]
         return CONF.get(GeneralUserConfigProperties.USER_LAYOUT.value, type=dict)
 
     @staticmethod

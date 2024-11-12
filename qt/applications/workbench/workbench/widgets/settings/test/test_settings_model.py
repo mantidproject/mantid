@@ -43,7 +43,7 @@ class MockConfigModel(ConfigSettingsChangesModel):
     def __init__(self):
         super().__init__()
         self.apply_changes = MagicMock()
-        self.get_changes_dict = MagicMock(return_value={})
+        self.get_changes = MagicMock(return_value={})
         self.properties_to_be_changed = MagicMock(return_value=[])
 
 
@@ -70,8 +70,8 @@ class SettingsModelTest(TestCase):
     def test_unsaved_changes(self):
         self.assertEqual(self.model.unsaved_changes(), {})
 
-        self.mock_settings_category_model_1.get_changes_dict.return_value = {"font": "comic sans", "font size": "96"}
-        self.mock_settings_category_model_2.get_changes_dict.return_value = {"x_min": "1", "x scale": "Linear"}
+        self.mock_settings_category_model_1.get_changes.return_value = {"font": "comic sans", "font size": "96"}
+        self.mock_settings_category_model_2.get_changes.return_value = {"x_min": "1", "x scale": "Linear"}
 
         self.assertEqual(self.model.unsaved_changes(), {"font": "comic sans", "font size": "96", "x_min": "1", "x scale": "Linear"})
 
