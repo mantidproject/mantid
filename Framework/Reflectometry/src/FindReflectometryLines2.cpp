@@ -134,7 +134,7 @@ void FindReflectometryLines2::exec() {
   setProperty(Prop::LINE_CENTRE, peakWSIndex);
   if (!isDefault(Prop::OUTPUT_WS)) {
     auto outputWS = makeOutput(peakWSIndex);
-    setProperty(Prop::OUTPUT_WS, outputWS);
+    setProperty(Prop::OUTPUT_WS, std::move(outputWS));
   }
 }
 
@@ -189,7 +189,7 @@ double FindReflectometryLines2::findPeak(const API::MatrixWorkspace_sptr &ws) {
   func = API::FunctionFactory::Instance().createFunction("LinearBackground");
   func->setParameter("A0", medianY);
   func->setParameter("A1", 0.);
-  sum->addFunction(func);
+  sum->addFunction(std::move(func));
   // call Fit child algorithm
   auto fit = createChildAlgorithm("Fit");
   fit->initialize();
