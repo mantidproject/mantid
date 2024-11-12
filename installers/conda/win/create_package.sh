@@ -170,7 +170,7 @@ rm -f $THIS_SCRIPT_DIR/uninstall_files.nsh
 rm -f $THIS_SCRIPT_DIR/uninstall_dirs.nsh
 
 echo "Creating nsis conda env"
-"$CONDA_EXE" create --prefix $NSIS_CONDA_ENV_PATH nsis -c conda-forge --channel mantid -y
+"$CONDA_EXE" create --prefix $NSIS_CONDA_ENV_PATH nsis -c conda-forge -y
 echo "Conda nsis env created"
 
 NSIS_SCRIPT=$THIS_SCRIPT_DIR/project.nsi
