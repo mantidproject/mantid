@@ -11,7 +11,7 @@ from unittest.mock import MagicMock, patch
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.widgets.settings.plots.presenter import PlotSettings
 from workbench.widgets.settings.test_utilities.settings_test_utilities import (
-    test_presenter_has_added_mousewheel_filter_to_all_como_and_spin_boxes,
+    assert_presenter_has_added_mousewheel_filter_to_all_como_and_spin_boxes,
 )
 
 from qtpy.QtCore import Qt
@@ -107,7 +107,7 @@ class PlotsSettingsTest(unittest.TestCase):
     def test_filters_added_to_combo_and_spin_boxes(self, mock_mousewheel_filter):
         presenter = PlotSettings(None, model=self.mock_model)
         view = presenter.get_view()
-        test_presenter_has_added_mousewheel_filter_to_all_como_and_spin_boxes(view, mock_mousewheel_filter)
+        assert_presenter_has_added_mousewheel_filter_to_all_como_and_spin_boxes(view, mock_mousewheel_filter)
 
     def test_load_current_setting_values(self):
         # load current setting is called automatically in the constructor

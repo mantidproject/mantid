@@ -31,7 +31,7 @@ class FittingSettingsModelTest(BaseSettingsModelTest):
 
     def test_get_background_function_names(self):
         mock_function_factory = self._add_mock_function_factory()
-        self._test_getter_with_different_values(
+        self._assert_getter_with_different_values(
             mock_function_factory.getBackgroundFunctionNames,
             self.model.get_background_function_names,
             [["linear", "gaussian"], ["exp", "linear"]],
@@ -40,7 +40,7 @@ class FittingSettingsModelTest(BaseSettingsModelTest):
 
     def test_get_peak_function_names(self):
         mock_function_factory = self._add_mock_function_factory()
-        self._test_getter_with_different_values(
+        self._assert_getter_with_different_values(
             mock_function_factory.getPeakFunctionNames,
             self.model.get_peak_function_names,
             [["linear", "gaussian"], ["exp", "linear"]],
@@ -49,44 +49,46 @@ class FittingSettingsModelTest(BaseSettingsModelTest):
 
     @patch(GET_SAVED_VALUE_PATCH_PATH)
     def test_get_auto_background(self, get_saved_value_mock: MagicMock):
-        self._test_getter_with_different_values(
+        self._assert_getter_with_different_values(
             get_saved_value_mock, self.model.get_auto_background, ["linear", "log"], call(FittingProperties.AUTO_BACKGROUND.value)
         )
 
     @patch(GET_SAVED_VALUE_PATCH_PATH)
     def test_get_default_peak(self, get_saved_value_mock: MagicMock):
-        self._test_getter_with_different_values(
+        self._assert_getter_with_different_values(
             get_saved_value_mock, self.model.get_default_peak, ["guassian", "expDecay"], call(FittingProperties.DEFAULT_PEAK.value)
         )
 
     @patch(GET_SAVED_VALUE_PATCH_PATH)
     def test_get_fwhm(self, get_saved_value_mock: MagicMock):
-        self._test_getter_with_different_values(
+        self._assert_getter_with_different_values(
             get_saved_value_mock, self.model.get_fwhm, ["12", "0.7"], call(FittingProperties.FWHM.value)
         )
 
     @patch(GET_SAVED_VALUE_PATCH_PATH)
     def test_get_tolerance(self, get_saved_value_mock: MagicMock):
-        self._test_getter_with_different_values(
+        self._assert_getter_with_different_values(
             get_saved_value_mock, self.model.get_tolerance, ["1", "5.7"], call(FittingProperties.TOLERANCE.value)
         )
 
     @patch(ADD_CHANGE_PATCH_PATH)
     def test_set_auto_background(self, add_change_mock: MagicMock):
-        self._test_setter_with_different_values(
+        self._assert_setter_with_different_values(
             add_change_mock, self.model.set_auto_background, ["Ploynomial", "Linear"], FittingProperties.AUTO_BACKGROUND.value
         )
 
     @patch(ADD_CHANGE_PATCH_PATH)
     def test_set_default_peak(self, add_change_mock: MagicMock):
-        self._test_setter_with_different_values(
+        self._assert_setter_with_different_values(
             add_change_mock, self.model.set_default_peak, ["Gaussian", "ExpDecay"], FittingProperties.DEFAULT_PEAK.value
         )
 
     @patch(ADD_CHANGE_PATCH_PATH)
     def test_set_fwhm(self, add_change_mock: MagicMock):
-        self._test_setter_with_different_values(add_change_mock, self.model.set_fwhm, ["5", "11"], FittingProperties.FWHM.value)
+        self._assert_setter_with_different_values(add_change_mock, self.model.set_fwhm, ["5", "11"], FittingProperties.FWHM.value)
 
     @patch(ADD_CHANGE_PATCH_PATH)
     def test_set_tolerance(self, add_change_mock: MagicMock):
-        self._test_setter_with_different_values(add_change_mock, self.model.set_tolerance, ["0.5", "1"], FittingProperties.TOLERANCE.value)
+        self._assert_setter_with_different_values(
+            add_change_mock, self.model.set_tolerance, ["0.5", "1"], FittingProperties.TOLERANCE.value
+        )
