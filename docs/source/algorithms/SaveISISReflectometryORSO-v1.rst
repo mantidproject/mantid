@@ -139,6 +139,17 @@ Usage
      # Delete file
      os.remove(file)
 
+
+Class Diagram
+-------------
+
+The following diagram shows the main classes supporting the algorithm, and their relationships.
+
+.. image:: /images/SaveISISReflectometryORSO_class_diagram.png
+    :alt: Class diagram showing the main classes and their relationships
+    :width: 80%
+
+
 References
 ----------
 

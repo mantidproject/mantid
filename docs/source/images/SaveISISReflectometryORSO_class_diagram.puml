@@ -1,0 +1,61 @@
+@startuml
+
+class orsopy.Column {}
+
+class orsopy.ErrorColumn {}
+
+class orsopy.OrsoDataset{}
+
+class orsopy.Orso{}
+
+class orsopy.Header{}
+
+class MantidORSOSaver {
+    - _datasets: List[MantidORSODataset]
+    + add_dataset(dataset: MantidORSODataset)
+    + save_orso_ascii()
+    + save_orso_nexus()
+}
+
+class MantidORSODataset {
+    - _data_columns: MantidORSODataColumns
+    - _header: orsopy.Orso(_data_columns.header_info,...)
+    + dataset() : OrsoDataset(_header, _data_columns.data)
+}
+
+class MantidORSODataColumns {
+    + data: np.ndarray
+    + header_info: List[Union[Column, ErrorColumn]]
+}
+
+class SaveISISReflectometryORSO {
+    + PyExec() has orso_saver: MantidORSOSaver
+    - _create_and_sort_refl_datasets() : List[ReflectometryDataset]
+    - _create_data_columns(ReflectometryDataset) : MantidORSODataColumns
+    - _create_dataset_with_mandatory_header(MantidORSODataColumns, ReflectometryDataset) : MantidORSODataset
+    - _create_orso_dataset(ReflectometryDataset) : MantidORSODataset
+
+}
+
+class ReflectometryDataset {
+    + ws: MatrixWorkspace
+    + reduction_history: WorkspaceHistory
+    + stitch_history: WorkspaceHistory
+}
+
+orsopy.Orso <-- orsopy.Header
+
+MantidORSOSaver "1" *-- "0..*" MantidORSODataset
+MantidORSODataset *-- MantidORSODataColumns
+MantidORSODataset *-- orsopy.Orso
+MantidORSODataset ..> orsopy.OrsoDataset : returns
+
+MantidORSODataColumns "1" *-- "0..*" orsopy.Column
+MantidORSODataColumns "1" *-- "0..*" orsopy.ErrorColumn
+
+SaveISISReflectometryORSO --> MantidORSOSaver
+SaveISISReflectometryORSO ..> ReflectometryDataset : returns
+SaveISISReflectometryORSO ..> MantidORSODataset : returns
+SaveISISReflectometryORSO ..> MantidORSODataColumns : returns
+
+@enduml
