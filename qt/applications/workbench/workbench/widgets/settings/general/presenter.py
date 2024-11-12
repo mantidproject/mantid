@@ -4,9 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench
-#
-#
 from mantidqt.widgets import instrumentselector
 from workbench.config import SAVE_STATE_VERSION
 from workbench.widgets.settings.general.view import GeneralSettingsView

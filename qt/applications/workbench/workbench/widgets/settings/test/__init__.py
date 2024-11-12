@@ -5,4 +5,3 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # coding=utf-8
-#  This file is part of the mantid workbench.

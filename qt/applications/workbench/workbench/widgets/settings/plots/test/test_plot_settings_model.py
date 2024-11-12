@@ -4,7 +4,6 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench
 from unittest.mock import MagicMock, call, patch
 
 from workbench.widgets.settings.plots.model import PlotsSettingsModel, PlotProperties
