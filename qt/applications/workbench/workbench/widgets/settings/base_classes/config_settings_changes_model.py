@@ -36,5 +36,5 @@ class ConfigSettingsChangesModel:
             self.changes.pop(property_string)
 
     @staticmethod
-    def get_saved_value(property_string) -> str:
+    def get_saved_value(property_string: str) -> str:
         return ConfigService.getString(property_string)
