@@ -8,7 +8,8 @@
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser.h"
+#include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "StretchData.h"
 #include "ui_Stretch.h"

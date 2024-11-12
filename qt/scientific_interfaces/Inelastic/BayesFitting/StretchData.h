@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include <string>
+
 namespace MantidQt::CustomInterfaces {
 
 struct StretchRunData {
@@ -22,15 +24,15 @@ struct StretchRunData {
 
   StretchRunData(const std::string &sample, const std::string &resolution, double min, double max, int b, bool elastic,
                  const std::string &bg, int sig, int binning, bool sequential)
-      : sampleName(sample), resolutionName(resolution), eMin(min), eMax(max), beta(b), elasticPeak(elastic),
-        backgroundName(bg), sigma(sig), sampleBinning(binning), sequentialFit(sequential) {}
+      : sampleName(sample), resolutionName(resolution), backgroundName(bg), eMin(min), eMax(max), beta(b),
+        elasticPeak(elastic), sigma(sig), sampleBinning(binning), sequentialFit(sequential) {}
 };
 
 struct CurrentPreviewData {
   const std::string sampleName;
   const bool hasSample;
 
-  CurrentPreviewData(const std::string sampleName, bool hasSample) : sampleName(sampleName), hasSample(hasSample) {}
+  CurrentPreviewData(const std::string &sampleName, bool hasSample) : sampleName(sampleName), hasSample(hasSample) {}
 };
 
 } // namespace MantidQt::CustomInterfaces

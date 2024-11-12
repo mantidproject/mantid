@@ -45,6 +45,8 @@ public: // public constructor, destructor and functions
   void initLayout() override;
 
 private:
+  std::unique_ptr<MantidQt::API::AlgorithmRunner> createAlgorithmRunner();
+
   std::string documentationPage() const override;
 
   void applySettings(std::map<std::string, QVariant> const &settings) override;

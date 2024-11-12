@@ -21,41 +21,6 @@ static const unsigned int INT_DECIMALS = 0;
 
 Mantid::Kernel::Logger g_log("Stretch");
 
-void setPlotPropertyRange(QtDoublePropertyManager &dblManager, MantidQt::MantidWidgets::RangeSelector *rs,
-                          QtProperty *min, QtProperty *max, const QPair<double, double> &bounds) {
-  dblManager.setRange(min, bounds.first, bounds.second);
-  dblManager.setRange(max, bounds.first, bounds.second);
-  rs->setBounds(bounds.first, bounds.second);
-}
-
-void setRangeSelector(QtDoublePropertyManager &dblManager, MantidQt::MantidWidgets::RangeSelector *rs,
-                      QtProperty *lower, QtProperty *upper, const QPair<double, double> &range,
-                      const std::optional<QPair<double, double>> &bounds) {
-  dblManager.setValue(lower, range.first);
-  dblManager.setValue(upper, range.second);
-  rs->setRange(range.first, range.second);
-  if (bounds) {
-    const auto values = bounds.value();
-    rs->setBounds(values.first, values.second);
-  }
-}
-
-void setRangeSelectorMin(QtDoublePropertyManager &dblManager, QtProperty *minProperty, QtProperty *maxProperty,
-                         MantidQt::MantidWidgets::RangeSelector *rangeSelector, double newValue) {
-  if (newValue <= maxProperty->valueText().toDouble())
-    rangeSelector->setMinimum(newValue);
-  else
-    dblManager.setValue(minProperty, rangeSelector->getMinimum());
-}
-
-void setRangeSelectorMax(QtDoublePropertyManager &dblManager, QtProperty *minProperty, QtProperty *maxProperty,
-                         MantidQt::MantidWidgets::RangeSelector *rangeSelector, double newValue) {
-  if (newValue >= minProperty->valueText().toDouble())
-    rangeSelector->setMaximum(newValue);
-  else
-    dblManager.setValue(maxProperty, rangeSelector->getMaximum());
-}
-
 struct BackgroundType {
   inline static const std::string SLOPING = "Sloping";
   inline static const std::string FLAT = "Flat";
@@ -74,7 +39,7 @@ struct PlotType {
 
 namespace MantidQt::CustomInterfaces {
 StretchView::StretchView(QWidget *parent)
-    : m_dblManager(new QtDoublePropertyManager()), m_propTree(new QtTreePropertyBrowser()), m_properties() {
+    : m_dblManager(new QtDoublePropertyManager()), m_properties(), m_propTree(new QtTreePropertyBrowser()) {
   m_uiForm.setupUi(parent);
 
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("StretchERange");
@@ -133,9 +98,9 @@ void StretchView::propertiesUpdated(QtProperty *prop, double val) {
   disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &StretchView::propertiesUpdated);
 
   if (prop == m_properties["EMin"]) {
-    setRangeSelectorMin(*m_dblManager, m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
+    setRangeSelectorMin(m_dblManager, m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   } else if (prop == m_properties["EMax"]) {
-    setRangeSelectorMax(*m_dblManager, m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
+    setRangeSelectorMax(m_dblManager, m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   }
 
   connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &StretchView::propertiesUpdated);
@@ -235,8 +200,8 @@ void StretchView::handleSampleInputReady(const QString &filename) {
 
   auto const range = getXRangeFromWorkspace(filename.toStdString());
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
-  setRangeSelector(*m_dblManager, eRangeSelector, m_properties["EMin"], m_properties["EMax"], range, std::nullopt);
-  setPlotPropertyRange(*m_dblManager, eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
+  setRangeSelector(m_dblManager, eRangeSelector, m_properties["EMin"], m_properties["EMax"], range, std::nullopt);
+  setPlotPropertyRange(m_dblManager, eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
 
   eRangeSelector->setMinimum(range.first);
   eRangeSelector->setMaximum(range.second);
