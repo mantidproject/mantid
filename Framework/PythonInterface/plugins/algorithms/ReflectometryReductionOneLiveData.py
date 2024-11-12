@@ -154,7 +154,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
 
     def _setup_instrument(self):
         """Sets the instrument name and loads the instrument on the workspace"""
-        LoadInstrument(Workspace=self._temp_ws_name, RewriteSpectraMap=True, InstrumentName=self._instrument)
+        LoadInstrument(Workspace=self._temp_ws_name, RewriteSpectraMap=False, InstrumentName=self._instrument)
 
     def _setup_sample_logs(self, liveValues):
         """Set up the sample logs based on live values from the instrument"""
