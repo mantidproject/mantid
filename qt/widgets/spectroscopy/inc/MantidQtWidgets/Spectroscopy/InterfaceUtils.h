@@ -68,6 +68,9 @@ MANTID_SPECTROSCOPY_DLL void setRangeSelectorMax(QtDoublePropertyManager *dblPro
                                                  QtProperty *maxProperty, MantidWidgets::RangeSelector *rangeSelector,
                                                  double newValue);
 
+MANTID_SPECTROSCOPY_DLL bool checkADSForPlotSaveWorkspace(const std::string &workspaceName, const bool plotting,
+                                                          const bool warn = true);
+
 } // namespace InterfaceUtils
 } // namespace CustomInterfaces
 } // namespace MantidQt
