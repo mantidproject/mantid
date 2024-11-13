@@ -80,18 +80,18 @@ function(PYSYSTEMTEST_ADD_TEST)
   foreach(part ${ARGN})
     set(_test_name ${part})
     if(NOT PR_JOB)
-      set(_system_test_options "-l information --quiet --output-on-failure")
+      set(_system_test_options "")
     else()
-      set(_system_test_options "-l information --quiet --output-on-failure --exclude-in-pull-requests")
+      set(_system_test_options "--exclude-in-pull-requests")
     endif()
 
     if(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
       add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update.bat -R ${_test_name}
-                                          ${_system_test_options}
+                                          --output-on-failure -l information ${_system_test_options}
       )
     else()
-      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update -R ${_test_name}
-                                          ${_system_test_options}
+      add_test(NAME ${_test_name} COMMAND ${CMAKE_BINARY_DIR}/systemtest_no_update -R ${_test_name} --output-on-failure
+                                          -l information ${_system_test_options}
       )
     endif()
 
