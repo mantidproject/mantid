@@ -74,7 +74,7 @@ mkdir $COPY_DIR
 
 echo "Creating conda env from mantidworkbench and jq"
 "$CONDA_EXE" create --prefix $CONDA_ENV_PATH \
-  --copy --channel $CONDA_CHANNEL --channel conda-forge -y \
+  --copy --channel $CONDA_CHANNEL --channel conda-forge --channel mantid -y \
   mantidworkbench \
   m2w64-jq
 echo "Conda env created"

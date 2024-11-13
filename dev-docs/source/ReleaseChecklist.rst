@@ -482,9 +482,6 @@ have been fixed. Then:
 * Check the release notes and verify that the "Under Construction" paragraph on the main
   index page has been removed. Remove the paragraph if it still exists.
 * Ensure that all changes, including release notes, have been merged into the ``release-next`` branch.
-* On the ``release-next`` branch, check whether the `git SHA
-  <https://github.com/mantidproject/mantid/blob/release-next/scripts/ExternalInterfaces/CMakeLists.txt>`__
-  for MSlice is up to date. If not, create a PR to update it and ask a gatekeeper to merge it.
 * Make sure the ``release-next`` branch is fully merged into ``main``. If required, manually run the `GitHub workflow
   <https://github.com/mantidproject/mantid/actions/workflows/automerge.yml/>`__ using the ``release-next`` branch to
   merge the changes.
@@ -525,7 +522,9 @@ Create Final Release Candidates
 ###############################
 
 Check with the Quality Assurance Manager that the Smoke testing has been completed, and any issues
-have been fixed. The release candidates must now be recreated with their final version numbers. To do this, build the
+have been fixed. Additionally, ensure that the version of the ``mslice`` package in ``conda_build_config.yaml`` is correct.
+If there have been any updates to MSlice since the last release, it must be released first. The release candidates must
+now be recreated with their final version numbers. To do this, build the
 `release-next_nightly_deployment Jenkins pipeline
 <https://builds.mantidproject.org/view/Nightly%20Pipelines/job/release-next_nightly_deployment/>`__
 with the following parameters (most are already defaulted to the correct values):

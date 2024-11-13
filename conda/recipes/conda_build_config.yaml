@@ -68,6 +68,9 @@ numpy:
 matplotlib:
   - 3.8.*
 
+mslice:
+  - '2.10'
+
 ninja:
   - '>=1.10.2'
 
