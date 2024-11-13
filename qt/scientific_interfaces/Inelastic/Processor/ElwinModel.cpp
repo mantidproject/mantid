@@ -101,8 +101,10 @@ void ElwinModel::groupAlgorithm(std::string const &inputWorkspaces, std::string 
 }
 
 std::string ElwinModel::setupExtractSpectra(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra,
-                                            std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algQueue) const {
+                                            std::string const &outputName,
+                                            std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> *algQueue) const {
 
+  std::cout << "HEHEHEHE" << std::endl;
   // Configure ExtractSingleSpectrum algorithm
   auto elwinSingAlg = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
   elwinSingAlg->initialize();
@@ -111,20 +113,26 @@ std::string ElwinModel::setupExtractSpectra(MatrixWorkspace_sptr workspace, Func
   extractSpectra->setProperty("OutputWorkspace", workspace->getName() + "_extracted_spectra");
   extractSpectra->setProperty("WorkspaceIndex", std::to_string(spectra[0].value));
 
+  std::cout << "HEHEHEHE 2 2" << std::endl;
   MantidQt::API::IConfiguredAlgorithm_sptr elwinAlg =
       std::make_shared<API::ConfiguredAlgorithm>(elwinSingAlg, std::move(extractSpectra));
-  algQueue.emplace_back(elwinAlg);
+  algQueue->emplace_back(elwinAlg);
+  std::cout << "HEHEHEHE 33 " << std::endl;
   for (size_t j = 1; j < spectra.size().value; j++) {
 
+    std::cout << "HEHEHEHE 33 0" << std::to_string(spectra[j].value) << std::endl;
     // Configure ExtractSingleSpectrum algorithm
     extractSpectra = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
     extractSpectra->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
+    std::cout << "HEHEHEHE 33 1" << std::endl;
     extractSpectra->setProperty("OutputWorkspace", "specWSnext");
+    std::cout << "HEHEHEHE 33 2" << std::endl;
     extractSpectra->setProperty("WorkspaceIndex", std::to_string(spectra[j].value));
+    std::cout << "HEHEHEHE 33 a" << std::endl;
     elwinAlg = std::make_shared<API::ConfiguredAlgorithm>(elwinSingAlg, std::move(extractSpectra));
-    algQueue.emplace_back(elwinAlg);
-
-    // Configure AppendSpectra algorithm
+    algQueue->emplace_back(elwinAlg);
+    std::cout << "HEHEHEHE 33 b" << std::endl;
+    // Configure ExtractSingleSpectrum algorithm
     auto elwinAppAlg = AlgorithmManager::Instance().create("AppendSpectra");
     elwinAppAlg->initialize();
     auto appendSpectra = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
@@ -133,8 +141,10 @@ std::string ElwinModel::setupExtractSpectra(MatrixWorkspace_sptr workspace, Func
     appendSpectra->setProperty("AppendYAxisLabels", true);
     appendSpectra->setProperty("OutputWorkspace", workspace->getName() + "_extracted_spectra");
     elwinAlg = std::make_shared<API::ConfiguredAlgorithm>(elwinAppAlg, std::move(appendSpectra));
-    algQueue.emplace_back(elwinAlg);
+    algQueue->emplace_back(elwinAlg);
   }
+  std::cout << "HEHEHEHE 4 " << std::endl;
+  // AnalysisDataService::Instance().remove("specWSnext");
   return workspace->getName() + "_extracted_spectra";
 }
 
