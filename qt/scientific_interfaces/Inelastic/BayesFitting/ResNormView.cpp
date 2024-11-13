@@ -115,7 +115,7 @@ void ResNormView::setMaximumSpectrum(int maximum) const { m_uiForm.spPreviewSpec
 
 void ResNormView::updateSelectorRange(std::string const &filename) const {
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormViewERange");
-  QPair<double, double> res;
+  std::pair<double, double> res;
 
   auto const range = getXRangeFromWorkspace(filename);
 

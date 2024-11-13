@@ -302,7 +302,7 @@ void IqtView::plotInput(MatrixWorkspace_sptr inputWS, int spectrum) {
   }
 }
 
-void IqtView::setRangeSelectorDefault(const MatrixWorkspace_sptr workspace, const QPair<double, double> &range) {
+void IqtView::setRangeSelectorDefault(const MatrixWorkspace_sptr workspace, const std::pair<double, double> &range) {
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
   try {
     double rounded_min(range.first);

@@ -196,7 +196,7 @@ void InelasticTab::addSaveWorkspaceToQueue(const std::string &wsName, const std:
  * @param bounds :: The upper and lower bounds to be set
  */
 void InelasticTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min, QtProperty *max,
-                                        const QPair<double, double> &bounds) {
+                                        const std::pair<double, double> &bounds) {
   m_dblManager->setRange(min, bounds.first, bounds.second);
   m_dblManager->setRange(max, bounds.first, bounds.second);
   rs->setBounds(bounds.first, bounds.second);
@@ -212,8 +212,8 @@ void InelasticTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min, QtPr
  * @param range :: The range to set the range selector to.
  */
 void InelasticTab::setRangeSelector(RangeSelector *rs, QtProperty *lower, QtProperty *upper,
-                                    const QPair<double, double> &range,
-                                    const std::optional<QPair<double, double>> &bounds) {
+                                    const std::pair<double, double> &range,
+                                    const std::optional<std::pair<double, double>> &bounds) {
   m_dblManager->setValue(lower, range.first);
   m_dblManager->setValue(upper, range.second);
   rs->setRange(range.first, range.second);

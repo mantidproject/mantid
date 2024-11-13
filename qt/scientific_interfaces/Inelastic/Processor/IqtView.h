@@ -39,7 +39,8 @@ public:
   void plotInput(MatrixWorkspace_sptr inputWS, int spectrum) override;
   void setPreviewSpectrumMaximum(int value) override;
   void updateDisplayedBinParameters() override;
-  void setRangeSelectorDefault(const MatrixWorkspace_sptr inputWorkspace, const QPair<double, double> &range) override;
+  void setRangeSelectorDefault(const MatrixWorkspace_sptr inputWorkspace,
+                               const std::pair<double, double> &range) override;
   void setSampleFBSuffixes(const QStringList &suffix) override;
   void setSampleWSSuffixes(const QStringList &suffix) override;
   void setResolutionFBSuffixes(const QStringList &suffix) override;

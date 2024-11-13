@@ -26,14 +26,14 @@ extractAxisLabels(const Mantid::API::MatrixWorkspace_const_sptr &workspace, cons
 EXPORT_OPT_MANTIDQT_COMMON std::string getEMode(const Mantid::API::MatrixWorkspace_sptr &ws);
 EXPORT_OPT_MANTIDQT_COMMON std::optional<double> getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws);
 
-EXPORT_OPT_MANTIDQT_COMMON bool getResolutionRangeFromWs(const std::string &workspace, QPair<double, double> &res);
+EXPORT_OPT_MANTIDQT_COMMON bool getResolutionRangeFromWs(const std::string &workspace, std::pair<double, double> &res);
 EXPORT_OPT_MANTIDQT_COMMON bool getResolutionRangeFromWs(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
-                                                         QPair<double, double> &res);
+                                                         std::pair<double, double> &res);
 
-EXPORT_OPT_MANTIDQT_COMMON QPair<double, double>
+EXPORT_OPT_MANTIDQT_COMMON std::pair<double, double>
 getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace, double precision = 0.00001);
-EXPORT_OPT_MANTIDQT_COMMON QPair<double, double> getXRangeFromWorkspace(std::string const &workspaceName,
-                                                                        double precision = 0.000001);
+EXPORT_OPT_MANTIDQT_COMMON std::pair<double, double> getXRangeFromWorkspace(std::string const &workspaceName,
+                                                                            double precision = 0.000001);
 
 EXPORT_OPT_MANTIDQT_COMMON std::optional<std::size_t> maximumIndex(const Mantid::API::MatrixWorkspace_sptr &workspace);
 EXPORT_OPT_MANTIDQT_COMMON std::string getIndexString(const std::string &workspaceName);

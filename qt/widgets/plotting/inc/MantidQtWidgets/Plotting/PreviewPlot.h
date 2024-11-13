@@ -76,7 +76,7 @@ public:
 
   void setOverrideAxisLabel(AxisID const &axisID, char const *const label);
   void tickLabelFormat(const std::string &axis, const std::string &style, bool useOffset);
-  void setAxisRange(const QPair<double, double> &range, AxisID axisID = AxisID::XBottom);
+  void setAxisRange(const std::pair<double, double> &range, AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
 
   void allowRedraws(bool state);
