@@ -39,12 +39,6 @@ xsi:schemaLocation="http://www.w3schools.com IndirectInterfacePropertiesSchema.x
 		<WORKSPACE-SUFFIXES sample="_red,_sqw,_elf" container="_red,_sqw,_elf"/>
 	</INTERFACE>
 
-	<INTERFACE id="CalculatePaalmanPings">
-		<EXTENSIONS all=".nxs"/>
-		<FILE-SUFFIXES sample="_red.nxs" container="_red.nxs"/>
-		<WORKSPACE-SUFFIXES sample="_red" container="_red"/>
-	</INTERFACE>
-
 	<INTERFACE id="CalculateMonteCarlo">
 		<EXTENSIONS all=".nxs"/>
 		<FILE-SUFFIXES sample="_red.nxs" container="_red.nxs"/>
