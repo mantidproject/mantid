@@ -219,7 +219,6 @@ void ElwinPresenter::handleRun() {
   // Set the result workspace for Python script export
   m_pythonExportWsName = m_outputNamePresenter->generateOutputLabel() + "_elwin_eq2";
   AnalysisDataService::Instance().remove("specWSnext");
-
 }
 
 /**
