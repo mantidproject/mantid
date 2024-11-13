@@ -253,8 +253,10 @@ bool ALCDataLoadingModel::checkCustomGrouping(const std::string &detGroupingType
   bool groupingOK = true;
 
   auto detectors = Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(forwardGrouping, groupingOK));
+  if (!groupingOK) {
+    return false;
+  }
   const auto backward = Mantid::Kernel::Strings::parseRange(isCustomGroupingValid(backwardGrouping, groupingOK));
-
   if (!groupingOK) {
     return false;
   }
