@@ -25,9 +25,9 @@ public:
 
   virtual API::IConfiguredAlgorithm_sptr setupLoadAlgorithm(std::string const &filepath,
                                                             std::string const &outputName) const = 0;
-  virtual API::IConfiguredAlgorithm_sptr setupExtractSpectra(MatrixWorkspace_sptr workspace,
-                                                             FunctionModelSpectra const &spectra,
-                                                             std::string const &outputName) const = 0;
+  virtual std::string setupExtractSpectra(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra,
+                                          std::string const &outputName,
+                                          std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> *algQueue) const = 0;
   virtual API::IConfiguredAlgorithm_sptr setupGroupAlgorithm(std::string const &inputWorkspacesString,
                                                              std::string const &inputGroupWsName) const = 0;
   virtual API::IConfiguredAlgorithm_sptr setupElasticWindowMultiple(std::string const &inputGroupWsName,
@@ -53,9 +53,9 @@ public:
   ~ElwinModel() override = default;
   API::IConfiguredAlgorithm_sptr setupLoadAlgorithm(std::string const &filepath,
                                                     std::string const &outputName) const override;
-  API::IConfiguredAlgorithm_sptr setupExtractSpectra(MatrixWorkspace_sptr workspace,
-                                                     FunctionModelSpectra const &spectra,
-                                                     std::string const &outputName) const override;
+  std::string setupExtractSpectra(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra,
+                                  std::string const &outputName,
+                                  std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> *algQueue) const override;
   API::IConfiguredAlgorithm_sptr setupGroupAlgorithm(std::string const &inputWorkspacesString,
                                                      std::string const &inputGroupWsName) const override;
   API::IConfiguredAlgorithm_sptr setupElasticWindowMultiple(std::string const &inputGroupWsName,
