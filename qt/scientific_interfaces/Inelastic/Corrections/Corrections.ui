@@ -31,11 +31,6 @@
         <string>Container Subtraction</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabCalculatePaalmanPings">
-       <attribute name="title">
-        <string>Calculate Paalman Pings</string>
-       </attribute>
-      </widget>
       <widget class="QWidget" name="tabAbsorptionCorrections">
        <attribute name="title">
         <string>Calculate Monte Carlo Absorption</string>

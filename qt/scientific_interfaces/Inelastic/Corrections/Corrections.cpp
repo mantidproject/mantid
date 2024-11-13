@@ -7,7 +7,6 @@
 #include "Corrections.h"
 #include "AbsorptionCorrections.h"
 #include "ApplyAbsorptionCorrections.h"
-#include "CalculatePaalmanPings.h"
 #include "ContainerSubtraction.h"
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 
@@ -24,9 +23,8 @@ Corrections::Corrections(QWidget *parent)
   // We make the assumption that each map key corresponds to the order in which
   // the tabs appear.
   m_tabs.emplace(CONTAINER_SUBTRACTION, new ContainerSubtraction(m_uiForm.twTabs->widget(CONTAINER_SUBTRACTION)));
-  m_tabs.emplace(CALC_CORR, new CalculatePaalmanPings(m_uiForm.twTabs->widget(CALC_CORR)));
   m_tabs.emplace(ABSORPTION_CORRECTIONS, new AbsorptionCorrections(m_uiForm.twTabs->widget(ABSORPTION_CORRECTIONS)));
-  m_tabs.emplace(APPLY_CORR, new ApplyAbsorptionCorrections(m_uiForm.twTabs->widget(APPLY_CORR)));
+  m_tabs.emplace(APPLY_CORRECTIONS, new ApplyAbsorptionCorrections(m_uiForm.twTabs->widget(APPLY_CORRECTIONS)));
 }
 
 /**
