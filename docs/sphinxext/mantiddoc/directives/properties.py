@@ -75,11 +75,12 @@ class PropertiesDirective(AlgorithmBaseDirective):
 
             for prop in alg_properties:
                 # Append a tuple of properties to the list.
+                str_prop_type = str(prop.type)
                 properties.append(
                     (
                         str(prop.name),
                         str(direction_string[prop.direction]),
-                        property_type_dict.get(str(prop.type), str(prop.type)),
+                        property_type_dict.get(str_prop_type, str_prop_type),
                         str(self._get_default_prop(prop)),
                         self._create_property_description_string(prop),
                     )
