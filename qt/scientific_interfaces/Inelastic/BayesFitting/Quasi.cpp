@@ -443,8 +443,8 @@ void Quasi::handleSampleInputReady(const QString &filename) {
 
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
 
-  setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
-  setPlotPropertyRange(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
+  // setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
+  // setPlotPropertyRange(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
   eRangeSelector->setMinimum(range.first);
   eRangeSelector->setMaximum(range.second);
 }

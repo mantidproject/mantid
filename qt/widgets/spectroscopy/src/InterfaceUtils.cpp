@@ -229,6 +229,18 @@ void setRangeSelectorMax(QtDoublePropertyManager *dblPropertyManager, QtProperty
     dblPropertyManager->setValue(maxProperty, rangeSelector->getMaximum());
 }
 
+/**
+ * Reformats the tree property browser, including indentation and colour.
+ *
+ * @param treeWidget :: The QtTreePropertyBrowser to be reformatted.
+ * @param properties :: The properties held within the tree browser
+ */
+void formatTreeWidget(QtTreePropertyBrowser *treeWidget, QMap<QString, QtProperty *> const &properties) {
+  treeWidget->setIndentation(0);
+  for (auto const &item : properties)
+    treeWidget->setBackgroundColor(treeWidget->topLevelItem(item), QColor(246, 246, 246));
+}
+
 } // namespace InterfaceUtils
 } // namespace CustomInterfaces
 } // namespace MantidQt
