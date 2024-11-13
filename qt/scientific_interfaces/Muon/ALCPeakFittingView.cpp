@@ -33,7 +33,7 @@ IPeakFunction_const_sptr ALCPeakFittingView::peakPicker() const { return m_peakP
 void ALCPeakFittingView::initialize() {
   m_ui.setupUi(m_widget);
 
-  connect(m_ui.fit, SIGNAL(clicked()), this, SLOT(fitRequested()));
+  connect(m_ui.fit, &QPushButton::clicked, this, &ALCPeakFittingView::fitRequested);
 
   m_ui.plot->setCanvasColour(Qt::white);
 
@@ -50,8 +50,8 @@ void ALCPeakFittingView::initialize() {
   // connect(m_ui.peaks, SIGNAL(functionStructureChanged()), SIGNAL(currentFunctionChanged()));
   // connect(m_ui.peaks, SIGNAL(parameterChanged(QString, QString)), SIGNAL(parameterChanged(QString, QString)));
 
-  connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_ui.plotGuess, SIGNAL(clicked()), this, SLOT(plotGuess()));
+  connect(m_ui.help, &QPushButton::clicked, this, &ALCPeakFittingView::help);
+  connect(m_ui.plotGuess, &QPushButton::clicked, this, &ALCPeakFittingView::plotGuess);
 }
 
 void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {

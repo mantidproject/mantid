@@ -94,15 +94,15 @@ ALCInterface::ALCInterface(QWidget *parent)
 void ALCInterface::initLayout() {
   m_ui.setupUi(this);
 
-  connect(m_ui.nextStep, SIGNAL(clicked()), SLOT(nextStep()));
-  connect(m_ui.previousStep, SIGNAL(clicked()), SLOT(previousStep()));
-  connect(m_ui.exportResults, SIGNAL(clicked()), SLOT(exportResults()));
-  connect(m_ui.importResults, SIGNAL(clicked()), SLOT(importResults()));
-  connect(m_ui.externalPlotButton, SIGNAL(clicked()), SLOT(externalPlotRequested()));
+  connect(m_ui.nextStep, &QPushButton::clicked, this, &ALCInterface::nextStep);
+  connect(m_ui.previousStep, &QPushButton::clicked, this, &ALCInterface::previousStep);
+  connect(m_ui.exportResults, &QPushButton::clicked, this, &ALCInterface::exportResults);
+  connect(m_ui.importResults, &QPushButton::clicked, this, &ALCInterface::importResults);
+  connect(m_ui.externalPlotButton, &QPushButton::clicked, this, &ALCInterface::externalPlotRequested);
 
   auto dataLoadingModel = std::make_unique<ALCDataLoadingModel>();
   auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
-  connect(dataLoadingView, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
+  connect(dataLoadingView, &ALCDataLoadingView::dataChanged, this, &ALCInterface::updateBaselineData);
 
   m_dataLoading = std::make_unique<ALCDataLoadingPresenter>(dataLoadingView, std::move(dataLoadingModel));
   m_dataLoading->initialize();
@@ -118,10 +118,9 @@ void ALCInterface::initLayout() {
   auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
   auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
   m_peakFittingModel = std::make_shared<ALCPeakFittingModel>(std::move(algorithmRunner));
-  m_peakFitting = new ALCPeakFittingPresenter(m_peakFittingView, m_peakFittingModel.get());
+  m_peakFitting = std::make_unique<ALCPeakFittingPresenter>(m_peakFittingView, m_peakFittingModel.get());
   m_peakFitting->initialize();
 
-  connect(m_dataLoading, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
   m_baselineModelling->subscribe(this);
 
   assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps

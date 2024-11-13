@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
 #include "ALCBaselineModellingPresenter.h"
+#include "ALCPeakFittingPresenter.h"
 #include "IALCBaselineModellingPresenterSubscriber.h"
 #include "ALCDataLoadingPresenter.h"
 
@@ -28,7 +29,6 @@ class ALCBaselineModellingView;
 class ALCBaselineModellingModel;
 
 class ALCPeakFittingView;
-class ALCPeakFittingPresenter;
 class ALCPeakFittingModel;
 
 /** ALCInterface : Custom interface for Avoided Level Crossing analysis
@@ -84,7 +84,7 @@ private:
   // Step presenters
   std::unique_ptr<ALCDataLoadingPresenter> m_dataLoading;
   std::unique_ptr<ALCBaselineModellingPresenter> m_baselineModelling;
-  ALCPeakFittingPresenter *m_peakFitting;
+  std::unique_ptr<ALCPeakFittingPresenter> m_peakFitting;
 
   // Models
   std::shared_ptr<ALCPeakFittingModel> m_peakFittingModel;
