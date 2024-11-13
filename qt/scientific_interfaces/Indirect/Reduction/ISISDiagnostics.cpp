@@ -301,18 +301,18 @@ void ISISDiagnostics::setBackgroundRangeLimits(double backgroundMin, double back
 void ISISDiagnostics::setRangeLimits(MantidWidgets::RangeSelector *rangeSelector, double minimum, double maximum,
                                      QString const &minPropertyName, QString const &maxPropertyName) {
   setPlotPropertyRange(rangeSelector, m_properties[minPropertyName], m_properties[maxPropertyName],
-                       qMakePair(minimum, maximum));
+                       std::pair(minimum, maximum));
 }
 
 void ISISDiagnostics::setPeakRange(double minimum, double maximum) {
   auto slicePeak = m_uiForm.ppRawPlot->getRangeSelector("SlicePeak");
-  setRangeSelector(slicePeak, m_properties["PeakStart"], m_properties["PeakEnd"], qMakePair(minimum, maximum));
+  setRangeSelector(slicePeak, m_properties["PeakStart"], m_properties["PeakEnd"], std::pair(minimum, maximum));
 }
 
 void ISISDiagnostics::setBackgroundRange(double minimum, double maximum) {
   auto sliceBackground = m_uiForm.ppRawPlot->getRangeSelector("SliceBackground");
   setRangeSelector(sliceBackground, m_properties["BackgroundStart"], m_properties["BackgroundEnd"],
-                   qMakePair(minimum, maximum));
+                   std::pair(minimum, maximum));
 }
 
 /**

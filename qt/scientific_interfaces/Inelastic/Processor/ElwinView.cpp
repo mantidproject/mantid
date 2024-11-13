@@ -365,8 +365,8 @@ double ElwinView::getBackgroundEnd() { return m_dblManager->value(m_properties["
  * @param range :: The range to set the range selector to.
  */
 void ElwinView::setRangeSelector(RangeSelector *rs, QtProperty *lower, QtProperty *upper,
-                                 const QPair<double, double> &range,
-                                 const std::optional<QPair<double, double>> &bounds) {
+                                 const std::pair<double, double> &range,
+                                 const std::optional<std::pair<double, double>> &bounds) {
   m_dblManager->setValue(lower, range.first);
   m_dblManager->setValue(upper, range.second);
   rs->setRange(range.first, range.second);

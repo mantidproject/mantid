@@ -9,8 +9,8 @@
 #include "MantidFrameworkTestHelpers/IndirectFitDataCreationHelper.h"
 #include "MantidQtWidgets/Common/WorkspaceUtils.h"
 
-#include <QPair>
 #include <cxxtest/TestSuite.h>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
@@ -49,13 +49,13 @@ public:
   }
 
   void test_getResolutionFromWs_returns_false_for_no_instrument_workspace() {
-    auto res = QPair<double, double>(0, 0);
+    auto res = std::pair<double, double>(0, 0);
     auto const testWorkspace = createWorkspace(1, 5);
 
     TS_ASSERT(!getResolutionRangeFromWs(testWorkspace, res));
   }
   void test_getResolutionFromWs_returns_res_for_instrument_workspace() {
-    auto res = QPair<double, double>(0, 0);
+    auto res = std::pair<double, double>(0, 0);
     auto const testWorkspace = createWorkspaceWithIndirectInstrumentAndParameters();
     getResolutionRangeFromWs(testWorkspace, res);
 

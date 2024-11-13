@@ -22,9 +22,9 @@ Mantid::Kernel::Logger g_log("WorkspaceUtils");
 
 double roundToPrecision(double value, double precision) { return value - std::remainder(value, precision); }
 
-QPair<double, double> roundRangeToPrecision(double rangeStart, double rangeEnd, double precision) {
-  return QPair<double, double>(roundToPrecision(rangeStart, precision) + precision,
-                               roundToPrecision(rangeEnd, precision) - precision);
+std::pair<double, double> roundRangeToPrecision(double rangeStart, double rangeEnd, double precision) {
+  return std::pair<double, double>(roundToPrecision(rangeStart, precision) + precision,
+                                   roundToPrecision(rangeEnd, precision) - precision);
 }
 
 auto const regDigits = std::regex("\\d+");
@@ -163,7 +163,7 @@ std::optional<double> getEFixed(const Mantid::API::MatrixWorkspace_sptr &ws) {
  * @param res :: The retrieved values for the resolution parameter (if one was
  *found)
  */
-bool getResolutionRangeFromWs(const std::string &workspace, QPair<double, double> &res) {
+bool getResolutionRangeFromWs(const std::string &workspace, std::pair<double, double> &res) {
   auto const ws =
       Mantid::API::AnalysisDataService::Instance().retrieveWS<const Mantid::API::MatrixWorkspace>(workspace);
   return getResolutionRangeFromWs(ws, res);
@@ -176,7 +176,8 @@ bool getResolutionRangeFromWs(const std::string &workspace, QPair<double, double
  * @param res :: The retrieved values for the resolution parameter (if one was
  *found)
  */
-bool getResolutionRangeFromWs(const Mantid::API::MatrixWorkspace_const_sptr &workspace, QPair<double, double> &res) {
+bool getResolutionRangeFromWs(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
+                              std::pair<double, double> &res) {
   if (workspace) {
     auto const instrument = workspace->getInstrument();
     if (instrument && instrument->hasParameter("analyser")) {
@@ -188,7 +189,7 @@ bool getResolutionRangeFromWs(const Mantid::API::MatrixWorkspace_const_sptr &wor
 
           // set the default instrument resolution
           if (params.size() > 0) {
-            res = qMakePair(-params[0], params[0]);
+            res = std::pair(-params[0], params[0]);
             return true;
           }
         }
@@ -198,15 +199,16 @@ bool getResolutionRangeFromWs(const Mantid::API::MatrixWorkspace_const_sptr &wor
   return false;
 }
 
-QPair<double, double> getXRangeFromWorkspace(std::string const &workspaceName, double precision) {
+std::pair<double, double> getXRangeFromWorkspace(std::string const &workspaceName, double precision) {
   auto const &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName))
     return getXRangeFromWorkspace(ads.retrieveWS<MatrixWorkspace>(workspaceName), precision);
-  return QPair<double, double>(0.0, 0.0);
+  return std::pair<double, double>(0.0, 0.0);
 }
 
-QPair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
-                                             double precision) {
+std::pair<double, double> getXRangeFromWorkspace(const Mantid::API::MatrixWorkspace_const_sptr &workspace,
+                                                 double precision) {
+  assert(workspace != nullptr);
   auto const &xValues = workspace->x(0);
   return roundRangeToPrecision(xValues.front(), xValues.back(), precision);
 }
