@@ -204,7 +204,7 @@ void ElwinPresenter::handleRun() {
     auto workspace = m_dataModel->getWorkspace(i);
     auto spectra = m_dataModel->getSpectra(i);
     auto spectraWS = workspace->getName() + "_extracted_spectra";
-    algQueue.emplace_back(m_model->setupExtractSpectra(workspace, spectra, spectraWS));
+    spectraWS = m_model->setupExtractSpectra(workspace, spectra, spectraWS, &algQueue);
     inputWorkspacesString += spectraWS + ",";
   }
 
@@ -214,7 +214,9 @@ void ElwinPresenter::handleRun() {
                                                             m_view->getLogValue()));
   m_algorithmRunner->execute(std::move(algQueue));
   // Set the result workspace for Python script export
-  m_pythonExportWsName = outputWsBasename + "_elwin_eq2";
+
+  m_pythonExportWsName = m_outputNamePresenter->generateOutputLabel() + "_elwin_eq2";
+  AnalysisDataService::Instance().remove("specWSnext");
 }
 
 /**
