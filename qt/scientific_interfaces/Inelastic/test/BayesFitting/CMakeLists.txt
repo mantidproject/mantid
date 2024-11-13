@@ -1,6 +1,6 @@
 get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 
-set(TEST_FILES StretchModelTest.h StretchPresenterTest.h)
+set(TEST_FILES QuasiModelTest.h QuasiPresenterTest.h StretchModelTest.h StretchPresenterTest.h)
 
 set(TEST_HELPERS MockObjects.h)
 
@@ -11,7 +11,6 @@ set(ALL_TEST_FILES
     ${ALL_TEST_FILES} ${TEST_FILES}
     PARENT_SCOPE
 )
-
 set(ALL_TEST_HELPERS
     ${ALL_TEST_HELPERS} ${TEST_HELPERS}
     PARENT_SCOPE
