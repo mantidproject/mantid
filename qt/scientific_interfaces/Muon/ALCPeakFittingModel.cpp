@@ -14,7 +14,6 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include <Poco/ActiveResult.h>
 #include <utility>
 
 using namespace Mantid::API;

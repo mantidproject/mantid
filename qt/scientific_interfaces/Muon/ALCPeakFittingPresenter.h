@@ -21,7 +21,6 @@ namespace MantidQt::CustomInterfaces {
  */
 class MANTIDQT_MUONINTERFACE_DLL ALCPeakFittingPresenter : public IALCPeakFittingModelSubscriber,
                                                            public IALCPeakFittingViewSubscriber {
-  //  Q_OBJECT
 
 public:
   ALCPeakFittingPresenter(IALCPeakFittingView *view, IALCPeakFittingModel *model);
