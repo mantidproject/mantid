@@ -28,17 +28,6 @@ Container Subtraction tab
 #. In the ``Output Options``, select indices ``50-51``. A red asterisk should appear, preventing you from using ``Plot Spectra``
 #. In the ``Output Options``, select indices ``49-50``. It should be possible to click ``Plot Spectra`` to plot a two spectra graph
 
-Calculate Paalman Pings Tab
----------------------------
-
-**Time required 1 minute**
-
---------------
-
-#. Go to ``Interfaces`` > ``Inelastic`` > ``Corrections``
-#. Go to the ``Calculate Paalman Pings`` tab
-#. Read the deprecation message. This tab should be removed for the release of version 6.12 assuming no user feedback.
-
 Calculate Monte Carlo Absorption Tab
 ------------------------------------
 
