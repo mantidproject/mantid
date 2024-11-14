@@ -7,13 +7,12 @@
 #pragma once
 
 #include "DllConfig.h"
+#include "IALCDataLoadingModel.h"
+#include "IALCDataLoadingPresenter.h"
 #include "IALCDataLoadingView.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidQtWidgets/Common/MuonPeriodInfo.h"
-#include <QFileSystemWatcher>
-#include <QObject>
 #include <atomic>
 
 namespace MantidQt {
@@ -21,125 +20,69 @@ namespace CustomInterfaces {
 
 /** ALCDataLoadingPresenter : Presenter for ALC Data Loading step
  */
-class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingPresenter : public QObject {
-  Q_OBJECT
+class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingPresenter : public IALCDataLoadingPresenter {
 
 public:
-  ALCDataLoadingPresenter(IALCDataLoadingView *view);
+  ALCDataLoadingPresenter(IALCDataLoadingView *view, std::unique_ptr<IALCDataLoadingModel> model);
 
-  void initialize();
+  void initialize() override;
 
   /// @return Last loaded data workspace
-  Mantid::API::MatrixWorkspace_sptr loadedData() const { return m_loadedData; }
+  Mantid::API::MatrixWorkspace_sptr loadedData() const override { return m_model->getLoadedData(); }
 
   /// @return Loaded data as MatrixWorkspace_sptr
-  Mantid::API::MatrixWorkspace_sptr exportWorkspace();
+  Mantid::API::MatrixWorkspace_sptr exportWorkspace() override;
 
   /// Sets some data
-  void setData(const Mantid::API::MatrixWorkspace_sptr &data);
+  void setData(const Mantid::API::MatrixWorkspace_sptr &data) override;
 
   // Returns a boolean stating whether data is currently being loading
-  bool isLoading() const;
+  bool isLoading() const override;
 
   // Cancels current loading algorithm
-  void cancelLoading() const;
+  void cancelLoading() const override;
 
-private slots:
   /// Check file range and call method to load new data
-  void handleLoadRequested();
+  void handleLoadRequested() override;
 
   /// Updates the list of logs and number of periods
-  void updateAvailableInfo();
+  void updateAvailableInfo() override;
 
   /// Handle for when runs editing starts
-  void handleRunsEditing();
+  void handleRunsEditing() override;
 
   /// Handle for when runs editing finishes
-  void handleRunsEditingFinished();
+  void handleRunsEditingFinished() override;
 
   /// Handle for when instrument changed
-  void handleInstrumentChanged(const std::string &instrument);
-
-  /// Handle for when manage user directories clicked
-  void handleManageDirectories();
+  void handleInstrumentChanged(const std::string &instrument) override;
 
   /// Handle for when runs have been searched for
-  void handleRunsFound();
+  void handleRunsFound() override;
 
   /// When directory contents change, set flag
-  void updateDirectoryChangedFlag(const QString &path);
-
-  /// Begin/Stop watching path
-  void startWatching(bool watch);
+  void setDirectoryChanged(bool hasDirectoryChanged) override;
 
   /// Handle a user requests to see the period info widget
-  void handlePeriodInfoClicked();
+  void handlePeriodInfoClicked() override;
 
-signals:
-  /// Signal emitted when data get changed
-  void dataChanged();
+  /// Handle timer event that checks directory for new files added
+  void handleTimerEvent() override;
 
-protected:
-  /// Signal emitted when timer event occurs
-  void timerEvent(QTimerEvent *timeup) override;
+  void handleWatcherStopped() override;
 
 private:
   /// Load new data and update the view accordingly
-  void load(const std::vector<std::string> &files);
-
-  /// Check custom grouping is sensible
-  bool checkCustomGrouping();
-
-  /// Extract run number as int from file name string
-  int extractRunNumber(const std::string &file);
-
-  /// Check the group is valid
-  std::string isCustomGroupingValid(const std::string &group, bool &isValid);
-
-  /// Get path from files
-  std::string getPathFromFiles() const;
+  void loadFilesCurrentlyInModel();
 
   /// Update info on MuonPeriodInfo widget using sample logs from ws
   void updateAvailablePeriodInfo(const Mantid::API::MatrixWorkspace_sptr &ws);
 
   /// View which the object works with
-  IALCDataLoadingView *const m_view;
+  IALCDataLoadingView *m_view;
 
-  /// Period Info Widget displayed from the view
-  std::unique_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> m_periodInfo;
-
-  /// Last loaded data workspace
-  Mantid::API::MatrixWorkspace_sptr m_loadedData;
-
-  /// Number of detectors for current first run
-  size_t m_numDetectors;
-
-  // bool to state whether loading data
-  std::atomic_bool m_loadingData;
-
-  // Loading algorithm
-  Mantid::API::IAlgorithm_sptr m_LoadingAlg;
-
-  /// Watches the path for changes
-  QFileSystemWatcher m_watcher;
-
-  /// Flag for changes in watched directory
-  std::atomic_bool m_directoryChanged;
-
-  /// Timer ID of running timer
-  int m_timerID;
-
-  /// Last run loaded by auto
-  int m_lastRunLoadedAuto;
-
-  /// Files that are loaded
-  std::vector<std::string> m_filesLoaded;
-
-  /// Last run added by auto was addes as range
-  std::atomic_bool m_wasLastAutoRange;
-
-  /// Previous first run number (INSTNAMERUNNUMBER)
-  std::string m_previousFirstRun;
+  // Model
+  std::unique_ptr<IALCDataLoadingModel> m_model;
 };
 
 } // namespace CustomInterfaces

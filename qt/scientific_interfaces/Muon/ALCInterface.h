@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
 #include "ALCBaselineModellingPresenter.h"
+#include "ALCDataLoadingPresenter.h"
 
 #include "ui_ALCInterface.h"
 
@@ -78,7 +79,7 @@ private:
   ALCPeakFittingView *m_peakFittingView;
 
   // Step presenters
-  ALCDataLoadingPresenter *m_dataLoading;
+  std::unique_ptr<ALCDataLoadingPresenter> m_dataLoading;
   std::unique_ptr<ALCBaselineModellingPresenter> m_baselineModelling;
   ALCPeakFittingPresenter *m_peakFitting;
 

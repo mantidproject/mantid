@@ -8,12 +8,14 @@
 
 #include "ALCBaselineModellingView.h"
 #include "ALCDataLoadingView.h"
+
 #include "ALCPeakFittingView.h"
 
 #include "ALCDataLoadingPresenter.h"
 #include "ALCPeakFittingPresenter.h"
 
 #include "ALCBaselineModellingModel.h"
+#include "ALCDataLoadingModel.h"
 #include "ALCPeakFittingModel.h"
 
 #include "QInputDialog"
@@ -98,13 +100,16 @@ void ALCInterface::initLayout() {
   connect(m_ui.importResults, SIGNAL(clicked()), SLOT(importResults()));
   connect(m_ui.externalPlotButton, SIGNAL(clicked()), SLOT(externalPlotRequested()));
 
+  auto dataLoadingModel = std::make_unique<ALCDataLoadingModel>();
   auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
-  m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
+  connect(dataLoadingView, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
+
+  m_dataLoading = std::make_unique<ALCDataLoadingPresenter>(dataLoadingView, std::move(dataLoadingModel));
   m_dataLoading->initialize();
-  m_dataLoading->setParent(this);
 
   auto baselineModellingModel = std::make_unique<ALCBaselineModellingModel>();
-  ALCBaselineModellingView *baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
+  auto *baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
+
   m_baselineModelling =
       std::make_unique<ALCBaselineModellingPresenter>(baselineModellingView, std::move(baselineModellingModel));
   m_baselineModelling->initialize();
@@ -112,8 +117,6 @@ void ALCInterface::initLayout() {
   m_peakFittingView = new ALCPeakFittingView(m_ui.peakFittingView);
   m_peakFitting = new ALCPeakFittingPresenter(m_peakFittingView, m_peakFittingModel);
   m_peakFitting->initialize();
-
-  connect(m_dataLoading, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
 
   assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
 

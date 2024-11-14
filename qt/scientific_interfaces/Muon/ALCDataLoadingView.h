@@ -7,17 +7,16 @@
 #pragma once
 
 #include "MantidKernel/System.h"
+#include "MantidQtWidgets/Common/MuonPeriodInfo.h"
 
 #include "DllConfig.h"
+#include "IALCDataLoadingPresenter.h"
 #include "IALCDataLoadingView.h"
+#include <QFileSystemWatcher>
+#include <QTimer>
 
 #include "ui_ALCDataLoadingView.h"
-
-namespace MantidQt {
-namespace MantidWidgets {
-class LogValueSelector;
-} // namespace MantidWidgets
-} // namespace MantidQt
+#include <QObject>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -26,13 +25,16 @@ namespace CustomInterfaces {
   widgets
 */
 
-class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingView : public IALCDataLoadingView {
+class MANTIDQT_MUONINTERFACE_DLL ALCDataLoadingView : public QObject, public IALCDataLoadingView {
+  Q_OBJECT
+
 public:
   ALCDataLoadingView(QWidget *widget);
   ~ALCDataLoadingView();
 
   // -- IALCDataLoadingView interface
   // ------------------------------------------------------------
+  void subscribePresenter(IALCDataLoadingPresenter *presenter) override;
 
   void initialize() override;
 
@@ -61,11 +63,9 @@ public:
   void setAvailablePeriods(const std::vector<std::string> &periods) override;
   void setTimeLimits(double tMin, double tMax) override;
   void setTimeRange(double tMin, double tMax) override;
-  void help() override;
   void disableAll() override;
   void enableAll() override;
   void setAvailableInfoToEmpty() override;
-  void instrumentChanged(QString instrument) override;
   void enableLoad(bool enable) override;
   void setPath(const std::string &path) override;
   void enableRunsAutoAdd(bool enable) override;
@@ -74,7 +74,6 @@ public:
   std::vector<std::string> getFiles() override;
   std::string getFirstFile() override;
   void setLoadStatus(const std::string &status, const std::string &colour) override;
-  void runsAutoAddToggled(bool on) override;
   void setRunsTextWithoutSearch(const std::string &text) override;
   void toggleRunsAutoAdd(const bool autoAdd) override;
   void enableAlpha(const bool alpha) override;
@@ -83,8 +82,28 @@ public:
   std::string getAlphaValue() const override;
   void showAlphaMessage(const bool alpha) override;
   void setFileExtensions(const std::vector<std::string> &extensions) override;
+  std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> getPeriodInfo() override;
+  QFileSystemWatcher *getFileSystemWatcher() override;
+  QTimer *getTimer() override;
+
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
+
+private slots:
+  void runsAutoAddToggled(bool on) override;
+  void instrumentChanged(QString instrument) override;
+  void help() override;
+  void notifyLoadClicked() override;
+  void notifyRunsEditingChanged() override;
+  void notifyRunsEditingFinished() override;
+  void notifyRunsFoundFinished() override;
+  void openManageDirectories() override;
+  void notifyPeriodInfoClicked() override;
+  void notifyTimerEvent() override;
+
+signals:
+  /// New data has been loaded
+  void dataChanged();
 
 private:
   /// Common function to set available items in a combo box
@@ -92,14 +111,26 @@ private:
 
   bool setCurrentLog(const QString &log);
 
+  void handleStartWatching(bool watch);
+
   /// UI form
   Ui::ALCDataLoadingView m_ui;
 
   /// The widget used
   QWidget *const m_widget;
 
+  /// Watches the path for changes
+  QFileSystemWatcher *const m_watcher;
+
+  /// Timer of running timer
+  QTimer *m_timer;
+
+  /// Period Info Widget displayed from the view
+  std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> m_periodInfo;
+
   QString m_selectedLog;
   size_t m_numPeriods;
+  IALCDataLoadingPresenter *m_presenter;
 };
 
 } // namespace CustomInterfaces
