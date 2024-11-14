@@ -139,7 +139,6 @@ Usage
      # Delete file
      os.remove(file)
 
-
 References
 ----------
 
