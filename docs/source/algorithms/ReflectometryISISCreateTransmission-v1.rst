@@ -12,7 +12,7 @@ Description
 
 This algorithm creates a transmission workspace for ISIS reflectometry data. It is intended primarily for creating input transmission workspaces that are compatible with the :ref:`algm-PolarizationEfficienciesWildes` algorithm.
 
-First the ``InputRun`` is loaded using :ref:`algm-LoadNexus`. The ``InputRun`` can be prefixed with an instrument name to load runs that are not from the user's default instrument.
+The ``InputRuns`` property takes a list of one or more run numbers. These are loaded and summed (if more than one) using :ref:`algm-LoadAndMerge`.
 
 If a ``FloodWorkspace`` is provided then a flood correction is performed using the :ref:`algm-ApplyFloodWorkspace` algorithm.
 
@@ -27,7 +27,7 @@ Usage
 
 .. testcode:: ReflectometryISISCreateTransmissionExample
 
-   transmission_grp = ReflectometryISISCreateTransmission(InputRun="POLREF4699", ProcessingInstructions="5-244")
+   transmission_grp = ReflectometryISISCreateTransmission(InputRuns="POLREF4699", ProcessingInstructions="5-244")
    print(f"Output workspace group contains {transmission_grp.size()} single spectrum transmission workspaces.")
 
 Output:

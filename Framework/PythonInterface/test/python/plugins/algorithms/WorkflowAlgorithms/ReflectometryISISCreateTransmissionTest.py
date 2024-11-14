@@ -21,7 +21,7 @@ class ReflectometryISISCreateTransmissionTest(unittest.TestCase):
 
     _OUTPUT_WS_NAME = "out_ws"
 
-    _LOAD_ALG = "LoadNexus"
+    _LOAD_ALG = "LoadAndMerge"
     _FLOOD_ALG = "ApplyFloodWorkspace"
     _BACK_SUB_ALG = "ReflectometryBackgroundSubtraction"
     _TRANS_WS_ALG = "CreateTransmissionWorkspaceAuto"
@@ -46,6 +46,14 @@ class ReflectometryISISCreateTransmissionTest(unittest.TestCase):
         expected_history = [self._LOAD_ALG, self._FLOOD_ALG, self._TRANS_WS_ALG]
         self._check_history(output_ws, expected_history)
         self._check_output_data(output_ws, 771, 1.9796095404641e-07, 1.049193056445973e-05)
+
+    def test_correct_output_for_multiple_runs(self):
+        output_ws = self._run_algorithm(self._create_args(["INTER13463", "INTER13464"], back_sub_roi=""))
+        self.assertIsNotNone(output_ws)
+        self.assertIsInstance(output_ws, MatrixWorkspace)
+        expected_history = [self._LOAD_ALG, self._FLOOD_ALG, self._TRANS_WS_ALG]
+        self._check_history(output_ws, expected_history)
+        self._check_output_data(output_ws, 771, 0.018547099002195058, 1.2884763705979813e-05)
 
     def test_correct_output_for_workspace_groups(self):
         expected_history = [
@@ -80,7 +88,7 @@ class ReflectometryISISCreateTransmissionTest(unittest.TestCase):
 
     def _create_args(self, input_run, perform_flood=True, back_sub_roi="100-200"):
         args = {
-            Prop.INPUT_RUN: input_run,
+            Prop.INPUT_RUNS: input_run,
             Prop.TRANS_ROI: "4",
             Prop.I0_MON_IDX: "2",
             Prop.MON_WAV_MIN: "2.5",

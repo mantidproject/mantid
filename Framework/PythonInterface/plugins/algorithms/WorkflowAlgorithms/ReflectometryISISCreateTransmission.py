@@ -13,11 +13,11 @@ from mantid.api import (
     WorkspaceGroup,
     WorkspaceProperty,
 )
-from mantid.kernel import Direction, StringMandatoryValidator
+from mantid.kernel import Direction, StringArrayLengthValidator, StringArrayMandatoryValidator, StringArrayProperty, CompositeValidator
 
 
 class Prop:
-    INPUT_RUN = "InputRun"
+    INPUT_RUNS = "InputRuns"
     OUTPUT_WS = "OutputWorkspace"
     FLOOD_WS = "FloodWorkspace"
     BACK_SUB_ROI = "BackgroundProcessingInstructions"
@@ -28,7 +28,7 @@ class Prop:
 
 
 class ReflectometryISISCreateTransmission(DataProcessorAlgorithm):
-    _LOAD_ALG = "LoadNexus"
+    _LOAD_ALG = "LoadAndMerge"
     _FLOOD_ALG = "ApplyFloodWorkspace"
     _BACK_SUB_ALG = "ReflectometryBackgroundSubtraction"
     _TRANS_WS_ALG = "CreateTransmissionWorkspaceAuto"
@@ -54,12 +54,14 @@ class ReflectometryISISCreateTransmission(DataProcessorAlgorithm):
         return [self._FLOOD_ALG, self._BACK_SUB_ALG, self._TRANS_WS_ALG]
 
     def PyInit(self):
+        mandatory_runs = CompositeValidator()
+        mandatory_runs.add(StringArrayMandatoryValidator())
+        len_validator = StringArrayLengthValidator()
+        len_validator.setLengthMin(1)
+        mandatory_runs.add(len_validator)
         self.declareProperty(
-            Prop.INPUT_RUN,
-            "",
-            direction=Direction.Input,
-            validator=StringMandatoryValidator(),
-            doc="The input run number to create a transmission workspace from",
+            StringArrayProperty(Prop.INPUT_RUNS, values=[], validator=mandatory_runs),
+            doc="A list of input run numbers. Multiple runs will be summed after loading",
         )
 
         self.copyProperties(self._TRANS_WS_ALG, [Prop.TRANS_ROI, Prop.I0_MON_IDX, Prop.MON_WAV_MIN, Prop.MON_WAV_MAX])
@@ -82,7 +84,7 @@ class ReflectometryISISCreateTransmission(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-        ws = self._load_run(self.getPropertyValue(Prop.INPUT_RUN), self.getPropertyValue(Prop.OUTPUT_WS))
+        ws = self._load_and_sum_runs(self.getProperty(Prop.INPUT_RUNS).value, self.getPropertyValue(Prop.OUTPUT_WS))
 
         ws = self._apply_flood_correction(ws)
         ws = self._apply_background_subtraction(ws)
@@ -90,11 +92,12 @@ class ReflectometryISISCreateTransmission(DataProcessorAlgorithm):
 
         self.setProperty(Prop.OUTPUT_WS, ws)
 
-    def _load_run(self, run: str, output_name: str):
-        """Load a run as a histogram workspace"""
-        self.log().information("Loading the run file")
-        alg = self.createChildAlgorithm(self._LOAD_ALG, Filename=run, OutputWorkspace=output_name)
+    def _load_and_sum_runs(self, runs: list[str], output_name: str):
+        """Load and sum the input runs"""
+        self.log().information("Loading and summing the run files")
+        alg = self.createChildAlgorithm(self._LOAD_ALG, Filename="+".join(runs), LoaderName="LoadNexus", OutputWorkspace=output_name)
         alg.setRethrows(True)
+        alg.setProperty("MergeRunsOptions", {"FailBehaviour": "Stop"})
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
