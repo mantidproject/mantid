@@ -46,7 +46,6 @@ public:
   std::string getPreviewWorkspaceName(int index) const override;
   void setPreviewWorkspaceName(int index) override;
   std::string getCurrentPreview() const override;
-  void updateSelectorRange(const MatrixWorkspace_sptr &inputWS) override;
 
   // controls for dataTable
   void clearDataTable() override;

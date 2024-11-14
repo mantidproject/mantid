@@ -245,15 +245,6 @@ void ElwinView::setDefaultSampleLog(const Mantid::API::MatrixWorkspace_const_spt
   }
 }
 
-void ElwinView::updateSelectorRange(const MatrixWorkspace_sptr &inputWs) {
-  const auto range = WorkspaceUtils::getXRangeFromWorkspace(inputWs);
-
-  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), m_properties["IntegrationStart"],
-                   m_properties["IntegrationEnd"], range);
-  setRangeSelector(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), m_properties["BackgroundStart"],
-                   m_properties["BackgroundEnd"], range);
-}
-
 /**
  * Plots the selected spectrum of the input workspace.
  *
