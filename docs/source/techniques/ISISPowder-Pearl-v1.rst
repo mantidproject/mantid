@@ -405,7 +405,7 @@ Determines how the banks are grouped when using the
 :ref:`focus_pearl_isis-powder-diffraction-ref` method.
 Each mode is further described below.
 
-Accepted values are: **all**, **groups**, **mods**, **trans_subset** and **trans**
+Accepted values are: **all**, **groups**, **mods**, **trans_custom** and **trans**
 
 all
 ====
@@ -441,7 +441,7 @@ is set to **True**.
 All banks are also output as individual workspaces with appropriate names
 with no additional processing applied.
 
-trans_subset
+trans_custom
 ============
 This mode behaves the same as **trans** except the user can optionally supply which modules in the transverse banks to
 focus/sum using the input parameter e.g. *trans_mod_nums="1-3,5"* which would focus modules 1,2,3 and 5. The output

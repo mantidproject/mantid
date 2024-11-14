@@ -164,7 +164,7 @@ class FocusTestFocusModeTransSubset(systemtesting.MantidSystemTest):
     def runTest(self):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        inst_object = setup_inst_object(focus_mode="trans_subset")
+        inst_object = setup_inst_object(focus_mode="trans_custom")
         self.focus_results = run_focus(inst_object, tt_mode="tt70", subtract_empty=True, spline_path=spline_path, trans_mod_nums="1-9")
 
     def validate(self):

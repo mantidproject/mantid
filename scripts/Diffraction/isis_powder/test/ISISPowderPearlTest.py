@@ -73,13 +73,13 @@ class ISISPowderPearlTest(unittest.TestCase):
         inst_obj.focus(run_number=999, long_mode=False)
         mock_focus.assert_called_once()
 
-    def test_get_trans_module_indices_focus_mode_trans_subset(self):
+    def test_get_trans_module_indices_focus_mode_trans_custom(self):
         mod_nums_in = "1-3,5"
         inst_obj = Pearl(
             user_name="PEARL",
             calibration_directory="dummy",
             output_directory="dummy",
-            focus_mode="trans_subset",
+            focus_mode="trans_custom",
             trans_mod_nums=mod_nums_in,
         )
 
