@@ -25,13 +25,11 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 namespace Prop {
-constexpr auto PNR_LABEL("PNR");
-constexpr auto PA_LABEL("PA");
-constexpr auto EFFICIENCIES{"Efficiencies"};
-constexpr auto INPUT_WORKSPACE{"InputWorkspace"};
-constexpr auto OUTPUT_WORKSPACE{"OutputWorkspace"};
-constexpr auto INPUT_SPIN_STATES("InputSpinStates");
-constexpr auto OUTPUT_SPIN_STATES("OutputSpinStates");
+static const std::string EFFICIENCIES{"Efficiencies"};
+static const std::string INPUT_WORKSPACE{"InputWorkspace"};
+static const std::string OUTPUT_WORKSPACE{"OutputWorkspace"};
+static const std::string INPUT_SPIN_STATES("InputSpinStates");
+static const std::string OUTPUT_SPIN_STATES("OutputSpinStates");
 
 // Default order for PA anaysis
 static const std::vector<std::string> defaultOrderForPA = {
@@ -47,18 +45,22 @@ static const std::vector<std::string> defaultOrderForPNR = {Mantid::Algorithms::
 
 namespace {
 
-const std::string crhoLabel("Rho");
+static const std::string CRHO_LABEL("Rho");
 
-const std::string cppLabel("Pp");
+static const std::string CPP_LABEL("Pp");
 
-const std::string cAlphaLabel("Alpha");
+static const std::string CALPHA_LABEL("Alpha");
 
-const std::string cApLabel("Ap");
+static const std::string CAP_LABEL("Ap");
+
+static const std::string PNR_LABEL("PNR");
+
+static const std::string PA_LABEL("PA");
 
 std::vector<std::string> modes() {
   std::vector<std::string> modes;
-  modes.emplace_back(Prop::PA_LABEL);
-  modes.emplace_back(Prop::PNR_LABEL);
+  modes.emplace_back(PA_LABEL);
+  modes.emplace_back(PNR_LABEL);
   return modes;
 }
 
@@ -74,7 +76,7 @@ Instrument_const_sptr fetchInstrument(WorkspaceGroup const *const groupWS) {
 
 // Helper function to check valid spin states
 bool isValidSpinState(const std::vector<std::string> &spinStates, const std::string &analysisMode) {
-  if (analysisMode == Prop::PNR_LABEL) {
+  if (analysisMode == PNR_LABEL) {
     // for PR, spinStates must be "p,a", "a,p", or empty vector
     return (spinStates.size() == 2 &&
             ((spinStates[0] == Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA &&
@@ -82,7 +84,7 @@ bool isValidSpinState(const std::vector<std::string> &spinStates, const std::str
              (spinStates[0] == Mantid::Algorithms::SpinStateConfigurationsFredrikze::ANTI &&
               spinStates[1] == Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA))) ||
            spinStates.empty();
-  } else if (analysisMode == Prop::PA_LABEL) {
+  } else if (analysisMode == PA_LABEL) {
     // For PA, spinStates size must be 4 or empty
     return (spinStates.size() == 4 || spinStates.empty());
   }
@@ -302,10 +304,10 @@ WorkspaceGroup_sptr PolarizationCorrectionFredrikze::execPA(const WorkspaceGroup
   Ipa->setTitle("Ipa");
   Iap->setTitle("Iap");
 
-  const auto rho = this->getEfficiencyWorkspace(crhoLabel);
-  const auto pp = this->getEfficiencyWorkspace(cppLabel);
-  const auto alpha = this->getEfficiencyWorkspace(cAlphaLabel);
-  const auto ap = this->getEfficiencyWorkspace(cApLabel);
+  const auto rho = this->getEfficiencyWorkspace(CRHO_LABEL);
+  const auto pp = this->getEfficiencyWorkspace(CPP_LABEL);
+  const auto alpha = this->getEfficiencyWorkspace(CALPHA_LABEL);
+  const auto ap = this->getEfficiencyWorkspace(CAP_LABEL);
 
   const auto A0 = (Iaa * pp * ap) + (Ipa * ap * rho * pp) + (Iap * ap * alpha * pp) + (Ipp * ap * alpha * rho * pp);
   const auto A1 = Iaa * pp;
@@ -367,8 +369,8 @@ WorkspaceGroup_sptr PolarizationCorrectionFredrikze::execPNR(const WorkspaceGrou
   MatrixWorkspace_sptr Ip = inputMap[SpinStateConfigurationsFredrikze::PARA];
   MatrixWorkspace_sptr Ia = inputMap[SpinStateConfigurationsFredrikze::ANTI];
 
-  const auto rho = this->getEfficiencyWorkspace(crhoLabel);
-  const auto pp = this->getEfficiencyWorkspace(cppLabel);
+  const auto rho = this->getEfficiencyWorkspace(CRHO_LABEL);
+  const auto pp = this->getEfficiencyWorkspace(CPP_LABEL);
 
   const auto D = pp * (rho + 1);
 
@@ -410,7 +412,7 @@ PolarizationCorrectionFredrikze::getEfficiencyWorkspace(const std::string &label
     // Check if we need to fetch polarization parameters from the instrument's
     // parameters
     static std::map<std::string, std::string> loadableProperties{
-        {crhoLabel, "crho"}, {cppLabel, "cPp"}, {cApLabel, "cAp"}, {cAlphaLabel, "calpha"}};
+        {CRHO_LABEL, "crho"}, {CPP_LABEL, "cPp"}, {CAP_LABEL, "cAp"}, {CALPHA_LABEL, "calpha"}};
     WorkspaceGroup_sptr inWS = getProperty(Prop::INPUT_WORKSPACE);
     Instrument_const_sptr instrument = fetchInstrument(inWS.get());
     auto vals = instrument->getStringParameter(loadableProperties[label]);
@@ -452,13 +454,13 @@ void PolarizationCorrectionFredrikze::exec() {
   validateInputWorkspace(inWS, inputStatesStr, outputStatesStr, analysisMode);
 
   WorkspaceGroup_sptr outWS;
-  if (analysisMode == Prop::PA_LABEL) {
+  if (analysisMode == PA_LABEL) {
     if (nWorkspaces != 4) {
       throw std::invalid_argument("For PA analysis, input group must have 4 periods.");
     }
     g_log.notice("PA polarization correction");
     outWS = execPA(inWS, inputStates, outputStates);
-  } else if (analysisMode == Prop::PNR_LABEL) {
+  } else if (analysisMode == PNR_LABEL) {
     if (nWorkspaces != 2) {
       throw std::invalid_argument("For PNR analysis, input group must have 2 periods.");
     }
