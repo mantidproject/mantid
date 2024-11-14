@@ -89,10 +89,6 @@ void LogFilter::addFilter(const TimeSeriesProperty<bool> &filter) {
   } else {
     // determine if the current version of things are open-ended
     filterOpenEnded = (m_filter->lastValue() && filter.lastValue());
-    DateAndTime firstTime = std::min(m_filter->firstTime(), filter.firstTime());
-    if (m_prop && (m_prop->size() > 0)) {
-      firstTime = std::min(firstTime, m_prop->firstTime());
-    }
 
     // create a local copy of both filters to add extra values to
     auto filter1 = m_filter.get();

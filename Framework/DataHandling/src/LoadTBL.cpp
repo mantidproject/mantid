@@ -160,7 +160,7 @@ void LoadTBL::csvParse(const std::string &line, std::vector<std::string> &cols,
           firstCell = false;
         } else {
           auto colVal = line.substr(lastComma + 1, pos - (lastComma + 1));
-          cols.emplace_back(line.substr(lastComma + 1, pos - (lastComma + 1)));
+          cols.emplace_back(colVal);
         }
       }
       lastComma = pos;

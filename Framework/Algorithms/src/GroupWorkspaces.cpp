@@ -58,7 +58,6 @@ std::map<std::string, std::string> GroupWorkspaces::validateInputs() {
   std::map<std::string, std::string> results;
   const std::vector<std::string> inputWorkspaces = getProperty("InputWorkspaces");
   std::string globExpression = getProperty("GlobExpression");
-  std::string outputWorkspace = getProperty("OutputWorkspace");
 
   for (auto it = globExpression.begin(); it < globExpression.end(); ++it) {
     if (*it == '\\') {
