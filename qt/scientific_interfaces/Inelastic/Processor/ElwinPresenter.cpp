@@ -159,6 +159,7 @@ void ElwinPresenter::newPreviewWorkspaceSelected(int index) {
   setInputWorkspace(workspace);
   updateAvailableSpectra();
   setSelectedSpectrum(m_view->getPreviewSpec());
+  // m_view->updateSelectorRange(workspace);
 
   m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
 }
