@@ -32,13 +32,10 @@ The algorithm expresses the order of the workspaces in the input and output grou
 This property determines the order of the spin states in the input workspace group
 
 - :literal:`'pp, pa, ap, aa'`
-   Full polarization analysis (:literal:`'PA'`): both parallel, parallel-anti-parallel, anti-parallel-parallel, both  anti-parallel. Four input workspaces are required. The spin states can be provided in any order and should match the order of the workspaces in the input group.
+   Full polarization analysis (:literal:`'PA'`): both parallel, parallel-anti-parallel, anti-parallel-parallel, both  anti-parallel. Four input workspaces are required. The spin states can be provided in any order and should match the order of the workspaces in the input group. the default order is :literal:`pp, pa, ap, aa`
 
 - :literal:`'p, a'`
-   Polarized Neutron Reflectivity (:literal:`'PNR'`):  parallel, anti-parallel. Two input workspaces are required. The spin states can be provided in any order and should match the order of the workspaces in the input group.
-
-.. note::
-    the default order used by the algorithm if none is specified are :literal:`pp, pa, ap, aa` for full polarization analysis or :literal:`p, a` for Polarized Neutron Reflectivity.
+   Polarized Neutron Reflectivity (:literal:`'PNR'`):  parallel, anti-parallel. Two input workspaces are required. The spin states can be provided in any order and should match the order of the workspaces in the input group. the default order is :literal:`p, a`
 
 **Output Spin State Order:**
 This property determines the order of the spin states in the output workspace group. Similar to the input configuration, users can specify output spin states in any order.
@@ -141,7 +138,7 @@ References
 ----------
 
 .. [#FREDRIKZE] Fredrikze, H, et al., *Calibration of a polarized neutron reflectometer*, Physica B 297 (2001)
-             `doi: 10.1016/S0921-4526(00)00823-1 <https://doi.org/10.1016/S0921-4526(00)00823-1>`
+             `doi: 10.1016/S0921-4526(00)00823-1 <https://doi.org/10.1016/S0921-4526(00)00823-1>`_
 
 .. categories::
 
