@@ -14,9 +14,9 @@
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
 #include "ALCBaselineModellingPresenter.h"
+#include "ALCDataLoadingPresenter.h"
 #include "ALCPeakFittingPresenter.h"
 #include "IALCBaselineModellingPresenterSubscriber.h"
-#include "ALCDataLoadingPresenter.h"
 
 #include "ui_ALCInterface.h"
 
