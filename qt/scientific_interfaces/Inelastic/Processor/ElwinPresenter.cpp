@@ -154,7 +154,7 @@ void ElwinPresenter::newPreviewWorkspaceSelected(int index) {
   setInputWorkspace(workspace);
   updateAvailableSpectra();
   setSelectedSpectrum(m_view->getPreviewSpec());
-  m_view->updateSelectorRange(workspace);
+  // m_view->updateSelectorRange(workspace);
   m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
 }
 
@@ -219,7 +219,6 @@ void ElwinPresenter::handleRun() {
   // Set the result workspace for Python script export
   m_pythonExportWsName = m_outputNamePresenter->generateOutputLabel() + "_elwin_eq2";
   AnalysisDataService::Instance().remove("specWSnext");
-
 }
 
 /**
