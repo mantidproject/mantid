@@ -9,7 +9,6 @@
 #include "DllConfig.h"
 #include "IALCDataLoadingModel.h"
 #include "IALCDataLoadingPresenter.h"
-#include "IALCDataLoadingView.h"
 #include "MantidAPI/IAlgorithm_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
@@ -17,6 +16,8 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+class IALCDataLoadingPresenterSubscriber;
+class IALCDataLoadingView;
 
 /** ALCDataLoadingPresenter : Presenter for ALC Data Loading step
  */
@@ -26,6 +27,8 @@ public:
   ALCDataLoadingPresenter(IALCDataLoadingView *view, std::unique_ptr<IALCDataLoadingModel> model);
 
   void initialize() override;
+
+  void setSubscriber(IALCDataLoadingPresenterSubscriber *subscriber) override;
 
   /// @return Last loaded data workspace
   Mantid::API::MatrixWorkspace_sptr loadedData() const override { return m_model->getLoadedData(); }
@@ -77,6 +80,9 @@ private:
 
   /// Update info on MuonPeriodInfo widget using sample logs from ws
   void updateAvailablePeriodInfo(const Mantid::API::MatrixWorkspace_sptr &ws);
+
+  /// Subscriber to notify of loaded data changes.
+  IALCDataLoadingPresenterSubscriber *m_subscriber;
 
   /// View which the object works with
   IALCDataLoadingView *m_view;

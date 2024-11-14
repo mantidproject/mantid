@@ -1,0 +1,1 @@
+- The :ref:`Muon ALC <MuonALC-ref>` interface can now import data from a matrix workspace which was externally generated (i.e. not previously exported from the Muon ALC interface).
