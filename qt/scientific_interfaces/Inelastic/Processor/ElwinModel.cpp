@@ -104,9 +104,9 @@ void ElwinModel::groupAlgorithm(std::string const &inputWorkspaces, std::string 
 }
 
 std::string ElwinModel::setupExtractSpectra(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra,
-                                            std::string const &outputName,
                                             std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> *algQueue) const {
 
+  // remove std::string const &outputName !!
   // Configure ExtractSingleSpectrum algorithm
   auto elwinSingAlg = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
   elwinSingAlg->initialize();
