@@ -161,8 +161,7 @@ public:
     Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name1_sqw", workspace1);
 
     // auto extractSpectra =
-    m_model->setupExtractSpectra(workspace1, FunctionModelSpectra("0,1"), "Workspace_name1_sqw_extracted_spectra",
-                                 &algQueue);
+    m_model->setupExtractSpectra(workspace1, FunctionModelSpectra("0,1"), &algQueue);
     batch.setQueue(std::move(algQueue));
     batch.executeBatch();
 
