@@ -29,6 +29,7 @@ static const std::string SPIN_STATES{"SpinStates"};
 static const std::string EFFICIENCIES{"Efficiencies"};
 static const std::string INPUT_WS{"InputWorkspaces"};
 static const std::string OUTPUT_WS{"OutputWorkspace"};
+static const std::string ADD_SPIN_STATE_LOG{"AddSpinStateToLog"};
 } // namespace Prop
 
 /**
@@ -340,6 +341,9 @@ void PolarizationCorrectionWildes::init() {
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(Prop::EFFICIENCIES, "", Kernel::Direction::Input),
       "A workspace containing the efficiency factors P1, P2, F1 and F2 as "
       "histograms");
+  declareProperty(
+      Prop::ADD_SPIN_STATE_LOG, false,
+      "Whether to add the final spin state into the sample log of each child workspace in the output group.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -348,6 +352,8 @@ void PolarizationCorrectionWildes::init() {
 void PolarizationCorrectionWildes::exec() {
   const std::string flipperProperty = getProperty(Prop::FLIPPERS);
   const auto flippers = PolarizationCorrectionsHelpers::splitSpinStateString(flipperProperty);
+  // Check if the input flipper configuration includes an analyser
+  const bool hasAnalyser = flippers.front().size() > 1;
   const auto inputs = mapInputsToDirections(flippers);
   checkConsistentNumberHistograms(inputs);
   const EfficiencyMap efficiencies = efficiencyFactors();
@@ -358,8 +364,7 @@ void PolarizationCorrectionWildes::exec() {
     outputs = directBeamCorrections(inputs, efficiencies);
     break;
   case 2:
-    // Check if the input flipper configuration includes an analyser
-    if (flippers.front().size() > 1) {
+    if (hasAnalyser) {
       outputs = twoInputCorrections(inputs, efficiencies);
     } else {
       outputs = analyzerlessCorrections(inputs, efficiencies);
@@ -371,7 +376,7 @@ void PolarizationCorrectionWildes::exec() {
   case 4:
     outputs = fullCorrections(inputs, efficiencies);
   }
-  setProperty(Prop::OUTPUT_WS, groupOutput(outputs));
+  setProperty(Prop::OUTPUT_WS, groupOutput(outputs, hasAnalyser));
 }
 
 /**
@@ -513,27 +518,35 @@ void PolarizationCorrectionWildes::checkConsistentX(const WorkspaceMap &inputs, 
  * The workspaces will be published in the ADS, their names appended by
  * appropriate suffices.
  * @param outputs a set of workspaces to group
+ * @param hasAnalyser whether the flipper configuration included an analyser.
  * @return a group workspace
  */
-API::WorkspaceGroup_sptr PolarizationCorrectionWildes::groupOutput(const WorkspaceMap &outputs) {
+API::WorkspaceGroup_sptr PolarizationCorrectionWildes::groupOutput(const WorkspaceMap &outputs,
+                                                                   const bool hasAnalyser) {
   const auto &outWSName = getPropertyValue(Prop::OUTPUT_WS);
   auto spinStateOrder = getPropertyValue(Prop::SPIN_STATES);
+  const bool addSpinStateLog = getProperty(Prop::ADD_SPIN_STATE_LOG);
+
   std::vector<std::string> names;
   if (!spinStateOrder.empty()) {
     names.resize(PolarizationCorrectionsHelpers::splitSpinStateString(spinStateOrder).size());
   }
 
   if (outputs.ppWS) {
-    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.ppWS, SpinStateConfigurationsWildes::PLUS_PLUS);
+    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.ppWS, SpinStateConfigurationsWildes::PLUS_PLUS,
+                       addSpinStateLog, hasAnalyser);
   }
   if (outputs.pmWS) {
-    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.pmWS, SpinStateConfigurationsWildes::PLUS_MINUS);
+    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.pmWS, SpinStateConfigurationsWildes::PLUS_MINUS,
+                       addSpinStateLog, hasAnalyser);
   }
   if (outputs.mpWS) {
-    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.mpWS, SpinStateConfigurationsWildes::MINUS_PLUS);
+    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.mpWS, SpinStateConfigurationsWildes::MINUS_PLUS,
+                       addSpinStateLog, hasAnalyser);
   }
   if (outputs.mmWS) {
-    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.mmWS, SpinStateConfigurationsWildes::MINUS_MINUS);
+    addSpinStateOutput(names, spinStateOrder, outWSName, outputs.mmWS, SpinStateConfigurationsWildes::MINUS_MINUS,
+                       addSpinStateLog, hasAnalyser);
   }
 
   auto group = createChildAlgorithm("GroupWorkspaces");
@@ -547,16 +560,24 @@ API::WorkspaceGroup_sptr PolarizationCorrectionWildes::groupOutput(const Workspa
 
 /**
  * Add an output name in the correct position in the vector and to the ADS.
+ * Optionally adds a spin state log to the output workspace.
  * @param names A list of the names of the workspaces the algorithm has generated.
  * @param spinStateOrder The order the output should be in.
  * @param baseName The base name for the output workspaces ("BASENAME_SPINSTATE" e.g "OUTNAME_+-")
  * @param ws The workspace to add to the vector and ADS.
  * @param spinState The spin state the workspace represents.
+ * @param addSpinStateLog Whether to add a sample log to the output workspace giving the spin state using the
+ * Reflectometry ORSO notation.
+ * @param hasAnalyser Whether the flipper configuration included an analyser.
  */
 void PolarizationCorrectionWildes::addSpinStateOutput(std::vector<std::string> &names,
                                                       const std::string &spinStateOrder, const std::string &baseName,
-                                                      const API::MatrixWorkspace_sptr &ws,
-                                                      const std::string &spinState) {
+                                                      const API::MatrixWorkspace_sptr &ws, const std::string &spinState,
+                                                      const bool addSpinStateLog, const bool hasAnalyser) {
+  if (addSpinStateLog) {
+    addSpinStateLogToWs(ws, spinState, hasAnalyser);
+  }
+
   if (spinStateOrder.empty()) {
     names.emplace_back(baseName + "_" + spinState);
     API::AnalysisDataService::Instance().addOrReplace(names.back(), ws);
@@ -571,6 +592,29 @@ void PolarizationCorrectionWildes::addSpinStateOutput(std::vector<std::string> &
     names[index] = baseName + "_" + spinState;
     API::AnalysisDataService::Instance().addOrReplace(names[index], ws);
   }
+}
+
+/**
+ * Adds a sample log to the workspace that gives the spin state of the data using Reflectometry ORSO notation.
+ * @param ws The workspace to add the sample log to.
+ * @param spinState The spin state the workspace represents.
+ * @param hasAnalyser Whether the flipper configuration included an analyser.
+ */
+void PolarizationCorrectionWildes::addSpinStateLogToWs(const API::MatrixWorkspace_sptr &ws,
+                                                       const std::string &spinState, const bool hasAnalyser) {
+  if (!hasAnalyser) {
+    if (spinState == SpinStateConfigurationsWildes::PLUS_PLUS) {
+      SpinStatesORSO::addORSOLogForSpinState(ws, SpinStateConfigurationsWildes::PLUS);
+      return;
+    }
+
+    if (spinState == SpinStateConfigurationsWildes::MINUS_MINUS) {
+      SpinStatesORSO::addORSOLogForSpinState(ws, SpinStateConfigurationsWildes::MINUS);
+      return;
+    }
+  }
+
+  SpinStatesORSO::addORSOLogForSpinState(ws, spinState);
 }
 
 /**
