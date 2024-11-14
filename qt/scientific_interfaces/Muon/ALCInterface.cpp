@@ -34,8 +34,9 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger logger("ALC Interface");
 
+auto &ads = AnalysisDataService::Instance();
+
 MatrixWorkspace_sptr getWorkspace(const std::string &workspaceName) {
-  auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName)) {
     return ads.retrieveWS<MatrixWorkspace>(workspaceName);
   } else {
@@ -261,20 +262,27 @@ void ALCInterface::exportResults() {
 
 void ALCInterface::importResults() {
   bool okClicked;
-  const auto groupName =
+  const auto workspaceName =
       QInputDialog::getText(this, "Results label", "Label to assign to the results: ", QLineEdit::Normal, "ALCResults",
                             &okClicked)
           .toStdString();
 
   if (!okClicked) {
     return;
-  } else if (!AnalysisDataService::Instance().doesExist(groupName)) {
-    QMessageBox::critical(this, "Error", "Workspace " + QString::fromStdString(groupName) + " could not be found.");
+  }
+  if (!ads.doesExist(workspaceName)) {
+    QMessageBox::critical(this, "Error", "Workspace " + QString::fromStdString(workspaceName) + " could not be found.");
+    return;
   }
 
-  importLoadedData(groupName + "_Loaded_Data");
-  importBaselineData(groupName + "_Baseline_Workspace");
-  importPeakData(groupName + "_Peaks_Workspace");
+  if (ads.retrieveWS<WorkspaceGroup>(workspaceName)) {
+    importLoadedData(workspaceName + "_Loaded_Data");
+    importBaselineData(workspaceName + "_Baseline_Workspace");
+    importPeakData(workspaceName + "_Peaks_Workspace");
+  } else if (ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
+    importLoadedData(workspaceName);
+    importBaselineData(workspaceName);
+  }
 }
 
 void ALCInterface::importLoadedData(const std::string &workspaceName) {
