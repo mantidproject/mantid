@@ -498,21 +498,15 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value, int rol
       return false;
     }
     // query the user if he wants to delete only locally or remote as well.
-    auto *box = new DeleteQueryBox(QString::fromStdString(path), father);
+    auto box = DeleteQueryBox(QString::fromStdString(path), father);
 
-    if (box->exec() != QMessageBox::Yes) {
+    if (box.exec() != QMessageBox::Yes) {
       // the user gave up deleting this entry, release memory
-      delete box;
-      box = nullptr;
       return false;
     }
 
     // get the options from the user
-    QString comment(box->comment());
-    { // release memory
-      delete box;
-      box = nullptr;
-    }
+    QString comment(box.comment());
 
     // remove from central repository
     // currently, directories can not be deleted recursively

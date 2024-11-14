@@ -66,7 +66,7 @@ std::map<std::string, std::string> InterpolatingRebin::validateInputs() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   std::vector<double> rbParams = getProperty("Params");
   try {
-    std::vector<double> validParams = Rebin::rebinParamsFromInput(rbParams, *inputWS, g_log);
+    Rebin::rebinParamsFromInput(rbParams, *inputWS, g_log);
   } catch (std::exception &err) {
     helpMessages["Params"] = err.what();
   }

@@ -159,8 +159,6 @@ void CalculateCarpenterSampleCorrection::exec() {
   // Initialize progress reporting.
   Progress prog(this, 0.0, 1.0, NUM_HIST);
 
-  EventWorkspace_sptr inputWkspEvent = std::dynamic_pointer_cast<EventWorkspace>(inputWksp);
-
   // Create the new correction workspaces
   MatrixWorkspace_sptr absWksp = createOutputWorkspace(inputWksp, "Attenuation factor");
   MatrixWorkspace_sptr msWksp = createOutputWorkspace(inputWksp, "Multiple scattering factor");

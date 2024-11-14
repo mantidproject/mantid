@@ -314,7 +314,6 @@ void SmoothNeighbours::findNeighboursUbiquitous() {
   m_progress->resetNumSteps(m_inWS->getNumberHistograms(), 0.2, 0.5);
   this->progress(0.2, "Building Neighbour Map");
 
-  Instrument_const_sptr inst = m_inWS->getInstrument();
   const spec2index_map spec2index = m_inWS->getSpectrumToWorkspaceIndexMap();
 
   // Resize the vector we are setting

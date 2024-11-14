@@ -46,9 +46,6 @@ void SavePHX::exec() {
   // Retrieve the filename from the properties
   const std::string filename = getProperty("Filename");
 
-  // Get a pointer to the sample
-  IComponent_const_sptr sample = inputWorkspace->getInstrument()->getSample();
-
   std::ofstream outPHX_file(filename.c_str());
 
   if (!outPHX_file) {
