@@ -295,7 +295,7 @@ void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
         // Only look at workspace properties
         PropertyWidget *otherWidget = it.value();
         Property *prop = it.value()->getProperty();
-        IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+        const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
         if (otherWidget && wsProp) {
           if (prop->direction() == Direction::Input) {
             // Input workspace property. Get the text typed in.
@@ -400,7 +400,7 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPr
   // set Visible and Enabled as appropriate
   for (auto &widget : m_propWidgets) {
     Mantid::Kernel::Property *prop = widget->getProperty();
-    IPropertySettings *settings = prop->getSettings();
+    const IPropertySettings *settings = prop->getSettings();
     const auto &propName = QString::fromStdString(prop->name());
 
     // Set the enabled and visible flags based on what the validators say.

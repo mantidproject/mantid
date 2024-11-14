@@ -391,7 +391,7 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value, int rol
     // the path can not be changed
     return false;
   int count_changed = 0;
-  auto *item = static_cast<RepoItem *>(index.internalPointer());
+  const auto *item = static_cast<RepoItem *>(index.internalPointer());
   std::string path = item->path().toStdString();
 
   bool ret = false;
@@ -625,7 +625,7 @@ QModelIndex RepoModel::index(int row, int column, const QModelIndex &parent) con
   if (!hasIndex(row, column, parent))
     return QModelIndex();
   // retrieve the pointer ot the RepoItem from the parent
-  RepoItem *parentItem;
+  const RepoItem *parentItem;
   if (!parent.isValid())
     parentItem = rootItem;
   else
@@ -665,7 +665,7 @@ QModelIndex RepoModel::parent(const QModelIndex &index) const {
  * @return the number of children of the given folder.
  */
 int RepoModel::rowCount(const QModelIndex &parent) const {
-  RepoItem *parentItem;
+  const RepoItem *parentItem;
 
   if (parent.column() > 0)
     return 0; // there are rows defined only of the column 0
@@ -689,7 +689,7 @@ int RepoModel::columnCount(const QModelIndex & /*parent*/) const { return 4; }
 /** Return the description of the file for a defined entry
  **/
 QString RepoModel::fileDescription(const QModelIndex &index) {
-  auto *item = static_cast<RepoItem *>(index.internalPointer());
+  const auto *item = static_cast<RepoItem *>(index.internalPointer());
   if (!item)
     return "";
   QString desc;
@@ -702,7 +702,7 @@ QString RepoModel::fileDescription(const QModelIndex &index) {
 }
 
 QString RepoModel::author(const QModelIndex &index) {
-  auto *item = static_cast<RepoItem *>(index.internalPointer());
+  const auto *item = static_cast<RepoItem *>(index.internalPointer());
   QString author = "Not defined";
   if (!item)
     return author;
@@ -719,7 +719,7 @@ QString RepoModel::author(const QModelIndex &index) {
     @return The operative system path or empty string
 */
 QString RepoModel::filePath(const QModelIndex &index) {
-  auto *item = static_cast<RepoItem *>(index.internalPointer());
+  const auto *item = static_cast<RepoItem *>(index.internalPointer());
   //   qDebug() << "Get file path from : " <<  item->path()<< '\n';
   Mantid::API::SCRIPTSTATUS state = repo_ptr->fileStatus(item->path().toStdString());
 

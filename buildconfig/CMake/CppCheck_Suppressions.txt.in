@@ -306,7 +306,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SpatialGroup
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UpdateScriptRepository.cpp:51
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/SofQWPolygon.h:55
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHasProperty.cpp:36
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:382
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SumEventsByLogValue.cpp:409
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1DMany.cpp:291
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IAlgorithmRuntimeProps.h:16
@@ -721,7 +720,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTrans
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAffine.cpp:277
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAffine.cpp:357
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAffine.cpp:368
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePHX.cpp:77
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveOpenGenieAscii.h:23
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:412
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:428
@@ -1116,8 +1114,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.c
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:902
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:904
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h:50
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmPropertiesWidget.cpp:299
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmPropertiesWidget.cpp:404
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h:45
 missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ConfiguredAlgorithm.h:19
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h:73
@@ -1206,13 +1202,7 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidge
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ScriptEditor.h:63
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ScriptRepositoryView.cpp:113
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:107
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:394
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:634
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:674
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:698
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:711
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:728
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:966
+constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:960
 unassignedVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:50
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/TextPropertyWidget.cpp:39
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FunctionTreeView.h:107
