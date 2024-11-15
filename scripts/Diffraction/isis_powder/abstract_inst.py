@@ -198,7 +198,8 @@ class AbstractInst(object):
         return self._generate_inst_filename(run_number=run_number, file_ext=file_ext)
 
     def _check_sample_details(self):
-        if self._sample_details is None:
+        # note vanadium sample details are set using advanced configs
+        if self._sample_details is None and not self._is_vanadium:
             raise ValueError(
                 "Absorption corrections cannot be run without sample details."
                 " Please set sample details using set_sample before running absorption corrections."

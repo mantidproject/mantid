@@ -274,6 +274,18 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
         expected_calls = 2 * [call(d_spacing_group=run_string, tof_group=run_string, unit_to_keep=None)]
         mock_keep_unit.assert_has_calls(expected_calls)
 
+    def test_check_sample_details_is_vanadium(self):
+        mock_inst = self._setup_mock_inst(calibration_dir="ignored", output_dir="ignored", yaml_file_path="ISISPowderRunDetailsTest.yaml")
+        mock_inst._is_vanadium = True
+        mock_inst._sample_details = None
+        mock_inst._check_sample_details()  # does not throw
+
+    def test_check_sample_details_is_not_vanadium(self):
+        mock_inst = self._setup_mock_inst(calibration_dir="ignored", output_dir="ignored", yaml_file_path="ISISPowderRunDetailsTest.yaml")
+        mock_inst._is_vanadium = False
+        mock_inst._sample_details = None
+        self.assertRaises(ValueError, mock_inst._check_sample_details)
+
 
 if __name__ == "__main__":
     unittest.main()
