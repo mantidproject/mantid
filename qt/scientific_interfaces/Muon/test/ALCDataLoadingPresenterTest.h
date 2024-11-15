@@ -15,6 +15,7 @@
 
 #include "../Muon/ALCDataLoadingModel.h"
 #include "../Muon/ALCDataLoadingPresenter.h"
+#include "../Muon/IALCDataLoadingPresenterSubscriber.h"
 #include "../Muon/IALCDataLoadingView.h"
 
 using namespace Mantid::API;
@@ -103,6 +104,11 @@ public:
   MOCK_METHOD(std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo>, getPeriodInfo, (), (override));
 };
 
+class MockALCDataLoadingPresenterSubscriber : public IALCDataLoadingPresenterSubscriber {
+public:
+  MOCK_METHOD(void, loadedDataChanged, (), (override));
+};
+
 MATCHER_P4(WorkspaceX, i, j, value, delta, "") {
   if (fabs(arg->x(i)[j] - value) < delta) {
     return true;
@@ -125,6 +131,7 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 class ALCDataLoadingPresenterTest : public CxxTest::TestSuite {
 
   std::unique_ptr<MockALCDataLoadingView> m_view;
+  std::unique_ptr<MockALCDataLoadingPresenterSubscriber> m_subscriber;
   std::unique_ptr<ALCDataLoadingPresenter> m_presenter;
   ALCDataLoadingModel *m_model;
 
@@ -152,8 +159,10 @@ public:
     m_view = std::make_unique<NiceMock<MockALCDataLoadingView>>();
     auto model = std::make_unique<ALCDataLoadingModel>();
     m_model = model.get();
+    m_subscriber = std::make_unique<NiceMock<MockALCDataLoadingPresenterSubscriber>>();
     m_presenter = std::make_unique<ALCDataLoadingPresenter>(m_view.get(), std::move(model));
     m_presenter->initialize();
+    m_presenter->subscribe(m_subscriber.get());
 
     m_watcher = new QFileSystemWatcher();
     m_timer = new QTimer();

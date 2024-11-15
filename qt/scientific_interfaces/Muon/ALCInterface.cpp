@@ -103,7 +103,6 @@ void ALCInterface::initLayout() {
 
   auto dataLoadingModel = std::make_unique<ALCDataLoadingModel>();
   auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
-  connect(dataLoadingView, &ALCDataLoadingView::dataChanged, this, &ALCInterface::updateBaselineData);
 
   m_dataLoading = std::make_unique<ALCDataLoadingPresenter>(dataLoadingView, std::move(dataLoadingModel));
   m_dataLoading->initialize();
@@ -122,6 +121,7 @@ void ALCInterface::initLayout() {
   m_peakFitting = std::make_unique<ALCPeakFittingPresenter>(m_peakFittingView, m_peakFittingModel.get());
   m_peakFitting->initialize();
 
+  m_dataLoading->subscribe(this);
   m_baselineModelling->subscribe(this);
 
   assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
@@ -129,7 +129,7 @@ void ALCInterface::initLayout() {
   switchStep(0); // We always start from the first step
 }
 
-void ALCInterface::updateBaselineData() {
+void ALCInterface::loadedDataChanged() {
 
   // Make sure we do have some data
   if (m_dataLoading->loadedData()) {
@@ -147,9 +147,7 @@ void ALCInterface::updateBaselineData() {
   }
 }
 
-void ALCInterface::correctedDataChanged() { updatePeakData(); }
-
-void ALCInterface::updatePeakData() {
+void ALCInterface::correctedDataChanged() {
 
   // Make sure we do have some data
   if (m_baselineModelling->correctedData()) {
@@ -295,7 +293,6 @@ void ALCInterface::importBaselineData(const std::string &workspaceName) {
   if (const auto baselineWS = getWorkspace(workspaceName)) {
     m_baselineModelling->setData(baselineWS);
     m_baselineModelling->setCorrectedData(baselineWS);
-    updatePeakData();
   }
 }
 
