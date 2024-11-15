@@ -6,6 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCDataLoadingPresenter.h"
 
+#include "IALCDataLoadingPresenterSubscriber.h"
+#include "IALCDataLoadingView.h"
+
 namespace {
 const int RUNS_WARNING_LIMIT = 200;
 // must include the "."
@@ -17,13 +20,15 @@ using namespace Mantid::API;
 
 namespace MantidQt::CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view, std::unique_ptr<IALCDataLoadingModel> model)
-    : m_view(view), m_model(std::move(model)) {}
+    : m_subscriber(), m_view(view), m_model(std::move(model)) {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
   m_view->subscribePresenter(this);
   m_view->setFileExtensions(ADDITIONAL_EXTENSIONS);
 }
+
+void ALCDataLoadingPresenter::subscribe(IALCDataLoadingPresenterSubscriber *subscriber) { m_subscriber = subscriber; }
 
 void ALCDataLoadingPresenter::handleRunsEditing() {
   m_view->enableLoad(false);
@@ -135,6 +140,7 @@ void ALCDataLoadingPresenter::loadFilesCurrentlyInModel() {
   } catch (std::exception &e) {
     throw std::runtime_error(e.what()); // Caught in handle load request
   }
+  m_subscriber->loadedDataChanged();
   m_view->enableAll();
   m_model->setLoadingData(false);
 }
@@ -176,6 +182,7 @@ void ALCDataLoadingPresenter::setData(const MatrixWorkspace_sptr &data) {
   if (data) {
     m_model->setLoadedData(data);
     m_view->setDataCurve(data);
+    m_subscriber->loadedDataChanged();
   } else {
     throw std::invalid_argument("Cannot load an empty workspace");
   }

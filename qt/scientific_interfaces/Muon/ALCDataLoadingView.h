@@ -101,10 +101,6 @@ private slots:
   void notifyPeriodInfoClicked() override;
   void notifyTimerEvent() override;
 
-signals:
-  /// New data has been loaded
-  void dataChanged();
-
 private:
   /// Common function to set available items in a combo box
   void setAvailableItems(QComboBox *comboBox, const std::vector<std::string> &items);
