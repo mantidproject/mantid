@@ -11,6 +11,7 @@
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "../Muon/ALCDataLoadingModel.h"
@@ -215,6 +216,15 @@ public:
     auto presenter = std::make_unique<ALCDataLoadingPresenter>(view.get(), std::move(model));
     TS_ASSERT_THROWS_EQUALS(presenter->setData(nullptr), const std::invalid_argument &e, std::string(e.what()),
                             "Cannot load an empty workspace");
+  }
+
+  void test_setData_notifies_the_subscriber() {
+    const MatrixWorkspace_sptr workspace = WorkspaceCreationHelper::create2DWorkspace(1, 5);
+
+    EXPECT_CALL(*m_view, setDataCurve(workspace, 0u)).Times(1);
+    EXPECT_CALL(*m_subscriber, loadedDataChanged()).Times(1);
+
+    m_presenter->setData(workspace);
   }
 
   void test_defaultLoad() {
