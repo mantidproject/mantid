@@ -432,15 +432,13 @@ bool File::append(const std::string &path, const std::string &name, const void *
     else if (targetPosition != -1)
       throw std::runtime_error("format exception"); // it has to be the last file in the archive
 
-    FileInfo fileInfo;
-    fileInfo.Offset = position;
-    fileInfo.Size = header.readFileSize();
+    auto fileSize = header.readFileSize();
 
-    auto offset = static_cast<size_t>(fileInfo.Size % 512);
+    auto offset = static_cast<size_t>(fileSize % 512);
     if (offset != 0)
       offset = 512 - offset;
 
-    fileStatus &= 0 == fseek(handle.get(), static_cast<long>(fileInfo.Size + offset), SEEK_CUR);
+    fileStatus &= 0 == fseek(handle.get(), static_cast<long>(fileSize + offset), SEEK_CUR);
   }
 
   if (targetPosition < 0)

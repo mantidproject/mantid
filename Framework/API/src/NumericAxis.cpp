@@ -163,7 +163,7 @@ std::string NumericAxis::formatLabel(const double value) const {
     if (*it == '0') {
       it = numberLabel.erase(it);
     } else if (*it == '.') {
-      it = numberLabel.erase(it);
+      numberLabel.erase(it);
       break;
     } else {
       break;

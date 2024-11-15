@@ -26,7 +26,6 @@ using namespace Mantid::Kernel;
 namespace {
 static const std::string INPUT_WORKSPACE_PROPERTY = "InputWorkspaces";
 static const std::string REFERENCE_WORKSPACE_PROPERTY = "ReferenceWorkspace";
-static const std::string COMBINATION_BEHAVIOUR_PROPERTY = "CombinationBehaviour";
 static const std::string SCALE_FACTOR_CALCULATION_PROPERTY = "ScaleFactorCalculation";
 static const std::string MANUAL_SCALE_FACTORS_PROPERTY = "ManualScaleFactors";
 static const std::string TIE_SCALE_FACTORS_PROPERTY = "TieScaleFactors";
@@ -241,8 +240,6 @@ void Stitch::init() {
                   "that is, the one that will not be scaled. If left blank, "
                   "stitching will be performed left to right in the order of x-axes ascending, "
                   "no matter the order of workspaces names in the input.");
-  declareProperty(COMBINATION_BEHAVIOUR_PROPERTY, "Interleave",
-                  std::make_unique<ListValidator<std::string>>(std::array<std::string, 1>{"Interleave"}));
   declareProperty(SCALE_FACTOR_CALCULATION_PROPERTY, "MedianOfRatios",
                   std::make_unique<ListValidator<std::string>>(std::array<std::string, 2>{"MedianOfRatios", "Manual"}));
   declareProperty(std::make_unique<ArrayProperty<double>>(MANUAL_SCALE_FACTORS_PROPERTY),
@@ -264,7 +261,6 @@ void Stitch::init() {
  */
 void Stitch::exec() {
   const auto referenceName = getPropertyValue(REFERENCE_WORKSPACE_PROPERTY);
-  const auto combinationBehaviour = getPropertyValue(COMBINATION_BEHAVIOUR_PROPERTY);
   const auto scaleFactorCalculation = getPropertyValue(SCALE_FACTOR_CALCULATION_PROPERTY);
   const auto inputs = RunCombinationHelper::unWrapGroups(getProperty(INPUT_WORKSPACE_PROPERTY));
   MatrixWorkspace_sptr scaleFactorsWorkspace;

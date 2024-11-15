@@ -60,7 +60,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/EnabledWhenPropert
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/EnabledWhenProperty.cpp:151
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/DiskBuffer.cpp:363
 iterateByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/MultiFileValidator.cpp:65
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogFilter.cpp:94
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:148
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:149
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/InternetHelper.cpp:150
@@ -165,7 +164,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AbsorptionC
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AbsorptionCorrection.cpp:445
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculateEfficiency.cpp:158
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculateEfficiency.cpp:159
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/CalculateCarpenterSampleCorrection.cpp:162
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/SpectrumAlgorithm.h:97
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/FunctionDomain1D.h:89
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/FunctionValues.h:86
@@ -211,7 +209,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EQSANSTofStruc
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EQSANSTofStructure.cpp:81
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FilterByLogValue.cpp:82
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/EstimateResolutionDiffraction.cpp:188
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GroupWorkspaces.cpp:61
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/FindPeaksConvolve.h:62
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/FindPeaksConvolve.h:63
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/FindPeaksConvolve.h:64
@@ -241,7 +238,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GeneratePeak
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/He3TubeEfficiency.cpp:374
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:892
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeaks.cpp:999
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/InterpolatingRebin.cpp:69
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetEi2.cpp:213
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/GetAllEi.h:32
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetTimeSeriesLogInformation.cpp:277
@@ -307,13 +303,10 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ShiftLogTime.c
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SofQCommon.cpp:25
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SampleCorrections/SparseWorkspace.cpp:32
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SpatialGrouping.cpp:214
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch.cpp:267
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/UpdateScriptRepository.cpp:51
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/SofQWPolygon.h:55
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/AlgorithmHasProperty.cpp:36
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:382
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SumEventsByLogValue.cpp:409
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/SmoothNeighbours.cpp:317
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/Stitch1DMany.cpp:291
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IAlgorithmRuntimeProps.h:16
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/AlgorithmRuntimeProps.h:21
@@ -353,11 +346,9 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IPeaksWorkspace.cpp:5
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/FunctionFactory.cpp:267
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ITableWorkspace.cpp:118
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDHistoWorkspace.cpp:54
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/WeightedMeanOfWorkspace.cpp:63
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:50
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:85
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/IMDEventWorkspace.cpp:92
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/API/src/NumericAxis.cpp:166
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ParameterReference.cpp:52
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:135
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiDomainFunction.cpp:174
@@ -435,7 +426,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakStatistics
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/CentroidPeaks.cpp:75
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/LoadIsawSpectrum.cpp:190
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/LoadIsawSpectrum.cpp:191
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/GoniometerAnglesFromPhiRotation.cpp:306
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindSXPeaks.cpp:223
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SelectCellWithForm.cpp:134
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PredictSatellitePeaks.cpp:95
@@ -609,7 +599,6 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandlin
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/BitStream.h:30
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadANSTOHelper.cpp:210
 variableScope:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DetermineChunking.cpp:163
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadANSTOHelper.cpp:436
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:547
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:124
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:125
@@ -675,7 +664,6 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonN
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexus2.cpp:148
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexus2.cpp:486
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadTBL.cpp:133
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadTBL.cpp:162
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPreNexus.cpp:244
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadSpiceXML2DDet.h:30
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadSpiceXML2DDet.h:31
@@ -732,8 +720,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTrans
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAffine.cpp:277
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAffine.cpp:357
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAffine.cpp:368
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePHX.cpp:77
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePHX.cpp:50
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveOpenGenieAscii.h:23
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:412
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:428
@@ -864,7 +850,6 @@ invalidPointerCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ADA
 invalidPointerCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ADARA/ADARAPackets.h:679
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/isisds_command.cpp:170
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/isisds_command.cpp:126
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/isisds_command.cpp:316
 badBitmaskCheck:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ISIS/TCPEventStreamDefs.h:70
 unsignedPositive:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ISIS/TCPEventStreamDefs.h:61
 identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:220
@@ -1129,9 +1114,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.c
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:902
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:904
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h:50
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmPropertiesWidget.cpp:299
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmPropertiesWidget.cpp:404
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmPropertiesWidget.cpp:294
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AlgorithmSelectorWidget.h:45
 missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ConfiguredAlgorithm.h:19
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h:73
@@ -1220,16 +1202,8 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidge
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ScriptEditor.h:63
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ScriptRepositoryView.cpp:113
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:107
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:394
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:634
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:674
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:698
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:711
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:728
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:966
+constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:960
 unassignedVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:50
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:506
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:514
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/TextPropertyWidget.cpp:39
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FunctionTreeView.h:107
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionTreeView.cpp:974

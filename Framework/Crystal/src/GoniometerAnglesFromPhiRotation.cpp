@@ -303,7 +303,6 @@ void GoniometerAnglesFromPhiRotation::exec() {
   double deg, ax1, ax2, ax3;
   Q1.getAngleAxis(deg, ax1, ax2, ax3);
   if (dphi * deg < 0) {
-    deg = -deg;
     ax1 = -ax1;
     ax2 = -ax2;
     ax3 = -ax3;
