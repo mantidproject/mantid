@@ -25,6 +25,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/QtJobRunner.h"
 
 #include <algorithm>
 
@@ -88,21 +89,20 @@ void ALCInterface::closeEvent(QCloseEvent *event) {
 // namespace CustomInterfaces
 ALCInterface::ALCInterface(QWidget *parent)
     : UserSubWindow(parent), m_ui(), m_peakFittingView(nullptr), m_dataLoading(nullptr), m_baselineModelling(nullptr),
-      m_peakFitting(nullptr), m_peakFittingModel(new ALCPeakFittingModel()),
-      m_externalPlotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()) {}
+      m_peakFitting(nullptr), m_externalPlotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()) {}
 
 void ALCInterface::initLayout() {
   m_ui.setupUi(this);
 
-  connect(m_ui.nextStep, SIGNAL(clicked()), SLOT(nextStep()));
-  connect(m_ui.previousStep, SIGNAL(clicked()), SLOT(previousStep()));
-  connect(m_ui.exportResults, SIGNAL(clicked()), SLOT(exportResults()));
-  connect(m_ui.importResults, SIGNAL(clicked()), SLOT(importResults()));
-  connect(m_ui.externalPlotButton, SIGNAL(clicked()), SLOT(externalPlotRequested()));
+  connect(m_ui.nextStep, &QPushButton::clicked, this, &ALCInterface::nextStep);
+  connect(m_ui.previousStep, &QPushButton::clicked, this, &ALCInterface::previousStep);
+  connect(m_ui.exportResults, &QPushButton::clicked, this, &ALCInterface::exportResults);
+  connect(m_ui.importResults, &QPushButton::clicked, this, &ALCInterface::importResults);
+  connect(m_ui.externalPlotButton, &QPushButton::clicked, this, &ALCInterface::externalPlotRequested);
 
   auto dataLoadingModel = std::make_unique<ALCDataLoadingModel>();
   auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
-  connect(dataLoadingView, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
+  connect(dataLoadingView, &ALCDataLoadingView::dataChanged, this, &ALCInterface::updateBaselineData);
 
   m_dataLoading = std::make_unique<ALCDataLoadingPresenter>(dataLoadingView, std::move(dataLoadingModel));
   m_dataLoading->initialize();
@@ -115,8 +115,13 @@ void ALCInterface::initLayout() {
   m_baselineModelling->initialize();
 
   m_peakFittingView = new ALCPeakFittingView(m_ui.peakFittingView);
-  m_peakFitting = new ALCPeakFittingPresenter(m_peakFittingView, m_peakFittingModel);
+  auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
+  auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
+  m_peakFittingModel = std::make_shared<ALCPeakFittingModel>(std::move(algorithmRunner));
+  m_peakFitting = std::make_unique<ALCPeakFittingPresenter>(m_peakFittingView, m_peakFittingModel.get());
   m_peakFitting->initialize();
+
+  m_baselineModelling->subscribe(this);
 
   assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
 
@@ -141,6 +146,8 @@ void ALCInterface::updateBaselineData() {
   }
 }
 
+void ALCInterface::correctedDataChanged() { updatePeakData(); }
+
 void ALCInterface::updatePeakData() {
 
   // Make sure we do have some data
@@ -153,7 +160,7 @@ void ALCInterface::updatePeakData() {
     if (m_peakFittingView->function("")) {
 
       // Fit the data
-      m_peakFittingView->emitFitRequested();
+      m_peakFittingView->fitRequested();
     }
   }
 }

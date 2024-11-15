@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "IALCPeakFittingViewSubscriber.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
@@ -15,8 +16,7 @@
 #include <QObject>
 #include <optional>
 
-namespace MantidQt {
-namespace CustomInterfaces {
+namespace MantidQt::CustomInterfaces {
 
 /** IALCPeakFittingView : Interface for ALC Peak Fitting step view.
  */
@@ -33,7 +33,15 @@ public:
   /// @return A peak currently represented by the peak picker
   virtual Mantid::API::IPeakFunction_const_sptr peakPicker() const = 0;
 
-  virtual void removePlot(QString const &plotName) = 0;
+  virtual void removePlot(std::string const &plotName) = 0;
+
+  /**
+   * Pops-up an error box
+   * @param message :: Error message to display
+   */
+  virtual void displayError(const std::string &message) = 0;
+
+  virtual void subscribe(IALCPeakFittingViewSubscriber *subscriber) = 0;
 
 public slots:
   /// Performs any necessary initialization
@@ -72,25 +80,23 @@ public slots:
   /// @param peak :: A new peak to represent
   virtual void setPeakPicker(const Mantid::API::IPeakFunction_const_sptr &peak) = 0;
 
-  /**
-   * Pops-up an error box
-   * @param message :: Error message to display
-   */
-  virtual void displayError(const QString &message) = 0;
-
   /// Opens the Mantid Wiki web page
   virtual void help() = 0;
 
-  /// Emits signal
+  /// Calls out to the subscriber
   virtual void plotGuess() = 0;
 
   /// Changes button state
   virtual void changePlotGuessState(bool plotted) = 0;
 
-signals:
   /// Request to perform peak fitting
-  void fitRequested();
+  virtual void fitRequested() = 0;
 
+  /// Parameter value is changed in the Function Browser _either by user or
+  /// programmatically_
+  virtual void onParameterChanged(std::string const &, std::string const &) = 0;
+
+signals:
   /// Currently selected function in Function Browser has changed
   void currentFunctionChanged();
 
@@ -106,5 +112,4 @@ signals:
   void plotGuessClicked();
 };
 
-} // namespace CustomInterfaces
-} // namespace MantidQt
+} // namespace MantidQt::CustomInterfaces

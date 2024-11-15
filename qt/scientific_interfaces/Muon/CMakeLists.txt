@@ -18,12 +18,10 @@ set(MOC_FILES
     ALCBaselineModellingPresenter.h
     ALCBaselineModellingView.h
     ALCInterface.h
-    ALCPeakFittingPresenter.h
     ALCDataLoadingView.h
     IALCBaselineModellingView.h
     IALCBaselineModellingModel.h
     IALCPeakFittingView.h
-    IALCPeakFittingModel.h
     MuonAnalysisHelper.h
 )
 
@@ -43,11 +41,14 @@ set(INC_FILES
     IALCBaselineModellingModel.h
     IALCBaselineModellingView.h
     IALCBaselineModellingPresenter.h
+    IALCBaselineModellingPresenterSubscriber.h
     IALCDataLoadingView.h
     IALCDataLoadingModel.h
     IALCDataLoadingPresenter.h
     IALCPeakFittingModel.h
     IALCPeakFittingView.h
+    IALCPeakFittingModelSubscriber.h
+    IALCPeakFittingViewSubscriber.h
 )
 
 set(UI_FILES ALCBaselineModellingView.ui ALCDataLoadingView.ui ALCInterface.ui ALCPeakFittingView.ui)

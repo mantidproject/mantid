@@ -19,6 +19,7 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "../Muon/ALCBaselineModellingPresenter.h"
+#include "../Muon/IALCBaselineModellingPresenterSubscriber.h"
 #include "../Muon/IALCBaselineModellingView.h"
 
 using namespace Mantid::API;
@@ -93,6 +94,11 @@ public:
   MOCK_CONST_METHOD0(exportModel, Mantid::API::ITableWorkspace_sptr());
 };
 
+class MockALCBaselineModellingPresenterSubscriber : public IALCBaselineModellingPresenterSubscriber {
+public:
+  MOCK_METHOD(void, correctedDataChanged, (), (override));
+};
+
 MATCHER_P(FunctionName, name, "") { return arg->name() == name; }
 
 MATCHER_P3(FunctionParameter, param, value, delta, "") { return fabs(arg->getParameter(param) - value) < delta; }
@@ -102,6 +108,7 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 class ALCBaselineModellingPresenterTest : public CxxTest::TestSuite {
   std::unique_ptr<MockALCBaselineModellingView> m_view;
   MockALCBaselineModellingModel *m_model;
+  std::unique_ptr<MockALCBaselineModellingPresenterSubscriber> m_parentPresenter;
   std::unique_ptr<ALCBaselineModellingPresenter> m_presenter;
 
   // To save myself some typing
@@ -123,13 +130,17 @@ public:
     m_view = std::make_unique<NiceMock<MockALCBaselineModellingView>>();
     auto model = std::make_unique<NiceMock<MockALCBaselineModellingModel>>();
     m_model = model.get();
+    m_parentPresenter = std::make_unique<NiceMock<MockALCBaselineModellingPresenterSubscriber>>();
+
     m_presenter = std::make_unique<ALCBaselineModellingPresenter>(m_view.get(), std::move(model));
     m_presenter->initialize();
+    m_presenter->subscribe(m_parentPresenter.get());
   }
 
   void tearDown() override {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_model));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_parentPresenter));
   }
 
   // Creates a workspace with x = [1,2,3...size], y = x + deltaY and e = 1
@@ -158,6 +169,7 @@ public:
     ON_CALL(*m_model, correctedData()).WillByDefault(Return(correctedWorkspace));
 
     EXPECT_CALL(*m_view, setCorrectedCurve(correctedWorkspace, 0)).Times(1);
+    EXPECT_CALL(*m_parentPresenter, correctedDataChanged()).Times(1);
 
     m_presenter->updateCorrectedCurve();
   }
@@ -166,6 +178,7 @@ public:
     ON_CALL(*m_model, correctedData()).WillByDefault(Return(MatrixWorkspace_sptr()));
 
     EXPECT_CALL(*m_view, removePlot(QString("Corrected"))).Times(1);
+    EXPECT_CALL(*m_parentPresenter, correctedDataChanged()).Times(1);
 
     m_presenter->updateCorrectedCurve();
   }
@@ -268,6 +281,7 @@ public:
 
     EXPECT_CALL(*m_model, fit(AllOf(FunctionName("FlatBackground"), FunctionParameter("A0", 3, 1E-8)),
                               ElementsAre(Pair(10, 20), Pair(40, 55))));
+    EXPECT_CALL(*m_parentPresenter, correctedDataChanged()).Times(1);
 
     m_presenter->fit();
   }

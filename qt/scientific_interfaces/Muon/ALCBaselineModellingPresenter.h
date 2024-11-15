@@ -8,6 +8,7 @@
 
 #include "IALCBaselineModellingModel.h"
 #include "IALCBaselineModellingPresenter.h"
+#include "IALCBaselineModellingPresenterSubscriber.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 
@@ -42,6 +43,9 @@ public:
   /// Called when on of section selectors is modified
   void onSectionSelectorModified(int index) override;
 
+  /// Subscribe to updates on changes to the corrected data.
+  void subscribe(IALCBaselineModellingPresenterSubscriber *subscriber);
+
   /// Updates data curve from the model
   void updateDataCurve();
 
@@ -72,6 +76,9 @@ public:
 
 private:
   void updateAfterFit();
+
+  /// Subscriber to notify of corrected curve changes.
+  IALCBaselineModellingPresenterSubscriber *m_subscriber;
 
   /// Associated view
   IALCBaselineModellingView *const m_view;
