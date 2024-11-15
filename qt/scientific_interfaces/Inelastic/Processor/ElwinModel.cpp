@@ -103,7 +103,6 @@ void ElwinModel::groupAlgorithm(std::string const &inputWorkspaces, std::string 
 std::string ElwinModel::setupExtractSpectra(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra,
                                             std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> *algQueue) const {
 
-  // remove std::string const &outputName !!
   // Configure ExtractSingleSpectrum algorithm
   auto elwinSingAlg = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
   elwinSingAlg->initialize();
@@ -136,8 +135,6 @@ std::string ElwinModel::setupExtractSpectra(MatrixWorkspace_sptr workspace, Func
     elwinAlg = std::make_shared<API::ConfiguredAlgorithm>(elwinAppAlg, std::move(appendSpectra));
     algQueue->emplace_back(elwinAlg);
   }
-
-  // AnalysisDataService::Instance().remove("specWSnext");
   return workspace->getName() + "_extracted_spectra";
 }
 
