@@ -160,7 +160,6 @@ public:
     auto workspace1 = WorkspaceCreationHelper::create2DWorkspace(5, 4);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name1_sqw", workspace1);
 
-    // auto extractSpectra =
     m_model->setupExtractSpectra(workspace1, FunctionModelSpectra("0,1"), &algQueue);
     batch.setQueue(std::move(algQueue));
     batch.executeBatch();

@@ -124,7 +124,7 @@ std::string ElwinModel::setupExtractSpectra(MatrixWorkspace_sptr workspace, Func
     elwinAlg = std::make_shared<API::ConfiguredAlgorithm>(elwinSingAlg, std::move(extractSpectra));
     algQueue->emplace_back(elwinAlg);
 
-    // Configure ExtractSingleSpectrum algorithm
+    // Configure AppendSpectra algorithm
     auto elwinAppAlg = AlgorithmManager::Instance().create("AppendSpectra");
     elwinAppAlg->initialize();
     auto appendSpectra = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
