@@ -32,10 +32,10 @@ The algorithm expresses the order of the workspaces in the input and output grou
 This property determines the order of the spin states in the input workspace group
 
 - :literal:`'pp, pa, ap, aa'`
-   Full polarization analysis (:literal:`'PA'`): both parallel, parallel-anti-parallel, anti-parallel-parallel, both  anti-parallel. Four input workspaces are required. The spin states can be provided in any order and should match the order of the workspaces in the input group. the default order is :literal:`pp, pa, ap, aa`
+   Full polarization analysis (:literal:`'PA'`): both parallel, parallel-anti-parallel, anti-parallel-parallel, both  anti-parallel. Four input workspaces are required. The spin states can be provided in any order and should match the order of the workspaces in the input group. The default order is :literal:`pp, pa, ap, aa`.
 
 - :literal:`'p, a'`
-   Polarized Neutron Reflectivity (:literal:`'PNR'`):  parallel, anti-parallel. Two input workspaces are required. The spin states can be provided in any order and should match the order of the workspaces in the input group. the default order is :literal:`p, a`
+   Polarized Neutron Reflectivity (:literal:`'PNR'`):  parallel, anti-parallel. Two input workspaces are required. The spin states can be provided in any order and should match the order of the workspaces in the input group. The default order is :literal:`p, a`.
 
 **Output Spin State Order:**
 This property determines the order of the spin states in the output workspace group. Similar to the input configuration, users can specify output spin states in any order.

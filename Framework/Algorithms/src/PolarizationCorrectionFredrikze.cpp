@@ -25,11 +25,11 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
 namespace Prop {
-constexpr auto EFFICIENCIES{"Efficiencies"};
-constexpr auto INPUT_WORKSPACE{"InputWorkspace"};
-constexpr auto OUTPUT_WORKSPACE{"OutputWorkspace"};
-constexpr auto INPUT_SPIN_STATES("InputSpinStates");
-constexpr auto OUTPUT_SPIN_STATES("OutputSpinStates");
+static const std::string EFFICIENCIES{"Efficiencies"};
+static const std::string INPUT_WORKSPACE{"InputWorkspace"};
+static const std::string OUTPUT_WORKSPACE{"OutputWorkspace"};
+static const std::string INPUT_SPIN_STATES("InputSpinStates");
+static const std::string OUTPUT_SPIN_STATES("OutputSpinStates");
 
 // Default order for PA anaysis
 static const std::vector<std::string> defaultOrderForPA = {
@@ -45,17 +45,17 @@ static const std::vector<std::string> defaultOrderForPNR = {Mantid::Algorithms::
 
 namespace {
 
-const std::string CRHO_LABEL("Rho");
+static const std::string CRHO_LABEL("Rho");
 
-const std::string CPP_LABEL("Pp");
+static const std::string CPP_LABEL("Pp");
 
-const std::string CALPHA_LABEL("Alpha");
+static const std::string CALPHA_LABEL("Alpha");
 
-const std::string CAP_LABEL("Ap");
+static const std::string CAP_LABEL("Ap");
 
-const std::string PNR_LABEL("PNR");
+static const std::string PNR_LABEL("PNR");
 
-const std::string PA_LABEL("PA");
+static const std::string PA_LABEL("PA");
 
 std::vector<std::string> modes() {
   std::vector<std::string> modes;
