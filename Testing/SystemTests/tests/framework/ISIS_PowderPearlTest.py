@@ -469,7 +469,7 @@ def setup_inst_object(**kwargs):
 
 
 def generate_error_message(expected_file, output_dir):
-    return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
+    return f"Unable to find {expected_file} in {output_dir}.\nContents={os.listdir(output_dir)}"
 
 
 def _try_delete(path):

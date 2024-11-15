@@ -448,7 +448,7 @@ focus/sum using the input parameter e.g. *trans_mod_nums="1-3,5"* which would fo
 spectrum is similarly normalised by the number of modules requested.
 
 If any module numbers are duplicated or outside the range 1-9 inclusive then all transverse modules are included -
-i.e. it defaults to the behaviour of *focus_mode="trans"* and the *trans_mod_nums* arguemnt is ignored.
+i.e. it defaults to the behaviour of *focus_mode="trans"* and the *trans_mod_nums* argument is ignored.
 
 mods
 ====
