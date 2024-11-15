@@ -7,7 +7,6 @@ set(SYSTEST_NAMES
     AlgorithmMatrixWorkspaceValidateInputsTest
     AlgorithmMDWorkspaceValidateInputsTest
     AlgorithmTableWorkspaceValidateInputsTest
-    AlgorithmValidateInputsTestBase
     AlgorithmWorkspaceGroupValidateInputsTest
     AlignAndFocusPowderFromFilesTest
     AlignComponentsTest
@@ -116,7 +115,6 @@ set(SYSTEST_NAMES
     ISISMuonAnalysis
     ISISMuonAnalysisGrouping
     ISISReflectometryAutoreductionTest
-    ISISReflectometryWorkflowBase
     ISISReflectometryWorkflowPreprocessingTest
     ISISReflectometryWorkflowSlicingTest
     ISISReflInstrumentIDFTest
@@ -126,7 +124,6 @@ set(SYSTEST_NAMES
     LiquidsReflectometryReductionNoScalingTest
     LiquidsReflectometryReductionTest
     LiquidsReflectometryReductionWithBackgroundTest
-    LoadAndCheckBase
     LoadCIFTest
     LoadElementalAnalysisTest
     LoadEmbeddedInstrumentInfo
