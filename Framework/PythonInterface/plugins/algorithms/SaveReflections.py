@@ -121,8 +121,8 @@ class SaveReflections(PythonAlgorithm):
             name="SeparateBatchNumbers",
             defaultValue=False,
             direction=Direction.Input,
-            doc="If True all peaks from all runs will be labelled with the same batch number (in SHELX) or COD in"
-            "Jana/Fullprof - i.e. same scale factor will be used for all runs. If False then a different scale "
+            doc="If False all peaks from all runs will be labelled with the same batch number (in SHELX) or COD in"
+            "Jana/Fullprof - i.e. same scale factor will be used for all runs. If True then a different scale "
             "factor will be used for each run number in the peak table. This option does not apply to GSAS format.",
         )
         not_gsas = EnabledWhenProperty("Format", PropertyCriterion.IsNotEqualTo, ReflectionFormat.GSAS.name)
