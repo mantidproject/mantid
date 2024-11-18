@@ -591,7 +591,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandlin
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/MSVesuvioHelpers.cpp:369
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/MSVesuvioHelpers.cpp:370
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/ISISJournal.h:35
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusClasses.h:107
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DataBlockComposite.cpp:383
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/CreatePolarizationEfficienciesBase.h:30
 containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/CreatePolarizationEfficiencies.cpp:119
@@ -640,7 +639,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFullpr
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFullprofResolution.cpp:299
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.cpp:181
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.cpp:254
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/MuonNexusReader.h:78
 mismatchingContainerExpression:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadInstrument.cpp:148
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLog.cpp:448
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadANSTOEventFile.h:132
@@ -670,19 +668,10 @@ unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_co
 variableScope:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:474
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:906
 uninitdata:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:518
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadISISNexus2.cpp:607
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadISISNexus2.cpp:946
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadISISNexus2.cpp:947
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMLZ.cpp:172
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMLZ.cpp:355
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadPSIMuonBin.h:74
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonStrategy.cpp:119
 stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRKH.cpp:521
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusMonitors2.cpp:452
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusFileIO.h:208
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusFileIO.h:211
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusFileIO.h:273
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusFileIO.h:276
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadNexusProcessed2.h:38
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadMuonNexus1.h:60
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadMuonNexus1.h:62
@@ -696,8 +685,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNe
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexus1.cpp:551
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexus1.cpp:641
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexus1.cpp:661
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexus2.cpp:148
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonNexus2.cpp:486
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadTBL.cpp:133
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadTBL.cpp:162
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPreNexus.cpp:244
@@ -718,8 +705,7 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceX
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceXML2DDet.cpp:897
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpiceAscii.cpp:330
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSpice2D.cpp:613
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSINQFocus.cpp:124
-uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSINQFocus.cpp:121
+uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadSINQFocus.cpp:122
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCSV.cpp:107
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCSV.cpp:139
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCSV.cpp:155
@@ -760,9 +746,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransfor
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePHX.cpp:77
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SavePHX.cpp:50
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveOpenGenieAscii.h:23
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:412
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:428
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXcanSAS.cpp:320
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveReflectometryAscii.h:79
 internalError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDBoxSaveable.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MDLeanEvent.cpp:0
@@ -932,11 +915,9 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/ISISHisto
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/ApplyMuonDetectorGroupPairing.h:28
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/ApplyMuonDetectorGrouping.h:28
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/GlobalInterpreterLock.cpp:24
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/MuonNexusReader.h:97
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/NDArray.cpp:111
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/ReleaseGlobalInterpreterLock.cpp:17
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/UninstallTrace.cpp:16
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/src/MuonNexusReader.cpp:248
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/CloneToNDArray.cpp:123
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/NexusGeometry/src/NexusShapeFactory.cpp:33
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/NDArrayToVector.cpp:126

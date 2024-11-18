@@ -10,6 +10,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadHelper.h"
@@ -77,7 +78,7 @@ void LoadMLZ::exec() {
   loadInstrumentDetails(dataFirstEntry);
   loadTimeDetails(dataFirstEntry);
 
-  initWorkSpace(dataFirstEntry);
+  initWorkspace(dataFirstEntry);
 
   // load the instrument from the IDF
   runLoadInstrument();
@@ -169,7 +170,7 @@ void LoadMLZ::loadInstrumentDetails(const NeXus::NXEntry &firstEntry) {
  * @param entry :: The Nexus entry
  *
  */
-void LoadMLZ::initWorkSpace(NeXus::NXEntry &entry) //, const std::vector<std::vector<int> >&monitors)
+void LoadMLZ::initWorkspace(const NeXus::NXEntry &entry) //, const std::vector<std::vector<int> >&monitors)
 {
   // read in the data
   NXData dataGroup = entry.openNXData("data");
@@ -352,7 +353,7 @@ void LoadMLZ::loadExperimentDetails(const NXEntry &entry) {
  *
  * @param entry :: The Nexus entry
  */
-void LoadMLZ::loadDataIntoTheWorkSpace(NeXus::NXEntry &entry) {
+void LoadMLZ::loadDataIntoTheWorkSpace(const NeXus::NXEntry &entry) {
   // read in the data
   NXData dataGroup = entry.openNXData("data");
   NXInt data = dataGroup.openIntData();

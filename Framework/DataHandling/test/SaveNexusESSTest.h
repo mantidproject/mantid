@@ -12,7 +12,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/LoadNexusProcessed2.h"
 #include "MantidDataHandling/SaveNexusESS.h"
@@ -28,6 +27,7 @@
 #include "MantidHistogramData/Histogram.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/Logger.h"
+#include "MantidNexus/H5Util.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 #include "MantidNexusGeometry/NexusGeometrySave.h"
 #include <memory>
@@ -303,7 +303,7 @@ public:
         entryName << "/mantid_workspace_" << n;
         std::cout << "creating: " << entryName.str() << std::endl;
         H5::Group g = h5.createGroup(entryName.str());
-        H5Util::writeStrAttribute(g, NX_CLASS, NX_ENTRY);
+        Mantid::NeXus::H5Util::writeStrAttribute(g, NX_CLASS, NX_ENTRY);
       }
       h5.close();
     }
@@ -352,7 +352,7 @@ public:
         std::ostringstream entryName;
         entryName << "/mantid_workspace_" << n;
         H5::Group g = h5.createGroup(entryName.str());
-        H5Util::writeStrAttribute(g, NX_CLASS, NX_ENTRY);
+        Mantid::NeXus::H5Util::writeStrAttribute(g, NX_CLASS, NX_ENTRY);
         h5.close();
       }
       {
@@ -463,9 +463,9 @@ private:
     for (const auto &pathWithClass : pathsWithClasses) {
       const std::string &groupPath = pathWithClass.first;
       const std::string &className = pathWithClass.second;
-      TS_ASSERT(H5Util::groupExists(file, groupPath));
+      TS_ASSERT(Mantid::NeXus::H5Util::groupExists(file, groupPath));
       H5::Group g = file.openGroup(groupPath);
-      TS_ASSERT(H5Util::keyHasValue(g, NX_CLASS, className));
+      TS_ASSERT(Mantid::NeXus::H5Util::keyHasValue(g, NX_CLASS, className));
     }
   }
 };

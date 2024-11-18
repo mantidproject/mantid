@@ -8,7 +8,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/H5Util.h"
 #include "MantidFrameworkTestHelpers/FileResource.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
@@ -19,6 +18,7 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidNexus/H5Util.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
@@ -31,7 +31,7 @@
 
 using namespace Mantid;
 using namespace NexusGeometry;
-using namespace DataHandling;
+using namespace Mantid::NeXus;
 
 namespace {
 std::unique_ptr<Geometry::DetectorInfo> extractDetectorInfo(const Mantid::Geometry::Instrument &instrument) {
