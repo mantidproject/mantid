@@ -211,15 +211,20 @@ class BaseSX(ABC):
 
     @default_apply_to_all_runs
     def load_isaw_ub(self, isaw_file: str, run=None, tol=0.15):
+        if not path.exists(isaw_file):
+            logger.error(f"Invalid path {isaw_file} to ISAW UB file")
+            return
         ws = self.get_ws_name(run)
         try:
             mantid.LoadIsawUB(InputWorkspace=ws, Filename=isaw_file)
-            peaks = self.get_peaks(run, PEAK_TYPE.FOUND)
+            peaks = self.get_peaks_name(run, PEAK_TYPE.FOUND)
             if peaks is not None:
                 mantid.LoadIsawUB(InputWorkspace=peaks, Filename=isaw_file)
                 mantid.IndexPeaks(PeaksWorkspace=peaks, Tolerance=tol, RoundHKLs=True)
         except:
-            print(f"LoadIsawUB failed for run {run}")
+            logger.error(
+                f"LoadIsawUB failed for run {run} - check file contains valid ISAW format UB and the U matrix is a proper rotation matrix."
+            )
 
     def find_ub_using_lattice_params(self, global_B, tol=0.15, **kwargs):
         if global_B:
@@ -406,15 +411,16 @@ class BaseSX(ABC):
         # store result
         self.set_peaks(run, peak_int_name, peak_type, integration_type)
 
-    def save_peak_table(self, run, peak_type, integration_type, save_dir, save_format, run_ref=None):
+    def save_peak_table(self, run, peak_type, integration_type, save_dir, save_format, run_ref=None, save_nxs=True, **kwargs):
         peaks = self.get_peaks_name(run, peak_type, integration_type)
         if run_ref is not None and run_ref != run:
             self.make_UB_consistent(self.get_peaks_name(run_ref, peak_type, integration_type), peaks)
         filepath = path.join(save_dir, "_".join([peaks, save_format])) + ".int"
-        mantid.SaveReflections(InputWorkspace=peaks, Filename=filepath, Format=save_format, SplitFiles=False)
-        mantid.SaveNexus(InputWorkspace=peaks, Filename=filepath[:-3] + "nxs")
+        mantid.SaveReflections(InputWorkspace=peaks, Filename=filepath, Format=save_format, **kwargs)
+        if save_nxs:
+            mantid.SaveNexus(InputWorkspace=peaks, Filename=filepath[:-3] + "nxs")
 
-    def save_all_peaks(self, peak_type, integration_type, save_dir, save_format, run_ref=None):
+    def save_all_peaks(self, peak_type, integration_type, save_dir, save_format, run_ref=None, save_nxs=True, **kwargs):
         runs = list(self.runs.keys())
         if len(runs) > 1:
             # get name for peak table from range of runs integrated
@@ -431,8 +437,9 @@ class BaseSX(ABC):
                     self.make_UB_consistent(self.get_peaks(run_ref, peak_type, integration_type), peaks)
                 mantid.CombinePeaksWorkspaces(LHSWorkspace=all_peaks, RHSWorkspace=peaks, OutputWorkspace=all_peaks)
             filepath = path.join(save_dir, "_".join([all_peaks, save_format])) + ".int"
-            mantid.SaveReflections(InputWorkspace=all_peaks, Filename=filepath, Format=save_format, SplitFiles=False)
-            mantid.SaveNexus(InputWorkspace=all_peaks, Filename=filepath[:-3] + "nxs")
+            mantid.SaveReflections(InputWorkspace=all_peaks, Filename=filepath, Format=save_format, **kwargs)
+            if save_nxs:
+                mantid.SaveNexus(InputWorkspace=all_peaks, Filename=filepath[:-3] + "nxs")
 
     def _is_vanadium_processed(self):
         return self.van_ws is not None and ADS.doesExist(self.van_ws)
@@ -641,12 +648,12 @@ class BaseSX(ABC):
         )
 
     @staticmethod
-    def remove_non_integrated_peaks(peaks):
+    def remove_non_integrated_peaks(peaks, min_intens_over_sigma=0):
         return mantid.FilterPeaks(
             InputWorkspace=peaks,
             OutputWorkspace=BaseSX.retrieve(peaks).name(),
             FilterVariable="Signal/Noise",
-            FilterValue=0,
+            FilterValue=min_intens_over_sigma,
             Operator=">",
             EnableLogging=False,
         )
