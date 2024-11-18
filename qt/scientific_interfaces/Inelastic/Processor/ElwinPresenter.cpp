@@ -75,6 +75,10 @@ void ElwinPresenter::runComplete(Mantid::API::IAlgorithm_sptr const algorithm, b
   (void)algorithm;
   m_view->setRunIsRunning(false);
   m_outputNamePresenter->generateWarningLabel();
+
+  if (AnalysisDataService::Instance().doesExist("specWSnext")) {
+    AnalysisDataService::Instance().remove("specWSnext");
+  }
   if (!error) {
     if (!m_view->isGroupInput()) {
       m_model->ungroupAlgorithm("Elwin_Input");
@@ -91,6 +95,7 @@ void ElwinPresenter::runComplete(Mantid::API::IAlgorithm_sptr const algorithm, b
     if (m_view->getNormalise() && !checkForELTWorkspace())
       m_view->showMessageBox("ElasticWindowMultiple successful. \nThe _elt workspace "
                              "was not produced - temperatures were not found.");
+
   } else {
     m_view->setSaveResultEnabled(false);
   }
@@ -206,7 +211,7 @@ void ElwinPresenter::handleRun() {
   for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); ++i) {
     auto workspace = m_dataModel->getWorkspace(i);
     auto spectra = m_dataModel->getSpectra(i);
-    auto spectraWS = m_model->setupExtractSpectra(workspace, spectra, &algQueue);
+    auto spectraWS = m_model->setupExtractSpectra(workspace, spectra, algQueue);
     inputWorkspacesString += spectraWS + ",";
   }
   // Group input workspaces
@@ -217,7 +222,6 @@ void ElwinPresenter::handleRun() {
 
   // Set the result workspace for Python script export
   m_pythonExportWsName = m_outputNamePresenter->generateOutputLabel() + "_elwin_eq2";
-  AnalysisDataService::Instance().remove("specWSnext");
 }
 
 /**
