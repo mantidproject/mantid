@@ -44,6 +44,7 @@ requirements:
     - matplotlib {{ matplotlib }}
     - mslice {{ mslice }}
     - python.app  # [osx]
+    - pystack  # [linux]
     - qtconsole {{ qtconsole }}
     - {{ pin_compatible("setuptools", max_pin="x.x") }}
     {% if environ.get('INCLUDE_MANTIDDOCS', 'True') != 'False' %}
