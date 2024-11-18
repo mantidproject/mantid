@@ -7,9 +7,9 @@
 #include "MantidDataHandling/SaveDiffCal.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
-#include "MantidDataHandling/H5Util.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
+#include "MantidNexus/H5Util.h"
 
 #include <H5Cpp.h>
 #include <Poco/File.h>
@@ -30,6 +30,7 @@ using Mantid::DataObjects::MaskWorkspace_const_sptr;
 using Mantid::Kernel::Direction;
 
 using namespace H5;
+using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveDiffCal)

@@ -13,7 +13,6 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
@@ -21,6 +20,7 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/H5Util.h"
 
 #include <H5Cpp.h>
 #include <boost/algorithm/string.hpp>
@@ -29,6 +29,7 @@ namespace Mantid::DataHandling {
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_NEXUS_HDF5_FILELOADER_ALGORITHM(LoadMcStas)

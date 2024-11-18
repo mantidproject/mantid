@@ -11,7 +11,6 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
@@ -22,6 +21,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidNexus/H5Util.h"
 
 #include <H5Cpp.h>
 #include <Poco/Path.h>

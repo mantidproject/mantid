@@ -13,7 +13,6 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
@@ -24,6 +23,7 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidNexus/H5Util.h"
 
 #include <H5Cpp.h>
 #include <boost/algorithm/string/trim.hpp>
@@ -77,10 +77,10 @@ std::string makeCompliantName(const std::string &input, bool isStrict,
 template <typename NumT>
 void writeArray1DWithStrAttributes(H5::Group &group, const std::string &dataSetName, const std::vector<NumT> &values,
                                    const std::map<std::string, std::string> &attributes) {
-  Mantid::DataHandling::H5Util::writeArray1D(group, dataSetName, values);
+  Mantid::NeXus::H5Util::writeArray1D(group, dataSetName, values);
   auto dataSet = group.openDataSet(dataSetName);
   for (const auto &attribute : attributes) {
-    Mantid::DataHandling::H5Util::writeStrAttribute(dataSet, attribute.first, attribute.second);
+    Mantid::NeXus::H5Util::writeStrAttribute(dataSet, attribute.first, attribute.second);
   }
 }
 
@@ -95,7 +95,7 @@ H5::DSetCreatPropList setCompression2D(const hsize_t *chunkDims, const int defla
 template <typename Functor>
 void write2DWorkspace(H5::Group &group, Mantid::API::MatrixWorkspace_sptr workspace, const std::string &dataSetName,
                       Functor func, const std::map<std::string, std::string> &attributes) {
-  using namespace Mantid::DataHandling::H5Util;
+  using namespace Mantid::NeXus::H5Util;
 
   // Set the dimension
   const size_t dimension0 = workspace->getNumberHistograms();
@@ -167,22 +167,21 @@ std::vector<std::string> splitDetectorNames(std::string detectorNames) {
 H5::Group addSasEntry(H5::H5File &file, const Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &suffix) {
   using namespace Mantid::DataHandling::NXcanSAS;
   const std::string sasEntryName = sasEntryGroupName + suffix;
-  auto sasEntry =
-      Mantid::DataHandling::H5Util::createGroupCanSAS(file, sasEntryName, nxEntryClassAttr, sasEntryClassAttr);
+  auto sasEntry = Mantid::NeXus::H5Util::createGroupCanSAS(file, sasEntryName, nxEntryClassAttr, sasEntryClassAttr);
 
   // Add version
-  Mantid::DataHandling::H5Util::writeStrAttribute(sasEntry, sasEntryVersionAttr, sasEntryVersionAttrValue);
+  Mantid::NeXus::H5Util::writeStrAttribute(sasEntry, sasEntryVersionAttr, sasEntryVersionAttrValue);
 
   // Add definition
-  Mantid::DataHandling::H5Util::write(sasEntry, sasEntryDefinition, sasEntryDefinitionFormat);
+  Mantid::NeXus::H5Util::write(sasEntry, sasEntryDefinition, sasEntryDefinitionFormat);
 
   // Add title
   auto workspaceTitle = workspace->getTitle();
-  Mantid::DataHandling::H5Util::write(sasEntry, sasEntryTitle, workspaceTitle);
+  Mantid::NeXus::H5Util::write(sasEntry, sasEntryTitle, workspaceTitle);
 
   // Add run
   const auto runNumber = workspace->getRunNumber();
-  Mantid::DataHandling::H5Util::write(sasEntry, sasEntryRun, std::to_string(runNumber));
+  Mantid::NeXus::H5Util::write(sasEntry, sasEntryRun, std::to_string(runNumber));
 
   return sasEntry;
 }
@@ -219,11 +218,11 @@ void addDetectors(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wor
         const auto distance = component->getDistance(*sample);
         std::map<std::string, std::string> sddAttributes;
         sddAttributes.insert(std::make_pair(sasUnitAttr, sasInstrumentDetectorSddUnitAttrValue));
-        auto detector = Mantid::DataHandling::H5Util::createGroupCanSAS(
-            group, sasDetectorName, nxInstrumentDetectorClassAttr, sasInstrumentDetectorClassAttr);
-        Mantid::DataHandling::H5Util::write(detector, sasInstrumentDetectorName, detectorName);
-        Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(detector, sasInstrumentDetectorSdd, distance,
-                                                                          sddAttributes);
+        auto detector = Mantid::NeXus::H5Util::createGroupCanSAS(group, sasDetectorName, nxInstrumentDetectorClassAttr,
+                                                                 sasInstrumentDetectorClassAttr);
+        Mantid::NeXus::H5Util::write(detector, sasInstrumentDetectorName, detectorName);
+        Mantid::NeXus::H5Util::writeScalarDataSetWithStrAttributes(detector, sasInstrumentDetectorSdd, distance,
+                                                                   sddAttributes);
       }
     }
   }
@@ -242,41 +241,41 @@ void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wo
                    const std::vector<std::string> &detectorNames) {
   // Setup instrument
   const std::string sasInstrumentNameForGroup = sasInstrumentGroupName;
-  auto instrument = Mantid::DataHandling::H5Util::createGroupCanSAS(group, sasInstrumentNameForGroup,
-                                                                    nxInstrumentClassAttr, sasInstrumentClassAttr);
+  auto instrument = Mantid::NeXus::H5Util::createGroupCanSAS(group, sasInstrumentNameForGroup, nxInstrumentClassAttr,
+                                                             sasInstrumentClassAttr);
   auto instrumentName = getInstrumentName(workspace);
-  Mantid::DataHandling::H5Util::write(instrument, sasInstrumentName, instrumentName);
+  Mantid::NeXus::H5Util::write(instrument, sasInstrumentName, instrumentName);
 
   // Setup the detector
   addDetectors(instrument, workspace, detectorNames);
 
   // Setup source
   const std::string sasSourceName = sasInstrumentSourceGroupName;
-  auto source = Mantid::DataHandling::H5Util::createGroupCanSAS(instrument, sasSourceName, nxInstrumentSourceClassAttr,
-                                                                sasInstrumentSourceClassAttr);
-  Mantid::DataHandling::H5Util::write(source, sasInstrumentSourceRadiation, radiationSource);
+  auto source = Mantid::NeXus::H5Util::createGroupCanSAS(instrument, sasSourceName, nxInstrumentSourceClassAttr,
+                                                         sasInstrumentSourceClassAttr);
+  Mantid::NeXus::H5Util::write(source, sasInstrumentSourceRadiation, radiationSource);
 
   // Setup Aperture
   const std::string sasApertureName = sasInstrumentApertureGroupName;
-  auto aperture = Mantid::DataHandling::H5Util::createGroupCanSAS(
-      instrument, sasApertureName, nxInstrumentApertureClassAttr, sasInstrumentApertureClassAttr);
+  auto aperture = Mantid::NeXus::H5Util::createGroupCanSAS(instrument, sasApertureName, nxInstrumentApertureClassAttr,
+                                                           sasInstrumentApertureClassAttr);
 
-  Mantid::DataHandling::H5Util::write(aperture, sasInstrumentApertureShape, geometry);
+  Mantid::NeXus::H5Util::write(aperture, sasInstrumentApertureShape, geometry);
 
   std::map<std::string, std::string> beamSizeAttrs;
   beamSizeAttrs.insert(std::make_pair(sasUnitAttr, sasBeamAndSampleSizeUnitAttrValue));
   if (beamHeight != 0) {
-    Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureGapHeight,
-                                                                      beamHeight, beamSizeAttrs);
+    Mantid::NeXus::H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureGapHeight, beamHeight,
+                                                               beamSizeAttrs);
   }
   if (beamWidth != 0) {
-    Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureGapWidth,
-                                                                      beamWidth, beamSizeAttrs);
+    Mantid::NeXus::H5Util::writeScalarDataSetWithStrAttributes(aperture, sasInstrumentApertureGapWidth, beamWidth,
+                                                               beamSizeAttrs);
   }
 
   // Add IDF information
   auto idf = getIDF(workspace);
-  Mantid::DataHandling::H5Util::write(instrument, sasInstrumentIDF, idf);
+  Mantid::NeXus::H5Util::write(instrument, sasInstrumentIDF, idf);
 }
 
 //------- SASsample
@@ -287,13 +286,13 @@ void addSample(H5::Group &group, const double &sampleThickness) {
   }
   std::string const sasSampleNameForGroup = sasInstrumentSampleGroupAttr;
 
-  auto sample = Mantid::DataHandling::H5Util::createGroupCanSAS(
-      group, sasSampleNameForGroup, nxInstrumentSampleClassAttr, sasInstrumentSampleClassAttr);
+  auto sample = Mantid::NeXus::H5Util::createGroupCanSAS(group, sasSampleNameForGroup, nxInstrumentSampleClassAttr,
+                                                         sasInstrumentSampleClassAttr);
 
   std::map<std::string, std::string> sampleThicknessAttrs;
   sampleThicknessAttrs.insert(std::make_pair(sasUnitAttr, sasBeamAndSampleSizeUnitAttrValue));
-  Mantid::DataHandling::H5Util::writeScalarDataSetWithStrAttributes(sample, sasInstrumentSampleThickness,
-                                                                    sampleThickness, sampleThicknessAttrs);
+  Mantid::NeXus::H5Util::writeScalarDataSetWithStrAttributes(sample, sasInstrumentSampleThickness, sampleThickness,
+                                                             sampleThicknessAttrs);
 }
 
 //------- SASprocess
@@ -318,7 +317,7 @@ void addPropertyFromRunIfExists(Run const &run, std::string const &propertyName,
                                 std::string const &sasTerm) {
   if (run.hasProperty(propertyName)) {
     auto property = run.getProperty(propertyName);
-    Mantid::DataHandling::H5Util::write(sasGroup, sasTerm, property->value());
+    Mantid::NeXus::H5Util::write(sasGroup, sasTerm, property->value());
   }
 }
 
@@ -331,19 +330,19 @@ void addPropertyFromRunIfExists(Run const &run, std::string const &propertyName,
 void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace) {
   // Setup process
   const std::string sasProcessNameForGroup = sasProcessGroupName;
-  auto process = Mantid::DataHandling::H5Util::createGroupCanSAS(group, sasProcessNameForGroup, nxProcessClassAttr,
-                                                                 sasProcessClassAttr);
+  auto process =
+      Mantid::NeXus::H5Util::createGroupCanSAS(group, sasProcessNameForGroup, nxProcessClassAttr, sasProcessClassAttr);
 
   // Add name
-  Mantid::DataHandling::H5Util::write(process, sasProcessName, sasProcessNameValue);
+  Mantid::NeXus::H5Util::write(process, sasProcessName, sasProcessNameValue);
 
   // Add creation date of the file
   auto date = getDate();
-  Mantid::DataHandling::H5Util::write(process, sasProcessDate, date);
+  Mantid::NeXus::H5Util::write(process, sasProcessDate, date);
 
   // Add Mantid version
   const auto version = std::string(MantidVersion::version());
-  Mantid::DataHandling::H5Util::write(process, sasProcessTermSvn, version);
+  Mantid::NeXus::H5Util::write(process, sasProcessTermSvn, version);
 
   // Add log values
   const auto run = workspace->run();
@@ -361,19 +360,19 @@ void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &works
                 const Mantid::API::MatrixWorkspace_sptr &canWorkspace) {
   // Setup process
   const std::string sasProcessNameForGroup = sasProcessGroupName;
-  auto process = Mantid::DataHandling::H5Util::createGroupCanSAS(group, sasProcessNameForGroup, nxProcessClassAttr,
-                                                                 sasProcessClassAttr);
+  auto process =
+      Mantid::NeXus::H5Util::createGroupCanSAS(group, sasProcessNameForGroup, nxProcessClassAttr, sasProcessClassAttr);
 
   // Add name
-  Mantid::DataHandling::H5Util::write(process, sasProcessName, sasProcessNameValue);
+  Mantid::NeXus::H5Util::write(process, sasProcessName, sasProcessNameValue);
 
   // Add creation date of the file
   auto date = getDate();
-  Mantid::DataHandling::H5Util::write(process, sasProcessDate, date);
+  Mantid::NeXus::H5Util::write(process, sasProcessDate, date);
 
   // Add Mantid version
   const auto version = std::string(MantidVersion::version());
-  Mantid::DataHandling::H5Util::write(process, sasProcessTermSvn, version);
+  Mantid::NeXus::H5Util::write(process, sasProcessTermSvn, version);
 
   const auto run = workspace->run();
   addPropertyFromRunIfExists(run, sasProcessUserFileInLogs, process, sasProcessTermUserFile);
@@ -381,7 +380,7 @@ void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &works
 
   // Add can run number
   const auto canRun = canWorkspace->getRunNumber();
-  Mantid::DataHandling::H5Util::write(process, sasProcessTermCan, std::to_string(canRun));
+  Mantid::NeXus::H5Util::write(process, sasProcessTermCan, std::to_string(canRun));
 }
 
 /**
@@ -393,7 +392,7 @@ void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &works
 void addProcessEntry(H5::Group &group, const std::string &entryName, const std::string &entryValue) {
   auto process = group.openGroup(sasProcessGroupName);
   // Populate process entry
-  Mantid::DataHandling::H5Util::write(process, entryName, entryValue);
+  Mantid::NeXus::H5Util::write(process, entryName, entryValue);
 }
 
 WorkspaceDimensionality getWorkspaceDimensionality(const Mantid::API::MatrixWorkspace_sptr &workspace) {
@@ -440,15 +439,15 @@ std::string getUnitFromMDDimension(const Mantid::Geometry::IMDDimension_const_sp
 
 void addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspace) {
   // Add attributes for @signal, @I_axes, @Q_indices,
-  Mantid::DataHandling::H5Util::writeStrAttribute(data, sasSignal, sasDataI);
-  Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIAxesAttr, sasDataQ);
-  Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr, sasDataIdev);
-  Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIUncertaintiesAttr, sasDataIdev);
-  Mantid::DataHandling::H5Util::writeNumAttribute(data, sasDataQIndicesAttr, std::vector<int>{0});
+  Mantid::NeXus::H5Util::writeStrAttribute(data, sasSignal, sasDataI);
+  Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataIAxesAttr, sasDataQ);
+  Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr, sasDataIdev);
+  Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataIUncertaintiesAttr, sasDataIdev);
+  Mantid::NeXus::H5Util::writeNumAttribute(data, sasDataQIndicesAttr, std::vector<int>{0});
 
   if (workspace->hasDx(0)) {
-    Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataQUncertaintyAttr, sasDataQdev);
-    Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataQUncertaintiesAttr, sasDataQdev);
+    Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataQUncertaintyAttr, sasDataQdev);
+    Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataQUncertaintiesAttr, sasDataQdev);
   }
 
   //-----------------------------------------
@@ -598,13 +597,13 @@ void addData2D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
     throw std::invalid_argument("SaveNXcanSAS: The provided 2D workspace needs to have 2 numeric axes.");
   }
   // Add attributes for @signal, @I_axes, @Q_indices,
-  Mantid::DataHandling::H5Util::writeStrAttribute(data, sasSignal, sasDataI);
+  Mantid::NeXus::H5Util::writeStrAttribute(data, sasSignal, sasDataI);
   const std::string sasDataIAxesAttr2D = sasDataQ + sasSeparator + sasDataQ;
-  Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIAxesAttr, sasDataIAxesAttr2D);
-  Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr, sasDataIdev);
-  Mantid::DataHandling::H5Util::writeStrAttribute(data, sasDataIUncertaintiesAttr, sasDataIdev);
+  Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataIAxesAttr, sasDataIAxesAttr2D);
+  Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataIUncertaintyAttr, sasDataIdev);
+  Mantid::NeXus::H5Util::writeStrAttribute(data, sasDataIUncertaintiesAttr, sasDataIdev);
   // Write the Q Indices as Int Array
-  Mantid::DataHandling::H5Util::writeNumAttribute(data, sasDataQIndicesAttr, std::vector<int>{0, 1});
+  Mantid::NeXus::H5Util::writeNumAttribute(data, sasDataQIndicesAttr, std::vector<int>{0, 1});
 
   // Store the 2D Qx data + units
   std::map<std::string, std::string> qxAttributes;
@@ -644,7 +643,7 @@ void addData2D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
 
 void addData(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace) {
   const std::string sasDataName = sasDataGroupName;
-  auto data = Mantid::DataHandling::H5Util::createGroupCanSAS(group, sasDataName, nxDataClassAttr, sasDataClassAttr);
+  auto data = Mantid::NeXus::H5Util::createGroupCanSAS(group, sasDataName, nxDataClassAttr, sasDataClassAttr);
 
   auto workspaceDimensionality = getWorkspaceDimensionality(workspace);
   switch (workspaceDimensionality) {
@@ -665,22 +664,21 @@ void addTransmission(H5::Group &group, const Mantid::API::MatrixWorkspace_const_
                      const std::string &transmissionName) {
   // Setup process
   const std::string sasTransmissionName = sasTransmissionSpectrumGroupName + "_" + transmissionName;
-  auto transmission = Mantid::DataHandling::H5Util::createGroupCanSAS(
+  auto transmission = Mantid::NeXus::H5Util::createGroupCanSAS(
       group, sasTransmissionName, nxTransmissionSpectrumClassAttr, sasTransmissionSpectrumClassAttr);
 
   // Add attributes for @signal, @T_axes, @T_indices, @T_uncertainty,
   // @T_uncertainties, @name, @timestamp
-  Mantid::DataHandling::H5Util::writeStrAttribute(transmission, sasSignal, sasTransmissionSpectrumT);
-  Mantid::DataHandling::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTIndices,
-                                                  sasTransmissionSpectrumT);
-  Mantid::DataHandling::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTUncertainty,
-                                                  sasTransmissionSpectrumTdev);
-  Mantid::DataHandling::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTUncertainties,
-                                                  sasTransmissionSpectrumTdev);
-  Mantid::DataHandling::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumNameAttr, transmissionName);
+  Mantid::NeXus::H5Util::writeStrAttribute(transmission, sasSignal, sasTransmissionSpectrumT);
+  Mantid::NeXus::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTIndices, sasTransmissionSpectrumT);
+  Mantid::NeXus::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTUncertainty,
+                                           sasTransmissionSpectrumTdev);
+  Mantid::NeXus::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTUncertainties,
+                                           sasTransmissionSpectrumTdev);
+  Mantid::NeXus::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumNameAttr, transmissionName);
 
   auto date = getDate();
-  Mantid::DataHandling::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTimeStampAttr, date);
+  Mantid::NeXus::H5Util::writeStrAttribute(transmission, sasTransmissionSpectrumTimeStampAttr, date);
 
   //-----------------------------------------
   // Add T with units + uncertainty definition
