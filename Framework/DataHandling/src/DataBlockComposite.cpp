@@ -382,7 +382,7 @@ void DataBlockComposite::removeSpectra(DataBlockComposite &toRemove) {
   // Now create the new intervals which don't include the removeInterval
   // values
   std::vector<SpectrumPair> newIntervals;
-  for (auto &originalInterval : originalIntervals) {
+  for (const auto &originalInterval : originalIntervals) {
     // Find all relevant remove intervals. In principal this could
     // be made more efficient.
     auto currentRemovalIntervals =

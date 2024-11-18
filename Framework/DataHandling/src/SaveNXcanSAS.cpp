@@ -316,7 +316,7 @@ std::string getDate() {
 void addPropertyFromRunIfExists(Run const &run, std::string const &propertyName, H5::Group &sasGroup,
                                 std::string const &sasTerm) {
   if (run.hasProperty(propertyName)) {
-    auto property = run.getProperty(propertyName);
+    const auto *property = run.getProperty(propertyName);
     Mantid::NeXus::H5Util::write(sasGroup, sasTerm, property->value());
   }
 }
@@ -408,7 +408,7 @@ WorkspaceDimensionality getWorkspaceDimensionality(const Mantid::API::MatrixWork
 
 //------- SASdata
 
-std::string getIntensityUnitLabel(std::string intensityUnitLabel) {
+std::string getIntensityUnitLabel(const std::string &intensityUnitLabel) {
   if (intensityUnitLabel == "I(q) (cm-1)") {
     return sasIntensity;
   } else {
@@ -424,7 +424,7 @@ std::string getIntensityUnit(const Mantid::API::MatrixWorkspace_sptr &workspace)
   return iUnit;
 }
 
-std::string getMomentumTransferLabel(std::string momentumTransferLabel) {
+std::string getMomentumTransferLabel(const std::string &momentumTransferLabel) {
   if (momentumTransferLabel == "Angstrom^-1") {
     return sasMomentumTransfer;
   } else {

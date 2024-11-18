@@ -209,10 +209,10 @@ bool NexusFileIO::writeNxValue(const std::string &name, const TYPE &value, const
   if (NXopendata(fileID, name.c_str()) == NX_ERROR)
     return false;
   for (unsigned int it = 0; it < attributes.size(); ++it) {
-    NXputattr(fileID, attributes[it].c_str(), (void *)avalues[it].c_str(), static_cast<int>(avalues[it].size() + 1),
-              NX_CHAR);
+    NXputattr(fileID, attributes[it].c_str(), static_cast<const void *>(avalues[it].c_str()),
+              static_cast<int>(avalues[it].size() + 1), NX_CHAR);
   }
-  NXputdata(fileID, (void *)&value);
+  NXputdata(fileID, static_cast<const void *>(&value));
   NXclosedata(fileID);
   return true;
 }
@@ -274,10 +274,10 @@ bool NexusFileIO::writeSingleValueNXLog(const std::string &name, const TYPE &val
   if (NXopendata(fileID, "value") == NX_ERROR)
     return false;
   for (unsigned int it = 0; it < attributes.size(); ++it) {
-    NXputattr(fileID, attributes[it].c_str(), (void *)avalues[it].c_str(), static_cast<int>(avalues[it].size() + 1),
-              NX_CHAR);
+    NXputattr(fileID, attributes[it].c_str(), static_cast<const void *>(avalues[it].c_str()),
+              static_cast<int>(avalues[it].size() + 1), NX_CHAR);
   }
-  NXputdata(fileID, (void *)&value);
+  NXputdata(fileID, static_cast<const void *>(&value));
   NXclosedata(fileID);
   NXclosegroup(fileID);
   return true;

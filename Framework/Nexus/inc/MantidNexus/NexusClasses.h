@@ -96,7 +96,7 @@ public:
   // definition.
   // virtual bool isStandard()const = 0;
   /// Returns the absolute path to the object
-  std::string path() const { return m_path; }
+  std::string const &path() const { return m_path; }
   /// Returns the name of the object
   std::string name() const;
   /// Attributes

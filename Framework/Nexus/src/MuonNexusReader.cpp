@@ -222,7 +222,7 @@ void MuonNexusReader::getTimeChannels(float *timebnds, const int &nbnds) const {
   timebnds[nbnds - 1] = timebnds[nbnds - 2] + float(2.0) * binHalfWidth;
 }
 
-string MuonNexusReader::getInstrumentName() const { return (m_nexusInstrumentName); }
+std::string const &MuonNexusReader::getInstrumentName() const { return m_nexusInstrumentName; }
 
 // NeXus Muon file reader for NXlog data.
 // Read the given Nexus file into temp storage.
@@ -246,7 +246,7 @@ void MuonNexusReader::readLogData(const string &filename) {
   // memory
   // Also get the start_time string needed to change these times into ISO times
   std::map<string, string> entries = handle.getEntries();
-  for (auto &entrie : entries) {
+  for (const auto &entrie : entries) {
     string nxname = entrie.first;
     string nxclass = entrie.second;
 

@@ -74,7 +74,7 @@ public:
   void getTimeChannels(float *timebnds,
                        const int &nbnds) const; ///< get time bin boundaries
                                                 /// return sample name
-  std::string getSampleName() const { return m_nexusSampleName; };
+  std::string const &getSampleName() const { return m_nexusSampleName; };
   int numberOfLogs() const;                  ///< Number of NXlog sections read from file
   int getLogLength(const int i) const;       ///< Lenght of i'th log
   std::string getLogName(const int i) const; ///< Name of i'th log
@@ -89,11 +89,11 @@ public:
   int t_ntc1 = 0; ///< number of time channels in time regime 1
   int t_nper = 0; ///< number of periods in file (=1 at present)
   // for nexus histogram data
-  std::vector<float> m_correctedTimes;   ///< temp store for corrected times
-  std::vector<int> m_counts;             ///< temp store of histogram data
-  std::vector<int> m_detectorGroupings;  ///< detector grouping info
-  int m_numDetectors = 0;                ///< detector count
-  std::string getInstrumentName() const; ///< return instrument name
+  std::vector<float> m_correctedTimes;          ///< temp store for corrected times
+  std::vector<int> m_counts;                    ///< temp store of histogram data
+  std::vector<int> m_detectorGroupings;         ///< detector grouping info
+  int m_numDetectors = 0;                       ///< detector count
+  std::string const &getInstrumentName() const; ///< return instrument name
   int m_numPeriodSequences = 0;
   std::string m_periodNames;
   std::string m_periodTypes;
