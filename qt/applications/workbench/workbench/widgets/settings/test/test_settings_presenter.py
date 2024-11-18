@@ -103,6 +103,7 @@ class SettingsPresenterTest(TestCase):
     def test_action_apply_button_pushed(self):
         self.presenter.action_apply_button_pushed()
         self.mock_model.apply_all_settings.assert_called_once()
+        self.mock_parent.config_updated.assert_called_once()
 
     @patch("workbench.widgets.settings.presenter.SettingsPresenter.view_closing")
     def test_action_okay_button_pushed(self, mock_view_closing: MagicMock):

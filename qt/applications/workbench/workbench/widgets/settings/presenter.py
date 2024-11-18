@@ -88,6 +88,7 @@ class SettingsPresenter(object):
     def action_apply_button_pushed(self):
         changes_that_need_restart = self.model.potential_changes_that_need_a_restart()
         self.model.apply_all_settings()
+        self.parent.config_updated()
         self.view.notify_changes_need_restart(changes_that_need_restart)
 
     def action_section_changed(self, new_section_pos):
