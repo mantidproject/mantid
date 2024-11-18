@@ -265,8 +265,10 @@ WorkspaceDimensionality getWorkspaceDimensionality(H5::Group &dataGroup) {
   return dimensionality;
 }
 
-std::string getUnit(H5::DataSet &dataSet) {
-  return Mantid::DataHandling::H5Util::readAttributeAsString(dataSet, sasUnitAttr);
+std::string getUnit(const H5::DataSet &dataSet) {
+  std::string unit;
+  Mantid::DataHandling::H5Util::readStringAttribute(dataSet, sasUnitAttr, unit);
+  return unit;
 }
 
 bool hasQDev(H5::Group &dataGroup) {
@@ -480,7 +482,8 @@ void loadTransmissionData(H5::Group &transmission, const Mantid::API::MatrixWork
   // transmission lambda points to be saved as bin edges rather than points as
   // required by the NXcanSAS standard. We allow loading those files and convert
   // to points on the fly
-  auto lambda = Mantid::DataHandling::H5Util::readArray1DCoerce<double>(transmission, sasTransmissionSpectrumLambda);
+  std::vector<double> lambda;
+  Mantid::DataHandling::H5Util::readArray1DCoerce(transmission, sasTransmissionSpectrumLambda, lambda);
   if (lambda.size() == workspace->blocksize())
     workspace->setPoints(0, std::move(lambda));
   else if (lambda.size() == workspace->blocksize() + 1)

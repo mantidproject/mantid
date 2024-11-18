@@ -57,14 +57,13 @@ MANTID_DATAHANDLING_DLL H5::Group createGroupCanSAS(H5::H5File &file, const std:
 MANTID_DATAHANDLING_DLL H5::DSetCreatPropList setCompressionAttributes(const std::size_t length,
                                                                        const int deflateLevel = 6);
 
-template <typename LocationType>
-void writeStrAttribute(LocationType &location, const std::string &name, const std::string &value);
+MANTID_DATAHANDLING_DLL void writeStrAttribute(const H5::H5Object &object, const std::string &name,
+                                               const std::string &value);
 
-template <typename NumT, typename LocationType>
-void writeNumAttribute(LocationType &location, const std::string &name, const NumT &value);
+template <typename NumT> void writeNumAttribute(const H5::H5Object &object, const std::string &name, const NumT &value);
 
-template <typename NumT, typename LocationType>
-void writeNumAttribute(LocationType &location, const std::string &name, const std::vector<NumT> &value);
+template <typename NumT>
+void writeNumAttribute(const H5::H5Object &object, const std::string &name, const std::vector<NumT> &value);
 
 MANTID_DATAHANDLING_DLL void write(H5::Group &group, const std::string &name, const std::string &value);
 
@@ -78,22 +77,25 @@ MANTID_DATAHANDLING_DLL std::string readString(H5::H5File &file, const std::stri
 
 MANTID_DATAHANDLING_DLL std::string readString(H5::Group &group, const std::string &name);
 
-MANTID_DATAHANDLING_DLL std::string readString(H5::DataSet &dataset);
+MANTID_DATAHANDLING_DLL std::string readString(const H5::DataSet &dataset);
 
 MANTID_DATAHANDLING_DLL std::vector<std::string> readStringVector(H5::Group &, const std::string &);
 
-template <typename LocationType>
-std::string readAttributeAsString(LocationType &dataset, const std::string &attributeName);
+MANTID_DATAHANDLING_DLL bool hasAttribute(const H5::H5Object &object, const char *attributeName);
 
-template <typename NumT, typename LocationType>
-NumT readNumAttributeCoerce(LocationType &location, const std::string &attributeName);
+MANTID_DATAHANDLING_DLL void readStringAttribute(const H5::H5Object &object, const std::string &attributeName,
+                                                 std::string &output);
 
-template <typename NumT, typename LocationType>
-std::vector<NumT> readNumArrayAttributeCoerce(LocationType &location, const std::string &attributeName);
+template <typename NumT> NumT readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 
-template <typename NumT> std::vector<NumT> readArray1DCoerce(H5::Group &group, const std::string &name);
+template <typename NumT>
+std::vector<NumT> readNumArrayAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 
-template <typename NumT> std::vector<NumT> readArray1DCoerce(H5::DataSet &dataset);
+template <typename NumT>
+void readArray1DCoerce(const H5::Group &group, const std::string &name, std::vector<NumT> &output);
+template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::Group &group, const std::string &name);
+
+template <typename NumT> void readArray1DCoerce(const H5::DataSet &dataset, std::vector<NumT> &output);
 
 /// Test if a group already exists within an HDF5 file or parent group.
 MANTID_DATAHANDLING_DLL bool groupExists(H5::H5Object &h5, const std::string &groupPath);

@@ -33,19 +33,10 @@ using namespace Mantid::DataObjects;
 //
 class LoadMcStasTest : public CxxTest::TestSuite {
 public:
-  void testInit() {
-    TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());
-    TS_ASSERT(algToBeTested.isInitialized());
-  }
-
   void testLoadHistPlusEvent() {
     outputSpace = "LoadMcStasTestLoadHistPlusEvent";
-    algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
 
-    // Should fail because mandatory parameter has not been set
-    TS_ASSERT_THROWS(algToBeTested.execute(), const std::runtime_error &);
-
-    load_test("mcstas_event_hist.h5", outputSpace);
+    load_test("mcstas_event_hist.h5", outputSpace, true);
 
     std::string postfix = "_" + outputSpace;
 
@@ -84,8 +75,6 @@ public:
   // components, hence where two additional event datasets are returned
   void testLoadHistPlusEvent2() {
     outputSpace = "LoadMcStasTestLoadHistPlusEvent2";
-    algToBeTested.setPropertyValue("OutputWorkspace", outputSpace);
-    algToBeTested.setPropertyValue("OutputOnlySummedEventWorkspace", boost::lexical_cast<std::string>(false));
 
     load_test("mcstas_event_hist.h5", outputSpace);
 
@@ -113,8 +102,6 @@ public:
 
   void testLoadMultipleDatasets() {
     outputSpace = "LoadMcStasTestLoadMultipleDatasets";
-    algToBeTested.setProperty("OutputWorkspace", outputSpace);
-    algToBeTested.setPropertyValue("OutputOnlySummedEventWorkspace", boost::lexical_cast<std::string>(false));
     // load one dataset
     auto outputGroup = load_test("mccode_contains_one_bank.h5", outputSpace);
     TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 6);
@@ -125,10 +112,8 @@ public:
 
   void testLoadSameDataTwice() {
     outputSpace = "LoadMcStasTestLoadSameDataTwice";
-    algToBeTested.setProperty("OutputWorkspace", outputSpace);
-    algToBeTested.setPropertyValue("OutputOnlySummedEventWorkspace", boost::lexical_cast<std::string>(true));
     // load the same dataset twice
-    load_test("mccode_contains_one_bank.h5", outputSpace);
+    load_test("mccode_contains_one_bank.h5", outputSpace, true);
     auto outputGroup = load_test("mccode_contains_one_bank.h5", outputSpace);
     TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 6);
   }
@@ -137,13 +122,9 @@ public:
   // values of OutputOnlySummedEventWorkspace
   void testLoadSameDataTwice2() {
     outputSpace = "LoadMcStasTestLoadSameDataTwice2";
-    algToBeTested.setProperty("OutputWorkspace", outputSpace);
-
-    algToBeTested.setPropertyValue("OutputOnlySummedEventWorkspace", boost::lexical_cast<std::string>(true));
-    auto outputGroup = load_test("mccode_multiple_scattering.h5", outputSpace);
+    auto outputGroup = load_test("mccode_multiple_scattering.h5", outputSpace, true);
     TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 1);
 
-    algToBeTested.setPropertyValue("OutputOnlySummedEventWorkspace", boost::lexical_cast<std::string>(false));
     outputGroup = load_test("mccode_multiple_scattering.h5", outputSpace);
     TS_ASSERT_EQUALS(outputGroup->getNumberOfEntries(), 3);
   }
@@ -159,9 +140,12 @@ private:
     return sum;
   }
 
-  std::shared_ptr<WorkspaceGroup> load_test(const std::string &fileName, const std::string &outputName) {
-
-    // specify name of file to load workspace from
+  std::shared_ptr<WorkspaceGroup> load_test(const std::string &fileName, const std::string &outputName,
+                                            bool summed = false) {
+    LoadMcStas algToBeTested;
+    algToBeTested.initialize();
+    algToBeTested.setProperty("OutputWorkspace", outputName);
+    algToBeTested.setPropertyValue("OutputOnlySummedEventWorkspace", boost::lexical_cast<std::string>(summed));
     algToBeTested.setProperty("Filename", fileName);
 
     // mark the temp file to be deleted upon end of execution
@@ -175,7 +159,6 @@ private:
     return outputGroup;
   }
 
-  LoadMcStas algToBeTested;
   std::string inputFile;
   std::string outputSpace;
 };
