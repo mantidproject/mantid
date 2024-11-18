@@ -152,7 +152,7 @@ void SymmetriseView::setDefaults() {
   m_enumManager->setValue(m_properties["ReflectType"], 0);
 
   // Set default x axis range
-  QPair<double, double> defaultRange(-1.0, 1.0);
+  std::pair<double, double> defaultRange(-1.0, 1.0);
   m_uiForm.ppRawPlot->setAxisRange(defaultRange, AxisID::XBottom);
   m_uiForm.ppPreviewPlot->setAxisRange(defaultRange, AxisID::XBottom);
 
@@ -220,7 +220,7 @@ void SymmetriseView::resetEDefaults(bool isPositive) {
  * @param range Active spectra range
  *
  */
-void SymmetriseView::resetEDefaults(bool isPositive, QPair<double, double> range) {
+void SymmetriseView::resetEDefaults(bool isPositive, std::pair<double, double> range) {
   auto rangeESelector = m_uiForm.ppRawPlot->getRangeSelector("rangeE");
 
   // Set Selector range boundaries
@@ -332,8 +332,8 @@ void SymmetriseView::updateMiniPlots() {
   m_uiForm.ppPreviewPlot->replot();
 
   // Update bounds for horizontal markers
-  auto verticalRange = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
-  updateHorizontalMarkers(convertTupleToQPair(verticalRange));
+  auto const verticalRange = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
+  updateHorizontalMarkers(convertTupleToPair(verticalRange));
 }
 
 /**
@@ -342,7 +342,7 @@ void SymmetriseView::updateMiniPlots() {
  * @param Y range for current workspace
  *
  */
-void SymmetriseView::updateHorizontalMarkers(QPair<double, double> yrange) {
+void SymmetriseView::updateHorizontalMarkers(std::pair<double, double> yrange) {
   auto horzMarkFirst = m_uiForm.ppRawPlot->getSingleSelector("horzMarkFirst");
   auto horzMarkSecond = m_uiForm.ppRawPlot->getSingleSelector("horzMarkSecond");
 

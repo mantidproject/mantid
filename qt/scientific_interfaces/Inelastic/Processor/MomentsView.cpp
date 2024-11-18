@@ -138,7 +138,7 @@ void MomentsView::plotNewData(std::string const &filename) {
  *
  * @param bounds :: The upper and lower bounds to be set in the property browser
  */
-void MomentsView::setPlotPropertyRange(const QPair<double, double> &bounds) {
+void MomentsView::setPlotPropertyRange(const std::pair<double, double> &bounds) {
   disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &MomentsView::notifyValueChanged);
   m_dblManager->setMinimum(m_properties["EMin"], bounds.first);
   m_dblManager->setMaximum(m_properties["EMin"], bounds.second);
@@ -154,7 +154,7 @@ void MomentsView::setPlotPropertyRange(const QPair<double, double> &bounds) {
  *
  * @param bounds :: The upper and lower bounds to be set
  */
-void MomentsView::setRangeSelector(const QPair<double, double> &bounds) {
+void MomentsView::setRangeSelector(const std::pair<double, double> &bounds) {
   disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &MomentsView::notifyValueChanged);
 
   double deltaX = abs(bounds.second - bounds.first);

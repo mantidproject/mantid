@@ -526,8 +526,8 @@ public:
   MOCK_METHOD1(setWSSuffixes, void(QStringList const &suffix));
   MOCK_METHOD1(setLoadHistory, void(bool doLoadHistory));
 
-  MOCK_METHOD1(setPlotPropertyRange, void(const QPair<double, double> &bounds));
-  MOCK_METHOD1(setRangeSelector, void(const QPair<double, double> &bounds));
+  MOCK_METHOD1(setPlotPropertyRange, void(const std::pair<double, double> &bounds));
+  MOCK_METHOD1(setRangeSelector, void(const std::pair<double, double> &bounds));
   MOCK_METHOD1(setRangeSelectorMin, void(double newValue));
   MOCK_METHOD1(setRangeSelectorMax, void(double newValue));
   MOCK_METHOD1(setSaveResultEnabled, void(bool enable));
@@ -563,7 +563,7 @@ public:
   MOCK_METHOD1(setPreviewSpectrumMaximum, void(int value));
   MOCK_METHOD0(updateDisplayedBinParameters, void());
   MOCK_METHOD2(setRangeSelectorDefault,
-               void(const Mantid::API::MatrixWorkspace_sptr inputWorkspace, const QPair<double, double> &range));
+               void(const Mantid::API::MatrixWorkspace_sptr inputWorkspace, const std::pair<double, double> &range));
 
   MOCK_METHOD1(setSampleWSSuffixes, void(const QStringList &suffix));
   MOCK_METHOD1(setSampleFBSuffixes, void(const QStringList &suffix));

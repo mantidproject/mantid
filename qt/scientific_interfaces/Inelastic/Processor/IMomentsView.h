@@ -43,9 +43,9 @@ public:
   virtual void setLoadHistory(bool doLoadHistory) = 0;
 
   /// Function to set the range limits of the plot
-  virtual void setPlotPropertyRange(const QPair<double, double> &bounds) = 0;
+  virtual void setPlotPropertyRange(const std::pair<double, double> &bounds) = 0;
   /// Function to set the range selector on the mini plot
-  virtual void setRangeSelector(const QPair<double, double> &bounds) = 0;
+  virtual void setRangeSelector(const std::pair<double, double> &bounds) = 0;
   /// Sets the min of the range selector if it is less than the max
   virtual void setRangeSelectorMin(double newValue) = 0;
   /// Sets the max of the range selector if it is more than the min

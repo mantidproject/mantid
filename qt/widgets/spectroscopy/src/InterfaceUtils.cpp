@@ -147,10 +147,6 @@ QStringList getCorrectionsWSSuffixes(std::string const &interfaceName) {
   return getWSSuffixes(interfaceName, "corrections");
 }
 
-QPair<double, double> convertTupleToQPair(std::tuple<double, double> const &doubleTuple) {
-  return QPair<double, double>(std::get<0>(doubleTuple), std::get<1>(doubleTuple));
-}
-
 std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &doubleTuple) {
   return std::make_pair(std::get<0>(doubleTuple), std::get<1>(doubleTuple));
 }
@@ -168,7 +164,7 @@ QString makeQStringNumber(double value, int precision) { return QString::number(
  * @param bounds :: The upper and lower bounds to be set
  */
 void setPlotPropertyRange(QtDoublePropertyManager *dblPropertyManager, MantidWidgets::RangeSelector *rs,
-                          QtProperty *min, QtProperty *max, const QPair<double, double> &bounds) {
+                          QtProperty *min, QtProperty *max, const std::pair<double, double> &bounds) {
   dblPropertyManager->setRange(min, bounds.first, bounds.second);
   dblPropertyManager->setRange(max, bounds.first, bounds.second);
   rs->setBounds(bounds.first, bounds.second);
@@ -185,8 +181,8 @@ void setPlotPropertyRange(QtDoublePropertyManager *dblPropertyManager, MantidWid
  * @param range :: The range to set the range selector to.
  */
 void setRangeSelector(QtDoublePropertyManager *dblPropertyManager, MantidWidgets::RangeSelector *rs, QtProperty *lower,
-                      QtProperty *upper, const QPair<double, double> &range,
-                      const std::optional<QPair<double, double>> &bounds) {
+                      QtProperty *upper, const std::pair<double, double> &range,
+                      const std::optional<std::pair<double, double>> &bounds) {
   dblPropertyManager->setValue(lower, range.first);
   dblPropertyManager->setValue(upper, range.second);
   rs->setRange(range.first, range.second);
