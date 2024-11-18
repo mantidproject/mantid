@@ -119,5 +119,5 @@ if [[ $ENABLE_SYSTEM_TESTS == true ]]; then
         SYSTEM_TEST_OPTIONS+=" --exclude-in-pull-requests"
     fi
 
-    run_with_xvfb ctest -L SystemTest --no-compress-output -T Test -O test_logs/systest_$OSTYPE.log --schedule-random --repeat until-pass:3 $SYSTEM_TEST_OPTIONS
+    run_with_xvfb ctest -L SystemTest --test-output-truncation middle -T Test -O test_logs/systest_$OSTYPE.log $SYSTEM_TEST_OPTIONS
 fi
