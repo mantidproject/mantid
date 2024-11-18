@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/DataBlockComposite.h"
 #include "MantidDataHandling/DataBlockGenerator.h"
+
 #include <algorithm>
 #include <cassert>
+#include <numeric>
 
 namespace {
 

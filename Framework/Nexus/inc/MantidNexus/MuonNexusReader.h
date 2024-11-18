@@ -6,9 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidNexus/DllConfig.h"
+
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <climits>
 #include <nexus/NeXusFile.hpp>

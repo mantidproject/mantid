@@ -6,11 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Sample.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/DllConfig.h"
@@ -22,9 +17,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
 
 namespace Mantid {
 namespace NeXus {
