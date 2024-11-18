@@ -104,7 +104,7 @@ void ElwinModel::groupAlgorithm(std::string const &inputWorkspaces, std::string 
 }
 
 std::string ElwinModel::setupExtractSpectra(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra,
-                                            std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> *algQueue) const {
+                                            std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algQueue) const {
 
   // Configure ExtractSingleSpectrum algorithm
   auto elwinSingAlg = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
@@ -116,7 +116,7 @@ std::string ElwinModel::setupExtractSpectra(MatrixWorkspace_sptr workspace, Func
 
   MantidQt::API::IConfiguredAlgorithm_sptr elwinAlg =
       std::make_shared<API::ConfiguredAlgorithm>(elwinSingAlg, std::move(extractSpectra));
-  algQueue->emplace_back(elwinAlg);
+  algQueue.emplace_back(elwinAlg);
   for (size_t j = 1; j < spectra.size().value; j++) {
 
     // Configure ExtractSingleSpectrum algorithm
@@ -125,7 +125,7 @@ std::string ElwinModel::setupExtractSpectra(MatrixWorkspace_sptr workspace, Func
     extractSpectra->setProperty("OutputWorkspace", "specWSnext");
     extractSpectra->setProperty("WorkspaceIndex", std::to_string(spectra[j].value));
     elwinAlg = std::make_shared<API::ConfiguredAlgorithm>(elwinSingAlg, std::move(extractSpectra));
-    algQueue->emplace_back(elwinAlg);
+    algQueue.emplace_back(elwinAlg);
 
     // Configure AppendSpectra algorithm
     auto elwinAppAlg = AlgorithmManager::Instance().create("AppendSpectra");
@@ -136,7 +136,7 @@ std::string ElwinModel::setupExtractSpectra(MatrixWorkspace_sptr workspace, Func
     appendSpectra->setProperty("AppendYAxisLabels", true);
     appendSpectra->setProperty("OutputWorkspace", workspace->getName() + "_extracted_spectra");
     elwinAlg = std::make_shared<API::ConfiguredAlgorithm>(elwinAppAlg, std::move(appendSpectra));
-    algQueue->emplace_back(elwinAlg);
+    algQueue.emplace_back(elwinAlg);
   }
   return workspace->getName() + "_extracted_spectra";
 }
