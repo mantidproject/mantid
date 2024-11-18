@@ -261,7 +261,11 @@ bool QtMainWindowView::fileExists(std::string const &filepath) const {
 }
 
 std::string QtMainWindowView::getFullFilePath(const std::string &filename) const {
-  return FileFinder::Instance().getFullPath(filename);
+  try {
+    return FileFinder::Instance().getFullPath(filename);
+  } catch (const Poco::PathSyntaxException &) {
+    return "";
+  }
 }
 
 } // namespace CustomInterfaces::ISISReflectometry
