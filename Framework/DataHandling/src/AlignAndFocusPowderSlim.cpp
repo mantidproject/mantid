@@ -335,78 +335,90 @@ void AlignAndFocusPowderSlim::exec() {
 
   if (itClassEntries != allEntries.end()) {
     const std::set<std::string> &classEntries = itClassEntries->second;
-    const std::regex classRegex("(/entry/)([^/]*)");
-    std::smatch groups;
+
+    // filter out the diagnostic entries
+    std::set<std::string> bankEntryNames;
+    {
+      const std::regex classRegex("(/entry/)([^/]*)");
+      std::smatch groups;
+
+      for (const std::string &classEntry : classEntries) {
+        if (std::regex_match(classEntry, groups, classRegex)) {
+          const std::string entry_name(groups[2].str());
+          if (classEntry.ends_with("bank_error_events")) {
+            // do nothing
+          } else if (classEntry.ends_with("bank_unmapped_events")) {
+            // do nothing
+          } else {
+            bankEntryNames.insert(entry_name);
+          }
+        }
+      }
+    }
 
     size_t specnum = 0;
-    for (const std::string &classEntry : classEntries) {
-      if (std::regex_match(classEntry, groups, classRegex)) {
-        const std::string entry_name(groups[2].str());
-        const auto startTimeBank = std::chrono::high_resolution_clock::now();
+    for (const std::string &entry_name : bankEntryNames) {
+      std::cout << "ENTRY: " << entry_name << std::endl;
+      const auto startTimeBank = std::chrono::high_resolution_clock::now();
 
-        // skip entries with junk data
-        if (entry_name == "bank_error_events" || entry_name == "bank_unmapped_events")
-          continue;
+      // TODO should re-use vectors to save malloc/free calls
+      std::unique_ptr<std::vector<uint32_t>> event_detid = std::make_unique<std::vector<uint32_t>>();
+      std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
+      // TODO std::unique_ptr<std::vector<float>> event_weight; some other time
+      std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
+      g_log.information() << "Loading bank " << entry_name << '\n';
+      h5file.openGroup(entry_name, "NXevent_data");
 
-        // TODO should re-use vectors to save malloc/free calls
-        std::unique_ptr<std::vector<uint32_t>> event_detid = std::make_unique<std::vector<uint32_t>>();
-        std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
-        // TODO std::unique_ptr<std::vector<float>> event_weight; some other time
-        std::unique_ptr<std::vector<uint64_t>> event_index = std::make_unique<std::vector<uint64_t>>();
-        g_log.information() << "Loading bank " << entry_name << '\n';
-        h5file.openGroup(entry_name, "NXevent_data");
-
-        if (is_time_filtered) {
-          const auto startTime = std::chrono::high_resolution_clock::now();
-          loadEventIndex(event_index, h5file);
-          addTimer("loadEventIndex" + entry_name, startTime, std::chrono::high_resolution_clock::now());
-          start_event = event_index->at(pulse_start_index);
-          if (pulse_stop_index != std::numeric_limits<size_t>::max())
-            stop_event = event_index->at(pulse_stop_index);
-          g_log.debug() << "Loading events from " << start_event << " to " << stop_event << '\n';
-        }
-
-        {
-          const auto startTime = std::chrono::high_resolution_clock::now();
-          loadTOF(event_time_of_flight, h5file);
-          addTimer("readTOF" + entry_name, startTime, std::chrono::high_resolution_clock::now());
-        }
-        {
-          const auto startTime = std::chrono::high_resolution_clock::now();
-          loadDetid(event_detid, h5file);
-          addTimer("readDetID" + entry_name, startTime, std::chrono::high_resolution_clock::now());
-        }
-
-        if (event_time_of_flight->empty() || event_detid->empty()) {
-          g_log.warning() << "No data for bank " << entry_name << '\n';
-          h5file.closeGroup();
-          continue;
-        }
-
-        const auto startTimeSetup = std::chrono::high_resolution_clock::now();
-        const auto [minval, maxval] = parallel_minmax(event_detid.get());
-        BankCalibration calibration(static_cast<detid_t>(minval), static_cast<detid_t>(maxval), m_calibration);
-
-        auto &spectrum = wksp->getSpectrum(specnum);
-        Histogrammer histogrammer(&spectrum.readX(), binWidth, linearBins);
-        const auto numEvent = event_time_of_flight->size();
-        // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
-        // counting things
-        std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
-        addTimer("setup" + entry_name, startTimeSetup, std::chrono::high_resolution_clock::now());
-
-        const auto startTimeProcess = std::chrono::high_resolution_clock::now();
-        ProcessEventsTask task(&histogrammer, event_detid.get(), event_time_of_flight.get(), &calibration, &y_temp,
-                               &m_masked);
-        tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent), task);
-        auto &y_values = spectrum.dataY();
-        std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
-        addTimer("proc" + entry_name, startTimeProcess, std::chrono::high_resolution_clock::now());
-        addTimer(entry_name, startTimeBank, std::chrono::high_resolution_clock::now());
-
-        h5file.closeGroup();
-        specnum++;
+      if (is_time_filtered) {
+        const auto startTime = std::chrono::high_resolution_clock::now();
+        loadEventIndex(event_index, h5file);
+        addTimer("loadEventIndex" + entry_name, startTime, std::chrono::high_resolution_clock::now());
+        start_event = event_index->at(pulse_start_index);
+        if (pulse_stop_index != std::numeric_limits<size_t>::max())
+          stop_event = event_index->at(pulse_stop_index);
+        g_log.debug() << "Loading events from " << start_event << " to " << stop_event << '\n';
       }
+
+      {
+        const auto startTime = std::chrono::high_resolution_clock::now();
+        loadTOF(event_time_of_flight, h5file);
+        addTimer("readTOF" + entry_name, startTime, std::chrono::high_resolution_clock::now());
+      }
+      {
+        const auto startTime = std::chrono::high_resolution_clock::now();
+        loadDetid(event_detid, h5file);
+        addTimer("readDetID" + entry_name, startTime, std::chrono::high_resolution_clock::now());
+      }
+
+      if (event_time_of_flight->empty() || event_detid->empty()) {
+        g_log.warning() << "No data for bank " << entry_name << '\n';
+        h5file.closeGroup();
+        continue;
+      }
+
+      const auto startTimeSetup = std::chrono::high_resolution_clock::now();
+      const auto [minval, maxval] = parallel_minmax(event_detid.get());
+      BankCalibration calibration(static_cast<detid_t>(minval), static_cast<detid_t>(maxval), m_calibration);
+
+      auto &spectrum = wksp->getSpectrum(specnum);
+      Histogrammer histogrammer(&spectrum.readX(), binWidth, linearBins);
+      const auto numEvent = event_time_of_flight->size();
+      // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
+      // counting things
+      std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
+      addTimer("setup" + entry_name, startTimeSetup, std::chrono::high_resolution_clock::now());
+
+      const auto startTimeProcess = std::chrono::high_resolution_clock::now();
+      ProcessEventsTask task(&histogrammer, event_detid.get(), event_time_of_flight.get(), &calibration, &y_temp,
+                             &m_masked);
+      tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent), task);
+      auto &y_values = spectrum.dataY();
+      std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
+      addTimer("proc" + entry_name, startTimeProcess, std::chrono::high_resolution_clock::now());
+      addTimer(entry_name, startTimeBank, std::chrono::high_resolution_clock::now());
+
+      h5file.closeGroup();
+      specnum++;
     }
   }
 
