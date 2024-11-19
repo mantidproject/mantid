@@ -51,7 +51,6 @@ public:
   virtual std::string getPreviewWorkspaceName(int index) const = 0;
   virtual void setPreviewWorkspaceName(int index) = 0;
   virtual std::string getCurrentPreview() const = 0;
-  virtual void updateSelectorRange(const MatrixWorkspace_sptr &inputWS) = 0;
 
   // controls for dataTable
   virtual void clearDataTable() = 0;

@@ -156,13 +156,12 @@ public:
 
   void test_ExtractSpectra_set_up() {
     MantidQt::API::BatchAlgorithmRunner batch;
-
+    std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algQueue = {};
     auto workspace1 = WorkspaceCreationHelper::create2DWorkspace(5, 4);
     Mantid::API::AnalysisDataService::Instance().addOrReplace("Workspace_name1_sqw", workspace1);
 
-    auto const extractSpectra =
-        m_model->setupExtractSpectra(workspace1, FunctionModelSpectra("0,1"), "Workspace_name1_sqw_extracted_spectra");
-    batch.setQueue(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>{extractSpectra});
+    m_model->setupExtractSpectra(workspace1, FunctionModelSpectra("0,1"), algQueue);
+    batch.setQueue(std::move(algQueue));
     batch.executeBatch();
 
     TS_ASSERT(Mantid::API::AnalysisDataService::Instance().doesExist("Workspace_name1_sqw_extracted_spectra"));
