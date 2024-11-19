@@ -5,11 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.kernel import V3D
-from mantid.dataobjects import NoShape, PeakShapeSpherical, PeakShapeEllipsoid
+from mantid.kernel import V3D, SpecialCoordinateSystem
+from mantid.dataobjects import NoShape, PeakShapeSpherical, PeakShapeEllipsoid, PeakShapeDetectorBin
 from mantid.simpleapi import CreateSimulationWorkspace, CreatePeaksWorkspace, LoadInstrument
 import numpy as np
 import numpy.testing as npt
+import json
 
 
 class IPeakTest(unittest.TestCase):
@@ -173,6 +174,8 @@ class IPeakTest(unittest.TestCase):
         no_shape = NoShape()
         sphere = PeakShapeSpherical(1)
         ellipse = PeakShapeEllipsoid([V3D(1, 0, 0), V3D(0, 1, 0), V3D(0, 0, 1)], [0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9])
+        detectorXList = [(14500, 20.45, 50.89), (45670, 109.88, 409.56), (60995, 56009.89, 70988.89)]
+        detectorBin = PeakShapeDetectorBin(detectorXList, SpecialCoordinateSystem.NONE, "test", 1)
 
         self.assertEqual(self._peak.getPeakShape().shapeName(), "none")
 
@@ -184,6 +187,16 @@ class IPeakTest(unittest.TestCase):
 
         self._peak.setPeakShape(no_shape)
         self.assertEqual(self._peak.getPeakShape().shapeName(), "none")
+
+        self._peak.setPeakShape(detectorBin)
+        self.assertEqual(self._peak.getPeakShape().shapeName(), "PeakShapeDetectorBin")
+        self.assertEqual(self._peak.getPeakShape().algorithmVersion(), 1)
+        self.assertEqual(self._peak.getPeakShape().algorithmName(), "test")
+        det_bin_dict = json.loads(self._peak.getPeakShape().toJSON())
+        for i in range(3):
+            self.assertEqual(det_bin_dict["detectors"][i]["detId"], detectorXList[i][0])
+            self.assertEqual(det_bin_dict["detectors"][i]["startX"], detectorXList[i][1])
+            self.assertEqual(det_bin_dict["detectors"][i]["endX"], detectorXList[i][2])
 
 
 if __name__ == "__main__":

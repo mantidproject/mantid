@@ -54,6 +54,8 @@ set(SRC_FILES
     src/WorkspaceCreation.cpp
     src/WorkspaceProperty.cpp
     src/WorkspaceSingleValue.cpp
+    src/PeakShapeDetectorBin.cpp
+    src/PeakShapeDetectorBinFactory.cpp
 )
 
 set(INC_FILES
@@ -138,6 +140,8 @@ set(INC_FILES
     inc/MantidDataObjects/Workspace2D_fwd.h
     inc/MantidDataObjects/WorkspaceCreation.h
     inc/MantidDataObjects/WorkspaceSingleValue.h
+    inc/MantidDataObjects/PeakShapeDetectorBin.h
+    inc/MantidDataObjects/PeakShapeDetectorBinFactory.h
 )
 
 set(TEST_FILES
@@ -205,6 +209,8 @@ set(TEST_FILES
     WorkspaceSingleValueTest.h
     WorkspaceValidatorsTest.h
     MortonIndex/BitInterleavingTest.h
+    PeakShapeDetectorBinTest.h
+    PeakShapeDetectorBinFactoryTest.h
 )
 
 if(COVERAGE)
