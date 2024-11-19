@@ -485,9 +485,9 @@ public:
 
   MOCK_CONST_METHOD2(setupLoadAlgorithm, MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &filepath,
                                                                                   std::string const &outputName));
-  MOCK_CONST_METHOD3(setupExtractSpectra, MantidQt::API::IConfiguredAlgorithm_sptr(MatrixWorkspace_sptr workspce,
-                                                                                   FunctionModelSpectra const &spectra,
-                                                                                   std::string const &outputName));
+  MOCK_CONST_METHOD3(setupExtractSpectra,
+                     std::string(MatrixWorkspace_sptr workspace, FunctionModelSpectra const &spectra,
+                                 std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algQueue));
   MOCK_CONST_METHOD2(setupGroupAlgorithm,
                      MantidQt::API::IConfiguredAlgorithm_sptr(std::string const &inputWorkspacesString,
                                                               std::string const &inputGroupWsName));
