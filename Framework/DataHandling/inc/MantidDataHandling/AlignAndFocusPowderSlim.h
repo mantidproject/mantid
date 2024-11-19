@@ -44,11 +44,6 @@ private:
 
   void initCalibrationConstants(API::MatrixWorkspace_sptr &wksp);
 
-  void loadTOF(std::unique_ptr<std::vector<float>> &data, ::NeXus::File &h5file);
-  void loadDetid(std::unique_ptr<std::vector<uint32_t>> &data, ::NeXus::File &h5file);
-  void loadPulseTimes(std::unique_ptr<std::vector<double>> &data, ::NeXus::File &h5file);
-  void loadEventIndex(std::unique_ptr<std::vector<uint64_t>> &data, ::NeXus::File &h5file);
-
   void loadCalFile(const Mantid::API::Workspace_sptr &inputWS, const std::string &filename);
 
   std::map<detid_t, double> m_calibration; // detid: 1/difc
