@@ -71,7 +71,6 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::I
  */
 void ElwinPresenter::runComplete(bool error) {
   m_view->setRunIsRunning(false);
-  m_outputNamePresenter->generateWarningLabel();
 
   if (AnalysisDataService::Instance().doesExist("specWSnext")) {
     AnalysisDataService::Instance().remove("specWSnext");
@@ -220,7 +219,7 @@ void ElwinPresenter::handleRun() {
   m_algorithmRunner->execute(std::move(algQueue));
   // Set the result workspace for Python script export
 
-  m_pythonExportWsName = m_outputNamePresenter->generateOutputLabel() + "_elwin_eq2";
+  m_pythonExportWsName = outputWsBasename + "_elwin_eq2";
 }
 
 /**
