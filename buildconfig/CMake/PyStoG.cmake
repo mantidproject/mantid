@@ -57,6 +57,9 @@ foreach(_py_file ${_test_files_support})
   file(COPY ${_PyStoG_source_test_dir}/${_py_file} DESTINATION ${_PyStoG_test_dir})
 endforeach()
 
+# copy over the test data
+file(COPY ${_PyStoG_download_dir}/src/PyStoG/data/test_data DESTINATION ${_PyStoG_test_dir})
+
 # register the tests
 set(PYUNITTEST_PYTHONPATH_EXTRA ${_PyStoG_test_root_dir})
 pyunittest_add_test(${_PyStoG_test_dir} python.scripts.pystog ${_test_files})
