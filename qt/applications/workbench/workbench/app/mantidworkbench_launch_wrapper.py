@@ -11,13 +11,13 @@ import sys
 from workbench.app.main import main
 
 
-def launch():
+def launch(args):
     if sys.platform.startswith("linux"):
         command = ["launch_mantidworkbench"] + sys.argv[1:]
         subprocess.run(command)
     else:
-        main()
+        main(args)
 
 
 if __name__ == "__main__":
-    sys.exit(launch())
+    sys.exit(launch(sys.argv))
