@@ -1,0 +1,1 @@
+- Fix a bug where :ref:`algm-ApplyFloodWorkspace` was modifying spectra for which there is no flood correction data in multiple bin correction files.
