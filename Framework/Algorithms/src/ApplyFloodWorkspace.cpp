@@ -23,9 +23,11 @@ std::string const FLOOD_WORKSPACE("FloodWorkspace");
 std::string const OUTPUT_WORKSPACE("OutputWorkspace");
 } // namespace Prop
 
-/// The division operation on event workspaces can make
-/// a mixture of TOF and WEIGHTED events. This function
-/// will switch all events to WEIGHTED.
+/** The division operation on event workspaces can make
+ *   a mixture of TOF and WEIGHTED events.
+ *   This function will switch all events to WEIGHTED.
+ *   @param ws Pointer to matrix workspace
+ */
 void correctEvents(MatrixWorkspace *ws) {
   auto eventWS = dynamic_cast<IEventWorkspace *>(ws);
   if (eventWS) {
@@ -36,21 +38,42 @@ void correctEvents(MatrixWorkspace *ws) {
   }
 }
 
-/// Make sure that the returned flood workspace match the input workspace
-/// in number and order of the spectra.
-MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input, const MatrixWorkspace_sptr &flood) {
+/** Refactors spectra containing flat or missing flood data back to 1 after rebinning
+ *  @param flood Reference to flood Workspace with selected spectra to refactor
+ *  @param indexList Vector containing missing or incorrect workspaces to which it is assigned a flat flood
+ */
+void refactorSelectedSpectra(MatrixWorkspace_sptr &flood, const std::vector<int64_t> &indexList) {
+  auto const &floodBlockSize = flood->blocksize();
+
+  for (auto i = 0; auto const &specNum : indexList) {
+    if (specNum < 0) {
+      flood->mutableY(i).assign(floodBlockSize, 1.0);
+    }
+    i++;
+  }
+}
+
+/** Make sure that the returned flood workspace match the input workspace
+ * in number and order of the spectra.
+ *
+ *  @param input Input Workspace
+ *  @param flood Flood Workspace
+ *  @param indexList Vector containing missing or incorrect spectrum to which a flat flood is assigned
+ *  @return A flood matrix workspace equal to input in number and order of spectra
+ */
+MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input, const MatrixWorkspace_sptr &flood,
+                                    const std::vector<int64_t> &indexList) {
   auto newFlood = WorkspaceFactory::Instance().create(flood, input->getNumberHistograms());
-  auto const table = BinaryOperation::buildBinaryOperationTable(input, flood);
   auto const floodBlocksize = flood->blocksize();
   const ISpectrum *missingSpectrum = nullptr;
-  for (size_t i = 0; i < table->size(); ++i) {
-    auto const j = (*table)[i];
+  for (size_t i = 0; i < indexList.size(); ++i) {
+    auto const j = (indexList)[i];
     if (j < 0) {
       if (missingSpectrum) {
         newFlood->getSpectrum(i).copyDataFrom(*missingSpectrum);
       } else {
-        newFlood->dataY(i).assign(floodBlocksize, 1.0);
-        newFlood->dataE(i).assign(floodBlocksize, 0.0);
+        newFlood->mutableY(i).assign(floodBlocksize, 1.0);
+        newFlood->mutableE(i).assign(floodBlocksize, 0.0);
         missingSpectrum = &newFlood->getSpectrum(i);
       }
     } else {
@@ -96,12 +119,14 @@ void ApplyFloodWorkspace::exec() {
   MatrixWorkspace_sptr input = getProperty(Prop::INPUT_WORKSPACE);
   MatrixWorkspace_sptr flood = getProperty(Prop::FLOOD_WORKSPACE);
 
+  auto indexTable = std::make_shared<std::vector<int64_t>>();
   if (input->size() != flood->size()) {
-    flood = makeEqualSizes(input, flood);
+    indexTable = BinaryOperation::buildBinaryOperationTable(input, flood);
+    flood = makeEqualSizes(input, flood, *indexTable);
   }
 
   auto const inputXUnitId = input->getAxis(0)->unit()->unitID();
-  bool const doConvertUnits = flood->getAxis(0)->unit()->unitID() != inputXUnitId;
+  bool const doConvertUnits = ((flood->getAxis(0)->unit()->unitID() != inputXUnitId) && (inputXUnitId != "Empty"));
   bool const doRebin = flood->blocksize() > 1;
 
   if (doRebin) {
@@ -119,6 +144,7 @@ void ApplyFloodWorkspace::exec() {
     rebin->setProperty("OutputWorkspace", "dummy");
     rebin->execute();
     flood = rebin->getProperty("OutputWorkspace");
+    refactorSelectedSpectra(flood, *indexTable);
   }
 
   auto divide = createChildAlgorithm("Divide", 0, 1);
