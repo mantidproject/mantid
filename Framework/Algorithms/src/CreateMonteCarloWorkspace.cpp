@@ -122,7 +122,7 @@ void CreateMonteCarloWorkspace::exec() {
   progress.report();
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-  MatrixWorkspace_sptr outputWs = WorkspaceFactory::Instance().create(instWs);
+  MatrixWorkspace_sptr outputWs = WorkspaceFactory::Instance().create(instWs, 1);
   progress.report();
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
@@ -138,6 +138,9 @@ void CreateMonteCarloWorkspace::exec() {
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   outputWs->mutableY(0) = outputY;
+
+  g_log.warning("Only the first spectrum is being plotted.");
+
   progress.report();
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
