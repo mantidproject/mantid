@@ -4,8 +4,13 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-# coding=utf-8
-"""
-The categories settings section package. It should contain settings relevant
-to selecting the visible categories in Workbench.
-"""
+from unittest.mock import MagicMock
+
+
+class MockConfigService:
+    def __init__(self):
+        self.setString = MagicMock()
+        self.getString = MagicMock()
+
+
+BASE_CLASS_CONFIG_SERVICE_PATCH_PATH = "workbench.widgets.settings.base_classes.config_settings_changes_model.ConfigService"
