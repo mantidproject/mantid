@@ -40,8 +40,6 @@ Usage
 
     fig.show()
 
-Output:
-    A histogram similar to the original but generated in a random way.
 
 .. image:: ../../../images/New.png
    :alt: Overplot of simulated data over input data
