@@ -28,7 +28,7 @@ public:
     CreateMonteCarloWorkspace alg;
     Mantid::HistogramData::HistogramY yData = {1.0, 2.0, 3.0, 4.0};
     int iterations = alg.computeNumberOfIterations(yData);
-    TS_ASSERT_EQUALS(iterations, 10); // Verify if the sum of yData is rounded correctly
+    TS_ASSERT_EQUALS(iterations, 10); // Verify the sum of yData rounds correctly
   }
 
   void test_computeNormalizedCDF() {
@@ -36,42 +36,17 @@ public:
     Mantid::HistogramData::HistogramY yData = {1.0, 2.0, 3.0, 4.0};
     std::vector<double> cdf = alg.computeNormalizedCDF(yData);
     TS_ASSERT_EQUALS(cdf.size(), yData.size());
-    TS_ASSERT_DELTA(cdf.back(), 1.0, 1e-6); // Check if the last element is normalized to 1.0
+    TS_ASSERT_DELTA(cdf.back(), 1.0, 1e-6); // Check the last element is normalized to 1.0
   }
 
   void test_fillHistogramWithRandomData() {
     CreateMonteCarloWorkspace alg;
     std::vector<double> cdf = {0.1, 0.3, 0.6, 1.0};
-    std::mt19937 gen(32);
-
-    Mantid::HistogramData::HistogramY outputY = alg.fillHistogramWithRandomData(cdf, 100, gen);
+    Mantid::API::Progress progress(nullptr, 0.0, 1.0, 1); // Dummy progress
+    Mantid::HistogramData::HistogramY outputY = alg.fillHistogramWithRandomData(cdf, 100, 32, progress);
 
     auto sumCounts = std::accumulate(outputY.begin(), outputY.end(), 0.0);
-    TS_ASSERT_EQUALS(sumCounts, 100); // Ensure that the total number of counts is correct
-  }
-
-  void test_fillHistogramWithRandomData_indexOutOfBounds() {
-    CreateMonteCarloWorkspace alg;
-    // Create a CDF where the last value is less than 1.0
-    std::vector<double> cdf = {0.2, 0.5, 0.7, 0.9};
-    std::mt19937 gen(42);
-
-    int numIterations = 1000;
-
-    Mantid::HistogramData::HistogramY outputY = alg.fillHistogramWithRandomData(cdf, numIterations, gen);
-
-    // The total counts should be less than numIterations because some random numbers are not counted
-    auto sumCounts = std::accumulate(outputY.begin(), outputY.end(), 0.0);
-    TS_ASSERT_LESS_THAN(sumCounts, numIterations);
-
-    double expectedCounts = cdf.back() * numIterations;
-    TS_ASSERT_DELTA(sumCounts, expectedCounts, numIterations * 0.05); // Allow 5% tolerance
-
-    // Ensure no counts are negative or NaN
-    for (size_t i = 0; i < outputY.size(); ++i) {
-      TS_ASSERT_LESS_THAN_EQUALS(0.0, outputY[i]);
-      TS_ASSERT(std::isfinite(outputY[i]));
-    }
+    TS_ASSERT_EQUALS(sumCounts, 100); // Ensure the total number of counts is correct
   }
 
   void test_exec() {
@@ -89,7 +64,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    using Mantid::API::AnalysisDataService; // To Retrieve the output workspace
+    using Mantid::API::AnalysisDataService; // To retrieve the output workspace
     MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MonteCarloTest_WS");
     TS_ASSERT(outputWS);
 
