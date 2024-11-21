@@ -17,6 +17,7 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
 namespace {
+auto constexpr MISSING_Y_VALUE = 1.0;
 namespace Prop {
 std::string const INPUT_WORKSPACE("InputWorkspace");
 std::string const FLOOD_WORKSPACE("FloodWorkspace");
@@ -40,14 +41,14 @@ void correctEvents(MatrixWorkspace *ws) {
 
 /** Refactors spectra containing flat or missing flood data back to 1 after rebinning
  *  @param flood Reference to flood Workspace with selected spectra to refactor
- *  @param indexList Vector containing missing or incorrect workspaces to which it is assigned a flat flood
+ *  @param indexList Vector containing missing or incorrect spectra to which it is assigned a flat flood
  */
-void refactorSelectedSpectra(MatrixWorkspace_sptr &flood, const std::vector<int64_t> &indexList) {
+void resetMissingSpectra(MatrixWorkspace_sptr &flood, const std::vector<int64_t> &indexList) {
   auto const &floodBlockSize = flood->blocksize();
 
   for (auto i = 0; auto const &specNum : indexList) {
     if (specNum < 0) {
-      flood->mutableY(i).assign(floodBlockSize, 1.0);
+      flood->mutableY(i).assign(floodBlockSize, MISSING_Y_VALUE);
     }
     i++;
   }
@@ -72,7 +73,7 @@ MatrixWorkspace_sptr makeEqualSizes(const MatrixWorkspace_sptr &input, const Mat
       if (missingSpectrum) {
         newFlood->getSpectrum(i).copyDataFrom(*missingSpectrum);
       } else {
-        newFlood->mutableY(i).assign(floodBlocksize, 1.0);
+        newFlood->mutableY(i).assign(floodBlocksize, MISSING_Y_VALUE);
         newFlood->mutableE(i).assign(floodBlocksize, 0.0);
         missingSpectrum = &newFlood->getSpectrum(i);
       }
@@ -144,7 +145,7 @@ void ApplyFloodWorkspace::exec() {
     rebin->setProperty("OutputWorkspace", "dummy");
     rebin->execute();
     flood = rebin->getProperty("OutputWorkspace");
-    refactorSelectedSpectra(flood, *indexTable);
+    resetMissingSpectra(flood, *indexTable);
   }
 
   auto divide = createChildAlgorithm("Divide", 0, 1);
