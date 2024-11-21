@@ -16,7 +16,7 @@ namespace DataObjects {
  */
 class MANTID_DATAOBJECTS_DLL PeakShapeDetectorBin : public PeakShapeBase {
 public:
-  PeakShapeDetectorBin(std::vector<std::tuple<int32_t, double, double>> detectorBinList,
+  PeakShapeDetectorBin(const std::vector<std::tuple<int32_t, double, double>> &detectorBinList,
                        Kernel::SpecialCoordinateSystem frame, std::string algorithmName = std::string(),
                        int algorithmVersion = -1);
   /// Equals operator

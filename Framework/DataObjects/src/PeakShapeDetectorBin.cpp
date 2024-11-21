@@ -21,7 +21,7 @@ namespace Mantid::DataObjects {
  * @param algorithmName Name of the algorithm using this shape
  * @param algorithmVersion Version of the above algorithm
  */
-PeakShapeDetectorBin::PeakShapeDetectorBin(std::vector<std::tuple<int32_t, double, double>> detectorBinList,
+PeakShapeDetectorBin::PeakShapeDetectorBin(const std::vector<std::tuple<int32_t, double, double>> &detectorBinList,
                                            Kernel::SpecialCoordinateSystem frame, std::string algorithmName,
                                            int algorithmVersion)
     : PeakShapeBase(frame, std::move(algorithmName), algorithmVersion), m_detectorBinList(detectorBinList) {
