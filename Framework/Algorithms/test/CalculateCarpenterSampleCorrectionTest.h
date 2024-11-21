@@ -18,6 +18,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -189,6 +190,8 @@ public:
     AnalysisDataService::Instance().remove("TestOutputWS");
   }
 
+  GNU_DIAG_OFF("dangling-reference")
+
   void testCalculationEvent() {
     const std::string outName("CalculateCarpenterSampleCorrectionEventOutput");
 
@@ -254,6 +257,8 @@ public:
     AnalysisDataService::Instance().remove(outName + "_ms");
     AnalysisDataService::Instance().remove(outName);
   }
+
+  GNU_DIAG_ON("dangling-reference")
 
 private:
   Mantid::Algorithms::CalculateCarpenterSampleCorrection algorithm;

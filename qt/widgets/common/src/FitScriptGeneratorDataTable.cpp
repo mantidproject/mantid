@@ -198,9 +198,8 @@ std::vector<FitDomainIndex> FitScriptGeneratorDataTable::selectedRows() const {
   auto const selectionModel = this->selectionModel();
   if (selectionModel->hasSelection()) {
     const auto rows = selectionModel->selectedRows();
-    std::transform(rows.cbegin(), rows.cend(), std::back_inserter(rowIndices), [](const auto &rowIndex) {
-      return std::move(FitDomainIndex(static_cast<std::size_t>(rowIndex.row())));
-    });
+    std::transform(rows.cbegin(), rows.cend(), std::back_inserter(rowIndices),
+                   [](const auto &rowIndex) { return FitDomainIndex(static_cast<std::size_t>(rowIndex.row())); });
     std::reverse(rowIndices.begin(), rowIndices.end());
   }
   return rowIndices;

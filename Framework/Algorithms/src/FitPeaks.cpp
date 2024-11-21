@@ -34,6 +34,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StartsWithValidator.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include "boost/algorithm/string.hpp"
 #include "boost/algorithm/string/trim.hpp"
@@ -2118,6 +2119,8 @@ size_t FitPeaks::histRangeToDataPointCount(size_t iws, const std::pair<double, d
   return number_dp;
 }
 
+GNU_DIAG_OFF("dangling-reference")
+
 //----------------------------------------------------------------------------------------------
 /** Convert a histogram range to vector index boundaries
  * @param iws :: histogram index in workspace
@@ -2171,6 +2174,8 @@ void FitPeaks::getRangeData(size_t iws, const std::pair<double, double> &range, 
   std::copy(orig_y.begin() + left_index, orig_y.begin() + left_index + num_datapoints, vec_y.begin());
   std::copy(orig_e.begin() + left_index, orig_e.begin() + left_index + num_datapoints, vec_e.begin());
 }
+
+GNU_DIAG_ON("dangling-reference")
 
 //----------------------------------------------------------------------------------------------
 /** Calculate signal-to-noise ratio in a histogram range
