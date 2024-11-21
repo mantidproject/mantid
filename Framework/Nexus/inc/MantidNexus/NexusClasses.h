@@ -6,11 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Sample.h"
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/DllConfig.h"
@@ -22,9 +17,6 @@
 #include <memory>
 #include <string>
 #include <vector>
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
 
 namespace Mantid {
 namespace NeXus {
@@ -104,7 +96,7 @@ public:
   // definition.
   // virtual bool isStandard()const = 0;
   /// Returns the absolute path to the object
-  std::string path() const { return m_path; }
+  std::string const &path() const { return m_path; }
   /// Returns the name of the object
   std::string name() const;
   /// Attributes

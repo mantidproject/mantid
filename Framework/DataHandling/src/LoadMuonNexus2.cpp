@@ -5,11 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMuonNexus2.h"
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadMuonNexus1.h"
@@ -24,6 +26,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/NexusClasses.h"
+
 #include <Poco/Path.h>
 #include <memory>
 // clang-format off
@@ -145,7 +148,7 @@ void LoadMuonNexus2::doExec() {
 
   std::string detectorName;
   // Only the first NXdata found
-  for (auto &group : entry.groups()) {
+  for (const auto &group : entry.groups()) {
     std::string className = group.nxclass;
     if (className == "NXdata") {
       detectorName = group.nxname;
@@ -483,7 +486,7 @@ std::map<int, std::set<int>> LoadMuonNexus2::loadDetectorMapping(const Mantid::N
   NXEntry entry = root.openEntry(m_entry_name);
   const std::string detectorName = [&entry]() {
     // Only the first NXdata found
-    for (auto &group : entry.groups()) {
+    for (const auto &group : entry.groups()) {
       std::string className = group.nxclass;
       if (className == "NXdata") {
         return group.nxname;

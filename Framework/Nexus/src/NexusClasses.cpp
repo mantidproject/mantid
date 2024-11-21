@@ -4,10 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidNexus/NexusClasses.h"
+
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/PropertyWithValue.h"
+
 #include <memory>
 #include <utility>
 

@@ -5,13 +5,17 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
+#include "MantidAPI/Column.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/VectorColumn.h"
+#include "MantidAPI/Run.h"
+#include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace_fwd.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidNexus/DllConfig.h"
+
 #include <boost/date_time/c_local_time_adjustor.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -205,10 +209,10 @@ bool NexusFileIO::writeNxValue(const std::string &name, const TYPE &value, const
   if (NXopendata(fileID, name.c_str()) == NX_ERROR)
     return false;
   for (unsigned int it = 0; it < attributes.size(); ++it) {
-    NXputattr(fileID, attributes[it].c_str(), (void *)avalues[it].c_str(), static_cast<int>(avalues[it].size() + 1),
-              NX_CHAR);
+    NXputattr(fileID, attributes[it].c_str(), static_cast<const void *>(avalues[it].c_str()),
+              static_cast<int>(avalues[it].size() + 1), NX_CHAR);
   }
-  NXputdata(fileID, (void *)&value);
+  NXputdata(fileID, static_cast<const void *>(&value));
   NXclosedata(fileID);
   return true;
 }
@@ -270,10 +274,10 @@ bool NexusFileIO::writeSingleValueNXLog(const std::string &name, const TYPE &val
   if (NXopendata(fileID, "value") == NX_ERROR)
     return false;
   for (unsigned int it = 0; it < attributes.size(); ++it) {
-    NXputattr(fileID, attributes[it].c_str(), (void *)avalues[it].c_str(), static_cast<int>(avalues[it].size() + 1),
-              NX_CHAR);
+    NXputattr(fileID, attributes[it].c_str(), static_cast<const void *>(avalues[it].c_str()),
+              static_cast<int>(avalues[it].size() + 1), NX_CHAR);
   }
-  NXputdata(fileID, (void *)&value);
+  NXputdata(fileID, static_cast<const void *>(&value));
   NXclosedata(fileID);
   NXclosegroup(fileID);
   return true;

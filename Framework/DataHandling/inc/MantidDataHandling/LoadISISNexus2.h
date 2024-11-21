@@ -116,7 +116,8 @@ private:
   void validateMultiPeriodLogs(const Mantid::API::MatrixWorkspace_sptr &);
 
   // build the list of spectra numbers to load and include in the spectra list
-  void buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList, DataBlockComposite &dataBlockComposite);
+  void buildSpectraInd2SpectraNumMap(bool range_supplied, bool hasSpectraList,
+                                     const DataBlockComposite &dataBlockComposite);
 
   /// Check if any of the spectra block ranges overlap
   void checkOverlappingSpectraRange();
@@ -171,8 +172,8 @@ private:
   boost::scoped_ptr< ::NeXus::File> m_nexusFile;
   // clang-format on
 
-  bool findSpectraDetRangeInFile(NeXus::NXEntry &entry, std::vector<specnum_t> &spectrum_index, int64_t ndets,
-                                 int64_t n_vms_compat_spectra, std::map<specnum_t, std::string> &monitors,
+  bool findSpectraDetRangeInFile(const NeXus::NXEntry &entry, std::vector<specnum_t> &spectrum_index, int64_t ndets,
+                                 int64_t n_vms_compat_spectra, const std::map<specnum_t, std::string> &monitors,
                                  bool excludeMonitors, bool separateMonitors);
 
   /// Check if is the file is a multiple time regime file

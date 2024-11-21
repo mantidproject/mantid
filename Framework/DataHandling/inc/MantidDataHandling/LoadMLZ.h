@@ -42,14 +42,14 @@ private:
 
   std::vector<std::vector<int>> getMonitorInfo(NeXus::NXEntry &firstEntry);
 
-  void initWorkSpace(NeXus::NXEntry &entry);
+  void initWorkspace(const NeXus::NXEntry &entry);
   void initInstrumentSpecific();
   void loadRunDetails(NeXus::NXEntry &entry);
   void loadExperimentDetails(const NeXus::NXEntry &entry);
 
   NeXus::NXData loadNexusFileData(NeXus::NXEntry &entry);
   void maskDetectors(const NeXus::NXEntry &entry);
-  void loadDataIntoTheWorkSpace(NeXus::NXEntry &entry); //, int ElasticPeakPosition = -1);
+  void loadDataIntoTheWorkSpace(const NeXus::NXEntry &entry); //, int ElasticPeakPosition = -1);
 
   void runLoadInstrument();
 
