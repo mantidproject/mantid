@@ -29,7 +29,7 @@ public:
   const string summary() const override;
 
   Mantid::HistogramData::HistogramY fillHistogramWithRandomData(const std::vector<double> &cdf, int numIterations,
-                                                                std::mt19937 &gen);
+                                                                int seed_input, API::Progress &progress);
   std::vector<double> computeNormalizedCDF(const Mantid::HistogramData::HistogramY &yData);
   int computeNumberOfIterations(const Mantid::HistogramData::HistogramY &yData);
 

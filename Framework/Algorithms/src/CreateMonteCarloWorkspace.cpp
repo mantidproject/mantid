@@ -67,18 +67,26 @@ void CreateMonteCarloWorkspace::init() {
 
 Mantid::HistogramData::HistogramY CreateMonteCarloWorkspace::fillHistogramWithRandomData(const std::vector<double> &cdf,
                                                                                          int numIterations,
-                                                                                         std::mt19937 &gen) {
+                                                                                         int seed_input,
+                                                                                         API::Progress &progress) {
+
   Mantid::HistogramData::HistogramY outputY(cdf.size(), 0.0);
+  std::mt19937 gen(seed_input);
   std::uniform_real_distribution<> dis(0.0, 1.0);
+
+  int progressInterval = std::max(1, numIterations / 100); // Update progress every 1%
+
   for (int i = 0; i < numIterations; ++i) {
     double randomNum = dis(gen);
-    // Find the bin corresponding to the random number in the CDF
     auto it = std::lower_bound(cdf.begin(), cdf.end(), randomNum);
     size_t index = std::distance(cdf.begin(), it);
 
-    // Ensure the index is within bounds
     if (index < outputY.size()) {
       outputY[index] += 1.0;
+    }
+
+    if (i % progressInterval == 0) {
+      progress.report("Generating random data...");
     }
   }
   return outputY;
@@ -105,44 +113,26 @@ int CreateMonteCarloWorkspace::computeNumberOfIterations(const Mantid::Histogram
 // Using Cumulative Distribution Function
 void CreateMonteCarloWorkspace::exec() {
   // Progress Bar set up
-  int numSteps = 7;
+  int numSteps = 2;
   API::Progress progress(this, 0.0, 1.0, numSteps);
 
   MatrixWorkspace_sptr instWs = getProperty("InputWorkspace");
   int seed_input = getProperty("Seed");
-  progress.report();
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   const Mantid::HistogramData::HistogramY &yData = instWs->y(0); // Counts in each bin
-  progress.report();
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   int numIterations = computeNumberOfIterations(yData);
   std::vector<double> cdf = computeNormalizedCDF(yData);
-  progress.report();
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  progress.report("Computing normalized CDF...");
 
   MatrixWorkspace_sptr outputWs = WorkspaceFactory::Instance().create(instWs, 1);
-  progress.report();
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   // Copy the bin boundaries (X-values) from the input to the output
   outputWs->setSharedX(0, instWs->sharedX(0));
-  progress.report();
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-  std::mt19937 gen(seed_input);
-
-  Mantid::HistogramData::HistogramY outputY = fillHistogramWithRandomData(cdf, numIterations, gen);
-  progress.report();
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
+  Mantid::HistogramData::HistogramY outputY = fillHistogramWithRandomData(cdf, numIterations, seed_input, progress);
   outputWs->mutableY(0) = outputY;
 
   g_log.warning("Only the first spectrum is being plotted.");
-
-  progress.report();
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
   setProperty("OutputWorkspace", outputWs);
 }
