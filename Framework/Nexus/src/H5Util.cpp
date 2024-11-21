@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/H5Util.h"
+#include "MantidNexus/H5Util.h"
 #include "MantidAPI/LogManager.h"
 #include "MantidKernel/System.h"
 
@@ -17,7 +17,7 @@
 
 using namespace H5;
 
-namespace Mantid::DataHandling::H5Util {
+namespace Mantid::NeXus::H5Util {
 
 namespace {
 /// static logger object
@@ -33,17 +33,17 @@ const std::string CAN_SAS_ATTR_CLASS("canSAS_class");
 
 template <typename NumT> DataType getType() { throw DataTypeIException(); }
 
-template <> MANTID_DATAHANDLING_DLL DataType getType<float>() { return PredType::NATIVE_FLOAT; }
+template <> MANTID_NEXUS_DLL DataType getType<float>() { return PredType::NATIVE_FLOAT; }
 
-template <> MANTID_DATAHANDLING_DLL DataType getType<double>() { return PredType::NATIVE_DOUBLE; }
+template <> MANTID_NEXUS_DLL DataType getType<double>() { return PredType::NATIVE_DOUBLE; }
 
-template <> MANTID_DATAHANDLING_DLL DataType getType<int32_t>() { return PredType::NATIVE_INT32; }
+template <> MANTID_NEXUS_DLL DataType getType<int32_t>() { return PredType::NATIVE_INT32; }
 
-template <> MANTID_DATAHANDLING_DLL DataType getType<uint32_t>() { return PredType::NATIVE_UINT32; }
+template <> MANTID_NEXUS_DLL DataType getType<uint32_t>() { return PredType::NATIVE_UINT32; }
 
-template <> MANTID_DATAHANDLING_DLL DataType getType<int64_t>() { return PredType::NATIVE_INT64; }
+template <> MANTID_NEXUS_DLL DataType getType<int64_t>() { return PredType::NATIVE_INT64; }
 
-template <> MANTID_DATAHANDLING_DLL DataType getType<uint64_t>() { return PredType::NATIVE_UINT64; }
+template <> MANTID_NEXUS_DLL DataType getType<uint64_t>() { return PredType::NATIVE_UINT64; }
 
 DataSpace getDataSpace(const size_t length) {
   hsize_t dims[] = {length};
@@ -470,146 +470,136 @@ void deleteObjectLink(H5::H5Object &h5, const std::string &target) {
 // instantiations for writeNumAttribute
 // -------------------------------------------------------------------
 
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
-                                                        const float &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
-                                                        const double &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
-                                                        const int32_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
-                                                        const uint32_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
-                                                        const int64_t &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
-                                                        const uint64_t &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const float &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const double &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const int32_t &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const uint32_t &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const int64_t &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const uint64_t &value);
 
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
-                                                        const std::vector<float> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
-                                                        const std::vector<double> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
-                                                        const std::vector<int32_t> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
-                                                        const std::vector<uint32_t> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
-                                                        const std::vector<int64_t> &value);
-template MANTID_DATAHANDLING_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
-                                                        const std::vector<uint64_t> &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const std::vector<float> &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const std::vector<double> &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const std::vector<int32_t> &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const std::vector<uint32_t> &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const std::vector<int64_t> &value);
+template MANTID_NEXUS_DLL void writeNumAttribute(const H5::H5Object &object, const std::string &name,
+                                                 const std::vector<uint64_t> &value);
 
 // -------------------------------------------------------------------
 // instantiations for readNumAttributeCoerce
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL float readNumAttributeCoerce(const H5::H5Object &object,
-                                                              const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL double readNumAttributeCoerce(const H5::H5Object &object,
-                                                               const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL int32_t readNumAttributeCoerce(const H5::H5Object &object,
-                                                                const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL uint32_t readNumAttributeCoerce(const H5::H5Object &object,
-                                                                 const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL int64_t readNumAttributeCoerce(const H5::H5Object &object,
-                                                                const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL uint64_t readNumAttributeCoerce(const H5::H5Object &object,
-                                                                 const std::string &attributeName);
+template MANTID_NEXUS_DLL float readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL double readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL int32_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL uint32_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL int64_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
+template MANTID_NEXUS_DLL uint64_t readNumAttributeCoerce(const H5::H5Object &object, const std::string &attributeName);
 
 // -------------------------------------------------------------------
 // instantiations for readNumArrayAttributeCoerce
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL std::vector<float> readNumArrayAttributeCoerce(const H5::H5Object &object,
-                                                                                const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<double> readNumArrayAttributeCoerce(const H5::H5Object &object,
-                                                                                 const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<int32_t> readNumArrayAttributeCoerce(const H5::H5Object &object,
-                                                                                  const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<uint32_t> readNumArrayAttributeCoerce(const H5::H5Object &object,
-                                                                                   const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<int64_t> readNumArrayAttributeCoerce(const H5::H5Object &object,
-                                                                                  const std::string &attributeName);
-template MANTID_DATAHANDLING_DLL std::vector<uint64_t> readNumArrayAttributeCoerce(const H5::H5Object &object,
-                                                                                   const std::string &attributeName);
+template MANTID_NEXUS_DLL std::vector<float> readNumArrayAttributeCoerce(const H5::H5Object &object,
+                                                                         const std::string &attributeName);
+template MANTID_NEXUS_DLL std::vector<double> readNumArrayAttributeCoerce(const H5::H5Object &object,
+                                                                          const std::string &attributeName);
+template MANTID_NEXUS_DLL std::vector<int32_t> readNumArrayAttributeCoerce(const H5::H5Object &object,
+                                                                           const std::string &attributeName);
+template MANTID_NEXUS_DLL std::vector<uint32_t> readNumArrayAttributeCoerce(const H5::H5Object &object,
+                                                                            const std::string &attributeName);
+template MANTID_NEXUS_DLL std::vector<int64_t> readNumArrayAttributeCoerce(const H5::H5Object &object,
+                                                                           const std::string &attributeName);
+template MANTID_NEXUS_DLL std::vector<uint64_t> readNumArrayAttributeCoerce(const H5::H5Object &object,
+                                                                            const std::string &attributeName);
 
 // -------------------------------------------------------------------
 // instantiations for writeArray1D
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name,
-                                                   const std::vector<float> &values);
-template MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name,
-                                                   const std::vector<double> &values);
-template MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name,
-                                                   const std::vector<int32_t> &values);
-template MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name,
-                                                   const std::vector<uint32_t> &values);
-template MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name,
-                                                   const std::vector<int64_t> &values);
-template MANTID_DATAHANDLING_DLL void writeArray1D(H5::Group &group, const std::string &name,
-                                                   const std::vector<uint64_t> &values);
+template MANTID_NEXUS_DLL void writeArray1D(H5::Group &group, const std::string &name,
+                                            const std::vector<float> &values);
+template MANTID_NEXUS_DLL void writeArray1D(H5::Group &group, const std::string &name,
+                                            const std::vector<double> &values);
+template MANTID_NEXUS_DLL void writeArray1D(H5::Group &group, const std::string &name,
+                                            const std::vector<int32_t> &values);
+template MANTID_NEXUS_DLL void writeArray1D(H5::Group &group, const std::string &name,
+                                            const std::vector<uint32_t> &values);
+template MANTID_NEXUS_DLL void writeArray1D(H5::Group &group, const std::string &name,
+                                            const std::vector<int64_t> &values);
+template MANTID_NEXUS_DLL void writeArray1D(H5::Group &group, const std::string &name,
+                                            const std::vector<uint64_t> &values);
 
 // -------------------------------------------------------------------
 // Instantiations for writeScalarWithStrAttributes
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL void
+template MANTID_NEXUS_DLL void
 writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const std::string &value,
                                     const std::map<std::string, std::string> &attributes);
-template MANTID_DATAHANDLING_DLL void
+template MANTID_NEXUS_DLL void
 writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const float &value,
                                     const std::map<std::string, std::string> &attributes);
-template MANTID_DATAHANDLING_DLL void
+template MANTID_NEXUS_DLL void
 writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const double &value,
                                     const std::map<std::string, std::string> &attributes);
-template MANTID_DATAHANDLING_DLL void
+template MANTID_NEXUS_DLL void
 writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const int32_t &value,
                                     const std::map<std::string, std::string> &attributes);
-template MANTID_DATAHANDLING_DLL void
+template MANTID_NEXUS_DLL void
 writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const uint32_t &value,
                                     const std::map<std::string, std::string> &attributes);
-template MANTID_DATAHANDLING_DLL void
+template MANTID_NEXUS_DLL void
 writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const int64_t &value,
                                     const std::map<std::string, std::string> &attributes);
-template MANTID_DATAHANDLING_DLL void
+template MANTID_NEXUS_DLL void
 writeScalarDataSetWithStrAttributes(H5::Group &group, const std::string &name, const uint64_t &value,
                                     const std::map<std::string, std::string> &attributes);
 
 // -------------------------------------------------------------------
 // instantiations for getDataSpace
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<float> &data);
-template MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<double> &data);
-template MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<int32_t> &data);
-template MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<uint32_t> &data);
-template MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<int64_t> &data);
-template MANTID_DATAHANDLING_DLL DataSpace getDataSpace(const std::vector<uint64_t> &data);
+template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<float> &data);
+template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<double> &data);
+template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<int32_t> &data);
+template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<uint32_t> &data);
+template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<int64_t> &data);
+template MANTID_NEXUS_DLL DataSpace getDataSpace(const std::vector<uint64_t> &data);
 
 // -------------------------------------------------------------------
 // instantiations for readArray1DCoerce
 // -------------------------------------------------------------------
-template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
-                                                        std::vector<float> &output);
-template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
-                                                        std::vector<double> &output);
-template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
-                                                        std::vector<int32_t> &output);
-template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
-                                                        std::vector<uint32_t> &output);
-template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
-                                                        std::vector<int64_t> &output);
-template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
-                                                        std::vector<uint64_t> &output);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
+                                                 std::vector<float> &output);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
+                                                 std::vector<double> &output);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
+                                                 std::vector<int32_t> &output);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
+                                                 std::vector<uint32_t> &output);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
+                                                 std::vector<int64_t> &output);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const H5::Group &group, const std::string &name,
+                                                 std::vector<uint64_t> &output);
 
-template MANTID_DATAHANDLING_DLL std::vector<float> readArray1DCoerce(const H5::Group &group, const std::string &name);
-template MANTID_DATAHANDLING_DLL std::vector<double> readArray1DCoerce(const H5::Group &group, const std::string &name);
-template MANTID_DATAHANDLING_DLL std::vector<int32_t> readArray1DCoerce(const H5::Group &group,
-                                                                        const std::string &name);
-template MANTID_DATAHANDLING_DLL std::vector<uint32_t> readArray1DCoerce(const H5::Group &group,
-                                                                         const std::string &name);
-template MANTID_DATAHANDLING_DLL std::vector<int64_t> readArray1DCoerce(const H5::Group &group,
-                                                                        const std::string &name);
-template MANTID_DATAHANDLING_DLL std::vector<uint64_t> readArray1DCoerce(const H5::Group &group,
-                                                                         const std::string &name);
+template MANTID_NEXUS_DLL std::vector<float> readArray1DCoerce(const H5::Group &group, const std::string &name);
+template MANTID_NEXUS_DLL std::vector<double> readArray1DCoerce(const H5::Group &group, const std::string &name);
+template MANTID_NEXUS_DLL std::vector<int32_t> readArray1DCoerce(const H5::Group &group, const std::string &name);
+template MANTID_NEXUS_DLL std::vector<uint32_t> readArray1DCoerce(const H5::Group &group, const std::string &name);
+template MANTID_NEXUS_DLL std::vector<int64_t> readArray1DCoerce(const H5::Group &group, const std::string &name);
+template MANTID_NEXUS_DLL std::vector<uint64_t> readArray1DCoerce(const H5::Group &group, const std::string &name);
 
-template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<float> &output);
-template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<double> &output);
-template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<int32_t> &output);
-template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint32_t> &output);
-template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<int64_t> &output);
-template MANTID_DATAHANDLING_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint64_t> &output);
-} // namespace Mantid::DataHandling::H5Util
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<float> &output);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<double> &output);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<int32_t> &output);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint32_t> &output);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<int64_t> &output);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint64_t> &output);
+} // namespace Mantid::NeXus::H5Util

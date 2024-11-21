@@ -16,6 +16,7 @@
 #define NAME_MAX 260
 #endif /* _WIN32 */
 #include "MantidAPI/NumericAxis.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
 #include "MantidDataObjects/TableWorkspace.h"
