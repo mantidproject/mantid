@@ -30,7 +30,7 @@ public:
   std::string shapeName() const override;
 
   /// PeakBase interface
-  std::optional<double> radius(RadiusType type = RadiusType::Radius) const override;
+  std::optional<double> radius(RadiusType) const override { return std::nullopt; }
 
   static const std::string detectorBinShapeName();
 

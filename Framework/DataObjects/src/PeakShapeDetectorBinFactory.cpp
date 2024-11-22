@@ -33,7 +33,7 @@ Mantid::Geometry::PeakShape *PeakShapeDetectorBinFactory::create(const std::stri
 
       std::vector<std::tuple<int32_t, double, double>> detectorBinList;
       const Json::Value detectorList = root["detectors"];
-      for (int index = 0; index < detectorList.size(); index++) {
+      for (uint32_t index = 0; index < detectorList.size(); index++) {
         const Json::Value detBinVal = detectorList[index];
         detectorBinList.emplace_back(detBinVal["detId"].asInt(), detBinVal["startX"].asDouble(),
                                      detBinVal["endX"].asDouble());
