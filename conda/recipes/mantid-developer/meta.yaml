@@ -28,7 +28,7 @@ requirements:
     - muparser {{ muparser }}
     - nexus {{ nexus }}
     - ninja {{ ninja }}
-    - numpy>=1.24,<1.27 # This is intentionally different to conda_build_config.yaml, will address later.
+    - numpy>=2.0,<2.2 # This is intentionally different to conda_build_config.yaml, will address later.
     - occt {{ occt }}
     - pip {{ pip }}
     - poco {{ poco }}

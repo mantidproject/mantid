@@ -434,12 +434,12 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         levels = tester.tube_collevel  # shape = (TUBE_COUNT,)
         assert len(levels) == tester.TUBE_COUNT
         first1, last1 = tester.TUBES_IN_EIGHTPACK * 77, tester.TUBES_IN_EIGHTPACK * 78
-        assert np.all(levels[:first1]) == CollimationLevel.Empty
-        assert np.all(levels[first1:last1]) == CollimationLevel.Half
+        assert np.all(levels[:first1] == CollimationLevel.Empty)
+        assert np.all(levels[first1:last1] == CollimationLevel.Half)
         first2, last2 = tester.TUBES_IN_EIGHTPACK * 95, tester.TUBES_IN_EIGHTPACK * 96
-        assert np.all(levels[last1:first2]) == CollimationLevel.Empty
-        assert np.all(levels[first2:last2]) == CollimationLevel.Full
-        assert np.all(levels[last2:]) == CollimationLevel.Empty
+        assert np.all(levels[last1:first2] == CollimationLevel.Empty)
+        assert np.all(levels[first2:last2] == CollimationLevel.Full)
+        assert np.all(levels[last2:] == CollimationLevel.Empty)
 
     def test_panel_median(self):
         tester = self.tester1
