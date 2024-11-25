@@ -25,18 +25,41 @@ namespace Mantid::DataHandling {
 
 namespace {
 void setupConsistentSpectrumNumbers(IndexInfo &filtered, const std::vector<detid_t> &detIDs) {
-  std::vector<Indexing::SpectrumNumber> spectrumNumbers;
-  // Temporary spectrum number in `filtered` was detector ID, now translate
-  // to spectrum number, starting at 1. Note that we use detIDs and not
-  // DetectorInfo for translation since we need to match the unfiltered
-  // spectrum numbers, which are based on skipping monitors (which would be
-  // included in DetectorInfo).
-  for (int32_t i = 0; i < static_cast<int32_t>(detIDs.size()); ++i) {
-    if (filtered.spectrumNumber(spectrumNumbers.size()) == detIDs[i])
-      spectrumNumbers.emplace_back(i + 1);
-    if (filtered.size() == spectrumNumbers.size())
-      break;
+  // get the filtered information and sort the ids to make the main loop run faster
+  auto spectrumNumbersFiltered = filtered.spectrumNumbers(); // what it is at the beginning
+  if (!std::is_sorted(spectrumNumbersFiltered.cbegin(), spectrumNumbersFiltered.cend())) {
+    std::sort(spectrumNumbersFiltered.begin(), spectrumNumbersFiltered.end());
   }
+
+  // Temporary spectrum number in `filtered` was detector ID, now translate to spectrum number, starting at 1. Note that
+  // we use detIDs and not DetectorInfo for translation since we need to match the unfiltered spectrum numbers, which
+  // are based on skipping monitors (which would be included in DetectorInfo).
+  std::vector<Indexing::SpectrumNumber> spectrumNumbers;
+  const auto NUM_DETIDS = static_cast<int32_t>(detIDs.size());
+  auto specFilterIter = spectrumNumbersFiltered.cbegin();
+  auto specFilterIterEnd = spectrumNumbersFiltered.cend();
+  for (int32_t i = 0; i < NUM_DETIDS; ++i) {
+    auto specFilterIterTemp = std::find(specFilterIter, specFilterIterEnd, detIDs[i]);
+    if (specFilterIterTemp != specFilterIterEnd) {
+      spectrumNumbers.emplace_back(i + 1);
+
+      // finish early if everything was found
+      if (filtered.size() == spectrumNumbers.size())
+        break;
+
+      // advance to the element after the one found to start next search
+      specFilterIter = std::next(specFilterIterTemp);
+    }
+  }
+
+  // error check the results
+  if (filtered.size() != spectrumNumbers.size()) {
+    std::stringstream msg;
+    msg << "Not all detectors were found in the instrumen. Requested filtered=" << filtered.size()
+        << " found=" << spectrumNumbers.size();
+    throw std::runtime_error(msg.str());
+  }
+
   filtered.setSpectrumNumbers(std::move(spectrumNumbers));
 }
 } // namespace
@@ -48,24 +71,22 @@ LoadEventNexusIndexSetup::LoadEventNexusIndexSetup(MatrixWorkspace_const_sptr in
 std::pair<int32_t, int32_t> LoadEventNexusIndexSetup::eventIDLimits() const { return {m_min, m_max}; }
 
 IndexInfo LoadEventNexusIndexSetup::makeIndexInfo() {
-  // The default 1:1 will suffice but exclude the monitors as they are always in
-  // a separate workspace
-  auto detIDs = m_instrumentWorkspace->getInstrument()->getDetectorIDs(true);
+  // The default 1:1 will suffice but exclude the monitors as they are always in a separate workspace
+  const auto detIDs = m_instrumentWorkspace->getInstrument()->getDetectorIDs(true);
   const auto &detectorInfo = m_instrumentWorkspace->detectorInfo();
   std::vector<SpectrumDefinition> specDefs;
   specDefs.reserve(detIDs.size());
   std::transform(detIDs.cbegin(), detIDs.cend(), std::back_inserter(specDefs),
                  [&detectorInfo](const auto detID) { return SpectrumDefinition(detectorInfo.indexOf(detID)); });
-  // We need to filter based on detector IDs, but use IndexInfo for filtering
-  // for a unified filtering mechanism. Thus we set detector IDs as (temporary)
-  // spectrum numbers.
+  // We need to filter based on detector IDs, but use IndexInfo for filtering for a unified filtering mechanism. Thus we
+  // set detector IDs as (temporary) spectrum numbers.
   IndexInfo indexInfo(std::vector<SpectrumNumber>(detIDs.begin(), detIDs.end()));
   indexInfo.setSpectrumDefinitions(specDefs);
 
   auto filtered = filterIndexInfo(indexInfo);
 
-  // Spectrum numbers are continuous and start at 1. If there is a filter,
-  // spectrum numbers are set up to be consistent with the unfiltered case.
+  // Spectrum numbers are continuous and start at 1. If there is a filter, spectrum numbers are set up to be consistent
+  // with the unfiltered case.
   if (filtered.size() == indexInfo.size()) {
     filtered.setSpectrumNumbers(1, static_cast<int32_t>(filtered.size()));
   } else {
@@ -96,9 +117,8 @@ IndexInfo LoadEventNexusIndexSetup::makeIndexInfo(const std::vector<std::string>
     }
     if (dets.empty())
       throw std::runtime_error("Could not find the bank named '" + bankName +
-                               "' as a component assembly in the instrument "
-                               "tree; or it did not contain any detectors. Try "
-                               "unchecking SingleBankPixelsOnly.");
+                               "' as a component assembly in the instrument tree; or it did not contain any detectors. "
+                               "Try unchecking SingleBankPixelsOnly.");
   }
   Indexing::IndexInfo indexInfo(std::move(spectrumNumbers));
   indexInfo.setSpectrumDefinitions(std::move(spectrumDefinitions));
