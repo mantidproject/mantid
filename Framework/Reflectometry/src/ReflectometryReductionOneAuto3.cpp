@@ -558,7 +558,6 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(con
 
   // With algorithmic corrections, monitors should not be integrated, see below
   const std::string correctionAlgorithm = getProperty("CorrectionAlgorithm");
-
   if (correctionAlgorithm == "PolynomialCorrection") {
     alg->setProperty("NormalizeByIntegratedMonitors", false);
     alg->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
@@ -587,17 +586,22 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(con
           throw std::runtime_error("Could not find parameter 'polystring' in "
                                    "parameter file. Cannot apply polynomial "
                                    "correction.");
+        setProperty("Polynomial", polyVec[0]);
         alg->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
         alg->setProperty("Polynomial", polyVec[0]);
       } else if (correctionStr == "exponential") {
-        const auto c0Vec = instrument->getStringParameter("C0");
+        const auto c0Vec = instrument->getNumberParameter("C0");
         if (c0Vec.empty())
           throw std::runtime_error("Could not find parameter 'C0' in parameter "
                                    "file. Cannot apply exponential correction.");
-        const auto c1Vec = instrument->getStringParameter("C1");
+        const auto c1Vec = instrument->getNumberParameter("C1");
         if (c1Vec.empty())
           throw std::runtime_error("Could not find parameter 'C1' in parameter "
                                    "file. Cannot apply exponential correction.");
+
+        setProperty("C0", c0Vec[0]);
+        setProperty("C1", c1Vec[0]);
+        alg->setProperty("CorrectionAlgorithm", "ExponentialCorrection");
         alg->setProperty("C0", c0Vec[0]);
         alg->setProperty("C1", c1Vec[0]);
       }
