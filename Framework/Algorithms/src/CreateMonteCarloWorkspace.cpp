@@ -17,6 +17,8 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/CreateMonteCarloWorkspace.h"
+#include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Logger.h"
 
@@ -25,6 +27,8 @@ Mantid::Kernel::Logger g_log("CreateMonteCarloWorkspace");
 }
 namespace Mantid {
 namespace Algorithms {
+using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::HistogramY;
 using Mantid::Kernel::Direction;
 using namespace Mantid::API;
 using namespace std;
@@ -59,6 +63,8 @@ void CreateMonteCarloWorkspace::init() {
                   "Input Workspace containing data to be fitted");
   declareProperty("Seed", 32, mustBePositive,
                   "Integer that initializes a random-number generator, good for reproducibility");
+  declareProperty("MonteCarloEvents", 0, mustBePositive,
+                  "Number of Monte Carlo events to simulate. Defaults to integral of input workspace if 0.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "Name of output workspace.");
 }
@@ -101,9 +107,40 @@ std::vector<double> CreateMonteCarloWorkspace::computeNormalizedCDF(const Mantid
   return cdf;
 }
 
-int CreateMonteCarloWorkspace::computeNumberOfIterations(const Mantid::HistogramData::HistogramY &yData) {
+int CreateMonteCarloWorkspace::computeNumberOfIterations(const Mantid::HistogramData::HistogramY &yData,
+                                                         int userMCEvents) {
+  if (userMCEvents > 0) {
+    return userMCEvents;
+  }
+
+  // Default: Integral of Input
   double total_counts = std::accumulate(yData.begin(), yData.end(), 0.0);
-  return static_cast<int>(std::round(total_counts));
+  int iterations = static_cast<int>(std::round(total_counts));
+
+  if (iterations == 0) {
+    g_log.warning("Total counts in the input workspace round to 0. No Monte Carlo events will be generated.");
+  }
+
+  return iterations;
+}
+
+Mantid::HistogramData::HistogramY
+CreateMonteCarloWorkspace::scaleInputToMatchMCEvents(const Mantid::HistogramData::HistogramY &yData,
+                                                     int targetMCEvents) {
+
+  double total_counts = std::accumulate(yData.begin(), yData.end(), 0.0);
+  if (total_counts == 0) {
+    g_log.warning("Total counts in the input workspace are 0. Scaling cannot be performed.");
+    return yData;
+  }
+
+  double scaleFactor = static_cast<double>(targetMCEvents) / total_counts;
+
+  Mantid::HistogramData::HistogramY scaledY(yData.size());
+  std::transform(yData.begin(), yData.end(), scaledY.begin(),
+                 [scaleFactor](double count) { return count * scaleFactor; });
+
+  return scaledY;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -118,10 +155,20 @@ void CreateMonteCarloWorkspace::exec() {
 
   MatrixWorkspace_sptr instWs = getProperty("InputWorkspace");
   int seed_input = getProperty("Seed");
+  int userMCEvents = getProperty("MonteCarloEvents");
 
-  const Mantid::HistogramData::HistogramY &yData = instWs->y(0); // Counts in each bin
+  const Mantid::HistogramData::HistogramY &originalYData = instWs->y(0); // Counts in each bin
+  Mantid::HistogramData::HistogramY yData = originalYData;
 
-  int numIterations = computeNumberOfIterations(yData);
+  // Scale input workspace if user has specified MC events
+  if (userMCEvents > 0) {
+    g_log.warning() << "Custom Monte Carlo events: " << userMCEvents << ". Input workspace scaled accordingly.\n";
+    yData = scaleInputToMatchMCEvents(originalYData, userMCEvents);
+  }
+
+  // Determine number of iterations
+  int numIterations = computeNumberOfIterations(yData, userMCEvents);
+
   std::vector<double> cdf = computeNormalizedCDF(yData);
   progress.report("Computing normalized CDF...");
 
@@ -131,6 +178,11 @@ void CreateMonteCarloWorkspace::exec() {
   outputWs->setSharedX(0, instWs->sharedX(0));
   Mantid::HistogramData::HistogramY outputY = fillHistogramWithRandomData(cdf, numIterations, seed_input, progress);
   outputWs->mutableY(0) = outputY;
+
+  // Calculate errors as the square root of the counts
+  Mantid::HistogramData::HistogramE outputE(outputY.size());
+  std::transform(outputY.begin(), outputY.end(), outputE.begin(), [](double count) { return std::sqrt(count); });
+  outputWs->mutableE(0) = outputE;
 
   g_log.warning("Only the first spectrum is being plotted.");
 
