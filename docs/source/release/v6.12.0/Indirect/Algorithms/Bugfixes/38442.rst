@@ -1,0 +1,2 @@
+- :ref:`LoadVesuvio <algm-LoadVesuvio-v1>` now accepts multiple consecutive runs for the ``Filename`` property,
+  for example ``43066-43070, 43072-43074`` is the same as running ``43066-43074`` except the run ``43071`` will not be included.
