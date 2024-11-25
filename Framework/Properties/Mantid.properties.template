@@ -59,6 +59,9 @@ usagereports.enabled = @ENABLE_USAGE_REPORTS@
 errorreports.rooturl = https://errorreports.mantidproject.org
 usagereports.rooturl = https://reports.mantidproject.org
 
+# Location of core dump files (linux only feature)
+errorreports.core_dumps =
+
 # Where to load Grouping files (that are shipped with Mantid) from
 groupingFiles.directory = @MANTID_ROOT@/instrument/Grouping
 

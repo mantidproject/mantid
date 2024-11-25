@@ -157,6 +157,7 @@ class ConfigServiceTest(unittest.TestCase):
             "UpdateInstrumentDefinitions.URL",  # shouldn't be changed by users
             "docs.html.root",  # shouldn't be changed by users
             "errorreports.rooturl",  # shouldn't be changed by users
+            "errorreports.core_dumps",
             "usagereports.rooturl",  # shouldn't be changed by users
             "workspace.sendto.SansView.arguments",
             "workspace.sendto.SansView.saveusing",  # related to SASview in menu
