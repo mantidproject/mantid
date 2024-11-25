@@ -6,13 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from testhelpers import run_algorithm, can_be_instantiated, WorkspaceCreationHelper
+from testhelpers import can_be_instantiated, WorkspaceCreationHelper
 
-from mantid.api import IEventWorkspace, IEventList, IWorkspaceProperty, AlgorithmManager
+from mantid.api import IEventWorkspace, IEventList
 
 
 class IEventWorkspaceTest(unittest.TestCase):
-
     _test_ws = None
     _nbins = 10
     _npixels = 5
@@ -42,7 +41,7 @@ class IEventWorkspaceTest(unittest.TestCase):
         self.assertTrue(isinstance(el, IEventList))
         self.assertEqual(el.getNumberEvents(), 200)
 
-    def test_event_list_getWeights(self):
+    def test_event_list_getTofs(self):
         el = self._test_ws.getSpectrum(0)
         self.assertTrue(isinstance(el, IEventList))
         TofList = el.getTofs()

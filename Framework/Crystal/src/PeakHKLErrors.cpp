@@ -147,7 +147,7 @@ void PeakHKLErrors::cLone(std::shared_ptr<Geometry::ParameterMap> &pmap,
     }
 
     std::shared_ptr<const CompAssembly> parent = std::dynamic_pointer_cast<const CompAssembly>(component);
-    if (parent && parent->nelements() < 180) //# need speed up. Assume pixel
+    if (parent && parent->nelements() < 180) // # need speed up. Assume pixel
       // elements of a Panel have no
       // attributes
       for (int child = 0; child < parent->nelements(); child++) {

@@ -13,7 +13,7 @@ import unittest
 # third party imports
 import matplotlib
 
-matplotlib.use("AGG")  # noqa
+matplotlib.use("AGG")
 
 
 # local imports

@@ -186,7 +186,7 @@ void ModeratorTzero::exec() {
       else if (emode == "Direct") {
         outputWS->mutableX(i) += -t0_direct;
       } // end of else if(emode="Direct")
-    }   // end of if(L2 >= 0)
+    } // end of if(L2 >= 0)
 
     prog.report();
     PARALLEL_END_INTERRUPT_REGION
@@ -308,7 +308,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
             evlist.setTofs(tofs);
             evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
           } // end of if( t2>= 0)
-        }   // end of if(emode=="Indirect")
+        } // end of if(emode=="Indirect")
         else if (emode == "Elastic") {
           // Apply t0 correction to histogram bins
           auto &x = evlist.mutableX();
@@ -341,8 +341,8 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
         } // end of else if(emode=="Direct")
-      }   // end of if(L2 >= 0)
-    }     // end of if (evlist.getNumberEvents() > 0)
+      } // end of if(L2 >= 0)
+    } // end of if (evlist.getNumberEvents() > 0)
     prog.report();
     PARALLEL_END_INTERRUPT_REGION
   } // end of for (int i = 0; i < static_cast<int>(numHists); ++i)

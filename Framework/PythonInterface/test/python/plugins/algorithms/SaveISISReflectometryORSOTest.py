@@ -16,9 +16,6 @@ from mantid.simpleapi import (
     CreateSampleWorkspace,
     SaveISISReflectometryORSO,
     ConvertToPointData,
-    NRCalculateSlitResolution,
-    LoadNexus,
-    DeleteLog,
     GroupWorkspaces,
 )
 from mantid.api import AnalysisDataService
@@ -115,7 +112,8 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._check_file_header(
             [
-                f"reduction:\n#   software: {{name: {MantidORSODataset.SOFTWARE_NAME}, version: {version()}}}\n#   timestamp: 2024-02-13T12:14:36+00:00\n#"
+                f"reduction:\n#   software: {{name: {MantidORSODataset.SOFTWARE_NAME}, version: {version()}}}\n"
+                f"#   timestamp: 2024-02-13T12:14:36+00:00\n#"
             ]
         )
 

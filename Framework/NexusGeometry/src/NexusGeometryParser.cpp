@@ -214,7 +214,7 @@ private:
     }
   }
 
-  // Provided to support invalid or null-termination character strings
+  // Provided to support invalid or empty null-termination character strings
   std::string readOrSubstitute(const std::string &dataset, const Group &group, const std::string &substitute) {
     auto read = get1DStringDataset(dataset, group);
     if (read.empty())
@@ -257,32 +257,26 @@ private:
   }
 
   // Get the instrument name
-  std::string instrumentName(const Group &root) {
-    Group entryGroup = *utilities::findGroup(root, NX_ENTRY);
-    Group instrumentGroup = *utilities::findGroup(entryGroup, NX_INSTRUMENT);
+  std::string instrumentName(const Group &parent) {
+    Group instrumentGroup = *utilities::findGroup(parent, NX_INSTRUMENT);
     return get1DStringDataset("name", instrumentGroup);
   }
 
-  // Open all detector groups into a vector
-  std::vector<Group> openDetectorGroups(const Group &root) {
-    std::vector<Group> rawDataGroupPaths = openSubGroups(root, NX_ENTRY);
+  // Open all detector subgroups into a vector
+  std::vector<Group> openDetectorGroups(const Group &parent) {
 
-    // Open all instrument groups within rawDataGroups
-    std::vector<Group> instrumentGroupPaths;
-    for (auto const &rawDataGroupPath : rawDataGroupPaths) {
-      std::vector<Group> instrumentGroups = openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
-      instrumentGroupPaths.insert(instrumentGroupPaths.end(), instrumentGroups.begin(), instrumentGroups.end());
-    }
-    // Open all detector groups within instrumentGroups
-    std::vector<Group> detectorGroupPaths;
-    for (auto const &instrumentGroupPath : instrumentGroupPaths) {
-      // Open sub detector groups
-      std::vector<Group> detectorGroups = openSubGroups(instrumentGroupPath, NX_DETECTOR);
-      // Append to detectorGroups vector
-      detectorGroupPaths.insert(detectorGroupPaths.end(), detectorGroups.begin(), detectorGroups.end());
-    }
+    // This method was originally written to open all detector groups for all instruments in the file.
+    // But then it was used only with files containing a single instrument.
+    //   In order to work correctly for files containing multiple workspaces,
+    // this method needs to open _only_ the detector groups for the current instrument.
+
+    Group instrumentGroup = *utilities::findGroup(parent, NX_INSTRUMENT);
+
+    // Open all detector subgroups within the instrument
+    std::vector<Group> detectorGroups = openSubGroups(instrumentGroup, NX_DETECTOR);
+
     // Return the detector groups
-    return detectorGroupPaths;
+    return detectorGroups;
   }
 
   // Function to return the (x,y,z) offsets of pixels in the chosen
@@ -344,10 +338,10 @@ private:
   }
 
   /**
-   * Creates a Homogeneous transfomation for nexus groups
+   * Creates a Homogeneous transformation for NeXus groups
    *
    * Walks the chain of transformations described in the file where W1 is first
-   *transformation and Wn is last and assembles them as
+   * transformation and Wn is last and assembles them as
    *
    * W = Wn x ... W2 x W1
    *
@@ -645,9 +639,9 @@ private:
   void parseAndAddBank(const Group &shapeGroup, InstrumentBuilder &builder,
                        const std::vector<Mantid::detid_t> &detectorIds, const std::string &bankName,
                        const Group &detectorGroup) {
-    if (utilities::hasNXAttribute(shapeGroup, NX_OFF)) {
+    if (utilities::hasNXClass(shapeGroup, NX_OFF)) {
       parseMeshAndAddDetectors(builder, shapeGroup, detectorIds, bankName, detectorGroup);
-    } else if (utilities::hasNXAttribute(shapeGroup, NX_CYLINDER)) {
+    } else if (utilities::hasNXClass(shapeGroup, NX_CYLINDER)) {
       parseNexusCylinderDetector(shapeGroup, bankName, builder, detectorIds);
     } else {
       std::stringstream ss;
@@ -689,9 +683,8 @@ private:
   }
 
   // Parse source and add to instrument
-  void parseAndAddSource(const H5File &file, const Group &root, InstrumentBuilder &builder) {
-    Group entryGroup = utilities::findGroupOrThrow(root, NX_ENTRY);
-    Group instrumentGroup = utilities::findGroupOrThrow(entryGroup, NX_INSTRUMENT);
+  void parseAndAddSource(const H5File &file, const Group &parent, InstrumentBuilder &builder) {
+    Group instrumentGroup = utilities::findGroupOrThrow(parent, NX_INSTRUMENT);
     Group sourceGroup = utilities::findGroupOrThrow(instrumentGroup, NX_SOURCE);
     std::string sourceName = "Unspecified";
     if (utilities::findDataset(sourceGroup, "name"))
@@ -702,9 +695,8 @@ private:
   }
 
   // Parse sample and add to instrument
-  void parseAndAddSample(const H5File &file, const Group &root, InstrumentBuilder &builder) {
-    Group entryGroup = utilities::findGroupOrThrow(root, NX_ENTRY);
-    Group sampleGroup = utilities::findGroupOrThrow(entryGroup, NX_SAMPLE);
+  void parseAndAddSample(const H5File &file, const Group &parent, InstrumentBuilder &builder) {
+    Group sampleGroup = utilities::findGroupOrThrow(parent, NX_SAMPLE);
     auto sampleTransforms = getTransformations(file, sampleGroup);
     Eigen::Vector3d samplePos = sampleTransforms * Eigen::Vector3d(0.0, 0.0, 0.0);
     std::string sampleName = "Unspecified";
@@ -713,35 +705,36 @@ private:
     builder.addSample(sampleName, samplePos);
   }
 
-  void parseMonitors(const H5File &file, const H5::Group &root, InstrumentBuilder &builder) {
-    std::vector<Group> rawDataGroupPaths = openSubGroups(root, NX_ENTRY);
+  void parseMonitors(const H5File &file, const H5::Group &parent, InstrumentBuilder &builder) {
+    // As for `openDetectorGroups`: this method was previously written to parse the monitors from every instrument in
+    // the file. But then was only used with files containing a single instrument.
 
-    // Open all instrument groups within rawDataGroups
-    for (auto const &rawDataGroupPath : rawDataGroupPaths) {
-      std::vector<Group> instrumentGroups = openSubGroups(rawDataGroupPath, NX_INSTRUMENT);
-      for (auto &inst : instrumentGroups) {
-        std::vector<Group> monitorGroups = openSubGroups(inst, NX_MONITOR);
-        for (auto &monitor : monitorGroups) {
-          if (!utilities::findDataset(monitor, DETECTOR_ID))
-            throw std::invalid_argument("NXmonitors must have " + DETECTOR_ID);
-          auto detectorId = readNXInts(monitor, DETECTOR_ID)[0];
-          bool proxy = false;
-          auto monitorShape = parseNexusShape(monitor, proxy);
-          auto monitorTransforms = getTransformations(file, monitor);
-          builder.addMonitor(std::to_string(detectorId), static_cast<Mantid::detid_t>(detectorId),
-                             monitorTransforms * Eigen::Vector3d{0, 0, 0}, monitorShape);
-        }
-      }
+    // In order to be used with files containing multiple workspaces, the requirement is actually
+    // to parse _only_ the monitors from the current instrument.
+
+    Group instrumentGroup = utilities::findGroupOrThrow(parent, NX_INSTRUMENT);
+
+    std::vector<Group> monitorGroups = openSubGroups(instrumentGroup, NX_MONITOR);
+    for (const auto &monitor : monitorGroups) {
+      if (!utilities::findDataset(monitor, DETECTOR_ID))
+        throw std::invalid_argument("NXmonitors must have " + DETECTOR_ID);
+      auto detectorId = readNXInts(monitor, DETECTOR_ID)[0];
+      bool proxy = false;
+      auto monitorShape = parseNexusShape(monitor, proxy);
+      auto monitorTransforms = getTransformations(file, monitor);
+      builder.addMonitor(std::to_string(detectorId), static_cast<Mantid::detid_t>(detectorId),
+                         monitorTransforms * Eigen::Vector3d{0, 0, 0}, monitorShape);
     }
   }
 
 public:
   explicit Parser(std::unique_ptr<AbstractLogger> &&logger) : m_logger(std::move(logger)) {}
 
-  std::unique_ptr<const Mantid::Geometry::Instrument> extractInstrument(const H5File &file, const Group &root) {
-    InstrumentBuilder builder(instrumentName(root));
-    // Get path to all detector groups
-    const std::vector<Group> detectorGroups = openDetectorGroups(root);
+  std::unique_ptr<const Mantid::Geometry::Instrument> extractInstrument(const H5File &file, const Group &parent) {
+    InstrumentBuilder builder(instrumentName(parent));
+
+    // Open all detector subgroups
+    const std::vector<Group> detectorGroups = openDetectorGroups(parent);
     for (auto &detectorGroup : detectorGroups) {
       // Transform in homogenous coordinates. Offsets will be rotated then bank
       // translation applied.
@@ -791,24 +784,40 @@ public:
         builder.addDetectorToLastBank(name, detectorIds[index], relativePos, detShape);
       }
     }
-    // Sort the detectors
-    // Parse source and sample and add to instrument
-    parseAndAddSample(file, root, builder);
-    parseAndAddSource(file, root, builder);
-    parseMonitors(file, root, builder);
+
+    // TODO? Sort the detectors
+
+    // Parse the source and sample and add to instrument
+    parseAndAddSample(file, parent, builder);
+    parseAndAddSource(file, parent, builder);
+
+    // Parse and add the monitors
+    parseMonitors(file, parent, builder);
+
     return builder.createInstrument();
   }
 };
 } // namespace
 
-std::unique_ptr<const Geometry::Instrument>
+std::unique_ptr<const Mantid::Geometry::Instrument>
 NexusGeometryParser::createInstrument(const std::string &fileName, std::unique_ptr<AbstractLogger> logger) {
-
   const H5File file(fileName, H5F_ACC_RDONLY);
   auto rootGroup = file.openGroup("/");
+  auto parentGroup = utilities::findGroupOrThrow(rootGroup, NX_ENTRY);
 
   Parser parser(std::move(logger));
-  return parser.extractInstrument(file, rootGroup);
+  return parser.extractInstrument(file, parentGroup);
+}
+
+std::unique_ptr<const Geometry::Instrument>
+NexusGeometryParser::createInstrument(const std::string &fileName, const std::string &parentGroupName,
+                                      std::unique_ptr<AbstractLogger> logger) {
+
+  const H5File file(fileName, H5F_ACC_RDONLY);
+  auto parentGroup = file.openGroup(std::string("/") + parentGroupName);
+
+  Parser parser(std::move(logger));
+  return parser.extractInstrument(file, parentGroup);
 }
 
 // Create a unique instrument name from Nexus file

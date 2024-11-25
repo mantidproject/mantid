@@ -70,8 +70,8 @@ class DataProcessorAlgorithmTest(unittest.TestCase):
                 self.declareProperty(WorkspaceProperty("Workspace", "", Direction.Output))
 
             def PyExec(self):
-                number = self.getProperty("NumberProperty").value
-                wksp = self.getProperty("Workspace").value
+                self.number = self.getProperty("NumberProperty").value
+                self.wksp = self.getProperty("Workspace").value
 
         # end
         alg = DataProcessorProperties()

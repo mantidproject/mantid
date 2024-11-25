@@ -678,7 +678,7 @@ private:
   public:
     MockSparseWorkspace(const Mantid::API::MatrixWorkspace &modelWS, const size_t wavelengthPoints, const size_t rows,
                         const size_t columns)
-        : SparseWorkspace(modelWS, wavelengthPoints, rows, columns){};
+        : SparseWorkspace(modelWS, wavelengthPoints, rows, columns) {};
 
   public:
     GNU_DIAG_OFF_SUGGEST_OVERRIDE

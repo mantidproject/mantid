@@ -9,9 +9,8 @@ import unittest
 from testhelpers import assertRaisesNothing
 from testhelpers.tempfile_wrapper import TemporaryFileHelper
 
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import AlgorithmFactory, AlgorithmManager, AnalysisDataService
+from mantid.simpleapi import DeleteWorkspace, PoldiCreatePeaksFromCell, PoldiCreatePeaksFromFile
 
 
 class PoldiCreatePeaksFromFileTest(unittest.TestCase):

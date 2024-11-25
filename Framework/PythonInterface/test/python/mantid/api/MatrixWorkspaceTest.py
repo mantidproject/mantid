@@ -5,13 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import sys
 import math
 from testhelpers import create_algorithm, run_algorithm, can_be_instantiated, WorkspaceCreationHelper
 from mantid.api import (
     MatrixWorkspace,
-    MatrixWorkspaceProperty,
-    WorkspaceProperty,
     Workspace,
     ExperimentInfo,
     AnalysisDataService,
@@ -19,7 +16,7 @@ from mantid.api import (
     NumericAxis,
 )
 from mantid.geometry import Detector
-from mantid.kernel import Direction, V3D
+from mantid.kernel import V3D
 from mantid.simpleapi import CreateSampleWorkspace, Rebin
 import numpy as np
 
@@ -368,7 +365,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
     def test_complex_binary_ops_do_not_leave_temporary_workspaces_behind(self):
         run_algorithm("CreateWorkspace", OutputWorkspace="ca", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
         ads = AnalysisDataService
-        w1 = (ads["ca"] * 0.0) + 1.0
+        w1 = (ads["ca"] * 0.0) + 1.0  # noqa: F841
 
         self.assertTrue("w1" in ads)
         self.assertTrue("ca" in ads)

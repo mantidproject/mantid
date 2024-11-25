@@ -21,7 +21,6 @@ from mantid.simpleapi import (
     CorrectToFile,
     CreateSingleValuedWorkspace,
     CropWorkspace,
-    DeleteWorkspace,
     Divide,
     ExtractMask,
     MaskDetectors,
@@ -174,11 +173,8 @@ class Normalize(ReductionStep):
             Scale(InputWorkspace=workspace, OutputWorkspace=workspace, Factor=1.0 / norm_count, Operation="Multiply")
             return "Normalization by time: %6.2g sec" % norm_count
         else:
-            logger.notice("Normalization step did not get a valid normalization option: skipping")
+            sanslog.notice("Normalization step did not get a valid normalization option: skipping")
             return "Normalization step did not get a valid normalization option: skipping"
-
-    def clean(self):
-        DeleteWorkspace(Workspace=norm_ws)
 
 
 class Mask(ReductionStep):
@@ -678,11 +674,9 @@ class ConvertToQ(ReductionStep):
             else:
                 raise NotImplementedError("The type of Q reduction has not been set, e.g. 1D or 2D")
         except:
-            # when we are all up to Python 2.5 replace the duplicated code below with one finally:
-            self._deleteWorkspaces([wave_adj, pixel_adj])
             raise
-
-        self._deleteWorkspaces([wave_adj, pixel_adj])
+        finally:
+            self._deleteWorkspaces([wave_adj, pixel_adj])
 
     def _deleteWorkspaces(self, workspaces):
         """
@@ -951,16 +945,6 @@ class StripEndNans(ReductionStep):
     def __init__(self):
         super(StripEndNans, self).__init__()
 
-    def _isNan(self, val):
-        """
-        Can replaced by isNaN in Python 2.6
-        @param val: float to check
-        """
-        if val != val:
-            return True
-        else:
-            return False
-
     def execute(self, reducer, workspace):
         """
         Trips leading and trailing Nan values from workspace
@@ -977,14 +961,14 @@ class StripEndNans(ReductionStep):
         # Find the first non-zero value
         start = 0
         for i in range(0, length):
-            if not self._isNan(y_vals[i]):
+            if not math.isnan(y_vals[i]):
                 start = i
                 break
         # Now find the last non-zero value
         stop = 0
         length -= 1
         for j in range(length, 0, -1):
-            if not self._isNan(y_vals[j]):
+            if not math.isnan(y_vals[j]):
                 stop = j
                 break
         # Find the appropriate X values and call CropWorkspace

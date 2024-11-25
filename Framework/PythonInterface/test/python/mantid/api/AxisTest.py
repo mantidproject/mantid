@@ -6,12 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from testhelpers import run_algorithm
-from mantid.api import NumericAxis, SpectraAxis, TextAxis, mtd
+from mantid.api import NumericAxis, SpectraAxis, TextAxis
 import numpy as np
 
 
 class AxisTest(unittest.TestCase):
-
     _test_ws = None
 
     def setUp(self):

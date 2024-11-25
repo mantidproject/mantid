@@ -6,8 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidKernel/Quat.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {

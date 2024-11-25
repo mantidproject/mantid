@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import mtd, AlgorithmFactory, FunctionFactory, MatrixWorkspaceProperty, Progress, PythonAlgorithm, WorkspaceFactory
+from mantid.kernel import Direction, FloatBoundedValidator
 from mantid.simpleapi import Fit
 import testhelpers
 
@@ -54,7 +54,7 @@ class Example1DFunctionTest(unittest.TestCase):
 
     def test_fit_succeeds_with_expected_answer(self):
         AlgorithmFactory.subscribe(_InternalMakeLinear)
-        alg = testhelpers.run_algorithm("_InternalMakeLinear", A0=1.0, A1=0.75, OutputWorkspace="_test_linear")
+        testhelpers.run_algorithm("_InternalMakeLinear", A0=1.0, A1=0.75, OutputWorkspace="_test_linear")
 
         func_string = "name=Example1DFunction,A0=0.0,A1=0.0"
         Fit(Function=func_string, InputWorkspace="_test_linear", StartX=1000, EndX=6000, CreateOutput=1, MaxIterations=2)

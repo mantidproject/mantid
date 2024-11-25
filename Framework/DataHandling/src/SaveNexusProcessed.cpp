@@ -267,7 +267,7 @@ void SaveNexusProcessed::doExec(const Workspace_sptr &inputWorkspace,
   const bool append_to_file = getProperty("Append");
 
   nexusFile->resetProgress(&prog_init);
-  nexusFile->openNexusWrite(filename, std::move(entryNumber), append_to_file || keepFile);
+  nexusFile->openNexusWrite(filename, entryNumber, append_to_file || keepFile);
 
   // Equivalent C++ API handle
   ::NeXus::File cppFile(nexusFile->fileID);
@@ -526,7 +526,7 @@ void SaveNexusProcessed::setOtherProperties(IAlgorithm *alg, const std::string &
 }
 
 /**
- Overriden process groups.
+ Overridden process groups.
  */
 bool SaveNexusProcessed::processGroups() {
   // Then immediately open the file

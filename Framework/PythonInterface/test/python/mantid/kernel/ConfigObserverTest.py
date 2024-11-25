@@ -26,7 +26,7 @@ class ConfigObserverTest(unittest.TestCase):
             def onValueChanged(self, name, new, old):
                 onValueChangedMock(name, new, old)
 
-        observer = FakeConfigObserver()
+        self.observer = FakeConfigObserver()
         ConfigService.Instance().setString("defaultsave.directory", "/dev/null")
         onValueChangedMock.assert_any_call("defaultsave.directory", mock.ANY, mock.ANY)
         onValueChangedMock.assert_any_call("datasearch.directories", mock.ANY, mock.ANY)

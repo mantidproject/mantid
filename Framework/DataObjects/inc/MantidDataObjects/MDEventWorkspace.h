@@ -7,16 +7,15 @@
 #pragma once
 
 #include "MantidAPI/BoxController.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/ProgressBase.h"
-//#include "MantidDataObjects/BoxCtrlChangesList.h"
 #include "MantidAPI/CoordTransform.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidKernel/ProgressBase.h"
 
 namespace Mantid {
 namespace DataObjects {

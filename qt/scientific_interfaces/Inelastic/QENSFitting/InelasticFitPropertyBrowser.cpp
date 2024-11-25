@@ -70,14 +70,16 @@ void InelasticFitPropertyBrowser::initFunctionBrowser() {
   m_functionBrowser = new FunctionBrowser(nullptr, true);
   m_functionBrowser->setObjectName("functionBrowser");
   // Process internally
-  connect(m_functionBrowser, SIGNAL(globalsChanged()), this, SLOT(updateFitType()));
+  connect(m_functionBrowser, &FunctionBrowser::globalsChanged, this, &InelasticFitPropertyBrowser::updateFitType);
   // Re-emit
-  connect(m_functionBrowser, SIGNAL(functionStructureChanged()), this, SLOT(notifyFunctionChanged()));
-  connect(m_functionBrowser, SIGNAL(parameterChanged(std::string const &, std::string const &)), this,
-          SLOT(notifyFunctionChanged()));
-  connect(m_functionBrowser, SIGNAL(globalsChanged()), this, SLOT(notifyFunctionChanged()));
-  connect(m_functionBrowser, SIGNAL(localParameterButtonClicked(std::string const &)), this,
-          SIGNAL(localParameterEditRequested(std::string const &)));
+  connect(m_functionBrowser, &FunctionBrowser::functionStructureChanged, this,
+          &InelasticFitPropertyBrowser::notifyFunctionChanged);
+  connect(m_functionBrowser, &FunctionBrowser::parameterChanged, this,
+          &InelasticFitPropertyBrowser::notifyFunctionChanged);
+  connect(m_functionBrowser, &FunctionBrowser::globalsChanged, this,
+          &InelasticFitPropertyBrowser::notifyFunctionChanged);
+  connect(m_functionBrowser, &FunctionBrowser::localParameterButtonClicked, this,
+          &InelasticFitPropertyBrowser::localParameterEditRequested);
 }
 
 void InelasticFitPropertyBrowser::initFitOptionsBrowser() {
@@ -166,7 +168,7 @@ void InelasticFitPropertyBrowser::init() {
     m_functionWidget->insertWidget(0, m_templatePresenter->browser());
     m_browserSwitcher = new QCheckBox("See full function");
     m_browserSwitcher->setObjectName("browserSwitcher");
-    connect(m_browserSwitcher, SIGNAL(clicked(bool)), this, SLOT(showFullFunctionBrowser(bool)));
+    connect(m_browserSwitcher, &QCheckBox::clicked, this, &InelasticFitPropertyBrowser::showFullFunctionBrowser);
     m_fitStatusWidget = new FitStatusWidget(w);
     m_fitStatusWidget->setObjectName("browserFitStatus");
     m_fitStatusWidget->hide();
@@ -188,7 +190,8 @@ void InelasticFitPropertyBrowser::setFunctionTemplatePresenter(std::unique_ptr<I
   }
   m_templatePresenter = std::move(templatePresenter);
   m_templatePresenter->init();
-  connect(m_templatePresenter->browser(), SIGNAL(functionStructureChanged()), this, SLOT(notifyFunctionChanged()));
+  connect(m_templatePresenter->browser(), &FunctionTemplateView::functionStructureChanged, this,
+          &InelasticFitPropertyBrowser::notifyFunctionChanged);
 }
 
 void InelasticFitPropertyBrowser::notifyFunctionChanged() {

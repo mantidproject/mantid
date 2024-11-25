@@ -17,22 +17,23 @@ from mantidqt.utils.qt.testing import start_qapplication
 
 import matplotlib
 
+# Must be called before anything tries to use matplotlib
 matplotlib.use("Agg")
 # Mock out simpleapi to import expensive import of something we don't use anyway
 sys.modules["mantid.simpleapi"] = mock.MagicMock()
 
-from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE
-from mantidqt.widgets.sliceviewer.presenters.presenter import (
+from mantidqt.widgets.sliceviewer.models.model import SliceViewerModel, WS_TYPE  # noqa: E402
+from mantidqt.widgets.sliceviewer.presenters.presenter import (  # noqa: E402
     DBLMAX,
     PeaksViewerCollectionPresenter,
     SliceViewer,
     SliceViewXAxisEditor,
     SliceViewYAxisEditor,
 )
-from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform
-from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText
-from mantidqt.widgets.sliceviewer.views.view import SliceViewerView
-from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView
+from mantidqt.widgets.sliceviewer.models.transform import NonOrthogonalTransform  # noqa: E402
+from mantidqt.widgets.sliceviewer.views.toolbar import ToolItemText  # noqa: E402
+from mantidqt.widgets.sliceviewer.views.view import SliceViewerView  # noqa: E402
+from mantidqt.widgets.sliceviewer.views.dataview import SliceViewerDataView  # noqa: E402
 
 
 def _create_presenter(model: SliceViewerModel, view, mock_sliceinfo_cls, enable_nonortho_axes, supports_nonortho):
@@ -328,14 +329,16 @@ class SliceViewerTest(unittest.TestCase):
 
         self.view.data_view.disable_tool_button.assert_has_calls([mock.call(ToolItemText.NONAXISALIGNEDCUTS)])
 
-    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.CutViewerPresenter")
-    def test_cut_view_toggled_on(self, mock_cv_pres):
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.CutViewerPresenter", autospec=True)
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.CutViewerView", autospec=True)
+    @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.CutViewerModel", autospec=True)
+    def test_cut_view_toggled_on(self, mock_cv_model, mock_cv_view, mock_cv_pres):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         self.view.data_view.track_cursor = mock.MagicMock()
 
         presenter.non_axis_aligned_cut(True)
 
-        mock_cv_pres.assert_called_once_with(presenter, self.view.data_view.canvas)
+        self.assertTrue(presenter._cutviewer_presenter is not None)
         # test correct buttons disabled
         self.view.data_view.deactivate_and_disable_tool.assert_has_calls(
             [mock.call(tool) for tool in (ToolItemText.REGIONSELECTION, ToolItemText.LINEPLOTS)]

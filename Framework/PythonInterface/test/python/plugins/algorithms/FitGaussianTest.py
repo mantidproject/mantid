@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.simpleapi import FitGaussian, CreateSampleWorkspace, DeleteWorkspace
-import logging
 
 
 class FitGaussianTest(unittest.TestCase):

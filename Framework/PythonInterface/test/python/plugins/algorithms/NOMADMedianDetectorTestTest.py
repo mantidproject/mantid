@@ -10,7 +10,6 @@ from mantid.api import AlgorithmManager
 from mantid.simpleapi import LoadNexusProcessed, NOMADMedianDetectorTest
 
 # standard imports
-import os
 import tempfile
 import unittest
 

@@ -5,9 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import numpy as np
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.simpleapi import CreateEmptyTableWorkspace, StatisticsOfTableWorkspace
 
 
 class StatisticsOfTableWorkspaceTest(unittest.TestCase):

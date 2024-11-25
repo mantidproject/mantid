@@ -2,13 +2,9 @@
 line-length = 140
 # https://beta.ruff.rs/docs/rules/
 lint.select = ["C90", "E", "F", "RUF100", "W"]
-lint.ignore = ["E402", # module level import not at top of file
-               "E722", # bare except
-               "E741", "E743", # ambiguous function name, generally 'l'
-               "F821", # unknown names from probably from wild imports
+lint.ignore = ["E722", # bare except
 ]
 exclude = [
-   "Framework/PythonInterface/test",
    "qt/applications/workbench/workbench/app/resources.py",
    "qt/python/mantidqt/mantidqt/resources.py",
    "qt/python/mantidqt/mantidqt/dialogs/errorreports/resources_qt5.py",

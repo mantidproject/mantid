@@ -1,0 +1,1 @@
+- fixes a bug in :ref:`LoadNexusProcessed <algm-LoadNexusProcessed>` when determining the number of workspaces in a NeXus HDF5 file.  It now counts the number of root-level "NX_class: NXentry" groups. Previously, it simply counted the number of root-level groups, assuming all were of "NX_class: NXentry".

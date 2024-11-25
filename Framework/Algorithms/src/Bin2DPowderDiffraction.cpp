@@ -99,8 +99,11 @@ void Bin2DPowderDiffraction::exec() {
   MatrixWorkspace_sptr outputWS = createOutputWorkspace();
 
   const bool normalizeByBinArea = this->getProperty("NormalizeByBinArea");
-  if (normalizeByBinArea)
+  if (normalizeByBinArea) {
+    const auto startTime = std::chrono::high_resolution_clock::now();
     normalizeToBinArea(outputWS);
+    addTimer("normalizeByBinArea", startTime, std::chrono::high_resolution_clock::now());
+  }
 
   setProperty("OutputWorkspace", outputWS);
 }
@@ -157,6 +160,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
   std::vector<std::vector<double>> fileXbins;
 
   // First create the output Workspace filled with zeros
+  auto startTime = std::chrono::high_resolution_clock::now();
   if (binsFromFile) {
     dPerp.clear();
     ReadBinsFromFile(dPerp, fileXbins);
@@ -187,7 +191,9 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
     auto abscissa = std::make_unique<BinEdgeAxis>(dBins.mutableRawData());
     outputWS->replaceAxis(0, std::move(abscissa));
   }
+  addTimer("createWorkspace", startTime, std::chrono::high_resolution_clock::now());
 
+  startTime = std::chrono::high_resolution_clock::now();
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 
   auto verticalAxis = std::make_unique<BinEdgeAxis>(dPerp);
@@ -206,13 +212,15 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
   g_log.debug() << "newYSize = " << dPerpSize << std::endl;
   g_log.debug() << "newXSize = " << dSize << std::endl;
   std::vector<double> dp_vec(verticalAxisRaw->getValues());
+  addTimer("fillValues", startTime, std::chrono::high_resolution_clock::now());
 
+  startTime = std::chrono::high_resolution_clock::now();
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_inputWS, *outputWS))
   for (int64_t snum = 0; snum < numSpectra; ++snum) {
     PARALLEL_START_INTERRUPT_REGION
     if (!spectrumInfo.isMasked(snum)) {
-      double theta = 0.5 * spectrumInfo.twoTheta(snum);
-      double sin_theta = sin(theta);
+      const double theta = 0.5 * spectrumInfo.twoTheta(snum);
+      const double sin_theta = sin(theta);
       if (sin_theta == 0) {
         throw std::runtime_error("Spectrum " + std::to_string(snum) + " has sin(theta)=0. Cannot calculate d-Spacing!");
       }
@@ -220,7 +228,7 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
         throw std::runtime_error("Spectrum " + std::to_string(snum) +
                                  " has cos(theta) <= 0. Cannot calculate d-SpacingPerpendicular!");
       }
-      double log_cos_theta = log(cos(theta));
+      const double log_cos_theta = log(cos(theta));
       EventList &evList = m_inputWS->getSpectrum(snum);
 
       // Switch to weighted if needed.
@@ -230,17 +238,21 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
       std::vector<WeightedEvent> events = evList.getWeightedEvents();
 
       for (const auto &ev : events) {
-        auto d = calcD(ev.tof(), sin_theta);
-        auto dp = calcDPerp(ev.tof(), log_cos_theta);
+        // find d-perpendicular bin
+        const auto dp = calcDPerp(ev.tof(), log_cos_theta);
         const auto lowy = std::lower_bound(dp_vec.begin(), dp_vec.end(), dp);
         if ((lowy == dp_vec.end()) || (lowy == dp_vec.begin()))
           continue;
-        int64_t dp_index = std::distance(dp_vec.begin(), lowy) - 1;
-        auto xs = binsFromFile ? fileXbins[dp_index] : dBins.rawData();
+        const auto dp_index = static_cast<size_t>(std::distance(dp_vec.begin(), lowy) - 1);
+
+        // find d bin
+        const auto xs = binsFromFile ? fileXbins[dp_index] : dBins.rawData();
+        const auto d = calcD(ev.tof(), sin_theta);
         const auto lowx = std::lower_bound(xs.begin(), xs.end(), d);
         if ((lowx == xs.end()) || lowx == xs.begin())
           continue;
-        int64_t d_index = std::distance(xs.begin(), lowx) - 1;
+        const auto d_index = static_cast<size_t>(std::distance(xs.begin(), lowx) - 1);
+
         // writing to the same vectors is not thread-safe
         PARALLEL_CRITICAL(newValues) {
           newYValues[dp_index][d_index] += ev.weight();
@@ -252,6 +264,9 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
     PARALLEL_END_INTERRUPT_REGION
   }
   PARALLEL_CHECK_INTERRUPT_REGION
+  addTimer("histogram", startTime, std::chrono::high_resolution_clock::now());
+
+  startTime = std::chrono::high_resolution_clock::now();
   size_t idx = 0;
   for (const auto &yVec : newYValues) {
     outputWS->setCounts(idx, yVec);
@@ -263,6 +278,8 @@ MatrixWorkspace_sptr Bin2DPowderDiffraction::createOutputWorkspace() {
     outputWS->setCountStandardDeviations(idx, eVec);
     idx++;
   }
+  addTimer("setValues", startTime, std::chrono::high_resolution_clock::now());
+
   return outputWS;
 }
 

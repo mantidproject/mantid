@@ -108,12 +108,11 @@ class INTERReductionTest(systemtesting.MantidSystemTest, ISISReflectometryWorkfl
         testFittingOfReducedData(44990, 44991, self.expected_fit_params, self.expected_fit_covariance)
         self.finaliseResults()
 
-    @staticmethod
-    def regenerateReferenceFileByReducing():
+    def regenerateReferenceFileByReducing(self):
         setupInstrument()
         test = INTERReductionTest()
         test.runTest()
-        SaveNexus(InputWorkspace=INTERReductionTest.reference_workspace_name, Filename=INTERReductionTest.reference_file)
+        SaveNexus(InputWorkspace=self.reference_workspace_name, Filename=self.reference_file)
 
 
 def eventRef(run_number, angle, start=0, stop=0, DB="TRANS"):

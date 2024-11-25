@@ -117,11 +117,11 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
         # ================================TR INPUT RUNS================================#
 
-        for l in range(N_LAMBDAS):
-            p_name = f"SampleTrRunsW{l+1}"
+        for i in range(N_LAMBDAS):
+            p_name = f"SampleTrRunsW{i+1}"
             self.declareProperty(
                 MultipleFileProperty(name=p_name, action=FileAction.OptionalLoad, extensions=["nxs"], allow_empty=True),
-                doc=f"Sample transmission run(s) at the wavelength #{l+1}.",
+                doc=f"Sample transmission run(s) at the wavelength #{i+1}.",
             )
             self.setPropertyGroup(p_name, "Transmission Numors")
 
@@ -338,8 +338,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def _check_tr_runs_dimensions(self):
         """Makes sure all the sample transmission inputs have matching extents"""
         issues = dict()
-        for l in range(self.lambda_rank):
-            prop = f"SampleTrRunsW{l+1}"
+        for i in range(self.lambda_rank):
+            prop = f"SampleTrRunsW{i+1}"
             n_items = self.getPropertyValue(prop).count(",") + 1
             if n_items > 1 and n_items != self.n_samples:
                 issues[prop] = f"{prop} has {n_items} elements instead of {self.n_samples}"
@@ -550,8 +550,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
     def _set_lambda_rank(self):
         """Sets the actual lambda rank"""
         self.lambda_rank = 0
-        for l in range(N_LAMBDAS):
-            if self.getPropertyValue(f"SampleTrRunsW{l+1}"):
+        for i in range(N_LAMBDAS):
+            if self.getPropertyValue(f"SampleTrRunsW{i+1}"):
                 self.lambda_rank += 1
         self.log().notice(f"Set the lambda rank of reduction to {self.lambda_rank}")
 
@@ -584,22 +584,22 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         else:
             return radii[d]
 
-    def get_tr_beam_radius(self, l):
+    def get_tr_beam_radius(self, i):
         """Returns transmission beam radius at the given wavelength"""
         radii = self.getProperty("TrBeamRadius").value
         if len(radii) == 1:
             return radii[0]
         else:
-            return radii[l]
+            return radii[i]
 
     # ================================PROCESSING ALL===============================#
 
     def process_all_transmissions(self):
         """Calculates all the transmissions"""
         all_outputs = []
-        for l in range(self.lambda_rank):
-            transmissions = self.process_all_transmissions_at_lambda(l)
-            self.progress.report((l + 1) * self.n_samples, f"Calculated transmissions for wavelength index {l+1}")
+        for i in range(self.lambda_rank):
+            transmissions = self.process_all_transmissions_at_lambda(i)
+            self.progress.report((i + 1) * self.n_samples, f"Calculated transmissions for wavelength index {i+1}")
             all_outputs.append(transmissions)
         return all_outputs
 
@@ -625,14 +625,14 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
             all_outputs.append(outputs)
         return all_outputs
 
-    def process_all_transmissions_at_lambda(self, l):
+    def process_all_transmissions_at_lambda(self, i):
         """
         Calculates transmissions at the given lambda index
         """
-        tr_dark_current_ws = self.process_tr_dark_current(l)
-        [tr_empty_beam_ws, tr_empty_beam_flux] = self.process_tr_empty_beam(l, tr_dark_current_ws)
-        tr_empty_can_ws = self.process_empty_can_tr(l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux)
-        tr_sample_ws = self.process_sample_tr(l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux)
+        tr_dark_current_ws = self.process_tr_dark_current(i)
+        [tr_empty_beam_ws, tr_empty_beam_flux] = self.process_tr_empty_beam(i, tr_dark_current_ws)
+        tr_empty_can_ws = self.process_empty_can_tr(i, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux)
+        tr_sample_ws = self.process_sample_tr(i, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux)
         results = dict()
         if tr_sample_ws:
             results["SampleTransmission"] = tr_sample_ws
@@ -705,11 +705,11 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
     # ================================PROCESS REDUCTIONS================================#
 
-    def process_tr_dark_current(self, l):
+    def process_tr_dark_current(self, i):
         """Processes the dark current at the tranmission configuration"""
         runs = self.getPropertyValue("TrDarkCurrentRuns")
         if runs:
-            tr_dark_current = runs.split(",")[l]
+            tr_dark_current = runs.split(",")[i]
             [process_tr_dark_current, tr_dark_current_ws] = needs_processing(tr_dark_current, "DarkCurrent")
             if process_tr_dark_current:
                 SANSILLReduction(
@@ -722,11 +722,11 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         else:
             return ""
 
-    def process_tr_empty_beam(self, l, tr_dark_current_ws):
+    def process_tr_empty_beam(self, i, tr_dark_current_ws):
         """Processes the empty beam at the tranmission configuration"""
         runs = self.getPropertyValue("TrEmptyBeamRuns")
         if runs:
-            tr_empty_beam = runs.split(",")[l]
+            tr_empty_beam = runs.split(",")[i]
             [process_tr_empty_beam, tr_empty_beam_ws] = needs_processing(tr_empty_beam, "EmptyBeam")
             tr_empty_beam_flux = tr_empty_beam_ws + "Flux"
             if process_tr_empty_beam:
@@ -735,7 +735,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                     ProcessAs="EmptyBeam",
                     DarkCurrentWorkspace=tr_dark_current_ws,
                     NormaliseBy=self.getProperty("NormaliseBy").value,
-                    TransmissionBeamRadius=self.get_tr_beam_radius(l),
+                    TransmissionBeamRadius=self.get_tr_beam_radius(i),
                     OutputWorkspace=tr_empty_beam_ws,
                     OutputFluxWorkspace=tr_empty_beam_flux,
                 )
@@ -743,11 +743,11 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         else:
             return ["", ""]
 
-    def process_empty_can_tr(self, l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux):
+    def process_empty_can_tr(self, i, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux):
         """Processes the empty container transmission at the given wavelength"""
         runs = self.getPropertyValue("ContainerTrRuns")
         if runs:
-            tr_empty_can = runs.split(",")[l]
+            tr_empty_can = runs.split(",")[i]
             [process_tr_empty_can, tr_empty_can_ws] = needs_processing(tr_empty_can, "Transmission")
             if process_tr_empty_can:
                 SANSILLReduction(
@@ -757,16 +757,16 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                     EmptyBeamWorkspace=tr_empty_beam_ws,
                     FluxWorkspace=tr_empty_beam_flux,
                     NormaliseBy=self.getProperty("NormaliseBy").value,
-                    TransmissionBeamRadius=self.get_tr_beam_radius(l),
+                    TransmissionBeamRadius=self.get_tr_beam_radius(i),
                     OutputWorkspace=tr_empty_can_ws,
                 )
             return tr_empty_can_ws
         else:
             return ""
 
-    def process_sample_tr(self, l, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux):
+    def process_sample_tr(self, i, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux):
         """Processes the sample transmissions at the given wavelength"""
-        tr_sample = self.getPropertyValue(f"SampleTrRunsW{l+1}")
+        tr_sample = self.getPropertyValue(f"SampleTrRunsW{i+1}")
         if tr_sample:
             [_, tr_sample_ws] = needs_processing(tr_sample, "Transmission")
             SANSILLReduction(
@@ -776,10 +776,10 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                 EmptyBeamWorkspace=tr_empty_beam_ws,
                 FluxWorkspace=tr_empty_beam_flux,
                 NormaliseBy=self.getProperty("NormaliseBy").value,
-                TransmissionBeamRadius=self.get_tr_beam_radius(l),
+                TransmissionBeamRadius=self.get_tr_beam_radius(i),
                 OutputWorkspace=tr_sample_ws,
-                startProgress=l * self.n_samples / self.n_reports,
-                endProgress=(l + 1) * self.n_samples / self.n_reports,
+                startProgress=i * self.n_samples / self.n_reports,
+                endProgress=(i + 1) * self.n_samples / self.n_reports,
             )
             return tr_sample_ws
         else:

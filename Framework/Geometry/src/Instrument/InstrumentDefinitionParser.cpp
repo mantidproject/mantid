@@ -1280,9 +1280,9 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(Geometry::ICompAssembly
     m_neutronicPos[detector] = pLocElem->getChildElement("neutronic");
   }
 
-  // mark-as is a depricated attribute used before is="monitor" was introduced
+  // mark-as is a deprecated attribute used before is="monitor" was introduced
   if (pCompElem->hasAttribute("mark-as") || pLocElem->hasAttribute("mark-as")) {
-    g_log.warning() << "Attribute 'mark-as' is a depricated attribute in "
+    g_log.warning() << "Attribute 'mark-as' is a deprecated attribute in "
                        "Instrument Definition File."
                     << " Please see the deprecated section of "
                        "docs.mantidproject.org/concepts/InstrumentDefinitionFile for how to remove this "
@@ -1293,7 +1293,7 @@ void InstrumentDefinitionParser::createDetectorOrMonitor(Geometry::ICompAssembly
     if (category == "Monitor" || category == "monitor")
       m_instrument->markAsMonitor(detector);
     else {
-      // for backwards compatebility look for mark-as="monitor"
+      // for backwards compatibility look for mark-as="monitor"
       if ((pCompElem->hasAttribute("mark-as") && pCompElem->getAttribute("mark-as") == "monitor") ||
           (pLocElem->hasAttribute("mark-as") && pLocElem->getAttribute("mark-as") == "monitor")) {
         m_instrument->markAsMonitor(detector);
@@ -2051,8 +2051,8 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp, const Poc
 
   } else // so if no facing element associated with location element apply
          // default facing if set
-      if (m_haveDefaultFacing)
-    makeXYplaneFaceComponent(comp, m_defaultFacing);
+    if (m_haveDefaultFacing)
+      makeXYplaneFaceComponent(comp, m_defaultFacing);
 }
 
 //-----------------------------------------------------------------------------------------------------------------------

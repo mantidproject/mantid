@@ -15,7 +15,6 @@ from testhelpers import run_algorithm
 
 
 class EnggSaveSinglePeakFitResultsToHDF5Test(unittest.TestCase):
-
     ALG_NAME = "EnggSaveSinglePeakFitResultsToHDF5"
     FIT_PARAMS = ["dSpacing", "A0", "A0_Err", "A1", "A1_Err", "X0", "X0_Err", "A", "A_Err", "B", "B_Err", "S", "S_Err", "I", "I_Err", "Chi"]
     FIT_RESULTS_TABLE_NAME = "FitResults"

@@ -7,9 +7,9 @@
 # pylint: disable=too-many-public-methods,invalid-name
 
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import AnalysisDataService, FileFinder, WorkspaceGroup
 from mantid.kernel import config
+from mantid.simpleapi import CompareWorkspaces, CreateGroupingWorkspace, ISISIndirectDiffractionReduction, LoadNexus
 
 
 class ISISIndirectDiffractionReductionTest(unittest.TestCase):

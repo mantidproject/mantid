@@ -1,5 +1,6 @@
 .. _mantid.utils:
 
+
 ====================
  :mod:`mantid.utils`
 ====================
@@ -10,10 +11,10 @@ can be used as a library to pull internal functions from an algorithm
 so that the code can be shared with external software needing the
 same functionality without the need to duplicate code.
 
-Unit tests for functions in this module should be placed in the
-``Framework/PythonInterface/test/python/mantid/utils/`` directory and
-added to its ``CMakeLists.txt`` to make sure the testing code gets
-registered with Mantid.
+.. toctree::
+   :maxdepth: 1
+
+   reflectometry
 
 
 Calling functions from ``utils``
@@ -69,3 +70,12 @@ can be called from different algorithms.
         element_size=2,      # integration element cube in mm
         cache_dir="/tmp",    # cache diretory for speeding up repeated calculation
         )
+
+
+Testing ``utils``
+=================
+
+Unit tests for functions in this module should be placed in the
+``Framework/PythonInterface/test/python/mantid/utils/`` directory and
+added to its ``CMakeLists.txt`` to make sure the testing code gets
+registered with Mantid.

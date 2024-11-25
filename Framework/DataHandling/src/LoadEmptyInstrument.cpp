@@ -101,7 +101,7 @@ int LoadEmptyInstrument::confidence(Kernel::FileDescriptor &descriptor) const {
         confidence = 20;
       }
     } // Has "Definition"
-  }   // Ascii file
+  } // Ascii file
   return confidence;
 }
 

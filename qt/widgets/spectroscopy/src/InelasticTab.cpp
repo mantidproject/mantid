@@ -18,6 +18,7 @@
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h"
 
 #include <MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h>
 #include <QDomDocument>
@@ -52,10 +53,11 @@ void setPropertyIf(const Algorithm_sptr &algorithm, std::string const &propName,
 namespace MantidQt::CustomInterfaces {
 
 InelasticTab::InelasticTab(QObject *parent)
-    : QObject(parent), m_runPresenter(), m_properties(), m_dblManager(new QtDoublePropertyManager()),
-      m_blnManager(new QtBoolPropertyManager()), m_grpManager(new QtGroupPropertyManager()),
-      m_dblEdFac(new DoubleEditorFactory()), m_tabStartTime(DateAndTime::getCurrentTime()),
-      m_tabEndTime(DateAndTime::maximum()), m_plotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()),
+    : QObject(parent), m_runPresenter(), m_outputNamePresenter(), m_plotOptionsPresenter(), m_properties(),
+      m_dblManager(new QtDoublePropertyManager()), m_blnManager(new QtBoolPropertyManager()),
+      m_grpManager(new QtGroupPropertyManager()), m_dblEdFac(new DoubleEditorFactory()),
+      m_tabStartTime(DateAndTime::getCurrentTime()), m_tabEndTime(DateAndTime::maximum()),
+      m_plotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()),
       m_adsInstance(Mantid::API::AnalysisDataService::Instance()) {
   m_parentWidget = dynamic_cast<QWidget *>(parent);
 
@@ -72,6 +74,20 @@ InelasticTab::InelasticTab(QObject *parent)
 
 void InelasticTab::setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter) {
   m_runPresenter = std::move(presenter);
+}
+
+void InelasticTab::setOutputNamePresenter(IOutputNameView *view) {
+  auto outputNameModel = std::make_unique<OutputNameModel>();
+  m_outputNamePresenter = std::make_unique<OutputNamePresenter>(std::move(outputNameModel), view);
+}
+
+void InelasticTab::setOutputPlotOptionsPresenter(
+    IOutputPlotOptionsView *view, PlotWidget const &plotType, std::string const &fixedIndices,
+    std::optional<std::map<std::string, std::string>> const &availableActions) {
+  auto outputPlotOptionsModel =
+      std::make_unique<OutputPlotOptionsModel>(std::make_unique<ExternalPlotter>(), availableActions);
+  m_plotOptionsPresenter =
+      std::make_unique<OutputPlotOptionsPresenter>(view, std::move(outputPlotOptionsModel), plotType, fixedIndices);
 }
 
 /**
@@ -180,7 +196,7 @@ void InelasticTab::addSaveWorkspaceToQueue(const std::string &wsName, const std:
  * @param bounds :: The upper and lower bounds to be set
  */
 void InelasticTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min, QtProperty *max,
-                                        const QPair<double, double> &bounds) {
+                                        const std::pair<double, double> &bounds) {
   m_dblManager->setRange(min, bounds.first, bounds.second);
   m_dblManager->setRange(max, bounds.first, bounds.second);
   rs->setBounds(bounds.first, bounds.second);
@@ -196,8 +212,8 @@ void InelasticTab::setPlotPropertyRange(RangeSelector *rs, QtProperty *min, QtPr
  * @param range :: The range to set the range selector to.
  */
 void InelasticTab::setRangeSelector(RangeSelector *rs, QtProperty *lower, QtProperty *upper,
-                                    const QPair<double, double> &range,
-                                    const std::optional<QPair<double, double>> &bounds) {
+                                    const std::pair<double, double> &range,
+                                    const std::optional<std::pair<double, double>> &bounds) {
   m_dblManager->setValue(lower, range.first);
   m_dblManager->setValue(upper, range.second);
   rs->setRange(range.first, range.second);

@@ -27,7 +27,7 @@ namespace Mantid {
 using coord_t = float;
 
 /// Define indicating that the coord_t type is a float (not double)
-//#undef COORDT_IS_FLOAT
+// #undef COORDT_IS_FLOAT
 #define COORDT_IS_FLOAT
 
 /** Typedef for the signal recorded in a MDBox, etc.

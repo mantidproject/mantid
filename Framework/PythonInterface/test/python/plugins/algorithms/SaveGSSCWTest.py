@@ -7,7 +7,7 @@
 # pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
 import mantid
 from mantid.api import AnalysisDataService
-from mantid.simpleapi import CreateWorkspace, SaveGSSCW, LoadAscii
+from mantid.simpleapi import CreateWorkspace, SaveGSSCW
 import numpy as np
 import os
 import unittest

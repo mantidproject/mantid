@@ -6,9 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy
-from numpy import *
-from mantid.kernel import *
-from mantid.api import *
+from numpy import arange
 import mantid.kernel as kernel
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
@@ -42,7 +40,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -116,7 +114,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -177,7 +175,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -206,7 +204,6 @@ class ExportExperimentLogTest(unittest.TestCase):
         In this case, the original file will be renamed and a new file will
         be creatd
         """
-        import datetime
         import time
 
         # Generate the matrix workspace with some logs
@@ -245,7 +242,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -268,7 +265,6 @@ class ExportExperimentLogTest(unittest.TestCase):
 
         # Rename the old one: split path from file, new name, and rename
         fileName, fileExtension = os.path.splitext(outfilename)
-        now = datetime.datetime.now()
         nowstr = time.strftime("%Y_%B_%d_%H_%M")
         oldfilename = fileName + "_" + nowstr + fileExtension
         print("Saved old file is {0}. ".format(oldfilename))
@@ -310,7 +306,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -391,7 +387,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -515,7 +511,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -613,7 +609,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return
@@ -678,7 +674,7 @@ class ExportExperimentLogTest(unittest.TestCase):
             ifile = open(outfilename)
             lines = ifile.readlines()
             ifile.close()
-        except IOError as err:
+        except IOError:
             print("Unable to open file {0}.".format(outfilename))
             self.fail()
             return

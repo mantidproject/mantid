@@ -62,7 +62,7 @@ if (%s) funcname<%s, %d>(%s); \\
     s = macro_top % (prefix, suffix)
 
     for mdevent_type in mdevent_types:
-        for nd in xrange(1, max_dimensions + 1):
+        for nd in range(1, max_dimensions + 1):
             if nd >= min_dimension:
                 eventType = "%s<%d>" % (mdevent_type, nd)
                 varname = "MDEW_%s_%d" % (mdevent_type.upper(), nd)
@@ -89,7 +89,7 @@ def find_line_number(lines, pattern, startat=0):
     """Look line-by-line in lines[] for a line that starts with pattern. Return
     the line number in source where the line was found, and the padding (in spaces) before it"""
     searcher = re.compile(pattern)
-    for n in xrange(startat, len(lines)):
+    for n in range(startat, len(lines)):
         found = searcher.search(lines[n])
         if found:
             # How much padding?
@@ -102,7 +102,7 @@ def find_line_number(lines, pattern, startat=0):
 def find_num_dim(lines):
     """Look up through header file and the string which identifies how many dimensions have to be instantiated"""
     searcher = re.compile(r"(?<=MAX_MD_DIMENSIONS_NUM)(\s*\=\s*)\d+")
-    for i in xrange(len(lines)):
+    for i in range(len(lines)):
         found = searcher.search(lines[i])
         if found:
             rez = found.group()

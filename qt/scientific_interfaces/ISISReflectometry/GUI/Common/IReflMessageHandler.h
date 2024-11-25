@@ -18,7 +18,7 @@ IReflMessageHandler is an interface for passing messages to the user
 */
 class IReflMessageHandler : public MantidWidgets::IMessageHandler {
 public:
-  virtual ~IReflMessageHandler(){};
+  virtual ~IReflMessageHandler() {};
   virtual std::string askUserForSaveFileName(std::string const &filter) = 0;
   virtual std::string askUserForLoadFileName(std::string const &filter) = 0;
 };

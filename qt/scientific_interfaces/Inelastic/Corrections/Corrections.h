@@ -21,9 +21,8 @@ class QtStringPropertyManager;
 namespace MantidQt {
 namespace CustomInterfaces {
 // The assumption is made elsewhere that the ordering of these enums matches the
-// ordering of the
-// tabs as they appear in the interface itself.
-enum CorrectionTabChoice { CONTAINER_SUBTRACTION, CALC_CORR, ABSORPTION_CORRECTIONS, APPLY_CORR };
+// ordering of the tabs as they appear in the interface itself.
+enum CorrectionTabChoice { CONTAINER_SUBTRACTION, ABSORPTION_CORRECTIONS, APPLY_CORRECTIONS };
 
 // Forward Declaration
 class CorrectionsTab;

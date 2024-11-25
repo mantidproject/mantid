@@ -9,7 +9,6 @@ from mantid.kernel import BoolTimeSeriesProperty, FloatTimeSeriesProperty, Float
 
 
 class FilteredTimeSeriesPropertyTest(unittest.TestCase):
-
     _source = None
     _filter = None
 

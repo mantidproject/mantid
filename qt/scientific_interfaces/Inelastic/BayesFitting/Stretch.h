@@ -18,7 +18,7 @@ class MANTIDQT_INELASTIC_DLL Stretch : public BayesFittingTab, public IRunSubscr
   Q_OBJECT
 
 public:
-  Stretch(QWidget *parent = nullptr);
+  Stretch(QWidget *parent = nullptr, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner = nullptr);
 
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;

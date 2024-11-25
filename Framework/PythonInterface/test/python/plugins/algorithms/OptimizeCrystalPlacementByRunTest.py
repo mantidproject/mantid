@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import LoadIsawPeaks, FindUBUsingFFT, IndexPeaks, OptimizeCrystalPlacementByRun
 from mantid.api import mtd
+from mantid.simpleapi import LoadIsawPeaks, FindUBUsingFFT, IndexPeaks, OptimizeCrystalPlacementByRun
 
 
 class OptimizeCrystalPlacementByRunTest(unittest.TestCase):
@@ -14,7 +14,7 @@ class OptimizeCrystalPlacementByRunTest(unittest.TestCase):
         ws = LoadIsawPeaks("calibrated.peaks")
         FindUBUsingFFT(PeaksWorkspace=ws, MinD=2, MaxD=20, Tolerance=0.12)
         IndexPeaks(PeaksWorkspace="ws", Tolerance=0.12)
-        wsd = OptimizeCrystalPlacementByRun(InputWorkspace=ws, OutputWorkspace="wsd", Tolerance=0.12)
+        OptimizeCrystalPlacementByRun(InputWorkspace=ws, OutputWorkspace="wsd", Tolerance=0.12)
         result = mtd["wsd"].getPeak(0).getSamplePos()
         self.assertAlmostEqual(result.getX(), -0.000678629)
         self.assertAlmostEqual(result.getY(), -2.16033e-05)

@@ -180,8 +180,8 @@ class BaseScriptElement(object):
         elem_list = []
         element_list = dom.getElementsByTagName(tag)
         if len(element_list) > 0:
-            for l in element_list:
-                elem_list.append(BaseScriptElement.getText(l.childNodes).strip())
+            for element in element_list:
+                elem_list.append(BaseScriptElement.getText(element.childNodes).strip())
         return elem_list
 
     @classmethod
@@ -310,6 +310,23 @@ def execute_script(script, error_cb=None):
     @param script :: A chunk of code to execute
     @param error_cb :: method to call on error, only registered in workbench
     """
+
+    def execute_script_async(script, error_cb=None):
+        # this is intentionally imported lazily to avoid a Qt dependency
+        # in the framework
+        from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
+
+        def on_error(arg):
+            Logger("scripter").error("Failed to execute script: {}".format(arg))
+
+        executioner = PythonCodeExecution()
+        if error_cb is None:
+            executioner.sig_exec_error.connect(on_error)
+        else:
+            executioner.sig_exec_error.connect(error_cb)
+
+        executioner.execute_async(script, 0)
+
     if SCRIPT_EXEC_METHOD == "async":
         Logger("scripter").information("using PythonCodeExecution")
         execute_script_async(script, error_cb)
@@ -319,27 +336,6 @@ def execute_script(script, error_cb=None):
     else:
         Logger("scripter").information("using straight exec")
         exec(script, globals(), locals())
-
-
-def execute_script_async(script, error_cb=None):
-    # Cannot define this code in execute_script as Python 2.7.5 generates an error:
-    # SyntaxError: unqualified exec is not allowed in function 'execute_script' it
-    # contains a nested function with free variables
-
-    # this is intentionally imported lazily to avoid a Qt dependency
-    # in the framework
-    from mantidqt.widgets.codeeditor.execution import PythonCodeExecution
-
-    def on_error(arg):
-        Logger("scripter").error("Failed to execute script: {}".format(arg))
-
-    executioner = PythonCodeExecution()
-    if error_cb is None:
-        executioner.sig_exec_error.connect(on_error)
-    else:
-        executioner.sig_exec_error.connect(error_cb)
-
-    executioner.execute_async(script, 0)
 
 
 class BaseReductionScripter(object):
@@ -573,12 +569,10 @@ class BaseReductionScripter(object):
             script = self.to_script(None)
             try:
                 self.execute_script(script)
-                # Update scripter
-                for item in self._observers:
-                    if item.state() is not None:
-                        item.state().update()
             except:
-                # Update scripter [Duplicated code because we can't use 'finally' on python 2.4]
+                raise
+            finally:
+                # Update scripter
                 for item in self._observers:
                     if item.state() is not None:
                         # Things might be broken, so update what we can
@@ -586,7 +580,6 @@ class BaseReductionScripter(object):
                             item.state().update()
                         except (StopIteration, ImportError, NameError, TypeError, ValueError, Warning):
                             pass
-                raise  # rethrow the exception
         else:
             raise RuntimeError("Reduction could not be executed: Mantid could not be imported")
 

@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import mtd
+from mantid.simpleapi import AddSampleLogMultiple, CreateSampleWorkspace, DeleteWorkspace
 
 
 class AddSampleLogMultipleTest(unittest.TestCase):
@@ -34,7 +34,7 @@ class AddSampleLogMultipleTest(unittest.TestCase):
         """
         logs = self._workspace.getRun().getProperties()
         matched_logs = list()
-        if units == None:
+        if units is None:
             units = [""] * len(names)
 
         for log in logs:
@@ -84,7 +84,7 @@ class AddSampleLogMultipleTest(unittest.TestCase):
 
         self._validate_sample_logs(names, values, types)
 
-    def test_strings_and_numbers(self):
+    def test_strings_and_numbers_with_parse_type_false(self):
         """
         Tests adding multiple strings and numbers.
         """
@@ -192,7 +192,7 @@ class AddSampleLogMultipleTest(unittest.TestCase):
             LogTypes=types,
         )
 
-    def test_validation_differing_types(self):
+    def test_validation_differing_number_of_log_types(self):
         """
         Test validation for differing numbers of log names and log types.
         """

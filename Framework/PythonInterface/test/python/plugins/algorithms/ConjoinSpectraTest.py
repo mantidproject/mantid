@@ -6,13 +6,11 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import mtd
 from testhelpers import run_algorithm
 
 
 class ConjoinSpectraTest(unittest.TestCase):
-
     _aWS = None
 
     def setUp(self):
@@ -26,7 +24,7 @@ class ConjoinSpectraTest(unittest.TestCase):
         self._aWS = createWSAlg.getPropertyValue("OutputWorkspace")
 
     def test_basicRun(self):
-        conjoinAlg = run_algorithm("ConjoinSpectra", InputWorkspaces="%s,%s" % (self._aWS, self._aWS), OutputWorkspace="conjoined")
+        run_algorithm("ConjoinSpectra", InputWorkspaces="%s,%s" % (self._aWS, self._aWS), OutputWorkspace="conjoined")
         conjoinedWS = mtd.retrieve("conjoined")
 
         wsIndex = 0

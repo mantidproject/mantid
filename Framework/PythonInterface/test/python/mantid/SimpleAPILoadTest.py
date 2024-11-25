@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Specifically tests the Load function in the simple API
+Specifically tests the Load function in the simple API
 """
+
 import unittest
 from mantid.simpleapi import Load
 from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
@@ -74,7 +75,7 @@ class SimpleAPILoadTest(unittest.TestCase):
 
     def test_Load_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided(self):
         wsname = "test_Load_uses_OutputWorkspace_keyword_over_lhs_var_name_if_provided"
-        wkspace = Load("IRS21360.raw", OutputWorkspace=wsname)
+        Load("IRS21360.raw", OutputWorkspace=wsname)
         self.assertTrue(wsname in mtd)
 
     def test_Load_accepts_EnableLogging_keyword(self):

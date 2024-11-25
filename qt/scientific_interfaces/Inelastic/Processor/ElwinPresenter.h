@@ -75,7 +75,7 @@ public:
   void updateAvailableSpectra() override;
 
   void setInputWorkspace(const MatrixWorkspace_sptr &inputWorkspace);
-  virtual void setSelectedSpectrum(int spectrum);
+  void setSelectedSpectrum(int spectrum);
   int getSelectedSpectrum() const;
   MatrixWorkspace_sptr getInputWorkspace() const override;
   MatrixWorkspace_sptr getPreviewPlotWorkspace();
@@ -89,10 +89,11 @@ public:
   void clearHandle() override;
 
 protected:
-  void runComplete(bool error) override;
-  virtual void addDataToModel(MantidWidgets::IAddWorkspaceDialog const *dialog);
+  void runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) override;
+  void addDataToModel(MantidWidgets::IAddWorkspaceDialog const *dialog);
 
 private:
+  void setFileExtensionsByName(bool filter) override;
   void updateInterface();
   void updateTableFromModel();
   void updateIntegrationRange();

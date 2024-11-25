@@ -17,7 +17,7 @@ using SpectrumToPlot = std::pair<std::string, std::size_t>;
 
 class MANTIDQT_INELASTIC_DLL IFitOutputOptionsModel {
 public:
-  IFitOutputOptionsModel(){};
+  IFitOutputOptionsModel() {};
   virtual ~IFitOutputOptionsModel() = default;
 
   virtual void setResultWorkspace(Mantid::API::WorkspaceGroup_sptr groupWorkspace) = 0;

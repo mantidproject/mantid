@@ -20,7 +20,7 @@ IFileHandler is an interface for saving/loading files
 */
 class IFileHandler {
 public:
-  virtual ~IFileHandler(){};
+  virtual ~IFileHandler() {};
   virtual void saveJSONToFile(std::string const &filename, QMap<QString, QVariant> const &map) = 0;
   virtual QMap<QString, QVariant> loadJSONFromFile(std::string const &filename) = 0;
   virtual void saveCSVToFile(std::string const &filename, std::string const &content) const = 0;

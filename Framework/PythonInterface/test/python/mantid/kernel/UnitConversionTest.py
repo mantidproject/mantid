@@ -27,7 +27,7 @@ class UnitConversionTest(unittest.TestCase):
         src_value = 1.5
         dest_unit = "Momentum"
 
-        l1 = l2 = theta = efixed = 0.0
+        l1 = l2 = theta = 0.0
         emode = DeltaEModeType.Indirect
         expected = 2.0 * math.pi / src_value
         params = UnitParametersMap()

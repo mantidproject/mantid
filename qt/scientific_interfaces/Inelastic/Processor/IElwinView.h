@@ -25,6 +25,7 @@ namespace CustomInterfaces {
 
 class IRunView;
 class IOutputPlotOptionsView;
+class IOutputNameView;
 class IElwinPresenter;
 
 class MANTIDQT_INELASTIC_DLL IElwinView {
@@ -36,6 +37,7 @@ public:
 
   virtual IRunView *getRunView() const = 0;
   virtual IOutputPlotOptionsView *getPlotOptions() const = 0;
+  virtual IOutputNameView *getOutputName() const = 0;
 
   virtual void setAvailableSpectra(MantidWidgets::WorkspaceIndex minimum, MantidWidgets::WorkspaceIndex maximum) = 0;
   virtual void setAvailableSpectra(const std::vector<MantidWidgets::WorkspaceIndex>::const_iterator &from,
@@ -49,7 +51,6 @@ public:
   virtual std::string getPreviewWorkspaceName(int index) const = 0;
   virtual void setPreviewWorkspaceName(int index) = 0;
   virtual std::string getCurrentPreview() const = 0;
-  virtual void updateSelectorRange(const MatrixWorkspace_sptr &inputWS) = 0;
 
   // controls for dataTable
   virtual void clearDataTable() = 0;

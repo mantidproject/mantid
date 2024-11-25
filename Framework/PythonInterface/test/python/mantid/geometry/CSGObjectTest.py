@@ -9,7 +9,6 @@ from mantid.geometry import BoundingBox, CSGObject
 
 
 class CSGObjectTest(unittest.TestCase):
-
     _testws = None
 
     def setUp(self):

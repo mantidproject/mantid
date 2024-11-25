@@ -17,6 +17,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnumeratedString.h"
+#include "MantidKernel/EnumeratedStringProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidKernel/VectorHelper.h"
@@ -215,8 +216,8 @@ std::map<std::string, std::string> Rebin::validateInputs() {
           helpMessages[PropertyNames::POWER] = "This binning is expected to give more than 10000 bins.";
         }
       } // end else
-    }   // end else if
-  }     // end if property power exists
+    } // end else if
+  } // end if property power exists
   return helpMessages;
 }
 
@@ -263,8 +264,7 @@ void Rebin::init() {
                   "is linear. Power must be between 0 and 1.");
 
   declareProperty(
-      PropertyNames::BINMODE, binningModeNames[size_t(BinningMode::DEFAULT)],
-      std::make_shared<Mantid::Kernel::StringListValidator>(binningModeNames),
+      std::make_unique<EnumeratedStringProperty<BinningMode, &binningModeNames>>(PropertyNames::BINMODE),
       "Optional. "
       "Binning behavior can be specified in the usual way through sign of binwidth and other properties ('Default'); "
       "or can be set to one of the allowed binning modes. "

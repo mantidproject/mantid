@@ -37,6 +37,7 @@ public:
   void setUp() override {
     m_view = std::make_unique<NiceMock<MockElwinView>>();
     m_outputPlotView = std::make_unique<NiceMock<MockOutputPlotOptionsView>>();
+    m_outputName = std::make_unique<NiceMock<MockOutputNameView>>();
     m_runView = std::make_unique<NiceMock<MockRunView>>();
 
     auto algorithmRunner = std::make_unique<NiceMock<MockAlgorithmRunner>>();
@@ -48,6 +49,7 @@ public:
     m_dataModel = dataModel.get();
 
     ON_CALL(*m_view, getPlotOptions()).WillByDefault(Return((m_outputPlotView.get())));
+    ON_CALL(*m_view, getOutputName()).WillByDefault(Return(m_outputName.get()));
     ON_CALL(*m_view, getRunView()).WillByDefault(Return((m_runView.get())));
     ON_CALL(*m_dataModel, getSpectra(WorkspaceID{0})).WillByDefault(Return(FunctionModelSpectra("0-1")));
 
@@ -66,11 +68,13 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_algorithmRunner));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_dataModel));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_outputPlotView.get()));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(m_outputName.get()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(m_runView.get()));
 
     m_presenter.reset();
     m_view.reset();
     m_outputPlotView.reset();
+    m_outputName.reset();
     m_runView.reset();
   }
 
@@ -146,6 +150,7 @@ private:
   NiceMock<MockElwinModel> *m_model;
   NiceMock<MockAlgorithmRunner> *m_algorithmRunner;
   std::unique_ptr<NiceMock<MockOutputPlotOptionsView>> m_outputPlotView;
+  std::unique_ptr<NiceMock<MockOutputNameView>> m_outputName;
   std::unique_ptr<NiceMock<MockRunView>> m_runView;
   std::unique_ptr<NiceMock<MockElwinView>> m_view;
   std::unique_ptr<ElwinPresenter> m_presenter;

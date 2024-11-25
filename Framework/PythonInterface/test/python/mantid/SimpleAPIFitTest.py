@@ -5,14 +5,15 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Specifically tests the Fit function in the simple API
+Specifically tests the Fit function in the simple API
 """
+
 import unittest
 import testhelpers
 import platform
 
 from mantid.simpleapi import CreateWorkspace, Fit, FunctionWrapper
-from mantid.api import mtd, MatrixWorkspace, ITableWorkspace, IFunction
+from mantid.api import mtd, MatrixWorkspace, ITableWorkspace
 
 
 import numpy as np
@@ -20,7 +21,6 @@ from testhelpers import run_algorithm
 
 
 class SimpleAPIFitTest(unittest.TestCase):
-
     _raw_ws = None
 
     def setUp(self):
@@ -87,6 +87,7 @@ class SimpleAPIFitTest(unittest.TestCase):
             return
         output_name = "otherargs_fitWS"
         retvals = Fit("name=FlatBackground", self._raw_ws, MaxIterations=2, Output=output_name, EnableLogging=False)
+        self._check_returns_are_correct_type_with_workspaces(retvals)
         self.assertTrue(output_name + "_Workspace" in mtd)
 
     def _check_returns_are_correct_type_with_workspaces(self, retvals):

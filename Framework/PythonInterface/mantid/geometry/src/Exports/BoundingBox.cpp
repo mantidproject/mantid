@@ -41,8 +41,7 @@ void export_BoundingBox() {
            "Returns true if the given point is inside the object. See "
            "mantid.kernel.V3D")
 
-      .def("doesLineIntersect",
-           (bool (BoundingBox::*)(const V3D &, const V3D &) const) & BoundingBox::doesLineIntersect,
+      .def("doesLineIntersect", (bool(BoundingBox::*)(const V3D &, const V3D &) const) & BoundingBox::doesLineIntersect,
            (arg("self"), arg("startPoint"), arg("lineDir")),
            "Returns true if the line given by the starting point & direction "
            "vector passes through the box");

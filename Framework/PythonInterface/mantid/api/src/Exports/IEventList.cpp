@@ -57,7 +57,7 @@ void export_IEventList() {
       .def("getMemorySize", &IEventList::getMemorySize, args("self"), "Returns the memory size in bytes")
       .def("integrate", &IEventList::integrate, args("self", "minX", "maxX", "entireRange"),
            "Integrate the events between a range of X values, or all events.")
-      .def("convertTof", (void (IEventList::*)(const double, const double)) & IEventList::convertTof,
+      .def("convertTof", (void(IEventList::*)(const double, const double)) & IEventList::convertTof,
            args("self", "factor", "offset"), "Convert the time of flight by tof'=tof*factor+offset")
       .def("scaleTof", &IEventList::scaleTof, args("self", "factor"),
            "Convert the tof units by scaling by a multiplier.")
@@ -88,12 +88,12 @@ void export_IEventList() {
            "The minimum pulse time for the list of the events.")
       .def("getTofMin", &IEventList::getTofMin, args("self"), "The minimum tof value for the list of the events.")
       .def("getTofMax", &IEventList::getTofMax, args("self"), "The maximum tof value for the list of the events.")
-      .def("multiply", (void (IEventList::*)(const double, const double)) & IEventList::multiply,
+      .def("multiply", (void(IEventList::*)(const double, const double)) & IEventList::multiply,
            args("self", "value", "error"),
            "Multiply the weights in this event "
            "list by a scalar variable with an "
            "error; though the error can be 0.0")
-      .def("divide", (void (IEventList::*)(const double, const double)) & IEventList::divide,
+      .def("divide", (void(IEventList::*)(const double, const double)) & IEventList::divide,
            args("self", "value", "error"),
            "Divide the weights in this event "
            "list by a scalar with an "

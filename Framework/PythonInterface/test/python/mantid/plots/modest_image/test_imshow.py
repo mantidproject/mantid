@@ -20,11 +20,6 @@ def default_data():
     return np.sin(x / 25) * np.cos(y / 50)
 
 
-def check_axes_props(ax1, ax2):
-    props = ["aspect"]
-    check_props(ax1, ax2, props)
-
-
 def setup_function(func):
     plt.clf()
     plt.cla()

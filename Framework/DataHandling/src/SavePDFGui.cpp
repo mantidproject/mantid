@@ -75,7 +75,7 @@ void SavePDFGui::exec() {
   out.open(filename.c_str(), std::ios_base::out);
 
   // --------- write the header in the style of
-  //#Comment: neutron, Qmin=0.5, Qmax=31.42, Qdamp=0.017659, Qbroad= 0.0191822,
+  // #Comment: neutron, Qmin=0.5, Qmax=31.42, Qdamp=0.017659, Qbroad= 0.0191822,
   // Temperature = 300
   writeMetaData(out, inputWS);
 

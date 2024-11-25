@@ -20,7 +20,6 @@ data = np.sin(x / 10.0) * np.cos(y / 30.0)
 
 
 def setup(img_cls):
-
     plt.clf()
     plt.cla()
     ax = plt.gca()
@@ -70,7 +69,6 @@ def time_move(img_cls, repeat=10):
 
 def time_move_zoom(img_cls, repeat=10):
     """Move image, at high zoom setting"""
-    delta = 100
     lims = [(0, 100), (500, 600)]
     a, t = setup(img_cls)
     ax = plt.gca()

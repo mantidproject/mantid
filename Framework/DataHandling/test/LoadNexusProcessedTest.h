@@ -13,6 +13,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
+
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
@@ -536,6 +537,34 @@ public:
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
       TS_ASSERT_EQUALS(ws->blocksize(), 2);
       TS_ASSERT_EQUALS(ws->getName(), "irs55125_graphite002_to_55131_" + std::string(suffix[i]) + "_1");
+    }
+  }
+
+  void test_load_workspace_group_other_root_groups() {
+
+    // Test that a group workspace can be loaded in the presence of other
+    //   non-NXentry NeXus and non-NeXus root groups.
+
+    LoadNexusProcessed alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
+    alg.setPropertyValue("Filename", "WorkspaceGroup_other_groups.nxs");
+    alg.setPropertyValue("OutputWorkspace", "group");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    Workspace_sptr workspace;
+    TS_ASSERT_THROWS_NOTHING(workspace = AnalysisDataService::Instance().retrieve("group"));
+    WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace);
+    TS_ASSERT(group);
+    int groupSize = group->getNumberOfEntries();
+    TS_ASSERT_EQUALS(groupSize, 12);
+    for (int i = 0; i < groupSize; ++i) {
+      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+      TS_ASSERT(ws);
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), 1);
+      TS_ASSERT_EQUALS(ws->blocksize(), 10);
+      TS_ASSERT_EQUALS(ws->getName(), "group_" + std::to_string(i + 1));
     }
   }
 

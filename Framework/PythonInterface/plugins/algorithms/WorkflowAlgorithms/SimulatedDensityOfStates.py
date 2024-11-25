@@ -446,9 +446,9 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
             for index, width in zip(peaks, peak_widths.tolist()):
                 gamma_by_2 = width / 2
-                for l in range(-n_lorentz, n_lorentz):
-                    if index + l > 0:
-                        dos[index + l] += hist[index] * gamma_by_2 / (l**2 + gamma_by_2**2) / math.pi
+                for i in range(-n_lorentz, n_lorentz):
+                    if index + i > 0:
+                        dos[index + i] += hist[index] * gamma_by_2 / (i**2 + gamma_by_2**2) / math.pi
 
         return dos
 

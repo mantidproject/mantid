@@ -7,7 +7,7 @@
 import unittest
 import testhelpers
 
-from mantid.kernel import StringListValidator, Direction
+from mantid.kernel import StringListValidator
 from mantid.api import PythonAlgorithm
 
 
@@ -37,7 +37,6 @@ class ListValidatorTest(unittest.TestCase):
         """
 
         class SingleItemListValidator(PythonAlgorithm):
-
             _allowed = "OnlyThis"
 
             def PyInit(self):
@@ -60,7 +59,6 @@ class ListValidatorTest(unittest.TestCase):
         """
 
         class MultiValueValidator(PythonAlgorithm):
-
             _allowed_vals = ["Val1", "Val2", "Val3"]
 
             def PyInit(self):

@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.kernel import *
-from mantid.api import *
+from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm
+from mantid.kernel import config, Direction, StringListValidator, StringMandatoryValidator
 from mantid.simpleapi import CreateWorkspace, ReflectometryReductionOneLiveData, GroupWorkspaces
 from testhelpers import assertRaisesNothing, create_algorithm
 
@@ -220,7 +220,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
         self.assertEqual(workspace.getInstrument().getName(), self._instrument_name)
 
     def test_instrument_was_not_set_on_input_workspace(self):
-        workspace = self._run_algorithm_with_defaults()
+        self._run_algorithm_with_defaults()
         # The input workspace should be unchanged
         self.assertEqual(self._input_ws.getInstrument().getName(), "")
 

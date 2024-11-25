@@ -147,15 +147,87 @@ QStringList getCorrectionsWSSuffixes(std::string const &interfaceName) {
   return getWSSuffixes(interfaceName, "corrections");
 }
 
-QPair<double, double> convertTupleToQPair(std::tuple<double, double> const &doubleTuple) {
-  return QPair<double, double>(std::get<0>(doubleTuple), std::get<1>(doubleTuple));
-}
-
 std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &doubleTuple) {
   return std::make_pair(std::get<0>(doubleTuple), std::get<1>(doubleTuple));
 }
 
 QString makeQStringNumber(double value, int precision) { return QString::number(value, 'f', precision); }
+
+/**
+ * Sets the edge bounds of plot to prevent the user inputting invalid values
+ * Also sets limits for range selector movement
+ *
+ * @param dblPropertyManager :: Pointer to the Qt Double Property Manager.
+ * @param rs :: Pointer to the RangeSelector
+ * @param min :: The lower bound property in the property browser
+ * @param max :: The upper bound property in the property browser
+ * @param bounds :: The upper and lower bounds to be set
+ */
+void setPlotPropertyRange(QtDoublePropertyManager *dblPropertyManager, MantidWidgets::RangeSelector *rs,
+                          QtProperty *min, QtProperty *max, const std::pair<double, double> &bounds) {
+  dblPropertyManager->setRange(min, bounds.first, bounds.second);
+  dblPropertyManager->setRange(max, bounds.first, bounds.second);
+  rs->setBounds(bounds.first, bounds.second);
+}
+
+/**
+ * Set the position of the range selectors on the mini plot
+ *
+ * @param dblPropertyManager :: Pointer to the Qt Double Property Manager.
+ * @param rs :: Pointer to the RangeSelector
+ * @param lower :: The lower bound property in the property browser
+ * @param upper :: The upper bound property in the property browser
+ * @param bounds :: The upper and lower bounds to be set
+ * @param range :: The range to set the range selector to.
+ */
+void setRangeSelector(QtDoublePropertyManager *dblPropertyManager, MantidWidgets::RangeSelector *rs, QtProperty *lower,
+                      QtProperty *upper, const std::pair<double, double> &range,
+                      const std::optional<std::pair<double, double>> &bounds) {
+  dblPropertyManager->setValue(lower, range.first);
+  dblPropertyManager->setValue(upper, range.second);
+  rs->setRange(range.first, range.second);
+  if (bounds) {
+    // clamp the bounds of the selector
+    const auto values = bounds.value();
+    rs->setBounds(values.first, values.second);
+  }
+}
+
+/**
+ * Set the minimum of a range selector if it is less than the maximum value.
+ * To be used when changing the min or max via the Property table
+ *
+ * @param dblPropertyManager :: Pointer to the Qt Double Property Manager.
+ * @param minProperty :: The property managing the minimum of the range
+ * @param maxProperty :: The property managing the maximum of the range
+ * @param rangeSelector :: The range selector
+ * @param newValue :: The new value for the minimum
+ */
+void setRangeSelectorMin(QtDoublePropertyManager *dblPropertyManager, QtProperty *minProperty, QtProperty *maxProperty,
+                         MantidWidgets::RangeSelector *rangeSelector, double newValue) {
+  if (newValue <= maxProperty->valueText().toDouble())
+    rangeSelector->setMinimum(newValue);
+  else
+    dblPropertyManager->setValue(minProperty, rangeSelector->getMinimum());
+}
+
+/**
+ * Set the maximum of a range selector if it is greater than the minimum value
+ * To be used when changing the min or max via the Property table
+ *
+ * @param dblPropertyManager :: Pointer to the Qt Double Property Manager.
+ * @param minProperty :: The property managing the minimum of the range
+ * @param maxProperty :: The property managing the maximum of the range
+ * @param rangeSelector :: The range selector
+ * @param newValue :: The new value for the maximum
+ */
+void setRangeSelectorMax(QtDoublePropertyManager *dblPropertyManager, QtProperty *minProperty, QtProperty *maxProperty,
+                         MantidWidgets::RangeSelector *rangeSelector, double newValue) {
+  if (newValue >= minProperty->valueText().toDouble())
+    rangeSelector->setMaximum(newValue);
+  else
+    dblPropertyManager->setValue(maxProperty, rangeSelector->getMaximum());
+}
 
 } // namespace InterfaceUtils
 } // namespace CustomInterfaces

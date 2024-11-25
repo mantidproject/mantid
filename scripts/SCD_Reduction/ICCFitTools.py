@@ -1144,7 +1144,7 @@ def integrateSample(
                     logger.information("Peak {:d} has 0 events or is HKL=000. Skipping!".format(p))
                     peak.setIntensity(0)
                     peak.setSigmaIntensity(1)
-                    paramLisg.append([i, energy, 0.0, 1.0e10, 1.0e10] + [0 for i in range(mtd["fit_parameters"].rowCount())] + [0])
+                    paramList.append([i, energy, 0.0, 1.0e10, 1.0e10] + [0 for i in range(mtd["fit_parameters"].rowCount())] + [0])
 
                     mtd.remove("MDbox_" + str(run) + "_" + str(i))
                     continue

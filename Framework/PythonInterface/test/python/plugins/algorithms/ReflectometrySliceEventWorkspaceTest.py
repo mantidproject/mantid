@@ -6,9 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.kernel import *
-from mantid.api import *
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.simpleapi import AddTimeSeriesLog, CloneWorkspace, CreateSampleWorkspace, GroupWorkspaces
 from mantid.dataobjects import Workspace2D
 from testhelpers import assertRaisesNothing, create_algorithm
 
@@ -138,7 +137,7 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         args["TimeInterval"] = "600, 1200"
         args["StopTime"] = "3600"
         args["UseNewFilterAlgorithm"] = False
-        output = self._assert_run_algorithm_fails(args)
+        self._assert_run_algorithm_fails(args)
 
     def test_setting_log_interval_without_log_name_produces_single_slice(self):
         args = self._default_args
@@ -379,7 +378,7 @@ class ReflectometrySliceEventWorkspaceTest(unittest.TestCase):
         self._check_y(output, child=5, spec=3, expected_bins=101, expected_values=[2, 1, 1])
 
     def test_fails_when_input_groups_are_different_sizes(self):
-        group = self._create_monitor_workspace_group_with_two_members()
+        self._create_monitor_workspace_group_with_two_members()
         args = self._default_args
         args["TimeInterval"] = 600
         args["InputWorkspace"] = "input_ws_group"

@@ -1,0 +1,41 @@
+@startuml
+
+class orsopy.Column {}
+
+class orsopy.ErrorColumn {}
+
+class orsopy.OrsoDataset{}
+
+class orsopy.Orso{}
+
+class orsopy.Header{}
+
+class MantidORSOSaver {
+    - _datasets: List[MantidORSODataset]
+    + add_dataset(dataset: MantidORSODataset)
+    + save_orso_ascii()
+    + save_orso_nexus()
+}
+
+class MantidORSODataset {
+    - _data_columns: MantidORSODataColumns
+    - _header: orsopy.Orso(_data_columns.header_info,...)
+    + dataset() : OrsoDataset(_header, _data_columns.data)
+}
+
+class MantidORSODataColumns {
+    + data: np.ndarray
+    + header_info: List[Union[Column, ErrorColumn]]
+}
+
+orsopy.Orso <-- orsopy.Header
+
+MantidORSOSaver "1" *-- "0..*" MantidORSODataset
+MantidORSODataset *-- MantidORSODataColumns
+MantidORSODataset *-- orsopy.Orso
+MantidORSODataset ..> orsopy.OrsoDataset : returns
+
+MantidORSODataColumns "1" *-- "0..*" orsopy.Column
+MantidORSODataColumns "1" *-- "0..*" orsopy.ErrorColumn
+
+@enduml
