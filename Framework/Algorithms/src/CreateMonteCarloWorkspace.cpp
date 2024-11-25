@@ -17,20 +17,19 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/CreateMonteCarloWorkspace.h"
+#include "MantidHistogramData/HistogramE.h"
+#include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Logger.h"
-#include "MantidHistogramData/HistogramY.h"
-#include "MantidHistogramData/HistogramE.h"
-
 
 namespace {
 Mantid::Kernel::Logger g_log("CreateMonteCarloWorkspace");
 }
 namespace Mantid {
 namespace Algorithms {
-using Mantid::Kernel::Direction;
-using Mantid::HistogramData::HistogramY;
 using Mantid::HistogramData::HistogramE;
+using Mantid::HistogramData::HistogramY;
+using Mantid::Kernel::Direction;
 using namespace Mantid::API;
 using namespace std;
 
@@ -72,8 +71,10 @@ void CreateMonteCarloWorkspace::init() {
 
 //----------------------------------------------------------------------------------------------
 
-Mantid::HistogramData::HistogramY CreateMonteCarloWorkspace::fillHistogramWithRandomData(const std::vector<double> &cdf, int numIterations,
-                                                                                         int seed_input, API::Progress &progress) {
+Mantid::HistogramData::HistogramY CreateMonteCarloWorkspace::fillHistogramWithRandomData(const std::vector<double> &cdf,
+                                                                                         int numIterations,
+                                                                                         int seed_input,
+                                                                                         API::Progress &progress) {
 
   Mantid::HistogramData::HistogramY outputY(cdf.size(), 0.0);
   std::mt19937 gen(seed_input);
@@ -123,8 +124,9 @@ int CreateMonteCarloWorkspace::computeNumberOfIterations(const Mantid::Histogram
   return iterations;
 }
 
-Mantid::HistogramData::HistogramY CreateMonteCarloWorkspace::scaleInputToMatchMCEvents(
-    const Mantid::HistogramData::HistogramY &yData, int targetMCEvents) {
+Mantid::HistogramData::HistogramY
+CreateMonteCarloWorkspace::scaleInputToMatchMCEvents(const Mantid::HistogramData::HistogramY &yData,
+                                                     int targetMCEvents) {
 
   double total_counts = std::accumulate(yData.begin(), yData.end(), 0.0);
   if (total_counts == 0) {
@@ -189,8 +191,3 @@ void CreateMonteCarloWorkspace::exec() {
 
 } // namespace Algorithms
 } // namespace Mantid
-
-
-
-
-
