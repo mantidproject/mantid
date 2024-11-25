@@ -10,13 +10,13 @@ set(SYSTEST_NAMES
     AlgorithmWorkspaceGroupValidateInputsTest
     AlignAndFocusPowderFromFilesTest
     AlignComponentsTest
-    ARCSReductionTest
+    # ARCSReductionTest  # Test skipped due to NaN Comparison. See Issue #38088
     BASISTest
     BayesQuasiTest
     BilbySANSDataProcessorTest
-    BuildSQWTest
+    # BuildSQWTest  # Tests skipped due to missing data.
     CalMuonDeadTimeTest
-    CNCSReductionTest
+    # CNCSReductionTest  # All tests skipped due to NaN Comparisons. See Issue #38088
     CodeConventions
     CompareMDWorkspacesTest
     complexShapeAbsorptionsTest
@@ -63,7 +63,7 @@ set(SYSTEST_NAMES
     GenerateLogbookTest
     GetEiT0atSNSSystemTest
     GetQsInQENSDataSystemTest
-    GSASIIRefineFitPeaksTest
+    # GSASIIRefineFitPeaksTest  # Skipped due to missing GSASII Path
     HB3AWorkflowTests
     HFIRBackgroundAPIv2
     HFIREffAPIv2
@@ -131,7 +131,7 @@ set(SYSTEST_NAMES
     LoadVesuvioTest
     LoadWANDSCDTest
     LRPrimaryFractionTest
-    LRReductionWithReferenceTest
+    # LRReductionWithReferenceTest  # Skipped due to missing import.
     LRScalingFactorsTest
     MagnetismReflectometryReductionTest
     MaxEntTest
@@ -217,7 +217,7 @@ set(SYSTEST_NAMES
     VesuvioLoadingTest
     WeightedLeastSquaresTest
     WishAnalysis
-    WishCalibrate
+    # WishCalibrate # Skipped since 2017
     WishDiffuseScattering
     WishMasking
 )
