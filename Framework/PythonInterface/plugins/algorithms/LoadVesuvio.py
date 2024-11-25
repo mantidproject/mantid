@@ -169,10 +169,13 @@ class LoadVesuvio(LoadEmptyVesuvio):
         # Validate run number ranges
         user_input = self.getProperty(RUN_PROP).value
         run_str = os.path.basename(user_input)
-        # String could be a full file path
-        if "-" in run_str:
-            lower, upper = run_str.split("-")
-            issues = self._validate_range_formatting(lower, upper, RUN_PROP, issues)
+
+        if "-" in run_str or "," in run_str:
+            run_ranges = [run_range.split("-") for run_range in run_str.replace(" ", "").split(",")]
+            for run_pair in run_ranges:
+                lower = run_pair[0]
+                upper = run_pair[1] if len(run_pair) == 2 else run_pair[0]
+                issues = self._validate_range_formatting(lower, upper, RUN_PROP, issues)
 
         # Validate SpectrumList
         grp_spectra_list = self.getProperty(SPECTRA_PROP).value
@@ -208,8 +211,13 @@ class LoadVesuvio(LoadEmptyVesuvio):
         """
         Validates is a range style input is in the correct form of lower-upper
         """
-        upper = int(upper)
-        lower = int(lower)
+        try:
+            upper = int(upper)
+            lower = int(lower)
+        except:
+            issues[property_name] = "Runs must be integers"
+            return issues
+
         if upper < lower:
             issues[property_name] = "Range must be in format lower-upper"
         return issues
@@ -429,7 +437,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 Filename=run_str,
                 OutputWorkspace=SUMMED_WS,
                 SpectrumList=all_spectra,
-                LoadLogFiles=self._load_log_files,
+                # LoadLogFiles=self._load_log_files,
                 EnableLogging=_LOGGING_,
             )
         else:
@@ -439,7 +447,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 Filename=run_str,
                 OutputWorkspace=SUMMED_WS,
                 SpectrumList=all_spec_inc_mon,
-                LoadLogFiles=self._load_log_files,
+                # LoadLogFiles=self._load_log_files,
                 LoadMonitors="Separate",
                 EnableLogging=_LOGGING_,
             )
@@ -604,7 +612,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 SpectrumList=spec_inc_mon,
                 OutputWorkspace=out_name,
                 LoadMonitors="Separate",
-                LoadLogFiles=self._load_log_files,
+                # LoadLogFiles=self._load_log_files,
                 EnableLogging=_LOGGING_,
             )
 
@@ -670,17 +678,17 @@ class LoadVesuvio(LoadEmptyVesuvio):
         user_input = self.getProperty(RUN_PROP).value
         run_str = os.path.basename(user_input)
         # Load is not doing the right thing when summing. The numbers don't look correct
-        if "-" in run_str:
-            lower, upper = run_str.split("-")
-            # Range goes lower to up-1 but we want to include the last number
-            runs = list(range(int(lower), int(upper) + 1))
-        elif "," in run_str:
-            runs = run_str.split(",")
-        else:
-            # Leave it as it is
-            runs = [user_input]
+        if "," not in run_str and "-" not in run_str:
+            return [user_input]
 
-        return runs
+        run_ranges = [run_range.split("-") for run_range in run_str.replace(" ", "").split(",")]
+        runs_list = []
+        for run_pair in run_ranges:
+            lower = run_pair[0]
+            upper = run_pair[1] if len(run_pair) == 2 else run_pair[0]
+            runs_list.extend(list(range(int(lower), int(upper) + 1)))
+
+        return runs_list
 
     def _set_spectra_type(self, spectrum_no):
         """
