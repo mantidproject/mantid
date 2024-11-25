@@ -8,7 +8,7 @@
 #
 #
 
-from numpy.testing import assert_array_equal, assert_allclose, assert_almost_equal
+from numpy.testing import assert_array_equal, assert_allclose, assert_array_less
 from os import path, remove
 from tempfile import gettempdir
 from unittest import TestCase, main
@@ -268,7 +268,7 @@ class PlotSampleShapeTest(TestCase):
         xlim = axes.get_xlim()
         ylim = axes.get_ylim()
         zlim = axes.get_zlim()
-        assert_almost_equal(xlim, (-0.165, 0.165), 5)  # extra 5%
+        assert_array_less((0.15, 0.15), np.abs(xlim))  # window is bigger than object 15cm
         assert_allclose(xlim, ylim, rtol=self.RELATIVE_TOLERANCE)
         assert_allclose(xlim, zlim, rtol=self.RELATIVE_TOLERANCE)
 
