@@ -11,10 +11,12 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidHistogramData/HistogramY.h"
 
 namespace Mantid {
 namespace Algorithms {
 using namespace std;
+using Mantid::HistogramData::HistogramY;
 
 /** CreateMonteCarloWorkspace : The algorithm generates a simulated workspace by sampling from the probability
 distribution of input data, useful for testing of fitting functions and modeling.
@@ -31,7 +33,9 @@ public:
   Mantid::HistogramData::HistogramY fillHistogramWithRandomData(const std::vector<double> &cdf, int numIterations,
                                                                 int seed_input, API::Progress &progress);
   std::vector<double> computeNormalizedCDF(const Mantid::HistogramData::HistogramY &yData);
-  int computeNumberOfIterations(const Mantid::HistogramData::HistogramY &yData);
+  int computeNumberOfIterations(const Mantid::HistogramData::HistogramY &yData, int userMCEvents);
+  Mantid::HistogramData::HistogramY scaleInputToMatchMCEvents(const Mantid::HistogramData::HistogramY &yData,
+                                                              int targetMCEvents);
 
 private:
   void init() override;
