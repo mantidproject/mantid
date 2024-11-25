@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidReflectometry/ReflectometryReductionOneAuto3.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -67,7 +68,10 @@ private:
 public:
   void setUp() override { Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS"); }
 
-  void tearDown() override { Mantid::Kernel::ConfigService::Instance().setString("default.facility", " "); }
+  void tearDown() override {
+    AnalysisDataService::Instance().clear();
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", " ");
+  }
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -642,8 +646,6 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned_13460"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_13460"));
-
-    AnalysisDataService::Instance().clear();
   }
 
   void test_optional_outputs_binned() {
@@ -664,8 +666,6 @@ public:
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsQ_binned_13460"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_13460"));
-
-    AnalysisDataService::Instance().clear();
   }
 
   void test_optional_outputs_set() {
@@ -687,8 +687,39 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam"));
+  }
 
-    AnalysisDataService::Instance().clear();
+  void test_autodetect_on_inter_instrument_sets_polynomial_correction() {
+    auto inter = loadRun("INTER00013460.nxs");
+    auto const polStringInter =
+        std::string("35.5893,-24.5591,9.20375,-1.89265,0.222291,-0.0148746,0.00052709,-7.66807e-06");
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", inter);
+    alg.setProperty("CorrectionAlgorithm", "AutoDetect");
+    alg.execute();
+
+    TS_ASSERT_EQUALS(alg.getPropertyValue("Polynomial"), polStringInter);
+  }
+
+  void test_autodetect_on_surf_instrument_sets_exponential_correction() {
+    // SURF instrument has exponential corrections
+    LoadEmptyInstrument loadInstAlg;
+    loadInstAlg.initialize();
+    loadInstAlg.setProperty("InstrumentName", "SURF");
+    loadInstAlg.setProperty("OutputWorkspace", "surfWS");
+    loadInstAlg.execute();
+    auto const &surfWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("surfWS");
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspace", surfWS);
+    alg.setProperty("CorrectionAlgorithm", "AutoDetect");
+    alg.execute();
+
+    TS_ASSERT_DELTA(static_cast<double>(alg.getProperty("C0")), 36.5688, 1e-9);
+    TS_ASSERT_DELTA(static_cast<double>(alg.getProperty("C1")), 0.188676, 1e-9);
   }
 
   void test_default_outputs_debug() {
@@ -708,8 +739,6 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned_13460"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam_13460"));
-
-    AnalysisDataService::Instance().clear();
   }
 
   void test_default_outputs_no_debug() {
@@ -729,8 +758,6 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned_13460"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_13460"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam_13460"));
-
-    AnalysisDataService::Instance().clear();
   }
 
   void test_default_outputs_no_run_number() {
@@ -751,8 +778,6 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam"));
-
-    AnalysisDataService::Instance().clear();
   }
 
   void test_default_outputs_no_run_number_no_debug() {
@@ -773,8 +798,6 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ_binned"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsQ"));
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam"));
-
-    AnalysisDataService::Instance().clear();
   }
 
   void test_polarization_correction() {
@@ -1671,7 +1694,6 @@ public:
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
     TS_ASSERT_DELTA(out->y(0)[0], 4.5, 0.000001);
-    AnalysisDataService::Instance().clear();
   }
 
   void test_flood_correction_transmission() {
@@ -1700,7 +1722,6 @@ public:
     alg.execute();
     MatrixWorkspace_sptr out = alg.getProperty("OutputWorkspace");
     TS_ASSERT_DELTA(out->y(0)[0], 0.0782608695, 0.000001);
-    AnalysisDataService::Instance().clear();
   }
 
   void test_flood_correction_group() {
@@ -1735,7 +1756,6 @@ public:
     TS_ASSERT_DELTA(out1->y(0)[0], 4.5, 0.000001);
     auto out2 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1));
     TS_ASSERT_DELTA(out2->y(0)[0], 9.0, 0.000001);
-    AnalysisDataService::Instance().clear();
   }
 
   void test_flood_correction_polarization_correction() {
@@ -1770,8 +1790,6 @@ public:
     TS_ASSERT_DELTA(out3->y(0)[0], 70.0, 0.003);
     auto out4 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(3));
     TS_ASSERT_DELTA(out4->y(0)[0], 60.0, 0.003);
-
-    AnalysisDataService::Instance().clear();
   }
 
   void test_flood_correction_parameter_file() {
@@ -1805,7 +1823,6 @@ public:
     TS_ASSERT_DELTA(out3->y(0)[0], 70.0, 1e-15);
     auto out4 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(3));
     TS_ASSERT_DELTA(out4->y(0)[0], 60.0, 1e-14);
-    AnalysisDataService::Instance().clear();
   }
 
   void test_flood_correction_parameter_file_no_flood_parameters() {
@@ -1828,7 +1845,6 @@ public:
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::invalid_argument & e, e.what(),
                             std::string("Instrument parameter file doesn't have the Flood_Run parameter."));
-    AnalysisDataService::Instance().clear();
   }
 
   void test_output_workspace_is_given_informative_name_if_input_has_correct_form() {
