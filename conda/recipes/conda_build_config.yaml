@@ -6,14 +6,14 @@ c_compiler:
   - vs2019                   # [win]
 c_compiler_version:            # [unix]
   - 16                         # [osx]
-  - 12                         # [linux]
+  - 13                         # [linux]
 cxx_compiler:
   - gxx                      # [linux]
   - clangxx                  # [osx]
   - vs2019                   # [win]
 cxx_compiler_version:          # [unix]
   - 16                         # [osx]
-  - 12                         # [linux]
+  - 13                         # [linux]
 llvm_openmp:                   # [osx]
   - 16                         # [osx]
 
@@ -63,7 +63,7 @@ nexus:
   - 4.4.*
 # We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
 numpy:
-  - 1.24.*
+  - 2.0.*
 
 matplotlib:
   - 3.8.*

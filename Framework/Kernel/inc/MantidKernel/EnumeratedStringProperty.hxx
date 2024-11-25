@@ -29,8 +29,7 @@ namespace Mantid::Kernel {
 template <class E, std::vector<std::string> const *const names>
 EnumeratedStringProperty<E, names>::EnumeratedStringProperty(std::string const &name, ENUMSTRING const &defaultValue,
                                                              Direction::Type const direction)
-    : Property(std::move(name), typeid(ENUMSTRING), direction), m_value(defaultValue),
-      m_initialValue(std::move(defaultValue)) {}
+    : Property(name, typeid(ENUMSTRING), direction), m_value(defaultValue), m_initialValue(std::move(defaultValue)) {}
 
 /** Copy Constructor
  *  @param right :: a copy

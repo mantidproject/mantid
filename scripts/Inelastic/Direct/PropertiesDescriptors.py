@@ -1685,10 +1685,10 @@ class RotationAngle(PropDescriptor):
         # pylint: disable=protected-access
         offset = self._mot_offset._offset
         if offset is None:
-            return np.NaN
+            return np.nan
         log_val = self._read_ws_logs(workspace)
         if log_val is None:
-            return np.NaN
+            return np.nan
         else:
             return offset + log_val
 

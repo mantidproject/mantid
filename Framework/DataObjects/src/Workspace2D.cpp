@@ -88,7 +88,7 @@ void Workspace2D::init(const HistogramData::Histogram &histogram) {
   Histogram1D spec(initializedHistogram.xMode(), initializedHistogram.yMode());
   spec.setHistogram(initializedHistogram);
   std::transform(data.begin(), data.end(), data.begin(),
-                 [&spec](const auto &) { return std::move(std::make_unique<Histogram1D>(spec)); });
+                 [&spec](const auto &) { return std::make_unique<Histogram1D>(spec); });
 
   // Add axes that reference the data
   m_axes.resize(2);

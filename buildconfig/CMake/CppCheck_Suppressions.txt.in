@@ -94,8 +94,6 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TopicInfo.cpp:38
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/FilteredTimeSeriesProperty.cpp:408
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManagerProperty.cpp:149
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/UsageService.h:63
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:127
-containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Parallel/src/IO/Chunker.cpp:128
 returnStdMoveLocal:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/LogParser.cpp:256
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Parallel/inc/MantidParallel/IO/EventsListsShmemStorage.h:32
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/TimeSeriesProperty.h:133
@@ -1017,9 +1015,7 @@ passedByValue:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHel
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/TestHelpers/src/ComponentCreationHelper.cpp:412
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/OffsetsWorkspace.cpp:23
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/GroupingWorkspace.cpp:42
-unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/Workspace2D.cpp:173
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/FindReflectometryLines2.cpp:213
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/FindReflectometryLines2.cpp:235
+unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/Workspace2D.cpp:177
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/CreateTransmissionWorkspace2.cpp:176
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/CreateTransmissionWorkspace2.cpp:177
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Reflectometry/src/CreateTransmissionWorkspace2.cpp:178

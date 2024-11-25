@@ -37,7 +37,7 @@ def _get_normalisation(nre, bnames):
     for bname in bnames:
         bdict = {bname: 1}
         ee, vv, ham = CFEnergy(nre, **bdict)
-        Omat = np.mat(ham)
+        Omat = np.asmatrix(ham)
         norm = np.trace(np.real(Omat * np.conj(Omat))) / (2 * J + 1)
         retval[bname] = np.sqrt(np.abs(norm)) * np.sign(norm)
     return retval

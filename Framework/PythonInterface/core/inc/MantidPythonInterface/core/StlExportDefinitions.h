@@ -8,6 +8,9 @@
 /**
     This file contains the export definitions for various stl containers.
 */
+#include "MantidKernel/WarningSuppressions.h"
+GNU_DIAG_OFF("maybe-uninitialized")
+
 #include <boost/python/class.hpp>
 #include <boost/python/init.hpp>
 #ifdef _MSC_VER
