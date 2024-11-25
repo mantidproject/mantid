@@ -437,7 +437,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 Filename=run_str,
                 OutputWorkspace=SUMMED_WS,
                 SpectrumList=all_spectra,
-                # LoadLogFiles=self._load_log_files,
+                LoadLogFiles=self._load_log_files,
                 EnableLogging=_LOGGING_,
             )
         else:
@@ -447,7 +447,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 Filename=run_str,
                 OutputWorkspace=SUMMED_WS,
                 SpectrumList=all_spec_inc_mon,
-                # LoadLogFiles=self._load_log_files,
+                LoadLogFiles=self._load_log_files,
                 LoadMonitors="Separate",
                 EnableLogging=_LOGGING_,
             )
@@ -612,7 +612,7 @@ class LoadVesuvio(LoadEmptyVesuvio):
                 SpectrumList=spec_inc_mon,
                 OutputWorkspace=out_name,
                 LoadMonitors="Separate",
-                # LoadLogFiles=self._load_log_files,
+                LoadLogFiles=self._load_log_files,
                 EnableLogging=_LOGGING_,
             )
 
