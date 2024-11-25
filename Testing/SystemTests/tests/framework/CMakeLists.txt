@@ -92,10 +92,6 @@ set(SYSTEST_NAMES
     InterfaceDocumentationTest
     INTERLoadingTest
     INTERReductionTest
-    ISIS_LETReduction
-    ISIS_MAPS_DGSReduction
-    ISIS_MariReduction
-    ISIS_MERLINReduction
     ISIS_PowderGemTest
     ISIS_PowderHRPDTest
     ISIS_PowderOsirisTest
