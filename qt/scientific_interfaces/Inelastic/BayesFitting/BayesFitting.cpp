@@ -7,8 +7,10 @@
 #include "BayesFitting.h"
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 #include "Quasi.h"
-#include "ResNorm.h"
+#include "ResNormPresenter.h"
 #include "Stretch.h"
+
+#include <MantidQtWidgets/Common/QtJobRunner.h>
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -23,8 +25,15 @@ BayesFitting::BayesFitting(QWidget *parent)
   // Connect Poco Notification Observer
   Mantid::Kernel::ConfigService::Instance().addObserver(m_changeObserver);
 
+  auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
+  auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
+
   // insert each tab into the interface on creation
-  m_bayesTabs.emplace(RES_NORM, new ResNorm(m_uiForm.bayesFittingTabs->widget(RES_NORM)));
+  auto resNormModel = std::make_unique<ResNormModel>();
+  auto resNormWidget = m_uiForm.bayesFittingTabs->widget(RES_NORM);
+  m_bayesTabs.emplace(RES_NORM, new ResNormPresenter(resNormWidget, std::move(algorithmRunner), std::move(resNormModel),
+                                                     new ResNormView(resNormWidget)));
+
   m_bayesTabs.emplace(QUASI, new Quasi(m_uiForm.bayesFittingTabs->widget(QUASI)));
   m_bayesTabs.emplace(STRETCH, new Stretch(m_uiForm.bayesFittingTabs->widget(STRETCH)));
 }
@@ -33,14 +42,14 @@ void BayesFitting::initLayout() {
   // Connect each tab to the actions available in this GUI
   std::map<unsigned int, BayesFittingTab *>::iterator iter;
   for (iter = m_bayesTabs.begin(); iter != m_bayesTabs.end(); ++iter) {
-    connect(iter->second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
+    connect(iter->second, &BayesFittingTab::showMessageBox, this, &BayesFitting::showMessageBox);
   }
 
   loadSettings();
 
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
+  connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &BayesFitting::settings);
+  connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &BayesFitting::help);
+  connect(m_uiForm.pbManageDirs, &QPushButton::clicked, this, &BayesFitting::manageUserDirectories);
 
   InelasticInterface::initLayout();
 }

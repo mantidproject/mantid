@@ -35,14 +35,15 @@ FitPlotView::FitPlotView(QWidget *parent)
     : API::MantidWidget(parent), m_plotForm(new Ui::FitPreviewPlot), m_presenter() {
   m_plotForm->setupUi(this);
 
-  connect(m_plotForm->cbDataSelection, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedFitDataChanged(int)));
-  connect(m_plotForm->spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(notifyDelayedPlotSpectrumChanged()));
-
-  connect(m_plotForm->cbPlotSpectrum, SIGNAL(currentIndexChanged(const QString &)), this,
-          SLOT(notifyPlotSpectrumChanged(const QString &)));
-  connect(m_plotForm->ckPlotGuess, SIGNAL(stateChanged(int)), this, SLOT(notifyPlotGuessChanged(int)));
-  connect(m_plotForm->pbPlotPreview, SIGNAL(clicked()), this, SLOT(notifyPlotCurrentPreview()));
-  connect(m_plotForm->pbFitSingle, SIGNAL(clicked()), this, SLOT(notifyFitSelectedSpectrum()));
+  connect(m_plotForm->cbDataSelection, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          &FitPlotView::notifySelectedFitDataChanged);
+  connect(m_plotForm->spPlotSpectrum, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+          &FitPlotView::notifyDelayedPlotSpectrumChanged);
+  connect(m_plotForm->cbPlotSpectrum, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+          [=](int index) { this->notifyPlotSpectrumChanged(m_plotForm->cbPlotSpectrum->itemText(index)); });
+  connect(m_plotForm->ckPlotGuess, &QCheckBox::stateChanged, this, &FitPlotView::notifyPlotGuessChanged);
+  connect(m_plotForm->pbPlotPreview, &QPushButton::clicked, this, &FitPlotView::notifyPlotCurrentPreview);
+  connect(m_plotForm->pbFitSingle, &QPushButton::clicked, this, &FitPlotView::notifyFitSelectedSpectrum);
 
   // Create a Splitter and place two plots within the splitter layout
   createSplitterWithPlots();
@@ -266,8 +267,8 @@ void FitPlotView::addFitRangeSelector() {
   auto fitRangeSelector = m_topPlot->addRangeSelector("FitRange");
   fitRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
 
-  connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(notifyStartXChanged(double)));
-  connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(notifyEndXChanged(double)));
+  connect(fitRangeSelector, &RangeSelector::minValueChanged, this, &FitPlotView::notifyStartXChanged);
+  connect(fitRangeSelector, &RangeSelector::maxValueChanged, this, &FitPlotView::notifyEndXChanged);
 }
 
 void FitPlotView::addBackgroundRangeSelector() {
@@ -277,8 +278,8 @@ void FitPlotView::addBackgroundRangeSelector() {
   backRangeSelector->setLowerBound(0.0);
   backRangeSelector->setUpperBound(10.0);
 
-  connect(backRangeSelector, SIGNAL(valueChanged(double)), this, SLOT(notifyBackgroundChanged(double)));
-  connect(backRangeSelector, SIGNAL(resetScientificBounds()), this, SLOT(setBackgroundBounds()));
+  connect(backRangeSelector, &SingleSelector::valueChanged, this, &FitPlotView::notifyBackgroundChanged);
+  connect(backRangeSelector, &SingleSelector::resetScientificBounds, this, &FitPlotView::setBackgroundBounds);
 }
 
 void FitPlotView::setBackgroundBounds() {
@@ -294,9 +295,9 @@ void FitPlotView::addHWHMRangeSelector() {
   hwhmRangeSelector->setRange(0.0, 0.0);
   hwhmRangeSelector->setVisible(false);
 
-  connect(hwhmRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(notifyHWHMMinimumChanged(double)));
-  connect(hwhmRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(notifyHWHMMaximumChanged(double)));
-  connect(hwhmRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyFWHMChanged(double, double)));
+  connect(hwhmRangeSelector, &RangeSelector::minValueChanged, this, &FitPlotView::notifyHWHMMinimumChanged);
+  connect(hwhmRangeSelector, &RangeSelector::maxValueChanged, this, &FitPlotView::notifyHWHMMaximumChanged);
+  connect(hwhmRangeSelector, &RangeSelector::selectionChanged, this, &FitPlotView::notifyFWHMChanged);
 }
 
 void FitPlotView::setBackgroundRangeVisible(bool visible) {

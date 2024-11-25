@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 #include "MantidQtWidgets/Common/AddWorkspaceMultiDialog.h"
+#include <MantidQtWidgets/Common/ParseKeyValueString.h>
 #include <algorithm>
 
 using namespace Mantid::API;
@@ -44,8 +45,9 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<API::IAlgorithmR
       m_dataModel(std::make_unique<DataModel>()), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
-  setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
+  setOutputPlotOptionsPresenter(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface);
+  setOutputNamePresenter(m_view->getOutputName());
+  m_outputNamePresenter->setWsSuffixes(qStringListToStdVector(InterfaceUtils::getSampleWSSuffixes("Elwin")));
   m_view->setup();
   observeRename(true);
   observeDelete(true);
@@ -60,8 +62,8 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::I
       m_dataModel(std::move(dataModel)), m_selectedSpectrum(0) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
-  setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
+  setOutputPlotOptionsPresenter(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface);
+  setOutputNamePresenter(m_view->getOutputName());
   m_view->setup();
   updateAvailableSpectra();
 }
@@ -69,13 +71,14 @@ ElwinPresenter::ElwinPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::I
 /**
  * Ungroups the output after the execution of the algorithm
  */
-void ElwinPresenter::runComplete(bool error) {
+void ElwinPresenter::runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) {
+  (void)algorithm;
   m_view->setRunIsRunning(false);
+  m_outputNamePresenter->generateWarningLabel();
 
   if (AnalysisDataService::Instance().doesExist("specWSnext")) {
     AnalysisDataService::Instance().remove("specWSnext");
   }
-
   if (!error) {
     if (!m_view->isGroupInput()) {
       m_model->ungroupAlgorithm("Elwin_Input");
@@ -200,26 +203,25 @@ void ElwinPresenter::handleRun() {
   m_view->setRunIsRunning(true);
 
   // Get workspace names
-  std::string const inputGroupWsName = "Elwin_Input";
-  std::string outputWsBasename = WorkspaceUtils::parseRunNumbers(m_dataModel->getWorkspaceNames());
+  std::string inputGroupWsName = "Elwin_Input";
   // Load input files
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algQueue = {};
   std::string inputWorkspacesString;
+  m_model->setOutputWorkspaceNames(m_outputNamePresenter->generateOutputLabel());
   for (WorkspaceID i = 0; i < m_dataModel->getNumberOfWorkspaces(); ++i) {
     auto workspace = m_dataModel->getWorkspace(i);
     auto spectra = m_dataModel->getSpectra(i);
     auto spectraWS = m_model->setupExtractSpectra(workspace, spectra, algQueue);
     inputWorkspacesString += spectraWS + ",";
   }
-
   // Group input workspaces
   algQueue.emplace_back(m_model->setupGroupAlgorithm(inputWorkspacesString, inputGroupWsName));
-  algQueue.emplace_back(m_model->setupElasticWindowMultiple(outputWsBasename, inputGroupWsName, m_view->getLogName(),
-                                                            m_view->getLogValue()));
+  algQueue.emplace_back(
+      m_model->setupElasticWindowMultiple(inputGroupWsName, m_view->getLogName(), m_view->getLogValue()));
   m_algorithmRunner->execute(std::move(algQueue));
-  // Set the result workspace for Python script export
 
-  m_pythonExportWsName = outputWsBasename + "_elwin_eq2";
+  // Set the result workspace for Python script export
+  m_pythonExportWsName = m_outputNamePresenter->generateOutputLabel() + "_elwin_eq2";
 }
 
 /**
@@ -247,6 +249,8 @@ void ElwinPresenter::handleAddData(MantidWidgets::IAddWorkspaceDialog const *dia
     updateTableFromModel();
     m_view->updatePreviewWorkspaceNames(m_dataModel->getWorkspaceNames());
     m_view->plotInput(getInputWorkspace(), getSelectedSpectrum());
+    m_outputNamePresenter->setOutputWsBasename(WorkspaceUtils::parseRunNumbers(m_dataModel->getWorkspaceNames()),
+                                               "_elwin_eq");
   } catch (const std::runtime_error &ex) {
     displayWarning(ex.what());
   }
@@ -409,6 +413,16 @@ void ElwinPresenter::renameHandle(std::string const &wsName, std::string const &
   // Remove renamed workspace if new name replaces a workspace in data model
   removeWorkspace(newName);
   updateInterface();
+}
+
+/**
+ * Overriding function called when changing file extensions in indirect settings:
+ * For Elwin Presenter, this function is reimplemented just to update the suffices in the
+ * output label widget.
+ */
+void ElwinPresenter::setFileExtensionsByName(bool filter) {
+  (void)filter;
+  m_outputNamePresenter->setWsSuffixes(qStringListToStdVector(InterfaceUtils::getSampleWSSuffixes("Elwin")));
 }
 
 } // namespace MantidQt::CustomInterfaces

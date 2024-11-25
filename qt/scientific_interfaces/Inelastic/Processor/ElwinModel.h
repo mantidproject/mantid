@@ -29,10 +29,10 @@ public:
                                           std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algQueue) const = 0;
   virtual API::IConfiguredAlgorithm_sptr setupGroupAlgorithm(std::string const &inputWorkspacesString,
                                                              std::string const &inputGroupWsName) const = 0;
-  virtual API::IConfiguredAlgorithm_sptr setupElasticWindowMultiple(std::string const &workspaceBaseName,
-                                                                    std::string const &inputGroupWsName,
+  virtual API::IConfiguredAlgorithm_sptr setupElasticWindowMultiple(std::string const &inputGroupWsName,
                                                                     std::string const &sampleEnvironmentLogName,
                                                                     std::string const &sampleEnvironmentLogValue) = 0;
+
   virtual void ungroupAlgorithm(std::string const &inputWorkspace) const = 0;
   virtual void groupAlgorithm(std::string const &inputWorkspaces, std::string const &outputWorkspace) const = 0;
   virtual void setIntegrationStart(double integrationStart) = 0;
@@ -56,8 +56,7 @@ public:
                                   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> &algQueue) const override;
   API::IConfiguredAlgorithm_sptr setupGroupAlgorithm(std::string const &inputWorkspacesString,
                                                      std::string const &inputGroupWsName) const override;
-  API::IConfiguredAlgorithm_sptr setupElasticWindowMultiple(std::string const &workspaceBaseName,
-                                                            std::string const &inputGroupWsName,
+  API::IConfiguredAlgorithm_sptr setupElasticWindowMultiple(std::string const &inputGroupWsName,
                                                             std::string const &sampleEnvironmentLogName,
                                                             std::string const &sampleEnvironmentLogValue) override;
   void ungroupAlgorithm(std::string const &inputWorkspace) const override;

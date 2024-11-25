@@ -7,7 +7,6 @@
 #include "Corrections.h"
 #include "AbsorptionCorrections.h"
 #include "ApplyAbsorptionCorrections.h"
-#include "CalculatePaalmanPings.h"
 #include "ContainerSubtraction.h"
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
 
@@ -24,9 +23,8 @@ Corrections::Corrections(QWidget *parent)
   // We make the assumption that each map key corresponds to the order in which
   // the tabs appear.
   m_tabs.emplace(CONTAINER_SUBTRACTION, new ContainerSubtraction(m_uiForm.twTabs->widget(CONTAINER_SUBTRACTION)));
-  m_tabs.emplace(CALC_CORR, new CalculatePaalmanPings(m_uiForm.twTabs->widget(CALC_CORR)));
   m_tabs.emplace(ABSORPTION_CORRECTIONS, new AbsorptionCorrections(m_uiForm.twTabs->widget(ABSORPTION_CORRECTIONS)));
-  m_tabs.emplace(APPLY_CORR, new ApplyAbsorptionCorrections(m_uiForm.twTabs->widget(APPLY_CORR)));
+  m_tabs.emplace(APPLY_CORRECTIONS, new ApplyAbsorptionCorrections(m_uiForm.twTabs->widget(APPLY_CORRECTIONS)));
 }
 
 /**
@@ -57,14 +55,14 @@ void Corrections::initLayout() {
 
   // Set up all tabs
   for (auto &tab : m_tabs) {
-    connect(tab.second, SIGNAL(showMessageBox(const std::string &)), this, SLOT(showMessageBox(const std::string &)));
+    connect(tab.second, &CorrectionsTab::showMessageBox, this, &Corrections::showMessageBox);
   }
 
   m_uiForm.pbSettings->setIcon(Settings::icon());
-  connect(m_uiForm.pbPythonExport, SIGNAL(clicked()), this, SLOT(exportTabPython()));
-  connect(m_uiForm.pbSettings, SIGNAL(clicked()), this, SLOT(settings()));
-  connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(manageUserDirectories()));
+  connect(m_uiForm.pbPythonExport, &QPushButton::clicked, this, &Corrections::exportTabPython);
+  connect(m_uiForm.pbSettings, &QPushButton::clicked, this, &Corrections::settings);
+  connect(m_uiForm.pbHelp, &QPushButton::clicked, this, &Corrections::help);
+  connect(m_uiForm.pbManageDirs, &QPushButton::clicked, this, &Corrections::manageUserDirectories);
 
   InelasticInterface::initLayout();
 }

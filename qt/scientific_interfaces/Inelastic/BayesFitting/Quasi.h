@@ -17,7 +17,7 @@ class MANTIDQT_INELASTIC_DLL Quasi : public BayesFittingTab, public IRunSubscrib
   Q_OBJECT
 
 public:
-  Quasi(QWidget *parent = nullptr);
+  Quasi(QWidget *parent = nullptr, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner = nullptr);
 
   /// Load default settings into the interface
   void loadSettings(const QSettings &settings) override;

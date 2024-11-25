@@ -54,7 +54,7 @@ public:
   virtual void setRawPlotWatchADS(bool watchADS) = 0;
 
   virtual void resetEDefaults(bool isPositive) = 0;
-  virtual void resetEDefaults(bool isPositive, QPair<double, double> range) = 0;
+  virtual void resetEDefaults(bool isPositive, std::pair<double, double> range) = 0;
 
   virtual void previewAlgDone() = 0;
   virtual void enableSave(bool save) = 0;

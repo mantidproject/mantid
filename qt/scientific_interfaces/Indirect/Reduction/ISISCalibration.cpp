@@ -45,8 +45,7 @@ ISISCalibration::ISISCalibration(IDataReduction *idrUI, QWidget *parent)
     : DataReductionTab(idrUI, parent), m_lastCalPlotFilename("") {
   m_uiForm.setupUi(parent);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
-  setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin));
+  setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::SpectraBin);
 
   m_uiForm.ppCalibration->setCanvasColour(QColor(240, 240, 240));
   m_uiForm.ppResolution->setCanvasColour(QColor(240, 240, 240));
@@ -250,20 +249,20 @@ QString ISISCalibration::backgroundString() const {
 void ISISCalibration::setPeakRange(const double &minimumTof, const double &maximumTof) {
   auto calibrationPeak = m_uiForm.ppCalibration->getRangeSelector("CalPeak");
   setRangeSelector(calibrationPeak, m_properties["CalPeakMin"], m_properties["CalPeakMax"],
-                   qMakePair(minimumTof, maximumTof));
+                   std::pair(minimumTof, maximumTof));
 }
 
 void ISISCalibration::setBackgroundRange(const double &minimumTof, const double &maximumTof) {
   auto background = m_uiForm.ppCalibration->getRangeSelector("CalBackground");
   setRangeSelector(background, m_properties["CalBackMin"], m_properties["CalBackMax"],
-                   qMakePair(minimumTof, maximumTof));
+                   std::pair(minimumTof, maximumTof));
 }
 
 void ISISCalibration::setRangeLimits(MantidWidgets::RangeSelector *rangeSelector, const double &minimum,
                                      const double &maximum, const QString &minPropertyName,
                                      const QString &maxPropertyName) {
   setPlotPropertyRange(rangeSelector, m_properties[minPropertyName], m_properties[maxPropertyName],
-                       qMakePair(minimum, maximum));
+                       std::pair(minimum, maximum));
 }
 
 void ISISCalibration::setPeakRangeLimits(const double &peakMin, const double &peakMax) {
@@ -485,7 +484,7 @@ void ISISCalibration::calPlotEnergy() {
   }
 
   const auto &dataX = energyWs->x(0);
-  QPair<double, double> range(dataX.front(), dataX.back());
+  std::pair<double, double> range(dataX.front(), dataX.back());
 
   auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");
   setPlotPropertyRange(resBackground, m_properties["ResStart"], m_properties["ResEnd"], range);
@@ -530,7 +529,7 @@ void ISISCalibration::calSetDefaultResolution(const MatrixWorkspace_const_sptr &
       if (-res * minScaleFactor > energyRange.first && res * maxScaleFactor < energyRange.second) {
         offset = 0.0;
       }
-      QPair<double, double> peakERange(-res * minScaleFactor + offset, res * maxScaleFactor + offset);
+      std::pair<double, double> peakERange(-res * minScaleFactor + offset, res * maxScaleFactor + offset);
       auto resPeak = m_uiForm.ppResolution->getRangeSelector("ResPeak");
       setPlotPropertyRange(resPeak, m_properties["ResELow"], m_properties["ResEHigh"], energyRange);
       setRangeSelector(resPeak, m_properties["ResELow"], m_properties["ResEHigh"], peakERange);
@@ -545,7 +544,7 @@ void ISISCalibration::calSetDefaultResolution(const MatrixWorkspace_const_sptr &
         maxScaleFactor = 15.;
         offset = (energyRange.second + energyRange.first) / 2.0;
       }
-      QPair<double, double> backgroundERange(-res * minScaleFactor + offset, -res * maxScaleFactor + offset);
+      std::pair<double, double> backgroundERange(-res * minScaleFactor + offset, -res * maxScaleFactor + offset);
       auto resBackground = m_uiForm.ppResolution->getRangeSelector("ResBackground");
       setRangeSelector(resBackground, m_properties["ResStart"], m_properties["ResEnd"], backgroundERange);
     }

@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/IAlgorithmRunnerSubscriber.h"
 #include "MantidQtWidgets/Spectroscopy/InelasticTab.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputNamePresenter.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
@@ -39,7 +40,6 @@ class DataReduction;
 class MANTIDQT_INELASTIC_DLL IDataProcessor {
 public:
   virtual ~IDataProcessor() = default;
-  virtual void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter>) = 0;
   virtual void clearOutputPlotOptionsWorkspaces() = 0;
   virtual void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) = 0;
   virtual void filterInputData(bool filter) = 0;
@@ -59,12 +59,9 @@ class MANTIDQT_INELASTIC_DLL DataProcessor : public IDataProcessor,
 
 public:
   DataProcessor(QObject *parent = nullptr, std::unique_ptr<MantidQt::API::IAlgorithmRunner> algorithmRunner = nullptr);
-  ~DataProcessor() = default;
-  /// Set the presenter for the output plotting options
-  void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) override;
+  ~DataProcessor() override = default;
   /// Overridden from IAlgorithmRunnerSubscriber: Notifies when a batch of algorithms is completed
   void notifyBatchComplete(API::IConfiguredAlgorithm_sptr &algorithm, bool error) override;
-
   /// Clear the workspaces held by the output plotting options
   void clearOutputPlotOptionsWorkspaces() override;
   /// Set the active workspaces used in the plotting options
@@ -79,13 +76,15 @@ public:
   void exportPythonDialog() override;
 
 protected:
-  virtual void runComplete(bool error) { (void)error; };
+  virtual void runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) {
+    (void)algorithm;
+    (void)error;
+  };
   std::unique_ptr<MantidQt::API::IAlgorithmRunner> m_algorithmRunner;
 
 private:
   virtual void setFileExtensionsByName(bool filter) { (void)filter; };
   virtual void setLoadHistory(bool doLoadHistory) { (void)doLoadHistory; }
-  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

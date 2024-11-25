@@ -35,7 +35,6 @@ public:
   SimulationTab(QWidget *parent = nullptr);
   ~SimulationTab() override;
 
-  void setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter);
   void setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces);
   void clearOutputPlotOptionsWorkspaces();
 
@@ -44,7 +43,6 @@ public:
 
 private:
   virtual void setLoadHistory(bool doLoadHistory) { UNUSED_ARG(doLoadHistory); }
-  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

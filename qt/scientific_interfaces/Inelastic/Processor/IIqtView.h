@@ -39,7 +39,7 @@ public:
   virtual void setPreviewSpectrumMaximum(int value) = 0;
   virtual void updateDisplayedBinParameters() = 0;
   virtual void setRangeSelectorDefault(const Mantid::API::MatrixWorkspace_sptr inputWorkspace,
-                                       const QPair<double, double> &range) = 0;
+                                       const std::pair<double, double> &range) = 0;
   virtual void setSampleFBSuffixes(const QStringList &suffix) = 0;
   virtual void setSampleWSSuffixes(const QStringList &suffix) = 0;
   virtual void setResolutionFBSuffixes(const QStringList &suffix) = 0;

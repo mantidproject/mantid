@@ -33,6 +33,7 @@ public:
 
   IRunView *getRunView() const override;
   IOutputPlotOptionsView *getPlotOptions() const override;
+  IOutputNameView *getOutputName() const override;
 
   void setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum) override;
   void setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
@@ -100,8 +101,8 @@ private:
 
   /// Function to set the range selector on the mini plot
   void setRangeSelector(MantidWidgets::RangeSelector *rs, QtProperty *lower, QtProperty *upper,
-                        const QPair<double, double> &range,
-                        const std::optional<QPair<double, double>> &bounds = std::nullopt);
+                        const std::pair<double, double> &range,
+                        const std::optional<std::pair<double, double>> &bounds = std::nullopt);
   /// Sets the min of the range selector if it is less than the max
   void setRangeSelectorMin(QtProperty *minProperty, QtProperty *maxProperty,
                            MantidWidgets::RangeSelector *rangeSelector, double newValue);

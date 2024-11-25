@@ -87,36 +87,37 @@ void ElwinView::setup() {
 
   auto integrationRangeSelector = m_uiForm.ppPlot->addRangeSelector("ElwinIntegrationRange");
   integrationRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
-  connect(integrationRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(notifyMinChanged(double)));
-  connect(integrationRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(notifyMaxChanged(double)));
+  connect(integrationRangeSelector, &RangeSelector::minValueChanged, this, &ElwinView::notifyMinChanged);
+  connect(integrationRangeSelector, &RangeSelector::maxValueChanged, this, &ElwinView::notifyMaxChanged);
   // create the second range
   auto backgroundRangeSelector = m_uiForm.ppPlot->addRangeSelector("ElwinBackgroundRange");
   backgroundRangeSelector->setColour(Qt::darkGreen); // dark green for background
   backgroundRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
 
-  connect(integrationRangeSelector, SIGNAL(selectionChanged(double, double)), backgroundRangeSelector,
-          SLOT(setRange(double, double)));
-  connect(backgroundRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(notifyMinChanged(double)));
-  connect(backgroundRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(notifyMaxChanged(double)));
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyDoubleValueChanged(QtProperty *, double)));
-  connect(m_blnManager, SIGNAL(valueChanged(QtProperty *, bool)), this,
-          SLOT(notifyCheckboxValueChanged(QtProperty *, bool)));
+  connect(integrationRangeSelector, &RangeSelector::selectionChanged, backgroundRangeSelector,
+          static_cast<void (RangeSelector::*)(double, double)>(&RangeSelector::setRange));
+  connect(backgroundRangeSelector, &RangeSelector::minValueChanged, this, &ElwinView::notifyMinChanged);
+  connect(backgroundRangeSelector, &RangeSelector::maxValueChanged, this, &ElwinView::notifyMaxChanged);
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ElwinView::notifyDoubleValueChanged);
+  connect(m_blnManager, &QtBoolPropertyManager::valueChanged, this, &ElwinView::notifyCheckboxValueChanged);
   notifyCheckboxValueChanged(m_properties["BackgroundSubtraction"], false);
 
-  connect(m_uiForm.wkspAdd, SIGNAL(clicked()), this, SLOT(notifyAddWorkspaceDialog()));
-  connect(m_uiForm.wkspRemove, SIGNAL(clicked()), this, SLOT(notifyRemoveDataClicked()));
-  connect(m_uiForm.pbSelAll, SIGNAL(clicked()), this, SLOT(notifySelectAllClicked()));
+  connect(m_uiForm.wkspAdd, &QPushButton::clicked, this, &ElwinView::notifyAddWorkspaceDialog);
+  connect(m_uiForm.wkspRemove, &QPushButton::clicked, this, &ElwinView::notifyRemoveDataClicked);
+  connect(m_uiForm.pbSelAll, &QPushButton::clicked, this, &ElwinView::notifySelectAllClicked);
 
-  connect(m_uiForm.cbPreviewFile, SIGNAL(currentIndexChanged(int)), this, SLOT(notifyPreviewIndexChanged(int)));
-  connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(notifySelectedSpectrumChanged()));
-  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged()));
-  connect(m_uiForm.ckCollapse, SIGNAL(stateChanged(int)), this, SLOT(notifyRowModeChanged()));
+  connect(m_uiForm.cbPreviewFile, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          &ElwinView::notifyPreviewIndexChanged);
+  connect(m_uiForm.spPlotSpectrum, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+          &ElwinView::notifySelectedSpectrumChanged);
+  connect(m_uiForm.cbPlotSpectrum, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          &ElwinView::notifySelectedSpectrumChanged);
+
+  connect(m_uiForm.ckCollapse, &QCheckBox::stateChanged, this, &ElwinView::notifyRowModeChanged);
 
   // Handle plot and save
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(notifyPlotPreviewClicked()));
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &ElwinView::notifySaveClicked);
+  connect(m_uiForm.pbPlotPreview, &QPushButton::clicked, this, &ElwinView::notifyPlotPreviewClicked);
 
   // Set any default values
   m_dblManager->setValue(m_properties["IntegrationStart"], -0.02);
@@ -148,8 +149,7 @@ void ElwinView::notifyAddWorkspaceDialog() { showAddWorkspaceDialog(); }
 
 void ElwinView::showAddWorkspaceDialog() {
   auto dialog = new MantidWidgets::AddWorkspaceMultiDialog(parentWidget());
-  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
-          SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
+  connect(dialog, &AddWorkspaceMultiDialog::addData, this, &ElwinView::notifyAddData);
   auto const tabName("Elwin");
   dialog->setup();
   dialog->setAttribute(Qt::WA_DeleteOnClose);
@@ -181,6 +181,8 @@ void ElwinView::addData(MantidWidgets::IAddWorkspaceDialog const *dialog) {
 IRunView *ElwinView::getRunView() const { return m_uiForm.runWidget; }
 
 IOutputPlotOptionsView *ElwinView::getPlotOptions() const { return m_uiForm.ipoPlotOptions; }
+
+IOutputNameView *ElwinView::getOutputName() const { return m_uiForm.outNameWidget; }
 
 void ElwinView::setHorizontalHeaders() {
   QStringList headers;
@@ -269,12 +271,12 @@ void ElwinView::notifyCheckboxValueChanged(QtProperty *prop, bool enabled) {
     m_properties["BackgroundStart"]->setEnabled(enabled);
     m_properties["BackgroundEnd"]->setEnabled(enabled);
 
-    disconnect(integrationRangeSelector, SIGNAL(selectionChanged(double, double)), backgroundRangeSelector,
-               SLOT(setRange(double, double)));
+    disconnect(integrationRangeSelector, &RangeSelector::selectionChanged, backgroundRangeSelector,
+               static_cast<void (RangeSelector::*)(double, double)>(&RangeSelector::setRange));
     if (!enabled) {
       backgroundRangeSelector->setRange(integrationRangeSelector->getRange());
-      connect(integrationRangeSelector, SIGNAL(selectionChanged(double, double)), backgroundRangeSelector,
-              SLOT(setRange(double, double)));
+      connect(integrationRangeSelector, &RangeSelector::selectionChanged, backgroundRangeSelector,
+              static_cast<void (RangeSelector::*)(double, double)>(&RangeSelector::setRange));
     }
   }
 }
@@ -314,29 +316,27 @@ void ElwinView::notifyDoubleValueChanged(QtProperty *prop, double val) {
 }
 
 void ElwinView::disconnectSignals() const {
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(notifyDoubleValueChanged(QtProperty *, double)));
-  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(maxValueChanged(double)), this,
-             SLOT(notifyMaxChanged(double)));
-  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(minValueChanged(double)), this,
-             SLOT(notifyMinChanged(double)));
-  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), SIGNAL(maxValueChanged(double)), this,
-             SLOT(notifyMaxChanged(double)));
-  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), SIGNAL(minValueChanged(double)), this,
-             SLOT(notifyMinChanged(double)));
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ElwinView::notifyDoubleValueChanged);
+  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), &RangeSelector::maxValueChanged, this,
+             &ElwinView::notifyMaxChanged);
+  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), &RangeSelector::minValueChanged, this,
+             &ElwinView::notifyMinChanged);
+  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), &RangeSelector::maxValueChanged, this,
+             &ElwinView::notifyMaxChanged);
+  disconnect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), &RangeSelector::minValueChanged, this,
+             &ElwinView::notifyMinChanged);
 }
 
 void ElwinView::connectSignals() const {
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyDoubleValueChanged(QtProperty *, double)));
-  connect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(maxValueChanged(double)), this,
-          SLOT(notifyMaxChanged(double)));
-  connect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), SIGNAL(minValueChanged(double)), this,
-          SLOT(notifyMinChanged(double)));
-  connect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), SIGNAL(maxValueChanged(double)), this,
-          SLOT(notifyMaxChanged(double)));
-  connect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), SIGNAL(minValueChanged(double)), this,
-          SLOT(notifyMinChanged(double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &ElwinView::notifyDoubleValueChanged);
+  connect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), &RangeSelector::maxValueChanged, this,
+          &ElwinView::notifyMaxChanged);
+  connect(m_uiForm.ppPlot->getRangeSelector("ElwinIntegrationRange"), &RangeSelector::minValueChanged, this,
+          &ElwinView::notifyMinChanged);
+  connect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), &RangeSelector::maxValueChanged, this,
+          &ElwinView::notifyMaxChanged);
+  connect(m_uiForm.ppPlot->getRangeSelector("ElwinBackgroundRange"), &RangeSelector::minValueChanged, this,
+          &ElwinView::notifyMinChanged);
 }
 
 void ElwinView::setIntegrationStart(double value) { m_dblManager->setValue(m_properties["IntegrationStart"], value); }
@@ -365,8 +365,8 @@ double ElwinView::getBackgroundEnd() { return m_dblManager->value(m_properties["
  * @param range :: The range to set the range selector to.
  */
 void ElwinView::setRangeSelector(RangeSelector *rs, QtProperty *lower, QtProperty *upper,
-                                 const QPair<double, double> &range,
-                                 const std::optional<QPair<double, double>> &bounds) {
+                                 const std::pair<double, double> &range,
+                                 const std::optional<std::pair<double, double>> &bounds) {
   m_dblManager->setValue(lower, range.first);
   m_dblManager->setValue(upper, range.second);
   rs->setRange(range.first, range.second);
@@ -427,7 +427,8 @@ void ElwinView::setAvailableSpectra(WorkspaceIndex minimum, WorkspaceIndex maxim
 
 void ElwinView::setAvailableSpectra(const std::vector<WorkspaceIndex>::const_iterator &from,
                                     const std::vector<WorkspaceIndex>::const_iterator &to) {
-  disconnect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged()));
+  disconnect(m_uiForm.cbPlotSpectrum, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+             &ElwinView::notifySelectedSpectrumChanged);
   m_uiForm.elwinPreviewSpec->setCurrentIndex(1);
   m_uiForm.cbPlotSpectrum->clear();
 
@@ -436,7 +437,8 @@ void ElwinView::setAvailableSpectra(const std::vector<WorkspaceIndex>::const_ite
 
   m_uiForm.cbPlotSpectrum->setCurrentIndex(0);
 
-  connect(m_uiForm.cbPlotSpectrum, SIGNAL(currentIndexChanged(int)), this, SLOT(notifySelectedSpectrumChanged()));
+  connect(m_uiForm.cbPlotSpectrum, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this,
+          &ElwinView::notifySelectedSpectrumChanged);
 }
 
 std::string ElwinView::getPreviewWorkspaceName(int index) const {

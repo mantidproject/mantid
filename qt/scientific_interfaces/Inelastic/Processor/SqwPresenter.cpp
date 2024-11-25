@@ -39,8 +39,7 @@ SqwPresenter::SqwPresenter(QWidget *parent, std::unique_ptr<MantidQt::API::IAlgo
     : DataProcessor(parent, std::move(algorithmRunner)), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
-  setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface));
+  setOutputPlotOptionsPresenter(m_view->getPlotOptions(), PlotWidget::SpectraSliceSurface);
 }
 
 /**
@@ -72,7 +71,8 @@ void SqwPresenter::handleValidation(IUserInputValidator *validator) const {
  *
  * @param error If the algorithm chain failed
  */
-void SqwPresenter::runComplete(bool error) {
+void SqwPresenter::runComplete(Mantid::API::IAlgorithm_sptr const algorithm, bool const error) {
+  (void)algorithm;
   if (!error) {
     setOutputPlotOptionsWorkspaces({m_model->getOutputWorkspace()});
   }
