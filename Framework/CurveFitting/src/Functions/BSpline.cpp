@@ -61,14 +61,14 @@ void BSpline::resetValidators() {
   auto attStartX = getAttribute("StartX");
   auto attEndX = getAttribute("EndX");
 
-  auto startXValidator = dynamic_cast<BoundedValidator<double> *>(attStartX.getValidator().get());
+  auto startXValidator = std::dynamic_pointer_cast<BoundedValidator<double>>(attStartX.getValidator());
   startXValidator->setUpper(attEndX.asDouble());
 
-  auto endXValidator = dynamic_cast<BoundedValidator<double> *>(attEndX.getValidator().get());
+  auto endXValidator = std::dynamic_pointer_cast<BoundedValidator<double>>(attEndX.getValidator());
   endXValidator->setLower(attStartX.asDouble());
 
   auto breakPointsValidator =
-      dynamic_cast<ArrayBoundedValidator<double> *>(getAttribute("BreakPoints").getValidator().get());
+      std::dynamic_pointer_cast<ArrayBoundedValidator<double>>(getAttribute("BreakPoints").getValidator());
   breakPointsValidator->setLower(attStartX.asDouble());
   breakPointsValidator->setUpper(attEndX.asDouble());
 }
