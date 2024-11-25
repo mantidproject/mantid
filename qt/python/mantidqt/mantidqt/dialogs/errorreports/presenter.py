@@ -10,7 +10,9 @@ from typing import Optional
 from qtpy.QtCore import QSettings
 
 from mantid.kernel import ConfigService, ErrorReporter, Logger, UsageService
+from mantid.kernel.environment import is_linux
 from mantidqt.dialogs.errorreports.report import MAX_STACK_TRACE_LENGTH
+from mantidqt.dialogs.errorreports.run_pystack import retrieve_thread_traces_from_coredump_file
 
 
 class ErrorReporterPresenter(object):
@@ -39,6 +41,9 @@ class ErrorReporterPresenter(object):
                         self._traceback = file.readlines()
                     new_workspace_name = os.path.join(ConfigService.getAppDataDirectory(), "{}_stacktrace_sent.txt".format(application))
                     os.rename(traceback_file_path, new_workspace_name)
+                elif is_linux():
+                    _ = retrieve_thread_traces_from_coredump_file()
+                    # TODO send to a new model field
             except OSError:
                 pass
 
