@@ -26,6 +26,7 @@ from mantid.kernel import (
     logger,
     CompositeValidator,
     CompositeRelation,
+    SpecialCoordinateSystem,
 )
 import numpy as np
 from scipy.signal import convolve2d
@@ -34,6 +35,7 @@ from scipy.stats import moment
 from mantid.geometry import RectangularDetector, GridDetector
 import re
 from enum import Enum
+from mantid.dataobjects import PeakShapeDetectorBin
 
 
 class PEAK_MASK_STATUS(Enum):
@@ -1027,7 +1029,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             # check that peak is in a valid detector
             detid = detids[ipk]
             detector_info = ws.detectorInfo()
-            invalid_detector = False
+            # invalid_detector = False
             try:
                 det_idx = detector_info.indexOf(detid)
                 invalid_detector = detector_info.isMonitor(det_idx) or detector_info.isMasked(det_idx)
@@ -1069,6 +1071,14 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
                 optimise_xwindow,
                 threshold_i_over_sig,
             )
+
+            # get all detector IDs related to the spectrum of the peak
+            ispec = ws.getIndicesFromDetectorIDs([detid])
+            detectors_per_spec = ws.getSpectrum(ispec[0]).getDetectorIDs()
+            det_bin_list = [(det, peak_data.xmin_opt, peak_data.xmax_opt) for det in detectors_per_spec]
+            peak_shape = PeakShapeDetectorBin(det_bin_list, SpecialCoordinateSystem.NONE, self.name(), self.version())
+            pk.setPeakShape(peak_shape)
+
             if peak_data.status is PEAK_MASK_STATUS.VALID:
                 if update_peak_pos:
                     hkl = pk.getHKL()
