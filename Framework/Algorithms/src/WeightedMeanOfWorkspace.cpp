@@ -60,10 +60,9 @@ void WeightedMeanOfWorkspace::exec() {
         continue;
     auto &y = inputWS->y(i);
     auto &e = inputWS->e(i);
-    double weight = 0.0;
     for (std::size_t j = 0; j < y.size(); ++j) {
       if (std::isfinite(y[j]) && std::isfinite(e[j])) {
-        weight = 1.0 / (e[j] * e[j]);
+        double weight = 1.0 / (e[j] * e[j]);
         averageValue += (y[j] * weight);
         weightSum += weight;
       }

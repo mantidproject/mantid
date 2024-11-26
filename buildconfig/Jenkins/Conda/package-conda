@@ -142,7 +142,7 @@ if [[ $ENABLE_BUILD_WORKBENCH == true ]]; then
     if [[ $BUILD_WORKBENCH_WITH_DOCS == false ]]; then
 	export INCLUDE_MANTIDDOCS=False
     fi
-    conda mambabuild ./mantidworkbench/ $EXTRA_BUILD_OPTIONS
+    conda mambabuild ./mantidworkbench/ -c mantid/label/main $EXTRA_BUILD_OPTIONS
 fi
 
 # elapsed time with second resolution

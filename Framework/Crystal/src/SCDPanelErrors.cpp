@@ -180,7 +180,7 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift, double xr
 
   auto inputP =
       Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<DataObjects::PeaksWorkspace, API::Workspace>(
-          cloned);
+          std::move(cloned));
   auto inst = inputP->getInstrument();
   Geometry::OrientedLattice lattice = inputP->mutableSample().getOrientedLattice();
   for (int i = 0; i < inputP->getNumberPeaks(); i++) {

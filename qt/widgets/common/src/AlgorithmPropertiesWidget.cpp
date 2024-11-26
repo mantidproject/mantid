@@ -291,16 +291,15 @@ void AlgorithmPropertiesWidget::replaceWSClicked(const QString &propName) {
       using CollectionOfPropertyWidget = std::vector<PropertyWidget *>;
       CollectionOfPropertyWidget candidateReplacementSources;
       // Find the name to put in the spot
-      QString wsName("");
       for (auto it = m_propWidgets.begin(); it != m_propWidgets.end(); it++) {
         // Only look at workspace properties
         PropertyWidget *otherWidget = it.value();
         Property *prop = it.value()->getProperty();
-        IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
+        const IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty *>(prop);
         if (otherWidget && wsProp) {
           if (prop->direction() == Direction::Input) {
             // Input workspace property. Get the text typed in.
-            wsName = otherWidget->getValue();
+            QString wsName = otherWidget->getValue();
             if (!wsName.isEmpty()) {
               // Add the candidate to the list of candidates.
               candidateReplacementSources.emplace_back(otherWidget);
@@ -401,7 +400,7 @@ void AlgorithmPropertiesWidget::hideOrDisableProperties(const QString &changedPr
   // set Visible and Enabled as appropriate
   for (auto &widget : m_propWidgets) {
     Mantid::Kernel::Property *prop = widget->getProperty();
-    IPropertySettings *settings = prop->getSettings();
+    const IPropertySettings *settings = prop->getSettings();
     const auto &propName = QString::fromStdString(prop->name());
 
     // Set the enabled and visible flags based on what the validators say.
