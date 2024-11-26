@@ -12,6 +12,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/EmptyValues.h"
+#include "MantidKernel/EnumeratedString.h"
 
 #include <atomic>
 #include <mutex>
@@ -31,6 +32,13 @@ class DateAndTime;
 namespace Geometry {
 class ParameterMap;
 }
+
+namespace {
+/// The allowed plot types for MatrixWorkspace
+enum class PlotTypeEnum { PLOT, SCATTER, HISTOGRAM, ERRORBAR, enum_count };
+const std::vector<std::string> plotTypeNames{"plot", "scatter", "histogram", "errorbar"};
+typedef Kernel::EnumeratedString<PlotTypeEnum, &plotTypeNames, &Kernel::compareStringsCaseInsensitive> PLOTTYPE;
+} // namespace
 
 namespace API {
 class Axis;
@@ -133,6 +141,11 @@ public:
   void setTitle(const std::string &) override;
   /// Gets MatrixWorkspace title (same as Run object run_title property)
   const std::string getTitle() const override;
+
+  /// Sets MatrixWorkspace plot_type
+  void setPlotType(const std::string &);
+  /// Gets MatrixWorkspace plot_type
+  const std::string getPlotType() const;
 
   virtual Types::Core::DateAndTime getFirstPulseTime() const;
   Types::Core::DateAndTime getLastPulseTime() const;
@@ -495,6 +508,9 @@ private:
   std::string m_YUnit;
   /// A text label for use when plotting spectra
   std::string m_YUnitLabel;
+
+  /// The plot style for the MatrixWorkspace
+  PLOTTYPE plot_type = std::string("plot");
 
   /// Flag indicating if the common bins flag is in a valid state
   mutable std::atomic<bool> m_isCommonBinsFlagValid{false};

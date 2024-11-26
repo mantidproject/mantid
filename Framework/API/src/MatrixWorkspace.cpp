@@ -22,6 +22,7 @@
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
@@ -38,6 +39,7 @@
 #include <numeric>
 #include <utility>
 
+using Mantid::Kernel::StringListValidator;
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
 
@@ -320,6 +322,24 @@ const std::string MatrixWorkspace::getTitle() const {
   } else
     return Workspace::getTitle();
 }
+
+/** Set the plot type of the workspace
+ *
+ * @param t :: The plot type. Must be an accepted type
+ */
+void MatrixWorkspace::setPlotType(const std::string &t) {
+
+  StringListValidator v(plotTypeNames);
+
+  if (v.isValid(t) == "")
+    this->plot_type = t;
+}
+
+/** Get the plot type
+ *
+ * @return The plot type
+ */
+const std::string MatrixWorkspace::getPlotType() const { return this->plot_type; }
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
   for (size_t j = 0; j < getNumberHistograms(); ++j) {
