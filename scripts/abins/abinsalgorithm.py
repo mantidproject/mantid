@@ -7,6 +7,7 @@
 
 # Supporting functions for the Abins Algorithm that don't belong in
 # another part of AbinsModules.
+from math import isnan
 import os
 from pathlib import Path
 import re
@@ -662,10 +663,11 @@ class AbinsAlgorithm:
 
         scattering_keys = {"Incoherent": "inc_scatt_xs", "Coherent": "coh_scatt_xs", "Total": "tot_scatt_xs"}
         cross_section = atom.neutron()[scattering_keys[scattering]]
-        from math import isnan
 
         if isnan(cross_section):
             raise ValueError(f"Found NaN cross-section for {atom.symbol} with {nucleons_number} nucleons.")
+
+        return cross_section
 
     @staticmethod
     def set_workspace_units(wrk, layout="1D", energy_units="cm-1"):

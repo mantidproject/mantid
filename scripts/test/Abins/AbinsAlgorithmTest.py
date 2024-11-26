@@ -16,6 +16,22 @@ from abins.abinsalgorithm import AbinsAlgorithm
 class AtomsDataTest(unittest.TestCase):
     """Test static methods on AbinsAlgorithm"""
 
+    def test_cross_section(self):
+        """Get cross section from nucleus information"""
+
+        for scattering, nucleons_number, protons_number, expected in [
+            ("Incoherent", 67, 30, 0.28),
+            ("Coherent", None, 30, 4.054),
+            ("Total", None, 1, 82.02),
+        ]:
+            xc = AbinsAlgorithm.get_cross_section(
+                scattering=scattering,
+                nucleons_number=nucleons_number,
+                protons_number=protons_number,
+            )
+
+            self.assertAlmostEqual(xc, expected)
+
     def test_get_bad_cross_section(self):
         """Test that an error is raised if cross section data is missing"""
 
