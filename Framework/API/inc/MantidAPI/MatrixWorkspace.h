@@ -510,7 +510,7 @@ private:
   std::string m_YUnitLabel;
 
   /// The plot style for the MatrixWorkspace
-  PLOTTYPE plot_type = std::string("plot");
+  PLOTTYPE m_plotType = std::string("plot");
 
   /// Flag indicating if the common bins flag is in a valid state
   mutable std::atomic<bool> m_isCommonBinsFlagValid{false};

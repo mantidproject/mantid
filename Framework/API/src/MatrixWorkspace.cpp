@@ -332,14 +332,14 @@ void MatrixWorkspace::setPlotType(const std::string &t) {
   StringListValidator v(plotTypeNames);
 
   if (v.isValid(t) == "")
-    this->plot_type = t;
+    this->m_plotType = t;
 }
 
 /** Get the plot type
  *
  * @return The plot type
  */
-const std::string MatrixWorkspace::getPlotType() const { return this->plot_type; }
+const std::string MatrixWorkspace::getPlotType() const { return this->m_plotType; }
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
   for (size_t j = 0; j < getNumberHistograms(); ++j) {
