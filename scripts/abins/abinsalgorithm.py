@@ -661,7 +661,11 @@ class AbinsAlgorithm:
             atom = Atom(z_number=protons_number)
 
         scattering_keys = {"Incoherent": "inc_scatt_xs", "Coherent": "coh_scatt_xs", "Total": "tot_scatt_xs"}
-        return atom.neutron()[scattering_keys[scattering]]
+        cross_section = atom.neutron()[scattering_keys[scattering]]
+        from math import isnan
+
+        if isnan(cross_section):
+            raise ValueError(f"Found NaN cross-section for {atom.symbol} with {nucleons_number} nucleons.")
 
     @staticmethod
     def set_workspace_units(wrk, layout="1D", energy_units="cm-1"):
