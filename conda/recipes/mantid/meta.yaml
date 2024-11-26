@@ -34,6 +34,7 @@ requirements:
   host:
     - eigen {{ eigen }}
     - gsl {{ gsl }}
+    - hdf4 {{ hdf4 }}
     - h5py
     - hdf5 {{ hdf5 }}
     - jemalloc  {{ jemalloc }} # [osx or linux]
@@ -45,7 +46,6 @@ requirements:
     - lib3mf  # [win]
     - mkl {{ mkl }} # [win]
     - muparser {{ muparser }}
-    - nexus {{ nexus }}
     - numpy {{ numpy }}
     - occt {{ occt }}
     - python {{ python }}
@@ -54,15 +54,16 @@ requirements:
     - tbb-devel {{ tbb }}
     - pip {{ pip }}
     - versioningit {{ versioningit }}
+    - zlib
     - libglu {{ libglu }}  # [linux]
   run:
     - {{ pin_compatible("gsl", max_pin="x.x") }}
+    - {{ pin_compatible("hdf4", max_pin="x.x") }}
     - h5py
     - {{ pin_compatible("hdf5", max_pin="x.x") }}
     - jemalloc {{ jemalloc }}  # [osx or linux]
     - lib3mf  # [win]
     - mkl {{ mkl }} # [win]
-    - nexus {{ nexus }}
     - {{ pin_compatible("numpy", upper_bound="2.2") }}
     - occt {{ occt }}
     - pycifrw
@@ -76,6 +77,7 @@ requirements:
     - joblib
     - orsopy {{ orsopy }}
     - quasielasticbayes
+    - zlib
     - pydantic
 
   run_constrained:
