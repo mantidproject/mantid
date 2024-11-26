@@ -66,7 +66,7 @@ numpy:
   - 2.0.*
 
 matplotlib:
-  - 3.8.*
+  - 3.9.*
 
 mslice:
   - '2.10'

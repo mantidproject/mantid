@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 
 from mantid.plots.utility import row_num, col_num
-from matplotlib.axes import ErrorbarContainer
+from matplotlib.container import ErrorbarContainer
 from matplotlib.collections import QuadMesh
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 
