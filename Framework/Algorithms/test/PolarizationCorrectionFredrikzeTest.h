@@ -14,6 +14,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/PolarizationCorrectionFredrikze.h"
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
@@ -25,7 +26,14 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace WorkspaceCreationHelper;
 
+namespace {
+
+constexpr int PA_GROUP_SIZE = 4;
+constexpr int PNR_GROUP_SIZE = 2;
+} // namespace
+
 class PolarizationCorrectionFredrikzeTest : public CxxTest::TestSuite {
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -42,8 +50,8 @@ public:
 
   void test_Init() {
     PolarizationCorrectionFredrikze alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    TS_ASSERT(alg.isInitialized());
   }
 
   void test_set_wrong_workspace_type_throws() {
@@ -61,13 +69,13 @@ public:
 
   void test_set_analysis_to_PNR() {
     PolarizationCorrectionFredrikze alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("PolarizationAnalysis", "PNR"));
   }
 
   void test_set_analysis_to_invalid_throws() {
     PolarizationCorrectionFredrikze alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT_THROWS(alg.setProperty("PolarizationAnalysis", "_"), std::invalid_argument &);
   }
 
@@ -125,7 +133,7 @@ public:
 
     TSM_ASSERT_EQUALS("Wrong number of output workspaces", outWS->size(), groupWS->size());
 
-    for (size_t i = 0; i < outWS->size(); ++i) {
+    for (size_t i = 0; i < outWS->size(); i++) {
       std::cout << "Checking equivalent workspaces at index : " << i << '\n';
       auto checkAlg = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
       checkAlg->initialize();
@@ -140,9 +148,9 @@ public:
 
   void setInstrument(const Workspace_sptr &ws, const std::string &instrument_name) {
     auto alg = AlgorithmManager::Instance().createUnmanaged("LoadInstrument");
-    AnalysisDataService::Instance().addOrReplace("dummy", ws);
+    AnalysisDataService::Instance().addOrReplace("output", ws);
     alg->initialize();
-    alg->setProperty("Workspace", "dummy");
+    alg->setProperty("Workspace", "output");
     alg->setProperty("InstrumentName", instrument_name);
     alg->setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(true));
     alg->execute();
@@ -161,7 +169,7 @@ public:
 
     TSM_ASSERT_EQUALS("Wrong number of output workspaces", outWS->size(), groupWS->size());
 
-    for (size_t i = 0; i < outWS->size(); ++i) {
+    for (size_t i = 0; i < outWS->size(); i++) {
       std::cout << "Checking equivalent workspaces at index : " << i << '\n';
       auto checkAlg = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
       checkAlg->initialize();
@@ -193,7 +201,7 @@ public:
 
     TSM_ASSERT_EQUALS("Wrong number of output workspaces", outWS->size(), groupWS->size());
 
-    for (size_t i = 0; i < outWS->size(); ++i) {
+    for (size_t i = 0; i < outWS->size(); i++) {
       std::cout << "Checking equivalent workspaces at index : " << i << '\n';
       auto checkAlg = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
       checkAlg->initialize();
@@ -227,7 +235,7 @@ public:
     join_eff->setProperty("Ap", Ap);
     join_eff->setProperty("Rho", Rho);
     join_eff->setProperty("Alpha", Alpha);
-    join_eff->setPropertyValue("OutputWorkspace", "dummy");
+    join_eff->setPropertyValue("OutputWorkspace", "output");
     join_eff->execute();
     MatrixWorkspace_sptr efficiencies = join_eff->getProperty("OutputWorkspace");
     TS_ASSERT(efficiencies);
@@ -270,13 +278,27 @@ public:
     TS_ASSERT_DELTA(out4->y(0)[0], 0.6, 1e-14);
   }
 
-  void test_valid_spin_state_order_for_PA() {
+  void test_default_spin_state_order_for_PA() {
+    auto groupWS = createGroupWorkspace(4, 4, 1, 1);
+    auto alg = initializeAlgorithm(groupWS, "PA", "1,0,0,0");
+    alg->setProperty("AddSpinStateToLog", true);
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    const Mantid::API::WorkspaceGroup_sptr outputWS = alg->getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), PA_GROUP_SIZE)
+    const std::vector<std::string> expectedLogValues{
+        {SpinStatesORSO::PP, SpinStatesORSO::PM, SpinStatesORSO::MP, SpinStatesORSO::MM}};
+
+    validateWorkspaceLogs(outputWS, expectedLogValues);
+  }
+
+  void test_spin_state_not_added_to_sample_log_by_default_for_PA() {
     auto groupWS = createGroupWorkspace(4, 4, 1, 1);
     auto alg = initializeAlgorithm(groupWS, "PA", "1,0,0,0");
 
-    alg->setProperty("InputSpinStates", "pp,pa,ap,aa");
-    alg->setProperty("OutputSpinStates", "pa,pp,ap,aa");
     TS_ASSERT_THROWS_NOTHING(alg->execute());
+    const Mantid::API::WorkspaceGroup_sptr outputWS = alg->getProperty("OutputWorkspace");
+    validateNoLogAdded(outputWS, PA_GROUP_SIZE);
   }
 
   void test_invalid_input_and_output_spin_state_order_for_PA() {
@@ -305,20 +327,38 @@ public:
                       alg->execute(), std::invalid_argument &);
   }
 
-  // Test various combinations of spin state orders
-  void test_various_spin_state_orders_for_PA() {
+  void test_valid_spin_state_order_for_PA() {
     auto groupWS = createGroupWorkspace(4, 4, 1, 1);
     auto alg = initializeAlgorithm(groupWS, "PA", "1,0,0,0");
+    alg->setProperty("AddSpinStateToLog", true);
 
-    // Test different input and output spin state orders
-    std::vector<std::string> spinStateOrders = {"pp,pa,ap,aa", "pa,pp,aa,ap", "ap,aa,pa,pp", "aa,ap,pp,pa"};
+    const std::vector<std::string> spinStateOrders = {
+        SpinStateConfigurationsFredrikze::PARA_PARA + "," + SpinStateConfigurationsFredrikze::PARA_ANTI + "," +
+            SpinStateConfigurationsFredrikze::ANTI_PARA + "," + SpinStateConfigurationsFredrikze::ANTI_ANTI,
 
-    for (const auto &inputOrder : spinStateOrders) {
-      for (const auto &outputOrder : spinStateOrders) {
-        alg->setProperty("InputSpinStates", inputOrder);
-        alg->setProperty("OutputSpinStates", outputOrder);
-        TS_ASSERT_THROWS_NOTHING(alg->execute());
-      }
+        SpinStateConfigurationsFredrikze::PARA_ANTI + "," + SpinStateConfigurationsFredrikze::PARA_PARA + "," +
+            SpinStateConfigurationsFredrikze::ANTI_ANTI + "," + SpinStateConfigurationsFredrikze::ANTI_PARA,
+
+        SpinStateConfigurationsFredrikze::ANTI_PARA + "," + SpinStateConfigurationsFredrikze::ANTI_ANTI + "," +
+            SpinStateConfigurationsFredrikze::PARA_ANTI + "," + SpinStateConfigurationsFredrikze::PARA_PARA,
+
+        SpinStateConfigurationsFredrikze::ANTI_ANTI + "," + SpinStateConfigurationsFredrikze::ANTI_PARA + "," +
+            SpinStateConfigurationsFredrikze::PARA_PARA + "," + SpinStateConfigurationsFredrikze::PARA_ANTI};
+
+    const std::vector<std::vector<std::string>> expectedLogValues = {
+        {SpinStatesORSO::PP, SpinStatesORSO::PM, SpinStatesORSO::MP, SpinStatesORSO::MM},
+        {SpinStatesORSO::PM, SpinStatesORSO::PP, SpinStatesORSO::MM, SpinStatesORSO::MP},
+        {SpinStatesORSO::MP, SpinStatesORSO::MM, SpinStatesORSO::PM, SpinStatesORSO::PP},
+        {SpinStatesORSO::MM, SpinStatesORSO::MP, SpinStatesORSO::PP, SpinStatesORSO::PM}};
+
+    for (size_t orderIdx = 0; orderIdx < spinStateOrders.size(); ++orderIdx) {
+      alg->setProperty("InputSpinStates", spinStateOrders[orderIdx]);
+      alg->setProperty("OutputSpinStates", spinStateOrders[orderIdx]);
+
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+      const Mantid::API::WorkspaceGroup_sptr outputWS = alg->getProperty("OutputWorkspace");
+
+      validateWorkspaceLogs(outputWS, expectedLogValues[orderIdx]);
     }
   }
 
@@ -336,13 +376,52 @@ public:
         alg->setProperty("OutputSpinStates", "y, x"), std::invalid_argument &);
   }
 
+  void test_default_spin_state_order_for_PNR() {
+    auto groupWS = createGroupWorkspace(2, 4, 1, 1);
+    auto alg = initializeAlgorithm(groupWS, "PNR", "1,0,0,0");
+    alg->setProperty("AddSpinStateToLog", true);
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    const Mantid::API::WorkspaceGroup_sptr outputWS = alg->getProperty("OutputWorkspace");
+
+    const std::vector<std::string> expectedLogValues = {SpinStatesORSO::PO, SpinStatesORSO::MO};
+
+    validateWorkspaceLogs(outputWS, expectedLogValues);
+  }
+
+  void test_spin_state_not_added_to_sample_log_by_default_for_PNR() {
+    auto groupWS = createGroupWorkspace(2, 4, 1, 1);
+    auto alg = initializeAlgorithm(groupWS, "PNR", "1,0,0,0");
+    alg->setProperty("InputSpinStates", "p, a");
+    alg->setProperty("OutputSpinStates", "a, p");
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    const Mantid::API::WorkspaceGroup_sptr outputWS = alg->getProperty("OutputWorkspace");
+
+    validateNoLogAdded(outputWS, PNR_GROUP_SIZE);
+  }
+
   void test_valid_spin_state_order_for_PNR() {
     auto groupWS = createGroupWorkspace(2, 4, 1, 1);
     auto alg = initializeAlgorithm(groupWS, "PNR", "1,0,0,0");
+    alg->setProperty("AddSpinStateToLog", true);
 
-    alg->setProperty("InputSpinStates", "p, a");
-    alg->setProperty("OutputSpinStates", "a, p");
-    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    std::vector<std::string> spinStateOrders = {
+        SpinStateConfigurationsFredrikze::PARA + "," + SpinStateConfigurationsFredrikze::ANTI,
+        SpinStateConfigurationsFredrikze::ANTI + "," + SpinStateConfigurationsFredrikze::PARA};
+
+    std::vector<std::vector<std::string>> expectedLogValues = {{SpinStatesORSO::PO, SpinStatesORSO::MO},
+                                                               {SpinStatesORSO::MO, SpinStatesORSO::PO}};
+
+    for (size_t orderIdx = 0; orderIdx < spinStateOrders.size(); ++orderIdx) {
+      alg->setProperty("InputSpinStates", spinStateOrders[orderIdx]);
+      alg->setProperty("OutputSpinStates", spinStateOrders[orderIdx]);
+
+      TS_ASSERT_THROWS_NOTHING(alg->execute());
+      const Mantid::API::WorkspaceGroup_sptr outputWS = alg->getProperty("OutputWorkspace");
+
+      validateWorkspaceLogs(outputWS, expectedLogValues[orderIdx]);
+    }
   }
 
   Mantid::API::WorkspaceGroup_sptr makeWorkspaceGroup() {
@@ -371,7 +450,7 @@ public:
 
   std::shared_ptr<WorkspaceGroup> createGroupWorkspace(int numWorkspaces, int bins, int xVal, int yVal) {
     auto groupWS = std::make_shared<WorkspaceGroup>();
-    for (int i = 0; i < numWorkspaces; ++i) {
+    for (int i = 0; i < numWorkspaces; i++) {
       groupWS->addWorkspace(create1DWorkspace(bins, xVal, yVal));
     }
     return groupWS;
@@ -386,7 +465,7 @@ public:
     alg->setRethrows(true);
     alg->initialize();
     alg->setProperty("InputWorkspace", groupWS);
-    alg->setPropertyValue("OutputWorkspace", "dummy");
+    alg->setPropertyValue("OutputWorkspace", "output");
     alg->setProperty("PolarizationAnalysis", polarizationType);
     if (efficiencies != nullptr) {
       alg->setProperty("Efficiencies", efficiencies);
@@ -397,5 +476,29 @@ public:
     }
 
     return alg;
+  }
+
+  void validateWorkspaceLogs(const Mantid::API::WorkspaceGroup_sptr &outputWS,
+                             const std::vector<std::string> &expectedLogValues) {
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), expectedLogValues.size());
+
+    for (size_t i = 0; i < expectedLogValues.size(); ++i) {
+      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(i));
+      TS_ASSERT(ws);
+
+      const auto &run = ws->run();
+      TS_ASSERT(run.hasProperty(SpinStatesORSO::LOG_NAME));
+      TS_ASSERT_EQUALS(run.getPropertyValueAsType<std::string>(SpinStatesORSO::LOG_NAME), expectedLogValues[i]);
+    }
+  }
+
+  void validateNoLogAdded(const Mantid::API::WorkspaceGroup_sptr &outputWS, size_t expectedSize) {
+    TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), expectedSize);
+
+    for (size_t i = 0; i < expectedSize; i++) {
+      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(i));
+      TS_ASSERT(ws);
+      TS_ASSERT(!ws->run().hasProperty(SpinStatesORSO::LOG_NAME));
+    }
   }
 };
