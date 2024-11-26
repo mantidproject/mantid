@@ -28,7 +28,7 @@ Spin State Configurations
 #########################
 The algorithm expresses the order of the workspaces in the input and output groups in terms of spin states. These orders are specified using two properties:
 
-**Input Spin State Order:**
+**Input Spin State:**
 This property determines the order of the spin states in the input workspace group
 
 - :literal:`'pp, pa, ap, aa'`
@@ -37,8 +37,11 @@ This property determines the order of the spin states in the input workspace gro
 - :literal:`'p, a'`
    Polarized Neutron Reflectivity (:literal:`'PNR'`):  parallel, anti-parallel. Two input workspaces are required. The spin states can be provided in any order and should match the order of the workspaces in the input group. The default order is :literal:`p, a`.
 
-**Output Spin State Order:**
+**Output Spin State:**
 This property determines the order of the spin states in the output workspace group. Similar to the input configuration, users can specify output spin states in any order.
+
+If the ``AddSpinStateToLog`` property has been set to ``True`` then a sample log entry called ``spin_state_ORSO`` is added to each output child workspace.
+This log entry specifies the spin state of the data using the notation from the Reflectometry ORSO data standard [#ORSO]_.
 
 Output from Full Polarization Analysis
 --------------------------------------
@@ -87,7 +90,7 @@ Usage
     eff = ConvertUnits(eff, "Wavelength")
     eff = RebinToWorkspace(eff, run.getItem(0), True)
 
-    out = PolarizationCorrectionFredrikze(run, eff, "PNR", InputSpinStates="p, a", OutputSpinStates="p, a")
+    out = PolarizationCorrectionFredrikze(run, eff, "PNR", InputSpinStates="p, a", OutputSpinStates="p, a", AddSpinStateToLog=True)
 
     for i, orig in enumerate(run):
     	corrected = out[i]
@@ -119,7 +122,7 @@ Output:
     eff = ConvertUnits(eff, "Wavelength")
     eff = RebinToWorkspace(eff, run.getItem(0), True)
 
-    out = PolarizationCorrectionFredrikze(run, eff, "PA", InputSpinStates="pp, pa, ap, aa", OutputSpinStates="pp, pa, ap, aa")
+    out = PolarizationCorrectionFredrikze(run, eff, "PA", InputSpinStates="pp, pa, ap, aa", OutputSpinStates="pp, pa, ap, aa", AddSpinStateToLog=True)
 
     for i, orig in enumerate(run):
     	corrected = out[i]
@@ -139,6 +142,7 @@ References
 
 .. [#FREDRIKZE] Fredrikze, H, et al., *Calibration of a polarized neutron reflectometer*, Physica B 297 (2001)
              `doi: 10.1016/S0921-4526(00)00823-1 <https://doi.org/10.1016/S0921-4526(00)00823-1>`_
+.. [#ORSO] ORSO file format specification: `https://www.reflectometry.org/file_format/specification <https://www.reflectometry.org/file_format/specification>`_
 
 .. categories::
 
