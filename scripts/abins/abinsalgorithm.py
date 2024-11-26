@@ -24,10 +24,10 @@ from mantid.api import mtd, FileAction, FileProperty, WorkspaceGroup, WorkspaceP
 from mantid.kernel import Atom, Direction, StringListValidator, StringArrayProperty, logger
 from mantid.simpleapi import CloneWorkspace, SaveAscii, Scale
 
-import abins
 from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ATOM_PREFIX
 from abins.input.jsonloader import abins_supported_json_formats, JSONLoader
 from abins.instruments import get_instrument, Instrument
+import abins.parameters
 
 
 class AbinsAlgorithm:
