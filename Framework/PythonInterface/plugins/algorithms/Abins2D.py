@@ -8,6 +8,8 @@
 import numbers
 from typing import Dict
 
+import numpy as np
+
 from mantid.api import AlgorithmFactory, PythonAlgorithm, Progress
 from mantid.api import WorkspaceFactory, AnalysisDataService
 from mantid.kernel import logger
@@ -15,7 +17,7 @@ from mantid.kernel import logger
 # noinspection PyProtectedMember
 from mantid.simpleapi import GroupWorkspaces
 import abins
-from abins.abinsalgorithm import AbinsAlgorithm
+from abins.abinsalgorithm import AbinsAlgorithm, AtomInfo
 
 
 # noinspection PyPep8Naming,PyMethodMayBeStatic
@@ -184,14 +186,13 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         self.setProperty("OutputWorkspace", self._out_ws_name)
         prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
 
-    def _fill_s_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
+    def _fill_s_workspace(self, *, s_points=None, workspace: str, species: AtomInfo | None = None):
         """
         Puts S into workspace(s).
 
         :param s_points: dynamical factor for the given atom
         :param workspace:  workspace to be filled with S
-        :param protons_number: number of protons in the given type fo atom
-        :param nucleons_number: number of nucleons in the given type of atom
+        :param species: Atom/isotope data
         """
         from abins.constants import FUNDAMENTALS, TWO_DIMENSIONAL_INSTRUMENTS
 
@@ -200,15 +201,11 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
 
         # only FUNDAMENTALS [data is 3d with length 1 in axis 0]
         if s_points.shape[0] == FUNDAMENTALS:
-            self._fill_s_2d_workspace(
-                s_points=s_points[0], workspace=workspace, protons_number=protons_number, nucleons_number=nucleons_number
-            )
+            self._fill_s_2d_workspace(s_points=s_points[0], workspace=workspace, species=species)
 
         # total workspaces [data is 2d array of S]
         elif s_points.shape[0] == abins.parameters.instruments[self._instrument.get_name()]["q_size"]:
-            self._fill_s_2d_workspace(
-                s_points=s_points, workspace=workspace, protons_number=protons_number, nucleons_number=nucleons_number
-            )
+            self._fill_s_2d_workspace(s_points=s_points, workspace=workspace, species=species)
 
         # Multiple quantum order events [data is 3d table of S using axis 0 for quantum orders]
         else:
@@ -219,9 +216,7 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
                 wrk_name = f"{workspace}_quantum_event_{n + 1}"
                 partial_wrk_names.append(wrk_name)
 
-                self._fill_s_2d_workspace(
-                    s_points=s_points[n], workspace=wrk_name, protons_number=protons_number, nucleons_number=nucleons_number
-                )
+                self._fill_s_2d_workspace(s_points=s_points[n], workspace=wrk_name, species=species)
 
                 GroupWorkspaces(InputWorkspaces=partial_wrk_names, OutputWorkspace=workspace)
 
@@ -232,14 +227,12 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
         AnalysisDataService.addOrReplace(name, wrk)
         return wrk
 
-    def _fill_s_2d_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
+    def _fill_s_2d_workspace(self, *, s_points: np.ndarray, workspace: str, species: AtomInfo | None = None):
         from mantid.api import NumericAxis
         from abins.constants import MILLI_EV_TO_WAVENUMBER
 
-        if protons_number is not None:
-            s_points = s_points * self.get_cross_section(
-                scattering=self._scale_by_cross_section, protons_number=protons_number, nucleons_number=nucleons_number
-            )
+        if species is not None:
+            s_points = s_points * self.get_cross_section(scattering=self._scale_by_cross_section, species=species)
 
         n_q_values, n_freq_bins = s_points.shape
         n_q_bins = self._q_bins.size
