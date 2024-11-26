@@ -349,7 +349,6 @@ size_t FindPeaksConvolve::findPeakInRawData(const int xIndex, const TensorMap_co
 void FindPeaksConvolve::generateNormalPDF(const int peakExtentBinNumber) {
   std::lock_guard<std::mutex> lock(m_mtx);
   if (m_pdf.size() == 0) {
-    std::lock_guard<std::mutex> lock(m_mtx);
     m_pdf.resize(peakExtentBinNumber);
     boost::math::normal_distribution<> dist(0.0,
                                             peakExtentBinNumber / 2.0); // assures 2 stddevs in the resultant vector
