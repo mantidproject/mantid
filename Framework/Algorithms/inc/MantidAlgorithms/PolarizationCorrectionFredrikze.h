@@ -39,11 +39,13 @@ private:
   std::shared_ptr<Mantid::API::MatrixWorkspace> getEfficiencyWorkspace(const std::string &label);
   std::shared_ptr<Mantid::API::WorkspaceGroup> execPA(const std::shared_ptr<Mantid::API::WorkspaceGroup> &inWS,
                                                       const std::vector<std::string> &inputOrder,
-                                                      const std::vector<std::string> &outputOrder);
+                                                      const std::vector<std::string> &outputOrder,
+                                                      const std::string &outputWSName, const bool addSpinStateLog);
 
   std::shared_ptr<Mantid::API::WorkspaceGroup> execPNR(const std::shared_ptr<Mantid::API::WorkspaceGroup> &inWS,
                                                        const std::vector<std::string> &inputOrder,
-                                                       const std::vector<std::string> &outputOrder);
+                                                       const std::vector<std::string> &outputOrder,
+                                                       const std::string &outputWSName, const bool addSpinStateLog);
   std::shared_ptr<Mantid::API::MatrixWorkspace> add(const std::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
                                                     const double &rhs);
   std::shared_ptr<Mantid::API::MatrixWorkspace> multiply(const std::shared_ptr<Mantid::API::MatrixWorkspace> &lhsWS,
