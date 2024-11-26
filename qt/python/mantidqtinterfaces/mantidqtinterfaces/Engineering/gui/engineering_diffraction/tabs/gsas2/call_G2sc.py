@@ -18,6 +18,11 @@ def print_histogram_R_factors(project):
     print("")
 
 
+def add_phases(project, phase_files):
+    for phase_file in phase_files:
+        project.add_phase(os.path.join(phase_file))
+
+
 def add_histograms(data_filenames, project, instruments, number_regions):
     if number_regions > len(data_filenames):  # many regions in one data and one instrument file
         if len(data_filenames) != 1:
@@ -62,7 +67,7 @@ def add_pawley_reflections(pawley_reflections, project, d_min):
         phase.data["Pawley ref"] = gsas_reflections
 
 
-def set_max_number_cycles(number_cycles):
+def set_max_number_cycles(gsas_project, number_cycles):
     gsas_project.data["Controls"]["data"]["max cyc"] = number_cycles
 
 
@@ -157,66 +162,69 @@ def export_lattice_parameters(temp_save_directory, name_of_project, project):
             file.write(parameters_json)
 
 
-"""Parse Inputs from Mantid"""
-inputs_dict = json.loads(sys.argv[1])
+def main():
+    # Parse Inputs from Mantid
+    inputs_dict = json.loads(sys.argv[1])
 
-path_to_gsas2 = inputs_dict["path_to_gsas2"]
-temporary_save_directory = inputs_dict["temporary_save_directory"]
-project_name = inputs_dict["project_name"]
-refinement_method = inputs_dict["refinement_method"]
-refine_background = inputs_dict["refine_background"]
-refine_microstrain = inputs_dict["refine_microstrain"]
-refine_sigma_one = inputs_dict["refine_sigma_one"]
-refine_gamma = inputs_dict["refine_gamma"]
-refine_histogram_scale_factor = inputs_dict["refine_histogram_scale_factor"]
-refine_unit_cell = inputs_dict["refine_unit_cell"]
-override_cell_lengths = inputs_dict["override_cell_lengths"]
-data_files = inputs_dict["data_files"]
-phase_files = inputs_dict["phase_files"]
-instrument_files = inputs_dict["instrument_files"]
-limits = inputs_dict["limits"]
-mantid_pawley_reflections = inputs_dict["mantid_pawley_reflections"]
-d_spacing_min = inputs_dict["d_spacing_min"]
-number_of_regions = inputs_dict["number_of_regions"]
+    path_to_gsas2 = inputs_dict["path_to_gsas2"]
+    temporary_save_directory = inputs_dict["temporary_save_directory"]
+    project_name = inputs_dict["project_name"]
+    refinement_method = inputs_dict["refinement_method"]
+    refine_background = inputs_dict["refine_background"]
+    refine_microstrain = inputs_dict["refine_microstrain"]
+    refine_sigma_one = inputs_dict["refine_sigma_one"]
+    refine_gamma = inputs_dict["refine_gamma"]
+    refine_histogram_scale_factor = inputs_dict["refine_histogram_scale_factor"]
+    refine_unit_cell = inputs_dict["refine_unit_cell"]
+    override_cell_lengths = inputs_dict["override_cell_lengths"]
+    data_files = inputs_dict["data_files"]
+    phase_files = inputs_dict["phase_files"]
+    instrument_files = inputs_dict["instrument_files"]
+    limits = inputs_dict["limits"]
+    mantid_pawley_reflections = inputs_dict["mantid_pawley_reflections"]
+    d_spacing_min = inputs_dict["d_spacing_min"]
+    number_of_regions = inputs_dict["number_of_regions"]
 
-"""Call GSASIIscriptable"""
-import_path = None
-try:
-    import_path = os.path.join(path_to_gsas2, "GSASII")
-    sys.path.insert(0, import_path)
-    import GSASIIscriptable as G2sc
-except ModuleNotFoundError:
-    raise ImportError(f"GSAS-II was not found at {import_path}")
+    # Call GSASIIscriptable
+    import_path = None
+    try:
+        import_path = os.path.join(path_to_gsas2, "GSASII")
+        sys.path.insert(0, import_path)
+        import GSASIIscriptable as G2sc
+    except ModuleNotFoundError:
+        raise ImportError(f"GSAS-II was not found at {import_path}")
 
-project_path = os.path.join(temporary_save_directory, project_name + ".gpx")
-gsas_project = G2sc.G2Project(filename=project_path)
+    project_path = os.path.join(temporary_save_directory, project_name + ".gpx")
+    gsas_project = G2sc.G2Project(filename=project_path)
 
-for phase_file in phase_files:
-    gsas_project.add_phase(os.path.join(phase_file))
+    add_phases(gsas_project, phase_files)
+    add_histograms(data_files, gsas_project, instrument_files, number_of_regions)
 
-add_histograms(data_files, gsas_project, instrument_files, number_of_regions)
+    if refinement_method == "Pawley" and mantid_pawley_reflections:
+        add_pawley_reflections(mantid_pawley_reflections, gsas_project, d_spacing_min)
 
-if refinement_method == "Pawley" and mantid_pawley_reflections:
-    add_pawley_reflections(mantid_pawley_reflections, gsas_project, d_spacing_min)
+    set_max_number_cycles(gsas_project, 3)
+    enable_background(refine_background, gsas_project)
+    enable_histogram_scale_factor(refine_histogram_scale_factor, gsas_project)
 
-set_max_number_cycles(3)
-enable_background(refine_background, gsas_project)
-enable_histogram_scale_factor(refine_histogram_scale_factor, gsas_project)
+    enable_unit_cell(refine_unit_cell, override_cell_lengths, gsas_project)
+    enable_limits(limits, gsas_project)
 
-enable_unit_cell(refine_unit_cell, override_cell_lengths, gsas_project)
-enable_limits(limits, gsas_project)
+    gsas_project.save(project_path)
+    gsas_project.do_refinements()
+    gsas_project.save(project_path)
+    print_histogram_R_factors(gsas_project)
 
-gsas_project.save(project_path)
-gsas_project.do_refinements()
-gsas_project.save(project_path)
-print_histogram_R_factors(gsas_project)
+    run_microstrain_refinement(refine_microstrain, gsas_project, project_path)
+    run_parameter_refinement(refine_sigma_one, "sig-1", gsas_project, project_path)
+    run_parameter_refinement(refine_gamma, "Y", gsas_project, project_path)
 
-run_microstrain_refinement(refine_microstrain, gsas_project, project_path)
-run_parameter_refinement(refine_sigma_one, "sig-1", gsas_project, project_path)
-run_parameter_refinement(refine_gamma, "Y", gsas_project, project_path)
+    export_refinement_to_csv(temporary_save_directory, project_name, gsas_project)
+    export_lattice_parameters(temporary_save_directory, project_name, gsas_project)
+    export_refined_instrument_parameters(temporary_save_directory, project_name, gsas_project)
+    if refinement_method == "Pawley":
+        export_reflections(temporary_save_directory, project_name, gsas_project)
 
-export_refinement_to_csv(temporary_save_directory, project_name, gsas_project)
-export_lattice_parameters(temporary_save_directory, project_name, gsas_project)
-export_refined_instrument_parameters(temporary_save_directory, project_name, gsas_project)
-if refinement_method == "Pawley":
-    export_reflections(temporary_save_directory, project_name, gsas_project)
+
+if __name__ == "__main__":
+    main()
