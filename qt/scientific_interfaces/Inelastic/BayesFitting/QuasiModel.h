@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include <MantidQtWidgets/Common/ConfiguredAlgorithm.h>
@@ -17,7 +18,7 @@
 
 namespace MantidQt::CustomInterfaces {
 
-class IQuasiModel {
+class MANTIDQT_INELASTIC_DLL IQuasiModel {
 public:
   virtual ~IQuasiModel() = default;
 
@@ -25,6 +26,7 @@ public:
   virtual Mantid::API::MatrixWorkspace_sptr sample() const = 0;
 
   virtual void setResolution(std::string const &workspaceName) = 0;
+  virtual Mantid::API::MatrixWorkspace_sptr resolution() const = 0;
 
   virtual void setOutputResult(std::string const &workspaceName) = 0;
   virtual void setOutputProbability(std::string const &workspaceName) = 0;
@@ -52,7 +54,7 @@ public:
   virtual API::IConfiguredAlgorithm_sptr setupSaveAlgorithm(Mantid::API::Workspace_sptr workspace) const = 0;
 };
 
-class QuasiModel final : public IQuasiModel {
+class MANTIDQT_INELASTIC_DLL QuasiModel final : public IQuasiModel {
 
 public:
   QuasiModel();
@@ -62,6 +64,7 @@ public:
   inline Mantid::API::MatrixWorkspace_sptr sample() const noexcept override { return m_sampleWorkspace; }
 
   void setResolution(std::string const &workspaceName) override;
+  inline Mantid::API::MatrixWorkspace_sptr resolution() const noexcept override { return m_resolutionWorkspace; }
 
   void setOutputResult(std::string const &workspaceName) override;
   void setOutputProbability(std::string const &workspaceName) override;
