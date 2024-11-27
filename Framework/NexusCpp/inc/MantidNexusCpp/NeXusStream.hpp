@@ -134,8 +134,8 @@ public:
     return *this;
   }
   void setName(const std::string &name) { m_holder->setName(name); }
-  virtual void readFromFile(File &nf) const { m_holder->readFromFile(nf); }
-  virtual void writeToFile(File &nf) const { m_holder->writeToFile(nf); }
+  virtual void readFromFile(File &nf) const override { m_holder->readFromFile(nf); }
+  virtual void writeToFile(File &nf) const override { m_holder->writeToFile(nf); }
   virtual ~Attr() {
     delete m_holder;
     m_holder = NULL;
@@ -165,14 +165,14 @@ public:
     processAttr(attr1_name, attr1_value, attr2_name, attr2_value);
   }
 
-  virtual void readFromFile(File &nf) const {
-    for (std::list<Attr>::const_iterator it = m_attr.begin(); it != m_attr.end(); it++) {
+  virtual void readFromFile(File &nf) const override {
+    for (std::list<Attr>::const_iterator it = m_attr.begin(); it != m_attr.end(); ++it) {
       it->readFromFile(nf);
     }
   }
 
-  virtual void writeToFile(File &nf) const {
-    for (std::list<Attr>::const_iterator it = m_attr.begin(); it != m_attr.end(); it++) {
+  virtual void writeToFile(File &nf) const override {
+    for (std::list<Attr>::const_iterator it = m_attr.begin(); it != m_attr.end(); ++it) {
       it->writeToFile(nf);
     }
   }
@@ -194,12 +194,12 @@ public:
         const Attr &attr1_value = Attr(), const std::string &attr2_name = "", const Attr &attr2_value = Attr())
       : ObjectWithAttr(attr1_name, attr1_value, attr2_name, attr2_value), m_name(name), m_class(nxclass) {}
 
-  virtual void readFromFile(File &nf) const {
+  virtual void readFromFile(File &nf) const override {
     nf.openGroup(m_name, m_class);
     ObjectWithAttr::readFromFile(nf);
   }
 
-  virtual void writeToFile(File &nf) const {
+  virtual void writeToFile(File &nf) const override {
     nf.makeGroup(m_name, m_class, true);
     ObjectWithAttr::writeToFile(nf);
   }
@@ -225,10 +225,10 @@ public:
   DataHolder(std::vector<NumT> &value);
   DataHolder(const std::vector<NumT> &value);
   NXnumtype getType() { return NeXus::getType<NumT>(); }
-  virtual void readFromFile(File &nf) const;
-  virtual void writeToFile(File &nf) const;
-  DataHolder *clone() { return new DataHolder(m_name, m_c_value, m_value); }
-  virtual ~DataHolder() {}
+  virtual void readFromFile(File &nf) const override;
+  virtual void writeToFile(File &nf) const override;
+  DataHolder *clone() override { return new DataHolder(m_name, m_c_value, m_value); }
+  virtual ~DataHolder() override {}
 };
 
 /**
@@ -263,9 +263,9 @@ public:
     }
     return *this;
   }
-  virtual void readFromFile(File &nf) const;
-  virtual void writeToFile(File &nf) const;
-  virtual ~Data() { delete m_holder; }
+  virtual void readFromFile(File &nf) const override;
+  virtual void writeToFile(File &nf) const override;
+  virtual ~Data() override { delete m_holder; }
 };
 
 /// \ingroup cpp_stream

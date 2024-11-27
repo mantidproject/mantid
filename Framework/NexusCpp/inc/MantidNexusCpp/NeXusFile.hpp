@@ -128,7 +128,7 @@ private:
    * \param class_name the current NX class name
    * \param tmap the typemap being constructed
    */
-  void walkFileForTypeMap(const std::string path, const std::string class_name, TypeMap &tmap);
+  void walkFileForTypeMap(const std::string &path, const std::string &class_name, TypeMap &tmap);
 
   /**
    * Function to append new path to current one.
@@ -136,7 +136,7 @@ private:
    * \param subpath the path to append to the current path
    * \return the newly joined path
    */
-  const std::string makeCurrentPath(const std::string currpath, const std::string subpath);
+  const std::string makeCurrentPath(const std::string &currpath, const std::string &subpath);
 
   /**
    * Function to consolidate the file opening code for the various constructors
@@ -476,7 +476,7 @@ public:
    * \param name Name of the attribute to add.
    * \param value The attribute value.
    */
-  void putAttr(const std::string &name, const std::string value);
+  void putAttr(const std::string &name, const std::string &value);
 
   /**
    * \copydoc NeXus::File::putSlab(void* data, std::vector<int64_t>& start,
@@ -810,7 +810,5 @@ public:
 template <typename NumT> MANTID_NEXUSCPP_DLL NXnumtype getType(NumT number = NumT());
 
 }; // namespace NeXus
-
-#include "MantidNexusCpp/NeXusStream.hpp"
 
 #endif
