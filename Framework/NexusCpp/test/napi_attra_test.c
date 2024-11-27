@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
   int i, n, level, NXrank, NXrank2, NXdims[32], NXdims2[32], NXtype, NXtype2, NXlen, attr_status;
   void *data_buffer;
 
-  int i4_array[4] = {1000000, 2000000, 3000000, 4000000};
+  const int i4_array[4] = {1000000, 2000000, 3000000, 4000000};
 
   char name[64], char_buffer[128];
   NXhandle fileid;
