@@ -480,10 +480,9 @@ class AbinsAlgorithm:
 
         ws_name = self._out_ws_name + "_" + label
         self._fill_s_workspace(
+            species=species,
             s_points=s_points,
             workspace=ws_name,
-            protons_number=species.z_number,
-            nucleons_number=species.nucleons_number,
         )
         return ws_name
 
@@ -639,7 +638,7 @@ class AbinsAlgorithm:
                         s_atoms[:, i] += mtd[partial_ws].dataY(i)
 
             # create workspace with S
-            self._fill_s_workspace(s_atoms, total_workspace)
+            self._fill_s_workspace(s_points=s_atoms, workspace=total_workspace)
 
         # # Otherwise just repackage the workspace we have as the total
         else:
