@@ -6,8 +6,6 @@
 #define HAVE_HDF5
 #define WITH_HDF5
 
-// not enabling HAVE_MXML or WITH_MXML - going to be removed
-
 // not enabling HAVE_FTIME - not used?
 
 // not enabling HAVE_TZSET - not used?

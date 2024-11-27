@@ -98,11 +98,9 @@ int main(int argc, char *argv[]) {
     nx_creation_code = NXACC_CREATE5;
     strcpy(nxFile, "NXtest.h5");
   } else if (strstr(argv[0], "napi_test-xml-table") != NULL) {
-    nx_creation_code = NXACC_CREATEXML | NXACC_TABLE;
-    strcpy(nxFile, "NXtest-table.xml");
+    return 1; // xml is not supported
   } else if (strstr(argv[0], "napi_test-xml") != NULL) {
-    nx_creation_code = NXACC_CREATEXML;
-    strcpy(nxFile, "NXtest.xml");
+    return 1; // xml is not supported
   } else {
     nx_creation_code = NXACC_CREATE;
     strcpy(nxFile, "NXtest.hdf");
@@ -621,8 +619,7 @@ static int testExternal(char *progName) {
     strcpy(ext, "h5");
     create = NXACC_CREATE5;
   } else if (strstr(progName, "xml") != NULL) {
-    strcpy(ext, "xml");
-    create = NXACC_CREATEXML;
+    return 1; // xml is not supported
   } else {
     printf("Failed to recognise napi_test program in testExternal\n");
     return 1;

@@ -237,28 +237,6 @@ NXstatus NXsetcache(long newVal) {
   return NX_ERROR;
 }
 
-#ifdef WITH_MXML
-/*-----------------------------------------------------------------------*/
-static NXstatus NXisXML(CONSTCHAR *filename) {
-  FILE *fd = NULL;
-  char line[132];
-
-  fd = fopen(filename, "r");
-  if (fd) {
-    int fgets_ok = (fgets(line, 131, fd) != NULL);
-    fclose(fd);
-    if (fgets_ok) {
-      if (strstr(line, "?xml") != NULL) {
-        return NX_OK;
-      }
-    } else {
-      return NX_ERROR;
-    }
-  }
-  return NX_ERROR;
-}
-#endif
-
 /*-------------------------------------------------------------------------*/
 static void NXNXNXReportError(void *pData, char *string) { fprintf(stderr, "%s \n", string); }
 
@@ -361,9 +339,6 @@ extern void NXMEnableErrorReporting() {
 #ifdef WITH_HDF4
 #include "MantidNexusCpp/napi4.h"
 #endif
-#ifdef WITH_MXML
-#include "MantidNexusCpp/nxxml.h"
-#endif
 /* ----------------------------------------------------------------------
 
    Definition of NeXus API
@@ -391,12 +366,6 @@ static int determineFileTypeImpl(CONSTCHAR *filename) {
   iRet = Hishdf((const char *)filename);
   if (iRet > 0) {
     return NXACC_CREATE4;
-  }
-#endif
-#ifdef WITH_MXML
-  iRet = NXisXML(filename);
-  if (iRet == NX_OK) {
-    return NXACC_CREATEXML;
   }
 #endif
   /*
@@ -491,9 +460,10 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     backend_type = NXACC_CREATE5;
     filename = strdup(userfilename);
   } else if (my_am == NXACC_CREATEXML) {
-    /* XML will be used ! */
-    backend_type = NXACC_CREATEXML;
-    filename = strdup(userfilename);
+    snprintf(error, 1023, "xml backend not supported for %s", filename);
+    NXReportError(error);
+    free(filename);
+    return NX_ERROR;
   } else {
     filename = locateNexusFileInPath((char *)userfilename);
     if (filename == NULL) {
@@ -567,22 +537,8 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     /*
        XML type
      */
-#ifdef WITH_MXML
-    NXhandle xmlHandle = NULL;
-    retstat = NXXopen(filename, am, &xmlHandle);
-    if (retstat != NX_OK) {
-      free(fHandle);
-      free(filename);
-      return retstat;
-    }
-    fHandle->pNexusData = xmlHandle;
-    fHandle->access_mode = backend_type || (NXACC_READ && am);
-    NXXassignFunctions(fHandle);
-    pushFileStack(fileStack, fHandle, filename);
-#else
     NXReportError("ERROR: Attempt to create XML file when not linked with XML");
     retstat = NX_ERROR;
-#endif
   } else {
     NXReportError("ERROR: Format not readable by this NeXus library");
     retstat = NX_ERROR;
