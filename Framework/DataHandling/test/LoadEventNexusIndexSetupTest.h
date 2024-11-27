@@ -190,6 +190,24 @@ public:
     TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(3));
   }
 
+  /* compare this test body with test_makeIndexInfo_from_bank. The main difference is that the instrument components are
+   * specifed backwards. This is consistent with VULCAN IDF */
+  void test_makeIndexInfo_from_bank_backwards() {
+    LoadEventNexusIndexSetup indexSetup(m_ws, EMPTY_INT(), EMPTY_INT(), {});
+    const auto indexInfo = indexSetup.makeIndexInfo({"det-12", "det-2"}); // intentionally backwards
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().first, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexSetup.eventIDLimits().second, EMPTY_INT());
+    TS_ASSERT_EQUALS(indexInfo.size(), 2);
+    // these match the spectrum numbers of the full instrument
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(0), SpectrumNumber(2));
+    TS_ASSERT_EQUALS(indexInfo.spectrumNumber(1), SpectrumNumber(4));
+    // this may actually be wrong, but it appears as though the order of the spectrum definitions match the way they
+    // were requested while the spectrum numbers (just above) are always in increasing order
+    const auto specDefs = indexInfo.spectrumDefinitions();
+    TS_ASSERT_EQUALS(specDefs->at(0), SpectrumDefinition(3));
+    TS_ASSERT_EQUALS(specDefs->at(1), SpectrumDefinition(1));
+  }
+
   void test_makeIndexInfo_from_bank_filter_ignored() {
     LoadEventNexusIndexSetup indexSetup(m_ws, 12, EMPTY_INT(), {1});
     // This variant ignores any filter in the index/workspace setup phase,
