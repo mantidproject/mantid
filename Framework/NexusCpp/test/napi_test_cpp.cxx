@@ -1,4 +1,5 @@
 #include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexusCpp/NeXusStream.hpp"
 #include "MantidNexusCpp/napiconfig.h"
 #include <cstdio>
 #include <cstdlib>
@@ -229,7 +230,7 @@ int readTest(const string &filename) {
   cout << "NXinquirefile found: " << relativePathOf(file.inquireFile()) << endl;
   vector<NeXus::AttrInfo> attr_infos = file.getAttrInfos();
   cout << "Number of global attributes: " << attr_infos.size() << endl;
-  for (vector<NeXus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); it++) {
+  for (vector<NeXus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
     if (it->name != "file_time" && it->name != "HDF_version" && it->name != "HDF5_Version" &&
         it->name != "XML_version") {
       cout << "   " << it->name << " = ";
@@ -244,7 +245,7 @@ int readTest(const string &filename) {
   file.openGroup("entry", "NXentry");
   attr_infos = file.getAttrInfos();
   cout << "Number of group attributes: " << attr_infos.size() << endl;
-  for (vector<NeXus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); it++) {
+  for (vector<NeXus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
     cout << "   " << it->name << " = ";
     if (it->type == NeXus::CHAR) {
       cout << file.getStrAttr(*it);
@@ -256,7 +257,7 @@ int readTest(const string &filename) {
   map<string, string> entries = file.getEntries();
   cout << "Group contains " << entries.size() << " items" << endl;
   NeXus::Info info;
-  for (map<string, string>::const_iterator it = entries.begin(); it != entries.end(); it++) {
+  for (map<string, string>::const_iterator it = entries.begin(); it != entries.end(); ++it) {
     cout << "   " << it->first;
     if (it->second == SDS) {
       file.openData(it->first);
@@ -463,8 +464,10 @@ int testLoadPath(const string &filename) {
     NeXus::File file(filename);
     cout << "Success loading NeXus file from path" << endl;
     // cout << file.inquireFile() << endl; // DEBUG print
+    return 0;
+  } else {
+    return 1;
   }
-  return 0;
 }
 
 int testExternal(const string &fileext, NXaccess create_code) {
@@ -564,9 +567,7 @@ int main(int argc, char **argv) {
     extfile_ext = ".hdf";
   }
 
-  int result;
-  result = writeTest(filename, nx_creation_code);
-  if (result) {
+  if (int result = writeTest(filename, nx_creation_code)) {
     cout << "writeTest failed" << endl;
     return result;
   }
@@ -575,38 +576,33 @@ int main(int argc, char **argv) {
   }
 
   // try reading a file
-  result = readTest(filename);
-  if (result) {
+  if (int result = readTest(filename)) {
     cout << "readTest failed" << endl;
     return result;
   }
 
   // try using the load path
-  result = testLoadPath("dmc01.hdf");
-  if (result) {
+  if (int result = testLoadPath("dmc01.hdf")) {
     cout << "testLoadPath failed" << endl;
     return result;
   }
 
   // try external linking
-  result = testExternal(extfile_ext, nx_creation_code);
-  if (result) {
+  if (int result = testExternal(extfile_ext, nx_creation_code)) {
     cout << "testExternal failed" << endl;
     return result;
   }
 
   // quick test of stream interface
   std::string fname = string("stream_test") + extfile_ext;
-  result = streamTest(fname, nx_creation_code);
   remove(fname.c_str());
-  if (result) {
+  if (int result = streamTest(fname, nx_creation_code)) {
     cout << "streamTest failed" << endl;
     return result;
   }
 
   // test of typemap generation
-  result = testTypeMap(filename);
-  if (result) {
+  if (int result = testTypeMap(filename)) {
     cout << "testTypeMap failed" << endl;
     return result;
   }

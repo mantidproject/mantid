@@ -33,7 +33,7 @@
 #include "MantidNexusCpp/napi.h"
 #include "MantidNexusCpp/napiconfig.h"
 
-static void print_data(const char *prefix, void *data, int type, int num);
+static void print_data(const char *prefix, const void *data, int type, int num);
 static int testLoadPath();
 static int testExternal(char *progName);
 
@@ -53,9 +53,9 @@ int main(int argc, char *argv[]) {
   int i, j, k, n, NXrank, NXdims[32], NXtype, NXlen, entry_status, attr_status;
   float r;
   void *data_buffer;
-  unsigned char i1_array[4] = {1, 2, 3, 4};
-  short int i2_array[4] = {1000, 2000, 3000, 4000};
-  int i4_array[4] = {1000000, 2000000, 3000000, 4000000};
+  const unsigned char i1_array[4] = {1, 2, 3, 4};
+  const short int i2_array[4] = {1000, 2000, 3000, 4000};
+  const int i4_array[4] = {1000000, 2000000, 3000000, 4000000};
   float r4_array[5][4] = {
       {1., 2., 3., 4.}, {5., 6., 7., 8.}, {9., 10., 11., 12.}, {13., 14., 15., 16.}, {17., 18., 19., 20.}};
   double r8_array[5][4] = {
@@ -767,7 +767,7 @@ static int testExternal(char *progName) {
   return 0;
 }
 /*----------------------------------------------------------------------*/
-static void print_data(const char *prefix, void *data, int type, int num) {
+static void print_data(const char *prefix, const void *data, int type, int num) {
   int i;
   printf("%s", prefix);
   for (i = 0; i < num; i++) {
