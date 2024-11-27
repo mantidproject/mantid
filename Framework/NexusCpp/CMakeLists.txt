@@ -107,9 +107,18 @@ add_test(NAME "${TEST_PREFIX}-Cpp-HDF4-test" COMMAND napi_test_cpp-hdf4)
 # if (WIN32) set_property(TEST "${TEST_PREFIX}-Cpp-HDF4-test" APPEND PROPERTY ENVIRONMENT "PATH=${TESTSPATH}")
 # endif(WIN32)
 
+# #### test for unlimited dimensions
+add_executable(napi_test_nxunlimited EXCLUDE_FROM_ALL test/test_nxunlimited.c)
+target_link_libraries(napi_test_nxunlimited NexusCpp)
+add_test(NAME "${TEST_PREFIX}-C-test-nxunlimited" COMMAND napi_test_nxunlimited)
+
+# TODO figure out correct check
+
+# if (WIN32) set_property(TEST "NAPI-C-test-nxunlimited" APPEND PROPERTY ENVIRONMENT "PATH=${TESTSPATH}") endif(WIN32)
+
 # #### leak tests
 
-add_executable(napi_leak_test1 test/leak_test1.c)
+add_executable(napi_leak_test1 EXCLUDE_FROM_ALL test/leak_test1.c)
 target_link_libraries(napi_leak_test1 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-leak-test-1" COMMAND napi_leak_test1)
 
@@ -143,6 +152,7 @@ add_custom_target(
           napi_test_hdf4
           napi_attra_test_hdf4
           napi_test_cpp-hdf4
+          napi_test_nxunlimited
           napi_leak_test1
           napi_leak_test2
           napi_leak_test3
