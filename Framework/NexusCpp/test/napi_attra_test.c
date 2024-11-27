@@ -74,8 +74,8 @@ int main(int argc, char *argv[]) {
     nx_creation_code = NXACC_CREATE;
     strcpy(nxFile, "attra.h4");
   } else if (strstr(argv[0], "xml") != NULL) {
-    nx_creation_code = NXACC_CREATEXML;
-    strcpy(nxFile, "attra.xml");
+    fprintf(stderr, "\nxml not supported\n");
+    return 1;
   } else {
     nx_creation_code = NXACC_CREATE5;
     strcpy(nxFile, "attra.h5");
