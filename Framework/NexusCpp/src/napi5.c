@@ -34,9 +34,11 @@
 #include <string.h>
 #include <time.h>
 
+// clang-format off
 #include "MantidNexusCpp/napi.h"
-#include "MantidNexusCpp/napi5.h"
 #include "MantidNexusCpp/napi_internal.h"
+#include "MantidNexusCpp/napi5.h"
+// clang-format on
 
 #ifdef H5_VERSION_GE
 #if !H5_VERSION_GE(1, 8, 0)

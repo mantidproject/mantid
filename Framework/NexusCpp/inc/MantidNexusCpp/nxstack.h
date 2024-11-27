@@ -27,6 +27,8 @@
 #ifndef NEXUSFILESTACK
 #define NEXUSFILESTACK
 
+#include "MantidNexusCpp/napi_internal.h"
+
 typedef struct __fileStack *pFileStack;
 #define MAXEXTERNALDEPTH 16
 

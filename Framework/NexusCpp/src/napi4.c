@@ -34,9 +34,11 @@
 #include <string.h>
 #include <time.h>
 
+// clang-format off
 #include "MantidNexusCpp/napi.h"
-#include "MantidNexusCpp/napi4.h"
 #include "MantidNexusCpp/napi_internal.h"
+#include "MantidNexusCpp/napi4.h"
+// clang-format on
 
 extern void *NXpData;
 
