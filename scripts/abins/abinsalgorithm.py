@@ -464,22 +464,27 @@ class AbinsAlgorithm:
                 result.extend(self._atom_number_s(atom_number=atom_number, s_data=s_data, s_atom_data=s_atom_data, atoms_data=atoms_data))
         return result
 
-    def _create_workspace(self, atom_name=None, s_points=None, optional_name="", protons_number=None, nucleons_number=None):
+    def _create_workspace(self, *, species: AtomInfo, s_points: np.ndarray, label: str | None = None):
         """
         Creates workspace for the given frequencies and s_points with S data. After workspace is created it is rebined,
         scaled by cross-section factor and optionally multiplied by the user defined scaling factor.
 
 
-        :param atom_name: symbol of atom for which workspace should be created
+        :param species: Object identifying isotope (or mixture)
         :param s_points: S(Q, omega)
-        :param optional_name: optional part of workspace name
+        :param label: species-specific part of workspace name. If None, take from species object.
         :returns: workspace for the given frequency and S data
-        :param protons_number: number of protons in the given type fo atom
-        :param nucleons_number: number of nucleons in the given type of atom
         """
 
-        ws_name = self._out_ws_name + "_" + atom_name + optional_name
-        self._fill_s_workspace(s_points=s_points, workspace=ws_name, protons_number=protons_number, nucleons_number=nucleons_number)
+        label = species.name if label is None else label
+
+        ws_name = self._out_ws_name + "_" + label
+        self._fill_s_workspace(
+            s_points=s_points,
+            workspace=ws_name,
+            protons_number=species.z_number,
+            nucleons_number=species.nucleons_number,
+        )
         return ws_name
 
     def _atom_number_s(self, *, atom_number, s_data, s_atom_data, atoms_data):
@@ -507,7 +512,8 @@ class AbinsAlgorithm:
         atom_workspaces = []
         s_atom_data.fill(0.0)
         output_atom_label = "%s_%d" % (ATOM_PREFIX, atom_number)
-        atom = Atom(atoms_data[atom_number - 1]["symbol"])
+        atom_data = atoms_data[atom_number - 1]
+        species = AtomInfo(symbol=atom_data["symbol"], mass=atom_data["mass"])
 
         for i, order in enumerate(range(FUNDAMENTALS, self._max_event_order + 1)):
             s_atom_data[i] = s_data[atom_number - 1]["order_%s" % order]
@@ -517,12 +523,12 @@ class AbinsAlgorithm:
         atom_workspaces = []
         atom_workspaces.append(
             self._create_workspace(
-                atom_name=output_atom_label, s_points=np.copy(total_s_atom_data), optional_name="_total", protons_number=atom.z_number
+                species=species,
+                s_points=np.copy(total_s_atom_data),
+                label=output_atom_label + "_total",
             )
         )
-        atom_workspaces.append(
-            self._create_workspace(atom_name=output_atom_label, s_points=np.copy(s_atom_data), protons_number=atom.z_number)
-        )
+        atom_workspaces.append(self._create_workspace(species=species, s_points=np.copy(s_atom_data), label=output_atom_label))
         return atom_workspaces
 
     def _atom_type_s(
@@ -572,19 +578,15 @@ class AbinsAlgorithm:
 
         atom_workspaces.append(
             self._create_workspace(
-                atom_name=species.name,
+                species=species,
                 s_points=np.copy(total_s_atom_data),
-                optional_name="_total",
-                protons_number=species.z_number,
-                nucleons_number=species.nucleons_number,
+                label=f"{species.name}_total",
             )
         )
         atom_workspaces.append(
             self._create_workspace(
-                atom_name=species.name,
+                species=species,
                 s_points=np.copy(s_atom_data),
-                protons_number=species.z_number,
-                nucleons_number=species.nucleons_number,
             )
         )
 
