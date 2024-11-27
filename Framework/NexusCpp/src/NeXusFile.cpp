@@ -2,6 +2,7 @@
 // REMOVE
 #include "MantidNexusCpp/NeXusException.hpp"
 #include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexusCpp/NeXusStream.hpp"
 #include "MantidNexusCpp/napiconfig.h"
 #include <iostream>
 #include <sstream>
@@ -587,7 +588,7 @@ void File::putAttr(const char *name, const char *value) {
   this->putAttr(s_name, s_value);
 }
 
-void File::putAttr(const std::string &name, const std::string value) {
+void File::putAttr(const std::string &name, const string &value) {
   string my_value(value);
   if (my_value.empty())
     my_value = " "; // Make a default "space" to avoid errors.
@@ -713,7 +714,7 @@ template <typename NumT> std::vector<NumT> *File::getData() {
 
   // determine the number of elements
   int64_t length = 1;
-  for (vector<int64_t>::const_iterator it = info.dims.begin(); it != info.dims.end(); it++) {
+  for (vector<int64_t>::const_iterator it = info.dims.begin(); it != info.dims.end(); ++it) {
     length *= *it;
   }
 
@@ -740,7 +741,7 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
   }
   // determine the number of elements
   int64_t length = 1;
-  for (vector<int64_t>::const_iterator it = info.dims.begin(); it != info.dims.end(); it++) {
+  for (vector<int64_t>::const_iterator it = info.dims.begin(); it != info.dims.end(); ++it) {
     length *= *it;
   }
 
@@ -874,7 +875,7 @@ string File::getStrData() {
     this->getData(value);
   } catch (const Exception &e) {
     delete[] value;
-    throw e;
+    throw; // rethrow the original exception
   }
   res = string(value, info.dims[0]);
   delete[] value;
@@ -1066,10 +1067,10 @@ string File::getStrAttr(const AttrInfo &info) {
   char *value = new char[info.length + 1];
   try {
     this->getAttr(info, value, info.length + 1);
-  } catch (Exception &e) {
+  } catch (const Exception &e) {
     // Avoid memory leak
     delete[] value;
-    throw e; // re-throw
+    throw; // rethrow original exception
   }
 
   // res = string(value, info.length);
@@ -1253,13 +1254,13 @@ void File::linkExternal(const string &name, const string &type, const string &ur
   }
 }
 
-const string File::makeCurrentPath(const string currpath, const string subpath) {
+const string File::makeCurrentPath(const string &currpath, const string &subpath) {
   std::ostringstream temp;
   temp << currpath << "/" << subpath;
   return temp.str();
 }
 
-void File::walkFileForTypeMap(const string path, const string class_name, TypeMap &tmap) {
+void File::walkFileForTypeMap(const string &path, const string &class_name, TypeMap &tmap) {
   if (!path.empty()) {
     tmap.insert(std::make_pair(class_name, path));
   }

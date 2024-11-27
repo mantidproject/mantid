@@ -45,27 +45,27 @@ int main(int argc, char *argv[]) {
       }
 
       for (iNXdata = 0; iNXdata < nData; iNXdata++) {
-        std::ostringstream oss;
-        oss << "data_" << iNXdata;
-        if (NXmakegroup(fileid, PSZ(oss.str()), "NXdata") != NX_OK) {
+        std::ostringstream oss2;
+        oss2 << "data_" << iNXdata;
+        if (NXmakegroup(fileid, PSZ(oss2.str()), "NXdata") != NX_OK) {
           std::cerr << "NXmakegroup failed!" << std::endl;
           return 1;
         }
 
-        if (NXopengroup(fileid, PSZ(oss.str()), "NXdata") != NX_OK) {
+        if (NXopengroup(fileid, PSZ(oss2.str()), "NXdata") != NX_OK) {
           std::cerr << "NXopengroup failed!" << std::endl;
           return 1;
         }
 
         for (iData = 0; iData < nData; iData++) {
-          std::ostringstream oss;
-          oss << "i2_data_" << iData;
-          if (NXmakedata(fileid, PSZ(oss.str()), NX_INT16, 1, &array_dims[1]) != NX_OK) {
+          std::ostringstream oss3;
+          oss3 << "i2_data_" << iData;
+          if (NXmakedata(fileid, PSZ(oss3.str()), NX_INT16, 1, &array_dims[1]) != NX_OK) {
             std::cerr << "NXmakedata failed!" << std::endl;
             return 1;
           }
 
-          if (NXopendata(fileid, PSZ(oss.str())) != NX_OK) {
+          if (NXopendata(fileid, PSZ(oss3.str())) != NX_OK) {
             std::cerr << "NXopendata failed!" << std::endl;
             return 1;
           }
