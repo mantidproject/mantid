@@ -3,7 +3,6 @@ get_filename_component(SUB_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}" NAME)
 set(SRC_FILES
     BayesFitting.cpp
     BayesFittingTab.cpp
-    Quasi.cpp
     ResNormModel.cpp
     ResNormView.cpp
     ResNormPresenter.cpp
@@ -15,7 +14,7 @@ set(SRC_FILES
 
 set(INC_FILES ResNormPresenter.h ResNormModel.h QuasiModel.h QuasiPresenter.h)
 
-set(MOC_FILES BayesFitting.h BayesFittingTab.h Quasi.h ResNormView.h Stretch.h QuasiView.h)
+set(MOC_FILES BayesFitting.h BayesFittingTab.h ResNormView.h Stretch.h QuasiView.h)
 
 set(UI_FILES BayesFitting.ui Quasi.ui ResNorm.ui Stretch.ui)
 
