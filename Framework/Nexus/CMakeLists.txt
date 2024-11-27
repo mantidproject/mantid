@@ -12,8 +12,6 @@ if(COVERAGE)
   endforeach(loop_var)
 endif()
 
-add_definitions(-DIN_NEXUS_CPP_LIBRARY)
-
 # Add the target for this directory
 add_library(Nexus ${SRC_FILES} ${INC_FILES})
 add_library(Mantid::Nexus ALIAS Nexus)
@@ -33,7 +31,7 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Nexus PROPERTY FOLDER "MantidFramework")
 
-target_link_libraries(Nexus PUBLIC Mantid::API Mantid::DataObjects Mantid::Kernel Nexus::nexus Nexus::nexuscpp)
+target_link_libraries(Nexus PUBLIC Mantid::API Mantid::DataObjects Mantid::Kernel Mantid::NexusCpp)
 
 # Add the unit tests directory
 add_subdirectory(test)

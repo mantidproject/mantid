@@ -12,6 +12,7 @@ add_dependencies(FrameworkTests Framework)
 
 add_subdirectory(Types)
 add_subdirectory(Json)
+add_subdirectory(NexusCpp)
 add_subdirectory(Kernel)
 add_subdirectory(Parallel)
 # HistogramData has header-only dependency on Kernel, so Kernel comes after.
@@ -160,8 +161,7 @@ install(
 )
 
 install(
-  FILES ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindNexus.cmake ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindJsonCPP.cmake
-        ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindMuParser.cmake
+  FILES ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindJsonCPP.cmake ${CMAKE_SOURCE_DIR}/buildconfig/CMake/FindMuParser.cmake
   DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MantidFramework/find_modules
   COMPONENT Devel
 )
