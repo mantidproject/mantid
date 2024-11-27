@@ -21,6 +21,7 @@ from mantid.kernel import (
     StringListValidator,
     EnabledWhenProperty,
     PropertyCriterion,
+    SpecialCoordinateSystem,
 )
 from dataclasses import dataclass
 import numpy as np
@@ -29,6 +30,7 @@ from scipy.signal import convolve
 from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
 from plugins.algorithms.FindSXPeaksConvolve import make_kernel, get_kernel_shape
 from enum import Enum
+from mantid.dataobjects import PeakShapeDetectorBin
 
 
 class PEAK_STATUS(Enum):
@@ -365,6 +367,13 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 ix = np.argmin(abs(x - pk_tof))
                 ipos_predicted = [peak_data.irow, peak_data.icol, ix]
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
+
+                # get all detector IDs related to the spectrum of the peak
+                ispec = ispecs[peak_data.irow, peak_data.icol]
+                detectors_per_spec = ws.getSpectrum(int(ispec)).getDetectorIDs()
+                det_bin_list = [(det, x[0], x[-1]) for det in detectors_per_spec]
+                peak_shape = PeakShapeDetectorBin(det_bin_list, SpecialCoordinateSystem.NONE, self.name(), self.version())
+                peak.setPeakShape(peak_shape)
 
                 intens, sigma, i_over_sig, status, ipos, nrows, ncols, nbins = integrate_peak(
                     ws,
