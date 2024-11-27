@@ -67,7 +67,7 @@ void killFileStack(pFileStack self) {
 /*---------------------------------------------------------------------*/
 int getFileStackSize() { return sizeof(fileStack); }
 /*----------------------------------------------------------------------*/
-void pushFileStack(pFileStack self, pNexusFunction pDriv, char *file) {
+void pushFileStack(pFileStack self, pNexusFunction pDriv, const char *file) {
   size_t length;
 
   self->fileStackPointer++;

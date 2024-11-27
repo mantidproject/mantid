@@ -51,24 +51,24 @@ int main() {
         ON_ERROR("NXopengroup failed!")
 
       for (iNXdata = 0; iNXdata < nData; iNXdata++) {
-        ostringstream oss;
-        oss << "data_" << iNXdata;
+        ostringstream oss2;
+        oss2 << "data_" << iNXdata;
 
-        if (NXmakegroup(fileid, PSZ(oss.str()), "NXdata") != NX_OK)
+        if (NXmakegroup(fileid, PSZ(oss2.str()), "NXdata") != NX_OK)
           ON_ERROR("NXmakegroup failed!")
 
-        if (NXopengroup(fileid, PSZ(oss.str()), "NXdata") != NX_OK)
+        if (NXopengroup(fileid, PSZ(oss2.str()), "NXdata") != NX_OK)
           ON_ERROR("NXopengroup failed!")
 
         NXgetgroupID(fileid, &aLink);
         for (iData = 0; iData < nData; iData++) {
-          ostringstream oss;
-          oss << "i2_data_" << iData;
+          ostringstream oss3;
+          oss3 << "i2_data_" << iData;
 
-          if (NXcompmakedata(fileid, PSZ(oss.str()), NX_INT16, 2, array_dims, NX_COMP_LZW, array_dims) != NX_OK)
+          if (NXcompmakedata(fileid, PSZ(oss3.str()), NX_INT16, 2, array_dims, NX_COMP_LZW, array_dims) != NX_OK)
             ON_ERROR("NXcompmakedata failed!")
 
-          if (NXopendata(fileid, PSZ(oss.str())) != NX_OK)
+          if (NXopendata(fileid, PSZ(oss3.str())) != NX_OK)
             ON_ERROR("NXopendata failed!")
 
           if (NXputdata(fileid, aiBinaryData) != NX_OK)
