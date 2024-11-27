@@ -553,13 +553,11 @@ int main(int argc, char **argv) {
     filename = "napi_test_cpp.h5";
     extfile_ext = ".h5";
   } else if (strstr(argv[0], "napi_test_cpp-xml-table") != NULL) {
-    nx_creation_code = NXACC_CREATEXML | NXACC_TABLE;
-    filename = "napi_test_cpp-table.xml";
-    extfile_ext = "-table.xml";
+    cout << "napi_test_cpp-xml-table is not supported" << endl;
+    return 1;
   } else if (strstr(argv[0], "napi_test_cpp-xml") != NULL) {
-    nx_creation_code = NXACC_CREATEXML;
-    filename = "napi_test_cpp.xml";
-    extfile_ext = ".xml";
+    cout << "napi_test_cpp-xml is not supported" << endl;
+    return 1;
   } else {
     nx_creation_code = NXACC_CREATE;
     filename = "napi_test_cpp.hdf";
