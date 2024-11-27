@@ -41,6 +41,12 @@ private:
   Int m_data;
 };
 
+template <class Derived, class Int, class = typename std::enable_if<std::is_integral<Int>::value>::type>
+std::ostream &operator<<(std::ostream &ostr, const IndexType<Derived, Int> object) {
+  ostr << object.str();
+  return ostr;
+}
+
 } // namespace detail
 } // namespace Indexing
 } // namespace Mantid

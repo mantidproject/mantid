@@ -12,7 +12,6 @@
 #include "MantidTypes/SpectrumDefinition.h"
 
 #include <algorithm>
-#include <functional>
 #include <numeric>
 
 namespace Mantid::Indexing {
@@ -100,10 +99,8 @@ const std::vector<SpectrumNumber> &IndexInfo::spectrumNumbers() const {
 /// Set a spectrum number for each index.
 void IndexInfo::setSpectrumNumbers(std::vector<SpectrumNumber> &&spectrumNumbers) {
   if (m_spectrumNumberTranslator->globalSize() != spectrumNumbers.size())
-    throw std::runtime_error("IndexInfo::setSpectrumNumbers: Size mismatch. "
-                             "The vector must contain a spectrum number for "
-                             "each spectrum (not just for the local "
-                             "partition).");
+    throw std::runtime_error("IndexInfo::setSpectrumNumbers: Size mismatch. The vector must contain a spectrum number "
+                             "for each spectrum (not just for the local partition).");
   makeSpectrumNumberTranslator(std::move(spectrumNumbers));
 }
 
@@ -111,10 +108,8 @@ void IndexInfo::setSpectrumNumbers(std::vector<SpectrumNumber> &&spectrumNumbers
 void IndexInfo::setSpectrumNumbers(const SpectrumNumber min, const SpectrumNumber max) {
   auto newSize = static_cast<int32_t>(max) - static_cast<int32_t>(min) + 1;
   if (static_cast<int64_t>(m_spectrumNumberTranslator->globalSize()) != newSize)
-    throw std::runtime_error("IndexInfo::setSpectrumNumbers: Size mismatch. "
-                             "The range of spectrum numbers must provide a "
-                             "spectrum number for each spectrum (not just for "
-                             "the local partition).");
+    throw std::runtime_error("IndexInfo::setSpectrumNumbers: Size mismatch. The range of spectrum numbers must provide "
+                             "a spectrum number for each spectrum (not just for the local partition).");
   std::vector<SpectrumNumber> specNums(newSize);
   std::iota(specNums.begin(), specNums.end(), static_cast<int32_t>(min));
   makeSpectrumNumberTranslator(std::move(specNums));
@@ -197,9 +192,8 @@ SpectrumIndexSet IndexInfo::makeIndexSet(const std::vector<GlobalSpectrumIndex> 
 std::vector<GlobalSpectrumIndex>
 IndexInfo::globalSpectrumIndicesFromDetectorIndices(const std::vector<size_t> &detectorIndices) const {
   if (!m_spectrumDefinitions)
-    throw std::runtime_error("IndexInfo::"
-                             "globalSpectrumIndicesFromDetectorIndices -- no "
-                             "spectrum definitions available");
+    throw std::runtime_error(
+        "IndexInfo::globalSpectrumIndicesFromDetectorIndices -- no spectrum definitions available");
   /*
    * We need some way of keeping track of which time indices of given detector
    * have a matching mapping. detectorMap holds pairs; first in the pair
@@ -260,26 +254,22 @@ IndexInfo::globalSpectrumIndicesFromDetectorIndices(const std::vector<size_t> &d
       }
     }
     if (spectrumDefinition.first == -2)
-      throw std::runtime_error("SpectrumDefinition contains multiple entries. "
-                               "No unique mapping from detector to spectrum "
-                               "possible");
+      throw std::runtime_error(
+          "SpectrumDefinition contains multiple entries. No unique mapping from detector to spectrum possible");
   }
 
   if (std::any_of(detectorMap.begin(), detectorMap.end(),
                   [](const std::pair<char, std::vector<char>> &p) { return p.first == 1; })) {
-    throw std::runtime_error("Some of the requested detectors do not have a "
-                             "corresponding spectrum");
+    throw std::runtime_error("Some of the requested detectors do not have a corresponding spectrum");
   }
   if (std::any_of(detectorMap.begin(), detectorMap.end(), [](const std::pair<char, std::vector<char>> &p) {
         return std::any_of(p.second.begin(), p.second.end(), [](char c) { return c > 1; });
       })) {
-    throw std::runtime_error("Some of the spectra map to the same detector "
-                             "at the same time index");
+    throw std::runtime_error("Some of the spectra map to the same detector at the same time index");
   }
 
   if (detectorIndices.size() > spectrumIndices.size())
-    throw std::runtime_error("Some of the requested detectors do not have a "
-                             "corresponding spectrum");
+    throw std::runtime_error("Some of the requested detectors do not have a corresponding spectrum");
   return spectrumIndices;
 }
 
