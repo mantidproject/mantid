@@ -7,10 +7,7 @@ set(SRC_FILES
     src/NeXusException.cpp
     src/NeXusFile.cpp
     src/NeXusStream.cpp
-    src/nxdataset.c # TODO REMOVE xml
-    src/nxio.c # TODO REMOVE xml
     src/nxstack.c
-    src/nxxml.c # TODO REMOVE xml
     src/stptok.c
 )
 
@@ -25,10 +22,7 @@ set(INC_FILES
     inc/MantidNexusCpp/NeXusStream.hpp
     inc/MantidNexusCpp/nx_stptok.h
     inc/MantidNexusCpp/nxconfig.h
-    inc/MantidNexusCpp/nxdataset.h # TODO REMOVE xml
-    inc/MantidNexusCpp/nxio.h # TODO REMOVE xml
     inc/MantidNexusCpp/nxstack.h
-    inc/MantidNexusCpp/nxxml.h # TODO REMOVE xml
 )
 
 # Add the target for this directory
