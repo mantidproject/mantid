@@ -230,13 +230,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         :param species: atom/isotope identity and data
         """
         if species is not None:
-            s_points = (
-                s_points
-                * self._scale
-                * self.get_cross_section(
-                    scattering=self._scale_by_cross_section, protons_number=species.z_number, nucleons_number=species.nucleons_number
-                )
-            )
+            s_points = s_points * self._scale * self.get_cross_section(scattering=self._scale_by_cross_section, species=species)
         dim = 1
         length = s_points.size
 

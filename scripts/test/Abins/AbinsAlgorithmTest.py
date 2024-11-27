@@ -10,7 +10,7 @@ import unittest
 # Import mantid.simpleapi first, otherwise we get circular import
 import mantid.simpleapi  # noqa: F401
 
-from abins.abinsalgorithm import AbinsAlgorithm
+from abins.abinsalgorithm import AbinsAlgorithm, AtomInfo
 
 
 class AtomsDataTest(unittest.TestCase):
@@ -19,16 +19,12 @@ class AtomsDataTest(unittest.TestCase):
     def test_cross_section(self):
         """Get cross section from nucleus information"""
 
-        for scattering, nucleons_number, protons_number, expected in [
-            ("Incoherent", 67, 30, 0.28),
-            ("Coherent", None, 30, 4.054),
-            ("Total", None, 1, 82.02),
+        for scattering, nucleons_number, symbol, expected in [
+            ("Incoherent", 67, "Zn", 0.28),
+            ("Coherent", 0, "Zn", 4.054),
+            ("Total", 0, "H", 82.02),
         ]:
-            xc = AbinsAlgorithm.get_cross_section(
-                scattering=scattering,
-                nucleons_number=nucleons_number,
-                protons_number=protons_number,
-            )
+            xc = AbinsAlgorithm.get_cross_section(scattering=scattering, species=AtomInfo(mass=float(nucleons_number), symbol=symbol))
 
             self.assertAlmostEqual(xc, expected)
 
@@ -37,4 +33,4 @@ class AtomsDataTest(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "Found NaN cross-section for Zn with 65 nucleons"):
             # Zn65 is unstable and has no recorded cross section values
-            AbinsAlgorithm.get_cross_section(nucleons_number=65, protons_number=30)
+            AbinsAlgorithm.get_cross_section("Total", AtomInfo(symbol="Zn", mass=65.0))

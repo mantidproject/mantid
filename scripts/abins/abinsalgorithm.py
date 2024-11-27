@@ -13,7 +13,7 @@ from math import isnan
 import os
 from pathlib import Path
 import re
-from typing import Dict, Iterable, List, Optional, Tuple, Union
+from typing import Dict, Iterable, List, Literal, Tuple, Union
 
 import yaml
 
@@ -664,29 +664,18 @@ class AbinsAlgorithm:
             )
 
     @staticmethod
-    def get_cross_section(scattering: str = "Total", nucleons_number: Optional[int] = None, *, protons_number: int) -> float:
+    def get_cross_section(scattering: Literal["Total", "Incoherent", "Coherent"], species: AtomInfo) -> float:
         """
         Calculates cross section for the given element.
         :param scattering: Type of cross-section: 'Incoherent', 'Coherent' or 'Total'
-        :param protons_number: number of protons in the given type fo atom
-        :param nucleons_number: number of nucleons in the given type of atom
+        :param species: Data for atom/isotope type
         :returns: cross section for that element
         """
-        if nucleons_number is not None:
-            try:
-                atom = Atom(a_number=nucleons_number, z_number=protons_number)
-            # isotopes are not implemented for all elements so use different constructor in that cases
-            except RuntimeError:
-                logger.warning(f"Could not find data for isotope {nucleons_number}, " f"using default values for {protons_number} protons.")
-                atom = Atom(z_number=protons_number)
-        else:
-            atom = Atom(z_number=protons_number)
-
         scattering_keys = {"Incoherent": "inc_scatt_xs", "Coherent": "coh_scatt_xs", "Total": "tot_scatt_xs"}
-        cross_section = atom.neutron()[scattering_keys[scattering]]
+        cross_section = species.neutron_data[scattering_keys[scattering]]
 
         if isnan(cross_section):
-            raise ValueError(f"Found NaN cross-section for {atom.symbol} with {nucleons_number} nucleons.")
+            raise ValueError(f"Found NaN cross-section for {species.symbol} with {species.nucleons_number} nucleons.")
 
         return cross_section
 

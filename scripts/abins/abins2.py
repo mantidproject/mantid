@@ -217,9 +217,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         :param workspace: workspace to be filled with S
         """
         if species is not None:
-            s_points = s_points * self.get_cross_section(
-                scattering=self._scale_by_cross_section, protons_number=species.z_number, nucleons_number=species.nucleons_number
-            )
+            s_points = s_points * self.get_cross_section(scattering=self._scale_by_cross_section, species=species)
         dim = 1
         length = s_points.size
 
