@@ -48,9 +48,11 @@ class ReflectometryDataset:
         self._stitch_history = None
         self._q_conversion_history = None
         self._q_conversion_theta: Optional[float] = None
+        self._spin_state: str = ""
 
         self._populate_histories()
         self._populate_q_conversion_info()
+        self._set_spin_state_from_logs()
         self._set_name()
 
     @property
@@ -70,6 +72,10 @@ class ReflectometryDataset:
         return self._ws.getInstrument().getName()
 
     @property
+    def spin_state(self) -> str:
+        return self._spin_state
+
+    @property
     def reduction_history(self):
         return self._reduction_history
 
@@ -84,6 +90,10 @@ class ReflectometryDataset:
     @property
     def is_stitched(self) -> bool:
         return self._stitch_history is not None
+
+    @property
+    def is_polarized(self) -> bool:
+        return len(self._spin_state) > 0
 
     @property
     def q_conversion_history(self):
@@ -138,10 +148,14 @@ class ReflectometryDataset:
             self._q_conversion_theta = float(np.rad2deg(self._ws.spectrumInfo().signedTwoTheta(0))) / 2.0
 
     def _set_name(self):
+        theta_assigned: bool = self._q_conversion_theta is not None
+
         if self.is_stitched:
             self._name = "Stitched"
-        elif self._q_conversion_theta is not None:
-            self._name = str(self._q_conversion_theta)
+        elif theta_assigned or self.is_polarized:
+            theta_str = f"{self._q_conversion_theta:.3f}" if theta_assigned else ""
+            space_str = " " if (theta_assigned and self.is_polarized) else ""
+            self._name = f"{theta_str}{space_str}{self._spin_state}"
         else:
             self._name = self._ws.name()
 
@@ -149,6 +163,10 @@ class ReflectometryDataset:
         # Eventually we will specify the polarization spin state to provide the unique names for polarised datasets.
         if self._is_ws_grp_member and self._name != self._ws.name():
             self._name = f"{self._ws.name()} {self._name}"
+
+    def _set_spin_state_from_logs(self) -> None:
+        if self._ws.getRun().hasProperty("spin_state_ORSO"):
+            self._spin_state = self._ws.getRun().getLogData("spin_state_ORSO").value
 
 
 class SaveISISReflectometryORSO(PythonAlgorithm):
@@ -395,6 +413,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             reduction_timestamp=self._get_reduction_timestamp(refl_dataset.reduction_history),
             creator_name=self.name(),
             creator_affiliation=MantidORSODataset.SOFTWARE_NAME,
+            polarized_dataset=refl_dataset.is_polarized,
         )
 
     def _add_optional_header_info(self, dataset: MantidORSODataset, refl_dataset: ReflectometryDataset) -> None:
@@ -407,6 +426,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         dataset.set_proposal_id(rb_number)
         dataset.set_doi(doi)
         dataset.set_reduction_call(self._get_reduction_script(refl_dataset))
+        dataset.set_polarization(refl_dataset.spin_state)
 
         reduction_workflow_histories = refl_dataset.reduction_workflow_histories
         if not refl_dataset.reduction_workflow_histories:
