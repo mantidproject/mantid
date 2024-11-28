@@ -13,12 +13,7 @@ from pathlib import Path
 from datetime import datetime, timezone, date, time
 
 from mantid import config
-from mantid.simpleapi import (
-    CreateSampleWorkspace,
-    SaveISISReflectometryORSO,
-    ConvertToPointData,
-    GroupWorkspaces,
-)
+from mantid.simpleapi import CreateSampleWorkspace, SaveISISReflectometryORSO, ConvertToPointData, GroupWorkspaces, AddSampleLog
 from mantid.api import AnalysisDataService
 from mantid.kernel import version, DateAndTime
 from mantid.utils.reflectometry.orso_helper import MantidORSODataset, MantidORSOSaver
@@ -484,7 +479,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_unstitched_data_gets_dataset_name_from_ref_roi(self, mock_alg_histories):
-        angle = "2.3"
+        angle = "2.300"
         ws = self._create_sample_workspace()
         self._configure_q_conversion_alg_mock_history(mock_alg_histories, self._REF_ROI, {"ScatteringAngle": angle})
 
@@ -499,7 +494,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._run_save_alg(ws, write_resolution=False)
 
-        self._check_file_header([self._get_dataset_name_entry(f"'{self._get_theta_value(ws)}'")])
+        self._check_file_header([self._get_dataset_name_entry(f"'{self._get_theta_value(ws):.3f}'")])
 
     @patch("mantid.api.WorkspaceHistory.getAlgorithmHistories")
     def test_unstitched_data_sets_dataset_name_to_ws_name_as_default(self, mock_alg_histories):
@@ -580,6 +575,16 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         mock_save_orso_nexus.assert_called_once()
         mock_save_orso_ascii.assert_not_called()
 
+    def test_data_with_spin_state_logs_adds_polarization_metadata_in_instrument_settings_header(self):
+        spin_states = ["pp", "mm", "mp", "pm"]
+        ws_grp = self._create_sample_workspace_group_with_spin_state(spin_states, instrument_name="POLREF")
+
+        self._run_save_alg(ws_grp, write_resolution=False, include_extra_cols=False)
+
+        self._check_file_header(["instrument_settings:\n" "#       incident_angle: null\n" "#       wavelength: null"])
+        for state in spin_states:
+            self._check_file_header([f"#       polarization: {state}"])
+
     def _create_sample_workspace(self, rb_num_log_name=_LOG_RB_NUMBER, instrument_name="", ws_name="ws"):
         # Create a single spectrum workspace in units of momentum transfer
         ws = CreateSampleWorkspace(
@@ -593,6 +598,15 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         for ws_name in member_ws_names:
             self._create_sample_workspace(ws_name=ws_name, instrument_name=instrument_name)
         return GroupWorkspaces(InputWorkspaces=",".join(member_ws_names), OutputWorkspace=group_name)
+
+    def _create_sample_workspace_group_with_spin_state(self, spin_states, instrument_name=""):
+        group_member_names = []
+        for state in spin_states:
+            ws_name = "ws_" + state
+            group_member_names.append(ws_name)
+            self._create_sample_workspace(ws_name=ws_name, instrument_name=instrument_name)
+            AddSampleLog(Workspace=ws_name, LogName="spin_state_ORSO", LogText=state)
+        return GroupWorkspaces(InputWorkspaces=",".join(group_member_names), OutputWorkspace="group_pol")
 
     def _get_expected_data_file_metadata(self, expected_entries, expected_section_end):
         files_entry = [f"{self._DATA_FILES_HEADING}\n"]
