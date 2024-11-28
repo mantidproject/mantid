@@ -62,6 +62,12 @@ class AtomInfo:
         nearest_isotope = Atom(symbol=self.symbol, a_number=nearest_int)
         standard_mix = Atom(symbol=self.symbol)
 
+        if abs(nearest_isotope.mass - standard_mix.mass) < 1e-12:
+            # items are the same: standard mix is more likely to contain data
+            # (e.g. Atom('F', 19) has no neutron data but Atom('F') does)
+            return standard_mix
+
+        # Return data closest to requested mass
         return min((nearest_isotope, standard_mix), key=(lambda atom: abs(atom.mass - self.mass)))
 
 
