@@ -11,12 +11,10 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
-#include "MantidHistogramData/HistogramY.h"
 
 namespace Mantid {
 namespace Algorithms {
 using namespace std;
-using Mantid::HistogramData::HistogramY;
 
 /** CreateMonteCarloWorkspace : The algorithm generates a simulated workspace by sampling from the probability
 distribution of input data, useful for testing of fitting functions and modeling.
