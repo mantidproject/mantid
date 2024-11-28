@@ -10,6 +10,7 @@ import tempfile
 import numpy as np
 from unittest.mock import Mock, patch
 from pathlib import Path
+from datetime import datetime, timezone, date, time
 
 from mantid import config
 from mantid.simpleapi import (
@@ -105,6 +106,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     def test_file_populates_software_version_and_reduction_timestamp(self, mock_alg_histories):
         input_ws = self._create_sample_workspace()
         history = self._create_mock_alg_history(self._REDUCTION_ALG, {"InputWorkspace": "input_ws"}, [Mock()])
+        expected_value = datetime.combine(date(2024, 2, 13), time(12, 14, 36)).replace(tzinfo=timezone.utc).astimezone(tz=None)
         history.executionDate = Mock(return_value=DateAndTime("2024-02-13T12:14:36.073814000"))
         mock_alg_histories.return_value = [history]
 
@@ -113,7 +115,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
         self._check_file_header(
             [
                 f"reduction:\n#   software: {{name: {MantidORSODataset.SOFTWARE_NAME}, version: {version()}}}\n"
-                f"#   timestamp: 2024-02-13T12:14:36+00:00\n#"
+                f"#   timestamp: {expected_value.isoformat()}\n#"
             ]
         )
 
