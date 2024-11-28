@@ -163,6 +163,7 @@ void CreateMonteCarloWorkspace::exec() {
   int numIterations = computeNumberOfIterations(yData, userMCEvents);
 
   std::vector<double> cdf = computeNormalizedCDF(yData);
+  // Set up progress bar
   API::Progress progress(this, 0.0, 1.0, 2);
   progress.report("Computing normalized CDF...");
 
