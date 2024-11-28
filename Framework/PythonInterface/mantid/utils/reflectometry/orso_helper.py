@@ -8,7 +8,7 @@ import numpy as np
 from datetime import datetime, timezone
 from typing import Optional, Union, List
 import re
-from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, Measurement
+from orsopy.fileio.data_source import DataSource, Person, Experiment, Sample, Measurement, Polarization, InstrumentSettings
 from orsopy.fileio import Reduction, Software
 from orsopy.fileio.orso import Orso, OrsoDataset, save_orso, save_nexus
 from orsopy.fileio.base import Column, ErrorColumn, File
@@ -62,11 +62,12 @@ class MantidORSODataset:
         reduction_timestamp: datetime,
         creator_name: str,
         creator_affiliation: str,
+        polarized_dataset: bool,
     ) -> None:
         self._data_columns = data_columns
         self._header = None
 
-        self._create_mandatory_header(ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation)
+        self._create_mandatory_header(ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation, polarized_dataset)
 
     @property
     def dataset(self) -> OrsoDataset:
@@ -80,6 +81,10 @@ class MantidORSODataset:
 
     def set_doi(self, doi: str) -> None:
         self._header.data_source.experiment.doi = doi
+
+    def set_polarization(self, pol: str) -> None:
+        if self._header.data_source.measurement.instrument_settings is not None:
+            self._header.data_source.measurement.instrument_settings.polarization = Polarization(pol)
 
     def set_reduction_call(self, call: str) -> None:
         self._header.reduction.call = call
@@ -97,7 +102,7 @@ class MantidORSODataset:
         return File(filename, timestamp, comment)
 
     def _create_mandatory_header(
-        self, ws, dataset_name: str, reduction_timestamp: datetime, creator_name: str, creator_affiliation: str
+        self, ws, dataset_name: str, reduction_timestamp: datetime, creator_name: str, creator_affiliation: str, polarized_dataset: bool
     ) -> None:
         owner = Person(name=None, affiliation=None)
 
@@ -111,7 +116,9 @@ class MantidORSODataset:
 
         sample = Sample(name=ws.getTitle())
 
-        measurement = Measurement(instrument_settings=None, data_files=[])
+        # This will initially only consider polarization
+        instrument_settings = InstrumentSettings(None, None) if polarized_dataset else None
+        measurement = Measurement(instrument_settings=instrument_settings, data_files=[])
 
         data_source = DataSource(owner=owner, experiment=experiment, sample=sample, measurement=measurement)
 
