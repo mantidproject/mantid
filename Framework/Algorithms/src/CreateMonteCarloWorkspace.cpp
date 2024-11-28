@@ -17,8 +17,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/CreateMonteCarloWorkspace.h"
-#include "MantidHistogramData/HistogramE.h"
-#include "MantidHistogramData/HistogramY.h"
+
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Logger.h"
 
@@ -27,8 +26,6 @@ Mantid::Kernel::Logger g_log("CreateMonteCarloWorkspace");
 }
 namespace Mantid {
 namespace Algorithms {
-using Mantid::HistogramData::HistogramE;
-using Mantid::HistogramData::HistogramY;
 using Mantid::Kernel::Direction;
 using namespace Mantid::API;
 using namespace std;
@@ -127,7 +124,6 @@ int CreateMonteCarloWorkspace::computeNumberOfIterations(const Mantid::Histogram
 Mantid::HistogramData::HistogramY
 CreateMonteCarloWorkspace::scaleInputToMatchMCEvents(const Mantid::HistogramData::HistogramY &yData,
                                                      int targetMCEvents) {
-
   double total_counts = std::accumulate(yData.begin(), yData.end(), 0.0);
   if (total_counts == 0) {
     g_log.warning("Total counts in the input workspace are 0. Scaling cannot be performed.");
@@ -135,8 +131,8 @@ CreateMonteCarloWorkspace::scaleInputToMatchMCEvents(const Mantid::HistogramData
   }
 
   double scaleFactor = static_cast<double>(targetMCEvents) / total_counts;
-
   Mantid::HistogramData::HistogramY scaledY(yData.size());
+
   std::transform(yData.begin(), yData.end(), scaledY.begin(),
                  [scaleFactor](double count) { return count * scaleFactor; });
 
@@ -149,15 +145,13 @@ CreateMonteCarloWorkspace::scaleInputToMatchMCEvents(const Mantid::HistogramData
 
 // Using Cumulative Distribution Function
 void CreateMonteCarloWorkspace::exec() {
-  // Progress Bar set up
-  int numSteps = 2;
-  API::Progress progress(this, 0.0, 1.0, numSteps);
-
-  MatrixWorkspace_sptr instWs = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
   int seed_input = getProperty("Seed");
   int userMCEvents = getProperty("MonteCarloEvents");
 
-  const Mantid::HistogramData::HistogramY &originalYData = instWs->y(0); // Counts in each bin
+  MatrixWorkspace_sptr scaledWs = inputWs;
+
+  const Mantid::HistogramData::HistogramY &originalYData = inputWs->y(0); // Counts in each bin
   Mantid::HistogramData::HistogramY yData = originalYData;
 
   // Scale input workspace if user has specified MC events
@@ -166,16 +160,17 @@ void CreateMonteCarloWorkspace::exec() {
     yData = scaleInputToMatchMCEvents(originalYData, userMCEvents);
   }
 
-  // Determine number of iterations
   int numIterations = computeNumberOfIterations(yData, userMCEvents);
 
   std::vector<double> cdf = computeNormalizedCDF(yData);
+  // Set up progress bar
+  API::Progress progress(this, 0.0, 1.0, 2);
   progress.report("Computing normalized CDF...");
 
-  MatrixWorkspace_sptr outputWs = WorkspaceFactory::Instance().create(instWs, 1);
+  MatrixWorkspace_sptr outputWs = WorkspaceFactory::Instance().create(inputWs, 1);
 
   // Copy the bin boundaries (X-values) from the input to the output
-  outputWs->setSharedX(0, instWs->sharedX(0));
+  outputWs->setSharedX(0, inputWs->sharedX(0));
   Mantid::HistogramData::HistogramY outputY = fillHistogramWithRandomData(cdf, numIterations, seed_input, progress);
   outputWs->mutableY(0) = outputY;
 
