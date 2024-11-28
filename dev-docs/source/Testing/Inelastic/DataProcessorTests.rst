@@ -46,7 +46,7 @@ Symmetrise tab
 :math:`S(Q, \omega)` tab
 ------------------------
 
-**Time required 5-10 minutes**
+**Time required 10-15 minutes**
 
 --------------
 
