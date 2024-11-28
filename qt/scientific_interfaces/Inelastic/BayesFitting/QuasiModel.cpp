@@ -13,6 +13,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
+#include "MantidQtWidgets/Common/ConfiguredAlgorithm.h"
 
 #include <memory>
 

@@ -23,15 +23,6 @@ class QtDoublePropertyManager;
 class QtProperty;
 class QtTreePropertyBrowser;
 
-namespace MantidQt {
-namespace MantidWidgets {
-class DataSelector;
-}
-namespace API {
-class FileFinderWidget;
-}
-} // namespace MantidQt
-
 namespace MantidQt::CustomInterfaces {
 class IRunView;
 class IQuasiPresenter;
@@ -42,10 +33,10 @@ public:
 
   virtual void subscribe(IQuasiPresenter *presenter) = 0;
   virtual IRunView *getRunView() const = 0;
-  virtual DataSelector *sampleSelector() const = 0;
-  virtual DataSelector *resolutionSelector() const = 0;
-  virtual DataSelector *resNormSelector() const = 0;
-  virtual FileFinderWidget *fixWidthFileFinder() const = 0;
+  virtual MantidWidgets::DataSelector *sampleSelector() const = 0;
+  virtual MantidWidgets::DataSelector *resolutionSelector() const = 0;
+  virtual MantidWidgets::DataSelector *resNormSelector() const = 0;
+  virtual API::FileFinderWidget *fixWidthFileFinder() const = 0;
 
   virtual void setPreviewSpectrumMax(std::size_t const max) = 0;
   virtual void setXRange(std::pair<double, double> const &range) = 0;
@@ -99,10 +90,10 @@ public:
 
   void subscribe(IQuasiPresenter *presenter) override;
   IRunView *getRunView() const override;
-  DataSelector *sampleSelector() const override;
-  DataSelector *resolutionSelector() const override;
-  DataSelector *resNormSelector() const override;
-  FileFinderWidget *fixWidthFileFinder() const override;
+  MantidWidgets::DataSelector *sampleSelector() const override;
+  MantidWidgets::DataSelector *resolutionSelector() const override;
+  MantidWidgets::DataSelector *resNormSelector() const override;
+  API::FileFinderWidget *fixWidthFileFinder() const override;
 
   void setPreviewSpectrumMax(std::size_t const max) override;
   void setXRange(std::pair<double, double> const &range) override;

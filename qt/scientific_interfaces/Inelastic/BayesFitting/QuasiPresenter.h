@@ -7,6 +7,7 @@
 #pragma once
 
 #include "BayesFittingTab.h"
+#include "DllConfig.h"
 #include "QuasiModel.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -33,7 +34,9 @@ public:
   virtual void handlePlotClicked() = 0;
 };
 
-class QuasiPresenter final : public BayesFittingTab, public IQuasiPresenter, public IRunSubscriber {
+class MANTIDQT_INELASTIC_DLL QuasiPresenter final : public BayesFittingTab,
+                                                    public IQuasiPresenter,
+                                                    public IRunSubscriber {
 
 public:
   QuasiPresenter(QWidget *parent, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner,
