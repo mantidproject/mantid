@@ -317,9 +317,12 @@ EOF = b""
 
 ROTATIONS_AND_TRANSLATIONS = 6
 
-# This constant is used to check whether for the given atom mass averaged over all isotopes or mass of the
-# specific isotope is used.
+# This constant is used to check whether the standard atomic mass is "close enough",
+# if closer isotope exists but lacks data
 MASS_EPS = 1e-2  # in amu units.
+
+# Tolerance when distinguishing between mass types in the input data
+FINE_MASS_EPS = 1e-6
 
 # this constant is used to check if in a system for the given symbol of an element all atoms with this symbol have
 # the same mass

@@ -58,6 +58,8 @@ class AtomInfo:
 
     @cached_property
     def _mantid_atom(self):
+        from abins.constants import MASS_EPS
+
         nearest_int = int(round(self.mass))
         nearest_isotope = Atom(symbol=self.symbol, a_number=nearest_int)
         standard_mix = Atom(symbol=self.symbol)
@@ -67,8 +69,24 @@ class AtomInfo:
             # (e.g. Atom('F', 19) has no neutron data but Atom('F') does)
             return standard_mix
 
-        # Return data closest to requested mass
-        return min((nearest_isotope, standard_mix), key=(lambda atom: abs(atom.mass - self.mass)))
+        if abs(self.mass - standard_mix.mass) < abs(self.mass - nearest_isotope.mass):
+            # Standard isotopic mixture, data should be available
+            return standard_mix
+
+        if isnan(nearest_isotope.neutron().get("coh_scatt_length_real")):
+            logger.warning(
+                f"Nearest isotope to atomic mass {self.mass} is "
+                f"{nearest_int}{self.symbol}{nearest_isotope.z_number}, but "
+                f"neutron-scattering data is not available."
+            )
+
+            if abs(self.mass - standard_mix.mass) > MASS_EPS:
+                raise ValueError(f"Could not find suitable isotope data for {self.symbol} with mass {self.mass}.")
+
+            logger.warning(f"Standard mass {standard_mix.mass} is close enough, will " f"use data for this isotope mixture.")
+            return standard_mix
+
+        return nearest_isotope
 
 
 class AbinsAlgorithm:
@@ -560,7 +578,7 @@ class AbinsAlgorithm:
         :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
             information but is used in-place to save on time instantiating large arrays.
         """
-        from abins.constants import MASS_EPS
+        from abins.constants import FINE_MASS_EPS
 
         atom_workspaces = []
         s_atom_data.fill(0.0)
@@ -569,7 +587,7 @@ class AbinsAlgorithm:
 
         for atom_index in range(num_atoms):
             # TODO this mass_eps could be smaller, we are checking against known masses from data
-            if atoms_data[atom_index]["symbol"] == element_symbol and abs(atoms_data[atom_index]["mass"] - mass) < MASS_EPS:
+            if atoms_data[atom_index]["symbol"] == element_symbol and abs(atoms_data[atom_index]["mass"] - mass) < FINE_MASS_EPS:
                 temp_s_atom_data.fill(0.0)
 
                 for order in range(1, self._max_event_order + 1):

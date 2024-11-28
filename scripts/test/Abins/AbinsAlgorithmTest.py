@@ -31,6 +31,6 @@ class AtomsDataTest(unittest.TestCase):
     def test_get_bad_cross_section(self):
         """Test that an error is raised if cross section data is missing"""
 
-        with self.assertRaisesRegex(ValueError, "Found NaN cross-section for Zn with 65 nucleons"):
+        with self.assertRaisesRegex(ValueError, "Could not find suitable isotope data for Zn with mass 65.0."):
             # Zn65 is unstable and has no recorded cross section values
             AbinsAlgorithm.get_cross_section("Total", AtomInfo(symbol="Zn", mass=65.0))
