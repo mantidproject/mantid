@@ -13,6 +13,23 @@ import mantid.simpleapi  # noqa: F401
 from abins.abinsalgorithm import AbinsAlgorithm, AtomInfo
 
 
+class AtomInfoTest(unittest.TestCase):
+    """Test the AtomInfo class"""
+
+    def test_atom_info(self):
+        for args, expected in [
+            # Non-standard isotope
+            (("Zn", 67.0), {"nucleons_number": 67, "name": "67Zn", "z_number": 30}),
+            # Round to standard mix
+            (("Zn", 65.4), {"nucleons_number": 0, "name": "Zn", "z_number": 30}),
+            # Choose standard mix when isotope with same mass is available
+            (("F", 19.0), {"nucleons_number": 0, "name": "F", "z_number": 9}),
+        ]:
+            atom_info = AtomInfo(*args)
+            for attr, value in expected.items():
+                self.assertEqual(getattr(atom_info, attr), value)
+
+
 class AtomsDataTest(unittest.TestCase):
     """Test static methods on AbinsAlgorithm"""
 
@@ -24,7 +41,10 @@ class AtomsDataTest(unittest.TestCase):
             ("Coherent", 0, "Zn", 4.054),
             ("Total", 0, "H", 82.02),
         ]:
-            xc = AbinsAlgorithm.get_cross_section(scattering=scattering, species=AtomInfo(mass=float(nucleons_number), symbol=symbol))
+            xc = AbinsAlgorithm.get_cross_section(
+                scattering=scattering,
+                species=AtomInfo(mass=float(nucleons_number), symbol=symbol),
+            )
 
             self.assertAlmostEqual(xc, expected)
 
