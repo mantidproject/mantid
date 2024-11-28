@@ -23,16 +23,6 @@
 namespace {
 static const std::string TAB_NAME = "Quasi";
 
-static const unsigned int NUM_DECIMALS = 6;
-static const unsigned int INT_DECIMALS = 0;
-
-struct BackgroundType {
-  inline static const std::string SLOPING = "Sloping";
-  inline static const std::string FLAT = "Flat";
-  inline static const std::string ZERO = "Zero";
-  inline static const std::string LINEAR = "Linear";
-};
-
 struct PlotType {
   inline static const std::string ALL = "All";
   inline static const std::string AMPLITUDE = "Amplitude";
