@@ -65,25 +65,38 @@ void test_computeNumberOfIterations() {
     TS_ASSERT_DELTA(totalScaledCounts, 20.0, 1e-6); // Verify the scaled sum matches targetMCEvents
   }
 
-void test_exec_with_scaling() {
+MatrixWorkspace_sptr createInputWorkspace(int numBins, double initialValue) {
+    auto ws = WorkspaceCreationHelper::create2DWorkspace(1, numBins);
+    auto &yData = ws->mutableY(0);
+    std::fill(yData.begin(), yData.end(), initialValue);
+    return ws;
+  }
+
+MatrixWorkspace_sptr runMonteCarloWorkspace(const MatrixWorkspace_sptr &inputWS, int seed, int mcEvents,
+                                              const std::string &outputName) {
     CreateMonteCarloWorkspace alg;
     alg.initialize();
-
-    auto inputWS = WorkspaceCreationHelper::create2DWorkspace(1, 10);
-    auto &yData = inputWS->mutableY(0);
-    std::fill(yData.begin(), yData.end(), 5.0); // Set uniform data
-
     alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("Seed", 32);
-    alg.setProperty("MonteCarloEvents", 100); // Custom MC events
-    alg.setPropertyValue("OutputWorkspace", "MonteCarloTest_Scaled");
+    alg.setProperty("Seed", seed);
+    alg.setProperty("MonteCarloEvents", mcEvents);
+    alg.setPropertyValue("OutputWorkspace", outputName);
 
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
     using Mantid::API::AnalysisDataService;
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MonteCarloTest_Scaled");
+    return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputName);
+  }
+
+void removeWorkspace(const std::string &workspaceName) {
+    using Mantid::API::AnalysisDataService;
+    AnalysisDataService::Instance().remove(workspaceName);
+  }
+
+void test_exec_with_scaling() {
+    auto inputWS = createInputWorkspace(10, 5.0); // 10 bins, initial value 5.0
+    auto outputWS = runMonteCarloWorkspace(inputWS, 32, 100, "MonteCarloTest_Scaled");
+
     TS_ASSERT(outputWS);
 
     // Verify the output data
@@ -92,28 +105,13 @@ void test_exec_with_scaling() {
     TS_ASSERT_DELTA(sumOutput, 100.0, 1e-6); // Verify sum matches custom MC events
 
     // Clean up
-    AnalysisDataService::Instance().remove("MonteCarloTest_Scaled");
+    removeWorkspace("MonteCarloTest_Scaled");
   }
 
 void test_exec_without_scaling() {
-    CreateMonteCarloWorkspace alg;
-    alg.initialize();
+    auto inputWS = createInputWorkspace(10, 5.0); // 10 bins, initial value 5.0
+    auto outputWS = runMonteCarloWorkspace(inputWS, 32, 0, "MonteCarloTest_Default");
 
-    auto inputWS = WorkspaceCreationHelper::create2DWorkspace(1, 10);
-    auto &yData = inputWS->mutableY(0);
-    std::fill(yData.begin(), yData.end(), 5.0); // Set uniform data
-
-    alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("Seed", 32);
-    alg.setProperty("MonteCarloEvents", 0); // Default behavior
-    alg.setPropertyValue("OutputWorkspace", "MonteCarloTest_Default");
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-
-    using Mantid::API::AnalysisDataService;
-    MatrixWorkspace_sptr outputWS =
-        AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MonteCarloTest_Default");
     TS_ASSERT(outputWS);
 
     // Verify the output data
@@ -122,90 +120,51 @@ void test_exec_without_scaling() {
     TS_ASSERT_DELTA(sumOutput, 50.0, 1e-6); // Verify sum matches input data's total counts
 
     // Clean up
-    AnalysisDataService::Instance().remove("MonteCarloTest_Default");
+    removeWorkspace("MonteCarloTest_Default");
   }
 
-  void test_reproducibility_with_seed() {
-    CreateMonteCarloWorkspace alg1;
-    alg1.initialize();
+void test_reproducibility_with_seed() {
+    auto inputWS = createInputWorkspace(10, 5.0); // 10 bins, initial value 5.0
 
-    auto inputWS = WorkspaceCreationHelper::create2DWorkspace(1, 10);
-    auto &yData = inputWS->mutableY(0);
-    std::fill(yData.begin(), yData.end(), 5.0);
-
-    alg1.setProperty("InputWorkspace", inputWS);
-    alg1.setProperty("Seed", 42);
-    alg1.setPropertyValue("OutputWorkspace", "MonteCarloTest_WS1");
-
-    TS_ASSERT_THROWS_NOTHING(alg1.execute());
-    TS_ASSERT(alg1.isExecuted());
-
-    // Second run to compare output data
-    CreateMonteCarloWorkspace alg2;
-    alg2.initialize();
-
-    alg2.setProperty("InputWorkspace", inputWS);
-    alg2.setProperty("Seed", 42);
-    alg2.setPropertyValue("OutputWorkspace", "MonteCarloTest_WS2");
-
-    TS_ASSERT_THROWS_NOTHING(alg2.execute());
-    TS_ASSERT(alg2.isExecuted());
-
-    using Mantid::API::AnalysisDataService;
-    MatrixWorkspace_sptr outputWS1 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MonteCarloTest_WS1");
-    MatrixWorkspace_sptr outputWS2 = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MonteCarloTest_WS2");
+    auto outputWS1 = runMonteCarloWorkspace(inputWS, 42, 0, "MonteCarloTest_WS1");
+    auto outputWS2 = runMonteCarloWorkspace(inputWS, 42, 0, "MonteCarloTest_WS2");
 
     TS_ASSERT(outputWS1);
     TS_ASSERT(outputWS2);
 
-    // Compare the output data
     const auto &outputY1 = outputWS1->y(0);
     const auto &outputY2 = outputWS2->y(0);
 
     TS_ASSERT_EQUALS(outputY1.size(), outputY2.size());
-
     for (size_t i = 0; i < outputY1.size(); ++i) {
       TS_ASSERT_EQUALS(outputY1[i], outputY2[i]);
     }
 
-    // Remove the workspaces from ADS
-    AnalysisDataService::Instance().remove("MonteCarloTest_WS1");
-    AnalysisDataService::Instance().remove("MonteCarloTest_WS2");
+    // Clean up
+    removeWorkspace("MonteCarloTest_WS1");
+    removeWorkspace("MonteCarloTest_WS2");
   }
 
-  void test_error_calculation() {
-    CreateMonteCarloWorkspace alg;
-    alg.initialize();
-
-    // Create an input workspace with predefined Y data
+void test_error_calculation() {
     auto inputWS = WorkspaceCreationHelper::create2DWorkspace(1, 10);
     auto &yData = inputWS->mutableY(0);
 
     // Using perfect squares (for sqrt testing)
     yData = {1.0, 4.0, 9.0, 16.0, 25.0, 36.0, 49.0, 64.0, 81.0, 100.0};
 
-    alg.setProperty("InputWorkspace", inputWS);
-    alg.setProperty("Seed", 32);
-    alg.setPropertyValue("OutputWorkspace", "MonteCarloTest_Error");
-
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(alg.isExecuted());
-
-    using Mantid::API::AnalysisDataService;
-    MatrixWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("MonteCarloTest_Error");
+    auto outputWS = runMonteCarloWorkspace(inputWS, 32, 0, "MonteCarloTest_Error");
     TS_ASSERT(outputWS);
 
-    // Verify the errors in the output workspace
     const auto &outputY = outputWS->y(0);
     const auto &outputE = outputWS->e(0);
 
     TS_ASSERT_EQUALS(outputY.size(), outputE.size());
-
     for (size_t i = 0; i < outputY.size(); ++i) {
       TS_ASSERT_DELTA(outputE[i], std::sqrt(outputY[i]), 1e-6);
-
-      // Clean up
-      AnalysisDataService::Instance().remove("MonteCarloTest_Error");
     }
+
+    // Clean up
+    removeWorkspace("MonteCarloTest_Error");
   }
+
 };
