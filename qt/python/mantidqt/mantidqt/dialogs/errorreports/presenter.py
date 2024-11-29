@@ -30,6 +30,7 @@ class ErrorReporterPresenter(object):
         self._exit_code = exit_code
         self._application = application
         self._traceback = traceback if traceback else ""
+        self._cpp_traces = b""
         self._view.set_report_callback(self.error_handler)
         self._view.moreDetailsButton.clicked.connect(self.show_more_details)
 
@@ -42,8 +43,7 @@ class ErrorReporterPresenter(object):
                     new_workspace_name = os.path.join(ConfigService.getAppDataDirectory(), "{}_stacktrace_sent.txt".format(application))
                     os.rename(traceback_file_path, new_workspace_name)
                 elif is_linux():
-                    _ = retrieve_thread_traces_from_coredump_file()
-                    # TODO send to a new model field
+                    self._cpp_traces = retrieve_thread_traces_from_coredump_file()
             except OSError:
                 pass
 
@@ -105,7 +105,15 @@ class ErrorReporterPresenter(object):
             )
 
         errorReporter = ErrorReporter(
-            self._application, uptime, self._exit_code, share_identifiable, str(name), str(email), str(text_box), stacktrace
+            self._application,
+            uptime,
+            self._exit_code,
+            share_identifiable,
+            str(name),
+            str(email),
+            str(text_box),
+            stacktrace,
+            self._cpp_traces,
         )
 
         status = errorReporter.sendErrorReport()

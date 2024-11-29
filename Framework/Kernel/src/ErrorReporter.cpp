@@ -33,21 +33,21 @@ Logger g_log("ErrorReporter");
  */
 ErrorReporter::ErrorReporter(const std::string &application, const Types::Core::time_duration &upTime,
                              const std::string &exitCode, const bool share)
-    : ErrorReporter(application, upTime, exitCode, share, "", "", "", "") {}
+    : ErrorReporter(application, upTime, exitCode, share, "", "", "", "", "") {}
 
 /** Constructor
  */
 ErrorReporter::ErrorReporter(const std::string &application, const Types::Core::time_duration &upTime,
                              const std::string &exitCode, const bool share, const std::string &name,
                              const std::string &email, const std::string &textBox)
-    : ErrorReporter(application, upTime, exitCode, share, name, email, textBox, "") {}
+    : ErrorReporter(application, upTime, exitCode, share, name, email, textBox, "", "") {}
 
 ErrorReporter::ErrorReporter(std::string application, Types::Core::time_duration upTime, std::string exitCode,
                              const bool share, std::string name, std::string email, std::string textBox,
-                             std::string traceback)
+                             std::string traceback, std::string cppTraces)
     : m_application(std::move(application)), m_exitCode(std::move(exitCode)), m_upTime(std::move(upTime)),
       m_share(share), m_name(std::move(name)), m_email(std::move(email)), m_textbox(std::move(textBox)),
-      m_stacktrace(std::move(traceback)) {
+      m_stacktrace(std::move(traceback)), m_cppTraces(std::move(cppTraces)) {
   auto url = Mantid::Kernel::ConfigService::Instance().getValue<std::string>("errorreports.rooturl");
   if (!url.has_value()) {
     g_log.debug() << "Failed to load error report url\n";
@@ -113,6 +113,7 @@ std::string ErrorReporter::generateErrorMessage() const {
     message["email"] = m_email;
     message["name"] = m_name;
     message["stacktrace"] = m_stacktrace;
+    message["cppTraces"] = m_cppTraces;
   } else {
     message["email"] = "";
     message["name"] = "";

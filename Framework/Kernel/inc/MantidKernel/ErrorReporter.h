@@ -30,7 +30,8 @@ public:
                 const std::string &textBox);
   /// Constructor
   ErrorReporter(std::string application, Types::Core::time_duration startTime, std::string exitCode, bool share,
-                std::string name, std::string email, std::string textBox, std::string stacktrace);
+                std::string name, std::string email, std::string textBox, std::string stacktrace,
+                std::string cppTraces);
   /// Sends an error report
   Kernel::InternetHelper::HTTPStatus sendErrorReport();
   /// Generates an error string in json format
@@ -50,6 +51,7 @@ private:
   const std::string m_textbox;
   std::string m_url;
   const std::string m_stacktrace;
+  const std::string m_cppTraces;
 };
 
 } // namespace Kernel
