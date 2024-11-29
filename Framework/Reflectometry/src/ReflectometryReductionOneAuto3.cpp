@@ -607,7 +607,7 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(con
       }
       alg->setProperty("NormalizeByIntegratedMonitors", false);
     } catch (std::runtime_error &e) {
-      g_log.error() << e.what() << ". Polynomial correction will not be performed.";
+      g_log.error() << e.what() << ". Algorithmic correction will not be performed.";
       alg->setProperty("CorrectionAlgorithm", "None");
     }
   } else {
