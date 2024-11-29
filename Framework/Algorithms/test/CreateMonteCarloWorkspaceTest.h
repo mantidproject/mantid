@@ -24,11 +24,11 @@ public:
     TS_ASSERT(alg.isInitialized());
   }
 
-void test_computeNumberOfIterations() {
+  void test_computeNumberOfIterations() {
     CreateMonteCarloWorkspace alg;
     Mantid::HistogramData::HistogramY yData = {1.0, 2.0, 3.0, 4.0};
     int iterations = alg.computeNumberOfIterations(yData, 0);
-    TS_ASSERT_EQUALS(iterations, 10);                         // Verify yData rounds correctly
+    TS_ASSERT_EQUALS(iterations, 10); // Verify yData rounds correctly
 
     // Test custom Monte Carlo events
     iterations = alg.computeNumberOfIterations(yData, 20);
@@ -65,14 +65,14 @@ void test_computeNumberOfIterations() {
     TS_ASSERT_DELTA(totalScaledCounts, 20.0, 1e-6); // Verify the scaled sum matches targetMCEvents
   }
 
-MatrixWorkspace_sptr createInputWorkspace(int numBins, double initialValue) {
+  MatrixWorkspace_sptr createInputWorkspace(int numBins, double initialValue) {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, numBins);
     auto &yData = ws->mutableY(0);
     std::fill(yData.begin(), yData.end(), initialValue);
     return ws;
   }
 
-MatrixWorkspace_sptr runMonteCarloWorkspace(const MatrixWorkspace_sptr &inputWS, int seed, int mcEvents,
+  MatrixWorkspace_sptr runMonteCarloWorkspace(const MatrixWorkspace_sptr &inputWS, int seed, int mcEvents,
                                               const std::string &outputName) {
     CreateMonteCarloWorkspace alg;
     alg.initialize();
@@ -88,12 +88,12 @@ MatrixWorkspace_sptr runMonteCarloWorkspace(const MatrixWorkspace_sptr &inputWS,
     return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputName);
   }
 
-void removeWorkspace(const std::string &workspaceName) {
+  void removeWorkspace(const std::string &workspaceName) {
     using Mantid::API::AnalysisDataService;
     AnalysisDataService::Instance().remove(workspaceName);
   }
 
-void test_exec_with_scaling() {
+  void test_exec_with_scaling() {
     auto inputWS = createInputWorkspace(10, 5.0); // 10 bins, initial value 5.0
     auto outputWS = runMonteCarloWorkspace(inputWS, 32, 100, "MonteCarloTest_Scaled");
 
@@ -108,7 +108,7 @@ void test_exec_with_scaling() {
     removeWorkspace("MonteCarloTest_Scaled");
   }
 
-void test_exec_without_scaling() {
+  void test_exec_without_scaling() {
     auto inputWS = createInputWorkspace(10, 5.0); // 10 bins, initial value 5.0
     auto outputWS = runMonteCarloWorkspace(inputWS, 32, 0, "MonteCarloTest_Default");
 
@@ -123,7 +123,7 @@ void test_exec_without_scaling() {
     removeWorkspace("MonteCarloTest_Default");
   }
 
-void test_reproducibility_with_seed() {
+  void test_reproducibility_with_seed() {
     auto inputWS = createInputWorkspace(10, 5.0); // 10 bins, initial value 5.0
 
     auto outputWS1 = runMonteCarloWorkspace(inputWS, 42, 0, "MonteCarloTest_WS1");
@@ -145,7 +145,7 @@ void test_reproducibility_with_seed() {
     removeWorkspace("MonteCarloTest_WS2");
   }
 
-void test_error_calculation() {
+  void test_error_calculation() {
     auto inputWS = WorkspaceCreationHelper::create2DWorkspace(1, 10);
     auto &yData = inputWS->mutableY(0);
 
@@ -166,5 +166,4 @@ void test_error_calculation() {
     // Clean up
     removeWorkspace("MonteCarloTest_Error");
   }
-
 };
