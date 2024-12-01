@@ -48,6 +48,7 @@ public:
   void tearDown() override {
     ADS.clear();
     clear_instrument_cache();
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", " ");
   }
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
@@ -1513,6 +1514,12 @@ private:
     }
   }
 
+  void check_output_group_contains_sample_logs_for_spin_state_ORSO(std::vector<MatrixWorkspace_sptr> const &wsGroup,
+                                                                   bool has_sample_logs = false) {
+    for (auto const &ws : wsGroup) {
+      TS_ASSERT_EQUALS(ws->mutableRun().hasProperty(SpinStatesORSO::LOG_NAME), has_sample_logs);
+    }
+  }
   void clear_instrument_cache() {
     // REFL instrument keeps cache of parameters that are needed only for specific tests
     ClearCache clearAlg;
@@ -1527,13 +1534,6 @@ private:
     auto const selectedChildHistories = selectedParentHistory->getChildHistories()[childLevelIdx];
     for (const auto &[prop, value] : propValues) {
       TS_ASSERT_EQUALS(selectedChildHistories->getPropertyValue(prop), value);
-    }
-  }
-
-  void check_output_group_contains_sample_logs_for_spin_state_ORSO(std::vector<MatrixWorkspace_sptr> const &wsGroup,
-                                                                   bool has_sample_logs = false) {
-    for (auto const &ws : wsGroup) {
-      TS_ASSERT_EQUALS(ws->mutableRun().hasProperty(SpinStatesORSO::LOG_NAME), has_sample_logs);
     }
   }
 };
