@@ -475,7 +475,6 @@ void PolarizationCorrectionFredrikze::exec() {
 
   const std::string inputStatesStr = getProperty(Prop::INPUT_SPIN_STATES);
   const std::string outputStatesStr = getProperty(Prop::OUTPUT_SPIN_STATES);
-  const auto &outWSName = getPropertyValue(Prop::OUTPUT_WORKSPACE);
   const bool addSpinStateLog = getProperty(Prop::ADD_SPIN_STATE_LOG);
 
   const auto inputStates = PolarizationCorrectionsHelpers::splitSpinStateString(inputStatesStr);
@@ -489,12 +488,12 @@ void PolarizationCorrectionFredrikze::exec() {
       throw std::invalid_argument("For PA analysis, input group must have 4 periods.");
     }
     g_log.notice("PA polarization correction");
-    outWS = execPA(inWS, inputStates, outputStates, outWSName, addSpinStateLog);
+    outWS = execPA(inWS, inputStates, outputStates, addSpinStateLog);
   } else if (analysisMode == PNR_LABEL) {
     if (nWorkspaces != 2) {
       throw std::invalid_argument("For PNR analysis, input group must have 2 periods.");
     }
-    outWS = execPNR(inWS, inputStates, outputStates, outWSName, addSpinStateLog);
+    outWS = execPNR(inWS, inputStates, outputStates, addSpinStateLog);
     g_log.notice("PNR polarization correction");
   }
 
