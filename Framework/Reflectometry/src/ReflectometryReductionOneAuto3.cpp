@@ -586,7 +586,6 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(con
           throw std::runtime_error("Could not find parameter 'polystring' in "
                                    "parameter file. Cannot apply polynomial "
                                    "correction.");
-        setProperty("Polynomial", polyVec[0]);
         alg->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
         alg->setProperty("Polynomial", polyVec[0]);
       } else if (correctionStr == "exponential") {
@@ -599,8 +598,6 @@ void ReflectometryReductionOneAuto3::populateAlgorithmicCorrectionProperties(con
           throw std::runtime_error("Could not find parameter 'C1' in parameter "
                                    "file. Cannot apply exponential correction.");
 
-        setProperty("C0", c0Vec[0]);
-        setProperty("C1", c1Vec[0]);
         alg->setProperty("CorrectionAlgorithm", "ExponentialCorrection");
         alg->setProperty("C0", c0Vec[0]);
         alg->setProperty("C1", c1Vec[0]);
