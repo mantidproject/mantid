@@ -18,6 +18,8 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAlgorithms/ClearCache.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidFrameworkTestHelpers/ReflectometryHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
@@ -69,7 +71,8 @@ public:
   void setUp() override { Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS"); }
 
   void tearDown() override {
-    AnalysisDataService::Instance().clear();
+    ADS.clear();
+    clear_instrument_cache();
     Mantid::Kernel::ConfigService::Instance().setString("default.facility", " ");
   }
 
@@ -689,39 +692,6 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("IvsLam"));
   }
 
-  void test_autodetect_on_inter_instrument_sets_polynomial_correction() {
-    auto inter = loadRun("INTER00013460.nxs");
-    auto const polStringInter =
-        std::string("35.5893,-24.5591,9.20375,-1.89265,0.222291,-0.0148746,0.00052709,-7.66807e-06");
-
-    ReflectometryReductionOneAuto3 alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", inter);
-    alg.setProperty("CorrectionAlgorithm", "AutoDetect");
-    alg.execute();
-
-    TS_ASSERT_EQUALS(alg.getPropertyValue("Polynomial"), polStringInter);
-  }
-
-  void test_autodetect_on_surf_instrument_sets_exponential_correction() {
-    // SURF instrument has exponential corrections
-    LoadEmptyInstrument loadInstAlg;
-    loadInstAlg.initialize();
-    loadInstAlg.setProperty("InstrumentName", "SURF");
-    loadInstAlg.setProperty("OutputWorkspace", "surfWS");
-    loadInstAlg.execute();
-    auto const &surfWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("surfWS");
-
-    ReflectometryReductionOneAuto3 alg;
-    alg.initialize();
-    alg.setProperty("InputWorkspace", surfWS);
-    alg.setProperty("CorrectionAlgorithm", "AutoDetect");
-    alg.execute();
-
-    TS_ASSERT_DELTA(static_cast<double>(alg.getProperty("C0")), 36.5688, 1e-9);
-    TS_ASSERT_DELTA(static_cast<double>(alg.getProperty("C1")), 0.188676, 1e-9);
-  }
-
   void test_default_outputs_debug() {
     auto inter = loadRun("INTER00013460.nxs");
     const double theta = 0.7;
@@ -892,8 +862,6 @@ public:
     auto outQGroupBinned = retrieveOutWS("IvsQ_binned_1234");
     TS_ASSERT_EQUALS(outQGroup.size(), 4);
     TS_ASSERT_EQUALS(outQGroupBinned.size(), 4);
-
-    ADS.clear();
   }
 
   void test_input_workspace_group_with_default_output_workspaces_and_debug_on() {
@@ -909,8 +877,6 @@ public:
 
     auto outLamGroup = retrieveOutWS("IvsLam_1234");
     TS_ASSERT_EQUALS(outLamGroup.size(), 4);
-
-    ADS.clear();
   }
 
   void test_input_workspace_group_with_named_output_workspaces() {
@@ -931,8 +897,6 @@ public:
     auto outQGroupBinned = retrieveOutWS("testIvsQ_binned");
     TS_ASSERT_EQUALS(outQGroup.size(), 4);
     TS_ASSERT_EQUALS(outQGroupBinned.size(), 4);
-
-    ADS.clear();
   }
 
   void test_input_workspace_group_with_named_output_workspaces_and_debug_on() {
@@ -951,8 +915,6 @@ public:
 
     auto outLamGroup = retrieveOutWS("testIvsLam");
     TS_ASSERT_EQUALS(outLamGroup.size(), 4);
-
-    ADS.clear();
   }
 
   void test_one_transmissionrun() {
@@ -1009,8 +971,6 @@ public:
 
     TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9207, 0.0001);
     TS_ASSERT_DELTA(outLamGroup[0]->y(0)[2], 1.3484, 0.0001);
-
-    ADS.clear();
   }
 
   void test_polarization_with_transmissionrun() {
@@ -1065,8 +1025,6 @@ public:
 
     TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.7785, 0.0001);
     TS_ASSERT_DELTA(outLamGroup[0]->y(0)[2], 0.5810, 0.0001);
-
-    ADS.clear();
   }
 
   void test_second_transmissionrun() {
@@ -1133,8 +1091,6 @@ public:
 
     TS_ASSERT_DELTA(outLamGroup[0]->y(0)[0], 0.9207, 0.0001);
     TS_ASSERT_DELTA(outLamGroup[0]->y(0)[2], 1.3484, 0.0001);
-
-    ADS.clear();
   }
 
   void test_polarization_correction_default_Wildes() {
@@ -1179,8 +1135,6 @@ public:
     TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.7813, 0.0001);
     TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.6797, 0.0001);
     TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.5242, 0.0001);
-
-    ADS.clear();
   }
 
   void test_polarization_correction_with_efficiency_workspace() {
@@ -1226,8 +1180,6 @@ public:
     TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 1.7838, 0.0001);
     TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], -0.3231, 0.0001);
     TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], -0.4659, 0.0001);
-
-    ADS.clear();
   }
 
   void test_polarization_correction_with_efficiency_workspace_Fredrikze_PNR() {
@@ -1269,8 +1221,6 @@ public:
 
     TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 1.4062, 0.0001);
     TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.2813, 0.0001);
-
-    ADS.clear();
   }
 
   void test_polarization_correction_with_efficiency_workspace_Wildes() {
@@ -1316,8 +1266,6 @@ public:
     TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.4330, 0.0001);
     TS_ASSERT_DELTA(outQGroup[2]->y(0)[0], 0.9766, 0.0001);
     TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.7544, 0.0001);
-
-    ADS.clear();
   }
 
   void test_polarization_correction_with_efficiency_workspace_Wildes_no_analyser() {
@@ -1359,8 +1307,6 @@ public:
 
     TS_ASSERT_DELTA(outQGroup[0]->y(0)[0], 0.7554, 0.0001);
     TS_ASSERT_DELTA(outQGroup[1]->y(0)[0], 0.9161, 0.0001);
-
-    ADS.clear();
   }
 
   void test_polarization_correction_with_invalid_efficiencies_workspace_labels() {
@@ -1393,8 +1339,6 @@ public:
     TS_ASSERT_THROWS_EQUALS(
         alg.execute(), std::runtime_error & e, std::string(e.what()),
         "Axes labels for efficiencies workspace do not match any supported polarization correction method");
-
-    ADS.clear();
   }
 
   void test_polarization_correction_with_invalid_efficiencies_workspace_format() {
@@ -1421,8 +1365,6 @@ public:
 
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, std::string(e.what()),
                             "Efficiencies workspace is not in a supported format");
-
-    ADS.clear();
   }
 
   void test_polarization_correction_with_efficiencies_workspace_and_invalid_num_input_workspaces() {
@@ -1448,8 +1390,6 @@ public:
 
     TS_ASSERT_THROWS_EQUALS(alg.execute(), std::runtime_error & e, std::string(e.what()),
                             "Only input workspace groups with two or four periods are supported");
-
-    ADS.clear();
   }
 
   void test_monitor_index_in_group() {
@@ -1871,8 +1811,48 @@ public:
     TS_ASSERT_EQUALS(ADS.doesExist("IvsQ_binned_1234_sliced_second"), true);
     TS_ASSERT_EQUALS(ADS.doesExist("IvsLam_1234_sliced_first"), true);
     TS_ASSERT_EQUALS(ADS.doesExist("IvsLam_1234_sliced_second"), true);
+  }
 
-    ADS.clear();
+  void test_autodetect_on_instrument_with_polynomial_correction() {
+    auto ws_1 = createREFL_WS(10, 5000, 10000, std::vector<double>(10, 1), "PolynomialCorrection");
+    auto const polStringInter =
+        std::string("35.5893,-24.5591,9.20375,-1.89265,0.222291,-0.0148746,0.00052709,-7.66807e-06");
+    std::map<std::string, std::string> propertiesToAssert{{"CorrectionAlgorithm", "PolynomialCorrection"},
+                                                          {"Polynomial", polStringInter}};
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setProperty("ThetaIn", 0.7);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("InputWorkspace", ws_1);
+    alg.setProperty("CorrectionAlgorithm", "AutoDetect");
+    alg.execute();
+
+    auto ws_out = ADS.retrieveWS<MatrixWorkspace>("IvsQ");
+    check_algorithm_properties_in_child_histories(ws_out, 2, 1, propertiesToAssert);
+  }
+
+  void test_autodetect_on_instrument_with_exponential_correction() {
+    auto const &ws_1 = createREFL_WS(10, 5000, 10000, std::vector<double>(10, 1), "ExponentialCorrection");
+    std::map<std::string, std::string> propertiesToAssert{
+        {"CorrectionAlgorithm", "ExponentialCorrection"}, {"C0", "36.568800000000003"}, {"C1", "0.18867600000000001"}};
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setProperty("ThetaIn", 0.7);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("InputWorkspace", ws_1);
+    alg.setProperty("CorrectionAlgorithm", "AutoDetect");
+    alg.execute();
+
+    auto ws_out = ADS.retrieveWS<MatrixWorkspace>("IvsQ");
+    check_algorithm_properties_in_child_histories(ws_out, 2, 1, propertiesToAssert);
   }
 
 private:
@@ -1941,7 +1921,6 @@ private:
     WorkspaceGroup_sptr group = ADS.retrieveWS<WorkspaceGroup>("input");
     MatrixWorkspace_sptr ws = ADS.retrieveWS<MatrixWorkspace>(group->getNames()[0]);
     ws->mutableRun().addProperty<std::string>("run_number", "1234");
-
     alg.initialize();
     alg.setChild(true);
     alg.setPropertyValue("InputWorkspace", name);
@@ -1967,5 +1946,21 @@ private:
     alg.setPropertyValue("OutputWorkspace", "IvsQ");
     alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
     alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+  }
+  void clear_instrument_cache() {
+    // REFL instrument keeps cache of parameters that are needed only for specific tests
+    ClearCache clearAlg;
+    clearAlg.initialize();
+    clearAlg.setProperty("InstrumentCache", true);
+    clearAlg.execute();
+  }
+  void check_algorithm_properties_in_child_histories(MatrixWorkspace_sptr &workspace, int topLevelIdx,
+                                                     int childLevelIdx,
+                                                     std::map<std::string, std::string> const &propValues) {
+    auto const selectedParentHistory = workspace->getHistory().getAlgorithmHistory(topLevelIdx);
+    auto const selectedChildHistories = selectedParentHistory->getChildHistories()[childLevelIdx];
+    for (const auto &[prop, value] : propValues) {
+      TS_ASSERT_EQUALS(selectedChildHistories->getPropertyValue(prop), value);
+    }
   }
 };
