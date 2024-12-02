@@ -8,7 +8,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidReflectometry/ReflectometryReductionOneAuto3.h"
 
 #include "MantidAPI/AnalysisDataService.h"
