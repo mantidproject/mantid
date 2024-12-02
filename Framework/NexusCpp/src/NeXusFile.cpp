@@ -2,7 +2,6 @@
 // REMOVE
 #include "MantidNexusCpp/NeXusException.hpp"
 #include "MantidNexusCpp/NeXusFile.hpp"
-#include "MantidNexusCpp/NeXusStream.hpp"
 #include "MantidNexusCpp/napiconfig.h"
 #include <iostream>
 #include <sstream>
