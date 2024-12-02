@@ -548,6 +548,9 @@ NXstatus NX5makegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 /*------------------------------------------------------------------------*/
 
 herr_t attr_check(hid_t loc_id, const char *member_name, const H5A_info_t *unused, void *opdata) {
+  UNUSED_ARG(loc_id);
+  UNUSED_ARG(unused);
+  UNUSED_ARG(opdata);
   char attr_name[8 + 1]; /* need to leave space for \0 as well */
 
   strcpy(attr_name, "NX_class");
@@ -892,6 +895,8 @@ NXstatus NX5makedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank, in
 /* --------------------------------------------------------------------- */
 
 NXstatus NX5compress(NXhandle fid, int compress_type) {
+  UNUSED_ARG(fid);
+  UNUSED_ARG(compress_type);
   printf(" NXcompress ERROR: NeXus API  based  on  HDF5  doesn't support\n");
   printf("                   NXcompress  function!  Using  HDF5 library,\n");
   printf("                   the NXcompmakedata function can be applied\n");
@@ -1351,6 +1356,7 @@ NXstatus NX5flush(NXhandle *pHandle) {
 /* Operator function. */
 
 herr_t nxgroup_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, void *op_data) {
+  UNUSED_ARG(statbuf);
   pinfo self = (pinfo)op_data;
   H5O_info1_t object_info;
   // TODO use new version of method rather than v2
@@ -1377,6 +1383,7 @@ herr_t nxgroup_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, v
 /* Operator function. */
 
 herr_t group_info1(hid_t loc_id, const char *name, const H5L_info_t *statbuf, void *opdata) {
+  UNUSED_ARG(statbuf);
   int iNX = *((int *)opdata);
   H5O_info1_t object_info;
   // TODO use new version of method rather than v2
@@ -1963,6 +1970,8 @@ NXstatus NX5getslab64(NXhandle fid, void *data, const int64_t iStart[], const in
 /* Operator function. */
 
 herr_t attr_info(hid_t loc_id, const char *name, const H5A_info_t *unused, void *opdata) {
+  UNUSED_ARG(loc_id);
+  UNUSED_ARG(unused);
   *((char **)opdata) = strdup(name);
   return 1;
 }

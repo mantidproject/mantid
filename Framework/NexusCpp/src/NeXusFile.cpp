@@ -129,12 +129,12 @@ static int check_char_too_big[1 - sizeof(char) + ARRAY_OFFSET]; // error if char
 namespace {
 
 static void inner_malloc(void *&data, const std::vector<int64_t> &dims, NXnumtype type) {
-  int rank = dims.size();
+  const auto rank = dims.size();
   int64_t c_dims[NX_MAXRANK];
-  for (int i = 0; i < rank; i++) {
+  for (size_t i = 0; i < rank; i++) {
     c_dims[i] = dims[i];
   }
-  NXstatus status = NXmalloc64(&data, rank, c_dims, type);
+  NXstatus status = NXmalloc64(&data, static_cast<int>(rank), c_dims, type);
   if (status != NX_OK) {
     throw Exception("NXmalloc failed", status);
   }
@@ -293,8 +293,8 @@ void File::makeData(const string &name, NXnumtype type, const vector<int64_t> &d
   }
 
   // do the work
-  NXstatus status =
-      NXmakedata64(this->m_file_id, name.c_str(), (int)type, dims.size(), const_cast<int64_t *>(&(dims[0])));
+  NXstatus status = NXmakedata64(this->m_file_id, name.c_str(), static_cast<int>(type), static_cast<int>(dims.size()),
+                                 const_cast<int64_t *>(&(dims[0])));
   // report errors
   if (status != NX_OK) {
     stringstream msg;
@@ -335,7 +335,7 @@ void File::writeData(const string &name, const string &value) {
 }
 
 template <typename NumT> void File::writeData(const string &name, const vector<NumT> &value) {
-  vector<int64_t> dims(1, value.size());
+  vector<int64_t> dims(1, static_cast<int64_t>(value.size()));
   this->writeData(name, value, dims);
 }
 
@@ -421,7 +421,7 @@ void File::makeCompData(const string &name, const NXnumtype type, const vector<i
   // do the work
   int i_type = static_cast<int>(type);
   int i_comp = static_cast<int>(comp);
-  NXstatus status = NXcompmakedata64(this->m_file_id, name.c_str(), i_type, dims.size(),
+  NXstatus status = NXcompmakedata64(this->m_file_id, name.c_str(), i_type, static_cast<int>(dims.size()),
                                      const_cast<int64_t *>(&(dims[0])), i_comp, const_cast<int64_t *>(&(bufsize[0])));
 
   // report errors
@@ -497,8 +497,8 @@ void File::putAttr(const AttrInfo &info, const void *data) {
   if (info.name.empty()) {
     throw Exception("Supplied empty name to putAttr");
   }
-  NXstatus status =
-      NXputattr(this->m_file_id, info.name.c_str(), const_cast<void *>(data), info.length, (int)(info.type));
+  NXstatus status = NXputattr(this->m_file_id, info.name.c_str(), const_cast<void *>(data),
+                              static_cast<int>(info.length), static_cast<int>(info.type));
   if (status != NX_OK) {
     stringstream msg;
     msg << "NXputattr(" << info.name << ", data, " << info.length << ", " << info.type << ") failed";
@@ -514,7 +514,7 @@ void File::putAttr(const std::string &name, const std::vector<std::string> &arra
     throw Exception("Supplied empty name to putAttr");
   }
 
-  int maxLength = 0;
+  size_t maxLength = 0;
   for (std::vector<std::string>::const_iterator it = array.begin(); it != array.end(); ++it) {
     if (maxLength < it->size()) {
       maxLength = it->size();
@@ -532,7 +532,7 @@ void File::putAttr(const std::string &name, const std::vector<std::string> &arra
 
   // set rank and dim
   const int rank = 2;
-  int dim[rank] = {static_cast<int>(array.size()), maxLength};
+  const int dim[rank] = {static_cast<int>(array.size()), static_cast<int>(maxLength)};
 
   // write data
   NXstatus status = NXputattra(this->m_file_id, name.c_str(), data.c_str(), rank, dim, CHAR);

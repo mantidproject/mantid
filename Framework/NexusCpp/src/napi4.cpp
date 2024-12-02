@@ -733,6 +733,7 @@ NXstatus NX4makedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank, in
 
 NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank, int64_t dimensions[],
                            int compress_type, int64_t chunk_size[]) {
+  UNUSED_ARG(chunk_size);
   pNexusFile pFile;
   int32 iNew, iRet, type;
   char pBuffer[256];
@@ -1726,12 +1727,22 @@ NXstatus NX4getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], in
 
 /*--------------------------------------------------------------------*/
 NXstatus NX4getattra(NXhandle handle, const char *name, void *data) {
+  UNUSED_ARG(handle);
+  UNUSED_ARG(name);
+  UNUSED_ARG(data);
+
   NXReportError("This is a HDF4 file, attribute array API is not supported here");
   return NX_ERROR;
 }
 
 /*--------------------------------------------------------------------*/
 NXstatus NX4getattrainfo(NXhandle handle, NXname pName, int *rank, int dim[], int *iType) {
+  UNUSED_ARG(handle);
+  UNUSED_ARG(pName);
+  UNUSED_ARG(rank);
+  UNUSED_ARG(dim);
+  UNUSED_ARG(iType);
+
   NXReportError("This is a HDF4 file, attribute array API is not supported here");
   return NX_ERROR;
 }

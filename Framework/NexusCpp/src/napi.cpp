@@ -236,7 +236,10 @@ NXstatus NXsetcache(long newVal) {
 }
 
 /*-------------------------------------------------------------------------*/
-static void NXNXNXReportError(void *pData, char *string) { fprintf(stderr, "%s \n", string); }
+static void NXNXNXReportError(void *pData, char *string) {
+  UNUSED_ARG(pData);
+  fprintf(stderr, "%s \n", string);
+}
 
 /*---------------------------------------------------------------------*/
 
@@ -248,6 +251,7 @@ static THREAD_LOCAL void (*NXEHIReportTError)(void *pData, char *string) = NULL;
 #endif
 
 void NXIReportError(void *pData, char *string) {
+  UNUSED_ARG(pData);
   fprintf(
       stderr,
       "Your application uses NXIReportError, but its first parameter is ignored now - you should use NXReportError.");

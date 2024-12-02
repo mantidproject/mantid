@@ -33,21 +33,3 @@ char *stptok(const char *s, char *tok, size_t toklen, char *brk) {
   *tok = 0;
   return (char *)s;
 }
-/*---------------------------------------------------------------------------*/
-/*
- static char *SkipSpace(char *pText)
- {
-   char *pRes;
-
-   pRes = pText;
-   while(*pRes)
-   {
-     if( (*pRes != ' ') && (*pRes != '\t') && (*pRes != '\r') )
-     {
-       return pRes;
-     }
-     pRes++;
-   }
-   return NULL;
- }
-*/

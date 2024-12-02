@@ -11,7 +11,7 @@
     return 1;                                                                                                          \
   }
 
-int main(int argc, char *argv[]) {
+int main() {
   NXaccess access_mode = NXACC_CREATE5;
   const int nReOpen = 1000;
   printf("Running for %d iterations\n", nReOpen);
