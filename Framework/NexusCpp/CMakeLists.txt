@@ -6,7 +6,6 @@ set(SRC_FILES
     src/napi5.c
     src/NeXusException.cpp
     src/NeXusFile.cpp
-    src/NeXusStream.cpp
     src/nxstack.c
     src/stptok.c
 )
@@ -19,7 +18,6 @@ set(INC_FILES
     inc/MantidNexusCpp/napi_internal.h
     inc/MantidNexusCpp/NeXusException.hpp
     inc/MantidNexusCpp/NeXusFile.hpp
-    inc/MantidNexusCpp/NeXusStream.hpp
     inc/MantidNexusCpp/nx_stptok.h
     inc/MantidNexusCpp/nxconfig.h
     inc/MantidNexusCpp/nxstack.h
