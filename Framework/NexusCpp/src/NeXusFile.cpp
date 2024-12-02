@@ -1004,6 +1004,7 @@ AttrInfo File::getNextAttr() {
     AttrInfo info;
     info.name = NULL_STR;
     info.length = 0;
+    info.type = NXnumtype::BINARY; // junk value that shouldn't be checked for
     return info;
   } else {
     throw Exception("NXgetnextattra failed", status);
@@ -1095,8 +1096,7 @@ void File::getAttr(const std::string &name, std::vector<std::string> &array) {
   int type;
   int rank;
   int dim[NX_MAXRANK];
-  NXstatus status = NXgetattrainfo(this->m_file_id, attr_name, &rank, dim, &type);
-  if (status != NX_OK) {
+  if (NXgetattrainfo(this->m_file_id, attr_name, &rank, dim, &type) != NX_OK) {
     throw Exception("Attribute \"" + name + "\" not found");
   }
 
@@ -1107,7 +1107,8 @@ void File::getAttr(const std::string &name, std::vector<std::string> &array) {
   // read data
   std::string sep(", ");
   char *char_data = new char[dim[0] * (dim[1] + sep.size())];
-  status = NXgetattra(this->m_file_id, attr_name, char_data);
+  if (NXgetattra(this->m_file_id, attr_name, char_data) != NX_OK)
+    throw Exception("Could not iterate to next attribute");
 
   // split data to strings
   std::string data(char_data);
@@ -1291,10 +1292,14 @@ template <typename NumT> void File::malloc(NumT *&data, const Info &info) {
   if (getType<NumT>() != info.type) {
     throw Exception("Type mismatch in malloc()");
   }
+  // cppcheck-suppress cstyleCast
   inner_malloc((void *&)data, info.dims, info.type);
 }
 
-template <typename NumT> void File::free(NumT *&data) { inner_free((void *&)data); }
+template <typename NumT> void File::free(NumT *&data) {
+  // cppcheck-suppress cstyleCast
+  inner_free((void *&)data);
+}
 
 } // namespace NeXus
 

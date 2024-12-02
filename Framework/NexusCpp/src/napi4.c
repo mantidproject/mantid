@@ -72,7 +72,7 @@ static pNexusFile NXIassert(NXhandle fid) {
 }
 /*----------------------------------------------------------------------*/
 static int findNapiClass(pNexusFile pFile, int groupRef, NXname nxclass) {
-  NXname classText, linkClass;
+  NXname classText;
   int32 tags[2], attID, linkID, groupID;
 
   groupID = Vattach(pFile->iVID, groupRef, "r");
@@ -88,6 +88,7 @@ static int findNapiClass(pNexusFile pFile, int groupRef, NXname nxclass) {
     if (attID >= 0) {
       Vgetattr(groupID, attID, tags);
       linkID = Vattach(pFile->iVID, tags[1], "r");
+      NXname linkClass;
       Vgetclass(linkID, linkClass);
       Vdetach(groupID);
       Vdetach(linkID);
@@ -220,7 +221,6 @@ static int32 NXIFindSDS(NXhandle fid, CONSTCHAR *name) {
 /*----------------------------------------------------------------------*/
 
 static int NXIInitDir(pNexusFile self) {
-  int i;
   int32 iTag, iRef;
   int iStackPtr;
 
@@ -247,7 +247,7 @@ static int NXIInitDir(pNexusFile self) {
       NXReportError("ERROR: out of memory in NXIInitDir");
       return NX_EOD;
     }
-    for (i = 0; i < self->iStack[self->iStackPtr].iNDir; i++) {
+    for (int i = 0; i < self->iStack[self->iStackPtr].iNDir; i++) {
       Vgettagref(self->iCurrentVG, i, &iTag, &iRef);
       self->iStack[iStackPtr].iRefDir[i] = iRef;
       self->iStack[iStackPtr].iTagDir[i] = iTag;
@@ -278,10 +278,10 @@ static int NXIInitAttDir(pNexusFile pFile) {
   int iRet;
   int32 iData, iAtt, iRank, iType;
   int32 iDim[H4_MAX_VAR_DIMS];
-  NXname pNam;
 
   pFile->iAtt.iCurDir = 0;
   if (pFile->iCurrentSDS != 0) { /* SDS level */
+    NXname pNam;
     iRet = SDgetinfo(pFile->iCurrentSDS, pNam, &iRank, iDim, &iType, &iAtt);
   } else {
     if (pFile->iCurrentVG == 0) {
@@ -425,6 +425,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     /* set the NeXus_version attribute*/
     if (SDsetattr(pNew->iSID, "NeXus_version", DFNT_CHAR8, strlen(NEXUS_VERSION), NEXUS_VERSION) < 0) {
       NXReportError("ERROR: HDF failed to store NeXus_version attribute ");
+      free(pNew);
       return NX_ERROR;
     }
 
@@ -432,12 +433,14 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     Hgetlibversion(&lmajor, &lminor, &lrelease, HDF_VERSION);
     if (SDsetattr(pNew->iSID, "HDF_version", DFNT_CHAR8, strlen(HDF_VERSION), HDF_VERSION) < 0) {
       NXReportError("ERROR: HDF failed to store HDF_version attribute ");
+      free(pNew);
       return NX_ERROR;
     }
 
     /* set the filename attribute */
     if (SDsetattr(pNew->iSID, "file_name", DFNT_CHAR8, strlen(filename), (char *)filename) < 0) {
       NXReportError("ERROR: HDF failed to store file_name attribute ");
+      free(pNew);
       return NX_ERROR;
     }
 
@@ -446,6 +449,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     if (time_puffer != NULL) {
       if (SDsetattr(pNew->iSID, "file_time", DFNT_CHAR8, strlen(time_puffer), time_puffer) < 0) {
         NXReportError("ERROR: HDF failed to store file_time attribute ");
+        free(pNew);
         free(time_puffer);
         return NX_ERROR;
       }
@@ -454,6 +458,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
 
     if (SDsetattr(pNew->iSID, "NX_class", DFNT_CHAR8, 7, "NXroot") < 0) {
       NXReportError("ERROR: HDF failed to store NX_class attribute ");
+      free(pNew);
       return NX_ERROR;
     }
   }
@@ -462,6 +467,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
    * Otherwise we try to create the file two times which makes HDF
    * Throw up on us.
    */
+  // cppcheck-suppress duplicateCondition
   if (am == NXACC_CREATE || am == NXACC_CREATE4) {
     am = NXACC_RDWR;
     am1 = DFACC_RDWR;
@@ -571,12 +577,12 @@ NXstatus NX4makegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 NXstatus NX4opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   pNexusFile pFile;
   int32 iRef;
-  char pBuffer[256];
 
   pFile = NXIassert(fid);
 
   iRef = NXIFindVgroup(pFile, (char *)name, nxclass);
   if (iRef < 0) {
+    char pBuffer[256];
     sprintf(pBuffer, "ERROR: Vgroup \"%s\", class \"%s\" NOT found", name, nxclass);
     NXReportError(pBuffer);
     return NX_ERROR;
@@ -863,11 +869,10 @@ NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank
 
 NXstatus NX4compress(NXhandle fid, int compress_type) {
   pNexusFile pFile;
-  int32 iRank, iAtt, iType, iRet;
+  int32 iRank, iAtt, iType;
   int32 iSize[H4_MAX_VAR_DIMS];
   comp_coder_t compress_typei = COMP_CODE_NONE;
   NXname pBuffer;
-  char pError[512];
   comp_info compstruct;
   int compress_level = 6;
 
@@ -906,8 +911,9 @@ NXstatus NX4compress(NXhandle fid, int compress_type) {
     compstruct.skphuff.skp_size = DFKNTsize(iType);
   }
 
-  iRet = SDsetcompress(pFile->iCurrentSDS, compress_typei, &compstruct);
+  const int32 iRet = SDsetcompress(pFile->iCurrentSDS, compress_typei, &compstruct);
   if (iRet < 0) {
+    char pError[512];
     sprintf(pError, "ERROR: failure to compress data to %s", pBuffer);
     NXReportError(pError);
     return NX_ERROR;
@@ -920,14 +926,12 @@ NXstatus NX4compress(NXhandle fid, int compress_type) {
 NXstatus NX4opendata(NXhandle fid, CONSTCHAR *name) {
   pNexusFile pFile;
   int32 iNew, attID, tags[2];
-  char pBuffer[256];
-  int iRet;
-
   pFile = NXIassert(fid);
 
   /* First find the reference number of the SDS */
   iNew = NXIFindSDS(fid, name);
   if (iNew < 0) {
+    char pBuffer[256];
     sprintf(pBuffer, "ERROR: SDS \"%s\" not found at this level", name);
     NXReportError(pBuffer);
     return NX_ERROR;
@@ -936,7 +940,7 @@ NXstatus NX4opendata(NXhandle fid, CONSTCHAR *name) {
    * still an SDS open.
    */
   if (pFile->iCurrentSDS) {
-    iRet = SDendaccess(pFile->iCurrentSDS);
+    const int iRet = SDendaccess(pFile->iCurrentSDS);
     if (iRet < 0) {
       NXReportError("ERROR: HDF cannot end access to SDS");
     }
@@ -967,12 +971,10 @@ NXstatus NX4opendata(NXhandle fid, CONSTCHAR *name) {
 
 NXstatus NX4closedata(NXhandle fid) {
   pNexusFile pFile;
-  int iRet;
-
   pFile = NXIassert(fid);
 
   if (pFile->iCurrentSDS != 0) {
-    iRet = SDendaccess(pFile->iCurrentSDS);
+    int iRet = SDendaccess(pFile->iCurrentSDS);
     pFile->iCurrentSDS = 0;
     if (iRet < 0) {
       NXReportError("ERROR: HDF cannot end access to SDS");
@@ -992,8 +994,7 @@ NXstatus NX4putdata(NXhandle fid, const void *data) {
   pNexusFile pFile;
   int32 iStart[H4_MAX_VAR_DIMS], iSize[H4_MAX_VAR_DIMS], iStride[H4_MAX_VAR_DIMS];
   NXname pBuffer;
-  int32 iRank, iAtt, iType, iRet, i;
-  char pError[512];
+  int32 iRank, iAtt, iType;
 
   pFile = NXIassert(fid);
 
@@ -1007,14 +1008,15 @@ NXstatus NX4putdata(NXhandle fid, const void *data) {
   SDgetinfo(pFile->iCurrentSDS, pBuffer, &iRank, iSize, &iType, &iAtt);
 
   /* initialise stride to 1 */
-  for (i = 0; i < iRank; i++) {
+  for (int i = 0; i < iRank; i++) {
     iStride[i] = 1;
   }
 
   /* actually write */
-  iRet = SDwritedata(pFile->iCurrentSDS, iStart, iStride, iSize, (void *)data);
+  int32 iRet = SDwritedata(pFile->iCurrentSDS, iStart, iStride, iSize, (void *)data);
   if (iRet < 0) {
     /* HEprint(stdout,0); */
+    char pError[512];
     sprintf(pError, "ERROR: failure to write data to %s", pBuffer);
     NXReportError(pError);
     return NX_ERROR;
@@ -1063,7 +1065,7 @@ NXstatus NX4putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen
       iRet = Vsetattr(pFile->iCurrentVG, (char *)name, (int32)type, (int32)datalen, data);
     }
   }
-  iType = type;
+  iType = type; // TODO what is the intention here?
   if (iRet < 0) {
     NXReportError("ERROR: HDF failed to store attribute ");
     return NX_ERROR;
@@ -1167,7 +1169,6 @@ NXstatus NX4makelink(NXhandle fid, NXlink *sLink) {
 NXstatus NX4makenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
   pNexusFile pFile;
   int32 dataID, type = DFNT_CHAR8, length, dataType = NX_CHAR, rank = 1, attType = NX_INT32;
-  int64_t iDim[1];
   char name[] = "target";
   int tags[2];
 
@@ -1182,7 +1183,7 @@ NXstatus NX4makenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
 
   length = strlen(sLink->targetPath);
   if (sLink->iTag == DFTAG_SDG || sLink->iTag == DFTAG_NDG || sLink->iTag == DFTAG_SDS) {
-    iDim[0] = 1;
+    int64_t iDim[1] = {1};
     NX4makedata64(fid, newname, dataType, rank, iDim);
     NX4opendata(fid, newname);
     NX4putattr(fid, "NAPIlink", tags, 2, attType);
@@ -1258,6 +1259,7 @@ NXstatus NX4flush(NXhandle *pHandle) {
     iStack = pFile->iStackPtr + 1;
     iRefs = (int *)malloc(iStack * sizeof(int));
     if (!iRefs) {
+      free(pCopy); // do not leak memory
       NXReportError("ERROR: Failed to allocate data for hierarchy copy");
       return NX_ERROR;
     }
@@ -1292,7 +1294,7 @@ NXstatus NX4flush(NXhandle *pHandle) {
 
 NXstatus NX4getnextentry(NXhandle fid, NXname name, NXname nxclass, int *datatype) {
   pNexusFile pFile;
-  int iRet, iStackPtr, iCurDir;
+  int iStackPtr, iCurDir;
   int32 iTemp, iD1, iD2, iA;
   int32 iDim[H4_MAX_VAR_DIMS];
 
@@ -1303,8 +1305,7 @@ NXstatus NX4getnextentry(NXhandle fid, NXname name, NXname nxclass, int *datatyp
 
   /* first case to check for: no directory entry */
   if (pFile->iStack[pFile->iStackPtr].iRefDir == NULL) {
-    iRet = NXIInitDir(pFile);
-    if (iRet < 0) {
+    if (NXIInitDir(pFile) < 0) {
       NXReportError("ERROR: no memory to store directory info");
       return NX_EOD;
     }
@@ -1597,10 +1598,10 @@ NXstatus NX4getattrinfo(NXhandle fid, int *iN) {
   int iRet;
   int32 iData, iAtt, iRank, iType;
   int32 iDim[H4_MAX_VAR_DIMS];
-  NXname pNam;
 
   pFile = NXIassert(fid);
   if (pFile->iCurrentSDS != 0) { /* SDS level */
+    NXname pNam;
     iRet = SDgetinfo(pFile->iCurrentSDS, pNam, &iRank, iDim, &iType, &iAtt);
   } else {
     if (pFile->iCurrentVG == 0) {

@@ -158,11 +158,10 @@ int validNXName(const char *name, int allow_colon) {
   return 1;
 }
 
-static int64_t *dupDimsArray(int *dims_array, int rank) {
-  int i;
+static int64_t *dupDimsArray(int const *dims_array, int rank) {
   int64_t *dims64 = (int64_t *)malloc(rank * sizeof(int64_t));
   if (dims64 != NULL) {
-    for (i = 0; i < rank; ++i) {
+    for (int i = 0; i < rank; ++i) {
       dims64[i] = dims_array[i];
     }
   }
@@ -176,7 +175,7 @@ static int64_t *dupDimsArray(int *dims_array, int rank) {
 static char *nxgetenv(const char *name) { return getenv(name); }
 
 /*----------------------------------------------------------------------*/
-static int canOpen(char *filename) {
+static int canOpen(char const *filename) {
   FILE *fd = NULL;
 
   fd = fopen(filename, "r");
@@ -192,7 +191,6 @@ static int canOpen(char *filename) {
 static char *locateNexusFileInPath(char *startName) {
   char *loadPath = NULL, *testPath = NULL, *pPtr = NULL;
   char pathPrefix[256];
-  int length;
 
   if (canOpen(startName)) {
     return strdup(startName);
@@ -206,7 +204,7 @@ static char *locateNexusFileInPath(char *startName) {
 
   pPtr = stptok(loadPath, pathPrefix, 255, LIBSEP);
   while (pPtr != NULL) {
-    length = (int)strlen(pathPrefix) + (int)strlen(startName) + (int)strlen(PATHSEP) + 2;
+    int length = (int)strlen(pathPrefix) + (int)strlen(startName) + (int)strlen(PATHSEP) + 2;
     testPath = (char *)malloc(length * sizeof(char));
     if (testPath == NULL) {
       return strdup(startName);
@@ -295,7 +293,11 @@ extern ErrFunc NXMGetError() {
 }
 
 /*----------------------------------------------------------------------*/
-static void NXNXNoReport(void *pData, char *string) { /* do nothing */ }
+static void NXNXNoReport(void *pData, char *string) {
+  // do nothing but declare the variables unused
+  (void)pData;
+  (void)string;
+}
 
 /*----------------------------------------------------------------------*/
 
@@ -460,9 +462,9 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     backend_type = NXACC_CREATE5;
     filename = strdup(userfilename);
   } else if (my_am == NXACC_CREATEXML) {
-    snprintf(error, 1023, "xml backend not supported for %s", filename);
+    snprintf(error, 1023, "xml backend not supported for %s", userfilename);
     NXReportError(error);
-    free(filename);
+    free(fHandle);
     return NX_ERROR;
   } else {
     filename = locateNexusFileInPath((char *)userfilename);
@@ -477,6 +479,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
       snprintf(error, 1023, "failed to open %s for reading", filename);
       NXReportError(error);
       free(filename);
+      free(fHandle);
       return NX_ERROR;
     }
     if (iRet == 0) {
@@ -490,6 +493,7 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
   }
   if (filename == NULL) {
     NXReportError("Out of memory in NeXus-API");
+    free(fHandle);
     return NX_ERROR;
   }
 
@@ -545,6 +549,9 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
   }
   if (filename != NULL) {
     free(filename);
+  }
+  if (fHandle != NULL) {
+    free(fHandle);
   }
   return retstat;
 }
@@ -614,9 +621,9 @@ NXstatus NXclose(NXhandle *fid) {
 /*-----------------------------------------------------------------------*/
 
 NXstatus NXmakegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
-  char buffer[256];
   pNexusFunction pFunc = handleToNexusFunc(fid);
   if (pFunc->checkNameSyntax && (nxclass != NULL) /* && !strncmp("NX", nxclass, 2) */ && !validNXName(name, 0)) {
+    char buffer[256];
     sprintf(buffer, "ERROR: invalid characters in group name \"%s\"", name);
     NXReportError(buffer);
     return NX_ERROR;
@@ -671,7 +678,6 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   NXaccess access = NXACC_READ;
   NXlink breakID;
   pFileStack fileStack;
-  char nxurl[1024], exfile[512], expath[512];
   pNexusFunction pFunc = NULL;
 
   fileStack = (pFileStack)fid;
@@ -682,12 +688,13 @@ NXstatus NXopengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
     pushPath(fileStack, name);
   }
   NXMDisableErrorReporting();
+  char nxurl[1024];
   attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
   NXMEnableErrorReporting();
   if (attStatus == NX_OK) {
-    /*
-       this is an external linking group
-     */
+    // this is an external linking group
+    char exfile[512];
+    char expath[512];
     status = analyzeNapimount(nxurl, exfile, 511, expath, 511);
     if (status == NXBADURL) {
       return NX_ERROR;
@@ -747,9 +754,9 @@ NXstatus NXmakedata(NXhandle fid, CONSTCHAR *name, int datatype, int rank, int d
 }
 
 NXstatus NXmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank, int64_t dimensions[]) {
-  char buffer[256];
   pNexusFunction pFunc = handleToNexusFunc(fid);
   if (pFunc->checkNameSyntax && !validNXName(name, 0)) {
+    char buffer[256];
     sprintf(buffer, "ERROR: invalid characters in dataset name \"%s\"", name);
     NXReportError(buffer);
     return NX_ERROR;
@@ -772,9 +779,9 @@ NXstatus NXcompmakedata(NXhandle fid, CONSTCHAR *name, int datatype, int rank, i
 
 NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank, int64_t dimensions[],
                           int compress_type, int64_t chunk_size[]) {
-  char buffer[256];
   pNexusFunction pFunc = handleToNexusFunc(fid);
   if (pFunc->checkNameSyntax && !validNXName(name, 0)) {
+    char buffer[256];
     sprintf(buffer, "ERROR: invalid characters in dataset name \"%s\"", name);
     NXReportError(buffer);
     return NX_ERROR;
@@ -797,7 +804,6 @@ NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
   NXaccess access = NXACC_READ;
   NXlink breakID;
   pFileStack fileStack;
-  char nxurl[1024], exfile[512], expath[512];
   pNexusFunction pFunc = NULL;
 
   fileStack = (pFileStack)fid;
@@ -809,12 +815,13 @@ NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
   }
 
   NXMDisableErrorReporting();
+  char nxurl[1024];
   attStatus = NXgetattr(fid, "napimount", nxurl, &length, &type);
   NXMEnableErrorReporting();
   if (attStatus == NX_OK) {
-    /*
-       this is an external linking group
-     */
+    // this is an external linking group
+    char exfile[512];
+    char expath[512];
     status = analyzeNapimount(nxurl, exfile, 511, expath, 511);
     if (status == NXBADURL) {
       return NX_ERROR;
@@ -874,7 +881,6 @@ NXstatus NXputdata(NXhandle fid, const void *data) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NXputattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen, int iType) {
-  char buffer[256];
   pNexusFunction pFunc = handleToNexusFunc(fid);
   if (datalen > 1 && iType != NX_CHAR) {
     NXReportError(
@@ -882,6 +888,7 @@ NXstatus NXputattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen,
     return NX_ERROR;
   }
   if (pFunc->checkNameSyntax && !validNXName(name, 0)) {
+    char buffer[256];
     sprintf(buffer, "ERROR: invalid characters in attribute name \"%s\"", name);
     NXReportError(buffer);
     return NX_ERROR;
@@ -926,9 +933,9 @@ NXstatus NXmakelink(NXhandle fid, NXlink *sLink) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NXmakenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
-  char buffer[256];
   pNexusFunction pFunc = handleToNexusFunc(fid);
   if (pFunc->checkNameSyntax && !validNXName(newname, 0)) {
+    char buffer[256];
     sprintf(buffer, "ERROR: invalid characters in link name \"%s\"", newname);
     NXReportError(buffer);
     return NX_ERROR;
@@ -968,9 +975,8 @@ NXstatus NXflush(NXhandle *pHandle) {
 /*-------------------------------------------------------------------------*/
 
 NXstatus NXmalloc(void **data, int rank, const int dimensions[], int datatype) {
-  int status;
   int64_t *dims64 = dupDimsArray((int *)dimensions, rank);
-  status = NXmalloc64(data, rank, dims64, datatype);
+  int status = NXmalloc64(data, rank, dims64, datatype);
   free(dims64);
   return status;
 }
@@ -1036,26 +1042,16 @@ NXstatus NXgetnextentry(NXhandle fid, NXname name, NXname nxclass, int *datatype
 #define NUL '\0'
 
 char *nxitrim(char *str) {
-  char *ibuf = str;
-  int i = 0;
-
-  /*
-   **  Trap NULL
-   */
-
+  // Trap NULL
   if (str) {
-    /*
-     **  Remove leading spaces (from RMLEAD.C)
-     */
-
+    //  Remove leading spaces (from RMLEAD.C)
+    char *ibuf = str;
     for (ibuf = str; *ibuf && isspace(*ibuf); ++ibuf)
       ;
     str = ibuf;
 
-    /*
-     **  Remove trailing spaces (from RMTRAIL.C)
-     */
-    i = (int)strlen(str);
+    // Remove trailing spaces (from RMTRAIL.C)
+    int i = (int)strlen(str);
     while (--i >= 0) {
       if (!isspace(str[i]))
         break;
@@ -1070,15 +1066,16 @@ char *nxitrim(char *str) {
 NXstatus NXgetdata(NXhandle fid, void *data) {
   int status, type, rank;
   int64_t iDim[NX_MAXRANK];
-  char *pPtr, *pPtr2;
 
   pNexusFunction pFunc = handleToNexusFunc(fid);
   status = LOCKED_CALL(pFunc->nxgetinfo64(pFunc->pNexusData, &rank, iDim, &type)); /* unstripped size if string */
   /* only strip one dimensional strings */
   if ((type == NX_CHAR) && (pFunc->stripFlag == 1) && (rank == 1)) {
+    char *pPtr;
     pPtr = (char *)malloc((size_t)iDim[0] + 5);
     memset(pPtr, 0, (size_t)iDim[0] + 5);
     status = LOCKED_CALL(pFunc->nxgetdata(pFunc->pNexusData, pPtr));
+    char const *pPtr2;
     pPtr2 = nxitrim(pPtr);
     strncpy((char *)data, pPtr2, strlen(pPtr2)); /* not NULL terminated by default */
     free(pPtr);
@@ -1233,13 +1230,11 @@ NXstatus NXinitgroupdir(NXhandle fid) {
 /*----------------------------------------------------------------------*/
 NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength) {
   pFileStack fileStack;
-  char *pPtr = NULL;
-  int length, status;
 
   pNexusFunction pFunc = handleToNexusFunc(handle);
   if (pFunc->nxnativeinquirefile != NULL) {
 
-    status = LOCKED_CALL(pFunc->nxnativeinquirefile(pFunc->pNexusData, filename, filenameBufferLength));
+    int status = LOCKED_CALL(pFunc->nxnativeinquirefile(pFunc->pNexusData, filename, filenameBufferLength));
     if (status < 0) {
       return NX_ERROR;
     } else {
@@ -1248,9 +1243,10 @@ NXstatus NXinquirefile(NXhandle handle, char *filename, int filenameBufferLength
   }
 
   fileStack = (pFileStack)handle;
+  char const *pPtr = NULL;
   pPtr = peekFilenameOnStack(fileStack);
   if (pPtr != NULL) {
-    length = (int)strlen(pPtr);
+    int length = (int)strlen(pPtr);
     if (length > filenameBufferLength) {
       length = filenameBufferLength - 1;
     }
@@ -1336,18 +1332,20 @@ NXstatus NXisexternaldataset(NXhandle fid, CONSTCHAR *name, char *url, int urlLe
 
 /*------------------------------------------------------------------------*/
 NXstatus NXlinkexternal(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass, CONSTCHAR *url) {
-  int status, type = NX_CHAR, length = 1024, urllen;
-  char nxurl[1024], exfile[512], expath[512];
+  int status, type = NX_CHAR, length = 1024;
   pNexusFunction pFunc = handleToNexusFunc(fid);
 
   // in HDF5 we support external linking natively
   if (pFunc->nxnativeexternallink != NULL) {
-    urllen = (int)strlen(url);
+    int urllen = (int)strlen(url);
+    char nxurl[1024];
     memset(nxurl, 0, length);
     if (urllen >= length) {
       urllen = length - 1;
     }
     memcpy(nxurl, url, urllen);
+    char exfile[512];
+    char expath[512];
     status = analyzeNapimount(nxurl, exfile, 511, expath, 511);
     if (status != NX_OK) {
       return status;
@@ -1378,8 +1376,7 @@ NXstatus NXlinkexternal(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass, CONST
 
 /*------------------------------------------------------------------------*/
 NXstatus NXlinkexternaldataset(NXhandle fid, CONSTCHAR *name, CONSTCHAR *url) {
-  int status, type = NX_CHAR, length = 1024, urllen;
-  char nxurl[1024], exfile[512], expath[512];
+  int status, type = NX_CHAR, length = 1024;
   pNexusFunction pFunc = handleToNexusFunc(fid);
   int rank = 1;
   int64_t dims[1] = {1};
@@ -1388,12 +1385,15 @@ NXstatus NXlinkexternaldataset(NXhandle fid, CONSTCHAR *name, CONSTCHAR *url) {
 
   // in HDF5 we support external linking natively
   if (pFunc->nxnativeexternallink != NULL) {
-    urllen = (int)strlen(url);
+    int urllen = (int)strlen(url);
+    char nxurl[1024];
     memset(nxurl, 0, length);
     if (urllen > length) {
       urllen = length - 1;
     }
     memcpy(nxurl, url, urllen);
+    char exfile[512];
+    char expath[512];
     status = analyzeNapimount(nxurl, exfile, 511, expath, 511);
     if (status != NX_OK) {
       return status;
@@ -1459,9 +1459,7 @@ static int isRoot(NXhandle hfil) {
   returns a pointer into path beyond the extracted path
   ---------------------------------------------------------------------*/
 static char *extractNextPath(char *path, NXname element) {
-  char *pPtr, *pStart;
-  int length;
-
+  char *pPtr;
   pPtr = path;
   /*
      skip over leading /
@@ -1469,6 +1467,7 @@ static char *extractNextPath(char *path, NXname element) {
   if (*pPtr == '/') {
     pPtr++;
   }
+  char const *pStart;
   pStart = pPtr;
 
   /*
@@ -1482,7 +1481,7 @@ static char *extractNextPath(char *path, NXname element) {
     strcpy(element, pStart);
     return NULL;
   } else {
-    length = (int)(pPtr - pStart);
+    size_t length = (size_t)(pPtr - pStart);
     strncpy(element, pStart, length);
     element[length] = '\0';
   }
@@ -1509,7 +1508,7 @@ static NXstatus gotoRoot(NXhandle hfil) {
 }
 
 /*--------------------------------------------------------------------*/
-static int isRelative(char *path) {
+static int isRelative(char const *path) {
   if (path[0] == '.' && path[1] == '.')
     return 1;
   else
@@ -1529,18 +1528,16 @@ static NXstatus moveOneDown(NXhandle hfil) {
   returns a pointer to the remaining path string to move up
   --------------------------------------------------------------------*/
 static char *moveDown(NXhandle hfil, char *path, int *code) {
-  int status;
-  char *pPtr;
-
   *code = NX_OK;
 
   if (path[0] == '/') {
     *code = gotoRoot(hfil);
     return path;
   } else {
+    char *pPtr;
     pPtr = path;
     while (isRelative(pPtr)) {
-      status = moveOneDown(hfil);
+      int status = moveOneDown(hfil);
       if (status == NX_ERROR) {
         *code = status;
         return pPtr;
@@ -1552,7 +1549,7 @@ static char *moveDown(NXhandle hfil, char *path, int *code) {
 }
 
 /*--------------------------------------------------------------------*/
-static NXstatus stepOneUp(NXhandle hfil, char *name) {
+static NXstatus stepOneUp(NXhandle hfil, char const *name) {
   int datatype;
   NXname name2, xclass;
   char pBueffel[256];
@@ -1582,7 +1579,7 @@ static NXstatus stepOneUp(NXhandle hfil, char *name) {
 }
 
 /*--------------------------------------------------------------------*/
-static NXstatus stepOneGroupUp(NXhandle hfil, char *name) {
+static NXstatus stepOneGroupUp(NXhandle hfil, char const *name) {
   int datatype;
   NXname name2, xclass;
   char pBueffel[256];
@@ -1748,9 +1745,9 @@ char *NXIformatNeXusTime() {
   time_info = localtime(&timer);
   if (time_info != NULL) {
     if (gmt_offset < 0) {
-      time_format = "%04d-%02d-%02dT%02d:%02d:%02d-%02d:%02d";
+      time_format = "%04d-%02d-%02dT%02d:%02d:%02d-%02ld:%02ld";
     } else {
-      time_format = "%04d-%02d-%02dT%02d:%02d:%02d+%02d:%02d";
+      time_format = "%04d-%02d-%02dT%02d:%02d:%02d+%02ld:%02ld";
     }
     sprintf(time_buffer, time_format, 1900 + time_info->tm_year, 1 + time_info->tm_mon, time_info->tm_mday,
             time_info->tm_hour, time_info->tm_min, time_info->tm_sec, labs(gmt_offset / 3600),
