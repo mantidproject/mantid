@@ -31,7 +31,7 @@
 #include "MantidNexusCpp/napi.h"
 #include "MantidNexusCpp/napiconfig.h"
 
-static void print_data(const char *prefix, void *data, int type, int num);
+static void print_data(const char *prefix, const void *data, const int type, const int num);
 
 int createAttrs(const NXhandle file) {
   int array_dims[2] = {5, 4};
@@ -175,7 +175,7 @@ int main(int argc, char *argv[]) {
 
       if (strcmp(name, "file_time") && strcmp(name, "NeXus_version") && strcmp(name, "HDF_version") &&
           strcmp(name, "HDF5_Version") && strcmp(name, "XML_version")) {
-        1;
+        // do nothing
       } else {
         fprintf(stderr, "\tskipping over %s as the value is not controlled by this test!\n", name);
         continue;
@@ -262,34 +262,34 @@ int main(int argc, char *argv[]) {
 }
 
 /*----------------------------------------------------------------------*/
-static void print_data(const char *prefix, void *data, int type, int num) {
+static void print_data(const char *prefix, const void *data, const int type, const int num) {
   int i;
   fprintf(stderr, "%s", prefix);
   for (i = 0; i < num; i++) {
     switch (type) {
     case NX_CHAR:
-      fprintf(stderr, "%c", ((char *)data)[i]);
+      fprintf(stderr, "%c", ((const char *)data)[i]);
       break;
     case NX_INT8:
-      fprintf(stderr, " %d", ((unsigned char *)data)[i]);
+      fprintf(stderr, " %d", ((const unsigned char *)data)[i]);
       break;
     case NX_INT16:
-      fprintf(stderr, " %d", ((short *)data)[i]);
+      fprintf(stderr, " %d", ((const short *)data)[i]);
       break;
     case NX_INT32:
-      fprintf(stderr, " %d", ((int *)data)[i]);
+      fprintf(stderr, " %d", ((const int *)data)[i]);
       break;
     case NX_INT64:
-      fprintf(stderr, " %lld", (long long)((int64_t *)data)[i]);
+      fprintf(stderr, " %lld", (const long long)((const int64_t *)data)[i]);
       break;
     case NX_UINT64:
-      fprintf(stderr, " %llu", (unsigned long long)((uint64_t *)data)[i]);
+      fprintf(stderr, " %llu", (const unsigned long long)((const uint64_t *)data)[i]);
       break;
     case NX_FLOAT32:
-      fprintf(stderr, " %f", ((float *)data)[i]);
+      fprintf(stderr, " %f", ((const float *)data)[i]);
       break;
     case NX_FLOAT64:
-      fprintf(stderr, " %f", ((double *)data)[i]);
+      fprintf(stderr, " %f", ((const double *)data)[i]);
       break;
     default:
       fprintf(stderr, " (print_data: invalid type %d)", type);

@@ -64,8 +64,8 @@ int main(int argc, char *argv[]) {
   int unlimited_dims[1] = {NX_UNLIMITED};
   int chunk_size[2] = {5, 4};
   int slab_start[2], slab_size[2];
-  char name[64], char_class[64], char_buffer[128];
-  char group_name[64], class_name[64];
+  char name[NX_MAXNAMELEN], char_class[NX_MAXNAMELEN], char_buffer[128];
+  char group_name[NX_MAXNAMELEN], class_name[NX_MAXNAMELEN];
   char c1_array[5][4] = {
       {'a', 'b', 'c', 'd'}, {'e', 'f', 'g', 'h'}, {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'}, {'q', 'r', 's', 't'}};
   int unlimited_cdims[2] = {NX_UNLIMITED, 4};
@@ -773,35 +773,35 @@ static void print_data(const char *prefix, const void *data, int type, int num) 
   for (i = 0; i < num; i++) {
     switch (type) {
     case NX_CHAR:
-      printf("%c", ((char *)data)[i]);
+      printf("%c", ((const char *)data)[i]);
       break;
 
     case NX_INT8:
-      printf(" %d", ((unsigned char *)data)[i]);
+      printf(" %d", ((const unsigned char *)data)[i]);
       break;
 
     case NX_INT16:
-      printf(" %d", ((short *)data)[i]);
+      printf(" %d", ((const short *)data)[i]);
       break;
 
     case NX_INT32:
-      printf(" %d", ((int *)data)[i]);
+      printf(" %d", ((const int *)data)[i]);
       break;
 
     case NX_INT64:
-      printf(" %lld", (long long)((int64_t *)data)[i]);
+      printf(" %lld", (const long long)((const int64_t *)data)[i]);
       break;
 
     case NX_UINT64:
-      printf(" %llu", (unsigned long long)((uint64_t *)data)[i]);
+      printf(" %llu", (const unsigned long long)((const uint64_t *)data)[i]);
       break;
 
     case NX_FLOAT32:
-      printf(" %f", ((float *)data)[i]);
+      printf(" %f", ((const float *)data)[i]);
       break;
 
     case NX_FLOAT64:
-      printf(" %f", ((double *)data)[i]);
+      printf(" %f", ((const double *)data)[i]);
       break;
 
     default:
