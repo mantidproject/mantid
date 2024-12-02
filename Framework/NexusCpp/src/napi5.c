@@ -25,7 +25,7 @@
 
 #define H5Aiterate_vers 2
 
-#include "MantidNexusCpp/nxconfig.h"
+#include "MantidNexusCpp/napiconfig.h"
 
 #ifdef WITH_HDF5
 
