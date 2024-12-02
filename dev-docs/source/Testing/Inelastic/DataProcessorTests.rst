@@ -46,10 +46,12 @@ Symmetrise tab
 :math:`S(Q, \omega)` tab
 ------------------------
 
-**Time required 5-10 minutes**
+**Time required 10-15 minutes**
 
 --------------
 
+1. ISIS data
+############
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``Data Processor``
 #. Go to the ``S(Q,w)`` tab
@@ -67,6 +69,20 @@ Symmetrise tab
 #. The resulting 3D plot should range in the Energy Transfer axis from -0.2 to 0.2 :math:`meV`.
 #. Don't remove yet the workspace with suffix ``_sqw`` from the ADS as you will use it for the Moments interface test.
 #. Repeat instructions 4 to 10, but loading instead the ``MAR27691_red.nxs`` file from the ISIS Sample Data set.
+
+2. ILL data
+###########
+
+#. Go to ``Interfaces`` > ``Inelastic`` > ``Data Processor``
+#. Go to the ``S(Q,w)`` tab
+#. Open the Settings widget from the bottom left of the interface, and untick `Restrict allowed input files by name (recommended)`
+#. On the File Input, click on ``Browse``, a dialog window should prompt.
+#. Find the file ``243489-243506ElwinHeat_H2O-HSA-stw.nxs`` from the SystemTest data directory and Load it.
+#. The data will be plot as a contour plot in the interface.
+#. The `Q Low`, `Q Width` and `Q High` will be automatically set to 0.2, 0.05 and 2.25 respectively.
+#. Click `Run` button.
+#. There should be two new workspaces in the ADS with the prefixes ``_sqw`` and ``_rqw``.
+#. Open the Settings widget from the bottom left of the interface, and tick `Restrict allowed input files by name (recommended)`
 
 .. _sqw_inelastic_test:
 

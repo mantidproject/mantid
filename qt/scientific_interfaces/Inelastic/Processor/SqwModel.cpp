@@ -7,7 +7,10 @@
 #include "SqwModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
@@ -27,10 +30,12 @@ using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
 namespace {
-void convertToSpectrumAxis(std::string const &inputName, std::string const &outputName) {
+auto &ads = AnalysisDataService::Instance();
+
+void convertSpectrumAxis(MatrixWorkspace_sptr const &inputWorkspace, std::string const &outputName) {
   auto converter = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
   converter->initialize();
-  converter->setProperty("InputWorkspace", inputName);
+  converter->setProperty("InputWorkspace", inputWorkspace);
   converter->setProperty("OutputWorkspace", outputName);
   converter->setProperty("Target", "ElasticQ");
   converter->setProperty("EMode", "Indirect");
@@ -75,7 +80,11 @@ API::IConfiguredAlgorithm_sptr SqwModel::setupSofQWAlgorithm() const {
   sqwInputProps->setProperty("Method", "NormalisedPolygon");
   sqwInputProps->setProperty("ReplaceNaNs", true);
 
-  sqwInputProps->setPropertyValue("InputWorkspace", m_rebinInEnergy ? eRebinWsName : m_inputWorkspace);
+  if (m_rebinInEnergy) {
+    sqwInputProps->setProperty("InputWorkspace", eRebinWsName);
+  } else {
+    sqwInputProps->setProperty("InputWorkspace", m_inputWorkspace);
+  }
 
   MantidQt::API::IConfiguredAlgorithm_sptr qwAlg =
       std::make_shared<MantidQt::API::ConfiguredAlgorithm>(sqwAlg, std::move(sqwInputProps));
@@ -99,10 +108,18 @@ API::IConfiguredAlgorithm_sptr SqwModel::setupAddSampleLogAlgorithm() const {
 }
 
 void SqwModel::setInputWorkspace(const std::string &workspace) {
-  m_inputWorkspace = workspace;
-  // remove _red suffix from inpur workspace for outputs
-  m_baseName = m_inputWorkspace.substr(0, m_inputWorkspace.find("_red", m_inputWorkspace.length() - 4));
+  m_inputWorkspace = ads.retrieveWS<MatrixWorkspace>(workspace);
+
+  if (!m_inputWorkspace->getAxis(1)->isSpectra()) {
+    auto spectraAxis = std::make_unique<SpectraAxis>(m_inputWorkspace.get());
+    m_inputWorkspace->replaceAxis(1, std::move(spectraAxis));
+  }
+
+  // remove _red suffix from input workspace for outputs
+  m_baseName = workspace.substr(0, workspace.find("_red", workspace.length() - 4));
 }
+
+MatrixWorkspace_sptr SqwModel::inputWorkspace() const { return m_inputWorkspace; }
 
 void SqwModel::setQMin(double qMin) { m_qLow = qMin; }
 
@@ -125,8 +142,8 @@ bool SqwModel::isRebinInEnergy() const { return m_rebinInEnergy; }
 std::string SqwModel::getOutputWorkspace() const { return m_baseName + "_sqw"; }
 
 MatrixWorkspace_sptr SqwModel::getRqwWorkspace() const {
-  auto const outputName = m_inputWorkspace.substr(0, m_inputWorkspace.size() - 4) + "_rqw";
-  convertToSpectrumAxis(m_inputWorkspace, outputName);
+  auto const outputName = m_baseName + "_rqw";
+  convertSpectrumAxis(m_inputWorkspace, outputName);
   return getADSWorkspace(outputName);
 }
 
