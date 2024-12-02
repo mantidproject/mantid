@@ -72,7 +72,7 @@ add_test(NAME "${TEST_PREFIX}-C-HDF5-attra-test" COMMAND napi_attra_test_hdf5)
 # if (WIN32) set_property(TEST "${TEST_PREFIX}-C-HDF5-test" "${TEST_PREFIX}-C-HDF5-attra-test" APPEND PROPERTY
 # ENVIRONMENT "PATH=${TESTSPATH}") endif(WIN32)
 
-add_executable(napi_test_cpp-hdf5 EXCLUDE_FROM_ALL test/napi_test_cpp.cxx)
+add_executable(napi_test_cpp-hdf5 EXCLUDE_FROM_ALL test/napi_test_cpp.cpp)
 target_link_libraries(napi_test_cpp-hdf5 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-Cpp-HDF5-test" COMMAND napi_test_cpp-hdf5)
 
@@ -96,7 +96,7 @@ set_tests_properties("${TEST_PREFIX}-C-HDF4-attra-test" PROPERTIES WILL_FAIL TRU
 # if(WIN32) set_property( TEST "${TEST_PREFIX}-C-HDF4-test" "${TEST_PREFIX}-C-HDF4-attra-test" APPEND PROPERTY
 # ENVIRONMENT "PATH=${TESTSPATH}" ) endif(WIN32)
 
-add_executable(napi_test_cpp-hdf4 EXCLUDE_FROM_ALL test/napi_test_cpp.cxx)
+add_executable(napi_test_cpp-hdf4 EXCLUDE_FROM_ALL test/napi_test_cpp.cpp)
 target_link_libraries(napi_test_cpp-hdf4 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-Cpp-HDF4-test" COMMAND napi_test_cpp-hdf4)
 
@@ -125,7 +125,7 @@ add_test(NAME "${TEST_PREFIX}-C-leak-test-1" COMMAND napi_leak_test1)
 # if (WIN32) set_property(TEST "${TEST_PREFIX}-C-leak-test-1" APPEND PROPERTY ENVIRONMENT "PATH=${TESTSPATH}")
 # endif(WIN32)
 
-add_executable(napi_leak_test2 EXCLUDE_FROM_ALL test/leak_test2.cxx)
+add_executable(napi_leak_test2 EXCLUDE_FROM_ALL test/leak_test2.cpp)
 target_link_libraries(napi_leak_test2 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-Cpp-leak-test-2" COMMAND napi_leak_test2)
 
@@ -133,7 +133,7 @@ add_test(NAME "${TEST_PREFIX}-Cpp-leak-test-2" COMMAND napi_leak_test2)
 
 # if (WIN32) set_property(TEST "NAPI-C++-leak-test-2" APPEND PROPERTY ENVIRONMENT "PATH=${TESTSPATH}") endif(WIN32)
 
-add_executable(napi_leak_test3 EXCLUDE_FROM_ALL test/leak_test3.cxx)
+add_executable(napi_leak_test3 EXCLUDE_FROM_ALL test/leak_test3.cpp)
 target_link_libraries(napi_leak_test3 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-Cpp-leak-test-3" COMMAND napi_leak_test3)
 
