@@ -25,7 +25,7 @@
 
 ----------------------------------------------------------------------------*/
 
-#include "MantidNexusCpp/nxconfig.h"
+#include "MantidNexusCpp/napiconfig.h"
 
 #ifdef WITH_HDF4
 

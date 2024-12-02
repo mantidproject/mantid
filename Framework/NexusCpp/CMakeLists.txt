@@ -19,7 +19,6 @@ set(INC_FILES
     inc/MantidNexusCpp/NeXusException.hpp
     inc/MantidNexusCpp/NeXusFile.hpp
     inc/MantidNexusCpp/nx_stptok.h
-    inc/MantidNexusCpp/nxconfig.h
     inc/MantidNexusCpp/nxstack.h
 )
 
