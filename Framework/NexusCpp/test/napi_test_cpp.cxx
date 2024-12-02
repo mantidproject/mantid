@@ -33,7 +33,7 @@ static std::string relativePathOf(const std::string &filenamestr) {
   }
 }
 
-static int writeTest(const string &filename, NXaccess create_code) {
+static void writeTest(const string &filename, NXaccess create_code) {
   NeXus::File file(filename, create_code);
   // create group
   file.makeGroup("entry", "NXentry", true);
@@ -55,21 +55,21 @@ static int writeTest(const string &filename, NXaccess create_code) {
 
   // 1d uint8 array
   vector<uint8_t> i1_array;
-  for (size_t i = 0; i < 4; i++) {
+  for (uint8_t i = 0; i < 4; i++) {
     i1_array.push_back(static_cast<uint8_t>(i + 1));
   }
   file.writeData("i1_data", i1_array);
 
   // 1d int16 array
   vector<int16_t> i2_array;
-  for (size_t i = 0; i < 4; i++) {
-    i2_array.push_back(1000 * (i + 1));
+  for (int16_t i = 0; i < 4; i++) {
+    i2_array.push_back(static_cast<int16_t>(1000 * (i + 1)));
   }
   file.writeData("i2_data", i2_array);
 
   // 1d int32 data
   vector<int32_t> i4_array;
-  for (size_t i = 0; i < 4; i++) {
+  for (int32_t i = 0; i < 4; i++) {
     i4_array.push_back(1000000 * (i + 1));
   }
   file.writeData("i4_data", i4_array);
@@ -204,8 +204,6 @@ static int writeTest(const string &filename, NXaccess create_code) {
   file.makeLink(glink);
   file.makeNamedLink("renLinkGroup", glink);
   file.makeNamedLink("renLinkData", link);
-
-  return 0;
 }
 
 template <typename NumT> string toString(const vector<NumT> &data) {
@@ -469,10 +467,10 @@ int testLoadPath(const string &filename) {
   }
 }
 
-int testExternal(const string &fileext, NXaccess create_code) {
-  string filename("nxext_cpp" + fileext);
-  string exturl1("nxfile://data/dmc01" + fileext + "#entry1");
-  string exturl2("nxfile://data/dmc02" + fileext + "#entry1");
+void testExternal(const string &fileext, NXaccess create_code) {
+  const string filename("nxext_cpp" + fileext);
+  const string exturl1("nxfile://data/dmc01" + fileext + "#entry1");
+  const string exturl2("nxfile://data/dmc02" + fileext + "#entry1");
 
   // create the external link
   NeXus::File fileout(filename, create_code);
@@ -492,8 +490,6 @@ int testExternal(const string &fileext, NXaccess create_code) {
   cout << "Second file time: " << filein.getStrData() << endl;
   filein.openPath("/");
   cout << "entry1 external URL = " << filein.isExternalGroup("entry1", "NXentry") << endl;
-
-  return 0;
 }
 
 int testTypeMap(const std::string &fname) {
@@ -538,9 +534,11 @@ int main(int argc, char **argv) {
     extfile_ext = ".hdf";
   }
 
-  if (int result = writeTest(filename, nx_creation_code)) {
-    cout << "writeTest failed" << endl;
-    return result;
+  try {
+    writeTest(filename, nx_creation_code);
+  } catch (const std::runtime_error &e) {
+    cout << "writeTest failed:\n" << e.what() << endl;
+    return 1;
   }
   if ((argc >= 2) && !strcmp(argv[1], "-q")) {
     return 0; //
@@ -559,9 +557,11 @@ int main(int argc, char **argv) {
   }
 
   // try external linking
-  if (int result = testExternal(extfile_ext, nx_creation_code)) {
-    cout << "testExternal failed" << endl;
-    return result;
+  try {
+    testExternal(extfile_ext, nx_creation_code);
+  } catch (const std::runtime_error &e) {
+    cout << "testExternal failed:\n" << e.what() << endl;
+    return 1;
   }
 
   // test of typemap generation
