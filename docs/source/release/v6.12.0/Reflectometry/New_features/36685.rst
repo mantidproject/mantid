@@ -1,0 +1,1 @@
+- Group workspaces subject to polarization efficiency correction algorithms will be saved with the spin state in ORSO format in the :ref:`algm-SaveISISReflectometryORSO` algorithm.
