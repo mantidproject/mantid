@@ -16,7 +16,7 @@ int array_dims[2] = {5, 4};
 short int i2_array[4] = {1000, 2000, 3000, 4000};
 int iFile, iReOpen, iEntry, iData, iNXdata, iSimpleArraySize = 4;
 
-int main(int argc, char *argv[]) {
+int main() {
   printf("Running for %d iterations\n", nFiles);
   NXaccess access_mode = NXACC_CREATE5;
   char strFile[512];
