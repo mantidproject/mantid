@@ -1467,7 +1467,7 @@ static char *extractNextPath(char *path, NXname element) {
   if (*pPtr == '/') {
     pPtr++;
   }
-  char const *pStart;
+  char *pStart;
   pStart = pPtr;
 
   /*

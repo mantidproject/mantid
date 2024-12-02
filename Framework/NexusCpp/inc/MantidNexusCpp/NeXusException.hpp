@@ -32,7 +32,7 @@ public:
    *
    * \return the message associated with the exception
    */
-  virtual const char *what() const throw();
+  virtual const char *what() const throw() override;
   /**
    * Get the status associated with the exception
    *

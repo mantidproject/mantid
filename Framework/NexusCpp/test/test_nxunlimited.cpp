@@ -34,7 +34,7 @@
 #define DATA_SIZE 200000
 
 int test_unlimited(int file_type, const char *filename) {
-  const static double d[DATA_SIZE];
+  static double d[DATA_SIZE];
   int dims[2] = {NX_UNLIMITED, DATA_SIZE};
   int i, slab_start[2], slab_size[2];
   NXhandle file_id = NULL;
@@ -59,7 +59,7 @@ int test_unlimited(int file_type, const char *filename) {
   return 0;
 }
 
-int main(int argc, char *argv[]) {
+int main() {
   time_t tim;
 #ifdef WITH_HDF4
   printf("Testing HDF4\n");

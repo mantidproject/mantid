@@ -30,6 +30,7 @@
 #ifdef WITH_HDF5
 
 #include <assert.h>
+#include <cstring>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -114,7 +115,7 @@ static herr_t readStringAttribute(hid_t attr, char **data) {
       iRet = H5Aread(attr, btype, data);
       H5Tclose(btype);
     } else {
-      *data = malloc(sdim + 1);
+      *data = (char *)malloc(sdim + 1);
       iRet = H5Aread(attr, atype, *data);
       (*data)[sdim] = '\0';
     }
@@ -132,7 +133,7 @@ static herr_t readStringAttribute(hid_t attr, char **data) {
     }
 
     iRet = H5Aread(attr, atype, strings[0]);
-    *data = calloc((sdim + 2) * thedims[0], sizeof(char));
+    *data = (char *)calloc((sdim + 2) * thedims[0], sizeof(char));
     for (i = 0; i < thedims[0]; i++) {
       if (i == 0) {
         strncpy(*data, strings[i], sdim);
@@ -1351,9 +1352,9 @@ NXstatus NX5flush(NXhandle *pHandle) {
 
 herr_t nxgroup_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, void *op_data) {
   pinfo self = (pinfo)op_data;
-  H5O_info_t object_info;
-  // TODO use new version of method rather than v1
-  H5Oget_info_by_name1(loc_id, name, &object_info, H5P_DEFAULT);
+  H5O_info1_t object_info;
+  // TODO use new version of method rather than v2
+  H5Oget_info_by_name2(loc_id, name, &object_info, H5O_INFO_ALL, H5P_DEFAULT);
   switch ((object_info).type) {
   case H5O_TYPE_GROUP:
     self->iname = strdup(name);
@@ -1377,9 +1378,9 @@ herr_t nxgroup_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, v
 
 herr_t group_info1(hid_t loc_id, const char *name, const H5L_info_t *statbuf, void *opdata) {
   int iNX = *((int *)opdata);
-  H5O_info_t object_info;
-  // TODO use new version of method rather than v1
-  H5Oget_info_by_name1(loc_id, name, &object_info, H5P_DEFAULT);
+  H5O_info1_t object_info;
+  // TODO use new version of method rather than v2
+  H5Oget_info_by_name2(loc_id, name, &object_info, H5O_INFO_ALL, H5P_DEFAULT);
   switch ((object_info).type) {
   case H5O_TYPE_GROUP:
     iNX++;
@@ -1758,10 +1759,10 @@ NXstatus NX5getdata(NXhandle fid, void *data) {
     tclass = H5Tget_class(datatype);
 
     if (H5Tis_variable_str(pFile->iCurrentT)) {
-      char *strdata = calloc(512, sizeof(char));
+      char *strdata = (char *)calloc(512, sizeof(char));
       status = H5Dread(pFile->iCurrentD, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &strdata);
       if (status >= 0)
-        strncpy(data, strdata, strlen(strdata));
+        std::strncpy((char *)data, strdata, strlen(strdata));
       free(strdata);
     } else {
       memtype_id = H5Screate(H5S_SCALAR);
@@ -2026,7 +2027,7 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, in
 
   /* finally read the data */
   if (type == H5T_C_S1) {
-    iRet = readStringAttributeN(pFile->iCurrentA, data, *datalen);
+    iRet = readStringAttributeN(pFile->iCurrentA, (char *)data, *datalen);
     *datalen = (int)strlen((char *)data);
   } else {
     iRet = H5Aread(pFile->iCurrentA, type, data);
@@ -2052,7 +2053,7 @@ NXstatus NX5getattrinfo(NXhandle fid, int *iN) {
   pNexusFile5 pFile;
   int idx;
   hid_t vid;
-  H5O_info_t oinfo;
+  H5O_info1_t oinfo;
 
   pFile = NXI5assert(fid);
   idx = 0;
@@ -2315,7 +2316,7 @@ NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], in
   char *iname = NULL;
   hsize_t idx, intern_idx = -1;
   hid_t vid;
-  H5O_info_t oinfo;
+  H5O_info1_t oinfo;
 
   pFile = NXI5assert(handle);
 
@@ -2325,8 +2326,8 @@ NXstatus NX5getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], in
   idx = pFile->iAtt5.iCurrentIDX;
   iRet = 0;
 
-  // TODO use new version of method rather than v1
-  H5Oget_info1(vid, &oinfo);
+  // TODO use new version of method rather than v2
+  H5Oget_info2(vid, &oinfo, H5O_INFO_ALL);
   intern_idx = oinfo.num_attrs;
   if (intern_idx == idx) {
     killAttVID(pFile, vid);
@@ -2393,10 +2394,10 @@ NXstatus NX5getattra(NXhandle handle, const char *name, void *data) {
   is_vlen_str = H5Tis_variable_str(datatype);
   if (ndims == 0 && is_vlen_str) {
     /* this assumes a fixed size - is this dangerous? */
-    char *strdata = calloc(512, sizeof(char));
+    char *strdata = (char *)calloc(512, sizeof(char));
     status = H5Aread(pFile->iCurrentA, H5S_ALL, &strdata);
     if (status >= 0)
-      strncpy(data, strdata, strlen(strdata));
+      strncpy((char *)data, strdata, strlen(strdata));
     free(strdata);
 
     H5Sclose(filespace);
@@ -2412,7 +2413,7 @@ NXstatus NX5getattra(NXhandle handle, const char *name, void *data) {
     status = readStringAttribute(pFile->iCurrentA, &datatmp);
     if (status < 0)
       return NX_ERROR;
-    strcpy(data, datatmp);
+    strcpy((char *)data, datatmp);
     free(datatmp);
     return NX_OK;
   }
