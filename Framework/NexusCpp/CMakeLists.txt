@@ -1,13 +1,13 @@
 include(GenerateExportHeader)
 
 set(SRC_FILES
-    src/napi.c
-    src/napi4.c
-    src/napi5.c
+    src/napi.cpp
+    src/napi4.cpp
+    src/napi5.cpp
     src/NeXusException.cpp
     src/NeXusFile.cpp
-    src/nxstack.c
-    src/stptok.c
+    src/nxstack.cpp
+    src/stptok.cpp
 )
 
 set(INC_FILES
@@ -58,11 +58,11 @@ generate_mantid_export_header(NexusCpp FALSE)
 set(TEST_PREFIX "NexusCppTest")
 
 # #### HDF5
-add_executable(napi_test_hdf5 EXCLUDE_FROM_ALL test/napi_test.c)
+add_executable(napi_test_hdf5 EXCLUDE_FROM_ALL test/napi_test.cpp)
 target_link_libraries(napi_test_hdf5 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-HDF5-test" COMMAND napi_test_hdf5)
 
-add_executable(napi_attra_test_hdf5 EXCLUDE_FROM_ALL test/napi_attra_test.c)
+add_executable(napi_attra_test_hdf5 EXCLUDE_FROM_ALL test/napi_attra_test.cpp)
 target_link_libraries(napi_attra_test_hdf5 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-HDF5-attra-test" COMMAND napi_attra_test_hdf5)
 
@@ -81,11 +81,11 @@ add_test(NAME "${TEST_PREFIX}-Cpp-HDF5-test" COMMAND napi_test_cpp-hdf5)
 # endif(WIN32)
 
 # #### HDF4
-add_executable(napi_test_hdf4 EXCLUDE_FROM_ALL test/napi_test.c)
+add_executable(napi_test_hdf4 EXCLUDE_FROM_ALL test/napi_test.cpp)
 target_link_libraries(napi_test_hdf4 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-HDF4-test" COMMAND napi_test_hdf4)
 
-add_executable(napi_attra_test_hdf4 EXCLUDE_FROM_ALL test/napi_attra_test.c)
+add_executable(napi_attra_test_hdf4 EXCLUDE_FROM_ALL test/napi_attra_test.cpp)
 target_link_libraries(napi_attra_test_hdf4 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-HDF4-attra-test" COMMAND napi_attra_test_hdf4)
 set_tests_properties("${TEST_PREFIX}-C-HDF4-attra-test" PROPERTIES WILL_FAIL TRUE)
@@ -105,7 +105,7 @@ add_test(NAME "${TEST_PREFIX}-Cpp-HDF4-test" COMMAND napi_test_cpp-hdf4)
 # endif(WIN32)
 
 # #### test for unlimited dimensions
-add_executable(napi_test_nxunlimited EXCLUDE_FROM_ALL test/test_nxunlimited.c)
+add_executable(napi_test_nxunlimited EXCLUDE_FROM_ALL test/test_nxunlimited.cpp)
 target_link_libraries(napi_test_nxunlimited NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-test-nxunlimited" COMMAND napi_test_nxunlimited)
 
@@ -115,7 +115,7 @@ add_test(NAME "${TEST_PREFIX}-C-test-nxunlimited" COMMAND napi_test_nxunlimited)
 
 # #### leak tests
 
-add_executable(napi_leak_test1 EXCLUDE_FROM_ALL test/leak_test1.c)
+add_executable(napi_leak_test1 EXCLUDE_FROM_ALL test/leak_test1.cpp)
 target_link_libraries(napi_leak_test1 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-leak-test-1" COMMAND napi_leak_test1)
 
