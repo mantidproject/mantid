@@ -29,7 +29,6 @@
 #include <unistd.h>
 #endif
 #include "MantidNexusCpp/napi.h"
-#include "MantidNexusCpp/napiconfig.h"
 
 static void print_data(const char *prefix, const void *data, const int type, const int num);
 
@@ -60,6 +59,11 @@ int createAttrs(const NXhandle file) {
 }
 
 int main(int argc, char *argv[]) {
+  if (argc != 1) {
+    fprintf(stderr, "failed to specify backend\n");
+    return 1;
+  }
+
   int i, n, level, NXrank, NXrank2, NXdims[32], NXdims2[32], NXtype, NXtype2, NXlen, attr_status;
   void *data_buffer;
 
@@ -280,10 +284,10 @@ static void print_data(const char *prefix, const void *data, const int type, con
       fprintf(stderr, " %d", ((const int *)data)[i]);
       break;
     case NX_INT64:
-      fprintf(stderr, " %lld", (const long long)((const int64_t *)data)[i]);
+      fprintf(stderr, " %lld", (long long)((const int64_t *)data)[i]);
       break;
     case NX_UINT64:
-      fprintf(stderr, " %llu", (const unsigned long long)((const uint64_t *)data)[i]);
+      fprintf(stderr, " %llu", (unsigned long long)((const uint64_t *)data)[i]);
       break;
     case NX_FLOAT32:
       fprintf(stderr, " %f", ((const float *)data)[i]);
