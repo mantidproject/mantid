@@ -33,7 +33,7 @@
 
 #include "MantidNexusCpp/napi.h"
 #include "MantidNexusCpp/napi_internal.h"
-#include "MantidNexusCpp/nxconfig.h"
+#include "MantidNexusCpp/napiconfig.h"
 #include "MantidNexusCpp/nxstack.h"
 
 /*---------------------------------------------------------------------
