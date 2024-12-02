@@ -48,7 +48,7 @@ requirements:
     - quasielasticbayes
     - requests>=2.25.1
     - scipy {{ scipy }}
-    - setuptools
+    - setuptools {{ setuptools}}
     - sphinx {{ sphinx }}
     - sphinx_bootstrap_theme {{ sphinx_bootstrap_theme }}
     - tbb-devel {{ tbb }}
