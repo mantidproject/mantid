@@ -10,6 +10,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -18,7 +19,6 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <nexus/NeXusFile.hpp>
 
 using Poco::XML::Document;
 using Poco::XML::DOMParser;

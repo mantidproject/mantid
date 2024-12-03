@@ -9,10 +9,9 @@
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/DllConfig.h"
+#include "MantidNexusCpp/napi.h"
 
 #include <boost/container/vector.hpp>
-#include <nexus/napi.h>
-
 #include <map>
 #include <memory>
 #include <string>

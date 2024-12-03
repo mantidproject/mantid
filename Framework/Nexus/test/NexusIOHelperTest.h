@@ -8,7 +8,7 @@
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidNexus/NexusIOHelper.h"
-#include <nexus/NeXusFile.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <cxxtest/TestSuite.h>
 

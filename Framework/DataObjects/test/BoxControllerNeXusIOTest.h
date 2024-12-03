@@ -9,15 +9,13 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidFrameworkTestHelpers/MDEventsTestHelper.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
+#include <Poco/File.h>
 #include <map>
 #include <memory>
 
 #include <cxxtest/TestSuite.h>
-
-#include <nexus/NeXusFile.hpp>
-
-#include <Poco/File.h>
 
 class BoxControllerNeXusIOTest : public CxxTest::TestSuite {
 public:

@@ -10,7 +10,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidMuon/DllConfig.h"
+#include "MantidDataObjects/Workspace2D_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidMuon/DllConfig.h"
 

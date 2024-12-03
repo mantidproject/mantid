@@ -23,11 +23,11 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/H5Util.h"
 
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include <H5Cpp.h>
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
-#include <nexus/NeXusFile.hpp>
 #include <type_traits>
 
 using namespace Mantid::Kernel;
