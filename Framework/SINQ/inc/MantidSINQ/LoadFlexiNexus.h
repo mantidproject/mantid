@@ -29,9 +29,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include "MantidSINQ/DllConfig.h"
-
-#include <nexus/NeXusFile.hpp>
 
 class MANTID_SINQ_DLL LoadFlexiNexus : public Mantid::API::Algorithm {
 public:
