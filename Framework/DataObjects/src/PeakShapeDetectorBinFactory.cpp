@@ -24,34 +24,34 @@ namespace Mantid::DataObjects {
 Mantid::Geometry::PeakShape *PeakShapeDetectorBinFactory::create(const std::string &source) const {
   Json::Value root;
   Mantid::Geometry::PeakShape *peakShape = nullptr;
-  if (Mantid::JsonHelpers::parse(source, &root)) {
-    const std::string shape = root["shape"].asString();
-    if (shape == PeakShapeDetectorBin::detectorBinShapeName()) {
-      const std::string algorithmName(root["algorithm_name"].asString());
-      const int algorithmVersion(root["algorithm_version"].asInt());
-      const auto frame(static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
-
-      std::vector<std::tuple<int32_t, double, double>> detectorBinList;
-      const Json::Value detectorList = root["detectors"];
-      for (uint32_t index = 0; index < detectorList.size(); index++) {
-        const Json::Value detBinVal = detectorList[index];
-        detectorBinList.emplace_back(detBinVal["detId"].asInt(), detBinVal["startX"].asDouble(),
-                                     detBinVal["endX"].asDouble());
-      }
-      peakShape = new PeakShapeDetectorBin(detectorBinList, frame, algorithmName, algorithmVersion);
-    } else {
-      if (m_successor) {
-        peakShape = m_successor->create(source);
-      } else {
-        throw std::invalid_argument("PeakShapeDetectorBinFactory:: No successor "
-                                    "factory able to process : " +
-                                    source);
-      }
-    }
-  } else {
+  if (!Mantid::JsonHelpers::parse(source, &root)) {
     throw std::invalid_argument("PeakShapeDetectorBinFactory:: Source JSON for "
                                 "the peak shape is not valid: " +
                                 source);
+  }
+
+  const std::string shape = root["shape"].asString();
+  if (shape == PeakShapeDetectorBin::detectorBinShapeName()) {
+    const std::string algorithmName(root["algorithm_name"].asString());
+    const int algorithmVersion(root["algorithm_version"].asInt());
+    const auto frame(static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
+
+    std::vector<std::tuple<int32_t, double, double>> detectorBinList;
+    const Json::Value detectorList = root["detectors"];
+    for (uint32_t index = 0; index < detectorList.size(); index++) {
+      const Json::Value detBinVal = detectorList[index];
+      detectorBinList.emplace_back(detBinVal["detId"].asInt(), detBinVal["startX"].asDouble(),
+                                   detBinVal["endX"].asDouble());
+    }
+    peakShape = new PeakShapeDetectorBin(detectorBinList, frame, algorithmName, algorithmVersion);
+  } else {
+    if (m_successor) {
+      peakShape = m_successor->create(source);
+    } else {
+      throw std::invalid_argument("PeakShapeDetectorBinFactory:: No successor "
+                                  "factory able to process : " +
+                                  source);
+    }
   }
   return peakShape;
 }
