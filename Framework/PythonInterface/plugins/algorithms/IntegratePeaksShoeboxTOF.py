@@ -386,7 +386,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     weak_peak_threshold,
                     do_optimise_shoebox,
                 )
-                peaks_spec_and_det_ids[ipk] = [ispecs[ipos[0], ipos[1]], peak_data.detids]
+                if ipos is not None:
+                    peaks_spec_and_det_ids[ipk] = [ispecs[ipos[0], ipos[1]], peak_data.detids]
+
                 if status == PEAK_STATUS.WEAK and do_optimise_shoebox and weak_peak_strategy == "NearestStrongPeak":
                     # look for possible strong peaks at any TOF in the window (won't know if strong until all pks integrated)
                     ipks_near, _ = find_ipks_in_window(ws, peaks, ispecs, ipk)
