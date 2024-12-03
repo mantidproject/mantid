@@ -39,5 +39,5 @@ void export_PeakShapeDetectorBin() {
       .def("__init__", make_constructor(&createPeakShapeDetectorBin, default_call_policies(),
                                         (arg("detectorBinList"), arg("frame") = SpecialCoordinateSystem::None,
                                          arg("algorithmName") = "", arg("algorithmVersion") = -1)))
-      .def("__eq__", &PeakShapeDetectorBin::operator==, arg("self"), arg("other"));
+      .def("__eq__", &PeakShapeDetectorBin::operator==);
 }
