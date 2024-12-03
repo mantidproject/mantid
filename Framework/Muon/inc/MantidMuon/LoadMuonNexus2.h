@@ -11,6 +11,7 @@
 //----------------------------------------------------------------------
 #include "MantidMuon/DllConfig.h"
 #include "MantidMuon/LoadMuonNexus.h"
+#include "MantidDataObjects/Histogram1D.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {

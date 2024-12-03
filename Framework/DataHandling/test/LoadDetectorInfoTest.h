@@ -20,10 +20,10 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
-#include <nexus/NeXusFile.hpp>
 #include <vector>
 
 using namespace Mantid::DataHandling;
