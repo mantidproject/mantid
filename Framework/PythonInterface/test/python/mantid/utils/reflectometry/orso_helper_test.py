@@ -225,7 +225,9 @@ class MantidORSODatasetTest(unittest.TestCase):
         reduction_timestamp = datetime.now()
         creator_name = "Creator Name"
         creator_affiliation = "Creator Affiliation"
-        dataset = MantidORSODataset(dataset_name, self._data_columns, self._ws, reduction_timestamp, creator_name, creator_affiliation)
+        dataset = MantidORSODataset(
+            dataset_name, self._data_columns, self._ws, reduction_timestamp, creator_name, creator_affiliation, polarized_dataset=False
+        )
 
         orso_dataset = dataset.dataset
         self.assertIsNotNone(orso_dataset)
@@ -252,6 +254,13 @@ class MantidORSODatasetTest(unittest.TestCase):
         dataset.set_doi(doi)
 
         self.assertEqual(doi, dataset.dataset.info.data_source.experiment.doi)
+
+    def test_set_polarization_on_mantid_orso_dataset(self):
+        dataset = self._create_test_dataset(polarized=True)
+        pol = "pp"
+        dataset.set_polarization(pol)
+
+        self.assertEqual("pp", dataset.dataset.info.data_source.measurement.instrument_settings.polarization)
 
     def test_set_reduction_call_on_mantid_orso_dataset(self):
         dataset = self._create_test_dataset()
@@ -353,10 +362,12 @@ class MantidORSODatasetTest(unittest.TestCase):
 
         self._check_files_are_created(dataset, filenames, 0, len(filenames), False)
 
-    def _create_test_dataset(self):
-        return MantidORSODataset("Test dataset", self._data_columns, self._ws, datetime.now(), "", "")
+    def _create_test_dataset(self, polarized=False):
+        return MantidORSODataset("Test dataset", self._data_columns, self._ws, datetime.now(), "", "", polarized_dataset=polarized)
 
-    def _check_mantid_default_header(self, orso_dataset, dataset_name, ws, reduction_timestamp, creator_name, creator_affiliation):
+    def _check_mantid_default_header(
+        self, orso_dataset, dataset_name, ws, reduction_timestamp, creator_name, creator_affiliation, polarization=False
+    ):
         """Check that the default header contains only the information that can be shared
         for all Mantid implementations of the standard
         """
