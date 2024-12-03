@@ -82,8 +82,7 @@ if(BUILD_MANTIDFRAMEWORK OR BUILD_MANTIDQT)
   # The new interface is not available in Clang yet so we haven't migrated
   add_definitions(-D_SILENCE_CXX20_OLD_SHARED_PTR_ATOMIC_SUPPORT_DEPRECATION_WARNING)
 
-  find_package(Poco 1.4.6 REQUIRED)
-  add_definitions(-DPOCO_ENABLE_CPP11)
+  find_package(Poco REQUIRED)
   find_package(TBB REQUIRED)
   find_package(OpenSSL REQUIRED)
 endif()

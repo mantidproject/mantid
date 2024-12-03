@@ -155,9 +155,7 @@ std::string CatalogDownloadDataFiles::doDownloadandSavetoLocalDrive(const std::s
 
     // Session takes ownership of socket
     Poco::Net::SecureStreamSocket socket{context};
-    Poco::Net::HTTPSClientSession session{socket};
-    session.setHost(uri.getHost());
-    session.setPort(uri.getPort());
+    Poco::Net::HTTPSClientSession session{socket, uri.getHost(), uri.getPort()};
 
     Poco::Net::HTTPRequest request(Poco::Net::HTTPRequest::HTTP_GET, path, Poco::Net::HTTPMessage::HTTP_1_1);
     session.sendRequest(request);

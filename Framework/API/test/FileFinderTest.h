@@ -477,9 +477,9 @@ public:
     TS_ASSERT(fileOn3.exists());
     TS_ASSERT(fileOn4.exists());
 #else
-    TS_ASSERT_THROWS_ANYTHING(fileOn2.exists());
-    TS_ASSERT_THROWS_ANYTHING(fileOn3.exists());
-    TS_ASSERT_THROWS_ANYTHING(fileOn4.exists());
+    TS_ASSERT(!fileOn2.exists());
+    TS_ASSERT(!fileOn3.exists());
+    TS_ASSERT(!fileOn4.exists());
 #endif
 
     fileFinder.setCaseSensitive(startingCaseOption);
