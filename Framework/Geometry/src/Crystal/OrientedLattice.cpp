@@ -6,8 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Exception.h"
-
-#include <nexus/NeXusException.hpp>
+#include "MantidNexusCpp/NeXusException.hpp"
 
 namespace Mantid::Geometry {
 using Mantid::Kernel::DblMatrix;

@@ -11,7 +11,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/Workspace2D_fwd.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/NexusDescriptor.h"
 
 //----------------------------------------------------------------------

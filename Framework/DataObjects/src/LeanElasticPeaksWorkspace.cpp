@@ -13,11 +13,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitConversion.h"
-
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <cmath>
 

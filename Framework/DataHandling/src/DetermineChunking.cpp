@@ -10,23 +10,19 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 
 // clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexusCpp/NeXusException.hpp"
 // clang-format on
 
 #include <Poco/File.h>
 #include <exception>
-#include <fstream>
 #include <set>
 #include <vector>
 

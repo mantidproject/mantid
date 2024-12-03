@@ -11,13 +11,11 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PhysicalConstants.h"
-
-#include <nexus/napi.h>
+#include "MantidNexusCpp/napi.h"
 
 namespace Mantid {
 
