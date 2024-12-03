@@ -109,7 +109,18 @@ class ReflectometryISISCreateTransmission(DataProcessorAlgorithm):
 
         self.log().information("Performing flood correction")
         args = {"FloodWorkspace": flood_ws}
-        return self._run_algorithm(workspace, self._FLOOD_ALG, "InputWorkspace", args)
+        corrected_ws = self._run_algorithm(workspace, self._FLOOD_ALG, "InputWorkspace", args)
+
+        # The flood correction performs a divide, which can result in the workspace being set as a distribution
+        # if the flood and input workspaces have the same Y units. We need to set the resulting workspace back to
+        # a non-distribution as it may be dimensionless after the divide, but it shouldn't be a distribution.
+        if isinstance(corrected_ws, WorkspaceGroup):
+            for child_ws in corrected_ws:
+                child_ws.setDistribution(False)
+        else:
+            corrected_ws.setDistribution(False)
+
+        return corrected_ws
 
     def _apply_background_subtraction(self, workspace):
         """If background processing instructions have been provided then perform a background subtraction"""
