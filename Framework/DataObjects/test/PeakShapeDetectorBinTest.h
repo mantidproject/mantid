@@ -111,4 +111,14 @@ public:
     TS_ASSERT_EQUALS(shape2.getDetectorBinList(), shape1.getDetectorBinList());
     TS_ASSERT_EQUALS(shape2.toJSON(), shape1.toJSON());
   }
+
+  void test_equal_operator() {
+    std::vector<std::tuple<int32_t, double, double>> detPeakBinList1 = {{100, 10, 50}, {200, 34, 55}};
+    PeakShapeDetectorBin shape1(detPeakBinList1, SpecialCoordinateSystem::None, "algo1", 1);
+
+    std::vector<std::tuple<int32_t, double, double>> detPeakBinList2 = {{100, 10, 50}, {200, 34, 55}};
+    PeakShapeDetectorBin shape2(detPeakBinList2, SpecialCoordinateSystem::None, "algo2", 2);
+
+    TS_ASSERT_EQUALS(shape1, shape2);
+  }
 };
