@@ -12,7 +12,6 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/EnumeratedString.h"
 
 #include <atomic>
 #include <mutex>

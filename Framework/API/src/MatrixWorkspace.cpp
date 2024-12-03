@@ -325,7 +325,7 @@ const std::string MatrixWorkspace::getTitle() const {
 
 /** Set the plot type of the workspace
  *
- * @param t :: The plot type. Must be an accepted type
+ * @param t :: The plot type. Must be one of: ["plot", "scatter", "histogram", "errorbar"]
  */
 void MatrixWorkspace::setPlotType(const std::string &t) {
 
