@@ -61,7 +61,7 @@ OSX
 ---
 
 * In Finder "command"+k opens a mounting dialogue
-* For `Server address` enter `smb://isisdatar80/inst$/` hit Connect
+* For `Server address` enter `smb://isisdatar80.isis.cclrc.ac.uk/inst$/` hit Connect
 * This should prompt you for federal ID `clrc\....` and password
 * After completing this the drive is now mounted
 * It can be found at `/Volumes/inst$`
