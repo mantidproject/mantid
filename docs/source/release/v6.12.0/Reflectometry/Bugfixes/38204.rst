@@ -1,0 +1,1 @@
+- Fix a bug where :ref:`algm-ReflectometryReductionOneLiveData` was not retrieving correctly the exponential correction parameters from the instrument definition file.
