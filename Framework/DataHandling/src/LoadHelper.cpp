@@ -15,8 +15,7 @@
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PhysicalConstants.h"
-
-#include <nexus/napi.h>
+#include "MantidNexusCpp/napi.h"
 
 namespace Mantid {
 

@@ -10,6 +10,7 @@
 // workspace names (workspace2D/1D etc), instrument classes and not for this
 // test case.
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
 #include <cxxtest/TestSuite.h>

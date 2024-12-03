@@ -16,11 +16,10 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/UsageService.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-
-#include <nexus/NeXusFile.hpp>
 
 #include <Poco/ActiveResult.h>
 

@@ -11,9 +11,8 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include <cxxtest/TestSuite.h>
-
-#include <nexus/NeXusFile.hpp>
 
 using Mantid::API::FileBackedExperimentInfo;
 
