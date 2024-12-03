@@ -33,12 +33,7 @@ namespace Geometry {
 class ParameterMap;
 }
 
-namespace {
-/// The allowed plot types for MatrixWorkspace
-enum class PlotTypeEnum { PLOT, SCATTER, HISTOGRAM, ERRORBAR, enum_count };
-const std::vector<std::string> plotTypeNames{"plot", "scatter", "histogram", "errorbar"};
-typedef Kernel::EnumeratedString<PlotTypeEnum, &plotTypeNames, &Kernel::compareStringsCaseInsensitive> PLOTTYPE;
-} // namespace
+const std::vector<std::string> validPlotTypes{"plot", "scatter", "histogram", "errorbar"};
 
 namespace API {
 class Axis;
@@ -145,7 +140,7 @@ public:
   /// Sets MatrixWorkspace plot_type
   void setPlotType(const std::string &);
   /// Gets MatrixWorkspace plot_type
-  const std::string getPlotType() const;
+  std::string getPlotType() const;
 
   virtual Types::Core::DateAndTime getFirstPulseTime() const;
   Types::Core::DateAndTime getLastPulseTime() const;
@@ -510,7 +505,7 @@ private:
   std::string m_YUnitLabel;
 
   /// The plot style for the MatrixWorkspace
-  PLOTTYPE m_plotType = std::string("plot");
+  std::string m_plotType = "plot";
 
   /// Flag indicating if the common bins flag is in a valid state
   mutable std::atomic<bool> m_isCommonBinsFlagValid{false};

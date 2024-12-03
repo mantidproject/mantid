@@ -116,7 +116,7 @@ MatrixWorkspace::MatrixWorkspace()
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
     : IMDWorkspace(other), ExperimentInfo(other), m_indexInfo(std::make_unique<Indexing::IndexInfo>(other.indexInfo())),
       m_isInitialized(other.m_isInitialized), m_YUnit(other.m_YUnit), m_YUnitLabel(other.m_YUnitLabel),
-      m_masks(other.m_masks), m_indexInfoNeedsUpdate(false) {
+      m_plotType(other.m_plotType), m_masks(other.m_masks), m_indexInfoNeedsUpdate(false) {
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
     m_axes[i] = std::unique_ptr<Axis>(other.m_axes[i]->clone(this));
@@ -329,7 +329,7 @@ const std::string MatrixWorkspace::getTitle() const {
  */
 void MatrixWorkspace::setPlotType(const std::string &t) {
 
-  StringListValidator v(plotTypeNames);
+  StringListValidator v(validPlotTypes);
 
   if (v.isValid(t) == "")
     this->m_plotType = t;
@@ -339,7 +339,7 @@ void MatrixWorkspace::setPlotType(const std::string &t) {
  *
  * @return The plot type
  */
-const std::string MatrixWorkspace::getPlotType() const { return this->m_plotType; }
+std::string MatrixWorkspace::getPlotType() const { return this->m_plotType; }
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
   for (size_t j = 0; j < getNumberHistograms(); ++j) {
