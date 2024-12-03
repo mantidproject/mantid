@@ -10,11 +10,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include <boost/scoped_array.hpp>
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
 
 namespace Mantid {
 

@@ -7,6 +7,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Quat.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include <algorithm>
 #include <boost/version.hpp>
 #include <sstream>
@@ -18,8 +19,6 @@ using boost::math::gcd;
 #include <boost/integer/common_factor.hpp>
 using boost::integer::gcd;
 #endif
-
-#include <nexus/NeXusFile.hpp>
 
 namespace {
 /** transform vector into form, used to describe directions in crystallogaphical
