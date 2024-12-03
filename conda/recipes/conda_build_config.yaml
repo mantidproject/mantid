@@ -82,10 +82,9 @@ occt:
 orsopy:
   - 1.2.1
 
-# 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning.
-# It's resolved on their devel branch but not yet included in a release, as of 1.12.5.
+# An API change to HTTPSClientSession was introduced in 1.14.0
 poco:
-  - '>=1.12.6'
+  - '>=1.14'
 
 psutil:
   - '>=5.8.0'
