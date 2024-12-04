@@ -307,7 +307,7 @@ void StretchView::setPlotContourEnabled(bool enabled) {
 
 void StretchView::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-int StretchView::displaySaveDirectoryMessage() {
+bool StretchView::displaySaveDirectoryMessage() {
   char const *textMessage = "BayesStretch requires a default save directory and "
                             "one is not currently set."
                             " If run, the algorithm will default to saving files "
