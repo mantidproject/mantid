@@ -136,6 +136,7 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
   // bogus entries that follows.
   int datatype;
   char nxclass[NX_MAXNAMELEN];
+  // cppcheck-suppress argumentSize
   NXstatus getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
   if (getnextentry_status == NX_OK) {
     if ((NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
@@ -172,6 +173,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
 
   bool has_entry = true; // follows getnextentry_status
   while (has_entry) {
+    // cppcheck-suppress argumentSize
     const NXstatus getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
 
     if (getnextentry_status == NX_OK) {
