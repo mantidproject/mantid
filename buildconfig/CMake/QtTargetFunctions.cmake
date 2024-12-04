@@ -304,7 +304,7 @@ function(mtd_add_qt_test_executable)
 
   target_link_libraries(${_target_name} LINK_PRIVATE ${LINK_LIBS} ${_link_libs} ${_mtd_qt_libs})
   if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(${_target_name} PRIVATE -Wno-maybe-uninitialized)
+    target_compile_options(${_target_name} PRIVATE -Wno-uninitialized)
   endif()
 
   # Add dependency to any parents

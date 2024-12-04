@@ -13,6 +13,7 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidKernel/BoundedValidator.h"
+#include "MantidKernel/DynamicPointerCastHelper.h"
 #include "MantidKernel/Statistics.h"
 
 namespace {
@@ -133,7 +134,7 @@ void FindReflectometryLines2::exec() {
   setProperty(Prop::LINE_CENTRE, peakWSIndex);
   if (!isDefault(Prop::OUTPUT_WS)) {
     auto outputWS = makeOutput(peakWSIndex);
-    setProperty(Prop::OUTPUT_WS, outputWS);
+    setProperty(Prop::OUTPUT_WS, std::move(outputWS));
   }
 }
 
@@ -142,7 +143,7 @@ void FindReflectometryLines2::exec() {
  *  @return fractional workspace index of the peak: Gaussian fit and position
  *  of the maximum
  */
-double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
+double FindReflectometryLines2::findPeak(const API::MatrixWorkspace_sptr &ws) {
   auto integralWS = integrate(ws);
   // integralWS may be ragged due to different integration limits for each
   // histogram. We don't really care but Transpose does.
@@ -176,9 +177,11 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   auto const fwhm = static_cast<double>(std::distance(revMaxFwhmIt, revMinFwhmIt) + 1);
   g_log.debug() << "Initial fwhm (full width at half maximum): " << fwhm << '\n';
   auto func = API::FunctionFactory::Instance().createFunction("CompositeFunction");
-  auto sum = std::dynamic_pointer_cast<API::CompositeFunction>(func);
+  auto sum =
+      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::CompositeFunction, API::IFunction>(func);
   func = API::FunctionFactory::Instance().createFunction("Gaussian");
-  auto gaussian = std::dynamic_pointer_cast<API::IPeakFunction>(func);
+  auto gaussian =
+      Kernel::DynamicPointerCastHelper::dynamicPointerCastWithCheck<API::IPeakFunction, API::IFunction>(func);
   gaussian->setHeight(height);
   gaussian->setCentre(centreIndex);
   gaussian->setFwhm(fwhm);
@@ -186,11 +189,11 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
   func = API::FunctionFactory::Instance().createFunction("LinearBackground");
   func->setParameter("A0", medianY);
   func->setParameter("A1", 0.);
-  sum->addFunction(func);
+  sum->addFunction(std::move(func));
   // call Fit child algorithm
   auto fit = createChildAlgorithm("Fit");
   fit->initialize();
-  fit->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(sum));
+  fit->setProperty("Function", std::dynamic_pointer_cast<API::IFunction>(std::move(sum)));
   fit->setProperty("InputWorkspace", transposedWS);
   fit->setProperty("StartX", centreIndex - 3 * fwhm);
   fit->setProperty("EndX", centreIndex + 3 * fwhm);
@@ -210,7 +213,7 @@ double FindReflectometryLines2::findPeak(API::MatrixWorkspace_sptr &ws) {
  *  @param ws a workspace to integrate
  *  @return a workspace containing the integrals
  */
-API::MatrixWorkspace_sptr FindReflectometryLines2::integrate(API::MatrixWorkspace_sptr &ws) {
+API::MatrixWorkspace_sptr FindReflectometryLines2::integrate(const API::MatrixWorkspace_sptr &ws) {
   int const startIndex = getProperty(Prop::START_INDEX);
   int const endIndex = getProperty(Prop::END_INDEX);
   double const startX = getProperty(Prop::RANGE_LOWER);
@@ -232,7 +235,7 @@ API::MatrixWorkspace_sptr FindReflectometryLines2::integrate(API::MatrixWorkspac
  *  @param ws a workspace to transpos
  *  @return a transposed workspace
  */
-API::MatrixWorkspace_sptr FindReflectometryLines2::transpose(API::MatrixWorkspace_sptr &ws) {
+API::MatrixWorkspace_sptr FindReflectometryLines2::transpose(const API::MatrixWorkspace_sptr &ws) {
   auto transpose = createChildAlgorithm("Transpose");
   transpose->initialize();
   transpose->setProperty("InputWorkspace", ws);

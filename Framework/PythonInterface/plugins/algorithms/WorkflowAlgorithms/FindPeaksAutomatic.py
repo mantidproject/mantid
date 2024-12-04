@@ -44,7 +44,7 @@ class FindPeaksAutomatic(DataProcessorAlgorithm):
         # Input parameters
         self.declareProperty("SpectrumNumber", 1, doc="Spectrum number to use", validator=IntBoundedValidator(lower=0))
         self.declareProperty("StartXValue", 0.0, doc="Value of X to start the search from")
-        self.declareProperty("EndXValue", np.Inf, doc="Value of X to stop the search to")
+        self.declareProperty("EndXValue", np.inf, doc="Value of X to stop the search to")
         self.declareProperty(
             "AcceptanceThreshold",
             0.01,

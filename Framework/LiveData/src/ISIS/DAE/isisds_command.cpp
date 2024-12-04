@@ -313,7 +313,6 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data, ISI
       free(*data);
       *data = nullptr;
     }
-    len_data = 0;
     return -1;
   }
   /* only update values if changed ... allows Read only parameters to be passed

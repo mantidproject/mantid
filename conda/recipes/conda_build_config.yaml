@@ -5,17 +5,17 @@ c_compiler:
   - clang                    # [osx]
   - vs2019                   # [win]
 c_compiler_version:            # [unix]
-  - 16                         # [osx]
-  - 12                         # [linux]
+  - 18                         # [osx]
+  - 13                         # [linux]
 cxx_compiler:
   - gxx                      # [linux]
   - clangxx                  # [osx]
   - vs2019                   # [win]
 cxx_compiler_version:          # [unix]
-  - 16                         # [osx]
-  - 12                         # [linux]
+  - 18                         # [osx]
+  - 13                         # [linux]
 llvm_openmp:                   # [osx]
-  - 16                         # [osx]
+  - 18                         # [osx]
 
 python:
   - 3.10
@@ -63,10 +63,13 @@ nexus:
   - 4.4.*
 # We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
 numpy:
-  - 1.24.*
+  - 2.0.*
 
 matplotlib:
-  - 3.8.*
+  - 3.9.*
+
+mslice:
+  - '2.10'
 
 ninja:
   - '>=1.10.2'
@@ -79,10 +82,9 @@ occt:
 orsopy:
   - 1.2.1
 
-# 1.12.2 introduced an unguarded #define NOMINMAX which causes a compiler warning.
-# It's resolved on their devel branch but not yet included in a release, as of 1.12.5.
+# An API change to HTTPSClientSession was introduced in 1.14.0
 poco:
-  - 1.12.1|>=1.12.6
+  - '>=1.14'
 
 psutil:
   - '>=5.8.0'

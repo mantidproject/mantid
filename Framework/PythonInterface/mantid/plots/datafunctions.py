@@ -398,7 +398,7 @@ def get_bin_indices(workspace):
     else:
         # the following two lines can be replaced by np.isin when > version 1.7.0 is used on RHEL7
         total_range = np.asarray(range(total_range))
-        indices = np.where(np.in1d(total_range, monitors_indices, invert=True).reshape(total_range.shape))
+        indices = np.where(np.isin(total_range, monitors_indices, invert=True).reshape(total_range.shape))
         # this check is necessary as numpy may return a tuple or a plain array based on platform.
         indices = indices[0] if isinstance(indices, tuple) else indices
         return indices

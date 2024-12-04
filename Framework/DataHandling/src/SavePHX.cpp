@@ -46,9 +46,6 @@ void SavePHX::exec() {
   // Retrieve the filename from the properties
   const std::string filename = getProperty("Filename");
 
-  // Get a pointer to the sample
-  IComponent_const_sptr sample = inputWorkspace->getInstrument()->getSample();
-
   std::ofstream outPHX_file(filename.c_str());
 
   if (!outPHX_file) {
@@ -74,7 +71,7 @@ void SavePHX::exec() {
                     }*/
   spCalcDetPar->execute();
   //
-  auto *pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
+  const auto *pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
   if (!pCalcDetPar) { // "can not get pointer to FindDetectorsPar algorithm"
     throw(std::bad_cast());
   }

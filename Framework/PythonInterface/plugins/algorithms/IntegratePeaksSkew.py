@@ -651,16 +651,16 @@ class PeakData:
             xmask, ymask = np.where(self.peak_mask.T)
             ax[0].lines[0].set_xdata(xmask)
             ax[0].lines[0].set_ydata(ymask)
-            ax[0].lines[1].set_xdata(self.icol)
-            ax[0].lines[1].set_ydata(self.irow)
+            ax[0].lines[1].set_xdata([self.icol])
+            ax[0].lines[1].set_ydata([self.irow])
             img.set_extent([-0.5, self.x_integrated_data.shape[1] - 0.5, self.x_integrated_data.shape[0] - 0.5, -0.5])
             # update 1D focused spectrum
             # vlines
             xmin_line, xmax_line, data, xpos_line, xmin_init_line, xmax_init_line, y0 = ax[1].lines
-            xmin_line.set_xdata(self.xmin_opt)
-            xmax_line.set_xdata(self.xmax_opt)
-            xmin_init_line.set_xdata(self.xmin)
-            xmax_init_line.set_xdata(self.xmax)
+            xmin_line.set_xdata([self.xmin_opt])
+            xmax_line.set_xdata([self.xmax_opt])
+            xmin_init_line.set_xdata([self.xmin])
+            xmax_init_line.set_xdata([self.xmax])
             xpos_line.set_xdata([self.xpos])
             # spectrum
             yerr = np.sqrt(self.epk_sq[istart:iend])
