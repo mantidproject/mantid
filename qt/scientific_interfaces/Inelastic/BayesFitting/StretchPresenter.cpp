@@ -20,15 +20,13 @@ struct PlotType {
   inline static const std::string ALL = "All";
   inline static const std::string SIGMA = "Sigma";
   inline static const std::string BETA = "Beta";
-  inline static const std::string FWHM = "FWHM";
 };
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-StretchPresenter::StretchPresenter(QWidget *parent, StretchView *view, std::unique_ptr<StretchModel> model,
+StretchPresenter::StretchPresenter(QWidget *parent, IStretchView *view, std::unique_ptr<IStretchModel> model,
                                    std::unique_ptr<API::IAlgorithmRunner> algorithmRunner)
-    : BayesFittingTab(parent, std::move(algorithmRunner)), m_previewSpec(0), m_save(false), m_view(view),
-      m_model(std::move(model)) {
+    : BayesFittingTab(parent, std::move(algorithmRunner)), m_previewSpec(0), m_view(view), m_model(std::move(model)) {
   m_view->subscribePresenter(this);
 
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunWidget()));
@@ -55,7 +53,8 @@ void StretchPresenter::handleRun() {
   m_fitWorkspaceName = baseName + "_Stretch_Fit";
   m_contourWorkspaceName = baseName + "_Stretch_Contour";
 
-  auto stretch = m_model->stretchAlgorithm(algParams, m_fitWorkspaceName, m_contourWorkspaceName);
+  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
+  auto stretch = m_model->stretchAlgorithm(algParams, m_fitWorkspaceName, m_contourWorkspaceName, useQuickBayes);
   m_algorithmRunner->execute(stretch);
 }
 
@@ -120,15 +119,15 @@ void StretchPresenter::notifyPlotClicked() {
 
   std::string const plotType = m_view->getPlotType();
   auto const plotErrors = SettingsHelper::externalPlotErrorBars();
-  auto const plotSigma = (plotType == "All" || plotType == "Sigma");
-  auto const plotBeta = (plotType == "All" || plotType == "Beta");
+  auto const plotSigma = (plotType == PlotType::ALL || plotType == PlotType::SIGMA);
+  auto const plotBeta = (plotType == PlotType::ALL || plotType == PlotType::BETA);
 
   auto const fitWorkspace = getADSWorkspace<WorkspaceGroup>(m_fitWorkspaceName);
   for (auto it = fitWorkspace->begin(); it < fitWorkspace->end(); ++it) {
     auto const name = (*it)->getName();
-    if (plotSigma && name.substr(name.length() - 5) == "Sigma") {
+    if (plotSigma && name.substr(name.length() - 5) == PlotType::SIGMA) {
       m_plotter->plotSpectra(name, "0", plotErrors);
-    } else if (plotBeta && name.substr(name.length() - 4) == "Beta") {
+    } else if (plotBeta && name.substr(name.length() - 4) == PlotType::BETA) {
       m_plotter->plotSpectra(name, "0", plotErrors);
     }
   }

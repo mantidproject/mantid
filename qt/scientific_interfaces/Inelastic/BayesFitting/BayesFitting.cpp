@@ -40,7 +40,7 @@ BayesFitting::BayesFitting(QWidget *parent)
                                                     std::make_unique<StretchModel>(), std::move(stretchRunner)));
 }
 
-std::unique_ptr<MantidQt::API::AlgorithmRunner> BayesFitting::createAlgorithmRunner() {
+std::unique_ptr<MantidQt::API::AlgorithmRunner> BayesFitting::createAlgorithmRunner() const {
   auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
   return std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
 }

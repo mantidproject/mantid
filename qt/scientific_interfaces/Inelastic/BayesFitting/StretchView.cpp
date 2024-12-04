@@ -13,7 +13,6 @@
 using namespace MantidQt::MantidWidgets::WorkspaceUtils;
 using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 
-// TODO(): range setters are copied from inelastic tab refactor them
 namespace {
 
 static const unsigned int NUM_DECIMALS = 6;
@@ -39,8 +38,11 @@ struct PlotType {
 
 namespace MantidQt::CustomInterfaces {
 StretchView::StretchView(QWidget *parent)
-    : m_dblManager(new QtDoublePropertyManager()), m_properties(), m_propTree(new QtTreePropertyBrowser()) {
+    : m_dblManager(new QtDoublePropertyManager()), m_properties(), m_propTree(new QtTreePropertyBrowser()),
+      m_dblEdFac(new DoubleEditorFactory()) {
   m_uiForm.setupUi(parent);
+
+  m_propTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("StretchERange");
   connect(eRangeSelector, &MantidWidgets::RangeSelector::minValueChanged, this, &StretchView::minValueChanged);
@@ -307,7 +309,7 @@ void StretchView::setPlotContourEnabled(bool enabled) {
 
 void StretchView::setSaveResultEnabled(bool enabled) { m_uiForm.pbSave->setEnabled(enabled); }
 
-int StretchView::displaySaveDirectoryMessage() {
+bool StretchView::displaySaveDirectoryMessage() {
   char const *textMessage = "BayesStretch requires a default save directory and "
                             "one is not currently set."
                             " If run, the algorithm will default to saving files "

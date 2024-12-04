@@ -8,7 +8,7 @@
 
 #include "DllConfig.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
-#include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
 #include "StretchData.h"
@@ -19,6 +19,8 @@ namespace CustomInterfaces {
 
 class MANTIDQT_INELASTIC_DLL IStretchViewSubscriber {
 public:
+  virtual ~IStretchViewSubscriber() = default;
+
   virtual void notifySaveClicked() = 0;
   virtual void notifyPlotClicked() = 0;
   virtual void notifyPlotContourClicked() = 0;
@@ -49,7 +51,7 @@ public:
   virtual void setLoadHistory(bool doLoadHistory) = 0;
 
   virtual void resetPlotContourOptions(const std::vector<std::string> &contourNames) = 0;
-  virtual int displaySaveDirectoryMessage() = 0;
+  virtual bool displaySaveDirectoryMessage() = 0;
 
   virtual void setPlotADSEnabled(bool enabled) = 0;
   virtual void setPlotResultEnabled(bool enabled) = 0;
@@ -85,7 +87,7 @@ public:
   void setLoadHistory(bool doLoadHistory) override;
 
   void resetPlotContourOptions(const std::vector<std::string> &contourNames) override;
-  int displaySaveDirectoryMessage() override;
+  bool displaySaveDirectoryMessage() override;
 
   void setPlotADSEnabled(bool enabled) override;
   void setPlotResultEnabled(bool enabled) override;
@@ -110,12 +112,12 @@ private slots:
 private:
   void formatTreeWidget(QtTreePropertyBrowser *treeWidget, QMap<QString, QtProperty *> const &properties) const;
 
-private:
   Ui::Stretch m_uiForm;
   QtDoublePropertyManager *m_dblManager;
   QMap<QString, QtProperty *> m_properties;
   IStretchViewSubscriber *m_presenter;
   QtTreePropertyBrowser *m_propTree;
+  DoubleEditorFactory *m_dblEdFac;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

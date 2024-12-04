@@ -28,7 +28,7 @@ public:
 class MANTIDQT_INELASTIC_DLL StretchPresenter : public BayesFittingTab, public IStretchPresenter {
 
 public:
-  StretchPresenter(QWidget *parent, StretchView *view, std::unique_ptr<StretchModel> model,
+  StretchPresenter(QWidget *parent, IStretchView *view, std::unique_ptr<IStretchModel> model,
                    std::unique_ptr<API::IAlgorithmRunner> algorithmRunner);
   ~StretchPresenter() override = default;
 
@@ -63,9 +63,8 @@ private:
   std::string m_fitWorkspaceName;
   std::string m_contourWorkspaceName;
 
-  bool m_save;
-  StretchView *m_view;
-  std::unique_ptr<StretchModel> m_model;
+  IStretchView *m_view;
+  std::unique_ptr<IStretchModel> m_model;
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt

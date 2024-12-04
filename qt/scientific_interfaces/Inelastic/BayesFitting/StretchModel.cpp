@@ -8,7 +8,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperties.h"
 #include "MantidAPI/AlgorithmRuntimeProps.h"
-#include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
 
 using namespace Mantid::API;
 
@@ -16,9 +15,8 @@ namespace MantidQt::CustomInterfaces {
 
 MantidQt::API::IConfiguredAlgorithm_sptr StretchModel::stretchAlgorithm(const StretchRunData &algParams,
                                                                         const std::string &fitWorkspaceName,
-                                                                        const std::string &contourWorkspaceName) const {
-  auto const useQuickBayes = SettingsHelper::hasDevelopmentFlag("quickbayes");
-
+                                                                        const std::string &contourWorkspaceName,
+                                                                        const bool useQuickBayes) const {
   auto properties = std::make_unique<AlgorithmRuntimeProps>();
 
   properties->setProperty("SampleWorkspace", algParams.sampleName);
@@ -40,7 +38,7 @@ MantidQt::API::IConfiguredAlgorithm_sptr StretchModel::stretchAlgorithm(const St
   auto stretch = AlgorithmManager::Instance().create(algorithmName);
   stretch->initialize();
 
-  return std::make_shared<API::ConfiguredAlgorithm>(std::move(stretch), std::move(properties));
+  return std::make_shared<API::ConfiguredAlgorithm>(stretch, std::move(properties));
 }
 
 API::IConfiguredAlgorithm_sptr StretchModel::setupSaveAlgorithm(const std::string &wsName) const {
@@ -49,13 +47,7 @@ API::IConfiguredAlgorithm_sptr StretchModel::setupSaveAlgorithm(const std::strin
 
   auto saveProps = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
-  const auto saveDir = Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory");
-  auto filename = saveDir + wsName + ".nxs";
-  if (filename.empty())
-    saveProps->setProperty("Filename", wsName + ".nxs");
-  else
-    saveProps->setProperty("Filename", filename);
-
+  saveProps->setPropertyValue("Filename", wsName + ".nxs");
   saveProps->setPropertyValue("InputWorkspace", wsName);
 
   return std::make_shared<API::ConfiguredAlgorithm>(saveAlgo, std::move(saveProps));
