@@ -1,0 +1,12 @@
+name: Linux unit tests and system tests
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  linux-build-and-test:
+    runs-on: self-hosted-linux
+    steps:
+     - name: Run unit tests and system tessts on Linux
+       run: ./buildconfig/Jenkins/Conda/conda-buildscript . linux-64-ci --enable-systemtests
