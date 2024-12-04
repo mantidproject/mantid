@@ -436,7 +436,7 @@ bool findDefinition(::NeXus::File &file) {
   bool foundDefinition = false;
   auto entries = file.getEntries();
 
-  for (auto &entry : entries) {
+  for (const auto &entry : entries) {
     if (entry.second == sasEntryClassAttr || entry.second == nxEntryClassAttr) {
       file.openGroup(entry.first, entry.second);
       file.openData(sasEntryDefinition);
