@@ -162,7 +162,8 @@ class ReflectometryDataset:
         # Ensure unique dataset names for workspace group members.
         # Eventually we will specify the polarization spin state to provide the unique names for polarised datasets.
         if self._is_ws_grp_member and self._name != self._ws.name():
-            self._name = f"{self._ws.name()} {self._name}"
+            ws_name = f"{self._ws.name()} " if not self.is_polarized else ""
+            self._name = f"{ws_name}{self._name}"
 
     def _set_spin_state_from_logs(self) -> None:
         if self._ws.getRun().hasProperty("spin_state_ORSO"):
