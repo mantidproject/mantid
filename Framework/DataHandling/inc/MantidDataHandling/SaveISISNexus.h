@@ -75,19 +75,19 @@ private:
   NXlink time_of_flight_raw_link;
   int *getMonitorData(int period, int imon);
 
-  void saveInt(const char *name, void *data, int size = 1);
-  void saveChar(const char *name, void *data, int size);
-  void saveFloat(const char *name, void *data, int size);
-  void saveIntOpen(const char *name, void *data, int size = 1);
-  void saveCharOpen(const char *name, void *data, int size);
-  void saveFloatOpen(const char *name, void *data, int size);
+  void saveInt(const char *name, const void *data, const int size = 1);
+  void saveChar(const char *name, const void *data, const int size);
+  void saveFloat(const char *name, const void *data, const int size);
+  void saveIntOpen(const char *name, const void *data, const int size = 1);
+  void saveCharOpen(const char *name, const void *data, const int size);
+  void saveFloatOpen(const char *name, const void *data, const int size);
   int saveStringVectorOpen(const char *name, const std::vector<std::string> &str_vec, int max_str_size = -1);
   void saveString(const char *name, const std::string &str);
   void saveStringOpen(const char *name, const std::string &str);
   inline void close() { NXclosedata(handle); }       ///< close an open dataset.
   inline void closegroup() { NXclosegroup(handle); } ///< close an open group.
   void putAttr(const char *name, const std::string &value);
-  void putAttr(const char *name, char *value, int size);
+  void putAttr(const char *name, const char *value, const int size);
   void putAttr(const char *name, int value, int size = 1);
   void toISO8601(std::string &str);
 

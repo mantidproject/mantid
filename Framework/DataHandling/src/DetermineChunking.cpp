@@ -156,11 +156,11 @@ void DetermineChunking::exec() {
     std::string classType = "NXevent_data";
     size_t total_events = 0;
     for (; it != entries.end(); ++it) {
-      std::string entry_name(it->first);
-      std::string entry_class(it->second);
+      const std::string entry_class(it->second);
       if (entry_class == classType) {
         if (!isEmpty(maxChunk)) {
           try {
+            const std::string entry_name(it->first);
             // Get total number of events for each bank
             file.openGroup(entry_name, entry_class);
             file.openData("total_counts");
