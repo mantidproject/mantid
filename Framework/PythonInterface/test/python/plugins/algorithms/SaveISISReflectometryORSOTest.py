@@ -580,7 +580,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
     def test_dataset_name_is_correctly_generated_for_different_angle_polarization_settings_in_ws_groups(self, mock_alg_histories):
         angle_pol = namedtuple("angle_pol", "angle polarization")
         angle_polarization_inputs = [angle_pol(None, "pp"), angle_pol(0.5, ""), angle_pol(0.5, "pp"), angle_pol(None, "")]
-        dataset_name_outputs = ["ws pp", "ws 0.500", "ws 0.500 pp", "ws"]
+        dataset_name_outputs = ["pp", "ws 0.500", "0.500 pp", "ws"]
         for in_params, out_dataset_name in zip(angle_polarization_inputs, dataset_name_outputs):
             with self.subTest(test_case=in_params):
                 ws = self._create_sample_workspace()
