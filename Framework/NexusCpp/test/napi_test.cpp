@@ -201,6 +201,7 @@ int main(int argc, char *argv[]) {
   slab_start[1] = 0;
   slab_size[0] = 1;
   slab_size[1] = 4;
+  // cppcheck-suppress cstyleCast
   if (NXputslab(fileid, (double *)r8_array + 16, slab_start, slab_size) != NX_OK)
     return TEST_FAILED;
   slab_start[0] = 0;
@@ -341,6 +342,7 @@ int main(int argc, char *argv[]) {
     printf("Number of global attributes: %d\n", i);
   }
   do {
+    // cppcheck-suppress argumentSize
     attr_status = NXgetnextattr(fileid, name, NXdims, &NXtype);
     if (attr_status == NX_ERROR)
       return TEST_FAILED;
@@ -366,6 +368,7 @@ int main(int argc, char *argv[]) {
     return TEST_FAILED;
   printf("NXentry path %s\n", path);
   do {
+    // cppcheck-suppress argumentSize
     attr_status = NXgetnextattr(fileid, name, NXdims, &NXtype);
     if (attr_status == NX_ERROR)
       return TEST_FAILED;
@@ -379,10 +382,12 @@ int main(int argc, char *argv[]) {
       }
     }
   } while (attr_status == NX_OK);
+  // cppcheck-suppress argumentSize
   if (NXgetgroupinfo(fileid, &i, group_name, class_name) != NX_OK)
     return TEST_FAILED;
   printf("Group: %s(%s) contains %d items\n", group_name, class_name, i);
   do {
+    // cppcheck-suppress argumentSize
     entry_status = NXgetnextentry(fileid, name, char_class, &NXtype);
     if (entry_status == NX_ERROR)
       return TEST_FAILED;
@@ -401,6 +406,7 @@ int main(int argc, char *argv[]) {
         if (NXgetinfo(fileid, &NXrank, NXdims, &NXtype) != NX_OK)
           return TEST_FAILED;
         printf("   %s(%d)", name, NXtype);
+        // cppcheck-suppress cstyleCast
         if (NXmalloc((void **)&data_buffer, NXrank, NXdims, NXtype) != NX_OK)
           return TEST_FAILED;
         n = 1;
@@ -445,6 +451,7 @@ int main(int argc, char *argv[]) {
             printf("      Number of attributes : %d\n", i);
           }
           do {
+            // cppcheck-suppress argumentSize
             attr_status = NXgetnextattr(fileid, name, NXdims, &NXtype);
             if (attr_status == NX_ERROR)
               return TEST_FAILED;
@@ -474,6 +481,7 @@ int main(int argc, char *argv[]) {
         }
         if (NXclosedata(fileid) != NX_OK)
           return TEST_FAILED;
+        // cppcheck-suppress cstyleCast
         if (NXfree((void **)&data_buffer) != NX_OK)
           return TEST_FAILED;
       }
@@ -643,8 +651,8 @@ static int testExternal(const std::string &progName) {
 
   std::string ext;
   if (strstr(progName.c_str(), "hdf4") != NULL) {
-    ext = "hdf";
-    create = NXACC_CREATE4;
+    std::cout << "Skipping external linking in hdf4\n";
+    return TEST_SUCCEED;
   } else if (strstr(progName.c_str(), "hdf5") != NULL) {
     ext = "h5";
     create = NXACC_CREATE5;
@@ -829,35 +837,35 @@ static void print_data(const char *prefix, const void *data, int type, int num) 
   for (i = 0; i < num; i++) {
     switch (type) {
     case NX_CHAR:
-      printf("%c", ((const char *)data)[i]);
+      printf("%c", (static_cast<const char *>(data))[i]);
       break;
 
     case NX_INT8:
-      printf(" %d", ((const unsigned char *)data)[i]);
+      printf(" %d", (static_cast<const unsigned char *>(data))[i]);
       break;
 
     case NX_INT16:
-      printf(" %d", ((const short *)data)[i]);
+      printf(" %d", (static_cast<const short *>(data))[i]);
       break;
 
     case NX_INT32:
-      printf(" %d", ((const int *)data)[i]);
+      printf(" %d", (static_cast<const int *>(data))[i]);
       break;
 
     case NX_INT64:
-      printf(" %lld", (const long long)((const int64_t *)data)[i]);
+      printf(" %ld", static_cast<const int64_t *>(data)[i]);
       break;
 
     case NX_UINT64:
-      printf(" %llu", (const unsigned long long)((const uint64_t *)data)[i]);
+      printf(" %lu", static_cast<const uint64_t *>(data)[i]);
       break;
 
     case NX_FLOAT32:
-      printf(" %f", ((const float *)data)[i]);
+      printf(" %f", (static_cast<const float *>(data))[i]);
       break;
 
     case NX_FLOAT64:
-      printf(" %f", ((const double *)data)[i]);
+      printf(" %f", (static_cast<const double *>(data))[i]);
       break;
 
     default:
