@@ -48,7 +48,7 @@ static const std::string FILE_EXTENSION = ".nxs";
 bool validateInputWorkspace(MatrixWorkspace_sptr const &ws, std::string const &propertyName,
                             std::map<std::string, std::string> &errorList) {
   if (ws == nullptr) {
-    errorList[propertyName] = "All input workspaces must be of type MatrixWorkspace.";
+    errorList[propertyName] = "All input workspaces must be of type MatrixWorkspace!";
     return false;
   }
   if (ws->getNumberHistograms() != 1) {
