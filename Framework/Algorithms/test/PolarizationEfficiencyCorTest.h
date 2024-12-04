@@ -455,7 +455,7 @@ private:
   MatrixWorkspace_sptr createEfficiencies(std::string const &kind) {
     static std::map<std::string, std::vector<std::string>> const labels = {{"Wildes", {"P1", "P2", "F1", "F2"}},
                                                                            {"Fredrikze", {"Pp", "Ap", "Rho", "Alpha"}}};
-    if (kind == "Wildes" || kind == "Fredrikze") {
+    if (kind == WILDES_METHOD || kind == FREDRIKZE_METHOD) {
       auto inWS = createWorkspaces(1)[0];
       MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(inWS, 4);
       ws->getAxis(0)->setUnit("Wavelength");
