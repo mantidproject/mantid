@@ -120,11 +120,11 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:665
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:154
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:184
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Statistics.cpp:58
-operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:225
+operatorEqVarError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:224
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
-shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:403
+shadowFunction:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:402
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ArrayProperty.h:47
-passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:76
+passedByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.tcc:75
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:280
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:863
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Math/Optimization/SLSQPMinimizer.cpp:1046
@@ -365,8 +365,6 @@ returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crys
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/PointGroupFactory.h:26
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:338
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:347
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:200
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:283
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/NumericAxisValidator.cpp:26
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:889
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:140
@@ -596,6 +594,8 @@ uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:5
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:124
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:125
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:126
+argumentSize:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHelper.cpp:139
+argumentSize:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadHelper.cpp:175
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadGSS.cpp:449
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.cpp:181
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadILLIndirect2.cpp:254
@@ -655,7 +655,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCSV.cp
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCSV.cpp:155
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveCanSAS1D.h:84
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D2.cpp:24
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SNSAppendGeometryToNexus.cpp:337
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:579
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:580
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:158
@@ -721,7 +720,6 @@ returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crys
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:448
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:712
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:738
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/OrientedLattice.cpp:236
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/NiggliCell.cpp:233
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/SpaceGroup.h:51
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/PointGroup.h:41

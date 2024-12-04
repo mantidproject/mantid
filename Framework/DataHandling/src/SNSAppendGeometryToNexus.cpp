@@ -334,7 +334,8 @@ std::string SNSAppendGeometryToNexus::getInstrumentName(const std::string &nxfil
  */
 
 bool SNSAppendGeometryToNexus::runLoadInstrument(const std::string &idf_filename,
-                                                 const API::MatrixWorkspace_sptr &localWorkspace, Algorithm *alg) {
+                                                 const API::MatrixWorkspace_sptr &localWorkspace,
+                                                 Algorithm *const alg) {
   auto loadInst = createChildAlgorithm("LoadInstrument", 0, 1, true);
 
   // Execute the Child Algorithm.
@@ -370,7 +371,7 @@ bool SNSAppendGeometryToNexus::runLoadInstrument(const std::string &idf_filename
  * @return true if successful.
  */
 bool SNSAppendGeometryToNexus::runLoadNexusLogs(const std::string &nexusFileName,
-                                                const API::MatrixWorkspace_sptr &localWorkspace, Algorithm *alg) {
+                                                const API::MatrixWorkspace_sptr &localWorkspace, Algorithm *const alg) {
   auto loadLogs = alg->createChildAlgorithm("LoadNexusLogs", 0, 1, true);
 
   // Execute the Child Algorithm, catching errors without stopping.
