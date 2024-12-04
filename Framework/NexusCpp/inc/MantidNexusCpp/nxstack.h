@@ -42,7 +42,7 @@ void popFileStack(pFileStack self);
 pNexusFunction peekFileOnStack(pFileStack self);
 char *peekFilenameOnStack(pFileStack self);
 void peekIDOnStack(pFileStack self, NXlink *id);
-void setCloseID(pFileStack self, NXlink id);
+void setCloseID(pFileStack self, const NXlink &id);
 
 int fileStackDepth(pFileStack self);
 

@@ -88,7 +88,7 @@ static pNexusFile5 NXI5assert(NXhandle fid) {
   pNexusFile5 pRes;
 
   assert(fid != NULL);
-  pRes = (pNexusFile5)fid;
+  pRes = static_cast<pNexusFile5>(fid);
   assert(pRes->iNXID == NX5SIGNATURE);
   return pRes;
 }
@@ -115,7 +115,7 @@ static herr_t readStringAttribute(hid_t attr, char **data) {
       iRet = H5Aread(attr, btype, data);
       H5Tclose(btype);
     } else {
-      *data = (char *)malloc(sdim + 1);
+      *data = static_cast<char *>(malloc(sdim + 1));
       iRet = H5Aread(attr, atype, *data);
       (*data)[sdim] = '\0';
     }
@@ -123,17 +123,17 @@ static herr_t readStringAttribute(hid_t attr, char **data) {
     int i;
     char **strings;
 
-    strings = (char **)malloc(thedims[0] * sizeof(char *));
+    strings = static_cast<char **>(malloc(thedims[0] * sizeof(char *)));
 
     if (!H5Tis_variable_str(atype)) {
-      strings[0] = (char *)malloc(thedims[0] * sdim * sizeof(char));
+      strings[0] = static_cast<char *>(malloc(thedims[0] * sdim * sizeof(char)));
       for (i = 1; i < thedims[0]; i++) {
         strings[i] = strings[0] + i * sdim;
       }
     }
 
     iRet = H5Aread(attr, atype, strings[0]);
-    *data = (char *)calloc((sdim + 2) * thedims[0], sizeof(char));
+    *data = static_cast<char *>(calloc((sdim + 2) * thedims[0], sizeof(char)));
     for (i = 0; i < thedims[0]; i++) {
       if (i == 0) {
         strncpy(*data, strings[i], sdim);
@@ -203,8 +203,8 @@ static void buildCurrentPath(pNexusFile5 self, char *pathBuffer, int pathBufferL
 NXstatus NX5reopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
   pNexusFile5 pNew = NULL, pOrig = NULL;
   *pNewHandle = NULL;
-  pOrig = (pNexusFile5)pOrigHandle;
-  pNew = (pNexusFile5)malloc(sizeof(NexusFile5));
+  pOrig = static_cast<pNexusFile5>(pOrigHandle);
+  pNew = static_cast<pNexusFile5>(malloc(sizeof(NexusFile5)));
   if (!pNew) {
     NXReportError("ERROR: no memory to create File datastructure");
     return NX_ERROR;
@@ -219,7 +219,7 @@ NXstatus NX5reopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
   strcpy(pNew->iAccess, pOrig->iAccess);
   pNew->iNXID = NX5SIGNATURE;
   pNew->iStack5[0].iVref = 0; /* root! */
-  *pNewHandle = (NXhandle)pNew;
+  *pNewHandle = static_cast<NXhandle>(pNew);
   return NX_OK;
 }
 
@@ -228,7 +228,7 @@ NXstatus NX5reopen(NXhandle pOrigHandle, NXhandle *pNewHandle) {
  */
 
 pNexusFile5 create_file_struct() {
-  pNexusFile5 pNew = (pNexusFile5)malloc(sizeof(NexusFile5));
+  pNexusFile5 pNew = static_cast<pNexusFile5>(malloc(sizeof(NexusFile5)));
   if (!pNew) {
     NXReportError("ERROR: not enough memory to create file structure");
   } else {
@@ -454,7 +454,7 @@ NXstatus NX5open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
   }
   pNew->iNXID = NX5SIGNATURE;
   pNew->iStack5[0].iVref = 0; /* root! */
-  *pHandle = (NXhandle)pNew;
+  *pHandle = static_cast<NXhandle>(pNew);
   return NX_OK;
 }
 
@@ -520,7 +520,7 @@ NXstatus NX5makegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   } else {
     snprintf(pBuffer, 1023, "/%s/%s", pFile->name_ref, name);
   }
-  iVID = H5Gcreate(pFile->iFID, (const char *)pBuffer, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+  iVID = H5Gcreate(pFile->iFID, static_cast<const char *>(pBuffer), H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
   if (iVID < 0) {
     NXReportError("ERROR: could not create Group");
     return NX_ERROR;
@@ -533,7 +533,7 @@ NXstatus NX5makegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
     NXReportError("ERROR: failed to store class name");
     return NX_ERROR;
   }
-  if (H5Awrite(attr1, aid1, (char *)nxclass) < 0) {
+  if (H5Awrite(attr1, aid1, const_cast<char *>(static_cast<const char *>(nxclass))) < 0) {
     NXReportError("ERROR: failed to store class name");
     return NX_ERROR;
   }
@@ -571,7 +571,7 @@ NXstatus NX5opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   } else {
     sprintf(pBuffer, "%s/%s", pFile->name_tmp, name);
   }
-  iVID = H5Gopen(pFile->iFID, (const char *)pBuffer, H5P_DEFAULT);
+  iVID = H5Gopen(pFile->iFID, static_cast<const char *>(pBuffer), H5P_DEFAULT);
   if (iVID < 0) {
     sprintf(pBuffer, "ERROR: group %s does not exist", pFile->name_tmp);
     NXReportError(pBuffer);
@@ -657,7 +657,7 @@ NXstatus NX5closegroup(NXhandle fid) {
       char *uname = NULL;
       uname = strdup(pFile->name_ref);
       char *u1name = NULL;
-      u1name = (char *)malloc((ii + 1) * sizeof(char));
+      u1name = static_cast<char *>(malloc((ii + 1) * sizeof(char)));
       memset(u1name, 0, ii);
       for (i = 0; i < ii; i++) {
         *(u1name + i) = *(uname + i);
@@ -820,7 +820,8 @@ NXstatus NX5compmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank
     }
     H5Pset_shuffle(cparms); // mrt: improves compression
     H5Pset_deflate(cparms, compress_level);
-    dID = H5Dcreate(pFile->iCurrentG, (char *)name, datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+    dID = H5Dcreate(pFile->iCurrentG, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, cparms,
+                    H5P_DEFAULT);
   } else if (compress_type == NX_COMP_NONE) {
     if (unlimiteddim) {
       cparms = H5Pcreate(H5P_DATASET_CREATE);
@@ -829,9 +830,11 @@ NXstatus NX5compmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank
         NXReportError("ERROR: size of chunks could not be set");
         return NX_ERROR;
       }
-      dID = H5Dcreate(pFile->iCurrentG, (char *)name, datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+      dID = H5Dcreate(pFile->iCurrentG, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, cparms,
+                      H5P_DEFAULT);
     } else {
-      dID = H5Dcreate(pFile->iCurrentG, (char *)name, datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+      dID = H5Dcreate(pFile->iCurrentG, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT,
+                      H5P_DEFAULT);
     }
   } else if (compress_type == NX_CHUNK) {
     cparms = H5Pcreate(H5P_DATASET_CREATE);
@@ -840,11 +843,13 @@ NXstatus NX5compmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank
       NXReportError("ERROR: size of chunks could not be set");
       return NX_ERROR;
     }
-    dID = H5Dcreate(pFile->iCurrentG, (char *)name, datatype1, dataspace, H5P_DEFAULT, cparms, H5P_DEFAULT);
+    dID = H5Dcreate(pFile->iCurrentG, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, cparms,
+                    H5P_DEFAULT);
 
   } else {
     NXReportError("HDF5 doesn't support selected compression method! Dataset created without compression");
-    iRet = H5Dcreate(pFile->iCurrentG, (char *)name, datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    iRet = H5Dcreate(pFile->iCurrentG, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT,
+                     H5P_DEFAULT);
   }
   if (dID < 0) {
     NXReportError("ERROR: creating chunked dataset failed");
@@ -1357,7 +1362,7 @@ NXstatus NX5flush(NXhandle *pHandle) {
 
 herr_t nxgroup_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, void *op_data) {
   UNUSED_ARG(statbuf);
-  pinfo self = (pinfo)op_data;
+  pinfo self = static_cast<pinfo>(op_data);
   H5O_info1_t object_info;
   // TODO use new version of method rather than v2
   H5Oget_info_by_name2(loc_id, name, &object_info, H5O_INFO_ALL, H5P_DEFAULT);
@@ -1384,18 +1389,18 @@ herr_t nxgroup_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, v
 
 herr_t group_info1(hid_t loc_id, const char *name, const H5L_info_t *statbuf, void *opdata) {
   UNUSED_ARG(statbuf);
-  int iNX = *((int *)opdata);
+  int iNX = *(static_cast<int *>(opdata));
   H5O_info1_t object_info;
   // TODO use new version of method rather than v2
   H5Oget_info_by_name2(loc_id, name, &object_info, H5O_INFO_ALL, H5P_DEFAULT);
   switch ((object_info).type) {
   case H5O_TYPE_GROUP:
     iNX++;
-    *((int *)opdata) = iNX;
+    *(static_cast<int *>(opdata)) = iNX;
     break;
   case H5O_TYPE_DATASET:
     iNX++;
-    *((int *)opdata) = iNX;
+    *(static_cast<int *>(opdata)) = iNX;
     break;
   default:
     break;
@@ -1766,10 +1771,10 @@ NXstatus NX5getdata(NXhandle fid, void *data) {
     tclass = H5Tget_class(datatype);
 
     if (H5Tis_variable_str(pFile->iCurrentT)) {
-      char *strdata = (char *)calloc(512, sizeof(char));
+      char *strdata = static_cast<char *>(calloc(512, sizeof(char)));
       status = H5Dread(pFile->iCurrentD, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &strdata);
       if (status >= 0)
-        std::strncpy((char *)data, strdata, strlen(strdata));
+        std::strncpy(static_cast<char *>(data), strdata, strlen(strdata));
       free(strdata);
     } else {
       memtype_id = H5Screate(H5S_SCALAR);
@@ -1789,15 +1794,15 @@ NXstatus NX5getdata(NXhandle fid, void *data) {
   /* map datatypes of other plateforms */
   tclass = H5Tget_class(pFile->iCurrentT);
   if (H5Tis_variable_str(pFile->iCurrentT)) {
-    vstrdata = (char **)malloc((size_t)dims[0] * sizeof(char *));
+    vstrdata = static_cast<char **>(malloc((size_t)dims[0] * sizeof(char *)));
     memtype_id = H5Tcopy(H5T_C_S1);
     H5Tset_size(memtype_id, H5T_VARIABLE);
     status = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, vstrdata);
-    ((char *)data)[0] = '\0';
+    static_cast<char *>(data)[0] = '\0';
     if (status >= 0) {
       for (hsize_t i = 0; i < dims[0]; ++i) {
         if (vstrdata[i] != NULL) {
-          strcat((char *)data, vstrdata[i]);
+          strcat(static_cast<char *>(data), vstrdata[i]);
         }
       }
     }
@@ -1910,9 +1915,9 @@ NXstatus NX5getslab64(NXhandle fid, void *data, const int64_t iStart[], const in
   } else {
 
     for (int i = 0; i < iRank; i++) {
-      myStart[i] = (hssize_t)iStart[i];
-      mySize[i] = (hsize_t)iSize[i];
-      mStart[i] = (hsize_t)0;
+      myStart[i] = static_cast<hsize_t>(iStart[i]);
+      mySize[i] = static_cast<hsize_t>(iSize[i]);
+      mStart[i] = static_cast<hsize_t>(0);
     }
 
     /*
@@ -1924,7 +1929,7 @@ NXstatus NX5getslab64(NXhandle fid, void *data, const int64_t iStart[], const in
       if (mySize[0] == 1) {
         mySize[0] = H5Tget_size(pFile->iCurrentT);
       }
-      tmp_data = (char *)malloc((size_t)mySize[0]);
+      tmp_data = static_cast<char *>(malloc((size_t)mySize[0]));
       memset(tmp_data, 0, sizeof(mySize[0]));
       iRet = H5Sselect_hyperslab(pFile->iCurrentS, H5S_SELECT_SET, mStart, NULL, mySize, NULL);
     } else {
@@ -1948,7 +1953,7 @@ NXstatus NX5getslab64(NXhandle fid, void *data, const int64_t iStart[], const in
       iRet = H5Dread(pFile->iCurrentD, memtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, tmp_data);
       char *data1;
       data1 = tmp_data + myStart[0];
-      strncpy((char *)data, data1, (size_t)iSize[0]);
+      strncpy(static_cast<char *>(data), data1, (size_t)iSize[0]);
       free(tmp_data);
     } else {
       iRet = H5Dread(pFile->iCurrentD, memtype_id, memspace, pFile->iCurrentS, H5P_DEFAULT, data);
@@ -1972,7 +1977,7 @@ NXstatus NX5getslab64(NXhandle fid, void *data, const int64_t iStart[], const in
 herr_t attr_info(hid_t loc_id, const char *name, const H5A_info_t *unused, void *opdata) {
   UNUSED_ARG(loc_id);
   UNUSED_ARG(unused);
-  *((char **)opdata) = strdup(name);
+  *(static_cast<char **>(opdata)) = strdup(name);
   return 1;
 }
 
@@ -2036,8 +2041,8 @@ NXstatus NX5getattr(NXhandle fid, const char *name, void *data, int *datalen, in
 
   /* finally read the data */
   if (type == H5T_C_S1) {
-    iRet = readStringAttributeN(pFile->iCurrentA, (char *)data, *datalen);
-    *datalen = (int)strlen((char *)data);
+    iRet = readStringAttributeN(pFile->iCurrentA, static_cast<char *>(data), *datalen);
+    *datalen = static_cast<int>(strlen(static_cast<char *>(data)));
   } else {
     iRet = H5Aread(pFile->iCurrentA, type, data);
     *datalen = 1;
@@ -2243,7 +2248,7 @@ NXstatus NX5initgroupdir(NXhandle fid) {
 NXstatus NX5putattra(NXhandle handle, CONSTCHAR *name, const void *data, const int rank, const int dim[],
                      const int iType) {
   hid_t datatype1, dataspace;
-  hid_t type, cparms = -1;
+  hid_t type;
   pNexusFile5 pFile;
   int i;
   hid_t vid, iATT;
@@ -2286,17 +2291,13 @@ NXstatus NX5putattra(NXhandle handle, CONSTCHAR *name, const void *data, const i
     dataspace = H5Screate_simple(rank, mydim, NULL);
   }
 
-  iATT = H5Acreate(vid, (char *)name, datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT);
+  iATT = H5Acreate(vid, static_cast<const char *>(name), datatype1, dataspace, H5P_DEFAULT, H5P_DEFAULT);
 
   if (iATT < 0) {
     NXReportError("ERROR: creating attribute failed");
     return NX_ERROR;
   } else {
     pFile->iCurrentA = iATT;
-  }
-  if (cparms != -1) {
-    if (H5Pclose(cparms) < 0)
-      return NX_ERROR;
   }
 
   iRet = H5Awrite(pFile->iCurrentA, datatype1, data);
@@ -2403,10 +2404,10 @@ NXstatus NX5getattra(NXhandle handle, const char *name, void *data) {
   is_vlen_str = H5Tis_variable_str(datatype);
   if (ndims == 0 && is_vlen_str) {
     /* this assumes a fixed size - is this dangerous? */
-    char *strdata = (char *)calloc(512, sizeof(char));
+    char *strdata = static_cast<char *>(calloc(512, sizeof(char)));
     status = H5Aread(pFile->iCurrentA, H5S_ALL, &strdata);
     if (status >= 0)
-      strncpy((char *)data, strdata, strlen(strdata));
+      strncpy(static_cast<char *>(data), strdata, strlen(strdata));
     free(strdata);
 
     H5Sclose(filespace);
@@ -2422,7 +2423,7 @@ NXstatus NX5getattra(NXhandle handle, const char *name, void *data) {
     status = readStringAttribute(pFile->iCurrentA, &datatmp);
     if (status < 0)
       return NX_ERROR;
-    strcpy((char *)data, datatmp);
+    strcpy(static_cast<char *>(data), datatmp);
     free(datatmp);
     return NX_OK;
   }
@@ -2430,15 +2431,15 @@ NXstatus NX5getattra(NXhandle handle, const char *name, void *data) {
   memset(iStart, 0, H5S_MAX_RANK * sizeof(int));
   /* map datatypes of other plateforms */
   if (is_vlen_str) {
-    vstrdata = (char **)malloc((size_t)dims[0] * sizeof(char *));
+    vstrdata = static_cast<char **>(malloc((size_t)dims[0] * sizeof(char *)));
     memtype_id = H5Tcopy(H5T_C_S1);
     H5Tset_size(memtype_id, H5T_VARIABLE);
     status = H5Aread(pFile->iCurrentA, memtype_id, vstrdata);
-    ((char *)data)[0] = '\0';
+    (static_cast<char *>(data))[0] = '\0';
     if (status >= 0) {
       for (hsize_t i = 0; i < dims[0]; ++i) {
         if (vstrdata[i] != NULL) {
-          strcat((char *)data, vstrdata[i]);
+          strcat(static_cast<char *>(data), vstrdata[i]);
         }
       }
     }

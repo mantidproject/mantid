@@ -152,6 +152,7 @@ NXClass::NXClass(const NXClass &parent, const std::string &name) : NXObject(pare
 NXClassInfo NXClass::getNextEntry() {
   NXClassInfo res;
   char nxname[NX_MAXNAMELEN], nxclass[NX_MAXNAMELEN];
+  // cppcheck-suppress argumentSize
   res.stat = NXgetnextentry(m_fileID, nxname, nxclass, &res.datatype);
   if (res) // Check if previous call was successful
   {

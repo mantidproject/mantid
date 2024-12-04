@@ -66,7 +66,7 @@ static pNexusFile NXIassert(NXhandle fid) {
   pNexusFile pRes;
 
   assert(fid != NULL);
-  pRes = (pNexusFile)fid;
+  pRes = static_cast<pNexusFile>(fid);
   assert(pRes->iNXID == NXSIGNATURE);
   return pRes;
 }
@@ -118,7 +118,7 @@ static int32 NXIFindVgroup(pNexusFile pFile, CONSTCHAR *name, CONSTCHAR *nxclass
     if (iN == 0) {
       return NX_EOD;
     }
-    pArray = (int32 *)malloc(iN * sizeof(int32));
+    pArray = static_cast<int32 *>(malloc(iN * sizeof(int32)));
     if (!pArray) {
       NXReportError("ERROR: out of memory in NXIFindVgroup");
       return NX_EOD;
@@ -232,7 +232,7 @@ static int NXIInitDir(pNexusFile self) {
   if (self->iCurrentVG == 0 && self->iStack[iStackPtr].iRefDir == NULL) { /* root level */
     /* get the number and ID's of all lone Vgroups in the file */
     self->iStack[iStackPtr].iNDir = Vlone(self->iVID, NULL, 0);
-    self->iStack[iStackPtr].iRefDir = (int32 *)malloc(self->iStack[iStackPtr].iNDir * sizeof(int32) + 1);
+    self->iStack[iStackPtr].iRefDir = static_cast<int32 *>(malloc(self->iStack[iStackPtr].iNDir * sizeof(int32) + 1));
     if (!self->iStack[iStackPtr].iRefDir) {
       NXReportError("ERROR: out of memory in NXIInitDir");
       return NX_EOD;
@@ -241,8 +241,8 @@ static int NXIInitDir(pNexusFile self) {
   } else {
     /* Vgroup level */
     self->iStack[iStackPtr].iNDir = Vntagrefs(self->iCurrentVG);
-    self->iStack[iStackPtr].iRefDir = (int32 *)malloc(self->iStack[iStackPtr].iNDir * sizeof(int32) + 1);
-    self->iStack[iStackPtr].iTagDir = (int32 *)malloc(self->iStack[iStackPtr].iNDir * sizeof(int32) + 1);
+    self->iStack[iStackPtr].iRefDir = static_cast<int32 *>(malloc(self->iStack[iStackPtr].iNDir * sizeof(int32) + 1));
+    self->iStack[iStackPtr].iTagDir = static_cast<int32 *>(malloc(self->iStack[iStackPtr].iNDir * sizeof(int32) + 1));
     if ((!self->iStack[iStackPtr].iRefDir) || (!self->iStack[iStackPtr].iTagDir)) {
       NXReportError("ERROR: out of memory in NXIInitDir");
       return NX_EOD;
@@ -375,7 +375,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     am1 = DFACC_RDWR;
   }
   /* get memory */
-  pNew = (pNexusFile)malloc(sizeof(NexusFile));
+  pNew = static_cast<pNexusFile>(malloc(sizeof(NexusFile)));
   if (!pNew) {
     NXReportError("ERROR: no memory to create File datastructure");
     return NX_ERROR;
@@ -438,7 +438,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     }
 
     /* set the filename attribute */
-    if (SDsetattr(pNew->iSID, "file_name", DFNT_CHAR8, strlen(filename), (char *)filename) < 0) {
+    if (SDsetattr(pNew->iSID, "file_name", DFNT_CHAR8, strlen(filename), static_cast<const char *>(filename)) < 0) {
       NXReportError("ERROR: HDF failed to store file_name attribute ");
       free(pNew);
       return NX_ERROR;
@@ -493,7 +493,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
   pNew->iNXID = NXSIGNATURE;
   pNew->iStack[0].iVref = 0; /* root! */
 
-  *pHandle = (NXhandle)pNew;
+  *pHandle = static_cast<NXhandle>(pNew);
   return NX_OK;
 }
 
@@ -544,7 +544,7 @@ NXstatus NX4makegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
    * Make sure that a group with the same name and nxclass does not
    * already exist.
    */
-  if ((iRet = NXIFindVgroup(pFile, (char *)name, nxclass)) >= 0) {
+  if ((iRet = NXIFindVgroup(pFile, static_cast<const char *>(name), nxclass)) >= 0) {
     sprintf(pBuffer, "ERROR: Vgroup %s, class %s already exists", name, nxclass);
     NXReportError(pBuffer);
     return NX_ERROR;
@@ -580,7 +580,7 @@ NXstatus NX4opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
 
   pFile = NXIassert(fid);
 
-  iRef = NXIFindVgroup(pFile, (char *)name, nxclass);
+  iRef = NXIFindVgroup(pFile, static_cast<const char *>(name), nxclass);
   if (iRef < 0) {
     char pBuffer[256];
     sprintf(pBuffer, "ERROR: Vgroup \"%s\", class \"%s\" NOT found", name, nxclass);
@@ -711,7 +711,8 @@ NXstatus NX4makedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank, in
   }
 
   /* dataset creation */
-  iNew = SDcreate(pFile->iSID, (char *)name, (int32)type, (int32)rank, myDim);
+  iNew =
+      SDcreate(pFile->iSID, static_cast<const char *>(name), static_cast<int32>(type), static_cast<int32>(rank), myDim);
   if (iNew < 0) {
     sprintf(pBuffer, "ERROR: cannot create SDS %s, check arguments", name);
     NXReportError(pBuffer);
@@ -813,7 +814,8 @@ NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank
   }
 
   /* dataset creation */
-  iNew = SDcreate(pFile->iSID, (char *)name, (int32)type, (int32)rank, myDim);
+  iNew =
+      SDcreate(pFile->iSID, static_cast<const char *>(name), static_cast<int32>(type), static_cast<int32>(rank), myDim);
   if (iNew < 0) {
     sprintf(pBuffer, "ERROR: cannot create SDS %s, check arguments", name);
     NXReportError(pBuffer);
@@ -1014,7 +1016,8 @@ NXstatus NX4putdata(NXhandle fid, const void *data) {
   }
 
   /* actually write */
-  int32 iRet = SDwritedata(pFile->iCurrentSDS, iStart, iStride, iSize, (void *)data);
+  int32 iRet =
+      SDwritedata(pFile->iCurrentSDS, iStart, iStride, iSize, const_cast<void *>(static_cast<const void *>(data)));
   if (iRet < 0) {
     /* HEprint(stdout,0); */
     char pError[512];
@@ -1056,14 +1059,17 @@ NXstatus NX4putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen
   }
   if (pFile->iCurrentSDS != 0) {
     /* SDS attribute */
-    iRet = SDsetattr(pFile->iCurrentSDS, (char *)name, (int32)type, (int32)datalen, data);
+    iRet = SDsetattr(pFile->iCurrentSDS, static_cast<const char *>(name), static_cast<int32>(type),
+                     static_cast<int32>(datalen), data);
   } else {
     if (pFile->iCurrentVG == 0) {
       /* global attribute */
-      iRet = SDsetattr(pFile->iSID, (char *)name, (int32)type, (int32)datalen, data);
+      iRet = SDsetattr(pFile->iSID, static_cast<const char *>(name), static_cast<int32>(type),
+                       static_cast<int32>(datalen), data);
     } else {
       /* group attribute */
-      iRet = Vsetattr(pFile->iCurrentVG, (char *)name, (int32)type, (int32)datalen, data);
+      iRet = Vsetattr(pFile->iCurrentVG, static_cast<const char *>(name), static_cast<int32>(type),
+                      static_cast<int32>(datalen), data);
     }
   }
   iType = type; // TODO what is the intention here?
@@ -1102,7 +1108,7 @@ NXstatus NX4putslab64(NXhandle fid, const void *data, const int64_t iStart[], co
     mySize[i] = (int32)iSize[i];
   }
   /* finally write */
-  iRet = SDwritedata(pFile->iCurrentSDS, myStart, iStride, mySize, (void *)data);
+  iRet = SDwritedata(pFile->iCurrentSDS, myStart, iStride, mySize, const_cast<void *>(static_cast<const void *>(data)));
 
   /* deal with HDF errors */
   if (iRet < 0) {
@@ -1160,7 +1166,7 @@ NXstatus NX4makelink(NXhandle fid, NXlink *sLink) {
     SDendaccess(dataID);
   } else {
     dataID = Vattach(pFile->iVID, sLink->iRef, "w");
-    Vsetattr(dataID, (char *)name, type, (int32)length, sLink->targetPath);
+    Vsetattr(dataID, static_cast<char *>(name), type, (int32)length, sLink->targetPath);
     Vdetach(dataID);
   }
   return NX_OK;
@@ -1199,7 +1205,7 @@ NXstatus NX4makenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
     NX4putattr(fid, "NAPIlink", tags, 2, attType);
     NX4closegroup(fid);
     dataID = Vattach(pFile->iVID, sLink->iRef, "w");
-    Vsetattr(dataID, (char *)name, type, (int32)length, sLink->targetPath);
+    Vsetattr(dataID, static_cast<char *>(name), type, (int32)length, sLink->targetPath);
     Vdetach(dataID);
   }
   return NX_OK;
@@ -1246,7 +1252,7 @@ NXstatus NX4flush(NXhandle *pHandle) {
     NXReportError("ERROR: NX4flush failed to determine file access mode");
     return NX_ERROR;
   }
-  pCopy = (char *)malloc((strlen(pFileName) + 10) * sizeof(char));
+  pCopy = static_cast<char *>(malloc((strlen(pFileName) + 10) * sizeof(char)));
   if (!pCopy) {
     NXReportError("ERROR: Failed to allocate data for filename copy");
     return NX_ERROR;
@@ -1258,7 +1264,7 @@ NXstatus NX4flush(NXhandle *pHandle) {
   iStack = 0;
   if (pFile->iStackPtr > 0) {
     iStack = pFile->iStackPtr + 1;
-    iRefs = (int *)malloc(iStack * sizeof(int));
+    iRefs = static_cast<int *>(malloc(iStack * sizeof(int)));
     if (!iRefs) {
       free(pCopy); // do not leak memory
       NXReportError("ERROR: Failed to allocate data for hierarchy copy");
@@ -1559,7 +1565,7 @@ NXstatus NX4getattr(NXhandle fid, const char *name, void *data, int *datalen, in
   if (*iType == NX_CHAR) {
     iLen += 1;
   }
-  pData = (void *)malloc(iLen);
+  pData = malloc(iLen);
   if (!pData) {
     NXReportError("ERROR: allocating memory in NXgetattr");
     return NX_ERROR;

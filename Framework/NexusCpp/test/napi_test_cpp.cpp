@@ -477,6 +477,11 @@ int testLoadPath(const string &filename) {
 }
 
 int testExternal(const string &fileext, NXaccess create_code) {
+  if (create_code == NXACC_CREATE4) {
+    std::cout << "Not testing external linking with hdf4\n";
+    return TEST_SUCCEED;
+  }
+
   const string extfilepath1("data/dmc01" + fileext);
   if (!std::filesystem::exists(extfilepath1)) {
     std::cerr << "Cannot find \"" << extfilepath1 << "\" for external linking\n";
