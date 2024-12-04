@@ -6,7 +6,7 @@ on:
 
 jobs:
   linux-build-and-test:
-    runs-on: self-hosted-linux
+    runs-on: [self-hosted, linux, x64]
     steps:
      - name: Run unit tests and system tessts on Linux
        run: ./buildconfig/Jenkins/Conda/conda-buildscript . linux-64-ci --enable-systemtests
