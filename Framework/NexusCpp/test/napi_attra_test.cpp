@@ -22,6 +22,8 @@
   For further information, see <http://www.nexusformat.org>
 
 ----------------------------------------------------------------------------*/
+#include <filesystem>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,8 +53,10 @@ int createAttrs(const NXhandle file) {
   if (NXputattra(file, "attribute_2d", r8_array, 2, array_dims, NX_FLOAT64) != NX_OK)
     return NX_ERROR;
 
-  if (NXputattr(file, "old_style_int_attribute", &i, 1, NX_INT32) != NX_OK)
+  if (NXputattr(file, "old_style_int_attribute", &i, 1, NX_INT32) != NX_OK) {
+    std::cerr << "Failed to NXputattr(handle, \"old_style_int_attribute\", ...)\n";
     return NX_ERROR;
+  }
   if (NXputattr(file, "oldstylestrattr", "i:wq!<ESC><ESC>", strlen("i:wq!<ESC><ESC>"), NX_CHAR) != NX_OK)
     return NX_ERROR;
   return NX_OK;
@@ -69,29 +73,35 @@ int main(int argc, char *argv[]) {
 
   const int i4_array[4] = {1000000, 2000000, 3000000, 4000000};
 
-  char name[64], char_buffer[128];
-  NXhandle fileid;
-  int nx_creation_code;
-  char nxFile[80];
+  char name[NX_MAXNAMELEN], char_buffer[128];
 
+  int nx_creation_code;
+  std::string filename("napi_attra.");
   if (strstr(argv[0], "hdf4") != NULL) {
     nx_creation_code = NXACC_CREATE;
-    strcpy(nxFile, "attra.h4");
+    filename += "hdf";
   } else if (strstr(argv[0], "xml") != NULL) {
     fprintf(stderr, "\nxml not supported\n");
     return 1;
   } else {
     nx_creation_code = NXACC_CREATE5;
-    strcpy(nxFile, "attra.h5");
+    filename += "h5";
   }
+
+  // cleanup from previous run
+  if (std::filesystem::exists(filename))
+    std::filesystem::remove(filename);
 
   /* make sure to test strings (we might not support vlen or only support that) and numbers */
 
-  fprintf(stderr, "\nstarting attra napi test\n");
-  fprintf(stderr, "creating file\n");
+  std::cout << "\nstarting napi_attra_test\n";
+  std::cout << "creating file \"" << filename << "\"\n";
 
-  if (NXopen(nxFile, nx_creation_code, &fileid) != NX_OK)
+  NXhandle fileid;
+  if (NXopen(filename.c_str(), nx_creation_code, &fileid) != NX_OK) {
+    std::cerr << "NXopen(" << filename << ", " << nx_creation_code << ", handle)\n failed";
     return 1;
+  }
   NXsetnumberformat(fileid, NX_FLOAT32, "%9.3f");
 
   /* create global attributes */
@@ -103,10 +113,14 @@ int main(int argc, char *argv[]) {
   }
 
   /* create group attributes */
-  if (NXmakegroup(fileid, "entry", "NXentry") != NX_OK)
+  if (NXmakegroup(fileid, "entry", "NXentry") != NX_OK) {
+    std::cerr << "Failed to create /entry\n";
     return 1;
-  if (NXopengroup(fileid, "entry", "NXentry") != NX_OK)
+  }
+  if (NXopengroup(fileid, "entry", "NXentry") != NX_OK) {
+    std::cerr << "Failed to open /entry\n";
     return 1;
+  }
 
   fprintf(stderr, "creating group attributes\n");
   if (createAttrs(fileid) != NX_OK && nx_creation_code == NXACC_CREATE5) {
@@ -140,7 +154,7 @@ int main(int argc, char *argv[]) {
 
   fprintf(stderr, "file closed - reopening for testing reads\n");
 
-  if (NXopen(nxFile, NXACC_READ, &fileid) != NX_OK)
+  if (NXopen(filename.c_str(), NXACC_READ, &fileid) != NX_OK)
     return 1;
 
   for (level = 0; level < 3; level++) {
@@ -172,6 +186,7 @@ int main(int argc, char *argv[]) {
     }
     NXinitattrdir(fileid);
     do {
+      // cppcheck-suppress argumentSize
       attr_status = NXgetnextattra(fileid, name, &NXrank, NXdims, &NXtype);
 
       if (attr_status == NX_ERROR)
@@ -187,6 +202,7 @@ int main(int argc, char *argv[]) {
 
       if (attr_status == NX_OK) {
         /* cross checking against info retrieved by name */
+        // cppcheck-suppress argumentSize
         if (NXgetattrainfo(fileid, name, &NXrank2, NXdims2, &NXtype2) != NX_OK)
           return 1;
         if (NXrank != NXrank2) {
@@ -207,6 +223,7 @@ int main(int argc, char *argv[]) {
 
         fprintf(stderr, "\tfound attribute named %s of type %d, rank %d and dimensions ", name, NXtype, NXrank);
         print_data("", NXdims, NX_INT32, NXrank);
+        // cppcheck-suppress cstyleCast
         if (NXmalloc((void **)&data_buffer, NXrank, NXdims, NXtype) != NX_OK) {
           fprintf(stderr, "CANNOT GET MEMORY FOR %s\n", name);
           return 1;
@@ -216,6 +233,7 @@ int main(int argc, char *argv[]) {
           return 1;
         }
         print_data("\t\t", data_buffer, NXtype, n);
+        // cppcheck-suppress cstyleCast
         if (NXfree((void **)&data_buffer) != NX_OK)
           return 1;
 
@@ -250,6 +268,7 @@ int main(int argc, char *argv[]) {
     fprintf(stderr, "Next we are expecting a failure iterating with the old api\n");
     NXinitattrdir(fileid);
     do {
+      // cppcheck-suppress argumentSize
       attr_status = NXgetnextattr(fileid, name, NXdims, &NXtype);
       if (attr_status == NX_EOD) {
         fprintf(stderr, "BANG! We've seen no error iterating through array attributes with old api\n");
@@ -261,7 +280,11 @@ int main(int argc, char *argv[]) {
   if (NXclose(&fileid) != NX_OK)
     return 1;
 
-  fprintf(stderr, "we reached the end - this looks good\n");
+  // remove file that was created
+  if (std::filesystem::exists(filename))
+    std::filesystem::remove(filename);
+
+  std::cout << "we reached the end - this looks good\n";
   return 0;
 }
 
@@ -272,28 +295,28 @@ static void print_data(const char *prefix, const void *data, const int type, con
   for (i = 0; i < num; i++) {
     switch (type) {
     case NX_CHAR:
-      fprintf(stderr, "%c", ((const char *)data)[i]);
+      fprintf(stderr, "%c", static_cast<const char *>(data)[i]);
       break;
     case NX_INT8:
-      fprintf(stderr, " %d", ((const unsigned char *)data)[i]);
+      fprintf(stderr, " %d", static_cast<const unsigned char *>(data)[i]);
       break;
     case NX_INT16:
-      fprintf(stderr, " %d", ((const short *)data)[i]);
+      fprintf(stderr, " %d", static_cast<const short *>(data)[i]);
       break;
     case NX_INT32:
-      fprintf(stderr, " %d", ((const int *)data)[i]);
+      fprintf(stderr, " %d", static_cast<const int *>(data)[i]);
       break;
     case NX_INT64:
-      fprintf(stderr, " %lld", (long long)((const int64_t *)data)[i]);
+      fprintf(stderr, " %ld", static_cast<const int64_t *>(data)[i]);
       break;
     case NX_UINT64:
-      fprintf(stderr, " %llu", (unsigned long long)((const uint64_t *)data)[i]);
+      fprintf(stderr, " %lu", static_cast<const uint64_t *>(data)[i]);
       break;
     case NX_FLOAT32:
-      fprintf(stderr, " %f", ((const float *)data)[i]);
+      fprintf(stderr, " %f", static_cast<const float *>(data)[i]);
       break;
     case NX_FLOAT64:
-      fprintf(stderr, " %f", ((const double *)data)[i]);
+      fprintf(stderr, " %f", static_cast<const double *>(data)[i]);
       break;
     default:
       fprintf(stderr, " (print_data: invalid type %d)", type);

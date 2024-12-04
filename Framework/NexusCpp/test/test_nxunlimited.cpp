@@ -34,6 +34,7 @@
 #define DATA_SIZE 200000
 
 int test_unlimited(int file_type, const char *filename) {
+  // cppcheck-suppress constVariable
   static double d[DATA_SIZE];
   int dims[2] = {NX_UNLIMITED, DATA_SIZE};
   int i, slab_start[2], slab_size[2];

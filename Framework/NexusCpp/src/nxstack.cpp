@@ -49,7 +49,7 @@ typedef struct __fileStack {
 pFileStack makeFileStack() {
   pFileStack pNew = NULL;
 
-  pNew = (pFileStack)malloc(sizeof(fileStack));
+  pNew = static_cast<pFileStack>(malloc(sizeof(fileStack)));
   if (pNew == NULL) {
     return NULL;
   }
@@ -95,7 +95,7 @@ void peekIDOnStack(pFileStack self, NXlink *id) {
   memcpy(id, &self->fileStack[self->fileStackPointer].closeID, sizeof(NXlink));
 }
 /*---------------------------------------------------------------------*/
-void setCloseID(pFileStack self, NXlink id) {
+void setCloseID(pFileStack self, const NXlink &id) {
   memcpy(&self->fileStack[self->fileStackPointer].closeID, &id, sizeof(NXlink));
 }
 /*----------------------------------------------------------------------*/
@@ -121,7 +121,7 @@ int buildPath(pFileStack self, char *path, int pathlen) {
   for (i = 0, totalPathLength = 5; i <= self->pathPointer; i++) {
     totalPathLength += strlen(self->pathStack[i]) + 1;
   }
-  totalPath = (char *)malloc(totalPathLength * sizeof(char));
+  totalPath = static_cast<char *>(malloc(totalPathLength * sizeof(char)));
   if (totalPath == NULL) {
     return 0;
   }
