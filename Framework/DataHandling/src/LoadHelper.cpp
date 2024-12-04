@@ -136,6 +136,7 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
   // bogus entries that follows.
   int datatype;
   char nxclass[NX_MAXNAMELEN];
+  // cppcheck-suppress argumentSize
   NXstatus getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
   if (getnextentry_status == NX_OK) {
     if ((NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
@@ -165,12 +166,14 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
   // Classes
   int datatype; ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see
   /// napi.h
-  char nxname[NX_MAXNAMELEN], nxclass[NX_MAXNAMELEN];
+  char nxname[NX_MAXNAMELEN];
   nxname[0] = '0';
+  char nxclass[NX_MAXNAMELEN];
   nxclass[0] = '0';
 
   bool has_entry = true; // follows getnextentry_status
   while (has_entry) {
+    // cppcheck-suppress argumentSize
     const NXstatus getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
 
     if (getnextentry_status == NX_OK) {

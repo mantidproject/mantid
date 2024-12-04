@@ -863,7 +863,7 @@ void SaveISISNexus::runlog() {
  * @param size The size of the data
  * @param units The units of the data
  */
-void SaveISISNexus::write_runlog(const char *name, void *times, void *data, int type, int size,
+void SaveISISNexus::write_runlog(const char *name, const void *times, const void *data, const int type, const int size,
                                  const std::string &units) {
   write_logOpen(name, times, data, type, size, units);
   closegroup();
@@ -878,7 +878,7 @@ void SaveISISNexus::write_runlog(const char *name, void *times, void *data, int 
  * @param size The size of the data
  * @param units The units of the data
  */
-void SaveISISNexus::write_logOpen(const char *name, void *times, void *data, int type, int size,
+void SaveISISNexus::write_logOpen(const char *name, const void *times, const void *data, const int type, const int size,
                                   const std::string &units) {
   NXmakegroup(handle, name, "NXlog");
   NXopengroup(handle, name, "NXlog");
