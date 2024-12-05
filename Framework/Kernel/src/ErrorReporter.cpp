@@ -113,7 +113,7 @@ std::string ErrorReporter::generateErrorMessage() const {
     message["email"] = m_email;
     message["name"] = m_name;
     message["stacktrace"] = m_stacktrace;
-    message["cppTraces"] = m_cppTraces;
+    message["cppCompressedTraces"] = m_cppTraces;
   } else {
     message["email"] = "";
     message["name"] = "";
