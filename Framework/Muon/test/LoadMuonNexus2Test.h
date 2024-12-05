@@ -20,14 +20,14 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
-#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
+#include "MantidMuon/LoadMuonNexus2.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::DataHandling;
+using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::detid_t;
 using Mantid::Types::Core::DateAndTime;

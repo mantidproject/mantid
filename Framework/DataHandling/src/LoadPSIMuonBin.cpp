@@ -73,10 +73,6 @@ int LoadPSIMuonBin::confidence(Kernel::FileDescriptor &descriptor) const {
   return 90;
 }
 
-// version 1 however there is an issue open to create a version which
-// handles temperatures aswell
-bool LoadPSIMuonBin::loadMutipleAsOne() { return false; }
-
 void LoadPSIMuonBin::init() {
   const std::vector<std::string> exts{".bin"};
   declareProperty(std::make_unique<Mantid::API::FileProperty>("Filename", "", Mantid::API::FileProperty::Load, exts),

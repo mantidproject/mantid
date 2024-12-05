@@ -7,10 +7,12 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/BinaryStreamReader.h"
 #include "MantidKernel/FileDescriptor.h"
+
 #include <cstdint>
 
 /** LoadPSIMuonBin : Loads a bin file from the PSI facility for muon
@@ -71,7 +73,6 @@ public:
   int version() const override;
   const std::string category() const override;
   int confidence(Kernel::FileDescriptor &descriptor) const override;
-  bool loadMutipleAsOne() override;
 
 private:
   void init() override;
