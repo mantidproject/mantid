@@ -19,7 +19,8 @@ namespace DataHandling {
 class LoadMuonNexusV2NexusHelper;
 
 // Create time zero table
-DataObjects::TableWorkspace_sptr createTimeZeroTable(const size_t numSpec, const std::vector<double> &timeZeros);
+MANTID_DATAHANDLING_DLL DataObjects::TableWorkspace_sptr createTimeZeroTable(const size_t numSpec,
+                                                                             const std::vector<double> &timeZeros);
 
 class MANTID_DATAHANDLING_DLL LoadMuonStrategy {
 public:
