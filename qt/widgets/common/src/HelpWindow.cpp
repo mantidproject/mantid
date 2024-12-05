@@ -4,6 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
@@ -12,9 +13,11 @@
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/MantidHelpInterface.h"
 
+#include <QPushButton>
 #include <QUrl>
+#include <QVBoxLayout>
 #include <QWidget>
-#include <boost/lexical_cast.hpp>
+#include <boost/python.hpp>
 
 namespace MantidQt::API {
 namespace {
@@ -57,7 +60,6 @@ void HelpWindow::showAlgorithm(const QString &name, const int version) {
   if (gui) {
     gui->showAlgorithm(name, version);
   } else {
-    // Open online help
     QString baseUrl = "https://docs.mantidproject.org/algorithms/";
     QString url = baseUrl + name + "-v" + QString::number(version) + ".html";
     MantidDesktopServices::openUrl(QUrl(url));
@@ -97,7 +99,6 @@ void HelpWindow::showCustomInterface(const QString &name, const QString &area, c
   if (gui) {
     gui->showCustomInterface(name, area, section);
   } else {
-    // Open online help
     QString baseUrl = "https://docs.mantidproject.org/interfaces/";
     if (!area.toStdString().empty()) {
       baseUrl += area + "/";
@@ -106,6 +107,32 @@ void HelpWindow::showCustomInterface(const QString &name, const QString &area, c
     MantidDesktopServices::openUrl(QUrl(url));
     g_log.debug("Opening online help page:\n" + url.toStdString());
   }
+}
+
+void HelpWindow::launchPythonHelp() {
+  try {
+    boost::python::object mainNamespace = boost::python::import("__main__").attr("__dict__");
+    boost::python::exec("from helpwindowpresenter import HelpPresenter", mainNamespace);
+
+    std::string currentPage = currentUrl.toStdString();
+    boost::python::exec(("presenter = HelpPresenter.instance(); presenter.show_page('" + currentPage + "')").c_str(),
+                        mainNamespace);
+  } catch (const boost::python::error_already_set &) {
+    PyErr_Print();
+    g_log.error("Failed to launch Python HelpWindow.");
+  }
+}
+
+HelpWindow::HelpWindow(QWidget *parent) : QWidget(parent), currentUrl("about:blank") {
+  auto *layout = new QVBoxLayout(this);
+
+  QPushButton *pythonHelpButton = new QPushButton("Python Implementation", this);
+  connect(pythonHelpButton, &QPushButton::clicked, this, &HelpWindow::launchPythonHelp);
+  layout->addWidget(pythonHelpButton);
+}
+
+QString HelpWindow::currentPageUrl() const {
+  return this->currentUrl; // Provide the current URL
 }
 
 } // namespace MantidQt::API
