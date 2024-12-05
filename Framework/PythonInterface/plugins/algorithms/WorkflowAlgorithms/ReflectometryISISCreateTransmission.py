@@ -165,7 +165,8 @@ class ReflectometryISISCreateTransmission(DataProcessorAlgorithm):
 
         # If the input run loads as a workspace group, then using the default workspace group handling of other Mantid algorithms
         # prevents us retrieving an output workspace group from this algorithm when it is run as a child (unless we store things
-        # in the ADS). To avoid this, when we have a workspace group we loop through it, run each algorithm against the child
+        # in the ADS). See issue #38473.
+        # To avoid this, when we have a workspace group we loop through it, run each algorithm against the child
         # workspaces individually and then collect them into a group again at the end
         if isinstance(workspace, WorkspaceGroup):
             output_grp = WorkspaceGroup()
