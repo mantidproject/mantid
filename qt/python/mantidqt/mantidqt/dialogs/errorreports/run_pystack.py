@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from datetime import datetime
 from pathlib import Path
+import base64
 import re
 import subprocess
 import zlib
@@ -35,7 +36,8 @@ def retrieve_thread_traces_from_coredump_file() -> bytes | None:
     pystack_output = _get_output_from_pystack(core_file)
 
     # Compress output and return
-    return zlib.compress(pystack_output.encode("utf-8"))
+    compressed_bytes = zlib.compress(pystack_output.encode("utf-8"))
+    return base64.standard_b64encode(compressed_bytes)
 
 
 def _get_core_dumps_dir() -> Path:
