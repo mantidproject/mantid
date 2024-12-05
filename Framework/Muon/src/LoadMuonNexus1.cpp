@@ -4,19 +4,19 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/LoadMuonNexus1.h"
+#include "MantidMuon/LoadMuonNexus1.h"
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/GroupingLoader.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/ISISRunLogs.h"
-#include "MantidDataHandling/LoadMuonStrategy.h"
+// #include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -45,7 +45,25 @@
 #include <limits>
 #include <memory>
 
-namespace Mantid::DataHandling {
+namespace {
+using namespace Mantid::DataObjects;
+
+TableWorkspace_sptr createTimeZeroTable(const size_t numSpec, const std::vector<double> &timeZeros) {
+  TableWorkspace_sptr timeZeroTable = std::dynamic_pointer_cast<TableWorkspace>(
+      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
+  timeZeroTable->addColumn("double", "time zero");
+
+  for (size_t specNum = 0; specNum < numSpec; ++specNum) {
+    Mantid::API::TableRow row = timeZeroTable->appendRow();
+    row << timeZeros[specNum];
+  }
+
+  return timeZeroTable;
+}
+
+} // namespace
+
+namespace Mantid::Algorithms {
 using namespace DataObjects;
 
 // Register the algorithm into the algorithm factory
@@ -773,8 +791,8 @@ void LoadMuonNexus1::runLoadLog(const DataObjects::Workspace2D_sptr &localWorksp
   setProperty("MainFieldDirection", mainFieldDirection);
   run.addProperty("main_field_direction", mainFieldDirection);
 
-  ISISRunLogs runLogs(run);
-  runLogs.addStatusLog(run);
+  // ISISRunLogs runLogs(run);
+  // runLogs.addStatusLog(run);
 }
 
 /**
@@ -784,13 +802,13 @@ void LoadMuonNexus1::runLoadLog(const DataObjects::Workspace2D_sptr &localWorksp
  */
 void LoadMuonNexus1::addPeriodLog(const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period) {
   auto &run = localWorkspace->mutableRun();
-  ISISRunLogs runLogs(run);
-  if (period == 0) {
-    runLogs.addPeriodLogs(1, run);
-  } else {
-    run.removeLogData("period 1");
-    runLogs.addPeriodLog(static_cast<int>(period) + 1, run);
-  }
+  // ISISRunLogs runLogs(run);
+  // if (period == 0) {
+  //   runLogs.addPeriodLogs(1, run);
+  // } else {
+  //   run.removeLogData("period 1");
+  //   runLogs.addPeriodLog(static_cast<int>(period) + 1, run);
+  // }
 }
 
 void LoadMuonNexus1::addGoodFrames(const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period, int nperiods) {
@@ -918,4 +936,4 @@ int LoadMuonNexus1::confidence(Kernel::NexusDescriptor &descriptor) const {
   return 0;
 }
 
-} // namespace Mantid::DataHandling
+} // namespace Mantid::Algorithms

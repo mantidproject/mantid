@@ -9,13 +9,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/DllConfig.h"
-#include "MantidDataHandling/LoadMuonNexus.h"
+#include "MantidMuon/DllConfig.h"
+#include "MantidMuon/LoadMuonNexus.h"
 #include "MantidNexus/NexusClasses.h"
 
 namespace Mantid {
 
-namespace DataHandling {
+namespace Algorithms {
 
 /**
 Loads an file in NeXus Muon format version 1 and 2 and stores it in a 2D
@@ -44,7 +44,7 @@ multiperiod file)
 together based on the groupings in the NeXus file. </LI>
 </UL>
 */
-class MANTID_DATAHANDLING_DLL LoadMuonNexus2 : public LoadMuonNexus {
+class MANTID_MUON_DLL LoadMuonNexus2 : public LoadMuonNexus {
 public:
   LoadMuonNexus2();
 
@@ -71,5 +71,5 @@ private:
   std::map<int, std::set<int>> loadDetectorMapping(const Mantid::NeXus::NXInt &spectrumIndex);
 };
 
-} // namespace DataHandling
+} // namespace Algorithms
 } // namespace Mantid
