@@ -59,6 +59,14 @@ void ConjoinWorkspaces::exec() {
     g_log.error(message);
     throw std::invalid_argument(message);
   }
+  // Check if bins match
+  if (!WorkspaceHelpers::matchingBins(*ws1, *ws2)) {
+    const std::string message("The bins do not match in the input workspaces. "
+                              "Consider using RebinToWorkspace to preprocess "
+                              "the workspaces before conjoining them.");
+    g_log.error(message);
+    throw std::invalid_argument(message);
+  }
 
   if (eventWs1 && eventWs2) {
     this->checkCompatibility(*eventWs1, *eventWs2);
