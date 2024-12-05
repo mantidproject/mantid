@@ -9,8 +9,9 @@
 //----------------------------------
 // Includes
 //----------------------------------
+#include <boost/python.hpp>
+
 #include "DllOption.h"
-// #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Instantiator.h"
 
 #include <QHash>
@@ -47,9 +48,7 @@ class MantidHelpInterface;
 
 /**
     This class is responsible for creating the correct dialog for an algorithm.
-   If
-    no specialized version is registered for that algorithm then the default is
-   created
+   If no specialized version is registered for that algorithm then the default is created.
 
     @author Martyn Gigg, Tessella Support Services plc
     @date 24/02/2009
@@ -81,31 +80,37 @@ public:
    */
   MantidHelpInterface *createHelpWindow() const;
 
-  /// @param url Relative URL of help page to show.
+  /// Show a help page by URL
   void showHelpPage(const QString &url = QString());
 
-  /// @param name of algorithm to show help for
-  /// @param version of algorithm
+  /// Show algorithm help by name and version
   void showAlgorithmHelp(const QString &name, const int version = -1);
 
-  /// @param name of concept to show help for
+  /// Show concept help by name
   void showConceptHelp(const QString &name);
 
-  /// @param name of fit function to show help for
+  /// Show fit function help
   void showFitFunctionHelp(const QString &name = QString());
 
   /**
    * @param name of interface to show help for
    * @param area - folder for documentation in the interfaces directory
-   * @param section - section in the html document
-   **/
+   * @param section - section in the HTML document
+   */
   void showCustomInterfaceHelp(const QString &name, const QString &area = QString(),
                                const QString &section = QString());
 
-  /// @param url of web page to open in browser
+  /// Open a web page by URL
   void showWebPage(const QString &url);
 
+  /// Close the active help window
   void closeHelpWindow();
+
+  /**
+   * Launch the Python-based HelpWindow
+   * @param url :: URL to pass to the Python HelpWindow
+   */
+  void launchPythonHelp(const QString &url);
 
   /**
    * Registration function for the help window factory.
@@ -121,6 +126,7 @@ public:
 
   /// Constructor
   InterfaceManager();
+
   /// Destructor
   virtual ~InterfaceManager();
 
@@ -130,6 +136,7 @@ private:
   /// Handle to the help window factory
   static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *m_helpViewer;
 };
+
 } // namespace API
 } // namespace MantidQt
 
