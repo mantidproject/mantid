@@ -45,7 +45,7 @@ Usage
 .. testcode:: ExCustomDeadTimes
 
    # Load single period of a MUSR run
-   input = LoadMuonNexus('MUSR0015189.nxs', EntryNumber=1)
+   input = Load('MUSR0015189.nxs', EntryNumber=1)
 
    # Remove uninteresting bins
    input = CropWorkspace('input', XMin=0.55, XMax=12)
@@ -81,7 +81,7 @@ Output:
 .. testcode:: ExLoadedDeadTimes
 
    # Load a MUSR run
-   input = LoadMuonNexus('MUSR0015189.nxs', DeadTimeTable='dead_times')
+   input = Load('MUSR0015189.nxs', DeadTimeTable='dead_times')
 
    # Remove uninteresting bins
    input = CropWorkspace('input', XMin=0.55, XMax=12)
