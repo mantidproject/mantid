@@ -86,6 +86,8 @@ set(SRC_FILES
     src/PropertyHandler.cpp
     src/PropertyWidget.cpp
     src/PropertyWidgetFactory.cpp
+    src/PythonHelpBridge.cpp
+    src/PythonHelpWindow.cpp
     src/PythonRunner.cpp
     src/QtAlgorithmRunner.cpp
     src/QtJobRunner.cpp
@@ -215,6 +217,8 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/PropertyWidget.h
+    inc/MantidQtWidgets/Common/PythonHelpBridge.h
+    inc/MantidQtWidgets/Common/PythonHelpWindow.h
     inc/MantidQtWidgets/Common/PythonRunner.h
     inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QtJobRunner.h
