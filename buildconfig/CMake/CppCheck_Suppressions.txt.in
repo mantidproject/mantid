@@ -30,6 +30,9 @@ unusedPrivateFunction
 // Since 2.13 Cppcheck reports how many checkers are used.
 checkersReport
 
+// Since 2.15 there are a lot of spurious information level defects to do with final classes
+class_X_Y
+
 // ----------------- Upstream libs ---------------
 
 // All ANN files as they are upstream anyway
