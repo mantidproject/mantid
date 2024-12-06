@@ -24,13 +24,13 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/WarningSuppressions.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include <Poco/File.h>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <map>
 #include <memory>
-#include <nexus/NeXusFile.hpp>
 #include <random>
 #include <vector>
 

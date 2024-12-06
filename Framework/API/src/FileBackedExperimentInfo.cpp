@@ -8,11 +8,11 @@
 #include "MantidKernel/Logger.h"
 
 #include <sstream>
+#include <utility>
 
 // clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-#include <utility>
+#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexusCpp/NeXusException.hpp"
 // clang-format on
 
 namespace Mantid::API {

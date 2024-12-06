@@ -13,6 +13,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
+#include <list>
 #include <optional>
 
 namespace Mantid {

@@ -15,6 +15,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidNexus/DllConfig.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/date_time/c_local_time_adjustor.hpp>
 #include <boost/date_time/local_time_adjustor.hpp>
@@ -23,7 +24,6 @@
 
 #include <climits>
 #include <memory>
-#include <nexus/NeXusFile.hpp>
 #include <optional>
 
 namespace Mantid {

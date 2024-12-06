@@ -13,8 +13,8 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Unit.h"
 // clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexusCpp/NeXusException.hpp"
 // clang-format on
 
 namespace Mantid::DataHandling {
@@ -97,7 +97,7 @@ void LoadMcStasNexus::exec() {
       // Find the axis names
       auto nxdataEntries = nxFile.getEntries();
       std::string axis1Name, axis2Name;
-      for (auto &nxdataEntry : nxdataEntries) {
+      for (const auto &nxdataEntry : nxdataEntries) {
         if (nxdataEntry.second == "NXparameters")
           continue;
         nxFile.openData(nxdataEntry.first);

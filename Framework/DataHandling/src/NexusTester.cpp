@@ -8,12 +8,12 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <Poco/File.h>
 #include <Poco/Thread.h>
 
 #include <cstdlib>
-#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
