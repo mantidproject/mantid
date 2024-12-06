@@ -144,7 +144,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
     # TESTS
     # ------------------------------------------------------------------------------------------------------------------
     def test_context_menu_add_pair_adds_pair_if_two_groups_selected(self):
-        self.assertEqual(self.pairing_table_view.num_rows(), 2)
+        self.assertEqual(self.pairing_table_widget.num_rows(), 2)
         self.grouping_table_view._get_selected_row_indices = mock.Mock(return_value=[0, 1])
         self.grouping_table_view.contextMenuEvent(0)
         self.grouping_table_view.add_pair_action.triggered.emit(True)
@@ -157,7 +157,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.assertEqual(len(self.model.groups), 0)
         self.assertEqual(len(self.model.pairs), 0)
         self.assertEqual(self.grouping_table_view.num_rows(), 0)
-        self.assertEqual(self.pairing_table_view.num_rows(), 0)
+        self.assertEqual(self.pairing_table_widget.num_rows(), 0)
 
     @mock.patch("mantidqtinterfaces.Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML")
     def test_that_load_grouping_triggers_the_correct_function(self, mock_load):
@@ -186,7 +186,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.assertCountEqual(self.model.group_names, ["grp1", "grp2"])
         self.assertCountEqual(self.model.pair_names, ["pair1"])
         self.assertEqual(self.grouping_table_view.num_rows(), 2)
-        self.assertEqual(self.pairing_table_view.num_rows(), 1)
+        self.assertEqual(self.pairing_table_widget.num_rows(), 1)
         self.assertEqual(self.pairing_table_view.pairing_table.cellWidget(0, 2).currentText(), "grp1")
         self.assertEqual(self.pairing_table_view.pairing_table.cellWidget(0, 3).currentText(), "grp2")
 
@@ -203,7 +203,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
         self.assertCountEqual(self.model.group_names, ["grp1"])
         self.assertCountEqual(self.model.pair_names, [])
         self.assertEqual(self.grouping_table_view.num_rows(), 1)
-        self.assertEqual(self.pairing_table_view.num_rows(), 0)
+        self.assertEqual(self.pairing_table_widget.num_rows(), 0)
 
     def test_loading_selects_all_pairs_if_any_pairs_exist_and_no_default_set(self):
         groups = [
@@ -354,9 +354,9 @@ class GroupingTabPresenterTest(unittest.TestCase):
 
     def test_cannot_remove_a_selected_pair_used_by_diff(self):
         self.add_pair_diff()
-        self.pairing_table_view.get_selected_pair_names_and_indexes = mock.Mock(return_value=[["long1", 0]])
+        self.pairing_table_widget.get_selected_pair_names_and_indexes = mock.Mock(return_value=[["long1", 0]])
         self.pairing_table_widget.handle_remove_pair_button_clicked()
-
+        #
         self.assertEqual(1, self.pairing_table_view.warning_popup.call_count)
         self.assertEqual(
             "long1 is used by: diff_1\n",
