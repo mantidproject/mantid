@@ -655,6 +655,7 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCSV.cp
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCSV.cpp:155
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveCanSAS1D.h:84
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveCanSAS1D2.cpp:24
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SNSAppendGeometryToNexus.cpp:336
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:579
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:580
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:158
