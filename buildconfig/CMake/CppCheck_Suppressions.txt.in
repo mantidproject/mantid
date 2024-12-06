@@ -400,12 +400,10 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorke
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:261
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorker.cpp:268
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/CalculateUMatrix.cpp:65
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:78
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:437
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:474
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:519
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:125
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:406
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:79
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:438
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:126
+useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/API/src/WorkspaceGroup.cpp:407
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:263
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:313
 shadowFunction:${CMAKE_SOURCE_DIR}/Framework/API/src/IFunction.cpp:325
