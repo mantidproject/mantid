@@ -16,10 +16,13 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "Poco/NumberParser.h"
 
-#include <boost/lexical_cast.hpp>
-#include <boost/regex.hpp>
 #include <memory>
 #include <utility>
+
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/regex.hpp>
 
 namespace Mantid::WorkflowAlgorithms::HFIRInstrument {
 /**
@@ -99,7 +102,7 @@ double getSourceToSampleDistance(const API::MatrixWorkspace_sptr &dataWS) {
   std::vector<double> parsDouble = dataWS->getInstrument()->getNumberParameter("Header_source_distance");
   if (!parsDouble.empty()) {
     // First let's try to get source_distance first:
-    sourceToSampleDistance = parsDouble[0] *= 1000; // convert to mm
+    sourceToSampleDistance = parsDouble[0] * 1000; // convert to mm
   } else {
     const auto nGuides = dataWS->run().getPropertyValueAsType<int>("Motor_Positions_nguides");
     // aperture-distances: array from the instrument parameters

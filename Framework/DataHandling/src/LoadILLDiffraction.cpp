@@ -530,7 +530,7 @@ void LoadILLDiffraction::fillDataScanMetaData(const NXDouble &scan) {
   auto absoluteTimes = getAbsoluteTimes(scan);
   auto &mutableRun = m_outWorkspace->mutableRun();
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
-    if (!boost::starts_with(m_scanVar[i].property, "Monitor")) {
+    if (!m_scanVar[i].property.starts_with("Monitor")) {
       const std::string scanVarName = boost::algorithm::to_lower_copy(m_scanVar[i].name);
       const std::string scanVarProp = boost::algorithm::to_lower_copy(m_scanVar[i].property);
       const std::string propName = scanVarName + "." + scanVarProp;
@@ -622,7 +622,7 @@ std::vector<double> LoadILLDiffraction::getAxis(const NXDouble &scan) const {
 std::vector<double> LoadILLDiffraction::getDurations(const NXDouble &scan) const {
   std::vector<double> timeDurations;
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
-    if (boost::starts_with(m_scanVar[i].property, "Time")) {
+    if (m_scanVar[i].property.starts_with("Time")) {
       timeDurations.assign(scan() + m_numberScanPoints * i, scan() + m_numberScanPoints * (i + 1));
       break;
     }

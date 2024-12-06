@@ -19,6 +19,7 @@
 #include "MantidKernel/StringTokenizer.h"
 
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/scoped_ptr.hpp>
 // clang-format off
 #include <nexus/NeXusFile.hpp>

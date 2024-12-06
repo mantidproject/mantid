@@ -12,6 +12,8 @@
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Strings.h"
 
+#include <boost/algorithm/string/trim.hpp>
+
 #include <json/value.h>
 
 namespace Mantid {

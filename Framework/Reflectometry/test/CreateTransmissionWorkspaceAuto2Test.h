@@ -14,6 +14,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidReflectometry/CreateTransmissionWorkspaceAuto2.h"
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
 
