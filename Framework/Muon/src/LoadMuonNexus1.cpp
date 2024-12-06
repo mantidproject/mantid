@@ -17,7 +17,6 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -45,6 +44,24 @@
 #include <cmath>
 #include <limits>
 #include <memory>
+
+namespace {
+using namespace Mantid::DataObjects;
+
+TableWorkspace_sptr createTimeZeroTable(const size_t numSpec, const std::vector<double> &timeZeros) {
+  TableWorkspace_sptr timeZeroTable = std::dynamic_pointer_cast<TableWorkspace>(
+      Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace"));
+  timeZeroTable->addColumn("double", "time zero");
+
+  for (size_t specNum = 0; specNum < numSpec; ++specNum) {
+    Mantid::API::TableRow row = timeZeroTable->appendRow();
+    row << timeZeros[specNum];
+  }
+
+  return timeZeroTable;
+}
+
+} // namespace
 
 namespace Mantid::Algorithms {
 using namespace DataObjects;
@@ -343,7 +360,7 @@ void LoadMuonNexus1::exec() {
       auto timeZeroList = std::vector<double>(m_numberOfSpectra, getProperty("TimeZero"));
       setProperty("TimeZeroList", timeZeroList);
       if (!getPropertyValue("TimeZeroTable").empty())
-        setProperty("TimeZeroTable", DataHandling::createTimeZeroTable(m_numberOfSpectra, timeZeroList));
+        setProperty("TimeZeroTable", createTimeZeroTable(m_numberOfSpectra, timeZeroList));
     }
 
     if (m_numberOfPeriods == 1)
