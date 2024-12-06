@@ -503,9 +503,6 @@ private:
   /// A text label for use when plotting spectra
   std::string m_YUnitLabel;
 
-  /// The plot style for the MatrixWorkspace
-  std::string m_plotType = "plot";
-
   /// Flag indicating if the common bins flag is in a valid state
   mutable std::atomic<bool> m_isCommonBinsFlagValid{false};
   /// Flag indicating whether the data has common bins

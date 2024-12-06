@@ -116,7 +116,7 @@ MatrixWorkspace::MatrixWorkspace()
 MatrixWorkspace::MatrixWorkspace(const MatrixWorkspace &other)
     : IMDWorkspace(other), ExperimentInfo(other), m_indexInfo(std::make_unique<Indexing::IndexInfo>(other.indexInfo())),
       m_isInitialized(other.m_isInitialized), m_YUnit(other.m_YUnit), m_YUnitLabel(other.m_YUnitLabel),
-      m_plotType(other.m_plotType), m_masks(other.m_masks), m_indexInfoNeedsUpdate(false) {
+      m_masks(other.m_masks), m_indexInfoNeedsUpdate(false) {
   m_axes.resize(other.m_axes.size());
   for (size_t i = 0; i < m_axes.size(); ++i)
     m_axes[i] = std::unique_ptr<Axis>(other.m_axes[i]->clone(this));
@@ -328,18 +328,30 @@ const std::string MatrixWorkspace::getTitle() const {
  * @param t :: The plot type. Must be one of: ["plot", "scatter", "histogram", "errorbar"]
  */
 void MatrixWorkspace::setPlotType(const std::string &t) {
-
+  Run &run = mutableRun();
   StringListValidator v(validPlotTypes);
 
-  if (v.isValid(t) == "")
-    this->m_plotType = t;
+  if (v.isValid(t) == "") {
+    if (run.hasProperty("plot_type"))
+      run.addProperty("plot_type", t, true);
+    else
+      run.addProperty("plot_type", t, false);
+  }
 }
 
 /** Get the plot type
  *
  * @return The plot type
  */
-std::string MatrixWorkspace::getPlotType() const { return this->m_plotType; }
+std::string MatrixWorkspace::getPlotType() const {
+  std::string plotType;
+  if (run().hasProperty("plot_type")) {
+    plotType = run().getProperty("plot_type")->value();
+  } else {
+    plotType = "plot";
+  }
+  return plotType;
+}
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
   for (size_t j = 0; j < getNumberHistograms(); ++j) {
