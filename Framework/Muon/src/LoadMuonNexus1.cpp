@@ -9,6 +9,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/GroupingLoader.h"
+#include "MantidAPI/ISISRunLogs.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/Run.h"
@@ -16,7 +17,6 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataHandling/LoadMuonStrategy.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -774,7 +774,7 @@ void LoadMuonNexus1::runLoadLog(const DataObjects::Workspace2D_sptr &localWorksp
   setProperty("MainFieldDirection", mainFieldDirection);
   run.addProperty("main_field_direction", mainFieldDirection);
 
-  DataHandling::ISISRunLogs runLogs(run);
+  API::ISISRunLogs runLogs(run);
   runLogs.addStatusLog(run);
 }
 
@@ -785,7 +785,7 @@ void LoadMuonNexus1::runLoadLog(const DataObjects::Workspace2D_sptr &localWorksp
  */
 void LoadMuonNexus1::addPeriodLog(const DataObjects::Workspace2D_sptr &localWorkspace, int64_t period) {
   auto &run = localWorkspace->mutableRun();
-  DataHandling::ISISRunLogs runLogs(run);
+  API::ISISRunLogs runLogs(run);
   if (period == 0) {
     runLogs.addPeriodLogs(1, run);
   } else {

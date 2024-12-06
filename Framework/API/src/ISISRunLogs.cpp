@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // Includes
-#include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidAPI/ISISRunLogs.h"
 
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-namespace Mantid::DataHandling {
+namespace Mantid::API {
 namespace {
 /// static logger
 Kernel::Logger g_log("ISISRunLogs");
@@ -142,4 +142,4 @@ std::vector<std::string> ISISRunLogs::getLogNamesExcludedFromFiltering(const API
   return retVal;
 }
 
-} // namespace Mantid::DataHandling
+} // namespace Mantid::API

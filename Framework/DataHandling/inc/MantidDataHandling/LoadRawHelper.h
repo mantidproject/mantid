@@ -7,9 +7,10 @@
 #pragma once
 
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/ISISRunLogs.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "MantidDataHandling/ISISRunLogs.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidHistogramData/HistogramX.h"
@@ -215,7 +216,7 @@ private:
   specnum_t m_total_specs;
 
   /// A ptr to the log creator
-  std::unique_ptr<ISISRunLogs> m_logCreator;
+  std::unique_ptr<API::ISISRunLogs> m_logCreator;
 
   /// Extract the log name from the path to the specific log file.
   std::string extractLogName(const std::string &path);

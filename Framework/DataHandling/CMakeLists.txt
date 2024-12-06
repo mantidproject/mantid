@@ -30,7 +30,6 @@ set(SRC_FILES
     src/ISISDataArchive.cpp
     src/ISISJournal.cpp
     src/ISISJournalGetExperimentRuns.cpp
-    src/ISISRunLogs.cpp
     src/JoinISISPolarizationEfficiencies.cpp
     src/Load.cpp
     src/LoadANSTOHelper.cpp
@@ -250,7 +249,6 @@ set(INC_FILES
     inc/MantidDataHandling/ISISDataArchive.h
     inc/MantidDataHandling/ISISJournal.h
     inc/MantidDataHandling/ISISJournalGetExperimentRuns.h
-    inc/MantidDataHandling/ISISRunLogs.h
     inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
     inc/MantidDataHandling/Load.h
     inc/MantidDataHandling/LoadANSTOEventFile.h
