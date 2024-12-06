@@ -12,7 +12,7 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidDataHandling/LoadMuonNexus2.h"
+#include "MantidDataHandling/Load.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
@@ -42,7 +42,7 @@ public:
   }
 
   void testExec() {
-    MatrixWorkspace_sptr inputWs = loadDataFromFile();
+    auto const inputWs = loadFile("emu00006473.nxs");
     auto deadTimes = makeDeadTimeTable(32);
 
     ApplyDeadTimeCorr applyDeadTime;
@@ -80,7 +80,7 @@ public:
   }
 
   void testDifferentSize() {
-    MatrixWorkspace_sptr inputWs = loadDataFromFile();
+    auto const inputWs = loadFile("emu00006473.nxs");
 
     // Bigger row count than file (expect to fail)
     auto deadTimes = makeDeadTimeTable(64);
@@ -99,7 +99,7 @@ public:
   }
 
   void testSelectedSpectrum() {
-    MatrixWorkspace_sptr inputWs = loadDataFromFile();
+    auto const inputWs = loadFile("emu00006473.nxs");
 
     std::shared_ptr<ITableWorkspace> deadTimes = std::make_shared<Mantid::DataObjects::TableWorkspace>();
     deadTimes->addColumn("int", "Spectrum Number");
@@ -173,7 +173,7 @@ public:
   // Test that algorithm throws if input workspace does not contain number of
   // good frames
   void testNoGoodfrmPresent() {
-    MatrixWorkspace_sptr inputWs = loadDataFromFile();
+    auto const inputWs = loadFile("emu00006473.nxs");
     auto deadTimes = makeDeadTimeTable(32);
 
     auto &run = inputWs->mutableRun();
@@ -207,22 +207,20 @@ private:
     return deadTimes;
   }
 
-  /**
-   * Loads data from the test data file
-   * @returns :: Workspace with loaded data
-   */
-  MatrixWorkspace_sptr loadDataFromFile() {
-    Mantid::DataHandling::LoadMuonNexus2 loader;
+  MatrixWorkspace_sptr loadFile(std::string const &filename) {
+    Mantid::DataHandling::Load loader;
     loader.initialize();
     loader.setChild(true);
-    loader.setPropertyValue("Filename", "emu00006473.nxs");
-    loader.setPropertyValue("OutputWorkspace", "__NotUsed");
+    loader.setPropertyValue("Filename", filename);
+
     TS_ASSERT_THROWS_NOTHING(loader.execute());
     TS_ASSERT_EQUALS(loader.isExecuted(), true);
-    Workspace_sptr data = loader.getProperty("OutputWorkspace");
-    auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(data);
-    TS_ASSERT(data);
-    return matrixWS;
+
+    TS_ASSERT_EQUALS("LoadMuonNexus", loader.getPropertyValue("LoaderName"));
+    TS_ASSERT_EQUALS("1", loader.getPropertyValue("LoaderVersion"));
+
+    Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
+    return std::dynamic_pointer_cast<MatrixWorkspace>(outWS);
   }
 
   /// Test dead time value

@@ -516,7 +516,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry
                          [&groupingData](const auto spec) { return groupingData[spec - 1]; });
         } else {
           // User selected an entry number
-          for (auto &spec : specToLoad) {
+          for (auto const &spec : specToLoad) {
             int index = spec - 1 + static_cast<int>((m_entrynumber - 1) * m_numberOfSpectra);
             grouping.emplace_back(groupingData[index]);
           }
@@ -548,7 +548,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry
 
           // Get the grouping
           grouping.clear();
-          for (auto &spec : specToLoad) {
+          for (auto const &spec : specToLoad) {
             int index = spec - 1 + i * static_cast<int>(m_numberOfSpectra);
             grouping.emplace_back(groupingData[index]);
           }
@@ -601,7 +601,8 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry
  * @param deadTimes :: vector containing the corresponding dead times
  * @return Dead Time Table create using the data
  */
-TableWorkspace_sptr LoadMuonNexus1::createDeadTimeTable(std::vector<int> specToLoad, std::vector<double> deadTimes) {
+TableWorkspace_sptr LoadMuonNexus1::createDeadTimeTable(std::vector<int> const &specToLoad,
+                                                        std::vector<double> const &deadTimes) {
   TableWorkspace_sptr deadTimeTable =
       std::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
@@ -623,8 +624,8 @@ TableWorkspace_sptr LoadMuonNexus1::createDeadTimeTable(std::vector<int> specToL
  * @param grouping :: Vector containing corresponding grouping
  * @return Detector Grouping Table create using the data
  */
-TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> specToLoad,
-                                                                std::vector<int> grouping) {
+TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(std::vector<int> const &specToLoad,
+                                                                std::vector<int> const &grouping) {
   auto detectorGroupingTable =
       std::dynamic_pointer_cast<TableWorkspace>(WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
@@ -638,7 +639,7 @@ TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(std::vector<int>
     groupingMap[grouping[i]].emplace_back(specToLoad[i]);
   }
 
-  for (auto &group : groupingMap) {
+  for (auto const &group : groupingMap) {
     if (group.first != 0) // Skip 0 group
     {
       TableRow newRow = detectorGroupingTable->appendRow();
@@ -658,7 +659,7 @@ TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(std::vector<int>
  *  @param localWorkspace :: A pointer to the workspace in which the data will
  * be stored
  */
-void LoadMuonNexus1::loadData(size_t hist, specnum_t &i, specnum_t specNo, MuonNexusReader &nxload,
+void LoadMuonNexus1::loadData(size_t hist, specnum_t const &i, specnum_t specNo, MuonNexusReader &nxload,
                               const int64_t lengthIn, const DataObjects::Workspace2D_sptr &localWorkspace) {
   // Read in a spectrum
   // Put it into a vector, discarding the 1st entry, which is rubbish
