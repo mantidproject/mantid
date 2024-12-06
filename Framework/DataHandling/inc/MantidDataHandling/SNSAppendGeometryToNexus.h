@@ -51,11 +51,11 @@ private:
 
   /// Run LoadInstrument as a Child Algorithm
   bool runLoadInstrument(const std::string &idf_filename, const API::MatrixWorkspace_sptr &localWorkspace,
-                         Algorithm *const alg);
+                         Algorithm *alg);
 
   /// Load logs from the NeXus file
   static bool runLoadNexusLogs(const std::string &nexusFileName, const API::MatrixWorkspace_sptr &localWorkspace,
-                               Algorithm *const alg);
+                               Algorithm *alg);
 
   /// Are we going to make a copy of the NeXus file to operate on ?
   bool m_makeNexusCopy;
