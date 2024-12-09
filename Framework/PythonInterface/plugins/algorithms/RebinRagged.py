@@ -190,6 +190,7 @@ class RebinRagged(PythonAlgorithm):
                         startProgress=(progStart + 2 * progStep),
                         endProgress=(progStart + 3 * progStep),
                         EnableLogging=False,
+                        CheckMatchingBins=False,
                     )
             self.setProperty("OutputWorkspace", mtd[accumulationWS])
             DeleteWorkspace(accumulationWS, EnableLogging=False)
