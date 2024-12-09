@@ -27,8 +27,8 @@ def create_test_workspace(workspace_name, ragged=False):
     if ragged:
         CreateWorkspace([1, 2, 3, 4], [1, 2, 3, 4], NSpec=1, OutputWorkspace="__temp1")
         CreateWorkspace([2, 3, 4, 5, 6], [3, 4, 5, 6, 7], NSpec=1, OutputWorkspace="__temp2")
-        ConjoinWorkspaces(workspace_name, "__temp1", CheckOverlapping=False)
-        ConjoinWorkspaces(workspace_name, "__temp2", CheckOverlapping=False)
+        ConjoinWorkspaces(workspace_name, "__temp1", CheckOverlapping=False, CheckMatchingBins=False)
+        ConjoinWorkspaces(workspace_name, "__temp2", CheckOverlapping=False, CheckMatchingBins=False)
     return AnalysisDataService.retrieve(workspace_name)
 
 
