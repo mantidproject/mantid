@@ -10,9 +10,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFileLoader.h"
-#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/NexusDescriptor.h"
+#include "MantidMuon/DllConfig.h"
 
 //----------------------------------------------------------------------
 // Forward declaration
@@ -20,7 +20,7 @@
 class MuonNexusReader;
 
 namespace Mantid {
-namespace DataHandling {
+namespace Algorithms {
 /** @class LoadMuonNexus LoadMuonNexus.h DataHandling/LoadMuonNexus.h
 
 It is a base class for loaders for versions 1 and 2 of the muon nexus file
@@ -47,7 +47,7 @@ multiperiod file)
 together based on the groupings in the NeXus file. </LI>
 </UL>
 */
-class MANTID_DATAHANDLING_DLL LoadMuonNexus : public API::IFileLoader<Kernel::NexusDescriptor> {
+class MANTID_MUON_DLL LoadMuonNexus : public API::IFileLoader<Kernel::NexusDescriptor> {
 public:
   /// Default constructor
   LoadMuonNexus();
@@ -109,5 +109,5 @@ private:
   void init() override;
 };
 
-} // namespace DataHandling
+} // namespace Algorithms
 } // namespace Mantid
