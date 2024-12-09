@@ -1774,6 +1774,7 @@ class DarkRunSubtraction(object):
         alg_conjoined.setChild(True)
         alg_conjoined.setProperty("InputWorkspace1", monitor)
         alg_conjoined.setProperty("InputWorkspace2", detector)
+        alg_conjoined.setProperty("CheckMatchingBins", False)
         alg_conjoined.execute()
         return alg_conjoined.getProperty("InputWorkspace1").value
 
