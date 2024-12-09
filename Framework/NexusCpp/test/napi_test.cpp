@@ -40,6 +40,9 @@ static int testLoadPath();
 static int testExternal(const std::string &progName);
 
 using NexusCppTest::print_data;
+using NexusCppTest::removeFile;
+using NexusCppTest::write_dmc01;
+using NexusCppTest::write_dmc02;
 
 namespace { // anonymous namespace
 // return to system when any test failed
@@ -56,13 +59,6 @@ static const char *relativePathOf(const char *filename) {
     return filename + strlen(cwd) + 1;
   } else {
     return filename;
-  }
-}
-
-// remove a file if it exists
-void removeFile(const std::string &filename) {
-  if (std::filesystem::exists(filename)) {
-    std::filesystem::remove(filename);
   }
 }
 } // anonymous namespace
@@ -629,6 +625,8 @@ int testLoadPath() {
   NXhandle h;
 
   if (getenv("NX_LOAD_PATH") != NULL) {
+    // TODO create file and cleanup
+    // std::string filename("data/dmc01.h5");
     if (NXopen("dmc01.hdf", NXACC_RDWR, &h) != NX_OK) {
       std::cout << "Loading NeXus file dmc01.hdf from path " << getenv("NX_LOAD_PATH") << " FAILED\n";
       return TEST_FAILED;
@@ -646,18 +644,15 @@ int testLoadPath() {
 /*---------------------------------------------------------------------*/
 static int testExternal(const std::string &progName) {
   const std::string PROTOCOL("nxfile://");
-  NXaccess_mode create;
   int dummylen = 1;
   float dummyfloat = 1;
   float temperature;
 
-  std::string ext;
   if (strstr(progName.c_str(), "hdf4") != NULL) {
     std::cout << "Skipping external linking in hdf4\n";
     return TEST_SUCCEED;
   } else if (strstr(progName.c_str(), "hdf5") != NULL) {
-    ext = "h5";
-    create = NXACC_CREATE5;
+    // this only works for hdf5 backed files
   } else if (strstr(progName.c_str(), "xml") != NULL) {
     std::cout << "XML backend is not supported\n";
     return TEST_FAILED;
@@ -665,14 +660,20 @@ static int testExternal(const std::string &progName) {
     std::cout << "Failed to recognise napi_test program in testExternal\n";
     return TEST_FAILED;
   }
+  const NXaccess_mode create(NXACC_CREATE5);
+  const std::string ext("h5");
 
-  // find external files
-  const std::string extFile1 = "data/dmc01." + ext;
+  // create external files
+  const std::string extFile1 = "dmc01c." + ext;
+  removeFile(extFile1); // in case it was left over from previous run
+  write_dmc01(extFile1);
   if (!std::filesystem::exists(extFile1)) {
     std::cerr << "Cannot find \"" << extFile1 << "\" to use for external linking\n";
     return TEST_FAILED;
   }
-  const std::string extFile2 = "data/dmc02." + ext;
+  const std::string extFile2 = "dmc02c." + ext;
+  removeFile(extFile2); // in case it was left over from previous run
+  write_dmc02(extFile2);
   if (!std::filesystem::exists(extFile2)) {
     std::cerr << "Cannot find \"" << extFile2 << "\" to use for external linking\n";
     return TEST_FAILED;
@@ -829,6 +830,8 @@ static int testExternal(const std::string &progName) {
 
   // remove file that was created
   removeFile(testFile);
+  removeFile(extFile1);
+  removeFile(extFile2);
 
   return TEST_SUCCEED;
 }
