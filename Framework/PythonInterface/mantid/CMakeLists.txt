@@ -22,6 +22,7 @@ add_subdirectory(geometry)
 add_subdirectory(api)
 add_subdirectory(dataobjects)
 add_subdirectory(_plugins)
+add_subdirectory(utils/reflectometry)
 
 # Defines the target the will cause the Python bundle to be copied
 set(PYBUNDLE_POST_TARGET PythonModule)
