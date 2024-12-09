@@ -250,7 +250,7 @@ void SelectFunctionDialog::helpClicked() const {
   if (!function.isEmpty()) {
     MantidQt::API::HelpWindow::showFitFunction(function.toStdString());
   } else { // No function selected open fit function index
-    MantidQt::API::HelpWindow::showFitFunction("");
+    MantidQt::API::HelpWindow::showFitFunction(QStringLiteral(""));
   }
 }
 
