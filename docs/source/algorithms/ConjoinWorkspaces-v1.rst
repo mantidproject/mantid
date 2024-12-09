@@ -66,12 +66,15 @@ y axis unit and label when conjoining workspaces. Changing YAxisUnit updates
 YAxisLabel automatically with the value of YAxisUnit, unless a separate value
 is supplied.
 
-Exception
-#########
+Exceptions
+##########
+
+If property 'CheckMatchingBins' is set to true, and the bins in the two input workspaces
+do not match, then an 'invalid_argument' exception will be thrown from the 'exec' method.
 
 If property 'CheckOverlapping' is set to true, and there are spectra and/or detectors
 are overlapping between two input workspaces,
-then an 'invalid_argument' exception will be thrown from function 'CheckForOverlap'.
+then an 'invalid_argument' exception will be thrown from 'CheckForOverlap' method.
 
 Usage
 -----
@@ -82,7 +85,7 @@ Usage
 
     ws1 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=2, BankPixelWidth=1, BinWidth=10, Xmax=50)
     print("Number of spectra in first workspace = {}".format(ws1.getNumberHistograms()))
-    ws2 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=3, BankPixelWidth=1, BinWidth=10, Xmax=50)
+    ws2 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=2, BankPixelWidth=1, BinWidth=10, Xmax=50)
     print("Number of spectra in second workspace = {}".format(ws2.getNumberHistograms()))
     ConjoinWorkspaces(InputWorkspace1=ws1, InputWorkspace2=ws2, CheckOverlapping=False, YAxisUnit="New unit", YAxisLabel="New label")
     ws = mtd['ws1'] # Have to update workspace from ADS, as it is an in-out parameter
@@ -95,8 +98,8 @@ Output:
 .. testoutput:: ConjoinWorkspacesEx
 
     Number of spectra in first workspace = 2
-    Number of spectra in second workspace = 3
-    Number of spectra after ConjoinWorkspaces = 5
+    Number of spectra in second workspace = 2
+    Number of spectra after ConjoinWorkspaces = 4
     Y unit is New unit
     Y label New label
 
