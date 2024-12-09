@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Spectroscopy/InterfaceUtils.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/SettingsHelper.h"
@@ -227,6 +228,18 @@ void setRangeSelectorMax(QtDoublePropertyManager *dblPropertyManager, QtProperty
     rangeSelector->setMaximum(newValue);
   else
     dblPropertyManager->setValue(maxProperty, rangeSelector->getMaximum());
+}
+
+bool checkADSForPlotSaveWorkspace(const std::string &workspaceName, const bool plotting, const bool warn) {
+  const auto workspaceExists = Mantid::API::AnalysisDataService::Instance().doesExist(workspaceName);
+  if (warn && !workspaceExists) {
+    const std::string plotSave = plotting ? "plotting" : "saving";
+    const auto errorMessage =
+        "Error while " + plotSave + ":\nThe workspace \"" + workspaceName + "\" could not be found.";
+    const char *textMessage = errorMessage.c_str();
+    QMessageBox::warning(nullptr, QObject::tr("Indirect "), QObject::tr(textMessage));
+  }
+  return workspaceExists;
 }
 
 } // namespace InterfaceUtils
