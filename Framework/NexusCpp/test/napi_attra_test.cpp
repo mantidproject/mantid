@@ -31,8 +31,9 @@
 #include <unistd.h>
 #endif
 #include "MantidNexusCpp/napi.h"
+#include "napi_test_util.h"
 
-static void print_data(const char *prefix, const void *data, const int type, const int num);
+using NexusCppTest::print_data;
 
 int createAttrs(const NXhandle file) {
   int array_dims[2] = {5, 4};
@@ -222,7 +223,7 @@ int main(int argc, char *argv[]) {
         }
 
         fprintf(stderr, "\tfound attribute named %s of type %d, rank %d and dimensions ", name, NXtype, NXrank);
-        print_data("", NXdims, NX_INT32, NXrank);
+        print_data("", std::cerr, NXdims, NX_INT32, NXrank);
         // cppcheck-suppress cstyleCast
         if (NXmalloc((void **)&data_buffer, NXrank, NXdims, NXtype) != NX_OK) {
           fprintf(stderr, "CANNOT GET MEMORY FOR %s\n", name);
@@ -232,7 +233,7 @@ int main(int argc, char *argv[]) {
           fprintf(stderr, "CANNOT get data for %s\n", name);
           return 1;
         }
-        print_data("\t\t", data_buffer, NXtype, n);
+        print_data("\t\t", std::cerr, data_buffer, NXtype, n);
         // cppcheck-suppress cstyleCast
         if (NXfree((void **)&data_buffer) != NX_OK)
           return 1;
@@ -252,7 +253,7 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "\tbut fails\n");
             return 1;
           }
-          print_data("\t\t", char_buffer, NXtype, 1);
+          print_data("\t\t", std::cerr, char_buffer, NXtype, 1);
 
         } else {
           fprintf(stderr, "\treading array attributes the old way should produce an error\n");
@@ -286,42 +287,4 @@ int main(int argc, char *argv[]) {
 
   std::cout << "we reached the end - this looks good\n";
   return 0;
-}
-
-/*----------------------------------------------------------------------*/
-static void print_data(const char *prefix, const void *data, const int type, const int num) {
-  int i;
-  fprintf(stderr, "%s", prefix);
-  for (i = 0; i < num; i++) {
-    switch (type) {
-    case NX_CHAR:
-      fprintf(stderr, "%c", static_cast<const char *>(data)[i]);
-      break;
-    case NX_INT8:
-      fprintf(stderr, " %d", static_cast<const unsigned char *>(data)[i]);
-      break;
-    case NX_INT16:
-      fprintf(stderr, " %d", static_cast<const short *>(data)[i]);
-      break;
-    case NX_INT32:
-      fprintf(stderr, " %d", static_cast<const int *>(data)[i]);
-      break;
-    case NX_INT64:
-      fprintf(stderr, " %ld", static_cast<const int64_t *>(data)[i]);
-      break;
-    case NX_UINT64:
-      fprintf(stderr, " %lu", static_cast<const uint64_t *>(data)[i]);
-      break;
-    case NX_FLOAT32:
-      fprintf(stderr, " %f", static_cast<const float *>(data)[i]);
-      break;
-    case NX_FLOAT64:
-      fprintf(stderr, " %f", static_cast<const double *>(data)[i]);
-      break;
-    default:
-      fprintf(stderr, " (print_data: invalid type %d)", type);
-      break;
-    }
-  }
-  fprintf(stderr, "\n");
 }

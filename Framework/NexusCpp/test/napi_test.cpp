@@ -34,10 +34,12 @@
 #include <unistd.h>
 #endif
 #include "MantidNexusCpp/napi.h"
+#include "napi_test_util.h"
 
-static void print_data(const char *prefix, const void *data, int type, int num);
 static int testLoadPath();
 static int testExternal(const std::string &progName);
+
+using NexusCppTest::print_data;
 
 namespace { // anonymous namespace
 // return to system when any test failed
@@ -416,11 +418,11 @@ int main(int argc, char *argv[]) {
         if (NXtype == NX_CHAR) {
           if (NXgetdata(fileid, data_buffer) != NX_OK)
             return TEST_FAILED;
-          print_data(" = ", data_buffer, NXtype, n);
+          print_data(" = ", std::cout, data_buffer, NXtype, n);
         } else if (NXtype != NX_FLOAT32 && NXtype != NX_FLOAT64) {
           if (NXgetdata(fileid, data_buffer) != NX_OK)
             return TEST_FAILED;
-          print_data(" = ", data_buffer, NXtype, n);
+          print_data(" = ", std::cout, data_buffer, NXtype, n);
         } else {
           slab_start[0] = 0;
           slab_start[1] = 0;
@@ -428,23 +430,23 @@ int main(int argc, char *argv[]) {
           slab_size[1] = 4;
           if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NX_OK)
             return TEST_FAILED;
-          print_data("\n      ", data_buffer, NXtype, 4);
+          print_data("\n      ", std::cout, data_buffer, NXtype, 4);
           slab_start[0] = TEST_FAILED;
           if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NX_OK)
             return TEST_FAILED;
-          print_data("      ", data_buffer, NXtype, 4);
+          print_data("      ", std::cout, data_buffer, NXtype, 4);
           slab_start[0] = 2;
           if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NX_OK)
             return TEST_FAILED;
-          print_data("      ", data_buffer, NXtype, 4);
+          print_data("      ", std::cout, data_buffer, NXtype, 4);
           slab_start[0] = 3;
           if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NX_OK)
             return TEST_FAILED;
-          print_data("      ", data_buffer, NXtype, 4);
+          print_data("      ", std::cout, data_buffer, NXtype, 4);
           slab_start[0] = 4;
           if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NX_OK)
             return TEST_FAILED;
-          print_data("      ", data_buffer, NXtype, 4);
+          print_data("      ", std::cout, data_buffer, NXtype, 4);
           if (NXgetattrinfo(fileid, &i) != NX_OK)
             return TEST_FAILED;
           if (i > 0) {
@@ -829,49 +831,4 @@ static int testExternal(const std::string &progName) {
   removeFile(testFile);
 
   return TEST_SUCCEED;
-}
-/*----------------------------------------------------------------------*/
-static void print_data(const char *prefix, const void *data, int type, int num) {
-  int i;
-  printf("%s", prefix);
-  for (i = 0; i < num; i++) {
-    switch (type) {
-    case NX_CHAR:
-      printf("%c", (static_cast<const char *>(data))[i]);
-      break;
-
-    case NX_INT8:
-      printf(" %d", (static_cast<const unsigned char *>(data))[i]);
-      break;
-
-    case NX_INT16:
-      printf(" %d", (static_cast<const short *>(data))[i]);
-      break;
-
-    case NX_INT32:
-      printf(" %d", (static_cast<const int *>(data))[i]);
-      break;
-
-    case NX_INT64:
-      printf(" %ld", static_cast<const int64_t *>(data)[i]);
-      break;
-
-    case NX_UINT64:
-      printf(" %lu", static_cast<const uint64_t *>(data)[i]);
-      break;
-
-    case NX_FLOAT32:
-      printf(" %f", (static_cast<const float *>(data))[i]);
-      break;
-
-    case NX_FLOAT64:
-      printf(" %f", (static_cast<const double *>(data))[i]);
-      break;
-
-    default:
-      printf("print_data: invalid type");
-      break;
-    }
-  }
-  printf("\n");
 }
