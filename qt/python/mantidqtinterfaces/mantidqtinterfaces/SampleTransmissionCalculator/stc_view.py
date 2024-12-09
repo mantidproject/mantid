@@ -36,6 +36,19 @@ class SampleTransmissionCalculatorView(QtWidgets.QWidget, Ui_sample_transmission
             "Or 0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000."
         )
 
+        self.single_high_spin_box.textChanged.connect(self._double_spinbox_textChanged)
+        self.single_low_spin_box.textChanged.connect(self._double_spinbox_textChanged)
+        self.single_width_spin_box.textChanged.connect(self._double_spinbox_textChanged)
+
+    def _double_spinbox_textChanged(self, text):
+        if "," in text:
+            text = text.replace(",", ".")
+            oldState = self.sender().blockSignals(True)
+            self.isEditing = True
+            self.sender().setValue(float(text))
+            self.sender().lineEdit().setText(f"{self.sender().value():.1f}")
+            self.sender().blockSignals(oldState)
+
     def get_input_dict(self):
         input_dict = {
             "binning_type": self.binning_type_combo_box.currentIndex(),
