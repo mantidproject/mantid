@@ -10,14 +10,11 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/VisibleWhenProperty.h"
 
 // clang-format off
 #include <nexus/NeXusFile.hpp>
@@ -26,7 +23,6 @@
 
 #include <Poco/File.h>
 #include <exception>
-#include <fstream>
 #include <set>
 #include <vector>
 
@@ -160,11 +156,11 @@ void DetermineChunking::exec() {
     std::string classType = "NXevent_data";
     size_t total_events = 0;
     for (; it != entries.end(); ++it) {
-      std::string entry_name(it->first);
-      std::string entry_class(it->second);
+      const std::string entry_class(it->second);
       if (entry_class == classType) {
         if (!isEmpty(maxChunk)) {
           try {
+            const std::string entry_name(it->first);
             // Get total number of events for each bank
             file.openGroup(entry_name, entry_class);
             file.openData("total_counts");
