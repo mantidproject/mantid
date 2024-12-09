@@ -21,6 +21,7 @@ from mantid.kernel import (
     StringListValidator,
     EnabledWhenProperty,
     PropertyCriterion,
+    SpecialCoordinateSystem,
 )
 from dataclasses import dataclass
 import numpy as np
@@ -29,6 +30,7 @@ from scipy.signal import convolve
 from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params
 from plugins.algorithms.FindSXPeaksConvolve import make_kernel, get_kernel_shape
 from enum import Enum
+from mantid.dataobjects import PeakShapeDetectorBin
 
 
 class PEAK_STATUS(Enum):
@@ -332,6 +334,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         weak_peaks_list = []
         ipks_strong = []
         results = np.full(peaks.getNumberPeaks(), None)
+        peaks_spec_and_det_ids = np.full(peaks.getNumberPeaks(), None)
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=peaks.getNumberPeaks())
         for ipk, peak in enumerate(peaks):
             prog_reporter.report("Integrating")
@@ -383,6 +386,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     weak_peak_threshold,
                     do_optimise_shoebox,
                 )
+                if ipos is not None:
+                    peaks_spec_and_det_ids[ipk] = [ispecs[ipos[0], ipos[1]], peak_data.detids]
+
                 if status == PEAK_STATUS.WEAK and do_optimise_shoebox and weak_peak_strategy == "NearestStrongPeak":
                     # look for possible strong peaks at any TOF in the window (won't know if strong until all pks integrated)
                     ipks_near, _ = find_ipks_in_window(ws, peaks, ispecs, ipk)
@@ -452,6 +458,9 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 f"WeakPeakStrategy to Fix"
             )
 
+        # Sets PeakShapeDetectorBin shapes for successfully integrated peaks
+        self._set_peak_shapes(results, peaks_spec_and_det_ids, ws, peaks)
+
         # plot output
         if output_file:
             prog_reporter.resetNumSteps(int(len(results) - np.sum(results is None)), start=0.0, end=1.0)
@@ -459,6 +468,29 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
 
         # assign output
         self.setProperty("OutputWorkspace", peaks)
+
+    def _set_peak_shapes(self, shoebox_results, peaks_spec_and_det_ids, input_ws, peaks_ws):
+        """
+        Sets PeakShapeDetectorBin - shapes for the successfully integrated peaks
+        @param shoebox_results - ShoeboxResult array for each peak
+        @param peaks_spec_and_det_ids - array of (spectrum id, detector ids) related to each peak
+        @param input_ws - input workspace
+        @param peaks_ws - peaks workspace
+        """
+        for ipk, (shoebox_res, spec_detids) in enumerate(zip(shoebox_results, peaks_spec_and_det_ids)):
+            if shoebox_res is not None and spec_detids is not None:
+                if shoebox_res.status != PEAK_STATUS.ON_EDGE and shoebox_res.status != PEAK_STATUS.NO_PEAK:
+                    det_id_row_start = shoebox_res.ipos[0] - shoebox_res.peak_shape[0] // 2
+                    det_id_row_end = shoebox_res.ipos[0] + shoebox_res.peak_shape[0] // 2
+                    det_id_col_start = shoebox_res.ipos[1] - shoebox_res.peak_shape[1] // 2
+                    det_id_col_end = shoebox_res.ipos[1] + shoebox_res.peak_shape[1] // 2
+                    selected_det_ids = spec_detids[-1][det_id_row_start:det_id_row_end, det_id_col_start:det_id_col_end]
+                    xstart = input_ws.readX(int(spec_detids[0]))[shoebox_res.ipos[2] - shoebox_res.peak_shape[2] // 2]
+                    xend = input_ws.readX(int(spec_detids[0]))[shoebox_res.ipos[2] + shoebox_res.peak_shape[2] // 2]
+                    det_bin_list = [(int(det_id), xstart, xend) for det_id in selected_det_ids.ravel()]
+                    peak_shape = PeakShapeDetectorBin(det_bin_list, SpecialCoordinateSystem.NONE, self.name(), self.version())
+                    peak = peaks_ws.getPeak(ipk)
+                    peak.setPeakShape(peak_shape)
 
     def exec_child_alg(self, alg_name, **kwargs):
         alg = self.createChildAlgorithm(alg_name, enableLogging=False)
