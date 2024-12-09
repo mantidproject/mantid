@@ -1050,6 +1050,7 @@ public:
     auto rhs = create_RaggedWorkspace();
     auto result = performTest(lhs, rhs, false, DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.4142135625 : 5.6568542436);
     TS_ASSERT(result->isRaggedWorkspace());
+    TS_ASSERT(result->isDistribution());
   }
 
   void test_RaggedWorkspace_and_single_value()

@@ -91,6 +91,11 @@ void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const API
       out->setYUnit(lhs->YUnit() + "/" + rhs->YUnit());
     else
       out->setYUnit("1/" + rhs->YUnit());
+
+    if (lhs->isRaggedWorkspace() && rhs->isRaggedWorkspace()) {
+      // if both workspaces are ragged, output workspace `isDistribution` flag will be true
+      out->setDistribution(true);
+    }
   }
 }
 
