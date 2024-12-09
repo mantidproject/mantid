@@ -56,6 +56,11 @@ void Multiply::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const A
                               API::MatrixWorkspace_sptr out) {
   if (!lhs->isDistribution() || !rhs->isDistribution())
     out->setDistribution(false);
+
+  if (lhs->isRaggedWorkspace() && rhs->isRaggedWorkspace()) {
+    // if both workspaces are ragged, output workspace `isDistribution` flag will be true
+    out->setDistribution(true);
+  }
 }
 
 // ===================================== EVENT LIST BINARY OPERATIONS
