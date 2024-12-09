@@ -197,8 +197,6 @@ class IPeakTest(unittest.TestCase):
             self.assertEqual(det_bin_dict["detectors"][i]["detId"], detector_x_list[i][0])
             self.assertEqual(det_bin_dict["detectors"][i]["startX"], detector_x_list[i][1])
             self.assertEqual(det_bin_dict["detectors"][i]["endX"], detector_x_list[i][2])
-        detector_bin_copy = PeakShapeDetectorBin(detector_x_list, SpecialCoordinateSystem.NONE, "test2", 2)
-        self.assertEqual(detector_bin, detector_bin_copy)
 
 
 if __name__ == "__main__":

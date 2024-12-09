@@ -38,6 +38,5 @@ void export_PeakShapeDetectorBin() {
   class_<PeakShapeDetectorBin, bases<Mantid::Geometry::PeakShape>, boost::noncopyable>("PeakShapeDetectorBin", no_init)
       .def("__init__", make_constructor(&createPeakShapeDetectorBin, default_call_policies(),
                                         (arg("detectorBinList"), arg("frame") = SpecialCoordinateSystem::None,
-                                         arg("algorithmName") = "", arg("algorithmVersion") = -1)))
-      .def("__eq__", &PeakShapeDetectorBin::operator==);
+                                         arg("algorithmName") = "", arg("algorithmVersion") = -1)));
 }
