@@ -1,4 +1,5 @@
 #include "MantidNexusCpp/NeXusFile.hpp"
+#include "napi_test_util.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -14,6 +15,9 @@
 #include <unistd.h>
 #endif /* _WIN32 */
 
+using NexusCppTest::removeFile;
+using NexusCppTest::write_dmc01;
+using NexusCppTest::write_dmc02;
 using std::cout;
 using std::endl;
 using std::map;
@@ -108,9 +112,11 @@ static void writeTest(const string &filename, NXaccess create_code) {
   file.putSlab(&(r8_array[0]), slab_start, slab_size);
 
   // add some attributes
+  std::cout << "writing attributes to r8_data" << std::endl;
   file.putAttr("ch_attribute", "NeXus");
   file.putAttr("i4_attribute", 42);
   file.putAttr("r4_attribute", 3.14159265);
+  std::cout << "... done" << std::endl;
 
   // set up for creating a link
   NXlink link = file.getDataID();
@@ -475,18 +481,21 @@ int testLoadPath(const string &filename) {
   }
 }
 
-int testExternal(const string &fileext, NXaccess create_code) {
+int testExternal(NXaccess create_code) {
   if (create_code == NXACC_CREATE4) {
     std::cout << "Not testing external linking with hdf4\n";
     return TEST_SUCCEED;
   }
+  const string fileext(".h5");
 
-  const string extfilepath1("data/dmc01" + fileext);
+  const string extfilepath1("dmc01cpp" + fileext);
+  write_dmc01(extfilepath1);
   if (!std::filesystem::exists(extfilepath1)) {
     std::cerr << "Cannot find \"" << extfilepath1 << "\" for external linking\n";
     return TEST_FAILED;
   }
-  const string extfilepath2("data/dmc02" + fileext);
+  const string extfilepath2("dmc02cpp" + fileext);
+  write_dmc02(extfilepath2);
   if (!std::filesystem::exists(extfilepath2)) {
     std::cerr << "Cannot find \"" << extfilepath2 << "\" for external linking\n";
     return TEST_FAILED;
@@ -495,8 +504,7 @@ int testExternal(const string &fileext, NXaccess create_code) {
   const string filename("nxext_cpp" + fileext);
 
   // remove output if it already exists
-  if (std::filesystem::exists(filename))
-    std::filesystem::remove(filename);
+  removeFile(filename);
 
   // create the external link
   const string exturl1("nxfile://" + extfilepath1 + "#entry1");
@@ -520,14 +528,15 @@ int testExternal(const string &fileext, NXaccess create_code) {
   cout << "entry1 external URL = " << filein.isExternalGroup("entry1", "NXentry") << endl;
 
   // cleanup
-  if (std::filesystem::exists(filename))
-    std::filesystem::remove(filename);
+  removeFile(filename);
+  removeFile(extfilepath1);
+  removeFile(extfilepath2);
 
   return TEST_SUCCEED;
 }
 
 int testTypeMap(const std::string &fname) {
-  NeXus::File file(fname);
+  NeXus::File file(fname, NXACC_READ);
   multimap<string, string> *map = file.getTypeMap();
   size_t mapsize = 25;
   // HDF4 does not have int64 capability, so resulting map is one shorter than HDF5 and XML files
@@ -593,7 +602,7 @@ int main(int argc, char **argv) {
 
   // try external linking
   try {
-    if (testExternal(extfile_ext, nx_creation_code) != TEST_SUCCEED) {
+    if (testExternal(nx_creation_code) != TEST_SUCCEED) {
       cout << "testExternal failed:\n";
       return TEST_FAILED;
     }
