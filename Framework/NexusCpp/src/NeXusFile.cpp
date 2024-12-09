@@ -497,8 +497,8 @@ void File::putAttr(const AttrInfo &info, const void *data) {
   if (info.name.empty()) {
     throw Exception("Supplied empty name to putAttr");
   }
-  NXstatus status = NXputattr(this->m_file_id, info.name.c_str(), const_cast<void *>(data),
-                              static_cast<int>(info.length), static_cast<int>(info.type));
+  NXstatus status =
+      NXputattr(this->m_file_id, info.name.c_str(), data, static_cast<int>(info.length), static_cast<int>(info.type));
   if (status != NX_OK) {
     stringstream msg;
     msg << "NXputattr(" << info.name << ", data, " << info.length << ", " << info.type << ") failed";
