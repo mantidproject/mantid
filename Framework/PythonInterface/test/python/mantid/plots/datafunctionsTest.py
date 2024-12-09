@@ -158,11 +158,11 @@ class DataFunctionsTest(unittest.TestCase):
             OutputWorkspace="ws2d_high_counting_detector",
         )
         wp = CreateWorkspace(DataX=[15, 25, 35, 45], DataY=[1, 2, 3, 4], NSpec=1)
-        ConjoinWorkspaces(cls.ws2d_point_uneven, wp, CheckOverlapping=False)
+        ConjoinWorkspaces(cls.ws2d_point_uneven, wp, CheckOverlapping=False, CheckMatchingBins=False)
         cls.ws2d_point_uneven = mantid.mtd["ws2d_point_uneven"]
         cls.ws2d_histo_uneven = CreateWorkspace(DataX=[10, 20, 30, 40], DataY=[1, 2, 3], NSpec=1, OutputWorkspace="ws2d_histo_uneven")
         wp = CreateWorkspace(DataX=[15, 25, 35, 45, 55], DataY=[1, 2, 3, 4], NSpec=1)
-        ConjoinWorkspaces(cls.ws2d_histo_uneven, wp, CheckOverlapping=False)
+        ConjoinWorkspaces(cls.ws2d_histo_uneven, wp, CheckOverlapping=False, CheckMatchingBins=False)
         cls.ws2d_histo_uneven = mantid.mtd["ws2d_histo_uneven"]
         newYAxis = mantid.api.NumericAxis.create(3)
         newYAxis.setValue(0, 10)
