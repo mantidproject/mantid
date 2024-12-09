@@ -572,6 +572,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         alg_conjoined.setProperty("InputWorkspace1", monitor_ws)
         alg_conjoined.setProperty("InputWorkspace2", sample_ws_copy)
         alg_conjoined.setProperty("CheckOverlapping", True)
+        alg_conjoined.setProperty("CheckMatchingBins", False)
         alg_conjoined.execute()
         monitor_ws = alg_conjoined.getProperty("InputWorkspace1").value
 
@@ -616,6 +617,7 @@ class DarkRunSubtractionTest(unittest.TestCase):
         alg_conjoined.setProperty("InputWorkspace1", monitor)
         alg_conjoined.setProperty("InputWorkspace2", detector)
         alg_conjoined.setProperty("CheckOverlapping", True)
+        alg_conjoined.setProperty("CheckMatchingBins", False)
         alg_conjoined.execute()
         trans_ws = alg_conjoined.getProperty("InputWorkspace1").value
 
