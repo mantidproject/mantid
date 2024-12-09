@@ -22,6 +22,7 @@
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
@@ -38,6 +39,7 @@
 #include <numeric>
 #include <utility>
 
+using Mantid::Kernel::StringListValidator;
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
 
@@ -319,6 +321,36 @@ const std::string MatrixWorkspace::getTitle() const {
     return title;
   } else
     return Workspace::getTitle();
+}
+
+/** Set the plot type of the workspace
+ *
+ * @param t :: The plot type. Must be one of: ["plot", "scatter", "histogram", "errorbar"]
+ */
+void MatrixWorkspace::setPlotType(const std::string &t) {
+  Run &run = mutableRun();
+  StringListValidator v(validPlotTypes);
+
+  if (v.isValid(t) == "") {
+    if (run.hasProperty("plot_type"))
+      run.addProperty("plot_type", t, true);
+    else
+      run.addProperty("plot_type", t, false);
+  }
+}
+
+/** Get the plot type
+ *
+ * @return The plot type
+ */
+std::string MatrixWorkspace::getPlotType() const {
+  std::string plotType;
+  if (run().hasProperty("plot_type")) {
+    plotType = run().getProperty("plot_type")->value();
+  } else {
+    plotType = "plot";
+  }
+  return plotType;
 }
 
 void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
