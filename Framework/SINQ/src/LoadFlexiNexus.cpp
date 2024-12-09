@@ -11,9 +11,11 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Utils.h"
+#include "MantidNexusCpp/NeXusException.hpp"
 
 #include <boost/algorithm/string.hpp>
 

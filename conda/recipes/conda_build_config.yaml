@@ -36,6 +36,9 @@ doxygen:
 eigen:
   - 3.4.*
 
+hdf4:
+  - 4.2.*
+
 hdf5: # this is to move to libcurl>=8.4
   - '>1.14.0,<1.15'
 
@@ -59,8 +62,6 @@ mkl:
 muparser:
   - '>=2.3.2'
 
-nexus:
-  - 4.4.*
 # We follow conda-forge and build with the lowest supported version of numpy for forward compatibility.
 numpy:
   - 2.0.*

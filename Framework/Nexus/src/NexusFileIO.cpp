@@ -1223,10 +1223,10 @@ int getNexusEntryTypes(const std::string &fileName, std::vector<std::string> &en
     NXopengroup(fileH, entry.c_str(), "NXentry");
     // loop through field names in this entry
     while ((NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) == NX_OK) {
-      std::string nxc(nxclass), nxn(nxname);
       // if a data field
-      if (nxc == "SDS")
+      if (std::string(nxclass) == "SDS") {
         // if one of the two names we are looking for
+        const std::string nxn(nxname);
         if (nxn == "definition" || nxn == "analysis") {
           NXopendata(fileH, nxname);
           stat = NXgetinfo(fileH, &rank, dims, &type);
@@ -1245,6 +1245,7 @@ int getNexusEntryTypes(const std::string &fileName, std::vector<std::string> &en
           NXclosegroup(fileH);
           break;
         }
+      }
     }
   }
   NXclose(&fileH);

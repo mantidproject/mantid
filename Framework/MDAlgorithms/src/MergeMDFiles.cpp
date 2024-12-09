@@ -10,10 +10,11 @@
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <Poco/File.h>
 #include <boost/scoped_ptr.hpp>
