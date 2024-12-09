@@ -17,7 +17,7 @@ public:
 
   virtual void initialize() = 0;
 
-  virtual void subscribe(IALCDataLoadingPresenterSubscriber *subscriber) = 0;
+  virtual void setSubscriber(IALCDataLoadingPresenterSubscriber *subscriber) = 0;
 
   /// @return Last loaded data workspace
   virtual Mantid::API::MatrixWorkspace_sptr loadedData() const = 0;

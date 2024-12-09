@@ -121,8 +121,8 @@ void ALCInterface::initLayout() {
   m_peakFitting = std::make_unique<ALCPeakFittingPresenter>(m_peakFittingView, m_peakFittingModel.get());
   m_peakFitting->initialize();
 
-  m_dataLoading->subscribe(this);
-  m_baselineModelling->subscribe(this);
+  m_dataLoading->setSubscriber(this);
+  m_baselineModelling->setSubscriber(this);
 
   assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
 

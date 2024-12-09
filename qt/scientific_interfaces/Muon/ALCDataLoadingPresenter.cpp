@@ -28,7 +28,9 @@ void ALCDataLoadingPresenter::initialize() {
   m_view->setFileExtensions(ADDITIONAL_EXTENSIONS);
 }
 
-void ALCDataLoadingPresenter::subscribe(IALCDataLoadingPresenterSubscriber *subscriber) { m_subscriber = subscriber; }
+void ALCDataLoadingPresenter::setSubscriber(IALCDataLoadingPresenterSubscriber *subscriber) {
+  m_subscriber = subscriber;
+}
 
 void ALCDataLoadingPresenter::handleRunsEditing() {
   m_view->enableLoad(false);
@@ -140,6 +142,7 @@ void ALCDataLoadingPresenter::loadFilesCurrentlyInModel() {
   } catch (std::exception &e) {
     throw std::runtime_error(e.what()); // Caught in handle load request
   }
+  assert(m_subscriber);
   m_subscriber->loadedDataChanged();
   m_view->enableAll();
   m_model->setLoadingData(false);

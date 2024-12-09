@@ -163,7 +163,7 @@ public:
     m_subscriber = std::make_unique<NiceMock<MockALCDataLoadingPresenterSubscriber>>();
     m_presenter = std::make_unique<ALCDataLoadingPresenter>(m_view.get(), std::move(model));
     m_presenter->initialize();
-    m_presenter->subscribe(m_subscriber.get());
+    m_presenter->setSubscriber(m_subscriber.get());
 
     m_watcher = new QFileSystemWatcher();
     m_timer = new QTimer();

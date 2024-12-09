@@ -28,7 +28,7 @@ public:
 
   void initialize() override;
 
-  void subscribe(IALCDataLoadingPresenterSubscriber *subscriber) override;
+  void setSubscriber(IALCDataLoadingPresenterSubscriber *subscriber) override;
 
   /// @return Last loaded data workspace
   Mantid::API::MatrixWorkspace_sptr loadedData() const override { return m_model->getLoadedData(); }
