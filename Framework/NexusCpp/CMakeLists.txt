@@ -58,11 +58,13 @@ generate_mantid_export_header(NexusCpp FALSE)
 set(TEST_PREFIX "NexusCppTest")
 
 # #### HDF5
-add_executable(napi_test_hdf5 EXCLUDE_FROM_ALL test/napi_test.cpp)
+add_executable(napi_test_hdf5 EXCLUDE_FROM_ALL test/napi_test.cpp test/napi_test_util.cpp test/napi_test_util.h)
 target_link_libraries(napi_test_hdf5 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-HDF5-test" COMMAND napi_test_hdf5)
 
-add_executable(napi_attra_test_hdf5 EXCLUDE_FROM_ALL test/napi_attra_test.cpp)
+add_executable(
+  napi_attra_test_hdf5 EXCLUDE_FROM_ALL test/napi_attra_test.cpp test/napi_test_util.cpp test/napi_test_util.h
+)
 target_link_libraries(napi_attra_test_hdf5 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-HDF5-attra-test" COMMAND napi_attra_test_hdf5)
 
@@ -71,7 +73,7 @@ add_test(NAME "${TEST_PREFIX}-C-HDF5-attra-test" COMMAND napi_attra_test_hdf5)
 # if (WIN32) set_property(TEST "${TEST_PREFIX}-C-HDF5-test" "${TEST_PREFIX}-C-HDF5-attra-test" APPEND PROPERTY
 # ENVIRONMENT "PATH=${TESTSPATH}") endif(WIN32)
 
-add_executable(napi_test_cpp-hdf5 EXCLUDE_FROM_ALL test/napi_test_cpp.cpp)
+add_executable(napi_test_cpp-hdf5 EXCLUDE_FROM_ALL test/napi_test_cpp.cpp test/napi_test_util.cpp test/napi_test_util.h)
 target_link_libraries(napi_test_cpp-hdf5 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-Cpp-HDF5-test" COMMAND napi_test_cpp-hdf5)
 
@@ -81,11 +83,13 @@ add_test(NAME "${TEST_PREFIX}-Cpp-HDF5-test" COMMAND napi_test_cpp-hdf5)
 # endif(WIN32)
 
 # #### HDF4
-add_executable(napi_test_hdf4 EXCLUDE_FROM_ALL test/napi_test.cpp)
+add_executable(napi_test_hdf4 EXCLUDE_FROM_ALL test/napi_test.cpp test/napi_test_util.cpp test/napi_test_util.h)
 target_link_libraries(napi_test_hdf4 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-HDF4-test" COMMAND napi_test_hdf4)
 
-add_executable(napi_attra_test_hdf4 EXCLUDE_FROM_ALL test/napi_attra_test.cpp)
+add_executable(
+  napi_attra_test_hdf4 EXCLUDE_FROM_ALL test/napi_attra_test.cpp test/napi_test_util.cpp test/napi_test_util.h
+)
 target_link_libraries(napi_attra_test_hdf4 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-HDF4-attra-test" COMMAND napi_attra_test_hdf4)
 set_tests_properties("${TEST_PREFIX}-C-HDF4-attra-test" PROPERTIES WILL_FAIL TRUE)
@@ -95,7 +99,7 @@ set_tests_properties("${TEST_PREFIX}-C-HDF4-attra-test" PROPERTIES WILL_FAIL TRU
 # if(WIN32) set_property( TEST "${TEST_PREFIX}-C-HDF4-test" "${TEST_PREFIX}-C-HDF4-attra-test" APPEND PROPERTY
 # ENVIRONMENT "PATH=${TESTSPATH}" ) endif(WIN32)
 
-add_executable(napi_test_cpp-hdf4 EXCLUDE_FROM_ALL test/napi_test_cpp.cpp)
+add_executable(napi_test_cpp-hdf4 EXCLUDE_FROM_ALL test/napi_test_cpp.cpp test/napi_test_util.cpp test/napi_test_util.h)
 target_link_libraries(napi_test_cpp-hdf4 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-Cpp-HDF4-test" COMMAND napi_test_cpp-hdf4)
 

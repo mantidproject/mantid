@@ -1,5 +1,4 @@
 #include "MantidNexusCpp/NeXusFile.hpp"
-#include "MantidNexusCpp/napiconfig.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
