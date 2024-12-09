@@ -73,7 +73,6 @@ public:
   int version() const override;
   const std::string category() const override;
   int confidence(Kernel::FileDescriptor &descriptor) const override;
-  bool loadMutipleAsOne() override;
 
 private:
   void init() override;

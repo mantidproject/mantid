@@ -44,7 +44,7 @@ public:
   LoadRawHelper();
   // Define destructor in .cpp as we have unique_ptr to forward declared
   // ISISRAW2
-  ~LoadRawHelper();
+  ~LoadRawHelper() override;
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadRawHelper"; }
   /// Algorithm's version for identification overriding a virtual method
