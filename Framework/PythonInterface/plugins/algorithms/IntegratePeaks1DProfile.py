@@ -15,6 +15,8 @@ from mantid.api import (
     Progress,
     FunctionFactory,
     IPeak,
+    MultiDomainFunction,
+    AnalysisDataService as ADS,
 )
 from mantid.kernel import (
     Direction,
@@ -23,17 +25,24 @@ from mantid.kernel import (
     StringListValidator,
     EnabledWhenProperty,
     PropertyCriterion,
-    UnitConversion,
-    DeltaEModeType,
     StringArrayProperty,
+    UnitParams,
 )
-from mantid.fitfunctions import FunctionWrapper
+from mantid.dataobjects import Workspace2D
+from mantid.fitfunctions import FunctionWrapper, CompositeFunctionWrapper
 import numpy as np
-from scipy.ndimage import binary_dilation
+from scipy.ndimage import distance_transform_edt, label
 from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params, PeakData
 from plugins.algorithms.IntegratePeaksShoeboxTOF import get_bin_width_at_tof, set_peak_intensity
 from enum import Enum
-from typing import Callable, Sequence
+from typing import Sequence
+
+
+class PEAK_STATUS(Enum):
+    VALID = "Valid Peak"
+    ON_EDGE = "Peak on detector edge"
+    NO_PEAK = "No peak found"
+
 
 MIN_TOF_WIDTH = 1e-3
 
@@ -283,7 +292,14 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         peaks = self.exec_child_alg("CloneWorkspace", InputWorkspace=peaks, OutputWorkspace="out_peaks")
 
         # select cost function
-        fit_kwargs = {"Minimizer": "Levenberg-Marquardt", "MaxIterations": 5000, "StepSizeMethod": "Sqrt epsilon"}
+        fit_kwargs = {
+            "Minimizer": "Levenberg-Marquardt",
+            "MaxIterations": 5000,
+            "StepSizeMethod": "Sqrt epsilon",
+            "IgnoreInvalidData": False,
+            "CreateOutput": True,
+            "OutputCompositeMembers": True,
+        }
         match cost_func_name:
             case "RSq":
                 fit_kwargs["CostFunction"] = "Unweighted least squares"
@@ -300,68 +316,81 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         for ipk, peak in enumerate(peaks):
             prog_reporter.report("Integrating")
 
-            intens, sigma = 0.0, 0.0
+            peak_intens, peak_sigma = 0.0, 0.0
             status = PEAK_STATUS.NO_PEAK
 
             detid = peak.getDetectorID()
             bank_name = peaks.column("BankName")[ipk]
+
+            # get fit range
             pk_tof = peak.getTOF()
+            ispec_pk = ws.getIndicesFromDetectorIDs([detid])[0]
+            if get_nbins_from_b2bexp_params:
+                fit_width = nfwhm * get_fwhm_from_back_to_back_params(peak, ws, detid)
+            else:
+                bin_width = get_bin_width_at_tof(ws, ispec_pk, pk_tof)
+                fit_width = self.getProperty("NBins").value * bin_width
+            if peak_func_name == "BackToBackExponential":
+                # take into account asymmetry of peak function in choosing window
+                tof_start = pk_tof - fit_width / 3
+            else:
+                tof_start = pk_tof - fit_width / 2
+            tof_end = tof_start + fit_width
 
             # check TOF is in limits of x-axis
             xdim = ws.getXDimension()
-            if xdim.getMinimum() < pk_tof < xdim.getMaximum():
-                # check peak is in extent of data
-                ispec = ws.getIndicesFromDetectorIDs([detid])[0]
-                bin_width = get_bin_width_at_tof(ws, ispec, pk_tof)  # used later to scale intensity
-                if get_nbins_from_b2bexp_params:
-                    fwhm = get_fwhm_from_back_to_back_params(peak, ws, detid)
-                    nbins = max(3, int(nfwhm * fwhm / bin_width)) if fwhm is not None else self.getProperty("NBins").value
-                else:
-                    nbins = self.getProperty("NBins").value
-
-                # get data array and crop
+            if xdim.getMinimum() < tof_start and tof_end < xdim.getMaximum():
+                # get detector IDs in peak region
                 peak_data = array_converter.get_peak_data(peak, detid, bank_name, nrows, ncols, nrows_edge, ncols_edge)
 
-                # fit peak
-                peak_fitter = PeakFitter(
-                    peak,
-                    peak_data,
-                    nbins,
-                    peak_func_name,
-                    bg_func_name,
-                    peak_params_to_fix,
-                    frac_dspac_delta,
-                    i_over_sig_threshold,
-                    self.exec_fit,
-                    fit_kwargs,
-                    error_strategy,
+                # fit all detectors with constrained peak centers
+                func_generator = PeakFunctionGenerator(peak_params_to_fix)
+                initial_function, md_fit_kwargs = func_generator.get_initial_fit_function_and_kwargs(
+                    ws, peak_data, peak.getDSpacing(), (tof_start, tof_end), peak_func_name, bg_func_name
                 )
-                peak_fitter.integrate_peak()
+                fit_result = self.exec_fit(initial_function, **fit_kwargs, **md_fit_kwargs)
+                if not fit_result["success"]:
+                    continue  # skip peak
 
-                # update intenisty and save results for later plotting
-                if np.any(peak_fitter.successful):
-                    # check edge
-                    is_on_edge = np.any(np.logical_and(peak_fitter.attempted, peak_data.det_edges))
-                    if integrate_on_edge or not is_on_edge:
-                        status = PEAK_STATUS.VALID
-                        intens = peak_fitter.intens_sum
-                        sigma = np.sqrt(peak_fitter.sigma_sq_sum)
-                    else:
-                        status = PEAK_STATUS.ON_EDGE
-                    if output_file:
-                        intens_over_sig = intens / sigma if sigma > 0 else 0.0
-                        results.append(
-                            LineProfileResult(
-                                ipk,
-                                peak,
-                                intens_over_sig,
-                                peak_fitter,
-                                peak_data,
-                                status,
-                            )
+                # find pixels contributing to peak
+                *_, i_over_sigma = calc_intens_and_sigma_arrays(fit_result, error_strategy)
+                non_bg_mask = np.reshape(i_over_sigma > i_over_sig_threshold, peak_data.detids.shape)
+                peak_mask = find_peak_cluster_in_window(non_bg_mask, (peak_data.irow, peak_data.icol))
+                if peak_mask is None:
+                    continue  # skip peak
+
+                # check if peak is on the edge
+                is_on_edge = np.any(np.logical_and(peak_mask, peak_data.det_edges))
+                if integrate_on_edge or not is_on_edge:
+                    # fit only peak pixels and let peak centers vary independently of DIFC ratio
+                    final_function = func_generator.get_final_fit_function(fit_result["Function"], peak_mask, frac_dspac_delta)
+                    fit_result = self.exec_fit(final_function, **fit_kwargs, **md_fit_kwargs)
+                    if not fit_result["success"]:
+                        continue  # skip peak
+
+                    # calculate intensity
+                    status = PEAK_STATUS.VALID
+                    intens, sigma, _ = calc_intens_and_sigma_arrays(fit_result, error_strategy)
+                    peak_intens = np.sum(intens[peak_mask.flat])
+                    peak_sigma = np.sqrt(np.sum(sigma[peak_mask.flat] ** 2))
+                else:
+                    status = PEAK_STATUS.ON_EDGE
+
+                if output_file:
+                    intens_over_sig = peak_intens / peak_sigma if peak_sigma > 0 else 0.0
+                    results.append(
+                        LineProfileResult(
+                            ipk,
+                            peak,
+                            intens_over_sig,
+                            status,
+                            peak_mask,
+                            fit_result,
+                            peak_data,
                         )
+                    )
 
-            set_peak_intensity(peak, intens, sigma, do_lorz_cor)
+            set_peak_intensity(peak, peak_intens, peak_sigma, do_lorz_cor)
 
         # plot output
         if output_file:
@@ -381,232 +410,128 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         else:
             return None
 
-    def exec_fit(self, ispec, **kwargs):
+    def exec_fit(self, function, **kwargs):
         alg = self.createChildAlgorithm("Fit", enableLogging=False)
         alg.initialize()
+        alg.setProperty("Function", function)  # needs to be done first
         alg.setProperties(kwargs)
-        alg.setProperty("WorkspaceIndex", ispec)
+        fit_result = {"success": False}
         try:
             alg.execute()
-            func = alg.getProperty("Function").value  # getPropertyValue returns FunctionProperty not IFunction
+            fit_result["Function"] = alg.getProperty("Function").value  # getPropertyValue returns FunctionProperty not IFunction
             status = alg.getPropertyValue("OutputStatus")
-            success = status == "success" or "Changes in function value are too small" in status
-            return success, func
+            fit_result["success"] = status == "success" or "Changes in function value are too small" in status
+            fit_result["OutputWorkspace"] = alg.getPropertyValue("OutputWorkspace")
+            return fit_result
         except:
-            return False, None
+            pass
+        return fit_result
 
 
-class PeakFitter:
-    def __init__(
-        self,
-        pk,
-        peak_data,
-        nbins,
-        peak_func_name,
-        bg_func_name,
-        peak_params_to_fix,
-        frac_dspac_delta,
-        i_over_sig_threshold,
-        exec_fit,
-        fit_kwargs,
-        error_strategy,
-    ):
-        self.ws = peak_data.ws
-        self.pk: IPeak = pk
-        self.peak_pos: tuple[int, int] = (peak_data.irow, peak_data.icol)
-        self.frac_dspac_delta: float = frac_dspac_delta
-        self.i_over_sig_threshold: float = i_over_sig_threshold
-        # extract data
-        self.tofs: np.ndarray = None
-        self.y: np.ndarray = None
-        self.esq: np.ndarray = None
-        self.ispecs: np.ndarray = None
-        self.yfit_foc: np.ndarray = None
-        self.successful: np.ndarray = None
-        self.attempted: np.ndarray = None
-        self.intens_sum: float = 0
-        self.sigma_sq_sum: float = 0
-        self.peak_func_name: str = peak_func_name
-        self.bg_func_name: str = bg_func_name
+class PeakFunctionGenerator:
+    def __init__(self, peak_params_to_fix: Sequence[str]):
+        self.cen_par_name: str = None
+        self.intens_par_name: str = None
         self.peak_params_to_fix: Sequence[str] = peak_params_to_fix
-        self.exec_fit: Callable = exec_fit
-        self.fit_kwargs: dict = None
-        self.error_strategy: str = error_strategy
-        self.cached_params: dict = None
-        self.nfixed_default: int = None
-        self.nfixed: int = None
 
-        self.get_and_clip_data_arrays(peak_data, nbins)
-        self.calc_limits_on_fwhm()
-        self.ysum = self.y.sum(axis=2)
-        self.yfit_foc: np.ndarray = np.zeros(self.tofs.shape)
-        self.successful: np.ndarray = np.zeros(self.ispecs.shape, dtype=bool)
-        self.attempted: np.ndarray = self.successful.copy()
-        self.update_peak_position()
-        self.fit_kwargs = {
-            "InputWorkspace": self.ws,
-            "CreateOutput": False,
-            "CalcErrors": True,
-            "StartX": self.tofs[0],
-            "EndX": self.tofs[-1],
-            **fit_kwargs,
-        }
+    def get_initial_fit_function_and_kwargs(
+        self, ws: Workspace2D, peak_data: PeakData, dpk: float, tof_range: tuple[float], peak_func_name: str, bg_func_name: str
+    ) -> str:
+        ispecs = ws.getIndicesFromDetectorIDs([int(d) for d in peak_data.detids.flat])
+        tof_start, tof_end = tof_range
+        function = MultiDomainFunction()
+        si = ws.spectrumInfo()
+        fit_kwargs = {}
+        # estimate background
+        istart = ws.yIndexOfX(tof_start)
+        iend = ws.yIndexOfX(tof_end)
+        bg = min([ws.readY(int(ispec))[istart : istart + 2].mean() for ispec in ispecs])
+        # init bg func (global)
+        bg_func = FunctionFactory.createFunction(bg_func_name)
+        bg_func["A0"] = bg
+        # init peak func
+        peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
+        # save parameter names for future ties/constraints
+        peak_func.setIntensity(1.0)
+        self.intens_par_name = next(peak_func.getParamName(ipar) for ipar in range(peak_func.nParams()) if peak_func.isExplicitlySet(ipar))
+        self.cen_par_name = peak_func.getCentreParameterName()
+        for idom, ispec in enumerate(ispecs):
+            difc = si.diffractometerConstants(int(ispec))[UnitParams.difc]
+            peak_func.setCentre(difc * dpk)
+            # estimate height/intensity
+            peak_func.setHeight(ws.readY(int(ispec))[istart:iend].max() - bg)
+            comp_func = CompositeFunctionWrapper(FunctionWrapper(peak_func), FunctionWrapper(bg_func), NumDeriv=True)
+            function.add(comp_func.function)
+            function.setDomainIndex(idom, idom)
+            key_suffix = f"_{idom}" if idom > 0 else ""
+            fit_kwargs["InputWorkspace" + key_suffix] = ws.name()
+            fit_kwargs["StartX" + key_suffix] = tof_start
+            fit_kwargs["EndX" + key_suffix] = tof_end
+            fit_kwargs["WorkspaceIndex" + key_suffix] = int(ispec)
+        # set instrument specific parameters
+        iset_initial = np.array([function[0][0].isExplicitlySet(ipar) for ipar in range(peak_func.nParams())])
+        ispec_pk = np.ravel_multi_index([peak_data.irow, peak_data.icol], peak_data.detids.shape)
+        function[0][0].setMatrixWorkspace(ws, int(ispec_pk), 0, 0)
+        iset_final = np.array([function[0][0].isExplicitlySet(ipar) for ipar in range(peak_func.nParams())])
+        ipars_to_tie = np.flatnonzero(np.logical_not(iset_initial, iset_final))
+        pars_to_tie = [function[0][0].parameterName(int(ipar)) for ipar in ipars_to_tie]  # global peak parameters
+        return self._add_parameter_ties_and_constraints(function, pars_to_tie), fit_kwargs
 
-    def get_tof_slice_for_cropping(self, nbins):
-        # get tof indices and limits
-        self.ispec = int(self.ispecs[self.peak_pos])
-        itof = self.ws.yIndexOfX(self.pk.getTOF(), self.ispec)
-        if self.peak_func_name == "BackToBackExponential":
-            # take into account asymmetry of peak function in choosing window
-            nbins_left = nbins // 3
-            istart = itof - nbins_left
-            iend = itof + (nbins - nbins_left)
-        else:
-            istart = itof - nbins // 2
-            iend = itof + nbins // 2
-        self.tof_slice = slice(
-            int(np.clip(istart, a_min=0, a_max=self.ws.blocksize())), int(np.clip(iend, a_min=0, a_max=self.ws.blocksize()))
-        )
+    def _add_parameter_ties_and_constraints(self, function: MultiDomainFunction, pars_to_tie: Sequence[str]) -> str:
+        # fix peak params requested
+        [function[0][0].fixParameter(par) for par in self.peak_params_to_fix]
+        additional_pars_to_fix = set(self.peak_params_to_fix) - set(pars_to_tie)
+        ties = []
+        for idom in range(1, function.nDomains()):
+            # tie global params to first
+            for par in pars_to_tie:
+                ties.append(f"f{idom}.f0.{par}=f0.f0.{par}")  # global peak pars
+                # function.tie(f"f{idom}.f0.{par}", f"f0.f0.{par}")
+            for ipar_bg in range(function[idom][1].nParams()):
+                par = function[idom][1].getParamName(ipar_bg)
+                ties.append(f"f{idom}.f1.{par}=f0.f1.{par}")
+                # function.tie(f"f{idom}.f1.{par}", f"f0.f1.{par}")
+            # tie center using ratio of DIFC
+            ratio = function[idom][0][self.cen_par_name] / function[0][0][self.cen_par_name]
+            ties.append(f"f{idom}.f0.{self.cen_par_name}={ratio}*f0.f0.{self.cen_par_name}")
+            # function.tie(f"f{idom}.f0.{self.cen_par_name}", f"{ratio}*f0.f0.{self.cen_par_name}")
+            for par in additional_pars_to_fix:
+                # pars to be fixed but not global/already tied
+                par = function[idom][0].fixParameter(par)
+        # add ties as string (orders of magnitude quicker than self.function.tie)
+        # return str(function)
+        return f"{str(function)};ties=({','.join(ties)})"
 
-    def get_and_clip_data_arrays(self, peak_data, nbins):
-        tofs, y, esq, self.ispecs = peak_data.get_data_arrays()  # 3d arrays [rows x cols x tof]
-        self.get_tof_slice_for_cropping(nbins)
-        self.tofs = tofs[self.peak_pos[0], self.peak_pos[1], self.tof_slice]  # take x at peak cen, should be same for all det
-        # crop data array to TOF region of peak
-        self.y = y[:, :, self.tof_slice]
-        self.esq = esq[:, :, self.tof_slice]
-
-    def calc_limits_on_fwhm(self):
-        self.min_fwhm = self.tofs[1 + (len(self.tofs) // 2)] - self.tofs[len(self.tofs) // 2]  # FWHM > bin-width
-        self.max_fwhm = (self.tofs[-1] - self.tofs[0]) / 3  # must be at least 3 FWHM in data range
-
-    def update_peak_position(self):
-        # search for pixel with highest TOF integrated counts in 3x3 window around peak position
-        irow_min = np.clip(self.peak_pos[0] - 1, a_min=0, a_max=self.ysum.shape[0])
-        irow_max = np.clip(self.peak_pos[0] + 2, a_min=0, a_max=self.ysum.shape[0])  # add 1 as last index not in slice
-        icol_min = np.clip(self.peak_pos[1] - 1, a_min=0, a_max=self.ysum.shape[1])
-        icol_max = np.clip(self.peak_pos[1] + 2, a_min=0, a_max=self.ysum.shape[1])  # add 1 as last index not in slice
-        imax = np.unravel_index(np.argmax(self.ysum[irow_min:irow_max, icol_min:icol_max]), (irow_max - irow_min, icol_max - icol_min))
-        self.peak_pos = (imax[0] + irow_min, imax[1] + icol_min)
-
-    def calc_tof_peak_centre_and_bounds(self, ispec):
-        # need to do this for each spectrum as DIFC different for each
-        diff_consts = self.ws.spectrumInfo().diffractometerConstants(int(ispec))
-        tof_pk = UnitConversion.run("dSpacing", "TOF", self.pk.getDSpacing(), 0, DeltaEModeType.Elastic, diff_consts)
-        tof_pk_min = np.clip(tof_pk * (1 - self.frac_dspac_delta), a_min=self.tofs[0], a_max=self.tofs[-1])
-        tof_pk_max = np.clip(tof_pk * (1 + self.frac_dspac_delta), a_min=self.tofs[0], a_max=self.tofs[-1])
-        return tof_pk, tof_pk_min, tof_pk_max
-
-    def create_peak_function_with_initial_params(self, ispec, intensity, bg, tof_pk, tof_pk_min, tof_pk_max):
-        # need to create from scratch for setMatrixWorkspace to overwrite parameters
-        peak_func = FunctionFactory.Instance().createPeakFunction(self.peak_func_name)
-        # set initial parameters of peak
-        peak_func.setCentre(tof_pk)
-        # initialise instrument specific parameters (e.g A,B,S for case of BackToBackExponential)
-        peak_func.setMatrixWorkspace(self.ws, ispec, 0, 0)
-        if np.isclose(peak_func.fwhm(), 0.0):
-            # width not set by default - set width based max of d-spacing tolerance or bin-width
-            fwhm = np.clip(self.frac_dspac_delta * tof_pk, a_min=self.min_fwhm, a_max=self.max_fwhm)
-            peak_func.setFwhm(fwhm)
-        peak_func.setIntensity(intensity)
-        # fix parameters
-        self.nfixed_default = len([ipar for ipar in range(peak_func.nParams()) if peak_func.isFixed(ipar)])
-        [peak_func.fixParameter(par_name) for par_name in self.peak_params_to_fix]
-        self.nfixed = len([ipar for ipar in range(peak_func.nParams()) if peak_func.isFixed(ipar)])
-        self.add_constraints_to_peak_function(peak_func, tof_pk_min, tof_pk_max)
-        bg_func = FunctionWrapper(self.bg_func_name)
-        bg_func.setParameter("A0", bg)  # set constant background
-        return FunctionWrapper(peak_func) + bg_func, peak_func
-
-    def add_constraints_to_peak_function(self, peak_func, tof_pk_min, tof_pk_max):
-        # set minimum of all parameters to be 0
-        [peak_func.addConstraints(f"0<{peak_func.parameterName(ipar)}") for ipar in range(peak_func.nParams())]
-        # constrain centre and width
-        peak_func.addConstraints(f"{tof_pk_min}<{peak_func.getCentreParameterName()}<{tof_pk_max}")
-        # assume constant scale factor between FWHM and width parameter
-        width_par_name = peak_func.getWidthParameterName()
-        scale_factor = peak_func.getParameterValue(width_par_name) / peak_func.fwhm()
-        peak_func.addConstraints(f"{self.min_fwhm*scale_factor}<{width_par_name}<{self.max_fwhm*scale_factor}")
-
-    def fit_spectrum(self, profile_func, ispec):
-        return self.exec_fit(ispec, Function=str(profile_func), **self.fit_kwargs)
-
-    def integrate_peak(self):
-        self.fit_nearest([self.peak_pos])
-
-    def fit_nearest(self, inearest):
-        # fit in order of max intensity
-        isort = np.argsort([-self.ysum[inear] for inear in inearest])
-        any_successful = False
-        for inear in isort:
-            irow, icol = inearest[inear]
-            self.attempted[irow, icol] = True
-            # check enough counts in spectrum
-            initial_intens, initial_sigma, bg = self.estimate_intensity_sigma_and_background(irow, icol)
-            intens_over_sigma = initial_intens / initial_sigma if initial_sigma > 0 else 0.0
-            if intens_over_sigma < self.i_over_sig_threshold:
-                continue  # skip this spectrum
-            # get center and check min data extent
-            ispec = int(self.ispecs[irow, icol])
-            tof_pk, tof_pk_min, tof_pk_max = self.calc_tof_peak_centre_and_bounds(ispec)
-            if tof_pk < self.tofs[0] or tof_pk > self.tofs[-1]:
-                continue  # peak not in data limits
-            # update initial parameter guesses
-            profile_func, peak_func = self.create_peak_function_with_initial_params(
-                ispec, initial_intens, bg, tof_pk, tof_pk_min, tof_pk_max
-            )
-            # fit
-            success, profile_func = self.fit_spectrum(profile_func, ispec)
-            if success:
-                any_successful = True
-                profile_func.freeAll()
-                [profile_func[0].fixParameter(par_name) for par_name in self.peak_params_to_fix]
-                success_final, profile_func_final = self.fit_spectrum(profile_func, ispec)
-                if success_final:
-                    profile_func = profile_func_final
-                # make peak function and get fwhm and intensity
-                [peak_func.setParameter(iparam, profile_func.getParameterValue(iparam)) for iparam in range(peak_func.nParams())]
-                if not self.min_fwhm < peak_func.fwhm() < self.max_fwhm:
-                    continue  # skip
-                intens = peak_func.intensity()
-                if self.error_strategy == "Hessian":
-                    [peak_func.setError(iparam, profile_func.getError(iparam)) for iparam in range(peak_func.nParams())]
-                    sigma = peak_func.intensityError()
-                else:
-                    sigma = calc_sigma_from_summation(self.tofs, self.esq[irow, icol, :], FunctionWrapper(peak_func)(self.tofs))
-                intens_over_sigma = intens / sigma if sigma > 0 else 0.0
-                if intens_over_sigma > self.i_over_sig_threshold:
-                    self.successful[irow, icol] = True
-                    self.yfit_foc += FunctionWrapper(profile_func)(self.tofs)
-                    self.intens_sum = self.intens_sum + intens
-                    self.sigma_sq_sum = self.sigma_sq_sum + sigma**2
-        if not any_successful:
-            # no neighbours successfully fitted - terminate here
-            return
-        # if did break start process again
-        inearest = self.find_neighbours()
-        return self.fit_nearest(inearest)
-
-    def find_neighbours(self):
-        mask = binary_dilation(self.successful)
-        mask = np.logical_and(mask, ~self.attempted)
-        return list(zip(*np.where(mask)))
-
-    def estimate_intensity_sigma_and_background(self, irow, icol):
-        if not np.any(self.y[irow, icol, :] > 0):
-            return 0.0, 0.0, 0.0
-        ibg, _ = PeakData.find_bg_pts_seed_skew(self.y[irow, icol, :])
-        bg = np.mean(self.y[irow, icol, ibg])
-        bin_width = np.diff(self.tofs)
-        intensity = np.sum((0.5 * (self.y[irow, icol, 1:] + self.y[irow, icol, :-1]) - bg) * bin_width)
-        sigma = np.sqrt(np.sum(0.5 * (self.esq[irow, icol, 1:] + self.esq[irow, icol, :-1]) * (bin_width**2)))
-        return intensity, sigma, bg
-
-
-class PEAK_STATUS(Enum):
-    VALID = "Valid Peak"
-    ON_EDGE = "Peak on detector edge"
-    NO_PEAK = "No peak found"
+    def get_final_fit_function(self, function: MultiDomainFunction, peak_mask: np.ndarray[bool], frac_dspac_delta: float) -> str:
+        function[0][0].freeAll()
+        [function[0][0].fixParameter(par_name) for par_name in self.peak_params_to_fix]
+        idom_peak = np.argmax(peak_mask)  # first domain containing peak
+        for idom, comp_func in enumerate(function):
+            # reset ties on peak function
+            function.removeTie(f"f{idom}.f0.{self.cen_par_name}")
+            if not peak_mask.flat[idom]:
+                comp_func[0][self.intens_par_name] = 0
+                comp_func[0].fixParameter(self.intens_par_name)
+                comp_func[0].fixParameter(self.cen_par_name)
+                for ipar_bg in range(comp_func[1].nParams()):
+                    par = comp_func[1].getParamName(ipar_bg)
+                    function.removeTie(f"f{idom}.f1.{par}")
+                    comp_func[1].fixParameter(par)
+            else:
+                function.removeTie(f"f{idom}.f0.{self.cen_par_name}")
+                xcen_lo = comp_func[0][self.cen_par_name] * (1 - frac_dspac_delta)
+                xcen_hi = comp_func[0][self.cen_par_name] * (1 + frac_dspac_delta)
+                comp_func.addConstraints(f"{xcen_lo}<f0.{self.cen_par_name}<{xcen_hi}")
+            # reset ties on background
+            for ipar_bg in range(comp_func[1].nParams()):
+                par = comp_func[1].getParamName(ipar_bg)
+                if idom > 0:
+                    function.removeTie(f"f{idom}.f1.{par}")
+                if not peak_mask.flat[idom]:
+                    comp_func[1].fixParameter(par)
+                elif idom != idom_peak:
+                    function.tie(f"f{idom}.f1.{par}", f"f{idom_peak}.f1.{par}")
+        return str(function)
 
 
 class LineProfileResult:
@@ -614,14 +539,23 @@ class LineProfileResult:
     This class holds result of line profile integration of a single-crystal Bragg peak
     """
 
-    def __init__(self, ipk, pk, intens_over_sig, peak_fitter, peak_data, status):
+    def __init__(
+        self,
+        ipk: int,
+        pk: IPeak,
+        intens_over_sig: float,
+        status: Enum,
+        peak_mask: np.ndarray[bool],
+        fit_result: dict,
+        peak_data: PeakData,
+    ):
         self.irow, self.icol = peak_data.irow, peak_data.icol
-        self.tofs = peak_fitter.tofs
-        self.ysum = peak_fitter.ysum
-        self.yfoc = peak_fitter.y[peak_fitter.successful].sum(axis=0)
-        self.efoc = np.sqrt(peak_fitter.esq[peak_fitter.successful].sum(axis=0))
-        self.yfoc_fit = peak_fitter.yfit_foc
-        self.successful = peak_fitter.successful
+        self.tofs = None
+        self.ysum = None
+        self.yfoc = None
+        self.efoc = None
+        self.yfoc_fit = None
+        self.peak_mask = peak_mask
         # extract peak properties inot title
         intens_over_sig = np.round(intens_over_sig, 1)
         hkl = np.round(pk.getHKL(), 2)
@@ -636,12 +570,34 @@ class LineProfileResult:
             rf"d={d} $\AA$"
             f"\n{status.value}"
         )
+        self._init_data(fit_result)
+
+    def _init_data(self, fit_result):
+        final_shape = (*self.peak_mask.shape, -1)
+        ydat = np.array(
+            [get_eval_ws(fit_result["OutputWorkspace"], idom).readY(0) for idom in range(fit_result["Function"].nDomains())]
+        ).reshape(final_shape)
+        edat_sq = (
+            np.array(
+                [get_eval_ws(fit_result["OutputWorkspace"], idom).readE(0) for idom in range(fit_result["Function"].nDomains())]
+            ).reshape(final_shape)
+            ** 2
+        )
+        yfit = np.array(
+            [get_eval_ws(fit_result["OutputWorkspace"], idom).readY(1) for idom in range(fit_result["Function"].nDomains())]
+        ).reshape(final_shape)
+        self.tofs = get_eval_ws(fit_result["OutputWorkspace"], 0).readX(0)
+        self.tofs = 0.5 * (self.tofs[1:] + self.tofs[:-1])
+        self.ysum = ydat.sum(axis=2)
+        self.yfoc = ydat[self.peak_mask].sum(axis=0)
+        self.efoc = np.sqrt(edat_sq[self.peak_mask].sum(axis=0))
+        self.yfoc_fit = yfit[self.peak_mask].sum(axis=0)
 
     def plot_integrated_peak(self, fig, axes, norm_func):
         # plot colorfill of TOF integrated data on LHS
         im = axes[0].imshow(self.ysum)
         im.set_norm(norm_func())
-        axes[0].plot(*np.where(self.successful)[::-1], "ow")
+        axes[0].plot(*np.where(self.peak_mask)[::-1], "ow")
         axes[0].plot(self.icol, self.irow, "+r")  # peak centre
         axes[0].set_xlabel("Col")
         axes[0].set_ylabel("Row")
@@ -652,16 +608,6 @@ class LineProfileResult:
         axes[1].set_ylabel("Intensity (a.u.)")
         # set title
         fig.suptitle(self.title)
-
-
-def calc_sigma_from_summation(xspec, esq_spec, ypeak, cutoff=0.025):
-    nbins = len(ypeak)
-    ypeak_cumsum = np.cumsum(ypeak)
-    ypeak_cumsum /= ypeak_cumsum[-1]
-    ilo = np.clip(np.argmin(abs(ypeak_cumsum - cutoff)), a_min=0, a_max=nbins // 2)
-    ihi = np.clip(np.argmin(abs(ypeak_cumsum - (1 - cutoff))), a_min=nbins // 2, a_max=nbins - 1) + 1
-    bin_width = np.diff(xspec[ilo:ihi])
-    return np.sqrt(np.sum(0.5 * (esq_spec[ilo : ihi - 1] + esq_spec[ilo + 1 : ihi]) * (bin_width**2)))
 
 
 def plot_integration_results(output_file, results, prog_reporter):
@@ -683,6 +629,51 @@ def plot_integration_results(output_file, results, prog_reporter):
             f"OutputFile ({output_file}) could not be opened - please check it is not open by "
             f"another programme and that the user has permission to write to that directory."
         )
+
+
+def find_peak_cluster_in_window(mask, predicted_pos):
+    labels, nlabels = label(mask)
+    if nlabels < 1:
+        return None  # no peak found
+    peak_label = labels[predicted_pos]
+    if peak_label == 0:
+        inearest = distance_transform_edt(labels == 0, return_distances=False, return_indices=True)
+        peak_label = labels[tuple(inearest)][predicted_pos]
+    return labels == peak_label
+
+
+def calc_sigma_from_summation(xdat, edat_sq, ypeak, cutoff=0.025):
+    nbins = len(ypeak)
+    ypeak_cumsum = np.cumsum(abs(ypeak))
+    ypeak_cumsum /= ypeak_cumsum[-1]
+    ilo = np.clip(np.argmin(abs(ypeak_cumsum - cutoff)), a_min=0, a_max=nbins // 2)
+    ihi = np.clip(np.argmin(abs(ypeak_cumsum - (1 - cutoff))), a_min=nbins // 2, a_max=nbins - 1) + 1
+    bin_width = np.diff(xdat[ilo : ihi + 1])
+    return np.sqrt(np.sum(edat_sq[ilo:ihi] * (bin_width**2)))
+
+
+def calc_intens_and_sigma_arrays(fit_result, error_strategy):
+    function = fit_result["Function"]
+    intens = np.zeros(function.nDomains())
+    sigma = np.zeros(intens.shape)
+    intens_over_sig = np.zeros(intens.shape)
+    peak_func = FunctionFactory.Instance().createPeakFunction(function[0][0].name())
+    for idom, comp_func in enumerate(function):
+        [peak_func.setParameter(iparam, comp_func.getParameterValue(iparam)) for iparam in range(peak_func.nParams())]
+        intens[idom] = peak_func.intensity()
+        if error_strategy == "Hessian":
+            [peak_func.setError(iparam, comp_func.getError(iparam)) for iparam in range(peak_func.nParams())]
+            sigma[idom] = peak_func.intensityError()
+        else:
+            ws_fit = get_eval_ws(fit_result["OutputWorkspace"], idom)
+            sigma[idom] = calc_sigma_from_summation(ws_fit.readX(0), ws_fit.readE(0) ** 2, ws_fit.readY(3))
+    ivalid = ~np.isclose(sigma, 0)
+    intens_over_sig[ivalid] = intens[ivalid] / sigma[ivalid]
+    return intens, sigma, intens_over_sig
+
+
+def get_eval_ws(out_ws_name, idom):
+    return ADS.retrieve(f"{out_ws_name[:-1]}_{idom}")
 
 
 # register algorithm with mantid
