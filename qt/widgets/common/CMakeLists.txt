@@ -1,3 +1,7 @@
+# Add the Python scripts directory to the build
+set(PYTHON_SCRIPTS_DIR ${CMAKE_SOURCE_DIR}/mantid/qt/python/mantidqt/mantidqt/widgets/helpwindow)
+set(ENV{PYTHONPATH} "$ENV{PYTHONPATH}:${PYTHON_SCRIPTS_DIR}")
+
 set(SRC_FILES
     src/AddWorkspaceDialog.cpp
     src/AddWorkspaceMultiDialog.cpp
