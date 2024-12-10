@@ -62,12 +62,12 @@ class MantidORSODataset:
         reduction_timestamp: datetime,
         creator_name: str,
         creator_affiliation: str,
-        polarized_dataset: bool,
+        is_polarized_dataset: bool,
     ) -> None:
         self._data_columns = data_columns
         self._header = None
 
-        self._create_mandatory_header(ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation, polarized_dataset)
+        self._create_mandatory_header(ws, dataset_name, reduction_timestamp, creator_name, creator_affiliation, is_polarized_dataset)
 
     @property
     def dataset(self) -> OrsoDataset:
@@ -102,7 +102,13 @@ class MantidORSODataset:
         return File(filename, timestamp, comment)
 
     def _create_mandatory_header(
-        self, ws, dataset_name: str, reduction_timestamp: datetime, creator_name: str, creator_affiliation: str, polarized_dataset: bool
+        self,
+        ws,
+        dataset_name: str,
+        reduction_timestamp: datetime,
+        creator_name: str,
+        creator_affiliation: str,
+        is_polarized_dataset: Optional[bool] = None,
     ) -> None:
         owner = Person(name=None, affiliation=None)
 
@@ -117,7 +123,7 @@ class MantidORSODataset:
         sample = Sample(name=ws.getTitle())
 
         # This will initially only consider polarization
-        instrument_settings = InstrumentSettings(None, None) if polarized_dataset else None
+        instrument_settings = InstrumentSettings(None, None) if is_polarized_dataset else None
         measurement = Measurement(instrument_settings=instrument_settings, data_files=[])
 
         data_source = DataSource(owner=owner, experiment=experiment, sample=sample, measurement=measurement)
