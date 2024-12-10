@@ -306,6 +306,10 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
 
     def PyExec(self):
         # get input
+        import pydevd_pycharm
+
+        pydevd_pycharm.settrace(stdoutToServer=True, stderrToServer=True)
+
         ws = self.getProperty("InputWorkspace").value
         peaks = self.getProperty("PeaksWorkspace").value
         # shoebox dimensions
@@ -430,21 +434,34 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     peak, peak.getDetectorID(), bank_name, nshoebox * kernel.shape[0], nshoebox * kernel.shape[1], nrows_edge, ncols_edge
                 )
                 x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, kernel, nshoebox)
-                # integrate at previously found ipos
-                ipos = [*np.argwhere(ispecs == weak_pk.ispec)[0], np.argmin(abs(x - weak_pk.tof))]
-                det_edges = peak_data.det_edges if not integrate_on_edge else None
-                intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
-                # scale summed intensity by bin width to get integrated area
-                intens = intens * weak_pk.tof_bin_width
-                sigma = sigma * weak_pk.tof_bin_width
-                set_peak_intensity(peak, intens, sigma, do_lorz_cor)
-                if output_file:
-                    # save result for plotting
-                    peak_shape = [nrows, ncols, nbins]
-                    ipos_predicted = [peak_data.irow, peak_data.icol, np.argmin(abs(x - pk_tof))]
-                    results[ipk] = ShoeboxResult(
-                        ipk, peak, x, y, peak_shape, ipos, ipos_predicted, i_over_sig, status, strong_peak=strong_pk, ipk_strong=ipk_strong
-                    )
+                if np.any(ispecs == weak_pk.ispec):
+                    # integrate at previously found ipos
+                    ipos = [*np.argwhere(ispecs == weak_pk.ispec)[0], np.argmin(abs(x - weak_pk.tof))]
+                    det_edges = peak_data.det_edges if not integrate_on_edge else None
+                    intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
+                    # scale summed intensity by bin width to get integrated area
+                    intens = intens * weak_pk.tof_bin_width
+                    sigma = sigma * weak_pk.tof_bin_width
+                    set_peak_intensity(peak, intens, sigma, do_lorz_cor)
+                    if output_file:
+                        # save result for plotting
+                        peak_shape = [nrows, ncols, nbins]
+                        ipos_predicted = [peak_data.irow, peak_data.icol, np.argmin(abs(x - pk_tof))]
+                        results[ipk] = ShoeboxResult(
+                            ipk,
+                            peak,
+                            x,
+                            y,
+                            peak_shape,
+                            ipos,
+                            ipos_predicted,
+                            i_over_sig,
+                            status,
+                            strong_peak=strong_pk,
+                            ipk_strong=ipk_strong,
+                        )
+                else:
+                    pass
         elif weak_peak_strategy == "NearestStrongPeak":
             raise ValueError(
                 f"No peaks found with I/sigma > WeakPeakThreshold ({weak_peak_threshold}) - can't "
