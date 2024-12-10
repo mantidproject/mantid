@@ -63,7 +63,7 @@ void ConjoinWorkspaces::exec() {
   }
   // Check if bins match
   bool checkBins = getProperty("CheckMatchingBins");
-  if (!WorkspaceHelpers::matchingBins(*ws1, *ws2) && checkBins) {
+  if (!WorkspaceHelpers::matchingBins(ws1, ws2) && checkBins) {
     const std::string message("The bins do not match in the input workspaces. "
                               "Consider using RebinToWorkspace to preprocess "
                               "the workspaces before conjoining them.");
