@@ -769,6 +769,48 @@ public:
     TS_ASSERT(!AnalysisDataService::Instance().doesExist("IvsLam"));
   }
 
+  void test_workspace_group_with_no_polarization_analysis_does_not_create_spin_state_sample_logs() {
+    ReflectometryReductionOneAuto3 alg;
+    setup_alg_on_input_workspace_group_with_run_number(alg);
+    alg.setProperty("PolarizationAnalysis", false);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    auto outQGroup = retrieveOutWS("IvsQ_1234");
+    auto outQGroupBinned = retrieveOutWS("IvsQ_binned_1234");
+    auto outQGroupLam = retrieveOutWS("IvsLam_1234");
+    check_output_group_contains_sample_logs_for_spin_state_ORSO(outQGroup, false);
+    check_output_group_contains_sample_logs_for_spin_state_ORSO(outQGroupBinned, false);
+    check_output_group_contains_sample_logs_for_spin_state_ORSO(outQGroupLam, false);
+  }
+
+  void test_workspace_group_with_polarization_analysis_creates_spin_state_sample_logs() {
+    std::string const name = "input";
+    prepareInputGroup(name, "Wildes");
+    applyPolarizationEfficiencies(name);
+
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", true);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+    alg.execute();
+
+    auto outQGroup = retrieveOutWS("IvsQ");
+    auto outQGroupBinned = retrieveOutWS("IvsQ_binned");
+    auto outQGroupLam = retrieveOutWS("IvsLam");
+
+    check_output_group_contains_sample_logs_for_spin_state_ORSO(outQGroup, true);
+    check_output_group_contains_sample_logs_for_spin_state_ORSO(outQGroupBinned, true);
+    check_output_group_contains_sample_logs_for_spin_state_ORSO(outQGroupLam, true);
+  }
+
   void test_polarization_correction() {
 
     std::string const name = "input";
@@ -1960,6 +2002,13 @@ private:
     auto const selectedChildHistories = selectedParentHistory->getChildHistories()[childLevelIdx];
     for (const auto &[prop, value] : propValues) {
       TS_ASSERT_EQUALS(selectedChildHistories->getPropertyValue(prop), value);
+    }
+  }
+
+  void check_output_group_contains_sample_logs_for_spin_state_ORSO(std::vector<MatrixWorkspace_sptr> const &wsGroup,
+                                                                   bool has_sample_logs = false) {
+    for (auto const &ws : wsGroup) {
+      TS_ASSERT_EQUALS(ws->mutableRun().hasProperty("spin_state_ORSO"), has_sample_logs)
     }
   }
 };
