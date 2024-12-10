@@ -365,9 +365,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:338
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:347
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:200
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:283
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:302
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:699
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/Run.cpp:732
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/NumericAxisValidator.cpp:26
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:889
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ExperimentInfo.cpp:140
@@ -589,13 +586,11 @@ comparisonOfFuncReturningBoolError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/Mant
 comparisonOfFuncReturningBoolError:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/BoundedValidator.h:156
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadEmptyInstrument.h:65
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadAscii2.cpp:211
-variableScope:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadEmptyInstrument.cpp:57
 duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:307
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadCalFile.cpp:57
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadDNSEvent.h:44
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/BitStream.h:30
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadANSTOHelper.cpp:210
-variableScope:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/DetermineChunking.cpp:163
 uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadFITS.cpp:547
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:124
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:125
@@ -708,10 +703,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveToSNSHis
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveToSNSHistogramNexus.cpp:661
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/GroupingWorkspace.cpp:153
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/SplittersWorkspace.cpp:89
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/LeanElasticPeaksWorkspace.cpp:149
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/LeanElasticPeaksWorkspace.cpp:620
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/LeanElasticPeaksWorkspace.cpp:135
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/LeanElasticPeaksWorkspace.cpp:713
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:575
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableWorkspace.h:199
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/TableWorkspace.cpp:253
@@ -728,10 +719,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MaskWorkspace
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h:35
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/SpaceGroupFactory.h:45
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/SpaceGroupFactory.h:46
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/PeaksWorkspace.cpp:159
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/PeaksWorkspace.cpp:917
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/PeaksWorkspace.cpp:145
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/PeaksWorkspace.cpp:982
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:448
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:712
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:738
