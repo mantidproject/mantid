@@ -7,7 +7,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/LoadMuonNexus.h"
+#include "MantidMuon/LoadMuonNexus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/TableRow.h"
@@ -33,7 +33,7 @@
 #include <nexus/NeXusException.hpp>
 // clang-format on
 
-namespace Mantid::DataHandling {
+namespace Mantid::Algorithms {
 
 using namespace Kernel;
 using namespace API;
@@ -214,4 +214,4 @@ void LoadMuonNexus::addToSampleLog(const std::string &logName, const std::string
   alg->setProperty("LogText", logString);
   alg->executeAsChildAlg();
 }
-} // namespace Mantid::DataHandling
+} // namespace Mantid::Algorithms

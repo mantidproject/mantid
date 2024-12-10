@@ -81,6 +81,7 @@ set(SRC_FILES
     src/IPeaksWorkspace.cpp
     src/IPowderDiffPeakFunction.cpp
     src/ISISInstrumentDataCache.cpp
+    src/ISISRunLogs.cpp
     src/ISpectrum.cpp
     src/ITableWorkspace.cpp
     src/ImmutableCompositeFunction.cpp
@@ -265,6 +266,7 @@ set(INC_FILES
     inc/MantidAPI/IPeaksWorkspace_fwd.h
     inc/MantidAPI/IPowderDiffPeakFunction.h
     inc/MantidAPI/ISISInstrumentDataCache.h
+    inc/MantidAPI/ISISRunLogs.h
     inc/MantidAPI/IPreview.h
     inc/MantidAPI/ISpectrum.h
     inc/MantidAPI/ISplittersWorkspace.h
