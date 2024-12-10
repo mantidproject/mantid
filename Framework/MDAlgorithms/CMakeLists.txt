@@ -96,6 +96,7 @@ set(SRC_FILES
     src/PolarizationAngleCorrectionMD.cpp
     src/PowerMD.cpp
     src/PreprocessDetectorsToMD.cpp
+    src/QTransform.cpp
     src/QueryMDWorkspace.cpp
     src/RecalculateTrajectoriesExtents.cpp
     src/ReplicateMD.cpp
@@ -216,6 +217,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/PolarizationAngleCorrectionMD.h
     inc/MantidMDAlgorithms/PowerMD.h
     inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h
+    inc/MantidMDAlgorithms/QTransform.h
     inc/MantidMDAlgorithms/QueryMDWorkspace.h
     inc/MantidMDAlgorithms/RecalculateTrajectoriesExtents.h
     inc/MantidMDAlgorithms/ReplicateMD.h
@@ -329,6 +331,7 @@ set(TEST_FILES
     PolarizationAngleCorrectionMDTest.h
     PowerMDTest.h
     PreprocessDetectorsToMDTest.h
+    QTransformTest.h
     QueryMDWorkspaceTest.h
     RecalculateTrajectoriesExtentsTest.h
     ReplicateMDTest.h
