@@ -1,0 +1,1 @@
+- Corrects `isDistribution` property of result of multiplication/division of two ragged workspaces, now `true`
