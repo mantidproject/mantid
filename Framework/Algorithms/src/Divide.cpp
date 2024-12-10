@@ -76,7 +76,7 @@ void Divide::performBinaryOperation(const HistogramData::Histogram &lhs, const d
 
 void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs,
                             API::MatrixWorkspace_sptr out) {
-  if (rhs->YUnit().empty() || !WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
+  if (rhs->YUnit().empty() || !WorkspaceHelpers::matchingBins(lhs, rhs, true)) {
     // Do nothing
   }
   // If the Y units match, then the output will be a distribution and will be
@@ -201,7 +201,7 @@ std::string Divide::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr
   if (m_matchXSize) {
     // Past this point, for a 2D WS operation, we require the X arrays to match.
     // Note this only checks the first spectrum except for ragged workspaces
-    if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, !m_lhsRagged && !m_rhsRagged)) {
+    if (!WorkspaceHelpers::matchingBins(lhs, rhs, !m_lhsRagged && !m_rhsRagged)) {
       return "X arrays must match when dividing 2D workspaces.";
     }
   }
