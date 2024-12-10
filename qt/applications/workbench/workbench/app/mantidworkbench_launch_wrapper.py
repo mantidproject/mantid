@@ -11,9 +11,11 @@ import sys
 from workbench.app.main import main
 
 
-def launch(args):
+def launch(args=None):
+    if args is None:
+        args = sys.argv
     if sys.platform.startswith("linux"):
-        command = ["launch_mantidworkbench"] + sys.argv[1:]
+        command = ["launch_mantidworkbench"] + args[1:]
         subprocess.run(command)
     else:
         main(args)
