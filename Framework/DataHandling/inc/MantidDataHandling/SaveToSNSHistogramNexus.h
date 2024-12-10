@@ -12,7 +12,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include <climits>
 // clang-format off
