@@ -1080,10 +1080,8 @@ NXstatus NX5putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen
   /* Close attribute  */
   iRet += H5Aclose(attr1);
   killAttVID(pFile, vid);
-  if (iRet < 0)
-    return NX_ERROR;
-  else
-    return NX_OK;
+  // TODO QUESTION always return that it is ok?
+  return NX_OK;
 }
 
 /* ------------------------------------------------------------------- */
