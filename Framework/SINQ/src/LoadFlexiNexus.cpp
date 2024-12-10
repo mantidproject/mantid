@@ -19,7 +19,6 @@
 
 #include <boost/algorithm/string.hpp>
 #include <fstream>
-#include <nexus/NeXusException.hpp>
 #include <sstream>
 
 // Register the algorithm into the AlgorithmFactory

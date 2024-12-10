@@ -18,7 +18,6 @@
 
 #include <Poco/File.h>
 #include <boost/scoped_ptr.hpp>
-#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
