@@ -278,13 +278,14 @@ int main(int argc, char *argv[]) {
     } while (attr_status != NX_ERROR);
   }
 
-  if (NXclose(&fileid) != NX_OK)
-    return 1;
+  const int result = (NXclose(&fileid) == NX_OK) ? 0 : 1;
 
   // remove file that was created
   if (std::filesystem::exists(filename))
     std::filesystem::remove(filename);
 
-  std::cout << "we reached the end - this looks good\n";
-  return 0;
+  if (result == 0)
+    std::cout << "we reached the end - this looks good\n";
+
+  return result;
 }
