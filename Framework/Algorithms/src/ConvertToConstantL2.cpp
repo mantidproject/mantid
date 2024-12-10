@@ -105,7 +105,7 @@ void ConvertToConstantL2::exec() {
       throw std::runtime_error(errorMsg.str());
     }
 
-    // subract the diference in l2
+    // subtract the difference in l2
     double thisDetL2 = inputSpecInfo.l2(i);
     double deltaL2 = std::abs(thisDetL2 - m_l2);
     double deltaTOF = calculateTOF(deltaL2);
