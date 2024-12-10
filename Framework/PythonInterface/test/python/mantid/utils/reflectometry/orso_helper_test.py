@@ -12,6 +12,7 @@ from datetime import datetime, timezone, date, time
 
 from mantid.simpleapi import CreateSampleWorkspace
 from mantid.utils.reflectometry.orso_helper import MantidORSODataColumns, MantidORSODataset, MantidORSOSaver
+from mantid.utils.reflectometry import SpinStatesORSO
 from orsopy.fileio.base import Column, ErrorColumn
 
 
@@ -226,7 +227,7 @@ class MantidORSODatasetTest(unittest.TestCase):
         creator_name = "Creator Name"
         creator_affiliation = "Creator Affiliation"
         dataset = MantidORSODataset(
-            dataset_name, self._data_columns, self._ws, reduction_timestamp, creator_name, creator_affiliation, polarized_dataset=False
+            dataset_name, self._data_columns, self._ws, reduction_timestamp, creator_name, creator_affiliation, is_polarized_dataset=False
         )
 
         orso_dataset = dataset.dataset
@@ -257,10 +258,9 @@ class MantidORSODatasetTest(unittest.TestCase):
 
     def test_set_polarization_on_mantid_orso_dataset(self):
         dataset = self._create_test_dataset(polarized=True)
-        pol = "pp"
-        dataset.set_polarization(pol)
+        dataset.set_polarization(SpinStatesORSO.PP)
 
-        self.assertEqual("pp", dataset.dataset.info.data_source.measurement.instrument_settings.polarization)
+        self.assertEqual(SpinStatesORSO.PP, dataset.dataset.info.data_source.measurement.instrument_settings.polarization)
 
     def test_set_reduction_call_on_mantid_orso_dataset(self):
         dataset = self._create_test_dataset()
@@ -363,11 +363,9 @@ class MantidORSODatasetTest(unittest.TestCase):
         self._check_files_are_created(dataset, filenames, 0, len(filenames), False)
 
     def _create_test_dataset(self, polarized=False):
-        return MantidORSODataset("Test dataset", self._data_columns, self._ws, datetime.now(), "", "", polarized_dataset=polarized)
+        return MantidORSODataset("Test dataset", self._data_columns, self._ws, datetime.now(), "", "", is_polarized_dataset=polarized)
 
-    def _check_mantid_default_header(
-        self, orso_dataset, dataset_name, ws, reduction_timestamp, creator_name, creator_affiliation, polarization=False
-    ):
+    def _check_mantid_default_header(self, orso_dataset, dataset_name, ws, reduction_timestamp, creator_name, creator_affiliation):
         """Check that the default header contains only the information that can be shared
         for all Mantid implementations of the standard
         """
