@@ -704,12 +704,12 @@ def _merge_workspaces(retWSname_front, retWSname_rear, rAnds):
 
 
 def _common_substring(val1, val2):
-    l = []
+    substrings = []
     for i in range(len(val1)):
         if val1[i] == val2[i]:
-            l.append(val1[i])
+            substrings.append(val1[i])
         else:
-            return "".join(l)
+            return "".join(substrings)
 
 
 def _group_workspaces(list_of_values, outputname):

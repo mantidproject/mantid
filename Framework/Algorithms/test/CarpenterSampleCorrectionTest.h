@@ -18,6 +18,7 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -63,6 +64,8 @@ public:
     TS_ASSERT(props[5]->isDefault());
     TS_ASSERT(dynamic_cast<PropertyWithValue<double> *>(props[5]));
   }
+
+  GNU_DIAG_OFF("dangling-reference")
 
   void testCalculationHist() {
     using namespace Mantid::HistogramData;
@@ -153,6 +156,8 @@ public:
       TS_ASSERT_LESS_THAN(2.39621, y_actual[i]);
       TS_ASSERT_LESS_THAN(y_actual[i], 6.66480);
     }
+
+    GNU_DIAG_ON("dangling-reference")
 
     // cleanup
     AnalysisDataService::Instance().remove(outName);

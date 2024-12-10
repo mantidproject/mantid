@@ -147,7 +147,6 @@ class ConfigServiceTest(unittest.TestCase):
 
         # read in the user documentation
         print("Parsing", doc_filename)
-        documented_keys = []
         with open(doc_filename) as handle:
             text = handle.read()
 

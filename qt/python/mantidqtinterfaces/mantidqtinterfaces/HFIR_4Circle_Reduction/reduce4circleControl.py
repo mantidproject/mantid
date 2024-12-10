@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=C0302,C0103,R0902,R0904,R0913,W0212,W0621,R0912,R0921,R0914,W0403
+# ruff: noqa: E741  # Ambiguous variable name
 ################################################################################
 #
 # Controlling class
@@ -2698,12 +2699,8 @@ class CWSCDReductionControl(object):
                 mantidsimple.ConvertCWSDExpToMomentum(**alg_args)
 
                 self._myMDWsList.append(out_q_name)
-            except RuntimeError as e:
-                err_msg += "Unable to convert scan %d data to Q-sample MDEvents due to %s" % (scan_no, str(e))
-                return False, err_msg
-            except ValueError as e:
-                err_msg += "Unable to convert scan %d data to Q-sample MDEvents due to %s." % (scan_no, str(e))
-                return False, err_msg
+            except (RuntimeError, ValueError) as e:
+                return False, f"Unable to convert scan {scan_no} data to Q-sample MDEvents due to {e}."
             # END-TRY
 
         else:
@@ -2845,7 +2842,7 @@ class CWSCDReductionControl(object):
         """
         if self._curr_2theta_fwhm_func is None:
             # user inputs smoothed data for interpolation
-            raise RuntimeError(blabla)
+            raise RuntimeError("Current Two theta FWHM function is none")
 
         else:
             # user inputs math equation as model

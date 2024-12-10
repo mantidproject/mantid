@@ -27,7 +27,6 @@ set(SRC_FILES
     src/GenerateGroupingPowder2.cpp
     src/GroupDetectors.cpp
     src/GroupDetectors2.cpp
-    src/H5Util.cpp
     src/ISISDataArchive.cpp
     src/ISISJournal.cpp
     src/ISISJournalGetExperimentRuns.cpp
@@ -251,7 +250,6 @@ set(INC_FILES
     inc/MantidDataHandling/GenerateGroupingPowder2.h
     inc/MantidDataHandling/GroupDetectors.h
     inc/MantidDataHandling/GroupDetectors2.h
-    inc/MantidDataHandling/H5Util.h
     inc/MantidDataHandling/ISISDataArchive.h
     inc/MantidDataHandling/ISISJournal.h
     inc/MantidDataHandling/ISISJournalGetExperimentRuns.h
@@ -475,7 +473,6 @@ set(TEST_FILES
     GenerateGroupingPowder2Test.h
     GroupDetectors2Test.h
     GroupDetectorsTest.h
-    H5UtilTest.h
     ISISDataArchiveTest.h
     ISISJournalGetExperimentRunsTest.h
     ISISJournalTest.h

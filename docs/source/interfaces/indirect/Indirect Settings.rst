@@ -95,7 +95,7 @@ Glossary of Allowed Suffixes
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 | _sqw         | EnergyTransfer (:math:`meV`) | Q (:math:`A^-1`)                               | :ref:`Data Reduction <interface-indirect-data-reduction>` in S(Q, w)                                                |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
-| _Corrections | EnergyTransfer (:math:`meV`) | Spectrum Number                                | :ref:`Data Corrections <interface-inelastic-corrections>` in CalculatePaalmanPings or CalculateMonteCarloAbsorption |
+| _Corrections | EnergyTransfer (:math:`meV`) | Spectrum Number                                | :ref:`Data Corrections <interface-inelastic-corrections>` in CalculateMonteCarloAbsorption                          |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
 | _eq          | Q (:math:`A^-1`)             | Sample Environment variable (e.g. Temperature) | :ref:`Data Processor <interface-inelastic-data-processor>` in Elwin                                                 |
 +--------------+------------------------------+------------------------------------------------+---------------------------------------------------------------------------------------------------------------------+
@@ -178,15 +178,6 @@ Sample Suffixes
 
 Container Suffixes
   _red, _sqw, _elf
-
-Calculate Paalman Pings
-#######################
-
-Sample Suffixes
-  _red, _sqw
-
-Container Suffixes
-  _red, _sqw
 
 Calculate Monte Carlo Absorption
 ################################

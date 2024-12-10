@@ -54,10 +54,10 @@ def make_decorator(algorithm_to_decorate):
 
     argspec = inspect.getfullargspec(algorithm_to_decorate)
     for parameter in argspec.varargs.split(","):
-        m = re.search("(^\w+)", parameter)  # Take the parameter key part from the defaults given as 'key=value'
+        m = re.search(r"(^\w+)", parameter)  # Take the parameter key part from the defaults given as 'key=value'
         if m:
             parameter = m.group(0).strip()
-        m = re.search("\w+$", parameter)  # strip off any leading numerical values produced by argspec
+        m = re.search(r"\w+$", parameter)  # strip off any leading numerical values produced by argspec
         if m:
             parameter = m.group(0).strip()
         add_getter_setter(Decorator, m.group(0).strip())

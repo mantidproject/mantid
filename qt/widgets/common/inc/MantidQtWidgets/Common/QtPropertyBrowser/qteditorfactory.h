@@ -113,7 +113,7 @@ class QtSpinBoxFactoryNoTimerPrivate;
 // Base QtSpinBoxFactory class
 template <class SpinBox> class QtSpinBoxFactoryBase : public QtAbstractEditorFactory<QtIntPropertyManager> {
 public:
-  QtSpinBoxFactoryBase(QObject *parent = nullptr) : QtAbstractEditorFactory<QtIntPropertyManager>(parent){};
+  QtSpinBoxFactoryBase(QObject *parent = nullptr) : QtAbstractEditorFactory<QtIntPropertyManager>(parent) {};
 
 protected:
   void connectPropertyManager(QtIntPropertyManager *manager) override;
@@ -169,7 +169,7 @@ template <class SpinBox> void QtSpinBoxFactoryBase<SpinBox>::disconnectPropertyM
 class QSpinBoxNoTimer : public QSpinBox {
   Q_OBJECT
 public:
-  QSpinBoxNoTimer(QWidget *parent = nullptr) : QSpinBox(parent){};
+  QSpinBoxNoTimer(QWidget *parent = nullptr) : QSpinBox(parent) {};
 
 private:
   void timerEvent(QTimerEvent *event) override {

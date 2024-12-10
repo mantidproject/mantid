@@ -11,13 +11,9 @@ from io import StringIO
 from mantid.api import PythonAlgorithm
 from mantid.kernel import ConfigService, logger
 from mantid.utils.deprecator import deprecated_algorithm
-from mantid.utils.logging import capture_logs
 
 # standard imports
-from contextlib import contextmanager
-import os
 import sys
-import tempfile
 import unittest
 
 
@@ -35,6 +31,7 @@ class MyOldAlg(PythonAlgorithm):
 
 class RedirectStdOut:
     r"""redirect logging messages to a file"""
+
     # Adapted from https://stackoverflow.com/a/45899925
 
     CONFIG_KEY = "logging.channels.consoleChannel.class"

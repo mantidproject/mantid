@@ -54,7 +54,7 @@ public:
         "The name to use for the output workspace");
     declareProperty("MissingProperty", "rubbish", Kernel::Direction::Input);
   };
-  void exec() override{
+  void exec() override {
 
   };
 };

@@ -8,13 +8,12 @@
 import unittest
 from testhelpers import assertRaisesNothing
 
-from LoadCIF import SpaceGroupBuilder, UnitCellBuilder, AtomListBuilder, UBMatrixBuilder, CrystalStructureBuilder
+from LoadCIF import SpaceGroupBuilder, UnitCellBuilder, AtomListBuilder, UBMatrixBuilder
 
 from mantid.api import AlgorithmFactory
 from mantid.geometry import UnitCell
 
 import numpy as np
-import sys
 
 
 def merge_dicts(lhs, rhs):

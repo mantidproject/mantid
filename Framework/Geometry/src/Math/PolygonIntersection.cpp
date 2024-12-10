@@ -29,7 +29,7 @@ Kernel::Logger g_log("PolygonIntersection");
 // Uncomment this to get detailed statements of the exact progress of the
 // intersection
 // calculation
-//#define DEBUG_INTERSECTION
+// #define DEBUG_INTERSECTION
 
 /// Define a macro to include the logging statements if requested. They hamper
 /// performance if

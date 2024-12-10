@@ -15,8 +15,8 @@ namespace MantidQt::MantidWidgets {
 
 AlgorithmProgressWidget::AlgorithmProgressWidget(QWidget *parent)
     : QWidget(parent), m_progressBar{new QProgressBar(this)}, m_layout{new QHBoxLayout(this)},
-      m_detailsButton{new QPushButton("Details")}, m_presenter{
-                                                       std::make_unique<AlgorithmProgressPresenter>(parent, this)} {
+      m_detailsButton{new QPushButton("Details")},
+      m_presenter{std::make_unique<AlgorithmProgressPresenter>(parent, this)} {
   m_progressBar->setAlignment(Qt::AlignHCenter);
   m_layout->addWidget(m_progressBar);
   m_layout->addWidget(m_detailsButton);

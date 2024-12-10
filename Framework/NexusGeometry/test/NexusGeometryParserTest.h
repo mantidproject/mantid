@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidFrameworkTestHelpers/FileResource.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -17,6 +18,8 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EigenConversionHelpers.h"
+#include "MantidNexus/H5Util.h"
+#include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
 
 #include "mockobjects.h"
@@ -28,6 +31,8 @@
 
 using namespace Mantid;
 using namespace NexusGeometry;
+using namespace Mantid::NeXus;
+
 namespace {
 std::unique_ptr<Geometry::DetectorInfo> extractDetectorInfo(const Mantid::Geometry::Instrument &instrument) {
   Geometry::ParameterMap pmap;
@@ -44,6 +49,7 @@ extractBeamline(const Mantid::Geometry::Instrument &instrument) {
 std::string instrument_path(const std::string &local_name) {
   return Kernel::ConfigService::Instance().getFullPath(local_name, true, Poco::Glob::GLOB_DEFAULT);
 }
+
 } // namespace
 
 class NexusGeometryParserTest : public CxxTest::TestSuite {
@@ -53,32 +59,52 @@ public:
   static NexusGeometryParserTest *createSuite() { return new NexusGeometryParserTest(); }
   static void destroySuite(NexusGeometryParserTest *suite) { delete suite; }
 
-  static std::unique_ptr<const Mantid::Geometry::Instrument> makeTestInstrument() {
-    const auto fullpath = instrument_path("unit_testing/SMALLFAKE_example_geometry.hdf5");
+  void test_parse_from_specific_entry() {
+    // Test that the parser works correctly when there are multiple NXentry
+    //   in the source file.
 
-    return NexusGeometryParser::createInstrument(fullpath, std::make_unique<MockLogger>());
+    FileResource multipleEntryInput("test_geometry_parser_with_multiple_entries.hdf5");
+    {
+      // Load the multiple NXentry test input.
+      // (See notes about `NexusGeometrySave` and `NexusGeometryParser` at `_verify_basic_instrument` below.)
+      H5::H5File input(instrument_path("unit_testing/SMALLFAKE_example_multiple_entries.hdf5"), H5F_ACC_RDONLY);
+
+      // Copy all of the NXentry groups to a new file.
+      H5::H5File testInput(multipleEntryInput.fullPath(), H5F_ACC_TRUNC);
+      H5Util::copyGroup(testInput, "/mantid_workspace_1", input, "/mantid_workspace_1");
+      H5Util::copyGroup(testInput, "/mantid_workspace_2", input, "/mantid_workspace_2");
+      H5Util::copyGroup(testInput, "/mantid_workspace_3", input, "/mantid_workspace_3");
+
+      // Remove the instrument from the first NXentry group.
+      H5Util::deleteObjectLink(testInput, "/mantid_workspace_1/SmallFakeTubeInstrument");
+    }
+
+    // The default `createInstrument` signature should fail: it will try to load from the first NXentry,
+    //   which no longer has an instrument.
+    TS_ASSERT_THROWS(
+        NexusGeometryParser::createInstrument(multipleEntryInput.fullPath(), std::make_unique<MockLogger>()),
+        const H5::Exception &);
+
+    // Loading explicitly from the first entry should also fail for the same reason.
+    TS_ASSERT_THROWS(NexusGeometryParser::createInstrument(multipleEntryInput.fullPath(), "mantid_workspace_1",
+                                                           std::make_unique<MockLogger>()),
+                     const H5::Exception &);
+
+    // Loading explicitly from the second entry should succeed.
+    auto instrument = NexusGeometryParser::createInstrument(multipleEntryInput.fullPath(), "mantid_workspace_2",
+                                                            std::make_unique<MockLogger>());
+
+    // Verify that the instrument has been parsed correctly.
+    _verify_basic_instrument(*instrument, true);
   }
 
   void test_basic_instrument_information() {
-    auto instrument = makeTestInstrument();
-    auto beamline = extractBeamline(*instrument);
-    auto componentInfo = std::move(beamline.first);
-    auto detectorInfo = std::move(beamline.second);
-
-    TSM_ASSERT_EQUALS("Detectors + 1 monitor", detectorInfo->size(), 128 * 2 + 1);
-    TSM_ASSERT_EQUALS("Detectors + 2 banks + 16 tubes + root + source + sample", componentInfo->size(),
-                      detectorInfo->size() + 21);
-    // Check 128 detectors in first bank
-    TS_ASSERT_EQUALS(128, componentInfo->detectorsInSubtree(componentInfo->root() - 3).size());
-    TS_ASSERT_EQUALS("rear-detector", componentInfo->name(componentInfo->root() - 3));
-    TS_ASSERT(Mantid::Kernel::toVector3d(componentInfo->position(componentInfo->root() - 3))
-                  .isApprox(Eigen::Vector3d{0, 0, 4}));
-    // Check 128 detectors in second bank
-    TS_ASSERT_EQUALS(128, componentInfo->detectorsInSubtree(componentInfo->root() - 12).size());
+    auto instrument = _makeTestInstrument();
+    _verify_basic_instrument(*instrument);
   }
 
   void test_source_is_where_expected() {
-    auto instrument = makeTestInstrument();
+    auto instrument = _makeTestInstrument();
     auto beamline = extractBeamline(*instrument);
     auto componentInfo = std::move(beamline.first);
 
@@ -88,7 +114,7 @@ public:
   }
 
   void test_simple_translation() {
-    auto instrument = makeTestInstrument();
+    auto instrument = _makeTestInstrument();
     auto detectorInfo = extractDetectorInfo(*instrument);
     // First pixel in bank 2
     auto det0Position = Kernel::toVector3d(detectorInfo->position(detectorInfo->indexOf(1100000)));
@@ -111,7 +137,7 @@ public:
   }
 
   void test_complex_translation() {
-    auto instrument = makeTestInstrument();
+    auto instrument = _makeTestInstrument();
     auto detectorInfo = extractDetectorInfo(*instrument);
     // First pixel in bank 1
 
@@ -141,7 +167,7 @@ public:
   }
 
   void test_shape_cylinder_shape() {
-    auto instrument = makeTestInstrument();
+    auto instrument = _makeTestInstrument();
     auto beamline = extractBeamline(*instrument);
     auto componentInfo = std::move(beamline.first);
     const auto &det1Shape = componentInfo->shape(1);
@@ -160,7 +186,7 @@ public:
   }
 
   void test_mesh_shape() {
-    auto instrument = makeTestInstrument();
+    auto instrument = _makeTestInstrument();
     auto beamline = extractBeamline(*instrument);
     auto componentInfo = std::move(beamline.first);
     auto detectorInfo = std::move(beamline.second);
@@ -340,6 +366,63 @@ public:
       // therefore expect mesh to be composed of 8 triangles
       TS_ASSERT_EQUALS(parsedShapeMesh->numberOfTriangles(), 8);
     }
+  }
+
+private:
+  // Parse a basic instrument from "unit_testing/SMALLFAKE_example_geometry.hdf5".
+  static std::unique_ptr<const Mantid::Geometry::Instrument> _makeTestInstrument() {
+    const auto fullpath = instrument_path("unit_testing/SMALLFAKE_example_geometry.hdf5");
+    return NexusGeometryParser::createInstrument(fullpath, std::make_unique<MockLogger>());
+  }
+
+  // Verify that the instrument from "unit_testing/SMALLFAKE_example_geometry.hdf5" has been parsed correctly.
+  // Notes:
+  //   * The original HDF5 test-input file contains detector tubes.  These will be parsed correctly by
+  //   `NexusGeometryParser`,
+  //     but unfortunately at present, these tubes are ignored by `NexusGeometrySave`;
+  //   * The `saveAndReparse` argument flag, and the `detectorInfoSize`, and `componentInfoSize`
+  //     constants are provided to allow the required adjustments, when reparsing an instrument saved by
+  //     `NexusGeometrySave`.
+  //   * For the original instrument:
+  //       -- `componentInfo->size() == 128 * 2 + 1 + 2 + 16 + 1 + 1 + 1`;
+  //       -- `detectorInfo->size() == 128 * 2 + 1;
+  //   * For the saved and reparsed instrument, excluding the tubes, these become:
+  //       -- `componentInfo->size() == 128 * 2 + 1 + 2 + 1 + 1 + 1`;
+  //       -- `detectorInfo->size() == 128 * 2 + 1`;
+  //
+  static void _verify_basic_instrument(const Mantid::Geometry::Instrument &instrument, bool saveAndReparse = false) {
+
+    const size_t expectedDetectorBankSize = 128;
+    const size_t numberOfDetectorBanks = 2;
+    const size_t numberOfMonitors = 1;
+    const size_t expectedDetectorInfoSize = numberOfDetectorBanks * expectedDetectorBankSize + numberOfMonitors;
+    const size_t numberOfTubes = 16;
+
+    const size_t expectedComponentInfoSize =
+        saveAndReparse
+            ? numberOfDetectorBanks * expectedDetectorBankSize + numberOfMonitors + numberOfDetectorBanks + 1 + 1 + 1
+            : numberOfDetectorBanks * expectedDetectorBankSize + numberOfMonitors + numberOfDetectorBanks +
+                  numberOfTubes + 1 + 1 + 1;
+    const std::string componentInfoDescription = saveAndReparse
+                                                     ? "Detectors + 2 banks + root + source + sample"
+                                                     : "Detectors + 2 banks + 16 tubes + root + source + sample";
+
+    auto [componentInfo, detectorInfo] = extractBeamline(instrument);
+
+    TSM_ASSERT_EQUALS("Detectors + 1 monitor", detectorInfo->size(), expectedDetectorInfoSize);
+    TSM_ASSERT_EQUALS(componentInfoDescription.c_str(), componentInfo->size(), expectedComponentInfoSize);
+
+    // Check 128 detectors in first bank
+    size_t rearBankIndex(-1);
+    TS_ASSERT_THROWS_NOTHING(rearBankIndex = componentInfo->indexOfAny("rear-detector"));
+    TS_ASSERT_EQUALS(128, componentInfo->detectorsInSubtree(rearBankIndex).size());
+
+    TS_ASSERT(Mantid::Kernel::toVector3d(componentInfo->position(rearBankIndex)).isApprox(Eigen::Vector3d{0, 0, 4}));
+
+    // Check 128 detectors in second bank
+    size_t frontBankIndex(-1);
+    TS_ASSERT_THROWS_NOTHING(frontBankIndex = componentInfo->indexOfAny("front-detector"));
+    TS_ASSERT_EQUALS(128, componentInfo->detectorsInSubtree(frontBankIndex).size());
   }
 };
 

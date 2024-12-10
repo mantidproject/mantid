@@ -11,10 +11,9 @@
 #include <memory>
 #include <vector>
 
+#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunctionParser.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
-//#include "MantidMDAlgorithms/PlaneImplicitFunctionParser.h"
-#include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>

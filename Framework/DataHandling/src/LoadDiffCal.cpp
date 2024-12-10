@@ -11,7 +11,6 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidDataHandling/H5Util.h"
 #include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -21,6 +20,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Unit.h"
+#include "MantidNexus/H5Util.h"
 
 #include <H5Cpp.h>
 #include <cmath>
@@ -44,6 +44,7 @@ using Mantid::Kernel::PropertyWithValue;
 using Mantid::Kernel::Exception::FileError;
 
 using namespace H5;
+using namespace NeXus;
 
 namespace {
 enum class CalibFilenameExtensionEnum { H5, HD5, HDF, CAL, enum_count };

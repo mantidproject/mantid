@@ -28,32 +28,33 @@ struct PlotType {
 } // namespace
 
 namespace MantidQt::CustomInterfaces {
-Stretch::Stretch(QWidget *parent) : BayesFittingTab(parent), m_previewSpec(0), m_save(false) {
+Stretch::Stretch(QWidget *parent, std::unique_ptr<API::IAlgorithmRunner> algorithmRunner)
+    : BayesFittingTab(parent, std::move(algorithmRunner)), m_previewSpec(0), m_save(false) {
   m_uiForm.setupUi(parent);
 
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
 
   // Create range selector
   auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("StretchERange");
-  connect(eRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
-  connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
-
+  connect(eRangeSelector, &MantidWidgets::RangeSelector::minValueChanged, this, &Stretch::minValueChanged);
+  connect(eRangeSelector, &MantidWidgets::RangeSelector::maxValueChanged, this, &Stretch::maxValueChanged);
   setupFitOptions();
   setupPropertyBrowser();
   setupPlotOptions();
 
   // Connect the data selector for the sample to the mini plot
-  connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString &)), this, SLOT(handleSampleInputReady(const QString &)));
-  connect(m_uiForm.chkSequentialFit, SIGNAL(toggled(bool)), m_uiForm.cbPlot, SLOT(setEnabled(bool)));
+  connect(m_uiForm.dsSample, &DataSelector::dataReady, this, &Stretch::handleSampleInputReady);
+  connect(m_uiForm.chkSequentialFit, &QCheckBox::toggled, m_uiForm.cbPlot, &QComboBox::setEnabled);
   // Connect preview spectrum spinner to handler
-  connect(m_uiForm.spPreviewSpectrum, SIGNAL(valueChanged(int)), this, SLOT(previewSpecChanged(int)));
+  connect(m_uiForm.spPreviewSpectrum, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+          &Stretch::previewSpecChanged);
   m_uiForm.spPreviewSpectrum->setMaximum(0);
 
   // Connect the plot and save push buttons
-  connect(m_uiForm.pbPlot, SIGNAL(clicked()), this, SLOT(plotWorkspaces()));
-  connect(m_uiForm.pbPlotContour, SIGNAL(clicked()), this, SLOT(plotContourClicked()));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(saveWorkspaces()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(plotCurrentPreview()));
+  connect(m_uiForm.pbPlot, &QPushButton::clicked, this, &Stretch::plotWorkspaces);
+  connect(m_uiForm.pbPlotContour, &QPushButton::clicked, this, &Stretch::plotContourClicked);
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &Stretch::saveWorkspaces);
+  connect(m_uiForm.pbPlotPreview, &QPushButton::clicked, this, &Stretch::plotCurrentPreview);
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSample->isOptional(true);
@@ -138,7 +139,7 @@ void Stretch::handleRun() {
   }
 
   m_batchAlgoRunner->addAlgorithm(stretch);
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+  connect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &Stretch::algorithmComplete);
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -146,7 +147,7 @@ void Stretch::handleRun() {
  * Handles the saving and plotting of workspaces after execution
  */
 void Stretch::algorithmComplete(const bool &error) {
-  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
+  disconnect(m_batchAlgoRunner, &API::BatchAlgorithmRunner::batchComplete, this, &Stretch::algorithmComplete);
 
   m_runPresenter->setRunEnabled(true);
   setPlotResultEnabled(!error);
@@ -413,10 +414,9 @@ void Stretch::plotCurrentPreview() {
  * @param min :: The new value of the lower guide
  */
 void Stretch::minValueChanged(double min) {
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateProperties(QtProperty *, double)));
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &Stretch::updateProperties);
   m_dblManager->setValue(m_properties["EMin"], min);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &Stretch::updateProperties);
 }
 
 /**
@@ -425,10 +425,9 @@ void Stretch::minValueChanged(double min) {
  * @param max :: The new value of the upper guide
  */
 void Stretch::maxValueChanged(double max) {
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateProperties(QtProperty *, double)));
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &Stretch::updateProperties);
   m_dblManager->setValue(m_properties["EMax"], max);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &Stretch::updateProperties);
 }
 
 /**
@@ -440,8 +439,7 @@ void Stretch::maxValueChanged(double max) {
 void Stretch::updateProperties(QtProperty *prop, double val) {
   auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
 
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updateProperties(QtProperty *, double)));
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &Stretch::updateProperties);
 
   if (prop == m_properties["EMin"]) {
     setRangeSelectorMin(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
@@ -449,7 +447,7 @@ void Stretch::updateProperties(QtProperty *prop, double val) {
     setRangeSelectorMax(m_properties["EMin"], m_properties["EMax"], eRangeSelector, val);
   }
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this, SLOT(updateProperties(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &Stretch::updateProperties);
 }
 
 void Stretch::setPlotResultEnabled(bool enabled) {

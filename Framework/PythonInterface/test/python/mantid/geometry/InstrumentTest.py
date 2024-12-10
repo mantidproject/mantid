@@ -11,7 +11,6 @@ from testhelpers import can_be_instantiated, WorkspaceCreationHelper
 
 
 class InstrumentTest(unittest.TestCase):
-
     __testws = None
 
     def setUp(self):

@@ -1350,7 +1350,7 @@ class SANS2D(ISISInstrument):
             # return the log value if it stored as a single number
             return float(log_data.getLogData(log_name).value)
         except TypeError:
-            # Python 2.4 doesn't have datetime.strptime...
+
             def format_date(date_string, format, date_str_len):
                 if len(date_string) > date_str_len:
                     date_string = date_string[:date_str_len]
@@ -1584,7 +1584,7 @@ class LARMOR(ISISInstrument):
             # return the log value if it stored as a single number
             return float(log_data.getLogData(log_name).value)
         except TypeError:
-            # Python 2.4 doesn't have datetime.strptime...
+
             def format_date(date_string, format, date_str_len):
                 if len(date_string) > date_str_len:
                     date_string = date_string[:date_str_len]

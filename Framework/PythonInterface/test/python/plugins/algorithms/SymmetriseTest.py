@@ -8,7 +8,7 @@
 import numpy as np
 import unittest
 
-from mantid.api import *
+from mantid.api import mtd
 from mantid.simpleapi import CreateWorkspace, ScaleX, Symmetrise
 
 
@@ -67,8 +67,6 @@ class SymmetriseTest(unittest.TestCase):
 
         @param workspace Workspace to check
         """
-        tolerance = 1e-15
-
         # Test that the axis and values were preserved
         sample_x_axis = self._sample_ws.getAxis(0)
         sample_v_axis = self._sample_ws.getAxis(1)

@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
-from mantid.api import *
+from mantid.api import mtd, ITableWorkspace
+from mantid.simpleapi import CreateSampleWorkspace, EditInstrumentGeometry, EnggFitPeaks
 
 
 class EnggFitPeaksTest(unittest.TestCase):
@@ -17,7 +17,7 @@ class EnggFitPeaksTest(unittest.TestCase):
 
         ws_name = "out_ws"
         peak = "name=BackToBackExponential, I=5000,A=1, B=1., X0=10000, S=150"
-        sws = CreateSampleWorkspace(
+        CreateSampleWorkspace(
             Function="User Defined",
             UserDefinedFunction=peak,
             NumBanks=1,

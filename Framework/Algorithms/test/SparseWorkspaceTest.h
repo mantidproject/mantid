@@ -30,7 +30,7 @@ class SparseWorkspaceWrapper : public SparseWorkspace {
 public:
   SparseWorkspaceWrapper(const Mantid::API::MatrixWorkspace &modelWS, const size_t wavelengthPoints, const size_t rows,
                          const size_t columns)
-      : SparseWorkspace(modelWS, wavelengthPoints, rows, columns){};
+      : SparseWorkspace(modelWS, wavelengthPoints, rows, columns) {};
   static std::array<double, 4> inverseDistanceWeights(const std::array<double, 4> &distances) {
     return SparseWorkspace::inverseDistanceWeights(distances);
   };

@@ -20,9 +20,9 @@ class WorkspaceUnaryOpsTest(unittest.TestCase):
         mdws_ads = CreateMDHistoWorkspace(
             SignalInput=[0], ErrorInput=[0], Dimensionality=1, Extents=[0, 1], NumberOfBins=1, Names=["a"], Units=["TOF"], StoreInADS=True
         )
-        result1 = ~mdws
+        result1 = ~mdws  # noqa: F841
         self.assertTrue(mtd.doesExist("result1"))
-        result2 = ~mdws_ads
+        result2 = ~mdws_ads  # noqa: F841
         self.assertTrue(mtd.doesExist("result2"))
 
 

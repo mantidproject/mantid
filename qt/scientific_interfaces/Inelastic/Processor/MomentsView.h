@@ -8,6 +8,7 @@
 
 #include "DllConfig.h"
 #include "IMomentsView.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleEditorFactory.h"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/QtTreePropertyBrowser"
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
@@ -39,9 +40,9 @@ public:
   void setLoadHistory(bool doLoadHistory) override;
 
   /// Function to set the range limits of the plot
-  void setPlotPropertyRange(const QPair<double, double> &bounds) override;
+  void setPlotPropertyRange(const std::pair<double, double> &bounds) override;
   /// Function to set the range selector on the mini plot
-  void setRangeSelector(const QPair<double, double> &bounds) override;
+  void setRangeSelector(const std::pair<double, double> &bounds) override;
   /// Sets the min of the range selector if it is less than the max
   void setRangeSelectorMin(double newValue) override;
   /// Sets the max of the range selector if it is more than the min
@@ -49,7 +50,7 @@ public:
   void setSaveResultEnabled(bool enable) override;
   void plotNewData(std::string const &filename) override;
   void replot() override;
-  void plotOutput(std::string const &outputWorkspace) override;
+  void plotOutput(Mantid::API::MatrixWorkspace_sptr outputWorkspace) override;
   void showMessageBox(const std::string &message) const override;
 
 private slots:

@@ -10,12 +10,12 @@ Unit test for Vesuvio reduction
 Assumes that mantid can be imported and the data paths
 are configured to find the Vesuvio data
 """
+
 import unittest
 import numpy as np
 import sys
 from mantid.api import AlgorithmManager
 import vesuvio.testing as testing
-import vesuvio.commands as vesuvio
 
 
 class VesuvioTOFFitTest(unittest.TestCase):

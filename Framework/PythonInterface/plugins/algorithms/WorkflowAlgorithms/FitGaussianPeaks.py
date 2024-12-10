@@ -261,7 +261,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         y_fit = y_fit[np.nonzero(y_data)]
         y_data = y_data[np.nonzero(y_data)]
         if len(y_fit) < 1:
-            return -np.Inf
+            return -np.inf
         y_log = np.log(np.abs(y_fit))
         return np.sum(-y_fit + y_data * y_log)
 

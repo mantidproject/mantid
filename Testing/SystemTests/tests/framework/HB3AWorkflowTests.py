@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,too-few-public-methods
+# ruff: noqa: E741  # Ambiguous variable name
 import numpy as np
 import systemtesting
 from mantid.simpleapi import (

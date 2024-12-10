@@ -6,10 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.kernel import *
-from mantid.api import *
-from mantid import config
-from mantid.simpleapi import *
+from mantid.api import mtd
+from mantid.kernel import config
+from mantid.simpleapi import DeleteWorkspace
 from testhelpers import run_algorithm
 
 
@@ -23,8 +22,6 @@ class RetrieveRunInfoTest(unittest.TestCase):
 
         # Only set up once.
         if not self.class_has_been_set_up:
-            class_has_been_set_up = True
-
             # Create a workspace that is not a table workspace.
             pre_existing_matrix_workspace_alg = run_algorithm("CreateWorkspace", OutputWorkspace="matrix_ws", DataX="0", DataY="1")
             self.__pre_existing_matrix_workspace_name = pre_existing_matrix_workspace_alg.getPropertyValue("OutputWorkspace")

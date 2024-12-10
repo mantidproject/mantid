@@ -19,7 +19,7 @@
 
 namespace Mantid::Kernel {
 //
-#define fabs(x) std::fabs((x)*1.0)
+#define fabs(x) std::fabs((x) * 1.0)
 
 namespace {
 //-------------------------------------------------------------------------

@@ -28,7 +28,7 @@ implementations.
 */
 class ISearcher {
 public:
-  virtual ~ISearcher(){};
+  virtual ~ISearcher() {};
   virtual void subscribe(SearcherSubscriber *notifyee) = 0;
   virtual std::vector<SearchResult> search(SearchCriteria searchCriteria) = 0;
   virtual bool startSearchAsync(SearchCriteria searchCriteria) = 0;

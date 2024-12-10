@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+# ruff: noqa: E741  # Ambiguous variable name
 from mantid.api import DataProcessorAlgorithm, mtd, AlgorithmFactory, WorkspaceProperty, PropertyMode, ITableWorkspaceProperty
 from mantid.simpleapi import CalculateUMatrix, PredictPeaks, FilterPeaks, DeleteWorkspace, CreatePeaksWorkspace
 from mantid.kernel import Direction, FloatBoundedValidator, IntBoundedValidator, StringMandatoryValidator, StringListValidator, V3D

@@ -33,7 +33,7 @@ class ConfigObserverTest(unittest.TestCase):
                 onPropertyValueChangedMock(new, old)
 
         new_save_directory_value = "/dev/null"
-        observer = FakeConfigPropertyObserver("defaultsave.directory")
+        self.observer = FakeConfigPropertyObserver("defaultsave.directory")
         self.config.setString("defaultsave.directory", new_save_directory_value)
         self.config.setString("algorithms.retained", "60")
         onPropertyValueChangedMock.assert_called_once_with(new_save_directory_value, mock.ANY)

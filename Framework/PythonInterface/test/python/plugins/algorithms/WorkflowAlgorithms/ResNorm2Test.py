@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
+from mantid.simpleapi import Load, ResNorm
 
 
 class ResNorm2Test(unittest.TestCase):

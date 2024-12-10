@@ -5,8 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <algorithm>
+#include <cstdint>
 #include <iterator>
 #include <numeric>
+#include <stdexcept>
 #include <tuple>
 #include <utility>
 
@@ -124,6 +126,11 @@ std::vector<Chunker::LoadRange> Chunker::makeLoadRanges() const {
       break;
     firstWorkerSharingOurPartition += workersInPartition;
   }
+
+  if (partitionIndex >= m_partitioning.size()) {
+    throw std::runtime_error("No workers sharing the partition");
+  }
+
   const auto workersSharingOurPartition = m_partitioning[partitionIndex].first;
   const auto &ourBanks = m_partitioning[partitionIndex].second;
 

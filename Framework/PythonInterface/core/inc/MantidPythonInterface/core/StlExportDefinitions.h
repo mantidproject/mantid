@@ -8,6 +8,9 @@
 /**
     This file contains the export definitions for various stl containers.
 */
+#include "MantidKernel/WarningSuppressions.h"
+GNU_DIAG_OFF("maybe-uninitialized")
+
 #include <boost/python/class.hpp>
 #include <boost/python/init.hpp>
 #ifdef _MSC_VER
@@ -138,7 +141,7 @@ template <typename ElementType> struct std_set_exporter {
         .def("append", insert_element, (arg("self"), arg("element")))
         .def("insert", insert_set, (arg("self"), arg("set")))
         .def("extend", insert_set, (arg("self"), arg("set")))
-        .def("erase", (std::size_t(w_t::*)(e_t const &)) & w_t::erase, (arg("self"), arg("index")))
+        .def("erase", (std::size_t(w_t::*)(e_t const &))&w_t::erase, (arg("self"), arg("index")))
         .def("clear", &w_t::clear, arg("self"))
         .enable_pickling()
 

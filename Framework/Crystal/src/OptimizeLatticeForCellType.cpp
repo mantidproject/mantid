@@ -210,16 +210,14 @@ void OptimizeLatticeForCellType::exec() {
       savePks_alg->setPropertyValue("InputWorkspace", i_run->getName());
       savePks_alg->setProperty("Filename", outputdir + "ls" + i_run->getName() + ".integrate");
       savePks_alg->executeAsChildAlg();
-      g_log.notice() << "See output file: " << outputdir + "ls" + i_run->getName() + ".integrate"
-                     << "\n";
+      g_log.notice() << "See output file: " << outputdir + "ls" + i_run->getName() + ".integrate" << "\n";
       // Save UB
       auto saveUB_alg = createChildAlgorithm("SaveIsawUB");
       saveUB_alg->setPropertyValue("InputWorkspace", i_run->getName());
       saveUB_alg->setProperty("Filename", outputdir + "ls" + i_run->getName() + ".mat");
       saveUB_alg->executeAsChildAlg();
       // Show the names of files written
-      g_log.notice() << "See output file: " << outputdir + "ls" + i_run->getName() + ".mat"
-                     << "\n";
+      g_log.notice() << "See output file: " << outputdir + "ls" + i_run->getName() + ".mat" << "\n";
     }
   }
 }

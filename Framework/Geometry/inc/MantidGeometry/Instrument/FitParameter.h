@@ -26,7 +26,7 @@ in the parameter map of the workspace.
 class MANTID_GEOMETRY_DLL FitParameter {
 public:
   /// Constructor
-  FitParameter() : m_value(0.0), m_tie(""), m_function(""){};
+  FitParameter() : m_value(0.0), m_tie(""), m_function("") {};
 
   /// get paramter value
   double getValue(const double &at) const;

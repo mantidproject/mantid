@@ -18,7 +18,6 @@ class HFIRSANS2WavelengthTest(unittest.TestCase):
         mtd.clear()
 
     def testTOF(self):
-
         out = HFIRSANS2Wavelength(InputWorkspace="ws")
         self.assertTrue(out)
         self.assertEqual(out.blocksize(), 1)

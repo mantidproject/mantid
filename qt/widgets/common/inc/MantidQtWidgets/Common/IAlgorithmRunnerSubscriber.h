@@ -24,7 +24,7 @@ public:
     (void)lastAlgorithm;
     (void)error;
   };
-  virtual void notifyBatchCancelled(){};
+  virtual void notifyBatchCancelled() {};
   virtual void notifyAlgorithmStarted(IConfiguredAlgorithm_sptr &algorithm) { (void)algorithm; };
   virtual void notifyAlgorithmComplete(IConfiguredAlgorithm_sptr &algorithm) { (void)algorithm; };
   virtual void notifyAlgorithmError(IConfiguredAlgorithm_sptr &algorithm, std::string const &message) {

@@ -117,8 +117,8 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
                     groupname = str(groupnum)
                     ids = spectra[i, j : j + pixelsx, k : k + pixelsy].reshape(-1)
                     detids = []
-                    for l in ids:
-                        detids.append(__w.getDetector(int(l)).getID())
+                    for id in ids:
+                        detids.append(__w.getDetector(int(id)).getID())
 
                     detids = str(detids).replace("[", "").replace("]", "")
 

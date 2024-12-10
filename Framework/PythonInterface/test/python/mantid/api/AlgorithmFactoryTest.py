@@ -27,7 +27,6 @@ class AlgorithmFactoryTest(unittest.TestCase):
         self.assertNotEqual(AlgorithmFactory, None)
 
     def test_getDescriptors(self):
-
         descriptors = AlgorithmFactory.getDescriptors(True)
         self.assertGreater(len(descriptors), 0)
         d = descriptors[0]
@@ -37,7 +36,6 @@ class AlgorithmFactoryTest(unittest.TestCase):
         self.assertTrue(hasattr(d, "version"))
 
     def test_getDescriptorsWithAlias(self):
-
         descriptors = AlgorithmFactory.getDescriptors(True, True)
         result = [d for d in descriptors if (d.name == "Subtract")]
         self.assertEqual(1, len(result))

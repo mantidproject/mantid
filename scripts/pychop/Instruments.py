@@ -650,8 +650,10 @@ class Moderator(object):
         """Interpolates flux from a table of measured flux"""
         if not hasattr(self, "flux_interp"):
             raise AttributeError("This instrument does not have a table of measured flux")
-        wavelength = [min(max(l, self.fmn), self.fmx) for l in np.sqrt(E2L / np.array(Ei if hasattr(Ei, "__len__") else [Ei]))]
-        return self.flux_interp(wavelength[0])
+        wavelengths = [
+            min(max(wavelength, self.fmn), self.fmx) for wavelength in np.sqrt(E2L / np.array(Ei if hasattr(Ei, "__len__") else [Ei]))
+        ]
+        return self.flux_interp(wavelengths[0])
 
     @property
     def theta_m(self):
@@ -999,7 +1001,7 @@ class Instrument(object):
             try:
                 etrans = float(etrans)
             except TypeError:
-                etrans = np.asfarray(etrans)
+                etrans = np.asarray(etrans, dtype=float)
         res = obj.getResolution(etrans)
         if return_polynomial:
 

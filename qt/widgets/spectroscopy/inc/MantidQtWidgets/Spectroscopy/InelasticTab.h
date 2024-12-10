@@ -18,6 +18,8 @@
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 #include "MantidQtWidgets/Plotting/PreviewPlot.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputNamePresenter.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsPresenter.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/RunPresenter.h"
 
 #include <boost/none_t.hpp>
@@ -72,6 +74,15 @@ protected:
   /// Set the presenter for the run widget
   void setRunWidgetPresenter(std::unique_ptr<RunPresenter> presenter);
 
+  /// Set the presenter for the output name widget
+  void setOutputNamePresenter(IOutputNameView *view);
+
+  /// Set the presenter for the output plotting options
+  void setOutputPlotOptionsPresenter(
+      IOutputPlotOptionsView *view, PlotWidget const &plotType = PlotWidget::Spectra,
+      std::string const &fixedIndices = "",
+      std::optional<std::map<std::string, std::string>> const &availableActions = std::nullopt);
+
   /// Run the load algorithms
   bool loadFile(const std::string &filename, const std::string &outputName, const int specMin = -1,
                 const int specMax = -1, bool loadHistory = true);
@@ -82,11 +93,11 @@ protected:
 
   /// Function to set the range limits of the plot
   void setPlotPropertyRange(MantidWidgets::RangeSelector *rs, QtProperty *min, QtProperty *max,
-                            const QPair<double, double> &bounds);
+                            const std::pair<double, double> &bounds);
   /// Function to set the range selector on the mini plot
   void setRangeSelector(MantidWidgets::RangeSelector *rs, QtProperty *lower, QtProperty *upper,
-                        const QPair<double, double> &range,
-                        const std::optional<QPair<double, double>> &bounds = std::nullopt);
+                        const std::pair<double, double> &range,
+                        const std::optional<std::pair<double, double>> &bounds = std::nullopt);
   /// Sets the min of the range selector if it is less than the max
   void setRangeSelectorMin(QtProperty *minProperty, QtProperty *maxProperty,
                            MantidWidgets::RangeSelector *rangeSelector, double newValue);
@@ -102,6 +113,10 @@ protected:
   bool checkADSForPlotSaveWorkspace(const std::string &workspaceName, const bool plotting, const bool warn = true);
 
   std::unique_ptr<RunPresenter> m_runPresenter;
+
+  std::unique_ptr<OutputNamePresenter> m_outputNamePresenter;
+
+  std::unique_ptr<OutputPlotOptionsPresenter> m_plotOptionsPresenter;
 
   /// Parent QWidget (if applicable)
   QWidget *m_parentWidget;

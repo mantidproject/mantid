@@ -61,8 +61,8 @@ struct dataPositions {
         // the following values have to be identified from the file
         // itself
         err_start(0), n_cell_pix_start(0), min_max_start(0), pix_start(0),
-        mdImageSize(0){}; // the following values have to be identified from the
-                          // file itself
+        mdImageSize(0) {}; // the following values have to be identified from the
+                           // file itself
 
   // the helper methods
   /// Block 1:  Main_header: Parse SQW main data header

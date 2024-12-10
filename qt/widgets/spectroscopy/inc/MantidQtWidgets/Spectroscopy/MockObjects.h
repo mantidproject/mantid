@@ -12,6 +12,8 @@
 #include "MantidKernel/WarningSuppressions.h"
 
 #include "MantidQtWidgets/Spectroscopy/IDataModel.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputNameModel.h"
+#include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputNameView.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsModel.h"
 #include "MantidQtWidgets/Spectroscopy/OutputWidget/OutputPlotOptionsView.h"
 #include "MantidQtWidgets/Spectroscopy/RunWidget/IRunSubscriber.h"
@@ -220,6 +222,30 @@ public:
   MOCK_CONST_METHOD1(handleValidation, void(IUserInputValidator *validator));
   MOCK_METHOD0(handleRun, void());
   MOCK_CONST_METHOD0(getSubscriberName, const std::string());
+};
+
+class MockOutputNameView : public IOutputNameView {
+public:
+  virtual ~MockOutputNameView() = default;
+  MOCK_METHOD1(subscribePresenter, void(IOutputNamePresenter *presenter));
+  MOCK_CONST_METHOD0(enableLabelEditor, void());
+  MOCK_CONST_METHOD2(setWarningLabel, void(std::string const &text, std::string const &textColor));
+  MOCK_CONST_METHOD1(setOutputNameLabel, void(std::string const &text));
+  MOCK_CONST_METHOD0(getCurrentLabel, std::string());
+  MOCK_CONST_METHOD0(getCurrentOutputName, std::string());
+};
+
+class MockOutputNameModel : public IOutputNameModel {
+public:
+  virtual ~MockOutputNameModel() = default;
+  MOCK_METHOD1(findIndexToInsertLabel, int(std::string const &basename));
+  MOCK_METHOD1(setSuffixes, void(std::vector<std::string> const &suffixes));
+  MOCK_METHOD1(setOutputSuffix, void(std::string const &outputSuffix));
+  MOCK_METHOD1(setOutputBasename, void(std::string const &outputName));
+
+  MOCK_CONST_METHOD0(suffixes, std::vector<std::string>());
+  MOCK_CONST_METHOD0(outputSuffix, std::string());
+  MOCK_CONST_METHOD0(outputBasename, std::string());
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE

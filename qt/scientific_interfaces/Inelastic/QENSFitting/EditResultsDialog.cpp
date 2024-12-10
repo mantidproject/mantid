@@ -13,9 +13,9 @@ EditResultsDialog::EditResultsDialog(QWidget *parent) : QDialog(parent) {
   m_uiForm.wsInputWorkspace->setLowerBinLimit(2);
   m_uiForm.wsSingleFitWorkspace->setUpperBinLimit(1);
 
-  connect(m_uiForm.pbPasteInputName, SIGNAL(clicked()), this, SLOT(setOutputWorkspaceName()));
-  connect(m_uiForm.pbReplaceFitResult, SIGNAL(clicked()), this, SIGNAL(replaceSingleFitResult()));
-  connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SLOT(close()));
+  connect(m_uiForm.pbPasteInputName, &QPushButton::clicked, this, &EditResultsDialog::setOutputWorkspaceName);
+  connect(m_uiForm.pbReplaceFitResult, &QPushButton::clicked, this, &EditResultsDialog::replaceSingleFitResult);
+  connect(m_uiForm.pbClose, &QPushButton::clicked, this, &EditResultsDialog::close);
 }
 
 void EditResultsDialog::setWorkspaceSelectorSuffices(QStringList const &suffices) {

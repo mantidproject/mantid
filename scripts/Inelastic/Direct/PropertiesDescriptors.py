@@ -285,11 +285,7 @@ class IncidentEnergy(PropDescriptor):
 
     #
 
-    # Python 3 compatibility
     def __next__(self):
-        return self.next()
-
-    def next(self):
         if isinstance(self._incident_energy, list):
             self._cur_iter_en += 1
             if self._cur_iter_en >= len(self._incident_energy):
@@ -1689,10 +1685,10 @@ class RotationAngle(PropDescriptor):
         # pylint: disable=protected-access
         offset = self._mot_offset._offset
         if offset is None:
-            return np.NaN
+            return np.nan
         log_val = self._read_ws_logs(workspace)
         if log_val is None:
-            return np.NaN
+            return np.nan
         else:
             return offset + log_val
 

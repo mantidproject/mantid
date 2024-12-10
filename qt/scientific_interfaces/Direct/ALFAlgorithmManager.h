@@ -68,7 +68,7 @@ public:
   void fit(std::unique_ptr<Mantid::API::AlgorithmRuntimeProps> properties) override;
 
   void notifyBatchComplete(bool error) override { (void)error; };
-  void notifyBatchCancelled() override{};
+  void notifyBatchCancelled() override {};
   void notifyAlgorithmStarted(API::IConfiguredAlgorithm_sptr &algorithm) override { (void)algorithm; };
   void notifyAlgorithmComplete(API::IConfiguredAlgorithm_sptr &algorithm) override;
   void notifyAlgorithmError(API::IConfiguredAlgorithm_sptr &algorithm, std::string const &message) override;

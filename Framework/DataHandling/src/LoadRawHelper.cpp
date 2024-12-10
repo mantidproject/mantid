@@ -1029,7 +1029,7 @@ void LoadRawHelper::calculateWorkspacesizes(const std::vector<specnum_t> &monito
           normalwsSpecs = m_total_specs - monitorwsSpecs;
           g_log.debug() << "normalwsSpecs is  " << normalwsSpecs << "  monitorwsSpecs is " << monitorwsSpecs << '\n';
         }
-      }      // end if loop for m_interval
+      } // end if loop for m_interval
       else { // if only List true
         specnum_t mSize = 0;
         std::vector<specnum_t>::const_iterator itr;

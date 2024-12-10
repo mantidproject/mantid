@@ -5,7 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from unittest import mock
 from mantid.simpleapi import (
     IntegratePeaks1DProfile,
     CreatePeaksWorkspace,
@@ -13,7 +12,6 @@ from mantid.simpleapi import (
     Rebin,
     LoadEmptyInstrument,
     AnalysisDataService,
-    SortPeaksWorkspace,
     CloneWorkspace,
     BackToBackExponential,
     DeleteTableRows,

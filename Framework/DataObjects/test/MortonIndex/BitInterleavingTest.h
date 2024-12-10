@@ -43,7 +43,9 @@ inline void Deinterleave_4_32_128(const uint64_t msb, const uint64_t lsb, uint32
 
 /* Reverse wrapper taken from: https://stackoverflow.com/a/28139075 */
 
-template <typename T> struct reversion_wrapper { T &iterable; };
+template <typename T> struct reversion_wrapper {
+  T &iterable;
+};
 
 template <typename T> auto begin(reversion_wrapper<T> w) { return std::rbegin(w.iterable); }
 

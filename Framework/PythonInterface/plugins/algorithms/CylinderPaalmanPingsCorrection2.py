@@ -773,10 +773,10 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             Area_y = r * r_step * omega_ster * amu_scat[n_scat]
             sum_1 = 0.0
             sum_2 = 0.0
-            I = 1
+            i = 1
             Area_sum = 0.0
             for _ in range(1, number_omega + 1):
-                omega = I * omega_ster + omega_deg
+                omega = i * omega_ster + omega_deg
                 distance = r * math.sin(omega)
 
                 skip = True
@@ -790,11 +790,11 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                         LIS.append(LISN - LIST)
                     #
                     # CALCULATE DISTANCE SCATTERED NEUTRON PASSES THROUGH EACH ANNULUS
-                    O = omega + theta_deg
+                    omega_scattered = omega + theta_deg
                     LSS = []
                     for j in range(0, nan):
-                        LSST = self._distance(r, self._radii[j], O)
-                        LSSN = self._distance(r, self._radii[j + 1], O)
+                        LSST = self._distance(r, self._radii[j], omega_scattered)
+                        LSSN = self._distance(r, self._radii[j + 1], omega_scattered)
                         LSS.append(LSSN - LSST)
                     #
                     # CALCULATE ABSORPTION FOR PATH THROUGH ALL ANNULI,AND THROUGH INNER ANNULI
@@ -810,9 +810,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                     skip = False
 
                 if skip:
-                    I = number_omega - I + 2
+                    i = number_omega - i + 2
                 else:
-                    I += 1
+                    i += 1
         AAA += sum_1 * Area_y
         BBB += sum_2 * Area_y
         Area += Area_sum * Area_y

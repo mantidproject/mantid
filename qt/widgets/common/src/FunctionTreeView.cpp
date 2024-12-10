@@ -332,7 +332,9 @@ void FunctionTreeView::removeProperty(QtProperty *prop) {
 
   // remove references to the children
   auto children = prop->subProperties();
-  foreach (QtProperty *child, children) { removeProperty(child); }
+  foreach (QtProperty *child, children) {
+    removeProperty(child);
+  }
   m_properties.erase(p);
 
   if (isFunction(prop)) {
@@ -426,7 +428,9 @@ FunctionTreeView::AProperty FunctionTreeView::addParameterProperty(QtProperty *p
  */
 void FunctionTreeView::setFunction(QtProperty *prop, const Mantid::API::IFunction_sptr &fun) {
   auto children = prop->subProperties();
-  foreach (QtProperty *child, children) { removeProperty(child); }
+  foreach (QtProperty *child, children) {
+    removeProperty(child);
+  }
   // m_localParameterValues.clear();
   if (!m_multiDomainFunctionPrefix.empty())
     addMultiDomainIndexProperty(prop);
@@ -1398,7 +1402,9 @@ Mantid::API::IFunction_sptr FunctionTreeView::getFunction(QtProperty *prop, bool
       }
     }
     // remove failed ties from the browser
-    foreach (QtProperty *p, failedTies) { removeProperty(p); }
+    foreach (QtProperty *p, failedTies) {
+      removeProperty(p);
+    }
   }
 
   // add constraints

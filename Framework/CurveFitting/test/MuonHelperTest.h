@@ -10,7 +10,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>
-//#include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::CurveFitting::MuonHelper;
 // using namespace Mantid::API;

@@ -142,21 +142,20 @@ void IqtView::setup() {
   xRangeSelector->setBounds(-DBL_MAX, DBL_MAX);
 
   // signals / slots & validators
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this, SLOT(notifySampDataReady(const QString &)));
-  connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this, SLOT(notifyResDataReady(const QString &)));
-  connect(m_uiForm.spIterations, SIGNAL(valueChanged(int)), this, SLOT(notifyIterationsChanged(int)));
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
-  connect(m_uiForm.pbPlotPreview, SIGNAL(clicked()), this, SLOT(notifyPlotCurrentPreview()));
-  connect(m_uiForm.cbCalculateErrors, SIGNAL(stateChanged(int)), this, SLOT(notifyErrorsClicked(int)));
-  connect(m_uiForm.enEnforceNormalization, SIGNAL(stateChanged(int)), this,
-          SLOT(notifyEnableNormalizationClicked(int)));
-  connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(notifyPreviewSpectrumChanged(int)));
-  connect(m_uiForm.ckSymmetricEnergy, SIGNAL(stateChanged(int)), this, SLOT(notifyUpdateEnergyRange(int)));
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyRangeChanged(double, double)));
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyValueChanged(QtProperty *, double)));
+  connect(m_uiForm.dsInput, &DataSelector::dataReady, this, &IqtView::notifySampDataReady);
+  connect(m_uiForm.dsResolution, &DataSelector::dataReady, this, &IqtView::notifyResDataReady);
+  connect(m_uiForm.spIterations, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+          &IqtView::notifyIterationsChanged);
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &IqtView::notifySaveClicked);
+  connect(m_uiForm.pbPlotPreview, &QPushButton::clicked, this, &IqtView::notifyPlotCurrentPreview);
+  connect(m_uiForm.cbCalculateErrors, &QCheckBox::stateChanged, this, &IqtView::notifyErrorsClicked);
+  connect(m_uiForm.enEnforceNormalization, &QCheckBox::stateChanged, this, &IqtView::notifyEnableNormalizationClicked);
+  connect(m_uiForm.spPreviewSpec, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), this,
+          &IqtView::notifyPreviewSpectrumChanged);
+  connect(m_uiForm.ckSymmetricEnergy, &QCheckBox::stateChanged, this, &IqtView::notifyUpdateEnergyRange);
+  connect(xRangeSelector, &RangeSelector::selectionChanged, this, &IqtView::notifyRangeChanged);
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &IqtView::notifyUpdateRangeSelector);
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &IqtView::notifyValueChanged);
 
   m_uiForm.dsInput->isOptional(true);
   m_uiForm.dsResolution->isOptional(true);
@@ -212,9 +211,8 @@ void IqtView::notifyRangeChanged(double min, double max) {
 
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
-  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyRangeChanged(double, double)));
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
+  disconnect(xRangeSelector, &RangeSelector::selectionChanged, this, &IqtView::notifyRangeChanged);
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &IqtView::notifyUpdateRangeSelector);
 
   if (fabs(oldMin - min) > 0.0000001) {
     m_dblManager->setValue(m_properties["ELow"], min);
@@ -234,9 +232,8 @@ void IqtView::notifyRangeChanged(double min, double max) {
     }
   }
 
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyRangeChanged(double, double)));
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
+  connect(xRangeSelector, &RangeSelector::selectionChanged, this, &IqtView::notifyRangeChanged);
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &IqtView::notifyUpdateRangeSelector);
 
   updateDisplayedBinParameters();
 }
@@ -251,9 +248,8 @@ void IqtView::notifyRangeChanged(double min, double max) {
 void IqtView::notifyUpdateRangeSelector(QtProperty *prop, double val) {
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
-  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyRangeChanged(double, double)));
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
+  disconnect(xRangeSelector, &RangeSelector::selectionChanged, this, &IqtView::notifyRangeChanged);
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &IqtView::notifyUpdateRangeSelector);
 
   if (prop == m_properties["ELow"]) {
     setRangeSelectorMin(m_properties["ELow"], m_properties["EHigh"], xRangeSelector, val);
@@ -270,9 +266,8 @@ void IqtView::notifyUpdateRangeSelector(QtProperty *prop, double val) {
     }
   }
 
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyRangeChanged(double, double)));
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
+  connect(xRangeSelector, &RangeSelector::selectionChanged, this, &IqtView::notifyRangeChanged);
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &IqtView::notifyUpdateRangeSelector);
 
   updateDisplayedBinParameters();
 }
@@ -307,7 +302,7 @@ void IqtView::plotInput(MatrixWorkspace_sptr inputWS, int spectrum) {
   }
 }
 
-void IqtView::setRangeSelectorDefault(const MatrixWorkspace_sptr workspace, const QPair<double, double> &range) {
+void IqtView::setRangeSelectorDefault(const MatrixWorkspace_sptr workspace, const std::pair<double, double> &range) {
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
   try {
     double rounded_min(range.first);
@@ -410,16 +405,14 @@ void IqtView::updateDisplayedBinParameters() {
   std::tie(success, energyWidth, sampleBins, resolutionBins) =
       calculateBinParameters(sampleName, resolutionName, energyMin, energyMax, numBins);
   if (success) {
-    disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-               SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
+    disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &IqtView::notifyUpdateRangeSelector);
 
     // Update data in property editor
     m_dblManager->setValue(m_properties["EWidth"], energyWidth);
     m_dblManager->setValue(m_properties["ResolutionBins"], resolutionBins);
     m_dblManager->setValue(m_properties["SampleBins"], sampleBins);
 
-    connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-            SLOT(notifyUpdateRangeSelector(QtProperty *, double)));
+    connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &IqtView::notifyUpdateRangeSelector);
 
     // Warn for low number of resolution bins
     if (resolutionBins < 5)

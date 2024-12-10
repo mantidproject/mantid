@@ -422,7 +422,9 @@ void FileFinderWidget::saveSettings(const QString &group) {
  */
 void FileFinderWidget::setNumberOfEntries(const int number) {
   const QString total = number > 0 ? QString::number(number) : "?";
-  { m_uiForm.numEntries->setText("/" + total); }
+  {
+    m_uiForm.numEntries->setText("/" + total);
+  }
 }
 
 /** Inform the widget of a running instance of MonitorLiveData to be used in
@@ -553,7 +555,7 @@ const QString FileFinderWidget::findFilesGetSearchText(QString &searchText) {
       QStringList runNumbers = searchText.split(",", Qt::SkipEmptyParts);
       QStringList newRunNumbers;
 
-      for (auto &runNumber : runNumbers)
+      for (const auto &runNumber : runNumbers)
         newRunNumbers << m_defaultInstrumentName + runNumber.simplified();
 
       searchText = newRunNumbers.join(",");
@@ -657,7 +659,7 @@ QString FileFinderWidget::createFileFilter() {
       fileExts = m_fileExtensions;
     } else if (isForRunFiles()) {
       std::vector<std::string> exts = ConfigService::Instance().getFacility().extensions();
-      for (auto &ext : exts) {
+      for (const auto &ext : exts) {
         fileExts.append(QString::fromStdString(ext));
       }
     } else {

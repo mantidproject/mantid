@@ -14,10 +14,6 @@ SimulationTab::SimulationTab(QWidget *parent) : InelasticTab(parent) {}
 
 SimulationTab::~SimulationTab() = default;
 
-void SimulationTab::setOutputPlotOptionsPresenter(std::unique_ptr<OutputPlotOptionsPresenter> presenter) {
-  m_plotOptionsPresenter = std::move(presenter);
-}
-
 void SimulationTab::setOutputPlotOptionsWorkspaces(std::vector<std::string> const &outputWorkspaces) {
   m_plotOptionsPresenter->setWorkspaces(outputWorkspaces);
 }

@@ -40,10 +40,10 @@ class CrystalFieldTests(unittest.TestCase):
     def _do_test_eigensystem(self, en, wf, ham):
         n = len(en)
         wf_ctr = np.conj(wf.transpose())
-        I = np.tensordot(wf_ctr, wf, axes=1)
+        product = np.tensordot(wf_ctr, wf, axes=1)
         for i in range(n):
-            re = np.real(I[i, i])
-            im = np.imag(I[i, i])
+            re = np.real(product[i, i])
+            im = np.imag(product[i, i])
             self.assertAlmostEqual(re, 1.0, 10)
             self.assertAlmostEqual(im, 0.0, 10)
         tmp = np.tensordot(wf_ctr, ham, axes=1)

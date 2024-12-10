@@ -7,8 +7,8 @@
 """Tests the construction of the various workspace
 property types
 """
+
 import unittest
-import testhelpers
 from mantid.api import (
     WorkspaceProperty,
     WorkspaceGroupProperty,

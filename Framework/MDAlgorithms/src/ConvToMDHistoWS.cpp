@@ -142,7 +142,7 @@ size_t ConvToMDHistoWS::conversionChunk(size_t startSpectra) {
         nBufEvents = 0;
       }
     } // end spectra loop
-  }   // end detectors loop;
+  } // end detectors loop;
 
   if (nBufEvents > 0) {
     m_OutWSWrapper->addMDData(sig_err, expInfoIndex, goniometer_index, det_ids, allCoord, nBufEvents);

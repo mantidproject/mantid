@@ -22,7 +22,7 @@ Mantid::Kernel::Logger g_log("NumericAxis");
 
 class EqualWithinTolerance {
 public:
-  explicit EqualWithinTolerance(double tolerance) : m_tolerance(tolerance){};
+  explicit EqualWithinTolerance(double tolerance) : m_tolerance(tolerance) {};
   /**
    * This handles NaNs and infs differently than the FloatingPointComparison operations.
    * If this is not necessary, then this entire class may be replaced with
@@ -163,7 +163,7 @@ std::string NumericAxis::formatLabel(const double value) const {
     if (*it == '0') {
       it = numberLabel.erase(it);
     } else if (*it == '.') {
-      it = numberLabel.erase(it);
+      numberLabel.erase(it);
       break;
     } else {
       break;

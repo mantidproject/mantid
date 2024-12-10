@@ -210,7 +210,7 @@ Eigen::Quaterniond ComponentInfo::rotation(const std::pair<size_t, size_t> &inde
 /**
  * Extract the position of a component relative to it's parent
  *
- * The parent rotatation is unwound prior to establishing the offset. This means
+ * The parent rotation is unwound prior to establishing the offset. This means
  *that
  * recorded relative positions are independent of changes in rotation.
  *
@@ -314,7 +314,7 @@ void ComponentInfo::doScaleComponent(const std::pair<size_t, size_t> &index, con
     const size_t offsetIndex = compOffsetIndex(subIndex);
     Eigen::Vector3d oldPos = position({subIndex, timeIndex});
     Eigen::Vector3d newPos = scalingMatrix * oldPos + (Eigen::Matrix3d::Identity() - scalingMatrix) * compPos;
-    m_positions.access()[linearIndex({offsetIndex, timeIndex})] = newPos;
+    m_positions.access()[linearIndex({offsetIndex, timeIndex})] = std::move(newPos);
   }
 }
 

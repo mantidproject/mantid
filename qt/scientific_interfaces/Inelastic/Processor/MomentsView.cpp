@@ -34,16 +34,14 @@ MomentsView::MomentsView(QWidget *parent) : QWidget(parent), m_presenter() {
 
   MantidWidgets::RangeSelector *xRangeSelector = m_uiForm.ppRawPlot->addRangeSelector("XRange");
 
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SLOT(notifyDataReady(const QString &)));
-  connect(m_uiForm.ckScale, SIGNAL(stateChanged(int)), this, SLOT(notifyScaleChanged(int)));
-  connect(m_uiForm.spScale, SIGNAL(valueChanged(double)), this, SLOT(notifyScaleValueChanged(double)));
+  connect(m_uiForm.dsInput, &DataSelector::dataReady, this, &MomentsView::notifyDataReady);
+  connect(m_uiForm.ckScale, &QCheckBox::stateChanged, this, &MomentsView::notifyScaleChanged);
+  connect(m_uiForm.spScale, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), this,
+          &MomentsView::notifyScaleValueChanged);
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &MomentsView::notifySaveClicked);
 
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
-
-  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this, SLOT(notifyRangeChanged(double, double)));
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyValueChanged(QtProperty *, double)));
+  connect(xRangeSelector, &MantidWidgets::RangeSelector::selectionChanged, this, &MomentsView::notifyRangeChanged);
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &MomentsView::notifyValueChanged);
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsInput->isOptional(true);
@@ -140,17 +138,15 @@ void MomentsView::plotNewData(std::string const &filename) {
  *
  * @param bounds :: The upper and lower bounds to be set in the property browser
  */
-void MomentsView::setPlotPropertyRange(const QPair<double, double> &bounds) {
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(notifyValueChanged(QtProperty *, double)));
+void MomentsView::setPlotPropertyRange(const std::pair<double, double> &bounds) {
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &MomentsView::notifyValueChanged);
   m_dblManager->setMinimum(m_properties["EMin"], bounds.first);
   m_dblManager->setMaximum(m_properties["EMin"], bounds.second);
   m_dblManager->setMinimum(m_properties["EMax"], bounds.first);
   m_dblManager->setMaximum(m_properties["EMax"], bounds.second);
   auto xRangeSelector = getRangeSelector();
   xRangeSelector->setBounds(bounds.first, bounds.second);
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyValueChanged(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &MomentsView::notifyValueChanged);
 }
 
 /**
@@ -158,9 +154,8 @@ void MomentsView::setPlotPropertyRange(const QPair<double, double> &bounds) {
  *
  * @param bounds :: The upper and lower bounds to be set
  */
-void MomentsView::setRangeSelector(const QPair<double, double> &bounds) {
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(notifyValueChanged(QtProperty *, double)));
+void MomentsView::setRangeSelector(const std::pair<double, double> &bounds) {
+  disconnect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &MomentsView::notifyValueChanged);
 
   double deltaX = abs(bounds.second - bounds.first);
   double lowX = bounds.first + (0.1) * deltaX;
@@ -170,8 +165,7 @@ void MomentsView::setRangeSelector(const QPair<double, double> &bounds) {
   m_dblManager->setValue(m_properties["EMax"], highX);
 
   // connecting back so that the model is updated.
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyValueChanged(QtProperty *, double)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &MomentsView::notifyValueChanged);
 
   auto xRangeSelector = getRangeSelector();
   xRangeSelector->setRange(bounds.first, bounds.second);
@@ -209,12 +203,12 @@ void MomentsView::replot() { m_uiForm.ppRawPlot->replot(); }
 
 MantidWidgets::RangeSelector *MomentsView::getRangeSelector() { return m_uiForm.ppRawPlot->getRangeSelector("XRange"); }
 
-void MomentsView::plotOutput(std::string const &outputWorkspace) {
+void MomentsView::plotOutput(MatrixWorkspace_sptr outputWorkspace) {
   // Plot each spectrum
   m_uiForm.ppMomentsPreview->clear();
-  m_uiForm.ppMomentsPreview->addSpectrum("M0", QString(outputWorkspace.data()), 0, Qt::green);
-  m_uiForm.ppMomentsPreview->addSpectrum("M1", QString(outputWorkspace.data()), 1, Qt::black);
-  m_uiForm.ppMomentsPreview->addSpectrum("M2", QString(outputWorkspace.data()), 2, Qt::red);
+  m_uiForm.ppMomentsPreview->addSpectrum("M0", outputWorkspace, 0, Qt::green);
+  m_uiForm.ppMomentsPreview->addSpectrum("M1", outputWorkspace, 1, Qt::black);
+  m_uiForm.ppMomentsPreview->addSpectrum("M2", outputWorkspace, 2, Qt::red);
   m_uiForm.ppMomentsPreview->resizeX();
 
   // Enable plot and save buttons

@@ -1,8 +1,8 @@
 include(ExternalProject)
 
-set(_PyStoG_VERSION 4ad6d316bb94221e52b9a57fccbb65f4959972d3)
+set(_PyStoG_VERSION 7b5492d98817024f2b62867bc2a82fc23184b777) # v0.5.0
 set(_PyStoG_download_dir ${CMAKE_CURRENT_BINARY_DIR}/../PyStoG-download)
-set(_PyStoG_source_dir ${_PyStoG_download_dir}/src/PyStoG/pystog)
+set(_PyStoG_source_dir ${_PyStoG_download_dir}/src/PyStoG/src/pystog)
 set(_PyStoG_source_test_dir ${_PyStoG_download_dir}/src/PyStoG/tests)
 set(_PyStoG_scripts_dir ${CMAKE_CURRENT_BINARY_DIR}/pystog)
 set(_PyStoG_test_root_dir ${CMAKE_CURRENT_BINARY_DIR}/test/pystog)
@@ -58,7 +58,7 @@ foreach(_py_file ${_test_files_support})
 endforeach()
 
 # copy over the test data
-file(COPY ${_PyStoG_download_dir}/src/PyStoG/data/test_data DESTINATION ${_PyStoG_test_dir})
+file(COPY ${_PyStoG_source_test_dir}/test_data DESTINATION ${_PyStoG_test_dir})
 
 # register the tests
 set(PYUNITTEST_PYTHONPATH_EXTRA ${_PyStoG_test_root_dir})

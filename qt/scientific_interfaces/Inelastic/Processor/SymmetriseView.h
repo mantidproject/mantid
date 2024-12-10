@@ -53,7 +53,7 @@ public:
   void enableSave(bool save) override;
   void showMessageBox(std::string const &message) const override;
   void resetEDefaults(bool isPositive) override;
-  void resetEDefaults(bool isPositive, QPair<double, double> range) override;
+  void resetEDefaults(bool isPositive, std::pair<double, double> range) override;
 
 private slots:
   void notifyDoubleValueChanged(QtProperty *, double);
@@ -65,7 +65,7 @@ private slots:
   void notifyXrangeHighChanged(double value);
 
 private:
-  void updateHorizontalMarkers(QPair<double, double> yrange);
+  void updateHorizontalMarkers(std::pair<double, double> yrange);
 
   Ui::SymmetriseTab m_uiForm;
 

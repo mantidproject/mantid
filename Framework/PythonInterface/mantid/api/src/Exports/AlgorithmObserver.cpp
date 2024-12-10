@@ -4,6 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/api/Algorithms/AlgorithmObserverAdapter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 
@@ -13,6 +14,8 @@
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
+
+GNU_DIAG_OFF("dangling-reference")
 
 void observeFinish(AlgorithmObserver &self, const boost::python::object &alg) {
   const IAlgorithm_sptr &calg = boost::python::extract<IAlgorithm_sptr &>(alg);

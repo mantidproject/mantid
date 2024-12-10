@@ -2938,11 +2938,9 @@ class ConvertToQISIS(ReductionStep):
             else:
                 raise NotImplementedError("The type of Q reduction has not been set, e.g. 1D or 2D")
         except:
-            # when we are all up to Python 2.5 replace the duplicated code below with one finally:
-            reducer.deleteWorkspaces([wave_adj, pixel_adj, wavepixeladj])
             raise
-
-        reducer.deleteWorkspaces([wave_adj, pixel_adj, wavepixeladj])
+        finally:
+            reducer.deleteWorkspaces([wave_adj, pixel_adj, wavepixeladj])
 
     def _get_q_resolution_workspace(self, det_bank_workspace):
         """
@@ -4238,24 +4236,6 @@ class StripEndNans(ReductionStep):
     def __init__(self):
         super(StripEndNans, self).__init__()
 
-    def _isNan(self, val):
-        """
-        Can replaced by isNaN in Python 2.6
-        @param val: float to check
-        """
-        if val != val:
-            return True
-        else:
-            return False
-
-    def _isInf(self, val):
-        """
-        Check if the value is inf or not
-        @param val: float to check
-        @returns true if value is inf
-        """
-        return math.isinf(val)
-
     def execute(self, reducer, workspace):
         """
         Trips leading and trailing Nan values from workspace
@@ -4272,14 +4252,14 @@ class StripEndNans(ReductionStep):
         # Find the first non-zero value
         start = 0
         for i in range(0, length):
-            if not self._isNan(y_vals[i]) and not self._isInf(y_vals[i]):
+            if not math.isnan(y_vals[i]) and not math.isinf(y_vals[i]):
                 start = i
                 break
         # Now find the last non-zero value
         stop = 0
         length -= 1
         for j in range(length, 0, -1):
-            if not self._isNan(y_vals[j]) and not self._isInf(y_vals[j]):
+            if not math.isnan(y_vals[j]) and not math.isinf(y_vals[j]):
                 stop = j
                 break
         # Find the appropriate X values and call CropWorkspace

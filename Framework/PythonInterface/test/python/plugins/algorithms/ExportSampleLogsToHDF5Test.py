@@ -10,13 +10,18 @@ import os
 import tempfile
 import unittest
 
-from mantid.kernel import *
+from mantid.kernel import (
+    BoolTimeSeriesProperty,
+    FloatTimeSeriesProperty,
+    Int32TimeSeriesProperty,
+    PropertyFactory,
+    StringTimeSeriesProperty,
+)
 import mantid.simpleapi as mantid
 from testhelpers import run_algorithm
 
 
 class ExportSampleLogsToHDF5Test(unittest.TestCase):
-
     ALG_NAME = "ExportSampleLogsToHDF5"
     TEST_WS_NAME = "SampleWorkspace"
     TEMP_FILE_NAME = os.path.join(tempfile.gettempdir(), "ExportSampleLogsToHDF5Test.hdf5")

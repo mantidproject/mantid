@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from mantid.api import mtd, ITableWorkspace, MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import CreateSampleWorkspace, MSDFit
-from mantid.api import *
 
 
 class MSDFitTest(unittest.TestCase):

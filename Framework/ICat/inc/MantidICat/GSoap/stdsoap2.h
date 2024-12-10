@@ -858,7 +858,7 @@ extern "C" {
 #endif
 #endif
 
-#define SOAP_INVALID_SOCKET ((SOAP_SOCKET)-1)
+#define SOAP_INVALID_SOCKET ((SOAP_SOCKET) - 1)
 #define soap_valid_socket(n) ((n) != SOAP_INVALID_SOCKET)
 
 #define SOAP_SHUT_WR 1
@@ -1694,9 +1694,7 @@ public:
   struct soap_multipart *content;
   bool operator==(const soap_multipart_iterator &iter) const { return (bool)(content == iter.content); }
   bool operator!=(const soap_multipart_iterator &iter) const { return (bool)(content != iter.content); }
-  struct soap_multipart &operator*() const {
-    return *content;
-  }
+  struct soap_multipart &operator*() const { return *content; }
   soap_multipart_iterator &operator++() {
     content = soap_next_multipart(content);
     return *this;
@@ -2038,8 +2036,8 @@ struct SOAP_STD_API soap {
   std::ostream *os; /* stream to send */
   std::istream *is; /* stream to receive */
 #else
-  void *os;     /* preserve struct size */
-  void *is;     /* preserve struct size */
+  void *os; /* preserve struct size */
+  void *is; /* preserve struct size */
 #endif
 #ifndef UNDER_CE
   int sendfd; /* WinCE FD to send */
@@ -2181,7 +2179,7 @@ struct SOAP_STD_API soap {
 #ifdef WIN32
   _locale_t c_locale; /* set to C locale by default */
 #else
-  locale_t c_locale;       /* set to C locale by default */
+  locale_t c_locale; /* set to C locale by default */
 #endif
 #else
   void *c_locale;

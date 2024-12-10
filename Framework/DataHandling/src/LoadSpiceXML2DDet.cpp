@@ -729,8 +729,8 @@ LoadSpiceXML2DDet::xmlCreateMatrixWorkspaceUnknowGeometry(const std::vector<Spic
         } else
           str_log_map.emplace(nodename, nodevalue);
       } // END-IF-ELSE (node value type)
-    }   // END-IF-ELSE (detector-node or log node)
-  }     // END-FOR (xml nodes)
+    } // END-IF-ELSE (detector-node or log node)
+  } // END-FOR (xml nodes)
 
   if (outws) {
     // Add the property to output workspace

@@ -9,7 +9,6 @@
 from mantid.utils.nomad.diagnostics import CollimationLevel, InstrumentComponentLevel, _NOMADMedianDetectorTest
 
 # third-party imports
-import numpy
 import numpy as np
 from numpy.testing import assert_allclose
 
@@ -287,8 +286,9 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
           full_col: [1, 8, 16, 25, 27, 28, 29]
           half_col: [30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 45, 46]
 
-        # Indeces of eight-packs in use.
-        eight_packs: [3,7,8,9,10,11,19,20,26,28,30,34,38,39,40,41,44,45,46,47,48,49,50,54,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,89,90,93,94,95]
+        # Indices of eight-packs in use.
+        eight_packs: [3,7,8,9,10,11,19,20,26,28,30,34,38,39,40,41,44,45,46,47,48,49,50,54,57,58,59,60,
+                      61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,89,90,93,94,95]
 
         bank:
           #
@@ -434,12 +434,12 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         levels = tester.tube_collevel  # shape = (TUBE_COUNT,)
         assert len(levels) == tester.TUBE_COUNT
         first1, last1 = tester.TUBES_IN_EIGHTPACK * 77, tester.TUBES_IN_EIGHTPACK * 78
-        assert np.all(levels[:first1]) == CollimationLevel.Empty
-        assert np.all(levels[first1:last1]) == CollimationLevel.Half
+        assert np.all(levels[:first1] == CollimationLevel.Empty)
+        assert np.all(levels[first1:last1] == CollimationLevel.Half)
         first2, last2 = tester.TUBES_IN_EIGHTPACK * 95, tester.TUBES_IN_EIGHTPACK * 96
-        assert np.all(levels[last1:first2]) == CollimationLevel.Empty
-        assert np.all(levels[first2:last2]) == CollimationLevel.Full
-        assert np.all(levels[last2:]) == CollimationLevel.Empty
+        assert np.all(levels[last1:first2] == CollimationLevel.Empty)
+        assert np.all(levels[first2:last2] == CollimationLevel.Full)
+        assert np.all(levels[last2:] == CollimationLevel.Empty)
 
     def test_panel_median(self):
         tester = self.tester1

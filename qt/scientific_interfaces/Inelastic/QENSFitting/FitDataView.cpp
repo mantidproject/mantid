@@ -41,10 +41,10 @@ FitDataView::FitDataView(const QStringList &headers, QWidget *parent)
 
   setHorizontalHeaders(headers);
 
-  connect(m_uiForm->pbAdd, SIGNAL(clicked()), this, SLOT(showAddWorkspaceDialog()));
-  connect(m_uiForm->pbRemove, SIGNAL(clicked()), this, SLOT(notifyRemoveClicked()));
-  connect(m_uiForm->pbUnify, SIGNAL(clicked()), this, SLOT(notifyUnifyClicked()));
-  connect(m_uiForm->tbFitData, SIGNAL(cellChanged(int, int)), this, SLOT(notifyCellChanged(int, int)));
+  connect(m_uiForm->pbAdd, &QPushButton::clicked, this, &FitDataView::showAddWorkspaceDialog);
+  connect(m_uiForm->pbRemove, &QPushButton::clicked, this, &FitDataView::notifyRemoveClicked);
+  connect(m_uiForm->pbUnify, &QPushButton::clicked, this, &FitDataView::notifyUnifyClicked);
+  connect(m_uiForm->tbFitData, &QTableWidget::cellChanged, this, &FitDataView::notifyCellChanged);
 }
 
 void FitDataView::subscribePresenter(IFitDataPresenter *presenter) { m_presenter = presenter; }
@@ -140,8 +140,7 @@ QModelIndexList FitDataView::getSelectedIndexes() const {
 
 void FitDataView::showAddWorkspaceDialog() {
   auto dialog = new MantidWidgets::AddWorkspaceDialog(parentWidget());
-  connect(dialog, SIGNAL(addData(MantidWidgets::IAddWorkspaceDialog *)), this,
-          SLOT(notifyAddData(MantidWidgets::IAddWorkspaceDialog *)));
+  connect(dialog, &AddWorkspaceDialog::addData, this, &FitDataView::notifyAddData);
 
   auto tabName = m_presenter->tabName();
   dialog->setAttribute(Qt::WA_DeleteOnClose);

@@ -9,6 +9,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadInstrumentFromNexus.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/Component.h"

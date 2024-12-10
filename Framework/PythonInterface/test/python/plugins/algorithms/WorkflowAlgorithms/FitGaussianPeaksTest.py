@@ -7,8 +7,8 @@
 import numpy as np
 import unittest
 
+from mantid.api import mtd
 from mantid.simpleapi import CreateEmptyTableWorkspace, CreateWorkspace, DeleteWorkspace, FitGaussianPeaks
-from mantid.api import *
 from unittest import mock
 
 import plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks as _FitGaussianPeaks
@@ -172,7 +172,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
 
     def test_parse_fit_table_marks_peaks_for_refitting_if_error_larger_than_value(self):
         peaks = [(35.2, 0.4), (25.03, 0.1), (10.03, 0.05)]
-        peaks += [(20.003, 40.22), (75.15, 0.2), (5.2, np.NaN)]
+        peaks += [(20.003, 40.22), (75.15, 0.2), (5.2, np.nan)]
         fit_table = self.simulate_fit_parameter_output(peaks, 100.034)
         data_table = CreateEmptyTableWorkspace()
 

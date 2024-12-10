@@ -55,7 +55,7 @@ public:
         "Loading double presision events blocks is not supported at the "
         "moment");
   }
-  void flushData() const override{};
+  void flushData() const override {};
   void closeFile() override { m_isOpened = false; }
 
   ~BoxControllerDummyIO() override;

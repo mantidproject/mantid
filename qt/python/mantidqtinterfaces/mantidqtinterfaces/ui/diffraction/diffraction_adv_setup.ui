@@ -1199,6 +1199,11 @@
                 <string>PAC10</string>
                </property>
               </item>
+              <item>
+               <property name="text">
+                <string>PowderCell</string>
+               </property>
+              </item>
              </widget>
             </item>
             <item row="1" column="4">

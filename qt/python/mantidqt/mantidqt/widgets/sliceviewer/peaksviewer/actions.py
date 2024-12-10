@@ -12,21 +12,25 @@ from qtpy import QtWidgets
 from mantidqt.utils.qt import load_ui
 
 # standard
-from typing import Optional
+from typing import Annotated, Optional, TypeAlias
+
+# Forward declarations
+PeaksViewerCollectionPresenter: TypeAlias = Annotated[type, "PeaksViewerCollectionPresenter"]
+PeaksViewerCollectionView: TypeAlias = Annotated[type, "PeaksViewerCollectionView"]
 
 
 class PeakActionsView(QtWidgets.QWidget):
-    def __init__(self, parent: Optional["PeaksViewerCollectionView"] = None):
+    def __init__(self, parent: Optional[PeaksViewerCollectionView] = None):
         super(PeakActionsView, self).__init__(parent=parent)
-        self._presenter: "PeaksViewerCollectionPresenter" = None
+        self._presenter: PeaksViewerCollectionPresenter = None
         self.ui = None
         self._setup_ui()
 
     @property
-    def presenter(self) -> "PeaksViewerCollectionPresenter":
+    def presenter(self) -> PeaksViewerCollectionPresenter:
         return self._presenter
 
-    def subscribe(self, presenter: "PeaksViewerCollectionPresenter") -> None:
+    def subscribe(self, presenter: PeaksViewerCollectionPresenter) -> None:
         r"""
         @brief Subscribe a presenter to the viever
         @details The presenter must have method 'response_function' able to handle the event

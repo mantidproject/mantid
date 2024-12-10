@@ -203,9 +203,9 @@ void SaveNXSPE::exec() {
     nxFile.makeGroup("fermi", "NXfermi_chopper", true);
     nxFile.writeData("energy", efixed);
     nxFile.closeGroup(); // NXfermi_chopper
-  }                      // TODO: Do not know what indirect people want for their instrument,
-                         // but they certainly do not have Fermi chopper.
-                         // This is for them to decide what(if) they want here in a future.
+  } // TODO: Do not know what indirect people want for their instrument,
+    // but they certainly do not have Fermi chopper.
+    // This is for them to decide what(if) they want here in a future.
 
   nxFile.closeGroup(); // NXinstrument
 

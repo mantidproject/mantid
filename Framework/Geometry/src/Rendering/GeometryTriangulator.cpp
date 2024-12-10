@@ -113,8 +113,7 @@ void GeometryTriangulator::triangulate() {
   m_isTriangulated = true;
 }
 
-void GeometryTriangulator::generateMesh() { /* Placeholder function to replace MeshGeometryGenerator::Generate()*/
-}
+void GeometryTriangulator::generateMesh() { /* Placeholder function to replace MeshGeometryGenerator::Generate()*/ }
 
 #ifdef ENABLE_OPENCASCADE
 bool GeometryTriangulator::hasOCSurface() const { return m_objSurface != nullptr; }

@@ -57,7 +57,7 @@ BOOST_PYTHON_MODULE(_WorkspaceCreationHelper) {
 
   // Function pointers to disambiguate the calls
   using Signature1_2D = Workspace2D_sptr (*)(int, int, bool, bool, bool, const std::string &, bool);
-  using Signature2_2D = Workspace2D_sptr (*)(int, int, int);
+  using Signature2_2D = Workspace2D_sptr (*)(int, int, int, const std::string &);
   using Signature3_2D = Workspace2D_sptr (*)(int, int, int, int);
 
   def("create2DWorkspaceWithFullInstrument", reinterpret_cast<Signature1_2D>(&create2DWorkspaceWithFullInstrument),

@@ -40,6 +40,7 @@
 #include <boost/regex.hpp>
 #include <nexus/NeXusException.hpp>
 
+#include <algorithm>
 #include <map>
 #include <memory>
 #include <string>
@@ -373,29 +374,31 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(NXRoot &root
 void LoadNexusProcessed::execLoader() {
 
   API::Workspace_sptr tempWS;
-  int nWorkspaceEntries = 0;
+  size_t nWorkspaceEntries = 0;
+
+  // Check for an entry number property
+  int entryNumber = getProperty("EntryNumber");
+  Property const *const entryNumberProperty = this->getProperty("EntryNumber");
+  bool bDefaultEntryNumber = entryNumberProperty->isDefault();
+
   // Start scoped block
   {
     progress(0, "Opening file...");
 
-    // Throws an approriate exception if there is a problem with file access
+    // Throws an appropriate exception if there is a problem with file access
     const std::string filename = getPropertyValue("Filename");
     NXRoot root(filename);
 
     // "Open" the same file but with the C++ interface
     m_nexusFile = std::make_unique<::NeXus::File>(root.m_fileID);
 
-    // Find out how many first level entries there are
-    // Cast down to int as another property later on is an int
-    nWorkspaceEntries = static_cast<int>((root.groups().size()));
+    // Find out how many NXentry groups there are in the file.
+    nWorkspaceEntries = std::count_if(root.groups().cbegin(), root.groups().cend(),
+                                      [](const auto &g) { return g.nxclass == "NXentry"; });
 
-    // Check for an entry number property
-    int entrynumber = getProperty("EntryNumber");
-    Property const *const entryNumberProperty = this->getProperty("EntryNumber");
-    bool bDefaultEntryNumber = entryNumberProperty->isDefault();
-
-    if (!bDefaultEntryNumber && entrynumber > nWorkspaceEntries) {
-      g_log.error() << "Invalid entry number specified. File only contains " << nWorkspaceEntries << " entries.\n";
+    if (!bDefaultEntryNumber && static_cast<size_t>(entryNumber) > nWorkspaceEntries) {
+      g_log.error() << "Invalid entry number: " << entryNumber
+                    << " specified. File only contains: " << nWorkspaceEntries << " entries.\n";
       throw std::invalid_argument("Invalid entry number specified.");
     }
 
@@ -404,9 +407,9 @@ void LoadNexusProcessed::execLoader() {
     std::ostringstream os;
     if (bDefaultEntryNumber) {
       // Set the entry number to 1 if not provided.
-      entrynumber = 1;
+      entryNumber = 1;
     }
-    os << basename << entrynumber;
+    os << basename << entryNumber;
     const std::string targetEntryName = os.str();
 
     // Take the first real workspace obtainable. We need it even if loading
@@ -421,7 +424,7 @@ void LoadNexusProcessed::execLoader() {
       // We already know that this is a group workspace. Is it a true
       // multiperiod workspace.
       const bool bFastMultiPeriod = this->getProperty("FastMultiPeriod");
-      const bool bIsMultiPeriod = isMultiPeriodFile(nWorkspaceEntries, tempWS, g_log);
+      const bool bIsMultiPeriod = isMultiPeriodFile(static_cast<int>(nWorkspaceEntries), tempWS, g_log);
       const Property *specListProp = this->getProperty("SpectrumList");
       m_list = !specListProp->isDefault();
 
@@ -433,7 +436,7 @@ void LoadNexusProcessed::execLoader() {
 
       // load names of each of the workspaces. Note that if we have duplicate
       // names then we don't select them
-      auto names = extractWorkspaceNames(root, static_cast<size_t>(nWorkspaceEntries));
+      auto names = extractWorkspaceNames(root, nWorkspaceEntries);
 
       // remove existing workspace and replace with the one being loaded
       bool wsExists = AnalysisDataService::Instance().doesExist(base_name);
@@ -465,7 +468,7 @@ void LoadNexusProcessed::execLoader() {
         g_log.information("Individual group loading");
       }
 
-      for (int p = 1; p <= nWorkspaceEntries; ++p) {
+      for (size_t p = 1; p <= nWorkspaceEntries; ++p) {
         const auto indexStr = std::to_string(p);
 
         // decide what the workspace should be called
@@ -501,12 +504,28 @@ void LoadNexusProcessed::execLoader() {
     }
 
     root.close();
-  } // All file resources should be scoped to here. All previous file handles
-  // must be cleared to release locks
-  loadNexusGeometry(*tempWS, nWorkspaceEntries, g_log, std::string(getProperty("Filename")));
+  }
+
+  // All file resources should be scoped to here. All previous file handles
+  //   must be cleared to release locks.
+
+  // NexusGeometry uses direct HDF5 access, and not the `NexusFileIO` methods.
+  // For this reason, a separate section is required to load the instrument[s] into the output workspace[s].
+
+  if (nWorkspaceEntries == 1 || !bDefaultEntryNumber)
+    loadNexusGeometry(*getValue<API::Workspace_sptr>("OutputWorkspace"), static_cast<size_t>(entryNumber), g_log,
+                      std::string(getProperty("Filename")));
+  else {
+    for (size_t nEntry = 1; nEntry <= static_cast<size_t>(nWorkspaceEntries); ++nEntry) {
+      std::ostringstream wsPropertyName;
+      wsPropertyName << "OutputWorkspace_" << nEntry;
+      loadNexusGeometry(*getValue<API::Workspace_sptr>(wsPropertyName.str()), nEntry, g_log,
+                        std::string(getProperty("Filename")));
+    }
+  }
 
   m_axis1vals.clear();
-} // namespace DataHandling
+}
 
 /**
  * Decides what to call a child of a group workspace.
@@ -913,13 +932,13 @@ void LoadNexusProcessed::loadV3DColumn(Mantid::NeXus::NXDouble &data, const API:
 
     const int rowCount = data.dim0();
 
-    // This might've been done already, but doing it twice should't do any harm
+    // This might've been done already, but doing it twice shouldn't do any harm
     tableWs->setRowCount(rowCount);
 
     data.load();
 
     for (int i = 0; i < rowCount; ++i) {
-      auto &cell = col[i];
+      auto &cell = col[i]; // cppcheck-suppress constVariableReference
       cell(data(i, 0), data(i, 1), data(i, 2));
     }
   }
@@ -1889,14 +1908,16 @@ API::Workspace_sptr LoadNexusProcessed::loadEntry(NXRoot &root, const std::strin
     progress(progressStart + 0.11 * progressRange, "Reading the parameter maps...");
     local_workspace->readParameterMap(parameterStr);
   } catch (std::exception &e) {
-    // TODO. For workspaces saved via SaveNexusESS, these warnings are not
-    // relevant. Unfortunately we need to close all file handles before we can
-    // attempt loading the new way see loadNexusGeometry function . A better
-    // solution should be found
-    g_log.warning("Error loading Instrument section of nxs file");
-    g_log.warning(e.what());
-    g_log.warning("Try running LoadInstrument Algorithm on the Workspace to "
-                  "update the geometry");
+    // For workspaces saved via SaveNexusESS, these warnings are not
+    // relevant. Such workspaces will contain an `NXinstrument` entry
+    // with the name of the instrument.
+    const auto &entries = getFileInfo()->getAllEntries();
+    if (version() < 2 || entries.find("NXinstrument") == entries.end()) {
+      g_log.warning("Error loading Instrument section of nxs file");
+      g_log.warning(e.what());
+      g_log.warning("Try running LoadInstrument Algorithm on the Workspace to "
+                    "update the geometry");
+    }
   }
 
   readSpectraToDetectorMapping(mtd_entry, *local_workspace);

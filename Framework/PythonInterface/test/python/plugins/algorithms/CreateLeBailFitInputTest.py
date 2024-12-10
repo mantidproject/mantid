@@ -5,12 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import numpy
-from mantid.kernel import *
-from mantid.api import *
 from testhelpers import run_algorithm
 from mantid.api import AnalysisDataService
-import os
 
 
 class CreateLeBailFitInputTest(unittest.TestCase):
@@ -34,16 +30,6 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         # Profile parameter workspace
         paramws = AnalysisDataService.retrieve("PG3_Bank2_Foo")
 
-        paramname0 = paramws.cell(0, 0)
-
-        if paramname0.lower() == "bank":
-            numrowgood = 29
-        else:
-            numrowgood = 28
-        print("Parameter name of first line = ", paramname0)
-
-        # self.assertEqual(numrowgood, paramws.rowCount())
-
         paramnames = []
         for i in range(paramws.rowCount()):
             paramname = paramws.cell(i, 0)
@@ -57,8 +43,6 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         # 4. Delete the test hkl file
         AnalysisDataService.remove("PG3_Bank2_Foo")
         AnalysisDataService.remove("LaB6_Peaks")
-
-        return
 
     def test_genHKLList(self):
         """Test to load a .hkl file"""
@@ -82,16 +66,6 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         # Profile parameter workspace
         paramws = AnalysisDataService.retrieve("PG3_Bank2_Foo2")
 
-        paramname0 = paramws.cell(0, 0)
-
-        if paramname0.lower() == "bank":
-            numrowgood = 28
-        else:
-            numrowgood = 27
-        # print "Parameter name of first line = ", paramname0
-
-        # self.assertEqual(numrowgood, paramws.rowCount())
-
         paramnames = []
         for i in range(paramws.rowCount()):
             paramname = paramws.cell(i, 0)
@@ -105,8 +79,6 @@ class CreateLeBailFitInputTest(unittest.TestCase):
         # 4. Delete the test hkl file
         AnalysisDataService.remove("PG3_Bank2_Foo2")
         AnalysisDataService.remove("Arb_Peaks")
-
-        return
 
 
 if __name__ == "__main__":

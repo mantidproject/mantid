@@ -20,8 +20,7 @@ namespace MantidQt::CustomInterfaces {
 MolDyn::MolDyn(QWidget *parent) : SimulationTab(parent) {
   m_uiForm.setupUi(parent);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_uiForm.runWidget));
-  setOutputPlotOptionsPresenter(
-      std::make_unique<OutputPlotOptionsPresenter>(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface, "0"));
+  setOutputPlotOptionsPresenter(m_uiForm.ipoPlotOptions, PlotWidget::SpectraSliceSurface, "0");
 
   connect(m_uiForm.ckCropEnergy, SIGNAL(toggled(bool)), m_uiForm.dspMaxEnergy, SLOT(setEnabled(bool)));
   connect(m_uiForm.ckResolution, SIGNAL(toggled(bool)), m_uiForm.dsResolution, SLOT(setEnabled(bool)));

@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.simpleapi import LoadNexusProcessed, IndirectCylinderAbsorption, DeleteWorkspace
-from mantid.api import *
 
 
 class IndirectCylinderAbsorption2Test(unittest.TestCase):

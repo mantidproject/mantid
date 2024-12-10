@@ -9,7 +9,6 @@ import mantid
 import mantid.api
 import mantid.simpleapi
 import mantid.kernel
-import numpy
 from mantid.simpleapi import GenerateGroupingSNSInelastic
 from testhelpers import run_algorithm
 import os
@@ -67,7 +66,7 @@ class GenerateGroupingSNSInelasticTest(unittest.TestCase):
         Catch an error to remind user to put a valid file in InstrumentDefinitionFile.
         """
 
-        with self.assertRaisesRegex(RuntimeError, "invalid") as cm:
+        with self.assertRaisesRegex(RuntimeError, "invalid"):
             GenerateGroupingSNSInelastic(
                 instrument="InstrumentDefinitionFile",
                 #  InstrumentDefinitionFile="",
@@ -80,9 +79,7 @@ class GenerateGroupingSNSInelasticTest(unittest.TestCase):
         Catch an error to remind user to put a valid file in InstrumentDefinitionFile.
         """
 
-        with self.assertRaisesRegex(
-            RuntimeError, "Select the instrument definition file from only one of ARCS, SEQUOIA, CNCS, HYSPEC"
-        ) as cm:
+        with self.assertRaisesRegex(RuntimeError, "Select the instrument definition file from only one of ARCS, SEQUOIA, CNCS, HYSPEC"):
             GenerateGroupingSNSInelastic(
                 instrument="InstrumentDefinitionFile",
                 InstrumentDefinitionFile=self.ALF_old_IDF,
@@ -90,7 +87,8 @@ class GenerateGroupingSNSInelasticTest(unittest.TestCase):
             )
 
     def test_Generate_Grouping_Files_from_InstrumentDefinitionFile(self):
-        """Test scenario: instrument == "InstrumentDefinitionFile" and InstrumentDefinitionFile is set to "SEQUOIA_Definition_20180513_20190403.xml".
+        """Test scenario: instrument == "InstrumentDefinitionFile" and InstrumentDefinitionFile
+        is set to"SEQUOIA_Definition_20180513_20190403.xml".
         Check the correct IDF file is generated and that the associated group number is 115712.
         """
 

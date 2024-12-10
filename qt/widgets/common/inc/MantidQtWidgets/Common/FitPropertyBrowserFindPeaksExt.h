@@ -40,7 +40,7 @@ public:
   virtual double getPeakCentre(const size_t peakIndex) const = 0;
   virtual double getPeakHeight(const size_t peakIndex) const = 0;
   virtual double getPeakWidth(const size_t peakIndex) const = 0;
-  virtual ~FindPeakStrategyGeneric(){};
+  virtual ~FindPeakStrategyGeneric() {};
 };
 
 template <typename T> class EXPORT_OPT_MANTIDQT_COMMON FindPeakStrategy : public FindPeakStrategyGeneric {

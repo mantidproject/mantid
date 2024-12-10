@@ -6,25 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <iomanip>
-#include <iostream>
-#include <sstream>
-#include <type_traits>
-#include <vector>
-#ifndef Q_MOC_RUN
-#include <boost/algorithm/string/trim.hpp>
-#include <memory>
-#endif
-#include "MantidKernel/EnumeratedStringProperty.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/NullValidator.h"
-#include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PropertyHelper.h"
 #include "MantidKernel/PropertyWithValueJSON.h"
-#include "MantidKernel/StringTokenizer.h"
-#include "MantidKernel/Strings.h"
 #include <json/value.h>
 
 namespace Mantid::Kernel {
@@ -33,9 +16,9 @@ namespace Mantid::Kernel {
 // Now the PropertyWithValue class itself
 //------------------------------------------------------------------------------------------------
 
-//######################################################//
-//    CONSTRUCTORS
-//######################################################//
+// ######################################################//
+//     CONSTRUCTORS
+// ######################################################//
 
 /** Constructor
  *  @param name :: The name to assign to the property
@@ -46,8 +29,7 @@ namespace Mantid::Kernel {
 template <class E, std::vector<std::string> const *const names>
 EnumeratedStringProperty<E, names>::EnumeratedStringProperty(std::string const &name, ENUMSTRING const &defaultValue,
                                                              Direction::Type const direction)
-    : Property(std::move(name), typeid(ENUMSTRING), direction), m_value(defaultValue),
-      m_initialValue(std::move(defaultValue)) {}
+    : Property(name, typeid(ENUMSTRING), direction), m_value(defaultValue), m_initialValue(std::move(defaultValue)) {}
 
 /** Copy Constructor
  *  @param right :: a copy
@@ -81,9 +63,9 @@ EnumeratedStringProperty<E, names>::operator=(EnumeratedStringProperty const &ri
   return *this;
 }
 
-//######################################################//
-//    GETTERS
-//######################################################//
+// ######################################################//
+//     GETTERS
+// ######################################################//
 
 /** Get the value of the property as a string
  *  @return The property's value as a string
@@ -188,17 +170,9 @@ std::vector<std::string> EnumeratedStringProperty<E, names>::allowedValues() con
   return *names;
 }
 
-/** Returns true, as multiple selection is allowed.
- *  @return true
- */
-template <class E, std::vector<std::string> const *const names>
-bool EnumeratedStringProperty<E, names>::isMultipleSelectionAllowed() {
-  return true;
-}
-
-//######################################################//
-//    SETTERS
-//######################################################//
+// ######################################################//
+//     SETTERS
+// ######################################################//
 
 /** Set the value of the property from a string representation.
  *  @param value :: The value to assign to the property
@@ -218,8 +192,16 @@ std::string EnumeratedStringProperty<E, names>::setValue(E const value) {
  */
 template <class E, std::vector<std::string> const *const names>
 std::string EnumeratedStringProperty<E, names>::setValue(std::string const &value) {
-  this->m_value = static_cast<EnumeratedString<E, names>>(value);
-  return "";
+  try {
+    this->m_value = static_cast<EnumeratedString<E, names>>(value);
+  } catch (std::runtime_error &exc) {
+    const std::string msg = exc.what();
+    if (msg.empty())
+      return "value \"" + value + "\" not in allowed list";
+    else
+      return msg;
+  }
+  return ""; // everything was fine
 }
 
 /** Set the value of the property from a string representation.
@@ -307,9 +289,9 @@ EnumeratedStringProperty<E, names>::operator=(EnumeratedString<E, names> const &
   return *this;
 }
 
-//######################################################//
-//    MUTATORS AND SUNDRY
-//######################################################//
+// ######################################################//
+//     MUTATORS AND SUNDRY
+// ######################################################//
 
 //--------------------------------------------------------------------------------------
 /** Add the value of another property
@@ -333,9 +315,9 @@ void EnumeratedStringProperty<E, names>::saveProperty(::NeXus::File * /*file*/) 
                               typeid(ENUMSTRING).name() + " not implemented.");
 }
 
-//######################################################//
-//    PRIVATE METHODS
-//######################################################//
+// ######################################################//
+//     PRIVATE METHODS
+// ######################################################//
 
 /**
  * Set the value of the property via a reference to another property.

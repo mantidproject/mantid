@@ -6,6 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "DllConfig.h"
+#include <MantidQtWidgets/Common/QtPropertyBrowser/qtpropertybrowser.h>
+#include <MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h>
+#include <MantidQtWidgets/Plotting/RangeSelector.h>
 #include <QString>
 #include <QStringList>
 #include <string>
@@ -43,9 +46,26 @@ MANTID_SPECTROSCOPY_DLL QStringList getContainerWSSuffixes(std::string const &in
 MANTID_SPECTROSCOPY_DLL QStringList getCorrectionsFBSuffixes(std::string const &interfaceName);
 MANTID_SPECTROSCOPY_DLL QStringList getCorrectionsWSSuffixes(std::string const &interfaceName);
 
-MANTID_SPECTROSCOPY_DLL QPair<double, double> convertTupleToQPair(std::tuple<double, double> const &doubleTuple);
 MANTID_SPECTROSCOPY_DLL std::pair<double, double> convertTupleToPair(std::tuple<double, double> const &doubleTuple);
 MANTID_SPECTROSCOPY_DLL QString makeQStringNumber(double value, int precision);
+
+/// Function to set the range limits of the plot
+MANTID_SPECTROSCOPY_DLL void setPlotPropertyRange(QtDoublePropertyManager *dblPropertyManager,
+                                                  MantidWidgets::RangeSelector *rs, QtProperty *min, QtProperty *max,
+                                                  const std::pair<double, double> &bounds);
+/// Function to set the range selector on the mini plot
+MANTID_SPECTROSCOPY_DLL void setRangeSelector(QtDoublePropertyManager *dblPropertyManager,
+                                              MantidWidgets::RangeSelector *rs, QtProperty *lower, QtProperty *upper,
+                                              const std::pair<double, double> &range,
+                                              const std::optional<std::pair<double, double>> &bounds = std::nullopt);
+/// Sets the min of the range selector if it is less than the max
+MANTID_SPECTROSCOPY_DLL void setRangeSelectorMin(QtDoublePropertyManager *dblPropertyManager, QtProperty *minProperty,
+                                                 QtProperty *maxProperty, MantidWidgets::RangeSelector *rangeSelector,
+                                                 double newValue);
+/// Sets the max of the range selector if it is more than the min
+MANTID_SPECTROSCOPY_DLL void setRangeSelectorMax(QtDoublePropertyManager *dblPropertyManager, QtProperty *minProperty,
+                                                 QtProperty *maxProperty, MantidWidgets::RangeSelector *rangeSelector,
+                                                 double newValue);
 
 } // namespace InterfaceUtils
 } // namespace CustomInterfaces

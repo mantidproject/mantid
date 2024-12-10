@@ -46,7 +46,7 @@ private:
   void init() override;
   void exec() override;
   void setInstrumentName(const NeXus::NXEntry &entry);
-  void initWorkSpace(NeXus::NXEntry &);
+  void initWorkSpace(const NeXus::NXEntry &);
   void loadDataIntoTheWorkSpace(NeXus::NXEntry &);
   /// Calculate error for y
   static double calculateError(double in) { return sqrt(in); }

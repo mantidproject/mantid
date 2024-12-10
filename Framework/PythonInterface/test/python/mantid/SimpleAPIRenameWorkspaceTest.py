@@ -5,8 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
-    Specifically tests the RenameWorkspace algorithm in the simple API
+Specifically tests the RenameWorkspace algorithm in the simple API
 """
+
 import unittest
 from mantid.api import mtd
 from mantid.simpleapi import CreateSampleWorkspace, RenameWorkspace
@@ -49,13 +50,13 @@ class SimpleAPIRenameWorkspaceTest(unittest.TestCase):
         self.assertFalse("name3_monitors" in mtd)
         self.assertTrue("name4_monitors" in mtd)
 
-        name5 = RenameWorkspace("name4")
+        RenameWorkspace("name4", "name5")
         self.assertFalse("name4" in mtd)
         self.assertTrue("name4_monitors" in mtd)
         self.assertTrue("name5" in mtd)
         self.assertFalse("name5_monitors" in mtd)
 
-        name6 = RenameWorkspace("name5", True)
+        RenameWorkspace("name5", "name6", True)
         self.assertFalse("name5" in mtd)
         self.assertFalse("name4_monitors" in mtd)
         self.assertTrue("name6" in mtd)
@@ -85,14 +86,14 @@ class SimpleAPIRenameWorkspaceTest(unittest.TestCase):
 
         # test trying to disable ADS
         try:
-            name10 = RenameWorkspace("name9", StoreInADS=False)
+            RenameWorkspace("name9", "name10", StoreInADS=False)
             self.fail("Disabling on ADS did not throw for RenameWorkspace")
         except KeyError:
             pass
 
         # test text value for disabling
         try:
-            name10 = RenameWorkspace("name9", StoreInADS="disable")
+            RenameWorkspace("name9", "name10", StoreInADS="disable")
             self.fail("Disabling on ADS did not throw for RenameWorkspace")
         except KeyError:
             pass

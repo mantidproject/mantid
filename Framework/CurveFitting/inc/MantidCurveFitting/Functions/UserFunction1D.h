@@ -57,7 +57,7 @@ the initial histogram and the difference
 class UserFunction1D : public Algorithms::Fit1D {
 public:
   /// Constructor
-  UserFunction1D() : m_x(0.0), m_x_set(false), m_parameters(100), m_nPars(0){};
+  UserFunction1D() : m_x(0.0), m_x_set(false), m_parameters(100), m_nPars(0) {};
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "UserFunction1D"; }
   /// Algorithm's version for identification overriding a virtual method
@@ -73,7 +73,7 @@ protected:
   // double function(const double* in, const double& x);
   void function(const double *in, double *out, const double *xValues, const size_t nData) override;
   void declareAdditionalProperties() override;
-  void declareParameters() override{};
+  void declareParameters() override {};
   void prepare() override;
   /// Derivatives of function with respect to parameters you are trying to fit
   void functionDeriv(const double *in, API::Jacobian *out, const double *xValues, const size_t nData) override;

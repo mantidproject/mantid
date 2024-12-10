@@ -72,6 +72,7 @@ elseif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
   add_definitions(-D_LIBCPP_DISABLE_AVAILABILITY)
   # Keep C++14 alignment behaviour while older macOS C++ ABI does not contain the required symbols. Minimum=macos 10.14
   add_compile_options(-fno-aligned-new)
+  add_compile_options(-fno-assume-unique-vtables)
 endif()
 
 # Add some options for debug build to help the Zoom profiler

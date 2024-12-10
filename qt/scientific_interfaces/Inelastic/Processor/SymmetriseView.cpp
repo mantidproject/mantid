@@ -119,19 +119,19 @@ SymmetriseView::SymmetriseView(QWidget *parent) : QWidget(parent), m_presenter()
 
   // SIGNAL/SLOT CONNECTIONS
   // Validate the E range when it is changed
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(notifyDoubleValueChanged(QtProperty *, double)));
-  connect(m_enumManager, SIGNAL(valueChanged(QtProperty *, int)), this,
-          SLOT(notifyReflectTypeChanged(QtProperty *, int)));
+  connect(m_dblManager, &QtDoublePropertyManager::valueChanged, this, &SymmetriseView::notifyDoubleValueChanged);
+  connect(m_enumManager, &QtEnumPropertyManager::valueChanged, this, &SymmetriseView::notifyReflectTypeChanged);
   // Plot miniplot when file has finished loading
-  connect(m_uiForm.dsInput, SIGNAL(dataReady(QString const &)), this, SLOT(notifyDataReady(QString const &)));
+  connect(m_uiForm.dsInput, &DataSelector::dataReady, this, &SymmetriseView::notifyDataReady);
   // Preview symmetrise
-  connect(m_uiForm.pbPreview, SIGNAL(clicked()), this, SLOT(notifyPreviewClicked()));
+  connect(m_uiForm.pbPreview, &QPushButton::clicked, this, &SymmetriseView::notifyPreviewClicked);
   // X range selectors
-  connect(rangeESelector, SIGNAL(minValueChanged(double)), this, SLOT(notifyXrangeLowChanged(double)));
-  connect(rangeESelector, SIGNAL(maxValueChanged(double)), this, SLOT(notifyXrangeHighChanged(double)));
+  connect(rangeESelector, &MantidWidgets::RangeSelector::minValueChanged, this,
+          &SymmetriseView::notifyXrangeLowChanged);
+  connect(rangeESelector, &MantidWidgets::RangeSelector::maxValueChanged, this,
+          &SymmetriseView::notifyXrangeHighChanged);
   // Handle running, plotting and saving
-  connect(m_uiForm.pbSave, SIGNAL(clicked()), this, SLOT(notifySaveClicked()));
+  connect(m_uiForm.pbSave, &QPushButton::clicked, this, &SymmetriseView::notifySaveClicked);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -152,7 +152,7 @@ void SymmetriseView::setDefaults() {
   m_enumManager->setValue(m_properties["ReflectType"], 0);
 
   // Set default x axis range
-  QPair<double, double> defaultRange(-1.0, 1.0);
+  std::pair<double, double> defaultRange(-1.0, 1.0);
   m_uiForm.ppRawPlot->setAxisRange(defaultRange, AxisID::XBottom);
   m_uiForm.ppPreviewPlot->setAxisRange(defaultRange, AxisID::XBottom);
 
@@ -220,7 +220,7 @@ void SymmetriseView::resetEDefaults(bool isPositive) {
  * @param range Active spectra range
  *
  */
-void SymmetriseView::resetEDefaults(bool isPositive, QPair<double, double> range) {
+void SymmetriseView::resetEDefaults(bool isPositive, std::pair<double, double> range) {
   auto rangeESelector = m_uiForm.ppRawPlot->getRangeSelector("rangeE");
 
   // Set Selector range boundaries
@@ -332,8 +332,8 @@ void SymmetriseView::updateMiniPlots() {
   m_uiForm.ppPreviewPlot->replot();
 
   // Update bounds for horizontal markers
-  auto verticalRange = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
-  updateHorizontalMarkers(convertTupleToQPair(verticalRange));
+  auto const verticalRange = m_uiForm.ppRawPlot->getAxisRange(AxisID::YLeft);
+  updateHorizontalMarkers(convertTupleToPair(verticalRange));
 }
 
 /**
@@ -342,7 +342,7 @@ void SymmetriseView::updateMiniPlots() {
  * @param Y range for current workspace
  *
  */
-void SymmetriseView::updateHorizontalMarkers(QPair<double, double> yrange) {
+void SymmetriseView::updateHorizontalMarkers(std::pair<double, double> yrange) {
   auto horzMarkFirst = m_uiForm.ppRawPlot->getSingleSelector("horzMarkFirst");
   auto horzMarkSecond = m_uiForm.ppRawPlot->getSingleSelector("horzMarkSecond");
 

@@ -270,7 +270,7 @@ void PreviewPlot::setAxisLabel(AxisID const &axisID, char const *const label) {
  * @param range The new range
  * @param axisID An enumeration defining the axis
  */
-void PreviewPlot::setAxisRange(const QPair<double, double> &range, AxisID axisID) {
+void PreviewPlot::setAxisRange(const std::pair<double, double> &range, AxisID axisID) {
   switch (axisID) {
   case AxisID::XBottom:
     m_canvas->gca().setXLim(range.first, range.second);

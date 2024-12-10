@@ -23,8 +23,8 @@ Quadrilateral::Quadrilateral(const V2D &lowerLeft, const V2D &lowerRight, const 
  *  Special constructor for a rectangle
  */
 Quadrilateral::Quadrilateral(const double lowerX, const double upperX, const double lowerY, const double upperY)
-    : ConvexPolygon(), m_vertices{
-                           {V2D(lowerX, lowerY), V2D(lowerX, upperY), V2D(upperX, upperY), V2D(upperX, lowerY)}} {}
+    : ConvexPolygon(),
+      m_vertices{{V2D(lowerX, lowerY), V2D(lowerX, upperY), V2D(upperX, upperY), V2D(upperX, lowerY)}} {}
 
 /**
  * Return the vertex at the given index

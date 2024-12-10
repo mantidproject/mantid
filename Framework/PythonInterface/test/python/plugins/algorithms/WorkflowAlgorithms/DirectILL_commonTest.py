@@ -7,7 +7,6 @@
 import unittest
 from mantid.api import mtd
 from mantid.simpleapi import LoadEmptyInstrument
-from testhelpers import illhelpers, run_algorithm
 import DirectILL_common as common
 
 
