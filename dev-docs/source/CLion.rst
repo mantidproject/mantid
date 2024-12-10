@@ -143,8 +143,7 @@ To debug workbench, you'll need to edit the ``workbench`` CMake Application conf
    .. hlist::
       :columns: 1
 
-      - On Linux & macOS: ``workbench --single-process``
-      - On Windows: ``workbench --single-process``
+      - On Linux, macOS and Windows: ``-m workbench --single-process``
 
 #. Set the working directory:
 
