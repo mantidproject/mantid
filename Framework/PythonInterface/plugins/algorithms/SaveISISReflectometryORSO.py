@@ -148,22 +148,20 @@ class ReflectometryDataset:
             self._q_conversion_theta = float(np.rad2deg(self._ws.spectrumInfo().signedTwoTheta(0))) / 2.0
 
     def _set_name(self):
-        theta_assigned: bool = self._q_conversion_theta is not None
-
         if self.is_stitched:
             self._name = "Stitched"
-        elif theta_assigned or self.is_polarized:
-            theta_str = f"{self._q_conversion_theta:.3f}" if theta_assigned else ""
-            space_str = " " if (theta_assigned and self.is_polarized) else ""
-            self._name = f"{theta_str}{space_str}{self._spin_state}"
+        elif self._q_conversion_theta is not None:
+            self._name = f"{self._q_conversion_theta:.3f}"
         else:
             self._name = self._ws.name()
 
+        if self.is_polarized:
+            self._name = f"{self._name} {self._spin_state}"
+            return
+
         # Ensure unique dataset names for workspace group members.
-        # Eventually we will specify the polarization spin state to provide the unique names for polarised datasets.
-        if self._is_ws_grp_member and self._name != self._ws.name():
-            ws_name = f"{self._ws.name()} " if not self.is_polarized else ""
-            self._name = f"{ws_name}{self._name}"
+        if self._is_ws_grp_member and self._ws.name() != self._name:
+            self._name = f"{self._ws.name()} {self._name}"
 
     def _set_spin_state_from_logs(self) -> None:
         if self._ws.getRun().hasProperty("spin_state_ORSO"):
@@ -414,7 +412,7 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
             reduction_timestamp=self._get_reduction_timestamp(refl_dataset.reduction_history),
             creator_name=self.name(),
             creator_affiliation=MantidORSODataset.SOFTWARE_NAME,
-            polarized_dataset=refl_dataset.is_polarized,
+            is_polarized_dataset=refl_dataset.is_polarized,
         )
 
     def _add_optional_header_info(self, dataset: MantidORSODataset, refl_dataset: ReflectometryDataset) -> None:
@@ -427,7 +425,8 @@ class SaveISISReflectometryORSO(PythonAlgorithm):
         dataset.set_proposal_id(rb_number)
         dataset.set_doi(doi)
         dataset.set_reduction_call(self._get_reduction_script(refl_dataset))
-        dataset.set_polarization(refl_dataset.spin_state)
+        if refl_dataset.is_polarized:
+            dataset.set_polarization(refl_dataset.spin_state)
 
         reduction_workflow_histories = refl_dataset.reduction_workflow_histories
         if not refl_dataset.reduction_workflow_histories:
