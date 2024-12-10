@@ -7,7 +7,7 @@
 # pylint: disable=no-init
 import systemtesting
 from mantid.simpleapi import (
-    AlignDetectors,
+    ApplyDiffCal,
     ConvertFromDistribution,
     ConvertToDistribution,
     ConvertUnits,
