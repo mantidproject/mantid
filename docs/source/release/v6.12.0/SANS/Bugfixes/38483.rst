@@ -1,0 +1,1 @@
+- Fixed a bug in :ref:`algm-PolarizerEfficiency` where passing in a ``SpinStates`` string that contains more spin states than the number of workspaces in the input workspace group could cause a crash.
