@@ -257,12 +257,12 @@ class PairingTablePresenterTest(unittest.TestCase):
         self.assertEqual(str(self.presenter.get_table_item_text(2, 0)), "pair_3")
         self.assertCountEqual(self.model.pair_names, ["pair_1", "pair_2", "pair_3"])
 
-    def test_disable_updates(self):
-        self.presenter.disable_updates()
-        self.assertEqual(self.view.is_updating, True)
-
     def test_enable_updates(self):
         self.presenter.enable_updates()
+        self.assertEqual(self.view.is_updating, True)
+
+    def test_disable_updates(self):
+        self.presenter.disable_updates()
         self.assertEqual(self.view.is_updating, False)
 
     def test_enable_editing(self):

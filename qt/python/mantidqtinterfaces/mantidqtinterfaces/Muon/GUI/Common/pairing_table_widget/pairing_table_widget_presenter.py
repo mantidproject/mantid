@@ -41,32 +41,34 @@ class PairingTablePresenter(object):
 
     def disable_editing(self):
         """Disables editing mode."""
-        with self.disable_updates_context():
-            self._view.set_is_disabled(True)
-            self._view.disable_all_buttons()
-            self._disable_all_table_items()
+        self.enable_updates()
+        self._view.set_is_disabled(True)
+        self._view.disable_all_buttons()
+        self._disable_all_table_items()
+        self.disable_updates()
 
     def enable_editing(self):
         """Enables editing mode."""
-        with self.disable_updates_context():
-            self._view.set_is_disabled(False)
-            self._view.enable_all_buttons()
-            self._enable_all_table_items()
+        self.enable_updates()
+        self._view.set_is_disabled(False)
+        self._view.enable_all_buttons()
+        self._enable_all_table_items()
+        self.disable_updates()
 
     @contextmanager
     def disable_updates_context(self):
         """Context manager to disable updates."""
-        self.disable_updates()
+        self.enable_updates()
         try:
             yield
         finally:
-            self.enable_updates()
+            self.disable_updates()
 
-    def disable_updates(self):
+    def enable_updates(self):
         """Prevent update signals being sent."""
         self._view.set_is_updating(True)
 
-    def enable_updates(self):
+    def disable_updates(self):
         """Allow update signals to be sent."""
         self._view.set_is_updating(False)
 
@@ -153,27 +155,24 @@ class PairingTablePresenter(object):
             self._model.add_pair(pair)
 
     def update_view_from_model(self):
-        self.disable_updates()
-
-        self.clear()
-        for pair in self._model.pairs:
-            if isinstance(pair, MuonPair):
-                to_analyse = True if pair.name in self._model.selected_pairs else False
-                forward_group_periods = self._model.get_context.group_pair_context[pair.forward_group].periods
-                backward_group_periods = self._model.get_context.group_pair_context[pair.backward_group].periods
-                forward_period_warning = self._model.validate_periods_list(forward_group_periods)
-                backward_period_warning = self._model.validate_periods_list(backward_group_periods)
-                if forward_period_warning == RowValid.invalid_for_all_runs or backward_period_warning == RowValid.invalid_for_all_runs:
-                    display_period_warning = RowValid.invalid_for_all_runs
-                elif forward_period_warning == RowValid.valid_for_some_runs or backward_period_warning == RowValid.valid_for_some_runs:
-                    display_period_warning = RowValid.valid_for_some_runs
-                else:
-                    display_period_warning = RowValid.valid_for_all_runs
-                color = row_colors[display_period_warning]
-                tool_tip = row_tooltips[display_period_warning]
-                self.add_pair_to_view(pair, to_analyse, color, tool_tip)
-
-        self.enable_updates()
+        with self.disable_updates_context():
+            self.clear()
+            for pair in self._model.pairs:
+                if isinstance(pair, MuonPair):
+                    to_analyse = True if pair.name in self._model.selected_pairs else False
+                    forward_group_periods = self._model.get_context.group_pair_context[pair.forward_group].periods
+                    backward_group_periods = self._model.get_context.group_pair_context[pair.backward_group].periods
+                    forward_period_warning = self._model.validate_periods_list(forward_group_periods)
+                    backward_period_warning = self._model.validate_periods_list(backward_group_periods)
+                    if forward_period_warning == RowValid.invalid_for_all_runs or backward_period_warning == RowValid.invalid_for_all_runs:
+                        display_period_warning = RowValid.invalid_for_all_runs
+                    elif forward_period_warning == RowValid.valid_for_some_runs or backward_period_warning == RowValid.valid_for_some_runs:
+                        display_period_warning = RowValid.valid_for_some_runs
+                    else:
+                        display_period_warning = RowValid.valid_for_all_runs
+                    color = row_colors[display_period_warning]
+                    tool_tip = row_tooltips[display_period_warning]
+                    self.add_pair_to_view(pair, to_analyse, color, tool_tip)
 
     def update_group_selections(self):
         groups = self._model.group_names + [diff.name for diff in self._model.get_diffs("group")]
@@ -212,12 +211,11 @@ class PairingTablePresenter(object):
     def add_pair_to_view(
         self, pair, to_analyse=False, color=row_colors[RowValid.valid_for_all_runs], tool_tip=row_tooltips[RowValid.valid_for_all_runs]
     ):
-        self.disable_updates()
-        self.update_group_selections()
-        assert isinstance(pair, MuonPair)
-        entry = [str(pair.name), to_analyse, str(pair.forward_group), str(pair.backward_group), str(pair.alpha)]
-        self.add_entry_to_table(entry, color, tool_tip)
-        self.enable_updates()
+        with self.disable_updates_context():
+            self.update_group_selections()
+            assert isinstance(pair, MuonPair)
+            entry = [str(pair.name), to_analyse, str(pair.forward_group), str(pair.backward_group), str(pair.alpha)]
+            self.add_entry_to_table(entry, color, tool_tip)
 
     """
     This is required to strip out the boolean value the clicked method
