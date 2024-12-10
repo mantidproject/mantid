@@ -2119,11 +2119,9 @@ NXstatus NX5getgroupID(NXhandle fileid, NXlink *sRes) {
 /* ------------------------------------------------------------------- */
 
 NXstatus NX5nativeexternallink(NXhandle fileid, const char *name, const char *externalfile, const char *remotetarget) {
-  herr_t iRet;
-  pNexusFile5 pFile;
   hid_t openwhere;
 
-  pFile = NXI5assert(fileid);
+  const pNexusFile5 pFile = NXI5assert(fileid);
 
   if (pFile->iCurrentG <= 0) {
     openwhere = pFile->iFID;
@@ -2131,7 +2129,7 @@ NXstatus NX5nativeexternallink(NXhandle fileid, const char *name, const char *ex
     openwhere = pFile->iCurrentG;
   }
 
-  iRet = H5Lcreate_external(externalfile, remotetarget, openwhere, name, H5P_DEFAULT, H5P_DEFAULT);
+  const herr_t iRet = H5Lcreate_external(externalfile, remotetarget, openwhere, name, H5P_DEFAULT, H5P_DEFAULT);
   if (iRet < 0) {
     NXReportError("ERROR: making external link failed");
     return NX_ERROR;
@@ -2142,10 +2140,9 @@ NXstatus NX5nativeexternallink(NXhandle fileid, const char *name, const char *ex
 /* ------------------------------------------------------------------- */
 
 NXstatus NX5nativeinquirefile(NXhandle fileid, char *externalfile, const int filenamelen) {
-  pNexusFile5 pFile;
   hid_t openthing;
 
-  pFile = NXI5assert(fileid);
+  const pNexusFile5 pFile = NXI5assert(fileid);
   if (pFile->iCurrentD > 0) {
     openthing = pFile->iCurrentD;
   } else if (pFile->iCurrentG > 0) {
