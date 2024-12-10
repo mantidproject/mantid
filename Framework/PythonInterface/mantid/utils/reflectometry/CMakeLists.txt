@@ -21,5 +21,5 @@ target_link_libraries(PythonReflHelpersModule PRIVATE Mantid::Algorithms Mantid:
 # Installation settings
 set_target_properties(PythonReflHelpersModule PROPERTIES INSTALL_RPATH "${EXT_INSTALL_RPATH}")
 mtd_install_shared_library(
-  TARGETS PythonReflHelpersModule DESTINATION ${Python_SITELIB_RELPATH}/mantid/polarization_helpers.cpp
+  TARGETS PythonReflHelpersModule DESTINATION ${Python_SITELIB_RELPATH}/mantid/utils/reflectometry
 )
