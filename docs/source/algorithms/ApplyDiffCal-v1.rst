@@ -25,8 +25,7 @@ calibrated diffractometer constants to be performed using the
 reads the constants from the instrument parameter map.
 
 When used together with :ref:`ConvertUnits <algm-ConvertUnits>` this algorithm provides a way of
-converting in both directions between time of flight and d spacing and it is an alternative to
-using :ref:`AlignDetectors <algm-AlignDetectors>`.
+converting in both directions between time of flight and d spacing.
 
 The values of the diffractometer constants that are stored in the instrument parameter map
 can be viewed on the Show Detectors screen of a workspace.
