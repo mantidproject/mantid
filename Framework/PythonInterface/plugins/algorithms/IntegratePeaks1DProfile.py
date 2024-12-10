@@ -316,7 +316,6 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=peaks.getNumberPeaks())
         for ipk, peak in enumerate(peaks):
             prog_reporter.report("Integrating")
-
             peak_intens, peak_sigma = 0.0, 0.0
             status = PEAK_STATUS.NO_PEAK
 
@@ -340,60 +339,61 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
 
             # check TOF is in limits of x-axis
             xdim = ws.getXDimension()
-            if xdim.getMinimum() < tof_start and tof_end < xdim.getMaximum():
-                # get detector IDs in peak region
-                peak_data = array_converter.get_peak_data(peak, detid, bank_name, nrows, ncols, nrows_edge, ncols_edge)
+            if xdim.getMinimum() > tof_start or xdim.getMaximum() < tof_end:
+                continue  # skip peak
 
-                # fit with constrained peak centers
-                func_generator = PeakFunctionGenerator(peak_params_to_fix)
-                initial_function, md_fit_kwargs, initial_peak_mask = func_generator.get_initial_fit_function_and_kwargs(
-                    ws, peak_data, peak.getDSpacing(), (tof_start, tof_end), peak_func_name, bg_func_name
-                )
-                if not initial_peak_mask.any():
-                    continue  # no peak
-                fit_result = self.exec_fit(initial_function, **fit_kwargs, **md_fit_kwargs)
-                if not fit_result["success"]:
-                    continue  # skip peak
+            # get detector IDs in peak region
+            peak_data = array_converter.get_peak_data(peak, detid, bank_name, nrows, ncols, nrows_edge, ncols_edge)
 
-                # update peak mask based on I/sig from fit
-                *_, i_over_sigma = calc_intens_and_sigma_arrays(fit_result, error_strategy)
-                non_bg_mask = np.zeros(peak_data.detids.shape, dtype=bool)
-                non_bg_mask.flat[initial_peak_mask] = i_over_sigma > i_over_sig_threshold
-                peak_mask = find_peak_cluster_in_window(non_bg_mask, (peak_data.irow, peak_data.icol))
-                is_on_edge = np.any(np.logical_and(peak_mask, peak_data.det_edges))
-                if not integrate_on_edge and is_on_edge:
-                    status = PEAK_STATUS.ON_EDGE
-                    continue  # skip peak
+            # fit with constrained peak centers
+            func_generator = PeakFunctionGenerator(peak_params_to_fix)
+            initial_function, md_fit_kwargs, initial_peak_mask = func_generator.get_initial_fit_function_and_kwargs(
+                ws, peak_data, peak.getDSpacing(), (tof_start, tof_end), peak_func_name, bg_func_name
+            )
+            if not initial_peak_mask.any():
+                continue  # no peak
+            fit_result = self.exec_fit(initial_function, **fit_kwargs, **md_fit_kwargs)
+            if not fit_result["success"]:
+                continue  # skip peak
 
-                # fit only peak pixels and let peak centers vary independently of DIFC ratio
-                fit_mask = peak_mask.flat[initial_peak_mask]  # get bool for domains to be fitted from peak mask
-                final_function = func_generator.get_final_fit_function(fit_result["Function"], fit_mask, frac_dspac_delta)
-                fit_result = self.exec_fit(final_function, **fit_kwargs, **md_fit_kwargs)
-                if not fit_result["success"]:
-                    continue  # skip peak
+            # update peak mask based on I/sig from fit
+            *_, i_over_sigma = calc_intens_and_sigma_arrays(fit_result, error_strategy)
+            non_bg_mask = np.zeros(peak_data.detids.shape, dtype=bool)
+            non_bg_mask.flat[initial_peak_mask] = i_over_sigma > i_over_sig_threshold
+            peak_mask = find_peak_cluster_in_window(non_bg_mask, (peak_data.irow, peak_data.icol))
+            is_on_edge = np.any(np.logical_and(peak_mask, peak_data.det_edges))
+            if not integrate_on_edge and is_on_edge:
+                status = PEAK_STATUS.ON_EDGE
+                continue  # skip peak
 
-                # calculate intensity
-                status = PEAK_STATUS.VALID
-                intens, sigma, _ = calc_intens_and_sigma_arrays(fit_result, error_strategy)
-                peak_intens = np.sum(intens[fit_mask])
-                peak_sigma = np.sqrt(np.sum(sigma[fit_mask] ** 2))
+            # fit only peak pixels and let peak centers vary independently of DIFC ratio
+            fit_mask = peak_mask.flat[initial_peak_mask]  # get bool for domains to be fitted from peak mask
+            final_function = func_generator.get_final_fit_function(fit_result["Function"], fit_mask, frac_dspac_delta)
+            fit_result = self.exec_fit(final_function, **fit_kwargs, **md_fit_kwargs)
+            if not fit_result["success"]:
+                continue  # skip peak
 
-                if output_file:
-                    intens_over_sig = peak_intens / peak_sigma if peak_sigma > 0 else 0.0
-                    results.append(
-                        LineProfileResult(
-                            ipk,
-                            peak,
-                            intens_over_sig,
-                            status,
-                            peak_mask,
-                            fit_mask,
-                            func_generator.ysum,
-                            fit_result,
-                            peak_data,
-                        )
+            # calculate intensity
+            status = PEAK_STATUS.VALID
+            intens, sigma, _ = calc_intens_and_sigma_arrays(fit_result, error_strategy)
+            peak_intens = np.sum(intens[fit_mask])
+            peak_sigma = np.sqrt(np.sum(sigma[fit_mask] ** 2))
+
+            if output_file:
+                intens_over_sig = peak_intens / peak_sigma if peak_sigma > 0 else 0.0
+                results.append(
+                    LineProfileResult(
+                        ipk,
+                        peak,
+                        intens_over_sig,
+                        status,
+                        peak_mask,
+                        fit_mask,
+                        func_generator.ysum,
+                        fit_result,
+                        peak_data,
                     )
-
+                )
             set_peak_intensity(peak, peak_intens, peak_sigma, do_lorz_cor)
 
         # plot output
