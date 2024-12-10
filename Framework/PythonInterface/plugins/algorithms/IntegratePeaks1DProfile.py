@@ -35,7 +35,7 @@ from scipy.ndimage import distance_transform_edt, label
 from plugins.algorithms.IntegratePeaksSkew import InstrumentArrayConverter, get_fwhm_from_back_to_back_params, PeakData
 from plugins.algorithms.IntegratePeaksShoeboxTOF import get_bin_width_at_tof, set_peak_intensity
 from enum import Enum
-from typing import Sequence
+from typing import Sequence, Tuple
 
 
 class PEAK_STATUS(Enum):
@@ -45,6 +45,7 @@ class PEAK_STATUS(Enum):
 
 
 MIN_TOF_WIDTH = 1e-3
+MIN_INTENS_OVER_SIGMA = 0.5
 
 
 class IntegratePeaks1DProfile(DataProcessorAlgorithm):
@@ -165,7 +166,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             name="IOverSigmaThreshold",
             defaultValue=2.5,
             direction=Direction.Input,
-            validator=FloatBoundedValidator(lower=0.0),
+            validator=FloatBoundedValidator(lower=MIN_INTENS_OVER_SIGMA),
             doc="Criterion to stop fitting.",
         )
         self.declareProperty(
@@ -343,38 +344,39 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
                 # get detector IDs in peak region
                 peak_data = array_converter.get_peak_data(peak, detid, bank_name, nrows, ncols, nrows_edge, ncols_edge)
 
-                # fit all detectors with constrained peak centers
+                # fit with constrained peak centers
                 func_generator = PeakFunctionGenerator(peak_params_to_fix)
-                initial_function, md_fit_kwargs = func_generator.get_initial_fit_function_and_kwargs(
+                initial_function, md_fit_kwargs, initial_peak_mask = func_generator.get_initial_fit_function_and_kwargs(
                     ws, peak_data, peak.getDSpacing(), (tof_start, tof_end), peak_func_name, bg_func_name
                 )
+                if not initial_peak_mask.any():
+                    continue  # no peak
                 fit_result = self.exec_fit(initial_function, **fit_kwargs, **md_fit_kwargs)
                 if not fit_result["success"]:
                     continue  # skip peak
 
-                # find pixels contributing to peak
+                # update peak mask based on I/sig from fit
                 *_, i_over_sigma = calc_intens_and_sigma_arrays(fit_result, error_strategy)
-                non_bg_mask = np.reshape(i_over_sigma > i_over_sig_threshold, peak_data.detids.shape)
+                non_bg_mask = np.zeros(peak_data.detids.shape, dtype=bool)
+                non_bg_mask.flat[initial_peak_mask] = i_over_sigma > i_over_sig_threshold
                 peak_mask = find_peak_cluster_in_window(non_bg_mask, (peak_data.irow, peak_data.icol))
-                if peak_mask is None:
+                is_on_edge = np.any(np.logical_and(peak_mask, peak_data.det_edges))
+                if not integrate_on_edge and is_on_edge:
+                    status = PEAK_STATUS.ON_EDGE
                     continue  # skip peak
 
-                # check if peak is on the edge
-                is_on_edge = np.any(np.logical_and(peak_mask, peak_data.det_edges))
-                if integrate_on_edge or not is_on_edge:
-                    # fit only peak pixels and let peak centers vary independently of DIFC ratio
-                    final_function = func_generator.get_final_fit_function(fit_result["Function"], peak_mask, frac_dspac_delta)
-                    fit_result = self.exec_fit(final_function, **fit_kwargs, **md_fit_kwargs)
-                    if not fit_result["success"]:
-                        continue  # skip peak
+                # fit only peak pixels and let peak centers vary independently of DIFC ratio
+                fit_mask = peak_mask.flat[initial_peak_mask]  # get bool for domains to be fitted from peak mask
+                final_function = func_generator.get_final_fit_function(fit_result["Function"], fit_mask, frac_dspac_delta)
+                fit_result = self.exec_fit(final_function, **fit_kwargs, **md_fit_kwargs)
+                if not fit_result["success"]:
+                    continue  # skip peak
 
-                    # calculate intensity
-                    status = PEAK_STATUS.VALID
-                    intens, sigma, _ = calc_intens_and_sigma_arrays(fit_result, error_strategy)
-                    peak_intens = np.sum(intens[peak_mask.flat])
-                    peak_sigma = np.sqrt(np.sum(sigma[peak_mask.flat] ** 2))
-                else:
-                    status = PEAK_STATUS.ON_EDGE
+                # calculate intensity
+                status = PEAK_STATUS.VALID
+                intens, sigma, _ = calc_intens_and_sigma_arrays(fit_result, error_strategy)
+                peak_intens = np.sum(intens[fit_mask])
+                peak_sigma = np.sqrt(np.sum(sigma[fit_mask] ** 2))
 
                 if output_file:
                     intens_over_sig = peak_intens / peak_sigma if peak_sigma > 0 else 0.0
@@ -385,6 +387,8 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
                             intens_over_sig,
                             status,
                             peak_mask,
+                            fit_mask,
+                            func_generator.ysum,
                             fit_result,
                             peak_data,
                         )
@@ -413,6 +417,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
     def exec_fit(self, function, **kwargs):
         alg = self.createChildAlgorithm("Fit", enableLogging=False)
         alg.initialize()
+        alg.setAlwaysStoreInADS(True)
         alg.setProperty("Function", function)  # needs to be done first
         alg.setProperties(kwargs)
         fit_result = {"success": False}
@@ -433,9 +438,11 @@ class PeakFunctionGenerator:
         self.cen_par_name: str = None
         self.intens_par_name: str = None
         self.peak_params_to_fix: Sequence[str] = peak_params_to_fix
+        self.peak_mask: np.ndarray[float] = None
+        self.ysum: np.ndarray[float] = None
 
     def get_initial_fit_function_and_kwargs(
-        self, ws: Workspace2D, peak_data: PeakData, dpk: float, tof_range: tuple[float], peak_func_name: str, bg_func_name: str
+        self, ws: Workspace2D, peak_data: PeakData, dpk: float, tof_range: tuple[float, float], peak_func_name: str, bg_func_name: str
     ) -> str:
         ispecs = ws.getIndicesFromDetectorIDs([int(d) for d in peak_data.detids.flat])
         tof_start, tof_end = tof_range
@@ -445,29 +452,40 @@ class PeakFunctionGenerator:
         # estimate background
         istart = ws.yIndexOfX(tof_start)
         iend = ws.yIndexOfX(tof_end)
-        bg = min([ws.readY(int(ispec))[istart : istart + 2].mean() for ispec in ispecs])
         # init bg func (global)
         bg_func = FunctionFactory.createFunction(bg_func_name)
-        bg_func["A0"] = bg
         # init peak func
         peak_func = FunctionFactory.Instance().createPeakFunction(peak_func_name)
         # save parameter names for future ties/constraints
         peak_func.setIntensity(1.0)
         self.intens_par_name = next(peak_func.getParamName(ipar) for ipar in range(peak_func.nParams()) if peak_func.isExplicitlySet(ipar))
         self.cen_par_name = peak_func.getCentreParameterName()
-        for idom, ispec in enumerate(ispecs):
-            difc = si.diffractometerConstants(int(ispec))[UnitParams.difc]
-            peak_func.setCentre(difc * dpk)
-            # estimate height/intensity
-            peak_func.setHeight(ws.readY(int(ispec))[istart:iend].max() - bg)
-            comp_func = CompositeFunctionWrapper(FunctionWrapper(peak_func), FunctionWrapper(bg_func), NumDeriv=True)
-            function.add(comp_func.function)
-            function.setDomainIndex(idom, idom)
-            key_suffix = f"_{idom}" if idom > 0 else ""
-            fit_kwargs["InputWorkspace" + key_suffix] = ws.name()
-            fit_kwargs["StartX" + key_suffix] = tof_start
-            fit_kwargs["EndX" + key_suffix] = tof_end
-            fit_kwargs["WorkspaceIndex" + key_suffix] = int(ispec)
+        avg_bg = 0
+        idom = 0
+        peak_mask = np.zeros(len(ispecs), dtype=bool)
+        self.ysum = np.zeros(peak_data.detids.shape)  # required for plotting later
+        for ii, ispec in enumerate(ispecs):
+            # check stats in pixel
+            intens, sigma, bg = self._estimate_intensity_and_background(ws, ispec, istart, iend)
+            self.ysum.flat[ii] = intens + bg * (iend - istart)
+            avg_bg += bg
+            peak_mask[ii] = sigma > 0 and intens / sigma > MIN_INTENS_OVER_SIGMA  # low threshold for initial fit
+            if peak_mask[ii]:
+                # add peak
+                difc = si.diffractometerConstants(int(ispec))[UnitParams.difc]
+                peak_func.setCentre(difc * dpk)
+                peak_func.setIntensity(intens)
+                comp_func = CompositeFunctionWrapper(FunctionWrapper(peak_func), FunctionWrapper(bg_func), NumDeriv=True)
+                function.add(comp_func.function)
+                function.setDomainIndex(idom, idom)
+                key_suffix = f"_{idom}" if idom > 0 else ""
+                fit_kwargs["InputWorkspace" + key_suffix] = ws.name()
+                fit_kwargs["StartX" + key_suffix] = tof_start
+                fit_kwargs["EndX" + key_suffix] = tof_end
+                fit_kwargs["WorkspaceIndex" + key_suffix] = int(ispec)
+                idom += 1
+        # set background (background global tied to first domain function)
+        function[0][1]["A0"] = avg_bg / len(ispecs)
         # set instrument specific parameters
         iset_initial = np.array([function[0][0].isExplicitlySet(ipar) for ipar in range(peak_func.nParams())])
         ispec_pk = np.ravel_multi_index([peak_data.irow, peak_data.icol], peak_data.detids.shape)
@@ -475,7 +493,19 @@ class PeakFunctionGenerator:
         iset_final = np.array([function[0][0].isExplicitlySet(ipar) for ipar in range(peak_func.nParams())])
         ipars_to_tie = np.flatnonzero(np.logical_not(iset_initial, iset_final))
         pars_to_tie = [function[0][0].parameterName(int(ipar)) for ipar in ipars_to_tie]  # global peak parameters
-        return self._add_parameter_ties_and_constraints(function, pars_to_tie), fit_kwargs
+        return self._add_parameter_ties_and_constraints(function, pars_to_tie), fit_kwargs, peak_mask
+
+    @staticmethod
+    def _estimate_intensity_and_background(ws: Workspace2D, ispec: int, istart: int, iend: int) -> Tuple[float, float, float]:
+        y = ws.readY(ispec)[istart:iend]
+        if not np.any(y > 0):
+            return 0.0, 0.0, 0.0
+        e = ws.readE(ispec)[istart:iend]
+        ibg, _ = PeakData.find_bg_pts_seed_skew(y)
+        bg = np.mean(y[ibg])
+        intensity = np.sum(y - bg)
+        sigma = np.sqrt(np.sum(e**2))
+        return intensity, sigma, bg
 
     def _add_parameter_ties_and_constraints(self, function: MultiDomainFunction, pars_to_tie: Sequence[str]) -> str:
         # fix peak params requested
@@ -546,17 +576,19 @@ class LineProfileResult:
         intens_over_sig: float,
         status: Enum,
         peak_mask: np.ndarray[bool],
+        fit_mask: np.ndarray[bool],
+        ysum: np.ndarray[float],
         fit_result: dict,
         peak_data: PeakData,
     ):
         self.irow, self.icol = peak_data.irow, peak_data.icol
         self.tofs = None
-        self.ysum = None
+        self.ysum = ysum
         self.yfoc = None
         self.efoc = None
         self.yfoc_fit = None
         self.peak_mask = peak_mask
-        # extract peak properties inot title
+        # extract peak properties into title
         intens_over_sig = np.round(intens_over_sig, 1)
         hkl = np.round(pk.getHKL(), 2)
         wl = np.round(pk.getWavelength(), 2)
@@ -570,28 +602,18 @@ class LineProfileResult:
             rf"d={d} $\AA$"
             f"\n{status.value}"
         )
-        self._init_data(fit_result)
+        self._init_foc_data(fit_result, fit_mask)
 
-    def _init_data(self, fit_result):
-        final_shape = (*self.peak_mask.shape, -1)
-        ydat = np.array(
-            [get_eval_ws(fit_result["OutputWorkspace"], idom).readY(0) for idom in range(fit_result["Function"].nDomains())]
-        ).reshape(final_shape)
-        edat_sq = (
-            np.array(
-                [get_eval_ws(fit_result["OutputWorkspace"], idom).readE(0) for idom in range(fit_result["Function"].nDomains())]
-            ).reshape(final_shape)
-            ** 2
-        )
-        yfit = np.array(
-            [get_eval_ws(fit_result["OutputWorkspace"], idom).readY(1) for idom in range(fit_result["Function"].nDomains())]
-        ).reshape(final_shape)
+    def _init_foc_data(self, fit_result, fit_mask):
+        ndoms = fit_result["Function"].nDomains()
+        ydat = np.array([get_eval_ws(fit_result["OutputWorkspace"], idom).readY(0) for idom in range(ndoms) if fit_mask[idom]])
+        edat_sq = np.array([get_eval_ws(fit_result["OutputWorkspace"], idom).readE(0) for idom in range(ndoms) if fit_mask[idom]]) ** 2
+        yfit = np.array([get_eval_ws(fit_result["OutputWorkspace"], idom).readY(1) for idom in range(ndoms) if fit_mask[idom]])
         self.tofs = get_eval_ws(fit_result["OutputWorkspace"], 0).readX(0)
         self.tofs = 0.5 * (self.tofs[1:] + self.tofs[:-1])
-        self.ysum = ydat.sum(axis=2)
-        self.yfoc = ydat[self.peak_mask].sum(axis=0)
-        self.efoc = np.sqrt(edat_sq[self.peak_mask].sum(axis=0))
-        self.yfoc_fit = yfit[self.peak_mask].sum(axis=0)
+        self.yfoc = ydat.sum(axis=0)
+        self.efoc = np.sqrt(edat_sq.sum(axis=0))
+        self.yfoc_fit = yfit.sum(axis=0)
 
     def plot_integrated_peak(self, fig, axes, norm_func):
         # plot colorfill of TOF integrated data on LHS
