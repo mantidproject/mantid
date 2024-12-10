@@ -77,20 +77,20 @@ void Divide::performBinaryOperation(const HistogramData::Histogram &lhs, const d
 void Divide::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs,
                             API::MatrixWorkspace_sptr out) {
 
-  if (lhs->isRaggedWorkspace() && rhs->isRaggedWorkspace()) {
-    // if both workspaces are ragged, output workspace `isDistribution` flag will be true
-    out->setDistribution(true);
-  }
-  if (rhs->YUnit().empty() || !WorkspaceHelpers::matchingBins(*lhs, *rhs, true)) {
-    // Do nothing
+  if (lhs->YUnit() == rhs->YUnit()) {
+    // If units match
+
+    // output will be dimensionless
+    out->setYUnit("");
+
+    if ((lhs->isRaggedWorkspace() && rhs->isRaggedWorkspace()) || m_rhsBlocksize > 1) {
+      // If both are RaggedWorkspaces OR RHS blocksize > 1
+
+      // Output will be ragged
+      out->setDistribution(true);
+    }
   }
 
-  // If the Y units match, then the output will be a distribution and will be
-  // dimensionless
-  else if (lhs->YUnit() == rhs->YUnit() && m_rhsBlocksize > 1) {
-    out->setYUnit("");
-    out->setDistribution(true);
-  }
   // Else we need to set the unit that results from the division
   else {
     if (!lhs->YUnit().empty())
