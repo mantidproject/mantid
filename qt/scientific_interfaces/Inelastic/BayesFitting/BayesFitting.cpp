@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "BayesFitting.h"
 #include "MantidQtWidgets/Spectroscopy/SettingsWidget/Settings.h"
-#include "Quasi.h"
+#include "QuasiModel.h"
+#include "QuasiPresenter.h"
+#include "QuasiView.h"
 #include "ResNormPresenter.h"
 #include "StretchPresenter.h"
 
@@ -31,7 +33,11 @@ BayesFitting::BayesFitting(QWidget *parent)
   m_bayesTabs.emplace(RES_NORM, new ResNormPresenter(resNormWidget, std::move(resNormRunner), std::move(resNormModel),
                                                      new ResNormView(resNormWidget)));
 
-  m_bayesTabs.emplace(QUASI, new Quasi(m_uiForm.bayesFittingTabs->widget(QUASI)));
+  auto quasiRunner = createAlgorithmRunner();
+  auto quasiModel = std::make_unique<QuasiModel>();
+  auto quasiWidget = m_uiForm.bayesFittingTabs->widget(QUASI);
+  m_bayesTabs.emplace(QUASI, new QuasiPresenter(quasiWidget, std::move(quasiRunner), std::move(quasiModel),
+                                                new QuasiView(quasiWidget)));
 
   auto stretchRunner = createAlgorithmRunner();
 
