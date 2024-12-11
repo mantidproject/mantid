@@ -363,10 +363,11 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             non_bg_mask.flat[initial_peak_mask] = i_over_sigma > i_over_sig_threshold
             peak_mask = find_peak_cluster_in_window(non_bg_mask, (peak_data.irow, peak_data.icol))
             is_on_edge = np.any(np.logical_and(peak_mask, peak_data.det_edges))
-            if not integrate_on_edge and is_on_edge:
+            if is_on_edge:
                 status = PEAK_STATUS.ON_EDGE
-                self.delete_fit_result_workspaces(fit_result)
-                continue  # skip peak
+                if not integrate_on_edge:
+                    self.delete_fit_result_workspaces(fit_result)
+                    continue  # skip peak
 
             # fit only peak pixels and let peak centers vary independently of DIFC ratio
             fit_mask = peak_mask.flat[initial_peak_mask]  # get bool for domains to be fitted from peak mask
