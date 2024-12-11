@@ -118,7 +118,7 @@ static int32 NXIFindVgroup(pNexusFile pFile, CONSTCHAR *name, CONSTCHAR *nxclass
     if (iN == 0) {
       return NX_EOD;
     }
-    pArray = static_cast<int32 *>(malloc(iN * sizeof(int32)));
+    pArray = static_cast<int32 *>(malloc(static_cast<size_t>(iN) * sizeof(int32)));
     if (!pArray) {
       NXReportError("ERROR: out of memory in NXIFindVgroup");
       return NX_EOD;
@@ -232,7 +232,8 @@ static int NXIInitDir(pNexusFile self) {
   if (self->iCurrentVG == 0 && self->iStack[iStackPtr].iRefDir == NULL) { /* root level */
     /* get the number and ID's of all lone Vgroups in the file */
     self->iStack[iStackPtr].iNDir = Vlone(self->iVID, NULL, 0);
-    self->iStack[iStackPtr].iRefDir = static_cast<int32 *>(malloc(self->iStack[iStackPtr].iNDir * sizeof(int32) + 1));
+    self->iStack[iStackPtr].iRefDir =
+        static_cast<int32 *>(malloc(static_cast<size_t>(self->iStack[iStackPtr].iNDir) * sizeof(int32) + 1));
     if (!self->iStack[iStackPtr].iRefDir) {
       NXReportError("ERROR: out of memory in NXIInitDir");
       return NX_EOD;
@@ -241,8 +242,10 @@ static int NXIInitDir(pNexusFile self) {
   } else {
     /* Vgroup level */
     self->iStack[iStackPtr].iNDir = Vntagrefs(self->iCurrentVG);
-    self->iStack[iStackPtr].iRefDir = static_cast<int32 *>(malloc(self->iStack[iStackPtr].iNDir * sizeof(int32) + 1));
-    self->iStack[iStackPtr].iTagDir = static_cast<int32 *>(malloc(self->iStack[iStackPtr].iNDir * sizeof(int32) + 1));
+    self->iStack[iStackPtr].iRefDir =
+        static_cast<int32 *>(malloc(static_cast<size_t>(self->iStack[iStackPtr].iNDir) * sizeof(int32) + 1));
+    self->iStack[iStackPtr].iTagDir =
+        static_cast<int32 *>(malloc(static_cast<size_t>(self->iStack[iStackPtr].iNDir) * sizeof(int32) + 1));
     if ((!self->iStack[iStackPtr].iRefDir) || (!self->iStack[iStackPtr].iTagDir)) {
       NXReportError("ERROR: out of memory in NXIInitDir");
       return NX_EOD;
@@ -423,7 +426,8 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
    */
   if (am == NXACC_CREATE || am == NXACC_CREATE4) {
     /* set the NeXus_version attribute*/
-    if (SDsetattr(pNew->iSID, "NeXus_version", DFNT_CHAR8, strlen(NEXUS_VERSION), NEXUS_VERSION) < 0) {
+    if (SDsetattr(pNew->iSID, "NeXus_version", DFNT_CHAR8, static_cast<int32>(strlen(NEXUS_VERSION)), NEXUS_VERSION) <
+        0) {
       NXReportError("ERROR: HDF failed to store NeXus_version attribute ");
       free(pNew);
       return NX_ERROR;
@@ -431,14 +435,15 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
 
     /* set the HDF4 version attribute */
     Hgetlibversion(&lmajor, &lminor, &lrelease, HDF_VERSION);
-    if (SDsetattr(pNew->iSID, "HDF_version", DFNT_CHAR8, strlen(HDF_VERSION), HDF_VERSION) < 0) {
+    if (SDsetattr(pNew->iSID, "HDF_version", DFNT_CHAR8, static_cast<int32>(strlen(HDF_VERSION)), HDF_VERSION) < 0) {
       NXReportError("ERROR: HDF failed to store HDF_version attribute ");
       free(pNew);
       return NX_ERROR;
     }
 
     /* set the filename attribute */
-    if (SDsetattr(pNew->iSID, "file_name", DFNT_CHAR8, strlen(filename), static_cast<const char *>(filename)) < 0) {
+    if (SDsetattr(pNew->iSID, "file_name", DFNT_CHAR8, static_cast<int32>(strlen(filename)),
+                  static_cast<const char *>(filename)) < 0) {
       NXReportError("ERROR: HDF failed to store file_name attribute ");
       free(pNew);
       return NX_ERROR;
@@ -447,7 +452,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     /* set the file_time attribute */
     time_puffer = NXIformatNeXusTime();
     if (time_puffer != NULL) {
-      if (SDsetattr(pNew->iSID, "file_time", DFNT_CHAR8, strlen(time_puffer), time_puffer) < 0) {
+      if (SDsetattr(pNew->iSID, "file_time", DFNT_CHAR8, static_cast<int32>(strlen(time_puffer)), time_puffer) < 0) {
         NXReportError("ERROR: HDF failed to store file_time attribute ");
         free(pNew);
         free(time_puffer);
@@ -1149,7 +1154,7 @@ NXstatus NX4getdataID(NXhandle fid, NXlink *sRes) {
 
 NXstatus NX4makelink(NXhandle fid, NXlink *sLink) {
   pNexusFile pFile;
-  int32 dataID, type = DFNT_CHAR8, length;
+  int32 dataID, type = DFNT_CHAR8;
   char name[] = "target";
 
   pFile = NXIassert(fid);
@@ -1157,15 +1162,15 @@ NXstatus NX4makelink(NXhandle fid, NXlink *sLink) {
   if (pFile->iCurrentVG == 0) { /* root level, can not link here */
     return NX_ERROR;
   }
-  Vaddtagref(pFile->iCurrentVG, sLink->iTag, sLink->iRef);
-  length = strlen(sLink->targetPath);
+  Vaddtagref(pFile->iCurrentVG, static_cast<int32>(sLink->iTag), static_cast<int32>(sLink->iRef));
+  int32 length = static_cast<int32>(strlen(sLink->targetPath));
   if (sLink->iTag == DFTAG_SDG || sLink->iTag == DFTAG_NDG || sLink->iTag == DFTAG_SDS) {
-    dataID = SDreftoindex(pFile->iSID, sLink->iRef);
+    dataID = SDreftoindex(pFile->iSID, static_cast<int32>(sLink->iRef));
     dataID = SDselect(pFile->iSID, dataID);
     SDsetattr(dataID, name, type, length, sLink->targetPath);
     SDendaccess(dataID);
   } else {
-    dataID = Vattach(pFile->iVID, sLink->iRef, "w");
+    dataID = Vattach(pFile->iVID, static_cast<int32>(sLink->iRef), "w");
     Vsetattr(dataID, static_cast<char *>(name), type, (int32)length, sLink->targetPath);
     Vdetach(dataID);
   }
@@ -1175,7 +1180,7 @@ NXstatus NX4makelink(NXhandle fid, NXlink *sLink) {
 
 NXstatus NX4makenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
   pNexusFile pFile;
-  int32 dataID, type = DFNT_CHAR8, length, dataType = NX_CHAR, rank = 1, attType = NX_INT32;
+  int32 dataID, type = DFNT_CHAR8, dataType = NX_CHAR, rank = 1, attType = NX_INT32;
   char name[] = "target";
   int tags[2];
 
@@ -1185,17 +1190,17 @@ NXstatus NX4makenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
     return NX_ERROR;
   }
 
-  tags[0] = sLink->iTag;
-  tags[1] = sLink->iRef;
+  tags[0] = static_cast<int>(sLink->iTag);
+  tags[1] = static_cast<int>(sLink->iRef);
 
-  length = strlen(sLink->targetPath);
+  int32 length = static_cast<int32>(strlen(sLink->targetPath));
   if (sLink->iTag == DFTAG_SDG || sLink->iTag == DFTAG_NDG || sLink->iTag == DFTAG_SDS) {
     int64_t iDim[1] = {1};
     NX4makedata64(fid, newname, dataType, rank, iDim);
     NX4opendata(fid, newname);
     NX4putattr(fid, "NAPIlink", tags, 2, attType);
     NX4closedata(fid);
-    dataID = SDreftoindex(pFile->iSID, sLink->iRef);
+    dataID = SDreftoindex(pFile->iSID, static_cast<int32>(sLink->iRef));
     dataID = SDselect(pFile->iSID, dataID);
     SDsetattr(dataID, name, type, length, sLink->targetPath);
     SDendaccess(dataID);
@@ -1204,7 +1209,7 @@ NXstatus NX4makenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
     NX4opengroup(fid, newname, "NAPIlink");
     NX4putattr(fid, "NAPIlink", tags, 2, attType);
     NX4closegroup(fid);
-    dataID = Vattach(pFile->iVID, sLink->iRef, "w");
+    dataID = Vattach(pFile->iVID, static_cast<int32>(sLink->iRef), "w");
     Vsetattr(dataID, static_cast<char *>(name), type, (int32)length, sLink->targetPath);
     Vdetach(dataID);
   }

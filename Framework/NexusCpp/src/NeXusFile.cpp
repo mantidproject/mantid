@@ -2,8 +2,8 @@
 // REMOVE
 #include "MantidNexusCpp/NeXusException.hpp"
 #include "MantidNexusCpp/NeXusFile.hpp"
-#include "MantidNexusCpp/napiconfig.h"
 #include <iostream>
+#include <numeric>
 #include <sstream>
 #include <typeinfo>
 
@@ -593,7 +593,7 @@ void File::putAttr(const std::string &name, const string &value) {
     my_value = " "; // Make a default "space" to avoid errors.
   AttrInfo info;
   info.name = name;
-  info.length = static_cast<int>(my_value.size());
+  info.length = static_cast<unsigned int>(my_value.size());
   info.type = CHAR;
   this->putAttr(info, &(my_value[0]));
 }
@@ -739,10 +739,9 @@ template <typename NumT> void File::getData(vector<NumT> &data) {
     throw Exception("NXgetdata failed - invalid vector type");
   }
   // determine the number of elements
-  int64_t length = 1;
-  for (vector<int64_t>::const_iterator it = info.dims.begin(); it != info.dims.end(); ++it) {
-    length *= *it;
-  }
+  size_t length =
+      std::accumulate(info.dims.cbegin(), info.dims.cend(), static_cast<size_t>(1),
+                      [](const auto subtotal, const auto &value) { return subtotal * static_cast<size_t>(value); });
 
   // allocate memory to put the data into
   // need to use resize() rather than reserve() so vector length gets set
@@ -869,14 +868,14 @@ string File::getStrData() {
     msg << "getStrData() only understand rank=1 data. Found rank=" << info.dims.size();
     throw Exception(msg.str());
   }
-  char *value = new char[info.dims[0] + 1]; // probably do not need +1, but being safe
+  char *value = new char[static_cast<size_t>(info.dims[0]) + 1]; // probably do not need +1, but being safe
   try {
     this->getData(value);
   } catch (const Exception &e) {
     delete[] value;
     throw; // rethrow the original exception
   }
-  res = string(value, info.dims[0]);
+  res = string(value, static_cast<size_t>(info.dims[0]));
   delete[] value;
   return res;
 }
@@ -982,16 +981,16 @@ AttrInfo File::getNextAttr() {
 
     // char (=string) or number array (1 dim)
     if (rank == 1) {
-      info.length = dim[0];
+      info.length = static_cast<unsigned int>(dim[0]);
       return info;
     }
 
     // string array (2 dim char array)
     if (rank == 2 && type == NX_CHAR) {
       info.length = 1;
-      for (unsigned int d = 0; d < rank; ++d) {
+      for (int d = 0; d < rank; ++d) {
         info.dims.push_back(dim[d]);
-        info.length *= dim[d];
+        info.length *= static_cast<unsigned int>(dim[d]);
       }
       return info;
     }
@@ -1016,7 +1015,7 @@ void File::getAttr(const AttrInfo &info, void *data, int length) {
   strcpy(name, info.name.c_str());
   int type = info.type;
   if (length < 0) {
-    length = info.length;
+    length = static_cast<int>(info.length);
   }
   NXstatus status = NXgetattr(this->m_file_id, name, data, &length, &type);
   if (status != NX_OK) {
@@ -1066,7 +1065,7 @@ string File::getStrAttr(const AttrInfo &info) {
   }
   char *value = new char[info.length + 1];
   try {
-    this->getAttr(info, value, info.length + 1);
+    this->getAttr(info, value, static_cast<int>(info.length) + 1);
   } catch (const Exception &e) {
     // Avoid memory leak
     delete[] value;
@@ -1090,7 +1089,7 @@ void File::getAttr(const std::string &name, std::vector<std::string> &array) {
   }
 
   // get attrInfo
-  char attr_name[name.size() + 1];
+  char attr_name[128];
   strcpy(attr_name, name.c_str());
 
   int type;
@@ -1106,7 +1105,7 @@ void File::getAttr(const std::string &name, std::vector<std::string> &array) {
 
   // read data
   std::string sep(", ");
-  char *char_data = new char[dim[0] * (dim[1] + sep.size())];
+  char *char_data = new char[static_cast<size_t>(dim[0]) * (static_cast<size_t>(dim[1]) + sep.size())];
   if (NXgetattra(this->m_file_id, attr_name, char_data) != NX_OK)
     throw Exception("Could not iterate to next attribute");
 
@@ -1202,7 +1201,7 @@ void File::setNumberFormat(NXnumtype &type, const string &format) {
 
 string File::inquireFile(const int buff_length) {
   string filename;
-  char *c_filename = new char[buff_length];
+  char *c_filename = new char[static_cast<size_t>(buff_length)];
   NXstatus status = NXinquirefile(this->m_file_id, c_filename, buff_length);
   if (status != NX_OK) {
     delete[] c_filename;
@@ -1224,12 +1223,13 @@ string File::isExternalGroup(const string &name, const string &type, const unsig
     throw Exception("Supplied empty type to isExternalGroup");
   }
   char *c_url = new char[buff_length];
-  NXstatus status = NXisexternalgroup(this->m_file_id, name.c_str(), type.c_str(), c_url, buff_length);
+  NXstatus status =
+      NXisexternalgroup(this->m_file_id, name.c_str(), type.c_str(), c_url, static_cast<int>(buff_length));
   if (status != NX_OK) {
     delete[] c_url;
     stringstream msg;
     msg << "NXisexternalgroup(" << type << ", " << buff_length << ")";
-    throw Exception(msg.str(), buff_length);
+    throw Exception(msg.str(), static_cast<int>(buff_length));
   }
   url = c_url;
   delete[] c_url;

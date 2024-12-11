@@ -208,12 +208,12 @@ int main(int argc, char *argv[]) {
   slab_size[1] = 4;
   if (NXputslab(fileid, r8_array, slab_start, slab_size) != NX_OK)
     return TEST_FAILED;
-  if (NXputattr(fileid, "ch_attribute", ch_test_data, strlen(ch_test_data), NX_CHAR) != NX_OK)
+  if (NXputattr(fileid, "ch_attribute", ch_test_data, static_cast<int>(strlen(ch_test_data)), NX_CHAR) != NX_OK)
     return TEST_FAILED;
   i = 42;
   if (NXputattr(fileid, "i4_attribute", &i, 1, NX_INT32) != NX_OK)
     return TEST_FAILED;
-  r = 3.14159265;
+  r = static_cast<float>(3.14159265);
   if (NXputattr(fileid, "r4_attribute", &r, 1, NX_FLOAT32) != NX_OK)
     return TEST_FAILED;
   if (NXgetdataID(fileid, &dlink) != NX_OK)
@@ -720,7 +720,8 @@ static int testExternal(const std::string &progName) {
   if (NXputdata(hfil, &dummyfloat) != NX_OK)
     return TEST_FAILED;
   std::string temperaturePath(PROTOCOL + extFile1 + "#/entry1/sample/temperature_mean");
-  if (NXputattr(hfil, "napimount", temperaturePath.c_str(), strlen(temperaturePath.c_str()), NX_CHAR) != NX_OK)
+  if (NXputattr(hfil, "napimount", temperaturePath.c_str(), static_cast<int>(strlen(temperaturePath.c_str())),
+                NX_CHAR) != NX_OK)
     return TEST_FAILED;
   /* this would segfault because we are tricking the napi stack
   if(NXclosedata(&hfil) != NX_OK){
