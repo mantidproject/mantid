@@ -618,22 +618,6 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetslab(NXhandle handle, void *data, const int st
 MANTID_NEXUSCPP_DLL NXstatus NXgetslab64(NXhandle handle, void *data, const int64_t start[], const int64_t size[]);
 
 /**
- * Iterate over global, group or dataset attributes depending on the currently open group or
- * dataset. In order to search attributes multiple calls to #NXgetnextattr are performed in a loop
- * until #NXgetnextattr returns NX_EOD which indicates that there are no further attributes.
- * reset search using #NXinitattrdir
- * This is deprecated as it only allows single value numerical attributes and single strings.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param pName The name of the attribute
- * \param iLength A pointer to an integer which be set to the length of the attribute data.
- * \param iType A pointer to an integer which be set to the NeXus data type of the attribute.
- * \return NX_OK on success, NX_ERROR in the case of an error, NX_EOD when there are no more items.
- * \ingroup c_readwrite
- */
-MANTID_NEXUSCPP_DLL NXstatus NXgetnextattr(NXhandle handle, NXname pName, int *iLength, int *iType)
-    NEXUS_DEPRECATED_FUNCTION("Use NXgetnextattra instead");
-
-/**
  * Read an attribute containing a single string or numerical value.
  * Use NXgetattra for attributes with dimensions. (Recommened as the general case.)
  * \param handle A NeXus file handle as initialized by NXopen.
