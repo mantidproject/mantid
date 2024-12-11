@@ -64,7 +64,8 @@ static const char *relativePathOf(const char *filename) {
 } // anonymous namespace
 
 int main(int argc, char *argv[]) {
-  int i, j, k, n, NXrank, NXdims[32], NXtype, NXlen, entry_status, attr_status;
+  int i, j, k, n, NXtype, NXlen, entry_status, attr_status;
+  int NXrank, NXdims[32];
   float r;
   void *data_buffer;
   const unsigned char i1_array[4] = {1, 2, 3, 4};
@@ -341,7 +342,7 @@ int main(int argc, char *argv[]) {
   }
   do {
     // cppcheck-suppress argumentSize
-    attr_status = NXgetnextattr(fileid, name, NXdims, &NXtype);
+    attr_status = NXgetnextattra(fileid, name, &NXrank, NXdims, &NXtype);
     if (attr_status == NX_ERROR)
       return TEST_FAILED;
     if (attr_status == NX_OK) {
@@ -367,7 +368,7 @@ int main(int argc, char *argv[]) {
   printf("NXentry path %s\n", path);
   do {
     // cppcheck-suppress argumentSize
-    attr_status = NXgetnextattr(fileid, name, NXdims, &NXtype);
+    attr_status = NXgetnextattra(fileid, name, &NXrank, NXdims, &NXtype);
     if (attr_status == NX_ERROR)
       return TEST_FAILED;
     if (attr_status == NX_OK) {
@@ -450,7 +451,7 @@ int main(int argc, char *argv[]) {
           }
           do {
             // cppcheck-suppress argumentSize
-            attr_status = NXgetnextattr(fileid, name, NXdims, &NXtype);
+            attr_status = NXgetnextattra(fileid, name, &NXrank, NXdims, &NXtype);
             if (attr_status == NX_ERROR)
               return TEST_FAILED;
             if (attr_status == NX_OK) {
