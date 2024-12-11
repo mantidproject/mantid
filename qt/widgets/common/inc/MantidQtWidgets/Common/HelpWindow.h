@@ -8,11 +8,9 @@
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QString>
+#include <QUrl>
 #include <QWidget>
 #include <string>
-
-// Forward declarations
-class QUrl;
 
 namespace MantidQt {
 namespace API {

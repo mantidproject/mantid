@@ -9,8 +9,6 @@
 //----------------------------------
 // Includes
 //----------------------------------
-#include <boost/python.hpp>
-
 #include "DllOption.h"
 #include "MantidKernel/Instantiator.h"
 
@@ -19,6 +17,12 @@
 #include <QPointer>
 #include <QString>
 #include <QStringList>
+
+#pragma push_macro("slots")
+#undef slots
+#include <Python.h>
+#include <boost/python.hpp>
+#pragma pop_macro("slots")
 
 //----------------------------------
 // Qt Forward declarations

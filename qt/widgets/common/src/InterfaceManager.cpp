@@ -1,8 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//   NScD Oak Ridge National Laboratory, European Spallation Source,
-//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------
 // Includes
@@ -31,23 +29,37 @@ using Mantid::Kernel::AbstractInstantiator;
 using MantidQt::MantidWidgets::MantidHelpWindow;
 
 namespace {
-// static logger
+// Static logger
 Mantid::Kernel::Logger g_log("InterfaceManager");
 
 // Load libraries once
 std::once_flag DLLS_LOADED;
 
-// Track if message saying offline help is unavailable has been shown
+// Track if the offline help message has been displayed
 bool offlineHelpMsgDisplayed = false;
 
 } // namespace
 
-// Initialise HelpWindow factory
+// Initialize HelpWindow factory
 Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *InterfaceManager::m_helpViewer = nullptr;
 
 //----------------------------------
 // Public member functions
 //----------------------------------
+
+AlgorithmDialog *InterfaceManager::createDialogFromName(const QString &algorithmName, const int version,
+                                                        QWidget *parent, bool forScript,
+                                                        const QHash<QString, QString> &presetValues,
+                                                        const QString &optionalMsg, const QStringList &enabled,
+                                                        const QStringList &disabled) {
+  auto alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(algorithmName.toStdString(), version);
+  if (!alg) {
+    g_log.error() << "Failed to create algorithm: " << algorithmName.toStdString() << "\n";
+    return nullptr;
+  }
+  return createDialog(std::shared_ptr<Mantid::API::IAlgorithm>(alg), parent, forScript, presetValues, optionalMsg,
+                      enabled, disabled);
+}
 
 /**
  * Show a help page using the default or Python-based HelpWindow
@@ -166,7 +178,7 @@ MantidHelpInterface *InterfaceManager::createHelpWindow() const {
   } else {
     auto *interface = m_helpViewer->createUnwrappedInstance();
     if (!interface) {
-      g_log.error("Error creating help window");
+      g_log.error("Error creating help window.");
     }
     return interface;
   }
