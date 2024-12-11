@@ -432,7 +432,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             alg.execute()
             fit_result["Function"] = alg.getProperty("Function").value  # getPropertyValue returns FunctionProperty not IFunction
             status = alg.getPropertyValue("OutputStatus")
-            fit_result["success"] = status == "success" or "Changes in function value are too small" in status
+            fit_result["success"] = status == "success" or status == "Changes in parameter value are too small"
             for prop in ("OutputWorkspace", "OutputNormalisedCovarianceMatrix", "OutputParameters"):
                 fit_result[prop] = alg.getPropertyValue(prop)
             return fit_result
