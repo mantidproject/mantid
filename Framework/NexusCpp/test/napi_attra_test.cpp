@@ -270,7 +270,7 @@ int main(int argc, char *argv[]) {
     NXinitattrdir(fileid);
     do {
       // cppcheck-suppress argumentSize
-      attr_status = NXgetnextattr(fileid, name, NXdims, &NXtype);
+      attr_status = NXgetnextattra(fileid, name, &NXrank, NXdims, &NXtype);
       if (attr_status == NX_EOD) {
         fprintf(stderr, "BANG! We've seen no error iterating through array attributes with old api\n");
         break;
