@@ -854,8 +854,8 @@ redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:1049
 redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:1077
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:636
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cppp:633
-redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cpp:725
-redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cpp:862
+redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cpp:730
+redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cpp:867
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:418
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cpp:1075
 uselessAssignmentArg:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cpp:1075
@@ -864,8 +864,8 @@ constParameter:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:769
 constParameter:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:770
 constParameter:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:771
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:239
-constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cpp:1216
-constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cpp:1673
+constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cpp:1221
+constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cpp:1678
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cpp:1734
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:191
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi5.cpp:180
