@@ -362,6 +362,9 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             non_bg_mask = np.zeros(peak_data.detids.shape, dtype=bool)
             non_bg_mask.flat[initial_peak_mask] = i_over_sigma > i_over_sig_threshold
             peak_mask = find_peak_cluster_in_window(non_bg_mask, (peak_data.irow, peak_data.icol))
+            if not peak_mask.any():
+                continue  # no peak
+
             is_on_edge = np.any(np.logical_and(peak_mask, peak_data.det_edges))
             if is_on_edge:
                 status = PEAK_STATUS.ON_EDGE
@@ -664,7 +667,7 @@ def plot_integration_results(output_file, results, prog_reporter):
 def find_peak_cluster_in_window(mask, predicted_pos):
     labels, nlabels = label(mask)
     if nlabels < 1:
-        return None  # no peak found
+        return np.zeros(mask.shape, dtype=bool)  # no peak found
     peak_label = labels[predicted_pos]
     if peak_label == 0:
         inearest = distance_transform_edt(labels == 0, return_distances=False, return_indices=True)
