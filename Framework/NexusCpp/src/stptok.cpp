@@ -25,11 +25,11 @@ char *stptok(const char *s, char *tok, size_t toklen, char *brk) {
     for (b = brk; *b; b++) {
       if (*s == *b) {
         *tok = 0;
-        return (char *)(s + 1);
+        return const_cast<char *>(s + 1);
       }
     }
     *tok++ = *s++;
   }
   *tok = 0;
-  return (char *)s;
+  return const_cast<char *>(s);
 }
