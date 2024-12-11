@@ -617,10 +617,8 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
   (void)is_definition;
 
   int status, attrLen, attrType;
-#ifndef NEXUS43
   int rank;
   int dims[4];
-#endif
   NXname attrName;
   void *attrBuffer;
 
@@ -628,19 +626,13 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
       {"NeXus_version", "XML_version", "HDF_version", "HDF5_Version", "file_name", "file_time"}};
 
   do {
-#ifdef NEXUS43
-    status = NXgetnextattr(inId, attrName, &attrLen, &attrType);
-#else
     status = NXgetnextattra(inId, attrName, &rank, dims, &attrType);
-#endif
     if (status == NX_ERROR)
       return NX_ERROR;
     if (status == NX_OK) {
-#ifndef NEXUS43
       if (rank != 1)
         return NX_ERROR;
       attrLen = dims[0];
-#endif
       if (std::none_of(attrs.cbegin(), attrs.cend(),
                        [&attrName](const char *name) { return strcmp(attrName, name) == 0; })) {
         attrLen++; /* Add space for string termination */

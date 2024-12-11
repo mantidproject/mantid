@@ -1165,13 +1165,6 @@ NXstatus NXgetslab64(NXhandle fid, void *data, const int64_t iStart[], const int
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXgetnextattr(NXhandle fileid, NXname pName, int *iLength, int *iType) {
-  pNexusFunction pFunc = handleToNexusFunc(fileid);
-  return LOCKED_CALL(pFunc->nxgetnextattr(pFunc->pNexusData, pName, iLength, iType));
-}
-
-/*-------------------------------------------------------------------------*/
-
 NXstatus NXgetattr(NXhandle fid, const char *name, void *data, int *datalen, int *iType) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxgetattr(pFunc->pNexusData, name, data, datalen, iType));
