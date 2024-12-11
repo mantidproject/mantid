@@ -354,6 +354,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
                 continue  # no peak
             fit_result = self.exec_fit(initial_function, **fit_kwargs, **md_fit_kwargs)
             if not fit_result["success"]:
+                self.delete_fit_result_workspaces(fit_result)
                 continue  # skip peak
 
             # update peak mask based on I/sig from fit
@@ -364,6 +365,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             is_on_edge = np.any(np.logical_and(peak_mask, peak_data.det_edges))
             if not integrate_on_edge and is_on_edge:
                 status = PEAK_STATUS.ON_EDGE
+                self.delete_fit_result_workspaces(fit_result)
                 continue  # skip peak
 
             # fit only peak pixels and let peak centers vary independently of DIFC ratio
@@ -371,6 +373,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             final_function = func_generator.get_final_fit_function(fit_result["Function"], fit_mask, frac_dspac_delta)
             fit_result = self.exec_fit(final_function, **fit_kwargs, **md_fit_kwargs)
             if not fit_result["success"]:
+                self.delete_fit_result_workspaces(fit_result)
                 continue  # skip peak
 
             # calculate intensity
@@ -395,6 +398,9 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
                     )
                 )
             set_peak_intensity(peak, peak_intens, peak_sigma, do_lorz_cor)
+
+            # delete fit workspaces
+            self.delete_fit_result_workspaces(fit_result)
 
         # plot output
         if output_file:
@@ -426,11 +432,16 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             fit_result["Function"] = alg.getProperty("Function").value  # getPropertyValue returns FunctionProperty not IFunction
             status = alg.getPropertyValue("OutputStatus")
             fit_result["success"] = status == "success" or "Changes in function value are too small" in status
-            fit_result["OutputWorkspace"] = alg.getPropertyValue("OutputWorkspace")
+            for prop in ("OutputWorkspace", "OutputNormalisedCovarianceMatrix", "OutputParameters"):
+                fit_result[prop] = alg.getPropertyValue(prop)
             return fit_result
         except:
             pass
         return fit_result
+
+    def delete_fit_result_workspaces(self, fit_result: dict):
+        wsnames = [fit_result[field] for field in ("OutputWorkspace", "OutputNormalisedCovarianceMatrix", "OutputParameters")]
+        self.exec_child_alg("DeleteWorkspaces", WorkspaceList=wsnames)
 
 
 class PeakFunctionGenerator:
@@ -516,20 +527,16 @@ class PeakFunctionGenerator:
             # tie global params to first
             for par in pars_to_tie:
                 ties.append(f"f{idom}.f0.{par}=f0.f0.{par}")  # global peak pars
-                # function.tie(f"f{idom}.f0.{par}", f"f0.f0.{par}")
             for ipar_bg in range(function[idom][1].nParams()):
                 par = function[idom][1].getParamName(ipar_bg)
                 ties.append(f"f{idom}.f1.{par}=f0.f1.{par}")
-                # function.tie(f"f{idom}.f1.{par}", f"f0.f1.{par}")
             # tie center using ratio of DIFC
             ratio = function[idom][0][self.cen_par_name] / function[0][0][self.cen_par_name]
             ties.append(f"f{idom}.f0.{self.cen_par_name}={ratio}*f0.f0.{self.cen_par_name}")
-            # function.tie(f"f{idom}.f0.{self.cen_par_name}", f"{ratio}*f0.f0.{self.cen_par_name}")
             for par in additional_pars_to_fix:
                 # pars to be fixed but not global/already tied
-                par = function[idom][0].fixParameter(par)
+                function[idom][0].fixParameter(par)
         # add ties as string (orders of magnitude quicker than self.function.tie)
-        # return str(function)
         return f"{str(function)};ties=({','.join(ties)})"
 
     def get_final_fit_function(self, function: MultiDomainFunction, peak_mask: np.ndarray[bool], frac_dspac_delta: float) -> str:
