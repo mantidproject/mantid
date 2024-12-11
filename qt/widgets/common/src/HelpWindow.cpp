@@ -14,14 +14,10 @@
 #include "MantidQtWidgets/Common/MantidHelpInterface.h"
 
 #include <QPushButton>
-#define PY_SSIZE_T_CLEAN
-#undef slots
-#include <Python.h>
-
 #include <QUrl>
 #include <QVBoxLayout>
-#include <QWidget>
-#include <boost/python.hpp>
+
+#define PY_SSIZE_T_CLEAN
 
 namespace MantidQt::API {
 namespace {

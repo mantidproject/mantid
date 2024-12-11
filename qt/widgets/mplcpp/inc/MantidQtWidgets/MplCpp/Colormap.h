@@ -11,7 +11,11 @@
 #undef slots
 #include "MantidQtWidgets/Common/Python/Object.h"
 #pragma pop_macro("slots")
+#include <QPushButton>
 #include <QString>
+#include <QUrl>
+#include <QVBoxLayout>
+#include <QWidget>
 
 namespace MantidQt {
 namespace Widgets {
