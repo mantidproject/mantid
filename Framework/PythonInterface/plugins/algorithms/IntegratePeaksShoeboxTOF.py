@@ -386,7 +386,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     weak_peak_threshold,
                     do_optimise_shoebox,
                 )
-                if ipos is not None:
+                if (ipos is not None) and (status is not PEAK_STATUS.WEAK):
                     peaks_spec_and_det_ids[ipk] = [ispecs[ipos[0], ipos[1]], peak_data.detids]
 
                 if status == PEAK_STATUS.WEAK and do_optimise_shoebox and weak_peak_strategy == "NearestStrongPeak":
@@ -438,6 +438,8 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, kernel, nshoebox)
                 # integrate at previously found ipos
                 ipos = [*np.argwhere(ispecs == weak_pk.ispec)[0], np.argmin(abs(x - weak_pk.tof))]
+                peaks_spec_and_det_ids[ipk] = [ispecs[ipos[0], ipos[1]], peak_data.detids]
+
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
                 intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
                 # scale summed intensity by bin width to get integrated area

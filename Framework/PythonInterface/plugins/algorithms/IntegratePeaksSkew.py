@@ -1182,9 +1182,11 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         """
         Sets PeakShapeDetectorBin shape for a peak
         @param ws - Input workspace
-        @param peak - peak to add the peak shape
+        @param peak - peak to add the shape
         @param peak_data - PeakData object containing details of the integrated peak
         """
+        if not peak_data.peak_mask.any():
+            return
         det_bin_list = []
         for det in peak_data.detids[peak_data.peak_mask]:
             ispec = ws.getIndicesFromDetectorIDs([int(det)])[0]
