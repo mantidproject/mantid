@@ -28,8 +28,8 @@ using namespace WorkspaceCreationHelper;
 
 namespace {
 
-static const int PA_GROUP_SIZE = 4;
-static const int PNR_GROUP_SIZE = 2;
+constexpr int PA_GROUP_SIZE = 4;
+constexpr int PNR_GROUP_SIZE = 2;
 } // namespace
 
 class PolarizationCorrectionFredrikzeTest : public CxxTest::TestSuite {
@@ -330,6 +330,7 @@ public:
   void test_valid_spin_state_order_for_PA() {
     auto groupWS = createGroupWorkspace(4, 4, 1, 1);
     auto alg = initializeAlgorithm(groupWS, "PA", "1,0,0,0");
+    alg->setProperty("AddSpinStateToLog", true);
 
     const std::vector<std::string> spinStateOrders = {
         SpinStateConfigurationsFredrikze::PARA_PARA + "," + SpinStateConfigurationsFredrikze::PARA_ANTI + "," +
@@ -353,7 +354,6 @@ public:
     for (size_t orderIdx = 0; orderIdx < spinStateOrders.size(); ++orderIdx) {
       alg->setProperty("InputSpinStates", spinStateOrders[orderIdx]);
       alg->setProperty("OutputSpinStates", spinStateOrders[orderIdx]);
-      alg->setProperty("AddSpinStateToLog", true);
 
       TS_ASSERT_THROWS_NOTHING(alg->execute());
       const Mantid::API::WorkspaceGroup_sptr outputWS = alg->getProperty("OutputWorkspace");
@@ -403,8 +403,8 @@ public:
 
   void test_valid_spin_state_order_for_PNR() {
     auto groupWS = createGroupWorkspace(2, 4, 1, 1);
-    auto eff = makeEfficiencies(create1DWorkspace(4, 1, 1), "1,0,0,0", "1,0,0,0");
     auto alg = initializeAlgorithm(groupWS, "PNR", "1,0,0,0");
+    alg->setProperty("AddSpinStateToLog", true);
 
     std::vector<std::string> spinStateOrders = {
         SpinStateConfigurationsFredrikze::PARA + "," + SpinStateConfigurationsFredrikze::ANTI,
@@ -416,7 +416,6 @@ public:
     for (size_t orderIdx = 0; orderIdx < spinStateOrders.size(); ++orderIdx) {
       alg->setProperty("InputSpinStates", spinStateOrders[orderIdx]);
       alg->setProperty("OutputSpinStates", spinStateOrders[orderIdx]);
-      alg->setProperty("AddSpinStateToLog", true);
 
       TS_ASSERT_THROWS_NOTHING(alg->execute());
       const Mantid::API::WorkspaceGroup_sptr outputWS = alg->getProperty("OutputWorkspace");
