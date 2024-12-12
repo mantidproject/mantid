@@ -1125,17 +1125,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/InstrumentSelec
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ListPropertyWidget.cpp:46
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FitDomain.h:35
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ManageUserDirectories.h:39
-ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:318
-ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:320
-ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:329
-ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:331
-ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:342
-ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:343
-ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:344
-ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:354
-ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:355
-ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:356
-ignoredReturnErrorCode:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:357
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/Message.h:52
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/Message.h:56
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/MantidHelpWindow.cpp:301

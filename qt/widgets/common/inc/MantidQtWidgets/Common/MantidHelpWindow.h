@@ -16,7 +16,9 @@
 class QHelpEngine;
 class QString;
 class QWidget;
+#ifdef DOCS_QTHELP
 class pqHelpWindow;
+#endif
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -25,7 +27,7 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidHelpWindow : public API::MantidHelpInterf
   Q_OBJECT
 
 public:
-  static bool helpWindowExists() { return !g_helpWindow.isNull(); }
+  static bool helpWindowExists();
 
   MantidHelpWindow(const Qt::WindowFlags &flags = Qt::WindowFlags());
 
@@ -49,13 +51,15 @@ private:
 
   /// The full path of the collection file.
   std::string m_collectionFile;
+#ifdef DOCS_QTHELP
   /// The window that renders the help information
   static QPointer<pqHelpWindow> g_helpWindow;
+#endif
 
   /// Whether this is the very first startup of the helpwindow.
   bool m_firstRun;
 
-  void findCollectionFile(std::string &binDir);
+  void findCollectionFile(const std::string &binDir);
   void determineFileLocs();
 
 public slots:
