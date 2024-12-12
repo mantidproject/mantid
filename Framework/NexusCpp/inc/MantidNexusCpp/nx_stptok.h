@@ -3,6 +3,6 @@
 
 #include <stddef.h>
 
-extern char *stptok(const char *s, char *tok, size_t toklen, char *brk);
+extern char *stptok(const char *s, char *tok, size_t toklen, char const *brk);
 
 #endif /* NX_STPTOK */

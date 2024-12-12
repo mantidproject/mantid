@@ -14,8 +14,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *stptok(const char *s, char *tok, size_t toklen, char *brk) {
-  char *lim, *b;
+char *stptok(const char *s, char *tok, size_t toklen, char const *brk) {
+  char *lim;
+  char const *b;
 
   if (!*s)
     return NULL;
