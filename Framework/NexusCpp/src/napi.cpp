@@ -1070,12 +1070,12 @@ NXstatus NXgetdata(NXhandle fid, void *data) {
     status = LOCKED_CALL(pFunc->nxgetdata(pFunc->pNexusData, pPtr));
     char const *pPtr2;
     pPtr2 = nxitrim(pPtr);
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+#if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-truncation"
 #endif
     strncpy(static_cast<char *>(data), pPtr2, strlen(pPtr2)); /* not NULL terminated by default */
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+#if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic pop
 #endif
     free(pPtr);
