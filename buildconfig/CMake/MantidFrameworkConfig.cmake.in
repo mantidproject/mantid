@@ -29,6 +29,7 @@ unset(_mypackage_module_path_save)
 set(MODULES
     Types
     Json
+    NexusCpp
     Kernel
     Parallel
     HistogramData
@@ -40,7 +41,6 @@ set(MODULES
     DataObjects
     Catalog
     Nexus
-    NexusCpp
     PythonInterfaceCore
 )
 
