@@ -236,7 +236,7 @@ NXstatus NXsetcache(long newVal) {
 }
 
 /*-------------------------------------------------------------------------*/
-static void NXNXNXReportError(void *pData, char *string) {
+static void NXNXNXReportError(void *pData, const char *string) {
   UNUSED_ARG(pData);
   fprintf(stderr, "%s \n", string);
 }
@@ -244,13 +244,13 @@ static void NXNXNXReportError(void *pData, char *string) {
 /*---------------------------------------------------------------------*/
 
 static void *NXEHpData = NULL;
-static void (*NXEHIReportError)(void *pData, char *string) = NXNXNXReportError;
+static void (*NXEHIReportError)(void *pData, const char *string) = NXNXNXReportError;
 #ifdef HAVE_TLS
 static THREAD_LOCAL void *NXEHpTData = NULL;
-static THREAD_LOCAL void (*NXEHIReportTError)(void *pData, char *string) = NULL;
+static THREAD_LOCAL void (*NXEHIReportTError)(void *pData, const char *string) = NULL;
 #endif
 
-void NXIReportError(void *pData, char *string) {
+void NXIReportError(void *pData, const char *string) {
   UNUSED_ARG(pData);
   fprintf(
       stderr,
@@ -258,7 +258,7 @@ void NXIReportError(void *pData, char *string) {
   NXReportError(string);
 }
 
-void NXReportError(char *string) {
+void NXReportError(const char *string) {
 #ifdef HAVE_TLS
   if (NXEHIReportTError) {
     (*NXEHIReportTError)(NXEHpTData, string);
@@ -271,13 +271,13 @@ void NXReportError(char *string) {
 }
 
 /*---------------------------------------------------------------------*/
-extern void NXMSetError(void *pData, void (*NewError)(void *pD, char *text)) {
+extern void NXMSetError(void *pData, void (*NewError)(void *pD, const char *text)) {
   NXEHpData = pData;
   NXEHIReportError = NewError;
 }
 
 /*----------------------------------------------------------------------*/
-extern void NXMSetTError(void *pData, void (*NewError)(void *pD, char *text)) {
+extern void NXMSetTError(void *pData, void (*NewError)(void *pD, const char *text)) {
 #ifdef HAVE_TLS
   NXEHpTData = pData;
   NXEHIReportTError = NewError;
@@ -297,7 +297,7 @@ extern ErrFunc NXMGetError() {
 }
 
 /*----------------------------------------------------------------------*/
-static void NXNXNoReport(void *pData, char *string) {
+static void NXNXNoReport(void *pData, const char *string) {
   // do nothing but declare the variables unused
   (void)pData;
   (void)string;

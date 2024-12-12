@@ -856,7 +856,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetrawinfo(NXhandle handle, int *rank, int dimens
  */
 MANTID_NEXUSCPP_DLL NXstatus NXgetrawinfo64(NXhandle handle, int *rank, int64_t dimension[], int *datatype);
 
-/** \typedef void (*ErrFunc)(void *data, char *text)
+/** \typedef void (*ErrFunc)(void *data, const char *text)
  * All NeXus error reporting happens through this special function, the
  * ErrFunc. The NeXus-API allows this error reporting function to be replaced
  * through a user defined implementation. The default error function prints to stderr. User
@@ -864,7 +864,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXgetrawinfo64(NXhandle handle, int *rank, int64_t 
  * \param data A pointer to some user defined data structure
  * \param text The text of the error message to display.
  */
-typedef void (*ErrFunc)(void *data, char *text);
+typedef void (*ErrFunc)(void *data, const char *text);
 
 /**
  * Set a global error function.
@@ -904,12 +904,12 @@ MANTID_NEXUSCPP_DLL void NXMEnableErrorReporting();
 /**
  * Dispatches the error message to the error function defined by NXMSetTError
  */
-MANTID_NEXUSCPP_DLL void NXReportError(char *text);
+MANTID_NEXUSCPP_DLL void NXReportError(const char *text);
 
 /**
  * Do not use, first parameter should be set by NXMSetTError
  */
-MANTID_NEXUSCPP_DLL void NXIReportError(void *pData, char *text);
+MANTID_NEXUSCPP_DLL void NXIReportError(void *pData, const char *text);
 /* extern void *NXpData; */
 MANTID_NEXUSCPP_DLL char *NXIformatNeXusTime();
 
