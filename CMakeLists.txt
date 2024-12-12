@@ -188,6 +188,8 @@ endif()
 # Docs requirements
 option(ENABLE_DOCS "Enable Building user and developer documentation" ON)
 if(ENABLE_DOCS)
+  option(DOCS_QTHELP "If enabled add a target to build the qthelp documentation for qtassistant" ON)
+
   find_package(Sphinx REQUIRED)
   # run python to see if the theme is installed
   execute_process(

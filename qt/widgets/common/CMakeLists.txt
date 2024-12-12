@@ -701,6 +701,11 @@ mtd_add_qt_library(
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
+# add an extra define to use pqhelpwindow which wraps qtassistant
+if(DOCS_QTHELP)
+  # warning - this is assuming that the output is qt5 only
+  target_compile_definitions(MantidQtWidgetsCommonQt5 PUBLIC -DDOCS_QTHELP)
+endif()
 
 set(TEST_FILES
     test/AlgorithmHintStrategyTest.h
