@@ -482,7 +482,7 @@ class PeakFunctionGenerator:
         for ii, ispec in enumerate(ispecs):
             # check stats in pixel
             intens, sigma, bg = self._estimate_intensity_and_background(ws, ispec, istart, iend)
-            self.ysum.flat[ii] = intens + bg * (iend - istart)
+            self.ysum.flat[ii] = ws.readY(ispec)[istart:iend].sum()
             avg_bg += bg
             peak_mask[ii] = sigma > 0 and intens / sigma > MIN_INTENS_OVER_SIGMA  # low threshold for initial fit
             if peak_mask[ii]:
@@ -512,14 +512,16 @@ class PeakFunctionGenerator:
 
     @staticmethod
     def _estimate_intensity_and_background(ws: Workspace2D, ispec: int, istart: int, iend: int) -> Tuple[float, float, float]:
+        bin_width = np.diff(ws.readX(ispec)[istart:iend])
+        bin_width = np.hstack((bin_width, bin_width[-1]))  # easier than checking iend and istart not out of bounds
         y = ws.readY(ispec)[istart:iend]
         if not np.any(y > 0):
             return 0.0, 0.0, 0.0
         e = ws.readE(ispec)[istart:iend]
         ibg, _ = PeakData.find_bg_pts_seed_skew(y)
         bg = np.mean(y[ibg])
-        intensity = np.sum(y - bg)
-        sigma = np.sqrt(np.sum(e**2))
+        intensity = np.sum((y - bg) * bin_width)
+        sigma = np.sqrt(np.sum((e * bin_width) ** 2))
         return intensity, sigma, bg
 
     def _add_parameter_ties_and_constraints(self, function: MultiDomainFunction, pars_to_tie: Sequence[str]) -> str:

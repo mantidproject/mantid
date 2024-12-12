@@ -31,6 +31,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         cls.ws = LoadEmptyInstrument(InstrumentName="SXD", OutputWorkspace="SXD")
         axis = cls.ws.getAxis(0)
         axis.setUnit("TOF")
+
         # rebin to get 20 TOF bins
         cls.ws = Rebin(InputWorkspace=cls.ws, OutputWorkspace=cls.ws.name(), Params="9900,25,10800", PreserveEvents=False)
         cls.ws += 50  # add constant background
@@ -40,7 +41,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         ispecs = cls.ws.getIndicesFromDetectorIDs(cls.detids)
         # simulate peak
         cls.pk_tof = 10250
-        pk_func = BackToBackExponential(I=1e4, A=0.9, X0=cls.pk_tof)  # override default A so cost-func not 0 in fit
+        pk_func = BackToBackExponential(I=1e4, X0=cls.pk_tof)
         for ipk, detid in enumerate(cls.detids):
             AddPeak(PeaksWorkspace=cls.peaks_edge, RunWorkspace=cls.ws, TOF=cls.pk_tof, DetectorID=detid)
             pk_func.function.setMatrixWorkspace(cls.ws, ispecs[ipk], 0.0, 0.0)
@@ -121,7 +122,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         kwargs = self.profile_kwargs.copy()
         kwargs["ErrorStrategy"] = "Hessian"
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_5", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 225585, delta=1)  # not realistic fit
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 1724060419, delta=1)  # not realistic fit - no noise!
 
     def test_exec_IOverSigmaThreshold_respected(self):
         kwargs = self.profile_kwargs.copy()
