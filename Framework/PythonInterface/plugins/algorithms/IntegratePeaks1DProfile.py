@@ -641,6 +641,7 @@ class LineProfileResult:
         axes[1].plot(self.tofs, self.yfoc_fit, "-r")
         axes[1].set_xlabel("TOF (mus)")
         axes[1].set_ylabel("Intensity (a.u.)")
+        fig.colorbar(im, ax=axes[0], location="left", label="Intensity (a.u.)")
         # set title
         fig.suptitle(self.title)
 
