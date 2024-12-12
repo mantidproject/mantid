@@ -37,6 +37,7 @@
 #include <time.h>
 
 // clang-format off
+#include "MantidNexusCpp/napiconfig.h"
 #include "MantidNexusCpp/napi.h"
 #include "MantidNexusCpp/napi_internal.h"
 #include "MantidNexusCpp/napi5.h"
