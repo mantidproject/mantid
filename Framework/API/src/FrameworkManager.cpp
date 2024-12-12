@@ -69,7 +69,7 @@ const char *PLUGINS_EXCLUDE_KEY = "framework.plugins.exclude";
  */
 // Prevent clang-tidy trying to change the signature for ext. interface
 // NOLINTNEXTLINE(readability-non-const-parameter)
-void NexusErrorFunction(void *, char *) {
+void NexusErrorFunction(void *, const char *) {
   // Do nothing.
 }
 
