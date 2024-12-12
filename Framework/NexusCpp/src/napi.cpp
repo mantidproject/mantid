@@ -792,13 +792,6 @@ NXstatus NXcompmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank,
 
 /* --------------------------------------------------------------------- */
 
-NXstatus NXcompress(NXhandle fid, int compress_type) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  return LOCKED_CALL(pFunc->nxcompress(pFunc->pNexusData, compress_type));
-}
-
-/* --------------------------------------------------------------------- */
-
 NXstatus NXopendata(NXhandle fid, CONSTCHAR *name) {
   int status, attStatus, type = NX_CHAR, length = 1023;
   NXaccess access = NXACC_READ;

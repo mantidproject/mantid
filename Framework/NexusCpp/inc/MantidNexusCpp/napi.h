@@ -257,12 +257,6 @@ typedef struct {
  *
  */
 
-#if (defined(__GNUC__) || defined(__clang__))
-#define NEXUS_DEPRECATED_FUNCTION(msg) __attribute__((deprecated(msg)))
-#else
-#define NEXUS_DEPRECATED_FUNCTION(msg)
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
@@ -420,19 +414,6 @@ MANTID_NEXUSCPP_DLL NXstatus NXcompmakedata(NXhandle handle, CONSTCHAR *label, i
  */
 MANTID_NEXUSCPP_DLL NXstatus NXcompmakedata64(NXhandle handle, CONSTCHAR *label, int datatype, int rank, int64_t dim[],
                                               int comp_typ, int64_t chunk_size[]);
-
-/**
- * Switch compression on. This routine is superceded by NXcompmakedata and thus
- * is deprecated.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param compr_type The compression scheme to use. Possible values:
- * \li NX_COMP_NONE no compression
- * \li NX_COMP_LZW (recommended) despite the name this enabled zlib compression (of various levels, see above)
- * \li NX_COMP_RLE run length encoding (only HDF-4)
- * \li NX_COMP_HUF Huffmann encoding (only HDF-4)
- * \ingroup c_readwrite
- */
-MANTID_NEXUSCPP_DLL NXstatus NXcompress(NXhandle handle, int compr_type) NEXUS_DEPRECATED_FUNCTION();
 
 /**
  * Open access to a dataset. After this call it is possible to write and read data or

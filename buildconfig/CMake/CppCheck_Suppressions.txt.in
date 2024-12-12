@@ -848,10 +848,10 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Unin
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/src/Converters/CloneToNDArray.cpp:123
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/src/NexusFileIO.cpp:725
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Nexus/src/NexusFileIO.cpp:784
-argumentSize:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/NeXusFile.cpp:906
-argumentSize:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/NeXusFile.cpp:970
-redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:1049
-redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:1077
+argumentSize:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/NeXusFile.cpp:900
+argumentSize:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/NeXusFile.cpp:964
+redundantInitialization:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:1042
+redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:1070
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:636
 redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cpp:730
 redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi4.cpp:867
@@ -874,8 +874,9 @@ redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi5.cpp:626
 redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi5.cpp:617
 redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi5.cpp:881
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi5.cpp:1224
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:192
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:638
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:1473
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:1466
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi5.cpp:1972
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi5.cpp:2007
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi5.cpp:2184
