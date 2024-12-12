@@ -1,0 +1,1 @@
+- Fix Deprecation Warning for getSampleDetails in :ref:`Fitting tab <ui engineering fitting>`

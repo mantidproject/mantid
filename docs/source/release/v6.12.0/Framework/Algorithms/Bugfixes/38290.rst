@@ -1,0 +1,1 @@
+- The following parameter names in :ref:`algm-HeliumAnalyserEfficiency` have been updated for consistency: `GasPressureTimesCellLength` is now `PxD`, `GasPressureTimesCellLengthError` is now `PXDError`, `StartLambda` is now `StartX`, and `EndLambda` is now `EndX`. Any scripts using the old names will need to be updated.

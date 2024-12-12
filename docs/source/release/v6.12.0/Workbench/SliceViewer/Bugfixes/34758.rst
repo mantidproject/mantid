@@ -1,0 +1,1 @@
+- Fixed a bug in the :ref:sliceviewer which was not showing data with correct ranges when doing a Transpose in non-orthogonal view.

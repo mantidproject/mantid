@@ -4,7 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#  This file is part of the mantid workbench
+from typing import Dict, Any
+
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QMessageBox
 
@@ -15,6 +16,11 @@ form, base = load_ui(__file__, "main.ui")
 
 
 class SettingsView(base, form):
+    ASK_BEFORE_CLOSE_TITLE = "Confirm exit"
+    ASK_BEFORE_CLOSE_MESSAGE = "Are you sure you want to exit without applying the settings?\n\n"
+    CHANGES_NEED_RESTART_TITLE = "Some changes require restart"
+    CHANGES_NEED_RESTART_MESSAGE = "The following changes will be applied when the workbench is restarted:\n\n"
+
     def __init__(self, parent, presenter):
         super(SettingsView, self).__init__(parent)
         self.setupUi(self)
@@ -31,9 +37,14 @@ class SettingsView(base, form):
             self.deleteLater()
             super(SettingsView, self).closeEvent(event)
 
-    def ask_before_close(self):
+    def ask_before_close(self, unsaved_changes: Dict[str, Any]):
+        change_strings = [f"{property_string}: {value}" for property_string, value in unsaved_changes.items()]
         reply = QMessageBox.question(
-            self, self.presenter.ASK_BEFORE_CLOSE_TITLE, self.presenter.ASK_BEFORE_CLOSE_MESSAGE, QMessageBox.Yes, QMessageBox.No
+            self,
+            self.ASK_BEFORE_CLOSE_TITLE,
+            self.ASK_BEFORE_CLOSE_MESSAGE + "  • " + "\n  • ".join(change_strings),
+            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.No,
         )
         return True if reply == QMessageBox.Yes else False
 
@@ -47,9 +58,10 @@ class SettingsView(base, form):
         )
 
     def notify_changes_need_restart(self, list_of_changes_that_need_restart):
-        QMessageBox.information(
-            self,
-            self.presenter.CHANGES_NEED_RESTART_TITLE,
-            self.presenter.CHANGES_NEED_RESTART_MESSAGE + "  • " + "\n  • ".join(list_of_changes_that_need_restart),
-            QMessageBox.Ok,
-        )
+        if list_of_changes_that_need_restart:
+            QMessageBox.information(
+                self,
+                self.CHANGES_NEED_RESTART_TITLE,
+                self.CHANGES_NEED_RESTART_MESSAGE + "  • " + "\n  • ".join(list_of_changes_that_need_restart),
+                QMessageBox.Ok,
+            )

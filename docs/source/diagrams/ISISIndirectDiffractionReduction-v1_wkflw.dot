@@ -6,11 +6,19 @@ digraph ISISIndirectDiffractionReduction {
     $decision_style
     need_to_unwrap                [label="Need To Unwrap Monitor?"]
     is_multi_frame                [label="Is Multiple Frames?"]
+    has_calib_file                [label="Using Calibration File?"]
+    has_container                 [label="Subtract Container?"]
+    has_container2                [label="Subtract Container?"]
+    has_mask                      [label="Has mask detector?"]
+    has_van                       [label="Scale Vanadium?"]
   }
 
   subgraph params {
     $param_style
     InputFiles
+    VanadiumFiles
+    ContainerFiles
+    ContainerScaleFactor
     SumFiles
     CalibrationFile
     Instrument
@@ -19,6 +27,11 @@ digraph ISISIndirectDiffractionReduction {
     RebinParam
     GroupingMethod
     OutputWorkspace
+    GroupingString
+    GroupingFile
+    GroupingWorkspace
+    NGroups
+    SpectraRange                  [label="SpectraRange"]
   }
 
   subgraph algorithms {
@@ -26,11 +39,18 @@ digraph ISISIndirectDiffractionReduction {
     ConvertUnits_unwrap_monitor   [label="ConvertUnits"]
     ConvertUnits_dSpacing         [label="ConvertUnits"]
     GroupWorkspaces
+    ApplyDiffCal
+    ApplyDiffCal1                 [label="ApplyDiffCal"]
+    ConvertUnits_calib            [label="ConvertUnits"]
+    Rebin
+    Minus
   }
 
   subgraph processes {
     $process_style
-    load_files                    [label="load_files\nLoads run files and instrument parameters.\nChops data into multiple frames if required.\nSumms runs if required."]
+    load_files                    [label="load_files\nLoads run files and instrument parameters.\nChops data into multiple frames if required.\nSums runs if required."]
+    load_and_scale_container      [label="load_and_scale_container\nLoads container files and scale them\nusing the ContainerScaleFactor if provided."]
+    load_and_calibrate_vanadium   [label="load_and_calibrate_vanadium\nLoads vanadium files and calibrate them\nusing the CalibrationFile if provided."]
     get_multi_frame_rebin         [label="get_multi_frame_rebin\nGets a rebin string for rebinning\nmultiple frames."]
     identify_bad_detectors        [label="identify_bad_detectors\nGets a list of noisy detectors using\nthe IdentifyNoisyDetectors algorithm."]
     unwrap_monitor                [label="unwrap_monitor\nUnwraps monitor based on IPF options\nusing UnwrapMonitor algorithm."]
@@ -41,6 +61,9 @@ digraph ISISIndirectDiffractionReduction {
     group_spectra                 [label="group_spectra\nGroups spectra based\non the GroupingMethod."]
     fold_chopped                  [label="fold_chopped\nFolds multiple frames into\na single reduction."]
     rename_reduction              [label="rename_reduction\nRenames reduced workspaces\nas per the IPF options."]
+    rebin_and_subtract            [label="rebin_and_subtract\nRebin the workspace with bigger blocksize \nto match the one with smaller blocksize\nThen subtract the container spectra from the vandium spectra."]
+    rebin_and_divide              [label="rebin_and_divide\nRebin the workspace with bigger blocksize \nto match the one with smaller blocksize\nThen divide the runs spectra by the vanadium spectra."]
+    mask_detector                 [label="mask_detector\nMask noisy detectors."]
   }
 
   subgraph values {
@@ -52,11 +75,7 @@ digraph ISISIndirectDiffractionReduction {
     unit_unwrap_monitor           [label="Wavelength"]
     e_mode                        [label="Elastic"]
     dspacing_unit                 [label="dSpacing"]
-  }
-
-  subgraph decision {
-    $decision_style
-    has_calib_file                [label="Using Calibration File"]
+    clear_calib                   [label="True"]
   }
 
   InputFiles                  -> load_files
@@ -65,18 +84,38 @@ digraph ISISIndirectDiffractionReduction {
   Mode                        -> load_files
   SumFiles                    -> load_files
   load_files                  -> has_calib_file
-  has_calib_file              -> AlignDetectors                [label="Yes"]
-  CalibrationFile             -> AlignDetectors
-  AlignDetectors              -> DiffractionFocussing
-  CalibrationFile             -> DiffractionFocussing
-  DiffractionFocussing        -> get_multi_frame_rebin
-  has_calib_file              -> get_multi_frame_rebin         [label="No"]
+  has_calib_file              -> ApplyDiffCal                  [label="Yes"]
+  CalibrationFile             -> ApplyDiffCal
+  ApplyDiffCal                -> ConvertUnits_calib
+  dspacing_unit               -> ConvertUnits_calib                  [label="Target"]
+  e_mode                      -> ConvertUnits_calib                  [label="EMode"]
+  ConvertUnits_calib          -> ApplyDiffCal1
+  clear_calib                 -> ApplyDiffCal1                 [label="ClearCalibration"]
+  ApplyDiffCal1               -> Rebin
+  CalibrationFile             -> Rebin
+  Rebin                       -> get_multi_frame_rebin
+  has_calib_file              -> get_multi_frame_rebin          [label="No"]
   RebinParam                  -> get_multi_frame_rebin
   get_multi_frame_rebin       -> multi_frame_rebin_string
   get_multi_frame_rebin       -> multi_frame_num_bins
   load_files                  -> identify_bad_detectors
   identify_bad_detectors      -> masked_detectors
-  load_files                  -> need_to_unwrap
+  load_files                  -> has_container
+  has_container               -> Minus                          [label="Yes"]
+  ContainerFiles              -> load_and_scale_container
+  ContainerScaleFactor        -> load_and_scale_container
+  load_and_scale_container    -> Minus
+  Minus                       -> has_van
+  has_container               -> has_van                        [label="No"]
+  has_van                     -> rebin_and_divide               [label="Yes"]
+  VanadiumFiles               -> load_and_calibrate_vanadium
+  load_and_calibrate_vanadium -> has_container2
+  has_container2              -> rebin_and_subtract             [label="Yes"]
+  load_and_scale_container    -> rebin_and_subtract
+  rebin_and_subtract          -> rebin_and_divide
+  has_container2              -> rebin_and_divide               [label="No"]
+  rebin_and_divide            -> need_to_unwrap
+  has_van                     -> need_to_unwrap                 [label="No"]
   need_to_unwrap              -> unwrap_monitor                 [label="Yes"]
   unwrap_monitor              -> ConvertUnits_unwrap_monitor
   unit_unwrap_monitor         -> ConvertUnits_unwrap_monitor    [label="Target"]
@@ -88,13 +127,20 @@ digraph ISISIndirectDiffractionReduction {
   scale_detectors             -> ConvertUnits_dSpacing
   dspacing_unit               -> ConvertUnits_dSpacing          [label="Target"]
   e_mode                      -> ConvertUnits_dSpacing          [label="EMode"]
-  ConvertUnits_dSpacing       -> rebin_reduction
+  ConvertUnits_dSpacing       -> has_mask
+  has_mask                    -> mask_detector                  [label="Yes"]
+  masked_detectors            -> mask_detector
+  mask_detector               -> rebin_reduction
+  has_mask                    -> rebin_reduction                [label="No"]
   RebinParam                  -> rebin_reduction
   multi_frame_rebin_string    -> rebin_reduction
   multi_frame_num_bins        -> rebin_reduction
   rebin_reduction             -> group_spectra
   GroupingMethod              -> group_spectra
-  masked_detectors            -> group_spectra
+  GroupingString              -> group_spectra
+  GroupingFile                -> group_spectra
+  GroupingWorkspace           -> group_spectra
+  NGroups                     -> group_spectra
   group_spectra               -> is_multi_frame
   is_multi_frame              -> fold_chopped                   [label="Yes"]
   fold_chopped                -> rename_reduction

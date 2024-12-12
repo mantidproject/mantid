@@ -6,7 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "Processor/SqwModel.h"
 #include <cxxtest/TestSuite.h>
@@ -111,6 +114,19 @@ public:
 
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace_name_r"));
     TS_ASSERT(AnalysisDataService::Instance().doesExist("Workspace_name_sqw"));
+  }
+
+  void test_setInputWorkspace_will_convert_a_non_spectrum_axis_to_a_spectrum_axis() {
+    auto workspace = WorkspaceCreationHelper::createProcessedWorkspaceWithCylComplexInstrument(5, 6, true);
+    auto numericAxis = std::make_unique<NumericAxis>(5);
+    workspace->replaceAxis(1, std::move(numericAxis));
+
+    TS_ASSERT(!workspace->getAxis(1)->isSpectra());
+    AnalysisDataService::Instance().addOrReplace("non_spectrum_workspace", workspace);
+
+    m_model->setInputWorkspace("non_spectrum_workspace");
+
+    TS_ASSERT(m_model->inputWorkspace()->getAxis(1)->isSpectra());
   }
 
 private:

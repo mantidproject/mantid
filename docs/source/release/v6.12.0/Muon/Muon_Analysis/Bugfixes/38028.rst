@@ -1,0 +1,1 @@
+- On Muon Interfaces, a legend containing a large string of text does not shrink the plot axes for tight layouts.

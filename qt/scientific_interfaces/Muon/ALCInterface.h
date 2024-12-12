@@ -13,6 +13,12 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Plotting/ExternalPlotter.h"
 
+#include "ALCBaselineModellingPresenter.h"
+#include "ALCDataLoadingPresenter.h"
+#include "ALCPeakFittingPresenter.h"
+#include "IALCBaselineModellingPresenterSubscriber.h"
+#include "IALCDataLoadingPresenterSubscriber.h"
+
 #include "ui_ALCInterface.h"
 
 namespace MantidQt {
@@ -21,21 +27,23 @@ namespace CustomInterfaces {
 class ALCDataLoadingPresenter;
 
 class ALCBaselineModellingView;
-class ALCBaselineModellingPresenter;
 class ALCBaselineModellingModel;
 
 class ALCPeakFittingView;
-class ALCPeakFittingPresenter;
 class ALCPeakFittingModel;
 
 /** ALCInterface : Custom interface for Avoided Level Crossing analysis
  */
-class MANTIDQT_MUONINTERFACE_DLL ALCInterface : public API::UserSubWindow {
+class MANTIDQT_MUONINTERFACE_DLL ALCInterface : public API::UserSubWindow,
+                                                public IALCDataLoadingPresenterSubscriber,
+                                                public IALCBaselineModellingPresenterSubscriber {
   Q_OBJECT
 
 public:
   ALCInterface(QWidget *parent = nullptr);
 
+  void loadedDataChanged() override;
+  void correctedDataChanged() override;
   void closeEvent(QCloseEvent *event) override;
   static std::string name() { return "ALC"; }
   static QString categoryInfo() { return "Muon"; }
@@ -52,8 +60,6 @@ private slots:
   void exportResults();
   void importResults();
 
-  void updateBaselineData();
-  void updatePeakData();
   void externalPlotRequested();
 
 private:
@@ -74,17 +80,15 @@ private:
   Ui::ALCInterface m_ui;
 
   // Step views
-  ALCBaselineModellingView *m_baselineModellingView;
   ALCPeakFittingView *m_peakFittingView;
 
   // Step presenters
-  ALCDataLoadingPresenter *m_dataLoading;
-  ALCBaselineModellingPresenter *m_baselineModelling;
-  ALCPeakFittingPresenter *m_peakFitting;
+  std::unique_ptr<ALCDataLoadingPresenter> m_dataLoading;
+  std::unique_ptr<ALCBaselineModellingPresenter> m_baselineModelling;
+  std::unique_ptr<ALCPeakFittingPresenter> m_peakFitting;
 
   // Models
-  ALCBaselineModellingModel *m_baselineModellingModel;
-  ALCPeakFittingModel *m_peakFittingModel;
+  std::shared_ptr<ALCPeakFittingModel> m_peakFittingModel;
 
   /// Name for every step for labels
   static const QStringList STEP_NAMES;

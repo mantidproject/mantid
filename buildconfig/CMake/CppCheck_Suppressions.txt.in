@@ -271,8 +271,6 @@ uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgori
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MergeRuns.cpp:292
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/MergeRuns.cpp:679
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PaalmanPingsAbsorptionCorrection.cpp:452
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionFredrikze.cpp:138
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/PolarizationCorrectionFredrikze.cpp:155
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/Rebin2D.h:26
 duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/ReadGroupsFromFile.cpp:134
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/RebinByTimeBase.h:24
@@ -1373,7 +1371,6 @@ unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/
 unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/FitDialog.h:186
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/FitDialog.cpp:202
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/FitDialog.cpp:413
-iterateByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Muon/ALCDataLoadingView.cpp:349
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Common/IReflMessageHandler.h:21
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Instrument/QtInstrumentView.cpp:79
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Instrument/QtInstrumentView.cpp:83

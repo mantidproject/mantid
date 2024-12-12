@@ -4,141 +4,132 @@
 Presenter Exercise Solution
 ===========================
 
-View
-####
+The View
+########
 
 .. code-block:: python
 
-    from qtpy import QtWidgets, QtCore, QtGui
+    from qtpy.QtCore import Qt
+    from qtpy.QtWidgets import QComboBox, QPushButton, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget
+    from typing import Union
+
+    TEXT_COLUMN = 0
+    WIDGET_COLUMN = 1
 
 
-    class View(QtWidgets.QWidget):
+    class View(QWidget):
 
-        plotSignal = QtCore.Signal()
-
-        def __init__(self, parent=None):
+        def __init__(self, parent: Union[QWidget, None]=None):
             super().__init__(parent)
 
-            grid = QtWidgets.QVBoxLayout(self)
+            self._presenter = None
 
-            self.table = QtWidgets.QTableWidget(self)
-            self.table.setRowCount(4)
-            self.table.setColumnCount(2)
+            grid = QVBoxLayout(self)
 
-            grid.addWidget(self.table)
+            self._table = QTableWidget(self)
+            self._table.setRowCount(4)
+            self._table.setColumnCount(2)
 
-            self.colours = QtWidgets.QComboBox()
+            grid.addWidget(self._table)
+
+            self._colours = QComboBox()
             options=["Blue", "Green", "Red"]
-            self.colours.addItems(options)
+            self._colours.addItems(options)
 
-            self.grid_lines= QtWidgets.QTableWidgetItem()
-            self.grid_lines.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
-            self.grid_lines.setCheckState(QtCore.Qt.Unchecked)
-            self.addItemToTable("Show grid lines", self.grid_lines, 1)
+            self._grid_lines= QTableWidgetItem()
+            self._grid_lines.setFlags(Qt.ItemIsUserCheckable | Qt.ItemIsEnabled)
+            self._grid_lines.setCheckState(Qt.Unchecked)
+            self._add_item_to_table("Show grid lines", self._grid_lines, 1)
 
-            self.freq = QtWidgets.QTableWidgetItem("1.0")
-            self.phi = QtWidgets.QTableWidgetItem("0.0")
+            self._freq = QTableWidgetItem("1.0")
+            self._phi = QTableWidgetItem("0.0")
 
-            self.addWidgetToTable("Colour", self.colours, 0)
-            self.addItemToTable("Frequency", self.freq, 2)
-            self.addItemToTable("Phase", self.phi, 3)
+            self._add_widget_to_table("Colour", self._colours, 0)
+            self._add_item_to_table("Frequency", self._freq, 2)
+            self._add_item_to_table("Phase", self._phi, 3)
 
-            self.plot = QtWidgets.QPushButton('Add', self)
-            self.plot.setStyleSheet("background-color:lightgrey")
+            self._plot = QPushButton('Add', self)
+            self._plot.setStyleSheet("background-color:lightgrey")
 
-            grid.addWidget(self.plot)
+            grid.addWidget(self._plot)
 
             self.setLayout(grid)
 
-            self.plot.clicked.connect(self.buttonPressed)
+            self._plot.clicked.connect(self._button_clicked)
 
-        def getColour(self):
-            return self.colours.currentText()
+        def subscribe_presenter(self, presenter) -> None:
+            # Subscribe the presenter to the view so we do not need to
+            # make a Qt connection between the presenter and view
+            self._presenter = presenter
 
-        def getGridLines(self):
-            return self.grid_lines.checkState() == QtCore.Qt.Checked
+        def get_colour(self) -> str:
+            return self._colours.currentText()
 
-        def getFreq(self):
-            return float(self.freq.text())
+        def get_grid_lines(self) -> bool:
+            return self._grid_lines.checkState() == Qt.Checked
 
-        def getPhase(self):
-            return float(self.phi.text())
+        def get_freq(self) -> float:
+            return float(self._freq.text())
 
-        def buttonPressed(self):
-            self.plotSignal.emit()
+        def get_phase(self) -> float:
+            return float(self._phi.text())
 
-        def setTableRow(self, name, row):
-            text = QtWidgets.QTableWidgetItem(name)
-            text.setFlags(QtCore.Qt.ItemIsEnabled)
-            col = 0
-            self.table.setItem(row, col, text)
+        def _button_clicked(self):
+            self._presenter.handle_plot_clicked()
 
-        def addWidgetToTable(self, name, widget, row):
-            self.setTableRow(name, row)
-            col = 1
-            self.table.setCellWidget(row, col, widget)
+        def _set_table_row(self, name: str, row: int) -> None:
+            text = QTableWidgetItem(name)
+            text.setFlags(Qt.ItemIsEnabled)
+            self._table.setItem(row, TEXT_COLUMN, text)
 
-        def addItemToTable(self, name, widget, row):
-            self.setTableRow(name, row)
-            col = 1
-            self.table.setItem(row, col, widget)
+        def _add_widget_to_table(self, name: str, widget: QWidget, row: int) -> None:
+            self._set_table_row(name, row)
+            self._table.setCellWidget(row, WIDGET_COLUMN, widget)
 
-Presenter
-#########
+        def _add_item_to_table(self, name: str, widget: QWidget, row: int) -> None:
+            self._set_table_row(name, row)
+            self._table.setItem(row, WIDGET_COLUMN, widget)
+
+The Presenter
+#############
 
 .. code-block:: python
 
-    class Presenter(object):
+    class Presenter:
 
-        # pass the view and model into the presenter
         def __init__(self, view):
-            self.view = view
+            self._view = view
+            self._view.subscribe_presenter(self)
 
-            self.view.plotSignal.connect(self.updatePlot)
-
-        # handle signals
-        def updatePlot(self):
+        def handle_plot_clicked(self) -> None:
             print("The table settings are:")
-            print("   colour     : " + str(self.view.getColour()))
-            print("   Grid lines : " + str(self.view.getGridLines()))
-            print("   Frequency  : " + str(self.view.getFreq()))
-            print("   Phase      : " + str(self.view.getPhase()))
+            print(f"   colour     : {self._view.get_colour()}")
+            print(f"   Grid lines : {self._view.get_grid_lines()}")
+            print(f"   Frequency  : {self._view.get_freq()}")
+            print(f"   Phase      : {self._view.get_phase()}")
 
-Main module
-###########
+The Main
+########
 
 .. code-block:: python
-
-    from qtpy import QtWidgets, QtCore, QtGui
 
     import sys
 
-    import view
-    import presenter
+    from qtpy.QtWidgets import QApplication
+
+    from view import View
+    from presenter import Presenter
 
 
-    """
-    A wrapper class for setting the main window
-    """
-    class Demo(QtWidgets.QMainWindow):
-        def __init__(self, parent=None):
-            super().__init__(parent)
+    def _get_qapplication_instance() -> QApplication:
+        if app := QApplication.instance():
+            return app
+        return QApplication(sys.argv)
 
-            self.window = QtWidgets.QMainWindow()
-            my_view = view.View()
-            self.presenter = presenter.Presenter(my_view)
-            # set the view for the main window
-            self.setCentralWidget(my_view)
-            self.setWindowTitle("view tutorial")
 
-    def get_qapplication_instance():
-        if QtWidgets.QApplication.instance():
-            app = QtWidgets.QApplication.instance()
-        else:
-            app = QtWidgets.QApplication(sys.argv)
-        return app
-
-    app = get_qapplication_instance()
-    window = Demo()
-    window.show()
-    app.exec_()
+    if __name__ == "__main__" :
+        app = _get_qapplication_instance()
+        view = View()
+        presenter = Presenter(view)
+        view.show()
+        app.exec_()

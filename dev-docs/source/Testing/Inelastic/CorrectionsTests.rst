@@ -61,7 +61,7 @@ Apply Absorption Corrections Tab
 #. With the Corrections combo box set to ``Workspace``, and select the workspace ending in ``_Corrections`` from the previous test.
 #. Tick ``Use Container`` and select the file ``irs26174_graphite002_red`` from the Sample Data folder.
 #. Click ``Run`` and wait.
-#. This should plot a blue subtracted line on the embedded plot. A workspace ending in ``_red`` should be produced
+#. This should plot a blue corrected line on the embedded plot. A workspace ending in ``_red`` should be produced
 #. In the ``Output Options``, select ``Open Slice Viewer`` using the down arrow, it should open the Slice Viewer with the generated dataset
 #. In the ``Output Options``, select ``Plot 3D Surface`` using the down arrow, it should open a surface plot for the generated dataset
 #. In the ``Output Options``, select indices ``50-51``. A red asterisk should appear, preventing you from using ``Plot Spectra``

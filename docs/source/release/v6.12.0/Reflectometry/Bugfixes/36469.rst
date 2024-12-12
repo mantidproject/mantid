@@ -1,0 +1,1 @@
+- Fix a bug in the :ref:`Experiment Settings<refl_exp_instrument_settings>` tab of the :ref:`Reflectometry Interface<interface-isis-refl>` where the input of certain File Paths (such as `"C:"`) in the `Polarization Correction` and `Flood Correction` text edits could cause a crash in Mantid from Windows.

@@ -373,10 +373,12 @@ class SliceViewerTest(unittest.TestCase):
         self.model.get_number_dimensions.return_value = 2
         mock_sliceinfo_cls.slicepoint = [None, None]  # no slicepoint as 2D ws
         data_view_mock.dimensions.get_previous_states.return_value = [0, 1]  # no None that indicates integrated dim
+        presenter.show_all_data_clicked = mock.MagicMock()
 
         presenter.dimensions_changed()
 
         mock_new_plot.assert_called_with(dimensions_transposing=True)
+        presenter.show_all_data_clicked.assert_not_called()
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
     def test_changing_dimensions_in_nonortho_mode_switches_to_ortho_when_dim_not_Q(self, mock_sliceinfo_cls):
@@ -384,12 +386,14 @@ class SliceViewerTest(unittest.TestCase):
             self.model, self.view, mock_sliceinfo_cls, enable_nonortho_axes=True, supports_nonortho=False
         )
         self.model.get_number_dimensions.return_value = 2
+        presenter.show_all_data_clicked = mock.MagicMock()
 
         presenter.dimensions_changed()
 
         data_view_mock.disable_tool_button.assert_called_once_with(ToolItemText.NONORTHOGONAL_AXES)
         data_view_mock.create_axes_orthogonal.assert_called_once()
         data_view_mock.create_axes_nonorthogonal.assert_not_called()
+        presenter.show_all_data_clicked.assert_called_once()
 
     @mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceInfo")
     def test_changing_dimensions_in_nonortho_mode_keeps_nonortho_when_dim_is_Q(self, mock_sliceinfo_cls):

@@ -1443,7 +1443,7 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
         for (auto &SQWSMapping : currentComponentWorkspaces)
           SQWSMapping.InvPOfQ = SQWSMapping.InvPOfQ->createCopy();
         prepareCumulativeProbForQ(k, newComponentWorkspaces);
-        currentComponentWorkspaces = newComponentWorkspaces;
+        currentComponentWorkspaces = std::move(newComponentWorkspaces);
       }
     }
     auto trackStillAlive =
@@ -1509,7 +1509,7 @@ std::tuple<bool, std::vector<double>> DiscusMultipleScatteringCorrection::scatte
       const double q = qVector.norm();
       const double finalW = fromWaveVector(k) - finalE;
       auto componentWSIt = findMatchingComponent(componentWorkspaces, shapeObjectWithScatter);
-      auto componentWSMapping = *componentWSIt; // to help debugging
+      auto &componentWSMapping = *componentWSIt; // to help debugging
       double SQ = Interpolate2D(componentWSMapping, q, finalW);
       scatteringXSection = m_NormalizeSQ ? scatteringXSection / interpolateFlat(*(componentWSMapping.QSQScaleFactor), k)
                                          : scatteringXSectionFull;

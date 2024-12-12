@@ -227,6 +227,8 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         else:
             self.new_plot()
         self._call_cutviewer_presenter_if_created("on_dimension_changed")
+        if self.view.data_view.nonorthogonal_mode:
+            self.show_all_data_clicked()
 
     def slicepoint_changed(self):
         """Indicates the slicepoint has been updated"""

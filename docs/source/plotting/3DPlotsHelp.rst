@@ -6,7 +6,7 @@
 
 .. TO UPDATE find these images in a .pptx file at https://github.com/mantidproject/documents/blob/master/Images/Images_for_Docs/formatting_plots.pptx
 
-`3D plotting in Matplotlib <https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html>`_
+`3D plotting in Matplotlib <https://matplotlib.org/stable/users/explain/toolkits/mplot3d.html>`_
 
 **Other Plot Types**
 
@@ -70,7 +70,7 @@ Scripting
 ---------
 
 
-Basic example of plotting a `Surface <https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html#surface-plots>`_:
+Basic example of plotting a `Surface <https://matplotlib.org/stable/gallery/mplot3d/surface3d.html>`_:
 
 .. plot::
    :include-source:
@@ -139,7 +139,7 @@ Click Menus
 Scripting
 ---------
 
-Basic example of plotting a `Wireframe <https://matplotlib.org/mpl_toolkits/mplot3d/tutorial.html#wireframe-plots>`_:
+Basic example of plotting a `Wireframe <https://matplotlib.org/stable/gallery/mplot3d/wire3d.html>`_:
 
 .. plot::
    :include-source:
@@ -195,7 +195,7 @@ File > Settings
 **Other Plotting Documentation**
 
 * :ref:`plotting`
-* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/3.1.1/users/navigation_toolbar.html#navigation-keyboard-shortcuts>`_
+* `Matplotlib Keyboard Shortcuts <https://matplotlib.org/stable/users/explain/figure/interactive.html#navigation-keyboard-shortcuts>`_
 * See :ref:`here <plotting>` for custom color cycles and colormaps
 
 .. |O| image:: /images/FigureOptionsGear.png

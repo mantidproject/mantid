@@ -7,22 +7,26 @@
 #pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/MuonPeriodInfo.h"
+#include <QFileSystemWatcher>
+#include <QTimer>
 
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 
-#include <QObject>
 #include <optional>
 
 namespace MantidQt {
 namespace CustomInterfaces {
 /** IALCDataLoadingView : View interface for ALC Data Loading step
  */
-class MANTIDQT_MUONINTERFACE_DLL IALCDataLoadingView : public QObject {
-  Q_OBJECT
+class IALCDataLoadingPresenter;
+
+class MANTIDQT_MUONINTERFACE_DLL IALCDataLoadingView {
 
 public:
+  virtual void subscribePresenter(IALCDataLoadingPresenter *presenter) = 0;
   /// Init instrument combo box
   virtual void initInstruments() = 0;
 
@@ -98,7 +102,13 @@ public:
 
   virtual void setFileExtensions(const std::vector<std::string> &extensions) = 0;
 
-public slots:
+  /// Period Info Widget displayed from the view
+  virtual std::shared_ptr<MantidQt::MantidWidgets::MuonPeriodInfo> getPeriodInfo() = 0;
+
+  virtual QFileSystemWatcher *getFileSystemWatcher() = 0;
+
+  virtual QTimer *getTimer() = 0;
+
   /// Performs any necessary initialization
   virtual void initialize() = 0;
 
@@ -143,9 +153,6 @@ public slots:
   /// Enables all the widgets
   virtual void enableAll() = 0;
 
-  /// Instrument Changed
-  virtual void instrumentChanged(QString instrument) = 0;
-
   /// Enables/Disables the load button when ready
   virtual void enableLoad(bool enable) = 0;
 
@@ -176,33 +183,23 @@ public slots:
   /// Sets text and ensure runs are not searched for
   virtual void setRunsTextWithoutSearch(const std::string &text) = 0;
 
-signals:
-  /// Request to load data
-  void loadRequested();
+  /// Slots for notifying presenter that view was changed
 
-  /// User has started editing the runs
-  void runsEditingSignal();
+  virtual void instrumentChanged(QString instrument) = 0;
 
-  /// User has finished editing the runs
-  void runsEditingFinishedSignal();
+  virtual void notifyLoadClicked() = 0;
 
-  /// New data has been loaded
-  void dataChanged();
+  virtual void notifyRunsEditingChanged() = 0;
 
-  /// Instrument has been changed
-  void instrumentChangedSignal(std::string);
+  virtual void notifyRunsEditingFinished() = 0;
 
-  // Manage user directories has been clicked
-  void manageDirectoriesClicked();
+  virtual void notifyRunsFoundFinished() = 0;
 
-  /// Searching finished
-  void runsFoundSignal();
+  virtual void openManageDirectories() = 0;
 
-  /// Runs Auto Add state changed
-  void autoAddToggledSignal(bool);
+  virtual void notifyPeriodInfoClicked() = 0;
 
-  /// Period Info Button Clicked
-  void periodInfoClicked();
+  virtual void notifyTimerEvent() = 0;
 };
 
 } // namespace CustomInterfaces

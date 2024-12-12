@@ -66,9 +66,7 @@ class BayesQuasi(PythonAlgorithm):
 
     def summary(self):
         return (
-            "This algorithm is deprecated, please use BayesQuasi2 instead. \n"
-            + "************************************************************* \n \n"
-            + "This algorithm runs the Fortran QLines programs which fits a Delta function of"
+            "This algorithm runs the Fortran QLines programs which fits a Delta function of"
             + " amplitude 0 and Lorentzians of amplitude A(j) and HWHM W(j) where j=1,2,3. The"
             + " whole function is then convolved with the resolution function."
         )
@@ -171,7 +169,6 @@ class BayesQuasi(PythonAlgorithm):
         from IndirectBayes import CalcErange, GetXYE
 
         setup_prog = Progress(self, start=0.0, end=0.3, nreports=5)
-        self.log().warning("This algorithm is deprecated, please use BayesQuasi2 instead.")
         self.log().information("BayesQuasi input")
 
         erange = [self._e_min, self._e_max]

@@ -80,6 +80,9 @@ Output
 
 The algorithm's output is a group workspace containing the corrected workspaces. The names of each corrected workspace is suffixed by :literal:`_++`, :literal:`_+-`, :literal:`_-+` or :literal:`_--` depending on which :math:`\Sigma^{mn}` they correspond to.
 
+If the ``AddSpinStateToLog`` property has been set to ``True`` then a sample log entry called ``spin_state_ORSO`` is added to each output child workspace.
+This log entry specifies the spin state of the data using the notation from the Reflectometry ORSO data standard [#ORSO]_.
+
 Efficiency factors
 ##################
 
@@ -179,6 +182,7 @@ References
 
 .. [#WILDES] A. R. Wildes, *Neutron News*, **17** 17 (2006)
              `doi: 10.1080/10448630600668738 <https://doi.org/10.1080/10448630600668738>`_
+.. [#ORSO] ORSO file format specification: `https://www.reflectometry.org/file_format/specification <https://www.reflectometry.org/file_format/specification>`_
 
 .. categories::
 

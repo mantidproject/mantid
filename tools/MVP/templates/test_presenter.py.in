@@ -1,0 +1,37 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
+
+import unittest
+from unittest import mock
+
+from model import Model
+from view import View
+from presenter import Presenter
+
+
+class TestPresenter(unittest.TestCase):
+
+    def setUp(self) -> None:
+        mock_view = mock.create_autospec(View)
+        mock_model = mock.create_autospec(Model)
+
+        self.presenter = Presenter(mock_model, mock_view)
+
+        mock_view.subscribe_presenter.assert_called_once()
+
+    def test_handle_button_clicked_will_update_model_count_and_set_the_view_label(self):
+        mock_count = mock.PropertyMock(return_value=1)
+        type(self.presenter._model).count = mock_count
+
+        self.presenter.handle_button_clicked()
+
+        self.presenter._view.set_label.assert_called_with('1')
+        self.assertEqual(mock_count.call_count, 3)
+
+
+if __name__ == "__main__":
+    unittest.main()

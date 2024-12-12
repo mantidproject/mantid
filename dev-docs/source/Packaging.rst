@@ -170,6 +170,23 @@ Say I've implemented a new file searching method on a branch ``1234_new_file_sea
 
 Most often, you won't need to upload the packages to Anaconda, this is most useful in cases where installing standalone packages is inconvenient. Standalone package builds created by the jenkins job can be found under the jenkins job build artifacts, this is near the top of the page. Say you built a package for Windows using the jenkins job, you should find a ``mantidworkbench`` exe file in the build artifacts.
 
+.. _build_custom_mantid-developer:
+
+Building a custom ``mantid-developer`` environment
+--------------------------------------------------
+
+This is useful if you need to change a pinned version of one of Mantid's dependencies and test the change locally.
+
+1. Create a conda environment and install ``boa`` and ``versioningit`` into it. For this example, called ``mantid_dev_builder``.
+2. Make your changes to the conda recipe files.
+3. Change directory to ``mantid/conda/recipes``
+4. With ``mantid_dev_builder`` active, run ``conda mambabuild ./mantid-developer/``. This will build a local version of ``mantid-developer`` with your changes and place it in ``mantid_dev_builder``'s ``conda-bld`` folder. The output from ``conda mambabuild`` should tell you the location.
+5. Deactivate ``mantid_dev_builder`` and create a new environment to install the custom ``mantid-developer`` package into (e.g if you were testing a new version of numpy you might call it ``mantid_dev_numpy_test``)
+6. ``mamba install -c <path to mantid_dev_builder's conda-bld folder> mantid-developer`` to install the package.
+7. You will need to re-run cmake with this new environment.
+
+Note: If you have ``boa`` installed in your base environment it seems ``conda mambabuild`` will use it over your activated environment. In this case you will likely get an error that you don't have ``versioningit`` installed. One way to fix this is to install ``versioningit`` into your base environment and just use that instead of making a new environment.
+
 
 .. _conda: https://conda.io
 .. _mantid-conda-recipes: https://github.com/mantidproject/mantid/tree/main/conda

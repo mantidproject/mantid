@@ -8,35 +8,46 @@ added to the ``__init__`` function of the view:
 
 .. code-block:: python
 
-    self.table = QtWidgets.QTableWidget(self)
-    self.table.setRowCount(2)
-    self.table.setColumnCount(2)
-    grid.addWidget(self.table)
+    from qtpy.QWidgets import QTableWidget
+
+    self._table = QTableWidget(self)
+    self._table.setRowCount(2)
+    self._table.setColumnCount(2)
+    grid.addWidget(self._table)
 
 The first line creates the widget. The second and third lines
 determine the size of the table. The fourth line adds it to the
 layout.
 
-To add (non-editable) labels to the table the following code is needed:
+To add (non-editable) labels to the table, we first need the
+following imports at the top of the file:
 
 .. code-block:: python
 
-    text = QtWidgets.QTableWidgetItem(("test"))
-    text.setFlags(QtCore.Qt.ItemIsEnabled)
+    from qtpy.QtCore import Qt
+
+We then need to add this code to the ``__init__`` function:
+
+.. code-block:: python
+
+    from qtpy.QWidgets import QTableWidgetItem
+
+    text = QTableWidgetItem(("test"))
+    text.setFlags(Qt.ItemIsEnabled)
     row = 0
     col = 0
-    self.table.setItem(row, col, text)
+    self._table.setItem(row, col, text)
 
     row = 1
-    text2 = QtWidgets.QTableWidgetItem(("another test"))
-    text2.setFlags(QtCore.Qt.ItemIsEnabled)
-    self.table.setItem(row, col, text2)
+    text2 = QTableWidgetItem(("another test"))
+    text2.setFlags(Qt.ItemIsEnabled)
+    self._table.setItem(row, col, text2)
 
     row = 0
     col = 1
-    self.table.setCellWidget(row, col, self.combo)
+    self._table.setCellWidget(row, col, self._combo)
     row = 1
-    self.table.setCellWidget(row, col, self.spin)
+    self._table.setCellWidget(row, col, self._spin)
 
 The first line creates a widget with the label ``test`` and the second
 flag ensures that a user cannot edit the value. The label is added to
