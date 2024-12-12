@@ -147,8 +147,17 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
     def test_exec_FractionalChangeDSpacing(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["FractionalChangeDSpacing"] = 1e-8
+        # need to fix center as well because d-spacing constraint only applies after initial fit
+        kwargs["FixPeakParameters"] = ["X0"]
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_9", **kwargs)
-        # I/sigma different as center constrained
+        # I/sigma different from test_exec_fix_peak_params where X0 fixed and no d-sapcing constraint
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 18.46, delta=1e-2)
+
+    def test_exec_fix_peak_params(self):
+        kwargs = self.profile_kwargs.copy()
+        kwargs["FixPeakParameters"] = ["X0"]  # fix center
+        out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_9", **kwargs)
+        # I/sig slightly different as center fixed and peak TOF half bin-width different from data
         self.assertAlmostEqual(out.column("Intens/SigInt")[0], 18.96, delta=1e-2)
 
     def test_exec_NPixMin_respected(self):
