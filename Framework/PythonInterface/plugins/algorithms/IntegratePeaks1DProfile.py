@@ -227,6 +227,15 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             "Optional file path in which to write diagnostic plots (note this will slow the execution of algorithm).",
         )
         self.setPropertyGroup("OutputFile", "Plotting")
+        # peak validation
+        self.declareProperty(
+            name="NPixMin",
+            defaultValue=0,
+            direction=Direction.Input,
+            validator=IntBoundedValidator(lower=0),
+            doc="Minimum number of pixels successfully fitted in a peak.",
+        )
+        self.setPropertyGroup("NPixMin", "Peak Validation")
 
     def validateInputs(self):
         issues = dict()
@@ -288,6 +297,8 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
         do_lorz_cor = self.getProperty("LorentzCorrection").value
         # saving file
         output_file = self.getProperty("OutputFile").value
+        # peak validation
+        npix_min = self.getProperty("NPixMin").value
 
         # create output table workspace
         peaks = self.exec_child_alg("CloneWorkspace", InputWorkspace=peaks, OutputWorkspace="out_peaks")
@@ -350,7 +361,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             initial_function, md_fit_kwargs, initial_peak_mask = func_generator.get_initial_fit_function_and_kwargs(
                 ws, peak_data, peak.getDSpacing(), (tof_start, tof_end), peak_func_name, bg_func_name
             )
-            if not initial_peak_mask.any():
+            if initial_peak_mask.sum() < npix_min:
                 continue  # no peak
             fit_result = self.exec_fit(initial_function, **fit_kwargs, **md_fit_kwargs)
             if not fit_result["success"]:
@@ -362,7 +373,7 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
             non_bg_mask = np.zeros(peak_data.detids.shape, dtype=bool)
             non_bg_mask.flat[initial_peak_mask] = i_over_sigma > i_over_sig_threshold
             peak_mask = find_peak_cluster_in_window(non_bg_mask, (peak_data.irow, peak_data.icol))
-            if not peak_mask.any():
+            if peak_mask.sum() < npix_min:
                 continue  # no peak
 
             is_on_edge = np.any(np.logical_and(peak_mask, peak_data.det_edges))

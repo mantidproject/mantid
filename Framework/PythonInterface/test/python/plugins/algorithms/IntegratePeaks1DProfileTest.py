@@ -108,9 +108,8 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
     def test_exec_poisson_cost_func(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["CostFunction"] = "Poisson"
-        kwargs["ErrorStrategy"] = "Hessian"
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_3", **kwargs)
-        self.assertGreater(out.column("Intens/SigInt")[0], 0.0)  # fit flaky
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 18.96, delta=1e-2)
 
     def test_exec_chisq_cost_func(self):
         kwargs = self.profile_kwargs.copy()
@@ -151,6 +150,14 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_9", **kwargs)
         # I/sigma different as center constrained
         self.assertAlmostEqual(out.column("Intens/SigInt")[0], 18.96, delta=1e-2)
+
+    def test_exec_NPixMin_respected(self):
+        kwargs = self.profile_kwargs.copy()
+        kwargs["NPixMin"] = 3  # only 2 pixels in simulated data
+        out = IntegratePeaks1DProfile(
+            InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_10", **kwargs
+        )
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 0.0, delta=1e-2)
 
 
 if __name__ == "__main__":
