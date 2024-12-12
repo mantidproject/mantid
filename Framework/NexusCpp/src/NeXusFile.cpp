@@ -865,7 +865,7 @@ string File::getStrData() {
   char *value = new char[static_cast<size_t>(info.dims[0]) + 1]; // probably do not need +1, but being safe
   try {
     this->getData(value);
-  } catch (const ::NeXus::Exception &e) {
+  } catch (const Exception &) {
     delete[] value;
     throw; // rethrow the original exception
   }
@@ -1060,7 +1060,7 @@ string File::getStrAttr(const AttrInfo &info) {
   char *value = new char[info.length + 1];
   try {
     this->getAttr(info, value, static_cast<int>(info.length) + 1);
-  } catch (const ::NeXus::Exception &e) {
+  } catch (const Exception &) {
     // Avoid memory leak
     delete[] value;
     throw; // rethrow original exception
