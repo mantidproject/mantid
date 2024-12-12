@@ -166,13 +166,13 @@ static herr_t readStringAttributeN(hid_t attr, char *data, int maxlen) {
   char *vdat = NULL;
   iRet = readStringAttribute(attr, &vdat);
   if (iRet >= 0) {
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+#if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-truncation"
 #endif
     // there is a danger of overflowing output string
     std::strncpy(data, vdat, static_cast<size_t>(maxlen));
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+#if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic pop
 #endif
     free(vdat);
@@ -1782,13 +1782,13 @@ NXstatus NX5getdata(NXhandle fid, void *data) {
       char *strdata = static_cast<char *>(calloc(512, sizeof(char)));
       status = H5Dread(pFile->iCurrentD, datatype, H5S_ALL, H5S_ALL, H5P_DEFAULT, &strdata);
       if (status >= 0) {
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+#if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-truncation"
 #endif
         // there is a danger of overflowing output string
         std::strncpy(static_cast<char *>(data), strdata, strlen(strdata));
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+#if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic pop
 #endif
       }
@@ -2419,12 +2419,12 @@ NXstatus NX5getattra(NXhandle handle, const char *name, void *data) {
     char *strdata = static_cast<char *>(calloc(512, sizeof(char)));
     status = H5Aread(pFile->iCurrentA, H5S_ALL, &strdata);
     if (status >= 0) {
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+#if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-truncation"
 #endif
       std::strncpy(static_cast<char *>(data), strdata, strlen(strdata));
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+#if defined(__GNUC__) && !(defined(__clang__))
 #pragma GCC diagnostic pop
 #endif
     }
