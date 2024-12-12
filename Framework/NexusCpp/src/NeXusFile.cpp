@@ -450,12 +450,6 @@ void File::writeCompData(const string &name, const vector<NumT> &value, const ve
   this->closeData();
 }
 
-void File::compress(NXcompression comp) {
-  stringstream msg;
-  msg << "compress(" << comp << ") is deprecated - use makeCompData()";
-  throw Exception(msg.str());
-}
-
 void File::openData(const string &name) {
   if (name.empty()) {
     throw Exception("Supplied empty name to openData");
@@ -871,7 +865,7 @@ string File::getStrData() {
   char *value = new char[static_cast<size_t>(info.dims[0]) + 1]; // probably do not need +1, but being safe
   try {
     this->getData(value);
-  } catch (const Exception &e) {
+  } catch (const ::NeXus::Exception &e) {
     delete[] value;
     throw; // rethrow the original exception
   }
@@ -1066,7 +1060,7 @@ string File::getStrAttr(const AttrInfo &info) {
   char *value = new char[info.length + 1];
   try {
     this->getAttr(info, value, static_cast<int>(info.length) + 1);
-  } catch (const Exception &e) {
+  } catch (const ::NeXus::Exception &e) {
     // Avoid memory leak
     delete[] value;
     throw; // rethrow original exception
