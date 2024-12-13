@@ -9,11 +9,11 @@
 from mantid.api import WorkspaceGroup
 from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.marked_columns import MarkedColumns
-from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceColumnTypeMapping, TableWorkspaceDisplayModel
+from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceColumnTypeMapping
 from collections import defaultdict
 
 
-class GroupTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
+class GroupTableWorkspaceDisplayModel:
     EDITABLE_COLUMN_NAMES = ["h", "k", "l"]
 
     ALLOWED_WORKSPACE_TYPES = [WorkspaceGroup]
@@ -88,6 +88,9 @@ class GroupTableWorkspaceDisplayModel(TableWorkspaceDisplayModel):
         if self.ws.size() != 0:
             return ["WS Index", "Group Index"] + self.ws[0].getColumnNames()
         return []
+
+    def get_column_header(self, index):
+        return self.get_column_headers()[index]
 
     def get_column(self, index):
         column_data = []
