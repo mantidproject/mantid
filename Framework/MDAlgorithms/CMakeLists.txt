@@ -85,6 +85,7 @@ set(SRC_FILES
     src/MDTransfQ3D.cpp
     src/MDWSDescription.cpp
     src/MDWSTransform.cpp
+    src/MagneticFormFactorCorrectionMD.cpp
     src/MaskMD.cpp
     src/MergeMD.cpp
     src/MergeMDFiles.cpp
@@ -206,6 +207,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/MDTransfQ3D.h
     inc/MantidMDAlgorithms/MDWSDescription.h
     inc/MantidMDAlgorithms/MDWSTransform.h
+    inc/MantidMDAlgorithms/MagneticFormFactorCorrectionMD.h
     inc/MantidMDAlgorithms/MaskMD.h
     inc/MantidMDAlgorithms/MergeMD.h
     inc/MantidMDAlgorithms/MergeMDFiles.h
@@ -320,6 +322,7 @@ set(TEST_FILES
     MDTransfQ3DTest.h
     MDWSDescriptionTest.h
     MDWSTransfTest.h
+    MagneticFormFactorCorrectionMDTest.h
     MaskMDTest.h
     MergeMDFilesTest.h
     MergeMDTest.h
