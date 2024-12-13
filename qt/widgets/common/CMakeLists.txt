@@ -1,7 +1,3 @@
-# Add the Python scripts directory to the build
-set(PYTHON_SCRIPTS_DIR ${CMAKE_SOURCE_DIR}/mantid/qt/python/mantidqt/mantidqt/widgets/helpwindow)
-set(ENV{PYTHONPATH} "$ENV{PYTHONPATH}:${PYTHON_SCRIPTS_DIR}")
-
 set(SRC_FILES
     src/AddWorkspaceDialog.cpp
     src/AddWorkspaceMultiDialog.cpp
@@ -162,7 +158,6 @@ set(SRC_FILES
     src/Python/Sip.cpp
     src/Python/QHashToDict.cpp
 )
-
 set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.h
@@ -265,7 +260,6 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
 )
-
 # Include files aren't required, but this makes them appear in Visual Studio
 set(QT5_INC_FILES
     ${QT5_MOC_FILES}
@@ -352,7 +346,6 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Python/Object.h
     inc/MantidQtWidgets/Common/Python/QHashToDict.h
 )
-
 set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.ui
@@ -373,7 +366,6 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/SlitCalculator.ui
     inc/MantidQtWidgets/Common/UserFunctionDialog.ui
 )
-
 set(MOC_FILES
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
@@ -480,7 +472,6 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/QtPropertyBrowser/qtbuttonpropertybrowser.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h
 )
-
 # Include files aren't required, but this makes them appear in Visual Studio
 set(INC_FILES
     ${MOC_FILES}
@@ -608,7 +599,6 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/Batch/MockJobTreeView.h
     inc/MantidQtWidgets/Common/Python/Object.h
 )
-
 set(UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.ui
@@ -633,13 +623,10 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/UserFunctionDialog.ui
     inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
-
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
-
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   list(APPEND TARGET_LIBRARIES "-framework CoreFoundation")
 endif()
-
 # Target Additional components for this module
 find_package(
   Qt5 ${QT_MIN_VERSION}
@@ -668,7 +655,6 @@ else()
     message(FATAL_ERROR "Unable to find suitable module for web widgets. Tried: WebEnginewidgets, WebKitWidgets")
   endif()
 endif()
-
 # If not sip header is defined we need to generate one with sip-module
 if(SIP_INCLUDE_DIR AND EXISTS ${SIP_INCLUDE_DIR}/sip.h)
   set(_sip_include_dir ${SIP_INCLUDE_DIR})
@@ -682,7 +668,6 @@ else()
     COMMENT "Generating sip.h for common widgets target"
   )
 endif()
-
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsCommon
   QT_VERSION 5
@@ -743,9 +728,7 @@ set(TEST_FILES
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h
 )
-
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
-
 set(QT5_TEST_FILES
     test/AlgorithmRunnerTest.h
     test/BatchAlgorithmRunnerTest.h
@@ -784,7 +767,6 @@ set(QT5_TEST_FILES
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h
 )
-
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   mtd_add_qt_tests(
     TARGET_NAME MantidQtWidgetsCommonTest
@@ -801,7 +783,6 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
     MTD_QT_LINK_LIBS MantidQtWidgetsCommon
     PARENT_DEPENDENCIES GUITests
   )
-
   add_framework_test_helpers(MantidQtWidgetsCommonTestQt5)
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} MantidQtWidgetsCommonPyTest ${TEST_PY_FILES})
 endif()
