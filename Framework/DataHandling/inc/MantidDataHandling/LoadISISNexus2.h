@@ -13,7 +13,6 @@
 #include "MantidAPI/ISISRunLogs.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidDataHandling/DataBlockComposite.h"
-#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidKernel/NexusDescriptor.h"
