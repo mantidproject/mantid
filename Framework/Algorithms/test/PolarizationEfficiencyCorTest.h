@@ -50,69 +50,67 @@ public:
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
   void test_input_ws_no_inputs() {
-    auto alg = createAlgorithm();
-    alg->setProperty("OutputWorkspace", "out");
-    alg->setProperty("Efficiencies", createEfficiencies("Wildes"));
+    auto alg = createAlgorithm(WILDES_METHOD);
     // Error: Input workspaces are missing. Either a workspace group or a list
     // of workspace names must be given
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_input_ws_default_group() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     alg->execute();
-    checkWorkspaceGroupSize(4);
+    checkOutputWorkspaceGroupSize(4);
   }
 
   void test_input_ws_wildes_group() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     alg->execute();
-    checkWorkspaceGroupSize(4);
+    checkOutputWorkspaceGroupSize(4);
   }
 
   void test_input_ws_fredrikze_group() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Fredrikze", "Fredrikze");
+    auto alg = createAlgorithm(FREDRIKZE_METHOD);
+    setAlgorithmProperties(alg, FREDRIKZE_METHOD);
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     alg->execute();
-    checkWorkspaceGroupSize(4);
+    checkOutputWorkspaceGroupSize(4);
   }
 
   void test_input_ws_wildes_wrong_input_size() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(2));
     // Error: Some invalid Properties found
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
   void test_input_ws_fredrikze_wrong_input_size() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Fredrikze", "Fredrikze");
+    auto alg = createAlgorithm(FREDRIKZE_METHOD);
+    setAlgorithmProperties(alg, FREDRIKZE_METHOD);
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(2));
     // Error: For PA analysis, input group must have 4 periods
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
   void test_input_ws_wildes_list() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));
     alg->execute();
-    checkWorkspaceGroupSize(4);
+    checkOutputWorkspaceGroupSize(4);
   }
   void test_input_ws_frederikze_needs_group() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Fredrikze", "Fredrikze");
+    auto alg = createAlgorithm(FREDRIKZE_METHOD);
+    setAlgorithmProperties(alg, FREDRIKZE_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));
     // Error: Input workspaces are required to be in a workspace group
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
   void test_input_ws_cannot_be_both() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg);
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));
     // Error: Input workspaces must be given either as a workspace group or a
@@ -120,235 +118,218 @@ public:
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
   void test_input_ws_wildes_wrong_size() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(2));
     // Error: Some invalid Properties found
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_efficiencies_fredrikze_wrong_efficiencies() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Fredrikze");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, FREDRIKZE_METHOD);
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     // Error: Efficiencey property not found: Rho;
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
   void test_efficiencies_wildes_wrong_efficiencies() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Fredrikze", "Wildes");
+    auto alg = createAlgorithm(FREDRIKZE_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));
     // Error: Some invalid Properties found
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
 
   void test_flippers_full() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));
     alg->setProperty("Flippers", "00, 01, 10, 11");
     alg->execute();
-    checkWorkspaceGroupSize(4);
+    checkOutputWorkspaceGroupSize(4);
   }
 
   void test_flippers_missing_01() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(3));
     alg->setProperty("Flippers", "00, 10, 11");
     alg->execute();
-    checkWorkspaceGroupSize(4);
+    checkOutputWorkspaceGroupSize(4);
   }
   void test_flippers_missing_10() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(3));
     alg->setProperty("Flippers", "00, 01, 11");
     alg->execute();
-    checkWorkspaceGroupSize(4);
+    checkOutputWorkspaceGroupSize(4);
   }
   void test_flippers_missing_0110() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(2));
     alg->setProperty("Flippers", "00, 11");
     alg->execute();
-    checkWorkspaceGroupSize(4);
+    checkOutputWorkspaceGroupSize(4);
   }
   void test_flippers_no_analyser() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(2));
     alg->setProperty("Flippers", "0, 1");
     alg->execute();
-    checkWorkspaceGroupSize(2);
+    checkOutputWorkspaceGroupSize(2);
   }
 
   void test_flippers_direct_beam() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(1));
     alg->setProperty("Flippers", "0");
     alg->execute();
-    checkWorkspaceGroupSize(1);
+    checkOutputWorkspaceGroupSize(1);
   }
 
   void test_that_wildes_can_work_with_spin_states_with_two_workspaces() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(2));
     alg->setProperty("Flippers", "0, 1");
     alg->setPropertyValue("SpinStatesOutWildes", "++, --");
     alg->execute();
-    checkWorkspaceGroupSize(2);
+    checkOutputWorkspaceGroupSize(2);
   }
 
   void test_that_wildes_can_work_with_spin_states_with_four_workspaces() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));
     alg->setPropertyValue("SpinStatesOutWildes", "++, --, -+, +-");
     alg->execute();
-    checkWorkspaceGroupSize(4);
+    checkOutputWorkspaceGroupSize(4);
   }
 
   void test_flippers_wrong_flippers() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));
     alg->setProperty("Flippers", "00, 10, 11");
     // Error: Some invalid Properties found
     TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
   }
   void test_flippers_wildes_no_pnr() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes", "PNR");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD, "PNR");
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));
     // Error: Property PolarizationAnalysis canot be used with the Wildes
     // method
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
   void test_flippers_wildes_no_pa() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes", "PA");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD, "PA");
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));
     // Error: Property PolarizationAnalysis canot be used with the Wildes
-    // method
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
   void test_polarization_analysis_pnr() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Fredrikze", "Fredrikze", "PNR");
+    auto alg = createAlgorithm(FREDRIKZE_METHOD);
+    setAlgorithmProperties(alg, FREDRIKZE_METHOD, "PNR");
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(2));
     alg->execute();
-    checkWorkspaceGroupSize(2);
+    checkOutputWorkspaceGroupSize(2);
   }
   void test_polarization_analysis_pa() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Fredrikze", "Fredrikze", "PA");
+    auto alg = createAlgorithm(FREDRIKZE_METHOD);
+    setAlgorithmProperties(alg, FREDRIKZE_METHOD, "PA");
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     alg->execute();
-    checkWorkspaceGroupSize(4);
+    checkOutputWorkspaceGroupSize(4);
   }
   void test_polarization_analysis_pa_with_spinstates() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Fredrikze", "Fredrikze", "PA");
+    auto alg = createAlgorithm(FREDRIKZE_METHOD);
+    setAlgorithmProperties(alg, FREDRIKZE_METHOD, "PA");
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     alg->setProperty("SpinStatesInFredrikze", "pp,pa,ap,aa");
     alg->setProperty("SpinStatesOutFredrikze", "pa,pp,ap,aa");
     alg->execute();
-    checkWorkspaceGroupSize(4);
+    checkOutputWorkspaceGroupSize(4);
   }
   void test_polarization_analysis_pnr_with_spinstates() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Fredrikze", "Fredrikze", "PNR");
+    auto alg = createAlgorithm(FREDRIKZE_METHOD);
+    setAlgorithmProperties(alg, FREDRIKZE_METHOD, "PNR");
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(2));
     alg->setProperty("SpinStatesInFredrikze", "p, a");
     alg->setProperty("SpinStatesOutFredrikze", "a, p");
     alg->execute();
-    checkWorkspaceGroupSize(2);
+    checkOutputWorkspaceGroupSize(2);
   }
 
   void test_that_fredrikze_input_spinstates_cannot_be_used_with_wildes() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));
     alg->setProperty("SpinStatesInFredrikze", "p, a");
 
-    try {
-      alg->execute();
-    } catch (const std::invalid_argument &e) {
-      TSM_ASSERT_EQUALS("Incorrect exception message.", std::string(e.what()),
-                        "Property SpinStatesInFredrikze cannot be used with the Wildes method.");
-    }
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::invalid_argument &e, std::string(e.what()),
+                            "Property SpinStatesInFredrikze cannot be used with the Wildes method.");
   }
 
   void test_that_fredrikze_output_spinstates_cannot_be_used_with_wildes() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Wildes", "Wildes");
+    auto alg = createAlgorithm(WILDES_METHOD);
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(1));
     alg->setProperty("SpinStatesOutFredrikze", "p, a");
 
-    try {
-      alg->execute();
-    } catch (const std::invalid_argument &e) {
-      TSM_ASSERT_EQUALS("Incorrect exception message.", std::string(e.what()),
-                        "Property SpinStatesOutFredrikze cannot be used with the Wildes method.");
-    }
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::invalid_argument &e, std::string(e.what()),
+                            "Property SpinStatesOutFredrikze cannot be used with the Wildes method.");
   }
 
   void test_polarization_analysis_wrong_group_size() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Fredrikze", "Fredrikze", "PNR");
+    auto alg = createAlgorithm(FREDRIKZE_METHOD);
+    setAlgorithmProperties(alg, FREDRIKZE_METHOD, "PNR");
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     // Error: For PNR analysis, input group must have 2 periods
     TS_ASSERT_THROWS(alg->execute(), const std::invalid_argument &);
   }
 
   void test_polarization_analysis_no_flippers() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Fredrikze", "Fredrikze");
+    auto alg = createAlgorithm(FREDRIKZE_METHOD);
+    setAlgorithmProperties(alg, FREDRIKZE_METHOD);
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     alg->setProperty("Flippers", "00, 01, 10, 11");
     // Error: Property Flippers canot be used with the Fredrikze method
-    try {
-      alg->execute();
-    } catch (const std::invalid_argument &e) {
-      TSM_ASSERT_EQUALS("Incorrect exception message.", std::string(e.what()),
-                        "Property Flippers cannot be used with the Fredrikze method.");
-    }
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::invalid_argument &e, std::string(e.what()),
+                            "Property Flippers cannot be used with the Fredrikze method.");
   }
 
   void test_that_wildes_output_spinstates_cannot_be_used_with_fredrikze() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "Fredrikze", "Fredrikze");
+    auto alg = createAlgorithm(FREDRIKZE_METHOD);
+    setAlgorithmProperties(alg, FREDRIKZE_METHOD);
     alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     alg->setPropertyValue("SpinStatesOutWildes", "+, -");
 
-    try {
-      alg->execute();
-    } catch (const std::invalid_argument &e) {
-      TSM_ASSERT_EQUALS("Incorrect exception message.", std::string(e.what()),
-                        "Property SpinStatesOutWildes cannot be used with the Fredrikze method.");
-    }
+    TS_ASSERT_THROWS_EQUALS(alg->execute(), const std::invalid_argument &e, std::string(e.what()),
+                            "Property SpinStatesOutWildes cannot be used with the Fredrikze method.");
   }
 
   void test_histo() {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, "histo", "Wildes");
+    auto alg = createAlgorithm("histo");
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", createWorkspacesInADS(4));
     alg->execute();
-    checkWorkspaceGroupSize(4);
+    checkOutputWorkspaceGroupSize(4);
   }
 
   void test_points() {
-    auto alg = createAlgorithm();
+    auto alg = createAlgorithm("points");
     auto const inputs = createWorkspacesInADS(4);
-    setAlgorithmProperties(alg, "points", "Wildes");
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", inputs);
     alg->execute();
-    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
-    TS_ASSERT_EQUALS(out->size(), 4);
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(OUTPUT_GRP_NAME);
+    checkOutputWorkspaceGroupSize(4);
 
     for (size_t i = 0; i < out->size(); ++i) {
       auto ws = AnalysisDataService::Instance().retrieve(inputs[i]);
@@ -364,13 +345,13 @@ public:
   }
 
   void test_points_short() {
-    auto alg = createAlgorithm();
+    auto alg = createAlgorithm("points-short");
     auto const inputs = createWorkspacesInADS(4);
-    setAlgorithmProperties(alg, "points-short", "Wildes");
+    setAlgorithmProperties(alg, WILDES_METHOD);
     alg->setProperty("InputWorkspaces", inputs);
     alg->execute();
-    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
-    TS_ASSERT_EQUALS(out->size(), 4);
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(OUTPUT_GRP_NAME);
+    checkOutputWorkspaceGroupSize(4);
 
     for (size_t i = 0; i < out->size(); ++i) {
       auto ws = AnalysisDataService::Instance().retrieve(inputs[i]);
@@ -394,6 +375,7 @@ public:
 private:
   const std::string WILDES_METHOD{"Wildes"};
   const std::string FREDRIKZE_METHOD{"Fredrikze"};
+  const std::string OUTPUT_GRP_NAME{"out"};
 
   std::vector<MatrixWorkspace_sptr> createWorkspaces(int n) {
     std::vector<MatrixWorkspace_sptr> workspaces;
@@ -427,34 +409,34 @@ private:
     return names;
   }
 
-  std::shared_ptr<PolarizationEfficiencyCor> createAlgorithm() {
+  std::shared_ptr<PolarizationEfficiencyCor> createAlgorithm(const std::string &efficiencyMethod) {
     auto alg = std::make_shared<PolarizationEfficiencyCor>();
     alg->setRethrows(true);
     alg->initialize();
+    alg->setProperty("OutputWorkspace", OUTPUT_GRP_NAME);
+    alg->setProperty("Efficiencies", createEfficiencies(efficiencyMethod));
     return alg;
   }
 
-  void setAlgorithmProperties(const std::shared_ptr<PolarizationEfficiencyCor> &alg,
-                              const std::string &efficiencyMethod, const std::string &method = "",
+  void setAlgorithmProperties(const std::shared_ptr<PolarizationEfficiencyCor> &alg, const std::string &method = "",
                               const std::string &analysisMethod = "") {
-    alg->setProperty("OutputWorkspace", "out");
+    alg->setProperty("OutputWorkspace", OUTPUT_GRP_NAME);
     if (!method.empty()) {
       alg->setProperty("CorrectionMethod", method);
     }
-    alg->setProperty("Efficiencies", createEfficiencies(efficiencyMethod));
     if (!analysisMethod.empty()) {
       alg->setProperty("PolarizationAnalysis", analysisMethod);
     }
   }
 
-  void checkWorkspaceGroupSize(size_t expectedSize) {
-    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+  void checkOutputWorkspaceGroupSize(size_t expectedSize) {
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(OUTPUT_GRP_NAME);
     TS_ASSERT_EQUALS(out->size(), expectedSize);
   }
 
   MatrixWorkspace_sptr createEfficiencies(std::string const &kind) {
-    static std::map<std::string, std::vector<std::string>> const labels = {{"Wildes", {"P1", "P2", "F1", "F2"}},
-                                                                           {"Fredrikze", {"Pp", "Ap", "Rho", "Alpha"}}};
+    static std::map<std::string, std::vector<std::string>> const labels = {
+        {WILDES_METHOD, {"P1", "P2", "F1", "F2"}}, {FREDRIKZE_METHOD, {"Pp", "Ap", "Rho", "Alpha"}}};
     if (kind == WILDES_METHOD || kind == FREDRIKZE_METHOD) {
       auto inWS = createWorkspaces(1)[0];
       MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create(inWS, 4);
@@ -481,7 +463,7 @@ private:
       alg->setProperty("P2", ws2);
       alg->setProperty("F1", ws3);
       alg->setProperty("F2", ws4);
-      alg->setPropertyValue("OutputWorkspace", "dummy");
+      alg->setPropertyValue("OutputWorkspace", OUTPUT_GRP_NAME);
       alg->execute();
       MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
       return outWS;
@@ -499,7 +481,7 @@ private:
       alg->setProperty("P2", ws2);
       alg->setProperty("F1", ws3);
       alg->setProperty("F2", ws4);
-      alg->setPropertyValue("OutputWorkspace", "dummy");
+      alg->setPropertyValue("OutputWorkspace", OUTPUT_GRP_NAME);
       alg->execute();
       MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
       return outWS;
@@ -517,7 +499,7 @@ private:
       alg->setProperty("P2", ws2);
       alg->setProperty("F1", ws3);
       alg->setProperty("F2", ws4);
-      alg->setPropertyValue("OutputWorkspace", "dummy");
+      alg->setPropertyValue("OutputWorkspace", OUTPUT_GRP_NAME);
       alg->execute();
       MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
       return outWS;
@@ -544,8 +526,8 @@ private:
   }
 
   void runSpinStateLogTest(const std::string &correctionMethod, const bool expectLog) {
-    auto alg = createAlgorithm();
-    setAlgorithmProperties(alg, correctionMethod, correctionMethod);
+    auto alg = createAlgorithm(correctionMethod);
+    setAlgorithmProperties(alg, correctionMethod);
     if (correctionMethod == FREDRIKZE_METHOD) {
       alg->setProperty("InputWorkspaceGroup", createWorkspaceGroup(4));
     } else {
@@ -555,9 +537,9 @@ private:
       alg->setProperty("AddSpinStateToLog", true);
     }
     alg->execute();
-    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>("out");
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(OUTPUT_GRP_NAME);
     TS_ASSERT_EQUALS(out->size(), 4);
-    for (size_t i = 0; i != 4; ++i) {
+    for (size_t i = 0; i < 4; ++i) {
       MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i));
       TS_ASSERT(ws)
       TS_ASSERT_EQUALS(ws->run().hasProperty(SpinStatesORSO::LOG_NAME), expectLog)
