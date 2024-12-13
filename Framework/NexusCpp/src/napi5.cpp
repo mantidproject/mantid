@@ -151,7 +151,11 @@ static herr_t readStringAttribute(hid_t attr, char **data) {
 
     free(strings);
   } else {
+#ifdef WIN32
+    *data = _strdup(" higher dimensional string array");
+#else
     *data = strdup(" higher dimensional string array");
+#endif
   }
 
   H5Tclose(atype);
@@ -636,7 +640,11 @@ NXstatus NX5opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   if (pFile->iCurrentLGG != NULL) {
     free(pFile->iCurrentLGG);
   }
+#ifdef WIN32
+  pFile->iCurrentLGG = _strdup(name);
+#else
   pFile->iCurrentLGG = strdup(name);
+#endif
   NXI5KillDir(pFile);
   return NX_OK;
 }
@@ -664,8 +672,11 @@ NXstatus NX5closegroup(NXhandle fid) {
       ii = ii - i;
     }
     if (ii > 0) {
-      char *uname = NULL;
-      uname = strdup(pFile->name_ref);
+#ifdef WIN32
+      char *uname = _strdup(pFile->name_ref);
+#else
+      char *uname = strdup(pFile->name_ref);
+#endif
       char *u1name = NULL;
       u1name = static_cast<char *>(malloc((ii + 1) * sizeof(char)));
       memset(u1name, 0, ii);
@@ -954,7 +965,11 @@ NXstatus NX5opendata(NXhandle fid, CONSTCHAR *name) {
   if (pFile->iCurrentLD != NULL) {
     free(pFile->iCurrentLD);
   }
+#ifdef WIN32
+  pFile->iCurrentLD = _strdup(name);
+#else
   pFile->iCurrentLD = strdup(name);
+#endif
   return NX_OK;
 }
 
@@ -1376,11 +1391,19 @@ herr_t nxgroup_info(hid_t loc_id, const char *name, const H5L_info_t *statbuf, v
   H5Oget_info_by_name2(loc_id, name, &object_info, H5O_INFO_ALL, H5P_DEFAULT);
   switch ((object_info).type) {
   case H5O_TYPE_GROUP:
+#ifdef WIN32
+    self->iname = _strdup(name);
+#else
     self->iname = strdup(name);
+#endif
     self->type = H5O_TYPE_GROUP;
     break;
   case H5O_TYPE_DATASET:
+#ifdef WIN32
+    self->iname = _strdup(name);
+#else
     self->iname = strdup(name);
+#endif
     self->type = H5O_TYPE_DATASET;
     break;
   default:
@@ -1996,7 +2019,11 @@ NXstatus NX5getslab64(NXhandle fid, void *data, const int64_t iStart[], const in
 herr_t attr_info(hid_t loc_id, const char *name, const H5A_info_t *unused, void *opdata) {
   UNUSED_ARG(loc_id);
   UNUSED_ARG(unused);
+#ifdef WIN32
+  *(static_cast<char **>(opdata)) = _strdup(name);
+#else
   *(static_cast<char **>(opdata)) = strdup(name);
+#endif
   return 1;
 }
 

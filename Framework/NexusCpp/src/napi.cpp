@@ -193,13 +193,21 @@ static char *locateNexusFileInPath(char *startName) {
   char pathPrefix[256];
 
   if (canOpen(startName)) {
+#ifdef WIN32
+    return _strdup(startName);
+#else
     return strdup(startName);
+#endif
   }
 
   loadPath = nxgetenv("NX_LOAD_PATH");
   if (loadPath == NULL) {
-    /* file not found will be issued by upper level code */
+/* file not found will be issued by upper level code */
+#ifdef WIN32
+    return _strdup(startName);
+#else
     return strdup(startName);
+#endif
   }
 
   pPtr = stptok(loadPath, pathPrefix, 255, LIBSEP);
@@ -207,7 +215,11 @@ static char *locateNexusFileInPath(char *startName) {
     auto length = strlen(pathPrefix) + strlen(startName) + strlen(PATHSEP) + 2;
     testPath = static_cast<char *>(malloc(length * sizeof(char)));
     if (testPath == NULL) {
+#ifdef WIN32
+      return _strdup(startName);
+#else
       return strdup(startName);
+#endif
     }
     memset(testPath, 0, length * sizeof(char));
     strcpy(testPath, pathPrefix);
@@ -219,7 +231,11 @@ static char *locateNexusFileInPath(char *startName) {
     free(testPath);
     pPtr = stptok(pPtr, pathPrefix, 255, LIBSEP);
   }
+#ifdef WIN32
+  return _strdup(startName);
+#else
   return strdup(startName);
+#endif
 }
 
 /*------------------------------------------------------------------------
@@ -450,18 +466,16 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     am = (NXaccess)(am & ~NXACC_CHECKNAMESYNTAX);
   }
 
-  if (my_am == NXACC_CREATE) {
+  if ((my_am == NXACC_CREATE) || (my_am == NXACC_CREATE4)) {
     /* HDF4 will be used ! */
     backend_type = NXACC_CREATE4;
-    filename = strdup(userfilename);
-  } else if (my_am == NXACC_CREATE4) {
-    /* HDF4 will be used ! */
-    backend_type = NXACC_CREATE4;
-    filename = strdup(userfilename);
+    filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
+    strcpy(filename, userfilename);
   } else if (my_am == NXACC_CREATE5) {
     /* HDF5 will be used ! */
     backend_type = NXACC_CREATE5;
-    filename = strdup(userfilename);
+    filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
+    strcpy(filename, userfilename);
   } else if (my_am == NXACC_CREATEXML) {
     snprintf(error, 1023, "xml backend not supported for %s", userfilename);
     NXReportError(error);
