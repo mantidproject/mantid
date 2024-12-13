@@ -18,12 +18,6 @@
 #include <QString>
 #include <QStringList>
 
-#pragma push_macro("slots")
-#undef slots
-#include <Python.h>
-#include <boost/python.hpp>
-#pragma pop_macro("slots")
-
 //----------------------------------
 // Qt Forward declarations
 //----------------------------------
@@ -111,12 +105,6 @@ public:
   void closeHelpWindow();
 
   /**
-   * Launch the Python-based HelpWindow
-   * @param url :: URL to pass to the Python HelpWindow
-   */
-  void launchPythonHelp(const QString &url);
-
-  /**
    * Registration function for the help window factory.
    * @param factory the factory instance
    */
@@ -135,10 +123,19 @@ public:
   virtual ~InterfaceManager();
 
 private:
-  void notifyExistingInterfaces(UserSubWindow *newWindow);
-
   /// Handle to the help window factory
   static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *m_helpViewer;
+
+  void notifyExistingInterfaces(UserSubWindow *newWindow);
+
+#ifdef USE_PYTHON_WEB_HELP
+  // Placeholder function that you would implement to run the Python-based help window
+  void launchPythonHelpWindow(const QString &relativePage);
+  void launchPythonHelpWindowForAlgorithm(const QString &name, int version = -1);
+  void launchPythonHelpWindowForConcept(const QString &name);
+  void launchPythonHelpWindowForFitFunction(const QString &name);
+  void launchPythonHelpWindowForCustomInterface(const QString &name, const QString &area, const QString &section);
+#endif
 };
 
 } // namespace API
@@ -149,6 +146,6 @@ private:
   namespace {                                                                                                          \
   Mantid::Kernel::RegistrationHelper                                                                                   \
       register_helpviewer(((MantidQt::API::InterfaceManager::registerHelpWindowFactory(                                \
-                               new Mantid::Kernel::Instantiator<TYPE, MantidHelpInterface>())),                        \
+                               new Mantid::Kernel::Instantiator<TYPE, MantidQt::API::MantidHelpInterface>())),         \
                            0));                                                                                        \
   }

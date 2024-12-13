@@ -11,9 +11,7 @@
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
-#ifdef DOCS_QTHELP
 #include "MantidQtWidgets/Common/pqHelpWindow.h"
-#endif
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <QApplication>
@@ -45,10 +43,8 @@ namespace {
 Mantid::Kernel::Logger g_log("MantidHelpWindow");
 } // namespace
 
-#ifdef DOCS_QTHELP
 // initialise the help window
 QPointer<pqHelpWindow> MantidHelpWindow::g_helpWindow;
-#endif
 
 /// name of the collection file itself
 const QString COLLECTION_FILE("MantidProject.qhc");
@@ -91,29 +87,17 @@ MantidHelpWindow::MantidHelpWindow(const Qt::WindowFlags &flags)
         g_log.debug("helpengine.setupData() returned false");
 
       // create a new help window
-#ifdef DOCS_QTHELP
       g_helpWindow = new pqHelpWindow(helpEngine, this, flags);
       g_helpWindow->setWindowTitle(QString("Mantid - Help"));
       g_helpWindow->setWindowIcon(QIcon(":/images/MantidIcon.ico"));
-#else
-      throw std::runtime_error("TODO not implemented yet");
-#endif
 
       // show the home page on startup
       auto registeredDocs = helpEngine->registeredDocumentations();
       if (registeredDocs.size() > 0) {
-#ifdef DOCS_QTHELP
         g_helpWindow->showHomePage(registeredDocs[0]);
-#else
-        throw std::runtime_error("TODO not implemented yet");
-#endif
       }
-#ifdef DOCS_QTHELP
       g_helpWindow->show();
       g_helpWindow->raise();
-#else
-      throw std::runtime_error("TODO not implemented yet");
-#endif
     } else {
       g_log.information("Without collection file redirecting help to default web browser");
     }
@@ -123,15 +107,11 @@ MantidHelpWindow::MantidHelpWindow(const Qt::WindowFlags &flags)
 void MantidHelpWindow::showHelp(const QString &url) {
   g_log.debug() << "open help window for \"" << url.toStdString() << "\"\n";
   // bring up the help window if it is showing
-#ifdef DOCS_QTHELP
   g_helpWindow->show();
   g_helpWindow->raise();
   if (!url.isEmpty()) {
     g_helpWindow->showPage(url);
   }
-#else
-  throw std::runtime_error("TODO not implemented yet");
-#endif
 }
 
 void MantidHelpWindow::openWebpage(const QUrl &url) {
@@ -303,12 +283,8 @@ void MantidHelpWindow::shutdown() {
   // Deleting the object ensures the help engine's destructor is called and
   // avoids a segfault when workbench is closed
   if (helpWindowExists()) {
-#ifdef DOCS_QTHELP
     g_helpWindow->setAttribute(Qt::WA_DeleteOnClose);
     g_helpWindow->close();
-#else
-    throw std::runtime_error("TODO not implemented yet");
-#endif
   } else {
     g_log.warning("Something really wrong in MantidHelpWindow::shutdown()");
   }
