@@ -1,1 +1,1 @@
-- Fixed workbench crash when conjoined workspaces with mismatched bins are passed to SaveNexusProcessed.
+- :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` has been updated to check for mismatched bins before conjoining the input workspaces.
