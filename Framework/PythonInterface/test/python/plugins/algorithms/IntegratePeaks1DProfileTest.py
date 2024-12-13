@@ -138,7 +138,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         kwargs["PeakFunction"] = "Gaussian"
         kwargs["FixPeakParameters"] = ""
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_7", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 19.07, delta=1e-2)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 19.24, delta=1e-2)
 
     def test_exec_OutputFile(self):
         out_file = path.join(self._test_dir, "out.pdf")

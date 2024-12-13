@@ -17,6 +17,7 @@ from mantid.api import (
     IPeak,
     MultiDomainFunction,
     AnalysisDataService as ADS,
+    IPeakFunction,
 )
 from mantid.kernel import (
     Direction,
@@ -519,7 +520,23 @@ class PeakFunctionGenerator:
         iset_final = np.array([function[0][0].isExplicitlySet(ipar) for ipar in range(peak_func.nParams())])
         ipars_to_tie = np.flatnonzero(np.logical_not(iset_initial, iset_final))
         pars_to_tie = [function[0][0].parameterName(int(ipar)) for ipar in ipars_to_tie]  # global peak parameters
-        return self._add_parameter_ties_and_constraints(function, pars_to_tie), fit_kwargs, peak_mask
+        # set constraint on FWHM (to avoid peak fitting to noise or background)
+        self._add_fwhm_constraints(function, peak_func, fit_range=tof_end - tof_start, nbins=iend - istart)
+        return self._add_parameter_ties(function, pars_to_tie), fit_kwargs, peak_mask
+
+    def _add_fwhm_constraints(self, function: MultiDomainFunction, peak_func: IPeakFunction, fit_range: float, nbins: int):
+        [peak_func.setParameter(iparam, function[0].getParameterValue(iparam)) for iparam in range(peak_func.nParams())]
+        width_par_name = peak_func.getWidthParameterName()
+        if function[0][0].isExplicitlySet(peak_func.getParameterIndex(width_par_name)):
+            # BackToBack initialised with instrument parameters (ratio of FWHM to Sigma also depends on A,B)
+            fwhm = peak_func.fwhm()
+            scale_factor = peak_func.getParameterValue(width_par_name) / fwhm if fwhm > 0 else 1
+        else:
+            # assume Gaussian (even for BackToBack with default pars - because the defaults very bad!)
+            scale_factor = 2 * np.sqrt(2 * np.log(2))
+        fwhm_min = fit_range / nbins  # FWHM > bin-width
+        fwhm_max = max(fwhm_min + 1e-10, fit_range / 3)  # must be at least 3 FWHM in data range
+        function[0].addConstraints(f"{fwhm_min * scale_factor}<f0.{width_par_name}<{fwhm_max * scale_factor}")
 
     @staticmethod
     def _estimate_intensity_and_background(ws: Workspace2D, ispec: int, istart: int, iend: int) -> Tuple[float, float, float]:
@@ -535,7 +552,7 @@ class PeakFunctionGenerator:
         sigma = np.sqrt(np.sum((e * bin_width) ** 2))
         return intensity, sigma, bg
 
-    def _add_parameter_ties_and_constraints(self, function: MultiDomainFunction, pars_to_tie: Sequence[str]) -> str:
+    def _add_parameter_ties(self, function: MultiDomainFunction, pars_to_tie: Sequence[str]) -> str:
         # fix peak params requested
         [function[0][0].fixParameter(par) for par in self.peak_params_to_fix]
         additional_pars_to_fix = set(self.peak_params_to_fix) - set(pars_to_tie)
@@ -576,7 +593,7 @@ class PeakFunctionGenerator:
                 xcen_lo = comp_func[0][self.cen_par_name] * (1 - frac_dspac_delta)
                 xcen_hi = comp_func[0][self.cen_par_name] * (1 + frac_dspac_delta)
                 comp_func.addConstraints(f"{xcen_lo}<f0.{self.cen_par_name}<{xcen_hi}")
-            # reset ties on background
+            # reset ties on background (fit only background in peak pixels)
             for ipar_bg in range(comp_func[1].nParams()):
                 par = comp_func[1].getParamName(ipar_bg)
                 if idom > 0:
