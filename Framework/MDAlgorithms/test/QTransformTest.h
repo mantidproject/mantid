@@ -83,6 +83,57 @@ public:
     runQTransform("QTransformTest7", true);
   }
 
+  static std::vector<std::vector<double>> get_events_helper(Mantid::API::IMDEventWorkspace_sptr workspace) {
+    MDEventWorkspace<MDLeanEvent<1>, 1>::sptr MDEW_MDLEANEVENT_1 =
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<1>, 1>>(workspace);
+    if (MDEW_MDLEANEVENT_1)
+      return get_events<MDLeanEvent<1>, 1>(MDEW_MDLEANEVENT_1);
+
+    MDEventWorkspace<MDLeanEvent<2>, 2>::sptr MDEW_MDLEANEVENT_2 =
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<2>, 2>>(workspace);
+    if (MDEW_MDLEANEVENT_2)
+      return get_events<MDLeanEvent<2>, 2>(MDEW_MDLEANEVENT_2);
+
+    MDEventWorkspace<MDLeanEvent<3>, 3>::sptr MDEW_MDLEANEVENT_3 =
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<3>, 3>>(workspace);
+    if (MDEW_MDLEANEVENT_3)
+      return get_events<MDLeanEvent<3>, 3>(MDEW_MDLEANEVENT_3);
+
+    MDEventWorkspace<MDLeanEvent<4>, 4>::sptr MDEW_MDLEANEVENT_4 =
+        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<4>, 4>>(workspace);
+    return get_events<MDLeanEvent<4>, 4>(MDEW_MDLEANEVENT_4);
+  }
+
+  template <typename MDE, size_t nd>
+  static std::vector<std::vector<double>> get_events(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) {
+    // return a vector of events, events being (signal, error, x1, x2, x3, ...)
+    std::vector<std::vector<double>> events_vector;
+    MDBoxBase<MDE, nd> *box1 = ws->getBox();
+    std::vector<Mantid::API::IMDNode *> boxes;
+    box1->getBoxes(boxes, 1000, true);
+    auto numBoxes = int(boxes.size());
+
+    for (int i = 0; i < numBoxes; ++i) {
+      auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
+      if (box && !box->getIsMasked()) {
+        std::vector<MDE> &events = box->getEvents();
+        for (auto it = events.begin(); it != events.end(); ++it) {
+
+          std::vector<double> event;
+          event.push_back(it->getSignal());
+          event.push_back(it->getError());
+          for (size_t d = 0; d < nd; ++d)
+            event.push_back(it->getCenter(d));
+          events_vector.push_back(event);
+        }
+      }
+      if (box) {
+        box->releaseEvents();
+      }
+    }
+    return events_vector;
+  }
+
 private:
   Mantid::API::IMDEventWorkspace_sptr runQTransform(std::string inputWS, bool expect_throw = false) {
     QTransformTestClass alg;
@@ -150,57 +201,6 @@ private:
       TS_ASSERT_DELTA(output_events[i][0], q2, 1e-5);
       TS_ASSERT_DELTA(output_events[i][1], q2, 1e-5);
     }
-  }
-
-  std::vector<std::vector<double>> get_events_helper(Mantid::API::IMDEventWorkspace_sptr workspace) {
-    MDEventWorkspace<MDLeanEvent<1>, 1>::sptr MDEW_MDLEANEVENT_1 =
-        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<1>, 1>>(workspace);
-    if (MDEW_MDLEANEVENT_1)
-      return get_events<MDLeanEvent<1>, 1>(MDEW_MDLEANEVENT_1);
-
-    MDEventWorkspace<MDLeanEvent<2>, 2>::sptr MDEW_MDLEANEVENT_2 =
-        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<2>, 2>>(workspace);
-    if (MDEW_MDLEANEVENT_2)
-      return get_events<MDLeanEvent<2>, 2>(MDEW_MDLEANEVENT_2);
-
-    MDEventWorkspace<MDLeanEvent<3>, 3>::sptr MDEW_MDLEANEVENT_3 =
-        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<3>, 3>>(workspace);
-    if (MDEW_MDLEANEVENT_3)
-      return get_events<MDLeanEvent<3>, 3>(MDEW_MDLEANEVENT_3);
-
-    MDEventWorkspace<MDLeanEvent<4>, 4>::sptr MDEW_MDLEANEVENT_4 =
-        std::dynamic_pointer_cast<MDEventWorkspace<MDLeanEvent<4>, 4>>(workspace);
-    return get_events<MDLeanEvent<4>, 4>(MDEW_MDLEANEVENT_4);
-  }
-
-  template <typename MDE, size_t nd>
-  std::vector<std::vector<double>> get_events(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) {
-    // return a vector of events, events being (signal, error, x1, x2, x3, ...)
-    std::vector<std::vector<double>> events_vector;
-    MDBoxBase<MDE, nd> *box1 = ws->getBox();
-    std::vector<Mantid::API::IMDNode *> boxes;
-    box1->getBoxes(boxes, 1000, true);
-    auto numBoxes = int(boxes.size());
-
-    for (int i = 0; i < numBoxes; ++i) {
-      auto *box = dynamic_cast<MDBox<MDE, nd> *>(boxes[i]);
-      if (box && !box->getIsMasked()) {
-        std::vector<MDE> &events = box->getEvents();
-        for (auto it = events.begin(); it != events.end(); ++it) {
-
-          std::vector<double> event;
-          event.push_back(it->getSignal());
-          event.push_back(it->getError());
-          for (size_t d = 0; d < nd; ++d)
-            event.push_back(it->getCenter(d));
-          events_vector.push_back(event);
-        }
-      }
-      if (box) {
-        box->releaseEvents();
-      }
-    }
-    return events_vector;
   }
 
   // small helper class to test abstract class
