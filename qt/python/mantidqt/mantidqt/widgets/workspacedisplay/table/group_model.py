@@ -75,6 +75,9 @@ class GroupTableWorkspaceDisplayModel:
                 if err_for_column >= 0:
                     self.marked_columns.add_y_err(ErrorColumn(col, err_for_column + 2))
 
+    def original_column_headers(self):
+        return self._original_column_headers[:]
+
     def build_current_labels(self):
         return self.marked_columns.build_labels()
 
@@ -137,6 +140,15 @@ class GroupTableWorkspaceDisplayModel:
         elif col_name == "l":
             p.setL(data)
 
+    def get_number_of_rows(self):
+        return self.ws_num_rows
+
+    def get_number_of_columns(self):
+        return self.ws_num_cols
+
+    def workspace_equals(self, workspace_name):
+        return self.ws.name() == workspace_name
+
     def delete_rows(self, selected_rows):
         from mantid.simpleapi import DeleteTableRows
 
@@ -155,6 +167,9 @@ class GroupTableWorkspaceDisplayModel:
 
     def sort(self, column_index, sort_ascending):
         from mantid.simpleapi import SortPeaksWorkspace
+
+        if column_index in [0, 1]:
+            return
 
         column_name = self.get_column_header(column_index)
 
