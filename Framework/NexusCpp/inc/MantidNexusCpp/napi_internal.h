@@ -73,7 +73,6 @@ typedef struct {
   NXstatus (*nxsameID)(NXhandle handle, NXlink *pFirstID, NXlink *pSecondID);
   NXstatus (*nxinitgroupdir)(NXhandle handle);
   NXstatus (*nxinitattrdir)(NXhandle handle);
-  NXstatus (*nxsetnumberformat)(NXhandle handle, const int type, const char *format);
   NXstatus (*nxprintlink)(NXhandle handle, NXlink *link);
   NXstatus (*nxnativeexternallink)(NXhandle handle, CONSTCHAR *name, CONSTCHAR *externalfile, CONSTCHAR *remotetarget);
   NXstatus (*nxnativeinquirefile)(NXhandle handle, char *externalfile, const int filenamelength);

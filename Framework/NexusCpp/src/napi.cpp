@@ -1200,21 +1200,6 @@ NXstatus NXinitattrdir(NXhandle fid) {
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXsetnumberformat(NXhandle fid, const int type, const char *format) {
-  pNexusFunction pFunc = handleToNexusFunc(fid);
-  if (pFunc->nxsetnumberformat != NULL) {
-    return LOCKED_CALL(pFunc->nxsetnumberformat(pFunc->pNexusData, type, format));
-  } else {
-    /*
-       silently ignore this. Most NeXus file formats do not require
-       this
-     */
-    return NX_OK;
-  }
-}
-
-/*-------------------------------------------------------------------------*/
-
 NXstatus NXinitgroupdir(NXhandle fid) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
   return LOCKED_CALL(pFunc->nxinitgroupdir(pFunc->pNexusData));

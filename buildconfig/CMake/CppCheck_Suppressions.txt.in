@@ -876,7 +876,7 @@ redundantAssignment:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi5.cpp:882
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi5.cpp:1225
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:192
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:638
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:1466
+constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:1451
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi5.cpp:1973
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi5.cpp:2008
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi5.cpp:2185

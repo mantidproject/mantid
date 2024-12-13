@@ -1179,20 +1179,6 @@ void File::initAttrDir() {
   }
 }
 
-void File::setNumberFormat(NXnumtype &type, const string &format) {
-  if (format.empty()) {
-    throw Exception("Supplied empty format to setNumberFormat");
-  }
-  char c_format[NX_MAXNAMELEN];
-  strcpy(c_format, format.c_str());
-  NXstatus status = NXsetnumberformat(this->m_file_id, type, c_format);
-  if (status != NX_OK) {
-    stringstream msg;
-    msg << "NXsetnumberformat(" << format << ") failed";
-    throw Exception(msg.str(), status);
-  }
-}
-
 string File::inquireFile(const int buff_length) {
   string filename;
   char *c_filename = new char[static_cast<size_t>(buff_length)];
