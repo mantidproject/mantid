@@ -239,7 +239,6 @@ typedef struct {
 #define NXsameID MANGLE(nxisameid)
 #define NXinitgroupdir MANGLE(nxiinitgroupdir)
 #define NXinitattrdir MANGLE(nxiinitattrdir)
-#define NXsetnumberformat MANGLE(nxisetnumberformat)
 #define NXsetcache MANGLE(nxisetcache)
 #define NXinquirefile MANGLE(nxiinquirefile)
 #define NXisexternalgroup MANGLE(nxiisexternalgroup)
@@ -708,17 +707,6 @@ MANTID_NEXUSCPP_DLL NXstatus NXinitgroupdir(NXhandle handle);
  * \ingroup c_navigation
  */
 MANTID_NEXUSCPP_DLL NXstatus NXinitattrdir(NXhandle handle);
-
-/**
- * Sets the format for number printing. This call has only an effect when using the XML physical file
- * format.
- * \param handle A NeXus file handle as initialized by NXopen.
- * \param type The NeXus data type to set the format for.
- * \param format The C-language format string to use for this data type.
- * \return NX_OK on success, NX_ERROR in the case of an error.
- * \ingroup c_readwrite
- */
-MANTID_NEXUSCPP_DLL NXstatus NXsetnumberformat(NXhandle handle, const int type, const char *format);
 
 /**
  * Inquire the filename of the currently open file. FilenameBufferLength of the file name

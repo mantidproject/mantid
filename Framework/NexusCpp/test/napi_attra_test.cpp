@@ -103,7 +103,6 @@ int main(int argc, char *argv[]) {
     std::cerr << "NXopen(" << filename << ", " << nx_creation_code << ", handle)\n failed";
     return 1;
   }
-  NXsetnumberformat(fileid, NX_FLOAT32, "%9.3f");
 
   /* create global attributes */
   fprintf(stderr, "creating global attributes\n");
