@@ -134,7 +134,6 @@ int main(int argc, char *argv[]) {
       return TEST_FAILED;
     }
   }
-  NXsetnumberformat(fileid, NX_FLOAT32, "%9.3f");
   if (NXmakegroup(fileid, "entry", "NXentry") != NX_OK)
     return TEST_FAILED;
   if (NXopengroup(fileid, "entry", "NXentry") != NX_OK)
