@@ -1200,7 +1200,7 @@ NXstatus NXinitattrdir(NXhandle fid) {
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NXsetnumberformat(NXhandle fid, int type, char *format) {
+NXstatus NXsetnumberformat(NXhandle fid, const int type, const char *format) {
   pNexusFunction pFunc = handleToNexusFunc(fid);
   if (pFunc->nxsetnumberformat != NULL) {
     return LOCKED_CALL(pFunc->nxsetnumberformat(pFunc->pNexusData, type, format));

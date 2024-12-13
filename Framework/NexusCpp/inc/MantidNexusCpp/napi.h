@@ -718,7 +718,7 @@ MANTID_NEXUSCPP_DLL NXstatus NXinitattrdir(NXhandle handle);
  * \return NX_OK on success, NX_ERROR in the case of an error.
  * \ingroup c_readwrite
  */
-MANTID_NEXUSCPP_DLL NXstatus NXsetnumberformat(NXhandle handle, int type, char *format);
+MANTID_NEXUSCPP_DLL NXstatus NXsetnumberformat(NXhandle handle, const int type, const char *format);
 
 /**
  * Inquire the filename of the currently open file. FilenameBufferLength of the file name
