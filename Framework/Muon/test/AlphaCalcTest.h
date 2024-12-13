@@ -14,7 +14,6 @@
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidDataHandling/Load.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidMuon/AlphaCalc.h"
 #include <stdexcept>

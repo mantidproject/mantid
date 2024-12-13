@@ -914,7 +914,7 @@ void LoadISISNexus2::loadLogs(DataObjects::Workspace2D_sptr &ws) {
   ws->populateInstrumentParameters();
 
   // Make log creator object and add the run status log
-  m_logCreator.reset(new ISISRunLogs(ws->run()));
+  m_logCreator.reset(new API::ISISRunLogs(ws->run()));
   m_logCreator->addStatusLog(ws->mutableRun());
 }
 

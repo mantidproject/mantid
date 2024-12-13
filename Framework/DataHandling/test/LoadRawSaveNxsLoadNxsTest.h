@@ -10,7 +10,6 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadRaw3.h"
