@@ -1,5 +1,7 @@
+import os
 from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QWidget
 from qtpy.QtWebEngineWidgets import QWebEngineView
+from qtpy.QtCore import QUrl
 
 
 class HelpWindowView(QMainWindow):
@@ -9,11 +11,18 @@ class HelpWindowView(QMainWindow):
         self.setWindowTitle("Python Help Window")
         self.resize(800, 600)
 
-        # Web view to display the help documentation
         self.browser = QWebEngineView()
-        self.browser.setUrl("https://docs.mantidproject.org/")
 
-        # Layout
+        # Determine initial URL:
+        local_docs_base = os.environ.get("MANTID_LOCAL_DOCS_BASE")
+        if local_docs_base and os.path.isdir(local_docs_base):
+            # Use local docs if available
+            index_path = os.path.join(local_docs_base, "index.html")
+            self.browser.setUrl(QUrl.fromLocalFile(index_path))
+        else:
+            # Fallback to online docs
+            self.browser.setUrl(QUrl("https://docs.mantidproject.org/"))
+
         layout = QVBoxLayout()
         layout.addWidget(self.browser)
         container = QWidget()
