@@ -24,7 +24,7 @@
 
 #include <Poco/Environment.h>
 #include <QStringList>
-#include <once_flag>
+#include <mutex>
 
 using namespace MantidQt::API;
 using Mantid::Kernel::AbstractInstantiator;
