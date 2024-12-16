@@ -12,7 +12,7 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** MagneticFormFactorCorrectionMD : TODO: DESCRIPTION
+/** MagneticFormFactorCorrectionMD : Correct event signal and error values for magnetic form factor.
  */
 class MANTID_MDALGORITHMS_DLL MagneticFormFactorCorrectionMD : public QTransform {
 public:
@@ -21,6 +21,7 @@ public:
   const std::string category() const override;
   const std::string summary() const override;
   double correction(const double) const override;
+  const std::vector<std::string> seeAlso() const override;
 
 private:
   void init() override;

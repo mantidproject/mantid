@@ -13,7 +13,7 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** QTransform : TODO: DESCRIPTION
+/** QTransform : Base algorithm for transforming |Q| values in an MD workspace.
  */
 class MANTID_MDALGORITHMS_DLL QTransform : public API::Algorithm {
 public:

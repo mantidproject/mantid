@@ -26,11 +26,13 @@ const std::string MagneticFormFactorCorrectionMD::name() const { return "Magneti
 int MagneticFormFactorCorrectionMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string MagneticFormFactorCorrectionMD::category() const { return "TODO: FILL IN A CATEGORY"; }
+const std::string MagneticFormFactorCorrectionMD::category() const { return "MDAlgorithms"; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string MagneticFormFactorCorrectionMD::summary() const { return "TODO: FILL IN A SUMMARY"; }
-
+const std::string MagneticFormFactorCorrectionMD::summary() const {
+  return "Apply magnetic form factor correction to MD events by dividing signal with F(Q)^2";
+}
+const std::vector<std::string> MagneticFormFactorCorrectionMD::seeAlso() const { return {"MagFormFactorCorrection"}; }
 // //----------------------------------------------------------------------------------------------
 // /** Initialize the algorithm's properties.
 //  */

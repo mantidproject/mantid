@@ -48,7 +48,7 @@ size_t getNumQDimensions(const IMDEventWorkspace_sptr ws) {
  */
 void QTransform::init() {
   declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("InputWorkspace", "", Direction::Input),
-                  "n input MDEventWorkspace. Must be in Q_sample/Q_lab frame.");
+                  "An input MDEventWorkspace. Must be in Q.");
   declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>("OutputWorkspace", "", Direction::Output),
                   "The output MDEventWorkspace with correction applied.");
 }
