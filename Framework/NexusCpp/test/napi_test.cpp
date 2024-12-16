@@ -30,7 +30,9 @@
 #include <stdlib.h>
 #include <string.h> // for copy and compare
 #include <string>
-#ifndef _WIN32
+#ifdef WIN32
+#include <direct.h>
+#else
 #include <unistd.h>
 #endif
 #include "MantidNexusCpp/napi.h"
@@ -53,7 +55,11 @@ constexpr int TEST_SUCCEED{0};
 static const char *relativePathOf(const char *filename) {
   char cwd[1024];
 
+#ifdef WIN32
+  _getcwd(cwd, sizeof(cwd));
+#else
   getcwd(cwd, sizeof(cwd));
+#endif
 
   if (strncmp(filename, cwd, strlen(cwd)) == 0) {
     return filename + strlen(cwd) + 1;
@@ -138,9 +144,9 @@ int main(int argc, char *argv[]) {
     return TEST_FAILED;
   if (NXopengroup(fileid, "entry", "NXentry") != NX_OK)
     return TEST_FAILED;
-  if (NXputattr(fileid, "hugo", "namenlos", strlen("namenlos"), NX_CHAR) != NX_OK)
+  if (NXputattr(fileid, "hugo", "namenlos", static_cast<int>(strlen("namenlos")), NX_CHAR) != NX_OK)
     return TEST_FAILED;
-  if (NXputattr(fileid, "cucumber", "passion", strlen("passion"), NX_CHAR) != NX_OK)
+  if (NXputattr(fileid, "cucumber", "passion", static_cast<int>(strlen("passion")), NX_CHAR) != NX_OK)
     return TEST_FAILED;
   NXlen = static_cast<int>(strlen(ch_test_data));
   if (NXmakedata(fileid, "ch_data", NX_CHAR, 1, &NXlen) != NX_OK)
