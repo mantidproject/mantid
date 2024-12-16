@@ -466,12 +466,12 @@ static NXstatus NXinternalopenImpl(CONSTCHAR *userfilename, NXaccess am, pFileSt
     am = (NXaccess)(am & ~NXACC_CHECKNAMESYNTAX);
   }
 
-  if ((my_am == NXACC_CREATE) || (my_am == NXACC_CREATE4)) {
+  if (my_am == NXACC_CREATE4) {
     /* HDF4 will be used ! */
     backend_type = NXACC_CREATE4;
     filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
     strcpy(filename, userfilename);
-  } else if (my_am == NXACC_CREATE5) {
+  } else if ((my_am == NXACC_CREATE) || (my_am == NXACC_CREATE5)) {
     /* HDF5 will be used ! */
     backend_type = NXACC_CREATE5;
     filename = static_cast<char *>(malloc(strlen(userfilename) + 1));
