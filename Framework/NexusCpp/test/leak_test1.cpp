@@ -1,9 +1,9 @@
-#include <stdio.h>
-#ifndef _WIN32
-#include <unistd.h>
-#endif
 #include "MantidNexusCpp/napi.h"
+#include "napi_test_util.h"
+#include <stdio.h>
 #include <stdlib.h>
+
+using NexusCppTest::removeFile;
 
 #define ON_ERROR(msgstr)                                                                                               \
   {                                                                                                                    \
@@ -16,11 +16,12 @@ int main() {
   const int nReOpen = 1000;
   printf("Running for %d iterations\n", nReOpen);
   int iReOpen;
-  const char *szFile = "leak_test1.nxs";
+  const std::string szFile("leak_test1.nxs");
 
   NXhandle fileid;
-  unlink(szFile);
-  if (NXopen(szFile, access_mode, &fileid) != NX_OK)
+
+  removeFile(szFile); // in case it was left over from previous run
+  if (NXopen(szFile.c_str(), access_mode, &fileid) != NX_OK)
     ON_ERROR("NXopen failed!\n")
 
   if (NXclose(&fileid) != NX_OK)
@@ -30,14 +31,14 @@ int main() {
     if (0 == iReOpen % 100)
       printf("loop count %d\n", iReOpen);
 
-    if (NXopen(szFile, NXACC_RDWR, &fileid) != NX_OK)
+    if (NXopen(szFile.c_str(), NXACC_RDWR, &fileid) != NX_OK)
       ON_ERROR("NXopen failed!\n");
 
     if (NXclose(&fileid) != NX_OK)
       ON_ERROR("NXclose failed!\n");
   }
 
-  unlink(szFile);
+  removeFile(szFile); // cleanup
   fileid = NULL;
   return 0;
 }
