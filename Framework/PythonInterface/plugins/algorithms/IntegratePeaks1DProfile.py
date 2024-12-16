@@ -392,6 +392,14 @@ class IntegratePeaks1DProfile(DataProcessorAlgorithm):
                 self.delete_fit_result_workspaces(fit_result)
                 continue  # skip peak
 
+            # post-fit check on peak widths (so as not
+            at_limit = func_generator.check_peak_widths_not_at_limits(fit_result["Function"])
+            if at_limit.all():
+                self.delete_fit_result_workspaces(fit_result)
+                continue  # skip peak
+            fit_mask[at_limit] = False  # do not include these pixels in peak
+            peak_mask.flat[initial_peak_mask] = fit_mask
+
             # calculate intensity
             status = PEAK_STATUS.VALID
             intens, sigma, _ = calc_intens_and_sigma_arrays(fit_result, error_strategy)
@@ -464,6 +472,9 @@ class PeakFunctionGenerator:
     def __init__(self, peak_params_to_fix: Sequence[str]):
         self.cen_par_name: str = None
         self.intens_par_name: str = None
+        self.width_par_name: str = None
+        self.width_max: float = None
+        self.width_max: float = None
         self.peak_params_to_fix: Sequence[str] = peak_params_to_fix
         self.peak_mask: np.ndarray[float] = None
         self.ysum: np.ndarray[float] = None
@@ -487,6 +498,7 @@ class PeakFunctionGenerator:
         peak_func.setIntensity(1.0)
         self.intens_par_name = next(peak_func.getParamName(ipar) for ipar in range(peak_func.nParams()) if peak_func.isExplicitlySet(ipar))
         self.cen_par_name = peak_func.getCentreParameterName()
+        self.width_par_name = peak_func.getWidthParameterName()
         avg_bg = 0
         idom = 0
         peak_mask = np.zeros(len(ispecs), dtype=bool)
@@ -526,17 +538,24 @@ class PeakFunctionGenerator:
 
     def _add_fwhm_constraints(self, function: MultiDomainFunction, peak_func: IPeakFunction, fit_range: float, nbins: int):
         [peak_func.setParameter(iparam, function[0].getParameterValue(iparam)) for iparam in range(peak_func.nParams())]
-        width_par_name = peak_func.getWidthParameterName()
-        if function[0][0].isExplicitlySet(peak_func.getParameterIndex(width_par_name)):
+        if function[0][0].isExplicitlySet(peak_func.getParameterIndex(self.width_par_name)):
             # BackToBack initialised with instrument parameters (ratio of FWHM to Sigma also depends on A,B)
             fwhm = peak_func.fwhm()
-            scale_factor = peak_func.getParameterValue(width_par_name) / fwhm if fwhm > 0 else 1
+            scale_factor = peak_func.getParameterValue(self.width_par_name) / fwhm if fwhm > 0 else 1
         else:
             # assume Gaussian (even for BackToBack with default pars - because the defaults very bad!)
             scale_factor = 2 * np.sqrt(2 * np.log(2))
-        fwhm_min = fit_range / nbins  # FWHM > bin-width
-        fwhm_max = max(fwhm_min + 1e-10, fit_range / 3)  # must be at least 3 FWHM in data range
-        function[0].addConstraints(f"{fwhm_min * scale_factor}<f0.{width_par_name}<{fwhm_max * scale_factor}")
+        self.width_min = 0.5 * (fit_range / nbins) * scale_factor  # FWHM > 0.5 * bin-width
+        self.width_max = max(self.width_min + 1e-10, (fit_range / 2) * scale_factor)  # must be at least 2 FWHM in data range
+        function[0].addConstraints(f"{self.width_min}<f0.{self.width_par_name}<{self.width_max}")
+
+    def check_peak_widths_not_at_limits(self, function: MultiDomainFunction):
+        at_limit = np.zeros(function.nDomains(), dtype=bool)
+        for idom, comp_func in enumerate(function):
+            width = comp_func[0].getParameterValue(self.width_par_name)
+            if np.isclose(width, self.width_min) or np.isclose(width, self.width_max):
+                at_limit[idom] = True
+        return at_limit
 
     @staticmethod
     def _estimate_intensity_and_background(ws: Workspace2D, ispec: int, istart: int, iend: int) -> Tuple[float, float, float]:
