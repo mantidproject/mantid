@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 #ifdef _WIN32
-#include <direct.h> /* for getcwd() */
+#include <direct.h> // for getcwd()
 #else
 #include <unistd.h>
 #endif /* _WIN32 */
@@ -35,7 +35,11 @@ constexpr int TEST_SUCCEED{0};
 static std::string relativePathOf(const std::string &filenamestr) {
   char cwd[1024];
 
+#ifdef WIN32
+  _getcwd(cwd, sizeof(cwd));
+#else
   getcwd(cwd, sizeof(cwd));
+#endif
 
   if (filenamestr.compare(0, strlen(cwd), cwd) == 0) {
     return filenamestr.substr(strlen(cwd) + 1); // +1 to skip trailing /

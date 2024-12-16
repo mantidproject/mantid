@@ -121,7 +121,7 @@ add_test(NAME "${TEST_PREFIX}-C-test-nxunlimited" COMMAND napi_test_nxunlimited)
 
 # #### leak tests
 
-add_executable(napi_leak_test1 EXCLUDE_FROM_ALL test/leak_test1.cpp)
+add_executable(napi_leak_test1 EXCLUDE_FROM_ALL test/leak_test1.cpp test/napi_test_util.cpp test/napi_test_util.h)
 target_link_libraries(napi_leak_test1 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-leak-test-1" COMMAND napi_leak_test1)
 

@@ -58,7 +58,8 @@ int createAttrs(const NXhandle file) {
     std::cerr << "Failed to NXputattr(handle, \"old_style_int_attribute\", ...)\n";
     return NX_ERROR;
   }
-  if (NXputattr(file, "oldstylestrattr", "i:wq!<ESC><ESC>", strlen("i:wq!<ESC><ESC>"), NX_CHAR) != NX_OK)
+  if (NXputattr(file, "oldstylestrattr", "i:wq!<ESC><ESC>", static_cast<int>(strlen("i:wq!<ESC><ESC>")), NX_CHAR) !=
+      NX_OK)
     return NX_ERROR;
   return NX_OK;
 }
