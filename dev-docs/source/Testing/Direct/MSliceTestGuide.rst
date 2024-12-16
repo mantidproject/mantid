@@ -326,3 +326,16 @@ The Workspace Manager
    :alt: compare_mslice_ws_2.png
    :align: center
    :width: 80%
+
+
+Interaction with ADS
+--------------------
+#. Create a few (maybe three or four) interactive cuts from a slice plot and click ``Save Cut to Workspace`` for each of them
+#. Navigate to the ``MD Histo`` tab of the Workspace Manager and select all cuts
+#. Click on ``Save to Workbench``
+#. In Mantid, all selected cuts from the ``MD Histo`` tab are now visible in the Workspaces window
+#. Select one of these and rename it
+#. Check that the corresponding workspace in the ``MD Histo`` has been renamed accordingly
+#. Select the renamed workspace in Mantid and click ``Delete``
+#. Check that the corresponding workspace in the ``MD Histo`` tab is deleted as well
+#. Now click ``Clear`` in the Workspaces window in Mantid and check that all workspace in the ``2D`` and ``MD Histo`` tabs in MSlice are deleted as well
