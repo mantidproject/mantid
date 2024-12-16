@@ -32,8 +32,8 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         axis = cls.ws.getAxis(0)
         axis.setUnit("TOF")
 
-        # rebin to get 20 TOF bins
-        cls.ws = Rebin(InputWorkspace=cls.ws, OutputWorkspace=cls.ws.name(), Params="9900,25,10800", PreserveEvents=False)
+        # rebin to get required blocksize
+        cls.ws = Rebin(InputWorkspace=cls.ws, OutputWorkspace=cls.ws.name(), Params="9900,10,10800", PreserveEvents=False)
         cls.ws += 50  # add constant background
 
         cls.peaks_edge = CreatePeaksWorkspace(InstrumentWorkspace=cls.ws, NumberOfPeaks=0, OutputWorkspace="peaks_incl_edge")
@@ -74,6 +74,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
 
         # output file dir
         cls._test_dir = tempfile.mkdtemp()
+        cls.default_intens_over_sigma = 30.966
 
     @classmethod
     def tearDownClass(cls):
@@ -84,14 +85,14 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         out = IntegratePeaks1DProfile(
             InputWorkspace=self.ws, PeaksWorkspace=self.peaks_edge, OutputWorkspace="peaks_int_1", **self.profile_kwargs
         )
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 18.96, delta=1e-1)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[1], 18.96, delta=1e-1)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], self.default_intens_over_sigma, delta=1e-1)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[1], self.default_intens_over_sigma, delta=1e-1)
 
     def test_exec_IntegrateIfOnEdge_False(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["IntegrateIfOnEdge"] = False
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks_edge, OutputWorkspace="peaks_int_2", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 18.96, delta=1e-1)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], self.default_intens_over_sigma, delta=1e-1)
         self.assertAlmostEqual(out.column("Intens/SigInt")[1], 0.0, delta=1e-2)
 
     def test_exec_IntegrateIfOnEdge_False_respects_detector_masking(self):
@@ -106,26 +107,26 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         out = IntegratePeaks1DProfile(
             InputWorkspace=ws_masked, PeaksWorkspace=self.peaks_edge, OutputWorkspace="peaks_int_2_masked", **kwargs
         )
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 18.96, delta=1e-1)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], self.default_intens_over_sigma, delta=1e-1)
         self.assertAlmostEqual(out.column("Intens/SigInt")[1], 0.0, delta=1e-2)
 
     def test_exec_poisson_cost_func(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["CostFunction"] = "Poisson"
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_3", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 18.93, delta=1e-2)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 30.95, delta=1e-2)
 
     def test_exec_chisq_cost_func(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["CostFunction"] = "ChiSq"
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_4", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 18.96, delta=1e-2)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], self.default_intens_over_sigma, delta=1e-2)
 
     def test_exec_hessian_error_strategy(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["ErrorStrategy"] = "Hessian"
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_5", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 38582077, delta=1)  # not realistic fit - no noise!
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 62502473, delta=1)  # not realistic fit - no noise!
 
     def test_exec_IOverSigmaThreshold_respected(self):
         kwargs = self.profile_kwargs.copy()
@@ -138,7 +139,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         kwargs["PeakFunction"] = "Gaussian"
         kwargs["FixPeakParameters"] = ""
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_7", **kwargs)
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 19.24, delta=1e-2)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 31.04, delta=1e-2)
 
     def test_exec_OutputFile(self):
         out_file = path.join(self._test_dir, "out.pdf")
@@ -152,15 +153,15 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
         kwargs = self.profile_kwargs.copy()
         kwargs["FractionalChangeDSpacing"] = 1e-10
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_9", **kwargs)
-        # I/sigma different now d-sapcing constrained
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 18.94, delta=1e-2)
+        # I/sigma different now d-spacing constrained
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 31.16, delta=1e-2)
 
     def test_exec_fix_peak_params(self):
         kwargs = self.profile_kwargs.copy()
-        kwargs["FixPeakParameters"] = ["I"]  # fix intensity at initial guess (pretty good!)
+        kwargs["FixPeakParameters"] = ["I"]
         out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_9", **kwargs)
-        # I/sig slightly different as center fixed and peak TOF half bin-width different from data
-        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 18.94, delta=1e-2)
+        # I/sig slightly different as fixed intensity at initial guess (pretty good guess!)
+        self.assertAlmostEqual(out.column("Intens/SigInt")[0], 30.964, delta=1e-3)
 
     def test_exec_NPixMin_respected(self):
         kwargs = self.profile_kwargs.copy()
