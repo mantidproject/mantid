@@ -5,6 +5,8 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 from pathlib import Path
 import matplotlib.pyplot as plt
+import instrumentview.Projections.spherical_projection as iv_spherical
+import instrumentview.Projections.cylindrical_projection as iv_cylindrical
 from mantid.simpleapi import LoadRaw, LoadNexus, LoadEventNexus
 
 
@@ -42,13 +44,15 @@ class MainWindow(QMainWindow):
         # Create a PyVista plotter and add it to the layout
         self.plotter = BackgroundPlotter(show=False)
         layout.addWidget(self.plotter.app_window)
+        self.projection_plotter = BackgroundPlotter(show=False)
+        layout.addWidget(self.projection_plotter.app_window)
 
         pv.global_theme.color_cycler = "default"
 
-        self.plotWorkspace(Path(r"C:\Tutorial\SampleData-ISIS\SXD23767.raw"), False)
+        # self.plotWorkspace(Path(r"C:\Tutorial\SampleData-ISIS\SXD23767.raw"), False)
         # self.plotWorkspace(Path(r"C:\Tutorial\UsageData\CNCS_7860_event.nxs"), False, is_event=True)
         # self.plotWorkspace(Path(r"C:\Tutorial\SampleData-ISIS\INTER00013470.nxs"), True)
-        # self.plotWorkspace(Path(r"C:\Tutorial\SampleData-ISIS\MAR11060.raw"), True)
+        self.plotWorkspace(Path(r"C:\Tutorial\SampleData-ISIS\MAR11060.raw"), True)
         # self.plotWorkspace(Path(r"C:\Temp\sans2d.nxs"), False)
 
         # Plot origin
@@ -157,6 +161,9 @@ class MainWindow(QMainWindow):
             self.plotter.add_mesh(multiblock, multi_colors=colours, pickable=False)
 
         self.plotter.add_mesh(monitor_point_cloud, scalars="colours", rgba=True, render_points_as_spheres=True, point_size=10)
+
+        self.calculate_projection(data_min, data_max, is_spherical=True)
+        # self.calculate_projection(data_min, data_max, is_spherical=False)
 
     def generateSingleColour(self, points, red: float, green: float, blue: float, alpha: float) -> np.ndarray:
         rgba = np.zeros((len(points), 4))
@@ -358,3 +365,22 @@ class MainWindow(QMainWindow):
             detector_info_lines.append("Pixel counts: " + str(counts))
 
         return "\n".join(s for s in detector_info_lines)
+
+    def calculate_projection(self, data_min: float, data_max: float, is_spherical: bool):
+        spherical = (
+            iv_spherical.spherical_projection(self.m_workspace, self.m_detector_indices, np.array([1, 0, 0]))
+            if is_spherical
+            else iv_cylindrical.cylindrical_projection(self.m_workspace, self.m_detector_indices, np.array([1, 0, 0]))
+        )
+        projection_points = []
+        for det_id in range(len(self.m_detector_indices)):
+            x, y = spherical.coordinate_for_detector(det_id)
+            projection_points.append([x, y, 0])
+
+        projection_mesh = self.createPolyDataMesh(projection_points)
+        projection_mesh["Integrated Counts"] = self.m_detector_counts
+        self.projection_plotter.add_mesh(
+            projection_mesh, scalars="Integrated Counts", clim=[data_min, data_max], render_points_as_spheres=True, point_size=7
+        )
+        self.projection_plotter.view_xy()
+        self.projection_plotter.enable_image_style()
