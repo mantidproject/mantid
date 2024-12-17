@@ -1046,6 +1046,7 @@ internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDEventWSWrapper.cp
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSTransform.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDWSDescription.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNormDirectSC.cpp:0
+internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MagneticFormFactorCorrectionMD.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/OrMD.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNorm.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MergeMDFiles.cpp:0
