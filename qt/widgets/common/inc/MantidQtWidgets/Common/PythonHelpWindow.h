@@ -1,4 +1,6 @@
 #pragma once
+
+#include "DllOption.h"
 #include "MantidQtWidgets/Common/MantidHelpInterface.h"
 #include <QString>
 #include <QUrl>
