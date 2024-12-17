@@ -237,10 +237,10 @@ void QuasiView::handleProgramChange(int const index) {
   int const numberOptions = m_uiForm.cbPlot->count();
   switch (index) {
   case 0:
-    m_uiForm.cbPlot->setItemText(numberOptions - 2, "Prob");
+    m_uiForm.cbPlot->setItemText(numberOptions - 1, "Prob");
     break;
   case 1:
-    m_uiForm.cbPlot->setItemText(numberOptions - 2, "Beta");
+    m_uiForm.cbPlot->setItemText(numberOptions - 1, "Beta");
     break;
   }
 }
