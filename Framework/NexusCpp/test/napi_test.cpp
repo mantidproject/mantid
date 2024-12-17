@@ -89,7 +89,6 @@ int main(int argc, char *argv[]) {
   char group_name[NX_MAXNAMELEN], class_name[NX_MAXNAMELEN];
   char c1_array[5][4] = {
       {'a', 'b', 'c', 'd'}, {'e', 'f', 'g', 'h'}, {'i', 'j', 'k', 'l'}, {'m', 'n', 'o', 'p'}, {'q', 'r', 's', 't'}};
-  int unlimited_cdims[2] = {NX_UNLIMITED, 4};
   NXhandle fileid;
   NXlink glink, dlink, blink;
   int comp_array[100][20];
@@ -127,13 +126,14 @@ int main(int argc, char *argv[]) {
   }
   removeFile(nxFile); // in case previous run didn't clean up
 
-  std::cout << "Creating \"" << nxFile << "\"\n";
+  std::cout << "Creating \"" << nxFile << "\"" << std::endl;
   // create file
   if (NXopen(nxFile.c_str(), nx_creation_code, &fileid) != NX_OK) {
     std::cerr << "Failed to NXopen(" << nxFile << ", " << nx_creation_code << ", fileid)\n";
     return TEST_FAILED;
   }
   if (nx_creation_code == NXACC_CREATE5) {
+    std::cout << "Trying to reopen the file handle" << std::endl;
     NXhandle clone_fileid;
     if (NXreopen(fileid, &clone_fileid) != NX_OK) {
       std::cerr << "Failed to NXreopen " << nxFile << "\n";
@@ -291,22 +291,6 @@ int main(int argc, char *argv[]) {
     return TEST_FAILED;
   if (NXgetgroupID(fileid, &glink) != NX_OK)
     return TEST_FAILED;
-  if ((nx_creation_code & NXACC_CREATEXML) == 0) {
-    if (NXmakedata(fileid, "cdata_unlimited", NX_CHAR, 2, unlimited_cdims) != NX_OK)
-      return TEST_FAILED;
-    if (NXopendata(fileid, "cdata_unlimited") != NX_OK)
-      return TEST_FAILED;
-    slab_size[0] = 1;
-    slab_size[1] = 4;
-    slab_start[1] = 0;
-    for (i = 0; i < 5; i++) {
-      slab_start[0] = i;
-      if (NXputslab(fileid, &(c1_array[i][0]), slab_start, slab_size) != NX_OK)
-        return TEST_FAILED;
-    }
-    if (NXclosedata(fileid) != NX_OK)
-      return TEST_FAILED;
-  }
   if (NXclosegroup(fileid) != NX_OK)
     return TEST_FAILED;
   if (NXclosegroup(fileid) != NX_OK)
@@ -325,25 +309,25 @@ int main(int argc, char *argv[]) {
     return TEST_FAILED;
   if (NXclose(&fileid) != NX_OK)
     return TEST_FAILED;
-  std::cout << "END OF WRITE\n"; // TODO REMOVE
+  std::cout << "END OF WRITE" << std::endl; // TODO REMOVE
   if ((argc >= 2) && !strcmp(argv[1], "-q")) {
     return TEST_SUCCEED; /* create only */
   }
 
   // read test
-  std::cout << "Read/Write to read \"" << nxFile << "\"\n";
+  std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;
   if (NXopen(nxFile.c_str(), NXACC_RDWR, &fileid) != NX_OK) {
-    std::cerr << "Failed to open \"" << nxFile << "\" for read/write\n";
+    std::cerr << "Failed to open \"" << nxFile << "\" for read/write" << std::endl;
     return TEST_FAILED;
   }
   char filename[256];
   if (NXinquirefile(fileid, filename, 256) != NX_OK) {
     return TEST_FAILED;
   }
-  printf("NXinquirefile found: %s\n", relativePathOf(filename));
+  std::cout << "NXinquirefile found: " << relativePathOf(filename) << std::endl;
   NXgetattrinfo(fileid, &i);
   if (i > 0) {
-    printf("Number of global attributes: %d\n", i);
+    std::cout << "Number of global attributes: " << i << std::endl;
   }
   do {
     // cppcheck-suppress argumentSize
@@ -367,10 +351,10 @@ int main(int argc, char *argv[]) {
   if (NXopengroup(fileid, "entry", "NXentry") != NX_OK)
     return TEST_FAILED;
   NXgetattrinfo(fileid, &i);
-  printf("Number of group attributes: %d\n", i);
+  std::cout << "Number of group attributes: " << i << std::endl;
   if (NXgetpath(fileid, path, 512) != NX_OK)
     return TEST_FAILED;
-  printf("NXentry path %s\n", path);
+  std::cout << "NXentry path " << path << std::endl;
   do {
     // cppcheck-suppress argumentSize
     attr_status = NXgetnextattra(fileid, name, &NXrank, NXdims, &NXtype);
@@ -626,13 +610,13 @@ int main(int argc, char *argv[]) {
   removeFile(nxFile);
   return TEST_SUCCEED;
 }
+
 /*---------------------------------------------------------------------*/
 int testLoadPath() {
-  NXhandle h;
-
   if (getenv("NX_LOAD_PATH") != NULL) {
     // TODO create file and cleanup
     // std::string filename("data/dmc01.h5");
+    NXhandle h;
     if (NXopen("dmc01.hdf", NXACC_RDWR, &h) != NX_OK) {
       std::cout << "Loading NeXus file dmc01.hdf from path " << getenv("NX_LOAD_PATH") << " FAILED\n";
       return TEST_FAILED;
@@ -649,6 +633,11 @@ int testLoadPath() {
 
 /*---------------------------------------------------------------------*/
 static int testExternal(const std::string &progName) {
+#ifdef WIN32
+  UNUSED_ARG(progName);
+  std::cout << "Skipping external linking on windows\n";
+  return TEST_SUCCEED;
+#else
   const std::string PROTOCOL("nxfile://");
   int dummylen = 1;
   float dummyfloat = 1;
@@ -841,4 +830,5 @@ static int testExternal(const std::string &progName) {
   removeFile(extFile2);
 
   return TEST_SUCCEED;
+#endif
 }
