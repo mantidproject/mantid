@@ -3,12 +3,10 @@
 #include <stdexcept>
 
 PythonHelpBridge::PythonHelpBridge() {
-  Py_Initialize(); // Initialize the Python interpreter
+  Py_Initialize();
   try {
     boost::python::object main = boost::python::import("__main__");
     boost::python::object global = main.attr("__dict__");
-
-    // Import the helpwindowbridge module
     boost::python::import("helpwindowbridge");
   } catch (boost::python::error_already_set &) {
     PyErr_Print();

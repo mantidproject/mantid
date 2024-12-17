@@ -123,13 +123,12 @@ public:
   virtual ~InterfaceManager();
 
 private:
+  void notifyExistingInterfaces(UserSubWindow *newWindow);
+
   /// Handle to the help window factory
   static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *m_helpViewer;
 
-  void notifyExistingInterfaces(UserSubWindow *newWindow);
-
-#ifdef USE_PYTHON_WEB_HELP
-  // Placeholder function that you would implement to run the Python-based help window
+#ifndef DOCS_QTHELP
   void launchPythonHelpWindow(const QString &relativePage);
   void launchPythonHelpWindowForAlgorithm(const QString &name, int version = -1);
   void launchPythonHelpWindowForConcept(const QString &name);

@@ -80,7 +80,6 @@ set(SRC_FILES
     src/ParseKeyValueString.cpp
     src/pixmaps.cpp
     src/PluginLibraries.cpp
-    src/pqHelpWindow.cxx
     src/ProcessingAlgoWidget.cpp
     src/ProgressableView.cpp
     src/PropertyHandler.cpp
@@ -158,6 +157,9 @@ set(SRC_FILES
     src/Python/Sip.cpp
     src/Python/QHashToDict.cpp
 )
+if(DOCS_QTHELP)
+  list(APPEND SRC_FILES src/pqHelpWindow.cxx)
+endif()
 set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.h
@@ -346,6 +348,9 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Python/Object.h
     inc/MantidQtWidgets/Common/Python/QHashToDict.h
 )
+if(DOCS_QTHELP)
+  list(APPEND QT5_INC_FILES inc/MantidQtWidgets/Common/pqHelpWindow.h)
+endif()
 set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.ui
@@ -357,7 +362,6 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/MuonPeriodInfo.ui
     inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/FitScriptGenerator.ui
-    inc/MantidQtWidgets/Common/pqHelpWindow.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
     inc/MantidQtWidgets/Common/ScriptRepositoryView.ui
@@ -366,6 +370,9 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/SlitCalculator.ui
     inc/MantidQtWidgets/Common/UserFunctionDialog.ui
 )
+if(DOCS_QTHELP)
+  list(APPEND QT5_UI_FILES inc/MantidQtWidgets/Common/pqHelpWindow.ui)
+endif()
 set(MOC_FILES
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
@@ -431,7 +438,6 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
     inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
-    inc/MantidQtWidgets/Common/pqHelpWindow.h
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
     inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
@@ -621,8 +627,10 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/SlicingAlgorithmDialog.ui
     inc/MantidQtWidgets/Common/SlitCalculator.ui
     inc/MantidQtWidgets/Common/UserFunctionDialog.ui
-    inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
+if(DOCS_QTHELP)
+  list(APPEND UI_FILES inc/MantidQtWidgets/Common/pqHelpWindow.ui)
+endif()
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   list(APPEND TARGET_LIBRARIES "-framework CoreFoundation")

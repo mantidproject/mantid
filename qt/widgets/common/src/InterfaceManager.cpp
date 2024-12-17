@@ -240,101 +240,101 @@ MantidHelpInterface *InterfaceManager::createHelpWindow() const {
 }
 
 void InterfaceManager::showHelpPage(const QString &url) {
-#ifdef USE_PYTHON_WEB_HELP
-  // When using Python-based help:
-  // Here you would call a function that calls into Python to display the requested page.
-  // Placeholder:
-  // launchPythonHelpWindow(url.isEmpty() ? "index.html" : url);
-  launchPythonHelpWindow(url);
-#else
+#ifdef DOCS_QTHELP
   // Original behavior
   auto window = createHelpWindow();
   window->showPage(url);
+#else
+  launchPythonHelpWindow(url.isEmpty() ? "index.html" : url);
+
 #endif
 }
 
 void InterfaceManager::showAlgorithmHelp(const QString &name, const int version) {
-#ifdef USE_PYTHON_WEB_HELP
-  // Python-based version: construct the relative URL and call the Python help launcher
-  launchPythonHelpWindowForAlgorithm(name, version);
-#else
+#ifdef DOCS_QTHELP
   // Original behavior
   auto window = createHelpWindow();
   window->showAlgorithm(name, version);
+#else
+  // Python-based version: construct the relative URL and call the Python help launcher
+  launchPythonHelpWindowForAlgorithm(name, version);
+
 #endif
 }
 
 void InterfaceManager::showConceptHelp(const QString &name) {
-#ifdef USE_PYTHON_WEB_HELP
-  launchPythonHelpWindowForConcept(name);
-#else
+#ifdef DOCS_QTHELP
   // Original behavior
   auto window = createHelpWindow();
   window->showConcept(name);
+#else
+  launchPythonHelpWindowForConcept(name);
 #endif
 }
 
 void InterfaceManager::showFitFunctionHelp(const QString &name) {
-#ifdef USE_PYTHON_WEB_HELP
-  launchPythonHelpWindowForFitFunction(name);
-#else
+#ifdef DOCS_QTHELP
   // Original behavior
   auto window = createHelpWindow();
   window->showFitFunction(name);
+#else
+  launchPythonHelpWindowForFitFunction(name);
 #endif
 }
 
 void InterfaceManager::showCustomInterfaceHelp(const QString &name, const QString &area, const QString &section) {
-#ifdef USE_PYTHON_WEB_HELP
-  launchPythonHelpWindowForCustomInterface(name, area, section);
-#else
+#ifdef DOCS_QTHELP
   // Original behavior
   auto window = createHelpWindow();
   window->showCustomInterface(name, area, section);
+#else
+  launchPythonHelpWindowForCustomInterface(name, area, section);
 #endif
 }
 
 void InterfaceManager::showWebPage(const QString &url) { MantidDesktopServices::openUrl(url); }
 
 void InterfaceManager::closeHelpWindow() {
-#ifdef USE_PYTHON_WEB_HELP
-  // If using Python-based help, implement closing the Python help window if needed.
-  // Placeholder: no operation here.
-#else
+#ifdef DOCS_QTHELP
   // Original behavior
   if (MantidHelpWindow::helpWindowExists()) {
     auto window = createHelpWindow();
     window->shutdown();
   }
+#elses
+  // If using Python-based help, implement closing the Python help window if needed.
+  // Placeholder: no operation here.
 #endif
 }
 
-#ifdef USE_PYTHON_WEB_HELP
+#ifndef DOCS_QTHELP
+#include "MantidQtWidgets/Common/PythonHelpBridge.h"
 // Placeholder implementations for the Python-based help window launching.
 // In your real code, you would implement these using SIP/Boost.Python or similar
 // to run the provided Python code that shows the QWebEngineView.
 
 void InterfaceManager::launchPythonHelpWindow(const QString &relativePage) {
-  g_log.information("Launching Python-based web help window with page: " + relativePage.toStdString());
-  // TODO: Implement Python bridge call here
+  static PythonHelpBridge bridge;
+  bridge.showHelpPage(relativePage.toStdString());
 }
 
 void InterfaceManager::launchPythonHelpWindowForAlgorithm(const QString &name, int version) {
   QString page = "algorithms/" + name;
   if (version > 0)
-    page += "-v" + QString::number(version);
-  page += ".html";
+    page += "-v" + QString::number(version) + ".html";
+  else
+    page += ".html";
   launchPythonHelpWindow(page);
 }
 
 void InterfaceManager::launchPythonHelpWindowForConcept(const QString &name) {
-  QString pageName = name.isEmpty() ? "concepts/index.html" : "concepts/" + name + ".html";
-  launchPythonHelpWindow(pageName);
+  QString page = name.isEmpty() ? "concepts/index.html" : "concepts/" + name + ".html";
+  launchPythonHelpWindow(page);
 }
 
 void InterfaceManager::launchPythonHelpWindowForFitFunction(const QString &name) {
-  QString pageName = name.isEmpty() ? "fitting/fitfunctions/index.html" : "fitting/fitfunctions/" + name + ".html";
-  launchPythonHelpWindow(pageName);
+  QString page = name.isEmpty() ? "fitting/fitfunctions/index.html" : "fitting/fitfunctions/" + name + ".html";
+  launchPythonHelpWindow(page);
 }
 
 void InterfaceManager::launchPythonHelpWindowForCustomInterface(const QString &name, const QString &area,
