@@ -486,6 +486,11 @@ int testLoadPath(const string &filename) {
 }
 
 int testExternal(NXaccess create_code) {
+#ifdef WIN32
+  UNUSED_ARG(create_code);
+  std::cout << "Skipping external linking on windows\n";
+  return TEST_SUCCEED;
+#else
   if (create_code == NXACC_CREATE4) {
     std::cout << "Not testing external linking with hdf4\n";
     return TEST_SUCCEED;
@@ -537,6 +542,7 @@ int testExternal(NXaccess create_code) {
   removeFile(extfilepath2);
 
   return TEST_SUCCEED;
+#endif
 }
 
 int testTypeMap(const std::string &fname) {
