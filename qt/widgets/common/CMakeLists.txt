@@ -80,11 +80,14 @@ set(SRC_FILES
     src/ParseKeyValueString.cpp
     src/pixmaps.cpp
     src/PluginLibraries.cpp
+    src/pqHelpWindow.cxx
     src/ProcessingAlgoWidget.cpp
     src/ProgressableView.cpp
     src/PropertyHandler.cpp
     src/PropertyWidget.cpp
     src/PropertyWidgetFactory.cpp
+    src/PythonHelpBridge.cpp
+    src/PythonHelpWindow.cpp
     src/PythonRunner.cpp
     src/QtAlgorithmRunner.cpp
     src/QtJobRunner.cpp
@@ -157,9 +160,7 @@ set(SRC_FILES
     src/Python/Sip.cpp
     src/Python/QHashToDict.cpp
 )
-if(DOCS_QTHELP)
-  list(APPEND SRC_FILES src/pqHelpWindow.cxx)
-endif()
+
 set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.h
@@ -216,6 +217,8 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/PropertyWidget.h
+    inc/MantidQtWidgets/Common/PythonBridge.h
+    inc/MantidQtWidgets/Common/PythonHelpWindow.h
     inc/MantidQtWidgets/Common/PythonRunner.h
     inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
     inc/MantidQtWidgets/Common/QtJobRunner.h
@@ -262,6 +265,7 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/QtPropertyBrowser/StringEditorFactory.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/WorkspaceEditorFactory.h
 )
+
 # Include files aren't required, but this makes them appear in Visual Studio
 set(QT5_INC_FILES
     ${QT5_MOC_FILES}
@@ -348,9 +352,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Python/Object.h
     inc/MantidQtWidgets/Common/Python/QHashToDict.h
 )
-if(DOCS_QTHELP)
-  list(APPEND QT5_INC_FILES inc/MantidQtWidgets/Common/pqHelpWindow.h)
-endif()
+
 set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.ui
@@ -362,6 +364,7 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/MuonPeriodInfo.ui
     inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/FitScriptGenerator.ui
+    inc/MantidQtWidgets/Common/pqHelpWindow.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
     inc/MantidQtWidgets/Common/ScriptRepositoryView.ui
@@ -370,9 +373,7 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/SlitCalculator.ui
     inc/MantidQtWidgets/Common/UserFunctionDialog.ui
 )
-if(DOCS_QTHELP)
-  list(APPEND QT5_UI_FILES inc/MantidQtWidgets/Common/pqHelpWindow.ui)
-endif()
+
 set(MOC_FILES
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
     inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
@@ -438,6 +439,7 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
     inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
+    inc/MantidQtWidgets/Common/pqHelpWindow.h
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
     inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
@@ -478,6 +480,7 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/QtPropertyBrowser/qtbuttonpropertybrowser.h
     inc/MantidQtWidgets/Common/QtPropertyBrowser/qtgroupboxpropertybrowser.h
 )
+
 # Include files aren't required, but this makes them appear in Visual Studio
 set(INC_FILES
     ${MOC_FILES}
@@ -605,6 +608,7 @@ set(INC_FILES
     inc/MantidQtWidgets/Common/Batch/MockJobTreeView.h
     inc/MantidQtWidgets/Common/Python/Object.h
 )
+
 set(UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
     inc/MantidQtWidgets/Common/AddWorkspaceMultiDialog.ui
@@ -627,14 +631,15 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/SlicingAlgorithmDialog.ui
     inc/MantidQtWidgets/Common/SlitCalculator.ui
     inc/MantidQtWidgets/Common/UserFunctionDialog.ui
+    inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
-if(DOCS_QTHELP)
-  list(APPEND UI_FILES inc/MantidQtWidgets/Common/pqHelpWindow.ui)
-endif()
+
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   list(APPEND TARGET_LIBRARIES "-framework CoreFoundation")
 endif()
+
 # Target Additional components for this module
 find_package(
   Qt5 ${QT_MIN_VERSION}
@@ -663,6 +668,7 @@ else()
     message(FATAL_ERROR "Unable to find suitable module for web widgets. Tried: WebEnginewidgets, WebKitWidgets")
   endif()
 endif()
+
 # If not sip header is defined we need to generate one with sip-module
 if(SIP_INCLUDE_DIR AND EXISTS ${SIP_INCLUDE_DIR}/sip.h)
   set(_sip_include_dir ${SIP_INCLUDE_DIR})
@@ -676,6 +682,7 @@ else()
     COMMENT "Generating sip.h for common widgets target"
   )
 endif()
+
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsCommon
   QT_VERSION 5
@@ -694,11 +701,6 @@ mtd_add_qt_library(
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
-# add an extra define to use pqhelpwindow which wraps qtassistant
-if(DOCS_QTHELP)
-  # warning - this is assuming that the output is qt5 only
-  target_compile_definitions(MantidQtWidgetsCommonQt5 PUBLIC -DDOCS_QTHELP)
-endif()
 
 set(TEST_FILES
     test/AlgorithmHintStrategyTest.h
@@ -736,7 +738,9 @@ set(TEST_FILES
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h
 )
+
 set(CXXTEST_EXTRA_HEADER_INCLUDE ${CMAKE_CURRENT_LIST_DIR}/test/WidgetsCommonTestInitialization.h)
+
 set(QT5_TEST_FILES
     test/AlgorithmRunnerTest.h
     test/BatchAlgorithmRunnerTest.h
@@ -775,6 +779,7 @@ set(QT5_TEST_FILES
     test/WorkspacePresenter/ADSAdapterTest.h
     test/WorkspacePresenter/WorkspacePresenterTest.h
 )
+
 if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
   mtd_add_qt_tests(
     TARGET_NAME MantidQtWidgetsCommonTest
@@ -791,6 +796,7 @@ if(MANTID_FRAMEWORK_LIB STREQUAL "BUILD")
     MTD_QT_LINK_LIBS MantidQtWidgetsCommon
     PARENT_DEPENDENCIES GUITests
   )
+
   add_framework_test_helpers(MantidQtWidgetsCommonTestQt5)
   pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} MantidQtWidgetsCommonPyTest ${TEST_PY_FILES})
 endif()

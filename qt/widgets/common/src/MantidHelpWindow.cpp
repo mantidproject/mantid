@@ -7,14 +7,11 @@
 #include "MantidQtWidgets/Common/MantidHelpWindow.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/RegistrationHelper.h"
 #include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
-#ifdef DOCS_QTHELP
 #include "MantidQtWidgets/Common/pqHelpWindow.h"
-#endif
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <QApplication>
@@ -38,19 +35,18 @@ namespace MantidQt::MantidWidgets {
 
 using std::string;
 using namespace MantidQt::API;
-using Mantid::Kernel::Exception::NotImplementedError;
 
+#ifdef DOCS_QTHELP
 REGISTER_HELPWINDOW(MantidHelpWindow)
+#endif
 
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("MantidHelpWindow");
 } // namespace
 
-#ifdef DOCS_QTHELP
 // initialise the help window
 QPointer<pqHelpWindow> MantidHelpWindow::g_helpWindow;
-#endif
 
 /// name of the collection file itself
 const QString COLLECTION_FILE("MantidProject.qhc");
@@ -68,14 +64,6 @@ const QString HTML_HOST("docs.mantidproject.org");
 const QString HTML_BASE_PATH("/");
 /// Page to display if nothing provided
 const QString DEFAULT_PAGENAME("index");
-
-bool MantidHelpWindow::helpWindowExists() {
-#ifdef DOCS_QTHELP
-  return !g_helpWindow.isNull();
-#else
-  throw NotImplementedError("This needs to be implemented");
-#endif
-}
 
 /**
  * Default constructor shows the base index page.
@@ -101,30 +89,17 @@ MantidHelpWindow::MantidHelpWindow(const Qt::WindowFlags &flags)
         g_log.debug("helpengine.setupData() returned false");
 
       // create a new help window
-#ifdef DOCS_QTHELP
       g_helpWindow = new pqHelpWindow(helpEngine, this, flags);
       g_helpWindow->setWindowTitle(QString("Mantid - Help"));
       g_helpWindow->setWindowIcon(QIcon(":/images/MantidIcon.ico"));
-#else
-      UNUSED_ARG(flags);
-      throw NotImplementedError("This needs to be implemented");
-#endif
 
       // show the home page on startup
       auto registeredDocs = helpEngine->registeredDocumentations();
       if (registeredDocs.size() > 0) {
-#ifdef DOCS_QTHELP
         g_helpWindow->showHomePage(registeredDocs[0]);
-#else
-        throw NotImplementedError("This needs to be implemented");
-#endif
       }
-#ifdef DOCS_QTHELP
       g_helpWindow->show();
       g_helpWindow->raise();
-#else
-      throw NotImplementedError("This needs to be implemented");
-#endif
     } else {
       g_log.information("Without collection file redirecting help to default web browser");
     }
@@ -134,15 +109,11 @@ MantidHelpWindow::MantidHelpWindow(const Qt::WindowFlags &flags)
 void MantidHelpWindow::showHelp(const QString &url) {
   g_log.debug() << "open help window for \"" << url.toStdString() << "\"\n";
   // bring up the help window if it is showing
-#ifdef DOCS_QTHELP
   g_helpWindow->show();
   g_helpWindow->raise();
   if (!url.isEmpty()) {
     g_helpWindow->showPage(url);
   }
-#else
-  throw NotImplementedError("This needs to be implemented");
-#endif
 }
 
 void MantidHelpWindow::openWebpage(const QUrl &url) {
@@ -314,12 +285,8 @@ void MantidHelpWindow::shutdown() {
   // Deleting the object ensures the help engine's destructor is called and
   // avoids a segfault when workbench is closed
   if (helpWindowExists()) {
-#ifdef DOCS_QTHELP
     g_helpWindow->setAttribute(Qt::WA_DeleteOnClose);
     g_helpWindow->close();
-#else
-    throw NotImplementedError("This needs to be implemented");
-#endif
   } else {
     g_log.warning("Something really wrong in MantidHelpWindow::shutdown()");
   }
@@ -333,7 +300,7 @@ void MantidHelpWindow::shutdown() {
  *
  * @param binDir The location of the mantid executable.
  */
-void MantidHelpWindow::findCollectionFile(const std::string &binDir) {
+void MantidHelpWindow::findCollectionFile(std::string &binDir) {
   // this being empty notes the feature being disabled
   m_collectionFile = "";
 
@@ -350,9 +317,9 @@ void MantidHelpWindow::findCollectionFile(const std::string &binDir) {
   }
 
   // try where the builds will put it for a single configuration build
-  UNUSED_ARG(searchDir.cdUp());
+  searchDir.cdUp();
   if (searchDir.cd("docs")) {
-    UNUSED_ARG(searchDir.cd("qthelp"));
+    searchDir.cd("qthelp");
     path = searchDir.absoluteFilePath(COLLECTION_FILE);
     g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
     if (searchDir.exists(COLLECTION_FILE)) {
@@ -361,9 +328,9 @@ void MantidHelpWindow::findCollectionFile(const std::string &binDir) {
     }
   }
   // try where the builds will put it for a multi-configuration build
-  UNUSED_ARG(searchDir.cdUp());
+  searchDir.cdUp();
   if (searchDir.cd("docs")) {
-    UNUSED_ARG(searchDir.cd("qthelp"));
+    searchDir.cd("qthelp");
     path = searchDir.absoluteFilePath(COLLECTION_FILE);
     g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
     if (searchDir.exists(COLLECTION_FILE)) {
@@ -374,9 +341,9 @@ void MantidHelpWindow::findCollectionFile(const std::string &binDir) {
 
   // try in windows/linux install location
   searchDir = QDir(QString::fromStdString(binDir));
-  UNUSED_ARG(searchDir.cdUp());
-  UNUSED_ARG(searchDir.cd("share"));
-  UNUSED_ARG(searchDir.cd("doc"));
+  searchDir.cdUp();
+  searchDir.cd("share");
+  searchDir.cd("doc");
   path = searchDir.absoluteFilePath(COLLECTION_FILE);
   g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
   if (searchDir.exists(COLLECTION_FILE)) {
@@ -386,10 +353,10 @@ void MantidHelpWindow::findCollectionFile(const std::string &binDir) {
 
   // try a special place for mac/osx
   searchDir = QDir(QString::fromStdString(binDir));
-  UNUSED_ARG(searchDir.cdUp());
-  UNUSED_ARG(searchDir.cdUp());
-  UNUSED_ARG(searchDir.cd("share"));
-  UNUSED_ARG(searchDir.cd("doc"));
+  searchDir.cdUp();
+  searchDir.cdUp();
+  searchDir.cd("share");
+  searchDir.cd("doc");
   path = searchDir.absoluteFilePath(COLLECTION_FILE);
   g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
   if (searchDir.exists(COLLECTION_FILE)) {

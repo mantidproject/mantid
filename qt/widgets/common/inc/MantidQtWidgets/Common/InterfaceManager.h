@@ -128,13 +128,11 @@ private:
   /// Handle to the help window factory
   static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *m_helpViewer;
 
-#ifndef DOCS_QTHELP
   void launchPythonHelpWindow(const QString &relativePage);
   void launchPythonHelpWindowForAlgorithm(const QString &name, int version = -1);
   void launchPythonHelpWindowForConcept(const QString &name);
   void launchPythonHelpWindowForFitFunction(const QString &name);
   void launchPythonHelpWindowForCustomInterface(const QString &name, const QString &area, const QString &section);
-#endif
 };
 
 } // namespace API
