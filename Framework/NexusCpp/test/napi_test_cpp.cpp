@@ -9,11 +9,6 @@
 #include <sstream>
 #include <string>
 #include <vector>
-#ifdef _WIN32
-#include <direct.h> // for getcwd()
-#else
-#include <unistd.h>
-#endif /* _WIN32 */
 
 using NexusCppTest::removeFile;
 using NexusCppTest::write_dmc01;
@@ -26,29 +21,16 @@ using std::string;
 using std::vector;
 
 namespace { // anonymous namespace
-// return to system when any test failed
-constexpr int TEST_FAILED{1};
-// return to system when all tests succeed
-constexpr int TEST_SUCCEED{0};
+const std::string DMC01("dmc01cpp");
+const std::string DMC02("dmc02cpp");
+
+std::string relativePathOf(const std::string &filenamestr) {
+  return std::filesystem::path(filenamestr).filename().string();
+}
 } // anonymous namespace
 
-static std::string relativePathOf(const std::string &filenamestr) {
-  char cwd[1024];
-
-#ifdef WIN32
-  _getcwd(cwd, sizeof(cwd));
-#else
-  getcwd(cwd, sizeof(cwd));
-#endif
-
-  if (filenamestr.compare(0, strlen(cwd), cwd) == 0) {
-    return filenamestr.substr(strlen(cwd) + 1); // +1 to skip trailing /
-  } else {
-    return filenamestr;
-  }
-}
-
 static void writeTest(const string &filename, NXaccess create_code) {
+  std::cout << "writeTest(" << filename << ") started\n";
   NeXus::File file(filename, create_code);
   // create group
   file.makeGroup("entry", "NXentry", true);
@@ -127,17 +109,10 @@ static void writeTest(const string &filename, NXaccess create_code) {
   file.closeData();
 
   // int64 tests
-  vector<int64_t> grossezahl;
 #if HAVE_LONG_LONG_INT
-  grossezahl.push_back(12);
-  grossezahl.push_back(555555555555LL);
-  grossezahl.push_back(23);
-  grossezahl.push_back(777777777777LL);
+  vector<int64_t> grossezahl{12, 555555555555LL, 23, 777777777777LL};
 #else
-  grossezahl.push_back(12);
-  grossezahl.push_back(555555);
-  grossezahl.push_back(23);
-  grossezahl.push_back(77777);
+  vector<int64_t> grossezahl{12, 555555, 23, 77777};
 #endif
   if (create_code != NXACC_CREATE4) {
     file.writeData("grosszahl", grossezahl);
@@ -221,6 +196,7 @@ static void writeTest(const string &filename, NXaccess create_code) {
   file.makeLink(glink);
   file.makeNamedLink("renLinkGroup", glink);
   file.makeNamedLink("renLinkData", link);
+  std::cout << "writeTest(" << filename << ") successful\n";
 }
 
 template <typename NumT> string toString(const vector<NumT> &data) {
@@ -238,6 +214,7 @@ template <typename NumT> string toString(const vector<NumT> &data) {
 }
 
 int readTest(const string &filename) {
+  std::cout << "readTest(" << filename << ") started\n";
   const string SDS("SDS");
   // top level file information
   NeXus::File file(filename);
@@ -470,6 +447,7 @@ int readTest(const string &filename) {
   printf("NXopenpath checks OK\n");
 
   // everything went fine
+  std::cout << "readTest(" << filename << ") successful\n";
   return TEST_SUCCEED;
 }
 
@@ -487,33 +465,43 @@ int testLoadPath(const string &filename) {
 
 int testExternal(NXaccess create_code) {
 #ifdef WIN32
+  // giving up and skipping the external linking on windows
   UNUSED_ARG(create_code);
-  std::cout << "Skipping external linking on windows\n";
+  std::cout << "Not testing external linking on windows\n";
   return TEST_SUCCEED;
 #else
   if (create_code == NXACC_CREATE4) {
     std::cout << "Not testing external linking with hdf4\n";
     return TEST_SUCCEED;
   }
+
   const string fileext(".h5");
-
-  const string extfilepath1("dmc01cpp" + fileext);
-  write_dmc01(extfilepath1);
-  if (!std::filesystem::exists(extfilepath1)) {
-    std::cerr << "Cannot find \"" << extfilepath1 << "\" for external linking\n";
-    return TEST_FAILED;
-  }
-  const string extfilepath2("dmc02cpp" + fileext);
-  write_dmc02(extfilepath2);
-  if (!std::filesystem::exists(extfilepath2)) {
-    std::cerr << "Cannot find \"" << extfilepath2 << "\" for external linking\n";
-    return TEST_FAILED;
-  }
-
   const string filename("nxext_cpp" + fileext);
 
   // remove output if it already exists
   removeFile(filename);
+
+  // create the external files if the don't already exist
+  const string extfilepath1(DMC01 + fileext);
+  if (std::filesystem::exists(extfilepath1)) {
+    std::cout << "using existing external file " << extfilepath1 << "\n";
+  } else {
+    write_dmc01(extfilepath1);
+    if (!std::filesystem::exists(extfilepath1)) {
+      std::cerr << "Cannot find \"" << extfilepath1 << "\" for external linking\n";
+      return TEST_FAILED;
+    }
+  }
+  const string extfilepath2(DMC02 + fileext);
+  if (std::filesystem::exists(extfilepath2)) {
+    std::cout << "using existing external file " << extfilepath2 << "\n";
+  } else {
+    write_dmc02(extfilepath2);
+    if (!std::filesystem::exists(extfilepath2)) {
+      std::cerr << "Cannot find \"" << extfilepath2 << "\" for external linking\n";
+      return TEST_FAILED;
+    }
+  }
 
   // create the external link
   const string exturl1("nxfile://" + extfilepath1 + "#entry1");
@@ -538,8 +526,6 @@ int testExternal(NXaccess create_code) {
 
   // cleanup
   removeFile(filename);
-  removeFile(extfilepath1);
-  removeFile(extfilepath2);
 
   return TEST_SUCCEED;
 #endif
@@ -569,12 +555,10 @@ int testTypeMap(const std::string &fname) {
 
 int main(int argc, char **argv) {
   NXaccess nx_creation_code;
-  string filename;
-  string extfile_ext;
+  string fileext;
   if (strstr(argv[0], "napi_test_cpp-hdf5") != NULL) {
     nx_creation_code = NXACC_CREATE5;
-    filename = "napi_test_cpp.h5";
-    extfile_ext = ".h5";
+    fileext = ".h5";
   } else if (strstr(argv[0], "napi_test_cpp-xml-table") != NULL) {
     cout << "napi_test_cpp-xml-table is not supported" << endl;
     return TEST_FAILED;
@@ -583,10 +567,11 @@ int main(int argc, char **argv) {
     return TEST_FAILED;
   } else {
     nx_creation_code = NXACC_CREATE4;
-    filename = "napi_test_cpp.hdf";
-    extfile_ext = ".hdf";
+    fileext = ".hdf";
   }
+  const string filename("napi_test_cpp" + fileext);
 
+  removeFile(filename); // in case last round failed
   try {
     writeTest(filename, nx_creation_code);
   } catch (const std::runtime_error &e) {
@@ -598,17 +583,29 @@ int main(int argc, char **argv) {
     return TEST_SUCCEED;
   }
 
-  // try reading a file
-  if (readTest(filename) != TEST_SUCCEED) {
-    cout << "readTest failed" << endl;
+  if (!std::filesystem::exists(filename)) {
+    std::cerr << "NeXus file \"" << filename << "\" does not exist after write test\n";
     return TEST_FAILED;
   }
 
-  // try using the load path
-  if (testLoadPath("dmc01.hdf") != TEST_SUCCEED) {
-    cout << "testLoadPath failed" << endl;
+  // try reading a file
+  try {
+    if (readTest(filename) != TEST_SUCCEED) {
+      cout << "readTest failed" << endl;
+      return TEST_FAILED;
+    }
+  } catch (const std::runtime_error &e) {
+    cout << "readTest failed:\n" << e.what() << endl;
     return TEST_FAILED;
   }
+
+  // test of typemap generation
+  if (testTypeMap(filename) != TEST_SUCCEED) {
+    cout << "testTypeMap failed" << endl;
+    return TEST_FAILED;
+  }
+
+  removeFile(filename); // cleanup
 
   // try external linking
   try {
@@ -621,11 +618,14 @@ int main(int argc, char **argv) {
     return TEST_FAILED;
   }
 
-  // test of typemap generation
-  if (testTypeMap(filename) != TEST_SUCCEED) {
-    cout << "testTypeMap failed" << endl;
+  // try using the load path
+  if (testLoadPath(DMC01 + fileext) != TEST_SUCCEED) {
+    cout << "testLoadPath failed" << endl;
     return TEST_FAILED;
   }
+
+  removeFile(DMC01 + fileext);
+  removeFile(DMC02 + fileext);
 
   // everything went ok
   return TEST_SUCCEED;
