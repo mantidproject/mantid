@@ -2,9 +2,9 @@
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
-#ifndef _WIN32
+#ifndef WIN32
 #include <unistd.h>
-#endif /* _WIN32 */
+#endif
 #include "MantidNexusCpp/napi.h"
 
 #define PSZ(s) (s).c_str()

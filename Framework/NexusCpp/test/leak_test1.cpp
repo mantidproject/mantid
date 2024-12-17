@@ -1,15 +1,10 @@
 #include "MantidNexusCpp/napi.h"
 #include "napi_test_util.h"
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 
 using NexusCppTest::removeFile;
-
-#define ON_ERROR(msgstr)                                                                                               \
-  {                                                                                                                    \
-    fprintf(stderr, msgstr);                                                                                           \
-    return 1;                                                                                                          \
-  }
 
 int main() {
   NXaccess access_mode = NXACC_CREATE5;
