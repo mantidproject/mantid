@@ -57,13 +57,14 @@
 #define THREAD_LOCAL __thread
 #endif
 
-#ifdef _MSC_VER
+#ifdef WIN32
 #define snprintf _snprintf
-#endif /* _MSC_VER */
+#define strdup _strdup
+#endif
 
 #include "MantidNexusCpp/nx_stptok.h"
 
-#if defined(_WIN32)
+#if defined(WIN32)
 /*
  *  HDF5 on windows does not do locking for multiple threads conveniently so we will implement it ourselves.
  *  Freddie Akeroyd, 16/06/2011
@@ -131,6 +132,8 @@ static int nxiunlock(int ret) {
 
 #define LOCKED_CALL(__call) (nxilock(), nxiunlock(__call))
 
+#define snprintf _snprintf
+
 #else
 
 #define LOCKED_CALL(__call) __call
@@ -193,21 +196,13 @@ static char *locateNexusFileInPath(char *startName) {
   char pathPrefix[256];
 
   if (canOpen(startName)) {
-#ifdef WIN32
-    return _strdup(startName);
-#else
     return strdup(startName);
-#endif
   }
 
   loadPath = nxgetenv("NX_LOAD_PATH");
   if (loadPath == NULL) {
-/* file not found will be issued by upper level code */
-#ifdef WIN32
-    return _strdup(startName);
-#else
+    // file not found will be issued by upper level code
     return strdup(startName);
-#endif
   }
 
   pPtr = stptok(loadPath, pathPrefix, 255, LIBSEP);
@@ -215,11 +210,7 @@ static char *locateNexusFileInPath(char *startName) {
     auto length = strlen(pathPrefix) + strlen(startName) + strlen(PATHSEP) + 2;
     testPath = static_cast<char *>(malloc(length * sizeof(char)));
     if (testPath == NULL) {
-#ifdef WIN32
-      return _strdup(startName);
-#else
       return strdup(startName);
-#endif
     }
     memset(testPath, 0, length * sizeof(char));
     strcpy(testPath, pathPrefix);
@@ -231,11 +222,7 @@ static char *locateNexusFileInPath(char *startName) {
     free(testPath);
     pPtr = stptok(pPtr, pathPrefix, 255, LIBSEP);
   }
-#ifdef WIN32
-  return _strdup(startName);
-#else
   return strdup(startName);
-#endif
 }
 
 /*------------------------------------------------------------------------
