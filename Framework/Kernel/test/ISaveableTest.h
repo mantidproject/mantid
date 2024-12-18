@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidKernel/ISaveable.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 

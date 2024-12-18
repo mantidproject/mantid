@@ -11,7 +11,6 @@
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cstring>
 #include <cxxtest/TestSuite.h>

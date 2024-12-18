@@ -18,7 +18,6 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cmath>
 #include <random>

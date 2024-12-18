@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 

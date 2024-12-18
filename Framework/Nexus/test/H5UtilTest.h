@@ -9,7 +9,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidFrameworkTestHelpers/FileResource.h"
-#include "MantidKernel/System.h"
 #include "MantidNexus/H5Util.h"
 
 #include <H5Cpp.h>
