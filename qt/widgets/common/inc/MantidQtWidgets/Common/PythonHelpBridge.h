@@ -1,4 +1,6 @@
 #pragma once
+
+#include "DllOption.h"
 #include <string>
 
 class PythonHelpBridge {

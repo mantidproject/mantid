@@ -31,14 +31,13 @@
 #include <memory>
 #include <stdexcept>
 
+#ifdef DOCS_QTHELP
 namespace MantidQt::MantidWidgets {
 
 using std::string;
 using namespace MantidQt::API;
 
-#ifdef DOCS_QTHELP
 REGISTER_HELPWINDOW(MantidHelpWindow)
-#endif
 
 namespace {
 /// static logger
@@ -382,3 +381,4 @@ void MantidHelpWindow::determineFileLocs() {
 void MantidHelpWindow::warning(const QString &msg) { g_log.warning(msg.toStdString()); }
 
 } // namespace MantidQt::MantidWidgets
+#endif
