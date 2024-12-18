@@ -588,7 +588,6 @@ def run_focus_no_absorption(per_detector=False):
         do_absorb_corrections=False,
         sample_empty=sample_empty,
         sample_empty_scale=sample_empty_scale,
-        van_normalisation_method="Relative",
         per_detector_vanadium=per_detector,
     )
 
@@ -636,7 +635,6 @@ def run_focus_absorption(run_number, paalman_pings=False):
             do_absorb_corrections=True,
             sample_empty=sample_empty,
             multiple_scattering=False,
-            van_normalisation_method="Relative",
         )
     else:
         return inst_object.focus(
@@ -647,7 +645,6 @@ def run_focus_absorption(run_number, paalman_pings=False):
             sample_empty=sample_empty,
             sample_empty_scale=sample_empty_scale,
             multiple_scattering=False,
-            van_normalisation_method="Relative",
         )
 
 
