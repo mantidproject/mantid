@@ -134,10 +134,10 @@ private:
 } // namespace MantidQt
 
 /// Used to register help window
-#define REGISTER_HELPWINDOW(TYPE)
-namespace {
-Mantid::Kernel::RegistrationHelper
-    register_helpviewer(((MantidQt::API::InterfaceManager::registerHelpWindowFactory(
-                             new Mantid::Kernel::Instantiator<TYPE, MantidQt::API::MantidHelpInterface>())),
-                         0));
-}
+#define REGISTER_HELPWINDOW(TYPE)                                                                                      \
+  namespace {                                                                                                          \
+  Mantid::Kernel::RegistrationHelper                                                                                   \
+      register_helpviewer(((MantidQt::API::InterfaceManager::registerHelpWindowFactory(                                \
+                               new Mantid::Kernel::Instantiator<TYPE, MantidQt::API::MantidHelpInterface>())),         \
+                           0));                                                                                        \
+  }
