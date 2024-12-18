@@ -240,83 +240,12 @@ MantidHelpInterface *InterfaceManager::createHelpWindow() const {
   }
 }
 
-void InterfaceManager::showHelpPage(const QString &url) {
-  // Original behavior
-  auto window = createHelpWindow();
-  window->showPage(url);
-}
-
-void InterfaceManager::showAlgorithmHelp(const QString &name, const int version) {
-  auto window = createHelpWindow();
-  if (window)
-    window->showAlgorithm(name, version);
-  else
-    launchPythonHelpWindowForAlgorithm(name, version);
-}
-
-void InterfaceManager::showConceptHelp(const QString &name) {
-  auto window = createHelpWindow();
-  if (window)
-    window->showConcept(name);
-  else
-    launchPythonHelpWindowForConcept(name);
-}
-
-void InterfaceManager::showFitFunctionHelp(const QString &name) {
-  auto window = createHelpWindow();
-  if (window)
-    window->showFitFunction(name);
-  else
-    launchPythonHelpWindowForFitFunction(name);
-}
-
-void InterfaceManager::showCustomInterfaceHelp(const QString &name, const QString &area, const QString &section) {
-  auto window = createHelpWindow();
-  if (window)
-    window->showCustomInterface(name, area, section);
-  else
-    launchPythonHelpWindowForCustomInterface(name, area, section);
-}
-
 void InterfaceManager::showWebPage(const QString &url) { MantidDesktopServices::openUrl(url); }
 
 void InterfaceManager::closeHelpWindow() {
-#ifdef DOCS_QTHELP
   if (MantidHelpWindow::helpWindowExists()) {
-#else
-  if (true) {
-#endif
     auto window = createHelpWindow();
     if (window)
       window->shutdown();
   }
-}
-
-void InterfaceManager::launchPythonHelpWindow(const QString &relativePage) {
-  static PythonHelpBridge bridge;
-  bridge.showHelpPage(relativePage.toStdString());
-}
-
-void InterfaceManager::launchPythonHelpWindowForAlgorithm(const QString &name, int version) {
-  QString page = "algorithms/" + name + (version > 0 ? "-v" + QString::number(version) + ".html" : ".html");
-  launchPythonHelpWindow(page);
-}
-
-void InterfaceManager::launchPythonHelpWindowForConcept(const QString &name) {
-  QString page = name.isEmpty() ? "concepts/index.html" : "concepts/" + name + ".html";
-  launchPythonHelpWindow(page);
-}
-
-void InterfaceManager::launchPythonHelpWindowForFitFunction(const QString &name) {
-  QString page = name.isEmpty() ? "fitting/fitfunctions/index.html" : "fitting/fitfunctions/" + name + ".html";
-  launchPythonHelpWindow(page);
-}
-
-void InterfaceManager::launchPythonHelpWindowForCustomInterface(const QString &name, const QString &area,
-                                                                const QString &section) {
-  QString areaPath = area.isEmpty() ? "" : area + "/";
-  QString page = "interfaces/" + areaPath + (name.isEmpty() ? "index.html" : name + ".html");
-  if (!section.isEmpty())
-    page += "#" + section;
-  launchPythonHelpWindow(page);
 }
