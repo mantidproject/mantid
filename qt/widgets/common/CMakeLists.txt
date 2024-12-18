@@ -217,7 +217,7 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/PropertyWidget.h
-    inc/MantidQtWidgets/Common/PythonBridge.h
+    inc/MantidQtWidgets/Common/PythonHelpBridge.h
     inc/MantidQtWidgets/Common/PythonHelpWindow.h
     inc/MantidQtWidgets/Common/PythonRunner.h
     inc/MantidQtWidgets/Common/QtAlgorithmRunner.h

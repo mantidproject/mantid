@@ -8,7 +8,6 @@ namespace MantidWidgets {
 
 #ifndef DOCS_QTHELP
 REGISTER_HELPWINDOW(PythonHelpWindow)
-#endif
 
 PythonHelpWindow::PythonHelpWindow() : MantidQt::API::MantidHelpInterface() {}
 
@@ -88,3 +87,4 @@ void PythonHelpWindow::shutdown() {
 
 } // namespace MantidWidgets
 } // namespace MantidQt
+#endif

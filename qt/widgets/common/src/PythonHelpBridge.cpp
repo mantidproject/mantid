@@ -1,4 +1,4 @@
-#include "PythonHelpBridge.h"
+#include "MantidQtWidgets/Common/PythonHelpBridge.h"
 #include <boost/python.hpp>
 #include <stdexcept>
 
