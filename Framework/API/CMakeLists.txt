@@ -411,7 +411,6 @@ set(TEST_FILES
     HistogramValidatorTest.h
     HistoryItemTest.h
     HistoryViewTest.h
-    IEventListTest.h
     IFunction1DSpectrumTest.h
     IFunction1DTest.h
     IFunctionMDTest.h
