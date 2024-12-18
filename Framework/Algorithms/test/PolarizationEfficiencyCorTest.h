@@ -290,47 +290,9 @@ public:
     checkOutputWorkspaceGroupSize(4);
   }
 
-  void test_points() {
-    auto alg = createAlgorithm("points", WILDES_METHOD);
-    auto const inputs = createWorkspacesInADS(4);
-    alg->setProperty("InputWorkspaces", inputs);
-    alg->execute();
-    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(OUTPUT_GRP_NAME);
-    checkOutputWorkspaceGroupSize(4);
+  void test_points() { pointTestHelper("points"); }
 
-    for (size_t i = 0; i < out->size(); ++i) {
-      auto ws = AnalysisDataService::Instance().retrieve(inputs[i]);
-      auto checkAlg = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
-      checkAlg->initialize();
-      checkAlg->setChild(true);
-      checkAlg->setProperty("Workspace1", ws);
-      checkAlg->setProperty("Workspace2", out->getItem(i));
-      checkAlg->setProperty("Tolerance", 3e-16);
-      checkAlg->execute();
-      TS_ASSERT(checkAlg->getProperty("Result"));
-    }
-  }
-
-  void test_points_short() {
-    auto alg = createAlgorithm("points-short", WILDES_METHOD);
-    auto const inputs = createWorkspacesInADS(4);
-    alg->setProperty("InputWorkspaces", inputs);
-    alg->execute();
-    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(OUTPUT_GRP_NAME);
-    checkOutputWorkspaceGroupSize(4);
-
-    for (size_t i = 0; i < out->size(); ++i) {
-      auto ws = AnalysisDataService::Instance().retrieve(inputs[i]);
-      auto checkAlg = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
-      checkAlg->initialize();
-      checkAlg->setChild(true);
-      checkAlg->setProperty("Workspace1", ws);
-      checkAlg->setProperty("Workspace2", out->getItem(i));
-      checkAlg->setProperty("Tolerance", 3e-16);
-      checkAlg->execute();
-      TS_ASSERT(checkAlg->getProperty("Result"));
-    }
-  }
+  void test_points_short() { pointTestHelper("points-short"); }
 
   void test_spin_state_log_not_added_by_default_Wildes() { runSpinStateLogTest(WILDES_METHOD, false); }
 
@@ -397,25 +359,29 @@ private:
     TS_ASSERT_EQUALS(out->size(), expectedSize);
   }
 
-  MatrixWorkspace_sptr createEfficiencyOutputWorkspace(size_t size = 10, double endX = 10) {
-    auto ws1 = createPointWS(size, 0, endX);
-    auto ws2 = createPointWS(size, 0, endX);
-    auto ws3 = createPointWS(size, 0, endX);
-    auto ws4 = createPointWS(size, 0, endX);
-
+  MatrixWorkspace_sptr createEfficiencyOutputWorkspace(size_t size, double endX, std::string const &kind) {
+    std::vector<MatrixWorkspace_sptr> workspaces;
+    if (kind == "histo") {
+      for (int i = 0; i < 4; ++i) {
+        workspaces.push_back(createHistoWS(size, 0, endX));
+      }
+    } else if (kind == "points" || kind == "points-short") {
+      for (int i = 0; i < 4; ++i) {
+        workspaces.push_back(createPointWS(size, 0, endX));
+      }
+    }
     auto alg = AlgorithmFactory::Instance().create("JoinISISPolarizationEfficiencies", -1);
     alg->initialize();
     alg->setChild(true);
     alg->setRethrows(true);
-    alg->setProperty("P1", ws1);
-    alg->setProperty("P2", ws2);
-    alg->setProperty("F1", ws3);
-    alg->setProperty("F2", ws4);
+    alg->setProperty("P1", workspaces[0]);
+    alg->setProperty("P2", workspaces[1]);
+    alg->setProperty("F1", workspaces[2]);
+    alg->setProperty("F2", workspaces[3]);
     alg->setPropertyValue("OutputWorkspace", OUTPUT_GRP_NAME);
     alg->execute();
 
-    MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
-    return outWS;
+    return alg->getProperty("OutputWorkspace");
   }
 
   MatrixWorkspace_sptr createEfficiencies(std::string const &kind) {
@@ -434,13 +400,13 @@ private:
       }
       return ws;
     } else if (kind == "histo") {
-      auto outWS = createEfficiencyOutputWorkspace();
+      auto outWS = createEfficiencyOutputWorkspace(10, 10, "histo");
       return outWS;
     } else if (kind == "points") {
-      auto outWS = createEfficiencyOutputWorkspace();
+      auto outWS = createEfficiencyOutputWorkspace(10, 10, "points");
       return outWS;
     } else if (kind == "points-short") {
-      auto outWS = createEfficiencyOutputWorkspace(4, 10);
+      auto outWS = createEfficiencyOutputWorkspace(4, 10, "points-short");
       return outWS;
     }
     throw std::logic_error("Unknown efficiency test kind");
@@ -481,6 +447,27 @@ private:
       MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i));
       TS_ASSERT(ws)
       TS_ASSERT_EQUALS(ws->run().hasProperty(SpinStatesORSO::LOG_NAME), expectLog)
+    }
+  }
+
+  void pointTestHelper(const std::string &kind) {
+    auto alg = createAlgorithm(kind, WILDES_METHOD);
+    auto const inputs = createWorkspacesInADS(4);
+    alg->setProperty("InputWorkspaces", inputs);
+    alg->execute();
+    WorkspaceGroup_sptr out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(OUTPUT_GRP_NAME);
+    checkOutputWorkspaceGroupSize(4);
+
+    for (size_t i = 0; i < out->size(); ++i) {
+      auto ws = AnalysisDataService::Instance().retrieve(inputs[i]);
+      auto checkAlg = AlgorithmManager::Instance().createUnmanaged("CompareWorkspaces");
+      checkAlg->initialize();
+      checkAlg->setChild(true);
+      checkAlg->setProperty("Workspace1", ws);
+      checkAlg->setProperty("Workspace2", out->getItem(i));
+      checkAlg->setProperty("Tolerance", 3e-16);
+      checkAlg->execute();
+      TS_ASSERT(checkAlg->getProperty("Result"));
     }
   }
 };
