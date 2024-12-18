@@ -722,8 +722,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspac
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:738
 shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/OrientedLattice.cpp:236
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/NiggliCell.cpp:233
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h:85
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h:86
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/SpaceGroup.h:51
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/PointGroup.h:41
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/SymmetryElement.h:45

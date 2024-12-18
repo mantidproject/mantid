@@ -37,10 +37,18 @@ public:
   void testGetSetElement() {
     IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer();
 
+    // Silicon
     TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("Element", "Si"));
     TS_ASSERT_EQUALS(scatterer->getElement(), "Si");
     TS_ASSERT_EQUALS(scatterer->getNeutronAtom().z_number, 14);
 
+    // Deuterated Hydrogen is a special case
+    TS_ASSERT_THROWS_NOTHING(scatterer->setProperty("Element", "D"));
+    TS_ASSERT_EQUALS(scatterer->getElement(), "D");
+    TS_ASSERT_EQUALS(scatterer->getNeutronAtom().z_number, 1);
+    TS_ASSERT_EQUALS(scatterer->getNeutronAtom().a_number, 2);
+
+    // non-existant element should error
     TS_ASSERT_THROWS_ANYTHING(scatterer->setProperty("Element", "Random"));
   }
 
