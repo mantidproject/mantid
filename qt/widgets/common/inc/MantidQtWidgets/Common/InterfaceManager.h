@@ -1,9 +1,3 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
-//
-// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//   NScD Oak Ridge National Laboratory, European Spallation Source,
-//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
-// SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 //----------------------------------
@@ -45,12 +39,12 @@ class UserSubWindow;
 class MantidHelpInterface;
 
 /**
-    This class is responsible for creating the correct dialog for an algorithm.
-   If no specialized version is registered for that algorithm then the default is created.
-
-    @author Martyn Gigg, Tessella Support Services plc
-    @date 24/02/2009
-*/
+ * This class is responsible for managing algorithm dialogs and interface windows.
+ * It also provides a mechanism for registering help window factories.
+ *
+ * @author Martyn Gigg
+ * @date 24/02/2009
+ */
 class EXPORT_OPT_MANTIDQT_COMMON InterfaceManager {
 
 public:
@@ -71,32 +65,6 @@ public:
 
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow *createSubWindow(const QString &interface_name, QWidget *parent = nullptr, bool isWindow = true);
-
-  /**
-   * Function that instantiates the help window.
-   * @return the help window
-   */
-  MantidHelpInterface *createHelpWindow() const;
-
-  /// Show a help page by URL
-  void showHelpPage(const QString &url = QString());
-
-  /// Show algorithm help by name and version
-  void showAlgorithmHelp(const QString &name, const int version = -1);
-
-  /// Show concept help by name
-  void showConceptHelp(const QString &name);
-
-  /// Show fit function help
-  void showFitFunctionHelp(const QString &name = QString());
-
-  /**
-   * @param name of interface to show help for
-   * @param area - folder for documentation in the interfaces directory
-   * @param section - section in the HTML document
-   */
-  void showCustomInterfaceHelp(const QString &name, const QString &area = QString(),
-                               const QString &section = QString());
 
   /// Open a web page by URL
   void showWebPage(const QString &url);
@@ -127,12 +95,6 @@ private:
 
   /// Handle to the help window factory
   static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *m_helpViewer;
-
-  void launchPythonHelpWindow(const QString &relativePage);
-  void launchPythonHelpWindowForAlgorithm(const QString &name, int version = -1);
-  void launchPythonHelpWindowForConcept(const QString &name);
-  void launchPythonHelpWindowForFitFunction(const QString &name);
-  void launchPythonHelpWindowForCustomInterface(const QString &name, const QString &area, const QString &section);
 };
 
 } // namespace API
