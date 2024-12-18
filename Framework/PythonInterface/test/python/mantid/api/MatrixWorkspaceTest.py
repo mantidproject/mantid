@@ -408,8 +408,24 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual("plot", ws1.getPlotType())
 
         # test valid takes
-        ws1.setPlotType("scatter")
-        self.assertEqual("scatter", ws1.getPlotType())
+        ws1.setPlotType("marker")
+        self.assertEqual("marker", ws1.getPlotType())
+
+    def test_setMarkerStyle(self):
+        run_algorithm("CreateWorkspace", OutputWorkspace="ws1", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
+        ws1 = AnalysisDataService["ws1"]
+
+        # test default
+        self.assertEqual("", ws1.getMarkerStyle())
+
+        # test set
+        ws1.setMarkerStyle("Circle")
+        self.assertEqual("Circle", ws1.getMarkerStyle())
+
+        # test marker size
+        self.assertEqual(6, ws1.getMarkerSize())
+        ws1.setMarkerSize(10)
+        self.assertEqual(10, ws1.getMarkerSize())
 
     def test_setGetMonitorWS(self):
         run_algorithm("CreateWorkspace", OutputWorkspace="ws1", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
