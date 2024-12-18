@@ -1,9 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
 //----------------------------------
 // Includes
 //----------------------------------
 #include "DllOption.h"
+// #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Instantiator.h"
 
 #include <QHash>
@@ -39,12 +46,14 @@ class UserSubWindow;
 class MantidHelpInterface;
 
 /**
- * This class is responsible for managing algorithm dialogs and interface windows.
- * It also provides a mechanism for registering help window factories.
- *
- * @author Martyn Gigg
- * @date 24/02/2009
- */
+    This class is responsible for creating the correct dialog for an algorithm.
+   If
+    no specialized version is registered for that algorithm then the default is
+   created
+
+    @author Martyn Gigg, Tessella Support Services plc
+    @date 24/02/2009
+*/
 class EXPORT_OPT_MANTIDQT_COMMON InterfaceManager {
 
 public:
@@ -66,10 +75,36 @@ public:
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow *createSubWindow(const QString &interface_name, QWidget *parent = nullptr, bool isWindow = true);
 
-  /// Open a web page by URL
+  /**
+   * Function that instantiates the help window.
+   * @return the help window
+   */
+  MantidHelpInterface *createHelpWindow() const;
+
+  /// @param url Relative URL of help page to show.
+  void showHelpPage(const QString &url = QString());
+
+  /// @param name of algorithm to show help for
+  /// @param version of algorithm
+  void showAlgorithmHelp(const QString &name, const int version = -1);
+
+  /// @param name of concept to show help for
+  void showConceptHelp(const QString &name);
+
+  /// @param name of fit function to show help for
+  void showFitFunctionHelp(const QString &name = QString());
+
+  /**
+   * @param name of interface to show help for
+   * @param area - folder for documentation in the interfaces directory
+   * @param section - section in the html document
+   **/
+  void showCustomInterfaceHelp(const QString &name, const QString &area = QString(),
+                               const QString &section = QString());
+
+  /// @param url of web page to open in browser
   void showWebPage(const QString &url);
 
-  /// Close the active help window
   void closeHelpWindow();
 
   /**
@@ -86,7 +121,6 @@ public:
 
   /// Constructor
   InterfaceManager();
-
   /// Destructor
   virtual ~InterfaceManager();
 
@@ -96,15 +130,14 @@ private:
   /// Handle to the help window factory
   static Mantid::Kernel::AbstractInstantiator<MantidHelpInterface> *m_helpViewer;
 };
-
 } // namespace API
 } // namespace MantidQt
 
 /// Used to register help window
-#define REGISTER_HELPWINDOW(TYPE)                                                                                      \
-  namespace {                                                                                                          \
-  Mantid::Kernel::RegistrationHelper                                                                                   \
-      register_helpviewer(((MantidQt::API::InterfaceManager::registerHelpWindowFactory(                                \
-                               new Mantid::Kernel::Instantiator<TYPE, MantidQt::API::MantidHelpInterface>())),         \
-                           0));                                                                                        \
-  }
+#define REGISTER_HELPWINDOW(TYPE)
+namespace {
+Mantid::Kernel::RegistrationHelper
+    register_helpviewer(((MantidQt::API::InterfaceManager::registerHelpWindowFactory(
+                             new Mantid::Kernel::Instantiator<TYPE, MantidQt::API::MantidHelpInterface>())),
+                         0));
+}
