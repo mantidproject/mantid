@@ -1,6 +1,6 @@
 #pragma once
 
-#include "DllOption.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/MantidHelpInterface.h"
 #include <QString>
 #include <QUrl>
@@ -9,7 +9,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-class PythonHelpWindow : public MantidQt::API::MantidHelpInterface {
+class EXPORT_OPT_MANTIDQT_COMMON PythonHelpWindow : public MantidQt::API::MantidHelpInterface {
 public:
   PythonHelpWindow();
   void showPage(const std::string &url = std::string()) override;
