@@ -31,13 +31,14 @@
 #include <memory>
 #include <stdexcept>
 
-#ifdef DOCS_QTHELP
 namespace MantidQt::MantidWidgets {
 
 using std::string;
 using namespace MantidQt::API;
 
+#ifdef DOCS_QTHELP
 REGISTER_HELPWINDOW(MantidHelpWindow)
+#endif
 
 namespace {
 /// static logger
@@ -63,6 +64,8 @@ const QString HTML_HOST("docs.mantidproject.org");
 const QString HTML_BASE_PATH("/");
 /// Page to display if nothing provided
 const QString DEFAULT_PAGENAME("index");
+
+bool MantidHelpWindow::helpWindowExists() { return !g_helpWindow.isNull(); }
 
 /**
  * Default constructor shows the base index page.
@@ -299,7 +302,7 @@ void MantidHelpWindow::shutdown() {
  *
  * @param binDir The location of the mantid executable.
  */
-void MantidHelpWindow::findCollectionFile(std::string &binDir) {
+void MantidHelpWindow::findCollectionFile(const std::string &binDir) {
   // this being empty notes the feature being disabled
   m_collectionFile = "";
 
@@ -316,9 +319,9 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir) {
   }
 
   // try where the builds will put it for a single configuration build
-  searchDir.cdUp();
+  UNUSED_ARG(searchDir.cdUp());
   if (searchDir.cd("docs")) {
-    searchDir.cd("qthelp");
+    UNUSED_ARG(searchDir.cd("qthelp"));
     path = searchDir.absoluteFilePath(COLLECTION_FILE);
     g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
     if (searchDir.exists(COLLECTION_FILE)) {
@@ -327,9 +330,9 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir) {
     }
   }
   // try where the builds will put it for a multi-configuration build
-  searchDir.cdUp();
+  UNUSED_ARG(searchDir.cdUp());
   if (searchDir.cd("docs")) {
-    searchDir.cd("qthelp");
+    UNUSED_ARG(searchDir.cd("qthelp"));
     path = searchDir.absoluteFilePath(COLLECTION_FILE);
     g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
     if (searchDir.exists(COLLECTION_FILE)) {
@@ -340,9 +343,9 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir) {
 
   // try in windows/linux install location
   searchDir = QDir(QString::fromStdString(binDir));
-  searchDir.cdUp();
-  searchDir.cd("share");
-  searchDir.cd("doc");
+  UNUSED_ARG(searchDir.cdUp());
+  UNUSED_ARG(searchDir.cd("share"));
+  UNUSED_ARG(searchDir.cd("doc"));
   path = searchDir.absoluteFilePath(COLLECTION_FILE);
   g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
   if (searchDir.exists(COLLECTION_FILE)) {
@@ -352,10 +355,10 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir) {
 
   // try a special place for mac/osx
   searchDir = QDir(QString::fromStdString(binDir));
-  searchDir.cdUp();
-  searchDir.cdUp();
-  searchDir.cd("share");
-  searchDir.cd("doc");
+  UNUSED_ARG(searchDir.cdUp());
+  UNUSED_ARG(searchDir.cdUp());
+  UNUSED_ARG(searchDir.cd("share"));
+  UNUSED_ARG(searchDir.cd("doc"));
   path = searchDir.absoluteFilePath(COLLECTION_FILE);
   g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
   if (searchDir.exists(COLLECTION_FILE)) {
@@ -381,4 +384,3 @@ void MantidHelpWindow::determineFileLocs() {
 void MantidHelpWindow::warning(const QString &msg) { g_log.warning(msg.toStdString()); }
 
 } // namespace MantidQt::MantidWidgets
-#endif

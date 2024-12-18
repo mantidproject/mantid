@@ -1,4 +1,6 @@
 #include "MantidQtWidgets/Common/PythonHelpWindow.h"
+#include "MantidKernel/RegistrationHelper.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/PythonHelpBridge.h"
 #include <QString>
 #include <string>
