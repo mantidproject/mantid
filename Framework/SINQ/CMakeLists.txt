@@ -1,3 +1,5 @@
+include(GenerateExportHeader)
+
 set(SRC_FILES
     src/InvertMDDim.cpp
     src/LoadFlexiNexus.cpp
@@ -41,7 +43,6 @@ set(SRC_FILES
 )
 
 set(INC_FILES
-    inc/MantidSINQ/DllConfig.h
     inc/MantidSINQ/InvertMDDim.h
     inc/MantidSINQ/LoadFlexiNexus.h
     inc/MantidSINQ/MDHistoToWorkspace2D.h
@@ -153,6 +154,12 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(SINQ PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
 endif()
+
+# Auto-generate exports header
+target_include_directories(
+  SINQ PUBLIC $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/Framework/SINQ> $<INSTALL_INTERFACE:include/Mantid>
+)
+generate_mantid_export_header(SINQ False)
 
 # Add to the 'Framework' group in VS
 set_property(TARGET SINQ PROPERTY FOLDER "MantidFramework")
