@@ -88,6 +88,7 @@ set(EXPORT_FILES
     src/Exports/IPreview.cpp
     src/Exports/PreviewManager.cpp
     src/Exports/RegionSelectorObserver.cpp
+    src/Exports/WorkspaceNearestNeighbourInfo.cpp
 )
 
 if(PROFILE_ALGORITHM_LINUX)
