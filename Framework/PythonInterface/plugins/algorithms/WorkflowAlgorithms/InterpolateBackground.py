@@ -74,8 +74,9 @@ class InterpolateBackground(PythonAlgorithm):
         lowWS = mtd[self.low_ws]
         highWS = mtd[self.high_ws]
 
-        scalar = (self.interpo_temp - self.low_temp) / (self.high_temp - self.interpo_temp)
-        outputWS = lowWS + scalar * highWS - scalar * lowWS
+        scalar1 = (self.interpo_temp - self.low_temp) / (self.high_temp - self.low_temp)
+        scalar2 = (self.high_temp - self.interpo_temp) / (self.high_temp - self.low_temp)
+        outputWS = scalar1 * highWS + scalar2 * lowWS
 
         output_ws_name = self.getProperty("OutputWorkspace").value
         RenameWorkspace(InputWorkspace=outputWS, OutputWorkspace=output_ws_name)
