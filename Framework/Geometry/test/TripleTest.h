@@ -8,7 +8,6 @@
 
 #include "MantidGeometry/Math/Triple.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;

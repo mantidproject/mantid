@@ -17,7 +17,6 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidKernel/System.h"
 
 #include <sstream>
 

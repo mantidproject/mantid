@@ -353,8 +353,6 @@ set(TEST_FILES
     FreeBlockTest.h
     FunctionTaskTest.h
     GlobTest.h
-    IPropertySettingsTest.h
-    ISaveableTest.h
     IValidatorTest.h
     IndexSetTest.h
     InstrumentInfoTest.h
