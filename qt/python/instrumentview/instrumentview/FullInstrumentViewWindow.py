@@ -4,13 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QLabel, QLineEdit, QGroupBox, QSizePolicy
-from qtpy.QtGui import QPalette
+from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QLineEdit, QGroupBox, QSizePolicy
+from qtpy.QtGui import QPalette, QIntValidator
 from pyvistaqt import BackgroundPlotter
 import matplotlib.pyplot as plt
 from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
 from instrumentview.DetectorInfo import DetectorInfo
 from typing import Callable
+import numpy as np
 
 
 class FullWindow(QMainWindow):
@@ -44,10 +45,18 @@ class FullWindow(QMainWindow):
         self._detector_pixel_counts_edit = self._add_detector_info_boxes(detector_vbox, "Pixel Counts")
         detector_group_box.setLayout(detector_vbox)
 
-        button2 = QPushButton("Option 2")
+        time_of_flight_group_box = QGroupBox("Time of Flight")
+        self._tof_min_edit, self._tof_max_edit = self._add_min_max_group_box(
+            time_of_flight_group_box, self._on_tof_limits_updated, self._on_tof_limits_updated
+        )
+        contour_range_group_box = QGroupBox("Contour Range")
+        self._contour_range_min_edit, self._contour_range_max_edit = self._add_min_max_group_box(
+            contour_range_group_box, self._on_contour_limits_updated, self._on_contour_limits_updated
+        )
+
         options_vertical_layout.addWidget(detector_group_box)
-        options_vertical_layout.addWidget(QLabel("Test"))
-        options_vertical_layout.addWidget(button2)
+        options_vertical_layout.addWidget(time_of_flight_group_box)
+        options_vertical_layout.addWidget(contour_range_group_box)
         options_vertical_layout.addStretch()
 
         central_widget.setLayout(parent_horizontal_layout)
@@ -58,6 +67,26 @@ class FullWindow(QMainWindow):
 
         self.main_plotter.reset_camera()
         self.projection_plotter.reset_camera()
+
+    def _add_min_max_group_box(self, parent_box: QGroupBox, min_callback, max_callback) -> tuple[QLineEdit, QLineEdit]:
+        root_vbox = QVBoxLayout()
+        min_hbox = QHBoxLayout()
+        min_hbox.addWidget(QLabel("Min"))
+        min_edit = QLineEdit()
+        min_edit.textEdited.connect(min_callback)
+        max_int_32 = np.iinfo(np.int32).max
+        min_edit.setValidator(QIntValidator(0, max_int_32, self))
+        min_hbox.addWidget(min_edit)
+        max_hbox = QHBoxLayout()
+        max_hbox.addWidget(QLabel("Max"))
+        max_edit = QLineEdit()
+        max_edit.textEdited.connect(max_callback)
+        max_edit.setValidator(QIntValidator(0, max_int_32, self))
+        max_hbox.addWidget(max_edit)
+        root_vbox.addLayout(min_hbox)
+        root_vbox.addLayout(max_hbox)
+        parent_box.setLayout(root_vbox)
+        return (min_edit, max_edit)
 
     def _add_detector_info_boxes(self, parent_box: QVBoxLayout, label: str) -> QHBoxLayout:
         hbox = QHBoxLayout()
@@ -71,6 +100,29 @@ class FullWindow(QMainWindow):
         palette.setColor(QPalette.Base, palette.color(QPalette.Window))
         line_edit.setPalette(palette)
         return line_edit
+
+    def set_contour_range_limits(self, contour_limits: list) -> None:
+        self._contour_range_min_edit.setText(f"{contour_limits[0]:.0f}")
+        self._contour_range_max_edit.setText(f"{contour_limits[1]:.0f}")
+
+    def _on_tof_limits_updated(self, text):
+        pass
+
+    def _on_contour_limits_updated(self, text):
+        if text is None:
+            return
+        try:
+            min = int(self._contour_range_min_edit.text())
+            max = int(self._contour_range_max_edit.text())
+        except ValueError:
+            return
+        if max <= min:
+            return
+        self._presenter.set_contour_limits(min, max)
+
+    def update_scalar_range(self, clim, label: str) -> None:
+        self.main_plotter.update_scalar_bar_range(clim, label)
+        self.projection_plotter.update_scalar_bar_range(clim, label)
 
     def closeEvent(self, QCloseEvent):
         super().closeEvent(QCloseEvent)
