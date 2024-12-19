@@ -32,7 +32,8 @@ Dataset names
 A dataset name is generated automatically for each individual workspace in the input list or workspace group. This is done as follows:
 
 - If there is a call to :ref:`algm-Stitch1DMany` in the workspace history then the dataset is given the name "Stitched".
-- If it is not a stitched dataset then, if available in the workspace reduction history, the value of theta that was used for conversion to Q is given as the dataset name.
+- If it is not a stitched dataset then, if available in the workspace reduction history, the value of theta that was used for conversion to Q  and/or the polarization
+  encountered in the sample logs is given as the dataset name.
 - If a dataset name cannot be generated from either of the above, then the workspace name is used as the dataset name.
 
 For a workspace that is a member of a workspace group, if the generated dataset name is either "Stitched" or the theta value, then the individual workspace name is also included in the dataset name.
@@ -98,6 +99,9 @@ the file is saved without this metadata included.
 |                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history. Also the flood          |
 |                     | correction workspace or file name and the calibration file name from                          |
 |                     | :ref:`algm-ReflectometryISISLoadAndProcess` in the workspace history.                         |
++---------------------+-----------------------------------------------------------------------------------------------+
+|polarization         | For input workspaces containing the ``spin_state_ORSO`` sample log, polarization information  |
+|                     | will be added to the header using the ORSO format [#ORSO]_.                                   |
 +---------------------+-----------------------------------------------------------------------------------------------+
 
 Usage
