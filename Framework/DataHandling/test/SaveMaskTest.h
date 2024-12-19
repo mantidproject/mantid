@@ -11,7 +11,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 
 #include "Poco/File.h"

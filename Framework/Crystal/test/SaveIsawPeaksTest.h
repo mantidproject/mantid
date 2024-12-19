@@ -13,7 +13,6 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include <Poco/File.h>

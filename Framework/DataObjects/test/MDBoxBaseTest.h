@@ -10,7 +10,6 @@
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>

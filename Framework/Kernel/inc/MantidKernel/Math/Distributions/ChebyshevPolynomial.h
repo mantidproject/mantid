@@ -20,7 +20,7 @@ namespace Kernel {
   for more information
 */
 struct MANTID_KERNEL_DLL ChebyshevPolynomial {
-  double operator()(const size_t n, const double x);
+  double operator()(const std::size_t n, const double x);
 };
 } // namespace Kernel
 } // namespace Mantid

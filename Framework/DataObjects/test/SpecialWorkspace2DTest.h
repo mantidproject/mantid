@@ -10,7 +10,6 @@
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidFrameworkTestHelpers/ComponentCreationHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "PropertyManagerHelper.h"
 #include <cxxtest/TestSuite.h>

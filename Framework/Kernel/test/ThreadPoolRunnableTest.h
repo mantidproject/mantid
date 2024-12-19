@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPoolRunnable.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Timer.h"

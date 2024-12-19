@@ -12,7 +12,6 @@
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "PropertyManagerHelper.h"

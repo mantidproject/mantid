@@ -11,7 +11,6 @@
 #include "MantidKernel/FreeBlock.h"
 #include "MantidKernel/ISaveable.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <boost/multi_index/hashed_index.hpp>
 #include <boost/multi_index/mem_fun.hpp>
