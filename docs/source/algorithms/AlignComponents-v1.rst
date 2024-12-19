@@ -20,7 +20,7 @@ the absolute value of the fractional difference between the observed peak center
 for detector pixel :math:`i` and peak :math:`j`, :math:`DIFC_i * TOF_{i,j}`, and a reference
 experimental value for the d-spacing of peak :math:`j`, :math:`d^{exp}_j`. The conversion from
 peak center in TOF units (:math:`TOF_{i,j}`) to d-spacing units is carried out via the
-geometrical parameter :math:`DIFC_i` -- see :ref:`algm-AlignDetectors` for more information
+geometrical parameter :math:`DIFC_i` -- see :ref:`Unit Factory` for more information
 regarding this parameter. As we change the location and orientations of the instrument components
 during the minimization, the geometrical parameter :math:`DIFC_i` is bound to change.
 
