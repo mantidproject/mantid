@@ -23,6 +23,7 @@ _PEAK_REPRESENTATION_FACTORY = {
     "none": NonIntegratedPeakRepresentation,
     "spherical": EllipsoidalIntegratedPeakRepresentation,
     "ellipsoid": EllipsoidalIntegratedPeakRepresentation,
+    "detectorbin": NonIntegratedPeakRepresentation,
 }
 
 
