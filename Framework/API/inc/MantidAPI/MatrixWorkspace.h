@@ -32,6 +32,8 @@ namespace Geometry {
 class ParameterMap;
 }
 
+const std::vector<std::string> validPlotTypes{"plot", "scatter", "histogram", "errorbar"};
+
 namespace API {
 class Axis;
 class SpectrumDetectorMapping;
@@ -133,6 +135,11 @@ public:
   void setTitle(const std::string &) override;
   /// Gets MatrixWorkspace title (same as Run object run_title property)
   const std::string getTitle() const override;
+
+  /// Sets MatrixWorkspace plot_type
+  void setPlotType(const std::string &);
+  /// Gets MatrixWorkspace plot_type
+  std::string getPlotType() const;
 
   virtual Types::Core::DateAndTime getFirstPulseTime() const;
   Types::Core::DateAndTime getLastPulseTime() const;

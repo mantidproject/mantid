@@ -19,7 +19,6 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 
 #include <Poco/DOM/DOMParser.h>

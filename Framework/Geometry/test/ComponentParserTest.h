@@ -10,7 +10,6 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include <Poco/SAX/AttributesImpl.h>

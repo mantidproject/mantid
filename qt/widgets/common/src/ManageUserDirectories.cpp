@@ -95,6 +95,7 @@ void ManageUserDirectories::initLayout() {
   connect(m_uiForm.pbDataRemDir, SIGNAL(clicked()), this, SLOT(remDir()));
   connect(m_uiForm.pbScriptRemDir, SIGNAL(clicked()), this, SLOT(remDir()));
   connect(m_uiForm.pbExtRemoveDir, SIGNAL(clicked()), this, SLOT(remDir()));
+  connect(m_uiForm.pbDataMoveToTop, SIGNAL(clicked()), this, SLOT(moveToTop()));
   connect(m_uiForm.pbDataMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
   connect(m_uiForm.pbScriptMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
   connect(m_uiForm.pbExtMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
@@ -269,34 +270,35 @@ void ManageUserDirectories::remDir() {
   }
 }
 
-/// Raise an item up in the list based on the sender of the signal
-void ManageUserDirectories::moveUp() {
+/// Move an item in the list based on the sender of the signal and a specified direction
+void ManageUserDirectories::moveItem(bool toTop, int offset) {
   QListWidget *list = listWidget(sender());
   QList<QListWidgetItem *> selected = list->selectedItems();
   for (auto &i : selected) {
     int index = list->row(i);
-    if (index != 0) {
+    int count = list->count();
+    int newIndex = 0;
+    if (toTop) {
+      newIndex = 0;
+    } else {
+      newIndex = index + offset;
+    }
+    if (newIndex >= 0 && newIndex < count) {
       QListWidgetItem *move = list->takeItem(index);
-      list->insertItem(index - 1, move);
+      list->insertItem(newIndex, move);
     }
     list->setCurrentItem(i);
   }
 }
 
+/// Raise an item to the top in the list based on the sender of the signal
+void ManageUserDirectories::moveToTop() { moveItem(true, 0); }
+
+/// Raise an item up in the list based on the sender of the signal
+void ManageUserDirectories::moveUp() { moveItem(false, -1); }
+
 /// Lower an item down in the list based on the sender of the signal
-void ManageUserDirectories::moveDown() {
-  QListWidget *list = listWidget(sender());
-  int count = list->count();
-  QList<QListWidgetItem *> selected = list->selectedItems();
-  for (auto &i : selected) {
-    int index = list->row(i);
-    if (index != (count - 1)) {
-      QListWidgetItem *move = list->takeItem(index);
-      list->insertItem(index + 1, move);
-    }
-    list->setCurrentItem(i);
-  }
-}
+void ManageUserDirectories::moveDown() { moveItem(false, 1); }
 
 /// Find an existing directory to be used for the save directory path
 void ManageUserDirectories::selectSaveDir() {

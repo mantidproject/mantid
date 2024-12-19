@@ -402,6 +402,19 @@ public:
     ws->setTitle("");
   }
 
+  void testGetSetPlotType() {
+    // test default
+    TS_ASSERT_EQUALS(ws->getPlotType(), "plot");
+
+    // test invalid is rejected
+    ws->setPlotType("invalid");
+    TS_ASSERT_EQUALS(ws->getPlotType(), "plot");
+
+    // test valid is accepted
+    ws->setPlotType("scatter");
+    TS_ASSERT_EQUALS(ws->getPlotType(), "scatter");
+  }
+
   void testGetSetComment() {
     TS_ASSERT_EQUALS(ws->getComment(), "");
     ws->setComment("commenting");

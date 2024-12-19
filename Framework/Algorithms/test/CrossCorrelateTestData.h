@@ -13,7 +13,6 @@
 #include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
 #include "MantidCurveFitting/Functions/Gaussian.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid;

@@ -225,7 +225,7 @@ void SaveISISNexus::exec() {
  * @param data Pointer to the data source
  * @param size size of the data in sizeof(int)
  */
-void SaveISISNexus::saveInt(const char *name, void *data, int size) {
+void SaveISISNexus::saveInt(const char *name, const void *data, const int size) {
   saveIntOpen(name, data, size);
   close();
 }
@@ -236,7 +236,7 @@ void SaveISISNexus::saveInt(const char *name, void *data, int size) {
  * @param data Pointer to the data source
  * @param size size of the data in sizeof(char)
  */
-void SaveISISNexus::saveChar(const char *name, void *data, int size) {
+void SaveISISNexus::saveChar(const char *name, const void *data, const int size) {
   saveCharOpen(name, data, size);
   close();
 }
@@ -247,7 +247,7 @@ void SaveISISNexus::saveChar(const char *name, void *data, int size) {
  * @param data Pointer to the data source
  * @param size size of the data in sizeof(float)
  */
-void SaveISISNexus::saveFloat(const char *name, void *data, int size) {
+void SaveISISNexus::saveFloat(const char *name, const void *data, const int size) {
   saveFloatOpen(name, data, size);
   close();
 }
@@ -258,7 +258,7 @@ void SaveISISNexus::saveFloat(const char *name, void *data, int size) {
  * @param data Pointer to the data source
  * @param size size of the data in sizeof(int)
  */
-void SaveISISNexus::saveIntOpen(const char *name, void *data, int size) {
+void SaveISISNexus::saveIntOpen(const char *name, const void *data, const int size) {
   int dim[1];
   dim[0] = size;
   // If we aren't going to anything with the status, then don't bother asking
@@ -274,7 +274,7 @@ void SaveISISNexus::saveIntOpen(const char *name, void *data, int size) {
  * @param data Pointer to the data source
  * @param size size of the data in sizeof(char)
  */
-void SaveISISNexus::saveCharOpen(const char *name, void *data, int size) {
+void SaveISISNexus::saveCharOpen(const char *name, const void *data, const int size) {
   int dim[1];
   dim[0] = size;
   // If we aren't going to anything with the status, then don't bother asking
@@ -290,7 +290,7 @@ void SaveISISNexus::saveCharOpen(const char *name, void *data, int size) {
  * @param data Pointer to the data source
  * @param size size of the data in sizeof(float)
  */
-void SaveISISNexus::saveFloatOpen(const char *name, void *data, int size) {
+void SaveISISNexus::saveFloatOpen(const char *name, const void *data, const int size) {
   int dim[1];
   dim[0] = size;
   // If we aren't going to anything with the status, then don't bother asking
@@ -370,7 +370,9 @@ void SaveISISNexus::putAttr(const char *name, const std::string &value) {
   NXputattr(handle, name, buff.get(), static_cast<int>(value.size()), NX_CHAR);
 }
 
-void SaveISISNexus::putAttr(const char *name, char *value, int size) { NXputattr(handle, name, value, size, NX_CHAR); }
+void SaveISISNexus::putAttr(const char *name, const char *value, const int size) {
+  NXputattr(handle, name, value, size, NX_CHAR);
+}
 
 void SaveISISNexus::putAttr(const char *name, int value, int size) { NXputattr(handle, name, &value, size, NX_INT32); }
 
@@ -861,7 +863,7 @@ void SaveISISNexus::runlog() {
  * @param size The size of the data
  * @param units The units of the data
  */
-void SaveISISNexus::write_runlog(const char *name, void *times, void *data, int type, int size,
+void SaveISISNexus::write_runlog(const char *name, const void *times, const void *data, const int type, const int size,
                                  const std::string &units) {
   write_logOpen(name, times, data, type, size, units);
   closegroup();
@@ -876,7 +878,7 @@ void SaveISISNexus::write_runlog(const char *name, void *times, void *data, int 
  * @param size The size of the data
  * @param units The units of the data
  */
-void SaveISISNexus::write_logOpen(const char *name, void *times, void *data, int type, int size,
+void SaveISISNexus::write_logOpen(const char *name, const void *times, const void *data, const int type, const int size,
                                   const std::string &units) {
   NXmakegroup(handle, name, "NXlog");
   NXopengroup(handle, name, "NXlog");

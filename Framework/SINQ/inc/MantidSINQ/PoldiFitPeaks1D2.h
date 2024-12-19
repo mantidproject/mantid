@@ -7,8 +7,6 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
-
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"

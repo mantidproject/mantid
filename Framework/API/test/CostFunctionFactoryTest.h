@@ -11,7 +11,6 @@
 #include "MantidAPI/CostFunctionFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/ICostFunction.h"
-#include "MantidKernel/System.h"
 
 #include <sstream>
 

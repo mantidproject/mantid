@@ -22,7 +22,6 @@
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
