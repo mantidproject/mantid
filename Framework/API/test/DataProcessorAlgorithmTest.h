@@ -10,7 +10,6 @@
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidFrameworkTestHelpers/FakeObjects.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 

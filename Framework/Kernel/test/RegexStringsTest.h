@@ -13,7 +13,6 @@
 #include <vector>
 
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 
 #include "MantidKernel/RegexStrings.h"
 #include <boost/regex.hpp>

@@ -12,7 +12,6 @@
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidKernel/System.h"
 
 #include <sstream>
 
