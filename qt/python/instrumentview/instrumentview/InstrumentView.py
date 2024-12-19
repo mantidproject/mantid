@@ -6,7 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import sys
 from qtpy.QtWidgets import QApplication
-from .pyvista_test import MainWindow
+from .FullInstrumentViewWindow import FullWindow
+from pathlib import Path
+from mantid.simpleapi import LoadRaw, LoadNexus, LoadEventNexus
 
 
 class InstrumentView:
@@ -15,7 +17,15 @@ class InstrumentView:
 
     def start_app_open_window():
         app = QApplication(sys.argv)
-        window = MainWindow()
+        workspace_path = Path(r"C:\Tutorial\SampleData-ISIS\MAR11060.raw")
+        is_event = False
+        if is_event:
+            ws = LoadEventNexus(str(workspace_path), StoreInADS=False)
+        elif workspace_path.suffix == ".nxs":
+            ws = LoadNexus(str(workspace_path), StoreInADS=False)
+        else:
+            ws = LoadRaw(str(workspace_path), StoreInADS=False)
+        window = FullWindow(ws)
         window.show()
         app.exec_()
 
