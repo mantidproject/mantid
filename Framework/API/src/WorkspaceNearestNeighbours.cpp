@@ -220,9 +220,11 @@ std::vector<size_t> WorkspaceNearestNeighbours::getSpectraDetectors() {
   indices.reserve(nSpec);
   for (size_t i = 0; i < nSpec; ++i) {
     // Always ignore monitors and ignore masked detectors if requested.
-    const bool heedMasking = m_bIgnoreMaskedDetectors && m_spectrumInfo.isMasked(i);
-    if (!m_spectrumInfo.isMonitor(i) && !heedMasking) {
-      indices.emplace_back(i);
+    if (m_spectrumInfo.hasDetectors(i)) {
+      const bool heedMasking = m_bIgnoreMaskedDetectors && m_spectrumInfo.isMasked(i);
+      if (!m_spectrumInfo.isMonitor(i) && !heedMasking) {
+        indices.emplace_back(i);
+      }
     }
   }
   return indices;
