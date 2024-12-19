@@ -359,17 +359,27 @@ private:
     TS_ASSERT_EQUALS(out->size(), expectedSize);
   }
 
-  MatrixWorkspace_sptr createEfficiencyOutputWorkspace(size_t size, double endX, std::string const &kind) {
+  MatrixWorkspace_sptr createEfficiencyOutputWorkspace(std::string const &kind) {
+    const auto numWorkspaces = 4;
+    const double endX = 10;
+
     std::vector<MatrixWorkspace_sptr> workspaces;
     if (kind == "histo") {
-      for (int i = 0; i < 4; ++i) {
-        workspaces.push_back(createHistoWS(size, 0, endX));
+      for (int i = 0; i < numWorkspaces; ++i) {
+        workspaces.push_back(createHistoWS(10, 0, endX));
       }
-    } else if (kind == "points" || kind == "points-short") {
-      for (int i = 0; i < 4; ++i) {
-        workspaces.push_back(createPointWS(size, 0, endX));
+    } else if (kind == "points") {
+      for (int i = 0; i < numWorkspaces; ++i) {
+        workspaces.push_back(createPointWS(10, 0, endX));
       }
+    } else if (kind == "points-short") {
+      for (int i = 0; i < numWorkspaces; ++i) {
+        workspaces.push_back(createPointWS(4, 0, endX));
+      }
+    } else {
+      throw std::logic_error("Unknown efficiency test kind");
     }
+
     auto alg = AlgorithmFactory::Instance().create("JoinISISPolarizationEfficiencies", -1);
     alg->initialize();
     alg->setChild(true);
@@ -399,17 +409,9 @@ private:
         axis1Raw->setLabel(i, current_labels[i]);
       }
       return ws;
-    } else if (kind == "histo") {
-      auto outWS = createEfficiencyOutputWorkspace(10, 10, "histo");
-      return outWS;
-    } else if (kind == "points") {
-      auto outWS = createEfficiencyOutputWorkspace(10, 10, "points");
-      return outWS;
-    } else if (kind == "points-short") {
-      auto outWS = createEfficiencyOutputWorkspace(4, 10, "points-short");
-      return outWS;
     }
-    throw std::logic_error("Unknown efficiency test kind");
+
+    return createEfficiencyOutputWorkspace(kind);
   }
 
   MatrixWorkspace_sptr createHistoWS(size_t size, double startX, double endX) const {
