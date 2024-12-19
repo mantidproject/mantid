@@ -8,8 +8,8 @@ from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QPush
 from qtpy.QtGui import QPalette
 from pyvistaqt import BackgroundPlotter
 import matplotlib.pyplot as plt
-from .FullInstrumentViewPresenter import FullInstrumentViewPresenter
-from .DetectorInfo import DetectorInfo
+from instrumentview.FullInstrumentViewPresenter import FullInstrumentViewPresenter
+from instrumentview.DetectorInfo import DetectorInfo
 from typing import Callable
 
 
@@ -91,6 +91,11 @@ class FullWindow(QMainWindow):
     def enable_point_picking(self, callback=None) -> None:
         self.main_plotter.enable_point_picking(show_message=False, callback=callback, use_picker=callback is not None)
 
+    def add_projection_mesh(self, mesh, scalars=None, clim=None) -> None:
+        self.projection_plotter.add_mesh(mesh, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7)
+        self.projection_plotter.view_xy()
+        self.projection_plotter.enable_image_style()
+
     def show_axes(self) -> None:
         self.main_plotter.show_axes()
 
@@ -121,12 +126,14 @@ class FullWindow(QMainWindow):
         self._set_detector_edit_text(self._detector_workspace_index_edit, detector_infos, lambda d: str(d.workspace_index))
         self._set_detector_edit_text(self._detector_component_path_edit, detector_infos, lambda d: d.component_path)
         self._set_detector_edit_text(
-            self._detector_xyz_edit, detector_infos, lambda d: f"x: {d.xyz_position[0]}, y: {d.xyz_position[1]}, z: {d.xyz_position[2]}"
+            self._detector_xyz_edit,
+            detector_infos,
+            lambda d: f"x: {d.xyz_position[0]:.3f}, y: {d.xyz_position[1]:.3f}, z: {d.xyz_position[2]:.3f}",
         )
         self._set_detector_edit_text(
             self._detector_spherical_position_edit,
             detector_infos,
-            lambda d: f"r: {d.spherical_position[0]}, t: {d.spherical_position[1]}, p: {d.spherical_position[2]}",
+            lambda d: f"r: {d.spherical_position[0]:.3f}, t: {d.spherical_position[1]:.1f}, p: {d.spherical_position[2]:.1f}",
         )
         self._set_detector_edit_text(self._detector_pixel_counts_edit, detector_infos, lambda d: str(d.pixel_counts))
 

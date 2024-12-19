@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from collections.abc import Iterable
 import pyvista as pv
-from .FullInstrumentViewModel import FullInstrumentViewModel
+from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
 import numpy as np
 
 
@@ -34,6 +34,11 @@ class FullInstrumentViewPresenter:
         monitor_point_cloud["colours"] = self.generateSingleColour(self._model.monitor_positions(), 1, 0, 0, 1)
 
         self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
+
+        projection = self._model.calculate_projection(is_spherical=True)
+        projection_mesh = self.createPolyDataMesh(projection)
+        projection_mesh["Integrated Counts"] = self._model.detector_counts()
+        self._view.add_projection_mesh(projection_mesh, "Integrated Counts", clim=self._model.data_limits())
 
     def point_picked(self, point, picker):
         if point is None:
