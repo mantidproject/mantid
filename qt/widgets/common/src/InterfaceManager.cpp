@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include "MantidQtWidgets/Common/MantidHelpWindow.h"
 #include "MantidQtWidgets/Common/PluginLibraries.h"
+#include "MantidQtWidgets/Common/PythonHelpBridge.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "MantidQtWidgets/Common/UserSubWindowFactory.h"
 
@@ -24,6 +25,7 @@
 
 #include <Poco/Environment.h>
 #include <QStringList>
+#include <mutex>
 
 using namespace MantidQt::API;
 using Mantid::Kernel::AbstractInstantiator;
@@ -154,7 +156,7 @@ UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name, 
     g_log.debug() << "Created a specialised interface for " << iname << '\n';
 
     // set the parent. Note - setParent without flags parameter resets the flags
-    // ie window becomes a child widget
+    // i.e. window becomes a child widget
     if (isWindow) {
       user_win->setParent(parent, user_win->windowFlags());
     } else {
