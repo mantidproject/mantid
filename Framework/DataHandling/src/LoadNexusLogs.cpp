@@ -11,6 +11,7 @@
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidNexusCpp/NeXusException.hpp"
 
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeFormatter.h>
@@ -19,7 +20,6 @@
 #include <Poco/Path.h>
 
 #include <boost/scoped_array.hpp>
-#include <nexus/NeXusException.hpp>
 
 #include <algorithm>
 #include <locale>

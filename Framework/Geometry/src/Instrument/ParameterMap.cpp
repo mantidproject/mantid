@@ -13,9 +13,9 @@
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidKernel/Cache.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include <boost/algorithm/string.hpp>
 #include <cstring>
-#include <nexus/NeXusFile.hpp>
 
 #ifdef _WIN32
 #define strcasecmp _stricmp

@@ -22,12 +22,12 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/H5Util.h"
+#include "MantidNexusCpp/napi.h"
 
 #include <H5Cpp.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/math/special_functions/round.hpp>
-#include <nexus/napi.h>
 #include <numeric>
 
 namespace Mantid::DataHandling {

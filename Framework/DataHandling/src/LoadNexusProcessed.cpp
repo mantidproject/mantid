@@ -36,10 +36,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/NexusFileIO.h"
+#include "MantidNexusCpp/NeXusException.hpp"
 
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/regex.hpp>
-#include <nexus/NeXusException.hpp>
 
 #include <algorithm>
 #include <map>
