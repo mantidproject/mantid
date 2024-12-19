@@ -7,7 +7,9 @@
 import numpy as np
 import pyvista as pv
 from scipy.spatial.transform import Rotation
-from .DetectorInfo import DetectorInfo
+from instrumentview.DetectorInfo import DetectorInfo
+import instrumentview.Projections.spherical_projection as iv_spherical
+import instrumentview.Projections.cylindrical_projection as iv_cylindrical
 
 
 class DetectorPosition(np.ndarray):
@@ -243,3 +245,15 @@ class FullInstrumentViewModel:
         return DetectorInfo(
             name, detector_id, workspace_index, np.array(xyz_position), np.array(spherical_position), component_path, int(pixel_counts)
         )
+
+    def calculate_projection(self, is_spherical: bool) -> list[float]:
+        spherical = (
+            iv_spherical.spherical_projection(self._workspace, self._detector_indices, np.array([1, 0, 0]))
+            if is_spherical
+            else iv_cylindrical.cylindrical_projection(self._workspace, self._detector_indices, np.array([1, 0, 0]))
+        )
+        projection_points = []
+        for det_id in range(len(self._detector_indices)):
+            x, y = spherical.coordinate_for_detector(det_id)
+            projection_points.append([x, y, 0])
+        return projection_points
