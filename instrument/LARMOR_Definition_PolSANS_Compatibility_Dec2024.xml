@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="LARMOR" valid-from   ="2024-02-21 20:00:00"
-                          valid-to     ="2025-01-01 23:59:58"
-		          last-modified="2024-03-28 13:22:00">
+ name="LARMOR" valid-from   ="2025-01-01 23:59:59"
+                          valid-to     ="2100-01-31 23:59:59"
+		          last-modified="2024-12-18 00:00:00">
 
   <defaults>
     <length unit="meter"/>
@@ -36,6 +36,8 @@
 	  - note have to swap x= and y= in Anders output list !
       02/04/12 Put in 'no shape monitors' for possible in the future monitors
       with ID 5-8
+	  21/02/24 include the SESANS and SEMSANS detector
+	  18/12/24 adding polarizing neutron optics to IDF
   -->
   
   
@@ -52,7 +54,41 @@
     <location z="25.300"/>
   </component>
   <type name="some-sample-holder" is="SamplePos" />
+ 
+  <!-- polarisation optics components, distances from McStas file -->
   
+  <type name="polarizer" />
+
+  <component type="polarizer" name="short-polarizer"> 
+      <location y="0.0" x="-0.5" z="17.95"/> 
+      <parameter name="device-type" type="string"> <value val="supermirror" /> </parameter> 
+  </component> 
+
+  <component type="polarizer" name="long-polarizer"> 
+    <location y="0.0" x="+0.5" z="17.95"/> 
+    <parameter name="device-type" type="string"> <value val="supermirror" /> </parameter> 
+  </component> 
+  
+  <type name="flipper" />  
+  
+  <component type="flipper" name="RF-flipper"> 
+    <location y="0.0" x="-0.5" z="19.64"/> 
+    <parameter name="device-type" type="string"> <value val="coil" /> </parameter> 
+  </component>    
+
+  <type name="analyzer" />   
+  
+  <component type="analyzer" name="helium-analyzer">
+    <location y="0.0" x="-0.5" z="26.260"/> 
+    <parameter name="device-type" type="string"> <value val="MEOP" /> </parameter> 
+    <parameter name="cell-length"> <value val="0.010" /> </parameter> 
+  </component> 
+  
+  <component type="analyzer" name="SE-analyzer"> 
+    <!-- better positions and shapes will be defined later -->
+    <location y="0.0" x="-0.5" z="29"/>
+    <parameter name="device-type" type="string"> <value val="supermirror" /> </parameter>
+  </component> 
   
   <!-- detector components (including monitors) -->
   
