@@ -37,6 +37,7 @@ class TableWorkspaceDisplayView(QTableView):
     def __init__(self, presenter=None, parent=None, window_flags=Qt.Window, table_model=None):
         super().__init__(parent)
         self.table_model = table_model if table_model else QStandardItemModel(parent)
+
         self.setModel(self.table_model)
 
         self.presenter = presenter

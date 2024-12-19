@@ -66,7 +66,7 @@ class MockWorkspace:
     def _return_MockSpectrumInfo():
         return MockSpectrumInfo()
 
-    def __init__(self, read_return=None, axes=2, isHistogramData=True):
+    def __init__(self, read_return=None, axes=2, isHistogramData=True, name=TEST_NAME):
         if read_return is None:
             read_return = [1, 2, 3, 4, 5]
         # This is assigned to a function, as the original implementation is a function that returns
@@ -96,7 +96,7 @@ class MockWorkspace:
 
         self.setCell = StrictMock()
 
-        self.name = StrictMock(return_value=self.TEST_NAME)
+        self.name = StrictMock(return_value=name)
 
         self._column_names = []
         for i in range(self.COLS):
@@ -119,3 +119,59 @@ class MockWorkspace:
         self.getLinkedYCol = StrictMock()
 
         self.hasDx = lambda x: x < len(read_return)
+
+    def __len__(self):
+        return self.row_count
+
+
+class MockWorkspaceGroup:
+    def __init__(self, name=None, workspaces=None):
+        super().__init__()
+        self._workspaces = workspaces if workspaces is not None else []
+        self._name = name
+
+        # Override id from parent
+        self.id = StrictMock(return_value="WorkspaceGroup")
+
+        # Group-specific methods
+        self.name = StrictMock(return_value=self._name)
+        self.toString = StrictMock(return_value="MockWorkspaceGroup")
+        self.getMemorySize = StrictMock(return_value=1000)
+        self.sortMembersByName = StrictMock()
+        self.addWorkspace = StrictMock()
+        self.getNumberOfEntries = StrictMock(return_value=len(self._workspaces))
+        self.getItem = StrictMock()
+        self.getAllItems = StrictMock(return_value=self._workspaces)
+        self.removeItem = StrictMock()
+        self.removeAll = StrictMock()
+        self.isEmpty = StrictMock(return_value=len(self._workspaces) == 0)
+        self.areNamesSimilar = StrictMock(return_value=True)
+        self.isMultiperiod = StrictMock(return_value=True)
+        self.isGroupPeaksWorkspaces = StrictMock(return_value=False)
+        self.isInGroup = StrictMock(return_value=False)
+        self.print = StrictMock()
+        self.throwIndexOutOfRangeError = StrictMock()
+
+        # ADS-related methods
+        self.sortByName = StrictMock()
+        self.add = StrictMock(self._workspaces.append)
+        self.remove = StrictMock(side_effect=lambda idx: self._workspaces.pop(idx))
+        self.contains = StrictMock(side_effect=self._contains)
+        self.getNames = StrictMock(return_value=[ws.name() for ws in self._workspaces])
+
+    def _contains(self, ws_or_name) -> bool:
+        if isinstance(ws_or_name, str):
+            return any(ws.name() == ws_or_name for ws in self._workspaces)
+        return ws_or_name in self._workspaces
+
+    def __iter__(self):
+        return iter(self._workspaces)
+
+    def __getitem__(self, index):
+        return self._workspaces[index]
+
+    def append(self, value):
+        self._workspaces.append(value)
+
+    def size(self):
+        return len(self._workspaces)
