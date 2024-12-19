@@ -188,7 +188,11 @@ class MaxEntPresenter(object):
             # this is caught as part of the calculation thread
             raise ValueError("Please select groups in the grouping tab")
         else:
-            maxent_workspace = run_MuonMaxent(maxent_parameters, alg, base_name)
+            try:
+                maxent_workspace = run_MuonMaxent(maxent_parameters, alg, base_name)
+            except KeyboardInterrupt:
+                return
+
             self.add_maxent_workspace_to_ADS(maxent_parameters["InputWorkspace"], maxent_workspace, alg)
 
     def _create_group_table(self):
