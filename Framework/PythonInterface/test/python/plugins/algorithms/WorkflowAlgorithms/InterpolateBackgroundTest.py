@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
+import numpy as np
 from mantid.simpleapi import DeleteWorkspace, InterpolateBackground, CreateWorkspace, GroupWorkspaces
 
 
@@ -26,8 +27,9 @@ class InterpolateBackgroundTest(unittest.TestCase):
         self.ws1.getRun().addProperty("SampleTemp", "100", False)
         self.ws2.getRun().addProperty("SampleTemp", "400", False)
         outputWS = InterpolateBackground(self.wsGroup, self.interpo)
-        expected = [15, 30, 45, 60, 75, 90, 105, 120, 135, 150]
-        self.assertListEqual(list(outputWS.readY(0)), expected)
+        expected = [8.33333333, 16.66666667, 25.0, 33.33333333, 41.66666667, 50.0, 58.33333333, 66.66666667, 75.0, 83.33333333]
+        tolerance = 1.0e-8
+        np.testing.assert_allclose(list(outputWS.readY(0)), expected, rtol=tolerance)
 
     def test_bad_input(self):
         # Test raises Runtime error if a workspace is missing SampleTemp property
