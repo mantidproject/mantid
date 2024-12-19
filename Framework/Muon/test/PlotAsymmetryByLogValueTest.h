@@ -13,7 +13,6 @@
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/SaveNexus.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidMuon/PlotAsymmetryByLogValue.h"

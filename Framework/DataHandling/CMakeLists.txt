@@ -30,7 +30,6 @@ set(SRC_FILES
     src/ISISDataArchive.cpp
     src/ISISJournal.cpp
     src/ISISJournalGetExperimentRuns.cpp
-    src/ISISRunLogs.cpp
     src/JoinISISPolarizationEfficiencies.cpp
     src/Load.cpp
     src/LoadANSTOHelper.cpp
@@ -89,9 +88,6 @@ set(SRC_FILES
     src/LoadMcStas.cpp
     src/LoadMcStasNexus.cpp
     src/LoadMuonLog.cpp
-    src/LoadMuonNexus.cpp
-    src/LoadMuonNexus1.cpp
-    src/LoadMuonNexus2.cpp
     src/LoadMuonNexusV2.cpp
     src/LoadMuonNexusV2NexusHelper.cpp
     src/LoadMuonStrategy.cpp
@@ -253,7 +249,6 @@ set(INC_FILES
     inc/MantidDataHandling/ISISDataArchive.h
     inc/MantidDataHandling/ISISJournal.h
     inc/MantidDataHandling/ISISJournalGetExperimentRuns.h
-    inc/MantidDataHandling/ISISRunLogs.h
     inc/MantidDataHandling/JoinISISPolarizationEfficiencies.h
     inc/MantidDataHandling/Load.h
     inc/MantidDataHandling/LoadANSTOEventFile.h
@@ -313,9 +308,6 @@ set(INC_FILES
     inc/MantidDataHandling/LoadMcStas.h
     inc/MantidDataHandling/LoadMcStasNexus.h
     inc/MantidDataHandling/LoadMuonLog.h
-    inc/MantidDataHandling/LoadMuonNexus.h
-    inc/MantidDataHandling/LoadMuonNexus1.h
-    inc/MantidDataHandling/LoadMuonNexus2.h
     inc/MantidDataHandling/LoadMuonNexusV2.h
     inc/MantidDataHandling/LoadMuonNexusV2NexusHelper.h
     inc/MantidDataHandling/LoadMuonStrategy.h
@@ -529,8 +521,6 @@ set(TEST_FILES
     LoadMcStasNexusTest.h
     LoadMcStasTest.h
     LoadMuonLogTest.h
-    LoadMuonNexus1Test.h
-    LoadMuonNexus2Test.h
     LoadMuonNexusV2Test.h
     LoadNGEMTest.h
     LoadNXSPETest.h

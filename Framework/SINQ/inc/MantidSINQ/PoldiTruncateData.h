@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidSINQ/DllConfig.h"
 
 #include "MantidSINQ/PoldiUtilities/PoldiAbstractChopper.h"
 

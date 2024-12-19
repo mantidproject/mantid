@@ -8,7 +8,6 @@
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction1DSpectrum.h"
-#include "MantidKernel/System.h"
 #include "MantidSINQ/DllConfig.h"
 #include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
 

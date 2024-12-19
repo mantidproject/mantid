@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidDataHandling/DllConfig.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/LogParser.h"
 
 #include "MantidAPI/Run.h"
@@ -14,7 +14,7 @@
 #include <memory>
 
 namespace Mantid {
-namespace DataHandling {
+namespace API {
 
 /**
 
@@ -25,7 +25,7 @@ namespace DataHandling {
     - current period log: "period x"
     - all periods: "periods"
  */
-class MANTID_DATAHANDLING_DLL ISISRunLogs {
+class MANTID_API_DLL ISISRunLogs {
 public:
   /// Construct this object using a run that has the required ICP event log
   /// and the number of periods
@@ -48,5 +48,5 @@ private:
   std::unique_ptr<Kernel::LogParser> m_logParser;
 };
 
-} // namespace DataHandling
+} // namespace API
 } // namespace Mantid

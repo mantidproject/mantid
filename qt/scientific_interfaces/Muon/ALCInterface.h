@@ -17,6 +17,7 @@
 #include "ALCDataLoadingPresenter.h"
 #include "ALCPeakFittingPresenter.h"
 #include "IALCBaselineModellingPresenterSubscriber.h"
+#include "IALCDataLoadingPresenterSubscriber.h"
 
 #include "ui_ALCInterface.h"
 
@@ -34,12 +35,14 @@ class ALCPeakFittingModel;
 /** ALCInterface : Custom interface for Avoided Level Crossing analysis
  */
 class MANTIDQT_MUONINTERFACE_DLL ALCInterface : public API::UserSubWindow,
+                                                public IALCDataLoadingPresenterSubscriber,
                                                 public IALCBaselineModellingPresenterSubscriber {
   Q_OBJECT
 
 public:
   ALCInterface(QWidget *parent = nullptr);
 
+  void loadedDataChanged() override;
   void correctedDataChanged() override;
   void closeEvent(QCloseEvent *event) override;
   static std::string name() { return "ALC"; }
@@ -57,8 +60,6 @@ private slots:
   void exportResults();
   void importResults();
 
-  void updateBaselineData();
-  void updatePeakData();
   void externalPlotRequested();
 
 private:
