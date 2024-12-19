@@ -411,8 +411,17 @@ public:
     TS_ASSERT_EQUALS(ws->getPlotType(), "plot");
 
     // test valid is accepted
-    ws->setPlotType("scatter");
-    TS_ASSERT_EQUALS(ws->getPlotType(), "scatter");
+    ws->setPlotType("marker");
+    TS_ASSERT_EQUALS(ws->getPlotType(), "marker");
+  }
+
+  void testGetSetMarkerStyle() {
+    // test default
+    TS_ASSERT_EQUALS(ws->getMarkerStyle(), "");
+
+    // test set
+    ws->setMarkerStyle("square");
+    TS_ASSERT_EQUALS(ws->getMarkerStyle(), "square");
   }
 
   void testGetSetComment() {

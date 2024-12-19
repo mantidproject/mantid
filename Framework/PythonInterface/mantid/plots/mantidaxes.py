@@ -31,7 +31,7 @@ from mantid.api import AnalysisDataService as ads
 from mantid.plots import datafunctions, axesfunctions, axesfunctions3D
 from mantid.plots.legend import LegendProperties
 from mantid.plots.datafunctions import get_normalize_by_bin_width
-from mantid.plots.utility import artists_hidden, autoscale_on_update, legend_set_draggable, MantidAxType
+from mantid.plots.utility import artists_hidden, autoscale_on_update, legend_set_draggable, MantidAxType, get_plot_specific_properties
 
 
 WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
@@ -694,6 +694,7 @@ class MantidAxes(Axes):
             spec_num = self.get_spec_number_or_bin(workspace, kwargs)
             normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, self, **kwargs)
             is_normalized = normalize_by_bin_width or (hasattr(workspace, "isDistribution") and workspace.isDistribution())
+            kwargs = get_plot_specific_properties(workspace, workspace.getPlotType(), kwargs)
             with autoscale_on_update(self, autoscale_on):
                 artist = self.track_workspace_artist(
                     workspace,
