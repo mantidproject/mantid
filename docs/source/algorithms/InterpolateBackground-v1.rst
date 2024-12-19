@@ -20,7 +20,9 @@ Below is the function used for the interpolation:
 
 .. math::
 
-	WS_{interpolated} = WS_{low} + (temp_{interpo} - temp_{low}) / (temp_{high} - temp_{interpo}) * (WS_{high} - WS_{low}),
+    factor1 = (temp_{interpo} - temp_{low}) / (temp_{high} - temp_{low})
+    factor2 = (temp_{high} - temp_{interpo}) / (temp_{high} - temp_{low})
+    WS_{interpolated} = WS_{high} * factor1 + WS_{low} * factor2
 
 where :math:`WS_{low}` and :math:`WS_{high}` are the workspaces containing the run data, :math:`temp_{low}` and
 :math:`temp_{high}` are the two extreme temperatures the empty containers were measured at, and
@@ -44,10 +46,10 @@ Usage
    ws1 = CreateWorkspace(dataX, dataY1)
    ws2 = CreateWorkspace(dataX, dataY2)
    wsGroup = GroupWorkspaces("ws1,ws2")
-   interpoTemp = "300"
+   interpoTemp = "200"
    # CreateWorkspace does not add the "SampleTemp" property so we need to add it here
    ws1.getRun().addProperty("SampleTemp", "100", False)
-   ws2.getRun().addProperty("SampleTemp", "400", False)
+   ws2.getRun().addProperty("SampleTemp", "300", False)
 
    # Perform the background interpolation
    outputWS = InterpolateBackground(wsGroup, interpoTemp)
@@ -59,7 +61,7 @@ Output:
 
 .. testoutput::
 
-   Interpolated Y values are: [3. 3. 3. 3. 3. 3. 3. 3. 3. 3.]
+   Interpolated Y values are: [1.5 1.5 1.5 1.5 1.5 1.5 1.5 1.5 1.5 1.5]
 
 
 .. categories::
