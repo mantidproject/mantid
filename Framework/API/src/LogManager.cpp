@@ -10,9 +10,7 @@
 #include "MantidKernel/PropertyNexus.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-
-#include <nexus/NeXusFile.hpp>
-#include <numeric>
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 namespace Mantid::API {
 

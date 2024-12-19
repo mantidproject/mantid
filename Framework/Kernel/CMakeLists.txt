@@ -488,7 +488,7 @@ target_link_libraries(
   Kernel
   PUBLIC Mantid::Types
          Mantid::Json
-         Nexus::nexuscpp
+         Mantid::NexusCpp
          Eigen3::Eigen
          TBB::tbb
          Poco::Foundation

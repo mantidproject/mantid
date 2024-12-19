@@ -86,26 +86,6 @@ set(INC_FILES
     inc/MantidPythonInterface/kernel/Registry/TypeRegistry.h
 )
 
-# Generate the packagesetup module for the build & install package
-set(PACKAGESETUP_PY packagesetup)
-set(NEXUSLIB ${NEXUS_C_LIBRARIES})
-if(WIN32) # .lib -> .dll
-  string(REPLACE "/lib/" "/bin/" NEXUSLIB ${NEXUSLIB})
-  string(REPLACE ".lib" ".dll" NEXUSLIB ${NEXUSLIB})
-endif()
-
-# Build version
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py)
-# Package version
-if(WIN32)
-  # NeXus library is in the same place relative to the Python library
-  get_filename_component(NEXUSLIB_FILE ${NEXUSLIB} NAME)
-  set(NEXUSLIB ../../${NEXUSLIB_FILE})
-endif()
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CURRENT_BINARY_DIR}/${PACKAGESETUP_PY}.install.py
-)
-
 # Add a precompiled header where they are supported
 list(APPEND ALL_FILES ${EXPORT_FILES} ${SRC_FILES})
 enable_precompiled_headers(inc/MantidPythonInterface/kernel/Registry/PrecompiledHeader.h ALL_FILES)
