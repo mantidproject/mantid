@@ -20,7 +20,7 @@ from numpy import array, sqrt
 import tempfile
 import shutil
 from os import path
-
+import json
 
 XML_PARAMS = """
 <?xml version="1.0" encoding="UTF-8" ?>
@@ -40,7 +40,7 @@ XML_PARAMS = """
 """
 
 
-class FindSXPeaksConvolveTest(unittest.TestCase):
+class IntegratePeaksShoeboxTOFTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # load empty instrument with RectangularDetector banks and create a peak table
@@ -226,6 +226,52 @@ class FindSXPeaksConvolveTest(unittest.TestCase):
             IntegrateIfOnEdge=True,
         )
         self._assert_found_correct_peaks(out, i_over_sigs=2 * [0.0])
+
+    def test_exec_peak_shape_when_IntegrateIfOnEdge_False(self):
+        out = IntegratePeaksShoeboxTOF(
+            InputWorkspace=self.ws,
+            PeaksWorkspace=self.peaks,
+            OutputWorkspace="peaks1",
+            GetNBinsFromBackToBackParams=False,
+            NRows=3,
+            NCols=3,
+            NBins=3,
+            WeakPeakThreshold=0.0,
+            OptimiseShoebox=False,
+            IntegrateIfOnEdge=False,
+        )
+        self.assertEqual(out.getNumberPeaks(), 2)
+        self.assertEqual(out.getPeak(0).getPeakShape().shapeName(), "none")
+        self.assertEqual(out.getPeak(1).getPeakShape().shapeName(), "none")
+
+    def test_exec_OptimiseShoebox_peak_shape(self):
+        # make kernel larger than optimum
+        out = IntegratePeaksShoeboxTOF(
+            InputWorkspace=self.ws,
+            PeaksWorkspace=self.peaks,
+            OutputWorkspace="peaks4",
+            GetNBinsFromBackToBackParams=False,
+            NRows=5,
+            NCols=5,
+            NBins=3,
+            WeakPeakThreshold=0.0,
+            OptimiseShoebox=True,
+            IntegrateIfOnEdge=True,
+        )
+
+        self.assertEqual(out.getNumberPeaks(), 2)
+
+        def _test_shapes(peaksws, start_end_points):
+            for i_pk, pk in enumerate(peaksws):
+                self.assertEqual(pk.getPeakShape().shapeName(), "detectorbin")
+                pk_shape_dict = json.loads(pk.getPeakShape().toJSON())
+                self.assertEqual(len(pk_shape_dict["detectors"]), 4)
+                self.assertEqual(pk_shape_dict["algorithm_name"], "IntegratePeaksShoeboxTOF")
+                for det in pk_shape_dict["detectors"]:
+                    self.assertEqual(det["startX"], start_end_points[i_pk][0])
+                    self.assertEqual(det["endX"], start_end_points[i_pk][1])
+
+        _test_shapes(out, ((2, 4), (7, 9)))
 
 
 if __name__ == "__main__":

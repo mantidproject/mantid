@@ -55,6 +55,6 @@ Mantid::Geometry::PeakShape *PeakShapeDetectorBin::clone() const { return new Pe
 
 std::string PeakShapeDetectorBin::shapeName() const { return PeakShapeDetectorBin::detectorBinShapeName(); }
 
-const std::string PeakShapeDetectorBin::detectorBinShapeName() { return "PeakShapeDetectorBin"; }
+const std::string PeakShapeDetectorBin::detectorBinShapeName() { return "detectorbin"; }
 
 } // namespace Mantid::DataObjects
