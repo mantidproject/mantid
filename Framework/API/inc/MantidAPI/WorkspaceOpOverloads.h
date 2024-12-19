@@ -54,9 +54,10 @@ MatrixWorkspace_sptr MANTID_API_DLL operator/=(const MatrixWorkspace_sptr &lhs, 
 */
 struct MANTID_API_DLL WorkspaceHelpers {
   // Checks whether the binning is the same in two workspaces
-  static bool matchingBins(const MatrixWorkspace &ws1, const MatrixWorkspace &ws2, const bool firstOnly = false);
+  static bool matchingBins(const std::shared_ptr<const MatrixWorkspace> &ws1,
+                           const std::shared_ptr<const MatrixWorkspace> &ws2, const bool firstOnly = false);
   // Checks whether a the X vectors in a workspace are actually the same vector
-  static bool sharedXData(const MatrixWorkspace &WS);
+  static bool sharedXData(const std::shared_ptr<const MatrixWorkspace> &WS);
   // Divides the data in a workspace by the bin width to make it a distribution
   // (or the reverse)
   static void makeDistribution(const MatrixWorkspace_sptr &workspace, const bool forwards = true);

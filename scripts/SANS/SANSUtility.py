@@ -373,7 +373,7 @@ def fromEvent2Histogram(ws_event, ws_monitor, binning=""):
         aux_hist = RebinToWorkspace(WorkspaceToRebin=ws_event, WorkspaceToMatch=ws_monitor, PreserveEvents=False)
         ws_monitor.clone(OutputWorkspace=name)
 
-    ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)
+    ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True, CheckMatchingBins=False)
     CopyInstrumentParameters(ws_event, OutputWorkspace=name)
 
     ws_hist = RenameWorkspace(name, OutputWorkspace=str(ws_event))

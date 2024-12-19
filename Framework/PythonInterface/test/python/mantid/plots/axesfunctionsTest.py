@@ -97,7 +97,7 @@ class PlotFunctionsTest(unittest.TestCase):
             OutputWorkspace="ws_spec",
         )
         wp = CreateWorkspace(DataX=[15, 25, 35, 45], DataY=[1, 2, 3, 4], NSpec=1)
-        ConjoinWorkspaces(cls.ws2d_point_uneven, wp, CheckOverlapping=False)
+        ConjoinWorkspaces(cls.ws2d_point_uneven, wp, CheckOverlapping=False, CheckMatchingBins=False)
         cls.ws2d_point_uneven = mantid.mtd["ws2d_point_uneven"]
         cls.ws2d_histo_uneven = CreateWorkspace(DataX=[10, 20, 30, 40], DataY=[1, 2, 3], NSpec=1, OutputWorkspace="ws2d_histo_uneven")
         AddTimeSeriesLog(cls.ws2d_histo, Name="my_log", Time="2010-01-01T00:00:00", Value=100)
