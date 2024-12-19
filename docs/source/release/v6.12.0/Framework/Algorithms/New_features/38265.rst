@@ -1,0 +1,1 @@
+- A new property ``AddSpinStateToLog`` was added to :ref:`PolarizationCorrectionFredrikze <algm-PolarizationCorrectionFredrikze>` to give the option to add the final spin state into the sample log of each child workspace in the output group.

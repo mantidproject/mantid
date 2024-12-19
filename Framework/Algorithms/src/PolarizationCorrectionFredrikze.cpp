@@ -30,16 +30,18 @@ static const std::string INPUT_WORKSPACE{"InputWorkspace"};
 static const std::string OUTPUT_WORKSPACE{"OutputWorkspace"};
 static const std::string INPUT_SPIN_STATES("InputSpinStates");
 static const std::string OUTPUT_SPIN_STATES("OutputSpinStates");
+static const std::string ADD_SPIN_STATE_LOG{"AddSpinStateToLog"};
 
 // Default order for PA anaysis
-static const std::vector<std::string> defaultOrderForPA = {
+static const std::vector<std::string> defaultSpinStatesForPA = {
     Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA_PARA,
     Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA_ANTI,
     Mantid::Algorithms::SpinStateConfigurationsFredrikze::ANTI_PARA,
     Mantid::Algorithms::SpinStateConfigurationsFredrikze::ANTI_ANTI};
 // Default order for PNR analysis
-static const std::vector<std::string> defaultOrderForPNR = {Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA,
-                                                            Mantid::Algorithms::SpinStateConfigurationsFredrikze::ANTI};
+static const std::vector<std::string> defaultSpinStatesForPNR = {
+    Mantid::Algorithms::SpinStateConfigurationsFredrikze::PARA,
+    Mantid::Algorithms::SpinStateConfigurationsFredrikze::ANTI};
 
 } // namespace Prop
 
@@ -158,33 +160,53 @@ void validateInputWorkspace(WorkspaceGroup_sptr &ws, const std::string &inputSta
 }
 
 /**
- * Map the input workspaces according to the specified input order.
+ * Map the input workspaces according to the specified input spinStates.
  * @param inWS :: The input WorkspaceGroup.
- * @param order :: The vector of strings representing the order.
+ * @param spinStates :: The vector of strings representing the spinStates.
  * @return A map of spin state to MatrixWorkspace shared pointers.
  */
-std::map<std::string, MatrixWorkspace_sptr> mapOrderToWorkspaces(const WorkspaceGroup_sptr &inWS,
-                                                                 const std::vector<std::string> &order) {
+std::map<std::string, MatrixWorkspace_sptr> mapSpinStatesToWorkspaces(const WorkspaceGroup_sptr &inWS,
+                                                                      const std::vector<std::string> &spinStates) {
   std::map<std::string, MatrixWorkspace_sptr> workspaceMap;
 
-  for (size_t i = 0; i < order.size(); ++i) {
-    workspaceMap[order[i]] = std::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(i));
+  for (size_t i = 0; i < spinStates.size(); ++i) {
+    workspaceMap[spinStates[i]] = std::dynamic_pointer_cast<MatrixWorkspace>(inWS->getItem(i));
   }
 
   return workspaceMap;
 }
 
 /**
- * Map the corrected workspaces to the specified output order.
- * @param workspaces :: The map of spin state to MatrixWorkspace shared pointers.
- * @param order :: The vector of strings representing the output order.
- * @return A WorkspaceGroup with workspaces in the specified order.
+ * Adds a sample log to the workspace that gives the spin state of the data using Reflectometry ORSO notation.
+ * @param ws The workspace to add the sample log to.
+ * @param spinState The spin state the workspace represents.
  */
-WorkspaceGroup_sptr mapWorkspacesToOrder(const std::map<std::string, MatrixWorkspace_sptr> &workspaces,
-                                         const std::vector<std::string> &order) {
+void addSpinStateLogToWs(const Mantid::API::MatrixWorkspace_sptr &ws, const std::string &spinState) {
+  Mantid::Algorithms::SpinStatesORSO::addORSOLogForSpinState(ws, spinState);
+}
+
+/**
+ * Map the corrected workspaces to the specified output spinStates.
+ * @param workspaces :: The map of spin state to MatrixWorkspace shared pointers.
+ * @param spinStates :: The vector of strings representing the output spinStates.
+ * @return A WorkspaceGroup with workspaces in the specified spinStates.
+ */
+WorkspaceGroup_sptr mapWorkspacesToSpinStates(const std::map<std::string, MatrixWorkspace_sptr> &workspaces,
+                                              const std::vector<std::string> &spinStates, const bool addSpinStateLog) {
+
   auto dataOut = std::make_shared<WorkspaceGroup>();
 
-  std::for_each(order.begin(), order.end(), [&](const auto &state) { dataOut->addWorkspace(workspaces.at(state)); });
+  std::for_each(spinStates.begin(), spinStates.end(), [&](const auto &spinState) {
+    // Retrieve the workspace corresponding to the current spin state
+    auto workspace = workspaces.at(spinState);
+
+    dataOut->addWorkspace(workspace);
+
+    if (addSpinStateLog) {
+      // Log the spin state into the sample logs of the current workspace
+      addSpinStateLogToWs(workspace, spinState);
+    }
+  });
 
   return dataOut;
 }
@@ -283,16 +305,21 @@ void PolarizationCorrectionFredrikze::init() {
   declareProperty(Prop::OUTPUT_SPIN_STATES, "", spinStateValidator,
                   "The order of spin states in the output workspace group. The possible values are 'pp,pa,ap,aa' or "
                   "'p,a', in any order.");
+
+  declareProperty(
+      Prop::ADD_SPIN_STATE_LOG, false,
+      "Whether to add the final spin state into the sample log of each child workspace in the output group.");
 }
 
 WorkspaceGroup_sptr PolarizationCorrectionFredrikze::execPA(const WorkspaceGroup_sptr &inWS,
-                                                            const std::vector<std::string> &inputOrder,
-                                                            const std::vector<std::string> &outputOrder) {
+                                                            const std::vector<std::string> &inputSpinStates,
+                                                            const std::vector<std::string> &outputSpinStates,
+                                                            const bool addSpinStateLog) {
 
-  // If the input order vector is empty, use the default order
-  const auto &effectiveInputOrder = inputOrder.empty() ? Prop::defaultOrderForPA : inputOrder;
-  // Map the input workspaces according to the specified input order
-  auto inputMap = mapOrderToWorkspaces(inWS, effectiveInputOrder);
+  // If the input spinStates vector is empty, use the default spinStates.
+  const auto &effectiveInputSpinStates = inputSpinStates.empty() ? Prop::defaultSpinStatesForPA : inputSpinStates;
+  // Map the input workspaces according to the specified input spinStates
+  auto inputMap = mapSpinStatesToWorkspaces(inWS, effectiveInputSpinStates);
 
   MatrixWorkspace_sptr Ipp = inputMap[SpinStateConfigurationsFredrikze::PARA_PARA];
   MatrixWorkspace_sptr Ipa = inputMap[SpinStateConfigurationsFredrikze::PARA_ANTI];
@@ -326,16 +353,16 @@ WorkspaceGroup_sptr PolarizationCorrectionFredrikze::execPA(const WorkspaceGroup
   const auto nIap = (A0 - A1 + A2 + A3 - A4 - A5 + A6 + A7 - A8 - Ipp - Iaa + Ipa + Iap) / D;
   const auto nIpa = (A0 + A1 - A2 - A3 + A4 + A5 - A6 - A7 + A8 - Ipp - Iaa + Ipa + Iap) / D;
 
-  // Map the corrected workspaces to the specified output order
+  // Map the corrected workspaces to the specified output spinStates
   std::map<std::string, MatrixWorkspace_sptr> outputMap;
   outputMap[SpinStateConfigurationsFredrikze::PARA_PARA] = nIpp;
   outputMap[SpinStateConfigurationsFredrikze::PARA_ANTI] = nIpa;
   outputMap[SpinStateConfigurationsFredrikze::ANTI_PARA] = nIap;
   outputMap[SpinStateConfigurationsFredrikze::ANTI_ANTI] = nIaa;
 
-  // If the output order vector is empty, use the default order
-  const auto &effectiveOutputOrder = outputOrder.empty() ? Prop::defaultOrderForPA : outputOrder;
-  auto dataOut = mapWorkspacesToOrder(outputMap, effectiveOutputOrder);
+  // If the output spinStates vector is empty, use the default spinStates
+  const auto &effectiveOutputSpinStates = outputSpinStates.empty() ? Prop::defaultSpinStatesForPA : outputSpinStates;
+  auto dataOut = mapWorkspacesToSpinStates(outputMap, effectiveOutputSpinStates, addSpinStateLog);
 
   size_t totalGroupEntries(dataOut->getNumberOfEntries());
   for (size_t i = 1; i < totalGroupEntries; i++) {
@@ -358,13 +385,14 @@ WorkspaceGroup_sptr PolarizationCorrectionFredrikze::execPA(const WorkspaceGroup
 }
 
 WorkspaceGroup_sptr PolarizationCorrectionFredrikze::execPNR(const WorkspaceGroup_sptr &inWS,
-                                                             const std::vector<std::string> &inputOrder,
-                                                             const std::vector<std::string> &outputOrder) {
+                                                             const std::vector<std::string> &inputSpinStates,
+                                                             const std::vector<std::string> &outputSpinStates,
+                                                             const bool addSpinStateLog) {
 
-  // If the input order vector is empty, use the default order
-  const auto &effectiveInputOrder = inputOrder.empty() ? Prop::defaultOrderForPNR : inputOrder;
-  // Map the input workspaces according to the specified input order
-  auto inputMap = mapOrderToWorkspaces(inWS, effectiveInputOrder);
+  // If the input spinStates vector is empty, use the default spinStates
+  const auto &effectiveInputOrder = inputSpinStates.empty() ? Prop::defaultSpinStatesForPNR : inputSpinStates;
+  // Map the input workspaces according to the specified input spinStates
+  auto inputMap = mapSpinStatesToWorkspaces(inWS, effectiveInputOrder);
 
   MatrixWorkspace_sptr Ip = inputMap[SpinStateConfigurationsFredrikze::PARA];
   MatrixWorkspace_sptr Ia = inputMap[SpinStateConfigurationsFredrikze::ANTI];
@@ -385,9 +413,9 @@ WorkspaceGroup_sptr PolarizationCorrectionFredrikze::execPNR(const WorkspaceGrou
   outputMap[SpinStateConfigurationsFredrikze::PARA] = nIp;
   outputMap[SpinStateConfigurationsFredrikze::ANTI] = nIa;
 
-  // If the output order vector is empty, use the default order
-  const auto &effectiveOutputOrder = outputOrder.empty() ? Prop::defaultOrderForPNR : outputOrder;
-  auto dataOut = mapWorkspacesToOrder(outputMap, effectiveOutputOrder);
+  // If the output order vector is empty, use the default spinStates
+  const auto &effectiveOutputSpinStates = outputSpinStates.empty() ? Prop::defaultSpinStatesForPNR : outputSpinStates;
+  auto dataOut = mapWorkspacesToSpinStates(outputMap, effectiveOutputSpinStates, addSpinStateLog);
 
   return dataOut;
 }
@@ -447,6 +475,7 @@ void PolarizationCorrectionFredrikze::exec() {
 
   const std::string inputStatesStr = getProperty(Prop::INPUT_SPIN_STATES);
   const std::string outputStatesStr = getProperty(Prop::OUTPUT_SPIN_STATES);
+  const bool addSpinStateLog = getProperty(Prop::ADD_SPIN_STATE_LOG);
 
   const auto inputStates = PolarizationCorrectionsHelpers::splitSpinStateString(inputStatesStr);
   const auto outputStates = PolarizationCorrectionsHelpers::splitSpinStateString(outputStatesStr);
@@ -459,12 +488,12 @@ void PolarizationCorrectionFredrikze::exec() {
       throw std::invalid_argument("For PA analysis, input group must have 4 periods.");
     }
     g_log.notice("PA polarization correction");
-    outWS = execPA(inWS, inputStates, outputStates);
+    outWS = execPA(inWS, inputStates, outputStates, addSpinStateLog);
   } else if (analysisMode == PNR_LABEL) {
     if (nWorkspaces != 2) {
       throw std::invalid_argument("For PNR analysis, input group must have 2 periods.");
     }
-    outWS = execPNR(inWS, inputStates, outputStates);
+    outWS = execPNR(inWS, inputStates, outputStates, addSpinStateLog);
     g_log.notice("PNR polarization correction");
   }
 
