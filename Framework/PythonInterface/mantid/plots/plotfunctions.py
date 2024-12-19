@@ -22,53 +22,13 @@ from mantid.api import AnalysisDataService, MatrixWorkspace, WorkspaceGroup
 from mantid.api import IMDHistoWorkspace
 from mantid.kernel import ConfigService
 from mantid.plots import datafunctions, MantidAxes
-from mantid.plots.utility import MantidAxType
+from mantid.plots.utility import MantidAxType, MARKER_MAP, get_plot_specific_properties
 
 # -----------------------------------------------------------------------------
 # Constants
 # -----------------------------------------------------------------------------
 PROJECTION = "mantid"
 
-MARKER_MAP = {
-    "square": "s",
-    "plus (filled)": "P",
-    "point": ".",
-    "tickdown": 3,
-    "triangle_right": ">",
-    "tickup": 2,
-    "hline": "_",
-    "vline": "|",
-    "pentagon": "p",
-    "tri_left": "3",
-    "caretdown": 7,
-    "caretright (centered at base)": 9,
-    "tickright": 1,
-    "caretright": 5,
-    "caretleft": 4,
-    "tickleft": 0,
-    "tri_up": "2",
-    "circle": "o",
-    "pixel": ",",
-    "caretleft (centered at base)": 8,
-    "diamond": "D",
-    "star": "*",
-    "hexagon1": "h",
-    "octagon": "8",
-    "hexagon2": "H",
-    "tri_right": "4",
-    "x (filled)": "X",
-    "thin_diamond": "d",
-    "tri_down": "1",
-    "triangle_left": "<",
-    "plus": "+",
-    "triangle_down": "v",
-    "triangle_up": "^",
-    "x": "x",
-    "caretup": 6,
-    "caretup (centered at base)": 10,
-    "caretdown (centered at base)": 11,
-    "None": "None",
-}
 
 # -----------------------------------------------------------------------------
 # Decorators
@@ -582,23 +542,27 @@ def _set_axes_limits_from_properties(ax):
 
 
 def _do_single_plot(ax, workspaces, errors, set_title, nums, kw, plot_kwargs, log_name=None, log_values=None):
-    # do the plotting
-    plot_fn = ax.errorbar if errors else ax.plot
-
     counter = 0
     for ws in workspaces:
         for num in nums:
+            plot_fn = ax.errorbar if errors else ax.plot
+            if isinstance(ws, MatrixWorkspace):
+                plot_type = ws.getPlotType()
+                _plot_kwargs = get_plot_specific_properties(ws, plot_type, plot_kwargs)
+                if "errorbar" in plot_type or errors:
+                    plot_fn = ax.errorbar
+
             if log_values:
                 label = log_values[counter]
                 if len(nums) > 1:
                     label = f"spec {num}: {label}"
 
-                plot_kwargs["label"] = label
+                _plot_kwargs["label"] = label
 
                 counter += 1
 
-            plot_kwargs[kw] = num
-            plot_fn(ws, **plot_kwargs)
+            _plot_kwargs[kw] = num
+            plot_fn(ws, **_plot_kwargs)
 
     _set_axes_limits_from_properties(ax)
     ax.make_legend()
