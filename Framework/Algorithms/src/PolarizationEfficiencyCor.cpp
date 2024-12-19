@@ -138,7 +138,7 @@ void PolarizationEfficiencyCor::init() {
 
   declareProperty(Prop::ADD_SPIN_STATE_LOG, false,
                   "Whether to add the final spin state into the sample log of each child workspace in the output "
-                  "group. (Wildes method only).");
+                  "group.");
 
   setPropertySettings(
       Prop::OUTPUT_WILDES_SPIN_STATES,
