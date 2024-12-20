@@ -109,6 +109,7 @@ add_dependencies(
   PythonAPIModule
   PythonDataObjectsModule
   PythonCurveFittingModule
+  PythonReflHelpersModule
 )
 
 # Clear any leftover bin/$(Configuration)/mantid/ folder, from when PythonInterface was being copied over. The last
