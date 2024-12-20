@@ -12,6 +12,10 @@ Custom tree model for DNS to store list of scans with files as children.
 import numpy as np
 from qtpy.QtCore import QAbstractItemModel, QModelIndex, Qt
 from mantidqtinterfaces.dns_powder_tof.data_structures.dns_treeitem import DNSTreeItem, TreeItemEnum
+import decimal
+
+
+decimal.getcontext().rounding = decimal.ROUND_HALF_UP
 
 
 class DNSTreeModel(QAbstractItemModel):
@@ -193,8 +197,8 @@ class DNSTreeModel(QAbstractItemModel):
                     n_checked.append(
                         {
                             "file_number": int(item.get_tree_item_data(TreeItemEnum.number.value)),
-                            "det_rot": float(item.get_tree_item_data(TreeItemEnum.det_rot.value)),
-                            "sample_rot": float(item.get_tree_item_data(TreeItemEnum.sample_rot.value)),
+                            "det_rot": float(round(decimal.Decimal(item.get_tree_item_data(TreeItemEnum.det_rot.value)), 1)),
+                            "sample_rot": float(round(decimal.Decimal(item.get_tree_item_data(TreeItemEnum.sample_rot.value)), 1)),
                             "field": item.get_tree_item_data(TreeItemEnum.field.value),
                             "temperature": float(item.get_tree_item_data(TreeItemEnum.temperature.value)),
                             "sample_name": item.get_tree_item_data(TreeItemEnum.sample.value),
