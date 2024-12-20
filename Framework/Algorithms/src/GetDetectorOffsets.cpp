@@ -5,15 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetDetectorOffsets.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/NumericAxis.h"
-#include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/SpectrumInfo.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidAlgorithms/PeakParameterHelper.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
@@ -129,20 +125,20 @@ void GetDetectorOffsets::exec() {
   std::string mode_str = getProperty("OffsetMode");
 
   if (mode_str == "Absolute") {
-    mode = offset_mode::absolute_offset;
+    m_mode = offset_mode::absolute_offset;
   }
 
   else if (mode_str == "Relative") {
-    mode = offset_mode::relative_offset;
+    m_mode = offset_mode::relative_offset;
   }
 
   else if (mode_str == "Signed") {
-    mode = offset_mode::signed_offset;
+    m_mode = offset_mode::signed_offset;
   }
 
   m_dideal = getProperty("DIdeal");
 
-  int64_t nspec = inputW->getNumberHistograms();
+  int64_t nspec = static_cast<int64_t>(inputW->getNumberHistograms());
 
   // Create the output OffsetsWorkspace and initialize it to zero.
   auto outputW = std::make_shared<OffsetsWorkspace>(inputW->getInstrument());
@@ -171,14 +167,14 @@ void GetDetectorOffsets::exec() {
   for (int64_t wi = 0; wi < nspec; ++wi) {
     PARALLEL_START_INTERRUPT_REGION
     // Get the list of detectors in this pixel
-    const auto &dets = inputW->getSpectrum(wi).getDetectorIDs();
+    const auto &dets = inputW->getSpectrum(static_cast<size_t>(wi)).getDetectorIDs();
 
     // If the entire spectrum is already masked, there's nothing to do.
     if (maskWS->isMasked(dets))
       continue;
 
     // Fit the peak
-    double offset = fitSpectra(wi);
+    double offset = fitSpectra(static_cast<size_t>(wi));
     bool spectrumIsMasked = false;
     if (std::abs(offset) > m_maxOffset) {
       g_log.debug() << "[GetDetectorOffsets]: fit failure: offset: " << std::abs(offset)
@@ -239,19 +235,19 @@ void GetDetectorOffsets::exec() {
 //-----------------------------------------------------------------------------------------
 /** Calls Gaussian1D as a child algorithm to fit the offset peak in a spectrum
  *
- *  @param s :: The Workspace Index to fit
+ *  @param wksp_index :: The Workspace Index to fit
  *  @return The calculated offset value
  */
-double GetDetectorOffsets::fitSpectra(const int64_t s) {
-  const double FIT_FAILURE = DBL_MAX;
+double GetDetectorOffsets::fitSpectra(const size_t wksp_index) {
+  constexpr double FIT_FAILURE = DBL_MAX;
 
   // Find point of peak centre
-  const auto &yValues = inputW->y(s);
+  const auto &yValues = inputW->y(wksp_index);
   auto it = std::max_element(yValues.cbegin(), yValues.cend());
 
   // Set the default peak height and location
   double peakHeight = *it;
-  const double peakLoc = inputW->x(s)[it - yValues.begin()];
+  const double peakLoc = inputW->x(wksp_index)[static_cast<size_t>(it - yValues.cbegin())];
 
   // Return if peak of Cross Correlation is nan (Happens when spectra is zero)
   // Pixel with large offset will be masked
@@ -261,7 +257,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
   IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
 
   // Try to observe the peak height and location
-  const auto &histogram = inputW->histogram(s);
+  const auto &histogram = inputW->histogram(wksp_index);
   const auto &vector_x = histogram.points();
   const auto start_index = findXIndex(vector_x, m_Xmin);
   const auto stop_index = findXIndex(vector_x, m_Xmax, start_index);
@@ -273,11 +269,11 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
     int result = estimatePeakParameters(histogram, std::pair<size_t, size_t>(start_index, stop_index), peakFunction,
                                         bkgdFunction, m_estimateFWHM, EstimatePeakWidth::Observation, EMPTY_DBL(), 0.0);
     if (result != PeakFitResult::GOOD) {
-      g_log.debug() << "ws index: " << s
+      g_log.debug() << "ws index: " << wksp_index
                     << "  bad result for estimating peak parameters, using default peak height and loc\n";
     }
   } else {
-    g_log.notice() << "ws index: " << s
+    g_log.notice() << "ws index: " << wksp_index
                    << "  range size is zero when estimating peak parameters, using default peak height and loc\n";
   }
 
@@ -294,7 +290,7 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
 
   fit_alg->setProperty("InputWorkspace", inputW);
   fit_alg->setProperty<int>("WorkspaceIndex",
-                            static_cast<int>(s)); // TODO what is the right thing to do here?
+                            static_cast<int>(wksp_index)); // TODO what is the right thing to do here?
   fit_alg->setProperty("StartX", m_Xmin);
   fit_alg->setProperty("EndX", m_Xmax);
   fit_alg->setProperty("MaxIterations", 100);
@@ -312,21 +308,19 @@ double GetDetectorOffsets::fitSpectra(const int64_t s) {
 
   double offset = function->getParameter(3); // params[3]; // f1.PeakCentre
 
-  if (mode == offset_mode::signed_offset) {
-    // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
-    // negative
+  if (m_mode == offset_mode::signed_offset) {
+    // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be negative
     offset *= -1;
   }
 
   /* offset relative to the reference */
-  else if (mode == offset_mode::relative_offset) {
-    // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
-    // negative
+  else if (m_mode == offset_mode::relative_offset) {
+    // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be negative
     offset = -1. * offset * m_step / (m_dreference + offset * m_step);
   }
 
   /* Offset relative to the ideal */
-  else if (mode == offset_mode::absolute_offset) {
+  else if (m_mode == offset_mode::absolute_offset) {
 
     offset = -1. * offset * m_step / (m_dreference + offset * m_step);
 

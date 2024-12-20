@@ -216,9 +216,7 @@ constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/FindPeakBac
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/FindDetectorsOutsideLimits.h:55
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/InterpolationOption.h:43
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/InterpolationOption.h:44
-uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/GetDetectorOffsets.h:60
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/Logarithm.h:52
-shadowVariable:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GetDetectorOffsets.cpp:148
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/DiscusMultipleScatteringCorrection.h:92
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/GenerateGoniometerIndependentBackground.cpp:189
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/FitPeak.h:67
