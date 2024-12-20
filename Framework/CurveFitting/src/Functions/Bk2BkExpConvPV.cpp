@@ -11,7 +11,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/Functions/Bk2BkExpConvPV.h"
 #include "MantidCurveFitting/SpecialFunctionSupport.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <gsl/gsl_sf_erf.h>

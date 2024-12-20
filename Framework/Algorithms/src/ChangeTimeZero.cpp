@@ -15,7 +15,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DateTimeValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/lexical_cast.hpp>

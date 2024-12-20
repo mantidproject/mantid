@@ -13,7 +13,6 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid::PhysicalConstants;

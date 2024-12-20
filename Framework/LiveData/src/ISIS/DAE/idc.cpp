@@ -15,7 +15,6 @@
 */
 
 #include "idc.h"
-#include "MantidKernel/System.h"
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>

@@ -17,7 +17,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include <algorithm>

@@ -8,7 +8,6 @@
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidKernel/FloatingPointComparison.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 
 #include <cmath>

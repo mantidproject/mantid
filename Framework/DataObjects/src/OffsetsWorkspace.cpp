@@ -10,7 +10,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid::DataObjects {
 // Register the workspace

@@ -21,7 +21,6 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include <Poco/File.h>
 
 using file_holder_type = std::unique_ptr<::NeXus::File>;
