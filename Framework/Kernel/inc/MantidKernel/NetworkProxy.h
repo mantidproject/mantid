@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ProxyInfo.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Kernel {

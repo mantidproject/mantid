@@ -40,7 +40,7 @@ static const size_t MIN_BLOCK_SIZE = 1000;
  *       the T type is done with a reinterpret_cast<T>.
  *
  */
-template <typename T> class DLLExport BinaryFile {
+template <typename T> class MANTID_KERNEL_DLL BinaryFile {
 public:
   //------------------------------------------------------------------------------------
   /// Empty constructor

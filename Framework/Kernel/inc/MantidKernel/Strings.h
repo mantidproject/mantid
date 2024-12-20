@@ -12,7 +12,6 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
-#include "MantidKernel/System.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
@@ -50,7 +49,7 @@ namespace Strings {
  * @return
  */
 template <typename ITERATOR_TYPE>
-DLLExport std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator) {
+MANTID_KERNEL_DLL std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator) {
   std::ostringstream output;
   ITERATOR_TYPE it;
   for (it = begin; it != end;) {
@@ -80,7 +79,7 @@ DLLExport std::string simpleJoin(ITERATOR_TYPE begin, ITERATOR_TYPE end, const s
  * @return
  */
 template <typename ITERATOR_TYPE>
-DLLExport std::string
+MANTID_KERNEL_DLL std::string
 join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
      typename std::enable_if<!(std::is_same<typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
                                             std::random_access_iterator_tag>::value)>::type * = nullptr) {
@@ -107,7 +106,7 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
  * @return
  */
 template <typename ITERATOR_TYPE>
-DLLExport std::string
+MANTID_KERNEL_DLL std::string
 join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
      typename std::enable_if<(std::is_same<typename std::iterator_traits<ITERATOR_TYPE>::iterator_category,
                                            std::random_access_iterator_tag>::value)>::type * = nullptr) {
@@ -193,8 +192,8 @@ join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator,
  * @return A string with contiguous values compressed using the list syntax
  */
 template <typename ITERATOR_TYPE>
-DLLExport std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator = ",",
-                                   const std::string &listSeparator = "-") {
+MANTID_KERNEL_DLL std::string joinCompress(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string &separator = ",",
+                                           const std::string &listSeparator = "-") {
 
   if (begin == end) {
     return "";

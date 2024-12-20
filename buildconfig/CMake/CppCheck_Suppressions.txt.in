@@ -51,7 +51,7 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/AttenuationProfil
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/GitHubApiHelper.h:26
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyWithValue.h:93
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/FacilityInfo.h:48
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Strings.h:170
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Strings.h:169
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:167
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:168
 nullPointerRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/GitHubApiHelper.cpp:169

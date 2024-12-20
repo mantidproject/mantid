@@ -12,7 +12,6 @@
     @author Martyn Gigg, Tessella plc
 */
 #include "MantidKernel/DllConfig.h"
-#include "MantidKernel/System.h"
 
 #include <limits>
 

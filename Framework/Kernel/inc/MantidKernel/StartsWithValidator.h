@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/IValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
 #include <set>
 #include <string>
 #include <vector>
@@ -19,7 +19,7 @@ namespace Kernel {
    start with one
     of the strings in a defined list of possibilities.
 */
-class DLLExport StartsWithValidator : public Kernel::StringListValidator {
+class MANTID_KERNEL_DLL StartsWithValidator : public Kernel::StringListValidator {
 public:
   StartsWithValidator() = default;
   StartsWithValidator(const std::vector<std::string> &values);
