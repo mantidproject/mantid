@@ -23,13 +23,6 @@ from mantid.kernel import funcinspect
 funcreturns = funcinspect
 
 ###############################################################################
-# Do site-specific setup for packages
-###############################################################################
-from mantid.kernel import packagesetup as _mantidsite
-
-_mantidsite.set_NEXUSLIB_var()
-
-###############################################################################
 # Load the C++ library
 ###############################################################################
 from mantid.utils import import_mantid_cext

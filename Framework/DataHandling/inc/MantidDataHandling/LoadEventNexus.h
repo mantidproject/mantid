@@ -30,8 +30,8 @@
 #include <boost/scoped_array.hpp>
 
 // clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexusCpp/NeXusException.hpp"
 // clang-format on
 
 #include <algorithm>

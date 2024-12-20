@@ -8,9 +8,9 @@
 
 #include "MantidAPI/Citation.h"
 #include "MantidFrameworkTestHelpers/NexusTestHelper.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <cxxtest/TestSuite.h>
-#include <nexus/NeXusFile.hpp>
 
 class CitationTest : public CxxTest::TestSuite {
 public:
