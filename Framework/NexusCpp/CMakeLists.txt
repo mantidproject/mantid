@@ -59,7 +59,7 @@ generate_mantid_export_header(NexusCpp FALSE)
 # ######### TESTS
 set(TEST_PREFIX "NexusCppTest")
 
-# #### HDF5
+# #### HDF5 The test doesn't want to work under windows
 add_executable(napi_test_hdf5 EXCLUDE_FROM_ALL test/napi_test.cpp test/napi_test_util.cpp test/napi_test_util.h)
 target_link_libraries(napi_test_hdf5 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-HDF5-test" COMMAND napi_test_hdf5)
