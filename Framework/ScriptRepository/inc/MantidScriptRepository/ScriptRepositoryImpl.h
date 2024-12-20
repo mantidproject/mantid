@@ -100,7 +100,7 @@ public:
   /* Return true if there is a local repository installed*/
   bool isValid() override;
 
-  void setValid(const bool valid) override;
+  bool checkLocalInstallIsPresent();
 
   std::vector<std::string> check4Update() override;
 

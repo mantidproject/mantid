@@ -142,21 +142,8 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent) : MantidDialog(paren
   // stablish the connections.
   connect(ui->repo_treeView, SIGNAL(activated(const QModelIndex &)), this, SLOT(cell_activated(const QModelIndex &)));
   connect(ui->repo_treeView, SIGNAL(currentCell(const QModelIndex &)), this, SLOT(currentChanged(const QModelIndex &)));
-
   const ConfigServiceImpl &config = ConfigService::Instance();
-  const QString loc = QString::fromStdString(config.getString("ScriptLocalRepository"));
-  const QString loc_info = "<html><head/><body><p><a href=\"%1\"><span style=\" "
-                           "text-decoration: underline; "
-                           "color:#0000ff;\">%2</span></a></p></body></html>";
-  QString path_label;
-  if (loc.size() < 50)
-    path_label = loc;
-  else {
-    path_label = QString("%1...%2").arg(loc.left(20)).arg(loc.right(27));
-  }
-
-  ui->folderPathLabel->setText(loc_info.arg(loc).arg(path_label));
-  ui->folderPathLabel->setToolTip(QString("Click here to open Script Repository Folder: %1.").arg(loc));
+  updateLocationString(config.getString("ScriptLocalRepository"));
   connect(ui->folderPathLabel, SIGNAL(linkActivated(QString)), this, SLOT(openFolderLink(QString)));
 }
 
@@ -219,8 +206,25 @@ bool ScriptRepositoryView::chooseLocationAndInstall(Mantid::API::ScriptRepositor
   }
   // attempt to install
   repo_ptr->install(dir.toStdString());
+  updateLocationString(dir.toStdString());
   g_log.information() << "ScriptRepository installed at " << dir.toStdString() << '\n';
   return true;
+}
+
+void ScriptRepositoryView::updateLocationString(const std::string installDir) {
+  const QString loc = QString::fromStdString(installDir);
+  const QString loc_info = "<html><head/><body><p><a href=\"%1\"><span style=\" "
+                           "text-decoration: underline; "
+                           "color:#0000ff;\">%2</span></a></p></body></html>";
+  QString path_label;
+  if (loc.size() < 50)
+    path_label = loc;
+  else {
+    path_label = QString("%1...%2").arg(loc.left(20)).arg(loc.right(27));
+  }
+
+  ui->folderPathLabel->setText(loc_info.arg(loc).arg(path_label));
+  ui->folderPathLabel->setToolTip(QString("Click here to open Script Repository Folder: %1.").arg(loc));
 }
 
 /** This method refreshes the ScriptRepository and allows it

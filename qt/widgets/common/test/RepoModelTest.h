@@ -190,16 +190,6 @@ public:
     }
   }
 
-  void test_repo_ptr_invalidated_on_install_dir_move() {
-    auto repoPath = Mantid::Kernel::ConfigService::Instance().getString("ScriptLocalRepository");
-    auto *model = new RepoModel();
-    const auto differentLocation = std::filesystem::temp_directory_path() / "tempScriptRepo";
-    std::filesystem::copy(repoPath, differentLocation, std::filesystem::copy_options::recursive);
-    std::filesystem::remove_all(repoPath);
-    EXPECT_CALL(scriptRepoMock, setValid(false)).Times(2);
-    std::filesystem::copy(differentLocation, repoPath, std::filesystem::copy_options::recursive);
-  }
-
 private:
   testing::NiceMock<MockScriptRepositoryImpl> scriptRepoMock;
 

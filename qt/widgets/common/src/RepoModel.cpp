@@ -7,7 +7,6 @@
 #include "MantidQtWidgets/Common/RepoModel.h"
 
 #include "MantidAPI/ScriptRepositoryFactory.h"
-#include <filesystem>
 #include <utility>
 #include <vector>
 
@@ -162,9 +161,6 @@ RepoModel::RepoModel(QObject *parent) : QAbstractItemModel(parent) {
   repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
   connect(&download_watcher, SIGNAL(finished()), this, SLOT(downloadFinished()));
   connect(&upload_watcher, SIGNAL(finished()), this, SLOT(uploadFinished()));
-  connect(&m_repoJsonFileWatcher, SIGNAL(fileChanged(const QString &)), this,
-          SLOT(repoJsonFileChanged(const QString &)));
-  addFilesToWatcher();
   uploading_path = nofile_flag;
   downloading_path = nofile_flag;
   setupModelData(rootItem);
@@ -876,14 +872,6 @@ void RepoModel::handleExceptions(const Mantid::API::ScriptRepoException &ex, con
   }
 }
 
-void RepoModel::addFilesToWatcher() {
-  const auto baseRepoPath = repo_ptr->localRepository();
-  const auto localJsonPath = baseRepoPath + "/.local.json";
-  const auto localRepositoryPath = baseRepoPath + "/.repository.json";
-  QStringList filesToWatch = {QString::fromStdString(localJsonPath), QString::fromStdString(localRepositoryPath)};
-  m_repoJsonFileWatcher.addPaths(filesToWatch);
-}
-
 void RepoModel::downloadFinished(void) {
   QString info = download_threads.result();
   if (!info.isEmpty()) {
@@ -931,11 +919,6 @@ bool RepoModel::isUploading(const QModelIndex &index) const {
   if (item)
     return item->path() == uploading_path;
   return false;
-}
-
-void RepoModel::repoJsonFileChanged(const QString &path) {
-  const auto fs_path = std::filesystem::path(path.toStdString());
-  repo_ptr->setValid(std::filesystem::exists(fs_path));
 }
 
 /// @return string to define the LOCAL_ONLY state

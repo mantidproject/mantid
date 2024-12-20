@@ -28,7 +28,6 @@ public:
   MOCK_METHOD4(remove, void(const std::string &, const std::string &, const std::string &, const std::string &));
   MOCK_METHOD1(setIgnorePatterns, void(const std::string &));
   MOCK_METHOD0(ignorePatterns, std::string());
-  MOCK_METHOD1(setValid, void(const bool));
 
   ScriptInfo info(const std::string &path) {
     ScriptInfo info;

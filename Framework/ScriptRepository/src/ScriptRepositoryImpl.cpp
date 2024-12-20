@@ -14,6 +14,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
+#include <filesystem>
 #include <unordered_set>
 #include <utility>
 
@@ -1154,9 +1155,21 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(const std::string &url, con
 
  An invalid repository accepts only the ::install method.
  */
-bool ScriptRepositoryImpl::isValid() { return m_valid; }
+bool ScriptRepositoryImpl::isValid() {
+  if (!checkLocalInstallIsPresent()) {
+    m_valid = false;
+  };
+  return m_valid;
+}
 
-void ScriptRepositoryImpl::setValid(const bool valid) { m_valid = valid; }
+bool ScriptRepositoryImpl::checkLocalInstallIsPresent() {
+  const auto local_json = std::filesystem::path(local_repository) / ".local.json";
+  const auto repository_json = std::filesystem::path(local_repository) / ".repository.json";
+  if (!std::filesystem::exists(local_json) || !std::filesystem::exists(repository_json)) {
+    return false;
+  }
+  return true;
+}
 
 /**
  * Implements ScriptRepository::check4Update. It downloads the file
