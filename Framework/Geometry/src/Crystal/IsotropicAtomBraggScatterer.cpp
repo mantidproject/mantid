@@ -41,7 +41,7 @@ void IsotropicAtomBraggScatterer::setElement(const std::string &element) {
   PhysicalConstants::Atom atom = PhysicalConstants::getAtom(element);
 
   m_atom = atom.neutron;
-  m_label = atom.symbol;
+  m_label = element;
 }
 
 /// Returns the string representation of the contained element.

@@ -44,7 +44,7 @@ public:
   void onSectionSelectorModified(int index) override;
 
   /// Subscribe to updates on changes to the corrected data.
-  void subscribe(IALCBaselineModellingPresenterSubscriber *subscriber);
+  void setSubscriber(IALCBaselineModellingPresenterSubscriber *subscriber);
 
   /// Updates data curve from the model
   void updateDataCurve();

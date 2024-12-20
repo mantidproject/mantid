@@ -55,7 +55,7 @@ The project has more detiled instructions, but in general
 
 .. code-block:: sh
 
-   python path/to/myscript.py & python path/to/mantid-profiler/mantid-profiler.py $!
+   python path/to/myscript.py & mantidprofiler $!
 
 The ``&`` puts the python process in the background.
 The ``$!`` is the process-id (PID) of the last process run and allows mantid-profiler to attach to the process.
@@ -65,6 +65,6 @@ Related Documentation
 
 - `mantid.api.AlgoTimeRegister <https://docs.mantidproject.org/api/python/mantid/api/AlgoTimeRegister.html>`_ discusses how timing is measured.
 
-- `The mantid-profiler README <https://developer.mantidproject.org/AlgorithmProfiler.html>`_ provides an overview of how to tool is used.
+- `The mantid-profiler README <https://github.com/mantidproject/mantid-profiler>`_ provides an overview of how to tool is used.
 
 - `Relevant properties file configurations <https://docs.mantidproject.org/concepts/PropertiesFile.html#algorithm-profiling-settings>`_.

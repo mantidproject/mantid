@@ -34,6 +34,7 @@ set(EXPORT_FILES
     src/Exports/PeakShapeSpherical.cpp
     src/Exports/PeakShapeEllipsoid.cpp
     src/Exports/WorkspaceValidators.cpp
+    src/Exports/PeakShapeDetectorBin.cpp
 )
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/dataobjects.cpp)

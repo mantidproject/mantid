@@ -29,7 +29,6 @@
 #include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/SetMDFrame.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>

@@ -40,6 +40,7 @@ private:
   void loadProperties();
   void saveProperties();
   QListWidget *listWidget(QObject *object);
+  void moveItem(bool toTop, int offset);
 
 private slots:
   void helpClicked();
@@ -48,6 +49,7 @@ private slots:
   void addDirectory();
   void browseToDirectory();
   void remDir();
+  void moveToTop();
   void moveUp();
   void moveDown();
   void selectSaveDir();

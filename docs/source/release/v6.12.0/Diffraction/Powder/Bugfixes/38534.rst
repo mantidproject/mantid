@@ -1,0 +1,1 @@
+- Fix the issue with the :ref:`InterpolateBackground <algm-InterpolateBackground>` algorithm.

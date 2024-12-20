@@ -8,7 +8,6 @@
 
 #include "MantidGeometry/Instrument/XMLInstrumentParameter.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"

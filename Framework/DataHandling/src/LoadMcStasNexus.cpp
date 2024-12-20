@@ -97,7 +97,7 @@ void LoadMcStasNexus::exec() {
       // Find the axis names
       auto nxdataEntries = nxFile.getEntries();
       std::string axis1Name, axis2Name;
-      for (auto &nxdataEntry : nxdataEntries) {
+      for (const auto &nxdataEntry : nxdataEntries) {
         if (nxdataEntry.second == "NXparameters")
           continue;
         nxFile.openData(nxdataEntry.first);

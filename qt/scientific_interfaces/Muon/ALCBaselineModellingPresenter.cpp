@@ -23,7 +23,7 @@ void ALCBaselineModellingPresenter::initialize() {
   m_view->subscribePresenter(this);
 }
 
-void ALCBaselineModellingPresenter::subscribe(IALCBaselineModellingPresenterSubscriber *subscriber) {
+void ALCBaselineModellingPresenter::setSubscriber(IALCBaselineModellingPresenterSubscriber *subscriber) {
   m_subscriber = subscriber;
 }
 

@@ -11,7 +11,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidFrameworkTestHelpers/FacilityHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidLiveData/LiveDataAlgorithm.h"
 #include <cxxtest/TestSuite.h>

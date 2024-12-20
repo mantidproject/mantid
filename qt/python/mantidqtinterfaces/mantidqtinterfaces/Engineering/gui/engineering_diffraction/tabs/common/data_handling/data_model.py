@@ -246,7 +246,7 @@ class FittingDataModel(object):
     # =================
 
     def get_sample_log_from_ws(self, ws_name, log_name):
-        return self._data_workspaces[ws_name].loaded_ws.getSampleDetails().getLogData(log_name).value
+        return self._data_workspaces[ws_name].loaded_ws.getRun().getLogData(log_name).value
 
     def get_all_log_workspaces_names(self):
         return (

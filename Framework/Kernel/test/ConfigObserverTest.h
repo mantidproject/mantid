@@ -8,7 +8,6 @@
 
 #include "MantidKernel/ConfigObserver.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/System.h"
 
 #include <cxxtest/TestSuite.h>
 

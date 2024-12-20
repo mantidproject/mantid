@@ -12,7 +12,6 @@
 #include "MantidGeometry/Surfaces/Torus.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 
 using namespace Mantid;

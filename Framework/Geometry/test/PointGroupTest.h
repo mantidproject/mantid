@@ -13,7 +13,6 @@
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <boost/lexical_cast.hpp>
 using namespace Mantid;
