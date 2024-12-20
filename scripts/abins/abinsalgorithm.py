@@ -7,10 +7,13 @@
 
 # Supporting functions for the Abins Algorithm that don't belong in
 # another part of AbinsModules.
+import dataclasses
+from functools import cached_property
+from math import isnan
 import os
 from pathlib import Path
 import re
-from typing import Dict, Iterable, List, Optional, Tuple, Union
+from typing import Dict, Iterable, List, Literal, Tuple, Union
 
 import yaml
 
@@ -24,10 +27,66 @@ from mantid.api import mtd, FileAction, FileProperty, WorkspaceGroup, WorkspaceP
 from mantid.kernel import Atom, Direction, StringListValidator, StringArrayProperty, logger
 from mantid.simpleapi import CloneWorkspace, SaveAscii, Scale
 
-import abins
 from abins.constants import AB_INITIO_FILE_EXTENSIONS, ALL_INSTRUMENTS, ATOM_PREFIX
 from abins.input.jsonloader import abins_supported_json_formats, JSONLoader
 from abins.instruments import get_instrument, Instrument
+import abins.parameters
+
+
+@dataclasses.dataclass
+class AtomInfo:
+    symbol: str
+    mass: float
+
+    @cached_property
+    def name(self):
+        if self.nucleons_number:
+            return f"{self.nucleons_number}{self.symbol}"
+        return self.symbol
+
+    @property
+    def z_number(self):
+        return self._mantid_atom.z_number
+
+    @property
+    def nucleons_number(self):
+        return self._mantid_atom.a_number
+
+    @cached_property
+    def neutron_data(self):
+        return self._mantid_atom.neutron()
+
+    @cached_property
+    def _mantid_atom(self):
+        from abins.constants import MASS_EPS
+
+        nearest_int = int(round(self.mass))
+        nearest_isotope = Atom(symbol=self.symbol, a_number=nearest_int)
+        standard_mix = Atom(symbol=self.symbol)
+
+        if abs(nearest_isotope.mass - standard_mix.mass) < 1e-12:
+            # items are the same: standard mix is more likely to contain data
+            # (e.g. Atom('F', 19) has no neutron data but Atom('F') does)
+            return standard_mix
+
+        if abs(self.mass - standard_mix.mass) < abs(self.mass - nearest_isotope.mass):
+            # Standard isotopic mixture, data should be available
+            return standard_mix
+
+        if isnan(nearest_isotope.neutron().get("coh_scatt_length_real")):
+            logger.warning(
+                f"Nearest isotope to atomic mass {self.mass} is "
+                f"{nearest_int}{self.symbol}{nearest_isotope.z_number}, but "
+                f"neutron-scattering data is not available."
+            )
+
+            if abs(self.mass - standard_mix.mass) > MASS_EPS:
+                raise ValueError(f"Could not find suitable isotope data for {self.symbol} with mass {self.mass}.")
+
+            logger.warning(f"Standard mass {standard_mix.mass} is close enough, will " f"use data for this isotope mixture.")
+            return standard_mix
+
+        return nearest_isotope
 
 
 class AbinsAlgorithm:
@@ -397,7 +456,7 @@ class AbinsAlgorithm:
 
         :returns: workspaces for list of atoms types, S for the particular type of atom
         """
-        from abins.constants import FLOAT_TYPE, MASS_EPS, ONLY_ONE_MASS
+        from abins.constants import FLOAT_TYPE
 
         # Create appropriately-shaped arrays to be used in-place by _atom_type_s - avoid repeated slow instantiation
         shape = [max_quantum_order]
@@ -412,7 +471,6 @@ class AbinsAlgorithm:
 
         if atoms_symbols is not None:
             for symbol in atoms_symbols:
-                sub = len(masses[symbol]) > ONLY_ONE_MASS or abs(Atom(symbol=symbol).mass - masses[symbol][0]) > MASS_EPS
                 for m in masses[symbol]:
                     result.extend(
                         self._atom_type_s(
@@ -423,7 +481,6 @@ class AbinsAlgorithm:
                             element_symbol=symbol,
                             temp_s_atom_data=temp_s_atom_data,
                             s_atom_data=s_atom_data,
-                            substitution=sub,
                         )
                     )
         if atom_numbers is not None:
@@ -431,22 +488,26 @@ class AbinsAlgorithm:
                 result.extend(self._atom_number_s(atom_number=atom_number, s_data=s_data, s_atom_data=s_atom_data, atoms_data=atoms_data))
         return result
 
-    def _create_workspace(self, atom_name=None, s_points=None, optional_name="", protons_number=None, nucleons_number=None):
+    def _create_workspace(self, *, species: AtomInfo, s_points: np.ndarray, label: str | None = None):
         """
         Creates workspace for the given frequencies and s_points with S data. After workspace is created it is rebined,
         scaled by cross-section factor and optionally multiplied by the user defined scaling factor.
 
 
-        :param atom_name: symbol of atom for which workspace should be created
+        :param species: Object identifying isotope (or mixture)
         :param s_points: S(Q, omega)
-        :param optional_name: optional part of workspace name
+        :param label: species-specific part of workspace name. If None, take from species object.
         :returns: workspace for the given frequency and S data
-        :param protons_number: number of protons in the given type fo atom
-        :param nucleons_number: number of nucleons in the given type of atom
         """
 
-        ws_name = self._out_ws_name + "_" + atom_name + optional_name
-        self._fill_s_workspace(s_points=s_points, workspace=ws_name, protons_number=protons_number, nucleons_number=nucleons_number)
+        label = species.name if label is None else label
+
+        ws_name = self._out_ws_name + "_" + label
+        self._fill_s_workspace(
+            species=species,
+            s_points=s_points,
+            workspace=ws_name,
+        )
         return ws_name
 
     def _atom_number_s(self, *, atom_number, s_data, s_atom_data, atoms_data):
@@ -474,8 +535,8 @@ class AbinsAlgorithm:
         atom_workspaces = []
         s_atom_data.fill(0.0)
         output_atom_label = "%s_%d" % (ATOM_PREFIX, atom_number)
-        symbol = atoms_data[atom_number - 1]["symbol"]
-        z_number = Atom(symbol=symbol).z_number
+        atom_data = atoms_data[atom_number - 1]
+        species = AtomInfo(symbol=atom_data["symbol"], mass=atom_data["mass"])
 
         for i, order in enumerate(range(FUNDAMENTALS, self._max_event_order + 1)):
             s_atom_data[i] = s_data[atom_number - 1]["order_%s" % order]
@@ -485,10 +546,12 @@ class AbinsAlgorithm:
         atom_workspaces = []
         atom_workspaces.append(
             self._create_workspace(
-                atom_name=output_atom_label, s_points=np.copy(total_s_atom_data), optional_name="_total", protons_number=z_number
+                species=species,
+                s_points=np.copy(total_s_atom_data),
+                label=output_atom_label + "_total",
             )
         )
-        atom_workspaces.append(self._create_workspace(atom_name=output_atom_label, s_points=np.copy(s_atom_data), protons_number=z_number))
+        atom_workspaces.append(self._create_workspace(species=species, s_points=np.copy(s_atom_data), label=output_atom_label))
         return atom_workspaces
 
     def _atom_type_s(
@@ -500,7 +563,6 @@ class AbinsAlgorithm:
         element_symbol=None,
         temp_s_atom_data=None,
         s_atom_data=None,
-        substitution=None,
     ):
         """
         Helper function for calculating S for the given type of atom
@@ -515,17 +577,17 @@ class AbinsAlgorithm:
             information but is used in-place to save on time instantiating large arrays.
         :param s_atom_data: helper array to accumulate S (outer loop over atoms); does not transport
             information but is used in-place to save on time instantiating large arrays.
-        :param substitution: True if isotope substitution and False otherwise
         """
-        from abins.constants import MASS_EPS
+        from abins.constants import FINE_MASS_EPS
 
         atom_workspaces = []
         s_atom_data.fill(0.0)
 
-        element = Atom(symbol=element_symbol)
+        species = AtomInfo(symbol=element_symbol, mass=mass)
 
         for atom_index in range(num_atoms):
-            if atoms_data[atom_index]["symbol"] == element_symbol and abs(atoms_data[atom_index]["mass"] - mass) < MASS_EPS:
+            # TODO this mass_eps could be smaller, we are checking against known masses from data
+            if atoms_data[atom_index]["symbol"] == element_symbol and abs(atoms_data[atom_index]["mass"] - mass) < FINE_MASS_EPS:
                 temp_s_atom_data.fill(0.0)
 
                 for order in range(1, self._max_event_order + 1):
@@ -537,35 +599,19 @@ class AbinsAlgorithm:
 
         total_s_atom_data = np.sum(s_atom_data, axis=0)
 
-        nucleons_number = int(round(mass))
-
-        if substitution:
-            atom_workspaces.append(
-                self._create_workspace(
-                    atom_name=str(nucleons_number) + element_symbol,
-                    s_points=np.copy(total_s_atom_data),
-                    optional_name="_total",
-                    protons_number=element.z_number,
-                    nucleons_number=nucleons_number,
-                )
+        atom_workspaces.append(
+            self._create_workspace(
+                species=species,
+                s_points=np.copy(total_s_atom_data),
+                label=f"{species.name}_total",
             )
-            atom_workspaces.append(
-                self._create_workspace(
-                    atom_name=str(nucleons_number) + element_symbol,
-                    s_points=np.copy(s_atom_data),
-                    protons_number=element.z_number,
-                    nucleons_number=nucleons_number,
-                )
+        )
+        atom_workspaces.append(
+            self._create_workspace(
+                species=species,
+                s_points=np.copy(s_atom_data),
             )
-        else:
-            atom_workspaces.append(
-                self._create_workspace(
-                    atom_name=element_symbol, s_points=np.copy(total_s_atom_data), optional_name="_total", protons_number=element.z_number
-                )
-            )
-            atom_workspaces.append(
-                self._create_workspace(atom_name=element_symbol, s_points=np.copy(s_atom_data), protons_number=element.z_number)
-            )
+        )
 
         return atom_workspaces
 
@@ -616,7 +662,7 @@ class AbinsAlgorithm:
                         s_atoms[:, i] += mtd[partial_ws].dataY(i)
 
             # create workspace with S
-            self._fill_s_workspace(s_atoms, total_workspace)
+            self._fill_s_workspace(s_points=s_atoms, workspace=total_workspace)
 
         # # Otherwise just repackage the workspace we have as the total
         else:
@@ -642,26 +688,20 @@ class AbinsAlgorithm:
             )
 
     @staticmethod
-    def get_cross_section(scattering: str = "Total", nucleons_number: Optional[int] = None, *, protons_number: int) -> float:
+    def get_cross_section(scattering: Literal["Total", "Incoherent", "Coherent"], species: AtomInfo) -> float:
         """
         Calculates cross section for the given element.
         :param scattering: Type of cross-section: 'Incoherent', 'Coherent' or 'Total'
-        :param protons_number: number of protons in the given type fo atom
-        :param nucleons_number: number of nucleons in the given type of atom
+        :param species: Data for atom/isotope type
         :returns: cross section for that element
         """
-        if nucleons_number is not None:
-            try:
-                atom = Atom(a_number=nucleons_number, z_number=protons_number)
-            # isotopes are not implemented for all elements so use different constructor in that cases
-            except RuntimeError:
-                logger.warning(f"Could not find data for isotope {nucleons_number}, " f"using default values for {protons_number} protons.")
-                atom = Atom(z_number=protons_number)
-        else:
-            atom = Atom(z_number=protons_number)
-
         scattering_keys = {"Incoherent": "inc_scatt_xs", "Coherent": "coh_scatt_xs", "Total": "tot_scatt_xs"}
-        return atom.neutron()[scattering_keys[scattering]]
+        cross_section = species.neutron_data[scattering_keys[scattering]]
+
+        if isnan(cross_section):
+            raise ValueError(f"Found NaN cross-section for {species.symbol} with {species.nucleons_number} nucleons.")
+
+        return cross_section
 
     @staticmethod
     def set_workspace_units(wrk, layout="1D", energy_units="cm-1"):
