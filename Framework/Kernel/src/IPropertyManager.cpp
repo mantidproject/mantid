@@ -33,11 +33,11 @@ namespace Mantid::Kernel {
 // assign to an existing string
 // via the getProperty() method, you can construct a local variable by saying,
 // e.g.: std::string s = getProperty("myProperty")
-template <> DLLExport std::string IPropertyManager::getValue<std::string>(const std::string &name) const {
+template <> MANTID_KERNEL_DLL std::string IPropertyManager::getValue<std::string>(const std::string &name) const {
   return getPropertyValue(name);
 }
 
-template <> DLLExport Property *IPropertyManager::getValue<Property *>(const std::string &name) const {
+template <> MANTID_KERNEL_DLL Property *IPropertyManager::getValue<Property *>(const std::string &name) const {
   return getPointerToProperty(name);
 }
 

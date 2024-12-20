@@ -7,7 +7,7 @@
 #pragma once
 
 #include "MantidKernel/Chainable.h"
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include <memory>
 #include <stdexcept>
 
@@ -17,7 +17,7 @@ namespace Kernel {
 /** ChainableFactory : Chain of Responsiblity generic factory
  */
 template <typename Factory, typename Product, typename Argument>
-class DLLExport ChainableFactory : public Chainable<Factory> {
+class MANTID_KERNEL_DLL ChainableFactory : public Chainable<Factory> {
 public:
   /**
    * Factory method wrapper. Wraps results in smart pointer.

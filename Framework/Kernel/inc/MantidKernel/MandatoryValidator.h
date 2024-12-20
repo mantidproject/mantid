@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Kernel {
 namespace Detail {
 /// Forward declare checking function
-template <typename T> DLLExport bool checkIsEmpty(const T &);
+template <typename T> MANTID_KERNEL_DLL bool checkIsEmpty(const T &);
 
 /// Specialization for any vector type
 template <typename T> bool checkIsEmpty(const std::vector<T> &value) { return value.empty(); }
@@ -40,7 +40,7 @@ template <typename T> struct IsEmpty {
     @author Nick Draper, Tessella Support Services plc
     @date 28/11/2007
 */
-template <typename TYPE> class DLLExport MandatoryValidator : public TypedValidator<TYPE> {
+template <typename TYPE> class MANTID_KERNEL_DLL MandatoryValidator : public TypedValidator<TYPE> {
 public:
   IValidator_sptr clone() const override { return std::make_shared<MandatoryValidator>(); }
 

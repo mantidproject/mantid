@@ -22,7 +22,7 @@ directly.
 
 A specialised type exists for std::shared_ptr types
  */
-template <typename HeldType> class DLLExport TypedValidator : public IValidator {
+template <typename HeldType> class MANTID_KERNEL_DLL TypedValidator : public IValidator {
 protected:
   /// Override this function to check the validity of the type
   virtual std::string checkValidity(const HeldType &) const = 0;
@@ -56,7 +56,8 @@ private:
  * The advantage of this is that Validator types then don't have to match
  * their types exactly.
  */
-template <typename ElementType> class DLLExport TypedValidator<std::shared_ptr<ElementType>> : public IValidator {
+template <typename ElementType>
+class MANTID_KERNEL_DLL TypedValidator<std::shared_ptr<ElementType>> : public IValidator {
   /// Shared ptr type
   using ElementType_sptr = std::shared_ptr<ElementType>;
 

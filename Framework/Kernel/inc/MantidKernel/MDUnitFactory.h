@@ -9,7 +9,6 @@
 #include "MantidKernel/ChainableFactory.h"
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MDUnit.h"
-#include "MantidKernel/System.h"
 #include <memory>
 
 namespace Mantid {

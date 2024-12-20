@@ -20,7 +20,7 @@ to extract the parameter type and then pass it to the vaildtor function.
 The function used for validation should accept one parameter, the variable to be validated,
 and returns an error string (empty string for no error).
  */
-template <typename ParamType> class DLLExport LambdaValidator : public TypedValidator<ParamType> {
+template <typename ParamType> class MANTID_KERNEL_DLL LambdaValidator : public TypedValidator<ParamType> {
   using ValidatorFunction = std::function<std::string(ParamType)>;
 
 public:
