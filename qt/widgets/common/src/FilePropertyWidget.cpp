@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FilePropertyWidget.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/System.h"
+
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
 

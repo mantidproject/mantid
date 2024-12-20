@@ -16,7 +16,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>

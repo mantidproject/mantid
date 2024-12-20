@@ -10,7 +10,6 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

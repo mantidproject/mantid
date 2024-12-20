@@ -10,7 +10,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
+
 #include "MantidKernel/TimeSeriesProperty.h"
 
 using namespace Mantid::Kernel;

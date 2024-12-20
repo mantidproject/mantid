@@ -11,7 +11,6 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include <sstream>
 #include <utility>
 

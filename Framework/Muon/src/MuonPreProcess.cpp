@@ -20,7 +20,6 @@
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/System.h"
 
 #include "MantidMuon/MuonAlgorithmHelper.h"
 

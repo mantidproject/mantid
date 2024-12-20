@@ -19,7 +19,6 @@
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/algorithm/string/erase.hpp>
