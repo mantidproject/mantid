@@ -189,7 +189,7 @@ class IPeakTest(unittest.TestCase):
         self.assertEqual(self._peak.getPeakShape().shapeName(), "none")
 
         self._peak.setPeakShape(detector_bin)
-        self.assertEqual(self._peak.getPeakShape().shapeName(), "PeakShapeDetectorBin")
+        self.assertEqual(self._peak.getPeakShape().shapeName(), "detectorbin")
         self.assertEqual(self._peak.getPeakShape().algorithmVersion(), 1)
         self.assertEqual(self._peak.getPeakShape().algorithmName(), "test")
         det_bin_dict = json.loads(self._peak.getPeakShape().toJSON())
