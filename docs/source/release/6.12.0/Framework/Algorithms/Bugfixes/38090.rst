@@ -1,0 +1,1 @@
+- :ref:`ConjoinWorkspaces <algm-ConjoinWorkspaces>` has been updated to check for mismatched bins before conjoining the input workspaces.

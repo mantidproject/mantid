@@ -74,7 +74,7 @@ class MatchAndMergeWorkspacesTest(unittest.TestCase):
         x_min = np.array([2, 5, 10, 15, 20])
         x_max = np.array([10, 20, 30, 40, 45])
         ws_group = AnalysisDataService.retrieve("ws_group")
-        ConjoinWorkspaces(InputWorkspace1=ws_group[3], InputWorkspace2=ws_group[4], CheckOverlapping=False)
+        ConjoinWorkspaces(InputWorkspace1=ws_group[3], InputWorkspace2=ws_group[4], CheckOverlapping=False, CheckMatchingBins=False)
         ws_list = [ws_group[0], ws_group[1], ws_group[2], ws_group[3]]
         ws_merged = MatchAndMergeWorkspaces(InputWorkspaces=ws_list, XMin=x_min, XMax=x_max)
         self.assertIsInstance(ws_merged, MatrixWorkspace)

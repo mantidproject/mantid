@@ -130,7 +130,7 @@ void CalculateTransmission::exec() {
   const bool usingSameInstrument = sampleWS->getInstrument()->getName() == directWS->getInstrument()->getName();
   if (!usingSameInstrument)
     throw std::invalid_argument("The input workspaces do not come from the same instrument.");
-  if (!WorkspaceHelpers::matchingBins(*sampleWS, *directWS))
+  if (!WorkspaceHelpers::matchingBins(sampleWS, directWS))
     throw std::invalid_argument("The input workspaces do not have matching bins.");
 
   bool usingMonitor = !isEmpty(transMonitorID);
