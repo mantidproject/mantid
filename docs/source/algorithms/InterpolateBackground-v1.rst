@@ -20,9 +20,8 @@ Below is the function used for the interpolation:
 
 .. math::
 
-    factor1 = (temp_{interpo} - temp_{low}) / (temp_{high} - temp_{low})
-    factor2 = (temp_{high} - temp_{interpo}) / (temp_{high} - temp_{low})
-    WS_{interpolated} = WS_{high} * factor1 + WS_{low} * factor2
+    factor = (temp_{interpo} - temp_{low}) / (temp_{high} - temp_{low})
+    WS_{interpolated} = WS_{high} * factor + WS_{low} * (1 - factor)
 
 where :math:`WS_{low}` and :math:`WS_{high}` are the workspaces containing the run data, :math:`temp_{low}` and
 :math:`temp_{high}` are the two extreme temperatures the empty containers were measured at, and
