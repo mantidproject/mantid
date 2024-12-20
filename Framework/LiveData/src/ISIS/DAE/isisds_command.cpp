@@ -31,7 +31,6 @@
 
 #include "isisds_command.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/System.h"
 #include <cstdio>
 
 /*

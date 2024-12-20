@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/TextPropertyWidget.h"
 #include "MantidKernel/MaskedProperty.h"
-#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 

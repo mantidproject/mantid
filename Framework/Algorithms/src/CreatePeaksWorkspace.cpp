@@ -12,7 +12,6 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid::Algorithms {
 

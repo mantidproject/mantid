@@ -11,7 +11,6 @@
 #include "MantidAPI/NotebookBuilder.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
 
 #include <fstream>
 

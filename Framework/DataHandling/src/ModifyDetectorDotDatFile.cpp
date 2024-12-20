@@ -12,7 +12,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/System.h"
 #include <fstream>
 
 using namespace Mantid::Kernel;

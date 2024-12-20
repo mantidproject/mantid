@@ -18,7 +18,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 
 #include <fstream>
 #include <map>

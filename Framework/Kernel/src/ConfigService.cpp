@@ -19,7 +19,6 @@
 #include "MantidKernel/StdoutChannel.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/Channel.h>

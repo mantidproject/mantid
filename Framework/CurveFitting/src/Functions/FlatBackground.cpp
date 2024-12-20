@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/FlatBackground.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 

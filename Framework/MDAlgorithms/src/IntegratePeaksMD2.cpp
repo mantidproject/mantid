@@ -34,7 +34,6 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/SetValueWhenProperty.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidMDAlgorithms/GSLFunctions.h"

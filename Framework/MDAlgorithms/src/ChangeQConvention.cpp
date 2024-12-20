@@ -19,7 +19,6 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 #include <Poco/File.h>
 
 using namespace Mantid::Kernel;

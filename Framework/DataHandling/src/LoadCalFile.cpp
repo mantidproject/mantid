@@ -16,7 +16,6 @@
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/OptionalBool.h"
-#include "MantidKernel/System.h"
 #include <Poco/Path.h>
 #include <fstream>
 

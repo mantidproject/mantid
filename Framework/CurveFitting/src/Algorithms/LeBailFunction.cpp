@@ -11,7 +11,6 @@
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
-#include "MantidKernel/System.h"
 
 #include <sstream>
 #include <utility>

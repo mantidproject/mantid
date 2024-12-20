@@ -10,7 +10,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/System.h"
 
 #include <algorithm>
 
