@@ -9,4 +9,5 @@
 class POLARIS_CHOPPER_MODES(object):
     enum_friendly_name = "Polaris chopper modes"
     PDF = "PDF"
+    PDF_NORM = "PDF_NORM"
     Rietveld = "Rietveld"
