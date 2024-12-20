@@ -116,7 +116,7 @@ class CreateVanadiumPerDetectorTest(systemtesting.MantidSystemTest):
             config["datasearch.directories"] = self.existing_config
 
 
-class FocusTestNoAbsorption(systemtesting.MantidSystemTest):
+class FocusTestNoAbsorptionWithRelativeNormalisation(systemtesting.MantidSystemTest):
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -126,7 +126,7 @@ class FocusTestNoAbsorption(systemtesting.MantidSystemTest):
     def runTest(self):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus_no_absorption()
+        self.focus_results = run_focus_no_absorption(mode="PDF")
 
     def validate(self):
         # check output files as expected
@@ -149,6 +149,49 @@ class FocusTestNoAbsorption(systemtesting.MantidSystemTest):
         self.tolerance_is_rel_err = True
         self.tolerance = 1e-6
         return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config["datasearch.directories"] = self.existing_config
+
+
+class FocusTestNoAbsorptionWithAbsoluteNormalisation(systemtesting.MantidSystemTest):
+    focus_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        self.focus_results = run_focus_no_absorption(mode="PDF_NORM")
+
+    def validate(self):
+        # check output files as expected
+        def generate_error_message(expected_file, output_dir):
+            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
+
+        def assert_output_file_exists(directory, filename):
+            self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
+
+        user_output = os.path.join(output_dir, "17_1", "Test")
+        assert_output_file_exists(user_output, "POLARIS98534.nxs")
+        assert_output_file_exists(user_output, "POLARIS98534.gsas")
+        output_dat_dir = os.path.join(user_output, "dat_files")
+        for bankno in range(1, 6):
+            assert_output_file_exists(output_dat_dir, "POL98534-b_{}-TOF.dat".format(bankno))
+            assert_output_file_exists(output_dat_dir, "POL98534-b_{}-d.dat".format(bankno))
+
+        for ws in self.focus_results:
+            self.assertEqual(ws.sample().getMaterial().name(), "Si Si")
+        self.tolerance_is_rel_err = True
+        self.tolerance = 1e-6
+        return self.focus_results.name(), "ISIS_Powder-POLARIS98534_FocusSempty.nxs"
 
     def cleanup(self):
         try:
@@ -534,7 +577,7 @@ def run_total_scattering(
 
 
 def _gen_required_files():
-    required_run_numbers = ["98531", "98532", "98533"]  # create_van : PDF mode  # File to focus (Si)
+    required_run_numbers = ["98531", "98532", "98533", "98534"]  # create_van : PDF mode  # File to focus (Si)
 
     # Generate file names of form "INSTxxxxx.nxs"
     input_files = [os.path.join(input_dir, (inst_name + "000" + number + ".nxs")) for number in required_run_numbers]
@@ -566,8 +609,13 @@ def run_vanadium_calibration(per_detector):
     return splined_ws, unsplined_ws
 
 
-def run_focus_no_absorption(per_detector=False):
-    run_number = 98533
+def run_focus_no_absorption(per_detector=False, mode="PDF"):
+    if mode == "PDF_NORM":
+        run_number = 98534
+    elif mode == "PDF":
+        run_number = 98533
+    else:
+        raise RuntimeError("Invalid mode")
     sample_empty = 98532  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # Set it to 50% scale
 
@@ -580,7 +628,7 @@ def run_focus_no_absorption(per_detector=False):
     original_splined_path = os.path.join(input_dir, splined_file_name)
     shutil.copy(original_splined_path, spline_path)
 
-    inst_object = setup_inst_object(mode="PDF")
+    inst_object = setup_inst_object(mode=mode)
     return inst_object.focus(
         run_number=run_number,
         input_mode="Individual",
