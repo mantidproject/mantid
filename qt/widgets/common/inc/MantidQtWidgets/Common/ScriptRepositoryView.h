@@ -76,7 +76,7 @@ protected slots:
 
 private:
   bool chooseLocationAndInstall(Mantid::API::ScriptRepository_sptr repo_ptr);
-  void updateLocationString(const std::string installDir);
+  void updateLocationString(const std::string &installDir);
 
   Ui::ScriptRepositoryView *ui;
   RepoModel *model;

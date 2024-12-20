@@ -1177,8 +1177,8 @@ missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ScriptEditor.h:70
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ScriptEditor.h:63
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/ScriptRepositoryView.cpp:113
-constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:108
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:977
+constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:107
+constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/RepoModel.cpp:960
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/TextPropertyWidget.cpp:39
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FunctionTreeView.h:107
 useStlAlgorithm:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/FunctionTreeView.cpp:974

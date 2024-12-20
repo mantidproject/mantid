@@ -211,7 +211,7 @@ bool ScriptRepositoryView::chooseLocationAndInstall(Mantid::API::ScriptRepositor
   return true;
 }
 
-void ScriptRepositoryView::updateLocationString(const std::string installDir) {
+void ScriptRepositoryView::updateLocationString(const std::string &installDir) {
   const QString loc = QString::fromStdString(installDir);
   const QString loc_info = "<html><head/><body><p><a href=\"%1\"><span style=\" "
                            "text-decoration: underline; "
