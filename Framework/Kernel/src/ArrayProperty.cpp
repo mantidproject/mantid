@@ -98,27 +98,27 @@ template <typename T> void ArrayProperty<T>::visualStudioC4661Workaround() {}
 // export macro not needed for int32_t due to explicit specialization in header.
 template class ArrayProperty<int32_t>;
 
-template class DLLExport ArrayProperty<uint32_t>;
-template class DLLExport ArrayProperty<int64_t>;
-template class DLLExport ArrayProperty<uint64_t>;
-template class DLLExport ArrayProperty<bool>;
-template class DLLExport ArrayProperty<float>;
-template class DLLExport ArrayProperty<double>;
-template class DLLExport ArrayProperty<std::string>;
+template class MANTID_KERNEL_DLL ArrayProperty<uint32_t>;
+template class MANTID_KERNEL_DLL ArrayProperty<int64_t>;
+template class MANTID_KERNEL_DLL ArrayProperty<uint64_t>;
+template class MANTID_KERNEL_DLL ArrayProperty<bool>;
+template class MANTID_KERNEL_DLL ArrayProperty<float>;
+template class MANTID_KERNEL_DLL ArrayProperty<double>;
+template class MANTID_KERNEL_DLL ArrayProperty<std::string>;
 
-template class DLLExport ArrayProperty<std::vector<int32_t>>;
-template class DLLExport ArrayProperty<std::vector<uint32_t>>;
-template class DLLExport ArrayProperty<std::vector<int64_t>>;
-template class DLLExport ArrayProperty<std::vector<uint64_t>>;
-template class DLLExport ArrayProperty<std::vector<float>>;
-template class DLLExport ArrayProperty<std::vector<double>>;
-template class DLLExport ArrayProperty<std::vector<std::string>>;
+template class MANTID_KERNEL_DLL ArrayProperty<std::vector<int32_t>>;
+template class MANTID_KERNEL_DLL ArrayProperty<std::vector<uint32_t>>;
+template class MANTID_KERNEL_DLL ArrayProperty<std::vector<int64_t>>;
+template class MANTID_KERNEL_DLL ArrayProperty<std::vector<uint64_t>>;
+template class MANTID_KERNEL_DLL ArrayProperty<std::vector<float>>;
+template class MANTID_KERNEL_DLL ArrayProperty<std::vector<double>>;
+template class MANTID_KERNEL_DLL ArrayProperty<std::vector<std::string>>;
 
 #if defined(_WIN32) || defined(__clang__) && defined(__APPLE__)
-template class DLLExport ArrayProperty<long>;
-template class DLLExport ArrayProperty<unsigned long>;
-template class DLLExport ArrayProperty<std::vector<long>>;
-template class DLLExport ArrayProperty<std::vector<unsigned long>>;
+template class MANTID_KERNEL_DLL ArrayProperty<long>;
+template class MANTID_KERNEL_DLL ArrayProperty<unsigned long>;
+template class MANTID_KERNEL_DLL ArrayProperty<std::vector<long>>;
+template class MANTID_KERNEL_DLL ArrayProperty<std::vector<unsigned long>>;
 #endif
 
 /// @endcond

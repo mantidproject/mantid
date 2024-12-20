@@ -24,7 +24,7 @@ Cache is a generic caching storage class.
 @author Nick Draper, Tessella Support Services plc
 @date 20/10/2009
 */
-template <class KEYTYPE, class VALUETYPE> class DLLExport Cache {
+template <class KEYTYPE, class VALUETYPE> class MANTID_KERNEL_DLL Cache {
 public:
   /// No-arg Constructor
   Cache() : m_cacheHit(0), m_cacheMiss(0), m_cacheMap(), m_mutex() {}

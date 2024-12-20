@@ -29,7 +29,7 @@ constexpr int LOWER_BOUND = -1;
 constexpr int UPPER_BOUND = 1;
 } // namespace
 
-template <class TYPE> class DLLExport BoundedValidator final : public TypedValidator<TYPE> {
+template <class TYPE> class MANTID_KERNEL_DLL BoundedValidator final : public TypedValidator<TYPE> {
 public:
   /// No-arg Constructor
   BoundedValidator() noexcept

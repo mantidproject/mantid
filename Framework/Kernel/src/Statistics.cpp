@@ -208,14 +208,14 @@ template <typename TYPE> Statistics getStatistics(const vector<TYPE> &data, cons
 }
 
 /// Getting statistics of a string array should just give a bunch of NaNs
-template <> DLLExport Statistics getStatistics<string>(const vector<string> &data, const unsigned int flags) {
+template <> MANTID_KERNEL_DLL Statistics getStatistics<string>(const vector<string> &data, const unsigned int flags) {
   UNUSED_ARG(flags);
   UNUSED_ARG(data);
   return Statistics(); // default is all nan
 }
 
 /// Getting statistics of a boolean array should just give a bunch of NaNs
-template <> DLLExport Statistics getStatistics<bool>(const vector<bool> &data, const unsigned int flags) {
+template <> MANTID_KERNEL_DLL Statistics getStatistics<bool>(const vector<bool> &data, const unsigned int flags) {
   UNUSED_ARG(flags);
   UNUSED_ARG(data);
   return Statistics(); // default is all nan

@@ -256,7 +256,7 @@ template <> int StrSingleSplit(const std::string &text, const boost::regex &Re, 
   @param Out :: string to place match
   @return count of line that matched (or zero on failure)
 */
-DLLExport int findPattern(std::istream &fh, const boost::regex &Re, std::string &Out) {
+MANTID_KERNEL_DLL int findPattern(std::istream &fh, const boost::regex &Re, std::string &Out) {
   char ss[512]; // max of 512
   boost::cmatch ans;
 
@@ -304,7 +304,7 @@ template <typename T> int findComp(std::istream &fh, const boost::regex &Re, T &
   @param Out :: component in ( ) expression must be first.
   @return count of line that matched (or zero on failure)
 */
-template <> DLLExport int findComp(std::istream &fh, const boost::regex &Re, std::string &Out) {
+template <> MANTID_KERNEL_DLL int findComp(std::istream &fh, const boost::regex &Re, std::string &Out) {
   char ss[512]; // max of 512
   boost::cmatch ans;
 
@@ -323,23 +323,23 @@ template <> DLLExport int findComp(std::istream &fh, const boost::regex &Re, std
 
 /// \cond TEMPLATE
 
-template DLLExport int StrFullCut(std::string &, const boost::regex &, std::string &, const int);
-template DLLExport int StrFullCut(std::string &, const boost::regex &, int &, const int);
-template DLLExport int StrFullCut(std::string &, const boost::regex &, double &, const int);
+template MANTID_KERNEL_DLL int StrFullCut(std::string &, const boost::regex &, std::string &, const int);
+template MANTID_KERNEL_DLL int StrFullCut(std::string &, const boost::regex &, int &, const int);
+template MANTID_KERNEL_DLL int StrFullCut(std::string &, const boost::regex &, double &, const int);
 
-template DLLExport int StrFullSplit(const std::string &, const boost::regex &, std::vector<int> &);
-template DLLExport int StrFullSplit(const std::string &, const boost::regex &, std::vector<double> &);
-template DLLExport int StrFullSplit(const std::string &, const boost::regex &, std::vector<std::string> &);
+template MANTID_KERNEL_DLL int StrFullSplit(const std::string &, const boost::regex &, std::vector<int> &);
+template MANTID_KERNEL_DLL int StrFullSplit(const std::string &, const boost::regex &, std::vector<double> &);
+template MANTID_KERNEL_DLL int StrFullSplit(const std::string &, const boost::regex &, std::vector<std::string> &);
 
-template DLLExport int StrSingleSplit(const std::string &, const boost::regex &, std::vector<int> &);
-template DLLExport int StrSingleSplit(const std::string &, const boost::regex &, std::vector<double> &);
+template MANTID_KERNEL_DLL int StrSingleSplit(const std::string &, const boost::regex &, std::vector<int> &);
+template MANTID_KERNEL_DLL int StrSingleSplit(const std::string &, const boost::regex &, std::vector<double> &);
 
-template DLLExport int StrComp(const char *, const boost::regex &, double &, const int);
-template DLLExport int StrComp(const char *, const boost::regex &, int &, const int);
-template DLLExport int StrComp(const std::string &, const boost::regex &, double &, const int);
-template DLLExport int StrComp(const std::string &, const boost::regex &, int &, const int);
+template MANTID_KERNEL_DLL int StrComp(const char *, const boost::regex &, double &, const int);
+template MANTID_KERNEL_DLL int StrComp(const char *, const boost::regex &, int &, const int);
+template MANTID_KERNEL_DLL int StrComp(const std::string &, const boost::regex &, double &, const int);
+template MANTID_KERNEL_DLL int StrComp(const std::string &, const boost::regex &, int &, const int);
 
-template DLLExport int findComp(std::istream &, const boost::regex &, int &);
+template MANTID_KERNEL_DLL int findComp(std::istream &, const boost::regex &, int &);
 
 /// \endcond TEMPLATE
 

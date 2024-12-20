@@ -33,7 +33,7 @@ namespace Kernel {
  * @author Janik Zikovsky
  * @date 2011-02-25 16:39:43.233991
  */
-class DLLExport ThreadSchedulerMutexes : public ThreadScheduler {
+class MANTID_KERNEL_DLL ThreadSchedulerMutexes : public ThreadScheduler {
 public:
   ThreadSchedulerMutexes() = default;
 

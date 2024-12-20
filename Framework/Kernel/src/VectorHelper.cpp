@@ -31,9 +31,10 @@ namespace Mantid::Kernel::VectorHelper {
  *  @param[in] power the power in case of inverse power sum. Must be between 0 and 1 or is ignored.
  *  @return The number of bin boundaries in the new axis
  **/
-int DLLExport createAxisFromRebinParams(const std::vector<double> &params, std::vector<double> &xnew,
-                                        const bool resize_xnew, const bool full_bins_only, const double xMinHint,
-                                        const double xMaxHint, const bool useReverseLogarithmic, const double power) {
+int MANTID_KERNEL_DLL createAxisFromRebinParams(const std::vector<double> &params, std::vector<double> &xnew,
+                                                const bool resize_xnew, const bool full_bins_only,
+                                                const double xMinHint, const double xMaxHint,
+                                                const bool useReverseLogarithmic, const double power) {
   std::vector<double> tmp;
   const std::vector<double> &fullParams = [&params, &tmp, xMinHint, xMaxHint]() {
     if (params.size() == 1) {
@@ -765,11 +766,11 @@ void smoothInRange(const std::vector<double> &input, std::vector<double> &output
 }
 
 /// Declare all version of this
-template DLLExport std::vector<int32_t> splitStringIntoVector<int32_t>(std::string listString);
-template DLLExport std::vector<int64_t> splitStringIntoVector<int64_t>(std::string listString);
-template DLLExport std::vector<size_t> splitStringIntoVector<size_t>(std::string listString);
-template DLLExport std::vector<float> splitStringIntoVector<float>(std::string listString);
-template DLLExport std::vector<double> splitStringIntoVector<double>(std::string listString);
-template DLLExport std::vector<std::string> splitStringIntoVector<std::string>(std::string listString);
+template MANTID_KERNEL_DLL std::vector<int32_t> splitStringIntoVector<int32_t>(std::string listString);
+template MANTID_KERNEL_DLL std::vector<int64_t> splitStringIntoVector<int64_t>(std::string listString);
+template MANTID_KERNEL_DLL std::vector<size_t> splitStringIntoVector<size_t>(std::string listString);
+template MANTID_KERNEL_DLL std::vector<float> splitStringIntoVector<float>(std::string listString);
+template MANTID_KERNEL_DLL std::vector<double> splitStringIntoVector<double>(std::string listString);
+template MANTID_KERNEL_DLL std::vector<std::string> splitStringIntoVector<std::string>(std::string listString);
 
 } // namespace Mantid::Kernel::VectorHelper

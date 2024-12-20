@@ -29,7 +29,7 @@ namespace Kernel {
     Boost.MultiIndex documentation
    (<http://www.boost.org/libs/multi_index/doc/reference/index.html>)
  */
-template <class T> class DLLExport MRUList {
+template <class T> class MANTID_KERNEL_DLL MRUList {
 private:
   /// hideous typedef for the container holding the list
   using item_list = typename boost::multi_index::multi_index_container<

@@ -54,7 +54,7 @@ struct CaseInsensitiveCmp {
    through writing scripts or directly
     through the API. It is implemented as a singleton class.
 */
-template <typename T> class DLLExport DataService {
+template <typename T> class MANTID_KERNEL_DLL DataService {
 private:
   /// Typedef for the map holding the names of and pointers to the data objects
   using svcmap = std::map<std::string, std::shared_ptr<T>, CaseInsensitiveCmp>;
