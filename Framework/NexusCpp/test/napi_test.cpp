@@ -46,6 +46,25 @@ std::string relativePathOf(const std::string &filename) { return std::filesystem
 } // anonymous namespace
 
 int main(int argc, char *argv[]) {
+  std::cout << "determining file type" << std::endl;
+  std::string nxFile;
+  NXaccess_mode nx_creation_code;
+  if (strstr(argv[0], "napi_test_hdf5") != NULL) {
+    nx_creation_code = NXACC_CREATE5;
+    nxFile = "NXtest.h5";
+  } else if (strstr(argv[0], "napi_test_hdf4") != NULL) {
+    nx_creation_code = NXACC_CREATE4;
+    nxFile = "NXtest.hdf";
+  } else {
+    ON_ERROR(std::string(argv[0]) + " is not supported");
+  }
+  removeFile(nxFile); // in case previous run didn't clean up
+
+#ifdef WIN32 // these have issues on windows
+  UNUSED_ARG(nx_creation_code);
+  UNUSED_ARG(argc);
+#else // WIN32
+  // ------------------------------------------> TODO fine up to here "nexuscpptest-c-hdf5-test"
   int i, j, NXlen;
   float r;
   const unsigned char i1_array[4] = {1, 2, 3, 4};
@@ -65,20 +84,6 @@ int main(int argc, char *argv[]) {
   NXlink glink, dlink;
   int comp_array[100][20];
   const char *ch_test_data = "NeXus ><}&{'\\&\" Data";
-
-  std::cout << "determining file type" << std::endl;
-  std::string nxFile;
-  NXaccess_mode nx_creation_code;
-  if (strstr(argv[0], "napi_test_hdf5") != NULL) {
-    nx_creation_code = NXACC_CREATE5;
-    nxFile = "NXtest.h5";
-  } else if (strstr(argv[0], "napi_test_hdf4") != NULL) {
-    nx_creation_code = NXACC_CREATE4;
-    nxFile = "NXtest.hdf";
-  } else {
-    ON_ERROR(std::string(argv[0]) + " is not supported");
-  }
-  removeFile(nxFile); // in case previous run didn't clean up
 
   std::cout << "Creating \"" << nxFile << "\"" << std::endl;
   // create file
@@ -270,8 +275,7 @@ int main(int argc, char *argv[]) {
   if ((argc >= 2) && !strcmp(argv[1], "-q")) {
     return TEST_SUCCEED; /* create only */
   }
-#ifndef WIN32 // these have issues on windows
-  // ------------------------------------------> TODO fine up to here "nexuscpptest-c-hdf5-test"
+
   char name[NX_MAXNAMELEN], char_class[NX_MAXNAMELEN], char_buffer[128];
   char group_name[NX_MAXNAMELEN], class_name[NX_MAXNAMELEN];
   char path[512];
@@ -552,7 +556,7 @@ int main(int argc, char *argv[]) {
 
   if (NXclose(&fileid) != NX_OK)
     return TEST_FAILED;
-#endif
+#endif // WIN32
 
   std::cout << "before load path tests\n";
   if (testLoadPath() != TEST_SUCCEED)
