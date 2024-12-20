@@ -16,6 +16,8 @@ namespace Kernel {
  * factories in Mantid. The fact that the constructor takes an int means that
  * the comma operator can be used to make a call to the factories' subscribe
  * method in the first part.
+ *
+ * The MANTID_KERNEL_DLL needs to be available where this helper is imported and used.
  */
 class MANTID_KERNEL_DLL RegistrationHelper{// clang-format off
 public:

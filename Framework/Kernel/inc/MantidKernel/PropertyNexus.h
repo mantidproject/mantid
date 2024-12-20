@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/NexusHDF5Descriptor.h"
-#include "MantidKernel/System.h"
 #include <memory>
 #include <string>
 
@@ -39,11 +39,11 @@ namespace PropertyNexus {
  * @param prefix indicates current group location in file (absolute name)
  * @return std::unique_ptr<Property>
  */
-DLLExport std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group,
-                                                 const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
-                                                 const std::string &prefix);
+MANTID_KERNEL_DLL std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group,
+                                                         const Mantid::Kernel::NexusHDF5Descriptor &fileInfo,
+                                                         const std::string &prefix);
 
-DLLExport std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group);
+MANTID_KERNEL_DLL std::unique_ptr<Property> loadProperty(::NeXus::File *file, const std::string &group);
 
 } // namespace PropertyNexus
 

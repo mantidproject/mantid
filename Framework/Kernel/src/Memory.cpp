@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 
 #include <cstdio>
 #include <sstream>
@@ -561,8 +560,8 @@ size_t MemoryStats::getCurrentRSS() const {
 }
 
 // -------------------------- concrete instantiations
-template DLLExport string memToString<uint32_t>(const uint32_t);
-template DLLExport string memToString<uint64_t>(const uint64_t);
+template MANTID_KERNEL_DLL string memToString<uint32_t>(const uint32_t);
+template MANTID_KERNEL_DLL string memToString<uint64_t>(const uint64_t);
 // To initialize the static class variable.
 std::mutex MemoryStats::mutexMemory;
 
