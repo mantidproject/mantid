@@ -809,7 +809,7 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPa
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:182
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:184
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:192
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/LiveDataAlgorithm.h:39
+missingOverride:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/LiveDataAlgorithm.h:38
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/LoadLiveData.h:24
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/FakeISISHistoDAE.cpp:268
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/FakeISISHistoDAE.cpp:27
@@ -838,7 +838,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/Instr
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:2677
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:3059
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:1552
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/Kafka/IKafkaStreamDecoder.h:81
+returnByReference:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/Kafka/IKafkaStreamDecoder.h:82
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/AsymmetryCalc.h:39
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/ISISHistoDataListener.cpp:527
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Muon/inc/MantidMuon/ApplyMuonDetectorGroupPairing.h:28

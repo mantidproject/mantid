@@ -8,6 +8,7 @@
 #include "MantidAPI/LogManager.h"
 
 #include <H5Cpp.h>
+
 #include <algorithm>
 #include <array>
 #include <boost/numeric/conversion/cast.hpp>
