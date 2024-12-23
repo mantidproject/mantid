@@ -69,8 +69,8 @@ is supplied.
 Exceptions
 ##########
 
-If property 'CheckMatchingBins' is set to true, and the bins in the two input workspaces
-do not match, then an 'invalid_argument' exception will be thrown from the 'exec' method.
+If property ``CheckMatchingBins`` is set to true, and the bins in the two input workspaces
+do not match, then an ``invalid_argument`` exception will be thrown from the ``exec`` method.
 
 If property 'CheckOverlapping' is set to true, and there are spectra and/or detectors
 are overlapping between two input workspaces,
