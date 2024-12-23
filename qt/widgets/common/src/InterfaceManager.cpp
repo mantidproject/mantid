@@ -24,7 +24,9 @@
 #include "MantidKernel/Logger.h"
 
 #include <Poco/Environment.h>
+#include <QDir>
 #include <QStringList>
+#include <cstdlib>
 #include <mutex>
 
 using namespace MantidQt::API;
@@ -225,6 +227,9 @@ void InterfaceManager::registerHelpWindowFactory(Mantid::Kernel::AbstractInstant
 }
 
 MantidHelpInterface *InterfaceManager::createHelpWindow() const {
+  QString localDocs = qEnvironmentVariable("MANTID_LOCAL_DOCS_BASE");
+  bool localAvailable = !localDocs.isEmpty() && QDir(localDocs).exists();
+
   if (m_helpViewer == nullptr) {
     if (!offlineHelpMsgDisplayed) {
       g_log.information("Offline help is not available in this version of Workbench.");
@@ -235,6 +240,7 @@ MantidHelpInterface *InterfaceManager::createHelpWindow() const {
     MantidHelpInterface *interface = this->m_helpViewer->createUnwrappedInstance();
     if (!interface) {
       g_log.error("Error creating help window");
+      return nullptr;
     }
     return interface;
   }
@@ -242,27 +248,58 @@ MantidHelpInterface *InterfaceManager::createHelpWindow() const {
 
 void InterfaceManager::showHelpPage(const QString &url) {
   auto window = createHelpWindow();
-  window->showPage(url);
+  if (window)
+    window->showPage(url);
+  else
+    MantidDesktopServices::openUrl(url);
 }
 
 void InterfaceManager::showAlgorithmHelp(const QString &name, const int version) {
   auto window = createHelpWindow();
-  window->showAlgorithm(name, version);
+  if (window)
+    window->showAlgorithm(name, version);
+  else {
+    QString url("https://docs.mantidproject.org/algorithms/");
+    url += name.isEmpty() ? "index.html" : name + (version > 0 ? "-v" + QString::number(version) + ".html" : ".html");
+    MantidDesktopServices::openUrl(url);
+  }
 }
 
 void InterfaceManager::showConceptHelp(const QString &name) {
   auto window = createHelpWindow();
-  window->showConcept(name);
+  if (window)
+    window->showConcept(name);
+  else {
+    QString url("https://docs.mantidproject.org/concepts/");
+    url += name.isEmpty() ? "index.html" : name + ".html";
+    MantidDesktopServices::openUrl(url);
+  }
 }
 
 void InterfaceManager::showFitFunctionHelp(const QString &name) {
   auto window = createHelpWindow();
-  window->showFitFunction(name);
+  if (window)
+    window->showFitFunction(name);
+  else {
+    QString url("https://docs.mantidproject.org/fitting/fitfunctions/");
+    url += name.isEmpty() ? "index.html" : name + ".html";
+    MantidDesktopServices::openUrl(url);
+  }
 }
 
 void InterfaceManager::showCustomInterfaceHelp(const QString &name, const QString &area, const QString &section) {
   auto window = createHelpWindow();
-  window->showCustomInterface(name, area, section);
+  if (window)
+    window->showCustomInterface(name, area, section);
+  else {
+    QString url("https://docs.mantidproject.org/interfaces/");
+    if (!area.isEmpty())
+      url += area + "/";
+    url += name.isEmpty() ? "index.html" : name + ".html";
+    if (!section.isEmpty())
+      url += "#" + section;
+    MantidDesktopServices::openUrl(url);
+  }
 }
 
 void InterfaceManager::showWebPage(const QString &url) { MantidDesktopServices::openUrl(url); }
@@ -270,6 +307,7 @@ void InterfaceManager::showWebPage(const QString &url) { MantidDesktopServices::
 void InterfaceManager::closeHelpWindow() {
   if (MantidHelpWindow::helpWindowExists()) {
     auto window = createHelpWindow();
-    window->shutdown();
+    if (window)
+      window->shutdown();
   }
 }
