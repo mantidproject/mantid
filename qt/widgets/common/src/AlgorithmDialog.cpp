@@ -13,7 +13,7 @@
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/FilePropertyWidget.h"
-#include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
 
@@ -705,13 +705,14 @@ void AlgorithmDialog::reject() {
  * A slot to handle the help button click
  */
 void AlgorithmDialog::helpClicked() {
+  __builtin_trap();
   // determine the version to show
   int version(-1); // the latest version
   if (m_algorithm)
     version = m_algorithm->version();
 
-  // bring up the help window
-  HelpWindow::showAlgorithm(m_algName, version);
+  // use interface manager instead of help window
+  MantidQt::API::InterfaceManager().showAlgorithmHelp(m_algName, version);
 }
 
 //-------------------------------------------------------------------------------------------------
