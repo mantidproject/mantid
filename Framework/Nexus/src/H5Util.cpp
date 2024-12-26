@@ -380,15 +380,13 @@ std::vector<NumT> readNumArrayAttributeCoerce(const H5::H5Object &object, const 
 }
 
 template <typename NumT> void readArray1DCoerce(const DataSet &dataset, std::vector<NumT> &output) {
-  DataType dataType = dataset.getDataType();
+  const DataType dataType = dataset.getDataType();
 
   if (getType<NumT>() == dataType) { // no conversion necessary
-    DataSpace dataSpace = dataset.getSpace();
-    output.resize(dataSpace.getSelectNpoints());
+    const DataSpace dataSpace = dataset.getSpace();
+    output.resize(static_cast<size_t>(dataSpace.getSelectNpoints()));
     dataset.read(output.data(), dataType, dataSpace);
-  }
-
-  if (PredType::NATIVE_INT32 == dataType) {
+  } else if (PredType::NATIVE_INT32 == dataType) {
     convertingRead<int32_t>(dataset, dataType, output);
   } else if (PredType::NATIVE_UINT32 == dataType) {
     convertingRead<uint32_t>(dataset, dataType, output);
