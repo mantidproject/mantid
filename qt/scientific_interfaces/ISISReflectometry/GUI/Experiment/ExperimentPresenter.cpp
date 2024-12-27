@@ -12,7 +12,6 @@
 #include "Reduction/ParseReflectometryStrings.h"
 #include "Reduction/PreviewRow.h"
 #include "Reduction/RowExceptions.h"
-#include "Reduction/ValidateLookupRow.h"
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 // unnamed namespace
@@ -443,7 +442,7 @@ void ExperimentPresenter::updateViewFromModel() {
     m_view->setPolarizationEfficienciesWorkspace(m_model.polarizationCorrections().workspace().get());
   m_view->setFloodCorrectionType(floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())
-    m_view->setFloodWorkspace(m_model.floodCorrections().workspace().get());
+    m_view->setFloodWorkspace(m_model.floodCorrections().workspace().value());
   else
     m_view->setFloodWorkspace("");
   m_view->setFloodFilePath("");

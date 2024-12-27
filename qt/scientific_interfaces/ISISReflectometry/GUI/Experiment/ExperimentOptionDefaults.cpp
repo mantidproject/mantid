@@ -19,7 +19,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
-std::string stringValueOrEmpty(boost::optional<double> value) { return value ? std::to_string(*value) : ""; }
+std::string stringValueOrEmpty(std::optional<double> value) { return value ? std::to_string(value.value()) : ""; }
 
 std::map<std::string, std::string> getStitchParams(OptionDefaults const &stitchDefaults) {
   std::map<std::string, std::string> initialStitchParameters;
