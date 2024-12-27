@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpAlpha.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidKernel/System.h"
 
 #include <cmath>
 #include <gsl/gsl_sf_erf.h>

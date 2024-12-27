@@ -7,8 +7,8 @@
 #include "MantidQtWidgets/Common/PropertyWidget.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IWorkspaceProperty.h"
+
 #include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/System.h"
 
 #include <cfloat>
 #include <climits>

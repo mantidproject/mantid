@@ -8,8 +8,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
+
 #include "MantidGeometry/IDetector.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/cow_ptr.h"
 

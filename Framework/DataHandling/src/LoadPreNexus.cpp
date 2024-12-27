@@ -14,8 +14,8 @@
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>

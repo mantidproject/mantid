@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidKernel/VMD.h"
+
 #include <algorithm>
 #include <boost/math/special_functions/round.hpp>
 #include <functional>

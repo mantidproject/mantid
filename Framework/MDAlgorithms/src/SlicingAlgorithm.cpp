@@ -15,7 +15,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/regex.hpp>

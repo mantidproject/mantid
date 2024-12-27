@@ -9,7 +9,6 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidKernel/System.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 

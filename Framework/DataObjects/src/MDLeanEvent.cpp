@@ -5,4 +5,3 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDLeanEvent.h"
-#include "MantidKernel/System.h"

@@ -18,7 +18,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 #include "Poco/Path.h"
