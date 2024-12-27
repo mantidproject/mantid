@@ -10,7 +10,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 #include <boost/lexical_cast.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <string>
 
 namespace Mantid {
@@ -18,7 +18,7 @@ namespace API {
 /** BoostOptionalToAlgorithmProperty : Checks for default values of an
 algorithm property if the user has not supplied the value. If it is a mandatory
 property then the value will be returned, if the property is optional then a
-value of type boost::optional<T> will be returned.
+value of type std::optional<T> will be returned.
 */
 
 /**
@@ -62,24 +62,24 @@ T checkForMandatoryInstrumentDefault(Mantid::API::Algorithm *const alg, const st
  * @param instrument : A pointer to the instrument
  * @param idf_name : The name of the property in the Instrument Defintion
  * @return A boost optional value of type T that is either the default value,
- * the user supplied value or an uninitialized boost::optional.
+ * the user supplied value or an uninitialized std::optional.
  *
  */
 template <typename T>
-boost::optional<T> checkForOptionalInstrumentDefault(Mantid::API::Algorithm *const alg, const std::string &propName,
-                                                     const Mantid::Geometry::Instrument_const_sptr &instrument,
-                                                     const std::string &idf_name) {
+std::optional<T> checkForOptionalInstrumentDefault(Mantid::API::Algorithm *const alg, const std::string &propName,
+                                                   const Mantid::Geometry::Instrument_const_sptr &instrument,
+                                                   const std::string &idf_name) {
   auto algProperty = alg->getPointerToProperty(propName);
   if (algProperty->isDefault()) {
     auto defaults = instrument->getNumberParameter(idf_name);
     if (!defaults.empty()) {
-      return boost::optional<T>(static_cast<T>(defaults[0]));
+      return std::optional<T>(static_cast<T>(defaults[0]));
     } else {
-      return boost::optional<T>();
+      return std::nullopt;
     }
   } else {
     double value = boost::lexical_cast<double, std::string>(algProperty->value());
-    return boost::optional<T>(static_cast<T>(value));
+    return std::optional<T>(static_cast<T>(value));
   }
 }
 
@@ -93,7 +93,7 @@ MANTID_API_DLL std::string checkForMandatoryInstrumentDefault(Mantid::API::Algor
                                                               const std::string &idf_name);
 
 template <>
-MANTID_API_DLL boost::optional<std::string>
+MANTID_API_DLL std::optional<std::string>
 checkForOptionalInstrumentDefault(Mantid::API::Algorithm *const alg, const std::string &propName,
                                   const Mantid::Geometry::Instrument_const_sptr &instrument,
                                   const std::string &idf_name);
