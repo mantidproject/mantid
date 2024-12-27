@@ -357,7 +357,7 @@ std::string MatrixWorkspace::getPlotType() const {
 /**
  * set marker type
  *
- * @param marker :: The Marker Type
+ * @param markerType :: The Marker Type
  */
 void MatrixWorkspace::setMarkerStyle(const std::string &markerType) { m_marker = markerType; }
 
