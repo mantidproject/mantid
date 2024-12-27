@@ -61,7 +61,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
     def editSettings(self, settingValues, mDialog):
         """
         Edit the settings window. This method will edit all the provided
-        settings and set them to their correcponding value.
+        settings and set them to their corresponding value.
 
         Args:
             settingValues (dict(str:str)): setting name and value to be set
@@ -83,16 +83,19 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
                     QTest.keyClicks(widgets[name], value)
                     QTest.keyClick(widgets[name], Qt.Key_Tab)
                 elif isinstance(widgets[name], QComboBox):
-                    v = widgets[name].view()
+                    w = widgets[name]
                     m = widgets[name].model()
                     for i in range(m.rowCount()):
                         index = m.index(i, 0)
                         text = index.data(Qt.DisplayRole)
-                        if text == name:
-                            v.scrollTo(index)
-                            pos = index.center()
-                            Qt.mouseClick(v.viewport(), Qt.LeftButton, 0, pos)
+                        if text == value:
+                            w.setCurrentIndex(index.row())
                             break
+                        # Former code based on QTest.mouseclick is not working, the view is updated but the widget is not
+                        # if text == name:
+                        #     v.scrollTo(index)
+                        #     pos = index.center()
+                        #     Qt.mouseClick(v.viewport(), Qt.LeftButton, 0, pos)
         QTest.mouseClick(sw.okButton, Qt.LeftButton)
 
     def cleanup(self):
