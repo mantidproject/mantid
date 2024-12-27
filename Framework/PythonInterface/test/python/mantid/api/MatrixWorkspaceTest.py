@@ -408,8 +408,8 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual("plot", ws1.getPlotType())
 
         # test valid takes
-        ws1.setPlotType("scatter")
-        self.assertEqual("scatter", ws1.getPlotType())
+        ws1.setPlotType("marker")
+        self.assertEqual("marker", ws1.getPlotType())
 
     def test_setGetMonitorWS(self):
         run_algorithm("CreateWorkspace", OutputWorkspace="ws1", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
