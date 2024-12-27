@@ -413,9 +413,7 @@ PolarizationCorrections makeEmptyPolarizationCorrections() {
   return PolarizationCorrections(PolarizationCorrectionType::None);
 }
 
-FloodCorrections makeFloodCorrections() {
-  return FloodCorrections(FloodCorrectionType::Workspace, boost::optional<std::string>("test_workspace"));
-}
+FloodCorrections makeFloodCorrections() { return FloodCorrections(FloodCorrectionType::Workspace, "test_workspace"); }
 
 TransmissionStitchOptions makeTransmissionStitchOptions() {
   return TransmissionStitchOptions(RangeInLambda{7.5, 9.2}, RebinParameters("-0.02"), true);

@@ -319,7 +319,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/CompositeFunction.cpp:912
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/BoostOptionalToAlgorithmProperty.cpp:11
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/BoostOptionalToAlgorithmProperty.cpp:14
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/BoostOptionalToAlgorithmProperty.cpp:30
+constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/src/BoostOptionalToAlgorithmProperty.cpp:29
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/BoostOptionalToAlgorithmProperty.cpp:33
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/BoostOptionalToAlgorithmProperty.h:38
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/BoostOptionalToAlgorithmProperty.h:41

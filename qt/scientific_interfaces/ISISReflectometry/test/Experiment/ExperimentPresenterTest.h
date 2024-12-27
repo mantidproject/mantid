@@ -239,7 +239,7 @@ public:
     auto presenter = makePresenter();
     FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"testWS"});
     EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(m_view, getFloodWorkspace()).WillOnce(Return(floodCorr.workspace().get()));
+    EXPECT_CALL(m_view, getFloodWorkspace()).WillOnce(Return(floodCorr.workspace().value()));
     EXPECT_CALL(m_view, setFloodCorrectionWorkspaceMode()).Times(1);
     presenter.notifySettingsChanged();
 
@@ -251,10 +251,10 @@ public:
     FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"path/to/testWS"});
 
     EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("FilePath"));
-    EXPECT_CALL(m_fileHandler, getFullFilePath(floodCorr.workspace().get()))
-        .WillOnce(Return(floodCorr.workspace().get()));
-    EXPECT_CALL(m_fileHandler, fileExists(floodCorr.workspace().get())).WillOnce(Return(true));
-    EXPECT_CALL(m_view, getFloodFilePath()).WillOnce(Return(floodCorr.workspace().get()));
+    EXPECT_CALL(m_fileHandler, getFullFilePath(floodCorr.workspace().value()))
+        .WillOnce(Return(floodCorr.workspace().value()));
+    EXPECT_CALL(m_fileHandler, fileExists(floodCorr.workspace().value())).WillOnce(Return(true));
+    EXPECT_CALL(m_view, getFloodFilePath()).WillOnce(Return(floodCorr.workspace().value()));
     EXPECT_CALL(m_view, setFloodCorrectionFilePathMode()).Times(1);
     presenter.notifySettingsChanged();
 
