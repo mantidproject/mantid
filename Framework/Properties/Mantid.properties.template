@@ -314,6 +314,12 @@ plots.errorbar.errorEvery = 1
 # Default width of error bars in 1d plots
 plots.errorbar.Width = 1.0
 
+# Default marker style for the errorbar workspace
+plots.errorbar.MarkerStyle = circle
+
+# Default marker size for the errorbar workspace
+plots.errorbar.MarkerSize = 4
+
 # Default legend location
 plots.legend.Location = best
 
@@ -326,8 +332,14 @@ plots.images.Colormap = viridis
 # Default colorbar scale for image plots
 plots.images.ColorBarScale = Linear
 
+# Default marker style for marker workspace plots
+plots.markerworkspace.MarkerStyle = vline
+
+# Default marker size for marker workspace plots
+plots.markerworkspace.MarkerSize = 6
+
 # Profiler Default Filename
-performancelog.filename = algorithmregister.out
+performancelog.filename = algotimeregister.out
 
 # Algorithm Profiler Default Status
 performancelog.write = Off
