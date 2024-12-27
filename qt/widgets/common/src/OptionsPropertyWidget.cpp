@@ -7,7 +7,7 @@
 #include "MantidQtWidgets/Common/OptionsPropertyWidget.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/System.h"
+
 #include <QComboBox>
 #include <QCompleter>
 #include <QLabel>

@@ -17,8 +17,8 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
+
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>

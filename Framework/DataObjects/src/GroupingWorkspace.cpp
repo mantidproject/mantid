@@ -9,8 +9,8 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/System.h"
 
 using std::size_t;
 using namespace Mantid::API;

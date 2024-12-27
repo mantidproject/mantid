@@ -7,7 +7,6 @@
 #include "MantidAlgorithms/ChangePulsetime.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid::Algorithms {
 

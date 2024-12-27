@@ -715,7 +715,6 @@ returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crys
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/CompositeBraggScatterer.h:64
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Crystal/CompositeBraggScatterer.cpp:189
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/Group.h:148
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/MaskWorkspace.cpp:411
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h:35
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/SpaceGroupFactory.h:45
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/inc/MantidGeometry/Crystal/SpaceGroupFactory.h:46
