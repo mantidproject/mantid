@@ -95,6 +95,9 @@ template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::Group &gr
 
 template <typename NumT> void readArray1DCoerce(const H5::DataSet &dataset, std::vector<NumT> &output);
 
+template <typename NumT>
+void readArray1DCoerce(const H5::DataSet &dataset, std::vector<NumT> &output, const size_t length, const size_t offset);
+
 /// Test if a group already exists within an HDF5 file or parent group.
 MANTID_NEXUS_DLL bool groupExists(H5::H5Object &h5, const std::string &groupPath);
 
