@@ -229,7 +229,7 @@ void updateEventProperties(AlgorithmRuntimeProps &properties, Slicing const &sli
   boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
 }
 
-boost::optional<double> getDouble(const IAlgorithm_sptr &algorithm, std::string const &property) {
+std::optional<double> getDouble(const IAlgorithm_sptr &algorithm, std::string const &property) {
   double result = algorithm->getProperty(property);
   return result;
 }

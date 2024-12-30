@@ -127,37 +127,31 @@ boost::optional<boost::optional<double>> parseScaleFactor(std::string const &sca
 boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, std::string const &max,
                                                        std::string const &step) {
   auto invalidParams = std::vector<int>();
-  auto minimum = boost::make_optional(false, double());
-  auto maximum = boost::make_optional(false, double());
-  auto stepValue = boost::make_optional(false, double());
+  std::optional<double> minimum = std::nullopt;
+  std::optional<double> maximum = std::nullopt;
+  std::optional<double> stepValue = std::nullopt;
 
   // If any values are set, check they parse ok
   if (!isEntirelyWhitespace(min)) {
-    auto minLocal = parseNonNegativeDouble(min);
-    if (minLocal.has_value())
-      minimum = minLocal.value();
-    else
+    minimum = parseNonNegativeDouble(min);
+    if (!minimum.has_value())
       invalidParams.emplace_back(0);
   }
 
   if (!isEntirelyWhitespace(max)) {
-    auto maxLocal = parseNonNegativeDouble(max);
-    if (maxLocal.has_value())
-      maximum = maxLocal.value();
-    else
+    maximum = parseNonNegativeDouble(max);
+    if (!maximum.has_value())
       invalidParams.emplace_back(1);
   }
 
   if (!isEntirelyWhitespace(step)) {
-    auto stepLocal = parseDouble(step);
-    if (stepLocal.has_value())
-      stepValue = stepLocal.value();
-    else
+    stepValue = parseDouble(step);
+    if (!stepValue.has_value())
       invalidParams.emplace_back(2);
   }
 
   // Check max is not less than min
-  if (maximum.is_initialized() && minimum.is_initialized() && maximum.get() < minimum.get()) {
+  if (maximum.has_value() && minimum.has_value() && maximum.value() < minimum.value()) {
     invalidParams.emplace_back(0);
     invalidParams.emplace_back(1);
   }

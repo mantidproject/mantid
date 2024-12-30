@@ -48,7 +48,7 @@ Row makeSimpleRow(std::string const &run, double theta) {
 }
 
 Row makeRow(std::string const &run, double theta, std::string const &trans1, std::string const &trans2,
-            boost::optional<double> qMin, boost::optional<double> qMax, boost::optional<double> qStep,
+            std::optional<double> qMin, std::optional<double> qMax, std::optional<double> qStep,
             boost::optional<double> scale, ReductionOptionsMap const &optionsMap) {
   return Row({run}, theta, TransmissionRunPair({trans1, trans2}),
              RangeInQ(std::move(qMin), std::move(qMax), std::move(qStep)), std::move(scale), optionsMap,
@@ -360,7 +360,7 @@ LookupTable makeEmptyLookupTable() { return LookupTable{}; }
 LookupTable makeLookupTable() {
   auto lookupRow =
       LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none,
-                RangeInQ(boost::none, boost::none, boost::none), boost::none, boost::none, boost::none, boost::none);
+                RangeInQ(std::nullopt, std::nullopt, std::nullopt), boost::none, boost::none, boost::none, boost::none);
   return LookupTable{std::move(lookupRow)};
 }
 
