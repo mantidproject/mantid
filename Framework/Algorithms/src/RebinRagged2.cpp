@@ -57,6 +57,7 @@ void RebinRagged::init() {
   declareProperty(std::make_unique<ArrayProperty<double>>("XMax"), "maximum x values with NaN meaning no maximum");
   declareProperty(std::make_unique<ArrayProperty<double>>("Delta"), "step parameter for rebin");
   declareProperty("PreserveEvents", true, "False converts event workspaces to histograms");
+  declareProperty("FullBinsOnly", false, "Omit the final bin if it's width is smaller than the step size");
 }
 
 std::map<std::string, std::string> RebinRagged::validateInputs() {
@@ -107,6 +108,7 @@ void RebinRagged::exec() {
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
   bool preserveEvents = getProperty("PreserveEvents");
+  bool fullBinsOnly = getProperty("FullBinsOnly");
 
   // Rebinning in-place
   bool inPlace = (inputWS == outputWS);
@@ -123,6 +125,7 @@ void RebinRagged::exec() {
     auto rebin = createChildAlgorithm("Rebin", 0.0, 1.0);
     rebin->setProperty("InputWorkspace", inputWS);
     rebin->setProperty("PreserveEvents", preserveEvents);
+    rebin->setProperty("FullBinsOnly", fullBinsOnly);
     const std::vector<double> params = {xmins[0], deltas[0], xmaxs[0]};
     rebin->setProperty("Params", params);
     rebin->execute();
@@ -164,7 +167,8 @@ void RebinRagged::exec() {
         const auto delta = deltas[hist];
 
         HistogramData::BinEdges XValues_new(0);
-        static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData()));
+        static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData(),
+                                                                  true, fullBinsOnly));
         EventList &el = eventOutputWS->getSpectrum(hist);
         el.setHistogram(XValues_new);
       }
@@ -188,7 +192,8 @@ void RebinRagged::exec() {
         const EventList &el = eventInputWS->getSpectrum(hist);
 
         HistogramData::BinEdges XValues_new(0);
-        static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData()));
+        static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData(),
+                                                                  true, fullBinsOnly));
 
         MantidVec y_data, e_data;
         // The EventList takes care of histogramming.
@@ -242,7 +247,8 @@ void RebinRagged::exec() {
       const auto delta = deltas[hist];
 
       HistogramData::BinEdges XValues_new(0);
-      static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData()));
+      static_cast<void>(VectorHelper::createAxisFromRebinParams({xmin, delta, xmax}, XValues_new.mutableRawData(), true,
+                                                                fullBinsOnly));
 
       outputWS->setHistogram(hist, HistogramData::rebin(inputWS->histogram(hist), XValues_new));
       prog.report();
