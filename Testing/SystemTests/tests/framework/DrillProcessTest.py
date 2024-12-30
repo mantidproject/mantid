@@ -121,6 +121,7 @@ class DrillProcessSANSTest(systemtesting.MantidSystemTest):
                 "BeamRadius": "0.05,0.05,0.05",
                 "CalculateResolution": "MildnerCarpenter",
                 "TransmissionBeamRadius": "0.2",
+                "NormaliseBy": "Time",
             }
         )
 
