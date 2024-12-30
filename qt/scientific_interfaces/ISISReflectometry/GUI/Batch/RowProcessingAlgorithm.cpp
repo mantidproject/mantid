@@ -148,7 +148,7 @@ void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow cons
 }
 
 void updateWavelengthRangeProperties(AlgorithmRuntimeProps &properties,
-                                     boost::optional<RangeInLambda> const &rangeInLambda) {
+                                     std::optional<RangeInLambda> const &rangeInLambda) {
   if (!rangeInLambda)
     return;
 

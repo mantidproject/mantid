@@ -9,6 +9,7 @@
 #include "ProcessingInstructions.h"
 #include "RangeInLambda.h"
 #include <boost/optional.hpp>
+#include <optional>
 #include <string>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -27,15 +28,14 @@ using RebinParameters = std::string;
 class MANTIDQT_ISISREFLECTOMETRY_DLL TransmissionStitchOptions {
 public:
   TransmissionStitchOptions();
-  TransmissionStitchOptions(boost::optional<RangeInLambda> overlapRange, RebinParameters rebinParameters,
-                            bool scaleRHS);
+  TransmissionStitchOptions(std::optional<RangeInLambda> overlapRange, RebinParameters rebinParameters, bool scaleRHS);
 
-  boost::optional<RangeInLambda> overlapRange() const;
+  std::optional<RangeInLambda> overlapRange() const;
   RebinParameters rebinParameters() const;
   bool scaleRHS() const;
 
 private:
-  boost::optional<RangeInLambda> m_overlapRange;
+  std::optional<RangeInLambda> m_overlapRange;
   RebinParameters m_rebinParameters;
   bool m_scaleRHS;
 };
