@@ -205,11 +205,11 @@ private:
     TS_ASSERT_EQUALS(static_cast<bool>(max), map[QString("maxPresent")].toBool())
     TS_ASSERT_EQUALS(static_cast<bool>(step), map[QString("stepPresent")].toBool())
     if (min)
-      TS_ASSERT_EQUALS(min.get(), map[QString("min")].toDouble())
+      TS_ASSERT_EQUALS(min.value(), map[QString("min")].toDouble())
     if (max)
-      TS_ASSERT_EQUALS(max.get(), map[QString("max")].toDouble())
+      TS_ASSERT_EQUALS(max.value(), map[QString("max")].toDouble())
     if (step)
-      TS_ASSERT_EQUALS(step.get(), map[QString("step")].toDouble())
+      TS_ASSERT_EQUALS(step.value(), map[QString("step")].toDouble())
   }
 
   void testTransmissionRunPair(const TransmissionRunPair &pair, const QMap<QString, QVariant> &map) {

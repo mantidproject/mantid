@@ -9,7 +9,7 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-using ValueFunction = boost::optional<double> (RangeInQ::*)() const;
+using ValueFunction = std::optional<double> (RangeInQ::*)() const;
 
 namespace { // unnamed
 std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromGroup(Group const &group,
@@ -20,10 +20,10 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromGroup(Group const &gr
 }
 
 MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, RangeInQ const &qRangeOutput,
-                                               ValueFunction valueFunction, boost::optional<int> precision) {
+                                               ValueFunction valueFunction, std::optional<int> precision) {
   auto maybeValue = (qRangeInput.*valueFunction)();
   auto useOutputValue = false;
-  if (!maybeValue.is_initialized()) {
+  if (!maybeValue.has_value()) {
     maybeValue = (qRangeOutput.*valueFunction)();
     useOutputValue = true;
   }
@@ -41,15 +41,20 @@ boost::optional<size_t> incrementIndex(const Row &row) {
 }
 
 std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, boost::optional<int> precision) {
+  // convert type for precision
+  std::optional<int> precisionStd = std::nullopt;
+  if (precision)
+    precisionStd = precision.get();
+
   auto lookupIndex = incrementIndex(row);
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
        MantidQt::MantidWidgets::Batch::Cell(valueToString(row.theta(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(row.transmissionWorkspaceNames().firstRunList()),
        MantidQt::MantidWidgets::Batch::Cell(row.transmissionWorkspaceNames().secondRunList()),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min, precision),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max, precision),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precision),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min, precisionStd),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max, precisionStd),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precisionStd),
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.scaleFactor(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions())),
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(lookupIndex, precision))});
