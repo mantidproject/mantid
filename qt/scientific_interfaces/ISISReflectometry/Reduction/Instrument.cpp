@@ -13,12 +13,12 @@ Instrument::Instrument()
       m_detectorCorrections(DetectorCorrections(false, DetectorCorrectionType::VerticalShift)),
       m_calibrationFilePath("") {}
 
-Instrument::Instrument(boost::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
+Instrument::Instrument(std::optional<RangeInLambda> wavelengthRange, MonitorCorrections monitorCorrections,
                        DetectorCorrections detectorCorrections, std::string calibrationFilePath)
     : m_wavelengthRange(std::move(wavelengthRange)), m_monitorCorrections(std::move(monitorCorrections)),
       m_detectorCorrections(detectorCorrections), m_calibrationFilePath(std::move(calibrationFilePath)) {}
 
-boost::optional<RangeInLambda> const &Instrument::wavelengthRange() const { return m_wavelengthRange; }
+const std::optional<RangeInLambda> &Instrument::wavelengthRange() const { return m_wavelengthRange; }
 
 MonitorCorrections const &Instrument::monitorCorrections() const { return m_monitorCorrections; }
 
@@ -30,9 +30,9 @@ size_t Instrument::monitorIndex() const { return m_monitorCorrections.monitorInd
 
 bool Instrument::integratedMonitors() const { return m_monitorCorrections.integrate(); }
 
-boost::optional<RangeInLambda> Instrument::monitorIntegralRange() const { return m_monitorCorrections.integralRange(); }
+std::optional<RangeInLambda> Instrument::monitorIntegralRange() const { return m_monitorCorrections.integralRange(); }
 
-boost::optional<RangeInLambda> Instrument::monitorBackgroundRange() const {
+std::optional<RangeInLambda> Instrument::monitorBackgroundRange() const {
   return m_monitorCorrections.backgroundRange();
 }
 
