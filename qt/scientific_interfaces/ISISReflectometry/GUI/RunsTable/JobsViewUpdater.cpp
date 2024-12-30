@@ -35,9 +35,9 @@ MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, Rang
   return result;
 }
 
-boost::optional<size_t> incrementIndex(const Row &row) {
+std::optional<size_t> incrementIndex(const Row &row) {
   auto lookupIndex = row.lookupIndex();
-  return lookupIndex.is_initialized() ? boost::optional<size_t>(lookupIndex.get() + 1) : boost::none;
+  return lookupIndex.has_value() ? std::optional<size_t>(lookupIndex.value() + 1) : std::nullopt;
 }
 
 std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, boost::optional<int> precision) {
@@ -57,7 +57,7 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, b
        qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precisionStd),
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.scaleFactor(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions())),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(lookupIndex, precision))});
+       MantidQt::MantidWidgets::Batch::Cell(optionalToString(lookupIndex, precisionStd))});
 }
 } // namespace
 
