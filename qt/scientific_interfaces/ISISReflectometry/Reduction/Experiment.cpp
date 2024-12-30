@@ -73,11 +73,11 @@ void Experiment::updateLookupRow(LookupRow lookupRow, double tolerance) {
   m_lookupTable.updateLookupRow(std::move(lookupRow), tolerance);
 }
 
-boost::optional<size_t> Experiment::getLookupRowIndexFromRow(Row const &row, double tolerance) const {
+std::optional<size_t> Experiment::getLookupRowIndexFromRow(Row const &row, double tolerance) const {
   if (auto const lookupRow = m_lookupTable.findLookupRow(row, tolerance)) {
     return m_lookupTable.getIndex(lookupRow.get());
   }
-  return boost::none;
+  return std::nullopt;
 }
 
 bool operator!=(Experiment const &lhs, Experiment const &rhs) { return !operator==(lhs, rhs); }
