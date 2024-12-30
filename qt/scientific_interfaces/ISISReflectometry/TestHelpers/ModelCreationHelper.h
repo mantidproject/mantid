@@ -27,9 +27,9 @@ MANTIDQT_ISISREFLECTOMETRY_DLL Row makeRow(double theta = 0.5);
 MANTIDQT_ISISREFLECTOMETRY_DLL Row makeRow(std::string const &run, double theta = 0.5);
 MANTIDQT_ISISREFLECTOMETRY_DLL Row makeSimpleRow(std::string const &run, double theta = 0.5);
 MANTIDQT_ISISREFLECTOMETRY_DLL Row makeRow(std::string const &run, double theta, std::string const &trans1,
-                                           std::string const &trans2, boost::optional<double> qMin = boost::none,
-                                           boost::optional<double> qMax = boost::none,
-                                           boost::optional<double> qStep = boost::none,
+                                           std::string const &trans2, std::optional<double> qMin = std::nullopt,
+                                           std::optional<double> qMax = std::nullopt,
+                                           std::optional<double> qStep = std::nullopt,
                                            boost::optional<double> scale = boost::none,
                                            ReductionOptionsMap const &optionsMap = ReductionOptionsMap());
 MANTIDQT_ISISREFLECTOMETRY_DLL Row makeRow(std::vector<std::string> const &runs, double theta = 0.5);

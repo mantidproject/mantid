@@ -72,9 +72,9 @@ public:
 
   void testDefaultLookupRowOptions() {
     auto result = getDefaults();
-    auto expected =
-        LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none,
-                  RangeInQ(boost::none, boost::none, boost::none), boost::none, boost::none, boost::none, boost::none);
+    auto expected = LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none,
+                              RangeInQ(std::nullopt, std::nullopt, std::nullopt), boost::none, boost::none, boost::none,
+                              boost::none);
     auto foundLookupRows = result.lookupTableRows();
     TS_ASSERT_EQUALS(foundLookupRows.size(), 1);
     if (!foundLookupRows.empty())
