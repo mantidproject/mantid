@@ -316,7 +316,7 @@ std::string ExperimentPresenter::transmissionStitchParamsFromView() {
   // If set, the params should be a list containing an odd number of double
   // values (as per the Params property of Rebin)
   auto maybeParamsList = parseList(stitchParams, parseDouble);
-  if (maybeParamsList.is_initialized() && maybeParamsList->size() % 2 != 0) {
+  if (maybeParamsList.has_value() && maybeParamsList->size() % 2 != 0) {
     m_view->showTransmissionStitchParamsValid();
     return stitchParams;
   }
