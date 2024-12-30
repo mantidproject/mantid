@@ -8,6 +8,7 @@
 #include "Common/DllConfig.h"
 #include "RangeInLambda.h"
 #include <boost/optional.hpp>
+#include <optional>
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
@@ -19,19 +20,19 @@ namespace ISISReflectometry {
  */
 class MANTIDQT_ISISREFLECTOMETRY_DLL MonitorCorrections {
 public:
-  MonitorCorrections(size_t monitorIndex, bool integrate, boost::optional<RangeInLambda> backgroundRange,
-                     boost::optional<RangeInLambda> integralRange);
+  MonitorCorrections(size_t monitorIndex, bool integrate, std::optional<RangeInLambda> backgroundRange,
+                     std::optional<RangeInLambda> integralRange);
 
   size_t monitorIndex() const;
   bool integrate() const;
-  boost::optional<RangeInLambda> backgroundRange() const;
-  boost::optional<RangeInLambda> integralRange() const;
+  std::optional<RangeInLambda> backgroundRange() const;
+  std::optional<RangeInLambda> integralRange() const;
 
 private:
   size_t m_monitorIndex;
   bool m_integrate;
-  boost::optional<RangeInLambda> m_backgroundRange;
-  boost::optional<RangeInLambda> m_integralRange;
+  std::optional<RangeInLambda> m_backgroundRange;
+  std::optional<RangeInLambda> m_integralRange;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator!=(MonitorCorrections const &lhs, MonitorCorrections const &rhs);

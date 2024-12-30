@@ -340,7 +340,7 @@ public:
 
   void testTransmissionRunRangeIsValidButNotUpdatedIfUnset() {
     RangeInLambda range(0.0, 0.0);
-    runTestForValidTransmissionRunRange(range, boost::none);
+    runTestForValidTransmissionRunRange(range, std::nullopt);
   }
 
   void testTransmissionParamsAreValidWithPositiveValue() { runTestForValidTransmissionParams("0.02"); }
@@ -1118,7 +1118,7 @@ private:
     presenter.notifySettingsChanged();
   }
 
-  void runTestForValidTransmissionRunRange(RangeInLambda const &range, boost::optional<RangeInLambda> const &result) {
+  void runTestForValidTransmissionRunRange(RangeInLambda const &range, std::optional<RangeInLambda> const &result) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getTransmissionStartOverlap()).WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getTransmissionEndOverlap()).WillOnce(Return(range.max()));
@@ -1133,7 +1133,7 @@ private:
     EXPECT_CALL(m_view, getTransmissionEndOverlap()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showTransmissionRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(presenter.experiment().transmissionStitchOptions().overlapRange(), boost::none);
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionStitchOptions().overlapRange(), std::nullopt);
   }
 
   // These functions create various rows in the per-theta defaults tables,

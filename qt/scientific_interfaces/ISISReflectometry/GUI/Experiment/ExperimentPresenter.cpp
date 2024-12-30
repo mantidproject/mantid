@@ -290,7 +290,7 @@ void ExperimentPresenter::disableFloodCorrectionInputs() {
   m_view->disableFloodCorrectionInputs();
 }
 
-boost::optional<RangeInLambda> ExperimentPresenter::transmissionRunRangeFromView() {
+std::optional<RangeInLambda> ExperimentPresenter::transmissionRunRangeFromView() {
   auto const range = RangeInLambda(m_view->getTransmissionStartOverlap(), m_view->getTransmissionEndOverlap());
   auto const bothOrNoneMustBeSet = false;
 
@@ -300,7 +300,7 @@ boost::optional<RangeInLambda> ExperimentPresenter::transmissionRunRangeFromView
     m_view->showTransmissionRangeInvalid();
 
   if (range.unset() || !range.isValid(bothOrNoneMustBeSet))
-    return boost::none;
+    return std::nullopt;
   else
     return range;
 }
