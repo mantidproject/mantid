@@ -11,7 +11,6 @@
 #include "MantidQtWidgets/Common/ParseKeyValueString.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
-#include <set>
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace { // unnamed
@@ -59,8 +58,8 @@ boost::optional<std::string> parseRunNumberOrWhitespace(std::string const &runNu
 
 boost::optional<double> parseTheta(std::string const &theta) {
   auto maybeTheta = parseNonNegativeDouble(theta);
-  if (maybeTheta.is_initialized() && maybeTheta.get() > 0.0)
-    return maybeTheta;
+  if (maybeTheta.has_value() && maybeTheta.value() > 0.0)
+    return maybeTheta.value();
   else
     return boost::none;
 }
@@ -120,8 +119,8 @@ boost::optional<boost::optional<double>> parseScaleFactor(std::string const &sca
   }
 
   auto value = parseDouble(scaleFactor);
-  if (value.is_initialized() && value != 0.0)
-    return value;
+  if (value.has_value() && value != 0.0)
+    return boost::optional<double>(value.value());
   return boost::none;
 }
 
@@ -134,20 +133,26 @@ boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, s
 
   // If any values are set, check they parse ok
   if (!isEntirelyWhitespace(min)) {
-    minimum = parseNonNegativeDouble(min);
-    if (!minimum.is_initialized())
+    auto minLocal = parseNonNegativeDouble(min);
+    if (minLocal.has_value())
+      minimum = minLocal.value();
+    else
       invalidParams.emplace_back(0);
   }
 
   if (!isEntirelyWhitespace(max)) {
-    maximum = parseNonNegativeDouble(max);
-    if (!maximum.is_initialized())
+    auto maxLocal = parseNonNegativeDouble(max);
+    if (maxLocal.has_value())
+      maximum = maxLocal.value();
+    else
       invalidParams.emplace_back(1);
   }
 
   if (!isEntirelyWhitespace(step)) {
-    stepValue = parseDouble(step);
-    if (!stepValue.is_initialized())
+    auto stepLocal = parseDouble(step);
+    if (stepLocal.has_value())
+      stepValue = stepLocal.value();
+    else
       invalidParams.emplace_back(2);
   }
 

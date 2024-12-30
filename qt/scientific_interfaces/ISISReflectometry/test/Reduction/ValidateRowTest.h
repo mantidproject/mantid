@@ -23,104 +23,104 @@ public:
   void test() {}
 
   void testParsesTriviallyValidDoubles() {
-    TS_ASSERT_DELTA(1.0, parseDouble("1.0").get(), TOLERANCE);
-    TS_ASSERT_DELTA(6.4, parseDouble("6.4").get(), TOLERANCE);
-    TS_ASSERT_DELTA(0.0, parseDouble("0").get(), TOLERANCE);
-    TS_ASSERT_DELTA(-7000.3, parseDouble("-7000.3").get(), TOLERANCE);
+    TS_ASSERT_DELTA(1.0, parseDouble("1.0").value(), TOLERANCE);
+    TS_ASSERT_DELTA(6.4, parseDouble("6.4").value(), TOLERANCE);
+    TS_ASSERT_DELTA(0.0, parseDouble("0").value(), TOLERANCE);
+    TS_ASSERT_DELTA(-7000.3, parseDouble("-7000.3").value(), TOLERANCE);
   }
 
   void testParsesValidDoublesWithLeadingAndTrailingWhitespace() {
-    TS_ASSERT_DELTA(1.0, parseDouble("  1.0  ").get(), TOLERANCE);
-    TS_ASSERT_DELTA(6.4, parseDouble("\n   6.4").get(), TOLERANCE);
-    TS_ASSERT_DELTA(0.0, parseDouble("0").get(), TOLERANCE);
-    TS_ASSERT_DELTA(-7000.3, parseDouble("\t-7000.3\t").get(), TOLERANCE);
+    TS_ASSERT_DELTA(1.0, parseDouble("  1.0  ").value(), TOLERANCE);
+    TS_ASSERT_DELTA(6.4, parseDouble("\n   6.4").value(), TOLERANCE);
+    TS_ASSERT_DELTA(0.0, parseDouble("0").value(), TOLERANCE);
+    TS_ASSERT_DELTA(-7000.3, parseDouble("\t-7000.3\t").value(), TOLERANCE);
   }
 
   void testFailsForTriviallyInvalidDoubles() {
-    TS_ASSERT_EQUALS(boost::none, parseDouble(""));
-    TS_ASSERT_EQUALS(boost::none, parseDouble("ABCD"));
-    TS_ASSERT_EQUALS(boost::none, parseDouble("A0.12"));
-    TS_ASSERT_EQUALS(boost::none, parseDouble("O.12"));
+    TS_ASSERT_EQUALS(std::nullopt, parseDouble(""));
+    TS_ASSERT_EQUALS(std::nullopt, parseDouble("ABCD"));
+    TS_ASSERT_EQUALS(std::nullopt, parseDouble("A0.12"));
+    TS_ASSERT_EQUALS(std::nullopt, parseDouble("O.12"));
   }
 
   void testFailsForOutOfRangeDoubles() {
     auto bigPositiveDoubleAsString = std::string(380, '9');
-    TS_ASSERT_EQUALS(boost::none, parseDouble(bigPositiveDoubleAsString));
+    TS_ASSERT_EQUALS(std::nullopt, parseDouble(bigPositiveDoubleAsString));
     auto smallNegativeDoubleAsString = "-" + bigPositiveDoubleAsString;
-    TS_ASSERT_EQUALS(boost::none, parseDouble(smallNegativeDoubleAsString));
+    TS_ASSERT_EQUALS(std::nullopt, parseDouble(smallNegativeDoubleAsString));
   }
 
   void testParsesTriviallyValidInts() {
-    TS_ASSERT_EQUALS(1, parseInt("1").get());
-    TS_ASSERT_EQUALS(64, parseInt("64").get());
-    TS_ASSERT_EQUALS(0, parseInt("0").get());
-    TS_ASSERT_EQUALS(-7000, parseInt("-7000").get());
+    TS_ASSERT_EQUALS(1, parseInt("1").value());
+    TS_ASSERT_EQUALS(64, parseInt("64").value());
+    TS_ASSERT_EQUALS(0, parseInt("0").value());
+    TS_ASSERT_EQUALS(-7000, parseInt("-7000").value());
   }
 
   void testParsesValidIntsWithLeadingAndTrailingWhitespace() {
-    TS_ASSERT_EQUALS(10, parseInt("  10  ").get());
-    TS_ASSERT_EQUALS(64, parseInt("\n   64").get());
-    TS_ASSERT_EQUALS(0, parseInt("  0\r\n").get());
-    TS_ASSERT_EQUALS(-7003, parseInt("\t-7003\t").get());
+    TS_ASSERT_EQUALS(10, parseInt("  10  ").value());
+    TS_ASSERT_EQUALS(64, parseInt("\n   64").value());
+    TS_ASSERT_EQUALS(0, parseInt("  0\r\n").value());
+    TS_ASSERT_EQUALS(-7003, parseInt("\t-7003\t").value());
   }
 
   void testParsesValidIntsWithLeadingZeroes() {
-    TS_ASSERT_EQUALS(30, parseInt("000030").get());
-    TS_ASSERT_EQUALS(64, parseInt(" 00064").get());
-    TS_ASSERT_EQUALS(100, parseInt("00100").get());
+    TS_ASSERT_EQUALS(30, parseInt("000030").value());
+    TS_ASSERT_EQUALS(64, parseInt(" 00064").value());
+    TS_ASSERT_EQUALS(100, parseInt("00100").value());
   }
 
   void testFailsForTriviallyInvalidInts() {
-    TS_ASSERT_EQUALS(boost::none, parseInt(""));
-    TS_ASSERT_EQUALS(boost::none, parseInt("ABCD"));
-    TS_ASSERT_EQUALS(boost::none, parseInt("A0"));
-    TS_ASSERT_EQUALS(boost::none, parseInt("O.12"));
+    TS_ASSERT_EQUALS(std::nullopt, parseInt(""));
+    TS_ASSERT_EQUALS(std::nullopt, parseInt("ABCD"));
+    TS_ASSERT_EQUALS(std::nullopt, parseInt("A0"));
+    TS_ASSERT_EQUALS(std::nullopt, parseInt("O.12"));
   }
 
   void testFailsForOutOfRangeInts() {
     auto bigPositiveIntAsString = std::string(380, '9');
-    TS_ASSERT_EQUALS(boost::none, parseInt(bigPositiveIntAsString));
+    TS_ASSERT_EQUALS(std::nullopt, parseInt(bigPositiveIntAsString));
     auto smallNegativeIntAsString = "-" + bigPositiveIntAsString;
-    TS_ASSERT_EQUALS(boost::none, parseInt(smallNegativeIntAsString));
+    TS_ASSERT_EQUALS(std::nullopt, parseInt(smallNegativeIntAsString));
   }
 
   void testParsesTriviallyValidNonNegativeInts() {
-    TS_ASSERT_EQUALS(1, parseNonNegativeInt("1").get());
-    TS_ASSERT_EQUALS(64, parseNonNegativeInt("64").get());
-    TS_ASSERT_EQUALS(0, parseNonNegativeInt("0").get());
-    TS_ASSERT_EQUALS(6999, parseNonNegativeInt("6999").get());
+    TS_ASSERT_EQUALS(1, parseNonNegativeInt("1").value());
+    TS_ASSERT_EQUALS(64, parseNonNegativeInt("64").value());
+    TS_ASSERT_EQUALS(0, parseNonNegativeInt("0").value());
+    TS_ASSERT_EQUALS(6999, parseNonNegativeInt("6999").value());
   }
 
   void testParsesValidNonNegativeIntsWithLeadingAndTrailingWhitespace() {
-    TS_ASSERT_EQUALS(13, parseNonNegativeInt("  13  ").get());
-    TS_ASSERT_EQUALS(58, parseNonNegativeInt("\n   58").get());
-    TS_ASSERT_EQUALS(0, parseNonNegativeInt("  0\r\n").get());
-    TS_ASSERT_EQUALS(7003, parseNonNegativeInt("\t7003\t").get());
+    TS_ASSERT_EQUALS(13, parseNonNegativeInt("  13  ").value());
+    TS_ASSERT_EQUALS(58, parseNonNegativeInt("\n   58").value());
+    TS_ASSERT_EQUALS(0, parseNonNegativeInt("  0\r\n").value());
+    TS_ASSERT_EQUALS(7003, parseNonNegativeInt("\t7003\t").value());
   }
 
   void testParsesValidNonNegativeIntsWithLeadingZeroes() {
-    TS_ASSERT_EQUALS(30, parseNonNegativeInt("000030").get());
-    TS_ASSERT_EQUALS(64, parseNonNegativeInt(" 00064").get());
-    TS_ASSERT_EQUALS(100, parseNonNegativeInt("00100").get());
+    TS_ASSERT_EQUALS(30, parseNonNegativeInt("000030").value());
+    TS_ASSERT_EQUALS(64, parseNonNegativeInt(" 00064").value());
+    TS_ASSERT_EQUALS(100, parseNonNegativeInt("00100").value());
   }
 
   void testFailsForTriviallyInvalidNonNegativeInts() {
-    TS_ASSERT_EQUALS(boost::none, parseNonNegativeInt(""));
-    TS_ASSERT_EQUALS(boost::none, parseNonNegativeInt("ABCD"));
-    TS_ASSERT_EQUALS(boost::none, parseNonNegativeInt("A0"));
-    TS_ASSERT_EQUALS(boost::none, parseNonNegativeInt("O.12"));
+    TS_ASSERT_EQUALS(std::nullopt, parseNonNegativeInt(""));
+    TS_ASSERT_EQUALS(std::nullopt, parseNonNegativeInt("ABCD"));
+    TS_ASSERT_EQUALS(std::nullopt, parseNonNegativeInt("A0"));
+    TS_ASSERT_EQUALS(std::nullopt, parseNonNegativeInt("O.12"));
   }
 
   void testFailsForOutOfRangeNonNegativeInts() {
     auto bigPositiveIntAsString = std::string(380, '9');
-    TS_ASSERT_EQUALS(boost::none, parseNonNegativeInt(bigPositiveIntAsString));
+    TS_ASSERT_EQUALS(std::nullopt, parseNonNegativeInt(bigPositiveIntAsString));
     auto smallNegativeIntAsString = "-" + bigPositiveIntAsString;
-    TS_ASSERT_EQUALS(boost::none, parseNonNegativeInt(smallNegativeIntAsString));
+    TS_ASSERT_EQUALS(std::nullopt, parseNonNegativeInt(smallNegativeIntAsString));
   }
 
   void testFailsForNegativeInts() {
-    TS_ASSERT_EQUALS(boost::none, parseNonNegativeInt("-1"));
-    TS_ASSERT_EQUALS(boost::none, parseNonNegativeInt("-3400"));
+    TS_ASSERT_EQUALS(std::nullopt, parseNonNegativeInt("-1"));
+    TS_ASSERT_EQUALS(std::nullopt, parseNonNegativeInt("-3400"));
   }
 
   void testParsesSingleRunNumber() {
