@@ -30,7 +30,7 @@ repos:
       exclude: Testing/Tools/cxxtest|tools|qt/icons/resources/
 
   - repo: https://github.com/mantidproject/pre-commit-hooks.git
-    rev: 17c2842277953a4afcbca26bf84e8956f729e765
+    rev: 15c7c52cf8eeb0d74c736a1f100743a244c2f0a8
     hooks:
       - id: cmake-missing-pytest-files
         # Exclude sphinx / template file
@@ -59,7 +59,7 @@ repos:
           )$
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.8.3
+    rev: v0.8.4
     # ruff must appear before black in the list of hooks
     hooks:
       - id: ruff
