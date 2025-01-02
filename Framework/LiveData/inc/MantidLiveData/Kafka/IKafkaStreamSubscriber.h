@@ -6,7 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidLiveData/DllConfig.h"
+#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -27,7 +28,7 @@ enum class SubscribeAtOption {
 /**
   Interface for classes that subscribe to Kafka streams.
 */
-class DLLExport IKafkaStreamSubscriber {
+class MANTID_LIVEDATA_DLL IKafkaStreamSubscriber {
 public:
   virtual ~IKafkaStreamSubscriber() = default;
   virtual void subscribe() = 0;
