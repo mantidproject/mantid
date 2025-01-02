@@ -265,13 +265,13 @@ class IntegratePeaksShoeboxTOFTest(unittest.TestCase):
             for i_pk, pk in enumerate(peaksws):
                 self.assertEqual(pk.getPeakShape().shapeName(), "detectorbin")
                 pk_shape_dict = json.loads(pk.getPeakShape().toJSON())
-                self.assertEqual(len(pk_shape_dict["detectors"]), 4)
+                self.assertEqual(len(pk_shape_dict["detectors"]), 9)
                 self.assertEqual(pk_shape_dict["algorithm_name"], "IntegratePeaksShoeboxTOF")
                 for det in pk_shape_dict["detectors"]:
                     self.assertEqual(det["startX"], start_end_points[i_pk][0])
                     self.assertEqual(det["endX"], start_end_points[i_pk][1])
 
-        _test_shapes(out, ((2, 4), (7, 9)))
+        _test_shapes(out, ((2.5, 4.5), (8.5, 10.5)))
 
 
 if __name__ == "__main__":

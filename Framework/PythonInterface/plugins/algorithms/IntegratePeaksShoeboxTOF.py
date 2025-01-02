@@ -63,6 +63,7 @@ class ShoeboxResult:
         self.ipos_pk = list(ipk_pos)
         self.labels = ["Row", "Col", "TOF"]
         self.ysum = []
+        self.x = x
         self.xmin, self.xmax = np.round(x[0], 1), np.round(x[-1], 1)
         self.status = status
         # integrate y over each dim
@@ -334,7 +335,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         weak_peaks_list = []
         ipks_strong = []
         results = np.full(peaks.getNumberPeaks(), None)
-        peaks_spec_and_det_ids = np.full(peaks.getNumberPeaks(), None)
+        peaks_det_ids = np.full(peaks.getNumberPeaks(), None)
         prog_reporter = Progress(self, start=0.0, end=1.0, nreports=peaks.getNumberPeaks())
         for ipk, peak in enumerate(peaks):
             prog_reporter.report("Integrating")
@@ -368,6 +369,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 ix = np.argmin(abs(x - pk_tof))
                 ipos_predicted = [peak_data.irow, peak_data.icol, ix]
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
+                peaks_det_ids[ipk] = peak_data.detids
 
                 intens, sigma, i_over_sig, status, ipos, nrows, ncols, nbins = integrate_peak(
                     ws,
@@ -386,8 +388,6 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                     weak_peak_threshold,
                     do_optimise_shoebox,
                 )
-                if (ipos is not None) and (status is not PEAK_STATUS.WEAK):
-                    peaks_spec_and_det_ids[ipk] = [ispecs[ipos[0], ipos[1]], peak_data.detids]
 
                 if status == PEAK_STATUS.WEAK and do_optimise_shoebox and weak_peak_strategy == "NearestStrongPeak":
                     # look for possible strong peaks at any TOF in the window (won't know if strong until all pks integrated)
@@ -438,7 +438,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
                 x, y, esq, ispecs = get_and_clip_data_arrays(ws, peak_data, pk_tof, kernel, nshoebox)
                 # integrate at previously found ipos
                 ipos = [*np.argwhere(ispecs == weak_pk.ispec)[0], np.argmin(abs(x - weak_pk.tof))]
-                peaks_spec_and_det_ids[ipk] = [ispecs[ipos[0], ipos[1]], peak_data.detids]
+                peaks_det_ids[ipk] = peak_data.detids
 
                 det_edges = peak_data.det_edges if not integrate_on_edge else None
                 intens, sigma, i_over_sig, status = integrate_shoebox_at_pos(y, esq, kernel, ipos, weak_peak_threshold, det_edges)
@@ -461,7 +461,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
             )
 
         # Sets PeakShapeDetectorBin shapes for successfully integrated peaks
-        self._set_peak_shapes(results, peaks_spec_and_det_ids, ws, peaks)
+        self._set_peak_shapes(results, peaks_det_ids, peaks)
 
         # plot output
         if output_file:
@@ -471,24 +471,23 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         # assign output
         self.setProperty("OutputWorkspace", peaks)
 
-    def _set_peak_shapes(self, shoebox_results, peaks_spec_and_det_ids, input_ws, peaks_ws):
+    def _set_peak_shapes(self, shoebox_results, peaks_det_ids, peaks_ws):
         """
-        Sets PeakShapeDetectorBin - shapes for the successfully integrated peaks
+        Sets PeakShapeDetectorBin shapes for the successfully integrated peaks
         @param shoebox_results - ShoeboxResult array for each peak
-        @param peaks_spec_and_det_ids - array of (spectrum id, detector ids) related to each peak
-        @param input_ws - input workspace
+        @param peaks_det_ids - detector ids related to each peak
         @param peaks_ws - peaks workspace
         """
-        for ipk, (shoebox_res, spec_detids) in enumerate(zip(shoebox_results, peaks_spec_and_det_ids)):
-            if shoebox_res is not None and spec_detids is not None:
+        for ipk, (shoebox_res, peak_detids) in enumerate(zip(shoebox_results, peaks_det_ids)):
+            if shoebox_res is not None and peak_detids is not None:
                 if shoebox_res.status != PEAK_STATUS.ON_EDGE and shoebox_res.status != PEAK_STATUS.NO_PEAK:
                     det_id_row_start = shoebox_res.ipos[0] - shoebox_res.peak_shape[0] // 2
-                    det_id_row_end = shoebox_res.ipos[0] + shoebox_res.peak_shape[0] // 2
+                    det_id_row_end = shoebox_res.ipos[0] + shoebox_res.peak_shape[0] // 2 + 1
                     det_id_col_start = shoebox_res.ipos[1] - shoebox_res.peak_shape[1] // 2
-                    det_id_col_end = shoebox_res.ipos[1] + shoebox_res.peak_shape[1] // 2
-                    selected_det_ids = spec_detids[-1][det_id_row_start:det_id_row_end, det_id_col_start:det_id_col_end]
-                    xstart = input_ws.readX(int(spec_detids[0]))[shoebox_res.ipos[2] - shoebox_res.peak_shape[2] // 2]
-                    xend = input_ws.readX(int(spec_detids[0]))[shoebox_res.ipos[2] + shoebox_res.peak_shape[2] // 2]
+                    det_id_col_end = shoebox_res.ipos[1] + shoebox_res.peak_shape[1] // 2 + 1
+                    selected_det_ids = peak_detids[det_id_row_start:det_id_row_end, det_id_col_start:det_id_col_end]
+                    xstart = shoebox_res.x[shoebox_res.ipos[2] - shoebox_res.peak_shape[2] // 2]
+                    xend = shoebox_res.x[shoebox_res.ipos[2] + shoebox_res.peak_shape[2] // 2]
                     det_bin_list = [(int(det_id), xstart, xend) for det_id in selected_det_ids.ravel()]
                     peak_shape = PeakShapeDetectorBin(det_bin_list, SpecialCoordinateSystem.NONE, self.name(), self.version())
                     peak = peaks_ws.getPeak(ipk)
