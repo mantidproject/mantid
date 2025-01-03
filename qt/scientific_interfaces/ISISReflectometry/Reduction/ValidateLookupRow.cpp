@@ -54,11 +54,11 @@ ValidatorT<boost::optional<double>> LookupRowValidator::parseThetaOrWhitespace(C
   return boost::none;
 }
 
-ValidatorT<boost::optional<boost::regex>> LookupRowValidator::parseTitleMatcherOrWhitespace(CellText const &cellText) {
+ValidatorT<std::optional<boost::regex>> LookupRowValidator::parseTitleMatcherOrWhitespace(CellText const &cellText) {
   auto const &text = cellText[LookupRow::Column::TITLE];
   if (isEntirelyWhitespace(text)) {
     // Mark validator as passed, but the enclosed value empty
-    return boost::optional<boost::regex>(boost::none);
+    return boost::make_optional<std::optional<boost::regex>>(std::nullopt);
   }
 
   // This check relies on us checking for whitespace chars before calling parseTitleMatcher
@@ -131,7 +131,7 @@ void LookupRowValidator::validateThetaAndRegex() {
     return;
 
   // Check we have a theta value, when we have a titleMatcher
-  if (m_titleMatcherOrInvalid.get().is_initialized() && !m_thetaOrInvalid.get().is_initialized()) {
+  if (m_titleMatcherOrInvalid.get().has_value() && !m_thetaOrInvalid.get().is_initialized()) {
     m_invalidColumns.insert(LookupRow::Column::THETA);
     m_invalidColumns.insert(LookupRow::Column::TITLE);
     m_thetaOrInvalid = boost::none;

@@ -13,7 +13,7 @@ constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-LookupRow::LookupRow(boost::optional<double> theta, boost::optional<boost::regex> titleMatcher,
+LookupRow::LookupRow(boost::optional<double> theta, std::optional<boost::regex> titleMatcher,
                      TransmissionRunPair transmissionRuns,
                      boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
                      boost::optional<double> scaleFactor,
@@ -30,11 +30,11 @@ LookupRow::LookupRow(boost::optional<double> theta, boost::optional<boost::regex
 
 TransmissionRunPair const &LookupRow::transmissionWorkspaceNames() const { return m_transmissionRuns; }
 
-bool LookupRow::isWildcard() const { return !m_theta.is_initialized() && !m_titleMatcher.is_initialized(); }
+bool LookupRow::isWildcard() const { return !m_theta.is_initialized() && !m_titleMatcher.has_value(); }
 
 boost::optional<double> LookupRow::thetaOrWildcard() const { return m_theta; }
 
-boost::optional<boost::regex> LookupRow::titleMatcher() const { return m_titleMatcher; }
+std::optional<boost::regex> LookupRow::titleMatcher() const { return m_titleMatcher; }
 
 RangeInQ const &LookupRow::qRange() const { return m_qRange; }
 

@@ -64,14 +64,14 @@ boost::optional<double> parseTheta(std::string const &theta) {
     return boost::none;
 }
 
-boost::optional<boost::regex> parseTitleMatcher(std::string const &titleMatcher) {
+std::optional<boost::regex> parseTitleMatcher(std::string const &titleMatcher) {
   if (isEntirelyWhitespace(titleMatcher)) {
-    return boost::none;
+    return std::nullopt;
   }
   try {
     return boost::regex(titleMatcher);
   } catch (boost::regex_error const &) {
-    return boost::none;
+    return std::nullopt;
   }
 }
 
