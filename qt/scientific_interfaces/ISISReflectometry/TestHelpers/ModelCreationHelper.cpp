@@ -345,7 +345,7 @@ ReductionJobs oneGroupWithTwoRowsWithOutputNamesModel() {
 
 /* Experiment */
 
-LookupRow makeLookupRow(boost::optional<double> angle, boost::optional<boost::regex> titleMatcher) {
+LookupRow makeLookupRow(boost::optional<double> angle, std::optional<boost::regex> titleMatcher) {
   return LookupRow(
       std::move(angle), std::move(titleMatcher),
       TransmissionRunPair(std::vector<std::string>{"22348", "22349"}, std::vector<std::string>{"22358", "22359"}),
@@ -353,19 +353,19 @@ LookupRow makeLookupRow(boost::optional<double> angle, boost::optional<boost::re
       ProcessingInstructions("2-3,7-8"), ProcessingInstructions("3-22"));
 }
 
-LookupRow makeWildcardLookupRow() { return makeLookupRow(boost::none, boost::none); }
+LookupRow makeWildcardLookupRow() { return makeLookupRow(boost::none, std::nullopt); }
 
 LookupTable makeEmptyLookupTable() { return LookupTable{}; }
 
 LookupTable makeLookupTable() {
   auto lookupRow =
-      LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none,
+      LookupRow(boost::none, std::nullopt, TransmissionRunPair(), boost::none,
                 RangeInQ(std::nullopt, std::nullopt, std::nullopt), boost::none, boost::none, boost::none, boost::none);
   return LookupTable{std::move(lookupRow)};
 }
 
 LookupTable makeLookupTableWithTwoAngles() {
-  return LookupTable{LookupRow(0.5, boost::none, TransmissionRunPair("22347", ""), boost::none,
+  return LookupTable{LookupRow(0.5, std::nullopt, TransmissionRunPair("22347", ""), boost::none,
                                RangeInQ(0.008, 0.02, 1.2), 0.8, ProcessingInstructions("2-3"), boost::none,
                                boost::none),
                      makeLookupRow(2.3)};
@@ -374,11 +374,11 @@ LookupTable makeLookupTableWithTwoAngles() {
 LookupTable makeLookupTableWithTwoAnglesAndWildcard() {
   return LookupTable{
       // wildcard row with no angle
-      LookupRow(boost::none, boost::none, TransmissionRunPair("22345", "22346"), ProcessingInstructions("5-6"),
+      LookupRow(boost::none, std::nullopt, TransmissionRunPair("22345", "22346"), ProcessingInstructions("5-6"),
                 RangeInQ(0.007, 0.01, 1.1), 0.7, ProcessingInstructions("1"), ProcessingInstructions("3,7"),
                 ProcessingInstructions("3-22")),
       // two angle rows
-      LookupRow(0.5, boost::none, TransmissionRunPair("22347", ""), boost::none, RangeInQ(0.008, 0.02, 1.2), 0.8,
+      LookupRow(0.5, std::nullopt, TransmissionRunPair("22347", ""), boost::none, RangeInQ(0.008, 0.02, 1.2), 0.8,
                 ProcessingInstructions("2-3"), boost::none, boost::none),
       LookupRow(makeLookupRow(2.3))};
 }

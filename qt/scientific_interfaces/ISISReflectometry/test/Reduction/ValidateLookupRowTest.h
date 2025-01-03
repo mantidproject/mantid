@@ -44,8 +44,8 @@ public:
   void testParseTitleMatcherEmpty() {
     LookupRowValidator validator;
     auto result = validator({"0.5", ""});
-    TS_ASSERT(result.isValid());                                     // Outer initialized (not invalid)
-    TS_ASSERT(!result.assertValid().titleMatcher().is_initialized()) // Inner not initialized (empty)
+    TS_ASSERT(result.isValid());                                // Outer initialized (not invalid)
+    TS_ASSERT(!result.assertValid().titleMatcher().has_value()) // Inner not initialized (empty)
   }
 
   void testParseTitleMatcherWhitespace() {
@@ -53,7 +53,7 @@ public:
     auto result = validator({"0.5", "    \t"});
     TS_ASSERT(result.isValid());
     // All whitespace is the equivalent of an empty string
-    TS_ASSERT(!result.assertValid().titleMatcher().is_initialized())
+    TS_ASSERT(!result.assertValid().titleMatcher().has_value())
   }
 
   void testParseTitleMatcherSimpleValid() {
@@ -63,8 +63,8 @@ public:
     TS_ASSERT(result.isValid());
 
     auto const &titleMatcher = result.assertValid().titleMatcher();
-    TS_ASSERT(titleMatcher.is_initialized())
-    TS_ASSERT_EQUALS(expected, titleMatcher.get().expression())
+    TS_ASSERT(titleMatcher.has_value())
+    TS_ASSERT_EQUALS(expected, titleMatcher.value().expression())
   }
 
   void testParseTitleMatcherRegexCharsValid() {
@@ -74,8 +74,8 @@ public:
     TS_ASSERT(result.isValid());
 
     auto const &titleMatcher = result.assertValid().titleMatcher();
-    TS_ASSERT(titleMatcher.is_initialized())
-    TS_ASSERT_EQUALS(expected, titleMatcher.get().expression())
+    TS_ASSERT(titleMatcher.has_value())
+    TS_ASSERT_EQUALS(expected, titleMatcher.value().expression())
   }
 
   void testParseTitleMatcherInvalid() {

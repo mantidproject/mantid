@@ -291,7 +291,7 @@ public:
 
   void test_searching_by_title_matches_empty_regex() {
     auto constexpr angle = 2.3;
-    auto emptyRegexRow = ModelCreationHelper::makeLookupRow(angle, boost::none);
+    auto emptyRegexRow = ModelCreationHelper::makeLookupRow(angle, std::nullopt);
     auto table = LookupTable{emptyRegexRow};
 
     auto group = Group("En Oh", {ModelCreationHelper::makeRow(angle)});
@@ -302,7 +302,7 @@ public:
 
   void test_searching_by_title_matches_empty_regex_for_preview_row() {
     auto constexpr angle = 2.3;
-    auto emptyRegexRow = ModelCreationHelper::makeLookupRow(angle, boost::none);
+    auto emptyRegexRow = ModelCreationHelper::makeLookupRow(angle, std::nullopt);
     auto table = LookupTable{emptyRegexRow};
 
     auto row = ModelCreationHelper::makePreviewRow(angle, "En Oh"s);
@@ -313,7 +313,7 @@ public:
 
   void test_empty_title_matches_only_empty_regex() {
     auto constexpr angle = 2.3;
-    auto emptyRegexRow = ModelCreationHelper::makeLookupRow(angle, boost::none);
+    auto emptyRegexRow = ModelCreationHelper::makeLookupRow(angle, std::nullopt);
     auto regexRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay"));
     auto table = LookupTable{emptyRegexRow, regexRow};
 
@@ -325,7 +325,7 @@ public:
 
   void test_empty_title_matches_only_empty_regex_for_preview_row() {
     auto constexpr angle = 2.3;
-    auto emptyRegexRow = ModelCreationHelper::makeLookupRow(angle, boost::none);
+    auto emptyRegexRow = ModelCreationHelper::makeLookupRow(angle, std::nullopt);
     auto regexRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay"));
     auto table = LookupTable{emptyRegexRow, regexRow};
 
@@ -337,7 +337,7 @@ public:
 
   void test_no_loaded_ws_matches_only_empty_regex_for_preview_row() {
     auto constexpr angle = 2.3;
-    auto emptyRegexRow = ModelCreationHelper::makeLookupRow(angle, boost::none);
+    auto emptyRegexRow = ModelCreationHelper::makeLookupRow(angle, std::nullopt);
     auto regexRow = ModelCreationHelper::makeLookupRow(angle, boost::regex("Ay"));
     auto table = LookupTable{emptyRegexRow, regexRow};
 
@@ -370,7 +370,7 @@ public:
   void test_searching_with_no_matching_title_but_matching_theta_with_matching_title_present() {
     auto angle = 0.7;
     auto regexRow = ModelCreationHelper::makeLookupRow(2.3, boost::regex("Ay"));
-    auto nonRegexRow = ModelCreationHelper::makeLookupRow(angle, boost::none);
+    auto nonRegexRow = ModelCreationHelper::makeLookupRow(angle, std::nullopt);
     auto table = LookupTable{regexRow, nonRegexRow};
 
     auto group = Group("Ay Bee", {ModelCreationHelper::makeRow(angle)});
@@ -382,7 +382,7 @@ public:
   void test_searching_with_no_matching_title_but_matching_theta_with_matching_title_present_for_preview_row() {
     auto angle = 0.7;
     auto regexRow = ModelCreationHelper::makeLookupRow(2.3, boost::regex("Ay"));
-    auto nonRegexRow = ModelCreationHelper::makeLookupRow(angle, boost::none);
+    auto nonRegexRow = ModelCreationHelper::makeLookupRow(angle, std::nullopt);
     auto table = LookupTable{regexRow, nonRegexRow};
 
     auto row = ModelCreationHelper::makePreviewRow(angle, "Ay Bee"s);

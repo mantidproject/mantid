@@ -72,7 +72,7 @@ public:
 
   void testDefaultLookupRowOptions() {
     auto result = getDefaults();
-    auto expected = LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none,
+    auto expected = LookupRow(boost::none, std::nullopt, TransmissionRunPair(), boost::none,
                               RangeInQ(std::nullopt, std::nullopt, std::nullopt), boost::none, boost::none, boost::none,
                               boost::none);
     auto foundLookupRows = result.lookupTableRows();
@@ -83,7 +83,7 @@ public:
 
   void testValidLookupRowOptionsFromParamsFile() {
     auto result = getDefaultsFromParamsFile("Experiment");
-    auto expected = LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
+    auto expected = LookupRow(boost::none, std::nullopt, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
                               0.7, std::string("390-415"), std::string("370-389,416-430"), boost::none);
     auto foundLookupRows = result.lookupTableRows();
     TS_ASSERT_EQUALS(foundLookupRows.size(), 1);
