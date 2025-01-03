@@ -1,6 +1,6 @@
 # mantid.utils.reflectometry tests
 
-set(TEST_PY_FILES orso_helper_test.py)
+set(TEST_PY_FILES orso_helper_test.py polarization_helpers_test.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
