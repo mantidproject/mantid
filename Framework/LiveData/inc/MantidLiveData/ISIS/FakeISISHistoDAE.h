@@ -10,6 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidLiveData/DllConfig.h"
 
 namespace Mantid {
 namespace LiveData {
@@ -24,7 +25,7 @@ namespace LiveData {
     different time regime (they have different binning to the rest of the
     spectra).
 */
-class DLLExport FakeISISHistoDAE final : public API::Algorithm {
+class MANTID_LIVEDATA_DLL FakeISISHistoDAE final : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FakeISISHistoDAE"; }

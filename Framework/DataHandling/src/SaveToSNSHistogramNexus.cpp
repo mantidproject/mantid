@@ -389,7 +389,6 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDet
  */
 int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank, int is_definition) {
   int dataType, dataRank, dataDimensions[NX_MAXRANK];
-  NXname nxName;
   void *dataBuffer;
 
   if (NXgetinfo(inId, &dataRank, dataDimensions, &dataType) != NX_OK)
@@ -405,6 +404,7 @@ int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank, int is_defi
       return NX_ERROR;
     if (NXgetdata(inId, dataBuffer) != NX_OK)
       return NX_ERROR;
+    NXname nxName;
     if (NXcompmakedata(outId, nxName, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK)
       return NX_ERROR;
     if (NXopendata(outId, nxName) != NX_OK)

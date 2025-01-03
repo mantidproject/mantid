@@ -85,6 +85,7 @@ set(SRC_FILES
     src/MDTransfQ3D.cpp
     src/MDWSDescription.cpp
     src/MDWSTransform.cpp
+    src/MagneticFormFactorCorrectionMD.cpp
     src/MaskMD.cpp
     src/MergeMD.cpp
     src/MergeMDFiles.cpp
@@ -96,6 +97,7 @@ set(SRC_FILES
     src/PolarizationAngleCorrectionMD.cpp
     src/PowerMD.cpp
     src/PreprocessDetectorsToMD.cpp
+    src/QTransform.cpp
     src/QueryMDWorkspace.cpp
     src/RecalculateTrajectoriesExtents.cpp
     src/ReplicateMD.cpp
@@ -205,6 +207,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/MDTransfQ3D.h
     inc/MantidMDAlgorithms/MDWSDescription.h
     inc/MantidMDAlgorithms/MDWSTransform.h
+    inc/MantidMDAlgorithms/MagneticFormFactorCorrectionMD.h
     inc/MantidMDAlgorithms/MaskMD.h
     inc/MantidMDAlgorithms/MergeMD.h
     inc/MantidMDAlgorithms/MergeMDFiles.h
@@ -216,6 +219,7 @@ set(INC_FILES
     inc/MantidMDAlgorithms/PolarizationAngleCorrectionMD.h
     inc/MantidMDAlgorithms/PowerMD.h
     inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h
+    inc/MantidMDAlgorithms/QTransform.h
     inc/MantidMDAlgorithms/QueryMDWorkspace.h
     inc/MantidMDAlgorithms/RecalculateTrajectoriesExtents.h
     inc/MantidMDAlgorithms/ReplicateMD.h
@@ -318,6 +322,7 @@ set(TEST_FILES
     MDTransfQ3DTest.h
     MDWSDescriptionTest.h
     MDWSTransfTest.h
+    MagneticFormFactorCorrectionMDTest.h
     MaskMDTest.h
     MergeMDFilesTest.h
     MergeMDTest.h
@@ -329,6 +334,7 @@ set(TEST_FILES
     PolarizationAngleCorrectionMDTest.h
     PowerMDTest.h
     PreprocessDetectorsToMDTest.h
+    QTransformTest.h
     QueryMDWorkspaceTest.h
     RecalculateTrajectoriesExtentsTest.h
     ReplicateMDTest.h

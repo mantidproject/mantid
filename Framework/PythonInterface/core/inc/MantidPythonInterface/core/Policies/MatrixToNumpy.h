@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 #include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
 #include "MantidPythonInterface/core/Converters/MatrixToNDArray.h"
 #include "MantidPythonInterface/core/NDArray.h"

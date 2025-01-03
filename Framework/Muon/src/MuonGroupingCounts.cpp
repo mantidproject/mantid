@@ -13,7 +13,6 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidHistogramData/HistogramMath.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/System.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
 #include <boost/format.hpp>
 

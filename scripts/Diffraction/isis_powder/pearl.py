@@ -98,7 +98,7 @@ class Pearl(AbstractInst):
 
     def get_trans_module_indices(self):
         default_imods = list(range(9))  # all modules 1-9 in transverse banks (tth~90 deg)
-        default_mod_nums_str = ""
+        default_mod_nums_str = "1-9"
         if self._inst_settings.focus_mode != "trans_custom" or not self._inst_settings.trans_mod_nums:
             return default_imods, default_mod_nums_str
         mod_nums = common.generate_run_numbers(run_number_string=self._inst_settings.trans_mod_nums)

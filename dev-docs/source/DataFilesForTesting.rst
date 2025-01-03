@@ -135,8 +135,9 @@ the preferred location for storing testing data.
 Adding A New File(s)
 ####################
 
-A helper git command is defined called ``add-test-data``. It would be
-called like this:
+A helper git command is defined called ``add-test-data``. Before first use, the command must be
+aliased using the procedure outlined :ref:`below <DataFilesForTesting_DeveloperSetup>`. Once setup,
+it would be called like this:
 
 .. code-block:: sh
 
@@ -161,16 +162,6 @@ This does the following:
    this way. Not every shell works as described, though `Github for
    Windows <https://windows.github.com/>`__ shell would allow you to do
    everything described here step by step without deviations.
-   Unfortunately, MINGW32 shell you have to select to do that is not the
-   most convenient shell under Windows. In addition to that,
-   ``add-test-data`` script is currently broken (at least was on
-   20/11/2015) . This is why I would suggest to use small python script,
-   provided below, which would calculate md5 hash, create the ``.md5``
-   file and rename your test or reference file according to the hash sum
-   calculated. You then have to manually put ``.md5`` file to requested
-   reference data location and add it to Git by usual means. The
-   hash-sum named file should be, as in the case of Unix, placed to the
-   `remote store <https://testdata.mantidproject.org/ftp/external-data/upload>`__
 -  Note, that ILL test data should be placed under ``ILL/${INSTRUMENT}``
    subdirectories (e.g. ``ILL/IN16B``), and should not contain any
    instrument prefix in the file name.
@@ -180,6 +171,8 @@ Updating File(s)
 
 The workflow is the same as :ref:`adding new files <DataFilesForTesting_AddingANewFile>` except that the developer must first put the new version of the file in the right place. For the example above, it would be ``Testing/Data/UnitTest/INST12345.nxs``. Then the new ``.md5`` file and associated renamed file will be created. ``git diff`` will show that change to the contents of ``Testing/Data/UnitTest/INST12345.nxs.md5`` and that there is an untracked file with the md5 sum for a name.
 
+
+.. _DataFilesForTesting_DeveloperSetup:
 
 Developer Setup
 ###############

@@ -4,15 +4,13 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <algorithm>
 #include <utility>
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/System.h"
-
-#include <algorithm>
 
 namespace Mantid::DataObjects {
 using Mantid::API::SpectrumInfo;
@@ -408,7 +406,8 @@ IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_sptr>(const std::s
 template <>
 DLLExport Mantid::DataObjects::MaskWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::MaskWorkspace_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(getPointerToProperty(name));
+  const auto *prop =
+      dynamic_cast<PropertyWithValue<Mantid::DataObjects::MaskWorkspace_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

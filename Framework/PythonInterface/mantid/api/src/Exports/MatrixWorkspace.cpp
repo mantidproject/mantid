@@ -332,6 +332,9 @@ void export_MatrixWorkspace() {
            "data).")
       .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms, arg("self"),
            "Returns the number of spectra in the workspace")
+      .def("getPlotType", &MatrixWorkspace::getPlotType, arg("self"), "Returns the plot type of the workspace")
+      .def("getMarkerStyle", &MatrixWorkspace::getMarkerStyle, arg("self"), "Return the marker style for the workspace")
+      .def("getMarkerSize", &MatrixWorkspace::getMarkerSize, arg("self"), "Returns the marker size for the workspace")
       .def("getSpectrumNumbers", &getSpectrumNumbers, arg("self"),
            "Returns a list of all spectrum numbers in the workspace")
       .def("yIndexOfX", &MatrixWorkspace::yIndexOfX,
@@ -396,6 +399,12 @@ void export_MatrixWorkspace() {
 
       //--------------------------------------- Setters
       //------------------------------------
+      .def("setPlotType", &MatrixWorkspace::setPlotType, (arg("self"), arg("newType")),
+           "Sets a new plot type for the workspace")
+      .def("setMarkerStyle", &MatrixWorkspace::setMarkerStyle, (arg("self"), arg("markerType")),
+           "Sets the marker type for the workspace")
+      .def("setMarkerSize", &MatrixWorkspace::setMarkerSize, (arg("self"), arg("markerSize")),
+           "Sets the size of the marker for the workspace")
       .def("setYUnitLabel", &MatrixWorkspace::setYUnitLabel, (arg("self"), arg("newLabel")),
            "Sets a new caption for the data (Y axis) in the workspace")
       .def("setYUnit", &MatrixWorkspace::setYUnit, (arg("self"), arg("newUnit")),

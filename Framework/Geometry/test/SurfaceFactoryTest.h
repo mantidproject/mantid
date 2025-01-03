@@ -14,7 +14,6 @@
 #include <vector>
 
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"

@@ -23,7 +23,7 @@ namespace LiveData {
 /**
   Interface to a named Kafka topic on a broker at a given address.
 */
-class DLLExport KafkaTopicSubscriber final : public IKafkaStreamSubscriber {
+class MANTID_LIVEDATA_DLL KafkaTopicSubscriber final : public IKafkaStreamSubscriber {
 public:
   KafkaTopicSubscriber(std::string broker, std::vector<std::string> topics, SubscribeAtOption subscribeOption);
   ~KafkaTopicSubscriber() override;

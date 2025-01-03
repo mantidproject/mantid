@@ -10,8 +10,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
+
 #include "MantidKernel/OptionalBool.h"
-#include "MantidKernel/System.h"
 
 // clang-format off
 #include <nexus/NeXusFile.hpp>

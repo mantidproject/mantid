@@ -8,8 +8,11 @@ set(SRC_FILES
     src/CalMuonDeadTime.cpp
     src/CalMuonDetectorPhases.cpp
     src/ConvertFitFunctionForMuonTFAsymmetry.cpp
-    src/LoadAndApplyMuonDetectorGrouping.cpp
     src/EstimateMuonAsymmetryFromCounts.cpp
+    src/LoadAndApplyMuonDetectorGrouping.cpp
+    src/LoadMuonNexus.cpp
+    src/LoadMuonNexus1.cpp
+    src/LoadMuonNexus2.cpp
     src/MuonAlgorithmHelper.cpp
     src/MuonAsymmetryHelper.cpp
     src/MuonGroupDetectors.cpp
@@ -35,6 +38,9 @@ set(INC_FILES
     inc/MantidMuon/CalMuonDetectorPhases.h
     inc/MantidMuon/ConvertFitFunctionForMuonTFAsymmetry.h
     inc/MantidMuon/LoadAndApplyMuonDetectorGrouping.h
+    inc/MantidMuon/LoadMuonNexus.h
+    inc/MantidMuon/LoadMuonNexus1.h
+    inc/MantidMuon/LoadMuonNexus2.h
     inc/MantidMuon/EstimateMuonAsymmetryFromCounts.h
     inc/MantidMuon/MuonAlgorithmHelper.h
     inc/MantidMuon/MuonAsymmetryHelper.h
@@ -61,6 +67,8 @@ set(TEST_FILES
     CalMuonDetectorPhasesTest.h
     ConvertFitFunctionForMuonTFAsymmetryTest.h
     LoadAndApplyMuonDetectorGroupingTest.h
+    LoadMuonNexus1Test.h
+    LoadMuonNexus2Test.h
     MuonAlgorithmHelperTest.h
     EstimateMuonAsymmetryFromCountsTest.h
     MuonGroupDetectorsTest.h
@@ -104,7 +112,7 @@ set_property(TARGET Muon PROPERTY FOLDER "MantidFramework")
 target_link_libraries(
   Muon
   PUBLIC Mantid::API Mantid::Kernel Mantid::Geometry
-  PRIVATE Mantid::DataObjects Mantid::Indexing
+  PRIVATE Mantid::DataObjects Mantid::Indexing Mantid::Nexus
 )
 # Add the unit tests directory
 add_subdirectory(test)

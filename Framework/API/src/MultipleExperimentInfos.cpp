@@ -7,7 +7,6 @@
 #include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Sample.h"
-#include "MantidKernel/System.h"
 
 #include <memory>
 #include <sstream>

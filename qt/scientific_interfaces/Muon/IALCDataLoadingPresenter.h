@@ -6,6 +6,7 @@
 
 namespace MantidQt {
 namespace CustomInterfaces {
+class IALCDataLoadingPresenterSubscriber;
 
 /** IALCDataLoadingPresenter : Abstract Presenter for ALC Data Loading step
  */
@@ -15,6 +16,8 @@ public:
   virtual ~IALCDataLoadingPresenter() = default;
 
   virtual void initialize() = 0;
+
+  virtual void setSubscriber(IALCDataLoadingPresenterSubscriber *subscriber) = 0;
 
   /// @return Last loaded data workspace
   virtual Mantid::API::MatrixWorkspace_sptr loadedData() const = 0;

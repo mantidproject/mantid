@@ -24,7 +24,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include "MantidMDAlgorithms/GSLFunctions.h"
 

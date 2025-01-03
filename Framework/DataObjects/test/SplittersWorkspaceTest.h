@@ -8,7 +8,6 @@
 
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidDataObjects/SplittersWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "PropertyManagerHelper.h"
 #include <cxxtest/TestSuite.h>

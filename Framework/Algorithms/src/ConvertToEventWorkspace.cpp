@@ -9,7 +9,6 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidKernel/System.h"
 #include <limits>
 
 using namespace Mantid::Kernel;

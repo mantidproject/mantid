@@ -32,6 +32,8 @@ namespace Geometry {
 class ParameterMap;
 }
 
+const std::vector<std::string> validPlotTypes{"plot", "marker", "histogram", "errorbar_x", "errorbar_y", "errorbar_xy"};
+
 namespace API {
 class Axis;
 class SpectrumDetectorMapping;
@@ -133,6 +135,21 @@ public:
   void setTitle(const std::string &) override;
   /// Gets MatrixWorkspace title (same as Run object run_title property)
   const std::string getTitle() const override;
+
+  /// Sets MatrixWorkspace plot_type
+  void setPlotType(const std::string &);
+  /// Gets MatrixWorkspace plot_type
+  std::string getPlotType() const;
+
+  /// Set the marker style for plotting
+  void setMarkerStyle(const std::string &markerType);
+  /// Get the marker style for plotting
+  std::string getMarkerStyle() const;
+
+  /// Set the size of the marker for plotting
+  void setMarkerSize(const float markerSize);
+  /// Get the size of the marker for plotting
+  float getMarkerSize() const;
 
   virtual Types::Core::DateAndTime getFirstPulseTime() const;
   Types::Core::DateAndTime getLastPulseTime() const;
@@ -512,6 +529,10 @@ private:
 
   mutable std::atomic<bool> m_indexInfoNeedsUpdate{true};
   mutable std::mutex m_indexInfoMutex;
+
+  // Marker style and size, used for plotting
+  std::string m_marker;
+  float m_marker_size;
 
 protected:
   /// Getter for the dimension id based on the axis.

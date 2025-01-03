@@ -134,7 +134,7 @@ public:
 
     m_presenter = std::make_unique<ALCBaselineModellingPresenter>(m_view.get(), std::move(model));
     m_presenter->initialize();
-    m_presenter->subscribe(m_parentPresenter.get());
+    m_presenter->setSubscriber(m_parentPresenter.get());
   }
 
   void tearDown() override {

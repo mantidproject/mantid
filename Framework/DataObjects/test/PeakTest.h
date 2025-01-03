@@ -8,7 +8,6 @@
 
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"

@@ -8,6 +8,7 @@
 
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidLiveData/DllConfig.h"
 #include "MantidLiveData/Kafka/IKafkaBroker.h"
 #include "MantidLiveData/Kafka/IKafkaStreamDecoder.h"
 #include "MantidLiveData/Kafka/IKafkaStreamSubscriber.h"
@@ -23,7 +24,7 @@ namespace LiveData {
   A call to capture() starts the process of capturing the stream on a separate
   thread.
 */
-class DLLExport KafkaEventStreamDecoder : public IKafkaStreamDecoder {
+class MANTID_LIVEDATA_DLL KafkaEventStreamDecoder : public IKafkaStreamDecoder {
 public:
   struct BufferedPulse {
     Types::Core::DateAndTime pulseTime;
@@ -82,7 +83,7 @@ private:
   const std::size_t m_intermediateBufferFlushThreshold;
 };
 
-DLLExport std::vector<size_t>
+MANTID_LIVEDATA_DLL std::vector<size_t>
 computeGroupBoundaries(const std::vector<KafkaEventStreamDecoder::BufferedEvent> &eventBuffer,
                        const size_t numberOfGroups);
 

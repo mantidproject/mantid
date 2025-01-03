@@ -45,6 +45,7 @@ set(INC_FILES
     IALCDataLoadingView.h
     IALCDataLoadingModel.h
     IALCDataLoadingPresenter.h
+    IALCDataLoadingPresenterSubscriber.h
     IALCPeakFittingModel.h
     IALCPeakFittingView.h
     IALCPeakFittingModelSubscriber.h

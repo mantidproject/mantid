@@ -9,10 +9,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDBoxFlatTree.h"
-#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidMDAlgorithms/DllConfig.h"
 #include <mutex>
-#include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
 namespace MDAlgorithms {

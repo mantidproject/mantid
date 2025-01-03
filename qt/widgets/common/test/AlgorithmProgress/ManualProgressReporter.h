@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
 
 static const std::string NAME_MANUALRPOGRESSREPORTER = "ManualProgressReporter";
 

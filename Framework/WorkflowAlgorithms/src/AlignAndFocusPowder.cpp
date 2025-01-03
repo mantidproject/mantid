@@ -27,7 +27,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidKernel/System.h"
 
 using Mantid::Geometry::Instrument_const_sptr;
 using namespace Mantid::Kernel;

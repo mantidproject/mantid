@@ -10,7 +10,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/PropertyNexus.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>

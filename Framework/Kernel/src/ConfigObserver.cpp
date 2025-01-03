@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ConfigObserver.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid::Kernel {
 /**

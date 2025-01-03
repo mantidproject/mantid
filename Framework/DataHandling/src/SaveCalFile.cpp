@@ -7,7 +7,6 @@
 #include "MantidDataHandling/SaveCalFile.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidKernel/System.h"
 #include <cmath>
 #include <fstream>
 
