@@ -129,7 +129,7 @@ void PolarizationEfficienciesWildes::init() {
 namespace {
 bool hasMatchingBins(const Mantid::API::MatrixWorkspace_sptr &workspace, const Mantid::API::MatrixWorkspace_sptr &refWs,
                      const std::string &propertyName, std::map<std::string, std::string> &problems) {
-  if (!WorkspaceHelpers::matchingBins(*workspace, *refWs, true)) {
+  if (!WorkspaceHelpers::matchingBins(workspace, refWs, true)) {
     problems[propertyName] = "All input workspaces must have the same X values.";
     return false;
   }

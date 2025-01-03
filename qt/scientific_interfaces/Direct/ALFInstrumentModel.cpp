@@ -165,7 +165,7 @@ bool ALFInstrumentModel::isALFData(MatrixWorkspace_const_sptr const &workspace) 
 }
 
 bool ALFInstrumentModel::binningMismatch() const {
-  return m_vanadium && !WorkspaceHelpers::matchingBins(*m_sample, *m_vanadium);
+  return m_vanadium && !WorkspaceHelpers::matchingBins(m_sample, m_vanadium);
 }
 
 bool ALFInstrumentModel::axisIsDSpacing() const { return m_sample->getAxis(0)->unit()->unitID() == D_SPACING_UNIT; }
