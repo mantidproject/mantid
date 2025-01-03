@@ -39,7 +39,7 @@ public:
     TS_ASSERT_EQUALS(algorithmName, peakShape->algorithmName());
     TS_ASSERT_EQUALS(version, peakShape->algorithmVersion());
     TS_ASSERT_EQUALS(coordinateSys, peakShape->frame());
-    TS_ASSERT_EQUALS("PeakShapeDetectorBin", peakShape->shapeName());
+    TS_ASSERT_EQUALS("detectorbin", peakShape->shapeName());
     TS_ASSERT_EQUALS(std::nullopt, peakShape->radius(Mantid::Geometry::PeakShape::RadiusType::Radius));
     TS_ASSERT_EQUALS(std::dynamic_pointer_cast<PeakShapeDetectorBin>(peakShape)->getDetectorBinList(), detPeakBinList);
 
@@ -48,7 +48,7 @@ public:
     TS_ASSERT_EQUALS(algorithmName, cloneShape->algorithmName());
     TS_ASSERT_EQUALS(version, cloneShape->algorithmVersion());
     TS_ASSERT_EQUALS(coordinateSys, cloneShape->frame());
-    TS_ASSERT_EQUALS("PeakShapeDetectorBin", cloneShape->shapeName());
+    TS_ASSERT_EQUALS("detectorbin", cloneShape->shapeName());
     TS_ASSERT_EQUALS(std::nullopt, cloneShape->radius(Mantid::Geometry::PeakShape::RadiusType::Radius));
     TS_ASSERT_EQUALS(std::dynamic_pointer_cast<PeakShapeDetectorBin>(cloneShape)->getDetectorBinList(), detPeakBinList);
   }
@@ -62,7 +62,7 @@ public:
     std::string jsonStr = peakShape->toJSON();
     Json::Value output;
     TSM_ASSERT("Should parse as JSON", Mantid::JsonHelpers::parse(jsonStr, &output));
-    TS_ASSERT_EQUALS("PeakShapeDetectorBin", output["shape"].asString());
+    TS_ASSERT_EQUALS("detectorbin", output["shape"].asString());
     TS_ASSERT_EQUALS("TestSuite", output["algorithm_name"].asString());
     TS_ASSERT_EQUALS(1, output["algorithm_version"].asInt());
     TS_ASSERT_EQUALS(0, output["frame"].asInt());
