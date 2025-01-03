@@ -55,8 +55,9 @@ Usage
     AddPeak(PeaksWorkspace="peaks", RunWorkspace="SXD23767", TOF=8303.3735339704781, DetectorID=7646)
 
     peaks_out = IntegratePeaks1DProfile(InputWorkspace="SXD23767", PeaksWorkspace="peaks", OutputWorkspace="peaks_int",
-                                        GetNBinsFromBackToBackParams=True, NFWHM=6, CostFunction="Poisson",
+                                        GetNBinsFromBackToBackParams=True, NFWHM=8, CostFunction="RSq",
                                         PeakFunction="BackToBackExponential", FixPeakParameters='A',
+                                        NRows=7, NCols=7, IOverSigmaThreshold=1,
                                         FractionalChangeDSpacing=0.01, IntegrateIfOnEdge=True)
 
     print(f"I/sigma = {peaks_out.getPeak(0).getIntensityOverSigma():.2f}")
@@ -65,7 +66,7 @@ Usage
 
 .. testoutput:: exampleIntegratePeaks1DProfile
 
-    I/sigma = 92.97
+    I/sigma = 94.35
 
 References
 ----------
