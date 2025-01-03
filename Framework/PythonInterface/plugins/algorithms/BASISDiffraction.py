@@ -129,7 +129,7 @@ class BASISDiffraction(DataProcessorAlgorithm):
         return DEPRECATION_NOTICE
 
     def seeAlso(self):
-        return ["AlignDetectors", "DiffractionFocussing", "SNSPowderReduction"]
+        return ["DiffractionFocussing", "SNSPowderReduction"]
 
     def PyInit(self):
         # Input validators

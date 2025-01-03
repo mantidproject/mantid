@@ -58,7 +58,7 @@ public:
   /// Algorithm's version
   int version() const override { return (1); }
   const std::vector<std::string> seeAlso() const override {
-    return {"ReadGroupsFromFile", "CreateCalFileByNames", "AlignDetectors", "DiffractionFocussing",
+    return {"ReadGroupsFromFile", "CreateCalFileByNames", "DiffractionFocussing",
             "LoadCalFile",        "SaveCalFile",          "MergeCalFiles"};
   }
   /// Algorithm's category for identification
