@@ -4,9 +4,9 @@
 <instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
- name="ZOOM" valid-from   ="2016-10-26 23:59:59"
-                          valid-to     ="2025-01-01 23:59:58"
-		          last-modified="2016-10-26 00:00:00">
+ name="ZOOM" valid-from   ="2025-01-01 23:59:59"
+                          valid-to     ="2100-01-31 23:59:59"
+		          last-modified="2024-12-18 00:00:00">
 
   <defaults>
     <length unit="meter"/>
@@ -40,6 +40,8 @@
       with ID 5-8
 	  04/02/14 start again with gas tube arrays
 	  14/03/14 correct the active tube length to 1041.4mm, zigzag offset 3mm 
+	  01/05/24 update positions with measured values on the instrument, redefine position of sample relative to centre of rotation of the sample stack
+	  18/12/24 adding polarizing neutron optics to IDF
   -->
   
   
@@ -51,16 +53,38 @@
     <location />
   </component>
   <type name="source" is="Source" />
+
   
-  
-  <!-- This is the position of the centre of rotation of the sample stack out of the drawings. I think that it would be more interesting to 
-  have it at the position of the sample changer -->
+  <!-- This is the position of the centre of rotation of the sample stack. It sits 8.776 from the center of Monitor 1. The sample center is expected to sit 407.5 from the end of the snout. Use the sample offset in the user file to correct for off-centered sample and/or moved sample stack, 17.3035 should be the position of the standard sample holder position (0.06m away from the safety shutter), the sample offset in the user file is then +0.2395 -->
   <component type="some-sample-holder">
-    <location z="17.3635"/>
+    <location z="17.064"/>
   </component>
   <type name="some-sample-holder" is="SamplePos" />
   
+  <!-- polarisation optics components -->
   
+  <type name="polarizer" />  
+  
+  <component type="polarizer" name="short-polarizer">
+    <location y="0.0" x="-0.5" z="8.782"/> 
+    <parameter name="device-type" type="string"> <value val="supermirror" /> </parameter>
+  </component> 
+
+  <type name="flipper" />  
+  
+  <component type="flipper" name="RF-flipper">
+    <location y="0.0" x="-0.5" z="13.0"/>
+    <parameter name="device-type" type="string"> <value val="Drabkin" /> </parameter>
+  </component>  
+  
+  <type name="analyzer" />   
+  
+  <component type="analyzer" name="helium-analyzer">
+    <location y="0.0" x="-1.0" z="17.3635"/>
+    <parameter name="device-type" type="string"> <value val="MEOP" /> </parameter>
+    <parameter name="cell-length"> <value val="0.010" /> </parameter>
+  </component> 
+
   <!-- detector components (including monitors) -->
   
   <component type="monitors" idlist="monitors">
@@ -69,21 +93,22 @@
   
   <type name="monitors">
     <component type="monitor-tbd">
-      <!-- better positions and shapes will be defined later -->
-      <location z="8.310" name="monitor1"/>
-      <location z="13.532" name="monitor2"/>
+      <!-- position of center of monitor from drawing all distances are relative to monitor 1 position -->
+      <location z="8.288" name="monitor1"/>
+      <!-- measured distance M1 to M2 is 5.208 -->
+      <location z="13.496" name="monitor2"/>
     </component>
     <component type="Moderator-Monitor3">
-      <!-- transmisssion detector, either in or out of beam -->
-      <location z="15.887" name="monitor3"/>
+      <!-- transmisssion detector, either in or out of beam, measured distance M1 to M3 is 7.700-->
+      <location z="15.988" name="monitor3"/>
     </component>
     <component type="monitor-tbd">
-      <!-- better positions and shapes will be defined later -->
-      <location z="17.405" name="monitor4"/>
+      <!-- measured position of M1 to M4 with tank in SC configuration is 9.196 (offset monitor 4 =0), use shift of monitor 4 to account for tank movement. TODO: let z_rear offset act also on M4 for ZOOM-->
+      <location z="17.484" name="monitor4"/>
     </component>
 	<component type="monitor-tbd">
-      <!-- better positions and shapes will be defined later, at the moment is defined to be 20mm in front of the detector  -->
-      <location z="20.77208" name="monitor5"/>
+      <!-- The beamstop monitor is defined to be 20mm in front of the detector (measured 35mm with casing), move_backstop_monitor in mantid/scripts/SANS/sans/algorithm_detail/move_workspaces.py will take care to keep the relative distance to the detector-->
+      <location z="17.329" name="monitor5"/>
     </component>        
     
     <!-- Putting in monitors, which are defined in raw/nexus
@@ -122,10 +147,11 @@
 
   <type name="no shape monitor" is="monitor" />   
 
-<!-- default position is at 3.4113m from the sample, waiting for Mo. Probably is more reasonable to put it at 4m away fromt the position of the sample changer -->
+<!-- 17.3635 should be the position of the safety shutter. The measured 4m detector position is 13.061 to M1 (total 21.349), and 8m position to M1 is 17.059 (total 25.347). This is for the standard SC position (z_rear = 0.5) with tank in forward position (rear_z = 0.0). In the user file, add z-offset to apply tank displacement and position of detector in tank: [detector.correction.position] rear_z = 0.0 + detector position.  TODO:Mantid should read the actual detector position and add it as an offset automatically. This would need a class ZOOM in mantid/scripts/SANS/isis_instrument.py with methods to get and set detector position/ move components like for the other instruments.
+ -->
 
    <component type="detector-bank" idlist="RearDetector" name="rear-detector">
-     <location z="20.77408" />
+     <location z="21.349" />
    </component>   
 
     

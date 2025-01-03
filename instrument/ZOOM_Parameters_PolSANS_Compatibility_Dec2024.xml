@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "ZOOM" valid-from = "2017-06-01 23:59:59" valid-to = "2025-01-01 23:59:58">
+<parameter-file instrument = "ZOOM" valid-from = "2025-01-01 23:59:59" valid-to = "2100-01-31 23:59:59">
 
 <component-link name = "ZOOM">
 
 <parameter name="default-incident-monitor-spectrum">
-  <value val="3"/>
+  <value val="1"/>
 </parameter>
 
 <parameter name="default-transmission-monitor-spectrum">
@@ -26,7 +26,7 @@
 
 <parameter name="low-angle-detector-num-rows">
 <!--I don't know what is this-->
-  <value val="120"/>
+  <value val="192"/>
 </parameter>
 
 <parameter name="centre-finder-step-size">
@@ -35,8 +35,8 @@
 </parameter>
 
 <parameter name="collimation-length-correction">
-<!-- This is a correction length in meter for the L1 value to obtain the default collimation length-->
-  <value val="17.2765"/>
+<!-- This is a correction length in meter (take jaw position after PCG) for the L1 value (sample to source distance) to obtain the default collimation length-->
+  <value val="12.822"/>
 </parameter>
 
 <parameter name="special-default-collimation-length-method" type="string">
@@ -46,17 +46,17 @@
 
 <parameter name="guide-collimation-length-increment">
 <!-- This is a correction length increment in meter-->
-  <value val="2.0"/>
+  <value val="4.0"/>
 </parameter>
 
 <parameter name="guide-cutoff">
 <!-- This is the cutoff value for the guides-->
-  <value val="130.0"/>
+  <value val="100.0"/>
 </parameter>
 
 <parameter name="number-of-guides">
 <!-- This number of guides-->
-  <value val="5"/>
+  <value val="1"/>
 </parameter>
 
 </component-link>
