@@ -56,22 +56,22 @@ boost::optional<std::string> parseRunNumberOrWhitespace(std::string const &runNu
   return boost::none;
 }
 
-boost::optional<double> parseTheta(std::string const &theta) {
+std::optional<double> parseTheta(std::string const &theta) {
   auto maybeTheta = parseNonNegativeDouble(theta);
   if (maybeTheta.has_value() && maybeTheta.value() > 0.0)
     return maybeTheta.value();
   else
-    return boost::none;
+    return std::nullopt;
 }
 
-boost::optional<boost::regex> parseTitleMatcher(std::string const &titleMatcher) {
+std::optional<boost::regex> parseTitleMatcher(std::string const &titleMatcher) {
   if (isEntirelyWhitespace(titleMatcher)) {
-    return boost::none;
+    return std::nullopt;
   }
   try {
     return boost::regex(titleMatcher);
   } catch (boost::regex_error const &) {
-    return boost::none;
+    return std::nullopt;
   }
 }
 
@@ -99,29 +99,29 @@ boost::optional<std::map<std::string, std::string>> parseOptions(std::string con
   }
 }
 
-boost::optional<boost::optional<std::string>> parseProcessingInstructions(std::string const &instructions) {
+std::optional<std::string> parseProcessingInstructions(std::string const &instructions) {
   if (isEntirelyWhitespace(instructions)) {
-    return boost::optional<std::string>(boost::none);
+    return std::nullopt;
   } else {
     try {
       auto const groups = Mantid::Kernel::Strings::parseGroups<size_t>(instructions);
-      return boost::optional<std::string>(instructions);
+      return std::optional<std::string>(instructions);
     } catch (std::runtime_error &) {
-      return boost::none;
+      return std::nullopt;
     }
   }
-  return boost::none;
+  return std::nullopt;
 }
 
-boost::optional<boost::optional<double>> parseScaleFactor(std::string const &scaleFactor) {
+std::optional<double> parseScaleFactor(std::string const &scaleFactor) {
   if (isEntirelyWhitespace(scaleFactor)) {
-    return boost::optional<double>(boost::none);
+    return std::nullopt;
   }
 
   auto value = parseDouble(scaleFactor);
   if (value.has_value() && value != 0.0)
-    return boost::optional<double>(value.value());
-  return boost::none;
+    return std::optional<double>(value.value());
+  return std::nullopt;
 }
 
 boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, std::string const &max,

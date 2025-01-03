@@ -43,18 +43,18 @@ public:
     auto table = Table({Cells({"0.5"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
-    TS_ASSERT(results[0].thetaOrWildcard().is_initialized());
-    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().get(), 0.5);
+    TS_ASSERT(results[0].thetaOrWildcard().has_value());
+    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().value(), 0.5);
   }
 
   void testTwoUniqueAngleRows() {
     auto table = Table({Cells({"0.5"}), Cells({"2.3"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 2);
-    TS_ASSERT(results[0].thetaOrWildcard().is_initialized());
-    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().get(), 0.5);
-    TS_ASSERT(results[1].thetaOrWildcard().is_initialized());
-    TS_ASSERT_EQUALS(results[1].thetaOrWildcard().get(), 2.3);
+    TS_ASSERT(results[0].thetaOrWildcard().has_value());
+    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().value(), 0.5);
+    TS_ASSERT(results[1].thetaOrWildcard().has_value());
+    TS_ASSERT_EQUALS(results[1].thetaOrWildcard().value(), 2.3);
   }
 
   void testTwoNonUniqueAngleRowsIsInvalid() {
@@ -71,11 +71,11 @@ public:
     auto results = runTestValid(table);
 
     TS_ASSERT_EQUALS(results.size(), 2);
-    TS_ASSERT(results[0].thetaOrWildcard().is_initialized());
-    TS_ASSERT(results[1].thetaOrWildcard().is_initialized());
-    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().get(), results[1].thetaOrWildcard().get());
-    TS_ASSERT_EQUALS(results[0].titleMatcher().get().expression(), title1);
-    TS_ASSERT_EQUALS(results[1].titleMatcher().get().expression(), title2);
+    TS_ASSERT(results[0].thetaOrWildcard().has_value());
+    TS_ASSERT(results[1].thetaOrWildcard().has_value());
+    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().value(), results[1].thetaOrWildcard().value());
+    TS_ASSERT_EQUALS(results[0].titleMatcher().value().expression(), title1);
+    TS_ASSERT_EQUALS(results[1].titleMatcher().value().expression(), title2);
   }
 
   void testDuplicateAnglesAndTitleMatchersAreInvalid() {
@@ -185,10 +185,10 @@ public:
     auto table = Table({Cells({"0.5"}), Cells({"0.5011"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 2);
-    TS_ASSERT(results[0].thetaOrWildcard().is_initialized());
-    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().get(), 0.5);
-    TS_ASSERT(results[1].thetaOrWildcard().is_initialized());
-    TS_ASSERT_EQUALS(results[1].thetaOrWildcard().get(), 0.5011);
+    TS_ASSERT(results[0].thetaOrWildcard().has_value());
+    TS_ASSERT_EQUALS(results[0].thetaOrWildcard().value(), 0.5);
+    TS_ASSERT(results[1].thetaOrWildcard().has_value());
+    TS_ASSERT_EQUALS(results[1].thetaOrWildcard().value(), 0.5011);
   }
 
   void testAnglesThatDifferByLessThanTolerance() {

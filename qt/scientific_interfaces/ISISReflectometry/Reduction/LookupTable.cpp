@@ -53,7 +53,7 @@ boost::optional<LookupRow> LookupTable::findLookupRow(PreviewRow const &previewR
   }
 }
 
-boost::optional<LookupRow> LookupTable::findLookupRow(std::string const &title, boost::optional<double> const &theta,
+boost::optional<LookupRow> LookupTable::findLookupRow(std::string const &title, std::optional<double> const &theta,
                                                       double tolerance) const {
   // First filter lookup rows by title
   auto lookupRows = findMatchingRegexes(title);
@@ -74,11 +74,10 @@ boost::optional<LookupRow> LookupTable::findLookupRow(std::string const &title, 
 }
 
 boost::optional<LookupRow> LookupTable::searchByTheta(std::vector<LookupRow> lookupRows,
-                                                      boost::optional<double> const &thetaAngle,
-                                                      double tolerance) const {
+                                                      const std::optional<double> &thetaAngle, double tolerance) const {
   std::vector<LookupRow> matchingRows;
   auto predicate = [thetaAngle, tolerance](LookupRow const &candiate) -> bool {
-    return !candiate.isWildcard() && equalWithinTolerance(*thetaAngle, candiate.thetaOrWildcard().get(), tolerance);
+    return !candiate.isWildcard() && equalWithinTolerance(*thetaAngle, candiate.thetaOrWildcard().value(), tolerance);
   };
 
   std::copy_if(lookupRows.cbegin(), lookupRows.cend(), std::back_inserter(matchingRows), predicate);
@@ -96,7 +95,7 @@ std::vector<LookupRow> LookupTable::findMatchingRegexes(std::string const &title
   auto results = std::vector<LookupRow>();
   std::copy_if(m_lookupRows.cbegin(), m_lookupRows.cend(), std::back_inserter(results),
                [&title](auto const &candidate) {
-                 return candidate.titleMatcher() && boost::regex_search(title, candidate.titleMatcher().get());
+                 return candidate.titleMatcher() && boost::regex_search(title, candidate.titleMatcher().value());
                });
   return results;
 }

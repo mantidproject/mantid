@@ -14,7 +14,7 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 Row::Row(std::vector<std::string> runNumbers, double theta,
 
-         TransmissionRunPair transmissionRuns, RangeInQ qRange, boost::optional<double> scaleFactor,
+         TransmissionRunPair transmissionRuns, RangeInQ qRange, std::optional<double> scaleFactor,
          ReductionOptionsMap reductionOptions,
 
          ReductionWorkspaces reducedWorkspaceNames)
@@ -39,7 +39,7 @@ RangeInQ const &Row::qRange() const { return m_qRange; }
 
 RangeInQ const &Row::qRangeOutput() const { return m_qRangeOutput; }
 
-boost::optional<double> Row::scaleFactor() const { return m_scaleFactor; }
+std::optional<double> Row::scaleFactor() const { return m_scaleFactor; }
 
 ReductionOptionsMap const &Row::reductionOptions() const { return m_reductionOptions; }
 

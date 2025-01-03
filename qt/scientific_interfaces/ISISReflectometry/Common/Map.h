@@ -90,6 +90,19 @@ template <typename T> std::string valueToString(T value, boost::optional<int> pr
   return std::to_string(value);
 }
 
+/** Converts value to string with optional precision
+ *
+ * @param value input value
+ * @param precision optional precision
+ * @return The value as a string (with specified precision if given)
+ *
+ */
+template <typename T> std::string valueToString(T value, std::optional<int> precision) {
+  if (precision.has_value())
+    return valueToString(value, precision.value());
+  return std::to_string(value);
+}
+
 /** Converts optional value to string with optional precision
  *
  * @param maybeValue optional input value

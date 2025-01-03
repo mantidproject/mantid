@@ -99,7 +99,7 @@ private:
   void setText(QLineEdit &lineEdit, double value);
   void setText(QLineEdit &lineEdit, std::string const &value);
   void setText(QLineEdit &lineEdit, boost::optional<int> value);
-  void setText(QLineEdit &lineEdit, boost::optional<double> value);
+  void setText(QLineEdit &lineEdit, std::optional<double> value);
   void setText(QLineEdit &lineEdit, boost::optional<std::string> const &value);
   void setChecked(QCheckBox &checkBox, bool checked);
   std::string getText(QLineEdit const &lineEdit) const;

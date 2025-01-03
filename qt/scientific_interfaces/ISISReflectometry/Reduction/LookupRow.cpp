@@ -13,11 +13,10 @@ constexpr double EPSILON = std::numeric_limits<double>::epsilon();
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-LookupRow::LookupRow(boost::optional<double> theta, boost::optional<boost::regex> titleMatcher,
+LookupRow::LookupRow(std::optional<double> theta, std::optional<boost::regex> titleMatcher,
                      TransmissionRunPair transmissionRuns,
                      boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
-                     boost::optional<double> scaleFactor,
-                     boost::optional<ProcessingInstructions> processingInstructions,
+                     std::optional<double> scaleFactor, boost::optional<ProcessingInstructions> processingInstructions,
                      boost::optional<ProcessingInstructions> backgroundProcessingInstructions,
                      boost::optional<ProcessingInstructions> roiDetectorIDs)
     : m_theta(std::move(theta)), m_titleMatcher(std::move(titleMatcher)),
@@ -30,15 +29,15 @@ LookupRow::LookupRow(boost::optional<double> theta, boost::optional<boost::regex
 
 TransmissionRunPair const &LookupRow::transmissionWorkspaceNames() const { return m_transmissionRuns; }
 
-bool LookupRow::isWildcard() const { return !m_theta.is_initialized() && !m_titleMatcher.is_initialized(); }
+bool LookupRow::isWildcard() const { return !m_theta.has_value() && !m_titleMatcher.has_value(); }
 
-boost::optional<double> LookupRow::thetaOrWildcard() const { return m_theta; }
+std::optional<double> LookupRow::thetaOrWildcard() const { return m_theta; }
 
-boost::optional<boost::regex> LookupRow::titleMatcher() const { return m_titleMatcher; }
+std::optional<boost::regex> LookupRow::titleMatcher() const { return m_titleMatcher; }
 
 RangeInQ const &LookupRow::qRange() const { return m_qRange; }
 
-boost::optional<double> LookupRow::scaleFactor() const { return m_scaleFactor; }
+std::optional<double> LookupRow::scaleFactor() const { return m_scaleFactor; }
 
 boost::optional<ProcessingInstructions> LookupRow::processingInstructions() const { return m_processingInstructions; }
 
@@ -73,10 +72,10 @@ void LookupRow::setProcessingInstructions(ROIType regionType,
 }
 
 bool LookupRow::hasEqualThetaAndTitle(LookupRow const &lookupRow, double tolerance) const {
-  if (!m_theta.is_initialized() && !lookupRow.m_theta.is_initialized()) {
+  if (!m_theta.has_value() && !lookupRow.m_theta.has_value()) {
     return m_titleMatcher == lookupRow.m_titleMatcher;
   }
-  if (m_theta.is_initialized() && lookupRow.m_theta.is_initialized()) {
+  if (m_theta.has_value() && lookupRow.m_theta.has_value()) {
     return std::abs(*m_theta - *lookupRow.m_theta) <= (tolerance + 2.0 * EPSILON) &&
            m_titleMatcher == lookupRow.m_titleMatcher;
   }

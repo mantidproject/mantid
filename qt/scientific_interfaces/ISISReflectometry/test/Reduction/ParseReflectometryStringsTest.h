@@ -54,44 +54,44 @@ public:
 
   void testParseTheta() {
     auto result = parseTheta("0.23");
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), 0.23);
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), 0.23);
   }
 
   void testParseThetaEmpty() {
     auto result = parseTheta("  \t");
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseThetaIgnoresWhitespace() {
     auto result = parseTheta("  \t0.23 ");
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), 0.23);
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), 0.23);
   }
 
   void testParseThetaConsidersNegativeDoubleInvalid() {
     auto result = parseTheta("-0.23");
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseThetaHandlesInvalidCharacters() {
     auto result = parseTheta("bad");
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseTitleMatcherEmpty() {
     auto result = parseTitleMatcher("      \t  ");
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseTitleMatcher() {
     auto result = parseTitleMatcher(".*");
-    TS_ASSERT(result.is_initialized());
+    TS_ASSERT(result.has_value());
   }
 
   void testParseTitleMatcherHandlesInvalidRegex() {
     auto result = parseTitleMatcher("[");
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseOptions() {
@@ -122,49 +122,47 @@ public:
 
   void testParseProcessingInstructions() {
     auto result = parseProcessingInstructions("1-3");
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT(result.get().is_initialized());
-    TS_ASSERT_EQUALS(result.get().get(), "1-3");
+    TS_ASSERT(result.has_value());
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), "1-3");
   }
 
   void testParseProcessingInstructionsWhitespace() {
     auto result = parseProcessingInstructions("");
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT(!result.get().is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseProcessingInstructionsInvalid() {
     auto result = parseProcessingInstructions("bad");
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseScaleFactor() {
     auto result = parseScaleFactor("1.5");
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT(result.get().is_initialized());
-    TS_ASSERT_EQUALS(result.get().get(), 1.5);
+    TS_ASSERT(result.has_value());
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), 1.5);
   }
 
   void testParseScaleFactorWhitespace() {
     auto result = parseScaleFactor("");
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT(!result.get().is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseScaleFactorInvalid() {
     auto result = parseScaleFactor("bad");
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseScaleFactorRejectsZero() {
     auto result = parseScaleFactor("0.0");
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseScaleFactorNegative() {
     auto result = parseScaleFactor("-1.0");
-    TS_ASSERT(result.get().is_initialized());
-    TS_ASSERT_EQUALS(result.get().get(), -1.0);
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), -1.0);
   }
 
   void testParseQRange() {

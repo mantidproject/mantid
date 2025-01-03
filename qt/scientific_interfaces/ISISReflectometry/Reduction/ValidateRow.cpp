@@ -59,9 +59,9 @@ boost::optional<std::vector<std::string>> RowValidator::parseRunNumbers(std::vec
   return runNumbers;
 }
 
-boost::optional<double> RowValidator::parseTheta(std::vector<std::string> const &cellText) {
+std::optional<double> RowValidator::parseTheta(std::vector<std::string> const &cellText) {
   auto theta = ::MantidQt::CustomInterfaces::ISISReflectometry::parseTheta(cellText[THETA_COLUMN]);
-  if (!theta.is_initialized())
+  if (!theta.has_value())
     m_invalidColumns.emplace_back(THETA_COLUMN);
   return theta;
 }
@@ -79,10 +79,10 @@ boost::optional<RangeInQ> RowValidator::parseQRange(std::vector<std::string> con
   return boost::apply_visitor(AppendErrorIfNotType<RangeInQ>(m_invalidColumns, QMIN_COLUMN), qRangeOrError);
 }
 
-boost::optional<boost::optional<double>> RowValidator::parseScaleFactor(std::vector<std::string> const &cellText) {
+std::optional<double> RowValidator::parseScaleFactor(std::vector<std::string> const &cellText) {
   auto optionalScaleFactorOrNoneIfError =
       ::MantidQt::CustomInterfaces::ISISReflectometry::parseScaleFactor(cellText[SCALE_COLUMN]);
-  if (!optionalScaleFactorOrNoneIfError.is_initialized())
+  if (!optionalScaleFactorOrNoneIfError.has_value())
     m_invalidColumns.emplace_back(SCALE_COLUMN);
 
   return optionalScaleFactorOrNoneIfError;
@@ -106,12 +106,12 @@ ValidationResult<Row, std::vector<int>> RowValidator::operator()(std::vector<std
 
   if (allInitialized(maybeRunNumbers, maybeTransmissionRuns)) {
     auto wsNames = workspaceNames(maybeRunNumbers.get(), maybeTransmissionRuns.get());
-    auto maybeRow =
-        makeIfAllInitialized<Row>(maybeRunNumbers, maybeTheta, maybeTransmissionRuns, maybeQRange, maybeScaleFactor,
-                                  maybeOptions, boost::optional<ReductionWorkspaces>(wsNames));
-    if (maybeRow.is_initialized())
-      return RowValidationResult(maybeRow.get());
-    else
+    // maybeRunNumbers, maybeTransmissionRuns where already checked
+    if (maybeTransmissionRuns.has_value() && maybeQRange.is_initialized() && maybeScaleFactor.has_value()) {
+      Row row(maybeRunNumbers.get(), maybeTheta.value(), maybeTransmissionRuns.value(), maybeQRange.value(),
+              maybeScaleFactor, maybeOptions.get(), ReductionWorkspaces(wsNames));
+      return RowValidationResult(row);
+    } else
       return RowValidationResult(m_invalidColumns);
   } else {
     return RowValidationResult(m_invalidColumns);

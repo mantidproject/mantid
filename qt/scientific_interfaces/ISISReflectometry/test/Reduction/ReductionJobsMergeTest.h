@@ -40,12 +40,12 @@ public:
 
   Row rowWithNameAndAngle(std::string const &name, double angle) {
     auto wsNames = ReductionWorkspaces({"TOF_" + name}, TransmissionRunPair{});
-    return Row({name}, angle, {"", ""}, RangeInQ(), boost::none, {}, wsNames);
+    return Row({name}, angle, {"", ""}, RangeInQ(), std::nullopt, {}, wsNames);
   }
 
   Row rowWithNamesAndAngle(std::vector<std::string> const &names, double angle) {
     auto wsNames = ReductionWorkspaces(names, TransmissionRunPair{});
-    return Row(names, angle, {"", ""}, RangeInQ(), boost::none, {}, wsNames);
+    return Row(names, angle, {"", ""}, RangeInQ(), std::nullopt, {}, wsNames);
   }
 
   void testMergeEmptyModels() {

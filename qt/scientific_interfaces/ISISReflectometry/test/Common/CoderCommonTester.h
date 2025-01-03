@@ -186,7 +186,7 @@ private:
       auto scaleFactorPresent = static_cast<bool>(row.get().scaleFactor());
       TS_ASSERT_EQUALS(scaleFactorPresent, map[QString("scaleFactorPresent")].toBool());
       if (scaleFactorPresent) {
-        TS_ASSERT_EQUALS(row.get().scaleFactor().get(), map[QString("scaleFactor")].toDouble())
+        TS_ASSERT_EQUALS(row.get().scaleFactor().value(), map[QString("scaleFactor")].toDouble())
       }
       testTransmissionRunPair(row.get().transmissionWorkspaceNames(), map[QString("transRunNums")].toMap());
       testReductionWorkspaces(row.get().reducedWorkspaceNames(), map[QString("reductionWorkspaces")].toMap());

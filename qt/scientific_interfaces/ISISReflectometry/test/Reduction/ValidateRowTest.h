@@ -159,16 +159,16 @@ public:
   }
 
   void testParseThetaFailsForNegativeAndZeroValues() {
-    TS_ASSERT_EQUALS(boost::none, parseTheta("-0.01"));
-    TS_ASSERT_EQUALS(boost::none, parseTheta("-0.12"));
-    TS_ASSERT_EQUALS(boost::none, parseTheta("-1"));
-    TS_ASSERT_EQUALS(boost::none, parseTheta("0.0"));
+    TS_ASSERT_EQUALS(std::nullopt, parseTheta("-0.01"));
+    TS_ASSERT_EQUALS(std::nullopt, parseTheta("-0.12"));
+    TS_ASSERT_EQUALS(std::nullopt, parseTheta("-1"));
+    TS_ASSERT_EQUALS(std::nullopt, parseTheta("0.0"));
   }
 
   void testParseScaleFactor() {
-    TS_ASSERT_EQUALS(boost::none, parseScaleFactor("ABSC"));
-    TS_ASSERT_EQUALS(boost::none, parseScaleFactor("").get());
-    TS_ASSERT_EQUALS(0.1, parseScaleFactor("0.1").get().get());
+    TS_ASSERT_EQUALS(std::nullopt, parseScaleFactor("ABSC"));
+    TS_ASSERT_EQUALS(std::nullopt, parseScaleFactor(""));
+    TS_ASSERT_EQUALS(0.1, parseScaleFactor("0.1").value());
   }
 
   void testParsesFirstTransmissionRun() {

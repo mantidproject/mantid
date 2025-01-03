@@ -48,13 +48,6 @@ void update(std::string const &property, double value, IAlgorithmRuntimeProps &p
   properties.setProperty(property, value);
 }
 
-// TODO code that uses this should move to std::optional
-[[deprecated("use version with std::optional instead")]] void
-update(std::string const &property, boost::optional<double> const &value, IAlgorithmRuntimeProps &properties) {
-  if (value)
-    update(property, value.get(), properties);
-}
-
 void update(std::string const &property, std::optional<double> const &value, IAlgorithmRuntimeProps &properties) {
   if (value)
     update(property, value.value(), properties);

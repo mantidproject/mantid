@@ -47,7 +47,7 @@ void SearchResult::parseMetadataFromTitle() {
 
   // Validate that the angle parses correctly
   auto const maybeTheta = parseTheta(m_theta);
-  if (!maybeTheta.is_initialized())
+  if (!maybeTheta.has_value())
     addError(std::string("Invalid theta value in run title: ").append(m_theta));
 }
 

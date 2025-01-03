@@ -228,21 +228,18 @@ MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, Rang
   return result;
 }
 
-std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, const boost::optional<int> &precision) {
-  std::optional<int> precisionStd = std::nullopt;
-  if (precision)
-    precisionStd = precision.get();
+std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, const std::optional<int> &precision) {
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
        MantidQt::MantidWidgets::Batch::Cell(valueToString(row.theta(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(row.transmissionWorkspaceNames().firstRunList()),
        MantidQt::MantidWidgets::Batch::Cell(row.transmissionWorkspaceNames().secondRunList()),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min, precisionStd),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max, precisionStd),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precisionStd),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min, precision),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max, precision),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precision),
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.scaleFactor(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions())),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.lookupIndex(), precisionStd))});
+       MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.lookupIndex(), precision))});
 }
 } // namespace
 
@@ -270,7 +267,10 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const Reductio
       if (row) {
         MantidQt::MantidWidgets::Batch::RowLocation location(
             {static_cast<int>(groupIndex), static_cast<int>(rowIndex)});
-        jobTreeView->setCellsAt({location}, cellsFromRow(row.get(), precision));
+        std::optional<int> precisionStd = std::nullopt;
+        if (precision.has_value())
+          precisionStd = precision.get();
+        jobTreeView->setCellsAt({location}, cellsFromRow(row.get(), precisionStd));
       }
     }
   }
@@ -357,7 +357,7 @@ Decoder::decodeRow(const QMap<QString, QVariant> &map) {
   const auto runNoList = map[QString("runNumbers")].toList();
   std::transform(runNoList.cbegin(), runNoList.cend(), std::back_inserter(number),
                  [](const auto &runNumber) { return runNumber.toString().toStdString(); });
-  boost::optional<double> maybeScaleFactor = boost::make_optional<double>(false, 0.0);
+  std::optional<double> maybeScaleFactor = std::nullopt;
   bool scaleFactorPresent = map[QString("scaleFactorPresent")].toBool();
   if (scaleFactorPresent) {
     maybeScaleFactor = map[QString("scaleFactor")].toDouble();
@@ -391,9 +391,8 @@ RangeInQ Decoder::decodeRangeInQ(const QMap<QString, QVariant> &map) {
   if (stepPresent) {
     step = map[QString("step")].toDouble();
   }
-  // Preffered implementation is using boost::optional<double> instead of bool
-  // and double but older versions of GCC seem to be complaining about
-  // -Wmaybe-uninitialized
+  // Preffered implementation is using std::optional<double> instead of bool and double but older versions of GCC seem
+  // to be complaining about -Wmaybe-uninitialized
   if (minPresent && maxPresent && stepPresent) {
     return RangeInQ(min, step, max);
   } else if (minPresent && maxPresent) {

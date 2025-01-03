@@ -13,6 +13,7 @@
 #include <array>
 #include <boost/optional.hpp>
 #include <boost/regex.hpp>
+#include <optional>
 #include <string>
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -47,19 +48,18 @@ public:
     ROI_DETECTOR_IDS = 11
   };
 
-  LookupRow(boost::optional<double> theta, boost::optional<boost::regex> titleMatcher,
-            TransmissionRunPair tranmissionRuns,
+  LookupRow(std::optional<double> theta, std::optional<boost::regex> titleMatcher, TransmissionRunPair tranmissionRuns,
             boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
-            boost::optional<double> scaleFactor, boost::optional<ProcessingInstructions> processingInstructions,
+            std::optional<double> scaleFactor, boost::optional<ProcessingInstructions> processingInstructions,
             boost::optional<ProcessingInstructions> backgroundProcessingInstructions,
             boost::optional<ProcessingInstructions> roiDetectorIDs);
 
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
-  boost::optional<double> thetaOrWildcard() const;
-  boost::optional<boost::regex> titleMatcher() const;
+  std::optional<double> thetaOrWildcard() const;
+  std::optional<boost::regex> titleMatcher() const;
   RangeInQ const &qRange() const;
-  boost::optional<double> scaleFactor() const;
+  std::optional<double> scaleFactor() const;
   boost::optional<ProcessingInstructions> transmissionProcessingInstructions() const;
   boost::optional<ProcessingInstructions> processingInstructions() const;
   boost::optional<ProcessingInstructions> backgroundProcessingInstructions() const;
@@ -72,11 +72,11 @@ public:
   MANTIDQT_ISISREFLECTOMETRY_DLL friend bool operator!=(LookupRow const &lhs, LookupRow const &rhs);
 
 private:
-  boost::optional<double> m_theta;
-  boost::optional<boost::regex> m_titleMatcher;
+  std::optional<double> m_theta;
+  std::optional<boost::regex> m_titleMatcher;
   TransmissionRunPair m_transmissionRuns;
   RangeInQ m_qRange;
-  boost::optional<double> m_scaleFactor;
+  std::optional<double> m_scaleFactor;
   boost::optional<ProcessingInstructions> m_transmissionProcessingInstructions;
   boost::optional<ProcessingInstructions> m_processingInstructions;
   boost::optional<ProcessingInstructions> m_backgroundProcessingInstructions;

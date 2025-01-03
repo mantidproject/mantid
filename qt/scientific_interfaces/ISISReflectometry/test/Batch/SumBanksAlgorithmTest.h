@@ -83,7 +83,7 @@ public:
     auto mockAlg = std::make_shared<StubbedPreProcess>();
     // Set some expected detector IDs in the lookup row
     auto const detIDsStr = boost::optional<ProcessingInstructions>{"2,3"};
-    auto lookupRow = makeLookupRow(boost::none);
+    auto lookupRow = makeLookupRow(std::nullopt);
     lookupRow.setRoiDetectorIDs(detIDsStr);
     auto maybeLookupRow = boost::optional<LookupRow>(lookupRow);
 

@@ -26,9 +26,9 @@ MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<std::string> parseRunNumber(std::
 MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<std::string>
 parseRunNumberOrWhitespace(std::string const &runNumberString);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double> parseTheta(std::string const &theta);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<double> parseTheta(std::string const &theta);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<boost::regex> parseTitleMatcher(std::string const &titleMatcher);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<boost::regex> parseTitleMatcher(std::string const &titleMatcher);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
 boost::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std::string const &firstTransmissionRun,
@@ -39,13 +39,13 @@ boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, s
                                                        std::string const &step);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
-boost::optional<boost::optional<double>> parseScaleFactor(std::string const &scaleFactor);
+std::optional<double> parseScaleFactor(std::string const &scaleFactor);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
 boost::optional<std::map<std::string, std::string>> parseOptions(std::string const &options);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
-boost::optional<boost::optional<std::string>> parseProcessingInstructions(std::string const &instructions);
+std::optional<std::string> parseProcessingInstructions(std::string const &instructions);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
 boost::optional<std::vector<std::string>> parseTitleAndThetaFromRunTitle(std::string const &runTitle);

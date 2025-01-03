@@ -13,10 +13,18 @@ namespace ISISReflectometry {
 
 template <typename Param> bool allInitialized(boost::optional<Param> const &param) { return param.is_initialized(); }
 
+template <typename Param> bool allInitialized(std::optional<Param> const &param) { return param.has_value(); }
+
 template <typename FirstParam, typename SecondParam, typename... Params>
 bool allInitialized(boost::optional<FirstParam> const &first, boost::optional<SecondParam> const &second,
                     boost::optional<Params> const &...params) {
   return first.is_initialized() && allInitialized(second, params...);
+}
+
+template <typename FirstParam, typename SecondParam, typename... Params>
+bool allInitialized(std::optional<FirstParam> const &first, std::optional<SecondParam> const &second,
+                    std::optional<Params> const &...params) {
+  return first.has_value() && allInitialized(second, params...);
 }
 
 template <typename Result, typename... Params>

@@ -39,9 +39,6 @@ void MANTID_API_DLL update(std::string const &property, size_t value, IAlgorithm
 
 void MANTID_API_DLL update(std::string const &property, double value, IAlgorithmRuntimeProps &properties);
 
-// TODO this method should no longer exist - migrate code to std::optional
-void MANTID_API_DLL update(std::string const &property, boost::optional<double> const &value,
-                           IAlgorithmRuntimeProps &properties);
 void MANTID_API_DLL update(std::string const &property, std::optional<double> const &value,
                            IAlgorithmRuntimeProps &properties);
 
