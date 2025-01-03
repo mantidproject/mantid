@@ -16,8 +16,8 @@
 #include "MantidNexus/NexusIOHelper.h"
 
 // clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidNexusCpp/NeXusException.hpp"
 // clang-format on
 
 #include <algorithm>
@@ -228,14 +228,10 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadTof(::NeXus::File 
   // Get the list of event_time_of_flight's
   file.openData(m_timeOfFlightFieldName);
 
-  // This is the data size
-  ::NeXus::Info id_info = file.getInfo();
-  const int64_t dim0 = recalculateDataSize(id_info.dims[0]);
-
   // Check that the required space is there in the file.
   ::NeXus::Info tof_info = file.getInfo();
-  int64_t tof_dim0 = recalculateDataSize(tof_info.dims[0]);
-  if (tof_dim0 < m_loadSize[0] + m_loadStart[0]) {
+  int64_t dim0 = recalculateDataSize(tof_info.dims[0]);
+  if (dim0 < m_loadSize[0] + m_loadStart[0]) {
     m_loader.alg->getLogger().warning() << "Entry " << entry_name
                                         << "'s event_time_offset field is too small "
                                            "to load the desired data.\n";

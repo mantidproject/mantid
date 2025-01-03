@@ -8,7 +8,7 @@
 
 #include "MantidAPI/NexusFileLoader.h"
 #include "MantidDataHandling/DllConfig.h"
-#include <nexus/NeXusFile.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include <vector>
 
 namespace Mantid {
