@@ -195,7 +195,7 @@ void Decoder::decodeInstrument(const QtInstrumentView *gui, const QMap<QString, 
 }
 
 void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
-                         const QMap<QString, QVariant> &map, boost::optional<int> precision,
+                         const QMap<QString, QVariant> &map, std::optional<int> precision,
                          QtCatalogSearcher *searcher) {
   decodeRunsTable(gui->m_tableView, redJobs, presenter, map[QString("runsTable")].toMap(), std::move(precision));
   gui->m_ui.comboSearchInstrument->setCurrentIndex(map[QString("comboSearchInstrument")].toInt());
@@ -244,7 +244,7 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, c
 } // namespace
 
 void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model,
-                                           const boost::optional<int> &precision) {
+                                           const std::optional<int> &precision) {
   auto jobTreeView = view->m_jobs.get();
   auto const &groups = model->groups();
   for (auto groupIndex = 0u; groupIndex < groups.size(); ++groupIndex) {
@@ -267,17 +267,14 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const Reductio
       if (row) {
         MantidQt::MantidWidgets::Batch::RowLocation location(
             {static_cast<int>(groupIndex), static_cast<int>(rowIndex)});
-        std::optional<int> precisionStd = std::nullopt;
-        if (precision.has_value())
-          precisionStd = precision.get();
-        jobTreeView->setCellsAt({location}, cellsFromRow(row.get(), precisionStd));
+        jobTreeView->setCellsAt({location}, cellsFromRow(row.get(), precision));
       }
     }
   }
 }
 
 void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
-                              const QMap<QString, QVariant> &map, boost::optional<int> precision) {
+                              const QMap<QString, QVariant> &map, std::optional<int> precision) {
   QSignalBlocker signalBlockerView(gui);
 
   m_projectSave = map[QString("projectSave")].toBool();
