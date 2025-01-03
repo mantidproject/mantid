@@ -99,7 +99,7 @@ class ISISPowderPearlTest(unittest.TestCase):
         imods, mod_nums = inst_obj.get_trans_module_indices()
 
         self.assertListEqual(imods, list(range(9)))
-        self.assertEqual(mod_nums, "")
+        self.assertEqual(mod_nums, "1-9")
 
 
 if __name__ == "__main__":
