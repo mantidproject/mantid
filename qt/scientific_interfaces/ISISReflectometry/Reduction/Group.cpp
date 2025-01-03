@@ -91,7 +91,7 @@ bool Group::requiresPostprocessing(bool reprocessFailed) const {
 
 std::string Group::postprocessedWorkspaceName() const { return m_postprocessedWorkspaceName; }
 
-boost::optional<int> Group::indexOfRowWithTheta(double theta, double tolerance) const {
+std::optional<int> Group::indexOfRowWithTheta(double theta, double tolerance) const {
   return indexOf(m_rows, [theta, tolerance](boost::optional<Row> const &row) -> bool {
     return row.is_initialized() && std::abs(row.get().theta() - theta) < tolerance;
   });

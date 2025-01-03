@@ -40,24 +40,19 @@ std::optional<size_t> incrementIndex(const Row &row) {
   return lookupIndex.has_value() ? std::optional<size_t>(lookupIndex.value() + 1) : std::nullopt;
 }
 
-std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, boost::optional<int> precision) {
-  // convert type for precision
-  std::optional<int> precisionStd = std::nullopt;
-  if (precision)
-    precisionStd = precision.get();
-
+std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, std::optional<int> precision) {
   auto lookupIndex = incrementIndex(row);
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
        MantidQt::MantidWidgets::Batch::Cell(valueToString(row.theta(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(row.transmissionWorkspaceNames().firstRunList()),
        MantidQt::MantidWidgets::Batch::Cell(row.transmissionWorkspaceNames().secondRunList()),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min, precisionStd),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max, precisionStd),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precisionStd),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min, precision),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max, precision),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precision),
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.scaleFactor(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions())),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(lookupIndex, precisionStd))});
+       MantidQt::MantidWidgets::Batch::Cell(optionalToString(lookupIndex, precision))});
 }
 } // namespace
 
@@ -85,6 +80,6 @@ void JobsViewUpdater::rowModified(int groupIndex, int rowIndex, Row const &row) 
 
 void JobsViewUpdater::setPrecision(const int &precision) { m_precision = precision; }
 
-void JobsViewUpdater::resetPrecision() { m_precision = boost::none; }
+void JobsViewUpdater::resetPrecision() { m_precision = std::nullopt; }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry
