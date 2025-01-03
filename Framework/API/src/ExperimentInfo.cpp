@@ -37,6 +37,7 @@
 #include "MantidKernel/Property.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
+#include "MantidNexusCpp/NeXusException.hpp"
 
 #include "MantidTypes/SpectrumDefinition.h"
 
@@ -45,7 +46,6 @@
 #include <boost/regex.hpp>
 
 #include <Poco/Path.h>
-#include <nexus/NeXusException.hpp>
 
 #include <algorithm>
 #include <memory>

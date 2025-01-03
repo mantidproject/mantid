@@ -13,9 +13,9 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitConversion.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <cmath>
-#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

@@ -9,15 +9,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/ISISRunLogs.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidDataHandling/DataBlockComposite.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/Workspace2D_fwd.h"
+#include "MantidHistogramData/HistogramX.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
-#include <nexus/NeXusFile.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/scoped_ptr.hpp>
 
