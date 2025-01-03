@@ -574,7 +574,7 @@ NXstatus NX5opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   pNexusFile5 pFile;
   hid_t attr1, atype, iVID;
   herr_t iRet;
-  char pBuffer[1024 + 12];
+  char pBuffer[NX_MAXPATHLEN + 12]; // no idea what the 12 is about
 
   pFile = NXI5assert(fid);
   if (pFile->iCurrentG == 0) {
@@ -1277,7 +1277,7 @@ static NXstatus NX5settargetattribute(pNexusFile5 pFile, NXlink *sLink) {
 
 NXstatus NX5makenamedlink(NXhandle fid, CONSTCHAR *name, NXlink *sLink) {
   pNexusFile5 pFile;
-  char linkTarget[1024];
+  char linkTarget[NX_MAXPATHLEN];
 
   pFile = NXI5assert(fid);
   if (pFile->iCurrentG == 0) { /* root level, can not link here */
@@ -1288,7 +1288,7 @@ NXstatus NX5makenamedlink(NXhandle fid, CONSTCHAR *name, NXlink *sLink) {
      build pathname to link from our current group and the name
      of the thing to link
    */
-  if (strlen(pFile->name_ref) + strlen(name) + 2 < 1024) {
+  if (strlen(pFile->name_ref) + strlen(name) + 2 < NX_MAXPATHLEN) {
     strcpy(linkTarget, "/");
     strcat(linkTarget, pFile->name_ref);
     strcat(linkTarget, "/");
@@ -1307,7 +1307,7 @@ NXstatus NX5makenamedlink(NXhandle fid, CONSTCHAR *name, NXlink *sLink) {
 
 NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
   pNexusFile5 pFile;
-  char linkTarget[1024];
+  char linkTarget[NX_MAXPATHLEN];
   char *itemName = NULL;
 
   pFile = NXI5assert(fid);
@@ -1329,7 +1329,7 @@ NXstatus NX5makelink(NXhandle fid, NXlink *sLink) {
      build pathname to link from our current group and the name
      of the thing to link
    */
-  if (strlen(pFile->name_ref) + strlen(itemName) + 2 < 1024) {
+  if (strlen(pFile->name_ref) + strlen(itemName) + 2 < NX_MAXPATHLEN) {
     strcpy(linkTarget, "/");
     strcat(linkTarget, pFile->name_ref);
     strcat(linkTarget, "/");
@@ -2187,7 +2187,7 @@ NXstatus NX5nativeisexternallink(NXhandle fileid, const char *name, char *url, c
   pNexusFile5 pFile;
   herr_t ret;
   H5L_info_t link_buff;
-  char linkval_buff[1024];
+  char linkval_buff[NX_MAXPATHLEN];
   const char *filepath = NULL, *objpath = NULL;
   size_t val_size;
   hid_t openthing;

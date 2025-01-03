@@ -271,7 +271,7 @@ int main(int argc, char *argv[]) {
     return TEST_FAILED;
   if (NXclose(&fileid) != NX_OK)
     return TEST_FAILED;
-  std::cout << "END OF WRITE" << std::endl; // TODO REMOVE
+
   if ((argc >= 2) && !strcmp(argv[1], "-q")) {
     return TEST_SUCCEED; /* create only */
   }

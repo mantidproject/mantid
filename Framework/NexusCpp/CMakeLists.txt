@@ -70,19 +70,9 @@ add_executable(
 target_link_libraries(napi_attra_test_hdf5 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-HDF5-attra-test" COMMAND napi_attra_test_hdf5)
 
-# TODO figure out correct check
-
-# if (WIN32) set_property(TEST "${TEST_PREFIX}-C-HDF5-test" "${TEST_PREFIX}-C-HDF5-attra-test" APPEND PROPERTY
-# ENVIRONMENT "PATH=${TESTSPATH}") endif(WIN32)
-
 add_executable(napi_test_cpp-hdf5 EXCLUDE_FROM_ALL test/napi_test_cpp.cpp test/napi_test_util.cpp test/napi_test_util.h)
 target_link_libraries(napi_test_cpp-hdf5 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-Cpp-HDF5-test" COMMAND napi_test_cpp-hdf5)
-
-# TODO figure out correct check
-
-# if (WIN32) set_property(TEST "${TEST_PREFIX}-Cpp-HDF5-test" APPEND PROPERTY ENVIRONMENT "PATH=${TESTSPATH}")
-# endif(WIN32)
 
 # #### HDF4
 add_executable(napi_test_hdf4 EXCLUDE_FROM_ALL test/napi_test.cpp test/napi_test_util.cpp test/napi_test_util.h)
@@ -96,28 +86,14 @@ target_link_libraries(napi_attra_test_hdf4 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-HDF4-attra-test" COMMAND napi_attra_test_hdf4)
 set_tests_properties("${TEST_PREFIX}-C-HDF4-attra-test" PROPERTIES WILL_FAIL TRUE)
 
-# TODO figure out correct check
-
-# if(WIN32) set_property( TEST "${TEST_PREFIX}-C-HDF4-test" "${TEST_PREFIX}-C-HDF4-attra-test" APPEND PROPERTY
-# ENVIRONMENT "PATH=${TESTSPATH}" ) endif(WIN32)
-
 add_executable(napi_test_cpp-hdf4 EXCLUDE_FROM_ALL test/napi_test_cpp.cpp test/napi_test_util.cpp test/napi_test_util.h)
 target_link_libraries(napi_test_cpp-hdf4 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-Cpp-HDF4-test" COMMAND napi_test_cpp-hdf4)
-
-# TODO figure out correct check
-
-# if (WIN32) set_property(TEST "${TEST_PREFIX}-Cpp-HDF4-test" APPEND PROPERTY ENVIRONMENT "PATH=${TESTSPATH}")
-# endif(WIN32)
 
 # #### test for unlimited dimensions
 add_executable(napi_test_nxunlimited EXCLUDE_FROM_ALL test/test_nxunlimited.cpp)
 target_link_libraries(napi_test_nxunlimited NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-test-nxunlimited" COMMAND napi_test_nxunlimited)
-
-# TODO figure out correct check
-
-# if (WIN32) set_property(TEST "NAPI-C-test-nxunlimited" APPEND PROPERTY ENVIRONMENT "PATH=${TESTSPATH}") endif(WIN32)
 
 # #### leak tests
 
@@ -125,26 +101,13 @@ add_executable(napi_leak_test1 EXCLUDE_FROM_ALL test/leak_test1.cpp test/napi_te
 target_link_libraries(napi_leak_test1 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-C-leak-test-1" COMMAND napi_leak_test1)
 
-# TODO figure out correct check
-
-# if (WIN32) set_property(TEST "${TEST_PREFIX}-C-leak-test-1" APPEND PROPERTY ENVIRONMENT "PATH=${TESTSPATH}")
-# endif(WIN32)
-
 add_executable(napi_leak_test2 EXCLUDE_FROM_ALL test/leak_test2.cpp)
 target_link_libraries(napi_leak_test2 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-Cpp-leak-test-2" COMMAND napi_leak_test2)
 
-# TODO figure out correct check
-
-# if (WIN32) set_property(TEST "NAPI-C++-leak-test-2" APPEND PROPERTY ENVIRONMENT "PATH=${TESTSPATH}") endif(WIN32)
-
 add_executable(napi_leak_test3 EXCLUDE_FROM_ALL test/leak_test3.cpp)
 target_link_libraries(napi_leak_test3 NexusCpp)
 add_test(NAME "${TEST_PREFIX}-Cpp-leak-test-3" COMMAND napi_leak_test3)
-
-# TODO figure out correct check
-
-# if (WIN32) set_property(TEST "NAPI-C++-leak-test-3" APPEND PROPERTY ENVIRONMENT "PATH=${TESTSPATH}") endif(WIN32)
 
 # #### phony target to drag in all tests
 add_custom_target(

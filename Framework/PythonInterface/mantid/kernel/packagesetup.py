@@ -1,6 +1,4 @@
 """
-===== AUTO-GENERATED MODULE ====
-
 Handles set up of aspects related to extra Python packages e.g. adding
 any required paths to sys.path, setting environment variables etc.
 """
