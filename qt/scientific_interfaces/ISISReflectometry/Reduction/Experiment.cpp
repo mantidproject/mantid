@@ -19,8 +19,8 @@ Experiment::Experiment()
       m_polarizationCorrections(PolarizationCorrections(PolarizationCorrectionType::None)),
       m_floodCorrections(FloodCorrections(FloodCorrectionType::Workspace)), m_transmissionStitchOptions(),
       m_stitchParameters(std::map<std::string, std::string>()),
-      m_lookupTable(LookupTable({LookupRow(std::nullopt, std::nullopt, TransmissionRunPair(), boost::none, RangeInQ(),
-                                           std::nullopt, ProcessingInstructions(), boost::none, boost::none)})) {}
+      m_lookupTable(LookupTable({LookupRow(std::nullopt, std::nullopt, TransmissionRunPair(), std::nullopt, RangeInQ(),
+                                           std::nullopt, ProcessingInstructions(), std::nullopt, std::nullopt)})) {}
 
 Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType, SummationType summationType,
                        bool includePartialBins, bool debug, BackgroundSubtraction backgroundSubtraction,

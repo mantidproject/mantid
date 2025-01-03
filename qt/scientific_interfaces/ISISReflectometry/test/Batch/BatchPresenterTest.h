@@ -546,7 +546,7 @@ public:
 
   void testHasROIDetectorIDsForPreviewRowNoDetectorIdsInLookupRow() {
     auto lookupRow = makeLookupRow(std::nullopt);
-    lookupRow.setRoiDetectorIDs(boost::none);
+    lookupRow.setRoiDetectorIDs(std::nullopt);
     auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
     runHasROIDetectorIDsForPreviewRowTest(maybeLookupRow, false);
   }

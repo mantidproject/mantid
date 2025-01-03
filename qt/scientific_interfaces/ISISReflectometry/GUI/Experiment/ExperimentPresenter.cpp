@@ -334,9 +334,9 @@ TransmissionStitchOptions ExperimentPresenter::transmissionStitchOptionsFromView
 
 std::map<std::string, std::string> ExperimentPresenter::stitchParametersFromView() {
   auto maybeStitchParameters = parseOptions(m_view->getStitchOptions());
-  if (maybeStitchParameters.is_initialized()) {
+  if (maybeStitchParameters.has_value()) {
     m_view->showStitchParametersValid();
-    return maybeStitchParameters.get();
+    return maybeStitchParameters.value();
   }
 
   m_view->showStitchParametersInvalid();
@@ -439,7 +439,7 @@ void ExperimentPresenter::updateViewFromModel() {
       polarizationCorrectionTypeToString(m_model.polarizationCorrections().correctionType()));
   m_view->setPolarizationEfficienciesFilePath("");
   if (m_model.polarizationCorrections().workspace())
-    m_view->setPolarizationEfficienciesWorkspace(m_model.polarizationCorrections().workspace().get());
+    m_view->setPolarizationEfficienciesWorkspace(m_model.polarizationCorrections().workspace().value());
   m_view->setFloodCorrectionType(floodCorrectionTypeToString(m_model.floodCorrections().correctionType()));
   if (m_model.floodCorrections().workspace())
     m_view->setFloodWorkspace(m_model.floodCorrections().workspace().value());

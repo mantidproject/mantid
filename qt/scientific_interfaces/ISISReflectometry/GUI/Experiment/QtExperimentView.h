@@ -184,7 +184,7 @@ private:
   void setText(QLineEdit &lineEdit, std::string const &value);
   void setText(QLineEdit &lineEdit, std::optional<int> value);
   void setText(QLineEdit &lineEdit, std::optional<double> value);
-  void setText(QLineEdit &lineEdit, boost::optional<std::string> const &value);
+  void setText(QLineEdit &lineEdit, std::optional<std::string> const &value);
   std::string textFromCell(QTableWidgetItem const *maybeNullItem) const;
 
   void setChecked(QCheckBox &checkBox, bool checked);

@@ -358,16 +358,16 @@ LookupRow makeWildcardLookupRow() { return makeLookupRow(std::nullopt, std::null
 LookupTable makeEmptyLookupTable() { return LookupTable{}; }
 
 LookupTable makeLookupTable() {
-  auto lookupRow = LookupRow(std::nullopt, std::nullopt, TransmissionRunPair(), boost::none,
-                             RangeInQ(std::nullopt, std::nullopt, std::nullopt), std::nullopt, boost::none, boost::none,
-                             boost::none);
+  auto lookupRow = LookupRow(std::nullopt, std::nullopt, TransmissionRunPair(), std::nullopt,
+                             RangeInQ(std::nullopt, std::nullopt, std::nullopt), std::nullopt, std::nullopt,
+                             std::nullopt, std::nullopt);
   return LookupTable{std::move(lookupRow)};
 }
 
 LookupTable makeLookupTableWithTwoAngles() {
-  return LookupTable{LookupRow(0.5, std::nullopt, TransmissionRunPair("22347", ""), boost::none,
-                               RangeInQ(0.008, 0.02, 1.2), 0.8, ProcessingInstructions("2-3"), boost::none,
-                               boost::none),
+  return LookupTable{LookupRow(0.5, std::nullopt, TransmissionRunPair("22347", ""), std::nullopt,
+                               RangeInQ(0.008, 0.02, 1.2), 0.8, ProcessingInstructions("2-3"), std::nullopt,
+                               std::nullopt),
                      makeLookupRow(2.3)};
 }
 
@@ -378,8 +378,8 @@ LookupTable makeLookupTableWithTwoAnglesAndWildcard() {
                 RangeInQ(0.007, 0.01, 1.1), 0.7, ProcessingInstructions("1"), ProcessingInstructions("3,7"),
                 ProcessingInstructions("3-22")),
       // two angle rows
-      LookupRow(0.5, std::nullopt, TransmissionRunPair("22347", ""), boost::none, RangeInQ(0.008, 0.02, 1.2), 0.8,
-                ProcessingInstructions("2-3"), boost::none, boost::none),
+      LookupRow(0.5, std::nullopt, TransmissionRunPair("22347", ""), std::nullopt, RangeInQ(0.008, 0.02, 1.2), 0.8,
+                ProcessingInstructions("2-3"), std::nullopt, std::nullopt),
       LookupRow(makeLookupRow(2.3))};
 }
 
@@ -406,7 +406,7 @@ PolarizationCorrections makePolarizationCorrections() {
 
 PolarizationCorrections makeWorkspacePolarizationCorrections() {
   return PolarizationCorrections(PolarizationCorrectionType::Workspace,
-                                 boost::optional<std::string>("test_eff_workspace"));
+                                 std::optional<std::string>("test_eff_workspace"));
 }
 
 PolarizationCorrections makeEmptyPolarizationCorrections() {

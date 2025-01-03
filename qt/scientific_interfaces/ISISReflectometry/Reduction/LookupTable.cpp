@@ -46,8 +46,8 @@ boost::optional<LookupRow> LookupTable::findLookupRow(PreviewRow const &previewR
   auto const title = !previewRow.getLoadedWs() ? EMPTY_SEARCH_TITLE : previewRow.getLoadedWs()->getTitle();
   auto titleAndTheta = parseTitleAndThetaFromRunTitle(title);
 
-  if (titleAndTheta.is_initialized()) {
-    return findLookupRow(titleAndTheta.get()[0], previewRow.theta(), tolerance);
+  if (titleAndTheta.has_value()) {
+    return findLookupRow(titleAndTheta.value()[0], previewRow.theta(), tolerance);
   } else {
     return findLookupRow(title, previewRow.theta(), tolerance);
   }

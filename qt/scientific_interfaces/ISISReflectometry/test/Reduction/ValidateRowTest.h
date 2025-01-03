@@ -124,25 +124,27 @@ public:
   }
 
   void testParsesSingleRunNumber() {
-    TS_ASSERT_EQUALS(std::vector<std::string>({"100"}), parseRunNumbers("100").get());
-    TS_ASSERT_EQUALS(std::vector<std::string>({"000102"}), parseRunNumbers("000102").get());
+    TS_ASSERT_EQUALS(std::vector<std::string>({"100"}), parseRunNumbers("100").value());
+    TS_ASSERT_EQUALS(std::vector<std::string>({"000102"}), parseRunNumbers("000102").value());
   }
 
   void testParsesMultipleRunNumbersSeparatedByPlus() {
-    TS_ASSERT_EQUALS(std::vector<std::string>({"100", "1002"}), parseRunNumbers("100+1002").get());
-    TS_ASSERT_EQUALS(std::vector<std::string>({"000102", "111102", "010"}), parseRunNumbers("000102+111102+010").get());
+    TS_ASSERT_EQUALS(std::vector<std::string>({"100", "1002"}), parseRunNumbers("100+1002").value());
+    TS_ASSERT_EQUALS(std::vector<std::string>({"000102", "111102", "010"}),
+                     parseRunNumbers("000102+111102+010").value());
   }
 
   void testParsesMultipleRunNumbersSeparatedByComma() {
-    TS_ASSERT_EQUALS(std::vector<std::string>({"100", "1002"}), parseRunNumbers("100,1002").get());
-    TS_ASSERT_EQUALS(std::vector<std::string>({"000102", "111102", "010"}), parseRunNumbers("000102+111102+010").get());
+    TS_ASSERT_EQUALS(std::vector<std::string>({"100", "1002"}), parseRunNumbers("100,1002").value());
+    TS_ASSERT_EQUALS(std::vector<std::string>({"000102", "111102", "010"}),
+                     parseRunNumbers("000102+111102+010").value());
   }
 
   void testFailsForNoRunNumbers() {
-    TS_ASSERT_EQUALS(boost::none, parseRunNumbers(""));
-    TS_ASSERT_EQUALS(boost::none, parseRunNumbers("   "));
-    TS_ASSERT_EQUALS(boost::none, parseRunNumbers("\n\n"));
-    TS_ASSERT_EQUALS(boost::none, parseRunNumbers("+"));
+    TS_ASSERT_EQUALS(std::nullopt, parseRunNumbers(""));
+    TS_ASSERT_EQUALS(std::nullopt, parseRunNumbers("   "));
+    TS_ASSERT_EQUALS(std::nullopt, parseRunNumbers("\n\n"));
+    TS_ASSERT_EQUALS(std::nullopt, parseRunNumbers("+"));
   }
 
   void testParsesRunNumbersMixedWithWorkspaceNames() {

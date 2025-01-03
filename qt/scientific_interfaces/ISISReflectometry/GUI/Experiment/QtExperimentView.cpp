@@ -446,7 +446,7 @@ void QtExperimentView::setText(QLineEdit &lineEdit, std::optional<int> value) {
     setText(lineEdit, value.value());
 }
 
-void QtExperimentView::setText(QLineEdit &lineEdit, boost::optional<std::string> const &text) {
+void QtExperimentView::setText(QLineEdit &lineEdit, const std::optional<std::string> &text) {
   if (text && !text->empty())
     setText(lineEdit, text);
 }

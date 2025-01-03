@@ -49,10 +49,10 @@ public:
   };
 
   LookupRow(std::optional<double> theta, std::optional<boost::regex> titleMatcher, TransmissionRunPair tranmissionRuns,
-            boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
-            std::optional<double> scaleFactor, boost::optional<ProcessingInstructions> processingInstructions,
-            boost::optional<ProcessingInstructions> backgroundProcessingInstructions,
-            boost::optional<ProcessingInstructions> roiDetectorIDs);
+            std::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
+            std::optional<double> scaleFactor, std::optional<ProcessingInstructions> processingInstructions,
+            std::optional<ProcessingInstructions> backgroundProcessingInstructions,
+            std::optional<ProcessingInstructions> roiDetectorIDs);
 
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
@@ -60,12 +60,12 @@ public:
   std::optional<boost::regex> titleMatcher() const;
   RangeInQ const &qRange() const;
   std::optional<double> scaleFactor() const;
-  boost::optional<ProcessingInstructions> transmissionProcessingInstructions() const;
-  boost::optional<ProcessingInstructions> processingInstructions() const;
-  boost::optional<ProcessingInstructions> backgroundProcessingInstructions() const;
-  boost::optional<ProcessingInstructions> roiDetectorIDs() const;
-  void setRoiDetectorIDs(boost::optional<ProcessingInstructions> selectedBanks);
-  void setProcessingInstructions(ROIType regionType, boost::optional<ProcessingInstructions> processingInstructions);
+  std::optional<ProcessingInstructions> transmissionProcessingInstructions() const;
+  std::optional<ProcessingInstructions> processingInstructions() const;
+  std::optional<ProcessingInstructions> backgroundProcessingInstructions() const;
+  std::optional<ProcessingInstructions> roiDetectorIDs() const;
+  void setRoiDetectorIDs(std::optional<ProcessingInstructions> selectedBanks);
+  void setProcessingInstructions(ROIType regionType, std::optional<ProcessingInstructions> processingInstructions);
   bool hasEqualThetaAndTitle(LookupRow const &lookupRow, double tolerance) const;
 
   MANTIDQT_ISISREFLECTOMETRY_DLL friend bool operator==(LookupRow const &lhs, LookupRow const &rhs);
@@ -77,10 +77,10 @@ private:
   TransmissionRunPair m_transmissionRuns;
   RangeInQ m_qRange;
   std::optional<double> m_scaleFactor;
-  boost::optional<ProcessingInstructions> m_transmissionProcessingInstructions;
-  boost::optional<ProcessingInstructions> m_processingInstructions;
-  boost::optional<ProcessingInstructions> m_backgroundProcessingInstructions;
-  boost::optional<ProcessingInstructions> m_roiDetectorIDs;
+  std::optional<ProcessingInstructions> m_transmissionProcessingInstructions;
+  std::optional<ProcessingInstructions> m_processingInstructions;
+  std::optional<ProcessingInstructions> m_backgroundProcessingInstructions;
+  std::optional<ProcessingInstructions> m_roiDetectorIDs;
 };
 
 LookupRow::ValueArray lookupRowToArray(LookupRow const &lookupRow);

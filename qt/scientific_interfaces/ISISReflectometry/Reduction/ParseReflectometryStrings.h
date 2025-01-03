@@ -8,7 +8,6 @@
 #include "Common/DllConfig.h"
 #include "RangeInQ.h"
 #include "TransmissionRunPair.h"
-#include <boost/optional.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
 #include <boost/variant.hpp>
@@ -19,11 +18,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<std::vector<std::string>> parseRunNumbers(std::string const &runNumbers);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<std::vector<std::string>> parseRunNumbers(std::string const &runNumbers);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<std::string> parseRunNumber(std::string const &runNumberString);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<std::string> parseRunNumber(std::string const &runNumberString);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<std::string>
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<std::string>
 parseRunNumberOrWhitespace(std::string const &runNumberString);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<double> parseTheta(std::string const &theta);
@@ -42,13 +41,13 @@ MANTIDQT_ISISREFLECTOMETRY_DLL
 std::optional<double> parseScaleFactor(std::string const &scaleFactor);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
-boost::optional<std::map<std::string, std::string>> parseOptions(std::string const &options);
+std::optional<std::map<std::string, std::string>> parseOptions(std::string const &options);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
 std::optional<std::string> parseProcessingInstructions(std::string const &instructions);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
-boost::optional<std::vector<std::string>> parseTitleAndThetaFromRunTitle(std::string const &runTitle);
+std::optional<std::vector<std::string>> parseTitleAndThetaFromRunTitle(std::string const &runTitle);
 
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

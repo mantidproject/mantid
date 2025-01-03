@@ -342,7 +342,7 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
   properties->setProperty("InputRunList", previewRow.runNumbers());
   properties->setProperty("ThetaIn", previewRow.theta());
   if (previewRow.getSelectedBanks().has_value()) {
-    properties->setProperty("ROIDetectorIDs", previewRow.getSelectedBanks().get());
+    properties->setProperty("ROIDetectorIDs", previewRow.getSelectedBanks().value());
   }
   updateProcessingInstructionsProperties(*properties, previewRow);
 

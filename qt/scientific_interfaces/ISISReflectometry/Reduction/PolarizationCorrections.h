@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 #include "Common/DllConfig.h"
-#include <boost/optional.hpp>
+#include <optional>
 #include <stdexcept>
 #include <string>
 namespace MantidQt {
@@ -47,14 +47,14 @@ inline std::string polarizationCorrectionTypeToString(PolarizationCorrectionType
 class MANTIDQT_ISISREFLECTOMETRY_DLL PolarizationCorrections {
 public:
   explicit PolarizationCorrections(PolarizationCorrectionType correctionType,
-                                   boost::optional<std::string> workspace = boost::none);
+                                   std::optional<std::string> workspace = std::nullopt);
 
   PolarizationCorrectionType correctionType() const;
-  boost::optional<std::string> workspace() const;
+  std::optional<std::string> workspace() const;
 
 private:
   PolarizationCorrectionType m_correctionType;
-  boost::optional<std::string> m_workspace;
+  std::optional<std::string> m_workspace;
 };
 
 MANTIDQT_ISISREFLECTOMETRY_DLL bool operator==(PolarizationCorrections const &lhs, PolarizationCorrections const &rhs);

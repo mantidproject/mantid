@@ -108,8 +108,8 @@ public:
     auto table = Table({Cells({"", "", "", "", "1-3"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
-    TS_ASSERT(results[0].transmissionProcessingInstructions().is_initialized());
-    TS_ASSERT_EQUALS(results[0].transmissionProcessingInstructions().get(), "1-3");
+    TS_ASSERT(results[0].transmissionProcessingInstructions().has_value());
+    TS_ASSERT_EQUALS(results[0].transmissionProcessingInstructions().value(), "1-3");
   }
 
   void testInvalidTransmissionProcessingInstructions() {
@@ -146,8 +146,8 @@ public:
     auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "1-3"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
-    TS_ASSERT(results[0].processingInstructions().is_initialized());
-    TS_ASSERT_EQUALS(results[0].processingInstructions().get(), "1-3");
+    TS_ASSERT(results[0].processingInstructions().has_value());
+    TS_ASSERT_EQUALS(results[0].processingInstructions().value(), "1-3");
   }
 
   void testInvalidProcessingInstructions() {
@@ -159,8 +159,8 @@ public:
     auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "", "1-3"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
-    TS_ASSERT(results[0].backgroundProcessingInstructions().is_initialized());
-    TS_ASSERT_EQUALS(results[0].backgroundProcessingInstructions().get(), "1-3");
+    TS_ASSERT(results[0].backgroundProcessingInstructions().has_value());
+    TS_ASSERT_EQUALS(results[0].backgroundProcessingInstructions().value(), "1-3");
   }
 
   void testInvalidBackgroundProcessingInstructions() {
@@ -172,8 +172,8 @@ public:
     auto table = Table({Cells({"", "", "", "", "", "", "", "", "", "", "", "1-3"})});
     auto results = runTestValid(table);
     TS_ASSERT_EQUALS(results.size(), 1);
-    TS_ASSERT(results[0].roiDetectorIDs().is_initialized());
-    TS_ASSERT_EQUALS(results[0].roiDetectorIDs().get(), "1-3");
+    TS_ASSERT(results[0].roiDetectorIDs().has_value());
+    TS_ASSERT_EQUALS(results[0].roiDetectorIDs().value(), "1-3");
   }
 
   void testInvalidROIDetectorProcessingInstructions() {

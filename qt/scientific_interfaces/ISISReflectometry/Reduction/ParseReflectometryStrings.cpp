@@ -14,17 +14,17 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 namespace { // unnamed
-boost::optional<std::vector<std::string>> parseRunNumbersOrWhitespace(std::string const &runNumberString) {
+std::optional<std::vector<std::string>> parseRunNumbersOrWhitespace(std::string const &runNumberString) {
   auto runNumbers = std::vector<std::string>();
   auto runNumberCandidates = boost::tokenizer<boost::escaped_list_separator<char>>(
       runNumberString, boost::escaped_list_separator<char>("\\", ",+", "\"'"));
 
   for (auto const &runNumberCandidate : runNumberCandidates) {
     auto const maybeRunNumber = parseRunNumberOrWhitespace(runNumberCandidate);
-    if (maybeRunNumber.is_initialized()) {
-      runNumbers.emplace_back(maybeRunNumber.get());
+    if (maybeRunNumber.has_value()) {
+      runNumbers.emplace_back(maybeRunNumber.value());
     } else {
-      return boost::none;
+      return std::nullopt;
     }
   }
 
@@ -32,7 +32,7 @@ boost::optional<std::vector<std::string>> parseRunNumbersOrWhitespace(std::strin
 }
 } // unnamed namespace
 
-boost::optional<std::string> parseRunNumber(std::string const &runNumberString) {
+std::optional<std::string> parseRunNumber(std::string const &runNumberString) {
   // We support any workspace name, as well as run numbers, so for just return
   // the input string, but trimmed of whitespace (or none if the result is
   // empty)
@@ -40,20 +40,20 @@ boost::optional<std::string> parseRunNumber(std::string const &runNumberString) 
   boost::trim(result);
 
   if (result.empty())
-    return boost::none;
+    return std::nullopt;
 
   return result;
 }
 
-boost::optional<std::string> parseRunNumberOrWhitespace(std::string const &runNumberString) {
+std::optional<std::string> parseRunNumberOrWhitespace(std::string const &runNumberString) {
   if (isEntirelyWhitespace(runNumberString)) {
     return std::string();
   } else {
     auto maybeRunNumber = parseRunNumber(runNumberString);
-    if (maybeRunNumber.is_initialized())
+    if (maybeRunNumber.has_value())
       return maybeRunNumber;
   }
-  return boost::none;
+  return std::nullopt;
 }
 
 std::optional<double> parseTheta(std::string const &theta) {
@@ -91,11 +91,11 @@ std::map<std::string, std::string> replaceBoolTextWithBoolValue(std::map<std::st
 }
 } // namespace
 
-boost::optional<std::map<std::string, std::string>> parseOptions(std::string const &options) {
+std::optional<std::map<std::string, std::string>> parseOptions(std::string const &options) {
   try {
     return replaceBoolTextWithBoolValue(MantidQt::MantidWidgets::parseKeyValueString(options));
   } catch (std::runtime_error &) {
-    return boost::none;
+    return std::nullopt;
   }
 }
 
@@ -163,22 +163,22 @@ boost::variant<RangeInQ, std::vector<int>> parseQRange(std::string const &min, s
     return RangeInQ(minimum, stepValue, maximum);
 }
 
-boost::optional<std::vector<std::string>> parseRunNumbers(std::string const &runNumberString) {
+std::optional<std::vector<std::string>> parseRunNumbers(std::string const &runNumberString) {
   auto runNumbers = std::vector<std::string>();
   auto runNumberCandidates = boost::tokenizer<boost::escaped_list_separator<char>>(
       runNumberString, boost::escaped_list_separator<char>("\\", ",+", "\"'"));
 
   for (auto const &runNumberCandidate : runNumberCandidates) {
     auto maybeRunNumber = parseRunNumber(runNumberCandidate);
-    if (maybeRunNumber.is_initialized()) {
-      runNumbers.emplace_back(maybeRunNumber.get());
+    if (maybeRunNumber.has_value()) {
+      runNumbers.emplace_back(maybeRunNumber.value());
     } else {
-      return boost::none;
+      return std::nullopt;
     }
   }
 
   if (runNumbers.empty())
-    return boost::none;
+    return std::nullopt;
   else
     return runNumbers;
 }
@@ -190,16 +190,16 @@ boost::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std:
   auto second = parseRunNumbersOrWhitespace(secondTransmissionRun);
 
   if (allInitialized(first, second)) {
-    if (first.get().empty() && !second.get().empty()) {
+    if (first.value().empty() && !second.value().empty()) {
       errorColumns.emplace_back(0);
       return errorColumns;
     } else {
-      return TransmissionRunPair(first.get(), second.get());
+      return TransmissionRunPair(first.value(), second.value());
     }
   } else {
-    if (!first.is_initialized())
+    if (!first.has_value())
       errorColumns.emplace_back(0);
-    if (!second.is_initialized())
+    if (!second.has_value())
       errorColumns.emplace_back(1);
     return errorColumns;
   }
@@ -210,12 +210,12 @@ boost::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std:
  * If it is not in this format then boost::none is returned.
  * If the format matches then the first element of the vector is the title and the second is theta.
  */
-boost::optional<std::vector<std::string>> parseTitleAndThetaFromRunTitle(std::string const &runTitle) {
+std::optional<std::vector<std::string>> parseTitleAndThetaFromRunTitle(std::string const &runTitle) {
   boost::smatch matches;
   static const boost::regex runTitleFormatRegex("(.*)(th[:=]\\s*([0-9.\\-]+))(.*)");
 
   if (!boost::regex_search(runTitle, matches, runTitleFormatRegex)) {
-    return boost::none;
+    return std::nullopt;
   }
 
   std::vector<std::string> parsedResult;

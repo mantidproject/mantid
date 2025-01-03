@@ -20,36 +20,36 @@ public:
 
   void testParseRunNumber() {
     auto result = parseRunNumber("13460");
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), "13460");
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), "13460");
   }
 
   void testParseRunNumberRemovesWhitespace() {
     auto result = parseRunNumber("  13460\t");
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), "13460");
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), "13460");
   }
 
   void testParseRunNumberConsidersAllWhitespaceInvalid() {
     auto result = parseRunNumber("");
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testRunNumberHandlesFreeTextInput() {
     auto result = parseRunNumber("some workspace name");
-    TS_ASSERT(result.is_initialized());
+    TS_ASSERT(result.has_value());
   }
 
   void testParseRunNumberOrWhitespaceExtractsRun() {
     auto result = parseRunNumberOrWhitespace("  13460\t");
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), "13460");
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), "13460");
   }
 
   void testParseRunNumberOrWhitespaceReturnsEmptyString() {
     auto result = parseRunNumberOrWhitespace("  \t");
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), "");
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), "");
   }
 
   void testParseTheta() {
@@ -97,27 +97,27 @@ public:
   void testParseOptions() {
     auto result = parseOptions("key1=value1, key2=value2");
     std::map<std::string, std::string> expected = {{"key1", "value1"}, {"key2", "value2"}};
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), expected);
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), expected);
   }
 
   void testParseOptionsReplacesBoolTextStrings() {
     auto result = parseOptions("key1=True, key2=false, key3=falser");
     std::map<std::string, std::string> const expected = {{{"key1", "1"}, {"key2", "0"}, {"key3", "falser"}}};
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), expected);
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), expected);
   }
 
   void testParseOptionsHandlesWhitespace() {
     auto result = parseOptions("\t key1=value1,   key2  =value2\t");
     std::map<std::string, std::string> expected = {{"key1", "value1"}, {"key2", "value2"}};
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), expected);
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), expected);
   }
 
   void testParseOptionsHandlesInvalidInput() {
     auto result = parseOptions("bad");
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseProcessingInstructions() {
@@ -208,39 +208,39 @@ public:
   void testParseRunNumbersSingle() {
     auto result = parseRunNumbers("13460");
     std::vector<std::string> expected = {"13460"};
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), expected);
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), expected);
   }
 
   void testParseRunNumbersWithCommaSeparator() {
     auto result = parseRunNumbers("13460, 13461");
     std::vector<std::string> expected = {"13460", "13461"};
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), expected);
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), expected);
   }
 
   void testParseRunNumbersWithPlusSeparator() {
     auto result = parseRunNumbers("13460+13461");
     std::vector<std::string> expected = {"13460", "13461"};
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), expected);
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), expected);
   }
 
   void testParseRunNumbersIgnoresWhitespace() {
     auto result = parseRunNumbers("  13460,\t13461");
     std::vector<std::string> expected = {"13460", "13461"};
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), expected);
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), expected);
   }
 
   void testParseRunNumbersEmptyExceptWhitespace() {
     auto result = parseRunNumbers("  \t");
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseRunNumbersHandlesFreeTextInput() {
     auto result = parseRunNumbers("13460, some workspace");
-    TS_ASSERT(result.is_initialized());
+    TS_ASSERT(result.has_value());
   }
 
   void testParseTransmissionRuns() {
@@ -289,28 +289,28 @@ public:
     auto runTitle = "ASF SM=0.75 th=0.8 ['SM2']=0.75";
     auto result = parseTitleAndThetaFromRunTitle(runTitle);
     std::vector<std::string> expected = {"ASF SM=0.75 ", "0.8"};
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), expected);
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), expected);
   }
 
   void testParseTitleAndThetaFromRunTitleReturnsNoneForEmptyString() {
     auto runTitle = "";
     auto result = parseTitleAndThetaFromRunTitle(runTitle);
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseTitleAndThetaFromRunTitleWithThetaOnly() {
     auto runTitle = "th=0.8";
     auto result = parseTitleAndThetaFromRunTitle(runTitle);
     std::vector<std::string> expected = {"", "0.8"};
-    TS_ASSERT(result.is_initialized());
-    TS_ASSERT_EQUALS(result.get(), expected);
+    TS_ASSERT(result.has_value());
+    TS_ASSERT_EQUALS(result.value(), expected);
   }
 
   void testParseTitleAndThetaFromRunTitleReturnsNoneForNoTheta() {
     auto runTitle = "ASF SM=0.75";
     auto result = parseTitleAndThetaFromRunTitle(runTitle);
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
 private:
