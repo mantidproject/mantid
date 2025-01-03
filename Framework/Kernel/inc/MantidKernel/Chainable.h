@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+// this needs to be System.h to use DllExport for windows
 #include "MantidKernel/System.h"
 #include <memory>
 #include <utility>

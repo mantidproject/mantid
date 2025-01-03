@@ -235,55 +235,57 @@ inline bool withinRelativeDifference(T const x, T const y, S const tolerance, MA
 
 ///@cond
 // Concrete instantiations
-template DLLExport bool equals<double>(double const, double const);
-template DLLExport bool equals<float>(float const, float const);
-template DLLExport bool ltEquals<double>(double const, double const);
-template DLLExport bool ltEquals<float>(float const, float const);
-template DLLExport bool gtEquals<double>(double const, double const);
-template DLLExport bool gtEquals<float>(float const, float const);
+template MANTID_KERNEL_DLL bool equals<double>(double const, double const);
+template MANTID_KERNEL_DLL bool equals<float>(float const, float const);
+template MANTID_KERNEL_DLL bool ltEquals<double>(double const, double const);
+template MANTID_KERNEL_DLL bool ltEquals<float>(float const, float const);
+template MANTID_KERNEL_DLL bool gtEquals<double>(double const, double const);
+template MANTID_KERNEL_DLL bool gtEquals<float>(float const, float const);
 // difference methods
-template DLLExport double absoluteDifference<double>(double const, double const);
-template DLLExport float absoluteDifference<float>(float const, float const);
-template DLLExport double relativeDifference<double>(double const, double const);
-template DLLExport float relativeDifference<float>(float const, float const);
+template MANTID_KERNEL_DLL double absoluteDifference<double>(double const, double const);
+template MANTID_KERNEL_DLL float absoluteDifference<float>(float const, float const);
+template MANTID_KERNEL_DLL double relativeDifference<double>(double const, double const);
+template MANTID_KERNEL_DLL float relativeDifference<float>(float const, float const);
 // within difference methods -- object and tolerance same
-template DLLExport bool withinAbsoluteDifference<double>(double const, double const, double const);
-template DLLExport bool withinAbsoluteDifference<float>(float const, float const, float const);
-template DLLExport bool withinAbsoluteDifference<int>(int const, int const, int const);
-template DLLExport bool withinAbsoluteDifference<unsigned int>(unsigned int const, unsigned int const,
-                                                               unsigned int const);
-template DLLExport bool withinAbsoluteDifference<long>(long const, long const, long const);
-template DLLExport bool withinAbsoluteDifference<long long>(long long const, long long const, long long const);
+template MANTID_KERNEL_DLL bool withinAbsoluteDifference<double>(double const, double const, double const);
+template MANTID_KERNEL_DLL bool withinAbsoluteDifference<float>(float const, float const, float const);
+template MANTID_KERNEL_DLL bool withinAbsoluteDifference<int>(int const, int const, int const);
+template MANTID_KERNEL_DLL bool withinAbsoluteDifference<unsigned int>(unsigned int const, unsigned int const,
+                                                                       unsigned int const);
+template MANTID_KERNEL_DLL bool withinAbsoluteDifference<long>(long const, long const, long const);
+template MANTID_KERNEL_DLL bool withinAbsoluteDifference<long long>(long long const, long long const, long long const);
 //
-template DLLExport bool withinRelativeDifference<double>(double const, double const, double const);
-template DLLExport bool withinRelativeDifference<float>(float const, float const, float const);
-template DLLExport bool withinRelativeDifference<int>(int const, int const, int const);
-template DLLExport bool withinRelativeDifference<unsigned int>(unsigned int const, unsigned int const,
-                                                               unsigned int const);
-template DLLExport bool withinRelativeDifference<long>(long const, long const, long const);
-template DLLExport bool withinRelativeDifference<long long>(long long const, long long const, long long const);
+template MANTID_KERNEL_DLL bool withinRelativeDifference<double>(double const, double const, double const);
+template MANTID_KERNEL_DLL bool withinRelativeDifference<float>(float const, float const, float const);
+template MANTID_KERNEL_DLL bool withinRelativeDifference<int>(int const, int const, int const);
+template MANTID_KERNEL_DLL bool withinRelativeDifference<unsigned int>(unsigned int const, unsigned int const,
+                                                                       unsigned int const);
+template MANTID_KERNEL_DLL bool withinRelativeDifference<long>(long const, long const, long const);
+template MANTID_KERNEL_DLL bool withinRelativeDifference<long long>(long long const, long long const, long long const);
 // within difference methods -- tolerance is double
-template DLLExport bool withinAbsoluteDifference<float, double>(float const, float const, double const);
-template DLLExport bool withinAbsoluteDifference<int, double>(int const, int const, double const);
-template DLLExport bool withinAbsoluteDifference<unsigned int, double>(unsigned int const, unsigned int const,
-                                                                       double const);
-template DLLExport bool withinAbsoluteDifference<long, double>(long const, long const, double const);
-template DLLExport bool withinAbsoluteDifference<unsigned long, double>(unsigned long const, unsigned long const,
-                                                                        double const);
-template DLLExport bool withinAbsoluteDifference<long long, double>(long long const, long long const, double const);
-template DLLExport bool withinAbsoluteDifference<unsigned long long, double>(unsigned long long const,
-                                                                             unsigned long long const, double const);
+template MANTID_KERNEL_DLL bool withinAbsoluteDifference<float, double>(float const, float const, double const);
+template MANTID_KERNEL_DLL bool withinAbsoluteDifference<int, double>(int const, int const, double const);
+template MANTID_KERNEL_DLL bool withinAbsoluteDifference<unsigned int, double>(unsigned int const, unsigned int const,
+                                                                               double const);
+template MANTID_KERNEL_DLL bool withinAbsoluteDifference<long, double>(long const, long const, double const);
+template MANTID_KERNEL_DLL bool withinAbsoluteDifference<unsigned long, double>(unsigned long const,
+                                                                                unsigned long const, double const);
+template MANTID_KERNEL_DLL bool withinAbsoluteDifference<long long, double>(long long const, long long const,
+                                                                            double const);
+template MANTID_KERNEL_DLL bool
+withinAbsoluteDifference<unsigned long long, double>(unsigned long long const, unsigned long long const, double const);
 //
-template DLLExport bool withinRelativeDifference<float, double>(float const, float const, double const);
-template DLLExport bool withinRelativeDifference<int, double>(int const, int const, double const);
-template DLLExport bool withinRelativeDifference<unsigned int, double>(unsigned int const, unsigned int const,
-                                                                       double const);
-template DLLExport bool withinRelativeDifference<long, double>(long const, long const, double const);
-template DLLExport bool withinRelativeDifference<unsigned long, double>(unsigned long const, unsigned long const,
-                                                                        double const);
-template DLLExport bool withinRelativeDifference<long long, double>(long long const, long long const, double const);
-template DLLExport bool withinRelativeDifference<unsigned long long, double>(unsigned long long const,
-                                                                             unsigned long long const, double const);
+template MANTID_KERNEL_DLL bool withinRelativeDifference<float, double>(float const, float const, double const);
+template MANTID_KERNEL_DLL bool withinRelativeDifference<int, double>(int const, int const, double const);
+template MANTID_KERNEL_DLL bool withinRelativeDifference<unsigned int, double>(unsigned int const, unsigned int const,
+                                                                               double const);
+template MANTID_KERNEL_DLL bool withinRelativeDifference<long, double>(long const, long const, double const);
+template MANTID_KERNEL_DLL bool withinRelativeDifference<unsigned long, double>(unsigned long const,
+                                                                                unsigned long const, double const);
+template MANTID_KERNEL_DLL bool withinRelativeDifference<long long, double>(long long const, long long const,
+                                                                            double const);
+template MANTID_KERNEL_DLL bool
+withinRelativeDifference<unsigned long long, double>(unsigned long long const, unsigned long long const, double const);
 ///@endcond
 
 } // namespace Mantid::Kernel

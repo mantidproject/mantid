@@ -139,7 +139,7 @@ public:
 /**
    A specialised Property class for holding a series of time-value pairs.
  */
-template <typename TYPE> class DLLExport TimeSeriesProperty : public Property, public ITimeSeriesProperty {
+template <typename TYPE> class MANTID_KERNEL_DLL TimeSeriesProperty : public Property, public ITimeSeriesProperty {
 public:
   /// Constructor
   explicit TimeSeriesProperty(const std::string &name);

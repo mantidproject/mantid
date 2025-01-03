@@ -237,8 +237,8 @@ const char *MisMatch<T>::what() const noexcept
 }
 
 /// \cond TEMPLATE
-template class DLLExport MisMatch<int>;
-template class DLLExport MisMatch<size_t>;
+template class MANTID_KERNEL_DLL MisMatch<int>;
+template class MANTID_KERNEL_DLL MisMatch<size_t>;
 /// \endcond TEMPLATE
 
 //-------------------------

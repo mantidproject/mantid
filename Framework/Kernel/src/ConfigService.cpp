@@ -1933,12 +1933,12 @@ void ConfigServiceImpl::setLogLevel(std::string const &logLevel, bool quiet) {
 std::string ConfigServiceImpl::getLogLevel() { return g_log.getLevelName(); }
 
 /// \cond TEMPLATE
-template DLLExport std::optional<double> ConfigServiceImpl::getValue(const std::string &);
-template DLLExport std::optional<std::string> ConfigServiceImpl::getValue(const std::string &);
-template DLLExport std::optional<int> ConfigServiceImpl::getValue(const std::string &);
-template DLLExport std::optional<size_t> ConfigServiceImpl::getValue(const std::string &);
+template MANTID_KERNEL_DLL std::optional<double> ConfigServiceImpl::getValue(const std::string &);
+template MANTID_KERNEL_DLL std::optional<std::string> ConfigServiceImpl::getValue(const std::string &);
+template MANTID_KERNEL_DLL std::optional<int> ConfigServiceImpl::getValue(const std::string &);
+template MANTID_KERNEL_DLL std::optional<size_t> ConfigServiceImpl::getValue(const std::string &);
 #ifdef _MSC_VER
-template DLLExport std::optional<bool> ConfigServiceImpl::getValue(const std::string &);
+template MANTID_KERNEL_DLL std::optional<bool> ConfigServiceImpl::getValue(const std::string &);
 #endif
 
 /// \endcond TEMPLATE

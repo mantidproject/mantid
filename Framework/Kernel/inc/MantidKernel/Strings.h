@@ -12,6 +12,7 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/StringTokenizer.h"
+// System is currently needed for DLLExport on windows
 #include "MantidKernel/System.h"
 
 #ifndef Q_MOC_RUN
