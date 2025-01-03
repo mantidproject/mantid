@@ -415,7 +415,7 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindClusterFace
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/FindClusterFaces.cpp:117
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:88
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/IndexSXPeaks.cpp:181
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/MatrixWorkspace.h:344
+returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/MatrixWorkspace.h:354
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Crystal/inc/MantidCrystal/PeaksIntersection.h:33
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/PeakStatisticsTools.cpp:209
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/CentroidPeaks.cpp:75

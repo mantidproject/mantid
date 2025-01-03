@@ -126,7 +126,7 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
         workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(workspace, axis, **kwargs)
         if axis == MantidAxType.BIN:
             # get_bin returns the bin *without the monitor data*
-            x, y, dy, dx = get_bins(workspace, workspace_index, with_dy)
+            x, y, dy, dx = get_bins(workspace, workspace_index, with_dy, with_dx)
             vertical_axis = workspace.getAxis(1)
             if isinstance(vertical_axis, mantid.api.NumericAxis):
                 axes.set_xlabel(vertical_axis.getUnit().unitID())
@@ -281,8 +281,22 @@ def errorbar(axes, workspace, *args, **kwargs):
     keyword for MDHistoWorkspaces. These type of workspaces have to have exactly one non integrated
     dimension
     """
+    withDy = True
+    withDx = False
+    if isinstance(workspace, mantid.api.MatrixWorkspace) and workspace.run().hasProperty("plot_type"):
+        plot_type = workspace.run().getProperty("plot_type").value
+        if plot_type == "errorbar_x":
+            withDy = False
+            withDx = True
+        if plot_type == "errorbar_y":
+            withDy = True
+            withDx = False
+        if plot_type == "errorbar_xy":
+            withDy = True
+            withDx = True
+
     normalize_by_bin_width, kwargs = get_normalize_by_bin_width(workspace, axes, **kwargs)
-    x, y, dy, dx, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs, with_dy=True, with_dx=False)
+    x, y, dy, dx, indices, axis, kwargs = _get_data_for_plot(axes, workspace, kwargs, with_dy=withDy, with_dx=withDx)
     if kwargs.pop("update_axes_labels", True):
         _setLabels1D(axes, workspace, indices, normalize_by_bin_width=normalize_by_bin_width, axis=axis)
     kwargs.pop("normalize_by_bin_width", None)
