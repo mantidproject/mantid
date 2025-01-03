@@ -9,6 +9,7 @@
 #include "Item.h"
 #include "Row.h"
 #include <boost/optional.hpp>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -32,7 +33,7 @@ public:
 
   virtual void resetSkipped() = 0;
 
-  virtual boost::optional<int> indexOfRowWithTheta(double angle, double tolerance) const = 0;
+  virtual std::optional<int> indexOfRowWithTheta(double angle, double tolerance) const = 0;
 
   virtual boost::optional<Row> const &operator[](int rowIndex) const = 0;
   virtual std::vector<boost::optional<Row>> const &rows() const = 0;

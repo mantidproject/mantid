@@ -39,7 +39,7 @@ public:
 
   MOCK_METHOD(void, resetSkipped, (), (override));
 
-  MOCK_METHOD(boost::optional<int>, indexOfRowWithTheta, (double, double), (const, override));
+  MOCK_METHOD(std::optional<int>, indexOfRowWithTheta, (double, double), (const, override));
 
   MOCK_METHOD(boost::optional<Row> const &, bracketOp, (int), (const));
   MOCK_METHOD(std::vector<boost::optional<Row>> const &, rows, (), (const, override));

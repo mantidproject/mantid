@@ -1390,7 +1390,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/PropertyHandler.c
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/instrumentview/inc/MantidQtWidgets/InstrumentView/PeakMarker2D.h:62
 missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidgetSimple.h:35
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/SortTableWorkspaceDialog.cpp:115
-missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/IGroup.h:18
+missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/IGroup.h:19
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Group.h:31
 constVariableReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/Clipboard.cpp:80
 passedByValue:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Common/OptionDefaults.h:47

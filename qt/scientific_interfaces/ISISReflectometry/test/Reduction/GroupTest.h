@@ -498,23 +498,23 @@ public:
   void test_index_of_row_with_theta_exact_match() {
     auto group = makeGroupWithThreeRows();
     auto maybeIndex = group.indexOfRowWithTheta(0.2, 0.01);
-    TS_ASSERT(maybeIndex.is_initialized());
-    if (maybeIndex.is_initialized())
+    TS_ASSERT(maybeIndex.has_value());
+    if (maybeIndex.has_value())
       TS_ASSERT_EQUALS(*maybeIndex, 1);
   }
 
   void test_index_of_row_with_theta_within_tolerance() {
     auto group = makeGroupWithThreeRows();
     auto maybeIndex = group.indexOfRowWithTheta(0.209, 0.01);
-    TS_ASSERT(maybeIndex.is_initialized());
-    if (maybeIndex.is_initialized())
+    TS_ASSERT(maybeIndex.has_value());
+    if (maybeIndex.has_value())
       TS_ASSERT_EQUALS(*maybeIndex, 1);
   }
 
   void test_index_of_row_with_theta_outside_tolerance() {
     auto group = makeGroupWithThreeRows();
     auto maybeIndex = group.indexOfRowWithTheta(0.23, 0.01);
-    TS_ASSERT(!maybeIndex.is_initialized());
+    TS_ASSERT(!maybeIndex.has_value());
   }
 
   void test_find_row_with_output_name() {

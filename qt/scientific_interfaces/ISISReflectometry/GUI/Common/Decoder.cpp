@@ -195,7 +195,7 @@ void Decoder::decodeInstrument(const QtInstrumentView *gui, const QMap<QString, 
 }
 
 void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
-                         const QMap<QString, QVariant> &map, boost::optional<int> precision,
+                         const QMap<QString, QVariant> &map, std::optional<int> precision,
                          QtCatalogSearcher *searcher) {
   decodeRunsTable(gui->m_tableView, redJobs, presenter, map[QString("runsTable")].toMap(), std::move(precision));
   gui->m_ui.comboSearchInstrument->setCurrentIndex(map[QString("comboSearchInstrument")].toInt());
@@ -228,26 +228,23 @@ MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, Rang
   return result;
 }
 
-std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, const boost::optional<int> &precision) {
-  std::optional<int> precisionStd = std::nullopt;
-  if (precision)
-    precisionStd = precision.get();
+std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, const std::optional<int> &precision) {
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
        MantidQt::MantidWidgets::Batch::Cell(valueToString(row.theta(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(row.transmissionWorkspaceNames().firstRunList()),
        MantidQt::MantidWidgets::Batch::Cell(row.transmissionWorkspaceNames().secondRunList()),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min, precisionStd),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max, precisionStd),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precisionStd),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min, precision),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max, precision),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step, precision),
        MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.scaleFactor(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(MantidWidgets::optionsToString(row.reductionOptions())),
-       MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.lookupIndex(), precisionStd))});
+       MantidQt::MantidWidgets::Batch::Cell(optionalToString(row.lookupIndex(), precision))});
 }
 } // namespace
 
 void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model,
-                                           const boost::optional<int> &precision) {
+                                           const std::optional<int> &precision) {
   auto jobTreeView = view->m_jobs.get();
   auto const &groups = model->groups();
   for (auto groupIndex = 0u; groupIndex < groups.size(); ++groupIndex) {
@@ -277,7 +274,7 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const Reductio
 }
 
 void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
-                              const QMap<QString, QVariant> &map, boost::optional<int> precision) {
+                              const QMap<QString, QVariant> &map, std::optional<int> precision) {
   QSignalBlocker signalBlockerView(gui);
 
   m_projectSave = map[QString("projectSave")].toBool();
