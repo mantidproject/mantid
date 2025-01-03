@@ -22,15 +22,15 @@ public:
     LookupRowValidator validator;
     auto result = validator({"1.3"});
     TS_ASSERT(result.isValid());
-    TS_ASSERT(result.assertValid().thetaOrWildcard().is_initialized());
-    TS_ASSERT_EQUALS(result.assertValid().thetaOrWildcard().get(), 1.3);
+    TS_ASSERT(result.assertValid().thetaOrWildcard().has_value());
+    TS_ASSERT_EQUALS(result.assertValid().thetaOrWildcard().value(), 1.3);
   }
 
   void testParseThetaWildcard() {
     LookupRowValidator validator;
     auto result = validator({""});
     TS_ASSERT(result.isValid());
-    TS_ASSERT(!result.assertValid().thetaOrWildcard().is_initialized());
+    TS_ASSERT(!result.assertValid().thetaOrWildcard().has_value());
   }
 
   void testParseThetaError() {
@@ -44,8 +44,8 @@ public:
   void testParseTitleMatcherEmpty() {
     LookupRowValidator validator;
     auto result = validator({"0.5", ""});
-    TS_ASSERT(result.isValid());                                     // Outer initialized (not invalid)
-    TS_ASSERT(!result.assertValid().titleMatcher().is_initialized()) // Inner not initialized (empty)
+    TS_ASSERT(result.isValid());                                // Outer initialized (not invalid)
+    TS_ASSERT(!result.assertValid().titleMatcher().has_value()) // Inner not initialized (empty)
   }
 
   void testParseTitleMatcherWhitespace() {
@@ -53,7 +53,7 @@ public:
     auto result = validator({"0.5", "    \t"});
     TS_ASSERT(result.isValid());
     // All whitespace is the equivalent of an empty string
-    TS_ASSERT(!result.assertValid().titleMatcher().is_initialized())
+    TS_ASSERT(!result.assertValid().titleMatcher().has_value())
   }
 
   void testParseTitleMatcherSimpleValid() {
@@ -63,8 +63,8 @@ public:
     TS_ASSERT(result.isValid());
 
     auto const &titleMatcher = result.assertValid().titleMatcher();
-    TS_ASSERT(titleMatcher.is_initialized())
-    TS_ASSERT_EQUALS(expected, titleMatcher.get().expression())
+    TS_ASSERT(titleMatcher.has_value())
+    TS_ASSERT_EQUALS(expected, titleMatcher.value().expression())
   }
 
   void testParseTitleMatcherRegexCharsValid() {
@@ -74,8 +74,8 @@ public:
     TS_ASSERT(result.isValid());
 
     auto const &titleMatcher = result.assertValid().titleMatcher();
-    TS_ASSERT(titleMatcher.is_initialized())
-    TS_ASSERT_EQUALS(expected, titleMatcher.get().expression())
+    TS_ASSERT(titleMatcher.has_value())
+    TS_ASSERT_EQUALS(expected, titleMatcher.value().expression())
   }
 
   void testParseTitleMatcherInvalid() {
@@ -114,8 +114,8 @@ public:
     LookupRowValidator validator;
     auto result = validator({"", "", "", "", "4-7"});
     TS_ASSERT(result.isValid());
-    TS_ASSERT(result.assertValid().transmissionProcessingInstructions().is_initialized());
-    TS_ASSERT_EQUALS(result.assertValid().transmissionProcessingInstructions().get(), "4-7");
+    TS_ASSERT(result.assertValid().transmissionProcessingInstructions().has_value());
+    TS_ASSERT_EQUALS(result.assertValid().transmissionProcessingInstructions().value(), "4-7");
   }
 
   void testParseTransmissionProcessingInstructionsError() {
@@ -167,8 +167,8 @@ public:
     LookupRowValidator validator;
     auto result = validator({"", "", "", "", "", "", "", "", "", "1-3"});
     TS_ASSERT(result.isValid());
-    TS_ASSERT(result.assertValid().processingInstructions().is_initialized());
-    TS_ASSERT_EQUALS(result.assertValid().processingInstructions().get(), "1-3");
+    TS_ASSERT(result.assertValid().processingInstructions().has_value());
+    TS_ASSERT_EQUALS(result.assertValid().processingInstructions().value(), "1-3");
   }
 
   void testParseProcessingInstructionsError() {
@@ -183,8 +183,8 @@ public:
     LookupRowValidator validator;
     auto result = validator({"", "", "", "", "", "", "", "", "", "", "4-7"});
     TS_ASSERT(result.isValid());
-    TS_ASSERT(result.assertValid().backgroundProcessingInstructions().is_initialized());
-    TS_ASSERT_EQUALS(result.assertValid().backgroundProcessingInstructions().get(), "4-7");
+    TS_ASSERT(result.assertValid().backgroundProcessingInstructions().has_value());
+    TS_ASSERT_EQUALS(result.assertValid().backgroundProcessingInstructions().value(), "4-7");
   }
 
   void testParseBackgroundProcessingInstructionsError() {
@@ -199,8 +199,8 @@ public:
     LookupRowValidator validator;
     auto result = validator({"", "", "", "", "", "", "", "", "", "", "", "4-7"});
     TS_ASSERT(result.isValid());
-    TS_ASSERT(result.assertValid().roiDetectorIDs().is_initialized());
-    TS_ASSERT_EQUALS(result.assertValid().roiDetectorIDs().get(), "4-7");
+    TS_ASSERT(result.assertValid().roiDetectorIDs().has_value());
+    TS_ASSERT_EQUALS(result.assertValid().roiDetectorIDs().value(), "4-7");
   }
 
   void testParseROIDetectorIDsError() {

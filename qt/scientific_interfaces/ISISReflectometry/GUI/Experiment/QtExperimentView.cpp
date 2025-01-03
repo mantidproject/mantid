@@ -436,17 +436,17 @@ void QtExperimentView::setSelected(QComboBox &box, std::string const &str) {
     box.setCurrentIndex(index);
 }
 
-void QtExperimentView::setText(QLineEdit &lineEdit, boost::optional<double> value) {
+void QtExperimentView::setText(QLineEdit &lineEdit, std::optional<double> value) {
   if (value)
-    setText(lineEdit, value.get());
+    setText(lineEdit, value.value());
 }
 
-void QtExperimentView::setText(QLineEdit &lineEdit, boost::optional<int> value) {
+void QtExperimentView::setText(QLineEdit &lineEdit, std::optional<int> value) {
   if (value)
-    setText(lineEdit, value.get());
+    setText(lineEdit, value.value());
 }
 
-void QtExperimentView::setText(QLineEdit &lineEdit, boost::optional<std::string> const &text) {
+void QtExperimentView::setText(QLineEdit &lineEdit, const std::optional<std::string> &text) {
   if (text && !text->empty())
     setText(lineEdit, text);
 }
@@ -465,57 +465,6 @@ void QtExperimentView::setText(QLineEdit &lineEdit, std::string const &text) {
   auto textAsQString = QString::fromStdString(text);
   lineEdit.setText(textAsQString);
 }
-
-// void QtExperimentView::setText(QTableWidget &table,
-//                             std::string const &propertyName,
-//                             boost::optional<double> value) {
-//  if (value)
-//    setText(table, propertyName, value.get());
-//}
-//
-// void QtExperimentView::setText(QTableWidget &table,
-//                             std::string const &propertyName, double value) {
-//  auto valueAsString = QString::number(value);
-//  setText(table, propertyName, valueAsString);
-//}
-//
-// void QtExperimentView::setText(QTableWidget &table,
-//                             std::string const &propertyName,
-//                             boost::optional<std::string> text) {
-//  if (text && !text->empty())
-//    setText(table, propertyName, text.get());
-//}
-//
-// void QtExperimentView::setText(QTableWidget &table,
-//                             std::string const &propertyName,
-//                             std::string const &text) {
-//  auto textAsQString = QString::fromStdString(text);
-//  setText(table, propertyName, textAsQString);
-//}
-//
-// void QtExperimentView::setText(QTableWidget &table,
-//                             std::string const &propertyName,
-//                             const QString &value) {
-//  // Find the column with this property name
-//  const auto columnIt =
-//      std::find(m_columnProperties.begin(), m_columnProperties.end(),
-//                QString::fromStdString(propertyName));
-//  // Do nothing if column was not found
-//  if (columnIt == m_columnProperties.end())
-//    return;
-//
-//  const auto column = columnIt - m_columnProperties.begin();
-//
-//  // Set the value in this column for the first row. (We don't really know
-//  // which row(s) the user might want updated so for now keep it simple.)
-//  constexpr int row = 0;
-//  auto cell = table.item(row, column);
-//  if (!cell) {
-//    cell = new QTableWidgetItem();
-//    table.setItem(row, column, cell);
-//  }
-//  cell->setText(value);
-//}
 
 void QtExperimentView::setChecked(QCheckBox &checkBox, bool checked) {
   auto checkedAsCheckState = checked ? Qt::Checked : Qt::Unchecked;

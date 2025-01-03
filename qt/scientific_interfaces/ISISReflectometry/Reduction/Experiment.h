@@ -62,7 +62,7 @@ public:
 
   void updateLookupRow(LookupRow lookupRow, double tolerance);
 
-  boost::optional<size_t> getLookupRowIndexFromRow(Row const &row, double tolerance) const;
+  std::optional<size_t> getLookupRowIndexFromRow(Row const &row, double tolerance) const;
 
 private:
   AnalysisMode m_analysisMode;

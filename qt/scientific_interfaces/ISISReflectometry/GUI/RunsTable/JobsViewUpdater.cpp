@@ -9,7 +9,7 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-using ValueFunction = boost::optional<double> (RangeInQ::*)() const;
+using ValueFunction = std::optional<double> (RangeInQ::*)() const;
 
 namespace { // unnamed
 std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromGroup(Group const &group,
@@ -20,10 +20,10 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromGroup(Group const &gr
 }
 
 MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, RangeInQ const &qRangeOutput,
-                                               ValueFunction valueFunction, boost::optional<int> precision) {
+                                               ValueFunction valueFunction, std::optional<int> precision) {
   auto maybeValue = (qRangeInput.*valueFunction)();
   auto useOutputValue = false;
-  if (!maybeValue.is_initialized()) {
+  if (!maybeValue.has_value()) {
     maybeValue = (qRangeOutput.*valueFunction)();
     useOutputValue = true;
   }
@@ -35,12 +35,12 @@ MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, Rang
   return result;
 }
 
-boost::optional<size_t> incrementIndex(const Row &row) {
+std::optional<size_t> incrementIndex(const Row &row) {
   auto lookupIndex = row.lookupIndex();
-  return lookupIndex.is_initialized() ? boost::optional<size_t>(lookupIndex.get() + 1) : boost::none;
+  return lookupIndex.has_value() ? std::optional<size_t>(lookupIndex.value() + 1) : std::nullopt;
 }
 
-std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, boost::optional<int> precision) {
+std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, std::optional<int> precision) {
   auto lookupIndex = incrementIndex(row);
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
@@ -80,6 +80,6 @@ void JobsViewUpdater::rowModified(int groupIndex, int rowIndex, Row const &row) 
 
 void JobsViewUpdater::setPrecision(const int &precision) { m_precision = precision; }
 
-void JobsViewUpdater::resetPrecision() { m_precision = boost::none; }
+void JobsViewUpdater::resetPrecision() { m_precision = std::nullopt; }
 
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

@@ -539,14 +539,14 @@ public:
   }
 
   void testHasROIDetectorIDsForPreviewRow() {
-    auto const lookupRow = makeLookupRow(boost::none);
+    auto const lookupRow = makeLookupRow(std::nullopt);
     auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
     runHasROIDetectorIDsForPreviewRowTest(maybeLookupRow, true);
   }
 
   void testHasROIDetectorIDsForPreviewRowNoDetectorIdsInLookupRow() {
-    auto lookupRow = makeLookupRow(boost::none);
-    lookupRow.setRoiDetectorIDs(boost::none);
+    auto lookupRow = makeLookupRow(std::nullopt);
+    lookupRow.setRoiDetectorIDs(std::nullopt);
     auto const maybeLookupRow = boost::optional<LookupRow>(lookupRow);
     runHasROIDetectorIDsForPreviewRowTest(maybeLookupRow, false);
   }

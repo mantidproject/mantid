@@ -57,11 +57,11 @@ bool groupNameExists(std::string const &groupName, ReductionJobs const &jobs,
 
   // Check if the group name exists in the jobs
   auto maybeExistingGroupIndex = jobs.indexOfGroupWithName(groupName);
-  if (!maybeExistingGroupIndex.is_initialized())
+  if (!maybeExistingGroupIndex.has_value())
     return false;
 
   // If it exists but in one of the roots to ignore, return false
-  auto existingGroupLocation = MantidWidgets::Batch::RowLocation({maybeExistingGroupIndex.get()});
+  auto existingGroupLocation = MantidWidgets::Batch::RowLocation({maybeExistingGroupIndex.value()});
   if (std::find(rootsToIgnore.cbegin(), rootsToIgnore.cend(), existingGroupLocation) != rootsToIgnore.cend())
     return false;
 

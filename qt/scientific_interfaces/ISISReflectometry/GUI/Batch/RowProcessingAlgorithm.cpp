@@ -148,7 +148,7 @@ void updateLookupRowProperties(AlgorithmRuntimeProps &properties, LookupRow cons
 }
 
 void updateWavelengthRangeProperties(AlgorithmRuntimeProps &properties,
-                                     boost::optional<RangeInLambda> const &rangeInLambda) {
+                                     std::optional<RangeInLambda> const &rangeInLambda) {
   if (!rangeInLambda)
     return;
 
@@ -229,7 +229,7 @@ void updateEventProperties(AlgorithmRuntimeProps &properties, Slicing const &sli
   boost::apply_visitor(UpdateEventPropertiesVisitor(properties), slicing);
 }
 
-boost::optional<double> getDouble(const IAlgorithm_sptr &algorithm, std::string const &property) {
+std::optional<double> getDouble(const IAlgorithm_sptr &algorithm, std::string const &property) {
   double result = algorithm->getProperty(property);
   return result;
 }
@@ -342,7 +342,7 @@ std::unique_ptr<Mantid::API::IAlgorithmRuntimeProps> createAlgorithmRuntimeProps
   properties->setProperty("InputRunList", previewRow.runNumbers());
   properties->setProperty("ThetaIn", previewRow.theta());
   if (previewRow.getSelectedBanks().has_value()) {
-    properties->setProperty("ROIDetectorIDs", previewRow.getSelectedBanks().get());
+    properties->setProperty("ROIDetectorIDs", previewRow.getSelectedBanks().value());
   }
   updateProcessingInstructionsProperties(*properties, previewRow);
 

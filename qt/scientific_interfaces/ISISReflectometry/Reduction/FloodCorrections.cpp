@@ -10,12 +10,12 @@
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
-FloodCorrections::FloodCorrections(FloodCorrectionType correctionType, boost::optional<std::string> workspace)
+FloodCorrections::FloodCorrections(FloodCorrectionType correctionType, std::optional<std::string> workspace)
     : m_correctionType(correctionType), m_workspace(std::move(workspace)) {}
 
 FloodCorrectionType FloodCorrections::correctionType() const { return m_correctionType; }
 
-boost::optional<std::string> FloodCorrections::workspace() const { return m_workspace; }
+std::optional<std::string> FloodCorrections::workspace() const { return m_workspace; }
 
 bool operator!=(FloodCorrections const &lhs, FloodCorrections const &rhs) { return !(lhs == rhs); }
 

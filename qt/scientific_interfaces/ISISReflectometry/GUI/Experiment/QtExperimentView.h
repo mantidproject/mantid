@@ -182,20 +182,11 @@ private:
   void setText(QLineEdit &lineEdit, int value);
   void setText(QLineEdit &lineEdit, double value);
   void setText(QLineEdit &lineEdit, std::string const &value);
-  void setText(QLineEdit &lineEdit, boost::optional<int> value);
-  void setText(QLineEdit &lineEdit, boost::optional<double> value);
-  void setText(QLineEdit &lineEdit, boost::optional<std::string> const &value);
+  void setText(QLineEdit &lineEdit, std::optional<int> value);
+  void setText(QLineEdit &lineEdit, std::optional<double> value);
+  void setText(QLineEdit &lineEdit, std::optional<std::string> const &value);
   std::string textFromCell(QTableWidgetItem const *maybeNullItem) const;
-  //  void setText(QTableWidget &table, std::string const &propertyName,
-  //               double value);
-  //  void setText(QTableWidget &table, std::string const &propertyName,
-  //               boost::optional<double> value);
-  //  void setText(QTableWidget &table, std::string const &propertyName,
-  //               boost::optional<std::string> value);
-  //  void setText(QTableWidget &table, std::string const &propertyName,
-  //               std::string const &value);
-  //  void setText(QTableWidget &table, std::string const &propertyName,
-  //               const QString &value);
+
   void setChecked(QCheckBox &checkBox, bool checked);
   std::string getText(QLineEdit const &lineEdit) const;
   std::string getText(QComboBox const &box) const;

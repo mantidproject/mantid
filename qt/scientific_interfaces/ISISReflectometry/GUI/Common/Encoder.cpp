@@ -137,13 +137,13 @@ QMap<QString, QVariant> Encoder::encodeRangeInQ(const RangeInQ &rangeInQ) {
   auto step = rangeInQ.step();
   qRangeMap.insert(QString("minPresent"), QVariant(static_cast<bool>(min)));
   if (min)
-    qRangeMap.insert(QString("min"), QVariant(min.get()));
+    qRangeMap.insert(QString("min"), QVariant(min.value()));
   qRangeMap.insert(QString("maxPresent"), QVariant(static_cast<bool>(max)));
   if (max)
-    qRangeMap.insert(QString("max"), QVariant(max.get()));
+    qRangeMap.insert(QString("max"), QVariant(max.value()));
   qRangeMap.insert(QString("stepPresent"), QVariant(static_cast<bool>(step)));
   if (step)
-    qRangeMap.insert(QString("step"), QVariant(step.get()));
+    qRangeMap.insert(QString("step"), QVariant(step.value()));
   return qRangeMap;
 }
 
@@ -197,7 +197,7 @@ QMap<QString, QVariant> Encoder::encodeRow(const MantidQt::CustomInterfaces::ISI
   rowMap.insert(QString("qRangeOutput"), QVariant(encodeRangeInQ(row.m_qRangeOutput)));
   rowMap.insert(QString("scaleFactorPresent"), QVariant(static_cast<bool>(row.m_scaleFactor)));
   if (row.m_scaleFactor) {
-    rowMap.insert(QString("scaleFactor"), QVariant(row.m_scaleFactor.get()));
+    rowMap.insert(QString("scaleFactor"), QVariant(row.m_scaleFactor.value()));
   }
   rowMap.insert(QString("transRunNums"), QVariant(encodeTransmissionRunPair(row.m_transmissionRuns)));
   rowMap.insert(QString("reductionWorkspaces"), QVariant(encodeReductionWorkspace(row.m_reducedWorkspaceNames)));

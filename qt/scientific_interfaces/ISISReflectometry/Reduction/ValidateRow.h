@@ -26,12 +26,12 @@ public:
   ValidationResult<Row, std::vector<int>> operator()(std::vector<std::string> const &cellText);
 
 private:
-  boost::optional<std::vector<std::string>> parseRunNumbers(std::vector<std::string> const &cellText);
-  boost::optional<double> parseTheta(std::vector<std::string> const &cellText);
+  std::optional<std::vector<std::string>> parseRunNumbers(std::vector<std::string> const &cellText);
+  std::optional<double> parseTheta(std::vector<std::string> const &cellText);
   boost::optional<TransmissionRunPair> parseTransmissionRuns(std::vector<std::string> const &cellText);
   boost::optional<RangeInQ> parseQRange(std::vector<std::string> const &cellText);
-  boost::optional<boost::optional<double>> parseScaleFactor(std::vector<std::string> const &cellText);
-  boost::optional<std::map<std::string, std::string>> parseOptions(std::vector<std::string> const &cellText);
+  std::optional<double> parseScaleFactor(std::vector<std::string> const &cellText);
+  std::optional<std::map<std::string, std::string>> parseOptions(std::vector<std::string> const &cellText);
 
   std::vector<int> m_invalidColumns;
 };

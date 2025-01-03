@@ -28,30 +28,30 @@ public:
     constexpr auto angle = 0.5;
     auto row = ModelCreationHelper::makeRow(angle);
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
-    TS_ASSERT_EQUALS(row.lookupIndex(), boost::none);
+    TS_ASSERT_EQUALS(row.lookupIndex(), std::nullopt);
     model.updateLookupIndex(row);
-    TS_ASSERT(row.lookupIndex().is_initialized());
-    TS_ASSERT_EQUALS(row.lookupIndex().get(), size_t(1));
+    TS_ASSERT(row.lookupIndex().has_value());
+    TS_ASSERT_EQUALS(row.lookupIndex().value(), size_t(1));
   }
 
   void test_update_lookup_index_single_row_wildcard() {
     constexpr auto angle = 0.1;
     auto row = ModelCreationHelper::makeRow(angle);
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
-    TS_ASSERT_EQUALS(row.lookupIndex(), boost::none);
+    TS_ASSERT_EQUALS(row.lookupIndex(), std::nullopt);
     model.updateLookupIndex(row);
-    TS_ASSERT(row.lookupIndex().is_initialized());
-    TS_ASSERT_EQUALS(row.lookupIndex().get(), size_t(0));
+    TS_ASSERT(row.lookupIndex().has_value());
+    TS_ASSERT_EQUALS(row.lookupIndex().value(), size_t(0));
   }
 
   void test_update_lookup_index_single_row_no_match() {
     constexpr auto angle = 0.1;
     auto row = ModelCreationHelper::makeRow(angle);
     auto model = Batch(ModelCreationHelper::makeEmptyExperiment(), m_instrument, m_runsTable, m_slicing);
-    TS_ASSERT_EQUALS(row.lookupIndex(), boost::none);
+    TS_ASSERT_EQUALS(row.lookupIndex(), std::nullopt);
     model.updateLookupIndex(row);
-    TS_ASSERT(!row.lookupIndex().is_initialized());
-    TS_ASSERT_EQUALS(row.lookupIndex(), boost::none);
+    TS_ASSERT(!row.lookupIndex().has_value());
+    TS_ASSERT_EQUALS(row.lookupIndex(), std::nullopt);
   }
 
   void test_update_lookup_index_group_updates_all_rows() {
@@ -63,18 +63,18 @@ public:
     group.appendRow(std::move(rowB));
     group.appendRow(std::move(rowW));
     auto model = Batch(m_experiment, m_instrument, m_runsTable, m_slicing);
-    TS_ASSERT_EQUALS(group.mutableRows()[0].get().lookupIndex(), boost::none);
-    TS_ASSERT_EQUALS(group.mutableRows()[1].get().lookupIndex(), boost::none);
-    TS_ASSERT_EQUALS(group.mutableRows()[2].get().lookupIndex(), boost::none);
+    TS_ASSERT_EQUALS(group.mutableRows()[0].get().lookupIndex(), std::nullopt);
+    TS_ASSERT_EQUALS(group.mutableRows()[1].get().lookupIndex(), std::nullopt);
+    TS_ASSERT_EQUALS(group.mutableRows()[2].get().lookupIndex(), std::nullopt);
 
     model.updateLookupIndexesOfGroup(group);
 
-    TS_ASSERT(group.mutableRows()[0].get().lookupIndex().is_initialized());
-    TS_ASSERT_EQUALS(group.mutableRows()[0].get().lookupIndex().get(), size_t(1));
-    TS_ASSERT(group.mutableRows()[1].get().lookupIndex().is_initialized());
-    TS_ASSERT_EQUALS(group.mutableRows()[1].get().lookupIndex().get(), size_t(2));
-    TS_ASSERT(group.mutableRows()[2].get().lookupIndex().is_initialized());
-    TS_ASSERT_EQUALS(group.mutableRows()[2].get().lookupIndex().get(), size_t(0));
+    TS_ASSERT(group.mutableRows()[0].get().lookupIndex().has_value());
+    TS_ASSERT_EQUALS(group.mutableRows()[0].get().lookupIndex().value(), size_t(1));
+    TS_ASSERT(group.mutableRows()[1].get().lookupIndex().has_value());
+    TS_ASSERT_EQUALS(group.mutableRows()[1].get().lookupIndex().value(), size_t(2));
+    TS_ASSERT(group.mutableRows()[2].get().lookupIndex().has_value());
+    TS_ASSERT_EQUALS(group.mutableRows()[2].get().lookupIndex().value(), size_t(0));
   }
 
   void test_update_lookup_index_table_updates_all_groups() {
@@ -82,7 +82,7 @@ public:
 
     for (auto const &group : m_runsTable.reductionJobs().groups()) {
       for (auto const &row : group.rows()) {
-        TS_ASSERT_EQUALS(row.get().lookupIndex(), boost::none);
+        TS_ASSERT_EQUALS(row.get().lookupIndex(), std::nullopt);
       }
     }
 
@@ -90,7 +90,7 @@ public:
 
     for (auto const &group : m_runsTable.reductionJobs().groups()) {
       for (auto const &row : group.rows()) {
-        TS_ASSERT(row.is_initialized());
+        TS_ASSERT(row.has_value());
         if (row.get().theta() == 0.5) {
           TS_ASSERT_EQUALS(row.get().lookupIndex(), size_t(1));
         } else {
@@ -110,9 +110,9 @@ public:
 
     auto model = Batch(exp, m_instrument, m_runsTable, m_slicing);
 
-    TS_ASSERT_EQUALS(group.rows()[0].get().lookupIndex(), boost::none);
+    TS_ASSERT_EQUALS(group.rows()[0].get().lookupIndex(), std::nullopt);
     model.updateLookupIndex(group.mutableRows()[0].get());
-    TS_ASSERT(!group.rows()[0].get().lookupIndex().is_initialized());
+    TS_ASSERT(!group.rows()[0].get().lookupIndex().has_value());
     TS_ASSERT_EQUALS(group.rows()[0].get().state(), State::ITEM_ERROR);
     TS_ASSERT_EQUALS(group.rows()[0].get().message(), "Multiple matching Experiment Setting rows")
   }

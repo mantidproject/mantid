@@ -77,17 +77,17 @@ public:
 
   void test_set_get_lookup_row_index() {
     auto row = makeEmptyRow();
-    auto index = boost::optional<size_t>{1};
+    auto index = std::optional<size_t>{1};
     row.setLookupIndex(index);
-    TS_ASSERT(row.lookupIndex().is_initialized());
-    TS_ASSERT_EQUALS(row.lookupIndex().get(), index.get());
+    TS_ASSERT(row.lookupIndex().has_value());
+    TS_ASSERT_EQUALS(row.lookupIndex().value(), index.value());
   }
 
   void test_set_get_no_lookup_row_index() {
     auto row = makeEmptyRow();
-    auto index = boost::none;
+    std::optional<size_t> index = std::nullopt;
     row.setLookupIndex(index);
-    TS_ASSERT(!row.lookupIndex().is_initialized());
-    TS_ASSERT_EQUALS(row.lookupIndex(), boost::none);
+    TS_ASSERT(!row.lookupIndex().has_value());
+    TS_ASSERT_EQUALS(row.lookupIndex(), std::nullopt);
   }
 };
