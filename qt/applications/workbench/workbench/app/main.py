@@ -12,7 +12,7 @@ from mantid import __version__ as mtd_version
 import warnings
 
 
-def main():
+def main(args=None):
     # setup command line arguments
     parser = argparse.ArgumentParser(description="Mantid Workbench")
     parser.add_argument("script", nargs="?")
@@ -45,7 +45,7 @@ def main():
         pass  # silently skip this
 
     # parse the command line options
-    options = parser.parse_args()
+    options = parser.parse_args(args=args)
 
     if options.error_on_warning:
         warnings.simplefilter("error")  # Change the filter in this process
