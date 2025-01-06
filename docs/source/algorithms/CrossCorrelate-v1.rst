@@ -11,14 +11,15 @@ Description
 
 Compute the cross correlation function for a range of spectra with respect to a reference spectrum.
 
-This is use in powder diffraction experiments when trying to estimate the offset (in number of bin indices) of one spectra with respect to another one.
-The input spectra should be in d-spacing and then interpolate on the X-axis of the reference before calculating the cross correlation in bin index.
-The cross correlation function is computed
+This is used in powder diffraction experiments when trying to estimate the offset (in number of bin indices) of one spectrum with respect to another one, where the x-axis units share a common crystallographic unit (such as d-spacing or momentum transfer).
+The input spectra need to be in d-spacing and then interpolated on the X-axis of the reference before calculating the cross correlation in bin index.
+In principle, momentum transfer will work, but this is not currently supported.
+The cross correlation function is computed as:
 
 .. math:: c_{fg}(r) = \frac{1}{\sigma_f \sigma_g} \int_{XMin}^{XMax} (f(x) - \mu_f) (g(x+r)-\mu_g) dx
 
 where :math:`x` and :math:`r` are bin indices.
-:math:`r` being either half of the number of points in the requested range, ``XMin`` to ``XMax``, of the reference spectrum, or up to `MaxDSpaceShift`, whichever is smaller.
+:math:`r` being either half of the number of points in the requested range, ``XMin`` to ``XMax``, of the reference spectrum, or up to the number of bins corresponding to `MaxDSpaceShift`, whichever is smaller.
 :math:`f(x)` is the reference spectrum, with :math:`\mu_f` and :math:`\sigma_f` being the mean and variance respectively.
 Similarly, :math:`g(x)` is the reference spectrum, with :math:`\mu_g` and :math:`\sigma_g` being the mean and variance respectively.
 All functions are evaluated as a function of bin number rather than x-value.
@@ -39,6 +40,7 @@ Comments for creating useful cross-correlation output
   However, it only works for logorithmic binning which will use ``OffsetMode="Signed"`` in :ref:`algm-GetDetectorOffsets`.
 * With wide range of integration, use the ``MaxDSpaceShift`` to limit the value of :math:`r`.
   Not only will this speed up the calculation, but the output spectra will only include where the spectra are similar to the reference and not have spurious peaks or background.
+  **NOTE:** `MaxDSpaceShift` must be greater than  approximately double the maximum Bragg peak full-width of the input data to ensure that that the cross correlation contains a complete peak.
 
 Usage
 -----
