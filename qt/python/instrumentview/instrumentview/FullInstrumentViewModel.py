@@ -10,6 +10,7 @@ from scipy.spatial.transform import Rotation
 from instrumentview.DetectorInfo import DetectorInfo
 import instrumentview.Projections.spherical_projection as iv_spherical
 import instrumentview.Projections.cylindrical_projection as iv_cylindrical
+import math
 
 
 class DetectorPosition(np.ndarray):
@@ -37,13 +38,18 @@ class FullInstrumentViewModel:
 
         self._detector_indices = []
         self._monitor_positions = []
-        monitor_indices = []
+        self._monitor_indices = []
         component_meshes = []
         component_mesh_colours = []
 
         self._detector_index_to_workspace_index = np.full(len(self._component_info), self._invalid_index, dtype=int)
         spectrum_info = workspace.spectrumInfo()
+        self._bin_min = math.inf
+        self._bin_max = -math.inf
         for workspace_index in range(workspace.getNumberHistograms()):
+            x_data = self._workspace.dataX(workspace_index)
+            self._union_with_current_bin_min_max(x_data[0])
+            self._union_with_current_bin_min_max(x_data[-1])
             spectrum_definition = spectrum_info.getSpectrumDefinition(workspace_index)
             for i in range(len(spectrum_definition)):
                 pair = spectrum_definition[i]
@@ -76,7 +82,7 @@ class FullInstrumentViewModel:
                         continue
                     if self._detector_info.isMonitor(component_index):
                         self._monitor_positions.append(self._detector_info.position(component_index))
-                        monitor_indices.append(component_index)
+                        self._monitor_indices.append(component_index)
                     elif self._component_info.hasValidShape(component_index):
                         self._detector_indices.append(component_index)
                         if draw_detector_geometry:
@@ -85,16 +91,26 @@ class FullInstrumentViewModel:
                         continue
 
         self._detector_counts = []
-        integrated_spectra = workspace.getIntegratedSpectra(0, 0, True)
+        self.update_time_of_flight_range(self._bin_min, self._bin_max, True)
+        self._detector_position_map = {id: DetectorPosition(self._component_info.position(id)) for id in self._detector_indices}
+
+    def _union_with_current_bin_min_max(self, bin_edge) -> None:
+        if not math.isinf(bin_edge):
+            if bin_edge < self._bin_min:
+                self._bin_min = bin_edge
+            elif bin_edge > self._bin_max:
+                self._bin_max = bin_edge
+
+    def update_time_of_flight_range(self, tof_min: float, tof_max: float, entire_range=False) -> None:
+        integrated_spectra = self._workspace.getIntegratedSpectra(tof_min, tof_max, entire_range)
+        self._detector_counts.clear()
         for det_index in self._detector_indices:
             workspace_index = int(self._detector_index_to_workspace_index[det_index])
-            if workspace_index == self._invalid_index or det_index in monitor_indices:
+            if workspace_index == self._invalid_index or det_index in self._monitor_indices:
                 continue
             self._detector_counts.append(integrated_spectra[workspace_index])
             self._data_max = max(self._data_max, integrated_spectra[workspace_index])
             self._data_min = min(self._data_min, integrated_spectra[workspace_index])
-
-        self._detector_position_map = {id: DetectorPosition(self._component_info.position(id)) for id in self._detector_indices}
 
     def workspace(self):
         return self._workspace
@@ -116,6 +132,9 @@ class FullInstrumentViewModel:
 
     def data_limits(self) -> list:
         return [self._data_min, self._data_max]
+
+    def bin_limits(self) -> list:
+        return [self._bin_min, self._bin_max]
 
     def monitor_positions(self) -> list:
         return self._monitor_positions

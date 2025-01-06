@@ -22,6 +22,7 @@ class FullInstrumentViewPresenter:
         self._view.add_simple_shape(origin, colour="orange", pickable=False)
 
         self._view.enable_point_picking(callback=self.point_picked)
+        # self.plotter.enable_rectangle_picking(show_message=False, callback=self.rectangle_picked, use_picker=True)
         self._view.show_axes()
         self._view.set_camera_focal_point(self._model.sample_position())
 
@@ -32,6 +33,9 @@ class FullInstrumentViewPresenter:
 
         self._view.add_mesh(self._detector_mesh, scalars=self._counts_label, clim=self._contour_limits, pickable=True)
         self._view.set_contour_range_limits(self._contour_limits)
+
+        self._bin_limits = [self._model.bin_limits()[0], self._model.bin_limits()[1]]
+        self._view.set_tof_range_limits(self._bin_limits)
 
         monitor_point_cloud = self.createPolyDataMesh(self._model.monitor_positions())
         monitor_point_cloud["colours"] = self.generateSingleColour(self._model.monitor_positions(), 1, 0, 0, 1)
@@ -47,6 +51,11 @@ class FullInstrumentViewPresenter:
         self._contour_limits = [min, max]
         self._view.update_scalar_range(self._contour_limits, self._counts_label)
 
+    def set_tof_limits(self, min: int, max: int) -> None:
+        self._model.update_time_of_flight_range(min, max)
+        self._detector_mesh[self._counts_label] = self._model.detector_counts()
+        self.set_contour_limits(self._model.data_limits()[0], self._model.data_limits()[1])
+
     def point_picked(self, point, picker):
         if point is None:
             return
@@ -54,6 +63,12 @@ class FullInstrumentViewPresenter:
         detector_index = self._model.detector_index(point_index)
         self.show_plot_for_detectors([detector_index])
         self.show_info_text_for_detectors([detector_index])
+
+    # def rectangle_picked(self, rectangle):
+    #     selected_points = rectangle.frustum_mesh.points
+    #     points = set([self.m_detector_mesh.find_closest_point(p) for p in selected_points])
+    #     self.show_plot_for_detectors(points)
+    #     self.show_info_text_for_detectors(points)
 
     def rectangle_picked(self, rectangle):
         selected_points = rectangle.frustum_mesh.points

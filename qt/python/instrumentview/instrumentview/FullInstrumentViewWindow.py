@@ -105,20 +105,31 @@ class FullWindow(QMainWindow):
         self._contour_range_min_edit.setText(f"{contour_limits[0]:.0f}")
         self._contour_range_max_edit.setText(f"{contour_limits[1]:.0f}")
 
+    def set_tof_range_limits(self, tof_limits: list) -> None:
+        self._tof_min_edit.setText(f"{tof_limits[0]:.0f}")
+        self._tof_max_edit.setText(f"{tof_limits[1]:.0f}")
+
     def _on_tof_limits_updated(self, text):
-        pass
+        is_valid, min, max = self._parse_min_max_text(text, self._tof_min_edit, self._tof_max_edit)
+        if is_valid:
+            self._presenter.set_tof_limits(min, max)
 
     def _on_contour_limits_updated(self, text):
+        is_valid, min, max = self._parse_min_max_text(text, self._contour_range_min_edit, self._contour_range_max_edit)
+        if is_valid:
+            self._presenter.set_contour_limits(min, max)
+
+    def _parse_min_max_text(self, text, min_edit, max_edit) -> tuple[bool, int, int]:
         if text is None:
-            return
+            return (False, 0, 0)
         try:
-            min = int(self._contour_range_min_edit.text())
-            max = int(self._contour_range_max_edit.text())
+            min = int(min_edit.text())
+            max = int(max_edit.text())
         except ValueError:
-            return
+            return (False, 0, 0)
         if max <= min:
-            return
-        self._presenter.set_contour_limits(min, max)
+            return (False, min, max)
+        return (True, min, max)
 
     def update_scalar_range(self, clim, label: str) -> None:
         self.main_plotter.update_scalar_bar_range(clim, label)
