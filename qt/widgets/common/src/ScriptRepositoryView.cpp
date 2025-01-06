@@ -97,6 +97,7 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent) : MantidDialog(paren
 
   // create and instance of ScriptRepository
   Mantid::API::ScriptRepository_sptr repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
+  ui->setupUi(this);
 
   try {
     // check if the ScriptRepository was ever installed
@@ -127,7 +128,6 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent) : MantidDialog(paren
   // from this point, it is assumed that ScriptRepository is installed.
 
   // configure the Ui
-  ui->setupUi(this);
   connect(ui->reloadPushButton, SIGNAL(clicked()), this, SLOT(updateModel()));
   connect(ui->pbHelp, SIGNAL(clicked()), this, SLOT(helpClicked()));
   connect(model, SIGNAL(executingThread(bool)), ui->reloadPushButton, SLOT(setDisabled(bool)));
