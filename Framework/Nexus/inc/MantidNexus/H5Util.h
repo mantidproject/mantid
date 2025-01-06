@@ -8,6 +8,7 @@
 
 #include "MantidNexus/DllConfig.h"
 
+#include <limits>
 #include <map>
 #include <string>
 #include <vector>
@@ -91,12 +92,13 @@ std::vector<NumT> readNumArrayAttributeCoerce(const H5::H5Object &object, const 
 
 template <typename NumT>
 void readArray1DCoerce(const H5::Group &group, const std::string &name, std::vector<NumT> &output);
+
 template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::Group &group, const std::string &name);
 
-template <typename NumT> void readArray1DCoerce(const H5::DataSet &dataset, std::vector<NumT> &output);
-
 template <typename NumT>
-void readArray1DCoerce(const H5::DataSet &dataset, std::vector<NumT> &output, const size_t length, const size_t offset);
+void readArray1DCoerce(const H5::DataSet &dataset, std::vector<NumT> &output,
+                       const size_t length = std::numeric_limits<size_t>::max(),
+                       const size_t offset = static_cast<size_t>(0));
 
 /// Test if a group already exists within an HDF5 file or parent group.
 MANTID_NEXUS_DLL bool groupExists(H5::H5Object &h5, const std::string &groupPath);
