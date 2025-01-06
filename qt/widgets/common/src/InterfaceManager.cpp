@@ -228,8 +228,6 @@ void InterfaceManager::registerHelpWindowFactory(Mantid::Kernel::AbstractInstant
 
 MantidHelpInterface *InterfaceManager::createHelpWindow() const {
   QString localDocs = qEnvironmentVariable("MANTID_LOCAL_DOCS_BASE");
-  bool localAvailable = !localDocs.isEmpty() && QDir(localDocs).exists();
-
   if (m_helpViewer == nullptr) {
     if (!offlineHelpMsgDisplayed) {
       g_log.information("Offline help is not available in this version of Workbench.");

@@ -9,6 +9,7 @@
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/Logger.h"
+#include <csignal>
 
 #include "MantidQtWidgets/Common/AlgorithmDialog.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
@@ -705,7 +706,7 @@ void AlgorithmDialog::reject() {
  * A slot to handle the help button click
  */
 void AlgorithmDialog::helpClicked() {
-  __builtin_trap();
+  std::raise(SIGTRAP);
   // determine the version to show
   int version(-1); // the latest version
   if (m_algorithm)
@@ -892,17 +893,14 @@ QString AlgorithmDialog::getValue(QWidget *widget) {
   } else if (QLineEdit *textfield = qobject_cast<QLineEdit *>(widget)) {
     return textfield->text().trimmed();
   } else if (QAbstractButton *checker = qobject_cast<QAbstractButton *>(widget)) {
-    if (checker->isChecked())
-      return QString("1");
-    else
-      return QString("0");
+    return checker->isChecked() ? QString("1") : QString("0");
   } else if (QDateTimeEdit *dateEdit = qobject_cast<QDateTimeEdit *>(widget)) {
     // String in ISO8601 format /* add toUTC() to go from local time */
     QString value = dateEdit->dateTime().toString(Qt::ISODate);
     return value;
-  } else if (MantidWidget *mtd_widget = qobject_cast<MantidWidget *>(widget)) {
+  } else if (const MantidWidget *mtd_widget = qobject_cast<const MantidWidget *>(widget)) { // Changed here
     return mtd_widget->getUserInput().toString().trimmed();
-  } else if (PropertyWidget *propWidget = qobject_cast<PropertyWidget *>(widget)) {
+  } else if (const PropertyWidget *propWidget = qobject_cast<const PropertyWidget *>(widget)) { // And here
     return propWidget->getValue().trimmed();
   } else {
     QMessageBox::warning(this, windowTitle(),
