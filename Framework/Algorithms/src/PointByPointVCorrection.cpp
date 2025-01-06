@@ -158,7 +158,7 @@ void PointByPointVCorrection::check_validity(API::MatrixWorkspace_const_sptr &w1
     throw std::runtime_error("The input workspaces are not the same size");
   }
   // Now check that the bins match
-  if (!WorkspaceHelpers::matchingBins(*w1, *w2)) {
+  if (!WorkspaceHelpers::matchingBins(w1, w2)) {
     g_log.error("The input workspaces have different binning");
     throw std::runtime_error("The input workspaces have different binning");
   }

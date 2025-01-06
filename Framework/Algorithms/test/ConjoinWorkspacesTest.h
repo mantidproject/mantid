@@ -98,12 +98,14 @@ public:
     // Check it fails if input overlap
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace1", "top"));
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace2", "top"));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckMatchingBins", false));
     TS_ASSERT_THROWS_NOTHING(conj.execute());
     TS_ASSERT(!conj.isExecuted());
 
     // Now it should succeed
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace1", "top"));
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace2", "bottom"));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckMatchingBins", false));
     TS_ASSERT_THROWS_NOTHING(conj.execute());
     TS_ASSERT(conj.isExecuted());
 
@@ -157,6 +159,7 @@ public:
 
     ConjoinWorkspaces conj;
     conj.initialize();
+    conj.setProperty("CheckMatchingBins", false);
     conj.setRethrows(true);
 
     conj.setProperty("InputWorkspace1", "testMismatchedEventWorkspace1");
@@ -164,6 +167,29 @@ public:
 
     TS_ASSERT_THROWS(conj.execute(), const std::invalid_argument &);
     TS_ASSERT(!conj.isExecuted());
+  }
+
+  void testCheckMatchingBinsError() {
+    MatrixWorkspace_sptr ws1, ws2;
+    ws1 = WorkspaceCreationHelper::createEventWorkspace(10, 5);
+    ws2 = WorkspaceCreationHelper::createEventWorkspace(10, 10);
+
+    ConjoinWorkspaces conj;
+    conj.initialize();
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("InputWorkspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("InputWorkspace2", ws2));
+    conj.setRethrows(true);
+
+    try {
+      conj.execute();
+      TS_FAIL("Expected an exception but none was thrown.");
+    } catch (const std::invalid_argument &e) {
+      std::string expectedMessage = "The bins do not match in the input workspaces. "
+                                    "Consider using RebinToWorkspace to preprocess "
+                                    "the workspaces before conjoining them.";
+      TS_ASSERT_EQUALS(std::string(e.what()), expectedMessage);
+      TS_ASSERT(!conj.isExecuted());
+    }
   }
 
   void testDoCheckForOverlap() {
@@ -180,6 +206,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace1", ws1Name));
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("InputWorkspace2", ws2));
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckOverlapping", true));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckMatchingBins", false));
     TS_ASSERT_THROWS_NOTHING(conj.execute());
     // Falls over as they overlap
     TS_ASSERT(!conj.isExecuted());
@@ -228,6 +255,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace1", ws1Name));
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace2", ws2Name));
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckOverlapping", false));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckMatchingBins", false));
     TS_ASSERT_THROWS_NOTHING(conj.execute();)
     TS_ASSERT(conj.isExecuted());
 
@@ -267,6 +295,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace1", ws1Name));
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("InputWorkspace2", ws2Name));
     TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckOverlapping", false));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckMatchingBins", false));
     TS_ASSERT_THROWS_NOTHING(conj.execute();)
     TS_ASSERT(conj.isExecuted());
 
@@ -316,6 +345,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisLabel", label));
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisUnit", unit));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckMatchingBins", false));
 
     TS_ASSERT_THROWS_NOTHING(conj.execute());
 
@@ -341,6 +371,7 @@ public:
     const std::string unit = "Modified y unit";
 
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisUnit", unit));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckMatchingBins", false));
     TS_ASSERT_THROWS_NOTHING(conj.execute());
 
     auto result = getWSFromADS(ws1Name);
@@ -363,6 +394,7 @@ public:
     const std::string label = "Modified y label";
 
     TS_ASSERT_THROWS_NOTHING(conj.setPropertyValue("YAxisLabel", label));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("CheckMatchingBins", false));
     TS_ASSERT_THROWS_NOTHING(conj.execute());
 
     auto result = getWSFromADS(ws1Name);

@@ -35,6 +35,8 @@ void ConjoinWorkspaces::init() {
                   "The label to set the Y axis to");
   declareProperty(std::make_unique<PropertyWithValue<std::string>>("YAxisUnit", "", Direction::Input),
                   "The unit to set the Y axis to");
+  declareProperty(std::make_unique<PropertyWithValue<bool>>("CheckMatchingBins", true, Direction::Input),
+                  "If true, the algorithm will check that the two input workspaces have matching bins.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -56,6 +58,15 @@ void ConjoinWorkspaces::exec() {
                               "EventWorkspace; please use matching workspace "
                               "types (both EventWorkspace's or both "
                               "Workspace2D's).");
+    g_log.error(message);
+    throw std::invalid_argument(message);
+  }
+  // Check if bins match
+  bool checkBins = getProperty("CheckMatchingBins");
+  if (!WorkspaceHelpers::matchingBins(ws1, ws2) && checkBins) {
+    const std::string message("The bins do not match in the input workspaces. "
+                              "Consider using RebinToWorkspace to preprocess "
+                              "the workspaces before conjoining them.");
     g_log.error(message);
     throw std::invalid_argument(message);
   }

@@ -836,7 +836,7 @@ class DirectEnergyConversion(object):
             ConjoinWorkspaces(InputWorkspace1="spectr_ws1", InputWorkspace2="spectr_ws2")
             RenameWorkspace(InputWorkspace="spectr_ws1", OutputWorkspace=monitor_ws_name)
             if "_OtherMon" in mtd:
-                ConjoinWorkspaces(InputWorkspace1=monitor_ws_name, InputWorkspace2="_OtherMon")
+                ConjoinWorkspaces(InputWorkspace1=monitor_ws_name, InputWorkspace2="_OtherMon", CheckMatchingBins=False)
             else:
                 pass
 

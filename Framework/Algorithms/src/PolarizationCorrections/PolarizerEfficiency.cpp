@@ -137,7 +137,7 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
   } else {
     const MatrixWorkspace_sptr t00Ws =
         std::dynamic_pointer_cast<MatrixWorkspace>(inputWorkspace->getItem(t00WsIndex.value()));
-    if (!WorkspaceHelpers::matchingBins(*t00Ws, *analyserWs, true)) {
+    if (!WorkspaceHelpers::matchingBins(t00Ws, analyserWs, true)) {
       errorList[PropertyNames::ANALYSER_EFFICIENCY] = "The bins in the " + std::string(PropertyNames::INPUT_WORKSPACE) +
                                                       " and " + PropertyNames::ANALYSER_EFFICIENCY +
                                                       "workspace do not match.";
