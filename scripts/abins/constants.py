@@ -322,7 +322,7 @@ ROTATIONS_AND_TRANSLATIONS = 6
 MASS_EPS = 1e-2  # in amu units.
 
 # Tolerance when distinguishing between mass types in the input data
-FINE_MASS_EPS = 1e-6
+FINE_MASS_EPS = 1e-8
 
 # this constant is used to check if in a system for the given symbol of an element all atoms with this symbol have
 # the same mass

@@ -32,13 +32,13 @@ class AtomInfo:
 
     @cached_property
     def _mantid_atom(self):
-        from abins.constants import MASS_EPS
+        from abins.constants import FINE_MASS_EPS, MASS_EPS
 
         nearest_int = int(round(self.mass))
         nearest_isotope = Atom(symbol=self.symbol, a_number=nearest_int)
         standard_mix = Atom(symbol=self.symbol)
 
-        if abs(nearest_isotope.mass - standard_mix.mass) < 1e-12:
+        if abs(nearest_isotope.mass - standard_mix.mass) < FINE_MASS_EPS:
             # items are the same: standard mix is more likely to contain data
             # (e.g. Atom('F', 19) has no neutron data but Atom('F') does)
             return standard_mix

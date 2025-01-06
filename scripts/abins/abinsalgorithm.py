@@ -529,7 +529,6 @@ class AbinsAlgorithm:
         species = AtomInfo(symbol=element_symbol, mass=mass)
 
         for atom_index in range(num_atoms):
-            # TODO this mass_eps could be smaller, we are checking against known masses from data
             if atoms_data[atom_index]["symbol"] == element_symbol and abs(atoms_data[atom_index]["mass"] - mass) < FINE_MASS_EPS:
                 temp_s_atom_data.fill(0.0)
 
