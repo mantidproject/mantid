@@ -40,7 +40,7 @@ Comments for creating useful cross-correlation output
   However, it only works for logorithmic binning which will use ``OffsetMode="Signed"`` in :ref:`algm-GetDetectorOffsets`.
 * With wide range of integration, use the ``MaxDSpaceShift`` to limit the value of :math:`r`.
   Not only will this speed up the calculation, but the output spectra will only include where the spectra are similar to the reference and not have spurious peaks or background.
-  **NOTE:** `MaxDSpaceShift` must be greater than  approximately double the maximum Bragg peak full-width of the input data to ensure that that the cross correlation contains a complete peak.
+  **NOTE:** `MaxDSpaceShift` must be greater than  approximately double the maximum Bragg peak full-width of the input data to ensure that the cross correlation contains a complete peak.
 
 Usage
 -----
