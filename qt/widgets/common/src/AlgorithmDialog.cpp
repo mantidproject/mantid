@@ -161,7 +161,7 @@ void AlgorithmDialog::saveInput() {
   AlgorithmInputHistory::Instance().clearAlgorithmInput(m_algName);
   QStringList::const_iterator pend = m_algProperties.end();
   for (QStringList::const_iterator pitr = m_algProperties.begin(); pitr != pend; ++pitr) {
-    Mantid::Kernel::Property *p = getAlgorithmProperty(*pitr);
+    const Mantid::Kernel::Property *p = getAlgorithmProperty(*pitr);
     if (p->remember()) {
       QString pName = *pitr;
       QString value = m_propertyValueMap.value(pName);
@@ -202,7 +202,7 @@ Mantid::API::IAlgorithm_sptr AlgorithmDialog::getAlgorithm() const { return m_al
  * Get a named property for this algorithm
  * @param propName :: The name of the property
  */
-Mantid::Kernel::Property *AlgorithmDialog::getAlgorithmProperty(const QString &propName) const {
+const Mantid::Kernel::Property *AlgorithmDialog::getAlgorithmProperty(const QString &propName) const {
   if (m_algProperties.contains(propName)) {
     return m_algorithm->getProperty(propName.toStdString());
   } else
@@ -223,7 +223,7 @@ bool AlgorithmDialog::requiresUserInput(const QString &propName) const { return 
 QString AlgorithmDialog::getInputValue(const QString &propName) const {
   QString value = m_propertyValueMap.value(propName);
   if (value.isEmpty()) {
-    Mantid::Kernel::Property *prop = getAlgorithmProperty(propName);
+    const Mantid::Kernel::Property *prop = getAlgorithmProperty(propName);
     if (prop)
       return QString::fromStdString(prop->getDefault());
     else
@@ -350,7 +350,7 @@ bool AlgorithmDialog::setPropertyValues(const QStringList &skipList) {
     const QString pName = *pitr;
     if (skipList.contains(pName)) {
       // For the load dialog, skips setting some properties
-      Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
+      const Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
       std::string error = p->isValid();
       m_errors[pName] = QString::fromStdString(error).trimmed();
       if (!error.empty())
@@ -443,7 +443,7 @@ bool AlgorithmDialog::isWidgetEnabled(const QString &propName) const {
     return true;
 
   // Otherwise it must be disabled but only if it is valid
-  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
+  const Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
   if (!property)
     return true;
 
@@ -499,13 +499,13 @@ QWidget *AlgorithmDialog::tie(QWidget *widget, const QString &property, QLayout 
   if (m_tied_properties.contains(property))
     m_tied_properties.remove(property);
 
-  Mantid::Kernel::Property *prop = getAlgorithmProperty(property);
+  const Mantid::Kernel::Property *prop = getAlgorithmProperty(property);
   if (prop) { // Set a few things on the widget
     widget->setToolTip(QString::fromStdString(prop->documentation()));
   }
   widget->setEnabled(isWidgetEnabled(property));
 
-  PropertyWidget *propWidget = qobject_cast<PropertyWidget *>(widget);
+  const PropertyWidget *propWidget = qobject_cast<const PropertyWidget *>(widget);
 
   // Save in the hashes
   m_tied_properties.insert(property, widget);
@@ -579,7 +579,7 @@ QString AlgorithmDialog::openFileDialog(const QString &propName) {
 void AlgorithmDialog::fillAndSetComboBox(const QString &propName, QComboBox *optionsBox) const {
   if (!optionsBox)
     return;
-  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
+  const Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
   if (!property)
     return;
 
@@ -614,7 +614,7 @@ void AlgorithmDialog::fillLineEdit(const QString &propName, QLineEdit *textField
   if (!isForScript()) {
     textField->setText(AlgorithmInputHistory::Instance().previousInput(m_algName, propName));
   } else {
-    Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
+    const Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
     if (property && property->isValid().empty() && (m_python_arguments.contains(propName) || !property->isDefault())) {
       textField->setText(QString::fromStdString(property->value()));
     }
@@ -940,7 +940,7 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget, const QString &propName)
 
   QString value = getPreviousValue(propName);
 
-  Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
+  const Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
 
   // Do the right thing for the widget type
   if (QComboBox *opts = qobject_cast<QComboBox *>(widget)) {
@@ -954,7 +954,7 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget, const QString &propName)
     return;
   }
   if (QAbstractButton *checker = qobject_cast<QAbstractButton *>(widget)) {
-    if (value.isEmpty() && dynamic_cast<Mantid::Kernel::PropertyWithValue<bool> *>(property))
+    if (value.isEmpty() && dynamic_cast<const Mantid::Kernel::PropertyWithValue<bool> *>(property))
       value = QString::fromStdString(property->value());
     checker->setChecked(value != "0");
     return;
@@ -972,13 +972,13 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget, const QString &propName)
   }
 
   QLineEdit *textfield = qobject_cast<QLineEdit *>(widget);
-  MantidWidget *mtdwidget = qobject_cast<MantidWidget *>(widget);
+  const MantidWidget *mtdwidget = qobject_cast<const MantidWidget *>(widget);
   if (textfield || mtdwidget) {
     if (!isForScript()) {
       if (textfield)
         textfield->setText(value);
       else
-        mtdwidget->setUserInput(value);
+        const_cast<MantidWidget *>(mtdwidget)->setUserInput(value);
     } else {
       // Need to check if this is the default value as we don't fill them in if
       // they are
@@ -986,16 +986,15 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget, const QString &propName)
         if (textfield)
           textfield->setText(value);
         else
-          mtdwidget->setUserInput(value);
+          const_cast<MantidWidget *>(mtdwidget)->setUserInput(value);
       }
     }
     return;
   }
 
-  PropertyWidget *propWidget = qobject_cast<PropertyWidget *>(widget);
+  const PropertyWidget *propWidget = qobject_cast<const PropertyWidget *>(widget);
   if (propWidget) {
-    propWidget->setPreviousValue(value);
-
+    const_cast<PropertyWidget *>(propWidget)->setPreviousValue(value);
     return;
   }
 
