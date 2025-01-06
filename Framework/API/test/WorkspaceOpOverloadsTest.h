@@ -23,20 +23,20 @@ public:
   void test_matchingBins() {
     auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 2, 1);
-    TSM_ASSERT("Passing it the same workspace twice had better work!", WorkspaceHelpers::matchingBins(*ws, *ws));
+    TSM_ASSERT("Passing it the same workspace twice had better work!", WorkspaceHelpers::matchingBins(ws, ws));
 
     // Different size workspaces fail of course
     auto ws2 = std::make_shared<WorkspaceTester>();
     ws2->initialize(3, 2, 1);
     auto ws3 = std::make_shared<WorkspaceTester>();
     ws3->initialize(2, 3, 2);
-    TSM_ASSERT("Different size workspaces should always fail", !WorkspaceHelpers::matchingBins(*ws, *ws2));
-    TSM_ASSERT("Different size workspaces should always fail", !WorkspaceHelpers::matchingBins(*ws, *ws3));
+    TSM_ASSERT("Different size workspaces should always fail", !WorkspaceHelpers::matchingBins(ws, ws2));
+    TSM_ASSERT("Different size workspaces should always fail", !WorkspaceHelpers::matchingBins(ws, ws3));
 
     ws2->dataX(1)[0] = 99.0;
     TSM_ASSERT("First-spectrum-only check should pass even when things differ "
                "in later spectra",
-               WorkspaceHelpers::matchingBins(*ws, *ws2, true));
+               WorkspaceHelpers::matchingBins(ws, ws2, true));
 
     // Check it fails if the sum is zero but the boundaries differ, both for 1st
     // & later spectra.
@@ -48,7 +48,7 @@ public:
     ws5->initialize(2, 3, 2);
     ws5->dataX(0)[0] = -1;
     ws5->dataX(0)[2] = 0;
-    TS_ASSERT(!WorkspaceHelpers::matchingBins(*ws4, *ws5, true))
+    TS_ASSERT(!WorkspaceHelpers::matchingBins(ws4, ws5, true))
     auto ws6 = std::make_shared<WorkspaceTester>();
     ws6->initialize(2, 3, 2);
     ws6->dataX(1)[0] = -1;
@@ -57,7 +57,7 @@ public:
     ws7->initialize(2, 3, 2);
     ws7->dataX(1)[0] = -1;
     ws7->dataX(1)[2] = 0;
-    TS_ASSERT(!WorkspaceHelpers::matchingBins(*ws6, *ws7))
+    TS_ASSERT(!WorkspaceHelpers::matchingBins(ws6, ws7))
 
     // N.B. There are known ways to fool this method, but they are considered
     // acceptable because
@@ -81,25 +81,25 @@ public:
     ws2->getSpectrum(1).dataX()[0] = -2.7;
     ws2->getSpectrum(1).dataX()[1] = -1.7;
 
-    TS_ASSERT(WorkspaceHelpers::matchingBins(*ws1, *ws2, true));
-    TS_ASSERT(!WorkspaceHelpers::matchingBins(*ws1, *ws2));
+    TS_ASSERT(WorkspaceHelpers::matchingBins(ws1, ws2, true));
+    TS_ASSERT(!WorkspaceHelpers::matchingBins(ws1, ws2));
 
     ws1->getSpectrum(0).dataX()[0] = -2.0;
     ws1->getSpectrum(0).dataX()[1] = -1.0;
     ws2->getSpectrum(0).dataX()[0] = -3.0;
     ws2->getSpectrum(0).dataX()[1] = -4.0;
 
-    TS_ASSERT(!WorkspaceHelpers::matchingBins(*ws1, *ws2, true));
+    TS_ASSERT(!WorkspaceHelpers::matchingBins(ws1, ws2, true));
   }
 
   void test_sharedXData() {
     auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 2, 1);
     // By default the X vectors are different ones
-    TS_ASSERT(!WorkspaceHelpers::sharedXData(*ws));
+    TS_ASSERT(!WorkspaceHelpers::sharedXData(ws));
     // Force both X spectra to point to the same underlying vector
     ws->getSpectrum(1).setX(ws->getSpectrum(0).ptrX());
-    TS_ASSERT(WorkspaceHelpers::sharedXData(*ws));
+    TS_ASSERT(WorkspaceHelpers::sharedXData(ws));
   }
 
   void test_makeDistribution() {

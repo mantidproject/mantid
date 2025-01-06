@@ -385,7 +385,7 @@ std::string BinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_c
     return "";
   // Past this point, we require the X arrays to match. Note this only checks
   // the first spectrum except for ragged workspaces
-  if (!WorkspaceHelpers::matchingBins(*lhs, *rhs, !m_lhsRagged && !m_rhsRagged)) {
+  if (!WorkspaceHelpers::matchingBins(lhs, rhs, !m_lhsRagged && !m_rhsRagged)) {
     return "X arrays must match when performing this operation on a 2D "
            "workspaces.";
   }
