@@ -15,7 +15,8 @@ from mantid.api import WorkspaceFactory, AnalysisDataService
 # noinspection PyProtectedMember
 from mantid.simpleapi import ConvertUnits, GroupWorkspaces
 import abins
-from abins.abinsalgorithm import AbinsAlgorithm, AtomInfo
+from abins.abinsalgorithm import AbinsAlgorithm
+from abins.atominfo import AtomInfo
 from abins.logging import get_logger, Logger
 
 
