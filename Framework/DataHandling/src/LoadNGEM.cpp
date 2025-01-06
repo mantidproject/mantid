@@ -84,6 +84,13 @@ void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int &event
         eventsInFrame[i].clear();
       }
     }
+  } else {
+    // clear event list in frame in preparation for next frame
+    PARALLEL_FOR_NO_WSP_CHECK()
+    // Add events that match parameters to workspace
+    for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
+      eventsInFrame[i].clear();
+    }
   }
 }
 
