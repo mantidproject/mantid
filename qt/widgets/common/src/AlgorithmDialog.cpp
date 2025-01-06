@@ -898,9 +898,9 @@ QString AlgorithmDialog::getValue(QWidget *widget) {
     // String in ISO8601 format /* add toUTC() to go from local time */
     QString value = dateEdit->dateTime().toString(Qt::ISODate);
     return value;
-  } else if (MantidWidget *mtd_widget = qobject_cast<MantidWidget *>(widget)) { // Changed here
+  } else if (const MantidWidget *mtd_widget = qobject_cast<const MantidWidget *>(widget)) { // Changed here
     return mtd_widget->getUserInput().toString().trimmed();
-  } else if (PropertyWidget *propWidget = qobject_cast<PropertyWidget *>(widget)) { // And here
+  } else if (const PropertyWidget *propWidget = qobject_cast<const PropertyWidget *>(widget)) { // And here
     return propWidget->getValue().trimmed();
   } else {
     QMessageBox::warning(this, windowTitle(),
