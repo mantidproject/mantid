@@ -83,7 +83,7 @@ class AtomInfo:
             if abs(self.mass - standard_mix.mass) > MASS_EPS:
                 raise ValueError(f"Could not find suitable isotope data for {self.symbol} with mass {self.mass}.")
 
-            logger.warning(f"Standard mass {standard_mix.mass} is close enough, will " f"use data for this isotope mixture.")
+            logger.warning(f"Standard mass {standard_mix.mass} is close enough, will use data for this isotope mixture.")
             return standard_mix
 
         return nearest_isotope
