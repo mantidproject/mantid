@@ -37,7 +37,7 @@ class CutViewerView(QWidget):
         :param parent: An optional parent widget
         """
         super().__init__()
-        self.presenter = None
+        self._presenter = None
         self.layout = None
         self.figure_layout = None
         self.table = None
@@ -50,7 +50,7 @@ class CutViewerView(QWidget):
         self.table.cellChanged.connect(self.on_cell_changed)
 
     def subscribe_presenter(self, presenter: CutViewPresenter):
-        self.presenter = presenter
+        self._presenter = presenter
 
     def hide(self):
         super().hide()
@@ -61,7 +61,7 @@ class CutViewerView(QWidget):
     # signals
 
     def on_cell_changed(self, irow, icol):
-        self.presenter.handle_cell_changed(irow, icol)
+        self._presenter.handle_cell_changed(irow, icol)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
@@ -132,7 +132,7 @@ class CutViewerView(QWidget):
         self.cut_rep = CutRepresentation(self.canvas, self.on_representation_changed, xmin, xmax, ymin, ymax, thickness, axes_transform)
 
     def on_representation_changed(self, xmin, xmax, ymin, ymax, thickness):
-        self.presenter.handle_cut_representation_changed(xmin, xmax, ymin, ymax, thickness)
+        self._presenter.handle_cut_representation_changed(xmin, xmax, ymin, ymax, thickness)
 
     # private api
     def _setup_ui(self):
