@@ -95,11 +95,12 @@ ScriptRepositoryView::ScriptRepositoryView(QWidget *parent) : MantidDialog(paren
   using Mantid::Kernel::ConfigService;
   using Mantid::Kernel::ConfigServiceImpl;
 
-  // create and instance of ScriptRepository
-  Mantid::API::ScriptRepository_sptr repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
   ui->setupUi(this);
 
   try {
+    // create and instance of ScriptRepository
+    Mantid::API::ScriptRepository_sptr repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
+
     // check if the ScriptRepository was ever installed
     if (!repo_ptr->isValid()) {
       bool successful = chooseLocationAndInstall(repo_ptr);
