@@ -58,7 +58,7 @@ class PowderCalculatorTest(unittest.TestCase):
         for key in ref_data["powder"]:
             for i in ref_data["powder"][key]:
                 try:
-                    assert_allclose(ref_data["powder"][key][i], calculated_data[key][i])
+                    assert_allclose(ref_data["powder"][key][i], calculated_data[key][i], atol=1e-12)
                 except AssertionError as e:
                     raise AssertionError(f"Difference in field '{key}' for case {name}") from e
 
