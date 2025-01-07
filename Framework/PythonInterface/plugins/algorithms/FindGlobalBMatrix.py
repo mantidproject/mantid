@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, Progress, ADSValidator, IPeaksWorkspace
-from mantid.simpleapi import AnalysisDataService, logger
+from mantid.simpleapi import AnalysisDataService, logger, SetUB
 from mantid.kernel import Direction, FloatBoundedValidator, StringArrayProperty
 import numpy as np
 from scipy.optimize import leastsq
@@ -106,7 +106,6 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         except ValueError:
             logger.error("CalculateUMatrix failed - check initial lattice parameters and tolerance provided.")
             return
-
         success = ier in [1, 2, 3, 4] and cov is not None  # cov is None when matrix is singular
         if success:
             # calculate errors
@@ -139,9 +138,12 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             for iws, ws in enumerate(ws_list)
             if AnalysisDataService.retrieve(ws).sample().hasOrientedLattice()
         ]  # [(iws, n_peaks_indexed),...]
-        if ws_with_UB:
-            iref, nindexed = max(ws_with_UB, key=lambda x: x[1])  # get UB which indexes most peaks
-            foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
+
+        # find which of the ws have a sufficient number of indexed peaks to be the reference
+        potential_ref_UB_iws = [(iws, n_peaks) for iws, n_peaks in ws_with_UB if n_peaks >= _MIN_NUM_INDEXED_PEAKS]
+        foundUB = len(potential_ref_UB_iws) > 0
+
+        # if none of the ws with UBs index enough peaks try calculating new UB for all from Lattice Params
         if not foundUB:
             # loop over all ws and try to find a UB
             for iws, ws in enumerate(ws_list):
@@ -162,56 +164,71 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 except ValueError:
                     pass
                 if foundUB:
-                    iref = iws
+                    # to reach this point this current UB must be the only potential reference we have
+                    potential_ref_UB_iws = [(iws, nindexed)]
                     break  # stop once found one UB found as FindUBUsingLatticeParameter takes a long time
         if not foundUB:
             raise RuntimeError("An initial UB could not be found with the provided lattice parameters")
 
-        # index other runs consistent with reference UB
-        iws_with_valid_UB = [iw for iw, npks in ws_with_UB if npks >= _MIN_NUM_INDEXED_PEAKS]
-        iws_unindexed = list(range(len(ws_list)))
-        iws_unindexed.pop(iref)
-        # loop over copy of iws_unindexed so can remove item from it when indexed a ws
-        for iws in iws_unindexed[:]:
-            if iws in iws_with_valid_UB:
-                self.make_UB_consistent(ws_list[iref], ws_list[iws])
-                foundUB = True  # already know npks >= _MIN_NUM_INDEXED_PEAKS
-            else:
-                # copy orientation from sample so as to ensure consistency of indexing
-                self.exec_child_alg(
-                    "CopySample",
-                    InputWorkspace=ws_list[iref],
-                    OutputWorkspace=ws_list[iws],
-                    CopyName=False,
-                    CopyMaterial=False,
-                    CopyEnvironment=False,
-                    CopyShape=False,
-                    CopyOrientationOnly=True,
-                )
-                nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
-                if nindexed < _MIN_NUM_INDEXED_PEAKS:
-                    # if gonio matrix is inaccurate we have to find the UB from scratch and transform to correct HKL
-                    self.exec_child_alg(
-                        "FindUBUsingLatticeParameters",
-                        PeaksWorkspace=ws_list[iws],
-                        a=a,
-                        b=b,
-                        c=c,
-                        alpha=alpha,
-                        beta=beta,
-                        gamma=gamma,
-                        FixParameters=False,
-                    )
-                    self.make_UB_consistent(ws_list[iref], ws_list[iws])
-                    nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
-                    foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
-            if foundUB:
-                iws_unindexed.remove(iws)
+        # iterate over the potential reference UBs to find the best one
+        potential_ref_UBs = [
+            AnalysisDataService.retrieve(ws_list[iws]).sample().getOrientedLattice().getUB() for (iws, n_peaks) in potential_ref_UB_iws
+        ]
 
-        # remove unindexed runs from workspaces
-        for iws in iws_unindexed:
-            ws = ws_list.pop(iws)
-            logger.warning(f"Consistent UB not found for {ws} - this workspace will be ignored.")
+        # we'll evaluate this in a separate function to make it easier to swap out for a different metric
+        best_iub, n_indexed_by_ref = self.evaluate_best_ref_UB(potential_ref_UB_iws, potential_ref_UBs, ws_list)
+        ref_ub = potential_ref_UBs[best_iub]
+
+        # set this UB and re-index the ws
+        for iws, cws in enumerate(ws_list):
+            SetUB(cws, UB=ref_ub)
+            self.exec_child_alg("IndexPeaks", PeaksWorkspace=cws, RoundHKLs=True, CommonUBForAll=False)
+
+        # for the ws with fewer peaks than threshold, try and find some more by adjusting U slightly
+        for iws in np.where(n_indexed_by_ref < _MIN_NUM_INDEXED_PEAKS)[0]:
+            self.exec_child_alg(
+                "FindUBUsingLatticeParameters",
+                PeaksWorkspace=ws_list[iws],
+                a=a,
+                b=b,
+                c=c,
+                alpha=alpha,
+                beta=beta,
+                gamma=gamma,
+                FixParameters=False,
+            )
+            self.make_UB_consistent(ws_list[best_iub], ws_list[iws])
+            nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
+
+            # if still too few, warn user and remove
+            if nindexed < _MIN_NUM_INDEXED_PEAKS:
+                logger.warning(f"Fewer than the desired {_MIN_NUM_INDEXED_PEAKS} peaks were indexed for Workspace {iws}")
+                ws_list.pop(iws)
+                logger.warning(f"Workspace {iws} removed")
+
+    def evaluate_best_ref_UB(self, potential_ref_UB_iws, potential_ref_UBs, ws_list):
+        # create an array to save n indexed peaks for each ref option
+        indexed_peaks = np.zeros((len(potential_ref_UBs), len(ws_list)))
+
+        # iterate over all the potential reference workspaces and find how many peaks each UB indexes
+        for iub, (iref, n_peaks) in enumerate(potential_ref_UB_iws):
+            ref_ub = potential_ref_UBs[iub]
+
+            for iws, cws in enumerate(ws_list):
+                if iws == iref:
+                    indexed_peaks[iub, iws] = n_peaks
+                else:
+                    SetUB(cws, UB=ref_ub)
+                    indexed_peaks[iub, iws] = self.exec_child_alg("IndexPeaks", PeaksWorkspace=cws, RoundHKLs=True, CommonUBForAll=False)[0]
+        # find, for each UB, the number of ws that have n_peaks over the threshold and the total sum of these
+        n_ws_over_thresh = np.sum(indexed_peaks >= _MIN_NUM_INDEXED_PEAKS, axis=1)
+        total_indexed_peaks = np.sum(indexed_peaks, axis=1)
+
+        # find which UBs give the most over threshold and then, of these, which fit the most peaks
+        max_over_thresh = np.argwhere(n_ws_over_thresh == np.max(n_ws_over_thresh))
+        best_iub = max_over_thresh[np.argmax(total_indexed_peaks[max_over_thresh])][0]
+
+        return best_iub, indexed_peaks[best_iub]
 
     def make_UB_consistent(self, ws_ref, ws):
         # compare U matrix to perform TransformHKL to preserve indexing
