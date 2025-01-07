@@ -603,12 +603,7 @@ class PeakFunctionGenerator:
                 comp_func[0][self.intens_par_name] = 0
                 comp_func[0].fixParameter(self.intens_par_name)
                 comp_func[0].fixParameter(self.cen_par_name)
-                for ipar_bg in range(comp_func[1].nParams()):
-                    par = comp_func[1].getParamName(ipar_bg)
-                    function.removeTie(f"f{idom}.f1.{par}")
-                    comp_func[1].fixParameter(par)
             else:
-                function.removeTie(f"f{idom}.f0.{self.cen_par_name}")
                 xcen_lo = comp_func[0][self.cen_par_name] * (1 - frac_dspac_delta)
                 xcen_hi = comp_func[0][self.cen_par_name] * (1 + frac_dspac_delta)
                 comp_func.addConstraints(f"{xcen_lo}<f0.{self.cen_par_name}<{xcen_hi}")
