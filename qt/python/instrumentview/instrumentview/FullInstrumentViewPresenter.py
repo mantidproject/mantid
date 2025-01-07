@@ -4,13 +4,22 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from collections.abc import Iterable
-import pyvista as pv
 from instrumentview.FullInstrumentViewModel import FullInstrumentViewModel
+from collections.abc import Iterable
 import numpy as np
+import pyvista as pv
 
 
 class FullInstrumentViewPresenter:
+    _SPHERICAL_X = "Spherical X"
+    _SPHERICAL_Y = "Spherical Y"
+    _SPHERICAL_Z = "Spherical Z"
+    _CYLINDRICAL_X = "Cylindrical X"
+    _CYLINDRICAL_Y = "Cylindrical Y"
+    _CYLINDRICAL_Z = "Cylindrical Z"
+    _SIDE_BY_SIDE = "Side-By-Side"
+    _PROJECTION_OPTIONS = [_SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z, _SIDE_BY_SIDE]
+
     def __init__(self, view, workspace):
         self._view = view
         self._model = FullInstrumentViewModel(workspace, draw_detector_geometry=False)
@@ -41,8 +50,32 @@ class FullInstrumentViewPresenter:
         monitor_point_cloud["colours"] = self.generateSingleColour(self._model.monitor_positions(), 1, 0, 0, 1)
 
         self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
+        self.projection_option_selected(0)
 
-        projection = self._model.calculate_projection(is_spherical=True)
+    def projection_combo_options(self) -> list[str]:
+        return self._PROJECTION_OPTIONS
+
+    def projection_option_selected(self, selected_index: int) -> None:
+        projection_type = self._PROJECTION_OPTIONS[selected_index]
+        if projection_type.startswith("Spherical"):
+            is_spherical = True
+        elif projection_type.startswith("Cylindrical"):
+            is_spherical = False
+        elif projection_type == self._SIDE_BY_SIDE:
+            pass
+        else:
+            raise ValueError(f"Unknown projection type: {projection_type}")
+
+        if projection_type.endswith("X"):
+            axis = [1, 0, 0]
+        elif projection_type.endswith("Y"):
+            axis = [0, 1, 0]
+        elif projection_type.endswith("Z"):
+            axis = [0, 0, 1]
+        else:
+            raise ValueError(f"Unknown projection type {projection_type}")
+
+        projection = self._model.calculate_projection(is_spherical, axis)
         projection_mesh = self.createPolyDataMesh(projection)
         projection_mesh[self._counts_label] = self._model.detector_counts()
         self._view.add_projection_mesh(projection_mesh, self._counts_label, clim=self._contour_limits)

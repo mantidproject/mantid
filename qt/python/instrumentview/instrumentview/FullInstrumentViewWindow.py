@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QLineEdit, QGroupBox, QSizePolicy
+from qtpy.QtWidgets import QMainWindow, QVBoxLayout, QHBoxLayout, QWidget, QLabel, QLineEdit, QGroupBox, QSizePolicy, QComboBox
 from qtpy.QtGui import QPalette, QIntValidator
 from pyvistaqt import BackgroundPlotter
 import matplotlib.pyplot as plt
@@ -57,14 +57,18 @@ class FullWindow(QMainWindow):
         options_vertical_layout.addWidget(detector_group_box)
         options_vertical_layout.addWidget(time_of_flight_group_box)
         options_vertical_layout.addWidget(contour_range_group_box)
-        options_vertical_layout.addStretch()
-
-        central_widget.setLayout(parent_horizontal_layout)
 
         self._presenter = FullInstrumentViewPresenter(self, workspace)
 
-        self.resize(1300, 1000)
+        projection_group_box = QGroupBox("Projection")
+        projection_vbox = QVBoxLayout()
+        self._setup_projection_options(projection_vbox)
+        projection_group_box.setLayout(projection_vbox)
+        options_vertical_layout.addWidget(projection_group_box)
 
+        options_vertical_layout.addStretch()
+        central_widget.setLayout(parent_horizontal_layout)
+        self.resize(1300, 1000)
         self.main_plotter.reset_camera()
         self.projection_plotter.reset_camera()
 
@@ -100,6 +104,16 @@ class FullWindow(QMainWindow):
         palette.setColor(QPalette.Base, palette.color(QPalette.Window))
         line_edit.setPalette(palette)
         return line_edit
+
+    def _setup_projection_options(self, parent: QVBoxLayout):
+        projection_combo_box = QComboBox(self)
+        projection_combo_box.addItems(self._presenter.projection_combo_options())
+        projection_combo_box.currentIndexChanged.connect(self._on_projection_combo_box_changed)
+        parent.addWidget(projection_combo_box)
+
+    def _on_projection_combo_box_changed(self, value):
+        if type(value) is int:
+            self._presenter.projection_option_selected(value)
 
     def set_contour_range_limits(self, contour_limits: list) -> None:
         self._contour_range_min_edit.setText(f"{contour_limits[0]:.0f}")
@@ -155,6 +169,7 @@ class FullWindow(QMainWindow):
         self.main_plotter.enable_point_picking(show_message=False, callback=callback, use_picker=callback is not None)
 
     def add_projection_mesh(self, mesh, scalars=None, clim=None) -> None:
+        self.projection_plotter.clear()
         self.projection_plotter.add_mesh(mesh, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7)
         self.projection_plotter.view_xy()
         self.projection_plotter.enable_image_style()
