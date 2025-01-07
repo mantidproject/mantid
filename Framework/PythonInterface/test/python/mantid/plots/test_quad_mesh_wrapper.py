@@ -9,7 +9,7 @@ from mantid.plots.quad_mesh_wrapper import QuadMeshWrapper
 
 class QuadMeshWrapperTest(unittest.TestCase):
     def setUp(self):
-        self.mock_mesh = mock.create_autospec(QuadMesh)
+        self.mock_mesh = mock.create_autospec(QuadMesh, instance=True)
         self.mock_mesh.axes = mock.MagicMock()
         xx, yy = meshgrid(linspace(-2, 2, 11), linspace(-1, 1, 5))
         self.mock_mesh._coordinates = dstack((xx, yy))

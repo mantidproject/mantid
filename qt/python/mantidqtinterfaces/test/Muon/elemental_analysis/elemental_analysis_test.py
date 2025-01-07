@@ -91,7 +91,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         assertRaisesNothing(self, self.gui.closeEvent, QCloseEvent())
 
     def test_that_closing_with_a_plot_will_close_the_window(self):
-        self.gui.plot_window = mock.create_autospec(MultiPlotWindow)
+        self.gui.plot_window = mock.create_autospec(MultiPlotWindow, instance=True)
         self.gui.closeEvent(QCloseEvent())
 
         self.assertEqual(self.gui.plot_window.closeEvent.call_count, 1)
@@ -146,7 +146,7 @@ class ElementalAnalysisTest(unittest.TestCase):
     @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._gen_label")
     @mock.patch("mantidqtinterfaces.Muon.GUI.ElementalAnalysis.elemental_analysis.ElementalAnalysisGui._plot_line_once")
     def test_that_plot_line_calls_plot_line_once_if_window_not_none(self, mock_plot_line_once, mock_gen_label):
-        self.gui.plot_window = mock.create_autospec(MultiPlotWindow)
+        self.gui.plot_window = mock.create_autospec(MultiPlotWindow, instance=True)
         self.gui.plotting = MultiPlotWidget(mock.Mock())
         self.gui.plotting.get_subplots = mock.Mock(return_value=["plot1"])
         mock_gen_label.return_value = "name of the label"
@@ -156,7 +156,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         mock_plot_line_once.assert_called_with("plot1", 1.0, "name of the label", "C0")
 
     def test_plot_line_once_calls_correct_multiplot_function(self):
-        self.gui.plotting = mock.create_autospec(MultiPlotWidget)
+        self.gui.plotting = mock.create_autospec(MultiPlotWidget, instance=True)
         self.gui._plot_line_once("GE1", 1.0, "label", "C0")
 
         self.assertEqual(self.gui.plotting.add_vline_and_annotate.call_count, 1)
@@ -174,7 +174,7 @@ class ElementalAnalysisTest(unittest.TestCase):
         self.gui.plotting = MultiPlotWidget(mock.Mock())
         self.gui.plotting.get_subplots = mock.Mock(return_value=["plot1", "plot2", "plot3"])
         self.gui.plotting.rm_vline_and_annotate = mock.Mock()
-        self.gui.plot_window = mock.create_autospec(MultiPlotWindow)
+        self.gui.plot_window = mock.create_autospec(MultiPlotWindow, instance=True)
         self.gui._rm_line("line")
 
         self.assertEqual(self.gui.plotting.get_subplots.call_count, 1)

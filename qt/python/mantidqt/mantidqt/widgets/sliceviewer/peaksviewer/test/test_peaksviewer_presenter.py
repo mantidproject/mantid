@@ -21,22 +21,22 @@ from mantidqt.widgets.sliceviewer.peaksviewer.test.modeltesthelpers import creat
 
 def create_test_model(name):
     """Create a test model object from a mock workspace"""
-    mock_ws = create_autospec(PeaksWorkspace)
+    mock_ws = create_autospec(PeaksWorkspace, instance=True)
     mock_ws.name.return_value = name
     return PeaksViewerModel(mock_ws, "r", "b")
 
 
 def create_mock_model(name):
     """Create a mock object to test calss"""
-    mock_ws = create_autospec(PeaksWorkspace)
+    mock_ws = create_autospec(PeaksWorkspace, instance=True)
     mock_ws.name.return_value = name
-    mock = create_autospec(PeaksViewerModel)
+    mock = create_autospec(PeaksViewerModel, instance=True)
     return mock
 
 
 def create_mock_view():
-    mock_view = create_autospec(PeaksViewerView)
-    mock_view.table_view = create_autospec(_PeaksWorkspaceTableView)
+    mock_view = create_autospec(PeaksViewerView, instance=True)
+    mock_view.table_view = create_autospec(_PeaksWorkspaceTableView, instance=True)
     return mock_view
 
 

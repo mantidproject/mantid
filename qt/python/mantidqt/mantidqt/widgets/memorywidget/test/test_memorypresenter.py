@@ -18,7 +18,7 @@ from unittest import mock
 
 class MemoryPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.view = mock.create_autospec(MemoryView)
+        self.view = mock.create_autospec(MemoryView, instance=True)
         self.mock_view_internals()
         self.presenter = MemoryPresenter(self.view)
 

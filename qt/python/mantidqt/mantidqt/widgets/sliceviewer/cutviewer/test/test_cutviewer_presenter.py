@@ -19,9 +19,9 @@ from mantidqt.widgets.sliceviewer.presenters.presenter import SliceViewer
 class TestCutViewerModel(unittest.TestCase):
     def setUp(self):
         # load empty instrument so can create a peak table
-        mock_view = mock.create_autospec(CutViewerView)
-        mock_model = mock.create_autospec(CutViewerModel)
-        self.mock_sv_presenter = mock.create_autospec(SliceViewer)
+        mock_view = mock.create_autospec(CutViewerView, instance=True)
+        mock_model = mock.create_autospec(CutViewerModel, instance=True)
+        self.mock_sv_presenter = mock.create_autospec(SliceViewer, instance=True)
         self.presenter = CutViewerPresenter(self.mock_sv_presenter, mock_model, mock_view)
 
     def test_on_cut_done(self):

@@ -29,9 +29,9 @@ class DNSReductionGUIPresenterTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.parent = mock.Mock()
-        cls.view = mock.create_autospec(DNSReductionGUIView)
-        cls.parameter_abo = mock.create_autospec(ParameterAbo)
-        cls.modus = mock.create_autospec(DNSModus)
+        cls.view = mock.create_autospec(DNSReductionGUIView, instance=True)
+        cls.parameter_abo = mock.create_autospec(ParameterAbo, instance=True)
+        cls.modus = mock.create_autospec(DNSModus, instance=True)
         cls.widget = mock.Mock()
         cls.modus.widgets = {"observer1": cls.widget}
         cls.widget.view = mock.Mock()

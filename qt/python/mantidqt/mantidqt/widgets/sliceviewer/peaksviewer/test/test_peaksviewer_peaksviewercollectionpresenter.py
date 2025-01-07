@@ -26,7 +26,7 @@ class FakePeaksModelFactory(MagicMock):
 
 def create_mock_peaks_workspace(name="peaks"):
     """Create a mock object that looks like a PeaksWorkspace"""
-    mock = create_autospec(PeaksWorkspace)
+    mock = create_autospec(PeaksWorkspace, instance=True)
     mock.name.return_value = name
     return mock
 

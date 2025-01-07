@@ -35,14 +35,14 @@ class MockedOutAddRunsFilenameManager(AddRunsFilenameManager):
 
 class AddRunsPagePresenterTestCase(unittest.TestCase):
     def _make_mock_view(self):
-        mock_view = mock.create_autospec(AddRunsPage, spec_set=True)
+        mock_view = mock.create_autospec(AddRunsPage, spec_set=True, instance=True)
         mock_view.sum = FakeSignal()
         mock_view.customOutFileChanged = FakeSignal()
         mock_view.saveDirectoryClicked = FakeSignal()
         return mock_view
 
     def _make_mock_parent_view(self):
-        mock_parent_view = mock.create_autospec(SANSDataProcessorGui, spec_set=True)
+        mock_parent_view = mock.create_autospec(SANSDataProcessorGui, spec_set=True, instance=True)
         mock_parent_view.instrument = SANSInstrument.LOQ
         return mock_parent_view
 
@@ -51,13 +51,13 @@ class AddRunsPagePresenterTestCase(unittest.TestCase):
         self.fake_summation_settings_view = "Fake Summation Settings View"
 
     def _make_mock_run_summation(self):
-        return mock.create_autospec(SumRunsModel, spec_set=True)
+        return mock.create_autospec(SumRunsModel, spec_set=True, instance=True)
 
     def _make_fake_run(self, path, is_event_data=False):
         return SummableRunFile(path, path, is_event_data)
 
     def _summation_settings_with_save_directory(self, directory):
-        mock_summation_settings = mock.create_autospec(SummationSettingsModel, spec_set=True)
+        mock_summation_settings = mock.create_autospec(SummationSettingsModel, spec_set=True, instance=True)
         mock_summation_settings.save_directory = directory
         return mock_summation_settings
 
@@ -91,13 +91,13 @@ class InitializationTest(AddRunsPagePresenterTestCase):
 
 class SummationSettingsViewEnablednessTest(AddRunsPagePresenterTestCase):
     def _make_fake_event_run(self):
-        run = mock.create_autospec(SummableRunFile, spec_set=True)
+        run = mock.create_autospec(SummableRunFile, spec_set=True, instance=True)
         run.display_name.return_value = "14"
         run.is_event_data.return_value = True
         return run
 
     def _make_fake_histogram_run(self):
-        run = mock.create_autospec(SummableRunFile, spec_set=True)
+        run = mock.create_autospec(SummableRunFile, spec_set=True, instance=True)
         run.display_name.return_value = "10"
         run.is_event_data.return_value = False
         return run

@@ -24,7 +24,7 @@ class PeaksActionViewTest(unittest.TestCase):
         self.assertFalse(view.erasing_mode_on)
         self.assertFalse(view.adding_mode_on)
 
-        mock_PeaksViewerCollectionPresenter = create_autospec(PeaksViewerCollectionPresenter)
+        mock_PeaksViewerCollectionPresenter = create_autospec(PeaksViewerCollectionPresenter, instance=True)
 
         view.subscribe(mock_PeaksViewerCollectionPresenter)
 

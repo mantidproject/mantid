@@ -27,8 +27,8 @@ class DNSXMLDumpPresenterTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.view = mock.create_autospec(DNSXMLDumpView)
-        cls.model = mock.create_autospec(DNSXMLDumpModel)
+        cls.view = mock.create_autospec(DNSXMLDumpView, instance=True)
+        cls.model = mock.create_autospec(DNSXMLDumpModel, instance=True)
         cls.parent = mock.Mock()
         cls.presenter = DNSXMLDumpPresenter(view=cls.view, model=cls.model, name="xml_dump", parent=cls.parent)
 
