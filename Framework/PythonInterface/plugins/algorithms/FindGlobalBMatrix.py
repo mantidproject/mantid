@@ -172,7 +172,8 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
         # iterate over the potential reference UBs to find the best one
         potential_ref_UBs = [
-            AnalysisDataService.retrieve(ws_list[iws]).sample().getOrientedLattice().getUB() for (iws, n_peaks) in potential_ref_UB_iws
+            AnalysisDataService.retrieve(ws_list[iws]).sample().getOrientedLattice().getUB().copy()
+            for (iws, n_peaks) in potential_ref_UB_iws
         ]
 
         # we'll evaluate this in a separate function to make it easier to swap out for a different metric
@@ -219,7 +220,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                     indexed_peaks[iub, iws] = n_peaks
                 else:
                     SetUB(cws, UB=ref_ub)
-                    indexed_peaks[iub, iws] = self.exec_child_alg("IndexPeaks", PeaksWorkspace=cws, RoundHKLs=True, CommonUBForAll=False)[0]
+                    indexed_peaks[iub, iws] = self.exec_child_alg("IndexPeaks", PeaksWorkspace=cws, RoundHKLs=True, CommonUBForAll=True)[0]
         # find, for each UB, the number of ws that have n_peaks over the threshold and the total sum of these
         n_ws_over_thresh = np.sum(indexed_peaks >= _MIN_NUM_INDEXED_PEAKS, axis=1)
         total_indexed_peaks = np.sum(indexed_peaks, axis=1)
@@ -245,7 +246,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         :param ws_list: list of peak workspaces
         :return: sqrt of average square residuals (required by scipy.leastsq optimiser - default settings behave better)
         """
-        residsq = np.zeros(sum([AnalysisDataService.retrieve(wsname).getNumberPeaks() for wsname in ws_list]))
+        residsq = np.full(sum([AnalysisDataService.retrieve(wsname).getNumberPeaks() for wsname in ws_list]), np.nan)
         ipk = 0  # normalise by n peaks indexed so no penalty in indexing more peaks
         for wsname in ws_list:
             # index peaks with CommonUBForAll=False (optimises a temp. UB when indexing - helps for bad guesses)
@@ -273,6 +274,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                     if pk.getHKL().norm2() > 1e-6:
                         residsq[ipk] = np.sum((UB @ pk.getIntHKL() - pk.getQSampleFrame()) ** 2)
                         ipk += 1
+        residsq = residsq[np.isfinite(residsq)]
         return np.sqrt(residsq / (ipk + 1))
 
     def exec_child_alg(self, alg_name: str, **kwargs):
