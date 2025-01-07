@@ -286,10 +286,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     const Mantid::API::WorkspaceGroup_sptr outputWS = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), PA_GROUP_SIZE)
-    const std::vector<std::string> EXPECTED_LOG_VALUES{
+    const std::vector<std::string> expectedLogValues{
         {SpinStatesORSO::PP, SpinStatesORSO::PM, SpinStatesORSO::MP, SpinStatesORSO::MM}};
 
-    validateWorkspaceLogs(outputWS, EXPECTED_LOG_VALUES);
+    validateWorkspaceLogs(outputWS, expectedLogValues);
   }
 
   void test_spin_state_not_added_to_sample_log_by_default_for_PA() {
@@ -345,7 +345,7 @@ public:
         SpinStateConfigurationsFredrikze::ANTI_ANTI + "," + SpinStateConfigurationsFredrikze::ANTI_PARA + "," +
             SpinStateConfigurationsFredrikze::PARA_PARA + "," + SpinStateConfigurationsFredrikze::PARA_ANTI};
 
-    const std::vector<std::vector<std::string>> EXPECTED_LOG_VALUES = {
+    const std::vector<std::vector<std::string>> expectedLogValues = {
         {SpinStatesORSO::PP, SpinStatesORSO::PM, SpinStatesORSO::MP, SpinStatesORSO::MM},
         {SpinStatesORSO::PM, SpinStatesORSO::PP, SpinStatesORSO::MM, SpinStatesORSO::MP},
         {SpinStatesORSO::MP, SpinStatesORSO::MM, SpinStatesORSO::PM, SpinStatesORSO::PP},
@@ -358,7 +358,7 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg->execute());
       const Mantid::API::WorkspaceGroup_sptr outputWS = alg->getProperty("OutputWorkspace");
 
-      validateWorkspaceLogs(outputWS, EXPECTED_LOG_VALUES[orderIdx]);
+      validateWorkspaceLogs(outputWS, expectedLogValues[orderIdx]);
     }
   }
 
@@ -384,9 +384,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     const Mantid::API::WorkspaceGroup_sptr outputWS = alg->getProperty("OutputWorkspace");
 
-    const std::vector<std::string> EXPECTED_LOG_VALUES = {SpinStatesORSO::PO, SpinStatesORSO::MO};
+    const std::vector<std::string> expectedLogValues = {SpinStatesORSO::PO, SpinStatesORSO::MO};
 
-    validateWorkspaceLogs(outputWS, EXPECTED_LOG_VALUES);
+    validateWorkspaceLogs(outputWS, expectedLogValues);
   }
 
   void test_spin_state_not_added_to_sample_log_by_default_for_PNR() {

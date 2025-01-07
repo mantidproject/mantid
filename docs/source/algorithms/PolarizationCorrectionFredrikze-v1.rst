@@ -28,7 +28,7 @@ Spin State Configurations
 #########################
 The algorithm expresses the order of the workspaces in the input and output groups in terms of spin states. These orders are specified using two properties:
 
-**Input Spin State:**
+**InputSpinStates:**
 This property determines the order of the spin states in the input workspace group
 
 - :literal:`'pp, pa, ap, aa'`
@@ -37,7 +37,7 @@ This property determines the order of the spin states in the input workspace gro
 - :literal:`'p, a'`
    Polarized Neutron Reflectivity (:literal:`'PNR'`):  parallel, anti-parallel. Two input workspaces are required. The spin states can be provided in any order and should match the order of the workspaces in the input group. The default order is :literal:`p, a`.
 
-**Output Spin State:**
+**OutputSpinStates:**
 This property determines the order of the spin states in the output workspace group. Similar to the input configuration, users can specify output spin states in any order.
 
 If the ``AddSpinStateToLog`` property has been set to ``True`` then a sample log entry called ``spin_state_ORSO`` is added to each output child workspace.
