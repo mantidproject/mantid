@@ -40,6 +40,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         self.assertEqual(self._test_ws.id(), "Workspace2D")
         self.assertEqual(self._test_ws.name(), "")
         self.assertEqual(self._test_ws.getTitle(), "Test histogram")
+        self.assertEqual(self._test_ws.getPlotType(), "plot")
         self.assertEqual(self._test_ws.getComment(), "")
         self.assertEqual(self._test_ws.isDirty(), False)
         self.assertGreater(self._test_ws.getMemorySize(), 0.0)
@@ -394,6 +395,21 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ws1.setComment(comment)
         self.assertEqual(comment, ws1.getComment())
         AnalysisDataService.remove(ws1.name())
+
+    def test_setPlotType(self):
+        run_algorithm("CreateWorkspace", OutputWorkspace="ws1", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
+        ws1 = AnalysisDataService["ws1"]
+
+        # test default
+        self.assertEqual("plot", ws1.getPlotType())
+
+        # test invalid doesn't take
+        ws1.setPlotType("invalid")
+        self.assertEqual("plot", ws1.getPlotType())
+
+        # test valid takes
+        ws1.setPlotType("marker")
+        self.assertEqual("marker", ws1.getPlotType())
 
     def test_setGetMonitorWS(self):
         run_algorithm("CreateWorkspace", OutputWorkspace="ws1", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")

@@ -78,6 +78,13 @@
                </widget>
               </item>
               <item>
+               <widget class="QPushButton" name="pbDataMoveToTop">
+                <property name="text">
+                 <string>Move to Top</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <widget class="QPushButton" name="pbDataMoveUp">
                 <property name="text">
                  <string>Move Up</string>

@@ -10,7 +10,7 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
+
 #include "MantidKernel/VectorHelper.h"
 
 #include <boost/algorithm/string.hpp>

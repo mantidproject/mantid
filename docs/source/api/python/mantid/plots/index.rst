@@ -185,6 +185,40 @@ when giving the projection:
     ax.plot_wireframe(x,y,z)       #for arrays
     fig.show()
 
+Matrix Workspace Plotting
+=========================
+
+The `setPlotType()` method allows you to define how a workspace should be visualized when plotting. The following plot types are available:
+
+- **marker**:
+  A scatter plot where data points are displayed as markers without connecting lines. Ideal for visualizing individual data points.
+
+- **plot**:
+  A standard line plot that connects data points using lines. This is the default visualization for continuous data.
+
+- **errorbar_x**:
+  A plot with error bars in the x-direction only. Uses `dataX` for the x-values, `dataY` for the y-values, and `dataDx` for the x-error values.
+
+- **errorbar_y**:
+  A plot with error bars in the y-direction only. Uses `dataX` for the x-values, `dataY` for the y-values, and `dataE` for the y-error values.
+
+- **errorbar_xy**:
+  A plot with error bars in both x- and y-directions. Uses `dataX` for the x-values, `dataY` for the y-values, `dataDx` for the x-error values, and `dataE` for the y-error values.
+
+These options can be set using:
+
+.. code-block:: python
+
+    workspace.setPlotType('marker') # or 'plot', 'errorbar_x', 'errorbar_y', 'errorbar_xy'
+    workspace.getPlotType() # returns the current plot type
+
+
+.. figure:: ../../../../images/mantid_plot_types.png
+   :align: center
+   :figwidth: image
+
+
+
 Types of functions
 ==================
 

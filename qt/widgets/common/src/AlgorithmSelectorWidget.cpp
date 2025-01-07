@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AlgorithmSelectorWidget.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidKernel/System.h"
 
 #include "boost/algorithm/string.hpp"
 

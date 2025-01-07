@@ -7,7 +7,7 @@
 #include "MantidAlgorithms/ShiftLogTime.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/System.h"
+
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <sstream>

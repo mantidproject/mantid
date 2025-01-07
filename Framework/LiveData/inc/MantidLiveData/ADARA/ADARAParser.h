@@ -7,6 +7,7 @@
 
 #include "ADARA.h"
 #include "ADARAPackets.h"
+#include "MantidLiveData/DllConfig.h"
 
 namespace ADARA {
 
@@ -19,7 +20,7 @@ namespace ADARA {
 
     Copyright &copy; 2012 Oak Ridge National Laboratory
  **/
-class DLLExport Parser {
+class MANTID_LIVEDATA_DLL Parser {
 public:
   /// Constructor
   Parser(uint32_t initial_buffer_size = 1024 * 1024, uint32_t max_pkt_size = 8 * 1024 * 1024);

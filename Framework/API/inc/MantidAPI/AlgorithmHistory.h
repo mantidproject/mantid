@@ -12,7 +12,7 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/PropertyHistory.h"
-#include <nexus/NeXusFile.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <ctime>
 #include <set>

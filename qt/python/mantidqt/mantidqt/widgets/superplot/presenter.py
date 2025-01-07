@@ -9,7 +9,7 @@ from .view import SuperplotView
 from .model import SuperplotModel
 
 from mantid.kernel import ConfigService
-from mantid.api import mtd
+from mantid.api import mtd, MatrixWorkspace
 from mantid.plots.utility import MantidAxType, legend_set_draggable
 from mantid.plots.plotfunctions import MARKER_MAP
 from mantid.plots import MantidAxes
@@ -479,7 +479,12 @@ class SuperplotPresenter:
                     if ws_name not in mtd:
                         continue
                     ws = mtd[ws_name]
-                    if self._error_bars:
+                    error_ws = False
+                    if isinstance(ws, MatrixWorkspace):
+                        plot_type = ws.getPlotType()
+                        if "errorbar" in plot_type:
+                            error_ws = True
+                    if self._error_bars or error_ws:
                         lines = axes.errorbar(ws, **kwargs)
                         color = lines.lines[0].get_color()
                     else:

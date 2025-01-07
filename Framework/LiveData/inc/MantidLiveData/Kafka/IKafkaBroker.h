@@ -17,7 +17,7 @@ namespace LiveData {
   Defines the interface used to communicate with a Kafka broker such as
   subscribing to topics.
 */
-class DLLExport IKafkaBroker {
+class MANTID_LIVEDATA_DLL IKafkaBroker {
 public:
   virtual ~IKafkaBroker() = default;
 

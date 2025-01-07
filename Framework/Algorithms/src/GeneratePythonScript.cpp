@@ -12,7 +12,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidKernel/System.h"
 
 #include <fstream>
 

@@ -12,7 +12,6 @@
 #include "MantidFrameworkTestHelpers/FacilityHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidLiveData/StartLiveData.h"
 #include <cxxtest/TestSuite.h>

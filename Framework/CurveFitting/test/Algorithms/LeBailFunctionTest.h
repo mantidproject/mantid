@@ -11,7 +11,6 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/cow_ptr.h"
 

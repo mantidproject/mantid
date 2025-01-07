@@ -72,7 +72,7 @@ class SortByQVectors(PythonAlgorithm):
             for norm, spec in sortStat:
                 ms.ExtractSingleSpectrum(InputWorkspace=wsName, OutputWorkspace=wsTemp, WorkspaceIndex=spec)
                 if wsOutput in mtd:
-                    ms.ConjoinWorkspaces(InputWorkspace1=wsOutput, InputWorkspace2=wsTemp, CheckOverlapping=False)
+                    ms.ConjoinWorkspaces(InputWorkspace1=wsOutput, InputWorkspace2=wsTemp, CheckOverlapping=False, CheckMatchingBins=False)
                     if wsTemp in mtd:
                         ms.DeleteWorkspace(Workspace=wsTemp)
                 else:

@@ -10,11 +10,8 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include <boost/scoped_array.hpp>
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
 
 namespace Mantid {
 
@@ -87,13 +84,13 @@ private:
   /// split multi period histogram workspace into a workspace group
   void splitMutiPeriodHistrogramData(const size_t numPeriods);
 
-  size_t getMonitorInfo(NeXus::File &file, size_t &numPeriods);
+  size_t getMonitorInfo(::NeXus::File &file, size_t &numPeriods);
 
   bool createOutputWorkspace(std::vector<bool> &loadMonitorFlags);
 
-  void readEventMonitorEntry(NeXus::File &file, size_t ws_index);
+  void readEventMonitorEntry(::NeXus::File &file, size_t ws_index);
 
-  void readHistoMonitorEntry(NeXus::File &file, size_t ws_index, size_t numPeriods);
+  void readHistoMonitorEntry(::NeXus::File &file, size_t ws_index, size_t numPeriods);
 
 private:
   std::vector<LoadNexusMonitorsAlg::MonitorInfo> m_monitorInfo;

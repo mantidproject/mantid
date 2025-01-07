@@ -8,7 +8,6 @@
 
 #include "MantidDataObjects/MDBin.h"
 #include "MantidDataObjects/MDEventFactory.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 

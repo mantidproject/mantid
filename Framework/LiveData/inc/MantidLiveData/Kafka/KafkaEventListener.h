@@ -9,6 +9,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/LiveListener.h"
+#include "MantidLiveData/DllConfig.h"
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -31,7 +32,7 @@ class KafkaEventStreamDecoder;
   need updating if the schema changes.
   Some further documentation is in docs/source/concepts/KafkaLiveStreams.rst
  */
-class DLLExport KafkaEventListener : public API::LiveListener {
+class MANTID_LIVEDATA_DLL KafkaEventListener : public API::LiveListener {
 public:
   KafkaEventListener();
   ~KafkaEventListener() override = default;

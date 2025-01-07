@@ -7,7 +7,6 @@
 #include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidKernel/System.h"
 #include <cmath>
 #include <gsl/gsl_sf_erf.h>
 

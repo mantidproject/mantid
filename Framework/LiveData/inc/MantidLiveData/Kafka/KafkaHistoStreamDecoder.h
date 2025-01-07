@@ -22,7 +22,7 @@ namespace LiveData {
 
   Some further documentation is in docs/source/concepts/KafkaLiveStreams.rst
 */
-class DLLExport KafkaHistoStreamDecoder : public IKafkaStreamDecoder {
+class MANTID_LIVEDATA_DLL KafkaHistoStreamDecoder : public IKafkaStreamDecoder {
 public:
   KafkaHistoStreamDecoder(std::shared_ptr<IKafkaBroker> broker, const std::string &histoTopic,
                           const std::string &runInfoTopic, const std::string &sampleEnvTopic,

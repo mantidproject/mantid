@@ -9,7 +9,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ILiveListener.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/System.h"
 #include "MantidLiveData/DllConfig.h"
 
 namespace Mantid {

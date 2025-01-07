@@ -125,6 +125,7 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
     errorList[PropertyNames::SPIN_STATES] =
         "The number of workspaces in the input WorkspaceGroup (" + std::to_string(inputWsCount) +
         ") does not match the number of spin states provided (" + std::to_string(spinStates.size()) + ").";
+    return errorList;
   }
   const auto &t01WsIndex =
       PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(spinStates, FlipperConfigurations::OFF_ON);
@@ -136,7 +137,7 @@ std::map<std::string, std::string> PolarizerEfficiency::validateInputs() {
   } else {
     const MatrixWorkspace_sptr t00Ws =
         std::dynamic_pointer_cast<MatrixWorkspace>(inputWorkspace->getItem(t00WsIndex.value()));
-    if (!WorkspaceHelpers::matchingBins(*t00Ws, *analyserWs, true)) {
+    if (!WorkspaceHelpers::matchingBins(t00Ws, analyserWs, true)) {
       errorList[PropertyNames::ANALYSER_EFFICIENCY] = "The bins in the " + std::string(PropertyNames::INPUT_WORKSPACE) +
                                                       " and " + PropertyNames::ANALYSER_EFFICIENCY +
                                                       "workspace do not match.";

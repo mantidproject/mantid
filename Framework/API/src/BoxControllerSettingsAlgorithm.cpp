@@ -12,8 +12,8 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/StringTokenizer.h"
+
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 

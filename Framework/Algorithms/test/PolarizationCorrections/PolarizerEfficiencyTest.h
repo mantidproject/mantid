@@ -114,7 +114,10 @@ public:
     auto grpWs = groupWorkspaces("grpWs", {tPara, tAnti});
 
     auto polariserEfficiency = createPolarizerEfficiencyAlgorithm(grpWs);
-    polariserEfficiency->setProperty("SpinStates", "00, 01, 10");
+    // The 00 spin state is deliberately placed at the end of the input string so that it does not match a workspace in
+    // the group. The algorithm validation normally tries to look up the 00 workspace, so this checks that we don't do
+    // that when the spin states and workspace group length don't match.
+    polariserEfficiency->setProperty("SpinStates", "10, 01, 00");
     TS_ASSERT_THROWS(polariserEfficiency->execute(), const std::runtime_error &);
   }
 

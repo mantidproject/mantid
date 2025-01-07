@@ -16,7 +16,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/cow_ptr.h"
-#include <nexus/NeXusFile.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>

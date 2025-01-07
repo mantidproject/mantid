@@ -4,17 +4,17 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include "MantidCurveFitting/Functions/BivariateNormal.h"
+
 #include "MantidAPI/FunctionFactory.h"
+
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
 
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
-#include "MantidCurveFitting/Functions/BivariateNormal.h"
-
 #include "MantidHistogramData/HistogramY.h"
 
 #include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/System.h"
 
 #include <algorithm>
 #include <cmath>

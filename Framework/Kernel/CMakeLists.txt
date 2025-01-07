@@ -354,8 +354,6 @@ set(TEST_FILES
     FreeBlockTest.h
     FunctionTaskTest.h
     GlobTest.h
-    IPropertySettingsTest.h
-    ISaveableTest.h
     IValidatorTest.h
     IndexSetTest.h
     InstrumentInfoTest.h
@@ -490,7 +488,7 @@ target_link_libraries(
   Kernel
   PUBLIC Mantid::Types
          Mantid::Json
-         Nexus::nexuscpp
+         Mantid::NexusCpp
          Eigen3::Eigen
          TBB::tbb
          Poco::Foundation

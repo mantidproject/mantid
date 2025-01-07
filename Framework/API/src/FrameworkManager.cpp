@@ -16,11 +16,10 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/UsageService.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-
-#include <nexus/NeXusFile.hpp>
 
 #include <Poco/ActiveResult.h>
 
@@ -70,7 +69,7 @@ const char *PLUGINS_EXCLUDE_KEY = "framework.plugins.exclude";
  */
 // Prevent clang-tidy trying to change the signature for ext. interface
 // NOLINTNEXTLINE(readability-non-const-parameter)
-void NexusErrorFunction(void *, char *) {
+void NexusErrorFunction(void *, const char *) {
   // Do nothing.
 }
 

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include <gsl/gsl_linalg.h>
 #include <stdexcept>

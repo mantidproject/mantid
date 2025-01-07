@@ -92,7 +92,7 @@ class ConjoinSpectra(PythonAlgorithm):
             ta.setLabel(loopIndex, labelString)
             loopIndex += 1
             if mtd.doesExist(wsOutput):
-                ConjoinWorkspaces(InputWorkspace1=wsOutput, InputWorkspace2=wsTemp, CheckOverlapping=False)
+                ConjoinWorkspaces(InputWorkspace1=wsOutput, InputWorkspace2=wsTemp, CheckOverlapping=False, CheckMatchingBins=False)
                 if mtd.doesExist(wsTemp):
                     DeleteWorkspace(Workspace=wsTemp)
             else:

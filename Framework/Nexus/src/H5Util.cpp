@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/H5Util.h"
 #include "MantidAPI/LogManager.h"
-#include "MantidKernel/System.h"
 
 #include <H5Cpp.h>
+
 #include <algorithm>
 #include <array>
 #include <boost/numeric/conversion/cast.hpp>

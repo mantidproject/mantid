@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidKernel/ChecksumHelper.h"
-#include "MantidKernel/System.h"
 
 #include <cxxtest/TestSuite.h>
 #include <filesystem>

@@ -12,7 +12,6 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>
 

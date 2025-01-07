@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
+
 #include "MantidHistogramData/Histogram.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid::API {
 

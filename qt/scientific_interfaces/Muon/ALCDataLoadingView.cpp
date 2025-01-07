@@ -190,8 +190,6 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_
     m_ui.dataPlot->tickLabelFormat("x", "sci", true);
 
   m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black, kwargs);
-
-  emit dataChanged();
 }
 
 void ALCDataLoadingView::displayError(const std::string &error) {

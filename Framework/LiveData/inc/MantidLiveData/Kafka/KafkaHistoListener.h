@@ -9,6 +9,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/LiveListener.h"
+#include "MantidLiveData/DllConfig.h"
 
 //----------------------------------------------------------------------
 // Forward declarations
@@ -23,7 +24,7 @@ class KafkaHistoStreamDecoder;
   format from the Kafka system at ISIS. It currently parses the histogram data
   directly using flatbuffers so will need updating if the schema changes.
  */
-class DLLExport KafkaHistoListener : public API::LiveListener {
+class MANTID_LIVEDATA_DLL KafkaHistoListener : public API::LiveListener {
 public:
   KafkaHistoListener();
   ~KafkaHistoListener() override = default;

@@ -9,7 +9,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/Run.h"
-#include "MantidKernel/System.h"
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMWriter.h>

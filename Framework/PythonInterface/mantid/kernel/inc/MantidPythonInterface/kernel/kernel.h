@@ -28,7 +28,7 @@
  */
 #ifdef _WIN32
 
-#include "MantidKernel/System.h"
+#include "MantidPythonInterface/kernel/DllConfig.h"
 
-DLLExport void kernel_dll_import_numpy_capi_for_unittest();
+PYTHON_KERNEL_DLL void kernel_dll_import_numpy_capi_for_unittest();
 #endif

@@ -8,7 +8,6 @@
 
 #include "MantidGeometry/Instrument/GridDetector.h"
 #include "MantidGeometry/Instrument/GridDetectorPixel.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 
 using namespace Mantid::Kernel;

@@ -28,9 +28,9 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+
 #include <MantidKernel/InvisibleProperty.h>
 
 #include <memory>

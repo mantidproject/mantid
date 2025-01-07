@@ -8,7 +8,6 @@
 
 #include "MantidAPI/BoxController.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <Poco/DOM/Attr.h>

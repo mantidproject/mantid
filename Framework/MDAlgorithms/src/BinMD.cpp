@@ -19,7 +19,6 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
 #include <boost/algorithm/string.hpp>
 

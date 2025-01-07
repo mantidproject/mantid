@@ -10,7 +10,6 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
-#include "MantidKernel/System.h"
 #include "MantidSINQ/DllConfig.h"
 
 #include "MantidKernel/Matrix.h"

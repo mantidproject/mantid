@@ -8,7 +8,6 @@
 #include "MantidAPI/Algorithm.tcc"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid::Algorithms {
 
