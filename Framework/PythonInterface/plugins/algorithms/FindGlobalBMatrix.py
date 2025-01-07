@@ -146,8 +146,16 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             # loop over all ws and try to find a UB
             for iws, ws in enumerate(ws_list):
                 try:
-                    self.child_FindUBUsingLatticeParameters(
-                        PeaksWorkspace=ws, a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma, FixParameters=False
+                    self.exec_child_alg(
+                        "FindUBUsingLatticeParameters",
+                        PeaksWorkspace=ws,
+                        a=a,
+                        b=b,
+                        c=c,
+                        alpha=alpha,
+                        beta=beta,
+                        gamma=gamma,
+                        FixParameters=False,
                     )
                     nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=False)
                     foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
@@ -174,8 +182,16 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)
                 if nindexed < _MIN_NUM_INDEXED_PEAKS:
                     # if gonio matrix is inaccurate we have to find the UB from scratch and transform to correct HKL
-                    self.child_FindUBUsingLatticeParameters(
-                        PeaksWorkspace=ws_list[iws], a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma, FixParameters=False
+                    self.exec_child_alg(
+                        "FindUBUsingLatticeParameters",
+                        PeaksWorkspace=ws_list[iws],
+                        a=a,
+                        b=b,
+                        c=c,
+                        alpha=alpha,
+                        beta=beta,
+                        gamma=gamma,
+                        FixParameters=False,
                     )
                     self.make_UB_consistent(ws_list[iref], ws_list[iws])
                     nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)
@@ -231,18 +247,6 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             return alg.getProperty(alg.outputProperties()[0]).value
         else:
             return tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
-
-    def child_FindUBUsingLatticeParameters(self, PeaksWorkspace, a, b, c, alpha, beta, gamma, FixParameters=False):
-        alg = self.createChildAlgorithm("FindUBUsingLatticeParameters", enableLogging=False)
-        alg.setProperty("PeaksWorkspace", PeaksWorkspace)
-        alg.setProperty("a", a)
-        alg.setProperty("b", b)
-        alg.setProperty("c", c)
-        alg.setProperty("alpha", alpha)
-        alg.setProperty("beta", beta)
-        alg.setProperty("gamma", gamma)
-        alg.setProperty("FixParameters", FixParameters)
-        alg.execute()
 
     def child_CalculateUMatrix(self, PeaksWorkspace, a, b, c, alpha, beta, gamma):
         alg = self.createChildAlgorithm("CalculateUMatrix", enableLogging=False)
