@@ -589,7 +589,6 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
             angle_pol(None, ""),
         ]
         dataset_name_outputs = [f"{w_name} {SpinStatesORSO.PP}", f"{w_name} {theta:.3f}", f"{theta:.3f} {SpinStatesORSO.PP}", w_name]
-        dataset_name_outputs = [f"{w_name} {SpinStatesORSO.PP}", f"{w_name} {theta:.3f}", f"{theta:.3f} {SpinStatesORSO.PP}", w_name]
         for in_params, out_dataset_name in zip(angle_polarization_inputs, dataset_name_outputs):
             with self.subTest(test_case=in_params):
                 ws = self._create_sample_workspace()
