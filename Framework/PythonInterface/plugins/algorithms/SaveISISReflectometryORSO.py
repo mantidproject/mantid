@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.utils.reflectometry.orso_helper import MantidORSODataColumns, MantidORSODataset, MantidORSOSaver
+from mantid.utils.reflectometry import SpinStatesORSO
 
 from mantid.kernel import (
     Direction,
@@ -164,8 +165,8 @@ class ReflectometryDataset:
             self._name = f"{self._ws.name()} {self._name}"
 
     def _set_spin_state_from_logs(self) -> None:
-        if self._ws.getRun().hasProperty("spin_state_ORSO"):
-            self._spin_state = self._ws.getRun().getLogData("spin_state_ORSO").value
+        if self._ws.getRun().hasProperty(SpinStatesORSO.LOG_NAME):
+            self._spin_state = self._ws.getRun().getLogData(SpinStatesORSO.LOG_NAME).value
 
 
 class SaveISISReflectometryORSO(PythonAlgorithm):
