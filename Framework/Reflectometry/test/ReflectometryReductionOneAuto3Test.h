@@ -20,6 +20,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAlgorithms/ClearCache.h"
 #include "MantidAlgorithms/GroupWorkspaces.h"
+#include "MantidAlgorithms/PolarizationCorrections/PolarizationCorrectionsHelpers.h"
 #include "MantidFrameworkTestHelpers/ReflectometryHelper.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
@@ -2008,7 +2009,7 @@ private:
   void check_output_group_contains_sample_logs_for_spin_state_ORSO(std::vector<MatrixWorkspace_sptr> const &wsGroup,
                                                                    bool has_sample_logs = false) {
     for (auto const &ws : wsGroup) {
-      TS_ASSERT_EQUALS(ws->mutableRun().hasProperty("spin_state_ORSO"), has_sample_logs)
+      TS_ASSERT_EQUALS(ws->mutableRun().hasProperty(SpinStatesORSO::LOG_NAME), has_sample_logs);
     }
   }
 };
