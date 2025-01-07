@@ -18,11 +18,11 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 #include <memory>
-#include <nexus/NeXusFile.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

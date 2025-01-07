@@ -7,10 +7,11 @@
 #pragma once
 
 #include "MantidIndexing/DllConfig.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
+
 #include <algorithm>
 #include <boost/any.hpp>
 #include <cstdint>
-#include <nexus/NeXusFile.hpp>
 #include <numeric>
 #include <string>
 #include <utility>

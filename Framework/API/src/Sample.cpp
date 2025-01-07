@@ -12,8 +12,8 @@
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Strings.h"
+#include "MantidNexusCpp/NeXusException.hpp"
 
-#include <nexus/NeXusException.hpp>
 #include <utility>
 
 namespace Mantid::API {
