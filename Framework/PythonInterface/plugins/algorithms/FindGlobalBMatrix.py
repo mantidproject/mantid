@@ -234,16 +234,19 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             # index peaks with CommonUBForAll=False (optimises a temp. UB when indexing - helps for bad guesses)
             nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=False)
             if nindexed >= _MIN_NUM_INDEXED_PEAKS:
-                self.exec_child_alg(
-                    "CalculateUMatrix",
-                    PeaksWorkspace=wsname,
-                    a=x0[0],
-                    b=x0[1],
-                    c=x0[2],
-                    alpha=x0[3],
-                    beta=x0[4],
-                    gamma=x0[5],
-                )
+                try:
+                    self.exec_child_alg(
+                        "CalculateUMatrix",
+                        PeaksWorkspace=wsname,
+                        a=x0[0],
+                        b=x0[1],
+                        c=x0[2],
+                        alpha=x0[3],
+                        beta=x0[4],
+                        gamma=x0[5],
+                    )
+                except ValueError:
+                    logger.error(f"Cannot calculate U Matrix for {wsname} - this workspace should be removed.")
                 # don't index with optimisation after this point and don't round HKL (to calc resids)
                 self.exec_child_alg("IndexPeaks", PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=False)
                 ws = AnalysisDataService.retrieve(wsname)
