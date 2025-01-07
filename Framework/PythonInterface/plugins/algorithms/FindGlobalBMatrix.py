@@ -178,7 +178,16 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 foundUB = True  # already know npks >= _MIN_NUM_INDEXED_PEAKS
             else:
                 # copy orientation from sample so as to ensure consistency of indexing
-                self.child_CopySample(InputWorkspace=ws_list[iref], OutputWorkspace=ws_list[iws])
+                self.exec_child_alg(
+                    "CopySample",
+                    InputWorkspace=ws_list[iref],
+                    OutputWorkspace=ws_list[iws],
+                    CopyName=False,
+                    CopyMaterial=False,
+                    CopyEnvironment=False,
+                    CopyShape=False,
+                    CopyOrientationOnly=True,
+                )
                 nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)
                 if nindexed < _MIN_NUM_INDEXED_PEAKS:
                     # if gonio matrix is inaccurate we have to find the UB from scratch and transform to correct HKL
@@ -256,26 +265,6 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             return alg.getProperty(alg.outputProperties()[0]).value
         else:
             return tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
-
-    def child_CopySample(
-        self,
-        InputWorkspace,
-        OutputWorkspace,
-        CopyName=False,
-        CopyMaterial=False,
-        CopyEnvironment=False,
-        CopyShape=False,
-        CopyOrientationOnly=True,
-    ):
-        alg = self.createChildAlgorithm("CopySample", enableLogging=False)
-        alg.setProperty("InputWorkspace", InputWorkspace)
-        alg.setProperty("OutputWorkspace", OutputWorkspace)
-        alg.setProperty("CopyName", CopyName)
-        alg.setProperty("CopyMaterial", CopyMaterial)
-        alg.setProperty("CopyEnvironment", CopyEnvironment)
-        alg.setProperty("CopyShape", CopyShape)
-        alg.setProperty("CopyOrientationOnly", CopyOrientationOnly)
-        alg.execute()
 
 
 # register algorithm with mantid
