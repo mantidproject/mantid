@@ -9,8 +9,7 @@
 #include "../../src/LoadRaw/isisraw2.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
-
-#include <nexus/NeXusFile.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <climits>
 #include <memory>

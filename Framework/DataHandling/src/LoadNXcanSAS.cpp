@@ -23,11 +23,11 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/H5Util.h"
 
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include <H5Cpp.h>
 #include <Poco/DirectoryIterator.h>
 #include <Poco/Path.h>
 #include <boost/algorithm/string.hpp>
-#include <nexus/NeXusFile.hpp>
 #include <type_traits>
 
 using namespace Mantid::Kernel;
@@ -436,7 +436,7 @@ bool findDefinition(::NeXus::File &file) {
   bool foundDefinition = false;
   auto entries = file.getEntries();
 
-  for (auto &entry : entries) {
+  for (const auto &entry : entries) {
     if (entry.second == sasEntryClassAttr || entry.second == nxEntryClassAttr) {
       file.openGroup(entry.first, entry.second);
       file.openData(sasEntryDefinition);

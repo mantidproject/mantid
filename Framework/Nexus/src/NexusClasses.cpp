@@ -88,18 +88,11 @@ std::string NXObject::name() const {
 void NXObject::getAttributes() {
   NXname pName;
   int iLength, iType;
-#ifndef NEXUS43
   int rank;
   int dims[4];
-#endif
   std::vector<char> buff(128);
 
-#ifdef NEXUS43
-  while (NXgetnextattr(m_fileID, pName, &iLength, &iType) != NX_EOD) {
-#else
   while (NXgetnextattra(m_fileID, pName, &rank, dims, &iType) != NX_EOD) {
-#endif
-#ifndef NEXUS43
     if (rank > 1) { // mantid only supports single value attributes
       throw std::runtime_error("Encountered attribute with multi-dimensional array value");
     }
@@ -107,7 +100,6 @@ void NXObject::getAttributes() {
     if (iType != NX_CHAR && iLength != 1) {
       throw std::runtime_error("Encountered attribute with array value");
     }
-#endif
 
     switch (iType) {
     case NX_CHAR: {
@@ -152,6 +144,7 @@ NXClass::NXClass(const NXClass &parent, const std::string &name) : NXObject(pare
 NXClassInfo NXClass::getNextEntry() {
   NXClassInfo res;
   char nxname[NX_MAXNAMELEN], nxclass[NX_MAXNAMELEN];
+  // cppcheck-suppress argumentSize
   res.stat = NXgetnextentry(m_fileID, nxname, nxclass, &res.datatype);
   if (res) // Check if previous call was successful
   {

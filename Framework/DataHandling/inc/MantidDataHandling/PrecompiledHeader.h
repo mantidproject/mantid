@@ -15,8 +15,8 @@
 
 // NeXus
 // clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 // clang-format on
 
 // Poco

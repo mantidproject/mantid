@@ -18,10 +18,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
-
-#include <nexus/NeXusException.hpp>
-#include <nexus/NeXusFile.hpp>
 
 #include <filesystem>
 

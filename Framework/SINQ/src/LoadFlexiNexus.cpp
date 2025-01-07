@@ -15,10 +15,10 @@
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Utils.h"
+#include "MantidNexusCpp/NeXusException.hpp"
 
 #include <boost/algorithm/string.hpp>
 #include <fstream>
-#include <nexus/NeXusException.hpp>
 #include <sstream>
 
 // Register the algorithm into the AlgorithmFactory
