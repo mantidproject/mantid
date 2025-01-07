@@ -126,6 +126,10 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         prog_reporter.report(3, "Done")
 
     def find_initial_indexing(self, a, b, c, alpha, beta, gamma, ws_list):
+        import pydevd_pycharm
+
+        pydevd_pycharm.settrace(stdoutToServer=True, stderrToServer=True)
+
         # check if a UB exists on any run and if so whether it indexes a sufficient number of peaks
         foundUB = False
         ws_with_UB = [
@@ -214,6 +218,17 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                         residsq[ipk] = np.sum((UB @ pk.getIntHKL() - pk.getQSampleFrame()) ** 2)
                         ipk += 1
         return np.sqrt(residsq / (ipk + 1))
+
+    def exec_child_alg(self, alg_name: str, **kwargs):
+        alg = self.createChildAlgorithm(alg_name, enableLogging=False)
+        alg.setAlwaysStoreInADS(False)
+        alg.initialize()
+        alg.setProperties(kwargs)
+        alg.execute()
+        if len(alg.outputProperties()) == 1:
+            return alg.getProperty(alg.outputProperties()[0]).value
+        else:
+            return tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
 
     def child_IndexPeaks(self, PeaksWorkspace, RoundHKLs=True, CommonUBForAll=False):
         alg = self.createChildAlgorithm("IndexPeaks", enableLogging=False)
