@@ -12,6 +12,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
+#include "MantidDataHandling/NXcanSASHelper.h"
 #include "MantidDataHandling/SaveNXcanSAS.h"
 #include "MantidFrameworkTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument.h"
@@ -512,7 +513,7 @@ private:
   void do_assert_detector(H5::Group &instrument, const std::vector<std::string> &detectors) {
     for (auto &detector : detectors) {
       std::string detectorName = sasInstrumentDetectorGroupName + detector;
-      auto detectorNameSanitized = Mantid::DataHandling::makeCanSASRelaxedName(detectorName);
+      auto detectorNameSanitized = Mantid::DataHandling::NXcanSAS::makeCanSASRelaxedName(detectorName);
       auto detectorGroup = instrument.openGroup(detectorNameSanitized);
 
       auto numAttributes = detectorGroup.getNumAttrs();
