@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
+#include "MantidDataHandling/SaveNXcanSASBase.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -15,7 +16,7 @@ namespace DataHandling {
 /** SaveNXcanSAS : Saves a reduced workspace in the NXcanSAS format. Currently
  * only MatrixWorkspaces resulting from 1D and 2D reductions are supported.
  */
-class MANTID_DATAHANDLING_DLL SaveNXcanSAS final : public API::Algorithm {
+class MANTID_DATAHANDLING_DLL SaveNXcanSAS final : public SaveNXcanSASBase {
 public:
   /// Constructor
   SaveNXcanSAS();
@@ -41,8 +42,6 @@ private:
   /// Execution code
   void exec() override;
 };
-
-std::string MANTID_DATAHANDLING_DLL makeCanSASRelaxedName(const std::string &input);
 
 } // namespace DataHandling
 } // namespace Mantid

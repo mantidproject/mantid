@@ -184,6 +184,7 @@ set(SRC_FILES
     src/SaveNXSPE.cpp
     src/SaveNXTomo.cpp
     src/SaveNXcanSAS.cpp
+    src/SaveNXCanSASBase.cpp
     src/SaveNexus.cpp
     src/SaveNexusESS.cpp
     src/SaveNexusGeometry.cpp
@@ -401,6 +402,7 @@ set(INC_FILES
     inc/MantidDataHandling/SaveNXSPE.h
     inc/MantidDataHandling/SaveNXTomo.h
     inc/MantidDataHandling/SaveNXcanSAS.h
+    inc/MantidDataHandling/SaveNXcanSASBase.h
     inc/MantidDataHandling/SaveNexus.h
     inc/MantidDataHandling/SaveNexusESS.h
     inc/MantidDataHandling/SaveNexusGeometry.h
