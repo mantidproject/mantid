@@ -9,7 +9,6 @@
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 

@@ -12,7 +12,6 @@
  */
 
 #pragma once
-#include "MantidKernel/System.h"
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/IFunction1D.h"

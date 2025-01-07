@@ -8,7 +8,6 @@
 
 #include "MantidAPI/IPowderDiffPeakFunction.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

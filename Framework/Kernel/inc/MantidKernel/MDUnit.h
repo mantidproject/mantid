@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/UnitLabel.h"
 #include <memory>
 #include <string>

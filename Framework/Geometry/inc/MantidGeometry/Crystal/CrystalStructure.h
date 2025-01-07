@@ -13,7 +13,7 @@
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidKernel/System.h"
+#include "MantidGeometry/DllConfig.h"
 
 #include <memory>
 

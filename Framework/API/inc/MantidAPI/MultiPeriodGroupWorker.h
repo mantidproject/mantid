@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
-#include "MantidKernel/System.h"
 #include <memory>
 #include <string>
 #include <vector>

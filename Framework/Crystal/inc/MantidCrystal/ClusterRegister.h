@@ -8,7 +8,6 @@
 
 #include "MantidCrystal/DisjointElement.h"
 #include "MantidCrystal/DllConfig.h"
-#include "MantidKernel/System.h"
 #include <boost/scoped_ptr.hpp>
 #include <map>
 #include <memory>

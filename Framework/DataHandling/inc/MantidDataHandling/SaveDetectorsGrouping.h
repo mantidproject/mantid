@@ -9,7 +9,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {

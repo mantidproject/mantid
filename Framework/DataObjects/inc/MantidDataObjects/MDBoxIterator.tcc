@@ -7,7 +7,7 @@
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/System.h"
+#include <cstddef>
 
 namespace Mantid {
 namespace DataObjects {
