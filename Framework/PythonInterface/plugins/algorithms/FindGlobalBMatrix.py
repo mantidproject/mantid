@@ -110,9 +110,9 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         success = ier in [1, 2, 3, 4] and cov is not None  # cov is None when matrix is singular
         if success:
             # calculate errors
-            dof = sum([self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=False) for ws in ws_list]) - len(
-                alatt0
-            )
+            dof = sum(
+                [self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=False)[0] for ws in ws_list]
+            ) - len(alatt0)
             err = np.sqrt(abs(np.diag(cov)) * (info["fvec"] ** 2).sum() / dof)
             for wsname in ws_list:
                 ws = AnalysisDataService.retrieve(wsname)
@@ -135,7 +135,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         # check if a UB exists on any run and if so whether it indexes a sufficient number of peaks
         foundUB = False
         ws_with_UB = [
-            (iws, self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=False))
+            (iws, self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=False)[0])
             for iws, ws in enumerate(ws_list)
             if AnalysisDataService.retrieve(ws).sample().hasOrientedLattice()
         ]  # [(iws, n_peaks_indexed),...]
@@ -157,7 +157,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                         gamma=gamma,
                         FixParameters=False,
                     )
-                    nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=False)
+                    nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=False)[0]
                     foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
                 except ValueError:
                     pass
@@ -188,7 +188,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                     CopyShape=False,
                     CopyOrientationOnly=True,
                 )
-                nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)
+                nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
                 if nindexed < _MIN_NUM_INDEXED_PEAKS:
                     # if gonio matrix is inaccurate we have to find the UB from scratch and transform to correct HKL
                     self.exec_child_alg(
@@ -203,7 +203,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                         FixParameters=False,
                     )
                     self.make_UB_consistent(ws_list[iref], ws_list[iws])
-                    nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)
+                    nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
                     foundUB = nindexed >= _MIN_NUM_INDEXED_PEAKS
             if foundUB:
                 iws_unindexed.remove(iws)
@@ -232,7 +232,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         ipk = 0  # normalise by n peaks indexed so no penalty in indexing more peaks
         for wsname in ws_list:
             # index peaks with CommonUBForAll=False (optimises a temp. UB when indexing - helps for bad guesses)
-            nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=False)
+            nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=False)[0]
             if nindexed >= _MIN_NUM_INDEXED_PEAKS:
                 try:
                     self.exec_child_alg(
@@ -264,10 +264,8 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         alg.initialize()
         alg.setProperties(kwargs)
         alg.execute()
-        if len(alg.outputProperties()) == 1:
-            return alg.getProperty(alg.outputProperties()[0]).value
-        else:
-            return tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
+        out_props = tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
+        return out_props[0] if len(out_props) == 1 else out_props
 
 
 # register algorithm with mantid
