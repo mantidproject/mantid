@@ -225,7 +225,16 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             # index peaks with CommonUBForAll=False (optimises a temp. UB when indexing - helps for bad guesses)
             nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=False)
             if nindexed >= _MIN_NUM_INDEXED_PEAKS:
-                self.child_CalculateUMatrix(wsname, *x0)
+                self.exec_child_alg(
+                    "CalculateUMatrix",
+                    PeaksWorkspace=wsname,
+                    a=x0[0],
+                    b=x0[1],
+                    c=x0[2],
+                    alpha=x0[3],
+                    beta=x0[4],
+                    gamma=x0[5],
+                )
                 # don't index with optimisation after this point and don't round HKL (to calc resids)
                 self.exec_child_alg("IndexPeaks", PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=False)
                 ws = AnalysisDataService.retrieve(wsname)
@@ -247,17 +256,6 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             return alg.getProperty(alg.outputProperties()[0]).value
         else:
             return tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
-
-    def child_CalculateUMatrix(self, PeaksWorkspace, a, b, c, alpha, beta, gamma):
-        alg = self.createChildAlgorithm("CalculateUMatrix", enableLogging=False)
-        alg.setProperty("PeaksWorkspace", PeaksWorkspace)
-        alg.setProperty("a", a)
-        alg.setProperty("b", b)
-        alg.setProperty("c", c)
-        alg.setProperty("alpha", alpha)
-        alg.setProperty("beta", beta)
-        alg.setProperty("gamma", gamma)
-        alg.execute()
 
     def child_TransformHKL(self, PeaksWorkspace, HKLTransform, FindError=False):
         alg = self.createChildAlgorithm("TransformHKL", enableLogging=False)
