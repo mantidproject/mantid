@@ -4,11 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import sys
-from qtpy.QtWidgets import QApplication
 from instrumentview.FullInstrumentViewWindow import FullWindow
-from pathlib import Path
 from mantid.simpleapi import LoadRaw, LoadNexus, LoadEventNexus
+from pathlib import Path
+from qtpy.QtWidgets import QApplication
+import sys
 
 
 class InstrumentView:
