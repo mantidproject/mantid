@@ -50,10 +50,6 @@ public:
 
   SCRIPTSTATUS fileStatus(const std::string &file_path) { return std::get<0>(testFiles[file_path]); }
 
-  std::string localRepository() override {
-    return Mantid::Kernel::ConfigService::Instance().getString("ScriptLocalRepository");
-  }
-
 private:
   // contains fake file entries: path, status, autoupdate, directory
   std::map<std::string, std::tuple<SCRIPTSTATUS, bool, bool>> testFiles;

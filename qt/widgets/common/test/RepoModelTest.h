@@ -8,7 +8,6 @@
 
 #include "MantidKernel/ConfigService.h"
 #include <cxxtest/TestSuite.h>
-#include <filesystem>
 #include <gmock/gmock.h>
 
 #include "MantidAPI/ScriptRepositoryFactory.h"
