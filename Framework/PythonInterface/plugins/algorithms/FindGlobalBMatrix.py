@@ -210,7 +210,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         U = AnalysisDataService.retrieve(ws).sample().getOrientedLattice().getU()
         # find transform required  ( U_ref = U T^-1) - see TransformHKL docs for details
         transform = np.linalg.inv(getSignMaxAbsValInCol(np.linalg.inv(U) @ U_ref))
-        self.child_TransformHKL(PeaksWorkspace=ws, HKLTransform=transform, FindError=False)
+        self.exec_child_alg("TransformHKL", PeaksWorkspace=ws, HKLTransform=transform, FindError=False)
 
     def calcResiduals(self, x0, ws_list):
         """
@@ -256,13 +256,6 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             return alg.getProperty(alg.outputProperties()[0]).value
         else:
             return tuple(alg.getProperty(prop).value for prop in alg.outputProperties())
-
-    def child_TransformHKL(self, PeaksWorkspace, HKLTransform, FindError=False):
-        alg = self.createChildAlgorithm("TransformHKL", enableLogging=False)
-        alg.setProperty("PeaksWorkspace", PeaksWorkspace)
-        alg.setProperty("HKLTransform", HKLTransform)
-        alg.setProperty("FindError", FindError)
-        alg.execute()
 
     def child_CopySample(
         self,
