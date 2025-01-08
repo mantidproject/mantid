@@ -9,6 +9,7 @@
 from functools import partial
 from qtpy.QtWidgets import QApplication, QVBoxLayout
 
+from instrumentview.FullInstrumentViewWindow import FullInstrumentViewWindow
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting import functions
@@ -69,6 +70,7 @@ class WorkspaceWidget(PluginWidget):
         self.workspacewidget.sliceViewerClicked.connect(self._do_slice_viewer)
         self.workspacewidget.showDataClicked.connect(self._do_show_data)
         self.workspacewidget.showInstrumentClicked.connect(self._do_show_instrument)
+        self.workspacewidget.showNewInstrumentViewClicked.connect(self._do_show_new_instrument_view)
         self.workspacewidget.showAlgorithmHistoryClicked.connect(self._do_show_algorithm_history)
         self.workspacewidget.showDetectorsClicked.connect(self._do_show_detectors)
         self.workspacewidget.plotAdvancedClicked.connect(partial(self._do_plot_spectrum, errors=False, overplot=False, advanced=True))
@@ -289,6 +291,23 @@ class WorkspaceWidget(PluginWidget):
                     logger.warning("Could not show instrument for workspace '{}':\n{}\n".format(ws.name(), exception))
             else:
                 logger.warning("Could not show instrument for workspace '{}':\nNo instrument available.\n".format(ws.name()))
+
+    def _do_show_new_instrument_view(self, names, off_screen=False):
+        """
+        Show the updated instrument view for the given workspaces
+
+        :param names: A list of workspace names
+        """
+        parent, _ = get_window_config()
+        for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
+            if ws.getInstrument().getName():
+                try:
+                    view = FullInstrumentViewWindow(ws, parent=parent, off_screen=off_screen)
+                    view.show()
+                except Exception as exception:
+                    logger.warning("Could not show instrument for workspace " "'{}':\n{}\n".format(ws.name(), exception))
+            else:
+                logger.warning("Could not show instrument for workspace '{}':" "\nNo instrument available.\n" "".format(ws.name()))
 
     def _do_show_data(self, names):
         # local import to allow this module to be imported without pyplot being imported
