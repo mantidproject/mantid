@@ -1,0 +1,3 @@
+- Added property ``errorreports.core_dumps``. Linux users can set this to the directory on their system where core dump files are put after a crash (e.g ``errorreports.core_dumps=/var/lib/apport/coredump``).
+  Workbench will then be able to use this property to extract useful information from the core dump file created after a crash and give that to the error reporting service.
+  This will help us to diagnose some problems where previously no stacktrace was available after a crash. On Linux, core dumps are now always turned on for the workbench process.
