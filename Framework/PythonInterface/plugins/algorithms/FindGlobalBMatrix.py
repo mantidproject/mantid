@@ -12,7 +12,7 @@ from scipy.optimize import leastsq
 from plugins.algorithms.FindGoniometerFromUB import getSignMaxAbsValInCol
 
 _MIN_NUM_PEAKS = 6  # minimum required to use FindUBUsingLatticeParameters assuming all linearly indep.
-_MIN_NUM_INDEXED_PEAKS = 3  # minimum indexed peaks required for CalculateUMatrix
+_MIN_NUM_INDEXED_PEAKS = 2  # minimum indexed peaks required for CalculateUMatrix
 
 
 class FindGlobalBMatrix(DataProcessorAlgorithm):
