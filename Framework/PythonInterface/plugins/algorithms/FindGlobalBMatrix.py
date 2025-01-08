@@ -79,8 +79,8 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             issues["PeakWorkspaces"] = (
                 f"Accept only PeaksWorkspaces with either: attached UBs and more than {_MIN_NUM_INDEXED_PEAKS} peaks; "
                 f"or no attached UBs and more than {_MIN_NUM_PEAKS} peaks - "
-                f"there must be at least two valid peak tables provided in total. "
-                f"Currently provided: {n_valid_ws}/{len(ws_list)} valid workspaces, with {ws_n_peaks} total peaks"
+                f"there must be at least 2 valid peak tables provided in total. "
+                f"Currently {n_valid_ws}/{len(ws_list)} of provided workspaces are valid, with {ws_n_peaks} total peaks"
             )
         return issues
 
