@@ -3,7 +3,7 @@
 Abins Data Formats
 ==================
 
-.. list-table:: Title
+.. list-table::
    :header-rows: 1
 
   * - Code
