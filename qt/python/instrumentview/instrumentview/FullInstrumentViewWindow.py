@@ -14,11 +14,11 @@ from typing import Callable
 import numpy as np
 
 
-class FullWindow(QMainWindow):
+class FullInstrumentViewWindow(QMainWindow):
     _detector_spectrum_fig = None
 
-    def __init__(self, workspace, parent=None):
-        super(FullWindow, self).__init__(parent)
+    def __init__(self, workspace, parent=None, off_screen=False):
+        super(FullInstrumentViewWindow, self).__init__(parent)
         self.setWindowTitle("Instrument View")
 
         central_widget = QWidget(self)
@@ -29,9 +29,9 @@ class FullWindow(QMainWindow):
         parent_horizontal_layout.addLayout(options_vertical_layout, 1)
         parent_horizontal_layout.addLayout(pyvista_vertical_layout, 3)
 
-        self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False)
+        self.main_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=off_screen)
         pyvista_vertical_layout.addWidget(self.main_plotter.app_window)
-        self.projection_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False)
+        self.projection_plotter = BackgroundPlotter(show=False, menu_bar=False, toolbar=False, off_screen=off_screen)
         pyvista_vertical_layout.addWidget(self.projection_plotter.app_window)
 
         detector_group_box = QGroupBox("Detector Info")
@@ -166,16 +166,19 @@ class FullWindow(QMainWindow):
         self.main_plotter.add_mesh(mesh, scalars=scalars, rgba=True, render_points_as_spheres=True, point_size=10)
 
     def enable_point_picking(self, callback=None) -> None:
-        self.main_plotter.enable_point_picking(show_message=False, callback=callback, use_picker=callback is not None)
+        if not self.main_plotter.off_screen:
+            self.main_plotter.enable_point_picking(show_message=False, callback=callback, use_picker=callback is not None)
 
     def add_projection_mesh(self, mesh, scalars=None, clim=None) -> None:
         self.projection_plotter.clear()
         self.projection_plotter.add_mesh(mesh, scalars=scalars, clim=clim, render_points_as_spheres=True, point_size=7)
         self.projection_plotter.view_xy()
-        self.projection_plotter.enable_image_style()
+        if not self.projection_plotter.off_screen:
+            self.projection_plotter.enable_image_style()
 
     def show_axes(self) -> None:
-        self.main_plotter.show_axes()
+        if not self.main_plotter.off_screen:
+            self.main_plotter.show_axes()
 
     def set_camera_focal_point(self, focal_point) -> None:
         self.main_plotter.camera.focal_point = focal_point

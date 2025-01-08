@@ -146,7 +146,7 @@ class FullInstrumentViewModel:
         corner_positions = corner_positions * scale
         # Number of points for each face, followed by the indices of the vertices
         faces = [4, 0, 1, 2, 3]
-        return self.createPolyDataMesh(corner_positions, faces)
+        return pv.PolyData(corner_positions, faces)
 
     def drawStructuredBank(self, component_info, component_index: int) -> pv.PolyData:
         bank_corner_indices = component_info.quadrilateralComponentCornerIndices(component_index)
