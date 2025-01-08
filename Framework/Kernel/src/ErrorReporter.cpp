@@ -119,6 +119,7 @@ std::string ErrorReporter::generateErrorMessage() const {
     message["name"] = "";
     message["textBox"] = m_textbox;
     message["stacktrace"] = "";
+    message["cppCompressedTraces"] = "";
   }
 
   return Mantid::JsonHelpers::jsonToString(message);

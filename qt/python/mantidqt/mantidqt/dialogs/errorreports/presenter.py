@@ -4,8 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import base64
 import json
 import os
+import zlib
 from typing import Optional
 from qtpy.QtCore import QSettings
 
@@ -146,11 +148,16 @@ class ErrorReporterPresenter(object):
             str(self._view.input_name_line_edit.text()),
             str(self._view.input_email_line_edit.text()),
             str(self._view.input_free_text.toPlainText()),
-            "".join(self._traceback),
+            "",
+            "",
         )
 
         error_message_json = json.loads(error_reporter.generateErrorMessage())
-        stacktrace_text = error_message_json["stacktrace"]
+        if self._cpp_traces:
+            stacktrace_text = zlib.decompress(base64.standard_b64decode(self._cpp_traces)).decode("utf-8")
+        else:
+            stacktrace_text = "".join(self._traceback)
         del error_message_json["stacktrace"]  # remove this entry so it doesn't appear twice.
+        del error_message_json["cppCompressedTraces"]
         user_information = "".join("{}: {}\n".format(key, error_message_json[key]) for key in error_message_json)
         self._view.display_more_details(user_information, stacktrace_text)
