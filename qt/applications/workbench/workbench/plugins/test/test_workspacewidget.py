@@ -37,6 +37,8 @@ MATRIXWORKSPACE_DISPLAY = "mantidqt.widgets.workspacedisplay.matrix.presenter.Ma
 MATRIXWORKSPACE_DISPLAY_TYPE = "StatusBarView"
 SAMPLE_MATERIAL_DIALOG_TYPE = "SampleMaterialDialogView"
 SAMPLE_MATERIAL_DIALOG = "mantidqt.widgets.samplematerialdialog.samplematerial_view." + SAMPLE_MATERIAL_DIALOG_TYPE
+INSTRUMENT_VIEW_WINDOW_TYPE = "FullInstrumentViewWindow"
+INSTRUMENT_VIEW_DIALOG = "instrumentview.FullInstrumentViewWindow." + INSTRUMENT_VIEW_WINDOW_TYPE
 
 
 @start_qapplication
@@ -117,7 +119,6 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
 
     @mock.patch("workbench.plugins.workspacewidget.plot", autospec=True)
     def test_plot_with_plot_bin(self, mock_plot):
-        self.ws_widget._ads.add(self.ws_names[0], self.w_spaces[0])
         self.ws_widget._do_plot_bin([self.ws_names[0]], False, False)
         mock_plot.assert_called_once_with(mock.ANY, errors=False, overplot=False, wksp_indices=[0], plot_kwargs={"axis": MantidAxType.BIN})
 
@@ -200,11 +201,39 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         self.ws_widget._show_sample_shape(self.ws_names)
         mock_plot_sample_container_and_components.assert_not_called()
 
+    @mock.patch(INSTRUMENT_VIEW_DIALOG + ".show")
+    def test_new_instrument_view_opens_with_single_workspace_name(self, mock_show):
+        """
+        New Instrument View should work with a single workspace selected
+        """
+        single_ws_list = [self.ws_names[0]]
+        self.ws_widget._do_show_new_instrument_view(single_ws_list, off_screen=True)
+        mock_show.assert_called_once()
+
+    @mock.patch(INSTRUMENT_VIEW_DIALOG + ".show")
+    def test_new_instrument_view_opens_with_multiple_workspace_names(self, mock_show):
+        """
+        New Instrument View should work with multiple workspaces selected
+        """
+        workspaces = [self.ws_names[0], self.ws_names[0]]
+        self.ws_widget._do_show_new_instrument_view(workspaces, off_screen=True)
+        self.assertEqual(mock_show.call_count, len(workspaces))
+
     def test_empty_workspaces(self):
-        self.ws_widget._ads.clear()
+        def mock_getEmptyObjectNames():
+            return []
+
+        def mock_getSingleObjectNames():
+            return ["ws"]
+
+        original_ads = self.ws_widget._ads
+        mock_ads = mock.MagicMock()
+        mock_ads.getObjectNames = mock_getEmptyObjectNames
+        self.ws_widget._ads = mock_ads
         self.assertEqual(self.ws_widget.empty_of_workspaces(), True)
-        CreateSampleWorkspace(OutputWorkspace="ws")
+        mock_ads.getObjectNames = mock_getSingleObjectNames
         self.assertEqual(self.ws_widget.empty_of_workspaces(), False)
+        self.ws_widget._ads = original_ads
 
 
 if __name__ == "__main__":
