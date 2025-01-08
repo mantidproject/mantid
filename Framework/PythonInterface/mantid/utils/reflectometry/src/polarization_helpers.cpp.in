@@ -1,0 +1,20 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+
+@AUTO_GENERATE_WARNING@
+/********** Source = polarization_helpers.cpp.in **********************************************************/
+
+#include <boost/python/def.hpp>
+#include <boost/python/module.hpp>
+
+// Forward declare
+@EXPORT_DECLARE@
+
+BOOST_PYTHON_MODULE(_polarization_helpers)
+{
+@EXPORT_FUNCTIONS@
+}

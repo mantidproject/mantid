@@ -1085,6 +1085,7 @@ void ReflectometryReductionOneAuto3::applyPolarizationCorrection(const std::stri
   polAlg->setProperty("Efficiencies", efficiencies);
   polAlg->setProperty("CorrectionMethod", correctionMethod);
   polAlg->setProperty(CorrectionMethod::OPTION_NAME.at(correctionMethod), correctionOption);
+  polAlg->setProperty("AddSpinStateToLog", true);
 
   if (correctionMethod == "Fredrikze") {
     polAlg->setProperty("InputWorkspaceGroup", outputIvsLam);
