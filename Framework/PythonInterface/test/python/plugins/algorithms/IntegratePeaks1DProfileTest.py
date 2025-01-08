@@ -166,9 +166,7 @@ class IntegratePeaks1DProfileTest(unittest.TestCase):
     def test_exec_NPixMin_respected(self):
         kwargs = self.profile_kwargs.copy()
         kwargs["NPixMin"] = 3  # only 2 pixels in simulated data
-        out = IntegratePeaks1DProfile(
-            InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_10", **kwargs
-        )
+        out = IntegratePeaks1DProfile(InputWorkspace=self.ws, PeaksWorkspace=self.peaks, OutputWorkspace="peaks_int_10", **kwargs)
         self.assertAlmostEqual(out.column("Intens/SigInt")[0], 0.0, delta=1e-2)
 
 
