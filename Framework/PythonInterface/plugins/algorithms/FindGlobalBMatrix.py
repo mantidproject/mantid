@@ -114,13 +114,16 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         success = ier in [1, 2, 3, 4] and cov is not None  # cov is None when matrix is singular
         if success:
             # calculate errors
-            dof = sum(
-                [self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=False)[0] for ws in ws_list]
-            ) - len(alatt0)
+            n_peaks = [self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=False)[0] for ws in ws_list]
+            dof = sum(n_peaks) - len(alatt0)
             err = np.sqrt(abs(np.diag(cov)) * (info["fvec"] ** 2).sum() / dof)
-            for wsname in ws_list:
+            for iws, wsname in enumerate(ws_list):
                 ws = AnalysisDataService.retrieve(wsname)
                 ws.sample().getOrientedLattice().setError(*err)
+                if n_peaks[iws] < _MIN_NUM_INDEXED_PEAKS:
+                    logger.warning(
+                        f"Workspace: {wsname}, has only {n_peaks[iws]} indexed peaks, " f"fewer than the desired {_MIN_NUM_INDEXED_PEAKS}"
+                    )
             logger.notice(
                 f"Lattice parameters successfully refined for workspaces: {ws_list}\n"
                 f"Lattice Parameters: {np.array2string(alatt, precision=6)}\n"
