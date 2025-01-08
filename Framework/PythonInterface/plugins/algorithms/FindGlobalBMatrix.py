@@ -64,14 +64,23 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         issues = dict()
         ws_list = self.getProperty("PeakWorkspaces").value
         n_valid_ws = 0
+        ws_n_peaks = []
         for wsname in ws_list:
             ws = AnalysisDataService.retrieve(wsname)
-            if isinstance(ws, IPeaksWorkspace) and ws.getNumberPeaks() >= _MIN_NUM_PEAKS:
+            has_UB = int(ws.sample().hasOrientedLattice())  # 0 for no UB, 1 for has UB
+            n_peaks = ws.getNumberPeaks()
+            ws_n_peaks.append(n_peaks)
+            # require PeakWorkspaces with different req for those with/without UBs
+            # with: to have the more relaxed, n_peaks is at least _MIN_NUM_INDEXED_PEAKS
+            # without UBs: must have at least _MIN_NUM_PEAKS
+            if isinstance(ws, IPeaksWorkspace) and n_peaks >= (_MIN_NUM_PEAKS, _MIN_NUM_INDEXED_PEAKS)[has_UB]:
                 n_valid_ws += 1
         if n_valid_ws < 2 or n_valid_ws < len(ws_list):
             issues["PeakWorkspaces"] = (
-                f"Accept only peaks workspace with more than {_MIN_NUM_PEAKS} peaks - "
-                "there must be at least two peak tables provided in total."
+                f"Accept only PeaksWorkspaces with either: attached UBs and more than {_MIN_NUM_INDEXED_PEAKS} peaks; "
+                f"or no attached UBs and more than {_MIN_NUM_PEAKS} peaks - "
+                f"there must be at least two valid peak tables provided in total. "
+                f"Currently provided: {n_valid_ws}/{len(ws_list)} valid workspaces, with {ws_n_peaks} total peaks"
             )
         return issues
 
