@@ -21,10 +21,11 @@ class FullInstrumentViewPresenter:
     _PROJECTION_OPTIONS = [_SPHERICAL_X, _SPHERICAL_Y, _SPHERICAL_Z, _CYLINDRICAL_X, _CYLINDRICAL_Y, _CYLINDRICAL_Z, _SIDE_BY_SIDE]
 
     def __init__(self, view, workspace):
+        pv.global_theme.color_cycler = "default"
+        pv.global_theme.allow_empty_mesh = True
+
         self._view = view
         self._model = FullInstrumentViewModel(workspace, draw_detector_geometry=False)
-
-        pv.global_theme.color_cycler = "default"
 
         # Plot orange sphere at the origin
         origin = pv.Sphere(radius=0.01, center=[0, 0, 0])
@@ -46,10 +47,11 @@ class FullInstrumentViewPresenter:
         self._bin_limits = [self._model.bin_limits()[0], self._model.bin_limits()[1]]
         self._view.set_tof_range_limits(self._bin_limits)
 
-        monitor_point_cloud = self.createPolyDataMesh(self._model.monitor_positions())
-        monitor_point_cloud["colours"] = self.generateSingleColour(self._model.monitor_positions(), 1, 0, 0, 1)
+        if len(self._model.monitor_positions()) > 0:
+            monitor_point_cloud = self.createPolyDataMesh(self._model.monitor_positions())
+            monitor_point_cloud["colours"] = self.generateSingleColour(self._model.monitor_positions(), 1, 0, 0, 1)
+            self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
 
-        self._view.add_rgba_mesh(monitor_point_cloud, scalars="colours")
         self.projection_option_selected(0)
 
     def projection_combo_options(self) -> list[str]:
