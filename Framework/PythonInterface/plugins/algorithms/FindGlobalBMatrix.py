@@ -99,13 +99,9 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
             return self.calcResiduals(x, ws_list)
 
         alatt0 = [a, b, c, alpha, beta, gamma]
-        try:
-            alatt, cov, info, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
-            # eval the fobj at optimal solution to set UB (leastsq iteration stops at a next sub-optimal solution)
-            fobj(alatt)
-        except ValueError:
-            logger.error("CalculateUMatrix failed - check initial lattice parameters and tolerance provided.")
-            return
+        alatt, cov, info, msg, ier = leastsq(fobj, x0=alatt0, full_output=True)
+        # eval the fobj at optimal solution to set UB (leastsq iteration stops at a next sub-optimal solution)
+        fobj(alatt)
         success = ier in [1, 2, 3, 4] and cov is not None  # cov is None when matrix is singular
         if success:
             # calculate errors
@@ -127,10 +123,6 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         prog_reporter.report(3, "Done")
 
     def find_initial_indexing(self, a, b, c, alpha, beta, gamma, ws_list):
-        import pydevd_pycharm
-
-        pydevd_pycharm.settrace(stdoutToServer=True, stderrToServer=True)
-
         # check if a UB exists on any run and if so whether it indexes a sufficient number of peaks
         foundUB = False
         ws_with_UB = [
@@ -246,7 +238,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         :param ws_list: list of peak workspaces
         :return: sqrt of average square residuals (required by scipy.leastsq optimiser - default settings behave better)
         """
-        residsq = np.full(sum([AnalysisDataService.retrieve(wsname).getNumberPeaks() for wsname in ws_list]), np.nan)
+        residsq = np.zeros(sum([AnalysisDataService.retrieve(wsname).getNumberPeaks() for wsname in ws_list]))
         ipk = 0  # normalise by n peaks indexed so no penalty in indexing more peaks
         for wsname in ws_list:
             # index peaks with CommonUBForAll=False (optimises a temp. UB when indexing - helps for bad guesses)
@@ -265,8 +257,9 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                     )
                 except ValueError:
                     logger.error(f"Cannot calculate U Matrix for {wsname} - this workspace should be removed.")
+                    return None
                 # don't index with optimisation after this point and don't round HKL (to calc resids)
-                self.exec_child_alg("IndexPeaks", PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=False)
+                self.exec_child_alg("IndexPeaks", PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=True)
                 ws = AnalysisDataService.retrieve(wsname)
                 UB = 2 * np.pi * ws.sample().getOrientedLattice().getUB()
                 for ii in range(ws.getNumberPeaks()):
