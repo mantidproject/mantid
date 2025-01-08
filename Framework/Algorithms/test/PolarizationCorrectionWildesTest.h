@@ -32,117 +32,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
 
-namespace {
-
-MatrixWorkspace_sptr createWorkspace(size_t nHist = 2, std::optional<BinEdges> edges = std::nullopt,
-                                     std::optional<Counts> counts = std::nullopt) {
-  if (!edges) {
-    edges = BinEdges{0.3, 0.6, 0.9, 1.2};
-  }
-
-  const auto yVal = 2.3;
-  if (!counts) {
-    counts = Counts{yVal, 4.2 * (yVal), yVal};
-  }
-
-  return create<Workspace2D>(nHist, Histogram(*edges, *counts));
-}
-
-MatrixWorkspace_sptr createWorkspace(size_t nHist, const Counts &counts) {
-  return createWorkspace(nHist, std::nullopt, counts);
-}
-
-MatrixWorkspace_sptr createWorkspace(const Counts &counts) { return createWorkspace(2, std::nullopt, counts); }
-
-std::vector<MatrixWorkspace_sptr> cloneWorkspaces(const MatrixWorkspace_sptr &sourceWorkspace, const size_t numClones) {
-  std::vector<MatrixWorkspace_sptr> clonedWorkspaces;
-
-  clonedWorkspaces.push_back(sourceWorkspace);
-  for (size_t i = 1; i < numClones; ++i) {
-    clonedWorkspaces.push_back(sourceWorkspace->clone());
-  }
-
-  return clonedWorkspaces;
-}
-
-std::vector<std::string> generateWorkspaceNames(const size_t numClones) {
-  std::vector<std::string> wsNames;
-
-  for (size_t i = 0; i < numClones; ++i) {
-    wsNames.push_back("ws" + std::to_string(i));
-  }
-
-  return wsNames;
-}
-void addWorkspacesToService(const std::vector<std::string> &wsNames, const std::vector<MatrixWorkspace_sptr> &wsList,
-                            const size_t numWorkspaces) {
-  for (size_t i = 0; i < numWorkspaces; ++i) {
-    AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
-  }
-}
-
-void addWorkspaceToService(const std::string &wsName, const MatrixWorkspace_sptr &ws) {
-  AnalysisDataService::Instance().addOrReplace(wsName, ws);
-}
-
-void prepareAndRegisterWorkspaces(std::vector<std::string> &wsNames,
-                                  const std::vector<Mantid::API::MatrixWorkspace_sptr> &wsList, const size_t nHist) {
-
-  for (size_t i = 0; i != wsNames.size(); ++i) {
-    for (size_t j = 0; j != nHist; ++j) {
-      wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
-      wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
-    }
-    addWorkspacesToService(wsNames, wsList, wsNames.size());
-  }
-}
-
-std::vector<MatrixWorkspace_sptr> createWorkspaceList(const std::optional<Counts> counts, const size_t numClones) {
-  auto baseWorkspace = counts.has_value() ? createWorkspace(*counts) : createWorkspace();
-
-  return cloneWorkspaces(baseWorkspace, numClones);
-}
-
-std::vector<MatrixWorkspace_sptr> createWorkspaceList(const size_t numClones) {
-  return createWorkspaceList(std::nullopt, numClones);
-}
-
-void setupWorkspacesForIdealCasesTwoInput(const std::vector<std::string> &wsNames,
-                                          const std::vector<Mantid::API::MatrixWorkspace_sptr> &wsList,
-                                          const size_t nHist) {
-
-  for (size_t i = 0; i != nHist; ++i) {
-    wsList[1]->mutableY(i) *= 2.;
-    wsList[1]->mutableE(i) *= 2.;
-  }
-
-  AnalysisDataService::Instance().addOrReplace(wsNames.front(), wsList.front());
-  AnalysisDataService::Instance().addOrReplace(wsNames.back(), wsList.back());
-}
-
-void validateNumberOfEntries(const WorkspaceGroup_sptr workspaceGroup, const size_t expectedEntries) {
-  TS_ASSERT_EQUALS(workspaceGroup->getNumberOfEntries(), expectedEntries);
-}
-
-void validateSpinStateLogs(const WorkspaceGroup_sptr &outputWS, const std::vector<std::string> &expectedLogValues) {
-  const auto logName = SpinStatesORSO::LOG_NAME;
-  for (size_t i = 0; i < expectedLogValues.size(); ++i) {
-    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(i));
-    TS_ASSERT(ws);
-    const auto &run = ws->run();
-    TS_ASSERT(run.hasProperty(logName));
-    TS_ASSERT_EQUALS(run.getPropertyValueAsType<std::string>(logName), expectedLogValues[i]);
-  }
-}
-
-void validateNoSpinStateLogs(const WorkspaceGroup_sptr &outputWS, size_t numClones) {
-  for (size_t i = 0; i < numClones; ++i) {
-    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(i));
-    TS_ASSERT(ws);
-    TS_ASSERT(!ws->run().hasProperty(SpinStatesORSO::LOG_NAME));
-  }
-}
-} // namespace
+// namespace
 class PolarizationCorrectionWildesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -1522,6 +1412,116 @@ private:
       validateSpinStateLogs(outputWS, expectedLogValues);
     } else {
       validateNoSpinStateLogs(outputWS, numClones);
+    }
+  }
+
+  MatrixWorkspace_sptr createWorkspace(size_t nHist = 2, std::optional<BinEdges> edges = std::nullopt,
+                                       std::optional<Counts> counts = std::nullopt) {
+    if (!edges) {
+      edges = BinEdges{0.3, 0.6, 0.9, 1.2};
+    }
+
+    const auto yVal = 2.3;
+    if (!counts) {
+      counts = Counts{yVal, 4.2 * (yVal), yVal};
+    }
+
+    return create<Workspace2D>(nHist, Histogram(*edges, *counts));
+  }
+
+  MatrixWorkspace_sptr createWorkspace(size_t nHist, const Counts &counts) {
+    return createWorkspace(nHist, std::nullopt, counts);
+  }
+
+  MatrixWorkspace_sptr createWorkspace(const Counts &counts) { return createWorkspace(2, std::nullopt, counts); }
+
+  std::vector<MatrixWorkspace_sptr> cloneWorkspaces(const MatrixWorkspace_sptr &sourceWorkspace,
+                                                    const size_t numClones) {
+    std::vector<MatrixWorkspace_sptr> clonedWorkspaces;
+
+    clonedWorkspaces.push_back(sourceWorkspace);
+    for (size_t i = 1; i < numClones; ++i) {
+      clonedWorkspaces.push_back(sourceWorkspace->clone());
+    }
+
+    return clonedWorkspaces;
+  }
+
+  std::vector<std::string> generateWorkspaceNames(const size_t numClones) {
+    std::vector<std::string> wsNames;
+
+    for (size_t i = 0; i < numClones; ++i) {
+      wsNames.push_back("ws" + std::to_string(i));
+    }
+
+    return wsNames;
+  }
+  void addWorkspacesToService(const std::vector<std::string> &wsNames, const std::vector<MatrixWorkspace_sptr> &wsList,
+                              const size_t numWorkspaces) {
+    for (size_t i = 0; i < numWorkspaces; ++i) {
+      AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
+    }
+  }
+
+  void addWorkspaceToService(const std::string &wsName, const MatrixWorkspace_sptr &ws) {
+    AnalysisDataService::Instance().addOrReplace(wsName, ws);
+  }
+
+  void prepareAndRegisterWorkspaces(std::vector<std::string> &wsNames,
+                                    const std::vector<Mantid::API::MatrixWorkspace_sptr> &wsList, const size_t nHist) {
+
+    for (size_t i = 0; i != wsNames.size(); ++i) {
+      for (size_t j = 0; j != nHist; ++j) {
+        wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
+        wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
+      }
+      addWorkspacesToService(wsNames, wsList, wsNames.size());
+    }
+  }
+
+  std::vector<MatrixWorkspace_sptr> createWorkspaceList(const std::optional<Counts> counts, const size_t numClones) {
+    auto baseWorkspace = counts.has_value() ? createWorkspace(*counts) : createWorkspace();
+
+    return cloneWorkspaces(baseWorkspace, numClones);
+  }
+
+  std::vector<MatrixWorkspace_sptr> createWorkspaceList(const size_t numClones) {
+    return createWorkspaceList(std::nullopt, numClones);
+  }
+
+  void setupWorkspacesForIdealCasesTwoInput(const std::vector<std::string> &wsNames,
+                                            const std::vector<Mantid::API::MatrixWorkspace_sptr> &wsList,
+                                            const size_t nHist) {
+
+    for (size_t i = 0; i != nHist; ++i) {
+      wsList[1]->mutableY(i) *= 2.;
+      wsList[1]->mutableE(i) *= 2.;
+    }
+
+    AnalysisDataService::Instance().addOrReplace(wsNames.front(), wsList.front());
+    AnalysisDataService::Instance().addOrReplace(wsNames.back(), wsList.back());
+  }
+
+  void validateNumberOfEntries(const WorkspaceGroup_sptr workspaceGroup, const size_t expectedEntries) {
+    TS_ASSERT_EQUALS(workspaceGroup->getNumberOfEntries(), expectedEntries);
+  }
+
+  void validateSpinStateLogs(const WorkspaceGroup_sptr &outputWS, const std::vector<std::string> &expectedLogValues) {
+    const auto logName = SpinStatesORSO::LOG_NAME;
+    for (size_t i = 0; i < expectedLogValues.size(); ++i) {
+      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(i));
+      TS_ASSERT(ws);
+      const auto &run = ws->run();
+      TS_ASSERT(run.hasProperty(logName));
+      TS_ASSERT_EQUALS(run.getPropertyValueAsType<std::string>(logName), expectedLogValues[i]);
+    }
+  }
+
+  void validateNoSpinStateLogs(const WorkspaceGroup_sptr &outputWS, size_t numClones) {
+    for (size_t i = 0; i < numClones; ++i) {
+      MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(i));
+      TS_ASSERT(ws);
+      TS_ASSERT(!ws->run().hasProperty(SpinStatesORSO::LOG_NAME));
     }
   }
 };
