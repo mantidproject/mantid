@@ -265,22 +265,25 @@ void CrossCorrelate::exec() {
       const auto dataIndexMagnitude = static_cast<int>(abs(dataIndex));
       const auto dataIndexPositive = bool(dataIndex >= 0);
       double val = 0, err2 = 0;
-      double x, y, xE, yE;
       // loop over bin number
-      for (int binIndex = numReferenceY - 1 - dataIndexMagnitude; binIndex >= 0; --binIndex) {
-        if (dataIndexPositive) {
-          x = referenceYVector[binIndex];
-          y = tempY[binIndex + dataIndexMagnitude];
-          xE = referenceEVector[binIndex];
-          yE = tempE[binIndex + dataIndexMagnitude];
-        } else {
-          x = tempY[binIndex];
-          y = referenceYVector[binIndex + dataIndexMagnitude];
-          xE = tempE[binIndex];
-          yE = referenceEVector[binIndex + dataIndexMagnitude];
+      if (dataIndexPositive) {
+        for (int binIndex = numReferenceY - 1 - dataIndexMagnitude; binIndex >= 0; --binIndex) {
+          const auto x = referenceYVector[binIndex];
+          const auto y = tempY[binIndex + dataIndexMagnitude];
+          const auto xE = referenceEVector[binIndex];
+          const auto yE = tempE[binIndex + dataIndexMagnitude];
+          val += (x * y);
+          err2 += x * x * yE + y * y * xE;
         }
-        val += (x * y);
-        err2 += x * x * yE + y * y * xE;
+      } else {
+        for (int binIndex = numReferenceY - 1 - dataIndexMagnitude; binIndex >= 0; --binIndex) {
+          const auto x = tempY[binIndex];
+          const auto y = referenceYVector[binIndex + dataIndexMagnitude];
+          const auto xE = tempE[binIndex];
+          const auto yE = referenceEVector[binIndex + dataIndexMagnitude];
+          val += (x * y);
+          err2 += x * x * yE + y * y * xE;
+        }
       }
       const size_t dataIndex_corrected = static_cast<size_t>(dataIndex + numReferenceY - shiftCorrection - 2);
       outY[dataIndex_corrected] = (val * normalisation);
