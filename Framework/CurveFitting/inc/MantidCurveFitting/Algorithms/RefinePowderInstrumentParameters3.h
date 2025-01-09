@@ -6,8 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidKernel/System.h"
-
 #include "MantidAPI/Algorithm.h"
 
 #include "MantidDataObjects/TableWorkspace.h"
@@ -15,6 +13,7 @@
 
 #include "MantidCurveFitting/Algorithms/LeBailFit.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 
 namespace Mantid {

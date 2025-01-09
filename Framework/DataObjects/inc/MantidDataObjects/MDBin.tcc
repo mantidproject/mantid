@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDBin.h"
-#include "MantidKernel/System.h"
+#include <cstddef>
 
 namespace Mantid {
 namespace DataObjects {

@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument/Component.h"
-#include "MantidKernel/System.h"
 #include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/SAX/Attributes.h>
 #include <Poco/SAX/ContentHandler.h>

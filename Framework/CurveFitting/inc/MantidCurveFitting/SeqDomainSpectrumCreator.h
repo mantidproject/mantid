@@ -11,7 +11,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

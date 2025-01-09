@@ -11,7 +11,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace HistogramData {

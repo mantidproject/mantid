@@ -12,8 +12,6 @@
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 
 #include <cmath>
 #include <gsl/gsl_sf_erf.h>

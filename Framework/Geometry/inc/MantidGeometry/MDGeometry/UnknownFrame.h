@@ -9,7 +9,6 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
 #include "MantidKernel/MDUnit.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/UnitLabel.h"
 #include <memory>
 

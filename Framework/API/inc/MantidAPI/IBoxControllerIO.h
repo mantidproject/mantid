@@ -7,7 +7,6 @@
 #pragma once
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DiskBuffer.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {

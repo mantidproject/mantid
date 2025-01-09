@@ -9,13 +9,13 @@
 #include <utility>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
 #include "MantidKernel/SingletonHolder.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {

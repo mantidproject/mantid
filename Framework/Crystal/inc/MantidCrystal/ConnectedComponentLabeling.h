@@ -9,7 +9,6 @@
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidCrystal/DisjointElement.h"
 #include "MantidCrystal/DllConfig.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <boost/tuple/tuple.hpp>
 #include <map>

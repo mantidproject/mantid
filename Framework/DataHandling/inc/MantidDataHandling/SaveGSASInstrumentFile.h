@@ -10,7 +10,6 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {

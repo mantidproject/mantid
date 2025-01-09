@@ -8,7 +8,6 @@
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

@@ -9,7 +9,6 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {

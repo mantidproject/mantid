@@ -10,7 +10,6 @@
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
