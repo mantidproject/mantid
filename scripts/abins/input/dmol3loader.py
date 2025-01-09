@@ -37,13 +37,6 @@ class DMOL3Loader(AbInitioLoader):
     Class for loading DMOL3 ab initio vibrational data.
     """
 
-    def __init__(self, input_ab_initio_filename):
-        """
-        :param input_ab_initio_filename: name of file with vibrational data (foo.outmol)
-        """
-        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
-        self._norm = 0
-
     @property
     def _ab_initio_program(self) -> str:
         return "DMOL3"
