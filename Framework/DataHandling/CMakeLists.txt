@@ -142,6 +142,7 @@ set(SRC_FILES
     src/ModifyDetectorDotDatFile.cpp
     src/MoveInstrumentComponent.cpp
     src/MultiPeriodLoadMuonStrategy.cpp
+    src/NXcanSASHelper.cpp
     src/NexusTester.cpp
     src/ORNLDataArchive.cpp
     src/PDLoadCharacterizations.cpp
@@ -360,6 +361,7 @@ set(INC_FILES
     inc/MantidDataHandling/MoveInstrumentComponent.h
     inc/MantidDataHandling/MultiPeriodLoadMuonStrategy.h
     inc/MantidDataHandling/NXcanSASDefinitions.h
+    inc/MantidDataHandling/NXcanSASHelper.h
     inc/MantidDataHandling/NexusTester.h
     inc/MantidDataHandling/ORNLDataArchive.h
     inc/MantidDataHandling/PDLoadCharacterizations.h
