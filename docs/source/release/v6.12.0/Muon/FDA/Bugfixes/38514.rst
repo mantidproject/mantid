@@ -1,0 +1,1 @@
+- Remove off-putting error prompt that appears when canceling a MaxEnt calculation in the :ref:`Muon FDA interface <Frequency_Domain_Analysis-ref>`
