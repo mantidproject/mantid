@@ -12,7 +12,6 @@
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/EmptyValues.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 
 #include <iterator>

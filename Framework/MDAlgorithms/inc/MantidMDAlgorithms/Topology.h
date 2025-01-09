@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 
-#include "MantidKernel/System.h"
+#include "MantidMDAlgorithms/DllConfig.h"
 #include <vector>
 
 namespace Mantid {

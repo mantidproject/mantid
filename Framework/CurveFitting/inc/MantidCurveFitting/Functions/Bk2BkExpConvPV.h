@@ -9,7 +9,7 @@
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidKernel/System.h"
+
 #include <complex>
 
 namespace Mantid {

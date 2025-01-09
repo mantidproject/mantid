@@ -8,10 +8,10 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IEventWorkspace_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/System.h"
 #include <vector>
 
 namespace Mantid {

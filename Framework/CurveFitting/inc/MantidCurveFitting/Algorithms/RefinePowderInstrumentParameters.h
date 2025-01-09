@@ -13,6 +13,7 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/BackToBackExponential.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidCurveFitting/Functions/Polynomial.h"
@@ -21,7 +22,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidHistogramData/HistogramY.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

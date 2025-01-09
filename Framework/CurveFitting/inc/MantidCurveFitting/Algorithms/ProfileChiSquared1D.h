@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/EigenMatrix.h"
 #include "MantidCurveFitting/Functions/ChebfunBase.h"
 #include "MantidCurveFitting/IFittingAlgorithm.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

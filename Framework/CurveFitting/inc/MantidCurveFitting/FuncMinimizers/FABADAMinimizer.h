@@ -8,9 +8,9 @@
 
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/EigenMatrix.h"
 #include "MantidCurveFitting/EigenVector.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

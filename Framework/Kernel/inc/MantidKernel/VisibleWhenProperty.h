@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/DllConfig.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/System.h"
 
 #include <stdexcept>
 
