@@ -96,6 +96,7 @@ class FigureInteraction(object):
         self._cids = []
         self._cids.append(canvas.mpl_connect("button_press_event", self.on_mouse_button_press))
         self._cids.append(canvas.mpl_connect("button_release_event", self.on_mouse_button_release))
+        self._cids.append(canvas.mpl_connect("button_release_event", self.on_button_release_legend_bounds_check))
         self._cids.append(canvas.mpl_connect("draw_event", self.draw_callback))
         self._cids.append(canvas.mpl_connect("motion_notify_event", self.motion_event))
         self._cids.append(canvas.mpl_connect("resize_event", self.mpl_redraw_annotations))
@@ -253,6 +254,32 @@ class FigureInteraction(object):
             self._open_double_click_dialog(self.double_click_event, self.marker_selected_in_double_click_event)
             self.marker_selected_in_double_click_event = None
             self.double_click_event = None
+
+    @staticmethod
+    def on_button_release_legend_bounds_check(event):
+        fig = event.canvas.figure
+
+        for ax in fig.get_axes():
+            legend1 = ax.get_legend()
+            if legend1 is None:
+                continue
+
+            # Figure Size (in pixels)
+            fig_width, fig_height = fig.get_size_inches()
+            dpi = fig.get_dpi()
+            fig_width_px, fig_height_px = fig_width * dpi, fig_height * dpi
+
+            # Legend bounding box (in pixels)
+            bbox_legend = legend1.get_window_extent()
+            x0, y0, x1, y1 = bbox_legend.x0, bbox_legend.y0, bbox_legend.x1, bbox_legend.y1
+
+            outside_window = x1 < 0 or x0 > fig_width_px or y1 < 0 or y0 > fig_height_px
+            # Snap back legend
+            if outside_window:
+                legend1 = ax.legend(loc="upper left")
+                legend_set_draggable(legend1, True)
+                legend1.set_in_layout(False)
+                fig.canvas.draw()
 
     def on_leave(self, event):
         """
