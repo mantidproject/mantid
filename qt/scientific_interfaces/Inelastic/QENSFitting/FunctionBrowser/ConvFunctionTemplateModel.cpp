@@ -375,7 +375,7 @@ std::string ConvFunctionTemplateModel::buildTeixeiraFunctionString() const {
 }
 
 std::string ConvFunctionTemplateModel::buildTeixeiraIqtFTFunctionString() const {
-  return "name=TeixeiraWaterIqtFT, Amp=1, Gamma=1.2, Tau1=1.25, "
+  return "name=TeixeiraWaterIqtFT, Amp=1, Tau1=1.25, Gamma=1.2, "
          "constraints=(Amp>0, Gamma>0, Tau1>0)";
 }
 
