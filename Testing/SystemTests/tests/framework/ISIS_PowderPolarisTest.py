@@ -129,26 +129,7 @@ class FocusTestNoAbsorptionWithRelativeNormalisation(systemtesting.MantidSystemT
         self.focus_results = run_focus_no_absorption(mode="PDF")
 
     def validate(self):
-        # check output files as expected
-        def generate_error_message(expected_file, output_dir):
-            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
-
-        def assert_output_file_exists(directory, filename):
-            self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
-
-        user_output = os.path.join(output_dir, "17_1", "Test")
-        assert_output_file_exists(user_output, "POLARIS98533.nxs")
-        assert_output_file_exists(user_output, "POLARIS98533.gsas")
-        output_dat_dir = os.path.join(user_output, "dat_files")
-        for bankno in range(1, 6):
-            assert_output_file_exists(output_dat_dir, "POL98533-b_{}-TOF.dat".format(bankno))
-            assert_output_file_exists(output_dat_dir, "POL98533-b_{}-d.dat".format(bankno))
-
-        for ws in self.focus_results:
-            self.assertEqual(ws.sample().getMaterial().name(), "Si Si")
-        self.tolerance_is_rel_err = True
-        self.tolerance = 1e-6
-        return self.focus_results.name(), "ISIS_Powder-POLARIS98533_FocusSempty.nxs"
+        return validate_normalisation_focus_tests(self, "98533")
 
     def cleanup(self):
         try:
@@ -172,26 +153,7 @@ class FocusTestNoAbsorptionWithAbsoluteNormalisation(systemtesting.MantidSystemT
         self.focus_results = run_focus_no_absorption(mode="PDF_NORM")
 
     def validate(self):
-        # check output files as expected
-        def generate_error_message(expected_file, output_dir):
-            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
-
-        def assert_output_file_exists(directory, filename):
-            self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
-
-        user_output = os.path.join(output_dir, "17_1", "Test")
-        assert_output_file_exists(user_output, "POLARIS98534.nxs")
-        assert_output_file_exists(user_output, "POLARIS98534.gsas")
-        output_dat_dir = os.path.join(user_output, "dat_files")
-        for bankno in range(1, 6):
-            assert_output_file_exists(output_dat_dir, "POL98534-b_{}-TOF.dat".format(bankno))
-            assert_output_file_exists(output_dat_dir, "POL98534-b_{}-d.dat".format(bankno))
-
-        for ws in self.focus_results:
-            self.assertEqual(ws.sample().getMaterial().name(), "Si Si")
-        self.tolerance_is_rel_err = True
-        self.tolerance = 1e-6
-        return self.focus_results.name(), "ISIS_Powder-POLARIS98534_FocusSempty.nxs"
+        return validate_normalisation_focus_tests(self, "98534")
 
     def cleanup(self):
         try:
@@ -746,3 +708,26 @@ def get_bin_number_at_given_r(r_data, r):
     diffs = [abs(i - r) for i in r_centres]
     idx = diffs.index(min(diffs))
     return idx
+
+
+def validate_normalisation_focus_tests(test, ws_num):
+    # check output files as expected
+    def generate_error_message(expected_file, output_dir):
+        return f"Unable to find {expected_file} in {output_dir}.\nContents={os.listdir(output_dir)}"
+
+    def assert_output_file_exists(directory, filename):
+        test.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
+
+    user_output = os.path.join(output_dir, "17_1", "Test")
+    assert_output_file_exists(user_output, f"POLARIS{ws_num}.nxs")
+    assert_output_file_exists(user_output, f"POLARIS{ws_num}.gsas")
+    output_dat_dir = os.path.join(user_output, "dat_files")
+    for bankno in range(1, 6):
+        assert_output_file_exists(output_dat_dir, f"POL{ws_num}-b_{bankno}-TOF.dat")
+        assert_output_file_exists(output_dat_dir, f"POL{ws_num}-b_{bankno}-d.dat")
+
+    for ws in test.focus_results:
+        test.assertEqual(ws.sample().getMaterial().name(), "Si Si")
+    test.tolerance_is_rel_err = True
+    test.tolerance = 1e-6
+    return test.focus_results.name(), f"ISIS_Powder-POLARIS{ws_num}_FocusSempty.nxs"
