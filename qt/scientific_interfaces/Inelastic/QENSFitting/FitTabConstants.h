@@ -24,6 +24,7 @@ static const auto FUNCTION_STRINGS =
                                                   {"StretchedExpFT", "SFT"},
                                                   {"TeixeiraWater", "TxWater"},
                                                   {"TeixeiraWaterIqt", "TxWater"},
+                                                  {"TeixeiraWaterIqtFT", "TxWaterFT"},
                                                   {"TeixeiraWaterSQE", "TxWater"},
                                                   {"FickDiffusionSQE", "FickDiff"},
                                                   {"ChudleyElliotSQE", "ChudElliot"},
