@@ -21,17 +21,15 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
+
 #include <Poco/Path.h>
 #include <cmath>
 #include <limits>
 #include <memory>
-// clang-format off
-#include "MantidNexusCpp/NeXusFile.hpp"
-#include "MantidNexusCpp/NeXusException.hpp"
-// clang-format on
 
 namespace Mantid::Algorithms {
 

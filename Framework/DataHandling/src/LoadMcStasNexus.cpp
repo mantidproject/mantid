@@ -12,10 +12,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Unit.h"
-// clang-format off
-#include "MantidNexusCpp/NeXusFile.hpp"
 #include "MantidNexusCpp/NeXusException.hpp"
-// clang-format on
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 namespace Mantid::DataHandling {
 using namespace Kernel;

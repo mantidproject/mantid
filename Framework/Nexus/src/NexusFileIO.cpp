@@ -119,10 +119,10 @@ void NexusFileIO::openNexusWrite(const std::string &fileName, NexusFileIO::optio
       g_log.error("Unable to open file " + fileName);
       throw Exception::FileError("Unable to open File:", fileName);
     }
+
     auto file = new ::NeXus::File(fileID, true);
-    // clang-format off
-    m_filehandle = std::shared_ptr< ::NeXus::File>(file);
-    // clang-format on
+
+    m_filehandle = std::shared_ptr<::NeXus::File>(file);
   }
 
   //
@@ -993,9 +993,7 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels, i
 bool NexusFileIO::checkAttributeName(const std::string &target) const {
   // see if the given attribute name is in the current level
   // return true if it is.
-  // clang-format off
-  const std::vector< ::NeXus::AttrInfo> infos = m_filehandle->getAttrInfos();
-  // clang-format on
+  const std::vector<::NeXus::AttrInfo> infos = m_filehandle->getAttrInfos();
   return std::any_of(infos.cbegin(), infos.cend(), [&target](const auto &info) { return info.name == target; });
 }
 

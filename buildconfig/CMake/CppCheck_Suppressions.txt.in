@@ -565,8 +565,6 @@ uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/CreateChunking
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/IFittingAlgorithm.cpp:230
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadStl.h:55
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/ThreadSchedulerMutexes.h:150
-variableScope:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadEventNexus.h:392
-useStlAlgorithm:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadEventNexus.h:711
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/EventWorkspaceCollection.cpp:118
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/FindDetectorsPar.h:124
 duplicateConditionalAssign:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/FindDetectorsPar.cpp:484
@@ -625,7 +623,6 @@ variableScope:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:906
 uninitdata:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/isisraw.cpp:518
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonStrategy.cpp:119
-stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRKH.cpp:521
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusMonitors2.cpp:452
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadNexusProcessed2.h:38
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadTBL.cpp:133

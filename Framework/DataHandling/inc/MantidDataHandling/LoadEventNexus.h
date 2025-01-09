@@ -23,18 +23,16 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/NexusHDF5Descriptor.h"
 #include "MantidKernel/OptionalBool.h"
+
 #include "MantidKernel/TimeSeriesProperty.h"
 
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
+
 #include <Poco/Path.h>
+#include <algorithm>
 #include <boost/lexical_cast.hpp>
 #include <boost/scoped_array.hpp>
-
-// clang-format off
-#include "MantidNexusCpp/NeXusFile.hpp"
-#include "MantidNexusCpp/NeXusException.hpp"
-// clang-format on
-
-#include <algorithm>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -389,9 +387,9 @@ void adjustTimeOfFlightISISLegacy(::NeXus::File &file, T localWorkspace, const s
   if (classType == "NXmonitor") {
     std::vector<std::string> bankNames;
     for (string_map_t::const_iterator it = entries.begin(); it != entries.end(); ++it) {
-      std::string entryName(it->first);
-      std::string entry_class(it->second);
+      const std::string entry_class(it->second);
       if (entry_class == classType) {
+        const std::string entryName(it->first);
         bankNames.emplace_back(entryName);
       }
     }
@@ -703,17 +701,15 @@ void LoadEventNexus::loadEntryMetadata(const std::string &nexusfilename, T WS, c
     file.getDataCoerce(duration);
     if (duration.size() == 1) {
       // get the units
-      // clang-format off
-    std::vector< ::NeXus::AttrInfo> infos = file.getAttrInfos();
-    std::string units;
-    for (std::vector< ::NeXus::AttrInfo>::const_iterator it = infos.begin();
-         it != infos.end(); ++it) {
-      if (it->name == "units") {
-        units = file.getStrAttr(*it);
-        break;
+      std::vector<::NeXus::AttrInfo> infos = file.getAttrInfos();
+      std::string units;
+      for (auto it = infos.begin(); it != infos.end(); ++it) {
+        // cppcheck-suppress useStlAlgorithm
+        if (it->name == "units") {
+          units = file.getStrAttr(*it);
+          break;
+        }
       }
-    }
-      // clang-format on
 
       // set the property
       WS->mutableRun().addProperty("duration", duration[0], units, true);
