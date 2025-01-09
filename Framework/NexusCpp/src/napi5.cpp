@@ -1051,7 +1051,7 @@ NXstatus NX5putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen
   pNexusFile5 pFile;
   hid_t attr1, aid1, aid2;
   hid_t type;
-  herr_t iRet;
+  herr_t iRet = 0;
   hid_t vid, attRet;
 
   pFile = NXI5assert(fid);
