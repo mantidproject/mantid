@@ -185,7 +185,7 @@ set(SRC_FILES
     src/SaveNXSPE.cpp
     src/SaveNXTomo.cpp
     src/SaveNXcanSAS.cpp
-    src/SaveNXCanSASBase.cpp
+    src/SaveNXcanSASBase.cpp
     src/SaveNexus.cpp
     src/SaveNexusESS.cpp
     src/SaveNexusGeometry.cpp
