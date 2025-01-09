@@ -692,7 +692,7 @@ class BaseSX(ABC):
             with PdfPages(filename) as pdf:
                 for ipk, pk in enumerate(peaks):
                     peak_shape = pk.getPeakShape()
-                    if peak_shape.shapeName().lower() == "none":
+                    if peak_shape.shapeName().lower() == "none" or peak_shape.shapeName().lower() == "detectorbin":
                         continue
                     ws_cut, radii, bg_inner_radii, bg_outer_radii, box_lengths, imax = BaseSX._bin_MD_around_peak(
                         wsMD, pk, peak_shape, nbins_max, extent, frame_to_peak_centre_attr
