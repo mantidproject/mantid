@@ -299,8 +299,11 @@ void addDetectors(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &wor
  * instrument name and the IDF
  * @param group: the sasEntry
  * @param workspace: the workspace which is being stored
- * @param radiationSource: the selcted radiation source
+ * @param radiationSource: the selected radiation source
  * @param detectorNames: the names of the detectors to store
+ * @param geometry: Geometry type of collimation
+ * @param beamHeight: Height of collimation element in mm
+ * @param beamWidth: Width of collimation element in mm
  */
 void addInstrument(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace,
                    const std::string &radiationSource, const std::string &geometry, double beamHeight, double beamWidth,
@@ -564,8 +567,8 @@ void addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
  *  1    IQx0Qy1  IQx1Qy1   IQx2Qy1  ...  IQxMQy1
  *  2    IQx0Qy2  IQx1Qy2   IQx2Qy2  ...  IQxMQy2
  *  3    IQx0Qy3  IQx1Qy3   IQx2Qy3  ...  IQxMQy3
- *  .
- *  .
+ * \.
+ * \.
  *  N    IQx0QyN  IQx1QyN   IQx2QyN  ...  IQxMQyN
  *  (second dimension)
  *
@@ -578,16 +581,16 @@ void addData1D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspa
  * Qx1 Qx2 ... QxM
  * Qx1 Qx2 ... QxM
  * Qx1 Qx2 ... QxM
- *  .
- *  .
+ * \.
+ * \.
  * Qx1 Qx2 ... QxM
  *
  * In HDF5 the Qy would need to be stored as:
  * Qy1 Qy1 ... Qy1
  * Qy2 Qy2 ... Qy2
  * Qy3 Qy3 ... Qy3
- *  .
- *  .
+ * \.
+ * \.
  * QxN QxN ... QxN
  */
 void addData2D(H5::Group &data, const Mantid::API::MatrixWorkspace_sptr &workspace) {
