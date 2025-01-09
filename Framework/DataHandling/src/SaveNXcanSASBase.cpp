@@ -127,7 +127,7 @@ std::map<std::string, std::string> SaveNXcanSASBase::validateStandardInputs() {
  * @param sasEntry: sas group in which to store metadata
  */
 
-void SaveNXcanSASBase::addStandardMetadata(MatrixWorkspace_sptr &workspace, H5::Group &sasEntry) {
+void SaveNXcanSASBase::addStandardMetadata(const MatrixWorkspace_sptr &workspace, H5::Group &sasEntry) {
   std::string &&radiationSource = getPropertyValue("RadiationSource");
   std::string &&geometry = getProperty("Geometry");
   double &&beamHeight = getProperty("SampleHeight");

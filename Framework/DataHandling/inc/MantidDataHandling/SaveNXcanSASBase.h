@@ -20,7 +20,7 @@ namespace DataHandling {
  */
 class MANTID_DATAHANDLING_DLL SaveNXcanSASBase : public API::Algorithm {
 protected:
-  void addStandardMetadata(Mantid::API::MatrixWorkspace_sptr &workspace, H5::Group &sasEntry);
+  void addStandardMetadata(const Mantid::API::MatrixWorkspace_sptr &workspace, H5::Group &sasEntry);
   void addData(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace);
   H5::Group addSasEntry(H5::H5File &file, const Mantid::API::MatrixWorkspace_sptr &workspace,
                         const std::string &suffix);
