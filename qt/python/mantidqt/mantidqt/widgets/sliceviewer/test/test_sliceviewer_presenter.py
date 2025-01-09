@@ -583,6 +583,16 @@ class SliceViewerTest(unittest.TestCase):
         pres.replace_workspace("test1", "test2")
         pres._close_view_with_message.assert_called_once()
 
+    def test_replace_checking_original_workspace_fail(self):
+        mock_model = mock.MagicMock()
+        mock_view = mock.MagicMock()
+        pres = SliceViewer(mock.Mock(), model=mock_model, view=mock_view)
+        mock_model.check_for_removed_original_workspace = mock.Mock(side_effect=RuntimeError)
+        mock_model.workspace_equals.return_value = True
+        with mock.patch("mantidqt.widgets.sliceviewer.presenters.presenter.SliceViewerModel") as mock_model_class:
+            pres.replace_workspace(mock.NonCallableMock(), mock.NonCallableMock())
+            self.assertEqual(mock_model_class.return_value, pres.model)
+
     def test_replace_workspace_does_nothing_if_workspace_is_unchanged(self):
         mock_model = mock.MagicMock()
         mock_view = mock.MagicMock()
