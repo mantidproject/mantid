@@ -8,15 +8,14 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CrossCorrelate.h"
+#include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/RawCountValidator.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
-#include "MantidHistogramData/Histogram.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -24,7 +23,6 @@
 #include "MantidKernel/VectorHelper.h"
 #include <boost/iterator/counting_iterator.hpp>
 #include <numeric>
-#include <sstream>
 
 namespace {
 struct Variances {
@@ -39,6 +37,7 @@ Variances subtractMean(std::vector<double> &signal, std::vector<double> &error) 
   const auto n = signal.size();
   mean /= static_cast<double>(n);
   errorMeanSquared /= static_cast<double>(n * n);
+
   double variance = 0.0, errorVariance = 0.0;
   auto itY = signal.begin();
   auto itE = error.begin();
@@ -142,10 +141,10 @@ std::map<std::string, std::string> CrossCorrelate::validateInputs() {
  */
 void CrossCorrelate::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  double maxDSpaceShift = getProperty("MaxDSpaceShift");
-  int referenceSpectra = getProperty("ReferenceSpectra");
-  double xmin = getProperty("XMin");
-  double xmax = getProperty("XMax");
+  const double maxDSpaceShift = getProperty("MaxDSpaceShift");
+  const int referenceSpectra = getProperty("ReferenceSpectra");
+  const double xmin = getProperty("XMin");
+  const double xmax = getProperty("XMax");
 
   const auto index_ref = static_cast<size_t>(referenceSpectra);
 
@@ -154,11 +153,11 @@ void CrossCorrelate::exec() {
   if (indexes.empty()) {
     const int wsIndexMin = getProperty("WorkspaceIndexMin");
     const int wsIndexMax = getProperty("WorkspaceIndexMax");
-    indexes.reserve(wsIndexMax - wsIndexMin + 1);
+    indexes.reserve(static_cast<size_t>(wsIndexMax - wsIndexMin + 1)); // validated in validateInputs
     std::copy(boost::make_counting_iterator(wsIndexMin), boost::make_counting_iterator(wsIndexMax + 1),
               std::back_inserter(indexes));
   }
-  int numSpectra = static_cast<int>(indexes.size());
+  const int numSpectra = static_cast<int>(indexes.size());
 
   // Output message information
   g_log.information() << "There are " << numSpectra << " spectra in the range\n";
@@ -190,7 +189,7 @@ void CrossCorrelate::exec() {
 
   // Now start the real stuff
   // Create a 2DWorkspace that will hold the result
-  auto numReferenceY = static_cast<int>(referenceYVector.size());
+  const auto numReferenceY = static_cast<int>(referenceYVector.size());
 
   // max the shift
   int shiftCorrection = 0;
@@ -204,14 +203,14 @@ void CrossCorrelate::exec() {
     // convert dspacing to bins, where maxDSpaceShift is at least 0.1
     const auto maxBins = std::max(0.0 + maxDSpaceShift * 2, 0.1) / inputWS->getDimension(0)->getBinWidth();
     // calc range based on max bins
-    shiftCorrection = (int)std::max(0.0, abs((-numReferenceY + 2) - (numReferenceY - 2)) - maxBins) / 2;
+    shiftCorrection = static_cast<int>(std::max(0.0, abs((-numReferenceY + 2) - (numReferenceY - 2)) - maxBins)) / 2;
   }
 
   const int numPoints = 2 * (numReferenceY - shiftCorrection) - 3;
   if (numPoints < 1)
     throw std::runtime_error("Range is not valid");
 
-  MatrixWorkspace_sptr out = create<HistoWorkspace>(*inputWS, numSpectra, Points(numPoints));
+  MatrixWorkspace_sptr out = create<HistoWorkspace>(*inputWS, numSpectra, Points(static_cast<size_t>(numPoints)));
 
   const auto referenceVariance = subtractMean(referenceYVector, referenceEVector);
 
@@ -219,9 +218,10 @@ void CrossCorrelate::exec() {
   double referenceNormE = 0.5 * pow(referenceNorm, 3) * sqrt(referenceVariance.e);
 
   // Now copy the other spectra
-  bool isDistribution = inputWS->isDistribution();
+  const bool isDistribution = inputWS->isDistribution();
 
   auto &outX = out->mutableX(0);
+  // this has to be signed to allow for negative values
   for (int i = 0; i < static_cast<int>(outX.size()); ++i) {
     outX[i] = static_cast<double>(i - (numReferenceY - shiftCorrection) + 2);
   }
@@ -232,18 +232,19 @@ void CrossCorrelate::exec() {
   for (int currentSpecIndex = 0; currentSpecIndex < numSpectra; ++currentSpecIndex) // Now loop on all spectra
   {
     PARALLEL_START_INTERRUPT_REGION
-    size_t wsIndex = indexes[currentSpecIndex]; // Get the ws index from the table
+    const size_t currentSpecIndex_szt = static_cast<size_t>(currentSpecIndex);
+    const size_t wsIndex = indexes[currentSpecIndex_szt]; // Get the ws index from the table
     // Copy spectra info from input Workspace
-    out->getSpectrum(currentSpecIndex).copyInfoFrom(inputWS->getSpectrum(wsIndex));
-    out->setSharedX(currentSpecIndex, out->sharedX(0));
+    out->getSpectrum(currentSpecIndex_szt).copyInfoFrom(inputWS->getSpectrum(wsIndex));
+    out->setSharedX(currentSpecIndex_szt, out->sharedX(0));
     // Get temp referenceSpectras
     const auto &inputXVector = inputWS->x(wsIndex);
     const auto &inputYVector = inputWS->y(wsIndex);
     const auto &inputEVector = inputWS->e(wsIndex);
     // Copy Y,E data of spec(currentSpecIndex) to temp vector
     // Now rebin on the grid of referenceSpectra
-    std::vector<double> tempY(numReferenceY);
-    std::vector<double> tempE(numReferenceY);
+    std::vector<double> tempY(static_cast<size_t>(numReferenceY));
+    std::vector<double> tempE(static_cast<size_t>(numReferenceY));
 
     VectorHelper::rebin(inputXVector.rawData(), inputYVector.rawData(), inputEVector.rawData(), referenceXVector, tempY,
                         tempE, isDistribution);
@@ -254,32 +255,39 @@ void CrossCorrelate::exec() {
     const double tempNormE = 0.5 * pow(tempNorm, 3) * sqrt(tempVar.e);
     const double normalisation = referenceNorm * tempNorm;
     const double normalisationE2 = pow((referenceNorm * tempNormE), 2) + pow((tempNorm * referenceNormE), 2);
+
     // Get referenceSpectr to the ouput spectrum
-    auto &outY = out->mutableY(currentSpecIndex);
-    auto &outE = out->mutableE(currentSpecIndex);
+    auto &outY = out->mutableY(currentSpecIndex_szt);
+    auto &outE = out->mutableE(currentSpecIndex_szt);
 
     for (int dataIndex = -numReferenceY + 2 + shiftCorrection; dataIndex <= numReferenceY - 2 - shiftCorrection;
          ++dataIndex) {
-      const int dataIndexP = abs(dataIndex);
-      double val = 0, err2 = 0, x, y, xE, yE;
-      for (int j = numReferenceY - 1 - dataIndexP; j >= 0; --j) {
-        if (dataIndex >= 0) {
-          x = referenceYVector[j];
-          y = tempY[j + dataIndexP];
-          xE = referenceEVector[j];
-          yE = tempE[j + dataIndexP];
-        } else {
-          x = tempY[j];
-          y = referenceYVector[j + dataIndexP];
-          xE = tempE[j];
-          yE = referenceEVector[j + dataIndexP];
+      const auto dataIndexMagnitude = static_cast<int>(abs(dataIndex));
+      const auto dataIndexPositive = bool(dataIndex >= 0);
+      double val = 0, err2 = 0;
+      // loop over bin number
+      if (dataIndexPositive) {
+        for (int binIndex = numReferenceY - 1 - dataIndexMagnitude; binIndex >= 0; --binIndex) {
+          const auto x = referenceYVector[binIndex];
+          const auto y = tempY[binIndex + dataIndexMagnitude];
+          const auto xE = referenceEVector[binIndex];
+          const auto yE = tempE[binIndex + dataIndexMagnitude];
+          val += (x * y);
+          err2 += x * x * yE + y * y * xE;
         }
-        val += (x * y);
-        err2 += x * x * yE + y * y * xE;
+      } else {
+        for (int binIndex = numReferenceY - 1 - dataIndexMagnitude; binIndex >= 0; --binIndex) {
+          const auto x = tempY[binIndex];
+          const auto y = referenceYVector[binIndex + dataIndexMagnitude];
+          const auto xE = tempE[binIndex];
+          const auto yE = referenceEVector[binIndex + dataIndexMagnitude];
+          val += (x * y);
+          err2 += x * x * yE + y * y * xE;
+        }
       }
-      outY[dataIndex + numReferenceY - shiftCorrection - 2] = (val * normalisation);
-      outE[dataIndex + numReferenceY - shiftCorrection - 2] =
-          sqrt(val * val * normalisationE2 + normalisation * normalisation * err2);
+      const size_t dataIndex_corrected = static_cast<size_t>(dataIndex + numReferenceY - shiftCorrection - 2);
+      outY[dataIndex_corrected] = (val * normalisation);
+      outE[dataIndex_corrected] = sqrt(val * val * normalisationE2 + normalisation * normalisation * err2);
     }
     // Update progress information
     m_progress->report();

@@ -8,6 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IConstraint.h"

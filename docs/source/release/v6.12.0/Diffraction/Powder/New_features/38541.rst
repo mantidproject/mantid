@@ -1,0 +1,1 @@
+- Add more information to :ref:`CrossCorrelate <algm-CrossCorrelate>` and :ref:`GetDetectorOffsets <algm-GetDetectorOffsets>` user documenation
