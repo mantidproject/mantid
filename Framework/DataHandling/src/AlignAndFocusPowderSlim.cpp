@@ -9,6 +9,8 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
+#include "MantidAPI/Sample.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -18,6 +20,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/H5Util.h"
@@ -38,6 +41,7 @@ using Mantid::DataObjects::Workspace2D;
 using Mantid::Kernel::ArrayLengthValidator;
 using Mantid::Kernel::ArrayProperty;
 using Mantid::Kernel::Direction;
+using Mantid::Kernel::TimeSeriesProperty;
 
 namespace { // anonymous namespace
 namespace PropertyNames {
@@ -103,30 +107,15 @@ public:
                const std::pair<uint64_t, uint64_t> &eventRange) {
     // g_log.information(NxsFieldNames::TIME_OF_FLIGHT);
     auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
-    // TODO probably should resize data array
-    /*
-    // This is the data size
-    ::NeXus::Info id_info = m_h5file.getInfo();
-    const auto dim0 = static_cast<size_t>(LoadBankFromDiskTask::recalculateDataSize(id_info.dims[0]));
-    */
 
+    // H5Util resizes the vector
     if (m_is_time_filtered) {
-      throw std::runtime_error("filtering not implemented");
-      // TODO sort this out H5Util doesn't have slab read yet
-      /*
-      // These are the arguments to getSlab()
-      std::vector<int64_t> loadStart(1, eventRange.first);
-      int64_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
-                             ? dim0 - eventRange.first
-                             : eventRange.second - eventRange.first;
-      std::vector<int64_t> loadSize(1, slabsize);
-
-      data->resize(loadSize[0]);
-      Mantid::NeXus::NeXusIOHelper::readNexusSlab<float, Mantid::NeXus::NeXusIOHelper::PreventNarrowing>(
-          *data, m_h5file, NxsFieldNames::TIME_OF_FLIGHT, loadStart, loadSize);
-      */
+      const size_t offset = eventRange.first;
+      const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
+                                  ? std::numeric_limits<size_t>::max()
+                                  : eventRange.second - eventRange.first;
+      NeXus::H5Util::readArray1DCoerce(tof_SDS, *data, slabsize, offset);
     } else {
-      // TODO probably should resize data array
       NeXus::H5Util::readArray1DCoerce(tof_SDS, *data);
     }
 
@@ -143,30 +132,15 @@ public:
                  const std::pair<uint64_t, uint64_t> &eventRange) {
     // g_log.information(NxsFieldNames::DETID);
     auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
-    // TODO probably should resize data array
-    /*
-    // This is the data size
-    ::NeXus::Info id_info = m_h5file.getInfo();
-    const auto dim0 = static_cast<size_t>(LoadBankFromDiskTask::recalculateDataSize(id_info.dims[0]));
-    */
 
+    // H5Util resizes the vector
     if (m_is_time_filtered) {
-      throw std::runtime_error("filtering not implemented");
-      // TODO sort this out H5Util doesn't have slab read yet
-      /*
-      // These are the arguments to getSlab()
-      std::vector<int64_t> loadStart(1, eventRange.first);
-      int64_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
-                             ? dim0 - eventRange.first
-                             : eventRange.second - eventRange.first;
-      std::vector<int64_t> loadSize(1, slabsize);
-
-      data->resize(loadSize[0]);
-      Mantid::NeXus::NeXusIOHelper::readNexusSlab<uint32_t, Mantid::NeXus::NeXusIOHelper::PreventNarrowing>(
-          *data, m_h5file, NxsFieldNames::DETID, loadStart, loadSize);
-      */
+      const size_t offset = eventRange.first;
+      const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
+                                  ? std::numeric_limits<size_t>::max()
+                                  : eventRange.second - eventRange.first;
+      NeXus::H5Util::readArray1DCoerce(detID_SDS, *data, slabsize, offset);
     } else {
-      // TODO probably should resize data array
       NeXus::H5Util::readArray1DCoerce(detID_SDS, *data);
     }
   }
@@ -452,7 +426,6 @@ void AlignAndFocusPowderSlim::exec() {
 
   // Load the instrument
   // prog->doReport("Loading instrument"); TODO add progress bar stuff
-  // LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, "entry", this, &descriptor);
   LoadEventNexus::loadInstrument<MatrixWorkspace_sptr>(filename, wksp, ENTRY_TOP_LEVEL, this, &descriptor);
 
   const std::string cal_filename = getPropertyValue(PropertyNames::CAL_FILE);
@@ -463,25 +436,12 @@ void AlignAndFocusPowderSlim::exec() {
   }
 
   /*
-  // load run metadata
-  // prog->doReport("Loading metadata"); TODO add progress bar stuff
-  try {
-    LoadEventNexus::loadEntryMetadata(filename, WS, "entry", descriptor);
-  } catch (std::exception &e) {
-    g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
-  }
-
   // create IndexInfo
   // prog->doReport("Creating IndexInfo"); TODO add progress bar stuff
   const std::vector<int32_t> range;
   LoadEventNexusIndexSetup indexSetup(WS, EMPTY_INT(), EMPTY_INT(), range);
   auto indexInfo = indexSetup.makeIndexInfo();
   const size_t numHist = indexInfo.size();
-
-  // make output workspace with correct number of histograms
-  MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(WS, numHist, 2, 1);
-  // set spectrum index information
-  outWS->setIndexInfo(indexInfo);
   */
 
   // load the events
@@ -561,63 +521,24 @@ void AlignAndFocusPowderSlim::exec() {
                          m_calibration, m_masked, binWidth, linearBins);
     constexpr size_t GRAINSIZE_BANK{2};
     tbb::parallel_for(tbb::blocked_range<size_t>(0, bankEntryNames.size(), GRAINSIZE_BANK), task);
-
-    /*
-    NexusLoader loader(h5file, is_time_filtered, pulse_start_index, pulse_stop_index);
-
-    size_t specnum = 0;
-    for (const std::string &entry_name : bankEntryNames) {
-      std::cout << "ENTRY: " << entry_name << std::endl;
-      const auto startTimeBank = std::chrono::high_resolution_clock::now();
-
-      // TODO should re-use vectors to save malloc/free calls
-      std::unique_ptr<std::vector<uint32_t>> event_detid = std::make_unique<std::vector<uint32_t>>();
-      std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
-      // TODO std::unique_ptr<std::vector<float>> event_weight; some other time
-      g_log.information() << "Loading bank " << entry_name << '\n';
-      h5file.openGroup(entry_name, "NXevent_data");
-
-      // get filtering range
-      const auto eventRange = loader.getEventIndexRange(h5file);
-
-      loader.loadTOF(event_time_of_flight, eventRange);
-      loader.loadDetid(event_detid, eventRange);
-
-      if (event_time_of_flight->empty() || event_detid->empty()) {
-        g_log.warning() << "No data for bank " << entry_name << '\n';
-        h5file.closeGroup();
-        continue;
-      }
-
-      const auto startTimeSetup = std::chrono::high_resolution_clock::now();
-      const auto [minval, maxval] = parallel_minmax(event_detid.get());
-      BankCalibration calibration(static_cast<detid_t>(minval), static_cast<detid_t>(maxval), m_calibration);
-
-      auto &spectrum = wksp->getSpectrum(specnum);
-      Histogrammer histogrammer(&spectrum.readX(), binWidth, linearBins);
-      const auto numEvent = event_time_of_flight->size();
-      // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
-      // counting things
-      std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
-      addTimer("setup" + entry_name, startTimeSetup, std::chrono::high_resolution_clock::now());
-
-      const auto startTimeProcess = std::chrono::high_resolution_clock::now();
-      constexpr size_t GRAINSIZE_EVENT{2000};
-      ProcessEventsTask task(&histogrammer, event_detid.get(), event_time_of_flight.get(), &calibration, &y_temp,
-                             &m_masked);
-      tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent, GRAINSIZE_EVENT), task);
-      auto &y_values = spectrum.dataY();
-      std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
-      addTimer("proc" + entry_name, startTimeProcess, std::chrono::high_resolution_clock::now());
-      addTimer(entry_name, startTimeBank, std::chrono::high_resolution_clock::now());
-
-      h5file.closeGroup();
-      specnum++;
-    }
-  */
   }
 
-  // TODO load logs
+  // close the file so child algorithms can do their thing
+  h5file.close();
+
+  // load run metadata
+  // prog->doReport("Loading metadata"); TODO add progress bar stuff
+  try {
+    LoadEventNexus::loadEntryMetadata(filename, wksp, ENTRY_TOP_LEVEL, descriptor);
+  } catch (std::exception &e) {
+    g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
+  }
+
+  // load logs
+  auto periodLog = std::make_unique<const TimeSeriesProperty<int>>("period_log"); // not used
+  int nPeriods{1};
+  LoadEventNexus::runLoadNexusLogs<MatrixWorkspace_sptr>(filename, wksp, *this, false, nPeriods, periodLog);
+
   wksp->setYUnit("Counts");
   wksp->getAxis(0)->setUnit("DSpacing");
   setProperty(PropertyNames::OUTPUT_WKSP, std::move(wksp));
