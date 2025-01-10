@@ -268,10 +268,7 @@ class FigureInteraction(object):
             bbox_fig = fig.get_window_extent()
             bbox_legend = legend1.get_window_extent()
 
-            x0_fig, y0_fig, x1_fig, y1_fig = bbox_fig.x0, bbox_fig.y0, bbox_fig.x1, bbox_fig.y1
-            x0_leg, y0_leg, x1_leg, y1_leg = bbox_legend.x0, bbox_legend.y0, bbox_legend.x1, bbox_legend.y1
-
-            outside_window = x1_leg < x0_fig or x0_leg > x1_fig or y1_leg < y0_fig or y0_leg > y1_fig
+            outside_window = bbox_legend.x1 < bbox_fig.x0 or bbox_legend.x0 > bbox_fig.x1 or bbox_legend.y1 < bbox_fig.y0 or bbox_legend.y0 > bbox_fig.y1
 
             # Snap back legend
             if outside_window:
