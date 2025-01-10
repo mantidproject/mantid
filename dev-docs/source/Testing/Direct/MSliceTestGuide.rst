@@ -338,4 +338,4 @@ Interaction with ADS
 #. Check that the corresponding workspace in the ``MD Histo`` has been renamed accordingly
 #. Select the renamed workspace in Mantid and click ``Delete``
 #. Check that the corresponding workspace in the ``MD Histo`` tab is deleted as well
-#. Now click ``Clear`` in the Workspaces window in Mantid and check that all workspace in the ``2D`` and ``MD Histo`` tabs in MSlice are deleted as well
+#. Now click ``Clear`` in the Workspaces window in Mantid and check that all workspaces in the ``2D`` and ``MD Histo`` tabs in MSlice are deleted as well
