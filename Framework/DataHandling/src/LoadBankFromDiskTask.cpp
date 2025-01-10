@@ -14,11 +14,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidNexus/NexusIOHelper.h"
-
-// clang-format off
-#include "MantidNexusCpp/NeXusFile.hpp"
 #include "MantidNexusCpp/NeXusException.hpp"
-// clang-format on
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <algorithm>
 #include <utility>

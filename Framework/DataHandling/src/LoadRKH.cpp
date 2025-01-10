@@ -15,16 +15,14 @@
 #include "MantidDataHandling/SaveRKH.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/cow_ptr.h"
 
-// clang-format off
-#include <boost/date_time/gregorian/gregorian.hpp>
-#include <boost/date_time/date_parsing.hpp>
-// clang-format on
-#include "MantidKernel/StringTokenizer.h"
 #include <boost/algorithm/string.hpp>
+#include <boost/date_time/date_parsing.hpp>
+#include <boost/date_time/gregorian/gregorian.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include <boost/regex.hpp>
@@ -513,12 +511,10 @@ const std::string LoadRKH::readUnit(const std::string &line) {
 
   // this is a syntax check the line before returning its data
   if (codes.count() >= 3) {
-    // For the next line it is possible to use str.compare instead of str.find,
-    // this would be more efficient if the line was very long
-    // however to use is safely other checks would be required that would impair
-    // readability, therefore in this case the unlikely performance hit is
-    // accepted.
-    if (unit.find('(') != 0 || unit.find(')') != unit.size()) {
+    // For the next line it is possible to use str.compare instead of str.find, this would be more efficient if the line
+    // was very long however to use is safely other checks would be required that would impair readability, therefore in
+    // this case the unlikely performance hit is accepted.
+    if ((!unit.starts_with('(')) || (unit.find(')') != unit.size())) {
       std::string qCode = std::to_string(SaveRKH::Q_CODE);
       if (symbol == qCode && theQuantity == "q" &&
           (unit == "(1/Angstrom)" || unit == "(Angstrom^-1)")) { // 6 q (1/Angstrom) is the synatx for

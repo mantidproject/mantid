@@ -463,17 +463,14 @@ lines.
 formatting
 can be enabled */
 
-// clang-format off
-class ConvertMDHistoToMatrixWorkspaceTestPerformance:public CxxTest::TestSuite {
+class ConvertMDHistoToMatrixWorkspaceTestPerformance : public CxxTest::TestSuite {
 public:
   static ConvertMDHistoToMatrixWorkspaceTestPerformance *createSuite() {
     return new ConvertMDHistoToMatrixWorkspaceTestPerformance;
   }
-  static void destroySuite(ConvertMDHistoToMatrixWorkspaceTestPerformance *suite) {
-    delete suite;
-  }
-//clang-format on
-  void setUp() override{
+  static void destroySuite(ConvertMDHistoToMatrixWorkspaceTestPerformance *suite) { delete suite; }
+
+  void setUp() override {
     std::vector<size_t> nonInteger(2);
     nonInteger[0] = 0;
     nonInteger[1] = 1;
@@ -498,28 +495,24 @@ public:
     }
     signal_t signal(0.f), error(0.f);
     // IMDHistoWorkspace_sptr slice =
-    auto slice = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(
-        ndims, signal, error, &numberOfBins.front(), &start.front(),
-        &end.front(), names);
-    alg =
-        AlgorithmManager::Instance().create("ConvertMDHistoToMatrixWorkspace");
+    auto slice = MDEventsTestHelper::makeFakeMDHistoWorkspaceGeneral(ndims, signal, error, &numberOfBins.front(),
+                                                                     &start.front(), &end.front(), names);
+    alg = AlgorithmManager::Instance().create("ConvertMDHistoToMatrixWorkspace");
     alg->initialize();
     alg->setRethrows(true);
     alg->setChild(true);
     alg->setProperty("InputWorkspace", slice);
     alg->setPropertyValue("OutputWorkspace",
                           "_2"); // Not really required for child algorithm
-
-
   }
 
   void test_ConvertMDhistoToMatrixWorkspace() {
 
-      try {
-        alg->execute();
-      } catch (std::exception &e) {
-        TS_FAIL(e.what());
-      }
+    try {
+      alg->execute();
+    } catch (std::exception &e) {
+      TS_FAIL(e.what());
+    }
   }
 
 private:
