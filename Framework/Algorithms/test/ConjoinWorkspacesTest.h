@@ -412,7 +412,6 @@ private:
     MatrixWorkspace_sptr ews = WorkspaceCreationHelper::createEventWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(name, ews);
 
-    // Crop ews to have first 3 spectra, ews2 to have second 3
     CropWorkspace crop;
     crop.setChild(true);
     crop.initialize();
