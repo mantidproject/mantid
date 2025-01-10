@@ -35,9 +35,6 @@ public:
 
   void run() override;
 
-  // this is public for other things to use
-  static int64_t recalculateDataSize(const int64_t size);
-
 private:
   void loadPulseTimes(::NeXus::File &file);
   std::unique_ptr<std::vector<uint64_t>> loadEventIndex(::NeXus::File &file);
@@ -46,6 +43,7 @@ private:
   std::unique_ptr<std::vector<uint32_t>> loadEventId(::NeXus::File &file);
   std::unique_ptr<std::vector<float>> loadTof(::NeXus::File &file);
   std::unique_ptr<std::vector<float>> loadEventWeights(::NeXus::File &file);
+  int64_t recalculateDataSize(const int64_t size);
 
   /// Algorithm being run
   DefaultEventLoader &m_loader;
