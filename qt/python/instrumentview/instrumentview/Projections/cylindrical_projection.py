@@ -11,7 +11,7 @@ import numpy as np
 class cylindrical_projection(projection):
     def __init__(self, workspace, detector_indices, axis: np.ndarray):
         super().__init__(workspace, detector_indices)
-        self._projection_axis = axis
+        self._projection_axis = np.array(axis)
         self._calculate_axes()
         self._calculate_detector_coordinates()
         self._find_and_correct_x_gap()
