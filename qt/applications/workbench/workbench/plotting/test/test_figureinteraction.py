@@ -84,6 +84,7 @@ class FigureInteractionTest(unittest.TestCase):
         expected_call = [
             call("button_press_event", interactor.on_mouse_button_press),
             call("button_release_event", interactor.on_mouse_button_release),
+            call("button_release_event", interactor.on_button_release_legend_bounds_check),
             call("draw_event", interactor.draw_callback),
             call("motion_notify_event", interactor.motion_event),
             call("resize_event", interactor.mpl_redraw_annotations),
