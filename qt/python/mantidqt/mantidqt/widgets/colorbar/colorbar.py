@@ -45,15 +45,16 @@ class ColorbarWidget(QWidget):
     scaleNormChanged = Signal()
     # register additional color maps from file
     register_customized_colormaps()
-    # create the list
-    cmap_list = sorted([cmap for cmap in colormaps.keys() if not cmap.endswith("_r")])
 
     def __init__(self, parent=None, default_norm_scale=None):
         """
         :param default_scale: None uses linear, else either a string or tuple(string, other arguments), e.g. tuple('Power', exponent)
         """
 
-        super(ColorbarWidget, self).__init__(parent)
+        super().__init__(parent)
+
+        # create the list. Initialize in the init so that it can be updated if new colormaps are added
+        self.cmap_list = sorted([cmap for cmap in colormaps.keys() if not cmap.endswith("_r")])
 
         self.setWindowTitle("Colorbar")
         self.setMaximumWidth(100)
