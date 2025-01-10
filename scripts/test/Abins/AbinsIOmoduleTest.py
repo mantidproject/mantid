@@ -13,7 +13,9 @@ from abins import IO, test_helpers
 
 class IOTest(unittest.TestCase):
     def tearDown(self):
-        test_helpers.remove_output_files(list_of_names=["Cars", "temphgfrt"])
+        from mantid.kernel import ConfigService
+
+        test_helpers.remove_output_files(list_of_names=["Cars", "temphgfrt"], directory=ConfigService.getString("defaultsave.directory"))
 
     @staticmethod
     def _save_stuff():

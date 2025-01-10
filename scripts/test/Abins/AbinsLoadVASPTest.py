@@ -12,8 +12,10 @@ from abins.input import VASPLoader
 
 class AbinsLoadVASPTest(unittest.TestCase, abins.input.Tester):
     def tearDown(self):
-        # Remove ref files from .check() calls
-        abins.test_helpers.remove_output_files(list_of_names=["_LoadVASP"])
+        # Remove cache files
+        from mantid.kernel import ConfigService
+
+        abins.test_helpers.remove_output_files(list_of_names=["_LoadVASP"], directory=ConfigService.getString("defaultsave.directory"))
 
     def test_non_existing_file(self):
         with self.assertRaises(IOError):

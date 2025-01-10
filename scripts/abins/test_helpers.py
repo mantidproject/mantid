@@ -15,7 +15,6 @@ from pydantic import validate_call
 
 from abins.atomsdata import _AtomData
 from abins.kpointsdata import KpointData
-import abins.io
 
 
 # Module with helper functions used to create tests.
@@ -41,26 +40,15 @@ def find_file(filename: str, try_upcase_suffix: bool = True) -> str:
 
 
 @validate_call
-def remove_output_files(list_of_names: List[str]) -> None:
+def remove_output_files(list_of_names: List[str], directory: Path) -> None:
     """Removes output files created during a test."""
-
-    # import ConfigService here to avoid:
-    # RuntimeError: Pickling of "mantid.kernel._kernel.ConfigServiceImpl"
-    # instances is not enabled (http://www.boost.org/libs/python/doc/v2/pickle.html)
-
-    from mantid.kernel import ConfigService
-
-    save_dir_path = ConfigService.getString("defaultsave.directory")
-    if save_dir_path != "":  # default save directory set
-        all_files = os.listdir(save_dir_path)
-    else:
-        all_files = os.listdir(os.getcwd())
+    all_files = os.listdir(directory)
 
     for filename in all_files:
         for name in list_of_names:
             if name in filename:
-                full_path = os.path.join(abins.io.IO.get_save_dir_path(), filename)
-                if os.path.isfile(full_path):
+                full_path = directory / filename
+                if full_path.exists():
                     os.remove(full_path)
                 break
 

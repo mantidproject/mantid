@@ -45,7 +45,9 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
             CASTEPLoader(input_ab_initio_filename=1)
 
     def tearDown(self):
-        abins.test_helpers.remove_output_files(list_of_names=["_LoadCASTEP"])
+        from mantid.kernel import ConfigService
+
+        abins.test_helpers.remove_output_files(list_of_names=["_LoadCASTEP"], directory=ConfigService.getString("defaultsave.directory"))
 
     #  *************************** USE CASES ********************************************
     # ===================================================================================

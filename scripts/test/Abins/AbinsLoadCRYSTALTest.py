@@ -12,7 +12,9 @@ from abins.input import CRYSTALLoader
 
 class AbinsLoadCRYSTALTest(unittest.TestCase, abins.input.Tester):
     def tearDown(self):
-        abins.test_helpers.remove_output_files(list_of_names=["_LoadCRYSTAL"])
+        from mantid.kernel import ConfigService
+
+        abins.test_helpers.remove_output_files(list_of_names=["_LoadCRYSTAL"], directory=ConfigService.getString("defaultsave.directory"))
 
     # *************************** USE CASES *********************************************
     # ===================================================================================

@@ -12,7 +12,9 @@ import abins.test_helpers
 
 class AbinsLoadGAUSSIANTest(unittest.TestCase, abins.input.Tester):
     def tearDown(self):
-        abins.test_helpers.remove_output_files(list_of_names=["_LoadGAUSSIAN"])
+        from mantid.kernel import ConfigService
+
+        abins.test_helpers.remove_output_files(list_of_names=["_LoadGAUSSIAN"], directory=ConfigService.getString("defaultsave.directory"))
 
         #  *************************** USE CASES ********************************************
 
