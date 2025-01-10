@@ -166,6 +166,45 @@ public:
     TS_ASSERT(!conj.isExecuted());
   }
 
+  void testNonMatchingBinsThrowsError() {
+    MatrixWorkspace_sptr ws1, ws2;
+    ws1 = WorkspaceCreationHelper::createEventWorkspace(10, 5);
+    ws2 = WorkspaceCreationHelper::createEventWorkspace(10, 10);
+
+    ConjoinWorkspaces conj;
+    conj.initialize();
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("InputWorkspace1", ws1));
+    TS_ASSERT_THROWS_NOTHING(conj.setProperty("InputWorkspace2", ws2));
+    conj.setRethrows(true);
+
+    try {
+      conj.execute();
+      TS_FAIL("Expected an exception but none was thrown.");
+    } catch (const std::invalid_argument &e) {
+      std::string expectedMessage = "The bins do not match in the input workspaces. "
+                                    "Consider using RebinToWorkspace to preprocess "
+                                    "the workspaces before conjoining them.";
+      TS_ASSERT_EQUALS(std::string(e.what()), expectedMessage);
+      TS_ASSERT(!conj.isExecuted());
+    }
+  }
+
+  void testMatchingBinsThrowsNoError() {
+    MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::createEventWorkspace(10, 5);
+    MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::createEventWorkspace(10, 5);
+
+    // CheckMatchingBins is true by default, so don't set it here.
+    ConjoinWorkspaces conj;
+    conj.initialize();
+    conj.setProperty("CheckOverlapping", false);
+    conj.setProperty("InputWorkspace1", ws1);
+    conj.setProperty("InputWorkspace2", ws2);
+    conj.setAlwaysStoreInADS(false);
+    conj.setRethrows(true);
+
+    TS_ASSERT_THROWS_NOTHING(conj.execute());
+  }
+
   void testDoCheckForOverlap() {
     MatrixWorkspace_sptr ws1, ws2;
     int numPixels = 10;
