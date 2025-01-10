@@ -394,7 +394,7 @@ void addProcess(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &works
 }
 
 /**
- * Add the process information to the NXcanSAS file. This information
+ * Add the process information to the NXcanSAS file. It contains information
  * about the run number, the Mantid version and the user file (if available)
  * @param group: the sasEntry
  * @param workspace: the workspace which is being stored
