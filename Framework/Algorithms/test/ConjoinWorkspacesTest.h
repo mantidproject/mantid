@@ -169,7 +169,7 @@ public:
     TS_ASSERT(!conj.isExecuted());
   }
 
-  void testCheckMatchingBinsError() {
+  void testNonMatchingBinsThrowsError() {
     MatrixWorkspace_sptr ws1, ws2;
     ws1 = WorkspaceCreationHelper::createEventWorkspace(10, 5);
     ws2 = WorkspaceCreationHelper::createEventWorkspace(10, 10);
@@ -190,6 +190,21 @@ public:
       TS_ASSERT_EQUALS(std::string(e.what()), expectedMessage);
       TS_ASSERT(!conj.isExecuted());
     }
+  }
+
+  void testMatchingBinsNoThrowError() {
+    MatrixWorkspace_sptr ws1, ws2;
+    ws1 = WorkspaceCreationHelper::createEventWorkspace(10, 5);
+    ws2 = WorkspaceCreationHelper::createEventWorkspace(10, 5);
+
+    ConjoinWorkspaces conj;
+    conj.initialize();
+    conj.setProperty("CheckOverlapping", false);
+    conj.setProperty("InputWorkspace1", ws1);
+    conj.setProperty("InputWorkspace2", ws2);
+    conj.setRethrows(true);
+
+    TS_ASSERT_THROWS_NOTHING(conj.execute());
   }
 
   void testDoCheckForOverlap() {
