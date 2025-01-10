@@ -29,7 +29,7 @@ from mpl_toolkits.mplot3d.axes3d import Axes3D
 
 # mantid imports
 from mantid.api import AnalysisDataService as ads
-from mantid.plots import datafunctions, MantidAxes, axesfunctions, MantidAxes3D
+from mantid.plots import datafunctions, MantidAxes, axesfunctions, MantidAxes3D, LegendProperties
 from mantid.plots.utility import zoom, MantidAxType, legend_set_draggable
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
@@ -96,7 +96,6 @@ class FigureInteraction(object):
         self._cids = []
         self._cids.append(canvas.mpl_connect("button_press_event", self.on_mouse_button_press))
         self._cids.append(canvas.mpl_connect("button_release_event", self.on_mouse_button_release))
-        self._cids.append(canvas.mpl_connect("button_release_event", self.on_button_release_legend_bounds_check))
         self._cids.append(canvas.mpl_connect("draw_event", self.draw_callback))
         self._cids.append(canvas.mpl_connect("motion_notify_event", self.motion_event))
         self._cids.append(canvas.mpl_connect("resize_event", self.mpl_redraw_annotations))
@@ -255,8 +254,10 @@ class FigureInteraction(object):
             self.marker_selected_in_double_click_event = None
             self.double_click_event = None
 
+        self.legend_bounds_check(event)
+
     @staticmethod
-    def on_button_release_legend_bounds_check(event):
+    def legend_bounds_check(event):
         fig = event.canvas.figure
 
         for ax in fig.get_axes():
@@ -264,22 +265,19 @@ class FigureInteraction(object):
             if legend1 is None:
                 continue
 
-            # Figure Size (in pixels)
-            fig_width, fig_height = fig.get_size_inches()
-            dpi = fig.get_dpi()
-            fig_width_px, fig_height_px = fig_width * dpi, fig_height * dpi
-
-            # Legend bounding box (in pixels)
+            bbox_fig = fig.get_window_extent()
             bbox_legend = legend1.get_window_extent()
-            x0, y0, x1, y1 = bbox_legend.x0, bbox_legend.y0, bbox_legend.x1, bbox_legend.y1
 
-            outside_window = x1 < 0 or x0 > fig_width_px or y1 < 0 or y0 > fig_height_px
+            x0_fig, y0_fig, x1_fig, y1_fig = bbox_fig.x0, bbox_fig.y0, bbox_fig.x1, bbox_fig.y1
+            x0_leg, y0_leg, x1_leg, y1_leg = bbox_legend.x0, bbox_legend.y0, bbox_legend.x1, bbox_legend.y1
+
+            outside_window = x1_leg < x0_fig or x0_leg > x1_fig or y1_leg < y0_fig or y0_leg > y1_fig
+
             # Snap back legend
             if outside_window:
-                legend1 = ax.legend(loc="upper left")
-                legend_set_draggable(legend1, True)
-                legend1.set_in_layout(False)
-                fig.canvas.draw()
+                props = LegendProperties.from_legend(legend1)
+                LegendProperties.create_legend(props, legend1.axes)
+                fig.canvas.draw_idle()
 
     def on_leave(self, event):
         """
