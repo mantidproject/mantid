@@ -386,9 +386,14 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
         @param workspace_name: the name of the workspace that has changed
         @param workspace: the workspace that has changed
         """
-        if self.model.check_for_removed_original_workspace():
-            self._close_view_with_message("Original workspace has been replaced: Closing Slice Viewer")
-            return
+
+        try:
+            if self.model.check_for_removed_original_workspace():
+                self._close_view_with_message("Original workspace has been replaced: Closing Slice Viewer")
+                return
+        except RuntimeError:
+            # can't check for original workspace if existing models workspace has been replaced
+            pass
 
         if not self.model.workspace_equals(workspace_name):
             # TODO this is a dead branch, since the ADS observer will call this if the
@@ -403,7 +408,7 @@ class SliceViewer(ObservingPresenter, SliceViewerBasePresenter):
 
             # New model is OK, proceed with updating Slice Viewer
             self.model = candidate_model
-            self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
+            self._new_plot_method, self.update_plot_data = self._decide_plot_update_methods()
             self.view.delayed_refresh()
         except ValueError as err:
             self._close_view_with_message(f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}")
