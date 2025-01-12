@@ -182,7 +182,11 @@ class ColorbarWidget(QWidget):
         self.colorbar = Colorbar(ax=self.ax, mappable=mappable)
         self.cmin_value, self.cmax_value = mappable.get_clim()
         self.update_clim_text()
-        self.cmap_changed(cmap, False)
+        try:
+            self.cmap_changed(cmap, False)
+        except ValueError:
+            # the default mantid colormap is not available, just use matplotlib default
+            pass
 
         mappable_cmap = get_current_cmap(mappable)
 
