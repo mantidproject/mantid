@@ -100,6 +100,8 @@ public:
   /* Return true if there is a local repository installed*/
   bool isValid() override;
 
+  bool checkLocalInstallIsPresent();
+
   std::vector<std::string> check4Update() override;
 
   void setIgnorePatterns(const std::string &patterns) override;
@@ -161,7 +163,7 @@ private:
   void updateRepositoryJson(const std::string &, const RepositoryEntry &);
 
   /// flag that indicate a valid repository
-  bool valid;
+  bool m_valid;
 
   std::string ignoreregex;
 

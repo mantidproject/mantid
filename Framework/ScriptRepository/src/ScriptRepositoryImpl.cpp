@@ -14,6 +14,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/ProxyInfo.h"
+#include <filesystem>
 #include <unordered_set>
 #include <utility>
 
@@ -161,7 +162,7 @@ DECLARE_SCRIPTREPOSITORY(ScriptRepositoryImpl)
  "https://repository.mantidproject.com");
  @endcode
  */
-ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep, const std::string &remote) : valid(false) {
+ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep, const std::string &remote) : m_valid(false) {
   // get the local path and the remote path
   std::string loc, rem;
   const ConfigServiceImpl &config = ConfigService::Instance();
@@ -259,7 +260,7 @@ ScriptRepositoryImpl::ScriptRepositoryImpl(const std::string &local_rep, const s
     local_repository.append("/");
 
   repo.clear();
-  valid = true;
+  m_valid = true;
 }
 
 /**
@@ -343,7 +344,7 @@ void ScriptRepositoryImpl::install(const std::string &path) {
   if (local_repository.back() != '/')
     local_repository.append("/");
 
-  valid = true;
+  m_valid = true;
 }
 
 void ScriptRepositoryImpl::ensureValidRepository() {
@@ -1154,7 +1155,21 @@ std::string ScriptRepositoryImpl::doDeleteRemoteFile(const std::string &url, con
 
  An invalid repository accepts only the ::install method.
  */
-bool ScriptRepositoryImpl::isValid() { return valid; }
+bool ScriptRepositoryImpl::isValid() {
+  if (!checkLocalInstallIsPresent()) {
+    m_valid = false;
+  };
+  return m_valid;
+}
+
+bool ScriptRepositoryImpl::checkLocalInstallIsPresent() {
+  const auto local_json = std::filesystem::path(local_repository) / ".local.json";
+  const auto repository_json = std::filesystem::path(local_repository) / ".repository.json";
+  if (!std::filesystem::exists(local_json) || !std::filesystem::exists(repository_json)) {
+    return false;
+  }
+  return true;
+}
 
 /**
  * Implements ScriptRepository::check4Update. It downloads the file
@@ -1593,7 +1608,7 @@ bool ScriptRepositoryImpl::isEntryValid(const std::string &path) {
   if (path == ".local.json")
     return false;
   // hide everything under system folder
-  if (path == "system" || path.find("system/") == 0)
+  if (path == "system" || path.starts_with("system/"))
     return false;
 
   try {
