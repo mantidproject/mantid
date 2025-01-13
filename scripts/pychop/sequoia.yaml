@@ -13,21 +13,21 @@ chopper_system:
       distance: 18.01           # Distance from moderator to this chopper in metres
       aperture_distance: 17.0   # Distance from aperture (moderator face) to this chopper (only for Fermi)
       packages:                 # A hash of chopper packages
-        Fine:
+        High-Resolution:
           name: SEQUOIA Fine resolution 100meV
-          pslit: 1.087          # Neutron transparent slit width (mm)
-          pslat: 0.534          # Neutron absorbing slat width (mm)
-          radius: 49.0          # Chopper package radius (mm)
-          rho: 1300.0           # Chopper package curvature (mm)
+          pslit: 2.03           # Neutron transparent slit width (mm)
+          pslat: 0.35           # Neutron absorbing slat width (mm)
+          radius: 50.0          # Chopper package radius (mm)
+          rho: 580.0            # Chopper package curvature (mm)
           tjit: 0.0             # Jitter time (us)
           fluxcorr: 3.0         # (Empirical/Fudge) factor to scale calculated flux by
           isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
-        Sloppy:
+        High-Flux:
           name: SEQUOIA Sloppy resolution 700meV
-          pslit: 1.812          # Neutron transparent slit width (mm)
-          pslat: 0.534          # Neutron absorbing slat width (mm)
-          radius: 49.0          # Chopper package radius (mm)
-          rho: 920.0            # Chopper package curvature (mm)
+          pslit: 4.56           # Neutron transparent slit width (mm)
+          pslat: 0.35           # Neutron absorbing slat width (mm)
+          radius: 50.0          # Chopper package radius (mm)
+          rho: 1535.0           # Chopper package curvature (mm)
           tjit: 0.0             # Jitter time (us)
           fluxcorr: 3.0         # (Empirical/Fudge) factor to scale calculated flux by
           isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
@@ -42,7 +42,7 @@ chopper_system:
           isPi: False           # Should the PI pulse (at 180 deg rotation) be transmitted by this package?
         SEQ-700-3.5-AST:
           name: SEQUOIA 700 meV Sloppy
-          pslit: 3.56           # Neutron transparent slit width (mm)
+          pslit: 4.56           # Neutron transparent slit width (mm)
           pslat: 0.35           # Neutron absorbing slat width (mm)
           radius: 50.0          # Chopper package radius (mm)
           rho: 1535.0           # Chopper package curvature (mm)
@@ -106,8 +106,8 @@ chopper_system:
 
 sample:
   name: SEQUOIA Sample Can
-  isam: 0                       # Sample type: 0==flat plate, 1==ellipse, 2==annulus, 3==sphere, 4==solid cylinder
-  sx: 2.0                       # Thickness (mm)
+  isam: 2                       # Sample type: 0==flat plate, 1==ellipse, 2==annulus, 3==sphere, 4==solid cylinder
+  sx: 48.0                      # Thickness (mm)
   sy: 48.0                      # Width (mm)
   sz: 48.0                      # Height (mm)
   gamma: 0.0                    # Angle of x-axis to ki (degrees)
@@ -124,15 +124,12 @@ moderator:
   name: Ambient Water           # A==water, AP==poisoned water, CH4==methane, H2==hydrogen. This is only used for analytical calculations
                                 # of the flux distribution for ISIS TS1 moderators. If measured_flux is defined below, name can be anything
   imod: 1                       # Moderator time profile type: 0==chi^2, 1==Ikeda-Carpenter, 2==modified chi^2, 3==polynomial
-  mod_pars: [119.63, 33.618,    # Parameters for time profile (for I-K is: [S1, S2, B1, B2, Emod]
-             .037, .17, 172.42] #    where tau_f=1/(sqrt(Ei)*E2V*sqrt(S1^2+(S2*lam)^2), tau_s=B1 for E<=130meV, B2 otherwise, R=exp(-Ei/Emod)
+  mod_pars: [30.13, 10.0,       # Parameters for time profile (for I-K is: [S1, S2, B1, B2, Emod]
+             .07, .08, 50.42]   #    where tau_f=1/(sqrt(Ei)*E2V*sqrt(S1^2+(S2*lam)^2), tau_s=B1 for E<=130meV, B2 otherwise, R=exp(-Ei/Emod)
+                                #    and the overall variance (not FWHM) is: tau^2 = 3/tau_f^2 + R/(2-R)/tau_s^2
   theta: -13.75                 # Angle beamline makes with moderator face (degrees)
   source_rep: 60                # Frequency of source (Hz)
   measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom. Flux in n/cm^2/s/uA/Angstrom
-    scale_factor: 10000000      # A factor to scale the flux values below by
-    wavelength: [0.0285984265, 0.2335051748, 0.2859842653, 0.310193488, 0.3418165757, 0.3856211047, 0.4521808267, 0.4834016372,
-                 0.522133444, 0.5719685306, 0.6394802577, 0.6936137254, 0.7643250991, 0.8255654628, 0.9043616533, 0.9809179374,
-                 1.0809189212, 1.2194410046, 1.4299213265, 1.5286501982, 1.6511309256, 1.8087233066, 2.0222141331, 2.3350517482]
-    flux: [1, 1, 1.0769418795, 1.0912234366, 1.1117847541, 1.143928794, 1.201252718, 1.2318227972, 1.2731629789, 1.3321623679,
-           1.4236719322, 1.5075346925, 1.6322258496, 1.7551658109, 1.9353360797, 2.1356198518, 2.4386575654, 2.9461376015,
-           3.8879041876, 4.331779711, 4.8546361998, 5.4701373626, 6.1966620127, 7.3007339739]
+    scale_factor: 1.      # A factor to scale the flux values below by
+    wavelength: [0.28601414576833351, 0.29616861080662232, 0.30668359353866664, 0.31757189355627352, 0.32884676487984915, 0.34052193209214343, 0.35261160704479783, 0.36513050615803061, 0.37809386833452097, 0.39151747350929472, 0.40541766185819367, 0.41981135368831168, 0.43471607003460611, 0.45014995398775937, 0.46613179277925221, 0.48268104065052947, 0.49981784253410028, 0.5175630585753952, 0.53593828952523304, 0.55496590303380511, 0.57466906087818581, 0.59507174715650868, 0.61619879748313355, 0.63807592922033896, 0.66072977278334122, 0.68418790405674834, 0.70847887796190545, 0.73363226321599551, 0.75967867832520353, 0.78664982885576173, 0.81457854602823976, 0.84349882668206377, 0.87344587465890866, 0.90445614365534355, 0.93656738159688513, 0.969818676587485, 1.0042505044903745, 1.0399047781981905, 1.0768248986523594, 1.1150558076738351, 1.1546440426695133, 1.1956377932809006, 1.2380869600440081, 1.2820432151318641, 1.3275600652535944, 1.3746929167866273, 1.4234991432213153, 1.4740381550000654, 1.5263714718359951, 1.5805627975991423, 1.6366780978613906, 1.6947856801944969, 1.7549562773189731, 1.8172631332050293, 1.8817820922303938, 1.9485916915035324, 2.0177732564646584, 2.0894109998808901, 2.1635921243560827, 2.2404069284800938, 2.3199489167467102, 2.4023149133740307, 2.4876051801658536, 2.5759235385575425, 2.6673774959949301, 2.762078376800098, 2.8601414576833353, 2.9616861080662242, 3.0668359353866661, 3.1757189355627351, 3.2884676487984921, 3.4052193209214345, 3.5261160704479786, 3.6513050615803064, 3.780938683345211, 3.9151747350929473, 4.0541766185819386, 4.1981135368831177, 4.3471607003460608, 4.5014995398775941, 4.6613179277925214, 4.8268104065052952, 4.9981784253410035, 5.175630585753952, 5.3593828952523292, 5.5496590303380522, 5.7466906087818588, 5.9507174715650875, 6.1619879748313364, 6.3807592922033907, 6.6072977278334157, 6.8418790405674859, 7.0847887796190561, 7.3363226321599546, 7.5967867832520346, 7.866498288557616, 8.1457854602823971, 8.4349882668206373, 8.7344587465890875, 9.0445614365534368]
+    flux: [25276.821244674764, 28722.723407923262, 30360.473049322729, 33984.736292474241, 35854.454907360159, 37721.888451513369, 41792.101597201276, 45450.508563093113, 48323.974753436923, 52677.150482905265, 53810.476756526761, 58355.292747301173, 60130.332759471909, 65066.09090594935, 69045.858337315658, 72437.898974947966, 80728.676179699396, 87002.521650256065, 91084.890656927688, 98323.28542422819, 105006.17676779242, 114322.08986347441, 126171.54613173187, 139218.61294605921, 151521.41609409908, 161409.6958591649, 189259.48264800446, 210587.69758960878, 242242.73125719716, 268099.91882613447, 301397.72323530738, 340189.43392865575, 386431.19630181114, 439606.75079753564, 490872.55069392739, 559056.15358305548, 598054.68010369327, 642867.30642169702, 682214.88617398019, 735770.18390646728, 789062.37807587918, 843435.70552473445, 892067.84175600309, 932069.58753616642, 960829.52260059584, 977838.59389104007, 991797.75904680265, 1000337.9175057374, 982396.29545647511, 966139.49995927035, 951371.50707512058, 957975.67004690482, 970869.50658444816, 979478.07901000162, 986052.74143295304, 967911.34861546499, 896279.74583482195, 829475.87333898549, 779461.92206302506, 748939.9422760657, 720475.04177324544, 693928.58029561746, 673063.46634146478, 654417.17264869832, 637027.57674385677, 620809.98140205501, 605685.3977078927, 559996.66818095162, 517387.20610928442, 477649.47917235375, 440589.94203344069, 406028.09366374754, 373795.59819970129, 343735.46505153348, 320318.31796563335, 300587.22403512523, 282185.93979786616, 265024.84053124895, 249020.34191900652, 234094.49294804141, 220174.5962426459, 207192.8539869253, 195086.037710865, 183795.1803317109, 173265.28895073067, 163445.07700651177, 154286.71448023061, 145745.59493625097, 137780.11826340586, 130351.48805879033, 129879.12053379402, 129879.12053379402, 129879.12053379402, 129879.12053379402, 129879.12053379402, 129879.12053379402, 129879.12053379402, 129879.12053379402, 129879.12053379402, 129879.12053379402]
