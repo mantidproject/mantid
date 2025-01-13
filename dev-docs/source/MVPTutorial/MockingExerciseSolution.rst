@@ -15,7 +15,7 @@ Mocking Exercise Solution
 
     class PresenterTest(unittest.TestCase):
         def setUp(self):
-            self._view = mock.create_autospec(View)
+            self._view = mock.create_autospec(View, instance=True)
 
             # mock view
             self._view.get_colour = mock.Mock(return_value="black")

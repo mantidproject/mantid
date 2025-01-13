@@ -29,8 +29,8 @@ class DNSTofPowderScriptGenerator_presenterTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.parent = mock.Mock()
-        cls.view = mock.create_autospec(DNSScriptGeneratorView)
-        cls.model = mock.create_autospec(DNSTofPowderScriptGeneratorModel)
+        cls.view = mock.create_autospec(DNSScriptGeneratorView, instance=True)
+        cls.model = mock.create_autospec(DNSTofPowderScriptGeneratorModel, instance=True)
         cls.view.sig_progress_canceled.connect = mock.Mock()
         cls.view.sig_generate_script.connect = mock.Mock()
         cls.presenter = DNSTofPowderScriptGeneratorPresenter(

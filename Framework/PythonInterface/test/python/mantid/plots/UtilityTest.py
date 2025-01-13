@@ -51,7 +51,7 @@ class UtilityTest(unittest.TestCase):
         self.fig, self.axes = None, None
 
     def test_legend_set_draggable(self):
-        legend = create_autospec(Legend)
+        legend = create_autospec(Legend, instance=True)
         args = (None, False, "loc")
         legend_set_draggable(legend, *args)
 

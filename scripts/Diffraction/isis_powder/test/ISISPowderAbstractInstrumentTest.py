@@ -79,7 +79,7 @@ class ISISPowderAbstractInstrumentTest(unittest.TestCase):
 
     def _setup_output_focused_runs_test(self, mock_get_run_details, mock_get_mode, mock_output_ws, mock_keep_unit):
         mock_inst = self._setup_mock_inst(calibration_dir="ignored", output_dir="ignored", yaml_file_path="ISISPowderRunDetailsTest.yaml")
-        mock_run_details = create_autospec(run_details._RunDetails)
+        mock_run_details = create_autospec(run_details._RunDetails, instance=True)
         runs = ["123", "124"]
         run_string = "-".join(runs)
         mock_run_details.output_string = run_string

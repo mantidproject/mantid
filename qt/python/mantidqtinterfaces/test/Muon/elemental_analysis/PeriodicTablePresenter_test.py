@@ -18,14 +18,14 @@ from mantidqtinterfaces.Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_
 @start_qapplication
 class PeriodicTablePresenterTest(unittest.TestCase):
     def setUp(self):
-        self._model = mock.create_autospec(PeriodicTableModel)
+        self._model = mock.create_autospec(PeriodicTableModel, instance=True)
         self.view = PeriodicTableView()
         self.presenter = PeriodicTablePresenter(self.view, self._model)
         self.presenter.is_selected = mock.Mock()
-        self.mock_elem = mock.create_autospec(PeriodicTableItem)
+        self.mock_elem = mock.create_autospec(PeriodicTableItem, instance=True)
         self.mock_elem.symbol = mock.Mock()
 
-        self.view.ptable = mock.create_autospec(silxPT)
+        self.view.ptable = mock.create_autospec(silxPT, instance=True)
         self.view.ptable.getSelection = mock.Mock(return_value=self.mock_elem)
         self.view.ptable.isElementSelected = mock.Mock(return_value=True)
 

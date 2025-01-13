@@ -16,8 +16,8 @@ from presenter import Presenter
 class TestPresenter(unittest.TestCase):
 
     def setUp(self) -> None:
-        mock_view = mock.create_autospec(View)
-        mock_model = mock.create_autospec(Model)
+        mock_view = mock.create_autospec(View, instance=True)
+        mock_model = mock.create_autospec(Model, instance=True)
 
         self.presenter = Presenter(mock_model, mock_view)
 

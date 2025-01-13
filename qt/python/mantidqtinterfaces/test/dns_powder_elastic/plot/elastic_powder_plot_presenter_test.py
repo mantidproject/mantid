@@ -25,7 +25,7 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.parent = mock.Mock()
-        cls.view = mock.create_autospec(DNSElasticPowderPlotView)
+        cls.view = mock.create_autospec(DNSElasticPowderPlotView, instance=True)
         cls.view.sig_plot.connect = mock.Mock()
         cls.view.sig_grid_state_change.connect = mock.Mock()
         cls.view.sig_error_bar_change.connect = mock.Mock()
@@ -33,7 +33,7 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
         cls.view.sig_log_change.connect = mock.Mock()
         cls.view.get_check_plots.return_value = [0, 1]
         cls.view.get_data_list.return_value = [3, 4]
-        cls.model = mock.create_autospec(DNSElasticPowderPlotModel)
+        cls.model = mock.create_autospec(DNSElasticPowderPlotModel, instance=True)
         cls.model.get_x_y_yerr.return_value = [[1, 2], [3, 4], [4, 5]]
         cls.model.get_updated_ws_list.return_value = [["mat_test"], True]
         cls.presenter = DNSElasticPowderPlotPresenter(view=cls.view, model=cls.model, parent=cls.parent)

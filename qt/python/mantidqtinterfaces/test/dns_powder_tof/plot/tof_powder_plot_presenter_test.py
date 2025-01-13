@@ -25,8 +25,8 @@ class DNSTofPowderPlotPresenterTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.parent = mock.Mock()
-        cls.view = mock.create_autospec(DNSTofPowderPlotView)
-        cls.model = mock.create_autospec(DNSTofPowderPlotModel)
+        cls.view = mock.create_autospec(DNSTofPowderPlotView, instance=True)
+        cls.model = mock.create_autospec(DNSTofPowderPlotModel, instance=True)
         cls.presenter = DNSTofPowderPlotPresenter(view=cls.view, model=cls.model, parent=cls.parent)
         cls.presenter.param_dict = {"tof_powder_script_generator": {"script_number": 3}}
 

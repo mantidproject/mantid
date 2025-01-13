@@ -25,8 +25,8 @@ class SansRunTabAsyncTest(unittest.TestCase):
         worker.set_unit_test_mode(True)
 
         # Mock out various expensive methods
-        worker._notify_progress_signal = mock.create_autospec(worker._notify_progress_signal)
-        worker.batch_processor = mock.create_autospec(worker.batch_processor)
+        worker._notify_progress_signal = mock.create_autospec(worker._notify_progress_signal, instance=True)
+        worker.batch_processor = mock.create_autospec(worker.batch_processor, instance=True)
 
     def test_that_notify_done_method_set_correctly(self):
         self.async_worker.success_cb_slot(mock.NonCallableMock())

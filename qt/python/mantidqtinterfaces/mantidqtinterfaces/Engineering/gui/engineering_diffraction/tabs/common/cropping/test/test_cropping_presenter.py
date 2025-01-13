@@ -19,12 +19,12 @@ dir_path = "mantidqtinterfaces.Engineering.gui.engineering_diffraction.tabs.comm
 
 class CroppingPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.view = mock.create_autospec(cropping_view.CroppingView)
+        self.view = mock.create_autospec(cropping_view.CroppingView, instance=True)
         self.view.finder_custom = mock.MagicMock()
         self.view.finder_custom.isValid.return_value = True
 
         self.parent = mock.MagicMock()
-        self.model = mock.create_autospec(cropping_model.CroppingModel)
+        self.model = mock.create_autospec(cropping_model.CroppingModel, instance=True)
         self.presenter = cropping_presenter.CroppingPresenter(self.parent, self.view, self.model)
 
     def test_combo_changed_index_customcal(self):

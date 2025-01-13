@@ -29,7 +29,7 @@ The test class is then initialised:
 
     class PresenterTest(unittest.TestCase):
         def setUp(self):
-            self._view = mock.create_autospec(View)
+            self._view = mock.create_autospec(View, instance=True)
 
             # mock view
             self._view._button_clicked = mock.Mock()

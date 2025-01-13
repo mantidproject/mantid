@@ -34,11 +34,11 @@ class DNSElasticPowderScriptGeneratorPresenterTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.parent = mock.Mock()
-        cls.view = mock.create_autospec(DNSScriptGeneratorView)
+        cls.view = mock.create_autospec(DNSScriptGeneratorView, instance=True)
         cls.view.sig_progress_canceled.connect = mock.Mock()
         cls.view.sig_generate_script.connect = mock.Mock()
         cls.view.get_state.return_value = {"script_filename": "script.txt", "automatic_filename": False}
-        cls.model = mock.create_autospec(DNSElasticPowderScriptGeneratorModel)
+        cls.model = mock.create_autospec(DNSElasticPowderScriptGeneratorModel, instance=True)
         cls.model.get_plot_list.return_value = [1, 2, 3]
         cls.presenter = DNSElasticPowderScriptGeneratorPresenter(
             view=cls.view, model=cls.model, name="elastic_powder_script_generator", parent=cls.parent

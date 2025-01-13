@@ -22,8 +22,8 @@ def _get_item_checked_mock(_, arg):
 
 class FittingDataPresenterTest(unittest.TestCase):
     def setUp(self):
-        self.model = mock.create_autospec(data_model.FittingDataModel)
-        self.view = mock.create_autospec(data_view.FittingDataView)
+        self.model = mock.create_autospec(data_model.FittingDataModel, instance=True)
+        self.view = mock.create_autospec(data_view.FittingDataView, instance=True)
         self.presenter = data_presenter.FittingDataPresenter(self.model, self.view)
         # TOF axes
         mock_unit_TOF = mock.MagicMock()
