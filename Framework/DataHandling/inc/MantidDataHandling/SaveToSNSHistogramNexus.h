@@ -14,11 +14,10 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include <climits>
-// clang-format off
-#include "MantidNexusCpp/NeXusFile.hpp"
 #include "MantidNexusCpp/NeXusException.hpp"
-// clang-format on
+#include "MantidNexusCpp/NeXusFile.hpp"
+
+#include <climits>
 
 namespace Mantid {
 namespace DataHandling {

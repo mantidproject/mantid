@@ -1,0 +1,1 @@
+- The colorbar (used in Sliceviewer) has been updated to again allow the registration of custom matplotlib colormaps in scripts.

@@ -17,16 +17,13 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidKernel/StringTokenizer.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
+#include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/scoped_ptr.hpp>
-// clang-format off
-#include "MantidNexusCpp/NeXusFile.hpp"
-#include "MantidNexusCpp/NeXusException.hpp"
-// clang-format on
-
-#include <algorithm>
 #include <fstream>
 
 namespace Mantid::DataHandling {

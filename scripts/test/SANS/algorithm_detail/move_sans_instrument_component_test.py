@@ -35,6 +35,8 @@ def get_idf_filename_for_instrument(instrument_name):
     if instrument_name == "ZOOM":
         return "ZOOM_Definition.xml"
 
+    raise ValueError(f"Cannot get IDF filename for instrument name: {instrument_name}")
+
 
 def load_empty_instrument(instrument_name):
     sans_move_test_workspace = LoadEmptyInstrument(Filename=get_idf_filename_for_instrument(instrument_name))

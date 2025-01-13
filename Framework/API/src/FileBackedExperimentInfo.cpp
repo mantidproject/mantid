@@ -6,14 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FileBackedExperimentInfo.h"
 #include "MantidKernel/Logger.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <sstream>
 #include <utility>
-
-// clang-format off
-#include "MantidNexusCpp/NeXusFile.hpp"
-#include "MantidNexusCpp/NeXusException.hpp"
-// clang-format on
 
 namespace Mantid::API {
 

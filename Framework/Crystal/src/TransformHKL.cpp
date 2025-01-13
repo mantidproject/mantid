@@ -48,9 +48,7 @@ void TransformHKL::init() {
   identity_matrix[0] = 1;
   identity_matrix[4] = 1;
   identity_matrix[8] = 1;
-  // clang-format off
-  auto threeBythree = std::make_shared<ArrayLengthValidator<double> >(9);
-  // clang-format on
+  auto threeBythree = std::make_shared<ArrayLengthValidator<double>>(9);
   this->declareProperty(
       std::make_unique<ArrayProperty<double>>("HKLTransform", std::move(identity_matrix), std::move(threeBythree)),
       "Specify 3x3 HKL transform matrix as a comma separated list of 9 "

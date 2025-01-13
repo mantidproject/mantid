@@ -430,9 +430,7 @@ public:
   }
 };
 
-// clang-format off
 class IntegrateEllipsoidsWithSatellitesTestPerformance : public CxxTest::TestSuite {
-  // clang-format on
 
 private:
   Mantid::API::MatrixWorkspace_sptr m_eventWS;
@@ -440,11 +438,7 @@ private:
   Mantid::API::MatrixWorkspace_sptr m_histoWS;
 
 public:
-  // clang-format off
-  static void destroySuite(IntegrateEllipsoidsWithSatellitesTestPerformance *suite) {
-    // clang-format on
-    delete suite;
-  }
+  static void destroySuite(IntegrateEllipsoidsWithSatellitesTestPerformance *suite) { delete suite; }
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests

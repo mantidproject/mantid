@@ -13,7 +13,7 @@ from unittest import TestCase, mock
 
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget, NORM_OPTS
-from matplotlib.colors import LogNorm, Normalize, SymLogNorm
+from matplotlib.colors import LogNorm, Normalize, SymLogNorm, ListedColormap
 
 
 @start_qapplication
@@ -239,3 +239,18 @@ class ColorbarWidgetTest(TestCase):
             self.widget.clim_changed()
 
             self.assertEqual("0.0", self.widget.cmin.text())
+
+    def test_custom_colormaps(self):
+        # test that users can register custom colormaps and have it as an option in the colorbar
+        cmap_name = "custom_cmap"
+        self.assertFalse(cmap_name in plt.colormaps)
+        self.assertTrue(self.widget.cmap.findText(cmap_name) == -1)
+
+        plt.colormaps.register(cmap=ListedColormap([[0, 0, 0], [0, 0, 1]]), name=cmap_name)
+        self.assertTrue(cmap_name in plt.colormaps)
+
+        # now when you create a colorbar widget, the custom colormap should now be available
+        cb = ColorbarWidget()
+        self.assertTrue(cb.cmap.findText(cmap_name) != -1)
+
+        plt.colormaps.unregister(cmap_name)

@@ -14,10 +14,8 @@
 // STL
 
 // NeXus
-// clang-format off
 #include "MantidNexusCpp/NeXusException.hpp"
 #include "MantidNexusCpp/NeXusFile.hpp"
-// clang-format on
 
 // Poco
 #include <Poco/DOM/DOMParser.h>

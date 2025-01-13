@@ -22,11 +22,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
-// clang-format off
-class SpecularReflectionPositionCorrectTest: public CxxTest::TestSuite,
-    public SpecularReflectionAlgorithmTest
-// clang-format on
-{
+class SpecularReflectionPositionCorrectTest : public CxxTest::TestSuite, public SpecularReflectionAlgorithmTest {
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically

@@ -295,19 +295,15 @@ public:
     TS_ASSERT_DELTA(outWS->y(0)[49], 2.1769, Delta);
   }
 };
-// turn clang off, otherwise this does not compile
-// clang-format off
+
 class EstimateMuonAsymmetryFromCountsTestPerformance : public CxxTest::TestSuite {
-  // clang-format on
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static EstimateMuonAsymmetryFromCountsTestPerformance *createSuite() {
     return new EstimateMuonAsymmetryFromCountsTestPerformance();
   }
-  // clang-format off
-  static void  destroySuite(EstimateMuonAsymmetryFromCountsTestPerformance *suite) {
-    // clang-format on
+  static void destroySuite(EstimateMuonAsymmetryFromCountsTestPerformance *suite) {
     AnalysisDataService::Instance().clear();
     delete suite;
   }

@@ -16,11 +16,7 @@
 using namespace Mantid::Reflectometry;
 using namespace Mantid::API;
 
-// clang-format off
-class SpecularReflectionCalculateTheta2Test: public CxxTest::TestSuite,
-    public SpecularReflectionAlgorithmTest
-// clang-format on
-{
+class SpecularReflectionCalculateTheta2Test : public CxxTest::TestSuite, public SpecularReflectionAlgorithmTest {
 
 private:
   Mantid::API::IAlgorithm_sptr makeAlgorithm() const {

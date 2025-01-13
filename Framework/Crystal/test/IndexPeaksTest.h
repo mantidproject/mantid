@@ -73,16 +73,12 @@ PeaksWorkspace_sptr createTestPeaksWorkspaceMainReflOnly() {
                                   0.0045884,  0.0273738,  -0.08973560, 0.0252595};
   // peaks from TOPAZ_3007.peaks: 0, 1, 2, 10, 42 with sign for Q swapped
   // as we don't use the crystallographic convention
-  // clang-format off
-  GNU_DIAG_OFF("missing-braces")
-  // clang-format on
+  GNU_DIAG_OFF("missing-braces");
   constexpr std::array<MinimalPeak, npeaks> testPeaksInfo = {
       MinimalPeak{3008, V3D(-3.52961, 3.13589, 1.0899)}, MinimalPeak{3007, V3D(-2.42456, 2.29581, 1.71147)},
       MinimalPeak{3007, V3D(-3.04393, 3.05739, 2.03727)}, MinimalPeak{3007, V3D(-4.02271, 2.4073, 1.62228)},
       MinimalPeak{3008, V3D(-4.04552, 1.59916, 3.71776)}};
-  // clang-format off
-  GNU_DIAG_ON("missing-braces")
-  // clang-format on
+  GNU_DIAG_ON("missing-braces");
   return createPeaksWorkspace<npeaks>(testPeaksInfo, ub);
 }
 
@@ -91,9 +87,7 @@ PeaksWorkspace_sptr createTestPeaksWorkspaceWithSatellites(const int maxOrder = 
                                                            const bool crossTerms = false) {
   constexpr int npeaks{5};
   const std::vector<double> ub = {0.269, -0.01, 0.033, 0.081, -0.191, -0.039, 0.279, 0.347, -0.02};
-  // clang-format off
-  GNU_DIAG_OFF("missing-braces")
-  // clang-format on
+  GNU_DIAG_OFF("missing-braces");
   constexpr std::array<MinimalPeak, npeaks> testPeaksInfo = {
       MinimalPeak{1, V3D(-3.691, -0.694, 3.762)},     // main
       MinimalPeak{2, V3D(-1.234, -0.225, 1.25212)},   // satellite
@@ -101,9 +95,7 @@ PeaksWorkspace_sptr createTestPeaksWorkspaceWithSatellites(const int maxOrder = 
       MinimalPeak{1, V3D(0.872, -0.1998, 2.7476)},    // satellite
       MinimalPeak{2, V3D(-1.54093, 0.129343, 1.445)}, // satellite
   };
-  // clang-format off
-  GNU_DIAG_ON("missing-braces")
-  // clang-format on
+  GNU_DIAG_ON("missing-braces");
   return createPeaksWorkspace<npeaks>(testPeaksInfo, ub, maxOrder, modVectors, crossTerms);
 }
 

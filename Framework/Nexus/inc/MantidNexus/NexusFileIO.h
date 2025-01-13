@@ -105,9 +105,7 @@ public:
 
 private:
   /// C++ API file handle
-  // clang-format off
-  std::shared_ptr< ::NeXus::File> m_filehandle;
-  // clang-format on
+  std::shared_ptr<::NeXus::File> m_filehandle;
   /// Nexus compression method
   int m_nexuscompression;
   /// Allow an externally supplied progress object to be used
