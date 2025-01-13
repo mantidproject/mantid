@@ -9,7 +9,6 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 #include "MantidSINQ/DllConfig.h"
 
 #include <map>

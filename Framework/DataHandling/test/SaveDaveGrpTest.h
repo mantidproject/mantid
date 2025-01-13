@@ -15,7 +15,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/LoadDaveGrp.h"
 #include "MantidDataHandling/LoadEventNexus.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/UnitFactory.h"
 

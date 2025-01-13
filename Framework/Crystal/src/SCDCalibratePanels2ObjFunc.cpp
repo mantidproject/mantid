@@ -17,7 +17,6 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 
@@ -70,7 +69,7 @@ void SCDCalibratePanels2ObjFunc::setPeakWorkspace(IPeaksWorkspace_sptr &pws, con
   if (inst->getName().compare("CORELLI") == 0 && m_cmpt != "moderator")
     // the second check is just to ensure that no accidental passing in
     // a bank name with sixteenpack already appended
-    if (!boost::algorithm::ends_with(m_cmpt, "/sixteenpack"))
+    if (!m_cmpt.ends_with("/sixteenpack"))
       m_cmpt.append("/sixteenpack");
 
   // Get the experimentally measured TOFs
@@ -283,7 +282,7 @@ SCDCalibratePanels2ObjFunc::scaleRectagularDetectorSize(const double &scalex, co
       std::dynamic_pointer_cast<const Geometry::RectangularDetector>(comp);
   if (rectDet) {
     // get instrument parameter map and find out whether the
-    Geometry::ParameterMap &pmap = pws->instrumentParameters();
+    const Geometry::ParameterMap &pmap = pws->instrumentParameters();
     auto oldscalex = pmap.getDouble(rectDet->getName(), "scalex");
     auto oldscaley = pmap.getDouble(rectDet->getName(), "scaley");
     double relscalex{scalex}, relscaley{scaley};

@@ -1,0 +1,1 @@
+- Fix bug producing invalid data errors when plotting MDHistoWorkspaces with an original workspace in SliceViewer

@@ -14,7 +14,7 @@ namespace LiveData {
 /**
   Wraps communication with a Kafka broker at a given address.
 */
-class DLLExport KafkaBroker : public IKafkaBroker {
+class MANTID_LIVEDATA_DLL KafkaBroker : public IKafkaBroker {
 public:
   explicit KafkaBroker(std::string address);
 

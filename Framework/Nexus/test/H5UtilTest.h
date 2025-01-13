@@ -9,7 +9,6 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidFrameworkTestHelpers/FileResource.h"
-#include "MantidKernel/System.h"
 #include "MantidNexus/H5Util.h"
 
 #include <H5Cpp.h>
@@ -136,7 +135,7 @@ public:
 
     TS_ASSERT(std::filesystem::exists(FILENAME));
 
-    { // read tests
+    { // ---------- simple read tests
       H5File file(FILENAME, H5F_ACC_RDONLY);
       auto group = file.openGroup(GRP_NAME);
 
@@ -151,6 +150,63 @@ public:
       TS_ASSERT_THROWS(H5Util::readArray1DCoerce<int32_t>(group, "array1d_uint32"),
                        const boost::numeric::positive_overflow &);
       TS_ASSERT_THROWS_NOTHING(H5Util::readArray1DCoerce<uint32_t>(group, "array1d_int32"));
+
+      // ---------- slicing read tests
+      auto dataSetFloat = group.openDataSet("array1d_float");
+      auto dataSetDouble = group.openDataSet("array1d_double");
+
+      std::vector<double> output;
+      // full dataset
+      output.clear();
+      H5Util::readArray1DCoerce(dataSetFloat, output, array1d_double.size(), 0);
+      TS_ASSERT_EQUALS(output, array1d_double); // whole thing w/ coercion
+      output.clear();
+      H5Util::readArray1DCoerce(dataSetDouble, output, array1d_double.size(), 0);
+      TS_ASSERT_EQUALS(output, array1d_double); // whole thing w/o coercion
+      output.clear();
+      H5Util::readArray1DCoerce(dataSetFloat, output, array1d_double.size() + 1, 0);
+      TS_ASSERT_EQUALS(output, array1d_double); // more than the whole thing w/ coercion
+      output.clear();
+      H5Util::readArray1DCoerce(dataSetDouble, output, array1d_double.size() + 1, 0);
+      TS_ASSERT_EQUALS(output, array1d_double); // more than the whole thing w/o coercion
+
+      { // partial dataset from front 1->end
+        const std::vector<double> expected({1, 2, 3, 4});
+        output.clear();
+        H5Util::readArray1DCoerce(dataSetFloat, output, array1d_double.size() - 1, 1);
+        TS_ASSERT_EQUALS(output, expected); // w/ coercion
+        output.clear();
+        H5Util::readArray1DCoerce(dataSetDouble, output, array1d_double.size() - 1, 1);
+        TS_ASSERT_EQUALS(output, expected); // w/o coercion
+      }
+
+      { // partial dataset from front 0->end-1
+        const std::vector<double> expected({0, 1, 2, 3});
+        output.clear();
+        H5Util::readArray1DCoerce(dataSetFloat, output, array1d_double.size() - 1, 0);
+        TS_ASSERT_EQUALS(output, expected); // w/ coercion
+        output.clear();
+        H5Util::readArray1DCoerce(dataSetDouble, output, array1d_double.size() - 1, 0);
+        TS_ASSERT_EQUALS(output, expected); // w/o coercion
+      }
+      { // partial dataset from front 1->end-1
+        const std::vector<double> expected({1, 2, 3});
+        output.clear();
+        H5Util::readArray1DCoerce(dataSetFloat, output, array1d_double.size() - 2, 1);
+        TS_ASSERT_EQUALS(output, expected); // w/ coercion
+        output.clear();
+        H5Util::readArray1DCoerce(dataSetDouble, output, array1d_double.size() - 2, 1);
+        TS_ASSERT_EQUALS(output, expected); // w/o coercion
+      }
+      { // from 1->end+1
+        const std::vector<double> expected({1, 2, 3, 4});
+        output.clear();
+        H5Util::readArray1DCoerce(dataSetFloat, output, array1d_double.size() + 1, 1);
+        TS_ASSERT_EQUALS(output, expected); // w/ coercion
+        output.clear();
+        H5Util::readArray1DCoerce(dataSetDouble, output, array1d_double.size() + 1, 1);
+        TS_ASSERT_EQUALS(output, expected); // w/o coercion
+      }
 
       file.close();
     }

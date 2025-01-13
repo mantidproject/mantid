@@ -9,15 +9,15 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/ISISRunLogs.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidDataHandling/DataBlockComposite.h"
-#include "MantidDataHandling/ISISRunLogs.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/Workspace2D_fwd.h"
+#include "MantidHistogramData/HistogramX.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
-#include <nexus/NeXusFile.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/scoped_ptr.hpp>
 
@@ -162,15 +162,13 @@ private:
   /// Monitors, map spectrum index to monitor group name
   std::map<specnum_t, std::string> m_monitors;
   /// A pointer to the ISISRunLogs creator
-  boost::scoped_ptr<ISISRunLogs> m_logCreator;
+  boost::scoped_ptr<API::ISISRunLogs> m_logCreator;
   /// Progress reporting object
   std::shared_ptr<API::Progress> m_progress;
   /// Personal wrapper for sqrt to allow msvs to compile
   static double dblSqrt(double in);
   // Handle to the NeXus file
-  // clang-format off
-  boost::scoped_ptr< ::NeXus::File> m_nexusFile;
-  // clang-format on
+  boost::scoped_ptr<::NeXus::File> m_nexusFile;
 
   bool findSpectraDetRangeInFile(const NeXus::NXEntry &entry, std::vector<specnum_t> &spectrum_index, int64_t ndets,
                                  int64_t n_vms_compat_spectra, const std::map<specnum_t, std::string> &monitors,

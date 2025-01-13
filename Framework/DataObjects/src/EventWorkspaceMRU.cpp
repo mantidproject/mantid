@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/EventWorkspaceMRU.h"
-#include "MantidKernel/System.h"
 
 #include <algorithm>
 

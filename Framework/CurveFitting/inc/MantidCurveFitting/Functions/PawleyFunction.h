@@ -11,8 +11,8 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ParamFunction.h"
+
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidKernel/System.h"
 
 #include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidGeometry/Crystal/UnitCell.h"

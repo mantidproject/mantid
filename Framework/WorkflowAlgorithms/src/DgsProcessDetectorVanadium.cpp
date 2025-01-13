@@ -12,8 +12,6 @@
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidWorkflowAlgorithms/WorkflowAlgorithmHelpers.h"
 
-#include <boost/algorithm/string/predicate.hpp>
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace WorkflowAlgorithmHelpers;
@@ -141,8 +139,7 @@ void DgsProcessDetectorVanadium::exec() {
       }
 
       // Don't save private calculation workspaces
-      if (!outputFile.empty() && !boost::starts_with(outputFile, "ChildAlgOutput") &&
-          !boost::starts_with(outputFile, "__")) {
+      if (!outputFile.empty() && !outputFile.starts_with("ChildAlgOutput") && !outputFile.starts_with("__")) {
         auto save = createChildAlgorithm("SaveNexus");
         save->setProperty("InputWorkspace", outputWS);
         save->setProperty("FileName", outputFile);

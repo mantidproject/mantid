@@ -8,6 +8,7 @@ requirements:
   run:
     - ccache
     - cmake {{ cmake }}
+    - conda-verify
     - conda-wrappers # [win]
     - doxygen {{ doxygen }}
     - eigen {{ eigen }}
@@ -15,6 +16,7 @@ requirements:
     - graphviz {{ graphviz }}
     - gsl {{ gsl }}
     - h5py
+    - hdf4 {{ hdf4 }}
     - hdf5 {{ hdf5 }}
     - jemalloc {{ jemalloc }} # [linux]
     - jsoncpp {{ jsoncpp }}
@@ -26,7 +28,6 @@ requirements:
     - matplotlib {{ matplotlib }}
     - mkl {{ mkl }} # [win]
     - muparser {{ muparser }}
-    - nexus {{ nexus }}
     - ninja {{ ninja }}
     - numpy>=2.0,<2.2 # This is intentionally different to conda_build_config.yaml, will address later.
     - occt {{ occt }}
@@ -55,6 +56,7 @@ requirements:
     - texlive-core {{ texlive_core }} # [osx or linux]
     - toml {{ toml }}
     - versioningit {{ versioningit }}
+    - zlib
     - joblib
     - orsopy {{ orsopy }}
 
@@ -75,10 +77,9 @@ requirements:
     - xorg-libxtst>=1.2.3 # [linux]
 
     # Development tooling
-    - black  # may be out of sync with pre-commit
     - cppcheck==2.14.2
     - gcovr>=4.2 # [linux]
-    - pre-commit>=2.12.0
+    - pre-commit>=4.0
     - libcxx # [osx]
 
     # Use conda version of clang to get matching CXXFLAGS.

@@ -10,9 +10,8 @@
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
-#include <nexus/NeXusFile.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <numeric>
 #include <optional>

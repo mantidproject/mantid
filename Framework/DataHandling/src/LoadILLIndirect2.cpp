@@ -19,13 +19,13 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexusCpp/napi.h"
 
 #include <Poco/Path.h>
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <cmath>
-#include <nexus/napi.h>
 
 namespace Mantid::DataHandling {
 

@@ -12,9 +12,6 @@
 
 #include "Poco/URI.h"
 
-#include "boost/algorithm/string/predicate.hpp"
-#include "boost/make_shared.hpp"
-
 #include <stdexcept>
 #include <string>
 
@@ -67,7 +64,7 @@ void DownloadFile::init() {
  */
 void DownloadFile::exec() {
   std::string address = getProperty("Address");
-  if ((!boost::starts_with(address, "http://")) && (!boost::starts_with(address, "https://"))) {
+  if ((!address.starts_with("http://")) && (!address.starts_with("https://"))) {
     address = "http://" + address;
     g_log.information("Address must start http:// or https://, http has been "
                       "assumed to continue: " +

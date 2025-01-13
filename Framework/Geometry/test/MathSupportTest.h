@@ -15,7 +15,6 @@
 
 #include "MantidGeometry/Math/mathSupport.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 
 using namespace Mantid;
 using namespace mathSupport;

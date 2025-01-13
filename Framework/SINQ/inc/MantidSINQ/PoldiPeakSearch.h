@@ -9,7 +9,6 @@
 #include "MantidSINQ/DllConfig.h"
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V2D.h"
 

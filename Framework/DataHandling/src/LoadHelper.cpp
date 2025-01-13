@@ -11,15 +11,11 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/PhysicalConstants.h"
-
-#include <nexus/napi.h>
-
-#include <boost/algorithm/string/predicate.hpp> //assert(boost::algorithm::ends_with("mystring", "ing"));
+#include "MantidNexusCpp/napi.h"
 
 namespace Mantid {
 
@@ -128,8 +124,7 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &worksp
  */
 void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, const std::string &entryName,
                                        bool useFullPath) {
-  int datatype;
-  char nxname[NX_MAXNAMELEN], nxclass[NX_MAXNAMELEN];
+  char nxname[NX_MAXNAMELEN];
   if (!entryName.empty()) {
     strcpy(nxname, entryName.c_str());
   }
@@ -139,7 +134,9 @@ void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, 
   // by default we begin the parse on the first entry (entry0),
   // or from a chosen entryName. This allow to avoid the
   // bogus entries that follows.
-
+  int datatype;
+  char nxclass[NX_MAXNAMELEN];
+  // cppcheck-suppress argumentSize
   NXstatus getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
   if (getnextentry_status == NX_OK) {
     if ((NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
@@ -167,24 +164,21 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
                                                  const std::string &parent_name, const std::string &parent_class,
                                                  int level, bool useFullPath) {
   // Classes
-  NXstatus getnextentry_status; ///< return status
-  int datatype;                 ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see
+  int datatype; ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see
   /// napi.h
-  char nxname[NX_MAXNAMELEN], nxclass[NX_MAXNAMELEN];
+  char nxname[NX_MAXNAMELEN];
   nxname[0] = '0';
+  char nxclass[NX_MAXNAMELEN];
   nxclass[0] = '0';
 
   bool has_entry = true; // follows getnextentry_status
   while (has_entry) {
-    getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
+    // cppcheck-suppress argumentSize
+    const NXstatus getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
 
     if (getnextentry_status == NX_OK) {
-      NXstatus opengroup_status;
-      NXstatus opendata_status;
-      NXstatus getinfo_status;
-
       std::string property_name = (parent_name.empty() ? nxname : parent_name + "." + nxname);
-      if ((opengroup_status = NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
+      if (NXopengroup(nxfileID, nxname, nxclass) == NX_OK) {
         if (std::string(nxclass) != "ILL_data_scan_vars" && std::string(nxclass) != "NXill_data_scan_vars") {
           // Go down to one level, if the group is known to nexus
           std::string p_nxname = useFullPath ? property_name : nxname; // current names can be useful for next level
@@ -195,7 +189,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
 
         NXclosegroup(nxfileID);
       } // if(NXopengroup
-      else if ((opendata_status = NXopendata(nxfileID, nxname)) == NX_OK) {
+      else if (NXopendata(nxfileID, nxname) == NX_OK) {
         if (parent_class != "NXData" && parent_class != "NXMonitor" &&
             std::string(nxname) != "data") { // create a property
           int rank = 0;
@@ -203,7 +197,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
           int type;
 
           // Get the value
-          if ((getinfo_status = NXgetinfo(nxfileID, &rank, dims, &type)) == NX_OK) {
+          if (NXgetinfo(nxfileID, &rank, dims, &type) == NX_OK) {
             // Note, we choose to only build properties on small float arrays
             // filter logic is below
             bool build_small_float_array = false; // default
@@ -234,7 +228,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
 
                 if (type == NX_CHAR) {
                   std::string property_value(reinterpret_cast<const char *>(dataBuffer));
-                  if (boost::algorithm::ends_with(property_name, "_time")) {
+                  if (property_name.ends_with("_time")) {
                     // That's a time value! Convert to Mantid standard
                     property_value = dateTimeInIsoFormat(property_value);
                     if (runDetails.hasProperty(property_name))
@@ -259,8 +253,7 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID, API::Run &ru
                   int units_len = NX_MAXNAMELEN;
                   int units_type = NX_CHAR;
 
-                  char unitsAttrName[] = "units";
-                  units_status = NXgetattr(nxfileID, unitsAttrName, units_sbuf, &units_len, &units_type);
+                  units_status = NXgetattr(nxfileID, std::string("units").c_str(), units_sbuf, &units_len, &units_type);
                   if ((type == NX_FLOAT32) || (type == NX_FLOAT64)) {
                     // Mantid numerical properties are double only.
                     double property_double_value = 0.0;

@@ -40,13 +40,16 @@ function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
   if(GENERATE_EXTERN)
     set(CUSTOM
         "${CUSTOM}\
-// Use extern keyword in client code to suppress class template instantiation\n\
+// MantidKernel/System.h will be removed\n\
 #include \"MantidKernel/System.h\"\n\n\
+// Use extern keyword in client code to suppress class template instantiation\n\
 #ifdef ${TARGET_LIBRARY}_EXPORTS\n\
 #define EXTERN_MANTID_${TARGET_NAME}\n\
 #else\n\
+// EXTERN_IMPORT is defined in MantidKernel/System.h\n
 #define EXTERN_MANTID_${TARGET_NAME} EXTERN_IMPORT\n\
-#endif /* ${TARGET_LIBRARY}_EXPORTS*/\n\
+#endif /* ${TARGET_LIBRARY}_EXPORTS*/\n\n\
+#include <cstdint>
  "
     )
   endif(GENERATE_EXTERN)

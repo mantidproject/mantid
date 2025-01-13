@@ -15,7 +15,6 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAlgorithms/CompareWorkspaces.h"
-#include "MantidDataHandling/LoadMuonNexus2.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 

@@ -16,7 +16,6 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
-#include "MantidKernel/System.h"
 #include "Poco/Path.h"
 #include <stdexcept>
 #include <utility>

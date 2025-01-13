@@ -12,7 +12,6 @@
 #include "MantidKernel/MultiFileValidator.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyHelper.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VectorHelper.h"
 
 #include <Poco/Path.h>

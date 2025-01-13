@@ -12,8 +12,6 @@
 #include "MantidAPI/ScopedWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <boost/algorithm/string/predicate.hpp>
-
 using namespace Mantid::API;
 
 /// MockWorkspace copied from AnalysisDataServiceTest so I have something to add
@@ -62,7 +60,7 @@ public:
 
     const std::string prefix("__ScopedWorkspace_");
 
-    TS_ASSERT(boost::starts_with(test.name(), prefix));
+    TS_ASSERT(test.name().starts_with(prefix));
     TS_ASSERT_EQUALS(test.name().size(), prefix.size() + 16);
   }
 

@@ -12,12 +12,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Unit.h"
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
-
-#include <boost/algorithm/string.hpp>
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 namespace Mantid::DataHandling {
 using namespace Kernel;
@@ -47,7 +43,7 @@ int LoadMcStasNexus::confidence(Kernel::NexusHDF5Descriptor &descriptor) const {
   for (auto iter = entries.begin(); iter != entries.end(); ++iter) {
     const auto grouped_entries = iter->second;
     if (std::any_of(grouped_entries.cbegin(), grouped_entries.cend(),
-                    [](const auto &path) { return boost::ends_with(path, "information"); })) {
+                    [](const auto &path) { return path.ends_with("information"); })) {
       confidence = 40;
       break;
     }
@@ -99,7 +95,7 @@ void LoadMcStasNexus::exec() {
       // Find the axis names
       auto nxdataEntries = nxFile.getEntries();
       std::string axis1Name, axis2Name;
-      for (auto &nxdataEntry : nxdataEntries) {
+      for (const auto &nxdataEntry : nxdataEntries) {
         if (nxdataEntry.second == "NXparameters")
           continue;
         nxFile.openData(nxdataEntry.first);

@@ -18,12 +18,12 @@
 #include "MantidGeometry/Instrument.h"
 
 #include "MantidKernel/CompositeValidator.h"
+
 #include "MantidKernel/MantidVersion.h"
 
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
+#include "MantidNexusCpp/NeXusException.hpp"
+
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
@@ -179,7 +179,7 @@ void SaveNXTomo::processAll() {
   }
 
   // If not overwriting, ensure it has a .nxs extension
-  if ((!m_overwriteFile || status == NX_ERROR) && !boost::ends_with(this->m_filename, ".nxs"))
+  if ((!m_overwriteFile || status == NX_ERROR) && !this->m_filename.ends_with(".nxs"))
     m_filename = m_filename + ".nxs";
 
   status = NXopen(this->m_filename.c_str(), NXACC_CREATE5, &fileHandle);

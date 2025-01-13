@@ -9,8 +9,8 @@
 #include <string>
 
 #include "MantidAPI/DllConfig.h"
+
 #include "MantidAPI/Workspace_fwd.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {

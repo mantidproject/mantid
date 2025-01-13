@@ -13,8 +13,8 @@
  */
 
 struct ISISCRPT_STRUCT;
-#include "MantidKernel/System.h"
 #include "item_struct.h"
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 

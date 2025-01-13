@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/CostFunctionFactory.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllConfig.h"
 
 namespace Mantid {
 namespace API {

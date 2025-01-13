@@ -12,11 +12,11 @@
 #include <string>
 
 #include "ADARA.h"
-#include "MantidKernel/System.h"
+#include "MantidLiveData/DllConfig.h"
 
 namespace ADARA {
 
-class DLLExport PacketHeader {
+class MANTID_LIVEDATA_DLL PacketHeader {
 public:
   PacketHeader(const uint8_t *data) {
     const uint32_t *field = reinterpret_cast<const uint32_t *>(data);
@@ -67,7 +67,7 @@ protected:
   PacketHeader();
 };
 
-class DLLExport Packet : public PacketHeader {
+class MANTID_LIVEDATA_DLL Packet : public PacketHeader {
 public:
   Packet(const uint8_t *data, uint32_t len);
   Packet(const Packet &pkt);
@@ -88,7 +88,7 @@ private:
   Packet &operator=(const Packet &pkt);
 };
 
-class DLLExport RawDataPkt : public Packet {
+class MANTID_LIVEDATA_DLL RawDataPkt : public Packet {
 public:
   RawDataPkt(const RawDataPkt &pkt);
 
@@ -120,7 +120,7 @@ private:
   friend class MappedDataPkt;
 };
 
-class DLLExport MappedDataPkt : public RawDataPkt {
+class MANTID_LIVEDATA_DLL MappedDataPkt : public RawDataPkt {
 public:
 private:
   MappedDataPkt(const uint8_t *data, uint32_t len);
@@ -128,7 +128,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport RTDLPkt : public Packet {
+class MANTID_LIVEDATA_DLL RTDLPkt : public Packet {
 public:
   RTDLPkt(const RTDLPkt &pkt);
 
@@ -184,7 +184,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport SourceListPkt : public Packet {
+class MANTID_LIVEDATA_DLL SourceListPkt : public Packet {
 public:
   const uint32_t *ids() const { return reinterpret_cast<const uint32_t *>(payload()); }
   uint32_t num_ids() const { return (uint32_t)payload_length() / (uint32_t)sizeof(uint32_t); }
@@ -195,7 +195,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport BankedEventPkt : public Packet {
+class MANTID_LIVEDATA_DLL BankedEventPkt : public Packet {
 public:
   BankedEventPkt(const BankedEventPkt &pkt);
 
@@ -261,7 +261,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport BeamMonitorPkt : public Packet {
+class MANTID_LIVEDATA_DLL BeamMonitorPkt : public Packet {
 public:
   BeamMonitorPkt(const BeamMonitorPkt &pkt);
 
@@ -299,7 +299,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport PixelMappingPkt : public Packet {
+class MANTID_LIVEDATA_DLL PixelMappingPkt : public Packet {
 public:
   // TODO implement accessors for fields
 private:
@@ -308,7 +308,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport RunStatusPkt : public Packet {
+class MANTID_LIVEDATA_DLL RunStatusPkt : public Packet {
 public:
   RunStatusPkt(const RunStatusPkt &pkt);
 
@@ -325,7 +325,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport RunInfoPkt : public Packet {
+class MANTID_LIVEDATA_DLL RunInfoPkt : public Packet {
 public:
   const std::string &info() const { return m_xml; }
 
@@ -337,7 +337,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport TransCompletePkt : public Packet {
+class MANTID_LIVEDATA_DLL TransCompletePkt : public Packet {
 public:
   TransCompletePkt(const TransCompletePkt &pkt);
 
@@ -353,7 +353,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport ClientHelloPkt : public Packet {
+class MANTID_LIVEDATA_DLL ClientHelloPkt : public Packet {
 public:
   enum Flags {
     PAUSE_AGNOSTIC = 0x0000,
@@ -373,7 +373,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport AnnotationPkt : public Packet {
+class MANTID_LIVEDATA_DLL AnnotationPkt : public Packet {
 public:
   AnnotationPkt(const AnnotationPkt &pkt);
 
@@ -400,7 +400,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport SyncPkt : public Packet {
+class MANTID_LIVEDATA_DLL SyncPkt : public Packet {
 public:
   // TODO implement accessors for fields
 private:
@@ -409,7 +409,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport HeartbeatPkt : public Packet {
+class MANTID_LIVEDATA_DLL HeartbeatPkt : public Packet {
 public:
 private:
   HeartbeatPkt(const uint8_t *data, uint32_t len);
@@ -417,7 +417,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport GeometryPkt : public Packet {
+class MANTID_LIVEDATA_DLL GeometryPkt : public Packet {
 public:
   const std::string &info() const { return m_xml; }
 
@@ -429,7 +429,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport BeamlineInfoPkt : public Packet {
+class MANTID_LIVEDATA_DLL BeamlineInfoPkt : public Packet {
 public:
   const uint32_t &targetStationNumber() const { return m_targetStationNumber; }
 
@@ -449,7 +449,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport BeamMonitorConfigPkt : public Packet {
+class MANTID_LIVEDATA_DLL BeamMonitorConfigPkt : public Packet {
 public:
   BeamMonitorConfigPkt(const BeamMonitorConfigPkt &pkt);
 
@@ -498,7 +498,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport DetectorBankSetsPkt : public Packet {
+class MANTID_LIVEDATA_DLL DetectorBankSetsPkt : public Packet {
 public:
   DetectorBankSetsPkt(const DetectorBankSetsPkt &pkt) = delete;
   DetectorBankSetsPkt &operator=(DetectorBankSetsPkt) = delete;
@@ -617,7 +617,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport DataDonePkt : public Packet {
+class MANTID_LIVEDATA_DLL DataDonePkt : public Packet {
 public:
 private:
   DataDonePkt(const uint8_t *data, uint32_t len);
@@ -625,7 +625,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport DeviceDescriptorPkt : public Packet {
+class MANTID_LIVEDATA_DLL DeviceDescriptorPkt : public Packet {
 public:
   uint32_t devId() const { return m_devId; }
   const std::string &description() const { return m_desc; }
@@ -645,7 +645,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport VariableU32Pkt : public Packet {
+class MANTID_LIVEDATA_DLL VariableU32Pkt : public Packet {
 public:
   VariableU32Pkt(const VariableU32Pkt &pkt);
 
@@ -668,7 +668,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport VariableDoublePkt : public Packet {
+class MANTID_LIVEDATA_DLL VariableDoublePkt : public Packet {
 public:
   VariableDoublePkt(const VariableDoublePkt &pkt);
 
@@ -691,7 +691,7 @@ private:
   friend class Parser;
 };
 
-class DLLExport VariableStringPkt : public Packet {
+class MANTID_LIVEDATA_DLL VariableStringPkt : public Packet {
 public:
   VariableStringPkt(const VariableStringPkt &pkt);
 

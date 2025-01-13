@@ -20,7 +20,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include <stdexcept>
 #include <vector>
 

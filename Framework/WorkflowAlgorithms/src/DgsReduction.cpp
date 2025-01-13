@@ -19,10 +19,10 @@
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/RebinParamsValidator.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 
 #include <boost/algorithm/string/erase.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <sstream>
 
 using namespace Mantid::Kernel;
@@ -436,8 +436,8 @@ Workspace_sptr DgsReduction::loadInputData(const std::string &prop, const bool m
     this->setLoadAlg("Load");
     if ("ISIS" == facility) {
       std::string detCalFileFromAlg = this->getProperty("DetCalFilename");
-      std::string detCalFileProperty = prop + "DetCalFilename";
       if (!detCalFileFromAlg.empty()) {
+        const std::string detCalFileProperty = prop + "DetCalFilename";
         this->reductionManager->declareProperty(
             std::make_unique<PropertyWithValue<std::string>>(detCalFileProperty, detCalFileFromAlg));
       }
@@ -471,7 +471,7 @@ MatrixWorkspace_sptr DgsReduction::loadHardMask() {
   } else {
     IAlgorithm_sptr loadMask;
     bool castWorkspace = false;
-    if (boost::ends_with(hardMask, ".nxs")) {
+    if (hardMask.ends_with(".nxs")) {
       loadMask = this->createChildAlgorithm("Load");
       loadMask->setProperty("Filename", hardMask);
     } else {
@@ -571,7 +571,7 @@ void DgsReduction::exec() {
   const bool showIntermedWS = this->getProperty("ShowIntermediateWorkspaces");
 
   std::string outputWsName = this->getPropertyValue("OutputWorkspace");
-  if (boost::ends_with(outputWsName, "_spe")) {
+  if (outputWsName.ends_with("_spe")) {
     boost::erase_all(outputWsName, "_spe");
   }
 
@@ -607,8 +607,6 @@ void DgsReduction::exec() {
   IAlgorithm_sptr detVan;
   Workspace_sptr idetVanWS;
   if (detVanWS && !isProcessedDetVan) {
-    std::string detVanMaskName = outputWsName + "_diagmask";
-
     auto diag = createChildAlgorithm("DgsDiagnose");
     diag->setProperty("DetVanWorkspace", detVanWS);
     diag->setProperty("DetVanMonitorWorkspace", detVanMonWS);
@@ -622,6 +620,7 @@ void DgsReduction::exec() {
     maskWS = diag->getProperty("OutputWorkspace");
 
     if (showIntermedWS) {
+      const std::string detVanMaskName = outputWsName + "_diagmask";
       this->declareProperty(
           std::make_unique<WorkspaceProperty<>>("SampleDetVanDiagMask", detVanMaskName, Direction::Output));
       this->setProperty("SampleDetVanDiagMask", maskWS);
@@ -631,13 +630,13 @@ void DgsReduction::exec() {
     detVan->setProperty("InputWorkspace", detVanWS);
     detVan->setProperty("InputMonitorWorkspace", detVanMonWS);
     detVan->setProperty("MaskWorkspace", maskWS);
-    std::string idetVanName = outputWsName + "_idetvan";
     detVan->setProperty("ReductionProperties", getPropertyValue("ReductionProperties"));
     detVan->executeAsChildAlg();
     MatrixWorkspace_sptr oWS = detVan->getProperty("OutputWorkspace");
     idetVanWS = std::dynamic_pointer_cast<Workspace>(oWS);
 
     if (showIntermedWS) {
+      const std::string idetVanName = outputWsName + "_idetvan";
       this->declareProperty(
           std::make_unique<WorkspaceProperty<>>("IntegratedNormWorkspace", idetVanName, Direction::Output));
       this->setProperty("IntegratedNormWorkspace", idetVanWS);
@@ -679,8 +678,6 @@ void DgsReduction::exec() {
 
   // Perform absolute normalisation if necessary
   if (absSampleWS) {
-    std::string absWsName = outputWsName + "_absunits";
-
     // Collect the other workspaces first.
     MatrixWorkspace_sptr absSampleMonWS = this->getProperty("AbsUnitsSampleInputMonitorWorkspace");
     Workspace_sptr absDetVanWS = this->loadInputData("AbsUnitsDetectorVanadium", false);
@@ -712,6 +709,7 @@ void DgsReduction::exec() {
     outputWS = divide(outputWS, absUnitsWS);
 
     if (showIntermedWS) {
+      const std::string absWsName = outputWsName + "_absunits";
       this->declareProperty(std::make_unique<WorkspaceProperty<>>("AbsUnitsWorkspace", absWsName, Direction::Output));
       this->setProperty("AbsUnitsWorkspace", absUnitsWS);
       this->declareProperty(std::make_unique<WorkspaceProperty<>>(

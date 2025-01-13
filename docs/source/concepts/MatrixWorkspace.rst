@@ -284,6 +284,53 @@ Output:
   Counts
   Elephants
 
+Plotting
+^^^^^^^^
+.. _MatrixWorkspace_Plotting:
+
+You can specify the type of plot to be used when plotting a Matrix Workspace. The following plot types are available:
+``plot``, ``marker``, ``errorbar_x``, ``errorbar_y``, ``errorbar_xy``, with ``plot`` as the default.
+Changing the plot type will affect the way the data is displayed and can be changed in the following way:
+
+.. testsetup:: MatrixWorkspacePlotType
+
+  from mantid.simpleapi import CreateSampleWorkspace
+  ws = CreateSampleWorkspace()
+
+.. testcode:: MatrixWorkspacePlotType
+
+    print(ws.getPlotType())
+    ws.setPlotType("marker")
+    print(ws.getPlotType())
+
+Output:
+
+.. testoutput:: MatrixWorkspacePlotType
+
+  plot
+  marker
+
+**Setting Plot Marker**
+
+When plotting multiple marker workspaces it may be necessary to set the marker type for each workspace.
+If no marker is set, the default will be used from the :ref:`Properties File <Properties File>`. Marker style can be changed using the following code:
+
+.. testsetup:: MatrixWorkspaceMarker
+
+  from mantid.simpleapi import CreateSampleWorkspace
+  ws = CreateSampleWorkspace()
+
+.. testcode:: MatrixWorkspaceMarker
+
+    ws.setMarkerStyle("circle")
+    print(ws.getMarkerStyle())
+
+Output:
+
+.. testoutput:: MatrixWorkspaceMarker
+
+  circle
+
 Matrix Workspace Operations
 ###########################
 

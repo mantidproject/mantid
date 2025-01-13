@@ -9,7 +9,6 @@
 #include "MantidGeometry/Crystal/SymmetryElementFactory.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 
 #include <algorithm>
 #include <boost/algorithm/string.hpp>

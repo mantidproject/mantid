@@ -13,7 +13,6 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
 #include "MantidGeometry/Crystal/IPeak.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {

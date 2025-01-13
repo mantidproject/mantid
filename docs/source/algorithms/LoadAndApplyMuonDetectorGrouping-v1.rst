@@ -74,8 +74,8 @@ Usage
 					  OverwriteExisting=True)
 
 	# Load the data
-	LoadMuonNexus(  Filename='MUSR00015189.nxs',
-					OutputWorkspace='MuonAnalysis')
+	Load(Filename='MUSR00015189.nxs',
+		 OutputWorkspace='MuonAnalysis')
 
 	LoadAndApplyMuonDetectorGrouping(
 		Filename='MUSRGrouping.xml',

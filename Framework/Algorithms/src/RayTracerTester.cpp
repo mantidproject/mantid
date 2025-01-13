@@ -9,7 +9,6 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 
 #include <cmath>

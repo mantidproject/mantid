@@ -12,7 +12,6 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
 
 namespace Mantid::MDAlgorithms {

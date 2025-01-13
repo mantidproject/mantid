@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/SyncedCheckboxes.h"
-#include "MantidKernel/System.h"
 
 namespace MantidQt {
 namespace API {
