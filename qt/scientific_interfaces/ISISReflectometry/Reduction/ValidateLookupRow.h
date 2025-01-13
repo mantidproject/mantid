@@ -31,7 +31,7 @@ public:
 
 private:
   ValidatorT<boost::optional<double>> parseThetaOrWhitespace(LookupRow::ValueArray const &cellText);
-  ValidatorT<boost::optional<boost::regex>> parseTitleMatcherOrWhitespace(LookupRow::ValueArray const &cellText);
+  ValidatorT<std::optional<boost::regex>> parseTitleMatcherOrWhitespace(LookupRow::ValueArray const &cellText);
   ValidatorT<TransmissionRunPair> parseTransmissionRuns(LookupRow::ValueArray const &cellText);
   ValidatorT<boost::optional<std::string>>
   parseTransmissionProcessingInstructions(LookupRow::ValueArray const &cellText);
@@ -46,7 +46,7 @@ private:
 
   std::unordered_set<int> m_invalidColumns;
   ValidatorT<boost::optional<double>> m_thetaOrInvalid;
-  ValidatorT<boost::optional<boost::regex>> m_titleMatcherOrInvalid;
+  ValidatorT<std::optional<boost::regex>> m_titleMatcherOrInvalid;
 };
 
 ValidationResult<LookupRow, std::unordered_set<int>> validateLookupRow(LookupRow::ValueArray const &cellText);

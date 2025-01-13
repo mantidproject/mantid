@@ -96,7 +96,7 @@ std::vector<LookupRow> LookupTable::findMatchingRegexes(std::string const &title
   auto results = std::vector<LookupRow>();
   std::copy_if(m_lookupRows.cbegin(), m_lookupRows.cend(), std::back_inserter(results),
                [&title](auto const &candidate) {
-                 return candidate.titleMatcher() && boost::regex_search(title, candidate.titleMatcher().get());
+                 return candidate.titleMatcher() && boost::regex_search(title, candidate.titleMatcher().value());
                });
   return results;
 }

@@ -195,7 +195,7 @@ void Decoder::decodeInstrument(const QtInstrumentView *gui, const QMap<QString, 
 }
 
 void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
-                         const QMap<QString, QVariant> &map, boost::optional<int> precision,
+                         const QMap<QString, QVariant> &map, std::optional<int> precision,
                          QtCatalogSearcher *searcher) {
   decodeRunsTable(gui->m_tableView, redJobs, presenter, map[QString("runsTable")].toMap(), std::move(precision));
   gui->m_ui.comboSearchInstrument->setCurrentIndex(map[QString("comboSearchInstrument")].toInt());
@@ -210,13 +210,13 @@ void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePrese
 }
 
 namespace {
-using ValueFunction = boost::optional<double> (RangeInQ::*)() const;
+using ValueFunction = std::optional<double> (RangeInQ::*)() const;
 
 MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, RangeInQ const &qRangeOutput,
-                                               ValueFunction valueFunction, boost::optional<int> precision) {
+                                               ValueFunction valueFunction, std::optional<int> precision) {
   auto maybeValue = (qRangeInput.*valueFunction)();
   auto useOutputValue = false;
-  if (!maybeValue.is_initialized()) {
+  if (!maybeValue.has_value()) {
     maybeValue = (qRangeOutput.*valueFunction)();
     useOutputValue = true;
   }
@@ -228,7 +228,7 @@ MantidWidgets::Batch::Cell qRangeCellOrDefault(RangeInQ const &qRangeInput, Rang
   return result;
 }
 
-std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, const boost::optional<int> &precision) {
+std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, const std::optional<int> &precision) {
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
        MantidQt::MantidWidgets::Batch::Cell(valueToString(row.theta(), precision)),
@@ -244,7 +244,7 @@ std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row, c
 } // namespace
 
 void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model,
-                                           const boost::optional<int> &precision) {
+                                           const std::optional<int> &precision) {
   auto jobTreeView = view->m_jobs.get();
   auto const &groups = model->groups();
   for (auto groupIndex = 0u; groupIndex < groups.size(); ++groupIndex) {
@@ -274,7 +274,7 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view, const Reductio
 }
 
 void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
-                              const QMap<QString, QVariant> &map, boost::optional<int> precision) {
+                              const QMap<QString, QVariant> &map, std::optional<int> precision) {
   QSignalBlocker signalBlockerView(gui);
 
   m_projectSave = map[QString("projectSave")].toBool();
@@ -394,17 +394,17 @@ RangeInQ Decoder::decodeRangeInQ(const QMap<QString, QVariant> &map) {
   if (minPresent && maxPresent && stepPresent) {
     return RangeInQ(min, step, max);
   } else if (minPresent && maxPresent) {
-    return RangeInQ(min, boost::none, max);
+    return RangeInQ(min, std::nullopt, max);
   } else if (minPresent && stepPresent) {
     return RangeInQ(min, step);
   } else if (minPresent) {
     return RangeInQ(min);
   } else if (stepPresent && maxPresent) {
-    return RangeInQ(boost::none, step, max);
+    return RangeInQ(std::nullopt, step, max);
   } else if (stepPresent) {
-    return RangeInQ(boost::none, step);
+    return RangeInQ(std::nullopt, step);
   } else if (maxPresent) {
-    return RangeInQ(boost::none, boost::none, max);
+    return RangeInQ(std::nullopt, std::nullopt, max);
   } else {
     return RangeInQ();
   }

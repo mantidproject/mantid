@@ -81,17 +81,17 @@ public:
 
   void testParseTitleMatcherEmpty() {
     auto result = parseTitleMatcher("      \t  ");
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseTitleMatcher() {
     auto result = parseTitleMatcher(".*");
-    TS_ASSERT(result.is_initialized());
+    TS_ASSERT(result.has_value());
   }
 
   void testParseTitleMatcherHandlesInvalidRegex() {
     auto result = parseTitleMatcher("[");
-    TS_ASSERT(!result.is_initialized());
+    TS_ASSERT(!result.has_value());
   }
 
   void testParseOptions() {

@@ -15,9 +15,9 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace {
 Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
-boost::optional<RangeInLambda> rangeOrNone(const RangeInLambda &range, const bool bothOrNoneMustBeSet) {
+std::optional<RangeInLambda> rangeOrNone(const RangeInLambda &range, const bool bothOrNoneMustBeSet) {
   if (range.unset() || !range.isValid(bothOrNoneMustBeSet))
-    return boost::none;
+    return std::nullopt;
   else
     return range;
 }
@@ -132,7 +132,7 @@ void InstrumentPresenter::restoreDefaults() {
   updateViewFromModel();
 }
 
-boost::optional<RangeInLambda> InstrumentPresenter::wavelengthRangeFromView() {
+std::optional<RangeInLambda> InstrumentPresenter::wavelengthRangeFromView() {
   auto range = RangeInLambda(m_view->getLambdaMin(), m_view->getLambdaMax());
   bool const bothOrNoneMustBeSet = false;
 
@@ -144,7 +144,7 @@ boost::optional<RangeInLambda> InstrumentPresenter::wavelengthRangeFromView() {
   return rangeOrNone(range, bothOrNoneMustBeSet);
 }
 
-boost::optional<RangeInLambda> InstrumentPresenter::monitorBackgroundRangeFromView() {
+std::optional<RangeInLambda> InstrumentPresenter::monitorBackgroundRangeFromView() {
   auto range = RangeInLambda(m_view->getMonitorBackgroundMin(), m_view->getMonitorBackgroundMax());
   bool const bothOrNoneMustBeSet = true;
 
@@ -156,7 +156,7 @@ boost::optional<RangeInLambda> InstrumentPresenter::monitorBackgroundRangeFromVi
   return rangeOrNone(range, bothOrNoneMustBeSet);
 }
 
-boost::optional<RangeInLambda> InstrumentPresenter::monitorIntegralRangeFromView() {
+std::optional<RangeInLambda> InstrumentPresenter::monitorIntegralRangeFromView() {
   auto range = RangeInLambda(m_view->getMonitorIntegralMin(), m_view->getMonitorIntegralMax());
   bool const bothOrNoneMustBeSet = false;
 

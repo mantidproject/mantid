@@ -9,13 +9,13 @@
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 
 TransmissionStitchOptions::TransmissionStitchOptions()
-    : m_overlapRange(boost::none), m_rebinParameters(), m_scaleRHS(false) {}
+    : m_overlapRange(std::nullopt), m_rebinParameters(), m_scaleRHS(false) {}
 
-TransmissionStitchOptions::TransmissionStitchOptions(boost::optional<RangeInLambda> overlapRange,
+TransmissionStitchOptions::TransmissionStitchOptions(std::optional<RangeInLambda> overlapRange,
                                                      RebinParameters rebinParameters, bool scaleRHS)
     : m_overlapRange(std::move(overlapRange)), m_rebinParameters(std::move(rebinParameters)), m_scaleRHS(scaleRHS) {}
 
-boost::optional<RangeInLambda> TransmissionStitchOptions::overlapRange() const { return m_overlapRange; }
+std::optional<RangeInLambda> TransmissionStitchOptions::overlapRange() const { return m_overlapRange; }
 
 RebinParameters TransmissionStitchOptions::rebinParameters() const { return m_rebinParameters; }
 

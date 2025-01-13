@@ -118,8 +118,8 @@ void LookupTableValidator::sortInPlaceByThetaThenTitleMatcher(LookupTableRows &l
     if (*lhs.thetaOrWildcard() != *rhs.thetaOrWildcard()) {
       return *lhs.thetaOrWildcard() < *rhs.thetaOrWildcard();
     }
-    auto const lhsTitle = lhs.titleMatcher().get_value_or(boost::regex());
-    auto const rhsTitle = rhs.titleMatcher().get_value_or(boost::regex());
+    auto const lhsTitle = lhs.titleMatcher().value_or(boost::regex());
+    auto const rhsTitle = rhs.titleMatcher().value_or(boost::regex());
     return lhsTitle < rhsTitle;
   };
 

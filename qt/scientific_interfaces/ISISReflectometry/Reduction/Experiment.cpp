@@ -19,7 +19,7 @@ Experiment::Experiment()
       m_polarizationCorrections(PolarizationCorrections(PolarizationCorrectionType::None)),
       m_floodCorrections(FloodCorrections(FloodCorrectionType::Workspace)), m_transmissionStitchOptions(),
       m_stitchParameters(std::map<std::string, std::string>()),
-      m_lookupTable(LookupTable({LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none, RangeInQ(),
+      m_lookupTable(LookupTable({LookupRow(boost::none, std::nullopt, TransmissionRunPair(), boost::none, RangeInQ(),
                                            boost::none, ProcessingInstructions(), boost::none, boost::none)})) {}
 
 Experiment::Experiment(AnalysisMode analysisMode, ReductionType reductionType, SummationType summationType,
@@ -73,11 +73,11 @@ void Experiment::updateLookupRow(LookupRow lookupRow, double tolerance) {
   m_lookupTable.updateLookupRow(std::move(lookupRow), tolerance);
 }
 
-boost::optional<size_t> Experiment::getLookupRowIndexFromRow(Row const &row, double tolerance) const {
+std::optional<size_t> Experiment::getLookupRowIndexFromRow(Row const &row, double tolerance) const {
   if (auto const lookupRow = m_lookupTable.findLookupRow(row, tolerance)) {
     return m_lookupTable.getIndex(lookupRow.get());
   }
-  return boost::none;
+  return std::nullopt;
 }
 
 bool operator!=(Experiment const &lhs, Experiment const &rhs) { return !operator==(lhs, rhs); }

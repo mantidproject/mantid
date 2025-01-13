@@ -239,7 +239,7 @@ public:
     auto presenter = makePresenter();
     FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"testWS"});
     EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("Workspace"));
-    EXPECT_CALL(m_view, getFloodWorkspace()).WillOnce(Return(floodCorr.workspace().get()));
+    EXPECT_CALL(m_view, getFloodWorkspace()).WillOnce(Return(floodCorr.workspace().value()));
     EXPECT_CALL(m_view, setFloodCorrectionWorkspaceMode()).Times(1);
     presenter.notifySettingsChanged();
 
@@ -251,10 +251,10 @@ public:
     FloodCorrections floodCorr(FloodCorrectionType::Workspace, std::string{"path/to/testWS"});
 
     EXPECT_CALL(m_view, getFloodCorrectionType()).Times(2).WillRepeatedly(Return("FilePath"));
-    EXPECT_CALL(m_fileHandler, getFullFilePath(floodCorr.workspace().get()))
-        .WillOnce(Return(floodCorr.workspace().get()));
-    EXPECT_CALL(m_fileHandler, fileExists(floodCorr.workspace().get())).WillOnce(Return(true));
-    EXPECT_CALL(m_view, getFloodFilePath()).WillOnce(Return(floodCorr.workspace().get()));
+    EXPECT_CALL(m_fileHandler, getFullFilePath(floodCorr.workspace().value()))
+        .WillOnce(Return(floodCorr.workspace().value()));
+    EXPECT_CALL(m_fileHandler, fileExists(floodCorr.workspace().value())).WillOnce(Return(true));
+    EXPECT_CALL(m_view, getFloodFilePath()).WillOnce(Return(floodCorr.workspace().value()));
     EXPECT_CALL(m_view, setFloodCorrectionFilePathMode()).Times(1);
     presenter.notifySettingsChanged();
 
@@ -340,7 +340,7 @@ public:
 
   void testTransmissionRunRangeIsValidButNotUpdatedIfUnset() {
     RangeInLambda range(0.0, 0.0);
-    runTestForValidTransmissionRunRange(range, boost::none);
+    runTestForValidTransmissionRunRange(range, std::nullopt);
   }
 
   void testTransmissionParamsAreValidWithPositiveValue() { runTestForValidTransmissionParams("0.02"); }
@@ -658,7 +658,7 @@ public:
   }
 
   void testInstrumentChangedUpdatesLookupRowInView() {
-    auto lookupRow = LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
+    auto lookupRow = LookupRow(boost::none, std::nullopt, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
                                0.7, std::string("390-415"), std::string("370-389,416-430"), boost::none);
     auto model = makeModelWithLookupRow(std::move(lookupRow));
     auto defaultOptions = expectDefaults(model);
@@ -670,13 +670,13 @@ public:
   }
 
   void testInstrumentChangedUpdatesLookupRowInModel() {
-    auto model = makeModelWithLookupRow(LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none,
+    auto model = makeModelWithLookupRow(LookupRow(boost::none, std::nullopt, TransmissionRunPair(), boost::none,
                                                   RangeInQ(0.01, 0.03, 0.2), 0.7, std::string("390-415"),
                                                   std::string("370-389,416-430"), boost::none));
     auto defaultOptions = expectDefaults(model);
     auto presenter = makePresenter(std::move(defaultOptions));
     presenter.notifyInstrumentChanged("POLREF");
-    auto expected = LookupRow(boost::none, boost::none, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
+    auto expected = LookupRow(boost::none, std::nullopt, TransmissionRunPair(), boost::none, RangeInQ(0.01, 0.03, 0.2),
                               0.7, std::string("390-415"), std::string("370-389,416-430"), boost::none);
     auto lookupRows = presenter.experiment().lookupTableRows();
     TS_ASSERT_EQUALS(lookupRows.size(), 1);
@@ -1118,7 +1118,7 @@ private:
     presenter.notifySettingsChanged();
   }
 
-  void runTestForValidTransmissionRunRange(RangeInLambda const &range, boost::optional<RangeInLambda> const &result) {
+  void runTestForValidTransmissionRunRange(RangeInLambda const &range, std::optional<RangeInLambda> const &result) {
     auto presenter = makePresenter();
     EXPECT_CALL(m_view, getTransmissionStartOverlap()).WillOnce(Return(range.min()));
     EXPECT_CALL(m_view, getTransmissionEndOverlap()).WillOnce(Return(range.max()));
@@ -1133,20 +1133,20 @@ private:
     EXPECT_CALL(m_view, getTransmissionEndOverlap()).WillOnce(Return(range.max()));
     EXPECT_CALL(m_view, showTransmissionRangeInvalid()).Times(1);
     presenter.notifySettingsChanged();
-    TS_ASSERT_EQUALS(presenter.experiment().transmissionStitchOptions().overlapRange(), boost::none);
+    TS_ASSERT_EQUALS(presenter.experiment().transmissionStitchOptions().overlapRange(), std::nullopt);
   }
 
   // These functions create various rows in the per-theta defaults tables,
   // either as an input array of strings or an output model
   OptionsRow optionsRowWithFirstAngle() { return {"0.5", "", "13463", ""}; }
   LookupRow defaultsWithFirstAngle() {
-    return LookupRow(0.5, boost::none, TransmissionRunPair("13463", ""), boost::none, RangeInQ(), boost::none,
+    return LookupRow(0.5, std::nullopt, TransmissionRunPair("13463", ""), boost::none, RangeInQ(), boost::none,
                      boost::none, boost::none, boost::none);
   }
 
   OptionsRow optionsRowWithSecondAngle() { return {"2.3", "", "13463", "13464"}; }
   LookupRow defaultsWithSecondAngle() {
-    return LookupRow(2.3, boost::none, TransmissionRunPair("13463", "13464"), boost::none, RangeInQ(), boost::none,
+    return LookupRow(2.3, std::nullopt, TransmissionRunPair("13463", "13464"), boost::none, RangeInQ(), boost::none,
                      boost::none, boost::none, boost::none);
   }
   OptionsRow optionsRowWithWildcard() { return {"", "", "13463", "13464"}; }
