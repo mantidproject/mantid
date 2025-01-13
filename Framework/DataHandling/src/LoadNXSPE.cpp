@@ -14,19 +14,15 @@
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidKernel/DeltaEMode.h"
-#include "MantidKernel/UnitFactory.h"
-
-#include "MantidNexus/NexusClasses.h"
-// clang-format off
-#include "MantidNexusCpp/NeXusFile.hpp"
-#include "MantidNexusCpp/NeXusException.hpp"
-// clang-format on
-
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidKernel/DeltaEMode.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/NexusClasses.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/regex.hpp>
 

@@ -18,12 +18,12 @@
 #include "MantidGeometry/Instrument.h"
 
 #include "MantidKernel/CompositeValidator.h"
+
 #include "MantidKernel/MantidVersion.h"
 
-// clang-format off
-#include "MantidNexusCpp/NeXusFile.hpp"
 #include "MantidNexusCpp/NeXusException.hpp"
-// clang-format on
+
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 namespace Mantid::DataHandling {
 // Register the algorithm into the algorithm factory
