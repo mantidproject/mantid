@@ -1,0 +1,1 @@
+-  Added new mode ``mode="pdf_norm"`` to :ref:`ISIS POLARIS powder reduction<isis-powder-diffraction-polaris-ref>` for when the chopper is off/stationary with a default ``van_normalisation_method="absolute"``. The existing  ``mode="pdf"`` now has a default  ``van_normalisation_method="relative"`` (was previously ``"absolute"``).
