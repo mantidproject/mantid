@@ -169,7 +169,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         # overwrite the "Yes to All" button text
         ui.buttonBox.button(QDialogButtonBox.YesToAll).setText("Plot All")
         # ok disabled by default
-        ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+        ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
 
         # validity markers
         ui.wkspIndicesValid.setIcon(red_asterisk())
@@ -548,7 +548,7 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
                 if self._parent._ui.specNums.text() or self._parent._ui.wkspIndices.text():
                     self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
             else:
-                self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+                self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
 
             return valid_options
 
