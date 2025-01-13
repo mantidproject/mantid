@@ -1,0 +1,1 @@
+- Use :ref:`MultiDomainFunction<func-MultiDomainFunction>` in :ref:`IntegratePeaks1DProfile <algm-IntegratePeaks1DProfile>` to tie peak profile parameters accross pixels.
