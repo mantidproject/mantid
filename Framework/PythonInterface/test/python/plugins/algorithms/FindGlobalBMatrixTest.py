@@ -5,6 +5,7 @@ from mantid.simpleapi import (
     AnalysisDataService,
     SetGoniometer,
     SetUB,
+    ClearUB,
     CreatePeaksWorkspace,
     LoadEmptyInstrument,
     CloneWorkspace,
@@ -95,33 +96,51 @@ class FindGlobalBMatrixTest(unittest.TestCase):
             "FindGlobalBMatrix", PeakWorkspaces=[peaks1], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
         )
 
-        with self.assertRaisesRegex(RuntimeError, "there must be at least two peak tables provided in total."):
+        with self.assertRaisesRegex(RuntimeError, "Accept only PeaksWorkspaces with either:*"):
             alg.execute()
 
-    def test_peak_workspaces_need_at_least_six_peaks_each(self):
+    def test_peak_workspaces_need_at_least_six_peaks_each_without_ub(self):
         peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks5")
         UB = np.diag([0.25, 0.25, 0.1])
         SetUB(peaks1, UB=UB)
         # Add 5 peaks
         add_peaksHKL([peaks1], range(0, 5), [0], 4)
         peaks2 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks6")
+        ClearUB(peaks2)
 
         alg = create_algorithm(
             "FindGlobalBMatrix", PeakWorkspaces=[peaks1, peaks2], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
         )
 
-        with self.assertRaisesRegex(RuntimeError, "Accept only peaks workspace with more than 6 peaks"):
+        with self.assertRaisesRegex(RuntimeError, "Accept only PeaksWorkspaces with either:*"):
+            alg.execute()
+
+    def test_peak_workspaces_need_at_least_two_peaks_each_with_ub(self):
+        peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks7")
+        UB = np.diag([0.25, 0.25, 0.1])
+        SetUB(peaks1, UB=UB)
+        peaks2 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks8")
+        SetUB(peaks2, UB=UB)
+        # Add 5 peaks
+        add_peaksHKL([peaks1], range(0, 5), [0], 4)
+        add_peaksHKL([peaks2], range(0, 1), [0], 4)
+
+        alg = create_algorithm(
+            "FindGlobalBMatrix", PeakWorkspaces=[peaks1, peaks2], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
+        )
+
+        with self.assertRaisesRegex(RuntimeError, "Accept only PeaksWorkspaces with either:*"):
             alg.execute()
 
     def test_performs_correct_transform_to_ensure_consistent_indexing(self):
         # create peaks tables
-        peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks7")
+        peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks9")
         UB = np.diag([0.2, 0.25, 0.1])
         SetUB(peaks1, UB=UB)
         # Add some peaks
         add_peaksHKL([peaks1], range(0, 3), range(0, 3), 4)
         # Clone ws and transform
-        peaks2 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks8")
+        peaks2 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks10")
         peaks2.removePeak(0)  # peaks1 will have most peaks indexed so will used as reference
         transform = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
         TransformHKL(PeaksWorkspace=peaks2, HKLTransform=transform, FindError=False)
@@ -132,6 +151,35 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         self.assert_lattice([peaks1, peaks2], 5.0, 4.0, 10.0, 90.0, 90.0, 90.0, delta_latt=5e-2, delta_angle=2.5e-1)
         self.assert_matrix([peaks1], getBMatrix(peaks2), getBMatrix, delta=1e-10)  # should have same B matrix
         self.assert_matrix([peaks1, peaks2], np.eye(3), getUMatrix, delta=5e-2)
+
+    def test_any_workspaces_with_no_peaks_are_excluded(self):
+        # Setup
+
+        SetGoniometer(Workspace=self.ws, Axis0="-5,0,1,0,1")
+        peaks = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks11")
+        UB = np.diag([0.3333, 0.25, 0.09091])  # alatt = [3,4,11]
+        SetUB(peaks, UB=UB)
+
+        peaks2 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks12")
+        UB = np.diag([0.30, 0.25, 0.1])  # alatt = [3.33,4,10]
+        SetUB(peaks2, UB=UB)
+
+        SetGoniometer(Workspace=self.ws, Axis0="5,0,1,0,1")
+        peaks3 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks13")
+        UB = np.diag([0.3333, 0.25, 0.09091])  # alatt = [3,4,11]
+        SetUB(peaks3, UB=UB)
+
+        peaks_list = [peaks, peaks2, peaks3]
+        for K in range(1, 6):
+            for L in range(1, 6):
+                for peak_ws in peaks_list:
+                    pk = peak_ws.createPeakHKL([2, K, L])
+                    if pk.getDetectorID() > 0:
+                        peak_ws.addPeak(pk)
+
+        FindGlobalBMatrix(PeakWorkspaces=peaks_list, a=3, b=4, c=11, alpha=90, beta=90, gamma=90, Tolerance=0.15)
+
+        self.assertWarnsRegex(RuntimeWarning, "Workspace 1 removed")
 
     def assert_lattice(self, ws_list, a, b, c, alpha, beta, gamma, delta_latt=2e-2, delta_angle=2.5e-1):
         for ws in ws_list:
