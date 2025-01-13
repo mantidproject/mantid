@@ -22,6 +22,10 @@ from abins.test_helpers import assert_kpoint_almost_equal
 
 class TestAbinsData(unittest.TestCase):
     def setUp(self):
+        from mantid.kernel import ConfigService
+
+        self.cache_directory = ConfigService.getString("defaultsave.directory")
+
         self.mock_ad = MagicMock(spec=abins.AtomsData)
         self.mock_kpd = MagicMock(spec=abins.KpointsData)
 
@@ -34,7 +38,9 @@ class TestAbinsData(unittest.TestCase):
     def test_init_noloader(self):
         with self.assertRaises(ValueError):
             AbinsData.from_calculation_data(
-                abins.test_helpers.find_file("squaricn_sum_LoadCASTEP.phonon"), ab_initio_program="fake_program"
+                abins.test_helpers.find_file("squaricn_sum_LoadCASTEP.phonon"),
+                ab_initio_program="fake_program",
+                cache_directory=self.cache_directory,
             )
 
     def test_data_content(self):
@@ -54,13 +60,17 @@ class DummyLoader:
 
 class TestAbinsDataFromCalculation(unittest.TestCase):
     def setUp(self):
+        from mantid.kernel import ConfigService
+
+        self.cache_directory = ConfigService.getString("defaultsave.directory")
+
         all_loaders["DUMMYLOADER"] = DummyLoader
 
     def tearDown(self):
         del all_loaders["DUMMYLOADER"]
 
     def test_with_dummy_loader(self):
-        data = AbinsData.from_calculation_data("dummy_file.ext", "DummyLoader")
+        data = AbinsData.from_calculation_data("dummy_file.ext", "DummyLoader", cache_directory=self.cache_directory)
         self.assertEqual(data, "FORMATTED DATA")
 
 

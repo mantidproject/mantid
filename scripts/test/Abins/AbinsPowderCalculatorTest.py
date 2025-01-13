@@ -23,7 +23,11 @@ class PowderCalculatorTest(unittest.TestCase):
 
     #     test input
     def tearDown(self):
-        abins.test_helpers.remove_output_files(list_of_names=["CalculatePowder"])
+        from mantid.kernel import ConfigService
+
+        abins.test_helpers.remove_output_files(
+            list_of_names=["CalculatePowder"], directory=ConfigService.getString("defaultsave.directory")
+        )
 
     def test_wrong_input(self):
         full_path_filename = abins.test_helpers.find_file(filename=self._si2 + ".json")
