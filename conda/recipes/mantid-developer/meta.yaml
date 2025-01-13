@@ -37,6 +37,7 @@ requirements:
     - pycifrw
     - pydantic
     - pyqt {{ pyqt }}
+    - pyqtwebengine
     - python-dateutil {{ python_dateutil }}
     - python {{ python }}
     - python.app # [osx]
