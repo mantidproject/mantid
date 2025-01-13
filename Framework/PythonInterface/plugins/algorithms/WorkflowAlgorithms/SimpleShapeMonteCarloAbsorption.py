@@ -74,21 +74,21 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
         self.declareProperty(
             name="CoherentXSection",
             defaultValue=Property.EMPTY_DBL,
-            doc="The coherent cross section of the sample in barns. It can be used instead of the" "Chemical Formula.",
+            doc="The coherent cross section of the sample in barns. It can be used instead of theChemical Formula.",
         )
         self.setPropertySettings("CoherentXSection", material_defined_prop)
 
         self.declareProperty(
             name="IncoherentXSection",
             defaultValue=Property.EMPTY_DBL,
-            doc="The incoherent cross section of the sample in barns. It can be used instead of the" "Chemical Formula.",
+            doc="The incoherent cross section of the sample in barns. It can be used instead of theChemical Formula.",
         )
         self.setPropertySettings("IncoherentXSection", material_defined_prop)
 
         self.declareProperty(
             name="AttenuationXSection",
             defaultValue=Property.EMPTY_DBL,
-            doc="The absorption cross section of the sample in barns. It can be used instead of the" "Chemical Formula.",
+            doc="The absorption cross section of the sample in barns. It can be used instead of theChemical Formula.",
         )
         self.setPropertySettings("AttenuationXSection", material_defined_prop)
 

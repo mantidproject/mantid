@@ -285,7 +285,7 @@ class Abins2D(AbinsAlgorithm, PythonAlgorithm):
 
             self._instrument_kwargs.update({"chopper_frequency": chopper_frequency})
         elif self.getProperty("ChopperFrequency").value:
-            logger.warning("The selected instrument does not use a chopper: " "chopper frequency will be ignored.")
+            logger.warning("The selected instrument does not use a chopper: chopper frequency will be ignored.")
 
         self.set_instrument()
 

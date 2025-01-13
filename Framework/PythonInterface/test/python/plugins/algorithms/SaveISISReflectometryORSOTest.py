@@ -608,7 +608,7 @@ class SaveISISReflectometryORSOTest(unittest.TestCase):
 
         self._run_save_alg(ws_grp, write_resolution=False, include_extra_cols=False)
 
-        self._check_file_header(["instrument_settings:\n" "#       incident_angle: null\n" "#       wavelength: null"])
+        self._check_file_header(["instrument_settings:\n#       incident_angle: null\n#       wavelength: null"])
         for state in spin_states:
             with self.subTest(test_case=state):
                 self._check_file_header([f"#       polarization: {state}"])

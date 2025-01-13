@@ -44,7 +44,7 @@ class BatchCsvParser(object):
         batch_file_name = find_full_file_path(batch_file_name)
         if not batch_file_name:
             raise RuntimeError(
-                "batch_csv_file_parser: Could not find specified batch file. Make sure it is available" "in the Mantid path settings."
+                "batch_csv_file_parser: Could not find specified batch file. Make sure it is availablein the Mantid path settings."
             )
 
         parsed_rows = []

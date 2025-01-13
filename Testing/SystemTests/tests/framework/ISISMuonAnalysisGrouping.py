@@ -33,7 +33,7 @@ class ISISMuonAnalysisGrouping(systemtesting.MantidSystemTest, metaclass=ABCMeta
     @abstractmethod
     def get_reference_file(self):
         """Returns the name of the reference file to compare against"""
-        raise NotImplementedError("Implmenent get_reference_file to return " "the name of the file to compare against.")
+        raise NotImplementedError("Implmenent get_reference_file to return the name of the file to compare against.")
 
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""

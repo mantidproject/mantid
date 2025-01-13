@@ -137,7 +137,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        run_no_err = "Wrong number of {0} runs: {1}. Provide one or as many as " "sample runs: {2}."
+        run_no_err = "Wrong number of {0} runs: {1}. Provide one or as many as sample runs: {2}."
         runs_sample = len(self.getPropertyValue("Runs"))
         if not self.getProperty("EmptyContainerWorkspace").isDefault:
             runs_container = mtd[self.getPropertyValue("EmptyContainerWorkspace")].getNumberOfEntries()
@@ -179,7 +179,7 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
             try:
                 Load(Filename=flat_bkg_ws, OutputWorkspace=flat_bkg_ws)
             except ValueError:
-                issues["FlatBackgroundSource"] = "Desired flat background workspace:" " {} cannot be found.".format(flat_bkg_ws)
+                issues["FlatBackgroundSource"] = "Desired flat background workspace: {} cannot be found.".format(flat_bkg_ws)
 
         if self.getPropertyValue("AbsorptionCorrection") != "None":
             if self.getProperty("SampleMaterial").isDefault:
@@ -315,10 +315,10 @@ class DirectILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(IntArrayProperty(name="MaskedTubes", values=[], direction=Direction.Input), doc="List of tubes to be masked.")
 
         self.declareProperty(
-            "MaskThresholdMin", 0.0, doc="Threshold level below which bins will be masked" " to remove empty / background pixels."
+            "MaskThresholdMin", 0.0, doc="Threshold level below which bins will be masked to remove empty / background pixels."
         )
 
-        self.declareProperty("MaskThresholdMax", 0.0, doc="Threshold level above which bins will be masked" " to remove noisy pixels.")
+        self.declareProperty("MaskThresholdMax", 0.0, doc="Threshold level above which bins will be masked to remove noisy pixels.")
 
         self.declareProperty(
             FloatArrayProperty(name="MaskedAngles", values=[], validator=orderedPairsValidator),

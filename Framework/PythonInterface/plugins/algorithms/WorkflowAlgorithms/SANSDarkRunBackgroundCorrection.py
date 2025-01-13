@@ -32,8 +32,8 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", validator=CommonBinsValidator(), direction=Direction.Input))
         self.declareProperty(MatrixWorkspaceProperty("DarkRun", "", validator=CommonBinsValidator(), direction=Direction.Input))
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), "The corrected SANS workspace.")
-        self.declareProperty("NormalizationRatio", 1.0, "Number to scale the dark run in order" "to make it comparable to the SANS run")
-        self.declareProperty("Mean", False, "If True then a mean value of all spectra is used to " "calculate the value to subtract")
+        self.declareProperty("NormalizationRatio", 1.0, "Number to scale the dark run in orderto make it comparable to the SANS run")
+        self.declareProperty("Mean", False, "If True then a mean value of all spectra is used to calculate the value to subtract")
         self.declareProperty("Uniform", True, "If True then we treat the treat the tim ebins a")
         self.declareProperty("ApplyToDetectors", True, "If True then we apply the correction to the detector pixels")
         self.declareProperty("ApplyToMonitors", False, "If True then we apply the correction to the monitors")
@@ -249,7 +249,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
             # We only want to set the detecors to 0 which are not sepecifically mentioned
             detector_cleaned_dark_run = remover.set_mixed_monitor_detector_dark_run(dark_run, selected_monitors)
         else:
-            raise RuntimeError("SANSDarkRunBackgroundCorrection: Must provide either " "ApplyToDetectors or ApplyToMonitors or both")
+            raise RuntimeError("SANSDarkRunBackgroundCorrection: Must provide either ApplyToDetectors or ApplyToMonitors or both")
 
         return detector_cleaned_dark_run
 
@@ -302,7 +302,7 @@ class DarkRunMonitorAndDetectorRemover(object):
                     monitor_list.append(index)
         except:
             Logger("DarkRunMonitorAndDetectorRemover").information(
-                "There was an issue when trying " "to extract the monitor list from workspace"
+                "There was an issue when trying to extract the monitor list from workspace"
             )
         return list(zip(monitor_list, det_id_list))
 

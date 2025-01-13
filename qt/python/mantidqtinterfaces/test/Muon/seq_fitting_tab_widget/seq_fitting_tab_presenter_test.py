@@ -48,7 +48,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
         self.presenter.fitting_calculation_model = mock.MagicMock()
         self.model.get_fit_function_parameter_values = mock.MagicMock(return_value=values)
         fit_function = FunctionFactory.createInitialized(
-            f"name=GausOsc,A={values[0]},Sigma={values[1]}," f"Frequency={values[2]},Phi={values[3]}"
+            f"name=GausOsc,A={values[0]},Sigma={values[1]},Frequency={values[2]},Phi={values[3]}"
         )
         self.model.fit_function = fit_function
         self.model.get_ws_fit_function = mock.MagicMock(return_value=fit_function)

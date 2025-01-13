@@ -1322,7 +1322,7 @@ class DarkRunSubtraction(object):
         @param dark_run_setting
         """
         if not isinstance(dark_run_setting, UserFileParser.DarkRunSettings):
-            raise RuntimeError("DarkRunSubtraction: The provided settings " "object is not of type DarkRunSettings")
+            raise RuntimeError("DarkRunSubtraction: The provided settings object is not of type DarkRunSettings")
 
         # We only add entries where the run number has been specified
         if not dark_run_setting.run_number:

@@ -38,12 +38,8 @@ class MuonWorkspaceWrapper(object):
             self._is_in_ads = True
 
     def __str__(self):
-        return (
-            "MuonWorkspaceWrapper Object \n"
-            "In ADS         : {}\n"
-            "Name           : {}\n"
-            "Directory      : {}\n"
-            "Workspace Type : {}\n".format(self._is_in_ads, self._workspace_name, self._directory_structure, type(self._workspace))
+        return "MuonWorkspaceWrapper Object \nIn ADS         : {}\nName           : {}\nDirectory      : {}\nWorkspace Type : {}\n".format(
+            self._is_in_ads, self._workspace_name, self._directory_structure, type(self._workspace)
         )
 
     @property
@@ -91,7 +87,7 @@ class MuonWorkspaceWrapper(object):
         if isinstance(value, Workspace):
             self._workspace = value
         else:
-            raise AttributeError("Attempting to set object of type {}, must be" " a Mantid Workspace type".format(type(value)))
+            raise AttributeError("Attempting to set object of type {}, must be a Mantid Workspace type".format(type(value)))
 
     def show(self, name=""):
         """

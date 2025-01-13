@@ -55,7 +55,7 @@ class DNSTofPowderPlotPresenterTest(unittest.TestCase):
         self.view.set_plot.assert_not_called()
         self.view.raise_error.assert_called_once()
 
-    @patch("mantidqtinterfaces.dns_powder_tof.plot.tof_powder_plot_presenter." "DNSTofPowderPlotPresenter._plot")
+    @patch("mantidqtinterfaces.dns_powder_tof.plot.tof_powder_plot_presenter.DNSTofPowderPlotPresenter._plot")
     def test_tab_got_focus(self, mock_plot):
         self.presenter.tab_got_focus()
         mock_plot.assert_called_once()

@@ -36,7 +36,7 @@ class DNSElasticPowderPlotModelTest(unittest.TestCase):
         self.assertIsInstance(self.model, DNSObsModel)
         self.assertTrue(hasattr(self.model, "_plotted_script_number"))
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.plot." "elastic_powder_plot_model.mtd")
+    @patch("mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_model.mtd")
     def test__add_simulation_to_ws_list(self, mtd):
         ws_list = []
         mtd.__getitem__.return_value = 1
@@ -48,7 +48,7 @@ class DNSElasticPowderPlotModelTest(unittest.TestCase):
         test_v = elastic_powder_plot_model._add_simulation_to_ws_list(ws_list)
         self.assertEqual(test_v, [])
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.plot." "elastic_powder_plot_model.mtd")
+    @patch("mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_model.mtd")
     def test_get_max_int_of_workspaces(self, mtd):
         mtd.__getitem__.return_value = self.fake_workspace
         test_v = self.model.get_max_int_of_workspaces(["123"])
@@ -56,20 +56,20 @@ class DNSElasticPowderPlotModelTest(unittest.TestCase):
         test_v = self.model.get_max_int_of_workspaces(["simulation"])
         self.assertEqual(test_v, 1)
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.plot." "elastic_powder_plot_model.mtd")
+    @patch("mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_model.mtd")
     def test__get_x(self, mtd):
         mtd.__getitem__.return_value = self.fake_workspace
         test_v = elastic_powder_plot_model._get_x("123")
         self.assertEqual(test_v, np.asarray(1))
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.plot." "elastic_powder_plot_model.mtd")
+    @patch("mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_model.mtd")
     def test__get_y(self, mtd):
         mtd.__getitem__.return_value = self.fake_workspace
         test_v = elastic_powder_plot_model._get_y("123")
         self.assertEqual(test_v[0], 4)
         self.assertEqual(len(test_v), 2)
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.plot." "elastic_powder_plot_model.mtd")
+    @patch("mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_model.mtd")
     def test__get_yerr(self, mtd):
         mtd.__getitem__.return_value = self.fake_workspace
         test_v = elastic_powder_plot_model._get_yerr("123")
@@ -94,7 +94,7 @@ class DNSElasticPowderPlotModelTest(unittest.TestCase):
         self.assertEqual(test_v[0][0], 0.5)
         self.assertEqual(test_v[1][0], 1 / 3 * 5)
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.plot." "elastic_powder_plot_model.mtd")
+    @patch("mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_model.mtd")
     def test_get_x_y_yerr(self, mtd):
         mtd.__getitem__.return_value = self.fake_workspace
         test_v = self.model.get_x_y_yerr("a", "tt", 5, 4.74)
@@ -110,7 +110,7 @@ class DNSElasticPowderPlotModelTest(unittest.TestCase):
         test_v = self.model._data_list_updated(["mat_a", "mat_b"], ["a", "b"], 1)
         self.assertTrue(test_v)
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.plot." "elastic_powder_plot_model.mtd")
+    @patch("mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_model.mtd")
     def test_get_updated_ws_list(self, mtd):
         self.model._plotted_script_number = 0
         mtd.__getitem__.return_value = self.fake_workspace
@@ -138,7 +138,7 @@ class DNSElasticPowderPlotModelTest(unittest.TestCase):
         self.assertEqual(self.model._plotted_script_number, 5)
         self.model._plotted_script_number = 0
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.plot." "elastic_powder_plot_model.mtd")
+    @patch("mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_model.mtd")
     def test__check_workspace_exists(self, mtd):
         mtd.__getitem__.return_value = "123"
         test_v = elastic_powder_plot_model._check_workspace_exists("123")

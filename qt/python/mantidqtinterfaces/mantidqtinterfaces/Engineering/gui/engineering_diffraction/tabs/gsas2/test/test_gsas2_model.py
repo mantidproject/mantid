@@ -338,7 +338,7 @@ class TestGSAS2Model(unittest.TestCase):
             with open(project_path, mode="w"):
                 pass
             save_message = self.model.move_output_files_to_user_save_location()
-            self.assertEqual(save_message, f"\n\nOutput GSAS-II files saved in {self.model.user_save_directory}" f" and in {rb_directory}")
+            self.assertEqual(save_message, f"\n\nOutput GSAS-II files saved in {self.model.user_save_directory} and in {rb_directory}")
         finally:
             _try_delete(self.model.user_save_directory)
             _try_delete(stem_user_dir)
@@ -580,12 +580,12 @@ class TestGSAS2Model(unittest.TestCase):
         row_one_values = [
             "PWDR_ENGINX_305761_307521_all_banks_TOF_Bank_1",
             "Fe_gamma",
-            "38288.34268011223,    33257.94906996838,    23516.921315731473," "    20055.2978839699,    19201.485848241107",
+            "38288.34268011223,    33257.94906996838,    23516.921315731473,    20055.2978839699,    19201.485848241107",
         ]
         row_two_values = [
             "PWDR_ENGINX_305761_307521_all_banks_TOF_Bank_2",
             "Fe_gamma",
-            "38290.34946979921,    33260.04166233164,    23517.59925304957," "    20054.97099923875,    19200.87064357961",
+            "38290.34946979921,    33260.04166233164,    23517.59925304957,    20054.97099923875,    19200.87064357961",
         ]
 
         table = CreateEmptyTableWorkspace(OutputWorkspace="expected_gsas2_output_GSASII_lattice_parameters")

@@ -37,7 +37,7 @@ class SpaceGroupFactoryTest(systemtesting.MantidSystemTest):
 
         self.checkPointGroupOfSpaceGroup(group)
 
-        self.assertTrue(group.isGroup(), ("Space group " + str(group.getNumber()) + " (" + symbol + ") does not " "fulfill group axioms"))
+        self.assertTrue(group.isGroup(), ("Space group " + str(group.getNumber()) + " (" + symbol + ") does not fulfill group axioms"))
 
         groupOperations = set(group.getSymmetryOperationStrings())
 

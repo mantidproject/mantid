@@ -391,7 +391,7 @@ class BeamCentrePositionUpdaterFactory(object):  # pylint: disable=R0903
             return BeamCentrePositionUpdaterAll()
         else:
             RuntimeError(
-                "Error in BeamCentrePositionUpdaterFactory: You need to provide a position update" "policy, ie up/down, left/right or all"
+                "Error in BeamCentrePositionUpdaterFactory: You need to provide a position updatepolicy, ie up/down, left/right or all"
             )
 
 

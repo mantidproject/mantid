@@ -325,7 +325,7 @@ class StateGuiModelTest(unittest.TestCase):
                 self.assertEqual(
                     user_input,
                     state_gui_model.wavelength_range,
-                    f"Setting enum from {original_val} to {new_val}" " did not preserve the users selected range",
+                    f"Setting enum from {original_val} to {new_val} did not preserve the users selected range",
                 )
                 self.assertEqual(2.0, state_gui_model.wavelength_min)
                 self.assertEqual(8.0, state_gui_model.wavelength_max)

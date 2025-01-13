@@ -26,7 +26,7 @@ class UtilityTest(unittest.TestCase):
     def setUpClass(cls):
         cls.workspace = CreateSampleWorkspace(
             Function="User Defined",
-            UserDefinedFunction="name=ExpDecay,Lifetime = 20,Height = 200;" "name=Gaussian,PeakCentre=50, Height=10, Sigma=3",
+            UserDefinedFunction="name=ExpDecay,Lifetime = 20,Height = 200;name=Gaussian,PeakCentre=50, Height=10, Sigma=3",
             XMax=100,
             BinWidth=2,
             OutputWorkspace="__temp",

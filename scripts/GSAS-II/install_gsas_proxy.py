@@ -90,7 +90,7 @@ if __name__ == "__main__":
         default=os.path.abspath(os.sep),
         type=str,
         dest="install_dir",
-        help="Directory to install GSAS-II in " "(leave blank to use current drive (Windows) or / (Linux)",
+        help="Directory to install GSAS-II in (leave blank to use current drive (Windows) or / (Linux)",
     )
 
     parser.add_argument(
@@ -108,7 +108,7 @@ if __name__ == "__main__":
         action="store_true",
         default=False,
         dest="build_server_mode",
-        help="Build server mode. Install GSAS-II in Python user site package directory " "and don't wait for prompt before exiting",
+        help="Build server mode. Install GSAS-II in Python user site package directory and don't wait for prompt before exiting",
     )
 
     parser.add_argument(
@@ -117,8 +117,7 @@ if __name__ == "__main__":
         action="store_true",
         default=False,
         dest="force_overwrite",
-        help="Force overwrite mode. If a GSAS-II installation is found at the requested "
-        "directory, remove it and perform a fresh install",
+        help="Force overwrite mode. If a GSAS-II installation is found at the requested directory, remove it and perform a fresh install",
     )
 
     args = parser.parse_args()

@@ -54,7 +54,7 @@ def main(args=None):
     if options.profile:
         output_path = os.path.abspath(os.path.expanduser(options.profile))
         if not os.path.exists(os.path.dirname(output_path)):
-            raise ValueError("Invalid path given for profile output. " "Please specify and existing directory and filename.")
+            raise ValueError("Invalid path given for profile output. Please specify and existing directory and filename.")
         if options.yappi:
             _enable_yappi_profiling(output_path, options)
         else:

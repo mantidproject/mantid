@@ -160,7 +160,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         if normalisation_method == "Vanadium" and self.getProperty("VanadiumInputWorkspace").isDefault:
             issues["VanadiumInputWorkspace"] = (
-                "Vanadium input workspace is mandatory for when detector efficiency calibration" ' is "Vanadium".'
+                'Vanadium input workspace is mandatory for when detector efficiency calibration is "Vanadium".'
             )
 
         if normalisation_method in ["Incoherent", "Paramagnetic"]:
@@ -205,7 +205,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.declareProperty(
             WorkspaceGroupProperty("RotatedXYZWorkspace", "", direction=Direction.Input, optional=PropertyMode.Optional),
-            doc="The workspace used in 10p method when data is taken as two XYZ" " measurements rotated by 45 degress.",
+            doc="The workspace used in 10p method when data is taken as two XYZ measurements rotated by 45 degress.",
         )
 
         self.declareProperty(
@@ -265,7 +265,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             defaultValue=0.5,
             validator=FloatBoundedValidator(lower=0),
             direction=Direction.Input,
-            doc="Scattering angle bin size in degrees used for expressing scan data on a single " "TwoTheta axis.",
+            doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.",
         )
 
         self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty("OutputTreatment", PropertyCriterion.IsEqualTo, "Merge"))

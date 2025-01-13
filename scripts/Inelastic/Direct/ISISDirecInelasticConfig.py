@@ -317,7 +317,7 @@ class UserProperties(object):
 
     def validate_instrument(self, instrument):
         if instrument not in INELASTIC_INSTRUMENTS:
-            raise RuntimeError("Instrument {0} has to be one of " "ISIS inelastic instruments".format(instrument))
+            raise RuntimeError("Instrument {0} has to be one of ISIS inelastic instruments".format(instrument))
 
     def validate_date(self, start_date):
         if isinstance(start_date, str):
@@ -337,7 +337,7 @@ class UserProperties(object):
             error = True
         if error:
             raise RuntimeError(
-                "Experiment start date should be defined as" " a string in the form YYYYMMDD or YYMMDD but it is: {0}".format(start_date)
+                "Experiment start date should be defined as a string in the form YYYYMMDD or YYMMDD but it is: {0}".format(start_date)
             )
         return start_date
 

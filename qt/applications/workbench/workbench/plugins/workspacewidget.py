@@ -248,7 +248,7 @@ class WorkspaceWidget(PluginWidget):
             try:
                 SampleLogs(ws=ws, parent=parent, window_flags=flags)
             except Exception as exception:
-                logger.warning("Could not open sample logs for workspace '{}'." "".format(ws.name()))
+                logger.warning("Could not open sample logs for workspace '{}'.".format(ws.name()))
                 logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _do_slice_viewer(self, names):
@@ -270,7 +270,7 @@ class WorkspaceWidget(PluginWidget):
                 presenter = SliceViewer(ws=ws, conf=CONF, parent=parent, window_flags=flags)
                 presenter.view.show()
             except Exception as exception:
-                logger.warning("Could not open slice viewer for workspace '{}'." "".format(ws.name()))
+                logger.warning("Could not open slice viewer for workspace '{}'.".format(ws.name()))
                 logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _do_show_instrument(self, names):
@@ -286,9 +286,9 @@ class WorkspaceWidget(PluginWidget):
                     presenter = InstrumentViewPresenter(ws, parent=parent, window_flags=flags)
                     presenter.show_view()
                 except Exception as exception:
-                    logger.warning("Could not show instrument for workspace " "'{}':\n{}\n".format(ws.name(), exception))
+                    logger.warning("Could not show instrument for workspace '{}':\n{}\n".format(ws.name(), exception))
             else:
-                logger.warning("Could not show instrument for workspace '{}':" "\nNo instrument available.\n" "".format(ws.name()))
+                logger.warning("Could not show instrument for workspace '{}':\nNo instrument available.\n".format(ws.name()))
 
     def _do_show_data(self, names):
         # local import to allow this module to be imported without pyplot being imported
@@ -305,7 +305,7 @@ class WorkspaceWidget(PluginWidget):
             except ValueError as e:
                 logger.error(str(e))
                 logger.error(
-                    "Could not open workspace: {0} with neither " "MatrixWorkspaceDisplay nor TableWorkspaceDisplay." "".format(ws.name())
+                    "Could not open workspace: {0} with neither MatrixWorkspaceDisplay nor TableWorkspaceDisplay.".format(ws.name())
                 )
 
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
@@ -322,7 +322,7 @@ class WorkspaceWidget(PluginWidget):
                     presenter.show_view()
                 except ValueError:
                     logger.error(
-                        "Could not open workspace: {0} with neither " "MatrixWorkspaceDisplay nor TableWorkspaceDisplay.".format(ws.name())
+                        "Could not open workspace: {0} with neither MatrixWorkspaceDisplay nor TableWorkspaceDisplay.".format(ws.name())
                     )
 
     def _do_show_algorithm_history(self, names):
@@ -331,7 +331,7 @@ class WorkspaceWidget(PluginWidget):
                 try:
                     AlgorithmHistoryWindow(self, name).show()
                 except Exception as exception:
-                    logger.warning("Could not open history of '{}'. " "".format(name))
+                    logger.warning("Could not open history of '{}'. ".format(name))
                     logger.warning("{}: {}".format(type(exception).__name__, exception))
 
     def _do_show_detectors(self, names):
@@ -367,7 +367,7 @@ class WorkspaceWidget(PluginWidget):
                 presenter = SampleMaterialDialogPresenter(workspace, parent=self)
                 presenter.show_view()
             except Exception as exception:
-                logger.warning("Could not show sample material for workspace " "'{}':\n{}\n".format(names[0], exception))
+                logger.warning("Could not show sample material for workspace '{}':\n{}\n".format(names[0], exception))
         else:
             logger.warning("Sample material can only be viewed for a single workspace.")
 
@@ -381,7 +381,7 @@ class WorkspaceWidget(PluginWidget):
             try:
                 sample_shape.plot_sample_container_and_components(workspace_names[0])
             except Exception as exception:
-                logger.warning("Could not show sample shape for workspace " "'{}':\n{}\n".format(workspace_names[0], exception))
+                logger.warning("Could not show sample shape for workspace '{}':\n{}\n".format(workspace_names[0], exception))
         else:
             logger.warning("Plot Sample Shape can only be viewed for a single workspace.")
 

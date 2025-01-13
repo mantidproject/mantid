@@ -138,7 +138,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         )
         self.declareProperty(
             FloatArrayProperty("MaxValues", [10, 10, 10], FloatArrayLengthValidator(3), direction=Direction.Input),
-            doc="3 comma separated values, one for each q_sample dimension; must be larger than" "those specified in MinValues",
+            doc="3 comma separated values, one for each q_sample dimension; must be larger thanthose specified in MinValues",
         )
         self.declareProperty(
             "MergeInputs",

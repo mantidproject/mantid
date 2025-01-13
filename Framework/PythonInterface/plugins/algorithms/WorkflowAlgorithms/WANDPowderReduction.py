@@ -434,7 +434,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             if temp_val == 0.0:
                 temp_val = 300.0
             temp_val = "{:.1F}".format(temp_val).replace(".", "p")
-            out_tmp = f"{outname}{n+1}_T{temp_val}K"
+            out_tmp = f"{outname}{n + 1}_T{temp_val}K"
             output_workspaces.append(out_tmp)
         mask_workspaces = []
         for n, (_wksp_in, _wksp_out) in enumerate(zip(input_workspaces, output_workspaces)):

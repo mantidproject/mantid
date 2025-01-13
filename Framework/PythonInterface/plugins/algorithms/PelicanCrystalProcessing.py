@@ -44,7 +44,7 @@ class PelicanCrystalProcessing(DataProcessorAlgorithm):
         mandatoryInputRuns.add(StringArrayMandatoryValidator())
         self.declareProperty(
             StringArrayProperty("SampleRuns", values=[], validator=mandatoryInputRuns),
-            doc="Comma separated range of sample runs,\n" " eg [cycle::] 7333-7341,7345",
+            doc="Comma separated range of sample runs,\n eg [cycle::] 7333-7341,7345",
         )
 
         self.declareProperty(

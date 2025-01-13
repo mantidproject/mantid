@@ -162,7 +162,7 @@ class SpaceGroupTest(unittest.TestCase):
     def test_to_string(self):
         spaceGroup = SpaceGroupFactory.createSpaceGroup("F -4 3 c")
 
-        expected_str = "Space group with Hermann-Mauguin symbol: " "F -4 3 c"
+        expected_str = "Space group with Hermann-Mauguin symbol: F -4 3 c"
         expected_repr = 'SpaceGroupFactory.createSpaceGroup("F -4 3 c")'
 
         self.assertEqual(expected_str, str(spaceGroup))

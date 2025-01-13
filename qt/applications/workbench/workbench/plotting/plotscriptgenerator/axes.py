@@ -112,8 +112,8 @@ def generate_tick_commands(ax):
                 commands.append("minorticks_on()")
 
             if isinstance(getattr(ax.xaxis, f"{tick_type}Ticks"), list) and len(getattr(ax.xaxis, f"{tick_type}Ticks")) > 0:
-                commands.append(f"tick_params(axis='x', which='{tick_type}', **" f"{generate_tick_params_kwargs(ax.xaxis, tick_type)})")
-                commands.append(f"tick_params(axis='y', which='{tick_type}', **" f"{generate_tick_params_kwargs(ax.yaxis, tick_type)})")
+                commands.append(f"tick_params(axis='x', which='{tick_type}', **{generate_tick_params_kwargs(ax.xaxis, tick_type)})")
+                commands.append(f"tick_params(axis='y', which='{tick_type}', **{generate_tick_params_kwargs(ax.yaxis, tick_type)})")
                 # add the custom show_minor_gridlines attribute so that it can be controlled by qt
                 if (
                     tick_type == "minor"

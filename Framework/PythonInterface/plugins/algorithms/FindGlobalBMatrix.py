@@ -32,7 +32,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         # Input
         self.declareProperty(
             StringArrayProperty(name="PeakWorkspaces", direction=Direction.Input, validator=ADSValidator()),
-            doc="List of peak workspaces to use (must be more than" " two peaks workspaces and each must contain at least 6 peaks.",
+            doc="List of peak workspaces to use (must be more than two peaks workspaces and each must contain at least 6 peaks.",
         )
         positiveFloatValidator = FloatBoundedValidator(lower=0.0)
         angleValidator = FloatBoundedValidator(lower=0.0, upper=180.0)

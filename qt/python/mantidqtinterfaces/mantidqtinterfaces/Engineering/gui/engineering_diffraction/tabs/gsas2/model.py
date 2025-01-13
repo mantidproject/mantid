@@ -180,7 +180,7 @@ class GSAS2Model(object):
             logger.error("No Pawley Reflections were generated for the phases provided. Not calling GSAS-II.")
             return None
         if not self.path_to_gsas2:
-            logger.error("The Path to GSAS2 setting is empty. " "Please provide a valid path in Engineering Diffraction Settings")
+            logger.error("The Path to GSAS2 setting is empty. Please provide a valid path in Engineering Diffraction Settings")
             return None
         return True
 

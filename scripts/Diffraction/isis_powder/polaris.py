@@ -48,7 +48,7 @@ class Polaris(AbstractInst):
         self._switch_mode_specific_inst_settings(kwargs.get("mode"))
         self._inst_settings.update_attributes(kwargs=kwargs)
         if not self._inst_settings.multiple_scattering or not self._inst_settings.do_absorb_corrections:
-            raise ValueError("You must set multiple_scattering=True and do_absorb_corrections=True when creating the " "vanadium run.")
+            raise ValueError("You must set multiple_scattering=True and do_absorb_corrections=True when creating the vanadium run.")
 
         per_detector = False
         if self._inst_settings.per_detector_vanadium:
@@ -118,7 +118,7 @@ class Polaris(AbstractInst):
         sample_details_obj = common.dictionary_key_helper(
             dictionary=kwargs,
             key=kwarg_name,
-            exception_msg="The argument containing sample details was not found. Please" " set the following argument: " + kwarg_name,
+            exception_msg="The argument containing sample details was not found. Please set the following argument: " + kwarg_name,
         )
         self._sample_details = sample_details_obj
 

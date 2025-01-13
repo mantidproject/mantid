@@ -94,7 +94,7 @@ def compare_relative_errors(values_fitted, reference_values, tolerance=1e-6):
             )
             logger.error("These were the values found:         {0}".format(values_fitted))
             logger.error(" and these are the reference values: {0}".format(reference_values))
-            raise RuntimeError("Some results were not as accurate as expected. Please check the log " "messages for details")
+            raise RuntimeError("Some results were not as accurate as expected. Please check the log messages for details")
 
 
 def load_fitting_test_file_ascii(filename):
@@ -105,7 +105,7 @@ def load_fitting_test_file_ascii(filename):
     """
     wks = LoadAscii(Filename=filename)
     if not wks or not isinstance(wks, MatrixWorkspace):
-        raise RuntimeError("Input workspace from file {0} not available as a MatrixWorkspace. " "Cannot continue.".format(filename))
+        raise RuntimeError("Input workspace from file {0} not available as a MatrixWorkspace. Cannot continue.".format(filename))
 
     return wks
 
@@ -120,7 +120,7 @@ class TwoGaussPeaksEVSData(unittest.TestCase):
     Representative of a processed Vesuvio dataset that contains a couple of peaks.
     """
 
-    function_template = "name=Gaussian, {0} ; name=LinearBackground,A0=0,A1=0;" "name=Gaussian, {1}"
+    function_template = "name=Gaussian, {0} ; name=LinearBackground,A0=0,A1=0;name=Gaussian, {1}"
 
     @classmethod
     def setUpClass(cls) -> None:

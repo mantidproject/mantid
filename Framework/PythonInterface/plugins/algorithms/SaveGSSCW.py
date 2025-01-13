@@ -48,7 +48,7 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
             allowedUnits = ["'%s'" % unit for unit in allowedUnits]
             allowedUnits = ", ".join(allowedUnits)
             issues[wkspParamName] = "Only support units %s" % allowedUnits
-            print(f"[ERROR] Workspace {wksp.name()} with unit {units} is not supported." f"Allowed units are {allowedUnits}")
+            print(f"[ERROR] Workspace {wksp.name()} with unit {units} is not supported.Allowed units are {allowedUnits}")
 
         # check output file name: whether user can access and write files
         output_file_name_property = "OutputFilename"
@@ -58,7 +58,7 @@ class SaveGSSCW(mantid.api.PythonAlgorithm):
             temp_file = open(gsas_name, "w")
         except PermissionError as per_err:
             # error message
-            issues[output_file_name_property] = f"User is not allowed to write file {gsas_name} due to " f"{per_err}"
+            issues[output_file_name_property] = f"User is not allowed to write file {gsas_name} due to {per_err}"
         else:
             # delete the temp file
             temp_file.close()

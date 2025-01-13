@@ -125,7 +125,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.direct_emin_input.setValidator(QDoubleValidator())
         self.direct_emin_input.setToolTip("Minimum energy transfer to plot down to.")
         self.invalid_emin_msg = (
-            "\nEmin provided was either invalid or bigger than minimum value of Ei , " "automatically changed value to Emin = -max(Ei) / 2"
+            "\nEmin provided was either invalid or bigger than minimum value of Ei , automatically changed value to Emin = -max(Ei) / 2"
         )
         self.direct_emin_grid.addWidget(self.direct_emin_input)
         self.direct_grid.addWidget(self.direct_emin)

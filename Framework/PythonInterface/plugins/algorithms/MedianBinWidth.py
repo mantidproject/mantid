@@ -30,7 +30,7 @@ class MedianBinWidth(PythonAlgorithm):
         """
         Return algorithm's summary.
         """
-        return "Calculates the average of workspace's histograms'" " median bin widths."
+        return "Calculates the average of workspace's histograms' median bin widths."
 
     def version(self):
         """

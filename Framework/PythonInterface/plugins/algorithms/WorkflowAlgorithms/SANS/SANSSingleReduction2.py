@@ -44,7 +44,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
     def _declare_output_properties(self):
         self.declareProperty(
             MatrixWorkspaceProperty("OutShiftAndScaleFactor", "", optional=PropertyMode.Optional, direction=Direction.Output),
-            doc="A workspace containing the applied shift factor as X data and applied scale factor " "as Y data.",
+            doc="A workspace containing the applied shift factor as X data and applied scale factor as Y data.",
         )
 
         # This breaks our flexibility with the reduction mode. We need to check if we can populate this based on
@@ -344,7 +344,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
                             workspace_group_hab_can.addWorkspace(output_workspace)
                         else:
                             raise RuntimeError(
-                                "SANSSingleReduction: The reduction mode {0} should not" " be set with a can.".format(reduction_mode)
+                                "SANSSingleReduction: The reduction mode {0} should not be set with a can.".format(reduction_mode)
                             )
         if workspace_group_lab_can.size() > 0:
             # LAB group workspace is non-empty, so we want to set it as output
@@ -437,7 +437,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
                             workspace_group_hab_can.addWorkspace(output_workspace)
                         else:
                             raise RuntimeError(
-                                "SANSSingleReduction: The reduction mode {0} should not" " be set with a can.".format(reduction_mode)
+                                "SANSSingleReduction: The reduction mode {0} should not be set with a can.".format(reduction_mode)
                             )
                 elif output_bundle.data_type is DataType.SAMPLE:
                     reduction_mode = output_bundle.reduction_mode
@@ -452,7 +452,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
                             workspace_group_hab_sample.addWorkspace(output_workspace)
                         else:
                             raise RuntimeError(
-                                "SANSSingleReduction: The reduction mode {0} should not" " be set with a sample.".format(reduction_mode)
+                                "SANSSingleReduction: The reduction mode {0} should not be set with a sample.".format(reduction_mode)
                             )
 
         if workspace_group_hab_can.size() > 0:
@@ -484,9 +484,7 @@ class SANSSingleReduction(SANSSingleReductionBase):
                     self.setProperty("OutputWorkspaceCalculatedTransmission", calculated_transmission_workspace)
                 self.setProperty("OutputWorkspaceUnfittedTransmission", unfitted_transmission_workspace)
             else:
-                raise RuntimeError(
-                    "SANSSingleReduction: The data type {0} should be" " sample or can.".format(transmission_bundle.data_type)
-                )
+                raise RuntimeError("SANSSingleReduction: The data type {0} should be sample or can.".format(transmission_bundle.data_type))
 
     def _get_workspace_names(self, reduction_mode_vs_workspace_names, output_bundle):
         output_workspace_names = self._get_final_workspace_names(output_bundle)

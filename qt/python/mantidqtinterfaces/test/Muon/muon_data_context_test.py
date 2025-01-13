@@ -40,7 +40,7 @@ class MuonDataContextTest(unittest.TestCase):
         self.context.update_current_data()
 
         self.context.message_notifier.notify_subscribers.assert_called_once_with(
-            "MainFieldDirection has changed between" " data sets, click default to reset grouping if required"
+            "MainFieldDirection has changed between data sets, click default to reset grouping if required"
         )
         self.context.current_data["MainFieldDirection"] = "longitudinal"
 

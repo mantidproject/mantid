@@ -179,7 +179,7 @@ class FittingPlotPresenter(object):
             # append a deep copy to output list (will be initial parameters if not successful)
             fitprop_list.append(fitprop)
 
-        logger.notice(f'{"Serial" if not do_sequential else "Sequential"} fitting finished.')
+        logger.notice(f"{'Serial' if not do_sequential else 'Sequential'} fitting finished.")
         return fitprop_list
 
     # ==============================

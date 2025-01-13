@@ -97,5 +97,5 @@ def _get_volume(scale_info):
         volume = thickness * math.pi
         volume *= math.pow(width, 2) / 4.0
     else:
-        raise NotImplementedError("DivideByVolumeISIS: The shape {0} is not in the list of " "supported shapes".format(shape))
+        raise NotImplementedError("DivideByVolumeISIS: The shape {0} is not in the list of supported shapes".format(shape))
     return volume

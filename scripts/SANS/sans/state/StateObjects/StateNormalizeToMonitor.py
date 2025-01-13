@@ -129,7 +129,7 @@ class StateNormalizeToMonitor(metaclass=JsonSerializable):
                     if value_start > value_stop:
                         entry = validation_message(
                             "Incorrect monitor background TOF bounds.",
-                            "Make sure that lower monitor background TOF bound is" " smaller then upper bound.",
+                            "Make sure that lower monitor background TOF bound is smaller then upper bound.",
                             {
                                 "background_TOF_monitor_start": self.background_TOF_monitor_start,
                                 "background_TOF_monitor_stop": self.background_TOF_monitor_stop,
@@ -138,7 +138,7 @@ class StateNormalizeToMonitor(metaclass=JsonSerializable):
                         is_invalid.update(entry)
 
         if is_invalid:
-            raise ValueError("StateMoveDetectors: The provided inputs are illegal. " "Please see: {0}".format(json.dumps(is_invalid)))
+            raise ValueError("StateMoveDetectors: The provided inputs are illegal. Please see: {0}".format(json.dumps(is_invalid)))
 
 
 class StateNormalizeToMonitorLOQ(StateNormalizeToMonitor):

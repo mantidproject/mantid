@@ -54,7 +54,7 @@ MANTID_PLOTSPECTRUM_KWARGS = {"wkspIndex": 0, "distribution": False, "axis": Man
 ERRORBARS_HIDDEN_FUNC = "workbench.plotting.plotscriptgenerator.lines.errorbars_hidden"
 GET_MANTID_PLOT_KWARGS = "workbench.plotting.plotscriptgenerator.lines._get_mantid_specific_plot_kwargs"
 GET_PLOT_CMD_KWARGS_LINE2D = "workbench.plotting.plotscriptgenerator.lines._get_plot_command_kwargs_from_line2d"
-GET_PLOT_CMD_KWARGS_ERRORBAR = "workbench.plotting.plotscriptgenerator.lines." "_get_plot_command_kwargs_from_errorbar_container"
+GET_PLOT_CMD_KWARGS_ERRORBAR = "workbench.plotting.plotscriptgenerator.lines._get_plot_command_kwargs_from_errorbar_container"
 
 
 class PlotScriptGeneratorLinesTest(unittest.TestCase):

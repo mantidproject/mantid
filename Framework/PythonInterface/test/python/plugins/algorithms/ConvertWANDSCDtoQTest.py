@@ -82,7 +82,7 @@ class ConvertWANDSCDtoQTest(unittest.TestCase):
             mtd.remove(ws)
             for ws in [
                 "ConvertWANDSCDtoQTest_gold",
-                "ConvertWANDSCDtoQTest_dummy" "ConvertWANDSCDtoQTest_norm",
+                "ConvertWANDSCDtoQTest_dummyConvertWANDSCDtoQTest_norm",
                 "ConvertWANDSCDtoQTest_dummy2",
             ]
         ]

@@ -219,7 +219,7 @@ class DrillSettingsDialog(QDialog):
             self.getSettingValue(setting)
             self.valueChanged.emit(setting)
         except:
-            self.onSettingValidation(setting, False, "Unable to parse the " "value. Check the input")
+            self.onSettingValidation(setting, False, "Unable to parse the value. Check the input")
 
     def setSettings(self, settings):
         """

@@ -312,7 +312,7 @@ class SANSdata:
             self.logs["warning"].append("SD - sample detector distance ('l2') is not specified in the datafile.")
 
         if isinstance(self.setup.wavelength, str) or self.setup.wavelength == 0.0:
-            self.logs["warning"].append("Lambda (wavelength) is not specified in the datafile." " Wavelength is set to user's input.")
+            self.logs["warning"].append("Lambda (wavelength) is not specified in the datafile. Wavelength is set to user's input.")
 
         if isinstance(self.counter.sum_all_counts, str) or self.counter.sum_all_counts == 0.0:
             self.logs["warning"].append("Sum of all counts is not specified in the datafile.")

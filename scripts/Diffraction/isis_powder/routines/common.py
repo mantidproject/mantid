@@ -541,8 +541,7 @@ def subtract_summed_runs(ws_to_correct, empty_ws):
             mantid.Minus(LHSWorkspace=ws_to_correct, RHSWorkspace=empty_ws, OutputWorkspace=ws_to_correct)
         except ValueError:
             raise ValueError(
-                "The empty run(s) specified for this file do not have matching binning. Do the TOF windows of"
-                " the empty and sample match?"
+                "The empty run(s) specified for this file do not have matching binning. Do the TOF windows of the empty and sample match?"
             )
     else:
         ws_to_correct = copy.deepcopy(ws_to_correct)
@@ -655,7 +654,7 @@ def _check_load_range(list_of_runs_to_load):
     maximum_range_len = 1000  # If more than this number of runs is entered probably wrong
     if len(list_of_runs_to_load) > maximum_range_len:
         raise ValueError(
-            "More than " + str(maximum_range_len) + " runs were selected." " Found " + str(len(list_of_runs_to_load)) + " Aborting."
+            "More than " + str(maximum_range_len) + " runs were selected. Found " + str(len(list_of_runs_to_load)) + " Aborting."
         )
 
 

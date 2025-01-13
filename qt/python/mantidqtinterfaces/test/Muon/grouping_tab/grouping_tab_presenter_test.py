@@ -282,7 +282,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
     def _run_handle_load_grouping_with_mocked_load(self, groups, pairs, description="description", default=""):
         self.view.show_file_browser_and_return_selection = mock.Mock(return_value="grouping.xml")
         with mock.patch(
-            "mantidqtinterfaces.Muon.GUI.Common.grouping_tab_widget." "grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML"
+            "mantidqtinterfaces.Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_presenter.xml_utils.load_grouping_from_XML"
         ) as mock_load:
             # mock the loading to return set groups/pairs
             mock_load.return_value = (groups, pairs, [], "description", default)

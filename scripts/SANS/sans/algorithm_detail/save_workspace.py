@@ -72,7 +72,7 @@ def get_save_strategy(file_format_bundle, file_name, save_options, additional_pr
         file_name = get_file_name(file_format_bundle, file_name, "", ".csv")
         save_name = "SaveCSV"
     else:
-        raise RuntimeError("SaveWorkspace: The requested data {0} format is " "currently not supported.".format(file_format))
+        raise RuntimeError("SaveWorkspace: The requested data {0} format is currently not supported.".format(file_format))
     save_options.update({"Filename": file_name})
     return create_unmanaged_algorithm(save_name, **save_options)
 

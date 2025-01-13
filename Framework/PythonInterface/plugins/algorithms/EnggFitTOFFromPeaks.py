@@ -20,7 +20,7 @@ class EnggFitTOFFromPeaks(PythonAlgorithm):
         return "EnggFitPeaks"
 
     def summary(self):
-        return "The algorithm fits an expected diffraction pattern to a workpace spectrum by " "performing single peak fits."
+        return "The algorithm fits an expected diffraction pattern to a workpace spectrum by performing single peak fits."
 
     def PyInit(self):
         self.declareProperty(

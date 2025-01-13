@@ -52,7 +52,7 @@ class TransformToIqt(PythonAlgorithm):
         self.declareProperty(
             name="BinReductionFactor",
             defaultValue=10.0,
-            doc="Decrease total number of spectrum points by this ratio through merging of " "intensities from neighbouring bins.",
+            doc="Decrease total number of spectrum points by this ratio through merging of intensities from neighbouring bins.",
         )
 
         self.declareProperty(
@@ -183,7 +183,7 @@ class TransformToIqt(PythonAlgorithm):
             workflow_prog.report("Resorting to Default")
             resolution = get_efixed(self._sample) * 0.01
             logger.warning(
-                "Could not get the resolution from the IPF, using 1% of the E Fixed value for the " "resolution: {0}".format(resolution)
+                "Could not get the resolution from the IPF, using 1% of the E Fixed value for the resolution: {0}".format(resolution)
             )
 
         resolution_bins = int(round((2 * resolution) / self._e_width))

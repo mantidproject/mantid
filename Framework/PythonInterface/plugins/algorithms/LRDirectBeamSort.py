@@ -315,7 +315,7 @@ class LRDirectBeamSort(PythonAlgorithm):
             InputWorkspace=ws_name,
             OutputWorkspace=peak_ws_name,
             PeakCenters=f"{max_index}",
-            FitWindowBoundaryList=f"{crop},{signal.shape[0]-crop}",
+            FitWindowBoundaryList=f"{crop},{signal.shape[0] - crop}",
             HighBackground=False,
             ConstrainPeakPositions=False,
             FittedPeaksWorkspace=model_ws_name,

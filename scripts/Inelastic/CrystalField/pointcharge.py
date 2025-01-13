@@ -141,13 +141,13 @@ class PointCharge(object):
             if ind in argname:
                 argdict[ind] = kwargs[ind]
         if "Structure" not in argdict.keys():
-            raise ValueError("PointCharge must be initialised with either a CIF file or a " "workspace with a valid crystal structure")
+            raise ValueError("PointCharge must be initialised with either a CIF file or a workspace with a valid crystal structure")
         # Make sure only one of MaxDistance or Neighbour is set
         if "Neighbour" in kwargs.keys():
             if "MaxDistance" in kwargs.keys():
                 del argdict["Neighbour"]
                 warnings.warn(
-                    "Both " "Neighbour" " and " "MaxDistance" " arguments given. " "Using " "MaxDistance" ", ignoring " "Neighbour" "",
+                    "Both Neighbour and MaxDistance arguments given. Using MaxDistance, ignoring Neighbour",
                     RuntimeWarning,
                 )
             else:
@@ -179,7 +179,7 @@ class PointCharge(object):
                     self._cryst = self._copyCrystalStructure(mtd[structure].sample().getCrystalStructure())
                     self._getUniqueAtoms()
                 except RuntimeError:
-                    raise ValueError("Workspace " "%s" " has no valid CrystalStructure" % (structure))
+                    raise ValueError("Workspace %s has no valid CrystalStructure" % (structure))
             else:
                 tmpws = CreateWorkspace(1, 1, OutputWorkspace="_tempPointCharge_" + str(uuid.uuid4())[:8])
                 try:
@@ -208,13 +208,13 @@ class PointCharge(object):
         else:
             if not hasattr(structure, "sample"):
                 raise ValueError(
-                    "First input must be a Mantid CrystalStructure object, workspace or string " "(name of CIF file or workspace)"
+                    "First input must be a Mantid CrystalStructure object, workspace or string (name of CIF file or workspace)"
                 )
             try:
                 self._cryst = self._copyCrystalStructure(structure.sample().getCrystalStructure())
                 self._getUniqueAtoms()
             except RuntimeError:
-                raise ValueError("Workspace " "%s" " has no valid CrystalStructure" % (structure.name()))
+                raise ValueError("Workspace %s has no valid CrystalStructure" % (structure.name()))
 
     def _getUniqueAtoms(self):
         """Gets a list of unique ion names for each non-equivalent ion in the unit cell"""
@@ -231,7 +231,7 @@ class PointCharge(object):
 
     def _checkHasStructure(self, warnName=None):
         if self._atoms is None:
-            parwarn = ("Ignoring parameter " "%s" "." % (warnName)) if warnName else ""
+            parwarn = ("Ignoring parameter %s." % (warnName)) if warnName else ""
             warnings.warn("No structure has been set. %s" % (parwarn), RuntimeWarning)
             return False
         return True
@@ -253,7 +253,7 @@ class PointCharge(object):
         if self._checkHasStructure(warnName="Charges"):
             if value is None:
                 if not isinstance(charge, dict):
-                    raise ValueError("Argument " "charge" " must be a dictionary")
+                    raise ValueError("Argument charge must be a dictionary")
                 self._charges = charge
             else:
                 if self._charges is None:
@@ -286,7 +286,7 @@ class PointCharge(object):
             try:
                 self._neighbour = int(value)
                 if np.abs(self._neighbour - float(value)) > 1.0e-6:
-                    warnings.warn("Neighbour value " "%s" " not an integer, rounded to " "%s" "" % (value, self._neighbour), RuntimeWarning)
+                    warnings.warn("Neighbour value %s not an integer, rounded to %s" % (value, self._neighbour), RuntimeWarning)
                 if self._maxdistance is not None:
                     self._maxdistance = None
             except ValueError:
@@ -300,7 +300,7 @@ class PointCharge(object):
     @IonLabel.setter
     def IonLabel(self, value):
         if (self._atoms is not None) and (value not in self._atoms.keys()) and (self._ligands is None):
-            raise ValueError("IonLabel " "%s" " not in list of atoms: " "%s" "." % (value, ",".join(self._atoms.keys())))
+            raise ValueError("IonLabel %s not in list of atoms: %s." % (value, ",".join(self._atoms.keys())))
         self._ionlabel = value
 
     @property
@@ -312,7 +312,7 @@ class PointCharge(object):
     def Ion(self, value):
         ion = value[0].upper() + value[1].lower()
         if ion not in self.theta.keys():
-            raise ValueError("Ion " "%s" " not in list of known ions: " "%s" "." % (value, ",".join(self.theta.keys())))
+            raise ValueError("Ion %s not in list of known ions: %s." % (value, ",".join(self.theta.keys())))
         self._ion = ion
 
     def getIons(self):
@@ -413,11 +413,11 @@ class PointCharge(object):
                 try:
                     charges[name] = self._charges[re.match(CHARGES_PATTERN, name).group(0)]
                 except (KeyError, AttributeError):
-                    warnstr = "Atom type " "%s" " in structure not in list of charges. Assuming q=0" % (name)
+                    warnstr = "Atom type %s in structure not in list of charges. Assuming q=0" % (name)
                     warnings.warn(warnstr, RuntimeWarning)
                     charges[name] = 0.0
         if self._ionlabel not in pos.keys():
-            raise RuntimeError("Magnetic ion " "%s" " not found in structure" % (self._ionlabel))
+            raise RuntimeError("Magnetic ion %s not found in structure" % (self._ionlabel))
         # Construct a large enough supercell such that we can be sure to find all neighbours of the magnetic
         # ion up to the desired shell / distance.
         if dist < 0:
@@ -453,7 +453,7 @@ class PointCharge(object):
         try:
             return ion[0].upper() + ion[1].lower()
         except (TypeError, IndexError):
-            raise ValueError("Invalid value of IonLabel or Ion " "%s" "." % (ion))
+            raise ValueError("Invalid value of IonLabel or Ion %s." % (ion))
 
     def _getDist(self):
         return self._maxdistance if self._maxdistance else -self._neighbour

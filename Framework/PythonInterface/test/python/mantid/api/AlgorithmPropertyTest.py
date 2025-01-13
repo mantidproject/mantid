@@ -19,7 +19,7 @@ class AlgorithmPropertyTest(unittest.TestCase):
         # load plugins to register CreateWorkspace
         FrameworkManagerImpl.Instance()
         prop = AlgorithmProperty("TestProperty")
-        prop.valueAsStr = '{"name": "CreateWorkspace",' '"parameters": {"OutputWorkspace": "ws", "DataY": "1", "DataX": "1","NSpec": "1"}}'
+        prop.valueAsStr = '{"name": "CreateWorkspace","parameters": {"OutputWorkspace": "ws", "DataY": "1", "DataX": "1","NSpec": "1"}}'
         alg = prop.value
         self.assertTrue(isinstance(alg, IAlgorithm))
         self.assertEqual("CreateWorkspace", alg.name())

@@ -179,9 +179,7 @@ class PlotSelectorView(QWidget):
             "number, to get a handle to the plot."
         )
 
-        table_widget.horizontalHeaderItem(Column.Name).setToolTip(
-            "The plot name, also used  as the file name when " "saving multiple plots."
-        )
+        table_widget.horizontalHeaderItem(Column.Name).setToolTip("The plot name, also used  as the file name when saving multiple plots.")
 
         table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         table_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)

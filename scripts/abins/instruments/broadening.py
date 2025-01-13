@@ -386,7 +386,7 @@ def trunc_and_sum_inplace(
     nrows = len(center)
     ncols = int(np.ceil((freq_range * 2) / bin_width))
     if ncols > len(points):
-        raise ValueError("Kernel is wider than evaluation region; " "use a smaller cutoff limit or a larger range of points/bins")
+        raise ValueError("Kernel is wider than evaluation region; use a smaller cutoff limit or a larger range of points/bins")
 
     # Work out locations of frequency blocks. As these should all be the same size,
     # blocks which would exceed array size are "justified" into the array

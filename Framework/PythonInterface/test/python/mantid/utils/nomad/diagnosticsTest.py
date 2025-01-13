@@ -337,7 +337,7 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
         # check full collimated
         for pack_index in [7, 26]:
             assert eight_pack_collimation_states[pack_index] == 2, (
-                f"Pack index {pack_index}: {eight_pack_collimation_states[pack_index]} in " f"{eight_pack_collimation_states}"
+                f"Pack index {pack_index}: {eight_pack_collimation_states[pack_index]} in {eight_pack_collimation_states}"
             )
         # check half collimated
         for pack_index in [63, 90]:
@@ -356,21 +356,21 @@ class NOMADMedianDetectorTestTest(unittest.TestCase):
             np.testing.assert_allclose(
                 pixel_collimation_states[pack_index * 8 * 128 : (pack_index + 1) * 8 * 128],
                 np.zeros(8 * 128) + 2,
-                err_msg=f"Pack index {pack_index * 8 * 128}:... : " f"{pixel_collimation_states[pack_index]}",
+                err_msg=f"Pack index {pack_index * 8 * 128}:... : {pixel_collimation_states[pack_index]}",
             )
         # check half collimated
         for pack_index in [63, 90]:
             np.testing.assert_allclose(
                 pixel_collimation_states[pack_index * 8 * 128 : (pack_index + 1) * 8 * 128],
                 np.zeros(8 * 128) + 1,
-                err_msg=f"Pack index {pack_index * 8 * 128}:... : " f"{pixel_collimation_states[pack_index]}",
+                err_msg=f"Pack index {pack_index * 8 * 128}:... : {pixel_collimation_states[pack_index]}",
             )
         # not collimated
         for pack_index in [2, 3, 4, 5, 6, 91, 92]:
             np.testing.assert_allclose(
                 pixel_collimation_states[pack_index * 8 * 128 : (pack_index + 1) * 8 * 128],
                 np.zeros(8 * 128),
-                err_msg=f"Pack index {pack_index * 8 * 128}:... : " f"{pixel_collimation_states[pack_index]}",
+                err_msg=f"Pack index {pack_index * 8 * 128}:... : {pixel_collimation_states[pack_index]}",
             )
 
     def test_determine_tubes_thresholds(self):

@@ -42,7 +42,7 @@ def calculate_slab_absorb_corrections(ws_to_correct, sample_details_obj):
         )
     if not sample_details_obj.is_material_set():
         raise RuntimeError(
-            "The material for this sample has not been set yet. Please call" " set_material on the SampleDetails object to set the material"
+            "The material for this sample has not been set yet. Please call set_material on the SampleDetails object to set the material"
         )
 
     geometry_json = {
