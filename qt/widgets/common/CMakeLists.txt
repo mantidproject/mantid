@@ -80,7 +80,6 @@ set(SRC_FILES
     src/ParseKeyValueString.cpp
     src/pixmaps.cpp
     src/PluginLibraries.cpp
-    src/pqHelpWindow.cxx
     src/ProcessingAlgoWidget.cpp
     src/ProgressableView.cpp
     src/PropertyHandler.cpp
@@ -158,6 +157,9 @@ set(SRC_FILES
     src/Python/Sip.cpp
     src/Python/QHashToDict.cpp
 )
+if(DOCS_QTHELP)
+  list(APPEND SRC_FILES src/pqHelpWindow.cxx)
+endif()
 
 set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
@@ -211,7 +213,6 @@ set(QT5_MOC_FILES
     inc/MantidQtWidgets/Common/FileFinderWidget.h
     inc/MantidQtWidgets/Common/NotificationService.h
     inc/MantidQtWidgets/Common/OptionsPropertyWidget.h
-    inc/MantidQtWidgets/Common/pqHelpWindow.h
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/PropertyWidget.h
@@ -348,6 +349,9 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Python/Object.h
     inc/MantidQtWidgets/Common/Python/QHashToDict.h
 )
+if(DOCS_QTHELP)
+  list(APPEND QT5_INC_FILES inc/MantidQtWidgets/Common/pqHelpWindow.h)
+endif()
 
 set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
@@ -360,7 +364,6 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/MuonPeriodInfo.ui
     inc/MantidQtWidgets/Common/FileFinderWidget.ui
     inc/MantidQtWidgets/Common/FitScriptGenerator.ui
-    inc/MantidQtWidgets/Common/pqHelpWindow.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
     inc/MantidQtWidgets/Common/ScriptRepositoryView.ui
@@ -369,6 +372,9 @@ set(QT5_UI_FILES
     inc/MantidQtWidgets/Common/SlitCalculator.ui
     inc/MantidQtWidgets/Common/UserFunctionDialog.ui
 )
+if(DOCS_QTHELP)
+  list(APPEND QT5_UI_FILES inc/MantidQtWidgets/Common/pqHelpWindow.ui)
+endif()
 
 set(MOC_FILES
     inc/MantidQtWidgets/Common/AlgorithmDialog.h
@@ -435,7 +441,6 @@ set(MOC_FILES
     inc/MantidQtWidgets/Common/MuonFitPropertyBrowser.h
     inc/MantidQtWidgets/Common/MuonFunctionBrowser.h
     inc/MantidQtWidgets/Common/MuonPeriodInfo.h
-    inc/MantidQtWidgets/Common/pqHelpWindow.h
     inc/MantidQtWidgets/Common/PropertyHandler.h
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.h
     inc/MantidQtWidgets/Common/QtAlgorithmRunner.h
@@ -627,8 +632,10 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/SlicingAlgorithmDialog.ui
     inc/MantidQtWidgets/Common/SlitCalculator.ui
     inc/MantidQtWidgets/Common/UserFunctionDialog.ui
-    inc/MantidQtWidgets/Common/pqHelpWindow.ui
 )
+if(DOCS_QTHELP)
+  list(APPEND UI_FILES inc/MantidQtWidgets/Common/pqHelpWindow.ui)
+endif()
 
 set(TARGET_LIBRARIES ${CORE_MANTIDLIBS} ${POCO_LIBRARIES} ${Boost_LIBRARIES})
 
@@ -697,6 +704,11 @@ mtd_add_qt_library(
   OSX_INSTALL_RPATH @loader_path/../MacOS @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${WORKBENCH_LIB_DIR}"
 )
+# add an extra define to use pqhelpwindow which wraps qtassistant
+if(DOCS_QTHELP)
+  # warning - this is assuming that the output is qt5 only
+  target_compile_definitions(MantidQtWidgetsCommonQt5 PUBLIC -DDOCS_QTHELP)
+endif()
 
 set(TEST_FILES
     test/AlgorithmHintStrategyTest.h
