@@ -116,43 +116,12 @@ class CreateVanadiumPerDetectorTest(systemtesting.MantidSystemTest):
             config["datasearch.directories"] = self.existing_config
 
 
-class FocusSystemTestHelper:
-    class HelperClass(systemtesting.MantidSystemTest):
-        def requiredFiles(self):
-            return _gen_required_files()
-
-        def assert_output_file_exists(self, directory, filename):
-            self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=_generate_file_find_error_message(filename, directory))
-
-        def assert_focus_output_files(self, ws_num):
-            user_output = os.path.join(output_dir, "17_1", "Test")
-            self.assert_output_file_exists(user_output, f"POLARIS{ws_num}.nxs")
-            self.assert_output_file_exists(user_output, f"POLARIS{ws_num}.gsas")
-            output_dat_dir = os.path.join(user_output, "dat_files")
-            for bankno in range(1, 6):
-                self.assert_output_file_exists(output_dat_dir, f"POL{ws_num}-b_{bankno}-TOF.dat")
-                self.assert_output_file_exists(output_dat_dir, f"POL{ws_num}-b_{bankno}-d.dat")
-
-        def validate_normalisation_focus_results(self, ws_num):
-            # then check the results are within tol
-            for ws in self.focus_results:
-                self.assertEqual(ws.sample().getMaterial().name(), "Si Si")
-            self.tolerance_is_rel_err = True
-            self.tolerance = 1e-6
-            return self.focus_results.name(), f"ISIS_Powder-POLARIS{ws_num}_FocusSempty.nxs"
-
-        def cleanup(self):
-            try:
-                _try_delete(spline_path)
-                _try_delete(output_dir)
-            finally:
-                mantid.mtd.clear()
-                config["datasearch.directories"] = self.existing_config
-
-
-class FocusTestNoAbsorptionWithRelativeNormalisation(FocusSystemTestHelper.HelperClass):
+class FocusTestNoAbsorptionWithRelativeNormalisation(systemtesting.MantidSystemTest):
     focus_results = None
     existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
 
     def runTest(self):
         # Gen vanadium calibration first
@@ -160,14 +129,23 @@ class FocusTestNoAbsorptionWithRelativeNormalisation(FocusSystemTestHelper.Helpe
         self.focus_results = run_focus_no_absorption(mode="PDF")
 
     def validate(self):
-        ws_num = "98533"
-        self.assert_focus_output_files(ws_num)
-        return self.validate_normalisation_focus_results(ws_num)
+        return validate_normalisation_focus_tests(self, "98533")
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config["datasearch.directories"] = self.existing_config
 
 
-class FocusTestNoAbsorptionWithAbsoluteNormalisation(FocusSystemTestHelper.HelperClass):
+class FocusTestNoAbsorptionWithAbsoluteNormalisation(systemtesting.MantidSystemTest):
     focus_results = None
     existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
 
     def runTest(self):
         # Gen vanadium calibration first
@@ -175,9 +153,15 @@ class FocusTestNoAbsorptionWithAbsoluteNormalisation(FocusSystemTestHelper.Helpe
         self.focus_results = run_focus_no_absorption(mode="PDF_NORM")
 
     def validate(self):
-        ws_num = "98534"
-        self.assert_focus_output_files(ws_num)
-        return self.validate_normalisation_focus_results(ws_num)
+        return validate_normalisation_focus_tests(self, "98534")
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config["datasearch.directories"] = self.existing_config
 
 
 class FocusTestAbsorptionPaalmanPings(systemtesting.MantidSystemTest):
@@ -720,6 +704,24 @@ def get_bin_number_at_given_r(r_data, r):
     return idx
 
 
-# outside class
-def _generate_file_find_error_message(expected_file, output_dir):
-    return f"Unable to find {expected_file} in {output_dir}.\nContents={os.listdir(output_dir)}"
+def validate_normalisation_focus_tests(test, ws_num):
+    # check output files as expected
+    def generate_error_message(expected_file, output_dir):
+        return f"Unable to find {expected_file} in {output_dir}.\nContents={os.listdir(output_dir)}"
+
+    def assert_output_file_exists(directory, filename):
+        test.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
+
+    user_output = os.path.join(output_dir, "17_1", "Test")
+    assert_output_file_exists(user_output, f"POLARIS{ws_num}.nxs")
+    assert_output_file_exists(user_output, f"POLARIS{ws_num}.gsas")
+    output_dat_dir = os.path.join(user_output, "dat_files")
+    for bankno in range(1, 6):
+        assert_output_file_exists(output_dat_dir, f"POL{ws_num}-b_{bankno}-TOF.dat")
+        assert_output_file_exists(output_dat_dir, f"POL{ws_num}-b_{bankno}-d.dat")
+
+    for ws in test.focus_results:
+        test.assertEqual(ws.sample().getMaterial().name(), "Si Si")
+    test.tolerance_is_rel_err = True
+    test.tolerance = 1e-6
+    return test.focus_results.name(), f"ISIS_Powder-POLARIS{ws_num}_FocusSempty.nxs"
