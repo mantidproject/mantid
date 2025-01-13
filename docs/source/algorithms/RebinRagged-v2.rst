@@ -20,6 +20,8 @@ The minimum and maximum values that are specified are interpreted as follows:
 The ``Delta`` parameter is required and can either be a single number which is common to all, or one number per spectra.
 Positive values are interpreted as constant step-size. Negative are logorithmic.
 
+Please refer to :ref:`Rebin <algm-Rebin>` for a more analytical explanation of `FullBinsOnly`.
+
 Usage
 -----
 
