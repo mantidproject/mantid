@@ -84,6 +84,13 @@ void addFrameToOutputWorkspace(int &rawFrames, int &goodFrames, const int &event
         eventsInFrame[i].clear();
       }
     }
+  } else {
+    // clear event list in frame in preparation for next frame
+    PARALLEL_FOR_NO_WSP_CHECK()
+    // Add events that match parameters to workspace
+    for (auto i = 0; i < NUM_OF_SPECTRA; ++i) {
+      eventsInFrame[i].clear();
+    }
   }
 }
 
@@ -278,8 +285,9 @@ void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eve
       file.read(reinterpret_cast<char *>(&eventBigEndian), sizeof(eventBigEndian));
       // Correct for the big endian format of nGEM datafile.
       correctForBigEndian(eventBigEndian, event);
-    } while (!event.generic.check() && !file.seekg(SKIP_WORD_SIZE, std::ios_base::cur).eof() && ++numWordsSkipped);
+    } while (!event.generic.check() && !file.seekg(SKIP_WORD_SIZE, std::ios_base::cur).eof());
     if (file.eof()) {
+      ++numWordsSkipped;
       break; // we have either not read an event, or only read part of one
     }
     if (event.coincidence.check()) { // Check for coincidence event.

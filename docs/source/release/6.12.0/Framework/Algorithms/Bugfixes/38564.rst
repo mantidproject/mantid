@@ -1,0 +1,1 @@
+- Fixed bug in:ref:`LoadNGEM <algm-LoadNGEM>` where ``Min/MaxEventsPerFrame`` inputs were not being respected.

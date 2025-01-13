@@ -158,17 +158,13 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", getTestFilePath("GEM000005_00_000_short.edb")));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxEventsPerFrame", 0));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     DataObjects::EventWorkspace_sptr ws;
     ws = AnalysisDataService::Instance().retrieveWS<DataObjects::EventWorkspace>("ws");
     TS_ASSERT(ws);
-    const size_t rawNumEvents = ws->getNumberEvents();
-
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("MaxEventsPerFrame", 0));
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    ws = AnalysisDataService::Instance().retrieveWS<DataObjects::EventWorkspace>("ws");
-    TS_ASSERT(rawNumEvents > ws->getNumberEvents());
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), 0);
   }
 
 private:
