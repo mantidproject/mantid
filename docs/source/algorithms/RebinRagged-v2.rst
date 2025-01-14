@@ -41,7 +41,7 @@ This particular use-case, which uses the input workspace's binning, could be don
                         Xmax=[10.20, 20.8, nan, nan, nan, 9.35])
 
 
-Sometimes due to the data or logarithmic rebinning, there are incomplete bins left over at the end of the spectrum.  These incomplete bins may result in artificats at the tail end.  This can be removed by setting the `FullBinsOnly` parameter to `True`.
+Sometimes due to the data or logarithmic rebinning, there are incomplete bins left over at the end of the spectrum.  These incomplete bins may result in artifacts at the tail end.  This can be removed by setting the `FullBinsOnly` parameter to `True`.
 
 .. code-block:: python
 
