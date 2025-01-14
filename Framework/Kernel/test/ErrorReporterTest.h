@@ -66,7 +66,7 @@ public:
     const std::string appName = "My testing application name";
     const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
     const std::string stackTrace = "File \" C :\\file\\path\\file.py\", line 194, in broken_function";
-    TestableErrorReporter reporter(appName, upTime, "0", true, "name", "email", "textBox", stackTrace);
+    TestableErrorReporter reporter(appName, upTime, "0", true, "name", "email", "textBox", stackTrace, "");
     const std::string message = reporter.generateErrorMessage();
 
     ::Json::Value root;
@@ -102,7 +102,7 @@ public:
   void test_errorMessageWithShareAndRecoveryFileHash() {
     const std::string name = "My testing application name";
     const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
-    TestableErrorReporter errorService(name, upTime, "0", true, "name", "email", "textBox", "stacktrace");
+    TestableErrorReporter errorService(name, upTime, "0", true, "name", "email", "textBox", "stacktrace", "cppTraces");
     const std::string message = errorService.generateErrorMessage();
 
     ::Json::Value root;
@@ -111,7 +111,7 @@ public:
     const std::vector<std::string> expectedMembers{
         "ParaView", "application", "host",      "mantidSha1", "mantidVersion", "osArch",
         "osName",   "osReadable",  "osVersion", "uid",        "facility",      "upTime",
-        "exitCode", "textBox",     "name",      "email",      "stacktrace"};
+        "exitCode", "textBox",     "name",      "email",      "stacktrace",    "cppCompressedTraces"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
                  std::find(members.begin(), members.end(), expectedMember) != members.end());
@@ -124,12 +124,13 @@ public:
     TS_ASSERT_EQUALS(root["email"].asString(), "email");
     TS_ASSERT_EQUALS(root["textBox"].asString(), "textBox");
     TS_ASSERT_EQUALS(root["stacktrace"].asString(), "stacktrace");
+    TS_ASSERT_EQUALS(root["cppCompressedTraces"].asString(), "cppTraces");
   }
 
   void test_errorMessageWithNoShareAndRecoveryFileHash() {
     const std::string name = "My testing application name";
     const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
-    TestableErrorReporter errorService(name, upTime, "0", false, "name", "email", "textBox", "stacktrace");
+    TestableErrorReporter errorService(name, upTime, "0", false, "name", "email", "textBox", "stacktrace", "cppTraces");
     const std::string message = errorService.generateErrorMessage();
 
     ::Json::Value root;
@@ -138,7 +139,8 @@ public:
     const std::vector<std::string> expectedMembers{
         "ParaView", "application", "host",      "mantidSha1", "mantidVersion", "osArch",
         "osName",   "osReadable",  "osVersion", "uid",        "facility",      "upTime",
-        "exitCode", "textBox",     "name",      "email",      "stacktrace"};
+        "exitCode", "textBox",     "name",      "email",      "stacktrace",    "upTime",
+        "exitCode", "textBox",     "name",      "email",      "stacktrace",    "cppCompressedTraces"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
                  std::find(members.begin(), members.end(), expectedMember) != members.end());
@@ -151,5 +153,6 @@ public:
     TS_ASSERT_EQUALS(root["email"].asString(), "");
     TS_ASSERT_EQUALS(root["textBox"].asString(), "textBox");
     TS_ASSERT_EQUALS(root["stacktrace"].asString(), "");
+    TS_ASSERT_EQUALS(root["cppCompressedTraces"].asString(), "");
   }
 };
