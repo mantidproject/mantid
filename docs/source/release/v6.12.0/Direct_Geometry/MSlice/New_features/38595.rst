@@ -1,0 +1,3 @@
+- Added an example script for saving multiple cut plots as ASCII files in the documentation.
+- Upgrade to matplotlib version 3.9.2.
+- Added observer for the Analysis Data Service to the MSlice interface. Consequently, modifications to workspaces in Mantid are now synchronised with MSlice for shared workspaces. The behavior of the MSlice interface is thereby made consistent with that of other interfaces.
