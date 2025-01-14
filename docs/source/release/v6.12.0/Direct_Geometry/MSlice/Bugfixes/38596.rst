@@ -1,1 +1,1 @@
-- Catch error for performing binary operations on vectors of different length.
+- Performing binary operations on vectors of different length no longer crashes Mantid. An error is displayed instead.
