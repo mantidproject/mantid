@@ -94,6 +94,8 @@ std::string IETView::getGroupOutputOption() const { return m_uiForm.cbGroupOutpu
 
 bool IETView::getGroupOutputCheckbox() const { return m_uiForm.ckGroupOutput->isChecked(); }
 
+IOutputNameView *IETView::getOutputName() const { return m_uiForm.outNameWidget; }
+
 IRunView *IETView::getRunView() const { return m_uiForm.runWidget; }
 
 IOutputPlotOptionsView *IETView::getPlotOptionsView() const { return m_uiForm.ipoPlotOptions; }

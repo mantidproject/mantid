@@ -33,6 +33,7 @@ public:
   virtual IRunView *getRunView() const = 0;
   virtual IOutputPlotOptionsView *getPlotOptionsView() const = 0;
   virtual bool getGroupOutputCheckbox() const = 0;
+  virtual IOutputNameView *getOutputName() const = 0;
 
   virtual std::string getFirstFilename() const = 0;
 
@@ -97,6 +98,7 @@ public:
   IRunView *getRunView() const override;
   IOutputPlotOptionsView *getPlotOptionsView() const override;
   bool getGroupOutputCheckbox() const override;
+  IOutputNameView *getOutputName() const override;
 
   std::string getFirstFilename() const override;
 
