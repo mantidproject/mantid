@@ -18,19 +18,19 @@ CORE_DUMP_RECENCY_LIMIT = 30
 log = Logger("errorreports (pystack analysis)")
 
 
-def retrieve_thread_traces_from_coredump_file() -> bytes | None:
+def retrieve_thread_traces_from_coredump_file() -> bytes:
     # Locate the core dumps dir
     core_dumps_path = None
     try:
         core_dumps_path = _get_core_dumps_dir()
     except ValueError as e:
         log.error(str(e))
-        return None
+        return b""
 
     # Get most recent dump file, check it's python (can you check it's from workbench?)
     core_file = _get_most_recent_core_dump_file(core_dumps_path)
     if core_file is None:
-        return None
+        return b""
 
     # Run file through pystack and capture output
     pystack_output = _get_output_from_pystack(core_file)
