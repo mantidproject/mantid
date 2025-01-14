@@ -570,9 +570,12 @@ class Moderator(object):
 
     def __init__(self, inval=None):
         wrap_attributes(self, inval, self.__allowed_var_names)
+        self.flux_units = "n/cm^2/s"
         if hasattr(self, "measured_flux") and self.measured_flux:
             if "scale_factor" in self.measured_flux:
                 self.measured_flux["flux"] = np.array(self.measured_flux["flux"]) * float(self.measured_flux["scale_factor"])
+            if "units" in self.measured_flux:
+                self.flux_units = self.measured_flux["units"]
             idx = np.argsort(self.measured_flux["wavelength"])
             wavelength = np.array(self.measured_flux["wavelength"])[idx]
             flux = np.array(self.measured_flux["flux"])[idx]
