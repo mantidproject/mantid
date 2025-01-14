@@ -126,7 +126,7 @@ moderator:
   imod: 1                       # Moderator time profile type: 0==chi^2, 1==Ikeda-Carpenter, 2==modified chi^2, 3==polynomial
   mod_pars: [30.13, 10.0,       # Parameters for time profile (for I-K is: [S1, S2, B1, B2, Emod]
              .07, .08, 50.42]   #    where tau_f=1/(sqrt(Ei)*E2V*sqrt(S1^2+(S2*lam)^2), tau_s=B1 for E<=130meV, B2 otherwise, R=exp(-Ei/Emod)
-                                #    and the overall variance (not FWHM) is: tau^2 = 3/tau_f^2 + R/(2-R)/tau_s^2
+                                #    and the overall variance (not FWHM) is: tau^2 = 3*tau_f^2 + R*(2-R)*tau_s^2
   theta: -13.75                 # Angle beamline makes with moderator face (degrees)
   source_rep: 60                # Frequency of source (Hz)
   measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom.
