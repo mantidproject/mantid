@@ -875,8 +875,8 @@ class Instrument(object):
         Ei, _ = _check_input(self.chopper_system, Ei_in, frequency)
         Etrans = np.array(Etrans if np.shape(Etrans) else [Etrans])
         if frequency:
-            oldfreq = self.frequency
-            self.frequency = frequency
+            oldfreq = self.chopper_system.frequency
+            self.chopper_system.frequency = frequency
         tsqmod = self.moderator.getWidthSquared(Ei)
         tsqchp = self.chopper_system.getWidthSquared(Ei)
         tsqjit = self.tjit**2
@@ -891,7 +891,7 @@ class Instrument(object):
         tsqchp = tsqchp[0]
         tsqmodchop = np.array([tsqmod, tsqchp, x0])
         # Propagate the time widths to the sample position
-        omega = self.frequency[0] * 2 * np.pi
+        omega = self.chopper_system.frequency[0] * 2 * np.pi
         vi = E2V * np.sqrt(Ei)
         vf = E2V * np.sqrt(Ei - Etrans)
         vratio = (vi / vf) ** 3
@@ -923,7 +923,7 @@ class Instrument(object):
             vsqvan += tsqsam
             outdic["sample"] = tsqsam
         if frequency:
-            self.frequency = oldfreq
+            self.chopper_system.frequency = oldfreq
         return vsqvan, outdic, tsqmodchop
 
     @property
