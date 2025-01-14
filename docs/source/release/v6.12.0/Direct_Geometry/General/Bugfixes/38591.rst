@@ -1,0 +1,7 @@
+- Definition files for :ref:`PyChop <PyChop>` for SNS instruments ARCS and SEQUOIA fixed.
+
+  This was due to the wrong files from the original `repository <https://github.com/sns-chops/resolution>`_
+  being included into Mantid. The correct files are now include so that PyChop calculations in Mantid
+  now agree with that from the `online SNS calculator <https://rez.mcvine.ornl.gov/>`_.
+  Please note that the flux values for SNS instruments are in n/cm^2/s/MW whereas for ISIS instruments
+  it is in n/cm^2/s at a nominal proton current of 160uA.
