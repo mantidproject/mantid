@@ -41,6 +41,40 @@ This particular use-case, which uses the input workspace's binning, could be don
                         Xmax=[10.20, 20.8, nan, nan, nan, 9.35])
 
 
+Sometimes due to the data or logarithmic rebinning, there are incomplete bins left over at the end of the spectrum.  These incomplete bins may result in artificats at the tail end.  This can be removed by setting the `FullBinsOnly` parameter to `True`.
+
+.. code-block:: python
+
+    from mantid.simpleapi import *
+
+    from time import time
+
+
+    ## create a workspace to be rebin-ragged
+    wsname = "ws"
+    CreateSampleWorkspace(
+        OutputWorkspace=wsname,
+        BankPixelWidth=3,
+    )
+    GroupDetectors(
+        InputWorkspace=wsname,
+        OutputWorkspace=wsname,
+        GroupingPattern="0-3,4-5,6-8,9-12,13-14,15-17",
+    )
+
+    # rebin the workspace raggedly
+    xMin = [0.05,0.06,0.1,0.07,0.04, 0.04]
+    xMax = [0.36,0.41,0.64,0.48,0.48,0.48]
+    delta = [-0.000401475,-0.000277182,-0.000323453,-0.000430986,-0.000430986,-0.000430986]
+    RebinRagged(
+        InputWorkspace=wsname,
+        XMin=xMin,
+        XMax=xMax,
+        Delta=delta,
+        FullBinsOnly=True,
+        OutputWorkspace=wsname,
+    )
+
 .. categories::
 
 .. sourcelink::
