@@ -100,11 +100,21 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self._on_specnums_changed()
         self._on_wkspindices_changed()
 
+    # Check if workspace only has 1 spectra, if true set default value to 1
+    def check_num_spectra(self):
+        if not self._ui.specNums.text():
+            if any(ws.getNumberHistograms() == 1 for ws in self._workspaces):
+                self._ui.specNums.setText("1")
+
     def on_ok_clicked(self):
+        self.check_num_spectra()
+
         if self._check_number_of_plots(self.selection):
             self.accept()
 
     def on_plot_all_clicked(self):
+        self.check_num_spectra()
+
         selection = SpectraSelection(self._workspaces)
         selection.spectra = self._plottable_spectra
         selection.plot_type = self._ui.plotType.currentIndex()
@@ -290,7 +300,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                 if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text() == WORKSPACE_NAME:
                     self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText(WORKSPACE_REFERENCE_NUMBER)
 
-                self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(False)
+                self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(True)
             else:
                 self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(True)
                 self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setEnabled(False)
@@ -545,9 +555,6 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
                     values = [float(value) for value in values]
                     self._parent.selection.custom_log_values = values
 
-                if self._parent._ui.specNums.text() or self._parent._ui.wkspIndices.text():
-                    self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
-            else:
                 self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
 
             return valid_options
