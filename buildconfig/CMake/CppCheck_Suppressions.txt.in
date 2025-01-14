@@ -1078,7 +1078,6 @@ internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNorm.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MergeMDFiles.cpp:0
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/MDNormSCD.cpp:0
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/ScriptRepository/inc/MantidScriptRepository/ScriptRepositoryImpl.h:109
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/ScriptRepository/inc/MantidScriptRepository/ScriptRepositoryImpl.h:114
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveIsawQvector.cpp:0
 constParameterReference:${CMAKE_SOURCE_DIR}/qt/icons/src/Icon.cpp:80
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/SaveMD2.cpp:0
