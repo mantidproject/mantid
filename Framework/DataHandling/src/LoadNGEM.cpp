@@ -281,11 +281,20 @@ void LoadNGEM::loadSingleFile(const std::vector<std::string> &filePath, int &eve
     // so we seek to the start of a valid event.
     // Chopping only seems to occur on a 4 byte word, hence seekg() of 4
     EventUnion event, eventBigEndian;
+    bool isEventInvalid = true;
+    bool isNotEOFAfterSkip = true;
     do {
       file.read(reinterpret_cast<char *>(&eventBigEndian), sizeof(eventBigEndian));
       // Correct for the big endian format of nGEM datafile.
       correctForBigEndian(eventBigEndian, event);
-    } while (!event.generic.check() && !file.seekg(SKIP_WORD_SIZE, std::ios_base::cur).eof() && ++numWordsSkipped);
+      isEventInvalid = !event.generic.check();
+      if (isEventInvalid) {
+        isNotEOFAfterSkip = !file.seekg(SKIP_WORD_SIZE, std::ios_base::cur).eof();
+        if (isNotEOFAfterSkip) {
+          ++numWordsSkipped;
+        }
+      }
+    } while (isEventInvalid && isNotEOFAfterSkip);
     if (file.eof()) {
       break; // we have either not read an event, or only read part of one
     }
