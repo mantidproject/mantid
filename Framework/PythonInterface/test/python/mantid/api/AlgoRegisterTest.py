@@ -7,6 +7,7 @@
 import unittest
 import tempfile
 import time
+import os
 
 from mantid.kernel import amend_config
 from mantid.simpleapi import CreateSampleWorkspace, Max
@@ -35,21 +36,34 @@ def get_recorded_timedata(filename):
     return recorded_start_time, recorded_end_time, entry_name, thread_id
 
 
+def get_perf_counter_ns() -> int:
+    return time.perf_counter_ns()
+
+
 class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
-    # performance log file
-    PER_FILE = tempfile.NamedTemporaryFile()
-    # start clock
-    start_point = -1
-    # performance configuration
-    performance_config = {"performancelog.write": "On", "performancelog.filename": PER_FILE.name}
+    @classmethod
+    def setUpClass(cls):
+        # performance log file
+        f = tempfile.NamedTemporaryFile(delete=False)
+        cls.PER_FILE = f.name
+        f.close()
+        # start clock
+        cls.start_point = -1
+        # performance configuration
+        cls.performance_config = {"performancelog.write": "On", "performancelog.filename": cls.PER_FILE}
+
+    @classmethod
+    def tearDownClass(cls):
+        if os.path.exists(cls.PER_FILE):
+            os.remove(cls.PER_FILE)
 
     def setUp(self):
         with amend_config(**self.performance_config):
             AlgoTimeRegister.Instance()
             # add 1st time to read the start clock from the file
-            AlgoTimeRegister.addTime("1st entry", time.time_ns(), time.time_ns())
-            with open(self.PER_FILE.name, "r") as f:
-                # based on the format `START_POINT: <start point number> MAX_THREAD: <thread number>`
+            AlgoTimeRegister.addTime("1st entry", get_perf_counter_ns(), get_perf_counter_ns())
+            # based on the format `START_POINT: <start point number> MAX_THREAD: <thread number>`
+            with open(self.PER_FILE, "r") as f:
                 lines = f.readlines()
                 timeentry = lines[0].split(" ")
                 self.start_point = int(timeentry[1])
@@ -58,16 +72,16 @@ class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
         with amend_config(**self.performance_config):
             # time entry
             entry_name = "test_addTime_timeentry1"
-            start_time = time.time_ns()
+            start_time = get_perf_counter_ns()
             time.sleep(3.009)
-            end_time = time.time_ns()
+            end_time = get_perf_counter_ns()
             duration = end_time - start_time
 
             # add time
             AlgoTimeRegister.addTime(entry_name, start_time, end_time)
 
             # get time data from file
-            rec_start_time, rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_start_time, rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE)
             rec_duration = rec_end_time - rec_start_time
 
             # check the values
@@ -81,9 +95,9 @@ class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
         with amend_config(**self.performance_config):
             # time entry
             entry_name = "test_addTime_timeentry2"
-            start_time = time.time_ns()
+            start_time = get_perf_counter_ns()
             time.sleep(1.345)
-            end_time = time.time_ns()
+            end_time = get_perf_counter_ns()
             duration = end_time - start_time
 
             # it should ignore this
@@ -93,7 +107,7 @@ class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
             AlgoTimeRegister.addTime(entry_name, start_time, end_time)
 
             # get time data from file
-            rec_start_time, rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_start_time, rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE)
             rec_duration = rec_end_time - rec_start_time
 
             # check the values
@@ -107,16 +121,16 @@ class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
         with amend_config(**self.performance_config):
             # time entry
             entry_name = "test_addTime_timeentry3"
-            start_time = time.time_ns()
+            start_time = get_perf_counter_ns()
             time.sleep(2.543)
-            end_time = time.time_ns()
+            end_time = get_perf_counter_ns()
             duration = end_time - start_time
 
             # add time
             AlgoTimeRegister.addTime(entry_name, start_time, end_time)
 
             # get time data from file
-            rec_start_time, rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_start_time, rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE)
             rec_duration = rec_end_time - rec_start_time
 
             # check the values
@@ -129,17 +143,17 @@ class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
     def test_addTime_timeentry4(self):
         with amend_config(**self.performance_config):
             # time entry
-            start_time = time.time_ns()
+            start_time = get_perf_counter_ns()
             entry_name = "test_addTime_timeentry4"
             time.sleep(4.11100)
-            end_time = time.time_ns()
+            end_time = get_perf_counter_ns()
             duration = end_time - start_time
 
             # add time
             AlgoTimeRegister.addTime(entry_name, start_time, end_time)
 
             # get time data from file
-            rec_start_time, rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_start_time, rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE)
             rec_duration = rec_end_time - rec_start_time
 
             # check the values
@@ -160,7 +174,7 @@ class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
             AlgoTimeRegister.Instance()
 
             # get time data from file
-            _, _, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            _, _, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE)
 
             # check the values
             self.assertEqual(entry_name, rec_entry_name)
@@ -176,20 +190,29 @@ class AlgoTimeRegisterAddTimeTest(unittest.TestCase):
 
 
 class AlgoTimeRegisterStartTest(unittest.TestCase):
-    # performance log file
-    PER_FILE = tempfile.NamedTemporaryFile()
-    # start clock
-    start_point = -1
-    # performance configuration
-    performance_config = {"performancelog.write": "On", "performancelog.filename": PER_FILE.name}
+    @classmethod
+    def setUpClass(cls):
+        # performance log file
+        f = tempfile.NamedTemporaryFile(delete=False)
+        cls.PER_FILE = f.name
+        f.close()
+        # start clock
+        cls.start_point = -1
+        # performance configuration
+        cls.performance_config = {"performancelog.write": "On", "performancelog.filename": cls.PER_FILE}
+
+    @classmethod
+    def tearDownClass(cls):
+        if os.path.exists(cls.PER_FILE):
+            os.remove(cls.PER_FILE)
 
     def setUp(self):
         # do not initialize algotimeregister explicit
         with amend_config(**self.performance_config):
             # clock start here
             CreateSampleWorkspace(Function="Multiple Peaks", OutputWorkspace="ws")
-            with open(self.PER_FILE.name, "r") as f:
-                # based on the format `START_POINT: <start point number> MAX_THREAD: <thread number>`
+            # based on the format `START_POINT: <start point number> MAX_THREAD: <thread number>`
+            with open(self.PER_FILE, "r") as f:
                 timeentry = f.readlines()[0].split(" ")
                 self.start_point = int(timeentry[1])
 
@@ -202,7 +225,7 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
             ws = CreateSampleWorkspace(Function="Multiple Peaks")
 
             # get time data from file
-            rec_sample_start_time, rec_sample_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_sample_start_time, rec_sample_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE)
 
             # check values
             self.assertEqual(entry_name, rec_entry_name)
@@ -215,7 +238,7 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
             Max(ws, OutputWorkspace="max_ws")
 
             # get time data from file
-            rec_max_start_time, rec_max_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_max_start_time, rec_max_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE)
 
             # check the values
             self.assertEqual(entry_name, rec_entry_name)
@@ -233,7 +256,7 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
             ws = CreateSampleWorkspace(Function="Multiple Peaks")
 
             # get time data from file
-            rec_sample_start_time, rec_sample_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_sample_start_time, rec_sample_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE)
 
             # check the values
             self.assertEqual(entry_name, rec_entry_name)
@@ -245,7 +268,7 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
             Max(ws, OutputWorkspace="max_ws")
 
             # get time data from file
-            rec_max_start_time, rec_max_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_max_start_time, rec_max_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE)
 
             # check the values
             self.assertEqual(entry_name, rec_entry_name)
@@ -263,7 +286,7 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
             CreateSampleWorkspace(Function="Multiple Peaks", OutputWorkspace="ws")
 
             # get time data from file
-            _, _, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            _, _, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE)
 
             # check the values
             self.assertEqual(entry_name, rec_entry_name)
@@ -271,16 +294,16 @@ class AlgoTimeRegisterStartTest(unittest.TestCase):
 
             # time entry
             entry_name = "test_addtime_workspaces"
-            start_time = time.time_ns()
+            start_time = get_perf_counter_ns()
             time.sleep(2.01)
-            end_time = time.time_ns()
+            end_time = get_perf_counter_ns()
             duration = end_time - start_time
 
             # add time
             AlgoTimeRegister.addTime(entry_name, start_time, end_time)
 
             # get time data from file
-            rec_start_time, rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE.name)
+            rec_start_time, rec_end_time, rec_entry_name, rec_thread_id = get_recorded_timedata(self.PER_FILE)
             rec_duration = rec_end_time - rec_start_time
 
             # check the values

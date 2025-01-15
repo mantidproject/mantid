@@ -33,9 +33,11 @@ public:
 
   AlgoTimeRegisterTest() {
 
-    if (!std::filesystem::create_directory(m_directory.c_str())) {
+    const auto &path = m_directory.c_str();
+    if (!std::filesystem::create_directory(path)) {
       std::cerr << "Error :  " << strerror(errno) << std::endl;
     }
+    std::filesystem::permissions(path, std::filesystem::perms::owner_write, std::filesystem::perm_options::add);
     ConfigService::Instance().setString("performancelog.filename", m_directory + "test.log");
     ConfigService::Instance().setString("performancelog.write", "On");
     AlgoTimeRegister::Instance();
