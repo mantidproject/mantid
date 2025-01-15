@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from pathlib import Path
 from typing import Optional, Union
 
 import numpy as np
@@ -34,6 +35,7 @@ class SPowderSemiEmpiricalCalculator:
         instrument: Instrument,
         quantum_order_num: int = Field(ge=1, le=2),
         autoconvolution_max: int = 0,
+        cache_directory: Path | None = None,
     ) -> None:
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon). This is only used for caching, the file will not be read.
@@ -43,6 +45,7 @@ class SPowderSemiEmpiricalCalculator:
         :param quantum_order_num: number of quantum order events to simulate in semi-analytic approximation
         :param autoconvolution_max:
             approximate spectra up to this order using auto-convolution
+        :param cache_directory: location for .hdf5
         """
         from abins.constants import TWO_DIMENSIONAL_INSTRUMENTS
 
@@ -53,6 +56,7 @@ class SPowderSemiEmpiricalCalculator:
         self._quantum_order_num = quantum_order_num
         self._autoconvolution_max = autoconvolution_max
         self._instrument = instrument
+        self._cache_directory = cache_directory
 
         # This is only used as metadata for clerk, like filename
         self._sample_form = "Powder"
@@ -79,6 +83,7 @@ class SPowderSemiEmpiricalCalculator:
                 sample_form=self._sample_form,
                 temperature=self._temperature,
             ),
+            cache_directory=self._cache_directory,
         )
 
         # Set up two sampling grids: _bins for broadening/output
@@ -245,7 +250,7 @@ class SPowderSemiEmpiricalCalculator:
 
         # Compute tensors and traces, write to cache for access during atomic s calculations
         powder_calculator = abins.PowderCalculator(
-            filename=self._input_filename, abins_data=self._abins_data, temperature=self._temperature
+            filename=self._input_filename, abins_data=self._abins_data, temperature=self._temperature, cache_directory=self._cache_directory
         )
         self._powder_data = powder_calculator.get_formatted_data()
 

@@ -4,6 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from pathlib import Path
+
 import numpy as np
 
 import abins
@@ -28,6 +30,7 @@ class SCalculatorFactory(object):
         instrument: Instrument,
         quantum_order_num: int,
         autoconvolution_max: int = 0,
+        cache_directory: Path | None = None,
     ):
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon)
@@ -37,6 +40,7 @@ class SCalculatorFactory(object):
         :param instrument: object of type Instrument for which simulation should be performed
         :param quantum_order_num: number of quantum order events taken into account during the simulation
         :param autoconvolution_max: Convolve results with fundamentals to obtain approximate spectra up to this order
+        :param cache_directory: Directory for .hdf5 cache files
         """
         if sample_form in ALL_SAMPLE_FORMS:
             if sample_form == "Powder":
@@ -47,6 +51,7 @@ class SCalculatorFactory(object):
                     instrument=instrument,
                     quantum_order_num=quantum_order_num,
                     autoconvolution_max=autoconvolution_max,
+                    cache_directory=cache_directory,
                 )
 
             else:

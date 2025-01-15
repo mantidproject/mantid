@@ -4,8 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import numpy as np
+from pathlib import Path
 from typing import Dict, Tuple
+
+import numpy as np
 
 import abins
 from abins.constants import ACOUSTIC_PHONON_THRESHOLD, CONSTANT, CM1_2_HARTREE, K_2_HARTREE, NUM_ZERO
@@ -17,10 +19,11 @@ class PowderCalculator:
     Class for calculating powder data.
     """
 
-    def __init__(self, *, filename: str, abins_data: abins.AbinsData, temperature: float) -> None:
+    def __init__(self, *, filename: str, abins_data: abins.AbinsData, temperature: float, cache_directory: Path | None = None) -> None:
         """
         :param filename:  name of input DFT filename
         :param abins_data: object of type AbinsData with data from input DFT file
+        :param temperature: temperature in Kelvin (for Bose-Einstein occupation)
         """
         if not isinstance(abins_data, abins.AbinsData):
             raise ValueError("Object of AbinsData was expected.")
@@ -40,7 +43,10 @@ class PowderCalculator:
 
         self._masses = np.asarray([atoms_data[atom]["mass"] for atom in range(len(atoms_data))])
         self._clerk = abins.IO(
-            input_filename=filename, group_name=abins.parameters.hdf_groups["powder_data"], temperature=self._temperature
+            input_filename=filename,
+            group_name=abins.parameters.hdf_groups["powder_data"],
+            temperature=self._temperature,
+            cache_directory=cache_directory,
         )
 
     def _calculate_powder(self) -> abins.PowderData:

@@ -51,7 +51,7 @@ class AbinsAlgorithm:
 
         self._energy_units = self.getProperty("EnergyUnits").value
 
-        self._cache_directory = self.getProperty("CacheDirectory").value
+        self._cache_directory = Path(self.getProperty("CacheDirectory").value)
 
         # conversion from str to int
         self._num_quantum_order_events = int(self.getProperty("QuantumOrderEventsNumber").value)

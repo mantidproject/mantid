@@ -127,6 +127,7 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
             instrument=self._instrument,
             quantum_order_num=quantum_order_num,
             autoconvolution_max=autoconvolution_max,
+            cache_directory=self._cache_directory,
         )
         s_calculator.progress_reporter = prog_reporter
         s_data = s_calculator.get_formatted_data()
