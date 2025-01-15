@@ -16,28 +16,34 @@ class SaveINS(PythonAlgorithm):
     IDENTIY_OP = SymmetryOperationFactory.createSymOp("x,y,z")
     INVERSION_OP = SymmetryOperationFactory.createSymOp("-x,-y,-z")
     ROTATION_OPS = {1: [IDENTIY_OP, INVERSION_OP], -1: [IDENTIY_OP]}
+    A_CENTERING_OP = SymmetryOperationFactory.createSymOp("x,y+1/2,z+1/2")
+    B_CENTERING_OP = (SymmetryOperationFactory.createSymOp("x+1/2,y,z+1/2"),)
+    C_CENTERING_OP = SymmetryOperationFactory.createSymOp("x+1/2,y+1/2,z")
     CENTERING_OPS = {
         1: [IDENTIY_OP],
         2: [
+            IDENTIY_OP,
             SymmetryOperationFactory.createSymOp("x+1/2,y+1/2,z+1/2"),
         ],
         3: [
+            IDENTIY_OP,
             SymmetryOperationFactory.createSymOp("x+1/3,y+2/3,z+2/3"),
             SymmetryOperationFactory.createSymOp("x+2/3,y+1/3,z+1/3"),
         ],
         4: [
-            SymmetryOperationFactory.createSymOp("x,y+1/2,z+1/2"),
-            SymmetryOperationFactory.createSymOp("x+1/2,y,z+1/2"),
-            SymmetryOperationFactory.createSymOp("x+1/2,y+1/2,z"),
+            IDENTIY_OP,
+            A_CENTERING_OP,
+            B_CENTERING_OP,
+            C_CENTERING_OP,
         ],
         5: [
-            SymmetryOperationFactory.createSymOp("x,y+1/2,z+1/2"),
+            IDENTIY_OP,
+            A_CENTERING_OP,
         ],
-        6: [
-            SymmetryOperationFactory.createSymOp("x+1/2,y,z+1/2"),
-        ],
+        6: [IDENTIY_OP, B_CENTERING_OP],
         7: [
-            SymmetryOperationFactory.createSymOp("x+1/2,y+1/2,z"),
+            IDENTIY_OP,
+            C_CENTERING_OP,
         ],
     }
     DUMMY_WAVELENGTH = 1.0
