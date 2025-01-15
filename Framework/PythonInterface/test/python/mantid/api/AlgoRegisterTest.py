@@ -30,7 +30,9 @@ def get_recorded_timedata(filename):
             if timedata.startswith("AlgorithmName"):
                 entry_name = timedata.replace("AlgorithmName=", "")
             if timedata.startswith("ThreadID"):
-                thread_id = int(timedata.replace("ThreadID=", ""))
+                thread_id_str = timedata.replace("ThreadID=", "")
+                base = 16 if thread_id_str.startswith("0x") else 10
+                thread_id = int(thread_id_str, base)
             if recorded_start_time != -1 and recorded_end_time != -1 and entry_name != "" and thread_id != "":
                 break
     return recorded_start_time, recorded_end_time, entry_name, thread_id
