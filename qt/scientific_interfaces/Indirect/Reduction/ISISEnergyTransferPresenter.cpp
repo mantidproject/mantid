@@ -18,6 +18,7 @@
 
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include <MantidQtWidgets/Common/ParseKeyValueString.h>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -56,6 +57,8 @@ IETPresenter::IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_pt
   m_algorithmRunner->subscribe(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(m_view->getPlotOptionsView(), PlotWidget::SpectraSliceSurface);
+  setOutputNamePresenter(m_view->getOutputName());
+  m_outputNamePresenter->enableEditing();
 }
 
 void IETPresenter::validateInstrumentDetails(IUserInputValidator *validator) const {
@@ -140,9 +143,11 @@ void IETPresenter::handleRun() {
   InstrumentData instrumentData = getInstrumentData();
   IETRunData runData = m_view->getRunData();
 
+  std::string outputLabel = m_outputNamePresenter->getCurrentLabel();
+
   m_view->setEnableOutputOptions(false);
 
-  m_algorithmRunner->execute(m_model->energyTransferAlgorithm(instrumentData, runData));
+  m_algorithmRunner->execute(m_model->energyTransferAlgorithm(instrumentData, runData, outputLabel));
 }
 
 void IETPresenter::handleValidation(IUserInputValidator *validator) const {

@@ -27,8 +27,8 @@ public:
   virtual std::vector<std::string> validateRunData(IETRunData const &runData) = 0;
   virtual std::vector<std::string> validatePlotData(IETPlotData const &plotData) = 0;
 
-  virtual MantidQt::API::IConfiguredAlgorithm_sptr energyTransferAlgorithm(InstrumentData const &instData,
-                                                                           IETRunData &runParams) = 0;
+  virtual MantidQt::API::IConfiguredAlgorithm_sptr
+  energyTransferAlgorithm(InstrumentData const &instData, IETRunData &runParams, std::string const &outputLabel) = 0;
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   plotRawAlgorithmQueue(InstrumentData const &instData, IETPlotData const &plotData) const = 0;
 
@@ -56,7 +56,8 @@ public:
   std::vector<std::string> validatePlotData(IETPlotData const &plotData) override;
 
   MantidQt::API::IConfiguredAlgorithm_sptr energyTransferAlgorithm(InstrumentData const &instData,
-                                                                   IETRunData &runParams) override;
+                                                                   IETRunData &runParams,
+                                                                   std::string const &outputLabel) override;
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   plotRawAlgorithmQueue(InstrumentData const &instData, IETPlotData const &plotData) const override;
 
@@ -77,7 +78,7 @@ public:
   void setRebinProperties(IAlgorithmRuntimeProps &properties, IETRebinData const &rebinData);
   void setAnalysisProperties(IAlgorithmRuntimeProps &properties, IETAnalysisData const &analysisData);
   void setOutputProperties(IAlgorithmRuntimeProps &properties, IETOutputData const &outputData,
-                           std::string const &outputGroupName);
+                           std::string const &outputGroupName, std::string const &outputLabel);
   std::string getOutputGroupName(InstrumentData const &instData, std::string const &inputFiles);
 
   [[nodiscard]] inline std::string outputGroupName() const noexcept override { return m_outputGroupName; }

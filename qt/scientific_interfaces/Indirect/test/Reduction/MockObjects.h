@@ -45,7 +45,8 @@ public:
   MOCK_METHOD1(validatePlotData, std::vector<std::string>(IETPlotData const &plotData));
 
   MOCK_METHOD2(energyTransferAlgorithm,
-               MantidQt::API::IConfiguredAlgorithm_sptr(InstrumentData const &instData, IETRunData &runParams));
+               MantidQt::API::IConfiguredAlgorithm_sptr(InstrumentData const &instData, IETRunData &runParams,
+                                                        std::string const &outputLabel));
   MOCK_CONST_METHOD2(plotRawAlgorithmQueue,
                      std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>(InstrumentData const &instData,
                                                                           IETPlotData const &plotData));

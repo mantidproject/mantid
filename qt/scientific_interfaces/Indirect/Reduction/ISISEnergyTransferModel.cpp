@@ -103,12 +103,13 @@ void IETModel::setAnalysisProperties(IAlgorithmRuntimeProps &properties, IETAnal
 }
 
 void IETModel::setOutputProperties(IAlgorithmRuntimeProps &properties, IETOutputData const &outputData,
-                                   std::string const &outputGroupName) {
+                                   std::string const &outputGroupName, std::string const &outputLabel) {
   if (outputData.getUseDeltaEInWavenumber()) {
     Mantid::API::AlgorithmProperties::update("UnitX", std::string("DeltaE_inWavenumber"), properties);
   }
   Mantid::API::AlgorithmProperties::update("FoldMultipleFrames", outputData.getFoldMultipleFrames(), properties);
   Mantid::API::AlgorithmProperties::update("OutputWorkspace", outputGroupName, properties);
+  Mantid::API::AlgorithmProperties::update("OutputSuffix", outputLabel, properties);
 }
 
 std::string IETModel::getOutputGroupName(InstrumentData const &instData, std::string const &inputText) {
@@ -119,8 +120,8 @@ std::string IETModel::getOutputGroupName(InstrumentData const &instData, std::st
   return instrument + inputText + "_" + analyser + "_" + reflection + "_Reduced";
 }
 
-MantidQt::API::IConfiguredAlgorithm_sptr IETModel::energyTransferAlgorithm(InstrumentData const &instData,
-                                                                           IETRunData &runData) {
+MantidQt::API::IConfiguredAlgorithm_sptr
+IETModel::energyTransferAlgorithm(InstrumentData const &instData, IETRunData &runData, std::string const &outputLabel) {
   auto properties = runData.groupingProperties();
 
   setInstrumentProperties(*properties, instData);
@@ -131,7 +132,7 @@ MantidQt::API::IConfiguredAlgorithm_sptr IETModel::energyTransferAlgorithm(Instr
   setAnalysisProperties(*properties, runData.getAnalysisData());
 
   m_outputGroupName = getOutputGroupName(instData, runData.getInputData().getInputText());
-  setOutputProperties(*properties, runData.getOutputData(), m_outputGroupName);
+  setOutputProperties(*properties, runData.getOutputData(), m_outputGroupName, outputLabel);
 
   auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
   reductionAlg->initialize();
