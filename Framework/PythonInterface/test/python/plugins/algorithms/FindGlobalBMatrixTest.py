@@ -96,7 +96,10 @@ class FindGlobalBMatrixTest(unittest.TestCase):
             "FindGlobalBMatrix", PeakWorkspaces=[peaks1], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
         )
 
-        with self.assertRaisesRegex(RuntimeError, "Accept only PeaksWorkspaces with either:*"):
+        with self.assertRaisesRegex(
+            RuntimeError,
+            "Fewer than the desired number of .* workspaces " "have valid peak tables. " "Currently .* of provided workspaces are valid",
+        ):
             alg.execute()
 
     def test_peak_workspaces_need_at_least_six_peaks_each_without_ub(self):
@@ -105,42 +108,48 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         SetUB(peaks1, UB=UB)
         # Add 5 peaks
         add_peaksHKL([peaks1], range(0, 5), [0], 4)
+        # Clone peaks1 so we don't throw the too few valid ws error
         peaks2 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks6")
-        ClearUB(peaks2)
+        # Create a ws with no UB but still only 5 peaks
+        peaks3 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks7")
+        ClearUB(peaks3)
 
         alg = create_algorithm(
-            "FindGlobalBMatrix", PeakWorkspaces=[peaks1, peaks2], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
+            "FindGlobalBMatrix", PeakWorkspaces=[peaks1, peaks2, peaks3], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
         )
 
-        with self.assertRaisesRegex(RuntimeError, "Accept only PeaksWorkspaces with either:*"):
+        with self.assertRaisesRegex(RuntimeError, ".* does not have a UB set, therefore it must " "contain at least 6 peaks."):
             alg.execute()
 
     def test_peak_workspaces_need_at_least_two_peaks_each_with_ub(self):
-        peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks7")
+        peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks8")
         UB = np.diag([0.25, 0.25, 0.1])
         SetUB(peaks1, UB=UB)
-        peaks2 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks8")
+        peaks2 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks9")
         SetUB(peaks2, UB=UB)
-        # Add 5 peaks
+        # Add 5 peaks to one
         add_peaksHKL([peaks1], range(0, 5), [0], 4)
+        # Add only 1 peak to other
         add_peaksHKL([peaks2], range(0, 1), [0], 4)
+        # Clone peaks1 so we don't throw the too few valid ws error
+        peaks3 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks10")
 
         alg = create_algorithm(
-            "FindGlobalBMatrix", PeakWorkspaces=[peaks1, peaks2], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
+            "FindGlobalBMatrix", PeakWorkspaces=[peaks1, peaks2, peaks3], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
         )
 
-        with self.assertRaisesRegex(RuntimeError, "Accept only PeaksWorkspaces with either:*"):
+        with self.assertRaisesRegex(RuntimeError, ".* has a UB set, therefore it must contain at least " "2 peaks that can be indexed."):
             alg.execute()
 
     def test_performs_correct_transform_to_ensure_consistent_indexing(self):
         # create peaks tables
-        peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks9")
+        peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks11")
         UB = np.diag([0.2, 0.25, 0.1])
         SetUB(peaks1, UB=UB)
         # Add some peaks
         add_peaksHKL([peaks1], range(0, 3), range(0, 3), 4)
         # Clone ws and transform
-        peaks2 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks10")
+        peaks2 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks12")
         peaks2.removePeak(0)  # peaks1 will have most peaks indexed so will used as reference
         transform = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1]])
         TransformHKL(PeaksWorkspace=peaks2, HKLTransform=transform, FindError=False)
@@ -156,16 +165,16 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         # Setup
 
         SetGoniometer(Workspace=self.ws, Axis0="-5,0,1,0,1")
-        peaks = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks11")
+        peaks = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks13")
         UB = np.diag([0.3333, 0.25, 0.09091])  # alatt = [3,4,11]
         SetUB(peaks, UB=UB)
 
-        peaks2 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks12")
+        peaks2 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks14")
         UB = np.diag([0.30, 0.25, 0.1])  # alatt = [3.33,4,10]
         SetUB(peaks2, UB=UB)
 
         SetGoniometer(Workspace=self.ws, Axis0="5,0,1,0,1")
-        peaks3 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks13")
+        peaks3 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks15")
         UB = np.diag([0.3333, 0.25, 0.09091])  # alatt = [3,4,11]
         SetUB(peaks3, UB=UB)
 

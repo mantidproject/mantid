@@ -13,6 +13,7 @@ from plugins.algorithms.FindGoniometerFromUB import getSignMaxAbsValInCol
 
 _MIN_NUM_PEAKS = 6  # minimum required to use FindUBUsingLatticeParameters assuming all linearly indep.
 _MIN_NUM_INDEXED_PEAKS = 2  # minimum indexed peaks required for CalculateUMatrix
+_MIN_NUM_VALID_WS = 2  # minimum number of workspaces with satisfactory peak tables
 
 
 class FindGlobalBMatrix(DataProcessorAlgorithm):
@@ -62,26 +63,36 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        ws_list = self.getProperty("PeakWorkspaces").value
         n_valid_ws = 0
-        ws_n_peaks = []
+        ws_list = self.getProperty("PeakWorkspaces").value
         for wsname in ws_list:
             ws = AnalysisDataService.retrieve(wsname)
-            has_UB = int(ws.sample().hasOrientedLattice())  # 0 for no UB, 1 for has UB
-            n_peaks = ws.getNumberPeaks()
-            ws_n_peaks.append(n_peaks)
-            # require PeakWorkspaces with different req for those with/without UBs
-            # with: to have the more relaxed, n_peaks is at least _MIN_NUM_INDEXED_PEAKS
-            # without UBs: must have at least _MIN_NUM_PEAKS
-            if isinstance(ws, IPeaksWorkspace) and n_peaks >= (_MIN_NUM_PEAKS, _MIN_NUM_INDEXED_PEAKS)[has_UB]:
+            if not isinstance(ws, IPeaksWorkspace):
+                issues["PeakWorkspaces"] = f"{wsname} is not a PeaksWorkspace."
+                break
+            if ws.sample().hasOrientedLattice():
+                nindexed, *_ = self.exec_child_alg("IndexPeaks", PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=True)
+                if nindexed < _MIN_NUM_INDEXED_PEAKS:
+                    issues["PeakWorkspaces"] = (
+                        f"{wsname} has a UB set, therefore it must contain at least " f"{_MIN_NUM_INDEXED_PEAKS} peaks that can be indexed."
+                    )
+                else:
+                    # if it has UB and doesn't have too few peaks it is valid
+                    n_valid_ws += 1
+            elif ws.getNumberPeaks() < _MIN_NUM_PEAKS:
+                issues["PeakWorkspaces"] = (
+                    f"{wsname} does not have a UB set, therefore it must " f"contain at least {_MIN_NUM_PEAKS} peaks."
+                )
+            else:
+                # if it doesn't have a UB but does have more than the min num peaks it is also valid
                 n_valid_ws += 1
-        if n_valid_ws < 2 or n_valid_ws < len(ws_list):
+        if n_valid_ws < _MIN_NUM_VALID_WS:
             issues["PeakWorkspaces"] = (
-                f"Accept only PeaksWorkspaces with either: attached UBs and more than {_MIN_NUM_INDEXED_PEAKS} peaks; "
-                f"or no attached UBs and more than {_MIN_NUM_PEAKS} peaks - "
-                f"there must be at least 2 valid peak tables provided in total. "
-                f"Currently {n_valid_ws}/{len(ws_list)} of provided workspaces are valid, with {ws_n_peaks} total peaks"
+                f"Fewer than the desired number of {_MIN_NUM_VALID_WS} workspaces "
+                f"have valid peak tables. "
+                f"Currently {n_valid_ws}/{len(ws_list)} of provided workspaces are valid"
             )
+
         return issues
 
     def PyExec(self):
