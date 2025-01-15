@@ -34,10 +34,10 @@ class SaveINS(PythonAlgorithm):
             SymmetryOperationFactory.createSymOp("x,y+1/2,z+1/2"),
         ],
         6: [
-            SymmetryOperationFactory.createSymOp("x,y+1/2,z"),
+            SymmetryOperationFactory.createSymOp("x+1/2,y,z+1/2"),
         ],
         7: [
-            SymmetryOperationFactory.createSymOp("x,y,z+1/2"),
+            SymmetryOperationFactory.createSymOp("x+1/2,y+1/2,z"),
         ],
     }
     DUMMY_WAVELENGTH = 1.0
