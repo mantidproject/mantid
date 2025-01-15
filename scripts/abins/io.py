@@ -8,7 +8,6 @@ import hashlib
 import io
 import json
 import os
-from pathlib import Path
 import subprocess
 import shutil
 from typing import List, Optional
@@ -37,7 +36,7 @@ class IO(BaseModel):
     temperature: float = None
 
     @staticmethod
-    def _dir_is_not_writeable(directory: Path):
+    def _dir_is_not_writeable(directory: str):
         """Check write permissions of directory by writing a temporary file
 
         This is the only _really_ reliable way of knowing; checking attributes can
