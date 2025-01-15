@@ -5,7 +5,7 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, Progress, ADSValidator, IPeaksWorkspace
-from mantid.simpleapi import AnalysisDataService, logger, SetUB
+from mantid.simpleapi import AnalysisDataService, logger
 from mantid.kernel import Direction, FloatBoundedValidator, StringArrayProperty
 import numpy as np
 from scipy.optimize import leastsq
@@ -196,7 +196,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
         # set this UB and re-index the ws
         for iws, cws in enumerate(ws_list):
-            SetUB(cws, UB=ref_ub)
+            self.exec_child_alg("SetUB", Workspace=cws, UB=ref_ub)
 
         # for the ws with fewer peaks than threshold, try and find some more by adjusting U slightly
         for iws in np.where(n_indexed_by_ref < _MIN_NUM_INDEXED_PEAKS)[0]:
@@ -236,7 +236,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 if iws == iref:
                     indexed_peaks[iub, iws] = nindexed_ref[iub]
                 else:
-                    SetUB(cws, UB=ref_ub)
+                    self.exec_child_alg("SetUB", Workspace=cws, UB=ref_ub)
                     indexed_peaks[iub, iws] = self.exec_child_alg("IndexPeaks", PeaksWorkspace=cws, RoundHKLs=True, CommonUBForAll=True)[0]
 
         # find, for each UB, the number of ws that have n_peaks over the threshold and the total sum of these
