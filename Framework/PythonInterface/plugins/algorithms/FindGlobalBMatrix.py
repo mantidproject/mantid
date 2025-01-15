@@ -148,15 +148,18 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
     def find_initial_indexing(self, a, b, c, alpha, beta, gamma, ws_list):
         # check if a UB exists on any run and if so whether it indexes a sufficient number of peaks
         foundUB = False
-        ws_with_UB = [
-            (iws, self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=False)[0])
-            for iws, ws in enumerate(ws_list)
-            if AnalysisDataService.retrieve(ws).sample().hasOrientedLattice()
-        ]  # [(iws, n_peaks_indexed),...]
+
+        # find which of the ws have a ub and how many peaks are indexed
+        iws_have_ub = np.array([iws for iws, ws in enumerate(ws_list) if AnalysisDataService.retrieve(ws).sample().hasOrientedLattice()])
+        nindexed = np.array(
+            [self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0] for iws in iws_have_ub]
+        )
 
         # find which of the ws have a sufficient number of indexed peaks to be the reference
-        potential_ref_UB_iws = [(iws, n_peaks) for iws, n_peaks in ws_with_UB if n_peaks >= _MIN_NUM_INDEXED_PEAKS]
-        foundUB = len(potential_ref_UB_iws) > 0
+        ref_mask = np.flatnonzero(nindexed > _MIN_NUM_INDEXED_PEAKS)
+        iws_potential_ref_ub = iws_have_ub[ref_mask]
+        nindexed_ref = nindexed[ref_mask]
+        foundUB = len(iws_potential_ref_ub) > 0
 
         # if none of the ws with UBs index enough peaks try calculating new UB for all from Lattice Params
         if not foundUB:
@@ -180,20 +183,16 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                     pass
                 if foundUB:
                     # to reach this point this current UB must be the only potential reference we have
-                    potential_ref_UB_iws = [(iws, nindexed)]
+                    # still need to evaluate_best_ref to get n_peaks indexed by this UB
+                    # evaluate_best_ref requires lists of ref options
+                    iws_potential_ref_ub = [iws]
+                    nindexed_ref = [nindexed]
                     break  # stop once found one UB found as FindUBUsingLatticeParameter takes a long time
         if not foundUB:
             raise RuntimeError("An initial UB could not be found with the provided lattice parameters")
 
-        # iterate over the potential reference UBs to find the best one
-        potential_ref_UBs = [
-            AnalysisDataService.retrieve(ws_list[iws]).sample().getOrientedLattice().getUB().copy()
-            for (iws, n_peaks) in potential_ref_UB_iws
-        ]
-
         # we'll evaluate this in a separate function to make it easier to swap out for a different metric
-        best_iub, n_indexed_by_ref = self.evaluate_best_ref_UB(potential_ref_UB_iws, potential_ref_UBs, ws_list)
-        ref_ub = potential_ref_UBs[best_iub]
+        ref_ub, n_indexed_by_ref, iref = self.evaluate_best_ref_UB(iws_potential_ref_ub, nindexed_ref, ws_list)
 
         # set this UB and re-index the ws
         for iws, cws in enumerate(ws_list):
@@ -213,7 +212,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 gamma=gamma,
                 FixParameters=False,
             )
-            self.make_UB_consistent(ws_list[best_iub], ws_list[iws])
+            self.make_UB_consistent(ws_list[iref], ws_list[iws])
             nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
 
             # if still too few, warn user and remove
@@ -222,20 +221,25 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 ws_list.pop(iws)
                 logger.warning(f"Workspace {iws} removed")
 
-    def evaluate_best_ref_UB(self, potential_ref_UB_iws, potential_ref_UBs, ws_list):
-        # create an array to save n indexed peaks for each ref option
-        indexed_peaks = np.zeros((len(potential_ref_UBs), len(ws_list)))
+    def evaluate_best_ref_UB(self, iws_potential_ref_ub, nindexed_ref, ws_list):
+        indexed_peaks = np.zeros((len(iws_potential_ref_ub), len(ws_list)))
+
+        # need to get the UBs first as we are setting them in-place
+        pot_ubs = [
+            AnalysisDataService.retrieve(ws_list[iref]).sample().getOrientedLattice().getUB().copy() for iref in iws_potential_ref_ub
+        ]
 
         # iterate over all the potential reference workspaces and find how many peaks each UB indexes
-        for iub, (iref, n_peaks) in enumerate(potential_ref_UB_iws):
-            ref_ub = potential_ref_UBs[iub]
+        for iub, iref in enumerate(iws_potential_ref_ub):
+            ref_ub = pot_ubs[iub]
 
             for iws, cws in enumerate(ws_list):
                 if iws == iref:
-                    indexed_peaks[iub, iws] = n_peaks
+                    indexed_peaks[iub, iws] = nindexed_ref[iub]
                 else:
                     SetUB(cws, UB=ref_ub)
                     indexed_peaks[iub, iws] = self.exec_child_alg("IndexPeaks", PeaksWorkspace=cws, RoundHKLs=True, CommonUBForAll=True)[0]
+
         # find, for each UB, the number of ws that have n_peaks over the threshold and the total sum of these
         n_ws_over_thresh = np.sum(indexed_peaks >= _MIN_NUM_INDEXED_PEAKS, axis=1)
         total_indexed_peaks = np.sum(indexed_peaks, axis=1)
@@ -244,7 +248,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         max_over_thresh = np.argwhere(n_ws_over_thresh == np.max(n_ws_over_thresh))
         best_iub = max_over_thresh[np.argmax(total_indexed_peaks[max_over_thresh])][0]
 
-        return best_iub, indexed_peaks[best_iub]
+        return pot_ubs[best_iub], indexed_peaks[best_iub], iws_potential_ref_ub[best_iub]
 
     def make_UB_consistent(self, ws_ref, ws):
         # compare U matrix to perform TransformHKL to preserve indexing
