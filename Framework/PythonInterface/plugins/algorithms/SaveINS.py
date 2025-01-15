@@ -17,7 +17,7 @@ class SaveINS(PythonAlgorithm):
     INVERSION_OP = SymmetryOperationFactory.createSymOp("-x,-y,-z")
     ROTATION_OPS = {1: [IDENTIY_OP, INVERSION_OP], -1: [IDENTIY_OP]}
     CENTERING_OPS = {
-        1: [],
+        1: [IDENTIY_OP],
         2: [
             SymmetryOperationFactory.createSymOp("x+1/2,y+1/2,z+1/2"),
         ],
@@ -140,7 +140,7 @@ class SaveINS(PythonAlgorithm):
             f_handle.write(f"LATT {latt_type}\n")
 
             # print sym operations
-            for sym_str in self.get_shelx_symmetry_operators(spgr):
+            for sym_str in self.get_shelx_symmetry_operators(spgr, latt_type):
                 f_handle.write(f"SYMM {sym_str}\n")
 
             # print atom info
@@ -173,7 +173,7 @@ class SaveINS(PythonAlgorithm):
         w = W1 @ w2 + w1
         w[w < 0] += 1
         w[w > 1] -= 1
-        return tuple(W.astype(int).flatten().tolist() + np.round(w, 3).tolist())
+        return tuple(np.round(W, 0).astype(int).flatten().tolist() + np.round(w, 3).tolist())
 
     def symmetry_matrix_vector(self, symop):
         W = np.linalg.inv(np.column_stack([symop.transformHKL(V3D(*vec)) for vec in np.eye(3)]))
@@ -181,7 +181,7 @@ class SaveINS(PythonAlgorithm):
         return W, w
 
     def get_shelx_symmetry_operators(self, spgr, latt_type):
-        """Get SHELX SYMM records"""
+        """Get SHELX SYMM records https://cci.lbl.gov/cctbx/shelx.html"""
         indentity = self.IDENTIY_OP.getIdentifier()
         inversion = self.INVERSION_OP.getIdentifier()
         latt_numb = abs(latt_type)
@@ -203,7 +203,6 @@ class SaveINS(PythonAlgorithm):
                         S3 = self.symmetry_operation_key(W1, w1, W2, w2)
                         sym_ops_set.add(S3)
         return sym_ops_list
-        # https://cci.lbl.gov/cctbx/shelx.html
 
 
 AlgorithmFactory.subscribe(SaveINS)
