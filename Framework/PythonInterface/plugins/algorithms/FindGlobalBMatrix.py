@@ -197,7 +197,6 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         # set this UB and re-index the ws
         for iws, cws in enumerate(ws_list):
             SetUB(cws, UB=ref_ub)
-            self.exec_child_alg("IndexPeaks", PeaksWorkspace=cws, RoundHKLs=True, CommonUBForAll=False)
 
         # for the ws with fewer peaks than threshold, try and find some more by adjusting U slightly
         for iws in np.where(n_indexed_by_ref < _MIN_NUM_INDEXED_PEAKS)[0]:
