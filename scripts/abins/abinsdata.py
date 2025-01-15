@@ -49,7 +49,7 @@ class AbinsData:
                     ab_initio_program.upper(), " ".join(all_loaders.keys())
                 )
             )
-        loader = all_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename)
+        loader = all_loaders[ab_initio_program.upper()](input_ab_initio_filename=filename, cache_directory=cache_directory)
         data = loader.get_formatted_data()
         return data
 

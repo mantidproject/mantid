@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from pathlib import Path
 import unittest
 
 import numpy as np
@@ -12,14 +13,16 @@ from abins import IO, test_helpers
 
 
 class IOTest(unittest.TestCase):
-    def tearDown(self):
+    def setUp(self):
         from mantid.kernel import ConfigService
 
-        test_helpers.remove_output_files(list_of_names=["Cars", "temphgfrt"], directory=ConfigService.getString("defaultsave.directory"))
+        self._cache_directory = Path(ConfigService.getString("defaultsave.directory"))
 
-    @staticmethod
-    def _save_stuff():
-        saver = IO(input_filename="Cars.foo", group_name="Volksvagen")
+    def tearDown(self):
+        test_helpers.remove_output_files(list_of_names=["Cars", "temphgfrt"], directory=self._cache_directory)
+
+    def _save_stuff(self):
+        saver = IO(input_filename="Cars.foo", group_name="Volksvagen", cache_directory=self._cache_directory)
 
         # add some attributes
         saver.add_attribute("Fuel", 100)
@@ -45,13 +48,13 @@ class IOTest(unittest.TestCase):
         saver.save()
 
     def _add_wrong_attribute(self):
-        poor_saver = IO(input_filename="BadCars.foo", group_name="Volksvagen")
+        poor_saver = IO(input_filename="BadCars.foo", group_name="Volksvagen", cache_directory=self._cache_directory)
 
         with self.assertRaisesRegex(ValidationError, "Input should be an instance of int64"):
             poor_saver.add_attribute("BadPassengers", np.array([4, 5], dtype=np.int64))
 
     def _save_wrong_dataset(self):
-        poor_saver = IO(input_filename="BadCars.foo", group_name="Volksvagen")
+        poor_saver = IO(input_filename="BadCars.foo", group_name="Volksvagen", cache_directory=self._cache_directory)
         poor_saver.add_data("BadPassengers", 4)
         self.assertRaises(TypeError, poor_saver.save)
 
@@ -65,7 +68,7 @@ class IOTest(unittest.TestCase):
         self.assertRaises(ValueError, IO, input_filename="goodfile", group_name=1)
 
     def _wrong_file(self):
-        poor_loader = IO(input_filename="bumCars", group_name="nice_group")
+        poor_loader = IO(input_filename="bumCars", group_name="nice_group", cache_directory=self._cache_directory)
         self.assertRaises(IOError, poor_loader.load, list_of_attributes="one_attribute")
 
     def _loading_attributes(self):
@@ -116,7 +119,7 @@ class IOTest(unittest.TestCase):
         self._add_wrong_attribute()
         self._save_wrong_dataset()
 
-        self.loader = IO(input_filename="Cars.foo", group_name="Volksvagen")
+        self.loader = IO(input_filename="Cars.foo", group_name="Volksvagen", cache_directory=self._cache_directory)
 
         self._wrong_filename_type()
         self._empty_filename()

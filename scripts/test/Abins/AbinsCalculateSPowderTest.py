@@ -7,7 +7,9 @@
 from copy import deepcopy
 import functools
 import json
+from pathlib import Path
 import unittest
+from tempfile import TemporaryDirectory
 
 import numpy as np
 from numpy.testing import assert_almost_equal
@@ -32,14 +34,21 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
     _si2 = "Si2-sc_CalculateSPowder"
     _instruments_defaults = {}
 
-    default_calculator_kwargs = dict(
-        temperature=_temperature, instrument=_instrument, sample_form=_sample_form, quantum_order_num=_order_event, autoconvolution_max=0
-    )
-
     def setUp(self):
         self.default_threads = abins.parameters.performance["threads"]
         abins.parameters.performance["threads"] = 1
         self._instruments_defaults = deepcopy(abins.parameters.instruments)
+        self._temporary_directory = TemporaryDirectory()
+        self._cache_directory = Path(self._temporary_directory.name)
+
+        self.default_calculator_kwargs = dict(
+            temperature=self._temperature,
+            instrument=self._instrument,
+            sample_form=self._sample_form,
+            quantum_order_num=self._order_event,
+            autoconvolution_max=0,
+            cache_directory=self._cache_directory,
+        )
 
     def tearDown(self):
         from mantid.kernel import ConfigService
@@ -65,6 +74,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
                 abins_data=good_data,
                 instrument=self._instrument,
                 quantum_order_num=self._order_event,
+                cache_directory=self._cache_directory,
             )
 
         # invalid temperature
@@ -76,6 +86,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
                 abins_data=good_data,
                 instrument=self._instrument,
                 quantum_order_num=self._order_event,
+                cache_directory=self._cache_directory,
             )
 
         # invalid sample
@@ -87,6 +98,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
                 abins_data=good_data,
                 instrument=self._instrument,
                 quantum_order_num=self._order_event,
+                cache_directory=self._cache_directory,
             )
 
         # invalid abins data: content of abins data instead of object abins_data
@@ -98,6 +110,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
                 abins_data=good_data.extract(),
                 instrument=self._instrument,
                 quantum_order_num=self._order_event,
+                cache_directory=self._cache_directory,
             )
 
         # invalid instrument
@@ -109,6 +122,7 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
                 abins_data=good_data,
                 instrument="INSTRUMENT",
                 quantum_order_num=self._order_event,
+                cache_directory=self._cache_directory,
             )
 
     def test_1d_order1(self):

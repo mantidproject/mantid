@@ -51,8 +51,9 @@ class TestAbinsData(unittest.TestCase):
 
 
 class DummyLoader:
-    def __init__(self, *, input_ab_initio_filename):
+    def __init__(self, *, input_ab_initio_filename, cache_directory):
         self.filename = input_ab_initio_filename
+        self.cache_directory = cache_directory
 
     def get_formatted_data(self):
         return "FORMATTED DATA"

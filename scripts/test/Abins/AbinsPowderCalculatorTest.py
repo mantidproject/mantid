@@ -4,10 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import json
+from pathlib import Path
 import unittest
+
 import numpy as np
 from numpy.testing import assert_allclose
-import json
 
 from abins import AbinsData, PowderCalculator
 import abins.input
@@ -22,12 +24,13 @@ class PowderCalculatorTest(unittest.TestCase):
     _si2 = "Si2-sc_CalculatePowder"
 
     #     test input
-    def tearDown(self):
+    def setUp(self):
         from mantid.kernel import ConfigService
 
-        abins.test_helpers.remove_output_files(
-            list_of_names=["CalculatePowder"], directory=ConfigService.getString("defaultsave.directory")
-        )
+        self._cache_directory = Path(ConfigService.getString("defaultsave.directory"))
+
+    def tearDown(self):
+        abins.test_helpers.remove_output_files(list_of_names=["CalculatePowder"], directory=self._cache_directory)
 
     def test_wrong_input(self):
         full_path_filename = abins.test_helpers.find_file(filename=self._si2 + ".json")
@@ -55,7 +58,9 @@ class PowderCalculatorTest(unittest.TestCase):
         abins_data_filename = abins.test_helpers.find_file(filename=name + ".json")
         ref_data = self._get_ref_data(filename=abins_data_filename)
 
-        good_tester = abins.PowderCalculator(filename=abins_data_filename, abins_data=ref_data["DFT"], temperature=300.0)
+        good_tester = abins.PowderCalculator(
+            filename=abins_data_filename, abins_data=ref_data["DFT"], temperature=300.0, cache_directory=self._cache_directory
+        )
         calculated_data = good_tester.calculate_data().extract()
 
         # check if evaluated powder data  is correct
@@ -67,7 +72,9 @@ class PowderCalculatorTest(unittest.TestCase):
                     raise AssertionError(f"Difference in field '{key}' for case {name}") from e
 
         # check if loading powder data is correct
-        new_tester = abins.PowderCalculator(filename=abins_data_filename, abins_data=ref_data["DFT"], temperature=300.0)
+        new_tester = abins.PowderCalculator(
+            filename=abins_data_filename, abins_data=ref_data["DFT"], temperature=300.0, cache_directory=self._cache_directory
+        )
 
         loaded_data = new_tester.load_formatted_data().extract()
 
@@ -88,17 +95,18 @@ class PowderCalculatorTest(unittest.TestCase):
         self._write_data(name=self._c6h6)
         self._write_data(name=self._si2)
 
-    @classmethod
-    def _write_data(cls, name=None):
+    def _write_data(self, name=None):
         abins_data_filename = abins.test_helpers.find_file(name + ".json")
         with open(abins_data_filename, "r") as fp:
             abins_data = AbinsData.from_dict(json.load(fp))
 
-        powder = abins.PowderCalculator(filename=abins_data_filename, abins_data=abins_data, temperature=300.0).calculate_data()
+        powder = abins.PowderCalculator(
+            filename=abins_data_filename, abins_data=abins_data, temperature=300.0, cache_directory=self._cache_directory
+        ).calculate_data()
 
         powder_dict = abins.test_helpers.dict_arrays_to_lists(powder.extract())
         json_file = abins_data_filename.replace(".json", "_powder.txt")
-        raise Exception(json_file)
+
         with open(json_file, "w") as fd:
             json.dump(powder_dict, fd, indent=4, sort_keys=True)
 

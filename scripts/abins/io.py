@@ -60,6 +60,9 @@ class IO(BaseModel):
         if self.cache_directory:
             return self.cache_directory
 
+        else:
+            raise Exception("No directory")
+
         return Path(ConfigService.getString("defaultsave.directory"))
 
     def model_post_init(self, __context):

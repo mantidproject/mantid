@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import io
+from pathlib import Path
+
 import numpy as np
 
 from .textparser import TextParser
@@ -19,11 +21,11 @@ class CRYSTALLoader(AbInitioLoader):
     contributing to this module.
     """
 
-    def __init__(self, input_ab_initio_filename=None):
+    def __init__(self, input_ab_initio_filename=None, cache_directory: Path | None = None):
         """
         :param input_ab_initio_filename: name of a file with vibrational or phonon data (foo.out)
         """
-        super().__init__(input_ab_initio_filename=input_ab_initio_filename)
+        super().__init__(input_ab_initio_filename=input_ab_initio_filename, cache_directory=cache_directory)
 
         self._num_k = None
         self._num_modes = None
