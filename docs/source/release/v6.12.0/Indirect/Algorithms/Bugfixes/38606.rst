@@ -1,0 +1,1 @@
+- :ref:`Abins <algm-Abins-v1>` / :ref:`Abins2D <algm-Abins2D-v1>` now gives a more helpful error message when the Default Save Directory is unwriteable. (A writeable save directory is required for caching data.)
