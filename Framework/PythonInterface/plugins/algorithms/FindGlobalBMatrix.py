@@ -201,15 +201,20 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                         gamma=gamma,
                         FixParameters=False,
                     )
-                    self.make_UB_consistent(ws_list[iref], ws_list[iws])
-                    nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
-                    # if still too few, warn user and remove
-                    if nindexed < _MIN_NUM_INDEXED_PEAKS:
-                        logger.warning(
-                            f"Fewer than the desired {_MIN_NUM_INDEXED_PEAKS} peaks were indexed for Workspace {iws}. "
-                            f"Workspace {iws} removed"
-                        )
+                    singular_transform = self.make_UB_consistent(ws_list[iref], ws_list[iws])
+                    # if calculate transform is singular
+                    if singular_transform:
+                        logger.warning(f"Singular transform in make_UB_consistent, " f"{ws_list[iws]} removed")
                         ws_list.pop(iws)
+                    else:
+                        nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
+                        # if still too few, warn user and remove
+                        if nindexed < _MIN_NUM_INDEXED_PEAKS:
+                            logger.warning(
+                                f"Fewer than the desired {_MIN_NUM_INDEXED_PEAKS} peaks were indexed for Workspace {iws}. "
+                                f"Workspace {iws} removed"
+                            )
+                            ws_list.pop(iws)
         if len(ws_list) < 2:
             if n_ws_indexed_by_ref_ub <= 1:
                 err_msg = "Reference UB failed to index peaks in any other run"
@@ -289,8 +294,12 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         U_ref = AnalysisDataService.retrieve(ws_ref).sample().getOrientedLattice().getU()
         U = AnalysisDataService.retrieve(ws).sample().getOrientedLattice().getU()
         # find transform required  ( U_ref = U T^-1) - see TransformHKL docs for details
-        transform = np.linalg.inv(getSignMaxAbsValInCol(np.linalg.inv(U) @ U_ref))
-        self.exec_child_alg("TransformHKL", PeaksWorkspace=ws, HKLTransform=transform, FindError=False)
+        # check that the transform will be non-singular
+        singular_transform = np.linalg.det(getSignMaxAbsValInCol(np.linalg.inv(U) @ U_ref)) == 0
+        if not singular_transform:
+            transform = np.linalg.inv(getSignMaxAbsValInCol(np.linalg.inv(U) @ U_ref))
+            self.exec_child_alg("TransformHKL", PeaksWorkspace=ws, HKLTransform=transform, FindError=False)
+        return singular_transform
 
     def calcResiduals(self, x0, ws_list):
         """

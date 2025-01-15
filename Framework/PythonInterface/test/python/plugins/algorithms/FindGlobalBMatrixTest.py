@@ -201,9 +201,24 @@ class FindGlobalBMatrixTest(unittest.TestCase):
         # Add some peaks
         add_peaksHKL([peaks1, peaks2], range(0, 3), range(0, 3), 4)
 
-        # hard to explicitly test the warning message is flagged when that warning will almost always lead to the error
         with self.assertRaisesRegex(RuntimeError, "Reference UB failed to index peaks in any other run"):
             FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2], a=5.0, b=5.0, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15)
+
+    def test_handling_for_unable_to_get_consistent_ub(self):
+        peaks1 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks18")
+        UB = np.diag([0.2, 0.2, 0.1])
+        SetUB(peaks1, UB=UB)
+
+        peaks2 = CreatePeaksWorkspace(InstrumentWorkspace=self.ws, NumberOfPeaks=0, OutputWorkspace="SXD_peaks19")
+        UB = np.diag([0.33, 0.33, 0.1])
+        SetUB(peaks2, UB=UB)
+        peaks3 = CloneWorkspace(InputWorkspace=peaks1, OutputWorkspace="SXD_peaks20")
+        # Add some peaks
+        add_peaksHKL([peaks1, peaks2, peaks3], range(0, 3), range(0, 3), 4)
+
+        FindGlobalBMatrix(PeakWorkspaces=[peaks1, peaks2, peaks3], a=5.0, b=5.0, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15)
+
+        self.assertWarnsRegex(RuntimeWarning, "Singular transform in make_UB_consistent, .* removed")
 
     def assert_lattice(self, ws_list, a, b, c, alpha, beta, gamma, delta_latt=2e-2, delta_angle=2.5e-1):
         for ws in ws_list:
