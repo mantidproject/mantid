@@ -23,7 +23,7 @@ scattering spectra (INS).
 
 Abins requires data from existing lattice dynamics calculations to determine the phonon mode frequencies and displacements. These are used to compute INS intensities; higher-order phonons may be approximated as combinations of fundamental modes.
 Several file formats are supported for frequency and displacement data at given :math:`\mathbf{q}`-points. Alternatively, force-constants data can be provided and a fine :math:`\mathbf{q}`-point mesh will be sampled automatically.
-Supported codes include CASTEP (.phonon), CRYSTAL (.out), DMOL3 (.outmol), GAUSSIAN (.log), PHONOPY (.yaml), VASP (.xml) as well as some pre-processed JSON (.json) formats. For more information about the files, features and quirks of these codes see :ref:`Abins data formats`.
+Supported codes include CASTEP (.phonon), CRYSTAL (.out), DMOL3 (.outmol), GAUSSIAN (.log), PHONOPY (.yaml), VASP (.xml) as well as some pre-processed JSON (.json) formats. For more information about the files, features and quirks of these codes see :ref:`AbinsDataFormats`.
 
 The user may also provide an experimental file with measured dynamical structure factor S in order to directly
 compare theoretical and experimental spectra.

@@ -1,10 +1,10 @@
-.. _Abins Data Formats:
+.. _AbinsDataFormats:
 
 Abins Data Formats
 ==================
 
 .. list-table::
-   :header-rows: 1
+  :header-rows: 1
 
   * - Code
     - Data type

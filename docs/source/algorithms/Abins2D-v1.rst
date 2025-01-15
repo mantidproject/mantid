@@ -26,7 +26,7 @@ Abins requires data from existing lattice dynamics calculations to determine the
 
 Several file formats are supported for frequency and displacement data at given :math:`\mathbf{q}`-points. Alternatively, force-constants data can be provided and a fine :math:`\mathbf{q}`-point mesh will be sampled automatically.
 
-Supported codes include CASTEP (.phonon), CRYSTAL (.out), DMOL3 (.outmol), GAUSSIAN (.log), PHONOPY (.yaml), VASP (.xml) as well as some pre-processed JSON (.json) formats. For more information about the files, features and quirks of these codes see :ref:`Abins data formats`.
+Supported codes include CASTEP (.phonon), CRYSTAL (.out), DMOL3 (.outmol), GAUSSIAN (.log), PHONOPY (.yaml), VASP (.xml) as well as some pre-processed JSON (.json) formats. For more information about the files, features and quirks of theskee codes see :ref:`AbinsDataFormats`.
 
 For VASP XML inputs, it is also permitted to use a "selective dynamics" in which some atoms are frozen.
 In this case, data is only available for the moving atoms and contributions from the other atoms are omitted from the calculated spectrum.
