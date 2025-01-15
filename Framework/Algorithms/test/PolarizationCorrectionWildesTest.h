@@ -33,14 +33,13 @@ using namespace Mantid::Algorithms;
 using namespace Mantid::Algorithms::PolarizationCorrectionsHelpers;
 
 namespace {
-const double yVal{2.3};
-const BinEdges edges{0.3, 0.6, 0.9, 1.2};
-constexpr size_t nBins{3};
-constexpr size_t nHist{2};
-const std::string outputWSName{"output"};
+const double Y_VAL{2.3};
+const BinEdges DEFAULT_EDGES{0.3, 0.6, 0.9, 1.2};
+constexpr size_t NBINS{3};
+constexpr size_t NHIST{2};
+const std::string OUTPUT_WS_NAME{"output"};
 } // namespace
 
-// namespace
 class PolarizationCorrectionWildesTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -84,31 +83,30 @@ public:
 
   void test_IdealCaseTwoInputsWithAnalyzer() {
     constexpr size_t numClones{2};
-    Counts counts{yVal, 4.2 * yVal, yVal};
+    Counts counts{Y_VAL, 4.2 * Y_VAL, Y_VAL};
 
     auto wsList = createWorkspaceList(numClones);
     auto wsNames = generateWorkspaceNames(numClones);
     setupWorkspacesForIdealCasesTwoInput(wsList[1]);
-    addWorkspaceToService(wsNames.front(), wsList.front());
-    addWorkspaceToService(wsNames.back(), wsList.back());
+    addWorkspacesToService(wsNames, wsList);
 
-    auto effWS = idealEfficiencies(edges);
+    auto effWS = idealEfficiencies(DEFAULT_EDGES);
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, "00, 11");
     validateNumberOfEntries(outputWS, 4);
 
     const std::array<std::string, 4> POL_DIRS{{"++", "+-", "-+", "--"}};
     for (size_t i = 0; i != 4; ++i) {
       const auto &dir = POL_DIRS[i];
-      const std::string wsName = outputWSName + std::string("_") + dir;
+      const std::string wsName = OUTPUT_WS_NAME + std::string("_") + dir;
       MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
       TS_ASSERT(ws)
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
-      for (size_t j = 0; j != nHist; ++j) {
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), NHIST)
+      for (size_t j = 0; j != NHIST; ++j) {
         const auto &xs = ws->x(j);
         const auto &ys = ws->y(j);
         const auto &es = ws->e(j);
-        TS_ASSERT_EQUALS(ys.size(), nBins)
-        for (size_t k = 0; k != nBins; ++k) {
+        TS_ASSERT_EQUALS(ys.size(), NBINS)
+        for (size_t k = 0; k != NBINS; ++k) {
           const double y = counts[k];
           const double expected = [y, &dir]() {
             if (dir == "++") {
@@ -128,7 +126,7 @@ public:
               return 0.;
             }
           }();
-          TS_ASSERT_EQUALS(xs[k], edges[k])
+          TS_ASSERT_EQUALS(xs[k], DEFAULT_EDGES[k])
           TS_ASSERT_EQUALS(ys[k], expected)
           TS_ASSERT_EQUALS(es[k], expectedError)
         }
@@ -139,46 +137,45 @@ public:
   void test_IdealCaseTwoInputsNoAnalyzer() {
     constexpr size_t numClones{2};
     // confirm the counts in this method if this is correct
-    Counts counts{yVal, 4.2 * yVal, yVal};
+    Counts counts{Y_VAL, 4.2 * Y_VAL, Y_VAL};
 
     auto wsList = createWorkspaceList(numClones);
     auto wsNames = generateWorkspaceNames(numClones);
     setupWorkspacesForIdealCasesTwoInput(wsList[1]);
-    addWorkspaceToService(wsNames.front(), wsList.front());
-    addWorkspaceToService(wsNames.back(), wsList.back());
+    addWorkspacesToService(wsNames, wsList);
 
-    auto effWS = idealEfficiencies(edges);
+    auto effWS = idealEfficiencies(DEFAULT_EDGES);
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, "0, 1");
 
     compareCorrectionResults(
-        outputWS, {"_++", "_--"}, nHist, nBins, edges, counts,
+        outputWS, {"_++", "_--"}, NHIST, NBINS, DEFAULT_EDGES, counts,
         [](size_t wsIndex, double c) { return c * static_cast<double>(wsIndex + 1); },
         [](size_t wsIndex, double c) { return std::sqrt(c) * static_cast<double>(wsIndex + 1); });
   }
 
   void test_IdealCaseDirectBeamCorrections() {
-    Counts counts{yVal, 4.2 * yVal, yVal};
+    Counts counts{Y_VAL, 4.2 * Y_VAL, Y_VAL};
 
     auto const ws00 = createWorkspace();
     const std::string wsName{"ws00"};
     addWorkspaceToService(wsName, ws00);
 
-    auto effWS = idealEfficiencies(edges);
+    auto effWS = idealEfficiencies(DEFAULT_EDGES);
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsName, effWS, "0");
 
     validateNumberOfEntries(outputWS, 1);
     MatrixWorkspace_sptr ws =
-        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(outputWSName + std::string("_++")));
+        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(OUTPUT_WS_NAME + std::string("_++")));
     TS_ASSERT(ws)
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
-    for (size_t i = 0; i != nHist; ++i) {
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), NHIST)
+    for (size_t i = 0; i < NHIST; ++i) {
       const auto &xs = ws->x(i);
       const auto &ys = ws->y(i);
       const auto &es = ws->e(i);
-      TS_ASSERT_EQUALS(ys.size(), nBins)
-      for (size_t j = 0; j != nBins; ++j) {
+      TS_ASSERT_EQUALS(ys.size(), NBINS)
+      for (size_t j = 0; j != NBINS; ++j) {
         const double y = counts[j];
-        TS_ASSERT_EQUALS(xs[j], edges[j])
+        TS_ASSERT_EQUALS(xs[j], DEFAULT_EDGES[j])
         TS_ASSERT_EQUALS(ys[j], y)
         TS_ASSERT_EQUALS(es[j], std::sqrt(y))
       }
@@ -187,14 +184,14 @@ public:
 
   void test_FullCorrections() {
     constexpr size_t numClones{4};
-    Counts counts{yVal, yVal, yVal};
+    Counts counts{Y_VAL, Y_VAL, Y_VAL};
 
     auto wsList = createWorkspaceList(numClones, counts);
     auto wsNames = generateWorkspaceNames(numClones);
-    setWorkspacesTestData(wsList, nHist);
+    setWorkspacesTestData(wsList, NHIST);
     addWorkspacesToService(wsNames, wsList);
 
-    auto effWS = efficiencies(edges);
+    auto effWS = efficiencies(DEFAULT_EDGES);
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS);
 
     fullFourInputsResultsCheck(outputWS, wsList[0], wsList[1], wsList[2], wsList[3], effWS, counts);
@@ -206,16 +203,16 @@ public:
 
   void test_TwoInputsWithAnalyzer() {
     constexpr size_t numClones{2};
-    Counts counts{yVal, yVal, yVal};
+    Counts counts{Y_VAL, Y_VAL, Y_VAL};
 
     auto wsList = createWorkspaceList(numClones, counts);
     auto wsNames = generateWorkspaceNames(numClones);
-    setWorkspacesTestData(wsList, nHist);
+    setWorkspacesTestData(wsList, NHIST);
     addWorkspacesToService(wsNames, wsList);
     MatrixWorkspace_sptr ws01 = nullptr;
     MatrixWorkspace_sptr ws10 = nullptr;
 
-    auto effWS = efficiencies(edges);
+    auto effWS = efficiencies(DEFAULT_EDGES);
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, "00, 11");
 
     validateNumberOfEntries(outputWS, 4);
@@ -239,21 +236,21 @@ public:
     // the final corrected expected intensities.
     std::vector<double> errorTolerances = {1e-5, 1e-2, 1e-2, 1e-5};
     compareCorrectionResults(
-        outputWS, {"_++", "_+-", "_-+", "_--"}, nHist, nBins, edges, counts,
+        outputWS, {"_++", "_+-", "_-+", "_--"}, NHIST, NBINS, DEFAULT_EDGES, counts,
         [&expected](size_t i, double) { return expected[i]; },
         [&expectedError](size_t i, double) { return expectedError[i]; }, std::move(errorTolerances));
   }
 
   void test_TwoInputsWithoutAnalyzer() {
     constexpr size_t numClones{2};
-    Counts counts{yVal, yVal, yVal};
+    Counts counts(3, Y_VAL);
 
     auto wsList = createWorkspaceList(numClones, counts);
     auto wsNames = generateWorkspaceNames(numClones);
-    setWorkspacesTestData(wsList, nHist);
+    setWorkspacesTestData(wsList, NHIST);
     addWorkspacesToService(wsNames, wsList);
 
-    auto effWS = efficiencies(edges);
+    auto effWS = efficiencies(DEFAULT_EDGES);
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, "0, 1");
 
     validateNumberOfEntries(outputWS, 2);
@@ -266,18 +263,19 @@ public:
     const Eigen::Vector2d e{wsList[0]->e(0).front(), wsList[1]->e(0).front()};
     const auto expectedError = errorWithoutAnalyzer(y, e, F1, F1e, P1, P1e);
     compareCorrectionResults(
-        outputWS, {"_++", "_--"}, nHist, nBins, edges, counts, [&expected](size_t i, double) { return expected[i]; },
+        outputWS, {"_++", "_--"}, NHIST, NBINS, DEFAULT_EDGES, counts,
+        [&expected](size_t i, double) { return expected[i]; },
         [&expectedError](size_t i, double) { return expectedError[i]; });
   }
 
   void test_directBeamOnlyInput() {
-    Counts counts(3, yVal);
+    Counts counts(3, Y_VAL);
 
-    auto const ws00 = createWorkspace(nHist, counts);
+    auto const ws00 = createWorkspace(NHIST, counts);
     const std::string wsName{"ws00"};
     addWorkspaceToService(wsName, ws00);
 
-    auto effWS = efficiencies(edges);
+    auto effWS = efficiencies(DEFAULT_EDGES);
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsName, effWS, "0");
     validateNumberOfEntries(outputWS, 1);
 
@@ -294,7 +292,7 @@ public:
     const auto errorY = e * e * inverted * inverted;
     const auto expectedError = std::sqrt(errorP1 * errorP1 + errorP2 * errorP2 + errorY);
     compareCorrectionResults(
-        outputWS, {"_++"}, nHist, nBins, edges, counts, [&expected](size_t, double) { return expected; },
+        outputWS, {"_++"}, NHIST, NBINS, DEFAULT_EDGES, counts, [&expected](size_t, double) { return expected; },
         [&expectedError](size_t, double) { return expectedError; });
   }
 
@@ -325,15 +323,15 @@ public:
   void test_FailureWhenNumberOfHistogramsInInputWorkspacesMismatch() {
     Counts counts(3, 0.);
 
-    auto const ws00 = createWorkspace(nHist, counts);
+    auto const ws00 = createWorkspace(NHIST, counts);
     MatrixWorkspace_sptr ws01 = ws00->clone();
-    MatrixWorkspace_sptr ws10 = create<Workspace2D>(nHist + 1, Histogram(edges, counts));
+    MatrixWorkspace_sptr ws10 = create<Workspace2D>(NHIST + 1, Histogram(DEFAULT_EDGES, counts));
     MatrixWorkspace_sptr ws11 = ws00->clone();
     const std::vector<std::string> wsNames{{"ws00", "ws01", "ws10", "ws11"}};
     std::vector<MatrixWorkspace_sptr> wsList = {ws00, ws01, ws10, ws11};
     addWorkspacesToService(wsNames, wsList);
 
-    auto effWS = idealEfficiencies(edges);
+    auto effWS = idealEfficiencies(DEFAULT_EDGES);
     runCorrectionWildes(wsNames, effWS, "", "", false);
   }
 
@@ -354,11 +352,11 @@ public:
   }
 
   void test_IdealCrossPolarizationCaseFullCorrections() {
-    auto crossPolarizationEffWS = idealEfficiencies(edges, false);
+    auto crossPolarizationEffWS = idealEfficiencies(DEFAULT_EDGES, false);
     // Cross polarized ideal efficiencies should give us the same ouput as for ideal efficiencies but in the reverse
     // order
     const std::array<std::string, 4> POL_DIRS{{"--", "-+", "+-", "++"}};
-    idealCaseFullCorrectionsTest(edges, crossPolarizationEffWS, POL_DIRS);
+    idealCaseFullCorrectionsTest(DEFAULT_EDGES, crossPolarizationEffWS, POL_DIRS);
   }
 
   void test_SpinStateOrderInOutputWorkspaceGroup() {
@@ -369,7 +367,7 @@ public:
     auto wsNames = generateWorkspaceNames(numClones);
     addWorkspacesToService(wsNames, wsList);
 
-    auto effWS = idealEfficiencies(edges);
+    auto effWS = idealEfficiencies(DEFAULT_EDGES);
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS);
 
     validateNumberOfEntries(outputWS, 4);
@@ -377,35 +375,35 @@ public:
     for (size_t i = 0; i < 4; ++i) {
       auto ws = outputWS->getItem(i);
       TS_ASSERT(ws)
-      const std::string expectedName = outputWSName + std::string("_") + OUTPUT_ORDER[i];
+      const std::string expectedName = OUTPUT_WS_NAME + std::string("_") + OUTPUT_ORDER[i];
       TS_ASSERT_EQUALS(ws->getName(), expectedName)
     }
   }
 
   void test_SpinStateAddedToSampleLogWhenRequested() {
     constexpr size_t numClones{4};
-    Counts counts(3, yVal);
+    Counts counts(3, Y_VAL);
 
     const std::vector<std::string> expectedLogValues = {SpinStatesORSO::PP, SpinStatesORSO::PM, SpinStatesORSO::MP,
                                                         SpinStatesORSO::MM};
 
-    prepareWorkspacesAndRunCorrectionWithSampleState(counts, edges, numClones, true, expectedLogValues);
+    prepareWorkspacesAndRunCorrectionWithSampleState(counts, DEFAULT_EDGES, numClones, true, expectedLogValues);
   }
 
   void test_SpinStateAddedToSampleLogWhenRequestedNoAnalyser() {
     constexpr size_t numClones{2};
-    Counts counts(3, yVal);
+    Counts counts(3, Y_VAL);
 
     const std::vector<std::string> expectedLogValues = {SpinStatesORSO::PO, SpinStatesORSO::MO};
 
-    prepareWorkspacesAndRunCorrectionWithSampleState(counts, edges, numClones, true, expectedLogValues, "0, 1");
+    prepareWorkspacesAndRunCorrectionWithSampleState(counts, DEFAULT_EDGES, numClones, true, expectedLogValues, "0, 1");
   }
 
   void test_SpinStateNotAddedToSampleLogByDefault() {
     constexpr size_t numClones{4};
-    Counts counts(3, yVal);
+    Counts counts(3, Y_VAL);
 
-    prepareWorkspacesAndRunCorrectionWithSampleState(counts, edges, numClones, false, {});
+    prepareWorkspacesAndRunCorrectionWithSampleState(counts, DEFAULT_EDGES, numClones, false, {});
   }
 
 private:
@@ -425,7 +423,7 @@ private:
       TS_ASSERT_THROWS_NOTHING(alg->setProperty("InputWorkspaces", inputWorkspaces))
     }
 
-    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", outputWSName))
+    TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", OUTPUT_WS_NAME))
 
     if (!flippers.empty()) {
       alg->setProperty("Flippers", flippers);
@@ -485,7 +483,7 @@ private:
 
     for (size_t wsIndex = 0; wsIndex < wsGrp->size(); ++wsIndex) {
       MatrixWorkspace_sptr ws =
-          std::dynamic_pointer_cast<MatrixWorkspace>(wsGrp->getItem(outputWSName + pols[wsIndex]));
+          std::dynamic_pointer_cast<MatrixWorkspace>(wsGrp->getItem(OUTPUT_WS_NAME + pols[wsIndex]));
       TS_ASSERT(ws)
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
       for (size_t histIndex = 0; histIndex < nHist; ++histIndex) {
@@ -560,15 +558,15 @@ private:
                                     const std::array<std::string, 4> &outputSpinStates,
                                     const std::string &flipperConfig = "00,01,10,11",
                                     const std::string &spinStates = "") {
-    Counts counts{yVal, 4.2 * yVal, yVal};
-    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    Counts counts{Y_VAL, 4.2 * Y_VAL, Y_VAL};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(NHIST, Histogram(edges, counts));
     MatrixWorkspace_sptr ws01 = ws00->clone();
     MatrixWorkspace_sptr ws10 = ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
 
     std::vector<std::string> wsNames{"ws00", "ws01", "ws10", "ws11"};
     const std::vector<MatrixWorkspace_sptr> wsList{ws00, ws01, ws10, ws11};
-    setWorkspacesTestData(wsList, nHist);
+    setWorkspacesTestData(wsList, NHIST);
     addWorkspacesToService(wsNames, wsList);
 
     // Re-order the input workspace names to match the input flipper configuration
@@ -584,12 +582,12 @@ private:
                    [](const std::string &s) { return "_" + s; });
     if (!spinStates.empty()) {
       compareCorrectionResults(
-          outputWS, pols, nHist, nBins, edges, counts,
+          outputWS, pols, NHIST, NBINS, edges, counts,
           [&](size_t wsIndex, double c) { return c * static_cast<double>(getPolIndex(pols[wsIndex]) + 1); },
           [&](size_t wsIndex, double c) { return std::sqrt(c) * static_cast<double>(getPolIndex(pols[wsIndex]) + 1); });
     } else {
       compareCorrectionResults(
-          outputWS, pols, nHist, nBins, edges, counts,
+          outputWS, pols, NHIST, NBINS, edges, counts,
           [](size_t wsIndex, double c) { return c * static_cast<double>(wsIndex + 1); },
           [](size_t wsIndex, double c) { return std::sqrt(c) * static_cast<double>(wsIndex + 1); });
     }
@@ -597,15 +595,15 @@ private:
 
   void idealThreeInputsTest(const std::string &missingFlipperConf, const std::string &flipperConfig,
                             const std::vector<std::string> &outputWsOrder, const bool useSpinStates = false) {
-    Counts counts{yVal, 4.2 * yVal, yVal};
-    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    Counts counts{Y_VAL, 4.2 * Y_VAL, Y_VAL};
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(NHIST, Histogram(DEFAULT_EDGES, counts));
     MatrixWorkspace_sptr wsXX = ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
 
     const std::string presentFlipperConf = missingFlipperConf == "01" ? "10" : "01";
     std::vector<std::string> wsNames{"ws00", "wsXX", "ws11"};
     const std::vector<MatrixWorkspace_sptr> wsList{ws00, wsXX, ws11};
-    setWorkspacesTestData(wsList, nHist);
+    setWorkspacesTestData(wsList, NHIST);
     addWorkspacesToService(wsNames, wsList);
 
     // Re-order the input workspace names to match the input flipper configuration
@@ -619,22 +617,22 @@ private:
       spinStates = outputWsOrder[0] + "," + outputWsOrder[1] + "," + outputWsOrder[2] + "," + outputWsOrder[3];
     }
 
-    auto effWS = idealEfficiencies(edges);
+    auto effWS = idealEfficiencies(DEFAULT_EDGES);
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConfig, spinStates);
 
     TS_ASSERT_EQUALS(outputWS->getNumberOfEntries(), 4)
     for (size_t i = 0; i != 4; ++i) {
       const auto &dir = outputWsOrder[i];
-      const std::string wsName = outputWSName + std::string("_") + dir;
+      const std::string wsName = OUTPUT_WS_NAME + std::string("_") + dir;
       MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(wsName));
       TS_ASSERT(ws)
-      TS_ASSERT_EQUALS(ws->getNumberHistograms(), nHist)
-      for (size_t j = 0; j != nHist; ++j) {
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), NHIST)
+      for (size_t j = 0; j < NHIST; ++j) {
         const auto &xs = ws->x(j);
         const auto &ys = ws->y(j);
         const auto &es = ws->e(j);
-        TS_ASSERT_EQUALS(ys.size(), nBins)
-        for (size_t k = 0; k != nBins; ++k) {
+        TS_ASSERT_EQUALS(ys.size(), NBINS)
+        for (size_t k = 0; k != NBINS; ++k) {
           const double y = counts[k];
           const double expected = [y, &dir]() {
             if (dir == "++") {
@@ -660,7 +658,7 @@ private:
               }
             }
           }();
-          TS_ASSERT_EQUALS(xs[k], edges[k])
+          TS_ASSERT_EQUALS(xs[k], DEFAULT_EDGES[k])
           TS_ASSERT_EQUALS(ys[k], expected)
           TS_ASSERT_EQUALS(es[k], expectedError)
         }
@@ -669,21 +667,21 @@ private:
   }
 
   void threeInputsTest(const std::string &missingFlipperConf) {
-    Counts counts(3, yVal);
-    MatrixWorkspace_sptr ws00 = create<Workspace2D>(nHist, Histogram(edges, counts));
+    Counts counts(3, Y_VAL);
+    MatrixWorkspace_sptr ws00 = create<Workspace2D>(NHIST, Histogram(DEFAULT_EDGES, counts));
     MatrixWorkspace_sptr ws01 = missingFlipperConf == "01" ? nullptr : ws00->clone();
     MatrixWorkspace_sptr ws10 = missingFlipperConf == "10" ? nullptr : ws00->clone();
     MatrixWorkspace_sptr ws11 = ws00->clone();
     const std::vector<std::string> wsNames{{"ws00", "wsXX", "ws11"}};
     const std::array<MatrixWorkspace_sptr, 3> wsList{{ws00, ws01 != nullptr ? ws01 : ws10, ws11}};
-    for (size_t i = 0; i != 3; ++i) {
-      for (size_t j = 0; j != nHist; ++j) {
+    for (size_t i = 0; i < 3; ++i) {
+      for (size_t j = 0; j < NHIST; ++j) {
         wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
         wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
       }
       AnalysisDataService::Instance().addOrReplace(wsNames[i], wsList[i]);
     }
-    auto effWS = efficiencies(edges);
+    auto effWS = efficiencies(DEFAULT_EDGES);
     const std::string presentFlipperConf = missingFlipperConf == "01" ? "10" : "01";
     const std::string flipperConf = "00, " + presentFlipperConf + ", 11";
     WorkspaceGroup_sptr outputWS = runCorrectionWildes(wsNames, effWS, flipperConf);
@@ -1328,12 +1326,12 @@ private:
 
   void runIdealCaseFullCorrections(const std::string &flipperConfig, const std::array<std::string, 4> &outputOrder,
                                    const bool useSpinStates = false) {
-    auto effWS = idealEfficiencies(edges);
+    auto effWS = idealEfficiencies(DEFAULT_EDGES);
     std::string spinStates = "";
     if (useSpinStates) {
       spinStates = outputOrder[0] + "," + outputOrder[1] + "," + outputOrder[2] + "," + outputOrder[3];
     }
-    idealCaseFullCorrectionsTest(edges, effWS, outputOrder, flipperConfig, spinStates);
+    idealCaseFullCorrectionsTest(DEFAULT_EDGES, effWS, outputOrder, flipperConfig, spinStates);
   }
 
   size_t getPolIndex(const std::string &pol) {
@@ -1352,7 +1350,7 @@ private:
     const std::string wsName{"ws00"};
     addWorkspaceToService(wsName, ws00);
 
-    auto effWS = idealEfficiencies(edges);
+    auto effWS = idealEfficiencies(DEFAULT_EDGES);
 
     return {ws00, effWS};
   }
@@ -1363,7 +1361,7 @@ private:
                                                         const std::string &grouping = "") {
     auto wsList = createWorkspaceList(numClones, counts);
     auto wsNames = generateWorkspaceNames(numClones);
-    setWorkspacesTestData(wsList, nHist);
+    setWorkspacesTestData(wsList, NHIST);
     addWorkspacesToService(wsNames, wsList);
 
     const auto effWS = efficiencies(edges);
@@ -1382,10 +1380,10 @@ private:
 
   MatrixWorkspace_sptr createWorkspace(size_t nHist = 2, std::optional<Counts> counts = std::nullopt) {
     if (!counts) {
-      counts = Counts{yVal, 4.2 * (yVal), yVal};
+      counts = Counts{Y_VAL, 4.2 * (Y_VAL), Y_VAL};
     }
 
-    return create<Workspace2D>(nHist, Histogram(edges, *counts));
+    return create<Workspace2D>(nHist, Histogram(DEFAULT_EDGES, *counts));
   }
 
   std::vector<MatrixWorkspace_sptr> cloneWorkspaces(const MatrixWorkspace_sptr &sourceWorkspace,
@@ -1422,8 +1420,8 @@ private:
 
   void setWorkspacesTestData(const std::vector<Mantid::API::MatrixWorkspace_sptr> &wsList, const size_t nHist) {
 
-    for (size_t i = 0; i != wsList.size(); ++i) {
-      for (size_t j = 0; j != nHist; ++j) {
+    for (size_t i = 0; i < wsList.size(); ++i) {
+      for (size_t j = 0; j < nHist; ++j) {
         wsList[i]->mutableY(j) *= static_cast<double>(i + 1);
         wsList[i]->mutableE(j) *= static_cast<double>(i + 1);
       }
