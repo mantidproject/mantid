@@ -3,6 +3,9 @@
 Abins Data Formats
 ==================
 
+.. contents::
+  :local:
+
 .. list-table::
   :header-rows: 1
 
@@ -98,3 +101,5 @@ From VASP XML inputs, it is permitted to use "selective dynamics" in which some 
 In this case, data is only available for the moving atoms and contributions from the other atoms are omitted from the calculated spectrum.
 This may be a suitable model for systems where the frozen atoms form a rigid substrate (e.g. a noble metal surface) for an adsorbed molecule of lightweight atoms.
 It is not recommended where there is significant vibrational coupling between frozen and moving atoms, or where substrate modes would occupy a similar frequency range to the adsorbate.
+
+.. categories:: Concepts
