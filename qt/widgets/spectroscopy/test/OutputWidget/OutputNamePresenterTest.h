@@ -51,12 +51,12 @@ public:
   }
 
   void test_enable_editing() {
-    EXPECT_CALL(*m_view, enableLabelEditor().Times(1));
+    EXPECT_CALL(*m_view, enableLabelEditor()).Times(1);
     m_presenter->enableEditing();
   }
 
   void test_get_current_label() {
-    EXPECT_CALL(*m_view, getCurrentLabel().Times(1));
+    EXPECT_CALL(*m_view, getCurrentLabel()).Times(1);
     m_presenter->getCurrentLabel();
   }
 

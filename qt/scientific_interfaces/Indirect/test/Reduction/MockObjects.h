@@ -44,7 +44,7 @@ public:
   MOCK_METHOD1(validateRunData, std::vector<std::string>(IETRunData const &runData));
   MOCK_METHOD1(validatePlotData, std::vector<std::string>(IETPlotData const &plotData));
 
-  MOCK_METHOD2(energyTransferAlgorithm,
+  MOCK_METHOD3(energyTransferAlgorithm,
                MantidQt::API::IConfiguredAlgorithm_sptr(InstrumentData const &instData, IETRunData &runParams,
                                                         std::string const &outputLabel));
   MOCK_CONST_METHOD2(plotRawAlgorithmQueue,
@@ -76,6 +76,7 @@ public:
   MOCK_CONST_METHOD0(getSaveData, IETSaveData());
   MOCK_CONST_METHOD0(getGroupOutputOption, std::string());
   MOCK_CONST_METHOD0(getRunView, IRunView *());
+  MOCK_CONST_METHOD0(getOutputName, IOutputNameView *());
   MOCK_CONST_METHOD0(getPlotOptionsView, IOutputPlotOptionsView *());
   MOCK_CONST_METHOD0(getGroupOutputCheckbox, bool());
   MOCK_CONST_METHOD0(getFirstFilename, std::string());
