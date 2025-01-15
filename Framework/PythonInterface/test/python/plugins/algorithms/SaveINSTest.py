@@ -25,9 +25,6 @@ class SaveINSTest(unittest.TestCase):
             "ZERR 4 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000\n",
             "LATT 1\n",
             "SYMM -x+1/2,y+1/2,-z+1/2\n",
-            "SYMM -x,-y,-z\n",
-            "SYMM x+1/2,-y+1/2,z+1/2\n",
-            "SYMM x,y,z\n",
             "NEUT\n",
         ]
         cls.file_end = ["UNIT 48 36 12 8 4\n", "MERG 0\n", "HKLF 2\n", "END"]
