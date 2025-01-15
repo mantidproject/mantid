@@ -283,7 +283,7 @@ public:
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETOutputData outputData(true, true);
-    m_model->setOutputProperties(*properties, outputData, "output");
+    m_model->setOutputProperties(*properties, outputData, "output", "label");
 
     TS_ASSERT_EQUALS(properties->getPropertyValue("UnitX"), "DeltaE_inWavenumber");
     TS_ASSERT_EQUALS(properties->getPropertyValue("FoldMultipleFrames"), "1");
@@ -294,7 +294,7 @@ public:
     auto properties = std::make_unique<Mantid::API::AlgorithmRuntimeProps>();
 
     IETOutputData outputData(false, false);
-    m_model->setOutputProperties(*properties, outputData, "output");
+    m_model->setOutputProperties(*properties, outputData, "output", "label");
 
     TS_ASSERT(!properties->existsProperty("UnitX"));
     TS_ASSERT_EQUALS(properties->getPropertyValue("FoldMultipleFrames"), "0");
@@ -325,7 +325,7 @@ public:
 
     InstrumentData instData("instrument", "analyser", "reflection");
 
-    auto configuredAlg = m_model->energyTransferAlgorithm(instData, runData);
+    auto configuredAlg = m_model->energyTransferAlgorithm(instData, runData, "outputGroupName", "label");
     auto &runtimeProps = configuredAlg->getAlgorithmRuntimeProps();
     TS_ASSERT_EQUALS("instrument", runtimeProps.getPropertyValue("Instrument"));
     TS_ASSERT_EQUALS("analyser", runtimeProps.getPropertyValue("Analyser"));

@@ -18,6 +18,7 @@
 
 #include "MantidQtWidgets/Common/QtJobRunner.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
+#include <MantidQtWidgets/Common/ParseKeyValueString.h>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -31,6 +32,7 @@ using namespace MantidQt::CustomInterfaces::InterfaceUtils;
 namespace {
 constexpr auto REDUCTION_ALG_NAME = "ISISIndirectEnergyTransfer";
 constexpr auto PLOT_PREPROCESS_ALG_NAME = "GroupDetectors";
+std::vector<std::string> SUFFIXES = {"_Reduced"};
 
 enum class AlgorithmType { REDUCTION, PLOT_RAW_PREPROCESS };
 
@@ -56,6 +58,8 @@ IETPresenter::IETPresenter(IDataReduction *idrUI, IIETView *view, std::unique_pt
   m_algorithmRunner->subscribe(this);
   setRunWidgetPresenter(std::make_unique<RunPresenter>(this, m_view->getRunView()));
   setOutputPlotOptionsPresenter(m_view->getPlotOptionsView(), PlotWidget::SpectraSliceSurface);
+  setOutputNamePresenter(m_view->getOutputName());
+  m_outputNamePresenter->setWsSuffixes(SUFFIXES);
 }
 
 void IETPresenter::validateInstrumentDetails(IUserInputValidator *validator) const {
@@ -140,9 +144,12 @@ void IETPresenter::handleRun() {
   InstrumentData instrumentData = getInstrumentData();
   IETRunData runData = m_view->getRunData();
 
+  std::string outputLabel = m_outputNamePresenter->getCurrentLabel();
+  std::string outputGroupName = m_outputNamePresenter->generateOutputLabel();
+
   m_view->setEnableOutputOptions(false);
 
-  m_algorithmRunner->execute(m_model->energyTransferAlgorithm(instrumentData, runData));
+  m_algorithmRunner->execute(m_model->energyTransferAlgorithm(instrumentData, runData, outputGroupName, outputLabel));
 }
 
 void IETPresenter::handleValidation(IUserInputValidator *validator) const {
@@ -283,6 +290,8 @@ void IETPresenter::notifyRunFinished() {
     double detailedBalance = m_model->loadDetailedBalance(m_view->getFirstFilename());
     m_view->setDetailedBalance(detailedBalance);
     m_runPresenter->setRunEnabled(true);
+    std::string output = m_model->getOutputGroupName(getInstrumentData(), m_view->getInputText());
+    m_outputNamePresenter->setOutputWsBasename(output);
   }
   m_view->setRunFilesEnabled(true);
 }
