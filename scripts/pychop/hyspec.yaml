@@ -107,7 +107,8 @@ moderator:
         51.03,  42.13,  34.74,  28.75,  23.98,  20.19,  17.17,  14.77,
         12.85,  11.29 ]
     isSigma: false
-  measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom. Flux in n/cm^2/s/uA/Angstrom
+  measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom.
+    units: n/cm^2/s/MW          # Units (optional, if omitted assumes n/cm^2/s)
     scale_factor: 1.0    # A factor to scale the flux values below by
     wavelength: [1.28,1.53,1.74,2.02,2.34,3.3,3.69,4.04,4.64]
     flux: [4.23,8.42,12.52,21.27,30.67,24.92,18.72,12.33,11.60] #from V_fits2, sheet PGApr2014, yellow

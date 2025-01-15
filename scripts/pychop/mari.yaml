@@ -126,7 +126,8 @@ moderator:
     isSigma: False              # Indicates measurements are FWHM
     wavelength: [4.0240, 5.6898, 2.3250, 2.8480, 1.5224, 3.4331, 1.8009, 1.1167]
     width: [53.2, 62, 39.2, 44.8, 18.8, 48.8, 27.2, 12.4]
-  measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom. Flux in n/cm^2/s/uA/Angstrom
+  measured_flux:                # Table of measured flux vs wavelength. Wavelength in Angstrom.
+    units: n/cm^2/s/160uA       # Units (optional, if omitted assumes n/cm^2/s)
     wavelength: [1.5000e-01, 2.5000e-01, 3.5000e-01, 4.5000e-01, 5.5000e-01, 6.5000e-01, 7.5000e-01, 8.5000e-01, 9.5000e-01, 1.0500e+00,
                  1.1500e+00, 1.2500e+00, 1.3500e+00, 1.4500e+00, 1.5500e+00, 1.6500e+00, 1.7500e+00, 1.8500e+00, 1.9500e+00, 2.0500e+00,
                  2.1500e+00, 2.2500e+00, 2.3500e+00, 2.4500e+00, 2.5500e+00, 2.6500e+00, 2.7500e+00, 2.8500e+00, 2.9500e+00, 3.0500e+00,
