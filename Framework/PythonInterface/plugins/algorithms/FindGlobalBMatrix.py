@@ -226,9 +226,11 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
                     # if still too few, warn user and remove
                     if nindexed < _MIN_NUM_INDEXED_PEAKS:
-                        logger.warning(f"Fewer than the desired {_MIN_NUM_INDEXED_PEAKS} peaks were indexed for Workspace {iws}")
+                        logger.warning(
+                            f"Fewer than the desired {_MIN_NUM_INDEXED_PEAKS} peaks were indexed for Workspace {iws}."
+                            f"Workspace {iws} removed"
+                        )
                         ws_list.pop(iws)
-                        logger.warning(f"Workspace {iws} removed")
 
     def evaluate_best_ref_UB(self, iws_potential_ref_ub, nindexed_ref, ws_list):
         indexed_peaks = np.zeros((len(iws_potential_ref_ub), len(ws_list)))
