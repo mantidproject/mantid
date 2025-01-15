@@ -134,6 +134,8 @@ if(ENABLE_WORKBENCH OR BUILD_MANTIDQT)
   find_package(PyQt5 REQUIRED)
   find_package(SIP REQUIRED)
   separate_arguments(PYQT5_SIP_FLAGS)
+  # Disable use of C++ API deprecated in Qt 5.15
+  add_compile_definitions(QT_DISABLE_DEPRECATED_UP_TO=0x050F00)
 endif()
 
 # Now add in all the components
