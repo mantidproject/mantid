@@ -50,6 +50,16 @@ public:
     m_presenter->generateWarningLabel();
   }
 
+  void test_enable_editing() {
+    EXPECT_CALL(*m_view, enableLabelEditor().Times(1));
+    m_presenter->enableEditing();
+  }
+
+  void test_get_current_label() {
+    EXPECT_CALL(*m_view, getCurrentLabel().Times(1));
+    m_presenter->getCurrentLabel();
+  }
+
   void test_label_warning_message_if_workspace_does_not_exists_on_ads() {
     auto textColor = "color: darkGreen";
     auto text = "Unused name, new workspace will be created";
