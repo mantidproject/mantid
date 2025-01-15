@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import logging
+from pathlib import Path
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -40,7 +41,7 @@ class AbinsBasicTest(unittest.TestCase):
     _tmp_cache_dir = None
 
     def get_cache_dir(self):
-        return self._tmp_cache_dir.name
+        return Path(self._tmp_cache_dir.name)
 
     @classmethod
     def setUpClass(cls):
@@ -63,7 +64,8 @@ class AbinsBasicTest(unittest.TestCase):
                 "benzene_exp",
                 "benzene_Abins",
                 "numbered",
-            ]
+            ],
+            directory=self.get_cache_dir(),
         )
         mtd.clear()
 

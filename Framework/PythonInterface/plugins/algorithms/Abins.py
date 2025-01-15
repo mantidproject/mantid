@@ -108,7 +108,9 @@ class Abins(AbinsAlgorithm, PythonAlgorithm):
         prog_reporter.report("Input data from the user has been collected.")
 
         # 2) read ab initio data
-        ab_initio_data = abins.AbinsData.from_calculation_data(self._vibrational_or_phonon_data_file, self._ab_initio_program)
+        ab_initio_data = abins.AbinsData.from_calculation_data(
+            self._vibrational_or_phonon_data_file, self._ab_initio_program, cache_directory=self._cache_directory
+        )
         prog_reporter.report("Vibrational/phonon data has been read.")
 
         # 3) calculate S

@@ -20,7 +20,7 @@ from pydantic import BaseModel, ConfigDict, Field, validate_call
 
 import abins
 from abins.constants import AB_INITIO_FILE_EXTENSIONS, BUF, HDF5_ATTR_TYPE
-from mantid.kernel import logger, ConfigService
+from mantid.kernel import logger
 
 
 class IO(BaseModel):
@@ -54,6 +54,14 @@ class IO(BaseModel):
 
         return False
 
+    def get_save_dir_path(self):
+        from mantid.kernel import ConfigService
+
+        if self.cache_directory:
+            return self.cache_directory
+
+        return Path(ConfigService.getString("defaultsave.directory"))
+
     def model_post_init(self, __context):
         try:
             self._hash_input_filename = self.calculate_ab_initio_file_hash()
@@ -62,8 +70,8 @@ class IO(BaseModel):
         except ValueError as err:
             logger.error(str(err))
 
-        if self.cache_directory is None:
-            self.cache_directory = Path(ConfigService.getString("defaultsave.directory"))
+        # Set default if necessary
+        self.cache_directory = self.get_save_dir_path()
 
         # extract name of file from the full path in the platform independent way
         filename = os.path.basename(self.input_filename)
