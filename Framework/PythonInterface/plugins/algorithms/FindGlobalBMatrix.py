@@ -194,31 +194,41 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         # we'll evaluate this in a separate function to make it easier to swap out for a different metric
         ref_ub, n_indexed_by_ref, iref = self.evaluate_best_ref_UB(iws_potential_ref_ub, nindexed_ref, ws_list)
 
-        # set this UB and re-index the ws
+        ws_too_few_peaks = np.where(n_indexed_by_ref < _MIN_NUM_INDEXED_PEAKS)[0]
+
+        # make sure we set the reference ws back to correct UB first, before we loop over all
+        # and potentially call make_UB_consistent
+
+        self.exec_child_alg("SetUB", Workspace=ws_list[iref], UB=ref_ub)
+
+        # loop over the ws list
         for iws, cws in enumerate(ws_list):
-            self.exec_child_alg("SetUB", Workspace=cws, UB=ref_ub)
+            # if we are looking at the reference we can ignore
+            if iws != iref:
+                # otherwise set ub
+                self.exec_child_alg("SetUB", Workspace=cws, UB=ref_ub)
 
-        # for the ws with fewer peaks than threshold, try and find some more by adjusting U slightly
-        for iws in np.where(n_indexed_by_ref < _MIN_NUM_INDEXED_PEAKS)[0]:
-            self.exec_child_alg(
-                "FindUBUsingLatticeParameters",
-                PeaksWorkspace=ws_list[iws],
-                a=a,
-                b=b,
-                c=c,
-                alpha=alpha,
-                beta=beta,
-                gamma=gamma,
-                FixParameters=False,
-            )
-            self.make_UB_consistent(ws_list[iref], ws_list[iws])
-            nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
+                if iws in ws_too_few_peaks:
+                    # for the ws with fewer peaks than threshold, try and find some more by adjusting U slightly
+                    self.exec_child_alg(
+                        "FindUBUsingLatticeParameters",
+                        PeaksWorkspace=ws_list[iws],
+                        a=a,
+                        b=b,
+                        c=c,
+                        alpha=alpha,
+                        beta=beta,
+                        gamma=gamma,
+                        FixParameters=False,
+                    )
+                    self.make_UB_consistent(ws_list[iref], ws_list[iws])
+                    nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
 
-            # if still too few, warn user and remove
-            if nindexed < _MIN_NUM_INDEXED_PEAKS:
-                logger.warning(f"Fewer than the desired {_MIN_NUM_INDEXED_PEAKS} peaks were indexed for Workspace {iws}")
-                ws_list.pop(iws)
-                logger.warning(f"Workspace {iws} removed")
+                    # if still too few, warn user and remove
+                    if nindexed < _MIN_NUM_INDEXED_PEAKS:
+                        logger.warning(f"Fewer than the desired {_MIN_NUM_INDEXED_PEAKS} peaks were indexed for Workspace {iws}")
+                        ws_list.pop(iws)
+                        logger.warning(f"Workspace {iws} removed")
 
     def evaluate_best_ref_UB(self, iws_potential_ref_ub, nindexed_ref, ws_list):
         indexed_peaks = np.zeros((len(iws_potential_ref_ub), len(ws_list)))
