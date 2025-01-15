@@ -178,7 +178,7 @@ class SaveINS(PythonAlgorithm):
         W = W1 @ W2
         w = W1 @ w2 + w1
         w[w < 0] += 1
-        w[w > 1] -= 1
+        w[w >= 1] -= 1
         return tuple(np.round(W, 0).astype(int).flatten().tolist() + np.round(w, 3).tolist())
 
     def _symmetry_matrix_vector(self, symop):
@@ -202,17 +202,18 @@ class SaveINS(PythonAlgorithm):
             sym_key = sym_op.getIdentifier()
             if sym_key != indentity and sym_key != inversion:
                 S1 = self._symmetry_operation_key(W1, w1)
-                if S1 not in sym_ops_set:
+                # add key if not in symmetry set
+                if S1 not in sym_ops_set and np.linalg.det(W1) > 0:
                     sym_ops_list.append(sym_key)
-                # identity(/inversion) rotation symmetry operator
-                for rot in self.ROTATION_OPS[latt_sign]:
-                    W2, _ = self._symmetry_matrix_vector(rot)
-                    # lattice centering translation symmetry operator
-                    for cent in self.CENTERING_OPS[latt_numb]:
-                        _, w2 = self._symmetry_matrix_vector(cent)
-                        # equivalent symmetry operator generated from rotation and translation
-                        S3 = self._symmetry_operation_key(W1, w1, W2, w2)
-                        sym_ops_set.add(S3)
+                    # identity(/inversion) rotation symmetry operator
+                    for rot in self.ROTATION_OPS[latt_sign]:
+                        W2, _ = self._symmetry_matrix_vector(rot)
+                        # lattice centering translation symmetry operator
+                        for cent in self.CENTERING_OPS[latt_numb]:
+                            _, w2 = self._symmetry_matrix_vector(cent)
+                            # equivalent symmetry operator generated from rotation and translation
+                            S3 = self._symmetry_operation_key(W1, w1, W2, w2)
+                            sym_ops_set.add(S3)
         return sym_ops_list
 
 
