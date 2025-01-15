@@ -140,7 +140,7 @@ class SaveINS(PythonAlgorithm):
             f_handle.write(f"LATT {latt_type}\n")
 
             # print sym operations
-            for sym_str in self.get_shelx_symmetry_operators(spgr, latt_type):
+            for sym_str in self._get_shelx_symmetry_operators(spgr, latt_type):
                 f_handle.write(f"SYMM {sym_str}\n")
 
             # print atom info
@@ -167,20 +167,21 @@ class SaveINS(PythonAlgorithm):
             f_handle.write("HKLF 2\n")  # tells SHELX the columns saved in the reflection file
             f_handle.write("END")
 
-    def symmetry_operation_key(self, W1, w1, W2=np.eye(3), w2=np.zeros(3)):
-        """Symmetry element key for comparison"""
+    def _symmetry_operation_key(self, W1, w1, W2=np.eye(3), w2=np.zeros(3)):
+        """Symmetry element key (9 element tuple) for comparison"""
         W = W1 @ W2
         w = W1 @ w2 + w1
         w[w < 0] += 1
         w[w > 1] -= 1
         return tuple(np.round(W, 0).astype(int).flatten().tolist() + np.round(w, 3).tolist())
 
-    def symmetry_matrix_vector(self, symop):
+    def _symmetry_matrix_vector(self, symop):
+        """Symmetry rotation matrix and translation vector"""
         W = np.linalg.inv(np.column_stack([symop.transformHKL(V3D(*vec)) for vec in np.eye(3)]))
         w = np.array(symop.transformCoordinates(V3D(0, 0, 0)))
         return W, w
 
-    def get_shelx_symmetry_operators(self, spgr, latt_type):
+    def _get_shelx_symmetry_operators(self, spgr, latt_type):
         """Get SHELX SYMM records https://cci.lbl.gov/cctbx/shelx.html"""
         indentity = self.IDENTIY_OP.getIdentifier()
         inversion = self.INVERSION_OP.getIdentifier()
@@ -190,17 +191,21 @@ class SaveINS(PythonAlgorithm):
         sym_ops_list = []
         sym_ops_set = set()
         for sym_op in sym_ops:
-            W1, w1 = self.symmetry_matrix_vector(sym_op)
+            # space group symmetry operator
+            W1, w1 = self._symmetry_matrix_vector(sym_op)
             sym_key = sym_op.getIdentifier()
             if sym_key != indentity and sym_key != inversion:
-                S1 = self.symmetry_operation_key(W1, w1)
+                S1 = self._symmetry_operation_key(W1, w1)
                 if S1 not in sym_ops_set:
                     sym_ops_list.append(sym_key)
+                # identity(/inversion) rotation symmetry operator
                 for rot in self.ROTATION_OPS[latt_sign]:
-                    W2, _ = self.symmetry_matrix_vector(rot)
+                    W2, _ = self._symmetry_matrix_vector(rot)
+                    # lattice centering translation symmetry operator
                     for cent in self.CENTERING_OPS[latt_numb]:
-                        _, w2 = self.symmetry_matrix_vector(cent)
-                        S3 = self.symmetry_operation_key(W1, w1, W2, w2)
+                        _, w2 = self._symmetry_matrix_vector(cent)
+                        # equivalenty symmetry operator generated from rotation and translation
+                        S3 = self._symmetry_operation_key(W1, w1, W2, w2)
                         sym_ops_set.add(S3)
         return sym_ops_list
 
