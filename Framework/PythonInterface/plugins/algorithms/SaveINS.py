@@ -204,7 +204,7 @@ class SaveINS(PythonAlgorithm):
                     # lattice centering translation symmetry operator
                     for cent in self.CENTERING_OPS[latt_numb]:
                         _, w2 = self._symmetry_matrix_vector(cent)
-                        # equivalenty symmetry operator generated from rotation and translation
+                        # equivalent symmetry operator generated from rotation and translation
                         S3 = self._symmetry_operation_key(W1, w1, W2, w2)
                         sym_ops_set.add(S3)
         return sym_ops_list
