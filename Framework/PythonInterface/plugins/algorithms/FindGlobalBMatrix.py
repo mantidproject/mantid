@@ -110,6 +110,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
         # Find initial UB and use to index peaks in all runs
         prog_reporter.report(1, "Find initial UB for peak indexing")
+
         self.find_initial_indexing(a, b, c, alpha, beta, gamma, ws_list)  # removes runs from ws_list if can't index
 
         # optimize the lattice parameters across runs (i.e. B matrix)
@@ -169,7 +170,8 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
         # we'll evaluate possible reference UBs in a separate function
         # this way it can be swapped out for a different metric
-        ref_ub, n_indexed_by_ref, iref = self.evaluate_best_ref_UB(iws_potential_ref_ub, nindexed_ref, ws_list)
+
+        ref_ub, n_indexed_by_ref, iref, n_ws_indexed_by_ref_ub = self.evaluate_best_ref_UB(iws_potential_ref_ub, nindexed_ref, ws_list)
 
         # find which ws still have too few peaks
         ws_too_few_peaks = np.where(n_indexed_by_ref < _MIN_NUM_INDEXED_PEAKS)[0]
@@ -201,14 +203,19 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                     )
                     self.make_UB_consistent(ws_list[iref], ws_list[iws])
                     nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
-
                     # if still too few, warn user and remove
                     if nindexed < _MIN_NUM_INDEXED_PEAKS:
                         logger.warning(
-                            f"Fewer than the desired {_MIN_NUM_INDEXED_PEAKS} peaks were indexed for Workspace {iws}."
+                            f"Fewer than the desired {_MIN_NUM_INDEXED_PEAKS} peaks were indexed for Workspace {iws}. "
                             f"Workspace {iws} removed"
                         )
                         ws_list.pop(iws)
+        if len(ws_list) < 2:
+            if n_ws_indexed_by_ref_ub <= 1:
+                err_msg = "Reference UB failed to index peaks in any other run"
+            else:
+                err_msg = "Not enough valid workspaces to run an optimisation"
+            raise RuntimeError(err_msg)
 
     def evaluate_best_ref_UB(self, iws_potential_ref_ub, nindexed_ref, ws_list):
         indexed_peaks = np.zeros((len(iws_potential_ref_ub), len(ws_list)))
@@ -234,10 +241,19 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         total_indexed_peaks = np.sum(indexed_peaks, axis=1)
 
         # find which UBs give the most over threshold and then, of these, which fit the most peaks
-        max_over_thresh = np.argwhere(n_ws_over_thresh == np.max(n_ws_over_thresh))
-        best_iub = max_over_thresh[np.argmax(total_indexed_peaks[max_over_thresh])][0]
+        max_over_thresh = np.max(n_ws_over_thresh)
+        where_max_over_thresh = np.argwhere(n_ws_over_thresh == np.max(n_ws_over_thresh))
+        best_iub = where_max_over_thresh[np.argmax(total_indexed_peaks[where_max_over_thresh])][0]
 
-        return pot_ubs[best_iub], indexed_peaks[best_iub], iws_potential_ref_ub[best_iub]
+        if max_over_thresh <= 1:
+            logger.warning(
+                f"Best reference UB cannot find more than {_MIN_NUM_INDEXED_PEAKS} "
+                f"peaks in any of the other runs. "
+                f"Will try and fit UB from lattice parameters "
+                f"Check goniometer axes and angles."
+            )
+
+        return pot_ubs[best_iub], indexed_peaks[best_iub], iws_potential_ref_ub[best_iub], max_over_thresh
 
     def find_ref_ub_from_lattice_parameters(self, a, b, c, alpha, beta, gamma, ws_list):
         foundUB = False
