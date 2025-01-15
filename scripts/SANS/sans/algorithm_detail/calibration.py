@@ -246,7 +246,7 @@ def apply_missing_parameters(calibration_workspace, workspace, missing_parameter
             alg.setProperty("Value", str(value[0]))
     except KeyError:
         raise RuntimeError(
-            "SANSCalibration: An Instrument Parameter File value of unknown typewas going to be copied. Cannot handle this currently."
+            "SANSCalibration: An Instrument Parameter File value of unknown type was going to be copied. Cannot handle this currently."
         )
 
 

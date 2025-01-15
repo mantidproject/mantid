@@ -2088,7 +2088,7 @@ def ViewCurrentMask():
     detectors in the bank in a different colour
     """
     raise NotImplementedError(
-        "This is no longer implemented as it required MantidPlot, please switchto sans.command_interface.ISISCommandInterface instead"
+        "This is no longer implemented as it required MantidPlot, please switch to sans.command_interface.ISISCommandInterface instead"
     )
 
 

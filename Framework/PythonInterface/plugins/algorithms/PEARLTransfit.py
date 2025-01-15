@@ -330,7 +330,7 @@ class PEARLTransfit(PythonAlgorithm):
             # ----------------------------------------------------------
             if 8 * Teff < 3 * TD:
                 self.log().information(
-                    "The effective temperature is currently too far below the Debye temperature togive an accurate measure."
+                    "The effective temperature is currently too far below the Debye temperature to give an accurate measure."
                 )
                 Tactual = Teff
                 Terror = errTeff

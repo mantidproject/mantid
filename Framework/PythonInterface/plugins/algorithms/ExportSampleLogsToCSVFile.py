@@ -85,7 +85,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         self.declareProperty(
             "SeparateHeaderFile",
             True,
-            "If true, then the header is written to another file.Otherwise, header will be in the same output file.",
+            "If true, then the header is written to another file. Otherwise, header will be in the same output file.",
         )
 
         # Time zone

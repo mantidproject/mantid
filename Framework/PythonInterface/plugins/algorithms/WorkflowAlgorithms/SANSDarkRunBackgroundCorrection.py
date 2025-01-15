@@ -32,7 +32,7 @@ class SANSDarkRunBackgroundCorrection(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", validator=CommonBinsValidator(), direction=Direction.Input))
         self.declareProperty(MatrixWorkspaceProperty("DarkRun", "", validator=CommonBinsValidator(), direction=Direction.Input))
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), "The corrected SANS workspace.")
-        self.declareProperty("NormalizationRatio", 1.0, "Number to scale the dark run in orderto make it comparable to the SANS run")
+        self.declareProperty("NormalizationRatio", 1.0, "Number to scale the dark run in order to make it comparable to the SANS run")
         self.declareProperty("Mean", False, "If True then a mean value of all spectra is used to calculate the value to subtract")
         self.declareProperty("Uniform", True, "If True then we treat the treat the tim ebins a")
         self.declareProperty("ApplyToDetectors", True, "If True then we apply the correction to the detector pixels")

@@ -296,7 +296,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         config_enabled = EnabledWhenProperty("EnableConfigurator", PropertyCriterion.IsNotDefault)
         self.declareProperty(
             FileProperty(name="ConfigSaveDir", defaultValue="", action=FileAction.OptionalDirectory),
-            doc="Default directory is /SNS/IPTS-XXXX/shared/config where XXXX is theIPTS number of the first input run number",
+            doc="Default directory is /SNS/IPTS-XXXX/shared/config where XXXX is the IPTS number of the first input run number",
         )
         self.setPropertySettings("ConfigSaveDir", config_enabled)
         property_names = ["EnableConfigurator", "ConfigSaveDir"]

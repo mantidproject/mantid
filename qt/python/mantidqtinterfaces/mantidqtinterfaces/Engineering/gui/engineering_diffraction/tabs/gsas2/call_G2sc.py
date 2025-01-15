@@ -26,7 +26,7 @@ def add_phases(project, phase_files):
 def add_histograms(data_filenames, project, instruments, number_regions):
     if number_regions > len(data_filenames):  # many regions in one data and one instrument file
         if len(data_filenames) != 1:
-            raise ValueError("There must be one region/bank per focused data fileor many regions/banks in one focused data file")
+            raise ValueError("There must be one region/bank per focused data file or many regions/banks in one focused data file")
         for loop_region_index in range(1, number_regions + 1):
             project.add_powder_histogram(
                 datafile=os.path.join(data_filenames[0]),
@@ -37,7 +37,7 @@ def add_histograms(data_filenames, project, instruments, number_regions):
             )
     else:  # one region in each data file
         if len(data_filenames) != number_regions:
-            raise ValueError("There must be one region/bank per focused data fileor many regions/banks in one focused data file")
+            raise ValueError("There must be one region/bank per focused data file or many regions/banks in one focused data file")
         if len(instruments) == len(data_filenames):
             for loop_index, loop_data_filename in enumerate(data_filenames):
                 project.add_powder_histogram(
@@ -53,7 +53,7 @@ def add_histograms(data_filenames, project, instruments, number_regions):
                 )
         else:
             raise ValueError(
-                "Calling GSASII from Mantid with multiple instrument files and one focused data fileis currently not supported"
+                "Calling GSASII from Mantid with multiple instrument files and one focused data file is currently not supported"
             )
 
 
