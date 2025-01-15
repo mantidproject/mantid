@@ -219,7 +219,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         #
         crystal_diffraction_title = "Single Crystal Diffraction"
         self.declareProperty(
-            "PsiAngleLog", "SE50Rot", direction=Direction.Input, doc="log entry storing rotation of the samplearound the vertical axis"
+            "PsiAngleLog", "SE50Rot", direction=Direction.Input, doc="log entry storing rotation of the sample around the vertical axis"
         )
         self.declareProperty("PsiOffset", 0.0, direction=Direction.Input, doc="Add this quantity to PsiAngleLog")
         self.declareProperty(
@@ -233,23 +233,23 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         #    Reciprocal vector to be aligned with incoming beam
         self.declareProperty(
             FloatArrayProperty("VectorU", [1, 0, 0], array_length_three, direction=Direction.Input),
-            doc="three item, comma-separated, HKL indexesof the diffracting plane",
+            doc="three item, comma-separated, HKL indices of the diffracting plane",
         )
         #    Reciprocal vector orthogonal to VectorU and in-plane with
         #    incoming beam
         self.declareProperty(
             FloatArrayProperty("VectorV", [0, 1, 0], array_length_three, direction=Direction.Input),
-            doc="three item, comma-separated, HKL indexesof the direction perpendicular to VectorVand the vertical axis",
+            doc="three item, comma-separated, HKL indices of the direction perpendicular to VectorVand the vertical axis",
         )
         #    Abscissa view
         self.declareProperty(
             FloatArrayProperty("Uproj", [1, 0, 0], array_length_three, direction=Direction.Input),
-            doc="three item comma-separated Abscissa viewof the diffraction pattern",
+            doc="three item comma-separated Abscissa view of the diffraction pattern",
         )
         #    Ordinate view
         self.declareProperty(
             FloatArrayProperty("Vproj", [0, 1, 0], array_length_three, direction=Direction.Input),
-            doc="three item comma-separated Ordinate viewof the diffraction pattern",
+            doc="three item comma-separated Ordinate view of the diffraction pattern",
         )
         #    Hidden axis
         self.declareProperty(FloatArrayProperty("Wproj", [0, 0, 1], array_length_three, direction=Direction.Input), doc="Hidden axis view")

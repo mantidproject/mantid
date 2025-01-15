@@ -97,7 +97,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
         mandatoryInputRuns.add(StringArrayMandatoryValidator())
         self.declareProperty(
             StringArrayProperty("SampleRuns", values=[], validator=mandatoryInputRuns),
-            doc="Comma separated range of sample runs,\nand optional dataset indexes,\n eg [cycle::] 7333-7341,7345[:0-23]",
+            doc="Comma separated range of sample runs,\nand optional dataset indexes,\neg [cycle::] 7333-7341,7345[:0-23]",
         )
 
         self.declareProperty(

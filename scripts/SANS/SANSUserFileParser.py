@@ -222,7 +222,7 @@ class BackCommandParser(object):
         to_parse = self._prepare_argument(arguments)
 
         if not self.can_attempt_to_parse(arguments):
-            raise RuntimeError("BackCommandParser: Cannot parse provided arguments.They are not compatible")
+            raise RuntimeError("BackCommandParser: Cannot parse provided arguments. They are not compatible")
 
         index = 0
         for element in to_parse:

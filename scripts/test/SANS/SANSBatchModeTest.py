@@ -72,7 +72,7 @@ class TestSettingUserFileInBatchMode(unittest.TestCase):
         self.assertEqual(
             ReductionSingleton().user_settings.filename,
             original_user_file,
-            ("The reducer should use the original user file,since we don't provide a valid new user file."),
+            ("The reducer should use the original user file, since we don't provide a valid new user file."),
         )
         # Clean up
         self._delete_minimal_user_files(user_files)

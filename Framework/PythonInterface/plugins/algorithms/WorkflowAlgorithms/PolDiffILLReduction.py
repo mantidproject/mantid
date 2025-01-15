@@ -1095,7 +1095,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     clone_name = "{}_analyser_tr_corrected".format(ws)
                     CloneWorkspace(InputWorkspace=ws, OutputWorkspace=clone_name)
         else:
-            self.log().information("Detector-analyser energy efficiency will not be corrected as unit conversionis not permitted.")
+            self.log().information("Detector-analyser energy efficiency will not be corrected as unit conversion is not permitted.")
         return ws
 
     def _apply_polarisation_corrections(self, ws, pol_eff_ws):

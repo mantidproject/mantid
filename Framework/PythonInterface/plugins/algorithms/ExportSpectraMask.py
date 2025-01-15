@@ -190,7 +190,7 @@ class ExportSpectraMask(PythonAlgorithm):
         self.declareProperty(
             "ExportMaskOnly",
             False,
-            "If true, algorithm will not save mask in a fileand only returns the list containing numbers of masked spectra.",
+            "If true, algorithm will not save mask in a file and only returns the list containing numbers of masked spectra.",
             Direction.Input,
         )
         self.declareProperty(IntArrayProperty(name="SpectraMasks", direction=Direction.Output), doc="List of the masked  spectra numbers.")

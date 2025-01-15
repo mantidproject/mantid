@@ -82,7 +82,7 @@ class FitGaussianPeaks(DataProcessorAlgorithm):
         )
         self.declareProperty(
             ITableWorkspaceProperty(name="RefitPeakProperties", defaultValue="refit_peak_table", direction=Direction.Output),
-            "Table containing the properties of the peaks that had to be fitted twice as the firsttime the error was unreasonably large",
+            "Table containing the properties of the peaks that had to be fitted twice as the first time the error was unreasonably large",
         )
         self.declareProperty(
             ITableWorkspaceProperty(name="FitCost", defaultValue="fit_cost", direction=Direction.Output),

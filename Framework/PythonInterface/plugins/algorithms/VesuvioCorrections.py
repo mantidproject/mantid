@@ -94,7 +94,7 @@ class VesuvioCorrections(VesuvioBase):
 
         self.declareProperty(
             ITableWorkspaceProperty("FitParameters", "", direction=Direction.Input, optional=PropertyMode.Optional),
-            doc="Table containing the calculated fit parametersfor the data in the workspace",
+            doc="Table containing the calculated fit parameters for the data in the workspace",
         )
 
         input_group = "Input Options"
@@ -259,7 +259,7 @@ class VesuvioCorrections(VesuvioBase):
 
         self.declareProperty(
             ITableWorkspaceProperty("LinearFitResult", "", direction=Direction.Output, optional=PropertyMode.Optional),
-            doc="Table workspace containing the fit parameters used tolinearly fit the corrections to the data",
+            doc="Table workspace containing the fit parameters used to linearly fit the corrections to the data",
         )
 
         self.declareProperty(

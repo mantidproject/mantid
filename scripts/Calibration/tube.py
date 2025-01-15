@@ -918,7 +918,7 @@ class _CalibrationParameterHelper(object):
                     raise 3
             except:
                 raise RuntimeError(
-                    "Invalid type for {0}.The expected type was ITableWorkspace with 2 columns(Detector ID and Detector Positions)".format(
+                    "Invalid type for {0}. The expected type was ITableWorkspace with 2 columns(Detector ID and Detector Positions)".format(
                         self.CALIBTABLE
                     )
                 )

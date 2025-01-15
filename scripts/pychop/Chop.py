@@ -169,7 +169,7 @@ def flux_fun(en_ev, ch_mod):
     !     phifun : the functional dependace with energy
     """
     if ch_mod == "A":
-        raise ValueError("The A Moderator is not supported in PyChop")
+        raise ValueError('The "A" Moderator is not supported in PyChop')
     elif ch_mod == "AP":
         ijoin, rj, t, a, w1, w2, w3, w4, w5 = tuple([0, 2.25, 0.032, 0.95, 120.0, 10.0, 0.0, 0.0, 0.0])
     elif ch_mod == "H2":

@@ -43,7 +43,7 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         self.declareProperty(
             ITableWorkspaceProperty("BinningTable", "", Direction.Input, PropertyMode.Optional),
-            "Table workspace containing binning parameters. If not specified, then no re-binningis required",
+            "Table workspace containing binning parameters. If not specified, then no re-binning is required",
         )
 
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Name of rebinned matrix workspace. ")

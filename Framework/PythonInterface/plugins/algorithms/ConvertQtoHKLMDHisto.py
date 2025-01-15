@@ -61,12 +61,12 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
 
         self.declareProperty(
             FloatArrayProperty("Extents", [-6.02, 6.02, -6.02, 6.02, -6.02, 6.02], direction=Direction.Input),
-            "Binning parameters for each dimension. Enter it as acomma-separated list of values with theformat: 'minimum,maximum,'.",
+            "Binning parameters for each dimension. Enter it as a comma-separated list of values with the format: 'minimum,maximum,'.",
         )
 
         self.declareProperty(
             IntArrayProperty("Bins", [301, 301, 301], direction=Direction.Input),
-            "Number of bins to use for each dimension, Enter it as acomma-separated list of integers.",
+            "Number of bins to use for each dimension, Enter it as a comma-separated list of integers.",
         )
 
         self.declareProperty(

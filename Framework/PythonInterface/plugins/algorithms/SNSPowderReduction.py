@@ -540,7 +540,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 raise NotImplementedError("Summing spectra and filtering events are not supported simultaneously.")
 
             sam_ws_name = self._focusAndSum(samRuns, preserveEvents=preserveEvents, absorptionWksp=a_sample)
-            assert isinstance(sam_ws_name, str), "Returned from _focusAndSum() must be a string but not%s. " % str(type(sam_ws_name))
+            assert isinstance(sam_ws_name, str), "Returned from _focusAndSum() must be a string but not %s. " % str(type(sam_ws_name))
 
             workspacelist.append(sam_ws_name)
             samwksplist.append(sam_ws_name)
@@ -1658,7 +1658,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         """
         # Check requirements
         assert isinstance(raw_ws_name, str), "Raw workspace name must be a string."
-        assert isinstance(split_ws_name, str), "Input split workspace name must be string,but not of type %s" % str(type(split_ws_name))
+        assert isinstance(split_ws_name, str), "Input split workspace name must be string, but not of type %s" % str(type(split_ws_name))
         assert self.does_workspace_exist(split_ws_name)
 
         assert is_event_workspace(raw_ws_name), "Input workspace for splitting must be an EventWorkspace."

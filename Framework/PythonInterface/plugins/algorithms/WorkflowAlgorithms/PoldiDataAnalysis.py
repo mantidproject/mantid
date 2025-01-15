@@ -82,7 +82,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
             "MinimumPeakHeight",
             0.0,
             direction=Direction.Input,
-            doc=("Minimum height of peaks. If it is left at 0, the minimum peak height is calculatedfrom background noise."),
+            doc=("Minimum height of peaks. If it is left at 0, the minimum peak height is calculated from background noise."),
         )
 
         self.declareProperty(
@@ -145,7 +145,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
             "MultipleRuns",
             False,
             direction=Direction.Input,
-            doc=("If this is activated, peaks are searched again in theresiduals and the 1D- and 2D-fit is repeated with these data."),
+            doc=("If this is activated, peaks are searched again in the residuals and the 1D- and 2D-fit is repeated with these data."),
         )
 
         self.declareProperty(
