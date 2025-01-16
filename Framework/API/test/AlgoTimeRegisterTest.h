@@ -18,8 +18,6 @@
 
 using Mantid::Instrumentation::AlgoTimeRegister;
 using Mantid::Kernel::ConfigService;
-using std::filesystem::exists;
-using std::filesystem::remove_all;
 
 class AlgoTimeRegisterTest : public CxxTest::TestSuite {
 public:
@@ -34,16 +32,19 @@ public:
   };
 
   AlgoTimeRegisterTest() {
-    if (mkdir(m_directory.c_str(), 0777) == -1) {
+
+    const auto &path = m_directory.c_str();
+    if (!std::filesystem::create_directory(path)) {
       std::cerr << "Error :  " << strerror(errno) << std::endl;
     }
+    std::filesystem::permissions(path, std::filesystem::perms::owner_write, std::filesystem::perm_options::add);
     ConfigService::Instance().setString("performancelog.filename", m_directory + "test.log");
     ConfigService::Instance().setString("performancelog.write", "On");
     AlgoTimeRegister::Instance();
   }
 
   ~AlgoTimeRegisterTest() override {
-    remove_all(m_directory);
+    std::filesystem::remove_all(m_directory);
     ConfigService::Instance().setString("performancelog.filename", "");
     ConfigService::Instance().setString("performancelog.write", "Off");
   }
@@ -186,7 +187,7 @@ public:
 
     // Add the time entry
     AlgoTimeRegister::Instance().addTime("TestAlgorithm", startTime, endTime);
-    TS_ASSERT(!exists(m_directory + "noWrite.log"));
+    TS_ASSERT(!std::filesystem::exists(m_directory + "noWrite.log"));
   }
 
 private:
