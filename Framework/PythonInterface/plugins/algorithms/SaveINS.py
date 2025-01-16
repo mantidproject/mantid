@@ -183,38 +183,55 @@ class SaveINS(PythonAlgorithm):
 
     def _symmetry_matrix_vector(self, symop):
         """Symmetry rotation matrix and translation vector"""
-        W = np.linalg.inv(np.column_stack([symop.transformHKL(V3D(*vec)) for vec in np.eye(3)]))
+        W = np.linalg.inv(np.vstack([symop.transformHKL(V3D(*vec)) for vec in np.eye(3)]))
         w = np.array(symop.transformCoordinates(V3D(0, 0, 0)))
         return W, w
 
     def _get_shelx_symmetry_operators(self, spgr, latt_type):
         """Get SHELX SYMM records https://cci.lbl.gov/cctbx/shelx.html"""
-        indentity = self.IDENTIY_OP.getIdentifier()
-        inversion = self.INVERSION_OP.getIdentifier()
         latt_numb = abs(latt_type)
         latt_sign = 1 if latt_type > 0 else -1
+        latt_type_ops_set = set()
+        for rot in self.ROTATION_OPS[latt_sign]:
+            W2, _ = self._symmetry_matrix_vector(rot)
+            # lattice centering translation symmetry operator
+            for cent in self.CENTERING_OPS[latt_numb]:
+                _, w2 = self._symmetry_matrix_vector(cent)
+                # equivalent symmetry operator generated from rotation and translation
+                S3 = self._symmetry_operation_key(np.eye(3), np.zeros(3), W2, w2)
+                latt_type_ops_set.add(S3)
         sym_ops = spgr.getSymmetryOperations()
-        sym_ops_list = []
-        sym_ops_set = set()
+        sym_ops_dict = {}
+        W_dict = {}
+        w_dict = {}
         for sym_op in sym_ops:
             # space group symmetry operator
             W1, w1 = self._symmetry_matrix_vector(sym_op)
             sym_key = sym_op.getIdentifier()
-            if sym_key != indentity and sym_key != inversion:
-                S1 = self._symmetry_operation_key(W1, w1)
-                # add key if not in symmetry set
-                if S1 not in sym_ops_set and np.linalg.det(W1) > 0:
-                    sym_ops_list.append(sym_key)
-                    # identity(/inversion) rotation symmetry operator
-                    for rot in self.ROTATION_OPS[latt_sign]:
-                        W2, _ = self._symmetry_matrix_vector(rot)
-                        # lattice centering translation symmetry operator
-                        for cent in self.CENTERING_OPS[latt_numb]:
-                            _, w2 = self._symmetry_matrix_vector(cent)
-                            # equivalent symmetry operator generated from rotation and translation
-                            S3 = self._symmetry_operation_key(W1, w1, W2, w2)
-                            sym_ops_set.add(S3)
-        return sym_ops_list
+            S1 = self._symmetry_operation_key(W1, w1)
+            if S1 not in latt_type_ops_set:
+                # identity(/inversion) rotation symmetry operator
+                for rot in self.ROTATION_OPS[latt_sign]:
+                    W2, _ = self._symmetry_matrix_vector(rot)
+                    # lattice centering translation symmetry operator
+                    for cent in self.CENTERING_OPS[latt_numb]:
+                        _, w2 = self._symmetry_matrix_vector(cent)
+                        # equivalent symmetry operator generated from rotation and translation
+                        S3 = self._symmetry_operation_key(W1, w1, W2, w2)
+                        if sym_ops_dict.get(S3) is None:
+                            sym_ops_dict[S3] = sym_key
+                            W_dict[S3] = W1
+                            w_dict[S3] = w1
+                        if np.linalg.det(W1) > np.linalg.det(W_dict[S3]):
+                            sym_ops_dict[S3] = sym_key
+                            W_dict[S3] = W1
+                            w_dict[S3] = w1
+                        if np.linalg.norm(w1) < np.linalg.norm(w_dict[S3]):
+                            sym_ops_dict[S3] = sym_key
+                            W_dict[S3] = W1
+                            w_dict[S3] = w1
+
+        return list(set(sym_ops_dict.values()))
 
 
 AlgorithmFactory.subscribe(SaveINS)
