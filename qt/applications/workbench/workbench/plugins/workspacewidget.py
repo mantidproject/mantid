@@ -305,7 +305,7 @@ class WorkspaceWidget(PluginWidget):
             except ValueError as e:
                 logger.error(str(e))
                 logger.error(
-                    "Could not open workspace: {0} with neither " "MatrixWorkspaceDisplay nor TableWorkspaceDisplay." "".format(ws.name())
+                    "Could not open workspace: {0} with neither MatrixWorkspaceDisplay nor TableWorkspaceDisplay.".format(ws.name())
                 )
 
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
