@@ -180,7 +180,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         # overwrite the "Yes to All" button text
         ui.buttonBox.button(QDialogButtonBox.YesToAll).setText("Plot All")
         # ok disabled by default
-        ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+        ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
 
         # validity markers
         ui.wkspIndicesValid.setIcon(red_asterisk())
@@ -301,7 +301,11 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                 if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text() == WORKSPACE_NAME:
                     self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText(WORKSPACE_REFERENCE_NUMBER)
 
-                self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(True)
+                self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(False)
+
+                if self._ui.plotType.currentText() == SURFACE:
+                    self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(True)
+
             else:
                 self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(True)
                 self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setEnabled(False)
@@ -556,7 +560,10 @@ class AdvancedPlottingOptionsWidget(AdvancedPlottingOptionsWidgetUIBase):
                     values = [float(value) for value in values]
                     self._parent.selection.custom_log_values = values
 
-                self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+                if self._parent._ui.specNums.text() or self._parent._ui.wkspIndices.text():
+                    self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(True)
+            else:
+                self._parent._ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
 
             return valid_options
 

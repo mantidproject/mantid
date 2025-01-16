@@ -285,7 +285,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         workspaces = [self._single_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
         ssd._ui.plotType.setCurrentIndex(3)
-        self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.YesToAll).isEnabled())
+        self.assertTrue(ssd._ui.buttonBox.button(QDialogButtonBox.YesToAll).isEnabled())
 
     def test_plot_all_button_disabled_when_plot_type_is_contour(self):
         workspaces = [self._single_spec_ws] * 3
