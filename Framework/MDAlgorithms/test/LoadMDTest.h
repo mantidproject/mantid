@@ -23,16 +23,18 @@
 #include "MantidGeometry/MDGeometry/QSample.h"
 #include "MantidKernel/Strings.h"
 #include "MantidMDAlgorithms/LoadMD.h"
+#include "MantidNexus/H5Util.h"
+#include <H5Cpp.h>
 
 #include <cxxtest/TestSuite.h>
-
-#include <hdf5.h>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::NeXus;
+using namespace H5;
 
 class LoadMDTest : public CxxTest::TestSuite {
 public:
@@ -618,7 +620,7 @@ public:
   }
 
   Mantid::API::IMDWorkspace_sptr testSaveAndLoadWorkspace(const Mantid::API::IMDWorkspace_sptr &inputWS,
-                                                          const char *rootGroup, const bool rmCoordField = false) {
+                                                          std::string rootGroup, const bool rmCoordField = false) {
     const std::string fileName = "SaveMDSpecialCoordinatesTest.nxs";
     SaveMD2 saveAlg;
     saveAlg.setChild(true);
@@ -630,19 +632,8 @@ public:
     std::string this_fileName = saveAlg.getProperty("Filename");
 
     if (rmCoordField) {
-      // Remove the coordinate_system entry so it falls back on the log. NeXus
-      // can't do this
-      // so use the HDF5 API directly
-      auto fid = H5Fopen(this_fileName.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
-      auto gid = H5Gopen(fid, rootGroup, H5P_DEFAULT);
-      if (gid > 0) {
-        H5Ldelete(gid, "coordinate_system", H5P_DEFAULT);
-        H5Gclose(gid);
-      } else {
-        TS_FAIL("Cannot open MDEventWorkspace group. Test file has unexpected "
-                "structure.");
-      }
-      H5Fclose(fid);
+      H5File h5file(this_fileName.c_str(), H5F_ACC_RDWR);
+      H5Util::deleteObjectLink(h5file, rootGroup + "/coordinate_system");
     }
 
     LoadMD loadAlg;
