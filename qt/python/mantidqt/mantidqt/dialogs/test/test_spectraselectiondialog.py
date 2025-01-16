@@ -281,7 +281,7 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         ssd._ui.advanced_options_widget.ui.custom_log_line_edit.setText("2,1,3")
         self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.Ok).isEnabled())
 
-    def test_plot_all_button_disabled_when_plot_type_is_surface(self):
+    def test_plot_all_button_enabled_when_plot_type_is_surface(self):
         workspaces = [self._single_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
         ssd._ui.plotType.setCurrentIndex(3)

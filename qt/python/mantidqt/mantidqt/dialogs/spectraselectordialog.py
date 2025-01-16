@@ -263,17 +263,26 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.wkspIndices.clear()
         ui.wkspIndicesValid.hide()
 
-        self._parse_spec_nums()
+        try:
+            # Parse spectrum numbers
+            self._parse_spec_nums()
+            spectrum_numbers = [ws.getSpectrumNumbers() for ws in self._workspaces]
+            unique_spectra = {tuple(numbers) for numbers in spectrum_numbers}
+
+            if len(unique_spectra) > 1:
+                # Spectrum numbers differ between workspaces
+                ui.specNums.setEnabled(False)
+                ui.specNumsValid.setToolTip("Spectrum numbers differ across workspaces. Use 'Plot All' or workspace indices instead.")
+            else:
+                ui.specNums.setEnabled(True)
+                ui.specNumsValid.setToolTip("")
+
+        except Exception as e:
+            logger.error(f"Error parsing spectrum numbers: {e}")
+            ui.specNumsValid.setToolTip("Invalid spectrum number input.")
+            ui.specNumsValid.setVisible(True)
+
         ui.specNumsValid.setVisible(not self._is_input_valid())
-        if self._is_input_valid() or ui.specNums.text() == "":
-            ui.specNumsValid.setVisible(False)
-            ui.specNumsValid.setToolTip("")
-        elif ui.plotType.currentText() == SURFACE or ui.plotType.currentText() == CONTOUR:
-            ui.specNumsValid.setVisible(True)
-            ui.specNumsValid.setToolTip("Enter one spectrum number in " + ui.specNums.placeholderText())
-        else:
-            ui.specNumsValid.setVisible(True)
-            ui.specNumsValid.setToolTip("Not in " + ui.specNums.placeholderText())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
         if self._advanced:
