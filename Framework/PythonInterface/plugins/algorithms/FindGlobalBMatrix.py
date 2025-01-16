@@ -74,15 +74,13 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 nindexed, *_ = self.exec_child_alg("IndexPeaks", PeaksWorkspace=wsname, RoundHKLs=True, CommonUBForAll=True)
                 if nindexed < _MIN_NUM_INDEXED_PEAKS:
                     issues["PeakWorkspaces"] = (
-                        f"{wsname} has a UB set, therefore it must contain at least " f"{_MIN_NUM_INDEXED_PEAKS} peaks that can be indexed."
+                        f"{wsname} has a UB set, therefore it must contain at least {_MIN_NUM_INDEXED_PEAKS} peaks that can be indexed."
                     )
                 else:
                     # if it has UB and doesn't have too few peaks it is valid
                     n_valid_ws += 1
             elif ws.getNumberPeaks() < _MIN_NUM_PEAKS:
-                issues["PeakWorkspaces"] = (
-                    f"{wsname} does not have a UB set, therefore it must " f"contain at least {_MIN_NUM_PEAKS} peaks."
-                )
+                issues["PeakWorkspaces"] = f"{wsname} does not have a UB set, therefore it must contain at least {_MIN_NUM_PEAKS} peaks."
             else:
                 # if it doesn't have a UB but does have more than the min num peaks it is also valid
                 n_valid_ws += 1
@@ -134,7 +132,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 ws.sample().getOrientedLattice().setError(*err)
                 if n_peaks[iws] < _MIN_NUM_INDEXED_PEAKS:
                     logger.warning(
-                        f"Workspace: {wsname}, has only {n_peaks[iws]} indexed peaks, " f"fewer than the desired {_MIN_NUM_INDEXED_PEAKS}"
+                        f"Workspace: {wsname}, has only {n_peaks[iws]} indexed peaks, fewer than the desired {_MIN_NUM_INDEXED_PEAKS}"
                     )
             logger.notice(
                 f"Lattice parameters successfully refined for workspaces: {ws_list}\n"
@@ -209,7 +207,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                     singular_transform = self.make_UB_consistent(ws_list[iref], ws_list[iws])
                     # if calculate transform is singular
                     if singular_transform:
-                        logger.warning(f"Singular transform in make_UB_consistent, " f"{ws_list[iws]} removed")
+                        logger.warning(f"Singular transform in make_UB_consistent, {ws_list[iws]} removed")
                     else:
                         nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
                         # if now enough peaks, add to the list

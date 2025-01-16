@@ -98,7 +98,7 @@ class FindGlobalBMatrixTest(unittest.TestCase):
 
         with self.assertRaisesRegex(
             RuntimeError,
-            "Fewer than the desired number of .* workspaces " "have valid peak tables. " "Currently .* of provided workspaces are valid",
+            "Fewer than the desired number of .* workspaces have valid peak tables. Currently .* of provided workspaces are valid",
         ):
             alg.execute()
 
@@ -118,7 +118,7 @@ class FindGlobalBMatrixTest(unittest.TestCase):
             "FindGlobalBMatrix", PeakWorkspaces=[peaks1, peaks2, peaks3], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
         )
 
-        with self.assertRaisesRegex(RuntimeError, ".* does not have a UB set, therefore it must " "contain at least 6 peaks."):
+        with self.assertRaisesRegex(RuntimeError, ".* does not have a UB set, therefore it must contain at least 6 peaks."):
             alg.execute()
 
     def test_peak_workspaces_need_at_least_two_peaks_each_with_ub(self):
@@ -138,7 +138,7 @@ class FindGlobalBMatrixTest(unittest.TestCase):
             "FindGlobalBMatrix", PeakWorkspaces=[peaks1, peaks2, peaks3], a=4.1, b=4.2, c=10, alpha=88, beta=88, gamma=89, Tolerance=0.15
         )
 
-        with self.assertRaisesRegex(RuntimeError, ".* has a UB set, therefore it must contain at least " "2 peaks that can be indexed."):
+        with self.assertRaisesRegex(RuntimeError, ".* has a UB set, therefore it must contain at least 2 peaks that can be indexed."):
             alg.execute()
 
     def test_performs_correct_transform_to_ensure_consistent_indexing(self):
