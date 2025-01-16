@@ -125,7 +125,7 @@ class DataDownloadDialog(QDialog):
         """
         # get experiment number
         exp_no = self._expNumber
-        assert isinstance(exp_no, int), "Experiment number {0} must be an integer but not a {1}." "".format(exp_no, type(exp_no))
+        assert isinstance(exp_no, int), "Experiment number {0} must be an integer but not a {1}.".format(exp_no, type(exp_no))
 
         # Check scans to download
         scan_list_str = str(self.ui.lineEdit_downloadScans.text())
@@ -197,7 +197,7 @@ class DataDownloadDialog(QDialog):
         :param message:
         :return:
         """
-        assert isinstance(message, str), "Input message %s must a string but not %s." "" % (str(message), type(message))
+        assert isinstance(message, str), "Input message %s must a string but not %s." % (str(message), type(message))
         QMessageBox.information(self, "4-circle Data Reduction", message)
 
     def set_experiment_number(self, exp_number):
@@ -205,7 +205,7 @@ class DataDownloadDialog(QDialog):
         :param exp_number:
         :return:
         """
-        assert isinstance(exp_number, int), "Experiment number {0} to set to download dialog must be an integer but " "not a {1}.".format(
+        assert isinstance(exp_number, int), "Experiment number {0} to set to download dialog must be an integer but not a {1}.".format(
             exp_number, type(exp_number)
         )
 

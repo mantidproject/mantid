@@ -30,7 +30,7 @@ class StateAdjustmentFiles(metaclass=JsonSerializable):
         #       This is very low priority, but would be nice to have.
 
         if is_invalid:
-            raise ValueError("StateAdjustmentFiles: The provided inputs are illegal. " "Please see: {0}".format(json.dumps(is_invalid)))
+            raise ValueError("StateAdjustmentFiles: The provided inputs are illegal. Please see: {0}".format(json.dumps(is_invalid)))
 
 
 class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
@@ -85,7 +85,7 @@ class StateWavelengthAndPixelAdjustment(metaclass=JsonSerializable):
 
         if is_invalid:
             raise ValueError(
-                "StateWavelengthAndPixelAdjustment: The provided inputs are illegal. " "Please see: {0}".format(json.dumps(is_invalid))
+                "StateWavelengthAndPixelAdjustment: The provided inputs are illegal. Please see: {0}".format(json.dumps(is_invalid))
             )
 
 

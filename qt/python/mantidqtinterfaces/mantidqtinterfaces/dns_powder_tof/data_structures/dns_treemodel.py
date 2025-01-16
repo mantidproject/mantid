@@ -297,7 +297,7 @@ class DNSTreeModel(QAbstractItemModel):
 
     @staticmethod
     def _get_scan_text(dns_file):
-        return [f"{dns_file.scan_number} {dns_file.sample}" f" {dns_file.scan_command}" f" #{dns_file.scan_points}"] + 9 * [""]
+        return [f"{dns_file.scan_number} {dns_file.sample} {dns_file.scan_command} #{dns_file.scan_points}"] + 9 * [""]
 
     @staticmethod
     def _get_data_from_dns_file(dns_file):

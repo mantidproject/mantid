@@ -37,7 +37,7 @@ class LoadSANS1MLZ(PythonAlgorithm):
             name="Wavelength",
             defaultValue=0.0,
             validator=FloatBoundedValidator(lower=0.0),
-            doc="Wavelength in Angstrom. If 0, the wavelength " "will be read from the data file.",
+            doc="Wavelength in Angstrom. If 0, the wavelength will be read from the data file.",
         )
 
     def PyExec(self):

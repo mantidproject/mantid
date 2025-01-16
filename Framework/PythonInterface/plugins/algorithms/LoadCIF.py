@@ -136,7 +136,7 @@ class UnitCellBuilder(object):
         )
 
         if unitCellValueMap["_cell_length_a"] is None:
-            raise RuntimeError("The a-parameter of the unit cell is not specified in the supplied CIF.\n" "Key to look for: _cell_length_a")
+            raise RuntimeError("The a-parameter of the unit cell is not specified in the supplied CIF.\nKey to look for: _cell_length_a")
 
         replacementMap = {
             "_cell_length_b": str(unitCellValueMap["_cell_length_a"]),
@@ -202,9 +202,7 @@ class AtomListBuilder(object):
 
         for field in coordinateFields:
             if field not in cifData.keys():
-                raise RuntimeError(
-                    "Mandatory field {0} not found in CIF-file." "Please check the atomic position definitions.".format(field)
-                )
+                raise RuntimeError("Mandatory field {0} not found in CIF-file.Please check the atomic position definitions.".format(field))
 
         # Return a dict like { 'label1': 'x y z', 'label2': 'x y z' }
         return dict(
@@ -229,7 +227,7 @@ class AtomListBuilder(object):
         rawAtomSymbols = [cifData[x] for x in ["_atom_site_type_symbol", "_atom_site_label"] if x in cifData.keys()]
 
         if len(rawAtomSymbols) == 0:
-            raise RuntimeError("Cannot determine atom types, both _atom_site_type_symbol and _atom_site_label are " "missing.")
+            raise RuntimeError("Cannot determine atom types, both _atom_site_type_symbol and _atom_site_label are missing.")
 
         # Return a dict like { 'label1': 'Element1', ... } extracted from either _atom_site_type_symbol or _atom_site_label
         return dict([(label, self._getCleanAtomSymbol(x)) for label, x in zip(labels, rawAtomSymbols[0])])
@@ -427,9 +425,7 @@ class LoadCIF(PythonAlgorithm):
         try:
             self._loadFromCif()
         except ImportError:
-            raise RuntimeError(
-                "This algorithm requires an additional Python package: PyCifRW" " (https://pypi.python.org/pypi/PyCifRW/4.1)"
-            )
+            raise RuntimeError("This algorithm requires an additional Python package: PyCifRW (https://pypi.python.org/pypi/PyCifRW/4.1)")
 
     def _loadFromCif(self):
         from CifFile import ReadCif
@@ -487,7 +483,7 @@ class LoadCIF(PythonAlgorithm):
             if key in cif_data.keys():
                 return
 
-        raise RuntimeError(f"Could not find any UB Matrix keys. Missing one of the following: " f"{UBMatrixBuilder.ub_matrix_keys}")
+        raise RuntimeError(f"Could not find any UB Matrix keys. Missing one of the following: {UBMatrixBuilder.ub_matrix_keys}")
 
     def _getFileUrl(self):
         return self.getProperty("InputFile").value

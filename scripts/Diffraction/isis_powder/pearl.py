@@ -242,7 +242,7 @@ class Pearl(AbstractInst):
         if self._inst_settings.gen_absorb:
             absorb_file_name = self._inst_settings.absorb_out_file
             if not absorb_file_name:
-                raise RuntimeError('"absorb_corrections_out_filename" must be supplied when generating absorption ' "corrections")
+                raise RuntimeError('"absorb_corrections_out_filename" must be supplied when generating absorption corrections')
             absorb_corrections = pearl_algs.generate_vanadium_absorb_corrections(van_ws=ws_to_correct, output_filename=absorb_file_name)
         else:
             absorb_corrections = None

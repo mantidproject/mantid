@@ -27,7 +27,7 @@ class AbinsLoadVASPTest(unittest.TestCase, abins.input.Tester):
     def test_singlepoint_input(self):
         filename = abins.test_helpers.find_file("ethane_singlepoint.xml")
         bad_vasp_reader = VASPLoader(input_ab_initio_filename=filename)
-        with self.assertRaisesRegexp(ValueError, "Could not find a 'calculation' block containing a " "'dynmat' block in VASP XML file\\."):
+        with self.assertRaisesRegexp(ValueError, "Could not find a 'calculation' block containing a 'dynmat' block in VASP XML file\\."):
             bad_vasp_reader.read_vibrational_or_phonon_data()
 
     # IBRION=8 from optimised structure

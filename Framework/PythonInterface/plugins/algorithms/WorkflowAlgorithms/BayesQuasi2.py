@@ -68,8 +68,8 @@ class BayesQuasi2(QuickBayesTemplate):
             y += list(fit) + list(diff_fit)
             x += list(x_data) + list(x_data)
             errors += list(e) + list(diff_e)
-            axis_names.append(f"fit {j+1}")
-            axis_names.append(f"diff {j+1}")
+            axis_names.append(f"fit {j + 1}")
+            axis_names.append(f"diff {j + 1}")
         ws = self.create_ws(
             OutputWorkspace=name,
             DataX=np.array(x),

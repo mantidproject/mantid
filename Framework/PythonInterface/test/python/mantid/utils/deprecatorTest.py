@@ -26,7 +26,7 @@ class MyOldAlg(PythonAlgorithm):
         self.declareProperty("Meaning", 42, "Assign a meaning to the Universe")
 
     def PyExec(self):
-        logger.notice(f'The meaning of the Universe is {self.getPropertyValue("Meaning")}')
+        logger.notice(f"The meaning of the Universe is {self.getPropertyValue('Meaning')}")
 
 
 class RedirectStdOut:

@@ -158,7 +158,7 @@ class MessageDisplayTest(unittest.TestCase):
         for action in menu.actions():
             if action_text in action.iconText():
                 return action
-        self.fail("Could not find action with text '{}' in menu '{}'." "".format(action_text, menu))
+        self.fail("Could not find action with text '{}' in menu '{}'.".format(action_text, menu))
 
     def _simulate_script_executions(self, paths):
         for path in paths:

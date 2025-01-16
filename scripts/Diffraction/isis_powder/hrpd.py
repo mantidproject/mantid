@@ -120,7 +120,7 @@ class HRPD(AbstractInst):
             return solid_angle
         except ValueError:
             raise RuntimeError(
-                "Could not find " + os.path.join(path, name) + " please run create_vanadium with " '"do_solid_angle_corrections=True"'
+                "Could not find " + os.path.join(path, name) + ' please run create_vanadium with "do_solid_angle_corrections=True"'
             )
 
     def _generate_input_file_name(self, run_number, file_ext=""):

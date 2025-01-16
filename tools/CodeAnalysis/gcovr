@@ -496,7 +496,7 @@ def process_datafile(filename, covdata, options):  # noqa: C901
                 tmp = [os.path.join(x, options.objdir) for x in [os.path.dirname(abs_filename), os.getcwd()]]
             potential_wd = [testdir for testdir in tmp if os.path.isdir(testdir)]
             if len(potential_wd) == 0:
-                errors.append("ERROR: cannot identify the location where GCC " "was run using --object-directory=%s\n" % options.objdir)
+                errors.append("ERROR: cannot identify the location where GCC was run using --object-directory=%s\n" % options.objdir)
 
     # no objdir was specified (or it was a parent dir); walk up the dir tree
     if len(potential_wd) == 0:

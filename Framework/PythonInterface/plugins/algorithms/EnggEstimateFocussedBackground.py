@@ -30,7 +30,7 @@ class EnggEstimateFocussedBackground(PythonAlgorithm):
 
         self.declareProperty(
             MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
-            "Workspace to contain the estimated background (one for each spectrum in the " "InputWorkspace)",
+            "Workspace to contain the estimated background (one for each spectrum in the InputWorkspace)",
         )
 
         self.declareProperty(

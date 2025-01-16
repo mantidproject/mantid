@@ -121,7 +121,7 @@ def load_and_crop_data(runs, spectra, ip_file, diff_mode="single", fit_mode="spe
         elif spectra == "backward":
             bank_ranges = instrument.backward_banks
         else:
-            raise ValueError("Fitting by bank requires selecting either 'forward' or 'backward' " "for the spectra to load")
+            raise ValueError("Fitting by bank requires selecting either 'forward' or 'backward' for the spectra to load")
         bank_ranges = ["{0}-{1}".format(x, y) for x, y in bank_ranges]
         spectra = ";".join(bank_ranges)
     else:

@@ -14,7 +14,7 @@ def _add_executable_path_to_path():
     import os
     import sys
 
-    os.environ["PATH"] = f'{os.path.dirname(sys.executable)};{os.environ["PATH"]}'
+    os.environ["PATH"] = f"{os.path.dirname(sys.executable)};{os.environ['PATH']}"
     os.add_dll_directory(os.path.dirname(sys.executable))
 
 

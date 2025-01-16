@@ -118,7 +118,7 @@ class LoadEmptyVesuvio(PythonAlgorithm):
         try:
             return IP_HEADERS[len(columns)]
         except KeyError:
-            raise ValueError("Unknown format for IP file. Currently support 5/6 column " "variants. ncols=%d" % (len(columns)))
+            raise ValueError("Unknown format for IP file. Currently support 5/6 column variants. ncols=%d" % (len(columns)))
 
 
 # ----------------------------------------------------------------------------------------

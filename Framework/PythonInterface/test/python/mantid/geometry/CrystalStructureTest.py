@@ -13,9 +13,9 @@ class CrystalStructureTest(unittest.TestCase):
     def test_creation(self):
         # Some valid constructions
         self.assertTrue(self.createCrystalStructureOrRaise("5.43 5.43 5.43", "F d -3 m", "Al 1/3 0.454 1/12 1.0 0.01"))
-        self.assertTrue(self.createCrystalStructureOrRaise("5.43 5.43 5.43", "C m m m", "Al 1/3 0.454 1/12 1.0 0.01;\n" "Si 2/3 0.121 1/8"))
+        self.assertTrue(self.createCrystalStructureOrRaise("5.43 5.43 5.43", "C m m m", "Al 1/3 0.454 1/12 1.0 0.01;\nSi 2/3 0.121 1/8"))
         self.assertTrue(
-            self.createCrystalStructureOrRaise("5.43 5.43 5.43 90 90 120", "R -3 c", "Al 1/3 0.454 1/12 1.0 0.01;\n" "Si 2/3 0.121 1/8")
+            self.createCrystalStructureOrRaise("5.43 5.43 5.43 90 90 120", "R -3 c", "Al 1/3 0.454 1/12 1.0 0.01;\nSi 2/3 0.121 1/8")
         )
 
         # Invalid unit cell specification
@@ -68,7 +68,7 @@ class CrystalStructureTest(unittest.TestCase):
             "Si 0.1 0.2 0.3 0.99 0.1"
         )
 
-        expected_repr = 'CrystalStructure("5.43 5.42 5.41 90 90 90", ' '"F d -3 m", "Al 1/3 0.454 1/12 1 0.01; ' 'Si 0.1 0.2 0.3 0.99 0.1")'
+        expected_repr = 'CrystalStructure("5.43 5.42 5.41 90 90 90", "F d -3 m", "Al 1/3 0.454 1/12 1 0.01; Si 0.1 0.2 0.3 0.99 0.1")'
 
         self.assertEqual(expected_str, str(structure))
         self.assertEqual(expected_repr, structure.__repr__())

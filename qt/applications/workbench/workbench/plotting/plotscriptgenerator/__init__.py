@@ -41,7 +41,7 @@ if hasattr(Legend, "set_draggable"):
     SET_DRAGGABLE_METHOD = "set_draggable(True)"
 else:
     SET_DRAGGABLE_METHOD = "draggable()"
-FIT_DOCUMENTATION_STRING = "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more " "details"
+FIT_DOCUMENTATION_STRING = "# Fit definition, see https://docs.mantidproject.org/algorithms/Fit-v1.html for more details"
 TICKER_FORMATTER_IMPORT = "from matplotlib.ticker import NullFormatter, ScalarFormatter, LogFormatterSciNotation"
 
 

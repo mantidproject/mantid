@@ -1311,7 +1311,7 @@ class Qt4MplCanvas(FigureCanvas):
         grid_x, grid_y = np.meshgrid(vec_x, vec_y)
 
         # check size
-        assert grid_x.shape == matrix_z.shape, "Size of X (%d) and Y (%d) must match size of Z (%s)." "" % (
+        assert grid_x.shape == matrix_z.shape, "Size of X (%d) and Y (%d) must match size of Z (%s)." % (
             len(vec_x),
             len(vec_y),
             matrix_z.shape,
@@ -1546,10 +1546,8 @@ class Qt4MplCanvas(FigureCanvas):
         """
         # check input
         assert isinstance(title, str), "Title {0} must be a string but not a {1}.".format(title, type(title))
-        assert isinstance(color, str) and len(color) > 0, "Color {0} must be a non-empty string but not a {1}." "".format(
-            color, type(color)
-        )
-        assert isinstance(location, str) and len(location) > 0, "Location {0} must be a non-empty string but not a" " {1}.".format(
+        assert isinstance(color, str) and len(color) > 0, "Color {0} must be a non-empty string but not a {1}.".format(color, type(color))
+        assert isinstance(location, str) and len(location) > 0, "Location {0} must be a non-empty string but not a {1}.".format(
             location, type(location)
         )
 

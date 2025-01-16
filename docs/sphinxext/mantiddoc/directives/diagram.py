@@ -66,13 +66,13 @@ class DiagramDirective(BaseDirective):
         env = self.state.document.settings.env
         diagrams_dir = self.diagrams_dir
         if diagrams_dir is None:
-            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n" "    diagram generation was disabled")
+            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n    diagram generation was disabled")
             return []
 
         try:
             dot_executable = os.environ["DOT_EXECUTABLE"]
         except KeyError:
-            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n" "    graphviz not found - diagram could not be rendered.")
+            self.add_rst(".. figure:: /images/ImageNotFound.png\n\n    graphviz not found - diagram could not be rendered.")
             return []
 
         # Make sure we have an output directory

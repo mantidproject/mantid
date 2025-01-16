@@ -231,7 +231,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             name="PeakClippingWindowSize",
             defaultValue=10,
             validator=validator_peak_clipping,
-            doc="Read live data - requires a saved run in the current IPTS with the same " "instrument configuration",
+            doc="Read live data - requires a saved run in the current IPTS with the same instrument configuration",
         )
 
         validator_smoothing_range = IntBoundedValidator(lower=1, upper=20)
@@ -239,7 +239,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             name="SmoothingRange",
             defaultValue=10,
             validator=validator_smoothing_range,
-            doc="Read live data - requires a saved run in the current IPTS with the same " "instrument configuration",
+            doc="Read live data - requires a saved run in the current IPTS with the same instrument configuration",
         )
 
         grouping = ["All", "Column", "Banks", "Modules", "2_4 Grouping"]
@@ -296,7 +296,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         config_enabled = EnabledWhenProperty("EnableConfigurator", PropertyCriterion.IsNotDefault)
         self.declareProperty(
             FileProperty(name="ConfigSaveDir", defaultValue="", action=FileAction.OptionalDirectory),
-            doc="Default directory is /SNS/IPTS-XXXX/shared/config where XXXX is the" "IPTS number of the first input run number",
+            doc="Default directory is /SNS/IPTS-XXXX/shared/config where XXXX is the IPTS number of the first input run number",
         )
         self.setPropertySettings("ConfigSaveDir", config_enabled)
         property_names = ["EnableConfigurator", "ConfigSaveDir"]

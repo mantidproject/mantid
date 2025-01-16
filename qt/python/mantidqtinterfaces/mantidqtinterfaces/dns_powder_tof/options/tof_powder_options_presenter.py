@@ -34,10 +34,10 @@ class DNSTofPowderOptionsPresenter(DNSCommonOptionsPresenter):
             return False
         binning, errors = self.model.estimate_q_and_binning(full_data, wavelength)
         self.raise_error(
-            "Warning different channel_widths " f"{errors['channel_widths']} in selected" " datafiles.", do_raise=errors["chan_error"]
+            f"Warning different channel_widths {errors['channel_widths']} in selected datafiles.", do_raise=errors["chan_error"]
         )
         self.raise_error(
-            "Waning different number of tof channels" f" {errors['tof_channels']} in selected datafiles.", do_raise=errors["tof_error"]
+            f"Waning different number of tof channels {errors['tof_channels']} in selected datafiles.", do_raise=errors["tof_error"]
         )
         for key, value in binning.items():
             own_options[key] = value

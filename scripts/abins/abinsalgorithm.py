@@ -253,7 +253,7 @@ class AbinsAlgorithm:
         }
         if workspace_name in mtd:
             issues["OutputWorkspace"] = (
-                "Workspace with name " + workspace_name + " already in use; please give " "a different name for workspace."
+                "Workspace with name " + workspace_name + " already in use; please give a different name for workspace."
             )
         elif workspace_name == "":
             issues["OutputWorkspace"] = "Please specify name of workspace."
@@ -655,7 +655,7 @@ class AbinsAlgorithm:
                 atom = Atom(a_number=nucleons_number, z_number=protons_number)
             # isotopes are not implemented for all elements so use different constructor in that cases
             except RuntimeError:
-                logger.warning(f"Could not find data for isotope {nucleons_number}, " f"using default values for {protons_number} protons.")
+                logger.warning(f"Could not find data for isotope {nucleons_number}, using default values for {protons_number} protons.")
                 atom = Atom(z_number=protons_number)
         else:
             atom = Atom(z_number=protons_number)
@@ -714,7 +714,7 @@ class AbinsAlgorithm:
         # check  extension of a file
         found_filename_ext = os.path.splitext(filename_full_path)[1]
         if found_filename_ext.lower() != expected_file_extension:
-            comment = "{}Output from ab initio program {} is expected." " The expected extension of file is {}. Found: {}. {}".format(
+            comment = "{}Output from ab initio program {} is expected. The expected extension of file is {}. Found: {}. {}".format(
                 msg_err, ab_initio_program, expected_file_extension, found_filename_ext, msg_rename
             )
             return dict(Invalid=True, Comment=comment)

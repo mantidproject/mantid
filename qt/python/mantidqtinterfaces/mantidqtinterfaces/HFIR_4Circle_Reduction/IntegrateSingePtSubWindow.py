@@ -119,7 +119,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         formula = guiutility.get_value_from_dialog(
             parent=self,
             title="Input 2theta-FWHM function",
-            details="Example: y = 4.0 * x**2 - 1.2 * x + 1./x]=\n" "where y is FWHM and x is 2theta",
+            details="Example: y = 4.0 * x**2 - 1.2 * x + 1./x]=\nwhere y is FWHM and x is 2theta",
             label_name="Equation: ",
         )
 
@@ -369,7 +369,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
                     self._exp_number, scan_number, pt_number=1, roi_name=roi_name, integration_direction=direction
                 )
             except RuntimeError as run_err:
-                err_msg = "Unable to get single-pt scan model for {} {} {} due to {}" "".format(
+                err_msg = "Unable to get single-pt scan model for {} {} {} due to {}".format(
                     self._exp_number, scan_number, roi_name, run_err
                 )
                 if pop_error:
@@ -390,7 +390,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
             self.ui.graphicsView_integration1DView.add_fit_data(vec_x, model_y, label="Gaussian model", update_plot=True)
 
         # title
-        self.ui.graphicsView_integration1DView.set_title("Scan {} Pt {} {} Integration." "".format(scan_number, 1, direction))
+        self.ui.graphicsView_integration1DView.set_title("Scan {} Pt {} {} Integration.".format(scan_number, 1, direction))
 
         # save plot?
         if figure_file is not None:
@@ -520,7 +520,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :return:
         """
         # check input
-        assert isinstance(scan_pt_list, list), "Scan-Pt-Infos {} must be a list but not a {}." "".format(scan_pt_list, type(scan_pt_list))
+        assert isinstance(scan_pt_list, list), "Scan-Pt-Infos {} must be a list but not a {}.".format(scan_pt_list, type(scan_pt_list))
 
         # sort the scans
         scan_pt_list = sorted(scan_pt_list)
@@ -573,7 +573,7 @@ class IntegrateSinglePtIntensityWindow(QMainWindow):
         :param exp_number:
         :return:
         """
-        assert isinstance(exp_number, int) and exp_number > 0, "Experiment number {} (of type {} now) must be a " "positive integer".format(
+        assert isinstance(exp_number, int) and exp_number > 0, "Experiment number {} (of type {} now) must be a positive integer".format(
             exp_number, type(exp_number)
         )
         self._exp_number = exp_number

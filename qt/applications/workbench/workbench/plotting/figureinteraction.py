@@ -858,7 +858,7 @@ class FigureInteraction(object):
                     if "wkspIndex" in arg_set:
                         arg_set["specNum"] = workspace.getSpectrum(arg_set.pop("wkspIndex")).getSpectrumNo()
                     else:
-                        raise RuntimeError("No spectrum number associated with plot of " "workspace '{}'".format(workspace.name()))
+                        raise RuntimeError("No spectrum number associated with plot of workspace '{}'".format(workspace.name()))
 
                 arg_set_copy = copy(arg_set)
                 for key in ["function", "workspaces", "autoscale_on_update", "norm"]:

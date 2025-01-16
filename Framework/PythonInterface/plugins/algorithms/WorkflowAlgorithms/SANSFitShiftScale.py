@@ -241,7 +241,7 @@ class SANSFitShiftScale(DataProcessorAlgorithm):
             raise RuntimeError("The REAR detector does not seem to contain q values")
 
         if rear_q_max < front_q_min:
-            raise RuntimeError("The min value of the FRONT detector data set is larger" "than the max value of the REAR detector data set")
+            raise RuntimeError("The min value of the FRONT detector data set is larger than the max value of the REAR detector data set")
 
         # Get the min and max range
         min_q = max(rear_q_min, front_q_min, fit_min)

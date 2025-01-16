@@ -28,7 +28,7 @@ class LoadNMoldyn4Ascii1D(PythonAlgorithm):
         return "Simulation; Inelastic\\DataHandling"
 
     def summary(self):
-        return "Imports 1D dos and vac functions from an nMolDyn 4 output file," "convoluting it with a resolution function if required."
+        return "Imports 1D dos and vac functions from an nMolDyn 4 output file,convoluting it with a resolution function if required."
 
     def PyInit(self):
         self.declareProperty(FileProperty("Directory", "", action=FileAction.Directory), doc=("Path to directory containing dat files"))

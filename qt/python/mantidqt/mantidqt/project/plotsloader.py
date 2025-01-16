@@ -88,8 +88,9 @@ class PlotsLoader(object):
 
         if len(creation_args) == 0:
             logger.information(
-                "A plot could not be loaded from the save file, as it did not have creation_args. "
-                "The original plot title was: {}".format(plot_dict["label"])
+                "A plot could not be loaded from the save file, as it did not have creation_args. The original plot title was: {}".format(
+                    plot_dict["label"]
+                )
             )
             return
 

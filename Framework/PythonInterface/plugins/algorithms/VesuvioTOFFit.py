@@ -53,12 +53,12 @@ class VesuvioTOFFit(VesuvioBase):
         # ----- Optional ------
         self.declareProperty("WorkspaceIndex", 0, IntBoundedValidator(lower=0), doc="Workspace index for fit. [Default=0]")
         self.declareProperty(
-            "Background", "", doc="Function used to fit the background. " "The format is function=FunctionName,param1=val1,param2=val2"
+            "Background", "", doc="Function used to fit the background. The format is function=FunctionName,param1=val1,param2=val2"
         )
         self.declareProperty(
             "IntensityConstraints",
             "",
-            doc="A semi-colon separated list of intensity constraints defined " "as lists e.g [0,1,0,-4];[1,0,-2,0]",
+            doc="A semi-colon separated list of intensity constraints defined as lists e.g [0,1,0,-4];[1,0,-2,0]",
         )
 
         self.declareProperty("Ties", "", doc="A string representing the ties to be applied to the fit")

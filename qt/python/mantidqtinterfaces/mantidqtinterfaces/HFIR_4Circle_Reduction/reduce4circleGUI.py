@@ -2465,8 +2465,7 @@ class MainWindow(QMainWindow):
             curr_exp_number = self._myControl.get_experiment()
             if curr_exp_number is not None and exp_number != curr_exp_number:
                 self.pop_one_button_dialog(
-                    "Changing experiment to %d.  Clean previous experiment %d's result"
-                    " in Mantid manually." % (exp_number, curr_exp_number)
+                    "Changing experiment to %d.  Clean previous experiment %d's result in Mantid manually." % (exp_number, curr_exp_number)
                 )
             # set the new experiment number
             self._myControl.set_exp_number(exp_number)

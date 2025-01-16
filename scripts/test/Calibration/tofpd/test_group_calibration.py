@@ -41,7 +41,7 @@ def create_test_ws_and_group():
     # move the position of the detectors
     for n in range(1, 5):
         MoveInstrumentComponent(ws, ComponentName=f"bank{n}", X=1 + n / 10, Y=0, Z=1 + n / 10, RelativePosition=False)
-        MoveInstrumentComponent(ws, ComponentName=f"bank{n+4}", X=2 + n / 10, Y=0, Z=2 + n / 10, RelativePosition=False)
+        MoveInstrumentComponent(ws, ComponentName=f"bank{n + 4}", X=2 + n / 10, Y=0, Z=2 + n / 10, RelativePosition=False)
 
     # mask detectors 4 and 8
     # these are at workspace indices 3 and 7

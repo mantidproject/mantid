@@ -34,7 +34,7 @@ class SANSLoad(DataProcessorAlgorithm):
             "PublishToCache",
             True,
             direction=Direction.Input,
-            doc="Publish the calibration workspace to a cache, in order to avoid reloading " "for subsequent runs.",
+            doc="Publish the calibration workspace to a cache, in order to avoid reloading for subsequent runs.",
         )
 
         self.declareProperty(
@@ -56,9 +56,7 @@ class SANSLoad(DataProcessorAlgorithm):
             "Component",
             "",
             direction=Direction.Input,
-            doc="Component that should be moved. "
-            "If the workspaces should be loaded with an initial move, then this "
-            "needs to be specified.",
+            doc="Component that should be moved. If the workspaces should be loaded with an initial move, then this needs to be specified.",
         )
 
         # ------------

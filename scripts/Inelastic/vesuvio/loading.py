@@ -184,7 +184,7 @@ def _parse_spectra_bank(spectra_bank):
     elif spectra_bank == "backward":
         bank_ranges = VESUVIO()._instrument.backward_banks
     else:
-        raise ValueError("Fitting by bank requires selecting either 'forward' or 'backward' " "for the spectra to load")
+        raise ValueError("Fitting by bank requires selecting either 'forward' or 'backward' for the spectra to load")
     bank_ranges = ["{0}-{1}".format(x, y) for x, y in bank_ranges]
     return ";".join(bank_ranges)
 
@@ -207,7 +207,5 @@ def is_back_scattering_spectra(spectra):
             return any([lower <= first_spectrum <= upper for lower, upper in VESUVIO().backward_banks])
         except:
             raise RuntimeError(
-                "Invalid value given for spectrum range: Range must "
-                "either be 'forward', 'backward' or specified with "
-                "the syntax 'a-b'."
+                "Invalid value given for spectrum range: Range must either be 'forward', 'backward' or specified with the syntax 'a-b'."
             )

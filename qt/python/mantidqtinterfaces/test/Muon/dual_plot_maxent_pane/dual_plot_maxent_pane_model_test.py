@@ -79,7 +79,7 @@ class DuelPlotMaxentPaneModelTest(unittest.TestCase):
         self.assertEqual(self.model.create_options(), ["1", "2"])
 
     @mock.patch(
-        "mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget." "dual_plot_maxent_pane.dual_plot_maxent_pane_model.retrieve_ws"
+        "mantidqtinterfaces.Muon.GUI.FrequencyDomainAnalysis.plot_widget.dual_plot_maxent_pane.dual_plot_maxent_pane_model.retrieve_ws"
     )
     def test_set_reconstructed_data(self, mock_retrieve):
         mock_retrieve.return_value = gen_table()

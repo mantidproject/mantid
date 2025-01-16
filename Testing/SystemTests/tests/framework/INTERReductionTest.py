@@ -266,7 +266,7 @@ def compareFitResults(results_dict, reference_dict, tolerance):
                     "reference '{2}' by more than required tolerance '{3}'".format(index, value, expected, tolerance)
                 )
                 logger.error("These were the values found:         {0}".format(values_fitted))
-                raise RuntimeError("Some results were not as accurate as expected. Please check the log " "messages for details")
+                raise RuntimeError("Some results were not as accurate as expected. Please check the log messages for details")
 
 
 def sliceAndReduceRun(run_number):

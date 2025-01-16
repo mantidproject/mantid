@@ -25,7 +25,7 @@ class LoadSingleRunSingleSpectrumTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.assertFalse(
             self._tof_input.using_back_scattering_spectra,
-            "Forward-scattering spectra passed to VesuvioTOFFitInput but " "'using_back_scattering_spectra' property is True",
+            "Forward-scattering spectra passed to VesuvioTOFFitInput but 'using_back_scattering_spectra' property is True",
         )
         self.assertTrue(
             isinstance(self._tof_input.sample_data, MatrixWorkspace),
@@ -35,8 +35,7 @@ class LoadSingleRunSingleSpectrumTest(systemtesting.MantidSystemTest):
         self.assertEqual(
             self._tof_input.spectra,
             "143",
-            "Passed '143' as spectra to VesuvioTOFFitInput but found different value "
-            "for spectra field: '" + self._tof_input.spectra + "'.",
+            "Passed '143' as spectra to VesuvioTOFFitInput but found different value for spectra field: '" + self._tof_input.spectra + "'.",
         )
 
 
@@ -50,7 +49,7 @@ class LoadMultipleRunSingleSpectrumTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.assertFalse(
             self._tof_input.using_back_scattering_spectra,
-            "Forward-scattering spectra passed to VesuvioTOFFitInput but " "'using_back_scattering_spectra' property is True",
+            "Forward-scattering spectra passed to VesuvioTOFFitInput but 'using_back_scattering_spectra' property is True",
         )
         self.assertTrue(
             isinstance(self._tof_input.sample_data, MatrixWorkspace),
@@ -60,8 +59,7 @@ class LoadMultipleRunSingleSpectrumTest(systemtesting.MantidSystemTest):
         self.assertEqual(
             self._tof_input.spectra,
             "143",
-            "Passed '143' as spectra to VesuvioTOFFitInput but found different value "
-            "for spectra field: '" + self._tof_input.spectra + "'.",
+            "Passed '143' as spectra to VesuvioTOFFitInput but found different value for spectra field: '" + self._tof_input.spectra + "'.",
         )
 
 
@@ -75,7 +73,7 @@ class LoadMultipleRunMultipleSpectrumTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.assertFalse(
             self._tof_input.using_back_scattering_spectra,
-            "Forward-scattering spectra passed to VesuvioTOFFitInput but " "'using_back_scattering_spectra' property is True",
+            "Forward-scattering spectra passed to VesuvioTOFFitInput but 'using_back_scattering_spectra' property is True",
         )
         self.assertTrue(
             isinstance(self._tof_input.sample_data, MatrixWorkspace),
@@ -100,7 +98,7 @@ class LoadBackScatteringSpectrumTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.assertTrue(
             self._tof_input.using_back_scattering_spectra,
-            "Back-scattering spectra passed to VesuvioTOFFitInput but " "'using_back_scattering_spectra' property is False",
+            "Back-scattering spectra passed to VesuvioTOFFitInput but 'using_back_scattering_spectra' property is False",
         )
         self.assertTrue(
             isinstance(self._tof_input.sample_data, MatrixWorkspace),

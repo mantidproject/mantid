@@ -225,7 +225,7 @@ class ConvertWANDSCDtoQ(PythonAlgorithm):
             if self.getProperty("Frame").value == "HKL":
                 if not inWS.getExperimentInfo(0).sample().hasOrientedLattice():
                     issues["Frame"] = (
-                        "HKL selected but neither an UBWorkspace workspace was provided or " "the InputWorkspace has an OrientedLattice"
+                        "HKL selected but neither an UBWorkspace workspace was provided or the InputWorkspace has an OrientedLattice"
                     )
         symmetry = self.getProperty("SymmetryOperations").value
         if symmetry:

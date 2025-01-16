@@ -102,7 +102,7 @@ def get_settings_object(settings_prop_man_name=REDUCTION_SETTINGS_OBJ_NAME):
 
         def _get_prop_man(self, name):
             if not PropertyManagerDataService.doesExist(name):
-                logger.debug("Creating reduction settings PropertyManager " 'object with name "%s".' % name)
+                logger.debug('Creating reduction settings PropertyManager object with name "%s".' % name)
                 PropertyManagerDataService.add(name, PropertyManager())
 
             return PropertyManagerDataService.retrieve(name)
@@ -136,7 +136,7 @@ def get_settings_object(settings_prop_man_name=REDUCTION_SETTINGS_OBJ_NAME):
 
         def clone(self, new_name):
             if new_name == self.name:
-                raise RuntimeError('Cannot clone the settings object with name "%s" ' "into a new object with the same name." % new_name)
+                raise RuntimeError('Cannot clone the settings object with name "%s" into a new object with the same name.' % new_name)
 
             if PropertyManagerDataService.doesExist(new_name):
                 PropertyManagerDataService.remove(new_name)

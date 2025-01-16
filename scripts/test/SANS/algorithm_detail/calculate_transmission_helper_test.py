@@ -88,12 +88,7 @@ class CalculateTransmissionHelperTest(unittest.TestCase):
 
         # A mask file
         mask_content = (
-            '<?xml version="1.0"?>\n'
-            "\t<detector-masking>\n"
-            "\t\t<group>\n"
-            "\t\t\t<detids>6991</detids>\n"
-            "\t\t</group>\n"
-            "\t</detector-masking>\n"
+            '<?xml version="1.0"?>\n\t<detector-masking>\n\t\t<group>\n\t\t\t<detids>6991</detids>\n\t\t</group>\n\t</detector-masking>\n'
         )
         cls.mask_file_path = cls._get_path(cls.mask_file)
         cls._save_file(cls.mask_file_path, mask_content)

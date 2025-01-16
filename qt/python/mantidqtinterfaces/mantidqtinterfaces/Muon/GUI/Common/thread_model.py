@@ -80,7 +80,7 @@ class ThreadModel(QtWidgets.QWidget):
     def check_model_has_correct_attributes(self):
         if hasattr(self.model, "execute"):
             return
-        raise AttributeError("Please ensure the model passed to ThreadModel has implemented" " execute() method")
+        raise AttributeError("Please ensure the model passed to ThreadModel has implemented execute() method")
 
     def setup_thread_and_start(self):
         # Construct the Async thread
@@ -111,9 +111,7 @@ class ThreadModel(QtWidgets.QWidget):
     # if there are multiple inputs (alg>1)
     def loadData(self, inputs):
         if not hasattr(self.model, "loadData"):
-            raise AttributeError(
-                "The model passed to ThreadModel has not implemented" " loadData() method, which it is attempting to call."
-            )
+            raise AttributeError("The model passed to ThreadModel has not implemented loadData() method, which it is attempting to call.")
         self.model.loadData(inputs)
 
     def threadWrapperSetUp(self, on_thread_start_callback=lambda: 0, on_thread_end_callback=lambda: 0, on_thread_exception_callback=None):

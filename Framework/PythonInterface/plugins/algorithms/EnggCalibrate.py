@@ -112,7 +112,7 @@ class EnggCalibrate(PythonAlgorithm):
 
         self.declareProperty(
             ITableWorkspaceProperty("DetectorPositions", "", Direction.Input, PropertyMode.Optional),
-            "Calibrated detector positions. If not specified, default ones (from the " "current instrument definition) are used.",
+            "Calibrated detector positions. If not specified, default ones (from the current instrument definition) are used.",
         )
 
         self.declareProperty(
@@ -155,8 +155,7 @@ class EnggCalibrate(PythonAlgorithm):
 
         if not self.getPropertyValue("ExpectedPeaksFromFile") and not self.getPropertyValue("ExpectedPeaks"):
             issues["ExpectedPeaks"] = (
-                "Cannot run this algorithm without any expected peak. Please provide "
-                "either a list of peaks or a file with a list of peaks"
+                "Cannot run this algorithm without any expected peak. Please provide either a list of peaks or a file with a list of peaks"
             )
 
         return issues

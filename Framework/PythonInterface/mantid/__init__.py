@@ -70,7 +70,7 @@ for path in _bin_dirs():
 
 if _bindir is None:
     raise ImportError(
-        "Broken installation! Unable to find Mantid.properties file.\n" "Directories searched: {}".format(", ".join(_bin_dirs()))
+        "Broken installation! Unable to find Mantid.properties file.\nDirectories searched: {}".format(", ".join(_bin_dirs()))
     )
 
 # Windows doesn't have rpath settings so make sure the C-extensions can find the rest of the

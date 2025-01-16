@@ -80,7 +80,7 @@ class SANSConvertToWavelengthAndRebin(DataProcessorAlgorithm):
 
         self.declareProperty(
             WorkspaceGroupProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
-            doc="A grouped workspace containing the output workspaces" " in the same order as the input pairs.",
+            doc="A grouped workspace containing the output workspaces in the same order as the input pairs.",
         )
 
     def PyExec(self):
@@ -135,7 +135,7 @@ class SANSConvertToWavelengthAndRebin(DataProcessorAlgorithm):
 
         def _check_individual_pair(wavelength_low, wavelength_high):
             if wavelength_low is not None and wavelength_high is not None and wavelength_low > wavelength_high:
-                errors.update({self.WAV_PAIRS: "The lower wavelength setting needs to be smaller " "than the higher wavelength setting."})
+                errors.update({self.WAV_PAIRS: "The lower wavelength setting needs to be smaller than the higher wavelength setting."})
             if wavelength_low is not None and wavelength_low < 0:
                 errors.update({self.WAV_PAIRS: "The wavelength cannot be smaller than 0."})
             if wavelength_high is not None and wavelength_high < 0:

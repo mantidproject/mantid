@@ -97,7 +97,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
         mandatoryInputRuns.add(StringArrayMandatoryValidator())
         self.declareProperty(
             StringArrayProperty("SampleRuns", values=[], validator=mandatoryInputRuns),
-            doc="Comma separated range of sample runs,\n" "and optional dataset indexes,\n" " eg [cycle::] 7333-7341,7345[:0-23]",
+            doc="Comma separated range of sample runs,\nand optional dataset indexes,\neg [cycle::] 7333-7341,7345[:0-23]",
         )
 
         self.declareProperty(
@@ -148,21 +148,19 @@ class ElasticEMUauReduction(PythonAlgorithm):
         self.declareProperty(
             name="ScanParameter",
             defaultValue="",
-            doc="Display data for time series environment variable,\n" "using optional label and units" "  eg T02SP06 [, Temperature, K]",
+            doc="Display data for time series environment variable,\nusing optional label and units  eg T02SP06 [, Temperature, K]",
         )
 
         self.declareProperty(
             name="ReferenceRange",
             defaultValue="",
-            doc="Normalise the sample counts over the environment or\n"
-            "time range. Values are in environment units or secs,\n"
-            " eg 75-100",
+            doc="Normalise the sample counts over the environment or\ntime range. Values are in environment units or secs,\n eg 75-100",
         )
 
         self.declareProperty(
             name="SteppedScanParameter",
             defaultValue=False,
-            doc="If the environment variable is set and held\n" "during each scan rather than continuosly changing.",
+            doc="If the environment variable is set and held\nduring each scan rather than continuosly changing.",
         )
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), doc="Name for the reduced workspace.")
@@ -175,7 +173,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
         self.declareProperty(
             name="KeepIntermediateWorkspaces",
             defaultValue=False,
-            doc="Whether to keep the intermediate sample and calibration\n" "workspaces for diagnostic checks.",
+            doc="Whether to keep the intermediate sample and calibration\nworkspaces for diagnostic checks.",
         )
 
         self.declareProperty(

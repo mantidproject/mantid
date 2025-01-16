@@ -480,9 +480,9 @@ class PeakProcessRecord(object):
         :return:
         """
         # check
-        assert isinstance(abs_factor, float) or isinstance(
-            abs_factor, int
-        ), "Absorption correction {0} must be an integer but not {1}.".format(abs_factor, type(abs_factor))
+        assert isinstance(abs_factor, float) or isinstance(abs_factor, int), (
+            "Absorption correction {0} must be an integer but not {1}.".format(abs_factor, type(abs_factor))
+        )
 
         self._absorptionCorrection = abs_factor
 
@@ -594,10 +594,10 @@ class PeakProcessRecord(object):
         :param peak_integration_dict:
         :return:
         """
-        assert isinstance(
-            peak_integration_dict, dict
-        ), "Integrated peak information {0} must be given by a dictionary but not a {1}.".format(
-            peak_integration_dict, type(peak_integration_dict)
+        assert isinstance(peak_integration_dict, dict), (
+            "Integrated peak information {0} must be given by a dictionary but not a {1}.".format(
+                peak_integration_dict, type(peak_integration_dict)
+            )
         )
 
         self._integrationDict = peak_integration_dict

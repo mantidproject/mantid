@@ -147,10 +147,10 @@ class ScanPreProcessWindow(QMainWindow):
         import multi_threads_helpers
 
         # check inputs
-        assert isinstance(
-            self._myController, reduce4circleControl.CWSCDReductionControl
-        ), "Reduction controller of type {0} is not accepted. It must be a CWSCDReductionControl instance.".format(
-            self._myController.__class__.__name__
+        assert isinstance(self._myController, reduce4circleControl.CWSCDReductionControl), (
+            "Reduction controller of type {0} is not accepted. It must be a CWSCDReductionControl instance.".format(
+                self._myController.__class__.__name__
+            )
         )
 
         # check whether it is well setup for reduction
@@ -231,9 +231,9 @@ class ScanPreProcessWindow(QMainWindow):
                     end_scan = int(terms[1])
                     scan_list.extend(range(start_scan, end_scan + 1))
                 else:
-                    raise RuntimeError("{0} in scan list {1} cannot be converted to integer list." "".format(single_scan_str, scans_str))
+                    raise RuntimeError("{0} in scan list {1} cannot be converted to integer list.".format(single_scan_str, scans_str))
             else:
-                raise RuntimeError("{0} in scan list {1} cannot be converted to integer." "".format(single_scan_str, scans_str))
+                raise RuntimeError("{0} in scan list {1} cannot be converted to integer.".format(single_scan_str, scans_str))
         # END-FOR
 
         return scan_list
@@ -272,7 +272,7 @@ class ScanPreProcessWindow(QMainWindow):
                 self._myController.set_user_wave_length(exp_number, user_wavelength)
             except ValueError:
                 gui_util.show_message(
-                    self, "[ERROR] User-specified wave length {0} cannot be converted to float." "".format(user_wavelength_str)
+                    self, "[ERROR] User-specified wave length {0} cannot be converted to float.".format(user_wavelength_str)
                 )
                 return
         # END-IF
@@ -284,7 +284,7 @@ class ScanPreProcessWindow(QMainWindow):
             try:
                 det_center = gui_util.parse_integer_list(user_det_center_str, 2)
             except RuntimeError as run_err:
-                gui_util.show_message(self, "Unable to parse detector center {0} due to {1}" "".format(user_det_center_str, run_err))
+                gui_util.show_message(self, "Unable to parse detector center {0} due to {1}".format(user_det_center_str, run_err))
                 return
             self._myController.set_detector_center(exp_number, det_center[0], det_center[1])
         # END-IF
@@ -303,7 +303,7 @@ class ScanPreProcessWindow(QMainWindow):
         # detector size
         curr_det_size_index = self.ui.comboBox_detSize.currentIndex()
         if curr_det_size_index > 2:
-            gui_util.show_message(self, "Detector {0} is not supported by now!" "".format(str(self.ui.comboBox_detSize.currentText())))
+            gui_util.show_message(self, "Detector {0} is not supported by now!".format(str(self.ui.comboBox_detSize.currentText())))
             return
         det_size = [256, 512][curr_det_size_index]
         self._myController.set_detector_geometry(det_size, det_size)
@@ -362,10 +362,10 @@ class ScanPreProcessWindow(QMainWindow):
         :param controller:
         :return:
         """
-        assert isinstance(
-            controller, reduce4circleControl.CWSCDReductionControl
-        ), "Reduction controller must be an instance of reduce4circleControl.CWSCDReductionControl but not a {0}.".format(
-            controller.__class__.__name__
+        assert isinstance(controller, reduce4circleControl.CWSCDReductionControl), (
+            "Reduction controller must be an instance of reduce4circleControl.CWSCDReductionControl but not a {0}.".format(
+                controller.__class__.__name__
+            )
         )
 
         self._myController = controller
@@ -397,7 +397,7 @@ class ScanPreProcessWindow(QMainWindow):
             self.update_record_file(self._currExpNumber, check_duplicates=False, scan_list=self._scanNumbersProcessed)
             if self._scansToProcess != self._scanNumbersProcessed:
                 raise RuntimeWarning(
-                    "Scans to process {0} is not same as scans processed {1}." "".format(self._scansToProcess, self._scanNumbersProcessed)
+                    "Scans to process {0} is not same as scans processed {1}.".format(self._scansToProcess, self._scanNumbersProcessed)
                 )
         # END-IF
 
@@ -506,7 +506,7 @@ class ScanPreProcessStatusTable(NTableWidget.NTableWidget):
         :return:
         """
         # check input
-        assert isinstance(scan_numbers, list), "Scan numbers {0} must be a list but not a {1}." "".format(scan_numbers, type(scan_numbers))
+        assert isinstance(scan_numbers, list), "Scan numbers {0} must be a list but not a {1}.".format(scan_numbers, type(scan_numbers))
 
         # sort
         scan_numbers.sort()

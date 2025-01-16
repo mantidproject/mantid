@@ -68,7 +68,7 @@ class MuonGroup(object):
     @name.setter
     def name(self, name):
         raise AttributeError(
-            "Attempting to change name from {} to {}. " "Cannot change name of MuonGroup " "object".format(self._group_name, name)
+            "Attempting to change name from {} to {}. Cannot change name of MuonGroup object".format(self._group_name, name)
         )
 
     @property

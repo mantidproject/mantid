@@ -21,7 +21,7 @@ class DepolarizedAnalyzerTransmissionTest(SANSPolarizationCorrectionsBase):
         mt = self._average_workspaces_in_group(list(mt_group))
         dep = self._average_workspaces_in_group(list(dep_group))
 
-        DepolarizedAnalyserTransmission(dep, mt, OutputWorkspace="params" "", OutputFitCurves="curves")
+        DepolarizedAnalyserTransmission(dep, mt, OutputWorkspace="params", OutputFitCurves="curves")
 
     def _validate(self):
         result_curves = "curves"

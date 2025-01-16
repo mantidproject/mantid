@@ -18,7 +18,7 @@ from workbench.plotting.plotscriptgenerator.fitting import get_fit_cmds, BASE_FI
 
 EXAMPLE_FIT_PROPERTIES = {
     "EndX": 1018,
-    "Function": "name=Lorentzian,Amplitude=22078.3," "PeakCentre=492.226,FWHM=56.265",
+    "Function": "name=Lorentzian,Amplitude=22078.3,PeakCentre=492.226,FWHM=56.265",
     "InputWorkspace": "TestWorkspace",
     "MaxIterations": 5000,
     "Normalise": True,
