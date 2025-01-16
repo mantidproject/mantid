@@ -132,7 +132,8 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                 ws.sample().getOrientedLattice().setError(*err)
                 if n_peaks[iws] < _MIN_NUM_INDEXED_PEAKS:
                     logger.warning(
-                        f"Workspace: {wsname}, has only {n_peaks[iws]} indexed peaks, fewer than the desired {_MIN_NUM_INDEXED_PEAKS}"
+                        f"Workspace: {wsname}, has only {n_peaks[iws]} indexed peaks after optimisation, "
+                        f"fewer than the desired {_MIN_NUM_INDEXED_PEAKS}"
                     )
             logger.notice(
                 f"Lattice parameters successfully refined for workspaces: {ws_list}\n"
@@ -216,8 +217,8 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                         # otherwise warn the user
                         else:
                             logger.warning(
-                                f"Fewer than the desired {_MIN_NUM_INDEXED_PEAKS} peaks were indexed for Workspace {iws}. "
-                                f"Workspace {iws} removed"
+                                f"Fewer than the desired {_MIN_NUM_INDEXED_PEAKS} peaks were indexed by the reference UB "
+                                f"for Workspace {iws}. Workspace will NOT be included in the optimisation"
                             )
         if len(valid_ws_list) < 2:
             if n_ws_indexed_by_ref_ub <= 1:
