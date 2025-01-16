@@ -14,10 +14,29 @@ a new version of cppcheck.
 import argparse
 import sys
 import xml.etree.ElementTree as ET
+from dataclasses import dataclass
 from typing import List
 
 NEW_SOURCE_ROOT = "${CMAKE_SOURCE_DIR}"
 OLD_SOURCE_ROOT = "/jenkins_workdir/workspace/pull_requests-cppcheck"
+
+
+@dataclass
+class CppcheckSuppression:
+    error_type: str
+    file_path: str
+    line_number: int
+
+    # Comparison operator for sorting suppressions based on file name and line number.
+    def __lt__(self, other):
+        if self.file_path < other.file_path:
+            return True
+        elif self.file_path == other.file_path:
+            return self.line_number < other.line_number
+        return False
+
+    def suppression_string(self) -> str:
+        return f"{self.error_type}:{self.file_path}:{self.line_number}"
 
 
 def main() -> int:
@@ -66,8 +85,8 @@ def generate_suppressions(xml_tree: ET.ElementTree, old_source_root: str) -> Lis
     errors_element = results.find("errors")
     errors = errors_element.findall("error")
 
+    # Build list of suppression objects
     suppressions = []
-
     for error in errors:
         error_type = error.get("id")
         # checkersReport has no location
@@ -78,13 +97,21 @@ def generate_suppressions(xml_tree: ET.ElementTree, old_source_root: str) -> Lis
         # Replace the root of the source file so that it is consistent with what cmake expects.
         file_path = location.get("file")
         file_path = file_path.replace(old_source_root, NEW_SOURCE_ROOT)
-        line_number = location.get("line")
-        suppression = f"{error_type}:{file_path}:{line_number}"
+        line_number = int(location.get("line"))
 
-        if suppression not in suppressions:
-            suppressions.append(suppression)
+        suppressions.append(CppcheckSuppression(error_type=error_type, file_path=file_path, line_number=line_number))
 
-    return suppressions
+    # Sort the suppressions by file name and line number.
+    suppressions.sort()
+
+    # Convert to strings and remove any duplicates.
+    suppression_strings = []
+    for suppression in suppressions:
+        suppression_string = suppression.suppression_string()
+        if suppression_string not in suppression_strings:
+            suppression_strings.append(suppression_string)
+
+    return suppression_strings
 
 
 if __name__ == "__main__":
