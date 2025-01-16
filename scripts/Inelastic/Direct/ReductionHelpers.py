@@ -360,7 +360,7 @@ def parse_single_name(filename):
         path2, ind2, ext2 = parse_single_name(fr)
         if ind1 > ind2:
             raise ValueError(
-                "Invalid file number defined using colon : left run number " "{0} has to be large then right {1}".format(ind1, ind2)
+                "Invalid file number defined using colon : left run number {0} has to be large then right {1}".format(ind1, ind2)
             )
         number = list(range(ind1[0], ind2[0] + 1))
         if len(filepath) > 0:

@@ -96,7 +96,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.declareProperty(
             "ErrorWeighting",
             False,
-            doc="If True, a weighted average is used to to estimate the subtracted background." "Otherwise, a simple average is used.",
+            doc="If True, a weighted average is used to to estimate the subtracted background.Otherwise, a simple average is used.",
         )
         self.declareProperty("NormFlag", True, doc="If true, the data will be normalized")
         self.declareProperty(

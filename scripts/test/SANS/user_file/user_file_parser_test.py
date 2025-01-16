@@ -298,24 +298,20 @@ class LimitParserTest(unittest.TestCase):
             "L/Q 12 34 2.7": {LimitsId.Q: q_rebin_values(min=12.0, max=34.0, rebin_string="12.0,2.7,34.0")},
             "L/Q -12 34.6 2.7/LOG": {LimitsId.Q: q_rebin_values(min=-12.0, max=34.6, rebin_string="-12.0,-2.7,34.6")},
             "L/q -12 3.6 2 /LIN": {LimitsId.Q: q_rebin_values(min=-12.0, max=3.6, rebin_string="-12.0,2.0,3.6")},
-            "L/q -12   0.41  23 -34.8 3.6": {LimitsId.Q: q_rebin_values(min=-12.0, max=3.6, rebin_string="-12.0,0.41,23.0," "-34.8,3.6")},
-            "L/q -12   0.42  23 -34.8 3.6 /LIn": {
-                LimitsId.Q: q_rebin_values(min=-12.0, max=3.6, rebin_string="-12.0,0.42," "23.0,34.8," "3.6")
-            },
-            "L/q -12   0.43     23 -34.8 3.6": {
-                LimitsId.Q: q_rebin_values(min=-12.0, max=3.6, rebin_string="-12.0,0.43," "23.0,-34.8," "3.6")
-            },
+            "L/q -12   0.41  23 -34.8 3.6": {LimitsId.Q: q_rebin_values(min=-12.0, max=3.6, rebin_string="-12.0,0.41,23.0,-34.8,3.6")},
+            "L/q -12   0.42  23 -34.8 3.6 /LIn": {LimitsId.Q: q_rebin_values(min=-12.0, max=3.6, rebin_string="-12.0,0.42,23.0,34.8,3.6")},
+            "L/q -12   0.43     23 -34.8 3.6": {LimitsId.Q: q_rebin_values(min=-12.0, max=3.6, rebin_string="-12.0,0.43,23.0,-34.8,3.6")},
             "L/q -12   0.44  23  ,34.8,3.6  /Log": {
-                LimitsId.Q: q_rebin_values(min=-12.0, max=3.6, rebin_string="-12.0," "-0.44," "23.0," "-34.8,3.6")
+                LimitsId.Q: q_rebin_values(min=-12.0, max=3.6, rebin_string="-12.0,-0.44,23.0,-34.8,3.6")
             },
             "L/q -12  , 0.45 , 23  ,34.8 ,3.6, .123, 5.6  /Log": {
-                LimitsId.Q: q_rebin_values(min=-12.0, max=5.6, rebin_string="-12.0,-0.45,23.0," "-34.8,3.6," "-0.123,5.6")
+                LimitsId.Q: q_rebin_values(min=-12.0, max=5.6, rebin_string="-12.0,-0.45,23.0,-34.8,3.6,-0.123,5.6")
             },
             "L/q -12  , 0.46 , 23  ,34.8 ,3.6, -.123, 5.6": {
-                LimitsId.Q: q_rebin_values(min=-12.0, max=5.6, rebin_string="-12.0,0.46,23.0," "34.8,3.6," "-0.123,5.6")
+                LimitsId.Q: q_rebin_values(min=-12.0, max=5.6, rebin_string="-12.0,0.46,23.0,34.8,3.6,-0.123,5.6")
             },
             "L/q -12   0.47   23 34.8  3.6, -.123    5.6": {
-                LimitsId.Q: q_rebin_values(min=-12.0, max=5.6, rebin_string="-12.0,0.47,23.0," "34.8,3.6," "-0.123,5.6")
+                LimitsId.Q: q_rebin_values(min=-12.0, max=5.6, rebin_string="-12.0,0.47,23.0,34.8,3.6,-0.123,5.6")
             },
         }
 
@@ -702,7 +698,7 @@ class TransParserTest(unittest.TestCase):
     def test_that_roi_is_parsed_correctly(self):
         valid_settings = {
             "TRANS/ROI =testFile.xml": {TransId.ROI: ["testFile.xml"]},
-            "TRANS/ROI =testFile.xml, " "TestFile2.XmL,testFile4.xml": {TransId.ROI: ["testFile.xml", "TestFile2.XmL", "testFile4.xml"]},
+            "TRANS/ROI =testFile.xml, TestFile2.XmL,testFile4.xml": {TransId.ROI: ["testFile.xml", "TestFile2.XmL", "testFile4.xml"]},
         }
         invalid_settings = {
             "TRANS/ROI =t estFile.xml": RuntimeError,
@@ -717,7 +713,7 @@ class TransParserTest(unittest.TestCase):
     def test_that_mask_is_parsed_correctly(self):
         valid_settings = {
             "TRANS/Mask =testFile.xml": {TransId.MASK: ["testFile.xml"]},
-            "TRANS/ MASK =testFile.xml, " "TestFile2.XmL,testFile4.xml": {TransId.MASK: ["testFile.xml", "TestFile2.XmL", "testFile4.xml"]},
+            "TRANS/ MASK =testFile.xml, TestFile2.XmL,testFile4.xml": {TransId.MASK: ["testFile.xml", "TestFile2.XmL", "testFile4.xml"]},
         }
         invalid_settings = {
             "TRANS/MASK =t estFile.xml": RuntimeError,
@@ -1081,7 +1077,7 @@ class PrintParserTest(unittest.TestCase):
             "PRINT OdlfP slsk 23lksdl2 34l": {PrintId.PRINT_LINE: "OdlfP slsk 23lksdl2 34l"},
             "PRiNt OdlfP slsk 23lksdl2 34l": {PrintId.PRINT_LINE: "OdlfP slsk 23lksdl2 34l"},
             "  PRINT Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, Sample Changer, Banjo cells": {
-                PrintId.PRINT_LINE: "Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, " "Sample Changer, Banjo cells"
+                PrintId.PRINT_LINE: "Loaded: USER_LOQ_174J, 12/03/18, Xuzhi (Lu), 12mm, Sample Changer, Banjo cells"
             },
         }
 

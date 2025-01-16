@@ -155,7 +155,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         )
         self.declareProperty(
             IPeaksWorkspaceProperty(name="OutputWorkspace", defaultValue="", direction=Direction.Output),
-            doc="The output PeaksWorkspace will be a copy of the input PeaksWorkspace with the" " integrated intensities.",
+            doc="The output PeaksWorkspace will be a copy of the input PeaksWorkspace with the integrated intensities.",
         )
         # shoebox dimensions
         self.declareProperty(
@@ -277,7 +277,7 @@ class IntegratePeaksShoeboxTOF(DataProcessorAlgorithm):
         # plotting
         self.declareProperty(
             FileProperty("OutputFile", "", FileAction.OptionalSave, ".pdf"),
-            "Optional file path in which to write diagnostic plots (note this will slow the " "execution of algorithm).",
+            "Optional file path in which to write diagnostic plots (note this will slow the execution of algorithm).",
         )
         self.setPropertyGroup("OutputFile", "Plotting")
 

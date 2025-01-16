@@ -331,7 +331,7 @@ def combine_spatial_banks(tables: WorkspaceGroup, table_type: str = "calibration
     :param name: input name for the TableWorkSpace output
     :return unified TableWorkspace for all banks
     """
-    message = f'{"Cannot process Corelli combine_spatial_banks, input is not of type WorkspaceGroup"}'
+    message = f"{'Cannot process Corelli combine_spatial_banks, input is not of type WorkspaceGroup'}"
     assert isinstance(tables, WorkspaceGroup), message
 
     combined_table: TableWorkspace = (
@@ -347,7 +347,7 @@ def combine_spatial_banks(tables: WorkspaceGroup, table_type: str = "calibration
 
         # check column names
         if not has_valid_columns(table, table_type=table_type):
-            message = f"Table index {i} of type {table_type }is not a valid Corelli TableWorkspace"
+            message = f"Table index {i} of type {table_type}is not a valid Corelli TableWorkspace"
             raise RuntimeError(message)
 
         table_dict = table.toDict()

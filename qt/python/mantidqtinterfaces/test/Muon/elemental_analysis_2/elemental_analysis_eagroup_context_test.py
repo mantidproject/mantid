@@ -142,7 +142,7 @@ class EAGroupContextTest(TestCase):
         self.assertFalse(self._detector_ws_name_1 in self._context.group_names)
         mock_remove_ws.assert_called_once_with(self._detector_ws_name_1)
         error_notifier_mock.notify_subscribers.assert_called_once_with(
-            f"Unexpected error occurred when" f" deleting group {self._detector_ws_name_1}: mock error"
+            f"Unexpected error occurred when deleting group {self._detector_ws_name_1}: mock error"
         )
 
 

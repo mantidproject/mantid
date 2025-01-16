@@ -43,7 +43,7 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         self.declareProperty(
             ITableWorkspaceProperty("BinningTable", "", Direction.Input, PropertyMode.Optional),
-            "Table workspace containing binning parameters. If not specified, then no re-binning" "is required",
+            "Table workspace containing binning parameters. If not specified, then no re-binningis required",
         )
 
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Name of rebinned matrix workspace. ")
@@ -158,7 +158,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         input_workspace = AnalysisDataService.retrieve(input_ws_name)
         if input_workspace.id() != "EventWorkspace" and bin_par_ws_exist:
             self.log().warning(
-                "Input workspace {0} must be an EventWorkspace if rebin is required by {1}" "".format(input_workspace, bin_par_ws_name)
+                "Input workspace {0} must be an EventWorkspace if rebin is required by {1}".format(input_workspace, bin_par_ws_name)
             )
         elif input_workspace.getAxis(0).getUnit().unitID() != "TOF":
             raise NotImplementedError("InputWorkspace must be in unit as TOF.")
@@ -214,7 +214,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         bin_par_workspace = AnalysisDataService.retrieve(bin_par_ws_name)
         # check inputs
         assert isinstance(bin_par_workspace, ITableWorkspace), (
-            "Input binning workspace {0} must be " "an ITableWorkspace but not a {1}" "".format(bin_par_workspace, type(bin_par_workspace))
+            "Input binning workspace {0} must be an ITableWorkspace but not a {1}".format(bin_par_workspace, type(bin_par_workspace))
         )
 
         # check whether it is valid TableWorkspace
@@ -278,17 +278,17 @@ class SaveVulcanGSS(PythonAlgorithm):
             terms = bin_par_str.split(":")
             ref_ws_name = terms[0].strip()
             if AnalysisDataService.doesExist(ref_ws_name) is False:
-                raise RuntimeError("Workspace {0} does not exist (FYI {1})" "".format(ref_ws_name, bin_par_str))
+                raise RuntimeError("Workspace {0} does not exist (FYI {1})".format(ref_ws_name, bin_par_str))
             try:
                 ws_index = int(terms[1].strip())
             except ValueError:
                 raise RuntimeError(
-                    "{0} is supposed to be an integer for workspace index but not of type {1}." "".format(terms[1], type(terms[1]))
+                    "{0} is supposed to be an integer for workspace index but not of type {1}.".format(terms[1], type(terms[1]))
                 )
 
             ref_tof_ws = AnalysisDataService.retrieve(ref_ws_name)
             if ws_index < 0 or ws_index >= ref_tof_ws.getNumberHistograms():
-                raise RuntimeError("Workspace index {0} must be in range [0, {1})" "".format(ws_index, ref_tof_ws.getNumberHistograms()))
+                raise RuntimeError("Workspace index {0} must be in range [0, {1})".format(ws_index, ref_tof_ws.getNumberHistograms()))
 
             ref_tof_vec = ref_tof_ws.readX(ws_index)
             delta_tof_vec = ref_tof_vec[1:] - ref_tof_vec[:-1]
@@ -426,7 +426,7 @@ class SaveVulcanGSS(PythonAlgorithm):
         delta_tof = (vec_x[1] - tof_min) / tof_min  # deltaT/T
         data_size = len(vec_x)
 
-        bank_header = "BANK {0} {1} {2} {3} {4} {5:.1f} {6:.7f} 0 FXYE" "".format(
+        bank_header = "BANK {0} {1} {2} {3} {4} {5:.1f} {6:.7f} 0 FXYE".format(
             bank_id, data_size, data_size, "SLOG", tof_min, tof_max, delta_tof
         )
 

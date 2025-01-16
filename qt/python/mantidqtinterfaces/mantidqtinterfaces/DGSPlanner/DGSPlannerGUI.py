@@ -232,7 +232,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                 reply = QtWidgets.QMessageBox.warning(
                     self,
                     "Goniometer",
-                    "More than 10 goniometer settings. This might be long.\n" "Are you sure you want to proceed?",
+                    "More than 10 goniometer settings. This might be long.\nAre you sure you want to proceed?",
                     QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
                     QtWidgets.QMessageBox.No,
                 )

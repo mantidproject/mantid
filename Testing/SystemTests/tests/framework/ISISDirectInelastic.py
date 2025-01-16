@@ -43,7 +43,7 @@ class ISISDirectInelasticReduction(systemtesting.MantidSystemTest, metaclass=ABC
     @abstractmethod
     def get_reference_file(self):
         """Returns the name of the reference file to compare against"""
-        raise NotImplementedError("Implement get_reference_file to return " "the name of the file to compare against.")
+        raise NotImplementedError("Implement get_reference_file to return the name of the file to compare against.")
 
     @abstractmethod
     def get_result_workspace(self):

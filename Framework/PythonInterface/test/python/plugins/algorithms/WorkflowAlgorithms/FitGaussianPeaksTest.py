@@ -339,7 +339,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
             self.assertEqual(params, "parameters")
             np.testing.assert_equal(yvals, [7, 8])
             mock_fit.assert_called_with(
-                Function="name=Gaussian,PeakCentre=1,Height=2,Sigma=3;" "name=Gaussian,PeakCentre=1,Height=2,Sigma=3;",
+                Function="name=Gaussian,PeakCentre=1,Height=2,Sigma=3;name=Gaussian,PeakCentre=1,Height=2,Sigma=3;",
                 InputWorkspace=None,
                 Output="fit_result",
                 Minimizer="Levenberg-MarquardtMD",
@@ -513,7 +513,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
         table.addColumn("float", "Centre")
         table.addRow([20])
         with mock.patch(
-            "plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.FitGaussianPeaks." "estimate_single_parameters"
+            "plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.FitGaussianPeaks.estimate_single_parameters"
         ) as mock_estimate_params:
             mock_estimate_params.return_value = None
             FitGaussianPeaks(InputWorkspace=ws, PeakGuessTable=table, EstimateFitWindow=False, FitWindowSize=11)
@@ -536,7 +536,7 @@ class FitGaussianPeaksTest(unittest.TestCase):
         table.addColumn("float", "Centre")
         table.addRow([20])
         with mock.patch(
-            "plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.FitGaussianPeaks." "estimate_single_parameters"
+            "plugins.algorithms.WorkflowAlgorithms.FitGaussianPeaks.FitGaussianPeaks.estimate_single_parameters"
         ) as mock_estimate_params:
             mock_estimate_params.return_value = None
             FitGaussianPeaks(InputWorkspace=ws, PeakGuessTable=table, EstimateFitWindow=True, FitWindowSize=11)

@@ -34,7 +34,7 @@ class MatchSpectra(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("Scale", values=[], direction=Direction.Output), "Multiplicitive factor from matching")
         self.declareProperty(
             FloatArrayProperty("ChiSq", values=[], direction=Direction.Output),
-            "Unweighted ChiSq between the spectrum and the reference. " "NaN means that the spectrum was not matched",
+            "Unweighted ChiSq between the spectrum and the reference. NaN means that the spectrum was not matched",
         )
 
     def __getReferenceWsIndex(self):
@@ -124,7 +124,7 @@ class MatchSpectra(PythonAlgorithm):
         referenceE = outputWS.readE(referenceWkspIndex)
 
         if not np.any(referenceE > 0.0):
-            raise RuntimeError("None of the uncertainties in the reference spectrum " "is greater than zero. No data would be used.")
+            raise RuntimeError("None of the uncertainties in the reference spectrum is greater than zero. No data would be used.")
 
         resultOffset = []
         resultScale = []

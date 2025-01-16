@@ -79,14 +79,13 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         self.declareProperty(
             "DateTitleInHeader",
             True,
-            "If true, then the first 2 lines of header will be experiment date and title."
-            "Otherwise, there will be only 1 line in header.",
+            "If true, then the first 2 lines of header will be experiment date and title.Otherwise, there will be only 1 line in header.",
         )
 
         self.declareProperty(
             "SeparateHeaderFile",
             True,
-            "If true, then the header is written to another file." "Otherwise, header will be in the same output file.",
+            "If true, then the header is written to another file.Otherwise, header will be in the same output file.",
         )
 
         # Time zone

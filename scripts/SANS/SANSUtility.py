@@ -93,7 +93,7 @@ def deprecated(obj):
         return obj
 
     assert False, (
-        "Programming error.  You have incorrectly applied the " "@deprecated decorator.  This is only for use with functions " "or classes."
+        "Programming error.  You have incorrectly applied the @deprecated decorator.  This is only for use with functions or classes."
     )
 
 
@@ -1023,7 +1023,7 @@ def is_valid_ws_for_removing_zero_errors(input_workspace_name):
             break
 
     if not isValid:
-        message = "Workspace does not seem valid for zero error removal." "It must have been reduced with Q1D or Qxy."
+        message = "Workspace does not seem valid for zero error removal.It must have been reduced with Q1D or Qxy."
 
     return message, isValid
 
@@ -1737,7 +1737,7 @@ def get_start_q_and_end_q_values(rear_data_name, front_data_name, rescale_shift)
         raise RuntimeError("The REAR detector does not seem to contain q values")
 
     if rear_q_max < front_q_min:
-        raise RuntimeError("The min value of the FRONT detector data set is larger" "than the max value of the REAR detector data set")
+        raise RuntimeError("The min value of the FRONT detector data set is largerthan the max value of the REAR detector data set")
 
     # Get the min and max range
     min_q = max(rear_q_min, front_q_min)
@@ -2167,7 +2167,7 @@ def get_correct_combinDet_setting(instrument_name, detector_selection):
         elif detector_selection == "BOTH":
             new_combine_detector_selection = "both"
         else:
-            raise RuntimeError("SANSBatchReduce: Unknown detector {0} for conversion " "to combineDet.".format(detector_selection))
+            raise RuntimeError("SANSBatchReduce: Unknown detector {0} for conversion to combineDet.".format(detector_selection))
         return new_combine_detector_selection
 
     # If we are dealing with SANS2D, then the correct combineDet selection is
@@ -2181,7 +2181,7 @@ def get_correct_combinDet_setting(instrument_name, detector_selection):
         elif detector_selection == "BOTH":
             new_combine_detector_selection = "both"
         else:
-            raise RuntimeError("SANSBatchReduce: Unknown detector {0} for conversion " "to combineDet.".format(detector_selection))
+            raise RuntimeError("SANSBatchReduce: Unknown detector {0} for conversion to combineDet.".format(detector_selection))
         return new_combine_detector_selection
     raise RuntimeError("SANSBatchReduce: Unknown instrument {0}.".format(instrument_name))
 

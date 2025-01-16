@@ -24,7 +24,7 @@ class DNSTofPowderPlotPresenter(DNSObserver):
         workspace = self.model.get_plot_workspace()
         if workspace:
             self.view.set_plot(workspace)
-            self._plotted_script_number = self.param_dict["tof_powder_script_" "generator"]["script_number"]
+            self._plotted_script_number = self.param_dict["tof_powder_script_generator"]["script_number"]
         else:
             self.raise_error("No processed data found, generate script first.")
 

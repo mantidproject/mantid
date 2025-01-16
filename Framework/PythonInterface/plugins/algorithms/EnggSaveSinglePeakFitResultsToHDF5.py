@@ -44,7 +44,7 @@ class EnggSaveSinglePeakFitResultsToHDF5(PythonAlgorithm):
         runNumbers = self.getProperty(self.PROP_RUN_NUMBERS).value
         if len(input_ws_names) > 1 and len(runNumbers) != len(input_ws_names):
             issues[self.PROP_RUN_NUMBERS] = (
-                "When saving multiple fit results at once, one run number must be " "supplied for every input workspace"
+                "When saving multiple fit results at once, one run number must be supplied for every input workspace"
             )
 
         return issues

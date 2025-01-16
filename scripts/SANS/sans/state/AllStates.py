@@ -109,5 +109,5 @@ def get_all_states_builder(data_info):
         return AllStatesBuilder()
     else:
         raise NotImplementedError(
-            "SANSStateBuilder: Could not find any valid state builder for the " "specified SANSStateData object {0}".format(str(data_info))
+            "SANSStateBuilder: Could not find any valid state builder for the specified SANSStateData object {0}".format(str(data_info))
         )

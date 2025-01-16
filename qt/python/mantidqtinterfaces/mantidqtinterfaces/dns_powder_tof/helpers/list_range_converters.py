@@ -14,7 +14,7 @@ def list_to_range(value_list):
         increment = value_list[1] - value_list[0]
         my_range = range(value_list[0], value_list[-1] + increment, increment)
         if value_list == list(my_range):
-            return f"[*range({value_list[0]}, {value_list[-1] + increment}," f" {increment})]"
+            return f"[*range({value_list[0]}, {value_list[-1] + increment}, {increment})]"
     return str(value_list)
 
 

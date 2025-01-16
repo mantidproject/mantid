@@ -329,7 +329,7 @@ def generate(subproject, classname, overwrite, args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Utility to create Mantid class files: header, source and test. " "version " + VERSION)
+    parser = argparse.ArgumentParser(description="Utility to create Mantid class files: header, source and test. version " + VERSION)
     parser.add_argument("subproject", metavar="SUBPROJECT", type=str, help="The subproject under Framework/; e.g. Kernel")
     parser.add_argument("classname", metavar="CLASSNAME", type=str, help="Name of the class to create")
     parser.add_argument(
@@ -357,7 +357,7 @@ if __name__ == "__main__":
         "--subfolder",
         dest="subfolder",
         default="",
-        help="Put the source under a subfolder below the main part of the project, e.g. " "Geometry/Instrument.",
+        help="Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.",
     )
     parser.add_argument(
         "--project", dest="project", default="Framework", help="The project in which this goes. Default: Framework. Can be MantidQt"

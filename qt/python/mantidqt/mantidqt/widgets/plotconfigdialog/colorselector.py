@@ -69,7 +69,7 @@ class ColorSelector(QWidget):
 
     def update_color_button(self):
         color = self.get_color()
-        self.button.setStyleSheet("border:1px solid #000000;" f"background-color: {color}")
+        self.button.setStyleSheet(f"border:1px solid #000000;background-color: {color}")
         self.button.update()
 
     def convert_three_digit_hex_to_six(self):

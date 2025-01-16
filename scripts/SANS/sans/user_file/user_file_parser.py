@@ -68,7 +68,7 @@ def extract_range(to_extract, converter):
     entries_string = to_extract.split()
     number_of_entries = len(entries_string)
     if number_of_entries != 2:
-        raise RuntimeError("Expected a range defined by two numbers," " but instead received {0}".format(number_of_entries))
+        raise RuntimeError("Expected a range defined by two numbers, but instead received {0}".format(number_of_entries))
 
     return [converter(entries_string[0]), converter(entries_string[1])]
 
@@ -104,7 +104,7 @@ def extract_float_range_midpoint_and_steps(to_extract, separator):
     entries_string = [element for element in entries_string if element != ""]
     number_of_entries = len(entries_string)
     if number_of_entries != 5:
-        raise RuntimeError("Expected a range defined by 5 numbers," " but instead received {0}".format(number_of_entries))
+        raise RuntimeError("Expected a range defined by 5 numbers, but instead received {0}".format(number_of_entries))
 
     return [
         convert_string_to_float(entries_string[0]),
@@ -785,7 +785,7 @@ class LimitParser(UserFileComponentParser):
         else:
             # v2 GUI cannot currently support complex QXY ranges
             # output = self._extract_complex_pattern(qxy_range, LimitsId.qxy)
-            raise ValueError("QXY Limits: The expression {0} is currently not supported." " Use a simple pattern".format(line))
+            raise ValueError("QXY Limits: The expression {0} is currently not supported. Use a simple pattern".format(line))
         return output
 
     def _extract_wavelength_limit(self, line):
@@ -795,7 +795,7 @@ class LimitParser(UserFileComponentParser):
         else:
             # This is not implemented in the old parser, hence disable here
             # output = self._extract_complex_pattern(wavelength_range, LimitsId.wavelength)
-            raise ValueError("Wavelength Limits: The expression {0} is currently not supported." " Use a simple pattern.".format(line))
+            raise ValueError("Wavelength Limits: The expression {0} is currently not supported. Use a simple pattern.".format(line))
         return output
 
     def _extract_simple_pattern(self, simple_range_input, tag):
@@ -1097,7 +1097,7 @@ class MaskParser(UserFileComponentParser):
             output = {MaskId.LINE: mask_line(width=line_values[0], angle=line_values[1], x=line_values[2], y=line_values[3])}
         else:
             raise ValueError(
-                "MaskParser: Line mask accepts wither 2 or 4 parameters," " but {0} parameters were passed in.".format(length_values)
+                "MaskParser: Line mask accepts wither 2 or 4 parameters, but {0} parameters were passed in.".format(length_values)
             )
         return output
 
@@ -2237,7 +2237,7 @@ class MonParser(UserFileComponentParser):
         length_string = re.sub(self._length, "", line)
         length_entries = extract_float_list(length_string, separator=" ")
         if len(length_entries) != 2:
-            raise RuntimeError("MonParser: Length setting needs 2 numeric parameters, " "but received {0}.".format(len(length_entries)))
+            raise RuntimeError("MonParser: Length setting needs 2 numeric parameters, but received {0}.".format(len(length_entries)))
         return {MonId.LENGTH: monitor_length(length=length_entries[0], spectrum=length_entries[1], interpolate=interpolate)}
 
     def _extract_direct(self, line, original_line):
@@ -2569,7 +2569,7 @@ class UserFileParser(object):
                 continue
 
         # We have encountered an unknown file specifier.
-        raise ValueError("UserFileParser: Unknown user " "file command: {0}".format(line))
+        raise ValueError("UserFileParser: Unknown user file command: {0}".format(line))
 
     def parse_line(self, line):
         # Clean the line of trailing white space

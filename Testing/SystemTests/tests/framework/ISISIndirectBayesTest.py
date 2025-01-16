@@ -337,7 +337,7 @@ class JumpFitFunctionTestBase(systemtesting.MantidSystemTest, metaclass=ABCMeta)
     @abstractmethod
     def get_reference_files(self):
         """Returns the name of the reference files to compare against."""
-        raise NotImplementedError("Implmenent get_reference_files to return " "the names of the files to compare against.")
+        raise NotImplementedError("Implmenent get_reference_files to return the names of the files to compare against.")
 
     def runTest(self):
         # Load file

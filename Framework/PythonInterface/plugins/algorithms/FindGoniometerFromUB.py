@@ -86,7 +86,7 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
             defaultValue=1,
             validator=IntListValidator([-1, 1]),
             direction=Direction.Input,
-            doc="Handedness for the phi angles (rotation around goniometer axis) in the" " log file (1 for ccw/RH, -1 for cw/LH)",
+            doc="Handedness for the phi angles (rotation around goniometer axis) in the log file (1 for ccw/RH, -1 for cw/LH)",
         )
         self.declareProperty(
             name="PhiLogName",
@@ -100,7 +100,7 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
             defaultValue=0.0,
             direction=Direction.Input,
             validator=FloatBoundedValidator(lower=0.0, upper=180.0),
-            doc="omega rotation between component of goniometer axis in XY-plane from +ve Y-axis" "(perpendicular to ki)",
+            doc="omega rotation between component of goniometer axis in XY-plane from +ve Y-axis(perpendicular to ki)",
         )
         self.declareProperty(
             name="OmegaHand",

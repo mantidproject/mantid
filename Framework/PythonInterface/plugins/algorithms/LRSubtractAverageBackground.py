@@ -41,7 +41,7 @@ class LRSubtractAverageBackground(PythonAlgorithm):
         self.declareProperty(
             "ErrorWeighting",
             False,
-            "If True, a weighted average is used to to estimate the background. " "Otherwise, a simple average is used.",
+            "If True, a weighted average is used to to estimate the background. Otherwise, a simple average is used.",
         )
         detector_list = ["2D-Detector", "LinearDetector"]
         self.declareProperty("TypeOfDetector", "2D-Detector", StringListValidator(detector_list), doc="The type of detector used")

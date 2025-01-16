@@ -205,7 +205,7 @@ class AlgorithmTest(unittest.TestCase):
     def test_with_workspace_types(self):
         ws = CreateSampleWorkspace(
             Function="User Defined",
-            UserDefinedFunction="name=LinearBackground, A0=0.3;name=Gaussian, " "PeakCentre=5, Height=10, Sigma=0.7",
+            UserDefinedFunction="name=LinearBackground, A0=0.3;name=Gaussian, PeakCentre=5, Height=10, Sigma=0.7",
             NumBanks=1,
             BankPixelWidth=1,
             XMin=0,

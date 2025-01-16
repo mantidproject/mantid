@@ -53,10 +53,10 @@ OutputBundle = namedtuple("OutputBundle", "state, data_type, reduction_mode, out
 # 4. Handle to the partial output workspace which contains the counts.
 # 5. Handle to the partial output workspace which contains the normalization.
 
-OutputPartsBundle = namedtuple("OutputPartsBundle", "state, data_type, reduction_mode, " "output_workspace_count, output_workspace_norm")
+OutputPartsBundle = namedtuple("OutputPartsBundle", "state, data_type, reduction_mode, output_workspace_count, output_workspace_norm")
 
 OutputTransmissionBundle = namedtuple(
-    "OutputTransmissionBundle", "state, data_type, calculated_transmission_workspace," " unfitted_transmission_workspace"
+    "OutputTransmissionBundle", "state, data_type, calculated_transmission_workspace, unfitted_transmission_workspace"
 )
 
 # Bundles for event slice data

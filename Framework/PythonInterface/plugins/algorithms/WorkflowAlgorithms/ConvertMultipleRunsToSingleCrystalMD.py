@@ -93,7 +93,7 @@ class ConvertMultipleRunsToSingleCrystalMD(DataProcessorAlgorithm):
         )
         self.declareProperty(
             ITableWorkspaceProperty("ApplyCalibration", "", optional=PropertyMode.Optional, direction=Direction.Input),
-            doc="Calibration will be applied using this TableWorkspace using " ":ref:`ApplyCalibration <algm-ApplyCalibration>`.",
+            doc="Calibration will be applied using this TableWorkspace using :ref:`ApplyCalibration <algm-ApplyCalibration>`.",
         )
         self.declareProperty(
             FileProperty(name="DetCal", defaultValue="", action=FileAction.OptionalLoad, extensions=[".detcal"]),

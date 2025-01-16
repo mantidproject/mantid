@@ -65,7 +65,7 @@ def flipping_ratio_correction(workspace_name):
     try:
         mtd[nsf_workspace_name]
     except KeyError:
-        raise_error(f"Flipping ratio correction is selected, but no " f"matching nsf workspace found for {workspace_name}")
+        raise_error(f"Flipping ratio correction is selected, but no matching nsf workspace found for {workspace_name}")
         return False
     sf_field_name = sf_workspace_name[-4:]
     nsf_field_name = nsf_workspace_name[-5:]
@@ -77,7 +77,7 @@ def flipping_ratio_correction(workspace_name):
         mtd[nicr_sf_field_name]  # pylint: disable=pointless-statement
         mtd[nicr_nsf_field_name]  # pylint: disable=pointless-statement
     except KeyError:
-        raise_error(f"Flipping ratio correction is selected, but no " f"matching NiCr workspace found for {workspace_name}")
+        raise_error(f"Flipping ratio correction is selected, but no matching NiCr workspace found for {workspace_name}")
         return False
     new_nicr_sf = DivideMD(mtd[nicr_sf_field_name], mtd[nicr_sf_field_norm_name])
     new_nicr_nsf = DivideMD(mtd[nicr_nsf_field_name], mtd[nicr_nsf_field_norm_name])
@@ -192,7 +192,7 @@ def vanadium_correction(workspace_name, binning, vana_set=None, ignore_vana_fiel
             vana_sum = sum(vana_list)
             vana_sum_norm = sum(norm_list)
         else:
-            raise_error("Need to give vanadium dataset explicit if you want all" " vanadium files to be added.")
+            raise_error("Need to give vanadium dataset explicit if you want all vanadium files to be added.")
     elif sum_vana_sf_nsf:
         polarization = field_name.split("_")[0]
         vana_nsf_name = "_".join(("vana", polarization, "nsf"))
@@ -306,9 +306,7 @@ def remove_special_values_ws(ws):
     with 0.
     """
     logger.warning(
-        f"Warning: 'nan' and 'inf' values in the Workspace "
-        f"{ws} have been replaced by 0 upon a call of the "
-        f"vanadium_correction() function."
+        f"Warning: 'nan' and 'inf' values in the Workspace {ws} have been replaced by 0 upon a call of the vanadium_correction() function."
     )
     mask_ws = ~((ws > -np.inf) & (ws < np.inf))
     SetMDUsingMask(InputWorkspace=ws, OutputWorkspace=ws, Value="0", MaskWorkspace=mask_ws)

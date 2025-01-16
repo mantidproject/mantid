@@ -35,7 +35,7 @@ def move_component(component_name, state: AllStates, move_type, workspace, is_tr
 
     if move_type is MoveTypes.ELEMENTARY_DISPLACEMENT:
         if not beam_coordinates or len(beam_coordinates) == 0:
-            raise ValueError("Beam coordinates were not specified. An elementary displacement " "requires beam coordinates.")
+            raise ValueError("Beam coordinates were not specified. An elementary displacement requires beam coordinates.")
         mover.move_with_elementary_displacement(workspace, beam_coordinates, parsed_component_name)
 
     elif move_type is MoveTypes.INITIAL_MOVE:
@@ -45,7 +45,7 @@ def move_component(component_name, state: AllStates, move_type, workspace, is_tr
         mover.set_to_zero(workspace, parsed_component_name)
 
     else:
-        raise ValueError("move_sans_instrument_component: The selection {0} for the  move type " "is unknown".format(str(move_type)))
+        raise ValueError("move_sans_instrument_component: The selection {0} for the  move type is unknown".format(str(move_type)))
 
 
 def _get_coordinates(component_name, state):

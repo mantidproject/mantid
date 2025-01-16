@@ -734,8 +734,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             defaultValue=17,
             direction=Direction.Input,
             validator=IntBoundedValidator(lower=3),
-            doc="Number of column components in the window around a peak on the detector. "
-            "For WISH column components correspond to tubes.",
+            doc="Number of column components in the window around a peak on the detector. For WISH column components correspond to tubes.",
         )
         self.declareProperty(
             name="BackscatteringTOFResolution",
@@ -775,7 +774,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             name="NFWHM",
             defaultValue=4,
             direction=Direction.Input,
-            doc="Initial TOF window is NFWHM x FWHM of the BackToBackExponential peak at that " "position",
+            doc="Initial TOF window is NFWHM x FWHM of the BackToBackExponential peak at that position",
         )
         not_use_B2B_exp_params = EnabledWhenProperty("GetTOFWindowFromBackToBackParams", PropertyCriterion.IsDefault)
         self.setPropertySettings("BackscatteringTOFResolution", not_use_B2B_exp_params)
@@ -920,7 +919,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         # plotting
         self.declareProperty(
             FileProperty("OutputFile", "", FileAction.OptionalSave, ".pdf"),
-            "Optional file path in which to write diagnostic plots (note this will slow the " "execution of algorithm).",
+            "Optional file path in which to write diagnostic plots (note this will slow the execution of algorithm).",
         )
         self.setPropertyGroup("OutputFile", "Plotting")
         # Corrections
@@ -935,7 +934,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         # Output
         self.declareProperty(
             IPeaksWorkspaceProperty(name="OutputWorkspace", defaultValue="", direction=Direction.Output),
-            doc="The output PeaksWorkspace will be a copy of the input PeaksWorkspace with the" " integrated intensities.",
+            doc="The output PeaksWorkspace will be a copy of the input PeaksWorkspace with the integrated intensities.",
         )
 
     def validateInputs(self):
@@ -970,7 +969,7 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
             # check at least first peak in workspace has back to back params
             if not inst.getComponentByName(pk_ws.column("BankName")[0]).hasParameter("B"):
                 issues["GetTOFWindowFromBackToBackParams"] = (
-                    "Workspace doesn't have back to back exponential " "coefficients defined in the parameters.xml file."
+                    "Workspace doesn't have back to back exponential coefficients defined in the parameters.xml file."
                 )
 
         return issues

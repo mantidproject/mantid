@@ -75,7 +75,7 @@ class LeadPressureCalc(PythonAlgorithm):
             name="TargetPressure",
             defaultValue=0.0,
             validator=FloatBoundedValidator(lower=0),
-            doc="Optional: search for (111) position for a given pressure (GPa) and temperature, " "leave at default value to disable.",
+            doc="Optional: search for (111) position for a given pressure (GPa) and temperature, leave at default value to disable.",
         )
         self.declareProperty(
             ITableWorkspaceProperty(name="OutputWorkspace", direction=Direction.Output, defaultValue="LeadPressureCalcResults"),

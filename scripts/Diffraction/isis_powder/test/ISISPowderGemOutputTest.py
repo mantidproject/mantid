@@ -31,7 +31,7 @@ class ISISPowderGemOutputTest(unittest.TestCase):
             try:
                 shutil.rmtree(folder)
             except OSError as exc:
-                warnings.warn('Could not remove folder at "{}"\n' "Error message:\n{}".format(folder, exc))
+                warnings.warn('Could not remove folder at "{}"\nError message:\n{}'.format(folder, exc))
 
     def test_valid_save(self):
         path_to_ipf = self._find_file_or_die(self.IPF_FILE)

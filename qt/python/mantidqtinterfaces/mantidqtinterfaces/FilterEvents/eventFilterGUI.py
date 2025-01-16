@@ -1026,7 +1026,7 @@ class MainWindow(QMainWindow):
 
             mantidqt.interfacemanager.InterfaceManager().showCustomInterfaceHelp("Filter Events", "utility")
         except ImportError:
-            url = "http://docs.mantidproject.org/nightly/interfaces/{}.html" "".format("Filter Events")
+            url = "http://docs.mantidproject.org/nightly/interfaces/{}.html".format("Filter Events")
             QDesktopServices.openUrl(QUrl(url))
 
     def connect_signals(self):

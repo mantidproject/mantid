@@ -99,9 +99,9 @@ def generate_mask_file(file_path, ll_corner, ur_corner, rectangular=True, num_de
     """
     # check
     assert isinstance(file_path, str), "File path must be a string but not a %s." % str(type(file_path))
-    assert (
-        len(ll_corner) == 2 and len(ur_corner) == 2
-    ), "Left corner and right corner coordinates must be 2-tuple but not of size {0} or {1}".format(len(ll_corner), len(ur_corner))
+    assert len(ll_corner) == 2 and len(ur_corner) == 2, (
+        "Left corner and right corner coordinates must be 2-tuple but not of size {0} or {1}".format(len(ll_corner), len(ur_corner))
+    )
 
     if num_det_row is None:
         num_det_row = NUM_DET_ROW
@@ -542,7 +542,7 @@ def get_step_motor_parameters(log_value_vector):
     std_dev = numpy.std(log_value_vector)
 
     step_vector = log_value_vector[1:] - log_value_vector[:-1]
-    assert len(step_vector) > 0, "Log value vector size = %d. Step vector size = 0 is not allowed." "" % len(log_value_vector)
+    assert len(step_vector) > 0, "Log value vector size = %d. Step vector size = 0 is not allowed." % len(log_value_vector)
     step_dev = numpy.std(step_vector)
     step = sum(step_vector) / len(step_vector)
 
@@ -562,7 +562,7 @@ def get_merged_md_name(instrument_name, exp_no, scan_no, pt_list):
     # check
     assert isinstance(instrument_name, str)
     assert isinstance(exp_no, int) and isinstance(scan_no, int)
-    assert isinstance(pt_list, list), "Pt list {0} must be a list but not a {1}" "".format(pt_list, type(pt_list))
+    assert isinstance(pt_list, list), "Pt list {0} must be a list but not a {1}".format(pt_list, type(pt_list))
 
     if len(pt_list) == 0:
         raise RuntimeError("Pt number list {0} cannot be empty.", pt_list)
@@ -583,12 +583,12 @@ def get_merged_hkl_md_name(instrument_name, exp_no, scan_no, pt_list):
     :return:
     """
     # check
-    assert isinstance(instrument_name, str), "Instrument name {0} shall be a string but not a {1}" "".format(
+    assert isinstance(instrument_name, str), "Instrument name {0} shall be a string but not a {1}".format(
         instrument_name, type(instrument_name)
     )
-    assert isinstance(exp_no, int) and isinstance(
-        scan_no, int
-    ), "Both experiment number {0} ({1}) and scan number {2} ({3}) shall be integer.".format(exp_no, type(exp_no), scan_no, type(scan_no))
+    assert isinstance(exp_no, int) and isinstance(scan_no, int), (
+        "Both experiment number {0} ({1}) and scan number {2} ({3}) shall be integer.".format(exp_no, type(exp_no), scan_no, type(scan_no))
+    )
     assert isinstance(pt_list, list), "Pt list {0} shall be a list but not a {1}".format(pt_list, type(pt_list))
     if len(pt_list) == 0:
         raise RuntimeWarning("Pt list cannot be empty.")
@@ -846,8 +846,8 @@ def write_pre_process_record(file_name, record_dict):
     :return:
     """
     # check input
-    assert isinstance(file_name, str), "Record file name {0} must be a string but not a {1}." "".format(file_name, type(file_name))
-    assert isinstance(record_dict, dict), "One entry of record {0} must be given in a dictionary but not a {1}." "".format(
+    assert isinstance(file_name, str), "Record file name {0} must be a string but not a {1}.".format(file_name, type(file_name))
+    assert isinstance(record_dict, dict), "One entry of record {0} must be given in a dictionary but not a {1}.".format(
         record_dict, type(record_dict)
     )
 
@@ -947,7 +947,7 @@ def read_pre_process_record(file_name):
     :return: a dictionary
     """
     # check input
-    assert isinstance(file_name, str), "Record file name {0} must be a string but not a {1}." "".format(file_name, type(file_name))
+    assert isinstance(file_name, str), "Record file name {0} must be a string but not a {1}.".format(file_name, type(file_name))
     if os.path.exists(file_name) is False:
         raise RuntimeError("Pre-processed scan record file {0} does not exist.".format(file_name))
 

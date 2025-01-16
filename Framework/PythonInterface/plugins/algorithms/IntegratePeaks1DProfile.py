@@ -526,7 +526,7 @@ class PeakFitter:
         # assume constant scale factor between FWHM and width parameter
         width_par_name = peak_func.getWidthParameterName()
         scale_factor = peak_func.getParameterValue(width_par_name) / peak_func.fwhm()
-        peak_func.addConstraints(f"{self.min_fwhm*scale_factor}<{width_par_name}<{self.max_fwhm*scale_factor}")
+        peak_func.addConstraints(f"{self.min_fwhm * scale_factor}<{width_par_name}<{self.max_fwhm * scale_factor}")
 
     def fit_spectrum(self, profile_func, ispec):
         return self.exec_fit(ispec, Function=str(profile_func), **self.fit_kwargs)

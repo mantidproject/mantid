@@ -51,7 +51,7 @@ class ProjectTest(unittest.TestCase):
             try:
                 shutil.rmtree(folder)
             except OSError as exc:
-                warnings.warn('Could not remove folder at "{}"\n' "Error message:\n{}".format(folder, exc))
+                warnings.warn('Could not remove folder at "{}"\nError message:\n{}'.format(folder, exc))
         self._folders_to_remove.clear()
 
     def test_save_calls_save_as_when_last_location_is_not_none(self):

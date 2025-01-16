@@ -67,7 +67,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
         return "GSASIIRefineFitPeaks"
 
     def summary(self):
-        return "Perform Rietveld or Pawley refinement of lattice parameters on a diffraction spectrum " "using GSAS-II scriptable API"
+        return "Perform Rietveld or Pawley refinement of lattice parameters on a diffraction spectrum using GSAS-II scriptable API"
 
     def validateInputs(self):
         errors = {}
@@ -200,7 +200,7 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
             name=self.PROP_SUPPRESS_GSAS_OUTPUT,
             defaultValue=False,
             direction=Direction.Input,
-            doc="Set to True to prevent GSAS run info from being " "printed (not recommended, but can be useful for debugging)",
+            doc="Set to True to prevent GSAS run info from being printed (not recommended, but can be useful for debugging)",
         )
 
     def PyExec(self):

@@ -110,7 +110,7 @@ class MultiFileEditor(PluginWidget):
                 try:
                     self.open_file_in_new_tab(filepath)
                 except IOError as io_error:
-                    logger.warning("Could not load file:\n  '{}'" "".format(io_error))
+                    logger.warning("Could not load file:\n  '{}'".format(io_error))
 
     def get_plugin_title(self):
         return "Editor"
@@ -144,7 +144,7 @@ class MultiFileEditor(PluginWidget):
             try:
                 self.open_file_in_new_tab(filepath, startup)
             except IOError as io_error:
-                logger.warning("Could not load file:\n  {}" "".format(io_error))
+                logger.warning("Could not load file:\n  {}".format(io_error))
 
     def open_script_in_new_tab(self, content):
         self.editors.append_new_editor(content=content)

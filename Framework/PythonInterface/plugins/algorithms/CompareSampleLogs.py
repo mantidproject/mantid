@@ -58,7 +58,7 @@ class CompareSampleLogs(PythonAlgorithm):
         )
         self.declareProperty(
             "Result",
-            "A string that will be empty if all the logs match, " "otherwise will contain a comma separated list of  not matching logs",
+            "A string that will be empty if all the logs match, otherwise will contain a comma separated list of  not matching logs",
             Direction.Output,
         )
 

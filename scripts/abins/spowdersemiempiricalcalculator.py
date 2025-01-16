@@ -208,7 +208,7 @@ class SPowderSemiEmpiricalCalculator:
         if isinstance(progress_reporter, (Progress, type(None))):
             self._progress_reporter = progress_reporter
         else:
-            raise TypeError("Progress reporter type should be mantid.api.Progress. " "If unavailable, use None.")
+            raise TypeError("Progress reporter type should be mantid.api.Progress. If unavailable, use None.")
 
     @staticmethod
     def _report_progress(msg: str, reporter: Union[None, Progress] = None, notice: bool = False) -> None:
@@ -256,7 +256,7 @@ class SPowderSemiEmpiricalCalculator:
             return self._calculate_s_powder_2d()
         else:
             raise ValueError(
-                'Instrument "{}" is not recognised, cannot perform semi-empirical ' "powder averaging.".format(self._instrument.get_name())
+                'Instrument "{}" is not recognised, cannot perform semi-empirical powder averaging.'.format(self._instrument.get_name())
             )
 
     def _calculate_s_powder_2d(self) -> SData:

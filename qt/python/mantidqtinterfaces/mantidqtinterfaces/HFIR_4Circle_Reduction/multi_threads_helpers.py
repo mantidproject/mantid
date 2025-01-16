@@ -34,7 +34,7 @@ class AddPeaksThread(QThread):
         # check
         assert main_window is not None, "Main window cannot be None"
         assert isinstance(exp_number, int), "Experiment number must be an integer."
-        assert isinstance(scan_number_list, list), "Scan number list must be a list but not %s." "" % str(type(scan_number_list))
+        assert isinstance(scan_number_list, list), "Scan number list must be a list but not %s." % str(type(scan_number_list))
 
         # init thread
         super(AddPeaksThread, self).__init__()
@@ -143,19 +143,19 @@ class IntegratePeaksThread(QThread):
         # check
         assert main_window is not None, "Main window cannot be None"
         assert isinstance(exp_number, int), "Experiment number must be an integer."
-        assert isinstance(scan_tuple_list, list), "Scan (info) tuple list must be a list but not %s." "" % str(type(scan_tuple_list))
-        assert isinstance(mask_det, bool), "Parameter mask_det must be a boolean but not %s." "" % str(type(mask_det))
+        assert isinstance(scan_tuple_list, list), "Scan (info) tuple list must be a list but not %s." % str(type(scan_tuple_list))
+        assert isinstance(mask_det, bool), "Parameter mask_det must be a boolean but not %s." % str(type(mask_det))
         assert isinstance(mask_name, str), "Name of mask must be a string but not %s." % str(type(mask_name))
-        assert isinstance(norm_type, str), "Normalization type must be a string but not %s." "" % str(type(norm_type))
-        assert (
-            isinstance(num_pt_bg_left, int) and num_pt_bg_left >= 0
-        ), "Number of Pt at left for background {0} must be non-negative integers but not of type {1}.".format(
-            num_pt_bg_left, type(num_pt_bg_left)
+        assert isinstance(norm_type, str), "Normalization type must be a string but not %s." % str(type(norm_type))
+        assert isinstance(num_pt_bg_left, int) and num_pt_bg_left >= 0, (
+            "Number of Pt at left for background {0} must be non-negative integers but not of type {1}.".format(
+                num_pt_bg_left, type(num_pt_bg_left)
+            )
         )
-        assert (
-            isinstance(num_pt_bg_right, int) and num_pt_bg_right >= 0
-        ), "Number of Pt at right for background {0} must be non-negative integers but not of type {1}.".format(
-            num_pt_bg_right, type(num_pt_bg_right)
+        assert isinstance(num_pt_bg_right, int) and num_pt_bg_right >= 0, (
+            "Number of Pt at right for background {0} must be non-negative integers but not of type {1}.".format(
+                num_pt_bg_right, type(num_pt_bg_right)
+            )
         )
 
         # set values
@@ -222,7 +222,7 @@ class IntegratePeaksThread(QThread):
                 # continue to
                 if status:
                     # successfully merge peak
-                    assert isinstance(merged_ws_name, str), "Merged workspace %s must be a string but not %s." "" % (
+                    assert isinstance(merged_ws_name, str), "Merged workspace %s must be a string but not %s." % (
                         str(merged_ws_name),
                         type(merged_ws_name),
                     )
@@ -374,11 +374,11 @@ class MergePeaksThread(QThread):
         # check
         assert main_window is not None, "Main window cannot be None"
         assert isinstance(exp_number, int), "Experiment number must be an integer."
-        assert isinstance(scan_number_list, list), "Scan (info) tuple list {0} must be a list but not {1}." "".format(
+        assert isinstance(scan_number_list, list), "Scan (info) tuple list {0} must be a list but not {1}.".format(
             scan_number_list, type(scan_number_list)
         )
         assert isinstance(md_file_list, list) or md_file_list is None, (
-            "Output MDWorkspace file name list {0} " "must be either a list or None but not {1}.".format(md_file_list, type(md_file_list))
+            "Output MDWorkspace file name list {0} must be either a list or None but not {1}.".format(md_file_list, type(md_file_list))
         )
 
         if md_file_list is not None and len(scan_number_list) != len(md_file_list):
@@ -494,7 +494,7 @@ class MergePeaksThread(QThread):
         :return:
         """
         # check
-        assert isinstance(option_to_use, bool), "Option to use pre-process must be a boolean but not a {0}." "".format(type(option_to_use))
+        assert isinstance(option_to_use, bool), "Option to use pre-process must be a boolean but not a {0}.".format(type(option_to_use))
 
         self._checkPreprocessedScans = option_to_use
 

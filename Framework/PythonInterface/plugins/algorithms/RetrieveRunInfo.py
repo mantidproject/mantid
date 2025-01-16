@@ -119,7 +119,7 @@ class RetrieveRunInfo(PythonAlgorithm):
         # Ensure workspace does not already exist.
         output_ws_name = self.getPropertyValue("OutputWorkspace")
         if mtd.doesExist(output_ws_name):
-            raise ValueError('Workspace "' + output_ws_name + '" already ' "exists. Either delete it, or choose another workspace name.")
+            raise ValueError('Workspace "' + output_ws_name + '" already exists. Either delete it, or choose another workspace name.')
 
         # Check that all run files are available.
         run_string = self.getPropertyValue("Runs")

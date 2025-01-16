@@ -178,7 +178,7 @@ def add_actions(target, actions):
         elif isinstance(action, QAction):
             target.addAction(action)
         else:
-            raise ValueError("Unexpected action type. " "Expected one of (QAction,QMenu) but found '{}'".format(type(action)))
+            raise ValueError("Unexpected action type. Expected one of (QAction,QMenu) but found '{}'".format(type(action)))
 
 
 def toQSettings(settings):

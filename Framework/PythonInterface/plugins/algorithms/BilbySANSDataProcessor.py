@@ -92,7 +92,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
         self.declareProperty(
             name="FitMethod",
             defaultValue="log",
-            doc="Function to use to fit transmission; can be Linear," " Log, Polynomial (first letter shall be capital)",
+            doc="Function to use to fit transmission; can be Linear, Log, Polynomial (first letter shall be capital)",
         )
 
         self.declareProperty(
@@ -107,17 +107,17 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
 
         self.declareProperty(
             FloatArrayProperty("BinningWavelength", direction=Direction.Input, validator=FloatArrayMandatoryValidator()),
-            doc="Wavelength boundaries for reduction: a comma separated list of first bin boundary," " width, last bin boundary",
+            doc="Wavelength boundaries for reduction: a comma separated list of first bin boundary, width, last bin boundary",
         )
 
         self.declareProperty(
             FloatArrayProperty("BinningWavelengthTransm", direction=Direction.Input, validator=FloatArrayMandatoryValidator()),
-            doc="Wavelengths boundaries for transmission binning: a comma separated list of first bin" " boundary, width, last bin",
+            doc="Wavelengths boundaries for transmission binning: a comma separated list of first bin boundary, width, last bin",
         )
 
         self.declareProperty(
             FloatArrayProperty("BinningQ", direction=Direction.Input, validator=FloatArrayMandatoryValidator()),
-            doc="Output Q-boundaries: a comma separated list of first bin boundary," " width, last bin boundary",
+            doc="Output Q-boundaries: a comma separated list of first bin boundary, width, last bin boundary",
         )
 
         self.declareProperty(name="Timemode", defaultValue=True, doc="If data collected in ToF or monochromatic mode")
@@ -154,7 +154,7 @@ class BilbySANSDataProcessor(DataProcessorAlgorithm):
 
         self.declareProperty(
             MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
-            doc="Name of the workspace that contains the result of the calculation. " "Created automatically.",
+            doc="Name of the workspace that contains the result of the calculation. Created automatically.",
         )
 
         self.declareProperty(

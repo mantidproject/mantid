@@ -38,7 +38,7 @@ class PoldiMerge(PythonAlgorithm):
         self.declareProperty(
             "CheckInstruments",
             True,
-            "If checked, only workspaces with equal" "instrument parameters are merged." "Do not disable without a very good reason.",
+            "If checked, only workspaces with equalinstrument parameters are merged.Do not disable without a very good reason.",
         )
 
     def PyExec(self):

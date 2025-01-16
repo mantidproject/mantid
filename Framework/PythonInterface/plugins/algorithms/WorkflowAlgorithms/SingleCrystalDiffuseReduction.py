@@ -93,7 +93,7 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         self.declareProperty(
             "ReuseSAFlux",
             True,
-            "If True then if a previous SolidAngle and Flux has been loaded " "it will be reused otherwise it will be loaded.",
+            "If True then if a previous SolidAngle and Flux has been loaded it will be reused otherwise it will be loaded.",
         )
         self.declareProperty(
             FileProperty(name="SolidAngle", defaultValue="", action=FileAction.Load, extensions=[".nxs"]),
@@ -141,11 +141,11 @@ class SingleCrystalDiffuseReduction(DataProcessorAlgorithm):
         )
         self.declareProperty(
             ITableWorkspaceProperty("ApplyCalibration", "", optional=PropertyMode.Optional, direction=Direction.Input),
-            doc="Calibration will be applied using this TableWorkspace using " ":ref:`ApplyCalibration <algm-ApplyCalibration>`.",
+            doc="Calibration will be applied using this TableWorkspace using :ref:`ApplyCalibration <algm-ApplyCalibration>`.",
         )
         self.declareProperty(
             FileProperty(name="DetCal", defaultValue="", action=FileAction.OptionalLoad, extensions=[".detcal"]),
-            "Load an ISAW DetCal calibration onto the data from a file. " "See :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>`",
+            "Load an ISAW DetCal calibration onto the data from a file. See :ref:`LoadIsawDetCal <algm-LoadIsawDetCal>`",
         )
         self.declareProperty(
             MatrixWorkspaceProperty("CopyInstrumentParameters", "", optional=PropertyMode.Optional, direction=Direction.Input),

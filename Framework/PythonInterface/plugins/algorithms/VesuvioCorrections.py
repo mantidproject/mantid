@@ -94,7 +94,7 @@ class VesuvioCorrections(VesuvioBase):
 
         self.declareProperty(
             ITableWorkspaceProperty("FitParameters", "", direction=Direction.Input, optional=PropertyMode.Optional),
-            doc="Table containing the calculated fit parameters" "for the data in the workspace",
+            doc="Table containing the calculated fit parametersfor the data in the workspace",
         )
 
         input_group = "Input Options"
@@ -112,7 +112,7 @@ class VesuvioCorrections(VesuvioBase):
 
         self.declareProperty(
             PropertyManagerProperty("MassIndexToSymbolMap", {}, direction=Direction.Input),
-            doc="A map from the index of the mass in the Masses" " property to a chemical symbol.",
+            doc="A map from the index of the mass in the Masses property to a chemical symbol.",
         )
 
         self.declareProperty(
@@ -137,7 +137,7 @@ class VesuvioCorrections(VesuvioBase):
         self.declareProperty(
             "IntensityConstraints",
             "",
-            doc="A semi-colon separated list of intensity " "constraints defined as lists e.g " "[0,1,0,-4];[1,0,-2,0]",
+            doc="A semi-colon separated list of intensity constraints defined as lists e.g [0,1,0,-4];[1,0,-2,0]",
         )
 
         self.declareProperty(
@@ -161,7 +161,7 @@ class VesuvioCorrections(VesuvioBase):
         )
 
         self.declareProperty(
-            "ContainerScale", 0.0, doc="Scale factor to apply to container, set to 0 for " "automatic scale based on linear fit"
+            "ContainerScale", 0.0, doc="Scale factor to apply to container, set to 0 for automatic scale based on linear fit"
         )
 
         container_group = "Container Options"
@@ -177,7 +177,7 @@ class VesuvioCorrections(VesuvioBase):
         self.declareProperty(
             "GammaBackgroundScale",
             0.0,
-            doc="Scale factor to apply to gamma background, set to 0 " "for automatic scale based on linear fit",
+            doc="Scale factor to apply to gamma background, set to 0 for automatic scale based on linear fit",
         )
 
         gamma_group = "Gamma Correction Options"
@@ -249,17 +249,17 @@ class VesuvioCorrections(VesuvioBase):
 
         self.declareProperty(
             WorkspaceGroupProperty("CorrectionWorkspaces", "", direction=Direction.Output, optional=PropertyMode.Optional),
-            doc="Workspace group containing correction intensities " "for each correction",
+            doc="Workspace group containing correction intensities for each correction",
         )
 
         self.declareProperty(
             WorkspaceGroupProperty("CorrectedWorkspaces", "", direction=Direction.Output, optional=PropertyMode.Optional),
-            doc="Workspace group containing individual corrections " "applied to raw data",
+            doc="Workspace group containing individual corrections applied to raw data",
         )
 
         self.declareProperty(
             ITableWorkspaceProperty("LinearFitResult", "", direction=Direction.Output, optional=PropertyMode.Optional),
-            doc="Table workspace containing the fit parameters used to" "linearly fit the corrections to the data",
+            doc="Table workspace containing the fit parameters used tolinearly fit the corrections to the data",
         )
 
         self.declareProperty(

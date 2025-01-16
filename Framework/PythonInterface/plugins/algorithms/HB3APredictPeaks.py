@@ -98,7 +98,7 @@ class HB3APredictPeaks(PythonAlgorithm):
         if not isinstance(input_ws, IMDWorkspace):
             issues["InputWorkspace"] = "The InputWorkspace must be an IMDWorkspace."
         elif input_ws.getSpecialCoordinateSystem().name != "QSample":
-            issues["InputWorkspace"] = "Input workspace expected to be in QSample, " "workspace is in '{}'".format(
+            issues["InputWorkspace"] = "Input workspace expected to be in QSample, workspace is in '{}'".format(
                 input_ws.getSpecialCoordinateSystem().name
             )
         elif input_ws.getNumDims() != 3:

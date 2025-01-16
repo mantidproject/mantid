@@ -324,9 +324,7 @@ class ComputeIncoherentDOS(PythonAlgorithm):
     def absoluteUnits(self, atoms):
         absunits = self.getProperty("StatesPerEnergy").value
         if absunits and len(atoms) != 1:
-            self.log().warning(
-                "Sample material information not set, or sample is not a pure element. " "Ignoring StatesPerEnergy property."
-            )
+            self.log().warning("Sample material information not set, or sample is not a pure element. Ignoring StatesPerEnergy property.")
             absunits = False
         return absunits
 

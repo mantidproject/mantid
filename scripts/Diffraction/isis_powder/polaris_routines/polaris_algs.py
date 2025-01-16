@@ -219,7 +219,7 @@ def apply_placzek_correction_per_bank(
     self_scattering_correction = mantid.GroupWorkspaces(InputWorkspaces=ws_group_list)
     self_scattering_correction = mantid.RebinToWorkspace(WorkspaceToRebin=self_scattering_correction, WorkspaceToMatch=focused_ws)
     if not compare_ws_compatibility(focused_ws, self_scattering_correction):
-        raise RuntimeError("To use create_total_scattering_pdf you need to run focus with " "do_van_normalisation=true first.")
+        raise RuntimeError("To use create_total_scattering_pdf you need to run focus with do_van_normalisation=true first.")
     focused_ws = mantid.Subtract(LHSWorkspace=focused_ws, RHSWorkspace=self_scattering_correction)
     return focused_ws
 

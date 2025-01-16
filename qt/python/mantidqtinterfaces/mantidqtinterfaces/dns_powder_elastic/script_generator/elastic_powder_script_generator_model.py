@@ -70,12 +70,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     def _get_sep_save_string(self, sample, sample_type):
         lines = ""
         if self._ascii:
-            lines += (
-                f"SaveAscii('mat_{sample}_{sample_type}', "
-                f"'{self._export_path}/{sample}_{sample_type}.csv', "
-                "WriteSpectrumID=False)"
-                ""
-            )
+            lines += f"SaveAscii('mat_{sample}_{sample_type}', '{self._export_path}/{sample}_{sample_type}.csv', WriteSpectrumID=False)"
         if self._nexus:
             lines += f"\nSaveNexus('mat_{sample}_{sample_type}', '{self._export_path}/{sample}_{sample_type}.nxs')"
         return lines
@@ -140,9 +135,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
     def _get_header_lines():
         lines = [
             "from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic import load_all, background_subtraction",
-            "from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder"
-            "_elastic import "
-            "vanadium_correction, flipping_ratio_correction",
+            "from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic import vanadium_correction, flipping_ratio_correction",
             "from mantidqtinterfaces.dns_powder_elastic.scripts.md_powder_elastic import non_magnetic_separation, xyz_separation",
             "from mantid.simpleapi import ConvertMDHistoToMatrixWorkspace, mtd",
             "from mantid.simpleapi import SaveAscii, SaveNexus",
@@ -231,7 +224,7 @@ class DNSElasticPowderScriptGeneratorModel(DNSScriptGeneratorModel):
 
     def _get_nexus_save_string(self):
         if self._nexus:
-            return f"{self._spacing}SaveNexus" "('mat_{}'.format(workspace), " f"'{self._export_path}/" "{}.nxs'.format(" "workspace))"
+            return f"{self._spacing}SaveNexus('mat_{{}}'.format(workspace), '{self._export_path}/{{}}.nxs'.format(workspace))"
         return ""
 
     def _get_convert_to_matrix_lines(self, save_string):

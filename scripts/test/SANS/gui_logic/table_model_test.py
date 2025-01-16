@@ -237,9 +237,9 @@ class TableModelTest(unittest.TestCase):
             {
                 "WavelengthMin": "The min value of the wavelength when converting from TOF.",
                 "WavelengthMax": "The max value of the wavelength when converting from TOF.",
-                "PhiMin": "The min angle of the detector to accept." " Anti-clockwise from horizontal.",
-                "PhiMax": "The max angle of the detector to accept." " Anti-clockwise from horizontal.",
-                "UseMirror": "True or False. Whether or not to accept phi angle" " in opposing quadrant",
+                "PhiMin": "The min angle of the detector to accept. Anti-clockwise from horizontal.",
+                "PhiMax": "The max angle of the detector to accept. Anti-clockwise from horizontal.",
+                "UseMirror": "True or False. Whether or not to accept phi angle in opposing quadrant",
                 "MergeScale": "The scale applied to the HAB when merging",
                 "MergeShift": "The shift applied to the HAB when merging",
                 "EventSlices": "The event slices to reduce."

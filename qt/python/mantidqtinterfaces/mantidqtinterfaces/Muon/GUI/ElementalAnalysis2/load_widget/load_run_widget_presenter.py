@@ -215,7 +215,7 @@ class LoadRunWidgetPresenterEA(object):
             self.updated_directory.notify_subscribers(self._model._directory)
             self._view.notify_loading_finished()
         except ValueError:
-            self._view.warning_popup("Attempting to co-add data with different time bins. " "This is not currently supported.")
+            self._view.warning_popup("Attempting to co-add data with different time bins. This is not currently supported.")
             self._view.reset_run_edit_from_cache()
         except RuntimeError as error:
             self._view.warning_popup(error)

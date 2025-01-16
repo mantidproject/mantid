@@ -75,7 +75,7 @@ class HB3AIntegrateDetectorPeaks(PythonAlgorithm):
             direction=Direction.Input,
             defaultValue=2,
             validator=IntBoundedValidator(lower=0, exclusive=True),
-            doc="Controls integration range (+/- WidthScale/2*FWHM) defined around motor positions " "for CountsWithFitting method",
+            doc="Controls integration range (+/- WidthScale/2*FWHM) defined around motor positions for CountsWithFitting method",
         )
         self.setPropertySettings("WidthScale", EnabledWhenProperty("Method", PropertyCriterion.IsEqualTo, "CountsWithFitting"))
 

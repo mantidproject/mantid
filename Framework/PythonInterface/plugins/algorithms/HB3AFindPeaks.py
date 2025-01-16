@@ -92,13 +92,13 @@ class HB3AFindPeaks(PythonAlgorithm):
         # assumed to be True)
         self.declareProperty("MaxPeaks", 1000, doc="Maximum number of peaks to find.")
         self.declareProperty(
-            "PeakDistanceThreshold", 0.25, doc="Threshold distance for rejecting peaks that are found " "to be too close from each other"
+            "PeakDistanceThreshold", 0.25, doc="Threshold distance for rejecting peaks that are found to be too close from each other"
         )
         # Having this number too low will likely cause FindUBUsingFFT to fail since not enough peaks will be found
         self.declareProperty(
             "DensityThresholdFactor",
             2000.0,
-            doc="Scaling factor which the overall signal density will be multiplied by to determine " "a threshold for determining peaks.",
+            doc="Scaling factor which the overall signal density will be multiplied by to determine a threshold for determining peaks.",
         )
 
         self.declareProperty(
@@ -154,7 +154,7 @@ class HB3AFindPeaks(PythonAlgorithm):
             ):
                 issues["InputWorkspace"] = "Workspace need to be a MDWorkspace"
             elif AnalysisDataService[input_ws].getSpecialCoordinateSystem().name != "QSample":
-                issues["InputWorkspace"] = "Input workspace expected to be in QSample, " "workspace is in '{}'".format(
+                issues["InputWorkspace"] = "Input workspace expected to be in QSample, workspace is in '{}'".format(
                     AnalysisDataService[input_ws].getSpecialCoordinateSystem().name
                 )
             elif AnalysisDataService[input_ws].getNumDims() != 3:
