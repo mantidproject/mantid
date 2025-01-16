@@ -325,7 +325,7 @@ public:
 
     InstrumentData instData("instrument", "analyser", "reflection");
 
-    auto configuredAlg = m_model->energyTransferAlgorithm(instData, runData, "label");
+    auto configuredAlg = m_model->energyTransferAlgorithm(instData, runData, "outputGroupName", "label");
     auto &runtimeProps = configuredAlg->getAlgorithmRuntimeProps();
     TS_ASSERT_EQUALS("instrument", runtimeProps.getPropertyValue("Instrument"));
     TS_ASSERT_EQUALS("analyser", runtimeProps.getPropertyValue("Analyser"));

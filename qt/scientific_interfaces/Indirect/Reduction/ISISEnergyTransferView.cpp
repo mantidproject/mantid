@@ -102,6 +102,8 @@ IOutputPlotOptionsView *IETView::getPlotOptionsView() const { return m_uiForm.ip
 
 std::string IETView::getFirstFilename() const { return m_uiForm.dsRunFiles->getFirstFilename().toStdString(); }
 
+std::string IETView::getInputText() const { return m_uiForm.dsRunFiles->getText().toStdString(); }
+
 bool IETView::isRunFilesValid() const { return m_uiForm.dsRunFiles->isValid(); }
 
 void IETView::validateCalibrationFileType(IUserInputValidator *uiv) const {

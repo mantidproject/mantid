@@ -112,7 +112,7 @@ void IETModel::setOutputProperties(IAlgorithmRuntimeProps &properties, IETOutput
   Mantid::API::AlgorithmProperties::update("OutputSuffix", outputLabel, properties);
 }
 
-std::string IETModel::getOutputGroupName(InstrumentData const &instData, std::string const &inputText) {
+std::string IETModel::getOutputGroupName(InstrumentData const &instData, std::string const &inputText) const {
   std::string instrument = instData.getInstrument();
   std::string analyser = instData.getAnalyser();
   std::string reflection = instData.getReflection();
@@ -120,8 +120,10 @@ std::string IETModel::getOutputGroupName(InstrumentData const &instData, std::st
   return instrument + inputText + "_" + analyser + "_" + reflection + "_Reduced";
 }
 
-MantidQt::API::IConfiguredAlgorithm_sptr
-IETModel::energyTransferAlgorithm(InstrumentData const &instData, IETRunData &runData, std::string const &outputLabel) {
+MantidQt::API::IConfiguredAlgorithm_sptr IETModel::energyTransferAlgorithm(InstrumentData const &instData,
+                                                                           IETRunData &runData,
+                                                                           std::string const &outputGroupName,
+                                                                           std::string const &outputLabel) {
   auto properties = runData.groupingProperties();
 
   setInstrumentProperties(*properties, instData);
@@ -131,7 +133,7 @@ IETModel::energyTransferAlgorithm(InstrumentData const &instData, IETRunData &ru
   setRebinProperties(*properties, runData.getRebinData());
   setAnalysisProperties(*properties, runData.getAnalysisData());
 
-  m_outputGroupName = getOutputGroupName(instData, runData.getInputData().getInputText());
+  m_outputGroupName = outputGroupName;
   setOutputProperties(*properties, runData.getOutputData(), m_outputGroupName, outputLabel);
 
   auto reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");

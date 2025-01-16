@@ -27,8 +27,10 @@ public:
   virtual std::vector<std::string> validateRunData(IETRunData const &runData) = 0;
   virtual std::vector<std::string> validatePlotData(IETPlotData const &plotData) = 0;
 
-  virtual MantidQt::API::IConfiguredAlgorithm_sptr
-  energyTransferAlgorithm(InstrumentData const &instData, IETRunData &runParams, std::string const &outputLabel) = 0;
+  virtual MantidQt::API::IConfiguredAlgorithm_sptr energyTransferAlgorithm(InstrumentData const &instData,
+                                                                           IETRunData &runParams,
+                                                                           std::string const &outputGroupName,
+                                                                           std::string const &outputLabel) = 0;
   virtual std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   plotRawAlgorithmQueue(InstrumentData const &instData, IETPlotData const &plotData) const = 0;
 
@@ -42,13 +44,14 @@ public:
                                                    std::string const &groupOption, bool const shouldGroup) = 0;
 
   virtual std::string outputGroupName() const = 0;
+  virtual std::string getOutputGroupName(InstrumentData const &instData, std::string const &inputFiles) const = 0;
   virtual std::vector<std::string> outputWorkspaceNames() const = 0;
 };
 
 class MANTIDQT_INDIRECT_DLL IETModel : public IIETModel {
 public:
   IETModel();
-  ~IETModel() = default;
+  ~IETModel() override = default;
 
   void setInstrumentProperties(IAlgorithmRuntimeProps &properties, InstrumentData const &instData) override;
 
@@ -57,6 +60,7 @@ public:
 
   MantidQt::API::IConfiguredAlgorithm_sptr energyTransferAlgorithm(InstrumentData const &instData,
                                                                    IETRunData &runParams,
+                                                                   std::string const &outputGroupName,
                                                                    std::string const &outputLabel) override;
   std::deque<MantidQt::API::IConfiguredAlgorithm_sptr>
   plotRawAlgorithmQueue(InstrumentData const &instData, IETPlotData const &plotData) const override;
@@ -79,7 +83,7 @@ public:
   void setAnalysisProperties(IAlgorithmRuntimeProps &properties, IETAnalysisData const &analysisData);
   void setOutputProperties(IAlgorithmRuntimeProps &properties, IETOutputData const &outputData,
                            std::string const &outputGroupName, std::string const &outputLabel);
-  std::string getOutputGroupName(InstrumentData const &instData, std::string const &inputFiles);
+  std::string getOutputGroupName(InstrumentData const &instData, std::string const &inputFiles) const override;
 
   [[nodiscard]] inline std::string outputGroupName() const noexcept override { return m_outputGroupName; }
 
