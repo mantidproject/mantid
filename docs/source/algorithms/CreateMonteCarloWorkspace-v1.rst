@@ -10,8 +10,6 @@ Description
 -----------
 The algorithm generates a simulated workspace by sampling from the probability
 distribution of input data, useful for testing of fitting functions and modeling.
-By generating a simulated dataset that mirrors the probability
-distribution of existing data.
 
 Usage
 -----
@@ -20,28 +18,29 @@ Usage
 
 .. testcode:: Create simulation and compare
 
+    # import mantid algorithms, numpy and matplotlib
     from mantid.simpleapi import *
-    from mantid.api import AnalysisDataService as ADS
     import matplotlib.pyplot as plt
+    import numpy as np
+    from mantid.api import FunctionFactory
 
-    # Create Sample Workspace and Run Simulation
-    ws = CreateSampleWorkspace(Random= True)
-    wsOut = CreateMonteCarloWorkspace(InputWorkspace= 'ws', Seed= 32, OutputWorkspace= "New")
+    func = FunctionWrapper(FunctionFactory.createInitialized("name=BackToBackExponential,I=25000,A=0.06,B=0.015,X0=30000,S=30;name=FlatBackground,A0=50"))
+    # create input workspace
+    x = np.linspace(29650.0, 30500.0, 201)
+    y = func(x)
+    e = np.sqrt(y)
+    ws = CreateWorkspace(DataX=x, DataY=y, DataE=e, UnitX="TOF")
+    # call algorithm
+    ws_mc = CreateMonteCarloWorkspace(InputWorkspace=ws, Seed=0)
 
-    # Plot both of the above
-    fig, axes = plt.subplots(edgecolor='#ffffff', num='New', subplot_kw={'projection': 'mantid'})
-    for data, color, label in [(ADS.retrieve('New'), '#1f77b4', 'New: spec 1'),
-                               (ADS.retrieve('ws'), '#ff7f0e', 'ws: spec 1')]:
-        axes.plot(data, color=color, label=label, wkspIndex=0)
-
-    axes.tick_params(axis='both', which='major', size=6, tickdir='out', width=1, gridOn=False, label1On=True)
-    axes.set(title='New', xlabel='Time-of-flight ($\\mu s$)', ylabel='Counts ($\\mu s$)$^{-1}$', ylim=[-0.00225, 0.04725])
-    axes.legend(fontsize=8.0).set_draggable(True)
-
+    fig, axes = plt.subplots(subplot_kw={'projection': 'mantid'})
+    axes.plot(ws, label='input', wkspIndex=0)
+    axes.plot(ws_mc, label='CreateMonteCarloWorkspace output', wkspIndex=0, alpha=0.75)
+    legend = axes.legend(fontsize=8.0).set_draggable(True).legend
     fig.show()
 
 
-.. image:: ../../../images/New.png
+.. image:: ../../../images/CreateMonteCarloWorkspace_spectrum.png
    :alt: Overplot of simulated data over input data
    :width: 500px
    :height: 400px

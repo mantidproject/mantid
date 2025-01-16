@@ -1,6 +1,6 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
-// Copyright &copy; 2024 ISIS Rutherford Appleton Laboratory UKRI,
+// Copyright &copy; 2025 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
@@ -57,9 +57,9 @@ void CreateMonteCarloWorkspace::init() {
   mustBePositive->setLower(0);
 
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "", Direction::Input),
-                  "Input Workspace containing data to be fitted");
+                  "Input Workspace containing data to be simulated");
   declareProperty("Seed", 32, mustBePositive,
-                  "Integer that initializes a random-number generator, good for reproducibility");
+                  "Integer seed that initialises the random-number generator, for reproducibility");
   declareProperty("MonteCarloEvents", 0, mustBePositive,
                   "Number of Monte Carlo events to simulate. Defaults to integral of input workspace if 0.");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>("OutputWorkspace", "", Direction::Output),
@@ -70,11 +70,11 @@ void CreateMonteCarloWorkspace::init() {
 
 Mantid::HistogramData::HistogramY CreateMonteCarloWorkspace::fillHistogramWithRandomData(const std::vector<double> &cdf,
                                                                                          int numIterations,
-                                                                                         int seed_input,
+                                                                                         int seedInput,
                                                                                          API::Progress &progress) {
 
   Mantid::HistogramData::HistogramY outputY(cdf.size(), 0.0);
-  std::mt19937 gen(seed_input);
+  std::mt19937 gen(seedInput);
   std::uniform_real_distribution<> dis(0.0, 1.0);
 
   int progressInterval = std::max(1, numIterations / 100); // Update progress every 1%
@@ -95,83 +95,58 @@ Mantid::HistogramData::HistogramY CreateMonteCarloWorkspace::fillHistogramWithRa
   return outputY;
 }
 
+/**
+ *  Compute a normalized CDF [0..1] from the given histogram data.
+ */
 std::vector<double> CreateMonteCarloWorkspace::computeNormalizedCDF(const Mantid::HistogramData::HistogramY &yData) {
   std::vector<double> cdf(yData.size());
   std::partial_sum(yData.begin(), yData.end(), cdf.begin());
-  double total_counts = cdf.back();
-  // Normalize the CDF
-  std::transform(cdf.begin(), cdf.end(), cdf.begin(), [total_counts](double val) { return val / total_counts; });
+  double totalCounts = cdf.back();
+
+  if (totalCounts > 0.0) {
+    // Normalize the CDF
+    std::transform(cdf.begin(), cdf.end(), cdf.begin(), [totalCounts](double val) { return val / totalCounts; });
+  } else {
+    g_log.warning("Total counts are zero; normalization skipped.");
+  }
   return cdf;
 }
 
-int CreateMonteCarloWorkspace::computeNumberOfIterations(const Mantid::HistogramData::HistogramY &yData,
-                                                         int userMCEvents) {
-  if (userMCEvents > 0) {
-    return userMCEvents;
-  }
-
-  // Default: Integral of Input
+/**
+ *  Determine how many iterations to use for MC sampling.
+ *  If userMCEvents > 0, use that directly; otherwise use the integral of the input data.
+ */
+int CreateMonteCarloWorkspace::integrateYData(const Mantid::HistogramData::HistogramY &yData) {
   double total_counts = std::accumulate(yData.begin(), yData.end(), 0.0);
   int iterations = static_cast<int>(std::round(total_counts));
 
   if (iterations == 0) {
     g_log.warning("Total counts in the input workspace round to 0. No Monte Carlo events will be generated.");
   }
-
   return iterations;
-}
-
-Mantid::HistogramData::HistogramY
-CreateMonteCarloWorkspace::scaleInputToMatchMCEvents(const Mantid::HistogramData::HistogramY &yData,
-                                                     int targetMCEvents) {
-  double total_counts = std::accumulate(yData.begin(), yData.end(), 0.0);
-  if (total_counts == 0) {
-    g_log.warning("Total counts in the input workspace are 0. Scaling cannot be performed.");
-    return yData;
-  }
-
-  double scaleFactor = static_cast<double>(targetMCEvents) / total_counts;
-  Mantid::HistogramData::HistogramY scaledY(yData.size());
-
-  std::transform(yData.begin(), yData.end(), scaledY.begin(),
-                 [scaleFactor](double count) { return count * scaleFactor; });
-
-  return scaledY;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
-
-// Using Cumulative Distribution Function
 void CreateMonteCarloWorkspace::exec() {
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
-  int seed_input = getProperty("Seed");
+  int seedInput = getProperty("Seed");
   int userMCEvents = getProperty("MonteCarloEvents");
 
-  MatrixWorkspace_sptr scaledWs = inputWs;
+  const auto &originalYData = inputWs->y(0); // Counts in each bin
 
-  const Mantid::HistogramData::HistogramY &originalYData = inputWs->y(0); // Counts in each bin
-  Mantid::HistogramData::HistogramY yData = originalYData;
+  int numIterations = (userMCEvents > 0) ? userMCEvents : integrateYData(originalYData);
 
-  // Scale input workspace if user has specified MC events
-  if (userMCEvents > 0) {
-    g_log.warning() << "Custom Monte Carlo events: " << userMCEvents << ". Input workspace scaled accordingly.\n";
-    yData = scaleInputToMatchMCEvents(originalYData, userMCEvents);
-  }
-
-  int numIterations = computeNumberOfIterations(yData, userMCEvents);
-
-  std::vector<double> cdf = computeNormalizedCDF(yData);
-  // Set up progress bar
-  API::Progress progress(this, 0.0, 1.0, 2);
+  API::Progress progress(this, 0.0, 1.0, 101);
   progress.report("Computing normalized CDF...");
+  std::vector<double> cdf = computeNormalizedCDF(originalYData);
 
   MatrixWorkspace_sptr outputWs = WorkspaceFactory::Instance().create(inputWs, 1);
-
-  // Copy the bin boundaries (X-values) from the input to the output
   outputWs->setSharedX(0, inputWs->sharedX(0));
-  Mantid::HistogramData::HistogramY outputY = fillHistogramWithRandomData(cdf, numIterations, seed_input, progress);
+
+  // Fill the bins with random data, following the distribution in the CDF
+  Mantid::HistogramData::HistogramY outputY = fillHistogramWithRandomData(cdf, numIterations, seedInput, progress);
   outputWs->mutableY(0) = outputY;
 
   // Calculate errors as the square root of the counts
