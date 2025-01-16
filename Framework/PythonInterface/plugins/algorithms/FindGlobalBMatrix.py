@@ -111,7 +111,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         # Find initial UB and use to index peaks in all runs
         prog_reporter.report(1, "Find initial UB for peak indexing")
 
-        self.find_initial_indexing(a, b, c, alpha, beta, gamma, ws_list)  # removes runs from ws_list if can't index
+        ws_list = self.find_initial_indexing(a, b, c, alpha, beta, gamma, ws_list)  # removes runs from ws_list if can't index
 
         # optimize the lattice parameters across runs (i.e. B matrix)
         prog_reporter.report(2, "Optimize B")
@@ -126,7 +126,7 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
         success = ier in [1, 2, 3, 4] and cov is not None  # cov is None when matrix is singular
         if success:
             # calculate errors
-            n_peaks = [self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=False)[0] for ws in ws_list]
+            n_peaks = [self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws, RoundHKLs=True, CommonUBForAll=True)[0] for ws in ws_list]
             dof = sum(n_peaks) - len(alatt0)
             err = np.sqrt(abs(np.diag(cov)) * (info["fvec"] ** 2).sum() / dof)
             for iws, wsname in enumerate(ws_list):
@@ -181,14 +181,19 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
 
         self.exec_child_alg("SetUB", Workspace=ws_list[iref], UB=ref_ub)
 
+        valid_ws_list = []
         # loop over the ws list
         for iws, cws in enumerate(ws_list):
             # if we are looking at the reference we can ignore
-            if iws != iref:
+            if iws == iref:
+                valid_ws_list.append(cws)
+            else:
                 # otherwise set ub
                 self.exec_child_alg("SetUB", Workspace=cws, UB=ref_ub)
-
-                if iws in ws_too_few_peaks:
+                # if it has enough peaks add to valid_ws_list
+                if iws not in ws_too_few_peaks:
+                    valid_ws_list.append(cws)
+                else:
                     # for the ws with fewer peaks than threshold, try and find some more by adjusting U slightly
                     self.exec_child_alg(
                         "FindUBUsingLatticeParameters",
@@ -205,22 +210,25 @@ class FindGlobalBMatrix(DataProcessorAlgorithm):
                     # if calculate transform is singular
                     if singular_transform:
                         logger.warning(f"Singular transform in make_UB_consistent, " f"{ws_list[iws]} removed")
-                        ws_list.pop(iws)
                     else:
                         nindexed = self.exec_child_alg("IndexPeaks", PeaksWorkspace=ws_list[iws], RoundHKLs=True, CommonUBForAll=False)[0]
-                        # if still too few, warn user and remove
-                        if nindexed < _MIN_NUM_INDEXED_PEAKS:
+                        # if now enough peaks, add to the list
+                        if nindexed > _MIN_NUM_INDEXED_PEAKS:
+                            valid_ws_list.append(cws)
+                        # otherwise warn the user
+                        else:
                             logger.warning(
                                 f"Fewer than the desired {_MIN_NUM_INDEXED_PEAKS} peaks were indexed for Workspace {iws}. "
                                 f"Workspace {iws} removed"
                             )
-                            ws_list.pop(iws)
-        if len(ws_list) < 2:
+        if len(valid_ws_list) < 2:
             if n_ws_indexed_by_ref_ub <= 1:
                 err_msg = "Reference UB failed to index peaks in any other run"
             else:
                 err_msg = "Not enough valid workspaces to run an optimisation"
             raise RuntimeError(err_msg)
+        else:
+            return valid_ws_list
 
     def evaluate_best_ref_UB(self, iws_potential_ref_ub, nindexed_ref, ws_list):
         indexed_peaks = np.zeros((len(iws_potential_ref_ub), len(ws_list)))
