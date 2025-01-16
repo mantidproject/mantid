@@ -222,10 +222,12 @@ class SaveINS(PythonAlgorithm):
                             sym_ops_dict[S3] = sym_key
                             W_dict[S3] = W1
                             w_dict[S3] = w1
+                        # bias toward identity
                         if np.linalg.det(W1) > np.linalg.det(W_dict[S3]):
                             sym_ops_dict[S3] = sym_key
                             W_dict[S3] = W1
                             w_dict[S3] = w1
+                        # bias toward origin
                         if np.linalg.norm(w1) < np.linalg.norm(w_dict[S3]):
                             sym_ops_dict[S3] = sym_key
                             W_dict[S3] = W1

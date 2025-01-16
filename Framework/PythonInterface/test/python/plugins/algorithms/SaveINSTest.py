@@ -140,12 +140,100 @@ class SaveINSTest(unittest.TestCase):
 
         self._assert_file_contents(output_file, expected_lines)
 
+    def test_save_ins_symmetry_Rbar3(self):
+        output_file = path.join(self._tmp_directory, "test5.ins")
+
+        SaveINS(InputWorkspace=self.ws, Filename=output_file, Spacegroup="R -3")
+
+        self.file_start = [
+            "TITL ws\n",
+            "REM This file was produced by mantid using SaveINS\n",
+            "CELL 1.0 7.6508 13.2431 11.6243 90.0000 104.1183 90.0000\n",
+            "ZERR 4 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000\n",
+            "LATT 3\n",
+            "SYMM -x+y,-x,z\n",
+            "SYMM -y,x-y,z\n",
+            "NEUT\n",
+        ]
+
+        expected_lines = [*self.file_start, "SFAC C H N O S\n", *self.file_end]
+
+        self._assert_line_in_file_contents(output_file, expected_lines)
+
+    def test_save_ins_symmetry_R3(self):
+        output_file = path.join(self._tmp_directory, "test6.ins")
+
+        SaveINS(InputWorkspace=self.ws, Filename=output_file, Spacegroup="R 3")
+
+        self.file_start = [
+            "TITL ws\n",
+            "REM This file was produced by mantid using SaveINS\n",
+            "CELL 1.0 7.6508 13.2431 11.6243 90.0000 104.1183 90.0000\n",
+            "ZERR 4 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000\n",
+            "LATT -3\n",
+            "SYMM -x+y,-x,z\n",
+            "SYMM -y,x-y,z\n",
+            "NEUT\n",
+        ]
+
+        expected_lines = [*self.file_start, "SFAC C H N O S\n", *self.file_end]
+
+        self._assert_line_in_file_contents(output_file, expected_lines)
+
+    def test_save_ins_symmetry_Iabar3d(self):
+        output_file = path.join(self._tmp_directory, "test7.ins")
+
+        SaveINS(InputWorkspace=self.ws, Filename=output_file, Spacegroup="I a -3 d")
+
+        self.file_start = [
+            "TITL ws\n",
+            "REM This file was produced by mantid using SaveINS\n",
+            "CELL 1.0 7.6508 13.2431 11.6243 90.0000 104.1183 90.0000\n",
+            "ZERR 4 0.0000 0.0000 0.0000 0.0000 0.0000 0.0000\n",
+            "LATT 2\n",
+            "SYMM -x+1/4,-z+1/4,-y+1/4\n",
+            "SYMM -x,-y+1/2,z\n",
+            "SYMM x+3/4,z+1/4,-y+1/4\n",
+            "SYMM -z+1/4,y+3/4,x+1/4\n",
+            "SYMM z,x,y\n",
+            "SYMM -x+1/2,y,-z\n",
+            "SYMM x,-y,-z+1/2\n",
+            "SYMM -y+1/4,-x+1/4,-z+1/4\n",
+            "SYMM -z+1/4,-y+1/4,-x+1/4\n",
+            "SYMM y,-z,-x+1/2\n",
+            "SYMM y+3/4,x+1/4,-z+1/4\n",
+            "SYMM -z,-x+1/2,y\n",
+            "SYMM y+1/4,-x+1/4,z+3/4\n",
+            "SYMM -x+1/4,z+3/4,y+1/4\n",
+            "SYMM -y+1/2,z,-x\n",
+            "SYMM -y,-z+1/2,x\n",
+            "SYMM y,z,x\n",
+            "SYMM z+3/4,y+1/4,-x+1/4\n",
+            "SYMM x+1/4,-z+1/4,y+3/4\n",
+            "SYMM z,-x,-y+1/2\n",
+            "SYMM -y+1/4,x+3/4,z+1/4\n",
+            "SYMM z+1/4,-y+1/4,x+3/4\n",
+            "SYMM -z+1/2,x,-y\n",
+            "NEUT\n",
+        ]
+
+        expected_lines = [*self.file_start, "SFAC C H N O S\n", *self.file_end]
+
+        self._assert_line_in_file_contents(output_file, expected_lines)
+
     def _assert_file_contents(self, filepath, expected_lines):
         with open(filepath, "r") as f:
             lines = f.readlines()
         self.assertEqual(len(lines), len(expected_lines))
         for iline, line in enumerate(lines):
             self.assertEqual(line, expected_lines[iline])
+
+    def _assert_line_in_file_contents(self, filepath, expected_lines):
+        with open(filepath, "r") as f:
+            lines = f.readlines()
+        self.assertEqual(len(lines), len(expected_lines))
+        for line in lines:
+            self.assertTrue(line in lines)
 
 
 if __name__ == "__main__":
