@@ -1,17 +1,11 @@
 include(GenerateExportHeader)
 function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
   string(TOUPPER "${TARGET_LIBRARY}" TARGET_NAME)
-  set(CUSTOM "\n")
-
   set(CUSTOM
-      "${CUSTOM}\
-#ifndef UNUSED_ARG\n\
-    #define UNUSED_ARG(x) (void) x;\n\
-#endif\n\n\
+      "\n\
 #ifndef ${TARGET_NAME}_DEPRECATED\n\
     #define ${TARGET_NAME}_DEPRECATED(func) MANTID_${TARGET_NAME}_DEPRECATED func\n\
-#endif\n\n\
-"
+#endif\n\n"
   )
 
   if(GENERATE_EXTERN)
@@ -26,9 +20,18 @@ function(GENERATE_MANTID_EXPORT_HEADER TARGET_LIBRARY GENERATE_EXTERN)
 // EXTERN_IMPORT is defined in MantidKernel/System.h\n
 #define EXTERN_MANTID_${TARGET_NAME} EXTERN_IMPORT\n\
 #endif /* ${TARGET_LIBRARY}_EXPORTS*/\n\n\
-#include <cstdint>
  "
     )
+  else()
+    # UNUSED_ARG is defined and cstdint is included in MantidKernel/System.h
+    set(CUSTOM
+        "${CUSTOM}\
+#ifndef UNUSED_ARG\n\
+    #define UNUSED_ARG(x) (void) x;\n\
+#endif\n\n\
+#include <cstdint>\n"
+    )
+
   endif(GENERATE_EXTERN)
 
   generate_export_header(
