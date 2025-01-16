@@ -87,6 +87,8 @@ def generate_suppressions(xml_tree: ET.ElementTree, old_source_root: str) -> Lis
 
     # Build list of suppression objects
     suppressions = []
+    # Create a separate list of internal cppcheck errors
+    internal_errors = []
     for error in errors:
         error_type = error.get("id")
         # checkersReport has no location
@@ -98,16 +100,26 @@ def generate_suppressions(xml_tree: ET.ElementTree, old_source_root: str) -> Lis
         file_path = location.get("file")
         file_path = file_path.replace(old_source_root, NEW_SOURCE_ROOT)
         line_number = int(location.get("line"))
-
-        suppressions.append(CppcheckSuppression(error_type=error_type, file_path=file_path, line_number=line_number))
+        if error_type == "internalError":
+            internal_errors.append(CppcheckSuppression(error_type=error_type, file_path=file_path, line_number=line_number))
+        else:
+            suppressions.append(CppcheckSuppression(error_type=error_type, file_path=file_path, line_number=line_number))
 
     # Sort the suppressions by file name and line number.
     suppressions.sort()
+    internal_errors.sort()
 
     # Convert to strings and remove any duplicates.
     suppression_strings = []
+
     for suppression in suppressions:
         suppression_string = suppression.suppression_string()
+        if suppression_string not in suppression_strings:
+            suppression_strings.append(suppression_string)
+
+    # Group the internal errors together so they can be moved out of the suppressions list easily.
+    for internal_error in internal_errors:
+        suppression_string = internal_error.suppression_string()
         if suppression_string not in suppression_strings:
             suppression_strings.append(suppression_string)
 
