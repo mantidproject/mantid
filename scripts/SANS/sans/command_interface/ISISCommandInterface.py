@@ -828,8 +828,9 @@ def WavRangeReduction(
                                               current detector
                                               before running this method. If front apply rescale+shift)
     @param resetSetup: if true reset setup at the end
-    @param saveAlgs: this named algorithm will be passed the name of the results workspace and filename (default = 'SaveRKH').
-        Pass a tuple of strings to save to multiple file formats
+    @param saveAlgs: A list of strings containing the names of the algorithms to save the data with (ex: saveAlgs=['SaveRKH']),
+                      it raises error if the algorithm name is not valid.
+    @param save_as_zero_error_free: Should the reduced workspaces contain zero errors or not
     @param out_fit_settings: An output parameter. It is used, specially when resetSetup is True, in order
                              to remember the 'scale and fit' of the fitting algorithm.
     @param output_name: name of the output workspace/file, if none is specified then one is generated internally.
@@ -904,7 +905,7 @@ def WavRangeReduction(
 
 def BatchReduce(
     filename,
-    format,
+    format=None,
     plotresults=False,
     saveAlgs=None,
     verbose=False,
