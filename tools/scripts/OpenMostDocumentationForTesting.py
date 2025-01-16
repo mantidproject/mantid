@@ -78,11 +78,9 @@ technique_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightl
 all_urls.extend(technique_urls)
 
 print("Crawling python api...")
-mantid_kernel_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/kernel/" "index.html", k_samples)
-mantid_geometry_urls = crawl_url_for_html_addons(
-    "http://docs.mantidproject.org/nightly/api/python/mantid/geometry/" "index.html", k_samples
-)
-mantid_api_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/api/" "index.html", k_samples)
+mantid_kernel_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/kernel/index.html", k_samples)
+mantid_geometry_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/geometry/index.html", k_samples)
+mantid_api_urls = crawl_url_for_html_addons("http://docs.mantidproject.org/nightly/api/python/mantid/api/index.html", k_samples)
 # Only one
 mantid_plots_urls = ["http://docs.mantidproject.org/nightly/api/python/mantid/plots/index.html"]
 

@@ -309,7 +309,7 @@ class SliceViewerModel(SliceViewerBaseModel):
             cen_vec = cen_vec + cens[ivec] * vectors[ivec]
         proj_str = (
             "("
-            + " ".join([f"{np.round(c,2)}+{np.round(x,2)}x" if abs(x) > 0 else f"{np.round(c,2)}" for c, x in zip(cen_vec, vectors[ix])])
+            + " ".join([f"{np.round(c, 2)}+{np.round(x, 2)}x" if abs(x) > 0 else f"{np.round(c, 2)}" for c, x in zip(cen_vec, vectors[ix])])
             + ")"
         )
         proj_str = proj_str.replace("+-", "-")
@@ -324,8 +324,8 @@ class SliceViewerModel(SliceViewerBaseModel):
                     pass
             else:
                 length = np.sqrt(np.sum(vec**2))
-            unit_str = f"in {np.round(length,2)} Ang^-1" if length is not None else "r.l.u."
-            xlab = proj_str if ivec == ix else f"u{ivec+1}"
+            unit_str = f"in {np.round(length, 2)} Ang^-1" if length is not None else "r.l.u."
+            xlab = proj_str if ivec == ix else f"u{ivec + 1}"
             vec_str = ",".join(str(v) for v in vec)
             projection_params[f"BasisVector{ivec}"] = ", ".join([xlab, unit_str, vec_str])
 

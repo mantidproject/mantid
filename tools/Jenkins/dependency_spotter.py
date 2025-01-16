@@ -52,7 +52,7 @@ def dependency_spotter(os_name: str, first_build: int, second_build: int, pipeli
     print("Files available for comparison:")
     if len(files_in_both_builds) > 0:
         for i, file in enumerate(files_in_both_builds):
-            print(f"{i+1}) {file}")
+            print(f"{i + 1}) {file}")
     else:
         print("None")
     print("")

@@ -127,7 +127,7 @@ class DNSViewTest(unittest.TestCase):
         self.view.set_state(state_dict)
         self.assertEqual(self.mock_sb.value(), 1)
 
-    @patch("mantidqtinterfaces.dns_powder_tof.data_structures." "dns_view.QMessageBox")
+    @patch("mantidqtinterfaces.dns_powder_tof.data_structures.dns_view.QMessageBox")
     def test_raise_error(self, mock_messagebox):
         self.view.raise_error("123", critical=False, info=False)
         mock_messagebox.assert_called_once()

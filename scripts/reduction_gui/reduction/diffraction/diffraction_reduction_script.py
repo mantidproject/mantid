@@ -51,7 +51,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         # Information output
         if self.facility_name is False:
             self.facility_name = "SNS"
-        dbmsg = "[SNS Powder Reduction]  Facility = %s,  Instrument = %s\n" "Auto-save Directory %s" % (
+        dbmsg = "[SNS Powder Reduction]  Facility = %s,  Instrument = %s\nAuto-save Directory %s" % (
             self.facility_name,
             self.instrument_name,
             mantidconfigdir,

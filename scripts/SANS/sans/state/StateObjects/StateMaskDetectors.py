@@ -56,7 +56,7 @@ def range_check(start, stop, invalid_dict, start_name, stop_name, general_name=N
             if a > b:
                 entry = validation_message(
                     "Incorrect start-stop bounds.",
-                    "Make sure the lower bound is smaller than the upper bound for {0}." "".format(general_name),
+                    "Make sure the lower bound is smaller than the upper bound for {0}.".format(general_name),
                     {start_name: start, stop_name: stop},
                 )
                 invalid_dict.update(entry)
@@ -198,7 +198,7 @@ class StateMaskDetectors(metaclass=JsonSerializable):
         )
 
         if is_invalid:
-            raise ValueError("StateMaskDetectors: The provided inputs are illegal. " "Please see: {0}".format(json.dumps(is_invalid)))
+            raise ValueError("StateMaskDetectors: The provided inputs are illegal. Please see: {0}".format(json.dumps(is_invalid)))
 
 
 class StateMask(metaclass=JsonSerializable):
@@ -244,7 +244,7 @@ class StateMask(metaclass=JsonSerializable):
             if self.radius_min > 0 and self.radius_max > 0 and (self.radius_min > self.radius_max):
                 entry = validation_message(
                     "Incorrect radius bounds.",
-                    "Makes sure that the lower radius bound is smaller than the" " upper radius bound.",
+                    "Makes sure that the lower radius bound is smaller than the upper radius bound.",
                     {"radius_min": self.radius_min, "radius_max": self.radius_max},
                 )
                 is_invalid.update(entry)
@@ -279,7 +279,7 @@ class StateMask(metaclass=JsonSerializable):
             value.validate()
 
         if is_invalid:
-            raise ValueError("StateMask: The provided inputs are illegal. " "Please see: {0}".format(json.dumps(is_invalid)))
+            raise ValueError("StateMask: The provided inputs are illegal. Please see: {0}".format(json.dumps(is_invalid)))
 
 
 class StateMaskSANS2D(StateMask):
@@ -415,5 +415,5 @@ def get_mask_builder(data_info):
         return StateMaskBuilder(data_info, StateMaskNoInst())
     else:
         raise NotImplementedError(
-            "StateMaskBuilder: Could not find any valid mask builder for the " "specified StateData object {0}".format(str(instrument))
+            "StateMaskBuilder: Could not find any valid mask builder for the specified StateData object {0}".format(str(instrument))
         )

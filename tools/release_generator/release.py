@@ -114,7 +114,7 @@ TECH_DOCS = [
     "reflectometry.rst",
 ]
 
-MANTID_DOI = "`doi: 10.5286/SOFTWARE/MANTID{version_maj_min} <https://dx.doi.org/10.5286/SOFTWARE/" "MANTID{version_maj_min}>`_"
+MANTID_DOI = "`doi: 10.5286/SOFTWARE/MANTID{version_maj_min} <https://dx.doi.org/10.5286/SOFTWARE/MANTID{version_maj_min}>`_"
 
 #################################################################################
 # Lists to help create the subfolders

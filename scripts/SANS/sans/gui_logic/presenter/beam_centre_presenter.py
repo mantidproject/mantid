@@ -211,7 +211,7 @@ class BeamCentrePresenter(object):
             if min_value >= max_value:
                 if self._view.run_button.isEnabled():
                     # Only post to logger once per disabling
-                    self._logger.notice("Minimum radius is larger than maximum radius. " "Cannot find beam centre with current settings.")
+                    self._logger.notice("Minimum radius is larger than maximum radius. Cannot find beam centre with current settings.")
                     self._view.run_button.setEnabled(False)
             else:
                 self._view.run_button.setEnabled(True)

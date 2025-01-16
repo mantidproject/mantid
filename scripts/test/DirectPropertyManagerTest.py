@@ -161,10 +161,10 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         range = propman.norm_mon_integration_range
         self.assertAlmostEqual(
-            range[0], 1000.0, 7, " Default integration min range on MARI should be as described in MARI_Parameters.xml " "file"
+            range[0], 1000.0, 7, " Default integration min range on MARI should be as described in MARI_Parameters.xml file"
         )
         self.assertAlmostEqual(
-            range[1], 2000.0, 7, " Default integration max range on MAPS should be as described in MARI_Parameters.xml " "file"
+            range[1], 2000.0, 7, " Default integration max range on MAPS should be as described in MARI_Parameters.xml file"
         )
 
         self.assertEqual(propman.ei_mon_spectra, (2, 3), " Default ei monitors on MARI should be as described in MARI_Parameters.xml file")
@@ -1195,7 +1195,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertTrue(defaults["is_mc"])
         # the algorithm sets up the properties but does not verifis if the prperties
         # are acceptable by the corrections algorithm
-        propman.abs_corr_info = "{is_mc: True, NumberOfWavelengthPoints: 200; MaxScatterPtAttempts=20, " "SparseInstrument=True}"
+        propman.abs_corr_info = "{is_mc: True, NumberOfWavelengthPoints: 200; MaxScatterPtAttempts=20, SparseInstrument=True}"
 
         propss = propman.abs_corr_info
         self.assertTrue(propss["is_mc"])

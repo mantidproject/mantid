@@ -199,8 +199,7 @@ class RunBilbyReduction:
             binning_wavelength_ini[2] > binning_wavelength_transmission[2]
         ):
             raise ValueError(
-                "Range for transmission binning shall be equal or wider than the range for the"
-                " sample wavelength binning (refer to line 94)"
+                "Range for transmission binning shall be equal or wider than the range for the sample wavelength binning (refer to line 94)"
             )
 
         # Binning for Q
@@ -214,7 +213,7 @@ class RunBilbyReduction:
         transmission_fit_ini = self.current_reduction_settings[0]["transmission_fit"]
         if (transmission_fit_ini != "Linear") and (transmission_fit_ini != "Log") and (transmission_fit_ini != "Polynomial"):
             raise ValueError(
-                "Check value of transmission_fit; it can be only" ' "Linear", "Log" or "Polynomial",' " first letter is mandatory capital"
+                'Check value of transmission_fit; it can be only "Linear", "Log" or "Polynomial", first letter is mandatory capital'
             )
 
         PolynomialOrder = self.current_reduction_settings[0]["PolynomialOrder"]
@@ -226,9 +225,7 @@ class RunBilbyReduction:
         wav_delta = 0.0  # set the value, needed for the "wavelengh_slices" function
 
         if self.reduce_2D:
-            print(
-                "2D reduction is performing. Q interval and number of points are taking into account;" " Q-binning intervals are ignored."
-            )
+            print("2D reduction is performing. Q interval and number of points are taking into account; Q-binning intervals are ignored.")
             number_data_points_2D = float(
                 self.retrieve_reduction_settings("2D_number_data_points", raise_exception=True, message="Number of points shall be given")
             )

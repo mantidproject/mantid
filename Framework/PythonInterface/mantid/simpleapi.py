@@ -163,8 +163,7 @@ def Load(*args, **kwargs):
     # then raise a more helpful error than what we would get from an algorithm
     if lhs[0] == 0 and "OutputWorkspace" not in kwargs:
         raise RuntimeError(
-            "Unable to set output workspace name. Please either assign the output of "
-            "Load to a variable or use the OutputWorkspace keyword."
+            "Unable to set output workspace name. Please either assign the output of Load to a variable or use the OutputWorkspace keyword."
         )
 
     lhs_args = _get_args_from_lhs(lhs, algm)
@@ -246,7 +245,7 @@ def StartLiveData(*args, **kwargs):
     # Check for any properties that aren't known and warn they will not be used
     for key in list(final_keywords.keys()):
         if key not in algm:
-            logger.warning("You've passed a property (%s) to StartLiveData() " "that doesn't apply to this Instrument." % key)
+            logger.warning("You've passed a property (%s) to StartLiveData() that doesn't apply to this Instrument." % key)
             del final_keywords[key]
 
     set_properties(algm, **final_keywords)
@@ -450,7 +449,7 @@ def CutMD(*args, **kwargs):  # noqa: C901
     # Ensure the output names we were given are valid
     if handling_multiple_workspaces:
         if not isinstance(out_names, list):
-            raise RuntimeError("Multiple OutputWorkspaces must be given as a list when" " processing multiple InputWorkspaces.")
+            raise RuntimeError("Multiple OutputWorkspaces must be given as a list when processing multiple InputWorkspaces.")
     else:
         # We wrap in a list for our convenience. The user must not pass us one though.
         if not isinstance(out_names, list):
@@ -1340,7 +1339,7 @@ try:
         logger.information("Path to plugins manifest is empty. The python plugins will not be loaded.")
     elif not os.path.exists(plugins_manifest_path):
         logger.warning(
-            "The path to the python plugins manifest is invalid. The built in python plugins will " "not be loaded into the simpleapi."
+            "The path to the python plugins manifest is invalid. The built in python plugins will not be loaded into the simpleapi."
         )
     else:
         with open(plugins_manifest_path) as manifest:

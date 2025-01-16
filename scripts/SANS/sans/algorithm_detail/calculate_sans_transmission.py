@@ -216,7 +216,7 @@ def _get_corrected_wavelength_workspace(workspace, wav_range, detector_ids, calc
 
     # Make sure that we still have spectra in the workspace
     if workspace.getNumberHistograms() == 0:
-        raise RuntimeError("SANSCalculateTransmissionCorrection: The transmission workspace does " "not seem to have any spectra.")
+        raise RuntimeError("SANSCalculateTransmissionCorrection: The transmission workspace does not seem to have any spectra.")
 
     # ----------------------------------
     # Perform the prompt peak correction

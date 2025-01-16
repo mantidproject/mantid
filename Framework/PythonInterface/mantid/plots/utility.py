@@ -213,7 +213,7 @@ def zoom_axis(ax, coord, x_or_y, factor):
     :param float factor: The factor by which to zoom in, a factor less than 1 zooms out
     """
     if x_or_y.lower() not in ["x", "y"]:
-        raise ValueError("Can only zoom on axis 'x' or 'y'. Found '{}'." "".format(x_or_y))
+        raise ValueError("Can only zoom on axis 'x' or 'y'. Found '{}'.".format(x_or_y))
     get_lims = getattr(ax, "get_{}lim".format(x_or_y.lower()))
     set_lims = getattr(ax, "set_{}lim".format(x_or_y.lower()))
 

@@ -60,10 +60,10 @@ def run_cylinder_absorb_corrections(ws_to_correct, multiple_scattering, sample_d
     # Get the underlying material object
     if not sample_details_obj.is_material_set():
         raise RuntimeError(
-            "The material for this sample has not been set yet. Please call" " set_material on the SampleDetails object to set the material"
+            "The material for this sample has not been set yet. Please call set_material on the SampleDetails object to set the material"
         )
     if multiple_scattering and not is_vanadium:
-        raise NotImplementedError("Multiple scattering absorption corrections are not yet implemented for " "anisotropic samples")
+        raise NotImplementedError("Multiple scattering absorption corrections are not yet implemented for anisotropic samples")
     ws_to_correct = _calculate__cylinder_absorb_corrections(
         ws_to_correct=ws_to_correct,
         multiple_scattering=multiple_scattering,

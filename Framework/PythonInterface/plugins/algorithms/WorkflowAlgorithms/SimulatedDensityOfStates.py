@@ -90,7 +90,7 @@ class SimulatedDensityOfStates(PythonAlgorithm):
 
         self.declareProperty(
             StringArrayProperty("Ions", Direction.Input),
-            doc="List of Ions to use to calculate partial density of states." "If left blank, total density of states will be calculated",
+            doc="List of Ions to use to calculate partial density of states. If left blank, total density of states will be calculated",
         )
 
         self.declareProperty(name="SumContributions", defaultValue=False, doc="Sum the partial density of states into a single workspace.")

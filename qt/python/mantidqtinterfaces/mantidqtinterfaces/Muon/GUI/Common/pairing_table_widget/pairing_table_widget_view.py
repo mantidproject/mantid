@@ -119,12 +119,10 @@ class PairingTableView(QtWidgets.QWidget):
         )
         self.pairing_table.horizontalHeaderItem(1).setToolTip("Group 1 of the pair, selected from the grouping table")
         self.pairing_table.horizontalHeaderItem(2).setToolTip("Group 2 of the pair, selected from the grouping table")
-        self.pairing_table.horizontalHeaderItem(3).setToolTip(
-            "The value of Alpha for the pair asymmetry:" "\n   - The number must be >= 0.0"
-        )
+        self.pairing_table.horizontalHeaderItem(3).setToolTip("The value of Alpha for the pair asymmetry:\n   - The number must be >= 0.0")
 
         self.pairing_table.horizontalHeaderItem(4).setToolTip("Whether to include this pair in the analysis")
-        self.pairing_table.horizontalHeaderItem(5).setToolTip("Replace the current value of Alpha with one estimated" " from the data.")
+        self.pairing_table.horizontalHeaderItem(5).setToolTip("Replace the current value of Alpha with one estimated from the data.")
 
     def subscribe(self, presenter):
         self._presenter = presenter

@@ -200,7 +200,7 @@ class DNSFileSelectorPresenter(DNSObserver):
             self.view.set_state(self.param_dict.get(self.name, {}))
             not_found = self.model.check_by_file_numbers(file_numbers)
             if not_found:
-                print(f"Of {len(file_numbers)} loaded checked " f"file numbers {not_found} were not found " "in list of datafiles")
+                print(f"Of {len(file_numbers)} loaded checked file numbers {not_found} were not found in list of datafiles")
 
     def _clear_data_trees(self):
         self.model.sample_data_tree_model.clear_scans()

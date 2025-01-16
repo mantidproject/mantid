@@ -71,7 +71,7 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
         self.presenter._change_log(False)
         self.view.set_y_scale.assert_called_once_with("linear")
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.plot." "elastic_powder_plot_presenter." "DNSElasticPowderPlotPresenter._plot")
+    @patch("mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_presenter.DNSElasticPowderPlotPresenter._plot")
     def test_change_linestyle(self, mock_plot):
         self.presenter._change_line_style()
         self.assertEqual(self.presenter._line_style, 0)
@@ -81,7 +81,7 @@ class DNSElasticPowderPlotPresenterTest(unittest.TestCase):
         self.presenter._change_line_style()
         self.assertEqual(self.presenter._line_style, 2)
 
-    @patch("mantidqtinterfaces.dns_powder_elastic.plot." "elastic_powder_plot_presenter." "DNSElasticPowderPlotPresenter._plot")
+    @patch("mantidqtinterfaces.dns_powder_elastic.plot.elastic_powder_plot_presenter.DNSElasticPowderPlotPresenter._plot")
     def test_change_errorbar(self, mock_plot):
         self.presenter._change_error_bar()
         self.assertEqual(self.presenter._error_bar, 0)

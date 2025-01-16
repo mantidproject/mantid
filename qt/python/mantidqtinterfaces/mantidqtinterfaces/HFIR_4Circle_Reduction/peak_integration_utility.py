@@ -50,7 +50,7 @@ def calculate_motor_step(motor_pos_array, motor_step_tolerance=0.5):
     :param motor_pos_array:
     :return:
     """
-    assert isinstance(motor_pos_array, numpy.ndarray), "Motor positions {0} must be given as a numpy array but not " "a {1}.".format(
+    assert isinstance(motor_pos_array, numpy.ndarray), "Motor positions {0} must be given as a numpy array but not a {1}.".format(
         motor_pos_array, type(motor_pos_array)
     )
 
@@ -83,8 +83,8 @@ def calculate_peak_intensity_gauss(gauss_a, gauss_sigma, error_a_sq=None, error_
         # calculate integral intensity error by propagation
         # check
         assert isinstance(error_a_sq, float), "Error(a)**2 must be a float but not a {0}.".format(type(error_a_sq))
-        assert isinstance(error_sigma_sq, float), "Error(sigma)**2 must be a float but not a {0}." "".format(type(error_sigma_sq))
-        assert isinstance(error_a_sigma, float), "Error(a,sigma) must be a float but not a {0}." "".format(type(error_a_sigma))
+        assert isinstance(error_sigma_sq, float), "Error(sigma)**2 must be a float but not a {0}.".format(type(error_sigma_sq))
+        assert isinstance(error_a_sigma, float), "Error(a,sigma) must be a float but not a {0}.".format(type(error_a_sigma))
         # calculate
         error2 = gauss_a**2 * error_sigma_sq + error_a_sq * gauss_sigma**2 + 2.0 * gauss_a * gauss_sigma * error_a_sigma
         error = numpy.sqrt(error2)
@@ -103,8 +103,8 @@ def calculate_penalty(model_vec_y, exp_vec_y):
     :return:
     """
     # check inputs
-    assert isinstance(model_vec_y, numpy.ndarray), "Model vec Y cannot be {0}." "".format(type(model_vec_y))
-    assert isinstance(exp_vec_y, numpy.ndarray), "Experimental vec Y cannot be {0}." "".format(type(exp_vec_y))
+    assert isinstance(model_vec_y, numpy.ndarray), "Model vec Y cannot be {0}.".format(type(model_vec_y))
+    assert isinstance(exp_vec_y, numpy.ndarray), "Experimental vec Y cannot be {0}.".format(type(exp_vec_y))
     if model_vec_y.shape != exp_vec_y.shape or len(model_vec_y) <= 1:
         raise RuntimeError("Model and experimental data array do not match! Or too short!")
 
@@ -171,12 +171,12 @@ def estimate_background(pt_intensity_dict, bg_pt_list):
     :return:
     """
     # Check
-    assert isinstance(pt_intensity_dict, dict), "Peak (Pt) intensities {0} must be given by dictionary but not {1}." "".format(
+    assert isinstance(pt_intensity_dict, dict), "Peak (Pt) intensities {0} must be given by dictionary but not {1}.".format(
         pt_intensity_dict, type(pt_intensity_dict)
     )
-    assert (isinstance(bg_pt_list, tuple) or isinstance(bg_pt_list, list)) and len(
-        bg_pt_list
-    ) > 0, "background points {0} must be a 2-element tuple or list but not a {1}.".format(bg_pt_list, type(bg_pt_list))
+    assert (isinstance(bg_pt_list, tuple) or isinstance(bg_pt_list, list)) and len(bg_pt_list) > 0, (
+        "background points {0} must be a 2-element tuple or list but not a {1}.".format(bg_pt_list, type(bg_pt_list))
+    )
 
     # from bg_pt_list
     bg_sum = 0.0
@@ -314,9 +314,7 @@ def fit_gaussian_linear_background(vec_x, vec_y, vec_e, start_value_list=None, f
 
     # starting value
     if isinstance(start_value_list, list):
-        assert len(start_value_list) == 4, "If specified, there must be 4 values: a, x0, sigma and b but not {0}." "".format(
-            start_value_list
-        )
+        assert len(start_value_list) == 4, "If specified, there must be 4 values: a, x0, sigma and b but not {0}.".format(start_value_list)
     elif find_start_value_by_fit:
         # find out the starting value by fit a Gaussian without background
         fit1_coeff, fit1_cov_matrix = curve_fit(gaussian, vec_x, vec_y)
@@ -352,10 +350,10 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
     :return: 3-tuple: dictionary for fitted parameter, dictionary for fitting error, covariance matrix
     """
     # check inputs
-    assert isinstance(motor_pos_dict, dict), "Input motor position {0} must be a dictionary but not a {1}." "".format(
+    assert isinstance(motor_pos_dict, dict), "Input motor position {0} must be a dictionary but not a {1}.".format(
         motor_pos_dict, type(motor_pos_dict)
     )
-    assert isinstance(integrated_pt_dict, dict), "Input integrated Pt. intensity {0} must be a dictionary but not a " "{1}.".format(
+    assert isinstance(integrated_pt_dict, dict), "Input integrated Pt. intensity {0} must be a dictionary but not a {1}.".format(
         integrated_pt_dict, type(integrated_pt_dict)
     )
 
@@ -368,7 +366,7 @@ def fit_motor_intensity_model(motor_pos_dict, integrated_pt_dict):
 
     for pt in pt_list:
         if pt not in integrated_pt_dict:
-            raise RuntimeError("Pt. {0} does not exist in integrated intensity dictionary {1}" "".format(pt, integrated_pt_dict))
+            raise RuntimeError("Pt. {0} does not exist in integrated intensity dictionary {1}".format(pt, integrated_pt_dict))
         list_motor_pos.append(motor_pos_dict[pt])
         list_intensity.append(integrated_pt_dict[pt])
     # END-FOR
@@ -438,7 +436,7 @@ def get_motor_step_for_intensity(motor_pos_dict):
     pt_list = motor_pos_dict.keys()
     pt_list.sort()
     if len(pt_list) < 2:
-        raise RuntimeError("Motor position dictionary has too few Pt (FYI: Motor positions: {0}" "".format(motor_pos_dict))
+        raise RuntimeError("Motor position dictionary has too few Pt (FYI: Motor positions: {0}".format(motor_pos_dict))
 
     # get step dictionary
     motor_step_dict = dict()
@@ -522,10 +520,10 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
     :return:
     """
     # check input
-    assert isinstance(parameter_dict, dict), "Parameters {0} must be given as a dictionary but not a {1}." "".format(
+    assert isinstance(parameter_dict, dict), "Parameters {0} must be given as a dictionary but not a {1}.".format(
         parameter_dict, type(parameter_dict)
     )
-    assert isinstance(error_dict, dict), "Errors {0} must be given as a dictionary but not a {1}." "".format(error_dict, type(error_dict))
+    assert isinstance(error_dict, dict), "Errors {0} must be given as a dictionary but not a {1}.".format(error_dict, type(error_dict))
 
     # get the parameters from the dictionary
     try:
@@ -549,7 +547,7 @@ def gaussian_peak_intensity(parameter_dict, error_dict):
         error_a_s = error_dict["A_s"]
     except KeyError as key_err:
         raise RuntimeError(
-            'Error dictionary must have "A2", "s2", "A_s" but not only found {0}. FYI: {1}' "".format(error_dict.keys(), key_err)
+            'Error dictionary must have "A2", "s2", "A_s" but not only found {0}. FYI: {1}'.format(error_dict.keys(), key_err)
         )
     intensity_error = numpy.sqrt(
         2 / numpy.pi * (gauss_a**2 * error_s_sq + error_a_sq * gauss_sigma**2 + 2 * gauss_a * gauss_sigma * error_a_s)
@@ -610,10 +608,10 @@ def integrate_single_scan_peak(
     # check
     # assert isinstance(exp, int)
     # assert isinstance(scan, int)
-    assert isinstance(peak_radius, float) or peak_radius is None, "Peak radius {0} must be of type float but not " "{1}.".format(
+    assert isinstance(peak_radius, float) or peak_radius is None, "Peak radius {0} must be of type float but not {1}.".format(
         peak_radius, type(peak_radius)
     )
-    assert len(peak_centre) == 3, "Peak center {0} of type {1} must have 3 elements but not {2}." "".format(
+    assert len(peak_centre) == 3, "Peak center {0} of type {1} must have 3 elements but not {2}.".format(
         peak_centre, type(peak_centre), len(peak_centre)
     )
     assert isinstance(merge_peaks, bool), "Flag to merge peak must be a boolean but not {0}.".format(type(merge_peaks))
@@ -744,7 +742,7 @@ def integrate_peak_full_version(
     # result due to error
     if status is False:
         error_message = ret_obj
-        raise RuntimeError("Unable to integrate peak of workspace {0} due to {1}." "".format(scan_md_ws_name, error_message))
+        raise RuntimeError("Unable to integrate peak of workspace {0} due to {1}.".format(scan_md_ws_name, error_message))
     else:
         # process result
         integrated_pt_dict = ret_obj
@@ -824,7 +822,7 @@ def read_peak_integration_table_csv(peak_file_name):
     :return: a dictionary of peak integration result information in STRING form
     """
     # check input
-    assert isinstance(peak_file_name, str), "Peak integration table file {0} must be a string but not a {1}." "".format(
+    assert isinstance(peak_file_name, str), "Peak integration table file {0} must be a string but not a {1}.".format(
         peak_file_name, type(peak_file_name)
     )
 
@@ -869,11 +867,11 @@ def simple_integrate_peak(
     :return:
     """
     # check
-    assert isinstance(pt_intensity_dict, dict), "Pt. intensities {0} should be a dictionary but not a {1}." "".format(
+    assert isinstance(pt_intensity_dict, dict), "Pt. intensities {0} should be a dictionary but not a {1}.".format(
         pt_intensity_dict, type(pt_intensity_dict)
     )
-    assert isinstance(bg_value, float) and bg_value >= 0.0, "Background value {0} must be a non-negative float." "".format(bg_value)
-    assert isinstance(motor_step_dict, dict), "Motor steps {0} must be given as a dictionary of Pt but not a {1}." "".format(
+    assert isinstance(bg_value, float) and bg_value >= 0.0, "Background value {0} must be a non-negative float.".format(bg_value)
+    assert isinstance(motor_step_dict, dict), "Motor steps {0} must be given as a dictionary of Pt but not a {1}.".format(
         motor_step_dict, type(motor_step_dict)
     )
 

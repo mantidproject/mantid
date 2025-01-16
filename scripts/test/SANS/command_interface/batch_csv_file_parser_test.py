@@ -30,7 +30,7 @@ class BatchCsvParserTest(unittest.TestCase):
             os.remove(test_file_path)
 
     def test_that_raises_when_unknown_keyword_is_used(self):
-        content = "# MANTID_BATCH_FILE add more text here\n" "sample_sans,74044,output_as,test,new_key_word,test\n"
+        content = "# MANTID_BATCH_FILE add more text here\nsample_sans,74044,output_as,test,new_key_word,test\n"
         batch_file_path = BatchCsvParserTest._save_to_csv(content)
         parser = BatchCsvParser()
         with self.assertRaises(KeyError):
@@ -55,7 +55,7 @@ class BatchCsvParserTest(unittest.TestCase):
         BatchCsvParserTest._remove_csv(batch_file_path)
 
     def test_that_raises_when_sample_scatter_is_missing(self):
-        content = "# MANTID_BATCH_FILE add more text here\n" "sample_sans,,output_as,test_file\n"
+        content = "# MANTID_BATCH_FILE add more text here\nsample_sans,,output_as,test_file\n"
         batch_file_path = BatchCsvParserTest._save_to_csv(content)
         parser = BatchCsvParser()
         with self.assertRaises(ValueError):
@@ -63,7 +63,7 @@ class BatchCsvParserTest(unittest.TestCase):
         BatchCsvParserTest._remove_csv(batch_file_path)
 
     def test_that_does_not_raise_when_output_is_missing(self):
-        content = "# MANTID_BATCH_FILE add more text here\n" "sample_sans,test,output_as,\n"
+        content = "# MANTID_BATCH_FILE add more text here\nsample_sans,test,output_as,\n"
         batch_file_path = BatchCsvParserTest._save_to_csv(content)
         parser = BatchCsvParser()
         try:
@@ -77,7 +77,7 @@ class BatchCsvParserTest(unittest.TestCase):
         BatchCsvParserTest._remove_csv(batch_file_path)
 
     def test_that_raises_when_sample_transmission_is_specified_incompletely(self):
-        content = "# MANTID_BATCH_FILE add more text here\n" "sample_sans,test,output_as,test, sample_trans,test, sample_direct_beam,\n"
+        content = "# MANTID_BATCH_FILE add more text here\nsample_sans,test,output_as,test, sample_trans,test, sample_direct_beam,\n"
         batch_file_path = BatchCsvParserTest._save_to_csv(content)
         parser = BatchCsvParser()
         with self.assertRaises(ValueError):
@@ -85,7 +85,7 @@ class BatchCsvParserTest(unittest.TestCase):
         BatchCsvParserTest._remove_csv(batch_file_path)
 
     def test_that_raises_when_can_transmission_is_specified_incompletely(self):
-        content = "# MANTID_BATCH_FILE add more text here\n" "sample_sans,test,output_as,test, can_trans,, can_direct_beam, test\n"
+        content = "# MANTID_BATCH_FILE add more text here\nsample_sans,test,output_as,test, can_trans,, can_direct_beam, test\n"
         batch_file_path = BatchCsvParserTest._save_to_csv(content)
         parser = BatchCsvParser()
         with self.assertRaises(ValueError):
@@ -93,7 +93,7 @@ class BatchCsvParserTest(unittest.TestCase):
         BatchCsvParserTest._remove_csv(batch_file_path)
 
     def test_that_raises_when_can_transmission_is_specified_but_no_can_scatter(self):
-        content = "# MANTID_BATCH_FILE add more text here\n" "sample_sans,test,output_as,test, can_trans,, can_direct_beam, test\n"
+        content = "# MANTID_BATCH_FILE add more text here\nsample_sans,test,output_as,test, can_trans,, can_direct_beam, test\n"
         batch_file_path = BatchCsvParserTest._save_to_csv(content)
         parser = BatchCsvParser()
         with self.assertRaises(ValueError):
@@ -101,7 +101,7 @@ class BatchCsvParserTest(unittest.TestCase):
         BatchCsvParserTest._remove_csv(batch_file_path)
 
     def test_that_raises_when_background_workspace_is_specified_but_no_scale_factor(self):
-        content = "# MANTID_BATCH_FILE add more text here\n" "sample_sans,test,output_as,test, background_workspace, test\n"
+        content = "# MANTID_BATCH_FILE add more text here\nsample_sans,test,output_as,test, background_workspace, test\n"
         batch_file_path = BatchCsvParserTest._save_to_csv(content)
         parser = BatchCsvParser()
         with self.assertRaises(ValueError):
@@ -109,7 +109,7 @@ class BatchCsvParserTest(unittest.TestCase):
         BatchCsvParserTest._remove_csv(batch_file_path)
 
     def test_that_raises_when_scale_factor_is_specified_but_no_background_workspace(self):
-        content = "# MANTID_BATCH_FILE add more text here\n" "sample_sans,test,output_as,test, scale_factor, 1.1\n"
+        content = "# MANTID_BATCH_FILE add more text here\nsample_sans,test,output_as,test, scale_factor, 1.1\n"
         batch_file_path = BatchCsvParserTest._save_to_csv(content)
         parser = BatchCsvParser()
         with self.assertRaises(ValueError):
@@ -151,7 +151,7 @@ class BatchCsvParserTest(unittest.TestCase):
         BatchCsvParserTest._remove_csv(batch_file_path)
 
     def test_that_parses_period_selection(self):
-        content = "# MANTID_BATCH_FILE add more text here\n" "sample_sans,1p7,can_sans,2P3,output_as,test_file2\n"
+        content = "# MANTID_BATCH_FILE add more text here\nsample_sans,1p7,can_sans,2P3,output_as,test_file2\n"
         batch_file_path = BatchCsvParserTest._save_to_csv(content)
         parser = BatchCsvParser()
 

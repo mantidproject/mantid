@@ -236,15 +236,13 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
                 issues["BraggAngle"] = "Bragg angle is mandatory if the angle option is UserAngle"
             elif angle_option == "DetectorAngle":
                 if self.getProperty("DirectBeamDetectorAngle").isDefault:
-                    issues["DirectBeamDetectorAngle"] = "Direct beam detector angle is mandatory" " if the angle option is DetectorAngle"
+                    issues["DirectBeamDetectorAngle"] = "Direct beam detector angle is mandatory if the angle option is DetectorAngle"
                 if self.getProperty("DirectBeamForegroundCentre").isDefault:
-                    issues["DirectBeamForegroundCentre"] = (
-                        "Direct beam foreground centre is mandatory" " if the angle option is DetectorAngle"
-                    )
+                    issues["DirectBeamForegroundCentre"] = "Direct beam foreground centre is mandatory if the angle option is DetectorAngle"
 
         if self.getProperty(Prop.BKG_METHOD).value != BkgMethod.OFF:
             if self.getProperty(Prop.LOW_BKG_WIDTH).value == 0 and self.getProperty(Prop.HIGH_BKG_WIDTH).value == 0:
-                issues[Prop.BKG_METHOD] = "Cannot calculate flat background if both upper and lower background /" " widths are zero."
+                issues[Prop.BKG_METHOD] = "Cannot calculate flat background if both upper and lower background / widths are zero."
         # Early input validation to prevent FindReflectometryLines to fail its validation
         if not self.getProperty(Prop.XMIN).isDefault and not self.getProperty(Prop.XMAX).isDefault:
             x_min = self.getProperty(Prop.XMIN).value
@@ -298,7 +296,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
         self.declareProperty(
             "DirectBeamDetectorAngle",
             -1.0,
-            "The detector angle value [Degree] for the corresponding direct beam, " "used if angle option is DetectorAngle",
+            "The detector angle value [Degree] for the corresponding direct beam, used if angle option is DetectorAngle",
         )
 
         self.declareProperty(
@@ -368,28 +366,28 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
             Prop.LOW_BKG_OFFSET,
             defaultValue=7,
             validator=non_negative_int,
-            doc="Distance of flat background region towards smaller detector angles from the " "foreground centre, in pixels.",
+            doc="Distance of flat background region towards smaller detector angles from the foreground centre, in pixels.",
         )
 
         self.declareProperty(
             Prop.LOW_BKG_WIDTH,
             defaultValue=5,
             validator=non_negative_int,
-            doc="Width of flat background region towards smaller detector angles from the " "foreground centre, in pixels.",
+            doc="Width of flat background region towards smaller detector angles from the foreground centre, in pixels.",
         )
 
         self.declareProperty(
             Prop.HIGH_BKG_OFFSET,
             defaultValue=7,
             validator=non_negative_int,
-            doc="Distance of flat background region towards larger detector angles from the " "foreground centre, in pixels.",
+            doc="Distance of flat background region towards larger detector angles from the foreground centre, in pixels.",
         )
 
         self.declareProperty(
             Prop.HIGH_BKG_WIDTH,
             defaultValue=5,
             validator=non_negative_int,
-            doc="Width of flat background region towards larger detector angles from the " "foreground centre, in pixels.",
+            doc="Width of flat background region towards larger detector angles from the foreground centre, in pixels.",
         )
 
         self.declareProperty(

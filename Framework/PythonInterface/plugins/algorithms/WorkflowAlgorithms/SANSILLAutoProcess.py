@@ -62,10 +62,10 @@ def needs_processing(property_value, process_reduction_type):
                 if process == process_reduction_type:
                     logger.notice("Reusing {0} workspace: {1}".format(process_reduction_type, ws_name))
                 else:
-                    logger.warning("{0} workspace found, but processed " "differently: {1}".format(process_reduction_type, ws_name))
+                    logger.warning("{0} workspace found, but processed differently: {1}".format(process_reduction_type, ws_name))
                     do_process = True
             else:
-                logger.warning("{0} workspace found, but missing the " "ProcessedAs flag: {1}".format(process_reduction_type, ws_name))
+                logger.warning("{0} workspace found, but missing the ProcessedAs flag: {1}".format(process_reduction_type, ws_name))
                 do_process = True
         else:
             do_process = True
@@ -139,8 +139,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setUp()
 
         result = dict()
-        message = "Wrong number of {0} runs: {1}. Provide one or as many as " "sample runs: {2}."
-        message_value = "Wrong number of {0} values: {1}. Provide one or as " "many as sample runs: {2}."
+        message = "Wrong number of {0} runs: {1}. Provide one or as many as sample runs: {2}."
+        message_value = "Wrong number of {0} values: {1}. Provide one or as many as sample runs: {2}."
 
         # array parameters checks
         sample_dim = len(self.sample)
@@ -201,7 +201,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         # other checks
         if self.output_type == "I(Phi,Q)" and self.n_wedges == 0:
-            result["NumberOfWedges"] = "For I(Phi,Q) processing, the number " "of wedges must be different from 0."
+            result["NumberOfWedges"] = "For I(Phi,Q) processing, the number of wedges must be different from 0."
 
         if self.getPropertyValue("OutputWorkspace")[0].isdigit():
             result["OutputWorkspace"] = "Output workspace name must be alphanumeric, it should start with a letter."
@@ -276,7 +276,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.declareProperty(
             MultipleFileProperty("FluxRuns", action=FileAction.OptionalLoad, extensions=["nxs"]),
-            doc="Empty beam run(s) for flux calculation only; " "if left blank flux will be calculated from BeamRuns.",
+            doc="Empty beam run(s) for flux calculation only; if left blank flux will be calculated from BeamRuns.",
         )
 
         self.declareProperty(
@@ -348,15 +348,15 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             "TransmissionBeamRadius",
             0.1,
             validator=FloatBoundedValidator(lower=0.0),
-            doc="Beam radius [m]; used for transmission " "calculations.",
+            doc="Beam radius [m]; used for transmission calculations.",
         )
 
         self.declareProperty(
-            FloatArrayProperty("BeamRadius", values=[0.1]), doc="Beam radius [m]; used for beam center " "finding and flux calculations."
+            FloatArrayProperty("BeamRadius", values=[0.1]), doc="Beam radius [m]; used for beam center finding and flux calculations."
         )
 
         self.declareProperty(
-            "WaterCrossSection", 1.0, doc="Provide water cross-section; " "used only if the absolute scale is done by dividing to water."
+            "WaterCrossSection", 1.0, doc="Provide water cross-section; used only if the absolute scale is done by dividing to water."
         )
 
         self.setPropertyGroup("SensitivityMaps", "Options")
@@ -374,7 +374,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty("MaxQxy", values=[-1]), doc="Maximum of absolute Qx and Qy.")
         self.declareProperty(FloatArrayProperty("DeltaQ", values=[-1]), doc="The dimension of a Qx-Qy cell.")
 
-        self.declareProperty("OutputPanels", False, doc="Whether or not process the individual " "detector panels.")
+        self.declareProperty("OutputPanels", False, doc="Whether or not process the individual detector panels.")
 
         self.copyProperties(
             "SANSILLIntegration",
@@ -482,7 +482,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 DeleteWorkspace(stitch_params_ws)
                 outputSamples.append(stitched)
             except RuntimeError as re:
-                self.log().warning("Unable to stitch automatically, consider " "stitching manually: " + str(re))
+                self.log().warning("Unable to stitch automatically, consider stitching manually: " + str(re))
 
         GroupWorkspaces(InputWorkspaces=outputSamples, OutputWorkspace=self.output)
         self.set_distribution(outputSamples)
@@ -547,7 +547,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     )
                     GroupWorkspaces(InputWorkspaces=[group_name, stitched], OutputWorkspace=group_name)
                 except RuntimeError as re:
-                    self.log().warning("Unable to stitch automatically, consider " "stitching manually: " + str(re))
+                    self.log().warning("Unable to stitch automatically, consider stitching manually: " + str(re))
 
         self.set_distribution([group_name])
 
@@ -779,7 +779,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                         wavelength = None
                         raise ValueError
                 except:
-                    logger.notice("Unable to get a valid wavelength from the " "sample logs.")
+                    logger.notice("Unable to get a valid wavelength from the sample logs.")
         return wavelength
 
     def createCustomSuffix(self, ws):
@@ -805,7 +805,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 distance = None
                 raise ValueError
         except:
-            logger.notice("Unable to get a valid detector distance value from " "the sample logs.")
+            logger.notice("Unable to get a valid detector distance value from the sample logs.")
         collimation = None
         try:
             collimation = float(logs[COLLIMATION_LOG])
@@ -813,7 +813,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 collimation = None
                 raise ValueError
         except:
-            logger.notice("Unable to get a valid collimation distance from " "the sample logs.")
+            logger.notice("Unable to get a valid collimation distance from the sample logs.")
 
         wavelength = self.getWavelength(logs)
 

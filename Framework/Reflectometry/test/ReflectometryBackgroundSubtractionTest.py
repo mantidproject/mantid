@@ -166,7 +166,7 @@ class ReflectometryBackgroundSubtractionTest(unittest.TestCase):
         error_map = alg.validateInputs()
         self.assertEqual(len(error_map), 1)
         self.assertEqual(
-            error_map["InputWorkspace"], "Invalid workspace type provided to IndexProperty. " "Must be convertible to MatrixWorkspace."
+            error_map["InputWorkspace"], "Invalid workspace type provided to IndexProperty. Must be convertible to MatrixWorkspace."
         )
 
     def _assert_run_algorithm_succeeds(self, args):

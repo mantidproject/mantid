@@ -22,7 +22,7 @@ class SANSReductionCorePreprocess(SANSReductionCoreBase):
         return "SANS\\Reduction"
 
     def summary(self):
-        return "Runs the initial core reduction elements. These are the steps which " "can be carried out before event slicing."
+        return "Runs the initial core reduction elements. These are the steps which can be carried out before event slicing."
 
     def PyInit(self):
         # ----------

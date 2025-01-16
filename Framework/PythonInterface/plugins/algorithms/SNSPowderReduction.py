@@ -81,7 +81,7 @@ def get_workspace(workspace_name):
     :param workspace_name:
     :return:
     """
-    assert isinstance(workspace_name, str), "Input workspace name {0} must be a string but not a {1}." "".format(
+    assert isinstance(workspace_name, str), "Input workspace name {0} must be a string but not a {1}.".format(
         workspace_name, type(workspace_name)
     )
 
@@ -540,7 +540,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 raise NotImplementedError("Summing spectra and filtering events are not supported simultaneously.")
 
             sam_ws_name = self._focusAndSum(samRuns, preserveEvents=preserveEvents, absorptionWksp=a_sample)
-            assert isinstance(sam_ws_name, str), "Returned from _focusAndSum() must be a string but not" "%s. " % str(type(sam_ws_name))
+            assert isinstance(sam_ws_name, str), "Returned from _focusAndSum() must be a string but not %s. " % str(type(sam_ws_name))
 
             workspacelist.append(sam_ws_name)
             samwksplist.append(sam_ws_name)
@@ -561,9 +561,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     # Returned with a list of workspaces
                     focusedwksplist = returned
                     for sam_ws_name in focusedwksplist:
-                        assert isinstance(sam_ws_name, str), (
-                            "Impossible to have a non-string value in " "returned focused workspaces' names."
-                        )
+                        assert isinstance(sam_ws_name, str), "Impossible to have a non-string value in returned focused workspaces' names."
                         samwksplist.append(sam_ws_name)
                         workspacelist.append(sam_ws_name)
                     # END-FOR
@@ -815,7 +813,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             if is_event_workspace(out_ws_name):
                 # Event workspace
-                message = "FilterBadPulses reduces number of events from %d to %d (under %s percent) " "of workspace %s." % (
+                message = "FilterBadPulses reduces number of events from %d to %d (under %s percent) of workspace %s." % (
                     num_original_events,
                     get_workspace(out_ws_name).getNumberEvents(),
                     str(self._filterBadPulses),
@@ -1228,9 +1226,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 If there is no split workspace defined, filter is (0., 0.) as the default
         """
         # supported case: support both workspace and workspace name
-        assert (
-            isinstance(split_ws_name, str) and len(split_ws_name) > 0
-        ), "SplittersWorkspace {0} must be a non-empty string but not a {1}.".format(split_ws_name, type(split_ws_name))
+        assert isinstance(split_ws_name, str) and len(split_ws_name) > 0, (
+            "SplittersWorkspace {0} must be a non-empty string but not a {1}.".format(split_ws_name, type(split_ws_name))
+        )
         if AnalysisDataService.doesExist(split_ws_name):
             split_ws = get_workspace(split_ws_name)
         else:
@@ -1266,9 +1264,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         elif isinstance(split_ws, ITableWorkspace):
             # general table workspace: filter start and stop times are in seconds
             if split_ws.columnCount() < 3:
-                raise RuntimeError(
-                    "Table splitters workspace {0} has too few ({1}) columns." "".format(split_ws_name, split_ws.columnCount())
-                )
+                raise RuntimeError("Table splitters workspace {0} has too few ({1}) columns.".format(split_ws_name, split_ws.columnCount()))
 
             num_rows = split_ws.rowCount()
             # Searching for the table
@@ -1384,7 +1380,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
             # Check consistency with filterWall
             if filter_wall[0] < 1.0e-20 and filter_wall[1] < 1.0e-20:
                 # Default definition of filterWall when there is no split workspace specified.
-                raise RuntimeError("It is impossible to have a splitters workspace and a non-defined, i.e., (0,0) time " "filter wall.")
+                raise RuntimeError("It is impossible to have a splitters workspace and a non-defined, i.e., (0,0) time filter wall.")
             # ENDIF
 
             # Note: Unfiltered workspace (remainder) is not considered here
@@ -1662,7 +1658,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         """
         # Check requirements
         assert isinstance(raw_ws_name, str), "Raw workspace name must be a string."
-        assert isinstance(split_ws_name, str), "Input split workspace name must be string," "but not of type %s" % str(type(split_ws_name))
+        assert isinstance(split_ws_name, str), "Input split workspace name must be string, but not of type %s" % str(type(split_ws_name))
         assert self.does_workspace_exist(split_ws_name)
 
         assert is_event_workspace(raw_ws_name), "Input workspace for splitting must be an EventWorkspace."

@@ -356,7 +356,7 @@ class SaveReflectionsTest(unittest.TestCase):
 
     def _test_helper_scale_large_intensities(self, output_format, file_name):
         # Arrange
-        DeleteTableRows(TableWorkspace=self._workspace, Rows=f"1-{self._workspace.getNumberPeaks()-1}")  # only first pk
+        DeleteTableRows(TableWorkspace=self._workspace, Rows=f"1-{self._workspace.getNumberPeaks() - 1}")  # only first pk
         self._workspace.getPeak(0).setIntensity(2.5e8)
 
         # Act

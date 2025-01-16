@@ -35,7 +35,7 @@ class Osiris(AbstractInst):
         sample_details_obj = common.dictionary_key_helper(
             dictionary=kwargs,
             key=kwarg_name,
-            exception_msg="The argument containing sample details was not found. Please" f" set the following argument: {kwarg_name}",
+            exception_msg=f"The argument containing sample details was not found. Please set the following argument: {kwarg_name}",
         )
         self._sample_details = sample_details_obj
 

@@ -98,7 +98,7 @@ class D4ILLReduction(PythonAlgorithm):
         self.declareProperty(
             name="NormalisationStandard",
             defaultValue=1.0e6,
-            doc="Standard value against which the normalisation which be performed. The default is for" " normalisation to monitor.",
+            doc="Standard value against which the normalisation which be performed. The default is for normalisation to monitor.",
         )
 
         self.declareProperty(
@@ -106,7 +106,7 @@ class D4ILLReduction(PythonAlgorithm):
             defaultValue=0.5,
             validator=FloatBoundedValidator(lower=0),
             direction=Direction.Input,
-            doc="Scattering angle bin size in degrees used for expressing scan data on a single" " TwoTheta axis.",
+            doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.",
         )
 
         self.declareProperty("ExportASCII", True, doc="Whether or not to export the output workspaces as ASCII files.")

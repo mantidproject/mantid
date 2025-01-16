@@ -43,7 +43,7 @@ class PythonFileInterpreterTest(unittest.TestCase):
         test_cases = {"Ctrl+A": None, "Shift+A": ValueError, "Ctrl+AAA": ValueError, "Ctrl+Shift+A": ValueError}
         w = PythonFileInterpreter()
         for key_combo, expected_result in test_cases.items():
-            fail_msg = "Failed on case '{}' with expected result '{}'" "".format(key_combo, expected_result)
+            fail_msg = "Failed on case '{}' with expected result '{}'".format(key_combo, expected_result)
             if expected_result is ValueError:
                 with self.assertRaises(expected_result, msg=fail_msg):
                     w.clear_key_binding(key_combo)

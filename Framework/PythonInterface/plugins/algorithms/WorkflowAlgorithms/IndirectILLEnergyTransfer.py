@@ -153,7 +153,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         self.declareProperty(
             name="CropDeadMonitorChannels",
             defaultValue=False,
-            doc="Whether or not to exclude the first and last few channels " "with 0 monitor count in the energy transfer formula.",
+            doc="Whether or not to exclude the first and last few channels with 0 monitor count in the energy transfer formula.",
         )
 
         self.declareProperty(

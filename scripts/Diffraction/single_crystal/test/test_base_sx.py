@@ -247,7 +247,7 @@ class BaseSXTest(unittest.TestCase):
 
         # reset the UB to the unrotated one and set the goniometer matrix at a slightly different angle
         SetUB(peaks_rot, ub=ub)
-        SetGoniometer(peaks_rot, Axis0=f"{gonio_angle+offset},0,1,0,1")
+        SetGoniometer(peaks_rot, Axis0=f"{gonio_angle + offset},0,1,0,1")
         [pk.setGoniometerMatrix(peaks_rot.run().getGoniometer().getR()) for pk in BaseSX.retrieve(peaks_rot)]
 
         BaseSX.find_consistent_ub(peaks_ref, peaks_rot)

@@ -14,7 +14,7 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter import CurvesTa
 from mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter import ImagesTabWidgetPresenter
 from mantidqt.widgets.plotconfigdialog.legendtabwidget.presenter import LegendTabWidgetPresenter
 
-HELP_URL = "qthelp://org.mantidproject/doc/tutorials/mantid_basic_course/loading_and_displaying_data/" "06_formatting_plots.html"
+HELP_URL = "qthelp://org.mantidproject/doc/tutorials/mantid_basic_course/loading_and_displaying_data/06_formatting_plots.html"
 
 
 class PlotConfigDialogPresenter:

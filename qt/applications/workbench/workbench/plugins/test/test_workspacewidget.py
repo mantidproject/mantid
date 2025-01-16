@@ -32,8 +32,8 @@ from mantid.plots.utility import MantidAxType
 mpl.use("Agg")
 
 ALGORITHM_HISTORY_WINDOW_TYPE = "AlgorithmHistoryWindow"
-ALGORITHM_HISTORY_WINDOW = "mantidqt.widgets.workspacewidget." "algorithmhistorywindow." + ALGORITHM_HISTORY_WINDOW_TYPE
-MATRIXWORKSPACE_DISPLAY = "mantidqt.widgets.workspacedisplay.matrix." "presenter.MatrixWorkspaceDisplay"
+ALGORITHM_HISTORY_WINDOW = "mantidqt.widgets.workspacewidget.algorithmhistorywindow." + ALGORITHM_HISTORY_WINDOW_TYPE
+MATRIXWORKSPACE_DISPLAY = "mantidqt.widgets.workspacedisplay.matrix.presenter.MatrixWorkspaceDisplay"
 MATRIXWORKSPACE_DISPLAY_TYPE = "StatusBarView"
 SAMPLE_MATERIAL_DIALOG_TYPE = "SampleMaterialDialogView"
 SAMPLE_MATERIAL_DIALOG = "mantidqt.widgets.samplematerialdialog.samplematerial_view." + SAMPLE_MATERIAL_DIALOG_TYPE

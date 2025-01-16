@@ -747,6 +747,4 @@ class CommandInterfaceStateDirector(object):
         if index_to_remove is not None:
             del self._commands[index_to_remove]
         else:
-            raise RuntimeError(
-                "Tried to delete the last instance of {0}, but none was present in the list of " "commands".format(command_id)
-            )
+            raise RuntimeError("Tried to delete the last instance of {0}, but none was present in the list of commands".format(command_id))

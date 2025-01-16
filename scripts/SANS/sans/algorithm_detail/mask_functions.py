@@ -12,7 +12,7 @@ from sans.common.enums import DetectorType, SANSInstrument
 from sans.common.xml_parsing import get_named_elements_from_ipf_file
 
 
-detector_shape_bundle = namedtuple("detector_shape_bundle", "rectangular_shape, width, height, " "number_of_pixels_override")
+detector_shape_bundle = namedtuple("detector_shape_bundle", "rectangular_shape, width, height, number_of_pixels_override")
 geometry_bundle = namedtuple("geometry_bundle", "shape, first_low_angle_spec_number")
 
 
@@ -73,7 +73,7 @@ def get_geometry_information(ipf_path, detector_type):
     elif detector_type is DetectorType.HAB:
         prefix = "high-angle-detector-"
     else:
-        raise RuntimeError("MaskingParser: Tyring to get information for unknown " "detector {0}".format(str(detector_type)))
+        raise RuntimeError("MaskingParser: Tyring to get information for unknown detector {0}".format(str(detector_type)))
 
     search_items_for_detectors = ["num-columns", "non-rectangle-width", "num-rows", "non-rectangle-height", "num-pixels"]
     search_items = [prefix + item for item in search_items_for_detectors]
@@ -147,7 +147,7 @@ class SpectraBlock(object):
             self._first_spectrum_number = 9
             self._detector_orientation = DetectorOrientation.HORIZONTAL
         else:
-            raise RuntimeError("MaskParser: Cannot handle masking request for " "instrument {0}".format(str(self._instrument)))
+            raise RuntimeError("MaskParser: Cannot handle masking request for instrument {0}".format(str(self._instrument)))
 
     def get_block(self, y_lower, x_lower, y_dim, x_dim):
         """

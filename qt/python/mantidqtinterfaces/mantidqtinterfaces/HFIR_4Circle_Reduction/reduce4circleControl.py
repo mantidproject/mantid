@@ -1773,9 +1773,9 @@ class CWSCDReductionControl(object):
         assert isinstance(normalization, str), "Normalization type {0} must be a string but not a {1}.".format(
             normalization, type(normalization)
         )
-        assert isinstance(scale_factor, float) or isinstance(
-            scale_factor, int
-        ), "Scale factor {0} must be a float or integer but not a {1}.".format(scale_factor, type(scale_factor))
+        assert isinstance(scale_factor, float) or isinstance(scale_factor, int), (
+            "Scale factor {0} must be a float or integer but not a {1}.".format(scale_factor, type(scale_factor))
+        )
         assert len(peak_centre) == 3, "Peak center {0} must have 3 elements for (Qx, Qy, Qz).".format(peak_centre)
         assert len(background_pt_tuple) == 2, "Background tuple {0} must be of length 2.".format(background_pt_tuple)
 
@@ -2242,9 +2242,9 @@ class CWSCDReductionControl(object):
 
         # retrieve and check SPICE table workspace
         spice_table_ws = self._get_spice_workspace(exp_no, scan_no)
-        assert isinstance(
-            spice_table_ws, mantid.dataobjects.TableWorkspace
-        ), f"SPICE table workspace must be a TableWorkspace but not {type(spice_table_ws)}."
+        assert isinstance(spice_table_ws, mantid.dataobjects.TableWorkspace), (
+            f"SPICE table workspace must be a TableWorkspace but not {type(spice_table_ws)}."
+        )
         spice_table_name = spice_table_ws.name()
 
         # load SPICE Pt.  detector file
@@ -2882,12 +2882,12 @@ class CWSCDReductionControl(object):
         """
         # check
         assert isinstance(exp_number, int) and exp_number > 0, "Experiment number must be integer"
-        assert center_row is None or (
-            isinstance(center_row, int) and center_row >= 0
-        ), "Center row number {0} of type {1} must either None or non-negative integer.".format(center_row, type(center_row))
-        assert center_col is None or (
-            isinstance(center_col, int) and center_col >= 0
-        ), "Center column number {0} of type {1} must be either None or non-negative integer.".format(center_col, type(center_col))
+        assert center_row is None or (isinstance(center_row, int) and center_row >= 0), (
+            "Center row number {0} of type {1} must either None or non-negative integer.".format(center_row, type(center_row))
+        )
+        assert center_col is None or (isinstance(center_col, int) and center_col >= 0), (
+            "Center column number {0} of type {1} must be either None or non-negative integer.".format(center_col, type(center_col))
+        )
 
         if default:
             self._defaultDetectorCenter = center_row, center_col

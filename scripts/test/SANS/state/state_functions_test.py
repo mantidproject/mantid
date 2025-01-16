@@ -57,7 +57,7 @@ class StateFunctionsTest(unittest.TestCase):
         # Act
         val_message = validation_message(error_message, instruction, variables)
         # Assert
-        expected_text = "var1: 12\n" "var2: test\n" "" + instruction
+        expected_text = "var1: 12\nvar2: test\n" + instruction
         self.assertEqual(list(val_message.keys())[0], error_message)
         self.assertEqual(val_message[error_message], expected_text)
 

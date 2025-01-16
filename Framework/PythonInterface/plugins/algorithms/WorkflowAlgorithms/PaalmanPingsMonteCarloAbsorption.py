@@ -230,19 +230,19 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             name="SampleCoherentXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The coherent cross-section for the sample material in barns. To be used instead of " "Chemical Formula.",
+            doc="The coherent cross-section for the sample material in barns. To be used instead of Chemical Formula.",
         )
         self.declareProperty(
             name="SampleIncoherentXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The incoherent cross-section for the sample material in barns. To be used instead of " "Chemical Formula.",
+            doc="The incoherent cross-section for the sample material in barns. To be used instead of Chemical Formula.",
         )
         self.declareProperty(
             name="SampleAttenuationXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The absorption cross-section for the sample material in barns. To be used instead of " "Chemical Formula.",
+            doc="The absorption cross-section for the sample material in barns. To be used instead of Chemical Formula.",
         )
         self.declareProperty(
             name="SampleDensityType",
@@ -329,19 +329,19 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
             name="ContainerCoherentXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The coherent cross-section for the can material in barns. To be used instead of " "Chemical Formula.",
+            doc="The coherent cross-section for the can material in barns. To be used instead of Chemical Formula.",
         )
         self.declareProperty(
             name="ContainerIncoherentXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The incoherent cross-section for the can material in barns. To be used instead of " "Chemical Formula.",
+            doc="The incoherent cross-section for the can material in barns. To be used instead of Chemical Formula.",
         )
         self.declareProperty(
             name="ContainerAttenuationXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The absorption cross-section for the can material in barns. To be used instead of " "Chemical Formula.",
+            doc="The absorption cross-section for the can material in barns. To be used instead of Chemical Formula.",
         )
         self.declareProperty(
             name="ContainerDensityType",
@@ -568,7 +568,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         # We cannot support WorkspaceGroups as inputs, since the output of the algorithm itself is a group
         # and it is currently not possible to override processGroups in python
         if sample_is_group:
-            raise RuntimeError("WorkspaceGroup inputs are currently not supported. " "Please select the workspace items themselves.")
+            raise RuntimeError("WorkspaceGroup inputs are currently not supported. Please select the workspace items themselves.")
 
         self._beam_height = self.getProperty("BeamHeight").value
         self._beam_width = self.getProperty("BeamWidth").value
