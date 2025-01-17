@@ -35,7 +35,7 @@ class SPowderSemiEmpiricalCalculator:
         instrument: Instrument,
         quantum_order_num: int = Field(ge=1, le=2),
         autoconvolution_max: int = 0,
-        cache_directory: Path | None = None,
+        cache_directory: Path,
     ) -> None:
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon). This is only used for caching, the file will not be read.

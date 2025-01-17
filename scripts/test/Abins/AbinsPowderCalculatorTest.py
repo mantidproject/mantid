@@ -38,14 +38,25 @@ class PowderCalculatorTest(unittest.TestCase):
             abins_data = AbinsData.from_dict(json.load(fp))
 
         # wrong filename
-        self.assertRaises(ValueError, PowderCalculator, filename=1, abins_data=abins_data, temperature=300.0)
+        self.assertRaises(
+            ValueError, PowderCalculator, filename=1, abins_data=abins_data, temperature=300.0, cache_directory=self.cache_directory
+        )
 
         # data from object of type AtomsData instead of object of type AbinsData
         wrong_type_data = abins_data.get_atoms_data()
-        self.assertRaises(ValueError, PowderCalculator, filename=full_path_filename, abins_data=wrong_type_data, temperature=300.0)
+        self.assertRaises(
+            ValueError,
+            PowderCalculator,
+            filename=full_path_filename,
+            abins_data=wrong_type_data,
+            temperature=300.0,
+            cache_directory=self.cache_directory,
+        )
 
         # Missing Temperature
-        self.assertRaises(TypeError, PowderCalculator, filename=full_path_filename, abins_data=abins_data)
+        self.assertRaises(
+            TypeError, PowderCalculator, filename=full_path_filename, abins_data=abins_data, cache_directory=self.cache_directory
+        )
 
     #       main test
     def test_good_case(self):

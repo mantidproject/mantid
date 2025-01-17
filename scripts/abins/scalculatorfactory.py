@@ -30,7 +30,7 @@ class SCalculatorFactory(object):
         instrument: Instrument,
         quantum_order_num: int,
         autoconvolution_max: int = 0,
-        cache_directory: Path | None = None,
+        cache_directory: Path,
     ):
         """
         :param filename: name of input DFT file (CASTEP: foo.phonon)

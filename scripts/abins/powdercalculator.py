@@ -19,7 +19,7 @@ class PowderCalculator:
     Class for calculating powder data.
     """
 
-    def __init__(self, *, filename: str, abins_data: abins.AbinsData, temperature: float, cache_directory: Path | None = None) -> None:
+    def __init__(self, *, filename: str, abins_data: abins.AbinsData, temperature: float, cache_directory: Path) -> None:
         """
         :param filename:  name of input DFT filename
         :param abins_data: object of type AbinsData with data from input DFT file
