@@ -160,7 +160,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
         self.declareProperty(
             name="SteppedScanParameter",
             defaultValue=False,
-            doc="If the environment variable is set and held during each scan rather than continuosly changing.",
+            doc="If the environment variable is set and held during each scan rather than continuously changing.",
         )
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), doc="Name for the reduced workspace.")
@@ -502,7 +502,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
         stepped_env = self.getProperty("SteppedScanParameter").value
 
         # determine the pulse map function and bin parameters
-        # - if env parameter need to account for stepped or contnuous
+        # - if env parameter need to account for stepped or continuous
         # - if pulse then map to dataset index
         if single_bin:
             tsmap, bin_params = self.get_single_bin_map(anl_ws)
