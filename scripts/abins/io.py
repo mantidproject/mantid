@@ -86,8 +86,7 @@ class IO(BaseModel):
 
         if self._dir_is_not_writeable(str(self.cache_directory)):
             raise Exception(
-                f"Could not write a file to the cache directory {self.cache_directory}. "
-                "Please check this location is reasonable."
+                f"Could not write a file to the cache directory {self.cache_directory}. Please check this location is reasonable."
             )
         self._hdf_filename = str(self.cache_directory / f"{core_name}.hdf5")
 
