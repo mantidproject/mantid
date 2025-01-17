@@ -137,7 +137,7 @@ class InelasticEMUauReduction(PythonAlgorithm):
         self.declareProperty(
             name="KeepIntermediateWorkspaces",
             defaultValue=False,
-            doc="Whether to keep the intermediate sample and calibration\nworkspaces for diagnostic checks.",
+            doc="Whether to keep the intermediate sample and calibration workspaces for diagnostic checks.",
         )
 
         self.declareProperty(

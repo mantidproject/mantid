@@ -87,7 +87,7 @@ class SimpleScanViewerPresenter:
             peak_dict["I (bg corrected)"] = corrected_roi_integrations
 
             if np.any(self._bg_ws.getAxis(0).extractValues() != self._ws.getAxis(0).extractValues()):
-                logger.warning("Background and sample data have different two theta ranges.Please check that these data match.")
+                logger.warning("Background and sample data have different two theta ranges. Please check that these data match.")
 
             if len(self._bg_ws.getAxis(1)) > 1:
                 logger.warning("Background has more than one slice. Only the first one is considered for background subtraction.")

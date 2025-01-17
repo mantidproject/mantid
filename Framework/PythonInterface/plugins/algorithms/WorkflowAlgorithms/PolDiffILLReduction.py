@@ -378,7 +378,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.declareProperty(
             name="MaxTOFChannel",
             defaultValue=512,
-            doc="What is the maximal number of TOF bins to be used.Bins above this value will be removed.",
+            doc="What is the maximal number of TOF bins to be used. Bins above this value will be removed.",
         )
 
         self.setPropertySettings("MaxTOFChannel", tofMeasurement)
@@ -1332,7 +1332,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return attenuation_ws
 
     def _apply_self_attenuation_correction(self, sample_ws, empty_ws):
-        """Applies the self-attenuation correction based on the Palmaan-Pings Monte-Carlo calculation, taking into account
+        """Applies the self-attenuation correction based on the Paalman-Pings Monte-Carlo calculation, taking into account
         the sample's material, shape, and dimensions."""
 
         attenuation_method = self.getPropertyValue("SelfAttenuationMethod")

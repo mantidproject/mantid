@@ -48,7 +48,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         self.declareProperty(StringArrayProperty("SpectraNames", [], direction=Direction.Input), "Override with custom names for spectra")
         self.declareProperty("Result", "", Direction.Output)
 
-        self.declareProperty("PopCanvas", False, "If true, a Matplotlib canvas will be popped out , which contains the saved plot.")
+        self.declareProperty("PopCanvas", False, "If true, a Matplotlib canvas will be popped out, which contains the saved plot.")
 
     def validateInputs(self):
         messages = {}

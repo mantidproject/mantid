@@ -67,7 +67,7 @@ The algorithm for calculating the attenuation factor A proceeds as follows. For 
 
    * accumulate this wavelength-specific factor across all `NEvents`
 
-#. average the accumulated attentuation factors over `NEvents` and assign this as the correction factor for
+#. average the accumulated attenuation factors over `NEvents` and assign this as the correction factor for
    this :math:`\lambda`.
 
 
