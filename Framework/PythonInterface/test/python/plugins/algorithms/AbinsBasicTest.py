@@ -32,11 +32,11 @@ class AbinsBasicTest(unittest.TestCase):
     _tolerance = 0.0001
 
     def setUp(self):
-        self._tmpdir = TemporaryDirectory()
-        self._cache_directory = self._tmpdir.name
+        self.tempdir = TemporaryDirectory()
+        self._cache_directory = self.tempdir.name
 
     def tearDown(self):
-        self._tmpdir.cleanup()
+        self.tempdir.cleanup()
         mtd.clear()
 
     def test_wrong_input(self):

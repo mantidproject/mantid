@@ -23,8 +23,8 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         # set up input for Abins
         self._Si2 = "Si2-sc_AbinsAdvancedParameters"
         self._wrk_name = self._Si2 + "_ref"
-        self._tmpdir = TemporaryDirectory()
-        self._cache_directory = self._tmpdir.name
+        self.tempdir = TemporaryDirectory()
+        self._cache_directory = self.tempdir.name
 
         # before each test set abins.parameters to default values
         abins.parameters.instruments = {
@@ -55,7 +55,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         abins.parameters.performance = {"optimal_size": int(5e6), "threads": 1}
 
     def tearDown(self):
-        self._tmpdir.cleanup()
+        self.tempdir.cleanup()
         mtd.clear()
 
     def test_wrong_fwhm(self):
