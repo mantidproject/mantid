@@ -1310,6 +1310,33 @@ public:
     TS_ASSERT_DELTA(outQGroup[3]->y(0)[0], 0.7544, 0.0001);
   }
 
+  void test_parameter_file_used_with_efficiency_workspace_Wildes() {
+    std::string const name = "input";
+    prepareInputGroup(name, "Wildes");
+    auto input_group = retrieveOutWS(name);
+    // We're setting this to an invalid value to catch it on purpose later.
+    input_group[0]->instrumentParameters().addString(input_group[0]->getInstrument()->getComponentID(),
+                                                     "WildesFlipperConfig", "01,01,10");
+    auto efficiencies = createPolarizationEfficienciesWorkspace("Wildes");
+    ReflectometryReductionOneAuto3 alg;
+    alg.initialize();
+    alg.setPropertyValue("InputWorkspace", name);
+    alg.setProperty("ThetaIn", 10.0);
+    alg.setProperty("WavelengthMin", 1.0);
+    alg.setProperty("WavelengthMax", 15.0);
+    alg.setProperty("ProcessingInstructions", "2");
+    alg.setProperty("MomentumTransferStep", 0.04);
+    alg.setProperty("PolarizationAnalysis", true);
+    alg.setProperty("PolarizationEfficiencies", efficiencies);
+    alg.setPropertyValue("OutputWorkspace", "IvsQ");
+    alg.setPropertyValue("OutputWorkspaceBinned", "IvsQ_binned");
+    alg.setPropertyValue("OutputWorkspaceWavelength", "IvsLam");
+
+    TS_ASSERT_THROWS_EQUALS(alg.execute(), const std::logic_error &e, std::string(e.what()),
+                            "Invalid value for property Flippers (string) from string \"01,01,10\": When setting value "
+                            "of property \"Flippers\": The value \"01,01,10\" is not in the list of allowed values");
+  }
+
   void test_polarization_correction_with_efficiency_workspace_Wildes_no_analyser() {
 
     std::string const name = "input";

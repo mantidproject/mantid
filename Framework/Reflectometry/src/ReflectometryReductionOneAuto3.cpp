@@ -56,8 +56,8 @@ void validate(const std::string &method) {
 namespace CorrectionOption {
 static const std::string PNR{"PNR"};
 static const std::string PA{"PA"};
-static const std::string FLIPPERS_NO_ANALYSER{"0, 1"};
-static const std::string FLIPPERS_FULL{"00, 01, 10, 11"};
+static const std::string DEFAULT_FLIPPERS_NO_ANALYSER{"0, 1"};
+static const std::string DEFAULT_FLIPPERS_FULL{"00, 01, 10, 11"};
 } // namespace CorrectionOption
 
 std::vector<std::string> getGroupMemberNames(const std::string &groupName) {
@@ -1024,14 +1024,27 @@ std::string ReflectometryReductionOneAuto3::findPolarizationCorrectionOption(con
   auto groupIvsLam =
       AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(getPropertyValue("OutputWorkspaceWavelength"));
   auto numWorkspacesInGrp = groupIvsLam->size();
+  if (numWorkspacesInGrp != 4 && numWorkspacesInGrp != 2) {
+    throw std::runtime_error("Only input workspace groups with two or four periods are supported");
+  }
+
+  // If using Wildes, check and use a flipper configuration from the parameter file.
+  if (correctionMethod == CorrectionMethod::WILDES) {
+    auto const &correctionOption = std::dynamic_pointer_cast<MatrixWorkspace>(groupIvsLam->getItem(0))
+                                       ->getInstrument()
+                                       ->getParameterAsString("WildesFlipperConfig");
+
+    if (!correctionOption.empty()) {
+      return correctionOption;
+    }
+  }
+  // Otherwise, use the defaults defined in this file.
   if (numWorkspacesInGrp == 2) {
     return (correctionMethod == CorrectionMethod::FREDRIKZE) ? CorrectionOption::PNR
-                                                             : CorrectionOption::FLIPPERS_NO_ANALYSER;
+                                                             : CorrectionOption::DEFAULT_FLIPPERS_NO_ANALYSER;
   }
-  if (numWorkspacesInGrp == 4) {
-    return (correctionMethod == CorrectionMethod::FREDRIKZE) ? CorrectionOption::PA : CorrectionOption::FLIPPERS_FULL;
-  }
-  throw std::runtime_error("Only input workspace groups with two or four periods are supported");
+  return (correctionMethod == CorrectionMethod::FREDRIKZE) ? CorrectionOption::PA
+                                                           : CorrectionOption::DEFAULT_FLIPPERS_FULL;
 }
 
 /** Construct a polarization efficiencies workspace based on values of input
