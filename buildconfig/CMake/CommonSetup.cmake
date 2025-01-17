@@ -102,11 +102,10 @@ if(BUILD_MANTIDFRAMEWORK)
 
   find_package(
     HDF5 MODULE
-    COMPONENTS C CXX HL
+    COMPONENTS C CXX
     REQUIRED
   )
   set(HDF5_LIBRARIES hdf5::hdf5_cpp hdf5::hdf5)
-  set(HDF5_HL_LIBRARIES hdf5::hdf5_hl)
 endif()
 
 if(ENABLE_WORKBENCH)

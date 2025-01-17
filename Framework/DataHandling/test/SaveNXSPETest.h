@@ -23,8 +23,8 @@
 #include "boost/tuple/tuple.hpp"
 #include <memory>
 
-#include <hdf5.h>
-#include <hdf5_hl.h>
+#include "MantidNexus/H5Util.h"
+#include <H5Cpp.h>
 
 #include <Poco/File.h>
 
@@ -261,53 +261,47 @@ private:
                                std::vector<double>());
     }
 
-    auto h5file = H5Fopen(outputFile.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+    H5::H5File h5file(outputFile, H5F_ACC_RDONLY);
     const char *dset = "/mantid_workspace/data/data";
     int rank(0);
-    herr_t status = H5LTget_dataset_ndims(h5file, dset, &rank);
-    TS_ASSERT_EQUALS(0, status);
+    H5::DataSet dataset = h5file.openDataSet(dset);
+    rank = dataset.getSpace().getSimpleExtentNdims();
     TS_ASSERT_EQUALS(2, rank);
 
     std::vector<hsize_t> dims(rank);
-    H5T_class_t classId(H5T_NO_CLASS);
-    size_t typeSize(0);
-    status = H5LTget_dataset_info(h5file, dset, dims.data(), &classId, &typeSize);
-    TS_ASSERT_EQUALS(0, status);
-    TS_ASSERT_EQUALS(H5T_FLOAT, classId);
-    TS_ASSERT_EQUALS(8, typeSize);
+    dataset.getSpace().getSimpleExtentDims(dims.data());
+    H5::DataType dataType = dataset.getDataType();
+    TS_ASSERT_EQUALS(H5T_FLOAT, dataType.getClass());
+    TS_ASSERT_EQUALS(8, dataType.getSize());
 
     size_t bufferSize(dims[0] * dims[1]);
     std::vector<double> signal(bufferSize), error(bufferSize);
-    status = H5LTread_dataset_double(h5file, dset, signal.data());
-    TS_ASSERT_EQUALS(0, status);
+    Mantid::NeXus::H5Util::readArray1DCoerce(dataset, signal);
 
     const char *dsetErr = "/mantid_workspace/data/error";
-    status = H5LTread_dataset_double(h5file, dsetErr, error.data());
-    TS_ASSERT_EQUALS(0, status);
+    Mantid::NeXus::H5Util::readArray1DCoerce(h5file.openDataSet(dsetErr), error);
     //---------------------------------------------------------------
     // check efixed
     const char *efixed_dset = "/mantid_workspace/NXSPE_info/fixed_energy";
-    status = H5LTget_dataset_ndims(h5file, efixed_dset, &rank);
-    TS_ASSERT_EQUALS(0, status);
+    H5::DataSet efixed_dataset = h5file.openDataSet(efixed_dset);
+    rank = efixed_dataset.getSpace().getSimpleExtentNdims();
     TS_ASSERT_EQUALS(1, rank);
 
     std::vector<hsize_t> efix_dims(rank);
-    status = H5LTget_dataset_info(h5file, efixed_dset, efix_dims.data(), &classId, &typeSize);
-    TS_ASSERT_EQUALS(0, status);
-    TS_ASSERT_EQUALS(H5T_FLOAT, classId);
-    TS_ASSERT_EQUALS(8, typeSize);
+    efixed_dataset.getSpace().getSimpleExtentDims(efix_dims.data());
+    H5::DataType efixed_dataType = efixed_dataset.getDataType();
+    TS_ASSERT_EQUALS(H5T_FLOAT, efixed_dataType.getClass());
+    TS_ASSERT_EQUALS(8, efixed_dataType.getSize());
 
     size_t EnBuffer(efix_dims[0]);
     std::vector<double> efixed(EnBuffer);
-    status = H5LTread_dataset_double(h5file, efixed_dset, efixed.data());
-    TS_ASSERT_EQUALS(0, status);
+    Mantid::NeXus::H5Util::readArray1DCoerce(efixed_dataset, efixed);
     if (set_efixed) {
       TS_ASSERT_EQUALS(EnBuffer, 1);
       TS_ASSERT_DELTA(efixed[0], efix_value, 1.e-8);
     }
 
-    H5Fclose(h5file);
-    // Poco::File(outputFile).remove();
+    h5file.close();
 
     return boost::make_tuple(dims, signal, error, efixed);
   }
