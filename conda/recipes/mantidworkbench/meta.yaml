@@ -39,6 +39,7 @@ requirements:
     - versioningit {{ versioningit }}
   run:
     - ipykernel
+    - lz4  # [linux]
     - psutil {{ psutil }}
     - {{ pin_compatible("python", max_pin="x.x") }}
     - matplotlib {{ matplotlib }}

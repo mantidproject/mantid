@@ -8,11 +8,15 @@
 from pathlib import Path
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 from time import sleep
+from typing import List
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
+import lz4.frame
+import os
+
 from mantid.kernel.environment import is_linux
-from mantidqt.dialogs.errorreports.run_pystack import _get_core_dumps_dir, _get_most_recent_core_dump_file
+from mantidqt.dialogs.errorreports.run_pystack import _get_core_dumps_dir, _get_most_recent_core_dump_file, _is_lz4_file
 
 
 class TestRunPystack(TestCase):
@@ -51,10 +55,7 @@ class TestRunPystack(TestCase):
     def test_get_most_recent_core_dump_file_gets_the_latest_file(self, mock_check_workbench_process: MagicMock):
         mock_check_workbench_process.return_value = True
         file_names = ["first", "second", "third"]
-        with TemporaryDirectory() as tmp_dir:
-            for name in file_names:
-                open(f"{tmp_dir}/{name}", "a").close()
-                sleep(0.1)
+        with SetupSomeFilesInATempDir(file_names) as tmp_dir:
             latest_file = _get_most_recent_core_dump_file(Path(tmp_dir))
             self.assertEqual(latest_file.name, file_names[-1])
 
@@ -68,3 +69,43 @@ class TestRunPystack(TestCase):
     def test_get_most_recent_core_dump_file_returns_none_if_the_dir_is_empty(self):
         with TemporaryDirectory() as tmp_dir:
             self.assertIsNone(_get_most_recent_core_dump_file(Path(tmp_dir)))
+
+    def test_is_lz4_file_is_true_for_lz4_file(self):
+        random_data = os.urandom(1024)
+        with NamedTemporaryFile() as tmp_file:
+            with lz4.frame.open(tmp_file.name, "wb") as fp:
+                fp.write(random_data)
+            self.assertTrue(_is_lz4_file(Path(tmp_file.name)))
+
+    def test_is_lz4_is_false_for_tmp_file(self):
+        with NamedTemporaryFile() as tmp_file:
+            self.assertFalse(_is_lz4_file(Path(tmp_file.name)))
+
+    @patch(f"{MODULE_PATH}._decompress_lz4_file")
+    @patch(f"{MODULE_PATH}._is_lz4_file")
+    @patch(f"{MODULE_PATH}._check_core_file_is_the_workbench_process")
+    def test_decompress_lz4_file_is_called(
+        self, mock_check_workbench_process: MagicMock, mock_is_lz4_file: MagicMock, mock_decompress_lz4_file: MagicMock
+    ):
+        mock_check_workbench_process.return_value = True
+        mock_is_lz4_file.return_value = True
+        tmp_file = Path("/a/tmp/location")
+        mock_decompress_lz4_file.return_value = tmp_file
+        with SetupSomeFilesInATempDir(["core_file"]) as tmp_dir:
+            latest_file = _get_most_recent_core_dump_file(Path(tmp_dir))
+            self.assertEqual(latest_file, tmp_file)
+            mock_decompress_lz4_file.assert_called_once_with(Path(f"{tmp_dir}/core_file"))
+
+
+class SetupSomeFilesInATempDir:
+    def __init__(self, file_names: List[str]):
+        self.tmp_dir = TemporaryDirectory()
+        for name in file_names:
+            open(f"{self.tmp_dir.name}/{name}", "a").close()
+            sleep(0.1)
+
+    def __enter__(self):
+        return self.tmp_dir.name
+
+    def __exit__(self, type, value, traceback):
+        self.tmp_dir.cleanup()
