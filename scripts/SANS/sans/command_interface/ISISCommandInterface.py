@@ -9,7 +9,7 @@ import os
 import re
 
 import types
-from typing import Union, List
+from typing import Union, Dict
 
 from SANSadd2 import add_runs
 from mantid.api import AnalysisDataService, WorkspaceGroup
@@ -503,12 +503,12 @@ def SetPhiLimit(phimin, phimax, use_mirror=True):
 
 
 def set_save(
-    save_algorithms: Union[None, List] = None, save_as_zero_error_free: bool = False, output_mode: OutputMode = OutputMode.PUBLISH_TO_ADS
+    save_algorithms: Union[None, Dict] = None, save_as_zero_error_free: bool = False, output_mode: OutputMode = OutputMode.PUBLISH_TO_ADS
 ) -> OutputMode:
     """
     Mainly used internally by BatchReduce and WavRangeReduction. Prepares the save state on the director
 
-    @param save_algorithms: A list of strings containing the name of the save algorithms.
+    @param save_algorithms: A dict containing the name of the save algorithms as keys and extension as values.
     @param save_as_zero_error_free: True if a zero error correction should be performed.
     @param output_mode: Decides if output_mode publishes to ads and saves to file or only one of the two when save_algorithms are valid
     @return The OutputMode enum: PUBLISH_TO_ADS, SAVE_TO_FILE, BOTH
@@ -516,7 +516,7 @@ def set_save(
     # Set up the save algorithms
     save_algs = []
     if save_algorithms:
-        for key in save_algorithms:
+        for key in save_algorithms.keys():
             if key == "SaveRKH":
                 save_algs.append(SaveType.RKH)
             elif key == "SaveNexus":

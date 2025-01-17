@@ -56,12 +56,11 @@ class ISISCommandInterfaceTest(unittest.TestCase):
             self.assertIsNone(MaskFile(file_name))
 
     def test_set_save_raises_an_error_with_wrong_save_algorithms(self):
-        save_algs = [["SaveBad"], ["SaveRKH", "SaveBad"]]
+        save_algs = [{"SaveBad": "txt"}, {"SaveRKH": "txt", "SaveBad": "txt"}]
 
         for alg in save_algs:
-            with self.subTest(test_case=alg):
-                with self.assertRaises(RuntimeError):
-                    set_save(alg)
+            with self.subTest(test_case=alg), self.assertRaises(RuntimeError):
+                set_save(alg)
 
     def test_output_mode_defaults_to_publish_to_ads_if_save_algs_is_none(self):
         output_modes = [OutputMode.BOTH, OutputMode.SAVE_TO_FILE]
@@ -72,7 +71,7 @@ class ISISCommandInterfaceTest(unittest.TestCase):
                 self.assertEqual(output_mode, OutputMode.PUBLISH_TO_ADS)
 
     def test_output_mode_defaults_to_BOTH_if_there_is_a_save_alg(self):
-        output_mode = set_save(["SaveRKH"])
+        output_mode = set_save({"SaveRKH": "txt"})
         self.assertEqual(output_mode, OutputMode.BOTH)
 
 
