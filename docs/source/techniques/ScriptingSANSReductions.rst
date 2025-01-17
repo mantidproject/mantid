@@ -108,7 +108,7 @@ On calling this function the experimental run is :ref:`loaded <algm-Load>` and c
 Currently only ``reload=true`` is supported.
 
 TransmissionSample
-^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^
 
 .. code-block :: python
 
@@ -202,25 +202,26 @@ Assuming the mask file contains the correct analysis details one can proceed to 
 The return value of ``WavRangeReduction()`` is the name of the final reduced workspace.
 This function calls many algorithms ending with a call to :ref:`algm-Q1D` or :ref:`algm-Qxy`.
 Several optional parameters can control different aspects of the reduction
-    - ``wav_start``: the first wavelength to be in the output data.
-    - ``wav_end``: the last wavelength in the output data.
-    - ``full_trans_wav``: Whether to use default's instrument wavelength range for transmission correction calculation, default is false.
-    - ``name_suffix``: Appends the created output workspace with this suffix
-    - ``combineDet``: combineDet can be one of the following
 
-       - 'rear': runs one reduction for the 'rear' detector data
-       - 'front': run one reduction for the 'front' detector data, and rescale+shift 'front' data
-       - 'both': run both the above two reductions
-       - 'merged': run the same reductions as 'both' and additionally create a merged data workspace
-       - None: run one reduction for whatever detector has been set as the current detector before running this method. If front apply rescale+shift)
-    - ``saveAlgs``: A dict of save algorithms containing the names of the algorithms as key and the extension as value(ex: ``saveAlgs={'SaveRKH':'txt'}``).
-    - ``save_as_zero_error_free``: Should the reduced workspaces contain zero errors.
-    - ``output_name``: Name of the output file. Default is sample run number.
-    - ``output_mode``: Decides the output of the reduced data, whether to publish to the ads (``OutputMode.PUBLISH_TO_ADS``), save to file with the chosen algorithm
-      in ``saveAlgs`` (``OutputMode.SAVE_TO_FILE``) or doing both(``OutputMode.BOTH``). ``OutputMode`` can be imported
-      with ``from sans.common.enums import OutputMode``.
-      If this parameter is omitted, the default behaviour will be to publish the output to the ads and save it in a file if there is a ``saveAlgs``.
-    - ``use_reduction_mode_as_suffix``: If ``True``, appends second suffix to output name based on reduction mode.
+- ``wav_start``: the first wavelength to be in the output data.
+- ``wav_end``: the last wavelength in the output data.
+- ``full_trans_wav``: Whether to use default's instrument wavelength range for transmission correction calculation, default is false.
+- ``name_suffix``: Appends the created output workspace with this suffix
+- ``combineDet``: combineDet can be one of the following
+
+   - 'rear': runs one reduction for the 'rear' detector data
+   - 'front': run one reduction for the 'front' detector data, and rescale+shift 'front' data
+   - 'both': run both the above two reductions
+   - 'merged': run the same reductions as 'both' and additionally create a merged data workspace
+   - None: run one reduction for whatever detector has been set as the current detector before running this method. If front apply rescale+shift)
+- ``saveAlgs``: A dict of save algorithms containing the names of the algorithms as key and the extension as value(ex: ``saveAlgs={'SaveRKH':'txt'}``).
+- ``save_as_zero_error_free``: Should the reduced workspaces contain zero errors.
+- ``output_name``: Name of the output file. Default is sample run number.
+- ``output_mode``: Decides the output of the reduced data, whether to publish to the ads (``OutputMode.PUBLISH_TO_ADS``), save to file with the chosen algorithm
+  in ``saveAlgs`` (``OutputMode.SAVE_TO_FILE``) or doing both(``OutputMode.BOTH``). ``OutputMode`` can be imported
+  with ``from sans.common.enums import OutputMode``.
+  If this parameter is omitted, the default behaviour will be to publish the output to the ads and save it in a file if there is a ``saveAlgs``.
+- ``use_reduction_mode_as_suffix``: If ``True``, appends second suffix to output name based on reduction mode.
 
 
 BatchReduce
