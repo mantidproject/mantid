@@ -4,8 +4,10 @@ include(PythonPackageTargetFunctions)
 add_python_package(instrumentview)
 
 # ctest targets
-set(PYTHON_TEST_FILES instrumentview/test/test_presenter.py instrumentview/test/test_model.py
-                      instrumentview/test/test_instruments.py
+set(PYTHON_TEST_FILES
+    instrumentview/test/test_presenter.py instrumentview/test/test_model.py instrumentview/test/test_instruments.py
+    instrumentview/Projections/test/test_projection.py instrumentview/Projections/test/test_cylindrical_projection.py
+    instrumentview/Projections/test/test_spherical_projection.py
 )
 
 # Tests
