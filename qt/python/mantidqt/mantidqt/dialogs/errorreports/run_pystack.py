@@ -6,7 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from datetime import datetime
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 import base64
+import lz4.frame
 import re
 import subprocess
 import zlib
@@ -60,11 +62,14 @@ def _get_most_recent_core_dump_file(core_dumps_dir: Path) -> Path | None:
             # test it's recent enough
             age = datetime.now() - datetime.fromtimestamp(latest_core_dump_file.stat().st_ctime)
             if age.seconds < CORE_DUMP_RECENCY_LIMIT:
+                log.notice(f"Fround recent file {latest_core_dump_file.as_posix()}")
+                if _is_lz4_file(latest_core_dump_file):
+                    latest_core_dump_file = _decompress_lz4_file(latest_core_dump_file)
+                    log.notice(f"Decompressed lz4 core file to {latest_core_dump_file.as_posix()}")
                 # test it's the correct process.
                 if _check_core_file_is_the_workbench_process(latest_core_dump_file):
-                    file_path = Path(core_dumps_dir, latest_core_dump_file)
-                    log.notice(f"Found most recent workbench core dump: {file_path.as_posix()}")
-                    return file_path
+                    log.notice(f"{latest_core_dump_file.as_posix()} identified as mantid workbench core dump")
+                    return latest_core_dump_file
             else:
                 log.notice(
                     f"Could not find recent enough ( < {CORE_DUMP_RECENCY_LIMIT} seconds old) core dump file in {core_dumps_dir.as_posix()}"
@@ -77,6 +82,9 @@ def _get_most_recent_core_dump_file(core_dumps_dir: Path) -> Path | None:
 def _check_core_file_is_the_workbench_process(core_dump_file: Path) -> bool:
     args = ["pystack", "core", core_dump_file.as_posix()]
     process = subprocess.run(args, capture_output=True, text=True)
+    if process.stderr:
+        log.error(f"Pystack executable check failed: {process.stderr}")
+        return False
     stdout = process.stdout
     search_result = re.search(r"^executable: python arguments: python.*mantid/qt/applications/workbench.*$", stdout, re.MULTILINE)
     return search_result is not None
@@ -85,4 +93,19 @@ def _check_core_file_is_the_workbench_process(core_dump_file: Path) -> bool:
 def _get_output_from_pystack(core_dump_file: Path) -> str:
     args = ["pystack", "core", core_dump_file.as_posix(), "--native-all"]
     process = subprocess.run(args, capture_output=True, text=True)
+    if process.stderr:
+        log.error(f"Error when running Pystack: {process.stderr}")
     return process.stdout
+
+
+def _decompress_lz4_file(lz4_core_dump_file: Path) -> Path:
+    tmp_decompressed_core_file = NamedTemporaryFile()
+    with lz4.frame.open(lz4_core_dump_file.as_posix(), "r") as lz4_fp:
+        tmp_decompressed_core_file.write(lz4_fp.read())
+    return tmp_decompressed_core_file
+
+
+def _is_lz4_file(core_dump_file: Path) -> bool:
+    lz4_magic_number = b"\x04\x22\x4d\x18"
+    with open(core_dump_file, "rb") as f:
+        return f.read(4) == lz4_magic_number
