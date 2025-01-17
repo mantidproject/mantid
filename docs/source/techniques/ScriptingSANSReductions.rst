@@ -31,7 +31,7 @@ SANS data from ISIS can be analysed using :ref:`Python <introduction_to_python>`
     TransmissionCan('LOQ74020.nxs', 'LOQ74014.nxs')
 
     #Performs reduction and saves data to path using SaveRKH and SaveNexus algorithms
-    WavRangeReduction(2.2, 10, saveAlgs=["SaveRKH","SaveNexus"])
+    WavRangeReduction(2.2, 10, saveAlgs={'SaveRKH': 'txt','SaveNexus': 'nxs'})
 
 The commands are available once the ISISCommandInterface module has been imported, using the following line:
 
@@ -213,7 +213,7 @@ Several optional parameters can control different aspects of the reduction
        - 'both': run both the above two reductions
        - 'merged': run the same reductions as 'both' and additionally create a merged data workspace
        - None: run one reduction for whatever detector has been set as the current detector before running this method. If front apply rescale+shift)
-    - ``saveAlgs``: A list of strings containing the names of the algorithms to save the data with (ex: ``saveAlgs=['SaveRKH']``).
+    - ``saveAlgs``: A dict of save algorithms containing the names of the algorithms as key and the extension as value(ex: ``saveAlgs={'SaveRKH':'txt'}``).
     - ``save_as_zero_error_free``: Should the reduced workspaces contain zero errors.
     - ``output_name``: Name of the output file. Default is sample run number.
     - ``output_mode``: Decides the output of the reduced data, whether to publish to the ads (``OutputMode.PUBLISH_TO_ADS``), save to file with the chosen algorithm
@@ -228,7 +228,7 @@ BatchReduce
 
 .. code-block :: python
 
-    BatchReduce(filename, plotresults=False, saveAlgs={'SaveRKH':'txt'},
+    BatchReduce(filename, plotresults=False, saveAlgs=None,
                 centreit=False, combineDet=None, save_as_zero_error_Free=False,
                 output_mode=OutputMode.PUBLISH_TO_ADS)
 
@@ -244,7 +244,7 @@ Optional parameters:
     - ``centreit``: Do centre finding (False by default).
     - ``combineDet``: Same as :ref:`WavRangeReduction <SANSScriptingWavRangeReduction>`.
     - ``save_as_zero_error_free``: Same as :ref:`WavRangeReduction <SANSScriptingWavRangeReduction>`.
-    - ``output_mode``: Same sa Same as :ref:`WavRangeReduction <SANSScriptingWavRangeReduction>`..
+    - ``output_mode``: Same as :ref:`WavRangeReduction <SANSScriptingWavRangeReduction>`..
 
 Function returns a dictionary with some values from the reduction. (scale and shift as of now).
 
