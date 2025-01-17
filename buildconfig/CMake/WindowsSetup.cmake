@@ -30,8 +30,19 @@ add_definitions(-D_SILENCE_CXX17_SHARED_PTR_UNIQUE_DEPRECATION_WARNING)
 set(CMAKE_CXX_FLAGS
     "${CMAKE_CXX_FLAGS} \
   /MP /W3 /bigobj \
+  /wd4251 /wd4275 /wd4373 \
   /experimental:external /external:W0 "
 )
+# the warnings suppressed are:
+#
+# 4251 'identifier' : class 'type' needs to have dll-interface to be used by clients of class 'type2' Things from the
+# std library give these warnings and we can't do anything about them.
+#
+# 4275 Given that we are compiling everything with msvc under Windows and linking all with the same runtime we can
+# disable the warning about inheriting from a non-exported interface, e.g. std::runtime_error
+#
+# 4373 previous versions of the compiler did not override when parameters only differed by const/volatile qualifiers.
+# This is basically saying that it now follows the C++ standard and doesn't seem useful
 
 # Set PCH heap limit, the default does not work when running msbuild from the commandline for some reason Any other
 # value lower or higher seems to work but not the default. It is fine without this when compiling in the GUI though...
