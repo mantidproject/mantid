@@ -828,8 +828,8 @@ def WavRangeReduction(
                                               current detector
                                               before running this method. If front apply rescale+shift)
     @param resetSetup: if true reset setup at the end
-    @param saveAlgs: A list of strings containing the names of the algorithms to save the data with (ex: saveAlgs=['SaveRKH']),
-                      it raises error if the algorithm name is not valid.
+    @param saveAlgs: A dictionary  containing the names of the algorithms to save the data  as keys with extension
+                     as values (ex: saveAlgs={'SaveRKH': 'txt'}), it raises error if the algorithm name is not valid.
     @param save_as_zero_error_free: Should the reduced workspaces contain zero errors or not
     @param out_fit_settings: An output parameter. It is used, specially when resetSetup is True, in order
                              to remember the 'scale and fit' of the fitting algorithm.
@@ -919,8 +919,8 @@ def BatchReduce(
     @param filename: the CSV file with the list of runs to analyse
     @param format: type of file to load, nxs for Nexus, etc.
     @param plotresults: if true and this function is run from mantid a graph will be created for the results of each reduction
-    @param saveAlgs: this named algorithm will be passed the name of the results workspace and filename (default = 'SaveRKH').
-        Pass a tuple of strings to save to multiple file formats
+    @param saveAlgs: A dictionary  containing the names of the algorithms to save the data  as keys with extension
+                     as values (ex: saveAlgs={'SaveRKH': 'txt'}), it raises error if the algorithm name is not valid.
     @param verbose: set to true to write more information to the log (default=False)
     @param centreit: do centre finding (default=False)
     @param reducer: if to use the command line (default) or GUI reducer object
