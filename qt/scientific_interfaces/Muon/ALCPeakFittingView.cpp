@@ -18,6 +18,8 @@ ALCPeakFittingView::ALCPeakFittingView(QWidget *widget) : m_widget(widget), m_ui
 
 ALCPeakFittingView::~ALCPeakFittingView() = default;
 
+void ALCPeakFittingView::subscribe(IALCPeakFittingViewSubscriber *subscriber) { m_subscriber = subscriber; }
+
 IFunction_const_sptr ALCPeakFittingView::function(std::string const &index) const {
   return m_ui.peaks->getFunctionByIndex(index);
 }
@@ -31,7 +33,7 @@ IPeakFunction_const_sptr ALCPeakFittingView::peakPicker() const { return m_peakP
 void ALCPeakFittingView::initialize() {
   m_ui.setupUi(m_widget);
 
-  connect(m_ui.fit, SIGNAL(clicked()), this, SIGNAL(fitRequested()));
+  connect(m_ui.fit, &QPushButton::clicked, this, &ALCPeakFittingView::fitRequested);
 
   m_ui.plot->setCanvasColour(Qt::white);
 
@@ -48,8 +50,8 @@ void ALCPeakFittingView::initialize() {
   // connect(m_ui.peaks, SIGNAL(functionStructureChanged()), SIGNAL(currentFunctionChanged()));
   // connect(m_ui.peaks, SIGNAL(parameterChanged(QString, QString)), SIGNAL(parameterChanged(QString, QString)));
 
-  connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_ui.plotGuess, SIGNAL(clicked()), this, SLOT(plotGuess()));
+  connect(m_ui.help, &QPushButton::clicked, this, &ALCPeakFittingView::help);
+  connect(m_ui.plotGuess, &QPushButton::clicked, this, &ALCPeakFittingView::plotGuess);
 }
 
 void ALCPeakFittingView::setDataCurve(MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
@@ -73,8 +75,8 @@ void ALCPeakFittingView::setGuessCurve(MatrixWorkspace_sptr workspace, std::size
   m_ui.plot->replot();
 }
 
-void ALCPeakFittingView::removePlot(QString const &plotName) {
-  m_ui.plot->removeSpectrum(plotName);
+void ALCPeakFittingView::removePlot(std::string const &plotName) {
+  m_ui.plot->removeSpectrum(QString::fromStdString(plotName));
   m_ui.plot->replot();
 }
 
@@ -117,17 +119,23 @@ void ALCPeakFittingView::help() {
   MantidQt::API::HelpWindow::showCustomInterface(QString("Muon ALC"), QString("muon"));
 }
 
-void ALCPeakFittingView::displayError(const QString &message) { QMessageBox::critical(m_widget, "Error", message); }
+void ALCPeakFittingView::displayError(const std::string &message) {
+  QMessageBox::critical(m_widget, "Error", QString::fromStdString(message));
+}
 
-void ALCPeakFittingView::emitFitRequested() {
+void ALCPeakFittingView::fitRequested() {
   // Fit requested: reset "plot guess"
-  emit fitRequested();
+  m_subscriber->onFitRequested();
+}
+
+void ALCPeakFittingView::onParameterChanged(const std::string &function, const std::string &parameter) {
+  m_subscriber->onParameterChanged(function, parameter);
 }
 
 /**
- * Emit signal that "plot/remove guess" has been clicked
+ * Notify the subscriber that "plot/remove guess" has been clicked
  */
-void ALCPeakFittingView::plotGuess() { emit plotGuessClicked(); }
+void ALCPeakFittingView::plotGuess() { m_subscriber->onPlotGuessClicked(); }
 
 /**
  * Changes the text on the "Plot guess" button

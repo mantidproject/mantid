@@ -295,6 +295,19 @@ class WorkspaceWidget(PluginWidget):
         import matplotlib.pyplot
 
         parent, flags = get_window_config()
+        # Process group peak workspaces first and remove them from the list
+        for ws in self._ads.retrieveGroupPeaksWorkspaces(names):
+            try:
+                TableWorkspaceDisplay.supports(ws)
+                presenter = TableWorkspaceDisplay(ws, plot=matplotlib.pyplot, parent=parent, window_flags=flags, group=True)
+                presenter.show_view()
+                names.remove(ws.name())
+            except ValueError as e:
+                logger.error(str(e))
+                logger.error(
+                    "Could not open workspace: {0} with neither MatrixWorkspaceDisplay nor TableWorkspaceDisplay.".format(ws.name())
+                )
+
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
                 MatrixWorkspaceDisplay.supports(ws)

@@ -334,9 +334,11 @@ void WorkspaceTreeWidgetSimple::addWorkspaceGroupActions(QMenu *menu, const Mant
   if (containsMatrixWorkspace) {
     menu->addMenu(createMatrixWorkspacePlotMenu(menu, true));
     menu->addSeparator();
+    menu->addAction(m_showDetectors);
   }
 
-  if (containsMatrixWorkspace || containsPeaksWorkspace) {
+  if (containsPeaksWorkspace) {
+    menu->addAction(m_showData);
     menu->addAction(m_showDetectors);
   }
 }
