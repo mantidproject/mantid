@@ -209,6 +209,8 @@ class SaveINS(PythonAlgorithm):
     def _update_symmetry_dict(self, W1_mat, w1_vec, S3, sym_key, sym_ops_dict, W_mat_dict, w_vec_dict):
         """
         Update the symmetry operations dictionary with priority for closeness to identity/origin.
+        This bias improves readability.
+        # Ex: lattice type 3; "-x+y,-x,z" is simpler that "-x+y+1/3,-x+2/3,z+2/3"
         """
         if S3 not in sym_ops_dict or (
             np.linalg.det(W1_mat) > np.linalg.det(W_mat_dict[S3])  # identity preferred
