@@ -1,1 +1,2 @@
 - Enabled Surface Plotting from Single-Spectrum Workspaces
+- Enabled Wireframe Plotting across multiple workspaces.
