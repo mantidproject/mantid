@@ -4,12 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
 from mantid.simpleapi import Abins, mtd
-from mantid.kernel import ConfigService
 
-from abins import test_helpers
 import abins.parameters
 
 try:
@@ -25,7 +23,8 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         # set up input for Abins
         self._Si2 = "Si2-sc_AbinsAdvancedParameters"
         self._wrk_name = self._Si2 + "_ref"
-        self._cache_directory = ConfigService.getString("defaultsave.directory")
+        self._tmpdir = TemporaryDirectory()
+        self._cache_directory = self._tmpdir.name
 
         # before each test set abins.parameters to default values
         abins.parameters.instruments = {
@@ -56,7 +55,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         abins.parameters.performance = {"optimal_size": int(5e6), "threads": 1}
 
     def tearDown(self):
-        test_helpers.remove_output_files(list_of_names=["_AbinsAdvanced"], directory=Path(self._cache_directory))
+        self._tmpdir.cleanup()
         mtd.clear()
 
     def test_wrong_fwhm(self):
@@ -67,7 +66,12 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
         for fwhm in bad_fwhm_values:
             abins.parameters.instruments["fwhm"] = fwhm
             self.assertRaisesRegex(
-                RuntimeError, "Invalid value of fwhm", Abins, VibrationalOrPhononFile=self._Si2 + ".phonon", OutputWorkspace=self._wrk_name
+                RuntimeError,
+                "Invalid value of fwhm",
+                Abins,
+                VibrationalOrPhononFile=self._Si2 + ".phonon",
+                OutputWorkspace=self._wrk_name,
+                CacheDirectory=self._cache_directory,
             )
 
     # Tests for TOSCA parameters

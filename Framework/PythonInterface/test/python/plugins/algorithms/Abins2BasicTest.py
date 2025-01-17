@@ -5,14 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import logging
-from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
 from numpy.testing import assert_array_almost_equal
 
-import abins
-import abins.io
 from abins.abins2 import Abins as Abins2
 from abins.constants import ATOM_PREFIX
 
@@ -23,6 +19,10 @@ from mantid.simpleapi import mtd, CompareWorkspaces, Abins  # noqa: E402
 
 
 class AbinsBasicTest(unittest.TestCase):
+    # Test-related parameters
+    _tolerance = 0.0001
+    _tmp_cache_dir = None
+
     # Define typical values for parameters
     _si2 = "Si2-sc_Abins"
     _squaricn = "squaricn_sum_Abins"
@@ -36,16 +36,10 @@ class AbinsBasicTest(unittest.TestCase):
     _cross_section_factor = "Incoherent"
     _workspace_name = "output_workspace"
 
-    # Test-related parameters
-    _tolerance = 0.0001
-    _tmp_cache_dir = None
-
-    def get_cache_dir(self):
-        return Path(self._tmp_cache_dir.name)
-
     @classmethod
     def setUpClass(cls):
         cls._tmp_cache_dir = tempfile.TemporaryDirectory()
+        cls._cache_directory = cls._tmp_cache_dir.name
 
     @classmethod
     def tearDownClass(cls):
@@ -55,18 +49,6 @@ class AbinsBasicTest(unittest.TestCase):
         self.logger = logging.getLogger("abins2-basic-test")
 
     def tearDown(self):
-        abins.test_helpers.remove_output_files(
-            list_of_names=[
-                "explicit",
-                "default",
-                "total",
-                "squaricn_sum_Abins",
-                "benzene_exp",
-                "benzene_Abins",
-                "numbered",
-            ],
-            directory=self.get_cache_dir(),
-        )
         mtd.clear()
 
     def test_subscribe_warning(self):
@@ -80,12 +62,15 @@ class AbinsBasicTest(unittest.TestCase):
         """Test if the correct behaviour of algorithm in case input is not valid"""
 
         #  invalid CASTEP file missing:  Number of branches     6 in the header file
-
         with (
             self.assertRaisesRegex(RuntimeError, "The third line should include 'Number of branches'."),
-            patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
-            Abins(Version=2, VibrationalOrPhononFile="Si2-sc_wrong.phonon", OutputWorkspace=self._workspace_name)
+            Abins(
+                Version=2,
+                VibrationalOrPhononFile="Si2-sc_wrong.phonon",
+                OutputWorkspace=self._workspace_name,
+                CacheDirectory=self._cache_directory,
+            )
 
         # wrong extension of phonon file in case of CASTEP
         with (
@@ -93,12 +78,12 @@ class AbinsBasicTest(unittest.TestCase):
                 RuntimeError,
                 "The expected extension of file is .phonon.",
             ),
-            patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
             Abins(
                 Version=2,
                 VibrationalOrPhononFile="Si2-sc.wrong_phonon",
                 OutputWorkspace=self._workspace_name,
+                CacheDirectory=self._cache_directory,
             )
 
         # wrong extension of phonon file in case of CRYSTAL
@@ -107,18 +92,23 @@ class AbinsBasicTest(unittest.TestCase):
                 RuntimeError,
                 "The expected extension of file is .out.",
             ),
-            patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
             Abins(
                 Version=2,
                 AbInitioProgram="CRYSTAL",
                 VibrationalOrPhononFile="MgO.wrong_out",
                 OutputWorkspace=self._workspace_name,
+                CacheDirectory=self._cache_directory,
             )
 
         # no name for workspace
-        with self.assertRaises(TypeError), patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir):
-            Abins(Version=2, VibrationalOrPhononFile=self._si2 + ".phonon", TemperatureInKelvin=self._temperature)
+        with self.assertRaises(TypeError):
+            Abins(
+                Version=2,
+                VibrationalOrPhononFile=self._si2 + ".phonon",
+                TemperatureInKelvin=self._temperature,
+                CacheDirectory=self._cache_directory,
+            )
 
         # keyword total in the name of the workspace
         with (
@@ -126,25 +116,25 @@ class AbinsBasicTest(unittest.TestCase):
                 RuntimeError,
                 "Keyword: total cannot be used in the name of workspace.",
             ),
-            patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
             Abins(
                 Version=2,
                 VibrationalOrPhononFile=self._si2 + ".phonon",
                 TemperatureInKelvin=self._temperature,
                 OutputWorkspace=self._workspace_name + "total",
+                CacheDirectory=self._cache_directory,
             )
 
         # non-existent parameter
         with (
             self.assertRaisesRegex(TypeError, "'SampleForm' is an invalid keyword argument"),
-            patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
             Abins(
                 Version=2,
                 VibrationalOrPhononFile=self._si2 + ".phonon",
                 OutputWorkspace=self._workspace_name,
                 SampleForm="Powder",
+                CacheDirectory=self._cache_directory,
             )
 
         # negative temperature in K
@@ -153,25 +143,25 @@ class AbinsBasicTest(unittest.TestCase):
                 RuntimeError,
                 "Temperature must be positive.",
             ),
-            patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
             Abins(
                 Version=2,
                 VibrationalOrPhononFile=self._si2 + ".phonon",
                 TemperatureInKelvin=-1.0,
                 OutputWorkspace=self._workspace_name,
+                CacheDirectory=self._cache_directory,
             )
 
         # unknown instrument
         with (
             self.assertRaisesRegex(ValueError, 'The value "UnknownInstrument" is not in the list of allowed values'),
-            patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
             Abins(
                 Version=2,
                 VibrationalOrPhononFile=self._si2 + ".phonon",
                 Instrument="UnknownInstrument",
                 OutputWorkspace=self._workspace_name,
+                CacheDirectory=self._cache_directory,
             )
 
     # test if intermediate results are consistent
@@ -181,13 +171,13 @@ class AbinsBasicTest(unittest.TestCase):
         """
         with (
             self.assertRaisesRegex(RuntimeError, r"User atom selection \(by symbol\) contains repeated species."),
-            patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
             Abins(
                 Version=2,
                 VibrationalOrPhononFile=self._squaricn + ".phonon",
                 Atoms="C,C,H",
                 OutputWorkspace=self._workspace_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_non_unique_atoms(self):
@@ -196,13 +186,13 @@ class AbinsBasicTest(unittest.TestCase):
         """
         with (
             self.assertRaisesRegex(RuntimeError, r"User atom selection \(by number\) contains repeated atom."),
-            patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
             Abins(
                 Version=2,
                 VibrationalOrPhononFile=self._squaricn + ".phonon",
                 Atoms="atom_1,atom_2,atom1",
                 OutputWorkspace=self._workspace_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_non_existing_atoms(self):
@@ -212,108 +202,111 @@ class AbinsBasicTest(unittest.TestCase):
         # In _squaricn there are no N atoms
         with (
             self.assertRaisesRegex(RuntimeError, r"User defined atom selection \(by element\) 'N': not present in the system."),
-            patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir),
         ):
             Abins(
                 Version=2,
                 VibrationalOrPhononFile=self._squaricn + ".phonon",
                 Atoms="N",
                 OutputWorkspace=self._workspace_name,
+                CacheDirectory=self._cache_directory,
             )
 
     def test_atom_index_limits(self):
         """Individual atoms may be indexed (counting from 1); if the index falls outside number of atoms, Abins should
         terminate with a useful error message.
         """
-        with patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir):
-            self.assertRaisesRegex(
-                RuntimeError,
-                r"Invalid user atom selection \(by number\)" + f" '{ATOM_PREFIX}0'",
-                Abins,
-                VibrationalOrPhononFile=self._squaricn + ".phonon",
-                Atoms=ATOM_PREFIX + "0",
-                OutputWorkspace=self._workspace_name,
-            )
-            self.assertRaisesRegex(
-                RuntimeError,
-                r"Invalid user atom selection \(by number\)" + f" '{ATOM_PREFIX}61'",
-                Abins,
-                VibrationalOrPhononFile=self._squaricn + ".phonon",
-                Atoms=ATOM_PREFIX + "61",
-                OutputWorkspace=self._workspace_name,
-            )
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"Invalid user atom selection \(by number\)" + f" '{ATOM_PREFIX}0'",
+            Abins,
+            VibrationalOrPhononFile=self._squaricn + ".phonon",
+            Atoms=ATOM_PREFIX + "0",
+            OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
+        )
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"Invalid user atom selection \(by number\)" + f" '{ATOM_PREFIX}61'",
+            Abins,
+            VibrationalOrPhononFile=self._squaricn + ".phonon",
+            Atoms=ATOM_PREFIX + "61",
+            OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
+        )
 
     def test_atom_index_invalid(self):
         r"""If the atoms field includes an unmatched entry (i.e. containing the prefix but not matching the '\d+' regex,
         Abins should terminate with a useful error message.
         """
-        with patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir):
-            self.assertRaisesRegex(
-                RuntimeError,
-                r"Not all user atom selections \('atoms' option\) were understood.",
-                Abins,
-                VibrationalOrPhononFile=self._squaricn + ".phonon",
-                Atoms=ATOM_PREFIX + "-3",
-                OutputWorkspace=self._workspace_name,
-            )
-            self.assertRaisesRegex(
-                RuntimeError,
-                r"Not all user atom selections \('atoms' option\) were understood.",
-                Abins,
-                VibrationalOrPhononFile=self._squaricn + ".phonon",
-                Atoms=ATOM_PREFIX + "_#4",
-                OutputWorkspace=self._workspace_name,
-            )
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"Not all user atom selections \('atoms' option\) were understood.",
+            Abins,
+            VibrationalOrPhononFile=self._squaricn + ".phonon",
+            Atoms=ATOM_PREFIX + "-3",
+            OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
+        )
+        self.assertRaisesRegex(
+            RuntimeError,
+            r"Not all user atom selections \('atoms' option\) were understood.",
+            Abins,
+            VibrationalOrPhononFile=self._squaricn + ".phonon",
+            Atoms=ATOM_PREFIX + "_#4",
+            OutputWorkspace=self._workspace_name,
+            CacheDirectory=self._cache_directory,
+        )
 
     def test_lagrange_exists(self):
-        with patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir):
-            Abins(
-                Version=2,
-                AbInitioProgram=self._ab_initio_program,
-                VibrationalOrPhononFile=(self._squaricn + ".phonon"),
-                TemperatureInKelvin=self._temperature,
-                Instrument="Lagrange",
-                Setting="Cu(331) (Lagrange)",
-                Atoms=self._atoms,
-                SumContributions=self._sum_contributions,
-                QuantumOrderEventsNumber=self._quantum_order_events_number,
-                ScaleByCrossSection=self._cross_section_factor,
-                OutputWorkspace="squaricn-lagrange",
-            )
+        Abins(
+            Version=2,
+            AbInitioProgram=self._ab_initio_program,
+            VibrationalOrPhononFile=(self._squaricn + ".phonon"),
+            TemperatureInKelvin=self._temperature,
+            Instrument="Lagrange",
+            Setting="Cu(331) (Lagrange)",
+            Atoms=self._atoms,
+            SumContributions=self._sum_contributions,
+            QuantumOrderEventsNumber=self._quantum_order_events_number,
+            ScaleByCrossSection=self._cross_section_factor,
+            OutputWorkspace="squaricn-lagrange",
+            CacheDirectory=self._cache_directory,
+        )
 
     def test_partial_by_element(self):
         """Check results of INS spectrum resolved by elements: default should match explicit list of elements"""
+        wrk_ref = Abins(
+            Version=2,
+            AbInitioProgram=self._ab_initio_program,
+            VibrationalOrPhononFile=self._squaricn + ".phonon",
+            TemperatureInKelvin=self._temperature,
+            Instrument=self._instrument_name,
+            Atoms=self._atoms,
+            SumContributions=self._sum_contributions,
+            QuantumOrderEventsNumber=self._quantum_order_events_number,
+            ScaleByCrossSection=self._cross_section_factor,
+            OutputWorkspace=self._squaricn + "_ref",
+            CacheDirectory=self._cache_directory,
+        )
 
-        with patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir):
-            wrk_ref = Abins(
-                Version=2,
-                AbInitioProgram=self._ab_initio_program,
-                VibrationalOrPhononFile=self._squaricn + ".phonon",
-                TemperatureInKelvin=self._temperature,
-                Instrument=self._instrument_name,
-                Atoms=self._atoms,
-                SumContributions=self._sum_contributions,
-                QuantumOrderEventsNumber=self._quantum_order_events_number,
-                ScaleByCrossSection=self._cross_section_factor,
-                OutputWorkspace=self._squaricn + "_ref",
-            )
+        wks_all_atoms_explicitly = Abins(
+            Version=2,
+            VibrationalOrPhononFile=self._squaricn + ".phonon",
+            Atoms="H, C, O",
+            SumContributions=self._sum_contributions,
+            QuantumOrderEventsNumber=self._quantum_order_events_number,
+            OutputWorkspace="explicit",
+            CacheDirectory=self._cache_directory,
+        )
 
-            wks_all_atoms_explicitly = Abins(
-                Version=2,
-                VibrationalOrPhononFile=self._squaricn + ".phonon",
-                Atoms="H, C, O",
-                SumContributions=self._sum_contributions,
-                QuantumOrderEventsNumber=self._quantum_order_events_number,
-                OutputWorkspace="explicit",
-            )
-
-            wks_all_atoms_default = Abins(
-                Version=2,
-                VibrationalOrPhononFile=self._squaricn + ".phonon",
-                SumContributions=self._sum_contributions,
-                QuantumOrderEventsNumber=self._quantum_order_events_number,
-                OutputWorkspace="default",
-            )
+        wks_all_atoms_default = Abins(
+            Version=2,
+            VibrationalOrPhononFile=self._squaricn + ".phonon",
+            SumContributions=self._sum_contributions,
+            QuantumOrderEventsNumber=self._quantum_order_events_number,
+            OutputWorkspace="default",
+            CacheDirectory=self._cache_directory,
+        )
 
         # Python 3 has no guarantee of dict order so the workspaces in the group may be in
         # a different order on Python 3
@@ -335,28 +328,29 @@ class AbinsBasicTest(unittest.TestCase):
 
     def test_partial_by_number(self):
         """Simulated INS spectrum can also be resolved by numbered atoms. Check consistency with element totals"""
-        with patch.object(abins.io.IO, "get_save_dir_path", side_effect=self.get_cache_dir):
-            wrk_ref = Abins(
-                Version=2,
-                AbInitioProgram=self._ab_initio_program,
-                VibrationalOrPhononFile=self._squaricn + ".phonon",
-                Atoms=self._atoms,
-                QuantumOrderEventsNumber=self._quantum_order_events_number,
-                ScaleByCrossSection=self._cross_section_factor,
-                OutputWorkspace=self._squaricn + "_ref",
-            )
+        wrk_ref = Abins(
+            Version=2,
+            AbInitioProgram=self._ab_initio_program,
+            VibrationalOrPhononFile=self._squaricn + ".phonon",
+            Atoms=self._atoms,
+            QuantumOrderEventsNumber=self._quantum_order_events_number,
+            ScaleByCrossSection=self._cross_section_factor,
+            OutputWorkspace=self._squaricn + "_ref",
+            CacheDirectory=self._cache_directory,
+        )
 
-            numbered_workspace_name = "numbered"
-            h_indices = ("1", "2", "3", "4")
-            wks_numbered_atoms = Abins(
-                Version=2,
-                VibrationalOrPhononFile=self._squaricn + ".phonon",
-                Atoms=", ".join([ATOM_PREFIX + s for s in h_indices]),
-                SumContributions=self._sum_contributions,
-                QuantumOrderEventsNumber=self._quantum_order_events_number,
-                ScaleByCrossSection=self._cross_section_factor,
-                OutputWorkspace=numbered_workspace_name,
-            )
+        numbered_workspace_name = "numbered"
+        h_indices = ("1", "2", "3", "4")
+        wks_numbered_atoms = Abins(
+            Version=2,
+            VibrationalOrPhononFile=self._squaricn + ".phonon",
+            Atoms=", ".join([ATOM_PREFIX + s for s in h_indices]),
+            SumContributions=self._sum_contributions,
+            QuantumOrderEventsNumber=self._quantum_order_events_number,
+            ScaleByCrossSection=self._cross_section_factor,
+            OutputWorkspace=numbered_workspace_name,
+            CacheDirectory=self._cache_directory,
+        )
 
         wrk_ref_names = list(wrk_ref.getNames())
         wrk_h_total = wrk_ref[wrk_ref_names.index(self._squaricn + "_ref_H_total")]

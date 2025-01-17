@@ -4,11 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from tempfile import TemporaryDirectory
 import unittest
+
 from numpy.testing import assert_array_almost_equal
 
 from mantid.simpleapi import mtd, Abins, Scale, CompareWorkspaces, Load
-import abins
 from abins.constants import ATOM_PREFIX, FUNDAMENTALS
 
 
@@ -30,25 +31,12 @@ class AbinsBasicTest(unittest.TestCase):
     _workspace_name = "output_workspace"
     _tolerance = 0.0001
 
-    from mantid.kernel import ConfigService
-
-    _cache_directory = ConfigService.getString("defaultsave.directory")
+    def setUp(self):
+        self._tmpdir = TemporaryDirectory()
+        self._cache_directory = self._tmpdir.name
 
     def tearDown(self):
-        abins.test_helpers.remove_output_files(
-            list_of_names=[
-                "explicit",
-                "default",
-                "total",
-                "squaricn_sum_Abins",
-                "squaricn_scale",
-                "benzene_exp",
-                "benzene_Abins",
-                "experimental",
-                "numbered",
-            ],
-            directory=self._cache_directory,
-        )
+        self._tmpdir.cleanup()
         mtd.clear()
 
     def test_wrong_input(self):

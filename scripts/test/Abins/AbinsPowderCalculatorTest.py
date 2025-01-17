@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import json
 from pathlib import Path
+from tempfile import TemporaryDirectory
 import unittest
 
 import numpy as np
@@ -25,12 +26,11 @@ class PowderCalculatorTest(unittest.TestCase):
 
     #     test input
     def setUp(self):
-        from mantid.kernel import ConfigService
-
-        self._cache_directory = Path(ConfigService.getString("defaultsave.directory"))
+        self._tempdir = TemporaryDirectory()
+        self._cache_directory = Path(self._tempdir.name)
 
     def tearDown(self):
-        abins.test_helpers.remove_output_files(list_of_names=["CalculatePowder"], directory=self._cache_directory)
+        self._tempdir.cleanup()
 
     def test_wrong_input(self):
         full_path_filename = abins.test_helpers.find_file(filename=self._si2 + ".json")

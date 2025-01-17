@@ -51,11 +51,8 @@ class SCalculatorFactoryPowderTest(unittest.TestCase):
         )
 
     def tearDown(self):
-        from mantid.kernel import ConfigService
+        self._temporary_directory.cleanup()
 
-        abins.test_helpers.remove_output_files(
-            list_of_names=["_CalculateSPowder"], directory=ConfigService.getString("defaultsave.directory")
-        )
         abins.parameters.performance["threads"] = self.default_threads
         abins.parameters.instruments.update(self._instruments_defaults)
 
