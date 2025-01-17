@@ -25,6 +25,7 @@ requirements:
     - libboost-python-devel {{ libboost_python_devel }}
     - libopenblas {{ libopenblas }} # [osx or linux]
     - librdkafka {{ librdkafka }}
+    - lz4  # [linux]
     - matplotlib {{ matplotlib }}
     - mkl {{ mkl }} # [win]
     - muparser {{ muparser }}
