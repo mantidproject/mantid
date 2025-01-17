@@ -14,11 +14,6 @@ import abins.test_helpers
 class AbinsLoadDMOL3Test(unittest.TestCase, abins.input.Tester):
     """Check entire input files against expected outputs"""
 
-    def tearDown(self):
-        from mantid.kernel import ConfigService
-
-        abins.test_helpers.remove_output_files(list_of_names=["_LoadDMOL3"], directory=ConfigService.getString("defaultsave.directory"))
-
     _gamma_dmol3 = "LTA_40_O2_LoadDMOL3"
     _gamma_no_h_dmol3 = "Na2SiF6_LoadDMOL3"
     _molecule_dmol3 = "methane_LoadDMOL3"

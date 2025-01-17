@@ -22,12 +22,14 @@ from abins.test_helpers import assert_kpoint_almost_equal
 
 class TestAbinsData(unittest.TestCase):
     def setUp(self):
-        from mantid.kernel import ConfigService
-
-        self.cache_directory = ConfigService.getString("defaultsave.directory")
+        self._tempdir = TemporaryDirectory()
+        self.cache_directory = Path(self._tempdir.name)
 
         self.mock_ad = MagicMock(spec=abins.AtomsData)
         self.mock_kpd = MagicMock(spec=abins.KpointsData)
+
+    def tearDown(self):
+        self._tempdir.cleanup()
 
     def test_init_typeerror(self):
         with self.assertRaisesRegex(ValidationError, "Input should be an instance of KpointsData"):
@@ -61,13 +63,14 @@ class DummyLoader:
 
 class TestAbinsDataFromCalculation(unittest.TestCase):
     def setUp(self):
-        from mantid.kernel import ConfigService
-
-        self.cache_directory = ConfigService.getString("defaultsave.directory")
+        self._tempdir = TemporaryDirectory()
+        self.cache_directory = Path(self._tempdir.name)
 
         all_loaders["DUMMYLOADER"] = DummyLoader
 
     def tearDown(self):
+        self._tempdir.cleanup()
+
         del all_loaders["DUMMYLOADER"]
 
     def test_with_dummy_loader(self):

@@ -11,11 +11,6 @@ from abins.input import CRYSTALLoader
 
 
 class AbinsLoadCRYSTALTest(unittest.TestCase, abins.input.Tester):
-    def tearDown(self):
-        from mantid.kernel import ConfigService
-
-        abins.test_helpers.remove_output_files(list_of_names=["_LoadCRYSTAL"], directory=ConfigService.getString("defaultsave.directory"))
-
     # *************************** USE CASES *********************************************
     # ===================================================================================
     # | Use cases: Gamma point calculation for CRYSTAL                                  |

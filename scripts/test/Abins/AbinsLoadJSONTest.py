@@ -17,10 +17,6 @@ class AbinsLoadJSONTest(unittest.TestCase, abins.input.Tester):
         abins.parameters.sampling["force_constants"]["qpt_cutoff"] = 4.0
 
     def tearDown(self):
-        from mantid.kernel import ConfigService
-
-        abins.test_helpers.remove_output_files(list_of_names=["_LoadJSON"], directory=ConfigService.getString("defaultsave.directory"))
-
         abins.parameters.sampling["force_constants"]["qpt_cutoff"] = self.default_cutoff
 
     def test_json_1(self):

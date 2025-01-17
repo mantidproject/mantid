@@ -48,11 +48,6 @@ class LoadCASTEPTest(unittest.TestCase, abins.input.Tester):
             # noinspection PyUnusedLocal
             CASTEPLoader(input_ab_initio_filename=1)
 
-    def tearDown(self):
-        from mantid.kernel import ConfigService
-
-        abins.test_helpers.remove_output_files(list_of_names=["_LoadCASTEP"], directory=ConfigService.getString("defaultsave.directory"))
-
     #  *************************** USE CASES ********************************************
     # ===================================================================================
     # | Use case: Gamma point calculation and sum correction enabled during calculations|
