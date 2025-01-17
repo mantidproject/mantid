@@ -270,7 +270,7 @@ class IndirectILLReductionQENS(PythonAlgorithm):
         files = SelectNexusFilesByMetadata(files, self._criteria)
 
         if not files:
-            raise RuntimeError("None of the {0} runs are of QENS type.Check the files or reduction type.".format(label))
+            raise RuntimeError("None of the {0} runs are of QENS type. Check the files or reduction type.".format(label))
         else:
             self.log().information("Filtered {0} runs are: {1} \\n".format(label, files.replace(",", "\\n")))
 

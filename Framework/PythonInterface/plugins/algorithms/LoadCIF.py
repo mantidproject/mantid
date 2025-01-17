@@ -136,7 +136,7 @@ class UnitCellBuilder(object):
         )
 
         if unitCellValueMap["_cell_length_a"] is None:
-            raise RuntimeError("The a-parameter of the unit cell is not specified in the supplied CIF.\nKey to look for: _cell_length_a")
+            raise RuntimeError("The a-parameter of the unit cell is not specified in the supplied CIF. Key to look for: _cell_length_a")
 
         replacementMap = {
             "_cell_length_b": str(unitCellValueMap["_cell_length_a"]),
@@ -202,7 +202,7 @@ class AtomListBuilder(object):
 
         for field in coordinateFields:
             if field not in cifData.keys():
-                raise RuntimeError("Mandatory field {0} not found in CIF-file.Please check the atomic position definitions.".format(field))
+                raise RuntimeError("Mandatory field {0} not found in CIF-file. Please check the atomic position definitions.".format(field))
 
         # Return a dict like { 'label1': 'x y z', 'label2': 'x y z' }
         return dict(

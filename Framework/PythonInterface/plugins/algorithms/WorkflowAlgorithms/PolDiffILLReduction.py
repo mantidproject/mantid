@@ -378,7 +378,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.declareProperty(
             name="MaxTOFChannel",
             defaultValue=512,
-            doc="What is the maximal number of TOF bins to be used.Bins above this value will be removed.",
+            doc="What is the maximal number of TOF bins to be used. Bins above this value will be removed.",
         )
 
         self.setPropertySettings("MaxTOFChannel", tofMeasurement)
