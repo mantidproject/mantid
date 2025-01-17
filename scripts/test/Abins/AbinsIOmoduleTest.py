@@ -15,11 +15,11 @@ from abins import IO
 
 class IOTest(unittest.TestCase):
     def setUp(self):
-        self._tmpdir = TemporaryDirectory()
-        self.cache_directory = Path(self._tmpdir.name)
+        self.tempdir = TemporaryDirectory()
+        self.cache_directory = Path(self.tempdir.name)
 
     def tearDown(self):
-        self._tmpdir.cleanup()
+        self.tempdir.cleanup()
 
     def _save_stuff(self):
         saver = IO(input_filename="Cars.foo", group_name="Volksvagen", cache_directory=self.cache_directory)

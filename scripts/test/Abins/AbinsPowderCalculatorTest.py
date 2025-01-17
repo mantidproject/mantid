@@ -27,7 +27,7 @@ class PowderCalculatorTest(unittest.TestCase):
     #     test input
     def setUp(self):
         self._tempdir = TemporaryDirectory()
-        self._cache_directory = Path(self._tempdir.name)
+        self.cache_directory = Path(self._tempdir.name)
 
     def tearDown(self):
         self._tempdir.cleanup()
@@ -59,7 +59,7 @@ class PowderCalculatorTest(unittest.TestCase):
         ref_data = self._get_ref_data(filename=abins_data_filename)
 
         good_tester = abins.PowderCalculator(
-            filename=abins_data_filename, abins_data=ref_data["DFT"], temperature=300.0, cache_directory=self._cache_directory
+            filename=abins_data_filename, abins_data=ref_data["DFT"], temperature=300.0, cache_directory=self.cache_directory
         )
         calculated_data = good_tester.calculate_data().extract()
 
@@ -73,7 +73,7 @@ class PowderCalculatorTest(unittest.TestCase):
 
         # check if loading powder data is correct
         new_tester = abins.PowderCalculator(
-            filename=abins_data_filename, abins_data=ref_data["DFT"], temperature=300.0, cache_directory=self._cache_directory
+            filename=abins_data_filename, abins_data=ref_data["DFT"], temperature=300.0, cache_directory=self.cache_directory
         )
 
         loaded_data = new_tester.load_formatted_data().extract()
@@ -101,7 +101,7 @@ class PowderCalculatorTest(unittest.TestCase):
             abins_data = AbinsData.from_dict(json.load(fp))
 
         powder = abins.PowderCalculator(
-            filename=abins_data_filename, abins_data=abins_data, temperature=300.0, cache_directory=self._cache_directory
+            filename=abins_data_filename, abins_data=abins_data, temperature=300.0, cache_directory=self.cache_directory
         ).calculate_data()
 
         powder_dict = abins.test_helpers.dict_arrays_to_lists(powder.extract())
