@@ -68,8 +68,8 @@ void AppendSpectra::exec() {
   if (((eventWs1) && (!eventWs2)) || ((!eventWs1) && (eventWs2))) {
     const std::string message("Only one of the input workspaces are of type "
                               "EventWorkspace; please use matching workspace "
-                              "types (both EventWorkspace's or both "
-                              "Workspace2D's).");
+                              "types (both EventWorkspace or both "
+                              "Workspace2D).");
     g_log.error(message);
     throw std::invalid_argument(message);
   }
