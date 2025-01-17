@@ -287,11 +287,11 @@ class SpectraSelectionDialogTest(unittest.TestCase):
         ssd._ui.plotType.setCurrentIndex(3)
         self.assertTrue(ssd._ui.buttonBox.button(QDialogButtonBox.YesToAll).isEnabled())
 
-    def test_plot_all_button_disabled_when_plot_type_is_contour(self):
+    def test_plot_all_button_enabled_when_plot_type_is_contour(self):
         workspaces = [self._single_spec_ws] * 3
         ssd = SpectraSelectionDialog(workspaces, advanced=True)
         ssd._ui.plotType.setCurrentIndex(4)
-        self.assertFalse(ssd._ui.buttonBox.button(QDialogButtonBox.YesToAll).isEnabled())
+        self.assertTrue(ssd._ui.buttonBox.button(QDialogButtonBox.YesToAll).isEnabled())
 
     def test_ok_button_disabled_when_plot_type_is_surface_and_more_than_one_spectrum_number_entered(self):
         workspaces = [self._multi_spec_ws] * 3

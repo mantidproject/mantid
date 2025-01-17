@@ -313,10 +313,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                 if self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.text() == WORKSPACE_NAME:
                     self._ui.advanced_options_widget.ui.plot_axis_label_line_edit.setText(WORKSPACE_REFERENCE_NUMBER)
 
-                self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(False)
-
-                if self._ui.plotType.currentText() == SURFACE:
-                    self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(True)
+                self._ui.buttonBox.button(QDialogButtonBox.YesToAll).setEnabled(True)
 
             else:
                 self._ui.advanced_options_widget.ui.error_bars_check_box.setEnabled(True)
