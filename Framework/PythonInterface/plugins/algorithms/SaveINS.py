@@ -173,25 +173,25 @@ class SaveINS(PythonAlgorithm):
             f_handle.write("HKLF 2\n")  # tells SHELX the columns saved in the reflection file
             f_handle.write("END")
 
-    def _symmetry_operation_key(self, W1, w1, W2=np.eye(3), w2=np.zeros(3)):
+    def _symmetry_operation_key(self, W1_mat, w1_vec, W2_mat=np.eye(3), w2_vec=np.zeros(3)):
         """
         Generate a key for symmetry operation comparison.
         Combines rotation and translation into a unique tuple representation.
         Ex: "x,y,z+1/2" is equivalent to "x,y,z+0.5"
         """
-        W = W1 @ W2
-        w = W1 @ w2 + w1
-        w = np.mod(w, 1)  # Ensure w is within [0, 1)
-        return tuple(np.round(W, 0).astype(int).flatten().tolist() + np.round(w, 3).tolist())
+        W_mat = W1_mat @ W2_mat
+        w_vec = W1_mat @ w2_vec + w1_vec
+        w_vec = np.mod(w_vec, 1)  # Ensure w_vec is within [0, 1)
+        return tuple(np.round(W_mat, 0).astype(int).flatten().tolist() + np.round(w_vec, 3).tolist())
 
     def _symmetry_matrix_vector(self, symop):
         """
-        Extract the rotation matrix (W) and translation vector (w) from a symmetry element.
+        Extract the rotation matrix (W_mat) and translation vector (w_vec) from a symmetry element.
         This symmetry operation transform any point via a matrix/translation pair.
         """
-        W = np.linalg.inv(np.vstack([symop.transformHKL(V3D(*vec)) for vec in np.eye(3)]))
-        w = np.array(symop.transformCoordinates(V3D(0, 0, 0)))
-        return W, w
+        W_mat = np.linalg.inv(np.vstack([symop.transformHKL(V3D(*vec)) for vec in np.eye(3)]))
+        w_vec = np.array(symop.transformCoordinates(V3D(0, 0, 0)))
+        return W_mat, w_vec
 
     def _generate_equivalent_operators(self, rotation_ops, centering_ops):
         """
@@ -199,24 +199,24 @@ class SaveINS(PythonAlgorithm):
         """
         equivalent_ops = set()
         for rot in rotation_ops:
-            W2, _ = self._symmetry_matrix_vector(rot)
+            W2_mat, _ = self._symmetry_matrix_vector(rot)
             for cent in centering_ops:
-                _, w2 = self._symmetry_matrix_vector(cent)
-                key = self._symmetry_operation_key(np.eye(3), np.zeros(3), W2, w2)
+                _, w2_vec = self._symmetry_matrix_vector(cent)
+                key = self._symmetry_operation_key(np.eye(3), np.zeros(3), W2_mat, w2_vec)
                 equivalent_ops.add(key)
         return equivalent_ops
 
-    def _update_symmetry_dict(self, W1, w1, S3, sym_key, sym_ops_dict, W_dict, w_dict):
+    def _update_symmetry_dict(self, W1_mat, w1_vec, S3, sym_key, sym_ops_dict, W_mat_dict, w_vec_dict):
         """
         Update the symmetry operations dictionary with priority for closeness to identity/origin.
         """
         if S3 not in sym_ops_dict or (
-            np.linalg.det(W1) > np.linalg.det(W_dict[S3])  # identity preferred
-            or np.linalg.norm(w1) < np.linalg.norm(w_dict[S3])  # origin preferred
+            np.linalg.det(W1_mat) > np.linalg.det(W_mat_dict[S3])  # identity preferred
+            or np.linalg.norm(w1_vec) < np.linalg.norm(w_vec_dict[S3])  # origin preferred
         ):
             sym_ops_dict[S3] = sym_key
-            W_dict[S3] = W1
-            w_dict[S3] = w1
+            W_mat_dict[S3] = W1_mat
+            w_vec_dict[S3] = w1_vec
 
     def _get_shelx_symmetry_operators(self, spgr, latt_type):
         """
@@ -231,22 +231,22 @@ class SaveINS(PythonAlgorithm):
 
         sym_ops = spgr.getSymmetryOperations()
         sym_ops_dict = {}
-        W_dict = {}
-        w_dict = {}
+        W_mat_dict = {}
+        w_vec_dict = {}
 
         for sym_op in sym_ops:
-            W1, w1 = self._symmetry_matrix_vector(sym_op)
+            W1_mat, w1_vec = self._symmetry_matrix_vector(sym_op)
             sym_key = sym_op.getIdentifier()
-            S1 = self._symmetry_operation_key(W1, w1)
+            S1 = self._symmetry_operation_key(W1_mat, w1_vec)
 
             if S1 not in latt_type_ops_set:
                 # re-iterate over lattice operators to map equivalently generated
                 for rot in self.ROTATION_OPS[latt_sign]:
-                    W2, _ = self._symmetry_matrix_vector(rot)
+                    W2_mat, _ = self._symmetry_matrix_vector(rot)
                     for cent in self.CENTERING_OPS[latt_numb]:
-                        _, w2 = self._symmetry_matrix_vector(cent)
-                        S3 = self._symmetry_operation_key(W1, w1, W2, w2)
-                        self._update_symmetry_dict(W1, w1, S3, sym_key, sym_ops_dict, W_dict, w_dict)
+                        _, w2_vec = self._symmetry_matrix_vector(cent)
+                        S3 = self._symmetry_operation_key(W1_mat, w1_vec, W2_mat, w2_vec)
+                        self._update_symmetry_dict(W1_mat, w1_vec, S3, sym_key, sym_ops_dict, W_mat_dict, w_vec_dict)
 
         return set(sym_ops_dict.values())
 
