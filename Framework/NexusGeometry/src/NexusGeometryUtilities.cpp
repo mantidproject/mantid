@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexusGeometry/NexusGeometryUtilities.h"
-#include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include <regex>
 namespace Mantid::NexusGeometry::utilities {
@@ -66,7 +65,7 @@ bool hasNXClass(const H5::Group &group, const std::string &attributeValue) {
 }
 
 bool isNamed(const H5::H5Object &object, const std::string &name) {
-  const auto objName = H5_OBJ_NAME(object);
+  const auto objName = object.getObjName();
   // resultName gives full path. We match the last name on the path
   return std::regex_match(objName, std::regex(".*/" + name + "$"));
 }
