@@ -364,9 +364,6 @@ def plot_surface(workspaces, fig=None):
 
 @manage_workspace_names
 def plot_wireframe(workspaces, fig=None):
-    """
-    Plot wireframe plots for multiple workspaces on a single 3D plot.
-    """
     import matplotlib.pyplot as plt
     from matplotlib import colormaps
 
@@ -389,7 +386,6 @@ def plot_wireframe(workspaces, fig=None):
         legend = ax.legend(loc="upper right", title="Workspaces")
         legend_set_draggable(legend, True)
 
-    # Set the title to include the names of all workspaces
     workspace_names = ", ".join(ws.name() for ws in workspaces)
     ax.set_title(f"Wireframe Plot: {workspace_names}")
 
