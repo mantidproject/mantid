@@ -28,7 +28,7 @@ parseRunNumberOrWhitespace(std::string const &runNumberString);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<double> parseTheta(std::string const &theta);
 
-MANTIDQT_ISISREFLECTOMETRY_DLL boost::optional<boost::regex> parseTitleMatcher(std::string const &titleMatcher);
+MANTIDQT_ISISREFLECTOMETRY_DLL std::optional<boost::regex> parseTitleMatcher(std::string const &titleMatcher);
 
 MANTIDQT_ISISREFLECTOMETRY_DLL
 boost::variant<TransmissionRunPair, std::vector<int>> parseTransmissionRuns(std::string const &firstTransmissionRun,

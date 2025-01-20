@@ -57,9 +57,9 @@ private:
   IFileHandler *m_fileHandler;
   IReflMessageHandler *m_messageHandler;
 
-  boost::optional<RangeInLambda> wavelengthRangeFromView();
-  boost::optional<RangeInLambda> monitorBackgroundRangeFromView();
-  boost::optional<RangeInLambda> monitorIntegralRangeFromView();
+  std::optional<RangeInLambda> wavelengthRangeFromView();
+  std::optional<RangeInLambda> monitorBackgroundRangeFromView();
+  std::optional<RangeInLambda> monitorIntegralRangeFromView();
   MonitorCorrections monitorCorrectionsFromView();
   DetectorCorrectionType detectorCorrectionTypeFromView();
   DetectorCorrections detectorCorrectionsFromView();

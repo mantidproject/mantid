@@ -65,9 +65,9 @@ private:
   void decodePerAngleDefaultsRows(QTableWidget *tab, int rowsNum, int columnsNum, const QList<QVariant> &list);
   void decodeInstrument(const QtInstrumentView *gui, const QMap<QString, QVariant> &map);
   void decodeRuns(QtRunsView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
-                  const QMap<QString, QVariant> &map, boost::optional<int> precision, QtCatalogSearcher *searcher);
+                  const QMap<QString, QVariant> &map, std::optional<int> precision, QtCatalogSearcher *searcher);
   void decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs, RunsTablePresenter *presenter,
-                       const QMap<QString, QVariant> &map, boost::optional<int> precision);
+                       const QMap<QString, QVariant> &map, std::optional<int> precision);
   void decodeRunsTableModel(ReductionJobs *jobs, const QList<QVariant> &list);
   MantidQt::CustomInterfaces::ISISReflectometry::Group decodeGroup(const QMap<QString, QVariant> &map);
   std::vector<boost::optional<MantidQt::CustomInterfaces::ISISReflectometry::Row>>
@@ -81,7 +81,7 @@ private:
   void decodeSave(const QtSaveView *gui, const QMap<QString, QVariant> &map);
   void decodeEvent(const QtEventView *gui, const QMap<QString, QVariant> &map);
   void updateRunsTableViewFromModel(QtRunsTableView *view, const ReductionJobs *model,
-                                    const boost::optional<int> &precision);
+                                    const std::optional<int> &precision);
 
   bool m_projectSave = false;
   size_t m_currentBatchVersion = 0;

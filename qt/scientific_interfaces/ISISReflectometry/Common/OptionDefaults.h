@@ -5,9 +5,9 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-#include "Common/DllConfig.h"
 #include "MantidAPI/BoostOptionalToAlgorithmProperty.h"
 #include "MantidGeometry/Instrument_fwd.h"
+#include <optional>
 #include <string>
 
 namespace MantidQt {
@@ -25,7 +25,7 @@ public:
   template <typename T>
   T getValueOrDefault(std::string const &propertyName, std::string const &parameterName, T defaultValue) const;
   template <typename T>
-  boost::optional<T> getOptionalValue(std::string const &propertyName, std::string const &parameterName) const;
+  std::optional<T> getOptionalValue(std::string const &propertyName, std::string const &parameterName) const;
   template <typename T> T getValue(std::string const &propertyName, std::string const &parameterName) const;
 
   int getIntOrZero(std::string const &propertyName, std::string const &parameterName) const;
@@ -47,14 +47,14 @@ T OptionDefaults::getValueOrDefault(std::string const &propertyName, std::string
                                     T defaultValue) const {
   auto maybeValue =
       Mantid::API::checkForOptionalInstrumentDefault<T>(m_algorithm.get(), propertyName, m_instrument, parameterName);
-  if (maybeValue.is_initialized())
-    return maybeValue.get();
+  if (maybeValue.has_value())
+    return maybeValue.value();
   return defaultValue;
 }
 
 template <typename T>
-boost::optional<T> OptionDefaults::getOptionalValue(std::string const &propertyName,
-                                                    std::string const &parameterName) const {
+std::optional<T> OptionDefaults::getOptionalValue(std::string const &propertyName,
+                                                  std::string const &parameterName) const {
   return Mantid::API::checkForOptionalInstrumentDefault<T>(m_algorithm.get(), propertyName, m_instrument,
                                                            parameterName);
 }
