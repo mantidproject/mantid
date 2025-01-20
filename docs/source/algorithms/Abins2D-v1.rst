@@ -58,7 +58,7 @@ A minimal example, relying heavily on default parameters:
 
 .. testcode:: Abins2DCastepSimple
 
-    benzene_wrk = Abins2D(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon")
+    benzene_wrk = Abins2D(AbInitioProgram="CASTEP", VibrationalOrPhononFile="benzene.phonon", CacheDirectory="/tmp/")
 
 
     for name in benzene_wrk.getNames():
@@ -76,7 +76,7 @@ Output: (note that only the fundamental excitations are included)
 .. testcleanup:: Abins2DCastepSimple
 
     import os
-    os.remove("benzene.hdf5")
+    os.remove("/tmp/benzene.hdf5")
 
 **Example - using more arguments:**
 
@@ -94,7 +94,7 @@ approximation may not be the appropriate tool.)
                         TemperatureInKelvin=10, Instrument="MAPS",
                         Atoms="H, atom1, atom2", SumContributions=True,
                         QuantumOrderEventsNumber="2", Autoconvolution=True,
-                        ScaleByCrossSection="Total")
+                        ScaleByCrossSection="Total", CacheDirectory="/tmp")
 
     print(f"Created {wrk_verbose.size()} workspaces")
     print(f"including {wrk_verbose[12].name()}")
@@ -109,7 +109,7 @@ Output:
 .. testcleanup:: Abins2DExplicitParameters
 
     import os
-    os.remove("benzene.hdf5")
+    os.remove("/tmp/benzene.hdf5")
 
 .. categories::
 
