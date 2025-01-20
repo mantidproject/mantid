@@ -55,6 +55,7 @@ private:
   void init() override;
   void exec() override;
 
+  bool checkBinning(const API::MatrixWorkspace_const_sptr &ws1, const API::MatrixWorkspace_const_sptr &ws2) const;
   void checkForOverlap(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2, bool checkSpectra) const;
   API::MatrixWorkspace_sptr conjoinEvents(const DataObjects::EventWorkspace &ws1,
                                           const DataObjects::EventWorkspace &ws2);
