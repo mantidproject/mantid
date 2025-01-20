@@ -12,11 +12,12 @@ from typing import List
 from unittest import TestCase
 from unittest.mock import MagicMock, patch
 
-import lz4.frame
-import os
-
 from mantid.kernel.environment import is_linux
 from mantidqt.dialogs.errorreports.run_pystack import _get_core_dumps_dir, _get_most_recent_core_dump_file, _is_lz4_file
+
+if is_linux():
+    import lz4.frame
+import os
 
 
 class TestRunPystack(TestCase):
