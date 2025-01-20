@@ -169,7 +169,7 @@ public:
     TS_ASSERT(!conj.isExecuted());
   }
 
-  void testCheckMatchingBinsError() {
+  void testNonMatchingBinsThrowsError() {
     MatrixWorkspace_sptr ws1, ws2;
     ws1 = WorkspaceCreationHelper::createEventWorkspace(10, 5);
     ws2 = WorkspaceCreationHelper::createEventWorkspace(10, 10);
@@ -190,6 +190,22 @@ public:
       TS_ASSERT_EQUALS(std::string(e.what()), expectedMessage);
       TS_ASSERT(!conj.isExecuted());
     }
+  }
+
+  void testMatchingBinsThrowsNoError() {
+    MatrixWorkspace_sptr ws1 = WorkspaceCreationHelper::createEventWorkspace(10, 5);
+    MatrixWorkspace_sptr ws2 = WorkspaceCreationHelper::createEventWorkspace(10, 5);
+
+    // CheckMatchingBins is true by default, so don't set it here.
+    ConjoinWorkspaces conj;
+    conj.initialize();
+    conj.setProperty("CheckOverlapping", false);
+    conj.setProperty("InputWorkspace1", ws1);
+    conj.setProperty("InputWorkspace2", ws2);
+    conj.setAlwaysStoreInADS(false);
+    conj.setRethrows(true);
+
+    TS_ASSERT_THROWS_NOTHING(conj.execute());
   }
 
   void testDoCheckForOverlap() {
@@ -412,7 +428,6 @@ private:
     MatrixWorkspace_sptr ews = WorkspaceCreationHelper::createEventWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace(name, ews);
 
-    // Crop ews to have first 3 spectra, ews2 to have second 3
     CropWorkspace crop;
     crop.setChild(true);
     crop.initialize();

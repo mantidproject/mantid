@@ -148,8 +148,7 @@ DataObjects::EventWorkspace_sptr WorkspaceJoiners::execEvent(const DataObjects::
   return output;
 }
 
-/** Checks that the two input workspace have common size and the same
- * instrument & unit.
+/** Checks that the two input workspace have the same instrument, unit and distribution flag.
  *  @param ws1 :: The first input workspace
  *  @param ws2 :: The second input workspace
  *  @throw std::invalid_argument If the workspaces are not compatible
