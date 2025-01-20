@@ -103,10 +103,10 @@ def _get_output_from_pystack(core_dump_file: Path) -> str:
 
 
 def _decompress_lz4_file(lz4_core_dump_file: Path) -> Path:
-    tmp_decompressed_core_file = NamedTemporaryFile()
-    with lz4.frame.open(lz4_core_dump_file.as_posix(), "r") as lz4_fp:
-        tmp_decompressed_core_file.write(lz4_fp.read())
-    return tmp_decompressed_core_file
+    with NamedTemporaryFile(delete=False) as tmp_decompressed_core_file:
+        with lz4.frame.open(lz4_core_dump_file.as_posix(), "r") as lz4_fp:
+            tmp_decompressed_core_file.write(lz4_fp.read())
+    return Path(tmp_decompressed_core_file.name)
 
 
 def _is_lz4_file(core_dump_file: Path) -> bool:
