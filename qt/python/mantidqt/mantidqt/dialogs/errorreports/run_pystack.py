@@ -7,13 +7,17 @@
 from datetime import datetime
 from pathlib import Path
 from tempfile import NamedTemporaryFile
+
+from mantid.kernel.environment import is_linux
+from mantid.kernel import ConfigService, Logger
+
 import base64
-import lz4.frame
+
+if is_linux():
+    import lz4.frame
 import re
 import subprocess
 import zlib
-
-from mantid.kernel import ConfigService, Logger
 
 
 CORE_DUMP_RECENCY_LIMIT = 30
