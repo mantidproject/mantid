@@ -113,6 +113,10 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
     def on_ok_clicked(self):
         self.check_num_spectra()
 
+        if self.selection is None:
+            QMessageBox.warning(self, "Invalid Input", "Please enter a valid workspace index or spectrum number.")
+            return
+
         if self._check_number_of_plots(self.selection):
             self.accept()
 
@@ -145,10 +149,6 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
     # ------------------- Private -------------------------
     def _check_number_of_plots(self, selection):
-        if not selection or not selection.wksp_indices:
-            logger.error("Invalid selection or workspace indices are None.")
-            return False
-
         index_length = len(selection.wksp_indices) if selection.wksp_indices else len(selection.spectra)
         number_of_lines_to_plot = len(selection.workspaces) * index_length
         if selection.plot_type == SpectraSelection.Tiled and number_of_lines_to_plot > 12:
