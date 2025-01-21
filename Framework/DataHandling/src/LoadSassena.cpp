@@ -101,7 +101,7 @@ HistogramData::Points LoadSassena::loadQvectors(const H5::H5File &h5file, const 
   hsize_t dims[3];
   try {
     dataSetInfo(h5file, setName, dims);
-  } catch (H5::Exception &e) {
+  } catch (H5::Exception &) {
     throw Kernel::Exception::FileError("Unable to read " + setName + " dataset info:", m_filename);
   }
 
@@ -110,7 +110,7 @@ HistogramData::Points LoadSassena::loadQvectors(const H5::H5File &h5file, const 
 
   try {
     this->dataSetDouble(h5file, "qvectors", buf);
-  } catch (H5::Exception &e) {
+  } catch (H5::Exception &) {
     this->g_log.error("LoadSassena::loadQvectors cannot proceed");
     qvmod.resize(0);
     return HistogramData::Points(std::move(qvmod));
@@ -169,7 +169,7 @@ void LoadSassena::loadFQ(const H5::H5File &h5file, const API::WorkspaceGroup_spt
   std::vector<double> buf(nq * 2);
   try {
     this->dataSetDouble(h5file, setName, buf);
-  } catch (H5::Exception &e) {
+  } catch (H5::Exception &) {
     this->g_log.error("LoadSassena::loadFQ cannot proceed");
     return;
   }
@@ -229,7 +229,7 @@ void LoadSassena::loadFQT(const H5::H5File &h5file, const API::WorkspaceGroup_sp
   std::vector<double> buf(nq * nnt * 2);
   try {
     this->dataSetDouble(h5file, setName, buf);
-  } catch (H5::Exception &e) {
+  } catch (H5::Exception &) {
     this->g_log.error("LoadSassena::loadFQT cannot proceed");
     return;
   }
@@ -356,7 +356,7 @@ void LoadSassena::exec() {
   H5::H5File h5file;
   try {
     h5file = H5::H5File(m_filename.c_str(), H5F_ACC_RDONLY);
-  } catch (H5::FileIException &e) {
+  } catch (H5::FileIException &) {
     this->g_log.error("Cannot open " + m_filename);
     throw Kernel::Exception::FileError("Unable to open:", m_filename);
   }
