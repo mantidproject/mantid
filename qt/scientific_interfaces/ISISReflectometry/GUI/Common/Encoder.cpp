@@ -137,13 +137,13 @@ QMap<QString, QVariant> Encoder::encodeRangeInQ(const RangeInQ &rangeInQ) {
   auto step = rangeInQ.step();
   qRangeMap.insert(QString("minPresent"), QVariant(static_cast<bool>(min)));
   if (min)
-    qRangeMap.insert(QString("min"), QVariant(min.get()));
+    qRangeMap.insert(QString("min"), QVariant(min.value()));
   qRangeMap.insert(QString("maxPresent"), QVariant(static_cast<bool>(max)));
   if (max)
-    qRangeMap.insert(QString("max"), QVariant(max.get()));
+    qRangeMap.insert(QString("max"), QVariant(max.value()));
   qRangeMap.insert(QString("stepPresent"), QVariant(static_cast<bool>(step)));
   if (step)
-    qRangeMap.insert(QString("step"), QVariant(step.get()));
+    qRangeMap.insert(QString("step"), QVariant(step.value()));
   return qRangeMap;
 }
 

@@ -13,7 +13,7 @@ bool isEntirelyWhitespace(std::string const &string) {
   return std::all_of(string.cbegin(), string.cend(), [](unsigned char c) { return std::isspace(c); });
 }
 
-boost::optional<double> parseDouble(std::string string) {
+std::optional<double> parseDouble(std::string string) {
   boost::trim(string);
   auto end = std::size_t();
   try {
@@ -21,31 +21,31 @@ boost::optional<double> parseDouble(std::string string) {
     if (end == string.size())
       return result;
     else
-      return boost::none;
+      return std::nullopt;
   } catch (std::invalid_argument &) {
-    return boost::none;
+    return std::nullopt;
   } catch (std::out_of_range &) {
-    return boost::none;
+    return std::nullopt;
   }
 }
 
-boost::optional<double> parseNonNegativeDouble(std::string string) {
+std::optional<double> parseNonNegativeDouble(std::string string) {
   auto maybeNegative = parseDouble(std::move(string));
-  if (maybeNegative.is_initialized() && maybeNegative.get() >= 0.0)
-    return maybeNegative.get();
+  if (maybeNegative.has_value() && maybeNegative.value() >= 0.0)
+    return maybeNegative.value();
   else
-    return boost::none;
+    return std::nullopt;
 }
 
-boost::optional<double> parseNonNegativeNonZeroDouble(std::string string) {
+std::optional<double> parseNonNegativeNonZeroDouble(std::string string) {
   auto maybeNegative = parseDouble(std::move(string));
-  if (maybeNegative.is_initialized() && maybeNegative.get() > 0.0)
-    return maybeNegative.get();
+  if (maybeNegative.has_value() && maybeNegative.value() > 0.0)
+    return maybeNegative.value();
   else
-    return boost::none;
+    return std::nullopt;
 }
 
-boost::optional<int> parseInt(std::string string) {
+std::optional<int> parseInt(std::string string) {
   boost::trim(string);
   auto end = std::size_t();
   try {
@@ -53,19 +53,19 @@ boost::optional<int> parseInt(std::string string) {
     if (end == string.size())
       return result;
     else
-      return boost::none;
+      return std::nullopt;
   } catch (std::invalid_argument &) {
-    return boost::none;
+    return std::nullopt;
   } catch (std::out_of_range &) {
-    return boost::none;
+    return std::nullopt;
   }
 }
 
-boost::optional<int> parseNonNegativeInt(std::string string) {
+std::optional<int> parseNonNegativeInt(std::string string) {
   auto maybeNegative = parseInt(std::move(string));
-  if (maybeNegative.is_initialized() && maybeNegative.get() >= 0)
-    return maybeNegative.get();
+  if (maybeNegative.has_value() && maybeNegative.value() >= 0)
+    return maybeNegative.value();
   else
-    return boost::none;
+    return std::nullopt;
 }
 } // namespace MantidQt::CustomInterfaces::ISISReflectometry

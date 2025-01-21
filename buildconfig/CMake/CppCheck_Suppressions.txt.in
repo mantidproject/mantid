@@ -1123,7 +1123,7 @@ virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflec
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/GUI/Save/SaveAlgorithmRunner.h:18
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Experiment.h:54
 missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/Group.h:31
-missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/IGroup.h:18
+missingOverride:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/IGroup.h:19
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/ISISReflectometry/Reduction/TransmissionStitchOptions.h:34
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:42
 returnByReference:${CMAKE_SOURCE_DIR}/qt/scientific_interfaces/Indirect/Reduction/ISISEnergyTransferData.h:43

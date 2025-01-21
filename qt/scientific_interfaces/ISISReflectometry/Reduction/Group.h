@@ -72,7 +72,7 @@ public:
 
   void resetSkipped() override;
 
-  boost::optional<int> indexOfRowWithTheta(double angle, double tolerance) const override;
+  std::optional<int> indexOfRowWithTheta(double angle, double tolerance) const override;
 
   boost::optional<Row> const &operator[](int rowIndex) const override;
   std::vector<boost::optional<Row>> const &rows() const override;
@@ -103,8 +103,8 @@ void mergeRowsInto(Group &intoHere, Group const &fromHere, int groupIndex, doubl
     if (maybeRow.is_initialized()) {
       auto const &fromRow = maybeRow.get();
       auto index = intoHere.indexOfRowWithTheta(fromRow.theta(), thetaTolerance);
-      if (index.is_initialized()) {
-        auto const updateAtIndex = index.get();
+      if (index.has_value()) {
+        auto const updateAtIndex = index.value();
         auto const &intoRow = intoHere[updateAtIndex].get();
         auto updatedRow = mergedRow(intoRow, fromRow);
         intoHere.updateRow(updateAtIndex, updatedRow);

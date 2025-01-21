@@ -17,8 +17,8 @@ namespace MantidQt::CustomInterfaces::ISISReflectometry {
 namespace {
 Group &findOrMakeGroupWithName(ReductionJobs &jobs, std::string const &groupName) {
   auto maybeGroupIndex = jobs.indexOfGroupWithName(groupName);
-  if (maybeGroupIndex.is_initialized())
-    return jobs.mutableGroups()[maybeGroupIndex.get()];
+  if (maybeGroupIndex.has_value())
+    return jobs.mutableGroups()[maybeGroupIndex.value()];
   else
     return jobs.appendGroup(Group(groupName));
 }
@@ -44,7 +44,7 @@ Group &ReductionJobs::appendGroup(Group group) {
   return m_groups.back();
 }
 
-boost::optional<int> ReductionJobs::indexOfGroupWithName(std::string const &groupName) const {
+std::optional<int> ReductionJobs::indexOfGroupWithName(std::string const &groupName) const {
   return indexOf(m_groups, [&groupName](Group const &group) -> bool { return group.name() == groupName; });
 }
 
@@ -148,11 +148,11 @@ void mergeRowIntoGroup(ReductionJobs &jobs, Row const &row, double thetaToleranc
   auto &group = findOrMakeGroupWithName(jobs, groupName);
   auto indexOfRowToUpdate = group.indexOfRowWithTheta(row.theta(), thetaTolerance);
 
-  if (indexOfRowToUpdate.is_initialized()) {
-    auto rowToUpdate = group[indexOfRowToUpdate.get()].get();
+  if (indexOfRowToUpdate.has_value()) {
+    auto rowToUpdate = group[indexOfRowToUpdate.value()].get();
     auto newRowValue = mergedRow(rowToUpdate, row);
     if (newRowValue.runNumbers() != rowToUpdate.runNumbers())
-      group.updateRow(indexOfRowToUpdate.get(), newRowValue);
+      group.updateRow(indexOfRowToUpdate.value(), newRowValue);
   } else {
     group.insertRowSortedByAngle(row);
   }

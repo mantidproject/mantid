@@ -74,8 +74,8 @@ public:
     TS_ASSERT(results[0].thetaOrWildcard().is_initialized());
     TS_ASSERT(results[1].thetaOrWildcard().is_initialized());
     TS_ASSERT_EQUALS(results[0].thetaOrWildcard().get(), results[1].thetaOrWildcard().get());
-    TS_ASSERT_EQUALS(results[0].titleMatcher().get().expression(), title1);
-    TS_ASSERT_EQUALS(results[1].titleMatcher().get().expression(), title2);
+    TS_ASSERT_EQUALS(results[0].titleMatcher().value().expression(), title1);
+    TS_ASSERT_EQUALS(results[1].titleMatcher().value().expression(), title2);
   }
 
   void testDuplicateAnglesAndTitleMatchersAreInvalid() {
