@@ -100,7 +100,7 @@ HistogramData::Points LoadSassena::loadQvectors(const H5::H5File &h5file, const 
 
   hsize_t dims[3];
   try {
-    dataSetInfo(h5file, setName, dims);
+    this->dataSetInfo(h5file, setName, dims);
   } catch (H5::Exception &) {
     throw Kernel::Exception::FileError("Unable to read " + setName + " dataset info:", m_filename);
   }
@@ -216,7 +216,7 @@ void LoadSassena::loadFQT(const H5::H5File &h5file, const API::WorkspaceGroup_sp
 
   hsize_t dims[3];
   try {
-    dataSetInfo(h5file, setName, dims);
+    this->dataSetInfo(h5file, setName, dims);
   } catch (H5::Exception &) {
     this->g_log.error("Unable to read " + setName + " dataset info");
     this->g_log.error("LoadSassena::loadFQT cannot proceed");
