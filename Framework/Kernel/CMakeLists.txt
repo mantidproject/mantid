@@ -499,7 +499,6 @@ target_link_libraries(
          GSL::gsl
          OpenSSL::SSL
          ${HDF5_LIBRARIES}
-         ${HDF5_HL_LIBRARIES}
   PRIVATE ${NETWORK_LIBRARIES}
 )
 if(WIN32)

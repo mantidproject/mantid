@@ -826,11 +826,6 @@ truncLongCastAssignment:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Matrix.cpp:1021
 suspiciousFloatingPointCast:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Matrix.cpp:1205
 iterateByValue:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/MultiFileValidator.cpp:65
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NeutronAtom.cpp:713
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NexusHDF5Descriptor.cpp:50
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NexusHDF5Descriptor.cpp:58
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NexusHDF5Descriptor.cpp:61
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NexusHDF5Descriptor.cpp:68
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/NexusHDF5Descriptor.cpp:85
 variableScope:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:113
 invalidLifetime:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:142
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/PropertyManager.cpp:158
