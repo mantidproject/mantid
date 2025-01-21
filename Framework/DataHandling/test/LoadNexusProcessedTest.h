@@ -49,8 +49,6 @@ using namespace Mantid::HistogramData;
 using namespace Mantid::NeXus;
 using Mantid::detid_t;
 
-using namespace H5;
-
 // Note that this suite tests an old version of Nexus processed files that we
 // continue to support.
 // LoadRawSaveNxsLoadNxs tests the current version of Nexus processed by loading
@@ -801,7 +799,7 @@ public:
 
     // Remove the coordinate_system entry so it falls back on the log. NeXus
     // can't do this so use the HDF5 API directly
-    H5File h5file(filePath.c_str(), H5F_ACC_RDWR);
+    H5::H5File h5file(filePath.c_str(), H5F_ACC_RDWR);
     H5Util::deleteObjectLink(h5file, "/mantid_workspace_1/peaks_workspace/coordinate_system");
     h5file.close();
 
