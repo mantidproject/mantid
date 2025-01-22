@@ -12,7 +12,7 @@ find_dependency(GSL)
 find_dependency(HDF5)
 find_dependency(OpenSSL)
 find_dependency(OpenMP COMPONENTS CXX)
-find_dependency(HDF5 COMPONENTS C CXX HL)
+find_dependency(HDF5 COMPONENTS C CXX)
 find_dependency(Eigen3)
 
 set(_mypackage_module_path_save "${CMAKE_MODULE_PATH}")

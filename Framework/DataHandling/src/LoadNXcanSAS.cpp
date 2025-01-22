@@ -483,15 +483,7 @@ void loadTransmissionData(H5::Group &transmission, const Mantid::API::MatrixWork
   else if (lambda.size() == workspace->blocksize() + 1)
     workspace->setBinEdges(0, std::move(lambda));
   else {
-#if defined(H5_USE_18_API)
     const std::string objectName{transmission.getObjName()};
-#else
-    const size_t nchars = H5Iget_name(transmission.getId(), nullptr, 0);
-    std::string objectName;
-    objectName.resize(nchars);
-    H5Iget_name(transmission.getId(), objectName.data(),
-                nchars + 1); // +1 for null terminator
-#endif
     throw std::runtime_error("Unexpected array size for lambda in transmission group '" + objectName +
                              "'. Expected length=" + std::to_string(workspace->blocksize()) +
                              ", found length=" + std::to_string(lambda.size()));
