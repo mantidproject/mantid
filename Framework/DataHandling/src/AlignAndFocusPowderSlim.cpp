@@ -109,7 +109,7 @@ public:
     auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
 
     // H5Util resizes the vector
-    if (m_is_time_filtered) {
+    if (true) { // m_is_time_filtered) {
       const size_t offset = eventRange.first;
       const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
                                   ? std::numeric_limits<size_t>::max()
@@ -134,7 +134,7 @@ public:
     auto detID_SDS = event_group.openDataSet(NxsFieldNames::DETID);
 
     // H5Util resizes the vector
-    if (m_is_time_filtered) {
+    if (true) { // m_is_time_filtered) {
       const size_t offset = eventRange.first;
       const size_t slabsize = (eventRange.second == std::numeric_limits<size_t>::max())
                                   ? std::numeric_limits<size_t>::max()
@@ -302,54 +302,85 @@ public:
     std::unique_ptr<std::vector<uint32_t>> event_detid = std::make_unique<std::vector<uint32_t>>();
     std::unique_ptr<std::vector<float>> event_time_of_flight = std::make_unique<std::vector<float>>();
 
+    // number of events to histogram in a single thread
+    constexpr size_t GRAINSIZE_EVENT{2000};
+    // number of events to read from disk at one time
+    constexpr size_t EVENTS_PER_CHUNK{10000 * GRAINSIZE_EVENT};
+
     auto entry = m_h5file.openGroup("entry"); // type=NXentry
     for (size_t wksp_index = range.begin(); wksp_index < range.end(); ++wksp_index) {
       const auto &bankName = m_bankEntries[wksp_index];
       Kernel::Timer timer;
       std::cout << bankName << " start" << std::endl;
 
-      event_detid->clear();
-      event_time_of_flight->clear();
+      // open the bank
+      auto event_group = entry.openGroup(bankName); // type=NXevent_data
 
-      { // shrink variable scope
-        // open the bank
-        auto event_group = entry.openGroup(bankName); // type=NXevent_data
-
-        // get filtering range
-        const auto eventRange = m_loader.getEventIndexRange(event_group);
-        // load data
-        m_loader.loadTOF(event_group, event_time_of_flight, eventRange);
-        m_loader.loadDetid(event_group, event_detid, eventRange);
+      // get filtering range
+      auto eventRangeFull = m_loader.getEventIndexRange(event_group);
+      // update range for data that is present
+      if (eventRangeFull.second == std::numeric_limits<size_t>::max()) {
+        auto tof_SDS = event_group.openDataSet(NxsFieldNames::TIME_OF_FLIGHT);
+        const auto length_actual = static_cast<size_t>(tof_SDS.getSpace().getSelectNpoints());
+        eventRangeFull.second = length_actual;
       }
-      std::cout << bankName << " done reading " << timer << std::endl;
-      timer.reset();
 
-      if (event_time_of_flight->empty() || event_detid->empty()) {
+      // create object so bank calibration can be re-used
+      std::unique_ptr<AlignAndFocusPowderSlim::BankCalibration> calibration = nullptr;
+
+      if (eventRangeFull.first == eventRangeFull.second) {
         // g_log.warning() << "No data for bank " << entry_name << '\n';
-        continue;
+      } else {
+        // TODO REMOVE debug print
+        std::cout << bankName << " has " << eventRangeFull.second << " events\n"
+                  << "   and should be read in " << (eventRangeFull.second / EVENTS_PER_CHUNK) << " chunks of "
+                  << EVENTS_PER_CHUNK << "\n";
+
+        // create a histogrammer to process the events
+        auto &spectrum = m_wksp->getSpectrum(wksp_index);
+        Histogrammer histogrammer(&spectrum.readX(), m_binWidth, m_linearBins);
+
+        // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
+        // counting things
+        std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
+
+        // read parts of the bank at a time
+        size_t event_index_start = eventRangeFull.first;
+        while (event_index_start < eventRangeFull.second) {
+          // H5Cpp will truncate correctly
+          const std::pair<uint64_t, uint64_t> eventRangePartial{event_index_start,
+                                                                event_index_start + EVENTS_PER_CHUNK};
+
+          // load data and reuse chunk memory
+          event_detid->clear();
+          event_time_of_flight->clear();
+          m_loader.loadTOF(event_group, event_time_of_flight, eventRangePartial);
+          m_loader.loadDetid(event_group, event_detid, eventRangePartial);
+
+          // process the events that were loaded
+          const auto [minval, maxval] = parallel_minmax(event_detid.get());
+          // only recreate if it doesn't already have the useful information
+          if ((!calibration) || (calibration->idmin() != static_cast<detid_t>(minval)) ||
+              (calibration->idmax() != static_cast<detid_t>(maxval))) {
+            calibration = std::make_unique<AlignAndFocusPowderSlim::BankCalibration>(
+                static_cast<detid_t>(minval), static_cast<detid_t>(maxval), m_calibration);
+          }
+
+          const auto numEvent = event_time_of_flight->size();
+
+          // threaded processing of the events
+          ProcessEventsTask task(&histogrammer, event_detid.get(), event_time_of_flight.get(), calibration.get(),
+                                 &y_temp, &m_masked);
+          tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent, GRAINSIZE_EVENT), task);
+
+          event_index_start += EVENTS_PER_CHUNK;
+        }
+        // copy the data out into the correct spectrum
+        auto &y_values = spectrum.dataY();
+        std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
+
+        std::cout << bankName << " stop " << timer << std::endl;
       }
-
-      // process the events that were loaded
-      const auto [minval, maxval] = parallel_minmax(event_detid.get());
-      AlignAndFocusPowderSlim::BankCalibration calibration(static_cast<detid_t>(minval), static_cast<detid_t>(maxval),
-                                                           m_calibration);
-
-      auto &spectrum = m_wksp->getSpectrum(wksp_index);
-      Histogrammer histogrammer(&spectrum.readX(), m_binWidth, m_linearBins);
-      const auto numEvent = event_time_of_flight->size();
-
-      // std::atomic allows for multi-threaded accumulation and who cares about floats when you are just
-      // counting things
-      std::vector<std::atomic_uint32_t> y_temp(spectrum.dataY().size());
-
-      // threaded processing of the events
-      constexpr size_t GRAINSIZE_EVENT{2000};
-      ProcessEventsTask task(&histogrammer, event_detid.get(), event_time_of_flight.get(), &calibration, &y_temp,
-                             &m_masked);
-      tbb::parallel_for(tbb::blocked_range<size_t>(0, numEvent, GRAINSIZE_EVENT), task);
-      auto &y_values = spectrum.dataY();
-      std::copy(y_temp.cbegin(), y_temp.cend(), y_values.begin());
-      std::cout << bankName << " stop " << timer << std::endl;
     }
   }
 
@@ -519,7 +550,7 @@ void AlignAndFocusPowderSlim::exec() {
     // threaded processing of the banks
     ProcessBankTask task(bankEntryNames, h5file, is_time_filtered, pulse_start_index, pulse_stop_index, wksp,
                          m_calibration, m_masked, binWidth, linearBins);
-    constexpr size_t GRAINSIZE_BANK{2};
+    constexpr size_t GRAINSIZE_BANK{1};
     tbb::parallel_for(tbb::blocked_range<size_t>(0, bankEntryNames.size(), GRAINSIZE_BANK), task);
   }
 
@@ -584,7 +615,6 @@ AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, c
   if (idmax < idmin)
     throw std::runtime_error("BAD!"); // TODO better message
 
-  std::cout << "Setting size " << static_cast<size_t>(idmax - idmin + 1) << "\n";
   // allocate memory and set the default value to 1
   m_calibration.assign(static_cast<size_t>(idmax - idmin + 1), 1.);
 
@@ -604,8 +634,13 @@ AlignAndFocusPowderSlim::BankCalibration::BankCalibration(const detid_t idmin, c
 /*
  * This assumes that everything is in range. Values that weren't in the calibration map get set to 1.
  */
-double AlignAndFocusPowderSlim::BankCalibration::value(const detid_t detid) const {
+const double &AlignAndFocusPowderSlim::BankCalibration::value(const detid_t detid) const {
   return m_calibration[detid - m_detid_offset];
+}
+
+const detid_t &AlignAndFocusPowderSlim::BankCalibration::idmin() const { return m_detid_offset; }
+detid_t AlignAndFocusPowderSlim::BankCalibration::idmax() const {
+  return m_detid_offset + static_cast<detid_t>(m_calibration.size());
 }
 
 } // namespace Mantid::DataHandling
