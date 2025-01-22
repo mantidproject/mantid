@@ -1,2 +1,2 @@
-- Enabled Surface Plotting from Single-Spectrum Workspaces
+- Enabled surface and contour plotting in the `Plot Advanced` dialog when multiple single-spectrum workspaces are selected.
 - Enabled Wireframe Plotting across multiple workspaces.
