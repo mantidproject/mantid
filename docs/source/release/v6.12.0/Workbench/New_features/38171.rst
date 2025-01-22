@@ -1,2 +1,2 @@
 - Enabled surface and contour plotting in the `Plot Advanced` dialog when multiple single-spectrum workspaces are selected.
-- Enabled Wireframe Plotting across multiple workspaces.
+- Fixed a bug where selecting multiple workspaces in the ADS and plotting a wireframe would only result in one of the workspaces being plotted.
