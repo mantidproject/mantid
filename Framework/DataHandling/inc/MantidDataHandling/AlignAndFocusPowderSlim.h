@@ -31,7 +31,9 @@ public:
   class MANTID_DATAHANDLING_DLL BankCalibration {
   public:
     BankCalibration(const detid_t idmin, const detid_t idmax, const std::map<detid_t, double> &calibration_map);
-    double value(const detid_t detid) const;
+    const double &value(const detid_t detid) const;
+    const detid_t &idmin() const;
+    detid_t idmax() const;
 
   private:
     std::vector<double> m_calibration;
