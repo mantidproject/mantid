@@ -101,7 +101,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         self._on_wkspindices_changed()
 
     # Check if workspace only has a single spectra, if true set it as first valid spectrum number
-    def check_num_spectra(self):
+    def update_spectrum_number_text(self):
         if self.selection and (
             (self.selection.wksp_indices and len(self.selection.wksp_indices) > 0)
             or (self.selection.spectra and len(self.selection.spectra) > 0)
@@ -117,7 +117,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
                     break
 
     def on_ok_clicked(self):
-        self.check_num_spectra()
+        self.update_spectrum_number_text()
 
         if self.selection is None:
             QMessageBox.warning(self, "Invalid Input", "Please enter a valid workspace index or spectrum number.")
@@ -127,7 +127,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             self.accept()
 
     def on_plot_all_clicked(self):
-        self.check_num_spectra()
+        self.update_spectrum_number_text()
 
         selection = SpectraSelection(self._workspaces)
         selection.spectra = self._plottable_spectra
@@ -277,29 +277,32 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.wkspIndicesValid.hide()
 
         try:
-            # Parse spectrum numbers
             self._parse_spec_nums()
-            spectrum_numbers = [ws.getSpectrumNumbers() for ws in self._workspaces]
-            unique_spectra = {tuple(numbers) for numbers in spectrum_numbers}
-
-            if len(unique_spectra) > 1:
-                # Spectrum numbers differ between workspaces
-                ui.specNums.setEnabled(False)
-                ui.specNumsValid.setToolTip("Spectrum numbers differ across workspaces. Use 'Plot All' or workspace indices instead.")
-            else:
-                ui.specNums.setEnabled(True)
-                ui.specNumsValid.setToolTip("")
-
         except Exception as e:
             logger.error(f"Error parsing spectrum numbers: {e}")
             ui.specNumsValid.setToolTip("Invalid spectrum number input.")
             ui.specNumsValid.setVisible(True)
+            ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(False)
+
+            if self._advanced:
+                ui.advanced_options_widget._validate_custom_logs(ui.advanced_options_widget.ui.custom_log_line_edit.text())
+            return
+
+        spectrum_numbers = [ws.getSpectrumNumbers() for ws in self._workspaces]
+        unique_spectra = {tuple(numbers) for numbers in spectrum_numbers}
+
+        if len(unique_spectra) > 1:
+            ui.specNums.setEnabled(False)
+            ui.specNumsValid.setToolTip("Spectrum numbers differ across workspaces. " "Use 'Plot All' or workspace indices instead.")
+        else:
+            ui.specNums.setEnabled(True)
+            ui.specNumsValid.setToolTip("")
 
         ui.specNumsValid.setVisible(not self._is_input_valid())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
         if self._advanced:
-            ui.advanced_options_widget._validate_custom_logs(self._ui.advanced_options_widget.ui.custom_log_line_edit.text())
+            ui.advanced_options_widget._validate_custom_logs(ui.advanced_options_widget.ui.custom_log_line_edit.text())
 
     def _on_plot_type_changed(self, new_index):
         if self._overplot:
