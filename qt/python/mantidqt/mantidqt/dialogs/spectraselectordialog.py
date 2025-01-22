@@ -102,6 +102,12 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
     # Check if workspace only has a single spectra, if true set it as first valid spectrum number
     def check_num_spectra(self):
+        if self.selection and (
+            (self.selection.wksp_indices and len(self.selection.wksp_indices) > 0)
+            or (self.selection.spectra and len(self.selection.spectra) > 0)
+        ):
+            return
+
         if not self._ui.specNums.text():
             for ws in self._workspaces:
                 if ws.getNumberHistograms() == 1:
