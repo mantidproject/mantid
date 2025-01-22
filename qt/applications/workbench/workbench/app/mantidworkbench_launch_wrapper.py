@@ -18,7 +18,7 @@ def launch(args=None):
         command = ["launch_mantidworkbench"] + args[1:]
         subprocess.run(command)
     else:
-        main(args)
+        main(args[1:])
 
 
 if __name__ == "__main__":
