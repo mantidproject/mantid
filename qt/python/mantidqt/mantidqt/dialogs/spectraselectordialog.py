@@ -293,7 +293,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
 
         if len(unique_spectra) > 1:
             ui.specNums.setEnabled(False)
-            ui.specNumsValid.setToolTip("Spectrum numbers differ across workspaces. " "Use 'Plot All' or workspace indices instead.")
+            ui.specNumsValid.setToolTip("Spectrum numbers differ across workspaces. Use 'Plot All' or workspace indices instead.")
         else:
             ui.specNums.setEnabled(True)
             ui.specNumsValid.setToolTip("")
