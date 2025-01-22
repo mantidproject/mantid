@@ -15,11 +15,11 @@
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/SaveNexusProcessedHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexus/NexusFileIO.h"
 
 #include <cmath>
 #include <memory>
