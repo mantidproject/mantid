@@ -722,8 +722,9 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
  * @param compress :: if true, compress the entry
  */
 int NexusFileIO::writeNexusProcessedDataEventCombined(const DataObjects::EventWorkspace_const_sptr &ws,
-                                                      std::vector<int64_t> const &indices, double *tofs, float *weights,
-                                                      float *errorSquareds, int64_t *pulsetimes, bool compress) const {
+                                                      std::vector<int64_t> const &indices, double const *tofs,
+                                                      float const *weights, float const *errorSquareds,
+                                                      int64_t const *pulsetimes, bool compress) const {
   NXopengroup(fileID, "event_workspace", "NXdata");
 
   // The array of indices for each event list #

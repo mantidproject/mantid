@@ -76,8 +76,9 @@ public:
   int writeNexusProcessedDataEvent(const DataObjects::EventWorkspace_const_sptr &ws);
 
   int writeNexusProcessedDataEventCombined(const DataObjects::EventWorkspace_const_sptr &ws,
-                                           std::vector<int64_t> const &indices, double *tofs, float *weights,
-                                           float *errorSquareds, int64_t *pulsetimes, bool compress) const;
+                                           std::vector<int64_t> const &indices, double const *tofs,
+                                           float const *weights, float const *errorSquareds, int64_t const *pulsetimes,
+                                           bool compress) const;
 
   int writeEventList(const DataObjects::EventList &el, const std::string &group_name) const;
 
