@@ -8,6 +8,7 @@ import numpy as np
 import os
 import systemtesting
 import shutil
+from abc import abstractmethod
 
 import mantid.simpleapi as mantid
 from mantid import config
@@ -50,36 +51,40 @@ total_scattering_input_file = os.path.join(input_dir, "ISIS_Powder-POLARIS98533_
 total_scattering_input_file_per_det = os.path.join(input_dir, "ISIS_Powder-POLARIS98533_TotalScatteringInputPerDetector.nxs")
 
 
-def generate_helper_class():
-    # perform inheritance like this to prevent base class appearing as a test
-    class HelperClass(systemtesting.MantidSystemTest):
-        tolerance_is_rel_err = True
-        tolerance = 1e-6
+class HelperClass:
+    tolerance_is_rel_err = True
+    tolerance = 1e-6
 
-        def requiredFiles(self):
-            return _gen_required_files()
+    @abstractmethod
+    def assertTrue(self, *args, **kwargs):
+        pass
 
-        # check output files as expected
-        def generate_error_message(self, expected_file, output_dir):
-            return f"Unable to find {expected_file} in {output_dir}.\nContents={os.listdir(output_dir)}"
+    @abstractmethod
+    def assertEqual(self, *args, **kwargs):
+        pass
 
-        def assert_output_file_exists(self, directory, filename):
-            self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=self.generate_error_message(filename, directory))
+    def requiredFiles(self):
+        return _gen_required_files()
 
-        def validate_focus_files_exist(self, ws_num):
-            user_output = os.path.join(output_dir, "17_1", "Test")
-            self.assert_output_file_exists(user_output, f"POLARIS{ws_num}.nxs")
-            self.assert_output_file_exists(user_output, f"POLARIS{ws_num}.gsas")
-            output_dat_dir = os.path.join(user_output, "dat_files")
-            for bankno in range(1, 6):
-                self.assert_output_file_exists(output_dat_dir, f"POL{ws_num}-b_{bankno}-TOF.dat")
-                self.assert_output_file_exists(output_dat_dir, f"POL{ws_num}-b_{bankno}-d.dat")
+    # check output files as expected
+    def generate_error_message(self, expected_file, output_dir):
+        return f"Unable to find {expected_file} in {output_dir}.\nContents={os.listdir(output_dir)}"
 
-        def validate_focus_material(self, focus_results):
-            for ws in focus_results:
-                self.assertEqual(ws.sample().getMaterial().name(), "Si Si")
+    def assert_output_file_exists(self, directory, filename):
+        self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=self.generate_error_message(filename, directory))
 
-    return HelperClass
+    def validate_focus_files_exist(self, ws_num):
+        user_output = os.path.join(output_dir, "17_1", "Test")
+        self.assert_output_file_exists(user_output, f"POLARIS{ws_num}.nxs")
+        self.assert_output_file_exists(user_output, f"POLARIS{ws_num}.gsas")
+        output_dat_dir = os.path.join(user_output, "dat_files")
+        for bankno in range(1, 6):
+            self.assert_output_file_exists(output_dat_dir, f"POL{ws_num}-b_{bankno}-TOF.dat")
+            self.assert_output_file_exists(output_dat_dir, f"POL{ws_num}-b_{bankno}-d.dat")
+
+    def validate_focus_material(self, focus_results):
+        for ws in focus_results:
+            self.assertEqual(ws.sample().getMaterial().name(), "Si Si")
 
 
 class CreateVanadiumTest(systemtesting.MantidSystemTest):
@@ -148,7 +153,7 @@ class CreateVanadiumPerDetectorTest(systemtesting.MantidSystemTest):
             config["datasearch.directories"] = self.existing_config
 
 
-class FocusTestNoAbsorptionWithRelativeNormalisation(generate_helper_class()):
+class FocusTestNoAbsorptionWithRelativeNormalisation(systemtesting.MantidSystemTest, HelperClass):
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -171,7 +176,7 @@ class FocusTestNoAbsorptionWithRelativeNormalisation(generate_helper_class()):
             config["datasearch.directories"] = self.existing_config
 
 
-class FocusTestNoAbsorptionWithAbsoluteNormalisation(generate_helper_class()):
+class FocusTestNoAbsorptionWithAbsoluteNormalisation(systemtesting.MantidSystemTest, HelperClass):
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -194,7 +199,7 @@ class FocusTestNoAbsorptionWithAbsoluteNormalisation(generate_helper_class()):
             config["datasearch.directories"] = self.existing_config
 
 
-class TestFocusNoAbsorptionIndividual(generate_helper_class()):
+class TestFocusNoAbsorptionIndividual(systemtesting.MantidSystemTest, HelperClass):
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -220,7 +225,7 @@ class TestFocusNoAbsorptionIndividual(generate_helper_class()):
             config["datasearch.directories"] = self.existing_config
 
 
-class TestFocusNoAbsorptionSummed(generate_helper_class()):
+class TestFocusNoAbsorptionSummed(systemtesting.MantidSystemTest, HelperClass):
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -245,7 +250,7 @@ class TestFocusNoAbsorptionSummed(generate_helper_class()):
             config["datasearch.directories"] = self.existing_config
 
 
-class FocusTestAbsorptionPaalmanPings(generate_helper_class()):
+class FocusTestAbsorptionPaalmanPings(systemtesting.MantidSystemTest, HelperClass):
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -270,7 +275,7 @@ class FocusTestAbsorptionPaalmanPings(generate_helper_class()):
             config["datasearch.directories"] = self.existing_config
 
 
-class FocusTestAbsorptionMayers(generate_helper_class()):
+class FocusTestAbsorptionMayers(systemtesting.MantidSystemTest, HelperClass):
     focus_results = None
     existing_config = config["datasearch.directories"]
 
@@ -355,7 +360,7 @@ class FocusTestRunTwice(systemtesting.MantidSystemTest):
             config["datasearch.directories"] = self.existing_config
 
 
-class FocusTestPerDetector(generate_helper_class()):
+class FocusTestPerDetector(systemtesting.MantidSystemTest, HelperClass):
     focus_results = None
     existing_config = config["datasearch.directories"]
 
