@@ -200,7 +200,7 @@ class TestFocusNoAbsorptionIndividual(systemtesting.MantidSystemTest, HelperClas
     def runTest(self):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus_no_absorption("98533, 98534", mode="PDF", focus_mode="Individual")
+        self.focus_results = run_focus_no_absorption("98533, 98534", mode="PDF", input_mode="Individual")
 
     def validate(self):
         # Just check the files exists as functionality of the focussing tested elsewhere
@@ -226,7 +226,7 @@ class TestFocusNoAbsorptionSummed(systemtesting.MantidSystemTest, HelperClass):
     def runTest(self):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus_no_absorption("98533,98534", mode="PDF", focus_mode="Summed")
+        self.focus_results = run_focus_no_absorption("98533,98534", mode="PDF", input_mode="Summed")
 
     def validate(self):
         # Just check the files exists as functionality of the focussing tested elsewhere
@@ -596,7 +596,7 @@ def run_vanadium_calibration(per_detector):
     return splined_ws, unsplined_ws
 
 
-def run_focus_no_absorption(run_number, per_detector=False, mode="PDF", focus_mode="Individual"):
+def run_focus_no_absorption(run_number, per_detector=False, mode="PDF", input_mode="Individual"):
     sample_empty = "98532"  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # Set it to 50% scale
 
@@ -612,7 +612,7 @@ def run_focus_no_absorption(run_number, per_detector=False, mode="PDF", focus_mo
     inst_object = setup_inst_object(mode=mode)
     return inst_object.focus(
         run_number=run_number,
-        input_mode=focus_mode,
+        input_mode=input_mode,
         do_van_normalisation=True,
         do_absorb_corrections=False,
         sample_empty=sample_empty,
@@ -642,7 +642,7 @@ def run_focus_no_chopper(run_number):
     )
 
 
-def run_focus_absorption(run_number, paalman_pings=False, focus_mode="Summed"):
+def run_focus_absorption(run_number, paalman_pings=False, input_mode="Summed"):
     sample_empty = 98532  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # ignored if paalman_pings True
 
@@ -662,7 +662,7 @@ def run_focus_absorption(run_number, paalman_pings=False, focus_mode="Summed"):
 
     return inst_object.focus(
         run_number=run_number,
-        input_mode=focus_mode,
+        input_mode=input_mode,
         do_van_normalisation=True,
         do_absorb_corrections=True,
         sample_empty=sample_empty,
