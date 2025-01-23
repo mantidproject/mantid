@@ -301,9 +301,6 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
         ui.specNumsValid.setVisible(not self._is_input_valid())
         ui.buttonBox.button(QDialogButtonBox.Ok).setEnabled(self._is_input_valid())
 
-        if self._advanced:
-            ui.advanced_options_widget._validate_custom_logs(ui.advanced_options_widget.ui.custom_log_line_edit.text())
-
     def _on_plot_type_changed(self, new_index):
         if self._overplot:
             self._ui.plotType.setCurrentIndex(0)
