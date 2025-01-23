@@ -21,10 +21,10 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Unit.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <algorithm>
 #include <memory>
-#include <nexus/NeXusFile.hpp>
 #include <queue>
 #include <utility>
 

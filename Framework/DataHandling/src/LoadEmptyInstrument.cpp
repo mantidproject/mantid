@@ -18,10 +18,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/EnumeratedString.h"
 #include "MantidKernel/OptionalBool.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include "MantidNexusGeometry/NexusGeometryParser.h"
-
-#include <nexus/NeXusException.hpp>
-#include <nexus/NeXusFile.hpp>
 
 #include <filesystem>
 
@@ -54,11 +53,11 @@ std::string LoadEmptyInstrument::retrieveValidInstrumentFilenameExtension(const 
 
   // Test a possible double extension
   if (!pre_ext.empty()) {
-    std::string double_ext{pre_ext + ext};
     try {
+      const std::string double_ext{pre_ext + ext};
       FilenameExtension fne(double_ext);
       return fne.c_str();
-    } catch (std::runtime_error &) {
+    } catch (const std::runtime_error &) {
     }
   }
 

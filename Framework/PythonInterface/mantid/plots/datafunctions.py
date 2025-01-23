@@ -404,7 +404,7 @@ def get_bin_indices(workspace):
         return indices
 
 
-def get_bins(workspace, bin_index, withDy=False):
+def get_bins(workspace, bin_index, withDy=False, withDx=False):
     """
     Extract a requested bin from each spectrum, except if they correspond to monitors
 
@@ -416,6 +416,7 @@ def get_bins(workspace, bin_index, withDy=False):
     indices = get_bin_indices(workspace)
     x_values, y_values = [], []
     dy = [] if withDy else None
+    dx = [] if withDx else None
     for row_index in indices:
         y_data = workspace.readY(int(row_index))
         if bin_index < len(y_data):
@@ -423,7 +424,9 @@ def get_bins(workspace, bin_index, withDy=False):
             y_values.append(y_data[bin_index])
             if withDy:
                 dy.append(workspace.readE(int(row_index))[bin_index])
-    dx = None
+            if withDx:
+                dx.append(workspace.readDx(int(row_index))[bin_index])
+
     return x_values, y_values, dy, dx
 
 

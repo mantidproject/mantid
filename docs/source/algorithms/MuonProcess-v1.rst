@@ -75,9 +75,9 @@ Usage
 .. testcode:: ExPairAsymmetry
 
    # Begin by loading data into a workspace to process
-   load_result = LoadMuonNexus(Filename = "MUSR0015189.nxs",
-                               DetectorGroupingTable = "grouping",
-			       OutputWorkspace = "loadedWS")
+   load_result = Load(Filename="MUSR0015189.nxs",
+                      DetectorGroupingTable="grouping",
+			             OutputWorkspace = "loadedWS")
    loaded_time_zero = load_result[2] # time zero loaded from file
    grouping = mtd['grouping']        # detector grouping loaded from file
    grouping = grouping.getItem(0)    # grouping here is a WorkspaceGroup - use table for first period

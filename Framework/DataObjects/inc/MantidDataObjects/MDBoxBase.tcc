@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/MDBoxBase.h"
 #include "MantidDataObjects/MDEvent.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 
+#include <cstddef>
 #include <limits>
 #include <memory>
 

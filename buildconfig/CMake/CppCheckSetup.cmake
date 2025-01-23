@@ -60,6 +60,13 @@ if(CPPCHECK_EXECUTABLE)
     list(APPEND _cppcheck_xml_args "${_cppcheck_source_dirs}")
   endif(CPPCHECK_GENERATE_XML)
 
+  if(NOT WIN32)
+    message(STATUS "cppcheck configured to run (ignoring xml arguments)")
+    message(STATUS "remove the project argument to supply files to check")
+    list(JOIN _cppcheck_args " " _cppcheck_args_for_printing)
+    message(STATUS "${CPPCHECK_EXECUTABLE} ${_cppcheck_args_for_printing}")
+  endif()
+
   # generate the target
   if(NOT TARGET cppcheck)
     add_custom_target(

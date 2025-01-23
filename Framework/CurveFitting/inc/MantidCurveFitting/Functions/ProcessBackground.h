@@ -10,11 +10,11 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

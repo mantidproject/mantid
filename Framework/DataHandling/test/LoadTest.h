@@ -15,8 +15,6 @@
 #include "MantidKernel/ConfigService.h"
 #include <cxxtest/TestSuite.h>
 
-#include <boost/algorithm/string/predicate.hpp> //for ends_with
-
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
@@ -185,11 +183,9 @@ public:
 
     // Check it has found the correct two
     const std::string first = foundFiles[0][0];
-    TSM_ASSERT(std::string("Incorrect first file has been found: ") + first,
-               boost::algorithm::ends_with(first, "MUSR00015189.nxs"));
+    TSM_ASSERT(std::string("Incorrect first file has been found: ") + first, first.ends_with("MUSR00015189.nxs"));
     const std::string second = foundFiles[1][0];
-    TSM_ASSERT(std::string("Incorrect second file has been found") + second,
-               boost::algorithm::ends_with(second, "MUSR00015191.nxs"));
+    TSM_ASSERT(std::string("Incorrect second file has been found") + second, second.ends_with("MUSR00015191.nxs"));
 
     // A more through test of the loading and value checking is done in the
     // LoadTest.py system test
@@ -210,11 +206,9 @@ public:
 
     // Check it has found the correct two
     const std::string first = foundFiles[0][0];
-    TSM_ASSERT(std::string("Incorrect first file has been found: ") + first,
-               boost::algorithm::ends_with(first, "MUSR00015189.nxs"));
+    TSM_ASSERT(std::string("Incorrect first file has been found: ") + first, first.ends_with("MUSR00015189.nxs"));
     const std::string last = foundFiles[0][3];
-    TSM_ASSERT(std::string("Incorrect last file has been found") + last,
-               boost::algorithm::ends_with(last, "MUSR00015192.nxs"));
+    TSM_ASSERT(std::string("Incorrect last file has been found") + last, last.ends_with("MUSR00015192.nxs"));
 
     // A more through test of the loading and value checking is done in the
     // LoadTest.py system test
@@ -236,11 +230,9 @@ public:
 
     // Check it has found the correct two
     const std::string first = foundFiles[0][0];
-    TSM_ASSERT(std::string("Incorrect first file has been found: ") + first,
-               boost::algorithm::ends_with(first, "LOQ48127.raw"));
+    TSM_ASSERT(std::string("Incorrect first file has been found: ") + first, first.ends_with("LOQ48127.raw"));
     const std::string second = foundFiles[1][0];
-    TSM_ASSERT(std::string("Incorrect second file has been found") + second,
-               boost::algorithm::ends_with(second, "CSP79590.raw"));
+    TSM_ASSERT(std::string("Incorrect second file has been found") + second, second.ends_with("CSP79590.raw"));
   }
 
   /*

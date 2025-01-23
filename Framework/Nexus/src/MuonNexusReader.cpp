@@ -6,9 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
+#include "MantidNexusCpp/NeXusException.hpp"
 #include <boost/scoped_array.hpp>
-#include <nexus/NeXusException.hpp>
 #include <sstream>
 #include <vector>
 

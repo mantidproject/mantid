@@ -18,7 +18,6 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidKernel/System.h"
 
 #include <sstream>
 

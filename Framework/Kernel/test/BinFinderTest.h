@@ -7,7 +7,6 @@
 #pragma once
 
 #include "MantidKernel/BinFinder.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VectorHelper.h"
 #include <cxxtest/TestSuite.h>
 #include <sys/stat.h>

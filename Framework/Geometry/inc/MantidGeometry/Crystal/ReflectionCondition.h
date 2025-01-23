@@ -106,9 +106,8 @@ public:
   std::string getSymbol() override { return "F"; }
   /// Return true if the hkl is allowed.
   bool isAllowed(int h, int k, int l) override {
-    return (((((h + k) % 2) == 0) && (((h + l) % 2) == 0) && (((k + l) % 2) == 0)) |
-                ((h % 2 == 0) && (k % 2 == 0) && (l % 2 == 0)) ||
-            ((h % 2 == 1) && (k % 2 == 1) && (l % 2 == 1)));
+    return (((((h + k) % 2) == 0) && (((h + l) % 2) == 0) && (((k + l) % 2) == 0)) ||
+            ((h % 2 == 0) && (k % 2 == 0) && (l % 2 == 0)) || ((h % 2 == 1) && (k % 2 == 1) && (l % 2 == 1)));
   }
 };
 

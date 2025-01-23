@@ -8,7 +8,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
-#include "MantidKernel/System.h"
 #include <fstream>
 
 namespace Mantid::DataHandling {

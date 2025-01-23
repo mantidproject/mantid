@@ -13,11 +13,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitConversion.h"
-
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <cmath>
 
@@ -142,8 +138,8 @@ void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
     return;
   // if index of peak is in badPeaks remove
   int ip = -1;
-  auto it = std::remove_if(m_peaks.begin(), m_peaks.end(), [&ip, badPeaks](Peak &pk) {
-    (void)pk;
+  auto it = std::remove_if(m_peaks.begin(), m_peaks.end(), [&ip, badPeaks](const Peak &pk) {
+    UNUSED_ARG(pk);
     ip++;
     return std::any_of(badPeaks.cbegin(), badPeaks.cend(), [ip](int badPeak) { return badPeak == ip; });
   });
@@ -156,7 +152,7 @@ void PeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
  */
 void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
   if (dynamic_cast<const Peak *>(&ipeak)) {
-    m_peaks.emplace_back((const Peak &)ipeak);
+    m_peaks.emplace_back(static_cast<const Peak &>(ipeak));
   } else {
     m_peaks.emplace_back(Peak(ipeak));
   }
@@ -914,7 +910,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
       toNexus[ii * maxShapeJSONLength + ic] = ' ';
   }
 
-  file->putData((void *)(toNexus));
+  file->putData(static_cast<void *>(toNexus));
 
   delete[] toNexus;
   file->putAttr("units", "Not known"); // Units may need changing when known
@@ -966,8 +962,8 @@ namespace Mantid::Kernel {
 template <>
 DLLExport Mantid::DataObjects::PeaksWorkspace_sptr
 IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(getPointerToProperty(name));
-  if (prop) {
+  if (const auto *prop =
+          dynamic_cast<PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(getPointerToProperty(name))) {
     return *prop;
   } else {
     std::string message =
@@ -979,8 +975,8 @@ IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_sptr>(const std::
 template <>
 DLLExport Mantid::DataObjects::PeaksWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(getPointerToProperty(name));
-  if (prop) {
+  if (const auto *prop =
+          dynamic_cast<PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr> *>(getPointerToProperty(name))) {
     return prop->operator()();
   } else {
     std::string message =

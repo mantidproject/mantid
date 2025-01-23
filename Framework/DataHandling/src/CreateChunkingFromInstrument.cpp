@@ -15,13 +15,13 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
+
 #include "MantidKernel/StringTokenizer.h"
 
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
+
 #include <algorithm>
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
 
 namespace Mantid::DataHandling {
 using namespace Mantid::API;

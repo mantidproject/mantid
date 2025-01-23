@@ -5,17 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyNexus.h"
-
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
-
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 // PropertyWithValue implementation
 #include "MantidKernel/PropertyWithValue.tcc"

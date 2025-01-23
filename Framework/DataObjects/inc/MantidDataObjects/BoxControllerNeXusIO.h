@@ -9,8 +9,7 @@
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/IBoxControllerIO.h"
 #include "MantidDataObjects/DllConfig.h"
-#include "MantidKernel/DiskBuffer.h"
-#include <nexus/NeXusFile.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <mutex>
 

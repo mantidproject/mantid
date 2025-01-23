@@ -9,7 +9,6 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/IDTypes.h"
 #include "MantidHistogramData/Histogram.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include <set>

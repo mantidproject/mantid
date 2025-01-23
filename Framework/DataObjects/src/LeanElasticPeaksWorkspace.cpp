@@ -13,11 +13,7 @@
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitConversion.h"
-
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <cmath>
 
@@ -132,7 +128,7 @@ void LeanElasticPeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
     return;
   // if index of peak is in badPeaks remove
   int ip = -1;
-  auto it = std::remove_if(m_peaks.begin(), m_peaks.end(), [&ip, badPeaks](LeanElasticPeak &pk) {
+  auto it = std::remove_if(m_peaks.begin(), m_peaks.end(), [&ip, badPeaks](const LeanElasticPeak &pk) {
     (void)pk;
     ip++;
     return std::any_of(badPeaks.cbegin(), badPeaks.cend(), [ip](int badPeak) { return badPeak == ip; });
@@ -146,7 +142,7 @@ void LeanElasticPeaksWorkspace::removePeaks(std::vector<int> badPeaks) {
  */
 void LeanElasticPeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
   if (dynamic_cast<const LeanElasticPeak *>(&ipeak)) {
-    m_peaks.emplace_back((const LeanElasticPeak &)ipeak);
+    m_peaks.emplace_back(static_cast<const LeanElasticPeak &>(ipeak));
   } else {
     m_peaks.emplace_back(LeanElasticPeak(ipeak));
   }
@@ -617,7 +613,7 @@ void LeanElasticPeaksWorkspace::saveNexus(::NeXus::File *file) const {
       toNexus[ii * maxShapeJSONLength + ic] = ' ';
   }
 
-  file->putData((void *)(toNexus));
+  file->putData(static_cast<void *>(toNexus));
 
   delete[] toNexus;
   file->putAttr("units", "Not known"); // Units may need changing when known
@@ -710,9 +706,8 @@ IPropertyManager::getValue<Mantid::DataObjects::LeanElasticPeaksWorkspace_sptr>(
 template <>
 DLLExport Mantid::DataObjects::LeanElasticPeaksWorkspace_const_sptr
 IPropertyManager::getValue<Mantid::DataObjects::LeanElasticPeaksWorkspace_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::LeanElasticPeaksWorkspace_sptr> *>(
-      getPointerToProperty(name));
-  if (prop) {
+  if (const auto *prop = dynamic_cast<PropertyWithValue<Mantid::DataObjects::LeanElasticPeaksWorkspace_sptr> *>(
+          getPointerToProperty(name))) {
     return prop->operator()();
   } else {
     std::string message = "Attempt to assign property " + name +

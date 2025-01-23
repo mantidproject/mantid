@@ -27,16 +27,10 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidSINQ/DllConfig.h"
-
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
-
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include <memory>
+#include "MantidNexusCpp/NeXusFile.hpp"
+#include "MantidSINQ/DllConfig.h"
 
 class MANTID_SINQ_DLL LoadFlexiNexus : public Mantid::API::Algorithm {
 public:

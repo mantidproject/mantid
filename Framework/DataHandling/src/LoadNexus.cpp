@@ -112,7 +112,9 @@ void LoadNexus::exec() {
 }
 
 void LoadNexus::runLoadMuonNexus() {
-  auto loadMuonNexus = createChildAlgorithm("LoadMuonNexus", 0., 1.);
+  // The Load algorithm will choose the correct LoadMuonNexus algorithm
+  auto loadMuonNexus = createChildAlgorithm("Load", 0., 1.);
+
   // Pass through the same input filename
   loadMuonNexus->setPropertyValue("Filename", m_filename);
   // Set the workspace property

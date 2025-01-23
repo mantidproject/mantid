@@ -8,7 +8,6 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidKernel/System.h"
 #include <cfloat>
 
 using namespace Mantid::Kernel;

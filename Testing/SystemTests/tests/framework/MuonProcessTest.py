@@ -7,7 +7,7 @@
 # pylint: disable=no-init
 import systemtesting
 from mantid.api import mtd, WorkspaceFactory
-from mantid.simpleapi import LoadMuonNexus, MuonProcess
+from mantid.simpleapi import Load, MuonProcess
 
 
 class MuonProcessTest(systemtesting.MantidSystemTest):
@@ -27,7 +27,7 @@ class MuonProcessTest(systemtesting.MantidSystemTest):
             deadTimes.addRow([i, i * 0.01])
         mtd.addOrReplace("MuonProcess_DeadTimes", deadTimes)
 
-        load_result = LoadMuonNexus(Filename="MUSR00015192", OutputWorkspace="MuonProcess_Loaded")
+        load_result = Load(Filename="MUSR00015192", OutputWorkspace="MuonProcess_Loaded")
         loaded_time_zero = load_result[2]
 
         MuonProcess(

@@ -9,7 +9,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 
 #include <boost/variant/get.hpp>
 

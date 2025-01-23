@@ -14,7 +14,6 @@
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 
 using namespace Mantid::Kernel;

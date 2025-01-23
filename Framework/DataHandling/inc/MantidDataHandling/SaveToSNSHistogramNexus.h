@@ -12,13 +12,12 @@
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/Workspace2D_fwd.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
+
 #include <climits>
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
 
 namespace Mantid {
 namespace DataHandling {

@@ -416,7 +416,7 @@ std::string strip(const std::string &A) {
  */
 bool skipLine(const std::string &line) {
   // Empty or comment
-  return (line.empty() || boost::starts_with(line, "#"));
+  return (line.empty() || line.starts_with("#"));
 }
 
 //------------------------------------------------------------------------------------------------

@@ -12,7 +12,6 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidKernel/System.h"
 #include <cmath>
 
 namespace Mantid {

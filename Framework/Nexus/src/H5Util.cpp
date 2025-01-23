@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidNexus/H5Util.h"
 #include "MantidAPI/LogManager.h"
-#include "MantidKernel/System.h"
 
 #include <H5Cpp.h>
+
 #include <algorithm>
 #include <array>
 #include <boost/numeric/conversion/cast.hpp>
@@ -282,16 +282,15 @@ template <typename NumT> std::vector<NumT> readArray1DCoerce(const H5::Group &gr
 
 namespace {
 template <typename InputNumT, typename OutputNumT>
-void convertingRead(const DataSet &dataset, const DataType &dataType, std::vector<OutputNumT> &output) {
-  DataSpace dataSpace = dataset.getSpace();
-
-  std::vector<InputNumT> temp(dataSpace.getSelectNpoints());
-  dataset.read(temp.data(), dataType, dataSpace);
+void convertingRead(const DataSet &dataset, const DataType &dataType, std::vector<OutputNumT> &output,
+                    const DataSpace &memspace, const DataSpace &filespace) {
+  std::vector<InputNumT> temp(filespace.getSelectNpoints());
+  dataset.read(temp.data(), dataType, memspace, filespace);
 
   output.resize(temp.size());
 
   std::transform(temp.begin(), temp.end(), output.begin(),
-                 [](const InputNumT a) { // lambda
+                 [](const auto &a) { // lambda
                    return boost::numeric_cast<OutputNumT>(a);
                  });
 }
@@ -379,27 +378,46 @@ std::vector<NumT> readNumArrayAttributeCoerce(const H5::H5Object &object, const 
   return value;
 }
 
-template <typename NumT> void readArray1DCoerce(const DataSet &dataset, std::vector<NumT> &output) {
-  DataType dataType = dataset.getDataType();
+template <typename NumT>
+void readArray1DCoerce(const H5::DataSet &dataset, std::vector<NumT> &output, const size_t length,
+                       const size_t offset) {
+  DataSpace filespace = dataset.getSpace();
+  const auto length_actual = static_cast<size_t>(filespace.getSelectNpoints());
 
-  if (getType<NumT>() == dataType) { // no conversion necessary
-    DataSpace dataSpace = dataset.getSpace();
-    output.resize(dataSpace.getSelectNpoints());
-    dataset.read(output.data(), dataType, dataSpace);
+  if (offset >= length_actual) {
+    std::stringstream msg;
+    msg << "Tried to read offset=" << offset << " into array that is only lenght=" << length_actual << " long";
+    throw std::runtime_error(msg.str());
   }
 
-  if (PredType::NATIVE_INT32 == dataType) {
-    convertingRead<int32_t>(dataset, dataType, output);
+  // set extent and offset in DataSpace
+  const hsize_t rankedoffset[1] = {static_cast<hsize_t>(offset)};
+  const hsize_t rankedextent[1] = {
+      static_cast<hsize_t>(std::min(length, length_actual - offset))}; // don't read past the end
+  // select a part of filespace if appropriate
+  if (rankedextent[0] < length_actual)
+    filespace.selectHyperslab(H5S_SELECT_SET, rankedextent, rankedoffset);
+
+  // size of thing being read out
+  DataSpace memspace(1, rankedextent);
+
+  // do the actual read
+  const DataType dataType = dataset.getDataType();
+  if (getType<NumT>() == dataType) { // no conversion necessary
+    output.resize(static_cast<size_t>(filespace.getSelectNpoints()));
+    dataset.read(output.data(), dataType, memspace, filespace);
+  } else if (PredType::NATIVE_INT32 == dataType) {
+    convertingRead<int32_t>(dataset, dataType, output, memspace, filespace);
   } else if (PredType::NATIVE_UINT32 == dataType) {
-    convertingRead<uint32_t>(dataset, dataType, output);
+    convertingRead<uint32_t>(dataset, dataType, output, memspace, filespace);
   } else if (PredType::NATIVE_INT64 == dataType) {
-    convertingRead<int64_t>(dataset, dataType, output);
+    convertingRead<int64_t>(dataset, dataType, output, memspace, filespace);
   } else if (PredType::NATIVE_UINT64 == dataType) {
-    convertingRead<uint64_t>(dataset, dataType, output);
+    convertingRead<uint64_t>(dataset, dataType, output, memspace, filespace);
   } else if (PredType::NATIVE_FLOAT == dataType) {
-    convertingRead<float>(dataset, dataType, output);
+    convertingRead<float>(dataset, dataType, output, memspace, filespace);
   } else if (PredType::NATIVE_DOUBLE == dataType) {
-    convertingRead<double>(dataset, dataType, output);
+    convertingRead<double>(dataset, dataType, output, memspace, filespace);
   } else {
     // not a supported type
     throw DataTypeIException();
@@ -596,10 +614,16 @@ template MANTID_NEXUS_DLL std::vector<uint32_t> readArray1DCoerce(const H5::Grou
 template MANTID_NEXUS_DLL std::vector<int64_t> readArray1DCoerce(const H5::Group &group, const std::string &name);
 template MANTID_NEXUS_DLL std::vector<uint64_t> readArray1DCoerce(const H5::Group &group, const std::string &name);
 
-template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<float> &output);
-template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<double> &output);
-template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<int32_t> &output);
-template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint32_t> &output);
-template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<int64_t> &output);
-template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint64_t> &output);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<float> &output,
+                                                 const size_t length, const size_t offset);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<double> &output,
+                                                 const size_t length, const size_t offset);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<int32_t> &output,
+                                                 const size_t length, const size_t offset);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint32_t> &output,
+                                                 const size_t length, const size_t offset);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<int64_t> &output,
+                                                 const size_t length, const size_t offset);
+template MANTID_NEXUS_DLL void readArray1DCoerce(const DataSet &dataset, std::vector<uint64_t> &output,
+                                                 const size_t length, const size_t offset);
 } // namespace Mantid::NeXus::H5Util

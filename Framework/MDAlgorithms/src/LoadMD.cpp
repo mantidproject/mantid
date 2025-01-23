@@ -29,11 +29,10 @@
 #include "MantidKernel/MDUnitFactory.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/SetMDFrame.h"
+#include "MantidNexusCpp/NeXusException.hpp"
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
-#include <nexus/NeXusException.hpp>
 #include <vector>
 
 using namespace Mantid::Kernel;

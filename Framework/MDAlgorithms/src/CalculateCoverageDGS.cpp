@@ -98,9 +98,7 @@ void CalculateCoverageDGS::init() {
                                                         std::make_shared<InstrumentValidator>()),
                   "An input workspace.");
 
-  // clang-format off
-  auto mustBe3D = std::make_shared<ArrayLengthValidator<double> >(3);
-  // clang-format on
+  auto mustBe3D = std::make_shared<ArrayLengthValidator<double>>(3);
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
@@ -159,7 +157,9 @@ void CalculateCoverageDGS::exec() {
   }
 
   double ttmax = *(std::max_element(tt.begin(), tt.end()));
+
   m_Ei = getProperty("IncidentEnergy");
+
   if (m_Ei == EMPTY_DBL()) {
     if (inputWS->run().hasProperty("Ei")) {
       Kernel::Property *eiprop = inputWS->run().getProperty("Ei");

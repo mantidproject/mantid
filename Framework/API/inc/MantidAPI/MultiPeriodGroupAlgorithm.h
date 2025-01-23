@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/MultiPeriodGroupWorker.h"
-#include "MantidKernel/System.h"
 #include <boost/scoped_ptr.hpp>
 
 namespace Mantid {

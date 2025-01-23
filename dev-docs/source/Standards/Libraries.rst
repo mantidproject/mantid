@@ -49,5 +49,5 @@ until gcc 5 and some platforms still use gcc 4.8)
 String Algorithms (chop, ends_with etc)
 ---------------------------------------
 
-- Prefer Boost algorithms if possible
+- For any string functions that are not implemented in the C++ standard, prefer Boost algorithms if possible
 - Some string utilities also exist in ``MantidKernel/Strings.h``

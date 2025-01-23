@@ -88,8 +88,8 @@ void ConvertUnits::exec() {
   const bool acceptPointData = getProperty("ConvertFromPointData");
   bool workspaceWasConverted = false;
 
-  // we can do that before anything else, because it doesn't
-  // setup any blocksize, which is the one that changes with conversion
+  // we can do that before anything else, because it doesn't setup any blocksize, which is the one that changes with
+  // conversion
   this->setupMemberVariables(inputWS);
 
   // Check that the input workspace doesn't already have the desired unit.
@@ -97,11 +97,9 @@ void ConvertUnits::exec() {
     const std::string outputWSName = getPropertyValue("OutputWorkspace");
     const std::string inputWSName = getPropertyValue("InputWorkspace");
     if (outputWSName == inputWSName) {
-      // If it does, just set the output workspace to point to the input one and
-      // be done.
+      // If it does, just set the output workspace to point to the input one and be done
       g_log.information() << "Input workspace already has target unit (" << m_outputUnit->unitID()
-                          << "), so just pointing the output workspace "
-                             "property to the input workspace.\n";
+                          << "), so just pointing the output workspace property to the input workspace.\n";
       setProperty("OutputWorkspace", std::const_pointer_cast<MatrixWorkspace>(inputWS));
       return;
     } else {
@@ -136,8 +134,7 @@ void ConvertUnits::exec() {
         throw std::runtime_error("Failed to convert workspace from Points to Bins");
       }
     } else {
-      throw std::runtime_error("Workspace contains points, you can either run "
-                               "ConvertToHistogram on it, or set "
+      throw std::runtime_error("Workspace contains points, you can either run ConvertToHistogram on it, or set "
                                "ConvertFromPointData to enabled");
     }
   } else {
@@ -161,8 +158,7 @@ void ConvertUnits::exec() {
   }
 
   // Point the output property to the right place.
-  // Do right at end (workspace could could change in removeUnphysicalBins or
-  // alignBins methods)
+  // Do right at end (workspace could could change in removeUnphysicalBins or alignBins methods)
   setProperty("OutputWorkspace", outputWS);
 }
 
@@ -178,9 +174,7 @@ MatrixWorkspace_sptr ConvertUnits::executeUnitConversion(const API::MatrixWorksp
   // 2 edges, having less than 2 values would mean that the WS contains Points
   if (inputWS->x(0).size() < 2) {
     std::stringstream msg;
-    msg << "Input workspace has invalid X axis binning parameters. Should "
-           "have "
-           "at least 2 values. Found "
+    msg << "Input workspace has invalid X axis binning parameters. Should have at least 2 values. Found "
         << inputWS->x(0).size() << ".";
     throw std::runtime_error(msg.str());
   }
@@ -193,17 +187,14 @@ MatrixWorkspace_sptr ConvertUnits::executeUnitConversion(const API::MatrixWorksp
   // Check whether there is a quick conversion available
   double factor, power;
   if (m_inputUnit->quickConversion(*m_outputUnit, factor, power))
-  // If test fails, could also check whether a quick conversion in the
-  // opposite
-  // direction has been entered
+  // If test fails, could also check whether a quick conversion in the opposite direction has been entered
   {
     outputWS = this->convertQuickly(inputWS, factor, power);
   } else {
     outputWS = this->convertViaTOF(m_inputUnit, inputWS);
   }
 
-  // If the units conversion has flipped the ascending direction of X, reverse
-  // all the vectors
+  // If the units conversion has flipped the ascending direction of X, reverse all the vectors
   if (!outputWS->x(0).empty() &&
       (outputWS->x(0).front() > outputWS->x(0).back() ||
        outputWS->x(m_numberOfSpectra / 2).front() > outputWS->x(m_numberOfSpectra / 2).back())) {
@@ -211,21 +202,19 @@ MatrixWorkspace_sptr ConvertUnits::executeUnitConversion(const API::MatrixWorksp
   }
 
   // Need to lop bins off if converting to energy transfer.
-  // Don't do for EventWorkspaces, where you can easily rebin to recover the
-  // situation without losing information
+  // Don't do for EventWorkspaces, where you can easily rebin to recover the situation without losing information
   /* This is an ugly test - could be made more general by testing for DBL_MAX
   values at the ends of all spectra, but that would be less efficient */
   if (m_outputUnit->unitID().find("Delta") == 0 && !m_inputEvents)
     outputWS = this->removeUnphysicalBins(outputWS);
 
   // Rebin the data to common bins if requested, and if necessary
-  bool doAlignBins = getProperty("AlignBins");
+  const bool doAlignBins = getProperty("AlignBins");
   if (doAlignBins && !outputWS->isCommonBins())
     outputWS = this->alignBins(outputWS);
 
   // If appropriate, put back the bin width division into Y/E.
-  if (m_distribution && !m_inputEvents) // Never do this for event workspaces
-  {
+  if (m_distribution && !m_inputEvents) { // Never do this for event workspaces
     this->putBackBinWidth(outputWS);
   }
 
@@ -255,9 +244,7 @@ void ConvertUnits::setupMemberVariables(const API::MatrixWorkspace_const_sptr &i
 API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(const API::MatrixWorkspace_const_sptr &inputWS) {
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
-  // If input and output workspaces are NOT the same, create a new workspace
-  // for
-  // the output
+  // If input and output workspaces are NOT the same, create a new workspace for the output
   if (outputWS != inputWS) {
     outputWS = inputWS->clone();
   }
@@ -670,9 +657,8 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
  *  @param outputWS The workspace to operate on
  */
 void ConvertUnits::putBackBinWidth(const API::MatrixWorkspace_sptr &outputWS) {
-  const size_t outSize = outputWS->blocksize();
-
   for (size_t i = 0; i < m_numberOfSpectra; ++i) {
+    const size_t outSize = outputWS->getNumberBins(i);
     for (size_t j = 0; j < outSize; ++j) {
       const double width = std::abs(outputWS->x(i)[j + 1] - outputWS->x(i)[j]);
       outputWS->mutableY(i)[j] = outputWS->y(i)[j] / width;

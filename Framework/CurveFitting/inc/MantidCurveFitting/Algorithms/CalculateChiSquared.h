@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidAPI/IFunction_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/IFittingAlgorithm.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

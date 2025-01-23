@@ -13,7 +13,6 @@
  *      Author: Janik Zikovsky
  */
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/System.h"
 #include <limits>
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>

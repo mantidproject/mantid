@@ -7,10 +7,10 @@
 #pragma once
 
 #include "MantidNexus/DllConfig.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <climits>
-#include <nexus/NeXusFile.hpp>
 
 // class MuonNexusReader - based on ISISRAW this class implements a simple
 // reader for Nexus Muon data files.

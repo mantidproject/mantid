@@ -15,7 +15,6 @@
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_version.h>

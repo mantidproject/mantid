@@ -153,9 +153,9 @@ Version 1
 #########
 
 Version 1 supports the loading version 1.0 of the muon nexus format.
-This is still in active use, if the current version of LoadMuonNexus
-detects that it has been asked to load a previous version muon nexus
-file it will call the previous version of the algorithm to perform the
+This is still in active use, if the Load algorithm detects that it
+has been asked to load a previous version muon nexus file it will
+call the previous version of the LoadMuonNexus algorithm to perform the
 task.
 
 See :ref:`algm-LoadMuonNexus-v1` for more details about version 1.
@@ -172,7 +172,7 @@ Usage
 .. testcode:: LoadMuonNexusOnePeriod
 
    # Load MUSR dataset
-   ws = LoadMuonNexus(Filename="MUSR00015189.nxs",EntryNumber=1)
+   ws = Load(Filename="MUSR00015189.nxs",EntryNumber=1)
    print("Workspace has  {}  spectra".format(ws[0].getNumberHistograms()))
 
 Output:
@@ -186,7 +186,7 @@ Output:
 .. testcode:: ExLoadMuonNexusSomeSpectra
 
    # Load some spectra
-   ws = LoadMuonNexus(Filename="MUSR00015189.nxs",SpectrumMin=5,SpectrumMax=10,EntryNumber=1)
+   ws = Load(Filename="MUSR00015189.nxs",SpectrumMin=5,SpectrumMax=10,EntryNumber=1)
    print("Workspace has  {}  spectra".format(ws[0].getNumberHistograms()))
 
 Output:
@@ -200,7 +200,7 @@ Output:
 .. testcode:: ExLoadDeadTimeTable
 
    # Load some spectra
-   ws = LoadMuonNexus(Filename="emu00006473.nxs",SpectrumMin=5,SpectrumMax=10,DeadTimeTable="deadTimeTable")
+   ws = Load(Filename="emu00006473.nxs",SpectrumMin=5,SpectrumMax=10,DeadTimeTable="deadTimeTable")
    tab = mtd['deadTimeTable']
    for i in range(0,tab.rowCount()):
        print("{} {:.12f}".format(tab.cell(i,0), tab.cell(i,1)))

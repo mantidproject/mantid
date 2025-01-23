@@ -1,0 +1,1 @@
+- `MatrixWorkspace` now has a `plotType` property

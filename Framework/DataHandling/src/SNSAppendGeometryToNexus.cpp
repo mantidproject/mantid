@@ -6,17 +6,17 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SNSAppendGeometryToNexus.h"
 #include "MantidAPI/FileProperty.h"
+
 #include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/WorkspaceFactory.h"
+
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/OptionalBool.h"
-#include "MantidKernel/System.h"
 
-// clang-format off
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
-// clang-format on
+#include "MantidKernel/OptionalBool.h"
+
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <Poco/Exception.h>
 #include <Poco/File.h>

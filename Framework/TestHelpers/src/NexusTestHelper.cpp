@@ -18,7 +18,7 @@
 #if defined(_MSC_VER)
 #pragma warning(push, 0)
 #endif
-#include <nexus/NeXusFile.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
 #if defined(_MSC_VER)
 #pragma warning(pop)
 #endif

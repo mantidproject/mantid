@@ -12,7 +12,6 @@
 #include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace DataHandling {

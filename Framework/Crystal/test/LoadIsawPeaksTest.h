@@ -16,7 +16,6 @@
 #include "MantidGeometry/IDTypes.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 

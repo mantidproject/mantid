@@ -54,8 +54,9 @@ void Multiply::performBinaryOperation(const HistogramData::Histogram &lhs, const
 
 void Multiply::setOutputUnits(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs,
                               API::MatrixWorkspace_sptr out) {
-  if (!lhs->isDistribution() || !rhs->isDistribution())
+  if (!lhs->isDistribution() || !rhs->isDistribution()) {
     out->setDistribution(false);
+  }
 }
 
 // ===================================== EVENT LIST BINARY OPERATIONS

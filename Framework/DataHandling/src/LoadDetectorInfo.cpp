@@ -10,11 +10,11 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/Exception.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <Poco/Path.h>
 #include <boost/algorithm/string/compare.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include <nexus/NeXusFile.hpp>
 
 #include <fstream>
 

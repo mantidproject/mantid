@@ -8,12 +8,11 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/NexusDescriptor.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include <cxxtest/TestSuite.h>
 
 #include <filesystem>
 #include <memory>
-
-#include <nexus/NeXusFile.hpp>
 
 #include <cstdio>
 

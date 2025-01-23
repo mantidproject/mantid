@@ -9,7 +9,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataHandling/DeleteTableRows.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 

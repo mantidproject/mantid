@@ -18,7 +18,6 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/LoadEmptyInstrument.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadNexus.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidDataHandling/SaveNexusProcessed.h"
@@ -30,12 +29,11 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
 #include <boost/lexical_cast.hpp>
-
-#include <nexus/NeXusFile.hpp>
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>

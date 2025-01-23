@@ -21,7 +21,6 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include <Poco/File.h>

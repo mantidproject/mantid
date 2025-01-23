@@ -9,7 +9,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Sample.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 

@@ -9,7 +9,6 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include <cxxtest/TestSuite.h>

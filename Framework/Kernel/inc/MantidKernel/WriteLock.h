@@ -47,9 +47,9 @@ public:
 
 private:
   /// Disallow creating the object on the heap
-  void *operator new(size_t);
+  void *operator new(std::size_t);
   /// Disallow creating the object on the heap
-  void *operator new[](size_t);
+  void *operator new[](std::size_t);
 
   /// Reference to the data item we are locking
   const DataItem &m_item;

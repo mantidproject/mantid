@@ -8,7 +8,6 @@
 
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidKernel/System.h"
 #include <cxxtest/TestSuite.h>
 #include <sys/stat.h>
 

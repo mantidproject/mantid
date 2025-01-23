@@ -7,7 +7,6 @@
 #pragma once
 #include "MantidGeometry/Math/MapSupport.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <cmath>
 #include <cxxtest/TestSuite.h>

@@ -40,9 +40,8 @@ const std::string AddPeakHKL::summary() const { return "Add a peak in the hkl fr
 void AddPeakHKL::init() {
   declareProperty(std::make_unique<WorkspaceProperty<Mantid::API::IPeaksWorkspace>>("Workspace", "", Direction::InOut),
                   "An input workspace.");
-  // clang-format off
-    declareProperty(std::make_unique<ArrayProperty<double>>("HKL", std::make_shared<ArrayLengthValidator<double> > (3)), "HKL point to add");
-  // clang-format on
+  declareProperty(std::make_unique<ArrayProperty<double>>("HKL", std::make_shared<ArrayLengthValidator<double>>(3)),
+                  "HKL point to add");
 }
 
 //----------------------------------------------------------------------------------------------

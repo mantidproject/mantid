@@ -6,15 +6,13 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeROI.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/VectorHelper.h"
-
-#include <nexus/NeXusFile.hpp>
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/lexical_cast.hpp>
 #include <memory>
@@ -197,7 +195,7 @@ Run &Run::operator+=(const Run &rhs) {
   for (const auto &name : ADDABLE) {
     if (rhs.m_manager->existsProperty(name)) {
       // get a pointer to the property on the right-hand side workspace
-      Property *right = rhs.m_manager->getProperty(name);
+      const Property *right = rhs.m_manager->getProperty(name);
 
       // now deal with the left-hand side
       if (m_manager->existsProperty(name)) {
@@ -280,11 +278,11 @@ double Run::getProtonCharge() const {
  * If "proton_charge" is not found, the value is not stored
  */
 void Run::integrateProtonCharge(const std::string &logname) const {
-  Kernel::TimeSeriesProperty<double> *log = nullptr;
+  Kernel::TimeSeriesProperty<double> const *log = nullptr;
 
   if (this->hasProperty(logname)) {
     try {
-      log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(this->getProperty(logname));
+      log = dynamic_cast<Kernel::TimeSeriesProperty<double> const *>(this->getProperty(logname));
     } catch (Exception::NotFoundError &) {
       g_log.warning(logname + " log was not found. The value of the total proton "
                               "charge has not been set");
@@ -299,8 +297,8 @@ void Run::integrateProtonCharge(const std::string &logname) const {
     // get a copy of the run's TimeROI for selecting values
     Kernel::TimeROI timeroi = this->getTimeROI();
     // If the proton charge series is filtered, fetch its TimeROI and use it to update `timeRoi`
-    auto filteredLog = dynamic_cast<Kernel::FilteredTimeSeriesProperty<double> *>(this->getProperty(logname));
-    if (filteredLog)
+    if (const auto *filteredLog =
+            dynamic_cast<Kernel::FilteredTimeSeriesProperty<double> *>(this->getProperty(logname)))
       timeroi.update_or_replace_intersection(filteredLog->getTimeROI());
 
     if (timeroi.useAll()) {
@@ -696,9 +694,7 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group, const Mantid:
   if (this->hasProperty("proton_charge")) {
     // Old files may have a proton_charge field, single value.
     // Modern files (e.g. SNS) have a proton_charge TimeSeriesProperty.
-    PropertyWithValue<double> *charge_log =
-        dynamic_cast<PropertyWithValue<double> *>(this->getProperty("proton_charge"));
-    if (charge_log) {
+    if (const auto *charge_log = dynamic_cast<PropertyWithValue<double> *>(this->getProperty("proton_charge"))) {
       this->setProtonCharge(boost::lexical_cast<double>(charge_log->value()));
     }
   }
@@ -729,9 +725,7 @@ void Run::loadNexus(::NeXus::File *file, const std::string &group, bool keepOpen
   if (this->hasProperty("proton_charge")) {
     // Old files may have a proton_charge field, single value.
     // Modern files (e.g. SNS) have a proton_charge TimeSeriesProperty.
-    PropertyWithValue<double> *charge_log =
-        dynamic_cast<PropertyWithValue<double> *>(this->getProperty("proton_charge"));
-    if (charge_log) {
+    if (const auto *charge_log = dynamic_cast<PropertyWithValue<double> *>(this->getProperty("proton_charge"))) {
       this->setProtonCharge(boost::lexical_cast<double>(charge_log->value()));
     }
   }

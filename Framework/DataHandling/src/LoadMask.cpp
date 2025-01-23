@@ -17,8 +17,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
+
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 
 #include <fstream>
 #include <map>
@@ -292,11 +292,11 @@ void LoadMask::exec() {
   // 2. Parse Mask File
   std::string filename = getProperty("InputFile");
 
-  if (boost::ends_with(filename, "l") || boost::ends_with(filename, "L")) {
+  if (filename.ends_with("l") || filename.ends_with("L")) {
     // 2.1 XML File
     this->initializeXMLParser(filename);
     this->parseXML();
-  } else if (boost::ends_with(filename, "k") || boost::ends_with(filename, "K")) {
+  } else if (filename.ends_with("k") || filename.ends_with("K")) {
     // 2.2 ISIS Masking file
     loadISISMaskFile(filename, m_maskSpecID);
     m_defaultToUse = true;

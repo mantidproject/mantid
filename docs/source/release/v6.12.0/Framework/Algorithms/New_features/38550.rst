@@ -1,0 +1,1 @@
+- :ref:`RebinRagged <algm-RebinRagged>` exposes FullBinsOnly from Rebin Algo.

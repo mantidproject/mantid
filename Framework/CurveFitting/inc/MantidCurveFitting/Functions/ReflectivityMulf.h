@@ -9,8 +9,6 @@
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/System.h"
 #include <cmath>
 #include <complex>
 
