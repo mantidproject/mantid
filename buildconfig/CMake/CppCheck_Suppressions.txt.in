@@ -909,8 +909,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Muon/src/PlotAsymmetryByLog
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Muon/src/PlotAsymmetryByLogValue.cpp:507
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Muon/src/PlotAsymmetryByLogValue.cpp:868
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusClasses.h:150
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/src/NexusFileIO.cpp:725
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Nexus/src/NexusFileIO.cpp:784
 argumentSize:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/NeXusFile.cpp:900
 argumentSize:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/NeXusFile.cpp:964
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:194

@@ -70,7 +70,7 @@ void MuonNexusReader::openFirstNXentry(NeXus::File &handle) {
 // which does not use namespace.
 // This reader is only used by LoadMuonNexus - the NexusProcessed files are
 // dealt with by
-// NexusFileIO.cpp
+// SaveNexusProcessedHelper.cpp
 //
 // Expected content of Nexus file is:
 //     Entry: "run" (first entry opened, whatever name is)

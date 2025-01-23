@@ -17,6 +17,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidDataHandling/SaveNexusProcessedHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/LeanElasticPeaksWorkspace.h"
 #include "MantidDataObjects/Peak.h"
@@ -34,7 +35,6 @@
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexus/NexusFileIO.h"
 #include "MantidNexusCpp/NeXusException.hpp"
 
 #include <boost/algorithm/string/trim.hpp>
