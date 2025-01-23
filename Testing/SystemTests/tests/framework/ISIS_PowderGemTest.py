@@ -91,10 +91,10 @@ class FocusTestMixin(object):
             self.assert_output_file_exists(output_dat_dir, f"GEM{ws_num}-b_{bankno}-TOF.dat")
             self.assert_output_file_exists(output_dat_dir, f"GEM{ws_num}-b_{bankno}-d.dat")
 
-    def doTest(self, absorb_corrections, run_number="83605", focus_mode="Individual"):
+    def doTest(self, absorb_corrections, run_number="83605", input_mode="Individual"):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus(absorb_corrections, run_number, focus_mode)
+        self.focus_results = run_focus(absorb_corrections, run_number, input_mode)
 
     def cleanup(self):
         try:
@@ -125,7 +125,7 @@ class FocusTestWithAbsCorr(systemtesting.MantidSystemTest, FocusTestMixin):
 
 class FocusTestMultipleWSIndividual(systemtesting.MantidSystemTest, FocusTestMixin):
     def runTest(self):
-        self.doTest(absorb_corrections=False, run_number="83605,83607", focus_mode="Individual")
+        self.doTest(absorb_corrections=False, run_number="83605,83607", input_mode="Individual")
 
     def validate(self):
         self.validate_focus_files_exist("83605")
@@ -134,7 +134,7 @@ class FocusTestMultipleWSIndividual(systemtesting.MantidSystemTest, FocusTestMix
 
 class FocusTestMultipleWSSummed(systemtesting.MantidSystemTest, FocusTestMixin):
     def runTest(self):
-        self.doTest(absorb_corrections=False, run_number="83605,83607", focus_mode="Summed")
+        self.doTest(absorb_corrections=False, run_number="83605,83607", input_mode="Summed")
 
     def validate(self):
         self.validate_focus_files_exist("83605,83607")
@@ -193,7 +193,7 @@ def run_vanadium_calibration():
     return splined_ws
 
 
-def run_focus(absorb_corrections, run_number="83605", focus_mode="Individual"):
+def run_focus(absorb_corrections, run_number="83605", input_mode="Individual"):
     sample_empty = 83608  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # Set it to 50% scale
 
@@ -211,7 +211,7 @@ def run_focus(absorb_corrections, run_number="83605", focus_mode="Individual"):
 
     return inst_object.focus(
         run_number=run_number,
-        input_mode=focus_mode,
+        input_mode=input_mode,
         vanadium_normalisation=True,
         do_absorb_corrections=absorb_corrections,
         multiple_scattering=False,
