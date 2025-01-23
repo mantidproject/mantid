@@ -6,7 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
+
 #include <Poco/TemporaryFile.h>
 #include <string>
 #include <vector>
@@ -15,11 +18,13 @@ namespace NXcanSASTestHelper {
 struct NXcanSASTestParameters {
   NXcanSASTestParameters() {
     Poco::TemporaryFile tmpFile;
+
     tmpFile.keep();
     filename = tmpFile.path();
   }
 
   std::string filename;
+  std::vector<std::string> expectedGroupSuffices{"00", "01"};
   int size{10};
   double value{10.23};
   double error{3.45};
@@ -78,6 +83,9 @@ void set_logs(const Mantid::API::MatrixWorkspace_sptr &workspace, const std::str
               const std::string &userFile);
 
 void set_instrument(const Mantid::API::MatrixWorkspace_sptr &workspace, const std::string &instrumentName);
+
+Mantid::API::WorkspaceGroup_sptr provideGroupWorkspace(Mantid::API::AnalysisDataServiceImpl &ads,
+                                                       NXcanSASTestParameters &parameters);
 
 Mantid::API::MatrixWorkspace_sptr provide1DWorkspace(NXcanSASTestParameters &parameters);
 

@@ -11,6 +11,7 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
 #include "MantidDataHandling/NXcanSASHelper.h"
 #include "MantidDataHandling/SaveNXcanSAS.h"
@@ -365,6 +366,32 @@ public:
     removeFile(parameters.filename);
   }
 
+  void test_that_group_workspaces_are_saved_correctly_in_individual_files() {
+    // Arrange
+    NXcanSASTestParameters parameters;
+    removeFile(parameters.filename);
+
+    auto &ads = Mantid::API::AnalysisDataService::Instance();
+    auto const ws_group = provideGroupWorkspace(ads, parameters);
+
+    // Act
+    save_file_no_issues(std::dynamic_pointer_cast<Mantid::API::Workspace>(ws_group), parameters);
+
+    for (auto const &suffix : parameters.expectedGroupSuffices) {
+      // Assert
+      auto const tmpFilename = parameters.filename;
+      parameters.filename += suffix;
+      TS_ASSERT(Poco::File(parameters.filename).exists());
+      do_assert(parameters);
+
+      // clean files
+      removeFile(parameters.filename);
+      parameters.filename = tmpFilename;
+    }
+    // Clean ads
+    ads.clear();
+  }
+
   void test_that_2D_workspace_histogram_is_saved_correctly() {
     // Arrange
     NXcanSASTestParameters parameters;
@@ -393,7 +420,7 @@ public:
   }
 
 private:
-  void save_file_no_issues(const Mantid::API::MatrixWorkspace_sptr &workspace, NXcanSASTestParameters &parameters,
+  void save_file_no_issues(const Mantid::API::Workspace_sptr &workspace, NXcanSASTestParameters &parameters,
                            const Mantid::API::MatrixWorkspace_sptr &transmission = nullptr,
                            const Mantid::API::MatrixWorkspace_sptr &transmissionCan = nullptr) {
     auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged("SaveNXcanSAS");
@@ -935,7 +962,8 @@ private:
   void do_assert(NXcanSASTestParameters &parameters,
                  NXcanSASTestTransmissionParameters transmissionParameters = NXcanSASTestTransmissionParameters(),
                  NXcanSASTestTransmissionParameters transmissionCanParameters = NXcanSASTestTransmissionParameters()) {
-    H5::H5File file(parameters.filename, H5F_ACC_RDONLY);
+    auto filename = parameters.filename;
+    H5::H5File file(filename, H5F_ACC_RDONLY);
 
     // Check sasentry
     auto entry = file.openGroup(sasEntryGroupName + suffix);
