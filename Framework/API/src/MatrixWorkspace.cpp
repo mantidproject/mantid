@@ -337,6 +337,9 @@ void MatrixWorkspace::setPlotType(const std::string &t) {
       run.addProperty("plot_type", t, true);
     else
       run.addProperty("plot_type", t, false);
+  } else {
+    std::string validValues = boost::algorithm::join(validPlotTypes, ", ");
+    g_log.warning("Invalid plot type: " + t + ". Must be one of: " + validValues);
   }
 }
 
@@ -359,7 +362,16 @@ std::string MatrixWorkspace::getPlotType() const {
  *
  * @param markerType :: The Marker Type
  */
-void MatrixWorkspace::setMarkerStyle(const std::string &markerType) { m_marker = markerType; }
+void MatrixWorkspace::setMarkerStyle(const std::string &markerType) {
+  StringListValidator v(validMarkerStyles);
+
+  if (v.isValid(markerType) == "") {
+    m_marker = markerType;
+  } else {
+    std::string validValues = boost::algorithm::join(validMarkerStyles, ", ");
+    g_log.warning("Invalid marker type: " + markerType + ". Must be one of: " + validValues);
+  }
+}
 
 /**
  * get the marker type
@@ -368,7 +380,7 @@ void MatrixWorkspace::setMarkerStyle(const std::string &markerType) { m_marker =
  */
 std::string MatrixWorkspace::getMarkerStyle() const {
   if (m_marker.empty())
-    return Kernel::ConfigService::Instance().getString("markerworkspace.marker.Style");
+    return Kernel::ConfigService::Instance().getString("plots.markerworkspace.MarkerStyle");
   else
     return m_marker;
 }
