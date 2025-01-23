@@ -549,7 +549,7 @@ def run_vanadium_calibration(per_detector):
     return splined_ws, unsplined_ws
 
 
-def run_focus_no_absorption(per_detector=False, mode="PDF"):
+def run_focus_no_absorption(per_detector=False, mode="PDF", focus_mode="Individual"):
     if mode == "PDF_NORM":
         run_number = 98534
     elif mode == "PDF":
@@ -571,7 +571,7 @@ def run_focus_no_absorption(per_detector=False, mode="PDF"):
     inst_object = setup_inst_object(mode=mode)
     return inst_object.focus(
         run_number=run_number,
-        input_mode="Individual",
+        input_mode=focus_mode,
         do_van_normalisation=True,
         do_absorb_corrections=False,
         sample_empty=sample_empty,
@@ -601,7 +601,7 @@ def run_focus_no_chopper(run_number):
     )
 
 
-def run_focus_absorption(run_number, paalman_pings=False):
+def run_focus_absorption(run_number, paalman_pings=False, focus_mode="Summed"):
     sample_empty = 98532  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # ignored if paalman_pings True
 
@@ -621,7 +621,7 @@ def run_focus_absorption(run_number, paalman_pings=False):
 
     return inst_object.focus(
         run_number=run_number,
-        input_mode="Summed",
+        input_mode=focus_mode,
         do_van_normalisation=True,
         do_absorb_corrections=True,
         sample_empty=sample_empty,
