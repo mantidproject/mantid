@@ -16,6 +16,7 @@
 #define NAME_MAX 260
 #endif /* _WIN32 */
 #include "MantidAPI/NumericAxis.h"
+#include "MantidDataHandling/SaveNexusProcessedHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/RebinnedOutput.h"
@@ -27,7 +28,6 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidNexus/NexusFileIO.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -722,8 +722,9 @@ int NexusFileIO::writeNexusTableWorkspace(const API::ITableWorkspace_const_sptr 
  * @param compress :: if true, compress the entry
  */
 int NexusFileIO::writeNexusProcessedDataEventCombined(const DataObjects::EventWorkspace_const_sptr &ws,
-                                                      std::vector<int64_t> &indices, double *tofs, float *weights,
-                                                      float *errorSquareds, int64_t *pulsetimes, bool compress) const {
+                                                      std::vector<int64_t> const &indices, double const *tofs,
+                                                      float const *weights, float const *errorSquareds,
+                                                      int64_t const *pulsetimes, bool compress) const {
   NXopengroup(fileID, "event_workspace", "NXdata");
 
   // The array of indices for each event list #
@@ -781,7 +782,7 @@ int NexusFileIO::writeNexusProcessedDataEvent(const DataObjects::EventWorkspace_
 
 //-------------------------------------------------------------------------------------
 /** Write out an array to the open file. */
-void NexusFileIO::NXwritedata(const char *name, int datatype, int rank, int *dims_array, void *data,
+void NexusFileIO::NXwritedata(const char *name, int datatype, int rank, int *dims_array, void const *data,
                               bool compress) const {
   if (compress) {
     // We'll use the same slab/buffer size as the size of the array

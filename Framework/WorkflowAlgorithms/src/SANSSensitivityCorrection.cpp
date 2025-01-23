@@ -19,11 +19,13 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/PropertyManagerDataService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidNexus/NexusFileIO.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 #include "Poco/File.h"
 #include "Poco/NumberFormatter.h"
 #include "Poco/Path.h"
 #include "Poco/String.h"
+
 namespace Mantid::WorkflowAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
@@ -93,18 +95,23 @@ bool SANSSensitivityCorrection::fileCheck(const std::string &filePath) {
   if (!(Poco::icompare(nxs, extn) == 0 || Poco::icompare(nx5, extn) == 0))
     return false;
 
-  // If we have a Nexus file, check that is comes from Mantid
-  std::vector<std::string> entryName, definition;
-  int count = NeXus::getNexusEntryTypes(filePath, entryName, definition);
-  if (count <= -1) {
-    g_log.error("Error reading file " + filePath);
+  // open file and make sure it has entries
+  try {
+    ::NeXus::File handle(filePath, NXACC_READ);
+    const auto entries = handle.getEntries();
+    if (entries.size() == 0) {
+      g_log.error("Error no entries found in " + filePath);
+      return false;
+    }
+    // ensure the file has an NXentry type named "mantid_workspace_1"
+    auto const iter = entries.find("mantid_workspace_1");
+    if (iter == entries.cend())
+      return false;
+    else
+      return iter->second == "NXentry";
+  } catch (NeXus::Exception &) {
     throw Exception::FileError("Unable to read data in File:", filePath);
-  } else if (count == 0) {
-    g_log.error("Error no entries found in " + filePath);
-    return false;
   }
-
-  return entryName[0] == "mantid_workspace_1";
 }
 
 void SANSSensitivityCorrection::exec() {
