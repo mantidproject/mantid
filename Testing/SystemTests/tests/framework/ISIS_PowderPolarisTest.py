@@ -155,7 +155,7 @@ class FocusTestNoAbsorptionWithRelativeNormalisation(generate_helper_class()):
     def runTest(self):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus_no_absorption(mode="PDF")
+        self.focus_results = run_focus_no_absorption("98533", mode="PDF")
 
     def validate(self):
         self.validate_focus_files_exist("98533")
@@ -178,12 +178,63 @@ class FocusTestNoAbsorptionWithAbsoluteNormalisation(generate_helper_class()):
     def runTest(self):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus_no_absorption(mode="PDF_NORM")
+        self.focus_results = run_focus_no_absorption("98534", mode="PDF_NORM")
 
     def validate(self):
         self.validate_focus_files_exist("98534")
         self.validate_focus_material(self.focus_results)
         return self.focus_results.name(), "ISIS_Powder-POLARIS98534_FocusSempty.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config["datasearch.directories"] = self.existing_config
+
+
+class TestFocusNoAbsorptionIndividual(generate_helper_class()):
+    focus_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        self.focus_results = run_focus_no_absorption("98533, 98534", mode="PDF", focus_mode="Individual")
+
+    def validate(self):
+        # Just check the files exists as functionality of the focussing tested elsewhere
+        self.validate_focus_files_exist("98533")
+        self.validate_focus_files_exist("98534")
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            mantid.mtd.clear()
+            config["datasearch.directories"] = self.existing_config
+
+
+class TestFocusNoAbsorptionSummed(generate_helper_class()):
+    focus_results = None
+    existing_config = config["datasearch.directories"]
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        # Gen vanadium calibration first
+        setup_mantid_paths()
+        self.focus_results = run_focus_no_absorption("98533,98534", mode="PDF", focus_mode="Summed")
+
+    def validate(self):
+        # Just check the files exists as functionality of the focussing tested elsewhere
+        self.validate_focus_files_exist("98533,98534")
 
     def cleanup(self):
         try:
@@ -314,7 +365,7 @@ class FocusTestPerDetector(generate_helper_class()):
     def runTest(self):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus_no_absorption(per_detector=True)
+        self.focus_results = run_focus_no_absorption("98533", per_detector=True)
 
     def validate(self):
         self.validate_focus_files_exist("98533")
@@ -549,14 +600,8 @@ def run_vanadium_calibration(per_detector):
     return splined_ws, unsplined_ws
 
 
-def run_focus_no_absorption(per_detector=False, mode="PDF", focus_mode="Individual"):
-    if mode == "PDF_NORM":
-        run_number = 98534
-    elif mode == "PDF":
-        run_number = 98533
-    else:
-        raise RuntimeError("Invalid mode")
-    sample_empty = 98532  # Use the vanadium empty again to make it obvious
+def run_focus_no_absorption(run_number, per_detector=False, mode="PDF", focus_mode="Individual"):
+    sample_empty = "98532"  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # Set it to 50% scale
 
     # Copy the required splined file into place first (instead of relying on generated one)
