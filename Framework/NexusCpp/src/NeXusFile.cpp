@@ -672,23 +672,6 @@ void File::makeLink(NXlink &link) {
   }
 }
 
-void File::makeNamedLink(const string &name, NXlink &link) {
-  if (name.empty()) {
-    throw Exception("Supplied empty name to makeNamedLink");
-  }
-  NXstatus status = NXmakenamedlink(this->m_file_id, name.c_str(), &link);
-  if (status != NX_OK) {
-    throw Exception("NXmakenamedlink(" + name + ", link)", status);
-  }
-}
-
-void File::openSourceGroup() {
-  NXstatus status = NXopensourcegroup(this->m_file_id);
-  if (status != NX_OK) {
-    throw Exception("NXopensourcegroup failed");
-  }
-}
-
 void File::getData(void *data) {
   if (data == NULL) {
     throw Exception("Supplied null pointer to getData");
@@ -1153,18 +1136,6 @@ NXlink File::getGroupID() {
   return link;
 }
 
-bool File::sameID(NXlink &first, NXlink &second) {
-  NXstatus status = NXsameID(this->m_file_id, &first, &second);
-  return (status == NX_OK);
-}
-
-void File::printLink(NXlink &link) {
-  NXstatus status = NXIprintlink(this->m_file_id, &link);
-  if (status != NX_OK) {
-    throw Exception("NXprintlink failed");
-  }
-}
-
 void File::initGroupDir() {
   int status = NXinitgroupdir(this->m_file_id);
   if (status != NX_OK) {
@@ -1177,95 +1148,6 @@ void File::initAttrDir() {
   if (status != NX_OK) {
     throw Exception("NXinitattrdir failed", status);
   }
-}
-
-string File::inquireFile(const int buff_length) {
-  string filename;
-  char *c_filename = new char[static_cast<size_t>(buff_length)];
-  NXstatus status = NXinquirefile(this->m_file_id, c_filename, buff_length);
-  if (status != NX_OK) {
-    delete[] c_filename;
-    stringstream msg;
-    msg << "NXinquirefile(" << buff_length << ") failed";
-    throw Exception(msg.str(), status);
-  }
-  filename = c_filename;
-  delete[] c_filename;
-  return filename;
-}
-
-string File::isExternalGroup(const string &name, const string &type, const unsigned buff_length) {
-  string url;
-  if (name.empty()) {
-    throw Exception("Supplied empty name to isExternalGroup");
-  }
-  if (type.empty()) {
-    throw Exception("Supplied empty type to isExternalGroup");
-  }
-  char *c_url = new char[buff_length];
-  NXstatus status =
-      NXisexternalgroup(this->m_file_id, name.c_str(), type.c_str(), c_url, static_cast<int>(buff_length));
-  if (status != NX_OK) {
-    delete[] c_url;
-    stringstream msg;
-    msg << "NXisexternalgroup(" << type << ", " << buff_length << ")";
-    throw Exception(msg.str(), static_cast<int>(buff_length));
-  }
-  url = c_url;
-  delete[] c_url;
-  return url;
-}
-
-void File::linkExternal(const string &name, const string &type, const string &url) {
-  if (name.empty()) {
-    throw Exception("Supplied empty name to linkExternal");
-  }
-  if (type.empty()) {
-    throw Exception("Supplied empty type to linkExternal");
-  }
-  if (url.empty()) {
-    throw Exception("Supplied empty url to linkExternal");
-  }
-  NXstatus status = NXlinkexternal(this->m_file_id, name.c_str(), type.c_str(), url.c_str());
-  if (status != NX_OK) {
-    stringstream msg;
-    msg << "NXlinkexternal(" << name << ", " << type << ", " << url << ") failed";
-    throw Exception(msg.str(), status);
-  }
-}
-
-const string File::makeCurrentPath(const string &currpath, const string &subpath) {
-  std::ostringstream temp;
-  temp << currpath << "/" << subpath;
-  return temp.str();
-}
-
-void File::walkFileForTypeMap(const string &path, const string &class_name, TypeMap &tmap) {
-  if (!path.empty()) {
-    tmap.insert(std::make_pair(class_name, path));
-  }
-  map<string, string> dirents = this->getEntries();
-  map<string, string>::iterator pos;
-  for (pos = dirents.begin(); pos != dirents.end(); ++pos) {
-    if (pos->second == "SDS") {
-      tmap.insert(std::make_pair(pos->second, this->makeCurrentPath(path, pos->first)));
-    } else if (pos->second == "CDF0.0") {
-      // Do nothing with this
-      ;
-    } else {
-      this->openGroup(pos->first, pos->second);
-      this->walkFileForTypeMap(this->makeCurrentPath(path, pos->first), pos->second, tmap);
-    }
-  }
-  this->closeGroup();
-}
-
-TypeMap *File::getTypeMap() {
-  TypeMap *tmap = new TypeMap();
-  // Ensure that we're at the top of the file.
-  this->openPath("/");
-  this->walkFileForTypeMap("", "", *tmap);
-  return tmap;
 }
 
 template <typename NumT> void File::malloc(NumT *&data, const Info &info) {
