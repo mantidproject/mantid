@@ -188,6 +188,7 @@ set(SRC_FILES
     src/SaveNexusESS.cpp
     src/SaveNexusGeometry.cpp
     src/SaveNexusProcessed.cpp
+    src/SaveNexusProcessedHelper.cpp
     src/SaveOpenGenieAscii.cpp
     src/SavePAR.cpp
     src/SavePDFGui.cpp
@@ -405,6 +406,7 @@ set(INC_FILES
     inc/MantidDataHandling/SaveNexusESS.h
     inc/MantidDataHandling/SaveNexusGeometry.h
     inc/MantidDataHandling/SaveNexusProcessed.h
+    inc/MantidDataHandling/SaveNexusProcessedHelper.h
     inc/MantidDataHandling/SaveOpenGenieAscii.h
     inc/MantidDataHandling/SavePAR.h
     inc/MantidDataHandling/SavePDFGui.h

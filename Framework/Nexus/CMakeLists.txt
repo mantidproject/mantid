@@ -1,7 +1,7 @@
-set(SRC_FILES src/H5Util.cpp src/MuonNexusReader.cpp src/NexusClasses.cpp src/NexusFileIO.cpp)
+set(SRC_FILES src/H5Util.cpp src/MuonNexusReader.cpp src/NexusClasses.cpp)
 
 set(INC_FILES inc/MantidNexus/H5Util.h inc/MantidNexus/MuonNexusReader.h inc/MantidNexus/NexusClasses.h
-              inc/MantidNexus/NexusFileIO.h inc/MantidNexus/NexusIOHelper.h
+              inc/MantidNexus/NexusIOHelper.h
 )
 
 set(TEST_FILES H5UtilTest.h NexusIOHelperTest.h)
