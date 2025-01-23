@@ -176,8 +176,7 @@ def run_vanadium_calibration():
     return splined_ws
 
 
-def run_focus(absorb_corrections):
-    run_number = 83605
+def run_focus(absorb_corrections, run_number="83605", focus_mode="Individual"):
     sample_empty = 83608  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # Set it to 50% scale
 
@@ -195,7 +194,7 @@ def run_focus(absorb_corrections):
 
     return inst_object.focus(
         run_number=run_number,
-        input_mode="Individual",
+        input_mode=focus_mode,
         vanadium_normalisation=True,
         do_absorb_corrections=absorb_corrections,
         multiple_scattering=False,
