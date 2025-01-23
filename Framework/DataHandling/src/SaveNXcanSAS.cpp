@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidDataHandling/SaveNXcanSAS.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Progress.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
 #include <Poco/File.h>
 
@@ -23,32 +25,34 @@ void SaveNXcanSAS::init() { initStandardProperties(); }
 
 std::map<std::string, std::string> SaveNXcanSAS::validateInputs() { return validateStandardInputs(); }
 
-void SaveNXcanSAS::exec() {
+bool SaveNXcanSAS::processGroups() {
+  Mantid::API::Workspace_sptr &&workspace = getProperty("InputWorkspace");
+  auto const &group = std::dynamic_pointer_cast<WorkspaceGroup>(workspace)->getAllItems();
+  std::ranges::for_each(group.cbegin(), group.cend(), [&](auto const &wsChild) {
+    m_workspaces.push_back(std::dynamic_pointer_cast<MatrixWorkspace>(wsChild));
+  });
 
-  std::string &&filename = getPropertyValue("Filename");
-  // Remove the file if it already exists
-  if (Poco::File(filename).exists()) {
-    Poco::File(filename).remove();
-  }
-
-  H5::H5File file(filename, H5F_ACC_EXCL);
-
-  Progress progress(this, 0.1, 1.0, 3);
-  progress.report("Adding a new entry.");
-
-  Mantid::API::MatrixWorkspace_sptr &&workspace = getProperty("InputWorkspace");
-  // add sas entry
-  const std::string suffix("01");
-  auto sasEntry = addSasEntry(file, workspace, suffix);
-
-  // Add metadata for canSAS file: Instrument, Sample, Process
-  progress.report("Adding standard metadata");
-  addStandardMetadata(workspace, sasEntry);
-
-  // Add the data
-  progress.report("Adding data.");
-  addData(sasEntry, workspace);
-
-  file.close();
+  processAllWorkspaces();
+  return true;
 }
+
+void SaveNXcanSAS::processAllWorkspaces() {
+  m_progress = std::make_unique<API::Progress>(this, 0.1, 1.0, 3 * m_workspaces.size());
+  auto const &&baseFilename = getPropertyValue("Filename");
+  auto const addDigit = [&](int index) {
+    return m_workspaces.size() > 1 ? (index < 10 ? "0" + std::to_string(index) : std::to_string(index)) : "";
+  };
+
+  for (auto wksIndex = 0; wksIndex < static_cast<int>(m_workspaces.size()); wksIndex++) {
+    saveSingleWorkspaceFile(m_workspaces.at(wksIndex), baseFilename + addDigit(wksIndex));
+  }
+}
+
+void SaveNXcanSAS::exec() {
+  Mantid::API::Workspace_sptr &&workspace = getProperty("InputWorkspace");
+  m_workspaces.push_back(std::dynamic_pointer_cast<MatrixWorkspace>(workspace));
+
+  processAllWorkspaces();
+}
+
 } // namespace Mantid::DataHandling

@@ -20,12 +20,15 @@ namespace DataHandling {
  */
 class MANTID_DATAHANDLING_DLL SaveNXcanSASBase : public API::Algorithm {
 protected:
+  void saveSingleWorkspaceFile(const API::MatrixWorkspace_sptr &workspace, const std::string &filename);
   void addStandardMetadata(const Mantid::API::MatrixWorkspace_sptr &workspace, H5::Group &sasEntry);
   void addData(H5::Group &group, const Mantid::API::MatrixWorkspace_sptr &workspace);
   H5::Group addSasEntry(H5::H5File &file, const Mantid::API::MatrixWorkspace_sptr &workspace,
                         const std::string &suffix);
   void initStandardProperties();
   std::map<std::string, std::string> validateStandardInputs();
+
+  std::unique_ptr<API::Progress> m_progress = nullptr;
 };
 
 } // namespace DataHandling
