@@ -698,6 +698,10 @@ class IntegratePeaksSkew(DataProcessorAlgorithm):
         return issues
 
     def PyExec(self):
+        import pydevd_pycharm
+
+        pydevd_pycharm.settrace(stdoutToServer=True, stderrToServer=True)
+
         # get input
         ws = self.getProperty("InputWorkspace").value
         pk_ws = self.getProperty("PeaksWorkspace").value
