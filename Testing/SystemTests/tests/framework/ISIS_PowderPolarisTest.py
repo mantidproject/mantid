@@ -8,7 +8,6 @@ import numpy as np
 import os
 import systemtesting
 import shutil
-from abc import abstractmethod
 
 import mantid.simpleapi as mantid
 from mantid import config
@@ -54,14 +53,6 @@ total_scattering_input_file_per_det = os.path.join(input_dir, "ISIS_Powder-POLAR
 class HelperClass:
     tolerance_is_rel_err = True
     tolerance = 1e-6
-
-    @abstractmethod
-    def assertTrue(self, *args, **kwargs):
-        pass
-
-    @abstractmethod
-    def assertEqual(self, *args, **kwargs):
-        pass
 
     def requiredFiles(self):
         return _gen_required_files()
