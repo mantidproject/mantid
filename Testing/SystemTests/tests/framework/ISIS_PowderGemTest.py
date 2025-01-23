@@ -91,10 +91,10 @@ class FocusTestMixin(object):
             self.assert_output_file_exists(output_dat_dir, f"GEM{ws_num}-b_{bankno}-TOF.dat")
             self.assert_output_file_exists(output_dat_dir, f"GEM{ws_num}-b_{bankno}-d.dat")
 
-    def doTest(self, absorb_corrections):
+    def doTest(self, absorb_corrections, run_number="83605", focus_mode="Individual"):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus(absorb_corrections)
+        self.focus_results = run_focus(absorb_corrections, run_number, focus_mode)
 
     def cleanup(self):
         try:
@@ -121,6 +121,23 @@ class FocusTestWithAbsCorr(systemtesting.MantidSystemTest, FocusTestMixin):
 
     def validate(self):
         return self.focus_results.name(), "ISIS_Powder-GEM83605_FocusSempty_abscorr.nxs"
+
+
+class FocusTestMultipleWSIndividual(systemtesting.MantidSystemTest, FocusTestMixin):
+    def runTest(self):
+        self.doTest(absorb_corrections=False, run_number="83605,83607", focus_mode="Individual")
+
+    def validate(self):
+        self.validate_focus_files_exist("83605")
+        self.validate_focus_files_exist("83607")
+
+
+class FocusTestMultipleWSSummed(systemtesting.MantidSystemTest, FocusTestMixin):
+    def runTest(self):
+        self.doTest(absorb_corrections=False, run_number="83605,83607", focus_mode="Summed")
+
+    def validate(self):
+        self.validate_focus_files_exist("83605,83607")
 
 
 class CreateCalTest(systemtesting.MantidSystemTest):
