@@ -246,7 +246,7 @@ def load_workspace_from_filename(filename, input_properties=DEFAULT_INPUTS, outp
         load_result["OutputWorkspace"] = [MuonWorkspaceWrapper(load_result["OutputWorkspace"])]
         run = int(workspace.getRunNumber())
 
-        load_result["DataDeadTimeTable"] = load_result["DeadTimeTable"]
+        load_result["DataDeadTimeTable"] = AnalysisDataService.retrieve(load_result["DeadTimeTable"]).name()
         load_result["DeadTimeTable"] = None
         load_result["FirstGoodData"] = round(load_result["FirstGoodData"] - load_result["TimeZero"], 3)
 
