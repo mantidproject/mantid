@@ -48,6 +48,20 @@ public:
     TS_ASSERT(ws == nullptr);
   }
 
+  void testEmptySpinState() { runTestWorkspaceForSpinState({"01", "11"}, "", true); }
+
+  void testDuplicateSpinStates() { runTestWorkspaceForSpinState({"01", "01", "11"}, "01", false, "01"); }
+
+  void testWorkspaceForSpinStateUsingFredrikzeSpinStates() {
+    runTestWorkspaceForSpinState(FREDRIKZE_SPIN_STATES, SpinStateConfigurationsFredrikze::PARA_ANTI, false,
+                                 SpinStateConfigurationsFredrikze::PARA_ANTI);
+  }
+
+  void testWorkspaceForSpinStateUsingWildesSpinStates() {
+    runTestWorkspaceForSpinState(WILDES_SPIN_STATES, SpinStateConfigurationsWildes::PLUS_MINUS, false,
+                                 SpinStateConfigurationsWildes::PLUS_MINUS);
+  }
+
   void testGetORSONotationForSpinStateForWildes() { runTestGetORSONotationForSpinStates(WILDES_SPIN_STATES); }
 
   void testGetORSONotationForSpinStateForFredrikze() { runTestGetORSONotationForSpinStates(FREDRIKZE_SPIN_STATES); }
@@ -82,35 +96,21 @@ public:
   void testSplitSpinStateStringSingleItem() { runTestSplitSpinStateString("01", {"01"}); }
 
   void testIndexOfWorkspaceForSpinState_TargetStateExists() {
-    runTestIndexOfWorkspaceForSpinState({"00", "11", "10", "01"}, "10", true, 2);
+    runTestIndexOfWorkspaceForSpinState({"00", "11", "10", "01"}, "10", 2);
   }
 
   void testIndexOfWorkspaceForSpinState_TargetStateDoesNotExist() {
-    runTestIndexOfWorkspaceForSpinState({"00", "11", "10", "01"}, "invalid_state", false);
+    runTestIndexOfWorkspaceForSpinState({"00", "11", "10", "01"}, "invalid_state");
   }
 
-  void testIndexOfWorkspaceForSpinState_EmptySpinStateOrder() { runTestIndexOfWorkspaceForSpinState({}, "10", false); }
+  void testIndexOfWorkspaceForSpinState_EmptySpinStateOrder() { runTestIndexOfWorkspaceForSpinState({}, "10"); }
 
   void testIndexOfWorkspaceForSpinState_DuplicateEntries() {
-    runTestIndexOfWorkspaceForSpinState({"10", "10", "11"}, "10", true, 0);
+    runTestIndexOfWorkspaceForSpinState({"10", "10", "11"}, "10", 0);
   }
 
   void testIndexOfWorkspaceForSpinState_TrimWhitespace() {
-    runTestIndexOfWorkspaceForSpinState({"00", "11", "10", "01"}, " 10 ", true, 2);
-  }
-
-  void testEmptySpinStateOrder() { runTestWorkspaceForSpinState({"01", "11"}, "", true); }
-
-  void testDuplicateSpinStates() { runTestWorkspaceForSpinState({"01", "01", "11"}, "01", false, "01"); }
-
-  void testWorkspaceForSpinStateUsingFredrikzeSpinStates() {
-    runTestWorkspaceForSpinState(FREDRIKZE_SPIN_STATES, SpinStateConfigurationsFredrikze::PARA_ANTI, false,
-                                 SpinStateConfigurationsFredrikze::PARA_ANTI);
-  }
-
-  void testWorkspaceForSpinStateUsingWildesSpinStates() {
-    runTestWorkspaceForSpinState(WILDES_SPIN_STATES, SpinStateConfigurationsWildes::PLUS_MINUS, false,
-                                 SpinStateConfigurationsWildes::PLUS_MINUS);
+    runTestIndexOfWorkspaceForSpinState({"00", "11", "10", "01"}, " 10 ", 2);
   }
 
 private:
@@ -193,16 +193,10 @@ private:
   }
 
   void runTestIndexOfWorkspaceForSpinState(const std::vector<std::string> &spinStateOrder,
-                                           const std::string &targetSpinState, bool expectedHasValue,
-                                           int expectedIndex = -1) {
+                                           const std::string &targetSpinState,
+                                           const std::optional<size_t> expectedIndex = std::nullopt) {
     auto index = PolarizationCorrectionsHelpers::indexOfWorkspaceForSpinState(spinStateOrder, targetSpinState);
-
-    if (expectedHasValue) {
-      TS_ASSERT(index.has_value());
-      TS_ASSERT_EQUALS(index.value(), expectedIndex);
-    } else {
-      ASSERT_FALSE(index.has_value());
-    }
+    TS_ASSERT_EQUALS(index, expectedIndex);
   }
 
   void runTestWorkspaceForSpinState(const std::vector<std::string> &spinStateOrder, const std::string &targetSpinState,
@@ -211,10 +205,8 @@ private:
     auto ws =
         PolarizationCorrectionsHelpers::workspaceForSpinState(grp, boost::join(spinStateOrder, ","), targetSpinState);
 
-    if (expectedIsNull) {
-      TS_ASSERT(ws == nullptr);
-    } else {
-      TS_ASSERT(ws != nullptr);
+    TS_ASSERT_EQUALS(ws == nullptr, expectedIsNull);
+    if (!expectedIsNull) {
       TS_ASSERT_EQUALS(ws->getName(), expectedWorkspaceName);
     }
   }
