@@ -29,13 +29,16 @@ using namespace Mantid::DataHandling::NXcanSAS;
 namespace {
 
 bool hasUnit(const std::string &unitToCompareWith, const MatrixWorkspace_sptr &ws) {
+  if (ws->axes() == 0) {
+    return false;
+  }
   auto const unit = ws->getAxis(0)->unit();
   return (unit && !unit->unitID().compare(unitToCompareWith));
 }
 
 bool checkValidMatrixWorkspace(const Workspace_sptr &ws) {
   auto const &ws_input = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
-  return (hasUnit("MomentumTransfer", ws_input) && ws_input->isCommonBins());
+  return (ws_input && hasUnit("MomentumTransfer", ws_input) && ws_input->isCommonBins());
 }
 
 std::string validateGroupWithProperties(const Workspace_sptr &ws) {
