@@ -239,7 +239,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         #    incoming beam
         self.declareProperty(
             FloatArrayProperty("VectorV", [0, 1, 0], array_length_three, direction=Direction.Input),
-            doc="three item, comma-separated, HKL indices of the direction perpendicular to VectorVand the vertical axis",
+            doc="three item, comma-separated, HKL indices of the direction perpendicular to VectorV and the vertical axis",
         )
         #    Abscissa view
         self.declareProperty(
