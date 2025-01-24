@@ -100,7 +100,7 @@ class FindGoniometerFromUB(DataProcessorAlgorithm):
             defaultValue=0.0,
             direction=Direction.Input,
             validator=FloatBoundedValidator(lower=0.0, upper=180.0),
-            doc="omega rotation between component of goniometer axis in XY-plane from +ve Y-axis(perpendicular to ki)",
+            doc="omega rotation between component of goniometer axis in XY-plane from +ve Y-axis (perpendicular to ki)",
         )
         self.declareProperty(
             name="OmegaHand",

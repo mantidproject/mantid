@@ -242,7 +242,7 @@ class ReflectometryILLPreprocess(DataProcessorAlgorithm):
 
         if self.getProperty(Prop.BKG_METHOD).value != BkgMethod.OFF:
             if self.getProperty(Prop.LOW_BKG_WIDTH).value == 0 and self.getProperty(Prop.HIGH_BKG_WIDTH).value == 0:
-                issues[Prop.BKG_METHOD] = "Cannot calculate flat background if both upper and lower background / widths are zero."
+                issues[Prop.BKG_METHOD] = "Cannot calculate flat background if both upper and lower background widths are zero."
         # Early input validation to prevent FindReflectometryLines to fail its validation
         if not self.getProperty(Prop.XMIN).isDefault and not self.getProperty(Prop.XMAX).isDefault:
             x_min = self.getProperty(Prop.XMIN).value

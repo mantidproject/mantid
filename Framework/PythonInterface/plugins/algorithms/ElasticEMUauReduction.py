@@ -97,7 +97,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
         mandatoryInputRuns.add(StringArrayMandatoryValidator())
         self.declareProperty(
             StringArrayProperty("SampleRuns", values=[], validator=mandatoryInputRuns),
-            doc="Comma separated range of sample runs,\nand optional dataset indexes,\neg [cycle::] 7333-7341,7345[:0-23]",
+            doc="Comma separated range of sample runs, and optional dataset indexes, e.g. [cycle::] 7333-7341,7345[:0-23]",
         )
 
         self.declareProperty(
@@ -148,19 +148,19 @@ class ElasticEMUauReduction(PythonAlgorithm):
         self.declareProperty(
             name="ScanParameter",
             defaultValue="",
-            doc="Display data for time series environment variable,\nusing optional label and units  eg T02SP06 [, Temperature, K]",
+            doc="Display data for time series environment variable, using optional label and units e.g. T02SP06 [, Temperature, K]",
         )
 
         self.declareProperty(
             name="ReferenceRange",
             defaultValue="",
-            doc="Normalise the sample counts over the environment or\ntime range. Values are in environment units or secs,\n eg 75-100",
+            doc="Normalise the sample counts over the environment or time range. Values are in environment units or secs, e.g. 75-100",
         )
 
         self.declareProperty(
             name="SteppedScanParameter",
             defaultValue=False,
-            doc="If the environment variable is set and held\nduring each scan rather than continuosly changing.",
+            doc="If the environment variable is set and held during each scan rather than continuously changing.",
         )
 
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output), doc="Name for the reduced workspace.")
@@ -173,7 +173,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
         self.declareProperty(
             name="KeepIntermediateWorkspaces",
             defaultValue=False,
-            doc="Whether to keep the intermediate sample and calibration\nworkspaces for diagnostic checks.",
+            doc="Whether to keep the intermediate sample and calibration workspaces for diagnostic checks.",
         )
 
         self.declareProperty(
@@ -502,7 +502,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
         stepped_env = self.getProperty("SteppedScanParameter").value
 
         # determine the pulse map function and bin parameters
-        # - if env parameter need to account for stepped or contnuous
+        # - if env parameter need to account for stepped or continuous
         # - if pulse then map to dataset index
         if single_bin:
             tsmap, bin_params = self.get_single_bin_map(anl_ws)
