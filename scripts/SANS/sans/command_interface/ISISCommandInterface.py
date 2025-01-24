@@ -506,7 +506,7 @@ def set_save(
     save_algorithms: Union[None, Dict] = None, save_as_zero_error_free: bool = False, output_mode: OutputMode = OutputMode.PUBLISH_TO_ADS
 ) -> OutputMode:
     """
-    Mainly used internally by BatchReduce and WavRangeReduction. Prepares the save state on the director
+    Mainly used internally by WavRangeReduction. Prepares the save state on the director.
 
     @param save_algorithms: A dict containing the name of the save algorithms as keys and extension as values.
     @param save_as_zero_error_free: True if a zero error correction should be performed.
@@ -517,21 +517,21 @@ def set_save(
     save_algs = []
     if save_algorithms:
         for key in save_algorithms.keys():
-            if key == "SaveRKH":
-                save_algs.append(SaveType.RKH)
-            elif key == "SaveNexus":
-                save_algs.append(SaveType.NEXUS)
-            elif key == "SaveNistQxy":
-                save_algs.append(SaveType.NIST_QXY)
-            elif key == "SaveCanSAS" or key == "SaveCanSAS1D":
-                save_algs.append(SaveType.CAN_SAS)
-            elif key == "SaveCSV":
-                save_algs.append(SaveType.CSV)
-            elif key == "SaveNXcanSAS":
-                save_algs.append(SaveType.NX_CAN_SAS)
-            else:
-                raise RuntimeError(f"The save format {key} is not known")
-
+            match key:
+                case "SaveRKH":
+                    save_algs.append(SaveType.RKH)
+                case "SaveNexus":
+                    save_algs.append(SaveType.NEXUS)
+                case "SaveNistQxy":
+                    save_algs.append(SaveType.NIST_QXY)
+                case "SaveCanSAS" | "SaveCanSAS1D":
+                    save_algs.append(SaveType.CAN_SAS)
+                case "SaveCSV":
+                    save_algs.append(SaveType.CSV)
+                case "SaveNXCanSAS":
+                    save_algs.append(SaveType.NX_CAN_SAS)
+                case _:
+                    raise RuntimeError(f"The save format {key} is not known")
         output_mode = OutputMode.BOTH if (output_mode == OutputMode.PUBLISH_TO_ADS) else output_mode
     else:
         output_mode = OutputMode.PUBLISH_TO_ADS
