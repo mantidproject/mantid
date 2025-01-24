@@ -85,7 +85,7 @@ Do the following tests with an EventWorkspace (e.g. ``CNCS_7860_event.nxs``) and
 
     a. Confirm it tracks with the cursor when Track Cursor is checked
     b. Uncheck the track cursor and confirm it updates when the cursor is clicked.
-    c. Transpose the axes (as in step 6) and confirm the cursor position displayed is still correct (note if Track Cursor is checked you will need to click on the colorfill plot again).
+    c. Transpose the axes (as in step 6) and click on the colorfill plot. Confirm the clicked cursor position is correctly displayed in the table. If Track Cursor is checked the table should still track the cursor correctly.
 
 8. Resize the sliceviewer window, check the widgets, buttons etc. are still visible and clear for reasonable aspect ratios.
 
@@ -333,7 +333,7 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 21. Increase the thickness by dragging the left red marker of the cut representation to encompass the peak in the data - check the peak appears in the 1D plot at the right thickness.
 22. Play around with the direction of the cut by dragging the white markers at the end points of the white line - the vectors u1 and u3 should be orthogonal unit vectors.
 23. Reset the cut by transposing the axes so (X,Y) = (L,K)
-24. Double the slice thickness along H from 0.1 -> 0.2 (the counts of the peak in the 1D plot should double from ~2000 -> ~4000)
+24. Double the slice thickness along H from 0.1 -> 0.2 (the counts of the peak in the 1D plot should double from ~1750 -> ~3500)
 25. Change c* of u1 from 1 -> -1
 
     - The peak in the 1D plot should move from x= 1 -> -1
