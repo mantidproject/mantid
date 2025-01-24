@@ -418,22 +418,6 @@ public:
    * Put the supplied data as an attribute into the currently open data.
    *
    * \param name Name of the attribute to add.
-   * \param array The attribute value.
-   */
-  void putAttr(const std::string &name, const std::vector<std::string> &array);
-
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
-   * \param name Name of the attribute to add.
-   * \param array The attribute value.
-   */
-  template <typename NumT> void putAttr(const std::string &name, const std::vector<NumT> &array);
-
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
-   * \param name Name of the attribute to add.
    * \param value The attribute value.
    * \tparam NumT numeric data type of \a value
    */
@@ -672,15 +656,6 @@ public:
    * \return The value of the attribute.
    */
   std::string getStrAttr(const AttrInfo &info);
-
-  /**
-   * Get the value of a string array attribute.
-   *
-   * \param info Which attribute to read.
-   *
-   * \param array The values of the attribute.
-   */
-  void getAttr(const std::string &name, std::vector<std::string> &array);
 
   /**
    * \return The id of the group used for linking.
