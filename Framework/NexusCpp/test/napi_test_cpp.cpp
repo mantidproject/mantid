@@ -255,13 +255,13 @@ int readTest(const string &filename) {
           cout << "2d character array";
         }
       } else if (info.type == NeXus::FLOAT32) {
-        vector<float> *result = file.getData<float>();
-        cout << toString(*result);
-        delete result;
+        vector<float> result;
+        file.getData(result);
+        cout << toString(result);
       } else if (info.type == NeXus::FLOAT64) {
-        vector<double> *result = file.getData<double>();
-        cout << toString(*result);
-        delete result;
+        vector<double> result;
+        file.getData(result);
+        cout << toString(result);
       } else if (info.type == NeXus::INT8) {
         vector<int8_t> result;
         file.getData(result);

@@ -523,16 +523,6 @@ public:
   void getData(void *data);
 
   /**
-   * Allocate memory and return the data as a vector. Since this
-   * does call "new vector<NumT>" the caller is responsible for
-   * calling "delete".
-   * \tparam NumT numeric data type of result
-   *
-   * \return The data as a vector.
-   */
-  template <typename NumT> std::vector<NumT> *getData();
-
-  /**
    * Put data into the supplied vector. The vector does not need to
    * be the correct size, just the correct type as it is resized to
    * the appropriate value.

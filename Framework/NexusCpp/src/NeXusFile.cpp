@@ -682,33 +682,6 @@ void File::getData(void *data) {
   }
 }
 
-template <typename NumT> std::vector<NumT> *File::getData() {
-  Info info = this->getInfo();
-  if (info.type != getType<NumT>()) {
-    throw Exception("NXgetdata failed - invalid vector type");
-  }
-
-  // determine the number of elements
-  int64_t length = 1;
-  for (vector<int64_t>::const_iterator it = info.dims.begin(); it != info.dims.end(); ++it) {
-    length *= *it;
-  }
-
-  // allocate memory to put the data into
-  void *temp;
-  inner_malloc(temp, info.dims, info.type);
-
-  // fetch the data
-  this->getData(temp);
-
-  // put it in the vector
-  vector<NumT> *result =
-      new vector<NumT>(static_cast<NumT *>(temp), static_cast<NumT *>(temp) + static_cast<size_t>(length));
-
-  inner_free(temp);
-  return result;
-}
-
 template <typename NumT> void File::getData(vector<NumT> &data) {
   Info info = this->getInfo();
 
@@ -1406,18 +1379,6 @@ template MANTID_NEXUSCPP_DLL void File::writeCompData(const string &name, const 
 template MANTID_NEXUSCPP_DLL void File::writeCompData(const string &name, const vector<uint64_t> &value,
                                                       const vector<int64_t> &dims, const NXcompression comp,
                                                       const vector<int64_t> &bufsize);
-
-template MANTID_NEXUSCPP_DLL vector<float> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<double> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<int8_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<uint8_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<int16_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<uint16_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<int32_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<uint32_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<int64_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<uint64_t> *File::getData();
-template MANTID_NEXUSCPP_DLL vector<char> *File::getData();
 
 template MANTID_NEXUSCPP_DLL void File::getData(vector<float> &data);
 template MANTID_NEXUSCPP_DLL void File::getData(vector<double> &data);
