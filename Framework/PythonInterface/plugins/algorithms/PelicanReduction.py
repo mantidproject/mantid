@@ -98,13 +98,13 @@ class PelicanReduction(PythonAlgorithm):
         mandatoryInputRuns.add(StringArrayMandatoryValidator())
         self.declareProperty(
             StringArrayProperty("SampleRuns", values=[], validator=mandatoryInputRuns),
-            doc="Optional cycle number followed by comma separated range of sample runs as [cycle::] n1,n2,..  eg 123::7333-7341,7345",
+            doc="Optional cycle number followed by comma separated range of sample runs as [cycle::] n1,n2,.. e.g. 123::7333-7341,7345",
         )
 
         self.declareProperty(
             name="EmptyRuns",
             defaultValue="",
-            doc="Optional cycle number followed by comma separated range of runs as [cycle::] n1,n2,..   eg 123::6300-6308",
+            doc="Optional cycle number followed by comma separated range of runs as [cycle::] n1,n2,.. e.g. 123::6300-6308",
         )
 
         self.declareProperty(name="ScaleEmptyRuns", defaultValue=1.0, doc="Scale the empty runs prior to subtraction")
@@ -112,13 +112,13 @@ class PelicanReduction(PythonAlgorithm):
         self.declareProperty(
             name="CalibrationRuns",
             defaultValue="",
-            doc="Optional cycle number followed by comma separated range of runs as [cycle::] n1,n2,..  eg 123::6350-6365",
+            doc="Optional cycle number followed by comma separated range of runs as [cycle::] n1,n2,.. e.g. 123::6350-6365",
         )
 
         self.declareProperty(
             name="EmptyCalibrationRuns",
             defaultValue="",
-            doc="Optional cycle number followed by comma separated range of runs as [cycle::] n1,n2,..  eg 123::6370-6375",
+            doc="Optional cycle number followed by comma separated range of runs as [cycle::] n1,n2,.. e.g. 123::6370-6375",
         )
 
         self.declareProperty(

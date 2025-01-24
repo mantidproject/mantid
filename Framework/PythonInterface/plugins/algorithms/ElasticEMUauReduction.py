@@ -97,7 +97,7 @@ class ElasticEMUauReduction(PythonAlgorithm):
         mandatoryInputRuns.add(StringArrayMandatoryValidator())
         self.declareProperty(
             StringArrayProperty("SampleRuns", values=[], validator=mandatoryInputRuns),
-            doc="Comma separated range of sample runs, and optional dataset indexes, eg [cycle::] 7333-7341,7345[:0-23]",
+            doc="Comma separated range of sample runs, and optional dataset indexes, e.g. [cycle::] 7333-7341,7345[:0-23]",
         )
 
         self.declareProperty(
@@ -148,13 +148,13 @@ class ElasticEMUauReduction(PythonAlgorithm):
         self.declareProperty(
             name="ScanParameter",
             defaultValue="",
-            doc="Display data for time series environment variable, using optional label and units  eg T02SP06 [, Temperature, K]",
+            doc="Display data for time series environment variable, using optional label and units e.g. T02SP06 [, Temperature, K]",
         )
 
         self.declareProperty(
             name="ReferenceRange",
             defaultValue="",
-            doc="Normalise the sample counts over the environment or time range. Values are in environment units or secs,  eg 75-100",
+            doc="Normalise the sample counts over the environment or time range. Values are in environment units or secs, e.g. 75-100",
         )
 
         self.declareProperty(
