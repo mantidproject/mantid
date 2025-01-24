@@ -10,8 +10,6 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-#include <Poco/File.h>
-
 using namespace Mantid::API;
 
 namespace Mantid::DataHandling {
