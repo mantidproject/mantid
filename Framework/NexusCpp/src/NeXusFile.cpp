@@ -126,29 +126,6 @@ static int check_double_too_small[sizeof(double) - 8 + ARRAY_OFFSET]; // error i
 static int check_char_too_big[1 - sizeof(char) + ARRAY_OFFSET]; // error if char > 1 byte
 */
 
-namespace {
-
-static void inner_malloc(void *&data, const std::vector<int64_t> &dims, NXnumtype type) {
-  const auto rank = dims.size();
-  int64_t c_dims[NX_MAXRANK];
-  for (size_t i = 0; i < rank; i++) {
-    c_dims[i] = dims[i];
-  }
-  NXstatus status = NXmalloc64(&data, static_cast<int>(rank), c_dims, type);
-  if (status != NX_OK) {
-    throw Exception("NXmalloc failed", status);
-  }
-}
-
-static void inner_free(void *&data) {
-  NXstatus status = NXfree(&data);
-  if (status != NX_OK) {
-    throw Exception("NXfree failed", status);
-  }
-}
-
-} // end of anonymous namespace
-
 namespace NeXus {
 File::File(NXhandle handle, bool close_handle) : m_file_id(handle), m_close_handle(close_handle) {}
 
@@ -243,18 +220,6 @@ void File::openPath(const string &path) {
   if (status != NX_OK) {
     stringstream msg;
     msg << "NXopenpath(" << path << ") failed";
-    throw Exception(msg.str(), status);
-  }
-}
-
-void File::openGroupPath(const string &path) {
-  if (path.empty()) {
-    throw Exception("Supplied empty path to openGroupPath");
-  }
-  NXstatus status = NXopengrouppath(this->m_file_id, path.c_str());
-  if (status != NX_OK) {
-    stringstream msg;
-    msg << "NXopengrouppath(" << path << ") failed";
     throw Exception(msg.str(), status);
   }
 }
@@ -1020,19 +985,6 @@ void File::initAttrDir() {
   }
 }
 
-template <typename NumT> void File::malloc(NumT *&data, const Info &info) {
-  if (getType<NumT>() != info.type) {
-    throw Exception("Type mismatch in malloc()");
-  }
-  // cppcheck-suppress cstyleCast
-  inner_malloc((void *&)data, info.dims, info.type);
-}
-
-template <typename NumT> void File::free(NumT *&data) {
-  // cppcheck-suppress cstyleCast
-  inner_free((void *&)data);
-}
-
 } // namespace NeXus
 
 /* ---------------------------------------------------------------- */
@@ -1335,11 +1287,3 @@ template MANTID_NEXUSCPP_DLL void File::putSlab(const std::vector<uint64_t> &dat
 
 template MANTID_NEXUSCPP_DLL void File::getAttr(const std::string &name, double &value);
 template MANTID_NEXUSCPP_DLL void File::getAttr(const std::string &name, int &value);
-
-template MANTID_NEXUSCPP_DLL void File::malloc(int *&data, const Info &info);
-template MANTID_NEXUSCPP_DLL void File::malloc(float *&data, const Info &info);
-template MANTID_NEXUSCPP_DLL void File::malloc(double *&data, const Info &info);
-
-template MANTID_NEXUSCPP_DLL void File::free(int *&data);
-template MANTID_NEXUSCPP_DLL void File::free(float *&data);
-template MANTID_NEXUSCPP_DLL void File::free(double *&data);
