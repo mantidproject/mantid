@@ -213,7 +213,7 @@ Preview tab
    - Another run of ``ReflectometryISISLoadAndProcess`` will be logged in the Messages bar.
    - The 1D plot should update (although this is usually only noticeable when changes are made to the Signal region).
 
-#. Check that moving and resizing regions triggers a re-run of the reduction.
+#. Check that moving and vertically resizing regions triggers a re-run of the reduction (note that changing only the width of the rectangular selectors on the slice viewer plot will **not** trigger a new reduction).
 #. Check that you can delete one of the Background regions by selecting it and pressing the ``Delete`` key on your keyboard.
 #. Click the ``Apply`` button at the bottom right of the tab. The selected regions of interest should be populated in the lookup table on the Experiment Settings tab.
 #. Back on the Reduction Preview tab, click the export button above the top left of the 1D plot. This should export a workspace called ``preview_reduced_ws`` to the ADS.
