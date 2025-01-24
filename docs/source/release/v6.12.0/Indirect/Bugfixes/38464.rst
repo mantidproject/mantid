@@ -1,1 +1,1 @@
-- Added a warning when a calibration workspace used in the ISISIndirectEnergyTransfer algorithm has zeroes for one or more spectra.
+- Added a warning when a calibration workspace used in the `ISISIndirectEnergyTransfer <https://docs.mantidproject.org/nightly/algorithms/ISISIndirectEnergyTransfer-v1.html>`_ algorithm has zeroes for one or more spectra.
