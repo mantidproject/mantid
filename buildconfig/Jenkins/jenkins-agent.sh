@@ -55,7 +55,7 @@ LEGACY_JAR_FILE=remoting-${LEGACY_JAR_VERSION}.jar
 LEGACY_JENKINS_REPO_URL=https://repo.jenkins-ci.org/artifactory/releases/org/jenkins-ci/main/remoting
 
 # Name of the agent jar - full path determined later
-MAIN_JAR_FILE=agent.jar
+ARM_JAR_FILE=agent.jar
 
 # Some versions of cron don't set the USER environment variable
 # required by vnc
@@ -92,12 +92,15 @@ if [ ! -z "${PROXY_HOST}" ]; then
   export https_proxy=https://$PROXY_HOST:$PROXY_PORT
 fi
 
+# macOS agents with ARM architecture need to run the newer agent.jar file.
 if [[ "$OSTYPE" == "darwin"* ]] && [[ $(uname -m) == 'arm64' ]]; then
-  JAR_FILE=$MAIN_JAR_FILE
+  JAR_FILE=$ARM_JAR_FILE
   JAR_LOCATION="${JENKINS_URL}/jnlpJars"
+  JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -url ${JENKINS_URL} -secret ${SECRET} -name ${NODE_NAME}"
 else
   JAR_FILE=$LEGACY_JAR_FILE
   JAR_LOCATION="${LEGACY_JENKINS_REPO_URL}/${LEGACY_JAR_VERSION}"
+  JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -jnlpUrl ${AGENT_URL} -secret ${SECRET}"
 fi
 
 # find the jar file if it exists
@@ -123,12 +126,6 @@ fi
 echo "starting ..."
 if [ -z "${JAVA}" ]; then
   JAVA=`which java`
-fi
-
-if [[ "$OSTYPE" == "darwin"* ]] && [[ $(uname -m) == 'arm64' ]]; then
-  JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -url ${JENKINS_URL} -secret ${SECRET} -name ${NODE_NAME}"
-else
-  JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -jnlpUrl ${AGENT_URL} -secret ${SECRET}"
 fi
 
 echo "${JAVA} ${JAVA_ARGS}"
