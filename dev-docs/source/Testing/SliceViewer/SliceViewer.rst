@@ -343,7 +343,13 @@ It should only be enabled for the `ws_3D` and `ws_3D_QLab` workspaces (see comme
 
     - Check that the table values are updated correctly (use the HKL in the cursor info table to help determine this)
 
-27. Produce a non-axis aligned cut where the peak is not in the center of the x-range. Take the x-value at the peak maximum and plug it into the axis label - it should produce the HKL of the peak (0,0,1).
+27. Produce a non-axis aligned cut as shown below where the peak is not in the center of the x-range. Take the x-value at the peak maximum and plug it into the axis label - it should produce the HKL of the peak (0,0,1).
+
+    - In the example below, the x axis label is ``(0.0, -0.43+0.88x, 0.78+0.48x) in 6.53 Ang^-1``. By replacing x-value with the peak maximum of ~ 0.5, we get ``(0.0, -0.43+0.88*0.5, 0.78+0.48*0.5)`` = ``(0.0,0.01,1.02)`` which is very close actual peak HKL = ``(0,0,1)``
+
+.. figure:: ../../images/SliceViewer/CutViewer_nonAxisAlignedCut.png
+   :class: screenshot
+   :align: center
 
 Specific Tests
 --------------
