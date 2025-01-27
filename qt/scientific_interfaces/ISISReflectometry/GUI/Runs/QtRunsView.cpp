@@ -13,6 +13,7 @@
 #include "MantidQtWidgets/Common/QtAlgorithmRunner.h"
 #include <QMenu>
 #include <QMessageBox>
+#include <QSignalBlocker>
 
 namespace MantidQt::CustomInterfaces::ISISReflectometry {
 using namespace Mantid::API;
@@ -168,14 +169,12 @@ void QtRunsView::setInstrumentList(const std::vector<std::string> &instruments, 
   // We block signals while populating the list and setting the selected instrument because adding the first item
   // will trigger a currentIndexChanged signal. This causes existing batch settings to be overwritten when we're
   // initialising a new batch for an instrument that isn't the first in the list.
-  m_ui.comboSearchInstrument->blockSignals(true);
+  const QSignalBlocker blocker(m_ui.comboSearchInstrument);
+
   m_ui.comboSearchInstrument->clear();
   for (auto &&instrument : instruments)
     m_ui.comboSearchInstrument->addItem(QString::fromStdString(instrument));
   setSearchInstrument(selectedInstrument);
-  m_ui.comboSearchInstrument->blockSignals(false);
-  // Manually emit the signal once we've finished setting up the dropdown.
-  emit m_ui.comboSearchInstrument->currentIndexChanged(m_ui.comboSearchInstrument->currentIndex());
 }
 
 /**

@@ -72,8 +72,13 @@ RunsPresenter::~RunsPresenter() {
  */
 void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) { m_mainPresenter = mainPresenter; }
 
-void RunsPresenter::initInstrumentList(const std::string &selectedInstrument) {
+/** Initialise the list of available instruments.
+ * @param selectedInstrument : Optional name of an instrument to try and select from the list.
+ * @returns The name of the instrument that is selected.
+ */
+std::string RunsPresenter::initInstrumentList(const std::string &selectedInstrument) {
   m_view->setInstrumentList(m_instruments, selectedInstrument);
+  return m_view->getSearchInstrument();
 }
 
 RunsTable const &RunsPresenter::runsTable() const { return tablePresenter()->runsTable(); }
