@@ -128,7 +128,7 @@ class ReduceLET_OneRep(ReductionWrapper):
         Rebin(InputWorkspace=sample_ws, OutputWorkspace=sample_ws, Params=tbin, PreserveEvents=True)
         Rebin(InputWorkspace=monitors_ws, OutputWorkspace=monitors_ws, Params=tbin, PreserveEvents=True)
 
-        ConjoinWorkspaces(InputWorkspace1=sample_ws, InputWorkspace2=monitors_ws)
+        ConjoinWorkspaces(InputWorkspace1=sample_ws, InputWorkspace2=monitors_ws, CheckMatchingBins=False)
         prop.bkgd_range = [int(t_elastic), int(tbin[2])]
 
         ebinstring = str(energybin[0]) + "," + str(energybin[1]) + "," + str(energybin[2])

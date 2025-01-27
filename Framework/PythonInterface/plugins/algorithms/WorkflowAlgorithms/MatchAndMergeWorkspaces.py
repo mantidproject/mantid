@@ -89,7 +89,7 @@ class MatchAndMergeWorkspaces(DataProcessorAlgorithm):
         for ws in flattened_list[1:]:
             temp = CloneWorkspace(InputWorkspace=ws)
             temp = Rebin(InputWorkspace=temp, Params=rebin_param)
-            ConjoinWorkspaces(InputWorkspace1="ws_conjoined", InputWorkspace2=temp, CheckOverlapping=False)
+            ConjoinWorkspaces(InputWorkspace1="ws_conjoined", InputWorkspace2=temp, CheckOverlapping=False, CheckMatchingBins=False)
         ws_conjoined = AnalysisDataService.retrieve("ws_conjoined")
         ref_spec = ws_conjoined.getSpectrum(largest_range_spectrum).getSpectrumNo()
         ws_conjoined, offset, scale, chisq = MatchSpectra(

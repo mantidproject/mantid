@@ -1346,7 +1346,7 @@ class RunDescriptor(PropDescriptor):
         mon_ws_name = mon_ws.name()
         if not homo_binning:
             Rebin(InputWorkspace=mon_ws_name, OutputWorkspace=mon_ws_name, Params=bins, PreserveEvents="0")
-        ConjoinWorkspaces(InputWorkspace1=mon_ws_name, InputWorkspace2="tmp_mon")
+        ConjoinWorkspaces(InputWorkspace1=mon_ws_name, InputWorkspace2="tmp_mon", CheckMatchingBins=False)
         mon_ws = mtd[mon_ws_name]
 
         if "tmp_mon" in mtd:

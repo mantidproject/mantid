@@ -272,7 +272,7 @@ def handle_saving_event_workspace_when_saving_as_histogram(binning, runs, def_ty
     for i in range(mon_n):
         wsOut.setY(i, ws_in_monitor.dataY(i))
         wsOut.setE(i, ws_in_monitor.dataE(i))
-    ConjoinWorkspaces(wsOut, ws_in_detector, CheckOverlapping=True)
+    ConjoinWorkspaces(wsOut, ws_in_detector, CheckOverlapping=True, CheckMatchingBins=False)
 
     if "AddFilesSumTemporary_Rebin" in mtd:
         DeleteWorkspace("AddFilesSumTemporary_Rebin")
