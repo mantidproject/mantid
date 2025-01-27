@@ -32,7 +32,7 @@ class DNSScriptGeneratorModelTest(unittest.TestCase):
         with self.assertRaises(NameError):
             self.model.run_script(["x=y"])
         testv = self.model.run_script(
-            [("from mantidqtinterfaces.dns_powder_tof." "data_structures.dns_error " "import DNSError"), 'raise(DNSError("test"))']
+            [("from mantidqtinterfaces.dns_powder_tof.data_structures.dns_error import DNSError"), 'raise(DNSError("test"))']
         )
         self.assertEqual(testv, "test")
 

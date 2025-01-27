@@ -264,7 +264,7 @@ class CrystalField(object):
         free_parameters = {key: kwargs[key] for key in kwargs if key in CrystalField.field_parameter_names}
 
         if "ResolutionModel" in kwargs and "FWHM" in kwargs:
-            msg = "Both " "ResolutionModel" " and " "FWHM" " specified but can only accept one width option."
+            msg = "Both ResolutionModel and FWHM specified but can only accept one width option."
             msg += " Preferring to use ResolutionModel, and ignoring FWHM."
             kwargs.pop("FWHM")
             warnings.warn(msg, SyntaxWarning)
@@ -582,7 +582,7 @@ class CrystalField(object):
                     value = [float(v) for v in value]
                 else:
                     raise RuntimeError(
-                        "Vector of FWHMs must either have same size as " "Temperatures (%i) or have size 1." % (len(self.Temperature))
+                        "Vector of FWHMs must either have same size as Temperatures (%i) or have size 1." % (len(self.Temperature))
                     )
             self.crystalFieldFunction.setAttributeValue("FWHMs", value)
         else:
@@ -1055,7 +1055,7 @@ class CrystalField(object):
                 if np.abs(ev[ii, lv]) < 1e-5:
                     continue
                 val = ev[ii, lv] if np.abs(ev[ii, lv].imag) > 1e-3 else ev[ii, lv].real
-                jzstr = f"{int(jz2/2)}" if is_integral else f"{int(jz2)}/2"
+                jzstr = f"{int(jz2 / 2)}" if is_integral else f"{int(jz2)}/2"
                 # The Hamiltonian is expressed in the basis of the azimuthal quantum number |Jz>
                 # which goes from |Jz=-J> to |Jz=+J> in steps of 1. The values of the eigenvectors
                 # are coefficients corresponding to each of these quantum numbers

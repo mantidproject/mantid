@@ -98,15 +98,13 @@ class PelicanReduction(PythonAlgorithm):
         mandatoryInputRuns.add(StringArrayMandatoryValidator())
         self.declareProperty(
             StringArrayProperty("SampleRuns", values=[], validator=mandatoryInputRuns),
-            doc="Optional cycle number followed by comma separated range of\n"
-            "sample runs as [cycle::] n1,n2,..\n"
-            " eg 123::7333-7341,7345",
+            doc="Optional cycle number followed by comma separated range of sample runs as [cycle::] n1,n2,.. e.g. 123::7333-7341,7345",
         )
 
         self.declareProperty(
             name="EmptyRuns",
             defaultValue="",
-            doc="Optional cycle number followed by comma separated range of\n" "runs as [cycle::] n1,n2,..\n" "  eg 123::6300-6308",
+            doc="Optional cycle number followed by comma separated range of runs as [cycle::] n1,n2,.. e.g. 123::6300-6308",
         )
 
         self.declareProperty(name="ScaleEmptyRuns", defaultValue=1.0, doc="Scale the empty runs prior to subtraction")
@@ -114,13 +112,13 @@ class PelicanReduction(PythonAlgorithm):
         self.declareProperty(
             name="CalibrationRuns",
             defaultValue="",
-            doc="Optional cycle number followed by comma separated range of\n" "runs as [cycle::] n1,n2,..\n" "  eg 123::6350-6365",
+            doc="Optional cycle number followed by comma separated range of runs as [cycle::] n1,n2,.. e.g. 123::6350-6365",
         )
 
         self.declareProperty(
             name="EmptyCalibrationRuns",
             defaultValue="",
-            doc="Optional cycle number followed by comma separated range of\n" "runs as [cycle::] n1,n2,..\n" "  eg 123::6370-6375",
+            doc="Optional cycle number followed by comma separated range of runs as [cycle::] n1,n2,.. e.g. 123::6370-6375",
         )
 
         self.declareProperty(
@@ -139,7 +137,7 @@ class PelicanReduction(PythonAlgorithm):
             name="Processing",
             defaultValue="SOFQW1-Centre",
             validator=StringListValidator(["SOFQW1-Centre", "SOFQW3-NormalisedPolygon", "NXSPE"]),
-            doc="Convert to SOFQW or save file as NXSPE,\n" "note SOFQW3 is more accurate but much slower than SOFQW1.",
+            doc="Convert to SOFQW or save file as NXSPE, note SOFQW3 is more accurate but much slower than SOFQW1.",
         )
 
         self.declareProperty(name="LambdaOnTwoMode", defaultValue=False, doc="Set if instrument running in lambda on two mode.")
@@ -164,7 +162,7 @@ class PelicanReduction(PythonAlgorithm):
         self.declareProperty(
             name="KeepIntermediateWorkspaces",
             defaultValue=False,
-            doc="Whether to keep the intermediate sample and calibration\n" "workspaces for diagnostic checks.",
+            doc="Whether to keep the intermediate sample and calibration workspaces for diagnostic checks.",
         )
 
         self.declareProperty(

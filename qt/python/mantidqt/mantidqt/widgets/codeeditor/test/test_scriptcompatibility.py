@@ -13,7 +13,7 @@ import unittest
 from unittest import mock
 from mantidqt.widgets.codeeditor.scriptcompatibility import mantid_api_import_needed, mantid_algorithm_used_without_import
 
-PERMISSION_BOX_FUNC = "mantidqt.widgets.codeeditor.scriptcompatibility." "permission_box_to_prepend_import"
+PERMISSION_BOX_FUNC = "mantidqt.widgets.codeeditor.scriptcompatibility.permission_box_to_prepend_import"
 
 
 class ScriptCompatibilityTest(unittest.TestCase):
@@ -33,7 +33,7 @@ class ScriptCompatibilityTest(unittest.TestCase):
         ]
 
     def gen_fail_msg(self, case, expected_out):
-        return "Test case: \n  '{}' \nfailed with expected output:\n  '{}'" "".format(case, expected_out)
+        return "Test case: \n  '{}' \nfailed with expected output:\n  '{}'".format(case, expected_out)
 
     def test_mantid_api_import_needed(self):
         expected_results = [False, False, True, False, False, True, False, False, False]

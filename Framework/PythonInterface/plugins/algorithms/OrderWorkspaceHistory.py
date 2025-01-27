@@ -30,7 +30,7 @@ class OrderWorkspaceHistory(mantid.api.PythonAlgorithm):
         return "OrderWorkspaceHistory"
 
     def summary(self):
-        return "Takes a folder full of workspace histories or a string with timestamps and" " creates a single unified history from them."
+        return "Takes a folder full of workspace histories or a string with timestamps and creates a single unified history from them."
 
     def PyInit(self):
         self.declareProperty(

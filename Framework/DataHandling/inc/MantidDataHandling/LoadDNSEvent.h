@@ -11,7 +11,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidKernel/FileDescriptor.h"
-#include "MantidKernel/System.h"
+
 #include "MantidTypes/Core/DateAndTime.h"
 
 using namespace Mantid::Kernel;

@@ -133,7 +133,7 @@ class EnggFitTOFFromPeaksTest(unittest.TestCase):
 
         approx_comp = abs((ref - val) / ref) < epsilon
         if not approx_comp:
-            print("Failed approximate comparison between value {0} and reference value " "{1}, with epsilon {2}".format(val, ref, epsilon))
+            print("Failed approximate comparison between value {0} and reference value {1}, with epsilon {2}".format(val, ref, epsilon))
 
         return approx_comp
 

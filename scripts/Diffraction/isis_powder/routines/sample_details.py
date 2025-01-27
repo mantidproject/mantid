@@ -25,9 +25,7 @@ class SampleDetails(object):
         elif self._shape_type == "slab":
             self._shape = _Slab(kwargs)
         else:
-            raise KeyError(
-                'Shape type "' + self._shape_type + '" not supported: current supported shape types are ' '"cylinder" and "slab"'
-            )
+            raise KeyError('Shape type "' + self._shape_type + '" not supported: current supported shape types are "cylinder" and "slab"')
 
         self.material_object = None
         self.container_material_object = None
@@ -46,7 +44,7 @@ class SampleDetails(object):
         chemical_formula = common.dictionary_key_helper(
             dictionary=kwargs,
             key="chemical_formula",
-            exception_msg="The following argument is required but was not" " passed: chemical_formula",
+            exception_msg="The following argument is required but was not passed: chemical_formula",
         )
         number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
         number_density_effective = common.dictionary_key_helper(dictionary=kwargs, key="number_density_effective", throws=False)
@@ -71,7 +69,7 @@ class SampleDetails(object):
         chemical_formula = common.dictionary_key_helper(
             dictionary=kwargs,
             key="chemical_formula",
-            exception_msg="The following argument is required but was not" " passed: chemical_formula",
+            exception_msg="The following argument is required but was not passed: chemical_formula",
         )
         number_density = common.dictionary_key_helper(dictionary=kwargs, key="number_density", throws=False)
         number_density_effective = common.dictionary_key_helper(dictionary=kwargs, key="number_density_effective", throws=False)
@@ -79,7 +77,7 @@ class SampleDetails(object):
         if self.container_material_object is not None:
             self.print_container_details()
             raise RuntimeError(
-                "The container material has already been set to the above details. " "To change the material call 'reset_sample_material()'"
+                "The container material has already been set to the above details. To change the material call 'reset_sample_material()'"
             )
 
         self.container_material_object = _Material(
@@ -124,13 +122,11 @@ class SampleDetails(object):
     def validate_center(center):
         # Center has to be checked specially - it has to be a list of floating point values
         if not isinstance(center, list):
-            raise ValueError("The center of the cylinder must be specified as a list of X, Y, Z co-ordinates." " For example [0., 1., 2.]")
+            raise ValueError("The center of the cylinder must be specified as a list of X, Y, Z co-ordinates. For example [0., 1., 2.]")
 
         # The center of the cylinder can be at any position of X Y Z so don't check against physical constraints
         if len(center) != 3:
-            raise ValueError(
-                "The center must have three values corresponding to X, Y, Z position of the sample." " For example [0. ,1., 2.]"
-            )
+            raise ValueError("The center must have three values corresponding to X, Y, Z position of the sample. For example [0. ,1., 2.]")
 
         for val in center:
             _check_can_convert_to_float(property_name="center", value=val)
@@ -410,10 +406,7 @@ class _Slab(object):
         }
 
     def print_shape(self):
-        print(
-            f"Thickness: {self.thickness} \n Width: {self.width} \n Height: {self.height} \n"
-            f"Angle: {self.angle} \n Center: {self.center}"
-        )
+        print(f"Thickness: {self.thickness} \n Width: {self.width} \n Height: {self.height} \nAngle: {self.angle} \n Center: {self.center}")
 
 
 class _HollowCylinder(object):
@@ -479,14 +472,10 @@ def _check_value_is_physical(property_name, value):
 
     if property_name == "angle":
         if math.isnan(value):
-            raise ValueError(
-                "The value set for {} was: {} which is " "impossible for a physical object".format(property_name, original_value)
-            )
+            raise ValueError("The value set for {} was: {} which is impossible for a physical object".format(property_name, original_value))
     else:
         if value <= 0 or math.isnan(value):
-            raise ValueError(
-                "The value set for {} was: {} which is " "impossible for a physical object".format(property_name, original_value)
-            )
+            raise ValueError("The value set for {} was: {} which is impossible for a physical object".format(property_name, original_value))
 
 
 def _check_can_convert_to_float(property_name, value):

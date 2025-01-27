@@ -8,7 +8,6 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {

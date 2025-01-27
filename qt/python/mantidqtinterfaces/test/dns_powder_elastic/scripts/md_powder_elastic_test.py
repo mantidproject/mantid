@@ -55,13 +55,13 @@ class MDPowderElasticTest(unittest.TestCase):
         self.assertFalse(test_v)
         with self.assertRaises(DNSError) as context:
             flipping_ratio_correction("vana_x_sf")
-        self.assertTrue("no matching nsf workspace found " "for" in str(context.exception))
+        self.assertTrue("no matching nsf workspace found for" in str(context.exception))
 
         get_fake_MD_workspace_unique(name="vana_x_nsf", factor=64)
         get_fake_MD_workspace_unique(name="vana_x_nsf_norm", factor=27)
         with self.assertRaises(DNSError) as context:
             flipping_ratio_correction("vana_x_sf")
-        self.assertTrue("no matching NiCr workspace found " "for " in str(context.exception))
+        self.assertTrue("no matching NiCr workspace found for " in str(context.exception))
 
         get_fake_MD_workspace_unique(name="nicr_x_sf", factor=27)
         get_fake_MD_workspace_unique(name="nicr_x_sf_norm", factor=1)

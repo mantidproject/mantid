@@ -106,7 +106,7 @@ class MultivariateGaussianMassProfileTest(unittest.TestCase):
         test_profiles = MultivariateGaussianMassProfile(None, 16)
 
         expected = (
-            "name=MultivariateGaussianComptonProfile,IntegrationSteps=64,Mass=16.000000,SigmaX=1.000000," "SigmaY=1.000000,SigmaZ=1.000000;"
+            "name=MultivariateGaussianComptonProfile,IntegrationSteps=64,Mass=16.000000,SigmaX=1.000000,SigmaY=1.000000,SigmaZ=1.000000;"
         )
         self.assertEqual(expected, test_profiles.create_fit_function_str())
 
@@ -126,8 +126,7 @@ class MultivariateGaussianMassProfileTest(unittest.TestCase):
         test_profiles.integration_steps = 256
 
         expected = (
-            "name=MultivariateGaussianComptonProfile,IntegrationSteps=256,Mass=16.000000,SigmaX=1.000000,"
-            "SigmaY=1.000000,SigmaZ=1.000000;"
+            "name=MultivariateGaussianComptonProfile,IntegrationSteps=256,Mass=16.000000,SigmaX=1.000000,SigmaY=1.000000,SigmaZ=1.000000;"
         )
         self.assertEqual(expected, test_profiles.create_fit_function_str())
 

@@ -31,7 +31,7 @@ def _catch_exceptions(func):
 
 
 class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
-    def __init__(self, presenter, observe_replace=True):
+    def __init__(self, presenter, observe_replace=True, observe_group_update=False):
         super(WorkspaceDisplayADSObserver, self).__init__()
         self.presenter = presenter
 
@@ -39,6 +39,7 @@ class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
         self.observeDelete(True)
         self.observeReplace(observe_replace)
         self.observeRename(True)
+        self.observeGroupUpdate(observe_group_update)
 
     @_catch_exceptions
     def clearHandle(self):
@@ -72,3 +73,7 @@ class WorkspaceDisplayADSObserver(AnalysisDataServiceObserver):
     @_catch_exceptions
     def renameHandle(self, old_name, new_name):
         self.presenter.rename_workspace(old_name, new_name)
+
+    @_catch_exceptions
+    def groupUpdateHandle(self, ws_name, workspace):
+        self.presenter.group_update(ws_name, workspace)

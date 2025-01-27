@@ -257,14 +257,7 @@ class MaskSansWorkspaceTest(unittest.TestCase):
 
         # Arrange
         shape_xml = (
-            '<?xml version="1.0"?>\n'
-            "<detector-masking>\n"
-            "<group>\n"
-            "<detids>\n"
-            "1313191-1313256\n"
-            "</detids>\n"
-            "</group>\n"
-            "</detector-masking >"
+            '<?xml version="1.0"?>\n<detector-masking>\n<group>\n<detids>\n1313191-1313256\n</detids>\n</group>\n</detector-masking >'
         )
         file_name = create_shape_xml_file(shape_xml)
 

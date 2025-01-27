@@ -49,7 +49,7 @@ class PoldiLoadRuns(PythonAlgorithm):
             "FirstRun",
             1,
             direction=Direction.Input,
-            doc=("Run number of the first run. " "If only this number is supplied, only this run is processed."),
+            doc=("Run number of the first run. If only this number is supplied, only this run is processed."),
             validator=firstRunValidator,
         )
 
@@ -186,7 +186,7 @@ class PoldiLoadRuns(PythonAlgorithm):
 
         if remainder != 0:
             self.log().warning(
-                ("Number of runs is not compatible with selected merge width. " "Leaving out the last " + str(remainder) + " file(s).")
+                ("Number of runs is not compatible with selected merge width. Leaving out the last " + str(remainder) + " file(s).")
             )
 
             actualLastRun = lastRun - remainder

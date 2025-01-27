@@ -78,7 +78,7 @@ class DNSXMLDumpModelTest(unittest.TestCase):
         self.assertEqual(testv[1][0].attrib, {"type": "float"})
         self.assertEqual(testv[1][0].tag, "c1")
 
-    @patch("mantidqtinterfaces.dns_powder_tof.xml_dump." "xml_dump_model.save_txt")
+    @patch("mantidqtinterfaces.dns_powder_tof.xml_dump.xml_dump_model.save_txt")
     def test_dic_to_xml_file(self, mock_savetxt):
         self.model.dict_to_xml_file(self.testdic, "test.xml", {"mv": 1.0})
         mock_savetxt.assert_called_once()
@@ -108,7 +108,7 @@ class DNSXMLDumpModelTest(unittest.TestCase):
         self.assertEqual(self.model._return_type("123"), "str")
         self.assertEqual(self.model._return_type(self), "str")
 
-    @patch("mantidqtinterfaces.dns_powder_tof.xml_dump." "xml_dump_model.etree.parse")
+    @patch("mantidqtinterfaces.dns_powder_tof.xml_dump.xml_dump_model.etree.parse")
     def test_load_file_to_xml_tree(self, mock_parse):
         mock_parse.return_value = "test"
         testv = self.model._load_file_to_xml_tree("123")

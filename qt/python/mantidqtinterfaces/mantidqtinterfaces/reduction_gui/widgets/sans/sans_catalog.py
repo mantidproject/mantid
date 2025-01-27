@@ -69,7 +69,7 @@ class SANSCatalogWidget(BaseWidget):
         self._content.directory_edit.returnPressed.connect(self._update_content)
         self._content.directory_edit.setText(self._settings.catalog_data_path)
         self._content.directory_edit.setToolTip(
-            "Use a path of the form: /SNS/<instrument>/IPTS-<number>/data\nE.g.: " "/SNS/EQSANS/IPTS-1234/data"
+            "Use a path of the form: /SNS/<instrument>/IPTS-<number>/data\nE.g.: /SNS/EQSANS/IPTS-1234/data"
         )
         self._update_content(False)
 

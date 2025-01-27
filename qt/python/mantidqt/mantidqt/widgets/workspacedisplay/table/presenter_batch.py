@@ -16,12 +16,6 @@ class TableWorkspaceDataPresenterBatch(TableWorkspaceDataPresenterBase):
         table.model().load_data(self.model)
 
     def update_column_headers(self):
-        """
-        :param extra_labels: Extra labels to be appended to the column headers.
-                             Expected format: [(id, label), (2, "X"),...]
-        :type extra_labels: List[Tuple[int, str]]
-        :return:
-        """
         # deep copy the original headers so that they are not changed by the appending of the label
         column_headers = self.model.original_column_headers()
         table_item_model = self.view.model()

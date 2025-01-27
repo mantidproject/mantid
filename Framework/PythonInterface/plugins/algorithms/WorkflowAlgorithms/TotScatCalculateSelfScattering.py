@@ -54,7 +54,7 @@ class TotScatCalculateSelfScattering(DataProcessorAlgorithm):
         self.declareProperty(
             name="SampleTemp",
             defaultValue="",
-            doc="Sample Temperature in Kelvin. Required for 2nd order Placzek correction if not " "using Sample Logs.",
+            doc="Sample Temperature in Kelvin. Required for 2nd order Placzek correction if not using Sample Logs.",
         )
         self.declareProperty(name="ApplyPerDetector", defaultValue=False, doc="Apply the correction to unfocussed data.")
 

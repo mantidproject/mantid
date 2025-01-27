@@ -527,7 +527,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
             Symmetries="C2v",
             Temperatures=[20],
             FWHM=[1.0],
-            Background="name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground," "A0=0,A1=0",
+            Background="name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0",
         )
         self.assertEqual('"name=Gaussian,Height=0,PeakCentre=1,Sigma=0;name=LinearBackground,A0=0,A1=0"', cf["Background"])
         self.assertEqual(cf.background.param["f0.Sigma"], 0)

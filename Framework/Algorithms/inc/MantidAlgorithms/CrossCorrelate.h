@@ -10,7 +10,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {

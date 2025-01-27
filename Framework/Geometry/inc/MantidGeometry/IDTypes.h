@@ -5,10 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
-#include "MantidKernel/System.h"
+
+#include <cstdint>
 
 namespace Mantid {
 

@@ -34,7 +34,7 @@ class SANSSave(DataProcessorAlgorithm):
 
         self.declareProperty(
             FileProperty("Filename", "", action=FileAction.Save, extensions=[]),
-            doc="The name of the file which needs to be stored. Note that " "the actual file type is selected below.",
+            doc="The name of the file which needs to be stored. Note that the actual file type is selected below.",
         )
 
         self.declareProperty(
@@ -110,13 +110,13 @@ class SANSSave(DataProcessorAlgorithm):
             "SampleTransmissionRunNumber",
             "",
             direction=Direction.Input,
-            doc="The run number for the Sample Transmission workspace used in " "the reduction. Can be blank.",
+            doc="The run number for the Sample Transmission workspace used in the reduction. Can be blank.",
         )
         self.declareProperty(
             "SampleDirectRunNumber",
             "",
             direction=Direction.Input,
-            doc="The run number for the Sample Direct workspace used in " "the reduction. Can be blank.",
+            doc="The run number for the Sample Direct workspace used in the reduction. Can be blank.",
         )
         self.declareProperty(
             "CanScatterRunNumber",
@@ -212,7 +212,7 @@ class SANSSave(DataProcessorAlgorithm):
         axis1 = workspace.getAxis(1)
         is_first_axis_numeric = axis1.isNumeric()
         if not is_first_axis_numeric and number_of_histograms > 1:
-            errors.update({"InputWorkspace": "The input data seems to be 2D. In this case all " "axes need to be numeric."})
+            errors.update({"InputWorkspace": "The input data seems to be 2D. In this case all axes need to be numeric."})
 
         # Make sure that at least one file format is selected
         file_formats = self._get_file_formats()

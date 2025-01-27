@@ -78,7 +78,7 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
 
         self.declareProperty(
             IntArrayProperty(name=self.PROP_BANKIDS),
-            doc="Bank IDs of the workspaces a fit was run on " "(1 for each workspace, in order. 1 for North, 2 for South)",
+            doc="Bank IDs of the workspaces a fit was run on (1 for each workspace, in order. 1 for North, 2 for South)",
         )
 
         self.declareProperty(
@@ -104,16 +104,16 @@ class EnggSaveGSASIIFitResultsToHDF5(PythonAlgorithm):
 
         self.declareProperty(
             FloatArrayProperty(name=self.PROP_SIGMA),
-            doc="GSAS-II profile coefficient sigma, " "one for each run (or none if sigma wasn't refined)",
+            doc="GSAS-II profile coefficient sigma, one for each run (or none if sigma wasn't refined)",
         )
 
         self.declareProperty(
             FloatArrayProperty(name=self.PROP_GAMMA),
-            doc="GSAS-II profile coefficient gamma, " "one for each run (or none if gamma wasn't refined)",
+            doc="GSAS-II profile coefficient gamma, one for each run (or none if gamma wasn't refined)",
         )
 
         self.declareProperty(
-            FloatArrayProperty(name=self.PROP_RWP), doc="Weighted profile R-factor, 'goodness-of-fit' measure. " "One for each run"
+            FloatArrayProperty(name=self.PROP_RWP), doc="Weighted profile R-factor, 'goodness-of-fit' measure. One for each run"
         )
 
         self.declareProperty(

@@ -126,7 +126,7 @@ class MatrixTable(tableBase.NTableWidget):
         :return:
         """
         # check inputs
-        assert isinstance(matrix, numpy.ndarray) and matrix.shape == (4, 4), "Matrix {0} must be ndarray with {1}." "".format(
+        assert isinstance(matrix, numpy.ndarray) and matrix.shape == (4, 4), "Matrix {0} must be ndarray with {1}.".format(
             matrix, matrix.shape
         )
         for i in range(matrix.shape[0]):
@@ -694,11 +694,9 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :return:
         """
         # check
-        assert isinstance(exp_number, int), "Experiment number {0} must be an integer but not a {1}." "".format(
-            exp_number, type(exp_number)
-        )
-        assert isinstance(scan_number, int), "Scan number {0} must be an integer but not a {1}." "".format(scan_number, type(scan_number))
-        assert isinstance(ws_name, str), "Workspace name {0} must be a string but not a {1}." "".format(ws_name, type(ws_name))
+        assert isinstance(exp_number, int), "Experiment number {0} must be an integer but not a {1}.".format(exp_number, type(exp_number))
+        assert isinstance(scan_number, int), "Scan number {0} must be an integer but not a {1}.".format(scan_number, type(scan_number))
+        assert isinstance(ws_name, str), "Workspace name {0} must be a string but not a {1}.".format(ws_name, type(ws_name))
 
         # construct a row
         new_row = self._generate_empty_row(scan_number, ws_name=ws_name)
@@ -784,9 +782,9 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :param scan_number:
         :return:
         """
-        assert (
-            isinstance(scan_number, int) and scan_number >= 0
-        ), f"Scan number {scan_number} (type {type(scan_number)}) is invalid.  It must be a positive integer."
+        assert isinstance(scan_number, int) and scan_number >= 0, (
+            f"Scan number {scan_number} (type {type(scan_number)}) is invalid.  It must be a positive integer."
+        )
         num_rows = self.rowCount()
         ret_row_number = None
         for i_row in range(num_rows):
@@ -809,7 +807,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :return:
         """
         # Check
-        assert isinstance(target_state, str), "State {0} must be a string but not a {1}." "".format(target_state, type(target_state))
+        assert isinstance(target_state, str), "State {0} must be a string but not a {1}.".format(target_state, type(target_state))
 
         # Loop around to check
         return_list = list()
@@ -829,7 +827,7 @@ class ProcessTableWidget(tableBase.NTableWidget):
         :return: 3-float-tuple or None (not defined)
         """
         # check input's validity
-        assert isinstance(row_index, int) and row_index >= 0, "Row index %s of type %s is not acceptable." "" % (
+        assert isinstance(row_index, int) and row_index >= 0, "Row index %s of type %s is not acceptable." % (
             str(row_index),
             type(row_index),
         )
@@ -1058,12 +1056,12 @@ class ProcessTableWidget(tableBase.NTableWidget):
         """
         # check requirements
         assert isinstance(peak_intensity, float), "Peak intensity must be a float."
-        assert isinstance(integrate_method, str), "Integrated method {0} must be a string but not {1}." "".format(
+        assert isinstance(integrate_method, str), "Integrated method {0} must be a string but not {1}.".format(
             integrate_method, type(integrate_method)
         )
         if integrate_method not in ["", "simple", "mixed", "gaussian", "single-pt"]:
             raise RuntimeError(
-                'Peak integration {0} not in list. Method must be in ["" (Not defined), "simple"' ', "gaussian"]'.format(integrate_method)
+                'Peak integration {0} not in list. Method must be in ["" (Not defined), "simple", "gaussian"]'.format(integrate_method)
             )
 
         self.update_cell_value(row_number, self._colIndexIntensity, peak_intensity)
@@ -1322,7 +1320,7 @@ class ScanSurveyTable(tableBase.NTableWidget):
         """
         # check required size?
         assert isinstance(required_size, int) or required_size is None, (
-            "Required number of runs {0} must be None " "or an integer but not a {1}." "".format(required_size, type(required_size))
+            "Required number of runs {0} must be None or an integer but not a {1}.".format(required_size, type(required_size))
         )
 
         # get the selected row indexes and check
@@ -1472,7 +1470,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
             raise RuntimeError("Pt number {0} exists in the table already.".format(pt_number))
 
         # check inputs
-        assert isinstance(scan_number, int), "Scan number {0} must be an integer but not a {1}" "".format(scan_number, type(scan_number))
+        assert isinstance(scan_number, int), "Scan number {0} must be an integer but not a {1}".format(scan_number, type(scan_number))
         assert isinstance(pt_number, int), "Pt number {0} must be an integer".format(pt_number)
         assert isinstance(hkl_str, str), "HKL {0} must be given as a string.".format(hkl_str)
         assert isinstance(two_theta, float), "2theta {0} must be a float"
@@ -1582,7 +1580,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
         :return:
         """
         # check inputs ..
-        assert isinstance(out_file_name, str), "Output file name {0} must be a string but not a {1}" "".format(
+        assert isinstance(out_file_name, str), "Output file name {0} must be a string but not a {1}".format(
             out_file_name, type(out_file_name)
         )
         if not os.access(out_file_name, os.W_OK):
@@ -1628,7 +1626,7 @@ class SinglePtIntegrationTable(tableBase.NTableWidget):
                 scans_str += "{0}".format(ref_number)
 
         else:
-            raise AssertionError("Reference scan numbers {0} of type {1} is not supported." "".format(ref_numbers, type(ref_numbers)))
+            raise AssertionError("Reference scan numbers {0} of type {1} is not supported.".format(ref_numbers, type(ref_numbers)))
 
         # add to table
         self.update_cell_value(row_index, self._ref_scans_index, scans_str)
@@ -1818,7 +1816,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :return: 3-tuple as H, K, L
         """
         # check input
-        assert isinstance(row_index, int), "Row index {0} must be an integer but not a {1}." "".format(row_index, type(row_index))
+        assert isinstance(row_index, int), "Row index {0} must be an integer but not a {1}.".format(row_index, type(row_index))
 
         # get the HKL either parsed from SPICE file or from calculation
         if is_spice_hkl:
@@ -1956,12 +1954,12 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         assert isinstance(i_row, int), f"Row number (index) must be integer but not {type(i_row)}."
 
         if isinstance(hkl, list) or isinstance(hkl, tuple):
-            assert len(hkl) == 3, "In case HKL is list of tuple, its size must be equal to 3 but not %d." "" % len(hkl)
+            assert len(hkl) == 3, "In case HKL is list of tuple, its size must be equal to 3 but not %d." % len(hkl)
         elif isinstance(hkl, numpy.ndarray):
-            assert hkl.shape == (3,), "In case HKL is numpy array, its shape must be (3,) but not %s." "" % str(hkl.shape)
+            assert hkl.shape == (3,), "In case HKL is numpy array, its shape must be (3,) but not %s." % str(hkl.shape)
         else:
-            raise AssertionError("HKL of type %s is not supported. Supported types include list, tuple " "and numpy array." % type(hkl))
-        assert isinstance(is_spice_hkl, bool), "Flag {0} for SPICE-HKL must be a boolean but not a {1}." "".format(
+            raise AssertionError("HKL of type %s is not supported. Supported types include list, tuple and numpy array." % type(hkl))
+        assert isinstance(is_spice_hkl, bool), "Flag {0} for SPICE-HKL must be a boolean but not a {1}.".format(
             is_spice_hkl, type(is_spice_hkl)
         )
 
@@ -2024,7 +2022,7 @@ class UBMatrixPeakTable(tableBase.NTableWidget):
         :param k:
         :param l:
         """
-        assert isinstance(i_row, int), "row number {0} must be an integer but not a {1}." "".format(i_row, type(i_row))
+        assert isinstance(i_row, int), "row number {0} must be an integer but not a {1}.".format(i_row, type(i_row))
 
         self.update_cell_value(i_row, self._colIndexCalculatedHKL, self.format_array([h, k, l]))
 

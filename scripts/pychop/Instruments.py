@@ -233,7 +233,7 @@ class ChopperSystem(object):
             self._variant_defaults[key] = copy.deepcopy(getattr(self, key))
         if "_variant" not in self.__dict__:
             self._default_variant = list(self.variants.keys())[0]
-            warnings.warn("No default variants defined. Using " "%s" " as default" % (self._default_variant), SyntaxWarning)
+            warnings.warn("No default variants defined. Using %s as default" % (self._default_variant), SyntaxWarning)
             self.variant = self._default_variant
 
     def setChopper(self, *args, **kwargs):
@@ -493,7 +493,7 @@ class ChopperSystem(object):
         if value not in self.packages.keys():
             ky = [k for k in self.packages.keys() if str(value).upper() == k.upper()]
             if not ky:
-                raise ValueError("Fermi package " "%s" " not recognised. Allowed values are: %s" % (value, ", ".join(self.packages.keys())))
+                raise ValueError("Fermi package %s not recognised. Allowed values are: %s" % (value, ", ".join(self.packages.keys())))
             else:
                 value = ky[0]
         self._package = value
@@ -518,7 +518,7 @@ class ChopperSystem(object):
         if value not in self.variants.keys():
             ky = [k for k in self.variants.keys() if str(value).upper() == k.upper()]
             if not ky:
-                raise ValueError("Variant " "%s" " not recognised. Allowed values are: %s" % (value, ", ".join(self.variants.keys())))
+                raise ValueError("Variant %s not recognised. Allowed values are: %s" % (value, ", ".join(self.variants.keys())))
             else:
                 value = ky[0]
         for prop in self.variants[value]:

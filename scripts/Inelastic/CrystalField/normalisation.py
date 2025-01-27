@@ -49,7 +49,7 @@ def _parse_args(**kwargs):
     Blms = ["B20", "B21", "B22", "B40", "B41", "B42", "B43", "B44", "B60", "B61", "B62", "B63", "B64", "B65", "B66"]
     # Some Error checking
     if "Ion" not in kwargs.keys() and "IonNum" not in kwargs.keys():
-        raise NameError("You must specify the ion using either the " "Ion" ", " "IonNum" " keywords")
+        raise NameError("You must specify the ion using either the Ion, IonNum keywords")
     if "Ion" in kwargs.keys():
         nre = ionname2Nre(kwargs["Ion"])
     else:
@@ -204,7 +204,7 @@ def split2range(*args, **kwargs):
 
     # Error checking
     if "Ion" not in argin.keys() and "IonNum" not in argin.keys():
-        raise NameError("You must specify the ion using either the " "Ion" ", " "IonNum" " keywords")
+        raise NameError("You must specify the ion using either the Ion, IonNum keywords")
     if "Ion" in argin.keys():
         nre = ionname2Nre(kwargs["Ion"])
     else:

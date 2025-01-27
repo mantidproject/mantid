@@ -84,7 +84,7 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         Enter or leave the region of interest (ROI) selection mode
         :return:
         """
-        assert isinstance(roi_state, bool), "ROI mode state {} must be a boolean but not a {}." "".format(roi_state, type(roi_state))
+        assert isinstance(roi_state, bool), "ROI mode state {} must be a boolean but not a {}.".format(roi_state, type(roi_state))
 
         # set
         self._roiSelectMode = roi_state
@@ -401,8 +401,8 @@ class Detector2DView(mpl2dgraphicsview.Mpl2dGraphicsView):
         :return:
         """
         # check inputs
-        assert len(lower_left_corner) == 2, "Lower left corner row/col coordinate {0} must have 2 items." "".format(lower_left_corner)
-        assert len(upper_right_corner) == 2, "Upper right corner row/col coordinate {0} must have 2 items." "".format(upper_right_corner)
+        assert len(lower_left_corner) == 2, "Lower left corner row/col coordinate {0} must have 2 items.".format(lower_left_corner)
+        assert len(upper_right_corner) == 2, "Upper right corner row/col coordinate {0} must have 2 items.".format(upper_right_corner)
 
         # set lower left corner and upper right corner
         self._roiStart = lower_left_corner

@@ -211,7 +211,7 @@ class NTableWidget(QTableWidget):
                     return_value = float(return_value)
                 except ValueError as val_err:
                     raise RuntimeError(
-                        'Unable to convert cell ({0}, {1}) with value "{2}" to float due to {3}.' "".format(
+                        'Unable to convert cell ({0}, {1}) with value "{2}" to float due to {3}.'.format(
                             row_index, col_index, return_value, val_err
                         )
                     )
@@ -438,10 +438,10 @@ class NTableWidget(QTableWidget):
         :return:
         """
         # check inputs
-        assert (
-            isinstance(column_index, int) and 0 <= column_index < self.columnCount()
-        ), "Column index {0} must be an integer (now {1}) and in range (0, {2}]".format(
-            column_index, type(column_index), self.columnCount()
+        assert isinstance(column_index, int) and 0 <= column_index < self.columnCount(), (
+            "Column index {0} must be an integer (now {1}) and in range (0, {2}]".format(
+                column_index, type(column_index), self.columnCount()
+            )
         )
         if self._colIndexSelect is None:
             raise RuntimeError("Column for selection is never set up.")

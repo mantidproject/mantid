@@ -188,9 +188,7 @@ def get_input_workspace_as_copy_if_not_same_as_output_workspace(alg):
         return clone_alg.getProperty("OutputWorkspace").value
 
     if "InputWorkspace" not in alg or "OutputWorkspace" not in alg:
-        raise RuntimeError(
-            "The algorithm {} does not seem to have an InputWorkspace and" " an OutputWorkspace property.".format(alg.name())
-        )
+        raise RuntimeError("The algorithm {} does not seem to have an InputWorkspace and an OutputWorkspace property.".format(alg.name()))
 
     ws_in = alg.getProperty("InputWorkspace").value
     if ws_in is None:
@@ -324,7 +322,7 @@ def convert_bank_name_to_detector_type_isis(detector_name):
     elif detector_name == "FRONT-DETECTOR" or detector_name == "HAB" or detector_name == "FRONT":
         detector_type = DetectorType.HAB
     else:
-        raise RuntimeError("There is not detector type conversion for a detector with the " "name {0}".format(detector_name))
+        raise RuntimeError("There is not detector type conversion for a detector with the name {0}".format(detector_name))
     return detector_type
 
 
@@ -461,7 +459,7 @@ def parse_diagnostic_settings(string_to_parse):
                 integral += _extract_number(slice_setting)
             else:
                 raise ValueError(
-                    "The provided event slice configuration {0} cannot be parsed because " "of {1}".format(slice_settings, slice_setting)
+                    "The provided event slice configuration {0} cannot be parsed because of {1}".format(slice_settings, slice_setting)
                 )
             all_ranges.append(integral)
     return all_ranges
@@ -527,7 +525,7 @@ class EventSliceParser(object):
                 all_ranges.append(self._extract_full_range(slice_setting, self.range_marker))
             else:
                 raise ValueError(
-                    "The provided event slice configuration {0} cannot be parsed because " "of {1}".format(slice_settings, slice_setting)
+                    "The provided event slice configuration {0} cannot be parsed because of {1}".format(slice_settings, slice_setting)
                 )
         return all_ranges
 
@@ -745,7 +743,7 @@ def get_standard_output_workspace_name(state, reduction_data_type, wav_range, in
         detector_name_short = det_name if det_name is not None else "lab"
     else:
         raise RuntimeError(
-            "SANSStateFunctions: Unknown reduction data type {0} cannot be used to " "create an output name".format(reduction_data_type)
+            "SANSStateFunctions: Unknown reduction data type {0} cannot be used to create an output name".format(reduction_data_type)
         )
 
     # 4. Dimensionality
@@ -892,7 +890,7 @@ def get_base_name_from_multi_period_name(workspace_name):
     if re.search(multi_period_workspace_form, workspace_name) is not None:
         return re.sub(multi_period_workspace_form, "", workspace_name)
     else:
-        raise RuntimeError("The workspace name {0} seems to not be part of a " "multi-period workspace.".format(workspace_name))
+        raise RuntimeError("The workspace name {0} seems to not be part of a multi-period workspace.".format(workspace_name))
 
 
 def sanitise_instrument_name(instrument_name):
@@ -981,7 +979,7 @@ def get_state_hash_for_can_reduction(state, reduction_mode, wav_range: Optional[
     elif reduction_mode is ReductionMode.HAB:
         state_string += "HAB"
     else:
-        raise RuntimeError("Only LAB and HAB reduction modes are allowed at this point." " {} was provided".format(reduction_mode))
+        raise RuntimeError("Only LAB and HAB reduction modes are allowed at this point. {} was provided".format(reduction_mode))
 
     # If we are dealing with a partial output workspace, then mark it as such
     if partial_type is OutputParts.COUNT:

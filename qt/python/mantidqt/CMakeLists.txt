@@ -168,6 +168,9 @@ set(PYTHON_WIDGET_QT5_ONLY_TESTS
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_view.py
     mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_error_column.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_group_model.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_group_table_model.py
+    mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_group_presenter.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_marked_columns.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_tableworkspace_item.py
     mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py

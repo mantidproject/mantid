@@ -55,7 +55,7 @@ DefaultTrans = True
 # CommandInterfaceStateDirector global instance
 # ----------------------------------------------------------------------------------------------------------------------
 director = CommandInterfaceStateDirector(SANSFacility.ISIS)
-_plot_missing_str = "Plotting is not implemented for workbench yet, please contact us via the forum:\n" "https://forum.mantidproject.org/"
+_plot_missing_str = "Plotting is not implemented for workbench yet, please contact us via the forum:\nhttps://forum.mantidproject.org/"
 
 
 def deprecated(obj):
@@ -90,7 +90,7 @@ def deprecated(obj):
         return obj
 
     assert False, (
-        "Programming error.  You have incorrectly applied the " "@deprecated decorator.  This is only for use with functions " "or classes."
+        "Programming error.  You have incorrectly applied the @deprecated decorator.  This is only for use with functions or classes."
     )
 
 
@@ -562,7 +562,7 @@ def TransFit(mode, lambdamin=None, lambdamax=None, selector="BOTH"):
     elif selector == "BOTH":
         fit_data = FitData.Both
     else:
-        raise RuntimeError("TransFit: The selected fit data {0} is not valid. You have to either SAMPLE, " "CAN or BOTH.".format(selector))
+        raise RuntimeError("TransFit: The selected fit data {0} is not valid. You have to either SAMPLE, CAN or BOTH.".format(selector))
 
     # Output message
     message = mode
@@ -742,7 +742,7 @@ def _validate_wavrange_types(start, end):
     # If one input is a list, they must both be lists of the same length
     if is_list(start) != is_list(end):
         raise RuntimeError(
-            "WavRangeReduction: The wav_start and wav_end inputs must both be the same type (got" " a mixture of single value and list)"
+            "WavRangeReduction: The wav_start and wav_end inputs must both be the same type (got a mixture of single value and list)"
         )
     if is_list(start) and is_list(end) and len(start) != len(end):
         raise RuntimeError("WavRangeReduction: the wav_start and wav_end inputs must contain the same number of values")
@@ -1034,7 +1034,7 @@ def CompWavRanges(wavelens, plot=True, combineDet=None, resetSetup=True):
 
     if not isinstance(wavelens, list) or len(wavelens) < 2:
         if not isinstance(wavelens, tuple):
-            raise RuntimeError("Error CompWavRanges() requires a list of wavelengths between which " "reductions will be performed.")
+            raise RuntimeError("Error CompWavRanges() requires a list of wavelengths between which reductions will be performed.")
 
     # Perform a reduction over the full wavelength range which was specified
     reduced_workspace_names = []

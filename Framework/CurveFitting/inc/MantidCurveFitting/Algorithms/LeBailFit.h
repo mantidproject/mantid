@@ -12,11 +12,11 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidCurveFitting/Algorithms/LeBailFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/BackgroundFunction.h"
 #include "MantidCurveFitting/Functions/ThermalNeutronBk2BkExpConvPVoigt.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 
 #include <gsl/gsl_sf_erf.h>
 

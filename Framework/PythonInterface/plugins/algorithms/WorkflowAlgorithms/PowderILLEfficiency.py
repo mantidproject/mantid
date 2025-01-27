@@ -161,7 +161,7 @@ class PowderILLEfficiency(PythonAlgorithm):
             name="CalibrationMethod",
             defaultValue="Median",
             validator=StringListValidator(["Median", "Mean", "MostLikelyMean"]),
-            doc="The method of how the calibration constant of a pixel " "is derived from the distribution of ratios.",
+            doc="The method of how the calibration constant of a pixel is derived from the distribution of ratios.",
         )
 
         self.declareProperty(
@@ -450,7 +450,7 @@ class PowderILLEfficiency(PythonAlgorithm):
                 "Consider checking the option InterpolateOverlappingAngles.".format(scan_step_in_pixel_numbers)
             )
         if self._pixel_range[1] > self._n_det:
-            self.log().warning("Last pixel number provided is larger than total number of pixels. " "Taking the last existing pixel.")
+            self.log().warning("Last pixel number provided is larger than total number of pixels. Taking the last existing pixel.")
             self._pixel_range[1] = self._n_det
         if self._excluded_ranges.any():
             n_excluded_ranges = int(len(self._excluded_ranges) / 2)

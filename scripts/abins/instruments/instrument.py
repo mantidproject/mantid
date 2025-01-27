@@ -204,7 +204,7 @@ class Instrument:
 
             if "settings" not in parameters:
                 if setting != "":
-                    logger.warning(f'Instrument "{self.get_name()}" does not use settings. ' f'Ignoring selected setting "{setting}".')
+                    logger.warning(f'Instrument "{self.get_name()}" does not use settings. Ignoring selected setting "{setting}".')
                 return ""
 
             if setting == "":

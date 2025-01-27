@@ -59,7 +59,7 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
             name="TargetPeakCentre",
             defaultValue=0.0,
             direction=Direction.Output,
-            doc="X position between the centres of the two " "selected peaks",
+            doc="X position between the centres of the two selected peaks",
         )
 
         self.declareProperty(

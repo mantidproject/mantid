@@ -8,13 +8,14 @@
 
 #include "ALCBaselineModellingView.h"
 #include "ALCDataLoadingView.h"
+
 #include "ALCPeakFittingView.h"
 
-#include "ALCBaselineModellingPresenter.h"
 #include "ALCDataLoadingPresenter.h"
 #include "ALCPeakFittingPresenter.h"
 
 #include "ALCBaselineModellingModel.h"
+#include "ALCDataLoadingModel.h"
 #include "ALCPeakFittingModel.h"
 
 #include "QInputDialog"
@@ -24,6 +25,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtWidgets/Common/QtJobRunner.h"
 
 #include <algorithm>
 
@@ -32,8 +34,9 @@ using namespace Mantid::API;
 namespace {
 Mantid::Kernel::Logger logger("ALC Interface");
 
+auto &ads = AnalysisDataService::Instance();
+
 MatrixWorkspace_sptr getWorkspace(const std::string &workspaceName) {
-  auto &ads = AnalysisDataService::Instance();
   if (ads.doesExist(workspaceName)) {
     return ads.retrieveWS<MatrixWorkspace>(workspaceName);
   } else {
@@ -86,72 +89,77 @@ void ALCInterface::closeEvent(QCloseEvent *event) {
 }
 // namespace CustomInterfaces
 ALCInterface::ALCInterface(QWidget *parent)
-    : UserSubWindow(parent), m_ui(), m_baselineModellingView(nullptr), m_peakFittingView(nullptr),
-      m_dataLoading(nullptr), m_baselineModelling(nullptr), m_peakFitting(nullptr),
-      m_baselineModellingModel(new ALCBaselineModellingModel()), m_peakFittingModel(new ALCPeakFittingModel()),
-      m_externalPlotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()) {}
+    : UserSubWindow(parent), m_ui(), m_peakFittingView(nullptr), m_dataLoading(nullptr), m_baselineModelling(nullptr),
+      m_peakFitting(nullptr), m_externalPlotter(std::make_unique<Widgets::MplCpp::ExternalPlotter>()) {}
 
 void ALCInterface::initLayout() {
   m_ui.setupUi(this);
 
-  connect(m_ui.nextStep, SIGNAL(clicked()), SLOT(nextStep()));
-  connect(m_ui.previousStep, SIGNAL(clicked()), SLOT(previousStep()));
-  connect(m_ui.exportResults, SIGNAL(clicked()), SLOT(exportResults()));
-  connect(m_ui.importResults, SIGNAL(clicked()), SLOT(importResults()));
-  connect(m_ui.externalPlotButton, SIGNAL(clicked()), SLOT(externalPlotRequested()));
+  connect(m_ui.nextStep, &QPushButton::clicked, this, &ALCInterface::nextStep);
+  connect(m_ui.previousStep, &QPushButton::clicked, this, &ALCInterface::previousStep);
+  connect(m_ui.exportResults, &QPushButton::clicked, this, &ALCInterface::exportResults);
+  connect(m_ui.importResults, &QPushButton::clicked, this, &ALCInterface::importResults);
+  connect(m_ui.externalPlotButton, &QPushButton::clicked, this, &ALCInterface::externalPlotRequested);
 
+  auto dataLoadingModel = std::make_unique<ALCDataLoadingModel>();
   auto dataLoadingView = new ALCDataLoadingView(m_ui.dataLoadingView);
-  m_dataLoading = new ALCDataLoadingPresenter(dataLoadingView);
-  m_dataLoading->initialize();
-  m_dataLoading->setParent(this);
 
-  m_baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
-  m_baselineModelling = new ALCBaselineModellingPresenter(m_baselineModellingView, m_baselineModellingModel);
+  m_dataLoading = std::make_unique<ALCDataLoadingPresenter>(dataLoadingView, std::move(dataLoadingModel));
+  m_dataLoading->initialize();
+
+  auto baselineModellingModel = std::make_unique<ALCBaselineModellingModel>();
+  auto *baselineModellingView = new ALCBaselineModellingView(m_ui.baselineModellingView);
+
+  m_baselineModelling =
+      std::make_unique<ALCBaselineModellingPresenter>(baselineModellingView, std::move(baselineModellingModel));
   m_baselineModelling->initialize();
 
   m_peakFittingView = new ALCPeakFittingView(m_ui.peakFittingView);
-  m_peakFitting = new ALCPeakFittingPresenter(m_peakFittingView, m_peakFittingModel);
+  auto jobRunner = std::make_unique<MantidQt::API::QtJobRunner>(true);
+  auto algorithmRunner = std::make_unique<MantidQt::API::AlgorithmRunner>(std::move(jobRunner));
+  m_peakFittingModel = std::make_shared<ALCPeakFittingModel>(std::move(algorithmRunner));
+  m_peakFitting = std::make_unique<ALCPeakFittingPresenter>(m_peakFittingView, m_peakFittingModel.get());
   m_peakFitting->initialize();
 
-  connect(m_dataLoading, SIGNAL(dataChanged()), SLOT(updateBaselineData()));
-  connect(m_baselineModellingModel, SIGNAL(correctedDataChanged()), SLOT(updatePeakData()));
+  m_dataLoading->setSubscriber(this);
+  m_baselineModelling->setSubscriber(this);
 
   assert(m_ui.stepView->count() == STEP_NAMES.count()); // Should have names for all steps
 
   switchStep(0); // We always start from the first step
 }
 
-void ALCInterface::updateBaselineData() {
+void ALCInterface::loadedDataChanged() {
 
   // Make sure we do have some data
   if (m_dataLoading->loadedData()) {
 
     // Send the data to BaselineModelling
-    m_baselineModellingModel->setData(m_dataLoading->loadedData());
+    m_baselineModelling->setData(m_dataLoading->loadedData());
 
     // If we have a fitting function and a fitting range
     // we can update the baseline model
-    if ((!m_baselineModellingView->function().empty()) && (m_baselineModellingView->noOfSectionRows() > 0)) {
+    if ((!m_baselineModelling->function().empty()) && (m_baselineModelling->noOfSectionRows() > 0)) {
 
       // Fit the data
-      m_baselineModellingView->emitFitRequested();
+      m_baselineModelling->fit();
     }
   }
 }
 
-void ALCInterface::updatePeakData() {
+void ALCInterface::correctedDataChanged() {
 
   // Make sure we do have some data
-  if (m_baselineModellingModel->correctedData()) {
+  if (m_baselineModelling->correctedData()) {
 
     // Send the data to PeakFitting
-    m_peakFittingModel->setData(m_baselineModellingModel->correctedData());
+    m_peakFittingModel->setData(m_baselineModelling->correctedData());
 
     // If we have a fitting function
     if (m_peakFittingView->function("")) {
 
       // Fit the data
-      m_peakFittingView->emitFitRequested();
+      m_peakFittingView->fitRequested();
     }
   }
 }
@@ -216,11 +224,11 @@ void ALCInterface::exportResults() {
 
   if (const auto loadedData = m_dataLoading->exportWorkspace())
     results["Loaded_Data"] = loadedData->clone();
-  if (const auto baseline = m_baselineModellingModel->exportWorkspace())
+  if (const auto baseline = m_baselineModelling->exportWorkspace())
     results["Baseline_Workspace"] = baseline->clone();
-  if (const auto baselineSections = m_baselineModellingModel->exportSections())
+  if (const auto baselineSections = m_baselineModelling->exportSections())
     results["Baseline_Sections"] = baselineSections->clone();
-  if (const auto baselineModel = m_baselineModellingModel->exportModel())
+  if (const auto baselineModel = m_baselineModelling->exportModel())
     results["Baseline_Model"] = baselineModel->clone();
   if (const auto peaksWorkspace = m_peakFittingModel->exportWorkspace())
     results["Peaks_Workspace"] = peaksWorkspace->clone();
@@ -252,20 +260,27 @@ void ALCInterface::exportResults() {
 
 void ALCInterface::importResults() {
   bool okClicked;
-  const auto groupName =
+  const auto workspaceName =
       QInputDialog::getText(this, "Results label", "Label to assign to the results: ", QLineEdit::Normal, "ALCResults",
                             &okClicked)
           .toStdString();
 
   if (!okClicked) {
     return;
-  } else if (!AnalysisDataService::Instance().doesExist(groupName)) {
-    QMessageBox::critical(this, "Error", "Workspace " + QString::fromStdString(groupName) + " could not be found.");
+  }
+  if (!ads.doesExist(workspaceName)) {
+    QMessageBox::critical(this, "Error", "Workspace " + QString::fromStdString(workspaceName) + " could not be found.");
+    return;
   }
 
-  importLoadedData(groupName + "_Loaded_Data");
-  importBaselineData(groupName + "_Baseline_Workspace");
-  importPeakData(groupName + "_Peaks_Workspace");
+  if (ads.retrieveWS<WorkspaceGroup>(workspaceName)) {
+    importLoadedData(workspaceName + "_Loaded_Data");
+    importBaselineData(workspaceName + "_Baseline_Workspace");
+    importPeakData(workspaceName + "_Peaks_Workspace");
+  } else if (ads.retrieveWS<MatrixWorkspace>(workspaceName)) {
+    importLoadedData(workspaceName);
+    importBaselineData(workspaceName);
+  }
 }
 
 void ALCInterface::importLoadedData(const std::string &workspaceName) {
@@ -276,8 +291,8 @@ void ALCInterface::importLoadedData(const std::string &workspaceName) {
 
 void ALCInterface::importBaselineData(const std::string &workspaceName) {
   if (const auto baselineWS = getWorkspace(workspaceName)) {
-    m_baselineModellingModel->setData(baselineWS);
-    m_baselineModellingModel->setCorrectedData(baselineWS);
+    m_baselineModelling->setData(baselineWS);
+    m_baselineModelling->setCorrectedData(baselineWS);
   }
 }
 
@@ -352,7 +367,7 @@ void ALCInterface::externalPlotDataLoading() {
  * loaded data if available
  */
 void ALCInterface::externalPlotBaselineModel() {
-  if (auto data = m_baselineModellingModel->exportWorkspace()) {
+  if (auto data = m_baselineModelling->exportWorkspace()) {
     externallyPlotWorkspaces(data, std::vector<std::string>{2, "ALC_External_Plot_Baseline_Workspace"},
                              std::vector<int>{0, 1}, std::vector<bool>{true, false}, createPointAndLineKwargs());
   } else {
@@ -372,7 +387,7 @@ void ALCInterface::externalPlotPeakFitting() {
   } else {
     // If we don't have a peaks fit workspace, try to plot the raw peak data from the baseline model workspace (diff
     // spec (2))
-    if (auto data = m_baselineModellingModel->exportWorkspace()) {
+    if (auto data = m_baselineModelling->exportWorkspace()) {
       // Plot the diff spec from the baseline model workspace
       externallyPlotWorkspace(data, "ALC_External_Plot_Baseline_Workspace", "2", true, createPointKwargs());
     } else

@@ -420,7 +420,7 @@ class BaseSX(ABC):
             # get name for peak table from range of runs integrated
             min_ws = min(runs, key=lambda k: int("".join(filter(str.isdigit, k))))
             max_ws = max(runs, key=lambda k: int("".join(filter(str.isdigit, k))))
-            all_peaks = f'{"-".join([min_ws, max_ws])}_{peak_type.value}_{integration_type.value}'
+            all_peaks = f"{'-'.join([min_ws, max_ws])}_{peak_type.value}_{integration_type.value}"
             # clone first peak table
             mantid.CloneWorkspace(
                 InputWorkspace=self.get_peaks(runs[0], peak_type, integration_type), OutputWorkspace=all_peaks, EnableLogging=False

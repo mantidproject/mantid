@@ -36,7 +36,7 @@ Usage
     print("Number of spectra in first workspace {}".format(ws1.getNumberHistograms()))
     SaveGSS(ws1, ws1Path, SplitFiles=False, Append=False)
 
-    ws2 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=3, BankPixelWidth=1, BinWidth=10, Xmax=50)
+    ws2 = CreateSampleWorkspace(WorkspaceType="Histogram", NumBanks=2, BankPixelWidth=1, BinWidth=10, Xmax=50)
     print("Number of spectra in second workspace {}".format(ws2.getNumberHistograms()))
     SaveGSS(ws2,ws2Path, SplitFiles=False, Append=False)
 
@@ -51,8 +51,8 @@ Output:
 .. testoutput:: ConjoinFilesEx
 
     Number of spectra in first workspace 2
-    Number of spectra in second workspace 3
-    Number of spectra after ConjoinWorkspaces 5
+    Number of spectra in second workspace 2
+    Number of spectra after ConjoinWorkspaces 4
 
 
 .. categories::

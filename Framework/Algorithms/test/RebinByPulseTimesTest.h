@@ -125,10 +125,8 @@ public:
 //=====================================================================================
 // Performance Tests
 //=====================================================================================
-// clang-format off
-class RebinByPulseTimesTestPerformance : public CxxTest::TestSuite, public RebinByTimeBaseTestPerformance<RebinByPulseTimes>
-// clang-format on
-{
+class RebinByPulseTimesTestPerformance : public CxxTest::TestSuite,
+                                         public RebinByTimeBaseTestPerformance<RebinByPulseTimes> {
 
 public:
   static RebinByPulseTimesTestPerformance *createSuite() { return new RebinByPulseTimesTestPerformance(); }

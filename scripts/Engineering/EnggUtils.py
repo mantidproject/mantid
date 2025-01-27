@@ -237,7 +237,7 @@ def write_prm_file(ws_foc, prm_savepath, spec_nums=None):
     with open(path.join(CALIB_DIR, "template_ENGINX_prm_header.prm")) as fheader:
         lines = fheader.readlines()
     lines[1] = lines[1].replace("2", f"{nspec}")  # replace with nspectra in header
-    lines[13] = lines[13].replace("241391", f'{ws_foc.run().get("run_number").value}')  # replace run num
+    lines[13] = lines[13].replace("241391", f"{ws_foc.run().get('run_number').value}")  # replace run num
     # add blocks
     si = ws_foc.spectrumInfo()
     inst = ws_foc.getInstrument()
@@ -513,7 +513,7 @@ def process_vanadium(vanadium_path, calibration, full_calib):
         else:
             ws_van = _load_run_and_convert_to_dSpacing(vanadium_path, calibration.get_instrument(), full_calib)
             if not ws_van:
-                raise RuntimeError(f"vanadium run {van_run} has no proton_charge - " f"please supply a valid vanadium run to focus.")
+                raise RuntimeError(f"vanadium run {van_run} has no proton_charge - please supply a valid vanadium run to focus.")
         ws_van_foc = _focus_run_and_apply_roi_calibration(ws_van, calibration, ws_foc_name=van_foc_name)
         ws_van_foc = _smooth_vanadium(ws_van_foc)
     return ws_van_foc, van_run
@@ -702,7 +702,7 @@ def get_ws_indices_from_input_properties(workspace, bank, detector_indices):
         indices = get_ws_indices_for_bank(workspace, bank)
         if not indices:
             raise RuntimeError(
-                "Unable to find a meaningful list of workspace indices for the " "bank passed: %s. Please check the inputs." % bank
+                "Unable to find a meaningful list of workspace indices for the bank passed: %s. Please check the inputs." % bank
             )
         return indices
     elif detector_indices:
@@ -714,7 +714,7 @@ def get_ws_indices_from_input_properties(workspace, bank, detector_indices):
             )
         return indices
     else:
-        raise ValueError("You have not given any value for the properties 'Bank' and 'DetectorIndices' " "One of them is required")
+        raise ValueError("You have not given any value for the properties 'Bank' and 'DetectorIndices' One of them is required")
 
 
 def parse_spectrum_indices(workspace, spectrum_numbers):
@@ -800,7 +800,7 @@ def get_detector_ids_for_bank(bank):
     # PropertyWithValue<GroupingWorkspace> not working (GitHub issue 13437)
     # => cannot run as child and get outputworkspace property properly
     if not ADS.doesExist(group_name):
-        raise RuntimeError("LoadDetectorsGroupingFile did not run correctly. Could not " "find its output workspace: " + group_name)
+        raise RuntimeError("LoadDetectorsGroupingFile did not run correctly. Could not find its output workspace: " + group_name)
     grouping = ADS.retrieve(group_name)
 
     detector_ids = set()

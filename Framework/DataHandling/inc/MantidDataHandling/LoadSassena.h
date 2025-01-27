@@ -15,7 +15,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/NexusDescriptor.h"
 
-#include <hdf5.h>
+#include <H5Cpp.h>
 
 namespace Mantid {
 
@@ -62,17 +62,17 @@ protected:
   void registerWorkspace(const API::WorkspaceGroup_sptr &gws, const std::string &wsName,
                          const DataObjects::Workspace2D_sptr &ws, const std::string &description);
   /// Read info about one HDF5 dataset, log if error
-  herr_t dataSetInfo(const hid_t &h5file, const std::string &setName, hsize_t *dims) const;
+  void dataSetInfo(const H5::H5File &h5file, const std::string &setName, hsize_t *dims) const;
   /// Read dataset data to a buffer ot type double
-  herr_t dataSetDouble(const hid_t &h5file, const std::string &setName, std::vector<double> &buf);
+  void dataSetDouble(const H5::H5File &h5file, const std::string &setName, std::vector<double> &buf);
   /// Load qvectors dataset, calculate modulus of vectors
-  HistogramData::Points loadQvectors(const hid_t &h5file, const API::WorkspaceGroup_sptr &gws,
+  HistogramData::Points loadQvectors(const H5::H5File &h5file, const API::WorkspaceGroup_sptr &gws,
                                      std::vector<int> &sorting_indexes);
   /// Load structure factor asa function of q-vector modulus
-  void loadFQ(const hid_t &h5file, const API::WorkspaceGroup_sptr &gws, const std::string &setName,
+  void loadFQ(const H5::H5File &h5file, const API::WorkspaceGroup_sptr &gws, const std::string &setName,
               const HistogramData::Points &qvmod, const std::vector<int> &sorting_indexes);
   /// Load time-dependent structure factor
-  void loadFQT(const hid_t &h5file, const API::WorkspaceGroup_sptr &gws, const std::string &setName,
+  void loadFQT(const H5::H5File &h5file, const API::WorkspaceGroup_sptr &gws, const std::string &setName,
                const HistogramData::Points &qvmod, const std::vector<int> &sorting_indexes);
 
 private:

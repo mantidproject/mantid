@@ -11,7 +11,6 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidCurveFitting/DllConfig.h"
-#include "MantidKernel/System.h"
 #include <cmath>
 
 namespace Mantid {

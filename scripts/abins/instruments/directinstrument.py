@@ -34,7 +34,7 @@ class DirectInstrument(Instrument):
         elif units == "meV":
             self._e_init = e_init * MILLI_EV_TO_WAVENUMBER
         else:
-            raise ValueError("Unknown unit: incident energy should be given " "in 'cm-1' or 'meV'.")
+            raise ValueError("Unknown unit: incident energy should be given in 'cm-1' or 'meV'.")
 
     def get_incident_energy(self) -> float:
         return self._e_init

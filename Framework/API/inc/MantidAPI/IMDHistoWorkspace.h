@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {

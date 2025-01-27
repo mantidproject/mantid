@@ -11,7 +11,6 @@
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/MRUList.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 #include "Poco/RWLock.h"

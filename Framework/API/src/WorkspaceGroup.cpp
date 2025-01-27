@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/IPropertyManager.h"
@@ -456,6 +457,14 @@ bool WorkspaceGroup::isMultiperiod() const {
 }
 
 /**
+ * @return :: True if all of the workspaces in the group are peak workspaces
+ */
+bool WorkspaceGroup::isGroupPeaksWorkspaces() const {
+  return std::all_of(m_workspaces.begin(), m_workspaces.end(),
+                     [](auto ws) { return dynamic_cast<IPeaksWorkspace *>(ws.get()) != nullptr; });
+}
+
+/**
  * @param workspaceToCheck :: A workspace to check.
  * @param level :: The current nesting level. Intended for internal use only
  * by WorkspaceGroup.
@@ -471,7 +480,7 @@ bool WorkspaceGroup::isInGroup(const Workspace &workspaceToCheck, size_t level) 
   for (const auto &workspace : m_workspaces) {
     if (workspace.get() == &workspaceToCheck)
       return true;
-    auto *group = dynamic_cast<WorkspaceGroup *>(workspace.get());
+    const auto *group = dynamic_cast<WorkspaceGroup *>(workspace.get());
     if (group) {
       if (group->isInGroup(workspaceToCheck, level + 1))
         return true;
@@ -503,7 +512,7 @@ namespace Mantid::Kernel {
 template <>
 MANTID_API_DLL Mantid::API::WorkspaceGroup_sptr
 IPropertyManager::getValue<Mantid::API::WorkspaceGroup_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::WorkspaceGroup_sptr> *>(getPointerToProperty(name));
+  const auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::WorkspaceGroup_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return *prop;
   } else {
@@ -516,7 +525,7 @@ IPropertyManager::getValue<Mantid::API::WorkspaceGroup_sptr>(const std::string &
 template <>
 MANTID_API_DLL Mantid::API::WorkspaceGroup_const_sptr
 IPropertyManager::getValue<Mantid::API::WorkspaceGroup_const_sptr>(const std::string &name) const {
-  auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::WorkspaceGroup_sptr> *>(getPointerToProperty(name));
+  const auto *prop = dynamic_cast<PropertyWithValue<Mantid::API::WorkspaceGroup_sptr> *>(getPointerToProperty(name));
   if (prop) {
     return prop->operator()();
   } else {

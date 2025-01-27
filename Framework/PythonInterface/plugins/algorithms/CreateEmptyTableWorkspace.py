@@ -13,7 +13,7 @@ from mantid.kernel import Direction
 
 class CreateEmptyTableWorkspace(PythonAlgorithm):
     def summary(self):
-        return "Creates an empty TableWorkspace which can be populated with various " "types of information."
+        return "Creates an empty TableWorkspace which can be populated with various types of information."
 
     def category(self):
         return "Utility\\Workspaces"

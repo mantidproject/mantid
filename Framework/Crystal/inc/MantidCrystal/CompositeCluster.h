@@ -8,7 +8,6 @@
 
 #include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/ICluster.h"
-#include "MantidKernel/System.h"
 #include <memory>
 #include <optional>
 

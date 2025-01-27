@@ -139,13 +139,9 @@ class SaveGSSCWTest(unittest.TestCase):
         for li, line in enumerate(contents):
             # readlines() will keep the line-change sign
             if len(line) == 81:
-                assert line[-1] == "\n", (
-                    f"Line {li}: {line} contains {len(line)} characters but not 80." f"Its last character is [{line[-1]}]"
-                )
+                assert line[-1] == "\n", f"Line {li}: {line} contains {len(line)} characters but not 80. Its last character is [{line[-1]}]"
             else:
-                assert len(line) == 80, (
-                    f"Line {li}: {line} contains {len(line)} characters but not 80." f"Its last character is [{line[-1]}]"
-                )
+                assert len(line) == 80, f"Line {li}: {line} contains {len(line)} characters but not 80. Its last character is [{line[-1]}]"
 
         # line 0 is emtpy
         assert contents[0].strip() == "", "First line must be empty but not >{}<".format(contents[0].strip())

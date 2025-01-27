@@ -15,11 +15,8 @@
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/BoundedValidator.h"
-
-// clang-format off
-#include "MantidNexusCpp/NeXusFile.hpp"
 #include "MantidNexusCpp/NeXusException.hpp"
-// clang-format on
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <Poco/File.h>
 #include <exception>

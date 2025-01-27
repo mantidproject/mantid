@@ -61,7 +61,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_save_formats(self):
         tReducer = self.reducer
 
-        files = ["save_formats_test_file.spe", "save_formats_test_file.nxspe" "save_formats_test_file", "save_formats_test_file.nxs"]
+        files = ["save_formats_test_file.spe", "save_formats_test_file.nxspe", "save_formats_test_file", "save_formats_test_file.nxs"]
 
         def clean_up(file_list):
             for file in file_list:

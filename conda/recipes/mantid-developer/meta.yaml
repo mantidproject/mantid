@@ -78,7 +78,7 @@ requirements:
     - xorg-libxtst>=1.2.3 # [linux]
 
     # Development tooling
-    - cppcheck==2.14.2
+    - cppcheck==2.16.0 # [unix]
     - gcovr>=4.2 # [linux]
     - pre-commit>=4.0
     - libcxx # [osx]

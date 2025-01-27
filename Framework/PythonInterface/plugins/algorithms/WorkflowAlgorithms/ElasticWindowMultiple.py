@@ -114,10 +114,10 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         background_range_end = self.getProperty("BackgroundRangeEnd").value
 
         if background_range_start != Property.EMPTY_DBL and background_range_end == Property.EMPTY_DBL:
-            issues["BackgroundRangeEnd"] = "If background range start was given and " "background range end must also be provided."
+            issues["BackgroundRangeEnd"] = "If background range start was given and background range end must also be provided."
 
         if background_range_start == Property.EMPTY_DBL and background_range_end != Property.EMPTY_DBL:
-            issues["BackgroundRangeStart"] = "If background range end was given and background " "range start must also be provided."
+            issues["BackgroundRangeStart"] = "If background range end was given and background range start must also be provided."
 
         return issues
 
@@ -196,7 +196,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         else:
             if not workspaces_have_same_size(q_workspaces) or not workspaces_have_same_size(q2_workspaces):
                 raise RuntimeError(
-                    "The ElasticWindow algorithm produced differently sized workspaces. Please check " "the input files are compatible."
+                    "The ElasticWindow algorithm produced differently sized workspaces. Please check the input files are compatible."
                 )
             q_workspace = _append_all(q_workspaces)
             q2_workspace = _append_all(q2_workspaces)
@@ -341,7 +341,7 @@ def _extract_sensor_name(sample_log_name, run, instrument):
             return sensor_names[position]
         elif position < len(default_names):
             logger.warning(
-                "Position {0} not found within the instrument parameters, " "using default '{1}'.".format(position, default_names[position])
+                "Position {0} not found within the instrument parameters, using default '{1}'.".format(position, default_names[position])
             )
             return default_names[position]
         else:

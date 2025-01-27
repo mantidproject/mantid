@@ -101,7 +101,7 @@ class SuperplotModel(QObject):
             names = [name]
         for name in names:
             if not isinstance(mtd[name], MatrixWorkspace):
-                logger.warning('Type of workspace "{}" is not supported by ' "Superplot".format(name))
+                logger.warning('Type of workspace "{}" is not supported by Superplot'.format(name))
                 continue
             if name not in self._workspaces:
                 self._workspaces.append(name)

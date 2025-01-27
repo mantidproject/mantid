@@ -134,7 +134,7 @@ class MuonDataContext(object):
             and self._main_field_direction
         ):
             self.message_notifier.notify_subscribers(
-                "MainFieldDirection has changed between" " data sets, click default to reset grouping if required"
+                "MainFieldDirection has changed between data sets, click default to reset grouping if required"
             )
         self._main_field_direction = self.current_data["MainFieldDirection"]
 

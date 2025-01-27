@@ -43,7 +43,7 @@ function fixup_bundle() {
   echo "Fixing up bundle so it is self contained"
   # Fix absolute paths in Qt and our own startup script
   fixup_qt "$bundle_conda_prefix" "$HERE"/../common/qt.conf
-  sed -i -e "s@$bundle_prefix_absolute/@\$INSTALLDIR/@" $bundle_prefix_absolute/bin/mantidworkbench
+  sed -i -e "s@$bundle_prefix_absolute/@\$INSTALLDIR/@" $bundle_prefix_absolute/bin/launch_mantidworkbench
 }
 
 # Create a tarball out of the installed conda environment

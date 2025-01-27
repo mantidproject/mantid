@@ -45,9 +45,7 @@ class WishSX(BaseSX):
             # set goniometer
             if self.gonio_axes is not None:
                 if len(gonio_angles) != len(self.gonio_axes):
-                    logger.warning(
-                        "No goniometer will be applied as the number of goniometer angles doesn't " "match the number of axes set."
-                    )
+                    logger.warning("No goniometer will be applied as the number of goniometer angles doesn't match the number of axes set.")
                 elif isinstance(gonio_angles[0], str):
                     self._set_goniometer_on_ws(wsname, gonio_angles)
                 else:
@@ -84,7 +82,7 @@ class WishSX(BaseSX):
     @staticmethod
     def mask_detector_edges(ws, nedge=16, ntubes=2):
         # mask pixels on ends of tubes
-        mantid.MaskBTP(Workspace=ws, Pixel=f"1-{nedge},{512-nedge}-512")
+        mantid.MaskBTP(Workspace=ws, Pixel=f"1-{nedge},{512 - nedge}-512")
         # only mask tubes on panels with edge facing beam in/out
         tubes = np.r_[152 - (ntubes - 1) // 2 : 153, 76 - ntubes // 2 + 1 : 77]
         mantid.MaskBTP(Workspace=ws, Bank="5-6", Tube=",".join(str(tube) for tube in tubes))

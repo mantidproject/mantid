@@ -142,9 +142,9 @@ def cluster_qs(qs, k=None, threshold=1.5):
         _, clusters = kmeans2(qs, centroids, minit="matrix")
         if len(set(clusters)) != k:
             raise ValueError(
-                "Could not group the satellite reflections "
-                "into {} clusters. Please check that you have "
-                "at least {} satellites.".format(k, k)
+                "Could not group the satellite reflections into {} clusters. Please check that you have at least {} satellites.".format(
+                    k, k
+                )
             )
     else:
         clusters = hcluster.fclusterdata(qs, threshold, criterion="distance")

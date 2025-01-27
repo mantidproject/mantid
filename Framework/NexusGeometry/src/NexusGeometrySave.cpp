@@ -22,7 +22,6 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidKernel/EigenConversionHelpers.h"
 #include "MantidKernel/ProgressBase.h"
-#include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
 #include "MantidNexusGeometry/NexusGeometryUtilities.h"
 #include <H5Cpp.h>
@@ -64,7 +63,7 @@ struct SpectraMappings {
  * @return : new H5 Group object with name <childGroupName> if did not throw.
  */
 inline H5::Group tryCreateGroup(const H5::Group &parentGroup, const std::string &childGroupName) {
-  H5std_string parentGroupName = H5_OBJ_NAME(parentGroup);
+  H5std_string parentGroupName = parentGroup.getObjName();
   for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
     if (parentGroup.getObjTypeByIdx(i) == GROUP_TYPE) {
       H5std_string child = parentGroup.getObjnameByIdx(i);
@@ -239,7 +238,7 @@ void writeXYZPixeloffset(H5::Group &grp, const Geometry::ComponentInfo &compInfo
   hsize_t dims[static_cast<hsize_t>(1)];
   dims[0] = nDetectorsInBank;
 
-  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
+  H5::DataSpace space = H5::DataSpace(rank, dims, nullptr);
 
   if (!xIsZero) {
     xPixelOffset = grp.createDataSet(X_PIXEL_OFFSET, H5::PredType::NATIVE_DOUBLE, space);
@@ -265,7 +264,7 @@ void write1DIntDataset(H5::Group &grp, const H5std_string &name, const std::vect
   const int rank = 1;
   hsize_t dims[1] = {static_cast<hsize_t>(container.size())};
 
-  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
+  H5::DataSpace space = H5::DataSpace(rank, dims, nullptr);
 
   auto dataset = grp.createDataSet(name, H5::PredType::NATIVE_INT, space);
   if (!container.empty())
@@ -340,7 +339,7 @@ void writeNXMonitorNumber(H5::Group &grp, const int monitorID) {
   hsize_t dims[static_cast<hsize_t>(1)];
   dims[0] = static_cast<hsize_t>(1);
 
-  H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
+  H5::DataSpace space = H5::DataSpace(rank, dims, nullptr);
 
   // these DataSets are duplicates of each other. written to the group to
   // handle the naming inconsistency. probably temporary.
@@ -388,7 +387,7 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
   auto unitVec = position.normalized();                  // unit vector of the position vector
   std::vector<double> stdNormPos = toStdVector(unitVec); // convert to std::vector
 
-  dspace = H5Screate_simple(drank, ddims, nullptr); // dataspace for dataset
+  dspace = H5::DataSpace(drank, ddims, nullptr); // dataspace for dataset
   location = grp.createDataSet(LOCATION, H5::PredType::NATIVE_DOUBLE,
                                dspace); // dataset location
   location.write(&norm, H5::PredType::NATIVE_DOUBLE,
@@ -398,7 +397,7 @@ inline void writeLocation(H5::Group &grp, const Eigen::Vector3d &position) {
   hsize_t adims[static_cast<hsize_t>(3)]; // dimensions of attribute
   adims[0] = 3;                           // datapoints in attribute dimension 0
 
-  aspace = H5Screate_simple(arank, adims, nullptr); // dataspace for attribute
+  aspace = H5::DataSpace(arank, adims, nullptr); // dataspace for attribute
   vector = location.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE,
                                     aspace); // attribute vector
   vector.write(H5::PredType::NATIVE_DOUBLE,
@@ -459,7 +458,7 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
   Eigen::Vector3d axisOfRotation = rotation.vec().normalized();  // angle axis
   std::vector<double> stdNormAxis = toStdVector(axisOfRotation); // convert to std::vector
 
-  dspace = H5Screate_simple(drank, ddims, nullptr); // dataspace for dataset
+  dspace = H5::DataSpace(drank, ddims, nullptr); // dataspace for dataset
   orientation = grp.createDataSet(ORIENTATION, H5::PredType::NATIVE_DOUBLE,
                                   dspace); // dataset orientation
   orientation.write(&angle, H5::PredType::NATIVE_DOUBLE,
@@ -469,7 +468,7 @@ inline void writeOrientation(H5::Group &grp, const Eigen::Quaterniond &rotation,
   hsize_t adims[static_cast<hsize_t>(3)]; // dimensions of attribute
   adims[0] = static_cast<hsize_t>(3);     // datapoints in attibute dimension 0
 
-  aspace = H5Screate_simple(arank, adims, nullptr); // dataspace for attribute
+  aspace = H5::DataSpace(arank, adims, nullptr); // dataspace for attribute
   vector = orientation.createAttribute(VECTOR, H5::PredType::NATIVE_DOUBLE,
                                        aspace); // attribute vector
   vector.write(H5::PredType::NATIVE_DOUBLE,
@@ -699,17 +698,17 @@ public:
       // neither orientation nor location are non-zero, NXsource is self
       // dependent.
       if (!locationIsOrigin) {
-        dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
+        dependency = transformations.getObjName() + "/" + LOCATION;
         writeLocation(transformations, position);
       }
       if (!orientationIsZero) {
-        dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
+        dependency = transformations.getObjName() + "/" + ORIENTATION;
 
         // If location dataset is written to group also, then dependency for
         // orientation dataset containg the rotation transformation will be
         // location. Else dependency for orientation is self.
         std::string rotationDependency =
-            locationIsOrigin ? NO_DEPENDENCY : H5_OBJ_NAME(transformations) + "/" + LOCATION;
+            locationIsOrigin ? NO_DEPENDENCY : transformations.getObjName() + "/" + LOCATION;
         writeOrientation(transformations, rotation, rotationDependency);
       }
     }
@@ -762,17 +761,17 @@ public:
       // If neither orientation nor location are non-zero, NXmonitor is self
       // dependent.
       if (!locationIsOrigin) {
-        dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
+        dependency = transformations.getObjName() + "/" + LOCATION;
         writeLocation(transformations, position);
       }
       if (!orientationIsZero) {
-        dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
+        dependency = transformations.getObjName() + "/" + ORIENTATION;
 
         // If location dataset is written to group also, then dependency for
         // orientation dataset containg the rotation transformation will be
         // location. Else dependency for orientation is self.
         std::string rotationDependency =
-            locationIsOrigin ? NO_DEPENDENCY : H5_OBJ_NAME(transformations) + "/" + LOCATION;
+            locationIsOrigin ? NO_DEPENDENCY : transformations.getObjName() + "/" + LOCATION;
         writeOrientation(transformations, rotation, rotationDependency);
       }
     }
@@ -859,17 +858,17 @@ public:
       // If neither orientation nor location are non-zero, NXdetector is self
       // dependent.
       if (!locationIsOrigin) {
-        dependency = H5_OBJ_NAME(transformations) + "/" + LOCATION;
+        dependency = transformations.getObjName() + "/" + LOCATION;
         writeLocation(transformations, position);
       }
       if (!orientationIsZero) {
-        dependency = H5_OBJ_NAME(transformations) + "/" + ORIENTATION;
+        dependency = transformations.getObjName() + "/" + ORIENTATION;
 
         // If location dataset is written to group also, then dependency for
         // orientation dataset containing the rotation transformation will be
         // location. Else dependency for orientation is self.
         std::string rotationDependency =
-            locationIsOrigin ? NO_DEPENDENCY : H5_OBJ_NAME(transformations) + "/" + LOCATION;
+            locationIsOrigin ? NO_DEPENDENCY : transformations.getObjName() + "/" + LOCATION;
         writeOrientation(transformations, rotation, rotationDependency);
       }
     }

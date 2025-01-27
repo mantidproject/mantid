@@ -21,9 +21,9 @@ function trim_conda() {
   cp "$bundle_conda_prefix"/bin_tmp/Mantid.properties "$bundle_conda_prefix"/bin/
   cp "$bundle_conda_prefix"/bin_tmp/mantid-scripts.pth "$bundle_conda_prefix"/bin/
   cp "$bundle_conda_prefix"/bin_tmp/workbench "$bundle_conda_prefix"/bin/
-  if [ -f "$bundle_conda_prefix"/bin_tmp/mantidworkbench.standalone ]; then
+  if [ -f "$bundle_conda_prefix"/bin_tmp/launch_mantidworkbench.standalone ]; then
     # keep handwritten startup script used on Linux so that we use jemalloc
-    cp "$bundle_conda_prefix"/bin_tmp/mantidworkbench.standalone "$bundle_conda_prefix"/bin/mantidworkbench
+    cp "$bundle_conda_prefix"/bin_tmp/launch_mantidworkbench.standalone "$bundle_conda_prefix"/bin/launch_mantidworkbench
   fi
   # Heavily cut down share
   mv "$bundle_conda_prefix"/share "$bundle_conda_prefix"/share_tmp

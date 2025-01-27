@@ -85,10 +85,10 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         # ================================INPUT RUNS================================#
 
         for d in range(N_DISTANCES):
-            p_name = f"SampleRunsD{d+1}"
+            p_name = f"SampleRunsD{d + 1}"
             self.declareProperty(
                 MultipleFileProperty(name=p_name, action=FileAction.OptionalLoad, extensions=["nxs"], allow_empty=True),
-                doc=f"Sample run(s) at the distance #{d+1}.",
+                doc=f"Sample run(s) at the distance #{d + 1}.",
             )
             self.setPropertyGroup(p_name, "Numors")
 
@@ -105,7 +105,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
         self.declareProperty(
             MultipleFileProperty(name="FluxRuns", action=FileAction.OptionalLoad, extensions=["nxs"]),
-            doc="Empty beam run(s) for flux calculation only; " "if left blank the flux will be calculated from EmptyBeamRuns.",
+            doc="Empty beam run(s) for flux calculation only; if left blank the flux will be calculated from EmptyBeamRuns.",
         )
         self.setPropertyGroup("FluxRuns", "Numors")
 
@@ -118,10 +118,10 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         # ================================TR INPUT RUNS================================#
 
         for i in range(N_LAMBDAS):
-            p_name = f"SampleTrRunsW{i+1}"
+            p_name = f"SampleTrRunsW{i + 1}"
             self.declareProperty(
                 MultipleFileProperty(name=p_name, action=FileAction.OptionalLoad, extensions=["nxs"], allow_empty=True),
-                doc=f"Sample transmission run(s) at the wavelength #{i+1}.",
+                doc=f"Sample transmission run(s) at the wavelength #{i + 1}.",
             )
             self.setPropertyGroup(p_name, "Transmission Numors")
 
@@ -329,7 +329,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         """Makes sure all the sample inputs have matching extents"""
         issues = dict()
         for d in range(self.rank):
-            prop = f"SampleRunsD{d+1}"
+            prop = f"SampleRunsD{d + 1}"
             n_items = self.getPropertyValue(prop).count(",") + 1
             if n_items != self.n_samples:
                 issues[prop] = f"{prop} has {n_items} elements instead of {self.n_samples}"
@@ -339,7 +339,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         """Makes sure all the sample transmission inputs have matching extents"""
         issues = dict()
         for i in range(self.lambda_rank):
-            prop = f"SampleTrRunsW{i+1}"
+            prop = f"SampleTrRunsW{i + 1}"
             n_items = self.getPropertyValue(prop).count(",") + 1
             if n_items > 1 and n_items != self.n_samples:
                 issues[prop] = f"{prop} has {n_items} elements instead of {self.n_samples}"
@@ -458,9 +458,11 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         issues = dict()
         is_empty = False
         for d in range(N_DISTANCES):
-            prop = f"SampleRunsD{d+1}"
+            prop = f"SampleRunsD{d + 1}"
             if is_empty and self.getPropertyValue(prop):
-                issues[prop] = f"Samples have to be filled from D1 onwards: found {d+1} non-empty, while another distance before was empty."
+                issues[prop] = (
+                    f"Samples have to be filled from D1 onwards: found {d + 1} non-empty, while another distance before was empty."
+                )
             if not self.getPropertyValue(prop):
                 is_empty = True
         return issues
@@ -540,7 +542,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         """Sets the actual rank of the reduction"""
         self.rank = 0
         for d in range(N_DISTANCES):
-            if self.getPropertyValue(f"SampleRunsD{d+1}"):
+            if self.getPropertyValue(f"SampleRunsD{d + 1}"):
                 self.rank += 1
         if self.rank == 0:
             raise RuntimeError("No sample runs are provided, at least one distance must not be empty.")
@@ -551,15 +553,15 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         """Sets the actual lambda rank"""
         self.lambda_rank = 0
         for i in range(N_LAMBDAS):
-            if self.getPropertyValue(f"SampleTrRunsW{i+1}"):
+            if self.getPropertyValue(f"SampleTrRunsW{i + 1}"):
                 self.lambda_rank += 1
         self.log().notice(f"Set the lambda rank of reduction to {self.lambda_rank}")
 
     def _set_n_samples(self):
         """Sets the number of samples based on the inputs of the sample runs in the first non-empty distance"""
         for d in range(N_DISTANCES):
-            if self.getPropertyValue(f"SampleRunsD{d+1}"):
-                self.n_samples = self.getPropertyValue(f"SampleRunsD{d+1}").count(",") + 1
+            if self.getPropertyValue(f"SampleRunsD{d + 1}"):
+                self.n_samples = self.getPropertyValue(f"SampleRunsD{d + 1}").count(",") + 1
                 self.log().notice(f"Set number of samples to {self.n_samples}")
                 break
 
@@ -599,7 +601,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         all_outputs = []
         for i in range(self.lambda_rank):
             transmissions = self.process_all_transmissions_at_lambda(i)
-            self.progress.report((i + 1) * self.n_samples, f"Calculated transmissions for wavelength index {i+1}")
+            self.progress.report((i + 1) * self.n_samples, f"Calculated transmissions for wavelength index {i + 1}")
             all_outputs.append(transmissions)
         return all_outputs
 
@@ -609,7 +611,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
         for d in range(self.rank):
             outputs = dict()
             sample_ws = self.process_all_samples_at_distance(d, transmissions)
-            self.progress.report((d + 1) * self.n_samples, f"Reduced sample data at distance index {d+1}")
+            self.progress.report((d + 1) * self.n_samples, f"Reduced sample data at distance index {d + 1}")
             outputs["RealSpace"] = sample_ws[0]
             if len(sample_ws) > 1:
                 # if there is a 2nd output, it must be sensitivity
@@ -766,7 +768,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
     def process_sample_tr(self, i, tr_dark_current_ws, tr_empty_beam_ws, tr_empty_beam_flux):
         """Processes the sample transmissions at the given wavelength"""
-        tr_sample = self.getPropertyValue(f"SampleTrRunsW{i+1}")
+        tr_sample = self.getPropertyValue(f"SampleTrRunsW{i + 1}")
         if tr_sample:
             [_, tr_sample_ws] = needs_processing(tr_sample, "Transmission")
             SANSILLReduction(
@@ -871,7 +873,7 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
 
     def process_sample(self, d, dark_current_ws, empty_beam_ws, empty_can_ws, flux_ws, transmissions):
         """Processes all the samples at the given distance"""
-        runs = self.getPropertyValue(f"SampleRunsD{d+1}")
+        runs = self.getPropertyValue(f"SampleRunsD{d + 1}")
         if runs:
             [edge_mask_ws, beam_stop_mask_ws] = self.load_masks(d)
             flat_field_ws = self.load_flat_field(d)
@@ -1073,8 +1075,8 @@ class SANSILLMultiProcess(DataProcessorAlgorithm):
                 stitch_scale_factors = out + "_stitch_scale_factors_wedge_" + str(w + 1)
                 stitched_wedge = self.do_stitch(to_stitch_w, stitched_wedge_ws, stitch_scale_factors)
                 if stitched_wedge:
-                    results[f"Stitched_Wedge{w+1}"] = stitched_wedge[0]
-                    results[f"StitchScaleFactors_Wedge{w+1}"] = stitched_wedge[1]
+                    results[f"Stitched_Wedge{w + 1}"] = stitched_wedge[0]
+                    results[f"StitchScaleFactors_Wedge{w + 1}"] = stitched_wedge[1]
         return results
 
     def do_stitch(self, inputs, output, output_scale_factors):

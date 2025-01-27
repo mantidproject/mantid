@@ -493,6 +493,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                         CheckOverlapping=False,
                         YAxisLabel="TwoTheta_fit",
                         YAxisUnit="degrees",
+                        CheckMatchingBins=False,
                     )
                 except ValueError:
                     RenameWorkspace(InputWorkspace="ws", OutputWorkspace=conjoined_peak_fit_name)
@@ -588,7 +589,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             )
         except RuntimeError as e:
             raise RuntimeError(
-                "Fitting detector positions and wavelength failed due to {}." "\nConsider changing initial parameters.".format(e)
+                "Fitting detector positions and wavelength failed due to {}.\nConsider changing initial parameters.".format(e)
             )
         param_table = fit_output.OutputParameters
         self._created_ws_names.append("det_fit_out_{}_Workspaces".format(fit_output_name))

@@ -162,7 +162,7 @@ class PlotSelectorView(QWidget):
         """
         Make a table showing the matplotlib figure number of the
         plots, the name with close and edit buttons, and a hidden
-        column for sorting with the last actuve order
+        column for sorting with the last active order
         :return: A QTableWidget object which will contain plot widgets
         """
         table_widget = QTableWidget(0, 3, self)
@@ -179,9 +179,7 @@ class PlotSelectorView(QWidget):
             "number, to get a handle to the plot."
         )
 
-        table_widget.horizontalHeaderItem(Column.Name).setToolTip(
-            "The plot name, also used  as the file name when " "saving multiple plots."
-        )
+        table_widget.horizontalHeaderItem(Column.Name).setToolTip("The plot name, also used as the file name when saving multiple plots.")
 
         table_widget.setSelectionBehavior(QAbstractItemView.SelectRows)
         table_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)

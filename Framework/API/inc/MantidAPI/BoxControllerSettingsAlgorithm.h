@@ -8,8 +8,8 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/BoxController.h"
+#include "MantidAPI/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace API {

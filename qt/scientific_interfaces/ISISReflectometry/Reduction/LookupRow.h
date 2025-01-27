@@ -47,7 +47,7 @@ public:
     ROI_DETECTOR_IDS = 11
   };
 
-  LookupRow(boost::optional<double> theta, boost::optional<boost::regex> titleMatcher,
+  LookupRow(boost::optional<double> theta, std::optional<boost::regex> titleMatcher,
             TransmissionRunPair tranmissionRuns,
             boost::optional<ProcessingInstructions> transmissionProcessingInstructions, RangeInQ qRange,
             boost::optional<double> scaleFactor, boost::optional<ProcessingInstructions> processingInstructions,
@@ -57,7 +57,7 @@ public:
   TransmissionRunPair const &transmissionWorkspaceNames() const;
   bool isWildcard() const;
   boost::optional<double> thetaOrWildcard() const;
-  boost::optional<boost::regex> titleMatcher() const;
+  std::optional<boost::regex> titleMatcher() const;
   RangeInQ const &qRange() const;
   boost::optional<double> scaleFactor() const;
   boost::optional<ProcessingInstructions> transmissionProcessingInstructions() const;
@@ -73,7 +73,7 @@ public:
 
 private:
   boost::optional<double> m_theta;
-  boost::optional<boost::regex> m_titleMatcher;
+  std::optional<boost::regex> m_titleMatcher;
   TransmissionRunPair m_transmissionRuns;
   RangeInQ m_qRange;
   boost::optional<double> m_scaleFactor;

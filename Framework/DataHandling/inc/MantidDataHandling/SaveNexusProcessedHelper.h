@@ -10,11 +10,11 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/Run.h"
+#include "MantidDataHandling/DllConfig.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace_fwd.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/cow_ptr.h"
-#include "MantidNexus/DllConfig.h"
 #include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/date_time/c_local_time_adjustor.hpp>
@@ -28,10 +28,10 @@
 
 namespace Mantid {
 namespace NeXus {
-MANTID_NEXUS_DLL int getNexusEntryTypes(const std::string &fileName, std::vector<std::string> &entryName,
-                                        std::vector<std::string> &definition);
+MANTID_DATAHANDLING_DLL int getNexusEntryTypes(const std::string &fileName, std::vector<std::string> &entryName,
+                                               std::vector<std::string> &definition);
 
-/** @class NexusFileIO NexusFileIO.h NeXus/NexusFileIO.h
+/** @class NexusFileIO SaveNexusProcessedHelper.h NeXus/SaveNexusProcessedHelper.h
 
 Utility method for saving NeXus format of Mantid Workspace
 This class interfaces to the C Nexus API. This is written for use by
@@ -39,7 +39,7 @@ Save and Load NexusProcessed classes, though it could be extended to
 other Nexus formats. It might be replaced in future by methods using
 the new Nexus C++ API.
 */
-class MANTID_NEXUS_DLL NexusFileIO {
+class MANTID_DATAHANDLING_DLL NexusFileIO {
 
 public:
   // Helper typedef
@@ -76,15 +76,17 @@ public:
   int writeNexusProcessedDataEvent(const DataObjects::EventWorkspace_const_sptr &ws);
 
   int writeNexusProcessedDataEventCombined(const DataObjects::EventWorkspace_const_sptr &ws,
-                                           std::vector<int64_t> &indices, double *tofs, float *weights,
-                                           float *errorSquareds, int64_t *pulsetimes, bool compress) const;
+                                           std::vector<int64_t> const &indices, double const *tofs,
+                                           float const *weights, float const *errorSquareds, int64_t const *pulsetimes,
+                                           bool compress) const;
 
   int writeEventList(const DataObjects::EventList &el, const std::string &group_name) const;
 
   template <class T>
   void writeEventListData(std::vector<T> events, bool writeTOF, bool writePulsetime, bool writeWeight,
                           bool writeError) const;
-  void NXwritedata(const char *name, int datatype, int rank, int *dims_array, void *data, bool compress = false) const;
+  void NXwritedata(const char *name, int datatype, int rank, int *dims_array, void const *data,
+                   bool compress = false) const;
 
   /// find size of open entry data section
   int getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels, int &numberOfXpoints, bool &uniformBounds,
@@ -105,9 +107,7 @@ public:
 
 private:
   /// C++ API file handle
-  // clang-format off
-  std::shared_ptr< ::NeXus::File> m_filehandle;
-  // clang-format on
+  std::shared_ptr<::NeXus::File> m_filehandle;
   /// Nexus compression method
   int m_nexuscompression;
   /// Allow an externally supplied progress object to be used

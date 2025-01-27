@@ -34,7 +34,5 @@
 #include <Poco/Path.h>
 
 // NeXus
-// clang-format off
-#include "MantidNexusCpp/NeXusFile.hpp"
 #include "MantidNexusCpp/NeXusException.hpp"
-// clang-format on
+#include "MantidNexusCpp/NeXusFile.hpp"

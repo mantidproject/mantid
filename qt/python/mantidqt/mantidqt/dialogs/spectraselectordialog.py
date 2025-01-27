@@ -145,7 +145,7 @@ class SpectraSelectionDialog(SpectraSelectionDialogUIBase):
             response = QMessageBox.warning(
                 self,
                 "Mantid Workbench",
-                "You selected {} spectra to plot. Are you sure " "you want to plot this many?".format(number_of_lines_to_plot),
+                "You selected {} spectra to plot. Are you sure you want to plot this many?".format(number_of_lines_to_plot),
                 QMessageBox.Ok | QMessageBox.Cancel,
             )
             return response == QMessageBox.Ok

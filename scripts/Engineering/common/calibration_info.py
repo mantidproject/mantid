@@ -247,7 +247,7 @@ class CalibrationInfo:
             self.group_ws = grp_ws
         else:
             raise ValueError(
-                "Could not find or create grouping requested - make sure the directory of the grouping.xml" " files is on the path"
+                "Could not find or create grouping requested - make sure the directory of the grouping.xml files is on the path"
             )
 
     def create_grouping_workspace_from_calfile(self):

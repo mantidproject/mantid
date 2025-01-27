@@ -22,7 +22,7 @@ matplotlib.use("AGG")
 X_COLUMN_LABEL = "x_column"
 Y_COLUMN_LABEL = "y_column"
 FULL_FUNCTION = FunctionFactory.createInitialized(
-    "name=FlatBackground,A0=1;name=LinearBackground,A0=1," "A1=2;name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0"
+    "name=FlatBackground,A0=1;name=LinearBackground,A0=1,A1=2;name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0"
 )
 FUNCTION_1 = FunctionFactory.createInitialized("name=FlatBackground,A0=1")
 FUNCTION_2 = FunctionFactory.createInitialized("name=LinearBackground,A0=1,A1=2")

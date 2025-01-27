@@ -249,5 +249,5 @@ def get_move_builder(data_info):
         return StateMoveNoInstBuilder()
     else:
         raise NotImplementedError(
-            "StateMoveBuilder: Could not find any valid move builder for the " "specified StateData object {0}".format(str(data_info))
+            "StateMoveBuilder: Could not find any valid move builder for the specified StateData object {0}".format(str(data_info))
         )

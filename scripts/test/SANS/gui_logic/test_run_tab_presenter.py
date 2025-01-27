@@ -646,7 +646,7 @@ class RunTabPresenterTest(unittest.TestCase):
         self.assertEqual(
             self._mock_csv_parser.save_batch_file.call_count,
             0,
-            "_save_batch_file should not have been called." " It was called {} times.".format(self.presenter._export_table.call_count),
+            "_save_batch_file should not have been called. It was called {} times.".format(self.presenter._export_table.call_count),
         )
 
     def test_buttons_enabled_after_export_table_fails(self):
@@ -724,7 +724,7 @@ class RunTabPresenterTest(unittest.TestCase):
         try:
             self.presenter._validate_output_modes()
         except RuntimeError:
-            self.fail("Did not expect _validate_output_modes to fail when no file types are selected " "for memory output mode.")
+            self.fail("Did not expect _validate_output_modes to fail when no file types are selected for memory output mode.")
 
     def test_that_switching_to_memory_mode_disables_all_file_type_buttons(self):
         """This tests that all file type buttons are disabled when memory mode is selected."""

@@ -106,7 +106,7 @@ class GenerateLogbook(PythonAlgorithm):
         self.declareProperty(
             "OptionalHeaders",
             "",
-            doc="Names of optional metadata to be included in the logbook. Entries need to be specified" "in the instrument IPF.",
+            doc="Names of optional metadata to be included in the logbook. Entries need to be specified in the instrument IPF.",
         )
 
         self.declareProperty("CustomEntries", "", doc="Custom NeXus paths for additional metadata to be included in the logbook.")

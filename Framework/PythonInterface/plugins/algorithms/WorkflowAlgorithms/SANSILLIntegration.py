@@ -281,7 +281,7 @@ class SANSILLIntegration(PythonAlgorithm):
         Returns the OutputBinning string to be used in Q1DWeighted
         """
         if q_min < 0.0 or q_min >= q_max:
-            raise ValueError("qmin must be positive and smaller than qmax. " "Given qmin={0:.2f}, qmax={1:.2f}.".format(q_min, q_max))
+            raise ValueError("qmin must be positive and smaller than qmax. Given qmin={0:.2f}, qmax={1:.2f}.".format(q_min, q_max))
         binning = self.getProperty("OutputBinning").value
         strategy = self.getPropertyValue("DefaultQBinning")
         if len(binning) == 0:
@@ -465,13 +465,13 @@ class SANSILLIntegration(PythonAlgorithm):
         if max_qxy == -1:
             qmax = mtd[ws_in].getRun().getLogData("qmax").value
             max_qxy = qmax * 0.7071  # np.sqrt(2) / 2
-            self.log().information("Nothing ptovided for MaxQxy. Using a " "calculated value: {0}".format(max_qxy))
+            self.log().information("Nothing ptovided for MaxQxy. Using a calculated value: {0}".format(max_qxy))
         if delta_q == -1:
             if log_binning:
                 delta_q = max_qxy / 10
             else:
                 delta_q = max_qxy / 64
-            self.log().information("Nothing provided for DeltaQ. Using a " "calculated value: {0}".format(delta_q))
+            self.log().information("Nothing provided for DeltaQ. Using a calculated value: {0}".format(delta_q))
         Qxy(InputWorkspace=ws_in, OutputWorkspace=ws_out, MaxQxy=max_qxy, DeltaQ=delta_q, IQxQyLogBinning=log_binning)
 
     def _integrate_iq(self, ws_in, ws_out, panel=None):

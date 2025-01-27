@@ -99,21 +99,21 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             name="SampleCoherentXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The coherent cross-section for the sample material in barns. To be used instead of " "Chemical Formula.",
+            doc="The coherent cross-section for the sample material in barns. To be used instead of Chemical Formula.",
         )
 
         self.declareProperty(
             name="SampleIncoherentXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The incoherent cross-section for the sample material in barns. To be used instead of " "Chemical Formula.",
+            doc="The incoherent cross-section for the sample material in barns. To be used instead of Chemical Formula.",
         )
 
         self.declareProperty(
             name="SampleAttenuationXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The absorption cross-section for the sample material in barns. To be used instead of " "Chemical Formula.",
+            doc="The absorption cross-section for the sample material in barns. To be used instead of Chemical Formula.",
         )
 
         self.declareProperty(
@@ -149,21 +149,21 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             name="CanCoherentXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The coherent cross-section for the can material in barns. To be used instead of " "Chemical Formula.",
+            doc="The coherent cross-section for the can material in barns. To be used instead of Chemical Formula.",
         )
 
         self.declareProperty(
             name="CanIncoherentXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The incoherent cross-section for the can material in barns. To be used instead of " "Chemical Formula.",
+            doc="The incoherent cross-section for the can material in barns. To be used instead of Chemical Formula.",
         )
 
         self.declareProperty(
             name="CanAttenuationXSection",
             defaultValue=0.0,
             validator=FloatBoundedValidator(0.0),
-            doc="The absorption cross-section for the can material in barns. To be used instead of " "Chemical Formula.",
+            doc="The absorption cross-section for the can material in barns. To be used instead of Chemical Formula.",
         )
 
         self.declareProperty(
@@ -248,7 +248,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             if can_chemical_formula == "" and (
                 can_coherent_cross_section == 0.0 and can_incoherent_cross_section == 0.0 and can_attenuation_cross_section == 0.0
             ):
-                issues["CanChemicalFormula"] = "Must provide a chemical formula or cross sections when providing a " "can workspace."
+                issues["CanChemicalFormula"] = "Must provide a chemical formula or cross sections when providing a can workspace."
 
         # Ensure there are enough steps
         number_steps = int((self._sample_outer_radius - self._sample_inner_radius) / self._step_size)
@@ -454,7 +454,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                 self._efixed = self._getEfixed()
                 logger.information("Found Efixed = {0}".format(self._efixed))
             except ValueError:
-                raise RuntimeError("Could not find the Efixed parameter in the instrument. " "Please specify manually.")
+                raise RuntimeError("Could not find the Efixed parameter in the instrument. Please specify manually.")
 
         self._set_sample_method = "Chemical Formula" if self._sample_chemical_formula != "" else "Cross Sections"
         self._set_can_method = "Chemical Formula" if self._can_chemical_formula != "" else "Cross Sections"

@@ -9,8 +9,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/Functions/BSpline.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {

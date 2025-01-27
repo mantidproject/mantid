@@ -75,7 +75,7 @@ class LoadVisionElasticEQ(PythonAlgorithm):
                     mantid.simpleapi.RenameWorkspace(InputWorkspace=bank, OutputWorkspace=wksp_cache)
                     first_bank = False
                 else:
-                    mantid.simpleapi.ConjoinWorkspaces(wksp_cache, bank)
+                    mantid.simpleapi.ConjoinWorkspaces(wksp_cache, bank, CheckMatchingBins=False)
 
             ws = mantid.simpleapi.RenameWorkspace(InputWorkspace=wksp_cache, OutputWorkspace=wksp_name)
 

@@ -20,10 +20,10 @@ class WaterfallPlotFillAreaDialogPresenterTest(unittest.TestCase):
         self.fig.get_axes.return_value = [self.ax]
 
         view = Mock()
-        with patch("mantidqt.widgets.waterfallplotfillareadialog" ".presenter.WaterfallPlotFillAreaDialogPresenter.init_view"):
+        with patch("mantidqt.widgets.waterfallplotfillareadialog.presenter.WaterfallPlotFillAreaDialogPresenter.init_view"):
             self.presenter = WaterfallPlotFillAreaDialogPresenter(fig=self.fig, view=view)
 
-    @patch("mantidqt.widgets.waterfallplotfillareadialog" ".presenter.WaterfallPlotFillAreaDialogPresenter.init_view")
+    @patch("mantidqt.widgets.waterfallplotfillareadialog.presenter.WaterfallPlotFillAreaDialogPresenter.init_view")
     def test_opening_dialog_calls_init_view(self, patched_init):
         self.presenter = WaterfallPlotFillAreaDialogPresenter(fig=self.fig, view=Mock())
         patched_init.assert_called_once()
