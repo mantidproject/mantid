@@ -68,6 +68,24 @@ ARM_JAR_FILE=agent.jar
 #####################################################################
 # Script
 #####################################################################
+
+# error out if there isn't a node name and secret
+if [ "$#" -lt 2 ]; then
+  echo "Usage: `basename ${0}` <NODE_NAME> <SECRET> [PROXY_HOST] [PROXY_PORT]"
+  exit -1
+fi
+
+# macOS agents with ARM architecture need to run the newer agent.jar file.
+if [[ "$OSTYPE" == "darwin"* ]] && [[ $(uname -m) == 'arm64' ]]; then
+  JAR_FILE=$ARM_JAR_FILE
+  JAR_LOCATION="${JENKINS_URL}/jnlpJars"
+  JAR_ARGS="-url ${JENKINS_URL} -secret ${SECRET} -name ${NODE_NAME}"
+else
+  JAR_FILE=$LEGACY_JAR_FILE
+  JAR_LOCATION="${LEGACY_JENKINS_REPO_URL}/${LEGACY_JAR_VERSION}"
+  JAR_ARGS="-jnlpUrl ${AGENT_URL} -secret ${SECRET}"
+fi
+
 # exit if it is already running
 RUNNING=$(ps u -U $(whoami) | grep java | grep ${JAR_FILE})
 if [ ! -z "${RUNNING}" ]; then
@@ -77,12 +95,6 @@ else
   echo "Agent process is not running"
 fi
 
-# error out if there isn't a node name and secret
-if [ "$#" -lt 2 ]; then
-  echo "Usage: `basename ${0}` <NODE_NAME> <SECRET> [PROXY_HOST] [PROXY_PORT]"
-  exit -1
-fi
-
 # setup the proxy
 if [ ! -z "${PROXY_HOST}" ]; then
   PROXY_ARGS="-Dhttps.proxyHost=${PROXY_HOST} -Dhttps.proxyPort=${PROXY_PORT}"
@@ -90,17 +102,6 @@ if [ ! -z "${PROXY_HOST}" ]; then
   # For curl
   export http_proxy=http://$PROXY_HOST:$PROXY_PORT
   export https_proxy=https://$PROXY_HOST:$PROXY_PORT
-fi
-
-# macOS agents with ARM architecture need to run the newer agent.jar file.
-if [[ "$OSTYPE" == "darwin"* ]] && [[ $(uname -m) == 'arm64' ]]; then
-  JAR_FILE=$ARM_JAR_FILE
-  JAR_LOCATION="${JENKINS_URL}/jnlpJars"
-  JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -url ${JENKINS_URL} -secret ${SECRET} -name ${NODE_NAME}"
-else
-  JAR_FILE=$LEGACY_JAR_FILE
-  JAR_LOCATION="${LEGACY_JENKINS_REPO_URL}/${LEGACY_JAR_VERSION}"
-  JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -jnlpUrl ${AGENT_URL} -secret ${SECRET}"
 fi
 
 # find the jar file if it exists
@@ -122,6 +123,8 @@ else
   fi
   JAR_FILE=${JAR_FILE_TMP}
 fi
+
+JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} ${JAR_ARGS}"
 
 echo "starting ..."
 if [ -z "${JAVA}" ]; then
