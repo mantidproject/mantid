@@ -203,9 +203,9 @@ class TestFocusNoAbsorptionIndividual(systemtesting.MantidSystemTest, HelperClas
         self.focus_results = run_focus_no_absorption("98533, 98534", mode="PDF", input_mode="Individual")
 
     def validate(self):
-        # Just check the files exists as functionality of the focussing tested elsewhere
         self.validate_focus_files_exist("98533")
         self.validate_focus_files_exist("98534")
+        return self.focus_results.name(), "ISIS_Powder-POLARIS98534_focussed.nxs"
 
     def cleanup(self):
         try:
@@ -229,8 +229,8 @@ class TestFocusNoAbsorptionSummed(systemtesting.MantidSystemTest, HelperClass):
         self.focus_results = run_focus_no_absorption("98533,98534", mode="PDF", input_mode="Summed")
 
     def validate(self):
-        # Just check the files exists as functionality of the focussing tested elsewhere
         self.validate_focus_files_exist("98533,98534")
+        return self.focus_results.name(), "ISIS_Powder-POLARIS98533,98534_focussed.nxs"
 
     def cleanup(self):
         try:
