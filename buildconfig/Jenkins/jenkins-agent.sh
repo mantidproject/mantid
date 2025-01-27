@@ -96,11 +96,11 @@ fi
 if [[ "$OSTYPE" == "darwin"* ]] && [[ $(uname -m) == 'arm64' ]]; then
   JAR_FILE=$ARM_JAR_FILE
   JAR_LOCATION="${JENKINS_URL}/jnlpJars"
-  JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -url ${JENKINS_URL} -secret ${SECRET} -name ${NODE_NAME}"
+  JAR_ARGS="-url ${JENKINS_URL} -secret ${SECRET} -name ${NODE_NAME}"
 else
   JAR_FILE=$LEGACY_JAR_FILE
   JAR_LOCATION="${LEGACY_JENKINS_REPO_URL}/${LEGACY_JAR_VERSION}"
-  JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -jnlpUrl ${AGENT_URL} -secret ${SECRET}"
+  JAR_ARGS="-jnlpUrl ${AGENT_URL} -secret ${SECRET}"
 fi
 
 # find the jar file if it exists
@@ -122,6 +122,8 @@ else
   fi
   JAR_FILE=${JAR_FILE_TMP}
 fi
+
+JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} ${JAR_ARGS}"
 
 echo "starting ..."
 if [ -z "${JAVA}" ]; then
