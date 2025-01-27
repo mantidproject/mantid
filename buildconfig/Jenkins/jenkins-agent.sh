@@ -68,28 +68,11 @@ ARM_JAR_FILE=agent.jar
 #####################################################################
 # Script
 #####################################################################
-# exit if it is already running
-RUNNING=$(ps u -U $(whoami) | grep java | grep ${JAR_FILE})
-if [ ! -z "${RUNNING}" ]; then
-  echo "Agent process is already running"
-  exit 0
-else
-  echo "Agent process is not running"
-fi
 
 # error out if there isn't a node name and secret
 if [ "$#" -lt 2 ]; then
   echo "Usage: `basename ${0}` <NODE_NAME> <SECRET> [PROXY_HOST] [PROXY_PORT]"
   exit -1
-fi
-
-# setup the proxy
-if [ ! -z "${PROXY_HOST}" ]; then
-  PROXY_ARGS="-Dhttps.proxyHost=${PROXY_HOST} -Dhttps.proxyPort=${PROXY_PORT}"
-  echo "using proxy ${PROXY_HOST} ${PROXY_PORT}"
-  # For curl
-  export http_proxy=http://$PROXY_HOST:$PROXY_PORT
-  export https_proxy=https://$PROXY_HOST:$PROXY_PORT
 fi
 
 # macOS agents with ARM architecture need to run the newer agent.jar file.
@@ -101,6 +84,24 @@ else
   JAR_FILE=$LEGACY_JAR_FILE
   JAR_LOCATION="${LEGACY_JENKINS_REPO_URL}/${LEGACY_JAR_VERSION}"
   JAR_ARGS="-jnlpUrl ${AGENT_URL} -secret ${SECRET}"
+fi
+
+# exit if it is already running
+RUNNING=$(ps u -U $(whoami) | grep java | grep ${JAR_FILE})
+if [ ! -z "${RUNNING}" ]; then
+  echo "Agent process is already running"
+  exit 0
+else
+  echo "Agent process is not running"
+fi
+
+# setup the proxy
+if [ ! -z "${PROXY_HOST}" ]; then
+  PROXY_ARGS="-Dhttps.proxyHost=${PROXY_HOST} -Dhttps.proxyPort=${PROXY_PORT}"
+  echo "using proxy ${PROXY_HOST} ${PROXY_PORT}"
+  # For curl
+  export http_proxy=http://$PROXY_HOST:$PROXY_PORT
+  export https_proxy=https://$PROXY_HOST:$PROXY_PORT
 fi
 
 # find the jar file if it exists
