@@ -46,12 +46,16 @@ SECRET=${2}
 #####################################################################
 # URL of jnlp file for agent
 AGENT_URL="${JENKINS_URL}/computer/${NODE_NAME}/jenkins-agent.jnlp"
+
 # version number of the agent jar
-JAR_VERSION=4.13
-# name of the agent jar - full path is determined later
-JAR_FILE=remoting-${JAR_VERSION}.jar
+LEGACY_JAR_VERSION=4.13
+# name of the legacy agent jar - full path is determined later
+LEGACY_JAR_FILE=remoting-${LEGACY_JAR_VERSION}.jar
 # URL to jenkins rpeo
-JENKINS_REPO_URL=https://repo.jenkins-ci.org/artifactory/releases/org/jenkins-ci/main/remoting
+LEGACY_JENKINS_REPO_URL=https://repo.jenkins-ci.org/artifactory/releases/org/jenkins-ci/main/remoting
+
+# Name of the agent jar - full path determined later
+ARM_JAR_FILE=agent.jar
 
 # Some versions of cron don't set the USER environment variable
 # required by vnc
@@ -88,6 +92,17 @@ if [ ! -z "${PROXY_HOST}" ]; then
   export https_proxy=https://$PROXY_HOST:$PROXY_PORT
 fi
 
+# macOS agents with ARM architecture need to run the newer agent.jar file.
+if [[ "$OSTYPE" == "darwin"* ]] && [[ $(uname -m) == 'arm64' ]]; then
+  JAR_FILE=$ARM_JAR_FILE
+  JAR_LOCATION="${JENKINS_URL}/jnlpJars"
+  JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -url ${JENKINS_URL} -secret ${SECRET} -name ${NODE_NAME}"
+else
+  JAR_FILE=$LEGACY_JAR_FILE
+  JAR_LOCATION="${LEGACY_JENKINS_REPO_URL}/${LEGACY_JAR_VERSION}"
+  JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -jnlpUrl ${AGENT_URL} -secret ${SECRET}"
+fi
+
 # find the jar file if it exists
 if [ -f ${HOME}/jenkins-linode/${JAR_FILE} ]; then
   JAR_FILE=${HOME}/jenkins-linode/${JAR_FILE}
@@ -98,10 +113,10 @@ else
   if [ ! -f ${JAR_FILE_TMP} ]; then
     echo "Downloading agent jar file to ${JAR_FILE_TMP}"
     if [ $(command -v curl) ]; then
-      echo "curl --location -o ${JAR_FILE_TMP} ${JENKINS_REPO_URL}/${JAR_VERSION}/${JAR_FILE}"
-      curl --location -o ${JAR_FILE_TMP} ${JENKINS_REPO_URL}/${JAR_VERSION}/${JAR_FILE}
+      echo "curl --location -o ${JAR_FILE_TMP} ${JAR_LOCATION}/${JAR_FILE}"
+      curl --location -o ${JAR_FILE_TMP} ${JAR_LOCATION}/${JAR_FILE}
     else
-      echo "Need curl to download ${JENKINS_REPO_URL}/${JAR_VERSION}/${JAR_FILE}"
+      echo "Need curl to download ${JAR_LOCATION}/${JAR_FILE}"
       exit -1
     fi
   fi
@@ -112,6 +127,6 @@ echo "starting ..."
 if [ -z "${JAVA}" ]; then
   JAVA=`which java`
 fi
-JAVA_ARGS="${PROXY_ARGS} -jar ${JAR_FILE} -jnlpUrl ${AGENT_URL} -secret ${SECRET}"
+
 echo "${JAVA} ${JAVA_ARGS}"
 ${JAVA} ${JAVA_ARGS}
