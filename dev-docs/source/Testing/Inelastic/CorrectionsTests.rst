@@ -37,7 +37,7 @@ Calculate Monte Carlo Absorption Tab
 
 #. Go to ``Interfaces`` > ``Inelastic`` > ``Corrections``
 #. Go to the ``Calculate Monte Carlo Absorption`` tab
-#. With the Sample combo box set to ``File`` click browse and select the file ``irs26176_graphite002_red`` from the Sample Data folder
+#. With the Input Workspace set to ``File`` click browse and select the file ``irs26176_graphite002_red`` from the Sample Data folder
 #. Choose the Sample Shape to be ``Flat Plate``
 #. Sample Height & Width should be ``1.0``
 #. Sample Thickness, Container Front Thickness and Container Back Thickness should be ``0.1``
