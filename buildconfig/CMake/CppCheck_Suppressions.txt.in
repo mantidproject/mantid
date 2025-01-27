@@ -155,8 +155,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/MultiPeriodGroupWorke
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/NumericAxisValidator.cpp:26
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/ParameterReference.cpp:52
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/PeakFunctionIntegrator.cpp:190
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:338
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/API/src/Sample.cpp:347
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ScopedWorkspace.cpp:49
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/API/src/ScriptBuilder.cpp:279
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/API/src/SpectraAxisValidator.cpp:26
@@ -909,8 +907,8 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Muon/src/PlotAsymmetryByLog
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Muon/src/PlotAsymmetryByLogValue.cpp:507
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Muon/src/PlotAsymmetryByLogValue.cpp:868
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Nexus/inc/MantidNexus/NexusClasses.h:150
-argumentSize:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/NeXusFile.cpp:900
-argumentSize:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/NeXusFile.cpp:964
+argumentSize:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/NeXusFile.cpp:760
+argumentSize:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/NeXusFile.cpp:824
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:194
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:195
 unreadVariable:${CMAKE_SOURCE_DIR}/Framework/NexusCpp/src/napi.cpp:421

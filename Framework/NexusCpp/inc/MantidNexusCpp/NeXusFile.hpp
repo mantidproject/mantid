@@ -116,23 +116,6 @@ private:
   void initAttrDir();
 
   /**
-   * Function to walk the file tree and fill in the TypeMap.
-   *
-   * \param path the current path in the file
-   * \param class_name the current NX class name
-   * \param tmap the typemap being constructed
-   */
-  void walkFileForTypeMap(const std::string &path, const std::string &class_name, TypeMap &tmap);
-
-  /**
-   * Function to append new path to current one.
-   * \param currpath the current path to append to
-   * \param subpath the path to append to the current path
-   * \return the newly joined path
-   */
-  const std::string makeCurrentPath(const std::string &currpath, const std::string &subpath);
-
-  /**
    * Function to consolidate the file opening code for the various constructors
    * \param filename The name of the file to open.
    * \param access How to access the file.
@@ -173,10 +156,6 @@ public:
   /** Flush the file. */
   void flush();
 
-  template <typename NumT> void malloc(NumT *&data, const Info &info);
-
-  template <typename NumT> void free(NumT *&data);
-
   /**
    * Create a new group.
    *
@@ -204,14 +183,6 @@ public:
    */
   void openPath(const std::string &path);
 
-  /**
-   * Open the group in which the NeXus object with the specified path exists.
-   *
-   * \param path A unix like path string to a group or field. The path
-   * string is a list of group names and SDS names separated with a slash,
-   * '/' (i.e. "/entry/sample/name").
-   */
-  void openGroupPath(const std::string &path);
   /**
    * Get the path into the current file
    * \return A unix like path string pointing to the current
@@ -435,22 +406,6 @@ public:
    * Put the supplied data as an attribute into the currently open data.
    *
    * \param name Name of the attribute to add.
-   * \param array The attribute value.
-   */
-  void putAttr(const std::string &name, const std::vector<std::string> &array);
-
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
-   * \param name Name of the attribute to add.
-   * \param array The attribute value.
-   */
-  template <typename NumT> void putAttr(const std::string &name, const std::vector<NumT> &array);
-
-  /**
-   * Put the supplied data as an attribute into the currently open data.
-   *
-   * \param name Name of the attribute to add.
    * \param value The attribute value.
    * \tparam NumT numeric data type of \a value
    */
@@ -533,35 +488,11 @@ public:
   void makeLink(NXlink &link);
 
   /**
-   * Create a link with a new name.
-   *
-   * \param name The name of this copy of the link.
-   * \param link The object (group or data) in the file to link to.
-   */
-  void makeNamedLink(const std::string &name, NXlink &link);
-
-  /**
-   * Open the original copy of this group or data as declared by the
-   * "target" attribute.
-   */
-  void openSourceGroup();
-
-  /**
    * Put the currently open data in the supplied pointer.
    *
    * \param data The pointer to copy the data to.
    */
   void getData(void *data);
-
-  /**
-   * Allocate memory and return the data as a vector. Since this
-   * does call "new vector<NumT>" the caller is responsible for
-   * calling "delete".
-   * \tparam NumT numeric data type of result
-   *
-   * \return The data as a vector.
-   */
-  template <typename NumT> std::vector<NumT> *getData();
 
   /**
    * Put data into the supplied vector. The vector does not need to
@@ -715,86 +646,15 @@ public:
   std::string getStrAttr(const AttrInfo &info);
 
   /**
-   * Get the value of a string array attribute.
-   *
-   * \param info Which attribute to read.
-   *
-   * \param array The values of the attribute.
-   */
-  void getAttr(const std::string &name, std::vector<std::string> &array);
-
-  /**
    * \return The id of the group used for linking.
    */
   NXlink getGroupID();
 
   /**
-   * Determine whether or not two links refer to the same data or group.
-   *
-   * \param first The first link information to compare.
-   * \param second The second link information to compare.
-   *
-   * \return True if the two point at the same data or group.
-   */
-  bool sameID(NXlink &first, NXlink &second);
-
-  /**
-   * Diagnostic print of the link information.
-   *
-   * \param link The link to print to stdout.
-   */
-  void printLink(NXlink &link);
-
-  /**
-   * Set the number format used for a particular type when using the
-   * xml base. This is ignore in the other bases.
-   *
-   * \param type The primitive type to set the format for.
-   * \param format The format to use.
-   */
-  void setNumberFormat(NXnumtype &type, const std::string &format);
-
-  /**
-   * Find out the name of the file this object is holding onto.
-   *
-   * \param buff_length The size of the buffer to use for reading the name.
-   *
-   * \return The name of the file.
-   */
-  std::string inquireFile(const int buff_length = NX_MAXPATHLEN);
-
-  /**
-   * Determine Whether or not a supplied group is external.
-   *
-   * \param name The name of the group to check.
-   * \param type The type of the group to check.
-   * \param buff_length The size of the buffer to use for reading the url.
-   *
-   * \return The url to the external group.
-   */
-  std::string isExternalGroup(const std::string &name, const std::string &type,
-                              const unsigned buff_length = NX_MAXNAMELEN);
-
-  /**
-   * Create a link to a group in an external file.
-   *
-   * \param name The name for the group in this file.
-   * \param type The type for the group in this file.
-   * \param url The url to the group in the external file.
-   */
-  void linkExternal(const std::string &name, const std::string &type, const std::string &url);
-  /**
    * This function checksi if we are in an open dataset
    * \returns true if we are currently in an open dataset else false
    */
   bool isDataSetOpen();
-
-  /**
-   * Create a multimap with the data types as keys and the associated paths as values.
-   *
-   * \return The multimap of the opened file.
-   */
-  TypeMap *getTypeMap();
 };
 
 /**

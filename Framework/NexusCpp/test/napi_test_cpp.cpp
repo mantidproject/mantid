@@ -24,9 +24,6 @@ namespace { // anonymous namespace
 const std::string DMC01("dmc01cpp");
 const std::string DMC02("dmc02cpp");
 
-std::string relativePathOf(const std::string &filenamestr) {
-  return std::filesystem::path(filenamestr).filename().string();
-}
 } // anonymous namespace
 
 static void writeTest(const string &filename, NXaccess create_code) {
@@ -194,8 +191,6 @@ static void writeTest(const string &filename, NXaccess create_code) {
   file.openPath("/");
   file.makeGroup("link", "NXentry", true);
   file.makeLink(glink);
-  file.makeNamedLink("renLinkGroup", glink);
-  file.makeNamedLink("renLinkData", link);
   std::cout << "writeTest(" << filename << ") successful\n";
 }
 
@@ -218,7 +213,6 @@ int readTest(const string &filename) {
   const string SDS("SDS");
   // top level file information
   NeXus::File file(filename);
-  cout << "NXinquirefile found: " << relativePathOf(file.inquireFile()) << endl;
   vector<NeXus::AttrInfo> attr_infos = file.getAttrInfos();
   cout << "Number of global attributes: " << attr_infos.size() << endl;
   for (vector<NeXus::AttrInfo>::iterator it = attr_infos.begin(); it != attr_infos.end(); ++it) {
@@ -261,13 +255,13 @@ int readTest(const string &filename) {
           cout << "2d character array";
         }
       } else if (info.type == NeXus::FLOAT32) {
-        vector<float> *result = file.getData<float>();
-        cout << toString(*result);
-        delete result;
+        vector<float> result;
+        file.getData(result);
+        cout << toString(result);
       } else if (info.type == NeXus::FLOAT64) {
-        vector<double> *result = file.getData<double>();
-        cout << toString(*result);
-        delete result;
+        vector<double> result;
+        file.getData(result);
+        cout << toString(result);
       } else if (info.type == NeXus::INT8) {
         vector<int8_t> result;
         file.getData(result);
@@ -377,69 +371,6 @@ int readTest(const string &filename) {
   // Close the "entry" group
   file.closeGroup();
 
-  // check links
-  file.openGroup("entry", "NXentry");
-  file.openGroup("sample", "NXsample");
-  NXlink glink = file.getGroupID();
-  file.closeGroup();
-  file.openGroup("data", "NXdata");
-  file.openData("r8_data");
-  NXlink dlink = file.getDataID();
-  file.closeData();
-  file.closeGroup();
-  file.openData("r8_data");
-  NXlink d2link = file.getDataID();
-  file.closeData();
-  if (!file.sameID(dlink, d2link)) {
-    cout << "Link check FAILED (r8_data)" << endl;
-    cout << "     original data = ";
-    file.printLink(dlink);
-    cout << "     linked data = ";
-    file.printLink(d2link);
-    return TEST_FAILED;
-  }
-  file.closeGroup();
-
-  file.openGroup("link", "NXentry");
-  file.openGroup("sample", "NXsample");
-  NXlink g2link = file.getGroupID();
-  if (!file.sameID(glink, g2link)) {
-    cout << "Link check FAILED (sample)" << endl;
-    cout << "     original group = ";
-    file.printLink(glink);
-    cout << "     linked group = ";
-    file.printLink(g2link);
-    return TEST_FAILED;
-  }
-  file.closeGroup();
-
-  file.openGroup("renLinkGroup", "NXsample");
-  g2link = file.getGroupID();
-  file.closeGroup();
-  if (!file.sameID(glink, g2link)) {
-    cout << "Link check FAILED (renLinkGroup)" << endl;
-    cout << "     original group = ";
-    file.printLink(glink);
-    cout << "     linked group = ";
-    file.printLink(g2link);
-    return TEST_FAILED;
-  }
-
-  file.openData("renLinkData");
-  d2link = file.getDataID();
-  file.closeData();
-  if (!file.sameID(dlink, d2link)) {
-    cout << "Link check FAILED (renLinkData)" << endl;
-    cout << "     original data = ";
-    file.printLink(dlink);
-    cout << "     linked data = ";
-    file.printLink(d2link);
-    return TEST_FAILED;
-  }
-
-  file.closeGroup();
-  cout << "Link check OK" << endl;
-
   // openpath checks
   file.openPath("/entry/data/comp_data");
   file.openPath("/entry/data/comp_data");
@@ -461,96 +392,6 @@ int testLoadPath(const string &filename) {
     cout << "NX_LOAD_PATH variable not defined. Skipping testLoadPath\n";
     return TEST_SUCCEED;
   }
-}
-
-int testExternal(NXaccess create_code) {
-#ifdef WIN32
-  // giving up and skipping the external linking on windows
-  UNUSED_ARG(create_code);
-  std::cout << "Not testing external linking on windows\n";
-  return TEST_SUCCEED;
-#else
-  if (create_code == NXACC_CREATE4) {
-    std::cout << "Not testing external linking with hdf4\n";
-    return TEST_SUCCEED;
-  }
-
-  const string fileext(".h5");
-  const string filename("nxext_cpp" + fileext);
-
-  // remove output if it already exists
-  removeFile(filename);
-
-  // create the external files if the don't already exist
-  const string extfilepath1(DMC01 + fileext);
-  if (std::filesystem::exists(extfilepath1)) {
-    std::cout << "using existing external file " << extfilepath1 << "\n";
-  } else {
-    write_dmc01(extfilepath1);
-    if (!std::filesystem::exists(extfilepath1)) {
-      std::cerr << "Cannot find \"" << extfilepath1 << "\" for external linking\n";
-      return TEST_FAILED;
-    }
-  }
-  const string extfilepath2(DMC02 + fileext);
-  if (std::filesystem::exists(extfilepath2)) {
-    std::cout << "using existing external file " << extfilepath2 << "\n";
-  } else {
-    write_dmc02(extfilepath2);
-    if (!std::filesystem::exists(extfilepath2)) {
-      std::cerr << "Cannot find \"" << extfilepath2 << "\" for external linking\n";
-      return TEST_FAILED;
-    }
-  }
-
-  // create the external link
-  const string exturl1("nxfile://" + extfilepath1 + "#entry1");
-  const string exturl2("nxfile://" + extfilepath2 + "#entry1");
-  NeXus::File fileout(filename, create_code);
-  fileout.linkExternal("entry1", "NXentry", exturl1);
-  fileout.linkExternal("entry2", "NXentry", exturl2);
-  fileout.close();
-
-  // read the file to make sure things worked
-  NeXus::File filein(filename);
-  filein.openPath("/entry1/start_time");
-  cout << "First file time: " << filein.getStrData() << endl;
-  cout << "NXinquirefile found: " << relativePathOf(filein.inquireFile()) << endl;
-  filein.openPath("/entry2/sample/sample_name");
-  cout << "Second file sample: " << filein.getStrData() << endl;
-  cout << "NXinquirefile found: " << relativePathOf(filein.inquireFile()) << endl;
-  filein.openPath("/entry2/start_time");
-  cout << "Second file time: " << filein.getStrData() << endl;
-  filein.openPath("/");
-  cout << "entry1 external URL = " << filein.isExternalGroup("entry1", "NXentry") << endl;
-
-  // cleanup
-  removeFile(filename);
-
-  return TEST_SUCCEED;
-#endif
-}
-
-int testTypeMap(const std::string &fname) {
-  NeXus::File file(fname, NXACC_READ);
-  multimap<string, string> *map = file.getTypeMap();
-  size_t mapsize = 25;
-  // HDF4 does not have int64 capability, so resulting map is one shorter than HDF5 and XML files
-  if (fname == string("napi_test_cpp.hdf")) {
-    if (map->size() != (mapsize - 1)) {
-      cout << "TypeMap is incorrect" << endl;
-      return TEST_FAILED;
-    }
-  } else {
-    if (map->size() != mapsize) {
-      cout << "TypeMap is incorrect" << endl;
-      return TEST_FAILED;
-    }
-  }
-
-  cout << "TypeMap is correct size" << endl;
-
-  return TEST_SUCCEED;
 }
 
 int main(int argc, char **argv) {
@@ -599,24 +440,7 @@ int main(int argc, char **argv) {
     return TEST_FAILED;
   }
 
-  // test of typemap generation
-  if (testTypeMap(filename) != TEST_SUCCEED) {
-    cout << "testTypeMap failed" << endl;
-    return TEST_FAILED;
-  }
-
   removeFile(filename); // cleanup
-
-  // try external linking
-  try {
-    if (testExternal(nx_creation_code) != TEST_SUCCEED) {
-      cout << "testExternal failed:\n";
-      return TEST_FAILED;
-    }
-  } catch (const std::runtime_error &e) {
-    cout << "testExternal failed:\n" << e.what() << endl;
-    return TEST_FAILED;
-  }
 
   // try using the load path
   if (testLoadPath(DMC01 + fileext) != TEST_SUCCEED) {
