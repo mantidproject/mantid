@@ -201,9 +201,17 @@ mkdir -p "$bundle_contents"/{Resources,MacOS}
 # --platform osx-64 is required to allow ARM-based systems to install the osx-64 mantid packages.
 bundle_conda_prefix="$bundle_contents"/Resources
 
+# The mantid channel is required as the source for installing mslice
+mantid_channel=mantid
+# If it's a Nightly or Unstable package, use the mantid/label/nightly label so it picks up
+# the nightly version of mslice
+if [[ "$suffix" == "Unstable" ]] || [[ "$suffix" == "Nightly" ]]; then
+  mantid_channel=mantid/label/nightly
+fi
+
 echo "Creating Conda environment in '$bundle_conda_prefix'"
 "$CONDA_EXE" create --quiet --prefix "$bundle_conda_prefix" --copy --platform osx-64 \
-  --channel "$conda_channel" --channel conda-forge --channel mantid --yes \
+  --channel "$conda_channel" --channel conda-forge --channel $mantid_channel --yes \
   mantidworkbench \
   jq  # used for processing the version string
 echo
