@@ -718,7 +718,6 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cp
 invalidContainer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cpp:495
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:143
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:320
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Objects/CSGObject.cpp:473
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/RenderingHelpersOpenGL.cpp:204
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheReader.cpp:64
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheWriter.cpp:83
