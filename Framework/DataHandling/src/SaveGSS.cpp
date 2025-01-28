@@ -219,10 +219,9 @@ void SaveGSS::processUserSpecifiedHeaders() {
   // user specified GSAS
   m_user_specified_gsas_header = getProperty("UserSpecifiedGSASHeader");
 
+  m_overwrite_std_gsas_header = getProperty("OverwriteStandardHeader");
   if (m_user_specified_gsas_header.empty()) {
     m_overwrite_std_gsas_header = false;
-  } else {
-    m_overwrite_std_gsas_header = getProperty("OverwriteStandardHeader");
   }
 
   // user specified bank header
