@@ -305,7 +305,7 @@ std::vector<double> RadiusSum::getBoundariesOfNumericImage(const API::MatrixWork
   }
 
   // vertical axis
-  API::NumericAxis *verticalAxis = dynamic_cast<API::NumericAxis *>(inWS->getAxis(1));
+  const API::NumericAxis *verticalAxis = dynamic_cast<API::NumericAxis *>(inWS->getAxis(1));
   if (!verticalAxis)
     throw std::invalid_argument("Vertical axis is not a numeric axis. Can not "
                                 "find the limits of the image.");
