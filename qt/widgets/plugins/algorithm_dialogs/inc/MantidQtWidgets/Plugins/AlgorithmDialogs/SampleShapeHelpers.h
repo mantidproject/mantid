@@ -129,9 +129,7 @@ public:
   /// Write out the XML definition for this shape
   virtual QString writeXML() const = 0;
 
-  /// Get the id string - returning by values is safer than by reference here
-  // cppcheck-suppress returnByReference
-  QString getShapeID() const { return m_idvalue; }
+  const QString &getShapeID() const { return m_idvalue; }
 
   /// Create a new length units box
   static QComboBox *createLengthUnitsCombo();
