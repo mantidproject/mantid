@@ -73,7 +73,7 @@ NexusHDF5Descriptor::NexusHDF5Descriptor(std::string filename)
     : m_filename(std::move(filename)), m_allEntries(initAllEntries()) {}
 
 // PUBLIC
-std::string NexusHDF5Descriptor::getFilename() const noexcept { return m_filename; }
+const std::string &NexusHDF5Descriptor::getFilename() const noexcept { return m_filename; }
 
 const std::map<std::string, std::set<std::string>> &NexusHDF5Descriptor::getAllEntries() const noexcept {
   return m_allEntries;

@@ -30,8 +30,6 @@ public:
   /// Disable assignment operator
   PseudoRandomNumberGenerator &operator=(const PseudoRandomNumberGenerator &) = delete;
 
-  /// Set the random number seed
-  virtual void setSeed(const size_t seedValue) = 0;
   /// Sets the range of the subsequent calls to nextValue;
   virtual void setRange(const double start, const double end) = 0;
   /// Return the next double in the sequence

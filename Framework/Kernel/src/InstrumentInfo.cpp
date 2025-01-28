@@ -58,13 +58,13 @@ bool InstrumentInfo::operator==(const InstrumentInfo &rhs) const {
 }
 
 /// Returns the default delimiter between instrument name and run number
-std::string InstrumentInfo::delimiter() const { return m_delimiter; }
+const std::string &InstrumentInfo::delimiter() const { return m_delimiter; }
 
 /// Return the name of the instrument
 const std::string InstrumentInfo::name() const { return m_name; }
 
 /// Return the short name of the instrument
-const std::string InstrumentInfo::shortName() const { return m_shortName; }
+const std::string &InstrumentInfo::shortName() const { return m_shortName; }
 
 /// Returns zero padding for this instrument
 int InstrumentInfo::zeroPadding(unsigned int runNumber) const {
