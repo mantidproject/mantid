@@ -215,7 +215,7 @@ double GetEiMonDet3::computeTOF(const API::MatrixWorkspace &detectorWs, const do
  * @param wsIndices a vector of workspace indices to group
  * @return a single spectrum workspace
  */
-API::MatrixWorkspace_sptr GetEiMonDet3::groupSpectra(API::MatrixWorkspace_sptr &ws,
+API::MatrixWorkspace_sptr GetEiMonDet3::groupSpectra(const API::MatrixWorkspace_sptr &ws,
                                                      const std::vector<size_t> &wsIndices) {
   auto group = createChildAlgorithm("GroupDetectors");
   group->setProperty("InputWorkspace", ws);
@@ -258,7 +258,7 @@ double GetEiMonDet3::monitorPeakPosition(const size_t monitorIndex) {
  * @param ws a single spectrum workspace
  * @return detector peak in microseconds
  */
-double GetEiMonDet3::peakPosition(API::MatrixWorkspace_sptr &ws) {
+double GetEiMonDet3::peakPosition(const API::MatrixWorkspace_sptr &ws) {
   auto findEPP = createChildAlgorithm("FindEPP");
   findEPP->setProperty("InputWorkspace", ws);
   findEPP->setProperty("OutputWorkspace", "unused");
