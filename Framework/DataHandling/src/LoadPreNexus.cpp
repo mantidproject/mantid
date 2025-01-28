@@ -262,7 +262,7 @@ void LoadPreNexus::runLoadNexusLogs(const string &runinfo, const string &dataDir
   string shortName = runinfo.substr(runinfo.find_last_of("/\\") + 1);
   const size_t pos = shortName.find("_runinfo.xml");
   if (pos != string::npos) {
-    shortName = shortName.substr(0, pos);
+    shortName.resize(shortName.size() - 12);
   }
   g_log.debug() << "SHORTNAME = \"" << shortName << "\"\n";
 
