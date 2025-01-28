@@ -1297,7 +1297,6 @@ void restoreFunctionParameterValue(map<string, pair<double, double>> parvaluemap
 
     if (miter != parvaluemap.end()) {
       double parvalue = miter->second.first;
-      double parerror = miter->second.second;
 
       // 1. Function
       function->setParameter(parname, parvalue);
@@ -1307,7 +1306,7 @@ void restoreFunctionParameterValue(map<string, pair<double, double>> parvaluemap
       if (pariter != parammap.end()) {
         // Find the entry
         pariter->second.curvalue = parvalue;
-        pariter->second.fiterror = parerror;
+        pariter->second.fiterror = miter->second.second;
       }
     }
   }

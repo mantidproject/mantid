@@ -419,7 +419,6 @@ constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2309
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2378
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/FitPowderDiffPeaks.cpp:2454
-variableScope:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/RefinePowderInstrumentParameters3.cpp:1302
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/VesuvioCalculateGammaBackground.cpp:418
 derefInvalidIteratorRedundantCheck:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/ExcludeRangeFinder.cpp:77
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/FuncMinimizers/FABADAMinimizer.cpp:377
