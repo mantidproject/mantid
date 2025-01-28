@@ -123,9 +123,9 @@ private:
   std::map<std::string, std::string> m_metadata;
 
   double m_sansSpiceXmlFormatVersion{0.0};
-  double m_wavelength;
-  double m_dwavelength;
-  double m_sampleDetectorDistance;
+  double m_wavelength{0.0};
+  double m_dwavelength{0.0};
+  double m_sampleDetectorDistance{0.0};
   Mantid::Types::Core::DateAndTime m_startTime;
   Mantid::Types::Core::DateAndTime m_endTime;
 };

@@ -524,11 +524,7 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandlin
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadANSTOEventFile.h:132
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadDNSEvent.h:44
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadDetectorsGroupingFile.h:104
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadDetectorsGroupingFile.h:118
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadDetectorsGroupingFile.h:175
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadEmptyInstrument.h:65
-uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:124
-uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:125
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveCanSAS1D.h:84
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveGSS.h:147
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveGSS.h:151

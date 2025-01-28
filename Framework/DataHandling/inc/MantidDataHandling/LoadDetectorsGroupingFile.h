@@ -115,7 +115,7 @@ public:
   const std::map<int, std::vector<detid_t>> &getGroupDetectorsMap() const { return m_groupDetectorsMap; }
   const std::map<int, std::vector<int>> &getGroupSpectraMap() const { return m_groupSpectraMap; }
 
-  std::map<int, std::string> getGroupNamesMap() { return m_groupNamesMap; }
+  std::map<int, std::string> &getGroupNamesMap() { return m_groupNamesMap; }
 
 private:
   /// Instrument name
@@ -172,7 +172,7 @@ public:
   /// Return the map parsed from file. Should only be called after the file is
   /// parsed,
   /// otherwise a map will always be empty.
-  std::map<int, std::vector<int>> getGroupSpectraMap() { return m_groupSpectraMap; }
+  std::map<int, std::vector<int>> &getGroupSpectraMap() { return m_groupSpectraMap; }
 
 private:
   /// Skips all the empty lines and comment lines, and returns next line with
