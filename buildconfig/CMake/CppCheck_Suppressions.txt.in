@@ -194,11 +194,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/Ma
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/MonteCarloAbsorption.h:38
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/NormaliseToMonitor.h:114
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/PDCalibration.h:25
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/PDCalibration.h:29
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/PDFFourierTransform2.h:20
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/Power.h:48
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/Rebin2D.h:26
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/RebinByTimeBase.h:24
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/ResampleX.h:23
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/ResampleX.h:24
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/ResampleX.h:27
