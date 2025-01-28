@@ -274,7 +274,7 @@ TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable() {
  *
  *  This algorithm should be reconsidered how to work with it.
  */
-void GetTimeSeriesLogInformation::exportErrorLog(const MatrixWorkspace_sptr &ws, vector<DateAndTime> &abstimevec,
+void GetTimeSeriesLogInformation::exportErrorLog(const MatrixWorkspace_sptr &ws, const vector<DateAndTime> &abstimevec,
                                                  double dts) {
   std::string outputdir = getProperty("OutputDirectory");
   if (!outputdir.empty() && outputdir.back() != '/')
