@@ -291,6 +291,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/ReflectometryISISPreprocess.py
     algorithms/WorkflowAlgorithms/ReflectometryISISLoadAndProcess.py
     algorithms/WorkflowAlgorithms/ReflectometryISISSumBanks.py
+    algorithms/WorkflowAlgorithms/CalculateISISPolarizationEfficiencies.py
     algorithms/WorkflowAlgorithms/ReflectometryISISCalibration.py
     algorithms/WorkflowAlgorithms/ReflectometryISISCreateTransmission.py
     algorithms/WorkflowAlgorithms/ResNorm2.py
