@@ -452,7 +452,7 @@ bool LoadLog::isAscii(const std::string &filename) {
    */
   for (char *char_pos = data; char_pos < pend; ++char_pos) {
     auto char_value = static_cast<unsigned long>(*char_pos);
-    if ((char_value > 0x7F)) {
+    if (char_value > 0x7F) {
       return false;
     }
   }
