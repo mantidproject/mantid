@@ -98,7 +98,7 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(std::vec
 
   std::vector<std::vector<double>> polynomialCoefficients(labels.size());
 
-  std::transform(labels.cbegin(), labels.cend(), polynomialCoefficients.cbegin(),
+  std::transform(labels.cbegin(), labels.cend(), polynomialCoefficients.begin(),
                  [this](const std::string &label) { return std::vector<double>(getProperty(label)); });
 
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
