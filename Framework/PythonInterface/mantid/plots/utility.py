@@ -310,10 +310,7 @@ def get_plot_specific_properties(ws, plot_type, plot_kwargs):
     else:
         if plot_type == "marker":
             plot_kwargs["linestyle"] = "None"
-            if ws.getMarkerStyle():
-                plot_kwargs["marker"] = MARKER_MAP[ws.getMarkerType()]
-            else:
-                plot_kwargs["marker"] = MARKER_MAP[ConfigService.getString("plots.markerworkspace.MarkerStyle")]
+            plot_kwargs["marker"] = MARKER_MAP[ws.getMarkerStyle()]
             marker_size = ws.getMarkerSize()
             plot_kwargs["markersize"] = (
                 marker_size if marker_size != 6 else float(ConfigService.getString("plots.markerworkspace.MarkerSize"))

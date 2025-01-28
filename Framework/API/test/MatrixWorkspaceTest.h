@@ -417,7 +417,7 @@ public:
 
   void testGetSetMarkerStyle() {
     // test default
-    TS_ASSERT_EQUALS(ws->getMarkerStyle(), "");
+    TS_ASSERT_EQUALS(ws->getMarkerStyle(), "vline");
 
     // test set
     ws->setMarkerStyle("square");
