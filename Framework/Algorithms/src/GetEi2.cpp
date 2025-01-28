@@ -210,7 +210,7 @@ double GetEi2::calculateEi(const double initial_guess) {
   // Calculate actual peak postion for each monitor peak
   double peak_times[2] = {0.0, 0.0};
   double det_distances[2] = {0.0, 0.0};
-  auto &spectrumInfo = m_input_ws->spectrumInfo();
+  const auto &spectrumInfo = m_input_ws->spectrumInfo();
   for (unsigned int i = 0; i < 2; ++i) {
     size_t ws_index = mon_indices[i];
     det_distances[i] = getDistanceFromSource(ws_index, spectrumInfo);

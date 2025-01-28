@@ -908,7 +908,7 @@ double GetAllEi::getAvrgLogValue(const API::MatrixWorkspace_sptr &inputWS, const
 
   // this will always provide a defined pointer as this has been verified in
   // validator.
-  auto pTimeSeries = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pIProperty);
+  const auto *pTimeSeries = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pIProperty);
 
   if (!pTimeSeries) {
     throw std::runtime_error("Could not retrieve a time series property for the property name " + propertyName);
@@ -1039,7 +1039,7 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS, d
   chop_delay = std::fabs(this->getAvrgLogValue(inputWS, "ChopperDelayLog", timeroi));
 
   // process chopper delay in the units of degree (phase)
-  auto pProperty = getPLogForProperty(inputWS, "ChopperDelayLog");
+  const auto *pProperty = getPLogForProperty(inputWS, "ChopperDelayLog");
   if (!pProperty)
     throw std::runtime_error("ChopperDelayLog has been removed from workspace "
                              "during the algorithm execution");
@@ -1091,7 +1091,7 @@ bool check_time_series_property(const GetAllEi *algo, const API::MatrixWorkspace
   }
   try {
     Kernel::Property *pProp = inputWS->run().getProperty(LogName);
-    auto pTSProp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProp);
+    const auto *pTSProp = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(pProp);
     if (!pTSProp) {
       if (fail)
         result[prop_name] = "Workspace contains " + err_type + LogName + " But its type is not a timeSeries property";

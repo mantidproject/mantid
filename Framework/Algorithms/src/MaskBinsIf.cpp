@@ -92,8 +92,8 @@ void MaskBinsIf::exec() {
     outputWorkspace = inputWorkspace->clone();
   }
   const auto verticalAxis = outputWorkspace->getAxis(1);
-  const auto numericAxis = dynamic_cast<NumericAxis *>(verticalAxis);
-  const auto spectrumAxis = dynamic_cast<SpectraAxis *>(verticalAxis);
+  const auto *numericAxis = dynamic_cast<NumericAxis *>(verticalAxis);
+  const auto *spectrumAxis = dynamic_cast<SpectraAxis *>(verticalAxis);
   const bool spectrumOrNumeric = numericAxis || spectrumAxis;
   if (!spectrumOrNumeric) {
     throw std::runtime_error("Vertical axis must be NumericAxis or SpectraAxis");
@@ -104,7 +104,7 @@ void MaskBinsIf::exec() {
   for (int64_t index = 0; index < numberHistograms; ++index) {
     PARALLEL_START_INTERRUPT_REGION
     double y, e, x, dx;
-    double s = spectrumOrNumeric ? verticalAxis->getValue(index) : 0.;
+    double s = verticalAxis->getValue(index);
     mu::Parser parser = makeParser(y, e, x, dx, s, criterion);
     const auto &spectrum = outputWorkspace->histogram(index);
     const bool hasDx = outputWorkspace->hasDx(index);
