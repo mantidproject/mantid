@@ -97,8 +97,6 @@ std::vector<InputSpectraToFit> makeNames(const std::string &inputList, int defau
         spec = SpecialIndex::NOT_SET; // undefined yet
       } else if (!index.empty() && index[0] == 'v') {
         parseValueRange(index, start, end, wi, spec);
-      } else {
-        wi = default_wi;
       }
     }
     int period = 1;
@@ -158,7 +156,7 @@ void addGroupWorkspace(std::vector<InputSpectraToFit> &nameList, double start, d
  * @param end :: End of range for value based spectrum range
  * @return Vector of workspace indices to fit
  */
-std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace &ws, int workspaceIndex, int spectrumNumber,
+std::vector<int> getWorkspaceIndicesFromAxes(const API::MatrixWorkspace &ws, int workspaceIndex, int spectrumNumber,
                                              double start, double end) {
   if (workspaceIndex >= 0) {
     return std::vector<int>({workspaceIndex});

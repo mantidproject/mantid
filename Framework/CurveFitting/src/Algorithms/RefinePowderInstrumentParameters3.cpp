@@ -659,7 +659,7 @@ void RefinePowderInstrumentParameters3::setupRandomWalkStrategy(map<string, Para
   mcgroups.emplace_back(geomparams);
 
   dboutss << "Geometry parameters: ";
-  for (auto &geomparam : geomparams)
+  for (const auto &geomparam : geomparams)
     dboutss << geomparam << "\t\t";
   dboutss << '\n';
 
@@ -989,7 +989,7 @@ TableWorkspace_sptr RefinePowderInstrumentParameters3::genOutputProfileTable(map
   // 3. Set values
   map<string, Parameter>::iterator pariter;
   for (pariter = parameters.begin(); pariter != parameters.end(); ++pariter) {
-    Parameter &param = pariter->second;
+    const Parameter &param = pariter->second;
     TableRow newrow = tablews->appendRow();
 
     string fitortie;
@@ -1161,7 +1161,7 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(const IFun
 
     if (paramiter != params.end()) {
       // Found, set up the parameter
-      Parameter &param = paramiter->second;
+      const Parameter &param = paramiter->second;
       if (param.fit) {
         // If fit.  Unfix it and set up constraint
         function->unfix(i);
@@ -1198,6 +1198,8 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(const IFun
  * exacly same as
  * source;
  */
+// variable source is moved within this class(so it might be better to be passed by value and not reference)
+// cppcheck-suppress passedByValue
 void duplicateParameters(map<string, Parameter> source, map<string, Parameter> &target) {
   target.clear();
 
@@ -1216,7 +1218,7 @@ void duplicateParameters(map<string, Parameter> source, map<string, Parameter> &
  * exacly same as
  * source;
  */
-void copyParametersValues(map<string, Parameter> source, map<string, Parameter> &target) {
+void copyParametersValues(map<string, Parameter> &source, map<string, Parameter> &target) {
   // 1. Check
   if (source.size() != target.size())
     throw runtime_error("Source and Target should have the same size.");
