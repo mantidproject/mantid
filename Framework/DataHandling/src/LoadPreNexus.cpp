@@ -241,7 +241,7 @@ void LoadPreNexus::parseRuninfo(const string &runinfo, string &dataDir, vector<s
     g_log.debug() << "Found 1 event file: \"" << eventFilenames[0] << "\"\n";
   } else {
     g_log.debug() << "Found " << eventFilenames.size() << " event files:";
-    for (auto &eventFilename : eventFilenames) {
+    for (const auto &eventFilename : eventFilenames) {
       g_log.debug() << "\"" << eventFilename << "\" ";
     }
     g_log.debug() << "\n";
