@@ -820,6 +820,7 @@ L260:
   }
   /*   D*L'*S */
   k = 1;
+  // cppcheck-suppress redundantAssignment
   i__1 = *n;
   for (i__ = 1; i__ <= i__1; ++i__) {
     v[i__] = l[k] * v[i__];
