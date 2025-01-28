@@ -850,7 +850,6 @@ unsignedPositive:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ISIS/
 badBitmaskCheck:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/ISIS/TCPEventStreamDefs.h:70
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/Kafka/IKafkaStreamDecoder.h:82
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/LiveDataAlgorithm.h:38
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/LiveData/inc/MantidLiveData/LoadLiveData.h:24
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:161
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:182
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:184
