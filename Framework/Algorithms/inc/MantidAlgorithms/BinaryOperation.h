@@ -42,7 +42,7 @@ operand</LI>
 class MANTID_ALGORITHMS_DLL BinaryOperation : public API::Algorithm {
 public:
   /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override { return "Arithmetic"; }
+  virtual const std::string category() const override { return "Arithmetic"; }
 
   /** BinaryOperationTable: a list of ints.
    * Index into vector: workspace index in the lhs;
