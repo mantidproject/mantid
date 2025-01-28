@@ -838,11 +838,8 @@ knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TimeROI.cpp:97
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/TopicInfo.cpp:38
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:154
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/Unit.cpp:184
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:161
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:182
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:184
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:192
-identicalInnerCondition:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:220
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:187
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ADARA/ADARAPackets.cpp:185
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/idc.cpp:85
 constVariable:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/idc.cpp:91
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/LiveData/src/ISIS/DAE/idc.cpp:128

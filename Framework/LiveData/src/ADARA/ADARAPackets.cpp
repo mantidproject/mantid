@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/ADARA/ADARAPackets.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 #include <cstring>
 
@@ -158,8 +159,10 @@ BankedEventPkt::BankedEventPkt(const BankedEventPkt &pkt)
 const Event *BankedEventPkt::firstEvent() const {
   m_curEvent = nullptr;
   m_curFieldIndex = 4;
+
+  //  Explanation: m_curEvent can be set to not null by calling firstEventInSource
+  // cppcheck-suppress knownConditionTrueFalse
   while (m_curEvent == nullptr && m_curFieldIndex <= m_lastFieldIndex) {
-    // Start of a new source
     firstEventInSource();
   }
 
@@ -189,6 +192,7 @@ const Event *BankedEventPkt::nextEvent() const {
       }
 
       // If we still haven't found an event, check for more source sections
+      // cppcheck-suppress knownConditionTrueFalse
       while (m_curEvent == nullptr && m_curFieldIndex < m_lastFieldIndex) {
         firstEventInSource();
       }
@@ -217,12 +221,18 @@ void BankedEventPkt::firstEventInSource() const {
 
     while (m_bankNum <= m_bankCount && m_curEvent == nullptr) {
       firstEventInBank();
+      // Explanation: Although cppcheck sees 'while (m_bankNum <= m_bankCount && m_curEvent == nullptr)'
+      // as redundant, 'firstEventInBank()' (a const method) updates 'm_curEvent' via mutable fields.
+      // This means 'm_curEvent' can change from nullptr to non-null inside the loop, so the condition
+      // isn't actually identical or always true.
+      // cppcheck-suppress identicalInnerCondition
       if (m_curEvent == nullptr) {
         // Increment banknum because there were no events in the bank we
         // just tested
         m_bankNum++;
       }
     }
+
   } else // no banks in this source, skip to the next source
   {
     m_curFieldIndex += 4;

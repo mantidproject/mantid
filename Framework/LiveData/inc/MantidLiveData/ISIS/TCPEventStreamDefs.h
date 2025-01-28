@@ -58,7 +58,9 @@ struct TCPStreamEventHeader {
   bool isValid() const {
     return marker1 == marker && marker2 == marker && length >= sizeof(TCPStreamEventHeader) &&
            majorVersion() == TCPStreamEventHeader::major_version &&
-           minorVersion() >= TCPStreamEventHeader::minor_version && type != static_cast<uint32_t>(InvalidStream);
+           // This is already suppressed for gcc on Linux
+           // cppcheck-suppress unsignedPositive
+           minorVersion() >= TCPStreamEventHeader::minor_version && type != InvalidStream;
   }
   GNU_DIAG_ON("tautological-compare")
 
