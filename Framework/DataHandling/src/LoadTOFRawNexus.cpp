@@ -282,7 +282,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   file.openGroup("instrument", "NXinstrument");
   file.openGroup(bankName, "NXdetector");
 
-  size_t m_numPixels = 0;
+  m_numPixels = 0;
   std::vector<uint32_t> pixel_id;
 
   if (!m_assumeOldFile) {
@@ -354,7 +354,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   // Load the TOF vector
   std::vector<float> tof;
   file.readData(m_axisField, tof);
-  size_t m_numBins = tof.size() - 1;
+  m_numBins = tof.size() - 1;
   if (tof.size() <= 1) {
     file.close();
     m_fileMutex.unlock();
