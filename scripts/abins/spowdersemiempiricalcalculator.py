@@ -8,7 +8,6 @@
 from functools import partial
 import json
 from multiprocessing import Pool
-import numbers
 from operator import attrgetter
 from pathlib import Path
 from typing import Dict, Tuple, Union
