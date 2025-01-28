@@ -174,7 +174,7 @@ void HFIRLoad::exec() {
   } else {
     const std::string sddName = "total-sample-detector-distance";
     Mantid::Kernel::Property *prop = dataWS->run().getProperty(sddName);
-    auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    const auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
     if (!dp) {
       throw std::runtime_error("Could not cast (interpret) the property " + sddName +
                                " as a floating point numeric value.");
@@ -212,7 +212,7 @@ void HFIRLoad::exec() {
         "   Computed SSD from number of guides: " + Poco::NumberFormatter::format(src_to_sample / 1000.0, 3) + " \n";
   } catch (...) {
     Mantid::Kernel::Property *prop = dataWS->run().getProperty("source-sample-distance");
-    auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    const auto *dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
     src_to_sample = *dp;
     output_message += "   Could not compute SSD from number of guides, taking: " +
                       Poco::NumberFormatter::format(src_to_sample / 1000.0, 3) + " \n";
