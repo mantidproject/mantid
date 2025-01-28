@@ -14,6 +14,7 @@
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MantidQtWidgets/Common/FilePropertyWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 #include "MantidQtWidgets/Common/PropertyWidget.h"
 
@@ -711,7 +712,7 @@ void AlgorithmDialog::helpClicked() {
     version = m_algorithm->version();
 
   // bring up the help window
-  HelpWindow::showAlgorithm(m_algName, version);
+  MantidQt::API::InterfaceManager().showAlgorithmHelp(m_algName, version);
 }
 
 //-------------------------------------------------------------------------------------------------
