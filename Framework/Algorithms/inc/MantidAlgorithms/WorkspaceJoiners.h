@@ -32,7 +32,7 @@ public:
   const std::string summary() const override { return "Join two workspaces together by appending their spectra."; }
 
 protected:
-  ~WorkspaceJoiners() = default;
+  ~WorkspaceJoiners() override = default;
 
   API::MatrixWorkspace_sptr execWS2D(const API::MatrixWorkspace &ws1, const API::MatrixWorkspace &ws2);
   DataObjects::EventWorkspace_sptr execEvent(const DataObjects::EventWorkspace &eventWs1,

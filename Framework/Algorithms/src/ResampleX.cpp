@@ -36,9 +36,6 @@ const std::string ResampleX::name() const { return "ResampleX"; }
 /// Algorithm's version for identification. @see Algorithm::version
 int ResampleX::version() const { return 1; }
 
-/// Algorithm's category for identification. @see Algorithm::category
-const std::string ResampleX::category() const { return "Transforms\\Rebin"; }
-
 const std::string ResampleX::alias() const { return ""; }
 
 //----------------------------------------------------------------------------------------------

@@ -21,7 +21,7 @@ namespace Algorithms {
  */
 class MANTID_ALGORITHMS_DLL RebinByTimeBase : public API::Algorithm {
 protected:
-  ~RebinByTimeBase() = default;
+  ~RebinByTimeBase() override = default;
 
 private:
   /// Initialization method
