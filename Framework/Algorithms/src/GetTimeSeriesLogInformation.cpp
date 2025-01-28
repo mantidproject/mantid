@@ -498,8 +498,8 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
  *  @param values :: vector double of as the all the values in the time series
  * log to study.
  */
-void GetTimeSeriesLogInformation::checkLogValueChanging(vector<DateAndTime> &timevec, vector<double> &values,
-                                                        double delta) {
+void GetTimeSeriesLogInformation::checkLogValueChanging(const vector<DateAndTime> &timevec,
+                                                        const vector<double> &values, double delta) {
   std::stringstream ss;
   ss << "Alternating Threashold = " << delta << '\n';
 
