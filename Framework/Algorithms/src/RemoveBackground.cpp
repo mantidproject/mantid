@@ -232,9 +232,9 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data, Histogram
     ErrBgSq = m_ErrSq;
     IBg = m_NBg;
   } else {
-    auto &dataX = m_bgWs->x(nHist);
-    auto &dataY = m_bgWs->y(nHist);
-    auto &dataE = m_bgWs->e(nHist);
+    const auto &dataX = m_bgWs->x(nHist);
+    const auto &dataY = m_bgWs->y(nHist);
+    const auto &dataE = m_bgWs->e(nHist);
     dtBg = (dataX[1] - dataX[0]);
     IBg = dataY[0];
     ErrBgSq = dataE[0] * dataE[0]; // Needs further clarification
@@ -244,9 +244,9 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data, Histogram
     double L1 = m_spectrumInfo->l1();
 
     // get access to source workspace in case if target is different from source
-    auto &XValues = m_wkWS->x(nHist);
-    auto &YValues = m_wkWS->y(nHist);
-    auto &YErrors = m_wkWS->e(nHist);
+    const auto &XValues = m_wkWS->x(nHist);
+    const auto &YValues = m_wkWS->y(nHist);
+    const auto &YErrors = m_wkWS->e(nHist);
 
     // use thread-specific unit conversion class to avoid multithreading issues
     Kernel::Unit *unitConv = m_WSUnit[threadNum].get();

@@ -131,8 +131,7 @@ void ReadGroupsFromFile::exec() {
         spec.mutableY()[0] = static_cast<double>(((*it).second).first);
     } else
       spec.mutableY()[0] = static_cast<double>(((*it).second).first);
-    if (!success)
-      success = true; // At least one detector is found in the cal file
+    success = true; // At least one detector is found in the cal file
   }
   progress(1);
 
@@ -224,10 +223,7 @@ void ReadGroupsFromFile::readXMLGroupingFile(const std::string &filename) {
           throw Mantid::Kernel::Exception::FileError("Could cast string to integer in input XML file", filename);
         }
 
-        if (calibration.find(detID) == calibration.end()) {
-          // add detector to a group
-          calibration[detID] = std::pair<int, int>(i + 1, 1);
-        }
+        calibration.try_emplace(detID, std::pair<int, int>(i + 1, 1));
       }
     }
   }

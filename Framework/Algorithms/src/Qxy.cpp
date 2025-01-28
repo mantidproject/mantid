@@ -322,7 +322,7 @@ void Qxy::exec() {
   const size_t nbins = outputWorkspace->blocksize();
   int emptyBins = 0;
   for (size_t i = 0; i < nhist; ++i) {
-    auto &yOut = outputWorkspace->y(i);
+    const auto &yOut = outputWorkspace->y(i);
     for (size_t j = 0; j < nbins; ++j) {
       if (yOut[j] < 1.0e-12)
         ++emptyBins;

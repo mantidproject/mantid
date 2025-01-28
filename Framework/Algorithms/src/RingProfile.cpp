@@ -335,7 +335,7 @@ void RingProfile::checkInputsForNumericWorkspace(const API::MatrixWorkspace_sptr
   // ws->getAxis(1)
 
   // get the limits of the axis1 (Y)
-  API::NumericAxis *oldAxis2 = dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
+  const API::NumericAxis *oldAxis2 = dynamic_cast<API::NumericAxis *>(inputWS->getAxis(1));
   // we cannot have the positions in Y direction without a NumericAxis
   if (!oldAxis2)
     throw std::invalid_argument("Vertical axis is not a numeric axis. If it is "
