@@ -56,6 +56,7 @@ int byte_rel_comp(const int *data_in, int n_in, char *data_out, int max_out, int
         (icurrent < -LARGE_NUMBER)) {
       irel = 128; // Force absolute mode
     } else {
+      // cppcheck-suppress integerOverflowCond
       irel = data_in[i] - icurrent; // Calc relative offset
     }
     // If small put it in a byte
