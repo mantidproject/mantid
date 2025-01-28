@@ -942,7 +942,7 @@ using LU decomposition
 
   int determinantInterchange = 0;
   Matrix<T> Lcomp(*this);
-  Lcomp.lubcmp(indx.data(), determinantInterchange);
+  Lcomp.lubcmp<T>(indx.data(), determinantInterchange);
 
   auto det = static_cast<double>(determinantInterchange);
   for (size_t j = 0; j < m_numRows; j++)
@@ -1202,7 +1202,7 @@ divide by pivot.
         m_rawData[j][k] = static_cast<T>(dum);
       }
       interchange *= -1;
-      result[imax] = static_cast<T>(result[j]);
+      result[imax] = result[j];
     }
     rowperm[j] = imax;
 
