@@ -14,6 +14,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
+#include <ranges>
 
 #include <memory>
 
