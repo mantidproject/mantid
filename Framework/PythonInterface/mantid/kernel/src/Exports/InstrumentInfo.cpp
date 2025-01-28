@@ -25,11 +25,11 @@ void export_InstrumentInfo() {
            "Returns the full name of the instrument as defined in the "
            "Facilites.xml file")
 
-      .def("shortName", &InstrumentInfo::shortName, arg("self"),
+      .def("shortName", &InstrumentInfo::shortName, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the abbreviated name of the instrument as definined in the "
            "Facilites.xml file")
 
-      .def("__str__", &InstrumentInfo::shortName, arg("self"),
+      .def("__str__", &InstrumentInfo::shortName, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the abbreviated name of the instrument as definined in the "
            "Facilites.xml file")
 
@@ -39,7 +39,7 @@ void export_InstrumentInfo() {
       .def("filePrefix", &InstrumentInfo::filePrefix, (arg("self"), arg("runNumber")),
            "Returns file prefix for this instrument")
 
-      .def("delimiter", &InstrumentInfo::delimiter, arg("self"),
+      .def("delimiter", &InstrumentInfo::delimiter, arg("self"), return_value_policy<copy_const_reference>(),
            "Returns the delimiter "
            "between the instrument "
            "name and the run number.")

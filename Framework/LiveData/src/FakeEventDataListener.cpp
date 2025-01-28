@@ -10,7 +10,6 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/MersenneTwister.h"
 #include "MantidKernel/WriteLock.h"
 #include "MantidLiveData/Exception.h"
 
@@ -25,7 +24,6 @@ DECLARE_LISTENER(FakeEventDataListener)
 FakeEventDataListener::FakeEventDataListener()
     : LiveListener(), m_buffer(), m_rand(std::make_unique<Kernel::MersenneTwister>(5489)), m_timer(), m_callbackloop(1),
       m_numExtractDataCalls(0), m_runNumber(1) {
-
   auto datarateConfigVal = ConfigService::Instance().getValue<int>("fakeeventdatalistener.datarate");
   m_datarate = datarateConfigVal.value_or(200); // Default data rate. Low so that our lowest-powered
                                                 // buildserver can cope.
