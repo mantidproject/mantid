@@ -519,7 +519,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/Instr
 constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:2640
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:2677
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:3059
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ObjCompAssembly.cpp:346
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/XMLInstrumentParameter.cpp:92
 stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/XMLInstrumentParameter.cpp:146
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cpp:165
