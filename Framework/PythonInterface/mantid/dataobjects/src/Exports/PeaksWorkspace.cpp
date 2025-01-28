@@ -22,5 +22,6 @@ void export_PeaksWorkspace() {
   class_<PeaksWorkspace, bases<IPeaksWorkspace>, boost::noncopyable>("PeaksWorkspace", no_init);
 
   // register pointers
+  // cppcheck-suppress unusedScopedObject
   RegisterWorkspacePtrToPython<PeaksWorkspace>();
 }

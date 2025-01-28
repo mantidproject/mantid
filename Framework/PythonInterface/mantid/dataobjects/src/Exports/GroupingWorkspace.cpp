@@ -39,5 +39,6 @@ void export_GroupingWorkspace() {
            return_value_policy<Policies::VectorToNumpy>(), (arg("self,"), arg("groupID")));
 
   // register pointers
+  // cppcheck-suppress unusedScopedObject
   RegisterWorkspacePtrToPython<GroupingWorkspace>();
 }
