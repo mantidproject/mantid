@@ -471,6 +471,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
   ioRAW(file, &ver8, 1, from_file);
   fgetpos(file, &dhdr_pos);
   ioRAW(file, &dhdr, 1, from_file);
+  // cppcheck-suppress variableScope
   int ndes, nout, nwords, outbuff_size = 100000, offset;
   auto outbuff = new char[outbuff_size];
   if (!read_data) {
@@ -515,6 +516,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
       }
     }
   }
+  // cppcheck-suppress uninitdata
   delete[] outbuff;
   // log section
   ioRAW(file, &logsect, 1, from_file);
@@ -903,6 +905,7 @@ int ISISRAW::vmstime(char *timbuf, int len, time_t time_value) {
    * get time in VMS format 01-JAN-1970 00:00:00
    */
   size_t i, n;
+  // cppcheck-suppress constVariablePointer
   struct tm *tmstruct = nullptr;
 #ifdef MS_VISUAL_STUDIO
   errno_t err = localtime_s(tmstruct, &time_value);

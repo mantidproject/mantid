@@ -219,10 +219,12 @@ struct vax_double {
 
 /** What IEEE double precision floating point looks like */
 struct ieee_double {
+  // cppcheck-suppress-begin unusedStructMember
   unsigned int mantissa1 : 20; ///< mantissa 1
   unsigned int exp : 11;       ///< exponential
   unsigned int sign : 1;       ///< sign
   unsigned int mantissa2 : 32; ///< mantissa 2
+  // cppcheck-suppress-end unusedStructMember
 };
 
 /** Vax double precision floating point */
