@@ -385,7 +385,7 @@ public:
   uint32_t scanIndex() const { return m_fields[1]; }
   const std::string &comment() const {
     if (!m_comment.length() && (m_fields[0] & 0xffff)) {
-      m_comment.assign((const char *)&m_fields[2], m_fields[0] & 0xffff);
+      m_comment.assign(reinterpret_cast<const char *>(&m_fields[2]), m_fields[0] & 0xffff);
     }
 
     return m_comment;
@@ -484,9 +484,11 @@ public:
   }
 
   double distance(uint32_t index) const {
-    if (index < beamMonCount())
-      return *reinterpret_cast<const double *>(&m_fields[(index * 6) + 5]);
-    else
+    if (index < beamMonCount()) {
+      double value;
+      std::memcpy(&value, &m_fields[(index * 6) + 5], sizeof(double));
+      return value;
+    } else
       return (0.0);
   }
 
@@ -528,8 +530,8 @@ public:
   std::string name(uint32_t index) const {
     if (index < detBankSetCount()) {
       char name_c[SET_NAME_SIZE + 1]; // give them an inch...
-      memset((void *)name_c, '\0', SET_NAME_SIZE + 1);
-      strncpy(name_c, (const char *)&(m_fields[m_sectionOffsets[index]]), SET_NAME_SIZE);
+      std::memset(static_cast<void *>(name_c), '\0', SET_NAME_SIZE + 1);
+      std::strncpy(name_c, reinterpret_cast<const char *>(&(m_fields[m_sectionOffsets[index]])), SET_NAME_SIZE);
       return (std::string(name_c));
     } else {
       return ("<Out Of Range!>");
@@ -582,7 +584,9 @@ public:
 
   double throttle(uint32_t index) const {
     if (index < detBankSetCount()) {
-      return *reinterpret_cast<const double *>(&m_fields[m_after_banks_offset[index] + 3]);
+      double value;
+      std::memcpy(&value, &m_fields[m_after_banks_offset[index] + 3], sizeof(double));
+      return value;
     } else
       return (0.0);
   }
@@ -590,8 +594,9 @@ public:
   std::string suffix(uint32_t index) const {
     if (index < detBankSetCount()) {
       char suffix_c[THROTTLE_SUFFIX_SIZE + 1]; // give them an inch
-      memset((void *)suffix_c, '\0', THROTTLE_SUFFIX_SIZE + 1);
-      strncpy(suffix_c, (const char *)&(m_fields[m_after_banks_offset[index] + 5]), THROTTLE_SUFFIX_SIZE);
+      std::memset(static_cast<void *>(suffix_c), '\0', THROTTLE_SUFFIX_SIZE + 1);
+      std::strncpy(suffix_c, reinterpret_cast<const char *>(&(m_fields[m_after_banks_offset[index] + 5])),
+                   THROTTLE_SUFFIX_SIZE);
       return (std::string(suffix_c));
     } else {
       std::stringstream ss;
@@ -676,7 +681,11 @@ public:
   uint32_t varId() const { return m_fields[1]; }
   VariableStatus::Enum status() const { return static_cast<VariableStatus::Enum>(m_fields[2] >> 16); }
   VariableSeverity::Enum severity() const { return static_cast<VariableSeverity::Enum>(m_fields[2] & 0xffff); }
-  double value() const { return *reinterpret_cast<const double *>(&m_fields[3]); }
+  double value() const {
+    double result;
+    std::memcpy(&result, &m_fields[3], sizeof(double));
+    return result;
+  }
 
   void remapDeviceId(uint32_t dev) {
     uint32_t *fields = reinterpret_cast<uint32_t *>(const_cast<uint8_t *>(payload()));
