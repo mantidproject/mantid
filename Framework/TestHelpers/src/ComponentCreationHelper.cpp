@@ -381,8 +381,9 @@ Instrument_sptr createTestInstrumentCylindrical(int num_banks, const Mantid::Ker
 }
 
 Mantid::Geometry::Instrument_sptr
-createCylInstrumentWithVerticalOffsetsSpecified(size_t nTubes, std::vector<double> verticalOffsets, size_t nDetsPerTube,
-                                                double xMin, double xMax, double yMin, double yMax) {
+createCylInstrumentWithVerticalOffsetsSpecified(size_t nTubes, const std::vector<double> &verticalOffsets,
+                                                size_t nDetsPerTube, double xMin, double xMax, double yMin,
+                                                double yMax) {
   // Pixel shape
   const double ySpan = (yMax - yMin);
   const double xSpan = (xMax - xMin);
@@ -409,7 +410,6 @@ createCylInstrumentWithVerticalOffsetsSpecified(size_t nTubes, std::vector<doubl
     }
     tube->setPos(V3D(xMin + static_cast<double>(i) * tubeDiameter, -ySpan / 2 + verticalOffsets[i], 0));
     tube->setOutline(tube->createOutline());
-    Mantid::Geometry::BoundingBox tmp = tube->shape()->getBoundingBox();
     bank->add(tube);
   }
   bank->setPos(V3D(0, 0, bankZPos));

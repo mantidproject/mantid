@@ -594,9 +594,6 @@ public:
     throw std::runtime_error("Not Implemented");
   }
 
-  // Check if this class has an oriented lattice on any sample object
-  bool hasOrientedLattice() const override { return MultipleExperimentInfos::hasOrientedLattice(); }
-
   size_t getMemorySize() const override { throw std::runtime_error("Not Implemented"); }
 
   const std::string id() const override { throw std::runtime_error("Not Implemented"); }
