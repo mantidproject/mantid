@@ -1224,14 +1224,12 @@ void copyParametersValues(const map<string, Parameter> &source, map<string, Para
     throw runtime_error("Source and Target should have the same size.");
 
   // 2. Copy the value
-  map<string, Parameter>::iterator miter;
-  map<string, Parameter>::iterator titer;
-  for (miter = source.begin(); miter != source.end(); ++miter) {
+  for (auto miter = source.begin(); miter != source.end(); ++miter) {
     string parname = miter->first;
     Parameter param = miter->second;
     double paramvalue = param.curvalue;
 
-    titer = target.find(parname);
+    auto titer = target.find(parname);
     if (titer == target.end())
       throw runtime_error("Source and target should have exactly the same keys.");
 
