@@ -30,5 +30,6 @@ void export_TableWorkspace() {
       .def("__init__", make_constructor(&makeTableWorkspace));
 
   // register pointers
+  // cppcheck-suppress unusedScopedObject
   RegisterWorkspacePtrToPython<TableWorkspace>();
 }
