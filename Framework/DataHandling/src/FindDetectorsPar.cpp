@@ -629,7 +629,7 @@ void FindDetectorsPar::load_plain(std::ifstream &stream, std::vector<double> &Da
   char par_format[] = " %g %g %g %g %g";
   char phx_format[] = " %g %g %g %g %g %g";
   float data_buf[7];
-  char *format;
+  const char *format;
   int BlockSize;
   char EOL = FILE_TYPE.line_end;
 
