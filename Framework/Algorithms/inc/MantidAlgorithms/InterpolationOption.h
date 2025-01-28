@@ -40,8 +40,8 @@ public:
 
 private:
   Value m_value = Value::Linear;
-  bool m_calculateErrors;
-  bool m_independentErrors;
+  bool m_calculateErrors = false;
+  bool m_independentErrors = false;
 };
 
 } // namespace Algorithms

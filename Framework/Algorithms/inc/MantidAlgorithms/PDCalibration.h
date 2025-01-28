@@ -22,7 +22,7 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL PDCalibration final : public API::Algorithm {
 public:
   PDCalibration();
-  ~PDCalibration();
+  ~PDCalibration() override;
 
   const std::string name() const override;
   int version() const override;

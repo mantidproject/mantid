@@ -29,7 +29,7 @@ namespace Algorithms {
 class MANTID_ALGORITHMS_DLL GetAllEi : public API::Algorithm {
 public:
   GetAllEi();
-  virtual ~GetAllEi() = default;
+  virtual ~GetAllEi() override = default;
   /// Algorithms name for identification. @see Algorithm::name
   const std::string name() const override { return "GetAllEi"; };
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary

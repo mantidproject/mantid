@@ -64,10 +64,10 @@ public:
   void highBkgdFit();
 
   /// Get fitting error for peak function
-  std::map<std::string, double> getPeakError();
+  std::map<std::string, double> &getPeakError() { return m_fitErrorPeakFunc; };
 
   /// Get fitting error for background function
-  std::map<std::string, double> getBackgroundError();
+  std::map<std::string, double> &getBackgroundError() { return m_fitErrorBkgdFunc; };
 
   /// Get cost function value from fitting
   double getFitCostFunctionValue();
