@@ -23,7 +23,9 @@ namespace DataHandling {
 class MANTID_DATAHANDLING_DLL SaveNexusESS : public Mantid::DataHandling::SaveNexusProcessed {
 public:
   const std::string name() const override;
+  // cppcheck-suppress uselessOverride Should have its own version, even if it matches parent
   int version() const override;
+  // cppcheck-suppress uselessOverride Should have its own category, even if it matches parent
   const std::string category() const override;
   const std::string summary() const override;
 
