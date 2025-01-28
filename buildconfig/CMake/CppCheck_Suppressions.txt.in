@@ -534,11 +534,6 @@ returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandl
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadEmptyInstrument.h:65
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:124
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:125
-uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadHFIRSANS.h:126
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadSpiceXML2DDet.h:30
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadSpiceXML2DDet.h:31
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadSpiceXML2DDet.h:32
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/LoadSpiceXML2DDet.h:33
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveCanSAS1D.h:84
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveGSS.h:147
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/DataHandling/inc/MantidDataHandling/SaveGSS.h:151

@@ -116,25 +116,25 @@ bool SpiceXMLNode::isDouble() const { return (m_typechar == FLOAT32); }
  * @brief SpiceXMLNode::getName
  * @return
  */
-const std::string SpiceXMLNode::getName() const { return m_name; }
+const std::string &SpiceXMLNode::getName() const { return m_name; }
 
 /** Get unit of XML node
  * @brief SpiceXMLNode::getUnit
  * @return
  */
-const std::string SpiceXMLNode::getUnit() const { return m_unit; }
+const std::string &SpiceXMLNode::getUnit() const { return m_unit; }
 
 /** Get node's description
  * @brief SpiceXMLNode::getDescription
  * @return
  */
-const std::string SpiceXMLNode::getDescription() const { return m_description; }
+const std::string &SpiceXMLNode::getDescription() const { return m_description; }
 
 /** Get node's value in string
  * @brief SpiceXMLNode::getValue
  * @return
  */
-const std::string SpiceXMLNode::getValue() const { return m_value; }
+const std::string &SpiceXMLNode::getValue() const { return m_value; }
 
 /** Constructor
  */

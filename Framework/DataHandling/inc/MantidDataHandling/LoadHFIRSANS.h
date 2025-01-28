@@ -60,6 +60,8 @@ namespace DataHandling {
 class MANTID_DATAHANDLING_DLL LoadHFIRSANS : public API::IFileLoader<Kernel::FileDescriptor> {
 
 public:
+  /// Constructor
+  LoadHFIRSANS();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadHFIRSANS"; }
   /// Summary of algorithms purpose
