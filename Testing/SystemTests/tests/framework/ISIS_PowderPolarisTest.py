@@ -230,7 +230,7 @@ class TestFocusNoAbsorptionSummed(systemtesting.MantidSystemTest, HelperClass):
 
     def validate(self):
         self.validate_focus_files_exist("98533,98534")
-        return self.focus_results.name(), "ISIS_Powder-POLARIS98533,98534_focussed.nxs"
+        return self.focus_results.name(), "ISIS_Powder-POLARIS98533and98534_focussed.nxs"
 
     def cleanup(self):
         try:

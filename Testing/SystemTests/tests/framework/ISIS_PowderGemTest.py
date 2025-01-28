@@ -139,7 +139,7 @@ class FocusTestMultipleWSSummed(systemtesting.MantidSystemTest, FocusTestMixin):
 
     def validate(self):
         self.validate_focus_files_exist("83605,83607")
-        return self.focus_results.name(), "ISIS_Powder-GEM83605,83607-Focussed.nxs"
+        return self.focus_results.name(), "ISIS_Powder-GEM83605and83607-Focussed.nxs"
 
 
 class CreateCalTest(systemtesting.MantidSystemTest):
