@@ -27,24 +27,6 @@ constexpr static V3D X_AXIS{1, 0, 0};
 constexpr static V3D Y_AXIS{0, 1, 0};
 constexpr static V3D Z_AXIS{0, 0, 1};
 
-struct CylinderParameters {
-  // cppcheck-suppress-begin unusedStructMember
-  double radius;
-  double height;
-  // cppcheck-suppress-end unusedStructMember
-  V3D centerBottomBase;
-  V3D symmetryaxis;
-};
-
-struct HollowCylinderParameters {
-  // cppcheck-suppress-begin unusedStructMember
-  double radius;
-  double innerRadius;
-  double height;
-  // cppcheck-suppress-end unusedStructMember
-  V3D centerBottomBase;
-  V3D symmetryaxis;
-};
 
 // since cylinders are symmetric around the main axis, choose a random
 // perpendicular to have as the second axis
