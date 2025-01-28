@@ -560,7 +560,9 @@ int CSGObject::complementaryObject(const int cellNum, std::string &lineStr) {
   std::string Part = lineStr.substr(posA, posB - (posA + 1));
 
   m_objNum = cellNum;
+  // cppcheck-suppress knownConditionTrueFalse
   if (procString(Part)) {
+    // this validates if Part is a valid procString, a variable specific to this file
     m_surList.clear();
     lineStr.erase(posA - 1, posB + 1); // Delete brackets ( Part ) .
     std::ostringstream CompCell;
@@ -699,7 +701,7 @@ std::unique_ptr<CompGrp> CSGObject::procComp(std::unique_ptr<Rule> ruleItem) con
     return std::make_unique<CompGrp>();
 
   Rule *Pptr = ruleItem->getParent();
-  Rule *RItemptr = ruleItem.get();
+  const Rule *RItemptr = ruleItem.get();
   auto CG = std::make_unique<CompGrp>(Pptr, std::move(ruleItem));
   if (Pptr) {
     const int Ln = Pptr->findLeaf(RItemptr);
@@ -902,11 +904,11 @@ void CSGObject::print() const {
   Rule *TA, *TB; // Temp. for storage
 
   while (!rst.empty()) {
-    Rule *T1 = rst.front();
+    const Rule *T1 = rst.front();
     rst.pop_front();
     if (T1) {
       Rcount++;
-      auto *surface = dynamic_cast<SurfPoint *>(T1);
+      const auto *surface = dynamic_cast<const SurfPoint *>(T1);
       if (surface)
         Cells.emplace_back(surface->getKeyN());
       else {
