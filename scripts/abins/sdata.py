@@ -48,10 +48,7 @@ pint.set_application_registry(ureg)
 N_THREADS = abins.parameters.performance.get("threads")
 
 
-def _iter_check_thresholds(
-    items: Iterable[Tuple[int, int, np.ndarray]]
-) -> Generator[Tuple[int, int, float], None, None]:
-
+def _iter_check_thresholds(items: Iterable[Tuple[int, int, np.ndarray]]) -> Generator[Tuple[int, int, float], None, None]:
     """Compare S data values to minimum thresholds, return items with low intensity
 
     Items have form (atom_index, quantum_order_index, s_array)
@@ -150,7 +147,7 @@ class AbinsSpectrum1DCollection(Spectrum1DCollection):
                     pass
                 else:
                     raise ValueError(
-                        f"No data matched the select() criterion {key}={value}, " f"as rows have common metadata {key}={self.metadata[key]}"
+                        f"No data matched the select() criterion {key}={value}, as rows have common metadata {key}={self.metadata[key]}"
                     )
             else:
                 select_items[key] = value
@@ -306,9 +303,7 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
         if metadata and "line_data" in metadata.keys():
             if len(metadata["line_data"]) != len(z_data):
                 raise ValueError(
-                    f"y_data contains {len(y_data)} spectra, but "
-                    f'metadata["line_data"] contains '
-                    f'{len(metadata["line_data"])} entries'
+                    f'y_data contains {len(y_data)} spectra, but metadata["line_data"] contains {len(metadata["line_data"])} entries'
                 )
         self.metadata = {} if metadata is None else metadata
 
@@ -389,7 +384,7 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
                 if not all([isinstance(i, Integral) for i in item]):
                     raise TypeError
             except TypeError:
-                raise TypeError(f'Index "{item}" should be an integer, slice ' f"or sequence of ints")
+                raise TypeError(f'Index "{item}" should be an integer, slice or sequence of ints')
             new_metadata.update(self._combine_metadata([line_metadata[i] for i in item]))
         return type(self)(
             self.x_data,
@@ -562,7 +557,6 @@ class AbinsSpectrum2DCollection(collections.abc.Sequence, Spectrum):
         rtol: float = 1e-5,
         atol: float = 0.0,
     ) -> None:
-
         return Spectrum2D.assert_regular_bins(self, message=message, rtol=rtol, atol=atol)
 
     def to_dict(self) -> Dict[str, Any]:
