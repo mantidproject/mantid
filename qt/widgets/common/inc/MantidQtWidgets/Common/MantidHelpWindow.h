@@ -25,9 +25,9 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidHelpWindow : public API::MantidHelpInterf
   Q_OBJECT
 
 public:
-  static bool helpWindowExists() { return !g_helpWindow.isNull(); }
+  static bool helpWindowExists()
 
-  MantidHelpWindow(const Qt::WindowFlags &flags = Qt::WindowFlags());
+      MantidHelpWindow(const Qt::WindowFlags &flags = Qt::WindowFlags());
 
   void showPage(const std::string &url = std::string()) override;
   void showPage(const QString &url) override;
@@ -55,7 +55,7 @@ private:
   /// Whether this is the very first startup of the helpwindow.
   bool m_firstRun;
 
-  void findCollectionFile(std::string &binDir);
+  void findCollectionFile(const std::string &binDir);
   void determineFileLocs();
 
 public slots:
