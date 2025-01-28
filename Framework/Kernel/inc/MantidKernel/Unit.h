@@ -474,13 +474,10 @@ protected:
 class MANTID_KERNEL_DLL DeltaE_inWavenumber : public DeltaE {
 public:
   const std::string unitID() const override; ///< "DeltaE_inWavenumber"
-  const std::string caption() const override { return "Energy transfer"; }
   const UnitLabel label() const override;
 
   void init() override;
   Unit *clone() const override;
-  double conversionTOFMin() const override;
-  double conversionTOFMax() const override;
   /// Constructor
   DeltaE_inWavenumber();
 };
@@ -490,13 +487,10 @@ public:
 class MANTID_KERNEL_DLL DeltaE_inFrequency : public DeltaE {
 public:
   const std::string unitID() const override; ///< "DeltaE_inFrequency"
-  const std::string caption() const override { return "Energy transfer"; }
   const UnitLabel label() const override;
 
   void init() override;
   Unit *clone() const override;
-  double conversionTOFMin() const override;
-  double conversionTOFMax() const override;
   /// Constructor
   DeltaE_inFrequency();
 };

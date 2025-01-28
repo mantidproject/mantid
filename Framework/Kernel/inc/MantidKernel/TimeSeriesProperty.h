@@ -106,33 +106,33 @@ struct MANTID_KERNEL_DLL TimeSeriesPropertyStatistics {
  */
 template <class TYPE> class TimeValueUnit {
 private:
-  Types::Core::DateAndTime mtime;
-  TYPE mvalue;
+  Types::Core::DateAndTime m_time;
+  TYPE m_value;
 
 public:
-  TimeValueUnit(const Types::Core::DateAndTime &time, const TYPE &value) : mtime(time), mvalue(value) {}
+  TimeValueUnit(const Types::Core::DateAndTime &time, const TYPE &value) : m_time(time), m_value(value) {}
 
   ~TimeValueUnit() = default;
 
-  bool operator>(const TimeValueUnit &rhs) { return (mtime > rhs.mtime); }
+  bool operator>(const TimeValueUnit &rhs) { return (m_time > rhs.m_time); }
 
-  friend bool operator>(const TimeValueUnit &lhs, const TimeValueUnit &rhs) { return (lhs.mtime > rhs.mtime); }
+  friend bool operator>(const TimeValueUnit &lhs, const TimeValueUnit &rhs) { return (lhs.m_time > rhs.m_time); }
 
-  bool operator==(const TimeValueUnit &rhs) { return (mtime == rhs.mtime); }
+  bool operator==(const TimeValueUnit &rhs) { return (m_time == rhs.m_time); }
 
-  friend bool operator==(const TimeValueUnit &lhs, const TimeValueUnit &rhs) { return (lhs.mtime == rhs.mtime); }
+  friend bool operator==(const TimeValueUnit &lhs, const TimeValueUnit &rhs) { return (lhs.m_time == rhs.m_time); }
 
-  bool operator<(const TimeValueUnit &rhs) { return (mtime < rhs.mtime); }
+  bool operator<(const TimeValueUnit &rhs) { return (m_time < rhs.m_time); }
 
-  friend bool operator<(const TimeValueUnit &lhs, const TimeValueUnit &rhs) { return (lhs.mtime < rhs.mtime); }
+  friend bool operator<(const TimeValueUnit &lhs, const TimeValueUnit &rhs) { return (lhs.m_time < rhs.m_time); }
 
-  Types::Core::DateAndTime time() const { return mtime; }
+  Types::Core::DateAndTime time() const { return m_time; }
 
-  void setTime(Types::Core::DateAndTime newtime) { mtime = newtime; }
+  void setTime(Types::Core::DateAndTime newtime) { m_time = newtime; }
 
-  TYPE value() const { return mvalue; }
+  const TYPE &value() const { return m_value; }
 
-  static bool valueCmp(const TimeValueUnit &lhs, const TimeValueUnit &rhs) { return (lhs.mvalue < rhs.mvalue); }
+  static bool valueCmp(const TimeValueUnit &lhs, const TimeValueUnit &rhs) { return (lhs.m_value < rhs.m_value); }
 };
 //========================================================================================================
 

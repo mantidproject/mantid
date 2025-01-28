@@ -1082,10 +1082,6 @@ DeltaE_inWavenumber::DeltaE_inWavenumber() : DeltaE() {
   addConversion("DeltaE", 1 / PhysicalConstants::meVtoWavenumber, 1.);
 }
 
-double DeltaE_inWavenumber::conversionTOFMin() const { return DeltaE::conversionTOFMin(); }
-
-double DeltaE_inWavenumber::conversionTOFMax() const { return DeltaE::conversionTOFMax(); }
-
 // =====================================================================================================
 /* Energy Transfer in units of frequency
  * =====================================================================================================
@@ -1109,10 +1105,6 @@ Unit *DeltaE_inFrequency::clone() const { return new DeltaE_inFrequency(*this); 
 DeltaE_inFrequency::DeltaE_inFrequency() : DeltaE() {
   addConversion("DeltaE", 1.0 / PhysicalConstants::meVtoFrequency, 1.);
 }
-
-double DeltaE_inFrequency::conversionTOFMin() const { return DeltaE::conversionTOFMin(); }
-
-double DeltaE_inFrequency::conversionTOFMax() const { return DeltaE::conversionTOFMax(); }
 
 // =====================================================================================================
 /* Momentum in Angstrom^-1. It is 2*Pi/wavelength
