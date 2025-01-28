@@ -502,11 +502,11 @@ void MaskDetectors::appendToDetectorListFromWS(std::vector<detid_t> &detectorLis
 
   for (size_t i = 0; i < maskWs->getNumberHistograms(); ++i) {
     if (maskWs->y(i)[0] == 0) {
-      const auto &spec = maskWs->getSpectrum(i);
-      for (const auto &id : spec.getDetectorIDs()) {
-        if (detMap.at(id) >= startIndex && detMap.at(id) <= endIndex)
-          detectorList.emplace_back(id);
-      }
+      const auto &detIds = maskWs->getSpectrum(i).getDetectorIDs();
+      auto condition = [detMap, startIndex, endIndex](const auto id) {
+        return detMap.at(id) >= startIndex && detMap.at(id) <= endIndex;
+      };
+      std::copy_if(detIds.begin(), detIds.end(), std::back_inserter(detectorList), condition);
     }
   }
 }

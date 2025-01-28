@@ -104,7 +104,7 @@ void SaveCSV::exec() {
 
     // Add first x-axis line to output file
     {
-      auto &xValue = localworkspace->x(0);
+      const auto &xValue = localworkspace->x(0);
 
       outCSV_File << "A";
 
@@ -136,7 +136,7 @@ void SaveCSV::exec() {
 
       // add y-axis line for histogram (detector) i
 
-      auto &yValue = localworkspace->y(i);
+      const auto &yValue = localworkspace->y(i);
 
       outCSV_File << i;
 
@@ -152,7 +152,7 @@ void SaveCSV::exec() {
     outCSV_File << "\nERRORS\n";
 
     for (size_t i = 0; i < numberOfHist; i++) {
-      auto &eValue = localworkspace->e(i);
+      const auto &eValue = localworkspace->e(i);
 
       outCSV_File << i;
 

@@ -126,8 +126,9 @@ void RotateSampleShape::prepareGoniometerAxes(Goniometer &gon) {
         throw std::invalid_argument("Wrong number of arguments to parameter " + propName.str() +
                                     ". Expected 5 comma-separated arguments.");
 
-      std::transform(tokens.begin(), tokens.end(), tokens.begin(), [](std::string str) { return Strings::strip(str); });
-      if (!std::all_of(tokens.begin(), tokens.end(), [](std::string tokenStr) { return !tokenStr.empty(); })) {
+      std::transform(tokens.begin(), tokens.end(), tokens.begin(),
+                     [](const std::string &str) { return Strings::strip(str); });
+      if (!std::all_of(tokens.begin(), tokens.end(), [](const std::string &tokenStr) { return !tokenStr.empty(); })) {
         throw std::invalid_argument("Empty axis parameters found!");
       }
 
