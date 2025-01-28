@@ -10,7 +10,7 @@ namespace Mantid::Kernel::Math {
 namespace {
 ///@cond
 // Forward-declaration of minimizer
-int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu, const double *f, double *c__,
+int slsqp_(int *m, int *meq, const int *la, int *n, double *x, double *xl, double *xu, const double *f, double *c__,
            double *g, double *a, double *acc, int *iter, int *mode, double *w, const int *l_w__, int *jw,
            const int *l_jw__);
 ///@endcond
@@ -230,13 +230,13 @@ double linmin_(int *mode, const double *ax, const double *bx, const double *f, c
 double dnrm2___(const int *n, double *dx, const int *incx);
 int ldl_(const int *n, double *a, double *z__, const double *sigma, double *w);
 int lsei_(double *c__, double *d__, double *e, double *f, double *g, double *h__, const int *lc, const int *mc,
-          const int *le, const int *me, const int *lg, int *mg, const int *n, double *x, double *xnrm, double *w,
+          const int *le, const int *me, const int *lg, const int *mg, const int *n, double *x, double *xnrm, double *w,
           int *jw, int *mode);
 int h12_(const int *mode, const int *lpivot, const int *l1, const int *m, double *u, const int *iue, double *up,
          double *c__, const int *ice, const int *icv, const int *ncv);
 int hfti_(double *a, const int *mda, const int *m, const int *n, double *b, const int *mdb, const int *nb,
           const double *tau, int *krank, double *rnorm, double *h__, double *g, int *ip);
-int lsi_(double *e, double *f, double *g, double *h__, const int *le, const int *me, const int *lg, int *mg,
+int lsi_(double *e, double *f, double *g, double *h__, const int *le, const int *me, const int *lg, const int *mg,
          const int *n, double *x, double *xnorm, double *w, int *jw, int *mode);
 int ldp_(double *g, const int *mg, const int *m, const int *n, double *h__, double *x, double *xnorm, double *w,
          int *index, int *mode);
@@ -279,7 +279,7 @@ int dsrot_(const int *n, double *dx, const int *incx, double *dy, const int *inc
 /* *********************************************************************** */
 /*                              optimizer                               * */
 /* *********************************************************************** */
-int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu, const double *f, double *c__,
+int slsqp_(int *m, int *meq, const int *la, int *n, double *x, double *xl, double *xu, const double *f, double *c__,
            double *g, double *a, double *acc, int *iter, int *mode, double *w, const int *l_w__, int *jw,
            const int *l_jw__) {
   /* System generated locals */
@@ -1045,7 +1045,7 @@ int lsq_(int *m, int *meq, int *n, const int *nl, const int *la, double *l, doub
 } /* lsq_ */
 
 int lsei_(double *c__, double *d__, double *e, double *f, double *g, double *h__, const int *lc, const int *mc,
-          const int *le, const int *me, const int *lg, int *mg, const int *n, double *x, double *xnrm, double *w,
+          const int *le, const int *me, const int *lg, const int *mg, const int *n, double *x, double *xnrm, double *w,
           int *jw, int *mode) {
   /* Initialized data */
 
@@ -1236,7 +1236,7 @@ L75:
   return 0;
 } /* lsei_ */
 
-int lsi_(double *e, double *f, double *g, double *h__, const int *le, const int *me, const int *lg, int *mg,
+int lsi_(double *e, double *f, double *g, double *h__, const int *le, const int *me, const int *lg, const int *mg,
          const int *n, double *x, double *xnorm, double *w, int *jw, int *mode) {
   /* Initialized data */
 
