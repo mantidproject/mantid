@@ -419,8 +419,7 @@ void CreateChunkingFromInstrument::exec() {
       }
       // remove the trailing comma
       string banksStr = banks.str();
-      // cppcheck-suppress uselessCallsSubstr
-      banksStr = banksStr.substr(0, banksStr.size() - 1);
+      banksStr.pop_back();
 
       // add it to the table
       TableRow row = strategy->appendRow();
