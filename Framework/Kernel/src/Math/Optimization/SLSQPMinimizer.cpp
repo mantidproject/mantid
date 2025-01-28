@@ -10,8 +10,9 @@ namespace Mantid::Kernel::Math {
 namespace {
 ///@cond
 // Forward-declaration of minimizer
-int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu, double *f, double *c__, double *g,
-           double *a, double *acc, int *iter, int *mode, double *w, const int *l_w__, int *jw, const int *l_jw__);
+int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu, const double *f, double *c__,
+           double *g, double *a, double *acc, int *iter, int *mode, double *w, const int *l_w__, int *jw,
+           const int *l_jw__);
 ///@endcond
 } // namespace
 
@@ -221,25 +222,26 @@ int slsqpb_(int * /*m*/, int * /*meq*/, int * /*la*/, int * /*n*/, double * /*x*
             double * /*u*/, double * /*v*/, double * /*w*/, int * /*iw*/);
 int dcopy___(const int *n, double *dx, const int *incx, double *dy, const int *incy);
 int daxpy_sl__(const int *n, const double *da, double *dx, const int *incx, double *dy, const int *incy);
-int lsq_(int *m, int *meq, int *n, const int *nl, int *la, double *l, double *g, double *a, double *b, double *xl,
+int lsq_(int *m, int *meq, int *n, const int *nl, constint *la, double *l, double *g, double *a, double *b, double *xl,
          double *xu, double *x, double *y, double *w, int *jw, int *mode);
 double ddot_sl__(const int *n, double *dx, const int *incx, double *dy, const int *incy);
 int dscal_sl__(const int *n, const double *da, double *dx, const int *incx);
 double linmin_(int *mode, const double *ax, const double *bx, const double *f, const double *tol);
 double dnrm2___(const int *n, double *dx, const int *incx);
 int ldl_(const int *n, double *a, double *z__, const double *sigma, double *w);
-int lsei_(double *c__, double *d__, double *e, double *f, double *g, double *h__, int *lc, int *mc, int *le, int *me,
-          int *lg, int *mg, int *n, double *x, double *xnrm, double *w, int *jw, int *mode);
+int lsei_(double *c__, double *d__, double *e, double *f, double *g, double *h__, const int *lc, const int *mc,
+          const int *le, int *me, const int *lg, int *mg, const int *n, double *x, double *xnrm, double *w, int *jw,
+          int *mode);
 int h12_(const int *mode, const int *lpivot, const int *l1, const int *m, double *u, const int *iue, double *up,
          double *c__, const int *ice, const int *icv, const int *ncv);
-int hfti_(double *a, int *mda, int *m, int *n, double *b, int *mdb, int *nb, const double *tau, int *krank,
-          double *rnorm, double *h__, double *g, int *ip);
-int lsi_(double *e, double *f, double *g, double *h__, int *le, int *me, int *lg, int *mg, int *n, double *x,
-         double *xnorm, double *w, int *jw, int *mode);
-int ldp_(double *g, const int *mg, int *m, int *n, double *h__, double *x, double *xnorm, double *w, int *index,
+int hfti_(double *a, const int *mda, const int *m, const int *n, double *b, const int *mdb, const int *nb,
+          const double *tau, int *krank, double *rnorm, double *h__, double *g, int *ip);
+int lsi_(double *e, double *f, double *g, double *h__, const int *le, const int *me, const int *lg, int *mg, int *n,
+         double *x, double *xnorm, double *w, int *jw, int *mode);
+int ldp_(double *g, const int *mg, int *m, const int *n, double *h__, double *x, double *xnorm, double *w, int *index,
          int *mode);
-int nnls_(double *a, int *mda, int *m, int *n, double *b, double *x, double *rnorm, double *w, double *z__, int *index,
-          int *mode);
+int nnls_(double *a, const int *mda, const int *m, const int *n, double *b, double *x, double *rnorm, double *w,
+          double *z__, int *index, int *mode);
 int dsrotg_(double *da, double *db, double *c__, double *s);
 int dsrot_(const int *n, double *dx, const int *incx, double *dy, const int *incy, const double *c__, const double *s);
 //----------------------------------------------------------------------------
@@ -277,8 +279,9 @@ int dsrot_(const int *n, double *dx, const int *incx, double *dy, const int *inc
 /* *********************************************************************** */
 /*                              optimizer                               * */
 /* *********************************************************************** */
-int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu, double *f, double *c__, double *g,
-           double *a, double *acc, int *iter, int *mode, double *w, const int *l_w__, int *jw, const int *l_jw__) {
+int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu, const double *f, double *c__,
+           double *g, double *a, double *acc, int *iter, int *mode, double *w, const int *l_w__, int *jw,
+           const int *l_jw__) {
   /* System generated locals */
   int a_dim1, a_offset, i__1, i__2;
 
@@ -805,7 +808,6 @@ L260:
   }
   /*   L'*S */
   k = 0;
-  i__1 = *n;
   for (i__ = 1; i__ <= i__1; ++i__) {
     h1 = zero;
     ++k;
@@ -820,8 +822,6 @@ L260:
   }
   /*   D*L'*S */
   k = 1;
-  // cppcheck-suppress redundantAssignment
-  i__1 = *n;
   for (i__ = 1; i__ <= i__1; ++i__) {
     v[i__] = l[k] * v[i__];
     k = k + n1 - i__;
@@ -861,7 +861,7 @@ L330:
   return 0;
 } /* slsqpb_ */
 
-int lsq_(int *m, int *meq, int *n, const int *nl, int *la, double *l, double *g, double *a, double *b, double *xl,
+int lsq_(int *m, int *meq, int *n, const int *nl, const int *la, double *l, double *g, double *a, double *b, double *xl,
          double *xu, double *x, double *y, double *w, int *jw, int *mode) {
   /* Initialized data */
 
@@ -1044,8 +1044,9 @@ int lsq_(int *m, int *meq, int *n, const int *nl, int *la, double *l, double *g,
   return 0;
 } /* lsq_ */
 
-int lsei_(double *c__, double *d__, double *e, double *f, double *g, double *h__, int *lc, int *mc, int *le, int *me,
-          int *lg, int *mg, int *n, double *x, double *xnrm, double *w, int *jw, int *mode) {
+int lsei_(double *c__, double *d__, double *e, double *f, double *g, double *h__, const int *lc, const int *mc,
+          const int *le, int *me, int *lg, int *mg, const int *n, double *x, double *xnrm, double *w, int *jw,
+          int *mode) {
   /* Initialized data */
 
   static double epmach = 2.22e-16;
@@ -1235,8 +1236,8 @@ L75:
   return 0;
 } /* lsei_ */
 
-int lsi_(double *e, double *f, double *g, double *h__, int *le, int *me, int *lg, int *mg, int *n, double *x,
-         double *xnorm, double *w, int *jw, int *mode) {
+int lsi_(double *e, double *f, double *g, double *h__, const int *le, const int *me, const int *lg, int *mg, int *n,
+         double *x, double *xnorm, double *w, int *jw, int *mode) {
   /* Initialized data */
 
   static double epmach = 2.22e-16;
@@ -1350,7 +1351,7 @@ L50:
   return 0;
 } /* lsi_ */
 
-int ldp_(double *g, const int *mg, int *m, int *n, double *h__, double *x, double *xnorm, double *w, int *index,
+int ldp_(double *g, const int *mg, int *m, const int *n, double *h__, double *x, double *xnorm, double *w, int *index,
          int *mode) {
   /* Initialized data */
 
@@ -1474,8 +1475,8 @@ L50:
   return 0;
 } /* ldp_ */
 
-int nnls_(double *a, int *mda, int *m, int *n, double *b, double *x, double *rnorm, double *w, double *z__, int *index,
-          int *mode) {
+int nnls_(double *a, const int *mda, const int *m, const int *n, double *b, double *x, double *rnorm, double *w,
+          double *z__, int *index, int *mode) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -1731,8 +1732,8 @@ L290:
   return 0;
 } /* nnls_ */
 
-int hfti_(double *a, int *mda, int *m, int *n, double *b, int *mdb, int *nb, const double *tau, int *krank,
-          double *rnorm, double *h__, double *g, int *ip) {
+int hfti_(double *a, const int *mda, const int *m, const int *n, double *b, const int *mdb, const int *nb,
+          const double *tau, int *krank, double *rnorm, double *h__, double *g, int *ip) {
   /* Initialized data */
 
   static double zero = 0.;
@@ -2139,7 +2140,6 @@ int ldl_(const int *n, double *a, double *z__, const double *sigma, double *w) {
     /* L150: */
     w[i__] = z__[i__];
   }
-  i__1 = *n;
   for (i__ = 1; i__ <= i__1; ++i__) {
     v = w[i__];
     t += v * v / a[ij];
@@ -2155,7 +2155,6 @@ int ldl_(const int *n, double *a, double *z__, const double *sigma, double *w) {
   if (t >= zero) {
     t = epmach / *sigma;
   }
-  i__1 = *n;
   for (i__ = 1; i__ <= i__1; ++i__) {
     j = *n + 1 - i__;
     ij -= i__;
