@@ -942,7 +942,7 @@ using LU decomposition
 
   int determinantInterchange = 0;
   Matrix<T> Lcomp(*this);
-  Lcomp.lubcmp<T>(indx.data(), determinantInterchange);
+  Lcomp.lubcmp(indx.data(), determinantInterchange);
 
   auto det = static_cast<double>(determinantInterchange);
   for (size_t j = 0; j < m_numRows; j++)
@@ -1013,7 +1013,7 @@ yes invert the matrix using analytic formula. If not then use standard Invert
           if (((k + 1) * std::asinh(D / 2.0)) <= std::asinh(std::numeric_limits<long double>::max())) {
             a = std::cosh((k + 1 - iMinusj) * lambda);
             b = std::cosh((k + 1 - iPlusj - 2) * lambda); // extra -2 because i and j are 1-based in the paper
-            c = static_cast<long double>(2.0) * std::sinh(lambda) * std::sinh((k + 1 =) * lambda);
+            c = static_cast<long double>(2.0) * std::sinh(lambda) * std::sinh((k + 1) * lambda);
           } else {
             // cosh, sinh overflow for x~>710 so use approximation based on expansion of cosh, sinh into e^x and e^-x
             a = std::exp(-iMinusj * lambda);
