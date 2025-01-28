@@ -157,7 +157,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @return A shared_ptr to the named object. If the name does not exist it
    * sets a KeyError error indicator.
    */
-  static WeakPtr retrieveOrKeyError(SvcType &self, const std::string &name) {
+  static WeakPtr retrieveOrKeyError(const SvcType &self, const std::string &name) {
     using namespace Mantid::Kernel;
 
     SvcPtrType item;
