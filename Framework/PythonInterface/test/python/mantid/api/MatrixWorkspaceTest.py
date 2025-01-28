@@ -411,6 +411,21 @@ class MatrixWorkspaceTest(unittest.TestCase):
         ws1.setPlotType("marker")
         self.assertEqual("marker", ws1.getPlotType())
 
+    def test_setMarkerStyle(self):
+        run_algorithm("CreateWorkspace", OutputWorkspace="ws1", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
+        ws1 = AnalysisDataService["ws1"]
+
+        # test default
+        self.assertEqual("vline", ws1.getMarkerStyle())
+
+        # test invalid doesn't take
+        ws1.setMarkerStyle("invalid")
+        self.assertEqual("vline", ws1.getMarkerStyle())
+
+        # test valid takes
+        ws1.setMarkerStyle("square")
+        self.assertEqual("square", ws1.getMarkerStyle())
+
     def test_setGetMonitorWS(self):
         run_algorithm("CreateWorkspace", OutputWorkspace="ws1", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
         run_algorithm("CreateWorkspace", OutputWorkspace="ws_mon", DataX=[1.0, 2.0, 3.0], DataY=[2.0, 3.0], DataE=[2.0, 3.0], UnitX="TOF")
