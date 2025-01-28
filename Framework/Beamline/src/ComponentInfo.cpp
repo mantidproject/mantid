@@ -40,7 +40,8 @@ template <class T> bool unique_if_exists(const T &inputs, const typename T::valu
 } // namespace
 
 ComponentInfo::ComponentInfo()
-    : m_assemblySortedDetectorIndices(std::make_shared<std::vector<size_t>>(0)), m_size(0), m_detectorInfo(nullptr) {}
+    : m_assemblySortedDetectorIndices(std::make_shared<std::vector<size_t>>(0)), m_size(0), m_detectorInfo(nullptr),
+      m_sourceIndex(-1), m_sampleIndex(-1) {}
 
 ComponentInfo::ComponentInfo(
     std::shared_ptr<const std::vector<size_t>> assemblySortedDetectorIndices,
