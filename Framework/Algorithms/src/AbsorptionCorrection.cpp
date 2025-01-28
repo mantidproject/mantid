@@ -420,6 +420,7 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector, std::ve
 /// instruments
 double AbsorptionCorrection::doIntegration(const double linearCoefAbs, const std::vector<double> &L2s,
                                            const size_t startIndex, const size_t endIndex) const {
+  // cppcheck-suppress knownConditionTrueFalse
   if (endIndex - startIndex > MAX_INTEGRATION_LENGTH) {
     size_t middle = findMiddle(startIndex, endIndex);
 
