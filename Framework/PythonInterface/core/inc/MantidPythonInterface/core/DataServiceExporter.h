@@ -165,8 +165,8 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
       item = self.retrieve(name);
     } catch (Exception::NotFoundError &) {
       // Translate into a Python KeyError
-      std::string err = "'" + name + "' does not exist.";
-      PyErr_SetString(PyExc_KeyError, err.c_str());
+//      std::string err = "'" + name + "' does not exist.";
+//      PyErr_SetString(PyExc_KeyError, err.c_str());
       throw boost::python::error_already_set();
     }
     return WeakPtr(item);
