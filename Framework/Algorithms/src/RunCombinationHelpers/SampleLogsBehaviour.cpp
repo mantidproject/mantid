@@ -372,7 +372,7 @@ void SampleLogsBehaviour::mergeSampleLogs(const MatrixWorkspace_sptr &addeeWS, c
   for (const auto &item : m_logMap) {
     const std::string &logName = item.first.first;
 
-    Property *addeeWSProperty = addeeWS->getLog(logName);
+    const Property *addeeWSProperty = addeeWS->getLog(logName);
     const std::string originalUnit = addeeWS->getLog(logName)->units();
 
     double addeeWSNumericValue = 0.;
@@ -482,7 +482,7 @@ void SampleLogsBehaviour::updateListProperty(const MatrixWorkspace &addeeWS, Mat
  *numeric)
  * @param name the name of the sample log to check
  */
-void SampleLogsBehaviour::checkWarnProperty(const MatrixWorkspace &addeeWS, Property *addeeWSProperty,
+void SampleLogsBehaviour::checkWarnProperty(const MatrixWorkspace &addeeWS, const Property *addeeWSProperty,
                                             const SampleLogBehaviour &behaviour, const double addeeWSNumericValue,
                                             const double outWSNumericValue, const std::string &name) {
 
@@ -508,7 +508,7 @@ void SampleLogsBehaviour::checkWarnProperty(const MatrixWorkspace &addeeWS, Prop
  *numeric)
  * @param name the name of the sample log to check
  */
-void SampleLogsBehaviour::checkErrorProperty(const MatrixWorkspace &addeeWS, Property *addeeWSProperty,
+void SampleLogsBehaviour::checkErrorProperty(const MatrixWorkspace &addeeWS, const Property *addeeWSProperty,
                                              const SampleLogBehaviour &behaviour, const double addeeWSNumericValue,
                                              const double outWSNumericValue, const std::string &name) {
 
