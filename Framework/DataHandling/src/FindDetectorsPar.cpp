@@ -481,9 +481,6 @@ int FindDetectorsPar::count_changes(const char *const Buf, size_t buf_size) {
       is_symbol = true;
     }
     if (Buf[i] == ' ') { // this is a space
-      if (is_symbol) {
-        is_symbol = false;
-      }
       is_space = true;
     }
   }
