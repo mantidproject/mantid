@@ -30,7 +30,7 @@ namespace {
 /// Finalise shape
 std::unique_ptr<const Geometry::IObject>
 createCylinderShape(const std::map<int, std::shared_ptr<Geometry::Surface>> &surfaces, const std::string &algebra,
-                    std::vector<double> &boundingBox, Geometry::detail::ShapeInfo &&shapeInfo) {
+                    const std::vector<double> &boundingBox, Geometry::detail::ShapeInfo &&shapeInfo) {
   auto shape = std::make_unique<Geometry::CSGObject>();
   shape->setObject(21, algebra);
   shape->populate(surfaces);
