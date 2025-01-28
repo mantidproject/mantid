@@ -114,7 +114,7 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(std::vec
 
   auto const x = inWS->points(0);
   std::vector<double> y(x.size());
-  for (size_t i = 0; i < labels.size(); ++i) {
+  for (size_t i = 0; i < polynomialCoefficients.size(); ++i) {
     outWS->setSharedX(i, sharedInX);
     auto const &coefficients = polynomialCoefficients[i];
     std::transform(x.begin(), x.end(), y.begin(),
