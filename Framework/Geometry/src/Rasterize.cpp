@@ -27,21 +27,6 @@ constexpr static V3D X_AXIS{1, 0, 0};
 constexpr static V3D Y_AXIS{0, 1, 0};
 constexpr static V3D Z_AXIS{0, 0, 1};
 
-struct CylinderParameters {
-  double radius;
-  double height;
-  V3D centerBottomBase;
-  V3D symmetryaxis;
-};
-
-struct HollowCylinderParameters {
-  double radius;
-  double innerRadius;
-  double height;
-  V3D centerBottomBase;
-  V3D symmetryaxis;
-};
-
 // since cylinders are symmetric around the main axis, choose a random
 // perpendicular to have as the second axis
 V3D createPerpendicular(const V3D &symmetryAxis) {

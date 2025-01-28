@@ -470,15 +470,10 @@ int CSGObject::setObject(const int objName, const std::string &lineStr) {
   if (Mantid::Kernel::Strings::StrLook(lineStr, letters))
     return 0;
 
-  if (procString(lineStr)) // this currently does not fail:
-  {
-    m_surList.clear();
-    m_objNum = objName;
-    return 1;
-  }
-
-  // failure
-  return 0;
+  procString(lineStr);
+  m_surList.clear();
+  m_objNum = objName;
+  return 1;
 }
 
 /**
@@ -523,53 +518,6 @@ std::string CSGObject::cellStr(const std::map<int, CSGObject> &MList) const {
   }
   cx << TopStr;
   return cx.str();
-}
-
-/*
- * Calculate if there are any complementary components in
- * the object. That is lines with #(....)
- * @throw ColErr::ExBase :: Error with processing
- * @param lineStr :: Input string must:  ID Mat {Density}  {rules}
- * @param cellNum :: Number for cell since we don't have one
- * @retval 0 on no work to do
- * @retval 1 :: A (maybe there are many) #(...) object found
- */
-int CSGObject::complementaryObject(const int cellNum, std::string &lineStr) {
-  std::string::size_type posA = lineStr.find("#(");
-  // No work to do ?
-  if (posA == std::string::npos)
-    return 0;
-  posA += 2;
-
-  // First get the area to be removed
-  int numBrackets;
-  std::string::size_type posB;
-  posB = lineStr.find_first_of("()", posA);
-  if (posB == std::string::npos)
-    throw std::runtime_error("Object::complement :: " + lineStr);
-
-  numBrackets = (lineStr[posB] == '(') ? 1 : 0;
-  while (posB != std::string::npos && numBrackets) {
-    posB = lineStr.find_first_of("()", posB);
-    if (posB == std::string::npos)
-      break;
-    numBrackets += (lineStr[posB] == '(') ? 1 : -1;
-    posB++;
-  }
-
-  std::string Part = lineStr.substr(posA, posB - (posA + 1));
-
-  m_objNum = cellNum;
-  if (procString(Part)) {
-    m_surList.clear();
-    lineStr.erase(posA - 1, posB + 1); // Delete brackets ( Part ) .
-    std::ostringstream CompCell;
-    CompCell << cellNum << " ";
-    lineStr.insert(posA - 1, CompCell.str());
-    return 1;
-  }
-
-  throw std::runtime_error("Object::complement :: " + Part);
 }
 
 /**
@@ -699,7 +647,7 @@ std::unique_ptr<CompGrp> CSGObject::procComp(std::unique_ptr<Rule> ruleItem) con
     return std::make_unique<CompGrp>();
 
   Rule *Pptr = ruleItem->getParent();
-  Rule *RItemptr = ruleItem.get();
+  const Rule *RItemptr = ruleItem.get();
   auto CG = std::make_unique<CompGrp>(Pptr, std::move(ruleItem));
   if (Pptr) {
     const int Ln = Pptr->findLeaf(RItemptr);
@@ -902,11 +850,11 @@ void CSGObject::print() const {
   Rule *TA, *TB; // Temp. for storage
 
   while (!rst.empty()) {
-    Rule *T1 = rst.front();
+    const Rule *T1 = rst.front();
     rst.pop_front();
     if (T1) {
       Rcount++;
-      auto *surface = dynamic_cast<SurfPoint *>(T1);
+      const auto *surface = dynamic_cast<const SurfPoint *>(T1);
       if (surface)
         Cells.emplace_back(surface->getKeyN());
       else {
@@ -988,9 +936,8 @@ void CSGObject::write(std::ostream &outStream) const {
  * Processes the cell string. This is an internal function
  * to process a string with - String type has #( and ( )
  * @param lineStr :: String value
- * @returns 1 on success
  */
-int CSGObject::procString(const std::string &lineStr) {
+void CSGObject::procString(const std::string &lineStr) {
   m_topRule = nullptr;
   std::map<int, std::unique_ptr<Rule>> RuleList; // List for the rules
   int Ridx = 0;                                  // Current index (not necessary size of RuleList
@@ -1064,7 +1011,6 @@ int CSGObject::procString(const std::string &lineStr) {
                            "surface rules found. Expected=1, found=" +
                            std::to_string(RuleList.size()));
   }
-  return 1;
 }
 
 /**
