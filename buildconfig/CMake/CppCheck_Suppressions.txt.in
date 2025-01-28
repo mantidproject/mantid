@@ -194,7 +194,6 @@ missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/Ma
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/MonteCarloAbsorption.h:38
 uninitMemberVarPrivate:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/NormaliseToMonitor.h:114
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/PDCalibration.h:25
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/SofQWNormalisedPolygon.h:55
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/SpectrumAlgorithm.h:97
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AbsorptionCorrection.cpp:423
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AbsorptionCorrection.cpp:445
