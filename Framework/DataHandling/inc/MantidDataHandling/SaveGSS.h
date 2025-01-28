@@ -144,11 +144,11 @@ private:
   /// User specified header string
   std::vector<std::string> m_user_specified_gsas_header;
   /// flag to overwrite standard GSAS header
-  bool m_overwrite_std_gsas_header;
+  bool m_overwrite_std_gsas_header{false};
   /// User specified bank header
   std::vector<std::string> m_user_specified_bank_headers;
   /// flag to overwrite standard GSAS bank header
-  bool m_overwrite_std_bank_header;
+  bool m_overwrite_std_bank_header{false};
 };
 } // namespace DataHandling
 } // namespace Mantid
