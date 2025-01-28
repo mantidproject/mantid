@@ -399,7 +399,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadLog.cpp:
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMask.cpp:431
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadMuonStrategy.cpp:119
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadNexusMonitors2.cpp:452
-uselessCallsSubstr:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadPreNexus.cpp:263
 integerOverflowCond:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/byte_rel_comp.cpp:59
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:222
 unusedStructMember:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/LoadRaw/vms_convert.cpp:223
