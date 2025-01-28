@@ -199,10 +199,6 @@ uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/Re
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/ResampleX.h:27
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/SofQWNormalisedPolygon.h:55
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/SpectrumAlgorithm.h:97
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/TOFSANSResolution.h:47
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/WeightedMean.h:38
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/WorkspaceJoiners.h:35
-missingOverride:${CMAKE_SOURCE_DIR}/Framework/Algorithms/inc/MantidAlgorithms/XrayAbsorptionCorrection.h:36
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AbsorptionCorrection.cpp:423
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AbsorptionCorrection.cpp:445
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Algorithms/src/AddLogDerivative.cpp:54
