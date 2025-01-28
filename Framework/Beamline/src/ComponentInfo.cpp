@@ -52,7 +52,7 @@ ComponentInfo::ComponentInfo(
     std::shared_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> rotations,
     std::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
     std::shared_ptr<std::vector<ComponentType>> componentType, std::shared_ptr<const std::vector<std::string>> names,
-    int64_t sourceIndex, int64_t sampleIndex)
+    int64_t sourceIndex = -1, int64_t sampleIndex = -1)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(std::move(assemblySortedComponentIndices)),
       m_detectorRanges(std::move(detectorRanges)), m_componentRanges(std::move(componentRanges)),
