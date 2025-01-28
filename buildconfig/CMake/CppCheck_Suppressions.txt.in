@@ -89,4 +89,3 @@ internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/WeightedMeanMD.cpp:
 internalError:${CMAKE_SOURCE_DIR}/Framework/MDAlgorithms/src/XorMD.cpp:0
 
 // ----------- New list of suppressions after updating to cppcheck 2.16.0 -------------
-
