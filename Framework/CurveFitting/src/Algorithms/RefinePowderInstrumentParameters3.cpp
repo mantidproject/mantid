@@ -1218,7 +1218,7 @@ void duplicateParameters(map<string, Parameter> source, map<string, Parameter> &
  * exacly same as
  * source;
  */
-void copyParametersValues(map<string, Parameter> &source, map<string, Parameter> &target) {
+void copyParametersValues(const map<string, Parameter> &source, map<string, Parameter> &target) {
   // 1. Check
   if (source.size() != target.size())
     throw runtime_error("Source and Target should have the same size.");

@@ -483,8 +483,9 @@ void RefinePowderInstrumentParameters::refineInstrumentParametersMC(const TableW
  * Arguments
  * - fit2: boolean.  if True,then do Simplex fit for each step
  */
-void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(vector<string> &parnames, vector<double> &lowerbounds,
-                                                                  vector<double> &upperbounds,
+void RefinePowderInstrumentParameters::doParameterSpaceRandomWalk(vector<string> &parnames,
+                                                                  const vector<double> &lowerbounds,
+                                                                  const vector<double> &upperbounds,
                                                                   vector<double> &stepsizes, size_t maxsteps,
                                                                   double stepsizescalefactor, bool fit2) {
 

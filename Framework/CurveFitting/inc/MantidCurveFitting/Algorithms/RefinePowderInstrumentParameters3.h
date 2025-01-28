@@ -178,7 +178,7 @@ void restoreFunctionParameterValue(std::map<std::string, std::pair<double, doubl
 void duplicateParameters(std::map<std::string, Parameter> source, std::map<std::string, Parameter> &target);
 
 /// Copy parameters values from source to target
-void copyParametersValues(std::map<std::string, Parameter> &source, std::map<std::string, Parameter> &target);
+void copyParametersValues(const std::map<std::string, Parameter> &source, std::map<std::string, Parameter> &target);
 
 /// Calculate Chi^2
 double calculateFunctionChiSquare(const std::vector<double> &modelY, const std::vector<double> &dataY,
