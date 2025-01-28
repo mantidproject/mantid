@@ -106,7 +106,7 @@ returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/FunctionValues
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IAlgorithmRuntimeProps.h:16
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IMDWorkspace.h:92
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/IPowderDiffPeakFunction.h:41
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/MatrixWorkspace.h:354
+returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/MatrixWorkspace.h:392
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/MultipleFileProperty.h:122
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/MultipleFileProperty.h:125
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/API/inc/MantidAPI/ParameterTie.h:42
