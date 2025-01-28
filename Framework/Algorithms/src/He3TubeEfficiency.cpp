@@ -371,13 +371,13 @@ void He3TubeEfficiency::execEvent() {
     matrixOutputWS = matrixInputWS->clone();
     setProperty("OutputWorkspace", matrixOutputWS);
   }
-  m_outputWS = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(matrixOutputWS);
+  auto loc_outputWS = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(matrixOutputWS);
 
-  std::size_t numHistograms = m_outputWS->getNumberHistograms();
-  auto &spectrumInfo = m_outputWS->mutableSpectrumInfo();
+  std::size_t numHistograms = loc_outputWS->getNumberHistograms();
+  auto &spectrumInfo = loc_outputWS->mutableSpectrumInfo();
   m_progress = std::make_unique<API::Progress>(this, 0.0, 1.0, numHistograms);
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(*m_outputWS))
+  PARALLEL_FOR_IF(Kernel::threadSafe(*loc_outputWS))
   for (int i = 0; i < static_cast<int>(numHistograms); ++i) {
     PARALLEL_START_INTERRUPT_REGION
 
@@ -392,14 +392,14 @@ void He3TubeEfficiency::execEvent() {
     } catch (std::out_of_range &) {
       // Parameters are bad so skip correction
       PARALLEL_CRITICAL(deteff_invalid) {
-        m_spectraSkipped.emplace_back(m_outputWS->getAxis(1)->spectraNo(i));
-        m_outputWS->getSpectrum(i).clearData();
+        m_spectraSkipped.emplace_back(loc_outputWS->getAxis(1)->spectraNo(i));
+        loc_outputWS->getSpectrum(i).clearData();
         spectrumInfo.setMasked(i, true);
       }
     }
 
     // Do the correction
-    auto &evlist = m_outputWS->getSpectrum(i);
+    auto &evlist = loc_outputWS->getSpectrum(i);
     switch (evlist.getEventType()) {
     case API::TOF:
       // Switch to weights if needed.
@@ -424,7 +424,7 @@ void He3TubeEfficiency::execEvent() {
   }
   PARALLEL_CHECK_INTERRUPT_REGION
 
-  m_outputWS->clearMRU();
+  loc_outputWS->clearMRU();
 
   this->logErrors();
 }
