@@ -1361,8 +1361,6 @@ Degrees::Degrees() : Empty(), m_label("degrees") {}
 
 const UnitLabel Degrees::label() const { return m_label; }
 
-void Degrees::init() {}
-
 double Degrees::singleToTOF(const double x) const {
   UNUSED_ARG(x);
   throw std::runtime_error("Degrees is not allowed to be converted to TOF. ");
@@ -1372,10 +1370,6 @@ double Degrees::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
   throw std::runtime_error("Degrees is not allowed to be converted from TOF. ");
 }
-
-double Degrees::conversionTOFMax() const { return std::numeric_limits<double>::quiet_NaN(); }
-
-double Degrees::conversionTOFMin() const { return std::numeric_limits<double>::quiet_NaN(); }
 
 Unit *Degrees::clone() const { return new Degrees(*this); }
 
@@ -1395,8 +1389,6 @@ Temperature::Temperature() : Empty(), m_label("K") {}
 
 const UnitLabel Temperature::label() const { return m_label; }
 
-void Temperature::init() {}
-
 double Temperature::singleToTOF(const double x) const {
   UNUSED_ARG(x);
   throw std::runtime_error("Temperature is not allowed to be converted to TOF. ");
@@ -1406,10 +1398,6 @@ double Temperature::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
   throw std::runtime_error("Temperature is not allowed to be converted from TOF. ");
 }
-
-double Temperature::conversionTOFMin() const { return std::numeric_limits<double>::quiet_NaN(); }
-
-double Temperature::conversionTOFMax() const { return std::numeric_limits<double>::quiet_NaN(); }
 
 Unit *Temperature::clone() const { return new Temperature(*this); }
 
@@ -1425,8 +1413,6 @@ AtomicDistance::AtomicDistance() : Empty(), m_label("Atomic Distance") {}
 
 const UnitLabel AtomicDistance::label() const { return Symbol::Angstrom; }
 
-void AtomicDistance::init() {}
-
 Unit *AtomicDistance::clone() const { return new AtomicDistance(*this); }
 
 double AtomicDistance::singleToTOF(const double x) const {
@@ -1438,10 +1424,6 @@ double AtomicDistance::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
   throw std::runtime_error("Atomic Distance is not allowed to be converted from TOF. ");
 }
-
-double AtomicDistance::conversionTOFMin() const { return std::numeric_limits<double>::quiet_NaN(); }
-
-double AtomicDistance::conversionTOFMax() const { return std::numeric_limits<double>::quiet_NaN(); }
 
 // ================================================================================
 

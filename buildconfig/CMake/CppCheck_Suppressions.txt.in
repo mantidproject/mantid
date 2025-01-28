@@ -764,15 +764,6 @@ returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/MultiFil
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/MultiFileNameParser.h:153
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/NexusHDF5Descriptor.h:41
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/PropertyManager.h:106
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:609
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:614
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:615
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:638
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:643
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:644
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:659
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:664
-uselessOverride:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/Unit.h:665
 returnByReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/inc/MantidKernel/UsageService.h:63
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/AttenuationProfile.cpp:28
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Kernel/src/ConfigService.cpp:1698

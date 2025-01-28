@@ -600,13 +600,10 @@ public:
   const std::string caption() const override { return "Scattering angle"; }
   const UnitLabel label() const override;
 
-  void init() override;
   Unit *clone() const override;
 
   double singleToTOF(const double x) const override;
   double singleFromTOF(const double tof) const override;
-  double conversionTOFMin() const override;
-  double conversionTOFMax() const override;
 
 private:
   UnitLabel m_label;
@@ -629,13 +626,10 @@ public:
   const std::string caption() const override { return "Temperature"; }
   const UnitLabel label() const override;
 
-  void init() override;
   Unit *clone() const override;
 
   double singleToTOF(const double x) const override;
   double singleFromTOF(const double tof) const override;
-  double conversionTOFMin() const override;
-  double conversionTOFMax() const override;
 
 private:
   UnitLabel m_label;
@@ -650,13 +644,10 @@ public:
   const std::string caption() const override { return "Atomic Distance"; }
   const UnitLabel label() const override;
 
-  void init() override;
   Unit *clone() const override;
 
   double singleToTOF(const double x) const override;
   double singleFromTOF(const double tof) const override;
-  double conversionTOFMin() const override;
-  double conversionTOFMax() const override;
 
 private:
   UnitLabel m_label;
