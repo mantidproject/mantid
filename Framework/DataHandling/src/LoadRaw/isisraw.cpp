@@ -471,8 +471,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
   ioRAW(file, &ver8, 1, from_file);
   fgetpos(file, &dhdr_pos);
   ioRAW(file, &dhdr, 1, from_file);
-  int ndes, nout, nwords, outbuff_size = 100000, offset;
-  auto outbuff = new char[outbuff_size];
+  int ndes;
   if (!read_data) {
     ndes = ndata = 0;
     dat1 = nullptr;
@@ -491,13 +490,16 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
     ndes = 0;
     ioRAW(file, &dat1, ndata, from_file);
   } else {
+    int outbuff_size = 100000;
+    auto outbuff = new char[outbuff_size];
     ndata = 0;
     ndes = t_nper * (t_nsp1 + 1);
+    int nwords;
     ioRAW(file, &ddes, ndes, from_file);
     if (from_file) {
       dat1 = new uint32_t[ndes * (t_ntc1 + 1)];
     }
-    offset = 33 + ndes * 2;
+    int offset = 33 + ndes * 2;
     memset(outbuff, 0,
            outbuff_size); // so when we round up words we get a zero written
     for (i = 0; i < ndes; i++) {
@@ -506,6 +508,7 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
         ioRAW(file, outbuff, 4 * nwords, from_file);
         byte_rel_expn(outbuff, 4 * nwords, 0, reinterpret_cast<int *>(&dat1[i * (t_ntc1 + 1)]), t_ntc1 + 1);
       } else {
+        int nout;
         byte_rel_comp(reinterpret_cast<int *>(&dat1[i * (t_ntc1 + 1)]), t_ntc1 + 1, outbuff, outbuff_size, nout);
         nwords = (3 + nout) / 4; // round up to words
         ddes[i].nwords = nwords;
@@ -514,8 +517,9 @@ int ISISRAW::ioRAW(FILE *file, bool from_file, bool read_data) {
         ioRAW(file, outbuff, 4 * nwords, from_file);
       }
     }
+    delete[] outbuff;
   }
-  delete[] outbuff;
+
   // log section
   ioRAW(file, &logsect, 1, from_file);
   len_log = 2 + logsect.nlines;
@@ -903,14 +907,18 @@ int ISISRAW::vmstime(char *timbuf, int len, time_t time_value) {
    * get time in VMS format 01-JAN-1970 00:00:00
    */
   size_t i, n;
-  struct tm *tmstruct = nullptr;
 #ifdef MS_VISUAL_STUDIO
-  errno_t err = localtime_s(tmstruct, &time_value);
+  struct tm tm_local;
+  errno_t err = localtime_s(&tm_local, &time_value);
   if (err) {
     return FAILURE;
   }
+  const struct tm *tmstruct = &tm_local;
 #else  //_WIN32
-  tmstruct = localtime(&time_value);
+  const struct tm *tmstruct = localtime(&time_value);
+  if (!tmstruct) {
+    return FAILURE;
+  }
 #endif //_WIN32
   n = strftime(timbuf, len, "%d-%b-%Y %H:%M:%S", tmstruct);
   for (i = 0; i < n; i++) {
