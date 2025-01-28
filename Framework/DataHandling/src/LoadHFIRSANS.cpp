@@ -60,7 +60,8 @@ using namespace DataObjects;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadHFIRSANS)
 
-LoadHFIRSANS::LoadHFIRSANS() : m_sampleDetectorDistance(0.0) {}
+LoadHFIRSANS::LoadHFIRSANS()
+    : m_sansSpiceXmlFormatVersion(0.0), m_wavelength(0.0), m_dwavelength(0.0), m_sampleDetectorDistance(0.0) {}
 
 /**
  * Return the confidence with with this algorithm can load the file
