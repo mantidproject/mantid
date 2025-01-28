@@ -371,7 +371,7 @@ void He3TubeEfficiency::execEvent() {
     matrixOutputWS = matrixInputWS->clone();
     setProperty("OutputWorkspace", matrixOutputWS);
   }
-  auto m_outputWS = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(matrixOutputWS);
+  m_outputWS = std::dynamic_pointer_cast<DataObjects::EventWorkspace>(matrixOutputWS);
 
   std::size_t numHistograms = m_outputWS->getNumberHistograms();
   auto &spectrumInfo = m_outputWS->mutableSpectrumInfo();

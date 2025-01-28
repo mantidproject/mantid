@@ -245,7 +245,7 @@ TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable() {
   tablews->addColumn("double", "Value");
 
   // 1. Integer part
-  for (auto &intmapiter : m_intInfoMap) {
+  for (const auto &intmapiter : m_intInfoMap) {
     string text = intmapiter.first;
     size_t value = intmapiter.second;
 
@@ -274,7 +274,7 @@ TableWorkspace_sptr GetTimeSeriesLogInformation::generateStatisticTable() {
  *
  *  This algorithm should be reconsidered how to work with it.
  */
-void GetTimeSeriesLogInformation::exportErrorLog(const MatrixWorkspace_sptr &ws, vector<DateAndTime> abstimevec,
+void GetTimeSeriesLogInformation::exportErrorLog(const MatrixWorkspace_sptr &ws, vector<DateAndTime> &abstimevec,
                                                  double dts) {
   std::string outputdir = getProperty("OutputDirectory");
   if (!outputdir.empty() && outputdir.back() != '/')
@@ -498,7 +498,7 @@ void GetTimeSeriesLogInformation::checkLogBasicInforamtion() {
  *  @param values :: vector double of as the all the values in the time series
  * log to study.
  */
-void GetTimeSeriesLogInformation::checkLogValueChanging(vector<DateAndTime> timevec, vector<double> values,
+void GetTimeSeriesLogInformation::checkLogValueChanging(vector<DateAndTime> &timevec, vector<double> &values,
                                                         double delta) {
   std::stringstream ss;
   ss << "Alternating Threashold = " << delta << '\n';
