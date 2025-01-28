@@ -163,7 +163,7 @@ Taking Cuts
 #. Check that the ``File`` menu only has one menu item, ``Close``
 #. Change the rectangle by changing its size or dragging it to a different area of the slice plot. The cut plot should update accordingly.
 #. Click on ``Save Cut to Workspace`` and check the ``MD Histo`` tab of the Workspace Manager to verify that the new workspace was added
-#. Click on Flip Integration Axis. The y axis label changes from ``Energy Transfer (meV)`` to :math:`|Q| (\mathrm{\AA}^{-1})` or vice versa, depending on the initial label.
+#. Click on Flip Integration Axis. The x axis label changes from ``Energy Transfer (meV)`` to :math:`|Q| (\mathrm{\AA}^{-1})` or vice versa, depending on the initial label.
 
 
 .. figure:: ../../../../docs/source/images/flip_integration_axis.png
