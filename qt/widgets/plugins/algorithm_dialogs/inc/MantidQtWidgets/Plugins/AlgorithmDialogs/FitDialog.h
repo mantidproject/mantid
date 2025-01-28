@@ -180,7 +180,7 @@ public:
   /// Set all workspace properties
   void setProperties() override;
 
-protected:
+private:
   QSpinBox *m_workspaceIndex;
   QLineEdit *m_startX;
   QLineEdit *m_endX;
@@ -198,7 +198,7 @@ public:
   /// Set all workspace properties
   void setProperties() override;
 
-protected:
+private:
   QSpinBox *m_maxSize;
 };
 } // namespace CustomDialogs
