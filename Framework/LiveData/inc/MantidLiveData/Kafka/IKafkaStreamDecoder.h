@@ -79,7 +79,7 @@ public:
   ///@{
   bool isCapturing() const noexcept { return m_capturing; }
   virtual bool hasData() const noexcept = 0;
-  std::string runId() const noexcept { return m_runId; }
+  const std::string &runId() const noexcept { return m_runId; }
   int runNumber() const noexcept;
   virtual bool hasReachedEndOfRun() noexcept = 0;
   bool dataReset();

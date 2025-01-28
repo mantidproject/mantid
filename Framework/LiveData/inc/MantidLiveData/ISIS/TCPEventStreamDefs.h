@@ -58,7 +58,7 @@ struct TCPStreamEventHeader {
   bool isValid() const {
     return marker1 == marker && marker2 == marker && length >= sizeof(TCPStreamEventHeader) &&
            majorVersion() == TCPStreamEventHeader::major_version &&
-           minorVersion() >= TCPStreamEventHeader::minor_version && type != InvalidStream;
+           minorVersion() >= TCPStreamEventHeader::minor_version && type != static_cast<uint32_t>(InvalidStream);
   }
   GNU_DIAG_ON("tautological-compare")
 
@@ -67,7 +67,7 @@ struct TCPStreamEventHeader {
   static const uint32_t minor_version = 0; ///< reset to 0 in major version change, then incremented whenever
   /// layout of this or further packets changes in a backward compatible
   /// way
-  static const uint32_t current_version = (major_version << 16) | minor_version; ///< starts at 1, then incremented
+  static const uint32_t current_version = (major_version << 16); ///< starts at 1, then incremented
   /// whenever layout of this or
   /// further packets changes
   uint32_t majorVersion() const { return version >> 16; }
