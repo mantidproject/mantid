@@ -132,7 +132,8 @@ void LoadErrorEventsNexus::exec() {
   g_log.information() << "Loaded " << numEvents << " events with TOF min = " << min_tof << ", max = " << max_tof
                       << "\n";
 
-  eventWS->setAllX(HistogramData::BinEdges{min_tof, max_tof});
+  if (min_tof < max_tof)
+    eventWS->setAllX(HistogramData::BinEdges{min_tof, max_tof});
 
   outWS->getAxis(0)->setUnit("TOF");
   outWS->setYUnit("Counts");
