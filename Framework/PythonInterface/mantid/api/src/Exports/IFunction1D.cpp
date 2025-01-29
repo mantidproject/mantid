@@ -18,6 +18,8 @@ void export_IFunction1D() {
    * The Python held type, std::shared_ptr<IFunction1DAdapter>, allows
    * the class' virtual functions to be overridden in Python
    */
+  // suppress c-style cast of Function1D object - think this is desired behaviour
+  // cppcheck-suppress cstyleCast
   class_<IFunction1D, bases<IFunction>, std::shared_ptr<IFunction1DAdapter>, boost::noncopyable>(
       "IFunction1D", "Base class for 1D Fit functions")
       .def("function1D", (object(IFunction1DAdapter::*)(const object &) const)&IFunction1DAdapter::function1D,

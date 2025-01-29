@@ -17,7 +17,8 @@ using namespace boost::python;
 void export_IPeakFunction() {
 
   register_ptr_to_python<std::shared_ptr<IPeakFunction>>();
-
+  // suppress c-style cast of IPakFunction object - think this is desired behaviour
+  // cppcheck-suppress cstyleCast
   class_<IPeakFunction, bases<IFunction1D>, std::shared_ptr<IPeakFunctionAdapter>, boost::noncopyable>(
       "IPeakFunction", "Base class for peak Fit functions")
       .def("functionLocal", (object(IPeakFunctionAdapter::*)(const object &) const)&IPeakFunctionAdapter::functionLocal,

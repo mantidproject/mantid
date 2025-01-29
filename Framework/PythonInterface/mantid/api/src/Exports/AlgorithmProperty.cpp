@@ -27,7 +27,7 @@ namespace {
  * @param direction An output/input/inout property
  * @return A pointer to a new AlgorithmProperty object
  */
-AlgorithmProperty *createPropertyWithValidatorAndDirection(const std::string &name, IValidator *validator,
+AlgorithmProperty *createPropertyWithValidatorAndDirection(const std::string &name, const IValidator *validator,
                                                            unsigned int direction) {
   return new AlgorithmProperty(name, validator->clone(), direction);
 }
