@@ -144,7 +144,9 @@ double XMLInstrumentParameter::createParamValue(TimeSeriesProperty<double> const
     }
     // Looking for string: "position n", where n is an integer and is a 1-based
     // index
-    else if (m_extractSingleValueAs.starts_with("position 0") && m_extractSingleValueAs.size() >= 10) {
+    // cppcheck-suppress stlIfStrFind as string::starts_with(), cppcheck's suggested change, does not allow for position
+    // 0 to be anywhere
+    else if (m_extractSingleValueAs.find("position") == 0 && m_extractSingleValueAs.size() >= 10) {
       std::stringstream extractPosition(m_extractSingleValueAs);
       std::string dummy;
       int position;
