@@ -6,7 +6,7 @@
 #pragma once
 
 #include "MantidNexusCpp/DllConfig.h"
-#include <iostream>
+#include <iosfwd>
 
 typedef const char CONSTCHAR;
 
