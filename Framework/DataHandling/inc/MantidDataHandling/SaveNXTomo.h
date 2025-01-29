@@ -116,7 +116,7 @@ private:
   std::vector<DataObjects::Workspace2D_sptr> m_workspaces;
 
   // hold reference to NeXusFile;
-  std::unique_ptr<::NeXus::File> nxFile;
+  std::unique_ptr<::NeXus::File> m_nxFile;
 };
 
 } // namespace DataHandling
