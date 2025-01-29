@@ -282,6 +282,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename, const std::stri
   file.openGroup("instrument", "NXinstrument");
   file.openGroup(bankName, "NXdetector");
 
+  m_numPixels = 0;
   std::vector<uint32_t> pixel_id;
 
   if (!m_assumeOldFile) {
