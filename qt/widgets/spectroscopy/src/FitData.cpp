@@ -122,6 +122,8 @@ std::string cutLastOf(const std::string &str, const std::string &delimiter) {
   return str;
 }
 
+// formatString cannot be const to allow the bitwise and operation in the try block
+// cppcheck-suppress constParameterReference
 std::unique_ptr<boost::basic_format<char>> tryPassFormatArgument(boost::basic_format<char> &formatString,
                                                                  const std::string &arg) {
   auto tmpString = formatString;
