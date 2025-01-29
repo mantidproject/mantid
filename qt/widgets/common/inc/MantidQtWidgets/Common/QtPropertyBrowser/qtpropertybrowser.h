@@ -235,9 +235,17 @@ public:
     disconnectPropertyManager(manager);
     m_managers.remove(manager);
   }
+<<<<<<< HEAD
 
   const QSet<PropertyManager *> &propertyManagers() const { return m_managers; }
 
+||||||| parent of b672f89f0d9 (Added more fixes)
+  QSet<PropertyManager *> &propertyManagers() const { return m_managers; }
+=======
+  // returning a reference to the QSet is not possible
+  // cppcheck-suppress returnByReference
+  QSet<PropertyManager *> propertyManagers() const { return m_managers; }
+>>>>>>> b672f89f0d9 (Added more fixes)
   PropertyManager *propertyManager(QtProperty *property) const {
     const QtAbstractPropertyManager *manager = property->propertyManager();
     QSetIterator<PropertyManager *> itManager(m_managers);

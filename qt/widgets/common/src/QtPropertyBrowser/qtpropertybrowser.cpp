@@ -1634,7 +1634,6 @@ QtBrowserItem *QtAbstractPropertyBrowser::topLevelItem(QtProperty *property) con
 
     \sa topLevelItem()
 */
-
 const QList<QtBrowserItem *> &QtAbstractPropertyBrowser::topLevelItems() const { return d_ptr->m_topLevelIndexes; }
 
 /**
