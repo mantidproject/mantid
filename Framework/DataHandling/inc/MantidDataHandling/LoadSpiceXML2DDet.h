@@ -27,10 +27,10 @@ public:
   bool isInteger() const;
   bool isDouble() const;
 
-  const std::string getName() const;
-  const std::string getUnit() const;
-  const std::string getDescription() const;
-  const std::string getValue() const;
+  const std::string &getName() const;
+  const std::string &getUnit() const;
+  const std::string &getDescription() const;
+  const std::string &getValue() const;
 
   std::string m_name;
   std::string m_value;

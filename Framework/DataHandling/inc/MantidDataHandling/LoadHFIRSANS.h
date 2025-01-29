@@ -60,6 +60,8 @@ namespace DataHandling {
 class MANTID_DATAHANDLING_DLL LoadHFIRSANS : public API::IFileLoader<Kernel::FileDescriptor> {
 
 public:
+  /// Constructor
+  LoadHFIRSANS();
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "LoadHFIRSANS"; }
   /// Summary of algorithms purpose
@@ -120,7 +122,7 @@ private:
   DataObjects::Workspace2D_sptr m_workspace;
   std::map<std::string, std::string> m_metadata;
 
-  double m_sansSpiceXmlFormatVersion{0.0};
+  double m_sansSpiceXmlFormatVersion;
   double m_wavelength;
   double m_dwavelength;
   double m_sampleDetectorDistance;
