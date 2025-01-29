@@ -33,6 +33,9 @@ from mantid.api import Progress
 
 SpectrumCollection = AbinsSpectrum1DCollection | AbinsSpectrum2DCollection
 
+# Raw S contributions as a dict keyed by (atom_index, quantum_order)
+SByAtomAndOrder = Dict[Tuple[int, int], np.ndarray]
+
 
 class SPowderSemiEmpiricalCalculator:
     """
@@ -730,9 +733,6 @@ class SPowderSemiEmpiricalCalculator:
                 )
             case _:
                 raise ValueError("Unexpected shape of q2 array")
-
-    # Pass around raw S contributions as a dict keyed by (atom_index, quantum_order)
-    SByAtomAndOrder = Dict[Tuple[int, int], np.ndarray]
 
     @staticmethod
     def _add_s_contributions(a: SByAtomAndOrder, b: SByAtomAndOrder) -> SByAtomAndOrder:
