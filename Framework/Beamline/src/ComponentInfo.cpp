@@ -53,7 +53,7 @@ ComponentInfo::ComponentInfo(
     std::shared_ptr<std::vector<Eigen::Quaterniond, Eigen::aligned_allocator<Eigen::Quaterniond>>> rotations,
     std::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
     std::shared_ptr<std::vector<ComponentType>> componentType, std::shared_ptr<const std::vector<std::string>> names,
-    int64_t sourceIndex = -1, int64_t sampleIndex = -1)
+    int64_t sourceIndex, int64_t sampleIndex)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(std::move(assemblySortedComponentIndices)),
       m_detectorRanges(std::move(detectorRanges)), m_componentRanges(std::move(componentRanges)),
@@ -510,12 +510,10 @@ bool ComponentInfo::hasSource() const { return m_sourceIndex >= 0; }
  * @returns true if sources are equivalent
  */
 bool ComponentInfo::hasEquivalentSource(const ComponentInfo &other) const {
-  if (this->hasSource() != other.hasSource())
-    return false; // one has a source while the other does not
   if (this->hasSource() && other.hasSource()) {
     return (this->sourcePosition() - other.sourcePosition()).norm() < 1e-9;
   }
-  return true;
+  return this->hasSource() == other.hasSource();
 }
 
 bool ComponentInfo::hasSample() const { return m_sampleIndex >= 0; }
@@ -529,12 +527,10 @@ bool ComponentInfo::hasSample() const { return m_sampleIndex >= 0; }
  * @returns true if sources are equivalent
  */
 bool ComponentInfo::hasEquivalentSample(const ComponentInfo &other) const {
-  if (this->hasSample() != other.hasSample())
-    return false; // one has a source while the other does not
   if (this->hasSample() && other.hasSample()) {
     return (this->samplePosition() - other.samplePosition()).norm() < 1e-9;
   }
-  return true;
+  return this->hasSample() == other.hasSample();
 }
 
 const Eigen::Vector3d &ComponentInfo::sourcePosition() const {
