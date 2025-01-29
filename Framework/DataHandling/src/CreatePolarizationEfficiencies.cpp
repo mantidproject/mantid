@@ -14,7 +14,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Unit.h"
-#include <ranges>
 
 #include <memory>
 
@@ -99,8 +98,8 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(std::vec
 
   std::vector<std::vector<double>> polynomialCoefficients(labels.size());
 
-  std::ranges::transform(labels, polynomialCoefficients.begin(),
-                         [this](const std::string &label) -> std::vector<double> { return getProperty(label); });
+  std::transform(labels.cbegin(), labels.cend(), polynomialCoefficients.begin(),
+                 [this](const std::string &label) -> std::vector<double> { return getProperty(label); });
 
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   auto sharedInX = inWS->sharedX(0);
@@ -117,7 +116,8 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(std::vec
   for (size_t i = 0; i < polynomialCoefficients.size(); ++i) {
     outWS->setSharedX(i, sharedInX);
     auto const &coefficients = polynomialCoefficients[i];
-    std::ranges::transform(x, y.begin(), [&coefficients](double v) { return calculatePolynomial(coefficients, v); });
+    std::transform(x.cbegin(), x.cend(), y.begin(),
+                   [&coefficients](double v) { return calculatePolynomial(coefficients, v); });
     outWS->mutableY(i) = y;
     axis1Raw->setLabel(i, labels[i]);
   }
