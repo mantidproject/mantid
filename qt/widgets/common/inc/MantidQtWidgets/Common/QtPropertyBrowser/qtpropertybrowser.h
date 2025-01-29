@@ -102,6 +102,8 @@ class QtPropertyPrivate;
 class EXPORT_OPT_MANTIDQT_COMMON QtProperty {
 public:
   virtual ~QtProperty();
+  QtProperty(const QtProperty &) = delete;
+  QtProperty &operator=(const QtProperty &) = delete;
 
   QList<QtProperty *> subProperties() const;
 
@@ -282,6 +284,8 @@ class QtBrowserItemPrivate;
 
 class EXPORT_OPT_MANTIDQT_COMMON QtBrowserItem {
 public:
+  QtBrowserItem(const QtBrowserItem &) = delete;
+  QtBrowserItem &operator=(const QtBrowserItem &) = delete;
   QtProperty *property() const;
   QtBrowserItem *parent() const;
   QList<QtBrowserItem *> children() const;

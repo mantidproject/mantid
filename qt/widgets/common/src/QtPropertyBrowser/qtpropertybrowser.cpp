@@ -413,7 +413,7 @@ void QtProperty::insertSubProperty(QtProperty *property, QtProperty *afterProper
   int newPos = 0;
   QtProperty *properAfterProperty = nullptr;
   while (pos < pendingList.count()) {
-    QtProperty *i = pendingList.at(pos);
+    const QtProperty *i = pendingList.at(pos);
     if (i == property)
       return; // if item is already inserted in this item then cannot add.
     if (i == afterProperty) {
@@ -1222,7 +1222,7 @@ void QtAbstractPropertyBrowserPrivate::createBrowserIndexes(QtProperty *property
     QListIterator<QtBrowserItem *> itIndex(indexes);
     while (itIndex.hasNext()) {
       QtBrowserItem *idx = itIndex.next();
-      QtBrowserItem *parentIdx = idx->parent();
+      const QtBrowserItem *parentIdx = idx->parent();
       if ((parentProperty && parentIdx && parentIdx->property() == parentProperty) || (!parentProperty && !parentIdx))
         parentToAfter[idx->parent()] = idx;
     }
@@ -1279,7 +1279,7 @@ void QtAbstractPropertyBrowserPrivate::removeBrowserIndexes(QtProperty *property
   QListIterator<QtBrowserItem *> itIndex(indexes);
   while (itIndex.hasNext()) {
     QtBrowserItem *idx = itIndex.next();
-    QtBrowserItem *parentIdx = idx->parent();
+    const QtBrowserItem *parentIdx = idx->parent();
     if ((parentProperty && parentIdx && parentIdx->property() == parentProperty) || (!parentProperty && !parentIdx))
       toRemove.append(idx);
   }
@@ -1700,7 +1700,7 @@ QtBrowserItem *QtAbstractPropertyBrowser::insertProperty(QtProperty *property, Q
   int pos = 0;
   int newPos = 0;
   while (pos < pendingList.count()) {
-    QtProperty *prop = pendingList.at(pos);
+    const QtProperty *prop = pendingList.at(pos);
     if (prop == property)
       return nullptr;
     if (prop == afterProperty) {
@@ -1844,7 +1844,7 @@ QtBrowserItem *QtAbstractPropertyBrowser::currentItem() const { return d_ptr->m_
     \sa currentItem(), currentItemChanged()
 */
 void QtAbstractPropertyBrowser::setCurrentItem(QtBrowserItem *item) {
-  QtBrowserItem *oldItem = d_ptr->m_currentItem;
+  const QtBrowserItem *oldItem = d_ptr->m_currentItem;
   d_ptr->m_currentItem = item;
   if (oldItem != item)
     emit currentItemChanged(item);

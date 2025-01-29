@@ -122,8 +122,8 @@ class QtMetaEnumProvider {
 public:
   QtMetaEnumProvider();
 
-  QStringList policyEnumNames() const { return m_policyEnumNames; }
-  QStringList languageEnumNames() const { return m_languageEnumNames; }
+  const QStringList &policyEnumNames() const { return m_policyEnumNames; }
+  const QStringList &languageEnumNames() const { return m_languageEnumNames; }
   QStringList countryEnumNames(QLocale::Language language) const { return m_countryEnumNames.value(language); }
 
   QSizePolicy::Policy indexToSizePolicy(int index) const;
