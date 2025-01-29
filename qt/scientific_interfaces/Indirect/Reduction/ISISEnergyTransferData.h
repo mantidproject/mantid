@@ -215,7 +215,7 @@ public:
               const IETBackgroundData &backgroundData)
       : m_inputData(inputData), m_conversionData(conversionData), m_backgroundData(backgroundData) {}
 
-  IETInputData getInputData() const { return m_inputData; }
+  const IETInputData &getInputData() const { return m_inputData; }
   IETConversionData getConversionData() const { return m_conversionData; }
   IETBackgroundData getBackgroundData() const { return m_backgroundData; }
 

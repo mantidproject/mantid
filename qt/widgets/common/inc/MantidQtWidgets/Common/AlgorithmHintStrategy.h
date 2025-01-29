@@ -32,14 +32,16 @@ public:
   std::vector<Hint> createHints() override {
     std::vector<Hint> hints;
     auto properties = m_algorithm->getProperties();
-    properties.erase(
-        std::remove_if(properties.begin(), properties.end(),
-                       [this](Mantid::Kernel::Property *property) -> bool { return isBlacklisted(property->name()); }),
-        properties.end());
+    properties.erase(std::remove_if(properties.begin(), properties.end(),
+                                    [this](const Mantid::Kernel::Property *property) -> bool {
+                                      return isBlacklisted(property->name());
+                                    }),
+                     properties.end());
     hints.reserve(properties.size());
-    std::transform(
-        properties.cbegin(), properties.cend(), std::back_inserter(hints),
-        [](Mantid::Kernel::Property *property) -> Hint { return Hint(property->name(), property->documentation()); });
+    std::transform(properties.cbegin(), properties.cend(), std::back_inserter(hints),
+                   [](const Mantid::Kernel::Property *property) -> Hint {
+                     return Hint(property->name(), property->documentation());
+                   });
 
     return hints;
   }

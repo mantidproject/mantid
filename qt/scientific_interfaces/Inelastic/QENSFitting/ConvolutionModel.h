@@ -18,7 +18,7 @@ using ExtendedResolutionType = IndexCollectionType<WorkspaceID, std::string>;
 class MANTIDQT_INELASTIC_DLL ConvolutionModel : public FittingModel {
 public:
   ConvolutionModel();
-  ~ConvolutionModel() = default;
+  ~ConvolutionModel() override = default;
 
   std::optional<double> getInstrumentResolution(WorkspaceID workspaceID) const;
 
