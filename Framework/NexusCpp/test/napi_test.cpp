@@ -24,6 +24,7 @@
   $Id$
 
 ----------------------------------------------------------------------------*/
+#include "MantidNexusCpp/NeXusFile_fwd.h"
 #include "MantidNexusCpp/napi.h"
 #include "napi_test_util.h"
 #include <filesystem>
@@ -87,103 +88,104 @@ int main(int argc, char *argv[]) {
 
   std::cout << "Creating \"" << nxFile << "\"" << std::endl;
   // create file
-  if (NXopen(nxFile.c_str(), nx_creation_code, &fileid) != NX_OK) {
+  if (NXopen(nxFile.c_str(), nx_creation_code, &fileid) != NXstatus::OKAY) {
     std::cerr << "Failed to NXopen(" << nxFile << ", " << nx_creation_code << ", fileid)\n";
     return TEST_FAILED;
   }
   if (nx_creation_code == NXACC_CREATE5) {
     std::cout << "Trying to reopen the file handle" << std::endl;
     NXhandle clone_fileid;
-    if (NXreopen(fileid, &clone_fileid) != NX_OK) {
+    if (NXreopen(fileid, &clone_fileid) != NXstatus::OKAY) {
       std::cerr << "Failed to NXreopen " << nxFile << "\n";
       return TEST_FAILED;
     }
   }
-  if (NXmakegroup(fileid, "entry", "NXentry") != NX_OK)
+  if (NXmakegroup(fileid, "entry", "NXentry") != NXstatus::OKAY)
     ON_ERROR("NXmakegroup(fileid, \"entry\", \"NXentry\")");
-  if (NXopengroup(fileid, "entry", "NXentry") != NX_OK)
+  if (NXopengroup(fileid, "entry", "NXentry") != NXstatus::OKAY)
     ON_ERROR("NXopengroup(fileid, \"entry\", \"NXentry\")");
-  if (NXputattr(fileid, "hugo", "namenlos", static_cast<int>(strlen("namenlos")), NX_CHAR) != NX_OK)
-    ON_ERROR("NXputattr(fileid, \"hugo\", \"namenlos\", strlen, NX_CHAR)");
-  if (NXputattr(fileid, "cucumber", "passion", static_cast<int>(strlen("passion")), NX_CHAR) != NX_OK)
-    ON_ERROR("NXputattr(fileid, \"cucumber\", \"passion\", strlen, NX_CHAR)");
+  if (NXputattr(fileid, "hugo", "namenlos", static_cast<int>(strlen("namenlos")), NXnumtype::CHAR) != NXstatus::OKAY)
+    ON_ERROR("NXputattr(fileid, \"hugo\", \"namenlos\", strlen, NXnumtype::CHAR)");
+  if (NXputattr(fileid, "cucumber", "passion", static_cast<int>(strlen("passion")), NXnumtype::CHAR) != NXstatus::OKAY)
+    ON_ERROR("NXputattr(fileid, \"cucumber\", \"passion\", strlen, NXnumtype::CHAR)");
   NXlen = static_cast<int>(strlen(ch_test_data));
-  if (NXmakedata(fileid, "ch_data", NX_CHAR, 1, &NXlen) != NX_OK)
+  if (NXmakedata(fileid, "ch_data", NXnumtype::CHAR, 1, &NXlen) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopendata(fileid, "ch_data") != NX_OK)
+  if (NXopendata(fileid, "ch_data") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXputdata(fileid, ch_test_data) != NX_OK)
+  if (NXputdata(fileid, ch_test_data) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosedata(fileid) != NX_OK)
+  if (NXclosedata(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXmakedata(fileid, "c1_data", NX_CHAR, 2, array_dims) != NX_OK)
+  if (NXmakedata(fileid, "c1_data", NXnumtype::CHAR, 2, array_dims) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopendata(fileid, "c1_data") != NX_OK)
+  if (NXopendata(fileid, "c1_data") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXputdata(fileid, c1_array) != NX_OK)
+  if (NXputdata(fileid, c1_array) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosedata(fileid) != NX_OK)
+  if (NXclosedata(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXmakedata(fileid, "i1_data", NX_INT8, 1, &array_dims[1]) != NX_OK)
+  if (NXmakedata(fileid, "i1_data", NXnumtype::INT8, 1, &array_dims[1]) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopendata(fileid, "i1_data") != NX_OK)
+  if (NXopendata(fileid, "i1_data") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXputdata(fileid, i1_array) != NX_OK)
+  if (NXputdata(fileid, i1_array) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosedata(fileid) != NX_OK)
+  if (NXclosedata(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXmakedata(fileid, "i2_data", NX_INT16, 1, &array_dims[1]) != NX_OK)
+  if (NXmakedata(fileid, "i2_data", NXnumtype::INT16, 1, &array_dims[1]) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopendata(fileid, "i2_data") != NX_OK)
+  if (NXopendata(fileid, "i2_data") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXputdata(fileid, i2_array) != NX_OK)
+  if (NXputdata(fileid, i2_array) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosedata(fileid) != NX_OK)
+  if (NXclosedata(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXmakedata(fileid, "i4_data", NX_INT32, 1, &array_dims[1]) != NX_OK)
+  if (NXmakedata(fileid, "i4_data", NXnumtype::INT32, 1, &array_dims[1]) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopendata(fileid, "i4_data") != NX_OK)
+  if (NXopendata(fileid, "i4_data") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXputdata(fileid, i4_array) != NX_OK)
+  if (NXputdata(fileid, i4_array) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosedata(fileid) != NX_OK)
+  if (NXclosedata(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXcompmakedata(fileid, "r4_data", NX_FLOAT32, 2, array_dims, NX_COMP_LZW, chunk_size) != NX_OK)
+  if (NXcompmakedata(fileid, "r4_data", NXnumtype::FLOAT32, 2, array_dims, NX_COMP_LZW, chunk_size) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopendata(fileid, "r4_data") != NX_OK)
+  if (NXopendata(fileid, "r4_data") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXputdata(fileid, r4_array) != NX_OK)
+  if (NXputdata(fileid, r4_array) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosedata(fileid) != NX_OK)
+  if (NXclosedata(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXmakedata(fileid, "r8_data", NX_FLOAT64, 2, array_dims) != NX_OK)
+  if (NXmakedata(fileid, "r8_data", NXnumtype::FLOAT64, 2, array_dims) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopendata(fileid, "r8_data") != NX_OK)
+  if (NXopendata(fileid, "r8_data") != NXstatus::OKAY)
     return TEST_FAILED;
   slab_start[0] = 4;
   slab_start[1] = 0;
   slab_size[0] = 1;
   slab_size[1] = 4;
   // cppcheck-suppress cstyleCast
-  if (NXputslab(fileid, (double *)r8_array + 16, slab_start, slab_size) != NX_OK)
+  if (NXputslab(fileid, (double *)r8_array + 16, slab_start, slab_size) != NXstatus::OKAY)
     return TEST_FAILED;
   slab_start[0] = 0;
   slab_start[1] = 0;
   slab_size[0] = 4;
   slab_size[1] = 4;
-  if (NXputslab(fileid, r8_array, slab_start, slab_size) != NX_OK)
+  if (NXputslab(fileid, r8_array, slab_start, slab_size) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXputattr(fileid, "ch_attribute", ch_test_data, static_cast<int>(strlen(ch_test_data)), NX_CHAR) != NX_OK)
+  if (NXputattr(fileid, "ch_attribute", ch_test_data, static_cast<int>(strlen(ch_test_data)), NXnumtype::CHAR) !=
+      NXstatus::OKAY)
     return TEST_FAILED;
   i = 42;
-  if (NXputattr(fileid, "i4_attribute", &i, 1, NX_INT32) != NX_OK)
+  if (NXputattr(fileid, "i4_attribute", &i, 1, NXnumtype::INT32) != NXstatus::OKAY)
     return TEST_FAILED;
   r = static_cast<float>(3.14159265);
-  if (NXputattr(fileid, "r4_attribute", &r, 1, NX_FLOAT32) != NX_OK)
+  if (NXputattr(fileid, "r4_attribute", &r, 1, NXnumtype::FLOAT32) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXgetdataID(fileid, &dlink) != NX_OK)
+  if (NXgetdataID(fileid, &dlink) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosedata(fileid) != NX_OK)
+  if (NXclosedata(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
   if (nx_creation_code != NXACC_CREATE4) {
 #if HAVE_LONG_LONG_INT
@@ -192,20 +194,20 @@ int main(int argc, char *argv[]) {
     const int64_t grossezahl[4] = {12, 555555, 23, 77777};
 #endif /* HAVE_LONG_LONG_INT */
     int dims[1] = {4};
-    if (NXmakedata(fileid, "grosse_zahl", NX_INT64, 1, dims) == NX_OK) {
-      if (NXopendata(fileid, "grosse_zahl") != NX_OK)
+    if (NXmakedata(fileid, "grosse_zahl", NXnumtype::INT64, 1, dims) == NXstatus::OKAY) {
+      if (NXopendata(fileid, "grosse_zahl") != NXstatus::OKAY)
         return TEST_FAILED;
-      if (NXputdata(fileid, grossezahl) != NX_OK)
+      if (NXputdata(fileid, grossezahl) != NXstatus::OKAY)
         return TEST_FAILED;
-      if (NXclosedata(fileid) != NX_OK)
+      if (NXclosedata(fileid) != NXstatus::OKAY)
         return TEST_FAILED;
     }
   }
-  if (NXmakegroup(fileid, "data", "NXdata") != NX_OK)
+  if (NXmakegroup(fileid, "data", "NXdata") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopengroup(fileid, "data", "NXdata") != NX_OK)
+  if (NXopengroup(fileid, "data", "NXdata") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXmakelink(fileid, &dlink) != NX_OK)
+  if (NXmakelink(fileid, &dlink) != NXstatus::OKAY)
     return TEST_FAILED;
   int dims[2] = {100, 20};
   for (i = 0; i < 100; i++) {
@@ -214,62 +216,62 @@ int main(int argc, char *argv[]) {
     }
   }
   int cdims[2] = {20, 20};
-  if (NXcompmakedata(fileid, "comp_data", NX_INT32, 2, dims, NX_COMP_LZW, cdims) != NX_OK)
+  if (NXcompmakedata(fileid, "comp_data", NXnumtype::INT32, 2, dims, NX_COMP_LZW, cdims) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopendata(fileid, "comp_data") != NX_OK)
+  if (NXopendata(fileid, "comp_data") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXputdata(fileid, comp_array) != NX_OK)
+  if (NXputdata(fileid, comp_array) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosedata(fileid) != NX_OK)
+  if (NXclosedata(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXflush(&fileid) != NX_OK)
+  if (NXflush(&fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXmakedata(fileid, "flush_data", NX_INT32, 1, unlimited_dims) != NX_OK)
+  if (NXmakedata(fileid, "flush_data", NXnumtype::INT32, 1, unlimited_dims) != NXstatus::OKAY)
     return TEST_FAILED;
   slab_size[0] = 1;
   for (i = 0; i < 7; i++) {
     slab_start[0] = i;
-    if (NXopendata(fileid, "flush_data") != NX_OK)
+    if (NXopendata(fileid, "flush_data") != NXstatus::OKAY)
       return TEST_FAILED;
-    if (NXputslab(fileid, &i, slab_start, slab_size) != NX_OK)
+    if (NXputslab(fileid, &i, slab_start, slab_size) != NXstatus::OKAY)
       return TEST_FAILED;
-    if (NXflush(&fileid) != NX_OK)
+    if (NXflush(&fileid) != NXstatus::OKAY)
       return TEST_FAILED;
   }
-  if (NXclosegroup(fileid) != NX_OK)
+  if (NXclosegroup(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXmakegroup(fileid, "sample", "NXsample") != NX_OK)
+  if (NXmakegroup(fileid, "sample", "NXsample") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopengroup(fileid, "sample", "NXsample") != NX_OK)
+  if (NXopengroup(fileid, "sample", "NXsample") != NXstatus::OKAY)
     return TEST_FAILED;
   NXlen = 12;
-  if (NXmakedata(fileid, "ch_data", NX_CHAR, 1, &NXlen) != NX_OK)
+  if (NXmakedata(fileid, "ch_data", NXnumtype::CHAR, 1, &NXlen) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopendata(fileid, "ch_data") != NX_OK)
+  if (NXopendata(fileid, "ch_data") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXputdata(fileid, "NeXus sample") != NX_OK)
+  if (NXputdata(fileid, "NeXus sample") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosedata(fileid) != NX_OK)
+  if (NXclosedata(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXgetgroupID(fileid, &glink) != NX_OK)
+  if (NXgetgroupID(fileid, &glink) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosegroup(fileid) != NX_OK)
+  if (NXclosegroup(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosegroup(fileid) != NX_OK)
+  if (NXclosegroup(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXmakegroup(fileid, "link", "NXentry") != NX_OK)
+  if (NXmakegroup(fileid, "link", "NXentry") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopengroup(fileid, "link", "NXentry") != NX_OK)
+  if (NXopengroup(fileid, "link", "NXentry") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXmakelink(fileid, &glink) != NX_OK)
+  if (NXmakelink(fileid, &glink) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXmakenamedlink(fileid, "renLinkGroup", &glink) != NX_OK)
+  if (NXmakenamedlink(fileid, "renLinkGroup", &glink) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXmakenamedlink(fileid, "renLinkData", &dlink) != NX_OK)
+  if (NXmakenamedlink(fileid, "renLinkData", &dlink) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosegroup(fileid) != NX_OK)
+  if (NXclosegroup(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclose(&fileid) != NX_OK)
+  if (NXclose(&fileid) != NXstatus::OKAY)
     return TEST_FAILED;
 
   if ((argc >= 2) && !strcmp(argv[1], "-q")) {
@@ -282,12 +284,12 @@ int main(int argc, char *argv[]) {
 
   // read test
   std::cout << "Read/Write to read \"" << nxFile << "\"" << std::endl;
-  if (NXopen(nxFile.c_str(), NXACC_RDWR, &fileid) != NX_OK) {
+  if (NXopen(nxFile.c_str(), NXACC_RDWR, &fileid) != NXstatus::OKAY) {
     std::cerr << "Failed to open \"" << nxFile << "\" for read/write" << std::endl;
     return TEST_FAILED;
   }
   char filename[256];
-  if (NXinquirefile(fileid, filename, 256) != NX_OK) {
+  if (NXinquirefile(fileid, filename, 256) != NXstatus::OKAY) {
     return TEST_FAILED;
   }
   std::cout << "NXinquirefile found: " << relativePathOf(filename) << std::endl;
@@ -295,87 +297,89 @@ int main(int argc, char *argv[]) {
   if (i > 0) {
     std::cout << "Number of global attributes: " << i << std::endl;
   }
-  int NXtype, entry_status, attr_status;
+  NXnumtype NXtype;
+  NXstatus entry_status, attr_status;
   int NXrank, NXdims[32];
   do {
     // cppcheck-suppress argumentSize
     attr_status = NXgetnextattra(fileid, name, &NXrank, NXdims, &NXtype);
-    if (attr_status == NX_ERROR)
+    if (attr_status == NXstatus::ERROR)
       return TEST_FAILED;
-    if (attr_status == NX_OK) {
+    if (attr_status == NXstatus::OKAY) {
       switch (NXtype) {
-      case NX_CHAR:
+      case NXnumtype::CHAR:
         NXlen = sizeof(char_buffer);
-        if (NXgetattr(fileid, name, char_buffer, &NXlen, &NXtype) != NX_OK)
+        if (NXgetattr(fileid, name, char_buffer, &NXlen, &NXtype) != NXstatus::OKAY)
           return TEST_FAILED;
         if (strcmp(name, "file_time") && strcmp(name, "HDF_version") && strcmp(name, "HDF5_Version") &&
             strcmp(name, "XML_version")) {
           printf("   %s = %s\n", name, char_buffer);
         }
         break;
+      default:
+        break;
       }
     }
-  } while (attr_status == NX_OK);
-  if (NXopengroup(fileid, "entry", "NXentry") != NX_OK)
+  } while (attr_status == NXstatus::OKAY);
+  if (NXopengroup(fileid, "entry", "NXentry") != NXstatus::OKAY)
     return TEST_FAILED;
   NXgetattrinfo(fileid, &i);
   std::cout << "Number of group attributes: " << i << std::endl;
-  if (NXgetpath(fileid, path, 512) != NX_OK)
+  if (NXgetpath(fileid, path, 512) != NXstatus::OKAY)
     return TEST_FAILED;
   std::cout << "NXentry path " << path << std::endl;
   do {
     // cppcheck-suppress argumentSize
     attr_status = NXgetnextattra(fileid, name, &NXrank, NXdims, &NXtype);
-    if (attr_status == NX_ERROR)
+    if (attr_status == NXstatus::ERROR)
       return TEST_FAILED;
-    if (attr_status == NX_OK) {
-      switch (NXtype) {
-      case NX_CHAR:
+    if (attr_status == NXstatus::OKAY) {
+      if (NXtype == NXnumtype::CHAR) {
         NXlen = sizeof(char_buffer);
-        if (NXgetattr(fileid, name, char_buffer, &NXlen, &NXtype) != NX_OK)
+        if (NXgetattr(fileid, name, char_buffer, &NXlen, &NXtype) != NXstatus::OKAY)
           return TEST_FAILED;
         printf("   %s = %s\n", name, char_buffer);
       }
     }
-  } while (attr_status == NX_OK);
+  } while (attr_status == NXstatus::OKAY);
   // cppcheck-suppress argumentSize
-  if (NXgetgroupinfo(fileid, &i, group_name, class_name) != NX_OK)
+  if (NXgetgroupinfo(fileid, &i, group_name, class_name) != NXstatus::OKAY)
     return TEST_FAILED;
   std::cout << "Group: " << group_name << "(" << class_name << ") contains " << i << " items\n";
   do {
     // cppcheck-suppress argumentSize
     entry_status = NXgetnextentry(fileid, name, char_class, &NXtype);
-    if (entry_status == NX_ERROR)
+    if (entry_status == NXstatus::ERROR)
       return TEST_FAILED;
     if (strcmp(char_class, "SDS") != 0) {
-      if (entry_status != NX_EOD) {
+      if (entry_status != NXstatus::EOD) {
         printf("   Subgroup: %s(%s)\n", name, char_class);
-        entry_status = NX_OK;
+        entry_status = NXstatus::OKAY;
       }
     } else {
       void *data_buffer;
-      if (entry_status == NX_OK) {
-        if (NXopendata(fileid, name) != NX_OK)
+      if (entry_status == NXstatus::OKAY) {
+        if (NXopendata(fileid, name) != NXstatus::OKAY)
           return TEST_FAILED;
-        if (NXgetpath(fileid, path, 512) != NX_OK)
+        if (NXgetpath(fileid, path, 512) != NXstatus::OKAY)
           return TEST_FAILED;
         printf("Data path %s\n", path);
-        if (NXgetinfo(fileid, &NXrank, NXdims, &NXtype) != NX_OK)
+        if (NXgetinfo(fileid, &NXrank, NXdims, &NXtype) != NXstatus::OKAY)
           return TEST_FAILED;
-        printf("   %s(%d)", name, NXtype);
+        printf("   %s(%d)", name, (int)NXtype);
         // cppcheck-suppress cstyleCast
-        if (NXmalloc((void **)&data_buffer, NXrank, NXdims, NXtype) != NX_OK)
+        if (NXmalloc((void **)&data_buffer, NXrank, NXdims, NXtype) != NXstatus::OKAY)
           return TEST_FAILED;
         int n = 1;
         for (int k = 0; k < NXrank; k++) {
           n *= NXdims[k];
         }
-        if (NXtype == NX_CHAR) {
-          if (NXgetdata(fileid, data_buffer) != NX_OK)
+        if (NXtype == NXnumtype::CHAR) {
+          if (NXgetdata(fileid, data_buffer) != NXstatus::OKAY)
             return TEST_FAILED;
           print_data(" = ", std::cout, data_buffer, NXtype, n);
-        } else if (NXtype != NX_FLOAT32 && NXtype != NX_FLOAT64) {
-          if (NXgetdata(fileid, data_buffer) != NX_OK)
+        } else if (NXtype != NXnumtype::FLOAT32 && NXtype != NXnumtype::FLOAT64) {
+          if (NXgetdata(fileid, data_buffer) != NXstatus::OKAY)
             return TEST_FAILED;
           print_data(" = ", std::cout, data_buffer, NXtype, n);
         } else {
@@ -383,26 +387,26 @@ int main(int argc, char *argv[]) {
           slab_start[1] = 0;
           slab_size[0] = 1;
           slab_size[1] = 4;
-          if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NX_OK)
+          if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::OKAY)
             return TEST_FAILED;
           print_data("\n      ", std::cout, data_buffer, NXtype, 4);
           slab_start[0] = TEST_FAILED;
-          if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NX_OK)
+          if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::OKAY)
             return TEST_FAILED;
           print_data("      ", std::cout, data_buffer, NXtype, 4);
           slab_start[0] = 2;
-          if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NX_OK)
+          if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::OKAY)
             return TEST_FAILED;
           print_data("      ", std::cout, data_buffer, NXtype, 4);
           slab_start[0] = 3;
-          if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NX_OK)
+          if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::OKAY)
             return TEST_FAILED;
           print_data("      ", std::cout, data_buffer, NXtype, 4);
           slab_start[0] = 4;
-          if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NX_OK)
+          if (NXgetslab(fileid, data_buffer, slab_start, slab_size) != NXstatus::OKAY)
             return TEST_FAILED;
           print_data("      ", std::cout, data_buffer, NXtype, 4);
-          if (NXgetattrinfo(fileid, &i) != NX_OK)
+          if (NXgetattrinfo(fileid, &i) != NXstatus::OKAY)
             return TEST_FAILED;
           if (i > 0) {
             printf("      Number of attributes : %d\n", i);
@@ -410,151 +414,153 @@ int main(int argc, char *argv[]) {
           do {
             // cppcheck-suppress argumentSize
             attr_status = NXgetnextattra(fileid, name, &NXrank, NXdims, &NXtype);
-            if (attr_status == NX_ERROR)
+            if (attr_status == NXstatus::ERROR)
               return TEST_FAILED;
-            if (attr_status == NX_OK) {
+            if (attr_status == NXstatus::OKAY) {
               switch (NXtype) {
-              case NX_INT32:
+              case NXnumtype::INT32:
                 NXlen = TEST_FAILED;
-                if (NXgetattr(fileid, name, &i, &NXlen, &NXtype) != NX_OK)
+                if (NXgetattr(fileid, name, &i, &NXlen, &NXtype) != NXstatus::OKAY)
                   return TEST_FAILED;
                 printf("         %s : %d\n", name, i);
                 break;
-              case NX_FLOAT32:
+              case NXnumtype::FLOAT32:
                 NXlen = TEST_FAILED;
-                if (NXgetattr(fileid, name, &r, &NXlen, &NXtype) != NX_OK)
+                if (NXgetattr(fileid, name, &r, &NXlen, &NXtype) != NXstatus::OKAY)
                   return TEST_FAILED;
                 printf("         %s : %f\n", name, r);
                 break;
-              case NX_CHAR:
+              case NXnumtype::CHAR:
                 NXlen = sizeof(char_buffer);
-                if (NXgetattr(fileid, name, char_buffer, &NXlen, &NXtype) != NX_OK)
+                if (NXgetattr(fileid, name, char_buffer, &NXlen, &NXtype) != NXstatus::OKAY)
                   return TEST_FAILED;
                 printf("         %s : %s\n", name, char_buffer);
                 break;
+              default:
+                continue;
               }
             }
-          } while (attr_status == NX_OK);
+          } while (attr_status == NXstatus::OKAY);
         }
-        if (NXclosedata(fileid) != NX_OK)
+        if (NXclosedata(fileid) != NXstatus::OKAY)
           return TEST_FAILED;
         // cppcheck-suppress cstyleCast
-        if (NXfree((void **)&data_buffer) != NX_OK)
+        if (NXfree((void **)&data_buffer) != NXstatus::OKAY)
           return TEST_FAILED;
       }
     }
-  } while (entry_status == NX_OK);
-  if (NXclosegroup(fileid) != NX_OK)
+  } while (entry_status == NXstatus::OKAY);
+  if (NXclosegroup(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
   // check links
   std::cout << "check links\n";
   NXlink blink;
-  if (NXopengroup(fileid, "entry", "NXentry") != NX_OK)
+  if (NXopengroup(fileid, "entry", "NXentry") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopengroup(fileid, "sample", "NXsample") != NX_OK)
+  if (NXopengroup(fileid, "sample", "NXsample") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXgetgroupID(fileid, &glink) != NX_OK)
+  if (NXgetgroupID(fileid, &glink) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosegroup(fileid) != NX_OK)
+  if (NXclosegroup(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopengroup(fileid, "data", "NXdata") != NX_OK)
+  if (NXopengroup(fileid, "data", "NXdata") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopendata(fileid, "r8_data") != NX_OK)
+  if (NXopendata(fileid, "r8_data") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXgetdataID(fileid, &dlink) != NX_OK)
+  if (NXgetdataID(fileid, &dlink) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosedata(fileid) != NX_OK)
+  if (NXclosedata(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosegroup(fileid) != NX_OK)
+  if (NXclosegroup(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopendata(fileid, "r8_data") != NX_OK)
+  if (NXopendata(fileid, "r8_data") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXgetdataID(fileid, &blink) != NX_OK)
+  if (NXgetdataID(fileid, &blink) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosedata(fileid) != NX_OK)
+  if (NXclosedata(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXsameID(fileid, &dlink, &blink) != NX_OK) {
+  if (NXsameID(fileid, &dlink, &blink) != NXstatus::OKAY) {
     std::cout << "Link check FAILED (r8_data)\n" << "original data\n";
     NXIprintlink(fileid, &dlink);
     std::cout << "linked data\n";
     NXIprintlink(fileid, &blink);
     return TEST_FAILED;
   }
-  if (NXclosegroup(fileid) != NX_OK)
+  if (NXclosegroup(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
 
-  if (NXopengroup(fileid, "link", "NXentry") != NX_OK)
+  if (NXopengroup(fileid, "link", "NXentry") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopengroup(fileid, "sample", "NXsample") != NX_OK)
+  if (NXopengroup(fileid, "sample", "NXsample") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXgetpath(fileid, path, 512) != NX_OK)
+  if (NXgetpath(fileid, path, 512) != NXstatus::OKAY)
     return TEST_FAILED;
   std::cout << "Group path " << path << "\n";
-  if (NXgetgroupID(fileid, &blink) != NX_OK)
+  if (NXgetgroupID(fileid, &blink) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXsameID(fileid, &glink, &blink) != NX_OK) {
+  if (NXsameID(fileid, &glink, &blink) != NXstatus::OKAY) {
     std::cout << "Link check FAILED (sample)\n" << "original group\n";
     NXIprintlink(fileid, &glink);
     std::cout << "linked group\n";
     NXIprintlink(fileid, &blink);
     return TEST_FAILED;
   }
-  if (NXclosegroup(fileid) != NX_OK)
+  if (NXclosegroup(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
 
   std::cout << "renLinkGroup NXsample test\n";
-  if (NXopengroup(fileid, "renLinkGroup", "NXsample") != NX_OK)
+  if (NXopengroup(fileid, "renLinkGroup", "NXsample") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXgetgroupID(fileid, &blink) != NX_OK)
+  if (NXgetgroupID(fileid, &blink) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXsameID(fileid, &glink, &blink) != NX_OK) {
+  if (NXsameID(fileid, &glink, &blink) != NXstatus::OKAY) {
     std::cout << "Link check FAILED (renLinkGroup)\n" << "original group\n";
     NXIprintlink(fileid, &glink);
     std::cout << "linked group\n";
     NXIprintlink(fileid, &blink);
     return TEST_FAILED;
   }
-  if (NXclosegroup(fileid) != NX_OK)
+  if (NXclosegroup(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
 
   std::cout << "renLinkData test\n";
-  if (NXopendata(fileid, "renLinkData") != NX_OK)
+  if (NXopendata(fileid, "renLinkData") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXgetdataID(fileid, &blink) != NX_OK)
+  if (NXgetdataID(fileid, &blink) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXsameID(fileid, &dlink, &blink) != NX_OK) {
+  if (NXsameID(fileid, &dlink, &blink) != NXstatus::OKAY) {
     std::cout << "Link check FAILED (renLinkData)\n" << "original group\n";
     NXIprintlink(fileid, &glink);
     std::cout << "linked group\n";
     NXIprintlink(fileid, &blink);
     return TEST_FAILED;
   }
-  if (NXclosedata(fileid) != NX_OK)
+  if (NXclosedata(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXclosegroup(fileid) != NX_OK)
+  if (NXclosegroup(fileid) != NXstatus::OKAY)
     return TEST_FAILED;
   std::cout << "Link check OK\n";
 
   // tests for NXopenpath
   std::cout << "tests for NXopenpath\n";
-  if (NXopenpath(fileid, "/entry/data/comp_data") != NX_OK) {
+  if (NXopenpath(fileid, "/entry/data/comp_data") != NXstatus::OKAY) {
     ON_ERROR("Failure on NXopenpath\n");
   }
-  if (NXopenpath(fileid, "/entry/data/comp_data") != NX_OK) {
+  if (NXopenpath(fileid, "/entry/data/comp_data") != NXstatus::OKAY) {
     ON_ERROR("Failure on NXopenpath\n");
   }
-  if (NXopenpath(fileid, "../r8_data") != NX_OK) {
+  if (NXopenpath(fileid, "../r8_data") != NXstatus::OKAY) {
     ON_ERROR("Failure on NXopenpath\n");
   }
-  if (NXopengrouppath(fileid, "/entry/data/comp_data") != NX_OK) {
+  if (NXopengrouppath(fileid, "/entry/data/comp_data") != NXstatus::OKAY) {
     ON_ERROR("Failure on NXopengrouppath\n");
   }
-  if (NXopenpath(fileid, "/entry/data/r8_data") != NX_OK) {
+  if (NXopenpath(fileid, "/entry/data/r8_data") != NXstatus::OKAY) {
     ON_ERROR("Failure on NXopenpath\n");
   }
   std::cout << "NXopenpath checks OK\n";
 
-  if (NXclose(&fileid) != NX_OK)
+  if (NXclose(&fileid) != NXstatus::OKAY)
     return TEST_FAILED;
 #endif // WIN32
 
@@ -579,7 +585,7 @@ int testLoadPath() {
     // TODO create file and cleanup
     // std::string filename("data/dmc01.h5");
     NXhandle h;
-    if (NXopen("dmc01.hdf", NXACC_RDWR, &h) != NX_OK) {
+    if (NXopen("dmc01.hdf", NXACC_RDWR, &h) != NXstatus::OKAY) {
       std::cout << "Loading NeXus file dmc01.hdf from path " << getenv("NX_LOAD_PATH") << " FAILED\n";
       return TEST_FAILED;
     } else {
@@ -642,142 +648,142 @@ static int testExternal(const std::string &progName) {
 
   // create the test file
   NXhandle hfil;
-  if (NXopen(testFile.c_str(), create, &hfil) != NX_OK) {
+  if (NXopen(testFile.c_str(), create, &hfil) != NXstatus::OKAY) {
     std::cerr << "Failed to open \"" << testFile << "\" for writing\n";
     return TEST_FAILED;
   }
-  /*if(NXmakegroup(hfil,"entry1","NXentry") != NX_OK){
+  /*if(NXmakegroup(hfil,"entry1","NXentry") != NXstatus::OKAY){
     return TEST_FAILED;
   }*/
   const std::string extFile1EntryPath = PROTOCOL + extFile1 + "#/entry1";
-  if (NXlinkexternal(hfil, "entry1", "NXentry", extFile1EntryPath.c_str()) != NX_OK) {
+  if (NXlinkexternal(hfil, "entry1", "NXentry", extFile1EntryPath.c_str()) != NXstatus::OKAY) {
     std::cerr << "Failed to NXlinkexternal(hfil, \"entry1\", \"NXentry\", \"" << extFile1EntryPath << "\")\n";
     return TEST_FAILED;
   }
-  /*if(NXmakegroup(hfil,"entry2","NXentry") != NX_OK){
+  /*if(NXmakegroup(hfil,"entry2","NXentry") != NXstatus::OKAY){
     return TEST_FAILED;
   }*/
   const std::string extFile2EntryPath = PROTOCOL + extFile2 + "#/entry1";
-  if (NXlinkexternal(hfil, "entry2", "NXentry", extFile2EntryPath.c_str()) != NX_OK) {
+  if (NXlinkexternal(hfil, "entry2", "NXentry", extFile2EntryPath.c_str()) != NXstatus::OKAY) {
     std::cerr << "Failed to NXlinkexternal(hfil, \"entry2\", \"NXentry\", \"" << extFile2EntryPath << "\")\n";
     return TEST_FAILED;
   }
-  if (NXmakegroup(hfil, "entry3", "NXentry") != NX_OK) {
+  if (NXmakegroup(hfil, "entry3", "NXentry") != NXstatus::OKAY) {
     return TEST_FAILED;
   }
-  if (NXopengroup(hfil, "entry3", "NXentry") != NX_OK) {
+  if (NXopengroup(hfil, "entry3", "NXentry") != NXstatus::OKAY) {
     return TEST_FAILED;
   }
   /* force create old style external link */
-  if (NXmakedata(hfil, "extlinkdata", NX_FLOAT32, 1, &dummylen) != NX_OK)
+  if (NXmakedata(hfil, "extlinkdata", NXnumtype::FLOAT32, 1, &dummylen) != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXopendata(hfil, "extlinkdata") != NX_OK)
+  if (NXopendata(hfil, "extlinkdata") != NXstatus::OKAY)
     return TEST_FAILED;
-  if (NXputdata(hfil, &dummyfloat) != NX_OK)
+  if (NXputdata(hfil, &dummyfloat) != NXstatus::OKAY)
     return TEST_FAILED;
   std::string temperaturePath(PROTOCOL + extFile1 + "#/entry1/sample/temperature_mean");
   if (NXputattr(hfil, "napimount", temperaturePath.c_str(), static_cast<int>(strlen(temperaturePath.c_str())),
-                NX_CHAR) != NX_OK)
+                NXnumtype::CHAR) != NXstatus::OKAY)
     return TEST_FAILED;
   /* this would segfault because we are tricking the napi stack
-  if(NXclosedata(&hfil) != NX_OK){
+  if(NXclosedata(&hfil) != NXstatus::OKAY){
     return TEST_FAILED;
   }
   */
-  if (NXopenpath(hfil, "/entry3") != NX_OK) {
+  if (NXopenpath(hfil, "/entry3") != NXstatus::OKAY) {
     std::cerr << "Failed to NXopenpath(hfil, \"/entry3\") during write\n";
     return TEST_FAILED;
   }
   /* create new style external link on hdf5 , equivalent to the above on other backends */
-  if (NXlinkexternaldataset(hfil, "extlinknative", temperaturePath.c_str()) != NX_OK) {
+  if (NXlinkexternaldataset(hfil, "extlinknative", temperaturePath.c_str()) != NXstatus::OKAY) {
     std::cerr << "Failed to NXlinkexternaldataset(hfil, \"extlinknative\", \"" << temperaturePath << "\")\n";
     return TEST_FAILED;
   }
 
-  if (NXclose(&hfil) != NX_OK) {
+  if (NXclose(&hfil) != NXstatus::OKAY) {
     return TEST_FAILED;
   }
 
   // actually test linking
-  if (NXopen(testFile.c_str(), NXACC_RDWR, &hfil) != NX_OK) {
+  if (NXopen(testFile.c_str(), NXACC_RDWR, &hfil) != NXstatus::OKAY) {
     std::cerr << "Failed to open \"" << testFile << "\" for read/write\n";
     return TEST_FAILED;
   }
-  if (NXopenpath(hfil, "/entry1/start_time") != NX_OK) {
+  if (NXopenpath(hfil, "/entry1/start_time") != NXstatus::OKAY) {
     return TEST_FAILED;
   }
   char time[132];
   memset(time, 0, 132);
-  if (NXgetdata(hfil, time) != NX_OK) {
+  if (NXgetdata(hfil, time) != NXstatus::OKAY) {
     return TEST_FAILED;
   }
   printf("First file time: %s\n", time);
 
   char filename[256];
-  if (NXinquirefile(hfil, filename, 256) != NX_OK) {
+  if (NXinquirefile(hfil, filename, 256) != NXstatus::OKAY) {
     return TEST_FAILED;
   }
   std::cout << "NXinquirefile found: " << relativePathOf(filename) << "\n";
 
-  if (NXopenpath(hfil, "/entry2/sample/sample_name") != NX_OK) {
+  if (NXopenpath(hfil, "/entry2/sample/sample_name") != NXstatus::OKAY) {
     return TEST_FAILED;
   }
   memset(time, 0, 132);
-  if (NXgetdata(hfil, time) != NX_OK) {
+  if (NXgetdata(hfil, time) != NXstatus::OKAY) {
     return TEST_FAILED;
   }
   printf("Second file sample: %s\n", time);
-  if (NXinquirefile(hfil, filename, 256) != NX_OK) {
+  if (NXinquirefile(hfil, filename, 256) != NXstatus::OKAY) {
     return TEST_FAILED;
   }
   std::cout << "NXinquirefile found: " << relativePathOf(filename) << "\n";
 
-  if (NXopenpath(hfil, "/entry2/start_time") != NX_OK) {
+  if (NXopenpath(hfil, "/entry2/start_time") != NXstatus::OKAY) {
     return TEST_FAILED;
   }
   memset(time, 0, 132);
-  if (NXgetdata(hfil, time) != NX_OK) {
+  if (NXgetdata(hfil, time) != NXstatus::OKAY) {
     return TEST_FAILED;
   }
   printf("Second file time: %s\n", time);
   NXopenpath(hfil, "/");
-  if (NXisexternalgroup(hfil, "entry1", "NXentry", filename, 255) != NX_OK) {
+  if (NXisexternalgroup(hfil, "entry1", "NXentry", filename, 255) != NXstatus::OKAY) {
     return TEST_FAILED;
   } else {
     printf("entry1 external URL = %s\n", filename);
   }
   printf("testing link to external data set\n");
-  if (NXopenpath(hfil, "/entry3") != NX_OK) {
+  if (NXopenpath(hfil, "/entry3") != NXstatus::OKAY) {
     std::cerr << "failed to step into external file in \"/entry3\"\n";
     return TEST_FAILED;
   }
-  if (NXisexternaldataset(hfil, "extlinkdata", filename, 255) != NX_OK) {
+  if (NXisexternaldataset(hfil, "extlinkdata", filename, 255) != NXstatus::OKAY) {
     printf("extlinkdata should be external link\n");
     return TEST_FAILED;
   } else {
     printf("extlinkdata external URL = %s\n", filename);
   }
-  if (NXopendata(hfil, "extlinkdata") != NX_OK)
+  if (NXopendata(hfil, "extlinkdata") != NXstatus::OKAY)
     return TEST_FAILED;
   memset(&temperature, 0, 4);
-  if (NXgetdata(hfil, &temperature) != NX_OK) {
+  if (NXgetdata(hfil, &temperature) != NXstatus::OKAY) {
     return TEST_FAILED;
   }
   printf("value retrieved: %4.2f\n", temperature);
 
-  if (NXopenpath(hfil, "/entry3") != NX_OK) {
+  if (NXopenpath(hfil, "/entry3") != NXstatus::OKAY) {
     return TEST_FAILED;
   }
-  if (NXisexternaldataset(hfil, "extlinknative", filename, 255) != NX_OK) {
+  if (NXisexternaldataset(hfil, "extlinknative", filename, 255) != NXstatus::OKAY) {
     printf("extlinknative should be external link\n");
     return TEST_FAILED;
   } else {
     printf("extlinknative external URL = %s\n", filename);
   }
-  if (NXopendata(hfil, "extlinknative") != NX_OK)
+  if (NXopendata(hfil, "extlinknative") != NXstatus::OKAY)
     return TEST_FAILED;
   memset(&temperature, 0, 4);
-  if (NXgetdata(hfil, &temperature) != NX_OK) {
+  if (NXgetdata(hfil, &temperature) != NXstatus::OKAY) {
     return TEST_FAILED;
   }
   printf("value retrieved: %4.2f\n", temperature);

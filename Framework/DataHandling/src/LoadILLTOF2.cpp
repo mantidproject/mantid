@@ -265,7 +265,7 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
   NXstatus stat = NXopen(filename.c_str(), NXACC_READ, &nxfileID);
 
   g_log.debug() << "Starting parsing properties from : " << filename << '\n';
-  if (stat == NX_ERROR) {
+  if (stat == NXstatus::ERROR) {
     g_log.debug() << "convertNexusToProperties: Error loading " << filename;
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   }

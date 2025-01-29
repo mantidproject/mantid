@@ -236,9 +236,9 @@ private:
     NXhandle fileHandle;
     NXstatus status = NXopen(m_outputFile.c_str(), NXACC_RDWR, &fileHandle);
 
-    TS_ASSERT(status != NX_ERROR);
+    TS_ASSERT(status != NXstatus::ERROR);
 
-    if (status != NX_ERROR) {
+    if (status != NXstatus::ERROR) {
       ::NeXus::File nxFile(fileHandle);
 
       // Check for entry1/tomo_entry/control { and data dataset within }
@@ -317,7 +317,7 @@ private:
     // workspaces
     NXhandle fileHandle;
     NXstatus status = NXopen(m_outputFile.c_str(), NXACC_RDWR, &fileHandle);
-    if (status != NX_ERROR) {
+    if (status != NXstatus::ERROR) {
       ::NeXus::File nxFile(fileHandle);
 
       nxFile.openPath("/entry1/tomo_entry/data");
@@ -349,7 +349,7 @@ private:
     // the number of workspaces
     NXhandle fileHandle;
     NXstatus status = NXopen(m_outputFile.c_str(), NXACC_RDWR, &fileHandle);
-    if (status != NX_ERROR) {
+    if (status != NXstatus::ERROR) {
       ::NeXus::File nxFile(fileHandle);
 
       nxFile.openPath("/entry1/tomo_entry/data");
@@ -370,7 +370,7 @@ private:
     // value 2.0
     NXhandle fileHandle;
     NXstatus status = NXopen(m_outputFile.c_str(), NXACC_RDWR, &fileHandle);
-    if (status != NX_ERROR) {
+    if (status != NXstatus::ERROR) {
       ::NeXus::File nxFile(fileHandle);
 
       nxFile.openPath("/entry1/tomo_entry/data");

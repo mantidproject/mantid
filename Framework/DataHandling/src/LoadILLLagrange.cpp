@@ -171,7 +171,7 @@ void LoadILLLagrange::loadMetaData() {
   NXhandle nxHandle;
   NXstatus nxStat = NXopen((getPropertyValue("Filename")).c_str(), NXACC_READ, &nxHandle);
 
-  if (nxStat != NX_ERROR) {
+  if (nxStat != NXstatus::ERROR) {
     LoadHelper::addNexusFieldsToWsRun(nxHandle, m_outputWorkspace->mutableRun(), "entry0");
     NXclose(&nxHandle);
   }

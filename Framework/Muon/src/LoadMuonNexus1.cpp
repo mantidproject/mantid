@@ -93,7 +93,7 @@ void LoadMuonNexus1::exec() {
   NXEntry entry = root.openEntry("run/histogram_data_1");
   try {
     NXInfo info = entry.getDataSetInfo("time_zero");
-    if (info.stat != NX_ERROR) {
+    if (info.stat != NXstatus::ERROR) {
       double dum = root.getFloat("run/histogram_data_1/time_zero");
       setProperty("TimeZero", dum);
     }
@@ -104,14 +104,14 @@ void LoadMuonNexus1::exec() {
     NXInfo infoResolution = entry.getDataSetInfo("resolution");
     NXInt counts = root.openNXInt("run/histogram_data_1/counts");
     std::string firstGoodBin = counts.attributes("first_good_bin");
-    if (!firstGoodBin.empty() && infoResolution.stat != NX_ERROR) {
+    if (!firstGoodBin.empty() && infoResolution.stat != NXstatus::ERROR) {
       double resolution;
 
       switch (infoResolution.type) {
-      case NX_FLOAT32:
+      case NXnumtype::FLOAT32:
         resolution = static_cast<double>(entry.getFloat("resolution"));
         break;
-      case NX_INT32:
+      case NXnumtype::INT32:
         resolution = static_cast<double>(entry.getInt("resolution"));
         break;
       default:
@@ -131,14 +131,14 @@ void LoadMuonNexus1::exec() {
     NXInfo infoResolution = entry.getDataSetInfo("resolution");
     NXInt counts = root.openNXInt("run/histogram_data_1/counts");
     std::string lastGoodBin = counts.attributes("last_good_bin");
-    if (!lastGoodBin.empty() && infoResolution.stat != NX_ERROR) {
+    if (!lastGoodBin.empty() && infoResolution.stat != NXstatus::ERROR) {
       double resolution;
 
       switch (infoResolution.type) {
-      case NX_FLOAT32:
+      case NXnumtype::FLOAT32:
         resolution = static_cast<double>(entry.getFloat("resolution"));
         break;
-      case NX_INT32:
+      case NXnumtype::INT32:
         resolution = static_cast<double>(entry.getInt("resolution"));
         break;
       default:
@@ -388,7 +388,7 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
   NXEntry detector = root.openEntry("run/instrument/detector");
 
   NXInfo infoDeadTimes = detector.getDataSetInfo("deadtimes");
-  if (infoDeadTimes.stat != NX_ERROR) {
+  if (infoDeadTimes.stat != NXstatus::ERROR) {
     NXFloat deadTimesData = detector.openNXFloat("deadtimes");
     deadTimesData.load();
 
@@ -485,7 +485,7 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root, const Geometry
   NXEntry dataEntry = root.openEntry("run/histogram_data_1");
 
   NXInfo infoGrouping = dataEntry.getDataSetInfo("grouping");
-  if (infoGrouping.stat != NX_ERROR) {
+  if (infoGrouping.stat != NXstatus::ERROR) {
     NXInt groupingData = dataEntry.openNXInt("grouping");
     groupingData.load();
 

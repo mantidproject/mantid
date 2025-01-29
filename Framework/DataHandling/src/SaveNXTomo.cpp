@@ -166,25 +166,25 @@ void SaveNXTomo::processAll() {
   NXhandle fileHandle;
   NXstatus status = NXopen(this->m_filename.c_str(), NXACC_RDWR, &fileHandle);
 
-  if (status != NX_ERROR && !m_overwriteFile) {
+  if (status != NXstatus::ERROR && !m_overwriteFile) {
     // Appending to an existing file, return reference to the file
     ::NeXus::File nxFile(fileHandle);
     return nxFile;
   }
 
   // Either overwriting the file or creating a new one now
-  if (status != NX_ERROR) {
+  if (status != NXstatus::ERROR) {
     ::NeXus::File f(fileHandle);
     f.close();
   }
 
   // If not overwriting, ensure it has a .nxs extension
-  if ((!m_overwriteFile || status == NX_ERROR) && !this->m_filename.ends_with(".nxs"))
+  if ((!m_overwriteFile || status == NXstatus::ERROR) && !this->m_filename.ends_with(".nxs"))
     m_filename = m_filename + ".nxs";
 
   status = NXopen(this->m_filename.c_str(), NXACC_CREATE5, &fileHandle);
 
-  if (status == NX_ERROR)
+  if (status == NXstatus::ERROR)
     throw std::runtime_error("Unable to open or create nexus file.");
 
   // *********************************
@@ -229,7 +229,7 @@ void SaveNXTomo::processAll() {
   std::vector<int64_t> infDim;
   infDim.emplace_back(NX_UNLIMITED);
 
-  nxFile.makeData("image_key", ::NeXus::FLOAT64, infDim, false);
+  nxFile.makeData("image_key", NXnumtype::FLOAT64, infDim, false);
   nxFile.closeGroup(); // detector
 
   // source group // from diamond file contains {current,energy,name,probe,type}
@@ -241,7 +241,7 @@ void SaveNXTomo::processAll() {
   // NXsample
   nxFile.makeGroup("sample", "NXsample", true);
 
-  nxFile.makeData("rotation_angle", ::NeXus::FLOAT64, infDim, true);
+  nxFile.makeData("rotation_angle", NXnumtype::FLOAT64, infDim, true);
   // Create a link object for rotation_angle to use later
   NXlink rotationLink = nxFile.getDataID();
   nxFile.closeData();
@@ -251,7 +251,7 @@ void SaveNXTomo::processAll() {
   // Make the NXmonitor group - Holds base beam intensity for each image
 
   nxFile.makeGroup("control", "NXmonitor", true);
-  nxFile.makeData("data", ::NeXus::FLOAT64, infDim, false);
+  nxFile.makeData("data", NXnumtype::FLOAT64, infDim, false);
   nxFile.closeGroup(); // NXmonitor
 
   nxFile.makeGroup("data", "NXdata", true);
@@ -259,13 +259,13 @@ void SaveNXTomo::processAll() {
 
   nxFile.makeLink(rotationLink);
 
-  nxFile.makeData("data", ::NeXus::FLOAT64, m_infDimensions, true);
+  nxFile.makeData("data", NXnumtype::FLOAT64, m_infDimensions, true);
   // Create a link object for the data
   NXlink dataLink = nxFile.getDataID();
   nxFile.closeData();
 
   if (m_includeError)
-    nxFile.makeData("error", ::NeXus::FLOAT64, m_infDimensions, false);
+    nxFile.makeData("error", NXnumtype::FLOAT64, m_infDimensions, false);
 
   nxFile.closeGroup(); // Close Data group
 
@@ -406,7 +406,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
         std::vector<int64_t> infDim;
         infDim.emplace_back(NX_UNLIMITED);
         infDim.emplace_back(NX_UNLIMITED);
-        nxFile.makeData(prop->name(), ::NeXus::UINT8, infDim, true);
+        nxFile.makeData(prop->name(), NXnumtype::UINT8, infDim, true);
       }
       auto valueAsStr = prop->value();
       size_t strSize = valueAsStr.length();

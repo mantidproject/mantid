@@ -102,63 +102,64 @@ int SaveToSNSHistogramNexus::remove_path(const char *path) {
 /** Performs the copying from the input to the output file,
  *  while modifying the data and time_of_flight fields.
  */
-int SaveToSNSHistogramNexus::copy_file(const char *inFile, int nx__access, const char *outFile, int nx_write_access) {
+NXstatus SaveToSNSHistogramNexus::copy_file(const char *inFile, int nx__access, const char *outFile,
+                                            int nx_write_access) {
   int nx_is_definition = 0;
   links_count = 0;
   current_path[0] = '\0';
   NXlink link;
 
   /* Open NeXus input file and NeXus output file */
-  if (NXopen(inFile, nx__access, &inId) != NX_OK) {
+  if (NXopen(inFile, nx__access, &inId) != NXstatus::OKAY) {
     printf("NX_ERROR: Can't open %s\n", inFile);
-    return NX_ERROR;
+    return NXstatus::ERROR;
   }
 
-  if (NXopen(outFile, nx_write_access, &outId) != NX_OK) {
+  if (NXopen(outFile, nx_write_access, &outId) != NXstatus::OKAY) {
     printf("NX_ERROR: Can't open %s\n", outFile);
-    return NX_ERROR;
+    return NXstatus::ERROR;
   }
 
   /* Output global attributes */
-  if (WriteAttributes(nx_is_definition) != NX_OK) {
-    return NX_ERROR;
+  if (WriteAttributes(nx_is_definition) != NXstatus::OKAY) {
+    return NXstatus::ERROR;
   }
   /* Recursively cycle through the groups printing the contents */
-  if (WriteGroup(nx_is_definition) != NX_OK) {
-    return NX_ERROR;
+  if (WriteGroup(nx_is_definition) != NXstatus::OKAY) {
+    return NXstatus::ERROR;
   }
   /* close input */
-  if (NXclose(&inId) != NX_OK) {
-    return NX_ERROR;
+  if (NXclose(&inId) != NXstatus::OKAY) {
+    return NXstatus::ERROR;
   }
 
   // HDF5 only
   {
     /* now create any required links */
     for (int i = 0; i < links_count; i++) {
-      if (NXopenpath(outId, links_to_make[i].to) != NX_OK)
-        return NX_ERROR;
-      if (NXgetdataID(outId, &link) == NX_OK || NXgetgroupID(outId, &link) == NX_OK) {
-        if (NXopenpath(outId, links_to_make[i].from) != NX_OK)
-          return NX_ERROR;
-        char *tstr = strrchr(links_to_make[i].to, '/');
+      if (NXopenpath(outId, links_to_make[i].to) != NXstatus::OKAY)
+        return NXstatus::ERROR;
+      if (NXgetdataID(outId, &link) == NXstatus::OKAY || NXgetgroupID(outId, &link) == NXstatus::OKAY) {
+        if (NXopenpath(outId, links_to_make[i].from) != NXstatus::OKAY)
+          return NXstatus::ERROR;
+        char const *tstr = strrchr(links_to_make[i].to, '/');
         if (!strcmp(links_to_make[i].name, tstr + 1)) {
-          if (NXmakelink(outId, &link) != NX_OK)
-            return NX_ERROR;
+          if (NXmakelink(outId, &link) != NXstatus::OKAY)
+            return NXstatus::ERROR;
         } else {
-          if (NXmakenamedlink(outId, links_to_make[i].name, &link) != NX_OK)
-            return NX_ERROR;
+          if (NXmakenamedlink(outId, links_to_make[i].name, &link) != NXstatus::OKAY)
+            return NXstatus::ERROR;
         }
       } else {
-        return NX_ERROR;
+        return NXstatus::ERROR;
       }
     }
   }
   /* Close the input and output files */
-  if (NXclose(&outId) != NX_OK) {
-    return NX_ERROR;
+  if (NXclose(&outId) != NXstatus::OKAY) {
+    return NXstatus::ERROR;
   }
-  return NX_OK;
+  return NXstatus::OKAY;
 }
 
 //------------------------------------------------------------------------
@@ -177,9 +178,10 @@ int SaveToSNSHistogramNexus::copy_file(const char *inFile, int nx__access, const
  * @param bank :: name of the bank being written.
  * @return error code
  */
-int SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDetector_const_sptr &det, int x_pixel_slab,
-                                                  const char *field_name, const char *errors_field_name, bool doErrors,
-                                                  bool doBoth, int is_definition, const std::string &bank) {
+NXstatus SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDetector_const_sptr &det,
+                                                       int x_pixel_slab, const char *field_name,
+                                                       const char *errors_field_name, bool doErrors, bool doBoth,
+                                                       int is_definition, const std::string &bank) {
   int dataRank, dataDimensions[NX_MAXRANK];
   int slabDimensions[NX_MAXRANK], slabStartIndices[NX_MAXRANK];
 
@@ -206,40 +208,42 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDet
 
   // ----- Open the data field -----------------------
   if (m_compress) {
-    if (NXcompmakedata(outId, field_name, NX_FLOAT32, dataRank, dataDimensions, NX_COMP_LZW, slabDimensions) != NX_OK)
-      return NX_ERROR;
+    if (NXcompmakedata(outId, field_name, NXnumtype::FLOAT32, dataRank, dataDimensions, NX_COMP_LZW, slabDimensions) !=
+        NXstatus::OKAY)
+      return NXstatus::ERROR;
   } else {
-    if (NXmakedata(outId, field_name, NX_FLOAT32, dataRank, dataDimensions) != NX_OK)
-      return NX_ERROR;
+    if (NXmakedata(outId, field_name, NXnumtype::FLOAT32, dataRank, dataDimensions) != NXstatus::OKAY)
+      return NXstatus::ERROR;
   }
-  if (NXopendata(outId, field_name) != NX_OK)
-    return NX_ERROR;
-  if (WriteAttributes(is_definition) != NX_OK)
-    return NX_ERROR;
+  if (NXopendata(outId, field_name) != NXstatus::OKAY)
+    return NXstatus::ERROR;
+  if (WriteAttributes(is_definition) != NXstatus::OKAY)
+    return NXstatus::ERROR;
   if (!doErrors) {
     // Add an attribute called "errors" with value = the name of the data_errors
     // field.
     NXname attrName = "errors";
     std::string attrBuffer = errors_field_name;
-    if (NXputattr(outId, attrName, attrBuffer.c_str(), static_cast<int>(attrBuffer.size()), NX_CHAR) != NX_OK)
-      return NX_ERROR;
+    if (NXputattr(outId, attrName, attrBuffer.c_str(), static_cast<int>(attrBuffer.size()), NXnumtype::CHAR) !=
+        NXstatus::OKAY)
+      return NXstatus::ERROR;
   }
 
   // ---- Errors field -----
   if (doBoth) {
-    if (NXclosedata(outId) != NX_OK)
-      return NX_ERROR;
+    if (NXclosedata(outId) != NXstatus::OKAY)
+      return NXstatus::ERROR;
 
     if (m_compress) {
-      if (NXcompmakedata(outId, errors_field_name, NX_FLOAT32, dataRank, dataDimensions, NX_COMP_LZW, slabDimensions) !=
-          NX_OK)
-        return NX_ERROR;
+      if (NXcompmakedata(outId, errors_field_name, NXnumtype::FLOAT32, dataRank, dataDimensions, NX_COMP_LZW,
+                         slabDimensions) != NXstatus::OKAY)
+        return NXstatus::ERROR;
     } else {
-      if (NXmakedata(outId, errors_field_name, NX_FLOAT32, dataRank, dataDimensions) != NX_OK)
-        return NX_ERROR;
+      if (NXmakedata(outId, errors_field_name, NXnumtype::FLOAT32, dataRank, dataDimensions) != NXstatus::OKAY)
+        return NXstatus::ERROR;
     }
-    if (NXopendata(outId, errors_field_name) != NX_OK)
-      return NX_ERROR;
+    if (NXopendata(outId, errors_field_name) != NXstatus::OKAY)
+      return NXstatus::ERROR;
 
     //      NXlink * link = new NXlink;
     //      link->linkType = 1; /* SDS data link */
@@ -250,10 +254,10 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDet
     //        g_log.debug() << "Error while making link to " << targetPath <<
     //        '\n';
 
-    if (WriteAttributes(is_definition) != NX_OK)
-      return NX_ERROR;
-    if (NXclosedata(outId) != NX_OK)
-      return NX_ERROR;
+    if (WriteAttributes(is_definition) != NXstatus::OKAY)
+      return NXstatus::ERROR;
+    if (NXclosedata(outId) != NXstatus::OKAY)
+      return NXstatus::ERROR;
   }
 
   double fillTime = 0;
@@ -320,8 +324,8 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDet
       slabStartIndices[0] = slabnum * x_pixel_slab;
       slabStartIndices[1] = 0;
       slabStartIndices[2] = 0;
-      if (NXputslab(outId, data, slabStartIndices, slabDimensions) != NX_OK)
-        return NX_ERROR;
+      if (NXputslab(outId, data, slabStartIndices, slabDimensions) != NXstatus::OKAY)
+        return NXstatus::ERROR;
       saveTime += tim2.elapsed();
 
       std::ostringstream mess;
@@ -335,20 +339,20 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDet
     bool returnerror = false;
 
     Timer tim2;
-    if (NXopendata(outId, field_name) != NX_OK)
+    if (NXopendata(outId, field_name) != NXstatus::OKAY)
       returnerror = true;
-    else if (NXputdata(outId, data) != NX_OK)
+    else if (NXputdata(outId, data) != NXstatus::OKAY)
       returnerror = true;
-    else if (NXclosedata(outId) != NX_OK)
+    else if (NXclosedata(outId) != NXstatus::OKAY)
       returnerror = true;
     else {
       this->m_progress->reportIncrement(det->xpixels() * det->ypixels() * 1, det->getName() + " data");
 
-      if (NXopendata(outId, errors_field_name) != NX_OK)
+      if (NXopendata(outId, errors_field_name) != NXstatus::OKAY)
         returnerror = true;
-      else if (NXputdata(outId, errors) != NX_OK)
+      else if (NXputdata(outId, errors) != NXstatus::OKAY)
         returnerror = true;
-      else if (NXclosedata(outId) != NX_OK)
+      else if (NXclosedata(outId) != NXstatus::OKAY)
         returnerror = true;
       else {
         this->m_progress->reportIncrement(det->xpixels() * det->ypixels() * 1, det->getName() + " errors");
@@ -360,13 +364,13 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDet
       delete[] data;
       delete[] errors;
 
-      return NX_ERROR;
+      return NXstatus::ERROR;
     }
 
   } else {
-    if (NXclosedata(outId) != NX_OK) {
+    if (NXclosedata(outId) != NXstatus::OKAY) {
       delete[] data;
-      return NX_ERROR;
+      return NXstatus::ERROR;
     }
   }
 
@@ -377,7 +381,7 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDet
   if (doBoth)
     delete[] errors;
 
-  return NX_OK;
+  return NXstatus::OKAY;
 }
 
 //=================================================================================================
@@ -387,12 +391,13 @@ int SaveToSNSHistogramNexus::WriteOutDataOrErrors(const Geometry::RectangularDet
  * @param is_definition
  * @return error code
  */
-int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank, int is_definition) {
-  int dataType, dataRank, dataDimensions[NX_MAXRANK];
+NXstatus SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank, int is_definition) {
+  NXnumtype dataType;
+  int dataRank, dataDimensions[NX_MAXRANK];
   void *dataBuffer;
 
-  if (NXgetinfo(inId, &dataRank, dataDimensions, &dataType) != NX_OK)
-    return NX_ERROR;
+  if (NXgetinfo(inId, &dataRank, dataDimensions, &dataType) != NXstatus::OKAY)
+    return NXstatus::ERROR;
 
   // Get the rectangular detector
   IComponent_const_sptr det_comp = m_inputWorkspace->getInstrument()->getComponentByName(std::string(bank));
@@ -400,23 +405,24 @@ int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank, int is_defi
   if (!det) {
     g_log.information() << "Detector '" + bank + "' not found, or it is not a rectangular detector!\n";
     // Just copy that then.
-    if (NXmalloc(&dataBuffer, dataRank, dataDimensions, dataType) != NX_OK)
-      return NX_ERROR;
-    if (NXgetdata(inId, dataBuffer) != NX_OK)
-      return NX_ERROR;
+    if (NXmalloc(&dataBuffer, dataRank, dataDimensions, dataType) != NXstatus::OKAY)
+      return NXstatus::ERROR;
+    if (NXgetdata(inId, dataBuffer) != NXstatus::OKAY)
+      return NXstatus::ERROR;
     NXname nxName;
-    if (NXcompmakedata(outId, nxName, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK)
-      return NX_ERROR;
-    if (NXopendata(outId, nxName) != NX_OK)
-      return NX_ERROR;
-    if (WriteAttributes(is_definition) != NX_OK)
-      return NX_ERROR;
-    if (NXputdata(outId, dataBuffer) != NX_OK)
-      return NX_ERROR;
-    if (NXfree(&dataBuffer) != NX_OK)
-      return NX_ERROR;
-    if (NXclosedata(outId) != NX_OK)
-      return NX_ERROR;
+    if (NXcompmakedata(outId, nxName, dataType, dataRank, dataDimensions, NX_COMP_LZW, // cppcheck-suppress uninitvar
+                       dataDimensions) != NXstatus::OKAY)
+      return NXstatus::ERROR;
+    if (NXopendata(outId, nxName) != NXstatus::OKAY)
+      return NXstatus::ERROR;
+    if (WriteAttributes(is_definition) != NXstatus::OKAY)
+      return NXstatus::ERROR;
+    if (NXputdata(outId, dataBuffer) != NXstatus::OKAY)
+      return NXstatus::ERROR;
+    if (NXfree(&dataBuffer) != NXstatus::OKAY)
+      return NXstatus::ERROR;
+    if (NXclosedata(outId) != NXstatus::OKAY)
+      return NXstatus::ERROR;
   } else {
     // YES it is a rectangular detector.
 
@@ -450,25 +456,28 @@ int SaveToSNSHistogramNexus::WriteDataGroup(const std::string &bank, int is_defi
       }
 
       std::cout << "Saving in slabs of " << x_slab << " X pixels.\n";
-      if (this->WriteOutDataOrErrors(det, x_slab, "data", "data_errors", false, false, is_definition, bank) != NX_OK)
-        return NX_ERROR;
-      if (this->WriteOutDataOrErrors(det, x_slab, "errors", "", true, false, is_definition, bank) != NX_OK)
-        return NX_ERROR;
+      if (this->WriteOutDataOrErrors(det, x_slab, "data", "data_errors", false, false, is_definition, bank) !=
+          NXstatus::OKAY)
+        return NXstatus::ERROR;
+      if (this->WriteOutDataOrErrors(det, x_slab, "errors", "", true, false, is_definition, bank) != NXstatus::OKAY)
+        return NXstatus::ERROR;
     } else {
       std::cout << "Saving in one block.\n";
       if (this->WriteOutDataOrErrors(det, det->xpixels(), "data", "data_errors", false, true, is_definition, bank) !=
-          NX_OK)
-        return NX_ERROR;
+          NXstatus::OKAY)
+        return NXstatus::ERROR;
     }
   }
 
-  return NX_OK;
+  return NXstatus::OKAY;
 }
 
 //------------------------------------------------------------------------
 /** Prints the contents of each group as XML tags and values */
-int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
-  int status, dataType, dataRank, dataDimensions[NX_MAXRANK];
+NXstatus SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
+  NXstatus status;
+  NXnumtype dataType;
+  int dataRank, dataDimensions[NX_MAXRANK];
   NXname nxName, theClass;
   void *dataBuffer;
   NXlink link;
@@ -477,26 +486,26 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
     status = NXgetnextentry(inId, nxName, theClass, &dataType);
     //      std::cout << name << "(" << theClass << ")\n";
 
-    if (status == NX_ERROR)
-      return NX_ERROR;
-    if (status == NX_OK) {
+    if (status == NXstatus::ERROR)
+      return NXstatus::ERROR;
+    if (status == NXstatus::OKAY) {
       if (!strncmp(theClass, "NX", 2)) {
-        if (NXopengroup(inId, nxName, theClass) != NX_OK)
-          return NX_ERROR;
+        if (NXopengroup(inId, nxName, theClass) != NXstatus::OKAY)
+          return NXstatus::ERROR;
         add_path(nxName);
 
-        if (NXgetgroupID(inId, &link) != NX_OK)
-          return NX_ERROR;
+        if (NXgetgroupID(inId, &link) != NXstatus::OKAY)
+          return NXstatus::ERROR;
         if (!strcmp(current_path, link.targetPath)) {
           // Create a copy of the group
-          if (NXmakegroup(outId, nxName, theClass) != NX_OK)
-            return NX_ERROR;
-          if (NXopengroup(outId, nxName, theClass) != NX_OK)
-            return NX_ERROR;
-          if (WriteAttributes(is_definition) != NX_OK)
-            return NX_ERROR;
-          if (WriteGroup(is_definition) != NX_OK)
-            return NX_ERROR;
+          if (NXmakegroup(outId, nxName, theClass) != NXstatus::OKAY)
+            return NXstatus::ERROR;
+          if (NXopengroup(outId, nxName, theClass) != NXstatus::OKAY)
+            return NXstatus::ERROR;
+          if (WriteAttributes(is_definition) != NXstatus::OKAY)
+            return NXstatus::ERROR;
+          if (WriteGroup(is_definition) != NXstatus::OKAY)
+            return NXstatus::ERROR;
           remove_path(nxName);
         } else {
           remove_path(nxName);
@@ -504,17 +513,15 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
           strcpy(links_to_make[links_count].to, link.targetPath);
           strcpy(links_to_make[links_count].name, nxName);
           links_count++;
-          if (NXclosegroup(inId) != NX_OK)
-            return NX_ERROR;
+          if (NXclosegroup(inId) != NXstatus::OKAY)
+            return NXstatus::ERROR;
         }
       } else if (!strncmp(theClass, "SDS", 3)) {
         add_path(nxName);
-        if (NXopendata(inId, nxName) != NX_OK)
-          return NX_ERROR;
-        if (NXgetdataID(inId, &link) != NX_OK)
-          return NX_ERROR;
-
-        std::string data_label(nxName);
+        if (NXopendata(inId, nxName) != NXstatus::OKAY)
+          return NXstatus::ERROR;
+        if (NXgetdataID(inId, &link) != NXstatus::OKAY)
+          return NXstatus::ERROR;
 
         if (!strcmp(current_path, link.targetPath)) {
           // Look for the bank name
@@ -530,17 +537,18 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
             }
           }
 
+          std::string data_label(nxName);
           //---------------------------------------------------------------------------------------
           if (data_label == "data" && (!bank.empty())) {
-            if (this->WriteDataGroup(bank, is_definition) != NX_OK)
-              return NX_ERROR;
+            if (this->WriteDataGroup(bank, is_definition) != NXstatus::OKAY)
+              return NXstatus::ERROR;
             ;
           }
           //---------------------------------------------------------------------------------------
           else if (data_label == "time_of_flight" && (!bank.empty())) {
             // Get the original info
-            if (NXgetinfo(inId, &dataRank, dataDimensions, &dataType) != NX_OK)
-              return NX_ERROR;
+            if (NXgetinfo(inId, &dataRank, dataDimensions, &dataType) != NXstatus::OKAY)
+              return NXstatus::ERROR;
 
             // Get the X bins
             const auto &X = m_inputWorkspace->y(0);
@@ -552,40 +560,42 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
             // And fill it with the X data
             std::transform(X.cbegin(), X.cend(), tof_data.begin(), [](double x) { return static_cast<float>(x); });
 
-            if (NXcompmakedata(outId, nxName, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK)
-              return NX_ERROR;
-            if (NXopendata(outId, nxName) != NX_OK)
-              return NX_ERROR;
-            if (WriteAttributes(is_definition) != NX_OK)
-              return NX_ERROR;
-            if (NXputdata(outId, tof_data.data()) != NX_OK)
-              return NX_ERROR;
-            if (NXclosedata(outId) != NX_OK)
-              return NX_ERROR;
+            if (NXcompmakedata(outId, nxName, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) !=
+                NXstatus::OKAY)
+              return NXstatus::ERROR;
+            if (NXopendata(outId, nxName) != NXstatus::OKAY)
+              return NXstatus::ERROR;
+            if (WriteAttributes(is_definition) != NXstatus::OKAY)
+              return NXstatus::ERROR;
+            if (NXputdata(outId, tof_data.data()) != NXstatus::OKAY)
+              return NXstatus::ERROR;
+            if (NXclosedata(outId) != NXstatus::OKAY)
+              return NXstatus::ERROR;
 
           }
 
           //---------------------------------------------------------------------------------------
           else {
             // Everything else gets copies
-            if (NXgetinfo(inId, &dataRank, dataDimensions, &dataType) != NX_OK)
-              return NX_ERROR;
-            if (NXmalloc(&dataBuffer, dataRank, dataDimensions, dataType) != NX_OK)
-              return NX_ERROR;
-            if (NXgetdata(inId, dataBuffer) != NX_OK)
-              return NX_ERROR;
-            if (NXcompmakedata(outId, nxName, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) != NX_OK)
-              return NX_ERROR;
-            if (NXopendata(outId, nxName) != NX_OK)
-              return NX_ERROR;
-            if (WriteAttributes(is_definition) != NX_OK)
-              return NX_ERROR;
-            if (NXputdata(outId, dataBuffer) != NX_OK)
-              return NX_ERROR;
-            if (NXfree(&dataBuffer) != NX_OK)
-              return NX_ERROR;
-            if (NXclosedata(outId) != NX_OK)
-              return NX_ERROR;
+            if (NXgetinfo(inId, &dataRank, dataDimensions, &dataType) != NXstatus::OKAY)
+              return NXstatus::ERROR;
+            if (NXmalloc(&dataBuffer, dataRank, dataDimensions, dataType) != NXstatus::OKAY)
+              return NXstatus::ERROR;
+            if (NXgetdata(inId, dataBuffer) != NXstatus::OKAY)
+              return NXstatus::ERROR;
+            if (NXcompmakedata(outId, nxName, dataType, dataRank, dataDimensions, NX_COMP_LZW, dataDimensions) !=
+                NXstatus::OKAY)
+              return NXstatus::ERROR;
+            if (NXopendata(outId, nxName) != NXstatus::OKAY)
+              return NXstatus::ERROR;
+            if (WriteAttributes(is_definition) != NXstatus::OKAY)
+              return NXstatus::ERROR;
+            if (NXputdata(outId, dataBuffer) != NXstatus::OKAY)
+              return NXstatus::ERROR;
+            if (NXfree(&dataBuffer) != NXstatus::OKAY)
+              return NXstatus::ERROR;
+            if (NXclosedata(outId) != NXstatus::OKAY)
+              return NXstatus::ERROR;
           }
 
           remove_path(nxName);
@@ -597,26 +607,28 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
           strcpy(links_to_make[links_count].name, nxName);
           links_count++;
         }
-        if (NXclosedata(inId) != NX_OK)
-          return NX_ERROR;
+        if (NXclosedata(inId) != NXstatus::OKAY)
+          return NXstatus::ERROR;
       }
-    } else if (status == NX_EOD) {
-      if (NXclosegroup(inId) != NX_OK)
-        return NX_ERROR;
-      if (NXclosegroup(outId) != NX_OK)
-        return NX_ERROR;
-      return NX_OK;
+    } else if (status == NXstatus::EOD) {
+      if (NXclosegroup(inId) != NXstatus::OKAY)
+        return NXstatus::ERROR;
+      if (NXclosegroup(outId) != NXstatus::OKAY)
+        return NXstatus::ERROR;
+      return NXstatus::OKAY;
     }
-  } while (status == NX_OK);
-  return NX_OK;
+  } while (status == NXstatus::OKAY);
+  return NXstatus::OKAY;
 }
 
 //------------------------------------------------------------------------
 /** Copy the attributes from input to output */
-int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
+NXstatus SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
   (void)is_definition;
 
-  int status, attrLen, attrType;
+  NXstatus status;
+  NXnumtype attrType;
+  int attrLen;
   int rank;
   int dims[4];
   NXname attrName;
@@ -627,32 +639,27 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
 
   do {
     status = NXgetnextattra(inId, attrName, &rank, dims, &attrType);
-    if (status == NX_ERROR)
-      return NX_ERROR;
-    if (status == NX_OK) {
+    if (status == NXstatus::ERROR)
+      return NXstatus::ERROR;
+    if (status == NXstatus::OKAY) {
       if (rank != 1)
-        return NX_ERROR;
+        return NXstatus::ERROR;
       attrLen = dims[0];
       if (std::none_of(attrs.cbegin(), attrs.cend(),
                        [&attrName](const char *name) { return strcmp(attrName, name) == 0; })) {
         attrLen++; /* Add space for string termination */
-        if (NXmalloc(&attrBuffer, 1, &attrLen, attrType) != NX_OK)
-          return NX_ERROR;
-        if (NXgetattr(inId, attrName, attrBuffer, &attrLen, &attrType) != NX_OK)
-          return NX_ERROR;
-        if (NXputattr(outId, attrName, attrBuffer, attrLen, attrType) != NX_OK)
-          return NX_ERROR;
-        if (NXfree(&attrBuffer) != NX_OK)
-          return NX_ERROR;
+        if (NXmalloc(&attrBuffer, 1, &attrLen, attrType) != NXstatus::OKAY)
+          return NXstatus::ERROR;
+        if (NXgetattr(inId, attrName, attrBuffer, &attrLen, &attrType) != NXstatus::OKAY)
+          return NXstatus::ERROR;
+        if (NXputattr(outId, attrName, attrBuffer, attrLen, attrType) != NXstatus::OKAY)
+          return NXstatus::ERROR;
+        if (NXfree(&attrBuffer) != NXstatus::OKAY)
+          return NXstatus::ERROR;
       }
     }
-  } while (status != NX_EOD);
-  return NX_OK;
-}
-
-void nexus_print_error(void *pD, char *text) {
-  (void)pD;
-  std::cout << "Nexus Error: " << text << "\n";
+  } while (status != NXstatus::EOD);
+  return NXstatus::OKAY;
 }
 
 //------------------------------------------------------------------------
@@ -661,7 +668,6 @@ void nexus_print_error(void *pD, char *text) {
  *  @throw runtime_error Thrown if algorithm cannot execute
  */
 void SaveToSNSHistogramNexus::exec() {
-  // NXMSetError(NULL, nexus_print_error);
   NXMEnableErrorReporting();
 
   // Retrieve the filename from the properties
@@ -682,10 +688,10 @@ void SaveToSNSHistogramNexus::exec() {
     eventWorkspace->sortAll(TOF_SORT, m_progress.get());
   }
 
-  int ret;
+  NXstatus ret;
   ret = this->copy_file(m_inputFilename.c_str(), NXACC_READ, m_outputFilename.c_str(), NXACC_CREATE5);
 
-  if (ret == NX_ERROR)
+  if (ret == NXstatus::ERROR)
     throw std::runtime_error("Nexus error while copying the file.");
 }
 

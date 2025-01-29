@@ -898,7 +898,7 @@ void PeaksWorkspace::saveNexus(::NeXus::File *file) const {
   dims.emplace_back(np);
   dims.emplace_back(static_cast<int>(maxShapeJSONLength));
   const std::string name = "column_16";
-  file->makeData(name, NeXus::CHAR, dims, false);
+  file->makeData(name, NXnumtype::CHAR, dims, false);
   file->openData(name);
 
   auto toNexus = new char[maxShapeJSONLength * np];

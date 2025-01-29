@@ -37,27 +37,27 @@ int main() {
 
     NXhandle fileid;
     NXlink aLink;
-    if (NXopen(szFile, NXACC_CREATE5, &fileid) != NX_OK)
+    if (NXopen(szFile, NXACC_CREATE5, &fileid) != NXstatus::OKAY)
       ON_ERROR("NXopen_failed")
 
     for (iEntry = 0; iEntry < nEntry; iEntry++) {
       ostringstream oss;
       oss << "entry_" << iEntry;
 
-      if (NXmakegroup(fileid, PSZ(oss.str()), "NXentry") != NX_OK)
+      if (NXmakegroup(fileid, PSZ(oss.str()), "NXentry") != NXstatus::OKAY)
         ON_ERROR("NXmakegroup failed!")
 
-      if (NXopengroup(fileid, PSZ(oss.str()), "NXentry") != NX_OK)
+      if (NXopengroup(fileid, PSZ(oss.str()), "NXentry") != NXstatus::OKAY)
         ON_ERROR("NXopengroup failed!")
 
       for (iNXdata = 0; iNXdata < nData; iNXdata++) {
         ostringstream oss2;
         oss2 << "data_" << iNXdata;
 
-        if (NXmakegroup(fileid, PSZ(oss2.str()), "NXdata") != NX_OK)
+        if (NXmakegroup(fileid, PSZ(oss2.str()), "NXdata") != NXstatus::OKAY)
           ON_ERROR("NXmakegroup failed!")
 
-        if (NXopengroup(fileid, PSZ(oss2.str()), "NXdata") != NX_OK)
+        if (NXopengroup(fileid, PSZ(oss2.str()), "NXdata") != NXstatus::OKAY)
           ON_ERROR("NXopengroup failed!")
 
         NXgetgroupID(fileid, &aLink);
@@ -65,28 +65,29 @@ int main() {
           ostringstream oss3;
           oss3 << "i2_data_" << iData;
 
-          if (NXcompmakedata(fileid, PSZ(oss3.str()), NX_INT16, 2, array_dims, NX_COMP_LZW, array_dims) != NX_OK)
+          if (NXcompmakedata(fileid, PSZ(oss3.str()), NXnumtype::INT16, 2, array_dims, NX_COMP_LZW, array_dims) !=
+              NXstatus::OKAY)
             ON_ERROR("NXcompmakedata failed!")
 
-          if (NXopendata(fileid, PSZ(oss3.str())) != NX_OK)
+          if (NXopendata(fileid, PSZ(oss3.str())) != NXstatus::OKAY)
             ON_ERROR("NXopendata failed!")
 
-          if (NXputdata(fileid, aiBinaryData) != NX_OK)
+          if (NXputdata(fileid, aiBinaryData) != NXstatus::OKAY)
             ON_ERROR("NXputdata failed!")
 
-          if (NXclosedata(fileid) != NX_OK)
+          if (NXclosedata(fileid) != NXstatus::OKAY)
             ON_ERROR("NXclosedata failed!")
         }
 
-        if (NXclosegroup(fileid) != NX_OK)
+        if (NXclosegroup(fileid) != NXstatus::OKAY)
           ON_ERROR("NXclosegroup failed!")
       }
 
-      if (NXclosegroup(fileid) != NX_OK)
+      if (NXclosegroup(fileid) != NXstatus::OKAY)
         ON_ERROR("NXclosegroup failed!")
     }
 
-    if (NXclose(&fileid) != NX_OK)
+    if (NXclose(&fileid) != NXstatus::OKAY)
       ON_ERROR("NXclose failed!")
 
     // Delete file

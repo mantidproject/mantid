@@ -16,20 +16,20 @@ int main() {
   NXhandle fileid;
 
   removeFile(szFile); // in case it was left over from previous run
-  if (NXopen(szFile.c_str(), access_mode, &fileid) != NX_OK)
+  if (NXopen(szFile.c_str(), access_mode, &fileid) != NXstatus::OKAY)
     ON_ERROR("NXopen failed!\n")
 
-  if (NXclose(&fileid) != NX_OK)
+  if (NXclose(&fileid) != NXstatus::OKAY)
     ON_ERROR("NXclose failed!\n")
 
   for (iReOpen = 0; iReOpen < nReOpen; iReOpen++) {
     if (0 == iReOpen % 100)
       printf("loop count %d\n", iReOpen);
 
-    if (NXopen(szFile.c_str(), NXACC_RDWR, &fileid) != NX_OK)
+    if (NXopen(szFile.c_str(), NXACC_RDWR, &fileid) != NXstatus::OKAY)
       ON_ERROR("NXopen failed!\n");
 
-    if (NXclose(&fileid) != NX_OK)
+    if (NXclose(&fileid) != NXstatus::OKAY)
       ON_ERROR("NXclose failed!\n");
   }
 

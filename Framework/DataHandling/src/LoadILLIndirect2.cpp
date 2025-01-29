@@ -19,7 +19,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidNexusCpp/napi.h"
+#include "MantidNexusCpp/NeXusFile_fwd.h"
 
 #include <Poco/Path.h>
 #include <algorithm>
@@ -338,7 +338,7 @@ void LoadILLIndirect2::loadNexusEntriesIntoProperties(const std::string &nexusfi
   API::Run &runDetails = m_localWorkspace->mutableRun();
   NXhandle nxfileID;
   NXstatus stat = NXopen(nexusfilename.c_str(), NXACC_READ, &nxfileID);
-  if (stat == NX_ERROR) {
+  if (stat == NXstatus::ERROR) {
     g_log.debug() << "convertNexusToProperties: Error loading " << nexusfilename;
     throw Kernel::Exception::FileError("Unable to open File:", nexusfilename);
   }
