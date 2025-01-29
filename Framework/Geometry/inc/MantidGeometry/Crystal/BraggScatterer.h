@@ -67,9 +67,6 @@ public:
   bool isPropertyExposedToComposite(Kernel::Property *property) const;
 
 protected:
-  /// Base implementation does nothing, can be re-implemented by subclasses.
-  void afterPropertySet(const std::string &) override {}
-
   /// Base implementation does nothing - for implementing classes only.
   virtual void declareProperties() {}
 
