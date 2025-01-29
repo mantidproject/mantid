@@ -122,13 +122,16 @@ std::string cutLastOf(const std::string &str, const std::string &delimiter) {
   return str;
 }
 
-boost::basic_format<char> &tryPassFormatArgument(boost::basic_format<char> &formatString, const std::string &arg) {
+std::unique_ptr<boost::basic_format<char>> tryPassFormatArgument(boost::basic_format<char> &formatString,
+                                                                 const std::string &arg) {
+  auto tmpString = formatString;
   try {
-    auto &tmpString = formatString % arg;
-    return tmpString;
+    tmpString = formatString % arg;
   } catch (const boost::io::too_many_args &) {
-    return formatString;
+    return std::unique_ptr<boost::basic_format<char>>(&tmpString);
   }
+
+  return std::unique_ptr<boost::basic_format<char>>(&tmpString);
 }
 
 std::pair<double, double> getBinRange(const MatrixWorkspace_sptr &workspace) {
@@ -186,8 +189,8 @@ std::string FitData::displayName(const std::string &formatString, const std::str
   const auto spectraString = m_spectra.getString();
 
   auto formatted = boost::format(formatString);
-  formatted = tryPassFormatArgument(formatted, workspaceName);
-  formatted = tryPassFormatArgument(formatted, spectraString);
+  formatted = *tryPassFormatArgument(formatted, workspaceName);
+  formatted = *tryPassFormatArgument(formatted, spectraString);
 
   auto name = formatted.str();
   std::replace(name.begin(), name.end(), ',', '+');
@@ -198,8 +201,8 @@ std::string FitData::displayName(const std::string &formatString, WorkspaceIndex
   const auto workspaceName = getBasename();
 
   auto formatted = boost::format(formatString);
-  formatted = tryPassFormatArgument(formatted, workspaceName);
-  formatted = tryPassFormatArgument(formatted, std::to_string(spectrum.value));
+  formatted = *tryPassFormatArgument(formatted, workspaceName);
+  formatted = *tryPassFormatArgument(formatted, std::to_string(spectrum.value));
   return formatted.str();
 }
 
