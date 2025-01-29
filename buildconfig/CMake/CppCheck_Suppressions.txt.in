@@ -1062,7 +1062,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.c
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:616
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:902
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmDialog.cpp:904
-passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmProgress/AlgorithmProgressDialogPresenter.cpp:63
 passedByValue:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmProgress/AlgorithmProgressPresenter.cpp:44
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/AlgorithmPropertiesWidget.cpp:441
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/Batch/JobTreeView.cpp:48

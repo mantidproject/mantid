@@ -145,7 +145,7 @@ public:
   /// Set the input read-only or not
   void setReadOnly(bool readOnly);
   /// Get the last directory
-  const QString getLastDirectory() const { return m_lastDir; }
+  const QString &getLastDirectory() const { return m_lastDir; }
   /// Set the last directory
   void setLastDirectory(const QString &lastDir) { m_lastDir = lastDir; }
   /// Set an arbitrary validator on the line edit
