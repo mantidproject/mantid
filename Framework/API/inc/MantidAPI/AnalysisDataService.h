@@ -136,6 +136,8 @@ public:
   /// Return a lookup of the top level items
   std::map<std::string, Workspace_sptr> topLevelItems() const;
   void shutdown() override;
+  /// Private destructor
+  ~AnalysisDataServiceImpl() override = default;
 
 private:
   /// Checks the name is valid, throwing if not
@@ -149,8 +151,6 @@ private:
   AnalysisDataServiceImpl(const AnalysisDataServiceImpl &) = delete;
   /// Private, unimplemented copy assignment operator
   AnalysisDataServiceImpl &operator=(const AnalysisDataServiceImpl &) = delete;
-  /// Private destructor
-  ~AnalysisDataServiceImpl() override = default;
 
   /// The string of illegal characters
   std::string m_illegalChars;

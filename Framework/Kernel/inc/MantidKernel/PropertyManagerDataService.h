@@ -24,12 +24,12 @@ class MANTID_KERNEL_DLL PropertyManagerDataServiceImpl final : public DataServic
 public:
   PropertyManagerDataServiceImpl(const PropertyManagerDataServiceImpl &) = delete;
   PropertyManagerDataServiceImpl &operator=(const PropertyManagerDataServiceImpl &) = delete;
+  ~PropertyManagerDataServiceImpl() override = default;
 
 private:
   friend struct Mantid::Kernel::CreateUsingNew<PropertyManagerDataServiceImpl>;
   /// Constructor
   PropertyManagerDataServiceImpl();
-  ~PropertyManagerDataServiceImpl() override = default;
 };
 
 EXTERN_MANTID_KERNEL template class MANTID_KERNEL_DLL Mantid::Kernel::SingletonHolder<PropertyManagerDataServiceImpl>;
