@@ -175,15 +175,17 @@ protected:
 class MWPropertiesWidget : public DynamicPropertiesWidget {
 public:
   MWPropertiesWidget(InputWorkspaceWidget *parent);
-  ~MWPropertiesWidget();
   /// Initialize the child widgets with stored and allowed values
   void init() override;
   /// Set all workspace properties
   void setProperties() override;
 
-protected:
+private:
   QSpinBox *m_workspaceIndex;
+  // both unsafeClassCanLeak below seem to be incorrectly detected as QT manages the clean up
+  // cppcheck-suppress unsafeClassCanLeak
   QLineEdit *m_startX;
+  // cppcheck-suppress unsafeClassCanLeak
   QLineEdit *m_endX;
   QSpinBox *m_maxSize;
 };
@@ -199,7 +201,7 @@ public:
   /// Set all workspace properties
   void setProperties() override;
 
-protected:
+private:
   QSpinBox *m_maxSize;
 };
 } // namespace CustomDialogs

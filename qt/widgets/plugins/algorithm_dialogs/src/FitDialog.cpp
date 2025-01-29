@@ -214,14 +214,6 @@ MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget *parent) : DynamicPr
 }
 
 /**
- * Destructor.
- */
-MWPropertiesWidget::~MWPropertiesWidget() {
-  delete m_startX;
-  delete m_endX;
-}
-
-/**
  * Initialize the child widgets with stored and allowed values
  */
 void MWPropertiesWidget::init() {}
