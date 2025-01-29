@@ -128,10 +128,10 @@ std::unique_ptr<boost::basic_format<char>> tryPassFormatArgument(boost::basic_fo
   try {
     tmpString = formatString % arg;
   } catch (const boost::io::too_many_args &) {
-    return std::unique_ptr<boost::basic_format<char>>(&tmpString);
+    return std::unique_ptr<boost::basic_format<char>>(new boost::basic_format<char>(tmpString));
   }
 
-  return std::unique_ptr<boost::basic_format<char>>(&tmpString);
+  return std::unique_ptr<boost::basic_format<char>>(new boost::basic_format<char>(tmpString));
 }
 
 std::pair<double, double> getBinRange(const MatrixWorkspace_sptr &workspace) {
