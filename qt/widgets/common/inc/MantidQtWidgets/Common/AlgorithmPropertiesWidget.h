@@ -47,7 +47,7 @@ public:
   Mantid::API::IAlgorithm_sptr getAlgorithm();
   void setAlgorithm(const Mantid::API::IAlgorithm_sptr &algo);
 
-  QString getAlgorithmName() const;
+  const QString &getAlgorithmName() const;
   void setAlgorithmName(QString name);
 
   void addEnabledAndDisableLists(const QStringList &enabled, const QStringList &disabled);

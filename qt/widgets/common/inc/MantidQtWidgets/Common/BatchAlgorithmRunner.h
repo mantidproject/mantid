@@ -70,7 +70,7 @@ public:
       : Poco::Notification(), m_algorithm(std::move(algorithm)), m_errorMessage(errorMessage) {}
 
   IConfiguredAlgorithm_sptr algorithm() const { return m_algorithm; }
-  std::string errorMessage() const { return m_errorMessage; }
+  const std::string &errorMessage() const { return m_errorMessage; }
 
 private:
   IConfiguredAlgorithm_sptr m_algorithm;
