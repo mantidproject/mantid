@@ -102,20 +102,20 @@ public:
   void setDefaultStartingGroupID(int startgroupid) { m_startGroupID = startgroupid; }
 
   std::string getInstrumentName() { return m_instrumentName; }
-  bool isGivenInstrumentName() { return m_userGiveInstrument; }
+  bool isGivenInstrumentName() const { return m_userGiveInstrument; }
 
-  std::string getDate() { return m_date; }
-  bool isGivenDate() { return m_userGiveDate; }
+  const std::string &getDate() const { return m_date; }
+  bool isGivenDate() const { return m_userGiveDate; }
 
-  std::string getDescription() { return m_description; }
-  bool isGivenDescription() { return m_userGiveDescription; }
+  const std::string &getDescription() const { return m_description; }
+  bool isGivenDescription() const { return m_userGiveDescription; }
 
   /// Data structures to store XML to Group/Detector conversion map
-  std::map<int, std::vector<std::string>> getGroupComponentsMap() { return m_groupComponentsMap; }
-  std::map<int, std::vector<detid_t>> getGroupDetectorsMap() { return m_groupDetectorsMap; }
-  std::map<int, std::vector<int>> getGroupSpectraMap() { return m_groupSpectraMap; }
+  const std::map<int, std::vector<std::string>> &getGroupComponentsMap() const { return m_groupComponentsMap; }
+  const std::map<int, std::vector<detid_t>> &getGroupDetectorsMap() const { return m_groupDetectorsMap; }
+  const std::map<int, std::vector<int>> &getGroupSpectraMap() const { return m_groupSpectraMap; }
 
-  std::map<int, std::string> getGroupNamesMap() { return m_groupNamesMap; }
+  const std::map<int, std::string> &getGroupNamesMap() const { return m_groupNamesMap; }
 
 private:
   /// Instrument name
@@ -172,7 +172,7 @@ public:
   /// Return the map parsed from file. Should only be called after the file is
   /// parsed,
   /// otherwise a map will always be empty.
-  std::map<int, std::vector<int>> getGroupSpectraMap() { return m_groupSpectraMap; }
+  const std::map<int, std::vector<int>> &getGroupSpectraMap() const { return m_groupSpectraMap; }
 
 private:
   /// Skips all the empty lines and comment lines, and returns next line with
