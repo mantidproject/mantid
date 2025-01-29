@@ -221,7 +221,7 @@ void FileFinderWidget::doMultiEntry(const bool multiEntry) {
  * Returns the algorithm name
  * @returns The algorithm name
  */
-QString FileFinderWidget::getAlgorithmProperty() const { return m_algorithmProperty; }
+const QString &FileFinderWidget::getAlgorithmProperty() const { return m_algorithmProperty; }
 
 /**
  * Sets an algorithm name that can be tied to this widget
@@ -233,7 +233,7 @@ void FileFinderWidget::setAlgorithmProperty(const QString &text) { m_algorithmPr
  * Returns the list of file extensions the widget will search for.
  * @return list of file extensions
  */
-QStringList FileFinderWidget::getFileExtensions() const { return m_fileExtensions; }
+const QStringList &FileFinderWidget::getFileExtensions() const { return m_fileExtensions; }
 
 std::vector<std::string> FileFinderWidget::getStringFileExtensions() const {
   std::vector<std::string> extensions;
@@ -300,7 +300,7 @@ bool FileFinderWidget::isSearching() const { return m_pool.isSearchRunning(); }
  * Returns the names of the files found
  * @return an array of filenames entered in the box
  */
-QStringList FileFinderWidget::getFilenames() const { return m_foundFiles; }
+const QStringList &FileFinderWidget::getFilenames() const { return m_foundFiles; }
 
 /** Safer than using getRunFiles()[0] in the situation were there are no files
  *  @return an empty string is returned if no input files have been defined or
@@ -400,7 +400,7 @@ void FileFinderWidget::setFileProblem(const QString &message) {
  * Return the error.
  * @returns A string explaining the error.
  */
-QString FileFinderWidget::getFileProblem() const { return m_fileProblem; }
+const QString &FileFinderWidget::getFileProblem() const { return m_fileProblem; }
 
 /**
  * Save settings to the given group
@@ -445,7 +445,7 @@ void FileFinderWidget::setLiveAlgorithm(const IAlgorithm_sptr &monitorLiveData) 
  *
  * @return Name of instrument, empty if not set
  */
-QString FileFinderWidget::getInstrumentOverride() { return m_defaultInstrumentName; }
+const QString &FileFinderWidget::getInstrumentOverride() const { return m_defaultInstrumentName; }
 
 /**
  * Sets an instrument to fix the widget to.
