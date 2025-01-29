@@ -26,7 +26,7 @@ public:
   AbstractAlgorithmInputHistory(const AbstractAlgorithmInputHistory &) = delete;
   AbstractAlgorithmInputHistory &operator=(const AbstractAlgorithmInputHistory &) = delete;
   /// Abstract destructor
-  virtual ~AbstractAlgorithmInputHistory() = 0;
+  virtual ~AbstractAlgorithmInputHistory() override = 0;
 
   /// Update the old values that are stored here. Only valid
   /// values are stored here

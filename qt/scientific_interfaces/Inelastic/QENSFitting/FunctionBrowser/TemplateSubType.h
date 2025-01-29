@@ -94,7 +94,7 @@ template <class Type> struct TemplateSubTypeImpl : public TemplateSubType {
     return descriptions;
   }
 
-  std::string getFunctionName(Type type) const { return g_typeMap[type].function; }
+  const std::string &getFunctionName(Type type) const { return g_typeMap[type].function; }
 
   void applyToType(Type type, std::function<void(ParamID)> paramFun) const {
     applyToParamIDRange(g_typeMap[type].blocks.front(), g_typeMap[type].blocks.back(), paramFun);
