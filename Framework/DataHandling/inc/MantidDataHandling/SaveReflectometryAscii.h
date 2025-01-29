@@ -76,7 +76,7 @@ private:
   /// The output file stream
   std::ofstream m_file;
   /// The angle used to calculate wavelength from momentum exchange, in rad
-  double m_theta;
+  double m_theta{0.0};
 };
 } // namespace DataHandling
 } // namespace Mantid
