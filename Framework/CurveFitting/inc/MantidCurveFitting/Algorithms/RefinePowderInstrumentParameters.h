@@ -105,7 +105,7 @@ private:
   void refineInstrumentParametersMC(const DataObjects::TableWorkspace_sptr &parameterWS, bool fit2 = false);
 
   /// Core Monte Carlo random walk on parameter-space
-  void doParameterSpaceRandomWalk(std::vector<std::string> &parnames, const std::vector<double> &lowerbounds,
+  void doParameterSpaceRandomWalk(const std::vector<std::string> &parnames, const std::vector<double> &lowerbounds,
                                   const std::vector<double> &upperbounds, std::vector<double> &stepsizes,
                                   size_t maxsteps, double stepsizescalefactor, bool fit2);
 

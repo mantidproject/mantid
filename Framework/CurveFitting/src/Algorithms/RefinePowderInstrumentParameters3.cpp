@@ -1200,10 +1200,10 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(const IFun
  */
 // variable source is moved within this class(so it might be better to be passed by value and not reference)
 // cppcheck-suppress passedByValue
-void duplicateParameters(map<string, Parameter> source, map<string, Parameter> &target) {
+void duplicateParameters(const map<string, Parameter> source, map<string, Parameter> &target) {
   target.clear();
 
-  map<string, Parameter>::iterator miter;
+  map<string, Parameter>::const_iterator miter;
   for (miter = source.begin(); miter != source.end(); ++miter) {
     string parname = miter->first;
     Parameter param = miter->second;
