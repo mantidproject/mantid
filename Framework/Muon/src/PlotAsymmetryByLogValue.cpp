@@ -213,7 +213,7 @@ const std::string PlotAsymmetryByLogValue::getLogUnits(const std::string &fileNa
     ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(m_red - 1));
   }
   const Run &run = ws->run();
-  auto property = run.getLogData(m_logName);
+  const auto *property = run.getLogData(m_logName);
   return property->units();
 }
 
@@ -449,7 +449,7 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(MatrixWorkspace_sptr &outW
   auto tAxis = std::make_unique<TextAxis>(nplots);
   if (nplots == 1) {
     size_t i = 0;
-    for (auto &value : m_logValue) {
+    for (const auto &value : m_logValue) {
       outWS->mutableX(0)[i] = value.second;
       outWS->mutableY(0)[i] = m_redY[value.first];
       outWS->mutableE(0)[i] = m_redE[value.first];
@@ -459,7 +459,7 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace(MatrixWorkspace_sptr &outW
 
   } else {
     size_t i = 0;
-    for (auto &value : m_logValue) {
+    for (const auto &value : m_logValue) {
       outWS->mutableX(0)[i] = value.second;
       outWS->mutableY(0)[i] = m_diffY[value.first];
       outWS->mutableE(0)[i] = m_diffE[value.first];
@@ -494,7 +494,7 @@ void PlotAsymmetryByLogValue::saveResultsToADS(MatrixWorkspace_sptr &outWS, int 
 
   if (nplots == 2) {
     size_t i = 0;
-    for (auto &value : m_logValue) {
+    for (const auto &value : m_logValue) {
       size_t run = value.first;
       outWS->mutableX(0)[i] = static_cast<double>(run); // run number
       outWS->mutableY(0)[i] = value.second;             // log value
@@ -865,7 +865,7 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(const MatrixWorkspace_sptr &ws_re
  * @throw :: std::invalid_argument if the log cannot be converted to a double or
  *doesn't exist.
  */
-double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
+double PlotAsymmetryByLogValue::getLogValue(const MatrixWorkspace &ws) {
   const Run &run = ws.run();
   const auto &runROI = run.getTimeROI();
 

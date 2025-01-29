@@ -120,7 +120,7 @@ template <typename ElementType> PyObject *cloneND(const ElementType *carray, con
  * @param dims :: The length of the arrays in each dimension
  * @return
  */
-template <> PyObject *cloneND(const std::string *carray, const int ndims, Py_intptr_t *dims) {
+template <> PyObject *cloneND(const std::string *carray, const int ndims, const Py_intptr_t *dims) {
   boost::python::list pystrs;
   const std::string *iter = carray;
   for (int i = 0; i < ndims; ++i) {

@@ -157,6 +157,7 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
    * @return A shared_ptr to the named object. If the name does not exist it
    * sets a KeyError error indicator.
    */
+  // cppcheck-suppress constParameterCallback
   static WeakPtr retrieveOrKeyError(SvcType &self, const std::string &name) {
     using namespace Mantid::Kernel;
 
@@ -166,7 +167,6 @@ template <typename SvcType, typename SvcPtrType> struct DataServiceExporter {
     } catch (Exception::NotFoundError &) {
       // Translate into a Python KeyError
       std::string err = "'" + name + "' does not exist.";
-      PyErr_SetString(PyExc_KeyError, err.c_str());
       throw boost::python::error_already_set();
     }
     return WeakPtr(item);
