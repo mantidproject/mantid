@@ -23,7 +23,6 @@ public:
 
   void init() override;
   std::string name() const override { return "CrystalFieldMultiSpectrum"; }
-  const std::string category() const { return "General"; }
   size_t getNumberDomains() const override;
   void setAttribute(const std::string &name, const Attribute &) override;
   std::vector<API::IFunction_sptr> createEquivalentFunctions() const override;

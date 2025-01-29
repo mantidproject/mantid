@@ -34,7 +34,6 @@ public:
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "Chebyshev"; }
-  const std::string category() const { return "Background"; }
   void function1D(double *out, const double *xValues, const size_t nData) const override;
   void functionDeriv1D(API::Jacobian *out, const double *xValues, const size_t nData) override;
 

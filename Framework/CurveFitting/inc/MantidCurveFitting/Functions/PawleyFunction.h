@@ -49,7 +49,7 @@ public:
   std::string getProfileFunctionName() const { return getAttribute("ProfileFunction").asString(); }
 
   /// Returns the name of the stored function's center parameter
-  const std::string getProfileFunctionCenterParameterName() const { return m_profileFunctionCenterParameterName; }
+  const std::string &getProfileFunctionCenterParameterName() const { return m_profileFunctionCenterParameterName; }
 
   void function(const API::FunctionDomain &domain, API::FunctionValues &values) const override;
   void functionDeriv(const API::FunctionDomain &domain, API::Jacobian &jacobian) override;

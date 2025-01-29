@@ -102,7 +102,6 @@ public:
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "Convolution"; }
-  const std::string category() const { return "General"; }
   /// Function you want to fit to.
   void function(const API::FunctionDomain &domain, API::FunctionValues &values) const override;
   void functionFFTMode(const API::FunctionDomain &domain, API::FunctionValues &values) const;
