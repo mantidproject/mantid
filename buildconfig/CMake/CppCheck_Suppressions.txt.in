@@ -327,8 +327,6 @@ containerOutOfBounds:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveHKL.cpp:607
 passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawPeaks.cpp:508
 constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawUB.cpp:49
 constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawUB.cpp:50
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveLauenorm.cpp:164
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveLauenorm.cpp:234
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SelectCellWithForm.cpp:134
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/inc/MantidCurveFitting/Algorithms/Fit1D.h:61
 missingOverride:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/inc/MantidCurveFitting/Algorithms/PawleyFit.h:52
