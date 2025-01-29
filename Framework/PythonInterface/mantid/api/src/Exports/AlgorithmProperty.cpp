@@ -39,9 +39,11 @@ AlgorithmProperty *createPropertyWithValidatorAndDirection(const std::string &na
  * when passed to the framework
  * @return A pointer to a new AlgorithmProperty object
  */
-AlgorithmProperty *createPropertyWithValidator(const std::string &name, IValidator *validator) {
-  return createPropertyWithValidatorAndDirection(name, validator, Mantid::Kernel::Direction::Input);
-}
+const std::function<const AlgorithmProperty *(const std::string &, const IValidator *)> createPropertyWithValidator =
+    [](const std::string &name, const IValidator *validator) {
+      return createPropertyWithValidatorAndDirection(name, validator, Mantid::Kernel::Direction::Input);
+    };
+
 } // namespace
 
 void export_AlgorithmProperty() {
