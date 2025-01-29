@@ -1198,8 +1198,6 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(const IFun
  * exacly same as
  * source;
  */
-// variable source is moved within this class(so it might be better to be passed by value and not reference)
-// cppcheck-suppress passedByValue
 void duplicateParameters(const map<string, Parameter> source, map<string, Parameter> &target) {
   target.clear();
 
