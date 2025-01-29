@@ -94,9 +94,9 @@ public:
   void doButtonOpt(ButtonOpts buttonOpt);
   bool doMultiEntry() const;
   void doMultiEntry(bool /*multiEntry*/);
-  QString getAlgorithmProperty() const;
+  const QString &getAlgorithmProperty() const;
   void setAlgorithmProperty(const QString &name);
-  QStringList getFileExtensions() const;
+  const QStringList &getFileExtensions() const;
   std::vector<std::string> getStringFileExtensions() const;
   void setFileExtensions(const QStringList &extensions);
   bool extsAsSingleOption() const;
@@ -112,7 +112,7 @@ public:
 
   bool isValid() const;
   bool isSearching() const;
-  QStringList getFilenames() const;
+  const QStringList &getFilenames() const;
   QString getFirstFilename() const;
   int getEntryNum() const;
   void setEntryNum(const int num);
@@ -127,7 +127,7 @@ public:
   /// error
   void setFileProblem(const QString &message);
   /// Get file problem, empty string means no error.
-  QString getFileProblem() const;
+  const QString &getFileProblem() const;
   /// Read settings from the given group
   void readSettings(const QString &group);
   /// Save settings in the given group
@@ -139,13 +139,13 @@ public:
   /// stopLiveListener()
   void setLiveAlgorithm(const std::shared_ptr<Mantid::API::IAlgorithm> &monitorLiveData);
   /// Gets the instrument currently fixed to
-  QString getInstrumentOverride();
+  const QString &getInstrumentOverride() const;
   /// Overrides the value of default instrument
   void setInstrumentOverride(const QString &instName);
   /// Set the input read-only or not
   void setReadOnly(bool readOnly);
   /// Get the last directory
-  QString getLastDirectory() { return m_lastDir; }
+  const QString getLastDirectory() const { return m_lastDir; }
   /// Set the last directory
   void setLastDirectory(const QString &lastDir) { m_lastDir = lastDir; }
   /// Set an arbitrary validator on the line edit
