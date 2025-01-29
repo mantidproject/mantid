@@ -41,7 +41,7 @@ public:
 private:
   Value m_value = Value::Linear;
   bool m_calculateErrors = false;
-  bool m_independentErrors = false;
+  bool m_independentErrors = true;
 };
 
 } // namespace Algorithms

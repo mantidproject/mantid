@@ -67,7 +67,7 @@ public:
   const std::map<std::string, double> &getPeakError() const { return m_fitErrorPeakFunc; };
 
   /// Get fitting error for background function
-const std::map<std::string, double> &getBackgroundError() const { return m_fitErrorBkgdFunc; };
+  const std::map<std::string, double> &getBackgroundError() const { return m_fitErrorBkgdFunc; };
 
   /// Get cost function value from fitting
   double getFitCostFunctionValue();
