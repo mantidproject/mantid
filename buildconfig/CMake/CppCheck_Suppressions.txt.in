@@ -1005,12 +1005,6 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AlgorithmHintStrategy.h:42
 missingOverride:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AlgorithmInputHistory.h:29
 virtualCallInConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h:34
-returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/ConvolutionFunctionModel.h:36
-returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/EditLocalParameterDialog.h:37
-returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/EditLocalParameterDialog.h:38
-returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/EditLocalParameterDialog.h:39
-returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/EditLocalParameterDialog.h:40
-returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/EditLocalParameterDialog.h:41
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FileFinderWidget.h:97
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FileFinderWidget.h:99
 returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/common/inc/MantidQtWidgets/Common/FileFinderWidget.h:115
