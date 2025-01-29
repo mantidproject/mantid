@@ -35,7 +35,7 @@ class MCInteractionVolume;
 */
 class MANTID_ALGORITHMS_DLL MonteCarloAbsorption : public API::Algorithm {
 public:
-  virtual ~MonteCarloAbsorption() = default;
+  virtual ~MonteCarloAbsorption() override = default;
   /// Algorithm's name
   const std::string name() const override { return "MonteCarloAbsorption"; }
   /// Algorithm's version

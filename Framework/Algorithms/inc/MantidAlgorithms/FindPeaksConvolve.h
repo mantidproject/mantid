@@ -59,11 +59,11 @@ private:
   std::vector<std::vector<FindPeaksConvolve::PeakResult>> m_peakResults;
   std::atomic<size_t> m_maxPeakCount;
 
-  bool m_createIntermediateWorkspaces;
-  bool m_findHighestDatapointInPeak;
-  double m_iOverSigmaThreshold;
-  bool m_mergeNearbyPeaks;
-  bool m_centreBins;
+  bool m_createIntermediateWorkspaces = false;
+  bool m_findHighestDatapointInPeak = false;
+  double m_iOverSigmaThreshold = 3.0;
+  bool m_mergeNearbyPeaks = true;
+  bool m_centreBins = true;
   Eigen::VectorXd m_pdf;
   std::vector<std::string> m_intermediateWsNames;
   std::mutex m_mtx;
