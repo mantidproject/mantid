@@ -46,6 +46,7 @@ void export_Instrument() {
            "represents the source")
 
       .def("getComponentByName",
+           // cppcheck-suppress cstyleCast
            (std::shared_ptr<const IComponent>(Instrument::*)(const std::string &, int) const) &
                Instrument::getComponentByName,
            (arg("self"), arg("cname"), arg("nlevels") = 0), "Returns the named :class:`~mantid.geometry.Component`")
@@ -58,6 +59,7 @@ void export_Instrument() {
            Instrument_getNumberDetectors((arg("self"), arg("skipMonitors") = false)))
 
       .def("getReferenceFrame",
+           // cppcheck-suppress cstyleCast
            (std::shared_ptr<const ReferenceFrame>(Instrument::*)()) & Instrument::getReferenceFrame, arg("self"),
            return_value_policy<RemoveConstSharedPtr>(),
            "Returns the :class:`~mantid.geometry.ReferenceFrame` attached that "

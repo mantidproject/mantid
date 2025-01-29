@@ -818,13 +818,6 @@ unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Export
 constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceGroup.cpp:80
 unusedScopedObject:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/api/src/Exports/WorkspaceGroup.cpp:113
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/dataobjects/src/Exports/EventList.cpp:37
-unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/Goniometer.cpp:31
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/Instrument.cpp:49
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/Instrument.cpp:54
-constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/MeshObject.cpp:29
-constParameterCallback:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/ReflectionGenerator.cpp:40
-cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/geometry/src/Exports/UnitCell.cpp:175
-iterateByValue:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/ArrayProperty.cpp:52
 unknownMacro:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/ConfigService.cpp:73
 cstyleCast:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/FacilityInfo.cpp:46
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/PythonInterface/mantid/kernel/src/Exports/IPropertyManager.cpp:46
