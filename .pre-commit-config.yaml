@@ -27,6 +27,7 @@ repos:
     rev: v19.1.7
     hooks:
     - id: clang-format
+      files: $(git diff --name-only main HEAD)
       exclude: Testing/Tools/cxxtest|tools|qt/icons/resources/
 
   - repo: https://github.com/mantidproject/pre-commit-hooks.git
@@ -65,4 +66,5 @@ repos:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
       - id: ruff-format
+        files: $(git diff --name-only main HEAD)
         exclude: scripts/templates/reference/|Testing/Tools/cxxtest
