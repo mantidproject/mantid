@@ -41,7 +41,7 @@ protected:
   /// Keep a weak pointer to the workspace
   std::weak_ptr<const API::MatrixWorkspace> m_workspace;
   /// An index to a spectrum
-  size_t m_workspaceIndex;
+  size_t m_workspaceIndex = 0;
 };
 
 } // namespace API

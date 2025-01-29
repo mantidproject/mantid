@@ -328,7 +328,6 @@ passedByValue:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawPeaks.cpp:508
 constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawUB.cpp:49
 constVariable:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SaveIsawUB.cpp:50
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Crystal/src/SelectCellWithForm.cpp:134
-uninitDerivedMemberVar:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/inc/MantidCurveFitting/Functions/Bk2BkExpConvPV.h:28
 uselessOverride:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/inc/MantidCurveFitting/Functions/UserFunction1D.h:64
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/EstimateFitParameters.cpp:214
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/CurveFitting/src/Algorithms/EstimateFitParameters.cpp:260
