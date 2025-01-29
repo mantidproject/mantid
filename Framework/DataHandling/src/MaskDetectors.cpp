@@ -506,7 +506,7 @@ void MaskDetectors::appendToDetectorListFromWS(std::vector<detid_t> &detectorLis
       auto condition = [detMap, startIndex, endIndex](const auto id) {
         return detMap.at(id) >= startIndex && detMap.at(id) <= endIndex;
       };
-      std::copy_if(detIds.begin(), detIds.end(), std::back_inserter(detectorList), condition);
+      std::copy_if(detIds.cbegin(), detIds.cend(), std::back_inserter(detectorList), condition);
     }
   }
 }
