@@ -504,7 +504,7 @@ void PlotAsymmetryByLogValue::saveResultsToADS(MatrixWorkspace_sptr &outWS, int 
     }
   } else {
     size_t i = 0;
-    for (auto &value : m_logValue) {
+    for (const auto &value : m_logValue) {
       size_t run = value.first;
       outWS->mutableX(0)[i] = static_cast<double>(run); // run number
       outWS->mutableY(0)[i] = value.second;             // log value
