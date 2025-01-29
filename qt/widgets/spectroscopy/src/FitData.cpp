@@ -122,11 +122,10 @@ std::string cutLastOf(const std::string &str, const std::string &delimiter) {
   return str;
 }
 
-boost::basic_format<char> &tryPassFormatArgument(boost::basic_format<char> &formatString, const std::string &arg) {
+void tryPassFormatArgument(boost::basic_format<char> &formatString, const std::string &arg) {
   try {
-    return formatString % arg;
+    formatString = formatString % arg;
   } catch (const boost::io::too_many_args &) {
-    return formatString;
   }
 }
 
@@ -185,8 +184,8 @@ std::string FitData::displayName(const std::string &formatString, const std::str
   const auto spectraString = m_spectra.getString();
 
   auto formatted = boost::format(formatString);
-  formatted = tryPassFormatArgument(formatted, workspaceName);
-  formatted = tryPassFormatArgument(formatted, spectraString);
+  tryPassFormatArgument(formatted, workspaceName);
+  tryPassFormatArgument(formatted, spectraString);
 
   auto name = formatted.str();
   std::replace(name.begin(), name.end(), ',', '+');
@@ -197,8 +196,8 @@ std::string FitData::displayName(const std::string &formatString, WorkspaceIndex
   const auto workspaceName = getBasename();
 
   auto formatted = boost::format(formatString);
-  formatted = tryPassFormatArgument(formatted, workspaceName);
-  formatted = tryPassFormatArgument(formatted, std::to_string(spectrum.value));
+  tryPassFormatArgument(formatted, workspaceName);
+  tryPassFormatArgument(formatted, std::to_string(spectrum.value));
   return formatted.str();
 }
 
