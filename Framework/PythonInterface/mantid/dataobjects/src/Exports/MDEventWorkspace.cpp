@@ -31,6 +31,7 @@ template <unsigned int n> using MDEventEventWorkspace = MDEventWorkspace<MDEvent
 #define MDEVENT_GET_POINTER_N(type, n) GET_POINTER_SPECIALIZATION(BOOST_PP_CAT(type, EventWorkspace<n>))
 #define DECL(z, n, text) MDEVENT_GET_POINTER_N(text, n)
 BOOST_PP_REPEAT_FROM_TO(1, 10, DECL, MDLeanEvent)
+// cppcheck-suppress unknownMacro
 BOOST_PP_REPEAT_FROM_TO(1, 10, DECL, MDEvent)
 #undef DECL
 

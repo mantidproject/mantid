@@ -28,6 +28,7 @@ GNU_DIAG_OFF("unused-local-typedef")
 GNU_DIAG_OFF("conversion")
 
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SpecialWorkspace2D_setValue, SpecialWorkspace2D::setValue, 2, 3)
+// cppcheck-suppress unknownMacro
 BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(SpecialWorkspace2D_getValue, SpecialWorkspace2D::getValue, 1, 2)
 
 GNU_DIAG_ON("conversion")
