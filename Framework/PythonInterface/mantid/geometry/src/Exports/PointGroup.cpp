@@ -10,6 +10,7 @@
 #include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/operators.hpp>
@@ -80,8 +81,8 @@ void export_PointGroup() {
       .value("Cubic", PointGroup::LatticeSystem::Cubic);
 
   class_<PointGroup, boost::noncopyable, bases<Group>>("PointGroup", no_init)
-      .def("getName", &PointGroup::getName, arg("self"))
-      .def("getHMSymbol", &PointGroup::getSymbol, arg("self"))
+      .def("getName", &PointGroup::getName, arg("self"), return_value_policy<copy_const_reference>())
+      .def("getHMSymbol", &PointGroup::getSymbol, arg("self"), return_value_policy<copy_const_reference>())
       .def("getCrystalSystem", &PointGroup::crystalSystem, arg("self"))
       .def("getLatticeSystem", &PointGroup::latticeSystem, arg("self"))
       .def("isEquivalent", &isEquivalent, (arg("self"), arg("hkl1"), arg("hkl2")),

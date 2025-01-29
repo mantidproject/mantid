@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <boost/python/class.hpp>
+#include <boost/python/copy_const_reference.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>
@@ -92,7 +93,7 @@ void export_Group() {
            "Returns the type of coordinate system to distinguish groups with "
            "hexagonal system definition.")
       .def("getSymmetryOperations", &Group::getSymmetryOperations, arg("self"),
-           "Returns the symmetry operations contained in the group.")
+           return_value_policy<copy_const_reference>(), "Returns the symmetry operations contained in the group.")
       .def("getSymmetryOperationStrings", &getSymmetryOperationStrings, arg("self"),
            "Returns the x,y,z-strings for the contained symmetry operations.")
       .def("containsOperation", &Group::containsOperation, (arg("self"), arg("operation")),
