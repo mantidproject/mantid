@@ -115,12 +115,12 @@ void AnnularRingAbsorption::exec() {
 /**
  * @param workspace The workspace where the environment should be attached
  */
-void AnnularRingAbsorption::attachSample(MatrixWorkspace_sptr &workspace) {
+void AnnularRingAbsorption::attachSample(const MatrixWorkspace_sptr &workspace) {
   runCreateSampleShape(workspace);
   runSetSampleMaterial(workspace);
 }
 
-void AnnularRingAbsorption::runCreateSampleShape(API::MatrixWorkspace_sptr &workspace) {
+void AnnularRingAbsorption::runCreateSampleShape(const API::MatrixWorkspace_sptr &workspace) {
   auto inst = workspace->getInstrument();
   auto refFrame = inst->getReferenceFrame();
 
@@ -203,7 +203,7 @@ const std::string AnnularRingAbsorption::cylinderXML(const std::string &id, cons
  * Attaches a new Material object to the sample
  * @param workspace :: The workspace to attach the Material object to
  */
-void AnnularRingAbsorption::runSetSampleMaterial(API::MatrixWorkspace_sptr &workspace) {
+void AnnularRingAbsorption::runSetSampleMaterial(const API::MatrixWorkspace_sptr &workspace) {
   bool childLog = g_log.is(Logger::Priority::PRIO_DEBUG);
   auto alg = this->createChildAlgorithm("SetSampleMaterial", -1, -1, childLog);
   alg->setProperty("InputWorkspace", workspace);

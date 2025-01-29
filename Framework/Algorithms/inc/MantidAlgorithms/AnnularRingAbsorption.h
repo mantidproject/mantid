@@ -35,12 +35,12 @@ private:
   void init() override;
   void exec() override;
 
-  void attachSample(API::MatrixWorkspace_sptr &workspace);
-  void runCreateSampleShape(API::MatrixWorkspace_sptr &workspace);
+  void attachSample(const API::MatrixWorkspace_sptr &workspace);
+  void runCreateSampleShape(const API::MatrixWorkspace_sptr &workspace);
   std::string createSampleShapeXML(const Kernel::V3D &upAxis) const;
   const std::string cylinderXML(const std::string &id, const Kernel::V3D &bottomCentre, const double radius,
                                 const Kernel::V3D &axis, const double height) const;
-  void runSetSampleMaterial(API::MatrixWorkspace_sptr &workspace);
+  void runSetSampleMaterial(const API::MatrixWorkspace_sptr &workspace);
   API::MatrixWorkspace_sptr runMonteCarloAbsorptionCorrection(const API::MatrixWorkspace_sptr &workspace);
 };
 

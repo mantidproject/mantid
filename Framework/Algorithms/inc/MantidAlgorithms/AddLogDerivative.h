@@ -35,9 +35,9 @@ public:
   /// Algorithm's category for identification
   const std::string category() const override { return "DataHandling\\Logs"; }
 
-  static Mantid::Kernel::TimeSeriesProperty<double> *makeDerivative(API::Progress &progress,
-                                                                    Mantid::Kernel::TimeSeriesProperty<double> *input,
-                                                                    const std::string &name, int numDerivatives);
+  static Mantid::Kernel::TimeSeriesProperty<double> *
+  makeDerivative(API::Progress &progress, const Mantid::Kernel::TimeSeriesProperty<double> *input,
+                 const std::string &name, int numDerivatives);
 
 private:
   /// Initialise the properties
