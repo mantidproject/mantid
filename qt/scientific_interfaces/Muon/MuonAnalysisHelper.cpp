@@ -186,7 +186,7 @@ void printRunInfo(const MatrixWorkspace_sptr &runWs, std::ostringstream &out) {
   if (run.hasProperty("Temp_Sample")) {
     // Filter the temperatures by the start and end times for the run.
     Mantid::Kernel::TimeROI timeroi(start, end);
-    auto tempSample = run.getProperty("Temp_Sample");
+    const auto *tempSample = run.getProperty("Temp_Sample");
 
     if (const auto *tempSampleTimeSeries = dynamic_cast<const ITimeSeriesProperty *>(tempSample)) {
       out << tempSampleTimeSeries->timeAverageValue(&timeroi);
@@ -891,7 +891,7 @@ bool isReloadGroupingNecessary(const std::shared_ptr<Mantid::API::Workspace> &cu
   // Check if field direction has changed, even if instrument hasn't
   // (e.g. MUSR - same instrument can have different field directions)
   if (!reloadNecessary) {
-    Mantid::Kernel::Property *loadedField = nullptr, *currentField = nullptr;
+    const Mantid::Kernel::Property *loadedField = nullptr, *currentField = nullptr;
     try {
       loadedField = loadedData->run().getLogData("main_field_direction");
       currentField = currentData->run().getLogData("main_field_direction");

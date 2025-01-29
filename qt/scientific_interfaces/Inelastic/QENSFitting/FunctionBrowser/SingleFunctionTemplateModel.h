@@ -35,8 +35,8 @@ public:
   void updateAvailableFunctions(const std::map<std::string, std::string> &functionInitialisationStrings);
 
   void setFitType(const std::string &name);
-  std::string getFitType();
-  std::vector<std::string> getFunctionList();
+  const std::string &getFitType();
+  const std::vector<std::string> &getFunctionList();
   int getEnumIndex();
   void setGlobal(std::string const &parameterName, bool isGlobal) override;
 
