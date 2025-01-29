@@ -163,7 +163,7 @@ std::map<std::string, std::string> CalculatePlaczek::validateInputs() {
   // Case1: cannot locate sample temperature
   if (isDefault("SampleTemperature") && (order == 2)) {
     const auto run = inWS->run();
-    Mantid::Kernel::Property *sampleTempLog = NULL;
+    const Mantid::Kernel::Property *sampleTempLog = NULL;
     // ORNL logs use SampleTemp
     if (run.hasProperty("SampleTemp")) {
       sampleTempLog = run.getLogData("SampleTemp");
