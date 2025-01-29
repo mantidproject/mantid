@@ -37,7 +37,7 @@ size_t Group::order() const { return m_allOperations.size(); }
 Group::CoordinateSystem Group::getCoordinateSystem() const { return m_axisSystem; }
 
 /// Returns a vector with all symmetry operations.
-std::vector<SymmetryOperation> Group::getSymmetryOperations() const { return m_allOperations; }
+const std::vector<SymmetryOperation> &Group::getSymmetryOperations() const { return m_allOperations; }
 
 /// Returns true if the group contains the supplied operation.
 bool Group::containsOperation(const SymmetryOperation &operation) const {
