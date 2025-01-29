@@ -513,15 +513,8 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/CompA
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/CompAssembly.cpp:405
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentInfo.cpp:129
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentInfoBankHelpers.cpp:113
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:593
-unreadVariable:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:1552
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:2330
-constParameterReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:2640
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:2677
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/InstrumentDefinitionParser.cpp:3059
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/XMLInstrumentParameter.cpp:92
 stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/XMLInstrumentParameter.cpp:146
-invalidContainer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Math/Acomp.cpp:495
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/RenderingHelpersOpenGL.cpp:204
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheReader.cpp:64
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheWriter.cpp:83

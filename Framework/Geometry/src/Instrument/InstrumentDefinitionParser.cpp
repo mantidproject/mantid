@@ -590,7 +590,7 @@ void InstrumentDefinitionParser::appendLocations(Geometry::ICompAssembly *parent
  *
  *  @param outFilename :: Output filename
  */
-void InstrumentDefinitionParser::saveDOM_Tree(std::string &outFilename) {
+void InstrumentDefinitionParser::saveDOM_Tree(const std::string &outFilename) {
   Poco::XML::DOMWriter writer;
   writer.setNewLine("\n");
   writer.setOptions(Poco::XML::XMLWriter::PRETTY_PRINT);
@@ -1320,7 +1320,7 @@ void InstrumentDefinitionParser::createGridDetector(Geometry::ICompAssembly *par
                                                     const Poco::XML::Element *pCompElem, const std::string &filename,
                                                     const Poco::XML::Element *pType) {
 
-  //-------------- Create a RectangularDetector
+  //-------------- Create a GridDetector
   //------------------------------------------------
   std::string name = InstrumentDefinitionParser::getNameOfLocationElement(pLocElem, pCompElem);
 
@@ -1544,12 +1544,6 @@ void InstrumentDefinitionParser::createStructuredDetector(Geometry::ICompAssembl
   int idstep = 1;
   std::vector<double> xValues;
   std::vector<double> yValues;
-
-  // The shape!
-  // Given that this leaf component is actually an assembly, its constituent
-  // component detector shapes comes from its type attribute.
-  const std::string shapeType = pType->getAttribute("type");
-  std::shared_ptr<Geometry::IObject> shape = mapTypeNameToShape[shapeType];
 
   std::string typeName = pType->getAttribute("name");
   // These parameters are in the TYPE defining StructuredDetector
@@ -2327,7 +2321,7 @@ void InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp, co
       unsigned long numberPoint = pNLpoint->length();
 
       for (unsigned long j = 0; j < numberPoint; j++) {
-        auto *pPoint = static_cast<Element *>(pNLpoint->item(j));
+        auto const *pPoint = static_cast<Element *>(pNLpoint->item(j));
         double x = attrToDouble(pPoint, "x");
         double y = attrToDouble(pPoint, "y");
         interpolation->addPoint(x, y);
@@ -2637,7 +2631,7 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  * instrument file
  */
-void InstrumentDefinitionParser::adjust(Poco::XML::Element *pElem, std::map<std::string, bool> &isTypeAssembly,
+void InstrumentDefinitionParser::adjust(Poco::XML::Element *pElem, std::map<std::string, bool> const &isTypeAssembly,
                                         std::map<std::string, Poco::XML::Element *> &getTypeElement) {
   UNUSED_ARG(isTypeAssembly)
   // check if pElem is an element with tag name 'type'
@@ -2674,7 +2668,7 @@ void InstrumentDefinitionParser::adjust(Poco::XML::Element *pElem, std::map<std:
 
   // check if a <translate-rotate-combined-shape-to> is defined
   Poco::AutoPtr<NodeList> pNL_TransRot = pElem->getElementsByTagName("translate-rotate-combined-shape-to");
-  Element *pTransRot = nullptr;
+  Element const *pTransRot = nullptr;
   if (pNL_TransRot->length() == 1) {
     pTransRot = static_cast<Element *>(pNL_TransRot->item(0));
   }
@@ -3056,7 +3050,7 @@ according to pLocElem
 instrument file
 */
 std::string InstrumentDefinitionParser::getShapeCoorSysComp(Geometry::ICompAssembly *parent,
-                                                            Poco::XML::Element *pLocElem,
+                                                            Poco::XML::Element const *pLocElem,
                                                             std::map<std::string, Poco::XML::Element *> &getTypeElement,
                                                             Geometry::ICompAssembly *&endAssembly) {
   // The location element is required to be a child of a component element.

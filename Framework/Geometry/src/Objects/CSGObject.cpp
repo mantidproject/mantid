@@ -140,7 +140,7 @@ double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre, co
   double z0(0.0), z1(z_step);
   double r0(radius), r1(r0 - r_step);
 
-  // cppcheck-suppresion knownConditionTrueFalse as although Cone::g_NSTACKS is currently set at 1 if this changes this
+  // cppcheck-suppress knownConditionTrueFalse as although Cone::g_NSTACKS is currently set at 1 if this changes this
   // code block would stop working
   for (int st = 1; st < Cone::g_NSTACKS; ++st) {
     for (int sl = 0; sl < Cone::g_NSLICES; ++sl) {
@@ -319,7 +319,7 @@ double cylinderSolidAngle(const V3D &observer, const V3D &centre, const V3D &axi
   double z0(0.0), z1(z_step);
   double solid_angle(0.0);
   for (int st = 1; st <= Cylinder::g_NSTACKS; ++st) {
-    // cppcheck-suppresion knownConditionTrueFalse as although Cylinder::g_NSTACKS is currently set at 1 if this changes
+    // cppcheck-suppress knownConditionTrueFalse as although Cylinder::g_NSTACKS is currently set at 1 if this changes
     // this code block is necessary
     if (st == Cylinder::g_NSTACKS)
       z1 = height;
