@@ -100,7 +100,7 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(std::vec
   std::vector<std::vector<double>> polynomialCoefficients(labels.size());
 
   std::ranges::transform(labels, polynomialCoefficients.begin(),
-                         [this](const std::string &label) { return std::vector<double>(getProperty(label)); });
+                         [this](const std::string &label) -> std::vector<double> { return getProperty(label); });
 
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   auto sharedInX = inWS->sharedX(0);
@@ -117,8 +117,7 @@ MatrixWorkspace_sptr CreatePolarizationEfficiencies::createEfficiencies(std::vec
   for (size_t i = 0; i < polynomialCoefficients.size(); ++i) {
     outWS->setSharedX(i, sharedInX);
     auto const &coefficients = polynomialCoefficients[i];
-    std::transform(x.begin(), x.end(), y.begin(),
-                   [&coefficients](double v) { return calculatePolynomial(coefficients, v); });
+    std::ranges::transform(x, y.begin(), [&coefficients](double v) { return calculatePolynomial(coefficients, v); });
     outWS->mutableY(i) = y;
     axis1Raw->setLabel(i, labels[i]);
   }
