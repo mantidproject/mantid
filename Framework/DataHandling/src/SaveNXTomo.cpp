@@ -157,7 +157,6 @@ void SaveNXTomo::processAll() {
 
 /**
  * Creates the format for the output file if it doesn't exist
- * @returns the structured nexus file to write the data to
  *
  * @throw runtime_error Thrown if nexus file cannot be opened or created
  */
