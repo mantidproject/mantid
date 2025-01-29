@@ -38,7 +38,7 @@ public:
    * Returns a copy of the current file name
    * @return
    */
-  std::string getFilename() const noexcept;
+  const std::string &getFilename() const noexcept;
 
   /**
    * Returns a const reference of the internal map holding all entries in the
