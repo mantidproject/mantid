@@ -22,7 +22,7 @@ public:
   /// Overwrite IFunction base class
   std::string name() const override { return "FullprofPolynomial"; }
 
-  const std::string category() const override { return "Background"; }
+  const std::string category() const { return "Background"; }
 
   void function1D(double *out, const double *xValues, const size_t nData) const override;
 

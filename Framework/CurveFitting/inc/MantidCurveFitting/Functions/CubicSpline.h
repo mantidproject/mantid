@@ -36,7 +36,7 @@ public:
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "CubicSpline"; }
-  const std::string category() const override { return "Background"; }
+  const std::string category() const { return "Background"; }
   void function1D(double *out, const double *xValues, const size_t nData) const override;
   void derivative1D(double *out, const double *xValues, size_t nData, const size_t order) const override;
   void setParameter(size_t i, const double &value, bool explicitlySet = true) override;
