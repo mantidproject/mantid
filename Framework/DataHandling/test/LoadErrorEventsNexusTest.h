@@ -91,7 +91,7 @@ public:
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
     TS_ASSERT_EQUALS(outputWS->getNumberEvents(), 0)
     TS_ASSERT_EQUALS(outputWS->readX(0)[0], 0)
-    TS_ASSERT_EQUALS(outputWS->readX(0)[1], std::numeric_limits<double>::min())
+    TS_ASSERT_DELTA(outputWS->readX(0)[1], 16666.7, 1e-9)
   }
 
   void test_HYSA() {

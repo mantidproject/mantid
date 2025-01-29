@@ -134,6 +134,8 @@ void LoadErrorEventsNexus::exec() {
 
   if (min_tof < max_tof)
     eventWS->setAllX(HistogramData::BinEdges{min_tof, max_tof});
+  else
+    eventWS->setAllX(HistogramData::BinEdges{0, 16666.7});
 
   outWS->getAxis(0)->setUnit("TOF");
   outWS->setYUnit("Counts");
