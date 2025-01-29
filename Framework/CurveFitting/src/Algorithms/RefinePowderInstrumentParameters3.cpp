@@ -1198,7 +1198,7 @@ void RefinePowderInstrumentParameters3::setFunctionParameterFitSetups(const IFun
  * exacly same as
  * source;
  */
-void duplicateParameters(const map<string, Parameter> source, map<string, Parameter> &target) {
+void duplicateParameters(const map<string, Parameter> &source, map<string, Parameter> &target) {
   target.clear();
 
   map<string, Parameter>::const_iterator miter;

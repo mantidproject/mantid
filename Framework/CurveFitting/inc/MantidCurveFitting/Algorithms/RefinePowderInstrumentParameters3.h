@@ -175,7 +175,7 @@ void restoreFunctionParameterValue(std::map<std::string, std::pair<double, doubl
                                    const API::IFunction_sptr &function, std::map<std::string, Parameter> &parammap);
 
 /// Copy parameters from source to target
-void duplicateParameters(const std::map<std::string, Parameter> source, std::map<std::string, Parameter> &target);
+void duplicateParameters(const std::map<std::string, Parameter> &source, std::map<std::string, Parameter> &target);
 
 /// Copy parameters values from source to target
 void copyParametersValues(const std::map<std::string, Parameter> &source, std::map<std::string, Parameter> &target);
