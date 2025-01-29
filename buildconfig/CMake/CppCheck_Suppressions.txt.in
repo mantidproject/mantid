@@ -513,8 +513,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/CompA
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/CompAssembly.cpp:405
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentInfo.cpp:129
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/ComponentInfoBankHelpers.cpp:113
-constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/XMLInstrumentParameter.cpp:92
-stlIfStrFind:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Instrument/XMLInstrumentParameter.cpp:146
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/RenderingHelpersOpenGL.cpp:204
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheReader.cpp:64
 constParameterPointer:${CMAKE_SOURCE_DIR}/Framework/Geometry/src/Rendering/vtkGeometryCacheWriter.cpp:83

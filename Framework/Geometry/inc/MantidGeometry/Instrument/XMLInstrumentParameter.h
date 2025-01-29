@@ -76,7 +76,7 @@ public:
 
   /// Returns parameter value as generated using possibly equation expression
   /// etc
-  double createParamValue(Mantid::Kernel::TimeSeriesProperty<double> *logData, const Kernel::TimeROI *) const;
+  double createParamValue(Mantid::Kernel::TimeSeriesProperty<double> const *logData, const Kernel::TimeROI *) const;
 
   /// when this const equals 1 it means that angle=degree (default) is set in
   /// IDF

@@ -89,7 +89,8 @@ XMLInstrumentParameter::XMLInstrumentParameter(std::string logfileID, std::strin
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument definition file
  */
-double XMLInstrumentParameter::createParamValue(TimeSeriesProperty<double> *logData, const Kernel::TimeROI *roi) const {
+double XMLInstrumentParameter::createParamValue(TimeSeriesProperty<double> const *logData,
+                                                const Kernel::TimeROI *roi) const {
   // If this parameter is a <look-up-table> or <formula> return 0.0. Such
   // parameter types are
   // associated with 'fitting' parameters. In some sense this method should
@@ -143,7 +144,7 @@ double XMLInstrumentParameter::createParamValue(TimeSeriesProperty<double> *logD
     }
     // Looking for string: "position n", where n is an integer and is a 1-based
     // index
-    else if (m_extractSingleValueAs.find("position") == 0 && m_extractSingleValueAs.size() >= 10) {
+    else if (m_extractSingleValueAs.starts_with("position 0") && m_extractSingleValueAs.size() >= 10) {
       std::stringstream extractPosition(m_extractSingleValueAs);
       std::string dummy;
       int position;
