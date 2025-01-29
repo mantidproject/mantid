@@ -1242,16 +1242,3 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/RangeMarker.cpp:
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/mplcpp/src/SingleMarker.cpp:20
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/inc/MantidQtWidgets/Plotting/PeakPicker.h:40
 unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/inc/MantidQtWidgets/Plotting/RangeSelector.h:44
-unknownMacro:${CMAKE_SOURCE_DIR}/qt/widgets/plotting/inc/MantidQtWidgets/Plotting/SingleSelector.h:50
-unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/FitDialog.h:185
-unsafeClassCanLeak:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/FitDialog.h:186
-returnByReference:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/inc/MantidQtWidgets/Plugins/AlgorithmDialogs/SampleShapeHelpers.h:133
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/FitDialog.cpp:202
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/FitDialog.cpp:413
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/LoadRawDialog.cpp:123
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/LoadRawDialog.cpp:140
-constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/LoadRawDialog.cpp:149
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/SortTableWorkspaceDialog.cpp:115
-unreadVariable:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/StartLiveDataDialog.cpp:143
-constVariableReference:${CMAKE_SOURCE_DIR}/qt/widgets/plugins/algorithm_dialogs/src/StartLiveDataDialog.cpp:398
-returnTempReference:${CMAKE_SOURCE_DIR}/qt/widgets/spectroscopy/src/FitData.cpp:127
