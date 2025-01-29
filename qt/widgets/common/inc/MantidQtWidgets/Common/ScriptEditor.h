@@ -60,7 +60,7 @@ public:
   /// Set the name of the group to save the settings for
   void setSettingsGroup(const QString &name);
   /// Settings group
-  QString &settingsGroup() const;
+  const QString &settingsGroup() const;
   /// Read settings from persistent store
   void readSettings();
   /// Write settings from persistent store
