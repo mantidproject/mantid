@@ -315,7 +315,7 @@ PyObject *getAlgorithmID(const IAlgorithm &self) {
   AlgorithmID id = self.getAlgorithmID();
   if (id)
     return to_python_value<AlgorithmIDProxy>()(AlgorithmIDProxy(id));
-  return Py_NONE;
+  return Py_NewRef(Py_None)
 }
 
 //--------------------------------------------------------------------------------------
