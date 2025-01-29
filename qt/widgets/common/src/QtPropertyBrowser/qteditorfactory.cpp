@@ -1547,9 +1547,7 @@ Q_GLOBAL_STATIC(QtCursorDatabase, cursorDatabase)
 
 QtCursorEditorFactoryPrivate::QtCursorEditorFactoryPrivate() : m_updatingEnum(false) {}
 
-// to allow updating the enum property, property cannot be const
-// cppcheck-suppress constParameterPointer
-void QtCursorEditorFactoryPrivate::slotPropertyChanged(QtProperty *property, const QCursor &cursor) {
+void QtCursorEditorFactoryPrivate::slotPropertyChanged(QtProperty *const property, const QCursor &cursor) {
   // update enum property
   QtProperty *enumProp = m_propertyToEnum.value(property);
   if (!enumProp)
