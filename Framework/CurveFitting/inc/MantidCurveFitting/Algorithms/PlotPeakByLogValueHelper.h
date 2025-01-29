@@ -33,7 +33,7 @@ struct InputSpectraToFit {
   API::MatrixWorkspace_sptr ws; ///< shared pointer to the workspace
 };
 /// Get a workspace
-MANTID_CURVEFITTING_DLL std::vector<int> getWorkspaceIndicesFromAxes(API::MatrixWorkspace &ws, int workspaceIndex,
+MANTID_CURVEFITTING_DLL std::vector<int> getWorkspaceIndicesFromAxes(const API::MatrixWorkspace &ws, int workspaceIndex,
                                                                      int spectrumNumber, double start, double end);
 MANTID_CURVEFITTING_DLL std::optional<API::Workspace_sptr> getWorkspace(const std::string &name, int period);
 
