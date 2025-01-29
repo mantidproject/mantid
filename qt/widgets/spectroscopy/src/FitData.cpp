@@ -124,7 +124,7 @@ std::string cutLastOf(const std::string &str, const std::string &delimiter) {
 
 boost::basic_format<char> &tryPassFormatArgument(boost::basic_format<char> &formatString, const std::string &arg) {
   try {
-    auto tmpString = formatString % arg;
+    auto &tmpString = formatString % arg;
     return tmpString;
   } catch (const boost::io::too_many_args &) {
     return formatString;

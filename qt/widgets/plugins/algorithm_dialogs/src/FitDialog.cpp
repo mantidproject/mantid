@@ -199,7 +199,7 @@ MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget *parent) : DynamicPr
   if (wsName.isEmpty())
     return;
   try {
-    const auto ws = dynamic_cast<Mantid::API::MatrixWorkspace *>(
+    const auto *ws = dynamic_cast<Mantid::API::MatrixWorkspace *>(
         Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()).get());
     if (ws) {
       m_workspaceIndex->setRange(0, static_cast<int>(ws->getNumberHistograms()));
@@ -211,6 +211,14 @@ MWPropertiesWidget::MWPropertiesWidget(InputWorkspaceWidget *parent) : DynamicPr
     }
   } catch (...) {
   }
+}
+
+/**
+ * Destructor.
+ */
+MWPropertiesWidget::~MWPropertiesWidget() {
+  delete m_startX;
+  delete m_endX;
 }
 
 /**
@@ -410,7 +418,7 @@ void FitDialog::createInputWorkspaceWidgets() {
   m_form.tabWidget->clear();
   QStringList wsNames;
   foreach (QWidget *t, m_tabs) {
-    const auto tab = dynamic_cast<InputWorkspaceWidget *>(t);
+    const auto *tab = dynamic_cast<InputWorkspaceWidget *>(t);
     if (tab) {
       wsNames << tab->getWorkspaceName();
     } else {

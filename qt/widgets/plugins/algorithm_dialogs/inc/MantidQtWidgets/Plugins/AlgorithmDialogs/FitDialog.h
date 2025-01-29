@@ -175,12 +175,13 @@ protected:
 class MWPropertiesWidget : public DynamicPropertiesWidget {
 public:
   MWPropertiesWidget(InputWorkspaceWidget *parent);
+  ~MWPropertiesWidget();
   /// Initialize the child widgets with stored and allowed values
   void init() override;
   /// Set all workspace properties
   void setProperties() override;
 
-private:
+protected:
   QSpinBox *m_workspaceIndex;
   QLineEdit *m_startX;
   QLineEdit *m_endX;
@@ -198,7 +199,7 @@ public:
   /// Set all workspace properties
   void setProperties() override;
 
-private:
+protected:
   QSpinBox *m_maxSize;
 };
 } // namespace CustomDialogs
