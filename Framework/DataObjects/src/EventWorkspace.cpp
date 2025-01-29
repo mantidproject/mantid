@@ -445,7 +445,7 @@ size_t EventWorkspace::getNumberEvents() const {
  */
 Mantid::API::EventType EventWorkspace::getEventType() const {
   Mantid::API::EventType out = Mantid::API::TOF;
-  for (auto &list : this->data) {
+  for (const auto &list : this->data) {
     Mantid::API::EventType thisType = list->getEventType();
     if (static_cast<int>(out) < static_cast<int>(thisType)) {
       out = thisType;

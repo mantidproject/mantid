@@ -48,7 +48,7 @@ namespace NXcanSASTestHelper {
 
 std::string concatenateStringVector(const std::vector<std::string> &stringVector) {
   std::ostringstream os;
-  for (auto &element : stringVector) {
+  for (const auto &element : stringVector) {
     os << element;
     os << Mantid::DataHandling::NXcanSAS::sasSeparator;
   }
