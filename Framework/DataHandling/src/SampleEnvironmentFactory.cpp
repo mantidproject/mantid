@@ -124,7 +124,7 @@ SampleEnvironmentSpec_uptr SampleEnvironmentFactory::parseSpec(const std::string
  * then forms the path to find the named spec
  * @throws std::invalid_argument if the list is empty
  */
-SampleEnvironmentSpecFileFinder::SampleEnvironmentSpecFileFinder(std::vector<std::string> directories)
+SampleEnvironmentSpecFileFinder::SampleEnvironmentSpecFileFinder(std::vector<std::filesystem::path> directories)
     : m_rootDirs(std::move(directories)) {
   if (m_rootDirs.empty()) {
     throw std::invalid_argument("SampleEnvironmentSpecFileFinder() - Empty directory search list.");

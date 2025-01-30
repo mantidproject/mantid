@@ -19,6 +19,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
+#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/H5Util.h"
@@ -200,7 +201,8 @@ std::string extractIdfFileOnCurrentSystem(const std::string &idf) {
   const auto &fileName = path.getFileName();
 
   // Compare against all available IDFs
-  const std::vector<std::string> &directoryNames = Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
+  const std::vector<std::filesystem::path> &directoryNames =
+      Mantid::Kernel::ConfigService::Instance().getInstrumentDirectories();
   Poco::DirectoryIterator end_iter;
   for (const auto &directoryName : directoryNames) {
     for (Poco::DirectoryIterator dir_itr(directoryName); dir_itr != end_iter; ++dir_itr) {
