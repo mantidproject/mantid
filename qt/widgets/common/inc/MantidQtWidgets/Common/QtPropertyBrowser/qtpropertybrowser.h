@@ -105,14 +105,14 @@ public:
   QtProperty(const QtProperty &) = delete;
   QtProperty &operator=(const QtProperty &) = delete;
 
-  QList<QtProperty *> subProperties() const;
+  const QList<QtProperty *> &subProperties() const;
 
   QtAbstractPropertyManager *propertyManager() const;
 
   QString toolTip() const;
   QString statusTip() const;
-  QString whatsThis() const;
-  QString propertyName() const;
+  const QString &whatsThis() const;
+  const QString &propertyName() const;
   bool isEnabled() const;
   bool isModified() const;
 
@@ -162,7 +162,7 @@ public:
   explicit QtAbstractPropertyManager(QObject *parent = nullptr);
   ~QtAbstractPropertyManager() override;
 
-  QSet<QtProperty *> properties() const;
+  const QSet<QtProperty *> &properties() const;
   void clear() const;
   bool hasProperty(QtProperty *const prop) const;
 
@@ -233,9 +233,9 @@ public:
     disconnectPropertyManager(manager);
     m_managers.remove(manager);
   }
-  QSet<PropertyManager *> propertyManagers() const { return m_managers; }
+  const QSet<PropertyManager *> &propertyManagers() const { return m_managers; }
   PropertyManager *propertyManager(QtProperty *property) const {
-    QtAbstractPropertyManager *manager = property->propertyManager();
+    const QtAbstractPropertyManager *manager = property->propertyManager();
     QSetIterator<PropertyManager *> itManager(m_managers);
     while (itManager.hasNext()) {
       PropertyManager *m = itManager.next();
@@ -288,7 +288,7 @@ public:
   QtBrowserItem &operator=(const QtBrowserItem &) = delete;
   QtProperty *property() const;
   QtBrowserItem *parent() const;
-  QList<QtBrowserItem *> children() const;
+  const QList<QtBrowserItem *> &children() const;
   QtAbstractPropertyBrowser *browser() const;
 
 private:
@@ -306,10 +306,10 @@ public:
   explicit QtAbstractPropertyBrowser(QWidget *parent = nullptr);
   ~QtAbstractPropertyBrowser() override;
 
-  QList<QtProperty *> properties() const;
+  const QList<QtProperty *> &properties() const;
   QList<QtBrowserItem *> items(QtProperty *property) const;
   QtBrowserItem *topLevelItem(QtProperty *property) const;
-  QList<QtBrowserItem *> topLevelItems() const;
+  const QList<QtBrowserItem *> &topLevelItems() const;
   void clear();
 
   template <class PropertyManager>

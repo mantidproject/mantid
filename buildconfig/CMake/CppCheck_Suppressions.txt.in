@@ -1221,8 +1221,6 @@ constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowse
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:633
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:745
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qttreepropertybrowser.cpp:955
-noCopyConstructor:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:225
-noOperatorEq:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:225
 constParameterPointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:305
 constVariablePointer:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:345
 redundantAssignment:${CMAKE_SOURCE_DIR}/qt/widgets/common/src/QtPropertyBrowser/qtvariantproperty.cpp:349
