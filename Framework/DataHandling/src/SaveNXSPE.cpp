@@ -235,8 +235,8 @@ void SaveNXSPE::exec() {
   Dimensions arrayDims(2);
   arrayDims[0] = nHist;
   arrayDims[1] = nBins;
-  nxFile.makeData("data", ::NeXus::FLOAT64, arrayDims, false);
-  nxFile.makeData("error", ::NeXus::FLOAT64, arrayDims, false);
+  nxFile.makeData("data", NXnumtype::FLOAT64, arrayDims, false);
+  nxFile.makeData("error", NXnumtype::FLOAT64, arrayDims, false);
 
   // Add the axes attributes to the data
   nxFile.openData("data");

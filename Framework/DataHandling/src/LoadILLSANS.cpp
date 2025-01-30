@@ -998,7 +998,7 @@ void LoadILLSANS::setFinalProperties(const std::string &filename) {
   API::Run &runDetails = m_localWorkspace->mutableRun();
   NXhandle nxHandle;
   NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
-  if (nxStat != NX_ERROR) {
+  if (nxStat != NXstatus::NX_ERROR) {
     LoadHelper::addNexusFieldsToWsRun(nxHandle, runDetails);
     NXclose(&nxHandle);
   }

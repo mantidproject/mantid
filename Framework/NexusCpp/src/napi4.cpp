@@ -30,6 +30,7 @@
 #ifdef WITH_HDF4
 
 #include <assert.h>
+#include <map>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -60,6 +61,24 @@ typedef struct __NexusFile {
   int iStackPtr;
   char iAccess[2];
 } NexusFile, *pNexusFile;
+
+/*-------------------------------------------------------------------*/
+
+std::map<NXnumtype, int> const nxToHDF4Map{
+    {NXnumtype::CHAR, DFNT_CHAR8},    {NXnumtype::INT8, DFNT_INT8},       {NXnumtype::UINT8, DFNT_UINT8},
+    {NXnumtype::INT16, DFNT_INT16},   {NXnumtype::UINT16, DFNT_UINT16},   {NXnumtype::INT32, DFNT_INT32},
+    {NXnumtype::UINT32, DFNT_UINT32}, {NXnumtype::FLOAT32, DFNT_FLOAT32}, {NXnumtype::FLOAT64, DFNT_FLOAT64}};
+
+static int nxToHDF4Type(NXnumtype type) {
+  auto const iter = nxToHDF4Map.find(type);
+  if (iter != nxToHDF4Map.cend()) {
+    return iter->second;
+  } else {
+    NXReportError("ERROR: nxToHDF4Type: unknown type");
+    return -1;
+  }
+}
+
 /*-------------------------------------------------------------------*/
 
 static pNexusFile NXIassert(NXhandle fid) {
@@ -105,6 +124,7 @@ static int findNapiClass(pNexusFile pFile, int groupRef, NXname nxclass) {
 /* --------------------------------------------------------------------- */
 
 static int32 NXIFindVgroup(pNexusFile pFile, CONSTCHAR *name, CONSTCHAR *nxclass) {
+  int const NX_EOD = static_cast<int>(NXstatus::NX_EOD);
   int32 iNew, iRef, iTag;
   int iN, i;
   int32 *pArray = NULL;
@@ -167,6 +187,7 @@ static int32 NXIFindVgroup(pNexusFile pFile, CONSTCHAR *name, CONSTCHAR *nxclass
 /*----------------------------------------------------------------------*/
 
 static int32 NXIFindSDS(NXhandle fid, CONSTCHAR *name) {
+  int const NX_EOD = static_cast<int>(NXstatus::NX_EOD);
   pNexusFile self;
   int32 iNew, iRet, iTag, iRef;
   int32 i, iN, iA, iD1, iD2;
@@ -220,7 +241,7 @@ static int32 NXIFindSDS(NXhandle fid, CONSTCHAR *name) {
 
 /*----------------------------------------------------------------------*/
 
-static int NXIInitDir(pNexusFile self) {
+static NXstatus NXIInitDir(pNexusFile self) {
   int32 iTag, iRef;
   int iStackPtr;
 
@@ -236,7 +257,7 @@ static int NXIInitDir(pNexusFile self) {
         static_cast<int32 *>(malloc(static_cast<size_t>(self->iStack[iStackPtr].iNDir) * sizeof(int32) + 1));
     if (!self->iStack[iStackPtr].iRefDir) {
       NXReportError("ERROR: out of memory in NXIInitDir");
-      return NX_EOD;
+      return NXstatus::NX_EOD;
     }
     Vlone(self->iVID, self->iStack[self->iStackPtr].iRefDir, self->iStack[self->iStackPtr].iNDir);
   } else {
@@ -248,7 +269,7 @@ static int NXIInitDir(pNexusFile self) {
         static_cast<int32 *>(malloc(static_cast<size_t>(self->iStack[iStackPtr].iNDir) * sizeof(int32) + 1));
     if ((!self->iStack[iStackPtr].iRefDir) || (!self->iStack[iStackPtr].iTagDir)) {
       NXReportError("ERROR: out of memory in NXIInitDir");
-      return NX_EOD;
+      return NXstatus::NX_EOD;
     }
     for (int i = 0; i < self->iStack[self->iStackPtr].iNDir; i++) {
       Vgettagref(self->iCurrentVG, i, &iTag, &iRef);
@@ -257,7 +278,7 @@ static int NXIInitDir(pNexusFile self) {
     }
   }
   self->iStack[iStackPtr].iCurDir = 0;
-  return 1;
+  return NXstatus::NX_OK;
 }
 
 /*----------------------------------------------------------------------*/
@@ -277,7 +298,7 @@ static void NXIKillDir(pNexusFile self) {
 
 /*-------------------------------------------------------------------------*/
 
-static int NXIInitAttDir(pNexusFile pFile) {
+static NXstatus NXIInitAttDir(pNexusFile pFile) {
   int iRet;
   int32 iData, iAtt, iRank, iType;
   int32 iDim[H4_MAX_VAR_DIMS];
@@ -299,10 +320,10 @@ static int NXIInitAttDir(pNexusFile pFile) {
   if (iRet < 0) {
     NXReportError("ERROR: HDF cannot read attribute numbers");
     pFile->iAtt.iNDir = 0;
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   pFile->iAtt.iNDir = iAtt;
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /* --------------------------------------------------------------------- */
@@ -381,7 +402,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
   pNew = static_cast<pNexusFile>(malloc(sizeof(NexusFile)));
   if (!pNew) {
     NXReportError("ERROR: no memory to create File datastructure");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   memset(pNew, 0, sizeof(NexusFile));
 
@@ -395,7 +416,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
       sprintf(pBuffer, "ERROR: cannot open file_a: %s", filename);
       NXReportError(pBuffer);
       free(pNew);
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
     an_id = ANstart(file_id);
     ann_id = ANcreatef(an_id, AN_FILE_LABEL); /* AN_FILE_DESC */
@@ -406,7 +427,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
       sprintf(pBuffer, "ERROR: cannot close file: %s", filename);
       NXReportError(pBuffer);
       free(pNew);
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
     am = NXACC_RDWR;
   }
@@ -418,7 +439,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     sprintf(pBuffer, "ERROR: cannot open file_b: %s", filename);
     NXReportError(pBuffer);
     free(pNew);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   /*
    * need to create global attributes         file_name file_time NeXus_version
@@ -430,7 +451,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
         0) {
       NXReportError("ERROR: HDF failed to store NeXus_version attribute ");
       free(pNew);
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
 
     /* set the HDF4 version attribute */
@@ -438,7 +459,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     if (SDsetattr(pNew->iSID, "HDF_version", DFNT_CHAR8, static_cast<int32>(strlen(HDF_VERSION)), HDF_VERSION) < 0) {
       NXReportError("ERROR: HDF failed to store HDF_version attribute ");
       free(pNew);
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
 
     /* set the filename attribute */
@@ -446,7 +467,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
                   static_cast<const char *>(filename)) < 0) {
       NXReportError("ERROR: HDF failed to store file_name attribute ");
       free(pNew);
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
 
     /* set the file_time attribute */
@@ -456,7 +477,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
         NXReportError("ERROR: HDF failed to store file_time attribute ");
         free(pNew);
         free(time_puffer);
-        return NX_ERROR;
+        return NXstatus::NX_ERROR;
       }
       free(time_puffer);
     }
@@ -464,7 +485,7 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     if (SDsetattr(pNew->iSID, "NX_class", DFNT_CHAR8, 7, "NXroot") < 0) {
       NXReportError("ERROR: HDF failed to store NX_class attribute ");
       free(pNew);
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
   }
 
@@ -492,14 +513,14 @@ NXstatus NX4open(CONSTCHAR *filename, NXaccess am, NXhandle *pHandle) {
     sprintf(pBuffer, "ERROR: cannot open file_c: %s", filename);
     NXReportError(pBuffer);
     free(pNew);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   Vstart(pNew->iVID);
   pNew->iNXID = NXSIGNATURE;
   pNew->iStack[0].iVref = 0; /* root! */
 
   *pHandle = static_cast<NXhandle>(pNew);
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /*-----------------------------------------------------------------------*/
@@ -534,7 +555,7 @@ NXstatus NX4close(NXhandle *fid) {
   NXIKillDir(pFile);
   free(pFile);
   *fid = NULL;
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /*-----------------------------------------------------------------------*/
@@ -552,7 +573,7 @@ NXstatus NX4makegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   if ((iRet = NXIFindVgroup(pFile, static_cast<const char *>(name), nxclass)) >= 0) {
     sprintf(pBuffer, "ERROR: Vgroup %s, class %s already exists", name, nxclass);
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 
   /* create and configure the group */
@@ -560,7 +581,7 @@ NXstatus NX4makegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   if (iNew < 0) {
     sprintf(pBuffer, "ERROR: HDF could not create Vgroup %s, class %s", name, nxclass);
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   Vsetname(iNew, name);
   Vsetclass(iNew, nxclass);
@@ -573,9 +594,9 @@ NXstatus NX4makegroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
   Vdetach(iNew);
   if (iRet < 0) {
     NXReportError("ERROR: HDF failed to insert Vgroup");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /*------------------------------------------------------------------------*/
@@ -590,7 +611,7 @@ NXstatus NX4opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
     char pBuffer[256];
     sprintf(pBuffer, "ERROR: Vgroup \"%s\", class \"%s\" NOT found", name, nxclass);
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   /* are we at root level ? */
   if (pFile->iCurrentVG == 0) {
@@ -604,7 +625,7 @@ NXstatus NX4opengroup(NXhandle fid, CONSTCHAR *name, CONSTCHAR *nxclass) {
     pFile->iCurrentVG = Vattach(pFile->iVID, pFile->iStack[pFile->iStackPtr].iVref, pFile->iAccess);
   }
   NXIKillDir(pFile);
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 /* ------------------------------------------------------------------- */
 
@@ -618,7 +639,7 @@ NXstatus NX4closegroup(NXhandle fid) {
    */
   if (pFile->iCurrentVG == 0) {
     NXIKillDir(pFile);
-    return NX_OK;
+    return NXstatus::NX_OK;
   } else { /* Sighhh. Some work to do */
     /* close the current VG and decrement stack */
     Vdetach(pFile->iCurrentVG);
@@ -632,12 +653,12 @@ NXstatus NX4closegroup(NXhandle fid) {
       pFile->iCurrentVG = Vattach(pFile->iVID, pFile->iStack[pFile->iStackPtr].iVref, pFile->iAccess);
     }
   }
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /* --------------------------------------------------------------------- */
 
-NXstatus NX4makedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank, int64_t dimensions[]) {
+NXstatus NX4makedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[]) {
   pNexusFile pFile;
   int32 iNew;
   char pBuffer[256];
@@ -653,36 +674,15 @@ NXstatus NX4makedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank, in
   if ((iNew = NXIFindSDS(fid, name)) >= 0) {
     sprintf(pBuffer, "ERROR: SDS %s already exists at this level", name);
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 
-  if (datatype == NX_CHAR) {
-    type = DFNT_CHAR8;
-  } else if (datatype == NX_INT8) {
-    type = DFNT_INT8;
-  } else if (datatype == NX_UINT8) {
-    type = DFNT_UINT8;
-  } else if (datatype == NX_INT16) {
-    type = DFNT_INT16;
-  } else if (datatype == NX_UINT16) {
-    type = DFNT_UINT16;
-  } else if (datatype == NX_INT32) {
-    type = DFNT_INT32;
-  } else if (datatype == NX_UINT32) {
-    type = DFNT_UINT32;
-  } else if (datatype == NX_FLOAT32) {
-    type = DFNT_FLOAT32;
-  } else if (datatype == NX_FLOAT64) {
-    type = DFNT_FLOAT64;
-  } else {
-    NXReportError("ERROR: invalid type in NX4makedata");
-    return NX_ERROR;
-  }
+  type = nxToHDF4Type(datatype);
 
   if (rank <= 0) {
     sprintf(pBuffer, "ERROR: invalid rank specified for SDS %s", name);
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 
   /*
@@ -693,7 +693,7 @@ NXstatus NX4makedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank, in
     if (dimensions[i] <= 0) {
       sprintf(pBuffer, "ERROR: invalid dimension %d, value %lld given for SDS %s", i, (long long)dimensions[i], name);
       NXReportError(pBuffer);
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
   }
 
@@ -712,7 +712,7 @@ NXstatus NX4makedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank, in
   if (pFile->iCurrentVG == 0) {
     sprintf(pBuffer, "ERROR: SDS creation at root level is not permitted");
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 
   /* dataset creation */
@@ -721,24 +721,24 @@ NXstatus NX4makedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank, in
   if (iNew < 0) {
     sprintf(pBuffer, "ERROR: cannot create SDS %s, check arguments", name);
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   /* link into Vgroup, if in one */
   if (pFile->iCurrentVG != 0) {
-    iRet = Vaddtagref(pFile->iCurrentVG, DFTAG_NDG, SDidtoref(iNew));
+    Vaddtagref(pFile->iCurrentVG, DFTAG_NDG, SDidtoref(iNew));
   }
   iRet = SDendaccess(iNew);
   if (iRet < 0) {
     NXReportError("ERROR: HDF cannot end access to SDS");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /* --------------------------------------------------------------------- */
 
-NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank, int64_t dimensions[],
-                           int compress_type, int64_t chunk_size[]) {
+NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, NXnumtype datatype, int rank, int64_t dimensions[],
+                           int compress_type, int64_t const chunk_size[]) {
   UNUSED_ARG(chunk_size);
   pNexusFile pFile;
   int32 iNew, iRet, type;
@@ -756,36 +756,15 @@ NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank
   if ((iNew = NXIFindSDS(fid, name)) >= 0) {
     sprintf(pBuffer, "ERROR: SDS %s already exists at this level", name);
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 
-  if (datatype == NX_CHAR) {
-    type = DFNT_CHAR8;
-  } else if (datatype == NX_INT8) {
-    type = DFNT_INT8;
-  } else if (datatype == NX_UINT8) {
-    type = DFNT_UINT8;
-  } else if (datatype == NX_INT16) {
-    type = DFNT_INT16;
-  } else if (datatype == NX_UINT16) {
-    type = DFNT_UINT16;
-  } else if (datatype == NX_INT32) {
-    type = DFNT_INT32;
-  } else if (datatype == NX_UINT32) {
-    type = DFNT_UINT32;
-  } else if (datatype == NX_FLOAT32) {
-    type = DFNT_FLOAT32;
-  } else if (datatype == NX_FLOAT64) {
-    type = DFNT_FLOAT64;
-  } else {
-    NXReportError("ERROR: invalid datatype in NX4compmakedata");
-    return NX_ERROR;
-  }
+  type = nxToHDF4Type(datatype);
 
   if (rank <= 0) {
     sprintf(pBuffer, "ERROR: invalid rank specified for SDS %s", name);
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 
   /*
@@ -796,7 +775,7 @@ NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank
     if (dimensions[i] <= 0) {
       sprintf(pBuffer, "ERROR: invalid dimension %d, value %lld given for SDS %s", i, (long long)dimensions[i], name);
       NXReportError(pBuffer);
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
   }
 
@@ -815,7 +794,7 @@ NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank
   if (pFile->iCurrentVG == 0) {
     sprintf(pBuffer, "ERROR: SDS creation at root level is not permitted");
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 
   /* dataset creation */
@@ -824,7 +803,7 @@ NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank
   if (iNew < 0) {
     sprintf(pBuffer, "ERROR: cannot create SDS %s, check arguments", name);
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 
   /* compress SD data set */
@@ -839,38 +818,38 @@ NXstatus NX4compmakedata64(NXhandle fid, CONSTCHAR *name, int datatype, int rank
     iRet = SDsetcompress(iNew, COMP_CODE_DEFLATE, &compstruct);
     if (iRet < 0) {
       NXReportError("Deflate-Compression failure!");
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
   } else if (compress_type == NX_COMP_RLE) {
     iRet = SDsetcompress(iNew, COMP_CODE_RLE, &compstruct);
     if (iRet < 0) {
       NXReportError("RLE-Compression failure!");
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
   } else if (compress_type == NX_COMP_HUF) {
     compstruct.skphuff.skp_size = DFKNTsize(type);
     iRet = SDsetcompress(iNew, COMP_CODE_SKPHUFF, &compstruct);
     if (iRet < 0) {
       NXReportError("HUF-Compression failure!");
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
   } else if (compress_type == NX_COMP_NONE) {
     /*      */
   } else {
     NXReportError("Unknown compression method!");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   /* link into Vgroup, if in one */
   if (pFile->iCurrentVG != 0) {
-    iRet = Vaddtagref(pFile->iCurrentVG, DFTAG_NDG, SDidtoref(iNew));
+    Vaddtagref(pFile->iCurrentVG, DFTAG_NDG, SDidtoref(iNew));
   }
   iRet = SDendaccess(iNew);
   if (iRet < 0) {
     NXReportError("ERROR: HDF cannot end access to SDS");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /* --------------------------------------------------------------------- */
@@ -889,7 +868,7 @@ NXstatus NX4compress(NXhandle fid, int compress_type) {
   /* check if there is an SDS open */
   if (pFile->iCurrentSDS == 0) {
     NXReportError("ERROR: no SDS open");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 
   if (compress_type == NX_COMP_NONE) {
@@ -924,9 +903,9 @@ NXstatus NX4compress(NXhandle fid, int compress_type) {
     char pError[512];
     sprintf(pError, "ERROR: failure to compress data to %s", pBuffer);
     NXReportError(pError);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /* --------------------------------------------------------------------- */
@@ -942,7 +921,7 @@ NXstatus NX4opendata(NXhandle fid, CONSTCHAR *name) {
     char pBuffer[256];
     sprintf(pBuffer, "ERROR: SDS \"%s\" not found at this level", name);
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   /* Be nice: properly close the old open SDS silently if there is
    * still an SDS open.
@@ -970,9 +949,9 @@ NXstatus NX4opendata(NXhandle fid, CONSTCHAR *name) {
   if (pFile->iCurrentSDS < 0) {
     NXReportError("ERROR: HDF error opening SDS");
     pFile->iCurrentSDS = 0;
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /* ----------------------------------------------------------------- */
@@ -986,14 +965,14 @@ NXstatus NX4closedata(NXhandle fid) {
     pFile->iCurrentSDS = 0;
     if (iRet < 0) {
       NXReportError("ERROR: HDF cannot end access to SDS");
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
   } else {
     NXReportError("ERROR: no SDS open --> nothing to do");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   NXIKillAttDir(pFile); /* for attribute data */
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /* ------------------------------------------------------------------- */
@@ -1009,7 +988,7 @@ NXstatus NX4putdata(NXhandle fid, const void *data) {
   /* check if there is an SDS open */
   if (pFile->iCurrentSDS == 0) {
     NXReportError("ERROR: no SDS open");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   /* first read dimension information */
   memset(iStart, 0, H4_MAX_VAR_DIMS * sizeof(int32));
@@ -1028,40 +1007,19 @@ NXstatus NX4putdata(NXhandle fid, const void *data) {
     char pError[512];
     sprintf(pError, "ERROR: failure to write data to %s", pBuffer);
     NXReportError(pError);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /* ------------------------------------------------------------------- */
 
-NXstatus NX4putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen, int iType) {
+NXstatus NX4putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen, NXnumtype iType) {
   pNexusFile pFile;
   int iRet, type;
 
   pFile = NXIassert(fid);
-  if (iType == NX_CHAR) {
-    type = DFNT_CHAR8;
-  } else if (iType == NX_INT8) {
-    type = DFNT_INT8;
-  } else if (iType == NX_UINT8) {
-    type = DFNT_UINT8;
-  } else if (iType == NX_INT16) {
-    type = DFNT_INT16;
-  } else if (iType == NX_UINT16) {
-    type = DFNT_UINT16;
-  } else if (iType == NX_INT32) {
-    type = DFNT_INT32;
-  } else if (iType == NX_UINT32) {
-    type = DFNT_UINT32;
-  } else if (iType == NX_FLOAT32) {
-    type = DFNT_FLOAT32;
-  } else if (iType == NX_FLOAT64) {
-    type = DFNT_FLOAT64;
-  } else {
-    NXReportError("ERROR: Invalid data type for HDF attribute");
-    return NX_ERROR;
-  }
+  type = nxToHDF4Type(iType);
   if (pFile->iCurrentSDS != 0) {
     /* SDS attribute */
     iRet = SDsetattr(pFile->iCurrentSDS, static_cast<const char *>(name), static_cast<int32>(type),
@@ -1077,12 +1035,12 @@ NXstatus NX4putattr(NXhandle fid, CONSTCHAR *name, const void *data, int datalen
                       static_cast<int32>(datalen), data);
     }
   }
-  iType = type; // TODO what is the intention here?
+  // iType = type; // TODO what is the intention here?
   if (iRet < 0) {
     NXReportError("ERROR: HDF failed to store attribute ");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /* ------------------------------------------------------------------- */
@@ -1100,7 +1058,7 @@ NXstatus NX4putslab64(NXhandle fid, const void *data, const int64_t iStart[], co
   /* check if there is an SDS open */
   if (pFile->iCurrentSDS == 0) {
     NXReportError("ERROR: no SDS open");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   /* initialise stride to 1 */
   for (i = 0; i < H4_MAX_VAR_DIMS; i++) {
@@ -1118,36 +1076,37 @@ NXstatus NX4putslab64(NXhandle fid, const void *data, const int64_t iStart[], co
   /* deal with HDF errors */
   if (iRet < 0) {
     NXReportError("ERROR: writing slab failed");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /* ------------------------------------------------------------------- */
 
 NXstatus NX4getdataID(NXhandle fid, NXlink *sRes) {
   pNexusFile pFile;
-  int datalen, type = NX_CHAR;
+  int datalen;
+  NXnumtype type = NXnumtype::CHAR;
 
   pFile = NXIassert(fid);
 
   if (pFile->iCurrentSDS == 0) {
-    sRes->iTag = NX_ERROR;
-    return NX_ERROR;
+    sRes->iTag = static_cast<int>(NXstatus::NX_ERROR);
+    return NXstatus::NX_ERROR;
   } else {
     sRes->iTag = DFTAG_NDG;
     sRes->iRef = SDidtoref(pFile->iCurrentSDS);
     NXMDisableErrorReporting();
     datalen = 1024;
     memset(&sRes->targetPath, 0, 1024);
-    if (NX4getattr(fid, "target", &sRes->targetPath, &datalen, &type) != NX_OK) {
+    if (NX4getattr(fid, "target", &sRes->targetPath, &datalen, &type) != NXstatus::NX_OK) {
       NXIbuildPath(pFile, sRes->targetPath, 1024);
     }
     NXMEnableErrorReporting();
-    return NX_OK;
+    return NXstatus::NX_OK;
   }
-  sRes->iTag = NX_ERROR;
-  return NX_ERROR; /* not reached */
+  sRes->iTag = static_cast<int>(NXstatus::NX_ERROR);
+  return NXstatus::NX_ERROR; /* not reached */
 }
 
 /* ------------------------------------------------------------------- */
@@ -1160,7 +1119,7 @@ NXstatus NX4makelink(NXhandle fid, NXlink *sLink) {
   pFile = NXIassert(fid);
 
   if (pFile->iCurrentVG == 0) { /* root level, can not link here */
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   Vaddtagref(pFile->iCurrentVG, static_cast<int32>(sLink->iTag), static_cast<int32>(sLink->iRef));
   int32 length = static_cast<int32>(strlen(sLink->targetPath));
@@ -1174,20 +1133,21 @@ NXstatus NX4makelink(NXhandle fid, NXlink *sLink) {
     Vsetattr(dataID, static_cast<char *>(name), type, (int32)length, sLink->targetPath);
     Vdetach(dataID);
   }
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 /* ------------------------------------------------------------------- */
 
 NXstatus NX4makenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
   pNexusFile pFile;
-  int32 dataID, type = DFNT_CHAR8, dataType = NX_CHAR, rank = 1, attType = NX_INT32;
+  int32 dataID, type = DFNT_CHAR8, rank = 1;
+  NXnumtype dataType = NXnumtype::CHAR, attType = NXnumtype::INT32;
   char name[] = "target";
   int tags[2];
 
   pFile = NXIassert(fid);
 
   if (pFile->iCurrentVG == 0) { /* root level, can not link here */
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 
   tags[0] = static_cast<int>(sLink->iTag);
@@ -1213,22 +1173,23 @@ NXstatus NX4makenamedlink(NXhandle fid, CONSTCHAR *newname, NXlink *sLink) {
     Vsetattr(dataID, static_cast<char *>(name), type, (int32)length, sLink->targetPath);
     Vdetach(dataID);
   }
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /*----------------------------------------------------------------------*/
 
-NXstatus NX4printlink(NXhandle fid, NXlink *sLink) {
+NXstatus NX4printlink(NXhandle fid, NXlink const *sLink) {
   NXIassert(fid);
   printf("HDF4 link: iTag = %ld, iRef = %ld, target=\"%s\"\n", sLink->iTag, sLink->iRef, sLink->targetPath);
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /*----------------------------------------------------------------------*/
 
 NXstatus NX4flush(NXhandle *pHandle) {
   char *pFileName, *pCopy = NULL;
-  int access, dummy, iRet, i, iStack;
+  int access, dummy, i, iStack;
+  NXstatus iRet;
   pNexusFile pFile = NULL;
   NXaccess ac;
   int *iRefs = NULL;
@@ -1244,10 +1205,10 @@ NXstatus NX4flush(NXhandle *pHandle) {
     in order to recover the position in the vGroup hierarchy before the
     flush.
   */
-  iRet = Hfidinquire(pFile->iVID, &pFileName, &access, &dummy);
-  if (iRet < 0) {
+  iRet = static_cast<NXstatus>(Hfidinquire(pFile->iVID, &pFileName, &access, &dummy));
+  if (iRet == NXstatus::NX_EOD) {
     NXReportError("ERROR: Failed to inquire file name for HDF file");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   if (pFile->iAccess[0] == 'r') {
     ac = NXACC_READ;
@@ -1255,12 +1216,12 @@ NXstatus NX4flush(NXhandle *pHandle) {
     ac = NXACC_RDWR;
   } else {
     NXReportError("ERROR: NX4flush failed to determine file access mode");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   pCopy = static_cast<char *>(malloc((strlen(pFileName) + 10) * sizeof(char)));
   if (!pCopy) {
     NXReportError("ERROR: Failed to allocate data for filename copy");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   memset(pCopy, 0, strlen(pFileName) + 10);
   strcpy(pCopy, pFileName);
@@ -1273,17 +1234,14 @@ NXstatus NX4flush(NXhandle *pHandle) {
     if (!iRefs) {
       free(pCopy); // do not leak memory
       NXReportError("ERROR: Failed to allocate data for hierarchy copy");
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
     for (i = 0; i < iStack; i++) {
       iRefs[i] = pFile->iStack[i].iVref;
     }
   }
 
-  iRet = NX4close(pHandle);
-  if (iRet != NX_OK) {
-    return iRet;
-  }
+  NX4close(pHandle);
 
   iRet = NX4open(pCopy, ac, pHandle);
   free(pCopy);
@@ -1304,7 +1262,7 @@ NXstatus NX4flush(NXhandle *pHandle) {
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NX4getnextentry(NXhandle fid, NXname name, NXname nxclass, int *datatype) {
+NXstatus NX4getnextentry(NXhandle fid, NXname name, NXname nxclass, NXnumtype *datatype) {
   pNexusFile pFile;
   int iStackPtr, iCurDir;
   int32 iTemp, iD1, iD2, iA;
@@ -1317,16 +1275,16 @@ NXstatus NX4getnextentry(NXhandle fid, NXname name, NXname nxclass, int *datatyp
 
   /* first case to check for: no directory entry */
   if (pFile->iStack[pFile->iStackPtr].iRefDir == NULL) {
-    if (NXIInitDir(pFile) < 0) {
+    if (NXIInitDir(pFile) == NXstatus::NX_EOD) {
       NXReportError("ERROR: no memory to store directory info");
-      return NX_EOD;
+      return NXstatus::NX_EOD;
     }
   }
 
   /* Next case: end of directory */
   if (iCurDir >= pFile->iStack[pFile->iStackPtr].iNDir) {
     NXIKillDir(pFile);
-    return NX_EOD;
+    return NXstatus::NX_EOD;
   }
 
   /* Next case: we have data! supply it and increment counter */
@@ -1334,28 +1292,28 @@ NXstatus NX4getnextentry(NXhandle fid, NXname name, NXname nxclass, int *datatyp
     iTemp = Vattach(pFile->iVID, pFile->iStack[iStackPtr].iRefDir[iCurDir], "r");
     if (iTemp < 0) {
       NXReportError("ERROR: HDF cannot attach to Vgroup");
-      return NX_ERROR;
+      return NXstatus::NX_ERROR;
     }
     Vgetname(iTemp, name);
     Vdetach(iTemp);
     findNapiClass(pFile, pFile->iStack[pFile->iStackPtr].iRefDir[iCurDir], nxclass);
-    *datatype = DFTAG_VG;
+    *datatype = static_cast<NXnumtype>(DFTAG_VG);
     pFile->iStack[pFile->iStackPtr].iCurDir++;
-    return NX_OK;
+    return NXstatus::NX_OK;
   } else {                                                       /* in Vgroup */
     if (pFile->iStack[iStackPtr].iTagDir[iCurDir] == DFTAG_VG) { /* Vgroup */
       iTemp = Vattach(pFile->iVID, pFile->iStack[iStackPtr].iRefDir[iCurDir], "r");
       if (iTemp < 0) {
         NXReportError("ERROR: HDF cannot attach to Vgroup");
-        return NX_ERROR;
+        return NXstatus::NX_ERROR;
       }
       Vgetname(iTemp, name);
       Vdetach(iTemp);
       findNapiClass(pFile, pFile->iStack[pFile->iStackPtr].iRefDir[iCurDir], nxclass);
-      *datatype = DFTAG_VG;
+      *datatype = static_cast<NXnumtype>(DFTAG_VG);
       pFile->iStack[pFile->iStackPtr].iCurDir++;
       Vdetach(iTemp);
-      return NX_OK;
+      return NXstatus::NX_OK;
       /* we are now writing using DFTAG_NDG, but need others for backward compatability */
     } else if ((pFile->iStack[iStackPtr].iTagDir[iCurDir] == DFTAG_SDG) ||
                (pFile->iStack[iStackPtr].iTagDir[iCurDir] == DFTAG_NDG) ||
@@ -1364,19 +1322,19 @@ NXstatus NX4getnextentry(NXhandle fid, NXname name, NXname nxclass, int *datatyp
       iTemp = SDselect(pFile->iSID, iTemp);
       SDgetinfo(iTemp, name, &iA, iDim, &iD1, &iD2);
       strcpy(nxclass, "SDS");
-      *datatype = iD1;
+      *datatype = static_cast<NXnumtype>(iD1);
       SDendaccess(iTemp);
       pFile->iStack[pFile->iStackPtr].iCurDir++;
-      return NX_OK;
+      return NXstatus::NX_OK;
     } else { /* unidentified */
       strcpy(name, "UNKNOWN");
       strcpy(nxclass, "UNKNOWN");
-      *datatype = pFile->iStack[iStackPtr].iTagDir[iCurDir];
+      *datatype = static_cast<NXnumtype>(pFile->iStack[iStackPtr].iTagDir[iCurDir]);
       pFile->iStack[pFile->iStackPtr].iCurDir++;
-      return NX_OK;
+      return NXstatus::NX_OK;
     }
   }
-  return NX_ERROR; /* not reached */
+  return NXstatus::NX_ERROR; /* not reached */
 }
 
 /*-------------------------------------------------------------------------*/
@@ -1392,19 +1350,19 @@ NXstatus NX4getdata(NXhandle fid, void *data) {
   /* check if there is an SDS open */
   if (pFile->iCurrentSDS == 0) {
     NXReportError("ERROR: no SDS open");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   /* first read dimension information */
   memset(iStart, 0, H4_MAX_VAR_DIMS * sizeof(int32));
   SDgetinfo(pFile->iCurrentSDS, pBuffer, &iRank, iSize, &iType, &iAtt);
   /* actually read */
   SDreaddata(pFile->iCurrentSDS, iStart, NULL, iSize, data);
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NX4getinfo64(NXhandle fid, int *rank, int64_t dimension[], int *iType) {
+NXstatus NX4getinfo64(NXhandle fid, int *rank, int64_t dimension[], NXnumtype *iType) {
   pNexusFile pFile;
   NXname pBuffer;
   int32 iAtt, myDim[H4_MAX_VAR_DIMS], i, iRank, mType;
@@ -1414,18 +1372,18 @@ NXstatus NX4getinfo64(NXhandle fid, int *rank, int64_t dimension[], int *iType) 
   /* check if there is an SDS open */
   if (pFile->iCurrentSDS == 0) {
     NXReportError("ERROR: no SDS open");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   /* read information */
   SDgetinfo(pFile->iCurrentSDS, pBuffer, &iRank, myDim, &mType, &iAtt);
 
   /* conversion to proper ints for the platform */
-  *iType = (int)mType;
+  *iType = static_cast<NXnumtype>(mType);
   *rank = (int)iRank;
   for (i = 0; i < iRank; i++) {
     dimension[i] = (int)myDim[i];
   }
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -1441,7 +1399,7 @@ NXstatus NX4getslab64(NXhandle fid, void *data, const int64_t iStart[], const in
   /* check if there is an SDS open */
   if (pFile->iCurrentSDS == 0) {
     NXReportError("ERROR: no SDS open");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 
   SDgetinfo(pFile->iCurrentSDS, pBuffer, &iRank, myStart, &iType, &iAtt);
@@ -1451,14 +1409,14 @@ NXstatus NX4getslab64(NXhandle fid, void *data, const int64_t iStart[], const in
   }
   /* finally read  */
   SDreaddata(pFile->iCurrentSDS, myStart, NULL, mySize, data);
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NX4getnextattr(NXhandle fileid, NXname pName, int *iLength, int *iType) {
+NXstatus NX4getnextattr(NXhandle fileid, NXname pName, int *iLength, NXnumtype *iType) {
   pNexusFile pFile;
-  int iRet;
+  NXstatus iRet;
   int32 iPType, iCount, count;
 
   pFile = NXIassert(fileid);
@@ -1466,40 +1424,40 @@ NXstatus NX4getnextattr(NXhandle fileid, NXname pName, int *iLength, int *iType)
   /* first check if we have to start a new attribute search */
   if (pFile->iAtt.iNDir == 0) {
     iRet = NXIInitAttDir(pFile);
-    if (iRet == NX_ERROR) {
-      return NX_ERROR;
+    if (iRet == NXstatus::NX_ERROR) {
+      return NXstatus::NX_ERROR;
     }
   }
   /* are we done ? */
   if (pFile->iAtt.iCurDir >= pFile->iAtt.iNDir) {
     NXIKillAttDir(pFile);
-    return NX_EOD;
+    return NXstatus::NX_EOD;
   }
   /* well, there must be data to copy */
   if (pFile->iCurrentSDS == 0) {
     if (pFile->iCurrentVG == 0) {
       /* global attribute */
-      iRet = SDattrinfo(pFile->iSID, pFile->iAtt.iCurDir, pName, &iPType, &iCount);
+      iRet = static_cast<NXstatus>(SDattrinfo(pFile->iSID, pFile->iAtt.iCurDir, pName, &iPType, &iCount));
     } else {
       /* group attribute */
-      iRet = Vattrinfo(pFile->iCurrentVG, pFile->iAtt.iCurDir, pName, &iPType, &iCount, &count);
+      iRet = static_cast<NXstatus>(Vattrinfo(pFile->iCurrentVG, pFile->iAtt.iCurDir, pName, &iPType, &iCount, &count));
     }
   } else {
-    iRet = SDattrinfo(pFile->iCurrentSDS, pFile->iAtt.iCurDir, pName, &iPType, &iCount);
+    iRet = static_cast<NXstatus>(SDattrinfo(pFile->iCurrentSDS, pFile->iAtt.iCurDir, pName, &iPType, &iCount));
   }
-  if (iRet < 0) {
+  if (iRet == NXstatus::NX_EOD) {
     NXReportError("ERROR: HDF cannot read attribute info");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   *iLength = iCount;
-  *iType = iPType;
+  *iType = static_cast<NXnumtype>(iPType);
   pFile->iAtt.iCurDir++;
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /*-------------------------------------------------------------------------*/
 
-NXstatus NX4getattr(NXhandle fid, const char *name, void *data, int *datalen, int *iType) {
+NXstatus NX4getattr(NXhandle fid, const char *name, void *data, int *datalen, NXnumtype *iType) {
   pNexusFile pFile;
   int32 iNew, iType32, count;
   void *pData = NULL;
@@ -1508,26 +1466,7 @@ NXstatus NX4getattr(NXhandle fid, const char *name, void *data, int *datalen, in
   char pBuffer[256];
   NXname pNam;
 
-  type = *iType;
-  if (type == NX_CHAR) {
-    type = DFNT_CHAR8;
-  } else if (type == NX_INT8) {
-    type = DFNT_INT8;
-  } else if (type == NX_UINT8) {
-    type = DFNT_UINT8;
-  } else if (type == NX_INT16) {
-    type = DFNT_INT16;
-  } else if (type == NX_UINT16) {
-    type = DFNT_UINT16;
-  } else if (type == NX_INT32) {
-    type = DFNT_INT32;
-  } else if (type == NX_UINT32) {
-    type = DFNT_UINT32;
-  } else if (type == NX_FLOAT32) {
-    type = DFNT_FLOAT32;
-  } else if (type == NX_FLOAT64) {
-    type = DFNT_FLOAT64;
-  }
+  type = nxToHDF4Type(*iType);
   *datalen = (*datalen) * DFKNTsize(type);
   pFile = NXIassert(fid);
 
@@ -1547,7 +1486,7 @@ NXstatus NX4getattr(NXhandle fid, const char *name, void *data, int *datalen, in
   if (iNew < 0) {
     sprintf(pBuffer, "ERROR: attribute \"%s\" not found", name);
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   /* get more info, allocate temporary data space */
   iType32 = (int32)type;
@@ -1563,17 +1502,17 @@ NXstatus NX4getattr(NXhandle fid, const char *name, void *data, int *datalen, in
   if (iRet < 0) {
     sprintf(pBuffer, "ERROR: HDF could not read attribute info");
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
-  *iType = (int)iType32;
-  iLen = iLen * DFKNTsize(*iType);
-  if (*iType == NX_CHAR) {
+  *iType = static_cast<NXnumtype>(iType32);
+  iLen = iLen * DFKNTsize(type);
+  if (*iType == NXnumtype::CHAR) {
     iLen += 1;
   }
   pData = malloc(iLen);
   if (!pData) {
     NXReportError("ERROR: allocating memory in NXgetattr");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   memset(pData, 0, iLen);
 
@@ -1590,17 +1529,17 @@ NXstatus NX4getattr(NXhandle fid, const char *name, void *data, int *datalen, in
   if (iRet < 0) {
     sprintf(pBuffer, "ERROR: HDF could not read attribute data");
     NXReportError(pBuffer);
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   /* copy data to caller */
   memset(data, 0, *datalen);
-  if ((*datalen <= iLen) && (*iType == DFNT_UINT8 || *iType == DFNT_CHAR8 || *iType == DFNT_UCHAR8)) {
+  if ((*datalen <= iLen) && (type == DFNT_UINT8 || type == DFNT_CHAR8 || type == DFNT_UCHAR8)) {
     iLen = *datalen - 1; /* this enforces NULL termination regardless of size of datalen */
   }
   memcpy(data, pData, iLen);
-  *datalen = iLen / DFKNTsize(*iType);
+  *datalen = iLen / DFKNTsize(type);
   free(pData);
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -1627,10 +1566,10 @@ NXstatus NX4getattrinfo(NXhandle fid, int *iN) {
   if (iRet < 0) {
     NXReportError("NX_ERROR: HDF cannot read attribute numbers");
     *iN = 0;
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
   *iN = iAtt;
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -1641,17 +1580,17 @@ NXstatus NX4getgroupID(NXhandle fileid, NXlink *sRes) {
   pFile = NXIassert(fileid);
 
   if (pFile->iCurrentVG == 0) {
-    sRes->iTag = NX_ERROR;
-    return NX_ERROR;
+    sRes->iTag = static_cast<int>(NXstatus::NX_ERROR);
+    return NXstatus::NX_ERROR;
   } else {
     sRes->iTag = DFTAG_VG;
     sRes->iRef = VQueryref(pFile->iCurrentVG);
     NXIbuildPath(pFile, sRes->targetPath, 1024);
-    return NX_OK;
+    return NXstatus::NX_OK;
   }
   /* not reached */
-  sRes->iTag = NX_ERROR;
-  return NX_ERROR;
+  sRes->iTag = static_cast<int>(NXstatus::NX_ERROR);
+  return NXstatus::NX_ERROR;
 }
 
 /*-------------------------------------------------------------------------*/
@@ -1670,17 +1609,17 @@ NXstatus NX4getgroupinfo(NXhandle fid, int *iN, NXname pName, NXname pClass) {
     Vgetname(pFile->iCurrentVG, pName);
     Vgetclass(pFile->iCurrentVG, pClass);
   }
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /* ------------------------------------------------------------------- */
 
-NXstatus NX4sameID(NXhandle fileid, NXlink *pFirstID, NXlink *pSecondID) {
+NXstatus NX4sameID(NXhandle fileid, NXlink const *pFirstID, NXlink const *pSecondID) {
   NXIassert(fileid);
   if ((pFirstID->iTag == pSecondID->iTag) & (pFirstID->iRef == pSecondID->iRef)) {
-    return NX_OK;
+    return NXstatus::NX_OK;
   } else {
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 }
 
@@ -1688,74 +1627,64 @@ NXstatus NX4sameID(NXhandle fileid, NXlink *pFirstID, NXlink *pSecondID) {
 
 NXstatus NX4initattrdir(NXhandle fid) {
   pNexusFile pFile;
-  int iRet;
+  NXstatus iRet;
 
   pFile = NXIassert(fid);
   NXIKillAttDir(pFile);
   iRet = NXIInitAttDir(pFile);
-  if (iRet == NX_ERROR)
-    return NX_ERROR;
-  return NX_OK;
+  if (iRet == NXstatus::NX_ERROR)
+    return NXstatus::NX_ERROR;
+  return NXstatus::NX_OK;
 }
 
 /*-------------------------------------------------------------------------*/
 
 NXstatus NX4initgroupdir(NXhandle fid) {
   pNexusFile pFile;
-  int iRet;
+  NXstatus iRet;
 
   pFile = NXIassert(fid);
   NXIKillDir(pFile);
   iRet = NXIInitDir(pFile);
-  if (iRet < 0) {
+  if (iRet == NXstatus::NX_EOD) {
     NXReportError("NX_ERROR: no memory to store directory info");
-    return NX_EOD;
+    return NXstatus::NX_EOD;
   }
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /*--------------------------------------------------------------------*/
 NXstatus NX4putattra(NXhandle handle, CONSTCHAR *name, const void *data, const int rank, const int dim[],
-                     const int iType) {
+                     const NXnumtype iType) {
   if (rank > 1) {
     NXReportError("This is a HDF4 file, there is only rudimentary support for attribute arrays wirh rank <=1");
-    return NX_ERROR;
+    return NXstatus::NX_ERROR;
   }
 
   return NX4putattr(handle, name, data, dim[0], iType);
 }
 
 /*--------------------------------------------------------------------*/
-NXstatus NX4getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], int *iType) {
+NXstatus NX4getnextattra(NXhandle handle, NXname pName, int *rank, int dim[], NXnumtype *iType) {
   NXstatus ret = NX4getnextattr(handle, pName, dim, iType);
-  if (ret != NX_OK)
+  if (ret != NXstatus::NX_OK)
     return ret;
   (*rank) = 1;
   if (dim[0] <= 1)
     (*rank) = 0;
-  return NX_OK;
+  return NXstatus::NX_OK;
 }
 
 /*--------------------------------------------------------------------*/
-NXstatus NX4getattra(NXhandle handle, const char *name, void *data) {
-  UNUSED_ARG(handle);
-  UNUSED_ARG(name);
-  UNUSED_ARG(data);
-
+NXstatus NX4getattra(NXhandle, const char *, void *) {
   NXReportError("This is a HDF4 file, attribute array API is not supported here");
-  return NX_ERROR;
+  return NXstatus::NX_ERROR;
 }
 
 /*--------------------------------------------------------------------*/
-NXstatus NX4getattrainfo(NXhandle handle, NXname pName, int *rank, int dim[], int *iType) {
-  UNUSED_ARG(handle);
-  UNUSED_ARG(pName);
-  UNUSED_ARG(rank);
-  UNUSED_ARG(dim);
-  UNUSED_ARG(iType);
-
+NXstatus NX4getattrainfo(NXhandle, NXname, int *, int[], NXnumtype *) {
   NXReportError("This is a HDF4 file, attribute array API is not supported here");
-  return NX_ERROR;
+  return NXstatus::NX_ERROR;
 }
 
 /*--------------------------------------------------------------------*/

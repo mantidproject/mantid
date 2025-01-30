@@ -840,7 +840,7 @@ void MDBoxFlatTree::saveAffineTransformMatrix(::NeXus::File *const file, API::Co
     return;
   Kernel::Matrix<coord_t> matrix = transform->makeAffineMatrix();
   g_log.debug() << "TRFM: " << matrix.str() << '\n';
-  saveMatrix<coord_t>(file, entry_name, matrix, ::NeXus::FLOAT32, transform->id());
+  saveMatrix<coord_t>(file, entry_name, matrix, NXnumtype::FLOAT32, transform->id());
 }
 
 /**
@@ -852,7 +852,7 @@ void MDBoxFlatTree::saveAffineTransformMatrix(::NeXus::File *const file, API::Co
  * @param tag : id for an affine matrix conversion
  */
 template <typename T>
-void saveMatrix(::NeXus::File *const file, const std::string &name, Kernel::Matrix<T> &m, ::NeXus::NXnumtype type,
+void saveMatrix(::NeXus::File *const file, const std::string &name, Kernel::Matrix<T> &m, NXnumtype type,
                 const std::string &tag) {
   std::vector<T> v = m.getVector();
   // Number of data points

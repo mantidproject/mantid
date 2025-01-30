@@ -9,6 +9,7 @@
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/DllConfig.h"
+#include "MantidNexusCpp/NeXusFile_fwd.h"
 #include "MantidNexusCpp/napi.h"
 
 #include <boost/container/vector.hpp>
@@ -30,25 +31,25 @@ namespace NeXus {
  *  such as the dimensions and the type
  */
 struct NXInfo {
-  NXInfo() : nxname(), rank(0), dims(), type(-1), stat(NX_ERROR) {}
-  std::string nxname;                       ///< name of the object
-  int rank;                                 ///< number of dimensions of the data
-  int dims[4];                              ///< sizes along each dimension
-  int type;                                 ///< type of the data, e.g. NX_CHAR, NX_FLOAT32, see napi.h
-  NXstatus stat;                            ///< return status
-  operator bool() { return stat == NX_OK; } ///< returns success of an operation
+  NXInfo() : nxname(), rank(0), dims(), type(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
+  std::string nxname; ///< name of the object
+  int rank;           ///< number of dimensions of the data
+  int dims[4];        ///< sizes along each dimension
+  NXnumtype type;     ///< type of the data, e.g. NX_CHAR, NXnumtype::FLOAT32, see napi.h
+  NXstatus stat;      ///< return status
+  operator bool() { return stat == NXstatus::NX_OK; } ///< returns success of an operation
 };
 
 /**  Information about a Nexus class
  */
 struct NXClassInfo {
-  NXClassInfo() : nxname(), nxclass(), datatype(-1), stat(NX_ERROR) {}
+  NXClassInfo() : nxname(), nxclass(), datatype(NXnumtype::BAD), stat(NXstatus::NX_ERROR) {}
   std::string nxname;  ///< name of the object
   std::string nxclass; ///< NX class of the object or "SDS" if a dataset
-  int datatype;        ///< NX data type if a dataset, e.g. NX_CHAR, NX_FLOAT32, see
+  NXnumtype datatype;  ///< NX data type if a dataset, e.g. NX_CHAR, NXnumtype::FLOAT32, see
   /// napi.h
-  NXstatus stat;                            ///< return status
-  operator bool() { return stat == NX_OK; } ///< returns success of an operation
+  NXstatus stat;                                      ///< return status
+  operator bool() { return stat == NXstatus::NX_OK; } ///< returns success of an operation
 };
 
 /**
@@ -147,9 +148,9 @@ public:
   /// Returns the number of elements along the fourth dimension
   int dim3() const;
   /// Returns the name of the data set
-  std::string name() const { return m_info.nxname; }
+  std::string name() const { return m_info.nxname; } // cppcheck-suppress returnByReference
   /// Returns the Nexus type of the data. The types are defied in napi.h
-  int type() const { return m_info.type; }
+  NXnumtype type() const { return m_info.type; }
   /**  Load the data from the file. Calling this method with all default
    * arguments
    *   makes it to read in all the data.
@@ -584,7 +585,7 @@ public:
   std::vector<NXInfo> &datasets() const { return *m_datasets; }
   /** Returns NXInfo for a dataset
    *  @param name :: The name of the dataset
-   *  @return NXInfo::stat is set to NX_ERROR if the dataset does not exist
+   *  @return NXInfo::stat is set to NXstatus::NX_ERROR if the dataset does not exist
    */
   NXInfo getDataSetInfo(const std::string &name) const;
   /// Returns whether an individual dataset is present
@@ -650,7 +651,7 @@ private:
     if (vinfo.dims[0] != times.dim0())
       return nullptr;
 
-    if (vinfo.type == NX_CHAR) {
+    if (vinfo.type == NXnumtype::CHAR) {
       auto logv = new Kernel::TimeSeriesProperty<std::string>(logName);
       NXChar value(*this, "value");
       value.openLocal();
@@ -665,7 +666,7 @@ private:
         logv->addValue(t, std::string(value() + i * value.dim1(), value.dim1()));
       }
       return logv;
-    } else if (vinfo.type == NX_FLOAT64) {
+    } else if (vinfo.type == NXnumtype::FLOAT64) {
       if (logName.find("running") != std::string::npos || logName.find("period ") != std::string::npos) {
         auto logv = new Kernel::TimeSeriesProperty<bool>(logName);
         NXDouble value(*this, "value");
@@ -679,10 +680,10 @@ private:
       }
       NXDouble value(*this, "value");
       return loadValues<NXDouble, TYPE>(logName, value, start_t, times);
-    } else if (vinfo.type == NX_FLOAT32) {
+    } else if (vinfo.type == NXnumtype::FLOAT32) {
       NXFloat value(*this, "value");
       return loadValues<NXFloat, TYPE>(logName, value, start_t, times);
-    } else if (vinfo.type == NX_INT32) {
+    } else if (vinfo.type == NXnumtype::INT32) {
       NXInt value(*this, "value");
       return loadValues<NXInt, TYPE>(logName, value, start_t, times);
     }
