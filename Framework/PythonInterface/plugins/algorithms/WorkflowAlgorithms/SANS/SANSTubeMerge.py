@@ -84,12 +84,12 @@ class SANSTubeMerge(DataProcessorAlgorithm):
             prog_report.report("Saving to file")
             self._save_ws_as_nexus(self._CALIBRATED_WS_NAME, output_filename)
 
-    def _load_file(self, file_name, ws_name):
+    def _load_file(self, file_name: str, ws_name: str):
         alg = self._create_child_alg("Load", Filename=file_name, OutputWorkspace=ws_name)
         alg.execute()
         return alg.getProperty("OutputWorkspace").value
 
-    def _create_empty_calibrated_workspace(self, merged_calib_ws, calibrated_ws_name):
+    def _create_empty_calibrated_workspace(self, merged_calib_ws, calibrated_ws_name: str) -> None:
         """Copy the instrument parameters of a merged calibration workspace into a new workspace with no counts"""
 
         inst_file_name = merged_calib_ws.getInstrumentFilename(merged_calib_ws.getInstrument().getName())
@@ -105,12 +105,12 @@ class SANSTubeMerge(DataProcessorAlgorithm):
 
         AnalysisDataService.addOrReplace(calibrated_ws_name, calibrated_ws)
 
-    def _save_ws_as_nexus(self, ws_name, filename):
+    def _save_ws_as_nexus(self, ws_name: str, filename: str) -> None:
         save_filepath = filename if filename.endswith(self._NEXUS_SUFFIX) else f"{filename}{self._NEXUS_SUFFIX}"
         save_alg = self._create_child_alg("SaveNexusProcessed", InputWorkspace=ws_name, Filename=save_filepath)
         save_alg.execute()
 
-    def _create_child_alg(self, name, store_in_ADS=False, **kwargs):
+    def _create_child_alg(self, name: str, store_in_ADS: bool = False, **kwargs):
         alg = self.createChildAlgorithm(name, **kwargs)
         alg.setRethrows(True)
         if store_in_ADS:
