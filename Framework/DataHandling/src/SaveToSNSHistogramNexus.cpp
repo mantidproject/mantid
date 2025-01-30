@@ -141,7 +141,7 @@ int SaveToSNSHistogramNexus::copy_file(const char *inFile, int nx__access, const
       if (NXgetdataID(outId, &link) == NX_OK || NXgetgroupID(outId, &link) == NX_OK) {
         if (NXopenpath(outId, links_to_make[i].from) != NX_OK)
           return NX_ERROR;
-        char *tstr = strrchr(links_to_make[i].to, '/');
+        const char *tstr = strrchr(links_to_make[i].to, '/');
         if (!strcmp(links_to_make[i].name, tstr + 1)) {
           if (NXmakelink(outId, &link) != NX_OK)
             return NX_ERROR;
@@ -514,8 +514,6 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
         if (NXgetdataID(inId, &link) != NX_OK)
           return NX_ERROR;
 
-        std::string data_label(nxName);
-
         if (!strcmp(current_path, link.targetPath)) {
           // Look for the bank name
           std::string path(current_path);
@@ -531,6 +529,8 @@ int SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
           }
 
           //---------------------------------------------------------------------------------------
+          std::string data_label(nxName);
+
           if (data_label == "data" && (!bank.empty())) {
             if (this->WriteDataGroup(bank, is_definition) != NX_OK)
               return NX_ERROR;
@@ -650,7 +650,7 @@ int SaveToSNSHistogramNexus::WriteAttributes(int is_definition) {
   return NX_OK;
 }
 
-void nexus_print_error(void *pD, char *text) {
+void nexus_print_error(const void *pD, const char *text) {
   (void)pD;
   std::cout << "Nexus Error: " << text << "\n";
 }

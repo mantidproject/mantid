@@ -61,7 +61,7 @@ public:
   int getCol() const override;
   int getRow() const override;
 
-  Mantid::Kernel::V3D getQLabFrame() const override;
+  Mantid::Kernel::V3D getQLabFrame() const final; // Marked final since used in constructor
   Mantid::Kernel::V3D getQSampleFrame() const override;
 
   void setQSampleFrame(const Mantid::Kernel::V3D &QSampleFrame, std::optional<double> = std::nullopt) override;

@@ -180,9 +180,9 @@ bool SetScalingPSD::processScalingFile(const std::string &scalingFile, std::vect
     Kernel::V3D truPosLast, detPosLast;
     Progress prog(this, 0.0, 0.5, detectorCount);
     for (int i = 0; i < detectorCount; i++) {
-      int detIndex = detID[i];
       try {
         // detIndex is what Mantid usually calls detectorID
+        int detIndex = detID[i];
         size_t index = detectorInfo.indexOf(detIndex);
         Kernel::V3D detPos = detectorInfo.position(index);
         Kernel::V3D shift = truepos[i] - detPos;
