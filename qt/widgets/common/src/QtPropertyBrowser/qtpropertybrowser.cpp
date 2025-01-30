@@ -196,7 +196,7 @@ QtProperty::~QtProperty() {
 
     \sa insertSubProperty(), removeSubProperty()
 */
-QList<QtProperty *> QtProperty::subProperties() const { return d_ptr->m_subItems; }
+const QList<QtProperty *> &QtProperty::subProperties() const { return d_ptr->m_subItems; }
 
 /**
     Returns a pointer to the manager that owns this property.
@@ -226,14 +226,14 @@ QString QtProperty::statusTip() const { return d_ptr->m_statusTip; }
 
     \sa setWhatsThis()
 */
-QString QtProperty::whatsThis() const { return d_ptr->m_whatsThis; }
+const QString &QtProperty::whatsThis() const { return d_ptr->m_whatsThis; }
 
 /**
     Returns the property's name.
 
     \sa setPropertyName()
 */
-QString QtProperty::propertyName() const { return d_ptr->m_name; }
+const QString &QtProperty::propertyName() const { return d_ptr->m_name; }
 
 /**
     Returns whether the property is enabled.
@@ -413,7 +413,7 @@ void QtProperty::insertSubProperty(QtProperty *property, QtProperty *afterProper
   int newPos = 0;
   QtProperty *properAfterProperty = nullptr;
   while (pos < pendingList.count()) {
-    QtProperty *i = pendingList.at(pos);
+    const QtProperty *i = pendingList.at(pos);
     if (i == property)
       return; // if item is already inserted in this item then cannot add.
     if (i == afterProperty) {
@@ -644,7 +644,7 @@ void QtAbstractPropertyManager::clear() const {
 
     \sa addProperty()
 */
-QSet<QtProperty *> QtAbstractPropertyManager::properties() const { return d_ptr->m_properties; }
+const QSet<QtProperty *> &QtAbstractPropertyManager::properties() const { return d_ptr->m_properties; }
 
 /**
     Returns whether the given \a property has a value.
@@ -1119,8 +1119,7 @@ QtBrowserItem *QtBrowserItem::parent() const { return d_ptr->m_parent; }
 
     The \e childrenItems list represents the same list as \e childrenProperties.
 */
-
-QList<QtBrowserItem *> QtBrowserItem::children() const { return d_ptr->m_children; }
+const QList<QtBrowserItem *> &QtBrowserItem::children() const { return d_ptr->m_children; }
 
 /**
     Returns the property browser which owns \e this item.
@@ -1222,7 +1221,7 @@ void QtAbstractPropertyBrowserPrivate::createBrowserIndexes(QtProperty *property
     QListIterator<QtBrowserItem *> itIndex(indexes);
     while (itIndex.hasNext()) {
       QtBrowserItem *idx = itIndex.next();
-      QtBrowserItem *parentIdx = idx->parent();
+      const QtBrowserItem *parentIdx = idx->parent();
       if ((parentProperty && parentIdx && parentIdx->property() == parentProperty) || (!parentProperty && !parentIdx))
         parentToAfter[idx->parent()] = idx;
     }
@@ -1279,7 +1278,7 @@ void QtAbstractPropertyBrowserPrivate::removeBrowserIndexes(QtProperty *property
   QListIterator<QtBrowserItem *> itIndex(indexes);
   while (itIndex.hasNext()) {
     QtBrowserItem *idx = itIndex.next();
-    QtBrowserItem *parentIdx = idx->parent();
+    const QtBrowserItem *parentIdx = idx->parent();
     if ((parentProperty && parentIdx && parentIdx->property() == parentProperty) || (!parentProperty && !parentIdx))
       toRemove.append(idx);
   }
@@ -1602,7 +1601,7 @@ QtAbstractPropertyBrowser::~QtAbstractPropertyBrowser() {
 
     \sa addProperty(), insertProperty(), removeProperty()
 */
-QList<QtProperty *> QtAbstractPropertyBrowser::properties() const { return d_ptr->m_subItems; }
+const QList<QtProperty *> &QtAbstractPropertyBrowser::properties() const { return d_ptr->m_subItems; }
 
 /**
     Returns the property browser's list of all items associated
@@ -1636,7 +1635,7 @@ QtBrowserItem *QtAbstractPropertyBrowser::topLevelItem(QtProperty *property) con
     \sa topLevelItem()
 */
 
-QList<QtBrowserItem *> QtAbstractPropertyBrowser::topLevelItems() const { return d_ptr->m_topLevelIndexes; }
+const QList<QtBrowserItem *> &QtAbstractPropertyBrowser::topLevelItems() const { return d_ptr->m_topLevelIndexes; }
 
 /**
     Removes all the properties from the editor, but does not delete
@@ -1700,7 +1699,7 @@ QtBrowserItem *QtAbstractPropertyBrowser::insertProperty(QtProperty *property, Q
   int pos = 0;
   int newPos = 0;
   while (pos < pendingList.count()) {
-    QtProperty *prop = pendingList.at(pos);
+    const QtProperty *prop = pendingList.at(pos);
     if (prop == property)
       return nullptr;
     if (prop == afterProperty) {
@@ -1844,7 +1843,7 @@ QtBrowserItem *QtAbstractPropertyBrowser::currentItem() const { return d_ptr->m_
     \sa currentItem(), currentItemChanged()
 */
 void QtAbstractPropertyBrowser::setCurrentItem(QtBrowserItem *item) {
-  QtBrowserItem *oldItem = d_ptr->m_currentItem;
+  const QtBrowserItem *oldItem = d_ptr->m_currentItem;
   d_ptr->m_currentItem = item;
   if (oldItem != item)
     emit currentItemChanged(item);
