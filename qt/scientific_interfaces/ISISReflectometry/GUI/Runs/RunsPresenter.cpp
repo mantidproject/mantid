@@ -547,7 +547,7 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   auto errorMap = alg->validateInputs();
   if (!errorMap.empty()) {
     std::string errorString;
-    for (auto &kvp : errorMap)
+    for (auto const &kvp : errorMap)
       errorString.append(kvp.first + ":" + kvp.second);
     handleError(errorString);
     return nullptr;
