@@ -50,7 +50,7 @@ public:
   IntensityType intensityType() const;
 
   void setProfileFunctionName(std::string newProfileFunction);
-  std::string getProfileFunctionName() const;
+  const std::string &getProfileFunctionName() const;
   bool hasProfileFunctionName() const;
 
   void setPointGroup(const Geometry::PointGroup_sptr &pointGroup);

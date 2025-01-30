@@ -149,7 +149,6 @@ public:
       }
       return numY;
     }
-    return m_vec.empty() ? 0 : m_vec[0].dataY().size();
   }
 
   std::size_t getNumberBins(const std::size_t &index) const override {

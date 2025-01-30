@@ -59,7 +59,7 @@ PoldiPeakCollection_sptr PoldiPeakCollection::clone() {
   clone->setPointGroup(m_pointGroup);
   clone->setUnitCell(m_unitCell);
 
-  for (auto &peak : m_peaks) {
+  for (const auto &peak : m_peaks) {
     clone->addPeak(peak->clone());
   }
 
@@ -86,7 +86,7 @@ void PoldiPeakCollection::setProfileFunctionName(std::string newProfileFunction)
   m_profileFunctionName = std::move(newProfileFunction);
 }
 
-std::string PoldiPeakCollection::getProfileFunctionName() const { return m_profileFunctionName; }
+const std::string &PoldiPeakCollection::getProfileFunctionName() const { return m_profileFunctionName; }
 
 bool PoldiPeakCollection::hasProfileFunctionName() const { return !m_profileFunctionName.empty(); }
 

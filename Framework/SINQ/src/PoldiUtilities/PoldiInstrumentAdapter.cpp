@@ -255,7 +255,7 @@ double PoldiInstrumentAdapter::extractPropertyFromRun(const Run &runInformation,
  * @return Functor of type AbstractDoubleValueExtractor
  */
 AbstractDoubleValueExtractor_sptr
-PoldiInstrumentAdapter::getExtractorForProperty(Kernel::Property *chopperSpeedProperty) const {
+PoldiInstrumentAdapter::getExtractorForProperty(const Kernel::Property *const chopperSpeedProperty) const {
   if (!chopperSpeedProperty) {
     throw std::invalid_argument("Cannot process null-Property.");
   }

@@ -17,7 +17,7 @@ MillerIndices::MillerIndices(int h, int k, int l)
   populateVector();
 }
 
-MillerIndices::MillerIndices(std::vector<int> hkl) {
+MillerIndices::MillerIndices(std::vector<int> &hkl) {
   if (hkl.size() != 3) {
     throw std::runtime_error("MillerIndices object can only be created with 3 indices");
   }
