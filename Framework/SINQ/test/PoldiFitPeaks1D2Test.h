@@ -240,12 +240,12 @@ public:
 
     // Peaks with certain properties are rejected
     // 1. negative intensity
-    PoldiPeak_sptr negativeIntensity = m_testPeak->clone();
+    PoldiPeak_sptr negativeIntensity = m_testPeak->clonePeak();
     negativeIntensity->setIntensity(UncertainValue(-190.0));
     TS_ASSERT(!poldiPeakFit.peakIsAcceptable(negativeIntensity));
 
     // 2a. FWHM too large (rel. > 0.02)
-    PoldiPeak_sptr tooBroad = m_testPeak->clone();
+    PoldiPeak_sptr tooBroad = m_testPeak->clonePeak();
     tooBroad->setFwhm(UncertainValue(0.021), PoldiPeak::Relative);
     TS_ASSERT(!poldiPeakFit.peakIsAcceptable(tooBroad));
 
@@ -254,7 +254,7 @@ public:
     TS_ASSERT(poldiPeakFit.peakIsAcceptable(tooBroad));
 
     // 3. FWHM too small (rel. < 0.001)
-    PoldiPeak_sptr tooNarrow = m_testPeak->clone();
+    PoldiPeak_sptr tooNarrow = m_testPeak->clonePeak();
     tooNarrow->setFwhm(UncertainValue(0.0009), PoldiPeak::Relative);
     TS_ASSERT(!poldiPeakFit.peakIsAcceptable(tooNarrow));
   }

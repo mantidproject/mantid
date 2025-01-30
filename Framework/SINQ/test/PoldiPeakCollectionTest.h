@@ -274,7 +274,7 @@ public:
     peaks->addPeak(PoldiPeak::create(2.0));
     peaks->addPeak(PoldiPeak::create(3.0));
 
-    PoldiPeakCollection_sptr clone = peaks->clone();
+    PoldiPeakCollection_sptr clone = peaks->clonePeakCollection();
 
     // make sure those are different instances
     TS_ASSERT(clone != peaks);
