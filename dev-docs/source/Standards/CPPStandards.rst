@@ -413,6 +413,12 @@ In order to allow the suppressions file to function as a to-do list of fixes and
 to reduce developer time spent looking for solutions that have already been
 considered, false positives should be suppressed inline.
 
+Inline suppressions must be accompanied by a comment explaining why the problem
+was suppressed rather than fixed. This comment also allows future developers to
+determine if the suppressions can be removed when the code around them changes.
+
+Reviewers and gatekeepers should give these comments additional attention.
+
 .. attention::
 
    Inline suppressions are a last resort. You should be sure that a suppression
