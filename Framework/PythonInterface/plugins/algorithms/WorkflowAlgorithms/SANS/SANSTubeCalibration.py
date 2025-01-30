@@ -472,7 +472,7 @@ class SANSTubeCalibration(DataProcessorAlgorithm):
             raise RuntimeError(f"Found more than one tube for tube id {tube_id}")
         tube_ws_index_list = tube_spec.getTube(0)[0]
         if not len(tube_ws_index_list) == DetectorInfo.NUM_PIXELS_IN_TUBE:
-            raise RuntimeError(f"Found incorrect number of counts for tube id {tube_id}")
+            raise RuntimeError(f"Found incorrect number of workspace indices for tube id {tube_id}")
 
         return [ws.dataY(ws_index)[0] for ws_index in tube_ws_index_list]
 
