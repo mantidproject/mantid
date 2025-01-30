@@ -597,7 +597,7 @@ SetSample::setSampleEnvironmentFromFile(API::ExperimentInfo &exptInfo, const Ker
   }
 
   const auto &instDirs = config.getInstrumentDirectories();
-  std::vector<std::string> environDirs(instDirs);
+  std::vector<std::filesystem::path> environDirs(instDirs);
   for (auto &direc : environDirs) {
     direc = Poco::Path(direc).append("sampleenvironments").toString();
   }

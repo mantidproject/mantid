@@ -8,6 +8,7 @@
 
 #include "MantidAPI/DllConfig.h"
 
+#include <filesystem>
 #include <string>
 #include <vector>
 
@@ -25,14 +26,14 @@ public:
   /// Utility to retrieve a resource file (IDF, Parameters, ..)
   static std::vector<std::string> getResourceFilenames(const std::string &prefix,
                                                        const std::vector<std::string> &fileFormats,
-                                                       const std::vector<std::string> &directoryNames,
+                                                       const std::vector<std::filesystem::path> &directoryNames,
                                                        const std::string &date);
 
   /// Utility to retrieve the validity dates for the given IDF
   static void getValidFromTo(const std::string &IDFfilename, std::string &outValidFrom, std::string &outValidTo);
 
 private:
-  static std::string lookupIPF(const std::string &dir, std::string filename);
+  static std::string lookupIPF(const std::filesystem::path &dir, std::string filename);
 };
 
 } // Namespace Mantid::API
