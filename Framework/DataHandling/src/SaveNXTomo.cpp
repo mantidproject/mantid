@@ -390,7 +390,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
         std::vector<int64_t> infDim;
         infDim.emplace_back(NX_UNLIMITED);
         infDim.emplace_back(NX_UNLIMITED);
-        m_nxFile->makeData(prop->name(), ::NeXus::UINT8, infDim, true);
+        m_nxFile->makeData(prop->name(), NXnumtype::UINT8, infDim, true);
       }
       auto valueAsStr = prop->value();
       size_t strSize = valueAsStr.length();
