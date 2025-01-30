@@ -630,13 +630,6 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXSPE.cp
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXTomo.cpp:150
 knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:575
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/CoordinateConversion.h:109
-returnByReference:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/Peak.h:90
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/Peak.h:103
-virtualCallInConstructor:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/TableWorkspace.h:199
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAffine.cpp:277
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAffine.cpp:357
-constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/CoordTransformAffine.cpp:368
-constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:448
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:712
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:738
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/GroupingWorkspace.cpp:153

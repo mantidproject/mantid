@@ -523,8 +523,6 @@ NXstatus SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
         if (NXgetdataID(inId, &link) != NXstatus::NX_OK)
           return NXstatus::NX_ERROR;
 
-        std::string data_label(nxName);
-
         if (!strcmp(current_path, link.targetPath)) {
           // Look for the bank name
           std::string path(current_path);
@@ -540,6 +538,8 @@ NXstatus SaveToSNSHistogramNexus::WriteGroup(int is_definition) {
           }
 
           //---------------------------------------------------------------------------------------
+          std::string data_label(nxName);
+
           if (data_label == "data" && (!bank.empty())) {
             if (this->WriteDataGroup(bank, is_definition) != NXstatus::NX_OK)
               return NXstatus::NX_ERROR;
