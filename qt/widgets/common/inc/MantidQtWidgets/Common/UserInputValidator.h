@@ -138,8 +138,8 @@ bool IUserInputValidator::checkWorkspaceType(QString const &workspaceName, QStri
       addErrorMessage("The " + inputType.toStdString() + " workspace is not a " + validType.toStdString() + ".",
                       silent);
       return false;
-    } else
-      return true;
+    }
+    return true;
   }
   return false;
 }
