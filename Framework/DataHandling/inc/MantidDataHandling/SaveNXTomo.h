@@ -83,16 +83,16 @@ private:
   bool processGroups() override;
 
   /// Creates the format for the output file if it doesn't exist
-  ::NeXus::File setupFile();
+  void setupFile();
 
   /// Writes a single workspace into the file
-  void writeSingleWorkspace(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile);
+  void writeSingleWorkspace(const DataObjects::Workspace2D_sptr &workspace);
 
   /// Write various pieces of data from the workspace log with checks on the
   /// structure of the nexus file
-  void writeLogValues(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile, int thisFileInd);
-  void writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile, int thisFileInd);
-  void writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile, int thisFileInd);
+  void writeLogValues(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd);
+  void writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd);
+  void writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd);
 
   /// Main exec routine, called for group or individual workspace processing.
   void processAll();
@@ -114,6 +114,9 @@ private:
   static const std::string NXTOMO_VER;
 
   std::vector<DataObjects::Workspace2D_sptr> m_workspaces;
+
+  // hold reference to NeXusFile;
+  std::unique_ptr<::NeXus::File> m_nxFile;
 };
 
 } // namespace DataHandling
