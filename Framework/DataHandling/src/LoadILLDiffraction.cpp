@@ -228,7 +228,7 @@ void LoadILLDiffraction::loadMetaData() {
     ::NeXus::File filehandle(m_filename, NXACC_READ);
     LoadHelper::addNexusFieldsToWsRun(filehandle, mutableRun);
   } catch (const ::NeXus::Exception &e) {
-    g_log.debug() << "Failed to open nexus file \"" << m_filename << "\" in read mode\n";
+    g_log.debug() << "Failed to open nexus file \"" << m_filename << "\" in read mode: " << e.what() << "\n";
   }
 
   if (mutableRun.hasProperty("run_number"))

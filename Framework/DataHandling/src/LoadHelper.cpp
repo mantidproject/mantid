@@ -120,22 +120,6 @@ double LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &worksp
  * @param entryName   :: entry name to load properties from
  * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
  */
-void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, const std::string &entryName,
-                                       bool useFullPath) {
-  constexpr bool close_handle{false};
-  ::NeXus::File handle(nxfileID, close_handle);
-  addNexusFieldsToWsRun(handle, runDetails, entryName, useFullPath);
-}
-
-/**
- * Add properties from a nexus file to the workspace run.
- * API entry for recursive routine below
- *
- * @param nxfileID    :: Nexus file handle to be parsed, just after an NXopengroup
- * @param runDetails  :: where to add properties
- * @param entryName :: entry name to load properties from
- * @param useFullPath :: use full path to entry in nexus tree to generate the log entry name in Mantid
- */
 void LoadHelper::addNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runDetails, const std::string &entryName,
                                        bool useFullPath) {
   // As a workaround against some "not so good" old ILL nexus files (ILLIN5_Vana_095893.nxs for example) by default we

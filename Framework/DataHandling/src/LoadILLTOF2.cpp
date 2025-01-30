@@ -15,6 +15,8 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 namespace {
 /// An array containing the supported instrument names
@@ -261,16 +263,14 @@ void LoadILLTOF2::addAllNexusFieldsAsProperties(const std::string &filename) {
   API::Run &runDetails = m_localWorkspace->mutableRun();
 
   // Open NeXus file
-  NXhandle nxfileID;
-  NXstatus stat = NXopen(filename.c_str(), NXACC_READ, &nxfileID);
-
-  g_log.debug() << "Starting parsing properties from : " << filename << '\n';
-  if (stat == NXstatus::NX_ERROR) {
+  try {
+    ::NeXus::File nxfileID(filename, NXACC_READ);
+    LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
+  } catch (const ::NeXus::Exception &) {
     g_log.debug() << "convertNexusToProperties: Error loading " << filename;
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   }
-  LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);
-  NXclose(&nxfileID);
+
   runDetails.addProperty("run_list", runDetails.getPropertyValueAsType<int>("run_number"));
   g_log.debug() << "End parsing properties from : " << filename << '\n';
 }

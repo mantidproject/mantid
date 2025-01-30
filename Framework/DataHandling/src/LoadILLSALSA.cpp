@@ -254,9 +254,8 @@ void LoadILLSALSA::loadNexusV2(const H5::H5File &h5file) {
 
 void LoadILLSALSA::fillWorkspaceMetadata(const std::string &filename) {
   API::Run &runDetails = m_outputWorkspace->mutableRun();
-  NXhandle nxHandle;
-  NXopen(filename.c_str(), NXACC_READ, &nxHandle);
+
+  ::NeXus::File nxHandle(filename, NXACC_READ);
   LoadHelper::addNexusFieldsToWsRun(nxHandle, runDetails);
-  NXclose(&nxHandle);
 }
 } // namespace Mantid::DataHandling

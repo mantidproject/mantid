@@ -28,8 +28,6 @@ std::vector<double> getTimeBinningFromNexusPath(const Mantid::NeXus::NXEntry &, 
 double calculateEnergy(double);
 double calculateTOF(double, double);
 double getInstrumentProperty(const API::MatrixWorkspace_sptr &, const std::string &);
-void addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails, const std::string &entryName = "",
-                           bool useFullPath = false);
 void addNexusFieldsToWsRun(::NeXus::File &filehandle, API::Run &runDetails, const std::string &entryName = "",
                            bool useFullPath = false);
 std::string dateTimeInIsoFormat(const std::string &);

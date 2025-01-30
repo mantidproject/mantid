@@ -26,6 +26,8 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidNexusCpp/NeXusException.hpp"
+#include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <Poco/Path.h>
 
@@ -208,10 +210,8 @@ void LoadILLPolarizedDiffraction::loadData() {
 void LoadILLPolarizedDiffraction::loadMetaData() {
 
   // Open NeXus file
-  NXhandle nxHandle;
-  NXstatus nxStat = NXopen(m_fileName.c_str(), NXACC_READ, &nxHandle);
-
-  if (nxStat != NXstatus::NX_ERROR) {
+  try {
+    ::NeXus::File nxHandle(m_fileName, NXACC_READ);
     for (auto workspaceId = 0; workspaceId < static_cast<int>(m_outputWorkspaceGroup.size()); ++workspaceId) {
       MatrixWorkspace_sptr workspace =
           std::static_pointer_cast<API::MatrixWorkspace>(m_outputWorkspaceGroup[workspaceId]);
@@ -221,7 +221,8 @@ void LoadILLPolarizedDiffraction::loadMetaData() {
         workspace->mutableRun().addProperty("monochromator.wavelength", m_wavelength, true);
       }
     }
-    NXclose(&nxHandle);
+  } catch (const ::NeXus::Exception &e) {
+    g_log.debug() << "Failed to open nexus file \"" << m_fileName << "\" in read mode: " << e.what() << "\n";
   }
 }
 
