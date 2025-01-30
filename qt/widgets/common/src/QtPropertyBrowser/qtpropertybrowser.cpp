@@ -1124,8 +1124,7 @@ const QList<QtBrowserItem *> &QtBrowserItem::children() const { return d_ptr->m_
 /**
     Returns the property browser which owns \e this item.
 */
-
-QtAbstractPropertyBrowser *QtBrowserItem::browser() const { return d_ptr->m_browser; }
+QtAbstractPropertyBrowser *QtBrowserItem::browser() { return d_ptr->m_browser; }
 
 QtBrowserItem::QtBrowserItem(QtAbstractPropertyBrowser *browser, QtProperty *property, QtBrowserItem *parent) {
   d_ptr = new QtBrowserItemPrivate(browser, property, parent);

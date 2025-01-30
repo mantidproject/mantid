@@ -111,9 +111,9 @@ public:
 
   QString toolTip() const;
   QString statusTip() const;
-
   const QString &whatsThis() const;
   const QString &propertyName() const;
+
   bool isEnabled() const;
   bool isModified() const;
 
@@ -294,7 +294,6 @@ public:
   QtBrowserItem *parent() const;
 
   const QList<QtBrowserItem *> &children() const;
-  QtAbstractPropertyBrowser *browser() const;
 
 private:
   explicit QtBrowserItem(QtAbstractPropertyBrowser *browser, QtProperty *property, QtBrowserItem *parent);
