@@ -9,6 +9,7 @@ set(DOCS_MATH_EXT
 )
 set_property(CACHE DOCS_MATH_EXT PROPERTY STRINGS "sphinx.ext.imgmath" "sphinx.ext.mathjax")
 option(DOCS_PLOTDIRECTIVE "If enabled include plots generated with the plot directive. " OFF)
+option(DOCS_QTHELP "If enabled add a target to build the qthelp documentation" ON)
 option(SPHINX_WARNINGS_AS_ERRORS "non-zero exit if there are sphinx warnings" ON)
 option(SPHINX_FRESH_ENV "Don't use a saved environment, but rebuild it completely" ON)
 
