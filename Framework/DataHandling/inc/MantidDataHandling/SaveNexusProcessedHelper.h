@@ -96,8 +96,8 @@ private:
   /// Allow an externally supplied progress object to be used
   API::Progress *m_progress;
   /// Write a simple value plus possible attributes
-  bool writeNxValue(const std::string &name, const std::string &value, const NXnumtype nxType,
-                    const std::vector<std::string> &attributes, const std::vector<std::string> &avalues) const;
+  bool writeNxValue(const std::string &name, const std::string &value, const std::vector<std::string> &attributes,
+                    const std::vector<std::string> &avalues) const;
   /// search for exisiting MantidWorkpace_n entries in opened file
   int findMantidWSEntries() const;
 
@@ -126,25 +126,18 @@ private:
  * <code>attributes</code> argument
  * @returns A boolean indicating success or failure
  */
-inline bool NexusFileIO::writeNxValue(const std::string &name, const std::string &value, const NXnumtype nxType,
+inline bool NexusFileIO::writeNxValue(const std::string &name, const std::string &value,
                                       const std::vector<std::string> &attributes,
                                       const std::vector<std::string> &avalues) const {
-  (void)nxType;
-  int dimensions[1] = {0};
-  std::string nxstr = value;
-  if (nxstr.empty())
-    nxstr += " ";
-  dimensions[0] = static_cast<int>(nxstr.size() + 1);
-  if (NXmakedata(fileID, name.c_str(), nxType, 1, dimensions) == NXstatus::NX_ERROR)
-    return false;
-  if (NXopendata(fileID, name.c_str()) == NXstatus::NX_ERROR)
-    return false;
+  m_filehandle->writeData(name, value);
+
+  // open it again to add attributes
+  m_filehandle->openData(name);
   for (unsigned int it = 0; it < attributes.size(); ++it) {
-    NXputattr(fileID, attributes[it].c_str(), avalues[it].c_str(), static_cast<int>(avalues[it].size() + 1),
-              NXnumtype::CHAR);
+    m_filehandle->putAttr(attributes[it], avalues[it]);
   }
-  NXputdata(fileID, reinterpret_cast<void *>(const_cast<char *>(nxstr.c_str())));
-  NXclosedata(fileID);
+  m_filehandle->closeData();
+
   return true;
 }
 

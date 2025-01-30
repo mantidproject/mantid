@@ -182,12 +182,12 @@ int NexusFileIO::writeNexusProcessedHeader(const std::string &title, const std::
   std::vector<std::string> attributes, avalues;
   attributes.reserve(2);
   avalues.reserve(2);
-  if (!writeNxValue("title", title, NXnumtype::CHAR, attributes, avalues))
+  if (!writeNxValue("title", title, attributes, avalues))
     return (3);
 
   // name for workspace if this is a multi workspace nexus file
   if (!wsName.empty()) {
-    if (!writeNxValue("workspace_name", wsName, NXnumtype::CHAR, attributes, avalues))
+    if (!writeNxValue("workspace_name", wsName, attributes, avalues))
       return (3);
   }
 
@@ -196,12 +196,12 @@ int NexusFileIO::writeNexusProcessedHeader(const std::string &title, const std::
   attributes.emplace_back("Version");
   avalues.emplace_back("1.0");
   // this may not be the "correct" long term path, but it is valid at present
-  if (!writeNxValue("definition", className, NXnumtype::CHAR, attributes, avalues))
+  if (!writeNxValue("definition", className, attributes, avalues))
     return (3);
   avalues.clear();
   avalues.emplace_back("http://www.isis.rl.ac.uk/xml/IXmantid.xml");
   avalues.emplace_back("1.0");
-  if (!writeNxValue("definition_local", className, NXnumtype::CHAR, attributes, avalues))
+  if (!writeNxValue("definition_local", className, attributes, avalues))
     return (3);
   return (0);
 }
