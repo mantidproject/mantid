@@ -40,9 +40,9 @@ private:
   Mantid::Kernel::cow_ptr<std::vector<ComponentType>> m_componentType;
   std::shared_ptr<const std::vector<std::string>> m_names;
 
-  const size_t m_size = 0;
-  const int64_t m_sourceIndex = -1;
-  const int64_t m_sampleIndex = -1;
+  const size_t m_size;
+  const int64_t m_sourceIndex;
+  const int64_t m_sampleIndex;
   DetectorInfo *m_detectorInfo; // Geometry::DetectorInfo is the owner.
   /// The default initialisation is a single interval, i.e. no scan
   std::vector<std::pair<int64_t, int64_t>> m_scanIntervals{{0, 1}};
