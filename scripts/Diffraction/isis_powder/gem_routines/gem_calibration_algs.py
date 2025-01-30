@@ -140,6 +140,7 @@ def _calibration_processing(
     rebinned_tof = mantid.ConvertUnits(InputWorkspace=rebinned, Target="TOF")
     mantid.ApplyDiffCal(InstrumentWorkspace="rebinned_tof", CalibrationFile=offset_file)
     aligned = mantid.ConvertUnits(InputWorkspace=rebinned_tof, Target="dSpacing")
+    mantid.ApplyDiffCal(InstrumentWorkspace=aligned, ClearCalibration=True)
     grouping_file = os.path.join(calibration_dir, grouping_file_name)
     focused = mantid.DiffractionFocussing(
         InputWorkspace=aligned,
