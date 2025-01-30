@@ -73,17 +73,17 @@
 
 static CRITICAL_SECTION nx_critical;
 
-static NXstatus nxilock() {
+static int nxilock() {
   static int first_call = 1;
   if (first_call) {
     first_call = 0;
     InitializeCriticalSection(&nx_critical);
   }
   EnterCriticalSection(&nx_critical);
-  return NXstatus::NX_OK;
+  return static_cast<int>(NXstatus::NX_OK);
 }
 
-static NXstatus nxiunlock(NXstatus ret) {
+static int nxiunlock(int ret) {
   LeaveCriticalSection(&nx_critical);
   return ret;
 }
@@ -109,23 +109,23 @@ static void nx_pthread_init() {
   pthread_mutex_init(&nx_mutex, &attr);
 }
 
-static NXstatus nxilock() {
+static int nxilock() {
   static pthread_once_t once_control = PTHREAD_ONCE_INIT;
   if (pthread_once(&once_control, nx_pthread_init) != 0) {
     NXReportError("pthread_once failed");
-    return NXstatus::NX_ERROR;
+    return static_cast<int>(NXstatus::NX_ERROR);
   }
   if (pthread_mutex_lock(&nx_mutex) != 0) {
     NXReportError("pthread_mutex_lock failed");
-    return NXstatus::NX_ERROR;
+    return static_cast<int>(NXstatus::NX_ERROR);
   }
-  return NXstatus::NX_OK;
+  return static_cast<int>(NXstatus::NX_OK);
 }
 
-static NXstatus nxiunlock(NXstatus ret) {
+static int nxiunlock(int ret) {
   if (pthread_mutex_unlock(&nx_mutex) != 0) {
     NXReportError("pthread_mutex_unlock failed");
-    return NXstatus::NX_ERROR;
+    return static_cast<int>(NXstatus::NX_ERROR);
   }
   return ret;
 }
