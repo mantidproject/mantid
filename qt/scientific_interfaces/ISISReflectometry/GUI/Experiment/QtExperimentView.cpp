@@ -584,12 +584,12 @@ void QtExperimentView::disablePolarizationEfficiencies() {
 
 void QtExperimentView::enableFredrikzeSpinStateOrder() {
   m_ui.polCorrFredrikzeSpinStateLabel->setEnabled(true);
-  m_ui.polCorrFredrikzeSpinStateLabel->setEnabled(true);
+  m_ui.polCorrFredrikzeSpinStateEdit->setEnabled(true);
 }
 
 void QtExperimentView::disableFredrikzeSpinStateOrder() {
   m_ui.polCorrFredrikzeSpinStateLabel->setEnabled(false);
-  m_ui.polCorrFredrikzeSpinStateLabel->setEnabled(false);
+  m_ui.polCorrFredrikzeSpinStateEdit->setEnabled(false);
 }
 
 void QtExperimentView::disableFloodCorrectionInputs() {

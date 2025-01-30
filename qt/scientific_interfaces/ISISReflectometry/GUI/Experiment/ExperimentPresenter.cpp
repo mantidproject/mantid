@@ -251,11 +251,13 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
   }
   if (polCorrOption == "Workspace") {
     m_view->enablePolarizationEfficiencies();
+    m_view->enableFredrikzeSpinStateOrder();
     m_view->setPolarizationEfficienciesWorkspaceMode();
     return;
   }
   if (polCorrOption == "FilePath") {
     m_view->enablePolarizationEfficiencies();
+    m_view->enableFredrikzeSpinStateOrder();
     m_view->setPolarizationEfficienciesFilePathMode();
     return;
   }
@@ -264,6 +266,7 @@ void ExperimentPresenter::updatePolarizationCorrectionEnabledState() {
 void ExperimentPresenter::disablePolarizationEfficiencies() {
   m_view->setPolarizationEfficienciesWorkspaceMode();
   m_view->disablePolarizationEfficiencies();
+  m_view->disableFredrikzeSpinStateOrder();
 }
 
 void ExperimentPresenter::updateFloodCorrectionEnabledState() {
