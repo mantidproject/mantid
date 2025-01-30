@@ -16,10 +16,8 @@
 #include "MantidHistogramData/HistogramY.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-
 #include "MantidLiveData/Kafka/KafkaHistoStreamDecoder.h"
 
-#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
 using Mantid::LiveData::KafkaHistoStreamDecoder;
@@ -32,12 +30,12 @@ public:
     using Mantid::Kernel::ConfigService;
     auto &config = ConfigService::Instance();
     auto baseInstDir = config.getInstrumentDirectory();
-    Poco::Path testFile = Poco::Path(baseInstDir).resolve("unit_testing/UnitTestFacilities.xml");
+    std::filesystem::path testFile = std::filesystem::absolute(baseInstDir / "unit_testing/UnitTestFacilities.xml");
     // Load the test facilities file
-    config.updateFacilities(testFile.toString());
+    config.updateFacilities(testFile.string());
     config.setFacility("TEST");
     // Update instrument search directory
-    config.setString("instrumentDefinition.directory", baseInstDir + "/unit_testing");
+    config.setString("instrumentDefinition.directory", baseInstDir / "/unit_testing");
   }
 
   void tearDown() override {
