@@ -73,7 +73,7 @@
 
 static CRITICAL_SECTION nx_critical;
 
-static NXstatus::NX_OK nxilock() {
+static NXstatus nxilock() {
   static int first_call = 1;
   if (first_call) {
     first_call = 0;
