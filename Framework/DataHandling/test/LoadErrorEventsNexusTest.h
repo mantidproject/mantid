@@ -74,6 +74,26 @@ public:
     TS_ASSERT_EQUALS(events[0].pulseTime(), Mantid::Types::Core::DateAndTime("2021-10-06T14:25:29.962441733-04:00"))
   }
 
+  void test_CG3_zeroEvents() {
+    // This file contains no events in bank_error_events so should create an EventWorkspace with 0 events
+    LoadErrorEventsNexus alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "unused"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "CG3_960.nxs.h5"))
+    TS_ASSERT(alg.execute());
+
+    Mantid::DataObjects::EventWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS);
+
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 1)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+    TS_ASSERT_EQUALS(outputWS->getNumberEvents(), 0)
+    TS_ASSERT_EQUALS(outputWS->readX(0)[0], 0)
+    TS_ASSERT_DELTA(outputWS->readX(0)[1], 16666.7, 1e-9)
+  }
+
   void test_HYSA() {
     // this should fail to load as bank_error_events does not exist in this file
 
