@@ -218,7 +218,7 @@ void SaveNXTomo::setupFile() {
   std::vector<int64_t> infDim;
   infDim.emplace_back(NX_UNLIMITED);
 
-  m_nxFile->makeData("image_key", Nxnumtype::FLOAT64, infDim, false);
+  m_nxFile->makeData("image_key", NXnumtype::FLOAT64, infDim, false);
   m_nxFile->closeGroup(); // detector
 
   // source group // from diamond file contains {current,energy,name,probe,type}
