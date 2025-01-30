@@ -698,7 +698,7 @@
       </widget>
      </item>
      <item row="13" column="2">
-      <widget class="QLabel" name="fredrikzeSpinStateLabel">
+      <widget class="QLabel" name="polCorrFredrikzeSpinStateLabel">
        <property name="minimumSize">
         <size>
          <width>117</width>
@@ -708,31 +708,15 @@
        <property name="text">
         <string>Fredrikze Input SpinState Order</string>
        </property>
-       <property name="toolTip">
-        <string>
-         The spin state order of the workspaces in the workspace group to be passed to PolarizationCorrectionsFredrikze.
-         See the "Spin State Configurations" -> "InputSpinStates" section of the PolarizationCorrectionsFredrikze v1
-         documentation for more details. This is only applied to Fredrikze corrections. Wildes flipper configurations
-         are taken from the instrument's parameter file.
-        </string>
-       </property>
       </widget>
      </item>
      <item row="13" column="3">
-      <widget class="QLineEdit" name="fredrikzeSpinStateEdit">
+      <widget class="QLineEdit" name="polCorrFredrikzeSpinStateEdit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
-       </property>
-       <property name="toolTip">
-        <string>
-         The spin state order of the workspaces in the workspace group to be passed to PolarizationCorrectionsFredrikze.
-         See the "Spin State Configurations" -> "InputSpinStates" section of the PolarizationCorrectionsFredrikze v1
-         documentation for more details. This is only applied to Fredrikze corrections. Wildes flipper configurations
-         are taken from the instrument's parameter file.
-        </string>
        </property>
       </widget>
      </item>
