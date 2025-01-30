@@ -83,7 +83,7 @@ static NXstatus nxilock() {
   return NXstatus::NX_OK;
 }
 
-static int nxiunlock(int ret) {
+static NXstatus nxiunlock(NXstatus ret) {
   LeaveCriticalSection(&nx_critical);
   return ret;
 }
