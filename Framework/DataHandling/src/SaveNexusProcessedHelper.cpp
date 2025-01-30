@@ -28,6 +28,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/VectorHelper.h"
+#include "MantidNexusCpp/NeXusException.hpp"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -40,6 +41,7 @@ using namespace DataObjects;
 namespace {
 /// static logger
 Logger g_log("NexusFileIO");
+const std::string NULL_STR("NULL");
 } // namespace
 
 /// Empty default constructor
@@ -1195,66 +1197,56 @@ template <> std::string NexusFileIO::logValueType<bool>() const { return "bool";
  */
 int getNexusEntryTypes(const std::string &fileName, std::vector<std::string> &entryName,
                        std::vector<std::string> &definition) {
-  //
-  //
-  NXhandle fileH;
-  NXaccess mode = NXACC_READ;
-  NXstatus stat = NXopen(fileName.c_str(), mode, &fileH);
-  if (stat == NXstatus::NX_ERROR)
-    return (-1);
-  //
+  std::unique_ptr<::NeXus::File> fileH;
+
+  try {
+    fileH = std::make_unique<::NeXus::File>(fileName);
+  } catch (::NeXus::Exception &) {
+    return -1;
+  }
   entryName.clear();
   definition.clear();
-  char *nxname, *nxclass;
-  NXnumtype nxdatatype;
-  nxname = new char[NX_MAXNAMELEN];
-  nxclass = new char[NX_MAXNAMELEN];
-  int rank, dims[2];
-  NXnumtype type;
+
   //
   // Loop through all entries looking for the definition section in each (or
   // analysis for MuonV1)
   //
   std::vector<std::string> entryList;
-  while ((stat = NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) == NXstatus::NX_OK) {
-    std::string nxc(nxclass);
-    if (nxc == "NXentry")
-      entryList.emplace_back(nxname);
+
+  std::pair<std::string, std::string> entry;
+  while (true) {
+    entry = fileH->getNextEntry();
+    if (entry.first == NULL_STR && entry.second == NULL_STR)
+      break;
+
+    if (entry.second == "NXentry")
+      entryList.emplace_back(entry.first);
   }
+
   // for each entry found, look for "analysis" or "definition" text data fields
   // and return value plus entry name
-  for (auto &entry : entryList) {
-    NXopengroup(fileH, entry.c_str(), "NXentry");
+
+  for (auto &item : entryList) {
+    fileH->openGroup(item, "NXentry");
     // loop through field names in this entry
-    while ((NXgetnextentry(fileH, nxname, nxclass, &nxdatatype)) == NXstatus::NX_OK) {
+    while (true) {
+      entry = fileH->getNextEntry();
+      if (entry.first == NULL_STR && entry.second == NULL_STR)
+        break;
       // if a data field
-      if (std::string(nxclass) == "SDS") {
+      if (entry.second == "SDS") {
         // if one of the two names we are looking for
-        const std::string nxn(nxname);
-        if (nxn == "definition" || nxn == "analysis") {
-          NXopendata(fileH, nxname);
-          stat = NXgetinfo(fileH, &rank, dims, &type);
-          if (stat == NXstatus::NX_ERROR)
-            continue;
-          auto value = new char[dims[0] + 1];
-          stat = NXgetdata(fileH, value);
-          if (stat == NXstatus::NX_ERROR)
-            continue;
-          value[dims[0]] = '\0';
-          // return e.g entryName "analysis"/definition "muonTD"
+        if (entry.first == "definition" || entry.first == "analysis") {
+          std::string value;
+          fileH->readData(entry.first, value);
           definition.emplace_back(value);
-          entryName.emplace_back(entry);
-          delete[] value;
-          NXclosegroup(fileH); // close data group, then entry
-          NXclosegroup(fileH);
-          break;
+          entryName.emplace_back(item);
         }
       }
     }
+    fileH->closeGroup();
   }
-  NXclose(&fileH);
-  delete[] nxname;
-  delete[] nxclass;
+
   return (static_cast<int>(entryName.size()));
 }
 
