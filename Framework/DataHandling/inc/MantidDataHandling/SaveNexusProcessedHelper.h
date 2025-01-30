@@ -15,6 +15,7 @@
 #include "MantidDataObjects/EventWorkspace_fwd.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/cow_ptr.h"
+#include "MantidNexusCpp/NeXusException.hpp"
 #include "MantidNexusCpp/NeXusFile.hpp"
 
 #include <boost/date_time/c_local_time_adjustor.hpp>
@@ -76,7 +77,7 @@ public:
                                            float const *weights, float const *errorSquareds, int64_t const *pulsetimes,
                                            bool compress) const;
 
-  void NXwritedata(const char *name, NXnumtype datatype, int rank, int *dims_array, void const *data,
+  void NXwritedata(const char *name, NXnumtype datatype, std::vector<int> dims_array, void const *data,
                    bool compress = false) const;
 
   /// write bin masking information
@@ -92,7 +93,7 @@ private:
   /// C++ API file handle
   std::shared_ptr<::NeXus::File> m_filehandle;
   /// Nexus compression method
-  int m_nexuscompression;
+  ::NeXus::NXcompression m_nexuscompression;
   /// Allow an externally supplied progress object to be used
   API::Progress *m_progress;
   /// Write a simple value plus possible attributes
@@ -129,14 +130,18 @@ private:
 inline bool NexusFileIO::writeNxValue(const std::string &name, const std::string &value,
                                       const std::vector<std::string> &attributes,
                                       const std::vector<std::string> &avalues) const {
-  m_filehandle->writeData(name, value);
+  try {
+    m_filehandle->writeData(name, value);
 
-  // open it again to add attributes
-  m_filehandle->openData(name);
-  for (unsigned int it = 0; it < attributes.size(); ++it) {
-    m_filehandle->putAttr(attributes[it], avalues[it]);
+    // open it again to add attributes
+    m_filehandle->openData(name);
+    for (unsigned int it = 0; it < attributes.size(); ++it) {
+      m_filehandle->putAttr(attributes[it], avalues[it]);
+    }
+    m_filehandle->closeData();
+  } catch (::NeXus::Exception &) {
+    return false;
   }
-  m_filehandle->closeData();
 
   return true;
 }
