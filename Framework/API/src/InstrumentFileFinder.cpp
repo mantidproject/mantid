@@ -87,7 +87,8 @@ std::string InstrumentFileFinder::getInstrumentFilename(const std::string &instr
   const std::string instrument(Kernel::ConfigService::Instance().getInstrument(instrumentName).name());
 
   // Get the instrument directories for instrument file search
-  const std::vector<std::string> &directoryNames = Kernel::ConfigService::Instance().getInstrumentDirectories();
+  const std::vector<std::filesystem::path> &directoryNames =
+      Kernel::ConfigService::Instance().getInstrumentDirectories();
 
   // matching files sorted with newest files coming first
   const std::vector<std::string> matchingFiles =
@@ -120,7 +121,7 @@ std::string InstrumentFileFinder::getParameterPath(const std::string &instName, 
   }
 
   const Kernel::ConfigServiceImpl &configService = Kernel::ConfigService::Instance();
-  const std::vector<std::string> directoryNames = configService.getInstrumentDirectories();
+  const std::vector<std::filesystem::path> directoryNames = configService.getInstrumentDirectories();
 
   for (const auto &dirName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
@@ -136,7 +137,7 @@ std::string InstrumentFileFinder::getParameterPath(const std::string &instName, 
   return "";
 }
 
-std::string InstrumentFileFinder::lookupIPF(const std::string &dir, std::string filename) {
+std::string InstrumentFileFinder::lookupIPF(const std::filesystem::path &dir, std::string filename) {
   const std::string ext = ".xml";
   // Remove .xml for example if abc.xml was passed
   boost::algorithm::ierase_all(filename, ext);
@@ -186,10 +187,10 @@ std::string InstrumentFileFinder::lookupIPF(const std::string &dir, std::string 
  * this date
  * @return list of absolute paths for each valid file
  */
-std::vector<std::string> InstrumentFileFinder::getResourceFilenames(const std::string &prefix,
-                                                                    const std::vector<std::string> &fileFormats,
-                                                                    const std::vector<std::string> &directoryNames,
-                                                                    const std::string &date) {
+std::vector<std::string>
+InstrumentFileFinder::getResourceFilenames(const std::string &prefix, const std::vector<std::string> &fileFormats,
+                                           const std::vector<std::filesystem::path> &directoryNames,
+                                           const std::string &date) {
 
   if (date.empty()) {
     // Just use the current date

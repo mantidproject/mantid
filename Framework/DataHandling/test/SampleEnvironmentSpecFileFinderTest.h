@@ -10,8 +10,8 @@
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/File.h>
-#include <Poco/Path.h>
 
+#include <filesystem>
 #include <fstream>
 #include <vector>
 
@@ -27,11 +27,12 @@ public:
 
   SampleEnvironmentSpecFileFinderTest() {
     // Setup a temporary directory structure for testing
-    Poco::Path testDirec(Poco::Path::temp(), "SampleEnvironmentSpecFileFinderTest");
-    testDirec.makeDirectory();
-    m_testRoot = testDirec.toString();
-    testDirec.append(m_facilityName).append(m_instName);
-    Poco::File(testDirec).createDirectories();
+    std::filesystem::path testDirec = std::filesystem::temp_directory_path() / "SampleEnvironmentSpecFileFinderTest";
+    std::filesystem::create_directory(testDirec);
+    m_testRoot = testDirec;
+    testDirec /= m_facilityName;
+    testDirec /= m_instName;
+    std::filesystem::create_directory(testDirec);
 
     // Write test files
     const std::string xml = "<environmentspec>"
@@ -57,12 +58,12 @@ public:
                             "  </containers>"
                             " </components>"
                             "</environmentspec>";
-    Poco::File envFile(Poco::Path(testDirec, m_envName + ".xml"));
+    Poco::File envFile(testDirec / (m_envName + ".xml"));
     std::ofstream goodStream(envFile.path(), std::ios_base::out);
     goodStream << xml;
     goodStream.close();
     // Bad file
-    envFile = Poco::Path(testDirec, m_badName + ".xml");
+    envFile = testDirec / (m_badName + ".xml");
     std::ofstream badStream(envFile.path(), std::ios_base::out);
     const std::string wrongContent = "<garbage>";
     badStream << wrongContent;
@@ -80,7 +81,7 @@ public:
   // Success tests
   //----------------------------------------------------------------------------
   void test_Finder_Returns_Correct_Spec_If_Exists() {
-    SampleEnvironmentSpecFileFinder finder(std::vector<std::string>(1, m_testRoot));
+    SampleEnvironmentSpecFileFinder finder(std::vector<std::filesystem::path>(1, m_testRoot));
 
     SampleEnvironmentSpec_uptr spec;
     TS_ASSERT_THROWS_NOTHING(spec = finder.find(m_facilityName, m_instName, m_envName));
@@ -94,32 +95,32 @@ public:
   // Failure tests
   //---------------------------------------------------------------------------
   void test_Finder_Throws_If_Empty_Directory_List_Given() {
-    std::vector<std::string> empty;
+    std::vector<std::filesystem::path> empty;
     TS_ASSERT_THROWS(SampleEnvironmentSpecFileFinder finder(empty), const std::invalid_argument &);
   }
 
   void test_Finder_Throws_If_Facility_Correct_Instrument_Incorrect() {
-    SampleEnvironmentSpecFileFinder finder(std::vector<std::string>(1, m_testRoot));
+    SampleEnvironmentSpecFileFinder finder(std::vector<std::filesystem::path>(1, m_testRoot));
     TS_ASSERT_THROWS(finder.find(m_facilityName, "unknown", m_envName), const std::runtime_error &);
   }
 
   void test_Finder_Throws_If_Facility_Incorrect_Instrument_Correct() {
-    SampleEnvironmentSpecFileFinder finder(std::vector<std::string>(1, m_testRoot));
+    SampleEnvironmentSpecFileFinder finder(std::vector<std::filesystem::path>(1, m_testRoot));
     TS_ASSERT_THROWS(finder.find("unknown", m_instName, m_envName), const std::runtime_error &);
   }
 
   void test_Finder_Throws_If_Facility_Instrument_Correct_Bad_Environment() {
-    SampleEnvironmentSpecFileFinder finder(std::vector<std::string>(1, m_testRoot));
+    SampleEnvironmentSpecFileFinder finder(std::vector<std::filesystem::path>(1, m_testRoot));
     TS_ASSERT_THROWS(finder.find(m_facilityName, m_instName, "unknown"), const std::runtime_error &);
   }
 
   void test_Finder_Throws_If_Filename_Found_But_Content_Invalid() {
-    SampleEnvironmentSpecFileFinder finder(std::vector<std::string>(1, m_testRoot));
+    SampleEnvironmentSpecFileFinder finder(std::vector<std::filesystem::path>(1, m_testRoot));
     TS_ASSERT_THROWS(finder.find(m_facilityName, m_instName, m_badName), const std::runtime_error &);
   }
 
 private:
-  std::string m_testRoot;
+  std::filesystem::path m_testRoot;
   const std::string m_facilityName = "TestingFacility";
   const std::string m_instName = "TestingInst";
   const std::string m_envName = "TestingEnv";

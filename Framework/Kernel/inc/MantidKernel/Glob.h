@@ -11,8 +11,8 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include <Poco/Glob.h>
-#include <Poco/Path.h>
 
+#include <filesystem>
 #include <set>
 #include <string>
 
@@ -28,7 +28,7 @@ namespace Kernel {
 class MANTID_KERNEL_DLL Glob : public Poco::Glob {
 public:
   /// Creates a set of files that match the given pathPattern.
-  static void glob(const Poco::Path &pathPattern, std::set<std::string> &files, int options = 0);
+  static void glob(const std::filesystem::path &pathPattern, std::set<std::string> &files, int options = 0);
 };
 
 } // namespace Kernel

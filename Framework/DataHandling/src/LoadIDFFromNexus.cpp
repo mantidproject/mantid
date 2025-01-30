@@ -139,16 +139,15 @@ void LoadIDFFromNexus::exec() {
  */
 std::string LoadIDFFromNexus::getParameterCorrectionFile(const std::string &instName) {
 
-  std::vector<std::string> directoryNames = ConfigService::Instance().getInstrumentDirectories();
+  std::vector<std::filesystem::path> directoryNames = ConfigService::Instance().getInstrumentDirectories();
   for (auto &directoryName : directoryNames) {
     // This will iterate around the directories from user ->etc ->install, and
     // find the first appropriate file
-    Poco::Path iPath(directoryName,
-                     "embedded_instrument_corrections"); // Go to correction file subfolder
+    std::filesystem::path iPath(directoryName / "embedded_instrument_corrections"); // Go to correction file subfolder
     // First see if the directory exists
     Poco::File ipDir(iPath);
     if (ipDir.exists() && ipDir.isDirectory()) {
-      iPath.append(instName + "_Parameter_Corrections.xml"); // Append file name to pathname
+      iPath /= instName + "_Parameter_Corrections.xml"; // Append file name to pathname
       Poco::File ipFile(iPath);
       if (ipFile.exists() && ipFile.isFile()) {
         return ipFile.path(); // Return first found
@@ -256,16 +255,16 @@ void LoadIDFFromNexus::LoadParameters(::NeXus::File *nxfile, const MatrixWorkspa
   if (parameterString.empty()) {
     // No parameters have been found in Nexus file, so we look for them in a
     // parameter file.
-    std::vector<std::string> directoryNames = ConfigService::Instance().getInstrumentDirectories();
+    std::vector<std::filesystem::path> directoryNames = ConfigService::Instance().getInstrumentDirectories();
     const std::string instrumentName = localWorkspace->getInstrument()->getName();
     for (const auto &directoryName : directoryNames) {
       // This will iterate around the directories from user ->etc ->install, and
       // find the first appropriate file
-      const std::string paramFile = directoryName + instrumentName + "_Parameters.xml";
+      const std::filesystem::path paramFile = directoryName / instrumentName / "_Parameters.xml";
 
       // Attempt to load specified file, if successful, use file and stop
       // search.
-      if (loadParameterFile(paramFile, localWorkspace))
+      if (loadParameterFile(paramFile.string(), localWorkspace))
         break;
     }
   } else { // We do have parameters from the Nexus file

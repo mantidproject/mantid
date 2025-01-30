@@ -16,6 +16,8 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
+#include <filesystem>
+
 using Mantid::Algorithms::ClearCache;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -163,7 +165,7 @@ public:
     TS_ASSERT_EQUALS(filesRemoved, 0);
   }
 
-  std::string m_localInstDir;
-  std::vector<std::string> m_originalInstDir;
+  std::filesystem::path m_localInstDir;
+  std::vector<std::filesystem::path> m_originalInstDir;
   std::vector<Poco::File> m_directoriesToRemove;
 };

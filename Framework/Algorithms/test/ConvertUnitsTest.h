@@ -25,6 +25,8 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 
+#include <filesystem>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -69,7 +71,7 @@ void setup_WS(std::string &inputSpace) {
   Mantid::DataHandling::LoadInstrument loader;
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
-  const std::string inputFile = ConfigService::Instance().getInstrumentDirectory() + "HET_Definition_old.xml";
+  const std::filesystem::path inputFile = ConfigService::Instance().getInstrumentDirectory() / "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));
@@ -103,7 +105,7 @@ void setup_Points_WS(std::string &inputSpace) {
   Mantid::DataHandling::LoadInstrument loader;
   loader.initialize();
   // Path to test input file assumes Test directory checked out from SVN
-  const std::string inputFile = ConfigService::Instance().getInstrumentDirectory() + "HET_Definition_old.xml";
+  const std::filesystem::path inputFile = ConfigService::Instance().getInstrumentDirectory() / "HET_Definition_old.xml";
   loader.setPropertyValue("Filename", inputFile);
   loader.setPropertyValue("Workspace", inputSpace);
   loader.setProperty("RewriteSpectraMap", Mantid::Kernel::OptionalBool(false));

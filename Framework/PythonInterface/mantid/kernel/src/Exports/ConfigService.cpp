@@ -65,6 +65,8 @@ std::string getStringUsingCacheElseDefault(ConfigServiceImpl const *const self, 
     return defaultValue;
 }
 
+std::string getPropertiesDir(ConfigServiceImpl const *const self) { return self->getPropertiesDir().string(); }
+
 GNU_DIAG_OFF("unused-local-typedef")
 // Ignore -Wconversion warnings coming from boost::python
 // Seen with GCC 7.1.1 and Boost 1.63.0
@@ -93,7 +95,7 @@ void export_ConfigService() {
            "Returns the path to the system wide properties file.")
       .def("getUserFilename", &ConfigServiceImpl::getUserFilename, arg("self"),
            "Returns the path to the user properties file")
-      .def("getPropertiesDir", &ConfigServiceImpl::getPropertiesDir, arg("self"),
+      .def("getPropertiesDir", &getPropertiesDir, arg("self"),
            "Returns the directory containing the Mantid.properties file.")
       .def("getUserPropertiesDir", &ConfigServiceImpl::getUserPropertiesDir, arg("self"),
            "Returns the directory to use to write out Mantid information")

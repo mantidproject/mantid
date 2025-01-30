@@ -18,13 +18,14 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Unit.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/lexical_cast.hpp>
 #include <cxxtest/TestSuite.h>
+
+#include <filesystem>
+#include <fstream>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -49,13 +50,11 @@ public:
   /// </summary>
   void testAlternateDataStream() {
 #ifdef _WIN32
-    Poco::Path rawFilePath("./fakeRawFile.raw");
-    Poco::File rawFile(rawFilePath);
-
-    std::ofstream file(rawFile.path());
+    std::filesystem::path rawFilePath("./fakeRawFile.raw");
+    std::ofstream file(rawFilePath);
     file << "data goes here";
 
-    std::string adsFileName = rawFile.path() + ":checksum";
+    std::string adsFileName = rawFilePath + ":checksum";
     std::ofstream adsFile(adsFileName);
     adsFile << "ad0bc56c4c556fa368565000f01e77f7 *fakeRawFile.log" << std::endl;
     adsFile << "d5ace6dc7ac6c4365d48ee1f2906c6f4 *fakeRawFile.nxs" << std::endl;
@@ -70,16 +69,16 @@ public:
 
     // Create the log files, otherwise the searchForLogFiles function won't include them in the
     // list of log files.
-    Poco::File logFile("./fakeRawFile.log");
-    logFile.createFile();
-    Poco::File icpDebugFile("./fakeRawFile_ICPdebug.txt");
-    icpDebugFile.createFile();
-    Poco::File icpEventFile("./fakeRawFile_ICPevent.txt");
-    icpEventFile.createFile();
-    Poco::File icpStatusFile("./fakeRawFile_ICPstatus.txt");
-    icpStatusFile.createFile();
-    Poco::File statusFile("./fakeRawFile_Status.txt");
-    statusFile.createFile();
+    std::filesystem::path logFilePath("./fakeRawFile.log");
+    createFile(logFilePath);
+    std::filesystem::path icpDebugFilePath("./fakeRawFile_ICPdebug.txt");
+    createFile(icpDebugFilePath);
+    std::filesystem::path icpEventFilePath("./fakeRawFile_ICPevent.txt");
+    createFile(icpEventFilePath);
+    std::filesystem::path icpStatusFilePath("./fakeRawFile_ICPstatus.txt");
+    createFile(icpStatusFilePath);
+    std::filesystem::path statusFilePath("./fakeRawFile_Status.txt");
+    createFile(statusFilePath);
 
     std::list<std::string> logFiles = LoadRawHelper::searchForLogFiles(rawFilePath);
 
@@ -91,12 +90,12 @@ public:
     TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_ICPstatus.txt") != logFiles.end());
     TS_ASSERT(std::find(logFiles.begin(), logFiles.end(), "fakeRawFile_Status.txt") != logFiles.end());
 
-    rawFile.remove();
-    logFile.remove();
-    icpDebugFile.remove();
-    icpEventFile.remove();
-    icpStatusFile.remove();
-    statusFile.remove();
+    std::filesystem::remove(rawFilePath);
+    std::filesystem::remove(logFilePath);
+    std::filesystem::remove(icpDebugFilePath);
+    std::filesystem::remove(icpEventFilePath);
+    std::filesystem::remove(icpStatusFilePath);
+    std::filesystem::remove(statusFilePath);
 #endif
   }
 
@@ -105,7 +104,7 @@ public:
   /// </summary>
   void testLogFileSearch() {
     std::string rawFileName = FileFinder::Instance().getFullPath("NIMROD00001097.raw");
-    Poco::Path rawFilePath(rawFileName);
+    std::filesystem::path rawFilePath(rawFileName);
 
     std::list<std::string> logFiles = LoadRawHelper::searchForLogFiles(rawFilePath);
 
@@ -1167,6 +1166,11 @@ private:
       return "Different numbers of logs";
     }
     return "";
+  }
+
+  void createFile(const std::filesystem::path &filePath) {
+    std::ofstream file(filePath);
+    file.close();
   }
 
   LoadRaw3 loader, loader2, loader3;
