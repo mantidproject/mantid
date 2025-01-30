@@ -36,7 +36,8 @@ using namespace DataObjects;
 const std::string SaveNXTomo::NXTOMO_VER = "2.0";
 
 SaveNXTomo::SaveNXTomo()
-    : API::Algorithm(), m_includeError(false), m_overwriteFile(false), m_spectraCount(0), m_filename("") {}
+    : API::Algorithm(), m_includeError(false), m_overwriteFile(false), m_spectraCount(0), m_filename(""),
+      m_nxFile(nullptr) {}
 
 /**
  * Initialise the algorithm
@@ -142,160 +143,145 @@ void SaveNXTomo::processAll() {
   m_slabStart.emplace_back(0);
   m_slabStart.emplace_back(0);
 
-  ::NeXus::File nxFile = setupFile();
+  setupFile();
 
   // Create a progress reporting object
   Progress progress(this, 0.0, 1.0, m_workspaces.size());
 
-  for (auto &workspace : m_workspaces) {
-    writeSingleWorkspace(workspace, nxFile);
+  for (auto const &workspace : m_workspaces) {
+    writeSingleWorkspace(workspace);
     progress.report();
   }
 
-  nxFile.close();
+  m_nxFile->close();
 }
 
 /**
  * Creates the format for the output file if it doesn't exist
- * @returns the structured nexus file to write the data to
  *
  * @throw runtime_error Thrown if nexus file cannot be opened or created
  */
-::NeXus::File SaveNXTomo::setupFile() {
-  // Try and open the file, if it doesn't exist, create it.
-  NXhandle fileHandle;
-  NXstatus status = NXopen(this->m_filename.c_str(), NXACC_RDWR, &fileHandle);
-
-  if (status != NX_ERROR && !m_overwriteFile) {
-    // Appending to an existing file, return reference to the file
-    ::NeXus::File nxFile(fileHandle);
-    return nxFile;
+void SaveNXTomo::setupFile() {
+  // if this pointer already points to a file, make sure it is closed
+  if (m_nxFile) {
+    m_nxFile->close();
+    m_nxFile = nullptr;
   }
 
-  // Either overwriting the file or creating a new one now
-  if (status != NX_ERROR) {
-    ::NeXus::File f(fileHandle);
-    f.close();
+  // if we can overwrite, try to open the file
+  if (!m_overwriteFile) {
+    try {
+      m_nxFile = std::make_unique<::NeXus::File>(m_filename, NXACC_RDWR);
+      return;
+    } catch (NeXus::Exception &) {
+    }
   }
 
-  // If not overwriting, ensure it has a .nxs extension
-  if ((!m_overwriteFile || status == NX_ERROR) && !this->m_filename.ends_with(".nxs"))
-    m_filename = m_filename + ".nxs";
-
-  status = NXopen(this->m_filename.c_str(), NXACC_CREATE5, &fileHandle);
-
-  if (status == NX_ERROR)
-    throw std::runtime_error("Unable to open or create nexus file.");
-
-  // *********************************
-  // Now genererate file and structure
-
-  ::NeXus::File nxFile(fileHandle);
-
+  // If not overwriting, or no existing file found above, create new file
+  if (!m_nxFile) {
+    m_nxFile = std::make_unique<::NeXus::File>(m_filename, NXACC_CREATE5);
+  }
   // Make the top level entry (and open it)
-  nxFile.makeGroup("entry1", "NXentry", true);
+  m_nxFile->makeGroup("entry1", "NXentry", true);
 
   // Make an entry to store log values from the original files.
-  nxFile.makeGroup("log_info", "NXsubentry", false);
+  m_nxFile->makeGroup("log_info", "NXsubentry", false);
 
   // Make a sub-group for the entry to work with DAWN software (and open it)
-  nxFile.makeGroup("tomo_entry", "NXsubentry", true);
+  m_nxFile->makeGroup("tomo_entry", "NXsubentry", true);
 
   // Title
-  nxFile.writeData("title", this->m_filename);
+  m_nxFile->writeData("title", this->m_filename);
 
   // Definition name and version
-  nxFile.writeData("definition", "NXtomo");
-  nxFile.openData("definition");
-  nxFile.putAttr("version", NXTOMO_VER);
-  nxFile.closeData();
+  m_nxFile->writeData("definition", "NXtomo");
+  m_nxFile->openData("definition");
+  m_nxFile->putAttr("version", NXTOMO_VER);
+  m_nxFile->closeData();
 
   // Originating program name and version
-  nxFile.writeData("program_name", "mantid");
-  nxFile.openData("program_name");
-  nxFile.putAttr("version", Mantid::Kernel::MantidVersion::version());
-  nxFile.closeData();
+  m_nxFile->writeData("program_name", "mantid");
+  m_nxFile->openData("program_name");
+  m_nxFile->putAttr("version", Mantid::Kernel::MantidVersion::version());
+  m_nxFile->closeData();
 
   // ******************************************
   // NXinstrument
-  nxFile.makeGroup("instrument", "NXinstrument", true);
+  m_nxFile->makeGroup("instrument", "NXinstrument", true);
   // Write the instrument name | could add short_name attribute to name
-  nxFile.writeData("name", m_workspaces[0]->getInstrument()->getName());
+  m_nxFile->writeData("name", m_workspaces[0]->getInstrument()->getName());
 
   // detector group - diamond example file contains
   // {data,distance,image_key,x_pixel_size,y_pixel_size}
-  nxFile.makeGroup("detector", "NXdetector", true);
+  m_nxFile->makeGroup("detector", "NXdetector", true);
 
   std::vector<int64_t> infDim;
   infDim.emplace_back(NX_UNLIMITED);
 
-  nxFile.makeData("image_key", ::NeXus::FLOAT64, infDim, false);
-  nxFile.closeGroup(); // detector
+  m_nxFile->makeData("image_key", ::NeXus::FLOAT64, infDim, false);
+  m_nxFile->closeGroup(); // detector
 
   // source group // from diamond file contains {current,energy,name,probe,type}
   // - probe = [neutron | x-ray | electron]
 
-  nxFile.closeGroup(); // NXinstrument
+  m_nxFile->closeGroup(); // NXinstrument
 
   // ******************************************
   // NXsample
-  nxFile.makeGroup("sample", "NXsample", true);
+  m_nxFile->makeGroup("sample", "NXsample", true);
 
-  nxFile.makeData("rotation_angle", ::NeXus::FLOAT64, infDim, true);
+  m_nxFile->makeData("rotation_angle", ::NeXus::FLOAT64, infDim, true);
   // Create a link object for rotation_angle to use later
-  NXlink rotationLink = nxFile.getDataID();
-  nxFile.closeData();
-  nxFile.closeGroup(); // NXsample
+  NXlink rotationLink = m_nxFile->getDataID();
+  m_nxFile->closeData();
+  m_nxFile->closeGroup(); // NXsample
 
   // ******************************************
   // Make the NXmonitor group - Holds base beam intensity for each image
 
-  nxFile.makeGroup("control", "NXmonitor", true);
-  nxFile.makeData("data", ::NeXus::FLOAT64, infDim, false);
-  nxFile.closeGroup(); // NXmonitor
+  m_nxFile->makeGroup("control", "NXmonitor", true);
+  m_nxFile->makeData("data", ::NeXus::FLOAT64, infDim, false);
+  m_nxFile->closeGroup(); // NXmonitor
 
-  nxFile.makeGroup("data", "NXdata", true);
-  nxFile.putAttr<int>("NumFiles", 0);
+  m_nxFile->makeGroup("data", "NXdata", true);
+  m_nxFile->putAttr<int>("NumFiles", 0);
 
-  nxFile.makeLink(rotationLink);
+  m_nxFile->makeLink(rotationLink);
 
-  nxFile.makeData("data", ::NeXus::FLOAT64, m_infDimensions, true);
+  m_nxFile->makeData("data", ::NeXus::FLOAT64, m_infDimensions, true);
   // Create a link object for the data
-  NXlink dataLink = nxFile.getDataID();
-  nxFile.closeData();
+  NXlink dataLink = m_nxFile->getDataID();
+  m_nxFile->closeData();
 
   if (m_includeError)
-    nxFile.makeData("error", ::NeXus::FLOAT64, m_infDimensions, false);
+    m_nxFile->makeData("error", ::NeXus::FLOAT64, m_infDimensions, false);
 
-  nxFile.closeGroup(); // Close Data group
+  m_nxFile->closeGroup(); // Close Data group
 
   // Put a link to the data in instrument/detector
-  nxFile.openGroup("instrument", "NXinstrument");
-  nxFile.openGroup("detector", "NXdetector");
-  nxFile.makeLink(dataLink);
-  nxFile.closeGroup();
-  nxFile.closeGroup();
+  m_nxFile->openGroup("instrument", "NXinstrument");
+  m_nxFile->openGroup("detector", "NXdetector");
+  m_nxFile->makeLink(dataLink);
+  m_nxFile->closeGroup();
+  m_nxFile->closeGroup();
 
-  nxFile.closeGroup(); // tomo_entry sub-group
-  nxFile.closeGroup(); // Top level NXentry
-
-  return nxFile;
+  m_nxFile->closeGroup(); // tomo_entry sub-group
+  m_nxFile->closeGroup(); // Top level NXentry
 }
 
 /**
  * Writes a single workspace into the file
  * @param workspace the workspace to get data from
- * @param nxFile the nexus file to save data into
  */
-void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace, ::NeXus::File &nxFile) {
+void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace) {
   try {
-    nxFile.openPath("/entry1/tomo_entry/data");
+    m_nxFile->openPath("/entry1/tomo_entry/data");
   } catch (...) {
     throw std::runtime_error("Unable to create a valid NXTomo file");
   }
 
   int numFiles = 0;
-  nxFile.getAttr<int>("NumFiles", numFiles);
+  m_nxFile->getAttr<int>("NumFiles", numFiles);
 
   // Change slab start to after last data position
   m_slabStart[0] = numFiles;
@@ -314,13 +300,13 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace, ::NeXus
     // Invalid Cast is handled below
   }
 
-  nxFile.openData("rotation_angle");
-  nxFile.putSlab(rotValue, numFiles, 1);
-  nxFile.closeData();
+  m_nxFile->openData("rotation_angle");
+  m_nxFile->putSlab(rotValue, numFiles, 1);
+  m_nxFile->closeData();
 
   // Copy data out, remake data with dimension of old size plus new elements.
   // Insert previous data.
-  nxFile.openData("data");
+  m_nxFile->openData("data");
 
   auto dataArr = new double[m_spectraCount];
 
@@ -337,26 +323,25 @@ void SaveNXTomo::writeSingleWorkspace(const Workspace2D_sptr &workspace, ::NeXus
     }
   }
 
-  nxFile.putSlab(dataArr, m_slabStart, m_slabSize);
+  m_nxFile->putSlab(dataArr, m_slabStart, m_slabSize);
 
-  nxFile.closeData();
+  m_nxFile->closeData();
 
-  nxFile.putAttr("NumFiles", numFiles + 1);
+  m_nxFile->putAttr("NumFiles", numFiles + 1);
 
-  nxFile.closeGroup();
+  m_nxFile->closeGroup();
 
   // Write additional log information, intensity and image key
-  writeLogValues(workspace, nxFile, numFiles);
-  writeIntensityValue(workspace, nxFile, numFiles);
-  writeImageKeyValue(workspace, nxFile, numFiles);
+  writeLogValues(workspace, numFiles);
+  writeIntensityValue(workspace, numFiles);
+  writeImageKeyValue(workspace, numFiles);
   delete[] dataArr;
 }
 
-void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile,
-                                    int thisFileInd) {
+void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd) {
   // Add ImageKey to instrument/image_key if present, use 0 if not
   try {
-    nxFile.openPath("/entry1/tomo_entry/instrument/detector");
+    m_nxFile->openPath("/entry1/tomo_entry/instrument/detector");
   } catch (...) {
     throw std::runtime_error("Unable to create a valid NXTomo file");
   }
@@ -374,20 +359,19 @@ void SaveNXTomo::writeImageKeyValue(const DataObjects::Workspace2D_sptr &workspa
     // Invalid Cast is handled below
   }
 
-  nxFile.openData("image_key");
-  nxFile.putSlab(keyValue, thisFileInd, 1);
-  nxFile.closeData();
+  m_nxFile->openData("image_key");
+  m_nxFile->putSlab(keyValue, thisFileInd, 1);
+  m_nxFile->closeData();
 
-  nxFile.closeGroup();
+  m_nxFile->closeGroup();
 }
 
-void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile,
-                                int thisFileInd) {
+void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd) {
   // Add Log information (minus special values - Rotation, ImageKey, Intensity)
   // Unable to add multidimensional string data, storing strings as
   // multidimensional data set of uint8 values
   try {
-    nxFile.openPath("/entry1/log_info");
+    m_nxFile->openPath("/entry1/log_info");
   } catch (...) {
     throw std::runtime_error("Unable to create a valid NXTomo file");
   }
@@ -400,13 +384,13 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
     if (prop->name() != "ImageKey" && prop->name() != "Rotation" && prop->name() != "Intensity" &&
         prop->name() != "Axis1" && prop->name() != "Axis2") {
       try {
-        nxFile.openData(prop->name());
+        m_nxFile->openData(prop->name());
       } catch (::NeXus::Exception &) {
         // Create the data entry if it doesn't exist yet, and open.
         std::vector<int64_t> infDim;
         infDim.emplace_back(NX_UNLIMITED);
         infDim.emplace_back(NX_UNLIMITED);
-        nxFile.makeData(prop->name(), ::NeXus::UINT8, infDim, true);
+        m_nxFile->makeData(prop->name(), ::NeXus::UINT8, infDim, true);
       }
       auto valueAsStr = prop->value();
       size_t strSize = valueAsStr.length();
@@ -417,18 +401,17 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
       std::vector<int64_t> start = {thisFileInd, 0};
       std::vector<int64_t> size = {1, static_cast<int64_t>(strSize)};
       // single item
-      nxFile.putSlab(valueAsStr.data(), start, size);
+      m_nxFile->putSlab(valueAsStr.data(), start, size);
 
-      nxFile.closeData();
+      m_nxFile->closeData();
     }
   }
 }
 
-void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace, ::NeXus::File &nxFile,
-                                     int thisFileInd) {
+void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr &workspace, int thisFileInd) {
   // Add Intensity to control if present, use 1 if not
   try {
-    nxFile.openPath("/entry1/tomo_entry/control");
+    m_nxFile->openPath("/entry1/tomo_entry/control");
   } catch (...) {
     throw std::runtime_error("Unable to create a valid NXTomo file");
   }
@@ -445,9 +428,9 @@ void SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr &worksp
     // Invalid Cast is handled below
   }
 
-  nxFile.openData("data");
-  nxFile.putSlab(intensityValue, thisFileInd, 1);
-  nxFile.closeData();
+  m_nxFile->openData("data");
+  m_nxFile->putSlab(intensityValue, thisFileInd, 1);
+  m_nxFile->closeData();
 }
 
 } // namespace Mantid::DataHandling
