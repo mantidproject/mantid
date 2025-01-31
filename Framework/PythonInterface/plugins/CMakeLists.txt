@@ -19,6 +19,7 @@ set(PYTHON_PLUGINS
     algorithms/BinWidthAtX.py
     algorithms/CalculateEfficiencyCorrection.py
     algorithms/CalculateFlux.py
+    algorithms/CalculateISISPolarizationEfficiencies.py
     algorithms/CalculateSampleTransmission.py
     algorithms/CheckForSampleLogs.py
     algorithms/CleanFileCache.py
