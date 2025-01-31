@@ -501,7 +501,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   const std::string filename{getPropertyValue("Filename")};
   NXhandle nxfileID;
   NXstatus stat = NXopen(filename.c_str(), NXACC_READ, &nxfileID);
-  if (stat == NX_ERROR)
+  if (stat == NXstatus::NX_ERROR)
     throw Kernel::Exception::FileError("Unable to open File:", filename);
   API::Run &runDetails = m_localWorkspace->mutableRun();
   LoadHelper::addNexusFieldsToWsRun(nxfileID, runDetails);

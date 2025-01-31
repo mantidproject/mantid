@@ -218,7 +218,7 @@ void SaveNXTomo::setupFile() {
   std::vector<int64_t> infDim;
   infDim.emplace_back(NX_UNLIMITED);
 
-  m_nxFile->makeData("image_key", ::NeXus::FLOAT64, infDim, false);
+  m_nxFile->makeData("image_key", NXnumtype::FLOAT64, infDim, false);
   m_nxFile->closeGroup(); // detector
 
   // source group // from diamond file contains {current,energy,name,probe,type}
@@ -230,7 +230,7 @@ void SaveNXTomo::setupFile() {
   // NXsample
   m_nxFile->makeGroup("sample", "NXsample", true);
 
-  m_nxFile->makeData("rotation_angle", ::NeXus::FLOAT64, infDim, true);
+  m_nxFile->makeData("rotation_angle", NXnumtype::FLOAT64, infDim, true);
   // Create a link object for rotation_angle to use later
   NXlink rotationLink = m_nxFile->getDataID();
   m_nxFile->closeData();
@@ -240,7 +240,7 @@ void SaveNXTomo::setupFile() {
   // Make the NXmonitor group - Holds base beam intensity for each image
 
   m_nxFile->makeGroup("control", "NXmonitor", true);
-  m_nxFile->makeData("data", ::NeXus::FLOAT64, infDim, false);
+  m_nxFile->makeData("data", NXnumtype::FLOAT64, infDim, false);
   m_nxFile->closeGroup(); // NXmonitor
 
   m_nxFile->makeGroup("data", "NXdata", true);
@@ -248,13 +248,13 @@ void SaveNXTomo::setupFile() {
 
   m_nxFile->makeLink(rotationLink);
 
-  m_nxFile->makeData("data", ::NeXus::FLOAT64, m_infDimensions, true);
+  m_nxFile->makeData("data", NXnumtype::FLOAT64, m_infDimensions, true);
   // Create a link object for the data
   NXlink dataLink = m_nxFile->getDataID();
   m_nxFile->closeData();
 
   if (m_includeError)
-    m_nxFile->makeData("error", ::NeXus::FLOAT64, m_infDimensions, false);
+    m_nxFile->makeData("error", NXnumtype::FLOAT64, m_infDimensions, false);
 
   m_nxFile->closeGroup(); // Close Data group
 
@@ -390,7 +390,7 @@ void SaveNXTomo::writeLogValues(const DataObjects::Workspace2D_sptr &workspace, 
         std::vector<int64_t> infDim;
         infDim.emplace_back(NX_UNLIMITED);
         infDim.emplace_back(NX_UNLIMITED);
-        m_nxFile->makeData(prop->name(), ::NeXus::UINT8, infDim, true);
+        m_nxFile->makeData(prop->name(), NXnumtype::UINT8, infDim, true);
       }
       auto valueAsStr = prop->value();
       size_t strSize = valueAsStr.length();

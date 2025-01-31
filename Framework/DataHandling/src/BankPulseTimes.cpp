@@ -79,9 +79,9 @@ BankPulseTimes::BankPulseTimes(::NeXus::File &file, const std::vector<int> &peri
 
   // Nexus only requires event_time_zero to be a NXNumber, we support two
   // possilites
-  if (heldTimeZeroType == ::NeXus::FLOAT64) {
+  if (heldTimeZeroType == NXnumtype::FLOAT64) {
     this->readData<double>(file, numValues, start);
-  } else if (heldTimeZeroType == ::NeXus::UINT64) {
+  } else if (heldTimeZeroType == NXnumtype::UINT64) {
     this->readData<uint64_t>(file, numValues, start);
   } else {
     throw std::invalid_argument("Unsupported type for event_time_zero");

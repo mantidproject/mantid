@@ -88,15 +88,15 @@ private:
   int add_path(const char *path);
   int remove_path(const char *path);
 
-  int WriteGroup(int is_definition);
-  int WriteAttributes(int is_definition);
-  int copy_file(const char *inFile, int nx_read_access, const char *outFile, int nx_write_access);
+  NXstatus WriteGroup(int is_definition);
+  NXstatus WriteAttributes(int is_definition);
+  NXstatus copy_file(const char *inFile, int nx_read_access, const char *outFile, int nx_write_access);
 
-  int WriteOutDataOrErrors(const Geometry::RectangularDetector_const_sptr &det, int x_pixel_slab,
-                           const char *field_name, const char *errors_field_name, bool doErrors, bool doBoth,
-                           int is_definition, const std::string &bank);
+  NXstatus WriteOutDataOrErrors(const Geometry::RectangularDetector_const_sptr &det, int x_pixel_slab,
+                                const char *field_name, const char *errors_field_name, bool doErrors, bool doBoth,
+                                int is_definition, const std::string &bank);
 
-  int WriteDataGroup(const std::string &bank, int is_definition);
+  NXstatus WriteDataGroup(const std::string &bank, int is_definition);
 
   //
   //      // For iterating through the HDF file...

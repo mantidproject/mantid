@@ -290,7 +290,7 @@ std::unique_ptr<std::vector<float>> LoadBankFromDiskTask::loadEventWeights(::NeX
   }
 
   // Check that the type is what it is supposed to be
-  if (weight_info.type == ::NeXus::FLOAT32)
+  if (weight_info.type == NXnumtype::FLOAT32)
     file.getSlab(event_weight->data(), m_loadStart, m_loadSize);
   else {
     m_loader.alg->getLogger().warning() << "Entry " << entry_name
