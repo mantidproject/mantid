@@ -428,7 +428,7 @@ void NexusFileIO::writeTableColumn(NXnumtype type, const std::string &interpret_
   auto toNexus = new NexusT[nRows];
   for (int ii = 0; ii < nRows; ii++)
     toNexus[ii] = static_cast<NexusT>(col.cell<ColumnT>(ii));
-  NXwritedata(columnName.c_str(), type, dims_array, toNexus, false);
+  writeData(columnName.c_str(), type, dims_array, toNexus, false);
   delete[] toNexus;
 
   // attributes
@@ -490,7 +490,7 @@ void NexusFileIO::writeNexusVectorColumn(const Column_const_sptr &col, const std
   }
 
   // Write data
-  NXwritedata(columnName.c_str(), nexusType, dims, data.get(), false);
+  writeData(columnName.c_str(), nexusType, dims, data.get(), false);
 
   m_filehandle->openData(columnName);
 
@@ -648,13 +648,13 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(const DataObjects::EventWo
   // Write out each field
   dims_array[0] = static_cast<int>(indices.back()); // TODO big truncation error! This is the # of events
   if (tofs)
-    NXwritedata("tof", NXnumtype::FLOAT64, dims_array, tofs, compress);
+    writeData("tof", NXnumtype::FLOAT64, dims_array, tofs, compress);
   if (pulsetimes)
-    NXwritedata("pulsetime", NXnumtype::INT64, dims_array, pulsetimes, compress);
+    writeData("pulsetime", NXnumtype::INT64, dims_array, pulsetimes, compress);
   if (weights)
-    NXwritedata("weight", NXnumtype::FLOAT32, dims_array, weights, compress);
+    writeData("weight", NXnumtype::FLOAT32, dims_array, weights, compress);
   if (errorSquareds)
-    NXwritedata("error_squared", NXnumtype::FLOAT32, dims_array, errorSquareds, compress);
+    writeData("error_squared", NXnumtype::FLOAT32, dims_array, errorSquareds, compress);
 
   // Close up the overall group
   m_filehandle->closeGroup();
@@ -663,8 +663,8 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(const DataObjects::EventWo
 
 //-------------------------------------------------------------------------------------
 /** Write out an array to the open file. */
-void NexusFileIO::NXwritedata(const char *name, NXnumtype datatype, std::vector<int> dims_array, void const *data,
-                              bool compress) const {
+void NexusFileIO::writeData(const char *name, NXnumtype datatype, std::vector<int> dims_array, void const *data,
+                            bool compress) const {
   if (compress) {
     // We'll use the same slab/buffer size as the size of the array
     m_filehandle->makeCompData(name, datatype, dims_array, m_nexuscompression, dims_array);

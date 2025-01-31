@@ -76,8 +76,8 @@ public:
                                            float const *weights, float const *errorSquareds, int64_t const *pulsetimes,
                                            bool compress) const;
 
-  void NXwritedata(const char *name, NXnumtype datatype, std::vector<int> dims_array, void const *data,
-                   bool compress = false) const;
+  void writeData(const char *name, NXnumtype datatype, std::vector<int> dims_array, void const *data,
+                 bool compress = false) const;
 
   /// write bin masking information
   bool writeNexusBinMasking(const API::MatrixWorkspace_const_sptr &ws) const;
