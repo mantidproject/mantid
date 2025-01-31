@@ -470,7 +470,7 @@ constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSS.cpp:
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveGSS.cpp:566
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXSPE.cpp:324
 constVariableReference:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNXTomo.cpp:150
-knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:575
+knownConditionTrueFalse:${CMAKE_SOURCE_DIR}/Framework/DataHandling/src/SaveNexusProcessed.cpp:572
 syntaxError:${CMAKE_SOURCE_DIR}/Framework/DataObjects/inc/MantidDataObjects/MortonIndex/CoordinateConversion.h:109
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:712
 constVariablePointer:${CMAKE_SOURCE_DIR}/Framework/DataObjects/src/EventWorkspace.cpp:738
