@@ -33,7 +33,6 @@ using namespace DataObjects;
 namespace {
 /// static logger
 Logger g_log("NexusFileIO");
-const std::string NULL_STR("NULL");
 } // namespace
 
 /// Empty default constructor

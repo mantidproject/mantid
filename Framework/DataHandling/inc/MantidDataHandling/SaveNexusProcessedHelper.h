@@ -116,7 +116,6 @@ private:
  * Write a single valued entry to the Nexus file (specialization for a string)
  * @param name :: The name of the entry
  * @param value :: The value of the entry
- * @param nxType :: The nxType of the entry
  * @param attributes :: A list of attributes 1:1 mapped to their values in the
  * <code>avalues</code> argument
  * @param avalues :: A list of attribute values in the same order as the
