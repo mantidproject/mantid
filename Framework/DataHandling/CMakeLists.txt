@@ -202,7 +202,6 @@ set(SRC_FILES
     src/SaveSampleEnvironmentAndShape.cpp
     src/SaveStl.cpp
     src/SaveTBL.cpp
-    src/SaveToSNSHistogramNexus.cpp
     src/SaveVTK.cpp
     src/ScaleInstrumentComponent.cpp
     src/SetBeam.cpp
@@ -420,7 +419,6 @@ set(INC_FILES
     inc/MantidDataHandling/SaveSampleEnvironmentAndShape.h
     inc/MantidDataHandling/SaveStl.h
     inc/MantidDataHandling/SaveTBL.h
-    inc/MantidDataHandling/SaveToSNSHistogramNexus.h
     inc/MantidDataHandling/SaveVTK.h
     inc/MantidDataHandling/ScaleInstrumentComponent.h
     inc/MantidDataHandling/SetBeam.h
@@ -623,7 +621,6 @@ set(TEST_FILES
     SaveSampleEnvironmentAndShapeTest.h
     SaveStlTest.h
     SaveTBLTest.h
-    SaveToSNSHistogramNexusTest.h
     ScaleInstrumentComponentTest.h
     SetBeamTest.h
     SetSampleMaterialTest.h
