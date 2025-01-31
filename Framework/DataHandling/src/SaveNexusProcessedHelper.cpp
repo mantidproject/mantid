@@ -214,13 +214,15 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
                                            const bool &uniformSpectra, const bool &raggedSpectra,
                                            const std::vector<int> &indices, const char *group_name,
                                            bool write2Ddata) const {
-  NXstatus status;
+  // NXstatus status;
 
   // write data entry
-  status = NXmakegroup(fileID, group_name, "NXdata");
-  if (status == NXstatus::NX_ERROR)
-    return (2);
-  NXopengroup(fileID, group_name, "NXdata");
+  try {
+    m_filehandle->makeGroup(group_name, "NXdata", true);
+  } catch (const ::NeXus::Exception &) {
+    return 2;
+  }
+
   // write workspace data
   const size_t nHist = localworkspace->getNumberHistograms();
   if (nHist < 1)
@@ -230,7 +232,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
   if (raggedSpectra)
     for (size_t i = 0; i < nSpect; i++)
       nSpectBins = std::max(nSpectBins, localworkspace->y(indices[i]).size());
-  int dims_array[2] = {static_cast<int>(nSpect), static_cast<int>(nSpectBins)};
+  std::vector<int> dims_array = {static_cast<int>(nSpect), static_cast<int>(nSpectBins)};
 
   // Set the axis labels and values
   Mantid::API::Axis *xAxis = localworkspace->getAxis(0);
@@ -261,38 +263,32 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     for (size_t i = 0; i < sAxis->length(); i++)
       axis2.emplace_back((*sAxis)(i));
 
-  int start[2] = {0, 0};
-  int asize[2] = {1, dims_array[1]};
+  std::vector<int> start = {0, 0};
+  std::vector<int> asize = {1, dims_array[1]};
 
   // -------------- Actually write the 2D data ----------------------------
   if (write2Ddata) {
     std::string name = "values";
-    NXcompmakedata(fileID, name.c_str(), NXnumtype::FLOAT64, 2, dims_array, m_nexuscompression, asize);
-    NXopendata(fileID, name.c_str());
+    m_filehandle->makeCompData(name, NXnumtype::FLOAT64, dims_array, m_nexuscompression, asize, true);
     for (size_t i = 0; i < nSpect; i++) {
-      NXputslab(fileID, localworkspace->y(indices[i]).rawData().data(), start, asize);
+      m_filehandle->putSlab(localworkspace->y(indices[i]).rawData().data(), start, asize);
       start[0]++;
     }
     if (m_progress != nullptr)
       m_progress->reportIncrement(1, "Writing data");
-    int signal = 1;
-    NXputattr(fileID, "signal", &signal, 1, NXnumtype::INT32);
+    m_filehandle->putAttr("signal", 1);
     // More properties
-    const std::string axesNames = "axis2,axis1";
-    NXputattr(fileID, "axes", axesNames.c_str(), static_cast<int>(axesNames.size()), NXnumtype::CHAR);
-    std::string yUnits = localworkspace->YUnit();
-    std::string yUnitLabel = localworkspace->YUnitLabel();
-    NXputattr(fileID, "units", yUnits.c_str(), static_cast<int>(yUnits.size()), NXnumtype::CHAR);
-    NXputattr(fileID, "unit_label", yUnitLabel.c_str(), static_cast<int>(yUnitLabel.size()), NXnumtype::CHAR);
-    NXclosedata(fileID);
+    m_filehandle->putAttr("axes", "axis2,axis1");
+    m_filehandle->putAttr("units", localworkspace->YUnit(), false);
+    m_filehandle->putAttr("unit_label", localworkspace->YUnitLabel(), false);
+    m_filehandle->closeData();
 
     // error
     name = "errors";
-    NXcompmakedata(fileID, name.c_str(), NXnumtype::FLOAT64, 2, dims_array, m_nexuscompression, asize);
-    NXopendata(fileID, name.c_str());
+    m_filehandle->makeCompData(name, NXnumtype::FLOAT64, dims_array, m_nexuscompression, asize, true);
     start[0] = 0;
     for (size_t i = 0; i < nSpect; i++) {
-      NXputslab(fileID, localworkspace->e(indices[i]).rawData().data(), start, asize);
+      m_filehandle->putSlab(localworkspace->e(indices[i]).rawData().data(), start, asize);
       start[0]++;
     }
 
@@ -303,18 +299,17 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     if (localworkspace->id() == "RebinnedOutput") {
       RebinnedOutput_const_sptr rebin_workspace = std::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
       name = "frac_area";
-      NXcompmakedata(fileID, name.c_str(), NXnumtype::FLOAT64, 2, dims_array, m_nexuscompression, asize);
-      NXopendata(fileID, name.c_str());
+      m_filehandle->makeCompData(name, NXnumtype::FLOAT64, dims_array, m_nexuscompression, asize, true);
       start[0] = 0;
       for (size_t i = 0; i < nSpect; i++) {
-        NXputslab(fileID, rebin_workspace->readF(indices[i]).data(), start, asize);
+        m_filehandle->putSlab(rebin_workspace->readF(indices[i]).data(), start, asize);
         start[0]++;
       }
 
       std::string finalized = (rebin_workspace->isFinalized()) ? "1" : "0";
-      NXputattr(fileID, "finalized", finalized.c_str(), 2, NXnumtype::CHAR);
+      m_filehandle->putAttr("finalized", finalized);
       std::string sqrdErrs = (rebin_workspace->hasSqrdErrors()) ? "1" : "0";
-      NXputattr(fileID, "sqrd_errors", sqrdErrs.c_str(), 2, NXnumtype::CHAR);
+      m_filehandle->putAttr("sqrd_errors", sqrdErrs);
 
       if (m_progress != nullptr)
         m_progress->reportIncrement(1, "Writing data");
@@ -325,18 +320,16 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
       dims_array[0] = static_cast<int>(nSpect);
       dims_array[1] = static_cast<int>(localworkspace->dx(0).size());
       std::string dxErrorName = "xerrors";
-      NXcompmakedata(fileID, dxErrorName.c_str(), NXnumtype::FLOAT64, 2, dims_array, m_nexuscompression, asize);
-      NXopendata(fileID, dxErrorName.c_str());
+      m_filehandle->makeCompData(dxErrorName, NXnumtype::FLOAT64, dims_array, m_nexuscompression, asize, true);
       start[0] = 0;
       asize[1] = dims_array[1];
       for (size_t i = 0; i < nSpect; i++) {
-
-        NXputslab(fileID, localworkspace->dx(indices[i]).rawData().data(), start, asize);
+        m_filehandle->putSlab(localworkspace->dx(indices[i]).rawData().data(), start, asize);
         start[0]++;
       }
     }
 
-    NXclosedata(fileID);
+    m_filehandle->closeData();
   }
 
   // write X data, as single array or all values if "ragged"
@@ -346,8 +339,7 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
       max_x_size = std::max(max_x_size, localworkspace->x(indices[i]).size());
     dims_array[0] = static_cast<int>(nSpect);
     dims_array[1] = static_cast<int>(max_x_size);
-    NXmakedata(fileID, "axis1", NXnumtype::FLOAT64, 2, dims_array);
-    NXopendata(fileID, "axis1");
+    m_filehandle->makeData("axis1", NXnumtype::FLOAT64, dims_array, true);
     start[0] = 0;
 
     // create vector of NaNs to fill invalid space at end of ragged array
@@ -356,90 +348,82 @@ int NexusFileIO::writeNexusProcessedData2D(const API::MatrixWorkspace_const_sptr
     for (size_t i = 0; i < nSpect; i++) {
       size_t nBins = localworkspace->x(indices[i]).size();
       asize[1] = static_cast<int>(nBins);
-      NXputslab(fileID, localworkspace->x(indices[i]).rawData().data(), start, asize);
+      m_filehandle->putSlab(localworkspace->x(indices[i]).rawData().data(), start, asize);
       if (nBins < max_x_size) {
         start[1] = asize[1];
         asize[1] = static_cast<int>(max_x_size - nBins);
-        NXputslab(fileID, nans.data(), start, asize);
+        m_filehandle->putSlab(nans.data(), start, asize);
         start[1] = 0;
       }
       start[0]++;
     }
   } else if (uniformSpectra) {
-    dims_array[0] = static_cast<int>(localworkspace->x(0).size());
-    NXmakedata(fileID, "axis1", NXnumtype::FLOAT64, 1, dims_array);
-    NXopendata(fileID, "axis1");
-    NXputdata(fileID, localworkspace->x(0).rawData().data());
+    m_filehandle->makeData("axis1", NXnumtype::FLOAT64, std::vector<int>{static_cast<int>(localworkspace->x(0).size())},
+                           true);
+    m_filehandle->putData(localworkspace->x(0).rawData().data());
 
   } else {
     dims_array[0] = static_cast<int>(nSpect);
     dims_array[1] = static_cast<int>(localworkspace->x(0).size());
-    NXmakedata(fileID, "axis1", NXnumtype::FLOAT64, 2, dims_array);
-    NXopendata(fileID, "axis1");
+    m_filehandle->makeData("axis1", NXnumtype::FLOAT64, dims_array, true);
     start[0] = 0;
     asize[1] = dims_array[1];
     for (size_t i = 0; i < nSpect; i++) {
-      NXputslab(fileID, localworkspace->x(indices[i]).rawData().data(), start, asize);
+      m_filehandle->putSlab(localworkspace->x(indices[i]).rawData().data(), start, asize);
       start[0]++;
     }
   }
 
   std::string dist = (localworkspace->isDistribution()) ? "1" : "0";
-  NXputattr(fileID, "distribution", dist.c_str(), 2, NXnumtype::CHAR);
-  NXputattr(fileID, "units", xLabel.c_str(), static_cast<int>(xLabel.size()), NXnumtype::CHAR);
+  m_filehandle->putAttr("distribution", dist);
+  m_filehandle->putAttr("units", xLabel);
 
   auto label = std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(xAxis->unit());
   if (label) {
-    NXputattr(fileID, "caption", label->caption().c_str(), static_cast<int>(label->caption().size()), NXnumtype::CHAR);
+    m_filehandle->putAttr("caption", label->caption(), false);
     auto unitLbl = label->label();
-    NXputattr(fileID, "label", unitLbl.ascii().c_str(), static_cast<int>(unitLbl.ascii().size()), NXnumtype::CHAR);
+    m_filehandle->putAttr("label", unitLbl.ascii(), false);
   }
 
-  NXclosedata(fileID);
+  m_filehandle->closeData();
 
   if (!sAxis->isText()) {
     // write axis2, maybe just spectra number
-    dims_array[0] = static_cast<int>(axis2.size());
-    NXmakedata(fileID, "axis2", NXnumtype::FLOAT64, 1, dims_array);
-    NXopendata(fileID, "axis2");
-    NXputdata(fileID, axis2.data());
-    NXputattr(fileID, "units", sLabel.c_str(), static_cast<int>(sLabel.size()), NXnumtype::CHAR);
+    m_filehandle->makeData("axis2", NXnumtype::FLOAT64, std::vector<int>{static_cast<int>(axis2.size())}, true);
+    m_filehandle->putData(axis2.data());
+    m_filehandle->putAttr("units", sLabel, false);
 
     auto unitLabel = std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(sAxis->unit());
     if (unitLabel) {
-      NXputattr(fileID, "caption", unitLabel->caption().c_str(), static_cast<int>(unitLabel->caption().size()),
-                NXnumtype::CHAR);
+      m_filehandle->putAttr("caption", unitLabel->caption(), false);
       auto unitLbl = unitLabel->label();
-      NXputattr(fileID, "label", unitLbl.ascii().c_str(), static_cast<int>(unitLbl.ascii().size()), NXnumtype::CHAR);
+      m_filehandle->putAttr("label", unitLbl.ascii(), false);
     }
 
-    NXclosedata(fileID);
+    m_filehandle->closeData();
   } else {
     std::string textAxis;
     for (size_t i = 0; i < sAxis->length(); i++) {
       textAxis += sAxis->label(i) + "\n";
     }
-    dims_array[0] = static_cast<int>(textAxis.size());
-    NXmakedata(fileID, "axis2", NXnumtype::CHAR, 1, dims_array);
-    NXopendata(fileID, "axis2");
-    NXputdata(fileID, textAxis.c_str());
-    NXputattr(fileID, "units", "TextAxis", 8, NXnumtype::CHAR);
+    m_filehandle->makeData("axis2", NXnumtype::CHAR, std::vector<int>{static_cast<int>(textAxis.size())}, true);
+    m_filehandle->putData(textAxis.c_str());
+    m_filehandle->putAttr("units", "TextAxis");
 
     auto unitLabel = std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(sAxis->unit());
     if (unitLabel) {
-      NXputattr(fileID, "caption", unitLabel->caption().c_str(), static_cast<int>(unitLabel->caption().size()),
-                NXnumtype::CHAR);
+      m_filehandle->putAttr("caption", unitLabel->caption(), false);
       auto unitLbl = unitLabel->label();
-      NXputattr(fileID, "label", unitLbl.ascii().c_str(), static_cast<int>(unitLbl.ascii().size()), NXnumtype::CHAR);
+      m_filehandle->putAttr("label", unitLbl.ascii(), false);
     }
 
-    NXclosedata(fileID);
+    m_filehandle->closeData();
   }
 
   writeNexusBinMasking(localworkspace);
 
-  status = NXclosegroup(fileID);
-  return ((status == NXstatus::NX_ERROR) ? 3 : 0);
+  m_filehandle->closeGroup();
+  return 0;
 }
 
 //-------------------------------------------------------------------------------------
@@ -672,8 +656,8 @@ int NexusFileIO::writeNexusProcessedDataEventCombined(const DataObjects::EventWo
       m_filehandle->makeData("indices", NXnumtype::INT64, dims_array);
     m_filehandle->openData("indices");
     m_filehandle->putData(indices.data());
-    m_filehandle->putAttr("units", ws->YUnit());
-    m_filehandle->putAttr("unit_label", ws->YUnitLabel());
+    m_filehandle->putAttr("units", ws->YUnit(), false);
+    m_filehandle->putAttr("unit_label", ws->YUnitLabel(), false);
     m_filehandle->closeData();
   }
 
