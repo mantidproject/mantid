@@ -292,8 +292,8 @@ public:
   QtBrowserItem &operator=(const QtBrowserItem &) = delete;
   QtProperty *property() const;
   QtBrowserItem *parent() const;
-
   const QList<QtBrowserItem *> &children() const;
+  const QtAbstractPropertyBrowser *browser() const;
 
 private:
   explicit QtBrowserItem(QtAbstractPropertyBrowser *browser, QtProperty *property, QtBrowserItem *parent);
