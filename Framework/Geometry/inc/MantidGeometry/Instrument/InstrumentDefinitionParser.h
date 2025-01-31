@@ -189,7 +189,7 @@ private:
   /// elements with \<cuboid\>'s
   /// (note for now this will only work for \<cuboid\>'s and when necessary this
   /// can be extended).
-  void adjust(Poco::XML::Element *pElem, std::map<std::string, bool> const &isTypeAssembly,
+  void adjust(Poco::XML::Element *pElem, const std::map<std::string, bool> &isTypeAssembly,
               std::map<std::string, Poco::XML::Element *> &getTypeElement);
 
   /// Take as input a \<locations\> element. Such an element is a short-hand
@@ -251,7 +251,7 @@ private:
 
   /// This method returns the parent appended which its child components and
   /// also name of type of the last child component
-  std::string getShapeCoorSysComp(Geometry::ICompAssembly *parent, Poco::XML::Element const *pLocElem,
+  std::string getShapeCoorSysComp(Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElem,
                                   std::map<std::string, Poco::XML::Element *> &getTypeElement,
                                   Geometry::ICompAssembly *&endAssembly);
 

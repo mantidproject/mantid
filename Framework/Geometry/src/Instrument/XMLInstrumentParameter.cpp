@@ -89,7 +89,7 @@ XMLInstrumentParameter::XMLInstrumentParameter(std::string logfileID, std::strin
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument definition file
  */
-double XMLInstrumentParameter::createParamValue(TimeSeriesProperty<double> const *logData,
+double XMLInstrumentParameter::createParamValue(const TimeSeriesProperty<double> *logData,
                                                 const Kernel::TimeROI *roi) const {
   // If this parameter is a <look-up-table> or <formula> return 0.0. Such
   // parameter types are

@@ -2631,7 +2631,7 @@ void InstrumentDefinitionParser::createNeutronicInstrument() {
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  * instrument file
  */
-void InstrumentDefinitionParser::adjust(Poco::XML::Element *pElem, std::map<std::string, bool> const &isTypeAssembly,
+void InstrumentDefinitionParser::adjust(Poco::XML::Element *pElem, const std::map<std::string, bool> &isTypeAssembly,
                                         std::map<std::string, Poco::XML::Element *> &getTypeElement) {
   UNUSED_ARG(isTypeAssembly)
   // check if pElem is an element with tag name 'type'
@@ -2668,7 +2668,7 @@ void InstrumentDefinitionParser::adjust(Poco::XML::Element *pElem, std::map<std:
 
   // check if a <translate-rotate-combined-shape-to> is defined
   Poco::AutoPtr<NodeList> pNL_TransRot = pElem->getElementsByTagName("translate-rotate-combined-shape-to");
-  Element const *pTransRot = nullptr;
+  const Element *pTransRot = nullptr;
   if (pNL_TransRot->length() == 1) {
     pTransRot = static_cast<Element *>(pNL_TransRot->item(0));
   }
@@ -3050,7 +3050,7 @@ according to pLocElem
 instrument file
 */
 std::string InstrumentDefinitionParser::getShapeCoorSysComp(Geometry::ICompAssembly *parent,
-                                                            Poco::XML::Element const *pLocElem,
+                                                            const Poco::XML::Element *pLocElem,
                                                             std::map<std::string, Poco::XML::Element *> &getTypeElement,
                                                             Geometry::ICompAssembly *&endAssembly) {
   // The location element is required to be a child of a component element.
