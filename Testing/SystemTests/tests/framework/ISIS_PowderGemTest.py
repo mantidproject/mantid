@@ -75,10 +75,26 @@ class FocusTestMixin(object):
     def requiredFiles(self):
         return _gen_required_files()
 
-    def doTest(self, absorb_corrections):
+    # check output files as expected
+    def generate_error_message(self, expected_file, output_dir):
+        return f"Unable to find {expected_file} in {output_dir}.\nContents={os.listdir(output_dir)}"
+
+    def assert_output_file_exists(self, directory, filename):
+        self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=self.generate_error_message(filename, directory))
+
+    def validate_focus_files_exist(self, ws_num):
+        user_output = os.path.join(output_dir, cycle, user_name)
+        self.assert_output_file_exists(user_output, f"GEM{ws_num}.nxs")
+        self.assert_output_file_exists(user_output, f"GEM{ws_num}.gsas")
+        output_dat_dir = os.path.join(user_output, "dat_files")
+        for bankno in range(1, 7):
+            self.assert_output_file_exists(output_dat_dir, f"GEM{ws_num}-b_{bankno}-TOF.dat")
+            self.assert_output_file_exists(output_dat_dir, f"GEM{ws_num}-b_{bankno}-d.dat")
+
+    def doTest(self, absorb_corrections, run_number="83605", input_mode="Individual"):
         # Gen vanadium calibration first
         setup_mantid_paths()
-        self.focus_results = run_focus(absorb_corrections)
+        self.focus_results = run_focus(absorb_corrections, run_number, input_mode)
 
     def cleanup(self):
         try:
@@ -89,35 +105,41 @@ class FocusTestMixin(object):
             mantid.mtd.clear()
 
 
-class FocusTestNoAbsCorr(FocusTestMixin, systemtesting.MantidSystemTest):
+class FocusTestNoAbsCorr(systemtesting.MantidSystemTest, FocusTestMixin):
     def runTest(self):
         self.doTest(absorb_corrections=False)
 
     def validate(self):
-        # check output files as expected
-        def generate_error_message(expected_file, output_dir):
-            return "Unable to find {} in {}.\nContents={}".format(expected_file, output_dir, os.listdir(output_dir))
-
-        def assert_output_file_exists(directory, filename):
-            self.assertTrue(os.path.isfile(os.path.join(directory, filename)), msg=generate_error_message(filename, directory))
-
-        user_output = os.path.join(output_dir, cycle, user_name)
-        assert_output_file_exists(user_output, "GEM83605.nxs")
-        assert_output_file_exists(user_output, "GEM83605.gsas")
-        output_dat_dir = os.path.join(user_output, "dat_files")
-        for bankno in range(1, 7):
-            assert_output_file_exists(output_dat_dir, "GEM83605-b_{}-TOF.dat".format(bankno))
-            assert_output_file_exists(output_dat_dir, "GEM83605-b_{}-d.dat".format(bankno))
+        self.validate_focus_files_exist("83605")
 
         return self.focus_results.name(), "ISIS_Powder-GEM83605_FocusSempty.nxs"
 
 
-class FocusTestWithAbsCorr(FocusTestMixin, systemtesting.MantidSystemTest):
+class FocusTestWithAbsCorr(systemtesting.MantidSystemTest, FocusTestMixin):
     def runTest(self):
         self.doTest(absorb_corrections=True)
 
     def validate(self):
         return self.focus_results.name(), "ISIS_Powder-GEM83605_FocusSempty_abscorr.nxs"
+
+
+class FocusTestMultipleWSIndividual(systemtesting.MantidSystemTest, FocusTestMixin):
+    def runTest(self):
+        self.doTest(absorb_corrections=False, run_number="83605,83607", input_mode="Individual")
+
+    def validate(self):
+        self.validate_focus_files_exist("83605")
+        self.validate_focus_files_exist("83607")
+        return self.focus_results.name(), "ISIS_Powder-GEM83607-Focussed.nxs"
+
+
+class FocusTestMultipleWSSummed(systemtesting.MantidSystemTest, FocusTestMixin):
+    def runTest(self):
+        self.doTest(absorb_corrections=False, run_number="83605,83607", input_mode="Summed")
+
+    def validate(self):
+        self.validate_focus_files_exist("83605,83607")
+        return self.focus_results.name(), "ISIS_Powder-GEM83605and83607-Focussed.nxs"
 
 
 class CreateCalTest(systemtesting.MantidSystemTest):
@@ -173,8 +195,7 @@ def run_vanadium_calibration():
     return splined_ws
 
 
-def run_focus(absorb_corrections):
-    run_number = 83605
+def run_focus(absorb_corrections, run_number="83605", input_mode="Individual"):
     sample_empty = 83608  # Use the vanadium empty again to make it obvious
     sample_empty_scale = 0.5  # Set it to 50% scale
 
@@ -192,7 +213,7 @@ def run_focus(absorb_corrections):
 
     return inst_object.focus(
         run_number=run_number,
-        input_mode="Individual",
+        input_mode=input_mode,
         vanadium_normalisation=True,
         do_absorb_corrections=absorb_corrections,
         multiple_scattering=False,
