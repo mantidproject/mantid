@@ -18,7 +18,7 @@ namespace Algorithms {
  *  The offsets are all sets to zero and all detectors are selected. Detectors
  not assigned
  *  to any group will appear as group 0, i.e. not included when using
- AlignDetector or
+the
  *  DiffractionFocussing algorithms.
  *  The group number is assigned based on a descent in the instrument tree
  assembly.

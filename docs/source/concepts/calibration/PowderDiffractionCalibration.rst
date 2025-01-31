@@ -659,13 +659,13 @@ This can be done using the following code
 
 .. code::
 
-   from mantid.simpleapi import (AlignDetectors, LoadDiffCal, LoadEventNexus, LoadInstrument, Rebin)
+   from mantid.simpleapi import (ApplyDiffCal, ConvertUnits, LoadEventNexus, LoadInstrument, Rebin)
    from Calibration.tofpd import diagnostics
 
    LoadEventNexus(Filename='VULCAN_192227.nxs.h5', OutputWorkspace='ws')
    Rebin(InputWorkspace='ws', OutputWorkspace='ws', Params=(5000,-.002,70000))
-   LoadDiffCal(Filename='VULCAN_Calibration_CC_4runs_hybrid.h5', InputWorkspace='ws', WorkspaceName='VULCAN')
-   AlignDetectors(InputWorkspace='ws', OutputWorkspace='ws', CalibrationWorkspace='VULCAN_cal')
+   ApplyDiffCal(InputWorkspace='ws', CalibrationFile='VULCAN_Calibration_CC_4runs_hybrid.h5')
+   ConvertUnits(InputWorkspace='ws', Target="dSpacing")
    diagnostics.plot2d(mtd['ws'], horiz_markers=[8*512*20, 2*8*512*20], xmax=1.3)
 
 Here the expected peak positions are vertical lines, the horizontal lines are boundaries between banks.

@@ -35,9 +35,8 @@ namespace Algorithms {
  *   4        621  0.0000000  1    0
  *   The first column is simply an index, the second is a UDET identifier for
  the detector,
- *   the third column corresponds to an offset in Deltad/d (not applied, usually
- applied using
- *   the AlignDetectors algorithm). The forth column is a flag to indicate
+ *   the third column corresponds to an offset in Deltad/d (not applied, this can be interpreted by the ApplyDiffCal
+ *   algorithm). The forth column is a flag to indicate
  whether the detector
  *   is selected. The fifth column indicates the group this detector belongs to
  (number >=1),
