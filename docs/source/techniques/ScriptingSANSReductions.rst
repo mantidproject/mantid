@@ -40,7 +40,7 @@ The commands are available once the ISISCommandInterface module has been importe
     from sans.command_interface.ISISCommandInterface import *
 
 These commands are given below in the order in which they are likely to be found in a script file although,
-except were stated, the order does not matter.
+except where stated, the order does not matter.
 
 Reference Commands
 ------------------
@@ -217,10 +217,10 @@ Several optional parameters can control different aspects of the reduction
 - ``saveAlgs``: A dict of save algorithms containing the names of the algorithms as key and the extension as value(ex: ``saveAlgs={'SaveRKH':'txt'}``).
 - ``save_as_zero_error_free``: Should the reduced workspaces contain zero errors.
 - ``output_name``: Name of the output file. Default is sample run number.
-- ``output_mode``: Decides the output of the reduced data, whether to publish to the ads (``OutputMode.PUBLISH_TO_ADS``), save to file with the chosen algorithm
+- ``output_mode``: Decides the output of the reduced data, whether to publish to the ADS (``OutputMode.PUBLISH_TO_ADS``), save to file with the chosen algorithm
   in ``saveAlgs`` (``OutputMode.SAVE_TO_FILE``) or doing both(``OutputMode.BOTH``). ``OutputMode`` can be imported
   with ``from sans.common.enums import OutputMode``.
-  If this parameter is omitted, the default behaviour will be to publish the output to the ads and save it in a file if there is a ``saveAlgs``.
+  If this parameter is omitted, the default behaviour will be to publish the output to the ADS and save it in a file if there is a ``saveAlgs``.
 - ``use_reduction_mode_as_suffix``: If ``True``, appends second suffix to output name based on reduction mode.
 
 
@@ -247,7 +247,7 @@ Optional parameters:
     - ``save_as_zero_error_free``: Same as :ref:`WavRangeReduction <SANSScriptingWavRangeReduction>`.
     - ``output_mode``: Same as :ref:`WavRangeReduction <SANSScriptingWavRangeReduction>`..
 
-Function returns a dictionary with some values from the reduction. (scale and shift as of now).
+Function returns a dictionary with some values from the reduction (scale and shift as of now).
 
 
 AddRuns
