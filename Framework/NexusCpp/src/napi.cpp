@@ -64,33 +64,7 @@
 
 #include "MantidNexusCpp/nx_stptok.h"
 
-#if defined(WIN32)
-/*
- *  HDF5 on windows does not do locking for multiple threads conveniently so we will implement it ourselves.
- *  Freddie Akeroyd, 16/06/2011
- */
-#include <windows.h>
-
-static CRITICAL_SECTION nx_critical;
-
-static NXstatus nxilock() {
-  static int first_call = 1;
-  if (first_call) {
-    first_call = 0;
-    InitializeCriticalSection(&nx_critical);
-  }
-  EnterCriticalSection(&nx_critical);
-  return NXstatus::NX_OK;
-}
-
-static int nxiunlock(int ret) {
-  LeaveCriticalSection(&nx_critical);
-  return ret;
-}
-
-#define LOCKED_CALL(__call) (nxilock(), nxiunlock(__call))
-
-#elif HAVE_LIBPTHREAD
+#if HAVE_LIBPTHREAD
 
 #include <pthread.h>
 
@@ -132,7 +106,31 @@ static NXstatus nxiunlock(int ret) {
 
 #define LOCKED_CALL(__call) (nxilock(), nxiunlock(__call))
 
-#define snprintf _snprintf
+#elif defined(WIN32)
+/*
+ *  HDF5 on windows does not do locking for multiple threads conveniently so we will implement it ourselves.
+ *  Freddie Akeroyd, 16/06/2011
+ */
+#include <windows.h>
+
+static CRITICAL_SECTION nx_critical;
+
+static NXstatus nxilock() {
+  static int first_call = 1;
+  if (first_call) {
+    first_call = 0;
+    InitializeCriticalSection(&nx_critical);
+  }
+  EnterCriticalSection(&nx_critical);
+  return NXstatus::NX_OK;
+}
+
+static NXstatus nxiunlock(NXstatus ret) {
+  LeaveCriticalSection(&nx_critical);
+  return ret;
+}
+
+#define LOCKED_CALL(__call) (nxilock(), nxiunlock(__call))
 
 #else
 
@@ -384,7 +382,7 @@ static int determineFileTypeImpl(CONSTCHAR *filename) {
   return 0;
 }
 
-static int determineFileType(CONSTCHAR *filename) { return LOCKED_CALL(determineFileTypeImpl(filename)); }
+static int determineFileType(CONSTCHAR *filename) { return determineFileTypeImpl(filename); }
 
 /*---------------------------------------------------------------------*/
 static pNexusFunction handleToNexusFunc(NXhandle fid) {
