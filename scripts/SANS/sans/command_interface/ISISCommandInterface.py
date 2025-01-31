@@ -513,6 +513,10 @@ def set_save(
     @param output_mode: Decides if output_mode publishes to ads and saves to file or only one of the two when save_algorithms are valid
     @return The OutputMode enum: PUBLISH_TO_ADS, SAVE_TO_FILE, BOTH
     """
+
+    if not save_algorithms:
+        return OutputMode.PUBLISH_TO_ADS
+
     # Set up the save algorithms
     save_algs = []
     if save_algorithms:
@@ -532,14 +536,11 @@ def set_save(
                     save_algs.append(SaveType.NX_CAN_SAS)
                 case _:
                     raise RuntimeError(f"The save format {key} is not known")
-        output_mode = OutputMode.BOTH if (output_mode == OutputMode.PUBLISH_TO_ADS) else output_mode
-    else:
-        output_mode = OutputMode.PUBLISH_TO_ADS
 
     save_command = NParameterCommand(command_id=NParameterCommandId.SAVE, values=[save_algs, save_as_zero_error_free])
     director.add_command(save_command)
 
-    return output_mode
+    return output_mode.BOTH if (output_mode == OutputMode.PUBLISH_TO_ADS) else output_mode
 
 
 # --------------------------
@@ -799,12 +800,12 @@ def WavRangeReduction(
     name_suffix=None,
     combineDet=None,
     resetSetup=True,
-    saveAlgs=None,
-    save_as_zero_error_free=False,
     out_fit_settings=None,
     output_name=None,
     output_mode=OutputMode.PUBLISH_TO_ADS,
     use_reduction_mode_as_suffix=False,
+    saveAlgs=None,
+    save_as_zero_error_free=False,
 ):
     """
     Run reduction from loading the raw data to calculating Q. Its optional arguments allows specifics
