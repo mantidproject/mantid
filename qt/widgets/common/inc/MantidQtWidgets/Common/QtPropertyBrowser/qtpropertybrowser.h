@@ -109,10 +109,11 @@ public:
 
   QtAbstractPropertyManager *propertyManager() const;
 
-  QString toolTip() const;
-  QString statusTip() const;
+  const QString &toolTip() const;
+  const QString &statusTip() const;
   const QString &whatsThis() const;
   const QString &propertyName() const;
+
   bool isEnabled() const;
   bool isModified() const;
 
@@ -163,6 +164,7 @@ public:
   ~QtAbstractPropertyManager() override;
 
   const QSet<QtProperty *> &properties() const;
+
   void clear() const;
   bool hasProperty(QtProperty *const prop) const;
 
@@ -233,7 +235,9 @@ public:
     disconnectPropertyManager(manager);
     m_managers.remove(manager);
   }
+
   const QSet<PropertyManager *> &propertyManagers() const { return m_managers; }
+
   PropertyManager *propertyManager(QtProperty *property) const {
     const QtAbstractPropertyManager *manager = property->propertyManager();
     QSetIterator<PropertyManager *> itManager(m_managers);
@@ -289,7 +293,7 @@ public:
   QtProperty *property() const;
   QtBrowserItem *parent() const;
   const QList<QtBrowserItem *> &children() const;
-  QtAbstractPropertyBrowser *browser() const;
+  const QtAbstractPropertyBrowser *browser() const;
 
 private:
   explicit QtBrowserItem(QtAbstractPropertyBrowser *browser, QtProperty *property, QtBrowserItem *parent);
@@ -310,6 +314,7 @@ public:
   QList<QtBrowserItem *> items(QtProperty *property) const;
   QtBrowserItem *topLevelItem(QtProperty *property) const;
   const QList<QtBrowserItem *> &topLevelItems() const;
+
   void clear();
 
   template <class PropertyManager>

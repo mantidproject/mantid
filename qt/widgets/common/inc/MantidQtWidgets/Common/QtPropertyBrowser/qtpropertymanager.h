@@ -89,6 +89,8 @@
 
 #include "qtpropertybrowser.h"
 
+#include <utility>
+
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
 #endif
@@ -876,8 +878,10 @@ QSize qBound(QSize minVal, QSize val, QSize maxVal);
 QSizeF qBound(QSizeF minVal, QSizeF val, QSizeF maxVal);
 
 template <class Value> static void orderBorders(Value &minVal, Value &maxVal) {
-  if (minVal > maxVal)
-    qSwap(minVal, maxVal);
+  if (minVal > maxVal) {
+    using std::swap;
+    swap(minVal, maxVal);
+  }
 }
 
 template <class Value> void orderSizeBorders(Value &minVal, Value &maxVal) {
